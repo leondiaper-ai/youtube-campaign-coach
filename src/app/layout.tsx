@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: 'YouTube Campaign Coach',
-  description: 'Plan, track, and execute your YouTube campaign with a structured weekly playbook.',
+  description: 'Plan and track your YouTube campaign week by week',
 };
 
 export const viewport: Viewport = {
@@ -14,9 +15,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        {children}
-      </body>
+      <body className="min-h-screen bg-gray-50">{children}</body>
     </html>
   );
 }
