@@ -1633,15 +1633,6 @@ function MetricsModal({ plan, onSave, onClose }: {
     onClose();
   };
 
-  const Field = ({ label, value, onChange, hint }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) => (
-    <div>
-      <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">{label}</label>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-      {hint && <p className="text-[10px] text-gray-400 mt-1">{hint}</p>}
-    </div>
-  );
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/25" />
@@ -1655,7 +1646,12 @@ function MetricsModal({ plan, onSave, onClose }: {
         <div className="px-6 py-5 space-y-5 max-h-[60vh] overflow-y-auto">
           <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Baseline</div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Starting Subs" value={startingSubs} onChange={setStartingSubs} hint="Subscriber count at campaign start" />
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Starting Subs</label>
+              <input type="text" value={startingSubs} onChange={(e) => setStartingSubs(e.target.value)}
+                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
+              <p className="text-[10px] text-gray-400 mt-1">Subscriber count at campaign start</p>
+            </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Start Date</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
@@ -1668,16 +1664,36 @@ function MetricsModal({ plan, onSave, onClose }: {
 
           <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Growth Targets</div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Sub Target" value={subsTarget} onChange={setSubsTarget} hint="Goal subscriber count" />
-            <Field label="Views Target" value={viewsTarget} onChange={setViewsTarget} hint="Total campaign views goal" />
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Sub Target</label>
+              <input type="text" value={subsTarget} onChange={(e) => setSubsTarget(e.target.value)}
+                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
+              <p className="text-[10px] text-gray-400 mt-1">Goal subscriber count</p>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Views Target</label>
+              <input type="text" value={viewsTarget} onChange={(e) => setViewsTarget(e.target.value)}
+                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
+              <p className="text-[10px] text-gray-400 mt-1">Total campaign views goal</p>
+            </div>
           </div>
 
           <div className="h-px" style={{ background: 'rgba(0,0,0,0.06)' }} />
 
           <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Output Targets</div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Shorts / Week" value={shortsPerWeek} onChange={setShortsPerWeek} hint="Target shorts per week" />
-            <Field label="Videos / Week" value={videosPerWeek} onChange={setVideosPerWeek} hint="Target videos per week" />
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Shorts / Week</label>
+              <input type="text" value={shortsPerWeek} onChange={(e) => setShortsPerWeek(e.target.value)}
+                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
+              <p className="text-[10px] text-gray-400 mt-1">Target shorts per week</p>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Videos / Week</label>
+              <input type="text" value={videosPerWeek} onChange={(e) => setVideosPerWeek(e.target.value)}
+                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
+              <p className="text-[10px] text-gray-400 mt-1">Target videos per week</p>
+            </div>
           </div>
         </div>
 
