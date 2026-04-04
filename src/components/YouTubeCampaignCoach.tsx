@@ -1055,10 +1055,11 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
   return 'REAWAKEN';
 }
 
-function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan }: {
+function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: {
   plan: CampaignPlan;
   onPhaseClick: (name: PhaseName) => void;
   onUpdatePlan: (updates: Partial<CampaignPlan>) => void;
+  onOpenSettings?: () => void;
 }) {
   // Find active week
   let activeIdx = -1;
@@ -1084,21 +1085,37 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan }: {
     <div className="mb-8">
       {/* Header */}
       <div className="mb-4">
-        <h1 className="flex items-baseline gap-1 font-black text-2xl text-gray-900">
-          <span>YouTube Campaign —</span>
-          <input
-            className="font-black text-2xl text-gray-900 bg-transparent border-b border-dashed border-gray-300 focus:border-gray-500 outline-none min-w-[120px]"
-            value={plan.artist}
-            placeholder="Enter Artist Name"
-            onChange={(e) => onUpdatePlan({ artist: e.target.value })}
-          />
-        </h1>
-        <input
-          className="text-sm font-semibold text-gray-500 mt-0.5 bg-transparent border-b border-dashed border-gray-300 focus:border-gray-500 outline-none w-full"
-          value={plan.campaignName}
-          placeholder="Enter Campaign Name"
-          onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
-        />
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h1 className="flex items-baseline gap-1 font-black text-2xl text-gray-900">
+              <span>YouTube Campaign —</span>
+              <input
+                className="font-black text-2xl text-gray-900 bg-transparent border-b border-dashed border-gray-300 focus:border-gray-500 outline-none min-w-[120px]"
+                value={plan.artist}
+                placeholder="Enter Artist Name"
+                onChange={(e) => onUpdatePlan({ artist: e.target.value })}
+              />
+            </h1>
+            <input
+              className="text-sm font-semibold text-gray-500 mt-0.5 bg-transparent border-b border-dashed border-gray-300 focus:border-gray-500 outline-none w-full"
+              value={plan.campaignName}
+              placeholder="Enter Campaign Name"
+              onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
+            />
+          </div>
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              className="ml-3 mt-1 p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 hover:shadow transition-all text-gray-500 hover:text-gray-700"
+              title="Campaign Settings"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Week indicator + phase focus + drift warning */}
@@ -3664,7 +3681,7 @@ export default function YouTubeCampaignCoach() {
 
   return (
     <div style={{ background: '#faf8f6' }} className="min-h-screen">
-      <div className="max-w-5xl mx-auto px-3 py-4 sm:px-6 sm:py-8">
+      <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Campaign Timeline — header + status + phase rail */}
         <CampaignTimeline
           plan={plan}
@@ -3677,6 +3694,7 @@ export default function YouTubeCampaignCoach() {
             });
           }}
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
+          onOpenSettings={() => setShowMetricsModal(true)}
         />
 
         {/* Metric Cards */}
