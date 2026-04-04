@@ -1708,23 +1708,23 @@ function MetricsModal({ plan, onSave, onClose }: {
 
 
 // ──── ACTIVITY CONTEXT LINE ──────────────────────────────────────────────────
-// Lightweight, factual activity summary — no causal claims
+// Lightweight, factual activity summary — no causal claims, two-line layout
 function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
   const [copied, setCopied] = useState(false);
   const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
 
-  // Find active week
-  let activeIdx = 0;
-  for (let i = plan.weeks.length - 1; i >= 0; i--) {
-    if (plan.weeks[i].actions.some((a) => a.status !== 'planned')) { activeIdx = i; break; }
-  }
-  const activeWeek = plan.weeks[activeIdx];
-  const weekNum = activeWeek?.week || 0;
+  // Current week by calendar
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const campaignStart = new Date(plan.startDate + 'T12:00:00');
+  const daysSinceStart = Math.floor((today.getTime() - campaignStart.getTime()) / (24 * 60 * 60 * 1000));
+  const weekNum = Math.max(1, Math.min(plan.weeks.length, Math.floor(daysSinceStart / 7) + 1));
+  const currentWeek = plan.weeks.find((w) => w.week === weekNum);
 
   // This week counts
   const thisWeek = { shorts: 0, videos: 0, collabs: 0, posts: 0, lives: 0 };
-  if (activeWeek) {
-    for (const a of activeWeek.actions) {
+  if (currentWeek) {
+    for (const a of currentWeek.actions) {
       if (a.status !== 'done') continue;
       switch (a.type) {
         case 'short': thisWeek.shorts++; break;
@@ -1753,35 +1753,43 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
 
   const totalDone = totals.shorts + totals.videos + totals.collabs + totals.posts + totals.lives;
 
-  // Rule-based status signals — observable, no attribution
+  // Rule-based status signals — observable only, max 3
   const signals: string[] = [];
-  if (activeWeek) {
-    const weekShortsDone = activeWeek.actions.filter((a) => a.type === 'short' && a.status === 'done').length;
-    const weekVideosDone = activeWeek.actions.filter((a) => a.type === 'video' && a.status === 'done').length;
-    const weekPostsDone = activeWeek.actions.filter((a) => (a.type === 'post' || a.type === 'afterparty') && a.status === 'done').length;
+  if (currentWeek) {
+    const weekShortsDone = currentWeek.actions.filter((a) => a.type === 'short' && a.status === 'done').length;
+    const weekVideosDone = currentWeek.actions.filter((a) => a.type === 'video' && a.status === 'done').length;
+    const weekPostsDone = currentWeek.actions.filter((a) => (a.type === 'post' || a.type === 'afterparty') && a.status === 'done').length;
     if (weekShortsDone < targets.shortsPerWeek) signals.push('Shorts behind');
     if (targets.videosPerWeek > 0 && weekVideosDone === 0) signals.push('Longform missing');
-    if (weekPostsDone === 0 && targets.postsPerWeek > 0) signals.push('No posts this week');
+    if (weekPostsDone === 0 && (targets.postsPerWeek || 0) > 0) signals.push('No posts');
   }
 
-  // Build activity parts
-  const thisWeekParts = [
-    thisWeek.shorts > 0 ? `${thisWeek.shorts} Shorts` : null,
-    thisWeek.videos > 0 ? `${thisWeek.videos} Video${thisWeek.videos > 1 ? 's' : ''}` : null,
-    thisWeek.collabs > 0 ? `${thisWeek.collabs} Collab${thisWeek.collabs > 1 ? 's' : ''}` : null,
-    thisWeek.posts > 0 ? `${thisWeek.posts} Post${thisWeek.posts > 1 ? 's' : ''}` : null,
-    thisWeek.lives > 0 ? `${thisWeek.lives} Live${thisWeek.lives > 1 ? 's' : ''}` : null,
-  ].filter(Boolean);
+  // Action line — what needs doing
+  const actionParts: string[] = [];
+  if (currentWeek) {
+    const shortGap = Math.max(0, targets.shortsPerWeek - thisWeek.shorts);
+    const videoGap = Math.max(0, targets.videosPerWeek - thisWeek.videos);
+    const postGap = Math.max(0, (targets.postsPerWeek || 3) - thisWeek.posts);
+    if (shortGap > 0) actionParts.push(`drop ${shortGap} short${shortGap > 1 ? 's' : ''}`);
+    if (postGap > 0) actionParts.push(`post + engage ${postGap}x`);
+    if (videoGap > 0) actionParts.push(`upload ${videoGap} longform`);
+  }
+  if (actionParts.length > 0) actionParts[0] = actionParts[0].charAt(0).toUpperCase() + actionParts[0].slice(1);
+  const actionLine = actionParts.join(' + ');
 
-  const totalParts = [
-    totals.shorts > 0 ? `${totals.shorts} Shorts` : null,
-    totals.videos > 0 ? `${totals.videos} Videos` : null,
-    totals.collabs > 0 ? `${totals.collabs} Collabs` : null,
-    totals.posts > 0 ? `${totals.posts} Posts` : null,
-    totals.lives > 0 ? `${totals.lives} Lives` : null,
-  ].filter(Boolean);
+  // Build display parts
+  const fmtParts = (o: typeof thisWeek) => [
+    o.shorts > 0 ? `${o.shorts} Shorts` : null,
+    o.videos > 0 ? `${o.videos} Video${o.videos > 1 ? 's' : ''}` : null,
+    o.collabs > 0 ? `${o.collabs} Collab${o.collabs > 1 ? 's' : ''}` : null,
+    o.posts > 0 ? `${o.posts} Post${o.posts > 1 ? 's' : ''}` : null,
+    o.lives > 0 ? `${o.lives} Live${o.lives > 1 ? 's' : ''}` : null,
+  ].filter(Boolean) as string[];
 
-  // Copy summary builder
+  const thisWeekLabel = fmtParts(thisWeek);
+  const totalLabel = fmtParts(totals);
+
+  // Copy summary
   const handleCopy = () => {
     const phaseName = getPhaseForWeek(weekNum)?.name || 'REAWAKEN';
     const campaignLabel = [plan.artist, plan.campaignName].filter(Boolean).join(' — ') || 'Campaign';
@@ -1793,8 +1801,8 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
       `${campaignLabel} — Week ${weekNum}`,
       `Phase: ${phaseName}`,
       '',
-      `This week: ${thisWeekParts.length > 0 ? thisWeekParts.join(' · ') : 'None yet'}`,
-      `Campaign total: ${totalParts.length > 0 ? totalParts.join(' · ') : 'No content yet'}`,
+      `This week: ${thisWeekLabel.length > 0 ? thisWeekLabel.join(' · ') : 'No activity'}`,
+      `Total: ${totalLabel.length > 0 ? totalLabel.join(' · ') : 'No content yet'}`,
       '',
       `Growth: +${totalSubsGained.toLocaleString()} subs · ${totalViews.toLocaleString()} views`,
       signals.length > 0 ? `Status: ${signals.join(' · ')}` : '',
@@ -1807,38 +1815,51 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
   };
 
   return (
-    <div className="mb-4 flex items-center justify-between gap-4 px-1">
-      <div className="text-[11px] text-gray-400 leading-relaxed">
-        {thisWeekParts.length > 0 ? (
-          <span>
-            <span className="font-semibold text-gray-500">This week:</span>{' '}
-            {thisWeekParts.join(' · ')}
-          </span>
-        ) : (
-          <span className="font-semibold text-gray-500">No activity this week</span>
-        )}
-        {totalDone > 0 && (
-          <span className="ml-3">
-            <span className="text-gray-300">|</span>
-            <span className="ml-3 font-semibold text-gray-500">Campaign:</span>{' '}
-            {totalParts.join(' · ')}
-          </span>
-        )}
-        {signals.length > 0 && (
-          <span className="ml-3">
-            <span className="text-gray-300">|</span>
-            {signals.map((s, i) => (
-              <span key={i} className="ml-2 font-semibold" style={{ color: '#d97706' }}>{s}</span>
-            ))}
-          </span>
-        )}
+    <div className="mb-4 px-1">
+      <div className="flex items-start justify-between gap-4">
+        <div className="text-[11px] leading-relaxed min-w-0">
+          {/* Line 1: State */}
+          <div className="text-gray-400">
+            {thisWeekLabel.length > 0 ? (
+              <>
+                <span className="font-semibold text-gray-500">This week:</span>{' '}
+                {thisWeekLabel.join(' · ')}
+              </>
+            ) : (
+              <span className="font-semibold text-gray-500">No activity this week</span>
+            )}
+            {totalDone > 0 && (
+              <>
+                <span className="mx-2 text-gray-300">|</span>
+                <span className="font-semibold text-gray-500">Total:</span>{' '}
+                {totalLabel.join(' · ')}
+              </>
+            )}
+          </div>
+          {/* Line 2: Issues + action connector */}
+          {(signals.length > 0 || actionLine) && (
+            <div className="mt-0.5">
+              {signals.length > 0 && (
+                <span className="font-semibold" style={{ color: '#d97706' }}>
+                  {signals.join(' · ')}
+                </span>
+              )}
+              {actionLine && signals.length > 0 && (
+                <span className="text-gray-300 ml-2">→</span>
+              )}
+              {actionLine && (
+                <span className="ml-1.5 text-gray-400">{actionLine}</span>
+              )}
+            </div>
+          )}
+        </div>
+        <button
+          onClick={handleCopy}
+          className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all whitespace-nowrap shrink-0 mt-0.5"
+        >
+          {copied ? '✓ Copied' : 'Copy Update'}
+        </button>
       </div>
-      <button
-        onClick={handleCopy}
-        className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all whitespace-nowrap shrink-0"
-      >
-        {copied ? '✓ Copied' : 'Copy'}
-      </button>
     </div>
   );
 }
