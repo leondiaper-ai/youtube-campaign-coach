@@ -3,15 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  /* Lightened surfaces aligned with landing page */
+  --background: #FAF7F2;
+  --foreground: #0E0E0E;
+  --paper: #FAF7F2;
+  --ink: #0E0E0E;
+  --signal: #FF4A1C;
+  --electric: #2C25FF;
+  --mint: #1FBE7A;
+  --sun: #FFD24C;
+  --blush: #FFD3C9;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 html { scroll-behavior: smooth; }
-*:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+*:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+/* Shared editorial utilities (mirrors landing page) */
+.headline {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+}
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
