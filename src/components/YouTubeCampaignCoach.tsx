@@ -1707,56 +1707,9 @@ function MetricsModal({ plan, onSave, onClose }: {
 }
 
 
-// ──── CONTENT OUTPUT TALLY ───────────────────────────────────────────────────
-// Auto-calculated from all actions across the campaign
-function ContentOutputTally({ plan }: { plan: CampaignPlan }) {
-  const counts = { videos: 0, shorts: 0, collabs: 0, lives: 0, posts: 0, afterparty: 0 };
-  for (const week of plan.weeks) {
-    for (const a of week.actions) {
-      if (a.status !== 'done') continue;
-      switch (a.type) {
-        case 'video': counts.videos++; break;
-        case 'short': counts.shorts++; break;
-        case 'collab': counts.collabs++; break;
-        case 'live': counts.lives++; break;
-        case 'post': counts.posts++; break;
-        case 'afterparty': counts.afterparty++; break;
-      }
-    }
-  }
-  const total = counts.videos + counts.shorts + counts.collabs + counts.lives + counts.posts + counts.afterparty;
-  const items: { label: string; count: number; color: string }[] = [
-    { label: 'Videos', count: counts.videos, color: '#f87171' },
-    { label: 'Shorts', count: counts.shorts, color: '#d4a44a' },
-    { label: 'Collabs', count: counts.collabs, color: '#4ade80' },
-    { label: 'Lives', count: counts.lives, color: '#60a5fa' },
-    { label: 'Posts', count: counts.posts, color: '#a78bfa' },
-    { label: 'Afterparty', count: counts.afterparty, color: '#c084fc' },
-  ];
-
-  return (
-    <div className="mb-4 rounded-xl border border-gray-100 bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="flex items-baseline justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Content Output</span>
-        <span className="text-[10px] font-semibold text-gray-400">{total} total</span>
-      </div>
-      <div className="flex gap-3 flex-wrap">
-        {items.map((item) => (
-          <div key={item.label} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: item.color, opacity: item.count > 0 ? 1 : 0.3 }} />
-            <span className={`text-xs font-bold ${item.count > 0 ? 'text-gray-700' : 'text-gray-300'}`}>{item.count}</span>
-            <span className={`text-xs ${item.count > 0 ? 'text-gray-400' : 'text-gray-300'}`}>{item.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-// ──── STATE OF PLAY SUMMARY ─────────────────────────────────────────────────
-// Deterministic, rule-based campaign summary with copy-to-clipboard
-function StateOfPlay({ plan }: { plan: CampaignPlan }) {
+// ──── ACTIVITY CONTEXT LINE ──────────────────────────────────────────────────
+// Lightweight, factual activity summary — no causal claims
+function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
   const [copied, setCopied] = useState(false);
   const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
 
@@ -1768,14 +1721,14 @@ function StateOfPlay({ plan }: { plan: CampaignPlan }) {
   const activeWeek = plan.weeks[activeIdx];
   const weekNum = activeWeek?.week || 0;
 
-  // This week's output
-  const thisWeek = { videos: 0, shorts: 0, collabs: 0, lives: 0, posts: 0 };
+  // This week counts
+  const thisWeek = { shorts: 0, videos: 0, collabs: 0, posts: 0, lives: 0 };
   if (activeWeek) {
     for (const a of activeWeek.actions) {
       if (a.status !== 'done') continue;
       switch (a.type) {
-        case 'video': thisWeek.videos++; break;
         case 'short': thisWeek.shorts++; break;
+        case 'video': thisWeek.videos++; break;
         case 'collab': thisWeek.collabs++; break;
         case 'live': thisWeek.lives++; break;
         case 'post': case 'afterparty': thisWeek.posts++; break;
@@ -1784,13 +1737,13 @@ function StateOfPlay({ plan }: { plan: CampaignPlan }) {
   }
 
   // Campaign totals
-  const totals = { videos: 0, shorts: 0, collabs: 0, lives: 0, posts: 0 };
+  const totals = { shorts: 0, videos: 0, collabs: 0, posts: 0, lives: 0 };
   for (const week of plan.weeks) {
     for (const a of week.actions) {
       if (a.status !== 'done') continue;
       switch (a.type) {
-        case 'video': totals.videos++; break;
         case 'short': totals.shorts++; break;
+        case 'video': totals.videos++; break;
         case 'collab': totals.collabs++; break;
         case 'live': totals.lives++; break;
         case 'post': case 'afterparty': totals.posts++; break;
@@ -1798,131 +1751,94 @@ function StateOfPlay({ plan }: { plan: CampaignPlan }) {
     }
   }
 
-  // Growth
-  const totalSubsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
-  const totalViews = plan.weeks.reduce((sum, w) => sum + (w.feedback?.views || 0), 0);
+  const totalDone = totals.shorts + totals.videos + totals.collabs + totals.posts + totals.lives;
 
-  // Status signals — deterministic, rule-based
+  // Rule-based status signals — observable, no attribution
   const signals: string[] = [];
   if (activeWeek) {
     const weekShortsDone = activeWeek.actions.filter((a) => a.type === 'short' && a.status === 'done').length;
     const weekVideosDone = activeWeek.actions.filter((a) => a.type === 'video' && a.status === 'done').length;
     const weekPostsDone = activeWeek.actions.filter((a) => (a.type === 'post' || a.type === 'afterparty') && a.status === 'done').length;
     if (weekShortsDone < targets.shortsPerWeek) signals.push('Shorts behind');
-    if (weekShortsDone >= targets.shortsPerWeek) signals.push('Shorts on track');
     if (targets.videosPerWeek > 0 && weekVideosDone === 0) signals.push('Longform missing');
-    if (weekVideosDone >= targets.videosPerWeek) signals.push('Longform on track');
-    if (weekPostsDone === 0) signals.push('Engagement low');
+    if (weekPostsDone === 0 && targets.postsPerWeek > 0) signals.push('No posts this week');
   }
-  if (totalSubsGained > 0) signals.push('Growth positive');
-  if (totalSubsGained === 0 && weekNum > 2) signals.push('Growth stalled');
 
-  const phaseName = getPhaseForWeek(weekNum)?.name || 'REAWAKEN';
-  const campaignLabel = [plan.artist, plan.campaignName].filter(Boolean).join(' — ') || 'Campaign';
+  // Build activity parts
+  const thisWeekParts = [
+    thisWeek.shorts > 0 ? `${thisWeek.shorts} Shorts` : null,
+    thisWeek.videos > 0 ? `${thisWeek.videos} Video${thisWeek.videos > 1 ? 's' : ''}` : null,
+    thisWeek.collabs > 0 ? `${thisWeek.collabs} Collab${thisWeek.collabs > 1 ? 's' : ''}` : null,
+    thisWeek.posts > 0 ? `${thisWeek.posts} Post${thisWeek.posts > 1 ? 's' : ''}` : null,
+    thisWeek.lives > 0 ? `${thisWeek.lives} Live${thisWeek.lives > 1 ? 's' : ''}` : null,
+  ].filter(Boolean);
 
-  // Build plain text summary
-  const buildText = () => {
-    const lines: string[] = [];
-    lines.push(`${campaignLabel} — Week ${weekNum}`);
-    lines.push(`Phase: ${phaseName}`);
-    lines.push('');
+  const totalParts = [
+    totals.shorts > 0 ? `${totals.shorts} Shorts` : null,
+    totals.videos > 0 ? `${totals.videos} Videos` : null,
+    totals.collabs > 0 ? `${totals.collabs} Collabs` : null,
+    totals.posts > 0 ? `${totals.posts} Posts` : null,
+    totals.lives > 0 ? `${totals.lives} Lives` : null,
+  ].filter(Boolean);
 
-    const thisWeekItems = [
-      thisWeek.videos > 0 ? `${thisWeek.videos} video${thisWeek.videos > 1 ? 's' : ''}` : '',
-      thisWeek.shorts > 0 ? `${thisWeek.shorts} short${thisWeek.shorts > 1 ? 's' : ''}` : '',
-      thisWeek.collabs > 0 ? `${thisWeek.collabs} collab${thisWeek.collabs > 1 ? 's' : ''}` : '',
-      thisWeek.posts > 0 ? `${thisWeek.posts} post${thisWeek.posts > 1 ? 's' : ''}` : '',
-    ].filter(Boolean);
-    lines.push(`Output (this week): ${thisWeekItems.length > 0 ? thisWeekItems.join(' · ') : 'None yet'}`);
-
-    const totalItems = [
-      totals.shorts > 0 ? `${totals.shorts} shorts` : '',
-      totals.videos > 0 ? `${totals.videos} videos` : '',
-      totals.collabs > 0 ? `${totals.collabs} collabs` : '',
-      totals.posts > 0 ? `${totals.posts} posts` : '',
-    ].filter(Boolean);
-    lines.push(`Totals: ${totalItems.length > 0 ? totalItems.join(' / ') : 'No content yet'}`);
-    lines.push('');
-    lines.push(`Growth: +${totalSubsGained.toLocaleString()} subs · ${totalViews.toLocaleString()} views`);
-    lines.push('');
-    lines.push(`Status: ${signals.length > 0 ? signals.join(' · ') : 'No data yet'}`);
-    return lines.join('\n');
-  };
-
+  // Copy summary builder
   const handleCopy = () => {
-    navigator.clipboard.writeText(buildText()).then(() => {
+    const phaseName = getPhaseForWeek(weekNum)?.name || 'REAWAKEN';
+    const campaignLabel = [plan.artist, plan.campaignName].filter(Boolean).join(' — ') || 'Campaign';
+    const totalSubsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
+    const overrides = plan.manualOverrides || {};
+    const totalViews = overrides.totalViews ?? plan.weeks.reduce((sum, w) => sum + (w.feedback?.views || 0), 0);
+
+    const lines = [
+      `${campaignLabel} — Week ${weekNum}`,
+      `Phase: ${phaseName}`,
+      '',
+      `This week: ${thisWeekParts.length > 0 ? thisWeekParts.join(' · ') : 'None yet'}`,
+      `Campaign total: ${totalParts.length > 0 ? totalParts.join(' · ') : 'No content yet'}`,
+      '',
+      `Growth: +${totalSubsGained.toLocaleString()} subs · ${totalViews.toLocaleString()} views`,
+      signals.length > 0 ? `Status: ${signals.join(' · ')}` : '',
+    ].filter(Boolean);
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   };
 
   return (
-    <div className="mb-4 rounded-xl border border-gray-100 bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="flex items-baseline justify-between mb-3">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">State of Play</span>
-        <button
-          onClick={handleCopy}
-          className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all"
-        >
-          {copied ? '✓ Copied' : 'Copy Summary'}
-        </button>
-      </div>
-
-      <div className="space-y-2.5">
-        {/* Header line */}
-        <div className="text-sm font-bold text-gray-900">
-          {campaignLabel} — Week {weekNum}
-          <span className="ml-2 text-[10px] font-semibold text-gray-400">{phaseName}</span>
-        </div>
-
-        {/* This week */}
-        <div className="flex gap-4 flex-wrap text-xs">
-          <span className="text-gray-400 font-semibold w-20 shrink-0">This week</span>
-          {thisWeek.videos > 0 && <span className="font-semibold text-gray-700">{thisWeek.videos} video{thisWeek.videos > 1 ? 's' : ''}</span>}
-          {thisWeek.shorts > 0 && <span className="font-semibold text-gray-700">{thisWeek.shorts} short{thisWeek.shorts > 1 ? 's' : ''}</span>}
-          {thisWeek.collabs > 0 && <span className="font-semibold text-gray-700">{thisWeek.collabs} collab{thisWeek.collabs > 1 ? 's' : ''}</span>}
-          {thisWeek.posts > 0 && <span className="font-semibold text-gray-700">{thisWeek.posts} post{thisWeek.posts > 1 ? 's' : ''}</span>}
-          {(thisWeek.videos + thisWeek.shorts + thisWeek.collabs + thisWeek.posts) === 0 && <span className="text-gray-400">None yet</span>}
-        </div>
-
-        {/* Totals */}
-        <div className="flex gap-4 flex-wrap text-xs">
-          <span className="text-gray-400 font-semibold w-20 shrink-0">Totals</span>
-          {totals.shorts > 0 && <span className="font-semibold text-gray-700">{totals.shorts} shorts</span>}
-          {totals.videos > 0 && <span className="font-semibold text-gray-700">{totals.videos} videos</span>}
-          {totals.collabs > 0 && <span className="font-semibold text-gray-700">{totals.collabs} collabs</span>}
-          {totals.posts > 0 && <span className="font-semibold text-gray-700">{totals.posts} posts</span>}
-          {(totals.videos + totals.shorts + totals.collabs + totals.posts) === 0 && <span className="text-gray-400">No content yet</span>}
-        </div>
-
-        {/* Growth */}
-        <div className="flex gap-4 flex-wrap text-xs">
-          <span className="text-gray-400 font-semibold w-20 shrink-0">Growth</span>
-          <span className="font-semibold text-gray-700">+{totalSubsGained.toLocaleString()} subs</span>
-          <span className="font-semibold text-gray-700">{totalViews.toLocaleString()} views</span>
-        </div>
-
-        {/* Status signals */}
+    <div className="mb-4 flex items-center justify-between gap-4 px-1">
+      <div className="text-[11px] text-gray-400 leading-relaxed">
+        {thisWeekParts.length > 0 ? (
+          <span>
+            <span className="font-semibold text-gray-500">This week:</span>{' '}
+            {thisWeekParts.join(' · ')}
+          </span>
+        ) : (
+          <span className="font-semibold text-gray-500">No activity this week</span>
+        )}
+        {totalDone > 0 && (
+          <span className="ml-3">
+            <span className="text-gray-300">|</span>
+            <span className="ml-3 font-semibold text-gray-500">Campaign:</span>{' '}
+            {totalParts.join(' · ')}
+          </span>
+        )}
         {signals.length > 0 && (
-          <div className="flex gap-2 flex-wrap pt-1">
-            {signals.map((s, i) => {
-              const isPositive = s.includes('on track') || s.includes('positive');
-              return (
-                <span
-                  key={i}
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{
-                    background: isPositive ? '#dcfce7' : '#fef3c7',
-                    color: isPositive ? '#166534' : '#92400e',
-                  }}
-                >
-                  {s}
-                </span>
-              );
-            })}
-          </div>
+          <span className="ml-3">
+            <span className="text-gray-300">|</span>
+            {signals.map((s, i) => (
+              <span key={i} className="ml-2 font-semibold" style={{ color: '#d97706' }}>{s}</span>
+            ))}
+          </span>
         )}
       </div>
+      <button
+        onClick={handleCopy}
+        className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all whitespace-nowrap shrink-0"
+      >
+        {copied ? '✓ Copied' : 'Copy'}
+      </button>
     </div>
   );
 }
@@ -3963,9 +3879,8 @@ export default function YouTubeCampaignCoach() {
           onEditCancel={() => setEditingMetric(null)}
         />
 
-        {/* Content Output Tally + State of Play */}
-        <ContentOutputTally plan={plan} />
-        <StateOfPlay plan={plan} />
+        {/* Lightweight activity context line */}
+        <ActivityContextLine plan={plan} />
 
         {/* View Mode Toggle */}
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
