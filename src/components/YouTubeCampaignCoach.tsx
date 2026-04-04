@@ -1814,44 +1814,42 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
     });
   };
 
+  // Don't render if there are no issues to surface
+  if (signals.length === 0) {
+    return (
+      <div className="mb-4 px-1">
+        <div className="flex items-start justify-between gap-4">
+          <div className="text-[11px] leading-relaxed text-gray-400 min-w-0">
+            <span className="font-semibold text-gray-500">Campaign total:</span>{' '}
+            {totalDone > 0 ? totalLabel.join(' · ') : 'No content yet'}
+          </div>
+          <button
+            onClick={handleCopy}
+            className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all whitespace-nowrap shrink-0 mt-0.5"
+          >
+            {copied ? '✓ Copied' : 'Copy Update'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-4 px-1">
       <div className="flex items-start justify-between gap-4">
         <div className="text-[11px] leading-relaxed min-w-0">
-          {/* Line 1: State */}
-          <div className="text-gray-400">
-            {thisWeekLabel.length > 0 ? (
+          {/* Issues → Action (rhythm card owns this-week data) */}
+          <div>
+            <span className="font-semibold" style={{ color: '#d97706' }}>
+              {signals.join(' · ')}
+            </span>
+            {actionLine && (
               <>
-                <span className="font-semibold text-gray-500">This week:</span>{' '}
-                {thisWeekLabel.join(' · ')}
-              </>
-            ) : (
-              <span className="font-semibold text-gray-500">No activity this week</span>
-            )}
-            {totalDone > 0 && (
-              <>
-                <span className="mx-2 text-gray-300">|</span>
-                <span className="font-semibold text-gray-500">Total:</span>{' '}
-                {totalLabel.join(' · ')}
+                <span className="text-gray-300 ml-2">→</span>
+                <span className="ml-1.5 text-gray-400">{actionLine}</span>
               </>
             )}
           </div>
-          {/* Line 2: Issues + action connector */}
-          {(signals.length > 0 || actionLine) && (
-            <div className="mt-0.5">
-              {signals.length > 0 && (
-                <span className="font-semibold" style={{ color: '#d97706' }}>
-                  {signals.join(' · ')}
-                </span>
-              )}
-              {actionLine && signals.length > 0 && (
-                <span className="text-gray-300 ml-2">→</span>
-              )}
-              {actionLine && (
-                <span className="ml-1.5 text-gray-400">{actionLine}</span>
-              )}
-            </div>
-          )}
         </div>
         <button
           onClick={handleCopy}
