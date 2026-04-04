@@ -1725,8 +1725,6 @@ function ContentOutputTally({ plan }: { plan: CampaignPlan }) {
     }
   }
   const total = counts.videos + counts.shorts + counts.collabs + counts.lives + counts.posts + counts.afterparty;
-  if (total === 0) return null;
-
   const items: { label: string; count: number; color: string }[] = [
     { label: 'Videos', count: counts.videos, color: '#f87171' },
     { label: 'Shorts', count: counts.shorts, color: '#d4a44a' },
@@ -1734,7 +1732,7 @@ function ContentOutputTally({ plan }: { plan: CampaignPlan }) {
     { label: 'Lives', count: counts.lives, color: '#60a5fa' },
     { label: 'Posts', count: counts.posts, color: '#a78bfa' },
     { label: 'Afterparty', count: counts.afterparty, color: '#c084fc' },
-  ].filter((i) => i.count > 0);
+  ];
 
   return (
     <div className="mb-4 rounded-xl border border-gray-100 bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -1745,9 +1743,9 @@ function ContentOutputTally({ plan }: { plan: CampaignPlan }) {
       <div className="flex gap-3 flex-wrap">
         {items.map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
-            <span className="text-xs font-bold text-gray-700">{item.count}</span>
-            <span className="text-xs text-gray-400">{item.label}</span>
+            <div className="w-2 h-2 rounded-full" style={{ background: item.color, opacity: item.count > 0 ? 1 : 0.3 }} />
+            <span className={`text-xs font-bold ${item.count > 0 ? 'text-gray-700' : 'text-gray-300'}`}>{item.count}</span>
+            <span className={`text-xs ${item.count > 0 ? 'text-gray-400' : 'text-gray-300'}`}>{item.label}</span>
           </div>
         ))}
       </div>
@@ -1857,10 +1855,6 @@ function StateOfPlay({ plan }: { plan: CampaignPlan }) {
       setTimeout(() => setCopied(false), 2000);
     });
   };
-
-  // Don't render if no activity at all
-  const hasAnyActivity = plan.weeks.some((w) => w.actions.some((a) => a.status !== 'planned'));
-  if (!hasAnyActivity) return null;
 
   return (
     <div className="mb-4 rounded-xl border border-gray-100 bg-white p-4" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
