@@ -67,7 +67,7 @@ export default function ToolIntro({
             Tool {number} — Decision System
           </span>
           <a
-            href="/"
+            href="http://localhost:3000/#tools"
             className="text-[0.72rem] tracking-[0.18em] uppercase font-semibold text-black/60 hover:text-[#FF4A1C] transition-colors"
           >
             ← Back to system
