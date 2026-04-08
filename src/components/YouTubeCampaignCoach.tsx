@@ -98,6 +98,7 @@ type CampaignPlan = {
   dropWindows?: DropWindow[];
   dropPlans?: DropPlan[];
   supportPlans?: SupportPlan[];
+  moments?: CampaignMoment[];
 };
 
 type CoachTip = {
@@ -185,11 +186,11 @@ type ViewMode = 'campaign' | 'drop';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CAMPAIGN_PHASES: CampaignPhase[] = [
-  { name: 'REAWAKEN',        weekStart: 1,  weekEnd: 3,  color: '#818cf8' },
-  { name: 'BUILD THE WORLD', weekStart: 4,  weekEnd: 8,  color: '#c084fc' },
-  { name: 'SCALE THE STORY', weekStart: 9,  weekEnd: 13, color: '#fbbf24' },
-  { name: 'CULTURAL MOMENT', weekStart: 14, weekEnd: 22, color: '#fb7185' },
-  { name: 'EXTEND',          weekStart: 23, weekEnd: 24, color: '#2dd4bf' },
+  { name: 'REAWAKEN',        weekStart: 1,  weekEnd: 3,  color: '#2C25FF' },
+  { name: 'BUILD THE WORLD', weekStart: 4,  weekEnd: 8,  color: '#1FBE7A' },
+  { name: 'SCALE THE STORY', weekStart: 9,  weekEnd: 13, color: '#FFD24C' },
+  { name: 'CULTURAL MOMENT', weekStart: 14, weekEnd: 22, color: '#FF4A1C' },
+  { name: 'EXTEND',          weekStart: 23, weekEnd: 24, color: '#FFD3C9' },
 ];
 
 const ACTION_LABELS: Record<ActionType, string> = {
@@ -197,13 +198,13 @@ const ACTION_LABELS: Record<ActionType, string> = {
 };
 
 const ACTION_PILL: Record<ActionType, { icon: string; color: string }> = {
-  short:      { icon: '▶', color: '#c084fc' },
-  video:      { icon: '◆', color: '#fb7185' },
-  post:       { icon: '◎', color: '#818cf8' },
-  live:       { icon: '●', color: '#f97316' },
-  playlist:   { icon: '≡', color: '#2dd4bf' },
-  collab:     { icon: '◉', color: '#22c55e' },
-  afterparty: { icon: '★', color: '#a855f7' },
+  short:      { icon: '▶', color: '#FFD24C' },
+  video:      { icon: '◆', color: '#FF4A1C' },
+  post:       { icon: '◎', color: '#2C25FF' },
+  live:       { icon: '●', color: '#FF4A1C' },
+  playlist:   { icon: '≡', color: '#1FBE7A' },
+  collab:     { icon: '◉', color: '#1FBE7A' },
+  afterparty: { icon: '★', color: '#2C25FF' },
 };
 
 // ── ACTION TILES ─────────────────────────────────────────────────────────────
@@ -220,56 +221,56 @@ const TILE_META: Record<TileKind, {
   role: MomentRole;
   defaultTitle: string;
 }> = {
-  video:      { label: 'VIDEO',      bg: '#ef4444', actionType: 'video',      system: 2, intent: 'convert',    role: 'hero',    defaultTitle: 'New Video' },
-  shorts:     { label: 'SHORTS',     bg: '#eab308', actionType: 'short',      system: 1, intent: 'engage',     role: 'push',    defaultTitle: 'New Short' },
-  collab:     { label: 'COLLAB',     bg: '#22c55e', actionType: 'collab',     system: 2, intent: 'convert',    role: 'hero',    defaultTitle: 'New Collab' },
-  live:       { label: 'LIVE',       bg: '#3b82f6', actionType: 'live',       system: 1, intent: 'engage',     role: 'support', defaultTitle: 'New Live' },
-  afterparty: { label: 'AFTERPARTY', bg: '#a855f7', actionType: 'afterparty', system: 1, intent: 'distribute', role: 'push',    defaultTitle: 'Afterparty' },
+  video:      { label: 'VIDEO',      bg: '#FF4A1C', actionType: 'video',      system: 2, intent: 'convert',    role: 'hero',    defaultTitle: 'New Video' },
+  shorts:     { label: 'SHORTS',     bg: '#FFD24C', actionType: 'short',      system: 1, intent: 'engage',     role: 'push',    defaultTitle: 'New Short' },
+  collab:     { label: 'COLLAB',     bg: '#1FBE7A', actionType: 'collab',     system: 2, intent: 'convert',    role: 'hero',    defaultTitle: 'New Collab' },
+  live:       { label: 'LIVE',       bg: '#2C25FF', actionType: 'live',       system: 1, intent: 'engage',     role: 'support', defaultTitle: 'New Live' },
+  afterparty: { label: 'AFTERPARTY', bg: '#2C25FF', actionType: 'afterparty', system: 1, intent: 'distribute', role: 'push',    defaultTitle: 'Afterparty' },
 };
 
 const TILE_KINDS: TileKind[] = ['video', 'shorts', 'collab', 'live', 'afterparty'];
 
 const STATUS_STYLE: Record<ActionStatus, { bg: string; text: string; border: string }> = {
-  done:    { bg: 'rgba(0,0,0,0.03)', text: '#27272a', border: 'transparent' },
-  missed:  { bg: 'rgba(251,113,133,0.08)', text: '#e11d48', border: 'transparent' },
-  planned: { bg: 'transparent', text: '#a1a1aa', border: 'transparent' },
+  done:    { bg: 'rgba(31,190,122,0.06)', text: '#0E0E0E', border: 'transparent' },
+  missed:  { bg: 'rgba(255,74,28,0.06)', text: '#FF4A1C', border: 'transparent' },
+  planned: { bg: 'transparent', text: '#0E0E0E', border: 'transparent' },
 };
 
 const TEMP: Record<WeekStatus, { text: string; dot: string }> = {
-  cold:    { text: '#6366f1', dot: '#818cf8' },
-  warm:    { text: '#d97706', dot: '#f59e0b' },
-  hot:     { text: '#e11d48', dot: '#fb7185' },
-  cooling: { text: '#71717a', dot: '#a1a1aa' },
+  cold:    { text: '#2C25FF', dot: '#2C25FF' },
+  warm:    { text: '#FFD24C', dot: '#FFD24C' },
+  hot:     { text: '#FF4A1C', dot: '#FF4A1C' },
+  cooling: { text: '#0E0E0E', dot: '#0E0E0E' },
 };
 
 const INTENT_META: Record<ActionIntent, { label: string; color: string }> = {
-  engage:     { label: 'Engage',     color: '#38bdf8' },
-  tease:      { label: 'Tease',      color: '#a78bfa' },
-  convert:    { label: 'Convert',    color: '#fbbf24' },
-  distribute: { label: 'Distribute', color: '#34d399' },
+  engage:     { label: 'Engage',     color: '#2C25FF' },
+  tease:      { label: 'Tease',      color: '#FFD24C' },
+  convert:    { label: 'Convert',    color: '#FF4A1C' },
+  distribute: { label: 'Distribute', color: '#1FBE7A' },
 };
 
 const SYSTEM_LABEL: Record<ActionSystem, string> = { 1: 'S1', 2: 'S2' };
 
 const STATUS_CYCLE: ActionStatus[] = ['planned', 'done', 'missed'];
-const ACTION_TYPES: ActionType[] = ['short', 'video', 'post', 'live', 'playlist', 'collab', 'afterparty'];
+const ACTION_TYPES: ActionType[] = ['short', 'video', 'post', 'live', 'collab', 'afterparty'];
 const SYSTEMS: ActionSystem[] = [1, 2];
 const INTENTS: ActionIntent[] = ['engage', 'tease', 'convert', 'distribute'];
 const DAYS: DayLabel[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const SIGNALS: MomentSignal[] = ['strong', 'neutral', 'weak'];
 const SIGNAL_META: Record<MomentSignal, { label: string; color: string; icon: string }> = {
-  strong:  { label: 'Strong', color: '#16a34a', icon: '▲' },
-  neutral: { label: 'Neutral', color: '#71717a', icon: '—' },
-  weak:    { label: 'Weak', color: '#dc2626', icon: '▼' },
+  strong:  { label: 'Strong', color: '#1FBE7A', icon: '▲' },
+  neutral: { label: 'Neutral', color: '#0E0E0E', icon: '—' },
+  weak:    { label: 'Weak', color: '#FF4A1C', icon: '▼' },
 };
 const MOMENT_TYPES: CampaignMoment['type'][] = ['single', 'collab', 'album', 'announcement', 'milestone', 'anchor'];
 
 const MOMENT_ROLES: MomentRole[] = ['hero', 'support', 'repackage', 'push'];
 const MOMENT_ROLE_META: Record<MomentRole, { label: string; color: string; icon: string; desc: string }> = {
-  hero:      { label: 'Hero',      color: '#fb7185', icon: '◆', desc: 'Official video / anchor content' },
-  support:   { label: 'Support',   color: '#818cf8', icon: '◇', desc: 'Lyric video, BTS, live session' },
-  repackage: { label: 'Repackage', color: '#fbbf24', icon: '↻', desc: 'Remix, visualiser, reaction edit' },
-  push:      { label: 'Push',      color: '#2dd4bf', icon: '▶', desc: 'Shorts, community, playlists' },
+  hero:      { label: 'Hero',      color: '#FF4A1C', icon: '◆', desc: 'Official video / anchor content' },
+  support:   { label: 'Support',   color: '#2C25FF', icon: '◇', desc: 'Lyric video, BTS, live session' },
+  repackage: { label: 'Repackage', color: '#FFD24C', icon: '↻', desc: 'Remix, visualiser, reaction edit' },
+  push:      { label: 'Push',      color: '#1FBE7A', icon: '▶', desc: 'Shorts, community posts, engagement' },
 };
 
 // Default content template for a new track
@@ -320,15 +321,15 @@ function makeDefaultDropPlan(moment: CampaignMoment): DropPlan {
 
 const SUPPORT_STATUS_CYCLE: SupportStatus[] = ['not_recorded', 'recorded', 'posted'];
 const SUPPORT_STATUS_META: Record<SupportStatus, { label: string; short: string; color: string; bg: string; icon: string }> = {
-  not_recorded: { label: 'Not Recorded', short: 'NR',  color: '#a1a1aa', bg: 'rgba(0,0,0,0.04)',    icon: '○' },
-  recorded:     { label: 'Recorded',     short: 'REC', color: '#d97706', bg: 'rgba(217,119,6,0.08)', icon: '◑' },
-  posted:       { label: 'Posted',       short: 'UP',  color: '#16a34a', bg: 'rgba(22,163,74,0.08)', icon: '●' },
+  not_recorded: { label: 'Not Recorded', short: 'NR',  color: '#0E0E0E', bg: 'rgba(14,14,14,0.04)',    icon: '○' },
+  recorded:     { label: 'Recorded',     short: 'REC', color: '#FFD24C', bg: 'rgba(255,210,76,0.08)', icon: '◑' },
+  posted:       { label: 'Posted',       short: 'UP',  color: '#1FBE7A', bg: 'rgba(31,190,122,0.08)', icon: '●' },
 };
 
 const SUPPORT_PHASE_META: Record<SupportPhase, { label: string; color: string }> = {
-  pre:  { label: 'PRE DROP',  color: '#818cf8' },
-  drop: { label: 'DROP DAY',  color: '#fb7185' },
-  post: { label: 'POST DROP', color: '#2dd4bf' },
+  pre:  { label: 'PRE DROP',  color: '#2C25FF' },
+  drop: { label: 'DROP DAY',  color: '#FF4A1C' },
+  post: { label: 'POST DROP', color: '#1FBE7A' },
 };
 
 function makeSupportPlan(moment: CampaignMoment): SupportPlan {
@@ -394,12 +395,12 @@ function getContentStatus(items: TrackContentItem[]): ContentStatus {
 }
 
 const CONTENT_STATUS_META: Record<ContentStatus, { label: string; color: string }> = {
-  underbuilt: { label: 'Underbuilt', color: '#dc2626' },
-  building:   { label: 'Building',   color: '#d97706' },
-  ready:      { label: 'Ready',      color: '#16a34a' },
+  underbuilt: { label: 'Underbuilt', color: '#FF4A1C' },
+  building:   { label: 'Building',   color: '#FFD24C' },
+  ready:      { label: 'Ready',      color: '#1FBE7A' },
 };
 
-const LS_KEY = 'pih-campaign-coach-v2';
+const LS_KEY = 'pih-campaign-coach-v4';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CAMPAIGN NARRATIVE — story context for each phase and key moment
@@ -958,28 +959,188 @@ function act(
 }
 
 function makeSeedData(): CampaignPlan {
-  const today = new Date();
-  const startDate = today.toISOString().split('T')[0];
+  // Demo: K Trap — Album Campaign. Start date is set dynamically so
+  // "today" always falls in week 9 (the active week with mixed done/planned).
+  const now = new Date();
+  now.setHours(12, 0, 0, 0);
+  const base = new Date(now);
+  base.setDate(base.getDate() - 8 * 7); // 8 full weeks ago → we're in week 9
+  const startDate = base.toISOString().split('T')[0];
+  const fmt = (d: Date) => `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
+  const weekDate = (w: number, day: number) => {
+    const d = new Date(base); d.setDate(d.getDate() + (w - 1) * 7 + day);
+    return d.toISOString().split('T')[0];
+  };
+
+  let _id = 0;
+  const aid = () => `demo-${++_id}`;
+
+  const makeAction = (
+    title: string, type: ActionType, day: DayLabel, status: ActionStatus,
+    system: ActionSystem, intent: ActionIntent, opts?: Partial<CampaignAction>,
+  ): CampaignAction => ({
+    id: aid(), title, type, day, status, system, intent,
+    momentRole: opts?.momentRole, featuredArtist: opts?.featuredArtist,
+    date: opts?.date, notes: opts?.notes, metrics: opts?.metrics,
+  });
+
   const weeks: CampaignWeek[] = [];
   for (let i = 0; i < 24; i++) {
-    const weekStart = new Date(today);
-    weekStart.setDate(weekStart.getDate() + i * 7);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    const fmt = (d: Date) => `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
-    weeks.push({
-      week: i + 1,
-      dateRange: `${fmt(weekStart)} – ${fmt(weekEnd)}`,
-      actions: [],
-      feedback: {},
-    });
+    const ws = new Date(base); ws.setDate(ws.getDate() + i * 7);
+    const we = new Date(ws); we.setDate(we.getDate() + 6);
+    weeks.push({ week: i + 1, dateRange: `${fmt(ws)} – ${fmt(we)}`, actions: [], feedback: {} });
   }
+
+  // ── REAWAKEN (W1-3): Shorts + posts to warm the channel ──
+  weeks[0].actions = [
+    makeAction('Return Short — "I\'m back"', 'short', 'MON', 'done', 1, 'engage', { date: weekDate(1, 0), metrics: { views: 12400, comments: 340, signal: 'strong' } }),
+    makeAction('Studio Clip — new era', 'short', 'WED', 'done', 1, 'tease', { date: weekDate(1, 2), metrics: { views: 8700, comments: 180, signal: 'strong' } }),
+    makeAction('Community Post — what you want to hear', 'post', 'FRI', 'done', 1, 'engage', { date: weekDate(1, 4) }),
+  ];
+  weeks[0].feedback = { subsGained: 320, views: 21100, comments: 520, engagementNote: 'Strong return — algorithm picked up both shorts' };
+
+  weeks[1].actions = [
+    makeAction('Snippet Teaser #1', 'short', 'MON', 'done', 1, 'tease', { date: weekDate(2, 0), metrics: { views: 15600, comments: 420, signal: 'strong' } }),
+    makeAction('Freestyle Clip', 'short', 'THU', 'done', 1, 'engage', { date: weekDate(2, 3), metrics: { views: 22300, comments: 610, signal: 'strong' } }),
+    makeAction('Poll — album title vote', 'post', 'SAT', 'done', 1, 'engage', { date: weekDate(2, 5) }),
+  ];
+  weeks[1].feedback = { subsGained: 580, views: 37900, comments: 1030, engagementNote: 'Freestyle clip went semi-viral — 22K views' };
+
+  weeks[2].actions = [
+    makeAction('Behind the Scenes — studio', 'short', 'TUE', 'done', 1, 'tease', { date: weekDate(3, 1), metrics: { views: 9800, comments: 210, signal: 'neutral' } }),
+    makeAction('Snippet Teaser #2', 'short', 'FRI', 'done', 1, 'tease', { date: weekDate(3, 4), metrics: { views: 18200, comments: 490, signal: 'strong' } }),
+    makeAction('Community — single announcement', 'post', 'SUN', 'done', 1, 'convert', { date: weekDate(3, 6) }),
+  ];
+  weeks[2].feedback = { subsGained: 410, views: 28000, comments: 700, engagementNote: 'Good build — single announcement post got strong saves' };
+
+  // ── BUILD THE WORLD (W4-8): First drops + collabs ──
+  weeks[3].actions = [
+    makeAction('"No Sleep" Official Video', 'video', 'FRI', 'done', 2, 'convert', { date: weekDate(4, 4), momentRole: 'hero', metrics: { views: 145000, comments: 3200, subsGained: 1800, signal: 'strong' } }),
+    makeAction('Teaser Short — No Sleep hook', 'short', 'WED', 'done', 1, 'tease', { date: weekDate(4, 2), metrics: { views: 31000, comments: 870, signal: 'strong' } }),
+    makeAction('Reaction Clip', 'short', 'SAT', 'done', 1, 'engage', { date: weekDate(4, 5) }),
+  ];
+  weeks[3].feedback = { subsGained: 1800, views: 176000, comments: 4070, engagementNote: '"No Sleep" video landed hard — 145K first week' };
+
+  weeks[4].actions = [
+    makeAction('Lyric Video — No Sleep', 'video', 'MON', 'done', 2, 'distribute', { date: weekDate(5, 0), momentRole: 'support', metrics: { views: 42000, comments: 680, signal: 'neutral' } }),
+    makeAction('Fan Reaction Short', 'short', 'WED', 'done', 1, 'engage', { date: weekDate(5, 2), metrics: { views: 19400, comments: 510, signal: 'strong' } }),
+    makeAction('Remix Teaser', 'short', 'FRI', 'done', 1, 'tease', { date: weekDate(5, 4) }),
+    makeAction('Community Post — BTS video shoot', 'post', 'SAT', 'done', 1, 'engage', { date: weekDate(5, 5) }),
+  ];
+  weeks[4].feedback = { subsGained: 920, views: 61400, comments: 1190, engagementNote: 'Lyric video extended the moment — fan reaction short drove saves' };
+
+  weeks[5].actions = [
+    makeAction('"Dungeons" ft. Unknown T', 'video', 'FRI', 'done', 2, 'convert', { date: weekDate(6, 4), momentRole: 'hero', featuredArtist: 'Unknown T', metrics: { views: 210000, comments: 5100, subsGained: 2400, signal: 'strong' } }),
+    makeAction('Collab Announcement Short', 'short', 'TUE', 'done', 1, 'tease', { date: weekDate(6, 1), metrics: { views: 44000, comments: 1200, signal: 'strong' } }),
+    makeAction('Unknown T Clip', 'short', 'SAT', 'done', 1, 'engage', { date: weekDate(6, 5), featuredArtist: 'Unknown T' }),
+  ];
+  weeks[5].feedback = { subsGained: 2400, views: 254000, comments: 6300, engagementNote: 'Collab smashed — Unknown T crossover brought new audience' };
+
+  weeks[6].actions = [
+    makeAction('BTS — Dungeons Shoot', 'short', 'MON', 'done', 1, 'engage', { date: weekDate(7, 0), metrics: { views: 16700, comments: 380, signal: 'neutral' } }),
+    makeAction('Performance Clip — Dungeons', 'short', 'THU', 'done', 1, 'engage', { date: weekDate(7, 3) }),
+    makeAction('Community Post — album tracklist tease', 'post', 'FRI', 'done', 1, 'tease', { date: weekDate(7, 4) }),
+  ];
+  weeks[6].feedback = { subsGained: 650, views: 16700, comments: 380, engagementNote: 'Sustaining post-collab — tracklist tease drove speculation' };
+
+  weeks[7].actions = [
+    makeAction('Album Announcement Video', 'video', 'WED', 'done', 2, 'convert', { date: weekDate(8, 2), momentRole: 'hero', metrics: { views: 89000, comments: 2800, subsGained: 1100, signal: 'strong' } }),
+    makeAction('Countdown Short #1', 'short', 'MON', 'done', 1, 'tease', { date: weekDate(8, 0) }),
+    makeAction('Pre-save Push', 'post', 'THU', 'done', 1, 'convert', { date: weekDate(8, 3) }),
+  ];
+  weeks[7].feedback = { subsGained: 1100, views: 89000, comments: 2800, engagementNote: 'Album announcement landed — strong pre-save conversion' };
+
+  // ── SCALE THE STORY (W9-13): Current phase — expand reach ──
+  // Week 9 = current week — mix of done (early in week) and planned (later this week)
+  weeks[8].actions = [
+    makeAction('"Dungeons" Remix Visualiser', 'video', 'MON', 'done', 2, 'distribute', { date: weekDate(9, 0), momentRole: 'repackage', metrics: { views: 34000, comments: 720, signal: 'neutral' } }),
+    makeAction('Snippet — Track 5 Preview', 'short', 'TUE', 'done', 1, 'tease', { date: weekDate(9, 1), metrics: { views: 11200, comments: 290, signal: 'neutral' } }),
+    makeAction('Studio Vibes Short', 'short', 'WED', 'done', 1, 'engage', { date: weekDate(9, 2), metrics: { views: 8400, comments: 180, signal: 'neutral' } }),
+    makeAction('Community Post — vinyl pre-order', 'post', 'WED', 'done', 1, 'convert', { date: weekDate(9, 2) }),
+    makeAction('Third Single Teaser', 'short', 'FRI', 'planned', 1, 'tease', { date: weekDate(9, 4) }),
+    makeAction('Album Tracklist Reaction', 'short', 'SAT', 'planned', 1, 'engage', { date: weekDate(9, 5) }),
+  ];
+  weeks[8].feedback = { subsGained: 380, views: 53600, comments: 1190, engagementNote: 'Remix visualiser landed — snippets driving anticipation' };
+
+  // W10-13: Planned future content
+  weeks[9].actions = [
+    makeAction('"Third Single" Official Video', 'video', 'FRI', 'planned', 2, 'convert', { date: weekDate(10, 4), momentRole: 'hero' }),
+    makeAction('Teaser Short — Third Single', 'short', 'WED', 'planned', 1, 'tease', { date: weekDate(10, 2) }),
+    makeAction('Countdown Short #2', 'short', 'MON', 'planned', 1, 'tease', { date: weekDate(10, 0) }),
+  ];
+
+  weeks[10].actions = [
+    makeAction('Lyric Video — Third Single', 'video', 'MON', 'planned', 2, 'distribute', { date: weekDate(11, 0), momentRole: 'support' }),
+    makeAction('Fan Challenge Short', 'short', 'WED', 'planned', 1, 'engage', { date: weekDate(11, 2) }),
+    makeAction('Live Q&A — Album Preview', 'live', 'SAT', 'planned', 1, 'engage', { date: weekDate(11, 5) }),
+  ];
+
+  weeks[11].actions = [
+    makeAction('Collab Short — Central Cee', 'short', 'TUE', 'planned', 1, 'engage', { date: weekDate(12, 1), featuredArtist: 'Central Cee' }),
+    makeAction('Final Pre-save Push', 'post', 'THU', 'planned', 1, 'convert', { date: weekDate(12, 3) }),
+    makeAction('Album Trailer', 'video', 'FRI', 'planned', 2, 'tease', { date: weekDate(12, 4), momentRole: 'hero' }),
+  ];
+
+  weeks[12].actions = [
+    makeAction('Final Countdown Short', 'short', 'MON', 'planned', 1, 'tease', { date: weekDate(13, 0) }),
+    makeAction('Tracklist Reveal Post', 'post', 'WED', 'planned', 1, 'convert', { date: weekDate(13, 2) }),
+    makeAction('Album Listening Party Announcement', 'post', 'FRI', 'planned', 1, 'engage', { date: weekDate(13, 4) }),
+  ];
+
+  // ── CULTURAL MOMENT (W14-22): Album release window ──
+  weeks[13].actions = [
+    makeAction('ALBUM DROP — Full Album Out', 'video', 'FRI', 'planned', 2, 'convert', { date: weekDate(14, 4), momentRole: 'hero' }),
+    makeAction('Drop Day Recap Short', 'short', 'FRI', 'planned', 1, 'engage', { date: weekDate(14, 4) }),
+    makeAction('Listening Party Live', 'live', 'FRI', 'planned', 1, 'engage', { date: weekDate(14, 4) }),
+  ];
+
+  weeks[14].actions = [
+    makeAction('Track-by-Track Breakdown', 'video', 'MON', 'planned', 2, 'distribute', { date: weekDate(15, 0), momentRole: 'support' }),
+    makeAction('Fan Reactions Compilation', 'short', 'WED', 'planned', 1, 'engage', { date: weekDate(15, 2) }),
+    makeAction('Highlight Clip — best bars', 'short', 'FRI', 'planned', 1, 'engage', { date: weekDate(15, 4) }),
+  ];
+
+  weeks[15].actions = [
+    makeAction('Music Video — Album Focus Track', 'video', 'FRI', 'planned', 2, 'convert', { date: weekDate(16, 4), momentRole: 'hero' }),
+    makeAction('Performance Short', 'short', 'WED', 'planned', 1, 'engage', { date: weekDate(16, 2) }),
+  ];
+
+  // ── EXTEND (W23-24): Keep the conversation going ──
+  weeks[22].actions = [
+    makeAction('Deluxe Teaser', 'short', 'MON', 'planned', 1, 'tease', { date: weekDate(23, 0) }),
+    makeAction('Tour Announcement', 'post', 'FRI', 'planned', 1, 'convert', { date: weekDate(23, 4) }),
+  ];
+
+  weeks[23].actions = [
+    makeAction('Tour Dates Video', 'video', 'WED', 'planned', 2, 'convert', { date: weekDate(24, 2), momentRole: 'hero' }),
+    makeAction('Thank You Post', 'post', 'FRI', 'planned', 1, 'engage', { date: weekDate(24, 4) }),
+  ];
+
   return {
-    artist: '',
-    campaignName: '',
-    subscriberCount: 0,
+    artist: 'K Trap',
+    campaignName: 'Album - Trapo 2',
+    subscriberCount: 285000,
     startDate,
     weeks,
+    targets: {
+      subsTarget: 500000,
+      viewsTarget: 5000000,
+      shortsPerWeek: 3,
+      videosPerWeek: 1,
+      postsPerWeek: 2,
+      communityPerWeek: 2,
+    },
+    manualOverrides: {
+      currentSubs: 294200,
+      totalViews: 718100,
+    },
+    moments: [
+      { weekNum: 4, date: weekDate(4, 4), name: '"No Sleep" — Lead Single', type: 'single', isAnchor: true, why: 'First signal of the campaign — re-establish K Trap as active', prepNote: 'Teaser shorts W3, BTS content ready' },
+      { weekNum: 6, date: weekDate(6, 4), name: '"Dungeons" ft. Unknown T', type: 'collab', isAnchor: true, why: 'Crossover moment — tap Unknown T audience', prepNote: 'Collab announcement short, joint content planned' },
+      { weekNum: 8, date: weekDate(8, 2), name: 'Album Announcement', type: 'announcement', isAnchor: true, why: 'Lock in pre-saves, build anticipation', prepNote: 'Countdown shorts, pre-save push ready' },
+      { weekNum: 10, date: weekDate(10, 4), name: 'Third Single', type: 'single', isAnchor: true, why: 'Final single before album — maintain trajectory', prepNote: 'Teaser + countdown content' },
+      { weekNum: 14, date: weekDate(14, 4), name: 'Album Drop — Trapo 2', type: 'album', isAnchor: true, why: 'The main event — maximise first 48 hours', prepNote: 'All content assets lined up, listening party confirmed' },
+    ],
   };
 }
 
@@ -1007,11 +1168,11 @@ function recalcWeekDates(weeks: CampaignWeek[], startIso: string): CampaignWeek[
 // Unified header + status + phase timeline — feels like a journey
 
 const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string }> = {
-  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Get active',    focus: 'Focus: Shorts + Posts' },
-  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Drop + collabs', focus: 'Focus: Drops + Shorts' },
-  'SCALE THE STORY': { short: 'SCALE',     desc: 'Push content',  focus: 'Focus: Longform + Collabs' },
-  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak moment',   focus: 'Focus: All channels' },
-  'EXTEND':          { short: 'EXTEND',    desc: 'Sustain',       focus: 'Focus: Community' },
+  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Get active',    focus: '→ Post Shorts + Community to warm the algorithm' },
+  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Drop + collabs', focus: '→ Land first drops and build crossover audience' },
+  'SCALE THE STORY': { short: 'SCALE',     desc: 'Push content',  focus: '→ Push content volume and expand reach' },
+  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak moment',   focus: '→ Execute album rollout — maximise first 48hrs' },
+  'EXTEND':          { short: 'EXTEND',    desc: 'Sustain',       focus: '→ Keep the conversation alive post-release' },
 };
 
 // ── ACTUAL PHASE DETECTION ──────────────────────────────────────────────────
@@ -1087,17 +1248,17 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: 
       <div className="mb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h1 className="flex items-baseline gap-1 font-black text-2xl text-gray-900">
+            <h1 className="flex items-baseline gap-1 font-black text-2xl text-ink">
               <span>YouTube Campaign —</span>
               <input
-                className="font-black text-2xl text-gray-900 bg-transparent border-b border-dashed border-gray-300 focus:border-gray-500 outline-none min-w-[120px]"
+                className="font-black text-2xl text-ink bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none min-w-[120px]"
                 value={plan.artist}
                 placeholder="Enter Artist Name"
                 onChange={(e) => onUpdatePlan({ artist: e.target.value })}
               />
             </h1>
             <input
-              className="text-sm font-semibold text-gray-500 mt-0.5 bg-transparent border-b border-dashed border-gray-300 focus:border-gray-500 outline-none w-full"
+              className="text-sm font-semibold text-ink/50 mt-0.5 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none w-full"
               value={plan.campaignName}
               placeholder="Enter Campaign Name"
               onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
@@ -1106,7 +1267,7 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: 
           {onOpenSettings && (
             <button
               onClick={onOpenSettings}
-              className="ml-3 mt-1 p-2 rounded-lg bg-white border border-gray-200 shadow-sm hover:bg-gray-50 hover:shadow transition-all text-gray-500 hover:text-gray-700"
+              className="ml-3 mt-1 p-2 rounded-lg bg-paper border border-ink/8 shadow-sm hover:bg-paper hover:shadow transition-all text-ink/50 hover:text-ink/70"
               title="Campaign Settings"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1118,26 +1279,30 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: 
         </div>
       </div>
 
-      {/* Week indicator + phase focus + drift warning */}
-      <div className="mb-2 flex justify-between items-baseline">
-        <div className="flex items-baseline gap-2">
-          <span className="text-xs font-bold text-gray-500 tracking-wide">CAMPAIGN TIMELINE</span>
+      {/* Phase header — clean hierarchy: phase, description, reality */}
+      <div className="mb-3 flex justify-between items-start">
+        <div>
           {currentPhase && (
-            <span className="text-[10px] font-bold tracking-wide" style={{ color: currentPhase.color }}>
-              {PHASE_MICRO[currentPhase.name].short} — {PHASE_MICRO[currentPhase.name].focus}
-            </span>
-          )}
-          {phaseDrift && actualPhase && (
-            <span className="text-[10px] font-bold tracking-wide" style={{ color: actualPhase.color }}>
-              · Reality: {PHASE_MICRO[actualPhase.name].short}
-            </span>
+            <>
+              <div className="text-lg font-black tracking-tight" style={{ color: currentPhase.color }}>
+                {PHASE_MICRO[currentPhase.name].short}
+              </div>
+              <div className="text-[11px] text-ink/50 mt-0.5">
+                {PHASE_MICRO[currentPhase.name].focus.replace('→ ', '')}
+              </div>
+              {phaseDrift && actualPhase && (
+                <div className="text-[10px] font-semibold text-ink/30 mt-1">
+                  Reality: {PHASE_MICRO[actualPhase.name].short}
+                </div>
+              )}
+            </>
           )}
         </div>
-        <span className="text-xs font-semibold text-gray-400">Week {weekNum} of {totalWeeks}</span>
+        <span className="text-xs font-semibold text-ink/30 pt-1">Week {weekNum} of {totalWeeks}</span>
       </div>
 
       {/* Phase timeline */}
-      <div className="w-full flex gap-1 rounded-2xl overflow-hidden p-1.5" style={{ background: '#ffffff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+      <div className="w-full flex gap-1 rounded-2xl overflow-hidden p-1.5" style={{ background: '#F6F1E7', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
         {CAMPAIGN_PHASES.map((phase) => {
           const weekCount = phase.weekEnd - phase.weekStart + 1;
           const isCurrent = currentPhase?.name === phase.name;
@@ -1182,7 +1347,7 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: 
                 <span className="text-[8px] font-bold mt-1 opacity-60">{phaseDone}/{phaseTotal}</span>
               )}
               {isCurrent && (
-                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white" />
+                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-paper" />
               )}
             </button>
           );
@@ -1295,7 +1460,7 @@ function WeeklyRhythmCard({ plan }: { plan: CampaignPlan }) {
     return 'at_risk';
   };
 
-  const statusColor: Record<RowStatus, string> = { hit: '#16a34a', at_risk: '#ea580c', behind: '#dc2626' };
+  const statusColor: Record<RowStatus, string> = { hit: '#1FBE7A', at_risk: '#FFD24C', behind: '#FF4A1C' };
 
   const rows = categories.map((c) => ({ ...c, status: getRowStatus(c.done, c.target) }));
 
@@ -1306,9 +1471,9 @@ function WeeklyRhythmCard({ plan }: { plan: CampaignPlan }) {
   const overall: OverallStatus = behindCount >= 2 ? 'behind' : (behindCount >= 1 || atRiskCount >= 2) ? 'at_risk' : atRiskCount >= 1 ? 'at_risk' : 'on_track';
 
   const overallMeta: Record<OverallStatus, { label: string; color: string; bg: string }> = {
-    on_track: { label: 'On Track',  color: '#16a34a', bg: 'rgba(22,163,74,0.08)'  },
-    at_risk:  { label: 'At Risk',   color: '#ea580c', bg: 'rgba(234,88,12,0.08)'  },
-    behind:   { label: 'Behind',    color: '#dc2626', bg: 'rgba(220,38,38,0.08)'  },
+    on_track: { label: 'On Track',  color: '#1FBE7A', bg: 'rgba(31,190,122,0.08)'  },
+    at_risk:  { label: 'At Risk',   color: '#FFD24C', bg: 'rgba(255,210,76,0.08)'  },
+    behind:   { label: 'Behind',    color: '#FF4A1C', bg: 'rgba(255,74,28,0.08)'  },
   };
 
   // Generate imperative action command — short, direct, tells you exactly what to do
@@ -1341,10 +1506,10 @@ function WeeklyRhythmCard({ plan }: { plan: CampaignPlan }) {
   const om = overallMeta[overall];
 
   return (
-    <div className="rounded-2xl p-4 h-full flex flex-col" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+    <div className="rounded-2xl p-4 h-full flex flex-col" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       {/* Title with inline status */}
       <div className="flex items-baseline gap-2 mb-3">
-        <div className="text-sm font-black uppercase tracking-wide text-gray-500">This Week's Rhythm</div>
+        <div className="text-sm font-black uppercase tracking-wide text-ink/50">This Week's Rhythm</div>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full" style={{ background: om.color }} />
           <span className="text-xs font-black" style={{ color: om.color }}>{om.label}</span>
@@ -1357,20 +1522,20 @@ function WeeklyRhythmCard({ plan }: { plan: CampaignPlan }) {
           <div key={r.key} className="flex items-center gap-3">
             <div className="flex items-baseline gap-0.5 min-w-[48px]">
               <span className="text-xl font-black tabular-nums leading-none" style={{ color: statusColor[r.status] }}>{r.done}</span>
-              <span className="text-xs font-bold text-gray-300">/{r.target}</span>
+              <span className="text-xs font-bold text-ink/30">/{r.target}</span>
             </div>
-            <span className="text-sm font-bold text-gray-500">{r.label}</span>
+            <span className="text-sm font-bold text-ink/50">{r.label}</span>
           </div>
         ))}
       </div>
 
       {/* Action command — pushed to bottom */}
-      <div className="border-t border-gray-100 pt-2.5 mt-auto">
+      <div className="border-t border-ink/5 pt-2.5 mt-auto">
         <div className="text-sm font-black leading-tight" style={{ color: om.color }}>
           {generateAction()}
         </div>
         {generateUrgencyHint() && (
-          <div className="mt-1 text-[10px] font-semibold text-gray-400">{generateUrgencyHint()}</div>
+          <div className="mt-1 text-[10px] font-semibold text-ink/40">{generateUrgencyHint()}</div>
         )}
       </div>
     </div>
@@ -1462,12 +1627,12 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
           onChange={(e) => onEditChange(e.target.value)}
           onBlur={() => onEditSave(metricKey, metricDraft)}
           onKeyDown={(e) => { if (e.key === 'Enter') onEditSave(metricKey, metricDraft); if (e.key === 'Escape') onEditCancel(); }}
-          className="text-3xl font-black bg-gray-50 border border-gray-300 rounded px-2 py-1 w-32 outline-none focus:border-gray-500" />
+          className="text-lg font-black bg-paper border border-ink/12 rounded px-2 py-1 w-32 outline-none focus:border-ink/50" />
       );
     }
     return (
       <button onClick={() => onEditStart(metricKey, rawValue.toString())}
-        className="text-3xl font-black text-gray-900 hover:text-gray-600 transition-colors cursor-pointer">
+        className="text-lg font-black text-ink hover:text-ink/60 transition-colors cursor-pointer">
         {displayValue}
       </button>
     );
@@ -1507,96 +1672,61 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
   const subsOnPace = subsProgress >= Math.round((activeWeekCount / Math.max(1, totalWeeks)) * 100);
 
   return (
-    <div className="mb-8">
-      {/* Left: This Week (dominant) | Right: Views + Subs stacked compact */}
-      <div className="grid gap-3" style={{ gridTemplateColumns: '1.3fr 1fr' }}>
+    <div className="mb-6">
+      {/* Weekly Rhythm — full width, dominant */}
+      <WeeklyRhythmCard plan={plan} />
 
-        {/* THIS WEEK — left, fills full height */}
-        <div className="flex">
-          <div className="flex-1"><WeeklyRhythmCard plan={plan} /></div>
+      {/* Subs + Views — calm context panels, not status */}
+      <div className="grid grid-cols-2 gap-3 mt-3">
+        {/* Subscribers */}
+        <div className="rounded-xl px-4 py-3" style={{ background: '#F6F1E7' }}>
+          <div className="flex items-baseline justify-between mb-1">
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Subscribers</span>
+            <span className="text-[9px] font-semibold text-ink/30">
+              {subsOnPace ? 'On track' : 'Tracking below plan'}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <EditableNum metricKey="currentSubs" displayValue={formatSubs(currentSubs)} rawValue={currentSubs} />
+            <span className="text-[10px] font-semibold text-ink/40">/ {formatSubs(targets.subsTarget)}</span>
+          </div>
+          <div className="text-[10px] text-ink/30 mt-0.5">+{subsGained.toLocaleString()} this campaign</div>
+          <div className="mt-1.5"><ProgressBar pct={subsProgress} color={subsOnPace ? '#1FBE7A' : '#FFD24C'} /></div>
         </div>
 
-        {/* Right column — two compact cards stacked */}
-        <div className="flex flex-col gap-3">
-
-          {/* SUBSCRIBER GROWTH — campaign-focused */}
-          {(() => {
-            return (
-              <div className="rounded-2xl px-4 py-3 flex-1 flex flex-col justify-center" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subscribers</div>
-                  <span className="text-[10px] font-bold whitespace-nowrap" style={{ color: subsOnPace ? '#16a34a' : '#d97706' }}>
-                    {subsOnPace ? 'Ahead of target' : 'Behind target'}
-                  </span>
-                </div>
-                <div className="mb-0.5">
-                  <EditableNum metricKey="currentSubs" displayValue={formatSubs(currentSubs)} rawValue={currentSubs} />
-                </div>
-                <div className="text-[10px] font-bold text-gray-400 mb-1.5">
-                  +{subsGained.toLocaleString()} this campaign · <button onClick={onOpenTargets} className="underline decoration-dotted hover:text-gray-600 transition-colors cursor-pointer" style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit' }}>Target: {formatSubs(targets.subsTarget)}</button>
-                </div>
-                <ProgressBar pct={subsProgress} color={subsOnPace ? '#16a34a' : '#d97706'} />
-              </div>
-            );
-          })()}
-
-          {/* VIEWS — campaign-focused */}
-          {(() => {
-            const fmtViewsTarget = targets.viewsTarget >= 1000000
-              ? `${(targets.viewsTarget / 1000000).toFixed(targets.viewsTarget % 1000000 === 0 ? 0 : 1)}M`
-              : targets.viewsTarget.toLocaleString();
-            return (
-              <div className="rounded-2xl px-4 py-3 flex-1 flex flex-col justify-center" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Views</div>
-                  <span className="text-[10px] font-bold whitespace-nowrap" style={{ color: viewsAhead ? '#16a34a' : '#d97706' }}>
-                    {viewsAhead ? 'Ahead of target' : 'Behind target'}
-                  </span>
-                </div>
-                <div className="mb-0.5">
-                  <EditableNum metricKey="views" displayValue={totalViews.toLocaleString()} rawValue={totalViews} />
-                </div>
-                <div className="text-[10px] font-bold text-gray-400 mb-1.5">
-                  <button onClick={onOpenTargets} className="underline decoration-dotted hover:text-gray-600 transition-colors cursor-pointer" style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit' }}>Target: {fmtViewsTarget}</button>
-                </div>
-                <ProgressBar pct={viewsProgress} color={viewsAhead ? '#16a34a' : '#d97706'} />
-              </div>
-            );
-          })()}
-
-        </div>
-
-      </div>
-
-      {/* Row 2: Next Drop — full width, quiet/neutral */}
-      <div className="mt-3 rounded-2xl p-4" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="text-xs font-bold uppercase tracking-widest text-gray-400">Next Drop</div>
-            {nextDrop ? (
-              <>
-                <span className="text-sm font-black text-gray-900">{nextDrop.action.title}</span>
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ color: dropPill!.color, background: `${dropPill!.color}12` }}>
-                  {dropPill!.icon} {ACTION_LABELS[nextDrop.action.type]}
+        {/* Views */}
+        {(() => {
+          const fmtViewsTarget = targets.viewsTarget >= 1000000
+            ? `${(targets.viewsTarget / 1000000).toFixed(targets.viewsTarget % 1000000 === 0 ? 0 : 1)}M`
+            : targets.viewsTarget.toLocaleString();
+          return (
+            <div className="rounded-xl px-4 py-3" style={{ background: '#F6F1E7' }}>
+              <div className="flex items-baseline justify-between mb-1">
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Views</span>
+                <span className="text-[9px] font-semibold text-ink/30">
+                  {viewsAhead ? 'Ahead of plan' : 'Tracking below plan'}
                 </span>
-                <span className="text-xs text-gray-500">{dropDayStr} · {dropDateStr}</span>
-              </>
-            ) : (
-              <span className="text-sm text-gray-400">No upcoming key drop</span>
-            )}
-          </div>
-          {nextDrop && (
-            <div className="text-sm font-bold" style={{ color: dropUrgencyColor }}>
-              {dropUrgencyLabel}
+              </div>
+              <div className="flex items-baseline gap-2">
+                <EditableNum metricKey="views" displayValue={totalViews.toLocaleString()} rawValue={totalViews} />
+                <span className="text-[10px] font-semibold text-ink/40">/ {fmtViewsTarget}</span>
+              </div>
+              <div className="mt-1.5"><ProgressBar pct={viewsProgress} color={viewsAhead ? '#1FBE7A' : '#FFD24C'} /></div>
             </div>
-          )}
-        </div>
-        {nextDrop && daysAway > 14 && (
-          <div className="mt-1.5 text-[10px] font-semibold text-gray-400">
-            Prep starts in ~{Math.max(1, Math.floor((daysAway - 7) / 7))}–{Math.max(2, Math.floor((daysAway - 3) / 7))} weeks
-          </div>
-        )}
+          );
+        })()}
       </div>
+
+      {/* Next Drop — compact row */}
+      {nextDrop && (
+        <div className="mt-3 rounded-xl px-4 py-2.5 flex items-center justify-between" style={{ background: '#F6F1E7' }}>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 shrink-0">Next Drop</span>
+            <span className="text-xs font-black text-ink truncate">{nextDrop.action.title}</span>
+          </div>
+          <span className="text-[10px] font-bold shrink-0" style={{ color: dropUrgencyColor }}>{dropUrgencyLabel}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -1636,70 +1766,70 @@ function MetricsModal({ plan, onSave, onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/25" />
-      <div className="relative w-full max-w-md mx-4 rounded-2xl overflow-hidden" style={{ background: '#ffffff', boxShadow: '0 25px 50px rgba(0,0,0,0.15)' }}
+      <div className="relative w-full max-w-md mx-4 rounded-2xl overflow-hidden" style={{ background: '#F6F1E7', boxShadow: '0 25px 50px rgba(0,0,0,0.15)' }}
         onClick={(e) => e.stopPropagation()}>
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-          <h3 className="text-base font-black text-gray-900">Campaign Targets</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors text-lg">×</button>
+          <h3 className="text-base font-black text-ink">Campaign Targets</h3>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink/70 transition-colors text-lg">×</button>
         </div>
 
         <div className="px-6 py-5 space-y-5 max-h-[60vh] overflow-y-auto">
-          <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Baseline</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Baseline</div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Starting Subs</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Starting Subs</label>
               <input type="text" value={startingSubs} onChange={(e) => setStartingSubs(e.target.value)}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-              <p className="text-[10px] text-gray-400 mt-1">Subscriber count at campaign start</p>
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 transition-colors" />
+              <p className="text-[10px] text-ink/40 mt-1">Subscriber count at campaign start</p>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Start Date</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Start Date</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-              <p className="text-[10px] text-gray-400 mt-1">Week 1 starts from this date</p>
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 transition-colors" />
+              <p className="text-[10px] text-ink/40 mt-1">Week 1 starts from this date</p>
             </div>
           </div>
 
           <div className="h-px" style={{ background: 'rgba(0,0,0,0.06)' }} />
 
-          <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Growth Targets</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Growth Targets</div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Sub Target</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Sub Target</label>
               <input type="text" value={subsTarget} onChange={(e) => setSubsTarget(e.target.value)}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-              <p className="text-[10px] text-gray-400 mt-1">Goal subscriber count</p>
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 transition-colors" />
+              <p className="text-[10px] text-ink/40 mt-1">Goal subscriber count</p>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Views Target</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Views Target</label>
               <input type="text" value={viewsTarget} onChange={(e) => setViewsTarget(e.target.value)}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-              <p className="text-[10px] text-gray-400 mt-1">Total campaign views goal</p>
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 transition-colors" />
+              <p className="text-[10px] text-ink/40 mt-1">Total campaign views goal</p>
             </div>
           </div>
 
           <div className="h-px" style={{ background: 'rgba(0,0,0,0.06)' }} />
 
-          <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Output Targets</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Output Targets</div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Shorts / Week</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Shorts / Week</label>
               <input type="text" value={shortsPerWeek} onChange={(e) => setShortsPerWeek(e.target.value)}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-              <p className="text-[10px] text-gray-400 mt-1">Target shorts per week</p>
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 transition-colors" />
+              <p className="text-[10px] text-ink/40 mt-1">Target shorts per week</p>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Videos / Week</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Videos / Week</label>
               <input type="text" value={videosPerWeek} onChange={(e) => setVideosPerWeek(e.target.value)}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 transition-colors" />
-              <p className="text-[10px] text-gray-400 mt-1">Target videos per week</p>
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 transition-colors" />
+              <p className="text-[10px] text-ink/40 mt-1">Target videos per week</p>
             </div>
           </div>
         </div>
 
         <div className="px-6 py-4 flex justify-end gap-3" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <button onClick={onClose} className="text-xs font-semibold px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
-          <button onClick={handleSave} className="text-xs font-bold px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors">Save</button>
+          <button onClick={onClose} className="text-xs font-semibold px-4 py-2 rounded-lg text-ink/60 hover:bg-cream transition-colors">Cancel</button>
+          <button onClick={handleSave} className="text-xs font-bold px-4 py-2 rounded-lg bg-ink text-white hover:bg-ink/80 transition-colors">Save</button>
         </div>
       </div>
     </div>
@@ -1819,13 +1949,13 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
     return (
       <div className="mb-4 px-1">
         <div className="flex items-start justify-between gap-4">
-          <div className="text-[11px] leading-relaxed text-gray-400 min-w-0">
-            <span className="font-semibold text-gray-500">Campaign total:</span>{' '}
+          <div className="text-[11px] leading-relaxed text-ink/40 min-w-0">
+            <span className="font-semibold text-ink/50">Campaign total:</span>{' '}
             {totalDone > 0 ? totalLabel.join(' · ') : 'No content yet'}
           </div>
           <button
             onClick={handleCopy}
-            className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all whitespace-nowrap shrink-0 mt-0.5"
+            className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-ink/8 text-ink/40 hover:bg-paper hover:text-ink/60 transition-all whitespace-nowrap shrink-0 mt-0.5"
           >
             {copied ? '✓ Copied' : 'Copy Update'}
           </button>
@@ -1845,15 +1975,15 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
             </span>
             {actionLine && (
               <>
-                <span className="text-gray-300 ml-2">→</span>
-                <span className="ml-1.5 text-gray-400">{actionLine}</span>
+                <span className="text-ink/30 ml-2">→</span>
+                <span className="ml-1.5 text-ink/40">{actionLine}</span>
               </>
             )}
           </div>
         </div>
         <button
           onClick={handleCopy}
-          className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all whitespace-nowrap shrink-0 mt-0.5"
+          className="text-[10px] font-semibold px-2.5 py-1 rounded-md border border-ink/8 text-ink/40 hover:bg-paper hover:text-ink/60 transition-all whitespace-nowrap shrink-0 mt-0.5"
         >
           {copied ? '✓ Copied' : 'Copy Update'}
         </button>
@@ -1885,68 +2015,68 @@ function NextDropModal({ moment, dropEdit, onSave, onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/25" />
-      <div className="relative w-full max-w-md mx-4 rounded-2xl overflow-hidden" style={{ background: '#ffffff', boxShadow: '0 25px 50px rgba(0,0,0,0.15)' }}
+      <div className="relative w-full max-w-md mx-4 rounded-2xl overflow-hidden" style={{ background: '#F6F1E7', boxShadow: '0 25px 50px rgba(0,0,0,0.15)' }}
         onClick={(e) => e.stopPropagation()}>
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-          <h3 className="text-base font-black text-gray-900">Edit Next Drop</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors text-lg">×</button>
+          <h3 className="text-base font-black text-ink">Edit Next Drop</h3>
+          <button onClick={onClose} className="text-ink/40 hover:text-ink/70 transition-colors text-lg">×</button>
         </div>
 
         <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Title</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Title</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400" />
+              className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Type</label>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Type</label>
               <select value={type} onChange={(e) => setType(e.target.value as CampaignMoment['type'])}
-                className="w-full text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400">
+                className="w-full text-sm font-semibold text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40">
                 {MOMENT_TYPES.map((t) => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Week</label>
-              <div className="text-sm font-semibold text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">Week {moment.weekNum}</div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Week</label>
+              <div className="text-sm font-semibold text-ink/60 bg-paper border border-ink/8 rounded-lg px-3 py-2">Week {moment.weekNum}</div>
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Goal</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-1">Goal</label>
             <textarea value={goal} onChange={(e) => setGoal(e.target.value)}
-              className="w-full text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-gray-400 h-16 resize-none" />
+              className="w-full text-sm text-ink bg-paper border border-ink/8 rounded-lg px-3 py-2 outline-none focus:border-ink/40 h-16 resize-none" />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Prep Checklist</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-ink/40 mb-2">Prep Checklist</label>
             <div className="space-y-2">
               {checklist.map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">{i + 1}.</span>
+                  <span className="text-xs text-ink/40">{i + 1}.</span>
                   <input type="text" value={item}
                     onChange={(e) => { const next = [...checklist]; next[i] = e.target.value; setChecklist(next); }}
-                    className="flex-1 text-sm text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 outline-none focus:border-gray-400" />
+                    className="flex-1 text-sm text-ink bg-paper border border-ink/8 rounded-lg px-3 py-1.5 outline-none focus:border-ink/40" />
                   <button onClick={() => setChecklist(checklist.filter((_, j) => j !== i))}
-                    className="text-gray-400 hover:text-red-500 text-xs">×</button>
+                    className="text-ink/40 hover:text-red-500 text-xs">×</button>
                 </div>
               ))}
               <div className="flex items-center gap-2">
                 <input type="text" value={newItem} placeholder="Add item..."
                   onChange={(e) => setNewItem(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && newItem.trim()) { setChecklist([...checklist, newItem.trim()]); setNewItem(''); } }}
-                  className="flex-1 text-sm text-gray-500 bg-gray-50 border border-dashed border-gray-300 rounded-lg px-3 py-1.5 outline-none focus:border-gray-400" />
+                  className="flex-1 text-sm text-ink/50 bg-paper border border-dashed border-ink/12 rounded-lg px-3 py-1.5 outline-none focus:border-ink/40" />
                 <button onClick={() => { if (newItem.trim()) { setChecklist([...checklist, newItem.trim()]); setNewItem(''); } }}
-                  className="text-xs font-bold text-gray-500 hover:text-gray-700 px-2 py-1">+</button>
+                  className="text-xs font-bold text-ink/50 hover:text-ink/70 px-2 py-1">+</button>
               </div>
             </div>
           </div>
         </div>
 
         <div className="px-6 py-4 flex justify-end gap-3" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <button onClick={onClose} className="text-xs font-semibold px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
-          <button onClick={handleSave} className="text-xs font-bold px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors">Save</button>
+          <button onClick={onClose} className="text-xs font-semibold px-4 py-2 rounded-lg text-ink/60 hover:bg-cream transition-colors">Cancel</button>
+          <button onClick={handleSave} className="text-xs font-bold px-4 py-2 rounded-lg bg-ink text-white hover:bg-ink/80 transition-colors">Save</button>
         </div>
       </div>
     </div>
@@ -2000,34 +2130,34 @@ function ChannelHealthInline({ plan }: { plan: CampaignPlan }) {
   return (
     <div className="mb-6">
       <button onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-white"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all hover:bg-paper"
         style={{ background: open ? '#ffffff' : 'transparent' }}>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Channel</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-ink/40">Channel</span>
         {needsWarning && <span style={{ color: statusColor, fontSize: '12px' }}>&#9888;</span>}
         <span className="text-xs font-black" style={{ color: statusColor }}>{statusLabel}</span>
-        <span className="text-[10px] text-gray-300">{open ? '▲' : '▼'}</span>
+        <span className="text-[10px] text-ink/30">{open ? '▲' : '▼'}</span>
       </button>
 
       {open && (
-        <div className="mt-2 rounded-xl p-4 grid grid-cols-4 gap-4 text-xs" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className="mt-2 rounded-xl p-4 grid grid-cols-4 gap-4 text-xs" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div>
-            <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Last 4 Weeks</div>
-            <div className="font-black text-gray-900">{totalDoneLast4} uploads</div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-ink/40 mb-1">Last 4 Weeks</div>
+            <div className="font-black text-ink">{totalDoneLast4} uploads</div>
           </div>
           <div>
-            <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Consistency</div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-ink/40 mb-1">Consistency</div>
             <div className="font-black" style={{ color: consistencyColor }}>{consistency}</div>
           </div>
           <div>
-            <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Engagement</div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-ink/40 mb-1">Engagement</div>
             <div className="font-black" style={{ color: engagementColor }}>{engagementStr}</div>
           </div>
           <div>
-            <div className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Growth</div>
+            <div className="text-[9px] font-bold uppercase tracking-widest text-ink/40 mb-1">Growth</div>
             <div className="font-black" style={{ color: growthColor }}>{growthLabel}</div>
           </div>
-          <div className="col-span-4 pt-2 border-t border-gray-100">
-            <span className="text-gray-500">{diagnosis}</span>
+          <div className="col-span-4 pt-2 border-t border-ink/5">
+            <span className="text-ink/50">{diagnosis}</span>
           </div>
         </div>
       )}
@@ -2222,7 +2352,7 @@ function ActionTileGrid({ weekNum, startDate, onAdd, weekActions }: {
               </div>
               <span className="text-white font-black text-xs tracking-widest">{meta.label}</span>
               {hasExisting && (
-                <div className="absolute top-2 right-2 min-w-[18px] h-[18px] rounded-full bg-white flex items-center justify-center"
+                <div className="absolute top-2 right-2 min-w-[18px] h-[18px] rounded-full bg-paper flex items-center justify-center"
                   style={{ opacity: 0.9 }}>
                   <span className="text-[10px] font-black" style={{ color: meta.bg }}>{count}</span>
                 </div>
@@ -2276,7 +2406,7 @@ function UndoToast({ name, onUndo, onDismiss }: { name: string; onUndo: () => vo
   return (
     <div
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl"
-      style={{ background: '#18181b', minWidth: 260 }}>
+      style={{ background: '#0E0E0E', minWidth: 260 }}>
       <span className="text-sm text-white font-medium truncate" style={{ maxWidth: 200 }}>
         Removed <strong>{name}</strong>
       </span>
@@ -2380,22 +2510,22 @@ function ActionItem({ action, weekNum, onToggleStatus, onEdit, onDelete, dragged
       )}
 
       {action.date && (
-        <span className="flex-shrink-0 text-[9px] font-semibold text-gray-500">{fmtDate(action.date)}</span>
+        <span className="flex-shrink-0 text-[9px] font-semibold text-ink/50">{fmtDate(action.date)}</span>
       )}
-      <span className="flex-shrink-0 text-[9px] text-gray-400">{action.day}</span>
+      <span className="flex-shrink-0 text-[9px] text-ink/40">{action.day}</span>
 
       {/* Hover actions: edit + delete */}
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
         <button
           onClick={() => onEdit(action, weekNum)}
-          className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-black/5 rounded-lg transition-colors"
+          className="w-6 h-6 flex items-center justify-center text-ink/40 hover:text-ink/70 hover:bg-black/5 rounded-lg transition-colors"
           style={{ fontSize: '10px' }}
           title="Edit">
           ✎
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(weekNum, action); }}
-          className="w-6 h-6 flex items-center justify-center text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+          className="w-6 h-6 flex items-center justify-center text-ink/30 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
           style={{ fontSize: '11px' }}
           title="Remove">
           ✕
@@ -2433,7 +2563,7 @@ function HeroMoment({ action, weekNum, onToggleStatus, onEdit, onDelete, dragged
       onDrop={onDrop}
       className="group p-4 rounded-2xl cursor-move relative"
       style={{
-        background: '#ffffff',
+        background: '#F6F1E7',
         boxShadow: `0 1px 3px rgba(0,0,0,0.04), 0 0 15px ${pill.color}20`,
         borderLeft: `4px solid ${pill.color}`,
         opacity: isDeleting ? 0 : draggedId === action.id ? 0.5 : 1,
@@ -2448,7 +2578,7 @@ function HeroMoment({ action, weekNum, onToggleStatus, onEdit, onDelete, dragged
       {/* Delete button — top right, hover-revealed */}
       <button
         onClick={(e) => { e.stopPropagation(); onDelete(weekNum, action); }}
-        className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+        className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center text-ink/30 hover:text-rose-500 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
         style={{ fontSize: '13px' }}
         title="Remove">
         ✕
@@ -2460,7 +2590,7 @@ function HeroMoment({ action, weekNum, onToggleStatus, onEdit, onDelete, dragged
             <span className="text-lg" style={{ color: pill.color }}>
               {pill.icon}
             </span>
-            <h4 className="font-black text-base text-gray-900 leading-tight cursor-pointer hover:opacity-70" onClick={() => onEdit(action, weekNum)}>
+            <h4 className="font-black text-base text-ink leading-tight cursor-pointer hover:opacity-70" onClick={() => onEdit(action, weekNum)}>
               {action.title}
             </h4>
           </div>
@@ -2580,12 +2710,12 @@ function SupportStack({ supports, weekNum, onToggleStatus, onEdit, onDelete, dra
     <div>
       <button
         onClick={() => onToggleSupport(weekKey)}
-        className="text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors"
+        className="text-xs font-bold text-ink/50 hover:text-ink/70 transition-colors"
         style={{ textDecoration: 'underline' }}>
         {isExpanded ? `Hide ${supports.length} support action${supports.length > 1 ? 's' : ''}` : `Show ${supports.length} support action${supports.length > 1 ? 's' : ''}`}
       </button>
       {isExpanded && (
-        <div className="mt-2 space-y-2 pl-3 border-l-2 border-gray-200">
+        <div className="mt-2 space-y-2 pl-3 border-l-2 border-ink/8">
           {supports.map((s) => (
             <ActionItem
               key={s.id}
@@ -2667,28 +2797,28 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
       onClick={onClose}
       onKeyDown={(e) => e.key === 'Escape' && onClose()}>
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-5 max-h-[90vh] overflow-y-auto"
+        className="bg-paper rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-5 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-black text-gray-900 mb-3">Edit Action</h3>
+        <h3 className="text-lg font-black text-ink mb-3">Edit Action</h3>
 
         <div className="space-y-3 mb-4">
           <div>
-            <label className="text-xs font-bold text-gray-600 block mb-1">Title</label>
+            <label className="text-xs font-bold text-ink/60 block mb-1">Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">Type</label>
+              <label className="text-xs font-bold text-ink/60 block mb-1">Type</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as ActionType)}
-                className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400">
+                className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400">
                 {ACTION_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {ACTION_LABELS[t]}
@@ -2698,40 +2828,40 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">Day</label>
+              <label className="text-xs font-bold text-ink/60 block mb-1">Day</label>
               <select
                 value={dateVal ? fmtDay(dateVal) : day}
                 onChange={(e) => { if (!dateVal) setDay(e.target.value as DayLabel); }}
                 disabled={!!dateVal}
-                className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400 disabled:opacity-50">
+                className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400 disabled:opacity-50">
                 {DAYS.map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
                 ))}
               </select>
-              {dateVal && <span className="text-[9px] text-gray-400 mt-0.5 block">Auto from date</span>}
+              {dateVal && <span className="text-[9px] text-ink/40 mt-0.5 block">Auto from date</span>}
             </div>
           </div>
 
           {/* Date field */}
           <div>
-            <label className="text-xs font-bold text-gray-600 block mb-1">Date</label>
+            <label className="text-xs font-bold text-ink/60 block mb-1">Date</label>
             <input
               type="date"
               value={dateVal}
               onChange={(e) => setDateVal(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">System</label>
+              <label className="text-xs font-bold text-ink/60 block mb-1">System</label>
               <select
                 value={system}
                 onChange={(e) => setSystem(Number(e.target.value) as ActionSystem)}
-                className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400">
+                className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400">
                 {SYSTEMS.map((s) => (
                   <option key={s} value={s}>
                     {SYSTEM_LABEL[s]}
@@ -2741,11 +2871,11 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-gray-600 block mb-1">Intent</label>
+              <label className="text-xs font-bold text-ink/60 block mb-1">Intent</label>
               <select
                 value={intent}
                 onChange={(e) => setIntent(e.target.value as ActionIntent)}
-                className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400">
+                className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400">
                 {INTENTS.map((i) => (
                   <option key={i} value={i}>
                     {INTENT_META[i].label}
@@ -2756,11 +2886,11 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-600 block mb-1">Status</label>
+            <label className="text-xs font-bold text-ink/60 block mb-1">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as ActionStatus)}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400">
+              className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400">
               {STATUS_CYCLE.map((s) => (
                 <option key={s} value={s}>
                   {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -2771,7 +2901,7 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
 
           {/* Moment Role */}
           <div>
-            <label className="text-xs font-bold text-gray-600 block mb-1">Moment Role</label>
+            <label className="text-xs font-bold text-ink/60 block mb-1">Moment Role</label>
             <div className="flex gap-1.5">
               <button onClick={() => setMomentRole('')}
                 className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
@@ -2793,47 +2923,47 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-600 block mb-1">Featured Artist (optional)</label>
+            <label className="text-xs font-bold text-ink/60 block mb-1">Featured Artist (optional)</label>
             <input
               type="text"
               value={featured}
               onChange={(e) => setFeatured(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400"
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-gray-600 block mb-1">Notes (optional)</label>
+            <label className="text-xs font-bold text-ink/60 block mb-1">Notes (optional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-gray-200 outline-none focus:border-blue-400 h-14 resize-none"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-ink/8 outline-none focus:border-blue-400 h-14 resize-none"
             />
           </div>
 
           {/* Moment-level metrics */}
-          <div className="pt-2 border-t border-gray-100">
-            <label className="text-xs font-bold text-gray-600 block mb-1">Moment Metrics (optional)</label>
+          <div className="pt-2 border-t border-ink/5">
+            <label className="text-xs font-bold text-ink/60 block mb-1">Moment Metrics (optional)</label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] text-gray-400 block mb-1">Views</label>
+                <label className="text-[10px] text-ink/40 block mb-1">Views</label>
                 <input type="number" value={mViews} onChange={(e) => setMViews(e.target.value)} placeholder="0"
-                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-gray-200 outline-none focus:border-blue-400" />
+                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-ink/8 outline-none focus:border-blue-400" />
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 block mb-1">Comments</label>
+                <label className="text-[10px] text-ink/40 block mb-1">Comments</label>
                 <input type="number" value={mComments} onChange={(e) => setMComments(e.target.value)} placeholder="0"
-                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-gray-200 outline-none focus:border-blue-400" />
+                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-ink/8 outline-none focus:border-blue-400" />
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 block mb-1">Subs Gained</label>
+                <label className="text-[10px] text-ink/40 block mb-1">Subs Gained</label>
                 <input type="number" value={mSubs} onChange={(e) => setMSubs(e.target.value)} placeholder="0"
-                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-gray-200 outline-none focus:border-blue-400" />
+                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-ink/8 outline-none focus:border-blue-400" />
               </div>
               <div>
-                <label className="text-[10px] text-gray-400 block mb-1">Signal</label>
+                <label className="text-[10px] text-ink/40 block mb-1">Signal</label>
                 <select value={mSignal} onChange={(e) => setMSignal(e.target.value as MomentSignal | '')}
-                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-gray-200 outline-none focus:border-blue-400">
+                  className="w-full text-sm px-3 py-1.5 rounded-lg border border-ink/8 outline-none focus:border-blue-400">
                   <option value="">None</option>
                   {SIGNALS.map((s) => <option key={s} value={s}>{SIGNAL_META[s].label}</option>)}
                 </select>
@@ -2845,12 +2975,12 @@ function ActionModal({ action, weekNum, onSave, onClose }: {
         <div className="flex gap-2 justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            className="px-4 py-2 text-sm font-bold text-ink/60 hover:bg-cream rounded-lg transition-colors">
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-sm font-bold text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors">
+            className="px-4 py-2 text-sm font-bold text-white bg-ink hover:bg-ink/80 rounded-lg transition-colors">
             Save
           </button>
         </div>
@@ -2872,12 +3002,12 @@ function TrackPlanCard({ track, onToggleItem, onAddItem, onRemoveItem }: {
   const doneCount = track.items.filter((i) => i.done).length;
 
   return (
-    <div className="rounded-2xl p-5" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+    <div className="rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       <div className="flex items-center justify-between mb-3">
-        <h4 className="font-black text-sm text-gray-900 truncate flex-1">{track.trackName}</h4>
+        <h4 className="font-black text-sm text-ink truncate flex-1">{track.trackName}</h4>
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-[10px] font-bold" style={{ color: meta.color }}>{meta.label}</span>
-          <span className="text-[10px] text-gray-400">{doneCount}/{track.items.length}</span>
+          <span className="text-[10px] text-ink/40">{doneCount}/{track.items.length}</span>
         </div>
       </div>
 
@@ -2905,18 +3035,18 @@ function TrackPlanCard({ track, onToggleItem, onAddItem, onRemoveItem }: {
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ color: roleMeta.color, background: `${roleMeta.color}10` }}>
                 {roleMeta.icon}
               </span>
-              <span className="flex-1 text-xs text-gray-700" style={{ textDecoration: item.done ? 'line-through' : 'none', opacity: item.done ? 0.6 : 1 }}>
+              <span className="flex-1 text-xs text-ink/70" style={{ textDecoration: item.done ? 'line-through' : 'none', opacity: item.done ? 0.6 : 1 }}>
                 {item.label}
               </span>
               <button onClick={() => onRemoveItem(track.trackId, item.id)}
-                className="text-gray-300 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                className="text-ink/30 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity">×</button>
             </div>
           );
         })}
       </div>
 
       <button onClick={() => onAddItem(track.trackId)}
-        className="mt-2 text-[10px] font-bold text-gray-400 hover:text-gray-600 transition-colors">
+        className="mt-2 text-[10px] font-bold text-ink/40 hover:text-ink/60 transition-colors">
         + Add content item
       </button>
     </div>
@@ -2941,7 +3071,7 @@ function DropWindowBlock({ dw, actions, phaseColor, onToggleStatus, onEdit }: {
     <div className="mb-3 p-3 rounded-xl" style={{ background: `${phaseColor}08`, border: `1px solid ${phaseColor}20` }}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] font-black uppercase tracking-wider" style={{ color: phaseColor }}>{dw.label}</span>
-        <span className="text-[10px] text-gray-400">{doneCount}/{windowActions.length} done</span>
+        <span className="text-[10px] text-ink/40">{doneCount}/{windowActions.length} done</span>
       </div>
       <div className="space-y-1">
         {windowActions.map((a) => {
@@ -2962,12 +3092,12 @@ function DropWindowBlock({ dw, actions, phaseColor, onToggleStatus, onEdit }: {
                   {roleMeta.label}
                 </span>
               )}
-              <span className="flex-1 text-xs text-gray-700 truncate cursor-pointer hover:opacity-70"
+              <span className="flex-1 text-xs text-ink/70 truncate cursor-pointer hover:opacity-70"
                 onClick={() => onEdit(a, dw.weekNum)}
                 style={{ textDecoration: a.status === 'missed' ? 'line-through' : 'none' }}>
                 {a.title}
               </span>
-              <span className="text-[9px] text-gray-400">{a.day}</span>
+              <span className="text-[9px] text-ink/40">{a.day}</span>
             </div>
           );
         })}
@@ -3101,29 +3231,40 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
 }
 
 const DROP_STATUS_META: Record<AutoTrack['status'], { label: string; color: string }> = {
-  upcoming: { label: 'Upcoming', color: '#a1a1aa' },
-  active:   { label: 'Active',   color: '#d97706' },
-  complete: { label: 'Complete', color: '#16a34a' },
+  upcoming: { label: 'Upcoming',  color: 'rgba(14,14,14,0.35)' },
+  active:   { label: 'In progress', color: '#FFD24C' },
+  complete: { label: 'Complete',  color: '#1FBE7A' },
 };
 
 // ──── DROP PLAYBOOK ─────────────────────────────────────────────────────────
 // Defines expected support per drop type — all values derived from real actions
 type PlaybookExpectation = { label: string; type: ActionType; expected: number };
 
-// Default playbook: what a well-supported video drop should have
-const VIDEO_PLAYBOOK: PlaybookExpectation[] = [
-  { label: 'Video',           type: 'video',    expected: 1 },
-  { label: 'Shorts',          type: 'short',    expected: 3 },
-  { label: 'Community Posts',  type: 'post',     expected: 1 },
-  { label: 'Playlist',        type: 'playlist',  expected: 1 },
+// ── MULTI-ASSET DROP STRATEGY ─────────────────────────────────────────────
+// CORE: Main Video (required)
+// SUPPORT: Shorts (2–3) + Community Post (1–2)
+// EXPANSION: Lyric Video + Artwork Video (optional, major drops only)
+
+// Standard drop — all drops get this baseline
+const STANDARD_PLAYBOOK: PlaybookExpectation[] = [
+  { label: 'Main Video',       type: 'video',    expected: 1 },
+  { label: 'Shorts',           type: 'short',    expected: 2 },
+  { label: 'Community Post',   type: 'post',     expected: 1 },
 ];
 
-// Collab drops expect the same but with the collab type
+// Major drop — singles, key moments, album drops get expansion layer
+const MAJOR_PLAYBOOK: PlaybookExpectation[] = [
+  { label: 'Main Video',       type: 'video',    expected: 1 },
+  { label: 'Shorts',           type: 'short',    expected: 3 },
+  { label: 'Community Posts',   type: 'post',     expected: 2 },
+  { label: 'Lyric Video',      type: 'video',    expected: 1 },  // expansion
+];
+
+// Collab drop — similar to major but hero is a collab
 const COLLAB_PLAYBOOK: PlaybookExpectation[] = [
-  { label: 'Collab',          type: 'collab',   expected: 1 },
-  { label: 'Shorts',          type: 'short',    expected: 3 },
-  { label: 'Community Posts',  type: 'post',     expected: 1 },
-  { label: 'Playlist',        type: 'playlist',  expected: 1 },
+  { label: 'Collab Video',     type: 'collab',   expected: 1 },
+  { label: 'Shorts',           type: 'short',    expected: 3 },
+  { label: 'Community Posts',   type: 'post',     expected: 2 },
 ];
 
 type PlaybookResult = {
@@ -3136,9 +3277,11 @@ type PlaybookResult = {
 };
 
 function getDropPlaybook(track: AutoTrack): PlaybookResult[] {
-  // Choose playbook based on anchor action type
+  // Choose playbook: collab → collab, major moments (single/album/anchor) → major, else → standard
   const anchorType = track.anchorAction?.type;
-  const base = anchorType === 'collab' ? COLLAB_PLAYBOOK : VIDEO_PLAYBOOK;
+  const momentType = track.moment?.type;
+  const isMajor = momentType === 'single' || momentType === 'album' || momentType === 'anchor' || track.moment?.isAnchor;
+  const base = anchorType === 'collab' ? COLLAB_PLAYBOOK : isMajor ? MAJOR_PLAYBOOK : STANDARD_PLAYBOOK;
 
   // Gather all real actions: the hero + all support actions in the same week and nearby weeks
   const allActions = [
@@ -3148,32 +3291,57 @@ function getDropPlaybook(track: AutoTrack): PlaybookResult[] {
   // Also count support plan items (the filming checklist)
   const spItems = track.supportPlan?.items || [];
 
+  // Track video counts separately for Main Video vs Lyric Video
+  const videoActions = allActions.filter((a) => a.type === 'video');
+  const videoDone = videoActions.filter((a) => a.status === 'done').length;
+  const spVideos = spItems.filter((s) => s.contentType === 'video');
+  const spVideoPosted = spVideos.filter((s) => s.status === 'posted').length;
+  let videoSlotUsed = 0; // tracks how many video slots we've allocated
+
   return base.map((expectation) => {
-    // Count actions of this type
+    // Special handling: Lyric Video is the 2nd+ video in the pool
+    if (expectation.label === 'Lyric Video') {
+      const totalVideos = videoActions.length + spVideos.length;
+      const totalVideoDone = videoDone + spVideoPosted;
+      const expansionActual = Math.max(0, totalVideos - videoSlotUsed);
+      const expansionDone = Math.max(0, totalVideoDone - videoSlotUsed);
+      const actual = expansionActual;
+      const done = Math.min(expansionDone, expectation.expected);
+      return {
+        label: expectation.label, type: expectation.type, expected: expectation.expected,
+        actual, done,
+        status: done >= expectation.expected ? 'complete' as const : actual > 0 ? 'partial' as const : 'missing' as const,
+      };
+    }
+
+    // Main Video — first video slot
+    if (expectation.label === 'Main Video' || expectation.label === 'Collab Video') {
+      const actionsOfType = allActions.filter((a) => a.type === expectation.type);
+      const doneOfType = actionsOfType.filter((a) => a.status === 'done').length;
+      const spOfType = spItems.filter((s) => s.contentType === expectation.type);
+      const spPosted = spOfType.filter((s) => s.status === 'posted').length;
+      const actual = actionsOfType.length + spOfType.length;
+      const done = doneOfType + spPosted;
+      if (expectation.type === 'video') videoSlotUsed = Math.min(done, expectation.expected);
+      return {
+        label: expectation.label, type: expectation.type, expected: expectation.expected,
+        actual, done: Math.min(done, expectation.expected),
+        status: done >= expectation.expected ? 'complete' as const : actual > 0 ? 'partial' as const : 'missing' as const,
+      };
+    }
+
+    // Standard type matching (shorts, posts, etc.)
     const actionsOfType = allActions.filter((a) => a.type === expectation.type);
     const doneOfType = actionsOfType.filter((a) => a.status === 'done').length;
-
-    // Also count posted support plan items of this content type
     const spOfType = spItems.filter((s) => s.contentType === expectation.type);
     const spPosted = spOfType.filter((s) => s.status === 'posted').length;
-
     const actual = actionsOfType.length + spOfType.length;
     const done = doneOfType + spPosted;
 
-    let status: PlaybookResult['status'] = 'missing';
-    if (done >= expectation.expected) {
-      status = 'complete';
-    } else if (actual > 0) {
-      status = 'partial';
-    }
-
     return {
-      label: expectation.label,
-      type: expectation.type,
-      expected: expectation.expected,
-      actual,
-      done,
-      status,
+      label: expectation.label, type: expectation.type, expected: expectation.expected,
+      actual, done,
+      status: done >= expectation.expected ? 'complete' as const : actual > 0 ? 'partial' as const : 'missing' as const,
     };
   });
 }
@@ -3197,99 +3365,37 @@ function DropCard({ track }: { track: AutoTrack }) {
   const mainDropColor = mainDropStatus === 'live' ? '#16a34a' : mainDropStatus === 'missed' ? '#dc2626' : mainDropStatus === 'planned' ? '#d97706' : '#dc2626';
 
   return (
-    <div className="rounded-2xl p-5" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Header: name + status */}
-      <div className="flex items-center justify-between mb-1.5">
-        <h4 className="font-black text-sm text-gray-900 truncate flex-1">{track.name}</h4>
-        <span className="text-[10px] font-bold flex-shrink-0 px-2 py-0.5 rounded-full"
+    <div className="rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      {/* Name + Status */}
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-black text-sm text-ink truncate flex-1">{track.name}</h4>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
           style={{ color: statusMeta.color, background: `${statusMeta.color}15` }}>
           {statusMeta.label}
         </span>
       </div>
 
-      {/* Date + week */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-[10px] font-semibold" style={{ color: phaseColor }}>
-          Week {track.weekNum} · {fmtDate(track.date)}
-        </span>
-      </div>
-
-      {/* Main Drop */}
-      <div className="mb-3 p-3 rounded-xl" style={{ background: mainDropStatus === 'missing' ? '#fef2f2' : mainDropStatus === 'live' ? '#f0fdf4' : '#fffbeb' }}>
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Main Drop</span>
-          <span className="text-[10px] font-bold" style={{ color: mainDropColor }}>
-            {mainDropStatus === 'live' ? 'Live' : mainDropStatus === 'missed' ? 'Missed' : mainDropStatus === 'planned' ? 'Planned' : 'Missing'}
-          </span>
-        </div>
-        {mainDrop ? (
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: ACTION_PILL[mainDrop.type].color }} />
-            <span className="text-xs font-bold text-gray-800 truncate">{mainDrop.title}</span>
-            {mainDrop.featuredArtist && (
-              <span className="text-[10px] text-gray-400 flex-shrink-0">ft. {mainDrop.featuredArtist}</span>
-            )}
-          </div>
-        ) : (
-          <div className="mt-1.5 text-xs text-red-400 font-semibold">No video or collab added yet</div>
-        )}
-      </div>
-
-      {/* Support — actual vs expected per category */}
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Support</span>
-          <span className="text-[10px] font-bold tabular-nums" style={{ color: totalDone >= totalExpected ? '#16a34a' : '#71717a' }}>
-            {totalDone}/{totalExpected}
-          </span>
-        </div>
-        <div className="space-y-1.5">
-          {playbook.map((row, i) => {
-            const color = row.status === 'complete' ? '#16a34a' : row.status === 'partial' ? '#d97706' : '#d4d4d8';
-            const icon = row.status === 'complete' ? '✓' : row.status === 'partial' ? '◑' : '○';
-            const countColor = row.done >= row.expected ? '#16a34a' : row.done > 0 ? '#d97706' : '#a1a1aa';
-            return (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-[10px] w-3 text-center flex-shrink-0" style={{ color }}>{icon}</span>
-                <span className="text-[10px] flex-1 font-semibold" style={{ color: row.status === 'complete' ? '#71717a' : '#374151' }}>
-                  {row.label}
-                </span>
-                <span className="text-[10px] font-bold tabular-nums flex-shrink-0" style={{ color: countColor }}>
-                  {Math.min(row.done, row.expected)}/{row.expected}
-                </span>
-                <span className="text-[9px] font-bold px-1 rounded flex-shrink-0"
-                  style={{ color: ACTION_PILL[row.type].color, background: `${ACTION_PILL[row.type].color}10` }}>
-                  {ACTION_PILL[row.type].icon}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Execution Score */}
+      {/* Execution bar */}
       <div className="mb-2">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold text-gray-500">Execution</span>
-          <span className="text-xs font-black" style={{ color: executionPct === 100 ? '#16a34a' : executionPct >= 50 ? '#d97706' : '#dc2626' }}>
+          <span className="text-[10px] font-bold text-ink/40">Execution</span>
+          <span className="text-[10px] font-black" style={{ color: executionPct === 100 ? '#1FBE7A' : executionPct >= 50 ? '#FFD24C' : '#FF4A1C' }}>
             {executionPct}%
           </span>
         </div>
-        <div className="w-full h-2 rounded-full" style={{ background: 'rgba(0,0,0,0.05)' }}>
+        <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.05)' }}>
           <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.max(2, executionPct)}%`, background: executionPct === 100 ? '#16a34a' : executionPct >= 50 ? '#d97706' : '#dc2626' }} />
+            style={{ width: `${Math.max(2, executionPct)}%`, background: executionPct === 100 ? '#1FBE7A' : executionPct >= 50 ? '#FFD24C' : '#FF4A1C' }} />
         </div>
       </div>
 
-      {/* Missing Items */}
+      {/* Missing items — only if gaps exist */}
       {missingItems.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <span className="text-[10px] font-bold text-red-500">
-            Missing: {missingItems.map((m) => {
-              const gap = m.expected - m.done;
-              return gap === m.expected ? m.label : `${m.label} (${gap} more)`;
-            }).join(', ')}
-          </span>
+        <div className="text-[10px] font-semibold" style={{ color: '#FF4A1C' }}>
+          Missing: {missingItems.map((m) => {
+            const gap = m.expected - m.done;
+            return gap === m.expected ? m.label : `${m.label} (${gap})`;
+          }).join(', ')}
         </div>
       )}
     </div>
@@ -3303,7 +3409,7 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     return (
       <div className="text-center py-12" style={{ color: '#a1a1aa' }}>
         <div className="text-2xl mb-2">◆</div>
-        <p className="text-sm font-semibold text-gray-500">No drops planned yet</p>
+        <p className="text-sm font-semibold text-ink/50">No drops planned yet</p>
         <p className="text-xs mt-1">Add a video or collab in Campaign View and it will appear here as a drop.</p>
       </div>
     );
@@ -3330,43 +3436,43 @@ function DropView({ plan }: { plan: CampaignPlan }) {
   return (
     <div>
       {/* Summary card */}
-      <div className="mb-6 rounded-2xl p-5" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      <div className="mb-6 rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Drops</span>
-            <div className="mt-1 text-lg font-black text-gray-900">{totalDrops} drops</div>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink/40">Drops</span>
+            <div className="mt-1 text-lg font-black text-ink">{totalDrops} drops</div>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-center">
-              <div className="text-sm font-black" style={{ color: '#16a34a' }}>{completeCount}</div>
-              <div className="text-[9px] text-gray-400">Done</div>
+              <div className="text-sm font-black" style={{ color: '#1FBE7A' }}>{completeCount}</div>
+              <div className="text-[9px] text-ink/40">Done</div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-black" style={{ color: '#d97706' }}>{activeCount}</div>
-              <div className="text-[9px] text-gray-400">Active</div>
+              <div className="text-sm font-black" style={{ color: '#FFD24C' }}>{activeCount}</div>
+              <div className="text-[9px] text-ink/40">Active</div>
             </div>
             <div className="text-center">
-              <div className="text-sm font-black text-gray-400">{upcomingCount}</div>
-              <div className="text-[9px] text-gray-400">Upcoming</div>
+              <div className="text-sm font-black text-ink/40">{upcomingCount}</div>
+              <div className="text-[9px] text-ink/40">Upcoming</div>
             </div>
           </div>
         </div>
         {/* Overall execution bar */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-gray-500">Overall execution</span>
-            <span className="text-xs font-black" style={{ color: overallPct === 100 ? '#16a34a' : overallPct >= 50 ? '#d97706' : '#dc2626' }}>
+            <span className="text-[10px] font-bold text-ink/50">Overall execution</span>
+            <span className="text-xs font-black" style={{ color: overallPct === 100 ? '#1FBE7A' : overallPct >= 50 ? '#FFD24C' : '#FF4A1C' }}>
               {overallPct}%
             </span>
           </div>
           <div className="w-full h-2 rounded-full" style={{ background: 'rgba(0,0,0,0.05)' }}>
             <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.max(2, overallPct)}%`, background: overallPct === 100 ? '#16a34a' : overallPct >= 50 ? '#d97706' : '#dc2626' }} />
+              style={{ width: `${Math.max(2, overallPct)}%`, background: overallPct === 100 ? '#1FBE7A' : overallPct >= 50 ? '#FFD24C' : '#FF4A1C' }} />
           </div>
         </div>
         {/* Quick gap scan */}
         {dropsWithGaps.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-ink/5">
             <span className="text-[10px] font-bold text-red-500">
               {dropsWithGaps.length} drop{dropsWithGaps.length > 1 ? 's' : ''} with gaps
             </span>
@@ -3374,9 +3480,15 @@ function DropView({ plan }: { plan: CampaignPlan }) {
         )}
       </div>
 
-      {/* Drop cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {autoTracks.map((track) => (
+      {/* Drop cards — sorted worst execution first (triage) */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {[...autoTracks].sort((a, b) => {
+          const pbA = getDropPlaybook(a);
+          const pbB = getDropPlaybook(b);
+          const pctA = pbA.reduce((s, p) => s + p.expected, 0) > 0 ? pbA.reduce((s, p) => s + Math.min(p.done, p.expected), 0) / pbA.reduce((s, p) => s + p.expected, 0) : 1;
+          const pctB = pbB.reduce((s, p) => s + p.expected, 0) > 0 ? pbB.reduce((s, p) => s + Math.min(p.done, p.expected), 0) / pbB.reduce((s, p) => s + p.expected, 0) : 1;
+          return pctA - pctB;
+        }).map((track) => (
           <DropCard key={track.id} track={track} />
         ))}
       </div>
@@ -3387,15 +3499,15 @@ function DropView({ plan }: { plan: CampaignPlan }) {
 // ──── VIEW MODE TOGGLE ──────────────────────────────────────────────────────
 function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (mode: ViewMode) => void }) {
   return (
-    <div className="mb-6 flex rounded-xl p-1" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+    <div className="mb-6 flex rounded-xl p-1" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       {(['campaign', 'drop'] as ViewMode[]).map((m) => (
         <button
           key={m}
           onClick={() => onChange(m)}
           className="flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all"
           style={{
-            background: mode === m ? '#27272a' : 'transparent',
-            color: mode === m ? '#ffffff' : '#71717a',
+            background: mode === m ? '#0E0E0E' : 'transparent',
+            color: mode === m ? '#FAF7F2' : 'rgba(14,14,14,0.4)',
           }}>
           {m === 'campaign' ? 'Campaign View' : 'Drop View'}
         </button>
@@ -3445,7 +3557,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
       <button
         onClick={() => onToggleExpand(phase.name)}
         className="w-full mb-3 p-4 rounded-2xl text-left transition-all hover:shadow-md"
-        style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1">
             <div
@@ -3453,15 +3565,15 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
               style={{ background: phase.color }}
             />
             <div className="min-w-0">
-              <h3 className="font-black text-sm text-gray-900">{phase.name}</h3>
-              <p className="text-xs text-gray-500 truncate">{narrative}</p>
+              <h3 className="font-black text-sm text-ink">{phase.name}</h3>
+              <p className="text-xs text-ink/50 truncate">{narrative}</p>
             </div>
           </div>
           <div className="flex-shrink-0 flex items-center gap-2">
             <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ color: phase.color, background: `${phase.color}15` }}>
               {shortStatus}
             </span>
-            <span className="text-gray-400">▼</span>
+            <span className="text-ink/40">▼</span>
           </div>
         </div>
       </button>
@@ -3470,7 +3582,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
 
   // Expanded view
   return (
-    <div className="mb-6 p-6 rounded-2xl" style={{ background: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+    <div className="mb-6 p-6 rounded-2xl" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-4 border-b-2" style={{ borderColor: `${phase.color}20` }}>
         <div>
@@ -3482,11 +3594,11 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
               {shortStatus}
             </span>
           </div>
-          <p className="text-xs text-gray-600">{narrative}</p>
+          <p className="text-xs text-ink/60">{narrative}</p>
         </div>
         <button
           onClick={() => onToggleExpand(phase.name)}
-          className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex-shrink-0 text-ink/40 hover:text-ink/60 transition-colors"
           style={{ fontSize: '20px' }}>
           ▲
         </button>
@@ -3503,7 +3615,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           const windowedActions = weekActions.filter((a) => a.dropWindowId);
 
           return (
-            <div key={week.week} className="pb-4 border-b border-gray-100 last:border-b-0 last:pb-0">
+            <div key={week.week} className="pb-4 border-b border-ink/5 last:border-b-0 last:pb-0">
               {/* Week header — generic by default, data-driven details only if actions exist */}
               {(() => {
                 // Derive key drop from the week's own actions (video, collab, live, album, afterparty with system 2)
@@ -3513,7 +3625,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                   <div className="mb-3">
                     {/* Primary: date range + week number — always shown */}
                     <div className="flex items-center gap-2">
-                      <h4 className="font-black text-sm text-gray-900">{week.dateRange} · Week {week.week}</h4>
+                      <h4 className="font-black text-sm text-ink">{week.dateRange} · Week {week.week}</h4>
                       {hasKeyDrop && (
                         <span className="text-[9px] font-black px-2 py-0.5 rounded-full tracking-wide"
                           style={{ color: '#ffffff', background: phase.color }}>
@@ -3523,7 +3635,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                     </div>
                     {/* Optional user label — only if set */}
                     {week.label && (
-                      <div className="mt-0.5 text-xs font-semibold text-gray-500">{week.label}</div>
+                      <div className="mt-0.5 text-xs font-semibold text-ink/50">{week.label}</div>
                     )}
                     {/* Drop details — only if a key drop action exists and has release notes */}
                     {hasKeyDrop && keyDropAction.notes && (
@@ -3533,7 +3645,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                     )}
                     {/* Featured artist — only if the key drop is a collab */}
                     {hasKeyDrop && keyDropAction.featuredArtist && (
-                      <div className="mt-0.5 text-[10px] font-semibold text-gray-400">
+                      <div className="mt-0.5 text-[10px] font-semibold text-ink/40">
                         ft. {keyDropAction.featuredArtist}
                       </div>
                     )}
@@ -3625,7 +3737,12 @@ function loadPlan(): CampaignPlan {
   if (typeof window !== 'undefined') {
     try {
       const raw = window.localStorage.getItem(LS_KEY);
-      if (raw) return JSON.parse(raw) as CampaignPlan;
+      if (raw) {
+        const saved = JSON.parse(raw) as CampaignPlan;
+        // If saved plan has real data (artist name set), use it.
+        // Otherwise treat as stale empty state and load demo.
+        if (saved.artist && saved.artist.trim().length > 0) return saved;
+      }
     } catch { /* ignore */ }
   }
   return makeSeedData();
@@ -3633,14 +3750,7 @@ function loadPlan(): CampaignPlan {
 
 export default function YouTubeCampaignCoach() {
   const [plan, setPlan] = useState<CampaignPlan>(() => loadPlan());
-  const [expandedPhases, setExpandedPhases] = useState<Set<PhaseName>>(() => {
-    const seed = makeSeedData();
-    const activeIdx = Math.max(0, getActiveWeekIdx(seed.weeks));
-    const phase = getPhaseForWeek(seed.weeks[activeIdx]?.week ?? 1);
-    const s = new Set<PhaseName>();
-    CAMPAIGN_PHASES.forEach(p => s.add(p.name));
-    return s;
-  });
+  const [expandedPhases, setExpandedPhases] = useState<Set<PhaseName>>(new Set());
   const [editingMetric, setEditingMetric] = useState<string | null>(null);
   const [metricDraft, setMetricDraft] = useState('');
   const [modalAction, setModalAction] = useState<{ action: CampaignAction; weekNum: number } | null>(null);
@@ -3852,7 +3962,7 @@ export default function YouTubeCampaignCoach() {
   // ──────────────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ background: '#faf8f6' }} className="min-h-screen">
+    <div style={{ background: '#FAF7F2' }} className="min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Campaign Timeline — header + status + phase rail */}
         <CampaignTimeline
@@ -3898,8 +4008,68 @@ export default function YouTubeCampaignCoach() {
           onEditCancel={() => setEditingMetric(null)}
         />
 
-        {/* Lightweight activity context line */}
-        <ActivityContextLine plan={plan} />
+        {/* ── SYSTEM STATE — one-line campaign read ── */}
+        {(() => {
+          const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+          const today = new Date(); today.setHours(12, 0, 0, 0);
+          const campaignStart = new Date(plan.startDate + 'T12:00:00');
+          const daysSinceStart = Math.floor((today.getTime() - campaignStart.getTime()) / (24 * 60 * 60 * 1000));
+          const weekNum = Math.max(1, Math.min(plan.weeks.length, Math.floor(daysSinceStart / 7) + 1));
+          const currentWeek = plan.weeks.find((w) => w.week === weekNum);
+          const thisWeekDone = currentWeek?.actions.filter((a) => a.status === 'done').length || 0;
+          const thisWeekTotal = currentWeek?.actions.length || 0;
+          const thisWeekPlanned = currentWeek?.actions.filter((a) => a.status === 'planned').length || 0;
+
+          // Cadence check
+          const shortsDone = currentWeek?.actions.filter(a => a.type === 'short' && a.status === 'done').length || 0;
+          const videosDone = currentWeek?.actions.filter(a => a.type === 'video' && a.status === 'done').length || 0;
+          const shortsTarget = targets.shortsPerWeek || 3;
+          const videosTarget = targets.videosPerWeek || 1;
+          const shortsOk = shortsDone >= shortsTarget;
+          const videosOk = videosDone >= videosTarget;
+
+          let stateLabel: string;
+          let stateColor: string;
+          let priorityLine: string;
+
+          if (thisWeekDone >= thisWeekTotal && thisWeekTotal > 0) {
+            stateLabel = 'Cadence holding — on track';
+            stateColor = '#1FBE7A';
+            priorityLine = 'Maintain pace — no gaps this week';
+          } else if (thisWeekDone === 0 && thisWeekTotal > 0) {
+            stateLabel = 'Execution stalled — nothing landed this week';
+            stateColor = '#FF4A1C';
+            const parts: string[] = [];
+            if (!shortsOk) parts.push(`${shortsTarget} Shorts`);
+            if (!videosOk) parts.push(`${videosTarget} Video`);
+            priorityLine = parts.length > 0 ? `${parts.join(' + ')} — start today` : 'Execute planned actions now';
+          } else if (shortsDone > 0 && videosDone > 0) {
+            stateLabel = 'High momentum — maintain pace';
+            stateColor = '#1FBE7A';
+            const remaining = thisWeekPlanned;
+            priorityLine = remaining > 0 ? `${remaining} action${remaining > 1 ? 's' : ''} left this week` : 'All done — sustain output';
+          } else {
+            stateLabel = 'Execution lagging — output below plan';
+            stateColor = '#FFD24C';
+            const parts: string[] = [];
+            if (!shortsOk) parts.push(`${shortsTarget - shortsDone} Short${shortsTarget - shortsDone > 1 ? 's' : ''}`);
+            if (!videosOk) parts.push(`1 Video`);
+            priorityLine = parts.length > 0 ? `${parts.join(' + ')} — today` : 'Close gaps before end of week';
+          }
+
+          return (
+            <div className="mb-6 rounded-2xl px-6 py-4" style={{ background: '#F6F1E7', border: `1.5px solid ${stateColor}20` }}>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full" style={{ background: stateColor }} />
+                <span className="text-xs font-bold" style={{ color: stateColor }}>{stateLabel}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Priority</span>
+                <span className="text-sm font-black text-ink">{priorityLine}</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* View Mode Toggle */}
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
