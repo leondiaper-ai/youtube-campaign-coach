@@ -10,10 +10,10 @@ export default function Home() {
         number="03"
         accent="mint"
         name="YouTube Campaign Coach"
-        purpose="Structure YouTube planning and campaign execution around release moments — shorts, premieres, uploads, and priority queue."
-        inputs={["Release window", "Channel context", "Asset inventory"]}
-        outputs={["Posting plan", "Moment mapping", "Priority queue"]}
-        ctaLabel="Start planning"
+        purpose="Decide what to do on YouTube this week. Reads channel activity, places it on the narrative, and tells you the next move."
+        inputs={["Channel activity", "Cadence targets", "Release calendar"]}
+        outputs={["Channel signal", "This week's call", "Execution gaps"]}
+        ctaLabel="Read the signal"
         ctaHref="#tool"
       />
 

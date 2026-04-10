@@ -1279,12 +1279,20 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: 
         </div>
       </div>
 
-      {/* Phase header — clean hierarchy: phase, description, reality */}
+      {/* System connection line — ties this tool to the wider decision system */}
+      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/30">
+        From channel activity → narrative progression → campaign impact
+      </div>
+
+      {/* Narrative phase header — explicit label */}
       <div className="mb-3 flex justify-between items-start">
         <div>
           {currentPhase && (
             <>
-              <div className="text-lg font-black tracking-tight" style={{ color: currentPhase.color }}>
+              <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">
+                Narrative Phase
+              </div>
+              <div className="text-lg font-black tracking-tight mt-0.5" style={{ color: currentPhase.color }}>
                 {PHASE_MICRO[currentPhase.name].short}
               </div>
               <div className="text-[11px] text-ink/50 mt-0.5">
@@ -1416,127 +1424,298 @@ function CampaignAnchorStrip({ plan }: { plan: CampaignPlan }) {
   );
 }
 
-// ──── WEEKLY RHYTHM CARD ─────────────────────────────────────────────────────
-// System 1 widget: instant read, decision + action in under 2 seconds
-// "Are we on track? Where are we behind? What do we do right now?"
+// ──── CHANNEL SIGNAL + THIS WEEK'S CALL ──────────────────────────────────────
+// Fast read: is the channel in BUILD / PUSH / HOLD / FIX mode?
+// What is this week's single clearest action?
 
-function WeeklyRhythmCard({ plan }: { plan: CampaignPlan }) {
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
-  const totalWeeks = plan.weeks.length;
+type ChannelSignal = 'BUILD' | 'PUSH' | 'HOLD' | 'FIX';
 
-  // Current campaign week
+const CHANNEL_SIGNAL_META: Record<ChannelSignal, { color: string; bg: string; label: string; desc: string }> = {
+  BUILD: { color: '#2C25FF', bg: 'rgba(44,37,255,0.08)',  label: 'BUILD', desc: 'Lay the groundwork' },
+  PUSH:  { color: '#FF4A1C', bg: 'rgba(255,74,28,0.08)', label: 'PUSH',  desc: 'Momentum is live — back it' },
+  HOLD:  { color: '#71717a', bg: 'rgba(113,113,122,0.08)', label: 'HOLD', desc: 'Sustain, do not over-invest' },
+  FIX:   { color: '#d97706', bg: 'rgba(217,119,6,0.10)',   label: 'FIX',  desc: 'Rebuild consistency' },
+};
+
+type CadenceCounts = {
+  shortsDone: number;
+  shortsTarget: number;
+  postsDone: number;
+  postsTarget: number;
+  longformDone: number;
+  longformTarget: number;
+};
+
+function getCurrentWeek(plan: CampaignPlan): CampaignWeek | undefined {
   const today = new Date();
   today.setHours(12, 0, 0, 0);
-  const campaignStart = new Date(plan.startDate + 'T12:00:00');
-  const daysSinceStart = Math.floor((today.getTime() - campaignStart.getTime()) / (24 * 60 * 60 * 1000));
-  const currentWeekNum = Math.max(1, Math.min(totalWeeks, Math.floor(daysSinceStart / 7) + 1));
-  const currentWeekData = plan.weeks.find((w) => w.week === currentWeekNum);
-  const prevWeekData = plan.weeks.find((w) => w.week === currentWeekNum - 1);
+  const start = new Date(plan.startDate + 'T12:00:00');
+  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+  const weekNum = Math.max(1, Math.min(plan.weeks.length, Math.floor(daysSinceStart / 7) + 1));
+  return plan.weeks.find((w) => w.week === weekNum);
+}
 
-  // Day context
-  const dayOfWeek = ((daysSinceStart % 7) + 7) % 7;
-  const daysLeft = Math.max(0, 6 - dayOfWeek);
+function getCadenceCounts(plan: CampaignPlan): CadenceCounts {
+  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const currentWeek = getCurrentWeek(plan);
+  const actions = currentWeek?.actions || [];
+  const count = (type: ActionType) => actions.filter((a) => a.type === type && a.status === 'done').length;
+  return {
+    shortsDone: count('short'),
+    shortsTarget: targets.shortsPerWeek || 0,
+    postsDone: count('post') + count('live') + count('collab'),
+    postsTarget: (targets.postsPerWeek || 0) + (targets.communityPerWeek || 0),
+    longformDone: count('video'),
+    longformTarget: targets.videosPerWeek || 0,
+  };
+}
 
-  // Count done actions for this week
-  const thisWeekActions = currentWeekData?.actions || [];
-  const count = (type: string) => thisWeekActions.filter((a) => a.type === type && a.status === 'done').length;
+type CadenceStatus = 'Healthy' | 'At Risk' | 'Broken';
 
-  // 3 tracked categories — clear, no overlap
-  const postsAndCommunityDone = count('post') + count('live') + count('collab');
-  const postsAndCommunityTarget = (targets.postsPerWeek || 3) + (targets.communityPerWeek || 2);
-  const categories = [
-    { key: 'shorts',    label: 'Shorts',            done: count('short'), target: targets.shortsPerWeek || 3 },
-    { key: 'community', label: 'Posts / Community',  done: postsAndCommunityDone, target: postsAndCommunityTarget },
-    { key: 'longform',  label: 'Longform',           done: count('video'), target: targets.videosPerWeek || 1 },
-  ];
-
-  // Row status: hit (done >= target), at_risk (some progress), behind (zero or end of week)
-  type RowStatus = 'hit' | 'at_risk' | 'behind';
-  const getRowStatus = (done: number, target: number): RowStatus => {
+function getCadenceStatus(c: CadenceCounts): CadenceStatus {
+  const row = (done: number, target: number): 'hit' | 'at_risk' | 'behind' => {
     if (target === 0) return 'hit';
     if (done >= target) return 'hit';
     if (done === 0) return 'behind';
-    if (daysLeft === 0) return 'behind';
     return 'at_risk';
   };
+  const rows = [
+    row(c.shortsDone, c.shortsTarget),
+    row(c.postsDone, c.postsTarget),
+    row(c.longformDone, c.longformTarget),
+  ];
+  const behind = rows.filter((r) => r === 'behind').length;
+  const hit = rows.filter((r) => r === 'hit').length;
+  if (behind >= 2) return 'Broken';
+  if (hit >= 3) return 'Healthy';
+  return 'At Risk';
+}
 
-  const statusColor: Record<RowStatus, string> = { hit: '#1FBE7A', at_risk: '#FFD24C', behind: '#FF4A1C' };
+const CADENCE_STATUS_META: Record<CadenceStatus, { color: string; bg: string }> = {
+  Healthy:   { color: '#1FBE7A', bg: 'rgba(31,190,122,0.08)' },
+  'At Risk': { color: '#FFD24C', bg: 'rgba(255,210,76,0.10)' },
+  Broken:    { color: '#FF4A1C', bg: 'rgba(255,74,28,0.08)' },
+};
 
-  const rows = categories.map((c) => ({ ...c, status: getRowStatus(c.done, c.target) }));
+function computeChannelSignal(plan: CampaignPlan): ChannelSignal {
+  const cadence = getCadenceCounts(plan);
+  const cadenceStatus = getCadenceStatus(cadence);
+  if (cadenceStatus === 'Broken') return 'FIX';
 
-  // Overall status
-  const behindCount = rows.filter((r) => r.status === 'behind').length;
-  const atRiskCount = rows.filter((r) => r.status === 'at_risk').length;
-  type OverallStatus = 'on_track' | 'at_risk' | 'behind';
-  const overall: OverallStatus = behindCount >= 2 ? 'behind' : (behindCount >= 1 || atRiskCount >= 2) ? 'at_risk' : atRiskCount >= 1 ? 'at_risk' : 'on_track';
+  const currentPhase = detectActualPhase(plan);
+  const drop = getNextDrop(plan);
+  const nearDrop = drop !== null && drop.daysAway >= 0 && drop.daysAway <= 7;
 
-  const overallMeta: Record<OverallStatus, { label: string; color: string; bg: string }> = {
-    on_track: { label: 'On Track',  color: '#1FBE7A', bg: 'rgba(31,190,122,0.08)'  },
-    at_risk:  { label: 'At Risk',   color: '#FFD24C', bg: 'rgba(255,210,76,0.08)'  },
-    behind:   { label: 'Behind',    color: '#FF4A1C', bg: 'rgba(255,74,28,0.08)'  },
-  };
+  if (currentPhase === 'REAWAKEN') return 'FIX';
+  if (currentPhase === 'CULTURAL MOMENT' || currentPhase === 'SCALE THE STORY') {
+    return cadenceStatus === 'Healthy' ? 'PUSH' : 'FIX';
+  }
+  if (nearDrop) return 'PUSH';
+  if (currentPhase === 'BUILD THE WORLD') return cadenceStatus === 'Healthy' ? 'BUILD' : 'FIX';
+  return 'HOLD';
+}
 
-  // Generate imperative action command — short, direct, tells you exactly what to do
-  const generateAction = (): string => {
-    if (overall === 'on_track') return 'All done — maintain momentum';
-    const gaps = rows.filter((r) => r.status !== 'hit').map((r) => ({ ...r, need: r.target - r.done }));
-    if (gaps.length === 0) return 'On pace';
+function buildThisWeeksCall(plan: CampaignPlan, signal: ChannelSignal): string {
+  const c = getCadenceCounts(plan);
+  const shortsGap = Math.max(0, c.shortsTarget - c.shortsDone);
+  const postsGap = Math.max(0, c.postsTarget - c.postsDone);
+  const longGap = Math.max(0, c.longformTarget - c.longformDone);
 
-    // Build short imperative parts
-    const parts: string[] = [];
-    for (const g of gaps) {
-      if (g.key === 'shorts') parts.push(`drop ${g.need} short${g.need > 1 ? 's' : ''}`);
-      else if (g.key === 'community') parts.push(`post + engage ${g.need}x`);
-      else if (g.key === 'longform') parts.push(`upload ${g.need} longform`);
+  const gaps: string[] = [];
+  if (shortsGap > 0) gaps.push(`${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
+  if (postsGap > 0) gaps.push(`${postsGap} post${postsGap > 1 ? 's' : ''}`);
+  if (longGap > 0) gaps.push(`${longGap} longform`);
+
+  if (signal === 'FIX') {
+    if (gaps.length === 0) return 'Rebuild consistency — no execution recorded';
+    return `Rebuild consistency — ${gaps.join(' + ')} required`;
+  }
+  if (signal === 'PUSH') {
+    const drop = getNextDrop(plan);
+    if (drop && drop.daysAway >= 0 && drop.daysAway <= 7) {
+      const base = `Back the drop — ${drop.action.title}`;
+      return gaps.length > 0 ? `${base}. Close: ${gaps.join(' + ')}` : `${base}. Ship support content today`;
     }
-    // Capitalize first part, join with +
-    if (parts.length > 0) parts[0] = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-    return parts.join(' + ');
-  };
+    return gaps.length > 0 ? `Push momentum — close ${gaps.join(' + ')}` : 'Push momentum — keep shipping at cadence';
+  }
+  if (signal === 'BUILD') {
+    return gaps.length > 0 ? `Build the base — drop ${gaps.join(' + ')}` : 'Build the base — keep the rhythm';
+  }
+  return gaps.length > 0 ? `Hold the line — close ${gaps.join(' + ')}` : 'Hold the line — no new investment yet';
+}
 
-  // Micro urgency hint
-  const generateUrgencyHint = (): string | null => {
-    if (overall === 'on_track') return null;
-    const totalGap = rows.reduce((sum, r) => sum + Math.max(0, r.target - r.done), 0);
-    if (totalGap <= 2) return '(Quick win — do it now)';
-    if (totalGap <= 4) return '(10–15 mins to fix)';
-    return '(Needs a focused session)';
-  };
-
-  const om = overallMeta[overall];
+function TopSignalCard({ plan }: { plan: CampaignPlan }) {
+  const signal = computeChannelSignal(plan);
+  const call = buildThisWeeksCall(plan, signal);
+  const meta = CHANNEL_SIGNAL_META[signal];
+  const phaseName = detectActualPhase(plan);
+  const phaseShort = PHASE_MICRO[phaseName].short;
 
   return (
-    <div className="rounded-2xl p-4 h-full flex flex-col" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Title with inline status */}
-      <div className="flex items-baseline gap-2 mb-3">
-        <div className="text-sm font-black uppercase tracking-wide text-ink/50">This Week's Rhythm</div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full" style={{ background: om.color }} />
-          <span className="text-xs font-black" style={{ color: om.color }}>{om.label}</span>
+    <div className="mb-4 rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-3">
+        <div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Channel Signal</div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full" style={{ background: meta.bg, border: `1.5px solid ${meta.color}40` }}>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+            <span className="text-sm font-black tracking-wide" style={{ color: meta.color }}>{meta.label}</span>
+          </div>
+          <div className="text-[10px] font-semibold text-ink/40 mt-1">{meta.desc}</div>
+        </div>
+        <div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Narrative Phase</div>
+          <div className="text-sm font-black text-ink">{phaseShort}</div>
+        </div>
+      </div>
+      <div className="mt-4 pt-3 border-t border-ink/5">
+        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">This Week's Call</div>
+        <div className="text-base font-black leading-snug text-ink">{call}</div>
+      </div>
+    </div>
+  );
+}
+
+// ──── NEXT DROP ANCHOR ───────────────────────────────────────────────────────
+// Primary visual anchor — the next key drop + its role in the narrative
+
+function getDropRole(weekNum: number, type: ActionType): string {
+  const phase = getPhaseForWeek(weekNum);
+  if (!phase) return 'Next step in the campaign';
+  const phaseShort = PHASE_MICRO[phase.name].short;
+  if (phase.name === 'REAWAKEN') return 'Restarts algorithm signal — warms the channel before the first real drop';
+  if (phase.name === 'BUILD THE WORLD') return `Opens the ${phaseShort} phase — introduces the world to new ears`;
+  if (phase.name === 'SCALE THE STORY') return `Drives next step in ${phaseShort} phase — expands reach and volume`;
+  if (phase.name === 'CULTURAL MOMENT') return `Anchors the ${phaseShort} moment — maximise the first 48 hours`;
+  if (phase.name === 'EXTEND') return `Sustains the ${phaseShort} phase — keeps the conversation alive`;
+  if (type === 'collab') return 'Crossover moment — brings another audience in';
+  return `Drives next step in ${phaseShort} phase`;
+}
+
+function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
+  const drop = getNextDrop(plan);
+  if (!drop) return null;
+
+  const iso = drop.action.date || drop.dateObj.toISOString().slice(0, 10);
+  const dateStr = fmtDate(iso);
+  const dayStr = fmtDay(iso);
+  const daysAway = drop.daysAway;
+  const timeLabel = daysAway < 0
+    ? `${Math.abs(daysAway)}d overdue`
+    : daysAway === 0
+    ? 'Today'
+    : daysAway === 1
+    ? 'Tomorrow'
+    : `${daysAway}d away`;
+  const urgencyColor = daysAway < 0 ? '#FF4A1C' : daysAway <= 6 ? '#FF4A1C' : daysAway <= 14 ? '#FFD24C' : '#1FBE7A';
+  const role = getDropRole(drop.weekNum, drop.action.type);
+  const phase = getPhaseForWeek(drop.weekNum);
+
+  return (
+    <div
+      className="mb-6 rounded-2xl p-5 relative overflow-hidden"
+      style={{ background: '#0E0E0E', color: '#FAF7F2', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}
+    >
+      <div
+        className="absolute top-0 left-0 h-full w-1.5"
+        style={{ background: phase?.color || urgencyColor }}
+      />
+      <div className="pl-3">
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.5)' }}>
+            Next Drop
+          </div>
+          <div className="flex items-center gap-2 text-[10px] font-bold" style={{ color: urgencyColor }}>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: urgencyColor }} />
+            <span>{timeLabel}</span>
+          </div>
+        </div>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <h3 className="text-xl font-black tracking-tight leading-tight">{drop.action.title}</h3>
+          <span className="text-xs font-semibold" style={{ color: 'rgba(250,247,242,0.55)' }}>
+            {dateStr} · {dayStr}
+          </span>
+        </div>
+        {drop.action.featuredArtist && (
+          <div className="text-[11px] font-semibold mt-0.5" style={{ color: 'rgba(250,247,242,0.6)' }}>
+            ft. {drop.action.featuredArtist}
+          </div>
+        )}
+        <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(250,247,242,0.12)' }}>
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+            Role
+          </div>
+          <div className="mt-1 text-sm font-semibold leading-snug" style={{ color: 'rgba(250,247,242,0.92)' }}>
+            {role}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──── CADENCE CARD ───────────────────────────────────────────────────────────
+// Renamed from "This Week's Rhythm" — cadence status + simple X/Y rows + one action
+
+function CadenceCard({ plan }: { plan: CampaignPlan }) {
+  const counts = getCadenceCounts(plan);
+  const status = getCadenceStatus(counts);
+  const meta = CADENCE_STATUS_META[status];
+
+  const rows = [
+    { key: 'shorts',   label: 'Shorts',   done: counts.shortsDone,   target: counts.shortsTarget },
+    { key: 'posts',    label: 'Posts',    done: counts.postsDone,    target: counts.postsTarget },
+    { key: 'longform', label: 'Longform', done: counts.longformDone, target: counts.longformTarget },
+  ];
+
+  const rowStatusColor = (done: number, target: number): string => {
+    if (target === 0) return '#1FBE7A';
+    if (done >= target) return '#1FBE7A';
+    if (done === 0) return '#FF4A1C';
+    return '#FFD24C';
+  };
+
+  const buildAction = (): string => {
+    const gaps: string[] = [];
+    const shortsGap = Math.max(0, counts.shortsTarget - counts.shortsDone);
+    const postsGap = Math.max(0, counts.postsTarget - counts.postsDone);
+    const longGap = Math.max(0, counts.longformTarget - counts.longformDone);
+    if (shortsGap > 0) gaps.push(`Drop ${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
+    if (postsGap > 0) gaps.push(`post + engage ${postsGap}x`);
+    if (longGap > 0) gaps.push(`upload ${longGap} longform`);
+    if (gaps.length === 0) return 'Hold cadence — output is on plan';
+    return gaps.join(' + ');
+  };
+
+  return (
+    <div className="mb-4 rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      {/* Title + status pill */}
+      <div className="flex items-baseline justify-between mb-3">
+        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Cadence Status</div>
+        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: meta.bg, border: `1.5px solid ${meta.color}40` }}>
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
+          <span className="text-[11px] font-black tracking-wide" style={{ color: meta.color }}>{status}</span>
         </div>
       </div>
 
       {/* Rows — numbers first, labels second */}
-      <div className="space-y-2.5 mb-3">
+      <div className="space-y-2 mb-3">
         {rows.map((r) => (
           <div key={r.key} className="flex items-center gap-3">
             <div className="flex items-baseline gap-0.5 min-w-[48px]">
-              <span className="text-xl font-black tabular-nums leading-none" style={{ color: statusColor[r.status] }}>{r.done}</span>
+              <span className="text-lg font-black tabular-nums leading-none" style={{ color: rowStatusColor(r.done, r.target) }}>{r.done}</span>
               <span className="text-xs font-bold text-ink/30">/{r.target}</span>
             </div>
-            <span className="text-sm font-bold text-ink/50">{r.label}</span>
+            <span className="text-sm font-bold text-ink/60">{r.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Action command — pushed to bottom */}
-      <div className="border-t border-ink/5 pt-2.5 mt-auto">
-        <div className="text-sm font-black leading-tight" style={{ color: om.color }}>
-          {generateAction()}
+      {/* Single action line */}
+      <div className="border-t border-ink/5 pt-2.5">
+        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-0.5">Action</div>
+        <div className="text-sm font-black leading-tight" style={{ color: meta.color }}>
+          {buildAction()}
         </div>
-        {generateUrgencyHint() && (
-          <div className="mt-1 text-[10px] font-semibold text-ink/40">{generateUrgencyHint()}</div>
-        )}
       </div>
     </div>
   );
@@ -1644,89 +1823,34 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
     </div>
   );
 
-  // ── NEXT DROP (key drops only) ───────────────────────────────────────────
-  const nextDrop = getNextDrop(plan);
-  const daysAway = nextDrop?.daysAway ?? 0;
-  let dropDateStr = '';
-  let dropDayStr = '';
-  if (nextDrop) {
-    const iso = nextDrop.action.date || nextDrop.dateObj.toISOString().slice(0, 10);
-    dropDateStr = fmtDate(iso);
-    dropDayStr = fmtDay(iso);
-  }
-  const dropPill = nextDrop ? ACTION_PILL[nextDrop.action.type] : null;
-
-  // Urgency: 30+ neutral, 7-30 mild, 0-6 urgent, <0 overdue
-  const dropUrgencyColor = !nextDrop ? '#71717a'
-    : daysAway < 0 ? '#dc2626'
-    : daysAway <= 6 ? '#d97706'
-    : daysAway <= 30 ? '#a16207'
-    : '#71717a';
-  const dropUrgencyLabel = !nextDrop ? ''
-    : daysAway < 0 ? `${Math.abs(daysAway)}d overdue`
-    : daysAway === 0 ? 'Today'
-    : daysAway === 1 ? 'Tomorrow'
-    : `${daysAway}d away`;
-
-  // Subs growth indicator
+  // Subs growth indicator (used to colour the progress bar only — no status copy)
   const subsOnPace = subsProgress >= Math.round((activeWeekCount / Math.max(1, totalWeeks)) * 100);
 
-  return (
-    <div className="mb-6">
-      {/* Weekly Rhythm — full width, dominant */}
-      <WeeklyRhythmCard plan={plan} />
+  const fmtViewsTarget = targets.viewsTarget >= 1000000
+    ? `${(targets.viewsTarget / 1000000).toFixed(targets.viewsTarget % 1000000 === 0 ? 0 : 1)}M`
+    : targets.viewsTarget.toLocaleString();
 
-      {/* Subs + Views — calm context panels, not status */}
-      <div className="grid grid-cols-2 gap-3 mt-3">
-        {/* Subscribers */}
+  return (
+    <div className="mb-4">
+      {/* Subs + Views — calm context panels, no "tracking below plan" commentary */}
+      <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl px-4 py-3" style={{ background: '#F6F1E7' }}>
-          <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Subscribers</span>
-            <span className="text-[9px] font-semibold text-ink/30">
-              {subsOnPace ? 'On track' : 'Tracking below plan'}
-            </span>
-          </div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Subscribers</div>
           <div className="flex items-baseline gap-2">
             <EditableNum metricKey="currentSubs" displayValue={formatSubs(currentSubs)} rawValue={currentSubs} />
             <span className="text-[10px] font-semibold text-ink/40">/ {formatSubs(targets.subsTarget)}</span>
           </div>
-          <div className="text-[10px] text-ink/30 mt-0.5">+{subsGained.toLocaleString()} this campaign</div>
           <div className="mt-1.5"><ProgressBar pct={subsProgress} color={subsOnPace ? '#1FBE7A' : '#FFD24C'} /></div>
         </div>
-
-        {/* Views */}
-        {(() => {
-          const fmtViewsTarget = targets.viewsTarget >= 1000000
-            ? `${(targets.viewsTarget / 1000000).toFixed(targets.viewsTarget % 1000000 === 0 ? 0 : 1)}M`
-            : targets.viewsTarget.toLocaleString();
-          return (
-            <div className="rounded-xl px-4 py-3" style={{ background: '#F6F1E7' }}>
-              <div className="flex items-baseline justify-between mb-1">
-                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Views</span>
-                <span className="text-[9px] font-semibold text-ink/30">
-                  {viewsAhead ? 'Ahead of plan' : 'Tracking below plan'}
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <EditableNum metricKey="views" displayValue={totalViews.toLocaleString()} rawValue={totalViews} />
-                <span className="text-[10px] font-semibold text-ink/40">/ {fmtViewsTarget}</span>
-              </div>
-              <div className="mt-1.5"><ProgressBar pct={viewsProgress} color={viewsAhead ? '#1FBE7A' : '#FFD24C'} /></div>
-            </div>
-          );
-        })()}
-      </div>
-
-      {/* Next Drop — compact row */}
-      {nextDrop && (
-        <div className="mt-3 rounded-xl px-4 py-2.5 flex items-center justify-between" style={{ background: '#F6F1E7' }}>
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 shrink-0">Next Drop</span>
-            <span className="text-xs font-black text-ink truncate">{nextDrop.action.title}</span>
+        <div className="rounded-xl px-4 py-3" style={{ background: '#F6F1E7' }}>
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Views</div>
+          <div className="flex items-baseline gap-2">
+            <EditableNum metricKey="views" displayValue={totalViews.toLocaleString()} rawValue={totalViews} />
+            <span className="text-[10px] font-semibold text-ink/40">/ {fmtViewsTarget}</span>
           </div>
-          <span className="text-[10px] font-bold shrink-0" style={{ color: dropUrgencyColor }}>{dropUrgencyLabel}</span>
+          <div className="mt-1.5"><ProgressBar pct={viewsProgress} color={viewsAhead ? '#1FBE7A' : '#FFD24C'} /></div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -3346,9 +3470,19 @@ function getDropPlaybook(track: AutoTrack): PlaybookResult[] {
   });
 }
 
+function getDropImpact(executionPct: number, mainMissing: boolean, missingLabels: string[]): string {
+  if (executionPct === 100) return 'Full stack shipped — maximum discovery expected';
+  if (mainMissing) return 'No main drop — low discovery expected, algorithm cold';
+  if (executionPct < 50) {
+    if (missingLabels.includes('Shorts') || missingLabels.includes('Shorts')) return 'Thin support — low discovery expected';
+    return 'Thin support — limited lift from drop';
+  }
+  if (executionPct < 80) return 'Partial support — some lift, muted peak';
+  return 'Minor gaps — near-full lift expected';
+}
+
 function DropCard({ track }: { track: AutoTrack }) {
   const statusMeta = DROP_STATUS_META[track.status];
-  const phaseColor = track.phase?.color || '#71717a';
   const playbook = getDropPlaybook(track);
 
   // Execution: sum done / sum expected across all playbook rows
@@ -3356,13 +3490,17 @@ function DropCard({ track }: { track: AutoTrack }) {
   const totalDone = playbook.reduce((s, p) => s + Math.min(p.done, p.expected), 0);
   const executionPct = totalExpected > 0 ? Math.round((totalDone / totalExpected) * 100) : 0;
 
-  // Missing items: categories where done < expected
-  const missingItems = playbook.filter((p) => p.done < p.expected);
+  // Execution gaps: categories where done < expected
+  const gapItems = playbook.filter((p) => p.done < p.expected);
+  const gapLabels = gapItems.map((m) => {
+    const gap = m.expected - m.done;
+    return gap === m.expected ? m.label : `${m.label} (${gap})`;
+  });
 
-  // Main drop status (first row of the playbook is always the primary content)
-  const mainDrop = track.anchorAction;
-  const mainDropStatus = !mainDrop ? 'missing' : mainDrop.status === 'done' ? 'live' : mainDrop.status === 'missed' ? 'missed' : 'planned';
-  const mainDropColor = mainDropStatus === 'live' ? '#16a34a' : mainDropStatus === 'missed' ? '#dc2626' : mainDropStatus === 'planned' ? '#d97706' : '#dc2626';
+  // Main drop missing?
+  const mainRow = playbook[0];
+  const mainMissing = mainRow ? mainRow.done === 0 : !track.anchorAction;
+  const impactText = getDropImpact(executionPct, mainMissing, playbook.map((p) => p.label));
 
   return (
     <div className="rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -3376,7 +3514,7 @@ function DropCard({ track }: { track: AutoTrack }) {
       </div>
 
       {/* Execution bar */}
-      <div className="mb-2">
+      <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-[10px] font-bold text-ink/40">Execution</span>
           <span className="text-[10px] font-black" style={{ color: executionPct === 100 ? '#1FBE7A' : executionPct >= 50 ? '#FFD24C' : '#FF4A1C' }}>
@@ -3389,15 +3527,23 @@ function DropCard({ track }: { track: AutoTrack }) {
         </div>
       </div>
 
-      {/* Missing items — only if gaps exist */}
-      {missingItems.length > 0 && (
-        <div className="text-[10px] font-semibold" style={{ color: '#FF4A1C' }}>
-          Missing: {missingItems.map((m) => {
-            const gap = m.expected - m.done;
-            return gap === m.expected ? m.label : `${m.label} (${gap})`;
-          }).join(', ')}
+      {/* Execution Gap — clear language */}
+      {gapLabels.length > 0 && (
+        <div className="mb-2">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-0.5">Execution Gap</div>
+          <div className="text-[11px] font-semibold" style={{ color: '#FF4A1C' }}>
+            {gapLabels.join(', ')}
+          </div>
         </div>
       )}
+
+      {/* Impact — short expected outcome */}
+      <div>
+        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-0.5">Impact</div>
+        <div className="text-[11px] font-semibold text-ink/65 leading-snug">
+          {impactText}
+        </div>
+      </div>
     </div>
   );
 }
@@ -3604,130 +3750,234 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
         </button>
       </div>
 
-      {/* Weeks within phase */}
-      <div className="space-y-6">
-        {phaseWeeks.map((week) => {
-          const weekActions = week.actions;
-          const heroAction = weekActions.find((a) => a.system === 2 && !a.dropWindowId);
-          const shorts = weekActions.filter((a) => a.type === 'short' && !a.dropWindowId);
-          const supports = weekActions.filter((a) => a.type !== 'short' && a.system === 1 && !a.dropWindowId);
-          const weekDropWindows = (plan.dropWindows || []).filter((dw) => dw.weekNum === week.week);
-          const windowedActions = weekActions.filter((a) => a.dropWindowId);
-
-          return (
-            <div key={week.week} className="pb-4 border-b border-ink/5 last:border-b-0 last:pb-0">
-              {/* Week header — generic by default, data-driven details only if actions exist */}
-              {(() => {
-                // Derive key drop from the week's own actions (video, collab, live, album, afterparty with system 2)
-                const keyDropAction = weekActions.find((a) => KEY_DROP_TYPES.has(a.type) && a.system === 2);
-                const hasKeyDrop = !!keyDropAction;
-                return (
-                  <div className="mb-3">
-                    {/* Primary: date range + week number — always shown */}
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-black text-sm text-ink">{week.dateRange} · Week {week.week}</h4>
-                      {hasKeyDrop && (
-                        <span className="text-[9px] font-black px-2 py-0.5 rounded-full tracking-wide"
-                          style={{ color: '#ffffff', background: phase.color }}>
-                          KEY DROP
-                        </span>
-                      )}
-                    </div>
-                    {/* Optional user label — only if set */}
-                    {week.label && (
-                      <div className="mt-0.5 text-xs font-semibold text-ink/50">{week.label}</div>
-                    )}
-                    {/* Drop details — only if a key drop action exists and has release notes */}
-                    {hasKeyDrop && keyDropAction.notes && (
-                      <div className="mt-1 text-[10px] font-bold" style={{ color: phase.color }}>
-                        {keyDropAction.notes}
-                      </div>
-                    )}
-                    {/* Featured artist — only if the key drop is a collab */}
-                    {hasKeyDrop && keyDropAction.featuredArtist && (
-                      <div className="mt-0.5 text-[10px] font-semibold text-ink/40">
-                        ft. {keyDropAction.featuredArtist}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* Drop Windows */}
-              {weekDropWindows.map((dw) => (
-                <DropWindowBlock
-                  key={dw.id}
-                  dw={dw}
-                  actions={weekActions}
-                  phaseColor={phase.color}
-                  onToggleStatus={onToggleActionStatus}
-                  onEdit={onEditAction}
-                />
-              ))}
-
-              {/* Hero moment */}
-              {heroAction && (
-                <div className="mb-3">
-                  <HeroMoment
-                    action={heroAction}
-                    weekNum={week.week}
-                    onToggleStatus={onToggleActionStatus}
-                    onEdit={onEditAction}
-                    onDelete={onDeleteAction}
-                    draggedId={draggedId}
-                    dragOverId={dragOverId}
-                    onDragStart={onDragStart}
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
-                    isDeleting={deletingIds.has(heroAction.id)}
-                  />
-                </div>
-              )}
-
-              {/* Shorts cluster */}
-              {shorts.length > 0 && (
-                <div className="mb-3">
-                  <ShortCluster
-                    shorts={shorts}
-                    weekNum={week.week}
-                    onToggleStatus={onToggleActionStatus}
-                    onEdit={onEditAction}
-                    onDelete={onDeleteAction}
-                    draggedId={draggedId}
-                    dragOverId={dragOverId}
-                    onDragStart={onDragStart}
-                    onDragOver={onDragOver}
-                    onDrop={onDrop}
-                    deletingIds={deletingIds}
-                  />
-                </div>
-              )}
-
-              {/* Support stack */}
-              {supports.length > 0 && (
-                <SupportStack
-                  supports={supports}
-                  weekNum={week.week}
-                  onToggleStatus={onToggleActionStatus}
-                  onEdit={onEditAction}
-                  onDelete={onDeleteAction}
-                  draggedId={draggedId}
-                  dragOverId={dragOverId}
-                  onDragStart={onDragStart}
-                  onDragOver={onDragOver}
-                  onDrop={onDrop}
-                  showCollapsedSupport={showCollapsedSupport}
-                  onToggleSupport={onToggleSupport}
-                  deletingIds={deletingIds}
-                />
-              )}
-
-              {/* Action tiles — instant creation, active types highlighted */}
-              <ActionTileGrid weekNum={week.week} startDate={plan.startDate} onAdd={onAddAction} weekActions={weekActions} />
-            </div>
-          );
-        })}
+      {/* Weeks within phase — simplified decision steps, detail hidden behind expand */}
+      <div className="space-y-3">
+        {phaseWeeks.map((week) => (
+          <WeekRow
+            key={week.week}
+            week={week}
+            phase={phase}
+            plan={plan}
+            tier={tier}
+            allStatuses={statuses}
+            onToggleActionStatus={onToggleActionStatus}
+            onEditAction={onEditAction}
+            onDeleteAction={onDeleteAction}
+            onAddAction={onAddAction}
+            draggedId={draggedId}
+            dragOverId={dragOverId}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            showCollapsedSupport={showCollapsedSupport}
+            onToggleSupport={onToggleSupport}
+            deletingIds={deletingIds}
+          />
+        ))}
       </div>
+    </div>
+  );
+}
+
+// ──── WEEK ROW — simplified decision step ───────────────────────────────────
+// Renders each week as: "Week X — [Phase]" → What happened → Signal → What to do
+// Full action tiles/hero/shorts/support are hidden behind a "Show details" toggle.
+
+function WeekRow({
+  week, phase, plan, tier, allStatuses,
+  onToggleActionStatus, onEditAction, onDeleteAction, onAddAction,
+  draggedId, dragOverId, onDragStart, onDragOver, onDrop,
+  showCollapsedSupport, onToggleSupport, deletingIds,
+}: {
+  week: CampaignWeek;
+  phase: CampaignPhase;
+  plan: CampaignPlan;
+  tier: ChannelTier;
+  allStatuses: WeekStatus[];
+  onToggleActionStatus: (id: string) => void;
+  onEditAction: (action: CampaignAction, weekNum: number) => void;
+  onDeleteAction: (weekNum: number, action: CampaignAction) => void;
+  onAddAction: (weekNum: number, action: CampaignAction) => void;
+  draggedId: string | null;
+  dragOverId: string | null;
+  onDragStart: (id: string) => void;
+  onDragOver: (id: string) => void;
+  onDrop: () => void;
+  showCollapsedSupport: Set<string>;
+  onToggleSupport: (weekKey: string) => void;
+  deletingIds: Set<string>;
+}) {
+  const [open, setOpen] = useState(false);
+  const phaseShort = PHASE_MICRO[phase.name].short;
+  const weekActions = week.actions;
+  const weekIdx = plan.weeks.findIndex((w) => w.week === week.week);
+  const weekStatus = allStatuses[weekIdx];
+  const prevStatus = weekIdx > 0 ? allStatuses[weekIdx - 1] : undefined;
+
+  // What happened — up to 3 completed key items (hero + top shorts/posts)
+  const doneActions = weekActions.filter((a) => a.status === 'done');
+  const missedActions = weekActions.filter((a) => a.status === 'missed');
+  const heroAction = weekActions.find((a) => a.system === 2 && !a.dropWindowId);
+  const shorts = weekActions.filter((a) => a.type === 'short' && !a.dropWindowId);
+  const supports = weekActions.filter((a) => a.type !== 'short' && a.system === 1 && !a.dropWindowId);
+  const weekDropWindows = (plan.dropWindows || []).filter((dw) => dw.weekNum === week.week);
+
+  const whatHappened: string[] = [];
+  const doneHero = doneActions.find((a) => a.system === 2);
+  if (doneHero) whatHappened.push(`${ACTION_LABELS[doneHero.type]}: ${doneHero.title}`);
+  const doneShorts = doneActions.filter((a) => a.type === 'short').length;
+  if (doneShorts > 0) whatHappened.push(`${doneShorts} short${doneShorts > 1 ? 's' : ''} shipped`);
+  const donePosts = doneActions.filter((a) => a.type === 'post' || a.type === 'live' || a.type === 'collab').length;
+  if (donePosts > 0 && whatHappened.length < 3) whatHappened.push(`${donePosts} post${donePosts > 1 ? 's' : ''} / community`);
+  if (whatHappened.length === 0 && missedActions.length > 0) whatHappened.push(`${missedActions.length} planned item${missedActions.length > 1 ? 's' : ''} missed`);
+  if (whatHappened.length === 0) whatHappened.push('Nothing landed yet');
+
+  // Signal — compact meaning line
+  const signal = weekStatus
+    ? getWeekMeaning(week, weekStatus, tier, prevStatus)
+    : (doneActions.length > 0 ? 'Activity logged — read engagement before next step.' : 'No execution signal yet.');
+
+  // What to do — one next step
+  const whatToDo = weekStatus ? getPrimaryAction(week, weekStatus, tier) : 'Plan the week and ship the first item.';
+
+  // Colour hint based on week status
+  const statusAccent = weekStatus === 'hot' ? '#1FBE7A'
+    : weekStatus === 'warm' ? '#FFD24C'
+    : weekStatus === 'cooling' ? '#FF4A1C'
+    : '#71717a';
+
+  const keyDropAction = weekActions.find((a) => KEY_DROP_TYPES.has(a.type) && a.system === 2);
+
+  return (
+    <div className="rounded-xl" style={{ background: 'rgba(14,14,14,0.02)', border: '1px solid rgba(14,14,14,0.06)' }}>
+      {/* Week header — always visible */}
+      <div className="px-4 pt-3.5 pb-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <h4 className="font-black text-sm text-ink shrink-0">Week {week.week}</h4>
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: phase.color }}>
+              — {phaseShort}
+            </span>
+            {keyDropAction && (
+              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full tracking-wide shrink-0"
+                style={{ color: '#ffffff', background: phase.color }}>
+                KEY DROP
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-semibold text-ink/30 shrink-0">{week.dateRange}</span>
+        </div>
+
+        {/* What happened */}
+        <div className="mt-3">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">What happened</div>
+          <ul className="space-y-0.5">
+            {whatHappened.slice(0, 3).map((item, i) => (
+              <li key={i} className="flex gap-1.5 text-[12px] text-ink/70">
+                <span className="text-ink/30">—</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Signal */}
+        <div className="mt-3">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Signal</div>
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: statusAccent }} />
+            <p className="text-[12px] font-semibold text-ink/75 leading-snug">{signal}</p>
+          </div>
+        </div>
+
+        {/* What to do */}
+        <div className="mt-3">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">What to do</div>
+          <p className="text-[13px] font-black leading-snug" style={{ color: phase.color }}>
+            → {whatToDo}
+          </p>
+        </div>
+
+        {/* Show details toggle */}
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 hover:text-ink/70 transition-colors"
+        >
+          {open ? '▲ Hide details' : '▼ Show details'}
+        </button>
+      </div>
+
+      {/* Expandable detail block — all the rich action UI */}
+      {open && (
+        <div className="px-4 pb-4 pt-1 border-t border-ink/5">
+          {weekDropWindows.map((dw) => (
+            <DropWindowBlock
+              key={dw.id}
+              dw={dw}
+              actions={weekActions}
+              phaseColor={phase.color}
+              onToggleStatus={onToggleActionStatus}
+              onEdit={onEditAction}
+            />
+          ))}
+
+          {heroAction && (
+            <div className="mb-3 mt-3">
+              <HeroMoment
+                action={heroAction}
+                weekNum={week.week}
+                onToggleStatus={onToggleActionStatus}
+                onEdit={onEditAction}
+                onDelete={onDeleteAction}
+                draggedId={draggedId}
+                dragOverId={dragOverId}
+                onDragStart={onDragStart}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+                isDeleting={deletingIds.has(heroAction.id)}
+              />
+            </div>
+          )}
+
+          {shorts.length > 0 && (
+            <div className="mb-3">
+              <ShortCluster
+                shorts={shorts}
+                weekNum={week.week}
+                onToggleStatus={onToggleActionStatus}
+                onEdit={onEditAction}
+                onDelete={onDeleteAction}
+                draggedId={draggedId}
+                dragOverId={dragOverId}
+                onDragStart={onDragStart}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+                deletingIds={deletingIds}
+              />
+            </div>
+          )}
+
+          {supports.length > 0 && (
+            <SupportStack
+              supports={supports}
+              weekNum={week.week}
+              onToggleStatus={onToggleActionStatus}
+              onEdit={onEditAction}
+              onDelete={onDeleteAction}
+              draggedId={draggedId}
+              dragOverId={dragOverId}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDrop={onDrop}
+              showCollapsedSupport={showCollapsedSupport}
+              onToggleSupport={onToggleSupport}
+              deletingIds={deletingIds}
+            />
+          )}
+
+          <ActionTileGrid weekNum={week.week} startDate={plan.startDate} onAdd={onAddAction} weekActions={weekActions} />
+        </div>
+      )}
     </div>
   );
 }
@@ -3964,7 +4214,7 @@ export default function YouTubeCampaignCoach() {
   return (
     <div style={{ background: '#FAF7F2' }} className="min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Campaign Timeline — header + status + phase rail */}
+        {/* Campaign Timeline — header + system connection line + narrative phase + phase rail */}
         <CampaignTimeline
           plan={plan}
           onPhaseClick={(phase) => {
@@ -3979,7 +4229,10 @@ export default function YouTubeCampaignCoach() {
           onOpenSettings={() => setShowMetricsModal(true)}
         />
 
-        {/* Metric Cards */}
+        {/* TOP SECTION — Channel Signal + Narrative Phase + This Week's Call */}
+        <TopSignalCard plan={plan} />
+
+        {/* Subs + Views — calm context */}
         <MetricCards
           plan={plan}
           editingMetric={editingMetric}
@@ -4008,68 +4261,11 @@ export default function YouTubeCampaignCoach() {
           onEditCancel={() => setEditingMetric(null)}
         />
 
-        {/* ── SYSTEM STATE — one-line campaign read ── */}
-        {(() => {
-          const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
-          const today = new Date(); today.setHours(12, 0, 0, 0);
-          const campaignStart = new Date(plan.startDate + 'T12:00:00');
-          const daysSinceStart = Math.floor((today.getTime() - campaignStart.getTime()) / (24 * 60 * 60 * 1000));
-          const weekNum = Math.max(1, Math.min(plan.weeks.length, Math.floor(daysSinceStart / 7) + 1));
-          const currentWeek = plan.weeks.find((w) => w.week === weekNum);
-          const thisWeekDone = currentWeek?.actions.filter((a) => a.status === 'done').length || 0;
-          const thisWeekTotal = currentWeek?.actions.length || 0;
-          const thisWeekPlanned = currentWeek?.actions.filter((a) => a.status === 'planned').length || 0;
+        {/* CADENCE — status + X/Y rows + single action line */}
+        <CadenceCard plan={plan} />
 
-          // Cadence check
-          const shortsDone = currentWeek?.actions.filter(a => a.type === 'short' && a.status === 'done').length || 0;
-          const videosDone = currentWeek?.actions.filter(a => a.type === 'video' && a.status === 'done').length || 0;
-          const shortsTarget = targets.shortsPerWeek || 3;
-          const videosTarget = targets.videosPerWeek || 1;
-          const shortsOk = shortsDone >= shortsTarget;
-          const videosOk = videosDone >= videosTarget;
-
-          let stateLabel: string;
-          let stateColor: string;
-          let priorityLine: string;
-
-          if (thisWeekDone >= thisWeekTotal && thisWeekTotal > 0) {
-            stateLabel = 'Cadence holding — on track';
-            stateColor = '#1FBE7A';
-            priorityLine = 'Maintain pace — no gaps this week';
-          } else if (thisWeekDone === 0 && thisWeekTotal > 0) {
-            stateLabel = 'Execution stalled — nothing landed this week';
-            stateColor = '#FF4A1C';
-            const parts: string[] = [];
-            if (!shortsOk) parts.push(`${shortsTarget} Shorts`);
-            if (!videosOk) parts.push(`${videosTarget} Video`);
-            priorityLine = parts.length > 0 ? `${parts.join(' + ')} — start today` : 'Execute planned actions now';
-          } else if (shortsDone > 0 && videosDone > 0) {
-            stateLabel = 'High momentum — maintain pace';
-            stateColor = '#1FBE7A';
-            const remaining = thisWeekPlanned;
-            priorityLine = remaining > 0 ? `${remaining} action${remaining > 1 ? 's' : ''} left this week` : 'All done — sustain output';
-          } else {
-            stateLabel = 'Execution lagging — output below plan';
-            stateColor = '#FFD24C';
-            const parts: string[] = [];
-            if (!shortsOk) parts.push(`${shortsTarget - shortsDone} Short${shortsTarget - shortsDone > 1 ? 's' : ''}`);
-            if (!videosOk) parts.push(`1 Video`);
-            priorityLine = parts.length > 0 ? `${parts.join(' + ')} — today` : 'Close gaps before end of week';
-          }
-
-          return (
-            <div className="mb-6 rounded-2xl px-6 py-4" style={{ background: '#F6F1E7', border: `1.5px solid ${stateColor}20` }}>
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full" style={{ background: stateColor }} />
-                <span className="text-xs font-bold" style={{ color: stateColor }}>{stateLabel}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Priority</span>
-                <span className="text-sm font-black text-ink">{priorityLine}</span>
-              </div>
-            </div>
-          );
-        })()}
+        {/* NEXT DROP — primary anchor with role */}
+        <NextDropAnchor plan={plan} />
 
         {/* View Mode Toggle */}
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
