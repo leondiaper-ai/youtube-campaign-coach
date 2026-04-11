@@ -1,9 +1,24 @@
 import Link from 'next/link';
 
+const SITE_URL = 'https://music-decision-site.vercel.app/';
+
 export const metadata = {
-  title: 'YouTube Campaign Coach',
+  title: 'YouTube Campaign Coach — Decision System',
   description:
     'Plan your YouTube rollout around release moments. Turn weekly activity into a clear next move.',
+  openGraph: {
+    title: 'YouTube Campaign Coach',
+    description:
+      'Plan your YouTube rollout around release moments. Turn weekly activity into a clear next move.',
+    type: 'website',
+    siteName: 'Decision System',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'YouTube Campaign Coach',
+    description:
+      'Plan your YouTube rollout around release moments. Turn weekly activity into a clear next move.',
+  },
 };
 
 export default function EntryPage() {
@@ -13,13 +28,17 @@ export default function EntryPage() {
       style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif' }}
     >
       <section className="mx-auto max-w-[1440px] px-6 md:px-10 pt-10 md:pt-14 pb-20 md:pb-28">
-        {/* Eyebrow row — back to system + tool number */}
+        {/* Eyebrow row — site mark on the left, back-to-system on the right */}
         <div className="flex items-center justify-between mb-14 md:mb-20">
-          <span className="text-[0.72rem] tracking-[0.18em] uppercase font-semibold text-ink/60">
-            Tool 03 — Decision System
-          </span>
           <a
-            href="http://localhost:3000/#tools"
+            href={`${SITE_URL}#tools`}
+            className="flex items-center gap-2 text-[0.72rem] tracking-[0.18em] uppercase font-semibold text-ink/70 hover:text-ink transition-colors"
+          >
+            <span className="inline-block w-2 h-2 rounded-full bg-signal" />
+            decision/system_
+          </a>
+          <a
+            href={`${SITE_URL}#tools`}
             className="text-[0.72rem] tracking-[0.18em] uppercase font-semibold text-ink/60 hover:text-signal transition-colors"
           >
             ← Back to system
@@ -48,7 +67,7 @@ export default function EntryPage() {
               Turn weekly activity into a clear next move.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-5">
+            <div className="mt-10 flex flex-col items-start gap-3">
               <Link
                 href="/app"
                 className="group inline-flex items-center gap-2.5 rounded-full bg-ink text-paper px-8 py-4 text-[15px] font-black tracking-wide hover:-translate-y-0.5 hover:shadow-[6px_8px_0_0_rgba(14,14,14,1)] transition-all shadow-[4px_5px_0_0_rgba(14,14,14,1)]"
@@ -56,8 +75,8 @@ export default function EntryPage() {
                 Launch Tool
                 <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
-              <span className="text-[11px] tracking-[0.14em] uppercase text-ink/40 font-semibold">
-                Built for release teams, artist managers, and channel leads
+              <span className="text-[10px] tracking-[0.14em] uppercase text-ink/40 font-semibold">
+                Built for release teams, artist managers and channel leads
               </span>
             </div>
           </div>
