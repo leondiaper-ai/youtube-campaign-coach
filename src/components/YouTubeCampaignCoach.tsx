@@ -105,6 +105,8 @@ type CampaignPlan = {
   dropPlans?: DropPlan[];
   supportPlans?: SupportPlan[];
   moments?: CampaignMoment[];
+  /** True for the seeded K Trap reference campaign; false/undefined for user-created campaigns. */
+  isExample?: boolean;
 };
 
 type CoachTip = {
@@ -1147,6 +1149,41 @@ function makeSeedData(): CampaignPlan {
       { weekNum: 10, date: weekDate(10, 4), name: 'Third Single', type: 'single', isAnchor: true, why: 'Final single before album — maintain trajectory', prepNote: 'Teaser + countdown content' },
       { weekNum: 14, date: weekDate(14, 4), name: 'Album Drop — Trapo 2', type: 'album', isAnchor: true, why: 'The main event — maximise first 48 hours', prepNote: 'All content assets lined up, listening party confirmed' },
     ],
+    isExample: true,
+  };
+}
+
+// ──── EMPTY CAMPAIGN ─────────────────────────────────────────────────────────
+// Blank starting state for user-created campaigns. Same 24-week skeleton
+// as the seed, but with no artist, no actions, and no reference moments.
+function makeEmptyPlan(): CampaignPlan {
+  const base = new Date();
+  base.setHours(12, 0, 0, 0);
+  const startDate = base.toISOString().split('T')[0];
+  const fmt = (d: Date) => `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
+
+  const weeks: CampaignWeek[] = [];
+  for (let i = 0; i < 24; i++) {
+    const ws = new Date(base); ws.setDate(ws.getDate() + i * 7);
+    const we = new Date(ws); we.setDate(we.getDate() + 6);
+    weeks.push({ week: i + 1, dateRange: `${fmt(ws)} – ${fmt(we)}`, actions: [], feedback: {} });
+  }
+
+  return {
+    artist: '',
+    campaignName: '',
+    subscriberCount: 0,
+    startDate,
+    weeks,
+    targets: {
+      subsTarget: 0,
+      viewsTarget: 0,
+      shortsPerWeek: 3,
+      videosPerWeek: 1,
+      postsPerWeek: 2,
+      communityPerWeek: 2,
+    },
+    isExample: false,
   };
 }
 
@@ -1222,12 +1259,13 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
   return 'REAWAKEN';
 }
 
-function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, onOpenAdd }: {
+function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign }: {
   plan: CampaignPlan;
   onPhaseClick: (name: PhaseName) => void;
   onUpdatePlan: (updates: Partial<CampaignPlan>) => void;
   onOpenSettings?: () => void;
   onOpenAdd?: () => void;
+  onNewCampaign?: () => void;
 }) {
   // Find active week
   let activeIdx = -1;
@@ -1255,6 +1293,11 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
       <div className="mb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
+            {plan.isExample && (
+              <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-1">
+                Example Campaign
+              </div>
+            )}
             <h1 className="flex items-baseline gap-1 font-black text-2xl text-ink">
               <span>YouTube Campaign —</span>
               <input
@@ -1271,8 +1314,17 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
               onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
             />
           </div>
+          {onNewCampaign && (
+            <button
+              onClick={onNewCampaign}
+              className="ml-3 mt-1 px-3 py-2 rounded-lg bg-paper border border-ink/10 text-ink/70 font-bold text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow hover:text-ink transition-all"
+              title="Start a new campaign"
+            >
+              + New Campaign
+            </button>
+          )}
           {onOpenAdd && (
-            <div className="ml-3 mt-1 flex flex-col items-end">
+            <div className="ml-2 mt-1 flex flex-col items-end">
               <button
                 onClick={onOpenAdd}
                 className="px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
@@ -4690,9 +4742,14 @@ function loadPlan(): CampaignPlan {
       const raw = window.localStorage.getItem(LS_KEY);
       if (raw) {
         const saved = JSON.parse(raw) as CampaignPlan;
-        // If saved plan has real data (artist name set), use it.
-        // Otherwise treat as stale empty state and load demo.
-        if (saved.artist && saved.artist.trim().length > 0) return saved;
+        // User-created (non-example) plans persist even when empty.
+        if (saved && saved.isExample === false && Array.isArray(saved.weeks)) {
+          return saved;
+        }
+        // Example plans persist if they still have an artist filled in.
+        if (saved && saved.artist && saved.artist.trim().length > 0) {
+          return { ...saved, isExample: saved.isExample ?? true };
+        }
       }
     } catch { /* ignore */ }
   }
@@ -4935,6 +4992,15 @@ export default function YouTubeCampaignCoach() {
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
           onOpenSettings={() => setShowMetricsModal(true)}
           onOpenAdd={() => setAddModal({ open: true })}
+          onNewCampaign={() => {
+            // Soft confirm only if the user already has non-example work in progress
+            if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
+            setPlan(makeEmptyPlan());
+            setExpandedPhases(new Set());
+            setShowCollapsedSupport(new Set());
+            setAddModal({ open: false });
+            setEditingMetric(null);
+          }}
         />
 
         {/* CAMPAIGN ACTIVITY — Shorts/Posts/Videos counts + cadence + boosts */}
