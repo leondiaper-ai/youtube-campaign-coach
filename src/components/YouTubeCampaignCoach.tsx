@@ -3688,6 +3688,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const phaseWeeks = plan.weeks.filter((w) => w.week >= phase.weekStart && w.week <= phase.weekEnd);
   const tier = getTier(plan.subscriberCount);
   const statuses = getWeekStatuses(plan.weeks, tier);
+  const currentWeekNum = getCurrentWeekNum(plan);
 
   const allActions = phaseWeeks.flatMap((w) => w.actions);
   const doneCount = allActions.filter((a) => a.status === 'done').length;
@@ -3760,6 +3761,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             plan={plan}
             tier={tier}
             allStatuses={statuses}
+            isCurrent={week.week === currentWeekNum}
             onToggleActionStatus={onToggleActionStatus}
             onEditAction={onEditAction}
             onDeleteAction={onDeleteAction}
@@ -3779,12 +3781,51 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   );
 }
 
-// ──── WEEK ROW — simplified decision step ───────────────────────────────────
-// Renders each week as: "Week X — [Phase]" → What happened → Signal → What to do
-// Full action tiles/hero/shorts/support are hidden behind a "Show details" toggle.
+// ──── WEEK ROW — control panel, not report ──────────────────────────────────
+// Current week: expanded with Signal label, Action label, missing action buttons.
+// Previous weeks: single summary line. No paragraphs, no narrative.
+
+const WEEK_SIGNAL_META: Record<WeekStatus, { label: string; color: string }> = {
+  hot:     { label: 'Strong',  color: '#1FBE7A' },
+  warm:    { label: 'Warming', color: '#FFD24C' },
+  cooling: { label: 'Cooling', color: '#FF4A1C' },
+  cold:    { label: 'Cold',    color: '#71717a' },
+};
+
+const WEEK_ACTION_META: Record<WeekStatus, { label: string; color: string }> = {
+  hot:     { label: 'Maintain', color: '#1FBE7A' },
+  warm:    { label: 'Push',     color: '#FFD24C' },
+  cooling: { label: 'Recover',  color: '#FF4A1C' },
+  cold:    { label: 'Start',    color: '#2C25FF' },
+};
+
+type MissingActionKind = 'video' | 'short' | 'post' | 'collab' | 'live';
+
+const MISSING_ACTION_META: Record<MissingActionKind, {
+  label: string;
+  type: ActionType;
+  system: ActionSystem;
+  intent: ActionIntent;
+  role: MomentRole;
+  bg: string;
+  defaultTitle: string;
+}> = {
+  video:  { label: 'Video',  type: 'video',  system: 2, intent: 'convert',    role: 'hero',    bg: '#FF4A1C', defaultTitle: 'New Video' },
+  short:  { label: 'Short',  type: 'short',  system: 1, intent: 'engage',     role: 'push',    bg: '#FFD24C', defaultTitle: 'New Short' },
+  post:   { label: 'Post',   type: 'post',   system: 1, intent: 'engage',     role: 'support', bg: '#2C25FF', defaultTitle: 'Community Post' },
+  collab: { label: 'Collab', type: 'collab', system: 2, intent: 'convert',    role: 'hero',    bg: '#1FBE7A', defaultTitle: 'New Collab' },
+  live:   { label: 'Live',   type: 'live',   system: 1, intent: 'distribute', role: 'support', bg: '#2C25FF', defaultTitle: 'New Live' },
+};
+
+function getCurrentWeekNum(plan: CampaignPlan): number {
+  const today = new Date(); today.setHours(12, 0, 0, 0);
+  const start = new Date(plan.startDate + 'T12:00:00');
+  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+  return Math.max(1, Math.min(plan.weeks.length, Math.floor(daysSinceStart / 7) + 1));
+}
 
 function WeekRow({
-  week, phase, plan, tier, allStatuses,
+  week, phase, plan, tier, allStatuses, isCurrent,
   onToggleActionStatus, onEditAction, onDeleteAction, onAddAction,
   draggedId, dragOverId, onDragStart, onDragOver, onDrop,
   showCollapsedSupport, onToggleSupport, deletingIds,
@@ -3794,6 +3835,7 @@ function WeekRow({
   plan: CampaignPlan;
   tier: ChannelTier;
   allStatuses: WeekStatus[];
+  isCurrent: boolean;
   onToggleActionStatus: (id: string) => void;
   onEditAction: (action: CampaignAction, weekNum: number) => void;
   onDeleteAction: (weekNum: number, action: CampaignAction) => void;
@@ -3808,107 +3850,155 @@ function WeekRow({
   deletingIds: Set<string>;
 }) {
   const [open, setOpen] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const phaseShort = PHASE_MICRO[phase.name].short;
   const weekActions = week.actions;
   const weekIdx = plan.weeks.findIndex((w) => w.week === week.week);
-  const weekStatus = allStatuses[weekIdx];
-  const prevStatus = weekIdx > 0 ? allStatuses[weekIdx - 1] : undefined;
+  const weekStatus = allStatuses[weekIdx] ?? 'cold';
 
-  // What happened — up to 3 completed key items (hero + top shorts/posts)
-  const doneActions = weekActions.filter((a) => a.status === 'done');
+  const signalMeta = WEEK_SIGNAL_META[weekStatus];
+  const actionMeta = WEEK_ACTION_META[weekStatus];
+
+  // Compute missing action buttons from cadence targets
+  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const doneCount = (type: ActionType) => weekActions.filter((a) => a.type === type && a.status === 'done').length;
+  const missingKinds: MissingActionKind[] = [];
+  if (doneCount('video') < (targets.videosPerWeek || 0)) missingKinds.push('video');
+  if (doneCount('short') < (targets.shortsPerWeek || 0)) missingKinds.push('short');
+  if (doneCount('post') < (targets.postsPerWeek || 0)) missingKinds.push('post');
+
+  // Also surface planned-but-missed items from the current week as extra missing buttons
   const missedActions = weekActions.filter((a) => a.status === 'missed');
+
+  // Single optional context line (max 1)
+  const shippedCount = weekActions.filter((a) => a.status === 'done').length;
+  let contextLine: string | null = null;
+  if (missedActions.length > 0) contextLine = `${missedActions.length} missed`;
+  else if (shippedCount > 0) contextLine = `${shippedCount} shipped`;
+
   const heroAction = weekActions.find((a) => a.system === 2 && !a.dropWindowId);
   const shorts = weekActions.filter((a) => a.type === 'short' && !a.dropWindowId);
   const supports = weekActions.filter((a) => a.type !== 'short' && a.system === 1 && !a.dropWindowId);
   const weekDropWindows = (plan.dropWindows || []).filter((dw) => dw.weekNum === week.week);
 
-  const whatHappened: string[] = [];
-  const doneHero = doneActions.find((a) => a.system === 2);
-  if (doneHero) whatHappened.push(`${ACTION_LABELS[doneHero.type]}: ${doneHero.title}`);
-  const doneShorts = doneActions.filter((a) => a.type === 'short').length;
-  if (doneShorts > 0) whatHappened.push(`${doneShorts} short${doneShorts > 1 ? 's' : ''} shipped`);
-  const donePosts = doneActions.filter((a) => a.type === 'post' || a.type === 'live' || a.type === 'collab').length;
-  if (donePosts > 0 && whatHappened.length < 3) whatHappened.push(`${donePosts} post${donePosts > 1 ? 's' : ''} / community`);
-  if (whatHappened.length === 0 && missedActions.length > 0) whatHappened.push(`${missedActions.length} planned item${missedActions.length > 1 ? 's' : ''} missed`);
-  if (whatHappened.length === 0) whatHappened.push('Nothing landed yet');
+  const handleAddMissing = useCallback((kind: MissingActionKind) => {
+    const meta = MISSING_ACTION_META[kind];
+    const actionDate = weekToDate(week.week, plan.startDate, 0);
+    onAddAction(week.week, {
+      id: uid(),
+      title: meta.defaultTitle,
+      type: meta.type,
+      day: fmtDay(actionDate),
+      date: actionDate,
+      status: 'planned',
+      system: meta.system,
+      intent: meta.intent,
+      momentRole: meta.role,
+    });
+  }, [week.week, plan.startDate, onAddAction]);
 
-  // Signal — compact meaning line
-  const signal = weekStatus
-    ? getWeekMeaning(week, weekStatus, tier, prevStatus)
-    : (doneActions.length > 0 ? 'Activity logged — read engagement before next step.' : 'No execution signal yet.');
+  // ── Collapsed one-line summary for non-current weeks ──────────────────────
+  if (!isCurrent && !open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full text-left rounded-xl px-3 py-2 flex items-center gap-3 transition-colors hover:bg-ink/[0.04]"
+        style={{ border: '1px solid rgba(14,14,14,0.06)' }}
+      >
+        <span className="text-[11px] font-black text-ink/70 shrink-0">W{week.week}</span>
+        <span className="text-[9px] font-bold uppercase tracking-[0.12em] shrink-0" style={{ color: phase.color }}>{phaseShort}</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: signalMeta.color }} />
+          <span className="text-[11px] font-bold" style={{ color: signalMeta.color }}>{signalMeta.label}</span>
+        </div>
+        <span className="text-ink/20">·</span>
+        <span className="text-[11px] font-semibold text-ink/50 truncate">{actionMeta.label}</span>
+        {contextLine && (
+          <>
+            <span className="text-ink/20">·</span>
+            <span className="text-[10px] font-semibold text-ink/40 truncate">{contextLine}</span>
+          </>
+        )}
+        <span className="ml-auto text-[10px] text-ink/30">▸</span>
+      </button>
+    );
+  }
 
-  // What to do — one next step
-  const whatToDo = weekStatus ? getPrimaryAction(week, weekStatus, tier) : 'Plan the week and ship the first item.';
-
-  // Colour hint based on week status
-  const statusAccent = weekStatus === 'hot' ? '#1FBE7A'
-    : weekStatus === 'warm' ? '#FFD24C'
-    : weekStatus === 'cooling' ? '#FF4A1C'
-    : '#71717a';
-
-  const keyDropAction = weekActions.find((a) => KEY_DROP_TYPES.has(a.type) && a.system === 2);
-
+  // ── Expanded control panel (current week or user-expanded past week) ─────
   return (
-    <div className="rounded-xl" style={{ background: 'rgba(14,14,14,0.02)', border: '1px solid rgba(14,14,14,0.06)' }}>
-      {/* Week header — always visible */}
-      <div className="px-4 pt-3.5 pb-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <div className="flex items-baseline gap-2 min-w-0">
-            <h4 className="font-black text-sm text-ink shrink-0">Week {week.week}</h4>
-            <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: phase.color }}>
-              — {phaseShort}
-            </span>
-            {keyDropAction && (
-              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full tracking-wide shrink-0"
-                style={{ color: '#ffffff', background: phase.color }}>
-                KEY DROP
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-semibold text-ink/30 shrink-0">{week.dateRange}</span>
+    <div className="rounded-xl" style={{ background: isCurrent ? '#F6F1E7' : 'rgba(14,14,14,0.02)', border: `1.5px solid ${isCurrent ? phase.color + '30' : 'rgba(14,14,14,0.06)'}` }}>
+      {/* Header */}
+      <div className="px-4 pt-3 pb-2 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <h4 className="font-black text-sm text-ink shrink-0">Week {week.week}</h4>
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: phase.color }}>— {phaseShort}</span>
+          {isCurrent && (
+            <span className="text-[9px] font-black px-1.5 py-0.5 rounded-full tracking-wide shrink-0"
+              style={{ color: '#ffffff', background: phase.color }}>NOW</span>
+          )}
         </div>
-
-        {/* What happened */}
-        <div className="mt-3">
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">What happened</div>
-          <ul className="space-y-0.5">
-            {whatHappened.slice(0, 3).map((item, i) => (
-              <li key={i} className="flex gap-1.5 text-[12px] text-ink/70">
-                <span className="text-ink/30">—</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-[10px] font-semibold text-ink/30">{week.dateRange}</span>
+          {!isCurrent && (
+            <button onClick={() => setOpen(false)} className="text-ink/30 hover:text-ink/60 text-[10px]">▴</button>
+          )}
         </div>
-
-        {/* Signal */}
-        <div className="mt-3">
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Signal</div>
-          <div className="flex items-start gap-2">
-            <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ background: statusAccent }} />
-            <p className="text-[12px] font-semibold text-ink/75 leading-snug">{signal}</p>
-          </div>
-        </div>
-
-        {/* What to do */}
-        <div className="mt-3">
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">What to do</div>
-          <p className="text-[13px] font-black leading-snug" style={{ color: phase.color }}>
-            → {whatToDo}
-          </p>
-        </div>
-
-        {/* Show details toggle */}
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 hover:text-ink/70 transition-colors"
-        >
-          {open ? '▲ Hide details' : '▼ Show details'}
-        </button>
       </div>
 
-      {/* Expandable detail block — all the rich action UI */}
-      {open && (
+      {/* Signal + Action — big, label-only, no paragraph */}
+      <div className="px-4 pb-3 flex items-center gap-6 flex-wrap">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">Signal</span>
+          <span className="text-base font-black leading-none" style={{ color: signalMeta.color }}>{signalMeta.label}</span>
+        </div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">Action</span>
+          <span className="text-base font-black leading-none" style={{ color: actionMeta.color }}>{actionMeta.label}</span>
+        </div>
+        {contextLine && (
+          <span className="text-[10px] font-semibold text-ink/40">{contextLine}</span>
+        )}
+      </div>
+
+      {/* Missing action buttons — only for current week, only items with gaps */}
+      {isCurrent && missingKinds.length > 0 && (
+        <div className="px-4 pb-4">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-2">Missing</div>
+          <div className="flex flex-wrap gap-2">
+            {missingKinds.map((kind) => {
+              const meta = MISSING_ACTION_META[kind];
+              return (
+                <button
+                  key={kind}
+                  onClick={() => handleAddMissing(kind)}
+                  className="group flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all"
+                  style={{
+                    background: meta.bg,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.10)',
+                  }}
+                >
+                  <span className="text-white font-black text-[11px] tracking-widest uppercase">+ {meta.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Minimal "Show details" toggle — only when there's rich content to show */}
+      {(heroAction || shorts.length > 0 || supports.length > 0 || weekDropWindows.length > 0) && (
+        <div className="px-4 pb-3">
+          <button
+            onClick={() => setShowDetails((s) => !s)}
+            className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 hover:text-ink/70 transition-colors"
+          >
+            {showDetails ? '▲ Hide items' : '▼ Show items'}
+          </button>
+        </div>
+      )}
+
+      {/* Detail block — raw actions list, same handlers as before */}
+      {showDetails && (
         <div className="px-4 pb-4 pt-1 border-t border-ink/5">
           {weekDropWindows.map((dw) => (
             <DropWindowBlock
@@ -3974,8 +4064,6 @@ function WeekRow({
               deletingIds={deletingIds}
             />
           )}
-
-          <ActionTileGrid weekNum={week.week} startDate={plan.startDate} onAdd={onAddAction} weekActions={weekActions} />
         </div>
       )}
     </div>
