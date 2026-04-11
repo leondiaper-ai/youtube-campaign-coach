@@ -12,6 +12,7 @@ type ActionIntent = 'engage' | 'tease' | 'convert' | 'distribute';
 type ActionStatus = 'planned' | 'done' | 'missed';
 type ActionSystem = 1 | 2;
 type VideoSubtype = 'official' | 'lyric' | 'visualiser' | 'live' | 'collab';
+type DropType = 'official' | 'albumTrailer' | 'vlog' | 'performance' | 'tour' | 'announcement';
 type Distribution = { collab?: boolean; paidPush?: boolean; crossPost?: boolean };
 type DayLabel = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 type WeekStatus = 'cold' | 'warm' | 'hot' | 'cooling';
@@ -41,7 +42,8 @@ type CampaignAction = {
   momentRole?: MomentRole;
   trackId?: string;           // links to a TrackContentPlan
   dropWindowId?: string;      // groups into a DropWindow
-  videoSubtype?: VideoSubtype;    // only meaningful when type === 'video'
+  videoSubtype?: VideoSubtype;    // format of the video (official / lyric / artwork / live / collab)
+  dropType?: DropType;            // campaign role of a hero drop (official / album trailer / vlog / etc.)
   distribution?: Distribution;    // collab / paid push / cross-post flags
 };
 
@@ -3401,87 +3403,205 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
 }
 
 // ──── DROP SUPPORT MODEL ────────────────────────────────────────────────────
-// Every drop is graded on 5 support slots. Each slot is a yes/no (met or not).
-//   1. Shorts               (count >= target)
-//   2. Lyric Video          (at least one done)
-//   3. Artwork Video        (at least one done)
-//   4. Community Post       (count >= target)
-//   5. Follow-up Longform   (any additional full video after the main asset)
-// Coverage score = number of slots hit (0–5). Low (<2) / Medium (2–3) / Strong (4+).
-
-const SHORTS_TARGET_PER_DROP = 3;
-const POSTS_TARGET_PER_DROP  = 1;
-const STRONG_COVERAGE_THRESHOLD = 4;
+// Each drop has a Drop Type. The type defines a tailored recommended plan —
+// a set of support slots with targets, a system recommendation sentence, and
+// timing guidance. Coverage is scored only across the slots that are actually
+// relevant for that type (no one-size-fits-all checklist).
 
 type CoverageTier = 'Low' | 'Medium' | 'Strong';
 
+type SupportSlotKey =
+  | 'shorts'
+  | 'lyricVideo'
+  | 'artworkVideo'
+  | 'communityPost'
+  | 'followupLongform';
+
+type SupportSlotSpec = {
+  key: SupportSlotKey;
+  label: string;
+  target: number;      // minimum count to mark the slot "hit"
+  targetText: string;  // human-friendly target (e.g. "3–5" or "Yes")
+};
+
+type DropTypeConfig = {
+  label: string;
+  slots: SupportSlotSpec[];
+  recommendation: string;
+  timing: { day0: string; day1to3: string; day5plus: string };
+};
+
+const DROP_TYPE_CONFIG: Record<DropType, DropTypeConfig> = {
+  official: {
+    label: 'Official Video',
+    slots: [
+      { key: 'shorts',            label: 'Shorts',             target: 3, targetText: '3–5' },
+      { key: 'lyricVideo',        label: 'Lyric Video',        target: 1, targetText: 'Yes' },
+      { key: 'artworkVideo',      label: 'Artwork Video',      target: 1, targetText: 'Yes' },
+      { key: 'communityPost',     label: 'Community Post',     target: 1, targetText: 'Yes' },
+      { key: 'followupLongform',  label: 'Follow-up Longform', target: 1, targetText: 'Yes' },
+    ],
+    recommendation: 'Full launch stack — lyric + artwork + shorts drive discovery and re-entry.',
+    timing: {
+      day0:    'Premiere + community post',
+      day1to3: '2–3 shorts + cross-post clips',
+      day5plus: 'Lyric / artwork follow-up',
+    },
+  },
+  albumTrailer: {
+    label: 'Album Trailer',
+    slots: [
+      { key: 'shorts',        label: 'Shorts',         target: 1, targetText: '1–2' },
+      { key: 'communityPost', label: 'Community Post', target: 1, targetText: 'Yes' },
+    ],
+    recommendation: 'Tease-first drop — keep it short, hint at the story, save assets for the main launch.',
+    timing: {
+      day0:    'Upload + pinned community post',
+      day1to3: '1 short teaser',
+      day5plus: 'Optional: sneak peek or recap',
+    },
+  },
+  vlog: {
+    label: 'Vlog / BTS',
+    slots: [
+      { key: 'shorts',        label: 'Shorts',         target: 2, targetText: '2–4' },
+      { key: 'communityPost', label: 'Community Post', target: 1, targetText: 'Yes' },
+    ],
+    recommendation: 'Fan-building drop — personality first. Pull shorts from the clips, keep the feed warm.',
+    timing: {
+      day0:    'Upload + community post',
+      day1to3: '2–3 shorts from vlog moments',
+      day5plus: 'Reply to comments in pinned post',
+    },
+  },
+  performance: {
+    label: 'Performance Video',
+    slots: [
+      { key: 'shorts',        label: 'Shorts',         target: 2, targetText: '2–3' },
+      { key: 'communityPost', label: 'Community Post', target: 1, targetText: 'Yes' },
+    ],
+    recommendation: 'Showcase drop — clip the best moments, tag the venue / collaborators, let the energy travel.',
+    timing: {
+      day0:    'Upload + community post',
+      day1to3: '2–3 performance shorts',
+      day5plus: 'Optional: audio-only or reaction follow-up',
+    },
+  },
+  tour: {
+    label: 'Tour Video',
+    slots: [
+      { key: 'shorts',            label: 'Shorts',             target: 3, targetText: '3–5' },
+      { key: 'communityPost',     label: 'Community Post',     target: 1, targetText: 'Yes' },
+      { key: 'followupLongform',  label: 'Follow-up Longform', target: 1, targetText: 'Yes' },
+    ],
+    recommendation: 'Story drop — document legs of the tour, post between cities, close with a recap.',
+    timing: {
+      day0:    'Upload + community post',
+      day1to3: '3+ tour shorts between stops',
+      day5plus: 'Recap / highlight longform',
+    },
+  },
+  announcement: {
+    label: 'Announcement',
+    slots: [
+      { key: 'shorts',        label: 'Shorts',         target: 1, targetText: '1' },
+      { key: 'communityPost', label: 'Community Post', target: 1, targetText: 'Yes' },
+    ],
+    recommendation: 'Signal drop — one strong pinned post + one clip. Let fans carry the news.',
+    timing: {
+      day0:    'Upload + pinned community post',
+      day1to3: '1 short recap',
+      day5plus: '—',
+    },
+  },
+};
+
+const DROP_TYPE_ORDER: DropType[] = ['official', 'albumTrailer', 'vlog', 'performance', 'tour', 'announcement'];
+
+// Infer a DropType from legacy videoSubtype so existing data renders gracefully.
+function inferDropType(action: CampaignAction | null): DropType {
+  if (!action) return 'official';
+  if (action.dropType) return action.dropType;
+  if (action.videoSubtype === 'live') return 'performance';
+  return 'official';
+}
+
+type SlotResult = {
+  key: SupportSlotKey;
+  label: string;
+  targetText: string;
+  done: number;
+  target: number;
+  hit: boolean;
+  showsCount: boolean; // whether to render "x/y" vs a pure yes/no
+};
+
 type DropSupport = {
+  dropType: DropType;
+  dropTypeLabel: string;
   coreLabel: string;
   corePresent: boolean;
   coreDone: boolean;
-  shortsDone: number;
-  shortsTarget: number;
-  lyricVideoDone: boolean;
-  artworkVideoDone: boolean;
-  postsDone: number;
-  postsTarget: number;
-  followupLongformDone: boolean;
+  slots: SlotResult[];
   coverageScore: number;
   coverageMax: number;
   coverageTier: CoverageTier;
   signal: string;
+  recommendation: string;
+  timing: { day0: string; day1to3: string; day5plus: string };
 };
 
 function getDropSupport(track: AutoTrack): DropSupport {
   const hero = track.anchorAction;
-  const supportActions = track.supportActions;
+  const dropType = inferDropType(hero);
+  const config = DROP_TYPE_CONFIG[dropType];
 
-  // Core asset label — pulls real subtype if we have one
-  const coreLabel = hero
-    ? hero.type === 'collab'
-      ? 'Collab Video'
-      : hero.videoSubtype === 'lyric'
-      ? 'Lyric Video'
-      : hero.videoSubtype === 'visualiser'
-      ? 'Artwork Video'
-      : hero.videoSubtype === 'live'
-      ? 'Live / Performance'
-      : 'Official Video'
-    : 'Main drop';
+  const coreLabel = hero && hero.type === 'collab' ? 'Collab Video' : config.label;
   const corePresent = !!hero;
   const coreDone = !!hero && hero.status === 'done';
 
-  // Shorts
-  const shortsActions = supportActions.filter((a) => a.type === 'short');
-  const shortsDone = shortsActions.filter((a) => a.status === 'done').length;
-
-  // Posts
-  const postActions = supportActions.filter((a) => a.type === 'post');
-  const postsDone = postActions.filter((a) => a.status === 'done').length;
-
-  // Sidekick videos (exclude the hero itself)
+  // Raw counts from support actions
+  const supportActions = track.supportActions;
+  const shortsDone = supportActions.filter((a) => a.type === 'short' && a.status === 'done').length;
+  const postsDone  = supportActions.filter((a) => a.type === 'post'  && a.status === 'done').length;
   const sidekickVideos = supportActions.filter(
     (a) => (a.type === 'video' || a.type === 'collab') && a.id !== hero?.id
   );
   const doneSidekicks = sidekickVideos.filter((a) => a.status === 'done');
-  const lyricVideoDone   = doneSidekicks.some((a) => a.videoSubtype === 'lyric');
-  const artworkVideoDone = doneSidekicks.some((a) => a.videoSubtype === 'visualiser');
-  // Follow-up longform = any done sidekick that's NOT lyric / artwork
-  const followupLongformDone = doneSidekicks.some(
+  const lyricVideoDone   = doneSidekicks.filter((a) => a.videoSubtype === 'lyric').length;
+  const artworkVideoDone = doneSidekicks.filter((a) => a.videoSubtype === 'visualiser').length;
+  const followupLongformDone = doneSidekicks.filter(
     (a) => a.videoSubtype !== 'lyric' && a.videoSubtype !== 'visualiser'
-  );
+  ).length;
 
-  // Coverage — 5 slots
-  const slotsHit = [
-    shortsDone >= SHORTS_TARGET_PER_DROP,
-    lyricVideoDone,
-    artworkVideoDone,
-    postsDone >= POSTS_TARGET_PER_DROP,
-    followupLongformDone,
-  ].filter(Boolean).length;
-  const coverageMax = 5;
-  const coverageTier: CoverageTier =
-    slotsHit >= STRONG_COVERAGE_THRESHOLD ? 'Strong' : slotsHit >= 2 ? 'Medium' : 'Low';
+  const rawCount: Record<SupportSlotKey, number> = {
+    shorts: shortsDone,
+    lyricVideo: lyricVideoDone,
+    artworkVideo: artworkVideoDone,
+    communityPost: postsDone,
+    followupLongform: followupLongformDone,
+  };
+
+  const slots: SlotResult[] = config.slots.map((spec) => {
+    const done = rawCount[spec.key];
+    const hit = done >= spec.target;
+    // Shorts + community post show counts; yes/no slots (target === 1 text "Yes") show a tick only
+    const showsCount = spec.key === 'shorts' || spec.key === 'communityPost';
+    return {
+      key: spec.key,
+      label: spec.label,
+      targetText: spec.targetText,
+      done,
+      target: spec.target,
+      hit,
+      showsCount,
+    };
+  });
+
+  const coverageMax = slots.length;
+  const coverageScore = slots.filter((s) => s.hit).length;
+  const ratio = coverageMax > 0 ? coverageScore / coverageMax : 1;
+  const coverageTier: CoverageTier = ratio >= 0.8 ? 'Strong' : ratio >= 0.4 ? 'Medium' : 'Low';
 
   const signal =
     coverageTier === 'Strong'
@@ -3491,20 +3611,18 @@ function getDropSupport(track: AutoTrack): DropSupport {
       : 'Partial support — add more pieces to lift';
 
   return {
+    dropType,
+    dropTypeLabel: config.label,
     coreLabel,
     corePresent,
     coreDone,
-    shortsDone,
-    shortsTarget: SHORTS_TARGET_PER_DROP,
-    lyricVideoDone,
-    artworkVideoDone,
-    postsDone,
-    postsTarget: POSTS_TARGET_PER_DROP,
-    followupLongformDone,
-    coverageScore: slotsHit,
+    slots,
+    coverageScore,
     coverageMax,
     coverageTier,
     signal,
+    recommendation: config.recommendation,
+    timing: config.timing,
   };
 }
 
@@ -3538,40 +3656,16 @@ function DropCard({ track }: { track: AutoTrack }) {
   const support = getDropSupport(track);
   const coverageColor = COVERAGE_COLOR[support.coverageTier];
 
-  // Simple reusable checklist row
-  const Row = ({
-    label,
-    hit,
-    countLabel,
-  }: {
-    label: string;
-    hit: boolean;
-    countLabel?: string;
-  }) => (
-    <div className="flex items-center justify-between py-1.5 border-b border-ink/5 last:border-b-0">
-      <div className="flex items-center gap-2 min-w-0">
-        <span
-          className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
-          style={{
-            background: hit ? '#1FBE7A' : 'rgba(14,14,14,0.06)',
-            color: hit ? '#ffffff' : 'rgba(14,14,14,0.35)',
-          }}
-        >
-          {hit ? '✓' : '·'}
-        </span>
-        <span className="text-[12px] font-semibold text-ink/80 truncate">{label}</span>
-      </div>
-      {countLabel && (
-        <span className="text-[11px] font-bold text-ink/50 shrink-0 ml-2">{countLabel}</span>
-      )}
-    </div>
-  );
-
   return (
     <div className="rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Name + single status badge */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <h4 className="font-black text-sm text-ink truncate flex-1">{track.name}</h4>
+      {/* Name + drop type + coverage tier */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="min-w-0 flex-1">
+          <h4 className="font-black text-sm text-ink truncate">{track.name}</h4>
+          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/45 mt-0.5">
+            {support.dropTypeLabel}
+          </div>
+        </div>
         <span
           className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full shrink-0"
           style={{ color: coverageColor, background: `${coverageColor}15` }}
@@ -3581,32 +3675,56 @@ function DropCard({ track }: { track: AutoTrack }) {
       </div>
 
       {/* CORE DROP */}
-      <div className="mb-3">
-        <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/35 mb-1">Core</div>
-        <Row label={support.coreLabel} hit={support.coreDone} />
+      <div className="mb-3 pb-2 border-b border-ink/5">
+        <div className="flex items-center gap-2">
+          <span
+            className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+            style={{
+              background: support.coreDone ? '#1FBE7A' : 'rgba(14,14,14,0.06)',
+              color: support.coreDone ? '#ffffff' : 'rgba(14,14,14,0.35)',
+            }}
+          >
+            {support.coreDone ? '✓' : '·'}
+          </span>
+          <span className="text-[12px] font-black text-ink truncate">{support.coreLabel}</span>
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 ml-auto">Core</span>
+        </div>
       </div>
 
-      {/* SUPPORT LAYER */}
+      {/* RECOMMENDED PLAN vs ACTUAL — per slot */}
       <div className="mb-3">
-        <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/35 mb-1">Support</div>
-        <Row
-          label="Shorts"
-          hit={support.shortsDone >= support.shortsTarget}
-          countLabel={`${support.shortsDone}/${support.shortsTarget}`}
-        />
-        <Row label="Lyric Video" hit={support.lyricVideoDone} />
-        <Row label="Artwork Video" hit={support.artworkVideoDone} />
-        <Row
-          label="Community Post"
-          hit={support.postsDone >= support.postsTarget}
-          countLabel={`${support.postsDone}/${support.postsTarget}`}
-        />
-        <Row label="Follow-up Longform" hit={support.followupLongformDone} />
+        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">
+          <span>Recommended plan</span>
+          <span>Actual</span>
+        </div>
+        {support.slots.map((slot) => (
+          <div
+            key={slot.key}
+            className="flex items-center justify-between py-1.5 border-b border-ink/5 last:border-b-0"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+                style={{
+                  background: slot.hit ? '#1FBE7A' : 'rgba(14,14,14,0.06)',
+                  color: slot.hit ? '#ffffff' : 'rgba(14,14,14,0.35)',
+                }}
+              >
+                {slot.hit ? '✓' : '·'}
+              </span>
+              <span className="text-[12px] font-semibold text-ink/80 truncate">{slot.label}</span>
+              <span className="text-[10px] font-semibold text-ink/40 shrink-0">{slot.targetText}</span>
+            </div>
+            <span className="text-[11px] font-bold text-ink/50 shrink-0 ml-2">
+              {slot.showsCount ? `${slot.done}/${slot.target}` : slot.hit ? '✓' : '—'}
+            </span>
+          </div>
+        ))}
       </div>
 
-      {/* COVERAGE SCORE + SIGNAL */}
+      {/* COVERAGE + SIGNAL */}
       <div
-        className="rounded-xl px-3 py-2 flex items-center justify-between gap-3"
+        className="rounded-xl px-3 py-2 flex items-center justify-between gap-3 mb-3"
         style={{ background: `${coverageColor}10` }}
       >
         <div className="flex items-baseline gap-1.5 shrink-0">
@@ -3618,6 +3736,31 @@ function DropCard({ track }: { track: AutoTrack }) {
         <span className="text-[10px] font-semibold text-right leading-tight" style={{ color: coverageColor }}>
           {support.signal}
         </span>
+      </div>
+
+      {/* SYSTEM RECOMMENDATION */}
+      <div className="mb-3">
+        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-0.5">System recommendation</div>
+        <div className="text-[11px] font-semibold text-ink/70 leading-snug">{support.recommendation}</div>
+      </div>
+
+      {/* TIMING STRIP */}
+      <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(14,14,14,0.035)' }}>
+        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">Timing</div>
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">Day 0</span>
+            <span className="text-[11px] font-semibold text-ink/70 truncate">{support.timing.day0}</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">Day 1–3</span>
+            <span className="text-[11px] font-semibold text-ink/70 truncate">{support.timing.day1to3}</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">Day 5+</span>
+            <span className="text-[11px] font-semibold text-ink/70 truncate">{support.timing.day5plus}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -4202,6 +4345,7 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   const startWeek = initialWeek ?? getCurrentWeekNum(plan);
   const [date, setDate] = useState<string>(() => weekToDate(startWeek, plan.startDate, 0));
   const [videoSubtype, setVideoSubtype] = useState<VideoSubtype>('official');
+  const [dropType, setDropType] = useState<DropType>('official');
   const [distCollab, setDistCollab] = useState(false);
   const [distPaidPush, setDistPaidPush] = useState(false);
   const [distCrossPost, setDistCrossPost] = useState(false);
@@ -4235,7 +4379,7 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
       system: meta.system,
       intent: meta.intent,
       momentRole: meta.role,
-      ...(kind === 'video' ? { videoSubtype } : {}),
+      ...(kind === 'video' ? { videoSubtype, dropType } : {}),
       ...(hasDist ? { distribution: dist } : {}),
     });
     onClose();
@@ -4334,10 +4478,10 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
               />
             </label>
 
-            {/* Video subtype — only for videos */}
+            {/* Video format — only for videos */}
             {kind === 'video' && (
               <label className="block mb-4">
-                <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1">Type</span>
+                <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1">Format</span>
                 <select
                   value={videoSubtype}
                   onChange={(e) => setVideoSubtype(e.target.value as VideoSubtype)}
@@ -4345,6 +4489,22 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
                 >
                   {(Object.keys(VIDEO_SUBTYPE_LABELS) as VideoSubtype[]).map((vs) => (
                     <option key={vs} value={vs}>{VIDEO_SUBTYPE_LABELS[vs]}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+
+            {/* Drop type — only for videos, drives the support plan */}
+            {kind === 'video' && (
+              <label className="block mb-4">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1">Drop type</span>
+                <select
+                  value={dropType}
+                  onChange={(e) => setDropType(e.target.value as DropType)}
+                  className="w-full bg-transparent border-b border-ink/20 focus:border-ink outline-none text-base font-semibold text-ink pb-1"
+                >
+                  {DROP_TYPE_ORDER.map((dt) => (
+                    <option key={dt} value={dt}>{DROP_TYPE_CONFIG[dt].label}</option>
                   ))}
                 </select>
               </label>
