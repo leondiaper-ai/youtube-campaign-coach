@@ -3400,195 +3400,224 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
   return tracks.sort((a, b) => a.weekNum - b.weekNum);
 }
 
-const DROP_STATUS_META: Record<AutoTrack['status'], { label: string; color: string }> = {
-  upcoming: { label: 'Upcoming',  color: 'rgba(14,14,14,0.35)' },
-  active:   { label: 'In progress', color: '#FFD24C' },
-  complete: { label: 'Complete',  color: '#1FBE7A' },
+// ──── DROP SUPPORT MODEL ────────────────────────────────────────────────────
+// Every drop is graded on 5 support slots. Each slot is a yes/no (met or not).
+//   1. Shorts               (count >= target)
+//   2. Lyric Video          (at least one done)
+//   3. Artwork Video        (at least one done)
+//   4. Community Post       (count >= target)
+//   5. Follow-up Longform   (any additional full video after the main asset)
+// Coverage score = number of slots hit (0–5). Low (<2) / Medium (2–3) / Strong (4+).
+
+const SHORTS_TARGET_PER_DROP = 3;
+const POSTS_TARGET_PER_DROP  = 1;
+const STRONG_COVERAGE_THRESHOLD = 4;
+
+type CoverageTier = 'Low' | 'Medium' | 'Strong';
+
+type DropSupport = {
+  coreLabel: string;
+  corePresent: boolean;
+  coreDone: boolean;
+  shortsDone: number;
+  shortsTarget: number;
+  lyricVideoDone: boolean;
+  artworkVideoDone: boolean;
+  postsDone: number;
+  postsTarget: number;
+  followupLongformDone: boolean;
+  coverageScore: number;
+  coverageMax: number;
+  coverageTier: CoverageTier;
+  signal: string;
 };
 
-// ──── DROP PLAYBOOK ─────────────────────────────────────────────────────────
-// Defines expected support per drop type — all values derived from real actions
-type PlaybookExpectation = { label: string; type: ActionType; expected: number };
+function getDropSupport(track: AutoTrack): DropSupport {
+  const hero = track.anchorAction;
+  const supportActions = track.supportActions;
 
-// ── MULTI-ASSET DROP STRATEGY ─────────────────────────────────────────────
-// CORE: Main Video (required)
-// SUPPORT: Shorts (2–3) + Community Post (1–2)
-// EXPANSION: Lyric Video + Artwork Video (optional, major drops only)
+  // Core asset label — pulls real subtype if we have one
+  const coreLabel = hero
+    ? hero.type === 'collab'
+      ? 'Collab Video'
+      : hero.videoSubtype === 'lyric'
+      ? 'Lyric Video'
+      : hero.videoSubtype === 'visualiser'
+      ? 'Artwork Video'
+      : hero.videoSubtype === 'live'
+      ? 'Live / Performance'
+      : 'Official Video'
+    : 'Main drop';
+  const corePresent = !!hero;
+  const coreDone = !!hero && hero.status === 'done';
 
-// Standard drop — all drops get this baseline
-const STANDARD_PLAYBOOK: PlaybookExpectation[] = [
-  { label: 'Main Video',       type: 'video',    expected: 1 },
-  { label: 'Shorts',           type: 'short',    expected: 2 },
-  { label: 'Community Post',   type: 'post',     expected: 1 },
-];
+  // Shorts
+  const shortsActions = supportActions.filter((a) => a.type === 'short');
+  const shortsDone = shortsActions.filter((a) => a.status === 'done').length;
 
-// Major drop — singles, key moments, album drops get expansion layer
-const MAJOR_PLAYBOOK: PlaybookExpectation[] = [
-  { label: 'Main Video',       type: 'video',    expected: 1 },
-  { label: 'Shorts',           type: 'short',    expected: 3 },
-  { label: 'Community Posts',   type: 'post',     expected: 2 },
-  { label: 'Lyric Video',      type: 'video',    expected: 1 },  // expansion
-];
+  // Posts
+  const postActions = supportActions.filter((a) => a.type === 'post');
+  const postsDone = postActions.filter((a) => a.status === 'done').length;
 
-// Collab drop — similar to major but hero is a collab
-const COLLAB_PLAYBOOK: PlaybookExpectation[] = [
-  { label: 'Collab Video',     type: 'collab',   expected: 1 },
-  { label: 'Shorts',           type: 'short',    expected: 3 },
-  { label: 'Community Posts',   type: 'post',     expected: 2 },
-];
+  // Sidekick videos (exclude the hero itself)
+  const sidekickVideos = supportActions.filter(
+    (a) => (a.type === 'video' || a.type === 'collab') && a.id !== hero?.id
+  );
+  const doneSidekicks = sidekickVideos.filter((a) => a.status === 'done');
+  const lyricVideoDone   = doneSidekicks.some((a) => a.videoSubtype === 'lyric');
+  const artworkVideoDone = doneSidekicks.some((a) => a.videoSubtype === 'visualiser');
+  // Follow-up longform = any done sidekick that's NOT lyric / artwork
+  const followupLongformDone = doneSidekicks.some(
+    (a) => a.videoSubtype !== 'lyric' && a.videoSubtype !== 'visualiser'
+  );
 
-type PlaybookResult = {
-  label: string;
-  type: ActionType;
-  expected: number;
-  actual: number;
-  done: number;
-  status: 'complete' | 'partial' | 'missing';
-};
+  // Coverage — 5 slots
+  const slotsHit = [
+    shortsDone >= SHORTS_TARGET_PER_DROP,
+    lyricVideoDone,
+    artworkVideoDone,
+    postsDone >= POSTS_TARGET_PER_DROP,
+    followupLongformDone,
+  ].filter(Boolean).length;
+  const coverageMax = 5;
+  const coverageTier: CoverageTier =
+    slotsHit >= STRONG_COVERAGE_THRESHOLD ? 'Strong' : slotsHit >= 2 ? 'Medium' : 'Low';
 
-function getDropPlaybook(track: AutoTrack): PlaybookResult[] {
-  // Choose playbook: collab → collab, major moments (single/album/anchor) → major, else → standard
-  const anchorType = track.anchorAction?.type;
-  const momentType = track.moment?.type;
-  const isMajor = momentType === 'single' || momentType === 'album' || momentType === 'anchor' || track.moment?.isAnchor;
-  const base = anchorType === 'collab' ? COLLAB_PLAYBOOK : isMajor ? MAJOR_PLAYBOOK : STANDARD_PLAYBOOK;
+  const signal =
+    coverageTier === 'Strong'
+      ? 'Well supported — higher momentum potential'
+      : coverageTier === 'Low'
+      ? 'Weak support — risk of low discovery'
+      : 'Partial support — add more pieces to lift';
 
-  // Gather all real actions: the hero + all support actions in the same week and nearby weeks
-  const allActions = [
-    ...(track.anchorAction ? [track.anchorAction] : []),
-    ...track.supportActions,
-  ];
-  // Also count support plan items (the filming checklist)
-  const spItems = track.supportPlan?.items || [];
-
-  // Track video counts separately for Main Video vs Lyric Video
-  const videoActions = allActions.filter((a) => a.type === 'video');
-  const videoDone = videoActions.filter((a) => a.status === 'done').length;
-  const spVideos = spItems.filter((s) => s.contentType === 'video');
-  const spVideoPosted = spVideos.filter((s) => s.status === 'posted').length;
-  let videoSlotUsed = 0; // tracks how many video slots we've allocated
-
-  return base.map((expectation) => {
-    // Special handling: Lyric Video is the 2nd+ video in the pool
-    if (expectation.label === 'Lyric Video') {
-      const totalVideos = videoActions.length + spVideos.length;
-      const totalVideoDone = videoDone + spVideoPosted;
-      const expansionActual = Math.max(0, totalVideos - videoSlotUsed);
-      const expansionDone = Math.max(0, totalVideoDone - videoSlotUsed);
-      const actual = expansionActual;
-      const done = Math.min(expansionDone, expectation.expected);
-      return {
-        label: expectation.label, type: expectation.type, expected: expectation.expected,
-        actual, done,
-        status: done >= expectation.expected ? 'complete' as const : actual > 0 ? 'partial' as const : 'missing' as const,
-      };
-    }
-
-    // Main Video — first video slot
-    if (expectation.label === 'Main Video' || expectation.label === 'Collab Video') {
-      const actionsOfType = allActions.filter((a) => a.type === expectation.type);
-      const doneOfType = actionsOfType.filter((a) => a.status === 'done').length;
-      const spOfType = spItems.filter((s) => s.contentType === expectation.type);
-      const spPosted = spOfType.filter((s) => s.status === 'posted').length;
-      const actual = actionsOfType.length + spOfType.length;
-      const done = doneOfType + spPosted;
-      if (expectation.type === 'video') videoSlotUsed = Math.min(done, expectation.expected);
-      return {
-        label: expectation.label, type: expectation.type, expected: expectation.expected,
-        actual, done: Math.min(done, expectation.expected),
-        status: done >= expectation.expected ? 'complete' as const : actual > 0 ? 'partial' as const : 'missing' as const,
-      };
-    }
-
-    // Standard type matching (shorts, posts, etc.)
-    const actionsOfType = allActions.filter((a) => a.type === expectation.type);
-    const doneOfType = actionsOfType.filter((a) => a.status === 'done').length;
-    const spOfType = spItems.filter((s) => s.contentType === expectation.type);
-    const spPosted = spOfType.filter((s) => s.status === 'posted').length;
-    const actual = actionsOfType.length + spOfType.length;
-    const done = doneOfType + spPosted;
-
-    return {
-      label: expectation.label, type: expectation.type, expected: expectation.expected,
-      actual, done,
-      status: done >= expectation.expected ? 'complete' as const : actual > 0 ? 'partial' as const : 'missing' as const,
-    };
-  });
+  return {
+    coreLabel,
+    corePresent,
+    coreDone,
+    shortsDone,
+    shortsTarget: SHORTS_TARGET_PER_DROP,
+    lyricVideoDone,
+    artworkVideoDone,
+    postsDone,
+    postsTarget: POSTS_TARGET_PER_DROP,
+    followupLongformDone,
+    coverageScore: slotsHit,
+    coverageMax,
+    coverageTier,
+    signal,
+  };
 }
 
-function getDropImpact(executionPct: number, mainMissing: boolean, missingLabels: string[]): string {
-  if (executionPct === 100) return 'Full stack shipped — maximum discovery expected';
-  if (mainMissing) return 'No main drop — low discovery expected, algorithm cold';
-  if (executionPct < 50) {
-    if (missingLabels.includes('Shorts') || missingLabels.includes('Shorts')) return 'Thin support — low discovery expected';
-    return 'Thin support — limited lift from drop';
-  }
-  if (executionPct < 80) return 'Partial support — some lift, muted peak';
-  return 'Minor gaps — near-full lift expected';
+const COVERAGE_COLOR: Record<CoverageTier, string> = {
+  Low:    '#FF4A1C',
+  Medium: '#FFD24C',
+  Strong: '#1FBE7A',
+};
+
+// Campaign-wide output totals for the summary bar.
+function getCampaignSupportOutput(plan: CampaignPlan, tracks: AutoTrack[]) {
+  const allActions = plan.weeks.flatMap((w) => w.actions);
+  const done = allActions.filter((a) => a.status === 'done');
+  const totalShorts = done.filter((a) => a.type === 'short').length;
+  const totalVideos = done.filter((a) => a.type === 'video' || a.type === 'collab').length;
+  const totalPosts  = done.filter((a) => a.type === 'post').length;
+  // Support pieces = everything that isn't a core drop (shorts + posts + sidekick videos)
+  const totalSupport = totalShorts + totalPosts + Math.max(0, totalVideos - tracks.length);
+  const fullySupported = tracks.filter((t) => getDropSupport(t).coverageTier === 'Strong').length;
+  return {
+    totalShorts,
+    totalVideos,
+    totalPosts,
+    totalSupport,
+    fullySupported,
+    totalDrops: tracks.length,
+  };
 }
 
 function DropCard({ track }: { track: AutoTrack }) {
-  const statusMeta = DROP_STATUS_META[track.status];
-  const playbook = getDropPlaybook(track);
+  const support = getDropSupport(track);
+  const coverageColor = COVERAGE_COLOR[support.coverageTier];
 
-  // Execution: sum done / sum expected across all playbook rows
-  const totalExpected = playbook.reduce((s, p) => s + p.expected, 0);
-  const totalDone = playbook.reduce((s, p) => s + Math.min(p.done, p.expected), 0);
-  const executionPct = totalExpected > 0 ? Math.round((totalDone / totalExpected) * 100) : 0;
-
-  // Execution gaps: categories where done < expected
-  const gapItems = playbook.filter((p) => p.done < p.expected);
-  const gapLabels = gapItems.map((m) => {
-    const gap = m.expected - m.done;
-    return gap === m.expected ? m.label : `${m.label} (${gap})`;
-  });
-
-  // Main drop missing?
-  const mainRow = playbook[0];
-  const mainMissing = mainRow ? mainRow.done === 0 : !track.anchorAction;
-  const impactText = getDropImpact(executionPct, mainMissing, playbook.map((p) => p.label));
+  // Simple reusable checklist row
+  const Row = ({
+    label,
+    hit,
+    countLabel,
+  }: {
+    label: string;
+    hit: boolean;
+    countLabel?: string;
+  }) => (
+    <div className="flex items-center justify-between py-1.5 border-b border-ink/5 last:border-b-0">
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+          style={{
+            background: hit ? '#1FBE7A' : 'rgba(14,14,14,0.06)',
+            color: hit ? '#ffffff' : 'rgba(14,14,14,0.35)',
+          }}
+        >
+          {hit ? '✓' : '·'}
+        </span>
+        <span className="text-[12px] font-semibold text-ink/80 truncate">{label}</span>
+      </div>
+      {countLabel && (
+        <span className="text-[11px] font-bold text-ink/50 shrink-0 ml-2">{countLabel}</span>
+      )}
+    </div>
+  );
 
   return (
     <div className="rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Name + Status */}
-      <div className="flex items-center justify-between mb-2">
+      {/* Name + single status badge */}
+      <div className="flex items-center justify-between gap-2 mb-3">
         <h4 className="font-black text-sm text-ink truncate flex-1">{track.name}</h4>
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-          style={{ color: statusMeta.color, background: `${statusMeta.color}15` }}>
-          {statusMeta.label}
+        <span
+          className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full shrink-0"
+          style={{ color: coverageColor, background: `${coverageColor}15` }}
+        >
+          {support.coverageTier}
         </span>
       </div>
 
-      {/* Execution bar */}
+      {/* CORE DROP */}
       <div className="mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold text-ink/40">Execution</span>
-          <span className="text-[10px] font-black" style={{ color: executionPct === 100 ? '#1FBE7A' : executionPct >= 50 ? '#FFD24C' : '#FF4A1C' }}>
-            {executionPct}%
-          </span>
-        </div>
-        <div className="w-full h-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.05)' }}>
-          <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.max(2, executionPct)}%`, background: executionPct === 100 ? '#1FBE7A' : executionPct >= 50 ? '#FFD24C' : '#FF4A1C' }} />
-        </div>
+        <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/35 mb-1">Core</div>
+        <Row label={support.coreLabel} hit={support.coreDone} />
       </div>
 
-      {/* Execution Gap — clear language */}
-      {gapLabels.length > 0 && (
-        <div className="mb-2">
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-0.5">Execution Gap</div>
-          <div className="text-[11px] font-semibold" style={{ color: '#FF4A1C' }}>
-            {gapLabels.join(', ')}
-          </div>
-        </div>
-      )}
+      {/* SUPPORT LAYER */}
+      <div className="mb-3">
+        <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/35 mb-1">Support</div>
+        <Row
+          label="Shorts"
+          hit={support.shortsDone >= support.shortsTarget}
+          countLabel={`${support.shortsDone}/${support.shortsTarget}`}
+        />
+        <Row label="Lyric Video" hit={support.lyricVideoDone} />
+        <Row label="Artwork Video" hit={support.artworkVideoDone} />
+        <Row
+          label="Community Post"
+          hit={support.postsDone >= support.postsTarget}
+          countLabel={`${support.postsDone}/${support.postsTarget}`}
+        />
+        <Row label="Follow-up Longform" hit={support.followupLongformDone} />
+      </div>
 
-      {/* Impact — short expected outcome */}
-      <div>
-        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-0.5">Impact</div>
-        <div className="text-[11px] font-semibold text-ink/65 leading-snug">
-          {impactText}
+      {/* COVERAGE SCORE + SIGNAL */}
+      <div
+        className="rounded-xl px-3 py-2 flex items-center justify-between gap-3"
+        style={{ background: `${coverageColor}10` }}
+      >
+        <div className="flex items-baseline gap-1.5 shrink-0">
+          <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">Coverage</span>
+          <span className="text-[13px] font-black" style={{ color: coverageColor }}>
+            {support.coverageScore}/{support.coverageMax}
+          </span>
         </div>
+        <span className="text-[10px] font-semibold text-right leading-tight" style={{ color: coverageColor }}>
+          {support.signal}
+        </span>
       </div>
     </div>
   );
@@ -3607,80 +3636,55 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     );
   }
 
-  // Overall execution stats
-  const totalDrops = autoTracks.length;
-  const completeCount = autoTracks.filter((t) => t.status === 'complete').length;
-  const activeCount = autoTracks.filter((t) => t.status === 'active').length;
-  const upcomingCount = totalDrops - completeCount - activeCount;
+  const output = getCampaignSupportOutput(plan, autoTracks);
+  const fullyRatio = output.totalDrops > 0 ? output.fullySupported / output.totalDrops : 0;
+  const supportColor =
+    fullyRatio >= 0.6 ? '#1FBE7A' : fullyRatio >= 0.3 ? '#FFD24C' : '#FF4A1C';
 
-  // Calculate overall execution %
-  const allPlaybooks = autoTracks.map((t) => getDropPlaybook(t));
-  const totalExpected = allPlaybooks.reduce((s, pb) => s + pb.reduce((a, p) => a + p.expected, 0), 0);
-  const totalDone = allPlaybooks.reduce((s, pb) => s + pb.reduce((a, p) => a + p.done, 0), 0);
-  const overallPct = totalExpected > 0 ? Math.round((totalDone / totalExpected) * 100) : 0;
-
-  // Drops with missing items (for quick scan)
-  const dropsWithGaps = autoTracks.filter((t) => {
-    const pb = getDropPlaybook(t);
-    return pb.some((p) => p.status === 'missing') && t.status !== 'complete';
+  // Sort worst-coverage first so gaps surface immediately.
+  const sortedTracks = [...autoTracks].sort((a, b) => {
+    const sa = getDropSupport(a).coverageScore;
+    const sb = getDropSupport(b).coverageScore;
+    return sa - sb;
   });
+
+  const Stat = ({ value, label, color }: { value: number | string; label: string; color?: string }) => (
+    <div className="flex flex-col items-center flex-1 min-w-0 px-2">
+      <div className="text-xl font-black leading-none" style={{ color: color || '#0E0E0E' }}>
+        {value}
+      </div>
+      <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 text-center truncate">
+        {label}
+      </div>
+    </div>
+  );
 
   return (
     <div>
-      {/* Summary card */}
-      <div className="mb-6 rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-widest text-ink/40">Drops</span>
-            <div className="mt-1 text-lg font-black text-ink">{totalDrops} drops</div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-center">
-              <div className="text-sm font-black" style={{ color: '#1FBE7A' }}>{completeCount}</div>
-              <div className="text-[9px] text-ink/40">Done</div>
-            </div>
-            <div className="text-center">
-              <div className="text-sm font-black" style={{ color: '#FFD24C' }}>{activeCount}</div>
-              <div className="text-[9px] text-ink/40">Active</div>
-            </div>
-            <div className="text-center">
-              <div className="text-sm font-black text-ink/40">{upcomingCount}</div>
-              <div className="text-[9px] text-ink/40">Upcoming</div>
-            </div>
-          </div>
+      {/* ── CAMPAIGN SUPPORT OUTPUT — top-level summary ────────────── */}
+      <div
+        className="mb-6 rounded-2xl p-5"
+        style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+      >
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-3">
+          Campaign Support Output
         </div>
-        {/* Overall execution bar */}
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-ink/50">Overall execution</span>
-            <span className="text-xs font-black" style={{ color: overallPct === 100 ? '#1FBE7A' : overallPct >= 50 ? '#FFD24C' : '#FF4A1C' }}>
-              {overallPct}%
-            </span>
-          </div>
-          <div className="w-full h-2 rounded-full" style={{ background: 'rgba(0,0,0,0.05)' }}>
-            <div className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${Math.max(2, overallPct)}%`, background: overallPct === 100 ? '#1FBE7A' : overallPct >= 50 ? '#FFD24C' : '#FF4A1C' }} />
-          </div>
+        <div className="flex items-stretch gap-2 divide-x divide-ink/5">
+          <Stat value={output.totalShorts}  label="Shorts" />
+          <Stat value={output.totalVideos}  label="Videos" />
+          <Stat value={output.totalPosts}   label="Posts" />
+          <Stat value={output.totalSupport} label="Support pieces" />
+          <Stat
+            value={`${output.fullySupported}/${output.totalDrops}`}
+            label="Fully supported"
+            color={supportColor}
+          />
         </div>
-        {/* Quick gap scan */}
-        {dropsWithGaps.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-ink/5">
-            <span className="text-[10px] font-bold text-red-500">
-              {dropsWithGaps.length} drop{dropsWithGaps.length > 1 ? 's' : ''} with gaps
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Drop cards — sorted worst execution first (triage) */}
+      {/* ── DROP CARDS — worst coverage first ──────────────────────── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {[...autoTracks].sort((a, b) => {
-          const pbA = getDropPlaybook(a);
-          const pbB = getDropPlaybook(b);
-          const pctA = pbA.reduce((s, p) => s + p.expected, 0) > 0 ? pbA.reduce((s, p) => s + Math.min(p.done, p.expected), 0) / pbA.reduce((s, p) => s + p.expected, 0) : 1;
-          const pctB = pbB.reduce((s, p) => s + p.expected, 0) > 0 ? pbB.reduce((s, p) => s + Math.min(p.done, p.expected), 0) / pbB.reduce((s, p) => s + p.expected, 0) : 1;
-          return pctA - pctB;
-        }).map((track) => (
+        {sortedTracks.map((track) => (
           <DropCard key={track.id} track={track} />
         ))}
       </div>
