@@ -1266,14 +1266,17 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
             />
           </div>
           {onOpenAdd && (
-            <button
-              onClick={onOpenAdd}
-              className="ml-3 mt-1 px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
-              style={{ background: '#0E0E0E' }}
-              title="Add content"
-            >
-              + Add
-            </button>
+            <div className="ml-3 mt-1 flex flex-col items-end">
+              <button
+                onClick={onOpenAdd}
+                className="px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
+                style={{ background: '#0E0E0E' }}
+                title="Add content"
+              >
+                + Add
+              </button>
+              <span className="text-[9px] font-semibold text-ink/40 mt-1">Add video, short or post</span>
+            </div>
           )}
           {onOpenSettings && (
             <button
@@ -1532,35 +1535,40 @@ function buildThisWeeksCall(plan: CampaignPlan, signal: ChannelSignal): string {
   const postsGap = Math.max(0, c.postsTarget - c.postsDone);
   const longGap = Math.max(0, c.longformTarget - c.longformDone);
 
-  const gaps: string[] = [];
-  if (shortsGap > 0) gaps.push(`${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
-  if (postsGap > 0) gaps.push(`${postsGap} post${postsGap > 1 ? 's' : ''}`);
-  if (longGap > 0) gaps.push(`${longGap} longform`);
+  // Human list: "1 short", "3 updates", "1 video"
+  const parts: string[] = [];
+  if (longGap > 0) parts.push(`${longGap} video${longGap > 1 ? 's' : ''}`);
+  if (shortsGap > 0) parts.push(`${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
+  if (postsGap > 0) parts.push(`${postsGap} update${postsGap > 1 ? 's' : ''}`);
+  const joinHuman = (arr: string[]) => arr.length <= 1 ? arr.join('') : arr.length === 2 ? arr.join(' and ') : `${arr.slice(0, -1).join(', ')}, and ${arr[arr.length - 1]}`;
 
-  if (signal === 'FIX') {
-    if (gaps.length === 0) return 'Rebuild consistency — no execution recorded';
-    return `Rebuild consistency — ${gaps.join(' + ')} required`;
-  }
   if (signal === 'PUSH') {
     const drop = getNextDrop(plan);
     if (drop && drop.daysAway >= 0 && drop.daysAway <= 7) {
-      const base = `Back the drop — ${drop.action.title}`;
-      return gaps.length > 0 ? `${base}. Close: ${gaps.join(' + ')}` : `${base}. Ship support content today`;
+      if (parts.length === 0) return `Support "${drop.action.title}" — post something today`;
+      return `Support "${drop.action.title}" — post ${joinHuman(parts)} this week`;
     }
-    return gaps.length > 0 ? `Push momentum — close ${gaps.join(' + ')}` : 'Push momentum — keep shipping at cadence';
   }
-  if (signal === 'BUILD') {
-    return gaps.length > 0 ? `Build the base — drop ${gaps.join(' + ')}` : 'Build the base — keep the rhythm';
+
+  if (parts.length === 0) {
+    if (signal === 'FIX') return 'Post something this week — nothing has shipped yet';
+    return "You're on track — keep posting";
   }
-  return gaps.length > 0 ? `Hold the line — close ${gaps.join(' + ')}` : 'Hold the line — no new investment yet';
+  return `Post ${joinHuman(parts)} this week`;
 }
 
-function TopSignalCard({ plan }: { plan: CampaignPlan }) {
+function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const signal = computeChannelSignal(plan);
   const call = buildThisWeeksCall(plan, signal);
   const meta = CHANNEL_SIGNAL_META[signal];
   const phaseName = detectActualPhase(plan);
   const phaseShort = PHASE_MICRO[phaseName].short;
+
+  const strip: { kind: MissingActionKind; label: string }[] = [
+    { kind: 'short', label: '+ Add Short' },
+    { kind: 'post',  label: '+ Add Post' },
+    { kind: 'video', label: '+ Add Video' },
+  ];
 
   return (
     <div className="mb-4 rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -1582,6 +1590,29 @@ function TopSignalCard({ plan }: { plan: CampaignPlan }) {
         <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">This Week's Call</div>
         <div className="text-base font-black leading-snug text-ink">{call}</div>
       </div>
+
+      {/* PRIMARY ACTION STRIP — the main entry point */}
+      {onOpenAdd && (
+        <div className="mt-4 pt-4 border-t border-ink/5">
+          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/50 mb-2">What to do this week</div>
+          <div className="flex flex-wrap gap-2">
+            {strip.map((s) => {
+              const stripMeta = MISSING_ACTION_META[s.kind];
+              return (
+                <button
+                  key={s.kind}
+                  onClick={() => onOpenAdd(s.kind)}
+                  className="flex items-center rounded-xl px-4 py-2.5 transition-all hover:shadow-md"
+                  style={{ background: stripMeta.bg, boxShadow: '0 4px 12px rgba(0,0,0,0.10)' }}
+                >
+                  <span className="text-white font-black text-[11px] tracking-widest uppercase">{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-[10px] font-semibold text-ink/35 mt-2">Add video, short or post</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1591,15 +1622,14 @@ function TopSignalCard({ plan }: { plan: CampaignPlan }) {
 
 function getDropRole(weekNum: number, type: ActionType): string {
   const phase = getPhaseForWeek(weekNum);
-  if (!phase) return 'Next step in the campaign';
-  const phaseShort = PHASE_MICRO[phase.name].short;
-  if (phase.name === 'REAWAKEN') return 'Restarts algorithm signal — warms the channel before the first real drop';
-  if (phase.name === 'BUILD THE WORLD') return `Opens the ${phaseShort} phase — introduces the world to new ears`;
-  if (phase.name === 'SCALE THE STORY') return `Drives next step in ${phaseShort} phase — expands reach and volume`;
-  if (phase.name === 'CULTURAL MOMENT') return `Anchors the ${phaseShort} moment — maximise the first 48 hours`;
-  if (phase.name === 'EXTEND') return `Sustains the ${phaseShort} phase — keeps the conversation alive`;
-  if (type === 'collab') return 'Crossover moment — brings another audience in';
-  return `Drives next step in ${phaseShort} phase`;
+  if (!phase) return 'This is your next upload — build around it';
+  if (phase.name === 'REAWAKEN') return 'Warm the channel before your next big drop';
+  if (phase.name === 'BUILD THE WORLD') return 'This is your next major upload — build around it';
+  if (phase.name === 'SCALE THE STORY') return 'This is your next major upload — build around it';
+  if (phase.name === 'CULTURAL MOMENT') return 'This is your cultural peak — all attention goes here';
+  if (phase.name === 'EXTEND') return "Keep the story going — don't let it fade";
+  if (type === 'collab') return 'Crossover drop — brings a new audience in';
+  return 'This is your next major upload — build around it';
 }
 
 function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
@@ -1690,11 +1720,13 @@ function CadenceCard({ plan }: { plan: CampaignPlan }) {
     const shortsGap = Math.max(0, counts.shortsTarget - counts.shortsDone);
     const postsGap = Math.max(0, counts.postsTarget - counts.postsDone);
     const longGap = Math.max(0, counts.longformTarget - counts.longformDone);
-    if (shortsGap > 0) gaps.push(`Drop ${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
-    if (postsGap > 0) gaps.push(`post + engage ${postsGap}x`);
-    if (longGap > 0) gaps.push(`upload ${longGap} longform`);
-    if (gaps.length === 0) return 'Hold cadence — output is on plan';
-    return gaps.join(' + ');
+    if (longGap > 0) gaps.push(`${longGap} video${longGap > 1 ? 's' : ''}`);
+    if (shortsGap > 0) gaps.push(`${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
+    if (postsGap > 0) gaps.push(`${postsGap} update${postsGap > 1 ? 's' : ''}`);
+    if (gaps.length === 0) return "You're on track — keep going";
+    if (gaps.length === 1) return `Post ${gaps[0]} this week`;
+    if (gaps.length === 2) return `Post ${gaps.join(' and ')} this week`;
+    return `Post ${gaps.slice(0, -1).join(', ')}, and ${gaps[gaps.length - 1]} this week`;
   };
 
   return (
@@ -3985,7 +4017,7 @@ function WeekRow({
       {/* Missing action buttons — only for current week, only items with gaps */}
       {isCurrent && missingKinds.length > 0 && (
         <div className="px-4 pb-4">
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-2">Missing</div>
+          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/55 mb-2">Missing:</div>
           <div className="flex flex-wrap gap-2">
             {missingKinds.map((kind) => {
               const meta = MISSING_ACTION_META[kind];
@@ -4015,7 +4047,7 @@ function WeekRow({
             onClick={() => setShowDetails((s) => !s)}
             className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 hover:text-ink/70 transition-colors"
           >
-            {showDetails ? '▲ Hide items' : '▼ Show items'}
+            {showDetails ? '▲ Hide content' : '▼ View content'}
           </button>
         </div>
       )}
@@ -4100,15 +4132,16 @@ function WeekRow({
 
 const ADD_MODAL_KINDS: MissingActionKind[] = ['video', 'short', 'post', 'live', 'collab'];
 
-function AddContentModal({ plan, initialWeek, onAdd, onClose }: {
+function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   plan: CampaignPlan;
   initialWeek?: number;
+  initialKind?: MissingActionKind;
   onAdd: (weekNum: number, action: CampaignAction) => void;
   onClose: () => void;
 }) {
-  const [step, setStep] = useState<1 | 2>(1);
-  const [kind, setKind] = useState<MissingActionKind | null>(null);
-  const [title, setTitle] = useState('');
+  const [step, setStep] = useState<1 | 2>(initialKind ? 2 : 1);
+  const [kind, setKind] = useState<MissingActionKind | null>(initialKind ?? null);
+  const [title, setTitle] = useState<string>(initialKind ? MISSING_ACTION_META[initialKind].defaultTitle : '');
   const startWeek = initialWeek ?? getCurrentWeekNum(plan);
   const [date, setDate] = useState<string>(() => weekToDate(startWeek, plan.startDate, 0));
 
@@ -4280,7 +4313,7 @@ export default function YouTubeCampaignCoach() {
   const [viewMode, setViewMode] = useState<ViewMode>('campaign');
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [undoItem, setUndoItem] = useState<UndoItem | null>(null);
-  const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number }>({ open: false });
+  const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number; initialKind?: MissingActionKind }>({ open: false });
 
   useEffect(() => {
     try {
@@ -4483,6 +4516,11 @@ export default function YouTubeCampaignCoach() {
   return (
     <div style={{ background: '#FAF7F2' }} className="min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Top orientation line — sets intent for the whole tool */}
+        <div className="mb-3 text-[11px] font-semibold text-ink/45">
+          Add content each week to stay on track and build momentum
+        </div>
+
         {/* Campaign Timeline — header + system connection line + narrative phase + phase rail */}
         <CampaignTimeline
           plan={plan}
@@ -4499,8 +4537,11 @@ export default function YouTubeCampaignCoach() {
           onOpenAdd={() => setAddModal({ open: true })}
         />
 
-        {/* TOP SECTION — Channel Signal + Narrative Phase + This Week's Call */}
-        <TopSignalCard plan={plan} />
+        {/* TOP SECTION — Channel Signal + Narrative Phase + This Week's Call + Primary Action Strip */}
+        <TopSignalCard
+          plan={plan}
+          onOpenAdd={(kind) => setAddModal({ open: true, initialKind: kind })}
+        />
 
         {/* Subs + Views — calm context */}
         <MetricCards
@@ -4657,6 +4698,7 @@ export default function YouTubeCampaignCoach() {
         <AddContentModal
           plan={plan}
           initialWeek={addModal.initialWeek}
+          initialKind={addModal.initialKind}
           onAdd={addAction}
           onClose={() => setAddModal({ open: false })}
         />
