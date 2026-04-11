@@ -4047,7 +4047,7 @@ function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (mode: V
 
 // ──── PHASE BLOCK ────────────────────────────────────────────────────────────
 // Single expandable phase section
-function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatus, onEditAction, onDeleteAction, onAddAction, onOpenAdd, draggedId, dragOverId, onDragStart, onDragOver, onDrop, showCollapsedSupport, onToggleSupport, deletingIds, onCycleSupportStatus, onAddSupportItem, onRemoveSupportItem }: {
+function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatus, onEditAction, onDeleteAction, onOpenAdd, draggedId, dragOverId, onDragStart, onDragOver, onDrop, showCollapsedSupport, onToggleSupport, deletingIds, onCycleSupportStatus, onAddSupportItem, onRemoveSupportItem }: {
   phase: CampaignPhase;
   plan: CampaignPlan;
   expanded: boolean;
@@ -4055,8 +4055,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   onToggleActionStatus: (id: string) => void;
   onEditAction: (action: CampaignAction, weekNum: number) => void;
   onDeleteAction: (weekNum: number, action: CampaignAction) => void;
-  onAddAction: (weekNum: number, action: CampaignAction) => void;
-  onOpenAdd: (weekNum: number) => void;
+  onOpenAdd: (weekNum: number, kind?: MissingActionKind) => void;
   draggedId: string | null;
   dragOverId: string | null;
   onDragStart: (id: string) => void;
@@ -4149,7 +4148,6 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             onToggleActionStatus={onToggleActionStatus}
             onEditAction={onEditAction}
             onDeleteAction={onDeleteAction}
-            onAddAction={onAddAction}
             onOpenAdd={onOpenAdd}
             draggedId={draggedId}
             dragOverId={dragOverId}
@@ -4217,7 +4215,7 @@ function getCurrentWeekNum(plan: CampaignPlan): number {
 
 function WeekRow({
   week, phase, plan, tier, allStatuses, isCurrent,
-  onToggleActionStatus, onEditAction, onDeleteAction, onAddAction, onOpenAdd,
+  onToggleActionStatus, onEditAction, onDeleteAction, onOpenAdd,
   draggedId, dragOverId, onDragStart, onDragOver, onDrop,
   showCollapsedSupport, onToggleSupport, deletingIds,
 }: {
@@ -4230,8 +4228,7 @@ function WeekRow({
   onToggleActionStatus: (id: string) => void;
   onEditAction: (action: CampaignAction, weekNum: number) => void;
   onDeleteAction: (weekNum: number, action: CampaignAction) => void;
-  onAddAction: (weekNum: number, action: CampaignAction) => void;
-  onOpenAdd: (weekNum: number) => void;
+  onOpenAdd: (weekNum: number, kind?: MissingActionKind) => void;
   draggedId: string | null;
   dragOverId: string | null;
   onDragStart: (id: string) => void;
@@ -4289,21 +4286,12 @@ function WeekRow({
   const supports = weekActions.filter((a) => a.type !== 'short' && a.system === 1 && !a.dropWindowId);
   const weekDropWindows = (plan.dropWindows || []).filter((dw) => dw.weekNum === week.week);
 
+  // Open the AddContentModal pre-seeded with this kind. We never create an
+  // empty action straight in the timeline — every item must enter through the
+  // modal so the user always supplies a real title before anything is added.
   const handleAddMissing = useCallback((kind: MissingActionKind) => {
-    const meta = MISSING_ACTION_META[kind];
-    const actionDate = weekToDate(week.week, plan.startDate, 0);
-    onAddAction(week.week, {
-      id: uid(),
-      title: meta.defaultTitle,
-      type: meta.type,
-      day: fmtDay(actionDate),
-      date: actionDate,
-      status: 'planned',
-      system: meta.system,
-      intent: meta.intent,
-      momentRole: meta.role,
-    });
-  }, [week.week, plan.startDate, onAddAction]);
+    onOpenAdd(week.week, kind);
+  }, [week.week, onOpenAdd]);
 
   // ── Collapsed one-line summary for non-current weeks ──────────────────────
   if (!isCurrent && !open) {
@@ -5091,8 +5079,7 @@ export default function YouTubeCampaignCoach() {
             onToggleActionStatus={toggleActionStatus}
             onEditAction={(action, weekNum) => setModalAction({ action, weekNum })}
             onDeleteAction={softDeleteAction}
-            onAddAction={addAction}
-            onOpenAdd={(weekNum) => setAddModal({ open: true, initialWeek: weekNum })}
+            onOpenAdd={(weekNum, kind) => setAddModal({ open: true, initialWeek: weekNum, initialKind: kind })}
             deletingIds={deletingIds}
             draggedId={draggedId}
             dragOverId={dragOverId}
