@@ -3652,9 +3652,78 @@ function getCampaignSupportOutput(plan: CampaignPlan, tracks: AutoTrack[]) {
   };
 }
 
+// ──── CAMPAIGN INTELLIGENCE ────────────────────────────────────────────────
+// Aggregates per-drop gaps into a single top-of-page summary with key issues
+// and one short recommendation. Replaces per-card noise with a single voice.
+
+type CampaignIntelligence = {
+  fullySupported: number;
+  totalDrops: number;
+  strongRatio: number;
+  tier: CoverageTier;
+  keyIssues: string[];
+  recommendation: string;
+};
+
+function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
+  const supports = tracks.map((t) => getDropSupport(t));
+  const totalDrops = supports.length;
+  const fullySupported = supports.filter((s) => s.coverageTier === 'Strong').length;
+  const strongRatio = totalDrops > 0 ? fullySupported / totalDrops : 1;
+  const tier: CoverageTier = strongRatio >= 0.7 ? 'Strong' : strongRatio >= 0.35 ? 'Medium' : 'Low';
+
+  // Count drops missing each slot (only counts drops whose type actually asks for that slot)
+  const countMissing = (key: SupportSlotKey) =>
+    supports.filter((s) => s.slots.some((sl) => sl.key === key && !sl.hit)).length;
+
+  const missingShorts    = countMissing('shorts');
+  const missingPosts     = countMissing('communityPost');
+  const missingFollowup  = countMissing('followupLongform');
+  const missingLyric     = countMissing('lyricVideo');
+  const missingArtwork   = countMissing('artworkVideo');
+  const missingCore      = supports.filter((s) => !s.coreDone).length;
+
+  const pluralDrop = (n: number) => (n === 1 ? 'drop' : 'drops');
+
+  type Issue = { text: string; weight: number };
+  const issues: Issue[] = [];
+  if (missingCore > 0)     issues.push({ text: `Core asset not shipped on ${missingCore} ${pluralDrop(missingCore)}`, weight: missingCore * 5 });
+  if (missingShorts > 0)   issues.push({ text: `Missing shorts on ${missingShorts} ${pluralDrop(missingShorts)}`, weight: missingShorts * 3 });
+  if (missingPosts > 0)    issues.push({ text: `No community post on ${missingPosts} ${pluralDrop(missingPosts)}`, weight: missingPosts * 2 });
+  if (missingFollowup > 0) issues.push({ text: `No follow-up longform on ${missingFollowup} ${pluralDrop(missingFollowup)}`, weight: missingFollowup * 2 });
+  if (missingLyric > 0)    issues.push({ text: `Lyric video missing on ${missingLyric} ${pluralDrop(missingLyric)}`, weight: missingLyric * 1 });
+  if (missingArtwork > 0)  issues.push({ text: `Artwork video missing on ${missingArtwork} ${pluralDrop(missingArtwork)}`, weight: missingArtwork * 1 });
+
+  issues.sort((a, b) => b.weight - a.weight);
+  const keyIssues = issues.slice(0, 3).map((i) => i.text);
+
+  // Short, specific recommendation — driven by the heaviest gap.
+  let recommendation: string;
+  if (totalDrops === 0) {
+    recommendation = 'No drops yet — add a video to start tracking support.';
+  } else if (tier === 'Strong' && issues.length === 0) {
+    recommendation = 'Campaign is well supported — keep pace and protect momentum.';
+  } else if (missingCore > 0) {
+    recommendation = 'Ship the main asset on pending drops before layering more support.';
+  } else if (missingShorts >= 2) {
+    recommendation = 'Shorts are the biggest gap — clip from existing videos to catch up fast.';
+  } else if (missingPosts >= 2) {
+    recommendation = 'Add a community post on each under-supported drop — quickest lift available.';
+  } else if (missingFollowup > 0) {
+    recommendation = 'Plan follow-up longforms to extend the life of your major drops.';
+  } else if (missingLyric > 0 || missingArtwork > 0) {
+    recommendation = 'Finish lyric / artwork videos on official drops to reach Strong coverage.';
+  } else {
+    recommendation = 'Fill remaining gaps to move partial drops into Strong.';
+  }
+
+  return { fullySupported, totalDrops, strongRatio, tier, keyIssues, recommendation };
+}
+
 function DropCard({ track }: { track: AutoTrack }) {
   const support = getDropSupport(track);
   const coverageColor = COVERAGE_COLOR[support.coverageTier];
+  const [detailOpen, setDetailOpen] = useState(false);
 
   return (
     <div className="rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -3675,7 +3744,7 @@ function DropCard({ track }: { track: AutoTrack }) {
       </div>
 
       {/* CORE DROP */}
-      <div className="mb-3 pb-2 border-b border-ink/5">
+      <div className="mb-2 pb-2 border-b border-ink/5">
         <div className="flex items-center gap-2">
           <span
             className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
@@ -3691,12 +3760,8 @@ function DropCard({ track }: { track: AutoTrack }) {
         </div>
       </div>
 
-      {/* RECOMMENDED PLAN vs ACTUAL — per slot */}
+      {/* SUPPORT CHECKLIST — per slot, just execution vs expectation */}
       <div className="mb-3">
-        <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">
-          <span>Recommended plan</span>
-          <span>Actual</span>
-        </div>
         {support.slots.map((slot) => (
           <div
             key={slot.key}
@@ -3713,55 +3778,76 @@ function DropCard({ track }: { track: AutoTrack }) {
                 {slot.hit ? '✓' : '·'}
               </span>
               <span className="text-[12px] font-semibold text-ink/80 truncate">{slot.label}</span>
-              <span className="text-[10px] font-semibold text-ink/40 shrink-0">{slot.targetText}</span>
             </div>
             <span className="text-[11px] font-bold text-ink/50 shrink-0 ml-2">
-              {slot.showsCount ? `${slot.done}/${slot.target}` : slot.hit ? '✓' : '—'}
+              {slot.showsCount ? `${slot.done}/${slot.target}` : slot.hit ? '✓' : slot.targetText}
             </span>
           </div>
         ))}
       </div>
 
-      {/* COVERAGE + SIGNAL */}
+      {/* COVERAGE PILL — number only, no repeated prose */}
       <div
-        className="rounded-xl px-3 py-2 flex items-center justify-between gap-3 mb-3"
+        className="rounded-xl px-3 py-2 flex items-center justify-between gap-3"
         style={{ background: `${coverageColor}10` }}
       >
-        <div className="flex items-baseline gap-1.5 shrink-0">
-          <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">Coverage</span>
-          <span className="text-[13px] font-black" style={{ color: coverageColor }}>
-            {support.coverageScore}/{support.coverageMax}
-          </span>
-        </div>
-        <span className="text-[10px] font-semibold text-right leading-tight" style={{ color: coverageColor }}>
-          {support.signal}
+        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">Coverage</span>
+        <span className="text-[13px] font-black" style={{ color: coverageColor }}>
+          {support.coverageScore}/{support.coverageMax}
         </span>
       </div>
 
-      {/* SYSTEM RECOMMENDATION */}
-      <div className="mb-3">
-        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-0.5">System recommendation</div>
-        <div className="text-[11px] font-semibold text-ink/70 leading-snug">{support.recommendation}</div>
-      </div>
+      {/* Optional deeper guidance — hidden by default */}
+      <button
+        onClick={() => setDetailOpen((d) => !d)}
+        className="mt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35 hover:text-ink/60 transition-colors"
+      >
+        {detailOpen ? '▲ Hide detail' : '▼ Show detail'}
+      </button>
 
-      {/* TIMING STRIP */}
-      <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(14,14,14,0.035)' }}>
-        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">Timing</div>
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-baseline gap-2">
-            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">Day 0</span>
-            <span className="text-[11px] font-semibold text-ink/70 truncate">{support.timing.day0}</span>
+      {detailOpen && (
+        <div className="mt-2 pt-2 border-t border-ink/5 space-y-2">
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-0.5">
+              How to support this drop
+            </div>
+            <div className="text-[11px] font-semibold text-ink/70 leading-snug">
+              {support.recommendation}
+            </div>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">Day 1–3</span>
-            <span className="text-[11px] font-semibold text-ink/70 truncate">{support.timing.day1to3}</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">Day 5+</span>
-            <span className="text-[11px] font-semibold text-ink/70 truncate">{support.timing.day5plus}</span>
+          <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(14,14,14,0.035)' }}>
+            <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">
+              Timing
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">
+                  Day 0
+                </span>
+                <span className="text-[11px] font-semibold text-ink/70 truncate">
+                  {support.timing.day0}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">
+                  Day 1–3
+                </span>
+                <span className="text-[11px] font-semibold text-ink/70 truncate">
+                  {support.timing.day1to3}
+                </span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/45 shrink-0 w-12">
+                  Day 5+
+                </span>
+                <span className="text-[11px] font-semibold text-ink/70 truncate">
+                  {support.timing.day5plus}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -3779,10 +3865,8 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     );
   }
 
-  const output = getCampaignSupportOutput(plan, autoTracks);
-  const fullyRatio = output.totalDrops > 0 ? output.fullySupported / output.totalDrops : 0;
-  const supportColor =
-    fullyRatio >= 0.6 ? '#1FBE7A' : fullyRatio >= 0.3 ? '#FFD24C' : '#FF4A1C';
+  const intel = getCampaignIntelligence(autoTracks);
+  const tierColor = COVERAGE_COLOR[intel.tier];
 
   // Sort worst-coverage first so gaps surface immediately.
   const sortedTracks = [...autoTracks].sort((a, b) => {
@@ -3791,37 +3875,61 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     return sa - sb;
   });
 
-  const Stat = ({ value, label, color }: { value: number | string; label: string; color?: string }) => (
-    <div className="flex flex-col items-center flex-1 min-w-0 px-2">
-      <div className="text-xl font-black leading-none" style={{ color: color || '#0E0E0E' }}>
-        {value}
-      </div>
-      <div className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 text-center truncate">
-        {label}
-      </div>
-    </div>
-  );
-
   return (
     <div>
-      {/* ── CAMPAIGN SUPPORT OUTPUT — top-level summary ────────────── */}
+      {/* ── CAMPAIGN SUPPORT INTELLIGENCE — single top block ───────── */}
       <div
         className="mb-6 rounded-2xl p-5"
         style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
       >
-        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-3">
-          Campaign Support Output
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40">
+            Campaign Support Intelligence
+          </div>
+          <span
+            className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full"
+            style={{ color: tierColor, background: `${tierColor}15` }}
+          >
+            {intel.tier}
+          </span>
         </div>
-        <div className="flex items-stretch gap-2 divide-x divide-ink/5">
-          <Stat value={output.totalShorts}  label="Shorts" />
-          <Stat value={output.totalVideos}  label="Videos" />
-          <Stat value={output.totalPosts}   label="Posts" />
-          <Stat value={output.totalSupport} label="Support pieces" />
-          <Stat
-            value={`${output.fullySupported}/${output.totalDrops}`}
-            label="Fully supported"
-            color={supportColor}
-          />
+
+        {/* Summary headline */}
+        <div className="flex items-baseline gap-2 mb-4">
+          <span className="text-2xl font-black leading-none" style={{ color: tierColor }}>
+            {intel.fullySupported}/{intel.totalDrops}
+          </span>
+          <span className="text-[11px] font-semibold text-ink/55">drops well supported</span>
+        </div>
+
+        {/* Key issues */}
+        {intel.keyIssues.length > 0 && (
+          <div className="mb-4">
+            <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">
+              Key issues
+            </div>
+            <ul className="flex flex-col gap-0.5">
+              {intel.keyIssues.map((issue) => (
+                <li
+                  key={issue}
+                  className="text-[12px] font-semibold text-ink/75 flex items-start gap-2"
+                >
+                  <span className="text-ink/30 shrink-0">◦</span>
+                  <span>{issue}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Recommendation */}
+        <div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-0.5">
+            Recommendation
+          </div>
+          <div className="text-[12px] font-semibold text-ink leading-snug">
+            {intel.recommendation}
+          </div>
         </div>
       </div>
 
