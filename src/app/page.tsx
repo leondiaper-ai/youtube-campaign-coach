@@ -3,7 +3,7 @@ import Link from 'next/link';
 export const metadata = {
   title: 'YouTube Campaign Coach',
   description:
-    'Plan and track your YouTube rollout around key release moments. Turn weekly channel activity into a clear next move.',
+    'Plan your YouTube rollout around release moments. Turn weekly activity into a clear next move.',
 };
 
 export default function EntryPage() {
@@ -37,26 +37,26 @@ export default function EntryPage() {
               <span className="uppercase">Mint</span>
             </div>
 
-            <h1 className="font-extrabold leading-[0.92] tracking-[-0.04em] text-[clamp(2.5rem,7vw,5.25rem)]">
+            <h1 className="font-extrabold leading-[0.9] tracking-[-0.04em] text-ink text-[clamp(2.5rem,7vw,5.25rem)]">
               YouTube Campaign Coach
             </h1>
 
-            <p className="mt-6 text-lg md:text-xl text-ink/80 leading-snug max-w-xl">
-              Plan and track your YouTube rollout around key release moments.
+            <p className="mt-7 text-lg md:text-xl font-semibold text-ink leading-snug max-w-xl">
+              Plan your YouTube rollout around release moments.
             </p>
-            <p className="mt-3 text-base md:text-lg text-ink/60 leading-snug max-w-xl">
-              Turn weekly channel activity into a clear next move.
+            <p className="mt-1.5 text-lg md:text-xl text-ink/55 leading-snug max-w-xl">
+              Turn weekly activity into a clear next move.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-10 flex flex-wrap items-center gap-5">
               <Link
                 href="/app"
-                className="group inline-flex items-center gap-2 rounded-full bg-ink text-paper px-7 py-3.5 text-sm font-bold tracking-wide hover:bg-signal transition-colors shadow-[3px_3px_0_0_rgba(14,14,14,1)]"
+                className="group inline-flex items-center gap-2.5 rounded-full bg-ink text-paper px-8 py-4 text-[15px] font-black tracking-wide hover:-translate-y-0.5 hover:shadow-[6px_8px_0_0_rgba(14,14,14,1)] transition-all shadow-[4px_5px_0_0_rgba(14,14,14,1)]"
               >
                 Launch Tool
                 <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
-              <span className="text-[11px] tracking-[0.14em] uppercase text-ink/45 font-semibold">
+              <span className="text-[11px] tracking-[0.14em] uppercase text-ink/40 font-semibold">
                 Built for release teams, artist managers, and channel leads
               </span>
             </div>
@@ -81,7 +81,10 @@ function ToolPreview() {
       {/* Outer frame with the same chunky shadow language */}
       <div
         className="rounded-3xl border border-ink/10 bg-cream p-5 md:p-6"
-        style={{ boxShadow: '6px 6px 0 0 rgba(14,14,14,1)' }}
+        style={{
+          boxShadow:
+            '10px 12px 0 0 rgba(14,14,14,1), 0 30px 60px -20px rgba(14,14,14,0.25)',
+        }}
         aria-hidden="true"
       >
         {/* Fake browser chrome */}
