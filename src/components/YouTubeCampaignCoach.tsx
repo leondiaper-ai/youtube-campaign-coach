@@ -4213,11 +4213,14 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   const handleSubmit = () => {
     if (!kind) return;
     const meta = MISSING_ACTION_META[kind];
+    // Distribution flags only apply to videos
     const dist: Distribution = {};
-    if (distCollab) dist.collab = true;
-    if (distPaidPush) dist.paidPush = true;
-    if (distCrossPost) dist.crossPost = true;
-    const hasDist = distCollab || distPaidPush || distCrossPost;
+    if (kind === 'video') {
+      if (distCollab) dist.collab = true;
+      if (distPaidPush) dist.paidPush = true;
+      if (distCrossPost) dist.crossPost = true;
+    }
+    const hasDist = kind === 'video' && (distCollab || distPaidPush || distCrossPost);
     onAdd(suggestedWeek, {
       id: uid(),
       title: title.trim() || meta.defaultTitle,
@@ -4343,39 +4346,41 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
               </label>
             )}
 
-            {/* Distribution flags — collab / paid push / cross-post */}
-            <div className="mb-5">
-              <div className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-2">Distribution</div>
-              <div className="flex flex-col gap-1.5">
-                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
-                  <input
-                    type="checkbox"
-                    checked={distCollab}
-                    onChange={(e) => setDistCollab(e.target.checked)}
-                    className="accent-ink"
-                  />
-                  <span>Collab <span className="text-ink/40 font-normal">(YouTube collab feature)</span></span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
-                  <input
-                    type="checkbox"
-                    checked={distPaidPush}
-                    onChange={(e) => setDistPaidPush(e.target.checked)}
-                    className="accent-ink"
-                  />
-                  <span>Paid push</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
-                  <input
-                    type="checkbox"
-                    checked={distCrossPost}
-                    onChange={(e) => setDistCrossPost(e.target.checked)}
-                    className="accent-ink"
-                  />
-                  <span>Cross-post</span>
-                </label>
+            {/* Distribution flags — videos only (collab / paid push / cross-post) */}
+            {kind === 'video' && (
+              <div className="mb-5">
+                <div className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-2">Distribution</div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
+                    <input
+                      type="checkbox"
+                      checked={distCollab}
+                      onChange={(e) => setDistCollab(e.target.checked)}
+                      className="accent-ink"
+                    />
+                    <span>Collab <span className="text-ink/40 font-normal">(YouTube collab feature)</span></span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
+                    <input
+                      type="checkbox"
+                      checked={distPaidPush}
+                      onChange={(e) => setDistPaidPush(e.target.checked)}
+                      className="accent-ink"
+                    />
+                    <span>Paid push</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
+                    <input
+                      type="checkbox"
+                      checked={distCrossPost}
+                      onChange={(e) => setDistCrossPost(e.target.checked)}
+                      className="accent-ink"
+                    />
+                    <span>Cross-post</span>
+                  </label>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="mb-5 text-[11px] text-ink/50">
               <span className="font-semibold text-ink/40 uppercase tracking-[0.12em] text-[9px] mr-2">Week</span>
