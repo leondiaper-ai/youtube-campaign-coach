@@ -3660,7 +3660,7 @@ type CampaignIntelligence = {
   fullySupported: number;
   totalDrops: number;
   tier: CoverageTier;
-  insight: string;         // 1 short line (≤ 8 words)
+  summary: string;         // non-numeric headline (≤ 6 words)
   missingLabels: string[]; // short inline labels
   fix: string;             // 1 short action line
 };
@@ -3695,18 +3695,20 @@ function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
   gaps.sort((a, b) => b.weight - a.weight);
   const missingLabels = gaps.slice(0, 3).map((g) => g.label);
 
-  // Punchy insight — 1 short line
-  let insight: string;
+  // Non-numeric headline summary — no "X / Y" noise, just judgement.
+  let summary: string;
   if (totalDrops === 0) {
-    insight = 'No drops tracked yet';
-  } else if (tier === 'Strong' && gaps.length === 0) {
-    insight = 'Every drop fully supported';
-  } else if (tier === 'Strong') {
-    insight = 'Most drops supported, minor gaps';
-  } else if (tier === 'Medium') {
-    insight = 'Drops shipping, support inconsistent';
+    summary = 'No drops tracked yet';
+  } else if (fullySupported === totalDrops) {
+    summary = 'Every drop fully supported';
+  } else if (fullySupported === 0) {
+    summary = 'No drops fully supported';
+  } else if (strongRatio >= 0.7) {
+    summary = 'Most drops supported';
+  } else if (strongRatio >= 0.35) {
+    summary = 'Support is inconsistent';
   } else {
-    insight = 'Drops are being released, not amplified';
+    summary = 'Most drops under-supported';
   }
 
   // Short fix line — driven by heaviest gap
@@ -3729,7 +3731,7 @@ function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
     fix = 'Close remaining gaps';
   }
 
-  return { fullySupported, totalDrops, tier, insight, missingLabels, fix };
+  return { fullySupported, totalDrops, tier, summary, missingLabels, fix };
 }
 
 function DropCard({ track }: { track: AutoTrack }) {
@@ -3798,12 +3800,12 @@ function DropCard({ track }: { track: AutoTrack }) {
         ))}
       </div>
 
-      {/* COVERAGE PILL — number only, no repeated prose */}
+      {/* SUPPORT PILL — number only, no repeated prose */}
       <div
         className="rounded-xl px-3 py-2 flex items-center justify-between gap-3"
         style={{ background: `${coverageColor}10` }}
       >
-        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">Coverage</span>
+        <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">Support</span>
         <span className="text-[13px] font-black" style={{ color: coverageColor }}>
           {support.coverageScore}/{support.coverageMax}
         </span>
@@ -3912,7 +3914,7 @@ function DropView({ plan }: { plan: CampaignPlan }) {
         ))}
       </div>
 
-      {/* ── CAMPAIGN SUPPORT — headline-style summary ─────────────── */}
+      {/* ── CAMPAIGN SUPPORT — judgement, not numbers ─────────────── */}
       <div
         className="mb-6 rounded-2xl p-5"
         style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
@@ -3922,23 +3924,21 @@ function DropView({ plan }: { plan: CampaignPlan }) {
           Campaign Support
         </div>
 
-        {/* 2 · Core metric */}
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className="text-2xl font-black leading-none" style={{ color: tierColor }}>
-            {intel.fullySupported} / {intel.totalDrops}
-          </span>
-          <span className="text-[12px] font-semibold text-ink/55">drops supported</span>
-          <span className="text-base leading-none ml-0.5" aria-hidden="true">
+        {/* 2 · Non-numeric summary (headline) */}
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className="text-base leading-none"
+            style={{ color: tierColor }}
+            aria-hidden="true"
+          >
             {intel.tier === 'Strong' ? '✓' : intel.tier === 'Medium' ? '⚠' : '✕'}
           </span>
+          <span className="text-lg font-black leading-none" style={{ color: tierColor }}>
+            {intel.summary}
+          </span>
         </div>
 
-        {/* 3 · Insight */}
-        <div className="text-[13px] font-semibold text-ink/75 mb-2">
-          {intel.insight}
-        </div>
-
-        {/* 4 · Missing (inline) */}
+        {/* 3 · Missing (inline) */}
         {intel.missingLabels.length > 0 && (
           <div className="text-[12px] font-semibold text-ink/60 mb-1">
             <span className="text-ink/40">Missing:</span>{' '}
@@ -3946,7 +3946,7 @@ function DropView({ plan }: { plan: CampaignPlan }) {
           </div>
         )}
 
-        {/* 5 · Fix */}
+        {/* 4 · Fix */}
         <div className="text-[12px] font-bold" style={{ color: tierColor }}>
           <span className="text-ink/40 font-semibold">Fix:</span> {intel.fix}
         </div>
