@@ -3930,10 +3930,14 @@ function DropView({ plan }: { plan: CampaignPlan }) {
 
   if (autoTracks.length === 0) {
     return (
-      <div className="text-center py-12" style={{ color: '#a1a1aa' }}>
-        <div className="text-2xl mb-2">◆</div>
-        <p className="text-sm font-semibold text-ink/50">No drops planned yet</p>
-        <p className="text-xs mt-1">Add a video or collab in Campaign View and it will appear here as a drop.</p>
+      <div className="text-center py-14">
+        <div className="text-2xl mb-3 text-ink/30">◆</div>
+        <p className="text-base font-black text-ink">No drops yet</p>
+        <p className="mt-2 text-[13px] font-semibold text-ink/55 leading-snug max-w-sm mx-auto">
+          Plan and track support around your key releases.
+          <br />
+          Add a video or collab in Campaign View to create your first drop.
+        </p>
       </div>
     );
   }
