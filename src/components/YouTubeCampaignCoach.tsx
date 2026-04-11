@@ -1216,11 +1216,12 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
   return 'REAWAKEN';
 }
 
-function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: {
+function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, onOpenAdd }: {
   plan: CampaignPlan;
   onPhaseClick: (name: PhaseName) => void;
   onUpdatePlan: (updates: Partial<CampaignPlan>) => void;
   onOpenSettings?: () => void;
+  onOpenAdd?: () => void;
 }) {
   // Find active week
   let activeIdx = -1;
@@ -1264,10 +1265,20 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings }: 
               onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
             />
           </div>
+          {onOpenAdd && (
+            <button
+              onClick={onOpenAdd}
+              className="ml-3 mt-1 px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
+              style={{ background: '#0E0E0E' }}
+              title="Add content"
+            >
+              + Add
+            </button>
+          )}
           {onOpenSettings && (
             <button
               onClick={onOpenSettings}
-              className="ml-3 mt-1 p-2 rounded-lg bg-paper border border-ink/8 shadow-sm hover:bg-paper hover:shadow transition-all text-ink/50 hover:text-ink/70"
+              className="ml-2 mt-1 p-2 rounded-lg bg-paper border border-ink/8 shadow-sm hover:bg-paper hover:shadow transition-all text-ink/50 hover:text-ink/70"
               title="Campaign Settings"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -3664,7 +3675,7 @@ function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (mode: V
 
 // ──── PHASE BLOCK ────────────────────────────────────────────────────────────
 // Single expandable phase section
-function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatus, onEditAction, onDeleteAction, onAddAction, draggedId, dragOverId, onDragStart, onDragOver, onDrop, showCollapsedSupport, onToggleSupport, deletingIds, onCycleSupportStatus, onAddSupportItem, onRemoveSupportItem }: {
+function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatus, onEditAction, onDeleteAction, onAddAction, onOpenAdd, draggedId, dragOverId, onDragStart, onDragOver, onDrop, showCollapsedSupport, onToggleSupport, deletingIds, onCycleSupportStatus, onAddSupportItem, onRemoveSupportItem }: {
   phase: CampaignPhase;
   plan: CampaignPlan;
   expanded: boolean;
@@ -3673,6 +3684,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   onEditAction: (action: CampaignAction, weekNum: number) => void;
   onDeleteAction: (weekNum: number, action: CampaignAction) => void;
   onAddAction: (weekNum: number, action: CampaignAction) => void;
+  onOpenAdd: (weekNum: number) => void;
   draggedId: string | null;
   dragOverId: string | null;
   onDragStart: (id: string) => void;
@@ -3766,6 +3778,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             onEditAction={onEditAction}
             onDeleteAction={onDeleteAction}
             onAddAction={onAddAction}
+            onOpenAdd={onOpenAdd}
             draggedId={draggedId}
             dragOverId={dragOverId}
             onDragStart={onDragStart}
@@ -3826,7 +3839,7 @@ function getCurrentWeekNum(plan: CampaignPlan): number {
 
 function WeekRow({
   week, phase, plan, tier, allStatuses, isCurrent,
-  onToggleActionStatus, onEditAction, onDeleteAction, onAddAction,
+  onToggleActionStatus, onEditAction, onDeleteAction, onAddAction, onOpenAdd,
   draggedId, dragOverId, onDragStart, onDragOver, onDrop,
   showCollapsedSupport, onToggleSupport, deletingIds,
 }: {
@@ -3840,6 +3853,7 @@ function WeekRow({
   onEditAction: (action: CampaignAction, weekNum: number) => void;
   onDeleteAction: (weekNum: number, action: CampaignAction) => void;
   onAddAction: (weekNum: number, action: CampaignAction) => void;
+  onOpenAdd: (weekNum: number) => void;
   draggedId: string | null;
   dragOverId: string | null;
   onDragStart: (id: string) => void;
@@ -3937,8 +3951,16 @@ function WeekRow({
               style={{ color: '#ffffff', background: phase.color }}>NOW</span>
           )}
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-[10px] font-semibold text-ink/30">{week.dateRange}</span>
+          <button
+            onClick={() => onOpenAdd(week.week)}
+            className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-[0.12em] text-white hover:shadow transition-all"
+            style={{ background: '#0E0E0E' }}
+            title={`Add content to Week ${week.week}`}
+          >
+            + Add content
+          </button>
           {!isCurrent && (
             <button onClick={() => setOpen(false)} className="text-ink/30 hover:text-ink/60 text-[10px]">▴</button>
           )}
@@ -3971,6 +3993,7 @@ function WeekRow({
                 <button
                   key={kind}
                   onClick={() => handleAddMissing(kind)}
+                  title={`Add missing ${meta.label.toLowerCase()}`}
                   className="group flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all"
                   style={{
                     background: meta.bg,
@@ -4071,6 +4094,163 @@ function WeekRow({
 }
 
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// ADD CONTENT MODAL — 3-step: type → title/date → add
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const ADD_MODAL_KINDS: MissingActionKind[] = ['video', 'short', 'post', 'live', 'collab'];
+
+function AddContentModal({ plan, initialWeek, onAdd, onClose }: {
+  plan: CampaignPlan;
+  initialWeek?: number;
+  onAdd: (weekNum: number, action: CampaignAction) => void;
+  onClose: () => void;
+}) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [kind, setKind] = useState<MissingActionKind | null>(null);
+  const [title, setTitle] = useState('');
+  const startWeek = initialWeek ?? getCurrentWeekNum(plan);
+  const [date, setDate] = useState<string>(() => weekToDate(startWeek, plan.startDate, 0));
+
+  const suggestedWeek = Math.max(1, Math.min(plan.weeks.length, dateToWeek(date, plan.startDate)));
+
+  const selectKind = (k: MissingActionKind) => {
+    setKind(k);
+    if (!title.trim()) setTitle(MISSING_ACTION_META[k].defaultTitle);
+    setStep(2);
+  };
+
+  const handleSubmit = () => {
+    if (!kind) return;
+    const meta = MISSING_ACTION_META[kind];
+    onAdd(suggestedWeek, {
+      id: uid(),
+      title: title.trim() || meta.defaultTitle,
+      type: meta.type,
+      day: fmtDay(date),
+      date,
+      status: 'planned',
+      system: meta.system,
+      intent: meta.intent,
+      momentRole: meta.role,
+    });
+    onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: 'rgba(14,14,14,0.55)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl"
+        style={{ background: '#FAF7F2' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 pt-5 pb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-black uppercase tracking-[0.18em] text-ink">Add content</h3>
+            <span className="text-[10px] font-bold text-ink/40">{step}/2</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-ink/40 hover:text-ink text-xl leading-none"
+            title="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Step indicator */}
+        <div className="px-6 pb-4 flex gap-1.5">
+          <div className="h-0.5 flex-1 rounded-full" style={{ background: '#0E0E0E' }} />
+          <div className="h-0.5 flex-1 rounded-full" style={{ background: step === 2 ? '#0E0E0E' : 'rgba(14,14,14,0.12)' }} />
+        </div>
+
+        {/* Step 1: select type */}
+        {step === 1 && (
+          <div className="px-6 pb-6">
+            <div className="text-[11px] font-semibold text-ink/60 mb-3">What are you adding?</div>
+            <div className="grid grid-cols-2 gap-2">
+              {ADD_MODAL_KINDS.map((k) => {
+                const meta = MISSING_ACTION_META[k];
+                return (
+                  <button
+                    key={k}
+                    onClick={() => selectKind(k)}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-all hover:shadow-md"
+                    style={{ background: meta.bg }}
+                  >
+                    <span className="text-white font-black text-xs uppercase tracking-wider">{meta.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: title / date / auto week */}
+        {step === 2 && kind && (
+          <div className="px-6 pb-6">
+            <div className="mb-4 flex items-center gap-2">
+              <span
+                className="text-[10px] font-black uppercase tracking-wider text-white px-2 py-1 rounded-full"
+                style={{ background: MISSING_ACTION_META[kind].bg }}
+              >
+                {MISSING_ACTION_META[kind].label}
+              </span>
+              <button
+                onClick={() => setStep(1)}
+                className="text-[10px] font-semibold text-ink/40 hover:text-ink/70"
+              >
+                Change
+              </button>
+            </div>
+
+            <label className="block mb-4">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1">Title</span>
+              <input
+                autoFocus
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={MISSING_ACTION_META[kind].defaultTitle}
+                className="w-full bg-transparent border-b border-ink/20 focus:border-ink outline-none text-base font-semibold text-ink pb-1"
+              />
+            </label>
+
+            <label className="block mb-4">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1">Date</span>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-transparent border-b border-ink/20 focus:border-ink outline-none text-base font-semibold text-ink pb-1"
+              />
+            </label>
+
+            <div className="mb-5 text-[11px] text-ink/50">
+              <span className="font-semibold text-ink/40 uppercase tracking-[0.12em] text-[9px] mr-2">Week</span>
+              <span className="font-bold text-ink">W{suggestedWeek}</span>
+              <span className="text-ink/30"> · auto from date</span>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={!title.trim()}
+              className="w-full rounded-xl py-3 font-black text-xs uppercase tracking-[0.18em] text-white transition-all disabled:opacity-40"
+              style={{ background: '#0E0E0E' }}
+            >
+              Add
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function loadPlan(): CampaignPlan {
   if (typeof window !== 'undefined') {
     try {
@@ -4100,6 +4280,7 @@ export default function YouTubeCampaignCoach() {
   const [viewMode, setViewMode] = useState<ViewMode>('campaign');
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [undoItem, setUndoItem] = useState<UndoItem | null>(null);
+  const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number }>({ open: false });
 
   useEffect(() => {
     try {
@@ -4315,6 +4496,7 @@ export default function YouTubeCampaignCoach() {
           }}
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
           onOpenSettings={() => setShowMetricsModal(true)}
+          onOpenAdd={() => setAddModal({ open: true })}
         />
 
         {/* TOP SECTION — Channel Signal + Narrative Phase + This Week's Call */}
@@ -4382,6 +4564,7 @@ export default function YouTubeCampaignCoach() {
             onEditAction={(action, weekNum) => setModalAction({ action, weekNum })}
             onDeleteAction={softDeleteAction}
             onAddAction={addAction}
+            onOpenAdd={(weekNum) => setAddModal({ open: true, initialWeek: weekNum })}
             deletingIds={deletingIds}
             draggedId={draggedId}
             dragOverId={dragOverId}
@@ -4468,6 +4651,16 @@ export default function YouTubeCampaignCoach() {
           />
         );
       })()}
+
+      {/* Add Content Modal */}
+      {addModal.open && (
+        <AddContentModal
+          plan={plan}
+          initialWeek={addModal.initialWeek}
+          onAdd={addAction}
+          onClose={() => setAddModal({ open: false })}
+        />
+      )}
 
       {/* Undo Toast */}
       {undoItem && (
