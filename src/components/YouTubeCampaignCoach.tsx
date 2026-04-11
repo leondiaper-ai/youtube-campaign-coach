@@ -3878,6 +3878,7 @@ function DropView({ plan }: { plan: CampaignPlan }) {
   }
 
   const intel = getCampaignIntelligence(autoTracks);
+  const output = getCampaignSupportOutput(plan, autoTracks);
   const tierColor = COVERAGE_COLOR[intel.tier];
 
   // Sort worst-coverage first so gaps surface immediately.
@@ -3887,8 +3888,30 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     return sa - sb;
   });
 
+  const outputStats: { label: string; value: number }[] = [
+    { label: 'Shorts',         value: output.totalShorts },
+    { label: 'Videos',         value: output.totalVideos },
+    { label: 'Posts',          value: output.totalPosts },
+    { label: 'Support Pieces', value: output.totalSupport },
+  ];
+
   return (
     <div>
+      {/* ── CAMPAIGN OUTPUT — quick activity row ──────────────────── */}
+      <div
+        className="mb-4 rounded-2xl px-5 py-4 grid grid-cols-4 gap-2"
+        style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+      >
+        {outputStats.map((stat) => (
+          <div key={stat.label} className="flex flex-col items-center text-center">
+            <span className="text-xl font-black leading-none text-ink">{stat.value}</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">
+              {stat.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* ── CAMPAIGN SUPPORT — headline-style summary ─────────────── */}
       <div
         className="mb-6 rounded-2xl p-5"
