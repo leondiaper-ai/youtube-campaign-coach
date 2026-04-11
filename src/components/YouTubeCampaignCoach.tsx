@@ -3653,16 +3653,16 @@ function getCampaignSupportOutput(plan: CampaignPlan, tracks: AutoTrack[]) {
 }
 
 // ──── CAMPAIGN INTELLIGENCE ────────────────────────────────────────────────
-// Aggregates per-drop gaps into a single top-of-page summary with key issues
-// and one short recommendation. Replaces per-card noise with a single voice.
+// Aggregates per-drop gaps into a single headline-style summary. Everything
+// is short, punchy, and instantly scannable — no paragraphs, no explanations.
 
 type CampaignIntelligence = {
   fullySupported: number;
   totalDrops: number;
-  strongRatio: number;
   tier: CoverageTier;
-  keyIssues: string[];
-  recommendation: string;
+  insight: string;         // 1 short line (≤ 8 words)
+  missingLabels: string[]; // short inline labels
+  fix: string;             // 1 short action line
 };
 
 function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
@@ -3683,41 +3683,53 @@ function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
   const missingArtwork   = countMissing('artworkVideo');
   const missingCore      = supports.filter((s) => !s.coreDone).length;
 
-  const pluralDrop = (n: number) => (n === 1 ? 'drop' : 'drops');
+  // Weighted short labels — top 3 only, inline display
+  type Gap = { label: string; weight: number };
+  const gaps: Gap[] = [];
+  if (missingCore > 0)     gaps.push({ label: 'Core',      weight: missingCore * 5 });
+  if (missingShorts > 0)   gaps.push({ label: 'Shorts',    weight: missingShorts * 3 });
+  if (missingPosts > 0)    gaps.push({ label: 'Community', weight: missingPosts * 2 });
+  if (missingFollowup > 0) gaps.push({ label: 'Follow-up', weight: missingFollowup * 2 });
+  if (missingLyric > 0)    gaps.push({ label: 'Lyric',     weight: missingLyric });
+  if (missingArtwork > 0)  gaps.push({ label: 'Artwork',   weight: missingArtwork });
+  gaps.sort((a, b) => b.weight - a.weight);
+  const missingLabels = gaps.slice(0, 3).map((g) => g.label);
 
-  type Issue = { text: string; weight: number };
-  const issues: Issue[] = [];
-  if (missingCore > 0)     issues.push({ text: `Core asset not shipped on ${missingCore} ${pluralDrop(missingCore)}`, weight: missingCore * 5 });
-  if (missingShorts > 0)   issues.push({ text: `Missing shorts on ${missingShorts} ${pluralDrop(missingShorts)}`, weight: missingShorts * 3 });
-  if (missingPosts > 0)    issues.push({ text: `No community post on ${missingPosts} ${pluralDrop(missingPosts)}`, weight: missingPosts * 2 });
-  if (missingFollowup > 0) issues.push({ text: `No follow-up longform on ${missingFollowup} ${pluralDrop(missingFollowup)}`, weight: missingFollowup * 2 });
-  if (missingLyric > 0)    issues.push({ text: `Lyric video missing on ${missingLyric} ${pluralDrop(missingLyric)}`, weight: missingLyric * 1 });
-  if (missingArtwork > 0)  issues.push({ text: `Artwork video missing on ${missingArtwork} ${pluralDrop(missingArtwork)}`, weight: missingArtwork * 1 });
-
-  issues.sort((a, b) => b.weight - a.weight);
-  const keyIssues = issues.slice(0, 3).map((i) => i.text);
-
-  // Short, specific recommendation — driven by the heaviest gap.
-  let recommendation: string;
+  // Punchy insight — 1 short line
+  let insight: string;
   if (totalDrops === 0) {
-    recommendation = 'No drops yet — add a video to start tracking support.';
-  } else if (tier === 'Strong' && issues.length === 0) {
-    recommendation = 'Campaign is well supported — keep pace and protect momentum.';
-  } else if (missingCore > 0) {
-    recommendation = 'Ship the main asset on pending drops before layering more support.';
-  } else if (missingShorts >= 2) {
-    recommendation = 'Shorts are the biggest gap — clip from existing videos to catch up fast.';
-  } else if (missingPosts >= 2) {
-    recommendation = 'Add a community post on each under-supported drop — quickest lift available.';
-  } else if (missingFollowup > 0) {
-    recommendation = 'Plan follow-up longforms to extend the life of your major drops.';
-  } else if (missingLyric > 0 || missingArtwork > 0) {
-    recommendation = 'Finish lyric / artwork videos on official drops to reach Strong coverage.';
+    insight = 'No drops tracked yet';
+  } else if (tier === 'Strong' && gaps.length === 0) {
+    insight = 'Every drop fully supported';
+  } else if (tier === 'Strong') {
+    insight = 'Most drops supported, minor gaps';
+  } else if (tier === 'Medium') {
+    insight = 'Drops shipping, support inconsistent';
   } else {
-    recommendation = 'Fill remaining gaps to move partial drops into Strong.';
+    insight = 'Drops are being released, not amplified';
   }
 
-  return { fullySupported, totalDrops, strongRatio, tier, keyIssues, recommendation };
+  // Short fix line — driven by heaviest gap
+  let fix: string;
+  if (totalDrops === 0) {
+    fix = 'Add a drop to start';
+  } else if (tier === 'Strong' && gaps.length === 0) {
+    fix = 'Hold pace';
+  } else if (missingCore > 0) {
+    fix = 'Ship core assets first';
+  } else if (missingShorts >= 2) {
+    fix = 'Clip shorts within 72h';
+  } else if (missingPosts >= 2) {
+    fix = 'Post to community same day';
+  } else if (missingFollowup > 0) {
+    fix = 'Schedule follow-up longforms';
+  } else if (missingLyric > 0 || missingArtwork > 0) {
+    fix = 'Finish lyric / artwork videos';
+  } else {
+    fix = 'Close remaining gaps';
+  }
+
+  return { fullySupported, totalDrops, tier, insight, missingLabels, fix };
 }
 
 function DropCard({ track }: { track: AutoTrack }) {
@@ -3877,59 +3889,43 @@ function DropView({ plan }: { plan: CampaignPlan }) {
 
   return (
     <div>
-      {/* ── CAMPAIGN SUPPORT INTELLIGENCE — single top block ───────── */}
+      {/* ── CAMPAIGN SUPPORT — headline-style summary ─────────────── */}
       <div
         className="mb-6 rounded-2xl p-5"
         style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
       >
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40">
-            Campaign Support Intelligence
-          </div>
-          <span
-            className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full"
-            style={{ color: tierColor, background: `${tierColor}15` }}
-          >
-            {intel.tier}
-          </span>
+        {/* 1 · Title */}
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-2">
+          Campaign Support
         </div>
 
-        {/* Summary headline */}
-        <div className="flex items-baseline gap-2 mb-4">
+        {/* 2 · Core metric */}
+        <div className="flex items-baseline gap-2 mb-1">
           <span className="text-2xl font-black leading-none" style={{ color: tierColor }}>
-            {intel.fullySupported}/{intel.totalDrops}
+            {intel.fullySupported} / {intel.totalDrops}
           </span>
-          <span className="text-[11px] font-semibold text-ink/55">drops well supported</span>
+          <span className="text-[12px] font-semibold text-ink/55">drops supported</span>
+          <span className="text-base leading-none ml-0.5" aria-hidden="true">
+            {intel.tier === 'Strong' ? '✓' : intel.tier === 'Medium' ? '⚠' : '✕'}
+          </span>
         </div>
 
-        {/* Key issues */}
-        {intel.keyIssues.length > 0 && (
-          <div className="mb-4">
-            <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">
-              Key issues
-            </div>
-            <ul className="flex flex-col gap-0.5">
-              {intel.keyIssues.map((issue) => (
-                <li
-                  key={issue}
-                  className="text-[12px] font-semibold text-ink/75 flex items-start gap-2"
-                >
-                  <span className="text-ink/30 shrink-0">◦</span>
-                  <span>{issue}</span>
-                </li>
-              ))}
-            </ul>
+        {/* 3 · Insight */}
+        <div className="text-[13px] font-semibold text-ink/75 mb-2">
+          {intel.insight}
+        </div>
+
+        {/* 4 · Missing (inline) */}
+        {intel.missingLabels.length > 0 && (
+          <div className="text-[12px] font-semibold text-ink/60 mb-1">
+            <span className="text-ink/40">Missing:</span>{' '}
+            {intel.missingLabels.join(' · ')}
           </div>
         )}
 
-        {/* Recommendation */}
-        <div>
-          <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-0.5">
-            Recommendation
-          </div>
-          <div className="text-[12px] font-semibold text-ink leading-snug">
-            {intel.recommendation}
-          </div>
+        {/* 5 · Fix */}
+        <div className="text-[12px] font-bold" style={{ color: tierColor }}>
+          <span className="text-ink/40 font-semibold">Fix:</span> {intel.fix}
         </div>
       </div>
 
