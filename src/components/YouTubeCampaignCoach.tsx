@@ -11,6 +11,8 @@ type ActionType = 'short' | 'video' | 'post' | 'live' | 'playlist' | 'collab' | 
 type ActionIntent = 'engage' | 'tease' | 'convert' | 'distribute';
 type ActionStatus = 'planned' | 'done' | 'missed';
 type ActionSystem = 1 | 2;
+type VideoSubtype = 'official' | 'lyric' | 'visualiser' | 'live' | 'collab';
+type Distribution = { collab?: boolean; paidPush?: boolean; crossPost?: boolean };
 type DayLabel = 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
 type WeekStatus = 'cold' | 'warm' | 'hot' | 'cooling';
 type ChannelTier = 'small' | 'mid' | 'large';
@@ -39,6 +41,8 @@ type CampaignAction = {
   momentRole?: MomentRole;
   trackId?: string;           // links to a TrackContentPlan
   dropWindowId?: string;      // groups into a DropWindow
+  videoSubtype?: VideoSubtype;    // only meaningful when type === 'video'
+  distribution?: Distribution;    // collab / paid push / cross-post flags
 };
 
 type Feedback = {
@@ -1293,35 +1297,22 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
         </div>
       </div>
 
-      {/* System connection line — ties this tool to the wider decision system */}
-      <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink/30">
-        From channel activity → narrative progression → campaign impact
-      </div>
-
-      {/* Narrative phase header — explicit label */}
-      <div className="mb-3 flex justify-between items-start">
-        <div>
-          {currentPhase && (
-            <>
-              <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">
-                Narrative Phase
-              </div>
-              <div className="text-lg font-black tracking-tight mt-0.5" style={{ color: currentPhase.color }}>
-                {PHASE_MICRO[currentPhase.name].short}
-              </div>
-              <div className="text-[11px] text-ink/50 mt-0.5">
-                {PHASE_MICRO[currentPhase.name].focus.replace('→ ', '')}
-              </div>
-              {phaseDrift && actualPhase && (
-                <div className="text-[10px] font-semibold text-ink/30 mt-1">
-                  Reality: {PHASE_MICRO[actualPhase.name].short}
-                </div>
-              )}
-            </>
-          )}
+      {/* Phase position — plain labels showing planned vs actual */}
+      {currentPhase && (
+        <div className="mb-2 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[10px] text-ink/50">
+              You should be here → <span className="font-black" style={{ color: currentPhase.color }}>{PHASE_MICRO[currentPhase.name].short}</span>
+            </span>
+            {phaseDrift && actualPhase && (
+              <span className="text-[10px] text-ink/50">
+                You're currently here → <span className="font-black" style={{ color: actualPhase.color }}>{PHASE_MICRO[actualPhase.name].short}</span>
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-semibold text-ink/30">Week {weekNum} of {totalWeeks}</span>
         </div>
-        <span className="text-xs font-semibold text-ink/30 pt-1">Week {weekNum} of {totalWeeks}</span>
-      </div>
+      )}
 
       {/* Phase timeline */}
       <div className="w-full flex gap-1 rounded-2xl overflow-hidden p-1.5" style={{ background: '#F6F1E7', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
@@ -1560,9 +1551,19 @@ function buildThisWeeksCall(plan: CampaignPlan, signal: ChannelSignal): string {
 function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const signal = computeChannelSignal(plan);
   const call = buildThisWeeksCall(plan, signal);
-  const meta = CHANNEL_SIGNAL_META[signal];
+  const cadence = getCadenceCounts(plan);
+  const cadenceStatus = getCadenceStatus(cadence);
+  const onTrack = cadenceStatus === 'Healthy';
+  const statusLabel = onTrack ? "You're on track" : "You're behind";
+  const statusColor = onTrack ? '#1FBE7A' : '#FF4A1C';
   const phaseName = detectActualPhase(plan);
   const phaseShort = PHASE_MICRO[phaseName].short;
+
+  // Missing kinds for highlighting the strip
+  const missingSet = new Set<MissingActionKind>();
+  if (cadence.shortsDone < cadence.shortsTarget) missingSet.add('short');
+  if (cadence.postsDone < cadence.postsTarget) missingSet.add('post');
+  if (cadence.longformDone < cadence.longformTarget) missingSet.add('video');
 
   const strip: { kind: MissingActionKind; label: string }[] = [
     { kind: 'short', label: '+ Add Short' },
@@ -1572,38 +1573,41 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
 
   return (
     <div className="mb-4 rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="flex flex-wrap items-start gap-x-8 gap-y-3">
-        <div>
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Channel Signal</div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full" style={{ background: meta.bg, border: `1.5px solid ${meta.color}40` }}>
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
-            <span className="text-sm font-black tracking-wide" style={{ color: meta.color }}>{meta.label}</span>
-          </div>
-          <div className="text-[10px] font-semibold text-ink/40 mt-1">{meta.desc}</div>
-        </div>
-        <div>
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">Narrative Phase</div>
-          <div className="text-sm font-black text-ink">{phaseShort}</div>
-        </div>
-      </div>
-      <div className="mt-4 pt-3 border-t border-ink/5">
-        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-1">This Week's Call</div>
-        <div className="text-base font-black leading-snug text-ink">{call}</div>
+      {/* This week */}
+      <div>
+        <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45 mb-1">This week</div>
+        <div className="text-lg font-black leading-tight text-ink">{call}</div>
       </div>
 
-      {/* PRIMARY ACTION STRIP — the main entry point */}
+      {/* Status — plain sentence with phase in parens */}
+      <div className="mt-3 pt-3 border-t border-ink/5">
+        <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45 mb-1">Status</div>
+        <div className="text-sm font-black" style={{ color: statusColor }}>
+          {statusLabel} <span className="text-ink/40 font-semibold">({phaseShort} phase)</span>
+        </div>
+      </div>
+
+      {/* PRIMARY ACTION STRIP — the main interaction point */}
       {onOpenAdd && (
         <div className="mt-4 pt-4 border-t border-ink/5">
-          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/50 mb-2">What to do this week</div>
+          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45 mb-2">What to do this week</div>
           <div className="flex flex-wrap gap-2">
             {strip.map((s) => {
               const stripMeta = MISSING_ACTION_META[s.kind];
+              const isMissing = missingSet.has(s.kind);
               return (
                 <button
                   key={s.kind}
                   onClick={() => onOpenAdd(s.kind)}
                   className="flex items-center rounded-xl px-4 py-2.5 transition-all hover:shadow-md"
-                  style={{ background: stripMeta.bg, boxShadow: '0 4px 12px rgba(0,0,0,0.10)' }}
+                  style={{
+                    background: stripMeta.bg,
+                    boxShadow: isMissing
+                      ? `0 0 0 3px ${stripMeta.bg}33, 0 6px 18px rgba(0,0,0,0.14)`
+                      : '0 2px 8px rgba(0,0,0,0.08)',
+                    opacity: isMissing ? 1 : 0.78,
+                    transform: isMissing ? 'scale(1.03)' : 'scale(1)',
+                  }}
                 >
                   <span className="text-white font-black text-[11px] tracking-widest uppercase">{s.label}</span>
                 </button>
@@ -1694,18 +1698,31 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   );
 }
 
-// ──── CADENCE CARD ───────────────────────────────────────────────────────────
-// Renamed from "This Week's Rhythm" — cadence status + simple X/Y rows + one action
+// ──── CAMPAIGN ACTIVITY CARD ─────────────────────────────────────────────────
+// Instant read: how much has shipped this week vs target + any boosts used.
 
-function CadenceCard({ plan }: { plan: CampaignPlan }) {
+function isCollabAction(a: CampaignAction): boolean {
+  return a.type === 'collab' || a.distribution?.collab === true;
+}
+
+function getCollabsThisWeek(plan: CampaignPlan): number {
+  const wk = getCurrentWeek(plan);
+  if (!wk) return 0;
+  return wk.actions.filter((a) => a.status === 'done' && isCollabAction(a)).length;
+}
+
+function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
   const counts = getCadenceCounts(plan);
   const status = getCadenceStatus(counts);
-  const meta = CADENCE_STATUS_META[status];
+  const onTrack = status === 'Healthy';
+  const statusLabel = onTrack ? 'On track' : status === 'Broken' ? 'Behind' : 'Behind';
+  const statusColor = onTrack ? '#1FBE7A' : status === 'Broken' ? '#FF4A1C' : '#FFD24C';
+  const collabs = getCollabsThisWeek(plan);
 
   const rows = [
-    { key: 'shorts',   label: 'Shorts',   done: counts.shortsDone,   target: counts.shortsTarget },
-    { key: 'posts',    label: 'Posts',    done: counts.postsDone,    target: counts.postsTarget },
-    { key: 'longform', label: 'Longform', done: counts.longformDone, target: counts.longformTarget },
+    { key: 'shorts', label: 'Shorts', done: counts.shortsDone,   target: counts.shortsTarget },
+    { key: 'posts',  label: 'Posts',  done: counts.postsDone,    target: counts.postsTarget },
+    { key: 'videos', label: 'Videos', done: counts.longformDone, target: counts.longformTarget },
   ];
 
   const rowStatusColor = (done: number, target: number): string => {
@@ -1715,51 +1732,37 @@ function CadenceCard({ plan }: { plan: CampaignPlan }) {
     return '#FFD24C';
   };
 
-  const buildAction = (): string => {
-    const gaps: string[] = [];
-    const shortsGap = Math.max(0, counts.shortsTarget - counts.shortsDone);
-    const postsGap = Math.max(0, counts.postsTarget - counts.postsDone);
-    const longGap = Math.max(0, counts.longformTarget - counts.longformDone);
-    if (longGap > 0) gaps.push(`${longGap} video${longGap > 1 ? 's' : ''}`);
-    if (shortsGap > 0) gaps.push(`${shortsGap} short${shortsGap > 1 ? 's' : ''}`);
-    if (postsGap > 0) gaps.push(`${postsGap} update${postsGap > 1 ? 's' : ''}`);
-    if (gaps.length === 0) return "You're on track — keep going";
-    if (gaps.length === 1) return `Post ${gaps[0]} this week`;
-    if (gaps.length === 2) return `Post ${gaps.join(' and ')} this week`;
-    return `Post ${gaps.slice(0, -1).join(', ')}, and ${gaps[gaps.length - 1]} this week`;
-  };
-
   return (
     <div className="mb-4 rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Title + status pill */}
-      <div className="flex items-baseline justify-between mb-3">
-        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30">Cadence Status</div>
-        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: meta.bg, border: `1.5px solid ${meta.color}40` }}>
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: meta.color }} />
-          <span className="text-[11px] font-black tracking-wide" style={{ color: meta.color }}>{status}</span>
-        </div>
-      </div>
+      {/* Title */}
+      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">Campaign Activity</div>
 
       {/* Rows — numbers first, labels second */}
       <div className="space-y-2 mb-3">
         {rows.map((r) => (
           <div key={r.key} className="flex items-center gap-3">
-            <div className="flex items-baseline gap-0.5 min-w-[48px]">
+            <div className="flex items-baseline gap-0.5 min-w-[52px]">
               <span className="text-lg font-black tabular-nums leading-none" style={{ color: rowStatusColor(r.done, r.target) }}>{r.done}</span>
-              <span className="text-xs font-bold text-ink/30">/{r.target}</span>
+              <span className="text-xs font-bold text-ink/30">/ {r.target}</span>
             </div>
-            <span className="text-sm font-bold text-ink/60">{r.label}</span>
+            <span className="text-sm font-bold text-ink/70">{r.label}</span>
           </div>
         ))}
       </div>
 
-      {/* Single action line */}
-      <div className="border-t border-ink/5 pt-2.5">
-        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-0.5">Action</div>
-        <div className="text-sm font-black leading-tight" style={{ color: meta.color }}>
-          {buildAction()}
-        </div>
+      {/* Cadence line */}
+      <div className="border-t border-ink/5 pt-2.5 flex items-baseline justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40">Cadence</span>
+        <span className="text-sm font-black" style={{ color: statusColor }}>{statusLabel}</span>
       </div>
+
+      {/* Boosts used — only if any */}
+      {collabs > 0 && (
+        <div className="mt-2 pt-2 border-t border-ink/5 flex items-baseline justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40">Boosts used</span>
+          <span className="text-sm font-black text-ink">Collab ×{collabs}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -3844,7 +3847,7 @@ const WEEK_ACTION_META: Record<WeekStatus, { label: string; color: string }> = {
   cold:    { label: 'Start',    color: '#2C25FF' },
 };
 
-type MissingActionKind = 'video' | 'short' | 'post' | 'collab' | 'live';
+type MissingActionKind = 'video' | 'short' | 'post';
 
 const MISSING_ACTION_META: Record<MissingActionKind, {
   label: string;
@@ -3857,9 +3860,15 @@ const MISSING_ACTION_META: Record<MissingActionKind, {
 }> = {
   video:  { label: 'Video',  type: 'video',  system: 2, intent: 'convert',    role: 'hero',    bg: '#FF4A1C', defaultTitle: 'New Video' },
   short:  { label: 'Short',  type: 'short',  system: 1, intent: 'engage',     role: 'push',    bg: '#FFD24C', defaultTitle: 'New Short' },
-  post:   { label: 'Post',   type: 'post',   system: 1, intent: 'engage',     role: 'support', bg: '#2C25FF', defaultTitle: 'Community Post' },
-  collab: { label: 'Collab', type: 'collab', system: 2, intent: 'convert',    role: 'hero',    bg: '#1FBE7A', defaultTitle: 'New Collab' },
-  live:   { label: 'Live',   type: 'live',   system: 1, intent: 'distribute', role: 'support', bg: '#2C25FF', defaultTitle: 'New Live' },
+  post:   { label: 'Post',   type: 'post',   system: 1, intent: 'engage',     role: 'support', bg: '#2C25FF', defaultTitle: 'New Update' },
+};
+
+const VIDEO_SUBTYPE_LABELS: Record<VideoSubtype, string> = {
+  official:   'Official Video',
+  lyric:      'Lyric Video',
+  visualiser: 'Artwork / Visualiser',
+  live:       'Live / Performance',
+  collab:     'Collab Video',
 };
 
 function getCurrentWeekNum(plan: CampaignPlan): number {
@@ -3922,6 +3931,22 @@ function WeekRow({
   if (missedActions.length > 0) contextLine = `${missedActions.length} missed`;
   else if (shippedCount > 0) contextLine = `${shippedCount} shipped`;
 
+  // Piece breakdown: "3 pieces: 2 Shorts, 1 Post (1 Collab)"
+  const doneActions = weekActions.filter((a) => a.status === 'done');
+  const shortsDone = doneActions.filter((a) => a.type === 'short').length;
+  const postsDone  = doneActions.filter((a) => a.type === 'post').length;
+  const videosDone = doneActions.filter((a) => a.type === 'video').length;
+  const collabsDone = doneActions.filter(isCollabAction).length;
+  const totalPieces = shortsDone + postsDone + videosDone;
+  const hasCollab = collabsDone > 0;
+  const breakdownParts: string[] = [];
+  if (shortsDone > 0) breakdownParts.push(`${shortsDone} Short${shortsDone > 1 ? 's' : ''}`);
+  if (postsDone  > 0) breakdownParts.push(`${postsDone} Post${postsDone > 1 ? 's' : ''}`);
+  if (videosDone > 0) breakdownParts.push(`${videosDone} Video${videosDone > 1 ? 's' : ''}`);
+  const breakdownLine = totalPieces > 0
+    ? `${totalPieces} piece${totalPieces > 1 ? 's' : ''}: ${breakdownParts.join(', ')}${hasCollab ? ` (${collabsDone} Collab)` : ''}`
+    : null;
+
   const heroAction = weekActions.find((a) => a.system === 2 && !a.dropWindowId);
   const shorts = weekActions.filter((a) => a.type === 'short' && !a.dropWindowId);
   const supports = weekActions.filter((a) => a.type !== 'short' && a.system === 1 && !a.dropWindowId);
@@ -3959,12 +3984,26 @@ function WeekRow({
         </div>
         <span className="text-ink/20">·</span>
         <span className="text-[11px] font-semibold text-ink/50 truncate">{actionMeta.label}</span>
-        {contextLine && (
+        {breakdownLine ? (
+          <>
+            <span className="text-ink/20">·</span>
+            <span className="text-[10px] font-semibold text-ink/50 truncate">{breakdownLine}</span>
+            {hasCollab && (
+              <span
+                className="text-[9px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full shrink-0"
+                style={{ background: '#3A86FF15', color: '#3A86FF' }}
+                title={`${collabsDone} collab boost${collabsDone > 1 ? 's' : ''} this week`}
+              >
+                ★ Collab
+              </span>
+            )}
+          </>
+        ) : contextLine ? (
           <>
             <span className="text-ink/20">·</span>
             <span className="text-[10px] font-semibold text-ink/40 truncate">{contextLine}</span>
           </>
-        )}
+        ) : null}
         <span className="ml-auto text-[10px] text-ink/30">▸</span>
       </button>
     );
@@ -4009,7 +4048,21 @@ function WeekRow({
           <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">Action</span>
           <span className="text-base font-black leading-none" style={{ color: actionMeta.color }}>{actionMeta.label}</span>
         </div>
-        {contextLine && (
+        {breakdownLine && (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-ink/50">{breakdownLine}</span>
+            {hasCollab && (
+              <span
+                className="text-[9px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-full"
+                style={{ background: '#3A86FF15', color: '#3A86FF' }}
+                title={`${collabsDone} collab boost${collabsDone > 1 ? 's' : ''} this week`}
+              >
+                ★ Collab
+              </span>
+            )}
+          </div>
+        )}
+        {!breakdownLine && contextLine && (
           <span className="text-[10px] font-semibold text-ink/40">{contextLine}</span>
         )}
       </div>
@@ -4130,7 +4183,7 @@ function WeekRow({
 // ADD CONTENT MODAL — 3-step: type → title/date → add
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const ADD_MODAL_KINDS: MissingActionKind[] = ['video', 'short', 'post', 'live', 'collab'];
+const ADD_MODAL_KINDS: MissingActionKind[] = ['short', 'post', 'video'];
 
 function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   plan: CampaignPlan;
@@ -4144,6 +4197,10 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   const [title, setTitle] = useState<string>(initialKind ? MISSING_ACTION_META[initialKind].defaultTitle : '');
   const startWeek = initialWeek ?? getCurrentWeekNum(plan);
   const [date, setDate] = useState<string>(() => weekToDate(startWeek, plan.startDate, 0));
+  const [videoSubtype, setVideoSubtype] = useState<VideoSubtype>('official');
+  const [distCollab, setDistCollab] = useState(false);
+  const [distPaidPush, setDistPaidPush] = useState(false);
+  const [distCrossPost, setDistCrossPost] = useState(false);
 
   const suggestedWeek = Math.max(1, Math.min(plan.weeks.length, dateToWeek(date, plan.startDate)));
 
@@ -4156,6 +4213,11 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   const handleSubmit = () => {
     if (!kind) return;
     const meta = MISSING_ACTION_META[kind];
+    const dist: Distribution = {};
+    if (distCollab) dist.collab = true;
+    if (distPaidPush) dist.paidPush = true;
+    if (distCrossPost) dist.crossPost = true;
+    const hasDist = distCollab || distPaidPush || distCrossPost;
     onAdd(suggestedWeek, {
       id: uid(),
       title: title.trim() || meta.defaultTitle,
@@ -4166,6 +4228,8 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
       system: meta.system,
       intent: meta.intent,
       momentRole: meta.role,
+      ...(kind === 'video' ? { videoSubtype } : {}),
+      ...(hasDist ? { distribution: dist } : {}),
     });
     onClose();
   };
@@ -4262,6 +4326,56 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
                 className="w-full bg-transparent border-b border-ink/20 focus:border-ink outline-none text-base font-semibold text-ink pb-1"
               />
             </label>
+
+            {/* Video subtype — only for videos */}
+            {kind === 'video' && (
+              <label className="block mb-4">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1">Type</span>
+                <select
+                  value={videoSubtype}
+                  onChange={(e) => setVideoSubtype(e.target.value as VideoSubtype)}
+                  className="w-full bg-transparent border-b border-ink/20 focus:border-ink outline-none text-base font-semibold text-ink pb-1"
+                >
+                  {(Object.keys(VIDEO_SUBTYPE_LABELS) as VideoSubtype[]).map((vs) => (
+                    <option key={vs} value={vs}>{VIDEO_SUBTYPE_LABELS[vs]}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+
+            {/* Distribution flags — collab / paid push / cross-post */}
+            <div className="mb-5">
+              <div className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-2">Distribution</div>
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
+                  <input
+                    type="checkbox"
+                    checked={distCollab}
+                    onChange={(e) => setDistCollab(e.target.checked)}
+                    className="accent-ink"
+                  />
+                  <span>Collab <span className="text-ink/40 font-normal">(YouTube collab feature)</span></span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
+                  <input
+                    type="checkbox"
+                    checked={distPaidPush}
+                    onChange={(e) => setDistPaidPush(e.target.checked)}
+                    className="accent-ink"
+                  />
+                  <span>Paid push</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-[12px] font-semibold text-ink/80">
+                  <input
+                    type="checkbox"
+                    checked={distCrossPost}
+                    onChange={(e) => setDistCrossPost(e.target.checked)}
+                    className="accent-ink"
+                  />
+                  <span>Cross-post</span>
+                </label>
+              </div>
+            </div>
 
             <div className="mb-5 text-[11px] text-ink/50">
               <span className="font-semibold text-ink/40 uppercase tracking-[0.12em] text-[9px] mr-2">Week</span>
@@ -4537,7 +4651,10 @@ export default function YouTubeCampaignCoach() {
           onOpenAdd={() => setAddModal({ open: true })}
         />
 
-        {/* TOP SECTION — Channel Signal + Narrative Phase + This Week's Call + Primary Action Strip */}
+        {/* CAMPAIGN ACTIVITY — Shorts/Posts/Videos counts + cadence + boosts */}
+        <CampaignActivityCard plan={plan} />
+
+        {/* TOP SECTION — This week's call + Status + Primary Action Strip */}
         <TopSignalCard
           plan={plan}
           onOpenAdd={(kind) => setAddModal({ open: true, initialKind: kind })}
@@ -4571,9 +4688,6 @@ export default function YouTubeCampaignCoach() {
           }}
           onEditCancel={() => setEditingMetric(null)}
         />
-
-        {/* CADENCE — status + X/Y rows + single action line */}
-        <CadenceCard plan={plan} />
 
         {/* NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
