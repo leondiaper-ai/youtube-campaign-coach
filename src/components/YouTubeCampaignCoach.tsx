@@ -1551,15 +1551,7 @@ function buildThisWeeksCall(plan: CampaignPlan, signal: ChannelSignal): string {
 }
 
 function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
-  const signal = computeChannelSignal(plan);
-  const call = buildThisWeeksCall(plan, signal);
   const cadence = getCadenceCounts(plan);
-  const cadenceStatus = getCadenceStatus(cadence);
-  const onTrack = cadenceStatus === 'Healthy';
-  const statusLabel = onTrack ? "You're on track" : "You're behind";
-  const statusColor = onTrack ? '#1FBE7A' : '#FF4A1C';
-  const phaseName = detectActualPhase(plan);
-  const phaseShort = PHASE_MICRO[phaseName].short;
 
   // Missing kinds for highlighting the strip
   const missingSet = new Set<MissingActionKind>();
@@ -1573,52 +1565,46 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     { kind: 'video', label: '+ Add Video' },
   ];
 
+  if (!onOpenAdd) return null;
+
   return (
-    <div className="mb-4 rounded-2xl p-5" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* This week */}
-      <div>
-        <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45 mb-1">This week</div>
-        <div className="text-lg font-black leading-tight text-ink">{call}</div>
+    <div
+      className="mb-6 rounded-2xl p-5"
+      style={{
+        background: '#0E0E0E',
+        color: '#FAF7F2',
+        boxShadow: '0 6px 20px rgba(14,14,14,0.18), 0 1px 3px rgba(14,14,14,0.1)',
+      }}
+    >
+      {/* Label */}
+      <div className="text-[10px] font-bold uppercase tracking-[0.16em] mb-3" style={{ color: 'rgba(250,247,242,0.55)' }}>
+        What to do
       </div>
 
-      {/* Status — plain sentence with phase in parens */}
-      <div className="mt-3 pt-3 border-t border-ink/5">
-        <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45 mb-1">Status</div>
-        <div className="text-sm font-black" style={{ color: statusColor }}>
-          {statusLabel} <span className="text-ink/40 font-semibold">({phaseShort} phase)</span>
-        </div>
+      {/* Buttons — primary focus of the card */}
+      <div className="flex flex-wrap gap-2.5">
+        {strip.map((s) => {
+          const stripMeta = MISSING_ACTION_META[s.kind];
+          const isMissing = missingSet.has(s.kind);
+          return (
+            <button
+              key={s.kind}
+              onClick={() => onOpenAdd(s.kind)}
+              className="flex items-center rounded-xl px-5 py-3 transition-all hover:-translate-y-0.5"
+              style={{
+                background: stripMeta.bg,
+                boxShadow: isMissing
+                  ? `0 0 0 3px ${stripMeta.bg}33, 0 8px 22px rgba(0,0,0,0.28)`
+                  : '0 4px 14px rgba(0,0,0,0.22)',
+                opacity: isMissing ? 1 : 0.75,
+                transform: isMissing ? 'scale(1.03)' : 'scale(1)',
+              }}
+            >
+              <span className="text-white font-black text-[12px] tracking-widest uppercase">{s.label}</span>
+            </button>
+          );
+        })}
       </div>
-
-      {/* PRIMARY ACTION STRIP — the main interaction point */}
-      {onOpenAdd && (
-        <div className="mt-4 pt-4 border-t border-ink/5">
-          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45 mb-2">What to do this week</div>
-          <div className="flex flex-wrap gap-2">
-            {strip.map((s) => {
-              const stripMeta = MISSING_ACTION_META[s.kind];
-              const isMissing = missingSet.has(s.kind);
-              return (
-                <button
-                  key={s.kind}
-                  onClick={() => onOpenAdd(s.kind)}
-                  className="flex items-center rounded-xl px-4 py-2.5 transition-all hover:shadow-md"
-                  style={{
-                    background: stripMeta.bg,
-                    boxShadow: isMissing
-                      ? `0 0 0 3px ${stripMeta.bg}33, 0 6px 18px rgba(0,0,0,0.14)`
-                      : '0 2px 8px rgba(0,0,0,0.08)',
-                    opacity: isMissing ? 1 : 0.78,
-                    transform: isMissing ? 'scale(1.03)' : 'scale(1)',
-                  }}
-                >
-                  <span className="text-white font-black text-[11px] tracking-widest uppercase">{s.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="text-[10px] font-semibold text-ink/35 mt-2">Add video, short or post</div>
-        </div>
-      )}
     </div>
   );
 }
@@ -1736,11 +1722,21 @@ function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
 
   return (
     <div className="mb-4 rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Title */}
-      <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">Campaign Activity</div>
+      {/* Header — state label + status pill on the right */}
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">
+          This week
+        </span>
+        <span
+          className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full"
+          style={{ color: statusColor, background: `${statusColor}15` }}
+        >
+          {statusLabel}
+        </span>
+      </div>
 
       {/* Rows — numbers first, labels second */}
-      <div className="space-y-2 mb-3">
+      <div className="space-y-2">
         {rows.map((r) => (
           <div key={r.key} className="flex items-center gap-3">
             <div className="flex items-baseline gap-0.5 min-w-[52px]">
@@ -1752,15 +1748,9 @@ function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
         ))}
       </div>
 
-      {/* Cadence line */}
-      <div className="border-t border-ink/5 pt-2.5 flex items-baseline justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40">Cadence</span>
-        <span className="text-sm font-black" style={{ color: statusColor }}>{statusLabel}</span>
-      </div>
-
       {/* Boosts used — only if any */}
       {collabs > 0 && (
-        <div className="mt-2 pt-2 border-t border-ink/5 flex items-baseline justify-between">
+        <div className="mt-3 pt-2.5 border-t border-ink/5 flex items-baseline justify-between">
           <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40">Boosts used</span>
           <span className="text-sm font-black text-ink">Collab ×{collabs}</span>
         </div>
