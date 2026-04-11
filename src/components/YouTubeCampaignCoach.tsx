@@ -1210,12 +1210,12 @@ function recalcWeekDates(weeks: CampaignWeek[], startIso: string): CampaignWeek[
 // ──── CAMPAIGN TIMELINE ──────────────────────────────────────────────────────
 // Unified header + status + phase timeline — feels like a journey
 
-const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string }> = {
-  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Get active',    focus: '→ Post Shorts + Community to warm the algorithm' },
-  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Drop + collabs', focus: '→ Land first drops and build crossover audience' },
-  'SCALE THE STORY': { short: 'SCALE',     desc: 'Push content',  focus: '→ Push content volume and expand reach' },
-  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak moment',   focus: '→ Execute album rollout — maximise first 48hrs' },
-  'EXTEND':          { short: 'EXTEND',    desc: 'Sustain',       focus: '→ Keep the conversation alive post-release' },
+const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string; nudge: string }> = {
+  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Get active',    focus: '→ Post Shorts + Community to warm the algorithm', nudge: 'Warm up the channel' },
+  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Drop + collabs', focus: '→ Land first drops and build crossover audience', nudge: 'Build consistency this week' },
+  'SCALE THE STORY': { short: 'SCALE',     desc: 'Push content',  focus: '→ Push content volume and expand reach',          nudge: 'Keep pushing content' },
+  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak moment',   focus: '→ Execute album rollout — maximise first 48hrs',  nudge: 'Land the big moment' },
+  'EXTEND':          { short: 'EXTEND',    desc: 'Sustain',       focus: '→ Keep the conversation alive post-release',      nudge: 'Keep the story alive' },
 };
 
 // ── ACTUAL PHASE DETECTION ──────────────────────────────────────────────────
@@ -1333,7 +1333,7 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
               >
                 + Add
               </button>
-              <span className="text-[9px] font-semibold text-ink/40 mt-1">Add video, short or post</span>
+              <span className="text-[9px] font-semibold text-ink/40 mt-1">Start building this week&apos;s momentum</span>
             </div>
           )}
           {onOpenSettings && (
@@ -1363,6 +1363,9 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
                 You're currently here → <span className="font-black" style={{ color: actualPhase.color }}>{PHASE_MICRO[actualPhase.name].short}</span>
               </span>
             )}
+            <span className="text-[10px] font-semibold text-ink/55 mt-0.5">
+              {PHASE_MICRO[(phaseDrift && actualPhase ? actualPhase.name : currentPhase.name)].nudge}
+            </span>
           </div>
           <span className="text-[10px] font-semibold text-ink/30">Week {weekNum} of {totalWeeks}</span>
         </div>
@@ -1630,7 +1633,7 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     >
       {/* Label */}
       <div className="text-[10px] font-bold uppercase tracking-[0.16em] mb-3" style={{ color: 'rgba(250,247,242,0.55)' }}>
-        What to do
+        What to do next
       </div>
 
       {/* Buttons — primary focus of the card */}
@@ -1753,10 +1756,6 @@ function getCollabsThisWeek(plan: CampaignPlan): number {
 
 function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
   const counts = getCadenceCounts(plan);
-  const status = getCadenceStatus(counts);
-  const onTrack = status === 'Healthy';
-  const statusLabel = onTrack ? 'On track' : status === 'Broken' ? 'Behind' : 'Behind';
-  const statusColor = onTrack ? '#1FBE7A' : status === 'Broken' ? '#FF4A1C' : '#FFD24C';
   const collabs = getCollabsThisWeek(plan);
 
   const rows = [
@@ -1765,11 +1764,29 @@ function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
     { key: 'videos', label: 'Videos', done: counts.longformDone, target: counts.longformTarget },
   ];
 
+  // Forward-looking status: Ready → Building → On track. No "Behind".
+  const totalDone   = counts.shortsDone + counts.postsDone + counts.longformDone;
+  const totalTarget = counts.shortsTarget + counts.postsTarget + counts.longformTarget;
+  const allMet = rows.every((r) => r.target === 0 || r.done >= r.target);
+
+  let statusLabel: string;
+  let statusColor: string;
+  if (totalDone === 0) {
+    statusLabel = 'Ready to start';
+    statusColor = '#0E0E0E';
+  } else if (allMet || (totalTarget > 0 && totalDone >= totalTarget)) {
+    statusLabel = 'On track';
+    statusColor = '#1FBE7A';
+  } else {
+    statusLabel = 'Building momentum';
+    statusColor = '#FFD24C';
+  }
+
+  // Numbers stay calm — completed rows go green, everything else is neutral ink.
   const rowStatusColor = (done: number, target: number): string => {
     if (target === 0) return '#1FBE7A';
     if (done >= target) return '#1FBE7A';
-    if (done === 0) return '#FF4A1C';
-    return '#FFD24C';
+    return 'rgba(14,14,14,0.55)';
   };
 
   return (
