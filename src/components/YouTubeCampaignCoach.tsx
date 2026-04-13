@@ -4751,12 +4751,19 @@ function loadPlan(): CampaignPlan {
       const raw = window.localStorage.getItem(LS_KEY);
       if (raw) {
         const saved = JSON.parse(raw) as CampaignPlan;
-        // User-created (non-example) plans persist even when empty.
-        if (saved && saved.isExample === false && Array.isArray(saved.weeks)) {
-          return saved;
-        }
-        // Example plans persist if they still have an artist filled in.
-        if (saved && saved.artist && saved.artist.trim().length > 0) {
+        // Only restore a saved plan if it contains real content.
+        // Otherwise, fall through to the demo so a new/empty visitor
+        // always lands on the pre-loaded K Trap campaign.
+        const hasContent =
+          !!saved &&
+          Array.isArray(saved.weeks) &&
+          (
+            (saved.artist && saved.artist.trim().length > 0) ||
+            (saved.campaignName && saved.campaignName.trim().length > 0) ||
+            saved.weeks.some((w) => Array.isArray(w.actions) && w.actions.length > 0)
+          );
+        if (hasContent) {
+          // User-created plans keep their flag; legacy saves default to example.
           return { ...saved, isExample: saved.isExample ?? true };
         }
       }
