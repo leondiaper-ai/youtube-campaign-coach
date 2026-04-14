@@ -1492,70 +1492,36 @@ function CampaignAnchorStrip({ plan }: { plan: CampaignPlan }) {
 
 type ChannelSignal = 'PUSH' | 'SCALE' | 'HOLD' | 'TEST';
 
-// ── Integrated thinking — three tight lines folded into the decision card.
-//    Why this matters / What to watch / What to do. Deterministic, grounded
-//    in the already-computed channel signal.
-type IntegratedThinking = { why: string; watch: string; todo: string };
+// ── Unified decision detail — content-native, no spend/channel language.
+//    Why this decision / What to do now / What would change this.
+type DecisionDetail = { why: string; todo: string; changeIt: string };
 
-// Marketing Action — spend behaviour derived from the channel signal.
-type MarketingAction = { spend: string; channel: string; timing: string };
-
-function buildMarketingAction(signal: ChannelSignal): MarketingAction {
+function buildDecisionDetail(signal: ChannelSignal): DecisionDetail {
   switch (signal) {
     case 'SCALE':
       return {
-        spend: 'Scale',
-        channel: 'Marquee + off-platform',
-        timing: 'Immediate — maintain while Shorts-to-subscriber conversion holds',
+        why: 'Cadence is holding and the channel is in a momentum window — reach is the lever now, not more posting volume.',
+        todo: 'Concentrate on hero formats around the next drop — double down on the one or two that are pulling returning viewers.',
+        changeIt: 'Shorts-to-subscriber conversion slipping, or returning-viewer growth flattening for two straight weeks.',
       };
     case 'PUSH':
       return {
-        spend: 'Scale',
-        channel: 'Marquee + off-platform',
-        timing: 'Immediate — while the next-drop window is open',
+        why: "Short-form is pulling early reach, but long-form isn't compounding yet — the channel is attracting attention, not yet holding it.",
+        todo: 'Pair every Shorts hit with a long-form piece on the same hook — convert reach into returning viewers.',
+        changeIt: 'Shorts continuing to spike without repeat-return lifting across the next two weeks.',
       };
     case 'TEST':
       return {
-        spend: 'Controlled',
-        channel: 'Marquee test or light off-platform',
-        timing: 'Conditional — trigger once a two-week posting rhythm holds',
+        why: "Posting rhythm is inconsistent — performance signals can't be trusted until cadence clears as the limiting variable.",
+        todo: 'Hold a steady two-week posting rhythm on one format — treat everything else as noise until cadence is proven.',
+        changeIt: 'Two full weeks of consistent cadence with one format showing clear engagement separation.',
       };
     case 'HOLD':
     default:
       return {
-        spend: 'No spend',
-        channel: 'None or minimal discovery',
-        timing: 'Wait — hold unless repeat return behaviour lifts for two weeks',
-      };
-  }
-}
-
-function buildIntegratedThinking(signal: ChannelSignal): IntegratedThinking {
-  switch (signal) {
-    case 'SCALE':
-      return {
-        why: 'Cadence is holding — reach is the lever that compounds now, not more posting volume.',
-        watch: 'Shorts-to-subscriber conversion and whether returning viewers lift week over week.',
-        todo: 'Scale hero content around the next drop — concentrate spend on top-performing formats.',
-      };
-    case 'PUSH':
-      return {
-        why: "Short-form is generating early reach, but long-form demand isn't fully formed yet.",
-        watch: 'Shorts-to-subscriber conversion and repeat return behaviour over the next two weeks.',
-        todo: 'Shift from testing cadence to scaling long-form content around the next drop.',
-      };
-    case 'TEST':
-      return {
-        why: "Output is inconsistent — performance signals can't be trusted until cadence clears.",
-        watch: 'Whether a consistent two-week posting rhythm clears cadence as the limiting variable.',
-        todo: 'Commit to the working format and let cadence compound before adding spend.',
-      };
-    case 'HOLD':
-    default:
-      return {
-        why: "Core audience is engaged, but there's no evidence of widening reach yet.",
-        watch: 'Repeat return behaviour rising, or subscriber growth climbing alongside Shorts views.',
-        todo: 'Hold spend — wait for one format to separate before committing.',
+        why: 'Core audience is engaged, but there is no evidence of widening reach — nothing to scale into yet.',
+        todo: 'Keep current cadence tight and watch for one format to separate — no format expansion this week.',
+        changeIt: 'Repeat return behaviour rising, or subscriber growth climbing alongside Shorts views.',
       };
   }
 }
@@ -1705,8 +1671,7 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
   const signal = computeChannelSignal(plan);
   const decisionMeta = CHANNEL_SIGNAL_META[signal];
   const thisWeek = buildThisWeeksCall(plan, signal);
-  const thinking = buildIntegratedThinking(signal);
-  const marketing = buildMarketingAction(signal);
+  const detail = buildDecisionDetail(signal);
 
   if (!onOpenAdd) return null;
 
@@ -1745,57 +1710,26 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
           {thisWeek}.
         </div>
 
-        {/* Integrated thinking — three lines folded into the decision */}
+        {/* Unified decision detail: Why / What to do / What would change this */}
         <div
-          className="mt-4 pt-4 space-y-2 text-[13px] leading-snug"
+          className="mt-5 pt-4 space-y-4"
           style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
         >
           {([
-            ['Why this matters', thinking.why],
-            ['What to watch', thinking.watch],
-            ['What to do', thinking.todo],
-          ] as const).map(([label, body]) => (
-            <div key={label} className="flex items-baseline gap-2.5">
-              <span
-                className="text-[10px] font-mono tracking-[0.12em] uppercase shrink-0"
-                style={{ color: 'rgba(250,247,242,0.45)' }}
-              >
-                {label}:
-              </span>
-              <span style={{ color: 'rgba(250,247,242,0.90)' }}>{body}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Marketing Action — spend behaviour derived from the signal */}
-      <div
-        className="rounded-xl p-4 mb-4"
-        style={{
-          background: 'rgba(250,247,242,0.04)',
-          border: '1px solid rgba(250,247,242,0.08)',
-        }}
-      >
-        <div
-          className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3"
-          style={{ color: 'rgba(250,247,242,0.55)' }}
-        >
-          Marketing Action
-        </div>
-        <div className="space-y-2 text-[13px] leading-snug">
-          {([
-            ['Spend', marketing.spend],
-            ['Channel', marketing.channel],
-            ['Timing', marketing.timing],
-          ] as const).map(([label, value]) => (
-            <div key={label} className="flex items-baseline gap-3">
-              <span
-                className="text-[10px] font-mono tracking-[0.14em] uppercase w-16 shrink-0"
+            ['Why this decision', detail.why, 0.95],
+            ['What to do now', detail.todo, 0.95],
+            ['What would change this', detail.changeIt, 0.75],
+          ] as const).map(([label, body, opacity]) => (
+            <div key={label}>
+              <div
+                className="text-[10px] font-mono uppercase tracking-[0.14em] mb-1"
                 style={{ color: 'rgba(250,247,242,0.45)' }}
               >
                 {label}
-              </span>
-              <span style={{ color: 'rgba(250,247,242,0.90)' }}>{value}</span>
+              </div>
+              <p className="text-[13.5px] leading-snug" style={{ color: `rgba(250,247,242,${opacity})` }}>
+                {body}
+              </p>
             </div>
           ))}
         </div>
