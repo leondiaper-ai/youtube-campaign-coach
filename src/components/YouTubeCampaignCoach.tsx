@@ -1843,9 +1843,44 @@ function useWatcherInsight() {
   return useWatcherChannel().insight;
 }
 
+// ── System-1 helpers ─────────────────────────────────────────────────────────
+function formatBig(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + 'K';
+  return n.toLocaleString();
+}
+function formatDelta(n: number | null | undefined): { text: string; dir: 'up' | 'flat' | 'down' } {
+  if (n == null || n === 0) return { text: 'flat', dir: 'flat' };
+  const abs = Math.abs(n);
+  const t = abs >= 1000 ? (abs / 1000).toFixed(abs % 1000 === 0 ? 0 : 1) + 'K' : abs.toLocaleString();
+  return { text: (n > 0 ? '+' : '−') + t, dir: n > 0 ? 'up' : 'down' };
+}
+function subsViewsSignal(subDelta: number | null, viewDelta: number | null): string {
+  const s = subDelta ?? 0;
+  const v = viewDelta ?? 0;
+  if (s > 0 && v > 0) return 'Momentum is building across views and subscribers';
+  if (s <= 0 && v > 0) return 'Reach is growing, but audience is not converting';
+  if (s > 0 && v <= 0) return 'Subscribers ticking up — reach has not caught up yet';
+  if (s < 0 && v < 0) return 'Channel is slipping across reach and growth';
+  return 'Channel is flat across both reach and growth';
+}
+function cadenceSummaryLine(cmp: CadenceCompare | null): { headline: string; detail: string; color: string } {
+  if (!cmp) return { headline: 'Cadence: —', detail: '', color: 'rgba(250,247,242,0.55)' };
+  const labelFor = (s: string): string => s === 'exceeding' ? 'exceeding' : s === 'on_track' ? 'on track' : s === 'slightly_behind' ? 'slightly behind' : 'behind';
+  const parts = cmp.rows.map((r) => {
+    if (r.actual < 0) return `${r.format} planned`;
+    return `${r.format} ${labelFor(r.status)}`;
+  });
+  const color = cmp.overall === 'Strong cadence' ? '#1FBE7A' : cmp.overall === 'Behind cadence' ? '#FF4A1C' : '#F5B73D';
+  const headline = cmp.overall === 'Strong cadence' ? 'Cadence: Strong' : cmp.overall === 'On track' ? 'Cadence: On track' : 'Cadence: Behind';
+  return { headline, detail: parts.join(' · '), color };
+}
+type CadenceCompare = ReturnType<typeof cadenceComparison>;
+
 function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const cadence = getCadenceCounts(plan);
   const watcher = useWatcherChannel();
+  const [showWhy, setShowWhy] = useState(false);
 
   // Missing kinds for highlighting the strip
   const missingSet = new Set<MissingActionKind>();
@@ -1900,132 +1935,123 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     behind:          { color: '#FF4A1C', bg: 'rgba(255,74,28,0.16)', label: 'Behind' },
   };
 
+  // ── SYSTEM 1 derived values ────────────────────────────────────────────────
+  const subDelta = watcher.state?.subscriberDelta ?? null;
+  const viewDelta = watcher.state?.viewDelta ?? null;
+  const subDeltaFmt = formatDelta(subDelta);
+  const viewDeltaFmt = formatDelta(viewDelta);
+  const dirColor = (d: 'up' | 'flat' | 'down') => d === 'up' ? '#1FBE7A' : d === 'down' ? '#FF4A1C' : 'rgba(250,247,242,0.45)';
+  const dirGlyph = (d: 'up' | 'flat' | 'down') => d === 'up' ? '▲' : d === 'down' ? '▼' : '–';
+  const signalLine = watcher.state ? subsViewsSignal(subDelta, viewDelta) : (watcher.insight?.headline ?? buildThisWeeksCall(plan, legacySignal));
+  const cadenceSummary = cadenceSummaryLine(cadenceCmp);
+  const primaryAction = decision ? decision.action : buildThisWeeksCall(plan, legacySignal);
+
   return (
     <div
-      className="mb-6 rounded-2xl p-5"
+      className="mb-6 rounded-2xl p-7"
       style={{
         background: '#0E0E0E',
         color: '#FAF7F2',
         boxShadow: '0 6px 20px rgba(14,14,14,0.18), 0 1px 3px rgba(14,14,14,0.1)',
       }}
     >
-      {/* Decision header — state pill, momentum, subtitle */}
-      <div
-        className="mb-4 flex items-center gap-3 flex-wrap pb-4"
-        style={{ borderBottom: '1px solid rgba(250,247,242,0.10)' }}
-      >
-        <span
-          className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md font-black uppercase tracking-wider text-[13px] leading-none"
-          style={{ background: `${headerColor}22`, color: headerColor }}
+      {/* ─── SYSTEM 1 ─────────────────────────────────────────────────────── */}
+
+      {/* 1. DECISION */}
+      <div className="mb-7">
+        <div
+          className="font-black uppercase tracking-[0.04em] leading-none"
+          style={{ color: headerColor, fontSize: '34px' }}
         >
           {headerLabel}
-        </span>
-        {decision && (
-          <span
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-mono uppercase tracking-[0.14em]"
-            style={{ background: 'rgba(250,247,242,0.08)', color: 'rgba(250,247,242,0.70)' }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: headerColor }} />
-            {MOMENTUM_LABEL[decision.momentum]}
-          </span>
-        )}
-        <span
-          className="text-[12.5px] leading-snug flex-1 min-w-[180px]"
-          style={{ color: 'rgba(250,247,242,0.75)' }}
+        </div>
+        <div
+          className="mt-2 text-[14px] leading-snug"
+          style={{ color: 'rgba(250,247,242,0.70)' }}
         >
-          {headerSubtitle}{headerSubtitle.endsWith('.') ? '' : '.'}
-        </span>
+          {decision ? stateMeta!.subtitle : headerSubtitle}
+        </div>
       </div>
 
-      {/* AI Decision Panel — READ → PLAN → GAP → ACTION */}
-      {decision && (
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-          {([
-            ['AI READ',          decision.read,   '#FAF7F2'],
-            [`PLAN (${coachPhase})`, decision.plan,   '#A8B5FF'],
-            ['GAP',              decision.gap,    '#F5B73D'],
-            ['ACTION',           decision.action, '#1FBE7A'],
-          ] as const).map(([label, body, color]) => (
-            <div
-              key={label}
-              className="rounded-xl p-3.5"
-              style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}
-            >
-              <div
-                className="text-[10px] font-mono uppercase tracking-[0.16em] mb-1.5"
-                style={{ color }}
-              >
-                {label}
-              </div>
-              <p className="text-[13px] leading-snug" style={{ color: 'rgba(250,247,242,0.92)' }}>
-                {body}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Cadence Compare — planned vs actual */}
-      {cadenceCmp && (
-        <div className="mb-4 rounded-xl p-3.5" style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] font-mono uppercase tracking-[0.16em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-              Cadence — planned vs actual
-            </div>
-            <div className="text-[10.5px] font-semibold" style={{ color: 'rgba(250,247,242,0.75)' }}>
-              {cadenceCmp.overall}
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {cadenceCmp.rows.map((row) => {
-              const meta = cadenceRowMeta[row.status];
-              const observable = row.actual >= 0;
-              return (
-                <div
-                  key={row.format}
-                  className="rounded-lg px-3 py-2.5"
-                  style={{ background: 'rgba(250,247,242,0.05)' }}
-                >
-                  <div className="flex items-baseline justify-between mb-1">
-                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(250,247,242,0.85)' }}>
-                      {row.format}
-                    </span>
-                    <span className="text-[10px]" style={{ color: meta.color }}>
-                      {observable ? meta.label : 'Planned only'}
-                    </span>
-                  </div>
-                  <div className="text-[13px] font-mono" style={{ color: 'rgba(250,247,242,0.95)' }}>
-                    {observable ? `${row.actual}/wk` : '—'} <span style={{ color: 'rgba(250,247,242,0.45)' }}>vs {row.planned}/wk</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Recent Signal — last 48h */}
-      {recent && (
+      {/* 2. CHANNEL HEALTH — Subs + Views, total + delta only */}
+      {watcher.state && (
         <div
-          className="mb-4 rounded-xl px-4 py-3"
-          style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}
+          className="mb-7 grid grid-cols-2 gap-6 pb-6"
+          style={{ borderBottom: '1px solid rgba(250,247,242,0.08)' }}
         >
-          <div className="flex items-center gap-2 mb-1">
-            <div className="text-[10px] font-mono uppercase tracking-[0.16em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-              Recent signal · 48h
+          <div>
+            <div
+              className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
+              style={{ color: 'rgba(250,247,242,0.45)' }}
+            >
+              Subscribers
             </div>
-            <span className="text-[10.5px] font-semibold" style={{ color: '#A8B5FF' }}>
-              {recent.signal}
-            </span>
+            <div className="font-black leading-none" style={{ fontSize: '40px', color: '#FAF7F2' }}>
+              {formatBig(watcher.state.subscriberCount)}
+            </div>
+            <div className="mt-2 text-[12px] font-semibold inline-flex items-center gap-1.5" style={{ color: dirColor(subDeltaFmt.dir) }}>
+              <span>{dirGlyph(subDeltaFmt.dir)}</span>
+              <span>{subDeltaFmt.text} 7d</span>
+            </div>
           </div>
-          <p className="text-[12.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
-            {recent.uploadsLast48h} upload{recent.uploadsLast48h === 1 ? '' : 's'} ({recent.shortsLast48h} short) · {recent.action}
-          </p>
+          <div>
+            <div
+              className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
+              style={{ color: 'rgba(250,247,242,0.45)' }}
+            >
+              Total Views
+            </div>
+            <div className="font-black leading-none" style={{ fontSize: '40px', color: '#FAF7F2' }}>
+              {formatBig(watcher.state.viewCount)}
+            </div>
+            <div className="mt-2 text-[12px] font-semibold inline-flex items-center gap-1.5" style={{ color: dirColor(viewDeltaFmt.dir) }}>
+              <span>{dirGlyph(viewDeltaFmt.dir)}</span>
+              <span>{viewDeltaFmt.text} 7d</span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Primary focus — the actions teams run the channel with */}
-      <div className="flex flex-wrap gap-3">
+      {/* 3. SIGNAL — one line */}
+      <div className="mb-5">
+        <div
+          className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5"
+          style={{ color: 'rgba(250,247,242,0.45)' }}
+        >
+          Signal
+        </div>
+        <p className="text-[15px] leading-snug" style={{ color: '#FAF7F2' }}>
+          {signalLine}
+        </p>
+      </div>
+
+      {/* 4. PRIMARY ACTION */}
+      <div className="mb-5">
+        <div
+          className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5"
+          style={{ color: 'rgba(250,247,242,0.45)' }}
+        >
+          Action
+        </div>
+        <p className="text-[15px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
+          {primaryAction}
+        </p>
+      </div>
+
+      {/* 5. CADENCE — single summary line */}
+      {cadenceCmp && (
+        <div className="mb-5 flex items-baseline gap-3 flex-wrap">
+          <span className="text-[13px] font-bold" style={{ color: cadenceSummary.color }}>
+            {cadenceSummary.headline}
+          </span>
+          <span className="text-[12px]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+            {cadenceSummary.detail}
+          </span>
+        </div>
+      )}
+
+      {/* Add-action strip (kept — these are System 1 primitive controls) */}
+      <div className="flex flex-wrap gap-3 mt-6">
         {strip.map((s) => {
           const stripMeta = MISSING_ACTION_META[s.kind];
           const isMissing = missingSet.has(s.kind);
@@ -2033,20 +2059,156 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
             <button
               key={s.kind}
               onClick={() => onOpenAdd(s.kind)}
-              className="flex-1 min-w-[140px] flex items-center justify-center rounded-2xl px-6 py-5 transition-all hover:-translate-y-1"
+              className="flex-1 min-w-[140px] flex items-center justify-center rounded-2xl px-6 py-4 transition-all hover:-translate-y-0.5"
               style={{
                 background: stripMeta.bg,
                 boxShadow: isMissing
                   ? `0 0 0 3px ${stripMeta.bg}40, 0 14px 32px rgba(0,0,0,0.34)`
                   : '0 6px 18px rgba(0,0,0,0.24)',
                 opacity: isMissing ? 1 : 0.78,
-                transform: isMissing ? 'scale(1.02)' : 'scale(1)',
               }}
             >
-              <span className="text-white font-black text-[15px] tracking-widest uppercase">{s.label}</span>
+              <span className="text-white font-black text-[14px] tracking-widest uppercase">{s.label}</span>
             </button>
           );
         })}
+      </div>
+
+      {/* ─── SYSTEM 2 — collapsible ──────────────────────────────────────── */}
+      <div className="mt-6 pt-5" style={{ borderTop: '1px solid rgba(250,247,242,0.08)' }}>
+        <button
+          type="button"
+          onClick={() => setShowWhy((v) => !v)}
+          aria-expanded={showWhy}
+          className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors hover:opacity-80"
+          style={{
+            background: 'rgba(250,247,242,0.06)',
+            border: '1px solid rgba(250,247,242,0.12)',
+          }}
+        >
+          <span
+            className="inline-flex items-center justify-center rounded-full text-[9px] font-mono"
+            style={{ width: 16, height: 16, background: '#FAF7F2', color: '#0E0E0E' }}
+          >
+            AI
+          </span>
+          <span className="text-[10.5px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.70)' }}>
+            {showWhy ? 'Hide details' : 'Why this call'}
+          </span>
+          <span
+            className="text-[10px] font-mono transition-transform"
+            style={{ color: 'rgba(250,247,242,0.45)', transform: showWhy ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          >
+            ▾
+          </span>
+        </button>
+
+        {showWhy && (
+          <div className="mt-4 space-y-4">
+            {/* Momentum + Phase tag (context, not header) */}
+            {decision && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-mono uppercase tracking-[0.14em]"
+                  style={{ background: 'rgba(250,247,242,0.08)', color: 'rgba(250,247,242,0.70)' }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: headerColor }} />
+                  {MOMENTUM_LABEL[decision.momentum]}
+                </span>
+                <span
+                  className="inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-mono uppercase tracking-[0.14em]"
+                  style={{ background: 'rgba(168,181,255,0.10)', color: '#A8B5FF' }}
+                >
+                  Phase · {coachPhase}
+                </span>
+              </div>
+            )}
+
+            {/* AI READ → PLAN → GAP → ACTION */}
+            {decision && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {([
+                  ['AI READ',              decision.read, '#FAF7F2'],
+                  [`PLAN (${coachPhase})`, decision.plan, '#A8B5FF'],
+                  ['GAP',                  decision.gap,  '#F5B73D'],
+                  ['ACTION',               decision.action, '#1FBE7A'],
+                ] as const).map(([label, body, color]) => (
+                  <div
+                    key={label}
+                    className="rounded-xl p-3.5"
+                    style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}
+                  >
+                    <div className="text-[10px] font-mono uppercase tracking-[0.16em] mb-1.5" style={{ color }}>
+                      {label}
+                    </div>
+                    <p className="text-[13px] leading-snug" style={{ color: 'rgba(250,247,242,0.92)' }}>
+                      {body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Cadence Compare — planned vs actual (detail) */}
+            {cadenceCmp && (
+              <div className="rounded-xl p-3.5" style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.16em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                    Cadence — planned vs actual
+                  </div>
+                  <div className="text-[10.5px] font-semibold" style={{ color: 'rgba(250,247,242,0.75)' }}>
+                    {cadenceCmp.overall}
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {cadenceCmp.rows.map((row) => {
+                    const meta = cadenceRowMeta[row.status];
+                    const observable = row.actual >= 0;
+                    return (
+                      <div key={row.format} className="rounded-lg px-3 py-2.5" style={{ background: 'rgba(250,247,242,0.05)' }}>
+                        <div className="flex items-baseline justify-between mb-1">
+                          <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(250,247,242,0.85)' }}>
+                            {row.format}
+                          </span>
+                          <span className="text-[10px]" style={{ color: meta.color }}>
+                            {observable ? meta.label : 'Planned only'}
+                          </span>
+                        </div>
+                        <div className="text-[13px] font-mono" style={{ color: 'rgba(250,247,242,0.95)' }}>
+                          {observable ? `${row.actual}/wk` : '—'} <span style={{ color: 'rgba(250,247,242,0.45)' }}>vs {row.planned}/wk</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Recent Signal — last 48h */}
+            {recent && (
+              <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.16em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                    Recent signal · 48h
+                  </div>
+                  <span className="text-[10.5px] font-semibold" style={{ color: '#A8B5FF' }}>
+                    {recent.signal}
+                  </span>
+                </div>
+                <p className="text-[12.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
+                  {recent.uploadsLast48h} upload{recent.uploadsLast48h === 1 ? '' : 's'} ({recent.shortsLast48h} short) · {recent.action}
+                </p>
+              </div>
+            )}
+
+            {/* Watcher meta — timestamp & breakdown */}
+            {watcher.state && (
+              <div className="text-[10px] font-mono" style={{ color: 'rgba(250,247,242,0.40)' }}>
+                {watcher.state.uploadsLast14Days} uploads / 14d · {watcher.state.videosLast14Days} video · {watcher.state.shortsLast14Days} short · checked {new Date(watcher.state.checkedAt).toLocaleString()}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -2272,12 +2434,12 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
   const overrides = plan.manualOverrides || {};
   const subsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
   const watcher = useWatcherChannel();
-  const liveSubs = watcher.state?.subscriberCount;
-  const liveViews = watcher.state?.viewCount;
-  const currentSubs = liveSubs ?? overrides.currentSubs ?? (startingSubs + subsGained);
+  // System 1 hero owns the live numbers — hide this card when watcher is feeding TopSignalCard.
+  if (watcher.state) return null;
+  const currentSubs = overrides.currentSubs ?? (startingSubs + subsGained);
   const subsProgress = targets.subsTarget > startingSubs ? Math.min(100, Math.round(((currentSubs - startingSubs) / (targets.subsTarget - startingSubs)) * 100)) : 0;
 
-  const totalViews = liveViews ?? overrides.totalViews ?? plan.weeks.reduce((sum, w) => sum + (w.feedback?.views || 0), 0);
+  const totalViews = overrides.totalViews ?? plan.weeks.reduce((sum, w) => sum + (w.feedback?.views || 0), 0);
   const viewsProgress = targets.viewsTarget > 0 ? Math.min(100, Math.round((totalViews / targets.viewsTarget) * 100)) : 0;
 
   let activeWeekCount = 0;
@@ -2349,27 +2511,6 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
           <div className="mt-1.5"><ProgressBar pct={viewsProgress} color={viewsAhead ? '#1FBE7A' : '#FFD24C'} /></div>
         </div>
       </div>
-      {watcher.state && (
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold text-ink/45">
-          <span className="inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1FBE7A]" />
-            LIVE
-          </span>
-          {watcher.state.subscriberDelta != null && (
-            <span>{watcher.state.subscriberDelta >= 0 ? '+' : ''}{watcher.state.subscriberDelta.toLocaleString()} subs vs prior poll</span>
-          )}
-          <span>·</span>
-          <span>{watcher.state.uploadsLast14Days} uploads / 14d ({watcher.state.videosLast14Days} video / {watcher.state.shortsLast14Days} short)</span>
-          {watcher.state.daysSinceLastUpload != null && (
-            <>
-              <span>·</span>
-              <span>last upload {watcher.state.daysSinceLastUpload === 0 ? 'today' : `${watcher.state.daysSinceLastUpload}d ago`}</span>
-            </>
-          )}
-          <span>·</span>
-          <span>checked {new Date(watcher.state.checkedAt).toLocaleString()}</span>
-        </div>
-      )}
     </div>
   );
 }
