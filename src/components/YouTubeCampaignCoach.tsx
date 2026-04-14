@@ -1492,38 +1492,152 @@ function CampaignAnchorStrip({ plan }: { plan: CampaignPlan }) {
 
 type ChannelSignal = 'PUSH' | 'SCALE' | 'HOLD' | 'TEST';
 
-// ── Unified decision detail — content-native, no spend/channel language.
-//    Why this decision / What to do now / What would change this.
-type DecisionDetail = { why: string; todo: string; changeIt: string };
+// ── System 1 + System 2 decision detail — content-native (no spend/channel).
+//    System 1: why + todo
+//    System 2 (collapsible): aiRead + watch + ifConfirmed
+type DecisionDetail = {
+  why: string;
+  todo: string;
+  aiRead: string;
+  watch: string;
+  ifConfirmed: string;
+};
 
 function buildDecisionDetail(signal: ChannelSignal): DecisionDetail {
   switch (signal) {
     case 'SCALE':
       return {
         why: 'Cadence is holding and the channel is in a momentum window — reach is the lever now, not more posting volume.',
-        todo: 'Concentrate on hero formats around the next drop — double down on the one or two that are pulling returning viewers.',
-        changeIt: 'Shorts-to-subscriber conversion slipping, or returning-viewer growth flattening for two straight weeks.',
+        todo: 'Concentrate on the hero formats pulling returning viewers — double down, stop testing sideways.',
+        aiRead:
+          'Shorts cadence has cleared as a limiting variable, and long-form is starting to compound the audience Shorts are sending — the channel is moving from reach to retention.',
+        watch: 'Shorts-to-subscriber conversion and whether returning viewers lift week over week.',
+        ifConfirmed: 'Move from scaling formats to scaling storylines — build multi-week arcs around the working hooks.',
       };
     case 'PUSH':
       return {
         why: "Short-form is pulling early reach, but long-form isn't compounding yet — the channel is attracting attention, not yet holding it.",
         todo: 'Pair every Shorts hit with a long-form piece on the same hook — convert reach into returning viewers.',
-        changeIt: 'Shorts continuing to spike without repeat-return lifting across the next two weeks.',
+        aiRead:
+          'Reach is widening but repeat behaviour is flat — the channel is picking up new viewers faster than it is keeping them.',
+        watch: 'Repeat-return rate rising alongside Shorts views over the next two weeks.',
+        ifConfirmed: 'Shift from testing cadence to scaling long-form around the next drop — commit to the working hook.',
       };
     case 'TEST':
       return {
         why: "Posting rhythm is inconsistent — performance signals can't be trusted until cadence clears as the limiting variable.",
-        todo: 'Hold a steady two-week posting rhythm on one format — treat everything else as noise until cadence is proven.',
-        changeIt: 'Two full weeks of consistent cadence with one format showing clear engagement separation.',
+        todo: 'Hold a steady two-week rhythm on one format — treat everything else as noise until cadence is proven.',
+        aiRead:
+          'Format spread is too wide for the current output — performance signals are tangled, not weak; the fix is discipline before breadth.',
+        watch: 'Two full weeks of consistent cadence with one format showing clear engagement separation.',
+        ifConfirmed: 'Move from test to push — commit to the format the rhythm validated and let it compound before adding more.',
       };
     case 'HOLD':
     default:
       return {
         why: 'Core audience is engaged, but there is no evidence of widening reach — nothing to scale into yet.',
-        todo: 'Keep current cadence tight and watch for one format to separate — no format expansion this week.',
-        changeIt: 'Repeat return behaviour rising, or subscriber growth climbing alongside Shorts views.',
+        todo: 'Keep cadence tight and watch for one format to separate — no format expansion this week.',
+        aiRead:
+          'Return behaviour is stable and reach is flat — the channel is held by the existing audience, not pulled by a new one.',
+        watch: 'Repeat return behaviour rising, or subscriber growth climbing alongside Shorts views.',
+        ifConfirmed: 'Move to a contained test on the format starting to separate — push cadence before expanding formats.',
       };
   }
+}
+
+// Intelligence panel — collapsible System 2 layer for the channel decision.
+function YTIntelligencePanel({
+  aiRead,
+  watch,
+  ifConfirmed,
+}: {
+  aiRead: string;
+  watch: string;
+  ifConfirmed: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className="mt-4 pt-4"
+      style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors"
+        style={{
+          background: 'rgba(250,247,242,0.05)',
+          border: '1px solid rgba(250,247,242,0.10)',
+        }}
+      >
+        <span className="flex items-center gap-2.5">
+          <span className="relative inline-flex items-center justify-center">
+            <span
+              className="absolute inset-0 rounded-full animate-pulse"
+              style={{ background: 'rgba(250,247,242,0.30)' }}
+            />
+            <span
+              className="relative inline-flex items-center justify-center rounded-full text-[9px] font-mono tracking-[0.1em]"
+              style={{
+                width: 18,
+                height: 18,
+                background: '#FAF7F2',
+                color: '#0E0E0E',
+              }}
+            >
+              AI
+            </span>
+          </span>
+          <span
+            className="text-[11.5px] font-mono uppercase tracking-[0.14em]"
+            style={{ color: 'rgba(250,247,242,0.65)' }}
+          >
+            {open ? 'Hide intelligence' : 'Open intelligence'}
+          </span>
+        </span>
+        <span
+          className="text-[11px] font-mono transition-transform"
+          style={{
+            color: 'rgba(250,247,242,0.45)',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        >
+          ▾
+        </span>
+      </button>
+      {open && (
+        <div
+          className="mt-3 rounded-xl p-4 space-y-3.5"
+          style={{
+            background: 'rgba(250,247,242,0.04)',
+            border: '1px solid rgba(250,247,242,0.10)',
+          }}
+        >
+          {([
+            ['AI Read', aiRead],
+            ['Watch', watch],
+            ['If confirmed', ifConfirmed],
+          ] as const).map(([label, body]) => (
+            <div key={label}>
+              <div
+                className="text-[10px] font-mono uppercase tracking-[0.14em] mb-1"
+                style={{ color: 'rgba(250,247,242,0.45)' }}
+              >
+                {label}
+              </div>
+              <p
+                className="text-[13.5px] leading-snug"
+                style={{ color: 'rgba(250,247,242,0.90)' }}
+              >
+                {body}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // Decision colors — shared system across all products.
@@ -1710,29 +1824,31 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
           {thisWeek}.
         </div>
 
-        {/* Unified decision detail: Why / What to do / What would change this */}
+        {/* System 1 — fast, decision-first */}
         <div
-          className="mt-5 pt-4 space-y-4"
+          className="mt-4 pt-4 space-y-2.5"
           style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
         >
-          {([
-            ['Why this decision', detail.why, 0.95],
-            ['What to do now', detail.todo, 0.95],
-            ['What would change this', detail.changeIt, 0.75],
-          ] as const).map(([label, body, opacity]) => (
-            <div key={label}>
-              <div
-                className="text-[10px] font-mono uppercase tracking-[0.14em] mb-1"
-                style={{ color: 'rgba(250,247,242,0.45)' }}
-              >
-                {label}
-              </div>
-              <p className="text-[13.5px] leading-snug" style={{ color: `rgba(250,247,242,${opacity})` }}>
-                {body}
-              </p>
-            </div>
-          ))}
+          <p className="text-[13.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
+            {detail.why}
+          </p>
+          <p className="text-[13.5px] leading-snug font-medium" style={{ color: 'rgba(250,247,242,0.95)' }}>
+            <span
+              className="mr-2 text-[10px] font-mono uppercase tracking-[0.14em]"
+              style={{ color: 'rgba(250,247,242,0.45)' }}
+            >
+              Do now
+            </span>
+            {detail.todo}
+          </p>
         </div>
+
+        {/* System 2 — collapsible intelligence */}
+        <YTIntelligencePanel
+          aiRead={detail.aiRead}
+          watch={detail.watch}
+          ifConfirmed={detail.ifConfirmed}
+        />
       </div>
 
       {/* Divider */}
