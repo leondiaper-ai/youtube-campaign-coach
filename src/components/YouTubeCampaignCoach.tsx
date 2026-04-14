@@ -1351,22 +1351,9 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
         </div>
       </div>
 
-      {/* Phase position — plain labels showing planned vs actual */}
+      {/* Week marker only — phase nav moved into the timeline below */}
       {currentPhase && (
-        <div className="mb-2 flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] text-ink/50">
-              You should be here → <span className="font-black" style={{ color: currentPhase.color }}>{PHASE_MICRO[currentPhase.name].short}</span>
-            </span>
-            {phaseDrift && actualPhase && (
-              <span className="text-[10px] text-ink/50">
-                You're currently here → <span className="font-black" style={{ color: actualPhase.color }}>{PHASE_MICRO[actualPhase.name].short}</span>
-              </span>
-            )}
-            <span className="text-[10px] font-semibold text-ink/55 mt-0.5">
-              {PHASE_MICRO[(phaseDrift && actualPhase ? actualPhase.name : currentPhase.name)].nudge}
-            </span>
-          </div>
+        <div className="mb-2 flex items-center justify-end">
           <span className="text-[10px] font-semibold text-ink/30">Week {weekNum} of {totalWeeks}</span>
         </div>
       )}
@@ -1550,28 +1537,37 @@ function YTIntelligencePanel({
   aiRead,
   watch,
   ifConfirmed,
+  compact = false,
 }: {
   aiRead: string;
   watch: string;
   ifConfirmed: string;
+  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const triggerBase = compact
+    ? 'relative inline-flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors'
+    : 'w-full flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors';
+  const label = compact
+    ? (open ? 'Hide' : 'Why this call')
+    : (open ? 'Hide intelligence' : 'Open intelligence');
+
   return (
     <div
-      className="mt-4 pt-4"
-      style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
+      className={compact ? 'relative' : 'mt-4 pt-4'}
+      style={compact ? {} : { borderTop: '1px solid rgba(250,247,242,0.10)' }}
     >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 transition-colors"
+        className={triggerBase}
         style={{
-          background: 'rgba(250,247,242,0.05)',
-          border: '1px solid rgba(250,247,242,0.10)',
+          background: 'rgba(250,247,242,0.06)',
+          border: '1px solid rgba(250,247,242,0.12)',
         }}
       >
-        <span className="flex items-center gap-2.5">
+        <span className="flex items-center gap-2">
           <span className="relative inline-flex items-center justify-center">
             <span
               className="absolute inset-0 rounded-full animate-pulse"
@@ -1580,8 +1576,8 @@ function YTIntelligencePanel({
             <span
               className="relative inline-flex items-center justify-center rounded-full text-[9px] font-mono tracking-[0.1em]"
               style={{
-                width: 18,
-                height: 18,
+                width: compact ? 16 : 18,
+                height: compact ? 16 : 18,
                 background: '#FAF7F2',
                 color: '#0E0E0E',
               }}
@@ -1590,41 +1586,44 @@ function YTIntelligencePanel({
             </span>
           </span>
           <span
-            className="text-[11.5px] font-mono uppercase tracking-[0.14em]"
-            style={{ color: 'rgba(250,247,242,0.65)' }}
+            className={`${compact ? 'text-[10.5px]' : 'text-[11.5px]'} font-mono uppercase tracking-[0.14em]`}
+            style={{ color: 'rgba(250,247,242,0.70)' }}
           >
-            {open ? 'Hide intelligence' : 'Open intelligence'}
+            {label}
           </span>
         </span>
-        <span
-          className="text-[11px] font-mono transition-transform"
-          style={{
-            color: 'rgba(250,247,242,0.45)',
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
-        >
-          ▾
-        </span>
+        {!compact && (
+          <span
+            className="text-[11px] font-mono transition-transform"
+            style={{
+              color: 'rgba(250,247,242,0.45)',
+              transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          >
+            ▾
+          </span>
+        )}
       </button>
       {open && (
         <div
-          className="mt-3 rounded-xl p-4 space-y-3.5"
+          className={`${compact ? 'absolute right-0 mt-2 w-[320px] z-20' : 'mt-3'} rounded-xl p-4 space-y-3.5`}
           style={{
-            background: 'rgba(250,247,242,0.04)',
-            border: '1px solid rgba(250,247,242,0.10)',
+            background: compact ? '#0E0E0E' : 'rgba(250,247,242,0.04)',
+            border: '1px solid rgba(250,247,242,0.12)',
+            boxShadow: compact ? '0 12px 30px rgba(0,0,0,0.4)' : 'none',
           }}
         >
           {([
             ['AI Read', aiRead],
             ['Watch', watch],
             ['If confirmed', ifConfirmed],
-          ] as const).map(([label, body]) => (
-            <div key={label}>
+          ] as const).map(([labelText, body]) => (
+            <div key={labelText}>
               <div
                 className="text-[10px] font-mono uppercase tracking-[0.14em] mb-1"
                 style={{ color: 'rgba(250,247,242,0.45)' }}
               >
-                {label}
+                {labelText}
               </div>
               <p
                 className="text-[13.5px] leading-snug"
@@ -1798,70 +1797,33 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         boxShadow: '0 6px 20px rgba(14,14,14,0.18), 0 1px 3px rgba(14,14,14,0.1)',
       }}
     >
-      {/* Decision layer — system output */}
-      <div className="mb-4">
-        <div
-          className="text-[10px] font-bold uppercase tracking-[0.16em] mb-2"
-          style={{ color: 'rgba(250,247,242,0.55)' }}
+      {/* Compact decision header — one line of context, intelligence tucked away */}
+      <div
+        className="mb-4 flex items-center gap-3 flex-wrap pb-4"
+        style={{ borderBottom: '1px solid rgba(250,247,242,0.10)' }}
+      >
+        <span
+          className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md font-black uppercase tracking-wider text-[13px] leading-none"
+          style={{ background: `${decisionMeta.color}22`, color: decisionMeta.color }}
         >
-          → Decision
-        </div>
-        <div className="flex items-baseline gap-3 flex-wrap">
-          <span
-            className="font-black uppercase tracking-wider text-[22px] leading-none"
-            style={{ color: decisionMeta.color }}
-          >
-            {decisionMeta.label}
-          </span>
-          <span className="text-[13px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
-            {decisionMeta.desc}
-          </span>
-        </div>
-        <div
-          className="mt-2 text-[12.5px] leading-snug"
-          style={{ color: 'rgba(250,247,242,0.60)' }}
+          {decisionMeta.label}
+        </span>
+        <span
+          className="text-[12.5px] leading-snug flex-1 min-w-[180px]"
+          style={{ color: 'rgba(250,247,242,0.75)' }}
         >
           {thisWeek}.
-        </div>
-
-        {/* System 1 — fast, decision-first */}
-        <div
-          className="mt-4 pt-4 space-y-2.5"
-          style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
-        >
-          <p className="text-[13.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
-            {detail.why}
-          </p>
-          <p className="text-[13.5px] leading-snug font-medium" style={{ color: 'rgba(250,247,242,0.95)' }}>
-            <span
-              className="mr-2 text-[10px] font-mono uppercase tracking-[0.14em]"
-              style={{ color: 'rgba(250,247,242,0.45)' }}
-            >
-              Do now
-            </span>
-            {detail.todo}
-          </p>
-        </div>
-
-        {/* System 2 — collapsible intelligence */}
+        </span>
         <YTIntelligencePanel
           aiRead={detail.aiRead}
           watch={detail.watch}
           ifConfirmed={detail.ifConfirmed}
+          compact
         />
       </div>
 
-      {/* Divider */}
-      <div className="border-t mb-4" style={{ borderColor: 'rgba(250,247,242,0.10)' }} />
-
-      {/* Actions driven by the decision */}
-      <div
-        className="text-[10px] font-bold uppercase tracking-[0.16em] mb-3"
-        style={{ color: 'rgba(250,247,242,0.55)' }}
-      >
-        What to do next
-      </div>
-      <div className="flex flex-wrap gap-2.5">
+      {/* Primary focus — the actions teams run the channel with */}
+      <div className="flex flex-wrap gap-3">
         {strip.map((s) => {
           const stripMeta = MISSING_ACTION_META[s.kind];
           const isMissing = missingSet.has(s.kind);
@@ -1869,17 +1831,17 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
             <button
               key={s.kind}
               onClick={() => onOpenAdd(s.kind)}
-              className="flex items-center rounded-xl px-5 py-3 transition-all hover:-translate-y-0.5"
+              className="flex-1 min-w-[140px] flex items-center justify-center rounded-2xl px-6 py-5 transition-all hover:-translate-y-1"
               style={{
                 background: stripMeta.bg,
                 boxShadow: isMissing
-                  ? `0 0 0 3px ${stripMeta.bg}33, 0 8px 22px rgba(0,0,0,0.28)`
-                  : '0 4px 14px rgba(0,0,0,0.22)',
-                opacity: isMissing ? 1 : 0.75,
-                transform: isMissing ? 'scale(1.03)' : 'scale(1)',
+                  ? `0 0 0 3px ${stripMeta.bg}40, 0 14px 32px rgba(0,0,0,0.34)`
+                  : '0 6px 18px rgba(0,0,0,0.24)',
+                opacity: isMissing ? 1 : 0.78,
+                transform: isMissing ? 'scale(1.02)' : 'scale(1)',
               }}
             >
-              <span className="text-white font-black text-[12px] tracking-widest uppercase">{s.label}</span>
+              <span className="text-white font-black text-[15px] tracking-widest uppercase">{s.label}</span>
             </button>
           );
         })}
