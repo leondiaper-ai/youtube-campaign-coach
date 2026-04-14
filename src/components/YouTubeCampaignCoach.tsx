@@ -1492,17 +1492,10 @@ function CampaignAnchorStrip({ plan }: { plan: CampaignPlan }) {
 
 type ChannelSignal = 'PUSH' | 'SCALE' | 'HOLD' | 'TEST';
 
-// ── AI interpretation layer — same grammar as the rest of the decision system:
-//    System stance / AI Read / Watch / If confirmed. Deterministic synth,
-//    grounded in the already-computed channel signal.
-type AIInterpretation = {
-  systemStance: string;
-  aiRead: string;
-  watch: string;
-  ifConfirmed: string;
-  confidence: 'High' | 'Medium' | 'Low';
-  confidenceNote: string;
-};
+// ── Integrated thinking — three tight lines folded into the decision card.
+//    Why this matters / What to watch / What to do. Deterministic, grounded
+//    in the already-computed channel signal.
+type IntegratedThinking = { why: string; watch: string; todo: string };
 
 // Marketing Action — spend behaviour derived from the channel signal.
 type MarketingAction = { spend: string; channel: string; timing: string };
@@ -1537,56 +1530,32 @@ function buildMarketingAction(signal: ChannelSignal): MarketingAction {
   }
 }
 
-function buildAIInterpretation(signal: ChannelSignal): AIInterpretation {
+function buildIntegratedThinking(signal: ChannelSignal): IntegratedThinking {
   switch (signal) {
     case 'SCALE':
       return {
-        systemStance: 'Scale — cadence holding, reach can be pushed',
-        aiRead:
-          "Cadence is healthy and the channel is in a momentum window — reach is the lever that compounds now, not more posting volume.",
-        watch:
-          'Shorts-to-subscriber conversion rate and whether returning viewers lift week over week.',
-        ifConfirmed:
-          'Move from testing cadence to scaling hero content around the next drop — concentrate spend on top-performing formats.',
-        confidence: 'High',
-        confidenceNote: 'Cadence + phase aligned — not a single-metric spike.',
+        why: 'Cadence is holding — reach is the lever that compounds now, not more posting volume.',
+        watch: 'Shorts-to-subscriber conversion and whether returning viewers lift week over week.',
+        todo: 'Scale hero content around the next drop — concentrate spend on top-performing formats.',
       };
     case 'PUSH':
       return {
-        systemStance: 'Push — window is open, back it with cadence',
-        aiRead:
-          "Short-form output is generating early reach, but long-form demand isn't fully formed yet — the channel is pulling attention, not yet compounding it.",
-        watch:
-          'Shorts-to-subscriber conversion and repeat return behaviour across the next two weeks.',
-        ifConfirmed:
-          'Shift from testing cadence to scaling long-form content around the next drop.',
-        confidence: 'Medium',
-        confidenceNote: 'Momentum real, but not yet confirmed across formats.',
+        why: "Short-form is generating early reach, but long-form demand isn't fully formed yet.",
+        watch: 'Shorts-to-subscriber conversion and repeat return behaviour over the next two weeks.',
+        todo: 'Shift from testing cadence to scaling long-form content around the next drop.',
       };
     case 'TEST':
       return {
-        systemStance: 'Test — foundation first, not reach',
-        aiRead:
-          "Output is inconsistent, so performance signals can't be trusted yet — any reach read now is more about cadence gaps than audience intent.",
-        watch:
-          'Whether a consistent two-week posting rhythm clears cadence as the limiting variable.',
-        ifConfirmed:
-          'Move from test to push — commit to the working format and let cadence compound before adding spend.',
-        confidence: 'Low',
-        confidenceNote: 'Evidence is thin — treat any action as reversible.',
+        why: "Output is inconsistent — performance signals can't be trusted until cadence clears.",
+        watch: 'Whether a consistent two-week posting rhythm clears cadence as the limiting variable.',
+        todo: 'Commit to the working format and let cadence compound before adding spend.',
       };
     case 'HOLD':
     default:
       return {
-        systemStance: 'Hold — sustain what works, don\u2019t over-invest',
-        aiRead:
-          'Core audience is engaged, but there\u2019s no evidence of widening reach yet — the channel is held, not growing.',
-        watch:
-          'Repeat return behaviour rising, or subscriber growth climbing alongside Shorts views.',
-        ifConfirmed:
-          'Shift from hold to test with a targeted format push on the strongest-performing asset type.',
-        confidence: 'Medium',
-        confidenceNote: 'Base is stable; no fresh signal to act on.',
+        why: "Core audience is engaged, but there's no evidence of widening reach yet.",
+        watch: 'Repeat return behaviour rising, or subscriber growth climbing alongside Shorts views.',
+        todo: 'Hold spend — wait for one format to separate before committing.',
       };
   }
 }
@@ -1736,10 +1705,8 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
   const signal = computeChannelSignal(plan);
   const decisionMeta = CHANNEL_SIGNAL_META[signal];
   const thisWeek = buildThisWeeksCall(plan, signal);
-  const ai = buildAIInterpretation(signal);
+  const thinking = buildIntegratedThinking(signal);
   const marketing = buildMarketingAction(signal);
-  const confidenceDot =
-    ai.confidence === 'High' ? '#1FBE7A' : ai.confidence === 'Medium' ? '#F5B73D' : '#2C6BFF';
 
   if (!onOpenAdd) return null;
 
@@ -1777,6 +1744,28 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         >
           {thisWeek}.
         </div>
+
+        {/* Integrated thinking — three lines folded into the decision */}
+        <div
+          className="mt-4 pt-4 space-y-2 text-[13px] leading-snug"
+          style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
+        >
+          {([
+            ['Why this matters', thinking.why],
+            ['What to watch', thinking.watch],
+            ['What to do', thinking.todo],
+          ] as const).map(([label, body]) => (
+            <div key={label} className="flex items-baseline gap-2.5">
+              <span
+                className="text-[10px] font-mono tracking-[0.12em] uppercase shrink-0"
+                style={{ color: 'rgba(250,247,242,0.45)' }}
+              >
+                {label}:
+              </span>
+              <span style={{ color: 'rgba(250,247,242,0.90)' }}>{body}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Marketing Action — spend behaviour derived from the signal */}
@@ -1810,89 +1799,6 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
             </div>
           ))}
         </div>
-      </div>
-
-      {/* AI interpretation — same four-block pattern used across the decision system */}
-      <div
-        className="rounded-xl p-4 mb-4"
-        style={{
-          background: 'rgba(250,247,242,0.04)',
-          border: '1px solid rgba(250,247,242,0.08)',
-        }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-mono tracking-[0.12em]"
-              style={{ background: '#FAF7F2', color: '#0E0E0E' }}
-            >
-              AI
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-              AI interpretation
-            </span>
-          </div>
-          <span className="text-[10px] font-mono tracking-[0.12em] uppercase" style={{ color: 'rgba(250,247,242,0.30)' }}>
-            Grounded synth
-          </span>
-        </div>
-
-        <div className="space-y-3">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              System stance
-            </div>
-            <div className="text-[13.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.90)' }}>
-              {ai.systemStance}
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              AI Read
-            </div>
-            <div className="text-[13.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
-              {ai.aiRead}
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              Watch
-            </div>
-            <div className="text-[13.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
-              {ai.watch}
-            </div>
-          </div>
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              If confirmed
-            </div>
-            <div className="text-[13.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
-              {ai.ifConfirmed}
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="mt-4 pt-3 flex flex-wrap items-center gap-x-4 gap-y-1"
-          style={{ borderTop: '1px solid rgba(250,247,242,0.10)' }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: confidenceDot }} />
-            <span className="text-[11px] font-mono tracking-[0.14em] uppercase" style={{ color: 'rgba(250,247,242,0.50)' }}>
-              Confidence · {ai.confidence}
-            </span>
-          </div>
-          <div className="text-[11.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.55)' }}>
-            {ai.confidenceNote}
-          </div>
-        </div>
-
-        <p
-          className="mt-3 pt-3 text-[9.5px] font-mono tracking-[0.14em] uppercase"
-          style={{ color: 'rgba(250,247,242,0.30)', borderTop: '1px solid rgba(250,247,242,0.08)' }}
-        >
-          Layered on top of structured decision logic
-        </p>
       </div>
 
       {/* Divider */}
