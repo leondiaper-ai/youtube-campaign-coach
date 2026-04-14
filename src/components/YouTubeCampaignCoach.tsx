@@ -1765,8 +1765,32 @@ function buildThisWeeksCall(plan: CampaignPlan, signal: ChannelSignal): string {
   return `Post ${joinHuman(parts)} this week`;
 }
 
+type WatcherInsight = {
+  headline: string;
+  detail: string;
+  flags: string[];
+  decisionHint: ChannelSignal;
+};
+
+function useWatcherInsight() {
+  const [insight, setInsight] = useState<WatcherInsight | null>(null);
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_WATCHER_URL;
+    const channelId = process.env.NEXT_PUBLIC_CHANNEL_ID;
+    if (!base || !channelId) return;
+    let alive = true;
+    fetch(`${base.replace(/\/$/, '')}/channels/${channelId}/insight`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (alive && data) setInsight(data as WatcherInsight); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+  return insight;
+}
+
 function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const cadence = getCadenceCounts(plan);
+  const watcher = useWatcherInsight();
 
   // Missing kinds for highlighting the strip
   const missingSet = new Set<MissingActionKind>();
@@ -1780,10 +1804,10 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     { kind: 'video', label: '+ Add Video' },
   ];
 
-  // System decision — one brain, same language as the rest of the product
-  const signal = computeChannelSignal(plan);
+  // System decision — watcher (live channel data) takes precedence over plan-only inference
+  const signal = watcher?.decisionHint ?? computeChannelSignal(plan);
   const decisionMeta = CHANNEL_SIGNAL_META[signal];
-  const thisWeek = buildThisWeeksCall(plan, signal);
+  const thisWeek = watcher ? watcher.headline : buildThisWeeksCall(plan, signal);
   const detail = buildDecisionDetail(signal);
 
   if (!onOpenAdd) return null;
@@ -1812,7 +1836,7 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
           className="text-[12.5px] leading-snug flex-1 min-w-[180px]"
           style={{ color: 'rgba(250,247,242,0.75)' }}
         >
-          {thisWeek}.
+          {thisWeek}{thisWeek.endsWith('.') ? '' : '.'}
         </span>
         <YTIntelligencePanel
           aiRead={detail.aiRead}
