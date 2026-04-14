@@ -1,6 +1,15 @@
 'use client';
 // PIH Campaign Coach v2.2 — Weekly Rhythm widget
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import {
+  aiDecisionLayer,
+  cadenceComparison,
+  recentSignal,
+  DECISION_STATE_META,
+  MOMENTUM_LABEL,
+  type PhaseName as CoachPhaseName,
+  type WatcherEventLike,
+} from '@/lib/coach';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -1788,10 +1797,14 @@ type WatcherState = {
   checkedAt: string;
 };
 
-type WatcherChannel = { insight: WatcherInsight | null; state: WatcherState | null };
+type WatcherChannel = {
+  insight: WatcherInsight | null;
+  state: WatcherState | null;
+  events: WatcherEventLike[];
+};
 
 function useWatcherChannel(): WatcherChannel {
-  const [data, setData] = useState<WatcherChannel>({ insight: null, state: null });
+  const [data, setData] = useState<WatcherChannel>({ insight: null, state: null, events: [] });
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_WATCHER_URL;
     const channelId = process.env.NEXT_PUBLIC_CHANNEL_ID;
@@ -1801,12 +1814,29 @@ function useWatcherChannel(): WatcherChannel {
     Promise.all([
       fetch(`${root}/channels/${channelId}/insight`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
       fetch(`${root}/channels/${channelId}/state`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-    ]).then(([insight, state]) => {
-      if (alive) setData({ insight: insight as WatcherInsight | null, state: state as WatcherState | null });
+      fetch(`${root}/channels/${channelId}/events`).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+    ]).then(([insight, state, events]) => {
+      if (alive) setData({
+        insight: insight as WatcherInsight | null,
+        state: state as WatcherState | null,
+        events: Array.isArray(events) ? (events as WatcherEventLike[]) : [],
+      });
     });
     return () => { alive = false; };
   }, []);
   return data;
+}
+
+// Map the campaign's PhaseName → coach engine PhaseName.
+function toCoachPhase(name: PhaseName | undefined): CoachPhaseName {
+  switch (name) {
+    case 'BUILD THE WORLD': return 'BUILD';
+    case 'SCALE THE STORY': return 'SCALE';
+    case 'CULTURAL MOMENT': return 'CULTURAL';
+    case 'EXTEND': return 'EXTEND';
+    case 'REAWAKEN':
+    default: return 'REAWAKEN';
+  }
 }
 
 function useWatcherInsight() {
@@ -1815,7 +1845,7 @@ function useWatcherInsight() {
 
 function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const cadence = getCadenceCounts(plan);
-  const watcher = useWatcherInsight();
+  const watcher = useWatcherChannel();
 
   // Missing kinds for highlighting the strip
   const missingSet = new Set<MissingActionKind>();
@@ -1829,13 +1859,46 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     { kind: 'video', label: '+ Add Video' },
   ];
 
-  // System decision — watcher (live channel data) takes precedence over plan-only inference
-  const signal = watcher?.decisionHint ?? computeChannelSignal(plan);
-  const decisionMeta = CHANNEL_SIGNAL_META[signal];
-  const thisWeek = watcher ? watcher.headline : buildThisWeeksCall(plan, signal);
-  const detail = buildDecisionDetail(signal);
+  // ── DECISION ENGINE (deterministic, phase-aware) ────────────────────────────
+  const currentWeek = getCurrentWeek(plan);
+  const phaseObj = currentWeek ? getPhaseForWeek(currentWeek.week) : undefined;
+  const coachPhase = toCoachPhase(phaseObj?.name);
+  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const planned = {
+    shortsPerWeek: targets.shortsPerWeek || 0,
+    postsPerWeek: targets.postsPerWeek || 0,
+    videosPerWeek: targets.videosPerWeek || 0,
+  };
+  const nextDropRaw = getNextDrop(plan);
+  const nextDrop = nextDropRaw
+    ? { date: nextDropRaw.dateObj.toISOString(), name: nextDropRaw.action.title }
+    : null;
+
+  const decision = watcher.state
+    ? aiDecisionLayer({ phase: coachPhase, plan: planned, state: watcher.state, events: watcher.events, nextDrop })
+    : null;
+  const cadenceCmp = watcher.state ? cadenceComparison(planned, watcher.state) : null;
+  const recent = watcher.state ? recentSignal(watcher.state, watcher.events) : null;
+
+  // Fallback (no watcher data yet): legacy plan-only signal.
+  const legacySignal = computeChannelSignal(plan);
+  const legacyMeta = CHANNEL_SIGNAL_META[legacySignal];
+  const stateMeta = decision ? DECISION_STATE_META[decision.state] : null;
+
+  const headerLabel = decision ? decision.state : legacyMeta.label;
+  const headerColor = decision ? stateMeta!.color : legacyMeta.color;
+  const headerSubtitle = decision
+    ? stateMeta!.subtitle
+    : (watcher.insight ? watcher.insight.headline : buildThisWeeksCall(plan, legacySignal));
 
   if (!onOpenAdd) return null;
+
+  const cadenceRowMeta: Record<string, { color: string; bg: string; label: string }> = {
+    on_track:        { color: '#1FBE7A', bg: 'rgba(31,190,122,0.14)', label: 'On track' },
+    exceeding:       { color: '#1FBE7A', bg: 'rgba(31,190,122,0.20)', label: 'Exceeding' },
+    slightly_behind: { color: '#F5B73D', bg: 'rgba(245,183,61,0.16)', label: 'Slightly behind' },
+    behind:          { color: '#FF4A1C', bg: 'rgba(255,74,28,0.16)', label: 'Behind' },
+  };
 
   return (
     <div
@@ -1846,30 +1909,120 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         boxShadow: '0 6px 20px rgba(14,14,14,0.18), 0 1px 3px rgba(14,14,14,0.1)',
       }}
     >
-      {/* Compact decision header — one line of context, intelligence tucked away */}
+      {/* Decision header — state pill, momentum, subtitle */}
       <div
         className="mb-4 flex items-center gap-3 flex-wrap pb-4"
         style={{ borderBottom: '1px solid rgba(250,247,242,0.10)' }}
       >
         <span
           className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md font-black uppercase tracking-wider text-[13px] leading-none"
-          style={{ background: `${decisionMeta.color}22`, color: decisionMeta.color }}
+          style={{ background: `${headerColor}22`, color: headerColor }}
         >
-          {decisionMeta.label}
+          {headerLabel}
         </span>
+        {decision && (
+          <span
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10.5px] font-mono uppercase tracking-[0.14em]"
+            style={{ background: 'rgba(250,247,242,0.08)', color: 'rgba(250,247,242,0.70)' }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: headerColor }} />
+            {MOMENTUM_LABEL[decision.momentum]}
+          </span>
+        )}
         <span
           className="text-[12.5px] leading-snug flex-1 min-w-[180px]"
           style={{ color: 'rgba(250,247,242,0.75)' }}
         >
-          {thisWeek}{thisWeek.endsWith('.') ? '' : '.'}
+          {headerSubtitle}{headerSubtitle.endsWith('.') ? '' : '.'}
         </span>
-        <YTIntelligencePanel
-          aiRead={detail.aiRead}
-          watch={detail.watch}
-          ifConfirmed={detail.ifConfirmed}
-          compact
-        />
       </div>
+
+      {/* AI Decision Panel — READ → PLAN → GAP → ACTION */}
+      {decision && (
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {([
+            ['AI READ',          decision.read,   '#FAF7F2'],
+            [`PLAN (${coachPhase})`, decision.plan,   '#A8B5FF'],
+            ['GAP',              decision.gap,    '#F5B73D'],
+            ['ACTION',           decision.action, '#1FBE7A'],
+          ] as const).map(([label, body, color]) => (
+            <div
+              key={label}
+              className="rounded-xl p-3.5"
+              style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}
+            >
+              <div
+                className="text-[10px] font-mono uppercase tracking-[0.16em] mb-1.5"
+                style={{ color }}
+              >
+                {label}
+              </div>
+              <p className="text-[13px] leading-snug" style={{ color: 'rgba(250,247,242,0.92)' }}>
+                {body}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Cadence Compare — planned vs actual */}
+      {cadenceCmp && (
+        <div className="mb-4 rounded-xl p-3.5" style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-[10px] font-mono uppercase tracking-[0.16em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+              Cadence — planned vs actual
+            </div>
+            <div className="text-[10.5px] font-semibold" style={{ color: 'rgba(250,247,242,0.75)' }}>
+              {cadenceCmp.overall}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {cadenceCmp.rows.map((row) => {
+              const meta = cadenceRowMeta[row.status];
+              const observable = row.actual >= 0;
+              return (
+                <div
+                  key={row.format}
+                  className="rounded-lg px-3 py-2.5"
+                  style={{ background: 'rgba(250,247,242,0.05)' }}
+                >
+                  <div className="flex items-baseline justify-between mb-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(250,247,242,0.85)' }}>
+                      {row.format}
+                    </span>
+                    <span className="text-[10px]" style={{ color: meta.color }}>
+                      {observable ? meta.label : 'Planned only'}
+                    </span>
+                  </div>
+                  <div className="text-[13px] font-mono" style={{ color: 'rgba(250,247,242,0.95)' }}>
+                    {observable ? `${row.actual}/wk` : '—'} <span style={{ color: 'rgba(250,247,242,0.45)' }}>vs {row.planned}/wk</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Signal — last 48h */}
+      {recent && (
+        <div
+          className="mb-4 rounded-xl px-4 py-3"
+          style={{ background: 'rgba(250,247,242,0.04)', border: '1px solid rgba(250,247,242,0.10)' }}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <div className="text-[10px] font-mono uppercase tracking-[0.16em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+              Recent signal · 48h
+            </div>
+            <span className="text-[10.5px] font-semibold" style={{ color: '#A8B5FF' }}>
+              {recent.signal}
+            </span>
+          </div>
+          <p className="text-[12.5px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
+            {recent.uploadsLast48h} upload{recent.uploadsLast48h === 1 ? '' : 's'} ({recent.shortsLast48h} short) · {recent.action}
+          </p>
+        </div>
+      )}
 
       {/* Primary focus — the actions teams run the channel with */}
       <div className="flex flex-wrap gap-3">
