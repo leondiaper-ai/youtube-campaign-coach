@@ -1504,6 +1504,39 @@ type AIInterpretation = {
   confidenceNote: string;
 };
 
+// Marketing Action — spend behaviour derived from the channel signal.
+type MarketingAction = { spend: string; channel: string; timing: string };
+
+function buildMarketingAction(signal: ChannelSignal): MarketingAction {
+  switch (signal) {
+    case 'SCALE':
+      return {
+        spend: 'Scale',
+        channel: 'Marquee + off-platform',
+        timing: 'Immediate — maintain while Shorts-to-subscriber conversion holds',
+      };
+    case 'PUSH':
+      return {
+        spend: 'Scale',
+        channel: 'Marquee + off-platform',
+        timing: 'Immediate — while the next-drop window is open',
+      };
+    case 'TEST':
+      return {
+        spend: 'Controlled',
+        channel: 'Marquee test or light off-platform',
+        timing: 'Conditional — trigger once a two-week posting rhythm holds',
+      };
+    case 'HOLD':
+    default:
+      return {
+        spend: 'No spend',
+        channel: 'None or minimal discovery',
+        timing: 'Wait — hold unless repeat return behaviour lifts for two weeks',
+      };
+  }
+}
+
 function buildAIInterpretation(signal: ChannelSignal): AIInterpretation {
   switch (signal) {
     case 'SCALE':
@@ -1704,6 +1737,7 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
   const decisionMeta = CHANNEL_SIGNAL_META[signal];
   const thisWeek = buildThisWeeksCall(plan, signal);
   const ai = buildAIInterpretation(signal);
+  const marketing = buildMarketingAction(signal);
   const confidenceDot =
     ai.confidence === 'High' ? '#1FBE7A' : ai.confidence === 'Medium' ? '#F5B73D' : '#2C6BFF';
 
@@ -1742,6 +1776,39 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
           style={{ color: 'rgba(250,247,242,0.60)' }}
         >
           {thisWeek}.
+        </div>
+      </div>
+
+      {/* Marketing Action — spend behaviour derived from the signal */}
+      <div
+        className="rounded-xl p-4 mb-4"
+        style={{
+          background: 'rgba(250,247,242,0.04)',
+          border: '1px solid rgba(250,247,242,0.08)',
+        }}
+      >
+        <div
+          className="text-[10px] font-bold uppercase tracking-[0.18em] mb-3"
+          style={{ color: 'rgba(250,247,242,0.55)' }}
+        >
+          Marketing Action
+        </div>
+        <div className="space-y-2 text-[13px] leading-snug">
+          {([
+            ['Spend', marketing.spend],
+            ['Channel', marketing.channel],
+            ['Timing', marketing.timing],
+          ] as const).map(([label, value]) => (
+            <div key={label} className="flex items-baseline gap-3">
+              <span
+                className="text-[10px] font-mono tracking-[0.14em] uppercase w-16 shrink-0"
+                style={{ color: 'rgba(250,247,242,0.45)' }}
+              >
+                {label}
+              </span>
+              <span style={{ color: 'rgba(250,247,242,0.90)' }}>{value}</span>
+            </div>
+          ))}
         </div>
       </div>
 
