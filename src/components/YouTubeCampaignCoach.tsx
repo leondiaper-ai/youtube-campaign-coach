@@ -1772,20 +1772,45 @@ type WatcherInsight = {
   decisionHint: ChannelSignal;
 };
 
-function useWatcherInsight() {
-  const [insight, setInsight] = useState<WatcherInsight | null>(null);
+type WatcherState = {
+  channelId: string;
+  subscriberCount: number;
+  subscriberDelta: number | null;
+  viewCount: number;
+  viewDelta: number | null;
+  videoCount: number;
+  lastUploadDate: string | null;
+  uploadsLast7Days: number;
+  uploadsLast14Days: number;
+  shortsLast14Days: number;
+  videosLast14Days: number;
+  daysSinceLastUpload: number | null;
+  checkedAt: string;
+};
+
+type WatcherChannel = { insight: WatcherInsight | null; state: WatcherState | null };
+
+function useWatcherChannel(): WatcherChannel {
+  const [data, setData] = useState<WatcherChannel>({ insight: null, state: null });
   useEffect(() => {
     const base = process.env.NEXT_PUBLIC_WATCHER_URL;
     const channelId = process.env.NEXT_PUBLIC_CHANNEL_ID;
     if (!base || !channelId) return;
+    const root = base.replace(/\/$/, '');
     let alive = true;
-    fetch(`${base.replace(/\/$/, '')}/channels/${channelId}/insight`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (alive && data) setInsight(data as WatcherInsight); })
-      .catch(() => {});
+    Promise.all([
+      fetch(`${root}/channels/${channelId}/insight`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch(`${root}/channels/${channelId}/state`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([insight, state]) => {
+      if (alive) setData({ insight: insight as WatcherInsight | null, state: state as WatcherState | null });
+    });
     return () => { alive = false; };
   }, []);
-  return insight;
+  return data;
+}
+
+function useWatcherInsight() {
+  return useWatcherChannel().insight;
 }
 
 function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
@@ -2093,10 +2118,13 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
   const startingSubs = plan.subscriberCount;
   const overrides = plan.manualOverrides || {};
   const subsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
-  const currentSubs = overrides.currentSubs ?? (startingSubs + subsGained);
+  const watcher = useWatcherChannel();
+  const liveSubs = watcher.state?.subscriberCount;
+  const liveViews = watcher.state?.viewCount;
+  const currentSubs = liveSubs ?? overrides.currentSubs ?? (startingSubs + subsGained);
   const subsProgress = targets.subsTarget > startingSubs ? Math.min(100, Math.round(((currentSubs - startingSubs) / (targets.subsTarget - startingSubs)) * 100)) : 0;
 
-  const totalViews = overrides.totalViews ?? plan.weeks.reduce((sum, w) => sum + (w.feedback?.views || 0), 0);
+  const totalViews = liveViews ?? overrides.totalViews ?? plan.weeks.reduce((sum, w) => sum + (w.feedback?.views || 0), 0);
   const viewsProgress = targets.viewsTarget > 0 ? Math.min(100, Math.round((totalViews / targets.viewsTarget) * 100)) : 0;
 
   let activeWeekCount = 0;
@@ -2168,6 +2196,27 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
           <div className="mt-1.5"><ProgressBar pct={viewsProgress} color={viewsAhead ? '#1FBE7A' : '#FFD24C'} /></div>
         </div>
       </div>
+      {watcher.state && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold text-ink/45">
+          <span className="inline-flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1FBE7A]" />
+            LIVE
+          </span>
+          {watcher.state.subscriberDelta != null && (
+            <span>{watcher.state.subscriberDelta >= 0 ? '+' : ''}{watcher.state.subscriberDelta.toLocaleString()} subs vs prior poll</span>
+          )}
+          <span>·</span>
+          <span>{watcher.state.uploadsLast14Days} uploads / 14d ({watcher.state.videosLast14Days} video / {watcher.state.shortsLast14Days} short)</span>
+          {watcher.state.daysSinceLastUpload != null && (
+            <>
+              <span>·</span>
+              <span>last upload {watcher.state.daysSinceLastUpload === 0 ? 'today' : `${watcher.state.daysSinceLastUpload}d ago`}</span>
+            </>
+          )}
+          <span>·</span>
+          <span>checked {new Date(watcher.state.checkedAt).toLocaleString()}</span>
+        </div>
+      )}
     </div>
   );
 }
