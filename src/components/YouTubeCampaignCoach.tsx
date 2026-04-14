@@ -1492,11 +1492,14 @@ function CampaignAnchorStrip({ plan }: { plan: CampaignPlan }) {
 
 type ChannelSignal = 'PUSH' | 'SCALE' | 'HOLD' | 'TEST';
 
+// Decision colors — shared system across all products.
+//   PUSH → #1FBE7A   HOLD → #F5B73D   TEST → #2C6BFF
+// SCALE inherits PUSH green (it's an intensification of PUSH, not a separate hue).
 const CHANNEL_SIGNAL_META: Record<ChannelSignal, { color: string; bg: string; label: string; desc: string }> = {
-  PUSH:  { color: '#FF4A1C', bg: 'rgba(255,74,28,0.10)',  label: 'PUSH',  desc: 'Momentum is live. Back it with cadence.' },
-  SCALE: { color: '#1FBE7A', bg: 'rgba(31,190,122,0.10)', label: 'SCALE', desc: 'Cadence holding. Increase reach and build momentum.' },
-  TEST:  { color: '#2C25FF', bg: 'rgba(44,37,255,0.10)',  label: 'TEST',  desc: 'Validate the foundation before scaling.' },
-  HOLD:  { color: '#FFD24C', bg: 'rgba(255,210,76,0.10)', label: 'HOLD',  desc: 'Sustain what\u2019s working. Don\u2019t over-invest yet.' },
+  PUSH:  { color: '#1FBE7A', bg: 'rgba(31,190,122,0.12)', label: 'PUSH',  desc: 'Momentum is live. Back it with cadence.' },
+  SCALE: { color: '#1FBE7A', bg: 'rgba(31,190,122,0.18)', label: 'SCALE', desc: 'Cadence holding. Increase reach and build momentum.' },
+  HOLD:  { color: '#F5B73D', bg: 'rgba(245,183,61,0.14)', label: 'HOLD',  desc: 'Sustain what\u2019s working. Don\u2019t over-invest yet.' },
+  TEST:  { color: '#2C6BFF', bg: 'rgba(44,107,255,0.12)', label: 'TEST',  desc: 'Validate the foundation before scaling.' },
 };
 
 type CadenceCounts = {
