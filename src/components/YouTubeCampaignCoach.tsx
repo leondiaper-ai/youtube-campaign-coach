@@ -1490,13 +1490,13 @@ function CampaignAnchorStrip({ plan }: { plan: CampaignPlan }) {
 // Fast read: is the channel in BUILD / PUSH / HOLD / FIX mode?
 // What is this week's single clearest action?
 
-type ChannelSignal = 'BUILD' | 'PUSH' | 'HOLD' | 'FIX';
+type ChannelSignal = 'PUSH' | 'SCALE' | 'HOLD' | 'TEST';
 
 const CHANNEL_SIGNAL_META: Record<ChannelSignal, { color: string; bg: string; label: string; desc: string }> = {
-  BUILD: { color: '#2C25FF', bg: 'rgba(44,37,255,0.08)',  label: 'BUILD', desc: 'Lay the groundwork' },
-  PUSH:  { color: '#FF4A1C', bg: 'rgba(255,74,28,0.08)', label: 'PUSH',  desc: 'Momentum is live — back it' },
-  HOLD:  { color: '#71717a', bg: 'rgba(113,113,122,0.08)', label: 'HOLD', desc: 'Sustain, do not over-invest' },
-  FIX:   { color: '#d97706', bg: 'rgba(217,119,6,0.10)',   label: 'FIX',  desc: 'Rebuild consistency' },
+  PUSH:  { color: '#FF4A1C', bg: 'rgba(255,74,28,0.10)',  label: 'PUSH',  desc: 'Momentum is live. Back it with cadence.' },
+  SCALE: { color: '#1FBE7A', bg: 'rgba(31,190,122,0.10)', label: 'SCALE', desc: 'Cadence holding. Increase reach and build momentum.' },
+  TEST:  { color: '#2C25FF', bg: 'rgba(44,37,255,0.10)',  label: 'TEST',  desc: 'Validate the foundation before scaling.' },
+  HOLD:  { color: '#FFD24C', bg: 'rgba(255,210,76,0.10)', label: 'HOLD',  desc: 'Sustain what\u2019s working. Don\u2019t over-invest yet.' },
 };
 
 type CadenceCounts = {
@@ -1562,18 +1562,27 @@ const CADENCE_STATUS_META: Record<CadenceStatus, { color: string; bg: string }> 
 function computeChannelSignal(plan: CampaignPlan): ChannelSignal {
   const cadence = getCadenceCounts(plan);
   const cadenceStatus = getCadenceStatus(cadence);
-  if (cadenceStatus === 'Broken') return 'FIX';
+  // Broken cadence = can't trust the channel yet — validate before investing more.
+  if (cadenceStatus === 'Broken') return 'TEST';
 
   const currentPhase = detectActualPhase(plan);
   const drop = getNextDrop(plan);
   const nearDrop = drop !== null && drop.daysAway >= 0 && drop.daysAway <= 7;
 
-  if (currentPhase === 'REAWAKEN') return 'FIX';
+  // Reawaken = still proving the channel is live.
+  if (currentPhase === 'REAWAKEN') return 'TEST';
+
+  // Cultural / Scale phases — momentum window, so SCALE when healthy, PUSH otherwise.
   if (currentPhase === 'CULTURAL MOMENT' || currentPhase === 'SCALE THE STORY') {
-    return cadenceStatus === 'Healthy' ? 'PUSH' : 'FIX';
+    return cadenceStatus === 'Healthy' ? 'SCALE' : 'PUSH';
   }
+
+  // Drop inside a week — back it.
   if (nearDrop) return 'PUSH';
-  if (currentPhase === 'BUILD THE WORLD') return cadenceStatus === 'Healthy' ? 'BUILD' : 'FIX';
+
+  // Build phase — foundation work, still validating.
+  if (currentPhase === 'BUILD THE WORLD') return cadenceStatus === 'Healthy' ? 'TEST' : 'PUSH';
+
   return 'HOLD';
 }
 
@@ -1599,7 +1608,8 @@ function buildThisWeeksCall(plan: CampaignPlan, signal: ChannelSignal): string {
   }
 
   if (parts.length === 0) {
-    if (signal === 'FIX') return 'Post something this week — nothing has shipped yet';
+    if (signal === 'TEST') return 'Post something this week — nothing has shipped yet';
+    if (signal === 'SCALE') return 'Cadence is holding — keep posting, push reach';
     return "You're on track — keep posting";
   }
   return `Post ${joinHuman(parts)} this week`;
@@ -1620,6 +1630,11 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     { kind: 'video', label: '+ Add Video' },
   ];
 
+  // System decision — one brain, same language as the rest of the product
+  const signal = computeChannelSignal(plan);
+  const decisionMeta = CHANNEL_SIGNAL_META[signal];
+  const thisWeek = buildThisWeeksCall(plan, signal);
+
   if (!onOpenAdd) return null;
 
   return (
@@ -1631,12 +1646,43 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         boxShadow: '0 6px 20px rgba(14,14,14,0.18), 0 1px 3px rgba(14,14,14,0.1)',
       }}
     >
-      {/* Label */}
-      <div className="text-[10px] font-bold uppercase tracking-[0.16em] mb-3" style={{ color: 'rgba(250,247,242,0.55)' }}>
-        What to do next
+      {/* Decision layer — system output */}
+      <div className="mb-4">
+        <div
+          className="text-[10px] font-bold uppercase tracking-[0.16em] mb-2"
+          style={{ color: 'rgba(250,247,242,0.55)' }}
+        >
+          → Decision
+        </div>
+        <div className="flex items-baseline gap-3 flex-wrap">
+          <span
+            className="font-black uppercase tracking-wider text-[22px] leading-none"
+            style={{ color: decisionMeta.color }}
+          >
+            {decisionMeta.label}
+          </span>
+          <span className="text-[13px] leading-snug" style={{ color: 'rgba(250,247,242,0.85)' }}>
+            {decisionMeta.desc}
+          </span>
+        </div>
+        <div
+          className="mt-2 text-[12.5px] leading-snug"
+          style={{ color: 'rgba(250,247,242,0.60)' }}
+        >
+          {thisWeek}.
+        </div>
       </div>
 
-      {/* Buttons — primary focus of the card */}
+      {/* Divider */}
+      <div className="border-t mb-4" style={{ borderColor: 'rgba(250,247,242,0.10)' }} />
+
+      {/* Actions driven by the decision */}
+      <div
+        className="text-[10px] font-bold uppercase tracking-[0.16em] mb-3"
+        style={{ color: 'rgba(250,247,242,0.55)' }}
+      >
+        What to do next
+      </div>
       <div className="flex flex-wrap gap-2.5">
         {strip.map((s) => {
           const stripMeta = MISSING_ACTION_META[s.kind];
