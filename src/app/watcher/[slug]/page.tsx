@@ -1,31 +1,21 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR, type LiveSnap } from '@/lib/artists';
+import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR } from '@/lib/artists';
+import { fetchChannelSnap } from '@/lib/youtube';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 600;
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
 
-async function fetchSnap(handle: string, base: string): Promise<LiveSnap | null> {
-  try {
-    const r = await fetch(`${base}/api/channel?q=${encodeURIComponent(handle)}`, { cache: 'no-store' });
-    if (!r.ok) return null;
-    return (await r.json()) as LiveSnap;
-  } catch {
-    return null;
-  }
-}
-
 export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const artist = ARTISTS.find((a) => a.slug === slug);
   if (!artist) notFound();
 
-  const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-  const live = artist.channelHandle ? await fetchSnap(artist.channelHandle, base) : null;
+  const live = artist.channelHandle ? await fetchChannelSnap(artist.channelHandle) : null;
   const derived = live ? deriveFromLive(live) : null;
   const status = derived?.status ?? artist.status;
   const watcherRead = derived?.watcherRead ?? artist.watcherRead;
