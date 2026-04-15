@@ -87,6 +87,41 @@ type CampaignTargets = {
   communityPerWeek: number;    // e.g. 2 — target comment replies / engagement per week
 };
 
+// Auto-derive campaign targets from the channel's starting size and planned output.
+// No user input required — updates live as the plan and watcher data change.
+function autoTargets(planLike: {
+  subscriberCount?: number;
+  weeks?: { actions: { type: string }[] }[];
+}): CampaignTargets {
+  const startingSubs = planLike.subscriberCount || 0;
+  // Growth multiplier tiered by channel size (smaller channels grow faster pct-wise).
+  let growthPct: number;
+  if (startingSubs < 10_000)          growthPct = 0.25;
+  else if (startingSubs < 100_000)    growthPct = 0.18;
+  else if (startingSubs < 1_000_000)  growthPct = 0.10;
+  else                                growthPct = 0.05;
+  const subsTarget = Math.max(1_000, Math.round(startingSubs * (1 + growthPct)));
+
+  // Views target: expected views-per-drop × planned hero-drop count.
+  // Heuristic: a "hero" drop (video/collab/live) on a healthy channel earns ~80% of subs
+  // in the 30-day rolling window. We lean conservative to avoid unrealistic goals.
+  const dropCount = (planLike.weeks || []).reduce(
+    (n, w) => n + w.actions.filter((a) => a.type === 'video' || a.type === 'collab' || a.type === 'live').length,
+    0,
+  );
+  const viewsPerDrop = Math.max(1_000, Math.round(startingSubs * 0.8));
+  const viewsTarget = Math.max(viewsPerDrop * Math.max(1, dropCount), Math.round(startingSubs * 2));
+
+  return {
+    subsTarget,
+    viewsTarget,
+    shortsPerWeek: 3,
+    videosPerWeek: 1,
+    postsPerWeek: 3,
+    communityPerWeek: 2,
+  };
+}
+
 type ManualOverrides = {
   currentSubs?: number;
   totalViews?: number;
@@ -1239,7 +1274,7 @@ const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: strin
 // Infers where the campaign really is based on execution, not the calendar.
 // Returns the actual operational phase based on output consistency.
 function detectActualPhase(plan: CampaignPlan): PhaseName {
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
 
   // Look at the last 3 weeks of activity
   const recentWeeks = plan.weeks
@@ -1360,18 +1395,7 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             onChange={(d) => onUpdatePlan({ startDate: d })}
           />
         </div>
-        {onOpenSettings && (
-          <button
-            onClick={onOpenSettings}
-            className="ml-2 mt-1 p-2 rounded-lg bg-paper border border-ink/8 shadow-sm hover:bg-paper hover:shadow transition-all text-ink/50 hover:text-ink/70"
-            title="Campaign Settings"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </button>
-        )}
+        {/* Settings cog retired — campaign targets now auto-derive from channel size + planned drops */}
       </div>
       {weekNum > 0 && (
         <div className="mt-2 text-right text-[10px] font-semibold text-ink/30">
@@ -1752,7 +1776,7 @@ function getCurrentWeek(plan: CampaignPlan): CampaignWeek | undefined {
 }
 
 function getCadenceCounts(plan: CampaignPlan): CadenceCounts {
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
   const currentWeek = getCurrentWeek(plan);
   const actions = currentWeek?.actions || [];
   const count = (type: ActionType) => actions.filter((a) => a.type === type && a.status === 'done').length;
@@ -2013,7 +2037,7 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
   const currentWeek = getCurrentWeek(plan);
   const phaseObj = currentWeek ? getPhaseForWeek(currentWeek.week) : undefined;
   const coachPhase = toCoachPhase(phaseObj?.name);
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
   const planned = {
     shortsPerWeek: targets.shortsPerWeek || 0,
     postsPerWeek: targets.postsPerWeek || 0,
@@ -2682,7 +2706,7 @@ function getNextDrop(plan: CampaignPlan): { action: CampaignAction; weekNum: num
   return { ...pick, daysAway };
 }
 
-function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChange, onEditSave, onEditCancel, onOpenTargets }: {
+function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChange, onEditSave, onEditCancel }: {
   plan: CampaignPlan;
   editingMetric: string | null;
   metricDraft: string;
@@ -2690,9 +2714,8 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
   onEditChange: (value: string) => void;
   onEditSave: (metric: string, value: string) => void;
   onEditCancel: () => void;
-  onOpenTargets: () => void;
 }) {
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
   const startingSubs = plan.subscriberCount;
   const overrides = plan.manualOverrides || {};
   const subsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
@@ -2780,13 +2803,17 @@ function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChan
 
 
 // ──── METRICS MODAL ─────────────────────────────────────────────────────────
-// System 2 depth for campaign targets and baseline editing
-function MetricsModal({ plan, onSave, onClose }: {
+// Retired — targets are now auto-derived by autoTargets(plan) based on the
+// channel's starting subs and the planned drop count. No manual input needed.
+// The function below is kept as a no-op for any stale references; the render
+// path below is unreachable and intentionally unused.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _UnusedLegacyMetricsModal({ plan, onSave, onClose }: {
   plan: CampaignPlan;
   onSave: (updates: Partial<CampaignPlan>) => void;
   onClose: () => void;
 }) {
-  const t = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const t = autoTargets(plan);
   const [startingSubs, setStartingSubs] = useState(plan.subscriberCount.toString());
   const [startDate, setStartDate] = useState(plan.startDate);
   const [subsTarget, setSubsTarget] = useState(t.subsTarget.toString());
@@ -2888,7 +2915,7 @@ function MetricsModal({ plan, onSave, onClose }: {
 // Lightweight, factual activity summary — no causal claims, two-line layout
 function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
   const [copied, setCopied] = useState(false);
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
 
   // Current week by calendar
   const today = new Date();
@@ -3218,7 +3245,7 @@ function ChannelHealthInline({ plan }: { plan: CampaignPlan }) {
 // Single-line contextual warning below metrics — only shows when something is off
 function InlineWarning({ plan }: { plan: CampaignPlan }) {
   const tier = getTier(plan.subscriberCount);
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
 
   let activeIdx = -1;
   for (let i = plan.weeks.length - 1; i >= 0; i--) {
@@ -5519,7 +5546,7 @@ function WeekRow({
   const actionMeta = WEEK_ACTION_META[weekStatus];
 
   // Compute missing action buttons from cadence targets
-  const targets = plan.targets || { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 3, communityPerWeek: 2 };
+  const targets = autoTargets(plan);
   const doneCount = (type: ActionType) => weekActions.filter((a) => a.type === type && a.status === 'done').length;
   const missingKinds: MissingActionKind[] = [];
   if (doneCount('video') < (targets.videosPerWeek || 0)) missingKinds.push('video');
@@ -6048,7 +6075,6 @@ export default function YouTubeCampaignCoach() {
   const [editingMetric, setEditingMetric] = useState<string | null>(null);
   const [metricDraft, setMetricDraft] = useState('');
   const [modalAction, setModalAction] = useState<{ action: CampaignAction; weekNum: number } | null>(null);
-  const [showMetricsModal, setShowMetricsModal] = useState(false);
   const [showNextDropModal, setShowNextDropModal] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -6264,7 +6290,6 @@ export default function YouTubeCampaignCoach() {
         <CampaignHeader
           plan={plan}
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
-          onOpenSettings={() => setShowMetricsModal(true)}
           onOpenAdd={() => setAddModal({ open: true })}
           onNewCampaign={() => {
             if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
@@ -6312,7 +6337,6 @@ export default function YouTubeCampaignCoach() {
           plan={plan}
           editingMetric={editingMetric}
           metricDraft={metricDraft}
-          onOpenTargets={() => setShowMetricsModal(true)}
           onEditStart={(metric, value) => {
             setEditingMetric(metric);
             setMetricDraft(value);
@@ -6438,22 +6462,7 @@ export default function YouTubeCampaignCoach() {
         />
       )}
 
-      {/* Metrics Modal */}
-      {showMetricsModal && (
-        <MetricsModal
-          plan={plan}
-          onSave={(updates) => {
-            setPlan((p) => {
-              const next = { ...p, ...updates };
-              if (updates.startDate && updates.startDate !== p.startDate) {
-                next.weeks = recalcWeekDates(next.weeks, updates.startDate);
-              }
-              return next;
-            });
-          }}
-          onClose={() => setShowMetricsModal(false)}
-        />
-      )}
+      {/* Metrics Modal retired — targets are auto-derived by autoTargets(plan) */}
 
       {/* Next Drop Modal */}
       {showNextDropModal && (() => {
