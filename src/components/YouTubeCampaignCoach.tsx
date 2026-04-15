@@ -5736,8 +5736,26 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const liveTracks = deriveLiveTracks(watcher.state, plan.startDate);
   const planTracks = deriveAutoTracks(plan);
   const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
-  const autoTracks = [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
-    .sort((a, b) => a.weekNum - b.weekNum);
+  const liveDates = new Set(liveTracks.map((t) => t.date));
+  // Fuzzy title match — if a planned drop looks like a live drop (same core
+  // title words), suppress the planned copy so we don't duplicate real
+  // releases like "Change (Official Video)" vs "'Change' — Official Music Video".
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const liveTitleTokens = liveTracks.map((t) => new Set(norm(t.title).split(' ').filter((w) => w.length > 2)));
+  const matchesLiveTitle = (planTitle: string) => {
+    const tokens = norm(planTitle).split(' ').filter((w) => w.length > 2);
+    if (tokens.length === 0) return false;
+    return liveTitleTokens.some((lt) => {
+      const overlap = tokens.filter((t) => lt.has(t)).length;
+      return overlap >= 2 && overlap / tokens.length >= 0.4;
+    });
+  };
+  const autoTracks = [
+    ...liveTracks,
+    ...planTracks.filter(
+      (t) => !liveWeeks.has(t.weekNum) && !liveDates.has(t.date) && !matchesLiveTitle(t.title),
+    ),
+  ].sort((a, b) => a.weekNum - b.weekNum);
 
   // Phase date range from campaign start + weekStart/weekEnd.
   const startMs = new Date(plan.startDate + 'T12:00:00').getTime();
