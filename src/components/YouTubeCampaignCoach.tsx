@@ -5531,22 +5531,11 @@ function CampaignToolsCard({
   plan,
   onToggleMerch,
   onToggleBands,
-  onSetCollabs,
 }: {
   plan: CampaignPlan;
   onToggleMerch: () => void;
   onToggleBands: () => void;
-  onSetCollabs: (n: number) => void;
 }) {
-  const watcher = useWatcherChannel();
-  const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
-  const vids = (watcher.state?.latestVideos ?? []).filter(
-    (v) => new Date(v.publishedAt).getTime() >= startT
-  );
-  const premieres = vids.filter((v) => v.isPremiere).length;
-  const lives     = vids.filter((v) => v.isLive).length;
-  const collabs   = plan.manualOverrides?.collabsCount ?? 0;
-
   const merchActive = !!plan.manualOverrides?.merchShelfActive;
   const bandsActive = !!plan.manualOverrides?.bandsintownActive;
 
@@ -5557,48 +5546,13 @@ function CampaignToolsCard({
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">
-          Campaign Tools
+          Channel Setup
         </span>
-        <span className="text-[9px] font-semibold text-ink/35">In campaign window</span>
-      </div>
-
-      {/* Tools row — premieres/lives auto-detected; collabs manual (API doesn't expose cross-channel collab tool) */}
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <div className="flex flex-col items-center text-center">
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => onSetCollabs(Math.max(0, collabs - 1))}
-              className="w-5 h-5 rounded-full text-[11px] font-black text-ink/55 hover:text-ink"
-              style={{ background: 'rgba(14,14,14,0.06)' }}
-              aria-label="Decrease collabs"
-            >
-              −
-            </button>
-            <span className="text-lg font-black leading-none text-ink tabular-nums min-w-[16px] text-center">{collabs}</span>
-            <button
-              onClick={() => onSetCollabs(collabs + 1)}
-              className="w-5 h-5 rounded-full text-[11px] font-black text-ink/55 hover:text-ink"
-              style={{ background: 'rgba(14,14,14,0.06)' }}
-              aria-label="Increase collabs"
-            >
-              +
-            </button>
-          </div>
-          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">Collabs</span>
-          <span className="text-[8px] font-semibold text-ink/35 mt-0.5">Manual (API blind)</span>
-        </div>
-        <div className="flex flex-col items-center text-center">
-          <span className="text-lg font-black leading-none text-ink">{premieres}</span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">Premieres</span>
-        </div>
-        <div className="flex flex-col items-center text-center">
-          <span className="text-lg font-black leading-none text-ink">{lives}</span>
-          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">Livestreams</span>
-        </div>
+        <span className="text-[9px] font-semibold text-ink/35">One-time activations</span>
       </div>
 
       {/* Manual reminders — features not exposed by the public API */}
-      <div className="pt-2 border-t border-ink/5 flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1.5">
         <ToolReminder
           label="Merch Shelf"
           hint="Activate under YouTube Studio → Monetization → Shopping"
@@ -6890,27 +6844,6 @@ export default function YouTubeCampaignCoach() {
 
         {planOpen && (
           <div className="mt-3">
-            <CampaignToolsCard
-              plan={plan}
-              onToggleMerch={() => setPlan((p) => ({
-                ...p,
-                manualOverrides: {
-                  ...p.manualOverrides,
-                  merchShelfActive: !p.manualOverrides?.merchShelfActive,
-                },
-              }))}
-              onToggleBands={() => setPlan((p) => ({
-                ...p,
-                manualOverrides: {
-                  ...p.manualOverrides,
-                  bandsintownActive: !p.manualOverrides?.bandsintownActive,
-                },
-              }))}
-              onSetCollabs={(n) => setPlan((p) => ({
-                ...p,
-                manualOverrides: { ...p.manualOverrides, collabsCount: n },
-              }))}
-            />
             {CAMPAIGN_PHASES.map((phase) => (
           <PhaseBlock
             key={phase.name}
@@ -6961,6 +6894,23 @@ export default function YouTubeCampaignCoach() {
             onRemoveSupportItem={removeSupportItem}
           />
         ))}
+            <CampaignToolsCard
+              plan={plan}
+              onToggleMerch={() => setPlan((p) => ({
+                ...p,
+                manualOverrides: {
+                  ...p.manualOverrides,
+                  merchShelfActive: !p.manualOverrides?.merchShelfActive,
+                },
+              }))}
+              onToggleBands={() => setPlan((p) => ({
+                ...p,
+                manualOverrides: {
+                  ...p.manualOverrides,
+                  bandsintownActive: !p.manualOverrides?.bandsintownActive,
+                },
+              }))}
+            />
           </div>
         )}
       </div>
