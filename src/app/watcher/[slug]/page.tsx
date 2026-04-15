@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR } from '@/lib/artists';
+import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR, type Status } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { detectOpportunities, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
@@ -12,6 +12,21 @@ const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
+
+type Verb = 'FIX' | 'PUSH' | 'TEST';
+type Confidence = 'HIGH' | 'MEDIUM' | 'LOW';
+
+const VERB_COLOR: Record<Verb, { bg: string; fg: string; dot: string }> = {
+  FIX:  { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
+  PUSH: { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
+  TEST: { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
+};
+
+function verbFromStatus(s: Status): Verb {
+  if (s === 'FIX FIRST' || s === 'ACTIVE BUT WEAK') return 'FIX';
+  if (s === 'BUILDING' || s === 'MOMENTUM') return 'PUSH';
+  return 'TEST';
+}
 
 export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -31,9 +46,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const status = derived?.status ?? artist.status;
   const watcherRead = derived?.watcherRead ?? artist.watcherRead;
   const nextAction = derived?.nextAction ?? artist.nextAction;
-  const objective = derived?.objective;
   const impact = derived?.impact;
-  const c = STATUS_COLOR[status];
   const lastUpDays = daysSince(live?.lastUploadAt);
 
   const opps = detectOpportunities(artist, live, daysToNextMoment).sort(
@@ -44,8 +57,67 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const subs7 = deltaOver(history, 7, 'subs');
   const subs30 = deltaOver(history, 30, 'subs');
   const views7 = deltaOver(history, 7, 'views');
+  const views30 = deltaOver(history, 30, 'views');
   const subsSeries = seriesForField(history, 'subs', 30);
   const viewsSeries = seriesForField(history, 'views', 30);
+
+  // --- Decision block (System 1) ---
+  const verb = verbFromStatus(status);
+  const isLive = !!(live && !live.error);
+  const confidence: Confidence = !isLive
+    ? 'LOW'
+    : history.length >= 3
+    ? 'HIGH'
+    : 'MEDIUM';
+
+  const channelOpps = opps.filter((o) => !o.videoId);
+  const criticalOpps = channelOpps.filter((o) => o.impact === 'HIGH');
+  const secondaryOpps = channelOpps.filter((o) => o.impact !== 'HIGH');
+  const videoOppsAll = opps.filter((o) => !!o.videoId);
+
+  // Top 3 signals under the decision headline
+  const signals: string[] = [];
+  signals.push(watcherRead);
+  if (daysToNextMoment != null) {
+    signals.push(
+      daysToNextMoment >= 0
+        ? `${daysToNextMoment}d to ${artist.nextMomentLabel.toLowerCase()}.`
+        : `${Math.abs(daysToNextMoment)}d past ${artist.nextMomentLabel.toLowerCase()}.`
+    );
+  }
+  if (criticalOpps.length > 0) {
+    signals.push(`${criticalOpps.length} high-impact gap${criticalOpps.length === 1 ? '' : 's'} flagged this week.`);
+  } else if (videoOppsAll.length > 0) {
+    signals.push(`${videoOppsAll.length} catalogue video${videoOppsAll.length === 1 ? '' : 's'} underused.`);
+  }
+
+  const ifIgnored =
+    verb === 'FIX'
+      ? 'Channel keeps losing algorithm favour; the next drop launches into a cold audience.'
+      : verb === 'PUSH'
+      ? 'Cadence is working — stalling now caps the ceiling on the next moment.'
+      : 'Current floor holds, but catalogue upside stays on the table.';
+
+  // Group per-video opportunities
+  const videoGroups = new Map<string, Opportunity[]>();
+  for (const o of videoOppsAll) {
+    const arr = videoGroups.get(o.videoId!) ?? [];
+    arr.push(o);
+    videoGroups.set(o.videoId!, arr);
+  }
+  const videoCards = Array.from(videoGroups.entries())
+    .map(([id, items]: [string, Opportunity[]]) => ({
+      id,
+      title: items[0].videoTitle ?? id,
+      views: items[0].videoViews ?? 0,
+      items: items
+        .slice()
+        .sort((a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]),
+    }))
+    .sort((a, b) => b.views - a.views);
+
+  const vc = VERB_COLOR[verb];
+  const s = STATUS_COLOR[status];
 
   return (
     <main className="bg-paper min-h-screen" style={{ color: INK }}>
@@ -69,164 +141,173 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
         <h1 className="font-black text-3xl mt-1">{artist.name}</h1>
 
-        {/* 1. Status / state of play */}
-        <div className="mt-6 rounded-xl border p-5" style={{ borderColor: MUTED, background: PAPER }}>
-          <div className="flex items-center gap-3">
+        {/* ─────────────────── 1. DECISION (System 1) ─────────────────── */}
+        <section
+          className="mt-6 rounded-2xl border-2 p-6"
+          style={{ borderColor: INK, background: PAPER }}
+        >
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.18em]"
+              style={{ background: vc.bg, color: vc.fg }}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ background: vc.dot }} />
+              {verb}
+            </span>
             <span
               className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.14em]"
-              style={{ background: c.bg, color: c.fg }}
+              style={{ background: s.bg, color: s.fg }}
             >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.dot }} />
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
               {status}
             </span>
-            {live && !live.error && (
-              <span className="text-[10px] uppercase tracking-[0.14em] text-ink/45">live · YouTube API</span>
-            )}
-            {(!live || live.error) && (
-              <span className="text-[10px] uppercase tracking-[0.14em]" style={{ color: '#FF4A1C' }}>
-                seed data — live fetch unavailable
-              </span>
-            )}
+            <span className="text-[10px] uppercase tracking-[0.14em] text-ink/45">
+              confidence · {confidence}
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.14em] ml-auto"
+              style={{ color: isLive ? '#0C6A3F' : '#FF4A1C' }}>
+              {isLive ? 'live · YouTube API' : 'seed data'}
+            </span>
           </div>
-          <div className="text-[15px] mt-3">{watcherRead}</div>
-          {objective && (
-            <div className="text-[13px] text-ink/70 mt-2">
-              <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Objective</span>
-              {objective}
-            </div>
-          )}
-        </div>
 
-        {/* 2. Action this week */}
-        <h2 className="font-black text-lg mt-10 mb-3">Action this week</h2>
-        <div
-          className="rounded-xl border-l-4 border p-5"
-          style={{ borderColor: MUTED, borderLeftColor: INK, background: PAPER }}
-        >
-          <div className="text-[15px] font-medium">{nextAction}</div>
-          {impact && (
-            <div className="text-[12px] text-ink/60 mt-2">
-              <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Why it matters</span>
-              {impact}
-            </div>
-          )}
-        </div>
+          {/* Headline action */}
+          <div className="mt-4 text-[20px] font-black leading-tight">
+            {nextAction}
+          </div>
 
-        {/* Growth */}
+          {/* Supporting signals */}
+          <ul className="mt-4 space-y-1.5">
+            {signals.map((sig, i) => (
+              <li key={i} className="flex items-start gap-2 text-[13px] text-ink/75">
+                <span className="mt-[7px] w-1 h-1 rounded-full shrink-0" style={{ background: INK }} />
+                <span>{sig}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Expected impact / if ignored */}
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            <div className="rounded-lg p-3" style={{ background: SOFT }}>
+              <div className="text-[9px] uppercase tracking-[0.18em] text-ink/45">Expected impact</div>
+              <div className="text-[12px] text-ink/80 mt-1 leading-snug">
+                {impact ?? 'Keeps the channel warm and lifts visibility on the next drop.'}
+              </div>
+            </div>
+            <div className="rounded-lg p-3" style={{ background: SOFT }}>
+              <div className="text-[9px] uppercase tracking-[0.18em] text-ink/45">If ignored</div>
+              <div className="text-[12px] text-ink/80 mt-1 leading-snug">{ifIgnored}</div>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────────── 2. SIGNAL SNAPSHOT ─────────────────── */}
         <div className="flex items-baseline justify-between mt-10 mb-3">
-          <h2 className="font-black text-lg">Growth</h2>
+          <h2 className="font-black text-lg">Signal snapshot</h2>
           <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
             {history.length > 0 ? `${history.length}d tracked` : 'snapshot starts today'}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <GrowthCard
+          <SignalCard
             label="Subscribers"
-            current={live?.subs != null ? fmtNum(live.subs) : '—'}
+            current={live?.subs != null ? fmtNum(live.subs) : artist.subs}
             d7={subs7}
             d30={subs30}
             series={subsSeries}
           />
-          <GrowthCard
+          <SignalCard
             label="Total views"
             current={live?.views != null ? fmtNum(live.views) : '—'}
             d7={views7}
-            d30={deltaOver(history, 30, 'views')}
+            d30={views30}
             series={viewsSeries}
           />
         </div>
-
-        {/* 3. Channel snapshot */}
-        <h2 className="font-black text-lg mt-10 mb-3">Channel snapshot</h2>
-        <div className="grid grid-cols-4 gap-3">
-          <Stat label="Subscribers" value={live?.subs != null ? fmtNum(live.subs) : artist.subs} />
-          <Stat label="Total views" value={live?.views != null ? fmtNum(live.views) : '—'} />
-          <Stat label="Uploads · 30d" value={String(live?.uploads30d ?? artist.uploads30d)} />
-          <Stat label="Last upload" value={lastUpDays != null ? `${lastUpDays}d ago` : '—'} />
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <MiniStat label="Uploads · 30d" value={String(live?.uploads30d ?? artist.uploads30d)} />
+          <MiniStat label="Last upload" value={lastUpDays != null ? `${lastUpDays}d ago` : '—'} />
         </div>
 
-        {/* 4. What's Missing — grouped */}
-        {(() => {
-          const channelOpps = opps.filter((o) => !o.videoId);
-          const videoGroups = new Map<string, Opportunity[]>();
-          for (const o of opps) {
-            if (!o.videoId) continue;
-            const arr = videoGroups.get(o.videoId) ?? [];
-            arr.push(o);
-            videoGroups.set(o.videoId, arr);
-          }
-          const videoCards = Array.from(videoGroups.entries())
-            .map(([id, items]: [string, Opportunity[]]) => ({
-              id,
-              title: items[0].videoTitle ?? id,
-              views: items[0].videoViews ?? 0,
-              items: items.slice().sort(
-                (a: Opportunity, b: Opportunity) =>
-                  IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]
-              ),
-            }))
-            .sort((a, b) => b.views - a.views);
+        {/* ─────────────────── 3. FIX THESE NOW (critical) ─────────────────── */}
+        {criticalOpps.length > 0 && (
+          <>
+            <div className="flex items-baseline justify-between mt-10 mb-3">
+              <h2 className="font-black text-lg">Fix these now</h2>
+              <div className="text-[10px] uppercase tracking-[0.18em]" style={{ color: '#8A1F0C' }}>
+                CRITICAL · {criticalOpps.length}
+              </div>
+            </div>
+            <div className="space-y-3">
+              {criticalOpps.map((o) => (
+                <OpportunityCard key={o.id} o={o} weight="strong" />
+              ))}
+            </div>
+          </>
+        )}
 
-          if (opps.length === 0) {
-            return (
-              <>
-                <h2 className="font-black text-lg mt-10 mb-3">What&rsquo;s missing</h2>
-                <div
-                  className="rounded-xl border p-5 text-[13px] text-ink/55"
-                  style={{ borderColor: MUTED, background: PAPER }}
-                >
-                  Nothing flagged. Channel is covered for now.
+        {/* ─────────────────── 4. IMPROVE PERFORMANCE (secondary) ─────────────────── */}
+        {secondaryOpps.length > 0 && (
+          <>
+            <div className="flex items-baseline justify-between mt-10 mb-3">
+              <h2 className="font-black text-lg">Improve performance</h2>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-ink/55">
+                SECONDARY · {secondaryOpps.length}
+              </div>
+            </div>
+            <div className="space-y-3">
+              {secondaryOpps.map((o) => (
+                <OpportunityCard key={o.id} o={o} weight="medium" />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* ─────────────────── 5. UNLOCK CATALOGUE VALUE (collapsed) ─────────────────── */}
+        {videoCards.length > 0 && (
+          <details className="mt-10 group">
+            <summary
+              className="cursor-pointer list-none rounded-xl border px-5 py-4 flex items-center justify-between hover:bg-ink/[0.02] transition"
+              style={{ borderColor: MUTED, background: PAPER }}
+            >
+              <div>
+                <div className="font-black text-lg">Unlock catalogue value</div>
+                <div className="text-[11px] text-ink/55 mt-0.5">
+                  {videoCards.length} top video{videoCards.length === 1 ? '' : 's'} with missing lyric cuts, visualizers, Shorts or captions
                 </div>
-              </>
-            );
-          }
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45 flex items-center gap-2">
+                OPPORTUNITY
+                <span className="text-ink/40 group-open:rotate-180 transition">▾</span>
+              </div>
+            </summary>
+            <div className="space-y-3 mt-3">
+              {videoCards.map((v) => (
+                <VideoGapCard key={v.id} video={v} />
+              ))}
+            </div>
+          </details>
+        )}
 
-          return (
-            <>
-              {channelOpps.length > 0 && (
-                <>
-                  <div className="flex items-baseline justify-between mt-10 mb-3">
-                    <h2 className="font-black text-lg">This week&rsquo;s focus</h2>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
-                      {channelOpps.length} {channelOpps.length === 1 ? 'channel gap' : 'channel gaps'}
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {channelOpps
-                      .sort((a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact])
-                      .map((o) => (
-                        <OpportunityCard key={o.id} o={o} />
-                      ))}
-                  </div>
-                </>
-              )}
-              {videoCards.length > 0 && (
-                <>
-                  <div className="flex items-baseline justify-between mt-10 mb-3">
-                    <h2 className="font-black text-lg">Catalogue wins</h2>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
-                      {videoCards.length} {videoCards.length === 1 ? 'video' : 'videos'} to level up
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {videoCards.map((v) => (
-                      <VideoGapCard key={v.id} video={v} />
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
-          );
-        })()}
+        {opps.length === 0 && (
+          <div
+            className="mt-10 rounded-xl border p-5 text-[13px] text-ink/55"
+            style={{ borderColor: MUTED, background: PAPER }}
+          >
+            Nothing flagged. Channel is covered for now.
+          </div>
+        )}
 
-        {/* 5. Next moment */}
+        {/* ─────────────────── 6. NEXT MOMENT ─────────────────── */}
         <h2 className="font-black text-lg mt-10 mb-3">Next moment</h2>
         <div className="rounded-xl border p-4" style={{ borderColor: MUTED, background: PAPER }}>
           <div className="text-[13px] font-bold">{artist.nextMomentLabel}</div>
-          <div className="text-[11px] text-ink/55 mt-0.5 font-mono">{artist.nextMomentDate}</div>
+          <div className="text-[11px] text-ink/55 mt-0.5 font-mono">
+            {artist.nextMomentDate}
+            {daysToNextMoment != null && daysToNextMoment >= 0 && ` · in ${daysToNextMoment}d`}
+          </div>
         </div>
 
-        {/* 6. Open Coach */}
+        {/* ─────────────────── 7. EXECUTE ─────────────────── */}
         <div className="mt-12 flex items-center justify-between">
           <div className="text-[12px] text-ink/55 max-w-[50ch]">
             Ready to execute? Open Coach to turn these actions into a plan.
@@ -248,7 +329,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   );
 }
 
-function GrowthCard({
+function SignalCard({
   label,
   current,
   d7,
@@ -275,10 +356,7 @@ function GrowthCard({
   const colorFor = (d: { delta: number } | null) =>
     !d ? '#8A8A8A' : d.delta > 0 ? '#0C6A3F' : d.delta < 0 ? '#8A1F0C' : '#8A8A8A';
   return (
-    <div
-      className="rounded-xl border p-4"
-      style={{ borderColor: MUTED, background: PAPER }}
-    >
+    <div className="rounded-xl border p-4" style={{ borderColor: MUTED, background: PAPER }}>
       <div className="flex items-baseline justify-between">
         <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
         <div className="font-black text-xl tabular-nums">{current}</div>
@@ -300,11 +378,11 @@ function GrowthCard({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border px-4 py-3" style={{ borderColor: MUTED, background: PAPER }}>
       <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
-      <div className="font-black text-2xl mt-1 tabular-nums">{value}</div>
+      <div className="font-black text-xl mt-1 tabular-nums">{value}</div>
     </div>
   );
 }
@@ -314,7 +392,6 @@ function VideoGapCard({
 }: {
   video: { id: string; title: string; views: number; items: Opportunity[] };
 }) {
-  // Worst impact drives the card edge colour
   const worst = video.items.reduce<Opportunity['impact']>(
     (acc, o) => (IMPACT_RANK[o.impact] < IMPACT_RANK[acc] ? o.impact : acc),
     'LOW'
@@ -373,16 +450,21 @@ function VideoGapCard({
   );
 }
 
-function OpportunityCard({ o }: { o: Opportunity }) {
+function OpportunityCard({ o, weight = 'strong' }: { o: Opportunity; weight?: 'strong' | 'medium' }) {
   const c = IMPACT_COLOR[o.impact];
+  const strong = weight === 'strong';
   return (
     <article
-      className="rounded-xl border-l-4 border p-5"
-      style={{ borderColor: MUTED, borderLeftColor: c.dot, background: PAPER }}
+      className={strong ? 'rounded-xl border-l-4 border-2 p-5' : 'rounded-xl border-l-4 border p-5'}
+      style={{
+        borderColor: strong ? INK : MUTED,
+        borderLeftColor: c.dot,
+        background: PAPER,
+      }}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-black text-[15px]">{o.subtype}</h3>
+          <h3 className={strong ? 'font-black text-[16px]' : 'font-black text-[14px]'}>{o.subtype}</h3>
           {o.videoId && o.videoTitle && (
             <a
               href={`https://www.youtube.com/watch?v=${o.videoId}`}
@@ -414,7 +496,7 @@ function OpportunityCard({ o }: { o: Opportunity }) {
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Why it matters</span>
         {o.impactRange}
       </div>
-      <div className="mt-2 text-[13px] text-ink/85 leading-snug font-medium">
+      <div className={strong ? 'mt-3 text-[14px] text-ink leading-snug font-bold' : 'mt-2 text-[13px] text-ink/85 leading-snug font-medium'}>
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Action</span>
         {o.action}
       </div>
