@@ -2859,11 +2859,10 @@ function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
   // Prefer real channel drops (gated to the campaign window) when available.
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
   const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
-  const autoTracks = useMemo(() => {
-    const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
-    return [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
-      .sort((a, b) => a.weekNum - b.weekNum);
-  }, [liveTracks, planTracks]);
+  const autoTracks = useMemo(
+    () => (liveTracks.length > 0 ? liveTracks : planTracks),
+    [liveTracks, planTracks],
+  );
 
   const rollup = useMemo(() => {
     if (!watcher.state || liveVideos.length === 0) return null;
@@ -3044,11 +3043,10 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
   const liveVideosInWindow = liveVideos.filter((v) => new Date(v.publishedAt).getTime() >= startT);
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
   const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
-  const autoTracks = useMemo(() => {
-    const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
-    return [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
-      .sort((a, b) => a.weekNum - b.weekNum);
-  }, [liveTracks, planTracks]);
+  const autoTracks = useMemo(
+    () => (liveTracks.length > 0 ? liveTracks : planTracks),
+    [liveTracks, planTracks],
+  );
   const liveByTrackId = useMemo(() => {
     const map: Record<string, LiveMatch> = {};
     for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
@@ -5640,11 +5638,13 @@ function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggl
   // Prefer real uploads as the source of drop cards when the channel has any
   // longform. Fall back to the manual campaign plan only when no live data.
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
-  const autoTracks = useMemo(() => {
-    const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
-    return [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
-      .sort((a, b) => a.weekNum - b.weekNum);
-  }, [liveTracks, planTracks]);
+  // DropView focuses on live drops (real uploads) so the user can concentrate
+  // on completing support for what's actually shipped. Planned future drops
+  // still appear in the Campaign Plan phase dropdown.
+  const autoTracks = useMemo(
+    () => (liveTracks.length > 0 ? liveTracks : planTracks),
+    [liveTracks, planTracks],
+  );
   const liveByTrackId = useMemo(() => {
     const map: Record<string, LiveMatch> = {};
     for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
@@ -5770,8 +5770,10 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   });
 
   const dropCount = tracksInPhase.length;
+  const plannedCount = trackSupports.filter((ts) => ts.track.status === 'upcoming').length;
+  // Only live/past drops count toward "missing support" — future-planned drops are flagged as Planned, not behind.
   const missingSupport = trackSupports.filter(
-    (ts) => !ts.support.coreDone || ts.support.coverageTier !== 'Strong'
+    (ts) => ts.track.status !== 'upcoming' && (!ts.support.coreDone || ts.support.coverageTier !== 'Strong')
   ).length;
 
   // Status from observable state.
@@ -5803,6 +5805,9 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
         <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
         {missingSupport > 0 && (
           <span style={{ color: '#FF4A1C' }}>· {missingSupport} missing support</span>
+        )}
+        {missingSupport === 0 && plannedCount > 0 && (
+          <span style={{ color: '#5B7CFA' }}>· {plannedCount} planned</span>
         )}
       </div>
     </div>
@@ -5842,12 +5847,14 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
 
         {trackSupports.map(({ track, support }) => {
           const missingSlots = support.slots.filter((s) => !s.hit);
-          const tierColor = COVERAGE_COLOR[support.coverageTier];
-          const supportLabel =
-            !support.coreDone ? 'Core missing' :
-            support.coverageTier === 'Strong' ? 'Supported' :
-            support.coverageTier === 'Medium' ? 'Partial'   :
-                                                 'Missing support';
+          const isUpcoming = track.status === 'upcoming';
+          const tierColor = isUpcoming ? '#5B7CFA' : COVERAGE_COLOR[support.coverageTier];
+          const supportLabel = isUpcoming
+            ? 'Planned'
+            : !support.coreDone ? 'Core missing'
+            : support.coverageTier === 'Strong' ? 'Supported'
+            : support.coverageTier === 'Medium' ? 'Partial'
+            : 'Missing support';
           const expectedLine = support.slots
             .map((s) => `${s.label}${s.target > 1 ? ` ×${s.target}` : ''}`)
             .join(' · ');
@@ -5885,10 +5892,16 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
 
               {missingSlots.length > 0 ? (
                 <>
-                  <div className="text-[9px] font-bold uppercase tracking-[0.14em] mb-0.5" style={{ color: '#FF4A1C' }}>
-                    Gaps
+                  <div
+                    className="text-[9px] font-bold uppercase tracking-[0.14em] mb-0.5"
+                    style={{ color: isUpcoming ? '#5B7CFA' : '#FF4A1C' }}
+                  >
+                    {isUpcoming ? 'Planned to ship' : 'Gaps'}
                   </div>
-                  <div className="text-[11px] font-bold leading-snug" style={{ color: '#FF4A1C' }}>
+                  <div
+                    className="text-[11px] font-bold leading-snug"
+                    style={{ color: isUpcoming ? '#5B7CFA' : '#FF4A1C' }}
+                  >
                     {missingSlots.map((s) => s.label).join(' · ')}
                   </div>
                 </>
