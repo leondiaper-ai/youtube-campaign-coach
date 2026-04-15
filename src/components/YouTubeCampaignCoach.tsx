@@ -90,6 +90,9 @@ type CampaignTargets = {
 type ManualOverrides = {
   currentSubs?: number;
   totalViews?: number;
+  // Per-drop manual toggles for things the YouTube API can't see.
+  // Keyed by track.id (e.g. 'live-<videoId>' or planned action id).
+  communityPostDone?: Record<string, boolean>;
 };
 
 type NextDropEdit = {
@@ -4577,7 +4580,7 @@ function matchLiveToDrop(dropDateIso: string, videos: WatcherVideo[] | undefined
   return m;
 }
 
-function getDropSupport(track: AutoTrack, live?: LiveMatch): DropSupport {
+function getDropSupport(track: AutoTrack, live?: LiveMatch, communityPostOverride?: boolean): DropSupport {
   const hero = track.anchorAction;
   const dropType = inferDropType(hero);
   const config = DROP_TYPE_CONFIG[dropType];
@@ -4613,7 +4616,8 @@ function getDropSupport(track: AutoTrack, live?: LiveMatch): DropSupport {
     shorts: shortsDone + liveM.shorts,
     lyricVideo: lyricVideoDone + liveM.lyricVideo,
     artworkVideo: artworkVideoDone + liveM.artworkVideo,
-    communityPost: postsDone, // Community Posts aren't in the public API — stays manual
+    // Community Posts aren't in the public API — artist marks manually.
+    communityPost: Math.max(postsDone, communityPostOverride ? 1 : 0),
     followupLongform: followupLongformDone + liveM.followupLongform,
   };
 
@@ -4769,8 +4773,13 @@ function getCampaignIntelligence(tracks: AutoTrack[], liveByTrackId?: Record<str
   return { fullySupported, totalDrops, tier, summary, missingLabels, fix };
 }
 
-function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
-  const support = getDropSupport(track, live);
+function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
+  track: AutoTrack;
+  live?: LiveMatch;
+  communityPostDone?: boolean;
+  onToggleCommunityPost?: (trackId: string) => void;
+}) {
+  const support = getDropSupport(track, live, communityPostDone);
   const coverageColor = COVERAGE_COLOR[support.coverageTier];
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -4813,10 +4822,27 @@ function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
       <div className="mb-3">
         {support.slots.map((slot) => {
           const missing = !slot.hit;
+          const isClickable = slot.key === 'communityPost' && !!onToggleCommunityPost;
+          const handleClick = isClickable ? () => onToggleCommunityPost!(track.id) : undefined;
           return (
             <div
               key={slot.key}
-              className="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md border-b border-ink/5 last:border-b-0"
+              onClick={handleClick}
+              role={isClickable ? 'button' : undefined}
+              tabIndex={isClickable ? 0 : undefined}
+              onKeyDown={
+                isClickable
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleClick?.();
+                      }
+                    }
+                  : undefined
+              }
+              className={`flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md border-b border-ink/5 last:border-b-0 ${
+                isClickable ? 'cursor-pointer hover:brightness-95 transition' : ''
+              }`}
               style={
                 missing
                   ? { background: 'rgba(255,74,28,0.08)', borderBottomColor: 'rgba(255,74,28,0.12)' }
@@ -4842,6 +4868,16 @@ function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
                 >
                   {slot.label}
                   {missing && <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.14em]">Missing</span>}
+                  {isClickable && missing && (
+                    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-ink/45">
+                      Tap to mark done
+                    </span>
+                  )}
+                  {isClickable && !missing && (
+                    <span className="ml-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-ink/35">
+                      Tap to undo
+                    </span>
+                  )}
                 </span>
               </div>
               <span
@@ -4921,7 +4957,8 @@ function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
   );
 }
 
-function DropView({ plan }: { plan: CampaignPlan }) {
+function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggleCommunityPost?: (trackId: string) => void }) {
+  const communityPostDone = plan.manualOverrides?.communityPostDone || {};
   const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
   const watcher = useWatcherChannel();
   const liveVideos = watcher.state?.latestVideos ?? [];
@@ -4960,8 +4997,8 @@ function DropView({ plan }: { plan: CampaignPlan }) {
 
   // Sort worst-coverage first so gaps surface immediately.
   const sortedTracks = [...autoTracks].sort((a, b) => {
-    const sa = getDropSupport(a, liveByTrackId[a.id]).coverageScore;
-    const sb = getDropSupport(b, liveByTrackId[b.id]).coverageScore;
+    const sa = getDropSupport(a, liveByTrackId[a.id], communityPostDone[a.id]).coverageScore;
+    const sb = getDropSupport(b, liveByTrackId[b.id], communityPostDone[b.id]).coverageScore;
     return sa - sb;
   });
 
@@ -5042,7 +5079,13 @@ function DropView({ plan }: { plan: CampaignPlan }) {
       {/* ── DROP CARDS — worst coverage first ──────────────────────── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {sortedTracks.map((track) => (
-          <DropCard key={track.id} track={track} live={liveByTrackId[track.id]} />
+          <DropCard
+            key={track.id}
+            track={track}
+            live={liveByTrackId[track.id]}
+            communityPostDone={!!communityPostDone[track.id]}
+            onToggleCommunityPost={onToggleCommunityPost}
+          />
         ))}
       </div>
     </div>
@@ -6034,7 +6077,16 @@ export default function YouTubeCampaignCoach() {
         <CampaignAssetRollup plan={plan} />
 
         {/* Drop View — the action layer, always visible */}
-        <DropView plan={plan} />
+        <DropView
+          plan={plan}
+          onToggleCommunityPost={(trackId) => {
+            setPlan((p) => {
+              const prev = p.manualOverrides?.communityPostDone || {};
+              const next = { ...prev, [trackId]: !prev[trackId] };
+              return { ...p, manualOverrides: { ...p.manualOverrides, communityPostDone: next } };
+            });
+          }}
+        />
 
         {/* Subs + Views — calm context */}
         <MetricCards
