@@ -1256,6 +1256,271 @@ function recalcWeekDates(weeks: CampaignWeek[], startIso: string): CampaignWeek[
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// TIMELINE AUTO-IMPORT — paste a release timeline, get a full YouTube plan
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type TimelineKind =
+  | 'singleRelease'
+  | 'albumRelease'
+  | 'albumAnnounce'
+  | 'documentaryTease'
+  | 'documentaryRelease'
+  | 'podcast'
+  | 'snippet'
+  | 'tourAnnounce'
+  | 'other';
+
+type ParsedTimelineEvent = {
+  dateISO: string;
+  title: string;
+  kind: TimelineKind;
+  featuredArtist?: string;
+};
+
+const MONTH_MAP: Record<string, number> = {
+  jan: 0, january: 0, feb: 1, february: 1, mar: 2, march: 2, apr: 3, april: 3,
+  may: 4, jun: 5, june: 5, jul: 6, july: 6, aug: 7, august: 7,
+  sep: 8, sept: 8, september: 8, oct: 9, october: 9, nov: 10, november: 10,
+  dec: 11, december: 11,
+};
+
+/** Parse a single line like "25 March - Mo Gilligan Podcast goes live" */
+function parseTimelineLine(raw: string, fallbackYear: number): ParsedTimelineEvent | null {
+  const line = raw.trim().replace(/^[-•*\u2022]\s*/, '');
+  if (!line) return null;
+  // Date patterns: "25 March", "2 April @ 7.30pm", "17th May", "1 or 3 July"
+  const dateRe = /^(\d{1,2})(?:st|nd|rd|th)?(?:\s*or\s*\d{1,2}(?:st|nd|rd|th)?)?\s+([A-Za-z]+)/;
+  const m = line.match(dateRe);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = MONTH_MAP[m[2].toLowerCase()];
+  if (month == null || !day) return null;
+  const d = new Date(Date.UTC(fallbackYear, month, day, 12, 0, 0));
+  const dateISO = d.toISOString().split('T')[0];
+
+  // Remainder after date and separator
+  const afterDate = line.slice(m[0].length).replace(/^[\s@].*?(-|–|—)\s*/, '').replace(/^[\s-–—]+/, '').trim();
+  const title = afterDate || line;
+
+  const kind = classifyTimelineEvent(title);
+  const featuredArtist = extractFeature(title);
+  return { dateISO, title, kind, featuredArtist };
+}
+
+function extractFeature(title: string): string | undefined {
+  const m = title.match(/\b(?:with|ft\.?|feat\.?|featuring)\s+([A-Z][A-Za-z0-9 '\-]+?)(?:\s+(?:\+|and|$)|$|\s*[.,])/);
+  return m ? m[1].trim() : undefined;
+}
+
+function classifyTimelineEvent(title: string): TimelineKind {
+  const t = title.toLowerCase();
+  if (/\bpodcast|interview\b/.test(t)) return 'podcast';
+  if (/\bsnippet|sound\b/.test(t)) return 'snippet';
+  if (/\btour\b/.test(t) && /\b(announce|tickets?|release)\b/.test(t)) return 'tourAnnounce';
+  if (/\bdocumentary\b.*\b(tease|teaser|trailer)\b/.test(t) || (/\bdocumentary\b/.test(t) && /\btease\b/.test(t))) return 'documentaryTease';
+  if (/\bdocumentary\b.*\brelease|release\b.*\bdocumentary|documentary.*youtube/.test(t) || /\bdocumentary\b/.test(t)) return 'documentaryRelease';
+  if (/\balbum\b.*\b(announce|announcement)\b/.test(t)) return 'albumAnnounce';
+  if (/\balbum\b.*\brelease\b|\brelease\b.*\balbum\b|\balbum (out|drop)\b/.test(t)) return 'albumRelease';
+  if (/\bsingle\b.*\brelease\b|\brelease\b.*\bsingle\b|\bsingle \d\b/.test(t)) return 'singleRelease';
+  if (/\brelease\b/.test(t)) return 'singleRelease';
+  return 'other';
+}
+
+function parseTimelineText(text: string, fallbackYear: number): ParsedTimelineEvent[] {
+  return text
+    .split(/\r?\n/)
+    .map((l) => parseTimelineLine(l, fallbackYear))
+    .filter((e): e is ParsedTimelineEvent => !!e)
+    .sort((a, b) => a.dateISO.localeCompare(b.dateISO));
+}
+
+/** Convert a date offset to a (weekIndex, dayLabel) pair relative to plan start. */
+function dateToWeekDay(startIso: string, targetIso: string): { weekIdx: number; day: DayLabel } | null {
+  const start = new Date(startIso + 'T12:00:00').getTime();
+  const target = new Date(targetIso + 'T12:00:00').getTime();
+  const diffDays = Math.round((target - start) / (24 * 60 * 60 * 1000));
+  if (diffDays < 0) return null;
+  const weekIdx = Math.floor(diffDays / 7);
+  const dayOfWeek = new Date(targetIso + 'T12:00:00').getUTCDay(); // 0=Sun..6=Sat
+  const DAYS: DayLabel[] = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  return { weekIdx, day: DAYS[dayOfWeek] };
+}
+
+function addDaysIso(iso: string, days: number): string {
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function titleCore(title: string): string {
+  // Extract a short reference like "'Change'" or first quoted phrase or first noun group.
+  const q = title.match(/['\u2018\u2019"\u201c\u201d]([^'\u2018\u2019"\u201c\u201d]+)['\u2018\u2019"\u201c\u201d]/);
+  if (q) return `'${q[1]}'`;
+  const m = title.replace(/^\s*(Single \d+|Single|Album)\s*[-:–]\s*/i, '').split(/[-–—,]/)[0].trim();
+  return m || title;
+}
+
+/** Build a set of CampaignActions for one parsed event. */
+function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dateISO: string; action: CampaignAction }> {
+  const out: Array<{ dateISO: string; action: CampaignAction }> = [];
+  const ref = titleCore(ev.title);
+  const addA = (offset: number, title: string, type: ActionType, intent: ActionIntent, system: ActionSystem = 1, momentRole?: MomentRole) => {
+    const dateISO = addDaysIso(ev.dateISO, offset);
+    const wd = dateToWeekDay(startIso, dateISO);
+    if (!wd) return;
+    const a = act(title, type, wd.day, system, intent, 'planned', ev.featuredArtist);
+    a.date = dateISO;
+    if (momentRole) a.momentRole = momentRole;
+    out.push({ dateISO, action: a });
+  };
+
+  switch (ev.kind) {
+    case 'singleRelease':
+      addA(-3, `Teaser Short — ${ref}`, 'short', 'tease');
+      addA(-1, `Snippet Short — ${ref}`, 'short', 'tease');
+      addA(0, `${ref} — Official Music Video`, 'video', 'convert', 2, 'hero');
+      addA(0, `Community Post — ${ref} out now`, 'post', 'convert');
+      addA(+2, `Reaction / BTS Short — ${ref}`, 'short', 'engage');
+      addA(+7, `${ref} — Lyric Video`, 'video', 'distribute', 2, 'support');
+      break;
+    case 'albumAnnounce':
+      addA(-2, `Teaser Short — album incoming`, 'short', 'tease');
+      addA(0, `Album Announcement Video`, 'video', 'tease', 2, 'hero');
+      addA(0, `Community Post — album announce + pre-save`, 'post', 'convert');
+      addA(+3, `Tracklist Tease Short`, 'short', 'tease');
+      break;
+    case 'albumRelease':
+      addA(-3, `Album Trailer`, 'video', 'tease', 2, 'hero');
+      addA(-1, `Final Countdown Short`, 'short', 'tease');
+      addA(0, `ALBUM DROP — Full Album Out`, 'video', 'convert', 2, 'hero');
+      addA(0, `Community Post — album out now`, 'post', 'convert');
+      addA(+1, `Drop Day Recap Short`, 'short', 'engage');
+      addA(+3, `Track-by-Track Breakdown`, 'video', 'distribute', 2, 'support');
+      addA(+5, `Fan Reactions Short`, 'short', 'engage');
+      addA(+7, `Highlight Bars Short`, 'short', 'engage');
+      break;
+    case 'documentaryTease':
+      addA(0, `Documentary Teaser Short`, 'short', 'tease');
+      addA(0, `Community Post — documentary coming`, 'post', 'tease');
+      break;
+    case 'documentaryRelease':
+      addA(-1, `Documentary Trailer Short`, 'short', 'tease');
+      addA(0, `Documentary — Full Release`, 'video', 'convert', 2, 'hero');
+      addA(0, `Community Post — documentary out now`, 'post', 'convert');
+      addA(+2, `Documentary Clip Short #1`, 'short', 'engage');
+      addA(+5, `Documentary Clip Short #2`, 'short', 'engage');
+      break;
+    case 'podcast':
+      addA(0, `Community Post — ${ref} podcast live`, 'post', 'engage');
+      addA(+1, `Podcast Clip Short #1`, 'short', 'engage');
+      addA(+2, `Podcast Clip Short #2`, 'short', 'engage');
+      break;
+    case 'snippet':
+      addA(0, `Snippet Short — ${ref}`, 'short', 'tease');
+      addA(0, `Community Post — new snippet`, 'post', 'tease');
+      break;
+    case 'tourAnnounce':
+      addA(0, `Tour Announcement Video`, 'video', 'convert', 2, 'hero');
+      addA(0, `Community Post — tour dates`, 'post', 'convert');
+      addA(+1, `Tour Hype Short`, 'short', 'engage');
+      break;
+    default:
+      addA(0, ev.title, 'post', 'engage');
+  }
+  return out;
+}
+
+/** Build a CampaignPlan from parsed timeline events. */
+function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, campaignName?: string): CampaignPlan | null {
+  if (events.length === 0) return null;
+  const first = events[0].dateISO;
+  const last = events[events.length - 1].dateISO;
+  // Start one week before the first event.
+  const startIso = addDaysIso(first, -7);
+  // End ~3 weeks after last event, minimum 24 weeks.
+  const endIso = addDaysIso(last, 21);
+  const start = new Date(startIso + 'T12:00:00');
+  const end = new Date(endIso + 'T12:00:00');
+  const totalDays = Math.round((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+  const weekCount = Math.max(24, Math.ceil(totalDays / 7));
+
+  const fmt = (d: Date) => `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
+  const weeks: CampaignWeek[] = [];
+  for (let i = 0; i < weekCount; i++) {
+    const ws = new Date(start); ws.setDate(ws.getDate() + i * 7);
+    const we = new Date(ws); we.setDate(we.getDate() + 6);
+    weeks.push({ week: i + 1, dateRange: `${fmt(ws)} – ${fmt(we)}`, actions: [], feedback: {} });
+  }
+
+  const moments: CampaignMoment[] = [];
+
+  for (const ev of events) {
+    const placed = actionsForEvent(ev, startIso);
+    for (const { action } of placed) {
+      const d = action.date;
+      if (!d) continue;
+      const wd = dateToWeekDay(startIso, d);
+      if (!wd || wd.weekIdx >= weeks.length) continue;
+      weeks[wd.weekIdx].actions.push(action);
+    }
+    // Build a moment for major events.
+    const wd = dateToWeekDay(startIso, ev.dateISO);
+    if (wd) {
+      const momentType: CampaignMoment['type'] | null =
+        ev.kind === 'singleRelease' ? 'single' :
+        ev.kind === 'albumRelease' ? 'album' :
+        ev.kind === 'albumAnnounce' ? 'announcement' :
+        ev.kind === 'documentaryRelease' ? 'milestone' :
+        ev.kind === 'tourAnnounce' ? 'milestone' :
+        null;
+      if (momentType) {
+        moments.push({
+          weekNum: wd.weekIdx + 1,
+          date: ev.dateISO,
+          name: ev.title,
+          type: momentType,
+          isAnchor: momentType === 'album' || momentType === 'single',
+          why: `Auto-imported from timeline (${ev.kind}).`,
+          prepNote: 'Teaser + day-of community post + follow-up short auto-added.',
+        });
+      }
+    }
+  }
+
+  // Sprinkle 2 baseline shorts per empty week (MON/THU).
+  for (const w of weeks) {
+    if (w.actions.length === 0) {
+      const base = new Date(start); base.setDate(base.getDate() + (w.week - 1) * 7);
+      const monISO = addDaysIso(base.toISOString().split('T')[0], 1);
+      const thuISO = addDaysIso(base.toISOString().split('T')[0], 4);
+      const mon = act('Baseline Short — studio / clip', 'short', 'MON', 1, 'engage', 'planned');
+      mon.date = monISO;
+      const thu = act('Baseline Short — clip / freestyle', 'short', 'THU', 1, 'engage', 'planned');
+      thu.date = thuISO;
+      w.actions.push(mon, thu);
+    }
+  }
+
+  return {
+    artist: artist || '',
+    campaignName: campaignName || 'Imported Campaign',
+    subscriberCount: 0,
+    startDate: startIso,
+    weeks,
+    targets: {
+      subsTarget: 0,
+      viewsTarget: 0,
+      shortsPerWeek: 3,
+      videosPerWeek: 1,
+      postsPerWeek: 2,
+      communityPerWeek: 2,
+    },
+    moments,
+    isExample: false,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // NEW SUB-COMPONENTS — CLEAN, BOLD, UNDERSTANDABLE IN 3 SECONDS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1398,12 +1663,106 @@ function CampaignBaselineControl({
   );
 }
 
-function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign }: {
+function TimelineImportModal({ open, onClose, onApply }: {
+  open: boolean;
+  onClose: () => void;
+  onApply: (plan: CampaignPlan) => void;
+}) {
+  const [text, setText] = useState('');
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [artist, setArtist] = useState('');
+  const [campaignName, setCampaignName] = useState('');
+  const events = useMemo(() => parseTimelineText(text, year), [text, year]);
+  if (!open) return null;
+  const preview = buildPlanFromTimeline(events, artist, campaignName || undefined);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(14,14,14,0.55)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
+        style={{ background: '#FAF7F2' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 py-4 border-b border-ink/10">
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45">Generate from Timeline</div>
+          <div className="font-black text-lg text-ink mt-0.5">Paste your release timeline</div>
+          <div className="text-[11px] text-ink/55 mt-1">One event per line. Example: <span className="font-mono">25 March - Mo Gilligan Podcast goes live</span></div>
+        </div>
+        <div className="px-5 py-4 space-y-3 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Artist</div>
+              <input className="mt-1 w-full text-sm font-semibold text-ink bg-white rounded-lg px-3 py-2 border border-ink/10 outline-none focus:border-ink/40"
+                value={artist} placeholder="Artist name" onChange={(e) => setArtist(e.target.value)} />
+            </label>
+            <label className="block">
+              <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Campaign</div>
+              <input className="mt-1 w-full text-sm font-semibold text-ink bg-white rounded-lg px-3 py-2 border border-ink/10 outline-none focus:border-ink/40"
+                value={campaignName} placeholder="e.g. Trapo 2 Album" onChange={(e) => setCampaignName(e.target.value)} />
+            </label>
+          </div>
+          <label className="block">
+            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Default year (if dates omit it)</div>
+            <input type="number" className="mt-1 w-28 text-sm font-semibold text-ink bg-white rounded-lg px-3 py-2 border border-ink/10 outline-none focus:border-ink/40"
+              value={year} onChange={(e) => setYear(parseInt(e.target.value, 10) || year)} />
+          </label>
+          <label className="block">
+            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Timeline</div>
+            <textarea
+              className="mt-1 w-full h-48 text-sm font-mono text-ink bg-white rounded-lg px-3 py-2 border border-ink/10 outline-none focus:border-ink/40"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={"25 March - Mo Gilligan Podcast goes live\n2 April - Single 1 Release - 'Change' with G Herbo + Official Music Video\n21 Aug - Album Release + Tour Announce"}
+            />
+          </label>
+          <div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45 mb-1.5">Detected ({events.length})</div>
+            <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+              {events.length === 0 && <div className="text-[11px] text-ink/40">No events detected yet — paste a timeline above.</div>}
+              {events.map((ev, i) => (
+                <div key={i} className="flex items-center justify-between text-[11px] bg-white rounded-md px-2 py-1.5 border border-ink/5">
+                  <div className="flex-1 min-w-0">
+                    <span className="font-bold text-ink">{ev.dateISO}</span>
+                    <span className="text-ink/70 ml-2 truncate">{ev.title}</span>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-ink/50 shrink-0 ml-2">{ev.kind}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {preview && (
+            <div className="text-[10px] text-ink/55">
+              Plan start <span className="font-bold text-ink">{preview.startDate}</span> · {preview.weeks.length} weeks · {preview.weeks.reduce((s, w) => s + w.actions.length, 0)} actions · {preview.moments?.length || 0} moments
+            </div>
+          )}
+        </div>
+        <div className="px-5 py-3 border-t border-ink/10 flex items-center justify-end gap-2">
+          <button onClick={onClose} className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] text-ink/60 hover:bg-ink/5">Cancel</button>
+          <button
+            disabled={!preview}
+            onClick={() => { if (preview) { onApply(preview); onClose(); } }}
+            className="px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] text-paper"
+            style={{ background: preview ? '#0E0E0E' : 'rgba(14,14,14,0.25)' }}
+          >
+            Apply plan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign, onOpenTimeline }: {
   plan: CampaignPlan;
   onUpdatePlan: (updates: Partial<CampaignPlan>) => void;
   onOpenSettings?: () => void;
   onOpenAdd?: () => void;
   onNewCampaign?: () => void;
+  onOpenTimeline?: () => void;
 }) {
   let activeIdx = -1;
   for (let i = plan.weeks.length - 1; i >= 0; i--) {
@@ -1444,6 +1803,16 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             onChange={(d) => onUpdatePlan({ startDate: d })}
           />
         </div>
+        {onOpenTimeline && (
+          <button
+            onClick={onOpenTimeline}
+            className="shrink-0 ml-3 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.14em] text-paper"
+            style={{ background: '#0E0E0E' }}
+            title="Paste a release timeline and auto-build a YouTube plan"
+          >
+            ↗ Generate from Timeline
+          </button>
+        )}
         {/* Settings cog retired — campaign targets now auto-derive from channel size + planned drops */}
       </div>
       {weekNum > 0 && (
@@ -6171,6 +6540,7 @@ export default function YouTubeCampaignCoach() {
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [undoItem, setUndoItem] = useState<UndoItem | null>(null);
   const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number; initialKind?: MissingActionKind }>({ open: false });
+  const [timelineModalOpen, setTimelineModalOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -6378,6 +6748,7 @@ export default function YouTubeCampaignCoach() {
           plan={plan}
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
           onOpenAdd={() => setAddModal({ open: true })}
+          onOpenTimeline={() => setTimelineModalOpen(true)}
           onNewCampaign={() => {
             if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
             setPlan(makeEmptyPlan());
@@ -6579,6 +6950,19 @@ export default function YouTubeCampaignCoach() {
           onClose={() => setAddModal({ open: false })}
         />
       )}
+
+      {/* Timeline Import Modal */}
+      <TimelineImportModal
+        open={timelineModalOpen}
+        onClose={() => setTimelineModalOpen(false)}
+        onApply={(newPlan) => {
+          setPlan(newPlan);
+          setExpandedPhases(new Set());
+          setShowCollapsedSupport(new Set());
+          setAddModal({ open: false });
+          setEditingMetric(null);
+        }}
+      />
 
       {/* Undo Toast */}
       {undoItem && (
