@@ -4824,28 +4824,48 @@ function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
 
       {/* SUPPORT CHECKLIST — per slot, just execution vs expectation */}
       <div className="mb-3">
-        {support.slots.map((slot) => (
-          <div
-            key={slot.key}
-            className="flex items-center justify-between py-1.5 border-b border-ink/5 last:border-b-0"
-          >
-            <div className="flex items-center gap-2 min-w-0">
+        {support.slots.map((slot) => {
+          const missing = !slot.hit;
+          return (
+            <div
+              key={slot.key}
+              className="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-md border-b border-ink/5 last:border-b-0"
+              style={
+                missing
+                  ? { background: 'rgba(255,74,28,0.08)', borderBottomColor: 'rgba(255,74,28,0.12)' }
+                  : undefined
+              }
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+                  style={{
+                    background: slot.hit ? '#1FBE7A' : '#FF4A1C',
+                    color: '#ffffff',
+                  }}
+                >
+                  {slot.hit ? '✓' : '!'}
+                </span>
+                <span
+                  className="text-[12px] truncate"
+                  style={{
+                    color: missing ? '#FF4A1C' : 'rgba(14,14,14,0.8)',
+                    fontWeight: missing ? 800 : 600,
+                  }}
+                >
+                  {slot.label}
+                  {missing && <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.14em]">Missing</span>}
+                </span>
+              </div>
               <span
-                className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
-                style={{
-                  background: slot.hit ? '#1FBE7A' : 'rgba(14,14,14,0.06)',
-                  color: slot.hit ? '#ffffff' : 'rgba(14,14,14,0.35)',
-                }}
+                className="text-[11px] font-bold shrink-0 ml-2"
+                style={{ color: missing ? '#FF4A1C' : 'rgba(14,14,14,0.5)' }}
               >
-                {slot.hit ? '✓' : '·'}
+                {slot.showsCount ? `${slot.done}/${slot.target}` : slot.hit ? '✓' : slot.targetText}
               </span>
-              <span className="text-[12px] font-semibold text-ink/80 truncate">{slot.label}</span>
             </div>
-            <span className="text-[11px] font-bold text-ink/50 shrink-0 ml-2">
-              {slot.showsCount ? `${slot.done}/${slot.target}` : slot.hit ? '✓' : slot.targetText}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* SUPPORT PILL — number only, no repeated prose */}
