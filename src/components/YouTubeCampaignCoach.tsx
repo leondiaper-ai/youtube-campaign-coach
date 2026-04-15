@@ -3071,14 +3071,31 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
   const liveSupport = liveShorts + Math.max(0, liveLongform - autoTracks.length);
   const totalDrops = autoTracks.length;
 
-  // Row 2 — THIS WEEK cadence
+  // Row 2 — THIS WEEK cadence (merge plan-done + live uploads from API)
   const counts = getCadenceCounts(plan);
+  // Count live uploads published within this ISO week (Mon→Sun).
+  const now = new Date();
+  const dow = now.getDay(); // 0=Sun..6=Sat
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const weekStart = new Date(now);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() + mondayOffset);
+  const weekStartMs = weekStart.getTime();
+  const liveThisWeek = liveVideos.filter((v) => {
+    const t = new Date(v.publishedAt).getTime();
+    return !Number.isNaN(t) && t >= weekStartMs;
+  });
+  const liveShortsWeek    = liveThisWeek.filter((v) => v.kind === 'short').length;
+  const liveLongformWeek  = liveThisWeek.filter((v) => v.kind === 'video').length;
+  // Merge: max of plan-done vs live counts so live activity can cover the week.
+  const mergedShortsDone   = Math.max(counts.shortsDone,   liveShortsWeek);
+  const mergedLongformDone = Math.max(counts.longformDone, liveLongformWeek);
   const rows = [
-    { key: 'shorts', label: 'Shorts', done: counts.shortsDone,   target: counts.shortsTarget },
-    { key: 'posts',  label: 'Posts',  done: counts.postsDone,    target: counts.postsTarget },
-    { key: 'videos', label: 'Videos', done: counts.longformDone, target: counts.longformTarget },
+    { key: 'shorts', label: 'Shorts', done: mergedShortsDone,   target: counts.shortsTarget,   live: liveShortsWeek },
+    { key: 'posts',  label: 'Posts',  done: counts.postsDone,    target: counts.postsTarget,   live: 0 },
+    { key: 'videos', label: 'Videos', done: mergedLongformDone, target: counts.longformTarget, live: liveLongformWeek },
   ];
-  const totalDone   = counts.shortsDone + counts.postsDone + counts.longformDone;
+  const totalDone   = mergedShortsDone + counts.postsDone + mergedLongformDone;
   const totalTarget = counts.shortsTarget + counts.postsTarget + counts.longformTarget;
   const allMet = rows.every((r) => r.target === 0 || r.done >= r.target);
   const weekStatus = totalDone === 0
@@ -3121,6 +3138,15 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
               <span className="font-black tabular-nums" style={{ color: rowColor(r.done, r.target) }}>{r.done}</span>
               <span className="text-ink/30">/{r.target}</span>
               <span className="text-ink/55 ml-0.5">{r.label}</span>
+              {r.live > 0 && (
+                <span
+                  className="ml-1 text-[9px] font-bold uppercase tracking-[0.12em]"
+                  style={{ color: '#1FBE7A' }}
+                  title={`${r.live} live from YouTube this week`}
+                >
+                  · {r.live} live
+                </span>
+              )}
             </span>
           ))}
         </div>
