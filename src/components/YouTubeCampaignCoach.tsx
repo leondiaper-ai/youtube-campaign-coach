@@ -978,11 +978,11 @@ function act(
 function makeSeedData(): CampaignPlan {
   // Demo: K Trap — Album Campaign. Start date is set dynamically so
   // "today" always falls in week 9 (the active week with mixed done/planned).
-  const now = new Date();
-  now.setHours(12, 0, 0, 0);
-  const base = new Date(now);
-  base.setDate(base.getDate() - 8 * 7); // 8 full weeks ago → we're in week 9
-  const startDate = base.toISOString().split('T')[0];
+  // Campaign start is the real anchor for this artist's campaign window.
+  // Defaults to 2026-03-22 for the K-Trap demo; users can override it in the
+  // campaign header. All live drop gating + rollups flow from this date.
+  const startDate = '2026-03-22';
+  const base = new Date(startDate + 'T12:00:00');
   const fmt = (d: Date) => `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
   const weekDate = (w: number, day: number) => {
     const d = new Date(base); d.setDate(d.getDate() + (w - 1) * 7 + day);
@@ -1322,6 +1322,22 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
               placeholder="Enter Campaign Name"
               onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
             />
+            {/* Campaign window anchor — all live drop gating flows from this */}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">
+                Campaign Start
+              </span>
+              <input
+                type="date"
+                className="text-[11px] font-bold text-ink/70 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none"
+                value={plan.startDate}
+                onChange={(e) => onUpdatePlan({ startDate: e.target.value })}
+                title="Uploads before this date are ignored in Drop View + rollups"
+              />
+              <span className="text-[10px] font-semibold text-ink/35">
+                Uploads before this date are ignored
+              </span>
+            </div>
           </div>
           {onNewCampaign && (
             <button
