@@ -2114,29 +2114,54 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
         </div>
       </div>
 
-      {/* 2. CHANNEL HEALTH — compact one-line row */}
+      {/* 2. CHANNEL HEALTH — prominent stat blocks, microsite-style */}
       {watcher.state && (
         <div
-          className="mb-6 flex flex-wrap items-baseline gap-x-5 gap-y-1.5 pb-5 text-[13px]"
-          style={{ borderBottom: '1px solid rgba(250,247,242,0.08)', color: 'rgba(250,247,242,0.75)' }}
+          className="mb-7 pb-6"
+          style={{ borderBottom: '1px solid rgba(250,247,242,0.08)' }}
         >
-          <span style={{ color: '#FAF7F2', fontWeight: 600 }}>
-            {formatBig(watcher.state.subscriberCount)} subs
-          </span>
-          <span style={{ color: dirColor(subDeltaFmt.dir) }}>
-            {dirGlyph(subDeltaFmt.dir)} {subDeltaFmt.text} 7d
-          </span>
-          <span style={{ color: 'rgba(250,247,242,0.25)' }}>·</span>
-          <span style={{ color: '#FAF7F2', fontWeight: 600 }}>
-            {formatBig(watcher.state.viewCount)} views
-          </span>
-          <span style={{ color: dirColor(viewDeltaFmt.dir) }}>
-            {dirGlyph(viewDeltaFmt.dir)} {viewDeltaFmt.text} 7d
-          </span>
-          <span style={{ color: 'rgba(250,247,242,0.25)' }}>·</span>
-          <span style={{ color: recencyColor(daysSince) }}>
-            Last upload {recencyLabel(daysSince).toLowerCase()}
-          </span>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <div
+                className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
+                style={{ color: 'rgba(250,247,242,0.45)' }}
+              >
+                Subscribers
+              </div>
+              <div className="flex items-baseline gap-2.5 flex-wrap">
+                <span className="font-black leading-none" style={{ fontSize: '36px', color: '#FAF7F2' }}>
+                  {formatBig(watcher.state.subscriberCount)}
+                </span>
+                <span className="text-[12px] font-semibold inline-flex items-center gap-1" style={{ color: dirColor(subDeltaFmt.dir) }}>
+                  <span>{dirGlyph(subDeltaFmt.dir)}</span>
+                  <span>{subDeltaFmt.text} 7d</span>
+                </span>
+              </div>
+            </div>
+            <div>
+              <div
+                className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
+                style={{ color: 'rgba(250,247,242,0.45)' }}
+              >
+                Total Views
+              </div>
+              <div className="flex items-baseline gap-2.5 flex-wrap">
+                <span className="font-black leading-none" style={{ fontSize: '36px', color: '#FAF7F2' }}>
+                  {formatBig(watcher.state.viewCount)}
+                </span>
+                <span className="text-[12px] font-semibold inline-flex items-center gap-1" style={{ color: dirColor(viewDeltaFmt.dir) }}>
+                  <span>{dirGlyph(viewDeltaFmt.dir)}</span>
+                  <span>{viewDeltaFmt.text} 7d</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-2 text-[12px]">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: recencyColor(daysSince) }} />
+            <span style={{ color: recencyColor(daysSince), fontWeight: 600 }}>
+              Last upload {recencyLabel(daysSince).toLowerCase()}
+            </span>
+          </div>
         </div>
       )}
 
@@ -2153,13 +2178,16 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
         </p>
       </div>
 
-      {/* 4. PRIMARY ACTION */}
-      <div className="mb-5">
+      {/* 4. PRIMARY ACTION — directional block */}
+      <div
+        className="mb-5 rounded-xl p-4"
+        style={{ background: 'rgba(31,190,122,0.08)', border: '1px solid rgba(31,190,122,0.22)' }}
+      >
         <div
           className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5"
-          style={{ color: 'rgba(250,247,242,0.45)' }}
+          style={{ color: '#1FBE7A' }}
         >
-          Action
+          Do this next
         </div>
         <p className="text-[15px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
           {primaryAction}
@@ -2168,7 +2196,7 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
           href="https://studio.youtube.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2.5 inline-flex items-center gap-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80"
+          className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80"
           style={{ color: '#A8B5FF' }}
         >
           Open in YouTube Studio <span aria-hidden>→</span>

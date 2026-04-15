@@ -380,7 +380,13 @@ export function aiDecisionLayer(input: {
     if (row.status === 'behind') actions.push(`Post ${row.planned} ${row.format} this week to catch cadence.`);
   }
   if (decisionState === 'PUSH—WEAK' || decisionState === 'ACTIVE BUT FLAT') {
-    actions.push(`Use ${ref} and post a follow-up Post within 24h to convert viewers.`);
+    // Avoid repeating the top-video reference if an earlier action already named it.
+    const refAlreadyNamed = actions.some((a) => ref !== 'your top clip' && a.includes(ref));
+    actions.push(
+      refAlreadyNamed
+        ? `Follow up with a Post within 24h to convert viewers.`
+        : `Use ${ref} and post a follow-up Post within 24h to convert viewers.`,
+    );
   }
   if (decisionState === 'SCALE—STRONG') {
     actions.push(`Post 2–3 Short variations of ${ref} over the next 48h and build a longform around it.`);
