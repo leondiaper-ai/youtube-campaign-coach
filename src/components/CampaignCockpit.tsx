@@ -104,7 +104,12 @@ export default function CampaignCockpit() {
   const effective = useMemo(
     () =>
       ARTISTS.map((a) => {
-        const d = live[a.slug] ? deriveFromLive(live[a.slug]) : null;
+        const d = live[a.slug]
+          ? deriveFromLive(live[a.slug], {
+              daysToNextMoment: daysFromNow(a.nextMomentDate),
+              phase: a.phase,
+            })
+          : null;
         return d
           ? { ...a, status: d.status, watcherRead: d.watcherRead, nextAction: d.nextAction }
           : a;

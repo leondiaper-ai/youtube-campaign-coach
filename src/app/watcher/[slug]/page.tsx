@@ -16,10 +16,20 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   if (!artist) notFound();
 
   const live = artist.channelHandle ? await fetchChannelSnap(artist.channelHandle) : null;
-  const derived = live ? deriveFromLive(live) : null;
+  const daysToNextMoment = artist.nextMomentDate
+    ? Math.round(
+        (new Date(artist.nextMomentDate + 'T00:00:00').getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;
+  const derived = live
+    ? deriveFromLive(live, { daysToNextMoment, phase: artist.phase })
+    : null;
   const status = derived?.status ?? artist.status;
   const watcherRead = derived?.watcherRead ?? artist.watcherRead;
   const nextAction = derived?.nextAction ?? artist.nextAction;
+  const objective = derived?.objective;
+  const impact = derived?.impact;
   const c = STATUS_COLOR[status];
   const lastUpDays = daysSince(live?.lastUploadAt);
 
@@ -66,10 +76,21 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             )}
           </div>
           <div className="text-[15px] mt-3">{watcherRead}</div>
+          {objective && (
+            <div className="text-[13px] text-ink/70 mt-2">
+              <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Objective</span>
+              {objective}
+            </div>
+          )}
           <div className="text-[13px] text-ink/70 mt-1">
-            <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Next</span>
+            <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">
+              {status === 'ALWAYS ON' ? 'This week' : 'Next'}
+            </span>
             {nextAction}
           </div>
+          {impact && (
+            <div className="text-[12px] text-ink/55 mt-2 italic">{impact}</div>
+          )}
         </div>
 
         {/* Channel snapshot */}

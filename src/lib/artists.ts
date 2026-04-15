@@ -1,4 +1,4 @@
-export type Status = 'READY' | 'FIX FIRST' | 'ACTIVE BUT WEAK' | 'BUILDING' | 'MOMENTUM';
+export type Status = 'READY' | 'FIX FIRST' | 'ACTIVE BUT WEAK' | 'BUILDING' | 'MOMENTUM' | 'ALWAYS ON';
 
 export type Artist = {
   slug: string;
@@ -106,6 +106,7 @@ export const STATUS_RANK: Record<Status, number> = {
   'BUILDING': 2,
   'MOMENTUM': 3,
   'READY': 4,
+  'ALWAYS ON': 5,
 };
 
 export const STATUS_COLOR: Record<Status, { bg: string; fg: string; dot: string }> = {
@@ -114,6 +115,7 @@ export const STATUS_COLOR: Record<Status, { bg: string; fg: string; dot: string 
   'BUILDING':         { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
   'ACTIVE BUT WEAK':  { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
   'FIX FIRST':        { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
+  'ALWAYS ON':        { bg: '#EEECE6', fg: '#3A3A3A', dot: '#8A8A8A' },
 };
 
 export type LiveSnap = {
@@ -128,17 +130,47 @@ export type LiveSnap = {
   error?: string;
 };
 
-export type Derived = { status: Status; watcherRead: string; nextAction: string };
+export type Derived = {
+  status: Status;
+  watcherRead: string;
+  nextAction: string;
+  objective?: string;
+  impact?: string;
+};
+
+export type DeriveCtx = {
+  daysToNextMoment?: number | null;
+  phase?: Artist['phase'];
+};
 
 export function daysSince(iso?: string | null) {
   if (!iso) return null;
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 }
 
-export function deriveFromLive(live: LiveSnap): Derived | null {
+export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | null {
   if (live.subs == null) return null;
   const u = live.uploads30d ?? 0;
   const last = daysSince(live.lastUploadAt);
+
+  // Out-of-cycle: no near-term moment and channel is cold → ALWAYS ON
+  const outOfCycle =
+    (ctx.daysToNextMoment == null || ctx.daysToNextMoment > 21) &&
+    (ctx.phase === 'SUSTAIN' || ctx.phase === 'PRE' || ctx.phase == null);
+  if (outOfCycle && (last == null || last > 21 || u <= 1)) {
+    return {
+      status: 'ALWAYS ON',
+      watcherRead:
+        last != null
+          ? `Out of cycle. Last upload ${last}d ago.`
+          : 'Out of cycle. No recent uploads.',
+      nextAction:
+        'Post 2 Shorts from catalogue · recut top track vertical · 1 community post.',
+      objective: 'Keep channel warm ahead of next moment.',
+      impact: 'Maintains baseline momentum and lifts the next release.',
+    };
+  }
+
   if (last == null || last > 30 || u === 0) {
     return {
       status: 'FIX FIRST',
