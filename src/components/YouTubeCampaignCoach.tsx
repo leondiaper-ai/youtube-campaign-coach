@@ -1970,7 +1970,7 @@ function useCampaignBaseline(
 ): CampaignBaseline {
   const [baseline, setBaseline] = useState<CampaignBaseline>(null);
   const storageKey =
-    channelId && campaignStart ? `coach.baseline.${channelId}.${campaignStart}` : null;
+    channelId && campaignStart ? `coach.baseline.v2.${channelId}.${campaignStart}` : null;
 
   // 1. Try watcher /snapshot?on=<campaignStart>
   useEffect(() => {
@@ -2049,8 +2049,7 @@ function formatBig(n: number): string {
 function formatDelta(n: number | null | undefined): { text: string; dir: 'up' | 'flat' | 'down' } {
   if (n == null || n === 0) return { text: 'flat', dir: 'flat' };
   const abs = Math.abs(n);
-  const t = abs >= 1000 ? (abs / 1000).toFixed(abs % 1000 === 0 ? 0 : 1) + 'K' : abs.toLocaleString();
-  return { text: (n > 0 ? '+' : '−') + t, dir: n > 0 ? 'up' : 'down' };
+  return { text: (n > 0 ? '+' : '−') + formatBig(abs), dir: n > 0 ? 'up' : 'down' };
 }
 // Behaviour → Problem → Implication copy. Combines subs/views trend with output.
 function subsViewsSignal(
@@ -2236,20 +2235,35 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
             </div>
           </div>
           {baseline && watcher.state && (() => {
-            const subsSince = watcher.state.subscriberCount - baseline.subscriberCount;
-            const viewsSince = watcher.state.viewCount - baseline.viewCount;
-            const subsFmt = formatDelta(subsSince);
-            const viewsFmt = formatDelta(viewsSince);
             const sourceLabel = baseline.source === 'watcher' ? 'since start' : 'since tracking';
+            // Guard: if baseline values look obviously stale (e.g. viewCount=0 from the
+            // pre-migration default) skip rendering for that stat rather than showing
+            // a nonsense delta.
+            const subsValid = baseline.subscriberCount > 0;
+            const viewsValid = baseline.viewCount > 0;
+            const subsSince = subsValid ? watcher.state.subscriberCount - baseline.subscriberCount : null;
+            const viewsSince = viewsValid ? watcher.state.viewCount - baseline.viewCount : null;
+            if (subsSince === null && viewsSince === null) return null;
+            const render = (n: number | null) => {
+              if (n === null) return null;
+              const f = formatDelta(n);
+              return (
+                <span className="inline-flex items-center gap-1">
+                  <span style={{ color: dirColor(f.dir) }}>
+                    {f.dir !== 'flat' && <span className="mr-0.5">{dirGlyph(f.dir)}</span>}
+                    {f.dir === 'flat' ? 'Flat' : f.text}
+                  </span>
+                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {sourceLabel}</span>
+                </span>
+              );
+            };
             return (
               <div className="mt-3 grid grid-cols-2 gap-6">
                 <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  <span style={{ color: dirColor(subsFmt.dir) }}>{dirGlyph(subsFmt.dir)} {subsFmt.text}</span>
-                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {sourceLabel}</span>
+                  {render(subsSince) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
                 </div>
                 <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  <span style={{ color: dirColor(viewsFmt.dir) }}>{dirGlyph(viewsFmt.dir)} {viewsFmt.text}</span>
-                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {sourceLabel}</span>
+                  {render(viewsSince) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
                 </div>
               </div>
             );
