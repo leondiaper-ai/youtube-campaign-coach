@@ -1309,13 +1309,99 @@ function CampaignStartControl({ startDate, onChange }: { startDate: string; onCh
   );
 }
 
-function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign }: {
+function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign }: {
   plan: CampaignPlan;
-  onPhaseClick: (name: PhaseName) => void;
   onUpdatePlan: (updates: Partial<CampaignPlan>) => void;
   onOpenSettings?: () => void;
   onOpenAdd?: () => void;
   onNewCampaign?: () => void;
+}) {
+  let activeIdx = -1;
+  for (let i = plan.weeks.length - 1; i >= 0; i--) {
+    if (plan.weeks[i].actions.some((a) => a.status === 'done' || a.status === 'missed')) {
+      activeIdx = i;
+      break;
+    }
+  }
+  const totalWeeks = plan.weeks.length;
+  const weekNum = activeIdx >= 0 ? plan.weeks[activeIdx].week : 0;
+
+  return (
+    <div className="mb-5">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          {plan.isExample && (
+            <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-1">
+              Example Campaign
+            </div>
+          )}
+          <h1 className="flex items-baseline gap-1 font-black text-2xl text-ink">
+            <span>YouTube Campaign —</span>
+            <input
+              className="font-black text-2xl text-ink bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none min-w-[120px]"
+              value={plan.artist}
+              placeholder="Enter Artist Name"
+              onChange={(e) => onUpdatePlan({ artist: e.target.value })}
+            />
+          </h1>
+          <input
+            className="text-sm font-semibold text-ink/50 mt-0.5 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none w-full"
+            value={plan.campaignName}
+            placeholder="Enter Campaign Name"
+            onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
+          />
+          <CampaignStartControl
+            startDate={plan.startDate}
+            onChange={(d) => onUpdatePlan({ startDate: d })}
+          />
+        </div>
+        {onNewCampaign && (
+          <button
+            onClick={onNewCampaign}
+            className="ml-3 mt-1 px-3 py-2 rounded-lg bg-paper border border-ink/10 text-ink/70 font-bold text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow hover:text-ink transition-all"
+            title="Start a new campaign"
+          >
+            + New Campaign
+          </button>
+        )}
+        {onOpenAdd && (
+          <div className="ml-2 mt-1 flex flex-col items-end">
+            <button
+              onClick={onOpenAdd}
+              className="px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
+              style={{ background: '#0E0E0E' }}
+              title="Add content"
+            >
+              + Add
+            </button>
+            <span className="text-[9px] font-semibold text-ink/40 mt-1">Start building this week&apos;s momentum</span>
+          </div>
+        )}
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="ml-2 mt-1 p-2 rounded-lg bg-paper border border-ink/8 shadow-sm hover:bg-paper hover:shadow transition-all text-ink/50 hover:text-ink/70"
+            title="Campaign Settings"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+        )}
+      </div>
+      {weekNum > 0 && (
+        <div className="mt-2 text-right text-[10px] font-semibold text-ink/30">
+          Week {weekNum} of {totalWeeks}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CampaignTimeline({ plan, onPhaseClick }: {
+  plan: CampaignPlan;
+  onPhaseClick: (name: PhaseName) => void;
 }) {
   // Find active week
   let activeIdx = -1;
@@ -1339,83 +1425,6 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
 
   return (
     <div className="mb-8">
-      {/* Header */}
-      <div className="mb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            {plan.isExample && (
-              <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-1">
-                Example Campaign
-              </div>
-            )}
-            <h1 className="flex items-baseline gap-1 font-black text-2xl text-ink">
-              <span>YouTube Campaign —</span>
-              <input
-                className="font-black text-2xl text-ink bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none min-w-[120px]"
-                value={plan.artist}
-                placeholder="Enter Artist Name"
-                onChange={(e) => onUpdatePlan({ artist: e.target.value })}
-              />
-            </h1>
-            <input
-              className="text-sm font-semibold text-ink/50 mt-0.5 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none w-full"
-              value={plan.campaignName}
-              placeholder="Enter Campaign Name"
-              onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
-            />
-            {/* Campaign window anchor — all live drop gating flows from this */}
-            <CampaignStartControl
-              startDate={plan.startDate}
-              onChange={(d) => onUpdatePlan({ startDate: d })}
-            />
-          </div>
-          {onNewCampaign && (
-            <button
-              onClick={onNewCampaign}
-              className="ml-3 mt-1 px-3 py-2 rounded-lg bg-paper border border-ink/10 text-ink/70 font-bold text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow hover:text-ink transition-all"
-              title="Start a new campaign"
-            >
-              + New Campaign
-            </button>
-          )}
-          {onOpenAdd && (
-            <div className="ml-2 mt-1 flex flex-col items-end">
-              <button
-                onClick={onOpenAdd}
-                className="px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
-                style={{ background: '#0E0E0E' }}
-                title="Add content"
-              >
-                + Add
-              </button>
-              <span className="text-[9px] font-semibold text-ink/40 mt-1">Start building this week&apos;s momentum</span>
-            </div>
-          )}
-          {onOpenSettings && (
-            <button
-              onClick={onOpenSettings}
-              className="ml-2 mt-1 p-2 rounded-lg bg-paper border border-ink/8 shadow-sm hover:bg-paper hover:shadow transition-all text-ink/50 hover:text-ink/70"
-              title="Campaign Settings"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Week marker only — phase nav moved into the timeline below */}
-      {currentPhase && (
-        <div className="mb-2 flex items-center justify-end">
-          <span className="text-[10px] font-semibold text-ink/30">Week {weekNum} of {totalWeeks}</span>
-        </div>
-      )}
-
-      {/* ── CAMPAIGN PLAN (System 2) ─────────────────────────────────
-          Secondary context layer. Does NOT give direct instructions —
-          Drop View owns action. This is pitch + narrative + tracking. */}
       <div className="mt-2">
         <div className="mb-1.5 flex items-baseline gap-2">
           <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">
@@ -6057,6 +6066,22 @@ export default function YouTubeCampaignCoach() {
   return (
     <div style={{ background: '#FAF7F2' }} className="min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* CAMPAIGN HEADER — artist + campaign name + start date + quick actions */}
+        <CampaignHeader
+          plan={plan}
+          onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
+          onOpenSettings={() => setShowMetricsModal(true)}
+          onOpenAdd={() => setAddModal({ open: true })}
+          onNewCampaign={() => {
+            if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
+            setPlan(makeEmptyPlan());
+            setExpandedPhases(new Set());
+            setShowCollapsedSupport(new Set());
+            setAddModal({ open: false });
+            setEditingMetric(null);
+          }}
+        />
+
         {/* ── TOP: 3-second answer (What's happening / What should I do / What's next) ── */}
 
         {/* 1. DECISION CARD — primary focus */}
@@ -6140,17 +6165,6 @@ export default function YouTubeCampaignCoach() {
                   else next.add(phase);
                   return next;
                 });
-              }}
-              onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
-              onOpenSettings={() => setShowMetricsModal(true)}
-              onOpenAdd={() => setAddModal({ open: true })}
-              onNewCampaign={() => {
-                if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
-                setPlan(makeEmptyPlan());
-                setExpandedPhases(new Set());
-                setShowCollapsedSupport(new Set());
-                setAddModal({ open: false });
-                setEditingMetric(null);
               }}
             />
 
