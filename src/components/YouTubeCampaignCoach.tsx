@@ -1802,11 +1802,6 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             startDate={plan.startDate}
             onChange={(d) => onUpdatePlan({ startDate: d })}
           />
-          <CampaignBaselineControl
-            baselineSubs={plan.baselineSubs}
-            baselineViews={plan.baselineViews}
-            onChange={(u) => onUpdatePlan(u)}
-          />
         </div>
         {onOpenTimeline && (
           <button
@@ -2525,20 +2520,26 @@ type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
 function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void; onUpdatePlan?: (updates: Partial<CampaignPlan>) => void }) {
   const watcher = useWatcherChannel();
-  const watcherBaseline = useCampaignBaseline(
+  // Keep the watcher-baseline hook mounted (side-effects: first-sight capture)
+  // but we no longer use its return value for display. Hardcoded baseline below.
+  useCampaignBaseline(
     watcher.state?.channelId,
     plan.startDate,
     watcher.state ? { subscriberCount: watcher.state.subscriberCount, viewCount: watcher.state.viewCount } : null,
   );
   // Manual override wins — user-entered baseline values anchored to campaignStart.
-  const baseline: CampaignBaseline = (plan.baselineSubs && plan.baselineViews)
-    ? {
-        subscriberCount: plan.baselineSubs,
-        viewCount: plan.baselineViews,
-        capturedAt: (plan.startDate || new Date().toISOString().slice(0, 10)) + 'T00:00:00.000Z',
-        source: 'watcher',
-      }
-    : watcherBaseline;
+  // Fallback hard-coded demo baseline for the K-Trap campaign so growth is
+  // visible before the watcher has accumulated real history.
+  const HARDCODED_BASELINE_SUBS = 142_000;
+  const HARDCODED_BASELINE_VIEWS = 112_200_000;
+  const effectiveBaselineSubs  = plan.baselineSubs  ?? HARDCODED_BASELINE_SUBS;
+  const effectiveBaselineViews = plan.baselineViews ?? HARDCODED_BASELINE_VIEWS;
+  const baseline: CampaignBaseline = {
+    subscriberCount: effectiveBaselineSubs,
+    viewCount: effectiveBaselineViews,
+    capturedAt: (plan.startDate || new Date().toISOString().slice(0, 10)) + 'T00:00:00.000Z',
+    source: 'watcher',
+  };
 
   // ── DECISION ENGINE (deterministic, phase-aware) ────────────────────────────
   const currentWeek = getCurrentWeek(plan);
