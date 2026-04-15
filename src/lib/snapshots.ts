@@ -21,10 +21,14 @@ export type ChannelSnapshot = {
 const MAX_HISTORY = 180;
 
 async function kv() {
-  if (!process.env.KV_REST_API_URL || !process.env.KV_REST_API_TOKEN) return null;
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+  if (!url || !token) return null;
   try {
-    const mod = await import('@vercel/kv');
-    return mod.kv;
+    const { Redis } = await import('@upstash/redis');
+    return new Redis({ url, token });
   } catch {
     return null;
   }
