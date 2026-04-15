@@ -1220,11 +1220,11 @@ function recalcWeekDates(weeks: CampaignWeek[], startIso: string): CampaignWeek[
 // Unified header + status + phase timeline — feels like a journey
 
 const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string; nudge: string }> = {
-  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Get active',    focus: '→ Post Shorts + Community to warm the algorithm', nudge: 'Warm up the channel' },
-  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Drop + collabs', focus: '→ Land first drops and build crossover audience', nudge: 'Build consistency this week' },
-  'SCALE THE STORY': { short: 'SCALE',     desc: 'Push content',  focus: '→ Push content volume and expand reach',          nudge: 'Keep pushing content' },
-  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak moment',   focus: '→ Execute album rollout — maximise first 48hrs',  nudge: 'Land the big moment' },
-  'EXTEND':          { short: 'EXTEND',    desc: 'Sustain',       focus: '→ Keep the conversation alive post-release',      nudge: 'Keep the story alive' },
+  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Restart activity (Shorts + Posts)',     focus: '→ Post Shorts + Community to warm the algorithm', nudge: 'Warm up the channel' },
+  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Introduce singles + collaborations',    focus: '→ Land first drops and build crossover audience', nudge: 'Build consistency this week' },
+  'SCALE THE STORY': { short: 'SCALE',     desc: 'Increase output + support drops',       focus: '→ Push content volume and expand reach',          nudge: 'Keep pushing content' },
+  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak activity around release',          focus: '→ Execute album rollout — maximise first 48hrs',  nudge: 'Land the big moment' },
+  'EXTEND':          { short: 'EXTEND',    desc: 'Maintain momentum post-release',        focus: '→ Keep the conversation alive post-release',      nudge: 'Keep the story alive' },
 };
 
 // ── ACTUAL PHASE DETECTION ──────────────────────────────────────────────────
@@ -1410,57 +1410,89 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
         </div>
       )}
 
-      {/* Phase timeline */}
-      <div className="w-full flex gap-1 rounded-2xl overflow-hidden p-1.5" style={{ background: '#F6F1E7', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-        {CAMPAIGN_PHASES.map((phase) => {
-          const weekCount = phase.weekEnd - phase.weekStart + 1;
-          const isCurrent = currentPhase?.name === phase.name;
-          const isPast = activeIdx >= 0 && plan.weeks[activeIdx].week > phase.weekEnd;
-          const isFuture = !isCurrent && !isPast;
-          const micro = PHASE_MICRO[phase.name];
+      {/* ── CAMPAIGN PLAN (System 2) ─────────────────────────────────
+          Secondary context layer. Does NOT give direct instructions —
+          Drop View owns action. This is pitch + narrative + tracking. */}
+      <div className="mt-2">
+        <div className="mb-1.5 flex items-baseline gap-2">
+          <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40">
+            Campaign Plan
+          </span>
+          <span className="text-[10px] font-semibold text-ink/35">
+            This is your planned campaign structure — used for pitching and tracking progress.
+          </span>
+        </div>
+        <div
+          className="w-full flex gap-1 rounded-xl overflow-hidden p-1"
+          style={{ background: '#FAF7F2', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+        >
+          {CAMPAIGN_PHASES.map((phase) => {
+            const weekCount = phase.weekEnd - phase.weekStart + 1;
+            const isCurrent = currentPhase?.name === phase.name;
+            const isPast = activeIdx >= 0 && plan.weeks[activeIdx].week > phase.weekEnd;
+            const micro = PHASE_MICRO[phase.name];
 
-          // Compute phase completion
-          const phaseWeeks = plan.weeks.filter((w) => w.week >= phase.weekStart && w.week <= phase.weekEnd);
-          const phaseActions = phaseWeeks.flatMap((w) => w.actions);
-          const phaseDone = phaseActions.filter((a) => a.status === 'done').length;
-          const phaseTotal = phaseActions.length;
+            // Real drop count for this phase (from planned or live tracks).
+            const phaseWeeks = plan.weeks.filter((w) => w.week >= phase.weekStart && w.week <= phase.weekEnd);
+            const phaseActions = phaseWeeks.flatMap((w) => w.actions);
+            const phaseDrops = phaseActions.filter((a) => a.type === 'video' || a.type === 'collab').length;
+            const phaseDone = phaseActions.filter((a) => a.status === 'done').length;
+            const phaseTotal = phaseActions.length;
 
-          return (
-            <button
-              key={phase.name}
-              onClick={() => onPhaseClick(phase.name)}
-              className="relative flex flex-col items-center justify-center rounded-xl transition-all"
-              style={{
-                flex: weekCount,
-                minWidth: 0,
-                minHeight: isCurrent ? 72 : 64,
-                background: isCurrent
-                  ? phase.color
-                  : isPast
-                  ? `${phase.color}25`
-                  : `${phase.color}10`,
-                color: isCurrent
-                  ? '#ffffff'
-                  : isPast
-                  ? phase.color
-                  : `${phase.color}90`,
-                padding: '8px 4px',
-                cursor: 'pointer',
-                transform: isCurrent ? 'scale(1.02)' : 'scale(1)',
-                boxShadow: isCurrent ? `0 4px 16px ${phase.color}40` : 'none',
-                zIndex: isCurrent ? 2 : 1,
-              }}>
-              <span className="font-black text-[11px] tracking-wider leading-none">{micro.short}</span>
-              <span className="text-[9px] font-semibold mt-1 opacity-80 leading-none">{micro.desc}</span>
-              {isPast && phaseTotal > 0 && (
-                <span className="text-[8px] font-bold mt-1 opacity-60">{phaseDone}/{phaseTotal}</span>
-              )}
-              {isCurrent && (
-                <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-paper" />
-              )}
-            </button>
-          );
-        })}
+            // Status logic
+            let status: 'Complete' | 'In Progress' | 'Upcoming';
+            if (isPast && phaseTotal > 0 && phaseDone >= phaseTotal) status = 'Complete';
+            else if (isCurrent || (isPast && phaseDone < phaseTotal)) status = 'In Progress';
+            else status = 'Upcoming';
+
+            const statusColor =
+              status === 'Complete' ? '#1FBE7A' :
+              status === 'In Progress' ? phase.color : 'rgba(14,14,14,0.25)';
+
+            return (
+              <button
+                key={phase.name}
+                onClick={() => onPhaseClick(phase.name)}
+                className="relative flex flex-col items-start justify-center rounded-lg transition-all text-left"
+                style={{
+                  flex: weekCount,
+                  minWidth: 0,
+                  minHeight: 52,
+                  background: isCurrent ? `${phase.color}14` : 'transparent',
+                  border: isCurrent ? `1px solid ${phase.color}55` : '1px solid rgba(14,14,14,0.04)',
+                  color: 'rgba(14,14,14,0.72)',
+                  padding: '6px 8px',
+                  cursor: 'pointer',
+                }}
+              >
+                <div className="flex items-center gap-1.5 w-full">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: statusColor }}
+                    aria-hidden="true"
+                  />
+                  <span className="font-black text-[10px] tracking-[0.08em] leading-none truncate">
+                    {micro.short}
+                  </span>
+                  {phaseDrops > 0 && (
+                    <span className="ml-auto text-[9px] font-bold text-ink/45 shrink-0">
+                      {phaseDrops} {phaseDrops === 1 ? 'drop' : 'drops'}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[9px] font-semibold text-ink/50 leading-snug mt-1 line-clamp-2">
+                  {micro.desc}
+                </span>
+                <span
+                  className="text-[8px] font-bold uppercase tracking-[0.12em] mt-1"
+                  style={{ color: statusColor }}
+                >
+                  {status}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
