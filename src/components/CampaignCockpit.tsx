@@ -23,6 +23,48 @@ function daysSince(iso?: string | null) {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 }
 
+type Derived = { status: Status; watcherRead: string; nextAction: string };
+
+function deriveFromLive(live: LiveSnap): Derived | null {
+  if (live.subs == null) return null;
+  const u = live.uploads30d ?? 0;
+  const last = daysSince(live.lastUploadAt);
+
+  if (last == null || last > 30 || u === 0) {
+    return {
+      status: 'FIX FIRST',
+      watcherRead: last != null ? `Quiet ${last}d. ${u} uploads/30d.` : `No upload data.`,
+      nextAction: 'Ship something this week.',
+    };
+  }
+  if (last > 14 && u < 2) {
+    return {
+      status: 'ACTIVE BUT WEAK',
+      watcherRead: `Only ${u} uploads/30d. Last ${last}d ago.`,
+      nextAction: 'Add a Short or Premiere this week.',
+    };
+  }
+  if (u >= 5 && last <= 3) {
+    return {
+      status: 'MOMENTUM',
+      watcherRead: `${u} uploads/30d. Last ${last}d ago.`,
+      nextAction: 'Layer a Short on the next drop.',
+    };
+  }
+  if (u >= 2 && last <= 14) {
+    return {
+      status: 'BUILDING',
+      watcherRead: `${u} uploads/30d. Building cadence.`,
+      nextAction: 'Lock weekly cadence.',
+    };
+  }
+  return {
+    status: 'READY',
+    watcherRead: `${u} uploads/30d. Cadence holding.`,
+    nextAction: 'Hold cadence — schedule next moment.',
+  };
+}
+
 // --- Design tokens (match Coach) ---
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
@@ -226,15 +268,30 @@ export default function CampaignCockpit() {
     []
   );
 
+  const effective = useMemo(
+    () =>
+      ARTISTS.map((a) => {
+        const d = live[a.slug] ? deriveFromLive(live[a.slug]) : null;
+        return d
+          ? { ...a, status: d.status, watcherRead: d.watcherRead, nextAction: d.nextAction }
+          : a;
+      }),
+    [live]
+  );
+
   const stats = useMemo(() => {
-    const fixFirst = ARTISTS.filter((a) => a.status === 'FIX FIRST').length;
-    const supportGaps = ARTISTS.filter((a) =>
+    const fixFirst = effective.filter((a) => a.status === 'FIX FIRST').length;
+    const supportGaps = effective.filter((a) =>
       a.status === 'ACTIVE BUT WEAK' || a.status === 'BUILDING'
     ).length;
     const next7 = upcoming.filter((a) => a.days >= 0 && a.days <= 7).length;
-    const cold = ARTISTS.filter((a) => a.uploads30d === 0).length;
+    const cold = effective.filter((a) => {
+      const l = live[a.slug];
+      const u = l?.uploads30d ?? a.uploads30d;
+      return u === 0;
+    }).length;
     return { fixFirst, supportGaps, next7, cold };
-  }, [upcoming]);
+  }, [effective, upcoming, live]);
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-10" style={{ color: INK }}>
@@ -309,7 +366,7 @@ export default function CampaignCockpit() {
           <div>Next action</div>
           <div className="text-right">Open</div>
         </div>
-        {[...ARTISTS]
+        {[...effective]
           .sort((a, b) => {
             const s = STATUS_RANK[a.status] - STATUS_RANK[b.status];
             if (s !== 0) return s;
