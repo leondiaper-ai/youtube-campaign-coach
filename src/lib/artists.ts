@@ -118,6 +118,12 @@ export const STATUS_COLOR: Record<Status, { bg: string; fg: string; dot: string 
   'ALWAYS ON':        { bg: '#EEECE6', fg: '#3A3A3A', dot: '#8A8A8A' },
 };
 
+export type TopComment = {
+  text: string;
+  likeCount: number;
+  authorName: string;
+};
+
 export type RecentUpload = {
   id: string;
   title: string;
@@ -129,6 +135,15 @@ export type RecentUpload = {
   viewCount: number;
   likeCount: number;
   commentCount: number;
+  // Sibling coverage (derived from title regex across recentUploads)
+  hasLyricSibling?: boolean;
+  hasVisualizerSibling?: boolean;
+  hasAudioSibling?: boolean;
+  hasShortSibling?: boolean; // Short (<=60s) within 14d referencing the same track
+  // Relative performance within this channel's recent window
+  isTopPerformer?: boolean;  // viewCount >= 2x median of long-form uploads
+  // Top comments (only populated for top performers to save quota)
+  topComments?: TopComment[];
 };
 
 export type LiveSnap = {

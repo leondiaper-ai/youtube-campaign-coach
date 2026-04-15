@@ -15,6 +15,52 @@ function parseDuration(iso?: string): number {
   return (+(m?.[1] ?? 0)) * 3600 + (+(m?.[2] ?? 0)) * 60 + (+(m?.[3] ?? 0));
 }
 
+// Pull the core track name from an upload title by stripping common suffixes
+// like "(Official Video)", "[Lyric Video]", "- Visualizer", "| Audio", etc.
+function normaliseTitle(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\(.*?\)|\[.*?\]/g, ' ')
+    .replace(
+      /\b(official\s*(music\s*)?video|lyric(s)?\s*video|lyrics?|visualiz(er|ation)|audio(\s*only)?|mv|live|acoustic|performance|session|premiere|short|teaser|trailer|snippet|clip|remix|instrumental|radio\s*edit|extended|sped\s*up|slowed)\b/g,
+      ' '
+    )
+    .replace(/[-–—_:|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function titleHasTag(title: string, tag: RegExp): boolean {
+  return tag.test(title.toLowerCase());
+}
+
+const LYRIC_RX = /\blyric(s)?\b/;
+const VISUALIZER_RX = /\bvisualiz(er|ation)\b/;
+const AUDIO_RX = /\baudio\b/;
+
+type CommentRes = { items?: Array<{ snippet?: { topLevelComment?: { snippet?: { textDisplay?: string; likeCount?: number; authorDisplayName?: string } } } }> };
+
+async function fetchTopComments(videoId: string, max = 5) {
+  try {
+    const j = (await jget(
+      `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&order=relevance&maxResults=${max}&videoId=${videoId}&key=${KEY}`
+    )) as CommentRes;
+    return (j.items ?? [])
+      .map((it) => {
+        const s = it.snippet?.topLevelComment?.snippet;
+        if (!s?.textDisplay) return null;
+        return {
+          text: s.textDisplay.replace(/<[^>]+>/g, '').slice(0, 300),
+          likeCount: Number(s.likeCount ?? 0),
+          authorName: s.authorDisplayName ?? '',
+        };
+      })
+      .filter(Boolean) as { text: string; likeCount: number; authorName: string }[];
+  } catch {
+    return [];
+  }
+}
+
 export async function resolveChannelId(input: string): Promise<string | null> {
   if (!KEY) return null;
   if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
@@ -100,6 +146,49 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
           if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;
           if (ageDays <= 30 && !captions && live === 'none') captionsMissing30d++;
           if (live === 'upcoming') upcomingCount++;
+        }
+
+        // ---- Sibling detection (per upload, across recent window) ----
+        const normed = recentUploads.map((u) => ({
+          u,
+          key: normaliseTitle(u.title),
+          ts: new Date(u.publishedAt).getTime(),
+        }));
+        for (const row of normed) {
+          const siblings = normed.filter(
+            (o) => o !== row && o.key && row.key && (o.key.includes(row.key) || row.key.includes(o.key))
+          );
+          row.u.hasLyricSibling = siblings.some((s) => titleHasTag(s.u.title, LYRIC_RX));
+          row.u.hasVisualizerSibling = siblings.some((s) => titleHasTag(s.u.title, VISUALIZER_RX));
+          row.u.hasAudioSibling = siblings.some((s) => titleHasTag(s.u.title, AUDIO_RX));
+          row.u.hasShortSibling = siblings.some(
+            (s) => s.u.durationSec > 0 && s.u.durationSec <= 60 &&
+              Math.abs(s.ts - row.ts) <= 14 * 86400000
+          );
+        }
+
+        // ---- Top performer flagging (long-form, non-live) ----
+        const longform = recentUploads.filter((u) => u.live === 'none' && u.durationSec > 60);
+        if (longform.length >= 3) {
+          const sorted = [...longform.map((u) => u.viewCount)].sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)] || 0;
+          for (const u of longform) {
+            if (median > 0 && u.viewCount >= median * 2) u.isTopPerformer = true;
+          }
+        }
+
+        // ---- Top comments for top 3 performers (by views) ----
+        const topPerformers = [...recentUploads]
+          .filter((u) => u.isTopPerformer)
+          .sort((a, b) => b.viewCount - a.viewCount)
+          .slice(0, 3);
+        if (topPerformers.length) {
+          const results = await Promise.all(
+            topPerformers.map((u) => fetchTopComments(u.id, 5))
+          );
+          topPerformers.forEach((u, i) => {
+            u.topComments = results[i];
+          });
         }
       }
     }

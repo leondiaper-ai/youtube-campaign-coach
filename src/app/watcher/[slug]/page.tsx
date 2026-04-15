@@ -265,7 +265,23 @@ function OpportunityCard({ o }: { o: Opportunity }) {
       style={{ borderColor: MUTED, borderLeftColor: c.dot, background: PAPER }}
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="font-black text-[15px]">{o.subtype}</h3>
+        <div className="min-w-0">
+          <h3 className="font-black text-[15px]">{o.subtype}</h3>
+          {o.videoId && o.videoTitle && (
+            <a
+              href={`https://www.youtube.com/watch?v=${o.videoId}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[11px] text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4 mt-1 inline-block truncate max-w-[48ch]"
+              title={o.videoTitle}
+            >
+              {o.videoTitle}
+              {o.videoViews != null && (
+                <span className="text-ink/35 ml-1">· {o.videoViews.toLocaleString()} views</span>
+              )}
+            </a>
+          )}
+        </div>
         <span
           className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.14em] shrink-0"
           style={{ background: c.bg, color: c.fg }}

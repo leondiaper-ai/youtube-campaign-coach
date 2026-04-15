@@ -18,6 +18,10 @@ export type Opportunity = {
   impactRange: string;
   action: string;
   source: 'live';
+  // Optional per-video context (populated by video-level detectors)
+  videoId?: string;
+  videoTitle?: string;
+  videoViews?: number;
 };
 
 export const IMPACT_RANK: Record<OpportunityImpact, number> = {
@@ -160,6 +164,130 @@ export function detectOpportunities(
           impactRange: '+Shorts views, +discovery',
           action: 'Cut 1–2 Shorts from the top-performing upload this week.',
           source: 'live',
+        });
+      }
+    }
+  }
+
+  // --- Per-video detectors (run against top performers) ---
+  const topPerformers = (snap.recentUploads ?? [])
+    .filter((u) => u.isTopPerformer && u.live === 'none' && u.durationSec > 60)
+    .sort((a, b) => b.viewCount - a.viewCount)
+    .slice(0, 3);
+
+  for (const v of topPerformers) {
+    const fmtV = v.viewCount.toLocaleString();
+
+    // 7. Top video missing a lyric companion
+    if (!v.hasLyricSibling) {
+      out.push({
+        id: `vid-no-lyric:${artist.slug}:${v.id}`,
+        artistSlug: artist.slug,
+        artistName: artist.name,
+        type: 'Underused asset',
+        subtype: 'Top video has no lyric cut',
+        signal: `"${v.title}" at ${fmtV} views with no lyric/lyrics companion uploaded.`,
+        impact: 'HIGH',
+        impactRange: 'Lyric variants typically add 20–50% incremental watch-time',
+        action: 'Commission a lyric video or generate a typographic cut and upload as companion.',
+        source: 'live',
+        videoId: v.id,
+        videoTitle: v.title,
+        videoViews: v.viewCount,
+      });
+    }
+
+    // 8. Top video missing a visualizer / audio-only companion
+    if (!v.hasVisualizerSibling && !v.hasAudioSibling) {
+      out.push({
+        id: `vid-no-viz:${artist.slug}:${v.id}`,
+        artistSlug: artist.slug,
+        artistName: artist.name,
+        type: 'Underused asset',
+        subtype: 'Top video has no visualizer / audio cut',
+        signal: `"${v.title}" has no visualizer or audio-only variant to soak up passive listening.`,
+        impact: 'MEDIUM',
+        impactRange: 'Unlocks background-listen surface + playlist seeding',
+        action: 'Render a 16:9 visualizer loop or an audio-only version for the same track.',
+        source: 'live',
+        videoId: v.id,
+        videoTitle: v.title,
+        videoViews: v.viewCount,
+      });
+    }
+
+    // 9. Top video has no Short companion
+    if (!v.hasShortSibling) {
+      out.push({
+        id: `vid-no-short:${artist.slug}:${v.id}`,
+        artistSlug: artist.slug,
+        artistName: artist.name,
+        type: 'Format gap',
+        subtype: 'Top video has no Short companion',
+        signal: `"${v.title}" at ${fmtV} views but no Short within 14d of publish.`,
+        impact: 'HIGH',
+        impactRange: 'Cheap Shorts push on a proven track',
+        action: 'Cut a 30–60s vertical from the best moment and upload this week.',
+        source: 'live',
+        videoId: v.id,
+        videoTitle: v.title,
+        videoViews: v.viewCount,
+      });
+    }
+
+    // 10. Top video missing captions (accessibility + reach)
+    if (!v.captions) {
+      out.push({
+        id: `vid-no-cc:${artist.slug}:${v.id}`,
+        artistSlug: artist.slug,
+        artistName: artist.name,
+        type: 'Missing support',
+        subtype: 'Top video has no captions',
+        signal: `"${v.title}" is driving ${fmtV} views with no captions track.`,
+        impact: 'MEDIUM',
+        impactRange: 'International reach + mute-autoplay retention',
+        action: 'Auto-generate captions in YT Studio, review, and publish.',
+        source: 'live',
+        videoId: v.id,
+        videoTitle: v.title,
+        videoViews: v.viewCount,
+      });
+    }
+
+    // 11. Comment demand — recurring requests in top comments
+    const comments = v.topComments ?? [];
+    if (comments.length >= 3) {
+      const joined = comments.map((c) => c.text.toLowerCase()).join(' | ');
+      type Pattern = { label: string; rx: RegExp; action: string };
+      const patterns: Pattern[] = [
+        { label: 'lyric video', rx: /\blyric/, action: 'Ship a lyric cut — fans are asking.' },
+        { label: 'instrumental', rx: /\binstrumental\b/, action: 'Upload an instrumental version.' },
+        { label: 'acoustic / stripped', rx: /\bacoustic|stripped\b/, action: 'Film a stripped/acoustic performance cut.' },
+        { label: 'remix', rx: /\bremix\b/, action: 'Open a remix pack or source a hot edit.' },
+        { label: 'tour / live dates', rx: /\btour|dates|coming to\b/, action: 'Reply with tour info + pin a dates comment.' },
+        { label: 'merch', rx: /\bmerch|hoodie|t-?shirt\b/, action: 'Surface merch link in pinned comment + description.' },
+        { label: 'spotify / streaming', rx: /\bspotify|apple music|streaming\b/, action: 'Pin the streaming link, add to description.' },
+      ];
+      const hits = patterns.filter((p) => {
+        const matches = comments.filter((c) => p.rx.test(c.text.toLowerCase())).length;
+        return matches >= 2; // at least two top comments mention it
+      });
+      if (hits.length) {
+        const top = hits[0];
+        out.push({
+          id: `vid-demand:${artist.slug}:${v.id}:${top.label}`,
+          artistSlug: artist.slug,
+          artistName: artist.name,
+          type: 'Missing support',
+          subtype: `Comment demand: ${top.label}`,
+          signal: `Multiple top comments on "${v.title}" request ${top.label}.`,
+          impact: 'HIGH',
+          impactRange: 'Direct-from-audience demand signal',
+          action: top.action,
+          source: 'live',
+          videoId: v.id,
+          videoTitle: v.title,
+          videoViews: v.viewCount,
         });
       }
     }
