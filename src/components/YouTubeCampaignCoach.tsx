@@ -2828,8 +2828,9 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
   const rowColor = (done: number, target: number) =>
     target === 0 || done >= target ? '#1FBE7A' : 'rgba(14,14,14,0.55)';
 
-  // Row 3 — COVERAGE + missing + fix
-  const intel = totalDrops > 0 ? getCampaignIntelligence(autoTracks, liveByTrackId) : null;
+  // Row 3 — COVERAGE + missing + fix (respects community-post taps)
+  const communityPostDone = plan.manualOverrides?.communityPostDone || {};
+  const intel = totalDrops > 0 ? getCampaignIntelligence(autoTracks, liveByTrackId, communityPostDone) : null;
   const tierColor = intel ? COVERAGE_COLOR[intel.tier] : '#0E0E0E';
 
   const divider = { borderTop: '1px solid rgba(14,14,14,0.08)' };
@@ -4963,8 +4964,12 @@ type CampaignIntelligence = {
   fix: string;             // 1 short action line
 };
 
-function getCampaignIntelligence(tracks: AutoTrack[], liveByTrackId?: Record<string, LiveMatch>): CampaignIntelligence {
-  const supports = tracks.map((t) => getDropSupport(t, liveByTrackId?.[t.id]));
+function getCampaignIntelligence(
+  tracks: AutoTrack[],
+  liveByTrackId?: Record<string, LiveMatch>,
+  communityPostDone?: Record<string, boolean>,
+): CampaignIntelligence {
+  const supports = tracks.map((t) => getDropSupport(t, liveByTrackId?.[t.id], communityPostDone?.[t.id]));
   const totalDrops = supports.length;
   const fullySupported = supports.filter((s) => s.coverageTier === 'Strong').length;
   const strongRatio = totalDrops > 0 ? fullySupported / totalDrops : 1;
