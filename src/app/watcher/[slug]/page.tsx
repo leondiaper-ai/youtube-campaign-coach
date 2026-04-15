@@ -145,27 +145,79 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <Stat label="Last upload" value={lastUpDays != null ? `${lastUpDays}d ago` : '—'} />
         </div>
 
-        {/* 4. What's Missing */}
-        <div className="flex items-baseline justify-between mt-10 mb-3">
-          <h2 className="font-black text-lg">What&rsquo;s missing</h2>
-          <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
-            {opps.length} {opps.length === 1 ? 'opportunity' : 'opportunities'}
-          </div>
-        </div>
-        {opps.length > 0 ? (
-          <div className="space-y-3">
-            {opps.map((o) => (
-              <OpportunityCard key={o.id} o={o} />
-            ))}
-          </div>
-        ) : (
-          <div
-            className="rounded-xl border p-5 text-[13px] text-ink/55"
-            style={{ borderColor: MUTED, background: PAPER }}
-          >
-            Nothing flagged. Channel is covered for now.
-          </div>
-        )}
+        {/* 4. What's Missing — grouped */}
+        {(() => {
+          const channelOpps = opps.filter((o) => !o.videoId);
+          const videoGroups = new Map<string, Opportunity[]>();
+          for (const o of opps) {
+            if (!o.videoId) continue;
+            const arr = videoGroups.get(o.videoId) ?? [];
+            arr.push(o);
+            videoGroups.set(o.videoId, arr);
+          }
+          const videoCards = Array.from(videoGroups.entries())
+            .map(([id, items]: [string, Opportunity[]]) => ({
+              id,
+              title: items[0].videoTitle ?? id,
+              views: items[0].videoViews ?? 0,
+              items: items.slice().sort(
+                (a: Opportunity, b: Opportunity) =>
+                  IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]
+              ),
+            }))
+            .sort((a, b) => b.views - a.views);
+
+          if (opps.length === 0) {
+            return (
+              <>
+                <h2 className="font-black text-lg mt-10 mb-3">What&rsquo;s missing</h2>
+                <div
+                  className="rounded-xl border p-5 text-[13px] text-ink/55"
+                  style={{ borderColor: MUTED, background: PAPER }}
+                >
+                  Nothing flagged. Channel is covered for now.
+                </div>
+              </>
+            );
+          }
+
+          return (
+            <>
+              {channelOpps.length > 0 && (
+                <>
+                  <div className="flex items-baseline justify-between mt-10 mb-3">
+                    <h2 className="font-black text-lg">This week&rsquo;s focus</h2>
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+                      {channelOpps.length} {channelOpps.length === 1 ? 'channel gap' : 'channel gaps'}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {channelOpps
+                      .sort((a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact])
+                      .map((o) => (
+                        <OpportunityCard key={o.id} o={o} />
+                      ))}
+                  </div>
+                </>
+              )}
+              {videoCards.length > 0 && (
+                <>
+                  <div className="flex items-baseline justify-between mt-10 mb-3">
+                    <h2 className="font-black text-lg">Catalogue wins</h2>
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+                      {videoCards.length} {videoCards.length === 1 ? 'video' : 'videos'} to level up
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {videoCards.map((v) => (
+                      <VideoGapCard key={v.id} video={v} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          );
+        })()}
 
         {/* 5. Next moment */}
         <h2 className="font-black text-lg mt-10 mb-3">Next moment</h2>
@@ -254,6 +306,66 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
       <div className="font-black text-2xl mt-1 tabular-nums">{value}</div>
     </div>
+  );
+}
+
+function VideoGapCard({
+  video,
+}: {
+  video: { id: string; title: string; views: number; items: Opportunity[] };
+}) {
+  // Worst impact drives the card edge colour
+  const worst = video.items.reduce<Opportunity['impact']>(
+    (acc, o) => (IMPACT_RANK[o.impact] < IMPACT_RANK[acc] ? o.impact : acc),
+    'LOW'
+  );
+  const c = IMPACT_COLOR[worst];
+  return (
+    <article
+      className="rounded-xl border-l-4 border p-5"
+      style={{ borderColor: MUTED, borderLeftColor: c.dot, background: PAPER }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <a
+            href={`https://www.youtube.com/watch?v=${video.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-black text-[15px] hover:underline underline-offset-4 decoration-ink/30 truncate inline-block max-w-[52ch]"
+            title={video.title}
+          >
+            {video.title}
+          </a>
+          <div className="text-[11px] text-ink/55 mt-0.5 font-mono">
+            {video.views.toLocaleString()} views · {video.items.length} {video.items.length === 1 ? 'gap' : 'gaps'}
+          </div>
+        </div>
+        <span
+          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.14em] shrink-0"
+          style={{ background: c.bg, color: c.fg }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.dot }} />
+          {worst}
+        </span>
+      </div>
+      <ul className="mt-4 space-y-2.5">
+        {video.items.map((o) => {
+          const ic = IMPACT_COLOR[o.impact];
+          return (
+            <li key={o.id} className="flex items-start gap-3 text-[13px]">
+              <span
+                className="mt-1 w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ background: ic.dot }}
+              />
+              <div className="min-w-0">
+                <div className="font-bold">{o.subtype.replace(/^Top video /i, '')}</div>
+                <div className="text-ink/70 leading-snug">{o.action}</div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </article>
   );
 }
 
