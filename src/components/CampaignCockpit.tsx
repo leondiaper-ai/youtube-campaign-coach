@@ -1,7 +1,27 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+
+type LiveSnap = {
+  subs?: number;
+  views?: number;
+  uploads30d?: number;
+  lastUploadAt?: string | null;
+  channelId?: string;
+  error?: string;
+  loading?: boolean;
+};
+
+function fmtNum(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
+  return String(n);
+}
+function daysSince(iso?: string | null) {
+  if (!iso) return null;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
 
 // --- Design tokens (match Coach) ---
 const INK = '#0E0E0E';
@@ -165,6 +185,38 @@ function StatusChip({ status }: { status: Status }) {
 
 export default function CampaignCockpit() {
   const [running, setRunning] = useState(false);
+  const [live, setLive] = useState<Record<string, LiveSnap>>({});
+  const [lastRunAt, setLastRunAt] = useState<number | null>(null);
+
+  async function runChecks() {
+    setRunning(true);
+    setLive((prev) => {
+      const next = { ...prev };
+      for (const a of ARTISTS) next[a.slug] = { ...next[a.slug], loading: true };
+      return next;
+    });
+    await Promise.all(
+      ARTISTS.map(async (a) => {
+        const q = a.channelHandle ?? a.name;
+        try {
+          const r = await fetch(`/api/channel?q=${encodeURIComponent(q)}`);
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.error ?? `${r.status}`);
+          setLive((prev) => ({ ...prev, [a.slug]: { ...j, loading: false } }));
+        } catch (e: any) {
+          setLive((prev) => ({ ...prev, [a.slug]: { error: String(e?.message ?? e), loading: false } }));
+        }
+      })
+    );
+    setLastRunAt(Date.now());
+    setRunning(false);
+  }
+
+  // auto-run on mount
+  useEffect(() => {
+    runChecks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const upcoming = useMemo(
     () =>
@@ -202,10 +254,7 @@ export default function CampaignCockpit() {
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <button
-            onClick={() => {
-              setRunning(true);
-              setTimeout(() => setRunning(false), 1200);
-            }}
+            onClick={runChecks}
             disabled={running}
             className="text-[12px] font-bold uppercase tracking-[0.14em] text-ink/60 hover:text-ink underline decoration-ink/20 underline-offset-4"
           >
@@ -242,7 +291,11 @@ export default function CampaignCockpit() {
           )}
         </div>
         <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
-          Live · auto-refreshing
+          {running
+            ? 'Checking…'
+            : lastRunAt
+            ? `Checked ${new Date(lastRunAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+            : 'Not yet checked'}
         </div>
       </div>
 
@@ -263,7 +316,7 @@ export default function CampaignCockpit() {
             return daysFromNow(a.nextMomentDate) - daysFromNow(b.nextMomentDate);
           })
           .map((a, i, arr) => (
-            <ArtistRow key={a.slug} a={a} last={i === arr.length - 1} />
+            <ArtistRow key={a.slug} a={a} last={i === arr.length - 1} live={live[a.slug]} />
           ))}
       </div>
 
@@ -311,8 +364,13 @@ function SectionHeader({ title, hint }: { title: string; hint?: string }) {
   );
 }
 
-function ArtistRow({ a, last }: { a: Artist; last: boolean }) {
+function ArtistRow({ a, last, live }: { a: Artist; last: boolean; live?: LiveSnap }) {
   const days = daysFromNow(a.nextMomentDate);
+  const subs = live?.subs != null ? fmtNum(live.subs) : a.subs;
+  const views30dDisplay = live?.views != null ? fmtNum(live.views) + ' total' : `${a.views30d} (30d)`;
+  const uploads30d = live?.uploads30d != null ? live.uploads30d : a.uploads30d;
+  const lastUpDays = daysSince(live?.lastUploadAt);
+  const isLive = !!live && !live.error && !live.loading && live.subs != null;
   return (
     <div
       className={`grid grid-cols-[1.4fr_1.2fr_1.6fr_1.6fr_auto] gap-4 px-5 py-4 items-center ${
@@ -325,9 +383,15 @@ function ArtistRow({ a, last }: { a: Artist; last: boolean }) {
         <div className="text-[11px] text-ink/55 truncate">
           {a.campaign} · <span className="uppercase tracking-[0.12em]">{a.phase}</span>
         </div>
-        <div className="text-[10px] text-ink/40 mt-1 font-mono">
-          {a.subs} subs · {a.views30d} (30d) · {a.uploads30d} uploads
+        <div className="text-[10px] text-ink/40 mt-1 font-mono flex items-center gap-1.5">
+          <span>{subs} subs · {views30dDisplay} · {uploads30d} uploads/30d</span>
+          {live?.loading && <span className="text-ink/30">· loading…</span>}
+          {live?.error && <span className="text-[#FF4A1C]" title={live.error}>· api error</span>}
+          {isLive && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#1FBE7A' }} title="Live data" />}
         </div>
+        {lastUpDays != null && (
+          <div className="text-[10px] text-ink/40 mt-0.5 font-mono">last upload {lastUpDays}d ago</div>
+        )}
       </div>
 
       <div>
