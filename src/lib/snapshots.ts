@@ -90,6 +90,26 @@ export function deltaOver(history: ChannelSnapshot[], days: number, field: 'subs
   return { delta, pct, baseline, last };
 }
 
+// --- Top-ever video cache (weekly refresh) ---
+
+export type TopEverCache = {
+  fetchedAt: string;
+  videoIds: string[];
+};
+
+export async function readTopEverCache(channelId: string): Promise<TopEverCache | null> {
+  const store = await kv();
+  if (!store) return null;
+  return ((await store.get(`topever:${channelId}`)) as TopEverCache | null) ?? null;
+}
+
+export async function writeTopEverCache(channelId: string, videoIds: string[]) {
+  const store = await kv();
+  if (!store) return;
+  const entry: TopEverCache = { fetchedAt: new Date().toISOString(), videoIds };
+  await store.set(`topever:${channelId}`, entry);
+}
+
 export function seriesForField(
   history: ChannelSnapshot[],
   field: 'subs' | 'views',

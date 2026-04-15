@@ -156,9 +156,11 @@ export type LiveSnap = {
   lastUploadAt?: string | null;
   thumbnail?: string;
   recentUploads?: RecentUpload[];
+  topEverVideos?: RecentUpload[]; // all-time top 10 by viewCount (weekly refresh)
   shorts30d?: number;
   upcomingCount?: number;
   captionsMissing30d?: number;
+  missingCaptionsVideos?: { id: string; title: string; viewCount: number }[];
   error?: string;
 };
 

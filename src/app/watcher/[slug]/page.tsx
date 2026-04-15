@@ -410,6 +410,28 @@ function OpportunityCard({ o }: { o: Opportunity }) {
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Action</span>
         {o.action}
       </div>
+      {o.relatedVideos && o.relatedVideos.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {o.relatedVideos.map((v) => (
+            <li key={v.id} className="text-[12px] flex items-center justify-between gap-3">
+              <a
+                href={`https://www.youtube.com/watch?v=${v.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="truncate max-w-[52ch] text-ink/75 hover:text-ink underline decoration-ink/20 underline-offset-4"
+                title={v.title}
+              >
+                {v.title}
+              </a>
+              {v.viewCount != null && (
+                <span className="text-[11px] text-ink/40 font-mono shrink-0">
+                  {v.viewCount.toLocaleString()}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </article>
   );
 }

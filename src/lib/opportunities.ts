@@ -22,6 +22,8 @@ export type Opportunity = {
   videoId?: string;
   videoTitle?: string;
   videoViews?: number;
+  // Optional list of related videos (used for channel-level card drill-downs)
+  relatedVideos?: { id: string; title: string; viewCount?: number }[];
 };
 
 export const IMPACT_RANK: Record<OpportunityImpact, number> = {
@@ -120,6 +122,7 @@ export function detectOpportunities(
 
   // 4. Captions missing on recent uploads
   const captionsMissing = snap.captionsMissing30d ?? 0;
+  const missingList = snap.missingCaptionsVideos ?? [];
   if (uploads30d >= 2 && captionsMissing >= Math.ceil(uploads30d / 2)) {
     out.push({
       id: `captions:${artist.slug}`,
@@ -132,6 +135,7 @@ export function detectOpportunities(
       impactRange: 'Limits reach + accessibility',
       action: 'Auto-generate captions, review, and publish on recent uploads.',
       source: 'live',
+      relatedVideos: missingList.slice(0, 8),
     });
   }
 
@@ -169,11 +173,17 @@ export function detectOpportunities(
     }
   }
 
-  // --- Per-video detectors (run against top performers) ---
-  const topPerformers = (snap.recentUploads ?? [])
-    .filter((u) => u.isTopPerformer && u.live === 'none' && u.durationSec > 60)
+  // --- Per-video detectors (run against recent top + all-time top) ---
+  const byId = new Map<string, NonNullable<LiveSnap['recentUploads']>[number]>();
+  for (const u of snap.recentUploads ?? []) {
+    if (u.isTopPerformer && u.live === 'none' && u.durationSec > 60) byId.set(u.id, u);
+  }
+  for (const u of snap.topEverVideos ?? []) {
+    if (u.live === 'none' && u.durationSec > 60) byId.set(u.id, u);
+  }
+  const topPerformers = Array.from(byId.values())
     .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, 3);
+    .slice(0, 5);
 
   for (const v of topPerformers) {
     const fmtV = v.viewCount.toLocaleString();
