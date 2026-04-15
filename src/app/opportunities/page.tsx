@@ -19,12 +19,11 @@ export default function OpportunitiesPage() {
     (a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]
   );
   const artistCount = new Set(OPPORTUNITIES.map((o) => o.artistSlug)).size;
-
   const tiers: OpportunityImpact[] = ['HIGH', 'MEDIUM', 'LOW'];
 
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-      <div className="max-w-[960px] mx-auto px-6 py-10">
+      <div className="max-w-[860px] mx-auto px-6 py-10">
         {/* Breadcrumb */}
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -34,17 +33,17 @@ export default function OpportunitiesPage() {
             ← Cockpit
           </Link>
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
-            Cockpit · Opportunities
+            Scanner
           </div>
         </div>
 
         {/* Header */}
         <h1 className="font-black text-3xl leading-tight">Opportunity Scanner</h1>
-        <p className="text-[14px] text-ink/70 mt-2">
-          Things we&rsquo;re not doing that we should be.
+        <p className="text-[13px] text-ink/65 mt-2 max-w-[55ch]">
+          Cross-artist radar. Pick a row to open Watcher for the full diagnosis and action.
         </p>
         <div className="text-[11px] uppercase tracking-[0.14em] text-ink/45 mt-3 font-mono">
-          {OPPORTUNITIES.length} opportunities across {artistCount} artists
+          {OPPORTUNITIES.length} flagged across {artistCount} artists
         </div>
 
         {/* Tiers */}
@@ -52,19 +51,22 @@ export default function OpportunitiesPage() {
           const items = sorted.filter((o) => o.impact === tier);
           if (items.length === 0) return null;
           return (
-            <section key={tier} className="mt-12">
+            <section key={tier} className="mt-10">
               <TierDivider tier={tier} count={items.length} />
-              <div className="space-y-4 mt-5">
+              <ul
+                className="mt-3 rounded-xl border divide-y overflow-hidden"
+                style={{ borderColor: MUTED, background: PAPER }}
+              >
                 {items.map((o) => (
-                  <OpportunityCard key={o.id} o={o} />
+                  <RadarRow key={o.id} o={o} />
                 ))}
-              </div>
+              </ul>
             </section>
           );
         })}
 
         <div className="mt-16 text-[10px] uppercase tracking-[0.18em] text-ink/35">
-          v0.1 · seeded opportunities · live detection in next pass
+          Scanner points · Watcher knows · Coach ships
         </div>
       </div>
     </main>
@@ -89,84 +91,32 @@ function TierDivider({ tier, count }: { tier: OpportunityImpact; count: number }
   );
 }
 
-function OpportunityCard({ o }: { o: Opportunity }) {
+function RadarRow({ o }: { o: Opportunity }) {
   const c = IMPACT_COLOR[o.impact];
   return (
-    <article
-      className="rounded-xl border p-5"
-      style={{ borderColor: MUTED, background: PAPER }}
-    >
-      {/* Top row: artist · type */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-[11px] uppercase tracking-[0.18em] text-ink/50 font-bold">
-            {o.artistName}
-          </div>
-          <h3 className="font-black text-[18px] mt-0.5 truncate">{o.subtype}</h3>
-        </div>
+    <li style={{ borderColor: MUTED }}>
+      <Link
+        href={`/watcher/${o.artistSlug}`}
+        className="flex items-center gap-4 px-5 py-4 hover:bg-[#F6F1E7] transition-colors"
+      >
         <span
-          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.14em] shrink-0"
-          style={{ background: c.bg, color: c.fg }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.dot }} />
-          {o.type}
-        </span>
-      </div>
-
-      {/* Signal / Impact / Action */}
-      <div className="mt-4 space-y-3">
-        <Row label="Signal" value={o.signal} />
-        <Row label="Impact" value={o.impactRange} mono />
-        <Row label="Action" value={o.action} emphasis />
-      </div>
-
-      {/* Foot links */}
-      <div
-        className="flex items-center gap-2 mt-5 pt-4 border-t"
-        style={{ borderColor: MUTED }}
-      >
-        <Link
-          href={`/watcher/${o.artistSlug}`}
-          className="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.14em] border"
-          style={{ borderColor: MUTED, background: SOFT, color: INK }}
-        >
-          Open Watcher
-        </Link>
-        <Link
-          href={`/?artist=${o.artistSlug}`}
-          className="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.14em]"
-          style={{ background: INK, color: PAPER }}
-        >
-          Open Coach
-        </Link>
-      </div>
-    </article>
-  );
-}
-
-function Row({
-  label,
-  value,
-  mono,
-  emphasis,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  emphasis?: boolean;
-}) {
-  return (
-    <div className="grid grid-cols-[80px_1fr] gap-3 items-baseline">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45 font-bold">
-        {label}
-      </div>
-      <div
-        className={`text-[13px] leading-snug ${mono ? 'font-mono text-ink/75' : ''} ${
-          emphasis ? 'font-medium text-ink/90' : 'text-ink/75'
-        }`}
-      >
-        {value}
-      </div>
-    </div>
+          className="w-1.5 h-1.5 rounded-full shrink-0"
+          style={{ background: c.dot }}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-2">
+            <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-ink/55 shrink-0">
+              {o.artistName}
+            </div>
+            <div className="text-[10px] text-ink/30">·</div>
+            <div className="text-[13px] font-bold truncate">{o.subtype}</div>
+          </div>
+          <div className="text-[12px] text-ink/60 mt-0.5 truncate">{o.signal}</div>
+        </div>
+        <div className="text-[10px] uppercase tracking-[0.14em] text-ink/40 shrink-0">
+          Watcher →
+        </div>
+      </Link>
+    </li>
   );
 }
