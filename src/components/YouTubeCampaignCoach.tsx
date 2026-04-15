@@ -2476,10 +2476,10 @@ function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
       className="mt-3 rounded-xl px-4 py-2.5 flex items-center gap-3"
       style={{ background: '#FAF7F2', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
     >
-      <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45 shrink-0">
+      <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 shrink-0">
         Across Recent Drops
       </span>
-      <span className="text-[12px] font-semibold text-ink/75 truncate">
+      <span className="text-[12px] font-semibold truncate" style={{ color: '#FF4A1C' }}>
         {rollup.map((r) => `${r.count} ${r.label} missing`).join(' · ')}
       </span>
     </div>
@@ -2641,7 +2641,7 @@ function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl" style={{ background: '#F6F1E7' }}>
       <div className="flex items-center gap-4 min-w-0 text-[12px] font-bold text-ink/70">
-        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">This week</span>
+        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45">This week</span>
         {rows.map((r) => (
           <span key={r.key} className="flex items-baseline gap-1">
             <span className="font-black tabular-nums" style={{ color: rowStatusColor(r.done, r.target) }}>{r.done}</span>
@@ -2654,8 +2654,8 @@ function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
         )}
       </div>
       <span
-        className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full shrink-0"
-        style={{ color: statusColor, background: `${statusColor}15` }}
+        className="text-[11px] font-black uppercase tracking-[0.14em] shrink-0"
+        style={{ color: statusColor }}
       >
         {statusLabel}
       </span>
@@ -4870,21 +4870,20 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
         </span>
       </div>
 
-      {/* FULLY SUPPORTED — celebratory nudge + why it matters */}
+      {/* FULLY SUPPORTED — microsite-style: mono label + bold status + rationale */}
       {support.coverageTier === 'Strong' && support.coreDone && (
-        <div
-          className="mt-2 rounded-xl px-3 py-2"
-          style={{ background: 'rgba(31,190,122,0.10)', border: '1px solid rgba(31,190,122,0.25)' }}
-        >
-          <div className="flex items-center gap-1.5">
-            <span className="text-[13px]">🔥</span>
-            <span className="text-[12px] font-black" style={{ color: '#1FBE7A' }}>
-              Smashed it — fully supported
+        <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(14,14,14,0.08)' }}>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45">
+              Status
+            </span>
+            <span className="text-[14px] font-black uppercase tracking-wider" style={{ color: '#1FBE7A' }}>
+              Smashed it
             </span>
           </div>
-          <div className="mt-1 text-[11px] font-semibold text-ink/65 leading-snug">
-            Algo has multiple entry points to rank this drop. Shorts feed new viewers in, companion videos hold watch-time, and the community post signals freshness — compounding discovery in the first 72h.
-          </div>
+          <p className="mt-2 text-[12px] font-semibold text-ink/65 leading-snug">
+            → Algo has multiple entry points to rank this drop. Shorts feed new viewers in, companion videos hold watch-time, the community post signals freshness — compounding discovery in the first 72h.
+          </p>
         </div>
       )}
 
@@ -5157,50 +5156,49 @@ function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggl
       >
         {outputStats.map((stat) => (
           <div key={stat.label} className="flex flex-col items-center text-center">
-            <span className="text-xl font-black leading-none text-ink">{stat.value}</span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">
+            <span className="text-2xl font-black leading-none text-ink">{stat.value}</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 mt-1.5">
               {stat.label}
             </span>
           </div>
         ))}
       </div>
 
-      {/* ── CAMPAIGN SUPPORT — judgement, not numbers ─────────────── */}
+      {/* ── CAMPAIGN SUPPORT — microsite-style: mono label + bold status word + arrow fix */}
       <div
         className="mb-6 rounded-2xl p-5"
         style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
       >
-        {/* 1 · Title */}
-        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-2">
+        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 mb-3">
           Campaign Support
         </div>
 
-        {/* 2 · Non-numeric summary (headline) */}
-        <div className="flex items-center gap-2 mb-2">
-          <span
-            className="text-base leading-none"
-            style={{ color: tierColor }}
-            aria-hidden="true"
-          >
-            {intel.tier === 'Strong' ? '✓' : intel.tier === 'Medium' ? '⚠' : '✕'}
+        <div className="flex items-baseline gap-3 flex-wrap pb-3" style={{ borderBottom: '1px solid rgba(14,14,14,0.08)' }}>
+          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45">
+            Coverage
           </span>
-          <span className="text-lg font-black leading-none" style={{ color: tierColor }}>
+          <span className="text-[18px] font-black uppercase tracking-wider" style={{ color: tierColor }}>
+            {intel.tier}
+          </span>
+          <span className="text-[13px] font-semibold text-ink/70">
             {intel.summary}
           </span>
         </div>
 
-        {/* 3 · Missing (inline) */}
         {intel.missingLabels.length > 0 && (
-          <div className="text-[12px] font-semibold text-ink/60 mb-1">
-            <span className="text-ink/40">Missing:</span>{' '}
-            {intel.missingLabels.join(' · ')}
+          <div className="mt-3 flex items-baseline gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45">
+              Missing
+            </span>
+            <span className="text-[12px] font-semibold" style={{ color: '#FF4A1C' }}>
+              {intel.missingLabels.join(' · ')}
+            </span>
           </div>
         )}
 
-        {/* 4 · Fix */}
-        <div className="text-[12px] font-bold" style={{ color: tierColor }}>
-          <span className="text-ink/40 font-semibold">Fix:</span> {intel.fix}
-        </div>
+        <p className="mt-2 text-[13px] font-semibold leading-snug" style={{ color: tierColor }}>
+          → {intel.fix}
+        </p>
       </div>
 
       {/* ── DROP CARDS — worst coverage first ──────────────────────── */}
@@ -6337,7 +6335,7 @@ export default function YouTubeCampaignCoach() {
         <div className="mt-6">
           <button
             onClick={() => setPlanOpen((o) => !o)}
-            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-[0.16em] text-ink/55 hover:text-ink/80 transition-colors"
+            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-[11px] font-mono uppercase tracking-[0.18em] text-ink/55 hover:text-ink/80 transition-colors"
             style={{ background: '#F6F1E7' }}
           >
             <span>Campaign Plan — what&apos;s scheduled, supported, and missing</span>
