@@ -36,7 +36,26 @@ type Artist = {
   views30d: string;
   uploads30d: number;
   channelHandle?: string;
+  lastCheckedMinsAgo: number;
 };
+
+const STATUS_RANK: Record<Status, number> = {
+  'FIX FIRST': 0,
+  'ACTIVE BUT WEAK': 1,
+  'BUILDING': 2,
+  'MOMENTUM': 3,
+  'READY': 4,
+};
+
+function fmtChecked(mins: number) {
+  if (mins < 60) return `Checked ${mins}m ago`;
+  const h = Math.round(mins / 60);
+  if (h < 24) return `Checked ${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d === 1) return 'Checked yesterday';
+  if (d < 7) return `Checked ${d}d ago`;
+  return `Checked ${d}d ago`;
+}
 
 const ARTISTS: Artist[] = [
   {
@@ -47,12 +66,13 @@ const ARTISTS: Artist[] = [
     status: 'FIX FIRST',
     nextMomentLabel: 'Pre-campaign channel setup',
     nextMomentDate: '2026-04-22',
-    watcherRead: 'Channel quiet for 38 days. Banner + trailer outdated. Strong back-catalogue base.',
-    nextAction: 'Run Channel Health Check before announce — refresh trailer & playlists this week.',
+    watcherRead: 'Quiet 38 days. Trailer outdated.',
+    nextAction: 'Refresh trailer & playlists before announce.',
     subs: '312K',
     views30d: '1.4M',
     uploads30d: 0,
     channelHandle: '@ezracollective',
+    lastCheckedMinsAgo: 35,
   },
   {
     slug: 'k-trap',
@@ -62,12 +82,13 @@ const ARTISTS: Artist[] = [
     status: 'MOMENTUM',
     nextMomentLabel: 'PUSH content drop',
     nextMomentDate: '2026-04-19',
-    watcherRead: 'Change video at 1.2M views, +18% wow. Shorts cadence holding 3/week.',
-    nextAction: 'Layer behind-the-scenes Short on drop day — capitalise on rising curve.',
+    watcherRead: 'Change at 1.2M, +18% week.',
+    nextAction: 'Cut a BTS Short for drop day.',
     subs: '142K',
     views30d: '4.6M',
     uploads30d: 7,
     channelHandle: '@ktrap',
+    lastCheckedMinsAgo: 120,
   },
   {
     slug: 'tom-odell',
@@ -77,12 +98,13 @@ const ARTISTS: Artist[] = [
     status: 'BUILDING',
     nextMomentLabel: 'Tour announce video',
     nextMomentDate: '2026-04-28',
-    watcherRead: 'Catalogue evergreen, 220k monthly. No new uploads in 21 days.',
-    nextAction: 'Schedule announce teaser + pinned community post 48h before.',
+    watcherRead: 'Catalogue strong. No uploads in 21d.',
+    nextAction: 'Schedule announce teaser + pinned post.',
     subs: '1.1M',
     views30d: '3.2M',
     uploads30d: 1,
     channelHandle: '@tomodell',
+    lastCheckedMinsAgo: 240,
   },
   {
     slug: 'bad-omens',
@@ -92,12 +114,13 @@ const ARTISTS: Artist[] = [
     status: 'ACTIVE BUT WEAK',
     nextMomentLabel: 'Coachella weekend recap',
     nextMomentDate: '2026-04-20',
-    watcherRead: 'Uploads steady (5/30d) but watch-time flat. Shorts under-used.',
-    nextAction: 'Cut 3 Shorts from festival footage within 24h of set.',
+    watcherRead: 'Watch-time flat 7d. Shorts gap.',
+    nextAction: 'Cut 3 Shorts from festival within 24h.',
     subs: '2.4M',
     views30d: '5.8M',
     uploads30d: 5,
     channelHandle: '@badomens',
+    lastCheckedMinsAgo: 55,
   },
   {
     slug: 'james-blake',
@@ -107,21 +130,14 @@ const ARTISTS: Artist[] = [
     status: 'READY',
     nextMomentLabel: 'Live session premiere',
     nextMomentDate: '2026-05-02',
-    watcherRead: 'Premieres converting at 32%. Sub growth +1.8% MoM.',
-    nextAction: 'Hold cadence — schedule next premiere window now.',
+    watcherRead: 'Premieres converting 32%. Holding cadence.',
+    nextAction: 'Schedule next premiere window.',
     subs: '895K',
     views30d: '2.1M',
     uploads30d: 3,
     channelHandle: '@jamesblake',
+    lastCheckedMinsAgo: 18,
   },
-];
-
-const RECENT_READS: { artist: string; ts: string; line: string }[] = [
-  { artist: 'K-Trap',          ts: '2h ago',  line: 'Change crossed 1.2M views (+18% wow).' },
-  { artist: 'Bad Omens',       ts: '6h ago',  line: 'Watch-time flat for 7th day — Shorts gap.' },
-  { artist: 'Ezra Collective', ts: '1d ago',  line: 'No uploads for 38 days. Trailer outdated.' },
-  { artist: 'James Blake',     ts: '2d ago',  line: 'Premiere converted 32% of notified subs.' },
-  { artist: 'Tom Odell',       ts: '3d ago',  line: 'Community tab silent for 14 days.' },
 ];
 
 function fmtDate(iso: string) {
@@ -184,37 +200,53 @@ export default function CampaignCockpit() {
             attention before the next moment hits.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
               setRunning(true);
               setTimeout(() => setRunning(false), 1200);
             }}
             disabled={running}
-            className="px-3 py-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em] border"
-            style={{ borderColor: MUTED, background: SOFT, color: INK }}
+            className="text-[12px] font-bold uppercase tracking-[0.14em] text-ink/60 hover:text-ink underline decoration-ink/20 underline-offset-4"
           >
             {running ? 'Running…' : 'Run checks'}
           </button>
           <Link
             href="/?openTimeline=1"
-            className="px-3 py-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em]"
+            className="px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em]"
             style={{ background: INK, color: PAPER }}
           >
-            Import timeline
+            Build from timeline
           </Link>
         </div>
       </div>
 
-      {/* Priority Strip */}
-      <div className="grid grid-cols-4 gap-3 mb-10">
-        <PriorityTile label="Fix first"        value={stats.fixFirst}    tone={BAD} />
-        <PriorityTile label="Support gaps"     value={stats.supportGaps} tone={WARN} />
-        <PriorityTile label="Drops next 7d"    value={stats.next7}       tone={INK} />
-        <PriorityTile label="Cold channels"    value={stats.cold}        tone={BAD} />
+      {/* Needs attention summary */}
+      <div
+        className="flex items-center justify-between rounded-xl border px-5 py-3 mb-8"
+        style={{ borderColor: MUTED, background: SOFT }}
+      >
+        <div className="text-[13px]">
+          <span className="font-black" style={{ color: BAD }}>
+            {stats.fixFirst + stats.supportGaps} campaigns
+          </span>
+          <span className="text-ink/70"> need attention</span>
+          <span className="text-ink/30"> · </span>
+          <span className="font-bold">{stats.next7} drops</span>
+          <span className="text-ink/60"> in the next 7 days</span>
+          {stats.cold > 0 && (
+            <>
+              <span className="text-ink/30"> · </span>
+              <span className="font-bold" style={{ color: BAD }}>{stats.cold} cold</span>
+            </>
+          )}
+        </div>
+        <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+          Live · auto-refreshing
+        </div>
       </div>
 
-      {/* Artists in Focus */}
+      {/* Artists in Focus — sorted by status severity, then by next moment proximity */}
       <SectionHeader title="Artists in focus" hint={`${ARTISTS.length} active campaigns`} />
       <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED, background: PAPER }}>
         <div className="grid grid-cols-[1.4fr_1.2fr_1.6fr_1.6fr_auto] gap-4 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-ink/45 border-b" style={{ borderColor: MUTED, background: SOFT }}>
@@ -224,13 +256,19 @@ export default function CampaignCockpit() {
           <div>Next action</div>
           <div className="text-right">Open</div>
         </div>
-        {ARTISTS.map((a, i) => (
-          <ArtistRow key={a.slug} a={a} last={i === ARTISTS.length - 1} />
-        ))}
+        {[...ARTISTS]
+          .sort((a, b) => {
+            const s = STATUS_RANK[a.status] - STATUS_RANK[b.status];
+            if (s !== 0) return s;
+            return daysFromNow(a.nextMomentDate) - daysFromNow(b.nextMomentDate);
+          })
+          .map((a, i, arr) => (
+            <ArtistRow key={a.slug} a={a} last={i === arr.length - 1} />
+          ))}
       </div>
 
-      {/* Two-up: Upcoming + Recent reads */}
-      <div className="grid grid-cols-2 gap-6 mt-10">
+      {/* Upcoming moments */}
+      <div className="mt-10">
         <div>
           <SectionHeader title="Upcoming moments" hint="Next 14 days" />
           <div className="rounded-xl border divide-y" style={{ borderColor: MUTED, background: PAPER }}>
@@ -255,37 +293,10 @@ export default function CampaignCockpit() {
             )}
           </div>
         </div>
-
-        <div>
-          <SectionHeader title="Recent watcher reads" hint="Last 72h" />
-          <div className="rounded-xl border divide-y" style={{ borderColor: MUTED, background: PAPER }}>
-            {RECENT_READS.map((r, idx) => (
-              <div key={idx} className="px-4 py-3" style={{ borderColor: MUTED }}>
-                <div className="flex items-center justify-between">
-                  <div className="text-[12px] font-bold">{r.artist}</div>
-                  <div className="text-[10px] uppercase tracking-[0.14em] text-ink/45">{r.ts}</div>
-                </div>
-                <div className="text-[12px] text-ink/65 mt-0.5">{r.line}</div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="mt-12 text-[10px] uppercase tracking-[0.18em] text-ink/35">
         v1 · seed data · live checks wire to watcher API in phase 2
-      </div>
-    </div>
-  );
-}
-
-function PriorityTile({ label, value, tone }: { label: string; value: number; tone: string }) {
-  return (
-    <div className="rounded-xl border px-4 py-4" style={{ borderColor: MUTED, background: PAPER }}>
-      <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/50">{label}</div>
-      <div className="flex items-baseline gap-2 mt-1.5">
-        <div className="font-black text-3xl tabular-nums" style={{ color: tone }}>{value}</div>
-        <div className="text-[11px] text-ink/45">{value === 1 ? 'artist' : 'artists'}</div>
       </div>
     </div>
   );
@@ -321,6 +332,7 @@ function ArtistRow({ a, last }: { a: Artist; last: boolean }) {
 
       <div>
         <StatusChip status={a.status} />
+        <div className="text-[10px] text-ink/45 mt-1 font-mono">{fmtChecked(a.lastCheckedMinsAgo)}</div>
         <div className="text-[12px] mt-2">{a.nextMomentLabel}</div>
         <div className="text-[10px] uppercase tracking-[0.14em] text-ink/45 mt-0.5">
           {fmtDate(a.nextMomentDate)} · {days === 0 ? 'today' : days < 0 ? `${-days}d ago` : `in ${days}d`}
