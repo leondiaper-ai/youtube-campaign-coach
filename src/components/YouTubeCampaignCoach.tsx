@@ -96,6 +96,8 @@ type ManualOverrides = {
   // Channel-level toggles for YouTube features the public API doesn't expose.
   merchShelfActive?: boolean;
   bandsintownActive?: boolean;
+  // Manual counter — YouTube's cross-channel Collab tool isn't in the public API.
+  collabsCount?: number;
 };
 
 type NextDropEdit = {
@@ -4998,28 +5000,24 @@ function CampaignToolsCard({
   plan,
   onToggleMerch,
   onToggleBands,
+  onSetCollabs,
 }: {
   plan: CampaignPlan;
   onToggleMerch: () => void;
   onToggleBands: () => void;
+  onSetCollabs: (n: number) => void;
 }) {
   const watcher = useWatcherChannel();
   const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
   const vids = (watcher.state?.latestVideos ?? []).filter(
     (v) => new Date(v.publishedAt).getTime() >= startT
   );
-  const collabs   = vids.filter((v) => v.isCollab).length;
   const premieres = vids.filter((v) => v.isPremiere).length;
   const lives     = vids.filter((v) => v.isLive).length;
+  const collabs   = plan.manualOverrides?.collabsCount ?? 0;
 
   const merchActive = !!plan.manualOverrides?.merchShelfActive;
   const bandsActive = !!plan.manualOverrides?.bandsintownActive;
-
-  const toolStats = [
-    { label: 'Collabs',    value: collabs   },
-    { label: 'Premieres',  value: premieres },
-    { label: 'Livestreams',value: lives     },
-  ];
 
   return (
     <div
@@ -5033,16 +5031,39 @@ function CampaignToolsCard({
         <span className="text-[9px] font-semibold text-ink/35">In campaign window</span>
       </div>
 
-      {/* API-detected tools */}
+      {/* Tools row — premieres/lives auto-detected; collabs manual (API doesn't expose cross-channel collab tool) */}
       <div className="grid grid-cols-3 gap-2 mb-3">
-        {toolStats.map((t) => (
-          <div key={t.label} className="flex flex-col items-center text-center">
-            <span className="text-lg font-black leading-none text-ink">{t.value}</span>
-            <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">
-              {t.label}
-            </span>
+        <div className="flex flex-col items-center text-center">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => onSetCollabs(Math.max(0, collabs - 1))}
+              className="w-5 h-5 rounded-full text-[11px] font-black text-ink/55 hover:text-ink"
+              style={{ background: 'rgba(14,14,14,0.06)' }}
+              aria-label="Decrease collabs"
+            >
+              −
+            </button>
+            <span className="text-lg font-black leading-none text-ink tabular-nums min-w-[16px] text-center">{collabs}</span>
+            <button
+              onClick={() => onSetCollabs(collabs + 1)}
+              className="w-5 h-5 rounded-full text-[11px] font-black text-ink/55 hover:text-ink"
+              style={{ background: 'rgba(14,14,14,0.06)' }}
+              aria-label="Increase collabs"
+            >
+              +
+            </button>
           </div>
-        ))}
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">Collabs</span>
+          <span className="text-[8px] font-semibold text-ink/35 mt-0.5">Manual (API blind)</span>
+        </div>
+        <div className="flex flex-col items-center text-center">
+          <span className="text-lg font-black leading-none text-ink">{premieres}</span>
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">Premieres</span>
+        </div>
+        <div className="flex flex-col items-center text-center">
+          <span className="text-lg font-black leading-none text-ink">{lives}</span>
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">Livestreams</span>
+        </div>
       </div>
 
       {/* Manual reminders — features not exposed by the public API */}
@@ -6390,6 +6411,10 @@ export default function YouTubeCampaignCoach() {
                   ...p.manualOverrides,
                   bandsintownActive: !p.manualOverrides?.bandsintownActive,
                 },
+              }))}
+              onSetCollabs={(n) => setPlan((p) => ({
+                ...p,
+                manualOverrides: { ...p.manualOverrides, collabsCount: n },
               }))}
             />
             {CAMPAIGN_PHASES.map((phase) => (
