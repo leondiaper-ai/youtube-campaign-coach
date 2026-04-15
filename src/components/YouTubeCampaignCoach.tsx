@@ -1268,6 +1268,44 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
   return 'REAWAKEN';
 }
 
+function CampaignStartControl({ startDate, onChange }: { startDate: string; onChange: (d: string) => void }) {
+  const watcher = useWatcherChannel();
+  const firstUpload = useMemo(() => {
+    const vids = watcher.state?.latestVideos;
+    if (!vids || vids.length === 0) return null;
+    const times = vids.map((v) => new Date(v.publishedAt).getTime()).filter((t) => !Number.isNaN(t));
+    if (times.length === 0) return null;
+    return new Date(Math.min(...times)).toISOString().slice(0, 10);
+  }, [watcher.state]);
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2">
+      <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">
+        Campaign Start
+      </span>
+      <input
+        type="date"
+        className="text-[11px] font-bold text-ink/70 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none"
+        value={startDate}
+        onChange={(e) => onChange(e.target.value)}
+        title="Uploads before this date are ignored in Drop View + rollups"
+      />
+      {firstUpload && firstUpload !== startDate && (
+        <button
+          onClick={() => onChange(firstUpload)}
+          className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/55 hover:text-ink px-2 py-0.5 rounded border border-ink/10 hover:border-ink/30 transition-colors"
+          title={`First upload on channel: ${firstUpload}`}
+        >
+          ⚓ Anchor to first upload
+        </button>
+      )}
+      <span className="text-[10px] font-semibold text-ink/35">
+        Uploads before this date are ignored
+      </span>
+    </div>
+  );
+}
+
 function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign }: {
   plan: CampaignPlan;
   onPhaseClick: (name: PhaseName) => void;
@@ -1323,21 +1361,10 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
               onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
             />
             {/* Campaign window anchor — all live drop gating flows from this */}
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">
-                Campaign Start
-              </span>
-              <input
-                type="date"
-                className="text-[11px] font-bold text-ink/70 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none"
-                value={plan.startDate}
-                onChange={(e) => onUpdatePlan({ startDate: e.target.value })}
-                title="Uploads before this date are ignored in Drop View + rollups"
-              />
-              <span className="text-[10px] font-semibold text-ink/35">
-                Uploads before this date are ignored
-              </span>
-            </div>
+            <CampaignStartControl
+              startDate={plan.startDate}
+              onChange={(d) => onUpdatePlan({ startDate: d })}
+            />
           </div>
           {onNewCampaign && (
             <button
