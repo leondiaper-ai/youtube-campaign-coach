@@ -2704,19 +2704,10 @@ function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?:
                 </span>
               );
             };
-            // When the baseline was first sighted within the last couple of
-            // days (e.g. a fresh timeline import where campaignStart predates
-            // our watcher history), a "since today" delta is meaningless —
-            // suppress the subs-since line entirely and let the big 7-day
-            // number carry the story. Views-since still shows earned views.
-            const nowMs = Date.now();
-            const baselineIsRecent = Math.abs(nowMs - capMs) < 2 * 86400_000;
-            const subsSinceDisplayable =
-              subsSince !== null && (usedManualOverride || !baselineIsRecent);
             return (
               <div className="mt-3 grid grid-cols-2 gap-6">
                 <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  {subsSinceDisplayable
+                  {subsSince !== null
                     ? render(subsSince, sourceLabel)
                     : <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
                 </div>
