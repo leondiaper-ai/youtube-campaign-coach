@@ -1952,6 +1952,78 @@ function useWatcherChannel(): WatcherChannel {
   return data;
 }
 
+// ─── CAMPAIGN BASELINE ─────────────────────────────────────────────────────
+// Tracks subs/views at the campaign start so the hero can show growth since
+// start. Prefers the watcher's historical snapshot (authoritative) and falls
+// back to a first-sight value persisted in localStorage.
+type CampaignBaseline = {
+  subscriberCount: number;
+  viewCount: number;
+  capturedAt: string;
+  source: 'watcher' | 'first-sight';
+} | null;
+
+function useCampaignBaseline(
+  channelId: string | undefined,
+  campaignStart: string | undefined,
+  liveState: { subscriberCount: number; viewCount: number } | null,
+): CampaignBaseline {
+  const [baseline, setBaseline] = useState<CampaignBaseline>(null);
+  const storageKey =
+    channelId && campaignStart ? `coach.baseline.${channelId}.${campaignStart}` : null;
+
+  // 1. Try watcher /snapshot?on=<campaignStart>
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_WATCHER_URL;
+    if (!base || !channelId || !campaignStart || !storageKey) return;
+    let alive = true;
+    const root = base.replace(/\/$/, '');
+    fetch(`${root}/channels/${channelId}/snapshot?on=${campaignStart}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((snap: { subscriberCount?: number; viewCount?: number; capturedAt?: string } | null) => {
+        if (!alive || !snap || typeof snap.subscriberCount !== 'number') return;
+        const b: CampaignBaseline = {
+          subscriberCount: snap.subscriberCount,
+          viewCount: snap.viewCount ?? 0,
+          capturedAt: snap.capturedAt ?? campaignStart,
+          source: 'watcher',
+        };
+        setBaseline(b);
+        try { localStorage.setItem(storageKey, JSON.stringify(b)); } catch {/*noop*/}
+      })
+      .catch(() => {/*noop*/});
+    return () => { alive = false; };
+  }, [channelId, campaignStart, storageKey]);
+
+  // 2. Hydrate from localStorage; if missing and we have a live state, first-sight.
+  useEffect(() => {
+    if (!storageKey) return;
+    if (baseline) return;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        setBaseline(JSON.parse(raw) as CampaignBaseline);
+        return;
+      }
+    } catch {/*noop*/}
+    if (liveState) {
+      const today = new Date().toISOString().slice(0, 10);
+      if (!campaignStart || today >= campaignStart) {
+        const b: CampaignBaseline = {
+          subscriberCount: liveState.subscriberCount,
+          viewCount: liveState.viewCount,
+          capturedAt: new Date().toISOString(),
+          source: 'first-sight',
+        };
+        setBaseline(b);
+        try { localStorage.setItem(storageKey, JSON.stringify(b)); } catch {/*noop*/}
+      }
+    }
+  }, [storageKey, liveState, baseline, campaignStart]);
+
+  return baseline;
+}
+
 // Map the campaign's PhaseName → coach engine PhaseName (internal vocab).
 function toCoachPhase(name: PhaseName | undefined): CoachPhaseName {
   switch (name) {
@@ -2031,6 +2103,11 @@ type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
 function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const watcher = useWatcherChannel();
+  const baseline = useCampaignBaseline(
+    watcher.state?.channelId,
+    plan.startDate,
+    watcher.state ? { subscriberCount: watcher.state.subscriberCount, viewCount: watcher.state.viewCount } : null,
+  );
   const [showWhy, setShowWhy] = useState(false);
 
   // ── DECISION ENGINE (deterministic, phase-aware) ────────────────────────────
@@ -2158,6 +2235,25 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
               </div>
             </div>
           </div>
+          {baseline && watcher.state && (() => {
+            const subsSince = watcher.state.subscriberCount - baseline.subscriberCount;
+            const viewsSince = watcher.state.viewCount - baseline.viewCount;
+            const subsFmt = formatDelta(subsSince);
+            const viewsFmt = formatDelta(viewsSince);
+            const sourceLabel = baseline.source === 'watcher' ? 'since start' : 'since tracking';
+            return (
+              <div className="mt-3 grid grid-cols-2 gap-6">
+                <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                  <span style={{ color: dirColor(subsFmt.dir) }}>{dirGlyph(subsFmt.dir)} {subsFmt.text}</span>
+                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {sourceLabel}</span>
+                </div>
+                <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                  <span style={{ color: dirColor(viewsFmt.dir) }}>{dirGlyph(viewsFmt.dir)} {viewsFmt.text}</span>
+                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {sourceLabel}</span>
+                </div>
+              </div>
+            );
+          })()}
           <div className="mt-4 flex items-baseline gap-3 flex-wrap">
             <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
               Last upload
