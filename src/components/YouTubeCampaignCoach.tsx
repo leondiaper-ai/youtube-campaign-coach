@@ -5813,9 +5813,12 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   };
   const autoTracks = [
     ...liveTracks,
-    ...planTracks.filter(
-      (t) => !liveWeeks.has(t.weekNum) && !liveDates.has(t.date) && !matchesLiveTitle(t.name),
-    ),
+    ...planTracks.filter((t) => {
+      // Phase-fill placeholders always survive — they only exist when the
+      // phase has no real drop at all, so they can't collide with live data.
+      if (t.id.startsWith('autotrack-phase-')) return true;
+      return !liveWeeks.has(t.weekNum) && !liveDates.has(t.date) && !matchesLiveTitle(t.name);
+    }),
   ].sort((a, b) => a.weekNum - b.weekNum);
 
   // Phase date range from campaign start + weekStart/weekEnd.
