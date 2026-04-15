@@ -1,6 +1,7 @@
 'use client';
 // PIH Campaign Coach v2.2 — Weekly Rhythm widget
 import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   aiDecisionLayer,
   cadenceComparison,
@@ -6596,10 +6597,10 @@ function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   );
 }
 
-function loadPlan(): CampaignPlan {
+function loadPlan(key: string = LS_KEY): CampaignPlan {
   if (typeof window !== 'undefined') {
     try {
-      const raw = window.localStorage.getItem(LS_KEY);
+      const raw = window.localStorage.getItem(key);
       if (raw) {
         const saved = JSON.parse(raw) as CampaignPlan;
         // Only restore a saved plan if it contains real content.
@@ -6624,7 +6625,12 @@ function loadPlan(): CampaignPlan {
 }
 
 export default function YouTubeCampaignCoach() {
-  const [plan, setPlan] = useState<CampaignPlan>(() => loadPlan());
+  const searchParams = useSearchParams();
+  const artistSlug = searchParams?.get('artist') || '';
+  const wantsTimeline = searchParams?.get('openTimeline') === '1';
+  const storageKey = artistSlug ? `${LS_KEY}:${artistSlug}` : LS_KEY;
+
+  const [plan, setPlan] = useState<CampaignPlan>(() => loadPlan(storageKey));
   const [expandedPhases, setExpandedPhases] = useState<Set<PhaseName>>(new Set());
   const [editingMetric, setEditingMetric] = useState<string | null>(null);
   const [metricDraft, setMetricDraft] = useState('');
@@ -6642,9 +6648,23 @@ export default function YouTubeCampaignCoach() {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(LS_KEY, JSON.stringify(plan));
+      window.localStorage.setItem(storageKey, JSON.stringify(plan));
     } catch { /* ignore */ }
-  }, [plan]);
+  }, [plan, storageKey]);
+
+  // Auto-open timeline modal when arriving from cockpit with ?openTimeline=1,
+  // or when arriving with ?artist=slug and no plan yet exists for them.
+  useEffect(() => {
+    if (wantsTimeline) {
+      setTimelineModalOpen(true);
+      return;
+    }
+    if (artistSlug && typeof window !== 'undefined') {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) setTimelineModalOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ──────────────────────────────────────────────────────────────────────────
   // HANDLERS
