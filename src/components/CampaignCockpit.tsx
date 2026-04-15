@@ -181,7 +181,7 @@ const ARTISTS: Artist[] = [
     subs: '2.4M',
     views30d: '5.8M',
     uploads30d: 5,
-    channelHandle: '@BadOmensTV',
+    channelHandle: 'UCre_5futd_kGkrSlL83n3pw',
     lastCheckedMinsAgo: 55,
   },
   {
