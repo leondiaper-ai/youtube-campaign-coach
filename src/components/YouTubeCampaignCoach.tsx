@@ -1360,28 +1360,6 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             onChange={(d) => onUpdatePlan({ startDate: d })}
           />
         </div>
-        {onNewCampaign && (
-          <button
-            onClick={onNewCampaign}
-            className="ml-3 mt-1 px-3 py-2 rounded-lg bg-paper border border-ink/10 text-ink/70 font-bold text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow hover:text-ink transition-all"
-            title="Start a new campaign"
-          >
-            + New Campaign
-          </button>
-        )}
-        {onOpenAdd && (
-          <div className="ml-2 mt-1 flex flex-col items-end">
-            <button
-              onClick={onOpenAdd}
-              className="px-3 py-2 rounded-lg text-white font-black text-[11px] uppercase tracking-[0.12em] shadow-sm hover:shadow transition-all"
-              style={{ background: '#0E0E0E' }}
-              title="Add content"
-            >
-              + Add
-            </button>
-            <span className="text-[9px] font-semibold text-ink/40 mt-1">Start building this week&apos;s momentum</span>
-          </div>
-        )}
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}
@@ -5262,7 +5240,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
 }) {
   // Silence unused-prop warnings — keeping the signature intact for the
   // existing render call site while this section is redesigned for planning.
-  void onToggleActionStatus; void onEditAction; void onDeleteAction; void onOpenAdd;
+  void onToggleActionStatus; void onEditAction; void onDeleteAction;
   void draggedId; void dragOverId; void onDragStart; void onDragOver; void onDrop;
   void showCollapsedSupport; void onToggleSupport; void deletingIds;
   void onCycleSupportStatus; void onAddSupportItem; void onRemoveSupportItem;
@@ -5424,6 +5402,27 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             </div>
           );
         })}
+
+        {/* Add to this phase — microsite-style action buttons */}
+        <div className="mt-3 pt-3 flex flex-wrap gap-2" style={{ borderTop: '1px solid rgba(14,14,14,0.08)' }}>
+          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 w-full mb-1">
+            Add to {phase.name}
+          </span>
+          {([
+            { kind: 'video' as const, label: '+ Video' },
+            { kind: 'short' as const, label: '+ Short' },
+            { kind: 'post'  as const, label: '+ Post' },
+          ]).map((b) => (
+            <button
+              key={b.kind}
+              onClick={() => onOpenAdd(phase.weekStart, b.kind)}
+              className="px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-[0.12em] transition-all hover:-translate-y-0.5"
+              style={{ background: '#0E0E0E', color: '#FAF7F2' }}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
