@@ -2027,22 +2027,9 @@ function cadenceSummaryLine(cmp: CadenceCompare | null): { headline: string; det
 }
 type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
-function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
-  const cadence = getCadenceCounts(plan);
+function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const watcher = useWatcherChannel();
   const [showWhy, setShowWhy] = useState(false);
-
-  // Missing kinds for highlighting the strip
-  const missingSet = new Set<MissingActionKind>();
-  if (cadence.shortsDone < cadence.shortsTarget) missingSet.add('short');
-  if (cadence.postsDone < cadence.postsTarget) missingSet.add('post');
-  if (cadence.longformDone < cadence.longformTarget) missingSet.add('video');
-
-  const strip: { kind: MissingActionKind; label: string }[] = [
-    { kind: 'short', label: '+ Add Short' },
-    { kind: 'post',  label: '+ Add Post' },
-    { kind: 'video', label: '+ Add Video' },
-  ];
 
   // ── DECISION ENGINE (deterministic, phase-aware) ────────────────────────────
   const currentWeek = getCurrentWeek(plan);
@@ -2079,8 +2066,6 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     ? stateMeta!.subtitle
     : (watcher.insight ? watcher.insight.headline : buildThisWeeksCall(plan, legacySignal));
 
-  if (!onOpenAdd) return null;
-
   const cadenceRowMeta: Record<string, { color: string; bg: string; label: string }> = {
     on_track:        { color: '#1FBE7A', bg: 'rgba(31,190,122,0.14)', label: 'On track' },
     exceeding:       { color: '#1FBE7A', bg: 'rgba(31,190,122,0.20)', label: 'Exceeding' },
@@ -2098,7 +2083,6 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
   const signalLine = watcher.state
     ? subsViewsSignal(subDelta, viewDelta, watcher.state.uploadsLast14Days)
     : (watcher.insight?.headline ?? buildThisWeeksCall(plan, legacySignal));
-  const topVideo = watcher.state?.topVideoLast14d ?? null;
   const daysSince = watcher.state?.daysSinceLastUpload ?? null;
   const cadenceSummary = cadenceSummaryLine(cadenceCmp);
   const primaryAction = decision ? decision.action : buildThisWeeksCall(plan, legacySignal);
@@ -2130,78 +2114,29 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         </div>
       </div>
 
-      {/* 2. CHANNEL HEALTH — Subs + Views, total + delta only */}
+      {/* 2. CHANNEL HEALTH — compact one-line row */}
       {watcher.state && (
         <div
-          className="mb-7 grid grid-cols-2 gap-6 pb-6"
-          style={{ borderBottom: '1px solid rgba(250,247,242,0.08)' }}
+          className="mb-6 flex flex-wrap items-baseline gap-x-5 gap-y-1.5 pb-5 text-[13px]"
+          style={{ borderBottom: '1px solid rgba(250,247,242,0.08)', color: 'rgba(250,247,242,0.75)' }}
         >
-          <div>
-            <div
-              className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
-              style={{ color: 'rgba(250,247,242,0.45)' }}
-            >
-              Subscribers
-            </div>
-            <div className="font-black leading-none" style={{ fontSize: '40px', color: '#FAF7F2' }}>
-              {formatBig(watcher.state.subscriberCount)}
-            </div>
-            <div className="mt-2 text-[12px] font-semibold inline-flex items-center gap-1.5" style={{ color: dirColor(subDeltaFmt.dir) }}>
-              <span>{dirGlyph(subDeltaFmt.dir)}</span>
-              <span>{subDeltaFmt.text} 7d</span>
-            </div>
-          </div>
-          <div>
-            <div
-              className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
-              style={{ color: 'rgba(250,247,242,0.45)' }}
-            >
-              Total Views
-            </div>
-            <div className="font-black leading-none" style={{ fontSize: '40px', color: '#FAF7F2' }}>
-              {formatBig(watcher.state.viewCount)}
-            </div>
-            <div className="mt-2 text-[12px] font-semibold inline-flex items-center gap-1.5" style={{ color: dirColor(viewDeltaFmt.dir) }}>
-              <span>{dirGlyph(viewDeltaFmt.dir)}</span>
-              <span>{viewDeltaFmt.text} 7d</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2b. ACTIVITY STRIP — Output · Last upload · Top video (all live) */}
-      {watcher.state && (
-        <div className="mb-6 space-y-2.5">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              Output · 14d
-            </span>
-            <span className="text-[14px] font-semibold" style={{ color: '#FAF7F2' }}>
-              {watcher.state.shortsLast14Days} {watcher.state.shortsLast14Days === 1 ? 'Short' : 'Shorts'} · {watcher.state.videosLast14Days} {watcher.state.videosLast14Days === 1 ? 'Video' : 'Videos'}
-            </span>
-          </div>
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              Last upload
-            </span>
-            <span
-              className="text-[14px] font-semibold inline-flex items-center gap-1.5"
-              style={{ color: recencyColor(daysSince) }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: recencyColor(daysSince) }} />
-              {recencyLabel(daysSince)}
-            </span>
-          </div>
-          {topVideo && (
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
-                Top video · 14d
-              </span>
-              <span className="text-[14px] font-semibold truncate max-w-[70%]" style={{ color: '#FAF7F2' }} title={topVideo.title}>
-                “{topVideo.title}” · {formatBig(topVideo.views)} views
-              </span>
-            </div>
-          )}
+          <span style={{ color: '#FAF7F2', fontWeight: 600 }}>
+            {formatBig(watcher.state.subscriberCount)} subs
+          </span>
+          <span style={{ color: dirColor(subDeltaFmt.dir) }}>
+            {dirGlyph(subDeltaFmt.dir)} {subDeltaFmt.text} 7d
+          </span>
+          <span style={{ color: 'rgba(250,247,242,0.25)' }}>·</span>
+          <span style={{ color: '#FAF7F2', fontWeight: 600 }}>
+            {formatBig(watcher.state.viewCount)} views
+          </span>
+          <span style={{ color: dirColor(viewDeltaFmt.dir) }}>
+            {dirGlyph(viewDeltaFmt.dir)} {viewDeltaFmt.text} 7d
+          </span>
+          <span style={{ color: 'rgba(250,247,242,0.25)' }}>·</span>
+          <span style={{ color: recencyColor(daysSince) }}>
+            Last upload {recencyLabel(daysSince).toLowerCase()}
+          </span>
         </div>
       )}
 
@@ -2229,6 +2164,15 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         <p className="text-[15px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
           {primaryAction}
         </p>
+        <a
+          href="https://studio.youtube.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2.5 inline-flex items-center gap-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80"
+          style={{ color: '#A8B5FF' }}
+        >
+          Open in YouTube Studio <span aria-hidden>→</span>
+        </a>
       </div>
 
       {/* 5. CADENCE — single summary line */}
@@ -2242,30 +2186,6 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
           </span>
         </div>
       )}
-
-      {/* Add-action strip (kept — these are System 1 primitive controls) */}
-      <div className="flex flex-wrap gap-3 mt-6">
-        {strip.map((s) => {
-          const stripMeta = MISSING_ACTION_META[s.kind];
-          const isMissing = missingSet.has(s.kind);
-          return (
-            <button
-              key={s.kind}
-              onClick={() => onOpenAdd(s.kind)}
-              className="flex-1 min-w-[140px] flex items-center justify-center rounded-2xl px-6 py-4 transition-all hover:-translate-y-0.5"
-              style={{
-                background: stripMeta.bg,
-                boxShadow: isMissing
-                  ? `0 0 0 3px ${stripMeta.bg}40, 0 14px 32px rgba(0,0,0,0.34)`
-                  : '0 6px 18px rgba(0,0,0,0.24)',
-                opacity: isMissing ? 1 : 0.78,
-              }}
-            >
-              <span className="text-white font-black text-[14px] tracking-widest uppercase">{s.label}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* ─── SYSTEM 2 — collapsible ──────────────────────────────────────── */}
       <div className="mt-6 pt-5" style={{ borderTop: '1px solid rgba(250,247,242,0.08)' }}>
