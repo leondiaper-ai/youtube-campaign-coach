@@ -139,7 +139,7 @@ const ARTISTS: Artist[] = [
     subs: '2.4M',
     views30d: '5.8M',
     uploads30d: 5,
-    channelHandle: '@badomens',
+    channelHandle: '@BadOmensTV',
     lastCheckedMinsAgo: 55,
   },
   {
