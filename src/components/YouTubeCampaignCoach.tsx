@@ -2518,7 +2518,7 @@ function cadenceSummaryLine(cmp: CadenceCompare | null): { headline: string; det
 }
 type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
-function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
+function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void; onUpdatePlan?: (updates: Partial<CampaignPlan>) => void }) {
   const watcher = useWatcherChannel();
   const watcherBaseline = useCampaignBaseline(
     watcher.state?.channelId,
@@ -2704,17 +2704,46 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
                 </span>
               );
             };
+            // When our baseline was first sighted far after campaign start
+            // (e.g. user just imported a timeline with a start date earlier
+            // than the watcher's oldest snapshot), the "since" delta becomes
+            // meaningless — flat since today. Offer a manual baseline input
+            // so the user can plug in the known subs at campaign start.
+            const nowMs = Date.now();
+            const baselineIsRecent = Math.abs(nowMs - capMs) < 2 * 86400_000;
+            const needManualBaseline =
+              !usedManualOverride && baselineIsRecent && startMs !== null && nowMs - startMs > 7 * 86400_000;
             return (
-              <div className="mt-3 grid grid-cols-2 gap-6">
-                <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  {render(subsSince, sourceLabel) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
+              <>
+                <div className="mt-3 grid grid-cols-2 gap-6">
+                  <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                    {render(subsSince, sourceLabel) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
+                  </div>
+                  <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                    {campaignViewsValid
+                      ? render(earnedViews, `on campaign uploads (${campaignVideos.length})`)
+                      : <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
+                  </div>
                 </div>
-                <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  {campaignViewsValid
-                    ? render(earnedViews, `on campaign uploads (${campaignVideos.length})`)
-                    : <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
-                </div>
-              </div>
+                {needManualBaseline && (
+                  <div
+                    className="mt-3 rounded-lg p-3 text-[11px]"
+                    style={{ background: 'rgba(250,247,242,0.06)', color: 'rgba(250,247,242,0.75)' }}
+                  >
+                    <div className="font-mono uppercase tracking-[0.16em] text-[9px] mb-1" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                      Baseline needed
+                    </div>
+                    <div className="leading-snug mb-2">
+                      We only started tracking this channel on {capLabel}. Enter your subscriber + total view counts at campaign start ({new Date(plan.startDate + 'T00:00:00').toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}) to show real growth since then.
+                    </div>
+                    <CampaignBaselineControl
+                      baselineSubs={plan.baselineSubs}
+                      baselineViews={plan.baselineViews}
+                      onChange={(updates) => onUpdatePlan?.(updates)}
+                    />
+                  </div>
+                )}
+              </>
             );
           })()}
           <div className="mt-4 flex items-baseline gap-3 flex-wrap">
@@ -6793,6 +6822,7 @@ export default function YouTubeCampaignCoach() {
         <TopSignalCard
           plan={plan}
           onOpenAdd={(kind) => setAddModal({ open: true, initialKind: kind })}
+          onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
         />
 
         {/* 2. NEXT DROP — primary anchor with role */}
