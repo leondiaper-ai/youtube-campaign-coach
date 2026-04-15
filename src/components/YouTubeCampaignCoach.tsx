@@ -4911,6 +4911,24 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
         </span>
       </div>
 
+      {/* FULLY SUPPORTED — celebratory nudge + why it matters */}
+      {support.coverageTier === 'Strong' && support.coreDone && (
+        <div
+          className="mt-2 rounded-xl px-3 py-2"
+          style={{ background: 'rgba(31,190,122,0.10)', border: '1px solid rgba(31,190,122,0.25)' }}
+        >
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px]">🔥</span>
+            <span className="text-[12px] font-black" style={{ color: '#1FBE7A' }}>
+              Smashed it — fully supported
+            </span>
+          </div>
+          <div className="mt-1 text-[11px] font-semibold text-ink/65 leading-snug">
+            Algo has multiple entry points to rank this drop. Shorts feed new viewers in, companion videos hold watch-time, and the community post signals freshness — compounding discovery in the first 72h.
+          </div>
+        </div>
+      )}
+
       {/* Optional deeper guidance — hidden by default */}
       <button
         onClick={() => setDetailOpen((d) => !d)}
