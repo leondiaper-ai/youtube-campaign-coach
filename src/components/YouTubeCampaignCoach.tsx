@@ -5290,97 +5290,170 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   onAddSupportItem: (planId: string, phase: SupportPhase) => void;
   onRemoveSupportItem: (planId: string, itemId: string) => void;
 }) {
-  const phaseWeeks = plan.weeks.filter((w) => w.week >= phase.weekStart && w.week <= phase.weekEnd);
-  const tier = getTier(plan.subscriberCount);
-  const statuses = getWeekStatuses(plan.weeks, tier);
+  // Silence unused-prop warnings — keeping the signature intact for the
+  // existing render call site while this section is redesigned for planning.
+  void onToggleActionStatus; void onEditAction; void onDeleteAction; void onOpenAdd;
+  void draggedId; void dragOverId; void onDragStart; void onDragOver; void onDrop;
+  void showCollapsedSupport; void onToggleSupport; void deletingIds;
+  void onCycleSupportStatus; void onAddSupportItem; void onRemoveSupportItem;
+
+  const watcher = useWatcherChannel();
+  const communityPostDone = plan.manualOverrides?.communityPostDone || {};
+
+  // Prefer live drops; fall back to planned.
+  const liveTracks = deriveLiveTracks(watcher.state, plan.startDate);
+  const planTracks = deriveAutoTracks(plan);
+  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+
+  // Phase date range from campaign start + weekStart/weekEnd.
+  const startMs = new Date(plan.startDate + 'T12:00:00').getTime();
+  const DAY = 86400000;
+  const phaseStartMs = startMs + (phase.weekStart - 1) * 7 * DAY;
+  const phaseEndMs   = startMs + phase.weekEnd * 7 * DAY;
+
+  const tracksInPhase = autoTracks.filter((t) => {
+    const d = new Date(t.date).getTime();
+    return d >= phaseStartMs && d < phaseEndMs;
+  });
+
+  const liveVideos = watcher.state?.latestVideos ?? [];
+  const trackSupports = tracksInPhase.map((t) => {
+    const live = matchLiveToDrop(t.date, liveVideos);
+    const support = getDropSupport(t, live, communityPostDone[t.id]);
+    return { track: t, support };
+  });
+
+  const dropCount = tracksInPhase.length;
+  const missingSupport = trackSupports.filter(
+    (ts) => !ts.support.coreDone || ts.support.coverageTier !== 'Strong'
+  ).length;
+
+  // Status from observable state.
   const currentWeekNum = getCurrentWeekNum(plan);
+  const isPast    = currentWeekNum > phase.weekEnd;
+  const isCurrent = currentWeekNum >= phase.weekStart && currentWeekNum <= phase.weekEnd;
+  let status: 'Complete' | 'In Progress' | 'Upcoming' | 'Behind';
+  if (isPast && dropCount > 0 && missingSupport === 0) status = 'Complete';
+  else if ((isPast || isCurrent) && missingSupport > 0) status = 'Behind';
+  else if (isCurrent) status = 'In Progress';
+  else status = 'Upcoming';
 
-  const allActions = phaseWeeks.flatMap((w) => w.actions);
-  const doneCount = allActions.filter((a) => a.status === 'done').length;
-  const missedCount = allActions.filter((a) => a.status === 'missed').length;
-  const allSubs = phaseWeeks.reduce((s, w) => s + (w.feedback?.subsGained || 0), 0);
+  const statusColor =
+    status === 'Complete'   ? '#1FBE7A' :
+    status === 'Behind'     ? '#FF4A1C' :
+    status === 'In Progress' ? phase.color :
+                               'rgba(14,14,14,0.35)';
 
-  const shortStatus = missedCount > 0 ? 'Missed' : doneCount === allActions.length && allActions.length > 0 ? 'Complete' : doneCount > 0 ? 'In Progress' : 'Upcoming';
-
-  const narrative = PHASE_NARRATIVE[phase.name].summary;
+  const PhaseSummary = () => (
+    <div className="flex items-center justify-between gap-3 w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColor }} />
+        <span className="font-black text-sm text-ink">{phase.name}</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: statusColor }}>
+          {status}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-ink/60">
+        <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
+        {missingSupport > 0 && (
+          <span style={{ color: '#FF4A1C' }}>· {missingSupport} missing support</span>
+        )}
+      </div>
+    </div>
+  );
 
   if (!expanded) {
     return (
       <button
         onClick={() => onToggleExpand(phase.name)}
-        className="w-full mb-3 p-4 rounded-2xl text-left transition-all hover:shadow-md"
-        style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1">
-            <div
-              className="w-3 h-3 rounded-full flex-shrink-0"
-              style={{ background: phase.color }}
-            />
-            <div className="min-w-0">
-              <h3 className="font-black text-sm text-ink">{phase.name}</h3>
-              <p className="text-xs text-ink/50 truncate">{narrative}</p>
-            </div>
-          </div>
-          <div className="flex-shrink-0 flex items-center gap-2">
-            <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ color: phase.color, background: `${phase.color}15` }}>
-              {shortStatus}
-            </span>
-            <span className="text-ink/40">▼</span>
-          </div>
+        className="w-full mb-2 px-4 py-3 rounded-xl text-left transition hover:shadow-sm"
+        style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0"><PhaseSummary /></div>
+          <span className="text-ink/30 text-sm">▼</span>
         </div>
       </button>
     );
   }
 
-  // Expanded view
   return (
-    <div className="mb-6 p-6 rounded-2xl" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b-2" style={{ borderColor: `${phase.color}20` }}>
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="font-black text-lg" style={{ color: phase.color }}>
-              {phase.name}
-            </h2>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ color: phase.color, background: `${phase.color}15` }}>
-              {shortStatus}
-            </span>
-          </div>
-          <p className="text-xs text-ink/60">{narrative}</p>
+    <div className="mb-3 rounded-2xl overflow-hidden" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      <button
+        onClick={() => onToggleExpand(phase.name)}
+        className="w-full px-4 py-3 text-left border-b border-ink/5"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0"><PhaseSummary /></div>
+          <span className="text-ink/30 text-sm">▲</span>
         </div>
-        <button
-          onClick={() => onToggleExpand(phase.name)}
-          className="flex-shrink-0 text-ink/40 hover:text-ink/60 transition-colors"
-          style={{ fontSize: '20px' }}>
-          ▲
-        </button>
-      </div>
+      </button>
 
-      {/* Weeks within phase — simplified decision steps, detail hidden behind expand */}
-      <div className="space-y-3">
-        {phaseWeeks.map((week) => (
-          <WeekRow
-            key={week.week}
-            week={week}
-            phase={phase}
-            plan={plan}
-            tier={tier}
-            allStatuses={statuses}
-            isCurrent={week.week === currentWeekNum}
-            onToggleActionStatus={onToggleActionStatus}
-            onEditAction={onEditAction}
-            onDeleteAction={onDeleteAction}
-            onOpenAdd={onOpenAdd}
-            draggedId={draggedId}
-            dragOverId={dragOverId}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-            showCollapsedSupport={showCollapsedSupport}
-            onToggleSupport={onToggleSupport}
-            deletingIds={deletingIds}
-          />
-        ))}
+      <div className="p-4">
+        {dropCount === 0 && (
+          <div className="text-[12px] text-ink/50 italic">No drops scheduled in this phase.</div>
+        )}
+
+        {trackSupports.map(({ track, support }) => {
+          const missingSlots = support.slots.filter((s) => !s.hit);
+          const tierColor = COVERAGE_COLOR[support.coverageTier];
+          const supportLabel =
+            !support.coreDone ? 'Core missing' :
+            support.coverageTier === 'Strong' ? 'Supported' :
+            support.coverageTier === 'Medium' ? 'Partial'   :
+                                                 'Missing support';
+          const expectedLine = support.slots
+            .map((s) => `${s.label}${s.target > 1 ? ` ×${s.target}` : ''}`)
+            .join(' · ');
+
+          const trackDate = new Date(track.date);
+          const dateLabel = trackDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+          return (
+            <div
+              key={track.id}
+              className="mb-3 last:mb-0 rounded-lg p-3"
+              style={{ background: 'rgba(255,255,255,0.55)' }}
+            >
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <span className="font-black text-[13px] text-ink truncate">
+                    {track.name || track.anchorAction?.title || 'Drop'}
+                  </span>
+                  <span className="text-[10px] font-semibold text-ink/45 shrink-0">{dateLabel}</span>
+                </div>
+                <span
+                  className="text-[10px] font-black uppercase tracking-[0.12em] shrink-0"
+                  style={{ color: tierColor }}
+                >
+                  {supportLabel}
+                </span>
+              </div>
+
+              <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-0.5">
+                Expected
+              </div>
+              <div className="text-[11px] font-semibold text-ink/65 mb-2 leading-snug">
+                {expectedLine}
+              </div>
+
+              {missingSlots.length > 0 ? (
+                <>
+                  <div className="text-[9px] font-bold uppercase tracking-[0.14em] mb-0.5" style={{ color: '#FF4A1C' }}>
+                    Gaps
+                  </div>
+                  <div className="text-[11px] font-bold leading-snug" style={{ color: '#FF4A1C' }}>
+                    {missingSlots.map((s) => s.label).join(' · ')}
+                  </div>
+                </>
+              ) : (
+                <div className="text-[11px] font-bold" style={{ color: '#1FBE7A' }}>
+                  ✓ All expected support present
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -6314,30 +6387,14 @@ export default function YouTubeCampaignCoach() {
             className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-[0.16em] text-ink/55 hover:text-ink/80 transition-colors"
             style={{ background: '#F6F1E7' }}
           >
-            <span>Campaign Plan</span>
+            <span>Campaign Plan — what&apos;s scheduled, supported, and missing</span>
             <span className="text-ink/40">{planOpen ? '▲' : '▼'}</span>
           </button>
         </div>
 
         {planOpen && (
           <div className="mt-3">
-            <CampaignTimeline
-              plan={plan}
-              onPhaseClick={(phase) => {
-                setExpandedPhases((s) => {
-                  const next = new Set(s);
-                  if (next.has(phase)) next.delete(phase);
-                  else next.add(phase);
-                  return next;
-                });
-              }}
-            />
-
-            <div className="mt-4">
-              <ViewModeToggle mode={viewMode} onChange={setViewMode} />
-            </div>
-
-            {viewMode === 'campaign' && CAMPAIGN_PHASES.map((phase) => (
+            {CAMPAIGN_PHASES.map((phase) => (
           <PhaseBlock
             key={phase.name}
             phase={phase}
