@@ -5409,9 +5409,12 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             Add to {phase.name}
           </span>
           {([
-            { kind: 'video' as const, label: '+ Video' },
-            { kind: 'short' as const, label: '+ Short' },
-            { kind: 'post'  as const, label: '+ Post' },
+            { kind: 'video'      as const, label: '+ Video' },
+            { kind: 'short'      as const, label: '+ Short' },
+            { kind: 'post'       as const, label: '+ Post' },
+            { kind: 'collab'     as const, label: '+ Collab' },
+            { kind: 'live'       as const, label: '+ Live' },
+            { kind: 'afterparty' as const, label: '+ Afterparty' },
           ]).map((b) => (
             <button
               key={b.kind}
@@ -5446,7 +5449,7 @@ const WEEK_ACTION_META: Record<WeekStatus, { label: string; color: string }> = {
   cold:    { label: 'Start',    color: '#2C25FF' },
 };
 
-type MissingActionKind = 'video' | 'short' | 'post';
+type MissingActionKind = 'video' | 'short' | 'post' | 'collab' | 'afterparty' | 'live';
 
 const MISSING_ACTION_META: Record<MissingActionKind, {
   label: string;
@@ -5457,9 +5460,12 @@ const MISSING_ACTION_META: Record<MissingActionKind, {
   bg: string;
   defaultTitle: string;
 }> = {
-  video:  { label: 'Video',  type: 'video',  system: 2, intent: 'convert',    role: 'hero',    bg: '#FF4A1C', defaultTitle: 'New Video' },
-  short:  { label: 'Short',  type: 'short',  system: 1, intent: 'engage',     role: 'push',    bg: '#FFD24C', defaultTitle: 'New Short' },
-  post:   { label: 'Post',   type: 'post',   system: 1, intent: 'engage',     role: 'support', bg: '#2C25FF', defaultTitle: 'New Update' },
+  video:      { label: 'Video',      type: 'video',      system: 2, intent: 'convert', role: 'hero',    bg: '#FF4A1C', defaultTitle: 'New Video' },
+  short:      { label: 'Short',      type: 'short',      system: 1, intent: 'engage',  role: 'push',    bg: '#FFD24C', defaultTitle: 'New Short' },
+  post:       { label: 'Post',       type: 'post',       system: 1, intent: 'engage',  role: 'support', bg: '#2C25FF', defaultTitle: 'New Update' },
+  collab:     { label: 'Collab',     type: 'collab',     system: 2, intent: 'convert', role: 'hero',    bg: '#A8B5FF', defaultTitle: 'New Collab' },
+  afterparty: { label: 'Afterparty', type: 'afterparty', system: 2, intent: 'convert', role: 'support', bg: '#FFD24C', defaultTitle: 'Premiere Afterparty' },
+  live:       { label: 'Live',       type: 'live',       system: 2, intent: 'convert', role: 'hero',    bg: '#FF4A1C', defaultTitle: 'Live Stream' },
 };
 
 const VIDEO_SUBTYPE_LABELS: Record<VideoSubtype, string> = {
@@ -5772,7 +5778,7 @@ function WeekRow({
 // ADD CONTENT MODAL — 3-step: type → title/date → add
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const ADD_MODAL_KINDS: MissingActionKind[] = ['short', 'post', 'video'];
+const ADD_MODAL_KINDS: MissingActionKind[] = ['short', 'post', 'video', 'collab', 'live', 'afterparty'];
 
 function AddContentModal({ plan, initialWeek, initialKind, onAdd, onClose }: {
   plan: CampaignPlan;
