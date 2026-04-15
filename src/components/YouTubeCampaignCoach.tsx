@@ -6320,25 +6320,6 @@ export default function YouTubeCampaignCoach() {
         {/* System 1 rollup: missing multi-format support across recent drops */}
         <CampaignAssetRollup plan={plan} />
 
-        {/* YouTube-native tools detected in the campaign window + manual reminders */}
-        <CampaignToolsCard
-          plan={plan}
-          onToggleMerch={() => setPlan((p) => ({
-            ...p,
-            manualOverrides: {
-              ...p.manualOverrides,
-              merchShelfActive: !p.manualOverrides?.merchShelfActive,
-            },
-          }))}
-          onToggleBands={() => setPlan((p) => ({
-            ...p,
-            manualOverrides: {
-              ...p.manualOverrides,
-              bandsintownActive: !p.manualOverrides?.bandsintownActive,
-            },
-          }))}
-        />
-
         {/* Drop View — the action layer, always visible */}
         <DropView
           plan={plan}
@@ -6394,6 +6375,23 @@ export default function YouTubeCampaignCoach() {
 
         {planOpen && (
           <div className="mt-3">
+            <CampaignToolsCard
+              plan={plan}
+              onToggleMerch={() => setPlan((p) => ({
+                ...p,
+                manualOverrides: {
+                  ...p.manualOverrides,
+                  merchShelfActive: !p.manualOverrides?.merchShelfActive,
+                },
+              }))}
+              onToggleBands={() => setPlan((p) => ({
+                ...p,
+                manualOverrides: {
+                  ...p.manualOverrides,
+                  bandsintownActive: !p.manualOverrides?.bandsintownActive,
+                },
+              }))}
+            />
             {CAMPAIGN_PHASES.map((phase) => (
           <PhaseBlock
             key={phase.name}
