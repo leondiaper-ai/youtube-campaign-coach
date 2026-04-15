@@ -118,6 +118,15 @@ export const STATUS_COLOR: Record<Status, { bg: string; fg: string; dot: string 
   'ALWAYS ON':        { bg: '#EEECE6', fg: '#3A3A3A', dot: '#8A8A8A' },
 };
 
+export type RecentUpload = {
+  id: string;
+  title: string;
+  publishedAt: string;
+  durationSec: number;
+  live: 'none' | 'upcoming' | 'live';
+  scheduledStart: string | null;
+};
+
 export type LiveSnap = {
   channelId?: string;
   title?: string;
@@ -127,6 +136,9 @@ export type LiveSnap = {
   uploads30d?: number;
   lastUploadAt?: string | null;
   thumbnail?: string;
+  recentUploads?: RecentUpload[];
+  shorts30d?: number;
+  upcomingCount?: number;
   error?: string;
 };
 

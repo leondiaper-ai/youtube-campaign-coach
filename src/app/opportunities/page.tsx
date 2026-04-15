@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { ARTISTS } from '@/lib/artists';
+import { fetchChannelSnap } from '@/lib/youtube';
 import {
-  OPPORTUNITIES,
+  detectOpportunities,
   IMPACT_COLOR,
   IMPACT_RANK,
   type Opportunity,
@@ -11,20 +13,30 @@ export const revalidate = 600;
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
-const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
 
-export default function OpportunitiesPage() {
-  const sorted = [...OPPORTUNITIES].sort(
-    (a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]
+export default async function OpportunitiesPage() {
+  // Run live detection for every artist in parallel
+  const results = await Promise.all(
+    ARTISTS.map(async (a) => {
+      const snap = a.channelHandle ? await fetchChannelSnap(a.channelHandle) : null;
+      const daysToNextMoment = a.nextMomentDate
+        ? Math.round(
+            (new Date(a.nextMomentDate + 'T00:00:00').getTime() - Date.now()) /
+              (1000 * 60 * 60 * 24)
+          )
+        : null;
+      return detectOpportunities(a, snap, daysToNextMoment);
+    })
   );
-  const artistCount = new Set(OPPORTUNITIES.map((o) => o.artistSlug)).size;
+  const all = results.flat();
+  const sorted = [...all].sort((a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]);
+  const artistCount = new Set(all.map((o) => o.artistSlug)).size;
   const tiers: OpportunityImpact[] = ['HIGH', 'MEDIUM', 'LOW'];
 
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[860px] mx-auto px-6 py-10">
-        {/* Breadcrumb */}
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/cockpit"
@@ -33,20 +45,28 @@ export default function OpportunitiesPage() {
             ← Cockpit
           </Link>
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
-            Scanner
+            Scanner · live
           </div>
         </div>
 
-        {/* Header */}
         <h1 className="font-black text-3xl leading-tight">Opportunity Scanner</h1>
         <p className="text-[13px] text-ink/65 mt-2 max-w-[55ch]">
-          Cross-artist radar. Pick a row to open Watcher for the full diagnosis and action.
+          Cross-artist radar, detected live from YouTube API signals. Click a row to open
+          Watcher for the full diagnosis and action.
         </p>
         <div className="text-[11px] uppercase tracking-[0.14em] text-ink/45 mt-3 font-mono">
-          {OPPORTUNITIES.length} flagged across {artistCount} artists
+          {all.length} flagged across {artistCount} artists
         </div>
 
-        {/* Tiers */}
+        {all.length === 0 && (
+          <div
+            className="mt-10 rounded-xl border p-6 text-[13px] text-ink/55"
+            style={{ borderColor: MUTED, background: PAPER }}
+          >
+            Nothing flagged right now. All tracked channels look covered.
+          </div>
+        )}
+
         {tiers.map((tier) => {
           const items = sorted.filter((o) => o.impact === tier);
           if (items.length === 0) return null;
@@ -99,10 +119,7 @@ function RadarRow({ o }: { o: Opportunity }) {
         href={`/watcher/${o.artistSlug}`}
         className="flex items-center gap-4 px-5 py-4 hover:bg-[#F6F1E7] transition-colors"
       >
-        <span
-          className="w-1.5 h-1.5 rounded-full shrink-0"
-          style={{ background: c.dot }}
-        />
+        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: c.dot }} />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-ink/55 shrink-0">

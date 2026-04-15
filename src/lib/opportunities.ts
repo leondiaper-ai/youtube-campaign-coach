@@ -1,9 +1,11 @@
+import type { Artist, LiveSnap } from './artists';
+
 export type OpportunityImpact = 'HIGH' | 'MEDIUM' | 'LOW';
 export type OpportunityType =
-  | 'Missing support'
-  | 'Underused asset'
   | 'Cold channel'
-  | 'Format gap';
+  | 'Format gap'
+  | 'Missing support'
+  | 'Underused asset';
 
 export type Opportunity = {
   id: string;
@@ -15,6 +17,7 @@ export type Opportunity = {
   impact: OpportunityImpact;
   impactRange: string;
   action: string;
+  source: 'live';
 };
 
 export const IMPACT_RANK: Record<OpportunityImpact, number> = {
@@ -23,131 +26,111 @@ export const IMPACT_RANK: Record<OpportunityImpact, number> = {
   LOW: 2,
 };
 
-export const OPPORTUNITIES: Opportunity[] = [
-  {
-    id: 'jb-lyric-video',
-    artistSlug: 'james-blake',
-    artistName: 'James Blake',
-    type: 'Missing support',
-    subtype: 'No lyric video on single',
-    signal:
-      'Single trending on TikTok — 14K creations in 7d — but no official lyric video on the channel.',
-    impact: 'HIGH',
-    impactRange: '+200–400K views / 30d',
-    action: 'Ship a lyric video within 72h. Typography over static art is enough.',
-  },
-  {
-    id: 'ktrap-shorts-gap',
-    artistSlug: 'k-trap',
-    artistName: 'K-Trap',
-    type: 'Format gap',
-    subtype: 'No Shorts around active push',
-    signal:
-      '7 uploads in 30d but 0 Shorts. Change is at 1.2M views and climbing — Shorts are where the audience is finding it.',
-    impact: 'HIGH',
-    impactRange: '+500K–1M Shorts views',
-    action: 'Cut 3 Shorts from the Change video this week — hook, best line, reaction.',
-  },
-  {
-    id: 'ezra-cold-pre-album',
-    artistSlug: 'ezra-collective',
-    artistName: 'Ezra Collective',
-    type: 'Cold channel',
-    subtype: 'Pre-album silence',
-    signal:
-      'Zero uploads in 38d. Album cycle announcing in ~6 weeks. Trailer on channel is from the last campaign.',
-    impact: 'HIGH',
-    impactRange: 'Foundation for full cycle',
-    action: 'Pin a fresh trailer or studio short this week. Warm the channel before announce.',
-  },
-  {
-    id: 'tom-tour-footage',
-    artistSlug: 'tom-odell',
-    artistName: 'Tom Odell',
-    type: 'Underused asset',
-    subtype: 'Tour footage not posted',
-    signal:
-      'Tour announce in 13d. Previous tour has 40+ hours of uncut footage sitting unused. No teaser up yet.',
-    impact: 'HIGH',
-    impactRange: '+150K views, +pre-save lift',
-    action: 'Cut a 60s announce teaser from tour footage. Schedule for 7d before announce.',
-  },
-  {
-    id: 'bo-festival-shorts',
-    artistSlug: 'bad-omens',
-    artistName: 'Bad Omens',
-    type: 'Format gap',
-    subtype: 'Festival Shorts lagging',
-    signal:
-      'Coachella recap in 5d but only 1 Short up from the run. Watch-time flat for 7d.',
-    impact: 'MEDIUM',
-    impactRange: '+80–150K views',
-    action: 'Cut 3 festival Shorts within 24h. Crowd shot, riff, walk-off.',
-  },
-  {
-    id: 'jb-live-session',
-    artistSlug: 'james-blake',
-    artistName: 'James Blake',
-    type: 'Underused asset',
-    subtype: 'Live session premiere window',
-    signal:
-      'Premieres converting at 32% — well above average. No premiere scheduled for the next 14d.',
-    impact: 'MEDIUM',
-    impactRange: '+50–120K premiere views',
-    action: 'Lock a premiere slot. Re-cut an existing live take if nothing new is ready.',
-  },
-  {
-    id: 'ktrap-catalogue',
-    artistSlug: 'k-trap',
-    artistName: 'K-Trap',
-    type: 'Underused asset',
-    subtype: 'Back catalogue not in playlists',
-    signal:
-      'Top 5 older tracks pull 10K+ views/month each but aren\'t grouped into a discovery playlist.',
-    impact: 'MEDIUM',
-    impactRange: '+session duration, +subs',
-    action: 'Build an "Essentials" playlist. Pin to channel homepage.',
-  },
-  {
-    id: 'ezra-community',
-    artistSlug: 'ezra-collective',
-    artistName: 'Ezra Collective',
-    type: 'Missing support',
-    subtype: 'Community tab dormant',
-    signal:
-      'Community tab last used 4 months ago. No poll, no image post, no audience warm-up before cycle.',
-    impact: 'MEDIUM',
-    impactRange: 'Lifts announce-day CTR',
-    action: 'Post a studio image or poll this week. Repeat weekly through announce.',
-  },
-  {
-    id: 'tom-playlists',
-    artistSlug: 'tom-odell',
-    artistName: 'Tom Odell',
-    type: 'Underused asset',
-    subtype: 'No tour-themed playlist',
-    signal:
-      'Tour announce incoming. No playlist grouping the tracks fans will hear on the road.',
-    impact: 'LOW',
-    impactRange: '+playlist adds',
-    action: 'Build a "Live 2026" playlist before announce.',
-  },
-  {
-    id: 'bo-pinned-comment',
-    artistSlug: 'bad-omens',
-    artistName: 'Bad Omens',
-    type: 'Missing support',
-    subtype: 'No pinned comment on recap',
-    signal:
-      'Last 3 uploads have no pinned comment. Easy lift for tour / merch / next-drop callout.',
-    impact: 'LOW',
-    impactRange: '+CTR to links',
-    action: 'Pin a comment on the recap at publish with tour link.',
-  },
-];
-
 export const IMPACT_COLOR: Record<OpportunityImpact, { bg: string; fg: string; dot: string }> = {
   HIGH: { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
   MEDIUM: { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
   LOW: { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
 };
+
+const ACTIVE_PHASES: Artist['phase'][] = ['START', 'RELEASE', 'PUSH', 'PEAK'];
+
+function daysAgo(iso?: string | null) {
+  if (!iso) return null;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+
+/**
+ * All detection is derived from YouTube Data API v3 signals pulled in
+ * fetchChannelSnap. No seed data, no external feeds.
+ */
+export function detectOpportunities(
+  artist: Artist,
+  snap: LiveSnap | null,
+  daysToNextMoment: number | null
+): Opportunity[] {
+  if (!snap || snap.error || snap.subs == null) return [];
+  const out: Opportunity[] = [];
+  const uploads30d = snap.uploads30d ?? 0;
+  const shorts30d = snap.shorts30d ?? 0;
+  const upcoming = snap.upcomingCount ?? 0;
+  const lastUp = daysAgo(snap.lastUploadAt);
+  const isActive = ACTIVE_PHASES.includes(artist.phase);
+  const hasNearMoment =
+    daysToNextMoment != null && daysToNextMoment >= 0 && daysToNextMoment <= 14;
+
+  // 1. Cold channel — no upload in 30d OR zero uploads in 30d window
+  if (lastUp == null || lastUp > 30 || uploads30d === 0) {
+    out.push({
+      id: `cold:${artist.slug}`,
+      artistSlug: artist.slug,
+      artistName: artist.name,
+      type: 'Cold channel',
+      subtype: 'Channel has gone cold',
+      signal:
+        lastUp != null
+          ? `Last upload ${lastUp}d ago. ${uploads30d} uploads in 30d.`
+          : `No uploads detected in the last 30d.`,
+      impact: isActive || hasNearMoment ? 'HIGH' : 'MEDIUM',
+      impactRange:
+        isActive || hasNearMoment
+          ? 'Blocks campaign traction'
+          : 'Erodes baseline watch-time',
+      action:
+        'Ship one upload this week — a Short from catalogue is enough to warm the channel.',
+      source: 'live',
+    });
+  }
+
+  // 2. Quiet before a near-term moment
+  if (hasNearMoment && (lastUp ?? 999) > 14 && (lastUp == null || lastUp <= 30)) {
+    out.push({
+      id: `quiet-pre-moment:${artist.slug}`,
+      artistSlug: artist.slug,
+      artistName: artist.name,
+      type: 'Missing support',
+      subtype: 'Quiet before next moment',
+      signal: `Next moment in ${daysToNextMoment}d but last upload was ${lastUp}d ago.`,
+      impact: 'HIGH',
+      impactRange: 'Reduces announce-day reach',
+      action: 'Post a teaser or catalogue Short this week to re-engage before the drop.',
+      source: 'live',
+    });
+  }
+
+  // 3. No Shorts on an active channel
+  if (uploads30d >= 2 && shorts30d === 0) {
+    out.push({
+      id: `no-shorts:${artist.slug}`,
+      artistSlug: artist.slug,
+      artistName: artist.name,
+      type: 'Format gap',
+      subtype: 'No Shorts in the last 30 days',
+      signal: `${uploads30d} uploads in 30d but 0 are Shorts (≤60s).`,
+      impact: isActive ? 'HIGH' : 'MEDIUM',
+      impactRange: isActive ? '+500K–1M Shorts views' : '+discovery surface',
+      action:
+        'Cut 2–3 vertical Shorts from the latest upload — hook, best moment, reaction.',
+      source: 'live',
+    });
+  }
+
+  // 4. No upcoming premiere / scheduled live
+  if (upcoming === 0 && (uploads30d >= 2 || isActive)) {
+    out.push({
+      id: `no-upcoming:${artist.slug}`,
+      artistSlug: artist.slug,
+      artistName: artist.name,
+      type: 'Underused asset',
+      subtype: 'No premiere or live scheduled',
+      signal:
+        'Nothing scheduled as an upcoming premiere or live on the channel.',
+      impact: 'LOW',
+      impactRange: 'Premieres lift session time + comments',
+      action:
+        'Schedule the next upload as a Premiere to concentrate launch attention.',
+      source: 'live',
+    });
+  }
+
+  return out;
+}

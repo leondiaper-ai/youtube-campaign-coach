@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
-import { OPPORTUNITIES, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
+import { detectOpportunities, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 
 export const revalidate = 600;
 
@@ -34,7 +34,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const c = STATUS_COLOR[status];
   const lastUpDays = daysSince(live?.lastUploadAt);
 
-  const opps = OPPORTUNITIES.filter((o) => o.artistSlug === slug).sort(
+  const opps = detectOpportunities(artist, live, daysToNextMoment).sort(
     (a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]
   );
 

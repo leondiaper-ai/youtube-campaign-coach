@@ -8,6 +8,13 @@ async function jget(url: string) {
   return r.json();
 }
 
+// ISO 8601 duration → seconds
+function parseDuration(iso?: string): number {
+  if (!iso) return 0;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  return (+(m?.[1] ?? 0)) * 3600 + (+(m?.[2] ?? 0)) * 60 + (+(m?.[3] ?? 0));
+}
+
 export async function resolveChannelId(input: string): Promise<string | null> {
   if (!KEY) return null;
   if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
@@ -40,20 +47,54 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
     const item = ch.items?.[0];
     if (!item) return { error: 'empty' };
     const uploadsId = item.contentDetails?.relatedPlaylists?.uploads;
+
     let uploads30d = 0;
     let lastUploadAt: string | null = null;
+    const recentUploads: LiveSnap['recentUploads'] = [];
+    let shorts30d = 0;
+    let upcomingCount = 0;
+
     if (uploadsId) {
       const pl = await jget(
         `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}`
       );
       const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const ids: string[] = [];
       for (const it of pl.items ?? []) {
         const t = it.snippet?.publishedAt;
-        if (!t) continue;
+        const vid = it.snippet?.resourceId?.videoId;
+        if (!t || !vid) continue;
         if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
         if (new Date(t).getTime() >= cutoff) uploads30d++;
+        ids.push(vid);
+      }
+      // Enrich the 25 most recent with durations + live status
+      const sliceIds = ids.slice(0, 25);
+      if (sliceIds.length) {
+        const vj = await jget(
+          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,liveStreamingDetails&id=${sliceIds.join(',')}&key=${KEY}`
+        );
+        for (const v of vj.items ?? []) {
+          const dur = parseDuration(v.contentDetails?.duration);
+          const publishedAt = v.snippet?.publishedAt ?? '';
+          const live = v.snippet?.liveBroadcastContent ?? 'none'; // 'none' | 'upcoming' | 'live'
+          const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          recentUploads.push({
+            id: v.id,
+            title: v.snippet?.title ?? '',
+            publishedAt,
+            durationSec: dur,
+            live,
+            scheduledStart,
+          });
+          const ageDays =
+            (Date.now() - new Date(publishedAt).getTime()) / 86400000;
+          if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;
+          if (live === 'upcoming') upcomingCount++;
+        }
       }
     }
+
     return {
       channelId,
       title: item.snippet?.title,
@@ -63,6 +104,9 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
       uploads30d,
       lastUploadAt,
       thumbnail: item.snippet?.thumbnails?.default?.url,
+      recentUploads,
+      shorts30d,
+      upcomingCount,
     };
   } catch (e: any) {
     return { error: String(e?.message ?? e) };
