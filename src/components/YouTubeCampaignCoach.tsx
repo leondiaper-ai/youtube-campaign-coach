@@ -5913,7 +5913,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                 </>
               ) : (
                 <div className="text-[11px] font-bold" style={{ color: '#1FBE7A' }}>
-                  ✓ All expected support present
+                  ✓ Multiformat strategy supported
                 </div>
               )}
             </div>
