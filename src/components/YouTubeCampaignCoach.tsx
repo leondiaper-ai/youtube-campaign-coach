@@ -1827,6 +1827,9 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             placeholder="Enter Campaign Name"
             onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
           />
+          <p className="text-[12px] text-ink/55 mt-2 max-w-[52ch]">
+            Paste your release dates. Get the cadence, support, and next move for every drop.
+          </p>
         </div>
         {onOpenTimeline && (
           <div className="shrink-0 ml-3 flex flex-col items-end gap-1">
@@ -6884,7 +6887,7 @@ export default function YouTubeCampaignCoach() {
             onClick={() => setTimelineModalOpen(true)}
             className="text-[12px] font-semibold text-ink/60 hover:text-ink transition-colors"
           >
-            Got a real release plan? <span className="underline decoration-ink/20 underline-offset-2">Build a campaign from it →</span>
+            <span className="underline decoration-ink/20 underline-offset-2">Start with your own release plan →</span>
           </button>
         </div>
 
