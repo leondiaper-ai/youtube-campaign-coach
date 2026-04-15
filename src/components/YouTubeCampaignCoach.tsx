@@ -2377,18 +2377,22 @@ function dropAction(
 // the top 1–2 missing multi-format assets. Renders nothing when the gap is
 // trivial — keeps the main view quiet by default.
 function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
-  const autoTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
   const watcher = useWatcherChannel();
   const liveVideos = watcher.state?.latestVideos ?? [];
+  // Prefer real channel drops (gated to the campaign window) when available.
+  const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
+  const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
+  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
 
   const rollup = useMemo(() => {
     if (!watcher.state || liveVideos.length === 0) return null;
     const now = Date.now();
-    // Only drops whose release window has opened and isn't ancient (≤60d old).
+    const campaignStartT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
+    // Only drops inside the campaign window and whose release window has opened.
     const eligible = autoTracks.filter((t) => {
       const dt = new Date(t.date).getTime();
       if (Number.isNaN(dt)) return false;
-      return dt <= now + 3 * 86400_000 && dt >= now - 60 * 86400_000;
+      return dt >= campaignStartT && dt <= now + 3 * 86400_000;
     });
     if (eligible.length === 0) return null;
 
@@ -2412,7 +2416,7 @@ function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
     const total = items.reduce((s, i) => s + i.count, 0);
     if (total <= 1) return null;
     return items.slice(0, 2);
-  }, [autoTracks, watcher.state, liveVideos]);
+  }, [autoTracks, watcher.state, liveVideos, plan.startDate]);
 
   if (!rollup) return null;
 
@@ -4278,9 +4282,12 @@ function dayLabelFromIso(iso: string): DayLabel {
   return (['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as DayLabel[])[d];
 }
 
-function deriveLiveTracks(state: WatcherState | null): AutoTrack[] {
+function deriveLiveTracks(state: WatcherState | null, startDate?: string): AutoTrack[] {
   if (!state || !state.latestVideos) return [];
-  const longform = state.latestVideos.filter((v) => v.kind === 'video');
+  const startT = startDate ? new Date(startDate + 'T00:00:00').getTime() : -Infinity;
+  const longform = state.latestVideos.filter(
+    (v) => v.kind === 'video' && new Date(v.publishedAt).getTime() >= startT
+  );
   if (longform.length === 0) return [];
   const now = Date.now();
   return longform
@@ -4833,7 +4840,11 @@ function DropView({ plan }: { plan: CampaignPlan }) {
   const liveVideos = watcher.state?.latestVideos ?? [];
   // Prefer real uploads as the source of drop cards when the channel has any
   // longform. Fall back to the manual campaign plan only when no live data.
-  const liveTracks = useMemo(() => deriveLiveTracks(watcher.state), [watcher.state]);
+  const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
+  // Gate stats + rollups to the campaign window so we measure THIS campaign,
+  // not the whole channel history.
+  const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
+  const liveVideosInWindow = liveVideos.filter((v) => new Date(v.publishedAt).getTime() >= startT);
   const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
   const isLiveMode = liveTracks.length > 0;
   const liveByTrackId = useMemo(() => {
@@ -4869,8 +4880,8 @@ function DropView({ plan }: { plan: CampaignPlan }) {
 
   // In live mode, output stats come from real API counts — total shorts + all
   // longform on the channel feed. Posts aren't in the public API (0 shown).
-  const liveShorts = liveVideos.filter((v) => v.kind === 'short').length;
-  const liveLongform = liveVideos.filter((v) => v.kind === 'video').length;
+  const liveShorts = liveVideosInWindow.filter((v) => v.kind === 'short').length;
+  const liveLongform = liveVideosInWindow.filter((v) => v.kind === 'video').length;
   const liveSupport = liveShorts + Math.max(0, liveLongform - autoTracks.length);
   const outputStats: { label: string; value: number }[] = isLiveMode
     ? [
