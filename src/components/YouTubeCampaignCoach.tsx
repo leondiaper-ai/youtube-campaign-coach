@@ -1688,8 +1688,8 @@ function TimelineImportModal({ open, onClose, onApply }: {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-4 border-b border-ink/10">
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45">Generate from Timeline</div>
-          <div className="font-black text-lg text-ink mt-0.5">Turn your timeline into a campaign</div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45">Build campaign from timeline</div>
+          <div className="font-black text-lg text-ink mt-0.5">Build your campaign from a timeline</div>
           <div className="text-[11px] text-ink/55 mt-1">Paste once — get weekly cadence, per-drop support, and the next actions.</div>
         </div>
         <div className="px-5 py-4 space-y-3 overflow-y-auto">
@@ -1800,14 +1800,19 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
           />
         </div>
         {onOpenTimeline && (
-          <button
-            onClick={onOpenTimeline}
-            className="shrink-0 ml-3 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.14em] text-paper"
-            style={{ background: '#0E0E0E' }}
-            title="Paste a release timeline and auto-build a YouTube plan"
-          >
-            ↗ Generate from Timeline
-          </button>
+          <div className="shrink-0 ml-3 flex flex-col items-end gap-1">
+            <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45">
+              Start here →
+            </span>
+            <button
+              onClick={onOpenTimeline}
+              className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.14em] text-paper shadow-sm"
+              style={{ background: '#0E0E0E' }}
+              title="Paste a release timeline and auto-build a YouTube plan"
+            >
+              Build campaign from timeline
+            </button>
+          </div>
         )}
         {/* Settings cog retired — campaign targets now auto-derive from channel size + planned drops */}
       </div>
@@ -6843,6 +6848,16 @@ export default function YouTubeCampaignCoach() {
           }}
           onEditCancel={() => setEditingMetric(null)}
         />
+
+        {/* Inline secondary entry — invites users to swap the example for their real plan */}
+        <div className="mt-5 flex items-center justify-between">
+          <button
+            onClick={() => setTimelineModalOpen(true)}
+            className="text-[12px] font-semibold text-ink/60 hover:text-ink transition-colors"
+          >
+            Got a real release plan? <span className="underline decoration-ink/20 underline-offset-2">Build a campaign from it →</span>
+          </button>
+        </div>
 
         {/* ── CAMPAIGN PLAN — collapsed by default, hosts phase bar + phase blocks + view toggle ── */}
         <div className="mt-6">
