@@ -2859,7 +2859,11 @@ function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
   // Prefer real channel drops (gated to the campaign window) when available.
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
   const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
-  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+  const autoTracks = useMemo(() => {
+    const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
+    return [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
+      .sort((a, b) => a.weekNum - b.weekNum);
+  }, [liveTracks, planTracks]);
 
   const rollup = useMemo(() => {
     if (!watcher.state || liveVideos.length === 0) return null;
@@ -3040,7 +3044,11 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
   const liveVideosInWindow = liveVideos.filter((v) => new Date(v.publishedAt).getTime() >= startT);
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
   const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
-  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+  const autoTracks = useMemo(() => {
+    const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
+    return [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
+      .sort((a, b) => a.weekNum - b.weekNum);
+  }, [liveTracks, planTracks]);
   const liveByTrackId = useMemo(() => {
     const map: Record<string, LiveMatch> = {};
     for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
@@ -4733,8 +4741,9 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 1. Create a track for each campaign moment
-  for (const moment of CAMPAIGN_MOMENTS) {
+  // 1. Create a track for each campaign moment (prefer plan-specific moments)
+  const moments = (plan.moments && plan.moments.length > 0) ? plan.moments : CAMPAIGN_MOMENTS;
+  for (const moment of moments) {
     const week = plan.weeks.find((w) => w.week === moment.weekNum);
     if (!week) continue;
 
@@ -4798,7 +4807,7 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
 
   // 2. Also create tracks for standalone video/collab actions NOT linked to a moment
   for (const week of plan.weeks) {
-    const momentWeeks = CAMPAIGN_MOMENTS.map((m) => m.weekNum);
+    const momentWeeks = moments.map((m) => m.weekNum);
     if (momentWeeks.includes(week.week)) continue;
 
     const heroActions = week.actions.filter((a) =>
@@ -5631,7 +5640,11 @@ function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggl
   // Prefer real uploads as the source of drop cards when the channel has any
   // longform. Fall back to the manual campaign plan only when no live data.
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
-  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+  const autoTracks = useMemo(() => {
+    const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
+    return [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
+      .sort((a, b) => a.weekNum - b.weekNum);
+  }, [liveTracks, planTracks]);
   const liveByTrackId = useMemo(() => {
     const map: Record<string, LiveMatch> = {};
     for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
@@ -5731,10 +5744,12 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const watcher = useWatcherChannel();
   const communityPostDone = plan.manualOverrides?.communityPostDone || {};
 
-  // Prefer live drops; fall back to planned.
+  // Merge: live drops supersede planned for same week; planned fills the future.
   const liveTracks = deriveLiveTracks(watcher.state, plan.startDate);
   const planTracks = deriveAutoTracks(plan);
-  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+  const liveWeeks = new Set(liveTracks.map((t) => t.weekNum));
+  const autoTracks = [...liveTracks, ...planTracks.filter((t) => !liveWeeks.has(t.weekNum))]
+    .sort((a, b) => a.weekNum - b.weekNum);
 
   // Phase date range from campaign start + weekStart/weekEnd.
   const startMs = new Date(plan.startDate + 'T12:00:00').getTime();
