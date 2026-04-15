@@ -15,7 +15,7 @@ import {
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type PhaseName = 'REAWAKEN' | 'BUILD THE WORLD' | 'SCALE THE STORY' | 'CULTURAL MOMENT' | 'EXTEND';
+type PhaseName = 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
 type ActionType = 'short' | 'video' | 'post' | 'live' | 'playlist' | 'collab' | 'afterparty';
 type ActionIntent = 'engage' | 'tease' | 'convert' | 'distribute';
 type ActionStatus = 'planned' | 'done' | 'missed';
@@ -203,11 +203,11 @@ type ViewMode = 'campaign' | 'drop';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CAMPAIGN_PHASES: CampaignPhase[] = [
-  { name: 'REAWAKEN',        weekStart: 1,  weekEnd: 3,  color: '#2C25FF' },
-  { name: 'BUILD THE WORLD', weekStart: 4,  weekEnd: 8,  color: '#1FBE7A' },
-  { name: 'SCALE THE STORY', weekStart: 9,  weekEnd: 13, color: '#FFD24C' },
-  { name: 'CULTURAL MOMENT', weekStart: 14, weekEnd: 22, color: '#FF4A1C' },
-  { name: 'EXTEND',          weekStart: 23, weekEnd: 24, color: '#FFD3C9' },
+  { name: 'START',        weekStart: 1,  weekEnd: 3,  color: '#2C25FF' },
+  { name: 'RELEASE', weekStart: 4,  weekEnd: 8,  color: '#1FBE7A' },
+  { name: 'PUSH', weekStart: 9,  weekEnd: 13, color: '#FFD24C' },
+  { name: 'PEAK', weekStart: 14, weekEnd: 22, color: '#FF4A1C' },
+  { name: 'SUSTAIN',          weekStart: 23, weekEnd: 24, color: '#FFD3C9' },
 ];
 
 const ACTION_LABELS: Record<ActionType, string> = {
@@ -424,11 +424,11 @@ const LS_KEY = 'pih-campaign-coach-v4';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const PHASE_NARRATIVE: Record<PhaseName, { goal: string; role: string; summary: string }> = {
-  'REAWAKEN':        { goal: 'Break the silence — remind YouTube you exist', role: 'YouTube re-activates channel signals, algorithm starts testing your content again', summary: 'Return from absence. Shorts and posts re-establish presence and warm the algorithm.' },
-  'BUILD THE WORLD': { goal: 'Prove the campaign is real — land the first major moment', role: 'YouTube starts recommending to new audiences through collab crossover', summary: 'First singles and collabs create the world of Campaign. Each drop expands the audience.' },
-  'SCALE THE STORY': { goal: 'Expand reach — turn singles into a narrative', role: 'YouTube algorithm scales distribution as watch time and engagement compound', summary: 'More collabs, more content, more reach. Build the story arc that leads to the album.' },
-  'CULTURAL MOMENT':  { goal: 'Execute the album rollout — this is the window', role: 'YouTube becomes the primary discovery and conversion platform for the release', summary: 'Album announcement, final singles, countdown content, and the release itself. Peak activity.' },
-  'EXTEND':          { goal: 'Sustain the conversation — don\'t let it die after release', role: 'YouTube long-tail keeps streams and discovery alive weeks after drop', summary: 'Post-release content, fan reactions, deluxe hints. Keep the album in the conversation.' },
+  'START':   { goal: 'Restart activity',                  role: 'Warming the algorithm with Shorts + Posts',            summary: 'Restart activity (Shorts + Posts).' },
+  'RELEASE': { goal: 'Launch singles + videos',           role: 'First drops enter the feed and build the audience',     summary: 'Launch singles + videos.' },
+  'PUSH':    { goal: 'Increase output + support drops',   role: 'Cadence climbs; each drop gets multi-format support',    summary: 'Increase output + support each drop.' },
+  'PEAK':    { goal: 'Max activity around release',       role: 'Peak posting window — the release is live',              summary: 'Max activity around the release moment.' },
+  'SUSTAIN': { goal: 'Maintain momentum after release',   role: 'Long-tail content keeps the release in conversation',    summary: 'Maintain momentum after release.' },
 };
 
 type CampaignMoment = {
@@ -475,7 +475,7 @@ function getInactionRisk(status: WeekStatus, week: CampaignWeek, phase: Campaign
   if (weeksToNext <= 2 && status !== 'hot') {
     return { risk: `${nextMoment!.name} is ${weeksToNext === 1 ? 'next week' : 'in 2 weeks'} and channel is ${status}. ${nextMoment!.name} will underperform.`, urgency: 'critical' };
   }
-  if (phase?.name === 'CULTURAL MOMENT' && status === 'cold') {
+  if (phase?.name === 'PEAK' && status === 'cold') {
     return { risk: 'Channel is cold during the most important phase. Album release will not land.', urgency: 'critical' };
   }
   if (status === 'cooling' && missed >= 2) {
@@ -627,7 +627,7 @@ function getVerdict(statuses: WeekStatus[], weeks: CampaignWeek[]): { headline: 
   const phaseName = phase ? phase.name : '';
 
   if (current === 'hot') {
-    if (phaseName === 'CULTURAL MOMENT') return { headline: 'DROP WINDOW OPEN', summary: 'Channel is hot during cultural moment. Execute the release.', color: '#fb7185' };
+    if (phaseName === 'PEAK') return { headline: 'DROP WINDOW OPEN', summary: 'Channel is hot during cultural moment. Execute the release.', color: '#fb7185' };
     return { headline: 'CHANNEL IS HOT', summary: 'Audience engaged, momentum strong. Keep building.', color: '#fb7185' };
   }
   if (current === 'cooling') return { headline: 'MOMENTUM SLIPPING', summary: 'Resume uploads before this stalls completely.', color: '#f97316' };
@@ -734,24 +734,24 @@ function generateCoachTips(weeks: CampaignWeek[], statuses: WeekStatus[]): Coach
     if (videosDone > 0 && shortsDone === 0) {
       weekTips.push({ week: w.week, message: 'Add Shorts to feed the algorithm between videos', priority: 'medium' });
     }
-    if (shortsDone >= 3 && videosDone === 0 && phaseName !== 'REAWAKEN') {
+    if (shortsDone >= 3 && videosDone === 0 && phaseName !== 'START') {
       weekTips.push({ week: w.week, message: 'Balance with a video — Shorts warm up, videos convert', priority: 'medium' });
     }
 
     // Phase-specific
-    if (phaseName === 'REAWAKEN' && planned > 0 && done === 0 && missed === 0) {
+    if (phaseName === 'START' && planned > 0 && done === 0 && missed === 0) {
       weekTips.push({ week: w.week, message: 'Post something today — break the silence', priority: 'high' });
     }
-    if (phaseName === 'BUILD THE WORLD' && videos.length === 0 && w.week > 5) {
+    if (phaseName === 'RELEASE' && videos.length === 0 && w.week > 5) {
       weekTips.push({ week: w.week, message: 'Plan a video — Build phase needs visuals', priority: 'medium' });
     }
-    if (phaseName === 'SCALE THE STORY' && (status === 'cold' || status === 'cooling')) {
+    if (phaseName === 'PUSH' && (status === 'cold' || status === 'cooling')) {
       weekTips.push({ week: w.week, message: 'Increase posting frequency', priority: 'high' });
     }
-    if (phaseName === 'SCALE THE STORY' && s2Actions.length === 0) {
+    if (phaseName === 'PUSH' && s2Actions.length === 0) {
       weekTips.push({ week: w.week, message: 'Add an anchor moment (S2 action)', priority: 'medium' });
     }
-    if (phaseName === 'CULTURAL MOMENT') {
+    if (phaseName === 'PEAK') {
       const s2Planned = s2Actions.filter((a) => a.status === 'planned');
       if (s2Planned.length > 0 && status !== 'hot') {
         weekTips.push({ week: w.week, message: 'Warm up NOW — drop will underperform on a cold channel', priority: 'high' });
@@ -760,7 +760,7 @@ function generateCoachTips(weeks: CampaignWeek[], statuses: WeekStatus[]): Coach
         weekTips.push({ week: w.week, message: 'Execute every planned action — this is the window', priority: 'high' });
       }
     }
-    if (phaseName === 'EXTEND' && planned === 0 && done === 0) {
+    if (phaseName === 'SUSTAIN' && planned === 0 && done === 0) {
       weekTips.push({ week: w.week, message: 'Post reaction content — keep the conversation alive', priority: 'medium' });
     }
 
@@ -1220,11 +1220,11 @@ function recalcWeekDates(weeks: CampaignWeek[], startIso: string): CampaignWeek[
 // Unified header + status + phase timeline — feels like a journey
 
 const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string; nudge: string }> = {
-  'REAWAKEN':        { short: 'REAWAKEN',  desc: 'Restart activity (Shorts + Posts)',     focus: '→ Post Shorts + Community to warm the algorithm', nudge: 'Warm up the channel' },
-  'BUILD THE WORLD': { short: 'BUILD',     desc: 'Introduce singles + collaborations',    focus: '→ Land first drops and build crossover audience', nudge: 'Build consistency this week' },
-  'SCALE THE STORY': { short: 'SCALE',     desc: 'Increase output + support drops',       focus: '→ Push content volume and expand reach',          nudge: 'Keep pushing content' },
-  'CULTURAL MOMENT': { short: 'CULTURAL',  desc: 'Peak activity around release',          focus: '→ Execute album rollout — maximise first 48hrs',  nudge: 'Land the big moment' },
-  'EXTEND':          { short: 'EXTEND',    desc: 'Maintain momentum post-release',        focus: '→ Keep the conversation alive post-release',      nudge: 'Keep the story alive' },
+  'START':   { short: 'START',   desc: 'Restart activity (Shorts + Posts)',  focus: '→ Post Shorts + Community to warm the algorithm', nudge: 'Warm up the channel' },
+  'RELEASE': { short: 'RELEASE', desc: 'Launch singles + videos',            focus: '→ Land first drops and build crossover audience', nudge: 'Build consistency this week' },
+  'PUSH':    { short: 'PUSH',    desc: 'Increase output + support each drop', focus: '→ Push content volume and expand reach',        nudge: 'Keep pushing content' },
+  'PEAK':    { short: 'PEAK',    desc: 'Max activity around release moment', focus: '→ Execute album rollout — maximise first 48hrs',  nudge: 'Land the big moment' },
+  'SUSTAIN': { short: 'SUSTAIN', desc: 'Maintain momentum after release',    focus: '→ Keep the conversation alive post-release',      nudge: 'Keep the story alive' },
 };
 
 // ── ACTUAL PHASE DETECTION ──────────────────────────────────────────────────
@@ -1238,7 +1238,7 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
     .filter((w) => w.actions.some((a) => a.status === 'done' || a.status === 'missed'))
     .slice(-3);
 
-  if (recentWeeks.length === 0) return 'REAWAKEN';
+  if (recentWeeks.length === 0) return 'START';
 
   // Count averages over recent weeks
   const avgCount = (type: string) => {
@@ -1261,11 +1261,11 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
   const multiType = (avgShorts > 0 ? 1 : 0) + (avgVideos > 0 ? 1 : 0) + (avgPosts > 0 ? 1 : 0) + (avgCollabs > 0 || avgLive > 0 ? 1 : 0);
 
   // SCALE: consistent shorts + longform + multiple types
-  if (shortsConsistent && longformActive && multiType >= 3) return 'SCALE THE STORY';
+  if (shortsConsistent && longformActive && multiType >= 3) return 'PUSH';
   // BUILD: consistent shorts + some longform/community starting
-  if (shortsConsistent && (longformActive || avgCommunity >= 1)) return 'BUILD THE WORLD';
+  if (shortsConsistent && (longformActive || avgCommunity >= 1)) return 'RELEASE';
   // Still in REAWAKEN
-  return 'REAWAKEN';
+  return 'START';
 }
 
 function CampaignStartControl({ startDate, onChange }: { startDate: string; onChange: (d: string) => void }) {
@@ -1439,15 +1439,20 @@ function CampaignTimeline({ plan, onPhaseClick, onUpdatePlan, onOpenSettings, on
             const phaseDone = phaseActions.filter((a) => a.status === 'done').length;
             const phaseTotal = phaseActions.length;
 
-            // Status logic
-            let status: 'Complete' | 'In Progress' | 'Upcoming';
+            // Status logic — observable, not aspirational.
+            // Behind = phase is current/past, has drops, and support is missing.
+            const missedInPhase = phaseActions.filter((a) => a.status === 'missed').length;
+            let status: 'Complete' | 'In Progress' | 'Behind' | 'Upcoming';
             if (isPast && phaseTotal > 0 && phaseDone >= phaseTotal) status = 'Complete';
+            else if ((isCurrent || isPast) && missedInPhase > 0) status = 'Behind';
             else if (isCurrent || (isPast && phaseDone < phaseTotal)) status = 'In Progress';
             else status = 'Upcoming';
 
             const statusColor =
-              status === 'Complete' ? '#1FBE7A' :
-              status === 'In Progress' ? phase.color : 'rgba(14,14,14,0.25)';
+              status === 'Complete'   ? '#1FBE7A' :
+              status === 'Behind'     ? '#FF4A1C' :
+              status === 'In Progress' ? phase.color :
+                                         'rgba(14,14,14,0.25)';
 
             return (
               <button
@@ -1804,10 +1809,10 @@ function computeChannelSignal(plan: CampaignPlan): ChannelSignal {
   const nearDrop = drop !== null && drop.daysAway >= 0 && drop.daysAway <= 7;
 
   // Reawaken = still proving the channel is live.
-  if (currentPhase === 'REAWAKEN') return 'TEST';
+  if (currentPhase === 'START') return 'TEST';
 
   // Cultural / Scale phases — momentum window, so SCALE when healthy, PUSH otherwise.
-  if (currentPhase === 'CULTURAL MOMENT' || currentPhase === 'SCALE THE STORY') {
+  if (currentPhase === 'PEAK' || currentPhase === 'PUSH') {
     return cadenceStatus === 'Healthy' ? 'SCALE' : 'PUSH';
   }
 
@@ -1815,7 +1820,7 @@ function computeChannelSignal(plan: CampaignPlan): ChannelSignal {
   if (nearDrop) return 'PUSH';
 
   // Build phase — foundation work, still validating.
-  if (currentPhase === 'BUILD THE WORLD') return cadenceStatus === 'Healthy' ? 'TEST' : 'PUSH';
+  if (currentPhase === 'RELEASE') return cadenceStatus === 'Healthy' ? 'TEST' : 'PUSH';
 
   return 'HOLD';
 }
@@ -1925,15 +1930,15 @@ function useWatcherChannel(): WatcherChannel {
   return data;
 }
 
-// Map the campaign's PhaseName → coach engine PhaseName.
+// Map the campaign's PhaseName → coach engine PhaseName (internal vocab).
 function toCoachPhase(name: PhaseName | undefined): CoachPhaseName {
   switch (name) {
-    case 'BUILD THE WORLD': return 'BUILD';
-    case 'SCALE THE STORY': return 'SCALE';
-    case 'CULTURAL MOMENT': return 'CULTURAL';
-    case 'EXTEND': return 'EXTEND';
-    case 'REAWAKEN':
-    default: return 'REAWAKEN';
+    case 'RELEASE': return 'BUILD';
+    case 'PUSH':    return 'SCALE';
+    case 'PEAK':    return 'CULTURAL';
+    case 'SUSTAIN': return 'EXTEND';
+    case 'START':
+    default:        return 'REAWAKEN';
   }
 }
 
@@ -2388,11 +2393,11 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
 function getDropRole(weekNum: number, type: ActionType): string {
   const phase = getPhaseForWeek(weekNum);
   if (!phase) return 'This is your next upload — build around it';
-  if (phase.name === 'REAWAKEN') return 'Warm the channel before your next big drop';
-  if (phase.name === 'BUILD THE WORLD') return 'This is your next major upload — build around it';
-  if (phase.name === 'SCALE THE STORY') return 'This is your next major upload — build around it';
-  if (phase.name === 'CULTURAL MOMENT') return 'This is your cultural peak — all attention goes here';
-  if (phase.name === 'EXTEND') return "Keep the story going — don't let it fade";
+  if (phase.name === 'START') return 'Warm the channel before your next big drop';
+  if (phase.name === 'RELEASE') return 'This is your next major upload — build around it';
+  if (phase.name === 'PUSH') return 'This is your next major upload — build around it';
+  if (phase.name === 'PEAK') return 'This is your cultural peak — all attention goes here';
+  if (phase.name === 'SUSTAIN') return "Keep the story going — don't let it fade";
   if (type === 'collab') return 'Crossover drop — brings a new audience in';
   return 'This is your next major upload — build around it';
 }
@@ -3027,7 +3032,7 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
 
   // Copy summary
   const handleCopy = () => {
-    const phaseName = getPhaseForWeek(weekNum)?.name || 'REAWAKEN';
+    const phaseName = getPhaseForWeek(weekNum)?.name || 'START';
     const campaignLabel = [plan.artist, plan.campaignName].filter(Boolean).join(' — ') || 'Campaign';
     const totalSubsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
     const overrides = plan.manualOverrides || {};
