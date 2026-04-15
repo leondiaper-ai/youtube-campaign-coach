@@ -2310,11 +2310,20 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
             // a nonsense delta.
             const subsValid = baseline.subscriberCount > 0;
             const subsSince = subsValid ? watcher.state.subscriberCount - baseline.subscriberCount : null;
-            // Views-since-start is suppressed: without a clean historical baseline the
-            // number is misleading. Re-enable once the watcher has real day-0 snapshots.
-            const viewsSince: number | null = null;
-            if (subsSince === null && viewsSince === null) return null;
-            const render = (n: number | null) => {
+            // Views-since-start from channel-total delta is suppressed (needs a clean
+            // historical baseline). Instead we show earned views from content uploaded
+            // during the campaign — sum of views on every video/short published on or
+            // after campaign start. That's API-accurate and directly attributable.
+            const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : null;
+            const campaignVideos = (watcher.state.latestVideos ?? []).filter((v) => {
+              if (!startT) return false;
+              const t = new Date(v.publishedAt).getTime();
+              return !Number.isNaN(t) && t >= startT;
+            });
+            const earnedViews = campaignVideos.reduce((s, v) => s + (v.views || 0), 0);
+            const campaignViewsValid = campaignVideos.length > 0;
+            if (subsSince === null && !campaignViewsValid) return null;
+            const render = (n: number | null, label: string) => {
               if (n === null) return null;
               const f = formatDelta(n);
               return (
@@ -2323,17 +2332,19 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
                     {f.dir !== 'flat' && <span className="mr-0.5">{dirGlyph(f.dir)}</span>}
                     {f.dir === 'flat' ? 'Flat' : f.text}
                   </span>
-                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {sourceLabel}</span>
+                  <span style={{ color: 'rgba(250,247,242,0.45)' }}> · {label}</span>
                 </span>
               );
             };
             return (
               <div className="mt-3 grid grid-cols-2 gap-6">
                 <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  {render(subsSince) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
+                  {render(subsSince, sourceLabel) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
                 </div>
                 <div className="text-[11px] font-mono uppercase tracking-[0.14em]" style={{ color: 'rgba(250,247,242,0.55)' }}>
-                  {render(viewsSince) ?? <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
+                  {campaignViewsValid
+                    ? render(earnedViews, `on campaign uploads (${campaignVideos.length})`)
+                    : <span style={{ color: 'rgba(250,247,242,0.35)' }}>—</span>}
                 </div>
               </div>
             );
