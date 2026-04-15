@@ -4906,6 +4906,34 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
     }
   }
 
+  // 3. Phase-fill: ensure every phase has at least one planned track so the
+  // rollout reads as a full campaign even when the imported timeline was
+  // sparse (e.g. no events landed in PUSH).
+  const coveredWeeks = new Set(tracks.map((t) => t.weekNum));
+  const phaseHasTrack = (p: CampaignPhase) =>
+    tracks.some((t) => t.weekNum >= p.weekStart && t.weekNum <= p.weekEnd);
+  for (const ph of CAMPAIGN_PHASES) {
+    if (phaseHasTrack(ph)) continue;
+    const midWeek = Math.min(
+      plan.weeks.length,
+      Math.floor((ph.weekStart + ph.weekEnd) / 2),
+    );
+    if (midWeek < 1 || coveredWeeks.has(midWeek)) continue;
+    const weekDate = weekToDate(midWeek, plan.startDate, 2); // Wed
+    tracks.push({
+      id: `autotrack-phase-${ph.name.toLowerCase()}`,
+      name: `${ph.name.charAt(0) + ph.name.slice(1).toLowerCase()} content drop`,
+      weekNum: midWeek,
+      date: weekDate,
+      anchorAction: null,
+      supportActions: [],
+      supportPlan: null,
+      moment: null,
+      status: 'upcoming',
+      phase: ph,
+    });
+  }
+
   return tracks.sort((a, b) => a.weekNum - b.weekNum);
 }
 
