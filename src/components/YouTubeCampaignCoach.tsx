@@ -4257,6 +4257,65 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
   return tracks.sort((a, b) => a.weekNum - b.weekNum);
 }
 
+// ──── LIVE TRACKS (from YouTube API) ────────────────────────────────────────
+// Derive AutoTracks directly from longform uploads on the channel. Each
+// longform video becomes a drop, classified by videoType. No manual campaign
+// plan required — this is the "real" view driven entirely by live data.
+
+function liveDropTypeFromVideo(v: WatcherVideo): DropType {
+  switch (v.videoType) {
+    case 'official':   return 'official';
+    case 'live':       return 'performance';
+    case 'lyric':      return 'official'; // treat lyric as part of an official-style drop
+    case 'visualizer': return 'official';
+    case 'audio':      return 'official';
+    default:           return 'vlog';
+  }
+}
+
+function dayLabelFromIso(iso: string): DayLabel {
+  const d = new Date(iso).getDay();
+  return (['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as DayLabel[])[d];
+}
+
+function deriveLiveTracks(state: WatcherState | null): AutoTrack[] {
+  if (!state || !state.latestVideos) return [];
+  const longform = state.latestVideos.filter((v) => v.kind === 'video');
+  if (longform.length === 0) return [];
+  const now = Date.now();
+  return longform
+    .map<AutoTrack>((v) => {
+      const dropType = liveDropTypeFromVideo(v);
+      const publishedT = new Date(v.publishedAt).getTime();
+      const anchor: CampaignAction = {
+        id: `live-${v.videoId}`,
+        title: v.title,
+        type: 'video',
+        day: dayLabelFromIso(v.publishedAt),
+        date: v.publishedAt.slice(0, 10),
+        status: 'done',
+        system: 1,
+        intent: 'convert',
+        dropType,
+      };
+      const ageDays = (now - publishedT) / 86400_000;
+      const status: AutoTrack['status'] = ageDays > 14 ? 'complete' : 'active';
+      return {
+        id: `live-track-${v.videoId}`,
+        name: v.title,
+        weekNum: 0,
+        date: v.publishedAt.slice(0, 10),
+        anchorAction: anchor,
+        supportActions: [],
+        supportPlan: null,
+        moment: null,
+        status,
+        phase: undefined,
+      };
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
 // ──── DROP SUPPORT MODEL ────────────────────────────────────────────────────
 // Each drop has a Drop Type. The type defines a tailored recommended plan —
 // a set of support slots with targets, a system recommendation sentence, and
@@ -4451,8 +4510,12 @@ function getDropSupport(track: AutoTrack, live?: LiveMatch): DropSupport {
 
   const coreLabel = hero && hero.type === 'collab' ? 'Collab Video' : config.label;
   const corePresent = !!hero;
+  // Live-derived tracks synthesize an anchor with status='done' — the mere
+  // existence of the upload is proof the core exists. For planned tracks, we
+  // still only credit from liveMatch when the videoType is 'official'.
+  const isLiveDerived = !!hero && hero.id.startsWith('live-');
   const liveCore = !!live && live.officialPresent && dropType === 'official';
-  const coreDone = (!!hero && hero.status === 'done') || liveCore;
+  const coreDone = (!!hero && hero.status === 'done') || liveCore || isLiveDerived;
 
   // Raw counts from support actions
   const supportActions = track.supportActions;
@@ -4765,9 +4828,14 @@ function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
 }
 
 function DropView({ plan }: { plan: CampaignPlan }) {
-  const autoTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
+  const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
   const watcher = useWatcherChannel();
   const liveVideos = watcher.state?.latestVideos ?? [];
+  // Prefer real uploads as the source of drop cards when the channel has any
+  // longform. Fall back to the manual campaign plan only when no live data.
+  const liveTracks = useMemo(() => deriveLiveTracks(watcher.state), [watcher.state]);
+  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+  const isLiveMode = liveTracks.length > 0;
   const liveByTrackId = useMemo(() => {
     const map: Record<string, LiveMatch> = {};
     for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
@@ -4799,12 +4867,24 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     return sa - sb;
   });
 
-  const outputStats: { label: string; value: number }[] = [
-    { label: 'Shorts',         value: output.totalShorts },
-    { label: 'Videos',         value: output.totalVideos },
-    { label: 'Posts',          value: output.totalPosts },
-    { label: 'Support Pieces', value: output.totalSupport },
-  ];
+  // In live mode, output stats come from real API counts — total shorts + all
+  // longform on the channel feed. Posts aren't in the public API (0 shown).
+  const liveShorts = liveVideos.filter((v) => v.kind === 'short').length;
+  const liveLongform = liveVideos.filter((v) => v.kind === 'video').length;
+  const liveSupport = liveShorts + Math.max(0, liveLongform - autoTracks.length);
+  const outputStats: { label: string; value: number }[] = isLiveMode
+    ? [
+        { label: 'Shorts',         value: liveShorts },
+        { label: 'Videos',         value: liveLongform },
+        { label: 'Drops',          value: autoTracks.length },
+        { label: 'Support Pieces', value: liveSupport },
+      ]
+    : [
+        { label: 'Shorts',         value: output.totalShorts },
+        { label: 'Videos',         value: output.totalVideos },
+        { label: 'Posts',          value: output.totalPosts },
+        { label: 'Support Pieces', value: output.totalSupport },
+      ];
 
   return (
     <div>
