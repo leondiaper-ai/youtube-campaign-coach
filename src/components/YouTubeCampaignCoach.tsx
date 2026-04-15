@@ -2788,6 +2788,112 @@ function getCollabsThisWeek(plan: CampaignPlan): number {
   return wk.actions.filter((a) => a.status === 'done' && isCollabAction(a)).length;
 }
 
+// ──── PULSE STRIP ───────────────────────────────────────────────────────────
+// One compact, three-row pulse check: LIVE ACTIVITY · THIS WEEK · COVERAGE.
+// Replaces CampaignActivityCard + CampaignAssetRollup + DropView's internal
+// output/coverage blocks. Keeps the real YouTube API activity visible but
+// framed as proof-of-activity, not a dashboard.
+function PulseStrip({ plan }: { plan: CampaignPlan }) {
+  const watcher = useWatcherChannel();
+  const liveVideos = watcher.state?.latestVideos ?? [];
+  const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
+  const liveVideosInWindow = liveVideos.filter((v) => new Date(v.publishedAt).getTime() >= startT);
+  const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
+  const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
+  const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
+  const liveByTrackId = useMemo(() => {
+    const map: Record<string, LiveMatch> = {};
+    for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
+    return map;
+  }, [autoTracks, liveVideos]);
+  const isLiveMode = liveTracks.length > 0;
+
+  // Row 1 — LIVE ACTIVITY (real API numbers; proof of activity)
+  const liveShorts = liveVideosInWindow.filter((v) => v.kind === 'short').length;
+  const liveLongform = liveVideosInWindow.filter((v) => v.kind === 'video').length;
+  const liveSupport = liveShorts + Math.max(0, liveLongform - autoTracks.length);
+  const totalDrops = autoTracks.length;
+
+  // Row 2 — THIS WEEK cadence
+  const counts = getCadenceCounts(plan);
+  const rows = [
+    { key: 'shorts', label: 'Shorts', done: counts.shortsDone,   target: counts.shortsTarget },
+    { key: 'posts',  label: 'Posts',  done: counts.postsDone,    target: counts.postsTarget },
+    { key: 'videos', label: 'Videos', done: counts.longformDone, target: counts.longformTarget },
+  ];
+  const totalDone   = counts.shortsDone + counts.postsDone + counts.longformDone;
+  const totalTarget = counts.shortsTarget + counts.postsTarget + counts.longformTarget;
+  const allMet = rows.every((r) => r.target === 0 || r.done >= r.target);
+  const weekStatus = totalDone === 0
+    ? { label: 'Ready to start',      color: '#0E0E0E' }
+    : (allMet || (totalTarget > 0 && totalDone >= totalTarget))
+    ? { label: 'On track',            color: '#1FBE7A' }
+    : { label: 'Building momentum',   color: '#C58F12' };
+  const rowColor = (done: number, target: number) =>
+    target === 0 || done >= target ? '#1FBE7A' : 'rgba(14,14,14,0.55)';
+
+  // Row 3 — COVERAGE + missing + fix
+  const intel = totalDrops > 0 ? getCampaignIntelligence(autoTracks, liveByTrackId) : null;
+  const tierColor = intel ? COVERAGE_COLOR[intel.tier] : '#0E0E0E';
+
+  const divider = { borderTop: '1px solid rgba(14,14,14,0.08)' };
+
+  return (
+    <div className="mb-5 rounded-2xl overflow-hidden" style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      {/* Row 1 — LIVE ACTIVITY */}
+      {watcher.state && (
+        <div className="flex items-center justify-between gap-3 px-5 py-2.5">
+          <div className="flex items-center gap-4 min-w-0 text-[12px] font-semibold text-ink/75">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 shrink-0">Live Activity</span>
+            <span><span className="font-black text-ink">{liveShorts}</span> <span className="text-ink/55">Shorts</span></span>
+            <span className="text-ink/25">·</span>
+            <span><span className="font-black text-ink">{totalDrops}</span> <span className="text-ink/55">{totalDrops === 1 ? 'Drop' : 'Drops'}</span></span>
+            <span className="text-ink/25">·</span>
+            <span><span className="font-black text-ink">{isLiveMode ? liveSupport : 0}</span> <span className="text-ink/55">Support</span></span>
+          </div>
+          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink/35 shrink-0">YouTube API</span>
+        </div>
+      )}
+      {/* Row 2 — THIS WEEK */}
+      <div className="flex items-center justify-between gap-3 px-5 py-2.5" style={watcher.state ? divider : undefined}>
+        <div className="flex items-center gap-4 min-w-0 text-[12px] font-semibold text-ink/75">
+          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 shrink-0">This Week</span>
+          {rows.map((r) => (
+            <span key={r.key} className="flex items-baseline gap-1">
+              <span className="font-black tabular-nums" style={{ color: rowColor(r.done, r.target) }}>{r.done}</span>
+              <span className="text-ink/30">/{r.target}</span>
+              <span className="text-ink/55 ml-0.5">{r.label}</span>
+            </span>
+          ))}
+        </div>
+        <span className="text-[11px] font-black uppercase tracking-[0.14em] shrink-0" style={{ color: weekStatus.color }}>
+          {weekStatus.label}
+        </span>
+      </div>
+      {/* Row 3 — COVERAGE */}
+      {intel && (
+        <div className="flex items-center justify-between gap-3 px-5 py-2.5" style={divider}>
+          <div className="flex items-center gap-3 min-w-0 text-[12px] font-semibold text-ink/75">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 shrink-0">Coverage</span>
+            <span className="text-[13px] font-black uppercase tracking-wider" style={{ color: tierColor }}>{intel.tier}</span>
+            <span className="text-ink/25">·</span>
+            <span className="text-ink/70 truncate">{intel.summary}</span>
+            {intel.missingLabels.length > 0 && (
+              <>
+                <span className="text-ink/25">·</span>
+                <span className="truncate" style={{ color: '#FF4A1C' }}>
+                  Missing: {intel.missingLabels.join(' · ')}
+                </span>
+              </>
+            )}
+          </div>
+          <span className="text-[11px] font-bold shrink-0 text-ink/80">→ {intel.fix}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
   const counts = getCadenceCounts(plan);
   const collabs = getCollabsThisWeek(plan);
@@ -5067,11 +5173,11 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
               Status
             </span>
             <span className="text-[14px] font-black uppercase tracking-wider" style={{ color: '#1FBE7A' }}>
-              Smashed it
+              Fully supported
             </span>
           </div>
           <p className="mt-2 text-[12px] font-semibold text-ink/65 leading-snug">
-            → Algo has multiple entry points to rank this drop. Shorts feed new viewers in, companion videos hold watch-time, the community post signals freshness — compounding discovery in the first 72h.
+            → Support stack complete. Strong early signals — ready to land.
           </p>
         </div>
       )}
@@ -5280,12 +5386,7 @@ function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggl
   // Prefer real uploads as the source of drop cards when the channel has any
   // longform. Fall back to the manual campaign plan only when no live data.
   const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
-  // Gate stats + rollups to the campaign window so we measure THIS campaign,
-  // not the whole channel history.
-  const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
-  const liveVideosInWindow = liveVideos.filter((v) => new Date(v.publishedAt).getTime() >= startT);
   const autoTracks = liveTracks.length > 0 ? liveTracks : planTracks;
-  const isLiveMode = liveTracks.length > 0;
   const liveByTrackId = useMemo(() => {
     const map: Record<string, LiveMatch> = {};
     for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
@@ -5306,10 +5407,7 @@ function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggl
     );
   }
 
-  const intel = getCampaignIntelligence(autoTracks, liveByTrackId);
-  const output = getCampaignSupportOutput(plan, autoTracks);
-  const tierColor = COVERAGE_COLOR[intel.tier];
-
+  // Summary/coverage numbers are rendered in the PulseStrip above the tracks.
   // Sort worst-coverage first so gaps surface immediately.
   const sortedTracks = [...autoTracks].sort((a, b) => {
     const sa = getDropSupport(a, liveByTrackId[a.id], communityPostDone[a.id]).coverageScore;
@@ -5317,80 +5415,9 @@ function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggl
     return sa - sb;
   });
 
-  // In live mode, output stats come from real API counts — total shorts + all
-  // longform on the channel feed. Posts aren't in the public API (0 shown).
-  const liveShorts = liveVideosInWindow.filter((v) => v.kind === 'short').length;
-  const liveLongform = liveVideosInWindow.filter((v) => v.kind === 'video').length;
-  const liveSupport = liveShorts + Math.max(0, liveLongform - autoTracks.length);
-  const outputStats: { label: string; value: number }[] = isLiveMode
-    ? [
-        { label: 'Shorts',         value: liveShorts },
-        { label: 'Videos',         value: liveLongform },
-        { label: 'Drops',          value: autoTracks.length },
-        { label: 'Support Pieces', value: liveSupport },
-      ]
-    : [
-        { label: 'Shorts',         value: output.totalShorts },
-        { label: 'Videos',         value: output.totalVideos },
-        { label: 'Posts',          value: output.totalPosts },
-        { label: 'Support Pieces', value: output.totalSupport },
-      ];
-
   return (
     <div>
-      {/* ── CAMPAIGN OUTPUT — quick activity row ──────────────────── */}
-      <div
-        className="mb-4 rounded-2xl px-5 py-4 grid grid-cols-4 gap-2"
-        style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
-      >
-        {outputStats.map((stat) => (
-          <div key={stat.label} className="flex flex-col items-center text-center">
-            <span className="text-2xl font-black leading-none text-ink">{stat.value}</span>
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 mt-1.5">
-              {stat.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* ── CAMPAIGN SUPPORT — microsite-style: mono label + bold status word + arrow fix */}
-      <div
-        className="mb-6 rounded-2xl p-5"
-        style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
-      >
-        <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 mb-3">
-          Campaign Support
-        </div>
-
-        <div className="flex items-baseline gap-3 flex-wrap pb-3" style={{ borderBottom: '1px solid rgba(14,14,14,0.08)' }}>
-          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45">
-            Coverage
-          </span>
-          <span className="text-[18px] font-black uppercase tracking-wider" style={{ color: tierColor }}>
-            {intel.tier}
-          </span>
-          <span className="text-[13px] font-semibold text-ink/70">
-            {intel.summary}
-          </span>
-        </div>
-
-        {intel.missingLabels.length > 0 && (
-          <div className="mt-3 flex items-baseline gap-3 flex-wrap">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45">
-              Missing
-            </span>
-            <span className="text-[12px] font-semibold" style={{ color: '#FF4A1C' }}>
-              {intel.missingLabels.join(' · ')}
-            </span>
-          </div>
-        )}
-
-        <p className="mt-2 text-[13px] font-semibold leading-snug" style={{ color: tierColor }}>
-          → {intel.fix}
-        </p>
-      </div>
-
-      {/* ── DROP CARDS — worst coverage first ──────────────────────── */}
+      {/* ── DROP CARDS — worst coverage first (summary/coverage moved to PulseStrip) ── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {sortedTracks.map((track) => (
           <DropCard
@@ -6496,13 +6523,8 @@ export default function YouTubeCampaignCoach() {
         {/* 2. NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
 
-        {/* 3. ONE-LINE WEEKLY CADENCE SUMMARY */}
-        <CampaignActivityCard plan={plan} />
-
-        {/* ── SECONDARY ──────────────────────────────────────────────── */}
-
-        {/* System 1 rollup: missing multi-format support across recent drops */}
-        <CampaignAssetRollup plan={plan} />
+        {/* 3. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
+        <PulseStrip plan={plan} />
 
         {/* Drop View — the action layer, always visible */}
         <DropView

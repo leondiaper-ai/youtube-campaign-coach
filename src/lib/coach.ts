@@ -236,20 +236,20 @@ export function recentSignal(
   const ref = topVideoRef(topVideo);
 
   let signal = 'Quiet window';
-  let action = `Post 1 Short today cut from ${ref} to keep cadence warm.`;
+  let action = `Post 1 Short today from ${ref} to keep cadence warm.`;
 
   if (uploads >= 2 && shorts >= 1) {
     signal = 'Active follow-through';
-    action = `Post 2 more Short variations cut from ${ref} over the next 48h.`;
+    action = `Create 2 Shorts from ${ref} in the next 48h.`;
   } else if (uploads >= 1 && shorts === 0) {
     signal = 'Weak follow-through';
-    action = `Post 2 Shorts cut from ${ref} within 24h to support the latest upload.`;
+    action = `Create 2 Shorts from ${ref} within 24h to support the latest upload.`;
   } else if (uploads === 0 && (subDelta ?? 0) > 0) {
     signal = 'Audience moving — channel silent';
-    action = `Post 1 Short today cut from ${ref} to capture the subscriber lift.`;
+    action = `Post 1 Short today from ${ref} to capture the subscriber lift.`;
   } else if (uploads === 0 && (state.daysSinceLastUpload ?? 0) >= 7) {
     signal = 'Channel went quiet';
-    action = `Post 1 Short today cut from ${ref} to break the silence.`;
+    action = `Post 1 Short today from ${ref} to break the silence.`;
   }
 
   return {
@@ -384,8 +384,8 @@ export function aiDecisionLayer(input: {
     const refAlreadyNamed = actions.some((a) => ref !== 'your top clip' && a.includes(ref));
     actions.push(
       refAlreadyNamed
-        ? `Follow up with a Post within 24h to convert viewers.`
-        : `Use ${ref} and post a follow-up Post within 24h to convert viewers.`,
+        ? `Post a follow-up within 24h to convert viewers.`
+        : `Post a follow-up from ${ref} within 24h to convert viewers.`,
     );
   }
   if (decisionState === 'SCALE—STRONG') {
