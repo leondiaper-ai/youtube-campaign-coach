@@ -93,6 +93,9 @@ type ManualOverrides = {
   // Per-drop manual toggles for things the YouTube API can't see.
   // Keyed by track.id (e.g. 'live-<videoId>' or planned action id).
   communityPostDone?: Record<string, boolean>;
+  // Channel-level toggles for YouTube features the public API doesn't expose.
+  merchShelfActive?: boolean;
+  bandsintownActive?: boolean;
 };
 
 type NextDropEdit = {
@@ -1910,6 +1913,9 @@ type WatcherVideo = {
   likes?: number;
   comments?: number;
   videoType?: WatcherVideoType;
+  isLive?: boolean;
+  isPremiere?: boolean;
+  isCollab?: boolean;
 };
 
 type WatcherChannel = {
@@ -4984,6 +4990,128 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
   );
 }
 
+// ── CAMPAIGN TOOLS CARD ────────────────────────────────────────────────────
+// Surfaces YouTube-native tools active in the campaign window (collabs /
+// premieres / lives detected from the API) plus two manual reminders for
+// Merch Shelf + Bandsintown (not exposed by the public API).
+function CampaignToolsCard({
+  plan,
+  onToggleMerch,
+  onToggleBands,
+}: {
+  plan: CampaignPlan;
+  onToggleMerch: () => void;
+  onToggleBands: () => void;
+}) {
+  const watcher = useWatcherChannel();
+  const startT = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : -Infinity;
+  const vids = (watcher.state?.latestVideos ?? []).filter(
+    (v) => new Date(v.publishedAt).getTime() >= startT
+  );
+  const collabs   = vids.filter((v) => v.isCollab).length;
+  const premieres = vids.filter((v) => v.isPremiere).length;
+  const lives     = vids.filter((v) => v.isLive).length;
+
+  const merchActive = !!plan.manualOverrides?.merchShelfActive;
+  const bandsActive = !!plan.manualOverrides?.bandsintownActive;
+
+  const toolStats = [
+    { label: 'Collabs',    value: collabs   },
+    { label: 'Premieres',  value: premieres },
+    { label: 'Livestreams',value: lives     },
+  ];
+
+  return (
+    <div
+      className="mb-4 rounded-2xl p-4"
+      style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">
+          Campaign Tools
+        </span>
+        <span className="text-[9px] font-semibold text-ink/35">In campaign window</span>
+      </div>
+
+      {/* API-detected tools */}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {toolStats.map((t) => (
+          <div key={t.label} className="flex flex-col items-center text-center">
+            <span className="text-lg font-black leading-none text-ink">{t.value}</span>
+            <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mt-1">
+              {t.label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Manual reminders — features not exposed by the public API */}
+      <div className="pt-2 border-t border-ink/5 flex flex-col gap-1.5">
+        <ToolReminder
+          label="Merch Shelf"
+          hint="Activate under YouTube Studio → Monetization → Shopping"
+          active={merchActive}
+          onToggle={onToggleMerch}
+        />
+        <ToolReminder
+          label="Bandsintown on Artist Channel"
+          hint="Link in YouTube Studio → Customization → Basic info"
+          active={bandsActive}
+          onToggle={onToggleBands}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ToolReminder({
+  label,
+  hint,
+  active,
+  onToggle,
+}: {
+  label: string;
+  hint: string;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      className="flex items-center justify-between w-full text-left rounded-md px-2 py-1.5 hover:brightness-95 transition"
+      style={
+        active
+          ? { background: 'rgba(31,190,122,0.10)' }
+          : { background: 'rgba(255,210,76,0.14)' }
+      }
+    >
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
+          style={{
+            background: active ? '#1FBE7A' : '#FFA23A',
+            color: '#ffffff',
+          }}
+        >
+          {active ? '✓' : '!'}
+        </span>
+        <span className="flex items-baseline gap-1.5 min-w-0">
+          <span
+            className="text-[12px] font-black truncate"
+            style={{ color: active ? '#1FBE7A' : '#B05700' }}
+          >
+            {label}
+          </span>
+          <span className="text-[10px] font-semibold text-ink/45 truncate">{hint}</span>
+        </span>
+      </div>
+      <span className="text-[9px] font-bold uppercase tracking-[0.14em] shrink-0 ml-2 text-ink/40">
+        {active ? 'Tap to undo' : 'Tap to confirm'}
+      </span>
+    </button>
+  );
+}
+
 function DropView({ plan, onToggleCommunityPost }: { plan: CampaignPlan; onToggleCommunityPost?: (trackId: string) => void }) {
   const communityPostDone = plan.manualOverrides?.communityPostDone || {};
   const planTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
@@ -6118,6 +6246,25 @@ export default function YouTubeCampaignCoach() {
 
         {/* System 1 rollup: missing multi-format support across recent drops */}
         <CampaignAssetRollup plan={plan} />
+
+        {/* YouTube-native tools detected in the campaign window + manual reminders */}
+        <CampaignToolsCard
+          plan={plan}
+          onToggleMerch={() => setPlan((p) => ({
+            ...p,
+            manualOverrides: {
+              ...p.manualOverrides,
+              merchShelfActive: !p.manualOverrides?.merchShelfActive,
+            },
+          }))}
+          onToggleBands={() => setPlan((p) => ({
+            ...p,
+            manualOverrides: {
+              ...p.manualOverrides,
+              bandsintownActive: !p.manualOverrides?.bandsintownActive,
+            },
+          }))}
+        />
 
         {/* Drop View — the action layer, always visible */}
         <DropView
