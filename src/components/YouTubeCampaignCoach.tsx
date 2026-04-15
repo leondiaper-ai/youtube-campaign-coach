@@ -1802,6 +1802,11 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             startDate={plan.startDate}
             onChange={(d) => onUpdatePlan({ startDate: d })}
           />
+          <CampaignBaselineControl
+            baselineSubs={plan.baselineSubs}
+            baselineViews={plan.baselineViews}
+            onChange={(u) => onUpdatePlan(u)}
+          />
         </div>
         {onOpenTimeline && (
           <button
