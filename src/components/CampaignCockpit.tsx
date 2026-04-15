@@ -309,21 +309,24 @@ export default function CampaignCockpit() {
             attention before the next moment hits.
           </p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-4 shrink-0">
           <button
             onClick={runChecks}
             disabled={running}
-            className="text-[12px] font-bold uppercase tracking-[0.14em] text-ink/60 hover:text-ink underline decoration-ink/20 underline-offset-4"
+            className="text-[11px] tracking-wide text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4"
           >
-            {running ? 'Running…' : 'Run checks'}
+            {running ? 'Refreshing…' : 'refresh checks'}
           </button>
-          <Link
-            href="/?openTimeline=1"
-            className="px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em]"
-            style={{ background: INK, color: PAPER }}
-          >
-            Build from timeline
-          </Link>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-[9px] uppercase tracking-[0.18em] text-ink/40">For new artists</span>
+            <Link
+              href="/?openTimeline=1"
+              className="px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em]"
+              style={{ background: INK, color: PAPER }}
+            >
+              Build from timeline
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -347,11 +350,17 @@ export default function CampaignCockpit() {
             </>
           )}
         </div>
-        <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+        <div className="text-[11px] text-ink/50">
           {running
-            ? 'Checking…'
+            ? 'Refreshing…'
             : lastRunAt
-            ? `Checked ${new Date(lastRunAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`
+            ? (() => {
+                const ago = Math.round((Date.now() - lastRunAt) / 60000);
+                if (ago < 1) return 'Updated just now';
+                if (ago === 1) return 'Updated 1m ago';
+                if (ago < 60) return `Updated ${ago}m ago`;
+                return `Updated ${new Date(lastRunAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+              })()
             : 'Not yet checked'}
         </div>
       </div>
