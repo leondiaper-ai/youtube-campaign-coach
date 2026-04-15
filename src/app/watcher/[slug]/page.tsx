@@ -437,10 +437,14 @@ function VideoGapCard({
               <div className="min-w-0">
                 <div className="font-bold">{o.subtype.replace(/^Top video /i, '')}</div>
                 <div className="text-ink/85 leading-snug mt-0.5">{o.action}</div>
-                <div className="text-ink/55 leading-snug mt-1 text-[12px]">
-                  <span className="text-ink/40 uppercase tracking-[0.12em] text-[9px] mr-1.5">Why</span>
-                  {o.impactRange}
-                </div>
+                <details className="group mt-1">
+                  <summary className="cursor-pointer list-none text-[10px] uppercase tracking-[0.14em] text-ink/45 hover:text-ink select-none">
+                    Why <span className="text-ink/30 group-open:rotate-180 inline-block transition">▾</span>
+                  </summary>
+                  <div className="text-ink/60 leading-snug mt-1 text-[12px] max-w-[72ch]">
+                    {o.impactRange}
+                  </div>
+                </details>
               </div>
             </li>
           );
@@ -492,36 +496,48 @@ function OpportunityCard({ o, weight = 'strong' }: { o: Opportunity; weight?: 's
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Signal</span>
         {o.signal}
       </div>
-      <div className="mt-2 text-[13px] text-ink/70 leading-snug">
-        <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Why it matters</span>
-        {o.impactRange}
-      </div>
       <div className={strong ? 'mt-3 text-[14px] text-ink leading-snug font-bold' : 'mt-2 text-[13px] text-ink/85 leading-snug font-medium'}>
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Action</span>
         {o.action}
       </div>
-      {o.relatedVideos && o.relatedVideos.length > 0 && (
-        <ul className="mt-3 space-y-1.5">
-          {o.relatedVideos.map((v) => (
-            <li key={v.id} className="text-[12px] flex items-center justify-between gap-3">
-              <a
-                href={`https://www.youtube.com/watch?v=${v.id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="truncate max-w-[52ch] text-ink/75 hover:text-ink underline decoration-ink/20 underline-offset-4"
-                title={v.title}
-              >
-                {v.title}
-              </a>
-              {v.viewCount != null && (
-                <span className="text-[11px] text-ink/40 font-mono shrink-0">
-                  {v.viewCount.toLocaleString()}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 pt-3 border-t" style={{ borderColor: MUTED }}>
+        <details className="group">
+          <summary className="cursor-pointer list-none text-[11px] uppercase tracking-[0.14em] text-ink/50 hover:text-ink select-none">
+            Why it matters <span className="text-ink/35 group-open:rotate-180 inline-block transition">▾</span>
+          </summary>
+          <div className="text-[12px] text-ink/70 leading-snug mt-2 max-w-[72ch]">
+            {o.impactRange}
+          </div>
+        </details>
+        {o.relatedVideos && o.relatedVideos.length > 0 && (
+          <details className="group">
+            <summary className="cursor-pointer list-none text-[11px] uppercase tracking-[0.14em] text-ink/50 hover:text-ink select-none">
+              Show {o.relatedVideos.length} affected {o.relatedVideos.length === 1 ? 'video' : 'videos'} <span className="text-ink/35 group-open:rotate-180 inline-block transition">▾</span>
+            </summary>
+            <ul className="mt-2 space-y-1.5 w-full">
+              {o.relatedVideos.map((v) => (
+                <li key={v.id} className="text-[12px] flex items-center justify-between gap-3">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${v.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="truncate max-w-[52ch] text-ink/75 hover:text-ink underline decoration-ink/20 underline-offset-4"
+                    title={v.title}
+                  >
+                    {v.title}
+                  </a>
+                  {v.viewCount != null && (
+                    <span className="text-[11px] text-ink/40 font-mono shrink-0">
+                      {v.viewCount.toLocaleString()}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </div>
     </article>
   );
 }
