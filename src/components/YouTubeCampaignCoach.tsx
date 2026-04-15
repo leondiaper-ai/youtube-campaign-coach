@@ -1487,6 +1487,35 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
     }
   }
 
+  // Ensure every phase has at least one planned drop so the campaign plan
+  // reads as a full rollout, not a sparse list of imported events. Synthesize
+  // a mid-phase content drop for any phase with no imported moments.
+  const PHASE_FALLBACKS: { name: string; weekStart: number; weekEnd: number; label: string }[] = [
+    { name: 'START',   weekStart: 1,  weekEnd: 3,  label: 'Warm-up content drop' },
+    { name: 'RELEASE', weekStart: 4,  weekEnd: 8,  label: 'Release-window content drop' },
+    { name: 'PUSH',    weekStart: 9,  weekEnd: 13, label: 'Push content drop' },
+    { name: 'PEAK',    weekStart: 14, weekEnd: 22, label: 'Peak-phase content drop' },
+    { name: 'SUSTAIN', weekStart: 23, weekEnd: 24, label: 'Sustain content drop' },
+  ];
+  for (const ph of PHASE_FALLBACKS) {
+    const hasMoment = moments.some((m) => m.weekNum >= ph.weekStart && m.weekNum <= ph.weekEnd);
+    if (hasMoment) continue;
+    const midWeek = Math.floor((ph.weekStart + ph.weekEnd) / 2);
+    if (midWeek > weeks.length) continue;
+    const base = new Date(start); base.setDate(base.getDate() + (midWeek - 1) * 7 + 2); // Wed of mid-week
+    const dateIso = base.toISOString().split('T')[0];
+    moments.push({
+      weekNum: midWeek,
+      date: dateIso,
+      name: ph.label,
+      type: 'milestone',
+      isAnchor: false,
+      why: `Planned ${ph.name.toLowerCase()}-phase content drop (auto-scaffolded).`,
+      prepNote: 'Swap for a real release, collab, or milestone when confirmed.',
+    });
+  }
+  moments.sort((a, b) => a.weekNum - b.weekNum);
+
   // Sprinkle 2 baseline shorts per empty week (MON/THU).
   for (const w of weeks) {
     if (w.actions.length === 0) {
