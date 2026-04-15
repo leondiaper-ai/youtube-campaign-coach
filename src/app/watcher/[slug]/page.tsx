@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { detectOpportunities, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
+import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
+import Sparkline from '@/components/Sparkline';
 
 export const revalidate = 600;
 
@@ -37,6 +39,13 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const opps = detectOpportunities(artist, live, daysToNextMoment).sort(
     (a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact]
   );
+
+  const history = live?.channelId ? await readHistory(live.channelId) : [];
+  const subs7 = deltaOver(history, 7, 'subs');
+  const subs30 = deltaOver(history, 30, 'subs');
+  const views7 = deltaOver(history, 7, 'views');
+  const subsSeries = seriesForField(history, 'subs', 30);
+  const viewsSeries = seriesForField(history, 'views', 30);
 
   return (
     <main className="bg-paper min-h-screen" style={{ color: INK }}>
@@ -103,6 +112,30 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           )}
         </div>
 
+        {/* Growth */}
+        <div className="flex items-baseline justify-between mt-10 mb-3">
+          <h2 className="font-black text-lg">Growth</h2>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+            {history.length > 0 ? `${history.length}d tracked` : 'snapshot starts today'}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <GrowthCard
+            label="Subscribers"
+            current={live?.subs != null ? fmtNum(live.subs) : '—'}
+            d7={subs7}
+            d30={subs30}
+            series={subsSeries}
+          />
+          <GrowthCard
+            label="Total views"
+            current={live?.views != null ? fmtNum(live.views) : '—'}
+            d7={views7}
+            d30={deltaOver(history, 30, 'views')}
+            series={viewsSeries}
+          />
+        </div>
+
         {/* 3. Channel snapshot */}
         <h2 className="font-black text-lg mt-10 mb-3">Channel snapshot</h2>
         <div className="grid grid-cols-4 gap-3">
@@ -160,6 +193,58 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
     </main>
+  );
+}
+
+function GrowthCard({
+  label,
+  current,
+  d7,
+  d30,
+  series,
+}: {
+  label: string;
+  current: string;
+  d7: { delta: number; pct: number } | null;
+  d30: { delta: number; pct: number } | null;
+  series: { x: number; y: number }[];
+}) {
+  const fmtDelta = (d: { delta: number; pct: number } | null) => {
+    if (!d) return '—';
+    const sign = d.delta > 0 ? '+' : d.delta < 0 ? '' : '±';
+    const n =
+      Math.abs(d.delta) >= 1_000_000
+        ? (d.delta / 1_000_000).toFixed(1) + 'M'
+        : Math.abs(d.delta) >= 1_000
+        ? (d.delta / 1_000).toFixed(1) + 'K'
+        : String(d.delta);
+    return `${sign}${n} (${(d.pct * 100).toFixed(1)}%)`;
+  };
+  const colorFor = (d: { delta: number } | null) =>
+    !d ? '#8A8A8A' : d.delta > 0 ? '#0C6A3F' : d.delta < 0 ? '#8A1F0C' : '#8A8A8A';
+  return (
+    <div
+      className="rounded-xl border p-4"
+      style={{ borderColor: MUTED, background: PAPER }}
+    >
+      <div className="flex items-baseline justify-between">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
+        <div className="font-black text-xl tabular-nums">{current}</div>
+      </div>
+      <div className="mt-3">
+        <Sparkline data={series} width={280} height={44} />
+      </div>
+      <div className="flex items-center justify-between mt-3 text-[11px] font-mono">
+        <div>
+          <span className="text-ink/45 uppercase tracking-[0.12em] text-[9px] mr-1">7d</span>
+          <span style={{ color: colorFor(d7) }}>{fmtDelta(d7)}</span>
+        </div>
+        <div>
+          <span className="text-ink/45 uppercase tracking-[0.12em] text-[9px] mr-1">30d</span>
+          <span style={{ color: colorFor(d30) }}>{fmtDelta(d30)}</span>
+        </div>
+      </div>
+    </div>
   );
 }
 

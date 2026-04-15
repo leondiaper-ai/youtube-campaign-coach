@@ -149,6 +149,12 @@ export default function CampaignCockpit() {
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <Link
+            href="/growth"
+            className="text-[11px] tracking-wide text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4"
+          >
+            growth
+          </Link>
+          <Link
             href="/opportunities"
             className="text-[11px] tracking-wide text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4"
           >

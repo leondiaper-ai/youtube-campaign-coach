@@ -125,6 +125,10 @@ export type RecentUpload = {
   durationSec: number;
   live: 'none' | 'upcoming' | 'live';
   scheduledStart: string | null;
+  captions: boolean;
+  viewCount: number;
+  likeCount: number;
+  commentCount: number;
 };
 
 export type LiveSnap = {
@@ -139,6 +143,7 @@ export type LiveSnap = {
   recentUploads?: RecentUpload[];
   shorts30d?: number;
   upcomingCount?: number;
+  captionsMissing30d?: number;
   error?: string;
 };
 

@@ -1,4 +1,5 @@
 import type { LiveSnap } from './artists';
+import { writeSnapshot } from './snapshots';
 
 const KEY = process.env.YOUTUBE_API_KEY;
 
@@ -8,7 +9,6 @@ async function jget(url: string) {
   return r.json();
 }
 
-// ISO 8601 duration → seconds
 function parseDuration(iso?: string): number {
   if (!iso) return 0;
   const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -50,9 +50,10 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
 
     let uploads30d = 0;
     let lastUploadAt: string | null = null;
-    const recentUploads: LiveSnap['recentUploads'] = [];
+    const recentUploads: NonNullable<LiveSnap['recentUploads']> = [];
     let shorts30d = 0;
     let upcomingCount = 0;
+    let captionsMissing30d = 0;
 
     if (uploadsId) {
       const pl = await jget(
@@ -68,17 +69,20 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
         if (new Date(t).getTime() >= cutoff) uploads30d++;
         ids.push(vid);
       }
-      // Enrich the 25 most recent with durations + live status
       const sliceIds = ids.slice(0, 25);
       if (sliceIds.length) {
         const vj = await jget(
-          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,liveStreamingDetails&id=${sliceIds.join(',')}&key=${KEY}`
+          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${sliceIds.join(',')}&key=${KEY}`
         );
         for (const v of vj.items ?? []) {
           const dur = parseDuration(v.contentDetails?.duration);
           const publishedAt = v.snippet?.publishedAt ?? '';
-          const live = v.snippet?.liveBroadcastContent ?? 'none'; // 'none' | 'upcoming' | 'live'
+          const live = v.snippet?.liveBroadcastContent ?? 'none';
           const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          const captions = v.contentDetails?.caption === 'true';
+          const viewCount = Number(v.statistics?.viewCount ?? 0);
+          const likeCount = Number(v.statistics?.likeCount ?? 0);
+          const commentCount = Number(v.statistics?.commentCount ?? 0);
           recentUploads.push({
             id: v.id,
             title: v.snippet?.title ?? '',
@@ -86,16 +90,21 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
             durationSec: dur,
             live,
             scheduledStart,
+            captions,
+            viewCount,
+            likeCount,
+            commentCount,
           });
           const ageDays =
             (Date.now() - new Date(publishedAt).getTime()) / 86400000;
           if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;
+          if (ageDays <= 30 && !captions && live === 'none') captionsMissing30d++;
           if (live === 'upcoming') upcomingCount++;
         }
       }
     }
 
-    return {
+    const snap: LiveSnap = {
       channelId,
       title: item.snippet?.title,
       handle: item.snippet?.customUrl,
@@ -107,7 +116,13 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
       recentUploads,
       shorts30d,
       upcomingCount,
+      captionsMissing30d,
     };
+
+    // Fire-and-forget time-series write (KV-backed, no-op if unconfigured)
+    writeSnapshot(channelId, snap).catch(() => {});
+
+    return snap;
   } catch (e: any) {
     return { error: String(e?.message ?? e) };
   }

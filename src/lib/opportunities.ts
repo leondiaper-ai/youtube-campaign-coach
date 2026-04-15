@@ -114,7 +114,58 @@ export function detectOpportunities(
     });
   }
 
-  // 4. No upcoming premiere / scheduled live
+  // 4. Captions missing on recent uploads
+  const captionsMissing = snap.captionsMissing30d ?? 0;
+  if (uploads30d >= 2 && captionsMissing >= Math.ceil(uploads30d / 2)) {
+    out.push({
+      id: `captions:${artist.slug}`,
+      artistSlug: artist.slug,
+      artistName: artist.name,
+      type: 'Missing support',
+      subtype: 'Captions missing on recent uploads',
+      signal: `${captionsMissing} of the last ${uploads30d} uploads have no captions.`,
+      impact: 'MEDIUM',
+      impactRange: 'Limits reach + accessibility',
+      action: 'Auto-generate captions, review, and publish on recent uploads.',
+      source: 'live',
+    });
+  }
+
+  // 5. Top recent upload has no Short companion
+  const recent = (snap.recentUploads ?? [])
+    .filter((u) => u.live === 'none' && u.durationSec > 60)
+    .slice(0, 10);
+  if (recent.length >= 3) {
+    const views = recent.map((u) => u.viewCount);
+    const top = recent[0 + views.indexOf(Math.max(...views))] ?? recent[0];
+    const median = [...views].sort((a, b) => a - b)[Math.floor(views.length / 2)];
+    // If the top long-form is 2x+ the median and there's no Short within 14d of it, flag it
+    if (top && median > 0 && top.viewCount >= median * 2) {
+      const topTs = new Date(top.publishedAt).getTime();
+      const hasCompanionShort = (snap.recentUploads ?? []).some(
+        (u) =>
+          u.durationSec > 0 &&
+          u.durationSec <= 60 &&
+          Math.abs(new Date(u.publishedAt).getTime() - topTs) <= 14 * 86400000
+      );
+      if (!hasCompanionShort) {
+        out.push({
+          id: `top-no-short:${artist.slug}`,
+          artistSlug: artist.slug,
+          artistName: artist.name,
+          type: 'Underused asset',
+          subtype: 'Top recent upload has no Short companion',
+          signal: `"${top.title}" is outperforming (${top.viewCount.toLocaleString()} views) but has no Short within 14d.`,
+          impact: 'HIGH',
+          impactRange: '+Shorts views, +discovery',
+          action: 'Cut 1–2 Shorts from the top-performing upload this week.',
+          source: 'live',
+        });
+      }
+    }
+  }
+
+  // 6. No upcoming premiere / scheduled live
   if (upcoming === 0 && (uploads30d >= 2 || isActive)) {
     out.push({
       id: `no-upcoming:${artist.slug}`,
