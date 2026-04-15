@@ -1798,10 +1798,6 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             placeholder="Enter Campaign Name"
             onChange={(e) => onUpdatePlan({ campaignName: e.target.value })}
           />
-          <CampaignStartControl
-            startDate={plan.startDate}
-            onChange={(d) => onUpdatePlan({ startDate: d })}
-          />
         </div>
         {onOpenTimeline && (
           <button
