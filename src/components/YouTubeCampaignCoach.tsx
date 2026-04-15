@@ -1945,11 +1945,14 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
     ? { date: nextDropRaw.dateObj.toISOString(), name: nextDropRaw.action.title }
     : null;
 
+  const topVideoForEngine = watcher.state?.topVideoLast14d
+    ? { title: watcher.state.topVideoLast14d.title, views: watcher.state.topVideoLast14d.views }
+    : null;
   const decision = watcher.state
-    ? aiDecisionLayer({ phase: coachPhase, plan: planned, state: watcher.state, events: watcher.events, nextDrop })
+    ? aiDecisionLayer({ phase: coachPhase, plan: planned, state: watcher.state, events: watcher.events, nextDrop, topVideo: topVideoForEngine })
     : null;
   const cadenceCmp = watcher.state ? cadenceComparison(planned, watcher.state) : null;
-  const recent = watcher.state ? recentSignal(watcher.state, watcher.events) : null;
+  const recent = watcher.state ? recentSignal(watcher.state, watcher.events, topVideoForEngine) : null;
 
   // Fallback (no watcher data yet): legacy plan-only signal.
   const legacySignal = computeChannelSignal(plan);
@@ -2336,20 +2339,28 @@ function dropImplication(strength: DropSupportStrength): string {
   if (strength === 'Partial') return "You're almost supporting this release — don't let it slip";
   return "You're not supporting this release properly — it won't land";
 }
-function dropAction(missing: string[], daysAway: number): string {
+function dropAction(
+  missing: string[],
+  daysAway: number,
+  topVideo?: WatcherTopVideo | null,
+): string {
   if (missing.length === 0) return 'Hold cadence. No corrective action needed.';
   const window = daysAway >= 0 && daysAway <= 7 ? 'within 48h' : daysAway <= 14 ? 'this week' : 'before drop week';
   const needShorts = missing.find((m) => m.toLowerCase().includes('short'));
   const needPost = missing.includes('Post');
   const needVideo = missing.includes('Follow-up video');
+  const clipRef = topVideo
+    ? `cut from your top video "${topVideo.title}"`
+    : 'cut from your best-performing recent clip';
   const parts: string[] = [];
-  if (needShorts) parts.push(needShorts.toLowerCase().includes('more') ? 'Add 1 Short' : 'Add 2 Shorts');
-  if (needPost) parts.push('1 Post');
-  if (needVideo) parts.push('1 follow-up Video');
-  return `${parts.join(' + ')} ${window}`;
+  if (needShorts) parts.push(needShorts.toLowerCase().includes('more') ? `Post 1 Short ${clipRef}` : `Post 2 Shorts ${clipRef}`);
+  if (needPost) parts.push('1 Post linking to the drop');
+  if (needVideo) parts.push('1 follow-up Video around the drop');
+  return `${parts.join(' + ')} ${window}.`;
 }
 
 function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
+  const watcher = useWatcherChannel();
   const drop = getNextDrop(plan);
   if (!drop) return null;
 
@@ -2369,7 +2380,7 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   const support = computeDropSupport(plan, drop.weekNum);
   const rule = 'This moment needs: 2 Shorts + 1 Post + 1 follow-up Video';
   const implication = dropImplication(support.strength);
-  const action = dropAction(support.missing, daysAway);
+  const action = dropAction(support.missing, daysAway, watcher.state?.topVideoLast14d ?? null);
 
   return (
     <div

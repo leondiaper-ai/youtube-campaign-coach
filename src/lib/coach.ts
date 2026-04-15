@@ -135,6 +135,21 @@ export interface NextDropLike {
   name: string;
 }
 
+export interface TopVideoLike {
+  title: string;
+  views: number;
+}
+
+function formatViews(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + 'K';
+  return n.toLocaleString();
+}
+function topVideoRef(top: TopVideoLike | null | undefined): string {
+  if (!top) return 'your best-performing recent clip';
+  return `your top video "${top.title}" (${formatViews(top.views)} views)`;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // MOMENTUM
 // ─────────────────────────────────────────────────────────────────────────────
@@ -210,29 +225,31 @@ export function cadenceComparison(
 
 export function recentSignal(
   state: WatcherStateLike,
-  events: WatcherEventLike[]
+  events: WatcherEventLike[],
+  topVideo?: TopVideoLike | null,
 ): RecentSignal {
   const cutoff = Date.now() - 48 * 60 * 60 * 1000;
   const recent = events.filter((e) => new Date(e.createdAt).getTime() >= cutoff);
   const uploads = recent.filter((e) => e.eventType === 'NEW_VIDEO' || e.eventType === 'NEW_SHORT').length;
   const shorts = recent.filter((e) => e.eventType === 'NEW_SHORT').length;
   const subDelta = state.subscriberDelta;
+  const ref = topVideoRef(topVideo);
 
   let signal = 'Quiet window';
-  let action = 'Ship one Short to keep cadence warm.';
+  let action = `Post 1 Short today cut from ${ref} to keep cadence warm.`;
 
   if (uploads >= 2 && shorts >= 1) {
     signal = 'Active follow-through';
-    action = 'Hold the line — repeat the format that landed best.';
+    action = `Post 2 more Short variations cut from ${ref} over the next 48h.`;
   } else if (uploads >= 1 && shorts === 0) {
     signal = 'Weak follow-through';
-    action = 'Add Shorts to support latest upload.';
+    action = `Post 2 Shorts cut from ${ref} within 24h to support the latest upload.`;
   } else if (uploads === 0 && (subDelta ?? 0) > 0) {
     signal = 'Audience moving — channel silent';
-    action = 'Ship a Short today to capture the lift.';
+    action = `Post 1 Short today cut from ${ref} to capture the subscriber lift.`;
   } else if (uploads === 0 && (state.daysSinceLastUpload ?? 0) >= 7) {
     signal = 'Channel went quiet';
-    action = 'Break the silence with a low-cost Short.';
+    action = `Post 1 Short today cut from ${ref} to break the silence.`;
   }
 
   return {
@@ -304,12 +321,14 @@ export function aiDecisionLayer(input: {
   state: WatcherStateLike;
   events: WatcherEventLike[];
   nextDrop: NextDropLike | null;
+  topVideo?: TopVideoLike | null;
 }): AIDecision {
-  const { phase, plan, state, events, nextDrop } = input;
+  const { phase, plan, state, events, nextDrop, topVideo } = input;
   const momentum = momentumState(state);
   const cadence = cadenceComparison(plan, state);
-  const recent = recentSignal(state, events);
+  const recent = recentSignal(state, events, topVideo);
   const readiness = dropReadiness(nextDrop, state, phase);
+  const ref = topVideoRef(topVideo);
   const decisionState = pickDecisionState(phase, momentum, cadence, state);
   const expected = PHASE_EXPECTATIONS[phase];
 
@@ -349,21 +368,22 @@ export function aiDecisionLayer(input: {
   }
   const gap = gapBits.length ? gapBits.join('; ') + '.' : 'No material gap — reality is matching the plan for this phase.';
 
-  // ACTION — clear next steps, derived from the gap + recent signal
+  // ACTION — clear next steps, derived from the gap + recent signal.
+  // Every action names real content when a top video is known.
   const actions: string[] = [];
   if (recent.action) actions.push(recent.action);
   if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14) {
-    actions.push(`Stack 2–3 Shorts pre-drop to support "${nextDrop?.name}".`);
+    actions.push(`Post 2–3 Shorts cut from ${ref} before "${nextDrop?.name}" to warm the audience.`);
   }
   for (const row of cadence.rows) {
     if (row.actual < 0) continue;
-    if (row.status === 'behind') actions.push(`Catch ${row.format}: aim for ${row.planned}/wk this week.`);
+    if (row.status === 'behind') actions.push(`Post ${row.planned} ${row.format} this week to catch cadence.`);
   }
   if (decisionState === 'PUSH—WEAK' || decisionState === 'ACTIVE BUT FLAT') {
-    actions.push('Pair the strongest hook with a follow-up Post within 24h.');
+    actions.push(`Use ${ref} and post a follow-up Post within 24h to convert viewers.`);
   }
   if (decisionState === 'SCALE—STRONG') {
-    actions.push('Commit to the working hook — extend it into a multi-week arc.');
+    actions.push(`Post 2–3 Short variations of ${ref} over the next 48h and build a longform around it.`);
   }
   if (actions.length === 0) actions.push('Hold cadence. No corrective action this week.');
 
@@ -382,11 +402,11 @@ export function aiDecisionLayer(input: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DECISION_STATE_META: Record<DecisionState, { color: string; subtitle: string }> = {
-  'SCALE—STRONG':     { color: '#1FBE7A', subtitle: 'Cadence holding, audience growing — extend the hook.' },
-  'PUSH—STRONG':      { color: '#1FBE7A', subtitle: 'Channel is in active push and converting.' },
-  'PUSH—WEAK':        { color: '#F5B73D', subtitle: 'Pushing but not converting — refine the hook.' },
-  'BUILD—MISALIGNED': { color: '#2C6BFF', subtitle: 'Phase says BUILD, output below the floor.' },
-  'ACTIVE BUT FLAT':  { color: '#F5B73D', subtitle: 'Posting plenty, audience not moving.' },
-  'HOLD—LOW CADENCE': { color: '#F5B73D', subtitle: 'Pause expansion until cadence steadies.' },
-  QUIET:              { color: '#A0A0A0', subtitle: 'Channel silent — break the silence.' },
+  'SCALE—STRONG':     { color: '#1FBE7A', subtitle: 'Cadence is holding and the audience is growing — extend your best-performing clip.' },
+  'PUSH—STRONG':      { color: '#1FBE7A', subtitle: 'Channel is posting and converting — keep the clip that is working live.' },
+  'PUSH—WEAK':        { color: '#F5B73D', subtitle: 'Posting is high but subs are flat — test a new version of your top clip.' },
+  'BUILD—MISALIGNED': { color: '#2C6BFF', subtitle: 'Output is below the phase floor — increase Shorts this week.' },
+  'ACTIVE BUT FLAT':  { color: '#F5B73D', subtitle: 'Posting plenty, audience not moving — follow up your top clip with a Post.' },
+  'HOLD—LOW CADENCE': { color: '#F5B73D', subtitle: 'Cadence is low — post one Short today before expanding.' },
+  QUIET:              { color: '#A0A0A0', subtitle: 'Channel is silent — post one Short today.' },
 };
