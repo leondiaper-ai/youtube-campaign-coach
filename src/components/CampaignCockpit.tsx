@@ -2,68 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import {
+  ARTISTS,
+  STATUS_COLOR,
+  STATUS_RANK,
+  deriveFromLive,
+  daysSince,
+  fmtNum,
+  type Artist,
+  type LiveSnap as BaseLiveSnap,
+  type Status,
+} from '@/lib/artists';
 
-type LiveSnap = {
-  subs?: number;
-  views?: number;
-  uploads30d?: number;
-  lastUploadAt?: string | null;
-  channelId?: string;
-  error?: string;
-  loading?: boolean;
-};
-
-function fmtNum(n: number) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
-  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
-  return String(n);
-}
-function daysSince(iso?: string | null) {
-  if (!iso) return null;
-  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-}
-
-type Derived = { status: Status; watcherRead: string; nextAction: string };
-
-function deriveFromLive(live: LiveSnap): Derived | null {
-  if (live.subs == null) return null;
-  const u = live.uploads30d ?? 0;
-  const last = daysSince(live.lastUploadAt);
-
-  if (last == null || last > 30 || u === 0) {
-    return {
-      status: 'FIX FIRST',
-      watcherRead: last != null ? `Quiet ${last}d. ${u} uploads/30d.` : `No upload data.`,
-      nextAction: 'Ship something this week.',
-    };
-  }
-  if (last > 14 && u < 2) {
-    return {
-      status: 'ACTIVE BUT WEAK',
-      watcherRead: `Only ${u} uploads/30d. Last ${last}d ago.`,
-      nextAction: 'Add a Short or Premiere this week.',
-    };
-  }
-  if (u >= 5 && last <= 3) {
-    return {
-      status: 'MOMENTUM',
-      watcherRead: `${u} uploads/30d. Last ${last}d ago.`,
-      nextAction: 'Layer a Short on the next drop.',
-    };
-  }
-  if (u >= 2 && last <= 14) {
-    return {
-      status: 'BUILDING',
-      watcherRead: `${u} uploads/30d. Building cadence.`,
-      nextAction: 'Lock weekly cadence.',
-    };
-  }
-  return {
-    status: 'READY',
-    watcherRead: `${u} uploads/30d. Cadence holding.`,
-    nextAction: 'Hold cadence — schedule next moment.',
-  };
-}
+type LiveSnap = BaseLiveSnap & { loading?: boolean };
 
 // --- Design tokens (match Coach) ---
 const INK = '#0E0E0E';
@@ -74,41 +25,6 @@ const GOOD = '#1FBE7A';
 const WARN = '#FFD24C';
 const BAD = '#FF4A1C';
 
-type Status = 'READY' | 'FIX FIRST' | 'ACTIVE BUT WEAK' | 'BUILDING' | 'MOMENTUM';
-
-const STATUS_COLOR: Record<Status, { bg: string; fg: string; dot: string }> = {
-  'READY':            { bg: '#E6F8EE', fg: '#0C6A3F', dot: GOOD },
-  'MOMENTUM':         { bg: '#E6F8EE', fg: '#0C6A3F', dot: GOOD },
-  'BUILDING':         { bg: '#FFF5D6', fg: '#7A5A00', dot: WARN },
-  'ACTIVE BUT WEAK':  { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  'FIX FIRST':        { bg: '#FFE2D8', fg: '#8A1F0C', dot: BAD },
-};
-
-type Artist = {
-  slug: string;
-  name: string;
-  campaign: string;
-  phase: 'PRE' | 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
-  status: Status;
-  nextMomentLabel: string;
-  nextMomentDate: string; // ISO
-  watcherRead: string;
-  nextAction: string;
-  subs: string;
-  views30d: string;
-  uploads30d: number;
-  channelHandle?: string;
-  lastCheckedMinsAgo: number;
-};
-
-const STATUS_RANK: Record<Status, number> = {
-  'FIX FIRST': 0,
-  'ACTIVE BUT WEAK': 1,
-  'BUILDING': 2,
-  'MOMENTUM': 3,
-  'READY': 4,
-};
-
 function fmtChecked(mins: number) {
   if (mins < 60) return `Checked ${mins}m ago`;
   const h = Math.round(mins / 60);
@@ -118,89 +34,6 @@ function fmtChecked(mins: number) {
   if (d < 7) return `Checked ${d}d ago`;
   return `Checked ${d}d ago`;
 }
-
-const ARTISTS: Artist[] = [
-  {
-    slug: 'ezra-collective',
-    name: 'Ezra Collective',
-    campaign: 'Album Cycle — TBD',
-    phase: 'PRE',
-    status: 'FIX FIRST',
-    nextMomentLabel: 'Pre-campaign channel setup',
-    nextMomentDate: '2026-04-22',
-    watcherRead: 'Quiet 38 days. Trailer outdated.',
-    nextAction: 'Refresh trailer & playlists before announce.',
-    subs: '312K',
-    views30d: '1.4M',
-    uploads30d: 0,
-    channelHandle: '@ezracollective',
-    lastCheckedMinsAgo: 35,
-  },
-  {
-    slug: 'k-trap',
-    name: 'K-Trap',
-    campaign: 'Change — Single Cycle',
-    phase: 'PUSH',
-    status: 'MOMENTUM',
-    nextMomentLabel: 'PUSH content drop',
-    nextMomentDate: '2026-04-19',
-    watcherRead: 'Change at 1.2M, +18% week.',
-    nextAction: 'Cut a BTS Short for drop day.',
-    subs: '142K',
-    views30d: '4.6M',
-    uploads30d: 7,
-    channelHandle: '@ktrap',
-    lastCheckedMinsAgo: 120,
-  },
-  {
-    slug: 'tom-odell',
-    name: 'Tom Odell',
-    campaign: 'Tour Announce',
-    phase: 'START',
-    status: 'BUILDING',
-    nextMomentLabel: 'Tour announce video',
-    nextMomentDate: '2026-04-28',
-    watcherRead: 'Catalogue strong. No uploads in 21d.',
-    nextAction: 'Schedule announce teaser + pinned post.',
-    subs: '1.1M',
-    views30d: '3.2M',
-    uploads30d: 1,
-    channelHandle: '@tomodell',
-    lastCheckedMinsAgo: 240,
-  },
-  {
-    slug: 'bad-omens',
-    name: 'Bad Omens',
-    campaign: 'Festival Run',
-    phase: 'PEAK',
-    status: 'ACTIVE BUT WEAK',
-    nextMomentLabel: 'Coachella weekend recap',
-    nextMomentDate: '2026-04-20',
-    watcherRead: 'Watch-time flat 7d. Shorts gap.',
-    nextAction: 'Cut 3 Shorts from festival within 24h.',
-    subs: '2.4M',
-    views30d: '5.8M',
-    uploads30d: 5,
-    channelHandle: 'UCre_5futd_kGkrSlL83n3pw',
-    lastCheckedMinsAgo: 55,
-  },
-  {
-    slug: 'james-blake',
-    name: 'James Blake',
-    campaign: 'Catalogue Sustain',
-    phase: 'SUSTAIN',
-    status: 'READY',
-    nextMomentLabel: 'Live session premiere',
-    nextMomentDate: '2026-05-02',
-    watcherRead: 'Premieres converting 32%. Holding cadence.',
-    nextAction: 'Schedule next premiere window.',
-    subs: '895K',
-    views30d: '2.1M',
-    uploads30d: 3,
-    channelHandle: '@jamesblake',
-    lastCheckedMinsAgo: 18,
-  },
-];
 
 function fmtDate(iso: string) {
   const d = new Date(iso + 'T00:00:00');
