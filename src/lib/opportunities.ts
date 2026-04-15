@@ -79,8 +79,8 @@ export function detectOpportunities(
       impact: isActive || hasNearMoment ? 'HIGH' : 'MEDIUM',
       impactRange:
         isActive || hasNearMoment
-          ? 'Blocks campaign traction'
-          : 'Erodes baseline watch-time',
+          ? 'Dormant channels lose algorithm favour — inactive periods cut reach on the next drop by 30–50%. During an active campaign this directly costs announce-day views.'
+          : 'Even between campaigns, a silent channel bleeds baseline watch-time and subscriber growth. One upload a week keeps the channel warm for the next moment.',
       action:
         'Ship one upload this week — a Short from catalogue is enough to warm the channel.',
       source: 'live',
@@ -97,7 +97,8 @@ export function detectOpportunities(
       subtype: 'Quiet before next moment',
       signal: `Next moment in ${daysToNextMoment}d but last upload was ${lastUp}d ago.`,
       impact: 'HIGH',
-      impactRange: 'Reduces announce-day reach',
+      impactRange:
+        'Channels that post in the two weeks before a moment see 2–3× the announce-day viewership of dormant ones. YouTube re-surfaces recent uploaders to their subscriber base, so every quiet day before the drop caps your launch ceiling.',
       action: 'Post a teaser or catalogue Short this week to re-engage before the drop.',
       source: 'live',
     });
@@ -113,7 +114,8 @@ export function detectOpportunities(
       subtype: 'No Shorts in the last 30 days',
       signal: `${uploads30d} uploads in 30d but 0 are Shorts (≤60s).`,
       impact: isActive ? 'HIGH' : 'MEDIUM',
-      impactRange: isActive ? '+500K–1M Shorts views' : '+discovery surface',
+      impactRange:
+        'Shorts are YouTube\'s fastest-growing surface and have separate discovery from long-form. Active music channels typically see 500K–1M+ Shorts views from 2–3 cuts per release, most of which converts subscribers who never would\'ve clicked a 3-minute video.',
       action:
         'Cut 2–3 vertical Shorts from the latest upload — hook, best moment, reaction.',
       source: 'live',
@@ -132,8 +134,10 @@ export function detectOpportunities(
       subtype: 'No published caption track on recent uploads',
       signal: `${captionsMissing} of the last ${uploads30d} uploads rely on auto-ASR only — no reviewed/published caption track.`,
       impact: 'MEDIUM',
-      impactRange: 'Limits reach + accessibility',
-      action: 'Open YT Studio → Subtitles, review the auto-generated transcript, and publish. This unlocks search indexing and auto-translation for international reach.',
+      impactRange:
+        'A published caption track gets indexed by YouTube search (auto-ASR doesn\'t), and YouTube can auto-translate it into 100+ languages. For music in particular, roughly 15–25% of a channel\'s watch-time comes from non-native-language regions — captions unlock that audience.',
+      action:
+        'Open YT Studio → Subtitles, review the auto-generated transcript for accuracy (especially lyrics + artist names), and hit publish.',
       source: 'live',
       relatedVideos: missingList.slice(0, 8),
     });
@@ -165,7 +169,8 @@ export function detectOpportunities(
           subtype: 'Top recent upload has no Short companion',
           signal: `"${top.title}" is outperforming (${top.viewCount.toLocaleString()} views) but has no Short within 14d.`,
           impact: 'HIGH',
-          impactRange: '+Shorts views, +discovery',
+          impactRange:
+            'A proven long-form hit already has audience validation. Cutting a Short from it gets algorithmic push on the new-content surface while driving viewers back to the long-form, compounding both.',
           action: 'Cut 1–2 Shorts from the top-performing upload this week.',
           source: 'live',
         });
@@ -198,8 +203,10 @@ export function detectOpportunities(
         subtype: 'Top video has no lyric cut',
         signal: `"${v.title}" at ${fmtV} views with no lyric/lyrics companion uploaded.`,
         impact: 'HIGH',
-        impactRange: 'Lyric variants typically add 20–50% incremental watch-time',
-        action: 'Commission a lyric video or generate a typographic cut and upload as companion.',
+        impactRange:
+          'Lyric variants capture the "I want to sing along" viewer who won\'t sit through a cinematic music video. For tracks with memorable lyrics, a lyric cut adds 20–50% incremental watch-time on top of the main video and gets its own playlist surface.',
+        action:
+          'Commission a lyric video or generate a typographic cut and upload as a companion to the main track.',
         source: 'live',
         videoId: v.id,
         videoTitle: v.title,
@@ -217,8 +224,10 @@ export function detectOpportunities(
         subtype: 'Top video has no visualizer / audio cut',
         signal: `"${v.title}" has no visualizer or audio-only variant to soak up passive listening.`,
         impact: 'MEDIUM',
-        impactRange: 'Unlocks background-listen surface + playlist seeding',
-        action: 'Render a 16:9 visualizer loop or an audio-only version for the same track.',
+        impactRange:
+          'A visualizer or audio-only version becomes the background-listen / study / party-playlist variant — viewers loop it passively where they wouldn\'t re-watch a music video. Typically 30–60% incremental watch-time on top of the main track.',
+        action:
+          'Render a 16:9 visualizer loop or an audio-only version for the same track and upload as a companion.',
         source: 'live',
         videoId: v.id,
         videoTitle: v.title,
@@ -236,8 +245,10 @@ export function detectOpportunities(
         subtype: 'Top video has no Short companion',
         signal: `"${v.title}" at ${fmtV} views but no Short within 14d of publish.`,
         impact: 'HIGH',
-        impactRange: 'Cheap Shorts push on a proven track',
-        action: 'Cut a 30–60s vertical from the best moment and upload this week.',
+        impactRange:
+          'This track is already proven — audience, watch-time, comments. A Short cut rides that validation to the new-content algorithm, reaches mobile viewers who skip long-form, and funnels them back to the main video. Highest-ROI content move on the channel.',
+        action:
+          'Cut a 30–60s vertical from the best moment of this video and upload it as a Short this week.',
         source: 'live',
         videoId: v.id,
         videoTitle: v.title,
@@ -255,7 +266,8 @@ export function detectOpportunities(
         subtype: 'Top video has no published caption track',
         signal: `"${v.title}" driving ${fmtV} views — auto-ASR only, no reviewed track published.`,
         impact: 'MEDIUM',
-        impactRange: 'Unlocks search indexing + auto-translation',
+        impactRange:
+          'A published caption track gets indexed by YouTube search and can be auto-translated into 100+ languages. On a top video already driving mass views, this opens international reach and mute-autoplay retention without touching the creative.',
         action: 'Auto-generate captions in YT Studio, review, and publish.',
         source: 'live',
         videoId: v.id,
@@ -292,7 +304,8 @@ export function detectOpportunities(
           subtype: `Comment demand: ${top.label}`,
           signal: `Multiple top comments on "${v.title}" request ${top.label}.`,
           impact: 'HIGH',
-          impactRange: 'Direct-from-audience demand signal',
+          impactRange:
+            'When multiple top comments request the same thing, that\'s a verified demand signal from the most engaged segment of the audience. Shipping it converts comment-watchers into repeat viewers and earns a disproportionate bump in engagement metrics.',
           action: top.action,
           source: 'live',
           videoId: v.id,
@@ -314,7 +327,8 @@ export function detectOpportunities(
       signal:
         'Nothing scheduled as an upcoming premiere or live on the channel.',
       impact: 'LOW',
-      impactRange: 'Premieres lift session time + comments',
+      impactRange:
+        'Premieres concentrate audience into a single live moment, driving 3–5× normal comment rate and live-chat engagement. That signal tells the algorithm the upload is a "moment" and boosts distribution for the first 48 hours.',
       action:
         'Schedule the next upload as a Premiere to concentrate launch attention.',
       source: 'live',

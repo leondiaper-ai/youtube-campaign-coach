@@ -359,7 +359,11 @@ function VideoGapCard({
               />
               <div className="min-w-0">
                 <div className="font-bold">{o.subtype.replace(/^Top video /i, '')}</div>
-                <div className="text-ink/70 leading-snug">{o.action}</div>
+                <div className="text-ink/85 leading-snug mt-0.5">{o.action}</div>
+                <div className="text-ink/55 leading-snug mt-1 text-[12px]">
+                  <span className="text-ink/40 uppercase tracking-[0.12em] text-[9px] mr-1.5">Why</span>
+                  {o.impactRange}
+                </div>
               </div>
             </li>
           );
@@ -399,12 +403,16 @@ function OpportunityCard({ o }: { o: Opportunity }) {
           style={{ background: c.bg, color: c.fg }}
         >
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: c.dot }} />
-          {o.impact} · {o.impactRange}
+          {o.impact}
         </span>
       </div>
       <div className="mt-3 text-[13px] text-ink/70 leading-snug">
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Signal</span>
         {o.signal}
+      </div>
+      <div className="mt-2 text-[13px] text-ink/70 leading-snug">
+        <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Why it matters</span>
+        {o.impactRange}
       </div>
       <div className="mt-2 text-[13px] text-ink/85 leading-snug font-medium">
         <span className="text-ink/45 uppercase tracking-[0.12em] text-[10px] mr-2">Action</span>
