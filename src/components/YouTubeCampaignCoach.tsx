@@ -1804,6 +1804,20 @@ type WatcherState = {
   daysSinceLastUpload: number | null;
   checkedAt: string;
   topVideoLast14d?: WatcherTopVideo | null;
+  latestVideos?: WatcherVideo[];
+};
+
+type WatcherVideo = {
+  videoId: string;
+  title: string;
+  publishedAt: string;
+  durationSeconds: number | null;
+  thumbnail: string | null;
+  kind: 'short' | 'video';
+  views?: number;
+  likes?: number;
+  comments?: number;
+  videoType?: WatcherVideoType;
 };
 
 type WatcherChannel = {
@@ -2357,6 +2371,64 @@ function dropAction(
   if (needPost) parts.push('1 Post linking to the drop');
   if (needVideo) parts.push('1 follow-up Video around the drop');
   return `${parts.join(' + ')} ${window}.`;
+}
+
+// System 1 rollup: scans recent/active drops against live uploads and surfaces
+// the top 1–2 missing multi-format assets. Renders nothing when the gap is
+// trivial — keeps the main view quiet by default.
+function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
+  const autoTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
+  const watcher = useWatcherChannel();
+  const liveVideos = watcher.state?.latestVideos ?? [];
+
+  const rollup = useMemo(() => {
+    if (!watcher.state || liveVideos.length === 0) return null;
+    const now = Date.now();
+    // Only drops whose release window has opened and isn't ancient (≤60d old).
+    const eligible = autoTracks.filter((t) => {
+      const dt = new Date(t.date).getTime();
+      if (Number.isNaN(dt)) return false;
+      return dt <= now + 3 * 86400_000 && dt >= now - 60 * 86400_000;
+    });
+    if (eligible.length === 0) return null;
+
+    const counters = { lyricVideo: 0, artworkVideo: 0, followupLongform: 0 };
+    for (const t of eligible) {
+      const live = matchLiveToDrop(t.date, liveVideos);
+      const sup = getDropSupport(t, live);
+      for (const slot of sup.slots) {
+        if (slot.hit) continue;
+        if (slot.key === 'lyricVideo') counters.lyricVideo++;
+        else if (slot.key === 'artworkVideo') counters.artworkVideo++;
+        else if (slot.key === 'followupLongform') counters.followupLongform++;
+      }
+    }
+
+    const items: { label: string; count: number }[] = [];
+    if (counters.lyricVideo > 0) items.push({ label: counters.lyricVideo === 1 ? 'Lyric Video' : 'Lyric Videos', count: counters.lyricVideo });
+    if (counters.artworkVideo > 0) items.push({ label: counters.artworkVideo === 1 ? 'Visualizer' : 'Visualizers', count: counters.artworkVideo });
+    if (counters.followupLongform > 0) items.push({ label: counters.followupLongform === 1 ? 'Follow-up Video' : 'Follow-up Videos', count: counters.followupLongform });
+    items.sort((a, b) => b.count - a.count);
+    const total = items.reduce((s, i) => s + i.count, 0);
+    if (total <= 1) return null;
+    return items.slice(0, 2);
+  }, [autoTracks, watcher.state, liveVideos]);
+
+  if (!rollup) return null;
+
+  return (
+    <div
+      className="mt-3 rounded-xl px-4 py-2.5 flex items-center gap-3"
+      style={{ background: '#FAF7F2', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+    >
+      <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45 shrink-0">
+        Across Recent Drops
+      </span>
+      <span className="text-[12px] font-semibold text-ink/75 truncate">
+        {rollup.map((r) => `${r.count} ${r.label} missing`).join(' · ')}
+      </span>
+    </div>
+  );
 }
 
 function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
@@ -4334,14 +4406,53 @@ type DropSupport = {
   timing: { day0: string; day1to3: string; day5plus: string };
 };
 
-function getDropSupport(track: AutoTrack): DropSupport {
+// Live-data match: given a drop date and the channel's recent uploads, attribute
+// uploads to this drop when they land inside the release window and classify
+// them into support-slot buckets by kind + videoType. Returns zeros if no
+// latestVideos are supplied.
+type LiveMatch = {
+  shorts: number;
+  lyricVideo: number;
+  artworkVideo: number;     // visualizer / artwork
+  followupLongform: number; // any longform that isn't official/lyric/visualizer/audio
+  officialPresent: boolean; // did we see an official video in the window (for core credit)
+};
+
+const DROP_WINDOW_BEFORE_DAYS = 3;
+const DROP_WINDOW_AFTER_DAYS = 14;
+
+function matchLiveToDrop(dropDateIso: string, videos: WatcherVideo[] | undefined | null): LiveMatch {
+  const zero: LiveMatch = { shorts: 0, lyricVideo: 0, artworkVideo: 0, followupLongform: 0, officialPresent: false };
+  if (!videos || videos.length === 0) return zero;
+  const dropT = new Date(dropDateIso).getTime();
+  if (Number.isNaN(dropT)) return zero;
+  const start = dropT - DROP_WINDOW_BEFORE_DAYS * 86400_000;
+  const end = dropT + DROP_WINDOW_AFTER_DAYS * 86400_000;
+  const m: LiveMatch = { ...zero };
+  for (const v of videos) {
+    const t = new Date(v.publishedAt).getTime();
+    if (Number.isNaN(t) || t < start || t > end) continue;
+    if (v.kind === 'short') { m.shorts++; continue; }
+    switch (v.videoType) {
+      case 'official':   m.officialPresent = true; break;
+      case 'lyric':      m.lyricVideo++; break;
+      case 'visualizer': m.artworkVideo++; break;
+      case 'audio':      m.followupLongform++; break;
+      default:           m.followupLongform++;
+    }
+  }
+  return m;
+}
+
+function getDropSupport(track: AutoTrack, live?: LiveMatch): DropSupport {
   const hero = track.anchorAction;
   const dropType = inferDropType(hero);
   const config = DROP_TYPE_CONFIG[dropType];
 
   const coreLabel = hero && hero.type === 'collab' ? 'Collab Video' : config.label;
   const corePresent = !!hero;
-  const coreDone = !!hero && hero.status === 'done';
+  const liveCore = !!live && live.officialPresent && dropType === 'official';
+  const coreDone = (!!hero && hero.status === 'done') || liveCore;
 
   // Raw counts from support actions
   const supportActions = track.supportActions;
@@ -4357,12 +4468,16 @@ function getDropSupport(track: AutoTrack): DropSupport {
     (a) => a.videoSubtype !== 'lyric' && a.videoSubtype !== 'visualiser'
   ).length;
 
+  // Fold in live uploads detected from YouTube API inside the release window.
+  // These augment the manually-tracked plan so an artist doesn't need to mark
+  // "done" once the asset is actually live on the channel.
+  const liveM = live ?? { shorts: 0, lyricVideo: 0, artworkVideo: 0, followupLongform: 0, officialPresent: false };
   const rawCount: Record<SupportSlotKey, number> = {
-    shorts: shortsDone,
-    lyricVideo: lyricVideoDone,
-    artworkVideo: artworkVideoDone,
-    communityPost: postsDone,
-    followupLongform: followupLongformDone,
+    shorts: shortsDone + liveM.shorts,
+    lyricVideo: lyricVideoDone + liveM.lyricVideo,
+    artworkVideo: artworkVideoDone + liveM.artworkVideo,
+    communityPost: postsDone, // Community Posts aren't in the public API — stays manual
+    followupLongform: followupLongformDone + liveM.followupLongform,
   };
 
   const slots: SlotResult[] = config.slots.map((spec) => {
@@ -4448,8 +4563,8 @@ type CampaignIntelligence = {
   fix: string;             // 1 short action line
 };
 
-function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
-  const supports = tracks.map((t) => getDropSupport(t));
+function getCampaignIntelligence(tracks: AutoTrack[], liveByTrackId?: Record<string, LiveMatch>): CampaignIntelligence {
+  const supports = tracks.map((t) => getDropSupport(t, liveByTrackId?.[t.id]));
   const totalDrops = supports.length;
   const fullySupported = supports.filter((s) => s.coverageTier === 'Strong').length;
   const strongRatio = totalDrops > 0 ? fullySupported / totalDrops : 1;
@@ -4517,8 +4632,8 @@ function getCampaignIntelligence(tracks: AutoTrack[]): CampaignIntelligence {
   return { fullySupported, totalDrops, tier, summary, missingLabels, fix };
 }
 
-function DropCard({ track }: { track: AutoTrack }) {
-  const support = getDropSupport(track);
+function DropCard({ track, live }: { track: AutoTrack; live?: LiveMatch }) {
+  const support = getDropSupport(track, live);
   const coverageColor = COVERAGE_COLOR[support.coverageTier];
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -4651,6 +4766,13 @@ function DropCard({ track }: { track: AutoTrack }) {
 
 function DropView({ plan }: { plan: CampaignPlan }) {
   const autoTracks = useMemo(() => deriveAutoTracks(plan), [plan]);
+  const watcher = useWatcherChannel();
+  const liveVideos = watcher.state?.latestVideos ?? [];
+  const liveByTrackId = useMemo(() => {
+    const map: Record<string, LiveMatch> = {};
+    for (const t of autoTracks) map[t.id] = matchLiveToDrop(t.date, liveVideos);
+    return map;
+  }, [autoTracks, liveVideos]);
 
   if (autoTracks.length === 0) {
     return (
@@ -4666,14 +4788,14 @@ function DropView({ plan }: { plan: CampaignPlan }) {
     );
   }
 
-  const intel = getCampaignIntelligence(autoTracks);
+  const intel = getCampaignIntelligence(autoTracks, liveByTrackId);
   const output = getCampaignSupportOutput(plan, autoTracks);
   const tierColor = COVERAGE_COLOR[intel.tier];
 
   // Sort worst-coverage first so gaps surface immediately.
   const sortedTracks = [...autoTracks].sort((a, b) => {
-    const sa = getDropSupport(a).coverageScore;
-    const sb = getDropSupport(b).coverageScore;
+    const sa = getDropSupport(a, liveByTrackId[a.id]).coverageScore;
+    const sb = getDropSupport(b, liveByTrackId[b.id]).coverageScore;
     return sa - sb;
   });
 
@@ -4742,7 +4864,7 @@ function DropView({ plan }: { plan: CampaignPlan }) {
       {/* ── DROP CARDS — worst coverage first ──────────────────────── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {sortedTracks.map((track) => (
-          <DropCard key={track.id} track={track} />
+          <DropCard key={track.id} track={track} live={liveByTrackId[track.id]} />
         ))}
       </div>
     </div>
@@ -5783,6 +5905,9 @@ export default function YouTubeCampaignCoach() {
 
         {/* NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
+
+        {/* System 1 rollup: missing multi-format support across recent drops */}
+        <CampaignAssetRollup plan={plan} />
 
         {/* View Mode Toggle */}
         <ViewModeToggle mode={viewMode} onChange={setViewMode} />
