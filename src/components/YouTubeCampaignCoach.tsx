@@ -1781,6 +1781,14 @@ type WatcherInsight = {
   decisionHint: ChannelSignal;
 };
 
+type WatcherVideoType = 'official' | 'lyric' | 'visualizer' | 'audio' | 'live' | 'unknown';
+type WatcherTopVideo = {
+  videoId: string;
+  title: string;
+  views: number;
+  publishedAt: string;
+  videoType: WatcherVideoType;
+};
 type WatcherState = {
   channelId: string;
   subscriberCount: number;
@@ -1795,6 +1803,7 @@ type WatcherState = {
   videosLast14Days: number;
   daysSinceLastUpload: number | null;
   checkedAt: string;
+  topVideoLast14d?: WatcherTopVideo | null;
 };
 
 type WatcherChannel = {
@@ -1855,15 +1864,42 @@ function formatDelta(n: number | null | undefined): { text: string; dir: 'up' | 
   const t = abs >= 1000 ? (abs / 1000).toFixed(abs % 1000 === 0 ? 0 : 1) + 'K' : abs.toLocaleString();
   return { text: (n > 0 ? '+' : '−') + t, dir: n > 0 ? 'up' : 'down' };
 }
-function subsViewsSignal(subDelta: number | null, viewDelta: number | null): string {
+// Behaviour → Problem → Implication copy. Combines subs/views trend with output.
+function subsViewsSignal(
+  subDelta: number | null,
+  viewDelta: number | null,
+  uploads14: number,
+): string {
   const s = subDelta ?? 0;
   const v = viewDelta ?? 0;
-  if (s > 0 && v > 0) return 'Momentum is building across views and subscribers';
-  if (s <= 0 && v > 0) return 'Reach is growing, but audience is not converting';
-  if (s > 0 && v <= 0) return 'Subscribers ticking up — reach has not caught up yet';
-  if (s < 0 && v < 0) return 'Channel is slipping across reach and growth';
-  return 'Channel is flat across both reach and growth';
+  if (uploads14 === 0) return "You're not posting — the channel is cooling off and the algorithm is letting go";
+  if (uploads14 >= 6 && s <= 0) return "You're posting a lot but not converting — content isn't sticking";
+  if (s > 0 && v > 0) return "Views and subs are both moving — the channel is working right now";
+  if (s <= 0 && v > 0) return "Reach is growing but subs are flat — viewers aren't staying";
+  if (s > 0 && v <= 0) return "Subs are ticking up but views aren't — the new audience is small";
+  if (s < 0 && v < 0) return "Views and subs are both down — the channel is slipping";
+  return "The channel is flat — nothing is moving yet";
 }
+
+function recencyLabel(days: number | null | undefined): string {
+  if (days == null) return '—';
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return `${days}d ago`;
+}
+function recencyColor(days: number | null | undefined): string {
+  if (days == null || days >= 10) return '#FF4A1C';
+  if (days >= 5) return '#F5B73D';
+  return '#1FBE7A';
+}
+const VIDEO_TYPE_LABEL: Record<WatcherVideoType, string> = {
+  official: 'Official Video',
+  lyric: 'Lyric Video',
+  visualizer: 'Visualizer',
+  audio: 'Audio',
+  live: 'Live / Performance',
+  unknown: 'Video',
+};
 function cadenceSummaryLine(cmp: CadenceCompare | null): { headline: string; detail: string; color: string } {
   if (!cmp) return { headline: 'Cadence: —', detail: '', color: 'rgba(250,247,242,0.55)' };
   const labelFor = (s: string): string => s === 'exceeding' ? 'exceeding' : s === 'on_track' ? 'on track' : s === 'slightly_behind' ? 'slightly behind' : 'behind';
@@ -1942,7 +1978,11 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
   const viewDeltaFmt = formatDelta(viewDelta);
   const dirColor = (d: 'up' | 'flat' | 'down') => d === 'up' ? '#1FBE7A' : d === 'down' ? '#FF4A1C' : 'rgba(250,247,242,0.45)';
   const dirGlyph = (d: 'up' | 'flat' | 'down') => d === 'up' ? '▲' : d === 'down' ? '▼' : '–';
-  const signalLine = watcher.state ? subsViewsSignal(subDelta, viewDelta) : (watcher.insight?.headline ?? buildThisWeeksCall(plan, legacySignal));
+  const signalLine = watcher.state
+    ? subsViewsSignal(subDelta, viewDelta, watcher.state.uploadsLast14Days)
+    : (watcher.insight?.headline ?? buildThisWeeksCall(plan, legacySignal));
+  const topVideo = watcher.state?.topVideoLast14d ?? null;
+  const daysSince = watcher.state?.daysSinceLastUpload ?? null;
   const cadenceSummary = cadenceSummaryLine(cadenceCmp);
   const primaryAction = decision ? decision.action : buildThisWeeksCall(plan, legacySignal);
 
@@ -2012,7 +2052,43 @@ function TopSignalCard({ plan, onOpenAdd }: { plan: CampaignPlan; onOpenAdd?: (k
         </div>
       )}
 
-      {/* 3. SIGNAL — one line */}
+      {/* 2b. ACTIVITY STRIP — Output · Last upload · Top video (all live) */}
+      {watcher.state && (
+        <div className="mb-6 space-y-2.5">
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+              Output · 14d
+            </span>
+            <span className="text-[14px] font-semibold" style={{ color: '#FAF7F2' }}>
+              {watcher.state.shortsLast14Days} {watcher.state.shortsLast14Days === 1 ? 'Short' : 'Shorts'} · {watcher.state.videosLast14Days} {watcher.state.videosLast14Days === 1 ? 'Video' : 'Videos'}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+              Last upload
+            </span>
+            <span
+              className="text-[14px] font-semibold inline-flex items-center gap-1.5"
+              style={{ color: recencyColor(daysSince) }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: recencyColor(daysSince) }} />
+              {recencyLabel(daysSince)}
+            </span>
+          </div>
+          {topVideo && (
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+                Top video · 14d
+              </span>
+              <span className="text-[14px] font-semibold truncate max-w-[70%]" style={{ color: '#FAF7F2' }} title={topVideo.title}>
+                “{topVideo.title}” · {formatBig(topVideo.views)} views
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3. SIGNAL — one line (Behaviour → Problem → Implication) */}
       <div className="mb-5">
         <div
           className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5"
@@ -2229,6 +2305,50 @@ function getDropRole(weekNum: number, type: ActionType): string {
   return 'This is your next major upload — build around it';
 }
 
+// ── Drop support logic — brutally clear.
+// Every drop needs: Shorts + Post + Video support. Count what's planned/done
+// in the drop week itself (and ±1 week either side for the support window).
+type DropSupportStrength = 'Strong' | 'Partial' | 'Weak';
+function computeDropSupport(plan: CampaignPlan, dropWeek: number): {
+  strength: DropSupportStrength;
+  color: string;
+  missing: string[];
+  have: { shorts: number; posts: number; videoSupport: number };
+} {
+  const window = plan.weeks.filter((w) => Math.abs(w.week - dropWeek) <= 1);
+  const actions = window.flatMap((w) => w.actions).filter((a) => a.status !== 'missed');
+  const shorts = actions.filter((a) => a.type === 'short').length;
+  const posts = actions.filter((a) => a.type === 'post' || a.type === 'live' || a.type === 'collab').length;
+  // The drop itself is counted as one video; support = any additional videos in window.
+  const videoSupport = Math.max(0, actions.filter((a) => a.type === 'video').length - 1);
+  const missing: string[] = [];
+  if (shorts < 2) missing.push(shorts === 0 ? 'Shorts' : 'More Shorts');
+  if (posts < 1) missing.push('Post');
+  if (videoSupport < 1) missing.push('Follow-up video');
+  let strength: DropSupportStrength = 'Weak';
+  let color = '#FF4A1C';
+  if (missing.length === 0) { strength = 'Strong'; color = '#1FBE7A'; }
+  else if (missing.length === 1) { strength = 'Partial'; color = '#F5B73D'; }
+  return { strength, color, missing, have: { shorts, posts, videoSupport } };
+}
+function dropImplication(strength: DropSupportStrength): string {
+  if (strength === 'Strong') return "This release is set up to land — keep cadence through drop week";
+  if (strength === 'Partial') return "You're almost supporting this release — don't let it slip";
+  return "You're not supporting this release properly — it won't land";
+}
+function dropAction(missing: string[], daysAway: number): string {
+  if (missing.length === 0) return 'Hold cadence. No corrective action needed.';
+  const window = daysAway >= 0 && daysAway <= 7 ? 'within 48h' : daysAway <= 14 ? 'this week' : 'before drop week';
+  const needShorts = missing.find((m) => m.toLowerCase().includes('short'));
+  const needPost = missing.includes('Post');
+  const needVideo = missing.includes('Follow-up video');
+  const parts: string[] = [];
+  if (needShorts) parts.push(needShorts.toLowerCase().includes('more') ? 'Add 1 Short' : 'Add 2 Shorts');
+  if (needPost) parts.push('1 Post');
+  if (needVideo) parts.push('1 follow-up Video');
+  return `${parts.join(' + ')} ${window}`;
+}
+
 function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   const drop = getNextDrop(plan);
   if (!drop) return null;
@@ -2245,8 +2365,11 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
     ? 'Tomorrow'
     : `${daysAway}d away`;
   const urgencyColor = daysAway < 0 ? '#FF4A1C' : daysAway <= 6 ? '#FF4A1C' : daysAway <= 14 ? '#FFD24C' : '#1FBE7A';
-  const role = getDropRole(drop.weekNum, drop.action.type);
   const phase = getPhaseForWeek(drop.weekNum);
+  const support = computeDropSupport(plan, drop.weekNum);
+  const rule = 'This moment needs: 2 Shorts + 1 Post + 1 follow-up Video';
+  const implication = dropImplication(support.strength);
+  const action = dropAction(support.missing, daysAway);
 
   return (
     <div
@@ -2278,12 +2401,49 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
             ft. {drop.action.featuredArtist}
           </div>
         )}
-        <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(250,247,242,0.12)' }}>
-          <div className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
-            Role
+
+        {/* Support strength — Strong / Partial / Weak */}
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(250,247,242,0.12)' }}>
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+              Support
+            </span>
+            <span className="text-[18px] font-black uppercase tracking-wider" style={{ color: support.color }}>
+              {support.strength}
+            </span>
           </div>
-          <div className="mt-1 text-sm font-semibold leading-snug" style={{ color: 'rgba(250,247,242,0.92)' }}>
-            {role}
+
+          {/* Missing list — simple */}
+          {support.missing.length > 0 && (
+            <div className="mt-2.5">
+              <div className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1" style={{ color: 'rgba(250,247,242,0.45)' }}>
+                Missing
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {support.missing.map((m) => (
+                  <span
+                    key={m}
+                    className="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold"
+                    style={{ background: 'rgba(255,74,28,0.12)', color: '#FF4A1C' }}
+                  >
+                    {m}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Rule · Implication · Action — the three human lines */}
+          <div className="mt-3.5 space-y-1.5">
+            <p className="text-[12.5px]" style={{ color: 'rgba(250,247,242,0.60)' }}>
+              {rule}
+            </p>
+            <p className="text-[13px] leading-snug" style={{ color: support.color }}>
+              {implication}
+            </p>
+            <p className="text-[13.5px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
+              → {action}
+            </p>
           </div>
         </div>
       </div>
