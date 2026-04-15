@@ -1689,8 +1689,8 @@ function TimelineImportModal({ open, onClose, onApply }: {
       >
         <div className="px-5 py-4 border-b border-ink/10">
           <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45">Generate from Timeline</div>
-          <div className="font-black text-lg text-ink mt-0.5">Paste your release timeline</div>
-          <div className="text-[11px] text-ink/55 mt-1">One event per line. Example: <span className="font-mono">25 March - Mo Gilligan Podcast goes live</span></div>
+          <div className="font-black text-lg text-ink mt-0.5">Turn your timeline into a campaign</div>
+          <div className="text-[11px] text-ink/55 mt-1">Paste once — get weekly cadence, per-drop support, and the next actions.</div>
         </div>
         <div className="px-5 py-4 space-y-3 overflow-y-auto">
           <div className="grid grid-cols-2 gap-3">
@@ -1706,12 +1706,12 @@ function TimelineImportModal({ open, onClose, onApply }: {
             </label>
           </div>
           <label className="block">
-            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Default year (if dates omit it)</div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Year <span className="text-ink/30 normal-case tracking-normal">— used when dates omit it</span></div>
             <input type="number" className="mt-1 w-28 text-sm font-semibold text-ink bg-white rounded-lg px-3 py-2 border border-ink/10 outline-none focus:border-ink/40"
               value={year} onChange={(e) => setYear(parseInt(e.target.value, 10) || year)} />
           </label>
           <label className="block">
-            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Timeline</div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45">Your release timeline</div>
             <textarea
               className="mt-1 w-full h-48 text-sm font-mono text-ink bg-white rounded-lg px-3 py-2 border border-ink/10 outline-none focus:border-ink/40"
               value={text}
@@ -1720,9 +1720,9 @@ function TimelineImportModal({ open, onClose, onApply }: {
             />
           </label>
           <div>
-            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45 mb-1.5">Detected ({events.length})</div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.15em] text-ink/45 mb-1.5">Parsed drops ({events.length})</div>
             <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-              {events.length === 0 && <div className="text-[11px] text-ink/40">No events detected yet — paste a timeline above.</div>}
+              {events.length === 0 && <div className="text-[11px] text-ink/40">Drops will appear here as we parse your plan.</div>}
               {events.map((ev, i) => (
                 <div key={i} className="flex items-center justify-between text-[11px] bg-white rounded-md px-2 py-1.5 border border-ink/5">
                   <div className="flex-1 min-w-0">
@@ -1748,7 +1748,7 @@ function TimelineImportModal({ open, onClose, onApply }: {
             className="px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] text-paper"
             style={{ background: preview ? '#0E0E0E' : 'rgba(14,14,14,0.25)' }}
           >
-            Apply plan
+            Build campaign
           </button>
         </div>
       </div>
