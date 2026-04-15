@@ -5741,7 +5741,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   // title words), suppress the planned copy so we don't duplicate real
   // releases like "Change (Official Video)" vs "'Change' — Official Music Video".
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-  const liveTitleTokens = liveTracks.map((t) => new Set(norm(t.title).split(' ').filter((w) => w.length > 2)));
+  const liveTitleTokens = liveTracks.map((t) => new Set(norm(t.name).split(' ').filter((w) => w.length > 2)));
   const matchesLiveTitle = (planTitle: string) => {
     const tokens = norm(planTitle).split(' ').filter((w) => w.length > 2);
     if (tokens.length === 0) return false;
@@ -5753,7 +5753,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const autoTracks = [
     ...liveTracks,
     ...planTracks.filter(
-      (t) => !liveWeeks.has(t.weekNum) && !liveDates.has(t.date) && !matchesLiveTitle(t.title),
+      (t) => !liveWeeks.has(t.weekNum) && !liveDates.has(t.date) && !matchesLiveTitle(t.name),
     ),
   ].sort((a, b) => a.weekNum - b.weekNum);
 
