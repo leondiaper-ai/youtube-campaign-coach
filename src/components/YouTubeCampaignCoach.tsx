@@ -147,6 +147,8 @@ type CampaignPlan = {
   artist: string;
   campaignName: string;
   subscriberCount: number;     // starting subs (baseline)
+  baselineSubs?: number;       // optional manual baseline at campaign start
+  baselineViews?: number;
   startDate: string;
   weeks: CampaignWeek[];
   targets?: CampaignTargets;
@@ -1349,6 +1351,53 @@ function CampaignStartControl({ startDate, onChange }: { startDate: string; onCh
   );
 }
 
+function CampaignBaselineControl({
+  baselineSubs, baselineViews, onChange,
+}: {
+  baselineSubs?: number;
+  baselineViews?: number;
+  onChange: (updates: { baselineSubs?: number; baselineViews?: number }) => void;
+}) {
+  const parseNum = (s: string): number | undefined => {
+    const t = s.trim().toUpperCase().replace(/,/g, '');
+    if (!t) return undefined;
+    const m = t.match(/^(-?\d*\.?\d+)\s*([KM]?)$/);
+    if (!m) return undefined;
+    const n = parseFloat(m[1]);
+    const mul = m[2] === 'M' ? 1_000_000 : m[2] === 'K' ? 1_000 : 1;
+    return Math.round(n * mul);
+  };
+  const fmt = (n?: number) => {
+    if (n == null) return '';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
+    if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + 'K';
+    return String(n);
+  };
+  return (
+    <div className="mt-1 flex flex-wrap items-center gap-2">
+      <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-ink/40">
+        Baseline
+      </span>
+      <input
+        className="text-[11px] font-bold text-ink/70 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none w-16"
+        defaultValue={fmt(baselineSubs)}
+        placeholder="subs"
+        onBlur={(e) => onChange({ baselineSubs: parseNum(e.target.value) })}
+        title="Subscribers at campaign start (e.g. 142K)"
+      />
+      <span className="text-[10px] text-ink/35">subs</span>
+      <input
+        className="text-[11px] font-bold text-ink/70 bg-transparent border-b border-dashed border-ink/12 focus:border-ink/50 outline-none w-20"
+        defaultValue={fmt(baselineViews)}
+        placeholder="views"
+        onBlur={(e) => onChange({ baselineViews: parseNum(e.target.value) })}
+        title="Total views at campaign start (e.g. 112.3M)"
+      />
+      <span className="text-[10px] text-ink/35">views · overrides tracked baseline</span>
+    </div>
+  );
+}
+
 function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCampaign }: {
   plan: CampaignPlan;
   onUpdatePlan: (updates: Partial<CampaignPlan>) => void;
@@ -1393,6 +1442,11 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
           <CampaignStartControl
             startDate={plan.startDate}
             onChange={(d) => onUpdatePlan({ startDate: d })}
+          />
+          <CampaignBaselineControl
+            baselineSubs={plan.baselineSubs}
+            baselineViews={plan.baselineViews}
+            onChange={(u) => onUpdatePlan(u)}
           />
         </div>
         {/* Settings cog retired — campaign targets now auto-derive from channel size + planned drops */}
@@ -2102,11 +2156,20 @@ type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
 function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void }) {
   const watcher = useWatcherChannel();
-  const baseline = useCampaignBaseline(
+  const watcherBaseline = useCampaignBaseline(
     watcher.state?.channelId,
     plan.startDate,
     watcher.state ? { subscriberCount: watcher.state.subscriberCount, viewCount: watcher.state.viewCount } : null,
   );
+  // Manual override wins — user-entered baseline values anchored to campaignStart.
+  const baseline: CampaignBaseline = (plan.baselineSubs && plan.baselineViews)
+    ? {
+        subscriberCount: plan.baselineSubs,
+        viewCount: plan.baselineViews,
+        capturedAt: (plan.startDate || new Date().toISOString().slice(0, 10)) + 'T00:00:00.000Z',
+        source: 'watcher',
+      }
+    : watcherBaseline;
   const [showWhy, setShowWhy] = useState(false);
 
   // ── DECISION ENGINE (deterministic, phase-aware) ────────────────────────────
@@ -2235,7 +2298,18 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
             </div>
           </div>
           {baseline && watcher.state && (() => {
-            const sourceLabel = baseline.source === 'watcher' ? 'since start' : 'since tracking';
+            // Label: if the baseline snapshot was captured within ~3d of campaign start,
+            // call it "since start". Otherwise be honest and show the actual capture date.
+            const startMs = plan.startDate ? new Date(plan.startDate + 'T00:00:00').getTime() : null;
+            const capMs = new Date(baseline.capturedAt).getTime();
+            const usedManualOverride = !!(plan.baselineSubs && plan.baselineViews);
+            const nearStart = usedManualOverride || (startMs !== null && Math.abs(capMs - startMs) < 3 * 86400_000);
+            const capLabel = new Date(baseline.capturedAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+            const sourceLabel = usedManualOverride
+              ? 'since start'
+              : nearStart
+                ? 'since start'
+                : `since ${capLabel}`;
             // Guard: if baseline values look obviously stale (e.g. viewCount=0 from the
             // pre-migration default) skip rendering for that stat rather than showing
             // a nonsense delta.
