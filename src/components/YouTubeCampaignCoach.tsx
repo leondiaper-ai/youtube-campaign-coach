@@ -2156,10 +2156,13 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
               </div>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-[12px]">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: recencyColor(daysSince) }} />
-            <span style={{ color: recencyColor(daysSince), fontWeight: 600 }}>
-              Last upload {recencyLabel(daysSince).toLowerCase()}
+          <div className="mt-4 flex items-baseline gap-3 flex-wrap">
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+              Last upload
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: recencyColor(daysSince) }}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: recencyColor(daysSince) }} />
+              {recencyLabel(daysSince)}
             </span>
           </div>
         </div>
@@ -2178,36 +2181,36 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
         </p>
       </div>
 
-      {/* 4. PRIMARY ACTION — directional block */}
-      <div
-        className="mb-5 rounded-xl p-4"
-        style={{ background: 'rgba(31,190,122,0.08)', border: '1px solid rgba(31,190,122,0.22)' }}
-      >
+      {/* 4. PRIMARY ACTION — plain, microsite style */}
+      <div className="mb-5">
         <div
-          className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1.5"
-          style={{ color: '#1FBE7A' }}
+          className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
+          style={{ color: 'rgba(250,247,242,0.45)' }}
         >
-          Do this next
+          Action
         </div>
-        <p className="text-[15px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
-          {primaryAction}
+        <p className="text-[13.5px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
+          → {primaryAction}
         </p>
         <a
           href="https://studio.youtube.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold transition-opacity hover:opacity-80"
+          className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-semibold transition-opacity hover:opacity-80"
           style={{ color: '#A8B5FF' }}
         >
           Open in YouTube Studio <span aria-hidden>→</span>
         </a>
       </div>
 
-      {/* 5. CADENCE — single summary line */}
+      {/* 5. CADENCE — mono label + status word + detail (microsite style) */}
       {cadenceCmp && (
         <div className="mb-5 flex items-baseline gap-3 flex-wrap">
-          <span className="text-[13px] font-bold" style={{ color: cadenceSummary.color }}>
-            {cadenceSummary.headline}
+          <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
+            Cadence
+          </span>
+          <span className="text-[14px] font-black uppercase tracking-wider" style={{ color: cadenceSummary.color }}>
+            {cadenceSummary.headline.replace(/^Cadence:\s*/, '')}
           </span>
           <span className="text-[12px]" style={{ color: 'rgba(250,247,242,0.55)' }}>
             {cadenceSummary.detail}
