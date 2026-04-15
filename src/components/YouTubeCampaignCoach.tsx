@@ -1443,11 +1443,6 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
             startDate={plan.startDate}
             onChange={(d) => onUpdatePlan({ startDate: d })}
           />
-          <CampaignBaselineControl
-            baselineSubs={plan.baselineSubs}
-            baselineViews={plan.baselineViews}
-            onChange={(u) => onUpdatePlan(u)}
-          />
         </div>
         {/* Settings cog retired — campaign targets now auto-derive from channel size + planned drops */}
       </div>
@@ -2314,9 +2309,10 @@ function TopSignalCard({ plan }: { plan: CampaignPlan; onOpenAdd?: (kind: Missin
             // pre-migration default) skip rendering for that stat rather than showing
             // a nonsense delta.
             const subsValid = baseline.subscriberCount > 0;
-            const viewsValid = baseline.viewCount > 0;
             const subsSince = subsValid ? watcher.state.subscriberCount - baseline.subscriberCount : null;
-            const viewsSince = viewsValid ? watcher.state.viewCount - baseline.viewCount : null;
+            // Views-since-start is suppressed: without a clean historical baseline the
+            // number is misleading. Re-enable once the watcher has real day-0 snapshots.
+            const viewsSince: number | null = null;
             if (subsSince === null && viewsSince === null) return null;
             const render = (n: number | null) => {
               if (n === null) return null;
