@@ -2666,41 +2666,28 @@ function CampaignActivityCard({ plan }: { plan: CampaignPlan }) {
     return 'rgba(14,14,14,0.55)';
   };
 
+  // One-line weekly cadence summary — compact, scannable.
   return (
-    <div className="mb-4 rounded-2xl p-4" style={{ background: '#F6F1E7', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Header — state label + status pill on the right */}
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">
-          This week
-        </span>
-        <span
-          className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full"
-          style={{ color: statusColor, background: `${statusColor}15` }}
-        >
-          {statusLabel}
-        </span>
-      </div>
-
-      {/* Rows — numbers first, labels second */}
-      <div className="space-y-2">
+    <div className="mb-4 flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl" style={{ background: '#F6F1E7' }}>
+      <div className="flex items-center gap-4 min-w-0 text-[12px] font-bold text-ink/70">
+        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/45">This week</span>
         {rows.map((r) => (
-          <div key={r.key} className="flex items-center gap-3">
-            <div className="flex items-baseline gap-0.5 min-w-[52px]">
-              <span className="text-lg font-black tabular-nums leading-none" style={{ color: rowStatusColor(r.done, r.target) }}>{r.done}</span>
-              <span className="text-xs font-bold text-ink/30">/ {r.target}</span>
-            </div>
-            <span className="text-sm font-bold text-ink/70">{r.label}</span>
-          </div>
+          <span key={r.key} className="flex items-baseline gap-1">
+            <span className="font-black tabular-nums" style={{ color: rowStatusColor(r.done, r.target) }}>{r.done}</span>
+            <span className="text-ink/30">/{r.target}</span>
+            <span className="text-ink/55 ml-0.5">{r.label}</span>
+          </span>
         ))}
+        {collabs > 0 && (
+          <span className="text-ink/55">· Collab ×{collabs}</span>
+        )}
       </div>
-
-      {/* Boosts used — only if any */}
-      {collabs > 0 && (
-        <div className="mt-3 pt-2.5 border-t border-ink/5 flex items-baseline justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40">Boosts used</span>
-          <span className="text-sm font-black text-ink">Collab ×{collabs}</span>
-        </div>
-      )}
+      <span
+        className="text-[10px] font-black uppercase tracking-[0.1em] px-2 py-0.5 rounded-full shrink-0"
+        style={{ color: statusColor, background: `${statusColor}15` }}
+      >
+        {statusLabel}
+      </span>
     </div>
   );
 }
@@ -5820,7 +5807,8 @@ export default function YouTubeCampaignCoach() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [showCollapsedSupport, setShowCollapsedSupport] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<ViewMode>('campaign');
+  const [viewMode, setViewMode] = useState<ViewMode>('drop');
+  const [planOpen, setPlanOpen] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [undoItem, setUndoItem] = useState<UndoItem | null>(null);
   const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number; initialKind?: MissingActionKind }>({ open: false });
@@ -6026,44 +6014,27 @@ export default function YouTubeCampaignCoach() {
   return (
     <div style={{ background: '#FAF7F2' }} className="min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8">
-        {/* Top orientation line — sets intent for the whole tool */}
-        <div className="mb-3 text-[11px] font-semibold text-ink/45">
-          Add content each week to stay on track and build momentum
-        </div>
+        {/* ── TOP: 3-second answer (What's happening / What should I do / What's next) ── */}
 
-        {/* Campaign Timeline — header + system connection line + narrative phase + phase rail */}
-        <CampaignTimeline
-          plan={plan}
-          onPhaseClick={(phase) => {
-            setExpandedPhases((s) => {
-              const next = new Set(s);
-              if (next.has(phase)) next.delete(phase);
-              else next.add(phase);
-              return next;
-            });
-          }}
-          onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
-          onOpenSettings={() => setShowMetricsModal(true)}
-          onOpenAdd={() => setAddModal({ open: true })}
-          onNewCampaign={() => {
-            // Soft confirm only if the user already has non-example work in progress
-            if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
-            setPlan(makeEmptyPlan());
-            setExpandedPhases(new Set());
-            setShowCollapsedSupport(new Set());
-            setAddModal({ open: false });
-            setEditingMetric(null);
-          }}
-        />
-
-        {/* CAMPAIGN ACTIVITY — Shorts/Posts/Videos counts + cadence + boosts */}
-        <CampaignActivityCard plan={plan} />
-
-        {/* TOP SECTION — This week's call + Status + Primary Action Strip */}
+        {/* 1. DECISION CARD — primary focus */}
         <TopSignalCard
           plan={plan}
           onOpenAdd={(kind) => setAddModal({ open: true, initialKind: kind })}
         />
+
+        {/* 2. NEXT DROP — primary anchor with role */}
+        <NextDropAnchor plan={plan} />
+
+        {/* 3. ONE-LINE WEEKLY CADENCE SUMMARY */}
+        <CampaignActivityCard plan={plan} />
+
+        {/* ── SECONDARY ──────────────────────────────────────────────── */}
+
+        {/* System 1 rollup: missing multi-format support across recent drops */}
+        <CampaignAssetRollup plan={plan} />
+
+        {/* Drop View — the action layer, always visible */}
+        <DropView plan={plan} />
 
         {/* Subs + Views — calm context */}
         <MetricCards
@@ -6094,22 +6065,48 @@ export default function YouTubeCampaignCoach() {
           onEditCancel={() => setEditingMetric(null)}
         />
 
-        {/* NEXT DROP — primary anchor with role */}
-        <NextDropAnchor plan={plan} />
+        {/* ── CAMPAIGN PLAN — collapsed by default, hosts phase bar + phase blocks + view toggle ── */}
+        <div className="mt-6">
+          <button
+            onClick={() => setPlanOpen((o) => !o)}
+            className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-[0.16em] text-ink/55 hover:text-ink/80 transition-colors"
+            style={{ background: '#F6F1E7' }}
+          >
+            <span>Campaign Plan</span>
+            <span className="text-ink/40">{planOpen ? '▲' : '▼'}</span>
+          </button>
+        </div>
 
-        {/* System 1 rollup: missing multi-format support across recent drops */}
-        <CampaignAssetRollup plan={plan} />
+        {planOpen && (
+          <div className="mt-3">
+            <CampaignTimeline
+              plan={plan}
+              onPhaseClick={(phase) => {
+                setExpandedPhases((s) => {
+                  const next = new Set(s);
+                  if (next.has(phase)) next.delete(phase);
+                  else next.add(phase);
+                  return next;
+                });
+              }}
+              onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
+              onOpenSettings={() => setShowMetricsModal(true)}
+              onOpenAdd={() => setAddModal({ open: true })}
+              onNewCampaign={() => {
+                if (!plan.isExample && !window.confirm('Start a new campaign?')) return;
+                setPlan(makeEmptyPlan());
+                setExpandedPhases(new Set());
+                setShowCollapsedSupport(new Set());
+                setAddModal({ open: false });
+                setEditingMetric(null);
+              }}
+            />
 
-        {/* View Mode Toggle */}
-        <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+            <div className="mt-4">
+              <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+            </div>
 
-        {/* Track View — auto-generated from campaign actions */}
-        {viewMode === 'drop' && (
-          <DropView plan={plan} />
-        )}
-
-        {/* Phase Blocks (Campaign View) */}
-        {viewMode === 'campaign' && CAMPAIGN_PHASES.map((phase) => (
+            {viewMode === 'campaign' && CAMPAIGN_PHASES.map((phase) => (
           <PhaseBlock
             key={phase.name}
             phase={phase}
@@ -6159,6 +6156,8 @@ export default function YouTubeCampaignCoach() {
             onRemoveSupportItem={removeSupportItem}
           />
         ))}
+          </div>
+        )}
       </div>
 
       {/* Action Modal */}
