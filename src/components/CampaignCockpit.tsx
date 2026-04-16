@@ -15,6 +15,7 @@ import {
 } from '@/lib/artists';
 import AddArtistButton from './AddArtistButton';
 import { CoachLiveDot } from './CoachLink';
+import { readCoachPlan, type CoachPlanSummary } from '@/lib/coachPlan';
 
 type LiveSnap = BaseLiveSnap & { loading?: boolean };
 
@@ -66,6 +67,8 @@ export default function CampaignCockpit() {
   const [live, setLive] = useState<Record<string, LiveSnap>>({});
   const [lastRunAt, setLastRunAt] = useState<number | null>(null);
   const [custom, setCustom] = useState<Artist[]>([]);
+  // Per-slug Coach plan overlay from localStorage. Null means checked, no plan.
+  const [coachPlans, setCoachPlans] = useState<Record<string, CoachPlanSummary | null>>({});
 
   const artists = useMemo<Artist[]>(() => {
     const seen = new Set<string>();
@@ -122,6 +125,20 @@ export default function CampaignCockpit() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artists.length]);
 
+  // Hydrate Coach plan overlays on mount + whenever the artist list changes.
+  // Also refresh when the tab regains focus in case the Coach just saved a
+  // new plan in another tab.
+  useEffect(() => {
+    const hydrate = () => {
+      const next: Record<string, CoachPlanSummary | null> = {};
+      for (const a of artists) next[a.slug] = readCoachPlan(a.slug);
+      setCoachPlans(next);
+    };
+    hydrate();
+    window.addEventListener('focus', hydrate);
+    return () => window.removeEventListener('focus', hydrate);
+  }, [artists]);
+
   const effective = useMemo(
     () =>
       artists.map((a) => {
@@ -143,10 +160,21 @@ export default function CampaignCockpit() {
   const upcoming = useMemo(
     () =>
       artists
-        .filter((a) => !!a.nextMomentDate)
-        .map((a) => ({ ...a, days: daysFromNow(a.nextMomentDate!) }))
+        .map((a) => {
+          const cp = coachPlans[a.slug];
+          const nextLabel = cp?.nextMoment?.label ?? a.nextMomentLabel ?? null;
+          const nextDate = cp?.nextMoment?.date ?? a.nextMomentDate ?? null;
+          if (!nextLabel || !nextDate) return null;
+          return {
+            ...a,
+            nextMomentLabel: nextLabel,
+            nextMomentDate: nextDate,
+            days: daysFromNow(nextDate),
+          };
+        })
+        .filter((a): a is NonNullable<typeof a> => !!a)
         .sort((a, b) => a.days - b.days),
-    [artists]
+    [artists, coachPlans]
   );
 
   const stats = useMemo(() => {
@@ -257,12 +285,20 @@ export default function CampaignCockpit() {
           .sort((a, b) => {
             const s = STATUS_RANK[a.status] - STATUS_RANK[b.status];
             if (s !== 0) return s;
-            const ad = a.nextMomentDate ? daysFromNow(a.nextMomentDate) : 9999;
-            const bd = b.nextMomentDate ? daysFromNow(b.nextMomentDate) : 9999;
+            const aDate = coachPlans[a.slug]?.nextMoment?.date ?? a.nextMomentDate;
+            const bDate = coachPlans[b.slug]?.nextMoment?.date ?? b.nextMomentDate;
+            const ad = aDate ? daysFromNow(aDate) : 9999;
+            const bd = bDate ? daysFromNow(bDate) : 9999;
             return ad - bd;
           })
           .map((a, i, arr) => (
-            <ArtistRow key={a.slug} a={a} last={i === arr.length - 1} live={live[a.slug]} />
+            <ArtistRow
+              key={a.slug}
+              a={a}
+              last={i === arr.length - 1}
+              live={live[a.slug]}
+              coach={coachPlans[a.slug] ?? null}
+            />
           ))}
         {artists.length === 0 && (
           <div className="px-5 py-8 text-center text-[13px] text-ink/55">
@@ -321,8 +357,24 @@ type EffectiveArtist = Artist & {
   nextAction: string | null;
 };
 
-function ArtistRow({ a, last, live }: { a: EffectiveArtist; last: boolean; live?: LiveSnap }) {
-  const days = a.nextMomentDate ? daysFromNow(a.nextMomentDate) : null;
+function ArtistRow({
+  a,
+  last,
+  live,
+  coach,
+}: {
+  a: EffectiveArtist;
+  last: boolean;
+  live?: LiveSnap;
+  coach: CoachPlanSummary | null;
+}) {
+  // Coach plan (from parent localStorage hydration) overlays its campaignName
+  // + next moment on top of whatever the server-side Artist record carries.
+  const nextLabel = coach?.nextMoment?.label ?? a.nextMomentLabel ?? null;
+  const nextDate = coach?.nextMoment?.date ?? a.nextMomentDate ?? null;
+  const days = nextDate ? daysFromNow(nextDate) : null;
+  const campaignName = coach?.campaignName ?? a.campaign ?? null;
+
   const subs = live?.subs != null ? fmtNum(live.subs) : null;
   const totalViews = live?.views != null ? fmtNum(live.views) + ' total' : null;
   const uploads30d = live?.uploads30d;
@@ -345,7 +397,7 @@ function ArtistRow({ a, last, live }: { a: EffectiveArtist; last: boolean; live?
           )}
         </div>
         <div className="text-[11px] text-ink/55 truncate">
-          {a.campaign ? `${a.campaign} · ` : ''}
+          {campaignName ? `${campaignName} · ` : ''}
           <span className="uppercase tracking-[0.12em]">{a.phase}</span>
         </div>
         <div className="text-[10px] text-ink/40 mt-1 font-mono flex items-center gap-1.5 flex-wrap">
@@ -369,13 +421,18 @@ function ArtistRow({ a, last, live }: { a: EffectiveArtist; last: boolean; live?
 
       <div>
         <StatusChip status={a.status} />
-        {a.nextMomentLabel && a.nextMomentDate ? (
+        {nextLabel && nextDate ? (
           <>
-            <div className="text-[12px] mt-2">{a.nextMomentLabel}</div>
+            <div className="text-[12px] mt-2 truncate" title={nextLabel}>{nextLabel}</div>
             <div className="text-[10px] uppercase tracking-[0.14em] text-ink/45 mt-0.5">
-              {fmtDate(a.nextMomentDate)} · {days === 0 ? 'today' : (days ?? 0) < 0 ? `${-(days ?? 0)}d ago` : `in ${days}d`}
+              {fmtDate(nextDate)} · {days === 0 ? 'today' : (days ?? 0) < 0 ? `${-(days ?? 0)}d ago` : `in ${days}d`}
+              {coach?.nextMoment?.isAnchor && <span className="text-ink/35"> · anchor</span>}
             </div>
           </>
+        ) : coach ? (
+          <div className="text-[11px] text-ink/45 mt-2 italic">
+            Plan is live but no upcoming moments remain — set the next drop in Coach.
+          </div>
         ) : (
           <div className="text-[11px] text-ink/45 mt-2 italic">No campaign timeline set.</div>
         )}

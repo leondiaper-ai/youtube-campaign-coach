@@ -16,6 +16,7 @@ import {
 } from '@/lib/conversion';
 import Sparkline from '@/components/Sparkline';
 import CoachLink from '@/components/CoachLink';
+import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
 
 export const revalidate = 600;
 
@@ -121,7 +122,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
           <YouTubeMark />
           <span>YouTube Watcher</span>
-          {artist.campaign && <><span className="text-ink/25">·</span><span>{artist.campaign}</span></>}
+          <CoachCampaignBadge slug={slug} fallback={artist.campaign} />
           <span className="text-ink/25">·</span>
           <span>{artist.phase}</span>
         </div>
@@ -357,26 +358,12 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
         {/* ─────────────────── 6. NEXT MOMENT ─────────────────── */}
-        {artist.nextMomentLabel && artist.nextMomentDate ? (
-          <>
-            <h2 className="font-black text-lg mt-10 mb-3">Next moment</h2>
-            <div className="rounded-xl border p-4" style={{ borderColor: MUTED, background: PAPER }}>
-              <div className="text-[13px] font-bold">{artist.nextMomentLabel}</div>
-              <div className="text-[11px] text-ink/55 mt-0.5 font-mono">
-                {artist.nextMomentDate}
-                {daysToNextMoment != null && daysToNextMoment >= 0 && ` · in ${daysToNextMoment}d`}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="mt-10 rounded-xl border p-4 flex items-center justify-between gap-4" style={{ borderColor: MUTED, background: PAPER }}>
-            <div>
-              <div className="text-[13px] font-bold">No campaign timeline yet</div>
-              <div className="text-[11px] text-ink/55 mt-0.5">Set one up in Coach to anchor Watcher against real moments.</div>
-            </div>
-            <CoachLink slug={slug} size="sm" />
-          </div>
-        )}
+        <NextMomentFromCoach
+          slug={slug}
+          fallbackLabel={artist.nextMomentLabel}
+          fallbackDate={artist.nextMomentDate}
+        />
+
 
         {/* ─────────────────── 7. EXECUTE ─────────────────── */}
         <div className="mt-12 flex items-center justify-between gap-4">
