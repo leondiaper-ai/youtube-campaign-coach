@@ -6,6 +6,14 @@ import { listCustomArtists } from '@/lib/artistStore';
 import { detectOpportunities, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
 import { decideWatcher, DECISION_COLOR, VERDICT_LABEL } from '@/lib/watcherDecision';
+import {
+  computeConversion,
+  rateTrend,
+  formatRate,
+  explainRate,
+  CONVERSION_BAND_META,
+  type ConversionResult,
+} from '@/lib/conversion';
 import Sparkline from '@/components/Sparkline';
 import CoachLink from '@/components/CoachLink';
 
@@ -47,6 +55,11 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const subsSeries = seriesForField(history, 'subs', 30);
   const viewsSeries = seriesForField(history, 'views', 30);
 
+  // View → subscriber conversion over 7d and 30d
+  const conv7 = computeConversion(history, 7);
+  const conv30 = computeConversion(history, 30);
+  const convTrend = rateTrend(conv7, conv30);
+
   // --- Decision block (System 1) ---
   const decision = decideWatcher({
     artist,
@@ -57,6 +70,8 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     subs30,
     views7,
     history,
+    conv7,
+    conv30,
   });
   const isLive = !!(live && !live.error);
 
@@ -214,6 +229,16 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <MiniStat label="Uploads · 30d" value={live?.uploads30d != null ? String(live.uploads30d) : '—'} />
           <MiniStat label="Last upload" value={lastUpDays != null ? `${lastUpDays}d ago` : '—'} />
         </div>
+
+        {/* ─────────────────── View → sub conversion ─────────────────── */}
+        <div className="flex items-baseline justify-between mt-10 mb-3">
+          <h2 className="font-black text-lg">View → sub conversion</h2>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+            Subs gained per 1,000 new views
+          </div>
+        </div>
+        <ConversionCard d7={conv7} d30={conv30} trend={convTrend} />
+
 
         {/* When the decision is MAINTAIN / ACCELERATE, don't pile on work —
             tuck the full opportunity list behind one summary instead. */}
@@ -447,6 +472,139 @@ function MiniStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-xl border px-4 py-3" style={{ borderColor: MUTED, background: PAPER }}>
       <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
       <div className="font-black text-xl mt-1 tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function ConversionCard({
+  d7,
+  d30,
+  trend,
+}: {
+  d7: ConversionResult;
+  d30: ConversionResult;
+  trend: 'improving' | 'cooling' | 'steady' | 'unknown';
+}) {
+  const m7 = CONVERSION_BAND_META[d7.band];
+  const m30 = CONVERSION_BAND_META[d30.band];
+  const trendLabel =
+    trend === 'improving'
+      ? { text: 'Improving', color: '#0C6A3F', arrow: '↑' }
+      : trend === 'cooling'
+      ? { text: 'Cooling', color: '#8A1F0C', arrow: '↓' }
+      : trend === 'steady'
+      ? { text: 'Steady', color: '#3A3A3A', arrow: '→' }
+      : null;
+
+  // Anchor row — the single most important number
+  const anchor = d7.band !== 'INSUFFICIENT' ? d7 : d30;
+  const anchorMeta = CONVERSION_BAND_META[anchor.band];
+
+  return (
+    <div className="rounded-xl border p-5" style={{ borderColor: MUTED, background: PAPER }}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+            {anchor.band === 'INSUFFICIENT'
+              ? 'Conversion'
+              : `Last ${anchor.spanDays}d`}
+          </div>
+          <div className="flex items-baseline gap-3 mt-1">
+            <div className="font-black text-3xl tabular-nums" style={{ color: anchorMeta.fg }}>
+              {formatRate(anchor)}
+            </div>
+            <span
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.14em]"
+              style={{ background: anchorMeta.bg, color: anchorMeta.fg }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: anchorMeta.dot }}
+              />
+              {anchorMeta.label}
+            </span>
+          </div>
+          <div className="text-[12px] text-ink/65 mt-2 max-w-[56ch] leading-snug">
+            {explainRate(anchor)}
+          </div>
+        </div>
+        {trendLabel && (
+          <div className="text-right shrink-0">
+            <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">
+              7d vs 30d
+            </div>
+            <div
+              className="font-black text-sm mt-1 flex items-center justify-end gap-1"
+              style={{ color: trendLabel.color }}
+            >
+              <span>{trendLabel.arrow}</span>
+              <span>{trendLabel.text}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 7d / 30d split */}
+      <div className="grid grid-cols-2 gap-3 mt-4">
+        <ConversionMini label="7 days" r={d7} />
+        <ConversionMini label="30 days" r={d30} />
+      </div>
+
+      {/* Reference strip */}
+      <div className="mt-4 pt-4 border-t" style={{ borderColor: MUTED }}>
+        <div className="text-[9px] uppercase tracking-[0.18em] text-ink/40 mb-2">
+          Benchmark · subs per 1,000 new views
+        </div>
+        <div className="flex gap-1.5 flex-wrap text-[10px] font-bold uppercase tracking-[0.14em]">
+          {(['WEAK', 'SOFT', 'HEALTHY', 'STRONG'] as const).map((b) => {
+            const m = CONVERSION_BAND_META[b];
+            const active = anchor.band === b;
+            const ranges: Record<typeof b, string> = {
+              WEAK: '< 2',
+              SOFT: '2–5',
+              HEALTHY: '5–10',
+              STRONG: '≥ 10',
+            };
+            return (
+              <span
+                key={b}
+                className="px-2 py-1 rounded inline-flex items-center gap-1.5"
+                style={{
+                  background: active ? m.bg : 'transparent',
+                  color: active ? m.fg : '#6A6A6A',
+                  border: active ? `1px solid ${m.dot}` : `1px solid ${MUTED}`,
+                }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: m.dot }} />
+                {m.label} {ranges[b]}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConversionMini({ label, r }: { label: string; r: ConversionResult }) {
+  const m = CONVERSION_BAND_META[r.band];
+  return (
+    <div className="rounded-lg p-3" style={{ background: SOFT }}>
+      <div className="text-[9px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
+      <div className="flex items-baseline gap-2 mt-1">
+        <div className="font-black text-lg tabular-nums" style={{ color: m.fg }}>
+          {formatRate(r)}
+        </div>
+        {r.band !== 'INSUFFICIENT' && (
+          <div className="text-[10px] text-ink/55">
+            {r.subsDelta >= 0 ? '+' : ''}
+            {r.subsDelta.toLocaleString()} subs
+          </div>
+        )}
+      </div>
+      <div className="text-[10px] text-ink/50 mt-1 leading-snug">
+        {r.band === 'INSUFFICIENT' ? explainRate(r) : `over ${r.spanDays}d tracked`}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Artist, LiveSnap } from './artists';
 import type { Opportunity } from './opportunities';
+import type { ConversionResult } from './conversion';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WATCHER DECISION — upgrades Watcher from "suggest actions" to "make decisions".
@@ -67,10 +68,26 @@ export interface DecisionInput {
   subs30: { delta: number; pct: number } | null;
   views7: { delta: number; pct: number } | null;
   history: unknown[]; // length used for confidence only
+  conv7?: ConversionResult | null;
+  conv30?: ConversionResult | null;
 }
 
 export function decideWatcher(input: DecisionInput): WatcherDecision {
-  const { artist, live, opps, daysToNextMoment, subs7, history } = input;
+  const { artist, live, opps, daysToNextMoment, subs7, history, conv7, conv30 } = input;
+
+  // Anchor conversion = tightest window with actual data, preferring 7d.
+  const convAnchor =
+    conv7 && conv7.band !== 'INSUFFICIENT'
+      ? conv7
+      : conv30 && conv30.band !== 'INSUFFICIENT'
+      ? conv30
+      : null;
+  const convWeak = convAnchor?.band === 'WEAK' || convAnchor?.band === 'SOFT';
+  const convStrong = convAnchor?.band === 'STRONG' || convAnchor?.band === 'HEALTHY';
+  const convPurge = convAnchor?.band === 'PURGE';
+  const convLine = convAnchor
+    ? `Conversion ${convAnchor.ratePer1k.toFixed(1)}/1k views over ${convAnchor.spanDays}d (${convAnchor.band.toLowerCase()}).`
+    : null;
 
   // ── Confidence ───────────────────────────────────────────────────────────
   const isLive = !!(live && !live.error && live.subs != null);
@@ -174,6 +191,27 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     };
   }
 
+  // ── 1b. FIX — conversion purge ───────────────────────────────────────────
+  // Channel is losing net subs *despite* new views. This is a real structural
+  // problem the Cockpit should surface even if cadence + opportunities look fine.
+  if (convPurge && convAnchor) {
+    return {
+      type: 'FIX',
+      verdict: 'DRIFT',
+      headline: `Net subscribers are falling even though views grew — check recent uploads for off-brand content.`,
+      signals: [
+        convLine!,
+        `${convAnchor.subsDelta.toLocaleString()} subs net · +${convAnchor.viewsDelta.toLocaleString()} new views in ${convAnchor.spanDays}d.`,
+        `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
+      ],
+      expectedImpact:
+        'Identifying which video triggered the unsub spike and pulling or reframing it typically halts the decline within a week.',
+      ifIgnored:
+        'Subscribers keep leaving faster than they arrive — the next release launches into a shrinking audience.',
+      confidence,
+    };
+  }
+
   // ── 2. CORRECT ───────────────────────────────────────────────────────────
   // Working, but suboptimal — something should change.
   if (highChannel.length > 0 && !subsGrowing) {
@@ -192,6 +230,30 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
       expectedImpact: top.impactRange,
       ifIgnored:
         'Uploads continue but the structural gap keeps capping reach — effort in, no compounding.',
+      confidence,
+    };
+  }
+
+  // ── 2b. CORRECT — cadence OK, conversion leaking ─────────────────────────
+  // Strong output, views coming in, but the viewer → subscriber flywheel isn't
+  // spinning. That points at packaging (channel trailer, end-screens, hooks),
+  // not cadence — and pushing more uploads won't fix it.
+  if (strongCadence && convWeak && convAnchor) {
+    return {
+      type: 'CORRECT',
+      verdict: 'DRIFT',
+      headline: 'Views are arriving but not converting — fix packaging before adding more uploads.',
+      signals: [
+        convLine!,
+        `${uploads30d} uploads / 30d — cadence already strong.`,
+        subs7
+          ? `Subs ${subs7.delta >= 0 ? '+' : ''}${subs7.delta.toLocaleString()} in 7d.`
+          : 'Subscriber trend flat.',
+      ],
+      expectedImpact:
+        'Tightening channel trailer, end-screens, and top-video pinned links typically lifts subs/1k views by 30–60% within two weeks.',
+      ifIgnored:
+        'New viewers keep arriving and leaving — effort goes in, compounding stays flat.',
       confidence,
     };
   }
@@ -225,12 +287,35 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
       signals: [
         `Subs +${subs7!.delta.toLocaleString()} (${(subs7!.pct * 100).toFixed(1)}%) in 7d.`,
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
-        lastUp != null ? `Last upload ${lastUp}d ago.` : 'Recent upload window active.',
+        convLine ?? (lastUp != null ? `Last upload ${lastUp}d ago.` : 'Recent upload window active.'),
       ],
       expectedImpact:
         'Staying the course while subs are lifting compounds the next moment — layering on top of what works is cheaper than manufacturing new reach.',
       ifIgnored:
         'Breaking cadence now resets the algorithm feedback loop; lift plateaus.',
+      confidence,
+    };
+  }
+
+  // ── 3b. ACCELERATE — strong conversion, cadence lagging ──────────────────
+  // When every visitor is converting, the constraint is view volume, not
+  // content quality. Push more uploads / pushes — the audience will convert.
+  if (convStrong && !cold && convAnchor) {
+    return {
+      type: 'ACCELERATE',
+      verdict: 'OPPORTUNITY',
+      headline: 'Every 1,000 views is converting well — push more volume, not more polish.',
+      signals: [
+        convLine!,
+        `${uploads30d} uploads / 30d — cadence has headroom to push.`,
+        subs7
+          ? `Subs ${subs7.delta >= 0 ? '+' : ''}${subs7.delta.toLocaleString()} in 7d.`
+          : 'Subscriber trend baselining.',
+      ],
+      expectedImpact:
+        'When conversion is already strong, every extra 1,000 views translates predictably into subs — scaling Shorts or collabs is the cheapest unit of growth.',
+      ifIgnored:
+        'The channel keeps converting well but at low volume — a leverage opportunity goes unused.',
       confidence,
     };
   }
