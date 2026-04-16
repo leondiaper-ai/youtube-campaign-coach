@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR } from '@/lib/artists';
+import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR, type Artist } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
+import { listCustomArtists } from '@/lib/artistStore';
 import { detectOpportunities, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
 import { decideWatcher, DECISION_COLOR, VERDICT_LABEL } from '@/lib/watcherDecision';
 import Sparkline from '@/components/Sparkline';
+import CoachLink from '@/components/CoachLink';
 
 export const revalidate = 600;
 
@@ -16,7 +18,8 @@ const MUTED = '#E9E2D3';
 
 export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const artist = ARTISTS.find((a) => a.slug === slug);
+  const custom: Artist[] = await listCustomArtists();
+  const artist = ARTISTS.find((a) => a.slug === slug) ?? custom.find((a) => a.slug === slug);
   if (!artist) notFound();
 
   const live = artist.channelHandle ? await fetchChannelSnap(artist.channelHandle) : null;
@@ -29,7 +32,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const derived = live
     ? deriveFromLive(live, { daysToNextMoment, phase: artist.phase })
     : null;
-  const status = derived?.status ?? artist.status;
+  const status = derived?.status ?? ('ALWAYS ON' as const);
   const lastUpDays = daysSince(live?.lastUploadAt);
 
   const opps = detectOpportunities(artist, live, daysToNextMoment).sort(
@@ -100,10 +103,28 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* Header */}
-        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
-          Watcher · {artist.campaign} · {artist.phase}
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
+          <YouTubeMark />
+          <span>YouTube Watcher</span>
+          {artist.campaign && <><span className="text-ink/25">·</span><span>{artist.campaign}</span></>}
+          <span className="text-ink/25">·</span>
+          <span>{artist.phase}</span>
         </div>
-        <h1 className="font-black text-3xl mt-1">{artist.name}</h1>
+        <div className="flex items-baseline flex-wrap gap-x-4 gap-y-1 mt-1">
+          <h1 className="font-black text-3xl">{artist.name}</h1>
+          {(live?.handle || artist.channelHandle) && (
+            <a
+              href={`https://www.youtube.com/${(live?.handle || artist.channelHandle)!.startsWith('@')
+                ? (live?.handle || artist.channelHandle)
+                : 'channel/' + (live?.handle || artist.channelHandle)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[12px] font-mono text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4"
+            >
+              {live?.handle || artist.channelHandle}
+            </a>
+          )}
+        </div>
 
         {/* ─────────────────── 1. DECISION (System 1) ─────────────────── */}
         <section
@@ -174,10 +195,11 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         <div className="grid grid-cols-2 gap-3">
           <SignalCard
             label="Subscribers"
-            current={live?.subs != null ? fmtNum(live.subs) : artist.subs}
+            current={live?.subs != null ? fmtNum(live.subs) : '—'}
             d7={subs7}
             d30={subs30}
             series={subsSeries}
+            historyDays={history.length}
           />
           <SignalCard
             label="Total views"
@@ -185,10 +207,11 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             d7={views7}
             d30={views30}
             series={viewsSeries}
+            historyDays={history.length}
           />
         </div>
         <div className="grid grid-cols-2 gap-3 mt-3">
-          <MiniStat label="Uploads · 30d" value={String(live?.uploads30d ?? artist.uploads30d)} />
+          <MiniStat label="Uploads · 30d" value={live?.uploads30d != null ? String(live.uploads30d) : '—'} />
           <MiniStat label="Last upload" value={lastUpDays != null ? `${lastUpDays}d ago` : '—'} />
         </div>
 
@@ -309,27 +332,33 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
         {/* ─────────────────── 6. NEXT MOMENT ─────────────────── */}
-        <h2 className="font-black text-lg mt-10 mb-3">Next moment</h2>
-        <div className="rounded-xl border p-4" style={{ borderColor: MUTED, background: PAPER }}>
-          <div className="text-[13px] font-bold">{artist.nextMomentLabel}</div>
-          <div className="text-[11px] text-ink/55 mt-0.5 font-mono">
-            {artist.nextMomentDate}
-            {daysToNextMoment != null && daysToNextMoment >= 0 && ` · in ${daysToNextMoment}d`}
+        {artist.nextMomentLabel && artist.nextMomentDate ? (
+          <>
+            <h2 className="font-black text-lg mt-10 mb-3">Next moment</h2>
+            <div className="rounded-xl border p-4" style={{ borderColor: MUTED, background: PAPER }}>
+              <div className="text-[13px] font-bold">{artist.nextMomentLabel}</div>
+              <div className="text-[11px] text-ink/55 mt-0.5 font-mono">
+                {artist.nextMomentDate}
+                {daysToNextMoment != null && daysToNextMoment >= 0 && ` · in ${daysToNextMoment}d`}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="mt-10 rounded-xl border p-4 flex items-center justify-between gap-4" style={{ borderColor: MUTED, background: PAPER }}>
+            <div>
+              <div className="text-[13px] font-bold">No campaign timeline yet</div>
+              <div className="text-[11px] text-ink/55 mt-0.5">Set one up in Coach to anchor Watcher against real moments.</div>
+            </div>
+            <CoachLink slug={slug} size="sm" />
           </div>
-        </div>
+        )}
 
         {/* ─────────────────── 7. EXECUTE ─────────────────── */}
-        <div className="mt-12 flex items-center justify-between">
+        <div className="mt-12 flex items-center justify-between gap-4">
           <div className="text-[12px] text-ink/55 max-w-[50ch]">
             Ready to execute? Open Coach to turn these actions into a plan.
           </div>
-          <Link
-            href={`/?artist=${slug}`}
-            className="px-5 py-2.5 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em]"
-            style={{ background: INK, color: PAPER }}
-          >
-            Open Coach →
-          </Link>
+          <CoachLink slug={slug} />
         </div>
 
         <div className="mt-10 text-[10px] uppercase tracking-[0.18em] text-ink/35">
@@ -346,14 +375,19 @@ function SignalCard({
   d7,
   d30,
   series,
+  historyDays,
 }: {
   label: string;
   current: string;
   d7: { delta: number; pct: number } | null;
   d30: { delta: number; pct: number } | null;
   series: { x: number; y: number }[];
+  historyDays: number;
 }) {
-  const fmtDelta = (d: { delta: number; pct: number } | null) => {
+  const have7 = historyDays >= 7;
+  const have30 = historyDays >= 30;
+  const fmtDelta = (d: { delta: number; pct: number } | null, enough: boolean) => {
+    if (!enough) return `needs ${enough === false ? (historyDays < 7 ? 7 : 30) : 7}d · ${historyDays}d tracked`;
     if (!d) return '—';
     const sign = d.delta > 0 ? '+' : d.delta < 0 ? '' : '±';
     const n =
@@ -364,28 +398,47 @@ function SignalCard({
         : String(d.delta);
     return `${sign}${n} (${(d.pct * 100).toFixed(1)}%)`;
   };
-  const colorFor = (d: { delta: number } | null) =>
-    !d ? '#8A8A8A' : d.delta > 0 ? '#0C6A3F' : d.delta < 0 ? '#8A1F0C' : '#8A8A8A';
+  const colorFor = (d: { delta: number } | null, enough: boolean) =>
+    !enough ? '#A0A0A0' : !d ? '#8A8A8A' : d.delta > 0 ? '#0C6A3F' : d.delta < 0 ? '#8A1F0C' : '#8A8A8A';
   return (
     <div className="rounded-xl border p-4" style={{ borderColor: MUTED, background: PAPER }}>
       <div className="flex items-baseline justify-between">
         <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45">{label}</div>
         <div className="font-black text-xl tabular-nums">{current}</div>
       </div>
-      <div className="mt-3">
-        <Sparkline data={series} width={280} height={44} />
+      <div className="mt-3 min-h-[44px] flex items-center">
+        {historyDays >= 2 ? (
+          <Sparkline data={series} width={280} height={44} />
+        ) : (
+          <div className="text-[10px] uppercase tracking-[0.14em] text-ink/35 w-full text-center">
+            Trend builds as Watcher tracks this channel daily
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-between mt-3 text-[11px] font-mono">
         <div>
           <span className="text-ink/45 uppercase tracking-[0.12em] text-[9px] mr-1">7d</span>
-          <span style={{ color: colorFor(d7) }}>{fmtDelta(d7)}</span>
+          <span style={{ color: colorFor(d7, have7) }}>{fmtDelta(d7, have7)}</span>
         </div>
         <div>
           <span className="text-ink/45 uppercase tracking-[0.12em] text-[9px] mr-1">30d</span>
-          <span style={{ color: colorFor(d30) }}>{fmtDelta(d30)}</span>
+          <span style={{ color: colorFor(d30, have30) }}>{fmtDelta(d30, have30)}</span>
         </div>
       </div>
     </div>
+  );
+}
+
+function YouTubeMark() {
+  // Simple inline YouTube glyph so the Watcher clearly signals "this is a YouTube tool"
+  return (
+    <svg width="16" height="12" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path
+        d="M23.5 2.7A3 3 0 0 0 21.4.6C19.6 0 12 0 12 0s-7.6 0-9.4.6A3 3 0 0 0 .5 2.7C0 4.5 0 8.5 0 8.5s0 4 .5 5.8a3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.8.5-5.8.5-5.8s0-4-.5-5.8Z"
+        fill="#FF0000"
+      />
+      <path d="M9.6 12.3 15.8 8.5 9.6 4.7v7.6Z" fill="#FAF7F2" />
+    </svg>
   );
 }
 

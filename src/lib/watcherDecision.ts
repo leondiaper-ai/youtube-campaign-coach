@@ -95,7 +95,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   const lastUp = daysAgo(live!.lastUploadAt);
   const isActivePhase = ACTIVE_PHASES.includes(artist.phase);
   const nearMoment = daysToNextMoment != null && daysToNextMoment >= 0 && daysToNextMoment <= 14;
-  const momentLabel = artist.nextMomentLabel.toLowerCase();
+  const momentLabel = (artist.nextMomentLabel ?? '').toLowerCase();
 
   const cold = lastUp == null || lastUp > 30 || uploads30d === 0;
   // Strong cadence ≈ weekly output the algorithm rewards for this phase

@@ -1,102 +1,57 @@
 export type Status = 'READY' | 'FIX FIRST' | 'ACTIVE BUT WEAK' | 'BUILDING' | 'MOMENTUM' | 'ALWAYS ON';
 
+/**
+ * Core Artist record.
+ *
+ * IMPORTANT: this is intentionally minimal. Everything about the channel
+ * (subs, views, uploads, cadence, status, watcher reads, next actions) comes
+ * from the live YouTube Data API via fetchChannelSnap(). Campaign info
+ * (nextMomentLabel/Date, campaign name) comes from a live Coach plan. No
+ * fake strings are stored here.
+ */
 export type Artist = {
   slug: string;
   name: string;
-  campaign: string;
-  phase: 'PRE' | 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
-  status: Status;
-  nextMomentLabel: string;
-  nextMomentDate: string;
-  watcherRead: string;
-  nextAction: string;
-  subs: string;
-  views30d: string;
-  uploads30d: number;
   channelHandle?: string;
-  lastCheckedMinsAgo: number;
+  phase: 'PRE' | 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
+  // Optional plan metadata — present only when a real Coach timeline exists.
+  campaign?: string;
+  nextMomentLabel?: string;
+  nextMomentDate?: string;
+  // Marks this artist as user-added (vs a built-in seed entry).
+  custom?: boolean;
 };
 
 export const ARTISTS: Artist[] = [
   {
     slug: 'ezra-collective',
     name: 'Ezra Collective',
-    campaign: 'Album Cycle — TBD',
     phase: 'PRE',
-    status: 'FIX FIRST',
-    nextMomentLabel: 'Pre-campaign channel setup',
-    nextMomentDate: '2026-04-22',
-    watcherRead: 'Quiet 38 days. Trailer outdated.',
-    nextAction: 'Refresh trailer & playlists before announce.',
-    subs: '312K',
-    views30d: '1.4M',
-    uploads30d: 0,
     channelHandle: '@ezracollective',
-    lastCheckedMinsAgo: 35,
   },
   {
     slug: 'k-trap',
     name: 'K-Trap',
-    campaign: 'Change — Single Cycle',
     phase: 'PUSH',
-    status: 'MOMENTUM',
-    nextMomentLabel: 'PUSH content drop',
-    nextMomentDate: '2026-04-19',
-    watcherRead: 'Change at 1.2M, +18% week.',
-    nextAction: 'Cut a BTS Short for drop day.',
-    subs: '142K',
-    views30d: '4.6M',
-    uploads30d: 7,
     channelHandle: '@ktrap',
-    lastCheckedMinsAgo: 120,
   },
   {
     slug: 'tom-odell',
     name: 'Tom Odell',
-    campaign: 'Tour Announce',
     phase: 'START',
-    status: 'BUILDING',
-    nextMomentLabel: 'Tour announce video',
-    nextMomentDate: '2026-04-28',
-    watcherRead: 'Catalogue strong. No uploads in 21d.',
-    nextAction: 'Schedule announce teaser + pinned post.',
-    subs: '1.1M',
-    views30d: '3.2M',
-    uploads30d: 1,
     channelHandle: '@tomodell',
-    lastCheckedMinsAgo: 240,
   },
   {
     slug: 'bad-omens',
     name: 'Bad Omens',
-    campaign: 'Festival Run',
     phase: 'PEAK',
-    status: 'ACTIVE BUT WEAK',
-    nextMomentLabel: 'Coachella weekend recap',
-    nextMomentDate: '2026-04-20',
-    watcherRead: 'Watch-time flat 7d. Shorts gap.',
-    nextAction: 'Cut 3 Shorts from festival within 24h.',
-    subs: '2.4M',
-    views30d: '5.8M',
-    uploads30d: 5,
     channelHandle: 'UCre_5futd_kGkrSlL83n3pw',
-    lastCheckedMinsAgo: 55,
   },
   {
     slug: 'james-blake',
     name: 'James Blake',
-    campaign: 'Catalogue Sustain',
     phase: 'SUSTAIN',
-    status: 'READY',
-    nextMomentLabel: 'Live session premiere',
-    nextMomentDate: '2026-05-02',
-    watcherRead: 'Premieres converting 32%. Holding cadence.',
-    nextAction: 'Schedule next premiere window.',
-    subs: '895K',
-    views30d: '2.1M',
-    uploads30d: 3,
     channelHandle: '@jamesblake',
-    lastCheckedMinsAgo: 18,
   },
 ];
 
@@ -135,14 +90,11 @@ export type RecentUpload = {
   viewCount: number;
   likeCount: number;
   commentCount: number;
-  // Sibling coverage (derived from title regex across recentUploads)
   hasLyricSibling?: boolean;
   hasVisualizerSibling?: boolean;
   hasAudioSibling?: boolean;
-  hasShortSibling?: boolean; // Short (<=60s) within 14d referencing the same track
-  // Relative performance within this channel's recent window
-  isTopPerformer?: boolean;  // viewCount >= 2x median of long-form uploads
-  // Top comments (only populated for top performers to save quota)
+  hasShortSibling?: boolean;
+  isTopPerformer?: boolean;
   topComments?: TopComment[];
 };
 
@@ -156,7 +108,7 @@ export type LiveSnap = {
   lastUploadAt?: string | null;
   thumbnail?: string;
   recentUploads?: RecentUpload[];
-  topEverVideos?: RecentUpload[]; // all-time top 10 by viewCount (weekly refresh)
+  topEverVideos?: RecentUpload[];
   shorts30d?: number;
   upcomingCount?: number;
   captionsMissing30d?: number;
@@ -187,7 +139,6 @@ export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | n
   const u = live.uploads30d ?? 0;
   const last = daysSince(live.lastUploadAt);
 
-  // Out-of-cycle: no near-term moment and channel is cold → ALWAYS ON
   const outOfCycle =
     (ctx.daysToNextMoment == null || ctx.daysToNextMoment > 21) &&
     (ctx.phase === 'SUSTAIN' || ctx.phase === 'PRE' || ctx.phase == null);
