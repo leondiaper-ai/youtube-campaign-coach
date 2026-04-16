@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR, type Status } from '@/lib/artists';
+import { ARTISTS, deriveFromLive, fmtNum, daysSince, STATUS_COLOR } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { detectOpportunities, IMPACT_COLOR, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
+import { decideWatcher, DECISION_COLOR, VERDICT_LABEL } from '@/lib/watcherDecision';
 import Sparkline from '@/components/Sparkline';
 
 export const revalidate = 600;
@@ -12,21 +13,6 @@ const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
-
-type Verb = 'FIX' | 'PUSH' | 'TEST';
-type Confidence = 'HIGH' | 'MEDIUM' | 'LOW';
-
-const VERB_COLOR: Record<Verb, { bg: string; fg: string; dot: string }> = {
-  FIX:  { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
-  PUSH: { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  TEST: { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-};
-
-function verbFromStatus(s: Status): Verb {
-  if (s === 'FIX FIRST' || s === 'ACTIVE BUT WEAK') return 'FIX';
-  if (s === 'BUILDING' || s === 'MOMENTUM') return 'PUSH';
-  return 'TEST';
-}
 
 export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -44,9 +30,6 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     ? deriveFromLive(live, { daysToNextMoment, phase: artist.phase })
     : null;
   const status = derived?.status ?? artist.status;
-  const watcherRead = derived?.watcherRead ?? artist.watcherRead;
-  const nextAction = derived?.nextAction ?? artist.nextAction;
-  const impact = derived?.impact;
   const lastUpDays = daysSince(live?.lastUploadAt);
 
   const opps = detectOpportunities(artist, live, daysToNextMoment).sort(
@@ -62,41 +45,22 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const viewsSeries = seriesForField(history, 'views', 30);
 
   // --- Decision block (System 1) ---
-  const verb = verbFromStatus(status);
+  const decision = decideWatcher({
+    artist,
+    live,
+    opps,
+    daysToNextMoment,
+    subs7,
+    subs30,
+    views7,
+    history,
+  });
   const isLive = !!(live && !live.error);
-  const confidence: Confidence = !isLive
-    ? 'LOW'
-    : history.length >= 3
-    ? 'HIGH'
-    : 'MEDIUM';
 
   const channelOpps = opps.filter((o) => !o.videoId);
   const criticalOpps = channelOpps.filter((o) => o.impact === 'HIGH');
   const secondaryOpps = channelOpps.filter((o) => o.impact !== 'HIGH');
   const videoOppsAll = opps.filter((o) => !!o.videoId);
-
-  // Top 3 signals under the decision headline
-  const signals: string[] = [];
-  signals.push(watcherRead);
-  if (daysToNextMoment != null) {
-    signals.push(
-      daysToNextMoment >= 0
-        ? `${daysToNextMoment}d to ${artist.nextMomentLabel.toLowerCase()}.`
-        : `${Math.abs(daysToNextMoment)}d past ${artist.nextMomentLabel.toLowerCase()}.`
-    );
-  }
-  if (criticalOpps.length > 0) {
-    signals.push(`${criticalOpps.length} high-impact gap${criticalOpps.length === 1 ? '' : 's'} flagged this week.`);
-  } else if (videoOppsAll.length > 0) {
-    signals.push(`${videoOppsAll.length} catalogue video${videoOppsAll.length === 1 ? '' : 's'} underused.`);
-  }
-
-  const ifIgnored =
-    verb === 'FIX'
-      ? 'Channel keeps losing algorithm favour; the next drop launches into a cold audience.'
-      : verb === 'PUSH'
-      ? 'Cadence is working — stalling now caps the ceiling on the next moment.'
-      : 'Current floor holds, but catalogue upside stays on the table.';
 
   // Group per-video opportunities
   const videoGroups = new Map<string, Opportunity[]>();
@@ -116,7 +80,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     }))
     .sort((a, b) => b.views - a.views);
 
-  const vc = VERB_COLOR[verb];
+  const dc = DECISION_COLOR[decision.type];
   const s = STATUS_COLOR[status];
 
   return (
@@ -149,20 +113,20 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.18em]"
-              style={{ background: vc.bg, color: vc.fg }}
+              style={{ background: dc.bg, color: dc.fg }}
             >
-              <span className="w-2 h-2 rounded-full" style={{ background: vc.dot }} />
-              {verb}
+              <span className="w-2 h-2 rounded-full" style={{ background: dc.dot }} />
+              {decision.type}
             </span>
             <span
               className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.14em]"
               style={{ background: s.bg, color: s.fg }}
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
-              {status}
+              {VERDICT_LABEL[decision.verdict]}
             </span>
             <span className="text-[10px] uppercase tracking-[0.14em] text-ink/45">
-              confidence · {confidence}
+              confidence · {decision.confidence}
             </span>
             <span className="text-[10px] uppercase tracking-[0.14em] ml-auto"
               style={{ color: isLive ? '#0C6A3F' : '#FF4A1C' }}>
@@ -172,12 +136,12 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 
           {/* Headline action */}
           <div className="mt-4 text-[20px] font-black leading-tight">
-            {nextAction}
+            {decision.headline}
           </div>
 
           {/* Supporting signals */}
           <ul className="mt-4 space-y-1.5">
-            {signals.map((sig, i) => (
+            {decision.signals.map((sig, i) => (
               <li key={i} className="flex items-start gap-2 text-[13px] text-ink/75">
                 <span className="mt-[7px] w-1 h-1 rounded-full shrink-0" style={{ background: INK }} />
                 <span>{sig}</span>
@@ -190,12 +154,12 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             <div className="rounded-lg p-3" style={{ background: SOFT }}>
               <div className="text-[9px] uppercase tracking-[0.18em] text-ink/45">Expected impact</div>
               <div className="text-[12px] text-ink/80 mt-1 leading-snug">
-                {impact ?? 'Keeps the channel warm and lifts visibility on the next drop.'}
+                {decision.expectedImpact}
               </div>
             </div>
             <div className="rounded-lg p-3" style={{ background: SOFT }}>
               <div className="text-[9px] uppercase tracking-[0.18em] text-ink/45">If ignored</div>
-              <div className="text-[12px] text-ink/80 mt-1 leading-snug">{ifIgnored}</div>
+              <div className="text-[12px] text-ink/80 mt-1 leading-snug">{decision.ifIgnored}</div>
             </div>
           </div>
         </section>
@@ -228,8 +192,55 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <MiniStat label="Last upload" value={lastUpDays != null ? `${lastUpDays}d ago` : '—'} />
         </div>
 
+        {/* When the decision is MAINTAIN / ACCELERATE, don't pile on work —
+            tuck the full opportunity list behind one summary instead. */}
+        {(decision.type === 'MAINTAIN' || decision.type === 'ACCELERATE') &&
+          (criticalOpps.length + secondaryOpps.length + videoOppsAll.length) > 0 && (
+            <details className="mt-10 group">
+              <summary
+                className="cursor-pointer list-none rounded-xl border px-5 py-4 flex items-center justify-between hover:bg-ink/[0.02] transition"
+                style={{ borderColor: MUTED, background: PAPER }}
+              >
+                <div>
+                  <div className="font-black text-lg">Everything else Watcher is tracking</div>
+                  <div className="text-[11px] text-ink/55 mt-0.5">
+                    {criticalOpps.length + secondaryOpps.length} channel · {videoOppsAll.length} catalogue. Not worth acting on while the plan is working.
+                  </div>
+                </div>
+                <div className="text-[10px] uppercase tracking-[0.18em] text-ink/45 flex items-center gap-2">
+                  SIDELINED
+                  <span className="text-ink/40 group-open:rotate-180 transition">▾</span>
+                </div>
+              </summary>
+              <div className="space-y-3 mt-3">
+                {[...criticalOpps, ...secondaryOpps].map((o) => (
+                  <OpportunityCard key={o.id} o={o} weight="medium" />
+                ))}
+                {videoOppsAll.length > 0 &&
+                  Array.from(
+                    videoOppsAll.reduce((m, o) => {
+                      const arr = m.get(o.videoId!) ?? [];
+                      arr.push(o);
+                      m.set(o.videoId!, arr);
+                      return m;
+                    }, new Map<string, Opportunity[]>())
+                  ).map(([id, items]: [string, Opportunity[]]) => (
+                    <VideoGapCard
+                      key={id}
+                      video={{
+                        id,
+                        title: items[0].videoTitle ?? id,
+                        views: items[0].videoViews ?? 0,
+                        items,
+                      }}
+                    />
+                  ))}
+              </div>
+            </details>
+          )}
+
         {/* ─────────────────── 3. FIX THESE NOW (critical) ─────────────────── */}
-        {criticalOpps.length > 0 && (
+        {decision.type !== 'MAINTAIN' && decision.type !== 'ACCELERATE' && criticalOpps.length > 0 && (
           <>
             <div className="flex items-baseline justify-between mt-10 mb-3">
               <h2 className="font-black text-lg">Fix these now</h2>
@@ -246,7 +257,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
         {/* ─────────────────── 4. IMPROVE PERFORMANCE (secondary) ─────────────────── */}
-        {secondaryOpps.length > 0 && (
+        {decision.type !== 'MAINTAIN' && decision.type !== 'ACCELERATE' && secondaryOpps.length > 0 && (
           <>
             <div className="flex items-baseline justify-between mt-10 mb-3">
               <h2 className="font-black text-lg">Improve performance</h2>
@@ -263,7 +274,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
         {/* ─────────────────── 5. UNLOCK CATALOGUE VALUE (collapsed) ─────────────────── */}
-        {videoCards.length > 0 && (
+        {decision.type !== 'MAINTAIN' && decision.type !== 'ACCELERATE' && videoCards.length > 0 && (
           <details className="mt-10 group">
             <summary
               className="cursor-pointer list-none rounded-xl border px-5 py-4 flex items-center justify-between hover:bg-ink/[0.02] transition"
