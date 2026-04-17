@@ -4404,6 +4404,40 @@ function pickPhaseHighlights(moments: { id: string; momentType: YouTubeMomentTyp
 }
 
 
+// ──── TIME CONTEXT — urgency + missed state for timeline moments ────────────
+
+type TimeContext = {
+  label: string;            // "This week", "In 5 days", "Missed"
+  urgency: 'now' | 'soon' | 'upcoming' | 'missed' | 'done' | 'past';
+  color: string;
+};
+
+function getTimeContext(momentDate: string, today: Date, supportMissing?: boolean): TimeContext {
+  const mDate = new Date(momentDate + 'T12:00:00');
+  const diffMs = mDate.getTime() - today.getTime();
+  const diffDays = Math.round(diffMs / 86400000);
+
+  if (diffDays < -14) {
+    // Well past — check if support was missed
+    if (supportMissing) {
+      return { label: 'Missed opportunity', urgency: 'missed', color: '#FF4A1C' };
+    }
+    return { label: 'Done', urgency: 'done', color: '#1FBE7A' };
+  }
+  if (diffDays < -1) {
+    if (supportMissing) {
+      return { label: 'Missed opportunity', urgency: 'missed', color: '#FF4A1C' };
+    }
+    return { label: `${Math.abs(diffDays)}d ago`, urgency: 'past', color: '#71717a' };
+  }
+  if (diffDays <= 0) return { label: 'Today', urgency: 'now', color: '#FF4A1C' };
+  if (diffDays <= 3) return { label: `In ${diffDays} days`, urgency: 'now', color: '#FF4A1C' };
+  if (diffDays <= 7) return { label: 'This week', urgency: 'now', color: '#FF4A1C' };
+  if (diffDays <= 14) return { label: 'Next week', urgency: 'soon', color: '#F08A3C' };
+  if (diffDays <= 30) return { label: `In ${Math.ceil(diffDays / 7)} weeks`, urgency: 'upcoming', color: '#71717a' };
+  return { label: '', urgency: 'upcoming', color: '#71717a' };
+}
+
 // ──── PULSE STRIP ───────────────────────────────────────────────────────────
 // One compact, three-row pulse check: LIVE ACTIVITY · THIS WEEK · COVERAGE.
 // Replaces CampaignActivityCard + CampaignAssetRollup + DropView's internal
@@ -7261,16 +7295,17 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           single: 'official_video', album: 'album_release', announcement: 'album_announce',
           milestone: 'track_moment', anchor: 'track_moment', collab: 'track_moment',
         };
-        type PillItem = { id: string; name: string; momentType: YouTubeMomentType; priority: string };
+        type PillItem = { id: string; name: string; momentType: YouTubeMomentType; priority: string; date: string };
         const ytTier1 = ytMoments.filter((m) => m.tier === 1);
         const pills: PillItem[] = ytTier1.length > 0
           ? ytTier1.map((m) => ({
-              id: m.id, name: m.title, momentType: m.momentType, priority: m.priority,
+              id: m.id, name: m.title, momentType: m.momentType, priority: m.priority, date: m.date,
             }))
           : phaseMoments.map((m) => ({
               id: m.name, name: m.name,
               momentType: MOMENT_TYPE_MAP[m.type] ?? 'track_moment',
               priority: m.isAnchor ? 'high' : 'medium',
+              date: m.date,
             }));
         if (pills.length === 0) return null;
         const highlights = pickPhaseHighlights(pills, 2);
@@ -7278,24 +7313,36 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
         <div className="mt-1.5 space-y-1">
           {pills.slice(0, 5).map((m, i) => {
             const ideas = getMomentContentIdeas(m.momentType);
-            const totalIdeas = ideas ? ideas.groups.reduce((n, g) => n + g.ideas.length, 0) : 0;
             const isHigh = highlights.has(m.id);
+            const tc = getTimeContext(m.date, todayRef);
+            const isMissed = tc.urgency === 'missed';
             return (
-              <div key={i} className="flex items-start gap-2">
+              <div key={i} className="flex items-start gap-2" style={{ opacity: isMissed ? 0.7 : 1 }}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: isHigh ? '#FFE2D8' : 'rgba(14,14,14,0.06)', color: isHigh ? '#8A1F0C' : 'rgba(14,14,14,0.55)' }}>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: isMissed ? 'rgba(255,74,28,0.08)' : isHigh ? '#FFE2D8' : 'rgba(14,14,14,0.06)', color: isMissed ? '#FF4A1C' : isHigh ? '#8A1F0C' : 'rgba(14,14,14,0.55)' }}>
                       {m.name}
                     </span>
-                    {isHigh && (
+                    {tc.label && (
+                      <span className="text-[8px] font-black uppercase tracking-[0.14em]" style={{ color: tc.color }}>
+                        {tc.label}
+                      </span>
+                    )}
+                    {!isMissed && isHigh && tc.urgency !== 'now' && (
                       <span className="text-[8px] font-black uppercase tracking-[0.14em]" style={{ color: '#8A1F0C' }}>
                         {ideas?.cta === "Don't miss this" ? "Don't miss" : 'High opportunity'}
                       </span>
                     )}
                   </div>
-                  <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
-                    → {ideas?.captureLine ?? 'Capture content around this moment'}
-                  </div>
+                  {isMissed ? (
+                    <div className="text-[9px] font-semibold mt-0.5 ml-1.5" style={{ color: '#FF4A1C' }}>
+                      → No content captured from this moment
+                    </div>
+                  ) : (
+                    <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
+                      → {ideas?.captureLine ?? 'Capture content around this moment'}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -7337,6 +7384,62 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
       </button>
 
       <div className="p-4">
+        {/* ── DO THIS NOW — top-of-phase urgent action (max 2) ──────── */}
+        {(() => {
+          // Collect urgent actions from moments in this phase
+          const allMoments = ytMoments.filter((m) => m.tier === 1);
+          const urgent: { label: string; color: string }[] = [];
+          for (const m of allMoments) {
+            if (urgent.length >= 2) break;
+            const tc = getTimeContext(m.date, todayRef, true);
+            const mIdeas = getMomentContentIdeas(m.momentType);
+            if (tc.urgency === 'now') {
+              urgent.push({
+                label: `${mIdeas?.captureLine ?? 'Capture content'} — ${m.title}`,
+                color: '#FF4A1C',
+              });
+            } else if (tc.urgency === 'missed') {
+              const weekActions = plan.weeks.find((w) => w.week === m.weekNum)?.actions ?? [];
+              const sCmp = compareSupportVsActual(m, watcher.state, weekActions);
+              if (sCmp.missing.length > 0) {
+                urgent.push({
+                  label: `Missed: ${m.title} — ${sCmp.missing.slice(0, 2).join(' + ')} not captured`,
+                  color: '#FF4A1C',
+                });
+              }
+            }
+          }
+          // Also check phaseMoments if no ytMoments
+          if (urgent.length === 0 && allMoments.length === 0) {
+            for (const m of phaseMoments) {
+              if (urgent.length >= 2) break;
+              const tc = getTimeContext(m.date, todayRef);
+              const mIdeas = getMomentContentIdeas(
+                ({ single: 'official_video', album: 'album_release', announcement: 'album_announce' } as Record<string, YouTubeMomentType>)[m.type] ?? 'track_moment'
+              );
+              if (tc.urgency === 'now') {
+                urgent.push({
+                  label: `${mIdeas?.captureLine ?? 'Capture content'} — ${m.name}`,
+                  color: '#FF4A1C',
+                });
+              }
+            }
+          }
+          if (urgent.length === 0) return null;
+          return (
+            <div className="mb-4 rounded-lg p-3" style={{ background: 'rgba(255,74,28,0.05)', border: '1px solid rgba(255,74,28,0.12)' }}>
+              <div className="text-[10px] font-black uppercase tracking-[0.14em] mb-1.5" style={{ color: '#FF4A1C' }}>
+                Do this now
+              </div>
+              {urgent.map((u, i) => (
+                <div key={i} className="text-[11px] font-bold text-ink/70 leading-snug">
+                  → {u.label}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* ── BUILD phase warm-up cadence tracker ──────────────────────── */}
         {phase.name === 'BUILD' && (() => {
           const phaseShorts = liveVideos.filter((v) => {
@@ -7452,27 +7555,48 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
 
               const isOpen = expandedOpps.has(m.id);
 
+              // Time context — urgency / missed state
+              const hasMissedSupport = supportCmp.missing.length > 0;
+              const tc = getTimeContext(m.date, todayRef, hasMissedSupport);
+              const isMissed = tc.urgency === 'missed';
+
               return (
                 <div
                   key={m.id}
                   className="mb-3 last:mb-0 rounded-lg overflow-hidden"
-                  style={{ border: `1px solid ${isHighlight ? '#FF4A1C33' : `${mMeta.color}22`}` }}
+                  style={{
+                    border: `1px solid ${isMissed ? '#FF4A1C22' : isHighlight ? '#FF4A1C33' : `${mMeta.color}22`}`,
+                    opacity: isMissed ? 0.85 : 1,
+                  }}
                 >
-                  {/* Momentum signal bar */}
-                  <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: mMeta.bg }}>
-                    <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: mMeta.color }}>
-                      {mMeta.label}
-                    </span>
-                    {isHighlight && (
-                      <span
-                        className="text-[8px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded shrink-0"
-                        style={{ background: '#FFE2D8', color: '#8A1F0C' }}
-                      >
-                        {ideas?.cta === "Don't miss this" ? "Don't miss" : 'High opportunity'}
+                  {/* Momentum / time signal bar */}
+                  <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: isMissed ? 'rgba(255,74,28,0.06)' : mMeta.bg }}>
+                    {isMissed ? (
+                      <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: '#FF4A1C' }}>
+                        Missed opportunity
                       </span>
+                    ) : (
+                      <>
+                        <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: mMeta.color }}>
+                          {mMeta.label}
+                        </span>
+                        {tc.label && (
+                          <span className="text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 rounded shrink-0" style={{ background: `${tc.color}15`, color: tc.color }}>
+                            {tc.label}
+                          </span>
+                        )}
+                        {isHighlight && tc.urgency !== 'now' && (
+                          <span
+                            className="text-[8px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded shrink-0"
+                            style={{ background: '#FFE2D8', color: '#8A1F0C' }}
+                          >
+                            {ideas?.cta === "Don't miss this" ? "Don't miss" : 'High opportunity'}
+                          </span>
+                        )}
+                      </>
                     )}
                     <span className="text-[10px] text-ink/55 font-semibold flex-1 truncate">
-                      {momentum.reason}
+                      {isMissed ? `No content captured — ${supportCmp.missing.slice(0, 2).join(', ')} missing` : momentum.reason}
                     </span>
                   </div>
 
