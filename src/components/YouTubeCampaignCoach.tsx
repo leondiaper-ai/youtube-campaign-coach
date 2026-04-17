@@ -4276,6 +4276,75 @@ function getCollabsThisWeek(plan: CampaignPlan): number {
   return wk.actions.filter((a) => a.status === 'done' && isCollabAction(a)).length;
 }
 
+// ──── CONTENT OPPORTUNITIES ─────────────────────────────────────────────────
+// Lightweight YouTube content suggestions derived from the campaign timeline.
+// NOT planner cards. NOT moments. Just: "here's what you could be filming."
+// Shows 3–6 upcoming event-type moments with practical content ideas.
+
+const OPPORTUNITY_CONTENT: Record<string, string[]> = {
+  tour:          ['Travel Shorts', 'backstage clips', 'performance snippets', 'recap video'],
+  tour_announce: ['Announcement Short', 'date reveal graphic', 'fan reaction content'],
+  festival:      ['Travel Short', 'backstage clip', 'crowd reaction Short', 'performance snippet', 'recap video'],
+  promo_trip:    ['Travel diary Shorts', 'behind-the-scenes clips', 'location content'],
+  activation:    ['BTS Short', 'event recap clip', 'fan interaction content'],
+  live_show:     ['Performance Short', 'soundcheck clip', 'crowd moment Short'],
+  album_announce:['Announcement Short', 'teaser clip', 'countdown content'],
+  track_moment:  ['Listening party Short', 'fan reaction content', 'studio clip'],
+};
+
+// Event types that generate content opportunities (not music releases)
+const OPPORTUNITY_EVENT_TYPES = new Set<YouTubeMomentType>([
+  'tour', 'tour_announce', 'festival', 'promo_trip', 'activation', 'live_show',
+]);
+
+function ContentOpportunities({ plan }: { plan: CampaignPlan }) {
+  const ytMoments = plan.youtubeMoments ?? [];
+  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+
+  const opportunities = useMemo(() => {
+    // Include upcoming event-type moments + very recent ones (past 7 days)
+    const cutoff = today.getTime() - 7 * 86400000;
+    return ytMoments
+      .filter((m) => OPPORTUNITY_EVENT_TYPES.has(m.momentType) && new Date(m.date + 'T12:00:00').getTime() >= cutoff)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 6);
+  }, [ytMoments, today]);
+
+  if (opportunities.length === 0) return null;
+
+  return (
+    <div className="mb-5 rounded-xl px-5 py-4" style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+      <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 mb-3">
+        Content Opportunities
+      </div>
+      <div className="space-y-2.5">
+        {opportunities.map((m) => {
+          const ideas = OPPORTUNITY_CONTENT[m.momentType] ?? ['Short', 'recap clip'];
+          const dateLabel = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          const isPast = new Date(m.date + 'T12:00:00') < today;
+          return (
+            <div key={m.id} className="flex items-start gap-3">
+              <div className="shrink-0 w-[70px] text-right">
+                <span className="text-[11px] font-bold text-ink/40 tabular-nums">{dateLabel}</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-black text-ink leading-tight">
+                  {m.title}
+                  {isPast && <span className="text-[10px] font-bold text-ink/30 ml-2">recent</span>}
+                </div>
+                <div className="text-[12px] text-ink/55 mt-0.5 leading-snug">
+                  → {ideas.join(' · ')}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
 // ──── PULSE STRIP ───────────────────────────────────────────────────────────
 // One compact, three-row pulse check: LIVE ACTIVITY · THIS WEEK · COVERAGE.
 // Replaces CampaignActivityCard + CampaignAssetRollup + DropView's internal
@@ -8448,7 +8517,10 @@ export default function YouTubeCampaignCoach() {
         {/* 2. NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
 
-        {/* 3. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
+        {/* 3. CONTENT OPPORTUNITIES — lightweight suggestions from timeline events */}
+        <ContentOpportunities plan={plan} />
+
+        {/* 4. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
         <PulseStrip plan={plan} />
 
         {/* Drop View — the action layer, always visible */}
