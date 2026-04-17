@@ -76,6 +76,11 @@ export async function GET(req: NextRequest) {
     if (/\b(lyric\s*(video)?|lyrics?\s*video)\b/.test(t)) return 'lyric';
     if (/\b(visuali[sz]er|official\s*visuali[sz]er)\b/.test(t)) return 'visualizer';
     if (/\b(live\s*(at|from|in|session|performance)|tiny\s*desk|concert)\b/.test(t)) return 'live';
+    // "Session" alone (e.g. "Magic Box Dundee Session") → live performance
+    if (/\bsession\b/.test(t)) return 'live';
+    // "(Official)" alone without "video"/"audio" → official music video
+    // On YouTube this almost always means the primary official release
+    if (/\(official\)/.test(t)) return 'official';
     return 'unknown';
   }
 
