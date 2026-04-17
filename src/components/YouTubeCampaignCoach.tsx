@@ -1796,24 +1796,8 @@ function enrichPlanWeeks(plan: CampaignPlan): CampaignPlan {
     }
   }
 
-  // 2. Synthesise placeholder drops for empty phases
-  for (const ph of phases) {
-    const hasMoment = moments.some((m) => m.weekNum >= ph.weekStart && m.weekNum <= ph.weekEnd);
-    if (hasMoment) continue;
-    const midWeek = Math.floor((ph.weekStart + ph.weekEnd) / 2);
-    if (midWeek > weekCount) continue;
-    const base = new Date(start); base.setDate(base.getDate() + (midWeek - 1) * 7 + 2);
-    const dateIso = base.toISOString().split('T')[0];
-    moments.push({
-      weekNum: midWeek,
-      date: dateIso,
-      name: `${ph.label} content drop`,
-      type: 'milestone',
-      isAnchor: false,
-      why: `Planned ${ph.name.toLowerCase()}-phase content drop (auto-scaffolded).`,
-      prepNote: 'Swap for a real release, collab, or milestone when confirmed.',
-    });
-  }
+  // Phase-fill moments removed: phases without releases don't need
+  // synthetic moments. The weekly cadence fills those weeks instead.
   moments.sort((a, b) => a.weekNum - b.weekNum);
 
   // 3. Fill empty weeks with context-aware content
@@ -5340,9 +5324,15 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 1. Create a track for each campaign moment (prefer plan-specific moments)
+  // 1. Create a track for each RELEASE moment only. Tour dates, festivals,
+  // live shows, and phase-filler milestones are NOT drops — they don't need
+  // lyric videos or artwork. They inform the weekly cadence instead.
+  const RELEASE_TYPES = new Set(['single', 'album', 'collab', 'announcement', 'anchor']);
   const moments = (plan.moments && plan.moments.length > 0) ? plan.moments : CAMPAIGN_MOMENTS;
   for (const moment of moments) {
+    // Skip non-release moments — tours, festivals, etc. just set context
+    if (!RELEASE_TYPES.has(moment.type)) continue;
+
     const week = plan.weeks.find((w) => w.week === moment.weekNum);
     if (!week) continue;
 
@@ -5385,10 +5375,11 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
     const supportPlan = (plan.supportPlans || []).find((sp) => sp.momentWeek === moment.weekNum) || null;
     const phase = planPhases.find((p) => moment.weekNum >= p.weekStart && moment.weekNum <= p.weekEnd);
 
-    // Derive track name from the actual hero action, not the hardcoded moment name
-    const trackName = heroAction
+    // Use the moment name (carries the timeline event title) as the track name.
+    // Fall back to hero action title, then a descriptive label.
+    const trackName = moment.name || (heroAction
       ? `${heroAction.title}${heroAction.featuredArtist ? ` ft. ${heroAction.featuredArtist}` : ''}`
-      : `Week ${moment.weekNum} drop`;
+      : `${moment.type === 'album' ? 'Album' : moment.type === 'single' ? 'Single' : 'Release'} — Week ${moment.weekNum}`);
 
     tracks.push({
       id: `autotrack-${moment.weekNum}`,
@@ -5440,33 +5431,9 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
     }
   }
 
-  // 3. Phase-fill: ensure every phase has at least one planned track so the
-  // rollout reads as a full campaign even when the imported timeline was
-  // sparse (e.g. no events landed in PUSH).
-  const coveredWeeks = new Set(tracks.map((t) => t.weekNum));
-  const phaseHasTrack = (p: CampaignPhase) =>
-    tracks.some((t) => t.weekNum >= p.weekStart && t.weekNum <= p.weekEnd);
-  for (const ph of planPhases) {
-    if (phaseHasTrack(ph)) continue;
-    const midWeek = Math.min(
-      plan.weeks.length,
-      Math.floor((ph.weekStart + ph.weekEnd) / 2),
-    );
-    if (midWeek < 1 || coveredWeeks.has(midWeek)) continue;
-    const weekDate = weekToDate(midWeek, plan.startDate, 2); // Wed
-    tracks.push({
-      id: `autotrack-phase-${ph.name.toLowerCase()}`,
-      name: `${ph.name.charAt(0) + ph.name.slice(1).toLowerCase()} content drop`,
-      weekNum: midWeek,
-      date: weekDate,
-      anchorAction: null,
-      supportActions: [],
-      supportPlan: null,
-      moment: null,
-      status: 'upcoming',
-      phase: ph,
-    });
-  }
+  // Phase-fill removed: phases without explicit releases don't need
+  // empty drop cards. The weekly cadence (shorts, posts) already fills
+  // those weeks with context-aware content via enrichPlanWeeks.
 
   return tracks.sort((a, b) => a.weekNum - b.weekNum);
 }
@@ -6354,9 +6321,6 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const autoTracks = [
     ...liveTracks,
     ...planTracks.filter((t) => {
-      // Phase-fill placeholders always survive — they only exist when the
-      // phase has no real drop at all, so they can't collide with live data.
-      if (t.id.startsWith('autotrack-phase-')) return true;
       return !liveWeeks.has(t.weekNum) && !liveDates.has(t.date) && !matchesLiveTitle(t.name);
     }),
   ].sort((a, b) => a.weekNum - b.weekNum);
