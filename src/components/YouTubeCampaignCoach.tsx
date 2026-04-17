@@ -4276,72 +4276,71 @@ function getCollabsThisWeek(plan: CampaignPlan): number {
   return wk.actions.filter((a) => a.status === 'done' && isCollabAction(a)).length;
 }
 
-// ──── CONTENT OPPORTUNITIES ─────────────────────────────────────────────────
-// Lightweight YouTube content suggestions derived from the campaign timeline.
-// NOT planner cards. NOT moments. Just: "here's what you could be filming."
-// Shows 3–6 upcoming event-type moments with practical content ideas.
+// ──── CONTENT OPPORTUNITIES (embedded in timeline moments) ──────────────────
+// Every event-type moment is a YouTube content opportunity. Grouped ideas
+// attach directly to the planner card — no separate list.
 
-const OPPORTUNITY_CONTENT: Record<string, string[]> = {
-  tour:          ['Travel Shorts', 'backstage clips', 'performance snippets', 'recap video'],
-  tour_announce: ['Announcement Short', 'date reveal graphic', 'fan reaction content'],
-  festival:      ['Travel Short', 'backstage clip', 'crowd reaction Short', 'performance snippet', 'recap video'],
-  promo_trip:    ['Travel diary Shorts', 'behind-the-scenes clips', 'location content'],
-  activation:    ['BTS Short', 'event recap clip', 'fan interaction content'],
-  live_show:     ['Performance Short', 'soundcheck clip', 'crowd moment Short'],
-  album_announce:['Announcement Short', 'teaser clip', 'countdown content'],
-  track_moment:  ['Listening party Short', 'fan reaction content', 'studio clip'],
+type ContentIdeaGroup = { label: string; ideas: string[] };
+
+const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGroup[]; highlight?: boolean }> = {
+  tour: {
+    cta: 'Film every show',
+    groups: [
+      { label: 'Shorts', ideas: ['Travel clip', 'Crowd reaction', 'Performance snippet'] },
+      { label: 'Video', ideas: ['Recap video', 'Tour diary'] },
+      { label: 'Support', ideas: ['Backstage BTS'] },
+    ],
+    highlight: true,
+  },
+  tour_announce: {
+    cta: 'Capture the announcement',
+    groups: [
+      { label: 'Shorts', ideas: ['Date reveal', 'Fan reaction'] },
+      { label: 'Support', ideas: ['Countdown content'] },
+    ],
+  },
+  festival: {
+    cta: "Don't miss this",
+    groups: [
+      { label: 'Shorts', ideas: ['Travel clip', 'Crowd reaction', 'Performance snippet'] },
+      { label: 'Video', ideas: ['Recap video'] },
+      { label: 'Support', ideas: ['Backstage BTS', 'Soundcheck clip'] },
+    ],
+    highlight: true,
+  },
+  promo_trip: {
+    cta: 'Film everything',
+    groups: [
+      { label: 'Shorts', ideas: ['Travel diary', 'Location content'] },
+      { label: 'Video', ideas: ['Behind-the-scenes'] },
+      { label: 'Support', ideas: ['BTS clips'] },
+    ],
+  },
+  activation: {
+    cta: 'Capture this',
+    groups: [
+      { label: 'Shorts', ideas: ['Event highlights', 'Fan interaction'] },
+      { label: 'Video', ideas: ['Recap clip'] },
+    ],
+  },
+  live_show: {
+    cta: 'Film this',
+    groups: [
+      { label: 'Shorts', ideas: ['Performance clip', 'Crowd moment'] },
+      { label: 'Video', ideas: ['Performance snippet'] },
+      { label: 'Support', ideas: ['Soundcheck clip'] },
+    ],
+    highlight: true,
+  },
 };
 
-// Event types that generate content opportunities (not music releases)
+// Event types that carry embedded content opportunities
 const OPPORTUNITY_EVENT_TYPES = new Set<YouTubeMomentType>([
   'tour', 'tour_announce', 'festival', 'promo_trip', 'activation', 'live_show',
 ]);
 
-function ContentOpportunities({ plan }: { plan: CampaignPlan }) {
-  const ytMoments = plan.youtubeMoments ?? [];
-  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
-
-  const opportunities = useMemo(() => {
-    // Include upcoming event-type moments + very recent ones (past 7 days)
-    const cutoff = today.getTime() - 7 * 86400000;
-    return ytMoments
-      .filter((m) => OPPORTUNITY_EVENT_TYPES.has(m.momentType) && new Date(m.date + 'T12:00:00').getTime() >= cutoff)
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(0, 6);
-  }, [ytMoments, today]);
-
-  if (opportunities.length === 0) return null;
-
-  return (
-    <div className="mb-5 rounded-xl px-5 py-4" style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 mb-3">
-        Content Opportunities
-      </div>
-      <div className="space-y-2.5">
-        {opportunities.map((m) => {
-          const ideas = OPPORTUNITY_CONTENT[m.momentType] ?? ['Short', 'recap clip'];
-          const dateLabel = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          const isPast = new Date(m.date + 'T12:00:00') < today;
-          return (
-            <div key={m.id} className="flex items-start gap-3">
-              <div className="shrink-0 w-[70px] text-right">
-                <span className="text-[11px] font-bold text-ink/40 tabular-nums">{dateLabel}</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-black text-ink leading-tight">
-                  {m.title}
-                  {isPast && <span className="text-[10px] font-bold text-ink/30 ml-2">recent</span>}
-                </div>
-                <div className="text-[12px] text-ink/55 mt-0.5 leading-snug">
-                  → {ideas.join(' · ')}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+function getMomentContentIdeas(type: YouTubeMomentType) {
+  return MOMENT_CONTENT_IDEAS[type] ?? null;
 }
 
 
@@ -7071,6 +7070,12 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const watcher = useWatcherChannel();
   const todayRef = useMemo(() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; }, []);
   const communityPostDone = plan.manualOverrides?.communityPostDone || {};
+  const [expandedOpps, setExpandedOpps] = useState<Set<string>>(new Set());
+  const toggleOpp = (id: string) => setExpandedOpps((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
 
   // Merge: live drops supersede planned for same week; planned fills the future.
   const liveTracks = deriveLiveTracks(watcher.state, plan.startDate);
@@ -7439,6 +7444,59 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                         </div>
                       </div>
                     )}
+
+                    {/* ── Embedded Content Opportunities ── */}
+                    {(() => {
+                      const ideas = getMomentContentIdeas(m.momentType);
+                      if (!ideas) return null;
+                      const totalIdeas = ideas.groups.reduce((n, g) => n + g.ideas.length, 0);
+                      const isOpen = expandedOpps.has(m.id);
+                      return (
+                        <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }}>
+                          <button
+                            onClick={() => toggleOpp(m.id)}
+                            className="w-full flex items-center gap-2 text-left group"
+                          >
+                            {ideas.highlight && (
+                              <span
+                                className="text-[8px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded shrink-0"
+                                style={{ background: '#FFE2D8', color: '#8A1F0C' }}
+                              >
+                                Must capture
+                              </span>
+                            )}
+                            <span className="text-[11px] font-bold text-ink/70 flex-1">
+                              {ideas.cta}
+                            </span>
+                            <span className="text-[10px] font-semibold text-ink/40">
+                              {totalIdeas} ideas {isOpen ? '▾' : '▸'}
+                            </span>
+                          </button>
+                          {isOpen && (
+                            <div className="mt-2 flex flex-wrap gap-3">
+                              {ideas.groups.map((g) => (
+                                <div key={g.label} className="min-w-0">
+                                  <div className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/40 mb-0.5">
+                                    {g.label}
+                                  </div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {g.ideas.map((idea) => (
+                                      <span
+                                        key={idea}
+                                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                                        style={{ background: 'rgba(14,14,14,0.04)', color: 'rgba(14,14,14,0.6)' }}
+                                      >
+                                        {idea}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               );
@@ -8517,10 +8575,7 @@ export default function YouTubeCampaignCoach() {
         {/* 2. NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
 
-        {/* 3. CONTENT OPPORTUNITIES — lightweight suggestions from timeline events */}
-        <ContentOpportunities plan={plan} />
-
-        {/* 4. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
+        {/* 3. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
         <PulseStrip plan={plan} />
 
         {/* Drop View — the action layer, always visible */}
