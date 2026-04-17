@@ -3693,7 +3693,7 @@ function cadenceSummaryLine(cmp: CadenceCompare | null): { headline: string; det
 }
 type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
-function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void; onUpdatePlan?: (updates: Partial<CampaignPlan>) => void }) {
+function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void; onUpdatePlan?: (updates: Partial<CampaignPlan>) => void; onOpenExecModal?: () => void }) {
   const watcher = useWatcherChannel();
   // Keep the watcher-baseline hook mounted (side-effects: first-sight capture).
   useCampaignBaseline(
@@ -3959,7 +3959,39 @@ function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?:
       )}
 
       {/* "Why this call" dropdown removed — state → signal → action already explains it. */}
+
+      {/* 6. EXECUTION ALERT — inline at the bottom of the card when gaps exist */}
+      {onOpenExecModal && <ExecutionAlert plan={plan} onOpenModal={onOpenExecModal} />}
     </div>
+  );
+}
+
+/**
+ * Execution alert rendered inside the black TopSignalCard.
+ * Replaces the standalone strip — sits naturally as the final row.
+ */
+function ExecutionAlert({ plan, onOpenModal }: { plan: CampaignPlan; onOpenModal: () => void }) {
+  const exec = useExecutionGaps(plan);
+  if (!exec || exec.gaps.length < 2) return null;
+
+  return (
+    <button
+      onClick={onOpenModal}
+      className="w-full flex items-center gap-3 mt-5 pt-4 text-left group"
+      style={{ borderTop: '1px solid rgba(250,247,242,0.08)' }}
+    >
+      <div className="flex-1 min-w-0">
+        <div className="text-[12px] font-bold" style={{ color: '#F5B73D' }}>
+          ⚠️ {exec.gaps.length} gap{exec.gaps.length !== 1 ? 's' : ''} limiting reach · −{exec.reachLoss}% estimated impact
+        </div>
+      </div>
+      <span
+        className="shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.12em] transition group-hover:opacity-90"
+        style={{ background: '#F08A3C', color: '#FAF7F2' }}
+      >
+        Fix Now
+      </span>
+    </button>
   );
 }
 
@@ -9168,17 +9200,15 @@ export default function YouTubeCampaignCoach() {
 
         {/* ── TOP: 3-second answer (What's happening / What should I do / What's next) ── */}
 
-        {/* 1. DECISION CARD — primary focus (channel state / "QUIET" etc.) */}
+        {/* 1. DECISION CARD — primary focus (channel state / "QUIET" etc.) + execution alert */}
         <TopSignalCard
           plan={plan}
           onOpenAdd={(kind) => setAddModal({ open: true, initialKind: kind })}
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
+          onOpenExecModal={() => setExecModalOpen(true)}
         />
 
-        {/* 2. EXECUTION TRIGGER — insight → problem → action, right after channel state */}
-        <ExecutionLayer plan={plan} onOpenModal={() => setExecModalOpen(true)} />
-
-        {/* 3. NEXT DROP — primary anchor with role */}
+        {/* 2. NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
 
         {/* 4. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
