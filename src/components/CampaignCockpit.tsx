@@ -42,25 +42,24 @@ const SIMPLE_STATUS_STYLE: Record<SimpleStatus, { bg: string; fg: string; dot: s
   'Healthy':         { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
 };
 
-// Human-readable "why" line for each status
+// Direct "why" line — blunt, commercial language
 function whyLine(status: Status, live: LiveSnap | undefined): string {
   const lastUp = daysSince(live?.lastUploadAt);
   const uploads = live?.uploads30d ?? 0;
-  const shorts = live?.shorts30d ?? 0;
 
   switch (status) {
     case 'FIX FIRST':
-      return lastUp != null ? `No uploads in ${lastUp} days` : 'No recent uploads detected';
+      return lastUp != null ? `Not posting. Last upload ${lastUp}d ago` : 'Not posting';
     case 'ACTIVE BUT WEAK':
-      return `Only ${uploads} upload${uploads === 1 ? '' : 's'} in 30 days`;
+      return `Only ${uploads} upload${uploads === 1 ? '' : 's'} in 30 days — channel cooling off`;
     case 'BUILDING':
       return `${uploads} uploads/30d — building cadence`;
     case 'MOMENTUM':
       return `Strong output — ${uploads} uploads/30d`;
     case 'READY':
-      return 'Cadence is holding — ready for the next moment';
+      return 'Cadence holding — ready for the next moment';
     case 'ALWAYS ON':
-      return 'Between campaigns — channel is warm';
+      return 'Between campaigns — channel warm';
     default:
       return '';
   }
@@ -198,7 +197,7 @@ export default function CampaignCockpit() {
             <span>YouTube Campaign System</span>
           </div>
           <h1 className="font-black text-3xl leading-tight mt-1">
-            Artist overview
+            All artists
           </h1>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -221,13 +220,13 @@ export default function CampaignCockpit() {
         >
           {needAttention > 0 && (
             <span className="font-black" style={{ color: '#8A1F0C' }}>
-              {needAttention} artist{needAttention === 1 ? '' : 's'} need{needAttention === 1 ? 's' : ''} attention
+              {needAttention} need{needAttention === 1 ? 's' : ''} attention
             </span>
           )}
           {atRisk > 0 && (
             <>
-              {needAttention > 0 && <span className="text-ink/25">·</span>}
-              <span className="font-bold text-ink/70">{atRisk} at risk</span>
+              {needAttention > 0 && <span className="text-ink/20">·</span>}
+              <span className="font-bold text-ink/65">{atRisk} at risk</span>
             </>
           )}
         </div>
@@ -307,17 +306,17 @@ function ArtistCard({
             <CoachLiveDot slug={a.slug} />
           </div>
 
-          {/* Why this artist is here + growth signal */}
-          <div className="text-[12px] text-ink/60 mt-1">
+          {/* Why + growth signal on same line */}
+          <div className="text-[12px] text-ink/55 mt-1 leading-snug">
             {why}
             {isLive && <GrowthSignal live={live!} />}
           </div>
 
-          {/* Scale: subs + views */}
-          <div className="flex items-center gap-3 mt-2 text-[11px] text-ink/40 font-mono flex-wrap">
+          {/* Scale: subs · views · growth delta */}
+          <div className="flex items-center gap-2 mt-1.5 text-[11px] text-ink/40 tabular-nums flex-wrap">
             {isLive && live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
-            {isLive && live?.views != null && <span>· {fmtNum(live.views)} views</span>}
-            {live?.uploads30d != null && <span>· {live.uploads30d} uploads/30d</span>}
+            {isLive && live?.views != null && <><span className="text-ink/15">·</span><span>{fmtNum(live.views)} views</span></>}
+            {live?.uploads30d != null && <><span className="text-ink/15">·</span><span>{live.uploads30d} uploads/30d</span></>}
             {live?.loading && <span className="text-ink/25">loading…</span>}
             {live?.error && <span style={{ color: '#FF4A1C' }}>api error</span>}
           </div>

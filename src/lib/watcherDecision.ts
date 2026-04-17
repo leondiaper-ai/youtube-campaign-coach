@@ -98,7 +98,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'MAINTAIN',
       verdict: 'ON_TRACK',
-      headline: 'Hold current plan — live channel data unavailable.',
+      headline: 'Hold current plan. Live data unavailable.',
       signals: ['Watcher is running on seed data only.'],
       expectedImpact: 'No change. Decision will sharpen once the live fetch returns.',
       ifIgnored: 'No downside — the system is simply waiting for signal.',
@@ -160,7 +160,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'DRIFT',
-      headline: 'Channel has gone cold. Post one Short this week to warm it back up.',
+      headline: 'Channel has gone cold. Post one Short this week.',
       signals: [
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'No uploads detected in 30d.',
         `${uploads30d} uploads / 30d.`,
@@ -198,7 +198,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'DRIFT',
-      headline: `Net subscribers are falling even though views grew — check recent uploads for off-brand content.`,
+      headline: 'Losing subscribers despite new views. Check recent uploads for off-brand content.',
       signals: [
         convLine!,
         `${convAnchor.subsDelta.toLocaleString()} subs net · +${convAnchor.viewsDelta.toLocaleString()} new views in ${convAnchor.spanDays}d.`,
@@ -242,7 +242,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
-      headline: 'Views are arriving but not converting — fix packaging before adding more uploads.',
+      headline: 'Views arriving but not converting. Fix packaging before adding more uploads.',
       signals: [
         convLine!,
         `${uploads30d} uploads / 30d — cadence already strong.`,
@@ -283,7 +283,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Growth is compounding — keep the current cadence live and scale the top clip.',
+      headline: 'Growth is compounding. Keep cadence and scale the top clip.',
       signals: [
         `Subs +${subs7!.delta.toLocaleString()} (${(subs7!.pct * 100).toFixed(1)}%) in 7d.`,
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
@@ -304,7 +304,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Every 1,000 views is converting well — push more volume, not more polish.',
+      headline: 'Every 1,000 views is converting well. Push more volume, not more polish.',
       signals: [
         convLine!,
         `${uploads30d} uploads / 30d — cadence has headroom to push.`,
@@ -326,7 +326,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'MAINTAIN',
       verdict: 'ON_TRACK',
-      headline: 'Maintain current cadence — channel is already warm heading into the next moment.',
+      headline: 'Keep current cadence. Channel is warm heading into the next moment.',
       signals: [
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'Recent upload window active.',
@@ -361,7 +361,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   return {
     type: 'MAINTAIN',
     verdict: 'ON_TRACK',
-    headline: 'Hold the plan — no material gap between reality and phase expectations.',
+    headline: 'Hold the plan. No gap between reality and expectations.',
     signals: [
       `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
       lastUp != null ? `Last upload ${lastUp}d ago.` : 'Upload window baseline.',

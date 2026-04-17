@@ -5,11 +5,9 @@ import { fetchChannelSnap } from '@/lib/youtube';
 import { listCustomArtists } from '@/lib/artistStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 import { readHistory, deltaOver } from '@/lib/snapshots';
-import { decideWatcher, DECISION_COLOR } from '@/lib/watcherDecision';
+import { decideWatcher } from '@/lib/watcherDecision';
 import {
   computeConversion,
-  rateTrend,
-  formatRate,
   type ConversionResult,
 } from '@/lib/conversion';
 import CoachLink from '@/components/CoachLink';
@@ -22,10 +20,6 @@ const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Simplified status mapping: FIX/CORRECT → Needs Attention, MAINTAIN → Healthy,
-// ACCELERATE → Opportunity. Verdict provides the one-word summary.
-// ─────────────────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
   FIX:        { label: 'Needs attention', bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
   CORRECT:    { label: 'At risk',         bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
@@ -78,16 +72,14 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const isLive = !!(live && !live.error);
 
   // ── Section buckets ─────────────────────────────────────────────────────
-  // Fix Now = channel-level HIGH impact (max 2)
   const channelOpps = opps.filter((o) => !o.videoId);
   const fixNow = channelOpps.filter((o) => o.impact === 'HIGH').slice(0, 2);
 
-  // What To Do Next = the decision's primary action + strongest secondary opp
   const secondaryOpps = channelOpps
     .filter((o) => o.impact !== 'HIGH')
     .slice(0, 1);
 
-  // Missed audience opportunities = per-video gaps, framed as missed upside (max 3)
+  // Missed audience opportunities — per-video gaps, ONE primary opp per video
   const videoOppsAll = opps.filter((o) => !!o.videoId);
   const videoGroups = new Map<string, Opportunity[]>();
   for (const o of videoOppsAll) {
@@ -96,21 +88,31 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     videoGroups.set(o.videoId!, arr);
   }
   const missedOpps = Array.from(videoGroups.entries())
-    .map(([id, items]) => ({
-      id,
-      title: items[0].videoTitle ?? id,
-      views: items[0].videoViews ?? 0,
-      topItem: items.sort((a, b) => IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact])[0],
-      items,
-    }))
+    .map(([id, items]) => {
+      // Priority: lyric → short → visualizer → captions
+      const sorted = [...items].sort((a, b) => {
+        const rank = (o: Opportunity) => {
+          if (o.subtype.includes('lyric')) return 0;
+          if (o.subtype.includes('Short')) return 1;
+          if (o.subtype.includes('visualizer')) return 2;
+          if (o.subtype.includes('caption')) return 3;
+          return 4;
+        };
+        return rank(a) - rank(b);
+      });
+      return {
+        id,
+        title: items[0].videoTitle ?? id,
+        views: items[0].videoViews ?? 0,
+        primaryOpp: sorted[0],
+        secondaryCount: items.length - 1,
+        items,
+      };
+    })
     .sort((a, b) => b.views - a.views)
     .slice(0, 3);
 
-  const dc = DECISION_COLOR[decision.type];
   const sm = STATUS_MAP[decision.type];
-
-  // ── Growth context line ─────────────────────────────────────────────────
-  const growthLine = buildGrowthLine(subs7, views7, lastUpDays, conv7, conv30);
 
   return (
     <main className="bg-paper min-h-screen" style={{ color: INK }}>
@@ -135,7 +137,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
         <h1 className="font-black text-3xl mt-1">{artist.name}</h1>
 
-        {/* Status + decision sentence */}
+        {/* Status + decision headline */}
         <div className="mt-5 flex items-start gap-3">
           <span
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.14em] shrink-0 mt-0.5"
@@ -149,42 +151,39 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
 
-        {/* ─── SIGNAL STRIP — trust layer ─────────────────────────────── */}
+        {/* ─── 1. SIGNAL STRIP — trust layer (max 2 lines) ──────────── */}
         <div
-          className="mt-5 rounded-xl px-5 py-4"
+          className="mt-5 rounded-xl px-5 py-3.5"
           style={{ background: SOFT }}
         >
-          {/* Line 1: Scale */}
-          <div className="flex items-baseline gap-4 flex-wrap text-[15px] font-black tabular-nums">
+          <div className="flex items-baseline gap-2 flex-wrap text-[15px] font-black tabular-nums leading-tight">
             {live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
             {live?.views != null && (
-              <><span className="text-ink/20 text-[12px]">·</span><span>{fmtNum(live.views)} views</span></>
+              <><span className="text-ink/20 text-[13px]">·</span><span>{fmtNum(live.views)} views</span></>
             )}
           </div>
-          {/* Line 2: Movement + recency */}
-          <div className="flex items-center gap-4 flex-wrap mt-1.5 text-[12px] font-mono text-ink/55">
-            {views7 && views7.delta !== 0 ? (
-              <span style={{ color: views7.delta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
-                {views7.delta > 0 ? '+' : ''}{fmtDelta(views7.delta)} views (7d)
+          <div className="flex items-center gap-3 flex-wrap mt-1 text-[12px] text-ink/50 tabular-nums">
+            {views7 ? (
+              <span style={views7.delta !== 0 ? { color: views7.delta > 0 ? '#0C6A3F' : '#8A1F0C' } : undefined}>
+                {views7.delta !== 0 ? fmtDelta(views7.delta) + ' views' : 'Views flat'} (7d)
               </span>
-            ) : views7 ? (
-              <span>Views flat (7d)</span>
             ) : null}
-            {subs7 && subs7.delta !== 0 ? (
-              <span style={{ color: subs7.delta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
-                {subs7.delta > 0 ? '+' : ''}{subs7.delta.toLocaleString()} subs (7d)
+            <span className="text-ink/15">·</span>
+            {subs7 ? (
+              <span style={subs7.delta !== 0 ? { color: subs7.delta > 0 ? '#0C6A3F' : '#8A1F0C' } : undefined}>
+                {subs7.delta !== 0 ? (subs7.delta > 0 ? '+' : '') + subs7.delta.toLocaleString() + ' subs' : 'Subs flat'} (7d)
               </span>
-            ) : subs7 ? (
-              <span>Subs flat (7d)</span>
             ) : null}
+            <span className="text-ink/15">·</span>
             {live?.uploads30d != null && <span>{live.uploads30d} uploads (30d)</span>}
+            <span className="text-ink/15">·</span>
             {lastUpDays != null && (
               <span>Last upload: {lastUpDays === 0 ? 'today' : lastUpDays === 1 ? 'yesterday' : `${lastUpDays}d ago`}</span>
             )}
           </div>
         </div>
 
-        {/* ─── PERFORMANCE SNAPSHOT ────────────────────────────────────── */}
+        {/* ─── 2. PERFORMANCE SNAPSHOT — numbers only ─────────────────── */}
         <div className="mt-4 grid grid-cols-4 gap-3">
           <MetricTile
             label="Views (7d)"
@@ -211,22 +210,15 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           />
         </div>
 
-        {/* Growth context — one readable line */}
-        {growthLine && (
-          <div className="mt-3 text-[13px] text-ink/55 font-medium">
-            {growthLine}
-          </div>
-        )}
-
-        {/* If Ignored — subtle warning */}
+        {/* If Ignored — blunt warning */}
         {(decision.type === 'FIX' || decision.type === 'CORRECT') && (
-          <div className="mt-3 text-[12px] text-ink/45 leading-snug max-w-[70ch]">
-            <span className="font-bold text-ink/55">If nothing changes:</span> {decision.ifIgnored}
+          <div className="mt-4 text-[12px] text-ink/50 leading-snug max-w-[70ch]">
+            <span className="font-bold text-ink/60">If nothing changes:</span> {decision.ifIgnored}
           </div>
         )}
 
 
-        {/* ─── 1. FIX NOW ─────────────────────────────────────────────────── */}
+        {/* ─── FIX NOW ────────────────────────────────────────────────────── */}
         {fixNow.length > 0 && (
           <section className="mt-10">
             <div className="flex items-center gap-2 mb-4">
@@ -242,7 +234,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
 
-        {/* ─── 2. WHAT TO DO NEXT ─────────────────────────────────────────── */}
+        {/* ─── 3. WHAT TO DO NEXT — direct, confident, 1-2 lines ──────── */}
         <section className="mt-10">
           <div className="flex items-center gap-2 mb-4">
             <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#F08A3C' }} />
@@ -253,35 +245,21 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             style={{ borderColor: MUTED, background: PAPER }}
           >
             <div className="text-[15px] font-bold leading-snug">
-              {decision.type === 'MAINTAIN'
-                ? 'Keep doing what you\'re doing. The plan is working.'
-                : decision.type === 'ACCELERATE'
-                ? decision.headline
-                : fixNow.length > 0
-                ? fixNow[0].action
-                : secondaryOpps.length > 0
-                ? secondaryOpps[0].action
-                : 'No specific action needed right now.'}
+              {directAction(decision, fixNow, secondaryOpps)}
             </div>
-            <div className="text-[12px] text-ink/55 mt-2 leading-snug max-w-[60ch]">
-              {decision.expectedImpact}
+            <div className="text-[12px] text-ink/50 mt-2 leading-snug max-w-[60ch]">
+              {directOutcome(decision)}
             </div>
-            {secondaryOpps.length > 0 && fixNow.length > 0 && (
-              <div className="mt-4 pt-3 border-t text-[13px] text-ink/65" style={{ borderColor: MUTED }}>
-                <span className="text-[10px] uppercase tracking-[0.14em] text-ink/40 mr-2">Also consider</span>
-                {secondaryOpps[0].action}
-              </div>
-            )}
           </div>
         </section>
 
 
-        {/* ─── 3. MISSED AUDIENCE OPPORTUNITIES ───────────────────────────── */}
+        {/* ─── 4. MISSED AUDIENCE OPPORTUNITIES — redesigned ──────────── */}
         {missedOpps.length > 0 && (
           <section className="mt-10">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#2C6BFF' }} />
-              <h2 className="font-black text-lg">Missed audience opportunities</h2>
+              <h2 className="font-black text-lg">Missed reach</h2>
             </div>
             <div className="space-y-3">
               {missedOpps.map((v) => (
@@ -292,10 +270,10 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
 
-        {/* Nothing flagged at all */}
+        {/* Nothing flagged */}
         {fixNow.length === 0 && missedOpps.length === 0 && decision.type === 'MAINTAIN' && (
           <div
-            className="mt-10 rounded-xl border p-5 text-[13px] text-ink/55"
+            className="mt-10 rounded-xl border p-5 text-[13px] text-ink/50"
             style={{ borderColor: MUTED, background: PAPER }}
           >
             Nothing flagged. Channel is in good shape.
@@ -313,13 +291,13 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 
         {/* ─── COACH CTA ──────────────────────────────────────────────────── */}
         <div className="mt-12 flex items-center justify-between gap-4">
-          <div className="text-[12px] text-ink/55 max-w-[50ch]">
-            Ready to plan? Open Coach to turn this into a campaign timeline.
+          <div className="text-[12px] text-ink/50 max-w-[50ch]">
+            Ready to plan? Open Coach to build the campaign timeline.
           </div>
           <CoachLink slug={slug} />
         </div>
 
-        <div className="mt-10 text-[10px] uppercase tracking-[0.18em] text-ink/30">
+        <div className="mt-10 text-[10px] uppercase tracking-[0.18em] text-ink/25">
           Watcher watches · Coach plans · You decide
         </div>
       </div>
@@ -332,7 +310,6 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 // HELPER COMPONENTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** Format a numeric delta for display: +71K, -3.2M, +500 */
 function fmtDelta(n: number): string {
   const sign = n >= 0 ? '+' : '';
   if (Math.abs(n) >= 1_000_000) return `${sign}${(n / 1_000_000).toFixed(1)}M`;
@@ -340,7 +317,6 @@ function fmtDelta(n: number): string {
   return `${sign}${n}`;
 }
 
-/** Small metric tile for the performance snapshot grid */
 function MetricTile({
   label,
   value,
@@ -354,12 +330,12 @@ function MetricTile({
 }) {
   return (
     <div className="rounded-lg px-4 py-3" style={{ background: PAPER, border: `1px solid ${MUTED}` }}>
-      <div className="text-[9px] uppercase tracking-[0.18em] text-ink/40">{label}</div>
+      <div className="text-[10px] uppercase tracking-[0.14em] text-ink/40 font-bold">{label}</div>
       <div className="font-black text-lg tabular-nums mt-0.5" style={color ? { color } : undefined}>
         {value}
       </div>
       {sub && (
-        <div className="text-[11px] font-mono mt-0.5" style={color ? { color } : { color: 'rgba(14,14,14,0.45)' }}>
+        <div className="text-[11px] tabular-nums mt-0.5" style={color ? { color } : { color: 'rgba(14,14,14,0.4)' }}>
           {sub}
         </div>
       )}
@@ -380,31 +356,57 @@ function YouTubeMark() {
 }
 
 
-/**
- * Fix Now card — problem, action, why.
- */
+// ═══════════════════════════════════════════════════════════════════════════════
+// 3. DIRECT "WHAT TO DO NEXT" — confident, blunt, one clear directive
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function directAction(
+  decision: { type: string; headline: string },
+  fixNow: Opportunity[],
+  secondaryOpps: Opportunity[],
+): string {
+  if (decision.type === 'MAINTAIN')
+    return 'Keep current cadence. Channel is active and holding momentum.';
+  if (decision.type === 'ACCELERATE')
+    return decision.headline;
+  if (fixNow.length > 0)
+    return fixNow[0].action;
+  if (secondaryOpps.length > 0)
+    return secondaryOpps[0].action;
+  return 'No action needed right now. Channel is on track.';
+}
+
+function directOutcome(decision: { type: string; expectedImpact: string }): string {
+  if (decision.type === 'MAINTAIN')
+    return 'Holding a working plan protects growth heading into the next drop.';
+  return decision.expectedImpact;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FIX NOW CARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function FixCard({ o }: { o: Opportunity }) {
   return (
     <article
       className="rounded-xl border-l-4 border p-5"
       style={{ borderColor: MUTED, borderLeftColor: '#FF4A1C', background: PAPER }}
     >
-      <div className="text-[14px] font-bold leading-snug">{humanizeSubtype(o)}</div>
-      <div className="text-[12px] text-ink/55 mt-1">{o.signal}</div>
-      <div className="mt-3 text-[13px] font-bold text-ink/90 leading-snug">
+      <div className="text-[14px] font-black leading-snug">{humanizeSubtype(o)}</div>
+      <div className="text-[12px] text-ink/50 mt-1 leading-snug max-w-[60ch]">{o.signal}</div>
+      <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
         → {o.action}
-      </div>
-      <div className="mt-2 text-[11px] text-ink/45 leading-snug max-w-[60ch]">
-        {humanizeImpact(o)}
       </div>
     </article>
   );
 }
 
 
-/**
- * Missed audience opportunity — framed as missed upside, not a checklist.
- */
+// ═══════════════════════════════════════════════════════════════════════════════
+// 4. MISSED OPP CARD — redesigned: bold type headline, scale, one action
+// ═══════════════════════════════════════════════════════════════════════════════
+
 function MissedOppCard({
   video,
 }: {
@@ -412,139 +414,117 @@ function MissedOppCard({
     id: string;
     title: string;
     views: number;
-    topItem: Opportunity;
+    primaryOpp: Opportunity;
+    secondaryCount: number;
     items: Opportunity[];
   };
 }) {
-  const topOpp = video.topItem;
+  const primary = video.primaryOpp;
+  const isHighImpact = video.views >= 5_000_000;
+
   return (
     <article
       className="rounded-xl border p-5"
       style={{ borderColor: MUTED, background: PAPER }}
     >
-      {/* Scale first — the number that earns trust */}
-      <div className="flex items-baseline gap-3">
+      {/* Opportunity type — BOLD UPPERCASE headline */}
+      <div className="text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: '#2C6BFF' }}>
+        {oppTypeLabel(primary)}
+      </div>
+
+      {/* Scale: view count + HIGH IMPACT if >5M */}
+      <div className="flex items-baseline gap-2.5 mt-2">
         <span className="font-black text-xl tabular-nums">{fmtNum(video.views)} views</span>
-        <span className="text-[11px] text-ink/40 font-mono">{missingFormats(video.items)}</span>
+        {isHighImpact && (
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: '#FFE2D8', color: '#8A1F0C' }}>
+            High impact
+          </span>
+        )}
       </div>
-      {/* Problem */}
-      <div className="text-[13px] text-ink/70 mt-1.5 leading-snug">
-        {humanizeMissedOpp(topOpp)}
+
+      {/* Insight — why this matters, direct language */}
+      <div className="text-[13px] text-ink/65 mt-1.5 leading-snug max-w-[55ch]">
+        {oppInsight(primary)}
       </div>
-      {/* Video title */}
+
+      {/* Video title — subtle, secondary */}
       <a
         href={`https://www.youtube.com/watch?v=${video.id}`}
         target="_blank"
         rel="noreferrer"
-        className="text-[11px] text-ink/40 hover:text-ink/70 underline decoration-ink/15 underline-offset-2 mt-1 inline-block truncate max-w-[52ch]"
+        className="text-[11px] text-ink/35 hover:text-ink/60 underline decoration-ink/10 underline-offset-2 mt-1 inline-block truncate max-w-[52ch]"
         title={video.title}
       >
         {video.title}
       </a>
-      {/* One action */}
-      <div className="mt-3 text-[13px] font-bold text-ink/90 leading-snug">
-        → {topOpp.action}
+
+      {/* ONE action — bold, directive */}
+      <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
+        → {oppAction(primary)}
       </div>
+
+      {/* Secondary gaps — subtle, not competing for attention */}
+      {video.secondaryCount > 0 && (
+        <div className="mt-2 text-[10px] text-ink/30 uppercase tracking-[0.12em]">
+          +{video.secondaryCount} other format{video.secondaryCount === 1 ? '' : 's'} missing
+        </div>
+      )}
     </article>
   );
 }
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// COPY HUMANIZERS — replace product language with manager-speak
+// 6. LANGUAGE SYSTEM — direct, commercial, slightly blunt
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function humanizeSubtype(o: Opportunity): string {
   const map: Record<string, string> = {
-    'Channel has gone cold': 'This channel has gone quiet',
-    'Quiet before next moment': 'Quiet ahead of an upcoming release',
-    'No Shorts in the last 30 days': 'No Shorts activity — missing the fastest-growing format',
-    'No published caption track on recent uploads': 'Recent uploads are missing captions',
-    'Top recent upload has no Short companion': 'Your top video isn\'t reaching new audiences',
+    'Channel has gone cold': 'Channel has gone quiet — not posting',
+    'Quiet before next moment': 'Quiet ahead of a release — missing warm-up',
+    'No Shorts in the last 30 days': 'No Shorts — missing reach on the fastest-growing format',
+    'No published caption track on recent uploads': 'Missing captions — limiting international reach',
+    'Top recent upload has no Short companion': 'Top video not reaching new audiences',
   };
   return map[o.subtype] ?? o.subtype;
 }
 
-function humanizeImpact(o: Opportunity): string {
-  const map: Record<string, string> = {
-    'Channel has gone cold': 'YouTube stops recommending channels that don\'t upload. The longer the silence, the smaller the audience when you come back.',
-    'Quiet before next moment': 'Channels that post in the weeks before a release see 2–3× the launch-day views. Every quiet day shrinks that ceiling.',
-    'No Shorts in the last 30 days': 'Shorts reach viewers who never click long-form. Without them, you\'re only reaching half your potential audience.',
-    'No published caption track on recent uploads': 'Captions unlock YouTube search indexing and auto-translation to 100+ languages — roughly 15–25% of watch-time comes from non-native regions.',
-  };
-  return map[o.subtype] ?? o.impactRange;
+/** UPPERCASE opportunity type for missed-opp card headline */
+function oppTypeLabel(o: Opportunity): string {
+  if (o.subtype.includes('lyric')) return 'Lyric video missing';
+  if (o.subtype.includes('Short')) return 'Short missing';
+  if (o.subtype.includes('visualizer')) return 'Visualizer missing';
+  if (o.subtype.includes('caption')) return 'Captions missing';
+  if (o.subtype.includes('demand')) return 'Fan demand unmet';
+  return 'Format gap';
 }
 
-function humanizeMissedOpp(o: Opportunity): string {
-  if (o.subtype.includes('no Short')) return 'This video isn\'t reaching new audiences';
-  if (o.subtype.includes('no lyric')) return 'No additional formats to extend this track\'s reach';
-  if (o.subtype.includes('no visualizer')) return 'No background-listen version for passive viewers';
-  if (o.subtype.includes('no published caption')) return 'Missing captions limiting international reach';
-  return 'Missed reach from high-performing video';
+/** Insight line — why the gap matters, direct language */
+function oppInsight(o: Opportunity): string {
+  if (o.subtype.includes('lyric'))
+    return 'This video is not reaching sing-along audiences. No supporting format extending its lifecycle.';
+  if (o.subtype.includes('Short'))
+    return 'Not reaching mobile-first viewers. No Short driving new audiences back to this track.';
+  if (o.subtype.includes('visualizer'))
+    return 'No passive-listen version. Missing background-play and playlist audiences.';
+  if (o.subtype.includes('caption'))
+    return 'Missing captions. Not indexed for YouTube search. Not reaching international audiences.';
+  if (o.subtype.includes('demand'))
+    return 'Multiple top comments requesting this. Verified audience demand going unanswered.';
+  return 'Missing reach from a high-performing video.';
 }
 
-function missingFormats(items: Opportunity[]): string {
-  const parts: string[] = [];
-  for (const o of items) {
-    if (o.subtype.includes('Short')) parts.push('no Short');
-    else if (o.subtype.includes('lyric')) parts.push('no lyric cut');
-    else if (o.subtype.includes('visualizer')) parts.push('no visualizer');
-    else if (o.subtype.includes('caption')) parts.push('no captions');
-  }
-  return parts.length > 0 ? parts.join(' · ') : `${items.length} gap${items.length === 1 ? '' : 's'}`;
-}
-
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// GROWTH CONTEXT LINE — one readable sentence with the headline numbers
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function buildGrowthLine(
-  subs7: { delta: number; pct: number } | null,
-  views7: { delta: number; pct: number } | null,
-  lastUpDays: number | null,
-  conv7: ConversionResult,
-  conv30: ConversionResult,
-): string | null {
-  const parts: string[] = [];
-
-  if (views7 && views7.delta !== 0) {
-    const sign = views7.delta > 0 ? '+' : '';
-    const v = Math.abs(views7.delta) >= 1_000_000
-      ? (views7.delta / 1_000_000).toFixed(1) + 'M'
-      : Math.abs(views7.delta) >= 1_000
-      ? (views7.delta / 1_000).toFixed(1) + 'K'
-      : String(views7.delta);
-    parts.push(`${sign}${v} views (7d)`);
-  } else if (views7) {
-    parts.push('Views flat (7d)');
-  }
-
-  if (subs7 && subs7.delta !== 0) {
-    const sign = subs7.delta > 0 ? '+' : '';
-    const pct = (subs7.pct * 100).toFixed(1);
-    parts.push(`Subs ${sign}${pct}% (7d)`);
-  } else if (subs7) {
-    parts.push('Subs flat (7d)');
-  }
-
-  // Add conversion if we have it
-  const convAnchor = conv7.band !== 'INSUFFICIENT' ? conv7 : conv30.band !== 'INSUFFICIENT' ? conv30 : null;
-  if (convAnchor) {
-    parts.push(`${formatRate(convAnchor)} subs per 1K new views`);
-  }
-
-  if (parts.length === 0) {
-    if (lastUpDays != null) {
-      return `Last upload ${lastUpDays === 0 ? 'today' : `${lastUpDays}d ago`}. Growth data builds over the next few days.`;
-    }
-    return null;
-  }
-
-  // Prepend trend arrow
-  const trending = (views7?.delta ?? 0) > 0 || (subs7?.delta ?? 0) > 0;
-  const declining = (views7?.delta ?? 0) < 0 || (subs7?.delta ?? 0) < 0;
-  const arrow = trending ? '↑' : declining ? '↓' : '→';
-
-  return `${arrow} ${parts.join(' · ')}`;
+/** ONE clear action — directive, this week */
+function oppAction(o: Opportunity): string {
+  if (o.subtype.includes('lyric'))
+    return 'Create a lyric video or typographic version this week.';
+  if (o.subtype.includes('Short'))
+    return 'Cut a 30–60s vertical Short from the best moment this week.';
+  if (o.subtype.includes('visualizer'))
+    return 'Render a visualizer loop and upload as a companion this week.';
+  if (o.subtype.includes('caption'))
+    return 'Review auto-generated captions in YT Studio and publish.';
+  if (o.subtype.includes('demand'))
+    return o.action;
+  return o.action;
 }
