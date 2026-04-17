@@ -307,12 +307,16 @@ function ArtistCard({
             <CoachLiveDot slug={a.slug} />
           </div>
 
-          {/* Why this artist is here */}
-          <div className="text-[12px] text-ink/60 mt-1">{why}</div>
+          {/* Why this artist is here + growth signal */}
+          <div className="text-[12px] text-ink/60 mt-1">
+            {why}
+            {isLive && <GrowthSignal live={live!} />}
+          </div>
 
-          {/* Quick stats */}
+          {/* Scale: subs + views */}
           <div className="flex items-center gap-3 mt-2 text-[11px] text-ink/40 font-mono flex-wrap">
             {isLive && live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
+            {isLive && live?.views != null && <span>· {fmtNum(live.views)} views</span>}
             {live?.uploads30d != null && <span>· {live.uploads30d} uploads/30d</span>}
             {live?.loading && <span className="text-ink/25">loading…</span>}
             {live?.error && <span style={{ color: '#FF4A1C' }}>api error</span>}
@@ -337,6 +341,52 @@ function ArtistCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+/**
+ * Inline growth signal for a Cockpit card.
+ * Uses the LiveSnap data we already have — cadence + recency as proxy for growth.
+ * When the snapshot history accumulates 7d of data, the Watcher page shows exact deltas.
+ */
+function GrowthSignal({ live }: { live: LiveSnap }) {
+  const uploads = live.uploads30d ?? 0;
+  const shorts = live.shorts30d ?? 0;
+  const last = daysSince(live.lastUploadAt);
+
+  // Strong output = proxy for growth
+  if (uploads >= 6 && (last ?? 999) <= 3) {
+    return (
+      <span className="ml-2 text-[11px] font-bold" style={{ color: '#0C6A3F' }}>
+        ↑ Strong output
+      </span>
+    );
+  }
+  if (uploads >= 3 && (last ?? 999) <= 7) {
+    return (
+      <span className="ml-2 text-[11px] font-bold" style={{ color: '#0C6A3F' }}>
+        ↑ Active
+      </span>
+    );
+  }
+  if (uploads <= 1 || (last ?? 999) > 21) {
+    return (
+      <span className="ml-2 text-[11px] font-bold" style={{ color: '#8A1F0C' }}>
+        ↓ Channel cooling off
+      </span>
+    );
+  }
+  if ((last ?? 999) > 14) {
+    return (
+      <span className="ml-2 text-[11px] font-bold" style={{ color: '#8A4A1A' }}>
+        → Not posting
+      </span>
+    );
+  }
+  return (
+    <span className="ml-2 text-[11px] font-bold text-ink/35">
+      → Steady
+    </span>
   );
 }
 

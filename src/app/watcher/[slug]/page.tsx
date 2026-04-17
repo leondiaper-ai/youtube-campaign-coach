@@ -149,25 +149,79 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
 
-        {/* Growth context — one line */}
+        {/* ─── SIGNAL STRIP — trust layer ─────────────────────────────── */}
+        <div
+          className="mt-5 rounded-xl px-5 py-4"
+          style={{ background: SOFT }}
+        >
+          {/* Line 1: Scale */}
+          <div className="flex items-baseline gap-4 flex-wrap text-[15px] font-black tabular-nums">
+            {live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
+            {live?.views != null && (
+              <><span className="text-ink/20 text-[12px]">·</span><span>{fmtNum(live.views)} views</span></>
+            )}
+          </div>
+          {/* Line 2: Movement + recency */}
+          <div className="flex items-center gap-4 flex-wrap mt-1.5 text-[12px] font-mono text-ink/55">
+            {views7 && views7.delta !== 0 ? (
+              <span style={{ color: views7.delta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
+                {views7.delta > 0 ? '+' : ''}{fmtDelta(views7.delta)} views (7d)
+              </span>
+            ) : views7 ? (
+              <span>Views flat (7d)</span>
+            ) : null}
+            {subs7 && subs7.delta !== 0 ? (
+              <span style={{ color: subs7.delta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
+                {subs7.delta > 0 ? '+' : ''}{subs7.delta.toLocaleString()} subs (7d)
+              </span>
+            ) : subs7 ? (
+              <span>Subs flat (7d)</span>
+            ) : null}
+            {live?.uploads30d != null && <span>{live.uploads30d} uploads (30d)</span>}
+            {lastUpDays != null && (
+              <span>Last upload: {lastUpDays === 0 ? 'today' : lastUpDays === 1 ? 'yesterday' : `${lastUpDays}d ago`}</span>
+            )}
+          </div>
+        </div>
+
+        {/* ─── PERFORMANCE SNAPSHOT ────────────────────────────────────── */}
+        <div className="mt-4 grid grid-cols-4 gap-3">
+          <MetricTile
+            label="Views (7d)"
+            value={views7 ? fmtDelta(views7.delta) : '—'}
+            sub={views7 ? `${views7.delta >= 0 ? '+' : ''}${(views7.pct * 100).toFixed(1)}%` : null}
+            color={views7 ? (views7.delta > 0 ? '#0C6A3F' : views7.delta < 0 ? '#8A1F0C' : undefined) : undefined}
+          />
+          <MetricTile
+            label="Subs (7d)"
+            value={subs7 ? (subs7.delta >= 0 ? '+' : '') + subs7.delta.toLocaleString() : '—'}
+            sub={subs7 ? `${subs7.delta >= 0 ? '+' : ''}${(subs7.pct * 100).toFixed(1)}%` : null}
+            color={subs7 ? (subs7.delta > 0 ? '#0C6A3F' : subs7.delta < 0 ? '#8A1F0C' : undefined) : undefined}
+          />
+          <MetricTile
+            label="Uploads (30d)"
+            value={live?.uploads30d != null ? String(live.uploads30d) : '—'}
+            sub={live?.shorts30d != null ? `${live.shorts30d} Shorts` : null}
+          />
+          <MetricTile
+            label="Last upload"
+            value={lastUpDays != null ? (lastUpDays === 0 ? 'Today' : `${lastUpDays}d ago`) : '—'}
+            sub={null}
+            color={lastUpDays != null ? (lastUpDays <= 3 ? '#0C6A3F' : lastUpDays >= 14 ? '#8A1F0C' : undefined) : undefined}
+          />
+        </div>
+
+        {/* Growth context — one readable line */}
         {growthLine && (
-          <div className="mt-3 text-[13px] text-ink/65 font-medium">
+          <div className="mt-3 text-[13px] text-ink/55 font-medium">
             {growthLine}
           </div>
         )}
 
-        {/* Quick stats strip */}
-        <div className="mt-4 flex items-center gap-4 text-[12px] text-ink/50 font-mono flex-wrap">
-          {live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
-          {live?.views != null && <span>· {fmtNum(live.views)} views</span>}
-          {live?.uploads30d != null && <span>· {live.uploads30d} uploads/30d</span>}
-          {lastUpDays != null && <span>· Last upload {lastUpDays === 0 ? 'today' : `${lastUpDays}d ago`}</span>}
-        </div>
-
         {/* If Ignored — subtle warning */}
         {(decision.type === 'FIX' || decision.type === 'CORRECT') && (
-          <div className="mt-4 text-[12px] text-ink/50 leading-snug max-w-[70ch]">
-            <span className="font-bold text-ink/60">If nothing changes:</span> {decision.ifIgnored}
+          <div className="mt-3 text-[12px] text-ink/45 leading-snug max-w-[70ch]">
+            <span className="font-bold text-ink/55">If nothing changes:</span> {decision.ifIgnored}
           </div>
         )}
 
@@ -278,6 +332,41 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 // HELPER COMPONENTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/** Format a numeric delta for display: +71K, -3.2M, +500 */
+function fmtDelta(n: number): string {
+  const sign = n >= 0 ? '+' : '';
+  if (Math.abs(n) >= 1_000_000) return `${sign}${(n / 1_000_000).toFixed(1)}M`;
+  if (Math.abs(n) >= 1_000) return `${sign}${(n / 1_000).toFixed(1)}K`;
+  return `${sign}${n}`;
+}
+
+/** Small metric tile for the performance snapshot grid */
+function MetricTile({
+  label,
+  value,
+  sub,
+  color,
+}: {
+  label: string;
+  value: string;
+  sub: string | null;
+  color?: string;
+}) {
+  return (
+    <div className="rounded-lg px-4 py-3" style={{ background: PAPER, border: `1px solid ${MUTED}` }}>
+      <div className="text-[9px] uppercase tracking-[0.18em] text-ink/40">{label}</div>
+      <div className="font-black text-lg tabular-nums mt-0.5" style={color ? { color } : undefined}>
+        {value}
+      </div>
+      {sub && (
+        <div className="text-[11px] font-mono mt-0.5" style={color ? { color } : { color: 'rgba(14,14,14,0.45)' }}>
+          {sub}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function YouTubeMark() {
   return (
     <svg width="16" height="12" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -333,15 +422,26 @@ function MissedOppCard({
       className="rounded-xl border p-5"
       style={{ borderColor: MUTED, background: PAPER }}
     >
-      <div className="text-[14px] font-bold leading-snug">
+      {/* Scale first — the number that earns trust */}
+      <div className="flex items-baseline gap-3">
+        <span className="font-black text-xl tabular-nums">{fmtNum(video.views)} views</span>
+        <span className="text-[11px] text-ink/40 font-mono">{missingFormats(video.items)}</span>
+      </div>
+      {/* Problem */}
+      <div className="text-[13px] text-ink/70 mt-1.5 leading-snug">
         {humanizeMissedOpp(topOpp)}
       </div>
-      <div className="text-[12px] text-ink/55 mt-1 font-mono">
-        {video.views.toLocaleString()} views · {missingFormats(video.items)}
-      </div>
-      <div className="mt-2 text-[11px] text-ink/45 leading-snug max-w-[60ch]">
-        Limiting discovery and continued growth from this track.
-      </div>
+      {/* Video title */}
+      <a
+        href={`https://www.youtube.com/watch?v=${video.id}`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-[11px] text-ink/40 hover:text-ink/70 underline decoration-ink/15 underline-offset-2 mt-1 inline-block truncate max-w-[52ch]"
+        title={video.title}
+      >
+        {video.title}
+      </a>
+      {/* One action */}
       <div className="mt-3 text-[13px] font-bold text-ink/90 leading-snug">
         → {topOpp.action}
       </div>
