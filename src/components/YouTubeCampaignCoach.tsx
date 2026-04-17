@@ -275,7 +275,7 @@ type YouTubeMomentType =
   | 'festival'
   | 'promo_trip'
   | 'activation'
-  | 'catalogue'
+  | 'track_moment'
   | 'live_show'
   | 'tour_announce';
 
@@ -526,7 +526,7 @@ const PHASE_NARRATIVE: Record<PhaseName, { goal: string; role: string; summary: 
   'BUILD':   { goal: 'Build pre-release momentum',       role: 'Warming the algorithm with Shorts + Posts before the first drop',  summary: 'Build pre-release momentum — warm the channel.' },
   'RELEASE': { goal: 'Launch and land the release',       role: 'First drops enter the feed — hero content + multi-format support', summary: 'Launch singles + videos — land the release.' },
   'SCALE':   { goal: 'Expand reach via tour + festivals', role: 'Tour content, festival recaps, and live moments drive reach',      summary: 'Scale through tours, festivals, and expansion.' },
-  'EXTEND':  { goal: 'Keep the catalogue alive',          role: 'Long-tail content keeps the release in conversation',              summary: 'Extend the campaign — keep the story alive.' },
+  'EXTEND':  { goal: 'Second lifecycle + reactivation',    role: 'Deluxe releases, late-cycle content, and future touring',           summary: 'Extend the campaign — second lifecycle and reactivation.' },
 };
 
 type CampaignMoment = {
@@ -1729,7 +1729,7 @@ const MOMENT_SUPPORT: Record<YouTubeMomentType, string[]> = {
   promo_trip:      ['Vlog / travel clip', 'BTS Short', 'City / culture clip', 'Community Post', 'Promo trip recap'],
   activation:      ['Short-form teaser', 'Event-day clip', 'Recap clip', 'Community Post'],
   live_show:       ['Performance Short', 'Backstage Short', 'Community Post', 'Recap clip'],
-  catalogue:       ['Catalogue Short', 'Community Post', 'Fan moment clip'],
+  track_moment:    ['Track Moment Short', 'Community Post', 'Fan moment clip'],
 };
 
 /** Map a TimelineKind + title to a YouTubeMomentType, or null if it should be skipped. */
@@ -1752,14 +1752,14 @@ function classifyAsMomentType(kind: TimelineKind, title: string): { type: YouTub
     case 'liveShow':            return { type: 'live_show', priority: 'medium' };
     case 'promoTrip':           return { type: 'promo_trip', priority: 'high' };
     case 'documentaryRelease':  return { type: 'official_video', priority: 'high' };
-    case 'documentaryTease':    return { type: 'catalogue', priority: 'medium' };
-    case 'podcast':             return { type: 'catalogue', priority: 'low' };
-    case 'snippet':             return { type: 'catalogue', priority: 'low' };
+    case 'documentaryTease':    return { type: 'track_moment', priority: 'medium' };
+    case 'podcast':             return { type: 'track_moment', priority: 'low' };
+    case 'snippet':             return { type: 'track_moment', priority: 'low' };
     case 'other': {
       // Check if it has content potential
       if (/\b(usa|japan|australia|europe)\b/.test(t) && /\b(flies?\s*to|trip|dates?|promo)\b/.test(t)) return { type: 'promo_trip', priority: 'medium' };
       if (/\b(fanzone|activation|fan\s*event)\b/.test(t)) return { type: 'activation', priority: 'medium' };
-      if (/\b(feature|bbc|itv|radio|tv)\b/.test(t)) return { type: 'catalogue', priority: 'low' };
+      if (/\b(feature|bbc|itv|radio|tv)\b/.test(t)) return { type: 'track_moment', priority: 'low' };
       if (/\b(headline|outdoor)\b.*\bshow/.test(t)) return { type: 'live_show', priority: 'medium' };
       // Skip admin-only or vague items
       if (/\b(pre-?\s*order|7"\s*single|socials|rx)\b/i.test(t)) return null;
@@ -1784,7 +1784,7 @@ function momentHeadline(type: YouTubeMomentType, title: string): string {
     case 'promo_trip':      return 'Travel and market-entry moment — vlog-style content adds human context';
     case 'activation':      return 'Cultural crossover moment — unique content opportunity';
     case 'live_show':       return 'Live performance window — capture energy for short-form content';
-    case 'catalogue':       return 'Catalogue / filler moment — keeps the channel active between peaks';
+    case 'track_moment':    return 'Track moment — keeps the channel active and builds toward the next drop';
   }
 }
 
@@ -1803,51 +1803,138 @@ function momentReason(type: YouTubeMomentType, title: string): string {
     case 'promo_trip':      return `Travel content adds personality and supports expansion into new markets`;
     case 'activation':      return `Activation creates unique content that stands out from regular release content`;
     case 'live_show':       return `Live show generates performance clips and fan-facing content`;
-    case 'catalogue':       return `Keeps the channel active and maintains algorithm momentum between peaks`;
+    case 'track_moment':    return `Track moment that keeps the channel active and builds toward the next drop`;
   }
 }
 
 let _ytMomentId = 0;
 
+/** Moment types that belong ONLY in RELEASE — direct music drops. */
+const RELEASE_MOMENT_TYPES = new Set<YouTubeMomentType>([
+  'official_video', 'lyric_video', 'visualizer',
+  'album_announce', 'album_release',
+]);
+
+/** Moment types that belong in SCALE — post-release reach growth. */
+const SCALE_MOMENT_TYPES = new Set<YouTubeMomentType>([
+  'tour', 'tour_announce', 'festival', 'promo_trip',
+  'activation', 'live_show',
+]);
+
+/** Moment types that belong in EXTEND — second lifecycle / reactivation. */
+const EXTEND_MOMENT_TYPES = new Set<YouTubeMomentType>([
+  'deluxe_release',
+]);
+
+/**
+ * Assign phase based on moment TYPE and LIFECYCLE POSITION — not week ranges.
+ *
+ * Rules (strict):
+ *  BUILD   = before the first music drop (tease, warm-up)
+ *  RELEASE = ONLY direct music releases (singles, videos, album announce/release)
+ *  SCALE   = post-release reach growth (tours, festivals, promo, activations)
+ *  EXTEND  = second lifecycle (deluxe, late-cycle, future touring tied to catalogue)
+ */
+function assignMomentPhase(
+  type: YouTubeMomentType,
+  weekNum: number,
+  firstReleaseWeek: number,
+  lastReleaseWeek: number,
+  isSecondCycle: boolean,
+): PhaseName {
+  // EXTEND: deluxe releases always, or anything in a clearly second cycle
+  if (EXTEND_MOMENT_TYPES.has(type)) return 'EXTEND';
+  if (isSecondCycle) return 'EXTEND';
+
+  // BUILD: anything before the first music drop that isn't itself a release
+  if (weekNum < firstReleaseWeek && !RELEASE_MOMENT_TYPES.has(type)) return 'BUILD';
+
+  // RELEASE: only direct music drops
+  if (RELEASE_MOMENT_TYPES.has(type)) return 'RELEASE';
+
+  // SCALE: tours, festivals, promo trips, activations, live shows
+  if (SCALE_MOMENT_TYPES.has(type)) return 'SCALE';
+
+  // track_moment / other: assign based on position in the campaign
+  // If it's near a release (within the release window), it supports RELEASE
+  if (weekNum >= firstReleaseWeek && weekNum <= lastReleaseWeek + 2) return 'RELEASE';
+  // If it's before the first release, it's BUILD
+  if (weekNum < firstReleaseWeek) return 'BUILD';
+  // After the last release + buffer → EXTEND
+  if (weekNum > lastReleaseWeek + 4) return 'EXTEND';
+
+  // Catch-all: SCALE (it's in the active campaign window)
+  return 'SCALE';
+}
+
 /**
  * Convert parsed timeline events into concrete YouTube planner moments.
  * Every important event gets a card. Low-value admin items are skipped.
+ *
+ * Phase assignment is LIFECYCLE-BASED, not timing-based:
+ * each moment's phase is determined by its TYPE and function in the campaign.
  */
 function buildYouTubeMoments(
   events: ParsedTimelineEvent[],
   startIso: string,
   weekCount: number,
-  phases: PhaseSlot[],
 ): YouTubeMoment[] {
-  const moments: YouTubeMoment[] = [];
+  // First pass: classify all events to find the first/last release weeks
+  const classified: Array<{
+    ev: ParsedTimelineEvent;
+    cls: { type: YouTubeMomentType; priority: 'high' | 'medium' | 'low' };
+    weekNum: number;
+  }> = [];
 
   for (const ev of events) {
-    const classification = classifyAsMomentType(ev.kind, ev.title);
-    if (!classification) continue; // skip admin / no-content-value items
-
+    const cls = classifyAsMomentType(ev.kind, ev.title);
+    if (!cls) continue;
     const wd = dateToWeekDay(startIso, ev.dateISO);
     if (!wd || wd.weekIdx >= weekCount) continue;
+    classified.push({ ev, cls, weekNum: wd.weekIdx + 1 });
+  }
 
-    const weekNum = wd.weekIdx + 1;
+  // Find release boundaries
+  const releaseEvents = classified.filter((c) => RELEASE_MOMENT_TYPES.has(c.cls.type));
+  const firstReleaseWeek = releaseEvents.length > 0
+    ? Math.min(...releaseEvents.map((c) => c.weekNum))
+    : Math.ceil(weekCount * 0.15);
+  const lastReleaseWeek = releaseEvents.length > 0
+    ? Math.max(...releaseEvents.map((c) => c.weekNum))
+    : firstReleaseWeek;
 
-    // Determine phase from week number
-    const phaseSlot = phases.find((p) => weekNum >= p.weekStart && weekNum <= p.weekEnd);
-    const phaseName: PhaseName = phaseSlot?.name ?? 'EXTEND';
+  // Detect second cycle: if there's a big gap (>12 weeks) after the last
+  // album release or the last SCALE-type event, anything after that is EXTEND.
+  const albumRelease = classified.find((c) => c.cls.type === 'album_release');
+  const lastScaleEvent = classified
+    .filter((c) => SCALE_MOMENT_TYPES.has(c.cls.type))
+    .sort((a, b) => a.weekNum - b.weekNum)
+    .pop();
+  const campaignEndWeek = Math.max(
+    albumRelease ? albumRelease.weekNum + 12 : 0,
+    lastScaleEvent ? lastScaleEvent.weekNum : 0,
+    lastReleaseWeek + 8,
+  );
 
-    const support = [...MOMENT_SUPPORT[classification.type]];
+  // Second pass: build moments with correct phase
+  const moments: YouTubeMoment[] = [];
+  for (const { ev, cls, weekNum } of classified) {
+    const isSecondCycle = weekNum > campaignEndWeek;
+    const phase = assignMomentPhase(cls.type, weekNum, firstReleaseWeek, lastReleaseWeek, isSecondCycle);
+    const support = [...MOMENT_SUPPORT[cls.type]];
 
     moments.push({
       id: `ytm-${++_ytMomentId}`,
       title: ev.title,
       date: ev.dateISO,
-      phase: phaseName,
-      momentType: classification.type,
-      headline: momentHeadline(classification.type, ev.title),
+      phase,
+      momentType: cls.type,
+      headline: momentHeadline(cls.type, ev.title),
       expectedSupport: support,
-      status: 'planned', // all start as planned — live data will update this
-      reason: momentReason(classification.type, ev.title),
+      status: 'planned',
+      reason: momentReason(cls.type, ev.title),
       weekNum,
-      priority: classification.priority,
+      priority: cls.priority,
     });
   }
 
@@ -1880,7 +1967,7 @@ const CONTENT_POOLS: Record<WeekContext, string[][]> = {
     ['Fan Cover Reaction Short', 'Community Post — streaming milestone'],
   ],
   'catalogue': [
-    ['Catalogue Short — throwback clip', 'Community Post — Q&A / fan question'],
+    ['Track Moment Short — throwback clip', 'Community Post — Q&A / fan question'],
     ['Studio Session Short — works in progress', 'Community Post — playlist / recommendation'],
     ['Acoustic / Stripped Back Short', 'Community Post — behind the music'],
     ['Freestyle / Off-the-cuff Short', 'Community Post — story time / update'],
@@ -1957,7 +2044,7 @@ function assignDynamicPhases(weekCount: number, moments: CampaignMoment[]): Phas
     ];
   }
 
-  // Classify moments
+  // Classify moments by lifecycle function
   const RELEASE_TYPES = new Set(['single', 'album', 'collab', 'announcement', 'anchor']);
   const SCALE_TYPES = new Set(['milestone']); // tours, festivals, live shows
   const releases = moments.filter((m) => RELEASE_TYPES.has(m.type)).sort((a, b) => a.weekNum - b.weekNum);
@@ -1965,40 +2052,50 @@ function assignDynamicPhases(weekCount: number, moments: CampaignMoment[]): Phas
 
   const firstRelease = releases[0]?.weekNum ?? Math.ceil(weekCount * 0.2);
   const lastRelease = releases[releases.length - 1]?.weekNum ?? firstRelease;
-  const lastMajorEvent = Math.max(lastRelease, scaleMoments[scaleMoments.length - 1]?.weekNum ?? 0);
+
+  // Find where the primary campaign cycle ends:
+  // album release + 12 weeks, or last scale event, whichever is later
+  const albumMoment = releases.find((m) => m.type === 'album');
+  const lastScaleWeek = scaleMoments.length > 0
+    ? scaleMoments[scaleMoments.length - 1].weekNum
+    : lastRelease;
+  const campaignEndWeek = Math.max(
+    albumMoment ? albumMoment.weekNum + 12 : 0,
+    lastScaleWeek,
+    lastRelease + 8,
+  );
 
   // BUILD: everything before the first release (min 1 week)
   const buildEnd = Math.max(1, firstRelease - 1);
 
-  // RELEASE: from first release through last release + 2 weeks buffer
-  const releaseEnd = Math.min(weekCount, lastRelease + 2);
+  // RELEASE: only the weeks containing actual releases (tight, focused)
+  // From first release week through last release + 1 week buffer
+  const releaseEnd = Math.min(weekCount, lastRelease + 1);
 
-  // SCALE: from after release through last major event + 2 weeks
+  // SCALE: from after release through end of primary campaign
   const scaleStart = releaseEnd + 1;
-  const scaleEnd = Math.min(weekCount, Math.max(scaleStart, lastMajorEvent + 2));
+  const scaleEnd = Math.min(weekCount, campaignEndWeek);
 
-  // EXTEND: everything after SCALE
+  // EXTEND: everything after the primary campaign cycle
   const phases: PhaseSlot[] = [];
   if (buildEnd >= 1) {
-    phases.push({ name: 'BUILD', weekStart: 1, weekEnd: buildEnd, label: 'Pre-release momentum' });
+    phases.push({ name: 'BUILD', weekStart: 1, weekEnd: buildEnd, label: 'Pre-release warm-up' });
   }
   if (releaseEnd >= (buildEnd + 1)) {
-    phases.push({ name: 'RELEASE', weekStart: buildEnd + 1, weekEnd: releaseEnd, label: 'Launch window' });
+    phases.push({ name: 'RELEASE', weekStart: buildEnd + 1, weekEnd: releaseEnd, label: 'Music drops only' });
   }
   if (scaleEnd >= scaleStart && scaleStart <= weekCount) {
     phases.push({ name: 'SCALE', weekStart: scaleStart, weekEnd: scaleEnd, label: 'Tour + festivals + expansion' });
   }
   if (scaleEnd < weekCount) {
-    phases.push({ name: 'EXTEND', weekStart: scaleEnd + 1, weekEnd: weekCount, label: 'Post-campaign lifecycle' });
+    phases.push({ name: 'EXTEND', weekStart: scaleEnd + 1, weekEnd: weekCount, label: 'Second lifecycle + reactivation' });
   }
 
   // Ensure full coverage — fill gaps if any exist
   if (phases.length === 0) {
     return [{ name: 'BUILD', weekStart: 1, weekEnd: weekCount, label: 'Campaign' }];
   }
-  // Make sure week 1 is covered
   if (phases[0].weekStart > 1) phases[0].weekStart = 1;
-  // Make sure last week is covered
   if (phases[phases.length - 1].weekEnd < weekCount) phases[phases.length - 1].weekEnd = weekCount;
 
   return phases;
@@ -2120,7 +2217,7 @@ function enrichWithTimelineContext(
     // Only touch weeks that got generic auto-fill (2 actions, both planned)
     const isAutoFilled = w.actions.length <= 3 &&
       w.actions.every((a) => a.status === 'planned') &&
-      w.actions.some((a) => a.title.startsWith('Catalogue') || a.title.startsWith('Community Post —') ||
+      w.actions.some((a) => a.title.startsWith('Track Moment') || a.title.startsWith('Community Post —') ||
         a.title.startsWith('Studio Session') || a.title.startsWith('Freestyle') ||
         a.title.startsWith('Collab Tease') || a.title.startsWith('Lifestyle') ||
         a.title.startsWith('Acoustic'));
@@ -2235,8 +2332,7 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
   // ── Build concrete YouTube planner moments ──────────────────────────
   // Every important real-world event becomes an actionable planner card
   // with support stack, status, and phase assignment.
-  const phases = assignDynamicPhases(weekCount, moments);
-  const youtubeMoments = buildYouTubeMoments(events, startIso, weekCount, phases);
+  const youtubeMoments = buildYouTubeMoments(events, startIso, weekCount);
 
   return {
     artist: artist || '',
@@ -2271,7 +2367,7 @@ const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: strin
   'BUILD':   { short: 'BUILD',   desc: 'Pre-release momentum — warm the channel',       focus: '→ 3 Shorts/week + Community Posts to warm the algorithm',          nudge: 'Warm up the channel',      cadence: '3 Shorts/week + 1 Community Post' },
   'RELEASE': { short: 'RELEASE', desc: 'Launch moment — land the drop',                  focus: '→ Hero video + multi-format support — maximise first 48hrs',       nudge: 'Land the release',         cadence: '3 Shorts/week + 1 longform every 10–14 days' },
   'SCALE':   { short: 'SCALE',   desc: 'Tour, festivals + expansion — grow reach',       focus: '→ Daily Shorts from the road + weekly recap longform',             nudge: 'Keep scaling reach',       cadence: '5 Shorts/week + 1 recap longform/week' },
-  'EXTEND':  { short: 'EXTEND',  desc: 'Post-campaign — keep the catalogue alive',       focus: '→ Catalogue content, fan moments, and long-tail engagement',       nudge: 'Keep the story alive',     cadence: '2 Shorts/week + 1 Community Post' },
+  'EXTEND':  { short: 'EXTEND',  desc: 'Second lifecycle — deluxe, late-cycle, future touring',  focus: '→ Deluxe releases, fan moments, and long-tail engagement',  nudge: 'Keep the story alive',     cadence: '2 Shorts/week + 1 Community Post' },
 };
 
 // ── ACTUAL PHASE DETECTION ──────────────────────────────────────────────────
