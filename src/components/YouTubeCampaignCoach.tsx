@@ -1238,7 +1238,9 @@ function makeEmptyPlan(): CampaignPlan {
     weeks.push({ week: i + 1, dateRange: `${fmt(ws)} – ${fmt(we)}`, actions: [], feedback: {} });
   }
 
-  return {
+  // Enrich with baseline content — no moments yet, so all weeks get
+  // catalogue-mode content (studio sessions, Q&A, lifestyle etc.)
+  return enrichPlanWeeks({
     artist: '',
     campaignName: '',
     subscriberCount: 0,
@@ -1253,7 +1255,7 @@ function makeEmptyPlan(): CampaignPlan {
       communityPerWeek: 2,
     },
     isExample: false,
-  };
+  });
 }
 
 
@@ -1600,6 +1602,292 @@ function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dat
   return out;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHARED PLAN ENRICHMENT — works on ANY CampaignPlan, not just timeline imports
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type WeekContext = 'tour' | 'festival' | 'pre-release' | 'post-release' | 'catalogue';
+
+// Content pools for each context — rotated through to avoid repetition
+const CONTENT_POOLS: Record<WeekContext, string[][]> = {
+  'tour': [
+    ['Tour Diary Short — prep / travel', 'Tour Diary Short — soundcheck / crowd'],
+    ['Tour Diary Short — backstage / band', 'Tour Diary Short — city life / explore'],
+    ['Tour Recap Short — highlights', 'Community Post — on the road'],
+    ['Tour Diary Short — fan moments', 'Tour Diary Short — merch / venue'],
+  ],
+  'festival': [
+    ['Festival Prep Short — packing / setlist', 'Festival Hype Short — countdown'],
+    ['Festival Diary Short — behind the scenes', 'Festival Short — crowd energy'],
+    ['Festival Recap Short — highlights', 'Community Post — festival season'],
+  ],
+  'pre-release': [
+    ['Teaser Short — studio session', 'Community Post — something coming'],
+    ['Snippet Short — new music preview', 'Behind the Scenes Short — making of'],
+    ['Countdown Short — release incoming', 'Community Post — pre-save reminder'],
+  ],
+  'post-release': [
+    ['Reaction Short — fan responses', 'Community Post — thank you / milestones'],
+    ['Behind the Scenes Short — how it was made', 'Acoustic/Alt Version Short'],
+    ['Fan Cover Reaction Short', 'Community Post — streaming milestone'],
+  ],
+  'catalogue': [
+    ['Catalogue Short — throwback clip', 'Community Post — Q&A / fan question'],
+    ['Studio Session Short — works in progress', 'Community Post — playlist / recommendation'],
+    ['Acoustic / Stripped Back Short', 'Community Post — behind the music'],
+    ['Freestyle / Off-the-cuff Short', 'Community Post — story time / update'],
+    ['Collab Tease Short — who should we work with?', 'Community Post — fan poll'],
+    ['Lifestyle Short — day in the life', 'Community Post — what are you listening to?'],
+  ],
+};
+
+/**
+ * Infer WeekContext from a CampaignMoment. Works on any plan — not just
+ * timeline imports — by reading moment type, name, and action titles.
+ */
+function inferMomentContext(m: CampaignMoment): WeekContext {
+  const n = m.name.toLowerCase();
+  if (/\btour\b/.test(n)) return 'tour';
+  if (/\bfestival|fest\b/.test(n) || /\btrnsmt|glastonbury|reading|primavera|coachella|shaky\s*knees|kendal|lollapalooza\b/.test(n)) return 'festival';
+  if (m.type === 'single' || m.type === 'album' || m.type === 'collab') return 'pre-release';
+  if (m.type === 'announcement') return 'pre-release';
+  if (/\b(live|show|gig|concert|headline|support|instore|signing)\b/.test(n)) return 'tour';
+  return 'catalogue';
+}
+
+/**
+ * Determine what kind of content an empty week should get, based on
+ * proximity to moments. Works on any CampaignPlan.
+ */
+function inferWeekContext(weekIdx: number, moments: CampaignMoment[]): WeekContext {
+  // Check proximity to moments (within 2 weeks)
+  for (const m of moments) {
+    const dist = weekIdx - (m.weekNum - 1);
+    if (Math.abs(dist) <= 2) {
+      const mctx = inferMomentContext(m);
+      if (mctx === 'pre-release' && dist > 0) return 'post-release';
+      return mctx;
+    }
+  }
+  // Check if between tour/festival moments (within 6 weeks of each other)
+  const liveEvents = moments.filter((m) => {
+    const c = inferMomentContext(m);
+    return c === 'tour' || c === 'festival';
+  });
+  for (let i = 0; i < liveEvents.length - 1; i++) {
+    const a = liveEvents[i].weekNum - 1;
+    const b = liveEvents[i + 1].weekNum - 1;
+    if (weekIdx > a && weekIdx < b && b - a <= 6) return 'tour';
+  }
+  return 'catalogue';
+}
+
+type PhaseSlot = { name: PhaseName; weekStart: number; weekEnd: number; label: string };
+
+/**
+ * Assign dynamic phases to a plan based on its length and anchor moments.
+ * Returns phase slots that cover the full week range.
+ */
+function assignDynamicPhases(weekCount: number, moments: CampaignMoment[]): PhaseSlot[] {
+  const anchorMoment = moments.find((m) => m.isAnchor);
+  const anchorWeek = anchorMoment ? anchorMoment.weekNum : null;
+
+  if (anchorWeek && anchorWeek > 3 && anchorWeek <= weekCount - 2) {
+    const preAnchor = anchorWeek - 1;
+    const postAnchor = weekCount - anchorWeek;
+    const phases: PhaseSlot[] = [
+      { name: 'START',   weekStart: 1, weekEnd: Math.max(1, Math.floor(preAnchor * 0.2)), label: 'Warm-up' },
+      { name: 'RELEASE', weekStart: 0, weekEnd: Math.max(1, Math.floor(preAnchor * 0.5)), label: 'Release build-up' },
+      { name: 'PUSH',    weekStart: 0, weekEnd: anchorWeek - 1, label: 'Pre-release push' },
+      { name: 'PEAK',    weekStart: anchorWeek, weekEnd: anchorWeek + Math.max(1, Math.floor(postAnchor * 0.5)), label: 'Peak activity' },
+      { name: 'SUSTAIN', weekStart: 0, weekEnd: weekCount, label: 'Sustain momentum' },
+    ];
+    phases[1].weekStart = phases[0].weekEnd + 1;
+    phases[2].weekStart = phases[1].weekEnd + 1;
+    phases[4].weekStart = phases[3].weekEnd + 1;
+    return phases;
+  }
+
+  const s = (pct: number) => Math.max(1, Math.round(weekCount * pct));
+  const startEnd = s(0.10);
+  const releaseEnd = startEnd + s(0.20);
+  const pushEnd = releaseEnd + s(0.20);
+  const peakEnd = pushEnd + s(0.35);
+  return [
+    { name: 'START',   weekStart: 1,              weekEnd: startEnd,   label: 'Warm-up' },
+    { name: 'RELEASE', weekStart: startEnd + 1,   weekEnd: releaseEnd, label: 'Release window' },
+    { name: 'PUSH',    weekStart: releaseEnd + 1,  weekEnd: pushEnd,   label: 'Push' },
+    { name: 'PEAK',    weekStart: pushEnd + 1,     weekEnd: peakEnd,   label: 'Peak' },
+    { name: 'SUSTAIN', weekStart: peakEnd + 1,     weekEnd: weekCount, label: 'Sustain' },
+  ];
+}
+
+/**
+ * Enrich any CampaignPlan with:
+ *  1. Dynamic phase labels on every week
+ *  2. Placeholder moments for empty phases
+ *  3. Context-aware content suggestions for empty weeks
+ *
+ * Works on timeline-imported, manually-built, or seed plans.
+ * Does NOT touch weeks that already have actions (user content is preserved).
+ */
+function enrichPlanWeeks(plan: CampaignPlan): CampaignPlan {
+  const weeks = plan.weeks.map((w) => ({ ...w, actions: [...w.actions] }));
+  const moments = [...(plan.moments ?? [])];
+  const weekCount = weeks.length;
+  if (weekCount === 0) return plan;
+
+  const start = new Date((plan.startDate || weeks[0].dateRange.split('–')[0].trim()) + 'T12:00:00');
+
+  // 1. Assign phases
+  const phases = assignDynamicPhases(weekCount, moments);
+  for (const ph of phases) {
+    for (let w = ph.weekStart; w <= Math.min(ph.weekEnd, weekCount); w++) {
+      weeks[w - 1].label = ph.name;
+    }
+  }
+
+  // 2. Synthesise placeholder drops for empty phases
+  for (const ph of phases) {
+    const hasMoment = moments.some((m) => m.weekNum >= ph.weekStart && m.weekNum <= ph.weekEnd);
+    if (hasMoment) continue;
+    const midWeek = Math.floor((ph.weekStart + ph.weekEnd) / 2);
+    if (midWeek > weekCount) continue;
+    const base = new Date(start); base.setDate(base.getDate() + (midWeek - 1) * 7 + 2);
+    const dateIso = base.toISOString().split('T')[0];
+    moments.push({
+      weekNum: midWeek,
+      date: dateIso,
+      name: `${ph.label} content drop`,
+      type: 'milestone',
+      isAnchor: false,
+      why: `Planned ${ph.name.toLowerCase()}-phase content drop (auto-scaffolded).`,
+      prepNote: 'Swap for a real release, collab, or milestone when confirmed.',
+    });
+  }
+  moments.sort((a, b) => a.weekNum - b.weekNum);
+
+  // 3. Fill empty weeks with context-aware content
+  const contextCounters: Record<WeekContext, number> = {
+    'tour': 0, 'festival': 0, 'pre-release': 0, 'post-release': 0, 'catalogue': 0,
+  };
+
+  for (const w of weeks) {
+    if (w.actions.length > 0) continue;
+    const ctx = inferWeekContext(w.week - 1, moments);
+    const pool = CONTENT_POOLS[ctx];
+    const idx = contextCounters[ctx] % pool.length;
+    contextCounters[ctx]++;
+    const [shortTitle, postTitle] = pool[idx];
+
+    const base = new Date(start); base.setDate(base.getDate() + (w.week - 1) * 7);
+    const monISO = addDaysIso(base.toISOString().split('T')[0], 1);
+    const thuISO = addDaysIso(base.toISOString().split('T')[0], 4);
+
+    const mon = act(shortTitle, 'short', 'MON', 1, 'engage', 'planned');
+    mon.date = monISO;
+    const thu = act(postTitle, postTitle.startsWith('Community') ? 'post' : 'short', 'THU', 1, 'engage', 'planned');
+    thu.date = thuISO;
+    w.actions.push(mon, thu);
+
+    if (ctx === 'tour' || ctx === 'festival') {
+      const wedISO = addDaysIso(base.toISOString().split('T')[0], 3);
+      const wed = act(`${ctx === 'tour' ? 'Tour' : 'Festival'} Update Short`, 'short', 'WED', 1, 'engage', 'planned');
+      wed.date = wedISO;
+      w.actions.push(wed);
+    }
+  }
+
+  return { ...plan, weeks, moments };
+}
+
+/**
+ * Second-pass enrichment for timeline-imported plans only.
+ * Uses ParsedTimelineEvent[] for finer-grained context (e.g. tourDate vs
+ * liveShow) than moments alone can provide. Replaces generic gap content
+ * with timeline-specific content where the timeline events give us better
+ * context than the moment type alone.
+ */
+function enrichWithTimelineContext(
+  weeks: CampaignWeek[],
+  events: ParsedTimelineEvent[],
+  startIso: string,
+): void {
+  if (events.length === 0) return;
+
+  const eventWeeks = events.map((ev) => {
+    const wd = dateToWeekDay(startIso, ev.dateISO);
+    return { weekIdx: wd ? wd.weekIdx : -1, kind: ev.kind, title: ev.title };
+  }).filter((e) => e.weekIdx >= 0);
+
+  function timelineContext(weekIdx: number): WeekContext | null {
+    for (const ev of eventWeeks) {
+      const dist = weekIdx - ev.weekIdx;
+      if (Math.abs(dist) <= 2) {
+        if (ev.kind === 'tourDate' || ev.kind === 'tourAnnounce') return 'tour';
+        if (ev.kind === 'festival') return 'festival';
+        if (ev.kind === 'singleRelease' || ev.kind === 'albumRelease') {
+          return dist < 0 ? 'pre-release' : 'post-release';
+        }
+        if (ev.kind === 'albumAnnounce') return 'pre-release';
+      }
+    }
+    const tourEvents = eventWeeks.filter((e) => e.kind === 'tourDate' || e.kind === 'festival');
+    for (let i = 0; i < tourEvents.length - 1; i++) {
+      if (weekIdx > tourEvents[i].weekIdx && weekIdx < tourEvents[i + 1].weekIdx &&
+          tourEvents[i + 1].weekIdx - tourEvents[i].weekIdx <= 6) {
+        return 'tour';
+      }
+    }
+    return null; // no override — keep the moment-based context
+  }
+
+  // Only override weeks where the timeline gives us a DIFFERENT context
+  // than what enrichPlanWeeks already assigned (which used moment inference)
+  const start = new Date(startIso + 'T12:00:00');
+  const counters: Record<WeekContext, number> = {
+    'tour': 0, 'festival': 0, 'pre-release': 0, 'post-release': 0, 'catalogue': 0,
+  };
+
+  for (const w of weeks) {
+    // Only touch weeks that got generic auto-fill (2 actions, both planned)
+    const isAutoFilled = w.actions.length <= 3 &&
+      w.actions.every((a) => a.status === 'planned') &&
+      w.actions.some((a) => a.title.startsWith('Catalogue') || a.title.startsWith('Community Post —') ||
+        a.title.startsWith('Studio Session') || a.title.startsWith('Freestyle') ||
+        a.title.startsWith('Collab Tease') || a.title.startsWith('Lifestyle') ||
+        a.title.startsWith('Acoustic'));
+    if (!isAutoFilled) continue;
+
+    const tlCtx = timelineContext(w.week - 1);
+    if (!tlCtx || tlCtx === 'catalogue') continue;
+
+    // Replace the auto-filled content with timeline-context content
+    w.actions = [];
+    const pool = CONTENT_POOLS[tlCtx];
+    const idx = counters[tlCtx] % pool.length;
+    counters[tlCtx]++;
+    const [shortTitle, postTitle] = pool[idx];
+
+    const base = new Date(start); base.setDate(base.getDate() + (w.week - 1) * 7);
+    const monISO = addDaysIso(base.toISOString().split('T')[0], 1);
+    const thuISO = addDaysIso(base.toISOString().split('T')[0], 4);
+
+    const mon = act(shortTitle, 'short', 'MON', 1, 'engage', 'planned');
+    mon.date = monISO;
+    const thu = act(postTitle, postTitle.startsWith('Community') ? 'post' : 'short', 'THU', 1, 'engage', 'planned');
+    thu.date = thuISO;
+    w.actions.push(mon, thu);
+
+    if (tlCtx === 'tour' || tlCtx === 'festival') {
+      const wedISO = addDaysIso(base.toISOString().split('T')[0], 3);
+      const wed = act(`${tlCtx === 'tour' ? 'Tour' : 'Festival'} Update Short`, 'short', 'WED', 1, 'engage', 'planned');
+      wed.date = wedISO;
+      w.actions.push(wed);
+    }
+  }
+}
+
 /** Build a CampaignPlan from parsed timeline events. */
 function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, campaignName?: string): CampaignPlan | null {
   if (events.length === 0) return null;
@@ -1660,173 +1948,22 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
     }
   }
 
-  // ── Dynamic phase assignment ──────────────────────────────────────────────
-  // Phases scale to the full timeline length instead of being hardcoded to 24
-  // weeks. We assign phases proportionally: START (first 10%), RELEASE (next
-  // 20%), PUSH (next 20%), PEAK (next 35%), SUSTAIN (final 15%). If there's
-  // an album/single anchor, PEAK centres on it; otherwise proportional.
-  const anchorMoment = moments.find((m) => m.isAnchor);
-  const anchorWeek = anchorMoment ? anchorMoment.weekNum : null;
-
-  type PhaseSlot = { name: PhaseName; weekStart: number; weekEnd: number; label: string };
-  let phases: PhaseSlot[];
-
-  if (anchorWeek && anchorWeek > 3 && anchorWeek <= weekCount - 2) {
-    // Anchor-centred layout: build around the main release moment
-    const preAnchor = anchorWeek - 1;
-    const postAnchor = weekCount - anchorWeek;
-    phases = [
-      { name: 'START',   weekStart: 1, weekEnd: Math.max(1, Math.floor(preAnchor * 0.2)), label: 'Warm-up' },
-      { name: 'RELEASE', weekStart: 0, weekEnd: Math.max(1, Math.floor(preAnchor * 0.5)), label: 'Release build-up' },
-      { name: 'PUSH',    weekStart: 0, weekEnd: anchorWeek - 1, label: 'Pre-release push' },
-      { name: 'PEAK',    weekStart: anchorWeek, weekEnd: anchorWeek + Math.max(1, Math.floor(postAnchor * 0.5)), label: 'Peak activity' },
-      { name: 'SUSTAIN', weekStart: 0, weekEnd: weekCount, label: 'Sustain momentum' },
-    ];
-    // Chain the ranges so they don't overlap
-    phases[1].weekStart = phases[0].weekEnd + 1;
-    phases[2].weekStart = phases[1].weekEnd + 1;
-    phases[4].weekStart = phases[3].weekEnd + 1;
-  } else {
-    // Proportional layout (no clear anchor or anchor is at the edges)
-    const s = (pct: number) => Math.max(1, Math.round(weekCount * pct));
-    const startEnd = s(0.10);
-    const releaseEnd = startEnd + s(0.20);
-    const pushEnd = releaseEnd + s(0.20);
-    const peakEnd = pushEnd + s(0.35);
-    phases = [
-      { name: 'START',   weekStart: 1,              weekEnd: startEnd,   label: 'Warm-up' },
-      { name: 'RELEASE', weekStart: startEnd + 1,   weekEnd: releaseEnd, label: 'Release window' },
-      { name: 'PUSH',    weekStart: releaseEnd + 1,  weekEnd: pushEnd,   label: 'Push' },
-      { name: 'PEAK',    weekStart: pushEnd + 1,     weekEnd: peakEnd,   label: 'Peak' },
-      { name: 'SUSTAIN', weekStart: peakEnd + 1,     weekEnd: weekCount, label: 'Sustain' },
-    ];
-  }
-
-  // Assign phase labels to weeks
-  for (const ph of phases) {
-    for (let w = ph.weekStart; w <= Math.min(ph.weekEnd, weeks.length); w++) {
-      weeks[w - 1].label = ph.name;
-    }
-  }
-
-  // ── Synthesise placeholder drops for empty phases ───────────────────────
-  for (const ph of phases) {
-    const hasMoment = moments.some((m) => m.weekNum >= ph.weekStart && m.weekNum <= ph.weekEnd);
-    if (hasMoment) continue;
-    const midWeek = Math.floor((ph.weekStart + ph.weekEnd) / 2);
-    if (midWeek > weeks.length) continue;
-    const base = new Date(start); base.setDate(base.getDate() + (midWeek - 1) * 7 + 2);
-    const dateIso = base.toISOString().split('T')[0];
-    moments.push({
-      weekNum: midWeek,
-      date: dateIso,
-      name: `${ph.label} content drop`,
-      type: 'milestone',
-      isAnchor: false,
-      why: `Planned ${ph.name.toLowerCase()}-phase content drop (auto-scaffolded).`,
-      prepNote: 'Swap for a real release, collab, or milestone when confirmed.',
-    });
-  }
-  moments.sort((a, b) => a.weekNum - b.weekNum);
-
-  // ── Context-aware gap filling ───────────────────────────────────────────
-  // Build a map of what's happening nearby so empty weeks get relevant
-  // content suggestions instead of generic "Baseline Short" everywhere.
-  type WeekContext = 'tour' | 'festival' | 'pre-release' | 'post-release' | 'catalogue';
-
-  // Map each event to its week index for proximity lookups
-  const eventWeeks: Array<{ weekIdx: number; kind: TimelineKind; title: string }> = events.map((ev) => {
-    const wd = dateToWeekDay(startIso, ev.dateISO);
-    return { weekIdx: wd ? wd.weekIdx : -1, kind: ev.kind, title: ev.title };
-  }).filter((e) => e.weekIdx >= 0);
-
-  function weekContext(weekIdx: number): WeekContext {
-    // Check proximity to events (within 2 weeks)
-    for (const ev of eventWeeks) {
-      const dist = weekIdx - ev.weekIdx;
-      if (Math.abs(dist) <= 2) {
-        if (ev.kind === 'tourDate' || ev.kind === 'tourAnnounce') return 'tour';
-        if (ev.kind === 'festival') return 'festival';
-        if (ev.kind === 'singleRelease' || ev.kind === 'albumRelease') {
-          return dist < 0 ? 'pre-release' : 'post-release';
-        }
-        if (ev.kind === 'albumAnnounce') return 'pre-release';
-      }
-    }
-    // Check if we're in a tour run (between consecutive tour dates)
-    const tourEvents = eventWeeks.filter((e) => e.kind === 'tourDate' || e.kind === 'festival');
-    for (let i = 0; i < tourEvents.length - 1; i++) {
-      if (weekIdx > tourEvents[i].weekIdx && weekIdx < tourEvents[i + 1].weekIdx &&
-          tourEvents[i + 1].weekIdx - tourEvents[i].weekIdx <= 6) {
-        return 'tour';
-      }
-    }
-    return 'catalogue';
-  }
-
-  // Content pools for each context — rotated through to avoid repetition
-  const CONTENT_POOLS: Record<WeekContext, string[][]> = {
-    'tour': [
-      ['Tour Diary Short — prep / travel', 'Tour Diary Short — soundcheck / crowd'],
-      ['Tour Diary Short — backstage / band', 'Tour Diary Short — city life / explore'],
-      ['Tour Recap Short — highlights', 'Community Post — on the road'],
-      ['Tour Diary Short — fan moments', 'Tour Diary Short — merch / venue'],
-    ],
-    'festival': [
-      ['Festival Prep Short — packing / setlist', 'Festival Hype Short — countdown'],
-      ['Festival Diary Short — behind the scenes', 'Festival Short — crowd energy'],
-      ['Festival Recap Short — highlights', 'Community Post — festival season'],
-    ],
-    'pre-release': [
-      ['Teaser Short — studio session', 'Community Post — something coming'],
-      ['Snippet Short — new music preview', 'Behind the Scenes Short — making of'],
-      ['Countdown Short — release incoming', 'Community Post — pre-save reminder'],
-    ],
-    'post-release': [
-      ['Reaction Short — fan responses', 'Community Post — thank you / milestones'],
-      ['Behind the Scenes Short — how it was made', 'Acoustic/Alt Version Short'],
-      ['Fan Cover Reaction Short', 'Community Post — streaming milestone'],
-    ],
-    'catalogue': [
-      ['Catalogue Short — throwback clip', 'Community Post — Q&A / fan question'],
-      ['Studio Session Short — works in progress', 'Community Post — playlist / recommendation'],
-      ['Acoustic / Stripped Back Short', 'Community Post — behind the music'],
-      ['Freestyle / Off-the-cuff Short', 'Community Post — story time / update'],
-      ['Collab Tease Short — who should we work with?', 'Community Post — fan poll'],
-      ['Lifestyle Short — day in the life', 'Community Post — what are you listening to?'],
-    ],
+  // ── Use shared enrichment for phase assignment + gap filling ──────────
+  const preEnrich: CampaignPlan = {
+    artist: artist || '', campaignName: campaignName || 'Imported Campaign',
+    subscriberCount: 0, startDate: startIso, weeks, moments,
+    targets: { subsTarget: 0, viewsTarget: 0, shortsPerWeek: 3, videosPerWeek: 1, postsPerWeek: 2, communityPerWeek: 2 },
+    isExample: false,
   };
+  const enriched = enrichPlanWeeks(preEnrich);
+  // Pull the enriched weeks and moments back into our local refs
+  for (let i = 0; i < weeks.length; i++) weeks[i] = enriched.weeks[i];
+  moments.length = 0;
+  moments.push(...(enriched.moments ?? []));
 
-  const contextCounters: Record<WeekContext, number> = {
-    'tour': 0, 'festival': 0, 'pre-release': 0, 'post-release': 0, 'catalogue': 0,
-  };
-
-  for (const w of weeks) {
-    if (w.actions.length > 0) continue;
-    const ctx = weekContext(w.week - 1);
-    const pool = CONTENT_POOLS[ctx];
-    const idx = contextCounters[ctx] % pool.length;
-    contextCounters[ctx]++;
-    const [shortTitle, postTitle] = pool[idx];
-
-    const base = new Date(start); base.setDate(base.getDate() + (w.week - 1) * 7);
-    const monISO = addDaysIso(base.toISOString().split('T')[0], 1);
-    const thuISO = addDaysIso(base.toISOString().split('T')[0], 4);
-
-    const mon = act(shortTitle, 'short', 'MON', 1, 'engage', 'planned');
-    mon.date = monISO;
-    const thu = act(postTitle, postTitle.startsWith('Community') ? 'post' : 'short', 'THU', 1, 'engage', 'planned');
-    thu.date = thuISO;
-    w.actions.push(mon, thu);
-
-    // In tour/festival context, add a third piece of content mid-week
-    if (ctx === 'tour' || ctx === 'festival') {
-      const wedISO = addDaysIso(base.toISOString().split('T')[0], 3);
-      const wed = act(`${ctx === 'tour' ? 'Tour' : 'Festival'} Update Short`, 'short', 'WED', 1, 'engage', 'planned');
-      wed.date = wedISO;
-      w.actions.push(wed);
-    }
-  }
+  // Second pass: timeline-specific context (tour proximity, festival runs, etc.)
+  // uses the parsed events for finer-grained context than moments alone can provide
+  enrichWithTimelineContext(weeks, events, startIso);
 
   return {
     artist: artist || '',
@@ -6961,8 +7098,15 @@ function loadPlan(key: string = LS_KEY): CampaignPlan {
             saved.weeks.some((w) => Array.isArray(w.actions) && w.actions.length > 0)
           );
         if (hasContent) {
-          // User-created plans keep their flag; legacy saves default to example.
-          return { ...saved, isExample: saved.isExample ?? true };
+          const plan = { ...saved, isExample: saved.isExample ?? true };
+          // Enrich empty weeks with context-aware content if the plan
+          // has moments — this ensures ALL campaigns benefit from smart
+          // gap-filling, not just timeline imports.
+          const hasEmptyWeeks = plan.weeks.some((w) => !w.actions || w.actions.length === 0);
+          if (hasEmptyWeeks && plan.moments && plan.moments.length > 0) {
+            return enrichPlanWeeks(plan);
+          }
+          return plan;
         }
       }
     } catch { /* ignore */ }
