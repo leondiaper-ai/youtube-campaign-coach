@@ -161,7 +161,9 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'DRIFT',
-      headline: 'Channel has gone cold. Post one Short this week.',
+      headline: lastUp != null
+        ? `Channel has gone cold. Last upload ${lastUp} days ago.`
+        : 'Channel has gone cold. No uploads detected.',
       signals: [
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'No uploads detected in 30d.',
         `${uploads30d} uploads / 30d.`,
@@ -199,7 +201,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'DRIFT',
-      headline: 'Losing subscribers despite new views. Check recent uploads for off-brand content.',
+      headline: 'Losing subscribers despite new views. Something recent is pushing people away.',
       signals: [
         convLine!,
         `${convAnchor.subsDelta.toLocaleString()} subs net · +${convAnchor.viewsDelta.toLocaleString()} new views in ${convAnchor.spanDays}d.`,
@@ -250,7 +252,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
-      headline: 'Views arriving but not converting. Fix packaging before adding more uploads.',
+      headline: 'Views arriving but not converting. Cadence is strong — packaging is the bottleneck.',
       signals: [
         convLine!,
         `${uploads30d} uploads / 30d — cadence already strong.`,
@@ -334,7 +336,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'MAINTAIN',
       verdict: 'ON_TRACK',
-      headline: 'Channel is warm. Keep current cadence.',
+      headline: 'Channel is warm. Cadence is holding.',
       signals: [
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'Recent upload window active.',
@@ -374,7 +376,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   return {
     type: 'MAINTAIN',
     verdict: 'ON_TRACK',
-    headline: 'Hold the plan. No gap between reality and expectations.',
+    headline: 'On track. No gap between plan and reality.',
     signals: [
       `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
       lastUp != null ? `Last upload ${lastUp}d ago.` : 'Upload window baseline.',
