@@ -295,6 +295,253 @@ type YouTubeMoment = {
   priority: 'high' | 'medium' | 'low';
 };
 
+// ── MOMENTUM SIGNALS ────────────────────────────────────────────────────────
+// Data-driven momentum states attached to planner moments.
+// Grounded in real YouTube API data + planned vs actual support comparison.
+
+type MomentumState = 'BUILDING' | 'ACTIVE' | 'DROPPING' | 'STALLED';
+
+type MomentumSignal = {
+  state: MomentumState;
+  reason: string;   // one-line data-grounded explanation
+  action: string;   // one-line direct action
+};
+
+type SupportComparison = {
+  status: 'COMPLETE' | 'PARTIAL' | 'CORE_MISSING';
+  expected: string[];
+  shipped: string[];
+  missing: string[];
+};
+
+const MOMENTUM_STATE_META: Record<MomentumState, { color: string; bg: string; label: string }> = {
+  BUILDING: { color: '#5B7CFA', bg: 'rgba(91,124,250,0.10)', label: 'BUILDING' },
+  ACTIVE:   { color: '#1FBE7A', bg: 'rgba(31,190,122,0.10)', label: 'ACTIVE' },
+  DROPPING: { color: '#FF4A1C', bg: 'rgba(255,74,28,0.10)',  label: 'DROPPING' },
+  STALLED:  { color: '#71717a', bg: 'rgba(113,113,122,0.10)', label: 'STALLED' },
+};
+
+/**
+ * Compute momentum state for a specific moment using REAL channel data.
+ *
+ * Inputs:
+ *  - watcher state (live API: uploads, views, subs, last upload date)
+ *  - the moment itself (date, type, expected support)
+ *  - support comparison (what's shipped vs missing)
+ *  - plan context (next drop distance)
+ */
+function computeMomentMomentum(
+  moment: YouTubeMoment,
+  supportCmp: SupportComparison,
+  watcher: WatcherState | null,
+  today: Date,
+): MomentumSignal {
+  const momentDate = new Date(moment.date + 'T12:00:00');
+  const daysUntil = Math.round((momentDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+  const daysSince = -daysUntil; // positive if moment is in the past
+
+  // No watcher data — can't evaluate real momentum
+  if (!watcher) {
+    if (daysUntil > 14) {
+      return { state: 'BUILDING', reason: `${daysUntil} days until this moment`, action: 'Connect YouTube channel to see live momentum data' };
+    }
+    if (daysUntil > 0) {
+      return { state: 'BUILDING', reason: `${daysUntil} days away — no live data connected`, action: 'Connect YouTube channel to track momentum' };
+    }
+    return { state: 'STALLED', reason: 'No live data — cannot evaluate momentum', action: 'Connect YouTube channel to see real signals' };
+  }
+
+  // Real data available — ground everything in it
+  const daysSinceUpload = watcher.daysSinceLastUpload ?? 999;
+  const uploads7d = watcher.uploadsLast7Days;
+  const uploads14d = watcher.uploadsLast14Days;
+  const viewDelta = watcher.viewDelta; // 7d view change
+  const subDelta = watcher.subscriberDelta; // 7d sub change
+  const channelCold = daysSinceUpload > 14;
+  const channelInactive = daysSinceUpload > 21;
+  const viewsGrowing = viewDelta !== null && viewDelta > 0;
+  const subsGrowing = subDelta !== null && subDelta > 0;
+
+  // ── FUTURE MOMENT (hasn't happened yet) ──────────────────────────────
+  if (daysUntil > 0) {
+    // Channel is stalled — no uploads, approaching a moment
+    if (channelInactive) {
+      return {
+        state: 'STALLED',
+        reason: `No uploads in ${daysSinceUpload} days — channel is cold`,
+        action: daysUntil <= 14
+          ? `Warm the channel NOW — ${moment.title} is ${daysUntil} days away`
+          : `Resume posting — channel needs warming before ${moment.title}`,
+      };
+    }
+
+    // Channel cold but not dead
+    if (channelCold) {
+      return {
+        state: 'DROPPING',
+        reason: `Last upload ${daysSinceUpload} days ago — momentum fading`,
+        action: daysUntil <= 7
+          ? `Post today — ${moment.title} is ${daysUntil} days away and channel is cold`
+          : `Increase cadence — ${daysSinceUpload} days of silence before a key moment`,
+      };
+    }
+
+    // Channel is active and moment is approaching
+    if (daysUntil <= 14 && uploads7d >= 2) {
+      const viewLine = viewDelta !== null && viewDelta > 0 ? ` +${formatCompact(viewDelta)} views this week` : '';
+      return {
+        state: 'BUILDING',
+        reason: `Channel active (${uploads7d} uploads/7d)${viewLine} — ${daysUntil} days to go`,
+        action: `Keep building — ${supportCmp.missing.length > 0 ? `ship ${supportCmp.missing[0]} before drop` : 'maintain cadence into the moment'}`,
+      };
+    }
+
+    // Far future — just tracking
+    return {
+      state: 'BUILDING',
+      reason: `${daysUntil} days away — ${uploads14d} uploads in last 14 days`,
+      action: uploads14d >= 3 ? 'Cadence is healthy — stay consistent' : 'Build cadence — aim for 3+ uploads per week',
+    };
+  }
+
+  // ── PAST OR CURRENT MOMENT ───────────────────────────────────────────
+  // Moment has happened — evaluate support delivery and momentum
+
+  // All support shipped and channel is active
+  if (supportCmp.status === 'COMPLETE' && !channelCold) {
+    const viewLine = viewsGrowing ? ` +${formatCompact(viewDelta!)} views this week` : '';
+    const subLine = subsGrowing ? `, +${formatCompact(subDelta!)} subs` : '';
+    return {
+      state: 'ACTIVE',
+      reason: `Support shipped${viewLine}${subLine} — content is compounding`,
+      action: viewsGrowing ? 'Double down — increase Shorts cadence while momentum holds' : 'Maintain output — keep the algorithm fed',
+    };
+  }
+
+  // Partial support and still active
+  if (supportCmp.status === 'PARTIAL' && !channelCold) {
+    return {
+      state: uploads7d >= 2 && viewsGrowing ? 'ACTIVE' : 'DROPPING',
+      reason: `${supportCmp.shipped.length}/${supportCmp.expected.length} support items shipped — ${supportCmp.missing.length} missing`,
+      action: `Ship ${supportCmp.missing[0] || 'missing support'} — momentum window is ${daysSince <= 7 ? 'still open' : 'closing'}`,
+    };
+  }
+
+  // Core support missing
+  if (supportCmp.status === 'CORE_MISSING') {
+    if (channelInactive) {
+      return {
+        state: 'STALLED',
+        reason: `No follow-up after ${moment.title} — ${daysSinceUpload} days since last upload`,
+        action: `Post ${supportCmp.missing[0] || 'follow-up content'} NOW — momentum from the drop is being wasted`,
+      };
+    }
+    return {
+      state: 'DROPPING',
+      reason: `Core support missing after ${moment.title} — ${supportCmp.missing.length} items not shipped`,
+      action: daysSince <= 7
+        ? `Ship ${supportCmp.missing[0]} immediately — first-week window still open`
+        : `Recover with ${supportCmp.missing[0]} — late is better than never`,
+    };
+  }
+
+  // Channel cold after a moment
+  if (channelCold) {
+    return {
+      state: 'DROPPING',
+      reason: `Last upload ${daysSinceUpload} days ago — lift from ${moment.title} is fading`,
+      action: 'Post follow-up content today — every day of silence loses audience',
+    };
+  }
+
+  // Default active
+  return {
+    state: 'ACTIVE',
+    reason: `${uploads7d} uploads this week — channel is active around ${moment.title}`,
+    action: 'Maintain cadence — keep supporting the moment',
+  };
+}
+
+/** Format a number compactly for momentum signals (e.g. 71000 → "71K") */
+function formatCompact(n: number): string {
+  if (Math.abs(n) >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
+  return n.toLocaleString();
+}
+
+/**
+ * Compare planned support for a moment against real uploads from the YouTube API.
+ * Returns COMPLETE / PARTIAL / CORE_MISSING with concrete lists.
+ */
+function compareSupportVsActual(
+  moment: YouTubeMoment,
+  watcher: WatcherState | null,
+  planActions: CampaignAction[],
+): SupportComparison {
+  const expected = [...moment.expectedSupport];
+
+  // Collect what's actually been shipped — from both watcher (real YouTube) and plan (marked done)
+  const shipped: string[] = [];
+  const momentDate = new Date(moment.date + 'T12:00:00');
+  const windowStart = new Date(momentDate.getTime() - 14 * 86400000); // 2 weeks before
+  const windowEnd = new Date(momentDate.getTime() + 21 * 86400000);   // 3 weeks after
+
+  // Check real YouTube uploads in the window
+  if (watcher?.latestVideos) {
+    const windowVideos = watcher.latestVideos.filter((v) => {
+      const pub = new Date(v.publishedAt);
+      return pub >= windowStart && pub <= windowEnd;
+    });
+    const shorts = windowVideos.filter((v) => v.kind === 'short');
+    const longform = windowVideos.filter((v) => v.kind === 'video');
+
+    if (shorts.length >= 3) shipped.push('Shorts ×3');
+    else if (shorts.length >= 2) shipped.push('Shorts ×2');
+    else if (shorts.length >= 1) shipped.push('Shorts ×1');
+
+    for (const v of longform) {
+      const t = v.title.toLowerCase();
+      if (v.videoType === 'lyric' || /\blyric\b/.test(t)) shipped.push('Lyric Video');
+      else if (v.videoType === 'visualizer' || /\b(visualis|visualiz|artwork)\b/.test(t)) shipped.push('Artwork Video');
+      else if (v.videoType === 'official' || /\bofficial\b/.test(t)) shipped.push('Official Video');
+      else shipped.push('Longform');
+    }
+  }
+
+  // Check plan actions marked as done in the window
+  const doneActions = planActions.filter((a) => {
+    if (a.status !== 'done') return false;
+    if (!a.date) return false;
+    const d = new Date(a.date + 'T12:00:00');
+    return d >= windowStart && d <= windowEnd;
+  });
+  for (const a of doneActions) {
+    if (a.type === 'post') shipped.push('Community Post');
+    if (a.type === 'short' && !shipped.some((s) => s.startsWith('Shorts'))) shipped.push('Short');
+  }
+
+  // Determine what's missing
+  const missing: string[] = [];
+  for (const item of expected) {
+    const normalised = item.toLowerCase().replace(/[×x]\s*\d+[-–]?\d*/g, '').trim();
+    const isShipped = shipped.some((s) => {
+      const sNorm = s.toLowerCase();
+      return sNorm.includes(normalised) || normalised.includes(sNorm) ||
+        (normalised.includes('short') && sNorm.includes('short')) ||
+        (normalised.includes('community') && sNorm.includes('community')) ||
+        (normalised.includes('longform') && (sNorm.includes('longform') || sNorm.includes('video')));
+    });
+    if (!isShipped) missing.push(item);
+  }
+
+  const status: SupportComparison['status'] =
+    missing.length === 0 ? 'COMPLETE' :
+    missing.length <= Math.ceil(expected.length / 2) ? 'PARTIAL' :
+    'CORE_MISSING';
+
+  return { status, expected, shipped, missing };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -6632,6 +6879,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   void onCycleSupportStatus; void onAddSupportItem; void onRemoveSupportItem;
 
   const watcher = useWatcherChannel();
+  const todayRef = useMemo(() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d; }, []);
   const communityPostDone = plan.manualOverrides?.communityPostDone || {};
 
   // Merge: live drops supersede planned for same week; planned fills the future.
@@ -6791,71 +7039,108 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           <>
             {ytMoments.map((m) => {
               const dateLabel = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: m.date.startsWith('2027') ? 'numeric' : undefined });
-              const statusColor =
-                m.status === 'complete' ? '#1FBE7A' :
-                m.status === 'partial' ? '#FFD24C' :
-                m.status === 'core_missing' ? '#FF4A1C' :
-                '#5B7CFA'; // planned
-              const statusLabel =
-                m.status === 'complete' ? 'COMPLETE' :
-                m.status === 'partial' ? 'PARTIAL' :
-                m.status === 'core_missing' ? 'CORE MISSING' :
-                'PLANNED';
-              const priorityBg =
-                m.priority === 'high' ? 'rgba(255,74,28,0.08)' :
-                m.priority === 'medium' ? 'rgba(255,210,76,0.08)' :
-                'rgba(14,14,14,0.03)';
               const typeBadge = m.momentType.replace(/_/g, ' ').toUpperCase();
+
+              // ── Compute REAL support comparison ──
+              const weekActions = plan.weeks.find((w) => w.week === m.weekNum)?.actions ?? [];
+              const supportCmp = compareSupportVsActual(m, watcher.state, weekActions);
+
+              // ── Compute data-driven MOMENTUM signal ──
+              const momentum = computeMomentMomentum(m, supportCmp, watcher.state, todayRef);
+              const mMeta = MOMENTUM_STATE_META[momentum.state];
+
+              // Support status drives the card status (overrides the static 'planned')
+              const supportStatusColor =
+                supportCmp.status === 'COMPLETE' ? '#1FBE7A' :
+                supportCmp.status === 'PARTIAL' ? '#FFD24C' :
+                '#FF4A1C';
 
               return (
                 <div
                   key={m.id}
-                  className="mb-3 last:mb-0 rounded-lg p-3"
-                  style={{ background: priorityBg, border: '1px solid rgba(14,14,14,0.06)' }}
+                  className="mb-3 last:mb-0 rounded-lg overflow-hidden"
+                  style={{ border: `1px solid ${mMeta.color}22` }}
                 >
-                  {/* Title row */}
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-black text-[13px] text-ink leading-tight">{m.title}</span>
-                        <span className="text-[10px] font-semibold text-ink/45 shrink-0">{dateLabel}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: phase.color, color: '#FAF7F2' }}>
-                          {typeBadge}
-                        </span>
-                        {m.priority === 'high' && (
-                          <span className="text-[9px] font-black uppercase tracking-[0.14em] text-[#FF4A1C]">HIGH PRIORITY</span>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.12em] shrink-0" style={{ color: statusColor }}>
-                      {statusLabel}
+                  {/* Momentum signal bar */}
+                  <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: mMeta.bg }}>
+                    <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: mMeta.color }}>
+                      MOMENTUM {mMeta.label}
+                    </span>
+                    <span className="text-[10px] text-ink/55 font-semibold flex-1 truncate">
+                      {momentum.reason}
                     </span>
                   </div>
 
-                  {/* Headline — why this matters */}
-                  <div className="text-[11px] text-ink/65 font-semibold mt-1.5 leading-snug">
-                    {m.headline}
-                  </div>
-
-                  {/* Expected support stack */}
-                  <div className="mt-2">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-0.5">
-                      YouTube support needed
+                  <div className="p-3" style={{ background: 'rgba(255,255,255,0.55)' }}>
+                    {/* Title row */}
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-black text-[13px] text-ink leading-tight">{m.title}</span>
+                          <span className="text-[10px] font-semibold text-ink/45 shrink-0">{dateLabel}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: phase.color, color: '#FAF7F2' }}>
+                            {typeBadge}
+                          </span>
+                          {m.priority === 'high' && (
+                            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-[#FF4A1C]">HIGH PRIORITY</span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.12em] shrink-0" style={{ color: supportStatusColor }}>
+                        {supportCmp.status.replace('_', ' ')}
+                      </span>
                     </div>
-                    <div className="flex flex-wrap gap-1 mt-0.5">
-                      {m.expectedSupport.map((s, i) => (
-                        <span key={i} className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(14,14,14,0.06)', color: 'rgba(14,14,14,0.6)' }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* Reason — why this is in the planner */}
-                  <div className="mt-2 text-[10px] text-ink/40 italic leading-snug">
-                    {m.reason}
+                    {/* Headline — why this matters */}
+                    <div className="text-[11px] text-ink/65 font-semibold mt-1.5 leading-snug">
+                      {m.headline}
+                    </div>
+
+                    {/* Action — what to do now */}
+                    <div className="mt-2 px-2 py-1.5 rounded" style={{ background: mMeta.bg }}>
+                      <div className="text-[11px] font-bold leading-snug" style={{ color: mMeta.color }}>
+                        {momentum.action}
+                      </div>
+                    </div>
+
+                    {/* Support comparison: planned vs actual */}
+                    <div className="mt-2">
+                      <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
+                        Planned vs actual support
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {supportCmp.expected.map((item, i) => {
+                          const isShipped = !supportCmp.missing.includes(item);
+                          return (
+                            <span
+                              key={i}
+                              className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                              style={{
+                                background: isShipped ? 'rgba(31,190,122,0.12)' : 'rgba(255,74,28,0.08)',
+                                color: isShipped ? '#1FBE7A' : '#FF4A1C',
+                                textDecoration: isShipped ? 'none' : 'none',
+                              }}
+                            >
+                              {isShipped ? '✓' : '✗'} {item}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Shipped from YouTube (real data) */}
+                    {supportCmp.shipped.length > 0 && (
+                      <div className="mt-1.5">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/30 mb-0.5">
+                          Shipped (from YouTube)
+                        </div>
+                        <div className="text-[10px] font-semibold text-ink/50">
+                          {supportCmp.shipped.join(' · ')}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
