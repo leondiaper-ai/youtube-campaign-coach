@@ -4418,23 +4418,24 @@ function getTimeContext(momentDate: string, today: Date, supportMissing?: boolea
   const diffDays = Math.round(diffMs / 86400000);
 
   if (diffDays < -14) {
-    // Well past — check if support was missed
     if (supportMissing) {
-      return { label: 'Missed opportunity', urgency: 'missed', color: '#FF4A1C' };
+      return { label: 'Missed', urgency: 'missed', color: '#FF4A1C' };
     }
     return { label: 'Done', urgency: 'done', color: '#1FBE7A' };
   }
   if (diffDays < -1) {
     if (supportMissing) {
-      return { label: 'Missed opportunity', urgency: 'missed', color: '#FF4A1C' };
+      return { label: 'Missed', urgency: 'missed', color: '#FF4A1C' };
     }
-    return { label: `${Math.abs(diffDays)}d ago`, urgency: 'past', color: '#71717a' };
+    return { label: `${Math.abs(diffDays)} days ago`, urgency: 'past', color: '#71717a' };
   }
-  if (diffDays <= 0) return { label: 'Today', urgency: 'now', color: '#FF4A1C' };
+  if (diffDays === -1) return { label: 'Yesterday', urgency: supportMissing ? 'missed' : 'past', color: supportMissing ? '#FF4A1C' : '#71717a' };
+  if (diffDays === 0) return { label: 'Today', urgency: 'now', color: '#FF4A1C' };
+  if (diffDays === 1) return { label: 'Tomorrow', urgency: 'now', color: '#FF4A1C' };
   if (diffDays <= 3) return { label: `In ${diffDays} days`, urgency: 'now', color: '#FF4A1C' };
   if (diffDays <= 7) return { label: 'This week', urgency: 'now', color: '#FF4A1C' };
-  if (diffDays <= 14) return { label: 'Next week', urgency: 'soon', color: '#F08A3C' };
-  if (diffDays <= 30) return { label: `In ${Math.ceil(diffDays / 7)} weeks`, urgency: 'upcoming', color: '#71717a' };
+  if (diffDays <= 14) return { label: `In ${diffDays} days`, urgency: 'soon', color: '#F08A3C' };
+  if (diffDays <= 42) return { label: `In ${Math.ceil(diffDays / 7)} weeks`, urgency: 'upcoming', color: '#71717a' };
   return { label: '', urgency: 'upcoming', color: '#71717a' };
 }
 
@@ -7316,6 +7317,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             const isHigh = highlights.has(m.id);
             const tc = getTimeContext(m.date, todayRef);
             const isMissed = tc.urgency === 'missed';
+            const pillDate = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
             return (
               <div key={i} className="flex items-start gap-2" style={{ opacity: isMissed ? 0.7 : 1 }}>
                 <div className="flex-1 min-w-0">
@@ -7323,6 +7325,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                     <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: isMissed ? 'rgba(255,74,28,0.08)' : isHigh ? '#FFE2D8' : 'rgba(14,14,14,0.06)', color: isMissed ? '#FF4A1C' : isHigh ? '#8A1F0C' : 'rgba(14,14,14,0.55)' }}>
                       {m.name}
                     </span>
+                    <span className="text-[9px] font-semibold text-ink/35">{pillDate}</span>
                     {tc.label && (
                       <span className="text-[8px] font-black uppercase tracking-[0.14em]" style={{ color: tc.color }}>
                         {tc.label}
@@ -7394,8 +7397,9 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             const tc = getTimeContext(m.date, todayRef, true);
             const mIdeas = getMomentContentIdeas(m.momentType);
             if (tc.urgency === 'now') {
+              const timeHint = tc.label === 'Today' ? 'Today' : tc.label === 'Tomorrow' ? 'Tomorrow' : tc.label;
               urgent.push({
-                label: `${mIdeas?.captureLine ?? 'Capture content'} — ${m.title}`,
+                label: `${mIdeas?.captureLine ?? 'Capture content'} — ${m.title} · ${timeHint}`,
                 color: '#FF4A1C',
               });
             } else if (tc.urgency === 'missed') {
