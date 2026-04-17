@@ -7254,18 +7254,63 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
       </div>
       <div className="mt-1 text-[11px] text-ink/50">{micro.desc}</div>
       <div className="mt-0.5 text-[10px] font-bold text-ink/40 uppercase tracking-wide">Cadence: {micro.cadence}</div>
-      {phaseMoments.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-1">
-          {phaseMoments.slice(0, 5).map((m, i) => (
-            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(14,14,14,0.06)', color: 'rgba(14,14,14,0.55)' }}>
-              {m.name}
-            </span>
-          ))}
-          {phaseMoments.length > 5 && (
-            <span className="text-[10px] text-ink/40">+{phaseMoments.length - 5} more</span>
+      {(() => {
+        // Use YouTubeMoments when available (they have proper momentType);
+        // fall back to raw CampaignMoments (phaseMoments) otherwise
+        const MOMENT_TYPE_MAP: Record<string, YouTubeMomentType> = {
+          single: 'official_video', album: 'album_release', announcement: 'album_announce',
+          milestone: 'track_moment', anchor: 'track_moment', collab: 'track_moment',
+        };
+        type PillItem = { id: string; name: string; momentType: YouTubeMomentType; priority: string };
+        const pills: PillItem[] = ytMoments.length > 0
+          ? ytMoments.filter((m) => m.tier === 1).map((m) => ({
+              id: m.id, name: m.title, momentType: m.momentType, priority: m.priority,
+            }))
+          : phaseMoments.map((m) => ({
+              id: m.name, name: m.name,
+              momentType: MOMENT_TYPE_MAP[m.type] ?? 'track_moment',
+              priority: m.isAnchor ? 'high' : 'medium',
+            }));
+        if (pills.length === 0) return null;
+        const highlights = pickPhaseHighlights(pills, 2);
+        return (
+        <div className="mt-1.5 space-y-1">
+          {pills.slice(0, 5).map((m, i) => {
+            const ideas = getMomentContentIdeas(m.momentType);
+            const totalIdeas = ideas ? ideas.groups.reduce((n, g) => n + g.ideas.length, 0) : 0;
+            const isHigh = highlights.has(m.id);
+            return (
+              <div key={i} className="flex items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: isHigh ? '#FFE2D8' : 'rgba(14,14,14,0.06)', color: isHigh ? '#8A1F0C' : 'rgba(14,14,14,0.55)' }}>
+                      {m.name}
+                    </span>
+                    {isHigh && (
+                      <span className="text-[8px] font-black uppercase tracking-[0.14em]" style={{ color: '#8A1F0C' }}>
+                        {ideas?.cta === "Don't miss this" ? "Don't miss" : 'High opportunity'}
+                      </span>
+                    )}
+                  </div>
+                  {totalIdeas > 0 ? (
+                    <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
+                      → {totalIdeas} content moments available
+                    </div>
+                  ) : (
+                    <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
+                      → Capture: support content around this drop
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+          {pills.length > 5 && (
+            <span className="text-[10px] text-ink/40 ml-1.5">+{pills.length - 5} more</span>
           )}
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 
