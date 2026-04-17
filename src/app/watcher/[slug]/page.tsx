@@ -117,16 +117,19 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   return (
     <main className="bg-paper min-h-screen" style={{ color: INK }}>
       <div className="max-w-[880px] mx-auto px-6 py-10">
-        {/* Breadcrumb */}
+        {/* Breadcrumb + Active Campaign CTA */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/cockpit" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
             ← All artists
           </Link>
-          {isLive && (
-            <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35">
-              Live · YouTube API
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {isLive && (
+              <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35">
+                Live · YouTube API
+              </span>
+            )}
+            <CoachLink slug={slug} size="sm" />
+          </div>
         </div>
 
         {/* ─── HEADER ─────────────────────────────────────────────────────── */}
@@ -289,11 +292,8 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         />
 
 
-        {/* ─── COACH CTA ──────────────────────────────────────────────────── */}
-        <div className="mt-12 flex items-center justify-between gap-4">
-          <div className="text-[12px] text-ink/50 max-w-[50ch]">
-            Ready to plan? Open Coach to build the campaign timeline.
-          </div>
+        {/* ─── COACH CTA (secondary, bottom) ────────────────────────────── */}
+        <div className="mt-12 flex items-center justify-center">
           <CoachLink slug={slug} />
         </div>
 
