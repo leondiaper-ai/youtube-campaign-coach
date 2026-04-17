@@ -25,6 +25,7 @@ export type CoachPlanSummary = {
   slug: string;
   artist: string | null;
   campaignName: string | null;
+  channelHandle: string | null;
   isExample: boolean;
   nextMoment: CoachNextMoment | null;
   hasPlan: true;
@@ -55,6 +56,8 @@ type RawWeek = {
 type RawPlan = {
   artist?: string;
   campaignName?: string;
+  slug?: string;
+  channelHandle?: string;
   startDate?: string;
   isExample?: boolean;
   moments?: RawMoment[];
@@ -99,12 +102,17 @@ export function readCoachPlan(slug: string): CoachPlanSummary | null {
     typeof plan.campaignName === 'string' && plan.campaignName.trim()
       ? plan.campaignName.trim()
       : null;
+  const channelHandle =
+    typeof plan.channelHandle === 'string' && plan.channelHandle.trim()
+      ? plan.channelHandle.trim()
+      : null;
   const isExample = !!plan.isExample;
 
   return {
     slug,
     artist,
     campaignName,
+    channelHandle,
     isExample,
     hasPlan: true,
     nextMoment: extractNextMoment(plan),

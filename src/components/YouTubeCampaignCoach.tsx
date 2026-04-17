@@ -1,6 +1,6 @@
 'use client';
 // PIH Campaign Coach v2.2 — Weekly Rhythm widget
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, createContext, useContext } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ConversionChip from '@/components/ConversionChip';
 import {
@@ -12,6 +12,15 @@ import {
   type PhaseName as CoachPhaseName,
   type WatcherEventLike,
 } from '@/lib/coach';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ARTIST SLUG CONTEXT — lets any child component know which artist we're editing
+// ═══════════════════════════════════════════════════════════════════════════════
+const ArtistSlugCtx = createContext<string>('');
+
+// Resolved artist info fetched once on mount when ?artist=slug is present.
+type ResolvedArtist = { slug: string; name: string; channelHandle?: string; phase?: string } | null;
+const ResolvedArtistCtx = createContext<ResolvedArtist>(null);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -148,6 +157,10 @@ type NextDropEdit = {
 type CampaignPlan = {
   artist: string;
   campaignName: string;
+  /** Artist slug — locks this plan to a specific artist. Populated from ?artist= URL param. */
+  slug?: string;
+  /** YouTube channel handle or ID — locks this plan to a specific channel. */
+  channelHandle?: string;
   subscriberCount: number;     // starting subs (baseline)
   baselineSubs?: number;       // optional manual baseline at campaign start
   baselineViews?: number;
@@ -1699,10 +1712,17 @@ function TimelineImportModal({ open, onClose, onApply }: {
   onClose: () => void;
   onApply: (plan: CampaignPlan) => void;
 }) {
+  const resolved = useContext(ResolvedArtistCtx);
+  const ctxSlug = useContext(ArtistSlugCtx);
   const [text, setText] = useState('');
   const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [artist, setArtist] = useState('');
+  const [artist, setArtist] = useState(resolved?.name ?? '');
   const [campaignName, setCampaignName] = useState('');
+
+  // Update artist name when resolved data arrives (async fetch completes after mount).
+  useEffect(() => {
+    if (resolved?.name && !artist) setArtist(resolved.name);
+  }, [resolved?.name]); // eslint-disable-line react-hooks/exhaustive-deps
   const events = useMemo(() => parseTimelineText(text, year), [text, year]);
   if (!open) return null;
   const preview = buildPlanFromTimeline(events, artist, campaignName || undefined);
@@ -1775,7 +1795,18 @@ function TimelineImportModal({ open, onClose, onApply }: {
           <button onClick={onClose} className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] text-ink/60 hover:bg-ink/5">Cancel</button>
           <button
             disabled={!preview}
-            onClick={() => { if (preview) { onApply(preview); onClose(); } }}
+            onClick={() => {
+              if (preview) {
+                // Lock the plan to this artist's slug + channel so it can't drift.
+                const locked: CampaignPlan = {
+                  ...preview,
+                  slug: ctxSlug || undefined,
+                  channelHandle: resolved?.channelHandle || undefined,
+                };
+                onApply(locked);
+                onClose();
+              }
+            }}
             className="px-4 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] text-paper"
             style={{ background: preview ? '#0E0E0E' : 'rgba(14,14,14,0.25)' }}
           >
@@ -1795,6 +1826,8 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
   onNewCampaign?: () => void;
   onOpenTimeline?: () => void;
 }) {
+  const resolved = useContext(ResolvedArtistCtx);
+  const ctxSlug = useContext(ArtistSlugCtx);
   let activeIdx = -1;
   for (let i = plan.weeks.length - 1; i >= 0; i--) {
     if (plan.weeks[i].actions.some((a) => a.status === 'done' || a.status === 'missed')) {
@@ -1804,6 +1837,7 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
   }
   const totalWeeks = plan.weeks.length;
   const weekNum = activeIdx >= 0 ? plan.weeks[activeIdx].week : 0;
+  const channelHandle = plan.channelHandle ?? resolved?.channelHandle;
 
   return (
     <div className="mb-5">
@@ -1812,6 +1846,36 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
           {plan.isExample && (
             <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-1">
               Example Campaign
+            </div>
+          )}
+          {/* Watcher link + channel handle */}
+          {ctxSlug && (
+            <div className="flex items-center gap-2 mb-1">
+              <a
+                href={`/watcher/${ctxSlug}`}
+                className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/45 hover:text-ink underline decoration-ink/20 underline-offset-2"
+              >
+                ← Watcher
+              </a>
+              {channelHandle && (
+                <>
+                  <span className="text-ink/20">·</span>
+                  <a
+                    href={`https://www.youtube.com/${channelHandle.startsWith('@') ? channelHandle : 'channel/' + channelHandle}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[9px] font-mono text-ink/40 hover:text-ink/70"
+                  >
+                    {channelHandle}
+                  </a>
+                </>
+              )}
+              {resolved?.phase && (
+                <>
+                  <span className="text-ink/20">·</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/35">{resolved.phase}</span>
+                </>
+              )}
             </div>
           )}
           <h1 className="flex items-baseline gap-1 font-black text-2xl text-ink">
@@ -2384,27 +2448,26 @@ type WatcherChannel = {
   events: WatcherEventLike[];
 };
 
-function useWatcherChannel(): WatcherChannel {
+function useWatcherChannel(explicitSlug?: string): WatcherChannel {
+  const ctxSlug = useContext(ArtistSlugCtx);
+  const artistSlug = explicitSlug || ctxSlug;
   const [data, setData] = useState<WatcherChannel>({ insight: null, state: null, events: [] });
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_WATCHER_URL;
-    const channelId = process.env.NEXT_PUBLIC_CHANNEL_ID;
-    if (!base || !channelId) return;
-    const root = base.replace(/\/$/, '');
+    if (!artistSlug) return;
     let alive = true;
-    Promise.all([
-      fetch(`${root}/channels/${channelId}/insight`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch(`${root}/channels/${channelId}/state`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      fetch(`${root}/channels/${channelId}/events`).then((r) => (r.ok ? r.json() : [])).catch(() => []),
-    ]).then(([insight, state, events]) => {
-      if (alive) setData({
-        insight: insight as WatcherInsight | null,
-        state: state as WatcherState | null,
-        events: Array.isArray(events) ? (events as WatcherEventLike[]) : [],
+    fetch(`/api/artist-live?slug=${encodeURIComponent(artistSlug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+      .then((json) => {
+        if (!alive || !json?.state) return;
+        setData({
+          insight: null,
+          state: json.state as WatcherState,
+          events: [],
+        });
       });
-    });
     return () => { alive = false; };
-  }, []);
+  }, [artistSlug]);
   return data;
 }
 
@@ -2558,20 +2621,16 @@ type CadenceCompare = ReturnType<typeof cadenceComparison>;
 
 function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?: (kind: MissingActionKind) => void; onUpdatePlan?: (updates: Partial<CampaignPlan>) => void }) {
   const watcher = useWatcherChannel();
-  // Keep the watcher-baseline hook mounted (side-effects: first-sight capture)
-  // but we no longer use its return value for display. Hardcoded baseline below.
+  // Keep the watcher-baseline hook mounted (side-effects: first-sight capture).
   useCampaignBaseline(
     watcher.state?.channelId,
     plan.startDate,
     watcher.state ? { subscriberCount: watcher.state.subscriberCount, viewCount: watcher.state.viewCount } : null,
   );
-  // Manual override wins — user-entered baseline values anchored to campaignStart.
-  // Fallback hard-coded demo baseline for the K-Trap campaign so growth is
-  // visible before the watcher has accumulated real history.
-  const HARDCODED_BASELINE_SUBS = 142_000;
-  const HARDCODED_BASELINE_VIEWS = 112_200_000;
-  const effectiveBaselineSubs  = plan.baselineSubs  ?? HARDCODED_BASELINE_SUBS;
-  const effectiveBaselineViews = plan.baselineViews ?? HARDCODED_BASELINE_VIEWS;
+  // Baseline: use plan-stored baselines if the user set them, else derive from
+  // the live channel data (via artist-live API), else fall back to plan.subscriberCount.
+  const effectiveBaselineSubs  = plan.baselineSubs ?? plan.subscriberCount ?? 0;
+  const effectiveBaselineViews = plan.baselineViews ?? 0;
   const baseline: CampaignBaseline = {
     subscriberCount: effectiveBaselineSubs,
     viewCount: effectiveBaselineViews,
@@ -6650,6 +6709,32 @@ export default function YouTubeCampaignCoach() {
   const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number; initialKind?: MissingActionKind }>({ open: false });
   const [timelineModalOpen, setTimelineModalOpen] = useState(false);
 
+  // Resolve the artist slug to a full record (name, channelHandle, phase)
+  // so the Coach can auto-fill fields and lock the plan to the right channel.
+  const [resolvedArtist, setResolvedArtist] = useState<ResolvedArtist>(null);
+  useEffect(() => {
+    if (!artistSlug) return;
+    let alive = true;
+    fetch(`/api/artist-live?slug=${encodeURIComponent(artistSlug)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+      .then((json) => {
+        if (!alive || !json?.artist) return;
+        setResolvedArtist(json.artist as ResolvedArtist);
+        // If the plan doesn't have an artist name yet, seed it from the resolved data.
+        setPlan((prev) => {
+          if (prev.artist && prev.artist.trim().length > 0 && !prev.isExample) return prev;
+          return {
+            ...prev,
+            artist: json.artist.name ?? prev.artist,
+            slug: json.artist.slug,
+            channelHandle: json.artist.channelHandle,
+          };
+        });
+      });
+    return () => { alive = false; };
+  }, [artistSlug]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     try {
       window.localStorage.setItem(storageKey, JSON.stringify(plan));
@@ -6863,6 +6948,8 @@ export default function YouTubeCampaignCoach() {
   // ──────────────────────────────────────────────────────────────────────────
 
   return (
+    <ArtistSlugCtx.Provider value={artistSlug}>
+    <ResolvedArtistCtx.Provider value={resolvedArtist}>
     <div style={{ background: '#FAF7F2' }} className="min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* CAMPAIGN HEADER — artist + campaign name + start date + quick actions */}
@@ -7102,5 +7189,7 @@ export default function YouTubeCampaignCoach() {
         />
       )}
     </div>
+    </ResolvedArtistCtx.Provider>
+    </ArtistSlugCtx.Provider>
   );
 }
