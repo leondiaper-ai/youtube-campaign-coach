@@ -92,17 +92,24 @@ export async function GET(req: NextRequest) {
           videoType: 'unknown' as const,
         }
       : null,
-    latestVideos: uploads.slice(0, 10).map((u) => ({
-      videoId: u.id,
-      title: u.title,
-      publishedAt: u.publishedAt,
-      durationSeconds: u.durationSec,
-      thumbnail: null,
-      kind: (u.durationSec <= 62 ? 'short' : 'video') as 'short' | 'video',
-      views: u.viewCount,
-      likes: u.likeCount,
-      comments: u.commentCount,
-    })),
+    // Include ALL longform videos (official drops must never fall off) + recent shorts
+    latestVideos: (() => {
+      const longform = uploads.filter((u) => u.durationSec > 62 && u.live === 'none');
+      const shorts = uploads.filter((u) => u.durationSec <= 62).slice(0, 20);
+      const ids = new Set([...longform, ...shorts].map((u) => u.id));
+      const combined = uploads.filter((u) => ids.has(u.id));
+      return combined.map((u) => ({
+        videoId: u.id,
+        title: u.title,
+        publishedAt: u.publishedAt,
+        durationSeconds: u.durationSec,
+        thumbnail: null,
+        kind: (u.durationSec <= 62 ? 'short' : 'video') as 'short' | 'video',
+        views: u.viewCount,
+        likes: u.likeCount,
+        comments: u.commentCount,
+      }));
+    })(),
   };
 
   return NextResponse.json({
