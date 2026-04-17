@@ -281,6 +281,28 @@ type YouTubeMomentType =
 
 type YouTubeMomentStatus = 'core_missing' | 'partial' | 'planned' | 'complete';
 
+// ── MOMENT TIER SYSTEM ─────────────────────────────────────────────────────
+// Tier 1 — PRIMARY: campaign anchors, can be "Next Drop"
+// Tier 2 — SUPPORT: must be attached to a Tier 1 moment, never standalone
+// Tier 3 — CONTINUOUS: shorts, posts, BTS — never standalone moments
+type MomentTier = 1 | 2 | 3;
+
+const PRIMARY_MOMENT_TYPES = new Set<YouTubeMomentType>([
+  'official_video', 'album_release', 'album_announce', 'track_moment',
+  'tour', 'festival', 'promo_trip', 'activation', 'live_show', 'tour_announce',
+  'deluxe_release',
+]);
+
+const SUPPORT_MOMENT_TYPES = new Set<YouTubeMomentType>([
+  'lyric_video', 'visualizer',
+]);
+
+function getMomentTier(type: YouTubeMomentType): MomentTier {
+  if (PRIMARY_MOMENT_TYPES.has(type)) return 1;
+  if (SUPPORT_MOMENT_TYPES.has(type)) return 2;
+  return 3;
+}
+
 type YouTubeMoment = {
   id: string;
   title: string;
@@ -293,6 +315,8 @@ type YouTubeMoment = {
   reason: string;            // why this exists in the planner
   weekNum: number;           // links to CampaignWeek
   priority: 'high' | 'medium' | 'low';
+  tier: MomentTier;          // 1=primary, 2=support, 3=continuous
+  parentId?: string;         // for tier-2: ID of the primary moment this supports
 };
 
 // ── MOMENTUM SIGNALS ────────────────────────────────────────────────────────
@@ -2182,10 +2206,28 @@ function buildYouTubeMoments(
       reason: momentReason(cls.type, ev.title),
       weekNum,
       priority: cls.priority,
+      tier: getMomentTier(cls.type),
     });
   }
 
-  return moments.sort((a, b) => a.date.localeCompare(b.date));
+  // Sort by date, then attach Tier 2 moments to their nearest Tier 1 parent
+  moments.sort((a, b) => a.date.localeCompare(b.date));
+  const primaries = moments.filter((m) => m.tier === 1);
+  for (const m of moments) {
+    if (m.tier !== 2) continue;
+    // Find the nearest Tier 1 moment (prefer same or earlier date, then later)
+    let best: YouTubeMoment | null = null;
+    let bestDist = Infinity;
+    for (const p of primaries) {
+      const dist = Math.abs(
+        new Date(m.date).getTime() - new Date(p.date).getTime()
+      );
+      if (dist < bestDist) { best = p; bestDist = dist; }
+    }
+    if (best) m.parentId = best.id;
+  }
+
+  return moments;
 }
 
 type WeekContext = 'tour' | 'festival' | 'pre-release' | 'post-release' | 'catalogue';
@@ -4056,26 +4098,84 @@ function CampaignAssetRollup({ plan }: { plan: CampaignPlan }) {
 
 function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   const watcher = useWatcherChannel();
-  const drop = getNextDrop(plan);
-  if (!drop) return null;
+  const ytMoments = plan.youtubeMoments ?? [];
+  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
 
-  const iso = drop.action.date || drop.dateObj.toISOString().slice(0, 10);
+  // ── Tier 1: find the next PRIMARY moment from youtube moments ──
+  const nextPrimary = useMemo(() => {
+    const primaries = ytMoments
+      .filter((m) => m.tier === 1)
+      .map((m) => ({ ...m, dateObj: new Date(m.date + 'T12:00:00') }))
+      .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+    // Prefer the first future/today primary; fallback to most recent past primary
+    const future = primaries.filter((p) => p.dateObj >= today);
+    return future.length > 0 ? future[0] : (primaries.length > 0 ? primaries[primaries.length - 1] : null);
+  }, [ytMoments, today]);
+
+  // Fallback to legacy getNextDrop when no timeline plan exists
+  const legacyDrop = !nextPrimary ? getNextDrop(plan) : null;
+
+  if (!nextPrimary && !legacyDrop) return null;
+
+  // ── Unified rendering data ──
+  const title = nextPrimary ? nextPrimary.title : legacyDrop!.action.title;
+  const iso = nextPrimary ? nextPrimary.date : (legacyDrop!.action.date || legacyDrop!.dateObj.toISOString().slice(0, 10));
   const dateStr = fmtDate(iso);
   const dayStr = fmtDay(iso);
-  const daysAway = drop.daysAway;
+  const momentDateObj = nextPrimary ? nextPrimary.dateObj : legacyDrop!.dateObj;
+  const daysAway = Math.round((momentDateObj.getTime() - today.getTime()) / 86400000);
   const timeLabel = daysAway < 0
     ? `${Math.abs(daysAway)}d overdue`
-    : daysAway === 0
-    ? 'Today'
-    : daysAway === 1
-    ? 'Tomorrow'
+    : daysAway === 0 ? 'Today'
+    : daysAway === 1 ? 'Tomorrow'
     : `${daysAway}d away`;
   const urgencyColor = daysAway < 0 ? '#FF4A1C' : daysAway <= 6 ? '#FF4A1C' : daysAway <= 14 ? '#FFD24C' : '#1FBE7A';
-  const phase = getPhaseForWeek(drop.weekNum);
-  const support = computeDropSupport(plan, drop.weekNum);
-  const rule = 'This moment needs: 2 Shorts + 1 Post + 1 follow-up Video';
-  const implication = dropImplication(support.strength);
-  const action = dropAction(support.missing, daysAway, watcher.state?.topVideoLast14d ?? null);
+  const weekNum = nextPrimary ? nextPrimary.weekNum : legacyDrop!.weekNum;
+  const phase = getPhaseForWeek(weekNum);
+
+  // ── Gather support items attached to this primary ──
+  const supportMoments = nextPrimary
+    ? ytMoments.filter((m) => m.tier === 2 && m.parentId === nextPrimary.id)
+    : [];
+
+  // ── Support assessment: combine expectedSupport + attached Tier 2 moments ──
+  const support = nextPrimary
+    ? (() => {
+        const expected = nextPrimary.expectedSupport;
+        const weekActions = plan.weeks.find((w) => w.week === weekNum)?.actions ?? [];
+        const cmp = compareSupportVsActual(nextPrimary, watcher.state, weekActions);
+        const missing = cmp.missing;
+        const strength: DropSupportStrength = missing.length === 0 ? 'Strong' : missing.length <= 2 ? 'Partial' : 'Weak';
+        const color = strength === 'Strong' ? '#1FBE7A' : strength === 'Partial' ? '#F5B73D' : '#FF4A1C';
+        return { strength, color, missing, expected };
+      })()
+    : (() => {
+        const s = computeDropSupport(plan, weekNum);
+        return { ...s, expected: [] as string[] };
+      })();
+
+  // ── Focused actions (max 3) and risks (max 2) ──
+  const actions: string[] = [];
+  const risks: string[] = [];
+  if (support.missing.length > 0) {
+    // Top 2-3 most important missing items as actions
+    const topMissing = support.missing.slice(0, 3);
+    for (const m of topMissing) {
+      if (/short/i.test(m)) actions.push(`Post ${m} to warm the algorithm before drop`);
+      else if (/community/i.test(m)) actions.push(`Schedule a Community Post to prime your audience`);
+      else if (/lyric|artwork|visuali/i.test(m)) actions.push(`Ship ${m} within 48h of the primary`);
+      else if (/follow/i.test(m)) actions.push(`Plan a follow-up longform within 7 days`);
+      else actions.push(`Ship ${m}`);
+    }
+  } else {
+    actions.push('Hold cadence — no corrective action needed');
+  }
+  if (daysAway <= 3 && daysAway >= 0 && support.missing.length > 1) {
+    risks.push(`${support.missing.length} support items still missing with ${daysAway}d to go`);
+  }
+  if (daysAway < 0) {
+    risks.push(`This drop is ${Math.abs(daysAway)}d overdue — ship it or reschedule`);
+  }
 
   return (
     <div
@@ -4087,6 +4187,7 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
         style={{ background: phase?.color || urgencyColor }}
       />
       <div className="pl-3">
+        {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-2">
           <div className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.5)' }}>
             Next Drop
@@ -4096,19 +4197,16 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
             <span>{timeLabel}</span>
           </div>
         </div>
+
+        {/* Title + date */}
         <div className="flex items-baseline gap-3 flex-wrap">
-          <h3 className="text-xl font-black tracking-tight leading-tight">{drop.action.title}</h3>
+          <h3 className="text-xl font-black tracking-tight leading-tight">{title}</h3>
           <span className="text-xs font-semibold" style={{ color: 'rgba(250,247,242,0.55)' }}>
             {dateStr} · {dayStr}
           </span>
         </div>
-        {drop.action.featuredArtist && (
-          <div className="text-[11px] font-semibold mt-0.5" style={{ color: 'rgba(250,247,242,0.6)' }}>
-            ft. {drop.action.featuredArtist}
-          </div>
-        )}
 
-        {/* Support strength — Strong / Partial / Weak */}
+        {/* Support strength */}
         <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(250,247,242,0.12)' }}>
           <div className="flex items-baseline gap-3 flex-wrap">
             <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
@@ -4119,38 +4217,46 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
             </span>
           </div>
 
-          {/* Missing list — simple */}
-          {support.missing.length > 0 && (
-            <div className="mt-2.5">
-              <div className="text-[10px] font-mono uppercase tracking-[0.18em] mb-1" style={{ color: 'rgba(250,247,242,0.45)' }}>
-                Missing
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {support.missing.map((m) => (
+          {/* Grouped support items (Tier 2 moments + expected support) */}
+          {(supportMoments.length > 0 || support.expected.length > 0) && (
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {(support.expected.length > 0 ? support.expected : supportMoments.map((m) => m.title)).map((item, i) => {
+                const isMissing = support.missing.includes(item);
+                return (
                   <span
-                    key={m}
-                    className="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold"
-                    style={{ background: 'rgba(255,74,28,0.12)', color: '#FF4A1C' }}
+                    key={i}
+                    className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold"
+                    style={{
+                      background: isMissing ? 'rgba(255,74,28,0.12)' : 'rgba(31,190,122,0.12)',
+                      color: isMissing ? '#FF4A1C' : '#1FBE7A',
+                    }}
                   >
-                    {m}
+                    {isMissing ? '✗' : '✓'} {item}
                   </span>
-                ))}
-              </div>
+                );
+              })}
             </div>
           )}
 
-          {/* Rule · Implication · Action — the three human lines */}
-          <div className="mt-3.5 space-y-1.5">
-            <p className="text-[12.5px]" style={{ color: 'rgba(250,247,242,0.60)' }}>
-              {rule}
-            </p>
-            <p className="text-[13px] leading-snug" style={{ color: support.color }}>
-              {implication}
-            </p>
-            <p className="text-[13.5px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
-              → {action}
-            </p>
+          {/* Actions — focused, max 3 */}
+          <div className="mt-3.5 space-y-1">
+            {actions.map((a, i) => (
+              <p key={i} className="text-[13px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
+                → {a}
+              </p>
+            ))}
           </div>
+
+          {/* Risks — max 2, only when real */}
+          {risks.length > 0 && (
+            <div className="mt-2.5 space-y-1">
+              {risks.map((r, i) => (
+                <p key={i} className="text-[12px] leading-snug" style={{ color: '#FF4A1C' }}>
+                  ⚠ {r}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -6058,14 +6164,14 @@ function dayLabelFromIso(iso: string): DayLabel {
 function deriveLiveTracks(state: WatcherState | null, startDate?: string): AutoTrack[] {
   if (!state || !state.latestVideos) return [];
   const startT = startDate ? new Date(startDate + 'T00:00:00').getTime() : -Infinity;
-  // Only major releases become "drops" with support checklists.
-  // Vlogs, performances, random videos should NOT appear here —
-  // they're supporting content, not drops that need support around them.
-  const MAJOR_TYPES = new Set(['official', 'lyric', 'visualizer', 'audio']);
+  // Only PRIMARY releases (Tier 1) become "drops" with support checklists.
+  // Lyric videos, visualizers, sessions are support content — they attach
+  // to the primary drop, not appear as standalone campaign anchors.
+  const PRIMARY_VIDEO_TYPES = new Set(['official', 'audio']);
   const longform = state.latestVideos.filter(
     (v) => v.kind === 'video' &&
       new Date(v.publishedAt).getTime() >= startT &&
-      MAJOR_TYPES.has(v.videoType ?? 'unknown')
+      PRIMARY_VIDEO_TYPES.has(v.videoType ?? 'unknown')
   );
   if (longform.length === 0) return [];
   const now = Date.now();
@@ -6984,14 +7090,22 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-ink/60">
-          {ytMoments.length > 0 ? (
+          {ytMoments.length > 0 ? (() => {
+            const primaryCount = ytMoments.filter((m) => m.tier === 1).length;
+            const supportCount = ytMoments.filter((m) => m.tier === 2).length;
+            const highPri = ytMoments.filter((m) => m.tier === 1 && m.priority === 'high').length;
+            return (
             <>
-              <span>{ytMoments.length} {ytMoments.length === 1 ? 'moment' : 'moments'}</span>
-              {ytMoments.filter((m) => m.priority === 'high').length > 0 && (
-                <span style={{ color: '#FF4A1C' }}>· {ytMoments.filter((m) => m.priority === 'high').length} high priority</span>
+              <span>{primaryCount} {primaryCount === 1 ? 'drop' : 'drops'}</span>
+              {supportCount > 0 && (
+                <span className="text-ink/40">· {supportCount} support</span>
+              )}
+              {highPri > 0 && (
+                <span style={{ color: '#FF4A1C' }}>· {highPri} high priority</span>
               )}
             </>
-          ) : (
+            );
+          })() : (
             <>
               <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
               {missingSupport > 0 && (
@@ -7130,12 +7244,15 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           );
         })()}
 
-        {/* ── YouTube Moment Planner Cards ────────────────────────────── */}
+        {/* ── YouTube Moment Planner Cards (Tier 1 only, Tier 2 nested) ── */}
         {ytMoments.length > 0 ? (
           <>
-            {ytMoments.map((m) => {
+            {ytMoments.filter((m) => m.tier === 1).map((m) => {
               const dateLabel = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: m.date.startsWith('2027') ? 'numeric' : undefined });
               const typeBadge = m.momentType.replace(/_/g, ' ').toUpperCase();
+
+              // Tier 2 support moments attached to this primary
+              const childMoments = ytMoments.filter((c) => c.tier === 2 && c.parentId === m.id);
 
               // ── Compute REAL support comparison ──
               const weekActions = plan.weeks.find((w) => w.week === m.weekNum)?.actions ?? [];
@@ -7145,7 +7262,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
               const momentum = computeMomentMomentum(m, supportCmp, watcher.state, todayRef);
               const mMeta = MOMENTUM_STATE_META[momentum.state];
 
-              // Support status drives the card status (overrides the static 'planned')
+              // Support status drives the card status
               const supportStatusColor =
                 supportCmp.status === 'COMPLETE' ? '#1FBE7A' :
                 supportCmp.status === 'PARTIAL' ? '#FFD24C' :
@@ -7160,7 +7277,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                   {/* Momentum signal bar */}
                   <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: mMeta.bg }}>
                     <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: mMeta.color }}>
-                      MOMENTUM {mMeta.label}
+                      {mMeta.label}
                     </span>
                     <span className="text-[10px] text-ink/55 font-semibold flex-1 truncate">
                       {momentum.reason}
@@ -7189,22 +7306,17 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                       </span>
                     </div>
 
-                    {/* Headline — why this matters */}
-                    <div className="text-[11px] text-ink/65 font-semibold mt-1.5 leading-snug">
-                      {m.headline}
-                    </div>
-
-                    {/* Action — what to do now */}
+                    {/* Action — what to do now (focused, one line) */}
                     <div className="mt-2 px-2 py-1.5 rounded" style={{ background: mMeta.bg }}>
                       <div className="text-[11px] font-bold leading-snug" style={{ color: mMeta.color }}>
-                        {momentum.action}
+                        → {momentum.action}
                       </div>
                     </div>
 
-                    {/* Support comparison: planned vs actual */}
+                    {/* Support checklist — grouped under this primary */}
                     <div className="mt-2">
                       <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
-                        Planned vs actual support
+                        Support
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {supportCmp.expected.map((item, i) => {
@@ -7216,7 +7328,6 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                               style={{
                                 background: isShipped ? 'rgba(31,190,122,0.12)' : 'rgba(255,74,28,0.08)',
                                 color: isShipped ? '#1FBE7A' : '#FF4A1C',
-                                textDecoration: isShipped ? 'none' : 'none',
                               }}
                             >
                               {isShipped ? '✓' : '✗'} {item}
@@ -7225,6 +7336,28 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                         })}
                       </div>
                     </div>
+
+                    {/* Nested Tier 2 support moments (lyric video, visualizer, etc.) */}
+                    {childMoments.length > 0 && (
+                      <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }}>
+                        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1">
+                          Attached Support
+                        </div>
+                        {childMoments.map((child) => {
+                          const childDate = new Date(child.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                          const childType = child.momentType.replace(/_/g, ' ');
+                          return (
+                            <div key={child.id} className="flex items-center gap-2 py-0.5">
+                              <span className="text-[10px] font-semibold text-ink/55">
+                                {childType}
+                              </span>
+                              <span className="text-[10px] text-ink/35">{child.title}</span>
+                              <span className="text-[10px] text-ink/30">{childDate}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
 
                     {/* Shipped from YouTube (real data) */}
                     {supportCmp.shipped.length > 0 && (
@@ -7320,9 +7453,11 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
         {ytMoments.length > 0 && (
           <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(14,14,14,0.08)' }}>
             {(() => {
-              const highPriority = ytMoments.filter((m) => m.priority === 'high');
-              const medPriority = ytMoments.filter((m) => m.priority === 'medium');
-              const coreMissing = ytMoments.filter((m) => m.status === 'core_missing');
+              // Only Tier 1 (primary) moments drive insight — no support noise
+              const primariesInPhase = ytMoments.filter((m) => m.tier === 1);
+              const highPriority = primariesInPhase.filter((m) => m.priority === 'high');
+              const medPriority = primariesInPhase.filter((m) => m.priority === 'medium');
+              const coreMissing = primariesInPhase.filter((m) => m.status === 'core_missing');
               // Phase-scoped shorts cadence (all phases, not just BUILD)
               const phaseShorts = liveVideos.filter((v) => {
                 const t = new Date(v.publishedAt).getTime();
