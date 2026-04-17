@@ -262,12 +262,15 @@ type ViewMode = 'campaign' | 'drop';
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// Default phases for the seed/demo plan. For dynamically-generated plans,
+// enrichPlanWeeks assigns phase labels to each week and
+// getPhaseForWeek reads those labels, so this is just the fallback.
 const CAMPAIGN_PHASES: CampaignPhase[] = [
-  { name: 'START',        weekStart: 1,  weekEnd: 3,  color: '#2C25FF' },
-  { name: 'RELEASE', weekStart: 4,  weekEnd: 8,  color: '#1FBE7A' },
-  { name: 'PUSH', weekStart: 9,  weekEnd: 13, color: '#FFD24C' },
-  { name: 'PEAK', weekStart: 14, weekEnd: 22, color: '#FF4A1C' },
-  { name: 'SUSTAIN',          weekStart: 23, weekEnd: 24, color: '#FFD3C9' },
+  { name: 'START',   weekStart: 1,    weekEnd: 3,   color: '#2C25FF' },
+  { name: 'RELEASE', weekStart: 4,    weekEnd: 8,   color: '#1FBE7A' },
+  { name: 'PUSH',    weekStart: 9,    weekEnd: 13,  color: '#FFD24C' },
+  { name: 'PEAK',    weekStart: 14,   weekEnd: 22,  color: '#FF4A1C' },
+  { name: 'SUSTAIN', weekStart: 23,   weekEnd: 200, color: '#FFD3C9' },
 ];
 
 const ACTION_LABELS: Record<ActionType, string> = {
@@ -586,7 +589,53 @@ function getNextMomentBridge(activeWeek: CampaignWeek, nextMoment: { week: Campa
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function getPhaseForWeek(weekNum: number): CampaignPhase | undefined {
+const PHASE_COLORS: Record<PhaseName, string> = {
+  START: '#2C25FF', RELEASE: '#1FBE7A', PUSH: '#FFD24C', PEAK: '#FF4A1C', SUSTAIN: '#FFD3C9',
+};
+
+/**
+ * Derive CampaignPhase[] from a plan's week labels. If weeks have labels
+ * (set by enrichPlanWeeks), use those. Otherwise fall back to CAMPAIGN_PHASES.
+ * This ensures the UI renders the correct phases for plans of any length.
+ */
+function getPlanPhases(plan: CampaignPlan): CampaignPhase[] {
+  const hasLabels = plan.weeks.some((w) => w.label);
+  if (!hasLabels) return CAMPAIGN_PHASES;
+
+  const phaseOrder: PhaseName[] = ['START', 'RELEASE', 'PUSH', 'PEAK', 'SUSTAIN'];
+  const phases: CampaignPhase[] = [];
+
+  for (const name of phaseOrder) {
+    const weeksInPhase = plan.weeks.filter((w) => w.label === name);
+    if (weeksInPhase.length === 0) continue;
+    phases.push({
+      name,
+      weekStart: weeksInPhase[0].week,
+      weekEnd: weeksInPhase[weeksInPhase.length - 1].week,
+      color: PHASE_COLORS[name],
+    });
+  }
+
+  // If no phases were derived (e.g. labels missing), fall back
+  return phases.length > 0 ? phases : CAMPAIGN_PHASES;
+}
+
+function getPhaseForWeek(weekNum: number, plan?: CampaignPlan): CampaignPhase | undefined {
+  // If the plan has week labels (set by enrichPlanWeeks), use those for
+  // dynamic plans that go beyond the default 24-week ranges.
+  if (plan && plan.weeks) {
+    const w = plan.weeks.find((wk) => wk.week === weekNum);
+    if (w?.label) {
+      const name = w.label as PhaseName;
+      // Build a synthetic CampaignPhase from the label
+      const color = PHASE_COLORS[name] ?? '#FFD3C9';
+      // Find the contiguous range of this phase
+      const samePhase = plan.weeks.filter((wk) => wk.label === name);
+      const weekStart = samePhase[0]?.week ?? weekNum;
+      const weekEnd = samePhase[samePhase.length - 1]?.week ?? weekNum;
+      return { name, weekStart, weekEnd, color };
+    }
+  }
   return CAMPAIGN_PHASES.find((p) => weekNum >= p.weekStart && weekNum <= p.weekEnd);
 }
 
@@ -2363,7 +2412,7 @@ function CampaignTimeline({ plan, onPhaseClick }: {
   const plannedPhase = activeIdx >= 0 ? getPhaseForWeek(plan.weeks[activeIdx]?.week) : null;
   // Actual phase = where execution says we really are
   const actualPhaseName = detectActualPhase(plan);
-  const actualPhase = CAMPAIGN_PHASES.find((p) => p.name === actualPhaseName) || null;
+  const actualPhase = getPlanPhases(plan).find((p) => p.name === actualPhaseName) || null;
   // Use planned for timeline highlight, but flag drift
   const currentPhase = plannedPhase;
   const phaseDrift = plannedPhase && actualPhase && plannedPhase.name !== actualPhase.name;
@@ -2385,7 +2434,7 @@ function CampaignTimeline({ plan, onPhaseClick }: {
           className="w-full flex gap-1 rounded-xl overflow-hidden p-1"
           style={{ background: '#FAF7F2', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
         >
-          {CAMPAIGN_PHASES.map((phase) => {
+          {getPlanPhases(plan).map((phase) => {
             const weekCount = phase.weekEnd - phase.weekStart + 1;
             const isCurrent = currentPhase?.name === phase.name;
             const isPast = activeIdx >= 0 && plan.weeks[activeIdx].week > phase.weekEnd;
@@ -5287,6 +5336,7 @@ type AutoTrack = {
 
 function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
   const tracks: AutoTrack[] = [];
+  const planPhases = getPlanPhases(plan);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -5333,7 +5383,7 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
     }
 
     const supportPlan = (plan.supportPlans || []).find((sp) => sp.momentWeek === moment.weekNum) || null;
-    const phase = CAMPAIGN_PHASES.find((p) => moment.weekNum >= p.weekStart && moment.weekNum <= p.weekEnd);
+    const phase = planPhases.find((p) => moment.weekNum >= p.weekStart && moment.weekNum <= p.weekEnd);
 
     // Derive track name from the actual hero action, not the hardcoded moment name
     const trackName = heroAction
@@ -5385,7 +5435,7 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
         supportPlan: null,
         moment: null,
         status,
-        phase: CAMPAIGN_PHASES.find((p) => week.week >= p.weekStart && week.week <= p.weekEnd),
+        phase: planPhases.find((p) => week.week >= p.weekStart && week.week <= p.weekEnd),
       });
     }
   }
@@ -5396,7 +5446,7 @@ function deriveAutoTracks(plan: CampaignPlan): AutoTrack[] {
   const coveredWeeks = new Set(tracks.map((t) => t.weekNum));
   const phaseHasTrack = (p: CampaignPhase) =>
     tracks.some((t) => t.weekNum >= p.weekStart && t.weekNum <= p.weekEnd);
-  for (const ph of CAMPAIGN_PHASES) {
+  for (const ph of planPhases) {
     if (phaseHasTrack(ph)) continue;
     const midWeek = Math.min(
       plan.weeks.length,
@@ -5445,8 +5495,14 @@ function dayLabelFromIso(iso: string): DayLabel {
 function deriveLiveTracks(state: WatcherState | null, startDate?: string): AutoTrack[] {
   if (!state || !state.latestVideos) return [];
   const startT = startDate ? new Date(startDate + 'T00:00:00').getTime() : -Infinity;
+  // Only major releases become "drops" with support checklists.
+  // Vlogs, performances, random videos should NOT appear here —
+  // they're supporting content, not drops that need support around them.
+  const MAJOR_TYPES = new Set(['official', 'lyric', 'visualizer', 'audio']);
   const longform = state.latestVideos.filter(
-    (v) => v.kind === 'video' && new Date(v.publishedAt).getTime() >= startT
+    (v) => v.kind === 'video' &&
+      new Date(v.publishedAt).getTime() >= startT &&
+      MAJOR_TYPES.has(v.videoType ?? 'unknown')
   );
   if (longform.length === 0) return [];
   const now = Date.now();
@@ -7474,7 +7530,7 @@ export default function YouTubeCampaignCoach() {
 
         {planOpen && (
           <div className="mt-3">
-            {CAMPAIGN_PHASES.map((phase) => (
+            {getPlanPhases(plan).map((phase) => (
           <PhaseBlock
             key={phase.name}
             phase={phase}
