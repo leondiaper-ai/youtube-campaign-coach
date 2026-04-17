@@ -201,6 +201,12 @@ export default function CampaignCockpit() {
           </h1>
         </div>
         <div className="flex items-center gap-3 shrink-0">
+          <Link
+            href="/growth"
+            className="text-[11px] tracking-wide text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4"
+          >
+            Control
+          </Link>
           <button
             onClick={runChecks}
             disabled={running}

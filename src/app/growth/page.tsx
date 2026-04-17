@@ -1,121 +1,268 @@
 import Link from 'next/link';
-import { ARTISTS, fmtNum } from '@/lib/artists';
+import { ARTISTS, fmtNum, daysSince, type Artist, type LiveSnap } from '@/lib/artists';
+import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
-import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
-import Sparkline from '@/components/Sparkline';
+import { readHistory, deltaOver } from '@/lib/snapshots';
 
 export const revalidate = 600;
 
+export const metadata = {
+  title: 'Control — YouTube Campaign System',
+  description: 'Which channels are growing, flat, or at risk.',
+};
+
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
+const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
-const GOOD = '#0C6A3F';
-const BAD = '#8A1F0C';
 
-export default async function GrowthPage() {
-  const rows = await Promise.all(
-    ARTISTS.map(async (a) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// STATUS SYSTEM — one label per artist, no interpretation required
+// ─────────────────────────────────────────────────────────────────────────────
+type ControlStatus = 'Growing' | 'Flat' | 'At risk';
+
+const STATUS_STYLE: Record<ControlStatus, { bg: string; fg: string; dot: string; rowBg: string }> = {
+  'At risk':  { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C', rowBg: '#FFF8F5' },
+  'Flat':     { bg: '#F6F1E7', fg: '#6B5E4A', dot: '#B0A68E', rowBg: PAPER },
+  'Growing':  { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A', rowBg: '#F8FDF9' },
+};
+
+const STATUS_RANK: Record<ControlStatus, number> = {
+  'At risk': 0,
+  'Flat': 1,
+  'Growing': 2,
+};
+
+/**
+ * Determine status from 7d deltas + upload recency.
+ *
+ * Growing: positive view OR sub movement in 7d
+ * At risk: losing subs, OR no uploads in 30+ days, OR declining views with no uploads in 14d
+ * Flat:    everything else
+ */
+function deriveStatus(
+  subs7: { delta: number; pct: number } | null,
+  views7: { delta: number; pct: number } | null,
+  lastUpDays: number | null,
+  uploads30d: number,
+): ControlStatus {
+  // At risk: channel gone cold or actively losing
+  if (lastUpDays != null && lastUpDays > 30) return 'At risk';
+  if (uploads30d === 0 && lastUpDays != null) return 'At risk';
+  if (subs7 && subs7.delta < 0 && subs7.pct < -0.002) return 'At risk';
+  if (lastUpDays != null && lastUpDays > 14 && views7 && views7.delta <= 0) return 'At risk';
+
+  // Growing: meaningful positive movement
+  if (views7 && views7.delta > 0 && views7.pct > 0.005) return 'Growing';
+  if (subs7 && subs7.delta > 0 && subs7.pct > 0.002) return 'Growing';
+
+  return 'Flat';
+}
+
+/** One-line reason for the status — blunt, no jargon */
+function statusReason(
+  status: ControlStatus,
+  subs7: { delta: number; pct: number } | null,
+  views7: { delta: number; pct: number } | null,
+  lastUpDays: number | null,
+  uploads30d: number,
+): string {
+  if (status === 'At risk') {
+    if (lastUpDays != null && lastUpDays > 30) return `No uploads in ${lastUpDays} days`;
+    if (uploads30d === 0) return 'No activity in 30 days';
+    if (subs7 && subs7.delta < 0) return `Losing subscribers (${subs7.delta.toLocaleString()} in 7d)`;
+    if (lastUpDays != null && lastUpDays > 14) return `Not posting. Last upload ${lastUpDays}d ago`;
+    return 'Declining';
+  }
+  if (status === 'Growing') {
+    if (views7 && views7.delta > 0) return `${fmtDelta(views7.delta)} views (7d)`;
+    if (subs7 && subs7.delta > 0) return `+${subs7.delta.toLocaleString()} subs (7d)`;
+    return 'Positive movement';
+  }
+  // Flat
+  if (views7 && views7.delta === 0) return '0 views (7d)';
+  if (!views7 && !subs7) return 'No growth data yet';
+  return 'No meaningful movement (7d)';
+}
+
+function fmtDelta(n: number): string {
+  const sign = n >= 0 ? '+' : '';
+  if (Math.abs(n) >= 1_000_000) return `${sign}${(n / 1_000_000).toFixed(1)}M`;
+  if (Math.abs(n) >= 1_000) return `${sign}${(n / 1_000).toFixed(1)}K`;
+  return `${sign}${n}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+type RowData = {
+  artist: Artist;
+  snap: LiveSnap | null;
+  subs7: { delta: number; pct: number } | null;
+  views7: { delta: number; pct: number } | null;
+  lastUpDays: number | null;
+  uploads30d: number;
+  status: ControlStatus;
+  reason: string;
+};
+
+export default async function ControlPage() {
+  const custom = await listCustomArtists();
+  const allArtists = [...ARTISTS, ...custom].filter(
+    (a, i, arr) => arr.findIndex((b) => b.slug === a.slug) === i
+  );
+
+  const rows: RowData[] = await Promise.all(
+    allArtists.map(async (a) => {
       const snap = a.channelHandle ? await fetchChannelSnap(a.channelHandle) : null;
       const history =
         snap?.channelId && !snap.error ? await readHistory(snap.channelId) : [];
-      return {
-        artist: a,
-        snap,
-        history,
-        subs7: deltaOver(history, 7, 'subs'),
-        subs30: deltaOver(history, 30, 'subs'),
-        views7: deltaOver(history, 7, 'views'),
-        subsSeries: seriesForField(history, 'subs', 30),
-      };
+      const subs7 = deltaOver(history, 7, 'subs');
+      const views7 = deltaOver(history, 7, 'views');
+      const lastUpDays = daysSince(snap?.lastUploadAt);
+      const uploads30d = snap?.uploads30d ?? 0;
+      const status = deriveStatus(subs7, views7, lastUpDays, uploads30d);
+      const reason = statusReason(status, subs7, views7, lastUpDays, uploads30d);
+      return { artist: a, snap, subs7, views7, lastUpDays, uploads30d, status, reason };
     })
   );
-  const sorted = [...rows].sort(
-    (a, b) => (b.subs7?.pct ?? -Infinity) - (a.subs7?.pct ?? -Infinity)
-  );
-  const tracked = rows.filter((r) => r.history.length > 0).length;
+
+  // Sort: At risk → Flat → Growing
+  const sorted = [...rows].sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
+
+  const notGrowing = rows.filter((r) => r.status !== 'Growing').length;
+  const atRisk = rows.filter((r) => r.status === 'At risk').length;
 
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-      <div className="max-w-[1100px] mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-6">
+      <div className="max-w-[960px] mx-auto px-6 py-10">
+        {/* Breadcrumb */}
+        <div className="flex items-center justify-between mb-8">
           <Link href="/cockpit" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
-            ← Cockpit
+            ← All artists
           </Link>
-          <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
-            Growth · {tracked}/{rows.length} tracked
-          </div>
+          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35">
+            Live · YouTube API
+          </span>
         </div>
-        <h1 className="font-black text-3xl leading-tight">Growth</h1>
-        <p className="text-[13px] text-ink/65 mt-2 max-w-[60ch]">
-          Time-series across every tracked artist. Daily snapshot, 30-day window.
-          History builds as the cron runs.
-        </p>
 
-        <div className="mt-8 rounded-xl overflow-hidden border" style={{ borderColor: MUTED, background: PAPER }}>
+        {/* ─── HEADER ─────────────────────────────────────────────────────── */}
+        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
+          Control
+        </div>
+        <h1 className="font-black text-3xl mt-1">Channel health</h1>
+        <div className="text-[13px] text-ink/50 mt-1">
+          Track which channels are growing vs stalling.
+        </div>
+
+        {/* ─── SUMMARY STRIP — blunt headline ────────────────────────────── */}
+        <div
+          className="mt-5 rounded-xl px-5 py-3.5 flex items-center gap-4 flex-wrap"
+          style={{ background: notGrowing > 0 ? '#FFE2D8' : '#E6F8EE' }}
+        >
+          <span className="font-black text-[15px]" style={{ color: notGrowing > 0 ? '#8A1F0C' : '#0C6A3F' }}>
+            {notGrowing}/{rows.length} channel{rows.length === 1 ? '' : 's'} not growing
+          </span>
+          {atRisk > 0 && (
+            <>
+              <span className="text-ink/20">·</span>
+              <span className="font-bold text-[13px]" style={{ color: '#8A1F0C' }}>
+                {atRisk} at risk
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* ─── TABLE ──────────────────────────────────────────────────────── */}
+        <div className="mt-6 rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
+          {/* Header row */}
           <div
-            className="grid grid-cols-[1.6fr_1.2fr_1fr_1fr_1fr] gap-4 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-ink/45 border-b"
-            style={{ borderColor: MUTED, background: '#F6F1E7' }}
+            className="grid grid-cols-[1.8fr_0.8fr_0.9fr_0.9fr_1fr] gap-3 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
+            style={{ borderColor: MUTED, background: SOFT }}
           >
             <div>Artist</div>
-            <div>Subs · 30d trend</div>
-            <div>Subs 7d</div>
-            <div>Subs 30d</div>
-            <div>Views 7d</div>
+            <div>Status</div>
+            <div className="text-right">Subs</div>
+            <div className="text-right">Subs (7d)</div>
+            <div className="text-right">Views (7d)</div>
           </div>
+
+          {/* Data rows */}
           {sorted.map((r, i) => (
-            <GrowthRow key={r.artist.slug} row={r} last={i === sorted.length - 1} />
+            <ControlRow key={r.artist.slug} row={r} last={i === sorted.length - 1} />
           ))}
         </div>
 
-        <div className="mt-12 text-[10px] uppercase tracking-[0.18em] text-ink/35">
-          Snapshots stored daily via Vercel Cron · backfills from today forward
+        {/* Footer */}
+        <div className="mt-12 text-[10px] uppercase tracking-[0.18em] text-ink/25">
+          Control watches · Watcher diagnoses · Coach plans
         </div>
       </div>
     </main>
   );
 }
 
-function GrowthRow({ row, last }: { row: any; last: boolean }) {
-  const { artist, snap, history, subs7, subs30, views7, subsSeries } = row;
-  const subs = snap?.subs != null ? fmtNum(snap.subs) : '—';
-  const fmt = (d: { delta: number; pct: number } | null) => {
-    if (!d) return '—';
-    const sign = d.delta > 0 ? '+' : d.delta < 0 ? '' : '';
-    const n =
-      Math.abs(d.delta) >= 1_000_000
-        ? (d.delta / 1_000_000).toFixed(1) + 'M'
-        : Math.abs(d.delta) >= 1_000
-        ? (d.delta / 1_000).toFixed(1) + 'K'
-        : String(d.delta);
-    return `${sign}${n} (${(d.pct * 100).toFixed(1)}%)`;
-  };
-  const color = (d: { delta: number } | null) =>
-    !d ? '#8A8A8A' : d.delta > 0 ? GOOD : d.delta < 0 ? BAD : '#8A8A8A';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TABLE ROW — clickable → opens Watcher for that artist
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function ControlRow({ row, last }: { row: RowData; last: boolean }) {
+  const { artist, snap, subs7, views7, status, reason } = row;
+  const st = STATUS_STYLE[status];
+  const subsTotal = snap?.subs != null ? fmtNum(snap.subs) : '—';
+
+  const fmtSubs7 = subs7
+    ? `${subs7.delta >= 0 ? '+' : ''}${subs7.delta.toLocaleString()}`
+    : '—';
+  const fmtViews7 = views7 ? fmtDelta(views7.delta) : '—';
+
+  const subsColor = subs7
+    ? subs7.delta > 0 ? '#0C6A3F' : subs7.delta < 0 ? '#8A1F0C' : undefined
+    : undefined;
+  const viewsColor = views7
+    ? views7.delta > 0 ? '#0C6A3F' : views7.delta < 0 ? '#8A1F0C' : undefined
+    : undefined;
+
   return (
     <Link
       href={`/watcher/${artist.slug}`}
-      className={`grid grid-cols-[1.6fr_1.2fr_1fr_1fr_1fr] gap-4 px-5 py-4 items-center hover:bg-[#F6F1E7] ${
+      className={`grid grid-cols-[1.8fr_0.8fr_0.9fr_0.9fr_1fr] gap-3 px-5 py-4 items-center hover:brightness-[0.97] transition-all ${
         last ? '' : 'border-b'
       }`}
-      style={{ borderColor: MUTED }}
+      style={{ borderColor: MUTED, background: st.rowBg }}
     >
+      {/* Artist */}
       <div className="min-w-0">
-        <div className="font-bold text-[14px] truncate">{artist.name}</div>
-        <div className="text-[10px] text-ink/45 mt-0.5 font-mono">
-          {subs} subs · {history.length}d history
-        </div>
+        <div className="font-black text-[14px] truncate">{artist.name}</div>
+        <div className="text-[11px] text-ink/40 mt-0.5 leading-snug">{reason}</div>
       </div>
-      <div className="flex items-center gap-3">
-        <Sparkline data={subsSeries} width={140} height={36} />
+
+      {/* Status badge */}
+      <div>
+        <span
+          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.12em] whitespace-nowrap"
+          style={{ background: st.bg, color: st.fg }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
+          {status}
+        </span>
       </div>
-      <div className="text-[12px] font-mono" style={{ color: color(subs7) }}>
-        {fmt(subs7)}
+
+      {/* Subs total */}
+      <div className="text-right text-[13px] font-bold tabular-nums">
+        {subsTotal}
       </div>
-      <div className="text-[12px] font-mono" style={{ color: color(subs30) }}>
-        {fmt(subs30)}
+
+      {/* Subs 7d delta */}
+      <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
+        {fmtSubs7}
       </div>
-      <div className="text-[12px] font-mono" style={{ color: color(views7) }}>
-        {fmt(views7)}
+
+      {/* Views 7d delta */}
+      <div className="text-right text-[13px] tabular-nums font-bold" style={viewsColor ? { color: viewsColor } : { color: 'rgba(14,14,14,0.35)' }}>
+        {fmtViews7}
       </div>
     </Link>
   );
