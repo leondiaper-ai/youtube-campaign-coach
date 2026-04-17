@@ -183,9 +183,6 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
 
-        {/* ─── CHANNEL CONTEXT — what's happening right now ────────────── */}
-        {isLive && <ChannelContext uploads={live?.recentUploads ?? []} artistName={artist.name} />}
-
         {/* ─── 2. PERFORMANCE SNAPSHOT — numbers only ─────────────────── */}
         <div className="mt-4 grid grid-cols-4 gap-3">
           <MetricTile
