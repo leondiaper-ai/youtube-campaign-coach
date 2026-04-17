@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { ARTISTS, fmtNum, daysSince, type Artist, type LiveSnap } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
-import { readHistory, deltaOver } from '@/lib/snapshots';
+import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
+import Sparkline from '@/components/Sparkline';
 
 export const revalidate = 600;
 
@@ -105,6 +106,7 @@ type RowData = {
   uploads30d: number;
   status: ControlStatus;
   reason: string;
+  subsSeries: { x: number; y: number }[];
 };
 
 export default async function ControlPage() {
@@ -122,9 +124,10 @@ export default async function ControlPage() {
       const views7 = deltaOver(history, 7, 'views');
       const lastUpDays = daysSince(snap?.lastUploadAt);
       const uploads30d = snap?.uploads30d ?? 0;
+      const subsSeries = seriesForField(history, 'subs', 30);
       const status = deriveStatus(subs7, views7, lastUpDays, uploads30d);
       const reason = statusReason(status, subs7, views7, lastUpDays, uploads30d);
-      return { artist: a, snap, subs7, views7, lastUpDays, uploads30d, status, reason };
+      return { artist: a, snap, subs7, views7, lastUpDays, uploads30d, status, reason, subsSeries };
     })
   );
 
@@ -178,10 +181,11 @@ export default async function ControlPage() {
         <div className="mt-6 rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
           {/* Header row */}
           <div
-            className="grid grid-cols-[1.8fr_0.8fr_0.9fr_0.9fr_1fr] gap-3 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
+            className="grid grid-cols-[1.6fr_0.7fr_0.7fr_0.8fr_0.8fr_0.9fr] gap-3 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
             style={{ borderColor: MUTED, background: SOFT }}
           >
             <div>Artist</div>
+            <div>30d trend</div>
             <div>Status</div>
             <div className="text-right">Subs</div>
             <div className="text-right">Subs (7d)</div>
@@ -208,9 +212,17 @@ export default async function ControlPage() {
 // TABLE ROW — clickable → opens Watcher for that artist
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/** Sparkline colour matched to status */
+const SPARK_COLOR: Record<ControlStatus, { stroke: string; fill: string }> = {
+  'Growing':  { stroke: '#0C6A3F', fill: 'rgba(12,106,63,0.08)' },
+  'Flat':     { stroke: '#B0A68E', fill: 'rgba(176,166,142,0.06)' },
+  'At risk':  { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
+};
+
 function ControlRow({ row, last }: { row: RowData; last: boolean }) {
-  const { artist, snap, subs7, views7, status, reason } = row;
+  const { artist, snap, subs7, views7, status, reason, subsSeries } = row;
   const st = STATUS_STYLE[status];
+  const sp = SPARK_COLOR[status];
   const subsTotal = snap?.subs != null ? fmtNum(snap.subs) : '—';
 
   const fmtSubs7 = subs7
@@ -228,7 +240,7 @@ function ControlRow({ row, last }: { row: RowData; last: boolean }) {
   return (
     <Link
       href={`/watcher/${artist.slug}`}
-      className={`grid grid-cols-[1.8fr_0.8fr_0.9fr_0.9fr_1fr] gap-3 px-5 py-4 items-center hover:brightness-[0.97] transition-all ${
+      className={`grid grid-cols-[1.6fr_0.7fr_0.7fr_0.8fr_0.8fr_0.9fr] gap-3 px-5 py-4 items-center hover:brightness-[0.97] transition-all ${
         last ? '' : 'border-b'
       }`}
       style={{ borderColor: MUTED, background: st.rowBg }}
@@ -237,6 +249,11 @@ function ControlRow({ row, last }: { row: RowData; last: boolean }) {
       <div className="min-w-0">
         <div className="font-black text-[14px] truncate">{artist.name}</div>
         <div className="text-[11px] text-ink/40 mt-0.5 leading-snug">{reason}</div>
+      </div>
+
+      {/* 30d sparkline */}
+      <div className="flex items-center">
+        <Sparkline data={subsSeries} width={100} height={32} stroke={sp.stroke} fill={sp.fill} />
       </div>
 
       {/* Status badge */}
