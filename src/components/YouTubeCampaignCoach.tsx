@@ -4527,31 +4527,37 @@ function useExecutionGaps(plan: CampaignPlan) {
 }
 
 /**
- * Compact inline card — replaces the large block. Shows gap count + CTA.
+ * Compact inline strip — primary trigger for managed execution.
+ * Headline focuses on outcome ("Campaign under-supported — N key gaps limiting reach")
+ * with a clear CTA button. Clicking anywhere opens the modal.
  */
 function ExecutionLayer({ plan, onOpenModal }: { plan: CampaignPlan; onOpenModal: () => void }) {
   const exec = useExecutionGaps(plan);
   if (!exec || exec.gaps.length < 2) return null;
 
-  const statusColor = '#F08A3C'; // orange = recommended
-
   return (
     <div className="mt-4">
       <button
         onClick={onOpenModal}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition hover:shadow-sm"
-        style={{ background: '#F6F1E7', border: '1px solid rgba(240,138,60,0.2)' }}
+        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-left transition hover:shadow-md group"
+        style={{ background: '#F6F1E7', border: '1px solid rgba(240,138,60,0.25)' }}
       >
-        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColor }} />
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] font-black text-ink">
-            Execution status: <span style={{ color: statusColor }}>Recommended</span>
+          <div className="text-[12px] font-black text-ink">
+            ⚠️ Campaign under-supported — {exec.gaps.length} key gap{exec.gaps.length !== 1 ? 's' : ''} limiting reach
           </div>
-          <div className="text-[10px] font-semibold text-ink/50">
-            This campaign has {exec.gaps.length} missing support actions · −{exec.reachLoss}% estimated reach
-          </div>
+          {exec.reachLoss > 0 && (
+            <div className="text-[10px] font-semibold text-ink/45 mt-0.5">
+              Estimated reach impact: −{exec.reachLoss}%
+            </div>
+          )}
         </div>
-        <span className="text-[11px] font-bold text-ink/40 shrink-0">Open →</span>
+        <span
+          className="shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.12em] text-white transition group-hover:opacity-90"
+          style={{ background: '#F08A3C' }}
+        >
+          Enable Managed Execution
+        </span>
       </button>
     </div>
   );
@@ -4559,17 +4565,25 @@ function ExecutionLayer({ plan, onOpenModal }: { plan: CampaignPlan; onOpenModal
 
 /**
  * Top-level button for action row — "Managed Execution" with status dot.
+ * Grey = inactive, Orange = recommended, Green = active.
  */
 function ManagedExecutionButton({ plan, onClick }: { plan: CampaignPlan; onClick: () => void }) {
   const exec = useExecutionGaps(plan);
   const hasGaps = exec && exec.gaps.length >= 2;
-  const dotColor = hasGaps ? '#F08A3C' : '#71717a'; // orange if recommended, grey if inactive
+  // grey = inactive, orange = recommended (has gaps)
+  const dotColor = hasGaps ? '#F08A3C' : '#A1A1AA';
+  const accent = hasGaps ? '#F08A3C' : undefined;
 
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.14em] transition hover:shadow-sm"
-      style={{ background: hasGaps ? 'rgba(240,138,60,0.08)' : 'rgba(14,14,14,0.04)', color: hasGaps ? '#8A4A1A' : 'rgba(14,14,14,0.5)', border: `1px solid ${hasGaps ? 'rgba(240,138,60,0.2)' : 'rgba(14,14,14,0.08)'}` }}
+      title="Fix missing campaign support and run execution"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.14em] transition hover:shadow-sm"
+      style={{
+        background: hasGaps ? 'rgba(240,138,60,0.08)' : 'rgba(14,14,14,0.04)',
+        color: hasGaps ? '#8A4A1A' : 'rgba(14,14,14,0.5)',
+        border: `1px solid ${accent ? 'rgba(240,138,60,0.22)' : 'rgba(14,14,14,0.08)'}`,
+      }}
     >
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor }} />
       Managed Execution
