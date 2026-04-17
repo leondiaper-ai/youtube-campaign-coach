@@ -245,7 +245,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             style={{ borderColor: MUTED, background: PAPER }}
           >
             <div className="text-[15px] font-bold leading-snug">
-              {directAction(decision, fixNow, secondaryOpps)}
+              {directAction(decision, fixNow, secondaryOpps, videoOppsAll)}
             </div>
             <div className="text-[12px] text-ink/50 mt-2 leading-snug max-w-[60ch]">
               {directOutcome(decision)}
@@ -361,14 +361,19 @@ function YouTubeMark() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function directAction(
-  decision: { type: string; headline: string },
+  decision: { type: string; headline: string; signals: string[] },
   fixNow: Opportunity[],
   secondaryOpps: Opportunity[],
+  videoOpps: Opportunity[],
 ): string {
   if (decision.type === 'MAINTAIN')
     return 'Keep current cadence. Channel is active and holding momentum.';
-  if (decision.type === 'ACCELERATE')
-    return decision.headline;
+  if (decision.type === 'ACCELERATE') {
+    // Push the specific action into "what to do next" — headline stays clean
+    const topVid = videoOpps.find((o) => o.impact === 'HIGH');
+    if (topVid) return topVid.action;
+    return 'Keep current cadence and scale what\'s working.';
+  }
   if (fixNow.length > 0)
     return fixNow[0].action;
   if (secondaryOpps.length > 0)

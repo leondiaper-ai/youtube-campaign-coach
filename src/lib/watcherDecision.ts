@@ -268,7 +268,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: `Growth is compounding — extend "${top.videoTitle}" while it's hot.`,
+      headline: 'Growth is compounding.',
       signals: [
         `Subs +${subs7!.delta.toLocaleString()} (${(subs7!.pct * 100).toFixed(1)}%) in 7d.`,
         `${uploads30d} uploads / 30d — cadence is strong.`,
@@ -286,7 +286,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Growth is compounding. Keep cadence and scale the top clip.',
+      headline: 'Growth is compounding.',
       signals: [
         `Subs +${subs7!.delta.toLocaleString()} (${(subs7!.pct * 100).toFixed(1)}%) in 7d.`,
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
@@ -307,7 +307,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Every 1,000 views is converting well. Push more volume, not more polish.',
+      headline: 'Conversion is strong.',
       signals: [
         convLine!,
         `${uploads30d} uploads / 30d — cadence has headroom to push.`,
@@ -329,7 +329,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'MAINTAIN',
       verdict: 'ON_TRACK',
-      headline: 'Keep current cadence. Channel is warm heading into the next moment.',
+      headline: 'Channel is warm. Keep current cadence.',
       signals: [
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'Recent upload window active.',
