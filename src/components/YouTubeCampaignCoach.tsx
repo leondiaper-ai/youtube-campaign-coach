@@ -7262,8 +7262,9 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           milestone: 'track_moment', anchor: 'track_moment', collab: 'track_moment',
         };
         type PillItem = { id: string; name: string; momentType: YouTubeMomentType; priority: string };
-        const pills: PillItem[] = ytMoments.length > 0
-          ? ytMoments.filter((m) => m.tier === 1).map((m) => ({
+        const ytTier1 = ytMoments.filter((m) => m.tier === 1);
+        const pills: PillItem[] = ytTier1.length > 0
+          ? ytTier1.map((m) => ({
               id: m.id, name: m.title, momentType: m.momentType, priority: m.priority,
             }))
           : phaseMoments.map((m) => ({
