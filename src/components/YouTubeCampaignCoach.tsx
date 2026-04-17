@@ -1283,6 +1283,9 @@ type TimelineKind =
   | 'podcast'
   | 'snippet'
   | 'tourAnnounce'
+  | 'tourDate'
+  | 'festival'
+  | 'liveShow'
   | 'other';
 
 type ParsedTimelineEvent = {
@@ -1331,7 +1334,11 @@ function classifyTimelineEvent(title: string): TimelineKind {
   const t = title.toLowerCase();
   if (/\bpodcast|interview\b/.test(t)) return 'podcast';
   if (/\bsnippet|sound\b/.test(t)) return 'snippet';
-  if (/\btour\b/.test(t) && /\b(announce|tickets?|release)\b/.test(t)) return 'tourAnnounce';
+  if (/\btour\b/.test(t) && /\b(announce|tickets?|on\s*sale)\b/.test(t)) return 'tourAnnounce';
+  if (/\bfestival|fest\b/.test(t)) return 'festival';
+  if (/\btour\b/.test(t) && /\b(start|leg|date|kick\s*off|night|show|gig)\b/.test(t)) return 'tourDate';
+  if (/\btour\b/.test(t) && !/\b(announce|tickets?|on\s*sale|release)\b/.test(t)) return 'tourDate';
+  if (/\b(live\s*show|gig|headline|support\s*slot|concert)\b/.test(t)) return 'liveShow';
   if (/\bdocumentary\b.*\b(tease|teaser|trailer)\b/.test(t) || (/\bdocumentary\b/.test(t) && /\btease\b/.test(t))) return 'documentaryTease';
   if (/\bdocumentary\b.*\brelease|release\b.*\bdocumentary|documentary.*youtube/.test(t) || /\bdocumentary\b/.test(t)) return 'documentaryRelease';
   if (/\balbum\b.*\b(announce|announcement)\b/.test(t)) return 'albumAnnounce';
@@ -1439,6 +1446,21 @@ function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dat
       addA(0, `Community Post — tour dates`, 'post', 'convert');
       addA(+1, `Tour Hype Short`, 'short', 'engage');
       break;
+    case 'tourDate':
+      addA(-1, `Tour Diary Short — getting ready`, 'short', 'engage');
+      addA(0, `Community Post — ${ref} tonight`, 'post', 'engage');
+      addA(+1, `Tour Recap Short — ${ref}`, 'short', 'engage');
+      break;
+    case 'festival':
+      addA(-2, `Festival Hype Short — ${ref}`, 'short', 'tease');
+      addA(0, `Community Post — ${ref} today`, 'post', 'engage');
+      addA(+1, `Festival Recap Short — ${ref}`, 'short', 'engage');
+      addA(+3, `Festival Highlights Short`, 'short', 'engage');
+      break;
+    case 'liveShow':
+      addA(0, `Community Post — ${ref}`, 'post', 'engage');
+      addA(+1, `Live Show Recap Short — ${ref}`, 'short', 'engage');
+      break;
     default:
       addA(0, ev.title, 'post', 'engage');
   }
@@ -1487,6 +1509,9 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
         ev.kind === 'albumAnnounce' ? 'announcement' :
         ev.kind === 'documentaryRelease' ? 'milestone' :
         ev.kind === 'tourAnnounce' ? 'milestone' :
+        ev.kind === 'tourDate' ? 'milestone' :
+        ev.kind === 'festival' ? 'milestone' :
+        ev.kind === 'liveShow' ? 'milestone' :
         null;
       if (momentType) {
         moments.push({
@@ -1502,27 +1527,67 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
     }
   }
 
-  // Ensure every phase has at least one planned drop so the campaign plan
-  // reads as a full rollout, not a sparse list of imported events. Synthesize
-  // a mid-phase content drop for any phase with no imported moments.
-  const PHASE_FALLBACKS: { name: string; weekStart: number; weekEnd: number; label: string }[] = [
-    { name: 'START',   weekStart: 1,  weekEnd: 3,  label: 'Warm-up content drop' },
-    { name: 'RELEASE', weekStart: 4,  weekEnd: 8,  label: 'Release-window content drop' },
-    { name: 'PUSH',    weekStart: 9,  weekEnd: 13, label: 'Push content drop' },
-    { name: 'PEAK',    weekStart: 14, weekEnd: 22, label: 'Peak-phase content drop' },
-    { name: 'SUSTAIN', weekStart: 23, weekEnd: 24, label: 'Sustain content drop' },
-  ];
-  for (const ph of PHASE_FALLBACKS) {
+  // ── Dynamic phase assignment ──────────────────────────────────────────────
+  // Phases scale to the full timeline length instead of being hardcoded to 24
+  // weeks. We assign phases proportionally: START (first 10%), RELEASE (next
+  // 20%), PUSH (next 20%), PEAK (next 35%), SUSTAIN (final 15%). If there's
+  // an album/single anchor, PEAK centres on it; otherwise proportional.
+  const anchorMoment = moments.find((m) => m.isAnchor);
+  const anchorWeek = anchorMoment ? anchorMoment.weekNum : null;
+
+  type PhaseSlot = { name: PhaseName; weekStart: number; weekEnd: number; label: string };
+  let phases: PhaseSlot[];
+
+  if (anchorWeek && anchorWeek > 3 && anchorWeek <= weekCount - 2) {
+    // Anchor-centred layout: build around the main release moment
+    const preAnchor = anchorWeek - 1;
+    const postAnchor = weekCount - anchorWeek;
+    phases = [
+      { name: 'START',   weekStart: 1, weekEnd: Math.max(1, Math.floor(preAnchor * 0.2)), label: 'Warm-up' },
+      { name: 'RELEASE', weekStart: 0, weekEnd: Math.max(1, Math.floor(preAnchor * 0.5)), label: 'Release build-up' },
+      { name: 'PUSH',    weekStart: 0, weekEnd: anchorWeek - 1, label: 'Pre-release push' },
+      { name: 'PEAK',    weekStart: anchorWeek, weekEnd: anchorWeek + Math.max(1, Math.floor(postAnchor * 0.5)), label: 'Peak activity' },
+      { name: 'SUSTAIN', weekStart: 0, weekEnd: weekCount, label: 'Sustain momentum' },
+    ];
+    // Chain the ranges so they don't overlap
+    phases[1].weekStart = phases[0].weekEnd + 1;
+    phases[2].weekStart = phases[1].weekEnd + 1;
+    phases[4].weekStart = phases[3].weekEnd + 1;
+  } else {
+    // Proportional layout (no clear anchor or anchor is at the edges)
+    const s = (pct: number) => Math.max(1, Math.round(weekCount * pct));
+    const startEnd = s(0.10);
+    const releaseEnd = startEnd + s(0.20);
+    const pushEnd = releaseEnd + s(0.20);
+    const peakEnd = pushEnd + s(0.35);
+    phases = [
+      { name: 'START',   weekStart: 1,              weekEnd: startEnd,   label: 'Warm-up' },
+      { name: 'RELEASE', weekStart: startEnd + 1,   weekEnd: releaseEnd, label: 'Release window' },
+      { name: 'PUSH',    weekStart: releaseEnd + 1,  weekEnd: pushEnd,   label: 'Push' },
+      { name: 'PEAK',    weekStart: pushEnd + 1,     weekEnd: peakEnd,   label: 'Peak' },
+      { name: 'SUSTAIN', weekStart: peakEnd + 1,     weekEnd: weekCount, label: 'Sustain' },
+    ];
+  }
+
+  // Assign phase labels to weeks
+  for (const ph of phases) {
+    for (let w = ph.weekStart; w <= Math.min(ph.weekEnd, weeks.length); w++) {
+      weeks[w - 1].label = ph.name;
+    }
+  }
+
+  // ── Synthesise placeholder drops for empty phases ───────────────────────
+  for (const ph of phases) {
     const hasMoment = moments.some((m) => m.weekNum >= ph.weekStart && m.weekNum <= ph.weekEnd);
     if (hasMoment) continue;
     const midWeek = Math.floor((ph.weekStart + ph.weekEnd) / 2);
     if (midWeek > weeks.length) continue;
-    const base = new Date(start); base.setDate(base.getDate() + (midWeek - 1) * 7 + 2); // Wed of mid-week
+    const base = new Date(start); base.setDate(base.getDate() + (midWeek - 1) * 7 + 2);
     const dateIso = base.toISOString().split('T')[0];
     moments.push({
       weekNum: midWeek,
       date: dateIso,
-      name: ph.label,
+      name: `${ph.label} content drop`,
       type: 'milestone',
       isAnchor: false,
       why: `Planned ${ph.name.toLowerCase()}-phase content drop (auto-scaffolded).`,
@@ -1531,17 +1596,102 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
   }
   moments.sort((a, b) => a.weekNum - b.weekNum);
 
-  // Sprinkle 2 baseline shorts per empty week (MON/THU).
+  // ── Context-aware gap filling ───────────────────────────────────────────
+  // Build a map of what's happening nearby so empty weeks get relevant
+  // content suggestions instead of generic "Baseline Short" everywhere.
+  type WeekContext = 'tour' | 'festival' | 'pre-release' | 'post-release' | 'catalogue';
+
+  // Map each event to its week index for proximity lookups
+  const eventWeeks: Array<{ weekIdx: number; kind: TimelineKind; title: string }> = events.map((ev) => {
+    const wd = dateToWeekDay(startIso, ev.dateISO);
+    return { weekIdx: wd ? wd.weekIdx : -1, kind: ev.kind, title: ev.title };
+  }).filter((e) => e.weekIdx >= 0);
+
+  function weekContext(weekIdx: number): WeekContext {
+    // Check proximity to events (within 2 weeks)
+    for (const ev of eventWeeks) {
+      const dist = weekIdx - ev.weekIdx;
+      if (Math.abs(dist) <= 2) {
+        if (ev.kind === 'tourDate' || ev.kind === 'tourAnnounce') return 'tour';
+        if (ev.kind === 'festival') return 'festival';
+        if (ev.kind === 'singleRelease' || ev.kind === 'albumRelease') {
+          return dist < 0 ? 'pre-release' : 'post-release';
+        }
+        if (ev.kind === 'albumAnnounce') return 'pre-release';
+      }
+    }
+    // Check if we're in a tour run (between consecutive tour dates)
+    const tourEvents = eventWeeks.filter((e) => e.kind === 'tourDate' || e.kind === 'festival');
+    for (let i = 0; i < tourEvents.length - 1; i++) {
+      if (weekIdx > tourEvents[i].weekIdx && weekIdx < tourEvents[i + 1].weekIdx &&
+          tourEvents[i + 1].weekIdx - tourEvents[i].weekIdx <= 6) {
+        return 'tour';
+      }
+    }
+    return 'catalogue';
+  }
+
+  // Content pools for each context — rotated through to avoid repetition
+  const CONTENT_POOLS: Record<WeekContext, string[][]> = {
+    'tour': [
+      ['Tour Diary Short — prep / travel', 'Tour Diary Short — soundcheck / crowd'],
+      ['Tour Diary Short — backstage / band', 'Tour Diary Short — city life / explore'],
+      ['Tour Recap Short — highlights', 'Community Post — on the road'],
+      ['Tour Diary Short — fan moments', 'Tour Diary Short — merch / venue'],
+    ],
+    'festival': [
+      ['Festival Prep Short — packing / setlist', 'Festival Hype Short — countdown'],
+      ['Festival Diary Short — behind the scenes', 'Festival Short — crowd energy'],
+      ['Festival Recap Short — highlights', 'Community Post — festival season'],
+    ],
+    'pre-release': [
+      ['Teaser Short — studio session', 'Community Post — something coming'],
+      ['Snippet Short — new music preview', 'Behind the Scenes Short — making of'],
+      ['Countdown Short — release incoming', 'Community Post — pre-save reminder'],
+    ],
+    'post-release': [
+      ['Reaction Short — fan responses', 'Community Post — thank you / milestones'],
+      ['Behind the Scenes Short — how it was made', 'Acoustic/Alt Version Short'],
+      ['Fan Cover Reaction Short', 'Community Post — streaming milestone'],
+    ],
+    'catalogue': [
+      ['Catalogue Short — throwback clip', 'Community Post — Q&A / fan question'],
+      ['Studio Session Short — works in progress', 'Community Post — playlist / recommendation'],
+      ['Acoustic / Stripped Back Short', 'Community Post — behind the music'],
+      ['Freestyle / Off-the-cuff Short', 'Community Post — story time / update'],
+      ['Collab Tease Short — who should we work with?', 'Community Post — fan poll'],
+      ['Lifestyle Short — day in the life', 'Community Post — what are you listening to?'],
+    ],
+  };
+
+  const contextCounters: Record<WeekContext, number> = {
+    'tour': 0, 'festival': 0, 'pre-release': 0, 'post-release': 0, 'catalogue': 0,
+  };
+
   for (const w of weeks) {
-    if (w.actions.length === 0) {
-      const base = new Date(start); base.setDate(base.getDate() + (w.week - 1) * 7);
-      const monISO = addDaysIso(base.toISOString().split('T')[0], 1);
-      const thuISO = addDaysIso(base.toISOString().split('T')[0], 4);
-      const mon = act('Baseline Short — studio / clip', 'short', 'MON', 1, 'engage', 'planned');
-      mon.date = monISO;
-      const thu = act('Baseline Short — clip / freestyle', 'short', 'THU', 1, 'engage', 'planned');
-      thu.date = thuISO;
-      w.actions.push(mon, thu);
+    if (w.actions.length > 0) continue;
+    const ctx = weekContext(w.week - 1);
+    const pool = CONTENT_POOLS[ctx];
+    const idx = contextCounters[ctx] % pool.length;
+    contextCounters[ctx]++;
+    const [shortTitle, postTitle] = pool[idx];
+
+    const base = new Date(start); base.setDate(base.getDate() + (w.week - 1) * 7);
+    const monISO = addDaysIso(base.toISOString().split('T')[0], 1);
+    const thuISO = addDaysIso(base.toISOString().split('T')[0], 4);
+
+    const mon = act(shortTitle, 'short', 'MON', 1, 'engage', 'planned');
+    mon.date = monISO;
+    const thu = act(postTitle, postTitle.startsWith('Community') ? 'post' : 'short', 'THU', 1, 'engage', 'planned');
+    thu.date = thuISO;
+    w.actions.push(mon, thu);
+
+    // In tour/festival context, add a third piece of content mid-week
+    if (ctx === 'tour' || ctx === 'festival') {
+      const wedISO = addDaysIso(base.toISOString().split('T')[0], 3);
+      const wed = act(`${ctx === 'tour' ? 'Tour' : 'Festival'} Update Short`, 'short', 'WED', 1, 'engage', 'planned');
+      wed.date = wedISO;
+      w.actions.push(wed);
     }
   }
 
