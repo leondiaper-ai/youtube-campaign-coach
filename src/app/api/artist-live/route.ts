@@ -108,12 +108,10 @@ export async function GET(req: NextRequest) {
           videoType: classifyVideoType(topVideo.title),
         }
       : null,
-    // Include ALL longform videos (official drops must never fall off) + recent shorts
+    // Include ALL uploads — no cap on shorts. The full campaign window of
+    // shorts is needed for warm-up tracking and campaign cadence reporting.
     latestVideos: (() => {
-      const longform = uploads.filter((u) => u.durationSec > 62 && u.live === 'none');
-      const shorts = uploads.filter((u) => u.durationSec <= 62).slice(0, 20);
-      const ids = new Set([...longform, ...shorts].map((u) => u.id));
-      const combined = uploads.filter((u) => ids.has(u.id));
+      const combined = uploads;
       return combined.map((u) => ({
         videoId: u.id,
         title: u.title,

@@ -4199,6 +4199,12 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
   const liveSupport = liveShorts + Math.max(0, liveLongform - autoTracks.length);
   const totalDrops = autoTracks.length;
 
+  // Campaign-scoped totals — how many weeks since start, shorts per week
+  const campaignWeeks = plan.startDate
+    ? Math.max(1, Math.ceil((Date.now() - new Date(plan.startDate + 'T00:00:00').getTime()) / (7 * 86400000)))
+    : null;
+  const shortsPerWeek = campaignWeeks ? +(liveShorts / campaignWeeks).toFixed(1) : null;
+
   // Row 2 — THIS WEEK cadence (merge plan-done + live uploads from API)
   const counts = getCadenceCounts(plan);
   // Count live uploads published within this ISO week (Mon→Sun).
@@ -4243,16 +4249,25 @@ function PulseStrip({ plan }: { plan: CampaignPlan }) {
 
   return (
     <div className="mb-5 rounded-2xl overflow-hidden" style={{ background: '#FAF7F2', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-      {/* Row 1 — LIVE ACTIVITY */}
+      {/* Row 1 — LIVE ACTIVITY (campaign-scoped) */}
       {watcher.state && (
         <div className="flex items-center justify-between gap-3 px-5 py-2.5">
           <div className="flex items-center gap-4 min-w-0 text-[12px] font-semibold text-ink/75">
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 shrink-0">Live Activity</span>
+            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink/45 shrink-0">Campaign Activity</span>
             <span><span className="font-black text-ink">{liveShorts}</span> <span className="text-ink/55">Shorts</span></span>
             <span className="text-ink/25">·</span>
             <span><span className="font-black text-ink">{totalDrops}</span> <span className="text-ink/55">{totalDrops === 1 ? 'Drop' : 'Drops'}</span></span>
             <span className="text-ink/25">·</span>
             <span><span className="font-black text-ink">{isLiveMode ? liveSupport : 0}</span> <span className="text-ink/55">Support</span></span>
+            {shortsPerWeek != null && (
+              <>
+                <span className="text-ink/25">·</span>
+                <span className="text-ink/55">
+                  <span className="font-black text-ink">{shortsPerWeek}</span>/wk avg
+                  <span className="text-ink/35 ml-1">({campaignWeeks}wk)</span>
+                </span>
+              </>
+            )}
           </div>
           <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink/35 shrink-0">YouTube API</span>
         </div>
@@ -7034,6 +7049,87 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
       </button>
 
       <div className="p-4">
+        {/* ── BUILD phase warm-up cadence tracker ──────────────────────── */}
+        {phase.name === 'BUILD' && (() => {
+          const phaseShorts = liveVideos.filter((v) => {
+            const t = new Date(v.publishedAt).getTime();
+            return v.kind === 'short' && t >= phaseStartMs && t < phaseEndMs;
+          });
+          const phaseLongform = liveVideos.filter((v) => {
+            const t = new Date(v.publishedAt).getTime();
+            return v.kind === 'video' && t >= phaseStartMs && t < phaseEndMs;
+          });
+          const phaseWeeksElapsed = Math.max(1, Math.ceil(
+            (Math.min(Date.now(), phaseEndMs) - phaseStartMs) / (7 * DAY)
+          ));
+          const shortsPerWk = +(phaseShorts.length / phaseWeeksElapsed).toFixed(1);
+          const TARGET_SHORTS_PER_WEEK = 3;
+          const totalTarget = TARGET_SHORTS_PER_WEEK * phaseWeeksElapsed;
+          const warmupStrength =
+            phaseShorts.length === 0 ? 'silent' :
+            shortsPerWk >= TARGET_SHORTS_PER_WEEK ? 'strong' :
+            shortsPerWk >= 1.5 ? 'building' : 'light';
+          const warmupColor =
+            warmupStrength === 'strong' ? '#1FBE7A' :
+            warmupStrength === 'building' ? '#FFD24C' :
+            warmupStrength === 'light' ? '#FF4A1C' : '#71717a';
+          const warmupLabel =
+            warmupStrength === 'strong' ? 'WARM-UP STRONG' :
+            warmupStrength === 'building' ? 'WARMING UP' :
+            warmupStrength === 'light' ? 'WARM-UP LIGHT' : 'CHANNEL SILENT';
+          const warmupMessage =
+            warmupStrength === 'strong'
+              ? `${phaseShorts.length} Shorts in ${phaseWeeksElapsed} weeks (${shortsPerWk}/wk). Algorithm is primed for first single.`
+              : warmupStrength === 'building'
+              ? `${phaseShorts.length} Shorts in ${phaseWeeksElapsed} weeks (${shortsPerWk}/wk). Push to ${TARGET_SHORTS_PER_WEEK}/wk to prime the algorithm before first drop.`
+              : warmupStrength === 'light'
+              ? `Only ${phaseShorts.length} Shorts in ${phaseWeeksElapsed} weeks. Need ${TARGET_SHORTS_PER_WEEK}/wk to warm the algorithm before release.`
+              : 'No Shorts posted yet. Start posting 3 Shorts/week now to warm the algorithm before first single.';
+
+          return (
+            <div className="mb-4 rounded-lg overflow-hidden" style={{ border: `1px solid ${warmupColor}22` }}>
+              <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: `${warmupColor}12` }}>
+                <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: warmupColor }}>
+                  {warmupLabel}
+                </span>
+                <span className="text-[10px] text-ink/55 font-semibold flex-1 truncate">
+                  Pre-release warm-up · {TARGET_SHORTS_PER_WEEK} Shorts/wk target
+                </span>
+              </div>
+              <div className="p-3" style={{ background: 'rgba(255,255,255,0.55)' }}>
+                <div className="text-[11px] font-semibold text-ink/65 leading-snug mb-2">
+                  {warmupMessage}
+                </div>
+                <div className="flex items-center gap-4 text-[12px] font-semibold">
+                  <span>
+                    <span className="font-black text-ink">{phaseShorts.length}</span>
+                    <span className="text-ink/40">/{totalTarget}</span>
+                    <span className="text-ink/55 ml-1">Shorts</span>
+                  </span>
+                  <span>
+                    <span className="font-black text-ink">{phaseLongform.length}</span>
+                    <span className="text-ink/55 ml-1">Videos</span>
+                  </span>
+                  <span>
+                    <span className="font-black" style={{ color: warmupColor }}>{shortsPerWk}</span>
+                    <span className="text-ink/55 ml-1">/wk avg</span>
+                  </span>
+                </div>
+                {/* Progress bar */}
+                <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(14,14,14,0.06)' }}>
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min(100, (phaseShorts.length / totalTarget) * 100)}%`,
+                      background: warmupColor,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ── YouTube Moment Planner Cards ────────────────────────────── */}
         {ytMoments.length > 0 ? (
           <>
@@ -7220,13 +7316,25 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           );
         })}
 
-        {/* Phase insight — gaps, opportunities, cadence notes */}
+        {/* Phase insight — gaps, opportunities, cadence notes, shorts tracker */}
         {ytMoments.length > 0 && (
           <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(14,14,14,0.08)' }}>
             {(() => {
               const highPriority = ytMoments.filter((m) => m.priority === 'high');
               const medPriority = ytMoments.filter((m) => m.priority === 'medium');
               const coreMissing = ytMoments.filter((m) => m.status === 'core_missing');
+              // Phase-scoped shorts cadence (all phases, not just BUILD)
+              const phaseShorts = liveVideos.filter((v) => {
+                const t = new Date(v.publishedAt).getTime();
+                return v.kind === 'short' && t >= phaseStartMs && t < phaseEndMs;
+              });
+              const phaseWeeksElapsed = Math.max(1, Math.ceil(
+                (Math.min(Date.now(), phaseEndMs) - phaseStartMs) / (7 * DAY)
+              ));
+              const phaseShortsPerWk = phaseShorts.length > 0
+                ? +(phaseShorts.length / phaseWeeksElapsed).toFixed(1)
+                : 0;
+
               return (
                 <div className="space-y-1.5">
                   {highPriority.length > 0 && (
@@ -7245,6 +7353,16 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                   {medPriority.length > 0 && highPriority.length === 0 && (
                     <div className="text-[11px] text-ink/50 leading-snug">
                       {medPriority.length} medium-priority {medPriority.length === 1 ? 'moment' : 'moments'} — cadence content around live dates
+                    </div>
+                  )}
+                  {/* Phase shorts cadence line */}
+                  {phaseShorts.length > 0 && (
+                    <div className="text-[11px] text-ink/55 leading-snug">
+                      <span className="font-black text-ink">{phaseShorts.length}</span> Shorts in this phase
+                      <span className="text-ink/35 mx-1">·</span>
+                      <span className="font-bold" style={{ color: phaseShortsPerWk >= 3 ? '#1FBE7A' : phaseShortsPerWk >= 1.5 ? '#FFD24C' : '#FF4A1C' }}>
+                        {phaseShortsPerWk}/wk
+                      </span>
                     </div>
                   )}
                   <div className="text-[10px] font-bold text-ink/40 mt-1">

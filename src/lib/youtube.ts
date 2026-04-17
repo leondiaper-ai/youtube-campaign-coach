@@ -202,25 +202,42 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
     const missingCaptionsVideos: NonNullable<LiveSnap['missingCaptionsVideos']> = [];
 
     if (uploadsId) {
-      const pl = await jget(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}`
-      );
+      // Paginate the uploads playlist to capture the full campaign window.
+      // Each page is 50 items / 1 quota unit — we fetch up to 4 pages (200
+      // items) which covers ~6+ months of an active channel's output.
       const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
       const ids: string[] = [];
-      for (const it of pl.items ?? []) {
-        const t = it.snippet?.publishedAt;
-        const vid = it.snippet?.resourceId?.videoId;
-        if (!t || !vid) continue;
-        if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
-        if (new Date(t).getTime() >= cutoff) uploads30d++;
-        ids.push(vid);
-      }
-      const sliceIds = ids.slice(0, 50);
-      if (sliceIds.length) {
-        const vj = await jget(
-          `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${sliceIds.join(',')}&key=${KEY}`
+      let nextPageToken: string | undefined;
+      const MAX_PAGES = 4;
+      for (let page = 0; page < MAX_PAGES; page++) {
+        const pageParam = nextPageToken ? `&pageToken=${nextPageToken}` : '';
+        const pl = await jget(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}${pageParam}`
         );
-        for (const v of vj.items ?? []) {
+        for (const it of pl.items ?? []) {
+          const t = it.snippet?.publishedAt;
+          const vid = it.snippet?.resourceId?.videoId;
+          if (!t || !vid) continue;
+          if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
+          if (new Date(t).getTime() >= cutoff) uploads30d++;
+          ids.push(vid);
+        }
+        nextPageToken = pl.nextPageToken;
+        if (!nextPageToken) break; // no more pages
+      }
+      // Fetch full video details in batches of 50 (videos.list limit)
+      const sliceIds = ids;
+      if (sliceIds.length) {
+        // videos.list accepts max 50 IDs per call — batch if we have more
+        const allVideoItems: any[] = [];
+        for (let i = 0; i < sliceIds.length; i += 50) {
+          const batch = sliceIds.slice(i, i + 50);
+          const vj = await jget(
+            `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${batch.join(',')}&key=${KEY}`
+          );
+          allVideoItems.push(...(vj.items ?? []));
+        }
+        for (const v of allVideoItems) {
           const dur = parseDuration(v.contentDetails?.duration);
           const publishedAt = v.snippet?.publishedAt ?? '';
           const live = v.snippet?.liveBroadcastContent ?? 'none';
