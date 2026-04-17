@@ -107,6 +107,7 @@ async function fetchTopEverVideos(
         fetched.push({
           id: v.id,
           title: v.snippet?.title ?? '',
+          description: v.snippet?.description ?? '',
           publishedAt: v.snippet?.publishedAt ?? '',
           durationSec: parseDuration(v.contentDetails?.duration),
           live: v.snippet?.liveBroadcastContent ?? 'none',
@@ -231,6 +232,7 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
           recentUploads.push({
             id: v.id,
             title: v.snippet?.title ?? '',
+            description: v.snippet?.description ?? '',
             publishedAt,
             durationSec: dur,
             live,

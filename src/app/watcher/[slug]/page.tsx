@@ -385,6 +385,15 @@ function directAction(
 
   if (decision.type === 'ACCELERATE' || decision.type === 'MAINTAIN') {
     // Use context from recent uploads to make the action specific
+
+    // Upcoming drop detected from descriptions — channel is warming up
+    if (ctx.hasUpcoming && ctx.hasLiveContent && ctx.liveVenue)
+      return `${ctx.liveVenue} content dropping ${ctx.upcomingHint}. Channel is primed — keep Shorts flowing to build anticipation.`;
+    if (ctx.hasUpcoming && ctx.hasLiveContent)
+      return `Live content dropping ${ctx.upcomingHint}. Keep the Shorts momentum to maximise the launch.`;
+    if (ctx.hasUpcoming)
+      return `New content dropping ${ctx.upcomingHint}. Keep the current cadence to ride the release window.`;
+
     if (ctx.hasLiveContent && ctx.hasShorts)
       return `Live content is landing. Cut more Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}footage to extend reach.`;
     if (ctx.hasLiveContent)
@@ -419,22 +428,46 @@ function readUploadContext(uploads: RecentUpload[]) {
   const recent14d = uploads.filter(
     (u) => (now - new Date(u.publishedAt).getTime()) / 86400000 <= 14
   );
-  const titles = recent14d.map((u) => u.title.toLowerCase());
-  const joined = titles.join(' | ');
 
-  const liveHits = titles.filter((t) =>
-    /\b(live at|live from|live in|performance|concert|session|tiny desk)\b/.test(t)
-  );
+  // Scan BOTH titles and descriptions — descriptions often carry the real context
+  // (e.g. a Short's description says "Live at the Royal Albert Hall — out tomorrow")
+  const allText = recent14d.map((u) => ({
+    text: `${u.title} ${u.description ?? ''}`.toLowerCase(),
+    title: u.title.toLowerCase(),
+    desc: (u.description ?? '').toLowerCase(),
+    age: (now - new Date(u.publishedAt).getTime()) / 86400000,
+  }));
+
+  const LIVE_RX = /\b(live at|live from|live in|performance|concert|session|tiny desk)\b/;
+  const liveHits = allText.filter((t) => LIVE_RX.test(t.text));
+
+  // Venue: prioritise newest match — the most recent upload is the best signal
   let liveVenue: string | null = null;
-  for (const t of liveHits) {
-    const m = t.match(/live (?:at|from|in) (?:the )?(.{4,35}?)(?:\s*[\(\)\[\]|–—-]|$)/i);
+  const sortedByRecency = [...liveHits].sort((a, b) => a.age - b.age);
+  for (const t of sortedByRecency) {
+    const m = t.text.match(/live (?:at|from|in) (?:the )?(.{4,40}?)(?:\s*[\(\)\[\]|–—.,]|$)/i);
     if (m) { liveVenue = m[1].trim().replace(/^(.)/, (c) => c.toUpperCase()); break; }
-    if (/tiny desk/i.test(t)) { liveVenue = 'Tiny Desk'; break; }
+    if (/tiny desk/i.test(t.text)) { liveVenue = 'Tiny Desk'; break; }
   }
 
   const shortsCount = recent14d.filter((u) => u.durationSec <= 62).length;
-  const featCount = titles.filter((t) => /\b(feat\.?|ft\.?|featuring)\b/.test(t)).length;
-  const audioCount = titles.filter((t) => /\b(official audio|audio)\b/.test(t)).length;
+  const titles = allText.map((t) => t.title);
+  const descs = allText.map((t) => t.desc);
+  const allFlat = allText.map((t) => t.text);
+  const featCount = allFlat.filter((t) => /\b(feat\.?|ft\.?|featuring)\b/.test(t)).length;
+  const audioCount = allFlat.filter((t) => /\b(official audio|audio)\b/.test(t)).length;
+
+  // Detect upcoming releases from descriptions ("out tomorrow", "out now", "pre-save")
+  const hasUpcoming = allFlat.some((t) =>
+    /\b(out tomorrow|out now|pre-?save|coming soon|drops? (?:today|tomorrow|this week))\b/.test(t)
+  );
+  const upcomingHint = hasUpcoming
+    ? allText.find((t) => /\b(out tomorrow|drops? tomorrow)\b/.test(t.text))
+      ? 'tomorrow'
+      : allText.find((t) => /\b(out now|drops? today)\b/.test(t.text))
+        ? 'today'
+        : 'soon'
+    : null;
 
   // Top recent by views
   const topRecent = recent14d.length > 0
@@ -449,6 +482,8 @@ function readUploadContext(uploads: RecentUpload[]) {
     shortsCount,
     hasCollabs: featCount >= 2,
     hasOfficialAudio: audioCount > 0,
+    hasUpcoming,
+    upcomingHint,
     topRecent: topRecent && topRecent.viewCount >= 100 ? topRecent : null,
   };
 }
@@ -622,7 +657,7 @@ type TopPerf = {
   daysAgo: number;
 };
 
-/** Detect what the channel is doing right now from upload titles + patterns */
+/** Detect what the channel is doing right now from upload titles + descriptions */
 function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
   if (uploads.length === 0) return null;
 
@@ -632,13 +667,15 @@ function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
   );
   if (recent14d.length === 0) return null;
 
+  // Scan both titles AND descriptions — descriptions carry the real context
+  const allText = recent14d.map((u) => `${u.title} ${u.description ?? ''}`.toLowerCase());
   const titles = recent14d.map((u) => u.title.toLowerCase());
-  const joined = titles.join(' | ');
+  const joined = allText.join(' | ');
 
   // Priority order: most specific → most general
 
-  // Live performance content
-  const liveHits = titles.filter((t) =>
+  // Live performance content (scan titles + descriptions)
+  const liveHits = allText.filter((t) =>
     /\b(live at|live from|live in|performance|concert|session|acoustic live)\b/.test(t)
   );
   if (liveHits.length >= 2) {
@@ -650,19 +687,19 @@ function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
     return { mode: 'Dropping live content', detail: venue ?? 'Live performance uploaded' };
   }
 
-  // Release warm-up / teaser
-  if (/\b(teaser|trailer|coming soon|announce|pre-?save|out now|out tomorrow)\b/.test(joined)) {
-    return { mode: 'Release warm-up', detail: 'Teaser or pre-save content detected' };
+  // Release warm-up / teaser (check descriptions too — "out tomorrow", "pre-save")
+  if (/\b(teaser|trailer|coming soon|announce|pre-?save|out now|out tomorrow|drops? tomorrow)\b/.test(joined)) {
+    return { mode: 'Release warm-up', detail: 'New content incoming — teaser or pre-save detected' };
   }
 
   // Collaboration / features
-  const featCount = titles.filter((t) => /\b(feat\.?|ft\.?|featuring|with )\b/.test(t)).length;
+  const featCount = allText.filter((t) => /\b(feat\.?|ft\.?|featuring|with )\b/.test(t)).length;
   if (featCount >= 2) {
     return { mode: 'Active collab period', detail: `${featCount} features in 14d` };
   }
 
   // Remix activity
-  const remixCount = titles.filter((t) => /\b(remix|edit|rework|version)\b/.test(t)).length;
+  const remixCount = allText.filter((t) => /\b(remix|edit|rework|version)\b/.test(t)).length;
   if (remixCount >= 2) {
     return { mode: 'Remix / repackage cycle', detail: `${remixCount} remixes in 14d` };
   }
@@ -675,7 +712,7 @@ function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
 
   // Catalogue repackaging
   if (/\b(lyric|lyrics|visuali[sz]er|audio|official audio)\b/.test(joined)) {
-    const catCount = titles.filter((t) => /\b(lyric|lyrics|visuali[sz]er|audio)\b/.test(t)).length;
+    const catCount = allText.filter((t) => /\b(lyric|lyrics|visuali[sz]er|audio)\b/.test(t)).length;
     if (catCount >= 2) {
       return { mode: 'Catalogue mode', detail: `Repackaging tracks — ${catCount} format variants in 14d` };
     }
@@ -689,14 +726,16 @@ function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
   return null;
 }
 
-function extractVenue(titles: string[]): string | null {
-  for (const t of titles) {
-    // "Live at the Royal Albert Hall" → "Royal Albert Hall"
-    const m = t.match(/live (?:at|from|in) (?:the )?(.{4,40}?)(?:\s*[\(\)\[\]|–—-]|$)/i);
+/** Extract venue from text — prioritise the most specific match */
+function extractVenue(textEntries: string[]): string | null {
+  for (const t of textEntries) {
+    const m = t.match(/live (?:at|from|in) (?:the )?(.{4,40}?)(?:\s*[\(\)\[\]|–—.,\-]|$)/i);
     if (m) {
       return m[1].replace(/^\s+|\s+$/g, '').replace(/^(.)/, (c) => c.toUpperCase());
     }
   }
+  // Fallback: named venues
+  if (textEntries.some((t) => /tiny desk/i.test(t))) return 'Tiny Desk';
   return null;
 }
 
@@ -722,11 +761,11 @@ function findLatestUpload(uploads: RecentUpload[]): TopPerf | null {
 function ChannelContext({ uploads, artistName }: { uploads: RecentUpload[]; artistName: string }) {
   const mode = detectContentMode(uploads);
 
-  // Last 3 uploads — the real-time feed
+  // Last 5 uploads — the real-time feed (exclude upcoming/live streams)
   const now = Date.now();
   const recentFeed = uploads
-    .filter((u) => u.live === 'none')
-    .slice(0, 3)
+    .filter((u) => u.live !== 'upcoming')
+    .slice(0, 5)
     .map((u) => ({
       id: u.id,
       title: u.title,

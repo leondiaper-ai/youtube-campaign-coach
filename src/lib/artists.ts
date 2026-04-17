@@ -82,6 +82,7 @@ export type TopComment = {
 export type RecentUpload = {
   id: string;
   title: string;
+  description: string;
   publishedAt: string;
   durationSec: number;
   live: 'none' | 'upcoming' | 'live';
