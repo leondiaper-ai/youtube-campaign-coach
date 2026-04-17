@@ -26,7 +26,7 @@ const ResolvedArtistCtx = createContext<ResolvedArtist>(null);
 // TYPES
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type PhaseName = 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
+type PhaseName = 'BUILD' | 'RELEASE' | 'SCALE' | 'EXTEND';
 type ActionType = 'short' | 'video' | 'post' | 'live' | 'playlist' | 'collab' | 'afterparty';
 type ActionIntent = 'engage' | 'tease' | 'convert' | 'distribute';
 type ActionStatus = 'planned' | 'done' | 'missed';
@@ -266,11 +266,10 @@ type ViewMode = 'campaign' | 'drop';
 // enrichPlanWeeks assigns phase labels to each week and
 // getPhaseForWeek reads those labels, so this is just the fallback.
 const CAMPAIGN_PHASES: CampaignPhase[] = [
-  { name: 'START',   weekStart: 1,    weekEnd: 3,   color: '#2C25FF' },
-  { name: 'RELEASE', weekStart: 4,    weekEnd: 8,   color: '#1FBE7A' },
-  { name: 'PUSH',    weekStart: 9,    weekEnd: 13,  color: '#FFD24C' },
-  { name: 'PEAK',    weekStart: 14,   weekEnd: 22,  color: '#FF4A1C' },
-  { name: 'SUSTAIN', weekStart: 23,   weekEnd: 200, color: '#FFD3C9' },
+  { name: 'BUILD',   weekStart: 1,    weekEnd: 4,   color: '#2C25FF' },
+  { name: 'RELEASE', weekStart: 5,    weekEnd: 10,  color: '#1FBE7A' },
+  { name: 'SCALE',   weekStart: 11,   weekEnd: 22,  color: '#FF4A1C' },
+  { name: 'EXTEND',  weekStart: 23,   weekEnd: 200, color: '#FFD3C9' },
 ];
 
 const ACTION_LABELS: Record<ActionType, string> = {
@@ -487,11 +486,10 @@ const LS_KEY = 'pih-campaign-coach-v4';
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const PHASE_NARRATIVE: Record<PhaseName, { goal: string; role: string; summary: string }> = {
-  'START':   { goal: 'Restart activity',                  role: 'Warming the algorithm with Shorts + Posts',            summary: 'Restart activity (Shorts + Posts).' },
-  'RELEASE': { goal: 'Launch singles + videos',           role: 'First drops enter the feed and build the audience',     summary: 'Launch singles + videos.' },
-  'PUSH':    { goal: 'Increase output + support drops',   role: 'Cadence climbs; each drop gets multi-format support',    summary: 'Increase output + support each drop.' },
-  'PEAK':    { goal: 'Max activity around release',       role: 'Peak posting window — the release is live',              summary: 'Max activity around the release moment.' },
-  'SUSTAIN': { goal: 'Maintain momentum after release',   role: 'Long-tail content keeps the release in conversation',    summary: 'Maintain momentum after release.' },
+  'BUILD':   { goal: 'Build pre-release momentum',       role: 'Warming the algorithm with Shorts + Posts before the first drop',  summary: 'Build pre-release momentum — warm the channel.' },
+  'RELEASE': { goal: 'Launch and land the release',       role: 'First drops enter the feed — hero content + multi-format support', summary: 'Launch singles + videos — land the release.' },
+  'SCALE':   { goal: 'Expand reach via tour + festivals', role: 'Tour content, festival recaps, and live moments drive reach',      summary: 'Scale through tours, festivals, and expansion.' },
+  'EXTEND':  { goal: 'Keep the catalogue alive',          role: 'Long-tail content keeps the release in conversation',              summary: 'Extend the campaign — keep the story alive.' },
 };
 
 type CampaignMoment = {
@@ -538,8 +536,8 @@ function getInactionRisk(status: WeekStatus, week: CampaignWeek, phase: Campaign
   if (weeksToNext <= 2 && status !== 'hot') {
     return { risk: `${nextMoment!.name} is ${weeksToNext === 1 ? 'next week' : 'in 2 weeks'} and channel is ${status}. ${nextMoment!.name} will underperform.`, urgency: 'critical' };
   }
-  if (phase?.name === 'PEAK' && status === 'cold') {
-    return { risk: 'Channel is cold during the most important phase. Album release will not land.', urgency: 'critical' };
+  if (phase?.name === 'RELEASE' && status === 'cold') {
+    return { risk: 'Channel is cold during the release phase. Drop will not land.', urgency: 'critical' };
   }
   if (status === 'cooling' && missed >= 2) {
     return { risk: `${missed} missed uploads this week. Every day of silence makes recovery harder — audience forgets.`, urgency: 'critical' };
@@ -590,7 +588,7 @@ function getNextMomentBridge(activeWeek: CampaignWeek, nextMoment: { week: Campa
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const PHASE_COLORS: Record<PhaseName, string> = {
-  START: '#2C25FF', RELEASE: '#1FBE7A', PUSH: '#FFD24C', PEAK: '#FF4A1C', SUSTAIN: '#FFD3C9',
+  BUILD: '#2C25FF', RELEASE: '#1FBE7A', SCALE: '#FF4A1C', EXTEND: '#FFD3C9',
 };
 
 /**
@@ -602,7 +600,7 @@ function getPlanPhases(plan: CampaignPlan): CampaignPhase[] {
   const hasLabels = plan.weeks.some((w) => w.label);
   if (!hasLabels) return CAMPAIGN_PHASES;
 
-  const phaseOrder: PhaseName[] = ['START', 'RELEASE', 'PUSH', 'PEAK', 'SUSTAIN'];
+  const phaseOrder: PhaseName[] = ['BUILD', 'RELEASE', 'SCALE', 'EXTEND'];
   const phases: CampaignPhase[] = [];
 
   for (const name of phaseOrder) {
@@ -736,7 +734,7 @@ function getVerdict(statuses: WeekStatus[], weeks: CampaignWeek[]): { headline: 
   const phaseName = phase ? phase.name : '';
 
   if (current === 'hot') {
-    if (phaseName === 'PEAK') return { headline: 'DROP WINDOW OPEN', summary: 'Channel is hot during cultural moment. Execute the release.', color: '#fb7185' };
+    if (phaseName === 'RELEASE') return { headline: 'DROP WINDOW OPEN', summary: 'Channel is hot during release window. Execute now.', color: '#fb7185' };
     return { headline: 'CHANNEL IS HOT', summary: 'Audience engaged, momentum strong. Keep building.', color: '#fb7185' };
   }
   if (current === 'cooling') return { headline: 'MOMENTUM SLIPPING', summary: 'Resume uploads before this stalls completely.', color: '#f97316' };
@@ -843,24 +841,24 @@ function generateCoachTips(weeks: CampaignWeek[], statuses: WeekStatus[]): Coach
     if (videosDone > 0 && shortsDone === 0) {
       weekTips.push({ week: w.week, message: 'Add Shorts to feed the algorithm between videos', priority: 'medium' });
     }
-    if (shortsDone >= 3 && videosDone === 0 && phaseName !== 'START') {
+    if (shortsDone >= 3 && videosDone === 0 && phaseName !== 'BUILD') {
       weekTips.push({ week: w.week, message: 'Balance with a video — Shorts warm up, videos convert', priority: 'medium' });
     }
 
     // Phase-specific
-    if (phaseName === 'START' && planned > 0 && done === 0 && missed === 0) {
+    if (phaseName === 'BUILD' && planned > 0 && done === 0 && missed === 0) {
       weekTips.push({ week: w.week, message: 'Post something today — break the silence', priority: 'high' });
     }
     if (phaseName === 'RELEASE' && videos.length === 0 && w.week > 5) {
-      weekTips.push({ week: w.week, message: 'Plan a video — Build phase needs visuals', priority: 'medium' });
+      weekTips.push({ week: w.week, message: 'Plan a video — Release phase needs hero content', priority: 'medium' });
     }
-    if (phaseName === 'PUSH' && (status === 'cold' || status === 'cooling')) {
+    if (phaseName === 'SCALE' && (status === 'cold' || status === 'cooling')) {
       weekTips.push({ week: w.week, message: 'Increase posting frequency', priority: 'high' });
     }
-    if (phaseName === 'PUSH' && s2Actions.length === 0) {
+    if (phaseName === 'SCALE' && s2Actions.length === 0) {
       weekTips.push({ week: w.week, message: 'Add an anchor moment (S2 action)', priority: 'medium' });
     }
-    if (phaseName === 'PEAK') {
+    if (phaseName === 'RELEASE') {
       const s2Planned = s2Actions.filter((a) => a.status === 'planned');
       if (s2Planned.length > 0 && status !== 'hot') {
         weekTips.push({ week: w.week, message: 'Warm up NOW — drop will underperform on a cold channel', priority: 'high' });
@@ -869,7 +867,7 @@ function generateCoachTips(weeks: CampaignWeek[], statuses: WeekStatus[]): Coach
         weekTips.push({ week: w.week, message: 'Execute every planned action — this is the window', priority: 'high' });
       }
     }
-    if (phaseName === 'SUSTAIN' && planned === 0 && done === 0) {
+    if (phaseName === 'EXTEND' && planned === 0 && done === 0) {
       weekTips.push({ week: w.week, message: 'Post reaction content — keep the conversation alive', priority: 'medium' });
     }
 
@@ -1337,6 +1335,7 @@ type TimelineKind =
   | 'tourDate'
   | 'festival'
   | 'liveShow'
+  | 'promoTrip'
   | 'other';
 
 type ParsedTimelineEvent = {
@@ -1484,7 +1483,7 @@ function classifyTimelineEvent(title: string): TimelineKind {
   if (/\btour\b/.test(t) && /\b(start|leg|date|kick\s*off|night|show|gig)\b/.test(t)) return 'tourDate';
   if (/\btour\b/.test(t) && !/\b(announce|tickets?|on\s*sale|release)\b/.test(t)) return 'tourDate';
   if (/\b(support\s*shows?|headline\s*shows?|live\s*show|gig|concert|instore|outstore|signing|fanzone|activation)\b/.test(t)) return 'liveShow';
-  if (/\b(promo\s*trip|press\s*trip|radio\s*promo)\b/.test(t)) return 'other';
+  if (/\b(promo\s*trip|press\s*trip|radio\s*promo|flies?\s*to|promo\s*(run|dates?|visit))\b/.test(t)) return 'promoTrip';
   if (/\bdocumentary\b.*\b(tease|teaser|trailer)\b/.test(t) || (/\bdocumentary\b/.test(t) && /\btease\b/.test(t))) return 'documentaryTease';
   if (/\bdocumentary\b.*\brelease|release\b.*\bdocumentary|documentary.*youtube/.test(t) || /\bdocumentary\b/.test(t)) return 'documentaryRelease';
   if (/\bdeluxe\b.*\b(album|release)\b/.test(t)) return 'albumRelease';
@@ -1495,7 +1494,7 @@ function classifyTimelineEvent(title: string): TimelineKind {
   if (/\brelease\b/.test(t)) return 'singleRelease';
   if (/\b(outdoor|headline)\b.*\bshow/.test(t)) return 'liveShow';
   if (/\b(uk|eu|europe|usa|us|japan|australia)\b.*\b(dates?|shows?|run)\b/.test(t)) return 'tourDate';
-  if (/\b(flies?\s*to|promo|dates)\b/.test(t)) return 'other';
+  if (/\b(promo|dates)\b/.test(t)) return 'other';
   return 'other';
 }
 
@@ -1586,7 +1585,9 @@ function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dat
       addA(-1, `Snippet Short — ${ref}`, 'short', 'tease');
       addA(0, `${ref} — Official Music Video`, 'video', 'convert', 2, 'hero');
       addA(0, `Community Post — ${ref} out now`, 'post', 'convert');
-      addA(+2, `Reaction / BTS Short — ${ref}`, 'short', 'engage');
+      addA(+1, `BTS Short — making of ${ref}`, 'short', 'engage');
+      addA(+3, `Reaction Short — fan responses to ${ref}`, 'short', 'engage');
+      addA(+5, `Performance Short — ${ref} live`, 'short', 'engage');
       addA(+7, `${ref} — Lyric Video`, 'video', 'distribute', 2, 'support');
       break;
     case 'albumAnnounce':
@@ -1596,14 +1597,17 @@ function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dat
       addA(+3, `Tracklist Tease Short`, 'short', 'tease');
       break;
     case 'albumRelease':
-      addA(-3, `Album Trailer`, 'video', 'tease', 2, 'hero');
+      addA(-5, `Album Trailer`, 'video', 'tease', 2, 'hero');
+      addA(-3, `BTS Short — making of the album`, 'short', 'tease');
       addA(-1, `Final Countdown Short`, 'short', 'tease');
       addA(0, `ALBUM DROP — Full Album Out`, 'video', 'convert', 2, 'hero');
-      addA(0, `Community Post — album out now`, 'post', 'convert');
+      addA(0, `Community Post — album out now + link`, 'post', 'convert');
       addA(+1, `Drop Day Recap Short`, 'short', 'engage');
-      addA(+3, `Track-by-Track Breakdown`, 'video', 'distribute', 2, 'support');
-      addA(+5, `Fan Reactions Short`, 'short', 'engage');
+      addA(+2, `Track-by-Track Breakdown`, 'video', 'distribute', 2, 'support');
+      addA(+4, `Fan Reactions Short`, 'short', 'engage');
+      addA(+5, `Lyric Video — lead single`, 'video', 'distribute', 2, 'support');
       addA(+7, `Highlight Bars Short`, 'short', 'engage');
+      addA(+10, `Live Performance Short — album track`, 'short', 'engage');
       break;
     case 'documentaryTease':
       addA(0, `Documentary Teaser Short`, 'short', 'tease');
@@ -1631,19 +1635,31 @@ function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dat
       addA(+1, `Tour Hype Short`, 'short', 'engage');
       break;
     case 'tourDate':
-      addA(-1, `Tour Diary Short — getting ready`, 'short', 'engage');
+      addA(-1, `Tour Diary Short — getting ready for ${ref}`, 'short', 'engage');
       addA(0, `Community Post — ${ref} tonight`, 'post', 'engage');
       addA(+1, `Tour Recap Short — ${ref}`, 'short', 'engage');
+      addA(+2, `Tour Diary Short — on the road`, 'short', 'engage');
+      addA(+5, `Weekly Tour Recap — highlights`, 'video', 'engage', 2, 'support');
       break;
     case 'festival':
-      addA(-2, `Festival Hype Short — ${ref}`, 'short', 'tease');
-      addA(0, `Community Post — ${ref} today`, 'post', 'engage');
-      addA(+1, `Festival Recap Short — ${ref}`, 'short', 'engage');
-      addA(+3, `Festival Highlights Short`, 'short', 'engage');
+      addA(-2, `Festival Hype Short — ${ref} countdown`, 'short', 'tease');
+      addA(-1, `Community Post — ${ref} set times + what to expect`, 'post', 'tease');
+      addA(0, `Performance Clip Short — ${ref}`, 'short', 'engage');
+      addA(+1, `Crowd Reaction Short — ${ref}`, 'short', 'engage');
+      addA(+2, `Festival Recap Short — ${ref} highlights`, 'short', 'engage');
+      addA(+4, `Festival Recap Video — ${ref}`, 'video', 'engage', 2, 'support');
       break;
     case 'liveShow':
       addA(0, `Community Post — ${ref}`, 'post', 'engage');
       addA(+1, `Live Show Recap Short — ${ref}`, 'short', 'engage');
+      addA(+2, `Live Performance Clip Short — ${ref}`, 'short', 'engage');
+      break;
+    case 'promoTrip':
+      addA(0, `Community Post — ${ref}`, 'post', 'engage');
+      addA(+1, `Promo Vlog Short — ${ref}`, 'short', 'engage');
+      addA(+2, `Cultural Moments Short — ${ref}`, 'short', 'engage');
+      addA(+3, `Short-form Highlights — ${ref}`, 'short', 'engage');
+      addA(+5, `Promo Trip Vlog — ${ref}`, 'video', 'engage', 2, 'support');
       break;
     default:
       addA(0, ev.title, 'post', 'engage');
@@ -1734,41 +1750,75 @@ function inferWeekContext(weekIdx: number, moments: CampaignMoment[]): WeekConte
 type PhaseSlot = { name: PhaseName; weekStart: number; weekEnd: number; label: string };
 
 /**
- * Assign dynamic phases to a plan based on its length and anchor moments.
- * Returns phase slots that cover the full week range.
+ * Event-driven phase assignment — 4 phases: BUILD / RELEASE / SCALE / EXTEND.
+ *
+ * BUILD  = everything before the first release (warming the channel)
+ * RELEASE = around release moments (singles, album, collabs, announcements)
+ * SCALE  = tours, festivals, promo trips, live expansion
+ * EXTEND = post-campaign lifecycle (after last major event)
+ *
+ * If no moments exist, falls back to proportional split.
  */
 function assignDynamicPhases(weekCount: number, moments: CampaignMoment[]): PhaseSlot[] {
-  const anchorMoment = moments.find((m) => m.isAnchor);
-  const anchorWeek = anchorMoment ? anchorMoment.weekNum : null;
-
-  if (anchorWeek && anchorWeek > 3 && anchorWeek <= weekCount - 2) {
-    const preAnchor = anchorWeek - 1;
-    const postAnchor = weekCount - anchorWeek;
-    const phases: PhaseSlot[] = [
-      { name: 'START',   weekStart: 1, weekEnd: Math.max(1, Math.floor(preAnchor * 0.2)), label: 'Warm-up' },
-      { name: 'RELEASE', weekStart: 0, weekEnd: Math.max(1, Math.floor(preAnchor * 0.5)), label: 'Release build-up' },
-      { name: 'PUSH',    weekStart: 0, weekEnd: anchorWeek - 1, label: 'Pre-release push' },
-      { name: 'PEAK',    weekStart: anchorWeek, weekEnd: anchorWeek + Math.max(1, Math.floor(postAnchor * 0.5)), label: 'Peak activity' },
-      { name: 'SUSTAIN', weekStart: 0, weekEnd: weekCount, label: 'Sustain momentum' },
+  if (moments.length === 0 || weekCount === 0) {
+    // No moments — proportional fallback
+    const s = (pct: number) => Math.max(1, Math.round(weekCount * pct));
+    const buildEnd = s(0.15);
+    const releaseEnd = buildEnd + s(0.25);
+    const scaleEnd = releaseEnd + s(0.40);
+    return [
+      { name: 'BUILD',   weekStart: 1,              weekEnd: buildEnd,    label: 'Pre-release momentum' },
+      { name: 'RELEASE', weekStart: buildEnd + 1,    weekEnd: releaseEnd,  label: 'Launch window' },
+      { name: 'SCALE',   weekStart: releaseEnd + 1,  weekEnd: scaleEnd,    label: 'Tour + festivals + expansion' },
+      { name: 'EXTEND',  weekStart: scaleEnd + 1,    weekEnd: weekCount,   label: 'Post-campaign lifecycle' },
     ];
-    phases[1].weekStart = phases[0].weekEnd + 1;
-    phases[2].weekStart = phases[1].weekEnd + 1;
-    phases[4].weekStart = phases[3].weekEnd + 1;
-    return phases;
   }
 
-  const s = (pct: number) => Math.max(1, Math.round(weekCount * pct));
-  const startEnd = s(0.10);
-  const releaseEnd = startEnd + s(0.20);
-  const pushEnd = releaseEnd + s(0.20);
-  const peakEnd = pushEnd + s(0.35);
-  return [
-    { name: 'START',   weekStart: 1,              weekEnd: startEnd,   label: 'Warm-up' },
-    { name: 'RELEASE', weekStart: startEnd + 1,   weekEnd: releaseEnd, label: 'Release window' },
-    { name: 'PUSH',    weekStart: releaseEnd + 1,  weekEnd: pushEnd,   label: 'Push' },
-    { name: 'PEAK',    weekStart: pushEnd + 1,     weekEnd: peakEnd,   label: 'Peak' },
-    { name: 'SUSTAIN', weekStart: peakEnd + 1,     weekEnd: weekCount, label: 'Sustain' },
-  ];
+  // Classify moments
+  const RELEASE_TYPES = new Set(['single', 'album', 'collab', 'announcement', 'anchor']);
+  const SCALE_TYPES = new Set(['milestone']); // tours, festivals, live shows
+  const releases = moments.filter((m) => RELEASE_TYPES.has(m.type)).sort((a, b) => a.weekNum - b.weekNum);
+  const scaleMoments = moments.filter((m) => SCALE_TYPES.has(m.type)).sort((a, b) => a.weekNum - b.weekNum);
+
+  const firstRelease = releases[0]?.weekNum ?? Math.ceil(weekCount * 0.2);
+  const lastRelease = releases[releases.length - 1]?.weekNum ?? firstRelease;
+  const lastMajorEvent = Math.max(lastRelease, scaleMoments[scaleMoments.length - 1]?.weekNum ?? 0);
+
+  // BUILD: everything before the first release (min 1 week)
+  const buildEnd = Math.max(1, firstRelease - 1);
+
+  // RELEASE: from first release through last release + 2 weeks buffer
+  const releaseEnd = Math.min(weekCount, lastRelease + 2);
+
+  // SCALE: from after release through last major event + 2 weeks
+  const scaleStart = releaseEnd + 1;
+  const scaleEnd = Math.min(weekCount, Math.max(scaleStart, lastMajorEvent + 2));
+
+  // EXTEND: everything after SCALE
+  const phases: PhaseSlot[] = [];
+  if (buildEnd >= 1) {
+    phases.push({ name: 'BUILD', weekStart: 1, weekEnd: buildEnd, label: 'Pre-release momentum' });
+  }
+  if (releaseEnd >= (buildEnd + 1)) {
+    phases.push({ name: 'RELEASE', weekStart: buildEnd + 1, weekEnd: releaseEnd, label: 'Launch window' });
+  }
+  if (scaleEnd >= scaleStart && scaleStart <= weekCount) {
+    phases.push({ name: 'SCALE', weekStart: scaleStart, weekEnd: scaleEnd, label: 'Tour + festivals + expansion' });
+  }
+  if (scaleEnd < weekCount) {
+    phases.push({ name: 'EXTEND', weekStart: scaleEnd + 1, weekEnd: weekCount, label: 'Post-campaign lifecycle' });
+  }
+
+  // Ensure full coverage — fill gaps if any exist
+  if (phases.length === 0) {
+    return [{ name: 'BUILD', weekStart: 1, weekEnd: weekCount, label: 'Campaign' }];
+  }
+  // Make sure week 1 is covered
+  if (phases[0].weekStart > 1) phases[0].weekStart = 1;
+  // Make sure last week is covered
+  if (phases[phases.length - 1].weekEnd < weekCount) phases[phases.length - 1].weekEnd = weekCount;
+
+  return phases;
 }
 
 /**
@@ -1859,6 +1909,7 @@ function enrichWithTimelineContext(
       if (Math.abs(dist) <= 2) {
         if (ev.kind === 'tourDate' || ev.kind === 'tourAnnounce') return 'tour';
         if (ev.kind === 'festival') return 'festival';
+        if (ev.kind === 'promoTrip') return 'tour'; // promo trips use tour-context content
         if (ev.kind === 'singleRelease' || ev.kind === 'albumRelease') {
           return dist < 0 ? 'pre-release' : 'post-release';
         }
@@ -2026,12 +2077,11 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
 // ──── CAMPAIGN TIMELINE ──────────────────────────────────────────────────────
 // Unified header + status + phase timeline — feels like a journey
 
-const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string; nudge: string }> = {
-  'START':   { short: 'START',   desc: 'Restart activity (Shorts + Posts)',  focus: '→ Post Shorts + Community to warm the algorithm', nudge: 'Warm up the channel' },
-  'RELEASE': { short: 'RELEASE', desc: 'Launch singles + videos',            focus: '→ Land first drops and build crossover audience', nudge: 'Build consistency this week' },
-  'PUSH':    { short: 'PUSH',    desc: 'Increase output + support each drop', focus: '→ Push content volume and expand reach',        nudge: 'Keep pushing content' },
-  'PEAK':    { short: 'PEAK',    desc: 'Max activity around release moment', focus: '→ Execute album rollout — maximise first 48hrs',  nudge: 'Land the big moment' },
-  'SUSTAIN': { short: 'SUSTAIN', desc: 'Maintain momentum after release',    focus: '→ Keep the conversation alive post-release',      nudge: 'Keep the story alive' },
+const PHASE_MICRO: Record<PhaseName, { short: string; desc: string; focus: string; nudge: string; cadence: string }> = {
+  'BUILD':   { short: 'BUILD',   desc: 'Pre-release momentum — warm the channel',       focus: '→ 3 Shorts/week + Community Posts to warm the algorithm',          nudge: 'Warm up the channel',      cadence: '3 Shorts/week + 1 Community Post' },
+  'RELEASE': { short: 'RELEASE', desc: 'Launch moment — land the drop',                  focus: '→ Hero video + multi-format support — maximise first 48hrs',       nudge: 'Land the release',         cadence: '3 Shorts/week + 1 longform every 10–14 days' },
+  'SCALE':   { short: 'SCALE',   desc: 'Tour, festivals + expansion — grow reach',       focus: '→ Daily Shorts from the road + weekly recap longform',             nudge: 'Keep scaling reach',       cadence: '5 Shorts/week + 1 recap longform/week' },
+  'EXTEND':  { short: 'EXTEND',  desc: 'Post-campaign — keep the catalogue alive',       focus: '→ Catalogue content, fan moments, and long-tail engagement',       nudge: 'Keep the story alive',     cadence: '2 Shorts/week + 1 Community Post' },
 };
 
 // ── ACTUAL PHASE DETECTION ──────────────────────────────────────────────────
@@ -2045,7 +2095,7 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
     .filter((w) => w.actions.some((a) => a.status === 'done' || a.status === 'missed'))
     .slice(-3);
 
-  if (recentWeeks.length === 0) return 'START';
+  if (recentWeeks.length === 0) return 'BUILD';
 
   // Count averages over recent weeks
   const avgCount = (type: string) => {
@@ -2068,11 +2118,11 @@ function detectActualPhase(plan: CampaignPlan): PhaseName {
   const multiType = (avgShorts > 0 ? 1 : 0) + (avgVideos > 0 ? 1 : 0) + (avgPosts > 0 ? 1 : 0) + (avgCollabs > 0 || avgLive > 0 ? 1 : 0);
 
   // SCALE: consistent shorts + longform + multiple types
-  if (shortsConsistent && longformActive && multiType >= 3) return 'PUSH';
-  // BUILD: consistent shorts + some longform/community starting
+  if (shortsConsistent && longformActive && multiType >= 3) return 'SCALE';
+  // RELEASE: consistent shorts + some longform/community starting
   if (shortsConsistent && (longformActive || avgCommunity >= 1)) return 'RELEASE';
-  // Still in REAWAKEN
-  return 'START';
+  // Still in BUILD
+  return 'BUILD';
 }
 
 function CampaignStartControl({ startDate, onChange }: { startDate: string; onChange: (d: string) => void }) {
@@ -2800,19 +2850,19 @@ function computeChannelSignal(plan: CampaignPlan): ChannelSignal {
   const drop = getNextDrop(plan);
   const nearDrop = drop !== null && drop.daysAway >= 0 && drop.daysAway <= 7;
 
-  // Reawaken = still proving the channel is live.
-  if (currentPhase === 'START') return 'TEST';
+  // BUILD = still proving the channel is live.
+  if (currentPhase === 'BUILD') return 'TEST';
 
-  // Cultural / Scale phases — momentum window, so SCALE when healthy, PUSH otherwise.
-  if (currentPhase === 'PEAK' || currentPhase === 'PUSH') {
+  // SCALE phase — momentum window, so SCALE when healthy, PUSH otherwise.
+  if (currentPhase === 'SCALE') {
     return cadenceStatus === 'Healthy' ? 'SCALE' : 'PUSH';
   }
 
   // Drop inside a week — back it.
   if (nearDrop) return 'PUSH';
 
-  // Build phase — foundation work, still validating.
-  if (currentPhase === 'RELEASE') return cadenceStatus === 'Healthy' ? 'TEST' : 'PUSH';
+  // RELEASE phase — actively launching, push if cadence isn't healthy.
+  if (currentPhase === 'RELEASE') return cadenceStatus === 'Healthy' ? 'SCALE' : 'PUSH';
 
   return 'HOLD';
 }
@@ -2999,11 +3049,10 @@ function useCampaignBaseline(
 // Map the campaign's PhaseName → coach engine PhaseName (internal vocab).
 function toCoachPhase(name: PhaseName | undefined): CoachPhaseName {
   switch (name) {
+    case 'BUILD':   return 'REAWAKEN';
     case 'RELEASE': return 'BUILD';
-    case 'PUSH':    return 'SCALE';
-    case 'PEAK':    return 'CULTURAL';
-    case 'SUSTAIN': return 'EXTEND';
-    case 'START':
+    case 'SCALE':   return 'SCALE';
+    case 'EXTEND':  return 'EXTEND';
     default:        return 'REAWAKEN';
   }
 }
@@ -3348,11 +3397,10 @@ function TopSignalCard({ plan, onUpdatePlan }: { plan: CampaignPlan; onOpenAdd?:
 function getDropRole(weekNum: number, type: ActionType): string {
   const phase = getPhaseForWeek(weekNum);
   if (!phase) return 'This is your next upload — build around it';
-  if (phase.name === 'START') return 'Warm the channel before your next big drop';
-  if (phase.name === 'RELEASE') return 'This is your next major upload — build around it';
-  if (phase.name === 'PUSH') return 'This is your next major upload — build around it';
-  if (phase.name === 'PEAK') return 'This is your cultural peak — all attention goes here';
-  if (phase.name === 'SUSTAIN') return "Keep the story going — don't let it fade";
+  if (phase.name === 'BUILD') return 'Warm the channel before your next big drop';
+  if (phase.name === 'RELEASE') return 'This is the launch moment — all attention goes here';
+  if (phase.name === 'SCALE') return 'Tour + festivals — build reach with every show';
+  if (phase.name === 'EXTEND') return "Keep the story going — don't let it fade";
   if (type === 'collab') return 'Crossover drop — brings a new audience in';
   return 'This is your next major upload — build around it';
 }
@@ -4116,7 +4164,7 @@ function ActivityContextLine({ plan }: { plan: CampaignPlan }) {
 
   // Copy summary
   const handleCopy = () => {
-    const phaseName = getPhaseForWeek(weekNum)?.name || 'START';
+    const phaseName = getPhaseForWeek(weekNum)?.name || 'BUILD';
     const campaignLabel = [plan.artist, plan.campaignName].filter(Boolean).join(' — ') || 'Campaign';
     const totalSubsGained = plan.weeks.reduce((sum, w) => sum + (w.feedback?.subsGained || 0), 0);
     const overrides = plan.manualOverrides || {};
@@ -6366,24 +6414,46 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
     status === 'In Progress' ? phase.color :
                                'rgba(14,14,14,0.35)';
 
+  const micro = PHASE_MICRO[phase.name];
+  // Key moments in this phase from the plan's moments array
+  const phaseMoments = (plan.moments ?? []).filter(
+    (m) => m.weekNum >= phase.weekStart && m.weekNum <= phase.weekEnd
+  );
+
   const PhaseSummary = () => (
-    <div className="flex items-center justify-between gap-3 w-full">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColor }} />
-        <span className="font-black text-sm text-ink">{phase.name}</span>
-        <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: statusColor }}>
-          {status}
-        </span>
+    <div className="w-full">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColor }} />
+          <span className="font-black text-sm text-ink">{phase.name}</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: statusColor }}>
+            {status}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-ink/60">
+          <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
+          {missingSupport > 0 && (
+            <span style={{ color: '#FF4A1C' }}>· {missingSupport} missing support</span>
+          )}
+          {missingSupport === 0 && plannedCount > 0 && (
+            <span style={{ color: '#5B7CFA' }}>· {plannedCount} planned</span>
+          )}
+        </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-ink/60">
-        <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
-        {missingSupport > 0 && (
-          <span style={{ color: '#FF4A1C' }}>· {missingSupport} missing support</span>
-        )}
-        {missingSupport === 0 && plannedCount > 0 && (
-          <span style={{ color: '#5B7CFA' }}>· {plannedCount} planned</span>
-        )}
-      </div>
+      <div className="mt-1 text-[11px] text-ink/50">{micro.desc}</div>
+      <div className="mt-0.5 text-[10px] font-bold text-ink/40 uppercase tracking-wide">Cadence: {micro.cadence}</div>
+      {phaseMoments.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {phaseMoments.slice(0, 5).map((m, i) => (
+            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(14,14,14,0.06)', color: 'rgba(14,14,14,0.55)' }}>
+              {m.name}
+            </span>
+          ))}
+          {phaseMoments.length > 5 && (
+            <span className="text-[10px] text-ink/40">+{phaseMoments.length - 5} more</span>
+          )}
+        </div>
+      )}
     </div>
   );
 
