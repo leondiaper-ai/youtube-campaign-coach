@@ -3980,7 +3980,7 @@ function getDropRole(weekNum: number, type: ActionType): string {
 // ── Drop support logic — brutally clear.
 // Every drop needs: Shorts + Post + Video support. Count what's planned/done
 // in the drop week itself (and ±1 week either side for the support window).
-type DropSupportStrength = 'Strong' | 'Partial' | 'Weak';
+type DropSupportStrength = 'Complete' | 'Partial' | 'Weak';
 function computeDropSupport(plan: CampaignPlan, dropWeek: number): {
   strength: DropSupportStrength;
   color: string;
@@ -3999,12 +3999,12 @@ function computeDropSupport(plan: CampaignPlan, dropWeek: number): {
   if (videoSupport < 1) missing.push('Follow-up video');
   let strength: DropSupportStrength = 'Weak';
   let color = '#FF4A1C';
-  if (missing.length === 0) { strength = 'Strong'; color = '#1FBE7A'; }
+  if (missing.length === 0) { strength = 'Complete'; color = '#1FBE7A'; }
   else if (missing.length === 1) { strength = 'Partial'; color = '#F5B73D'; }
   return { strength, color, missing, have: { shorts, posts, videoSupport } };
 }
 function dropImplication(strength: DropSupportStrength): string {
-  if (strength === 'Strong') return "This release is set up to land — keep cadence through drop week";
+  if (strength === 'Complete') return "This release is set up to land — keep cadence through drop week";
   if (strength === 'Partial') return "You're almost supporting this release — don't let it slip";
   return "You're not supporting this release properly — it won't land";
 }
@@ -4110,9 +4110,23 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   }, [ytMoments, today]);
 
   // Fallback to legacy getNextDrop when no timeline plan exists
-  const legacyDrop = !nextPrimary ? getNextDrop(plan) : null;
+  // Legacy also filtered to KEY_DROP_TYPES (video/collab/live/afterparty) — but 'video'
+  // action type can include lyric videos. Filter those out:
+  const legacyDropRaw = !nextPrimary ? getNextDrop(plan) : null;
+  const legacyDrop = legacyDropRaw && !/\blyric\b/i.test(legacyDropRaw.action.title) && !/\bvisualiz/i.test(legacyDropRaw.action.title) ? legacyDropRaw : null;
 
-  if (!nextPrimary && !legacyDrop) return null;
+  // Show "No primary drop scheduled" when there's nothing
+  if (!nextPrimary && !legacyDrop) {
+    return (
+      <div
+        className="mb-6 rounded-2xl px-5 py-4"
+        style={{ background: '#F6F1E7', border: '1px solid rgba(14,14,14,0.06)' }}
+      >
+        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-1">Next Drop</div>
+        <div className="text-[13px] font-bold text-ink/50">No primary drop scheduled</div>
+      </div>
+    );
+  }
 
   // ── Unified rendering data ──
   const title = nextPrimary ? nextPrimary.title : legacyDrop!.action.title;
@@ -4136,14 +4150,14 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
     : [];
 
   // ── Support assessment: combine expectedSupport + attached Tier 2 moments ──
-  const support = nextPrimary
+  const support: { strength: DropSupportStrength; color: string; missing: string[]; expected: string[] } = nextPrimary
     ? (() => {
         const expected = nextPrimary.expectedSupport;
         const weekActions = plan.weeks.find((w) => w.week === weekNum)?.actions ?? [];
         const cmp = compareSupportVsActual(nextPrimary, watcher.state, weekActions);
         const missing = cmp.missing;
-        const strength: DropSupportStrength = missing.length === 0 ? 'Strong' : missing.length <= 2 ? 'Partial' : 'Weak';
-        const color = strength === 'Strong' ? '#1FBE7A' : strength === 'Partial' ? '#F5B73D' : '#FF4A1C';
+        const strength: DropSupportStrength = missing.length === 0 ? 'Complete' : missing.length <= 2 ? 'Partial' : 'Weak';
+        const color = strength === 'Complete' ? '#1FBE7A' : strength === 'Partial' ? '#F5B73D' : '#FF4A1C';
         return { strength, color, missing, expected };
       })()
     : (() => {
@@ -4151,27 +4165,39 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
         return { ...s, expected: [] as string[] };
       })();
 
-  // ── Focused actions (max 3) and risks (max 2) ──
+  // ── Watcher-alignment guard: support cannot be "Complete" when cadence is behind ──
+  const watcherState = watcher.state;
+  if (support.strength === 'Complete' && watcherState) {
+    const recentShorts = watcherState.shortsLast14Days ?? 0;
+    const daysSinceUpload = watcherState.daysSinceLastUpload ?? 0;
+    if (recentShorts < 4 || daysSinceUpload > 10) {
+      // Cadence is behind — downgrade to Partial
+      support.strength = 'Partial';
+      support.color = '#F5B73D';
+      if (recentShorts < 4) support.missing.push('Shorts cadence (below 4 in 14d)');
+      if (daysSinceUpload > 10) support.missing.push('Upload gap (' + daysSinceUpload + 'd since last)');
+    }
+  }
+
+  // ── Structured "Fix This Week" actions — scannable, no verbose descriptions ──
   const actions: string[] = [];
   const risks: string[] = [];
   if (support.missing.length > 0) {
-    // Top 2-3 most important missing items as actions
-    const topMissing = support.missing.slice(0, 3);
-    for (const m of topMissing) {
-      if (/short/i.test(m)) actions.push(`Post ${m} to warm the algorithm before drop`);
-      else if (/community/i.test(m)) actions.push(`Schedule a Community Post to prime your audience`);
-      else if (/lyric|artwork|visuali/i.test(m)) actions.push(`Ship ${m} within 48h of the primary`);
-      else if (/follow/i.test(m)) actions.push(`Plan a follow-up longform within 7 days`);
+    for (const m of support.missing.slice(0, 3)) {
+      if (/short/i.test(m)) actions.push(`Post ${m}`);
+      else if (/community/i.test(m)) actions.push('Create Community Post');
+      else if (/lyric/i.test(m)) actions.push('Create lyric video');
+      else if (/artwork|visuali/i.test(m)) actions.push('Create artwork video');
+      else if (/follow/i.test(m)) actions.push('Plan follow-up longform');
+      else if (/upload gap/i.test(m)) actions.push('Upload this week');
       else actions.push(`Ship ${m}`);
     }
-  } else {
-    actions.push('Hold cadence — no corrective action needed');
   }
   if (daysAway <= 3 && daysAway >= 0 && support.missing.length > 1) {
-    risks.push(`${support.missing.length} support items still missing with ${daysAway}d to go`);
+    risks.push(`${support.missing.length} items missing — ${daysAway}d to go`);
   }
   if (daysAway < 0) {
-    risks.push(`This drop is ${Math.abs(daysAway)}d overdue — ship it or reschedule`);
+    risks.push(`${Math.abs(daysAway)}d overdue — ship or reschedule`);
   }
 
   return (
@@ -4203,11 +4229,11 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
           </span>
         </div>
 
-        {/* Support strength */}
+        {/* Support status */}
         <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(250,247,242,0.12)' }}>
           <div className="flex items-baseline gap-3 flex-wrap">
             <span className="text-[10px] font-mono uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.45)' }}>
-              Support
+              Support Status
             </span>
             <span className="text-[18px] font-black uppercase tracking-wider" style={{ color: support.color }}>
               {support.strength}
@@ -4235,14 +4261,21 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
             </div>
           )}
 
-          {/* Actions — focused, max 3 */}
-          <div className="mt-3.5 space-y-1">
-            {actions.map((a, i) => (
-              <p key={i} className="text-[13px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
-                → {a}
-              </p>
-            ))}
-          </div>
+          {/* Actions — structured "Fix This Week" list */}
+          {actions.length > 0 && (
+            <div className="mt-3.5">
+              <div className="text-[9px] font-bold uppercase tracking-[0.18em] mb-1.5" style={{ color: 'rgba(250,247,242,0.45)' }}>
+                Fix This Week
+              </div>
+              <div className="space-y-1">
+                {actions.map((a, i) => (
+                  <p key={i} className="text-[13px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
+                    → {a}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Risks — max 2, only when real */}
           {risks.length > 0 && (
