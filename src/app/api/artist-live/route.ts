@@ -68,6 +68,17 @@ export async function GET(req: NextRequest) {
     ? Math.floor((now - new Date(snap.lastUploadAt).getTime()) / 86400000)
     : null;
 
+  // ── Classify video type from title ─────────────────────────────────────
+  function classifyVideoType(title: string): 'official' | 'lyric' | 'visualizer' | 'audio' | 'live' | 'unknown' {
+    const t = title.toLowerCase();
+    if (/\b(official\s*(music\s*)?video)\b/.test(t)) return 'official';
+    if (/\b(official\s*audio)\b/.test(t)) return 'audio';
+    if (/\b(lyric\s*(video)?|lyrics?\s*video)\b/.test(t)) return 'lyric';
+    if (/\b(visuali[sz]er|official\s*visuali[sz]er)\b/.test(t)) return 'visualizer';
+    if (/\b(live\s*(at|from|in|session|performance)|tiny\s*desk|concert)\b/.test(t)) return 'live';
+    return 'unknown';
+  }
+
   // 6. Build a WatcherState-compatible object for the Coach's decision engine
   const state = {
     channelId: snap.channelId ?? '',
@@ -89,7 +100,7 @@ export async function GET(req: NextRequest) {
           title: topVideo.title,
           views: topVideo.viewCount,
           publishedAt: topVideo.publishedAt,
-          videoType: 'unknown' as const,
+          videoType: classifyVideoType(topVideo.title),
         }
       : null,
     // Include ALL longform videos (official drops must never fall off) + recent shorts
@@ -105,6 +116,7 @@ export async function GET(req: NextRequest) {
         durationSeconds: u.durationSec,
         thumbnail: null,
         kind: (u.durationSec <= 62 ? 'short' : 'video') as 'short' | 'video',
+        videoType: classifyVideoType(u.title),
         views: u.viewCount,
         likes: u.likeCount,
         comments: u.commentCount,
