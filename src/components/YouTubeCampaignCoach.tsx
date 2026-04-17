@@ -3644,7 +3644,7 @@ function formatDelta(n: number | null | undefined): { text: string; dir: 'up' | 
   const abs = Math.abs(n);
   return { text: (n > 0 ? '+' : '−') + formatBig(abs), dir: n > 0 ? 'up' : 'down' };
 }
-// Behaviour → Problem → Implication copy. Combines subs/views trend with output.
+// Signal line: diagnosis → direction. Adds cause/effect the co-headline doesn't.
 function subsViewsSignal(
   subDelta: number | null,
   viewDelta: number | null,
@@ -3652,14 +3652,14 @@ function subsViewsSignal(
 ): string {
   const s = subDelta ?? 0;
   const v = viewDelta ?? 0;
-  if (uploads14 === 0) return "You're not posting — the channel is cooling off and the algorithm is letting go";
-  if (uploads14 >= 6 && s <= 0 && v > 0) return "Cadence is strong and views are up — but viewers aren't subscribing";
-  if (uploads14 >= 6 && s <= 0) return "Posting consistently but not converting — depth, not volume, is the fix";
-  if (s > 0 && v > 0) return "Views and subs are both moving — the channel is working right now";
-  if (s <= 0 && v > 0) return "Reach is growing but subs are flat — viewers aren't staying";
-  if (s > 0 && v <= 0) return "Subs are ticking up but views aren't — the new audience is small";
-  if (s < 0 && v < 0) return "Views and subs are both down — the channel is slipping";
-  return "The channel is flat — nothing is moving yet";
+  if (uploads14 === 0) return "No uploads → algorithm is deprioritising the channel";
+  if (uploads14 >= 6 && s <= 0 && v > 0) return "Views converting but subs aren't — content isn't building connection";
+  if (uploads14 >= 6 && s <= 0) return "Volume isn't the problem — viewers need a reason to subscribe";
+  if (s > 0 && v > 0) return "Flywheel is working — views drive subs, subs drive reach";
+  if (s <= 0 && v > 0) return "Viewers are arriving but not staying — packaging or depth issue";
+  if (s > 0 && v <= 0) return "Small but loyal audience growing — reach needs expanding";
+  if (s < 0 && v < 0) return "Both metrics declining — cadence or content quality issue";
+  return "No movement — channel needs a trigger";
 }
 
 function recencyLabel(days: number | null | undefined): string {

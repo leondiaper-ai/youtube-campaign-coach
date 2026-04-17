@@ -471,11 +471,11 @@ export function aiDecisionLayer(input: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DECISION_STATE_META: Record<DecisionState, { color: string; subtitle: string }> = {
-  'SCALE—STRONG':     { color: '#1FBE7A', subtitle: 'Cadence is holding and the audience is growing — extend your best-performing clip.' },
-  'PUSH—STRONG':      { color: '#1FBE7A', subtitle: 'Channel is posting and converting — keep the clip that is working live.' },
-  'PUSH—WEAK':        { color: '#F5B73D', subtitle: 'Posting is high but subs are flat — go deeper with BTS, breakdowns, or personal content.' },
-  'BUILD—MISALIGNED': { color: '#2C6BFF', subtitle: 'Output is below the phase floor — increase Shorts this week.' },
-  'ACTIVE BUT FLAT':  { color: '#F5B73D', subtitle: 'Cadence is strong but not converting — try deeper content: BTS, making-of, personal pieces.' },
-  'HOLD—LOW CADENCE': { color: '#F5B73D', subtitle: 'Cadence is low — post one Short today before expanding.' },
-  QUIET:              { color: '#A0A0A0', subtitle: 'Channel is silent — post one Short today.' },
+  'SCALE—STRONG':     { color: '#1FBE7A', subtitle: 'Audience is growing and cadence is strong' },
+  'PUSH—STRONG':      { color: '#1FBE7A', subtitle: 'Posting consistently and converting viewers' },
+  'PUSH—WEAK':        { color: '#F5B73D', subtitle: 'High output, low subscriber growth' },
+  'BUILD—MISALIGNED': { color: '#2C6BFF', subtitle: 'Output is below the phase floor' },
+  'ACTIVE BUT FLAT':  { color: '#F5B73D', subtitle: 'Strong cadence, flat subscriber growth' },
+  'HOLD—LOW CADENCE': { color: '#F5B73D', subtitle: 'Cadence has dropped' },
+  QUIET:              { color: '#A0A0A0', subtitle: 'Channel is silent' },
 };
