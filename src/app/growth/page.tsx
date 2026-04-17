@@ -8,7 +8,7 @@ import Sparkline from '@/components/Sparkline';
 export const revalidate = 600;
 
 export const metadata = {
-  title: 'Control — YouTube Campaign System',
+  title: 'Channel Health — YouTube Campaign System',
   description: 'Which channels are growing, flat, or at risk.',
 };
 
@@ -141,22 +141,35 @@ export default async function ControlPage() {
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[960px] mx-auto px-6 py-10">
-        {/* Breadcrumb */}
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/cockpit" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
-            ← All artists
-          </Link>
-          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-6 mb-6">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
+              YouTube Campaign System
+            </div>
+
+            {/* View toggle: Channel Health (active) / All Artists */}
+            <div className="flex items-center gap-1 mt-2">
+              <span
+                className="px-3 py-1.5 rounded-md text-[13px] font-black"
+                style={{ background: SOFT }}
+              >
+                Channel Health
+              </span>
+              <Link
+                href="/cockpit"
+                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+              >
+                All Artists
+              </Link>
+            </div>
+          </div>
+          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 mt-2">
             Live · YouTube API
           </span>
         </div>
 
-        {/* ─── HEADER ─────────────────────────────────────────────────────── */}
-        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
-          Control
-        </div>
-        <h1 className="font-black text-3xl mt-1">Channel health</h1>
-        <div className="text-[13px] text-ink/50 mt-1">
+        <div className="text-[13px] text-ink/50 mb-2">
           Track which channels are growing vs stalling.
         </div>
 
@@ -201,7 +214,7 @@ export default async function ControlPage() {
 
         {/* Footer */}
         <div className="mt-12 text-[10px] uppercase tracking-[0.18em] text-ink/25">
-          Control watches · Watcher diagnoses · Coach plans
+          Channel Health watches · Watcher diagnoses · Coach plans
         </div>
       </div>
     </main>

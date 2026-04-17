@@ -187,8 +187,46 @@ export default function CampaignCockpit() {
   const needAttention = sorted.filter((a) => SIMPLE_STATUS[a.status] === 'Needs attention').length;
   const atRisk = sorted.filter((a) => SIMPLE_STATUS[a.status] === 'At risk').length;
 
+  const total = sorted.length;
+  const healthy = sorted.filter((a) => SIMPLE_STATUS[a.status] === 'Healthy').length;
+  const notGrowing = total - healthy;
+  const hasIssues = needAttention + atRisk > 0;
+
+  // Alert text — dynamic based on state
+  const alertText = (() => {
+    if (notGrowing === 0) return 'All channels growing';
+    if (needAttention > 0 && atRisk > 0)
+      return `${notGrowing}/${total} channels not growing · ${atRisk} at risk`;
+    if (needAttention > 0)
+      return `${needAttention} channel${needAttention === 1 ? '' : 's'} need${needAttention === 1 ? 's' : ''} attention`;
+    if (atRisk > 0)
+      return `${atRisk} channel${atRisk === 1 ? '' : 's'} at risk`;
+    return `${notGrowing}/${total} channels not growing`;
+  })();
+
   return (
     <div className="max-w-[960px] mx-auto px-6 py-10" style={{ color: INK }}>
+
+      {/* ─── ALERT STRIP — full-width, clickable → Channel Health ──────── */}
+      <Link
+        href="/growth"
+        className="block rounded-xl px-5 py-3.5 mb-8 hover:brightness-[0.97] transition-all"
+        style={{
+          background: hasIssues ? '#FFE2D8' : '#E6F8EE',
+        }}
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-[14px]">
+            <span className="font-black" style={{ color: hasIssues ? '#8A1F0C' : '#0C6A3F' }}>
+              {alertText}
+            </span>
+          </div>
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] shrink-0" style={{ color: hasIssues ? '#8A1F0C' : '#0C6A3F' }}>
+            View Channel Health →
+          </span>
+        </div>
+      </Link>
+
       {/* Header */}
       <div className="flex items-start justify-between gap-6 mb-6">
         <div>
@@ -196,17 +234,24 @@ export default function CampaignCockpit() {
             <YouTubeMark />
             <span>YouTube Campaign System</span>
           </div>
-          <h1 className="font-black text-3xl leading-tight mt-1">
-            All artists
-          </h1>
+
+          {/* View toggle: Channel Health / All Artists */}
+          <div className="flex items-center gap-1 mt-2">
+            <Link
+              href="/growth"
+              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+            >
+              Channel Health
+            </Link>
+            <span
+              className="px-3 py-1.5 rounded-md text-[13px] font-black"
+              style={{ background: SOFT }}
+            >
+              All Artists
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <Link
-            href="/growth"
-            className="text-[11px] tracking-wide text-ink/55 hover:text-ink underline decoration-ink/20 underline-offset-4"
-          >
-            Control
-          </Link>
+        <div className="flex items-center gap-3 shrink-0 mt-2">
           <button
             onClick={runChecks}
             disabled={running}
@@ -217,26 +262,6 @@ export default function CampaignCockpit() {
           <AddArtistButton onAdded={loadCustom} />
         </div>
       </div>
-
-      {/* Summary strip */}
-      {(needAttention + atRisk) > 0 && (
-        <div
-          className="flex items-center gap-3 rounded-xl px-5 py-3 mb-8 text-[13px]"
-          style={{ background: needAttention > 0 ? '#FFE2D8' : SOFT }}
-        >
-          {needAttention > 0 && (
-            <span className="font-black" style={{ color: '#8A1F0C' }}>
-              {needAttention} need{needAttention === 1 ? 's' : ''} attention
-            </span>
-          )}
-          {atRisk > 0 && (
-            <>
-              {needAttention > 0 && <span className="text-ink/20">·</span>}
-              <span className="font-bold text-ink/65">{atRisk} at risk</span>
-            </>
-          )}
-        </div>
-      )}
 
       {/* Artist list — priority sorted */}
       <div className="space-y-3">
