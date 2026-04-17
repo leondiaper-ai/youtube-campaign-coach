@@ -9138,21 +9138,21 @@ export default function YouTubeCampaignCoach() {
 
         {/* ── TOP: 3-second answer (What's happening / What should I do / What's next) ── */}
 
-        {/* 1. DECISION CARD — primary focus */}
+        {/* 1. DECISION CARD — primary focus (channel state / "QUIET" etc.) */}
         <TopSignalCard
           plan={plan}
           onOpenAdd={(kind) => setAddModal({ open: true, initialKind: kind })}
           onUpdatePlan={(updates) => setPlan((p) => ({ ...p, ...updates }))}
         />
 
-        {/* 2. NEXT DROP — primary anchor with role */}
+        {/* 2. EXECUTION TRIGGER — insight → problem → action, right after channel state */}
+        <ExecutionLayer plan={plan} onOpenModal={() => setExecModalOpen(true)} />
+
+        {/* 3. NEXT DROP — primary anchor with role */}
         <NextDropAnchor plan={plan} />
 
-        {/* 3. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
+        {/* 4. PULSE STRIP — one compact pulse-check (Live Activity · This Week · Coverage) */}
         <PulseStrip plan={plan} />
-
-        {/* 4. EXECUTION LAYER — missing content + deploy plan + managed execution */}
-        <ExecutionLayer plan={plan} onOpenModal={() => setExecModalOpen(true)} />
 
         {/* Drop View — the action layer, always visible */}
         <DropView
