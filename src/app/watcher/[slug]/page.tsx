@@ -184,7 +184,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* ─── CHANNEL CONTEXT — what's happening right now ────────────── */}
-        {isLive && <ChannelContext uploads={live?.recentUploads ?? []} />}
+        {isLive && <ChannelContext uploads={live?.recentUploads ?? []} artistName={artist.name} />}
 
         {/* ─── 2. PERFORMANCE SNAPSHOT — numbers only ─────────────────── */}
         <div className="mt-4 grid grid-cols-4 gap-3">
@@ -248,7 +248,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             style={{ borderColor: MUTED, background: PAPER }}
           >
             <div className="text-[15px] font-bold leading-snug">
-              {directAction(decision, fixNow, secondaryOpps, videoOppsAll)}
+              {directAction(decision, fixNow, secondaryOpps, videoOppsAll, live?.recentUploads ?? [])}
             </div>
             <div className="text-[12px] text-ink/50 mt-2 leading-snug max-w-[60ch]">
               {directOutcome(decision)}
@@ -368,26 +368,93 @@ function directAction(
   fixNow: Opportunity[],
   secondaryOpps: Opportunity[],
   videoOpps: Opportunity[],
+  uploads: RecentUpload[],
 ): string {
+  // Anchor actions to what the channel is actually doing
+  const ctx = readUploadContext(uploads);
+
+  if (decision.type === 'FIX') {
+    if (fixNow.length > 0) return fixNow[0].action;
+    return 'Post something this week to break the silence.';
+  }
+
+  if (decision.type === 'CORRECT') {
+    if (fixNow.length > 0) return fixNow[0].action;
+    if (secondaryOpps.length > 0) return secondaryOpps[0].action;
+  }
+
+  if (decision.type === 'ACCELERATE' || decision.type === 'MAINTAIN') {
+    // Use context from recent uploads to make the action specific
+    if (ctx.hasLiveContent && ctx.hasShorts)
+      return `Live content is landing. Cut more Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}footage to extend reach.`;
+    if (ctx.hasLiveContent)
+      return `Live content is driving views. Create Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}performances to reach new audiences.`;
+    if (ctx.hasCollabs)
+      return 'Collab content is active. Push the best-performing feature with a Short or lyric cut.';
+    if (ctx.hasOfficialAudio && !ctx.hasShorts)
+      return 'Audio tracks are dropping. Pair them with Shorts to drive discovery.';
+    if (ctx.hasShorts && ctx.recentCount >= 4)
+      return 'Strong Shorts output. Keep this cadence — it\'s feeding the algorithm.';
+    if (ctx.topRecent)
+      return `"${truncate(ctx.topRecent.title, 45)}" is the top performer. Extend it with a Short or supporting format.`;
+  }
+
   if (decision.type === 'MAINTAIN')
     return 'Keep current cadence. Channel is active and holding momentum.';
-  if (decision.type === 'ACCELERATE') {
-    // Push the specific action into "what to do next" — headline stays clean
-    const topVid = videoOpps.find((o) => o.impact === 'HIGH');
-    if (topVid) return topVid.action;
-    return 'Keep current cadence and scale what\'s working.';
-  }
-  if (fixNow.length > 0)
-    return fixNow[0].action;
-  if (secondaryOpps.length > 0)
-    return secondaryOpps[0].action;
+
   return 'No action needed right now. Channel is on track.';
 }
 
 function directOutcome(decision: { type: string; expectedImpact: string }): string {
   if (decision.type === 'MAINTAIN')
     return 'Holding a working plan protects growth heading into the next drop.';
+  if (decision.type === 'ACCELERATE')
+    return 'Scaling what\'s already working rides existing algorithmic momentum at a fraction of the cost of new content.';
   return decision.expectedImpact;
+}
+
+/** Read recent uploads to understand what the channel is doing */
+function readUploadContext(uploads: RecentUpload[]) {
+  const now = Date.now();
+  const recent14d = uploads.filter(
+    (u) => (now - new Date(u.publishedAt).getTime()) / 86400000 <= 14
+  );
+  const titles = recent14d.map((u) => u.title.toLowerCase());
+  const joined = titles.join(' | ');
+
+  const liveHits = titles.filter((t) =>
+    /\b(live at|live from|live in|performance|concert|session|tiny desk)\b/.test(t)
+  );
+  let liveVenue: string | null = null;
+  for (const t of liveHits) {
+    const m = t.match(/live (?:at|from|in) (?:the )?(.{4,35}?)(?:\s*[\(\)\[\]|–—-]|$)/i);
+    if (m) { liveVenue = m[1].trim().replace(/^(.)/, (c) => c.toUpperCase()); break; }
+    if (/tiny desk/i.test(t)) { liveVenue = 'Tiny Desk'; break; }
+  }
+
+  const shortsCount = recent14d.filter((u) => u.durationSec <= 62).length;
+  const featCount = titles.filter((t) => /\b(feat\.?|ft\.?|featuring)\b/.test(t)).length;
+  const audioCount = titles.filter((t) => /\b(official audio|audio)\b/.test(t)).length;
+
+  // Top recent by views
+  const topRecent = recent14d.length > 0
+    ? recent14d.reduce((best, u) => (u.viewCount > best.viewCount ? u : best), recent14d[0])
+    : null;
+
+  return {
+    recentCount: recent14d.length,
+    hasLiveContent: liveHits.length > 0,
+    liveVenue,
+    hasShorts: shortsCount > 0,
+    shortsCount,
+    hasCollabs: featCount >= 2,
+    hasOfficialAudio: audioCount > 0,
+    topRecent: topRecent && topRecent.viewCount >= 100 ? topRecent : null,
+  };
+}
+
+function truncate(s: string, n: number): string {
+  return s.length > n ? s.slice(0, n).trimEnd() + '…' : s;
 }
 
 
@@ -652,42 +719,87 @@ function findLatestUpload(uploads: RecentUpload[]): TopPerf | null {
   };
 }
 
-function ChannelContext({ uploads }: { uploads: RecentUpload[] }) {
+function ChannelContext({ uploads, artistName }: { uploads: RecentUpload[]; artistName: string }) {
   const mode = detectContentMode(uploads);
-  const latest = findLatestUpload(uploads);
 
-  if (!mode && !latest) return null;
+  // Last 3 uploads — the real-time feed
+  const now = Date.now();
+  const recentFeed = uploads
+    .filter((u) => u.live === 'none')
+    .slice(0, 3)
+    .map((u) => ({
+      id: u.id,
+      title: u.title,
+      views: u.viewCount,
+      kind: (u.durationSec <= 62 ? 'Short' : 'Video') as 'Short' | 'Video',
+      daysAgo: Math.floor((now - new Date(u.publishedAt).getTime()) / 86400000),
+    }));
+
+  if (!mode && recentFeed.length === 0) return null;
 
   return (
     <div className="mt-4 rounded-xl px-5 py-3.5 border" style={{ borderColor: MUTED, background: PAPER }}>
-      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-2">
+      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-2.5">
         Right now
       </div>
-      <div className="space-y-1.5">
-        {mode && (
-          <div className="text-[13px] leading-snug">
-            <span className="font-black">{mode.mode}.</span>
-            <span className="text-ink/55 ml-1.5">{mode.detail}</span>
+
+      {/* Content mode — what the channel is doing */}
+      {mode && (
+        <div className="text-[13px] leading-snug mb-3">
+          <span className="font-black">{mode.mode}.</span>
+          <span className="text-ink/55 ml-1.5">{mode.detail}</span>
+        </div>
+      )}
+
+      {/* Last 3 uploads — mini feed */}
+      {recentFeed.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35 mb-1">
+            Recent uploads
           </div>
-        )}
-        {latest && (
-          <div className="text-[13px] leading-snug">
-            <span className="font-black">Latest {latest.kind === 'short' ? 'Short' : 'video'}:</span>
-            <a
-              href={`https://www.youtube.com/watch?v=${latest.id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-ink/65 hover:text-ink ml-1.5 underline decoration-ink/15 underline-offset-2"
-            >
-              {latest.title}
-            </a>
-            <span className="text-ink/40 ml-1.5 tabular-nums">
-              {fmtNum(latest.views)} views
-              {latest.daysAgo === 0 ? ' · today' : latest.daysAgo === 1 ? ' · yesterday' : ` · ${latest.daysAgo}d ago`}
-            </span>
-          </div>
-        )}
-      </div>
+          {recentFeed.map((u) => (
+            <div key={u.id} className="flex items-baseline gap-2 text-[12px] leading-snug">
+              <span
+                className="text-[9px] font-bold uppercase tracking-[0.1em] px-1.5 py-0.5 rounded shrink-0"
+                style={{
+                  background: u.kind === 'Short' ? '#DCE8FF' : SOFT,
+                  color: u.kind === 'Short' ? '#1C3B8A' : '#6B5E4A',
+                }}
+              >
+                {u.kind}
+              </span>
+              <a
+                href={`https://www.youtube.com/watch?v=${u.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-ink/70 hover:text-ink underline decoration-ink/10 underline-offset-2 truncate min-w-0"
+              >
+                {cleanTitle(u.title, artistName)}
+              </a>
+              <span className="text-ink/35 tabular-nums shrink-0">
+                {fmtNum(u.views)}
+                {u.daysAgo === 0 ? ' · today' : u.daysAgo === 1 ? ' · 1d' : ` · ${u.daysAgo}d`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
+}
+
+/** Strip artist name prefix from video titles for cleaner display */
+function cleanTitle(title: string, artistName: string): string {
+  // Remove "Artist Name - " or "Artist Name – " prefix
+  const prefixes = [
+    `${artistName} - `,
+    `${artistName} – `,
+    `${artistName} — `,
+    `${artistName}: `,
+  ];
+  for (const p of prefixes) {
+    if (title.startsWith(p)) return title.slice(p.length);
+    if (title.toLowerCase().startsWith(p.toLowerCase())) return title.slice(p.length);
+  }
+  return title;
 }
