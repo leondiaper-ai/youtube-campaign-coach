@@ -386,18 +386,23 @@ function directAction(
   if (decision.type === 'ACCELERATE' || decision.type === 'MAINTAIN') {
     // Use context from recent uploads to make the action specific
 
-    // Upcoming drop detected from descriptions — channel is warming up
-    if (ctx.hasUpcoming && ctx.hasLiveContent && ctx.liveVenue)
-      return `${ctx.liveVenue} content dropping ${ctx.upcomingHint}. Channel is primed — keep Shorts flowing to build anticipation.`;
-    if (ctx.hasUpcoming && ctx.hasLiveContent)
-      return `Live content dropping ${ctx.upcomingHint}. Keep the Shorts momentum to maximise the launch.`;
-    if (ctx.hasUpcoming)
-      return `New content dropping ${ctx.upcomingHint}. Keep the current cadence to ride the release window.`;
+    // ── Release day — this is the primary activity ──────────────────
+    if (ctx.isRelease && ctx.hasShorts)
+      return `Release day. ${ctx.audioTitleCount} tracks just dropped. Push the announcement Short and cut more from the tracklist.`;
+    if (ctx.isRelease)
+      return `Release day. ${ctx.audioTitleCount} tracks just dropped. Cut Shorts from standout tracks to drive discovery.`;
+    if (ctx.hasDropSignal)
+      return 'New content incoming. Keep Shorts flowing to build anticipation for the drop.';
+    if (ctx.hasReleaseSignal)
+      return 'Active release window. Push the best-performing track with Shorts to extend the catalogue\'s reach.';
 
+    // ── Live content (from titles, not descriptions) ────────────────
     if (ctx.hasLiveContent && ctx.hasShorts)
       return `Live content is landing. Cut more Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}footage to extend reach.`;
     if (ctx.hasLiveContent)
       return `Live content is driving views. Create Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}performances to reach new audiences.`;
+
+    // ── Other patterns ──────────────────────────────────────────────
     if (ctx.hasCollabs)
       return 'Collab content is active. Push the best-performing feature with a Short or lyric cut.';
     if (ctx.hasOfficialAudio && !ctx.hasShorts)
@@ -422,52 +427,46 @@ function directOutcome(decision: { type: string; expectedImpact: string }): stri
   return decision.expectedImpact;
 }
 
-/** Read recent uploads to understand what the channel is doing */
+/**
+ * Read recent uploads to understand what the channel is doing.
+ *
+ * Key rule: "Live at X" in a DESCRIPTION means recorded there (release context).
+ *           "Live at X" in a TITLE means actual live content.
+ *           Release signals always take priority.
+ */
 function readUploadContext(uploads: RecentUpload[]) {
   const now = Date.now();
   const recent14d = uploads.filter(
     (u) => (now - new Date(u.publishedAt).getTime()) / 86400000 <= 14
   );
 
-  // Scan BOTH titles and descriptions — descriptions often carry the real context
-  // (e.g. a Short's description says "Live at the Royal Albert Hall — out tomorrow")
-  const allText = recent14d.map((u) => ({
-    text: `${u.title} ${u.description ?? ''}`.toLowerCase(),
-    title: u.title.toLowerCase(),
-    desc: (u.description ?? '').toLowerCase(),
-    age: (now - new Date(u.publishedAt).getTime()) / 86400000,
-  }));
+  const titles = recent14d.map((u) => u.title.toLowerCase());
+  const descs = recent14d.map((u) => (u.description ?? '').toLowerCase());
+  const allText = recent14d.map((u) => `${u.title} ${u.description ?? ''}`.toLowerCase());
 
-  const LIVE_RX = /\b(live at|live from|live in|performance|concert|session|tiny desk)\b/;
-  const liveHits = allText.filter((t) => LIVE_RX.test(t.text));
+  // ── Release detection (titles + descriptions) ──────────────────────
+  const audioTitleCount = titles.filter((t) => /\b(official audio|audio)\b/.test(t)).length;
+  const hasReleaseSignal = allText.some((t) =>
+    /\b(re-?release|anniversary|deluxe|remaster|out now|out today|available now|officially re-?released)\b/.test(t)
+  );
+  const hasDropSignal = allText.some((t) =>
+    /\b(out tomorrow|drops? tomorrow|pre-?save|coming soon)\b/.test(t)
+  );
+  const isRelease = audioTitleCount >= 3 || (audioTitleCount >= 2 && hasReleaseSignal);
 
-  // Venue: prioritise newest match — the most recent upload is the best signal
+  // ── Live detection (TITLES only — avoids "recorded live at" false positives) ──
+  const LIVE_TITLE_RX = /\b(live at|live from|live in|live session|tiny desk)\b/;
+  const liveTitleHits = titles.filter((t) => LIVE_TITLE_RX.test(t));
+  const hasLiveContent = liveTitleHits.length > 0 && !isRelease; // release trumps live
+
   let liveVenue: string | null = null;
-  const sortedByRecency = [...liveHits].sort((a, b) => a.age - b.age);
-  for (const t of sortedByRecency) {
-    const m = t.text.match(/live (?:at|from|in) (?:the )?(.{4,40}?)(?:\s*[\(\)\[\]|–—.,]|$)/i);
-    if (m) { liveVenue = m[1].trim().replace(/^(.)/, (c) => c.toUpperCase()); break; }
-    if (/tiny desk/i.test(t.text)) { liveVenue = 'Tiny Desk'; break; }
+  if (hasLiveContent) {
+    liveVenue = extractVenueFromTitles(liveTitleHits);
   }
 
+  // ── Other signals ─────────────────────────────────────────────────
   const shortsCount = recent14d.filter((u) => u.durationSec <= 62).length;
-  const titles = allText.map((t) => t.title);
-  const descs = allText.map((t) => t.desc);
-  const allFlat = allText.map((t) => t.text);
-  const featCount = allFlat.filter((t) => /\b(feat\.?|ft\.?|featuring)\b/.test(t)).length;
-  const audioCount = allFlat.filter((t) => /\b(official audio|audio)\b/.test(t)).length;
-
-  // Detect upcoming releases from descriptions ("out tomorrow", "out now", "pre-save")
-  const hasUpcoming = allFlat.some((t) =>
-    /\b(out tomorrow|out now|pre-?save|coming soon|drops? (?:today|tomorrow|this week))\b/.test(t)
-  );
-  const upcomingHint = hasUpcoming
-    ? allText.find((t) => /\b(out tomorrow|drops? tomorrow)\b/.test(t.text))
-      ? 'tomorrow'
-      : allText.find((t) => /\b(out now|drops? today)\b/.test(t.text))
-        ? 'today'
-        : 'soon'
-    : null;
+  const featCount = titles.filter((t) => /\b(feat\.?|ft\.?|featuring)\b/.test(t)).length;
 
   // Top recent by views
   const topRecent = recent14d.length > 0
@@ -476,14 +475,16 @@ function readUploadContext(uploads: RecentUpload[]) {
 
   return {
     recentCount: recent14d.length,
-    hasLiveContent: liveHits.length > 0,
+    isRelease,
+    hasReleaseSignal,
+    hasDropSignal,
+    audioTitleCount,
+    hasLiveContent,
     liveVenue,
     hasShorts: shortsCount > 0,
     shortsCount,
     hasCollabs: featCount >= 2,
-    hasOfficialAudio: audioCount > 0,
-    hasUpcoming,
-    upcomingHint,
+    hasOfficialAudio: audioTitleCount > 0,
     topRecent: topRecent && topRecent.viewCount >= 100 ? topRecent : null,
   };
 }
@@ -657,7 +658,15 @@ type TopPerf = {
   daysAgo: number;
 };
 
-/** Detect what the channel is doing right now from upload titles + descriptions */
+/**
+ * Detect what the channel is doing right now.
+ *
+ * Priority: Release activity → Catalogue drop → Shorts-led → Collabs → Live performances → Fallback
+ *
+ * Key insight: "Live at the Royal Albert Hall" in a description doesn't mean
+ * the channel is doing live content — it means tracks were RECORDED live.
+ * Only flag live mode when the TITLES themselves are live performances.
+ */
 function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
   if (uploads.length === 0) return null;
 
@@ -667,58 +676,70 @@ function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
   );
   if (recent14d.length === 0) return null;
 
-  // Scan both titles AND descriptions — descriptions carry the real context
-  const allText = recent14d.map((u) => `${u.title} ${u.description ?? ''}`.toLowerCase());
   const titles = recent14d.map((u) => u.title.toLowerCase());
-  const joined = allText.join(' | ');
+  const descs = recent14d.map((u) => (u.description ?? '').toLowerCase());
+  const allText = recent14d.map((u) => `${u.title} ${u.description ?? ''}`.toLowerCase());
+  const joinedTitles = titles.join(' | ');
+  const joinedAll = allText.join(' | ');
 
-  // Priority order: most specific → most general
+  // ── 1. RELEASE / RE-RELEASE — highest priority ──────────────────────
+  // Multiple "Official Audio" tracks + announcement = release day
+  const audioCount = titles.filter((t) => /\b(official audio|audio)\b/.test(t)).length;
+  const hasReleaseSignal = /\b(re-?release|anniversary|deluxe|remaster|out now|out today|available now)\b/.test(joinedAll);
+  const hasDropSignal = /\b(out tomorrow|drops? tomorrow|pre-?save|coming soon|teaser|trailer)\b/.test(joinedAll);
 
-  // Live performance content (scan titles + descriptions)
-  const liveHits = allText.filter((t) =>
-    /\b(live at|live from|live in|performance|concert|session|acoustic live)\b/.test(t)
-  );
-  if (liveHits.length >= 2) {
-    const venue = extractVenue(liveHits);
-    return { mode: 'Live performance content', detail: venue ?? `${liveHits.length} live videos in 14d` };
-  }
-  if (liveHits.length === 1) {
-    const venue = extractVenue(liveHits);
-    return { mode: 'Dropping live content', detail: venue ?? 'Live performance uploaded' };
-  }
-
-  // Release warm-up / teaser (check descriptions too — "out tomorrow", "pre-save")
-  if (/\b(teaser|trailer|coming soon|announce|pre-?save|out now|out tomorrow|drops? tomorrow)\b/.test(joined)) {
-    return { mode: 'Release warm-up', detail: 'New content incoming — teaser or pre-save detected' };
+  if (audioCount >= 3 || (audioCount >= 2 && hasReleaseSignal)) {
+    const venue = extractVenueFromTitles(titles);
+    const detail = hasReleaseSignal
+      ? `${audioCount} tracks dropped${venue ? ` — ${venue}` : ''}`
+      : `${audioCount} audio tracks in 14d${venue ? ` — ${venue}` : ''}`;
+    return { mode: 'Release day', detail };
   }
 
-  // Collaboration / features
-  const featCount = allText.filter((t) => /\b(feat\.?|ft\.?|featuring|with )\b/.test(t)).length;
+  if (hasReleaseSignal || hasDropSignal) {
+    return { mode: 'Release window', detail: hasDropSignal ? 'New content incoming' : 'Active release' };
+  }
+
+  // ── 2. CATALOGUE REPACKAGING ────────────────────────────────────────
+  const catCount = titles.filter((t) => /\b(lyric|lyrics|visuali[sz]er|official audio|audio)\b/.test(t)).length;
+  if (catCount >= 2 && audioCount < 3) {
+    return { mode: 'Catalogue mode', detail: `${catCount} format variants in 14d` };
+  }
+
+  // ── 3. SHORTS-LED ──────────────────────────────────────────────────
+  const shortsCount = recent14d.filter((u) => u.durationSec <= 62).length;
+  if (shortsCount >= 3 && shortsCount >= recent14d.length * 0.5) {
+    return { mode: 'Shorts-led strategy', detail: `${shortsCount} Shorts in 14d` };
+  }
+
+  // ── 4. COLLABORATION / FEATURES ─────────────────────────────────────
+  const featCount = titles.filter((t) => /\b(feat\.?|ft\.?|featuring)\b/.test(t)).length;
   if (featCount >= 2) {
     return { mode: 'Active collab period', detail: `${featCount} features in 14d` };
   }
 
-  // Remix activity
-  const remixCount = allText.filter((t) => /\b(remix|edit|rework|version)\b/.test(t)).length;
+  // ── 5. REMIX ACTIVITY ──────────────────────────────────────────────
+  const remixCount = titles.filter((t) => /\b(remix|edit|rework)\b/.test(t)).length;
   if (remixCount >= 2) {
     return { mode: 'Remix / repackage cycle', detail: `${remixCount} remixes in 14d` };
   }
 
-  // Shorts-heavy
-  const shortsCount = recent14d.filter((u) => u.durationSec <= 62).length;
-  if (shortsCount >= 3 && shortsCount >= recent14d.length * 0.6) {
-    return { mode: 'Shorts-led strategy', detail: `${shortsCount} Shorts in 14d` };
+  // ── 6. LIVE PERFORMANCE — only from TITLES, not descriptions ────────
+  // "Live at X" in a title = actual live content.
+  // "Live at X" in a description = where it was recorded — different signal.
+  const liveTitleHits = titles.filter((t) =>
+    /\b(live at|live from|live in|live session|tiny desk)\b/.test(t)
+  );
+  if (liveTitleHits.length >= 2) {
+    const venue = extractVenueFromTitles(liveTitleHits);
+    return { mode: 'Live performance content', detail: venue ?? `${liveTitleHits.length} live videos in 14d` };
+  }
+  if (liveTitleHits.length === 1) {
+    const venue = extractVenueFromTitles(liveTitleHits);
+    return { mode: 'Dropping live content', detail: venue ?? 'Live performance uploaded' };
   }
 
-  // Catalogue repackaging
-  if (/\b(lyric|lyrics|visuali[sz]er|audio|official audio)\b/.test(joined)) {
-    const catCount = allText.filter((t) => /\b(lyric|lyrics|visuali[sz]er|audio)\b/.test(t)).length;
-    if (catCount >= 2) {
-      return { mode: 'Catalogue mode', detail: `Repackaging tracks — ${catCount} format variants in 14d` };
-    }
-  }
-
-  // Active and posting — generic fallback
+  // ── 7. ACTIVE AND POSTING — fallback ───────────────────────────────
   if (recent14d.length >= 3) {
     return { mode: 'Consistent output', detail: `${recent14d.length} uploads in 14d` };
   }
@@ -726,16 +747,15 @@ function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
   return null;
 }
 
-/** Extract venue from text — prioritise the most specific match */
-function extractVenue(textEntries: string[]): string | null {
-  for (const t of textEntries) {
+/** Extract venue from TITLES only — avoids false positives from "recorded live at" in descriptions */
+function extractVenueFromTitles(titles: string[]): string | null {
+  for (const t of titles) {
     const m = t.match(/live (?:at|from|in) (?:the )?(.{4,40}?)(?:\s*[\(\)\[\]|–—.,\-]|$)/i);
     if (m) {
       return m[1].replace(/^\s+|\s+$/g, '').replace(/^(.)/, (c) => c.toUpperCase());
     }
+    if (/tiny desk/i.test(t)) return 'Tiny Desk';
   }
-  // Fallback: named venues
-  if (textEntries.some((t) => /tiny desk/i.test(t))) return 'Tiny Desk';
   return null;
 }
 
