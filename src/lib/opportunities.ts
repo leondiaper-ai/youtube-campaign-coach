@@ -194,7 +194,10 @@ export function detectOpportunities(
     const fmtV = v.viewCount.toLocaleString();
 
     // 7. Top video missing a lyric companion
-    if (!v.hasLyricSibling) {
+    // Skip if this video IS a lyric video (e.g. "Official Lyric Video")
+    const titleLower = v.title.toLowerCase();
+    const isLyricVideo = /\blyric(s)?\b/.test(titleLower);
+    if (!v.hasLyricSibling && !isLyricVideo) {
       out.push({
         id: `vid-no-lyric:${artist.slug}:${v.id}`,
         artistSlug: artist.slug,
@@ -215,7 +218,9 @@ export function detectOpportunities(
     }
 
     // 8. Top video missing a visualizer / audio-only companion
-    if (!v.hasVisualizerSibling && !v.hasAudioSibling) {
+    // Skip if this video IS a visualizer or audio-only track
+    const isVisualizerVideo = /\b(visuali[sz]er|audio)\b/.test(titleLower);
+    if (!v.hasVisualizerSibling && !v.hasAudioSibling && !isVisualizerVideo) {
       out.push({
         id: `vid-no-viz:${artist.slug}:${v.id}`,
         artistSlug: artist.slug,

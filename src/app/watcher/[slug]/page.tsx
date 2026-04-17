@@ -575,14 +575,23 @@ function MissedOppCard({
       className="rounded-xl border p-5"
       style={{ borderColor: MUTED, background: PAPER }}
     >
-      {/* Opportunity type — BOLD UPPERCASE headline */}
-      <div className="text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: '#2C6BFF' }}>
-        {oppTypeLabel(primary)}
-      </div>
+      {/* Video title — primary call to action, leads the card */}
+      <a
+        href={`https://www.youtube.com/watch?v=${video.id}`}
+        target="_blank"
+        rel="noreferrer"
+        className="font-black text-base text-ink hover:text-ink/80 transition-colors leading-tight block"
+        title={video.title}
+      >
+        {video.title}
+      </a>
 
-      {/* Scale: view count + HIGH IMPACT if >5M */}
-      <div className="flex items-baseline gap-2.5 mt-2">
-        <span className="font-black text-xl tabular-nums">{fmtNum(video.views)} views</span>
+      {/* Format gap + scale */}
+      <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
+        <span className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: 'rgba(44,107,255,0.08)', color: '#2C6BFF' }}>
+          {oppTypeLabel(primary)}
+        </span>
+        <span className="font-black text-[13px] tabular-nums text-ink/70">{fmtNum(video.views)} views</span>
         {isHighImpact && (
           <span className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: '#FFE2D8', color: '#8A1F0C' }}>
             High impact
@@ -590,21 +599,10 @@ function MissedOppCard({
         )}
       </div>
 
-      {/* Insight — why this matters, direct language */}
-      <div className="text-[13px] text-ink/65 mt-1.5 leading-snug max-w-[55ch]">
+      {/* Insight — why this matters */}
+      <div className="text-[12px] text-ink/55 mt-1.5 leading-snug max-w-[55ch]">
         {oppInsight(primary)}
       </div>
-
-      {/* Video title — subtle, secondary */}
-      <a
-        href={`https://www.youtube.com/watch?v=${video.id}`}
-        target="_blank"
-        rel="noreferrer"
-        className="text-[11px] text-ink/35 hover:text-ink/60 underline decoration-ink/10 underline-offset-2 mt-1 inline-block truncate max-w-[52ch]"
-        title={video.title}
-      >
-        {video.title}
-      </a>
 
       {/* ONE action — bold, directive */}
       <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
