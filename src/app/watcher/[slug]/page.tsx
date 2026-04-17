@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ARTISTS, deriveFromLive, fmtNum, daysSince, type Artist } from '@/lib/artists';
+import { ARTISTS, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { listCustomArtists } from '@/lib/artistStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
@@ -182,6 +182,9 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             )}
           </div>
         </div>
+
+        {/* ─── CHANNEL CONTEXT — what's happening right now ────────────── */}
+        {isLive && <ChannelContext uploads={live?.recentUploads ?? []} />}
 
         {/* ─── 2. PERFORMANCE SNAPSHOT — numbers only ─────────────────── */}
         <div className="mt-4 grid grid-cols-4 gap-3">
@@ -532,4 +535,160 @@ function oppAction(o: Opportunity): string {
   if (o.subtype.includes('demand'))
     return o.action;
   return o.action;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CHANNEL CONTEXT — scans recent uploads for real-time intelligence
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type ContentSignal = {
+  mode: string;       // e.g. "Live performance content"
+  detail: string;     // e.g. "Royal Albert Hall series"
+};
+
+type TopPerf = {
+  title: string;
+  views: number;
+  id: string;
+  kind: 'short' | 'video';
+  daysAgo: number;
+};
+
+/** Detect what the channel is doing right now from upload titles + patterns */
+function detectContentMode(uploads: RecentUpload[]): ContentSignal | null {
+  if (uploads.length === 0) return null;
+
+  const now = Date.now();
+  const recent14d = uploads.filter(
+    (u) => (now - new Date(u.publishedAt).getTime()) / 86400000 <= 14
+  );
+  if (recent14d.length === 0) return null;
+
+  const titles = recent14d.map((u) => u.title.toLowerCase());
+  const joined = titles.join(' | ');
+
+  // Priority order: most specific → most general
+
+  // Live performance content
+  const liveHits = titles.filter((t) =>
+    /\b(live at|live from|live in|performance|concert|session|acoustic live)\b/.test(t)
+  );
+  if (liveHits.length >= 2) {
+    const venue = extractVenue(liveHits);
+    return { mode: 'Live performance content', detail: venue ?? `${liveHits.length} live videos in 14d` };
+  }
+  if (liveHits.length === 1) {
+    const venue = extractVenue(liveHits);
+    return { mode: 'Dropping live content', detail: venue ?? 'Live performance uploaded' };
+  }
+
+  // Release warm-up / teaser
+  if (/\b(teaser|trailer|coming soon|announce|pre-?save|out now|out tomorrow)\b/.test(joined)) {
+    return { mode: 'Release warm-up', detail: 'Teaser or pre-save content detected' };
+  }
+
+  // Collaboration / features
+  const featCount = titles.filter((t) => /\b(feat\.?|ft\.?|featuring|with )\b/.test(t)).length;
+  if (featCount >= 2) {
+    return { mode: 'Active collab period', detail: `${featCount} features in 14d` };
+  }
+
+  // Remix activity
+  const remixCount = titles.filter((t) => /\b(remix|edit|rework|version)\b/.test(t)).length;
+  if (remixCount >= 2) {
+    return { mode: 'Remix / repackage cycle', detail: `${remixCount} remixes in 14d` };
+  }
+
+  // Shorts-heavy
+  const shortsCount = recent14d.filter((u) => u.durationSec <= 62).length;
+  if (shortsCount >= 3 && shortsCount >= recent14d.length * 0.6) {
+    return { mode: 'Shorts-led strategy', detail: `${shortsCount} Shorts in 14d` };
+  }
+
+  // Catalogue repackaging
+  if (/\b(lyric|lyrics|visuali[sz]er|audio|official audio)\b/.test(joined)) {
+    const catCount = titles.filter((t) => /\b(lyric|lyrics|visuali[sz]er|audio)\b/.test(t)).length;
+    if (catCount >= 2) {
+      return { mode: 'Catalogue mode', detail: `Repackaging tracks — ${catCount} format variants in 14d` };
+    }
+  }
+
+  // Active and posting — generic fallback
+  if (recent14d.length >= 3) {
+    return { mode: 'Consistent output', detail: `${recent14d.length} uploads in 14d` };
+  }
+
+  return null;
+}
+
+function extractVenue(titles: string[]): string | null {
+  for (const t of titles) {
+    // "Live at the Royal Albert Hall" → "Royal Albert Hall"
+    const m = t.match(/live (?:at|from|in) (?:the )?(.{4,40}?)(?:\s*[\(\)\[\]|–—-]|$)/i);
+    if (m) {
+      return m[1].replace(/^\s+|\s+$/g, '').replace(/^(.)/, (c) => c.toUpperCase());
+    }
+  }
+  return null;
+}
+
+/** Find the top-performing recent upload */
+function findTopPerformer(uploads: RecentUpload[]): TopPerf | null {
+  const now = Date.now();
+  const recent = uploads.filter(
+    (u) => (now - new Date(u.publishedAt).getTime()) / 86400000 <= 14 && u.live === 'none'
+  );
+  if (recent.length === 0) return null;
+
+  const top = recent.reduce((best, u) => (u.viewCount > best.viewCount ? u : best), recent[0]);
+  if (top.viewCount < 100) return null; // too low to be meaningful
+
+  return {
+    title: top.title,
+    views: top.viewCount,
+    id: top.id,
+    kind: top.durationSec <= 62 ? 'short' : 'video',
+    daysAgo: Math.floor((now - new Date(top.publishedAt).getTime()) / 86400000),
+  };
+}
+
+function ChannelContext({ uploads }: { uploads: RecentUpload[] }) {
+  const mode = detectContentMode(uploads);
+  const top = findTopPerformer(uploads);
+
+  if (!mode && !top) return null;
+
+  return (
+    <div className="mt-4 rounded-xl px-5 py-3.5 border" style={{ borderColor: MUTED, background: PAPER }}>
+      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-2">
+        Right now
+      </div>
+      <div className="space-y-1.5">
+        {mode && (
+          <div className="text-[13px] leading-snug">
+            <span className="font-black">{mode.mode}.</span>
+            <span className="text-ink/55 ml-1.5">{mode.detail}</span>
+          </div>
+        )}
+        {top && (
+          <div className="text-[13px] leading-snug">
+            <span className="font-black">Top performing:</span>
+            <a
+              href={`https://www.youtube.com/watch?v=${top.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-ink/65 hover:text-ink ml-1.5 underline decoration-ink/15 underline-offset-2"
+            >
+              {top.title}
+            </a>
+            <span className="text-ink/40 ml-1.5 tabular-nums">
+              {fmtNum(top.views)} views
+              {top.daysAgo === 0 ? ' · today' : top.daysAgo === 1 ? ' · yesterday' : ` · ${top.daysAgo}d ago`}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
