@@ -235,12 +235,20 @@ export function recentSignal(
   const subDelta = state.subscriberDelta;
   const ref = topVideoRef(topVideo);
 
+  // Detect strong cadence + not converting — actions should push depth, not volume
+  const strongButFlat = state.uploadsLast14Days >= 6 && (subDelta ?? 0) <= 0;
+
   let signal = 'Quiet window';
   let action = `Post 1 Short today from ${ref} to keep cadence warm.`;
 
-  if (uploads >= 2 && shorts >= 1) {
+  if (strongButFlat && uploads >= 1) {
+    signal = 'Active but not converting';
+    action = `Post a making-of or BTS from ${ref} — deeper content converts viewers to subscribers.`;
+  } else if (uploads >= 2 && shorts >= 1) {
     signal = 'Active follow-through';
-    action = `Create 2 Shorts from ${ref} in the next 48h.`;
+    action = strongButFlat
+      ? `Try a track breakdown or studio session from ${ref} — volume is strong, go deeper.`
+      : `Create 2 Shorts from ${ref} in the next 48h.`;
   } else if (uploads >= 1 && shorts === 0) {
     signal = 'Weak follow-through';
     action = `Create 2 Shorts from ${ref} within 24h to support the latest upload.`;
@@ -363,33 +371,42 @@ export function aiDecisionLayer(input: {
   if (readiness.status === 'under_supporting' && readiness.daysUntil != null) {
     gapBits.push(`${readiness.daysUntil}d to next drop, support level below phase floor`);
   }
-  if ((state.subscriberDelta ?? 0) <= 0 && state.uploadsLast7Days >= 3) {
-    gapBits.push('upload activity is high but subs are flat — reach not converting');
+  // Detect conversion-leak state: strong cadence but subs flat
+  const strongCadenceNotConverting = (state.subscriberDelta ?? 0) <= 0 && state.uploadsLast7Days >= 3;
+  if (strongCadenceNotConverting) {
+    gapBits.push('upload activity is high but subs are flat — volume is not the problem, content depth is');
   }
   const gap = gapBits.length ? gapBits.join('; ') + '.' : 'No material gap — reality is matching the plan for this phase.';
 
   // ACTION — clear next steps, derived from the gap + recent signal.
   // Every action names real content when a top video is known.
   const actions: string[] = [];
-  if (recent.action) actions.push(recent.action);
-  if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14) {
-    actions.push(`Post 2–3 Shorts cut from ${ref} before "${nextDrop?.name}" to warm the audience.`);
-  }
-  for (const row of cadence.rows) {
-    if (row.actual < 0) continue;
-    if (row.status === 'behind') actions.push(`Post ${row.planned} ${row.format} this week to catch cadence.`);
-  }
-  if (decisionState === 'PUSH—WEAK' || decisionState === 'ACTIVE BUT FLAT') {
-    // Avoid repeating the top-video reference if an earlier action already named it.
-    const refAlreadyNamed = actions.some((a) => ref !== 'your top clip' && a.includes(ref));
-    actions.push(
-      refAlreadyNamed
-        ? `Post a follow-up within 24h to convert viewers.`
-        : `Post a follow-up from ${ref} within 24h to convert viewers.`,
-    );
-  }
-  if (decisionState === 'SCALE—STRONG') {
-    actions.push(`Post 2–3 Short variations of ${ref} over the next 48h and build a longform around it.`);
+
+  // When cadence is strong but not converting, don't suggest more shorts —
+  // suggest deeper content that builds connection and converts.
+  if (strongCadenceNotConverting) {
+    actions.push(`Post a making-of or BTS from ${ref} — deeper content converts casual viewers to subscribers.`);
+    actions.push(`Try a track breakdown, studio session, or personal piece — give viewers a reason to subscribe.`);
+  } else {
+    if (recent.action) actions.push(recent.action);
+    if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14) {
+      actions.push(`Post 2–3 Shorts cut from ${ref} before "${nextDrop?.name}" to warm the audience.`);
+    }
+    for (const row of cadence.rows) {
+      if (row.actual < 0) continue;
+      if (row.status === 'behind') actions.push(`Post ${row.planned} ${row.format} this week to catch cadence.`);
+    }
+    if (decisionState === 'PUSH—WEAK' || decisionState === 'ACTIVE BUT FLAT') {
+      const refAlreadyNamed = actions.some((a) => ref !== 'your top clip' && a.includes(ref));
+      actions.push(
+        refAlreadyNamed
+          ? `Post a follow-up within 24h to convert viewers.`
+          : `Post a follow-up from ${ref} within 24h to convert viewers.`,
+      );
+    }
+    if (decisionState === 'SCALE—STRONG') {
+      actions.push(`Post 2–3 Short variations of ${ref} over the next 48h and build a longform around it.`);
+    }
   }
   if (actions.length === 0) actions.push('Hold cadence. No corrective action this week.');
 
@@ -410,9 +427,9 @@ export function aiDecisionLayer(input: {
 export const DECISION_STATE_META: Record<DecisionState, { color: string; subtitle: string }> = {
   'SCALE—STRONG':     { color: '#1FBE7A', subtitle: 'Cadence is holding and the audience is growing — extend your best-performing clip.' },
   'PUSH—STRONG':      { color: '#1FBE7A', subtitle: 'Channel is posting and converting — keep the clip that is working live.' },
-  'PUSH—WEAK':        { color: '#F5B73D', subtitle: 'Posting is high but subs are flat — test a new version of your top clip.' },
+  'PUSH—WEAK':        { color: '#F5B73D', subtitle: 'Posting is high but subs are flat — go deeper with BTS, breakdowns, or personal content.' },
   'BUILD—MISALIGNED': { color: '#2C6BFF', subtitle: 'Output is below the phase floor — increase Shorts this week.' },
-  'ACTIVE BUT FLAT':  { color: '#F5B73D', subtitle: 'Posting plenty, audience not moving — follow up your top clip with a Post.' },
+  'ACTIVE BUT FLAT':  { color: '#F5B73D', subtitle: 'Cadence is strong but not converting — try deeper content: BTS, making-of, personal pieces.' },
   'HOLD—LOW CADENCE': { color: '#F5B73D', subtitle: 'Cadence is low — post one Short today before expanding.' },
   QUIET:              { color: '#A0A0A0', subtitle: 'Channel is silent — post one Short today.' },
 };
