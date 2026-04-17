@@ -4444,11 +4444,9 @@ function getTimeContext(momentDate: string, today: Date, supportMissing?: boolea
 // and offers managed execution. Sits between PulseStrip and DropView.
 // Only renders when the campaign is under-deployed.
 
-function ExecutionLayer({ plan }: { plan: CampaignPlan }) {
+// Shared hook: compute execution gaps from watcher data + plan
+function useExecutionGaps(plan: CampaignPlan) {
   const watcher = useWatcherChannel();
-  const [connectOpen, setConnectOpen] = useState(false);
-  const [connectStep, setConnectStep] = useState(1);
-
   const state = watcher.state;
   if (!state) return null;
 
@@ -4456,118 +4454,159 @@ function ExecutionLayer({ plan }: { plan: CampaignPlan }) {
   const now = Date.now();
   const campaignStartMs = plan.startDate ? new Date(plan.startDate).getTime() : now - 90 * 86400000;
 
-  // ── State of Play: what exists vs what's expected ──
   const campaignVideos = videos.filter((v) => new Date(v.publishedAt).getTime() >= campaignStartMs);
   const hasOfficialVideo = campaignVideos.some((v) => v.videoType === 'official');
   const hasLyricVideo = campaignVideos.some((v) => v.videoType === 'lyric');
   const hasVisualizer = campaignVideos.some((v) => v.videoType === 'visualizer');
   const shortsCount = campaignVideos.filter((v) => v.kind === 'short').length;
   const campaignWeeks = Math.max(1, Math.ceil((now - campaignStartMs) / (7 * 86400000)));
-  const expectedShorts = campaignWeeks * 3; // 3/wk target
-  const postsActive = campaignVideos.length >= 2; // simplified: active if 2+ uploads
-
-  // ── Blocking issue: find the top problem ──
+  const expectedShorts = campaignWeeks * 3;
+  const postsActive = campaignVideos.length >= 2;
   const topVideo = state.topVideoLast14d;
   const shortsBelow = shortsCount < expectedShorts * 0.6;
   const hasNoShorts = shortsCount === 0 || shortsBelow;
   const hasNoSupport = !hasLyricVideo && !hasVisualizer;
   const recentShorts14d = state.shortsLast14Days ?? 0;
-  const shortsCadenceLow = recentShorts14d < 4; // less than ~2/wk in last 14d
+  const shortsCadenceLow = recentShorts14d < 4;
 
-  // Score how under-deployed this campaign is
   const gaps: string[] = [];
   if (!hasOfficialVideo) gaps.push('No official video');
-  if (!hasLyricVideo) gaps.push('No lyric video');
-  if (!hasVisualizer) gaps.push('No visualizer');
+  if (!hasLyricVideo) gaps.push('Missing lyric video');
+  if (!hasVisualizer) gaps.push('Missing visualizer');
   if (hasNoShorts) gaps.push('Shorts under-deployed');
   if (shortsCadenceLow && !hasNoShorts) gaps.push('Shorts cadence dropping');
   if (!postsActive) gaps.push('Upload cadence low');
 
-  // Only show the execution layer if there are meaningful gaps (2+ issues)
-  if (gaps.length < 2) return null;
-
-  // Estimated reach loss (rough heuristic)
   const reachLoss = Math.min(65, gaps.length * 12 + (hasNoShorts ? 10 : 0) + (hasNoSupport ? 8 : 0));
 
-  // ── Blocking growth message ──
+  // Blocking issue
   let blockingTitle = '';
-  let blockingDesc = '';
   let blockingFix = '';
   if (hasNoShorts && topVideo) {
     blockingTitle = `"${topVideo.title}" is not reaching new audiences`;
-    blockingDesc = 'No Shorts supporting this video — discovery is capped to existing subscribers.';
     blockingFix = `Cut 2–3 Shorts from "${topVideo.title}" this week`;
   } else if (hasNoSupport && topVideo) {
     blockingTitle = `"${topVideo.title}" has no support content`;
-    blockingDesc = 'No lyric video or visualizer to capture passive listeners.';
     blockingFix = 'Ship a lyric video or visualizer this week';
-  } else if (!hasOfficialVideo) {
-    blockingTitle = 'No official video released';
-    blockingDesc = 'The channel has no primary anchor content for this campaign.';
-    blockingFix = 'Prioritise the official video drop';
   } else if (shortsCadenceLow) {
     blockingTitle = 'Shorts cadence is dropping';
-    blockingDesc = `Only ${recentShorts14d} Shorts in the last 14 days — algorithm favours consistent uploaders.`;
     blockingFix = 'Post 3 Shorts this week to maintain momentum';
-  } else {
-    blockingTitle = 'Upload cadence is too low';
-    blockingDesc = `${campaignVideos.length} uploads in ${campaignWeeks} weeks — algorithm needs consistent output.`;
-    blockingFix = 'Post at least 3 Shorts this week to re-engage the algorithm';
+  } else if (gaps.length > 0) {
+    blockingTitle = 'Campaign support content is incomplete';
+    blockingFix = 'Fill the gaps below to unlock full reach';
   }
 
-  // ── Ready to Deploy plan ──
-  const deployDate = new Date();
-  deployDate.setDate(deployDate.getDate() + 2);
+  // Deploy plan items
   const formatDeploy = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  const deployItems: { label: string; detail: string; done: boolean }[] = [];
+  const deployItems: { label: string; detail: string }[] = [];
   if (!hasLyricVideo) {
-    deployItems.push({ label: 'Lyric video', detail: `Upload by ${formatDeploy(deployDate)}`, done: false });
+    const d = new Date(); d.setDate(d.getDate() + 2);
+    deployItems.push({ label: 'Lyric video', detail: `Upload by ${formatDeploy(d)}` });
   }
   if (hasNoShorts || shortsCount < expectedShorts * 0.5) {
     const shortsToDo = Math.min(6, Math.max(3, expectedShorts - shortsCount));
-    const spreadDays = Math.ceil(shortsToDo / 3) * 7;
-    deployItems.push({ label: `Shorts pack (${shortsToDo})`, detail: `Spread over ${Math.ceil(spreadDays / 7)} weeks`, done: false });
+    deployItems.push({ label: `Shorts pack (${shortsToDo})`, detail: `Spread over ${Math.ceil(shortsToDo / 3)} weeks` });
   }
   if (!hasVisualizer) {
-    const vizDate = new Date();
-    vizDate.setDate(vizDate.getDate() + 5);
-    deployItems.push({ label: 'Visualizer', detail: `Upload by ${formatDeploy(vizDate)}`, done: false });
+    const d = new Date(); d.setDate(d.getDate() + 5);
+    deployItems.push({ label: 'Visualizer', detail: `Upload by ${formatDeploy(d)}` });
   }
   if (!postsActive) {
-    deployItems.push({ label: 'Community posts (3)', detail: 'Weekly cadence', done: false });
+    deployItems.push({ label: 'Community posts (3)', detail: 'Weekly cadence' });
   }
+
+  const stateOfPlay = [
+    { label: 'Official Video', live: hasOfficialVideo },
+    { label: 'Lyric Video', live: hasLyricVideo },
+    { label: 'Visualizer', live: hasVisualizer },
+    { label: 'Shorts', live: !hasNoShorts, detail: `${shortsCount}/${expectedShorts} expected` },
+    { label: 'Shorts cadence', live: !shortsCadenceLow, detail: `${recentShorts14d} in last 14d` },
+  ];
+
+  return { gaps, reachLoss, blockingTitle, blockingFix, deployItems, stateOfPlay };
+}
+
+/**
+ * Compact inline card — replaces the large block. Shows gap count + CTA.
+ */
+function ExecutionLayer({ plan, onOpenModal }: { plan: CampaignPlan; onOpenModal: () => void }) {
+  const exec = useExecutionGaps(plan);
+  if (!exec || exec.gaps.length < 2) return null;
+
+  const statusColor = '#F08A3C'; // orange = recommended
+
+  return (
+    <div className="mt-4">
+      <button
+        onClick={onOpenModal}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition hover:shadow-sm"
+        style={{ background: '#F6F1E7', border: '1px solid rgba(240,138,60,0.2)' }}
+      >
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColor }} />
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] font-black text-ink">
+            Execution status: <span style={{ color: statusColor }}>Recommended</span>
+          </div>
+          <div className="text-[10px] font-semibold text-ink/50">
+            This campaign has {exec.gaps.length} missing support actions · −{exec.reachLoss}% estimated reach
+          </div>
+        </div>
+        <span className="text-[11px] font-bold text-ink/40 shrink-0">Open →</span>
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Top-level button for action row — "Managed Execution" with status dot.
+ */
+function ManagedExecutionButton({ plan, onClick }: { plan: CampaignPlan; onClick: () => void }) {
+  const exec = useExecutionGaps(plan);
+  const hasGaps = exec && exec.gaps.length >= 2;
+  const dotColor = hasGaps ? '#F08A3C' : '#71717a'; // orange if recommended, grey if inactive
+
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.14em] transition hover:shadow-sm"
+      style={{ background: hasGaps ? 'rgba(240,138,60,0.08)' : 'rgba(14,14,14,0.04)', color: hasGaps ? '#8A4A1A' : 'rgba(14,14,14,0.5)', border: `1px solid ${hasGaps ? 'rgba(240,138,60,0.2)' : 'rgba(14,14,14,0.08)'}` }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor }} />
+      Managed Execution
+    </button>
+  );
+}
+
+/**
+ * Full modal — campaign gaps, deploy plan, connect flow.
+ */
+function ExecutionModal({ plan, open, onClose }: { plan: CampaignPlan; open: boolean; onClose: () => void }) {
+  const exec = useExecutionGaps(plan);
+  const [connectStep, setConnectStep] = useState(0); // 0=not started, 1-3=connect flow
+
+  if (!open || !exec) return null;
 
   const INK = '#0E0E0E';
   const PAPER = '#FAF7F2';
 
   return (
-    <div className="mt-5">
-      {/* ── 1. Campaign Under-Deployed ── */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: PAPER, border: '1px solid rgba(255,74,28,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(14,14,14,0.5)' }}>
+      <div className="w-full max-w-lg mx-4 rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto" style={{ background: PAPER }}>
         {/* Header */}
-        <div className="px-5 py-4" style={{ background: 'rgba(255,74,28,0.04)' }}>
-          <div className="text-[14px] font-black text-ink">Campaign Under-Deployed</div>
-          <div className="text-[11px] font-semibold text-ink/55 mt-0.5">
-            Key content is missing. Reach is being capped.
-          </div>
+        <div className="px-5 py-4 flex items-center justify-between sticky top-0" style={{ background: INK }}>
+          <span className="text-[13px] font-black" style={{ color: PAPER }}>Enable Managed Execution</span>
+          <button onClick={onClose} className="text-[16px] font-bold" style={{ color: 'rgba(250,247,242,0.5)' }}>×</button>
         </div>
 
-        <div className="px-5 py-4 space-y-5">
+        <div className="px-5 py-5 space-y-5">
 
-          {/* ── 2. State of Play ── */}
+          {/* Section 1: Why we're recommending this */}
           <div>
             <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-2">
-              State of play
+              Why we&apos;re recommending this
             </div>
             <div className="space-y-1.5">
-              {[
-                { label: 'Official Video', live: hasOfficialVideo },
-                { label: 'Lyric Video', live: hasLyricVideo },
-                { label: 'Visualizer', live: hasVisualizer },
-                { label: 'Shorts', live: !hasNoShorts, detail: `${shortsCount}/${expectedShorts} expected` },
-                { label: 'Shorts cadence', live: !shortsCadenceLow, detail: `${recentShorts14d} in last 14d` },
-              ].map((item) => (
+              {exec.stateOfPlay.map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
                   <span className="text-[11px]" style={{ color: item.live ? '#1FBE7A' : '#FF4A1C' }}>
                     {item.live ? '●' : '○'}
@@ -4584,151 +4623,142 @@ function ExecutionLayer({ plan }: { plan: CampaignPlan }) {
               ))}
             </div>
             <div className="mt-2 text-[11px] font-bold" style={{ color: '#FF4A1C' }}>
-              Estimated reach loss: −{reachLoss}%
+              Estimated reach loss: −{exec.reachLoss}%
             </div>
-          </div>
-
-          {/* ── 3. Blocking Growth ── */}
-          <div className="rounded-lg p-3" style={{ background: 'rgba(255,74,28,0.04)', border: '1px solid rgba(255,74,28,0.08)' }}>
-            <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-1">
-              Blocking growth
-            </div>
-            <div className="text-[12px] font-black text-ink leading-snug">{blockingTitle}</div>
-            <div className="text-[11px] font-semibold text-ink/50 mt-0.5">{blockingDesc}</div>
-            <div className="mt-2 text-[11px] font-bold" style={{ color: '#FF4A1C' }}>
-              Fix this week: {blockingFix}
-            </div>
-          </div>
-
-          {/* ── 4. Ready to Deploy ── */}
-          {deployItems.length > 0 && (
-            <div>
-              <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-2">
-                Ready to deploy
+            {exec.blockingTitle && (
+              <div className="mt-2 rounded-lg p-2.5" style={{ background: 'rgba(255,74,28,0.04)' }}>
+                <div className="text-[11px] font-bold text-ink leading-snug">{exec.blockingTitle}</div>
+                <div className="text-[10px] font-semibold mt-0.5" style={{ color: '#FF4A1C' }}>{exec.blockingFix}</div>
               </div>
-              <div className="space-y-1.5">
-                {deployItems.map((item) => (
+            )}
+          </div>
+
+          {/* Section 2: What we'll handle */}
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-2">
+              What we&apos;ll handle
+            </div>
+            <div className="text-[11px] font-semibold text-ink/60 leading-relaxed">
+              Uploads · Scheduling · Metadata optimisation
+            </div>
+            <div className="text-[10px] font-semibold text-ink/40 mt-1">
+              All content goes live as draft/unlisted for your approval.
+            </div>
+            {exec.deployItems.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                {exec.deployItems.map((item) => (
                   <div key={item.label} className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded border flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(14,14,14,0.15)' }}>
-                      {item.done && <span className="text-[10px]" style={{ color: '#1FBE7A' }}>✓</span>}
-                    </span>
+                    <span className="w-4 h-4 rounded border flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(14,14,14,0.15)' }} />
                     <span className="text-[11px] font-bold text-ink/70 flex-1">{item.label}</span>
                     <span className="text-[10px] font-semibold text-ink/40">{item.detail}</span>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* ── 5. Managed Execution CTA ── */}
-          <div className="rounded-lg p-4" style={{ background: INK }}>
-            <div className="text-[13px] font-black" style={{ color: PAPER }}>Let us handle this for you</div>
-            <div className="mt-1.5 text-[10px] font-semibold leading-relaxed" style={{ color: 'rgba(250,247,242,0.55)' }}>
-              Uploads · Scheduling · Optimisation · All content goes live as draft/unlisted
+          {/* Section 3: How to enable */}
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-3">
+              How to enable
             </div>
-            <button
-              onClick={() => { setConnectOpen(true); setConnectStep(1); }}
-              className="mt-3 w-full py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center transition-colors hover:opacity-90"
-              style={{ background: '#FF4A1C', color: PAPER }}
-            >
-              Enable Managed YouTube Execution
-            </button>
+
+            {/* Step 1 */}
+            <div className="flex items-start gap-3 mb-3">
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0" style={{ background: connectStep > 1 ? '#1FBE7A' : connectStep === 1 ? '#FF4A1C' : INK, color: PAPER }}>
+                {connectStep > 1 ? '✓' : '1'}
+              </span>
+              <div className="flex-1">
+                <div className="text-[12px] font-black text-ink">Add channel access</div>
+                <div className="text-[11px] font-semibold text-ink/50 mt-0.5">
+                  Add <span className="font-black text-ink/70">youtube@yourtool.com</span> as Channel Manager
+                </div>
+                <div className="text-[10px] font-semibold text-ink/35 mt-0.5">
+                  YouTube Studio → Settings → Permissions
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="flex items-start gap-3 mb-3" style={{ opacity: connectStep >= 1 ? 1 : 0.4 }}>
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0" style={{ background: connectStep > 2 ? '#1FBE7A' : connectStep === 2 ? '#FF4A1C' : 'rgba(14,14,14,0.08)', color: connectStep >= 2 ? PAPER : INK }}>
+                {connectStep > 2 ? '✓' : '2'}
+              </span>
+              <div>
+                <div className="text-[12px] font-black text-ink">Confirm access</div>
+                <div className="text-[11px] font-semibold text-ink/50 mt-0.5">
+                  Click below once you&apos;ve added the email.
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="flex items-start gap-3" style={{ opacity: connectStep >= 2 ? 1 : 0.4 }}>
+              <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0" style={{ background: connectStep >= 3 ? '#1FBE7A' : 'rgba(14,14,14,0.08)', color: connectStep >= 3 ? PAPER : INK }}>
+                {connectStep >= 3 ? '✓' : '3'}
+              </span>
+              <div>
+                <div className="text-[12px] font-black text-ink">
+                  {connectStep >= 3 ? 'Plan activated' : 'We activate your plan'}
+                </div>
+                {connectStep >= 3 && (
+                  <div className="text-[11px] font-semibold text-ink/50 mt-0.5">
+                    Your execution plan is live. All uploads go as draft/unlisted for approval.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="flex items-center gap-2 pt-3" style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }}>
+            {connectStep === 0 && (
+              <button
+                onClick={() => setConnectStep(1)}
+                className="flex-1 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center"
+                style={{ background: INK, color: PAPER }}
+              >
+                I&apos;ve added access
+              </button>
+            )}
+            {connectStep === 1 && (
+              <button
+                onClick={() => setConnectStep(2)}
+                className="flex-1 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center"
+                style={{ background: INK, color: PAPER }}
+              >
+                I&apos;ve added access
+              </button>
+            )}
+            {connectStep === 2 && (
+              <button
+                onClick={() => setConnectStep(3)}
+                className="flex-1 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center"
+                style={{ background: '#FF4A1C', color: PAPER }}
+              >
+                Confirm &amp; activate
+              </button>
+            )}
+            {connectStep >= 3 && (
+              <button
+                onClick={onClose}
+                className="flex-1 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center"
+                style={{ background: '#1FBE7A', color: PAPER }}
+              >
+                Done
+              </button>
+            )}
+            {connectStep < 3 && (
+              <button
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-lg text-[11px] font-bold text-ink/50 hover:text-ink/70 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </div>
       </div>
-
-      {/* ── 6. Connect Modal ── */}
-      {connectOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(14,14,14,0.5)' }}>
-          <div className="w-full max-w-md mx-4 rounded-2xl overflow-hidden" style={{ background: PAPER }}>
-            <div className="px-5 py-4 flex items-center justify-between" style={{ background: INK }}>
-              <span className="text-[13px] font-black" style={{ color: PAPER }}>Connect Your Channel</span>
-              <button onClick={() => setConnectOpen(false)} className="text-[16px] font-bold" style={{ color: 'rgba(250,247,242,0.5)' }}>×</button>
-            </div>
-            <div className="px-5 py-5 space-y-5">
-              {/* Step 1 */}
-              <div className="flex items-start gap-3" style={{ opacity: connectStep >= 1 ? 1 : 0.4 }}>
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0" style={{ background: connectStep === 1 ? '#FF4A1C' : connectStep > 1 ? '#1FBE7A' : 'rgba(14,14,14,0.08)', color: connectStep >= 1 ? PAPER : INK }}>
-                  {connectStep > 1 ? '✓' : '1'}
-                </span>
-                <div>
-                  <div className="text-[12px] font-black text-ink">Add channel access</div>
-                  <div className="text-[11px] font-semibold text-ink/50 mt-0.5">
-                    Add <span className="font-black text-ink/70">youtube@yourtool.com</span> as Channel Manager in YouTube Studio → Settings → Permissions
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="flex items-start gap-3" style={{ opacity: connectStep >= 2 ? 1 : 0.4 }}>
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0" style={{ background: connectStep === 2 ? '#FF4A1C' : connectStep > 2 ? '#1FBE7A' : 'rgba(14,14,14,0.08)', color: connectStep >= 2 ? PAPER : INK }}>
-                  {connectStep > 2 ? '✓' : '2'}
-                </span>
-                <div>
-                  <div className="text-[12px] font-black text-ink">Confirm access</div>
-                  <div className="text-[11px] font-semibold text-ink/50 mt-0.5">
-                    Click below once you&apos;ve added the email above.
-                  </div>
-                  {connectStep === 2 && (
-                    <button
-                      onClick={() => setConnectStep(3)}
-                      className="mt-2 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.14em]"
-                      style={{ background: INK, color: PAPER }}
-                    >
-                      I&apos;ve added access
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="flex items-start gap-3" style={{ opacity: connectStep >= 3 ? 1 : 0.4 }}>
-                <span className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black shrink-0" style={{ background: connectStep === 3 ? '#1FBE7A' : 'rgba(14,14,14,0.08)', color: connectStep >= 3 ? PAPER : INK }}>
-                  {connectStep >= 3 ? '✓' : '3'}
-                </span>
-                <div>
-                  <div className="text-[12px] font-black text-ink">
-                    {connectStep >= 3 ? 'Plan activated' : 'We activate your plan'}
-                  </div>
-                  {connectStep >= 3 && (
-                    <div className="text-[11px] font-semibold text-ink/50 mt-0.5">
-                      Your execution plan is now live. All uploads will go as draft/unlisted for your approval.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }}>
-                {connectStep === 1 && (
-                  <button
-                    onClick={() => setConnectStep(2)}
-                    className="flex-1 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center"
-                    style={{ background: INK, color: PAPER }}
-                  >
-                    I&apos;ve added access
-                  </button>
-                )}
-                {connectStep >= 3 && (
-                  <button
-                    onClick={() => setConnectOpen(false)}
-                    className="flex-1 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-[0.14em] text-center"
-                    style={{ background: '#1FBE7A', color: PAPER }}
-                  >
-                    Done
-                  </button>
-                )}
-                <button
-                  onClick={() => setConnectOpen(false)}
-                  className="px-4 py-2.5 rounded-lg text-[11px] font-bold text-ink/50 hover:text-ink/70 transition-colors"
-                >
-                  {connectStep >= 3 ? '' : 'Cancel'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -8831,6 +8861,7 @@ export default function YouTubeCampaignCoach() {
   const [undoItem, setUndoItem] = useState<UndoItem | null>(null);
   const [addModal, setAddModal] = useState<{ open: boolean; initialWeek?: number; initialKind?: MissingActionKind }>({ open: false });
   const [timelineModalOpen, setTimelineModalOpen] = useState(false);
+  const [execModalOpen, setExecModalOpen] = useState(false);
 
   // Resolve the artist slug to a full record (name, channelHandle, phase)
   // so the Coach can auto-fill fields and lock the plan to the right channel.
@@ -9107,7 +9138,7 @@ export default function YouTubeCampaignCoach() {
         <PulseStrip plan={plan} />
 
         {/* 4. EXECUTION LAYER — missing content + deploy plan + managed execution */}
-        <ExecutionLayer plan={plan} />
+        <ExecutionLayer plan={plan} onOpenModal={() => setExecModalOpen(true)} />
 
         {/* Drop View — the action layer, always visible */}
         <DropView
@@ -9157,7 +9188,10 @@ export default function YouTubeCampaignCoach() {
           >
             <span className="underline decoration-ink/20 underline-offset-2">Start with your own release plan →</span>
           </button>
+          <ManagedExecutionButton plan={plan} onClick={() => setExecModalOpen(true)} />
         </div>
+
+        <ExecutionModal plan={plan} open={execModalOpen} onClose={() => setExecModalOpen(false)} />
 
         {/* ── CAMPAIGN PLAN — collapsed by default, hosts phase bar + phase blocks + view toggle ── */}
         <div className="mt-6">
