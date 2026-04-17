@@ -2,7 +2,6 @@
 // PIH Campaign Coach v2.2 — Weekly Rhythm widget
 import { useState, useMemo, useCallback, useEffect, createContext, useContext } from 'react';
 import { useSearchParams } from 'next/navigation';
-import ConversionChip from '@/components/ConversionChip';
 import {
   aiDecisionLayer,
   cadenceComparison,
@@ -2974,9 +2973,7 @@ function CampaignHeader({ plan, onUpdatePlan, onOpenSettings, onOpenAdd, onNewCa
           <p className="text-[12px] text-ink/55 mt-2 max-w-[52ch]">
             Paste your release dates. Get the cadence, support, and next move for every drop.
           </p>
-          <div className="mt-3">
-            <ConversionChip />
-          </div>
+          {/* ConversionChip removed — conversion data lives in watcher */}
         </div>
         {onOpenTimeline && (
           <div className="shrink-0 ml-3 flex flex-col items-end gap-1">
