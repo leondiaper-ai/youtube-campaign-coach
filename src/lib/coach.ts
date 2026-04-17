@@ -140,6 +140,15 @@ export interface TopVideoLike {
   views: number;
 }
 
+/** Lightweight video info passed from watcher for campaign-aware actions */
+export interface LatestVideoLike {
+  title: string;
+  publishedAt: string;
+  kind: 'video' | 'short';
+  videoType?: string;
+  views?: number;
+}
+
 function formatViews(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
   if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + 'K';
@@ -239,25 +248,27 @@ export function recentSignal(
   const strongButFlat = state.uploadsLast14Days >= 6 && (subDelta ?? 0) <= 0;
 
   let signal = 'Quiet window';
-  let action = `Post 1 Short today from ${ref} to keep cadence warm.`;
+  // Actions here are secondary — primary actions come from aiDecisionLayer.
+  // Keep these as light cadence nudges, not campaign-specific advice.
+  let action = 'Post 1 Short today to keep cadence warm.';
 
   if (strongButFlat && uploads >= 1) {
     signal = 'Active but not converting';
-    action = `Post a making-of or BTS from ${ref} — deeper content converts viewers to subscribers.`;
+    action = 'Cadence is strong — go deeper with BTS, breakdowns, or personal content.';
   } else if (uploads >= 2 && shorts >= 1) {
     signal = 'Active follow-through';
     action = strongButFlat
-      ? `Try a track breakdown or studio session from ${ref} — volume is strong, go deeper.`
-      : `Create 2 Shorts from ${ref} in the next 48h.`;
+      ? 'Volume is strong — try deeper content to convert viewers.'
+      : 'Follow through with 2 more Shorts in the next 48h.';
   } else if (uploads >= 1 && shorts === 0) {
     signal = 'Weak follow-through';
-    action = `Create 2 Shorts from ${ref} within 24h to support the latest upload.`;
+    action = 'Create 2 Shorts within 24h to support the latest upload.';
   } else if (uploads === 0 && (subDelta ?? 0) > 0) {
     signal = 'Audience moving — channel silent';
-    action = `Post 1 Short today from ${ref} to capture the subscriber lift.`;
+    action = 'Post 1 Short today to capture the subscriber lift.';
   } else if (uploads === 0 && (state.daysSinceLastUpload ?? 0) >= 7) {
     signal = 'Channel went quiet';
-    action = `Post 1 Short today from ${ref} to break the silence.`;
+    action = 'Post 1 Short today to break the silence.';
   }
 
   return {
@@ -330,8 +341,9 @@ export function aiDecisionLayer(input: {
   events: WatcherEventLike[];
   nextDrop: NextDropLike | null;
   topVideo?: TopVideoLike | null;
+  latestVideos?: LatestVideoLike[];
 }): AIDecision {
-  const { phase, plan, state, events, nextDrop, topVideo } = input;
+  const { phase, plan, state, events, nextDrop, topVideo, latestVideos } = input;
   const momentum = momentumState(state);
   const cadence = cadenceComparison(plan, state);
   const recent = recentSignal(state, events, topVideo);
@@ -378,36 +390,70 @@ export function aiDecisionLayer(input: {
   }
   const gap = gapBits.length ? gapBits.join('; ') + '.' : 'No material gap — reality is matching the plan for this phase.';
 
-  // ACTION — clear next steps, derived from the gap + recent signal.
-  // Every action names real content when a top video is known.
+  // ── CAMPAIGN-CONTEXT-AWARE ACTIONS ──────────────────────────────────────
+  // Actions are derived from the actual campaign state — latest drop, next
+  // planned moment, collab opportunities, cadence gaps — not generic "top video" refs.
   const actions: string[] = [];
 
-  // When cadence is strong but not converting, don't suggest more shorts —
-  // suggest deeper content that builds connection and converts.
-  if (strongCadenceNotConverting) {
-    actions.push(`Post a making-of or BTS from ${ref} — deeper content converts casual viewers to subscribers.`);
-    actions.push(`Try a track breakdown, studio session, or personal piece — give viewers a reason to subscribe.`);
-  } else {
-    if (recent.action) actions.push(recent.action);
-    if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14) {
-      actions.push(`Post 2–3 Shorts cut from ${ref} before "${nextDrop?.name}" to warm the audience.`);
-    }
+  // Detect latest longform drop from live data
+  const latestDrop = (latestVideos ?? [])
+    .filter((v) => v.kind === 'video')
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())[0] ?? null;
+  const dropAgeDays = latestDrop
+    ? Math.floor((Date.now() - new Date(latestDrop.publishedAt).getTime()) / 86400000)
+    : null;
+  const dropTitle = latestDrop ? `"${latestDrop.title}"` : null;
+
+  // Detect collab opportunities: "ft.", "feat.", "x " in latest drop title
+  const collabMatch = latestDrop
+    ? latestDrop.title.match(/(?:ft\.?|feat\.?|featuring)\s+([^(\[,]+)/i)
+      ?? latestDrop.title.match(/\bx\s+([A-Z][^(\[,]+)/i)
+    : null;
+  const collabArtist = collabMatch ? collabMatch[1].trim() : null;
+
+  // 1. CADENCE BEHIND — fix cadence first, everything else follows
+  const cadenceBehind = cadence.rows.some((r) => r.actual >= 0 && r.status === 'behind');
+  if (cadenceBehind && !strongCadenceNotConverting) {
     for (const row of cadence.rows) {
       if (row.actual < 0) continue;
       if (row.status === 'behind') actions.push(`Post ${row.planned} ${row.format} this week to catch cadence.`);
     }
-    if (decisionState === 'PUSH—WEAK' || decisionState === 'ACTIVE BUT FLAT') {
-      const refAlreadyNamed = actions.some((a) => ref !== 'your top clip' && a.includes(ref));
-      actions.push(
-        refAlreadyNamed
-          ? `Post a follow-up within 24h to convert viewers.`
-          : `Post a follow-up from ${ref} within 24h to convert viewers.`,
-      );
-    }
-    if (decisionState === 'SCALE—STRONG') {
-      actions.push(`Post 2–3 Short variations of ${ref} over the next 48h and build a longform around it.`);
+  }
+
+  // 2. JUST DROPPED (within 3 days) — follow up the drop
+  if (dropAgeDays != null && dropAgeDays <= 3 && dropTitle && !cadenceBehind) {
+    actions.push(`${dropTitle} is live — follow up with BTS or a making-of Short within 24h.`);
+    if (collabArtist) {
+      actions.push(`Set up collab tools with ${collabArtist} — cross-post clips to each other's channels.`);
     }
   }
+  // 3. DROP IS WORKING (4-14 days) — maximise what's already performing
+  else if (dropAgeDays != null && dropAgeDays <= 14 && dropTitle && !cadenceBehind) {
+    if (strongCadenceNotConverting) {
+      actions.push(`Post a track breakdown or studio session for ${dropTitle} — deeper content converts viewers to subscribers.`);
+    } else {
+      actions.push(`Cut 2–3 Shorts from ${dropTitle} to extend its reach while it's still being pushed.`);
+    }
+    if (collabArtist) {
+      actions.push(`Have you set up cross-promo with ${collabArtist}? Collab clips drive new audience.`);
+    }
+  }
+  // 4. STRONG CADENCE BUT NOT CONVERTING — suggest depth
+  else if (strongCadenceNotConverting) {
+    actions.push('Volume is strong — go deeper: BTS, track breakdowns, studio sessions, or personal content.');
+    actions.push('Give viewers a reason to subscribe — show the person behind the music.');
+  }
+
+  // 5. NEXT DROP APPROACHING — prep support
+  if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14 && nextDrop) {
+    actions.push(`"${nextDrop.name}" drops in ${readiness.daysUntil}d — line up 2–3 Shorts to warm the audience.`);
+  }
+
+  // 6. SCALING — lean into what works
+  if (decisionState === 'SCALE—STRONG' && dropTitle) {
+    actions.push(`${dropTitle} is performing — post 2–3 Short variations and build a longform around it.`);
+  }
+
   if (actions.length === 0) actions.push('Hold cadence. No corrective action this week.');
 
   return {

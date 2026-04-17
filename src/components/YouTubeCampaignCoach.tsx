@@ -3653,10 +3653,10 @@ function subsViewsSignal(
   const s = subDelta ?? 0;
   const v = viewDelta ?? 0;
   if (uploads14 === 0) return "You're not posting — the channel is cooling off and the algorithm is letting go";
-  if (uploads14 >= 6 && s <= 0 && v > 0) return "Cadence is strong and views are up — but viewers aren't subscribing. Go deeper: BTS, making-of, or story content";
-  if (uploads14 >= 6 && s <= 0) return "You're posting a lot but not converting — try deeper content (BTS, breakdowns, personal pieces) instead of more volume";
+  if (uploads14 >= 6 && s <= 0 && v > 0) return "Cadence is strong and views are up — but viewers aren't subscribing";
+  if (uploads14 >= 6 && s <= 0) return "Posting consistently but not converting — depth, not volume, is the fix";
   if (s > 0 && v > 0) return "Views and subs are both moving — the channel is working right now";
-  if (s <= 0 && v > 0) return "Reach is growing but subs are flat — viewers aren't staying. Build connection: BTS, personal content, or track breakdowns";
+  if (s <= 0 && v > 0) return "Reach is growing but subs are flat — viewers aren't staying";
   if (s > 0 && v <= 0) return "Subs are ticking up but views aren't — the new audience is small";
   if (s < 0 && v < 0) return "Views and subs are both down — the channel is slipping";
   return "The channel is flat — nothing is moving yet";
@@ -3731,8 +3731,15 @@ function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: Campaign
   const topVideoForEngine = watcher.state?.topVideoLast14d
     ? { title: watcher.state.topVideoLast14d.title, views: watcher.state.topVideoLast14d.views }
     : null;
+  const latestVideosForEngine = (watcher.state?.latestVideos ?? []).map((v) => ({
+    title: v.title,
+    publishedAt: v.publishedAt,
+    kind: v.kind as 'video' | 'short',
+    videoType: v.videoType,
+    views: v.views,
+  }));
   const decision = watcher.state
-    ? aiDecisionLayer({ phase: coachPhase, plan: planned, state: watcher.state, events: watcher.events, nextDrop, topVideo: topVideoForEngine })
+    ? aiDecisionLayer({ phase: coachPhase, plan: planned, state: watcher.state, events: watcher.events, nextDrop, topVideo: topVideoForEngine, latestVideos: latestVideosForEngine })
     : null;
   const cadenceCmp = watcher.state ? cadenceComparison(planned, watcher.state) : null;
   const recent = watcher.state ? recentSignal(watcher.state, watcher.events, topVideoForEngine) : null;
