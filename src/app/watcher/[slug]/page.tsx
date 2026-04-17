@@ -633,31 +633,30 @@ function extractVenue(titles: string[]): string | null {
   return null;
 }
 
-/** Find the top-performing recent upload */
-function findTopPerformer(uploads: RecentUpload[]): TopPerf | null {
-  const now = Date.now();
-  const recent = uploads.filter(
-    (u) => (now - new Date(u.publishedAt).getTime()) / 86400000 <= 14 && u.live === 'none'
-  );
-  if (recent.length === 0) return null;
+/** Find the latest upload — this tells you what's coming next */
+function findLatestUpload(uploads: RecentUpload[]): TopPerf | null {
+  if (uploads.length === 0) return null;
 
-  const top = recent.reduce((best, u) => (u.viewCount > best.viewCount ? u : best), recent[0]);
-  if (top.viewCount < 100) return null; // too low to be meaningful
+  // uploads are already sorted newest-first from the API
+  const latest = uploads.find((u) => u.live === 'none') ?? uploads[0];
+  const now = Date.now();
+  const daysAgo = Math.floor((now - new Date(latest.publishedAt).getTime()) / 86400000);
+  if (daysAgo > 14) return null; // stale
 
   return {
-    title: top.title,
-    views: top.viewCount,
-    id: top.id,
-    kind: top.durationSec <= 62 ? 'short' : 'video',
-    daysAgo: Math.floor((now - new Date(top.publishedAt).getTime()) / 86400000),
+    title: latest.title,
+    views: latest.viewCount,
+    id: latest.id,
+    kind: latest.durationSec <= 62 ? 'short' : 'video',
+    daysAgo,
   };
 }
 
 function ChannelContext({ uploads }: { uploads: RecentUpload[] }) {
   const mode = detectContentMode(uploads);
-  const top = findTopPerformer(uploads);
+  const latest = findLatestUpload(uploads);
 
-  if (!mode && !top) return null;
+  if (!mode && !latest) return null;
 
   return (
     <div className="mt-4 rounded-xl px-5 py-3.5 border" style={{ borderColor: MUTED, background: PAPER }}>
@@ -671,20 +670,20 @@ function ChannelContext({ uploads }: { uploads: RecentUpload[] }) {
             <span className="text-ink/55 ml-1.5">{mode.detail}</span>
           </div>
         )}
-        {top && (
+        {latest && (
           <div className="text-[13px] leading-snug">
-            <span className="font-black">Top performing:</span>
+            <span className="font-black">Latest {latest.kind === 'short' ? 'Short' : 'video'}:</span>
             <a
-              href={`https://www.youtube.com/watch?v=${top.id}`}
+              href={`https://www.youtube.com/watch?v=${latest.id}`}
               target="_blank"
               rel="noreferrer"
               className="text-ink/65 hover:text-ink ml-1.5 underline decoration-ink/15 underline-offset-2"
             >
-              {top.title}
+              {latest.title}
             </a>
             <span className="text-ink/40 ml-1.5 tabular-nums">
-              {fmtNum(top.views)} views
-              {top.daysAgo === 0 ? ' · today' : top.daysAgo === 1 ? ' · yesterday' : ` · ${top.daysAgo}d ago`}
+              {fmtNum(latest.views)} views
+              {latest.daysAgo === 0 ? ' · today' : latest.daysAgo === 1 ? ' · yesterday' : ` · ${latest.daysAgo}d ago`}
             </span>
           </div>
         )}
