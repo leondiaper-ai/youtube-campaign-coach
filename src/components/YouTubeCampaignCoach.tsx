@@ -174,6 +174,8 @@ type CampaignPlan = {
   dropPlans?: DropPlan[];
   supportPlans?: SupportPlan[];
   moments?: CampaignMoment[];
+  /** Concrete YouTube planner cards — each real-world event converted into an actionable moment. */
+  youtubeMoments?: YouTubeMoment[];
   /** True for the seeded K Trap reference campaign; false/undefined for user-created campaigns. */
   isExample?: boolean;
 };
@@ -257,6 +259,41 @@ type DropPlan = {
 };
 
 type ViewMode = 'campaign' | 'drop';
+
+// ── YOUTUBE MOMENT PLANNER CARDS ────────────────────────────────────────────
+// Each real-world campaign event that has YouTube content potential becomes a
+// YouTubeMoment — a concrete planner card with support stack, not commentary.
+
+type YouTubeMomentType =
+  | 'official_video'
+  | 'lyric_video'
+  | 'visualizer'
+  | 'album_announce'
+  | 'album_release'
+  | 'deluxe_release'
+  | 'tour'
+  | 'festival'
+  | 'promo_trip'
+  | 'activation'
+  | 'catalogue'
+  | 'live_show'
+  | 'tour_announce';
+
+type YouTubeMomentStatus = 'core_missing' | 'partial' | 'planned' | 'complete';
+
+type YouTubeMoment = {
+  id: string;
+  title: string;
+  date: string;              // ISO date
+  phase: PhaseName;
+  momentType: YouTubeMomentType;
+  headline: string;          // one-line: why this matters on YouTube
+  expectedSupport: string[]; // concrete support items
+  status: YouTubeMomentStatus;
+  reason: string;            // why this exists in the planner
+  weekNum: number;           // links to CampaignWeek
+  priority: 'high' | 'medium' | 'low';
+};
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -1482,8 +1519,10 @@ function classifyTimelineEvent(title: string): TimelineKind {
   if (/\b(trnsmt|glastonbury|reading|leeds|latitude|parklife|wireless|primavera|coachella|bonnaroo|lollapalooza|shaky\s*knees|kendal\s*calling|y\s*not|rockin'?\s*on|sonic)\b/.test(t)) return 'festival';
   if (/\btour\b/.test(t) && /\b(start|leg|date|kick\s*off|night|show|gig)\b/.test(t)) return 'tourDate';
   if (/\btour\b/.test(t) && !/\b(announce|tickets?|on\s*sale|release)\b/.test(t)) return 'tourDate';
-  if (/\b(support\s*shows?|headline\s*shows?|live\s*show|gig|concert|instore|outstore|signing|fanzone|activation)\b/.test(t)) return 'liveShow';
-  if (/\b(promo\s*trip|press\s*trip|radio\s*promo|flies?\s*to|promo\s*(run|dates?|visit))\b/.test(t)) return 'promoTrip';
+  if (/\b(support\s*shows?|headline\s*shows?|live\s*show|gig|concert|instore|outstore|signing|fanzone|activation|performances?)\b/.test(t)) return 'liveShow';
+  if (/\b(promo\s*trip|press\s*trip|radio\s*promo|promo\s*(run|dates?|visit))\b/.test(t)) return 'promoTrip';
+  // "flies to [destination]" — only if going somewhere notable (not just flying home)
+  if (/\bflies?\s*to\b/.test(t) && /\b(usa|us|america|japan|europe|australia|nyc|la|berlin|paris|tokyo)\b/i.test(t)) return 'promoTrip';
   if (/\bdocumentary\b.*\b(tease|teaser|trailer)\b/.test(t) || (/\bdocumentary\b/.test(t) && /\btease\b/.test(t))) return 'documentaryTease';
   if (/\bdocumentary\b.*\brelease|release\b.*\bdocumentary|documentary.*youtube/.test(t) || /\bdocumentary\b/.test(t)) return 'documentaryRelease';
   if (/\bdeluxe\b.*\b(album|release)\b/.test(t)) return 'albumRelease';
@@ -1492,6 +1531,7 @@ function classifyTimelineEvent(title: string): TimelineKind {
   if (/\bsingle\b.*\b(release|out|drop)\b|\b(release|drop)\b.*\bsingle\b|\bsingle\s*#?\d\b/.test(t)) return 'singleRelease';
   if (/\b(official\s*music\s*video|official\s*video|visualis|visualiz)\b/.test(t)) return 'singleRelease';
   if (/\brelease\b/.test(t)) return 'singleRelease';
+  if (/\bannounce\b/.test(t)) return 'snippet'; // bare announce without album/single context = tease moment
   if (/\b(outdoor|headline)\b.*\bshow/.test(t)) return 'liveShow';
   if (/\b(uk|eu|europe|usa|us|japan|australia)\b.*\b(dates?|shows?|run)\b/.test(t)) return 'tourDate';
   if (/\b(promo|dates)\b/.test(t)) return 'other';
@@ -1670,6 +1710,149 @@ function actionsForEvent(ev: ParsedTimelineEvent, startIso: string): Array<{ dat
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHARED PLAN ENRICHMENT — works on ANY CampaignPlan, not just timeline imports
 // ═══════════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// YOUTUBE MOMENT GENERATOR — converts timeline events into planner cards
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Support stack templates per moment type — concrete items, not commentary. */
+const MOMENT_SUPPORT: Record<YouTubeMomentType, string[]> = {
+  official_video:  ['Shorts ×3', 'Community Post', 'Lyric Video or Artwork Video', 'Follow-up Longform', 'Premiere setup'],
+  lyric_video:     ['Shorts ×2–3', 'Community Post', 'Artwork Video if no visualiser', 'Follow-up clip'],
+  visualizer:      ['Shorts ×2–3', 'Community Post', 'Live/performance cut if available'],
+  album_announce:  ['Announcement trailer', 'Shorts ×3', 'Community Post', 'Pre-order / tour CTA content'],
+  album_release:   ['Focus track video or trailer', 'Shorts ×3–5', 'Community Post', 'Follow-up longform', 'Listening / reaction / BTS asset'],
+  deluxe_release:  ['Announcement Short', 'Shorts ×2', 'Community Post', 'New track focus video', 'Behind-the-scenes clip'],
+  tour:            ['Travel Short', 'Backstage Short', 'Performance Short', 'Recap video', 'Community Post'],
+  tour_announce:   ['Announcement video', 'Shorts ×2', 'Community Post', 'Tour CTA / ticket link'],
+  festival:        ['Travel Short', 'Backstage Short', 'Performance clip', 'Crowd reaction Short', 'Recap video', 'Community Post'],
+  promo_trip:      ['Vlog / travel clip', 'BTS Short', 'City / culture clip', 'Community Post', 'Promo trip recap'],
+  activation:      ['Short-form teaser', 'Event-day clip', 'Recap clip', 'Community Post'],
+  live_show:       ['Performance Short', 'Backstage Short', 'Community Post', 'Recap clip'],
+  catalogue:       ['Catalogue Short', 'Community Post', 'Fan moment clip'],
+};
+
+/** Map a TimelineKind + title to a YouTubeMomentType, or null if it should be skipped. */
+function classifyAsMomentType(kind: TimelineKind, title: string): { type: YouTubeMomentType; priority: 'high' | 'medium' | 'low' } | null {
+  const t = title.toLowerCase();
+  switch (kind) {
+    case 'singleRelease': {
+      if (/\blyric\b/.test(t)) return { type: 'lyric_video', priority: 'high' };
+      if (/\bvisualis|visualiz/.test(t)) return { type: 'visualizer', priority: 'high' };
+      return { type: 'official_video', priority: 'high' };
+    }
+    case 'albumRelease': {
+      if (/\bdeluxe\b/.test(t)) return { type: 'deluxe_release', priority: 'high' };
+      return { type: 'album_release', priority: 'high' };
+    }
+    case 'albumAnnounce':       return { type: 'album_announce', priority: 'high' };
+    case 'tourAnnounce':        return { type: 'tour_announce', priority: 'high' };
+    case 'tourDate':            return { type: 'tour', priority: 'medium' };
+    case 'festival':            return { type: 'festival', priority: 'high' };
+    case 'liveShow':            return { type: 'live_show', priority: 'medium' };
+    case 'promoTrip':           return { type: 'promo_trip', priority: 'high' };
+    case 'documentaryRelease':  return { type: 'official_video', priority: 'high' };
+    case 'documentaryTease':    return { type: 'catalogue', priority: 'medium' };
+    case 'podcast':             return { type: 'catalogue', priority: 'low' };
+    case 'snippet':             return { type: 'catalogue', priority: 'low' };
+    case 'other': {
+      // Check if it has content potential
+      if (/\b(usa|japan|australia|europe)\b/.test(t) && /\b(flies?\s*to|trip|dates?|promo)\b/.test(t)) return { type: 'promo_trip', priority: 'medium' };
+      if (/\b(fanzone|activation|fan\s*event)\b/.test(t)) return { type: 'activation', priority: 'medium' };
+      if (/\b(feature|bbc|itv|radio|tv)\b/.test(t)) return { type: 'catalogue', priority: 'low' };
+      if (/\b(headline|outdoor)\b.*\bshow/.test(t)) return { type: 'live_show', priority: 'medium' };
+      // Skip admin-only or vague items
+      if (/\b(pre-?\s*order|7"\s*single|socials|rx)\b/i.test(t)) return null;
+      return null;
+    }
+    default: return null;
+  }
+}
+
+/** Build a headline explaining why a moment matters on YouTube. */
+function momentHeadline(type: YouTubeMomentType, title: string): string {
+  switch (type) {
+    case 'official_video':  return 'Main release moment — needs core support to land properly';
+    case 'lyric_video':     return 'Visual support asset — extends the release and catches search traffic';
+    case 'visualizer':      return 'Visual alternative — catches mood-based listeners and playlist adds';
+    case 'album_announce':  return 'Campaign anchor — establishes the release timeline and builds anticipation';
+    case 'album_release':   return 'Peak release moment — maximum support, all formats, first 48hrs critical';
+    case 'deluxe_release':  return 'Second-wave release — re-engages the audience with fresh album content';
+    case 'tour':            return 'Live content window — daily shorts from the road build audience connection';
+    case 'tour_announce':   return 'Tour launch — drives ticket sales and builds excitement for the live run';
+    case 'festival':        return 'High-visibility moment — festival content reaches beyond core audience';
+    case 'promo_trip':      return 'Travel and market-entry moment — vlog-style content adds human context';
+    case 'activation':      return 'Cultural crossover moment — unique content opportunity';
+    case 'live_show':       return 'Live performance window — capture energy for short-form content';
+    case 'catalogue':       return 'Catalogue / filler moment — keeps the channel active between peaks';
+  }
+}
+
+/** Build the "reason" string — why this specific item exists in the planner. */
+function momentReason(type: YouTubeMomentType, title: string): string {
+  switch (type) {
+    case 'official_video':  return `"${title}" is a release marker and should anchor the YouTube campaign`;
+    case 'lyric_video':     return `Lyric/visual version extends the release window and captures long-tail views`;
+    case 'visualizer':      return `Visualiser provides an alternative entry point for the track`;
+    case 'album_announce':  return `Album announcement sets the campaign timeline — everything builds from here`;
+    case 'album_release':   return `Album release is the campaign peak — all content funnels toward this moment`;
+    case 'deluxe_release':  return `Deluxe release re-activates the campaign cycle with new material`;
+    case 'tour':            return `Live dates create daily content opportunities — tour diary, backstage, recaps`;
+    case 'tour_announce':   return `Tour announcement drives ticket conversion and builds live-event anticipation`;
+    case 'festival':        return `Festival slot reaches new audiences and generates high-energy short-form content`;
+    case 'promo_trip':      return `Travel content adds personality and supports expansion into new markets`;
+    case 'activation':      return `Activation creates unique content that stands out from regular release content`;
+    case 'live_show':       return `Live show generates performance clips and fan-facing content`;
+    case 'catalogue':       return `Keeps the channel active and maintains algorithm momentum between peaks`;
+  }
+}
+
+let _ytMomentId = 0;
+
+/**
+ * Convert parsed timeline events into concrete YouTube planner moments.
+ * Every important event gets a card. Low-value admin items are skipped.
+ */
+function buildYouTubeMoments(
+  events: ParsedTimelineEvent[],
+  startIso: string,
+  weekCount: number,
+  phases: PhaseSlot[],
+): YouTubeMoment[] {
+  const moments: YouTubeMoment[] = [];
+
+  for (const ev of events) {
+    const classification = classifyAsMomentType(ev.kind, ev.title);
+    if (!classification) continue; // skip admin / no-content-value items
+
+    const wd = dateToWeekDay(startIso, ev.dateISO);
+    if (!wd || wd.weekIdx >= weekCount) continue;
+
+    const weekNum = wd.weekIdx + 1;
+
+    // Determine phase from week number
+    const phaseSlot = phases.find((p) => weekNum >= p.weekStart && weekNum <= p.weekEnd);
+    const phaseName: PhaseName = phaseSlot?.name ?? 'EXTEND';
+
+    const support = [...MOMENT_SUPPORT[classification.type]];
+
+    moments.push({
+      id: `ytm-${++_ytMomentId}`,
+      title: ev.title,
+      date: ev.dateISO,
+      phase: phaseName,
+      momentType: classification.type,
+      headline: momentHeadline(classification.type, ev.title),
+      expectedSupport: support,
+      status: 'planned', // all start as planned — live data will update this
+      reason: momentReason(classification.type, ev.title),
+      weekNum,
+      priority: classification.priority,
+    });
+  }
+
+  return moments.sort((a, b) => a.date.localeCompare(b.date));
+}
 
 type WeekContext = 'tour' | 'festival' | 'pre-release' | 'post-release' | 'catalogue';
 
@@ -2049,6 +2232,12 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
   // uses the parsed events for finer-grained context than moments alone can provide
   enrichWithTimelineContext(weeks, events, startIso);
 
+  // ── Build concrete YouTube planner moments ──────────────────────────
+  // Every important real-world event becomes an actionable planner card
+  // with support stack, status, and phase assignment.
+  const phases = assignDynamicPhases(weekCount, moments);
+  const youtubeMoments = buildYouTubeMoments(events, startIso, weekCount, phases);
+
   return {
     artist: artist || '',
     campaignName: campaignName || 'Imported Campaign',
@@ -2064,6 +2253,7 @@ function buildPlanFromTimeline(events: ParsedTimelineEvent[], artist?: string, c
       communityPerWeek: 2,
     },
     moments,
+    youtubeMoments,
     isExample: false,
   };
 }
@@ -6419,6 +6609,10 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   const phaseMoments = (plan.moments ?? []).filter(
     (m) => m.weekNum >= phase.weekStart && m.weekNum <= phase.weekEnd
   );
+  // YouTube planner cards for this phase
+  const ytMoments = (plan.youtubeMoments ?? []).filter(
+    (m) => m.phase === phase.name
+  );
 
   const PhaseSummary = () => (
     <div className="w-full">
@@ -6431,12 +6625,23 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0 text-[11px] font-bold text-ink/60">
-          <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
-          {missingSupport > 0 && (
-            <span style={{ color: '#FF4A1C' }}>· {missingSupport} missing support</span>
-          )}
-          {missingSupport === 0 && plannedCount > 0 && (
-            <span style={{ color: '#5B7CFA' }}>· {plannedCount} planned</span>
+          {ytMoments.length > 0 ? (
+            <>
+              <span>{ytMoments.length} {ytMoments.length === 1 ? 'moment' : 'moments'}</span>
+              {ytMoments.filter((m) => m.priority === 'high').length > 0 && (
+                <span style={{ color: '#FF4A1C' }}>· {ytMoments.filter((m) => m.priority === 'high').length} high priority</span>
+              )}
+            </>
+          ) : (
+            <>
+              <span>{dropCount} {dropCount === 1 ? 'drop' : 'drops'}</span>
+              {missingSupport > 0 && (
+                <span style={{ color: '#FF4A1C' }}>· {missingSupport} missing support</span>
+              )}
+              {missingSupport === 0 && plannedCount > 0 && (
+                <span style={{ color: '#5B7CFA' }}>· {plannedCount} planned</span>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -6485,11 +6690,87 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
       </button>
 
       <div className="p-4">
-        {dropCount === 0 && (
-          <div className="text-[12px] text-ink/50 italic">No drops scheduled in this phase.</div>
-        )}
+        {/* ── YouTube Moment Planner Cards ────────────────────────────── */}
+        {ytMoments.length > 0 ? (
+          <>
+            {ytMoments.map((m) => {
+              const dateLabel = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: m.date.startsWith('2027') ? 'numeric' : undefined });
+              const statusColor =
+                m.status === 'complete' ? '#1FBE7A' :
+                m.status === 'partial' ? '#FFD24C' :
+                m.status === 'core_missing' ? '#FF4A1C' :
+                '#5B7CFA'; // planned
+              const statusLabel =
+                m.status === 'complete' ? 'COMPLETE' :
+                m.status === 'partial' ? 'PARTIAL' :
+                m.status === 'core_missing' ? 'CORE MISSING' :
+                'PLANNED';
+              const priorityBg =
+                m.priority === 'high' ? 'rgba(255,74,28,0.08)' :
+                m.priority === 'medium' ? 'rgba(255,210,76,0.08)' :
+                'rgba(14,14,14,0.03)';
+              const typeBadge = m.momentType.replace(/_/g, ' ').toUpperCase();
 
-        {trackSupports.map(({ track, support }) => {
+              return (
+                <div
+                  key={m.id}
+                  className="mb-3 last:mb-0 rounded-lg p-3"
+                  style={{ background: priorityBg, border: '1px solid rgba(14,14,14,0.06)' }}
+                >
+                  {/* Title row */}
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-black text-[13px] text-ink leading-tight">{m.title}</span>
+                        <span className="text-[10px] font-semibold text-ink/45 shrink-0">{dateLabel}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: phase.color, color: '#FAF7F2' }}>
+                          {typeBadge}
+                        </span>
+                        {m.priority === 'high' && (
+                          <span className="text-[9px] font-black uppercase tracking-[0.14em] text-[#FF4A1C]">HIGH PRIORITY</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.12em] shrink-0" style={{ color: statusColor }}>
+                      {statusLabel}
+                    </span>
+                  </div>
+
+                  {/* Headline — why this matters */}
+                  <div className="text-[11px] text-ink/65 font-semibold mt-1.5 leading-snug">
+                    {m.headline}
+                  </div>
+
+                  {/* Expected support stack */}
+                  <div className="mt-2">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-0.5">
+                      YouTube support needed
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      {m.expectedSupport.map((s, i) => (
+                        <span key={i} className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(14,14,14,0.06)', color: 'rgba(14,14,14,0.6)' }}>
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Reason — why this is in the planner */}
+                  <div className="mt-2 text-[10px] text-ink/40 italic leading-snug">
+                    {m.reason}
+                  </div>
+                </div>
+              );
+            })}
+          </>
+        ) : dropCount === 0 ? (
+          <div className="text-[12px] text-ink/50 italic">No moments scheduled in this phase.</div>
+        ) : null}
+
+        {/* ── Legacy drop support cards (for live data / non-timeline plans) ── */}
+        {ytMoments.length === 0 && trackSupports.map(({ track, support }) => {
           const missingSlots = support.slots.filter((s) => !s.hit);
           const isUpcoming = track.status === 'upcoming';
           const tierColor = isUpcoming ? '#5B7CFA' : COVERAGE_COLOR[support.coverageTier];
@@ -6557,6 +6838,42 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
             </div>
           );
         })}
+
+        {/* Phase insight — gaps, opportunities, cadence notes */}
+        {ytMoments.length > 0 && (
+          <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(14,14,14,0.08)' }}>
+            {(() => {
+              const highPriority = ytMoments.filter((m) => m.priority === 'high');
+              const medPriority = ytMoments.filter((m) => m.priority === 'medium');
+              const coreMissing = ytMoments.filter((m) => m.status === 'core_missing');
+              return (
+                <div className="space-y-1.5">
+                  {highPriority.length > 0 && (
+                    <div className="text-[11px] text-ink/65 leading-snug">
+                      <span className="font-black text-ink/80">Strongest opportunities:</span>{' '}
+                      {highPriority.slice(0, 3).map((m) => m.title).join(', ')}
+                      {highPriority.length > 3 && ` + ${highPriority.length - 3} more`}
+                    </div>
+                  )}
+                  {coreMissing.length > 0 && (
+                    <div className="text-[11px] leading-snug" style={{ color: '#FF4A1C' }}>
+                      <span className="font-black">Missing core support:</span>{' '}
+                      {coreMissing.map((m) => m.title).join(', ')}
+                    </div>
+                  )}
+                  {medPriority.length > 0 && highPriority.length === 0 && (
+                    <div className="text-[11px] text-ink/50 leading-snug">
+                      {medPriority.length} medium-priority {medPriority.length === 1 ? 'moment' : 'moments'} — cadence content around live dates
+                    </div>
+                  )}
+                  <div className="text-[10px] font-bold text-ink/40 mt-1">
+                    Recommended cadence: {micro.cadence}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Add to this phase — microsite-style action buttons */}
         <div className="mt-3 pt-3 flex flex-wrap gap-2" style={{ borderTop: '1px solid rgba(14,14,14,0.08)' }}>
