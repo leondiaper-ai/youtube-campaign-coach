@@ -4282,9 +4282,53 @@ function getCollabsThisWeek(plan: CampaignPlan): number {
 
 type ContentIdeaGroup = { label: string; ideas: string[] };
 
-const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGroup[]; highlight?: boolean }> = {
+const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; groups: ContentIdeaGroup[]; highlight?: boolean }> = {
+  official_video: {
+    cta: 'Maximise the drop',
+    captureLine: 'Capture: BTS + reaction + teaser cuts',
+    groups: [
+      { label: 'Shorts', ideas: ['Behind-the-scenes', 'Best moment clip', 'Reaction cut'] },
+      { label: 'Video', ideas: ['Making-of', 'Director commentary'] },
+      { label: 'Support', ideas: ['Lyric video', 'Visualizer'] },
+    ],
+  },
+  album_release: {
+    cta: 'Capture the release',
+    captureLine: 'Capture: listening party + track breakdowns',
+    groups: [
+      { label: 'Shorts', ideas: ['Track-by-track teaser', 'Fan first reaction', 'Studio clip'] },
+      { label: 'Video', ideas: ['Listening party', 'Track breakdown'] },
+      { label: 'Support', ideas: ['Visualizers per track'] },
+    ],
+    highlight: true,
+  },
+  album_announce: {
+    cta: 'Build the hype',
+    captureLine: 'Capture: announcement + countdown content',
+    groups: [
+      { label: 'Shorts', ideas: ['Reveal clip', 'Tracklist tease', 'Studio snippet'] },
+      { label: 'Support', ideas: ['Countdown content', 'Pre-save push'] },
+    ],
+  },
+  track_moment: {
+    cta: 'Capture this',
+    captureLine: 'Capture: performance + fan reaction',
+    groups: [
+      { label: 'Shorts', ideas: ['Hook clip', 'Fan reaction', 'Performance cut'] },
+      { label: 'Video', ideas: ['Stripped-back version'] },
+    ],
+  },
+  deluxe_release: {
+    cta: 'Re-engage the audience',
+    captureLine: 'Capture: new track highlights + bonus content',
+    groups: [
+      { label: 'Shorts', ideas: ['New track teaser', 'Bonus content clip'] },
+      { label: 'Video', ideas: ['Deluxe breakdown'] },
+    ],
+  },
   tour: {
     cta: 'Film every show',
+    captureLine: 'Capture: performance + backstage + crowd reaction',
     groups: [
       { label: 'Shorts', ideas: ['Travel clip', 'Crowd reaction', 'Performance snippet'] },
       { label: 'Video', ideas: ['Recap video', 'Tour diary'] },
@@ -4294,6 +4338,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGro
   },
   tour_announce: {
     cta: 'Capture the announcement',
+    captureLine: 'Capture: date reveal + fan reaction',
     groups: [
       { label: 'Shorts', ideas: ['Date reveal', 'Fan reaction'] },
       { label: 'Support', ideas: ['Countdown content'] },
@@ -4301,6 +4346,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGro
   },
   festival: {
     cta: "Don't miss this",
+    captureLine: 'Capture: performance + backstage + crowd reaction',
     groups: [
       { label: 'Shorts', ideas: ['Travel clip', 'Crowd reaction', 'Performance snippet'] },
       { label: 'Video', ideas: ['Recap video'] },
@@ -4310,6 +4356,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGro
   },
   promo_trip: {
     cta: 'Film everything',
+    captureLine: 'Capture: travel + location content',
     groups: [
       { label: 'Shorts', ideas: ['Travel diary', 'Location content'] },
       { label: 'Video', ideas: ['Behind-the-scenes'] },
@@ -4318,6 +4365,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGro
   },
   activation: {
     cta: 'Capture this',
+    captureLine: 'Capture: event highlights + fan interaction',
     groups: [
       { label: 'Shorts', ideas: ['Event highlights', 'Fan interaction'] },
       { label: 'Video', ideas: ['Recap clip'] },
@@ -4325,6 +4373,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGro
   },
   live_show: {
     cta: 'Film this',
+    captureLine: 'Capture: performance + crowd moment',
     groups: [
       { label: 'Shorts', ideas: ['Performance clip', 'Crowd moment'] },
       { label: 'Video', ideas: ['Performance snippet'] },
@@ -4334,13 +4383,24 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; groups: ContentIdeaGro
   },
 };
 
-// Event types that carry embedded content opportunities
-const OPPORTUNITY_EVENT_TYPES = new Set<YouTubeMomentType>([
-  'tour', 'tour_announce', 'festival', 'promo_trip', 'activation', 'live_show',
-]);
-
 function getMomentContentIdeas(type: YouTubeMomentType) {
   return MOMENT_CONTENT_IDEAS[type] ?? null;
+}
+
+/**
+ * Pick at most `max` highlight moments per phase section.
+ * Prefers moments with highlight: true, then high priority, then earliest.
+ */
+function pickPhaseHighlights(moments: { id: string; momentType: YouTubeMomentType; priority: string }[], max = 2): Set<string> {
+  const scored = moments.map((m) => {
+    const ideas = getMomentContentIdeas(m.momentType);
+    let score = 0;
+    if (ideas?.highlight) score += 10;
+    if (m.priority === 'high') score += 5;
+    return { id: m.id, score };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  return new Set(scored.slice(0, max).filter((s) => s.score > 0).map((s) => s.id));
 }
 
 
@@ -7321,9 +7381,17 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
         {/* ── YouTube Moment Planner Cards (Tier 1 only, Tier 2 nested) ── */}
         {ytMoments.length > 0 ? (
           <>
-            {ytMoments.filter((m) => m.tier === 1).map((m) => {
+            {(() => {
+              const tier1 = ytMoments.filter((m) => m.tier === 1);
+              const highlights = pickPhaseHighlights(tier1);
+              return tier1.map((m) => {
               const dateLabel = new Date(m.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: m.date.startsWith('2027') ? 'numeric' : undefined });
               const typeBadge = m.momentType.replace(/_/g, ' ').toUpperCase();
+
+              // Content ideas for this moment type
+              const ideas = getMomentContentIdeas(m.momentType);
+              const totalIdeas = ideas ? ideas.groups.reduce((n, g) => n + g.ideas.length, 0) : 0;
+              const isHighlight = highlights.has(m.id);
 
               // Tier 2 support moments attached to this primary
               const childMoments = ytMoments.filter((c) => c.tier === 2 && c.parentId === m.id);
@@ -7342,17 +7410,27 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                 supportCmp.status === 'PARTIAL' ? '#FFD24C' :
                 '#FF4A1C';
 
+              const isOpen = expandedOpps.has(m.id);
+
               return (
                 <div
                   key={m.id}
                   className="mb-3 last:mb-0 rounded-lg overflow-hidden"
-                  style={{ border: `1px solid ${mMeta.color}22` }}
+                  style={{ border: `1px solid ${isHighlight ? '#FF4A1C33' : `${mMeta.color}22`}` }}
                 >
                   {/* Momentum signal bar */}
                   <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: mMeta.bg }}>
                     <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: mMeta.color }}>
                       {mMeta.label}
                     </span>
+                    {isHighlight && (
+                      <span
+                        className="text-[8px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded shrink-0"
+                        style={{ background: '#FFE2D8', color: '#8A1F0C' }}
+                      >
+                        {ideas?.cta === "Don't miss this" ? "Don't miss" : 'High opportunity'}
+                      </span>
+                    )}
                     <span className="text-[10px] text-ink/55 font-semibold flex-1 truncate">
                       {momentum.reason}
                     </span>
@@ -7360,7 +7438,7 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
 
                   <div className="p-3" style={{ background: 'rgba(255,255,255,0.55)' }}>
                     {/* Title row */}
-                    <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-black text-[13px] text-ink leading-tight">{m.title}</span>
@@ -7370,15 +7448,56 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                           <span className="text-[9px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: phase.color, color: '#FAF7F2' }}>
                             {typeBadge}
                           </span>
-                          {m.priority === 'high' && (
-                            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-[#FF4A1C]">HIGH PRIORITY</span>
-                          )}
                         </div>
                       </div>
                       <span className="text-[10px] font-black uppercase tracking-[0.12em] shrink-0" style={{ color: supportStatusColor }}>
                         {supportCmp.status.replace('_', ' ')}
                       </span>
                     </div>
+
+                    {/* Content opportunity subtitle — always visible */}
+                    {ideas && (
+                      <button
+                        onClick={() => toggleOpp(m.id)}
+                        className="mt-1.5 w-full flex items-center gap-2 text-left"
+                      >
+                        <span className="text-[11px] font-semibold text-ink/55">
+                          → {totalIdeas} content moments available
+                        </span>
+                        <span className="text-[10px] text-ink/30">{isOpen ? '▾' : '▸'}</span>
+                      </button>
+                    )}
+                    {!ideas && (
+                      <div className="mt-1.5 text-[11px] font-semibold text-ink/40">
+                        → Capture: support content around this drop
+                      </div>
+                    )}
+
+                    {/* Expanded content ideas */}
+                    {ideas && isOpen && (
+                      <div className="mt-2 px-2 py-2 rounded" style={{ background: 'rgba(14,14,14,0.02)' }}>
+                        <div className="flex flex-wrap gap-3">
+                          {ideas.groups.map((g) => (
+                            <div key={g.label} className="min-w-0">
+                              <div className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/40 mb-0.5">
+                                {g.label}
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {g.ideas.map((idea) => (
+                                  <span
+                                    key={idea}
+                                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                                    style={{ background: 'rgba(14,14,14,0.05)', color: 'rgba(14,14,14,0.6)' }}
+                                  >
+                                    {idea}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Action — what to do now (focused, one line) */}
                     <div className="mt-2 px-2 py-1.5 rounded" style={{ background: mMeta.bg }}>
@@ -7444,63 +7563,11 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                         </div>
                       </div>
                     )}
-
-                    {/* ── Embedded Content Opportunities ── */}
-                    {(() => {
-                      const ideas = getMomentContentIdeas(m.momentType);
-                      if (!ideas) return null;
-                      const totalIdeas = ideas.groups.reduce((n, g) => n + g.ideas.length, 0);
-                      const isOpen = expandedOpps.has(m.id);
-                      return (
-                        <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }}>
-                          <button
-                            onClick={() => toggleOpp(m.id)}
-                            className="w-full flex items-center gap-2 text-left group"
-                          >
-                            {ideas.highlight && (
-                              <span
-                                className="text-[8px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded shrink-0"
-                                style={{ background: '#FFE2D8', color: '#8A1F0C' }}
-                              >
-                                Must capture
-                              </span>
-                            )}
-                            <span className="text-[11px] font-bold text-ink/70 flex-1">
-                              {ideas.cta}
-                            </span>
-                            <span className="text-[10px] font-semibold text-ink/40">
-                              {totalIdeas} ideas {isOpen ? '▾' : '▸'}
-                            </span>
-                          </button>
-                          {isOpen && (
-                            <div className="mt-2 flex flex-wrap gap-3">
-                              {ideas.groups.map((g) => (
-                                <div key={g.label} className="min-w-0">
-                                  <div className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/40 mb-0.5">
-                                    {g.label}
-                                  </div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {g.ideas.map((idea) => (
-                                      <span
-                                        key={idea}
-                                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                                        style={{ background: 'rgba(14,14,14,0.04)', color: 'rgba(14,14,14,0.6)' }}
-                                      >
-                                        {idea}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
                   </div>
                 </div>
               );
-            })}
+            });
+            })()}
           </>
         ) : dropCount === 0 ? (
           <div className="text-[12px] text-ink/50 italic">No moments scheduled in this phase.</div>
