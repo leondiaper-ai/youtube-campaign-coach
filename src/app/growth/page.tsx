@@ -53,9 +53,10 @@ function deriveStatus(
   if (subs7 && subs7.delta < 0 && subs7.pct < -0.002) return 'At risk';
   if (lastUpDays != null && lastUpDays > 14 && views7 && views7.delta <= 0) return 'At risk';
 
-  // Growing: meaningful positive movement
-  if (views7 && views7.delta > 0 && views7.pct > 0.005) return 'Growing';
-  if (subs7 && subs7.delta > 0 && subs7.pct > 0.002) return 'Growing';
+  // Growing: any meaningful positive movement
+  // Use both % thresholds AND absolute floors so smaller channels aren't penalised
+  if (views7 && views7.delta > 0 && (views7.pct > 0.002 || views7.delta >= 10_000)) return 'Growing';
+  if (subs7 && subs7.delta > 0 && (subs7.pct > 0.001 || subs7.delta >= 50)) return 'Growing';
 
   return 'Flat';
 }
