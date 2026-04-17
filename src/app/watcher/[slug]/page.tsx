@@ -248,7 +248,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
               {directAction(decision, fixNow, secondaryOpps, videoOppsAll, live?.recentUploads ?? [])}
             </div>
             <div className="text-[12px] text-ink/50 mt-2 leading-snug max-w-[60ch]">
-              {directOutcome(decision)}
+              {directOutcome(decision, live?.recentUploads ?? [])}
             </div>
           </div>
         </section>
@@ -360,6 +360,31 @@ function YouTubeMark() {
 // 3. DIRECT "WHAT TO DO NEXT" — confident, blunt, one clear directive
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Scan recent longform uploads for missing support formats.
+ * Returns a prioritised list: which video needs what.
+ */
+type VideoGap = { title: string; gaps: string[] };
+function scanVideoGaps(uploads: RecentUpload[]): VideoGap[] {
+  const now = Date.now();
+  // Only longform, non-live, within 30 days
+  const longform = uploads.filter(
+    (u) => u.durationSec > 62 && u.live === 'none' &&
+      (now - new Date(u.publishedAt).getTime()) / 86400000 <= 30
+  );
+  const results: VideoGap[] = [];
+  for (const u of longform) {
+    const gaps: string[] = [];
+    if (!u.hasLyricSibling) gaps.push('Lyric Video');
+    if (!u.hasVisualizerSibling) gaps.push('Visualizer');
+    if (!u.hasShortSibling) gaps.push('Shorts');
+    if (gaps.length > 0) {
+      results.push({ title: u.title, gaps });
+    }
+  }
+  return results;
+}
+
 function directAction(
   decision: { type: string; headline: string; signals: string[] },
   fixNow: Opportunity[],
@@ -367,11 +392,10 @@ function directAction(
   videoOpps: Opportunity[],
   uploads: RecentUpload[],
 ): string {
-  // Anchor actions to what the channel is actually doing
   const ctx = readUploadContext(uploads);
+  const videoGaps = scanVideoGaps(uploads);
 
   if (decision.type === 'FIX') {
-    // Context-aware: reference what the channel last did
     if (ctx.recentCount === 0)
       return 'Post one Short this week. Anything to break the silence and restart the notification surface.';
     if (ctx.topRecent && ctx.shortsCount === 0)
@@ -380,62 +404,59 @@ function directAction(
     return 'Post one Short this week to break the silence.';
   }
 
-  if (decision.type === 'CORRECT') {
-    // Context-aware: reference actual uploads and what's missing
-    if (ctx.isRelease)
-      return `Release is live. Missing support formats — add lyric videos or Shorts to extend the drop.`;
-    if (ctx.recentCount > 0 && ctx.shortsCount === 0)
-      return `${ctx.recentCount} videos in 14d but no Shorts. Cut clips from recent uploads to drive discovery.`;
-    if (ctx.hasOfficialAudio && !ctx.hasShorts)
-      return 'Official audio is out but no Shorts supporting it. Cut clips to push the tracks.';
-    if (ctx.topRecent && ctx.shortsCount <= 1)
-      return `"${truncate(ctx.topRecent.title, 40)}" needs Shorts support. Cut 2–3 clips to extend its reach.`;
-    if (ctx.recentCount <= 4 && ctx.recentCount > 0)
-      return `Only ${ctx.recentCount} uploads in 14 days. Increase Shorts cadence to 2–3 per week to feed discovery.`;
-    // Fall back to opportunity actions (but only video-specific ones, not generic channel instructions)
-    const videoOpp = [...fixNow, ...secondaryOpps].find((o) => o.videoId);
-    if (videoOpp) return videoOpp.action;
-    if (fixNow.length > 0) return fixNow[0].action;
-    if (secondaryOpps.length > 0) return secondaryOpps[0].action;
+  // ── CORRECT + MAINTAIN + ACCELERATE all share the same context logic ──
+  // Priority: release activity → video gaps → cadence → ecosystem
+
+  // 1. Active release
+  if (ctx.isRelease && ctx.hasShorts)
+    return `Release day. ${ctx.audioTitleCount} tracks just dropped. Push the announcement Short and cut more from the tracklist.`;
+  if (ctx.isRelease)
+    return `Release day. ${ctx.audioTitleCount} tracks just dropped. Cut Shorts from standout tracks to drive discovery.`;
+  if (ctx.hasDropSignal)
+    return 'New content incoming. Keep Shorts flowing to build anticipation for the drop.';
+  if (ctx.hasReleaseSignal)
+    return 'Active release window. Push the best-performing track with Shorts to extend the catalogue\'s reach.';
+
+  // 2. Video-level gaps — most actionable for out-of-campaign artists
+  if (videoGaps.length > 0) {
+    const top = videoGaps[0];
+    const gapList = top.gaps.join(' + ');
+    if (videoGaps.length === 1)
+      return `"${truncate(top.title, 35)}" is missing ${gapList}. Fill the gaps to extend its reach.`;
+    // Multiple videos with gaps — summarise
+    const totalMissing = videoGaps.reduce((n, v) => n + v.gaps.length, 0);
+    return `${videoGaps.length} recent videos missing support formats (${totalMissing} gaps total). Start with "${truncate(top.title, 30)}" — needs ${gapList}.`;
   }
 
-  if (decision.type === 'ACCELERATE' || decision.type === 'MAINTAIN') {
-    // Use context from recent uploads to make the action specific
+  // 3. Live content
+  if (ctx.hasLiveContent && ctx.hasShorts)
+    return `Live content is landing. Cut more Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}footage to extend reach.`;
+  if (ctx.hasLiveContent)
+    return `Live content is driving views. Create Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}performances to reach new audiences.`;
 
-    // ── Release day — this is the primary activity ──────────────────
-    if (ctx.isRelease && ctx.hasShorts)
-      return `Release day. ${ctx.audioTitleCount} tracks just dropped. Push the announcement Short and cut more from the tracklist.`;
-    if (ctx.isRelease)
-      return `Release day. ${ctx.audioTitleCount} tracks just dropped. Cut Shorts from standout tracks to drive discovery.`;
-    if (ctx.hasDropSignal)
-      return 'New content incoming. Keep Shorts flowing to build anticipation for the drop.';
-    if (ctx.hasReleaseSignal)
-      return 'Active release window. Push the best-performing track with Shorts to extend the catalogue\'s reach.';
+  // 4. Cadence and pattern signals
+  if (ctx.hasCollabs)
+    return 'Collab content is active. Push the best-performing feature with a Short or lyric cut.';
+  if (ctx.recentCount > 0 && ctx.shortsCount === 0)
+    return `${ctx.recentCount} videos in 14d but no Shorts. Cut clips from recent uploads to drive discovery.`;
+  if (ctx.recentCount <= 4 && ctx.recentCount > 0)
+    return `Only ${ctx.recentCount} uploads in 14 days. Increase Shorts cadence to 2–3 per week to feed discovery.`;
+  if (ctx.hasShorts && ctx.recentCount >= 4)
+    return 'Strong Shorts output. Keep this cadence — it\'s feeding the algorithm.';
+  if (ctx.topRecent)
+    return `"${truncate(ctx.topRecent.title, 45)}" is the top performer. Extend it with a Short or supporting format.`;
 
-    // ── Live content (from titles, not descriptions) ────────────────
-    if (ctx.hasLiveContent && ctx.hasShorts)
-      return `Live content is landing. Cut more Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}footage to extend reach.`;
-    if (ctx.hasLiveContent)
-      return `Live content is driving views. Create Shorts from the ${ctx.liveVenue ? ctx.liveVenue + ' ' : ''}performances to reach new audiences.`;
-
-    // ── Other patterns ──────────────────────────────────────────────
-    if (ctx.hasCollabs)
-      return 'Collab content is active. Push the best-performing feature with a Short or lyric cut.';
-    if (ctx.hasOfficialAudio && !ctx.hasShorts)
-      return 'Audio tracks are dropping. Pair them with Shorts to drive discovery.';
-    if (ctx.hasShorts && ctx.recentCount >= 4)
-      return 'Strong Shorts output. Keep this cadence — it\'s feeding the algorithm.';
-    if (ctx.topRecent)
-      return `"${truncate(ctx.topRecent.title, 45)}" is the top performer. Extend it with a Short or supporting format.`;
-  }
-
+  // 5. Fallback — ecosystem maintenance
   if (decision.type === 'MAINTAIN')
-    return 'Keep current cadence. Channel is active and holding momentum.';
+    return 'Keep current cadence. Review your missed opportunities below to optimise the catalogue.';
 
-  return 'No action needed right now. Channel is on track.';
+  return 'No active gaps. Review missed opportunities below to extend your catalogue\'s reach.';
 }
 
-function directOutcome(decision: { type: string; expectedImpact: string }): string {
+function directOutcome(decision: { type: string; expectedImpact: string }, uploads: RecentUpload[]): string {
+  const gaps = scanVideoGaps(uploads);
+  if (gaps.length > 0 && (decision.type === 'CORRECT' || decision.type === 'MAINTAIN'))
+    return 'Each missing format is a discovery surface you\'re not using. Lyric videos and Shorts extend a track\'s life by weeks.';
   if (decision.type === 'MAINTAIN')
     return 'Holding a working plan protects growth heading into the next drop.';
   if (decision.type === 'ACCELERATE')
