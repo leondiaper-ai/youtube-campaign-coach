@@ -4285,7 +4285,7 @@ type ContentIdeaGroup = { label: string; ideas: string[] };
 const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; groups: ContentIdeaGroup[]; highlight?: boolean }> = {
   official_video: {
     cta: 'Maximise the drop',
-    captureLine: 'Capture: BTS + reaction + teaser cuts',
+    captureLine: 'Film BTS + cut reaction Shorts from the drop',
     groups: [
       { label: 'Shorts', ideas: ['Behind-the-scenes', 'Best moment clip', 'Reaction cut'] },
       { label: 'Video', ideas: ['Making-of', 'Director commentary'] },
@@ -4294,7 +4294,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   album_release: {
     cta: 'Capture the release',
-    captureLine: 'Capture: listening party + track breakdowns',
+    captureLine: 'Film listening party + post track breakdowns',
     groups: [
       { label: 'Shorts', ideas: ['Track-by-track teaser', 'Fan first reaction', 'Studio clip'] },
       { label: 'Video', ideas: ['Listening party', 'Track breakdown'] },
@@ -4304,7 +4304,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   album_announce: {
     cta: 'Build the hype',
-    captureLine: 'Capture: announcement + countdown content',
+    captureLine: 'Post reveal clip + countdown content',
     groups: [
       { label: 'Shorts', ideas: ['Reveal clip', 'Tracklist tease', 'Studio snippet'] },
       { label: 'Support', ideas: ['Countdown content', 'Pre-save push'] },
@@ -4312,7 +4312,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   track_moment: {
     cta: 'Capture this',
-    captureLine: 'Capture: performance + fan reaction',
+    captureLine: 'Capture live energy + fan reaction for Shorts',
     groups: [
       { label: 'Shorts', ideas: ['Hook clip', 'Fan reaction', 'Performance cut'] },
       { label: 'Video', ideas: ['Stripped-back version'] },
@@ -4320,7 +4320,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   deluxe_release: {
     cta: 'Re-engage the audience',
-    captureLine: 'Capture: new track highlights + bonus content',
+    captureLine: 'Post new track teasers + bonus content clips',
     groups: [
       { label: 'Shorts', ideas: ['New track teaser', 'Bonus content clip'] },
       { label: 'Video', ideas: ['Deluxe breakdown'] },
@@ -4328,7 +4328,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   tour: {
     cta: 'Film every show',
-    captureLine: 'Capture: performance + backstage + crowd reaction',
+    captureLine: 'Film crowd + backstage + performance clips',
     groups: [
       { label: 'Shorts', ideas: ['Travel clip', 'Crowd reaction', 'Performance snippet'] },
       { label: 'Video', ideas: ['Recap video', 'Tour diary'] },
@@ -4338,7 +4338,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   tour_announce: {
     cta: 'Capture the announcement',
-    captureLine: 'Capture: date reveal + fan reaction',
+    captureLine: 'Post date reveal + fan reaction Shorts',
     groups: [
       { label: 'Shorts', ideas: ['Date reveal', 'Fan reaction'] },
       { label: 'Support', ideas: ['Countdown content'] },
@@ -4346,7 +4346,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   festival: {
     cta: "Don't miss this",
-    captureLine: 'Capture: performance + backstage + crowd reaction',
+    captureLine: 'Film crowd + backstage + performance clips',
     groups: [
       { label: 'Shorts', ideas: ['Travel clip', 'Crowd reaction', 'Performance snippet'] },
       { label: 'Video', ideas: ['Recap video'] },
@@ -4356,7 +4356,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   promo_trip: {
     cta: 'Film everything',
-    captureLine: 'Capture: travel + location content',
+    captureLine: 'Capture travel + studio moments for Shorts',
     groups: [
       { label: 'Shorts', ideas: ['Travel diary', 'Location content'] },
       { label: 'Video', ideas: ['Behind-the-scenes'] },
@@ -4365,7 +4365,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   activation: {
     cta: 'Capture this',
-    captureLine: 'Capture: event highlights + fan interaction',
+    captureLine: 'Film event highlights + fan interaction',
     groups: [
       { label: 'Shorts', ideas: ['Event highlights', 'Fan interaction'] },
       { label: 'Video', ideas: ['Recap clip'] },
@@ -4373,7 +4373,7 @@ const MOMENT_CONTENT_IDEAS: Record<string, { cta: string; captureLine: string; g
   },
   live_show: {
     cta: 'Film this',
-    captureLine: 'Capture: performance + crowd moment',
+    captureLine: 'Capture performance + crowd energy for Shorts',
     groups: [
       { label: 'Shorts', ideas: ['Performance clip', 'Crowd moment'] },
       { label: 'Video', ideas: ['Performance snippet'] },
@@ -7292,15 +7292,9 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                       </span>
                     )}
                   </div>
-                  {totalIdeas > 0 ? (
-                    <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
-                      → {totalIdeas} content moments available
-                    </div>
-                  ) : (
-                    <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
-                      → Capture: support content around this drop
-                    </div>
-                  )}
+                  <div className="text-[9px] font-semibold text-ink/40 mt-0.5 ml-1.5">
+                    → {ideas?.captureLine ?? 'Capture content around this moment'}
+                  </div>
                 </div>
               </div>
             );
@@ -7500,21 +7494,20 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                       </span>
                     </div>
 
-                    {/* Content opportunity subtitle — always visible */}
-                    {ideas && (
+                    {/* Creative nudge — always visible */}
+                    {ideas ? (
                       <button
                         onClick={() => toggleOpp(m.id)}
                         className="mt-1.5 w-full flex items-center gap-2 text-left"
                       >
                         <span className="text-[11px] font-semibold text-ink/55">
-                          → {totalIdeas} content moments available
+                          → {ideas.captureLine}
                         </span>
                         <span className="text-[10px] text-ink/30">{isOpen ? '▾' : '▸'}</span>
                       </button>
-                    )}
-                    {!ideas && (
+                    ) : (
                       <div className="mt-1.5 text-[11px] font-semibold text-ink/40">
-                        → Capture: support content around this drop
+                        → Capture content around this moment
                       </div>
                     )}
 
