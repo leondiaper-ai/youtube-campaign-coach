@@ -120,7 +120,8 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     uploads30d >= 6 || (isActivePhase && uploads30d >= 4 && (lastUp ?? 999) <= 7);
   const weakCadence = uploads30d <= 2 || (lastUp ?? 999) > 14;
 
-  const subsGrowing = subs7 != null && subs7.delta > 0 && subs7.pct >= 0.005;
+  // Subs growing: either 0.5%+ growth OR 50+ absolute gain (protects smaller channels)
+  const subsGrowing = subs7 != null && subs7.delta > 0 && (subs7.pct >= 0.005 || subs7.delta >= 50);
   const subsFlat = subs7 != null && subs7.delta <= 0;
 
   const channelOpps = opps.filter((o) => !o.videoId);
@@ -238,7 +239,9 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   // Strong output, views coming in, but the viewer → subscriber flywheel isn't
   // spinning. That points at packaging (channel trailer, end-screens, hooks),
   // not cadence — and pushing more uploads won't fix it.
-  if (strongCadence && convWeak && convAnchor) {
+  // Guard: skip if subs are actually growing — conversion rate can be low on
+  // niche/smaller channels while still being healthy.
+  if (strongCadence && convWeak && convAnchor && !subsGrowing) {
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
