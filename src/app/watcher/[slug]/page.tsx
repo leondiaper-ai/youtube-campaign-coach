@@ -376,8 +376,20 @@ function directAction(
   }
 
   if (decision.type === 'CORRECT') {
+    // Context-aware: reference actual uploads and what's missing
+    if (ctx.recentCount > 0 && !ctx.hasShorts && ctx.shortsCount === 0)
+      return `${ctx.recentCount} videos in 14d but no Shorts. Cut clips from recent uploads to drive discovery.`;
+    if (ctx.hasOfficialAudio && !ctx.hasShorts)
+      return 'Official audio is out but no Shorts supporting it. Cut clips to push the tracks.';
+    if (ctx.isRelease)
+      return `Release is live. Missing support formats — add lyric videos or Shorts to extend the drop.`;
+    if (ctx.topRecent && ctx.shortsCount <= 1)
+      return `"${truncate(ctx.topRecent.title, 40)}" needs Shorts support. Cut 2–3 clips to extend its reach.`;
+    // Fall back to opportunity actions
     if (fixNow.length > 0) return fixNow[0].action;
     if (secondaryOpps.length > 0) return secondaryOpps[0].action;
+    if (ctx.recentCount <= 4)
+      return `Only ${ctx.recentCount} uploads in 14 days. Increase Shorts cadence to 2–3 per week.`;
   }
 
   if (decision.type === 'ACCELERATE' || decision.type === 'MAINTAIN') {

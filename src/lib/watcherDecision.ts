@@ -215,12 +215,17 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
 
   // ── 2. CORRECT ───────────────────────────────────────────────────────────
   // Working, but suboptimal — something should change.
+  // Headlines stay clean (status), actions go to "What to do next".
   if (highChannel.length > 0 && !subsGrowing) {
     const top = highChannel[0];
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
-      headline: top.action,
+      headline: weakCadence
+        ? `Only ${uploads30d} uploads in 30 days. Channel needs more volume.`
+        : subsFlat
+          ? 'Views arriving but subscribers flat. Structural gap is capping growth.'
+          : 'Channel is working but leaving reach on the table.',
       signals: [
         oppHeadline(top),
         subs7
@@ -346,13 +351,18 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   }
 
   // Soft middle: not broken, not strong — nudge one thing if there's a clear mid-impact gap.
+  // Headlines stay clean (status), actions go to "What to do next".
   if (midChannel.length > 0) {
     const top = midChannel[0];
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
-      headline: top.action,
-      signals: [oppHeadline(top), `${uploads30d} uploads / 30d.`],
+      headline: weakCadence
+        ? `Only ${uploads30d} uploads in 30 days. Channel needs more consistency.`
+        : shorts30d <= 1
+          ? `Low Shorts output — ${shorts30d} in 30 days. Discovery is capped.`
+          : `Channel is running but not compounding. Small gaps are adding up.`,
+      signals: [oppHeadline(top), `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`],
       expectedImpact: top.impactRange,
       ifIgnored:
         'Nothing urgent fails — the channel just keeps running at the current ceiling.',
