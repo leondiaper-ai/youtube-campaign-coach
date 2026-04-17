@@ -1302,23 +1302,115 @@ const MONTH_MAP: Record<string, number> = {
   dec: 11, december: 11,
 };
 
-/** Parse a single line like "25 March - Mo Gilligan Podcast goes live" */
+/**
+ * Parse a single timeline line into a dated event.
+ *
+ * Handles real-world formats:
+ *  - "25 March – title"           → exact day
+ *  - "17th May – title"           → exact day (ordinals)
+ *  - "1 or 3 July – title"       → first day
+ *  - "w/c 18 May – title"        → week-commencing day
+ *  - "12–22 Mar – title"         → first day of range
+ *  - "4–6 Jul – title"           → first day of range
+ *  - "31 Jul – 2 Aug – title"    → first day of range
+ *  - "Apr – title"               → month only → 15th
+ *  - "September – title"         → month only → 15th
+ *  - "September/October – title" → first month → 15th
+ *  - "Jun–Aug 2027 – title"      → first month → 15th, year detected
+ *  - "Jan 2027 – title"          → month + explicit year
+ *  - "19 Nov–11 Dec – title"     → first day
+ */
 function parseTimelineLine(raw: string, fallbackYear: number): ParsedTimelineEvent | null {
   const line = raw.trim().replace(/^[-•*\u2022]\s*/, '');
   if (!line) return null;
-  // Date patterns: "25 March", "2 April @ 7.30pm", "17th May", "1 or 3 July"
-  const dateRe = /^(\d{1,2})(?:st|nd|rd|th)?(?:\s*or\s*\d{1,2}(?:st|nd|rd|th)?)?\s+([A-Za-z]+)/;
-  const m = line.match(dateRe);
-  if (!m) return null;
-  const day = parseInt(m[1], 10);
-  const month = MONTH_MAP[m[2].toLowerCase()];
-  if (month == null || !day) return null;
-  const d = new Date(Date.UTC(fallbackYear, month, day, 12, 0, 0));
-  const dateISO = d.toISOString().split('T')[0];
 
-  // Remainder after date and separator
-  const afterDate = line.slice(m[0].length).replace(/^[\s@].*?(-|–|—)\s*/, '').replace(/^[\s-–—]+/, '').trim();
-  const title = afterDate || line;
+  let day: number | null = null;
+  let month: number | undefined;
+  let year = fallbackYear;
+  let consumed = 0; // characters consumed from the line for the date portion
+
+  // Helper: look for an explicit 4-digit year anywhere on the line
+  const yearMatch = line.match(/\b(20\d{2})\b/);
+  if (yearMatch) year = parseInt(yearMatch[1], 10);
+
+  // ── Pattern 1: "DD Mon – DD Mon" cross-month range (e.g. "31 Jul – 2 Aug", "19 Nov–11 Dec") ──
+  const crossMonthRe = /^(?:w\/c\s+)?(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s*[-–—]\s*\d{1,2}(?:st|nd|rd|th)?\s+([A-Za-z]+)/;
+  const mc = line.match(crossMonthRe);
+  if (mc) {
+    const d = parseInt(mc[1], 10);
+    const mo = MONTH_MAP[mc[2].toLowerCase()];
+    if (mo != null && d >= 1 && d <= 31) {
+      day = d;
+      month = mo;
+      consumed = mc[0].length;
+    }
+  }
+
+  // ── Pattern 2: "DD Month" / "DDth Month" / "DD–DD Month" / "w/c DD Month" ──
+  if (month == null) {
+    const dayFirstRe = /^(?:w\/c\s+)?(\d{1,2})(?:st|nd|rd|th)?(?:\s*(?:[-–—]|or)\s*\d{1,2}(?:st|nd|rd|th)?)?\s+([A-Za-z]+)/;
+    const m1 = line.match(dayFirstRe);
+    if (m1) {
+      const d = parseInt(m1[1], 10);
+      const mo = MONTH_MAP[m1[2].toLowerCase()];
+      if (mo != null && d >= 1 && d <= 31) {
+        day = d;
+        month = mo;
+        consumed = m1[0].length;
+      }
+    }
+  }
+
+  // ── Pattern 3: "Mon–Mon YYYY" season ranges like "Jun–Aug 2027" ──
+  if (month == null) {
+    const seasonRe = /^([A-Za-z]+)\s*[-–—]\s*([A-Za-z]+)(?:\s+(20\d{2}))?/;
+    const m3 = line.match(seasonRe);
+    if (m3) {
+      const mo1 = MONTH_MAP[m3[1].toLowerCase()];
+      const mo2 = MONTH_MAP[m3[2].toLowerCase()];
+      if (mo1 != null && mo2 != null) {
+        // Both parts are months — this is a season range
+        month = mo1;
+        day = 15;
+        if (m3[3]) year = parseInt(m3[3], 10);
+        consumed = m3[0].length;
+      }
+    }
+  }
+
+  // ── Pattern 4: "Month – title" / "Month YYYY – title" / "Month/Month – title" ──
+  if (month == null) {
+    const monthFirstRe = /^([A-Za-z]+)(?:\s*\/\s*[A-Za-z]+)?(?:\s+(20\d{2}))?/;
+    const m2 = line.match(monthFirstRe);
+    if (m2) {
+      const mo = MONTH_MAP[m2[1].toLowerCase()];
+      if (mo != null) {
+        month = mo;
+        day = 15; // mid-month fallback for month-only dates
+        if (m2[2]) year = parseInt(m2[2], 10);
+        consumed = m2[0].length;
+      }
+    }
+  }
+
+  if (month == null || day == null) return null;
+
+  const dt = new Date(Date.UTC(year, month, day, 12, 0, 0));
+  const dateISO = dt.toISOString().split('T')[0];
+
+  // ── Extract title: everything after the date portion + separator ──
+  // Strip the consumed date prefix, then remove the first dash/en-dash separator
+  let rest = line.slice(consumed);
+  // Remove any trailing date bits (e.g. extra year, time like "@ 7.30pm")
+  rest = rest.replace(/^\s*(?:20\d{2})?\s*/, '');
+  // Remove the separator between date and title
+  rest = rest.replace(/^\s*[-–—]+\s*/, '').trim();
+  // If rest still looks like it starts with a separator after time info
+  rest = rest.replace(/^[@\d.:apm\s]*[-–—]+\s*/i, '').trim();
+  const title = rest || line;
+
+  // Skip lines that are just dates with no meaningful title
+  if (!title || title.length < 3) return null;
 
   const kind = classifyTimelineEvent(title);
   const featuredArtist = extractFeature(title);
@@ -1334,26 +1426,67 @@ function classifyTimelineEvent(title: string): TimelineKind {
   const t = title.toLowerCase();
   if (/\bpodcast|interview\b/.test(t)) return 'podcast';
   if (/\bsnippet|sound\b/.test(t)) return 'snippet';
-  if (/\btour\b/.test(t) && /\b(announce|tickets?|on\s*sale)\b/.test(t)) return 'tourAnnounce';
-  if (/\bfestival|fest\b/.test(t)) return 'festival';
+  if (/\btour\b/.test(t) && /\b(announce|tickets?|on\s*sale|pre-?\s*sale|pre-?\s*order)\b/.test(t)) return 'tourAnnounce';
+  if (/\bfestival\b/.test(t)) return 'festival';
+  if (/\bfest\b/.test(t) && !/\bfestiv/.test(t)) return 'festival'; // "Kendal Calling" won't match but explicit "fest" will
+  if (/\b(trnsmt|glastonbury|reading|leeds|latitude|parklife|wireless|primavera|coachella|bonnaroo|lollapalooza|shaky\s*knees|kendal\s*calling|y\s*not|rockin'?\s*on|sonic)\b/.test(t)) return 'festival';
   if (/\btour\b/.test(t) && /\b(start|leg|date|kick\s*off|night|show|gig)\b/.test(t)) return 'tourDate';
   if (/\btour\b/.test(t) && !/\b(announce|tickets?|on\s*sale|release)\b/.test(t)) return 'tourDate';
-  if (/\b(live\s*show|gig|headline|support\s*slot|concert)\b/.test(t)) return 'liveShow';
+  if (/\b(support\s*shows?|headline\s*shows?|live\s*show|gig|concert|instore|outstore|signing|fanzone|activation)\b/.test(t)) return 'liveShow';
+  if (/\b(promo\s*trip|press\s*trip|radio\s*promo)\b/.test(t)) return 'other';
   if (/\bdocumentary\b.*\b(tease|teaser|trailer)\b/.test(t) || (/\bdocumentary\b/.test(t) && /\btease\b/.test(t))) return 'documentaryTease';
   if (/\bdocumentary\b.*\brelease|release\b.*\bdocumentary|documentary.*youtube/.test(t) || /\bdocumentary\b/.test(t)) return 'documentaryRelease';
-  if (/\balbum\b.*\b(announce|announcement)\b/.test(t)) return 'albumAnnounce';
-  if (/\balbum\b.*\brelease\b|\brelease\b.*\balbum\b|\balbum (out|drop)\b/.test(t)) return 'albumRelease';
-  if (/\bsingle\b.*\brelease\b|\brelease\b.*\bsingle\b|\bsingle \d\b/.test(t)) return 'singleRelease';
+  if (/\bdeluxe\b.*\b(album|release)\b/.test(t)) return 'albumRelease';
+  if (/\balbum\b.*\b(announc|reveal)\b/.test(t) || /\b(announc|reveal)\b.*\balbum\b/.test(t)) return 'albumAnnounce';
+  if (/\balbum\b.*\b(release|out|drop)\b|\b(release|drop)\b.*\balbum\b/.test(t)) return 'albumRelease';
+  if (/\bsingle\b.*\b(release|out|drop)\b|\b(release|drop)\b.*\bsingle\b|\bsingle\s*#?\d\b/.test(t)) return 'singleRelease';
+  if (/\b(official\s*music\s*video|official\s*video|visualis|visualiz)\b/.test(t)) return 'singleRelease';
   if (/\brelease\b/.test(t)) return 'singleRelease';
+  if (/\b(outdoor|headline)\b.*\bshow/.test(t)) return 'liveShow';
+  if (/\b(uk|eu|europe|usa|us|japan|australia)\b.*\b(dates?|shows?|run)\b/.test(t)) return 'tourDate';
+  if (/\b(flies?\s*to|promo|dates)\b/.test(t)) return 'other';
   return 'other';
 }
 
 function parseTimelineText(text: string, fallbackYear: number): ParsedTimelineEvent[] {
-  return text
-    .split(/\r?\n/)
-    .map((l) => parseTimelineLine(l, fallbackYear))
-    .filter((e): e is ParsedTimelineEvent => !!e)
-    .sort((a, b) => a.dateISO.localeCompare(b.dateISO));
+  const lines = text.split(/\r?\n/);
+  const events: ParsedTimelineEvent[] = [];
+
+  // First pass: parse all lines. Lines with explicit years (e.g. "Jan 2027")
+  // are handled by parseTimelineLine. For lines without explicit years, we
+  // track the last-seen month so we can detect year-wrap (e.g. after Dec
+  // the next Jan is the following year).
+  let lastMonth = -1;
+  let currentYear = fallbackYear;
+
+  for (const line of lines) {
+    // Check if this line explicitly mentions a year
+    const explicitYear = line.match(/\b(20\d{2})\b/);
+    if (explicitYear) {
+      currentYear = parseInt(explicitYear[1], 10);
+    }
+
+    const ev = parseTimelineLine(line, currentYear);
+    if (!ev) continue;
+
+    // Detect year-wrap: if month decreased without an explicit year, bump year
+    const evMonth = new Date(ev.dateISO + 'T12:00:00').getUTCMonth();
+    if (!explicitYear && lastMonth >= 9 && evMonth <= 2 && lastMonth > evMonth) {
+      currentYear++;
+      // Re-parse with corrected year
+      const corrected = parseTimelineLine(line, currentYear);
+      if (corrected) {
+        events.push(corrected);
+        lastMonth = new Date(corrected.dateISO + 'T12:00:00').getUTCMonth();
+        continue;
+      }
+    }
+
+    lastMonth = evMonth;
+    events.push(ev);
+  }
+
+  return events.sort((a, b) => a.dateISO.localeCompare(b.dateISO));
 }
 
 /** Convert a date offset to a (weekIndex, dayLabel) pair relative to plan start. */
