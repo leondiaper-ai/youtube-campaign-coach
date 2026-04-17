@@ -6715,7 +6715,13 @@ function liveDropTypeFromVideo(v: WatcherVideo): DropType {
     case 'lyric':      return 'official'; // treat lyric as part of an official-style drop
     case 'visualizer': return 'official';
     case 'audio':      return 'official';
-    default:           return 'vlog';
+    default: {
+      // Catch music videos that aren't tagged "official" — e.g. "[MUSIC VIDEO]", "(Music Video)"
+      const t = v.title.toLowerCase();
+      if (/\bmusic\s*video\b/.test(t)) return 'official';
+      if (/\bvlog\b/i.test(t)) return 'vlog';
+      return 'vlog';
+    }
   }
 }
 
@@ -6727,14 +6733,14 @@ function dayLabelFromIso(iso: string): DayLabel {
 function deriveLiveTracks(state: WatcherState | null, startDate?: string): AutoTrack[] {
   if (!state || !state.latestVideos) return [];
   const startT = startDate ? new Date(startDate + 'T00:00:00').getTime() : -Infinity;
-  // Only PRIMARY releases (Tier 1) become "drops" with support checklists.
-  // Lyric videos, visualizers, sessions are support content — they attach
-  // to the primary drop, not appear as standalone campaign anchors.
-  const PRIMARY_VIDEO_TYPES = new Set(['official', 'audio']);
+  // All longform uploads become "drops" EXCEPT lyric videos and visualizers,
+  // which are support content that attaches to a primary drop.
+  // This ensures music videos, vlogs, collabs, and unknown longform all surface.
+  const SUPPORT_VIDEO_TYPES = new Set(['lyric', 'visualizer']);
   const longform = state.latestVideos.filter(
     (v) => v.kind === 'video' &&
       new Date(v.publishedAt).getTime() >= startT &&
-      PRIMARY_VIDEO_TYPES.has(v.videoType ?? 'unknown')
+      !SUPPORT_VIDEO_TYPES.has(v.videoType ?? 'unknown')
   );
   if (longform.length === 0) return [];
   const now = Date.now();

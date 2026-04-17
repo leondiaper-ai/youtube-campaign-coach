@@ -81,6 +81,8 @@ export async function GET(req: NextRequest) {
     // "(Official)" alone without "video"/"audio" → official music video
     // On YouTube this almost always means the primary official release
     if (/\(official\)/.test(t)) return 'official';
+    // "[MUSIC VIDEO]" or "(Music Video)" without "official" — still a primary release
+    if (/\bmusic\s*video\b/.test(t)) return 'official';
     return 'unknown';
   }
 
