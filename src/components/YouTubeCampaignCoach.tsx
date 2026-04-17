@@ -4468,21 +4468,26 @@ function ExecutionLayer({ plan }: { plan: CampaignPlan }) {
 
   // ── Blocking issue: find the top problem ──
   const topVideo = state.topVideoLast14d;
-  const hasNoShorts = shortsCount === 0 || (shortsCount < expectedShorts * 0.3);
+  const shortsBelow = shortsCount < expectedShorts * 0.6;
+  const hasNoShorts = shortsCount === 0 || shortsBelow;
   const hasNoSupport = !hasLyricVideo && !hasVisualizer;
+  const recentShorts14d = state.shortsLast14Days ?? 0;
+  const shortsCadenceLow = recentShorts14d < 4; // less than ~2/wk in last 14d
 
   // Score how under-deployed this campaign is
   const gaps: string[] = [];
   if (!hasOfficialVideo) gaps.push('No official video');
   if (!hasLyricVideo) gaps.push('No lyric video');
+  if (!hasVisualizer) gaps.push('No visualizer');
   if (hasNoShorts) gaps.push('Shorts under-deployed');
+  if (shortsCadenceLow && !hasNoShorts) gaps.push('Shorts cadence dropping');
   if (!postsActive) gaps.push('Upload cadence low');
 
-  // Only show the execution layer if there are meaningful gaps
-  if (gaps.length === 0) return null;
+  // Only show the execution layer if there are meaningful gaps (2+ issues)
+  if (gaps.length < 2) return null;
 
   // Estimated reach loss (rough heuristic)
-  const reachLoss = Math.min(65, gaps.length * 15 + (hasNoShorts ? 10 : 0));
+  const reachLoss = Math.min(65, gaps.length * 12 + (hasNoShorts ? 10 : 0) + (hasNoSupport ? 8 : 0));
 
   // ── Blocking growth message ──
   let blockingTitle = '';
@@ -4500,6 +4505,10 @@ function ExecutionLayer({ plan }: { plan: CampaignPlan }) {
     blockingTitle = 'No official video released';
     blockingDesc = 'The channel has no primary anchor content for this campaign.';
     blockingFix = 'Prioritise the official video drop';
+  } else if (shortsCadenceLow) {
+    blockingTitle = 'Shorts cadence is dropping';
+    blockingDesc = `Only ${recentShorts14d} Shorts in the last 14 days — algorithm favours consistent uploaders.`;
+    blockingFix = 'Post 3 Shorts this week to maintain momentum';
   } else {
     blockingTitle = 'Upload cadence is too low';
     blockingDesc = `${campaignVideos.length} uploads in ${campaignWeeks} weeks — algorithm needs consistent output.`;
@@ -4555,8 +4564,9 @@ function ExecutionLayer({ plan }: { plan: CampaignPlan }) {
               {[
                 { label: 'Official Video', live: hasOfficialVideo },
                 { label: 'Lyric Video', live: hasLyricVideo },
-                { label: 'Shorts', live: shortsCount >= expectedShorts * 0.5, detail: `${shortsCount}/${expectedShorts} expected` },
-                { label: 'Upload cadence', live: postsActive },
+                { label: 'Visualizer', live: hasVisualizer },
+                { label: 'Shorts', live: !hasNoShorts, detail: `${shortsCount}/${expectedShorts} expected` },
+                { label: 'Shorts cadence', live: !shortsCadenceLow, detail: `${recentShorts14d} in last 14d` },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-2">
                   <span className="text-[11px]" style={{ color: item.live ? '#1FBE7A' : '#FF4A1C' }}>
