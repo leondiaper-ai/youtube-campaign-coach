@@ -3930,7 +3930,7 @@ function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: Campaign
         </p>
       </div>
 
-      {/* 4. ACTIONS — structured list, one item per line */}
+      {/* 4. ACTIONS — split on sentence boundaries, one per line */}
       <div className="mb-5">
         <div
           className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2.5"
@@ -3938,22 +3938,28 @@ function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: Campaign
         >
           Actions
         </div>
-        <div className="space-y-2">
-          {(decision?.actions ?? [primaryAction]).map((act, i) => (
-            <div
-              key={i}
-              className="flex items-start gap-2.5 text-[13px] leading-snug"
-            >
-              <span
-                className="shrink-0 w-[18px] h-[18px] rounded-md flex items-center justify-center text-[10px] font-black mt-0.5"
-                style={{ background: 'rgba(250,247,242,0.10)', color: 'rgba(250,247,242,0.55)' }}
-              >
-                {i + 1}
-              </span>
-              <span className="font-semibold" style={{ color: '#FAF7F2' }}>{act}</span>
+        {(() => {
+          // Split on ". " between sentences but keep each sentence intact
+          const items = primaryAction.split(/(?<=\.)\s+/).filter(Boolean);
+          return (
+            <div className="space-y-2">
+              {items.map((act, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2.5 text-[13px] leading-snug"
+                >
+                  <span
+                    className="shrink-0 w-[18px] h-[18px] rounded-md flex items-center justify-center text-[10px] font-black mt-0.5"
+                    style={{ background: 'rgba(250,247,242,0.10)', color: 'rgba(250,247,242,0.55)' }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="font-semibold" style={{ color: '#FAF7F2' }}>{act}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
         <a
           href="https://studio.youtube.com"
           target="_blank"
@@ -4345,32 +4351,7 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
             </div>
           )}
 
-          {/* Actions — structured "Fix This Week" list */}
-          {actions.length > 0 && (
-            <div className="mt-3.5">
-              <div className="text-[9px] font-bold uppercase tracking-[0.18em] mb-1.5" style={{ color: 'rgba(250,247,242,0.45)' }}>
-                Fix This Week
-              </div>
-              <div className="space-y-1">
-                {actions.map((a, i) => (
-                  <p key={i} className="text-[13px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
-                    → {a}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Risks — max 2, only when real */}
-          {risks.length > 0 && (
-            <div className="mt-2.5 space-y-1">
-              {risks.map((r, i) => (
-                <p key={i} className="text-[12px] leading-snug" style={{ color: '#FF4A1C' }}>
-                  ⚠ {r}
-                </p>
-              ))}
-            </div>
-          )}
+          {/* Actions live in the TopSignalCard — not duplicated here */}
         </div>
       </div>
     </div>
