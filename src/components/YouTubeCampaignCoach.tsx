@@ -3723,9 +3723,10 @@ function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: Campaign
     postsPerWeek: targets.postsPerWeek || 0,
     videosPerWeek: targets.videosPerWeek || 0,
   };
-  const nextDropRaw = getNextDrop(plan);
-  const nextDrop = nextDropRaw
-    ? { date: nextDropRaw.dateObj.toISOString(), name: nextDropRaw.action.title }
+  // 3-tier fallback: YouTubeMoments → plan drops → live channel drops
+  const resolved = resolveNextDrop(plan, watcher.state);
+  const nextDrop = resolved
+    ? { date: resolved.dateObj.toISOString(), name: resolved.title }
     : null;
 
   const topVideoForEngine = watcher.state?.topVideoLast14d
@@ -5128,6 +5129,56 @@ function getNextDrop(plan: CampaignPlan): { action: CampaignAction; weekNum: num
 
   const daysAway = Math.round((pick.dateObj.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
   return { ...pick, daysAway };
+}
+
+// ── REUSABLE: resolveNextDrop ────────────────────────────────────────────────
+// 3-tier fallback: YouTubeMoments → plan drops → live channel drops.
+// Rule: every live campaign should always anchor to a drop.
+type ResolvedDrop = {
+  title: string;
+  date: string;      // ISO date (yyyy-mm-dd)
+  dateObj: Date;
+  daysAway: number;
+  source: 'moment' | 'plan' | 'live';
+};
+
+function resolveNextDrop(
+  plan: CampaignPlan,
+  watcherState: WatcherState | null,
+): ResolvedDrop | null {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const ytMoments = plan.youtubeMoments ?? [];
+
+  // Tier 1: PRIMARY YouTubeMoment
+  const primaries = ytMoments
+    .filter((m) => m.tier === 1)
+    .map((m) => ({ ...m, dateObj: new Date(m.date + 'T12:00:00') }))
+    .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+  const futurePrimary = primaries.filter((p) => p.dateObj >= today);
+  const primary = futurePrimary.length > 0 ? futurePrimary[0] : (primaries.length > 0 ? primaries[primaries.length - 1] : null);
+  if (primary) {
+    const daysAway = Math.round((primary.dateObj.getTime() - today.getTime()) / 86400000);
+    return { title: primary.title, date: primary.date, dateObj: primary.dateObj, daysAway, source: 'moment' };
+  }
+
+  // Tier 2: plan-based key drop
+  const planDrop = getNextDrop(plan);
+  if (planDrop && !/\blyric\b/i.test(planDrop.action.title) && !/\bvisualiz/i.test(planDrop.action.title)) {
+    const iso = planDrop.action.date || planDrop.dateObj.toISOString().slice(0, 10);
+    return { title: planDrop.action.title, date: iso, dateObj: planDrop.dateObj, daysAway: planDrop.daysAway, source: 'plan' };
+  }
+
+  // Tier 3: latest live drop from the YouTube channel
+  const liveTracks = deriveLiveTracks(watcherState, plan.startDate);
+  if (liveTracks.length > 0) {
+    const pick = liveTracks.find((t) => t.status === 'active') ?? liveTracks[0];
+    const dateObj = new Date(pick.date + 'T12:00:00');
+    const daysAway = Math.round((dateObj.getTime() - today.getTime()) / 86400000);
+    return { title: pick.name, date: pick.date, dateObj, daysAway, source: 'live' };
+  }
+
+  return null;
 }
 
 function MetricCards({ plan, editingMetric, metricDraft, onEditStart, onEditChange, onEditSave, onEditCancel }: {
