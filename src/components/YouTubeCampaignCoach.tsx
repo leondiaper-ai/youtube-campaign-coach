@@ -3930,22 +3930,35 @@ function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: Campaign
         </p>
       </div>
 
-      {/* 4. PRIMARY ACTION — plain, microsite style */}
+      {/* 4. ACTIONS — structured list, one item per line */}
       <div className="mb-5">
         <div
-          className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2"
+          className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2.5"
           style={{ color: 'rgba(250,247,242,0.45)' }}
         >
-          Action
+          Actions
         </div>
-        <p className="text-[13.5px] font-semibold leading-snug" style={{ color: '#FAF7F2' }}>
-          → {primaryAction}
-        </p>
+        <div className="space-y-2">
+          {(decision?.actions ?? [primaryAction]).map((act, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-2.5 text-[13px] leading-snug"
+            >
+              <span
+                className="shrink-0 w-[18px] h-[18px] rounded-md flex items-center justify-center text-[10px] font-black mt-0.5"
+                style={{ background: 'rgba(250,247,242,0.10)', color: 'rgba(250,247,242,0.55)' }}
+              >
+                {i + 1}
+              </span>
+              <span className="font-semibold" style={{ color: '#FAF7F2' }}>{act}</span>
+            </div>
+          ))}
+        </div>
         <a
           href="https://studio.youtube.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-flex items-center gap-1.5 text-[11.5px] font-semibold transition-opacity hover:opacity-80"
+          className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] font-semibold transition-opacity hover:opacity-80"
           style={{ color: '#A8B5FF' }}
         >
           Open in YouTube Studio <span aria-hidden>→</span>

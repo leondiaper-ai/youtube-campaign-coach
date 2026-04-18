@@ -58,7 +58,8 @@ export interface AIDecision {
   read: string;     // AI READ — what is happening
   plan: string;     // PLAN(phase) — what should be happening
   gap: string;      // GAP — where reality and plan differ
-  action: string;   // ACTION — clear next steps
+  action: string;   // ACTION — joined for legacy consumers
+  actions: string[]; // ACTION — individual items for structured rendering
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -456,13 +457,15 @@ export function aiDecisionLayer(input: {
 
   if (actions.length === 0) actions.push('Hold cadence. No corrective action this week.');
 
+  const finalActions = actions.slice(0, 3);
   return {
     state: decisionState,
     momentum,
     read,
     plan: planText,
     gap,
-    action: actions.slice(0, 3).join(' '),
+    action: finalActions.join(' '),
+    actions: finalActions,
   };
 }
 
