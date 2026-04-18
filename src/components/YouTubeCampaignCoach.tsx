@@ -4155,8 +4155,21 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   const legacyDropRaw = !nextPrimary ? getNextDrop(plan) : null;
   const legacyDrop = legacyDropRaw && !/\blyric\b/i.test(legacyDropRaw.action.title) && !/\bvisualiz/i.test(legacyDropRaw.action.title) ? legacyDropRaw : null;
 
-  // Show "No primary drop scheduled" when there's nothing
-  if (!nextPrimary && !legacyDrop) {
+  // ── Tier 3: fall back to the most recent LIVE drop from the YouTube channel ──
+  // When neither a planned primary nor a plan drop exists, anchor to the latest
+  // real drop detected from the channel's uploads — so the card always has
+  // something actionable (e.g. "support this drop" or "next official video").
+  const liveTracks = useMemo(() => deriveLiveTracks(watcher.state, plan.startDate), [watcher.state, plan.startDate]);
+  const liveDrop = useMemo(() => {
+    if (nextPrimary || legacyDrop) return null; // higher-priority sources win
+    if (liveTracks.length === 0) return null;
+    // Pick most recent active drop; fallback to most recent complete drop
+    const active = liveTracks.filter((t) => t.status === 'active');
+    return active.length > 0 ? active[0] : liveTracks[0];
+  }, [nextPrimary, legacyDrop, liveTracks]);
+
+  // Show "No primary drop scheduled" only when ALL three sources are empty
+  if (!nextPrimary && !legacyDrop && !liveDrop) {
     return (
       <div
         className="mb-6 rounded-2xl px-5 py-4"
@@ -4169,19 +4182,24 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
   }
 
   // ── Unified rendering data ──
-  const title = nextPrimary ? nextPrimary.title : legacyDrop!.action.title;
-  const iso = nextPrimary ? nextPrimary.date : (legacyDrop!.action.date || legacyDrop!.dateObj.toISOString().slice(0, 10));
+  const title = nextPrimary ? nextPrimary.title : legacyDrop ? legacyDrop.action.title : liveDrop!.name;
+  const iso = nextPrimary ? nextPrimary.date : legacyDrop ? (legacyDrop.action.date || legacyDrop.dateObj.toISOString().slice(0, 10)) : liveDrop!.date;
   const dateStr = fmtDate(iso);
   const dayStr = fmtDay(iso);
-  const momentDateObj = nextPrimary ? nextPrimary.dateObj : legacyDrop!.dateObj;
+  const momentDateObj = nextPrimary ? nextPrimary.dateObj : legacyDrop ? legacyDrop.dateObj : new Date(liveDrop!.date + 'T12:00:00');
   const daysAway = Math.round((momentDateObj.getTime() - today.getTime()) / 86400000);
-  const timeLabel = daysAway < 0
-    ? `${Math.abs(daysAway)}d overdue`
-    : daysAway === 0 ? 'Today'
-    : daysAway === 1 ? 'Tomorrow'
-    : `${daysAway}d away`;
-  const urgencyColor = daysAway < 0 ? '#FF4A1C' : daysAway <= 6 ? '#FF4A1C' : daysAway <= 14 ? '#FFD24C' : '#1FBE7A';
-  const weekNum = nextPrimary ? nextPrimary.weekNum : legacyDrop!.weekNum;
+  const isLiveDrop = !nextPrimary && !legacyDrop && !!liveDrop;
+  const timeLabel = isLiveDrop
+    ? (daysAway === 0 ? 'Released today' : `Released ${Math.abs(daysAway)}d ago`)
+    : daysAway < 0
+      ? `${Math.abs(daysAway)}d overdue`
+      : daysAway === 0 ? 'Today'
+      : daysAway === 1 ? 'Tomorrow'
+      : `${daysAway}d away`;
+  const urgencyColor = isLiveDrop
+    ? (Math.abs(daysAway) <= 7 ? '#1FBE7A' : Math.abs(daysAway) <= 14 ? '#FFD24C' : '#FF4A1C')
+    : daysAway < 0 ? '#FF4A1C' : daysAway <= 6 ? '#FF4A1C' : daysAway <= 14 ? '#FFD24C' : '#1FBE7A';
+  const weekNum = nextPrimary ? nextPrimary.weekNum : legacyDrop ? legacyDrop.weekNum : (liveDrop?.weekNum ?? 0);
   const phase = getPhaseForWeek(weekNum);
 
   // ── Gather support items attached to this primary ──
@@ -4190,6 +4208,7 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
     : [];
 
   // ── Support assessment: combine expectedSupport + attached Tier 2 moments ──
+  const liveVideos = watcher.state?.latestVideos ?? [];
   const support: { strength: DropSupportStrength; color: string; missing: string[]; expected: string[] } = nextPrimary
     ? (() => {
         const expected = nextPrimary.expectedSupport;
@@ -4199,6 +4218,17 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
         const strength: DropSupportStrength = missing.length === 0 ? 'Complete' : missing.length <= 2 ? 'Partial' : 'Weak';
         const color = strength === 'Complete' ? '#1FBE7A' : strength === 'Partial' ? '#F5B73D' : '#FF4A1C';
         return { strength, color, missing, expected };
+      })()
+    : isLiveDrop
+    ? (() => {
+        // Use the drop support model for live drops — same logic as DropView cards
+        const matchedLive = matchLiveToDrop(liveDrop!.date, liveVideos);
+        const dropSup = getDropSupport(liveDrop!, matchedLive);
+        const missingSlots = dropSup.slots.filter((s) => !s.hit).map((s) => s.label);
+        // Map CoverageTier → DropSupportStrength
+        const strength: DropSupportStrength = dropSup.coverageTier === 'Strong' ? 'Complete' : dropSup.coverageTier === 'Medium' ? 'Partial' : 'Weak';
+        const color = strength === 'Complete' ? '#1FBE7A' : strength === 'Partial' ? '#F5B73D' : '#FF4A1C';
+        return { strength, color, missing: missingSlots, expected: dropSup.slots.map((s) => s.label) };
       })()
     : (() => {
         const s = computeDropSupport(plan, weekNum);
@@ -4253,7 +4283,7 @@ function NextDropAnchor({ plan }: { plan: CampaignPlan }) {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-2">
           <div className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: 'rgba(250,247,242,0.5)' }}>
-            Next Drop
+            {isLiveDrop ? 'Latest Drop' : 'Next Drop'}
           </div>
           <div className="flex items-center gap-2 text-[10px] font-bold" style={{ color: urgencyColor }}>
             <div className="w-1.5 h-1.5 rounded-full" style={{ background: urgencyColor }} />
