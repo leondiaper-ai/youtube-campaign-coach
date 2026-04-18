@@ -6798,13 +6798,15 @@ type SupportSlotKey =
   | 'lyricVideo'
   | 'artworkVideo'
   | 'communityPost'
-  | 'followupLongform';
+  | 'followupLongform'
+  | 'collabTool';
 
 type SupportSlotSpec = {
   key: SupportSlotKey;
   label: string;
   target: number;      // minimum count to mark the slot "hit"
   targetText: string;  // human-friendly target (e.g. "3–5" or "Yes")
+  isTool?: boolean;    // true = YouTube platform tool (rendered differently)
 };
 
 type DropTypeConfig = {
@@ -6917,6 +6919,7 @@ type SlotResult = {
   target: number;
   hit: boolean;
   showsCount: boolean; // whether to render "x/y" vs a pure yes/no
+  isTool?: boolean;    // true = YouTube platform tool (blue styling)
 };
 
 type DropSupport = {
@@ -7011,9 +7014,18 @@ function getDropSupport(track: AutoTrack, live?: LiveMatch, communityPostOverrid
     // Community Posts aren't in the public API — artist marks manually.
     communityPost: Math.max(postsDone, communityPostOverride ? 1 : 0),
     followupLongform: followupLongformDone + liveM.followupLongform,
+    collabTool: 0, // Not auto-detected — user marks this via UI
   };
 
-  const slots: SlotResult[] = config.slots.map((spec) => {
+  // Detect featured artist in the track title → inject collab tool slot
+  const collabMatch = track.name.match(/(?:ft\.?|feat\.?|featuring)\s+([^(\[,]+)/i)
+    ?? track.name.match(/\bx\s+([A-Z][^(\[,]+)/i);
+  const collabArtist = collabMatch ? collabMatch[1].trim() : null;
+  const allSlots: SupportSlotSpec[] = collabArtist
+    ? [...config.slots, { key: 'collabTool' as SupportSlotKey, label: `Collab with ${collabArtist}`, target: 1, targetText: 'Set up', isTool: true }]
+    : config.slots;
+
+  const slots: SlotResult[] = allSlots.map((spec) => {
     const done = rawCount[spec.key];
     const hit = done >= spec.target;
     // Shorts + community post show counts; yes/no slots (target === 1 text "Yes") show a tick only
@@ -7026,6 +7038,7 @@ function getDropSupport(track: AutoTrack, live?: LiveMatch, communityPostOverrid
       target: spec.target,
       hit,
       showsCount,
+      isTool: spec.isTool,
     };
   });
 
@@ -7218,8 +7231,14 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
       <div className="mb-3">
         {support.slots.map((slot) => {
           const missing = !slot.hit;
+          const isTool = !!slot.isTool;
           const isClickable = slot.key === 'communityPost' && !!onToggleCommunityPost;
           const handleClick = isClickable ? () => onToggleCommunityPost!(track.id) : undefined;
+          // Tool slots use blue/purple, content slots use red/green
+          const toolColor = '#5B7CFA';
+          const missingColor = isTool ? toolColor : '#FF4A1C';
+          const missingBg = isTool ? 'rgba(91,124,250,0.08)' : 'rgba(255,74,28,0.08)';
+          const missingBorder = isTool ? 'rgba(91,124,250,0.12)' : 'rgba(255,74,28,0.12)';
           return (
             <div
               key={slot.key}
@@ -7241,7 +7260,7 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
               }`}
               style={
                 missing
-                  ? { background: 'rgba(255,74,28,0.08)', borderBottomColor: 'rgba(255,74,28,0.12)' }
+                  ? { background: missingBg, borderBottomColor: missingBorder }
                   : undefined
               }
             >
@@ -7249,21 +7268,22 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
                 <span
                   className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black shrink-0"
                   style={{
-                    background: slot.hit ? '#1FBE7A' : '#FF4A1C',
+                    background: slot.hit ? '#1FBE7A' : missingColor,
                     color: '#ffffff',
                   }}
                 >
-                  {slot.hit ? '✓' : '!'}
+                  {slot.hit ? '✓' : isTool ? '★' : '!'}
                 </span>
                 <span
                   className="text-[12px] truncate"
                   style={{
-                    color: missing ? '#FF4A1C' : 'rgba(14,14,14,0.8)',
+                    color: missing ? missingColor : 'rgba(14,14,14,0.8)',
                     fontWeight: missing ? 800 : 600,
                   }}
                 >
                   {slot.label}
-                  {missing && <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.14em]">Missing</span>}
+                  {missing && !isTool && <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.14em]">Missing</span>}
+                  {missing && isTool && <span className="ml-1.5 text-[9px] font-black uppercase tracking-[0.14em]">YouTube Tool</span>}
                   {isClickable && missing && (
                     <span className="ml-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-ink/45">
                       Tap to mark done
@@ -7278,7 +7298,7 @@ function DropCard({ track, live, communityPostDone, onToggleCommunityPost }: {
               </div>
               <span
                 className="text-[11px] font-bold shrink-0 ml-2"
-                style={{ color: missing ? '#FF4A1C' : 'rgba(14,14,14,0.5)' }}
+                style={{ color: missing ? missingColor : 'rgba(14,14,14,0.5)' }}
               >
                 {slot.showsCount ? `${slot.done}/${slot.target}` : slot.hit ? '✓' : slot.targetText}
               </span>
