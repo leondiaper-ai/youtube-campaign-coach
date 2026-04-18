@@ -1,4 +1,10 @@
-export type Status = 'READY' | 'FIX FIRST' | 'ACTIVE BUT WEAK' | 'BUILDING' | 'MOMENTUM' | 'ALWAYS ON';
+// ─────────────────────────────────────────────────────────────────────────────
+// 4-STATE CHANNEL SYSTEM — one state, one reason, one action. No ambiguity.
+// ─────────────────────────────────────────────────────────────────────────────
+export type ChannelState = 'HEALTHY' | 'BUILDING' | 'AT RISK' | 'COLD';
+
+/** @deprecated Use ChannelState instead. Kept only for type compatibility during migration. */
+export type Status = ChannelState;
 
 /**
  * Core Artist record.
@@ -55,22 +61,18 @@ export const ARTISTS: Artist[] = [
   },
 ];
 
-export const STATUS_RANK: Record<Status, number> = {
-  'FIX FIRST': 0,
-  'ACTIVE BUT WEAK': 1,
+export const STATUS_RANK: Record<ChannelState, number> = {
+  'COLD': 0,
+  'AT RISK': 1,
   'BUILDING': 2,
-  'MOMENTUM': 3,
-  'READY': 4,
-  'ALWAYS ON': 5,
+  'HEALTHY': 3,
 };
 
-export const STATUS_COLOR: Record<Status, { bg: string; fg: string; dot: string }> = {
-  'READY':            { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-  'MOMENTUM':         { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-  'BUILDING':         { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
-  'ACTIVE BUT WEAK':  { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  'FIX FIRST':        { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
-  'ALWAYS ON':        { bg: '#EEECE6', fg: '#3A3A3A', dot: '#8A8A8A' },
+export const STATUS_COLOR: Record<ChannelState, { bg: string; fg: string; dot: string }> = {
+  'HEALTHY':   { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
+  'BUILDING':  { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
+  'AT RISK':   { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
+  'COLD':      { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
 };
 
 export type TopComment = {
@@ -118,11 +120,10 @@ export type LiveSnap = {
 };
 
 export type Derived = {
-  status: Status;
+  status: ChannelState;
+  reason: string;     // one-line WHY for this state
+  nextAction: string; // one clear action
   watcherRead: string;
-  nextAction: string;
-  objective?: string;
-  impact?: string;
 };
 
 export type DeriveCtx = {
@@ -135,60 +136,70 @@ export function daysSince(iso?: string | null) {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
 }
 
+/**
+ * Derive ONE clear channel state from live YouTube data.
+ *
+ * Rules (in priority order):
+ *  COLD       → 0 uploads in 60+ days (or no data at all)
+ *  AT RISK    → 0 uploads in 30 days, OR active but very sparse (<2 in 30d with gap >14d)
+ *  BUILDING   → Some activity but inconsistent (2-4 uploads/30d, or gap >7d)
+ *  HEALTHY    → Consistent uploads (5+ in 30d and posted within last 7d)
+ */
 export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | null {
   if (live.subs == null) return null;
   const u = live.uploads30d ?? 0;
   const last = daysSince(live.lastUploadAt);
 
-  const outOfCycle =
-    (ctx.daysToNextMoment == null || ctx.daysToNextMoment > 21) &&
-    (ctx.phase === 'SUSTAIN' || ctx.phase === 'PRE' || ctx.phase == null);
-  if (outOfCycle && (last == null || last > 21 || u <= 1)) {
+  // ── COLD: silent channel ──────────────────────────────────────────────
+  if (last == null || last >= 60 || (u === 0 && (last == null || last >= 30))) {
+    const reason = last != null
+      ? `No uploads in ${last} days`
+      : 'No upload data';
     return {
-      status: 'ALWAYS ON',
-      watcherRead:
-        last != null
-          ? `Out of cycle. Last upload ${last}d ago.`
-          : 'Out of cycle. No recent uploads.',
-      nextAction:
-        'Post 2 Shorts from catalogue · recut top track vertical · 1 community post.',
-      objective: 'Keep channel warm ahead of next moment.',
-      impact: 'Maintains baseline momentum and lifts the next release.',
+      status: 'COLD',
+      reason,
+      watcherRead: reason,
+      nextAction: 'Post 2 Shorts from catalogue this week',
     };
   }
 
-  if (last == null || last > 30 || u === 0) {
+  // ── AT RISK: channel cooling off ──────────────────────────────────────
+  if (u === 0 || (last > 30) || (u < 2 && last > 14)) {
+    const reason = u === 0
+      ? `No uploads in 30 days`
+      : `Only ${u} upload${u === 1 ? '' : 's'} in 30 days — channel cooling off`;
     return {
-      status: 'FIX FIRST',
-      watcherRead: last != null ? `Quiet ${last}d. ${u} uploads/30d.` : 'No upload data.',
-      nextAction: 'Ship something this week.',
+      status: 'AT RISK',
+      reason,
+      watcherRead: reason,
+      nextAction: u === 0
+        ? 'Ship something this week — a Short or Community Post'
+        : 'Add a Short or Premiere this week to rebuild cadence',
     };
   }
-  if (last > 14 && u < 2) {
+
+  // ── HEALTHY: consistent output ────────────────────────────────────────
+  if (u >= 5 && last <= 7) {
+    const reason = `Strong output — ${u} uploads in 30 days`;
     return {
-      status: 'ACTIVE BUT WEAK',
-      watcherRead: `Only ${u} uploads/30d. Last ${last}d ago.`,
-      nextAction: 'Add a Short or Premiere this week.',
+      status: 'HEALTHY',
+      reason,
+      watcherRead: reason,
+      nextAction: 'Maintain cadence — layer a Short on the next drop',
     };
   }
-  if (u >= 5 && last <= 3) {
-    return {
-      status: 'MOMENTUM',
-      watcherRead: `${u} uploads/30d. Last ${last}d ago.`,
-      nextAction: 'Layer a Short on the next drop.',
-    };
-  }
-  if (u >= 2 && last <= 14) {
-    return {
-      status: 'BUILDING',
-      watcherRead: `${u} uploads/30d. Building cadence.`,
-      nextAction: 'Lock weekly cadence.',
-    };
-  }
+
+  // ── BUILDING: active but inconsistent ─────────────────────────────────
+  const reason = last > 7
+    ? `${u} uploads in 30 days — last upload ${last}d ago`
+    : `${u} uploads in 30 days — building cadence`;
   return {
-    status: 'READY',
-    watcherRead: `${u} uploads/30d. Cadence holding.`,
-    nextAction: 'Hold cadence — schedule next moment.',
+    status: 'BUILDING',
+    reason,
+    watcherRead: reason,
+    nextAction: u >= 3
+      ? 'Lock weekly cadence — aim for 5+ uploads per month'
+      : 'Increase output — post 2 Shorts this week',
   };
 }
 

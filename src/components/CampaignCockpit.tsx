@@ -5,11 +5,12 @@ import Link from 'next/link';
 import {
   ARTISTS,
   deriveFromLive,
-  daysSince,
   fmtNum,
+  STATUS_COLOR,
+  STATUS_RANK,
   type Artist,
+  type ChannelState,
   type LiveSnap as BaseLiveSnap,
-  type Status,
 } from '@/lib/artists';
 import AddArtistButton from './AddArtistButton';
 import { CoachLiveDot } from './CoachLink';
@@ -25,45 +26,14 @@ const MUTED = '#E9E2D3';
 const LS_KEY = 'pih-campaign-coach-v4';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Simplified 3-tier status labels stakeholders can read instantly.
+// 4-STATE CARD SYSTEM — one state, one reason, one action. No ambiguity.
 // ─────────────────────────────────────────────────────────────────────────────
-type SimpleStatus = 'Needs attention' | 'At risk' | 'Healthy';
-const SIMPLE_STATUS: Record<Status, SimpleStatus> = {
-  'FIX FIRST':       'Needs attention',
-  'ACTIVE BUT WEAK': 'Needs attention',
-  'BUILDING':        'At risk',
-  'MOMENTUM':        'Healthy',
-  'READY':           'Healthy',
-  'ALWAYS ON':       'Healthy',
+const STATE_LABEL: Record<ChannelState, string> = {
+  'HEALTHY':  'Healthy',
+  'BUILDING': 'Building',
+  'AT RISK':  'At Risk',
+  'COLD':     'Cold',
 };
-const SIMPLE_STATUS_STYLE: Record<SimpleStatus, { bg: string; fg: string; dot: string }> = {
-  'Needs attention': { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
-  'At risk':         { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  'Healthy':         { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-};
-
-// Direct "why" line — blunt, commercial language
-function whyLine(status: Status, live: LiveSnap | undefined): string {
-  const lastUp = daysSince(live?.lastUploadAt);
-  const uploads = live?.uploads30d ?? 0;
-
-  switch (status) {
-    case 'FIX FIRST':
-      return lastUp != null ? `Not posting. Last upload ${lastUp}d ago` : 'Not posting';
-    case 'ACTIVE BUT WEAK':
-      return `Only ${uploads} upload${uploads === 1 ? '' : 's'} in 30 days — channel cooling off`;
-    case 'BUILDING':
-      return `${uploads} uploads/30d — building cadence`;
-    case 'MOMENTUM':
-      return `Strong output — ${uploads} uploads/30d`;
-    case 'READY':
-      return 'Cadence holding — ready for the next moment';
-    case 'ALWAYS ON':
-      return 'Between campaigns — channel warm';
-    default:
-      return '';
-  }
-}
 
 function fmtDate(iso: string) {
   const d = new Date(iso + 'T00:00:00');
@@ -161,19 +131,15 @@ export default function CampaignCockpit() {
           : null;
         return {
           ...a,
-          status: (d?.status ?? 'ALWAYS ON') as Status,
-          watcherRead: d?.watcherRead ?? null,
+          status: (d?.status ?? 'COLD') as ChannelState,
+          reason: d?.reason ?? 'No data yet',
           nextAction: d?.nextAction ?? null,
         };
       }),
     [artists, live]
   );
 
-  // Sort: needs attention first, then at risk, then healthy
-  const STATUS_RANK: Record<Status, number> = {
-    'FIX FIRST': 0, 'ACTIVE BUT WEAK': 1, 'BUILDING': 2,
-    'MOMENTUM': 3, 'READY': 4, 'ALWAYS ON': 5,
-  };
+  // Sort: worst state first (COLD → AT RISK → BUILDING → HEALTHY)
   const sorted = [...effective].sort((a, b) => {
     const s = STATUS_RANK[a.status] - STATUS_RANK[b.status];
     if (s !== 0) return s;
@@ -184,24 +150,22 @@ export default function CampaignCockpit() {
     return ad - bd;
   });
 
-  const needAttention = sorted.filter((a) => SIMPLE_STATUS[a.status] === 'Needs attention').length;
-  const atRisk = sorted.filter((a) => SIMPLE_STATUS[a.status] === 'At risk').length;
-
   const total = sorted.length;
-  const healthy = sorted.filter((a) => SIMPLE_STATUS[a.status] === 'Healthy').length;
-  const notGrowing = total - healthy;
-  const hasIssues = needAttention + atRisk > 0;
+  const healthy = sorted.filter((a) => a.status === 'HEALTHY').length;
+  const cold = sorted.filter((a) => a.status === 'COLD').length;
+  const atRisk = sorted.filter((a) => a.status === 'AT RISK').length;
+  const hasIssues = cold + atRisk > 0;
 
-  // Alert text — dynamic based on state
+  // Alert text — blunt, one line
   const alertText = (() => {
-    if (notGrowing === 0) return 'All channels growing';
-    if (needAttention > 0 && atRisk > 0)
-      return `${notGrowing}/${total} channels not growing · ${atRisk} at risk`;
-    if (needAttention > 0)
-      return `${needAttention} channel${needAttention === 1 ? '' : 's'} need${needAttention === 1 ? 's' : ''} attention`;
+    if (cold + atRisk === 0 && healthy === total) return 'All channels healthy';
+    if (cold > 0 && atRisk > 0)
+      return `${cold} cold · ${atRisk} at risk`;
+    if (cold > 0)
+      return `${cold} channel${cold === 1 ? '' : 's'} cold`;
     if (atRisk > 0)
       return `${atRisk} channel${atRisk === 1 ? '' : 's'} at risk`;
-    return `${notGrowing}/${total} channels not growing`;
+    return `${total - healthy}/${total} channels not healthy`;
   })();
 
   return (
@@ -294,8 +258,8 @@ export default function CampaignCockpit() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 type EffectiveArtist = Artist & {
-  status: Status;
-  watcherRead: string | null;
+  status: ChannelState;
+  reason: string;
   nextAction: string | null;
 };
 
@@ -308,9 +272,8 @@ function ArtistCard({
   live?: LiveSnap;
   coach: CoachPlanSummary | null;
 }) {
-  const simple = SIMPLE_STATUS[a.status];
-  const style = SIMPLE_STATUS_STYLE[simple];
-  const why = whyLine(a.status, live);
+  const style = STATUS_COLOR[a.status];
+  const label = STATE_LABEL[a.status];
   const nextLabel = coach?.nextMoment?.label ?? a.nextMomentLabel ?? null;
   const nextDate = coach?.nextMoment?.date ?? a.nextMomentDate ?? null;
   const days = nextDate ? daysFromNow(nextDate) : null;
@@ -324,7 +287,7 @@ function ArtistCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          {/* Name + status */}
+          {/* Name + state badge */}
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="font-black text-[16px]">{a.name}</span>
             <span
@@ -332,18 +295,17 @@ function ArtistCard({
               style={{ background: style.bg, color: style.fg }}
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: style.dot }} />
-              {simple}
+              {label}
             </span>
             <CoachLiveDot slug={a.slug} />
           </div>
 
-          {/* Why + growth signal on same line */}
+          {/* Reason — one line explaining the state */}
           <div className="text-[12px] text-ink/55 mt-1 leading-snug">
-            {why}
-            {isLive && <GrowthSignal live={live!} />}
+            {a.reason}
           </div>
 
-          {/* Scale: subs · views · growth delta */}
+          {/* Scale: subs · views */}
           <div className="flex items-center gap-2 mt-1.5 text-[11px] text-ink/40 tabular-nums flex-wrap">
             {isLive && live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
             {isLive && live?.views != null && <><span className="text-ink/15">·</span><span>{fmtNum(live.views)} views</span></>}
@@ -353,10 +315,12 @@ function ArtistCard({
           </div>
         </div>
 
-        {/* Right side: next action + next moment */}
+        {/* Right side: action + campaign context */}
         <div className="shrink-0 text-right max-w-[280px]">
           {a.nextAction && (
-            <div className="text-[12px] font-bold text-ink/80 leading-snug">{a.nextAction}</div>
+            <div className="text-[12px] font-bold leading-snug" style={{ color: style.fg }}>
+              → {a.nextAction}
+            </div>
           )}
           {nextLabel && nextDate && (
             <div className="text-[11px] text-ink/45 mt-1.5">
@@ -371,52 +335,6 @@ function ArtistCard({
         </div>
       </div>
     </Link>
-  );
-}
-
-/**
- * Inline growth signal for a Cockpit card.
- * Uses the LiveSnap data we already have — cadence + recency as proxy for growth.
- * When the snapshot history accumulates 7d of data, the Watcher page shows exact deltas.
- */
-function GrowthSignal({ live }: { live: LiveSnap }) {
-  const uploads = live.uploads30d ?? 0;
-  const shorts = live.shorts30d ?? 0;
-  const last = daysSince(live.lastUploadAt);
-
-  // Strong output = proxy for growth
-  if (uploads >= 6 && (last ?? 999) <= 3) {
-    return (
-      <span className="ml-2 text-[11px] font-bold" style={{ color: '#0C6A3F' }}>
-        ↑ Strong output
-      </span>
-    );
-  }
-  if (uploads >= 3 && (last ?? 999) <= 7) {
-    return (
-      <span className="ml-2 text-[11px] font-bold" style={{ color: '#0C6A3F' }}>
-        ↑ Active
-      </span>
-    );
-  }
-  if (uploads <= 1 || (last ?? 999) > 21) {
-    return (
-      <span className="ml-2 text-[11px] font-bold" style={{ color: '#8A1F0C' }}>
-        ↓ Channel cooling off
-      </span>
-    );
-  }
-  if ((last ?? 999) > 14) {
-    return (
-      <span className="ml-2 text-[11px] font-bold" style={{ color: '#8A4A1A' }}>
-        → Not posting
-      </span>
-    );
-  }
-  return (
-    <span className="ml-2 text-[11px] font-bold text-ink/35">
-      → Steady
-    </span>
   );
 }
 
