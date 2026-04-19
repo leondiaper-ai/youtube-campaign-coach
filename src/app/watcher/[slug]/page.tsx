@@ -20,12 +20,24 @@ const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
 
-const STATUS_MAP = {
-  FIX:        { label: 'Needs attention', bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
-  CORRECT:    { label: 'At risk',         bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  MAINTAIN:   { label: 'Healthy',         bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-  ACCELERATE: { label: 'Growing',         bg: '#DCE8FF', fg: '#1C3B8A', dot: '#2C6BFF' },
-} as const;
+// ── Use the SAME 4-state system as the overview page ────────────────────────
+// The watcher expands on the state with detail — it never contradicts it.
+import { STATUS_COLOR, type ChannelState } from '@/lib/artists';
+
+const STATE_LABEL: Record<ChannelState, string> = {
+  HEALTHY:  'Healthy',
+  BUILDING: 'Building',
+  'AT RISK': 'At Risk',
+  COLD:     'Cold',
+};
+
+// Fallback: when derived is null, map decision.type → ChannelState
+const DECISION_TO_STATE: Record<string, ChannelState> = {
+  FIX: 'COLD',
+  CORRECT: 'AT RISK',
+  MAINTAIN: 'HEALTHY',
+  ACCELERATE: 'HEALTHY',
+};
 
 export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -112,7 +124,9 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     .sort((a, b) => b.views - a.views)
     .slice(0, 3);
 
-  const sm = STATUS_MAP[decision.type];
+  // ── Use derived.status (same 4-state as overview). Fallback via decision.type.
+  const channelState: ChannelState = derived?.status ?? DECISION_TO_STATE[decision.type] ?? 'BUILDING';
+  const sc = STATUS_COLOR[channelState];
 
   return (
     <main className="bg-paper min-h-screen" style={{ color: INK }}>
@@ -140,14 +154,14 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
         <h1 className="font-black text-3xl mt-1">{artist.name}</h1>
 
-        {/* Status + decision headline */}
+        {/* Status + decision headline — uses the SAME 4-state as overview */}
         <div className="mt-5 flex items-start gap-3">
           <span
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.14em] shrink-0 mt-0.5"
-            style={{ background: sm.bg, color: sm.fg }}
+            style={{ background: sc.bg, color: sc.fg }}
           >
-            <span className="w-2 h-2 rounded-full" style={{ background: sm.dot }} />
-            {sm.label}
+            <span className="w-2 h-2 rounded-full" style={{ background: sc.dot }} />
+            {STATE_LABEL[channelState]}
           </span>
           <div className="text-[18px] font-black leading-snug">
             {decision.headline}

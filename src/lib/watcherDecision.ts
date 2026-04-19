@@ -140,7 +140,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'RISK',
-      headline: `Channel is cold with ${daysToNextMoment}d to ${momentLabel}. Ship something this week.`,
+      headline: `Nothing posted and ${daysToNextMoment} days to ${momentLabel}. The algorithm won't push your drop if the channel is silent.`,
       signals: [
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'No uploads detected in 30d.',
         `${uploads30d} uploads / 30d.`,
@@ -159,8 +159,8 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
       type: 'FIX',
       verdict: 'DRIFT',
       headline: lastUp != null
-        ? `Channel has gone cold. Last upload ${lastUp} days ago.`
-        : 'Channel has gone cold. No uploads detected.',
+        ? `Last upload was ${lastUp} days ago. YouTube has stopped showing your channel to subscribers.`
+        : 'No uploads detected. The channel is invisible right now.',
       signals: [
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'No uploads detected in 30d.',
         `${uploads30d} uploads / 30d.`,
@@ -177,7 +177,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'RISK',
-      headline: `${daysToNextMoment}d to ${momentLabel} and the cadence won't carry it.`,
+      headline: `${daysToNextMoment} days to ${momentLabel} and the channel isn't warm enough. Your drop will land to a cold audience.`,
       signals: [
         `${uploads30d} uploads / 30d (last ${lastUp}d ago).`,
         shorts30d === 0 ? 'No Shorts in the 30d window.' : `${shorts30d} Shorts / 30d.`,
@@ -198,7 +198,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'FIX',
       verdict: 'DRIFT',
-      headline: 'Losing subscribers despite new views. Something recent is pushing people away.',
+      headline: 'People are watching — but unsubscribing. Something recent is pushing them away.',
       signals: [
         convLine!,
         `${convAnchor.subsDelta.toLocaleString()} subs net · +${convAnchor.viewsDelta.toLocaleString()} new views in ${convAnchor.spanDays}d.`,
@@ -221,10 +221,10 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
       type: 'CORRECT',
       verdict: 'DRIFT',
       headline: weakCadence
-        ? `Only ${uploads30d} uploads in 30 days. Channel needs more volume.`
+        ? `Only ${uploads30d} uploads in 30 days. You're not posting enough for the algorithm to care.`
         : subsFlat
-          ? 'Views arriving but subscribers flat. Structural gap is capping growth.'
-          : 'Channel is working but leaving reach on the table.',
+          ? 'People are watching — but not subscribing. You\'re not giving them a reason to stay.'
+          : 'The channel is active but leaving reach on the table.',
       signals: [
         oppHeadline(top),
         subs7
@@ -249,7 +249,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
-      headline: 'Views arriving but not converting. Cadence is strong — packaging is the bottleneck.',
+      headline: 'People are watching — but not subscribing. Cadence is strong, so the problem is packaging.',
       signals: [
         convLine!,
         `${uploads30d} uploads / 30d — cadence already strong.`,
@@ -272,7 +272,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Growth is compounding.',
+      headline: 'Growth is compounding. Double down on what\'s working — don\'t add complexity.',
       signals: [
         `Subs +${subs7!.delta.toLocaleString()} (${(subs7!.pct * 100).toFixed(1)}%) in 7d.`,
         `${uploads30d} uploads / 30d — cadence is strong.`,
@@ -290,7 +290,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Growth is compounding.',
+      headline: 'Growth is compounding. Keep this cadence — the algorithm is rewarding it.',
       signals: [
         `Subs +${subs7!.delta.toLocaleString()} (${(subs7!.pct * 100).toFixed(1)}%) in 7d.`,
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
@@ -311,7 +311,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'ACCELERATE',
       verdict: 'OPPORTUNITY',
-      headline: 'Conversion is strong.',
+      headline: 'Every viewer is converting. The constraint is volume — push more content.',
       signals: [
         convLine!,
         `${uploads30d} uploads / 30d — cadence has headroom to push.`,
@@ -333,7 +333,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
     return {
       type: 'MAINTAIN',
       verdict: 'ON_TRACK',
-      headline: 'Channel is warm. Cadence is holding.',
+      headline: 'Channel is warm. Don\'t change anything — this cadence is working.',
       signals: [
         `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'Recent upload window active.',
@@ -357,10 +357,10 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
       type: 'CORRECT',
       verdict: 'DRIFT',
       headline: weakCadence
-        ? `Only ${uploads30d} uploads in 30 days. Channel needs more consistency.`
+        ? `Only ${uploads30d} uploads in 30 days. Not enough for the algorithm to build on.`
         : shorts30d <= 1
-          ? `Low Shorts output — ${shorts30d} in 30 days. Discovery is capped.`
-          : `Channel is running but not compounding. Small gaps are adding up.`,
+          ? `Only ${shorts30d} Short${shorts30d === 1 ? '' : 's'} in 30 days. You're missing the fastest discovery surface on YouTube.`
+          : 'The channel is running but not compounding. Small gaps are adding up.',
       signals: [oppHeadline(top), `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`],
       expectedImpact: top.impactRange,
       ifIgnored:
@@ -373,7 +373,7 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   return {
     type: 'MAINTAIN',
     verdict: 'ON_TRACK',
-    headline: 'On track. No gap between plan and reality.',
+    headline: 'On track. No changes needed right now.',
     signals: [
       `${uploads30d} uploads / 30d, ${shorts30d} Shorts.`,
       lastUp != null ? `Last upload ${lastUp}d ago.` : 'Upload window baseline.',
