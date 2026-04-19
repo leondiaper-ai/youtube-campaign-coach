@@ -463,9 +463,10 @@ function scanVideoGaps(uploads: RecentUpload[]): VideoGap[] {
   const results: VideoGap[] = [];
   for (const u of longform) {
     const gaps: string[] = [];
-    if (!u.hasLyricSibling) gaps.push('Lyric Video');
-    if (!u.hasVisualizerSibling) gaps.push('Visualizer');
-    if (!u.hasShortSibling) gaps.push('Short');
+    // Only flag as gap when confidence is 'none' — 'likely' or 'confirmed' means companion found
+    if ((u.lyricCompanion ?? 'none') === 'none') gaps.push('Lyric Video');
+    if ((u.visualizerCompanion ?? 'none') === 'none') gaps.push('Visualizer');
+    if ((u.shortCompanion ?? 'none') === 'none') gaps.push('Short');
     if (gaps.length > 0) {
       results.push({ title: u.title, gaps, views: u.viewCount });
     }
@@ -725,9 +726,9 @@ function humanizeSubtype(o: Opportunity): string {
 
 /** UPPERCASE opportunity type for missed-opp card headline */
 function oppTypeLabel(o: Opportunity): string {
-  if (o.subtype.includes('lyric')) return 'Lyric video missing';
-  if (o.subtype.includes('Short')) return 'Short missing';
-  if (o.subtype.includes('visualizer')) return 'Visualizer missing';
+  if (o.subtype.includes('lyric')) return 'No lyric video detected';
+  if (o.subtype.includes('Short')) return 'No Short detected';
+  if (o.subtype.includes('visualizer')) return 'No visualizer detected';
   if (o.subtype.includes('caption')) return 'Captions missing';
   if (o.subtype.includes('demand')) return 'Fan demand unmet';
   return 'Format gap';
@@ -736,16 +737,16 @@ function oppTypeLabel(o: Opportunity): string {
 /** Insight line — commercial framing: what's being lost */
 function oppInsight(o: Opportunity): string {
   if (o.subtype.includes('lyric'))
-    return 'No lyric cut extending this track — missing sing-along discovery, playlist adds, and repeat plays from lyric-search audiences.';
+    return 'No lyric companion detected on channel for this track — missing sing-along discovery, playlist adds, and repeat plays from lyric-search audiences.';
   if (o.subtype.includes('Short'))
-    return 'No Short driving mobile-first discovery back to this track. Shorts reach audiences who never click long-form — each one is incremental reach.';
+    return 'No companion Short detected on channel for this track. Shorts reach audiences who never click long-form — each one is incremental reach.';
   if (o.subtype.includes('visualizer'))
-    return 'No passive-listen version capturing background-play and study-playlist audiences. Visualizers add 30–60% incremental watch-time on a proven track.';
+    return 'No visualizer or audio companion detected on channel. Visualizers capture background-play and study-playlist audiences — typically 30–60% incremental watch-time.';
   if (o.subtype.includes('caption'))
     return 'No published caption track — YouTube can\'t index it for search or auto-translate for international audiences. 15–25% of music watch-time comes from non-native regions.';
   if (o.subtype.includes('demand'))
     return 'Multiple top comments requesting this. Verified demand from the most engaged segment — shipping it converts comment-watchers into repeat viewers.';
-  return 'No supporting formats extending this track — missing additional discovery and retention.';
+  return 'No supporting formats detected for this track — missing additional discovery and retention.';
 }
 
 /** ONE clear action — directive, this week */

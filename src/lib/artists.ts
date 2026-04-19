@@ -81,6 +81,9 @@ export type TopComment = {
   authorName: string;
 };
 
+/** Companion detection confidence level */
+export type CompanionConfidence = 'confirmed' | 'likely' | 'none';
+
 export type RecentUpload = {
   id: string;
   title: string;
@@ -93,6 +96,12 @@ export type RecentUpload = {
   viewCount: number;
   likeCount: number;
   commentCount: number;
+  // ── Companion confidence (fuzzy matching) ──
+  shortCompanion?: CompanionConfidence;
+  lyricCompanion?: CompanionConfidence;
+  visualizerCompanion?: CompanionConfidence;
+  audioCompanion?: CompanionConfidence;
+  // Legacy boolean flags — kept for backward compat, derived from companion confidence
   hasLyricSibling?: boolean;
   hasVisualizerSibling?: boolean;
   hasAudioSibling?: boolean;

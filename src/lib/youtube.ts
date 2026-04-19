@@ -1,4 +1,4 @@
-import type { LiveSnap, RecentUpload } from './artists';
+import type { LiveSnap, RecentUpload, CompanionConfidence } from './artists';
 import {
   writeSnapshot,
   readTopEverCache,
@@ -19,6 +19,10 @@ function parseDuration(iso?: string): number {
   return (+(m?.[1] ?? 0)) * 3600 + (+(m?.[2] ?? 0)) * 60 + (+(m?.[3] ?? 0));
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// TITLE NORMALISATION & KEYWORD EXTRACTION
+// ═══════════════════════════════════════════════════════════════════════════════
+
 // Pull the core track name from an upload title by stripping common suffixes
 // like "(Official Video)", "[Lyric Video]", "- Visualizer", "| Audio", etc.
 function normaliseTitle(raw: string): string {
@@ -34,13 +38,227 @@ function normaliseTitle(raw: string): string {
     .trim();
 }
 
+/** Words too common to be meaningful for track matching */
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+  'of', 'with', 'by', 'from', 'is', 'it', 'my', 'me', 'we', 'you', 'your',
+  'this', 'that', 'i', 'am', 'be', 'do', 'so', 'no', 'not', 'if', 'up',
+  'out', 'new', 'now', 'all', 'one', 'two', 'just', 'got', 'like', 'get',
+  'go', 'been', 'have', 'has', 'had', 'can', 'will', 'way', 'day',
+  // Music-specific filler
+  'official', 'video', 'music', 'audio', 'lyric', 'lyrics', 'visualizer',
+  'visualiser', 'visualization', 'short', 'shorts', 'clip', 'teaser',
+  'trailer', 'premiere', 'session', 'performance', 'live', 'acoustic',
+  'remix', 'instrumental', 'extended', 'version', 'edit', 'radio',
+  'feat', 'ft', 'featuring', 'prod', 'produced', 'dir', 'directed',
+  'mv', 'hd', '4k', 'hq', 'vevo',
+]);
+
+/** Extract meaningful keywords from a video title for fuzzy matching */
+function extractKeywords(title: string): Set<string> {
+  const cleaned = title
+    .toLowerCase()
+    .replace(/\(.*?\)|\[.*?\]/g, ' ')     // strip parentheticals
+    .replace(/[-–—_:|/\\#@]+/g, ' ')       // strip punctuation
+    .replace(/[''"".,!?;:]+/g, '')         // strip quotes/commas
+    .replace(/\s+/g, ' ')
+    .trim();
+  const words = cleaned.split(' ').filter((w) => w.length >= 2 && !STOP_WORDS.has(w));
+  return new Set(words);
+}
+
+/** Normalize feat./ft./featuring variants so they match */
+function normaliseFeaturing(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\bfeaturing\b/g, 'feat')
+    .replace(/\bft\.?\b/g, 'feat')
+    .replace(/\bfeat\.?\b/g, 'feat');
+}
+
 function titleHasTag(title: string, tag: RegExp): boolean {
   return tag.test(title.toLowerCase());
 }
 
 const LYRIC_RX = /\blyric(s)?\b/;
-const VISUALIZER_RX = /\bvisualiz(er|ation)\b/;
+const VISUALIZER_RX = /\bvisualiz(er|ation)|visualis(er|ation)\b/;
 const AUDIO_RX = /\baudio\b/;
+const SHORTS_TITLE_RX = /\b(short|shorts|#shorts)\b/i;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FUZZY COMPANION MATCHING ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type VideoRow = {
+  u: RecentUpload;
+  key: string;        // normalised title
+  ts: number;         // publish timestamp
+  keywords: Set<string>;
+  descLower: string;  // first 500 chars of description, lowercased
+};
+
+/**
+ * Score how likely `candidate` is a companion of `target` for a given format.
+ * Returns a numeric score — higher = stronger match.
+ *
+ * Thresholds:
+ *   >= 6  → confirmed companion
+ *   >= 3  → likely companion
+ *   <  3  → no match
+ */
+function scoreCompanion(
+  target: VideoRow,
+  candidate: VideoRow,
+  format: 'short' | 'lyric' | 'visualizer' | 'audio',
+): number {
+  if (target.u.id === candidate.u.id) return 0;
+
+  let score = 0;
+  const c = candidate;
+  const t = target;
+
+  // ── 1. FORMAT TAG in candidate title (STRONG: +3) ──
+  const cTitle = c.u.title.toLowerCase();
+  if (format === 'short') {
+    const isShortDuration = c.u.durationSec > 0 && c.u.durationSec <= 60;
+    if (isShortDuration) score += 3;
+    else return 0; // can't be a Short if it's not short
+    if (SHORTS_TITLE_RX.test(c.u.title)) score += 1; // bonus for explicit #shorts tag
+  } else if (format === 'lyric') {
+    if (LYRIC_RX.test(cTitle)) score += 3;
+    else return 0; // not a lyric video if title doesn't say so
+  } else if (format === 'visualizer') {
+    if (VISUALIZER_RX.test(cTitle)) score += 3;
+    else return 0;
+  } else if (format === 'audio') {
+    if (AUDIO_RX.test(cTitle) && !/\baudio\s*(description|commentary|book)\b/.test(cTitle)) score += 3;
+    else return 0;
+  }
+
+  // ── 2. NORMALISED TITLE MATCH (STRONG: +4) ──
+  // If normalised titles are substring-matches (existing logic), it's a strong signal
+  if (t.key && c.key && t.key.length >= 3 && c.key.length >= 3) {
+    if (t.key === c.key) {
+      score += 4;
+    } else if (t.key.includes(c.key) || c.key.includes(t.key)) {
+      score += 3;
+    }
+  }
+
+  // ── 3. KEYWORD OVERLAP (MEDIUM: up to +3) ──
+  // Count how many meaningful track-name words the candidate shares
+  if (t.keywords.size > 0 && c.keywords.size > 0) {
+    let overlap = 0;
+    t.keywords.forEach((w) => {
+      if (c.keywords.has(w)) overlap++;
+    });
+    // Score based on overlap ratio relative to target keywords
+    const ratio = overlap / Math.max(t.keywords.size, 1);
+    if (ratio >= 0.8 && overlap >= 2) score += 3;       // strong keyword match
+    else if (ratio >= 0.5 && overlap >= 2) score += 2;  // decent keyword match
+    else if (overlap >= 1) score += 1;                   // weak partial match
+  }
+
+  // ── 4. DESCRIPTION CROSS-REFERENCE (MEDIUM: +2) ──
+  // Check if candidate's description mentions the target title or vice versa
+  const tTitle = normaliseTitle(t.u.title);
+  if (tTitle.length >= 4) {
+    if (c.descLower.includes(tTitle)) score += 2;
+  }
+  const cNorm = normaliseTitle(c.u.title);
+  if (cNorm.length >= 4) {
+    if (t.descLower.includes(cNorm)) score += 1;
+  }
+
+  // ── 5. DATE PROXIMITY (MEDIUM: up to +2) ──
+  const daysDiff = Math.abs(c.ts - t.ts) / 86400000;
+  if (format === 'short') {
+    // Shorts can come weeks or months after the main video
+    if (daysDiff <= 7) score += 2;
+    else if (daysDiff <= 30) score += 1.5;
+    else if (daysDiff <= 90) score += 1;
+    else if (daysDiff <= 180) score += 0.5;
+    // Beyond 180d: no date bonus, but don't penalise — catalogue Shorts are valid
+  } else {
+    // Lyric/visualizer/audio usually land near the main video
+    if (daysDiff <= 7) score += 2;
+    else if (daysDiff <= 30) score += 1.5;
+    else if (daysDiff <= 90) score += 1;
+    else if (daysDiff <= 365) score += 0.5;
+  }
+
+  // ── 6. FEATURING ARTIST MATCH (WEAK: +1) ──
+  const tFeat = normaliseFeaturing(t.u.title);
+  const cFeat = normaliseFeaturing(c.u.title);
+  const featMatch = tFeat.match(/feat\s+(\w+)/);
+  if (featMatch && cFeat.includes(featMatch[1])) score += 1;
+
+  return score;
+}
+
+/** Convert numeric score to confidence level */
+function scoreToConfidence(score: number): CompanionConfidence {
+  if (score >= 6) return 'confirmed';
+  if (score >= 3) return 'likely';
+  return 'none';
+}
+
+/**
+ * Run fuzzy companion detection across all videos in the set.
+ * Updates each video's companion confidence fields + legacy boolean flags.
+ *
+ * @param rows      - all videos to scan (both targets and candidates)
+ * @param targetIds - which video IDs to compute companions for (if null, all)
+ */
+function detectCompanions(rows: VideoRow[], targetIds?: Set<string>): void {
+  for (const target of rows) {
+    if (targetIds && !targetIds.has(target.u.id)) continue;
+    // Skip Shorts themselves — we only detect companions for longform
+    if (target.u.durationSec > 0 && target.u.durationSec <= 60) continue;
+
+    let bestShort = 0;
+    let bestLyric = 0;
+    let bestViz = 0;
+    let bestAudio = 0;
+
+    for (const candidate of rows) {
+      if (candidate.u.id === target.u.id) continue;
+
+      const sShort = scoreCompanion(target, candidate, 'short');
+      const sLyric = scoreCompanion(target, candidate, 'lyric');
+      const sViz = scoreCompanion(target, candidate, 'visualizer');
+      const sAudio = scoreCompanion(target, candidate, 'audio');
+
+      if (sShort > bestShort) bestShort = sShort;
+      if (sLyric > bestLyric) bestLyric = sLyric;
+      if (sViz > bestViz) bestViz = sViz;
+      if (sAudio > bestAudio) bestAudio = sAudio;
+    }
+
+    target.u.shortCompanion = scoreToConfidence(bestShort);
+    target.u.lyricCompanion = scoreToConfidence(bestLyric);
+    target.u.visualizerCompanion = scoreToConfidence(bestViz);
+    target.u.audioCompanion = scoreToConfidence(bestAudio);
+
+    // Legacy boolean flags: treat both 'confirmed' and 'likely' as true
+    // (safety rule: false negatives worse than uncertainty)
+    target.u.hasShortSibling = bestShort >= 3;
+    target.u.hasLyricSibling = bestLyric >= 3;
+    target.u.hasVisualizerSibling = bestViz >= 3;
+    target.u.hasAudioSibling = bestAudio >= 3;
+  }
+}
+
+/** Build VideoRow array from uploads for the matching engine */
+function toVideoRows(uploads: RecentUpload[]): VideoRow[] {
+  return uploads.map((u) => ({
+    u,
+    key: normaliseTitle(u.title),
+    ts: new Date(u.publishedAt).getTime(),
+    keywords: extractKeywords(u.title),
+    descLower: (u.description ?? '').toLowerCase().slice(0, 500),
+  }));
+}
 
 type CommentRes = { items?: Array<{ snippet?: { topLevelComment?: { snippet?: { textDisplay?: string; likeCount?: number; authorDisplayName?: string } } } }> };
 
@@ -125,26 +343,14 @@ async function fetchTopEverVideos(
       .map((id) => recentById.get(id) ?? fetched.find((f) => f.id === id))
       .filter(Boolean) as RecentUpload[];
 
-    // Sibling detection across the combined set (recent + top-ever)
+    // Fuzzy companion detection across the combined set (recent + top-ever)
     const combined = [...recentUploads, ...assembled.filter((a) => !recentById.has(a.id))];
-    const normed = combined.map((u) => ({
-      u,
-      key: normaliseTitle(u.title),
-      ts: new Date(u.publishedAt).getTime(),
-    }));
-    for (const row of normed) {
-      if (!videoIds.includes(row.u.id)) continue;
-      const siblings = normed.filter(
-        (o) => o !== row && o.key && row.key && (o.key.includes(row.key) || row.key.includes(o.key))
-      );
-      row.u.hasLyricSibling = siblings.some((s) => titleHasTag(s.u.title, LYRIC_RX));
-      row.u.hasVisualizerSibling = siblings.some((s) => titleHasTag(s.u.title, VISUALIZER_RX));
-      row.u.hasAudioSibling = siblings.some((s) => titleHasTag(s.u.title, AUDIO_RX));
-      row.u.hasShortSibling = siblings.some(
-        (s) => s.u.durationSec > 0 && s.u.durationSec <= 60 &&
-          Math.abs(s.ts - row.ts) <= 14 * 86400000
-      );
-      row.u.isTopPerformer = true;
+    const combinedRows = toVideoRows(combined);
+    const topEverIds = new Set(videoIds);
+    detectCompanions(combinedRows, topEverIds);
+    // Mark top-ever videos as top performers
+    for (const row of combinedRows) {
+      if (topEverIds.has(row.u.id)) row.u.isTopPerformer = true;
     }
 
     // Top comments for top 3 all-time (cheap: 3 more units when cache is cold)
@@ -273,24 +479,9 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
           if (live === 'upcoming') upcomingCount++;
         }
 
-        // ---- Sibling detection (per upload, across recent window) ----
-        const normed = recentUploads.map((u) => ({
-          u,
-          key: normaliseTitle(u.title),
-          ts: new Date(u.publishedAt).getTime(),
-        }));
-        for (const row of normed) {
-          const siblings = normed.filter(
-            (o) => o !== row && o.key && row.key && (o.key.includes(row.key) || row.key.includes(o.key))
-          );
-          row.u.hasLyricSibling = siblings.some((s) => titleHasTag(s.u.title, LYRIC_RX));
-          row.u.hasVisualizerSibling = siblings.some((s) => titleHasTag(s.u.title, VISUALIZER_RX));
-          row.u.hasAudioSibling = siblings.some((s) => titleHasTag(s.u.title, AUDIO_RX));
-          row.u.hasShortSibling = siblings.some(
-            (s) => s.u.durationSec > 0 && s.u.durationSec <= 60 &&
-              Math.abs(s.ts - row.ts) <= 14 * 86400000
-          );
-        }
+        // ---- Fuzzy companion detection (across recent window) ----
+        const recentRows = toVideoRows(recentUploads);
+        detectCompanions(recentRows);
 
         // ---- Top performer flagging (long-form, non-live) ----
         const longform = recentUploads.filter((u) => u.live === 'none' && u.durationSec > 60);

@@ -143,7 +143,7 @@ export function detectOpportunities(
     });
   }
 
-  // 5. Top recent upload has no Short companion
+  // 5. Top recent upload has no Short companion (uses fuzzy matching confidence)
   const recent = (snap.recentUploads ?? [])
     .filter((u) => u.live === 'none' && u.durationSec > 60)
     .slice(0, 10);
@@ -151,23 +151,16 @@ export function detectOpportunities(
     const views = recent.map((u) => u.viewCount);
     const top = recent[0 + views.indexOf(Math.max(...views))] ?? recent[0];
     const median = [...views].sort((a, b) => a - b)[Math.floor(views.length / 2)];
-    // If the top long-form is 2x+ the median and there's no Short within 14d of it, flag it
     if (top && median > 0 && top.viewCount >= median * 2) {
-      const topTs = new Date(top.publishedAt).getTime();
-      const hasCompanionShort = (snap.recentUploads ?? []).some(
-        (u) =>
-          u.durationSec > 0 &&
-          u.durationSec <= 60 &&
-          Math.abs(new Date(u.publishedAt).getTime() - topTs) <= 14 * 86400000
-      );
-      if (!hasCompanionShort) {
+      const topShortConf = top.shortCompanion ?? 'none';
+      if (topShortConf === 'none') {
         out.push({
           id: `top-no-short:${artist.slug}`,
           artistSlug: artist.slug,
           artistName: artist.name,
           type: 'Underused asset',
           subtype: 'Top recent upload has no Short companion',
-          signal: `"${top.title}" is outperforming (${top.viewCount.toLocaleString()} views) but has no Short within 14d.`,
+          signal: `"${top.title}" is outperforming (${top.viewCount.toLocaleString()} views) — no companion Short detected.`,
           impact: 'HIGH',
           impactRange:
             'A proven long-form hit already has audience validation. Cutting a Short from it gets algorithmic push on the new-content surface while driving viewers back to the long-form, compounding both.',
@@ -193,19 +186,26 @@ export function detectOpportunities(
 
   for (const v of topPerformers) {
     const fmtV = v.viewCount.toLocaleString();
+    const titleLower = v.title.toLowerCase();
+
+    // ── Companion confidence (from fuzzy matching engine) ──
+    const shortConf = v.shortCompanion ?? 'none';
+    const lyricConf = v.lyricCompanion ?? 'none';
+    const vizConf = v.visualizerCompanion ?? 'none';
+    const audioConf = v.audioCompanion ?? 'none';
 
     // 7. Top video missing a lyric companion
     // Skip if this video IS a lyric video (e.g. "Official Lyric Video")
-    const titleLower = v.title.toLowerCase();
     const isLyricVideo = /\blyric(s)?\b/.test(titleLower);
-    if (!v.hasLyricSibling && !isLyricVideo) {
+    // Only flag when confidence is 'none' — 'likely' or 'confirmed' means we found one
+    if (lyricConf === 'none' && !isLyricVideo) {
       out.push({
         id: `vid-no-lyric:${artist.slug}:${v.id}`,
         artistSlug: artist.slug,
         artistName: artist.name,
         type: 'Underused asset',
         subtype: 'Top video has no lyric cut',
-        signal: `"${v.title}" at ${fmtV} views with no lyric/lyrics companion uploaded.`,
+        signal: `"${v.title}" at ${fmtV} views — no lyric companion detected on channel.`,
         impact: 'HIGH',
         impactRange:
           'Lyric variants capture the "I want to sing along" viewer who won\'t sit through a cinematic music video. For tracks with memorable lyrics, a lyric cut adds 20–50% incremental watch-time on top of the main video and gets its own playlist surface.',
@@ -221,14 +221,14 @@ export function detectOpportunities(
     // 8. Top video missing a visualizer / audio-only companion
     // Skip if this video IS a visualizer or audio-only track
     const isVisualizerVideo = /\b(visuali[sz]er|audio)\b/.test(titleLower);
-    if (!v.hasVisualizerSibling && !v.hasAudioSibling && !isVisualizerVideo) {
+    if (vizConf === 'none' && audioConf === 'none' && !isVisualizerVideo) {
       out.push({
         id: `vid-no-viz:${artist.slug}:${v.id}`,
         artistSlug: artist.slug,
         artistName: artist.name,
         type: 'Underused asset',
         subtype: 'Top video has no visualizer / audio cut',
-        signal: `"${v.title}" has no visualizer or audio-only variant to soak up passive listening.`,
+        signal: `"${v.title}" — no visualizer or audio-only variant detected on channel.`,
         impact: 'MEDIUM',
         impactRange:
           'A visualizer or audio-only version becomes the background-listen / study / party-playlist variant — viewers loop it passively where they wouldn\'t re-watch a music video. Typically 30–60% incremental watch-time on top of the main track.',
@@ -242,14 +242,15 @@ export function detectOpportunities(
     }
 
     // 9. Top video has no Short companion
-    if (!v.hasShortSibling) {
+    // Only flag when confidence is 'none' — both 'confirmed' and 'likely' suppress this
+    if (shortConf === 'none') {
       out.push({
         id: `vid-no-short:${artist.slug}:${v.id}`,
         artistSlug: artist.slug,
         artistName: artist.name,
         type: 'Format gap',
-        subtype: 'Top video has no Short companion',
-        signal: `"${v.title}" at ${fmtV} views but no Short within 14d of publish.`,
+        subtype: 'No Short detected for this video',
+        signal: `"${v.title}" at ${fmtV} views — no companion Short detected on channel.`,
         impact: 'HIGH',
         impactRange:
           'This track is already proven — audience, watch-time, comments. A Short cut rides that validation to the new-content algorithm, reaches mobile viewers who skip long-form, and funnels them back to the main video. Highest-ROI content move on the channel.',
