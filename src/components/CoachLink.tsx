@@ -34,21 +34,17 @@ export default function CoachLink({
   }, [slug]);
 
   const href = hasPlan ? `/?artist=${slug}` : `/?artist=${slug}&openTimeline=1`;
-  const label = hasPlan ? 'Open active campaign →' : 'Set up campaign →';
+  const label = hasPlan ? 'Open active campaign →' : 'Start campaign →';
 
   if (size === 'sm') {
     return (
       <Link
         href={href}
         className="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-[0.14em] text-center inline-flex items-center justify-center gap-1.5"
-        style={{
-          background: hasPlan ? INK : 'transparent',
-          color: hasPlan ? PAPER : INK,
-          border: `1px solid ${hasPlan ? INK : MUTED}`,
-        }}
+        style={{ background: INK, color: PAPER }}
       >
-        {hasPlan && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#1FBE7A' }} />}
-        {hasPlan ? 'Active campaign' : 'Set up'}
+        <span className="w-1.5 h-1.5 rounded-full" style={{ background: hasPlan ? '#1FBE7A' : '#FF4A1C' }} />
+        {hasPlan ? 'Active campaign' : 'Start campaign'}
       </Link>
     );
   }
@@ -59,7 +55,7 @@ export default function CoachLink({
       className="px-5 py-2.5 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em] inline-flex items-center gap-2"
       style={{ background: INK, color: PAPER }}
     >
-      {hasPlan && <span className="w-2 h-2 rounded-full" style={{ background: '#1FBE7A' }} />}
+      <span className="w-2 h-2 rounded-full" style={{ background: hasPlan ? '#1FBE7A' : '#FF4A1C' }} />
       {label}
     </Link>
   );
