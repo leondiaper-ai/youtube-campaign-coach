@@ -52,7 +52,9 @@ export const VERDICT_LABEL: Record<Verdict, string> = {
   OPPORTUNITY: 'OPPORTUNITY',
 };
 
-const ACTIVE_PHASES: Artist['phase'][] = ['START', 'RELEASE', 'PUSH', 'PEAK'];
+// NOTE: artist.phase is a static seed value — NOT derived from real campaign
+// state. Do not use it in decision logic. Use observable signals (uploads,
+// moments, subs/views deltas) instead.
 
 function daysAgo(iso?: string | null) {
   if (!iso) return null;
@@ -110,14 +112,12 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   const uploads30d = live!.uploads30d ?? 0;
   const shorts30d = live!.shorts30d ?? 0;
   const lastUp = daysAgo(live!.lastUploadAt);
-  const isActivePhase = ACTIVE_PHASES.includes(artist.phase);
   const nearMoment = daysToNextMoment != null && daysToNextMoment >= 0 && daysToNextMoment <= 14;
   const momentLabel = (artist.nextMomentLabel ?? '').toLowerCase();
 
   const cold = lastUp == null || lastUp > 30 || uploads30d === 0;
-  // Strong cadence ≈ weekly output the algorithm rewards for this phase
-  const strongCadence =
-    uploads30d >= 6 || (isActivePhase && uploads30d >= 4 && (lastUp ?? 999) <= 7);
+  // Strong cadence ≈ weekly output the algorithm rewards
+  const strongCadence = uploads30d >= 6 || (uploads30d >= 4 && (lastUp ?? 999) <= 7);
   const weakCadence = uploads30d <= 2 || (lastUp ?? 999) > 14;
 
   // Subs growing: either 0.5%+ growth OR 50+ absolute gain (protects smaller channels)
@@ -135,19 +135,16 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
 
   // ── 1. FIX ───────────────────────────────────────────────────────────────
   // Something is broken or actively blocking performance.
-  if (cold && (isActivePhase || nearMoment)) {
+  // Only escalate to FIX when there's a concrete upcoming moment at stake.
+  if (cold && nearMoment) {
     return {
       type: 'FIX',
       verdict: 'RISK',
-      headline: nearMoment
-        ? `Channel is cold with ${daysToNextMoment}d to ${momentLabel}. Ship something this week.`
-        : `Channel is cold inside an active ${artist.phase} phase. Ship something this week.`,
+      headline: `Channel is cold with ${daysToNextMoment}d to ${momentLabel}. Ship something this week.`,
       signals: [
         lastUp != null ? `Last upload ${lastUp}d ago.` : 'No uploads detected in 30d.',
         `${uploads30d} uploads / 30d.`,
-        nearMoment
-          ? `${daysToNextMoment}d to ${momentLabel}.`
-          : `Active phase: ${artist.phase}.`,
+        `${daysToNextMoment}d to ${momentLabel}.`,
       ],
       expectedImpact:
         'Breaking silence in the 2 weeks before a drop typically lifts announce-day viewership by 2–3× vs dormant channels.',

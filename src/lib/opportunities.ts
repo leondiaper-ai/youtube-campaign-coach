@@ -38,7 +38,8 @@ export const IMPACT_COLOR: Record<OpportunityImpact, { bg: string; fg: string; d
   LOW: { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
 };
 
-const ACTIVE_PHASES: Artist['phase'][] = ['START', 'RELEASE', 'PUSH', 'PEAK'];
+// NOTE: artist.phase is a static seed value — NOT derived from real campaign
+// state. Use observable signals (uploads, moment proximity) instead.
 
 function daysAgo(iso?: string | null) {
   if (!iso) return null;
@@ -60,7 +61,6 @@ export function detectOpportunities(
   const shorts30d = snap.shorts30d ?? 0;
   const upcoming = snap.upcomingCount ?? 0;
   const lastUp = daysAgo(snap.lastUploadAt);
-  const isActive = ACTIVE_PHASES.includes(artist.phase);
   const hasNearMoment =
     daysToNextMoment != null && daysToNextMoment >= 0 && daysToNextMoment <= 14;
 
@@ -76,9 +76,9 @@ export function detectOpportunities(
         lastUp != null
           ? `Last upload ${lastUp}d ago. ${uploads30d} uploads in 30d.`
           : `No uploads detected in the last 30d.`,
-      impact: isActive || hasNearMoment ? 'HIGH' : 'MEDIUM',
+      impact: hasNearMoment ? 'HIGH' : 'MEDIUM',
       impactRange:
-        isActive || hasNearMoment
+        hasNearMoment
           ? 'Dormant channels lose algorithm favour — inactive periods cut reach on the next drop by 30–50%. During an active campaign this directly costs announce-day views.'
           : 'Even between campaigns, a silent channel bleeds baseline watch-time and subscriber growth. One upload a week keeps the channel warm for the next moment.',
       action:
@@ -113,7 +113,7 @@ export function detectOpportunities(
       type: 'Format gap',
       subtype: 'No Shorts in the last 30 days',
       signal: `${uploads30d} uploads in 30d but 0 are Shorts (≤60s).`,
-      impact: isActive ? 'HIGH' : 'MEDIUM',
+      impact: hasNearMoment || uploads30d >= 4 ? 'HIGH' : 'MEDIUM',
       impactRange:
         'Shorts are YouTube\'s fastest-growing surface and have separate discovery from long-form. Active music channels typically see 500K–1M+ Shorts views from 2–3 cuts per release, most of which converts subscribers who never would\'ve clicked a 3-minute video.',
       action:
@@ -322,7 +322,7 @@ export function detectOpportunities(
   }
 
   // 6. No upcoming premiere / scheduled live
-  if (upcoming === 0 && (uploads30d >= 2 || isActive)) {
+  if (upcoming === 0 && uploads30d >= 2) {
     out.push({
       id: `no-upcoming:${artist.slug}`,
       artistSlug: artist.slug,
