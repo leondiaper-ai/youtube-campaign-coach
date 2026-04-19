@@ -13,7 +13,7 @@ import {
 import CoachLink from '@/components/CoachLink';
 import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
-import WatcherReport from '@/components/WatcherReport';
+import WatcherReport, { type ReportMissedVideo } from '@/components/WatcherReport';
 
 export const revalidate = 600;
 
@@ -311,9 +311,8 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         <WatcherReport
           artistName={artist.name}
           channelState={channelState}
-          headline={decision.headline}
-          ifIgnored={decision.type === 'FIX' || decision.type === 'CORRECT' ? decision.ifIgnored : null}
-          fixActions={fixNow.map((o) => o.action)}
+          stateReason={derived?.reason ?? decision.headline}
+          riskLine={decision.type === 'FIX' || decision.type === 'CORRECT' ? decision.ifIgnored : null}
           nextMove={campaignAction(decision, fixNow, secondaryOpps, videoOppsAll, live?.recentUploads ?? [], {
             isColdMode,
             daysToNextMoment,
@@ -321,10 +320,13 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             uploads30d,
             lastUpDays,
           })}
-          missedReach={missedOpps.map((v) => ({
+          missedReach={missedOpps.map((v): ReportMissedVideo => ({
             title: v.title,
             views: v.views,
-            formats: v.items.map((o) => formatName(o.subtype)),
+            formats: v.items.map((o) => ({
+              name: formatName(o.subtype),
+              impact: formatImpact(o.subtype),
+            })),
           }))}
           stats={{
             subs: live?.subs ?? null,
@@ -455,7 +457,7 @@ function campaignAction(
   if (ctx.isColdMode) {
     if (ctx.daysToNextMoment != null && ctx.daysToNextMoment >= 0 && ctx.daysToNextMoment <= 30 && ctx.momentLabel)
       return `Once the first upload lands, post a teaser for ${ctx.momentLabel} (${ctx.daysToNextMoment}d away). The algorithm needs 2 weeks of activity before a drop converts.`;
-    return 'Once the first upload lands, post twice more this week. Three uploads in 7 days is enough to restart the subscriber notification surface.';
+    return 'After the first post, upload twice more this week. Three uploads in 7 days is typically enough to re-activate subscriber reach.';
   }
 
   // ── LIVE CAMPAIGN — actions tied to specific content + timing ───────────
@@ -524,7 +526,7 @@ function campaignOutcome(
   isColdMode: boolean,
 ): string {
   if (isColdMode)
-    return 'Three uploads in a week is enough to re-enter subscriber feeds. The algorithm starts rewarding consistency within 7 days.';
+    return 'Three uploads in a week typically re-activates subscriber reach. Consistency signals tend to improve distribution within 7–14 days.';
 
   const gaps = scanVideoGaps(uploads);
   if (gaps.length > 0 && gaps[0].views >= 100_000)
