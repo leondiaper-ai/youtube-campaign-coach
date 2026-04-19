@@ -154,7 +154,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
         <h1 className="font-black text-3xl mt-1">{artist.name}</h1>
 
-        {/* Status + decision headline — uses the SAME 4-state as overview */}
+        {/* ─── STATE + HEADLINE + CONSEQUENCE ─────────────────────────── */}
         <div className="mt-5 flex items-start gap-3">
           <span
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.14em] shrink-0 mt-0.5"
@@ -163,45 +163,20 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             <span className="w-2 h-2 rounded-full" style={{ background: sc.dot }} />
             {STATE_LABEL[channelState]}
           </span>
-          <div className="text-[18px] font-black leading-snug">
-            {decision.headline}
-          </div>
-        </div>
-
-        {/* ─── 1. SIGNAL STRIP — trust layer (max 2 lines) ──────────── */}
-        <div
-          className="mt-5 rounded-xl px-5 py-3.5"
-          style={{ background: SOFT }}
-        >
-          <div className="flex items-baseline gap-2 flex-wrap text-[15px] font-black tabular-nums leading-tight">
-            {live?.subs != null && <span>{fmtNum(live.subs)} subs</span>}
-            {live?.views != null && (
-              <><span className="text-ink/20 text-[13px]">·</span><span>{fmtNum(live.views)} views</span></>
-            )}
-          </div>
-          <div className="flex items-center gap-3 flex-wrap mt-1 text-[12px] text-ink/50 tabular-nums">
-            {views7 ? (
-              <span style={views7.delta !== 0 ? { color: views7.delta > 0 ? '#0C6A3F' : '#8A1F0C' } : undefined}>
-                {views7.delta !== 0 ? fmtDelta(views7.delta) + ' views' : 'Views flat'} (7d)
-              </span>
-            ) : null}
-            <span className="text-ink/15">·</span>
-            {subs7 ? (
-              <span style={subs7.delta !== 0 ? { color: subs7.delta > 0 ? '#0C6A3F' : '#8A1F0C' } : undefined}>
-                {subs7.delta !== 0 ? (subs7.delta > 0 ? '+' : '') + subs7.delta.toLocaleString() + ' subs' : 'Subs flat'} (7d)
-              </span>
-            ) : null}
-            <span className="text-ink/15">·</span>
-            {live?.uploads30d != null && <span>{live.uploads30d} uploads (30d)</span>}
-            <span className="text-ink/15">·</span>
-            {lastUpDays != null && (
-              <span>Last upload: {lastUpDays === 0 ? 'today' : lastUpDays === 1 ? 'yesterday' : `${lastUpDays}d ago`}</span>
+          <div>
+            <div className="text-[18px] font-black leading-snug">
+              {decision.headline}
+            </div>
+            {(decision.type === 'FIX' || decision.type === 'CORRECT') && (
+              <div className="mt-2 text-[12px] text-ink/50 leading-snug max-w-[60ch]">
+                <span className="font-bold text-ink/60">If nothing changes:</span> {decision.ifIgnored}
+              </div>
             )}
           </div>
         </div>
 
-        {/* ─── 2. PERFORMANCE SNAPSHOT — numbers only ─────────────────── */}
-        <div className="mt-4 grid grid-cols-4 gap-3">
+        {/* ─── PERFORMANCE SNAPSHOT — primary data surface ────────────── */}
+        <div className="mt-6 grid grid-cols-4 gap-3">
           <MetricTile
             label="Views (7d)"
             value={views7 ? fmtDelta(views7.delta) : '—'}
@@ -226,13 +201,6 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             color={lastUpDays != null ? (lastUpDays <= 3 ? '#0C6A3F' : lastUpDays >= 14 ? '#8A1F0C' : undefined) : undefined}
           />
         </div>
-
-        {/* If Ignored — blunt warning */}
-        {(decision.type === 'FIX' || decision.type === 'CORRECT') && (
-          <div className="mt-4 text-[12px] text-ink/50 leading-snug max-w-[70ch]">
-            <span className="font-bold text-ink/60">If nothing changes:</span> {decision.ifIgnored}
-          </div>
-        )}
 
 
         {/* ─── FIX NOW ────────────────────────────────────────────────────── */}
