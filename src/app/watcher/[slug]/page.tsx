@@ -12,6 +12,8 @@ import {
 } from '@/lib/conversion';
 import CoachLink from '@/components/CoachLink';
 import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
+import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
+import WatcherReport from '@/components/WatcherReport';
 
 export const revalidate = 600;
 
@@ -262,20 +264,36 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </section>
 
 
-        {/* ─── 4. MISSED AUDIENCE OPPORTUNITIES — redesigned ──────────── */}
-        {missedOpps.length > 0 && (
-          <section className="mt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#2C6BFF' }} />
-              <h2 className="font-black text-lg">Missed reach</h2>
-            </div>
-            <div className="space-y-3">
-              {missedOpps.map((v) => (
-                <MissedOppCard key={v.id} video={v} />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* ─── 4. MISSED REACH — expandable, commercial framing ────────── */}
+        {missedOpps.length > 0 && (() => {
+          const missedCards: MissedReachVideo[] = missedOpps.map((v) => ({
+            id: v.id,
+            title: v.title,
+            views: v.views,
+            primaryLabel: oppTypeLabel(v.primaryOpp),
+            primaryInsight: oppInsight(v.primaryOpp),
+            primaryAction: oppAction(v.primaryOpp),
+            isHighImpact: v.views >= 5_000_000,
+            secondaryFormats: v.items.slice(1).map((o): FormatGap => ({
+              name: formatName(o.subtype),
+              impact: formatImpact(o.subtype),
+              action: oppAction(o),
+            })),
+          }));
+          return (
+            <section className="mt-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#2C6BFF' }} />
+                <h2 className="font-black text-lg">Missed reach</h2>
+              </div>
+              <div className="space-y-3">
+                {missedCards.map((v) => (
+                  <MissedReachCard key={v.id} video={v} />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
 
 
         {/* Nothing flagged */}
@@ -287,6 +305,35 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             Nothing flagged. Channel is in good shape.
           </div>
         )}
+
+
+        {/* ─── REPORT EXPORT ──────────────────────────────────────────────── */}
+        <WatcherReport
+          artistName={artist.name}
+          channelState={channelState}
+          headline={decision.headline}
+          ifIgnored={decision.type === 'FIX' || decision.type === 'CORRECT' ? decision.ifIgnored : null}
+          fixActions={fixNow.map((o) => o.action)}
+          nextMove={campaignAction(decision, fixNow, secondaryOpps, videoOppsAll, live?.recentUploads ?? [], {
+            isColdMode,
+            daysToNextMoment,
+            momentLabel: artist.nextMomentLabel ?? null,
+            uploads30d,
+            lastUpDays,
+          })}
+          missedReach={missedOpps.map((v) => ({
+            title: v.title,
+            views: v.views,
+            formats: v.items.map((o) => formatName(o.subtype)),
+          }))}
+          stats={{
+            subs: live?.subs ?? null,
+            views7d: views7?.delta ?? null,
+            subs7d: subs7?.delta ?? null,
+            uploads30d,
+            lastUpDays,
+          }}
+        />
 
 
         {/* ─── NEXT MOMENT ────────────────────────────────────────────────── */}
@@ -617,73 +664,7 @@ function ColdFixCard({ lastUpDays, uploads30d }: { lastUpDays: number | null; up
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// 4. MISSED OPP CARD — redesigned: bold type headline, scale, one action
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function MissedOppCard({
-  video,
-}: {
-  video: {
-    id: string;
-    title: string;
-    views: number;
-    primaryOpp: Opportunity;
-    secondaryCount: number;
-    items: Opportunity[];
-  };
-}) {
-  const primary = video.primaryOpp;
-  const isHighImpact = video.views >= 5_000_000;
-
-  return (
-    <article
-      className="rounded-xl border p-5"
-      style={{ borderColor: MUTED, background: PAPER }}
-    >
-      {/* Video title — primary call to action, leads the card */}
-      <a
-        href={`https://www.youtube.com/watch?v=${video.id}`}
-        target="_blank"
-        rel="noreferrer"
-        className="font-black text-base text-ink hover:text-ink/80 transition-colors leading-tight block"
-        title={video.title}
-      >
-        {video.title}
-      </a>
-
-      {/* Format gap + scale */}
-      <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
-        <span className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: 'rgba(44,107,255,0.08)', color: '#2C6BFF' }}>
-          {oppTypeLabel(primary)}
-        </span>
-        <span className="font-black text-[13px] tabular-nums text-ink/70">{fmtNum(video.views)} views</span>
-        {isHighImpact && (
-          <span className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded" style={{ background: '#FFE2D8', color: '#8A1F0C' }}>
-            High impact
-          </span>
-        )}
-      </div>
-
-      {/* Insight — why this matters */}
-      <div className="text-[12px] text-ink/55 mt-1.5 leading-snug max-w-[55ch]">
-        {oppInsight(primary)}
-      </div>
-
-      {/* ONE action — bold, directive */}
-      <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
-        → {oppAction(primary)}
-      </div>
-
-      {/* Secondary gaps — subtle, not competing for attention */}
-      {video.secondaryCount > 0 && (
-        <div className="mt-2 text-[10px] text-ink/30 uppercase tracking-[0.12em]">
-          +{video.secondaryCount} other format{video.secondaryCount === 1 ? '' : 's'} missing
-        </div>
-      )}
-    </article>
-  );
-}
+// MissedOppCard moved to client component: src/components/MissedReachCard.tsx
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -711,34 +692,54 @@ function oppTypeLabel(o: Opportunity): string {
   return 'Format gap';
 }
 
-/** Insight line — why the gap matters, direct language */
+/** Insight line — commercial framing: what's being lost */
 function oppInsight(o: Opportunity): string {
   if (o.subtype.includes('lyric'))
-    return 'This video is not reaching sing-along audiences. No supporting format extending its lifecycle.';
+    return 'No lyric cut extending this track — missing sing-along discovery, playlist adds, and repeat plays from lyric-search audiences.';
   if (o.subtype.includes('Short'))
-    return 'Not reaching mobile-first viewers. No Short driving new audiences back to this track.';
+    return 'No Short driving mobile-first discovery back to this track. Shorts reach audiences who never click long-form — each one is incremental reach.';
   if (o.subtype.includes('visualizer'))
-    return 'No passive-listen version. Missing background-play and playlist audiences.';
+    return 'No passive-listen version capturing background-play and study-playlist audiences. Visualizers add 30–60% incremental watch-time on a proven track.';
   if (o.subtype.includes('caption'))
-    return 'Missing captions. Not indexed for YouTube search. Not reaching international audiences.';
+    return 'No published caption track — YouTube can\'t index it for search or auto-translate for international audiences. 15–25% of music watch-time comes from non-native regions.';
   if (o.subtype.includes('demand'))
-    return 'Multiple top comments requesting this. Verified audience demand going unanswered.';
-  return 'Missing reach from a high-performing video.';
+    return 'Multiple top comments requesting this. Verified demand from the most engaged segment — shipping it converts comment-watchers into repeat viewers.';
+  return 'No supporting formats extending this track — missing additional discovery and retention.';
 }
 
 /** ONE clear action — directive, this week */
 function oppAction(o: Opportunity): string {
   if (o.subtype.includes('lyric'))
-    return 'Create a lyric video or typographic version this week.';
+    return 'Ship a lyric video this week — typographic cut or full production.';
   if (o.subtype.includes('Short'))
-    return 'Cut a 30–60s vertical Short from the best moment this week.';
+    return 'Cut a 30–60s vertical Short from the best moment and post this week.';
   if (o.subtype.includes('visualizer'))
     return 'Render a visualizer loop and upload as a companion this week.';
   if (o.subtype.includes('caption'))
-    return 'Review auto-generated captions in YT Studio and publish.';
+    return 'Open YT Studio → Subtitles, review the auto-generated transcript, and publish this week.';
   if (o.subtype.includes('demand'))
     return o.action;
   return o.action;
+}
+
+/** Impact level for a specific format gap */
+function formatImpact(subtype: string): 'HIGH' | 'MEDIUM' | 'LOW' {
+  if (subtype.includes('lyric')) return 'HIGH';
+  if (subtype.includes('Short')) return 'HIGH';
+  if (subtype.includes('visualizer')) return 'MEDIUM';
+  if (subtype.includes('caption')) return 'MEDIUM';
+  if (subtype.includes('demand')) return 'HIGH';
+  return 'LOW';
+}
+
+/** Human-readable format name */
+function formatName(subtype: string): string {
+  if (subtype.includes('lyric')) return 'Lyric Video';
+  if (subtype.includes('Short')) return 'Shorts';
+  if (subtype.includes('visualizer')) return 'Visualizer';
+  if (subtype.includes('caption')) return 'Captions';
+  if (subtype.includes('demand')) return 'Fan Demand';
+  return 'Support Format';
 }
 
 
