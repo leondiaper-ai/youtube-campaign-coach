@@ -26,6 +26,8 @@ export type MissedReachVideo = {
   primaryAction: string;
   secondaryFormats: FormatGap[];
   isHighImpact: boolean;
+  impactLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  impactBullets: string[];
 };
 
 export default function MissedReachCard({ video }: { video: MissedReachVideo }) {
@@ -77,6 +79,31 @@ export default function MissedReachCard({ video }: { video: MissedReachVideo }) 
       <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
         → {video.primaryAction}
       </div>
+
+      {/* Expected impact */}
+      {video.impactBullets.length > 0 && (
+        <div className="mt-3 rounded-lg px-3.5 py-2.5" style={{ background: 'rgba(14,14,14,0.02)', border: `1px solid ${MUTED}` }}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[9px] font-black uppercase tracking-[0.12em]" style={{ color: '#6B5E4A' }}>
+              Expected impact
+            </span>
+            <span
+              className="text-[8px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded"
+              style={{ background: IMPACT_PILL[video.impactLevel].bg, color: IMPACT_PILL[video.impactLevel].fg }}
+            >
+              {video.impactLevel}
+            </span>
+          </div>
+          <ul className="space-y-0.5">
+            {video.impactBullets.map((b, i) => (
+              <li key={i} className="text-[11px] text-ink/50 leading-snug flex items-start gap-1.5">
+                <span className="text-ink/25 mt-px shrink-0">·</span>
+                <span>{b}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Expandable secondary formats */}
       {video.secondaryFormats.length > 0 && (

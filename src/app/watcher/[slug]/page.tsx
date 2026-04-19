@@ -298,20 +298,26 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 
         {/* ─── 4. MISSED REACH — full catalogue, tiered, expandable ────── */}
         {allMissedOpps.length > 0 && (() => {
-          const toCard = (v: typeof allMissedOpps[0]): MissedReachVideo => ({
-            id: v.id,
-            title: v.title,
-            views: v.views,
-            primaryLabel: oppTypeLabel(v.primaryOpp),
-            primaryInsight: oppInsight(v.primaryOpp),
-            primaryAction: oppAction(v.primaryOpp),
-            isHighImpact: v.views >= 5_000_000,
-            secondaryFormats: v.items.slice(1).map((o): FormatGap => ({
-              name: formatName(o.subtype),
-              impact: formatImpact(o.subtype),
-              action: oppAction(o),
-            })),
-          });
+          const structuralGapNames = structuralGaps.map((g) => g.name);
+          const toCard = (v: typeof allMissedOpps[0]): MissedReachVideo => {
+            const tier = assignTier(v);
+            return {
+              id: v.id,
+              title: v.title,
+              views: v.views,
+              primaryLabel: oppTypeLabel(v.primaryOpp),
+              primaryInsight: oppInsight(v.primaryOpp),
+              primaryAction: oppAction(v.primaryOpp),
+              isHighImpact: v.views >= 5_000_000,
+              secondaryFormats: v.items.slice(1).map((o): FormatGap => ({
+                name: formatName(o.subtype),
+                impact: formatImpact(o.subtype),
+                action: oppAction(o),
+              })),
+              impactLevel: tier,
+              impactBullets: impactBullets(v.views, v.primaryOpp.subtype, tier, structuralGapNames),
+            };
+          };
           return (
             <MissedReachSection
               defaultCards={missedDefault.map(toCard)}
@@ -765,6 +771,57 @@ function formatImpact(subtype: string): 'HIGH' | 'MEDIUM' | 'LOW' {
   if (subtype.includes('caption')) return 'MEDIUM';
   if (subtype.includes('demand')) return 'HIGH';
   return 'LOW';
+}
+
+/** Generate 2-3 qualitative impact bullets for a missed reach card */
+function impactBullets(
+  views: number,
+  primarySubtype: string,
+  tier: 'HIGH' | 'MEDIUM' | 'LOW',
+  structuralGapNames: string[],
+): string[] {
+  const bullets: string[] = [];
+  const fName = formatName(primarySubtype);
+  const isStructural = structuralGapNames.includes(fName);
+
+  // Bullet 1: reach / lifecycle framing based on format
+  if (primarySubtype.includes('Short')) {
+    bullets.push('Shorts surface catalogue tracks to non-subscribers — the highest-leverage discovery format on YouTube');
+  } else if (primarySubtype.includes('lyric')) {
+    bullets.push('Lyric videos extend a track\'s active lifecycle by 2-4× and capture search traffic long after release');
+  } else if (primarySubtype.includes('visualizer')) {
+    bullets.push('Visualizers keep listeners on your channel instead of losing them to auto-generated topics');
+  } else if (primarySubtype.includes('caption')) {
+    bullets.push('Captions unlock non-English search traffic and improve retention for sound-off viewers');
+  } else if (primarySubtype.includes('demand')) {
+    bullets.push('Fan demand signals suggest untapped audience interest that could convert to views');
+  } else {
+    bullets.push('Adding a support format increases total catalogue surface area for algorithmic recommendation');
+  }
+
+  // Bullet 2: scale-aware framing
+  if (views >= 5_000_000) {
+    bullets.push(`At ${fmtViews(views)} views, even a small % recapture means significant incremental reach`);
+  } else if (views >= 1_000_000) {
+    bullets.push(`${fmtViews(views)} views signals proven demand — a companion format can capture the long-tail audience`);
+  } else if (views >= 500_000) {
+    bullets.push('This track has traction — a companion format can extend its reach window before momentum fades');
+  } else if (tier === 'MEDIUM') {
+    bullets.push('Mid-catalogue tracks benefit most from format diversification — low effort, measurable upside');
+  }
+
+  // Bullet 3: structural pattern callout
+  if (isStructural) {
+    bullets.push(`This is part of a catalogue-wide ${fName} gap — fixing it systematically compounds the impact`);
+  }
+
+  return bullets.slice(0, 3);
+}
+
+function fmtViews(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
+  return String(n);
 }
 
 /** Human-readable format name */
