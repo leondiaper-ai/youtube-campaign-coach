@@ -13,6 +13,7 @@ import {
 import CoachLink from '@/components/CoachLink';
 import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
+import MissedReachSection from '@/components/MissedReachSection';
 import WatcherReport, { type ReportMissedVideo } from '@/components/WatcherReport';
 
 export const revalidate = 600;
@@ -93,7 +94,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     .filter((o) => o.impact !== 'HIGH')
     .slice(0, 1);
 
-  // Missed audience opportunities — per-video gaps, ONE primary opp per video
+  // Missed audience opportunities — per-video gaps, full catalogue scan
   const videoOppsAll = opps.filter((o) => !!o.videoId);
   const videoGroups = new Map<string, Opportunity[]>();
   for (const o of videoOppsAll) {
@@ -101,7 +102,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     arr.push(o);
     videoGroups.set(o.videoId!, arr);
   }
-  const missedOpps = Array.from(videoGroups.entries())
+  const allMissedOpps = Array.from(videoGroups.entries())
     .map(([id, items]) => {
       // Priority: lyric → short → visualizer → captions
       const sorted = [...items].sort((a, b) => {
@@ -123,8 +124,39 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         items,
       };
     })
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 3);
+    .sort((a, b) => b.views - a.views);
+
+  // Tier assignment for missed reach
+  type MissedTier = 'HIGH' | 'MEDIUM' | 'LOW';
+  function assignTier(v: { views: number; primaryOpp: Opportunity }): MissedTier {
+    const hasHighFormat = v.primaryOpp.subtype.includes('lyric') || v.primaryOpp.subtype.includes('Short');
+    if (v.views >= 1_000_000 && hasHighFormat) return 'HIGH';
+    if (v.views >= 500_000 || hasHighFormat) return 'MEDIUM';
+    return 'LOW';
+  }
+  const missedHigh = allMissedOpps.filter((v) => assignTier(v) === 'HIGH');
+  const missedMedium = allMissedOpps.filter((v) => assignTier(v) === 'MEDIUM');
+  const missedLow = allMissedOpps.filter((v) => assignTier(v) === 'LOW');
+
+  // Default display: top 3 HIGH + top 2 MEDIUM
+  const missedDefault = [...missedHigh.slice(0, 3), ...missedMedium.slice(0, 2)];
+  const missedOverflow = allMissedOpps.length - missedDefault.length;
+
+  // Pattern detection: if 3+ videos share the same gap, it's structural
+  const gapCounts: Record<string, number> = {};
+  for (const v of allMissedOpps) {
+    for (const o of v.items) {
+      const key = formatName(o.subtype);
+      gapCounts[key] = (gapCounts[key] ?? 0) + 1;
+    }
+  }
+  const structuralGaps = Object.entries(gapCounts)
+    .filter(([, count]) => count >= 3)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count }));
+
+  // Backward compat — missedOpps used by campaignAction
+  const missedOpps = allMissedOpps;
 
   // ── Use derived.status (same 4-state as overview). Fallback via decision.type.
   const channelState: ChannelState = derived?.status ?? DECISION_TO_STATE[decision.type] ?? 'BUILDING';
@@ -264,9 +296,9 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </section>
 
 
-        {/* ─── 4. MISSED REACH — expandable, commercial framing ────────── */}
-        {missedOpps.length > 0 && (() => {
-          const missedCards: MissedReachVideo[] = missedOpps.map((v) => ({
+        {/* ─── 4. MISSED REACH — full catalogue, tiered, expandable ────── */}
+        {allMissedOpps.length > 0 && (() => {
+          const toCard = (v: typeof allMissedOpps[0]): MissedReachVideo => ({
             id: v.id,
             title: v.title,
             views: v.views,
@@ -279,19 +311,19 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
               impact: formatImpact(o.subtype),
               action: oppAction(o),
             })),
-          }));
+          });
           return (
-            <section className="mt-10">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#2C6BFF' }} />
-                <h2 className="font-black text-lg">Missed reach</h2>
-              </div>
-              <div className="space-y-3">
-                {missedCards.map((v) => (
-                  <MissedReachCard key={v.id} video={v} />
-                ))}
-              </div>
-            </section>
+            <MissedReachSection
+              defaultCards={missedDefault.map(toCard)}
+              overflowCards={allMissedOpps.slice(missedDefault.length).map(toCard)}
+              structuralGaps={structuralGaps}
+              totalScanned={allMissedOpps.length}
+              tierCounts={{
+                high: missedHigh.length,
+                medium: missedMedium.length,
+                low: missedLow.length,
+              }}
+            />
           );
         })()}
 
@@ -320,7 +352,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             uploads30d,
             lastUpDays,
           })}
-          missedReach={missedOpps.map((v): ReportMissedVideo => ({
+          missedReach={allMissedOpps.map((v): ReportMissedVideo => ({
             title: v.title,
             views: v.views,
             formats: v.items.map((o) => ({
@@ -328,6 +360,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
               impact: formatImpact(o.subtype),
             })),
           }))}
+          structuralGaps={structuralGaps}
           stats={{
             subs: live?.subs ?? null,
             views7d: views7?.delta ?? null,

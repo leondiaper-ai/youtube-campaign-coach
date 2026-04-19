@@ -178,17 +178,18 @@ export function detectOpportunities(
     }
   }
 
-  // --- Per-video detectors (run against recent top + all-time top) ---
+  // --- Per-video detectors (full catalogue scan: recent + all-time) ---
+  // Scan ALL available longform videos — not just the top 5.
+  // The watcher UI handles prioritisation and display limits.
   const byId = new Map<string, NonNullable<LiveSnap['recentUploads']>[number]>();
   for (const u of snap.recentUploads ?? []) {
-    if (u.isTopPerformer && u.live === 'none' && u.durationSec > 60) byId.set(u.id, u);
+    if (u.live === 'none' && u.durationSec > 60) byId.set(u.id, u);
   }
   for (const u of snap.topEverVideos ?? []) {
     if (u.live === 'none' && u.durationSec > 60) byId.set(u.id, u);
   }
   const topPerformers = Array.from(byId.values())
-    .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, 5);
+    .sort((a, b) => b.viewCount - a.viewCount);
 
   for (const v of topPerformers) {
     const fmtV = v.viewCount.toLocaleString();

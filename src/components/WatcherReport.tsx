@@ -22,6 +22,7 @@ export type ReportProps = {
   riskLine: string | null;
   nextMove: string;
   missedReach: ReportMissedVideo[];
+  structuralGaps?: { name: string; count: number }[];
   stats: {
     subs: number | null;
     views7d: number | null;
@@ -82,7 +83,13 @@ function buildReport(p: ReportProps): string {
 
   // ── 3. MISSED REACH (prioritised) ──────────────────────────────────────
   if (p.missedReach.length > 0) {
-    lines.push('MISSED REACH');
+    lines.push(`MISSED REACH (${p.missedReach.length} videos scanned)`);
+
+    // Structural patterns first
+    if (p.structuralGaps && p.structuralGaps.length > 0) {
+      const patternStr = p.structuralGaps.map((g) => `${g.count} videos missing ${g.name}`).join(', ');
+      lines.push(`  Pattern: ${patternStr}`);
+    }
 
     // Sort by views descending, then group by tier
     const sorted = [...p.missedReach].sort((a, b) => b.views - a.views);
@@ -95,13 +102,21 @@ function buildReport(p: ReportProps): string {
       tiers[priorityTier(v)].push(v);
     }
 
-    for (const tier of ['HIGH IMPACT', 'MEDIUM IMPACT', 'LOWER PRIORITY'] as const) {
+    // Show top HIGH + MEDIUM in full, summarise LOW
+    for (const tier of ['HIGH IMPACT', 'MEDIUM IMPACT'] as const) {
       const items = tiers[tier];
       if (items.length === 0) continue;
-      for (const v of items) {
+      for (const v of items.slice(0, 5)) {
         const formatList = v.formats.map((f) => f.name).join(', ');
         lines.push(`  ${tier} • "${v.title}" (${fmtNum(v.views)} views) — Missing: ${formatList}`);
       }
+      if (items.length > 5) {
+        lines.push(`  ... + ${items.length - 5} more ${tier.toLowerCase()} opportunities`);
+      }
+    }
+    const lowCount = tiers['LOWER PRIORITY'].length;
+    if (lowCount > 0) {
+      lines.push(`  + ${lowCount} lower priority opportunit${lowCount === 1 ? 'y' : 'ies'}`);
     }
     lines.push('');
   }
