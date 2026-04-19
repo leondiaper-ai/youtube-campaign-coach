@@ -138,10 +138,6 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const missedMedium = allMissedOpps.filter((v) => assignTier(v) === 'MEDIUM');
   const missedLow = allMissedOpps.filter((v) => assignTier(v) === 'LOW');
 
-  // Default display: top 3 HIGH + top 2 MEDIUM
-  const missedDefault = [...missedHigh.slice(0, 3), ...missedMedium.slice(0, 2)];
-  const missedOverflow = allMissedOpps.length - missedDefault.length;
-
   // Pattern detection: if 3+ videos share the same gap, it's structural
   const gapCounts: Record<string, number> = {};
   for (const v of allMissedOpps) {
@@ -306,7 +302,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
               title: v.title,
               views: v.views,
               primaryLabel: oppTypeLabel(v.primaryOpp),
-              primaryInsight: oppInsight(v.primaryOpp),
+              primaryConsequence: oppConsequence(v.primaryOpp),
               primaryAction: oppAction(v.primaryOpp),
               isHighImpact: v.views >= 5_000_000,
               secondaryFormats: v.items.slice(1).map((o): FormatGap => ({
@@ -318,10 +314,18 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
               impactBullets: impactBullets(v.views, v.primaryOpp.subtype, tier, structuralGapNames),
             };
           };
+
+          // 3-tier split: priority (top 3 HIGH), secondary (rest of HIGH + MEDIUM), remaining (LOW)
+          const priorityCards = missedHigh.slice(0, 3).map(toCard);
+          const secondaryItems = [...missedHigh.slice(3), ...missedMedium];
+          const secondaryCardsList = secondaryItems.map(toCard);
+          const remainingCardsList = missedLow.map(toCard);
+
           return (
             <MissedReachSection
-              defaultCards={missedDefault.map(toCard)}
-              overflowCards={allMissedOpps.slice(missedDefault.length).map(toCard)}
+              priorityCards={priorityCards}
+              secondaryCards={secondaryCardsList}
+              remainingCards={remainingCardsList}
               structuralGaps={structuralGaps}
               totalScanned={allMissedOpps.length}
               tierCounts={{
@@ -734,33 +738,23 @@ function oppTypeLabel(o: Opportunity): string {
   return 'Format gap';
 }
 
-/** Insight line — commercial framing: what's being lost */
-function oppInsight(o: Opportunity): string {
-  if (o.subtype.includes('lyric'))
-    return 'No lyric companion detected on channel for this track — missing sing-along discovery, playlist adds, and repeat plays from lyric-search audiences.';
-  if (o.subtype.includes('Short'))
-    return 'No companion Short detected on channel for this track. Shorts reach audiences who never click long-form — each one is incremental reach.';
-  if (o.subtype.includes('visualizer'))
-    return 'No visualizer or audio companion detected on channel. Visualizers capture background-play and study-playlist audiences — typically 30–60% incremental watch-time.';
-  if (o.subtype.includes('caption'))
-    return 'No published caption track — YouTube can\'t index it for search or auto-translate for international audiences. 15–25% of music watch-time comes from non-native regions.';
-  if (o.subtype.includes('demand'))
-    return 'Multiple top comments requesting this. Verified demand from the most engaged segment — shipping it converts comment-watchers into repeat viewers.';
-  return 'No supporting formats detected for this track — missing additional discovery and retention.';
+/** Short consequence line — what's being lost, no explanation */
+function oppConsequence(o: Opportunity): string {
+  if (o.subtype.includes('lyric')) return 'no long-tail search capture';
+  if (o.subtype.includes('Short')) return 'missing discovery layer';
+  if (o.subtype.includes('visualizer')) return 'no passive-listen capture';
+  if (o.subtype.includes('caption')) return 'no international / search reach';
+  if (o.subtype.includes('demand')) return 'verified demand unmet';
+  return 'missing support format';
 }
 
-/** ONE clear action — directive, this week */
+/** Urgent action — what to do this week */
 function oppAction(o: Opportunity): string {
-  if (o.subtype.includes('lyric'))
-    return 'Ship a lyric video this week — typographic cut or full production.';
-  if (o.subtype.includes('Short'))
-    return 'Cut a 30–60s vertical Short from the best moment and post this week.';
-  if (o.subtype.includes('visualizer'))
-    return 'Render a visualizer loop and upload as a companion this week.';
-  if (o.subtype.includes('caption'))
-    return 'Open YT Studio → Subtitles, review the auto-generated transcript, and publish this week.';
-  if (o.subtype.includes('demand'))
-    return o.action;
+  if (o.subtype.includes('lyric')) return 'Ship lyric video this week';
+  if (o.subtype.includes('Short')) return 'Cut Short from best moment this week';
+  if (o.subtype.includes('visualizer')) return 'Ship visualizer this week';
+  if (o.subtype.includes('caption')) return 'Review and publish captions in YT Studio';
+  if (o.subtype.includes('demand')) return o.action;
   return o.action;
 }
 
@@ -785,35 +779,33 @@ function impactBullets(
   const fName = formatName(primarySubtype);
   const isStructural = structuralGapNames.includes(fName);
 
-  // Bullet 1: reach / lifecycle framing based on format
+  // Bullet 1: what you are losing
   if (primarySubtype.includes('Short')) {
-    bullets.push('Shorts surface catalogue tracks to non-subscribers — the highest-leverage discovery format on YouTube');
+    bullets.push('You are invisible to non-subscribers on mobile. Shorts fix that.');
   } else if (primarySubtype.includes('lyric')) {
-    bullets.push('Lyric videos extend a track\'s active lifecycle by 2-4× and capture search traffic long after release');
+    bullets.push('This track has no long-tail search capture. Lyric videos extend lifecycle by 2-4×.');
   } else if (primarySubtype.includes('visualizer')) {
-    bullets.push('Visualizers keep listeners on your channel instead of losing them to auto-generated topics');
+    bullets.push('Passive listeners are going to auto-generated topics instead of your channel.');
   } else if (primarySubtype.includes('caption')) {
-    bullets.push('Captions unlock non-English search traffic and improve retention for sound-off viewers');
+    bullets.push('15-25% of watch-time comes from non-native regions. You are locked out of it.');
   } else if (primarySubtype.includes('demand')) {
-    bullets.push('Fan demand signals suggest untapped audience interest that could convert to views');
+    bullets.push('Your most engaged viewers are asking for this. Ignoring it costs repeat views.');
   } else {
-    bullets.push('Adding a support format increases total catalogue surface area for algorithmic recommendation');
+    bullets.push('No support format = no algorithmic surface beyond the main video.');
   }
 
-  // Bullet 2: scale-aware framing
+  // Bullet 2: scale consequence
   if (views >= 5_000_000) {
-    bullets.push(`At ${fmtViews(views)} views, even a small % recapture means significant incremental reach`);
+    bullets.push(`${fmtViews(views)} views. Even 1% recapture = significant incremental reach.`);
   } else if (views >= 1_000_000) {
-    bullets.push(`${fmtViews(views)} views signals proven demand — a companion format can capture the long-tail audience`);
+    bullets.push(`${fmtViews(views)} views proves demand. A companion captures the long tail.`);
   } else if (views >= 500_000) {
-    bullets.push('This track has traction — a companion format can extend its reach window before momentum fades');
-  } else if (tier === 'MEDIUM') {
-    bullets.push('Mid-catalogue tracks benefit most from format diversification — low effort, measurable upside');
+    bullets.push('Track has traction. Companion format extends the window before momentum fades.');
   }
 
-  // Bullet 3: structural pattern callout
+  // Bullet 3: structural callout
   if (isStructural) {
-    bullets.push(`This is part of a catalogue-wide ${fName} gap — fixing it systematically compounds the impact`);
+    bullets.push(`Catalogue-wide ${fName} gap. Fixing systematically compounds the return.`);
   }
 
   return bullets.slice(0, 3);

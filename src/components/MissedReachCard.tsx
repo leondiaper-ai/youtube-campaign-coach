@@ -22,7 +22,7 @@ export type MissedReachVideo = {
   title: string;
   views: number;
   primaryLabel: string;
-  primaryInsight: string;
+  primaryConsequence: string;
   primaryAction: string;
   secondaryFormats: FormatGap[];
   isHighImpact: boolean;
@@ -32,85 +32,54 @@ export type MissedReachVideo = {
 
 export default function MissedReachCard({ video }: { video: MissedReachVideo }) {
   const [expanded, setExpanded] = useState(false);
+  const pill = IMPACT_PILL[video.impactLevel];
+  const hasDetail = video.impactBullets.length > 0 || video.secondaryFormats.length > 0;
 
   return (
     <article
-      className="rounded-xl border p-5"
+      className="rounded-xl border p-4"
       style={{ borderColor: MUTED, background: PAPER }}
     >
-      {/* Video title */}
-      <a
-        href={`https://www.youtube.com/watch?v=${video.id}`}
-        target="_blank"
-        rel="noreferrer"
-        className="font-black text-base text-ink hover:text-ink/80 transition-colors leading-tight block"
-        title={video.title}
-      >
-        {video.title}
-      </a>
-
-      {/* Format gap + scale */}
-      <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
+      {/* ── Line 1: Label + Impact + Views ── */}
+      <div className="flex items-center gap-2 flex-wrap">
         <span
           className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded"
-          style={{ background: 'rgba(44,107,255,0.08)', color: '#2C6BFF' }}
+          style={{ background: pill.bg, color: pill.fg }}
         >
-          {video.primaryLabel}
+          {video.primaryLabel} · {video.impactLevel}
         </span>
-        <span className="font-black text-[13px] tabular-nums text-ink/70">
+        <span className="font-black text-[12px] tabular-nums text-ink/60">
           {fmtNum(video.views)} views
         </span>
-        {video.isHighImpact && (
-          <span
-            className="text-[10px] font-black uppercase tracking-[0.14em] px-1.5 py-0.5 rounded"
-            style={{ background: '#FFE2D8', color: '#8A1F0C' }}
-          >
-            High impact
-          </span>
-        )}
       </div>
 
-      {/* Insight */}
-      <div className="text-[12px] text-ink/55 mt-1.5 leading-snug max-w-[55ch]">
-        {video.primaryInsight}
+      {/* ── Line 2: Title → Consequence ── */}
+      <div className="mt-1 leading-tight">
+        <a
+          href={`https://www.youtube.com/watch?v=${video.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="font-bold text-[13px] text-ink hover:text-ink/70 transition-colors"
+          title={video.title}
+        >
+          {video.title}
+        </a>
+        <span className="text-[11px] text-ink/40">
+          {' '}— {video.primaryConsequence}
+        </span>
       </div>
 
-      {/* Primary action */}
-      <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
+      {/* ── Line 3: Action ── */}
+      <div className="mt-1.5 text-[12px] font-bold text-ink/80">
         → {video.primaryAction}
       </div>
 
-      {/* Expected impact */}
-      {video.impactBullets.length > 0 && (
-        <div className="mt-3 rounded-lg px-3.5 py-2.5" style={{ background: 'rgba(14,14,14,0.02)', border: `1px solid ${MUTED}` }}>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-[9px] font-black uppercase tracking-[0.12em]" style={{ color: '#6B5E4A' }}>
-              Expected impact
-            </span>
-            <span
-              className="text-[8px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded"
-              style={{ background: IMPACT_PILL[video.impactLevel].bg, color: IMPACT_PILL[video.impactLevel].fg }}
-            >
-              {video.impactLevel}
-            </span>
-          </div>
-          <ul className="space-y-0.5">
-            {video.impactBullets.map((b, i) => (
-              <li key={i} className="text-[11px] text-ink/50 leading-snug flex items-start gap-1.5">
-                <span className="text-ink/25 mt-px shrink-0">·</span>
-                <span>{b}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Expandable secondary formats */}
-      {video.secondaryFormats.length > 0 && (
-        <div className="mt-3">
+      {/* ── Expandable detail (impact bullets + secondary formats) ── */}
+      {hasDetail && (
+        <div className="mt-2">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 hover:text-ink/60 transition-colors cursor-pointer flex items-center gap-1"
+            className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/30 hover:text-ink/50 transition-colors cursor-pointer flex items-center gap-1"
           >
             <span
               className="inline-block transition-transform duration-150"
@@ -118,26 +87,43 @@ export default function MissedReachCard({ video }: { video: MissedReachVideo }) 
             >
               ▸
             </span>
-            {video.secondaryFormats.length} other format{video.secondaryFormats.length === 1 ? '' : 's'} missing
+            {expanded ? 'Less' : 'Detail'}
           </button>
 
           {expanded && (
-            <div className="mt-2 space-y-1.5 pl-3 border-l-2" style={{ borderColor: MUTED }}>
-              {video.secondaryFormats.map((f) => {
-                const pill = IMPACT_PILL[f.impact];
-                return (
-                  <div key={f.name} className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[12px] font-bold text-ink/70">{f.name}</span>
-                    <span
-                      className="text-[9px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded"
-                      style={{ background: pill.bg, color: pill.fg }}
-                    >
-                      {f.impact}
-                    </span>
-                    <span className="text-[11px] text-ink/40">→ {f.action}</span>
-                  </div>
-                );
-              })}
+            <div className="mt-2 space-y-2">
+              {/* Impact bullets */}
+              {video.impactBullets.length > 0 && (
+                <ul className="space-y-0.5 pl-2">
+                  {video.impactBullets.map((b, i) => (
+                    <li key={i} className="text-[11px] text-ink/45 leading-snug flex items-start gap-1.5">
+                      <span className="text-ink/20 mt-px shrink-0">·</span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Secondary formats */}
+              {video.secondaryFormats.length > 0 && (
+                <div className="pl-2 border-l-2 space-y-1" style={{ borderColor: MUTED }}>
+                  {video.secondaryFormats.map((f) => {
+                    const fp = IMPACT_PILL[f.impact];
+                    return (
+                      <div key={f.name} className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[11px] font-bold text-ink/60">{f.name}</span>
+                        <span
+                          className="text-[8px] font-black uppercase tracking-[0.1em] px-1 py-0.5 rounded"
+                          style={{ background: fp.bg, color: fp.fg }}
+                        >
+                          {f.impact}
+                        </span>
+                        <span className="text-[10px] text-ink/35">→ {f.action}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
