@@ -15,6 +15,22 @@ type Props = {
   tierCounts: { high: number; medium: number; low: number };
 };
 
+/** Detect when a single format dominates most cards */
+function detectDominantFormat(cards: MissedReachVideo[]): { format: string; count: number; total: number } | null {
+  if (cards.length < 3) return null;
+  const counts: Record<string, number> = {};
+  for (const c of cards) {
+    const label = c.primaryLabel;
+    counts[label] = (counts[label] ?? 0) + 1;
+  }
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const top = entries[0];
+  if (top && top[1] / cards.length >= 0.6) {
+    return { format: top[0], count: top[1], total: cards.length };
+  }
+  return null;
+}
+
 export default function MissedReachSection({
   priorityCards,
   secondaryCards,
@@ -25,7 +41,13 @@ export default function MissedReachSection({
 }: Props) {
   const [showSecondary, setShowSecondary] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const totalGaps = tierCounts.high + tierCounts.medium + tierCounts.low;
+
+  const allCards = [...priorityCards, ...secondaryCards, ...remainingCards];
+  const dominant = detectDominantFormat(allCards);
+  const isDominant = dominant != null;
+
+  // When one format dominates, show max 2 cards + structural callout instead of repeating
+  const displayPriority = isDominant ? priorityCards.slice(0, 2) : priorityCards;
 
   return (
     <section className="mt-10">
@@ -38,22 +60,29 @@ export default function MissedReachSection({
       </div>
 
       {/* ── Structural diagnosis ── */}
-      {structuralGaps.length > 0 && (
+      {(structuralGaps.length > 0 || isDominant) && (
         <div
           className="rounded-lg px-4 py-2.5 mt-3 text-[12px] leading-snug"
           style={{ background: SOFT, border: `1px solid ${MUTED}` }}
         >
           <span className="text-ink/55">
-            {totalScanned} videos scanned — {structuralGaps.map((g) =>
-              `${g.count} missing ${g.name}`
-            ).join(', ')}.
-            {totalGaps >= 10 ? ' This is a system gap.' : ''}
+            {totalScanned} videos scanned
+            {structuralGaps.length > 0 && (
+              <> — {structuralGaps.map((g) =>
+                `${g.count} missing ${g.name}`
+              ).join(', ')}</>
+            )}
+            .
+            {isDominant && (
+              <> <span className="font-bold text-ink/70">Structural gap: {dominant.format}</span> affects {dominant.count} of {dominant.total} videos. Fix this systematically, not per-track.</>
+            )}
+            {!isDominant && allCards.length >= 10 && ' This is a system gap.'}
           </span>
         </div>
       )}
 
-      {/* ── Scan summary (compact) ── */}
-      {structuralGaps.length === 0 && (
+      {/* ── Scan summary (when no structural gaps) ── */}
+      {structuralGaps.length === 0 && !isDominant && (
         <div className="text-[10px] text-ink/35 mt-2 flex items-center gap-3 flex-wrap">
           <span>{totalScanned} scanned</span>
           {tierCounts.high > 0 && <span>{tierCounts.high} high</span>}
@@ -63,43 +92,52 @@ export default function MissedReachSection({
       )}
 
       {/* ── PRIORITY cards (top 2-3, always visible) ── */}
-      {priorityCards.length > 0 && (
+      {displayPriority.length > 0 && (
         <div className="mt-4 space-y-2.5">
-          {priorityCards.map((v) => (
+          {displayPriority.map((v) => (
             <MissedReachCard key={v.id} video={v} />
           ))}
         </div>
       )}
 
-      {/* ── SECONDARY cards (collapsed by default) ── */}
-      {secondaryCards.length > 0 && (
-        <div className="mt-3">
-          {!showSecondary ? (
-            <button
-              onClick={() => setShowSecondary(true)}
-              className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35 hover:text-ink/55 transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <span>▸</span>
-              {secondaryCards.length} more opportunit{secondaryCards.length === 1 ? 'y' : 'ies'}
-            </button>
-          ) : (
-            <>
+      {/* ── Collapsed remainder ── */}
+      {(secondaryCards.length > 0 || (isDominant && priorityCards.length > 2)) && (() => {
+        const hiddenCount = isDominant
+          ? (priorityCards.length - 2) + secondaryCards.length
+          : secondaryCards.length;
+        if (hiddenCount <= 0) return null;
+        return (
+          <div className="mt-3">
+            {!showSecondary ? (
               <button
-                onClick={() => setShowSecondary(false)}
-                className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35 hover:text-ink/55 transition-colors cursor-pointer flex items-center gap-1 mb-2.5"
+                onClick={() => setShowSecondary(true)}
+                className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35 hover:text-ink/55 transition-colors cursor-pointer flex items-center gap-1"
               >
-                <span>▾</span>
-                Hide secondary
+                <span>▸</span>
+                {hiddenCount} more opportunit{hiddenCount === 1 ? 'y' : 'ies'}
               </button>
-              <div className="space-y-2.5">
-                {secondaryCards.map((v) => (
-                  <MissedReachCard key={v.id} video={v} />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowSecondary(false)}
+                  className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/35 hover:text-ink/55 transition-colors cursor-pointer flex items-center gap-1 mb-2.5"
+                >
+                  <span>▾</span>
+                  Hide
+                </button>
+                <div className="space-y-2.5">
+                  {isDominant && priorityCards.slice(2).map((v) => (
+                    <MissedReachCard key={v.id} video={v} />
+                  ))}
+                  {secondaryCards.map((v) => (
+                    <MissedReachCard key={v.id} video={v} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── REMAINING cards (hidden by default) ── */}
       {remainingCards.length > 0 && (

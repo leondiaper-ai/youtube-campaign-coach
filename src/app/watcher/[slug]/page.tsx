@@ -301,31 +301,57 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         {/* ─── 4. MISSED REACH — full catalogue, tiered, expandable ────── */}
         {allMissedOpps.length > 0 && (() => {
           const structuralGapNames = structuralGaps.map((g) => g.name);
-          const toCard = (v: typeof allMissedOpps[0]): MissedReachVideo => {
+          const toCard = (v: typeof allMissedOpps[0], forceOpp?: Opportunity): MissedReachVideo => {
             const tier = assignTier(v);
+            const primary = forceOpp ?? v.primaryOpp;
+            const others = v.items.filter((o) => o !== primary);
             return {
               id: v.id,
               title: v.title,
               views: v.views,
-              primaryLabel: oppTypeLabel(v.primaryOpp),
-              primaryConsequence: oppConsequence(v.primaryOpp),
-              primaryAction: oppAction(v.primaryOpp),
+              primaryLabel: oppTypeLabel(primary),
+              primaryConsequence: oppConsequence(primary),
+              primaryAction: oppAction(primary),
               isHighImpact: v.views >= 5_000_000,
-              secondaryFormats: v.items.slice(1).map((o): FormatGap => ({
+              secondaryFormats: others.map((o): FormatGap => ({
                 name: formatName(o.subtype),
                 impact: formatImpact(o.subtype),
                 action: oppAction(o),
               })),
               impactLevel: tier,
-              impactBullets: impactBullets(v.views, v.primaryOpp.subtype, tier, structuralGapNames),
+              impactBullets: impactBullets(v.views, primary.subtype, tier, structuralGapNames),
             };
           };
 
-          // 3-tier split: priority (top 3 HIGH), secondary (rest of HIGH + MEDIUM), remaining (LOW)
-          const priorityCards = missedHigh.slice(0, 3).map(toCard);
-          const secondaryItems = [...missedHigh.slice(3), ...missedMedium];
-          const secondaryCardsList = secondaryItems.map(toCard);
-          const remainingCardsList = missedLow.map(toCard);
+          // Diversify priority cards: if all would show same format, rotate primaries
+          const allSorted = [...missedHigh, ...missedMedium, ...missedLow];
+          function diversifiedCards(items: typeof allMissedOpps, maxCards: number): MissedReachVideo[] {
+            const cards: MissedReachVideo[] = [];
+            const seenFormats = new Set<string>();
+            for (const v of items) {
+              if (cards.length >= maxCards) break;
+              const primaryFormat = oppTypeLabel(v.primaryOpp);
+              // If this format is already shown, try to pick a different opp from this video
+              if (seenFormats.has(primaryFormat) && v.items.length > 1) {
+                const alt = v.items.find((o) => !seenFormats.has(oppTypeLabel(o)));
+                if (alt) {
+                  cards.push(toCard(v, alt));
+                  seenFormats.add(oppTypeLabel(alt));
+                  continue;
+                }
+              }
+              cards.push(toCard(v));
+              seenFormats.add(primaryFormat);
+            }
+            return cards;
+          }
+
+          // 3-tier split with diversity
+          const priorityCards = diversifiedCards(missedHigh, 3);
+          const usedIds = new Set(priorityCards.map((c) => c.id));
+          const secondaryItems = [...missedHigh, ...missedMedium].filter((v) => !usedIds.has(v.id));
+          const secondaryCardsList = secondaryItems.map((v) => toCard(v));
+          const remainingCardsList = missedLow.map((v) => toCard(v));
 
           return (
             <MissedReachSection
