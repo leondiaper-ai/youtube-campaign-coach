@@ -104,14 +104,18 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   }
   const allMissedOpps = Array.from(videoGroups.entries())
     .map(([id, items]) => {
-      // Priority: lyric → short → visualizer → captions
+      // Sort by impact level first (HIGH before MEDIUM before LOW),
+      // then by format priority as tiebreaker within same impact level.
       const sorted = [...items].sort((a, b) => {
+        const impactDiff = IMPACT_RANK[a.impact] - IMPACT_RANK[b.impact];
+        if (impactDiff !== 0) return impactDiff;
         const rank = (o: Opportunity) => {
           if (o.subtype.includes('lyric')) return 0;
           if (o.subtype.includes('Short')) return 1;
-          if (o.subtype.includes('visualizer')) return 2;
-          if (o.subtype.includes('caption')) return 3;
-          return 4;
+          if (o.subtype.includes('demand')) return 2;
+          if (o.subtype.includes('visualizer')) return 3;
+          if (o.subtype.includes('caption')) return 4;
+          return 5;
         };
         return rank(a) - rank(b);
       });
@@ -121,15 +125,17 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         views: items[0].videoViews ?? 0,
         primaryOpp: sorted[0],
         secondaryCount: items.length - 1,
-        items,
+        items: sorted,
       };
     })
     .sort((a, b) => b.views - a.views);
 
-  // Tier assignment for missed reach
+  // Tier assignment for missed reach — check ALL items, not just primaryOpp
   type MissedTier = 'HIGH' | 'MEDIUM' | 'LOW';
-  function assignTier(v: { views: number; primaryOpp: Opportunity }): MissedTier {
-    const hasHighFormat = v.primaryOpp.subtype.includes('lyric') || v.primaryOpp.subtype.includes('Short');
+  function assignTier(v: { views: number; items: Opportunity[] }): MissedTier {
+    const hasHighFormat = v.items.some((o) =>
+      o.impact === 'HIGH' || o.subtype.includes('lyric') || o.subtype.includes('Short')
+    );
     if (v.views >= 1_000_000 && hasHighFormat) return 'HIGH';
     if (v.views >= 500_000 || hasHighFormat) return 'MEDIUM';
     return 'LOW';

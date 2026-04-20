@@ -80,7 +80,7 @@ function titleHasTag(title: string, tag: RegExp): boolean {
   return tag.test(title.toLowerCase());
 }
 
-const LYRIC_RX = /\blyric(s)?\b/;
+const LYRIC_RX = /\blyric(s)?|sing\s*along|with\s+words\b/;
 const VISUALIZER_RX = /\bvisualiz(er|ation)|visualis(er|ation)\b/;
 const AUDIO_RX = /\baudio\b/;
 const SHORTS_TITLE_RX = /\b(short|shorts|#shorts)\b/i;
@@ -129,6 +129,7 @@ function scoreCompanion(
     else return 0; // not a lyric video if title doesn't say so
   } else if (format === 'visualizer') {
     if (VISUALIZER_RX.test(cTitle)) score += 3;
+    else if (/\bofficial\s+audio\b/.test(cTitle)) score += 2; // "Official Audio" is effectively a visualizer
     else return 0;
   } else if (format === 'audio') {
     if (AUDIO_RX.test(cTitle) && !/\baudio\s*(description|commentary|book)\b/.test(cTitle)) score += 3;

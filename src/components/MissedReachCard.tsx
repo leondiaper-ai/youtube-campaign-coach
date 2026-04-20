@@ -69,9 +69,16 @@ export default function MissedReachCard({ video }: { video: MissedReachVideo }) 
         </span>
       </div>
 
-      {/* ── Line 3: Action ── */}
-      <div className="mt-1.5 text-[12px] font-bold text-ink/80">
-        → {video.primaryAction}
+      {/* ── Line 3: Action + also-missing hint ── */}
+      <div className="mt-1.5 flex items-baseline gap-2 flex-wrap">
+        <span className="text-[12px] font-bold text-ink/80">
+          → {video.primaryAction}
+        </span>
+        {video.secondaryFormats.length > 0 && (
+          <span className="text-[10px] text-ink/30">
+            Also missing: {video.secondaryFormats.slice(0, 2).map((f) => f.name).join(', ')}
+          </span>
+        )}
       </div>
 
       {/* ── Expandable detail (impact bullets + secondary formats) ── */}

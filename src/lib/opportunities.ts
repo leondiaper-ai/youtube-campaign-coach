@@ -196,7 +196,7 @@ export function detectOpportunities(
 
     // 7. Top video missing a lyric companion
     // Skip if this video IS a lyric video (e.g. "Official Lyric Video")
-    const isLyricVideo = /\blyric(s)?\b/.test(titleLower);
+    const isLyricVideo = /\blyric(s)?|sing\s*along|with\s+words\b/.test(titleLower);
     // Only flag when confidence is 'none' — 'likely' or 'confirmed' means we found one
     if (lyricConf === 'none' && !isLyricVideo) {
       out.push({
@@ -220,7 +220,7 @@ export function detectOpportunities(
 
     // 8. Top video missing a visualizer / audio-only companion
     // Skip if this video IS a visualizer or audio-only track
-    const isVisualizerVideo = /\b(visuali[sz]er|audio)\b/.test(titleLower);
+    const isVisualizerVideo = /\b(visuali[sz]er|visualis(er|ation)|official\s+audio|audio)\b/.test(titleLower);
     if (vizConf === 'none' && audioConf === 'none' && !isVisualizerVideo) {
       out.push({
         id: `vid-no-viz:${artist.slug}:${v.id}`,
