@@ -54,6 +54,129 @@ const STATE_STYLE: Record<string, { bg: string; fg: string }> = {
   COLD:       { bg: '#FFE2D8', fg: '#8A1F0C' },
 };
 
+// ─── Snapshot generator ─────────────────────────────────────────────────────
+function generateSnapshot(card: CardData): string {
+  const name = card.name.toUpperCase();
+  const state = card.state ? (STATE_LABEL[card.state] ?? card.state).toUpperCase() : 'UNKNOWN';
+
+  // State interpretation
+  const interp = card.contextLine ?? 'No data available';
+
+  // This week
+  const viewsLine = card.views7Delta != null
+    ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)} views`
+    : 'No view data';
+  const subsLine = card.subs7Delta != null
+    ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs`
+    : 'No sub data';
+  const uploadsLine = `${card.uploadsLast30d} uploads in 30 days`;
+
+  // What's working / missing — derived from state + metrics
+  const working: string[] = [];
+  const missing: string[] = [];
+
+  if (card.views7Delta != null && card.views7Delta > 0) working.push('Views growing week-on-week');
+  if (card.subs7Delta != null && card.subs7Delta > 0) working.push('Subscriber growth positive');
+  if (card.uploadsLast30d >= 5) working.push('Strong upload cadence');
+  if (card.uploadsLast30d >= 2 && card.uploadsLast30d < 5) working.push('Consistent upload activity');
+  if (working.length === 0) working.push('No strong positive signals this week');
+
+  if (card.daysSinceUpload != null && card.daysSinceUpload > 14) missing.push(`No uploads in ${card.daysSinceUpload} days`);
+  else if (card.uploadsLast30d < 2) missing.push('Upload cadence below minimum');
+  if (card.subs7Delta != null && card.subs7Delta <= 0) missing.push('No subscriber growth');
+  if (card.views7Delta != null && card.views7Delta <= 0) missing.push('Views flat or declining');
+  if (missing.length === 0) missing.push('No major blockers');
+
+  // Context
+  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
+  const contextLine = latestNote
+    ? `${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`
+    : card.campaign ?? 'No notes';
+
+  // Next
+  const nextLine = card.nextAction ?? 'No action set';
+
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  return [
+    `YOUTUBE CAMPAIGN SNAPSHOT — ${name}`,
+    today,
+    '',
+    `STATE: ${state}`,
+    interp,
+    '',
+    'THIS WEEK',
+    viewsLine,
+    subsLine,
+    uploadsLine,
+    '',
+    "WHAT'S WORKING",
+    ...working.map((w) => `- ${w}`),
+    '',
+    "WHAT'S MISSING",
+    ...missing.map((m) => `- ${m}`),
+    '',
+    'CONTEXT',
+    `- ${contextLine}`,
+    '',
+    'NEXT ACTION',
+    `→ ${nextLine}`,
+  ].join('\n');
+}
+
+// ─── Snapshot Modal ─────────────────────────────────────────────────────────
+function SnapshotModal({
+  text,
+  onClose,
+}: {
+  text: string;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(14,14,14,0.35)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-xl shadow-lg p-6 mx-4 max-h-[85vh] flex flex-col"
+        style={{ background: PAPER }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-ink/50">Snapshot</h3>
+          <button onClick={onClose} className="text-ink/30 hover:text-ink/60 text-[18px]">&times;</button>
+        </div>
+        <pre
+          className="flex-1 overflow-y-auto text-[12px] leading-[1.6] whitespace-pre-wrap mb-4"
+          style={{ color: INK, fontFamily: 'system-ui, -apple-system, sans-serif' }}
+        >
+          {text}
+        </pre>
+        <button
+          onClick={handleCopy}
+          className="self-end text-[11px] font-bold uppercase tracking-[0.12em] px-4 py-2 rounded-lg transition-all"
+          style={{
+            background: copied ? '#E6F8EE' : INK,
+            color: copied ? '#0C6A3F' : PAPER,
+          }}
+        >
+          {copied ? 'Copied' : 'Copy to clipboard'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Status Card ────────────────────────────────────────────────────────────
 function StatusCard({
   card,
@@ -67,6 +190,7 @@ function StatusCard({
   const [noteInput, setNoteInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [snapshot, setSnapshot] = useState<string | null>(null);
   const style = card.state ? STATE_STYLE[card.state] : null;
 
   async function addNote() {
@@ -260,7 +384,7 @@ function StatusCard({
           </div>
         )}
 
-        {/* Add note input */}
+        {/* Add note input + Generate Snapshot */}
         <div className="flex items-center gap-2">
           <input
             value={noteInput}
@@ -280,8 +404,19 @@ function StatusCard({
               {saving ? '…' : 'Add'}
             </button>
           )}
+          <button
+            onClick={() => setSnapshot(generateSnapshot(card))}
+            className="text-[10px] text-ink/25 hover:text-ink/50 shrink-0 transition-colors"
+          >
+            Generate Snapshot
+          </button>
         </div>
       </div>
+
+      {/* Snapshot modal */}
+      {snapshot && (
+        <SnapshotModal text={snapshot} onClose={() => setSnapshot(null)} />
+      )}
     </div>
   );
 }
