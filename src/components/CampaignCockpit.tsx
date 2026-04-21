@@ -199,7 +199,7 @@ export default function CampaignCockpit() {
             <span>YouTube Campaign System</span>
           </div>
 
-          {/* View toggle: Channel Health / All Artists */}
+          {/* View toggle: Channel Health / All Artists / Active Campaigns */}
           <div className="flex items-center gap-1 mt-2">
             <Link
               href="/growth"
@@ -213,6 +213,12 @@ export default function CampaignCockpit() {
             >
               All Artists
             </span>
+            <Link
+              href="/campaigns"
+              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+            >
+              Active Campaigns
+            </Link>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0 mt-2">

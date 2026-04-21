@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ARTISTS, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { listCustomArtists } from '@/lib/artistStore';
+import { isPinned } from '@/lib/campaignStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
 import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
 import { decideWatcher } from '@/lib/watcherDecision';
@@ -11,6 +12,7 @@ import {
   type ConversionResult,
 } from '@/lib/conversion';
 import CoachLink from '@/components/CoachLink';
+import PinCampaignButton from '@/components/PinCampaignButton';
 import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
 import MissedReachSection from '@/components/MissedReachSection';
@@ -47,6 +49,8 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const custom: Artist[] = await listCustomArtists();
   const artist = ARTISTS.find((a) => a.slug === slug) ?? custom.find((a) => a.slug === slug);
   if (!artist) notFound();
+
+  const campaignPinned = await isPinned(slug);
 
   const live = artist.channelHandle ? await fetchChannelSnap(artist.channelHandle) : null;
   const daysToNextMoment = artist.nextMomentDate
@@ -200,6 +204,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
                 Live · YouTube API
               </span>
             )}
+            <PinCampaignButton slug={slug} initiallyPinned={campaignPinned} />
             <CoachLink slug={slug} size="sm" />
           </div>
         </div>

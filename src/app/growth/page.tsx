@@ -148,7 +148,7 @@ export default async function ControlPage() {
               YouTube Campaign System
             </div>
 
-            {/* View toggle: Channel Health (active) / All Artists */}
+            {/* View toggle: Channel Health (active) / All Artists / Active Campaigns */}
             <div className="flex items-center gap-1 mt-2">
               <span
                 className="px-3 py-1.5 rounded-md text-[13px] font-black"
@@ -161,6 +161,12 @@ export default async function ControlPage() {
                 className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
               >
                 All Artists
+              </Link>
+              <Link
+                href="/campaigns"
+                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+              >
+                Active Campaigns
               </Link>
             </div>
           </div>
