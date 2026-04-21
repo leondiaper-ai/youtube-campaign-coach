@@ -52,13 +52,20 @@ export interface DropReadiness {
   message: string;
 }
 
+export type CoachMove = {
+  label: string;    // short framing: "Ride the release window"
+  action: string;   // specific action tied to real data
+};
+
 export interface AIDecision {
   state: DecisionState;
   momentum: Momentum;
   read: string;     // AI READ — what is happening
   plan: string;     // PLAN(phase) — what should be happening
   gap: string;      // GAP — where reality and plan differ
-  action: string;   // ACTION — clear next steps
+  action: string;   // ACTION — clear next steps (legacy joined string)
+  primaryMove: CoachMove;
+  secondaryMove: CoachMove | null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -390,10 +397,9 @@ export function aiDecisionLayer(input: {
   }
   const gap = gapBits.length ? gapBits.join('; ') + '.' : 'No material gap — reality is matching the plan for this phase.';
 
-  // ── CAMPAIGN-CONTEXT-AWARE ACTIONS ──────────────────────────────────────
-  // Actions are derived from the actual campaign state — latest drop, next
-  // planned moment, collab opportunities, cadence gaps — not generic "top video" refs.
-  const actions: string[] = [];
+  // ── WHAT TO DO NOW — max 2 directions, sharp and specific ───────────────
+  // Derived from actual campaign state — latest drop, next planned moment,
+  // collab opportunities, cadence gaps — not generic advice.
 
   // Detect latest longform drop from live data
   const latestDrop = (latestVideos ?? [])
@@ -411,50 +417,90 @@ export function aiDecisionLayer(input: {
     : null;
   const collabArtist = collabMatch ? collabMatch[1].trim() : null;
 
-  // 1. CADENCE BEHIND — fix cadence first, everything else follows
+  let primaryMove: CoachMove;
+  let secondaryMove: CoachMove | null = null;
+
   const cadenceBehind = cadence.rows.some((r) => r.actual >= 0 && r.status === 'behind');
-  if (cadenceBehind && !strongCadenceNotConverting) {
-    for (const row of cadence.rows) {
-      if (row.actual < 0) continue;
-      if (row.status === 'behind') actions.push(`Post ${row.planned} ${row.format} this week to catch cadence.`);
-    }
-  }
+  const behindRows = cadence.rows.filter((r) => r.actual >= 0 && r.status === 'behind');
 
-  // 2. JUST DROPPED (within 3 days) — follow up the drop
-  if (dropAgeDays != null && dropAgeDays <= 3 && dropTitle && !cadenceBehind) {
-    actions.push(`${dropTitle} is live — follow up with BTS or a making-of Short within 24h.`);
-    if (collabArtist) {
-      actions.push(`Set up collab tools with ${collabArtist} — cross-post clips to each other's channels.`);
+  // 1. CADENCE BEHIND — fix cadence first
+  if (cadenceBehind && !strongCadenceNotConverting && behindRows.length > 0) {
+    const topBehind = behindRows[0];
+    primaryMove = {
+      label: 'Fix cadence before anything else',
+      action: `Post ${topBehind.planned} ${topBehind.format} this week to catch up. The algorithm rewards consistency — being behind on cadence caps everything else.`,
+    };
+    if (dropAgeDays != null && dropAgeDays <= 7 && dropTitle) {
+      secondaryMove = {
+        label: 'Support the live drop',
+        action: `${dropTitle} is still in its window. Cut a Short from the best moment while you catch cadence.`,
+      };
     }
   }
-  // 3. DROP IS WORKING (4-14 days) — maximise what's already performing
-  else if (dropAgeDays != null && dropAgeDays <= 14 && dropTitle && !cadenceBehind) {
+  // 2. JUST DROPPED (within 3 days)
+  else if (dropAgeDays != null && dropAgeDays <= 3 && dropTitle) {
+    primaryMove = {
+      label: 'Follow up the drop',
+      action: `${dropTitle} is live — ship a BTS or making-of Short within 24h to deepen engagement while the algorithm is pushing it.`,
+    };
+    if (collabArtist) {
+      secondaryMove = {
+        label: `Activate the ${collabArtist} audience`,
+        action: `Set up YouTube Collab with ${collabArtist} — cross-post clips to distribute across both channels.`,
+      };
+    }
+  }
+  // 3. DROP IS WORKING (4-14 days)
+  else if (dropAgeDays != null && dropAgeDays <= 14 && dropTitle) {
     if (strongCadenceNotConverting) {
-      actions.push(`Post a track breakdown or studio session for ${dropTitle} — deeper content converts viewers to subscribers.`);
+      primaryMove = {
+        label: 'Go deeper, not wider',
+        action: `${dropTitle} has views but isn't converting. Post a track breakdown or studio session — deeper content turns viewers into subscribers.`,
+      };
     } else {
-      actions.push(`Cut 2–3 Shorts from ${dropTitle} to extend its reach while it's still being pushed.`);
+      primaryMove = {
+        label: 'Extend the release window',
+        action: `${dropTitle} is still being pushed. Cut 2–3 Shorts from it this week while the algorithm is distributing.`,
+      };
     }
     if (collabArtist) {
-      actions.push(`Have you set up cross-promo with ${collabArtist}? Collab clips drive new audience.`);
+      secondaryMove = {
+        label: `Cross-promote with ${collabArtist}`,
+        action: `Collab clips drive new audience. Set up cross-promo while the track still has momentum.`,
+      };
     }
   }
-  // 4. STRONG CADENCE BUT NOT CONVERTING — suggest depth
+  // 4. STRONG CADENCE BUT NOT CONVERTING
   else if (strongCadenceNotConverting) {
-    actions.push('Volume is strong — go deeper: BTS, track breakdowns, studio sessions, or personal content.');
-    actions.push('Give viewers a reason to subscribe — show the person behind the music.');
+    primaryMove = {
+      label: 'Push connection, not volume',
+      action: 'Cadence is strong but subs are flat. Go deeper: BTS, track breakdowns, studio sessions. Give viewers a reason to subscribe.',
+    };
+  }
+  // 5. NEXT DROP APPROACHING
+  else if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14 && nextDrop) {
+    primaryMove = {
+      label: 'Warm up for the next drop',
+      action: `"${nextDrop.name}" drops in ${readiness.daysUntil}d — line up 2–3 Shorts to warm the audience before release.`,
+    };
+  }
+  // 6. SCALING
+  else if (decisionState === 'SCALE—STRONG' && dropTitle) {
+    primaryMove = {
+      label: 'Don\'t change what\'s working',
+      action: `${dropTitle} is performing. Post 2–3 Short variations and let it compound — don't add complexity.`,
+    };
+  }
+  // 7. DEFAULT — hold
+  else {
+    primaryMove = {
+      label: 'Hold the line',
+      action: 'Cadence is on track. No corrective action this week — focus on support formats for top content.',
+    };
   }
 
-  // 5. NEXT DROP APPROACHING — prep support
-  if (readiness.status === 'under_supporting' && readiness.daysUntil != null && readiness.daysUntil <= 14 && nextDrop) {
-    actions.push(`"${nextDrop.name}" drops in ${readiness.daysUntil}d — line up 2–3 Shorts to warm the audience.`);
-  }
-
-  // 6. SCALING — lean into what works
-  if (decisionState === 'SCALE—STRONG' && dropTitle) {
-    actions.push(`${dropTitle} is performing — post 2–3 Short variations and build a longform around it.`);
-  }
-
-  if (actions.length === 0) actions.push('Hold cadence. No corrective action this week.');
+  // Legacy action string for backward compat
+  const actionLegacy = [primaryMove.action, secondaryMove?.action].filter(Boolean).join(' ');
 
   return {
     state: decisionState,
@@ -462,7 +508,9 @@ export function aiDecisionLayer(input: {
     read,
     plan: planText,
     gap,
-    action: actions.slice(0, 3).join(' '),
+    action: actionLegacy,
+    primaryMove,
+    secondaryMove,
   };
 }
 

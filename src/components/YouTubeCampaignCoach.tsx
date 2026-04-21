@@ -3930,36 +3930,38 @@ function TopSignalCard({ plan, onUpdatePlan, onOpenExecModal }: { plan: Campaign
         </p>
       </div>
 
-      {/* 4. ACTIONS — split on sentence boundaries, one per line */}
+      {/* 4. WHAT TO DO NOW — max 2 directions */}
       <div className="mb-5">
         <div
           className="text-[10px] font-mono uppercase tracking-[0.18em] mb-2.5"
           style={{ color: 'rgba(250,247,242,0.45)' }}
         >
-          Actions
+          What to do now
         </div>
-        {(() => {
-          // Split on ". " between sentences but keep each sentence intact
-          const items = primaryAction.split(/(?<=\.)\s+/).filter(Boolean);
-          return (
-            <div className="space-y-2">
-              {items.map((act, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-2.5 text-[13px] leading-snug"
-                >
-                  <span
-                    className="shrink-0 w-[18px] h-[18px] rounded-md flex items-center justify-center text-[10px] font-black mt-0.5"
-                    style={{ background: 'rgba(250,247,242,0.10)', color: 'rgba(250,247,242,0.55)' }}
-                  >
-                    {i + 1}
-                  </span>
-                  <span className="font-semibold" style={{ color: '#FAF7F2' }}>{act}</span>
-                </div>
-              ))}
+        <div className="space-y-3">
+          {/* Primary move */}
+          <div className="rounded-lg p-3.5" style={{ background: 'rgba(250,247,242,0.06)', borderLeft: '3px solid rgba(250,247,242,0.25)' }}>
+            <div className="text-[10px] font-mono uppercase tracking-[0.12em] mb-1" style={{ color: 'rgba(250,247,242,0.40)' }}>Primary</div>
+            <div className="text-[14px] font-black leading-snug" style={{ color: '#FAF7F2' }}>
+              {decision?.primaryMove?.label ?? 'Hold the line'}
             </div>
-          );
-        })()}
+            <div className="text-[12px] mt-1 leading-snug" style={{ color: 'rgba(250,247,242,0.65)' }}>
+              {decision?.primaryMove?.action ?? primaryAction}
+            </div>
+          </div>
+          {/* Secondary move (optional) */}
+          {decision?.secondaryMove && (
+            <div className="rounded-lg p-3.5" style={{ background: 'rgba(250,247,242,0.03)' }}>
+              <div className="text-[10px] font-mono uppercase tracking-[0.12em] mb-1" style={{ color: 'rgba(250,247,242,0.35)' }}>Secondary</div>
+              <div className="text-[13px] font-bold leading-snug" style={{ color: '#FAF7F2' }}>
+                {decision.secondaryMove.label}
+              </div>
+              <div className="text-[12px] mt-1 leading-snug" style={{ color: 'rgba(250,247,242,0.55)' }}>
+                {decision.secondaryMove.action}
+              </div>
+            </div>
+          )}
+        </div>
         <a
           href="https://studio.youtube.com"
           target="_blank"
