@@ -24,6 +24,9 @@ export type Artist = {
   campaign?: string;
   nextMomentLabel?: string;
   nextMomentDate?: string;
+  // Campaign-period tracking: ISO date (yyyy-mm-dd) of the first post/short
+  // that kicked off the active campaign. Used to compute growth since start.
+  campaignStartDate?: string;
   // Marks this artist as user-added (vs a built-in seed entry).
   custom?: boolean;
 };
@@ -40,6 +43,8 @@ export const ARTISTS: Artist[] = [
     name: 'K-Trap',
     phase: 'PUSH',
     channelHandle: '@ktrap',
+    campaign: 'TRAPO 2',
+    campaignStartDate: '2026-03-22',
   },
   {
     slug: 'tom-odell',

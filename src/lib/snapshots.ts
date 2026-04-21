@@ -110,6 +110,32 @@ export async function writeTopEverCache(channelId: string, videoIds: string[]) {
   await store.set(`topever:${channelId}`, entry);
 }
 
+/**
+ * Campaign-period delta: computes subs/views change since a given start date.
+ * Uses the oldest snapshot on or after the start date as the baseline.
+ * Falls back to the oldest snapshot we have if none exist before the start date.
+ */
+export function campaignDelta(
+  history: ChannelSnapshot[],
+  campaignStartDate: string,
+  field: 'subs' | 'views',
+) {
+  if (history.length < 1) return null;
+  const last = history[history.length - 1];
+
+  // Find the oldest entry on or after campaign start
+  const startTs = new Date(campaignStartDate).getTime();
+  const baseline =
+    history.find((h) => new Date(h.ts).getTime() >= startTs) ?? history[0];
+
+  const delta = last[field] - baseline[field];
+  const pct = baseline[field] > 0 ? delta / baseline[field] : 0;
+  const daysCovered = Math.round(
+    (new Date(last.ts).getTime() - new Date(baseline.ts).getTime()) / 86400000
+  );
+  return { delta, pct, baseline, last, daysCovered, baselineDate: baseline.ts };
+}
+
 export function seriesForField(
   history: ChannelSnapshot[],
   field: 'subs' | 'views',

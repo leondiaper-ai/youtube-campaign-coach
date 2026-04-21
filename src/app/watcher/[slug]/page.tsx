@@ -4,7 +4,7 @@ import { ARTISTS, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpl
 import { fetchChannelSnap } from '@/lib/youtube';
 import { listCustomArtists } from '@/lib/artistStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
-import { readHistory, deltaOver } from '@/lib/snapshots';
+import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
 import { decideWatcher } from '@/lib/watcherDecision';
 import {
   computeConversion,
@@ -68,6 +68,22 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const subs7 = deltaOver(history, 7, 'subs');
   const subs30 = deltaOver(history, 30, 'subs');
   const views7 = deltaOver(history, 7, 'views');
+
+  // Campaign-period tracking
+  const campaignStart = artist.campaignStartDate ?? null;
+  const campSubs = campaignStart ? campaignDelta(history, campaignStart, 'subs') : null;
+  const campViews = campaignStart ? campaignDelta(history, campaignStart, 'views') : null;
+  const campaignUploads = campaignStart
+    ? (live?.recentUploads ?? []).filter(
+        (u) => new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
+      )
+    : [];
+  const campaignContentViews = campaignUploads.reduce((sum, u) => sum + u.viewCount, 0);
+  const campaignContentCount = campaignUploads.length;
+  const campaignShortsCount = campaignUploads.filter((u) => u.durationSec <= 62).length;
+  const campaignDaysSinceStart = campaignStart
+    ? Math.floor((Date.now() - new Date(campaignStart).getTime()) / 86400000)
+    : null;
 
   const conv7 = computeConversion(history, 7);
   const conv30 = computeConversion(history, 30);
@@ -244,6 +260,47 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           />
         </div>
 
+
+        {/* ─── CAMPAIGN PERFORMANCE — since campaign start ────────────── */}
+        {campaignStart && (
+          <section className="mt-8">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-2 h-2 rounded-full" style={{ background: '#2C6BFF' }} />
+              <h2 className="text-[11px] font-black uppercase tracking-[0.18em] text-ink/50">
+                Campaign · {artist.campaign ?? 'Active'} · Day {campaignDaysSinceStart}
+              </h2>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              <MetricTile
+                label="Content views"
+                value={fmtNum(campaignContentViews)}
+                sub={`${campaignContentCount} uploads since ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
+              />
+              <MetricTile
+                label="Channel views"
+                value={campViews ? fmtDelta(campViews.delta) : '—'}
+                sub={campViews ? `${campViews.daysCovered}d tracked` : `tracking from ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
+                color={campViews ? (campViews.delta > 0 ? '#0C6A3F' : campViews.delta < 0 ? '#8A1F0C' : undefined) : undefined}
+              />
+              <MetricTile
+                label="Subs gained"
+                value={campSubs ? (campSubs.delta >= 0 ? '+' : '') + campSubs.delta.toLocaleString() : '—'}
+                sub={campSubs ? `${campSubs.daysCovered}d tracked` : `tracking from ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
+                color={campSubs ? (campSubs.delta > 0 ? '#0C6A3F' : campSubs.delta < 0 ? '#8A1F0C' : undefined) : undefined}
+              />
+              <MetricTile
+                label="Content mix"
+                value={`${campaignContentCount} uploads`}
+                sub={`${campaignShortsCount} Shorts · ${campaignContentCount - campaignShortsCount} videos`}
+              />
+            </div>
+            {(!campSubs || !campViews) && (
+              <div className="mt-2 text-[10px] text-ink/30 leading-snug">
+                Channel-level subs and views deltas require daily snapshots. Tracking started {history.length > 0 ? `${history.length}d ago` : 'today'} — campaign-period deltas will build over time.
+              </div>
+            )}
+          </section>
+        )}
 
         {/* ─── FIX NOW ────────────────────────────────────────────────────── */}
         {(fixNow.length > 0 || isColdMode) && (

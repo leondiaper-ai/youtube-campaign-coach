@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
-import { readHistory, deltaOver } from '@/lib/snapshots';
+import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
 
 /**
  * GET /api/artist-live?slug=k-trap
@@ -39,6 +39,26 @@ export async function GET(req: NextRequest) {
   const subs7 = deltaOver(history, 7, 'subs');
   const subs30 = deltaOver(history, 30, 'subs');
   const views7 = deltaOver(history, 7, 'views');
+
+  // 3b. Campaign-period deltas (if campaignStartDate is set)
+  const campaignStart = artist.campaignStartDate ?? null;
+  const campaignSubs = campaignStart
+    ? campaignDelta(history, campaignStart, 'subs')
+    : null;
+  const campaignViews = campaignStart
+    ? campaignDelta(history, campaignStart, 'views')
+    : null;
+
+  // 3c. Campaign content stats — sum views from uploads since campaign start
+  const campaignUploads = campaignStart
+    ? (snap.recentUploads ?? []).filter(
+        (u) => new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
+      )
+    : [];
+  const campaignContentViews = campaignUploads.reduce((sum, u) => sum + u.viewCount, 0);
+  const campaignContentCount = campaignUploads.length;
+  const campaignShortsCount = campaignUploads.filter((u) => u.durationSec <= 62).length;
+  const campaignVideosCount = campaignContentCount - campaignShortsCount;
 
   // 4. Derive counts from recentUploads (7d, 14d breakdowns)
   const now = Date.now();
@@ -135,11 +155,29 @@ export async function GET(req: NextRequest) {
       name: artist.name,
       channelHandle: artist.channelHandle,
       phase: artist.phase,
+      campaign: artist.campaign ?? null,
+      campaignStartDate: campaignStart,
     },
     state,
     subs7,
     subs30,
     views7,
     historyDays: history.length,
+    // Campaign-period tracking
+    campaign: campaignStart
+      ? {
+          startDate: campaignStart,
+          name: artist.campaign ?? null,
+          subs: campaignSubs,
+          views: campaignViews,
+          contentViews: campaignContentViews,
+          contentCount: campaignContentCount,
+          shortsCount: campaignShortsCount,
+          videosCount: campaignVideosCount,
+          daysSinceStart: Math.floor(
+            (Date.now() - new Date(campaignStart).getTime()) / 86400000
+          ),
+        }
+      : null,
   });
 }
