@@ -29,6 +29,17 @@ type CardData = {
 
 type AvailableArtist = { slug: string; name: string };
 
+function fmtNoteDate(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays === 0) return 'today';
+  if (diffDays === 1) return 'yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
 const STATE_LABEL: Record<string, string> = {
   HEALTHY: 'Healthy',
   BUILDING: 'Building',
@@ -205,6 +216,7 @@ function StatusCard({
                 <span className="font-bold text-ink/60">{latestNote.tag ? `${latestNote.tag}: ` : ''}</span>
                 {latestNote.text}
               </div>
+              <div className="text-[10px] text-ink/25 mt-0.5">{fmtNoteDate(latestNote.createdAt)}</div>
             </div>
             <button
               onClick={() => deleteNote(latestNote.id)}
@@ -228,9 +240,12 @@ function StatusCard({
               <div className="mt-2 space-y-1.5">
                 {card.notes.slice(1).map((n) => (
                   <div key={n.id} className="flex items-start gap-2">
-                    <div className="text-[12px] text-ink/40 leading-snug flex-1 min-w-0 truncate">
-                      <span className="font-bold text-ink/50">{n.tag ? `${n.tag}: ` : ''}</span>
-                      {n.text}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] text-ink/40 leading-snug truncate">
+                        <span className="font-bold text-ink/50">{n.tag ? `${n.tag}: ` : ''}</span>
+                        {n.text}
+                      </div>
+                      <div className="text-[10px] text-ink/20 mt-0.5">{fmtNoteDate(n.createdAt)}</div>
                     </div>
                     <button
                       onClick={() => deleteNote(n.id)}
