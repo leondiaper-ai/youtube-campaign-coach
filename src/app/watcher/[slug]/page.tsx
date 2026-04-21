@@ -327,32 +327,51 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
 
-        {/* ─── NEXT MOVE — campaign-aware ────────────────────────────────── */}
-        <section className="mt-10">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: isLiveCampaign ? '#F08A3C' : '#2C6BFF' }} />
-            <h2 className="font-black text-lg">
-              {isLiveCampaign ? 'Next campaign move' : 'Next step'}
-            </h2>
-          </div>
-          <div
-            className="rounded-xl border p-5"
-            style={{ borderColor: MUTED, background: PAPER }}
-          >
-            <div className="text-[15px] font-bold leading-snug">
-              {campaignAction(decision, fixNow, secondaryOpps, videoOppsAll, live?.recentUploads ?? [], {
-                isColdMode,
-                daysToNextMoment,
-                momentLabel: artist.nextMomentLabel ?? null,
-                uploads30d,
-                lastUpDays,
-              })}
-            </div>
-            <div className="text-[12px] text-ink/50 mt-2 leading-snug max-w-[60ch]">
-              {campaignOutcome(decision, live?.recentUploads ?? [], isColdMode)}
-            </div>
-          </div>
-        </section>
+        {/* ─── WHAT TO DO NOW — max 2 directions ────────────────────────── */}
+        {(() => {
+          const videoGaps = scanVideoGaps(live?.recentUploads ?? []);
+          const moves = whatToDoNow(decision, live?.recentUploads ?? [], videoGaps, {
+            isColdMode,
+            daysToNextMoment,
+            momentLabel: artist.nextMomentLabel ?? null,
+            uploads30d,
+            lastUpDays,
+            subs7delta: subs7?.delta ?? null,
+            views7delta: views7?.delta ?? null,
+          });
+          return (
+            <section className="mt-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: isLiveCampaign ? '#F08A3C' : '#2C6BFF' }} />
+                <h2 className="font-black text-lg">What to do now</h2>
+              </div>
+              <div className="space-y-3">
+                <div
+                  className="rounded-xl border-l-4 border p-5"
+                  style={{ borderColor: MUTED, borderLeftColor: isLiveCampaign ? '#F08A3C' : '#2C6BFF', background: PAPER }}
+                >
+                  <div className="text-[11px] font-black uppercase tracking-[0.14em] text-ink/40 mb-1">Primary move</div>
+                  <div className="text-[15px] font-black leading-snug">{moves.primary.label}</div>
+                  <div className="text-[13px] text-ink/65 mt-1.5 leading-snug max-w-[60ch]">
+                    {moves.primary.action}
+                  </div>
+                </div>
+                {moves.secondary && (
+                  <div
+                    className="rounded-xl border p-5"
+                    style={{ borderColor: MUTED, background: PAPER }}
+                  >
+                    <div className="text-[11px] font-black uppercase tracking-[0.14em] text-ink/40 mb-1">Secondary move</div>
+                    <div className="text-[14px] font-bold leading-snug">{moves.secondary.label}</div>
+                    <div className="text-[12px] text-ink/50 mt-1.5 leading-snug max-w-[60ch]">
+                      {moves.secondary.action}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        })()}
 
 
         {/* ─── 4. MISSED REACH — full catalogue, tiered, expandable ────── */}
@@ -438,36 +457,62 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         )}
 
 
-        {/* ─── REPORT EXPORT ──────────────────────────────────────────────── */}
-        <WatcherReport
-          artistName={artist.name}
-          channelState={channelState}
-          stateReason={derived?.reason ?? decision.headline}
-          riskLine={decision.type === 'FIX' || decision.type === 'CORRECT' ? decision.ifIgnored : null}
-          nextMove={campaignAction(decision, fixNow, secondaryOpps, videoOppsAll, live?.recentUploads ?? [], {
+        {/* ─── WEEKLY REPORT ────────────────────────────────────────────── */}
+        {(() => {
+          const reportGaps = scanVideoGaps(live?.recentUploads ?? []);
+          const reportMoves = whatToDoNow(decision, live?.recentUploads ?? [], reportGaps, {
             isColdMode,
             daysToNextMoment,
             momentLabel: artist.nextMomentLabel ?? null,
             uploads30d,
             lastUpDays,
-          })}
-          missedReach={allMissedOpps.map((v): ReportMissedVideo => ({
-            title: v.title,
-            views: v.views,
-            formats: v.items.map((o) => ({
-              name: formatName(o.subtype),
-              impact: formatImpact(o.subtype),
-            })),
-          }))}
-          structuralGaps={structuralGaps}
-          stats={{
-            subs: live?.subs ?? null,
-            views7d: views7?.delta ?? null,
-            subs7d: subs7?.delta ?? null,
-            uploads30d,
-            lastUpDays,
-          }}
-        />
+            subs7delta: subs7?.delta ?? null,
+            views7delta: views7?.delta ?? null,
+          });
+          return (
+            <WatcherReport
+              artistName={artist.name}
+              channelState={channelState}
+              stateReason={derived?.reason ?? decision.headline}
+              riskLine={decision.type === 'FIX' || decision.type === 'CORRECT' ? decision.ifIgnored : null}
+              primaryMove={reportMoves.primary}
+              secondaryMove={reportMoves.secondary}
+              missedReach={allMissedOpps.map((v): ReportMissedVideo => ({
+                title: v.title,
+                views: v.views,
+                formats: v.items.map((o) => ({
+                  name: formatName(o.subtype),
+                  impact: formatImpact(o.subtype),
+                })),
+              }))}
+              structuralGaps={structuralGaps}
+              stats={{
+                subs: live?.subs ?? null,
+                views7d: views7?.delta ?? null,
+                subs7d: subs7?.delta ?? null,
+                uploads30d,
+                lastUpDays,
+                shorts30d: live?.shorts30d ?? 0,
+              }}
+              campaign={artist.campaign ?? null}
+              campaignContentViews={campaignContentViews}
+              campaignContentCount={campaignContentCount}
+              campaignShortsCount={campaignShortsCount}
+              campaignDaysSinceStart={campaignDaysSinceStart}
+              campaignSubsDelta={campSubs?.delta ?? null}
+              campaignViewsDelta={campViews?.delta ?? null}
+              recentUploads={(live?.recentUploads ?? []).filter(
+                (u) => (Date.now() - new Date(u.publishedAt).getTime()) / 86400000 <= 14
+              ).map((u) => ({
+                title: u.title,
+                views: u.viewCount,
+                kind: (u.durationSec <= 62 ? 'Short' : 'Video') as 'Short' | 'Video',
+                daysAgo: Math.floor((Date.now() - new Date(u.publishedAt).getTime()) / 86400000),
+              }))}
+              conv7={conv7}
+            />
+          );
+        })()}
 
 
         {/* ─── NEXT MOMENT ────────────────────────────────────────────────── */}
@@ -567,110 +612,176 @@ function scanVideoGaps(uploads: RecentUpload[]): VideoGap[] {
   return results.sort((a, b) => b.views - a.views);
 }
 
-type CampaignCtx = {
+// ═══════════════════════════════════════════════════════════════════════════════
+// WHAT TO DO NOW — max 2 directions, sharp and specific
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type WhatToDoCtx = {
   isColdMode: boolean;
   daysToNextMoment: number | null;
   momentLabel: string | null;
   uploads30d: number;
   lastUpDays: number | null;
+  subs7delta: number | null;
+  views7delta: number | null;
 };
 
-function campaignAction(
+type MoveDirection = {
+  label: string;    // short framing: "Push connection, not more volume"
+  action: string;   // specific action tied to real data
+};
+
+type WhatToDo = {
+  primary: MoveDirection;
+  secondary: MoveDirection | null;
+};
+
+function whatToDoNow(
   decision: { type: string; headline: string; signals: string[] },
-  fixNow: Opportunity[],
-  secondaryOpps: Opportunity[],
-  videoOpps: Opportunity[],
   uploads: RecentUpload[],
-  ctx: CampaignCtx,
-): string {
+  videoGaps: VideoGap[],
+  ctx: WhatToDoCtx,
+): WhatToDo {
   const upload = readUploadContext(uploads);
-  const videoGaps = scanVideoGaps(uploads);
-
-  // ── COLD / NO CAMPAIGN — focus on reactivation ─────────────────────────
-  if (ctx.isColdMode) {
-    if (ctx.daysToNextMoment != null && ctx.daysToNextMoment >= 0 && ctx.daysToNextMoment <= 30 && ctx.momentLabel)
-      return `Once the first upload lands, post a teaser for ${ctx.momentLabel} (${ctx.daysToNextMoment}d away). The algorithm needs 2 weeks of activity before a drop converts.`;
-    return 'After the first post, upload twice more this week. Three uploads in 7 days is typically enough to re-activate subscriber reach.';
-  }
-
-  // ── LIVE CAMPAIGN — actions tied to specific content + timing ───────────
-
-  // Near-moment urgency
   const nearMoment = ctx.daysToNextMoment != null && ctx.daysToNextMoment >= 0 && ctx.daysToNextMoment <= 14;
+  const subsFlat = ctx.subs7delta != null && ctx.subs7delta <= 0;
 
-  // 1. Active release window — reference specific tracks
-  if (upload.isRelease) {
-    if (upload.hasShorts)
-      return `${upload.audioTitleCount} tracks just dropped. Cut Shorts from the standout tracks this week — the first 48h window is when the algorithm distributes most aggressively.`;
-    return `${upload.audioTitleCount} tracks just dropped with no Shorts yet. Cut 2–3 vertical clips from the best tracks today — you're losing the first-48h distribution window.`;
+  // ── COLD — single clear reactivation move ──────────────────────────────
+  if (ctx.isColdMode) {
+    const primary: MoveDirection = ctx.momentLabel && ctx.daysToNextMoment != null && ctx.daysToNextMoment <= 30
+      ? {
+          label: 'Break the silence before the drop',
+          action: `Post a catalogue Short today and a teaser for ${ctx.momentLabel} (${ctx.daysToNextMoment}d away) this week. The algorithm needs activity before a drop converts.`,
+        }
+      : {
+          label: 'Break the silence',
+          action: 'Post one catalogue Short today. Three uploads in 7 days is typically enough to re-activate subscriber reach.',
+        };
+    return { primary, secondary: null };
   }
 
-  if (upload.hasDropSignal && ctx.momentLabel)
-    return `${ctx.momentLabel} is incoming. Post a teaser Short this week — channels that warm up before a drop see 2–3× the announce-day views.`;
-  if (upload.hasDropSignal)
-    return 'Drop is incoming. Post a teaser Short this week to prime subscriber notifications before the release lands.';
+  // ── ACTIVE RELEASE WINDOW ──────────────────────────────────────────────
+  if (upload.isRelease) {
+    const primary: MoveDirection = {
+      label: upload.hasShorts ? 'Ride the release window' : 'You\'re losing the 48h window',
+      action: upload.hasShorts
+        ? `${upload.audioTitleCount} tracks live. Cut Shorts from standout tracks this week — the first 48h is when the algorithm distributes most aggressively.`
+        : `${upload.audioTitleCount} tracks dropped with no Shorts. Cut 2–3 vertical clips from the best tracks today.`,
+    };
+    const secondary: MoveDirection | null = videoGaps.length > 0
+      ? {
+          label: 'Fill the format gap',
+          action: `"${truncate(videoGaps[0].title, 30)}" is missing ${videoGaps[0].gaps[0]}. Ship it this week while the release drives traffic.`,
+        }
+      : null;
+    return { primary, secondary };
+  }
 
-  // 2. Top performer needs support formats
+  // ── DROP INCOMING ──────────────────────────────────────────────────────
+  if (upload.hasDropSignal) {
+    return {
+      primary: {
+        label: 'Warm the channel before the drop',
+        action: ctx.momentLabel
+          ? `${ctx.momentLabel} is incoming. Post a teaser Short this week — channels that warm up before a drop see 2–3× announce-day views.`
+          : 'Drop incoming. Post a teaser Short this week to prime subscriber notifications before the release lands.',
+      },
+      secondary: null,
+    };
+  }
+
+  // ── TOP PERFORMER MISSING FORMATS ──────────────────────────────────────
   if (videoGaps.length > 0) {
     const top = videoGaps[0];
     const gapList = top.gaps.join(' + ');
-    if (nearMoment && ctx.momentLabel)
-      return `"${truncate(top.title, 30)}" at ${fmtNum(top.views)} views is missing ${gapList}. Fill these before ${ctx.momentLabel} in ${ctx.daysToNextMoment}d — each format compounds the track's reach into the drop.`;
-    return `"${truncate(top.title, 30)}" at ${fmtNum(top.views)} views is missing ${gapList}. Ship the ${top.gaps[0]} this week — it's the highest-ROI move on the channel right now.`;
+    const primary: MoveDirection = {
+      label: subsFlat
+        ? 'Push connection, not more volume'
+        : nearMoment && ctx.momentLabel
+          ? `Fill gaps before ${ctx.momentLabel}`
+          : 'Extend your best-performing content',
+      action: subsFlat
+        ? `"${truncate(top.title, 30)}" is live but not converting — ship ${top.gaps[0]} this week to deepen engagement.`
+        : nearMoment && ctx.momentLabel
+          ? `"${truncate(top.title, 30)}" at ${fmtNum(top.views)} views is missing ${gapList}. Fill before ${ctx.momentLabel} in ${ctx.daysToNextMoment}d.`
+          : `"${truncate(top.title, 30)}" at ${fmtNum(top.views)} views is missing ${gapList}. Ship ${top.gaps[0]} this week — highest-ROI move on the channel.`,
+    };
+
+    // Secondary: collab or cadence signal
+    let secondary: MoveDirection | null = null;
+    if (upload.hasCollabs && upload.topRecent) {
+      secondary = {
+        label: 'Extend reach via collaborator channels',
+        action: `Activate YouTube Collab with the feature artist to distribute "${truncate(upload.topRecent.title, 30)}" across both audiences.`,
+      };
+    } else if (videoGaps.length > 1 && videoGaps[1].gaps[0] !== top.gaps[0]) {
+      secondary = {
+        label: `Close the ${videoGaps[1].gaps[0]} gap`,
+        action: `"${truncate(videoGaps[1].title, 30)}" (${fmtNum(videoGaps[1].views)} views) also needs ${videoGaps[1].gaps[0]}. Same effort, double the return.`,
+      };
+    }
+    return { primary, secondary };
   }
 
-  // 3. Near moment with no specific gap — push cadence
+  // ── NEAR MOMENT, NO GAPS ──────────────────────────────────────────────
   if (nearMoment && ctx.momentLabel) {
-    if (upload.shortsCount === 0)
-      return `${ctx.daysToNextMoment}d to ${ctx.momentLabel} and no Shorts in the last 2 weeks. Post 2–3 Shorts from catalogue this week to warm the channel for the drop.`;
-    return `${ctx.daysToNextMoment}d to ${ctx.momentLabel}. Maintain this Shorts cadence through the drop — the algorithm is watching consistency.`;
+    return {
+      primary: {
+        label: upload.shortsCount === 0 ? 'Warm up for the drop' : 'Hold cadence through the drop',
+        action: upload.shortsCount === 0
+          ? `${ctx.daysToNextMoment}d to ${ctx.momentLabel} and no Shorts in 2 weeks. Post 2–3 catalogue Shorts this week to warm the channel.`
+          : `${ctx.daysToNextMoment}d to ${ctx.momentLabel}. Maintain this Shorts cadence — the algorithm is watching consistency.`,
+      },
+      secondary: null,
+    };
   }
 
-  // 4. Active release window
-  if (upload.hasReleaseSignal && upload.topRecent)
-    return `"${truncate(upload.topRecent.title, 35)}" is leading the release at ${fmtNum(upload.topRecent.viewCount)} views. Cut a Short from it this week to extend the window.`;
+  // ── ACTIVE BUT NO SHORTS ──────────────────────────────────────────────
+  if (upload.recentCount > 0 && upload.shortsCount === 0 && upload.topRecent) {
+    return {
+      primary: {
+        label: 'Add the discovery layer you\'re missing',
+        action: `${upload.recentCount} uploads in 14d but zero Shorts. Cut a clip from "${truncate(upload.topRecent.title, 30)}" — Shorts reach audiences who never click long-form.`,
+      },
+      secondary: null,
+    };
+  }
 
-  // 5. Live content
-  if (upload.hasLiveContent && upload.topRecent)
-    return `"${truncate(upload.topRecent.title, 35)}" (${fmtNum(upload.topRecent.viewCount)} views) from ${upload.liveVenue ?? 'the live set'}. Cut Shorts from the best moments this week.`;
+  // ── ACCELERATE ─────────────────────────────────────────────────────────
+  if (decision.type === 'ACCELERATE' && upload.topRecent) {
+    return {
+      primary: {
+        label: 'Don\'t change what\'s working',
+        action: `"${truncate(upload.topRecent.title, 30)}" is at ${fmtNum(upload.topRecent.viewCount)} views and climbing. Keep feeding this track with Shorts — let it compound.`,
+      },
+      secondary: null,
+    };
+  }
 
-  // 6. Collabs
-  if (upload.hasCollabs && upload.topRecent)
-    return `The collab "${truncate(upload.topRecent.title, 35)}" is at ${fmtNum(upload.topRecent.viewCount)} views. Push it with a Short or lyric cut this week while the feature drives traffic.`;
+  // ── TOP RECENT EXISTS ─────────────────────────────────────────────────
+  if (upload.topRecent) {
+    return {
+      primary: {
+        label: 'Extend your top performer',
+        action: `"${truncate(upload.topRecent.title, 30)}" is leading at ${fmtNum(upload.topRecent.viewCount)} views. Cut a Short from it this week.`,
+      },
+      secondary: upload.hasCollabs ? {
+        label: 'Activate the collab network',
+        action: 'Use YouTube Collab to distribute across the feature artist\'s audience while the track has momentum.',
+      } : null,
+    };
+  }
 
-  // 7. Cadence-based
-  if (upload.recentCount > 0 && upload.shortsCount === 0 && upload.topRecent)
-    return `${upload.recentCount} uploads in 14d but zero Shorts. Cut a clip from "${truncate(upload.topRecent.title, 35)}" this week — Shorts reach audiences who never click long-form.`;
-  if (upload.topRecent && decision.type === 'ACCELERATE')
-    return `"${truncate(upload.topRecent.title, 35)}" is at ${fmtNum(upload.topRecent.viewCount)} views and climbing. Don't add new formats — keep feeding this track with Shorts and let it compound.`;
-  if (upload.topRecent)
-    return `"${truncate(upload.topRecent.title, 35)}" is the top performer at ${fmtNum(upload.topRecent.viewCount)} views. Extend it with a Short this week.`;
-
-  // 8. Maintain — no generic advice, reference cadence
-  if (decision.type === 'MAINTAIN')
-    return `${ctx.uploads30d} uploads in 30d is holding. Don't change the cadence — focus on support formats for your top content.`;
-
-  return `${ctx.uploads30d} uploads in 30d. Push one more Short this week to keep the algorithm engaged.`;
-}
-
-function campaignOutcome(
-  decision: { type: string; expectedImpact: string },
-  uploads: RecentUpload[],
-  isColdMode: boolean,
-): string {
-  if (isColdMode)
-    return 'Three uploads in a week typically re-activates subscriber reach. Consistency signals tend to improve distribution within 7–14 days.';
-
-  const gaps = scanVideoGaps(uploads);
-  if (gaps.length > 0 && gaps[0].views >= 100_000)
-    return `"${truncate(gaps[0].title, 30)}" already has audience validation. Each support format compounds that reach — Shorts alone can add 30–50% incremental views.`;
-  if (gaps.length > 0)
-    return 'Each missing format is a discovery surface this track isn\'t using. Shorts and lyric cuts extend a video\'s active life by weeks.';
-  if (decision.type === 'ACCELERATE')
-    return 'The channel is compounding. Every extra upload this week rides existing momentum at a fraction of the cost of new content.';
-  if (decision.type === 'MAINTAIN')
-    return 'Cadence is working. Changing it now risks breaking the feedback loop the algorithm has built around this channel.';
-  return decision.expectedImpact;
+  // ── MAINTAIN ──────────────────────────────────────────────────────────
+  return {
+    primary: {
+      label: decision.type === 'MAINTAIN' ? 'Hold the line' : 'Keep the algorithm engaged',
+      action: decision.type === 'MAINTAIN'
+        ? `${ctx.uploads30d} uploads in 30d is working. Don't change cadence — focus on support formats for top content.`
+        : `${ctx.uploads30d} uploads in 30d. Push one more Short this week to keep the algorithm active.`,
+    },
+    secondary: null,
+  };
 }
 
 /**
