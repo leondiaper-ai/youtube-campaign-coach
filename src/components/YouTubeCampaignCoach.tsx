@@ -1678,8 +1678,11 @@ const MONTH_MAP: Record<string, number> = {
  *  - "19 Nov–11 Dec – title"     → first day
  */
 function parseTimelineLine(raw: string, fallbackYear: number): ParsedTimelineEvent | null {
-  const line = raw.trim().replace(/^[-•*\u2022]\s*/, '');
+  let line = raw.trim().replace(/^[-•*\u2022]\s*/, '');
   if (!line) return null;
+
+  // Strip leading day names: "Thursday 30th April" → "30th April"
+  line = line.replace(/^(?:Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?|Sat(?:urday)?|Sun(?:day)?)\s+/i, '');
 
   let day: number | null = null;
   let month: number | undefined;
@@ -1762,8 +1765,13 @@ function parseTimelineLine(raw: string, fallbackYear: number): ParsedTimelineEve
   rest = rest.replace(/^\s*(?:20\d{2})?\s*/, '');
   // Remove the separator between date and title
   rest = rest.replace(/^\s*[-–—]+\s*/, '').trim();
+  // Strip "@ time/location" blocks followed by a separator (colon, dash, en-dash)
+  // e.g. "@ 6pm UK: title", "@ Standard Store Turn: title", "@ 7.30pm – title"
+  rest = rest.replace(/^@\s*[^:–—\-]*\s*[:–—\-]\s*/i, '').trim();
   // If rest still looks like it starts with a separator after time info
   rest = rest.replace(/^[@\d.:apm\s]*[-–—]+\s*/i, '').trim();
+  // Handle colon separator (e.g. "30th April: title" when no @ block)
+  if (/^:\s*/.test(rest)) rest = rest.replace(/^:\s*/, '').trim();
   const title = rest || line;
 
   // Skip lines that are just dates with no meaningful title
@@ -1797,7 +1805,7 @@ function classifyTimelineEvent(title: string): TimelineKind {
   if (/\bdocumentary\b.*\brelease|release\b.*\bdocumentary|documentary.*youtube/.test(t) || /\bdocumentary\b/.test(t)) return 'documentaryRelease';
   if (/\bdeluxe\b.*\b(album|release)\b/.test(t)) return 'albumRelease';
   if (/\balbum\b.*\b(announc|reveal)\b/.test(t) || /\b(announc|reveal)\b.*\balbum\b/.test(t)) return 'albumAnnounce';
-  if (/\balbum\b.*\b(release|out|drop)\b|\b(release|drop)\b.*\balbum\b/.test(t)) return 'albumRelease';
+  if (/\balbum\b.*\b(release|launch|out|drop)\b|\b(release|launch|drop)\b.*\balbum\b/.test(t)) return 'albumRelease';
   if (/\bsingle\b.*\b(release|out|drop)\b|\b(release|drop)\b.*\bsingle\b|\bsingle\s*#?\d\b/.test(t)) return 'singleRelease';
   if (/\b(official\s*music\s*video|official\s*video|visualis|visualiz)\b/.test(t)) return 'singleRelease';
   if (/\brelease\b/.test(t)) return 'singleRelease';
