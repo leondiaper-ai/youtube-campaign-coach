@@ -50,6 +50,14 @@ const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string }> = {
   COLD:              { bg: '#FFE2D8', fg: '#8A1F0C' },
 };
 
+const SPARK_STYLE: Record<ChannelState, { stroke: string; fill: string }> = {
+  HEALTHY:           { stroke: '#1FBE7A', fill: 'rgba(31,190,122,0.12)' },
+  'WEAK CONVERSION': { stroke: '#F08A3C', fill: 'rgba(240,138,60,0.10)' },
+  BUILDING:          { stroke: '#C4A94D', fill: 'rgba(196,169,77,0.10)' },
+  'AT RISK':         { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.10)' },
+  COLD:              { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.10)' },
+};
+
 function deltaColor(v: number | null): string {
   if (v == null) return 'rgba(14,14,14,0.25)';
   if (v > 0) return '#0C6A3F';
@@ -258,15 +266,15 @@ function DecisionCard({
             7d subs{weak ? ' ⚠' : ''}
           </div>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto rounded-lg px-3 py-2" style={{ background: SPARK_STYLE[card.boardStatus].fill }}>
           <Sparkline
             data={card.sparkline}
-            width={120}
-            height={36}
-            stroke="rgba(14,14,14,0.25)"
-            fill="rgba(14,14,14,0.04)"
+            width={140}
+            height={44}
+            stroke={SPARK_STYLE[card.boardStatus].stroke}
+            fill={SPARK_STYLE[card.boardStatus].fill}
           />
-          <div className="text-[9px] text-ink/25 text-right mt-0.5 uppercase tracking-wider">
+          <div className="text-[9px] text-right mt-1 uppercase tracking-wider font-bold" style={{ color: SPARK_STYLE[card.boardStatus].stroke }}>
             30d trend
           </div>
         </div>
