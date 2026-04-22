@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { fmtNum, STATUS_COLOR, type ChannelState } from '@/lib/artists';
+import { fmtNum } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import Sparkline from './Sparkline';
 
@@ -9,6 +9,13 @@ const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
+
+type BoardStatus =
+  | 'HEALTHY'
+  | 'PUSH — WEAK CONVERSION'
+  | 'BUILDING'
+  | 'COLD'
+  | 'FIX';
 
 type CardData = {
   slug: string;
@@ -18,11 +25,10 @@ type CardData = {
   priority: 'high' | 'normal';
   subs7Delta: number | null;
   views7Delta: number | null;
-  uploadsLast30d: number;
-  daysSinceUpload: number | null;
-  state: ChannelState | null;
-  contextLine: string | null;
-  nextAction: string | null;
+  boardStatus: BoardStatus;
+  diagnosis: string;
+  actions: string[];
+  cadenceLine: string;
   sparkline: { x: number; y: number }[];
   notes: CampaignNote[];
 };
@@ -32,106 +38,78 @@ type AvailableArtist = { slug: string; name: string };
 function fmtNoteDate(iso: string) {
   const d = new Date(iso);
   const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
   if (diffDays === 0) return 'today';
   if (diffDays === 1) return 'yesterday';
   if (diffDays < 7) return `${diffDays}d ago`;
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-const STATE_LABEL: Record<string, string> = {
-  HEALTHY: 'Healthy',
-  BUILDING: 'Building',
-  'AT RISK': 'Stalled',
-  COLD: 'Cold',
+const STATUS_STYLE: Record<BoardStatus, { bg: string; fg: string }> = {
+  HEALTHY:                  { bg: '#E6F8EE', fg: '#0C6A3F' },
+  'PUSH — WEAK CONVERSION': { bg: '#FFEAD6', fg: '#8A4A1A' },
+  BUILDING:                 { bg: '#FFF5D6', fg: '#7A5A00' },
+  COLD:                     { bg: '#FFE2D8', fg: '#8A1F0C' },
+  FIX:                      { bg: '#FFE2D8', fg: '#8A1F0C' },
 };
 
-const STATE_STYLE: Record<string, { bg: string; fg: string }> = {
-  HEALTHY:    { bg: '#E6F8EE', fg: '#0C6A3F' },
-  BUILDING:   { bg: '#FFF5D6', fg: '#7A5A00' },
-  'AT RISK':  { bg: '#FFEAD6', fg: '#8A4A1A' },
-  COLD:       { bg: '#FFE2D8', fg: '#8A1F0C' },
-};
+function deltaColor(v: number | null): string {
+  if (v == null) return 'rgba(14,14,14,0.25)';
+  if (v > 0) return '#0C6A3F';
+  if (v < 0) return '#8A1F0C';
+  return 'rgba(14,14,14,0.4)';
+}
+
+/** Flag weak conversion: views strong but subs flat/negative */
+function subsIsWeak(card: CardData): boolean {
+  return (
+    card.views7Delta != null &&
+    card.views7Delta > 5000 &&
+    (card.subs7Delta == null || card.subs7Delta <= 0)
+  );
+}
 
 // ─── Snapshot generator ─────────────────────────────────────────────────────
 function generateSnapshot(card: CardData): string {
   const name = card.name.toUpperCase();
-  const state = card.state ? (STATE_LABEL[card.state] ?? card.state).toUpperCase() : 'UNKNOWN';
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-  // State interpretation
-  const interp = card.contextLine ?? 'No data available';
-
-  // This week
   const viewsLine = card.views7Delta != null
     ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)} views`
     : 'No view data';
   const subsLine = card.subs7Delta != null
     ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs`
     : 'No sub data';
-  const uploadsLine = `${card.uploadsLast30d} uploads in 30 days`;
 
-  // What's working / missing — derived from state + metrics
-  const working: string[] = [];
-  const missing: string[] = [];
-
-  if (card.views7Delta != null && card.views7Delta > 0) working.push('Views growing week-on-week');
-  if (card.subs7Delta != null && card.subs7Delta > 0) working.push('Subscriber growth positive');
-  if (card.uploadsLast30d >= 5) working.push('Strong upload cadence');
-  if (card.uploadsLast30d >= 2 && card.uploadsLast30d < 5) working.push('Consistent upload activity');
-  if (working.length === 0) working.push('No strong positive signals this week');
-
-  if (card.daysSinceUpload != null && card.daysSinceUpload > 14) missing.push(`No uploads in ${card.daysSinceUpload} days`);
-  else if (card.uploadsLast30d < 2) missing.push('Upload cadence below minimum');
-  if (card.subs7Delta != null && card.subs7Delta <= 0) missing.push('No subscriber growth');
-  if (card.views7Delta != null && card.views7Delta <= 0) missing.push('Views flat or declining');
-  if (missing.length === 0) missing.push('No major blockers');
-
-  // Context
   const latestNote = card.notes.length > 0 ? card.notes[0] : null;
   const contextLine = latestNote
     ? `${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`
     : card.campaign ?? 'No notes';
 
-  // Next
-  const nextLine = card.nextAction ?? 'No action set';
-
-  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
   return [
     `YOUTUBE CAMPAIGN SNAPSHOT — ${name}`,
     today,
     '',
-    `STATE: ${state}`,
-    interp,
+    `STATE: ${card.boardStatus}`,
     '',
     'THIS WEEK',
     viewsLine,
     subsLine,
-    uploadsLine,
+    card.cadenceLine,
     '',
-    "WHAT'S WORKING",
-    ...working.map((w) => `- ${w}`),
+    'DIAGNOSIS',
+    card.diagnosis,
     '',
-    "WHAT'S MISSING",
-    ...missing.map((m) => `- ${m}`),
+    'WHAT TO DO',
+    ...card.actions.map((a) => `→ ${a}`),
     '',
     'CONTEXT',
     `- ${contextLine}`,
-    '',
-    'NEXT ACTION',
-    `→ ${nextLine}`,
   ].join('\n');
 }
 
 // ─── Snapshot Modal ─────────────────────────────────────────────────────────
-function SnapshotModal({
-  text,
-  onClose,
-}: {
-  text: string;
-  onClose: () => void;
-}) {
+function SnapshotModal({ text, onClose }: { text: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
@@ -165,10 +143,7 @@ function SnapshotModal({
         <button
           onClick={handleCopy}
           className="self-end text-[11px] font-bold uppercase tracking-[0.12em] px-4 py-2 rounded-lg transition-all"
-          style={{
-            background: copied ? '#E6F8EE' : INK,
-            color: copied ? '#0C6A3F' : PAPER,
-          }}
+          style={{ background: copied ? '#E6F8EE' : INK, color: copied ? '#0C6A3F' : PAPER }}
         >
           {copied ? 'Copied' : 'Copy to clipboard'}
         </button>
@@ -177,8 +152,8 @@ function SnapshotModal({
   );
 }
 
-// ─── Status Card ────────────────────────────────────────────────────────────
-function StatusCard({
+// ─── Decision Card ──────────────────────────────────────────────────────────
+function DecisionCard({
   card,
   onUnpin,
   onNotesChange,
@@ -191,7 +166,8 @@ function StatusCard({
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
-  const style = card.state ? STATE_STYLE[card.state] : null;
+  const style = STATUS_STYLE[card.boardStatus];
+  const weak = subsIsWeak(card);
 
   async function addNote() {
     if (!noteInput.trim()) return;
@@ -228,7 +204,7 @@ function StatusCard({
       className="rounded-2xl p-6 relative group"
       style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}
     >
-      {/* Remove button — visible on hover */}
+      {/* Remove — hover only */}
       <button
         onClick={() => onUnpin(card.slug)}
         className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/25 hover:!text-ink/50 hover:bg-black/5 transition-all"
@@ -237,26 +213,24 @@ function StatusCard({
         &times;
       </button>
 
-      {/* ─── Top: Name + Campaign + Badge ─────────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 mb-5">
+      {/* ─── A. Artist / Campaign + B. Status ────────────────────────── */}
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div className="min-w-0">
           <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
           {card.campaign && (
             <div className="text-[12px] text-ink/40 mt-0.5">{card.campaign}</div>
           )}
         </div>
-        {style && card.state && (
-          <span
-            className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.12em] shrink-0 mt-1"
-            style={{ background: style.bg, color: style.fg }}
-          >
-            {STATE_LABEL[card.state] ?? card.state}
-          </span>
-        )}
+        <span
+          className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] shrink-0 mt-1 whitespace-nowrap"
+          style={{ background: style.bg, color: style.fg }}
+        >
+          {card.boardStatus}
+        </span>
       </div>
 
-      {/* ─── Hero Metrics: 7D Views + 7D Subs ────────────────────────── */}
-      <div className="flex items-end gap-8 mb-4">
+      {/* ─── C. Key metrics + sparkline ───────────────────────────────── */}
+      <div className="flex items-end gap-8 mb-3">
         <div>
           <div
             className="text-[32px] font-black leading-none tabular-nums"
@@ -273,18 +247,20 @@ function StatusCard({
         <div>
           <div
             className="text-[32px] font-black leading-none tabular-nums"
-            style={{ color: deltaColor(card.subs7Delta) }}
+            style={{
+              color: weak ? '#8A1F0C' : deltaColor(card.subs7Delta),
+            }}
           >
             {card.subs7Delta != null
               ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}`
               : '—'}
           </div>
-          <div className="text-[11px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-            7d subs
+          <div className="text-[11px] mt-1 uppercase tracking-[0.1em] font-bold" style={{
+            color: weak ? '#8A1F0C' : 'rgba(14,14,14,0.35)',
+          }}>
+            7d subs{weak ? ' ⚠' : ''}
           </div>
         </div>
-
-        {/* Sparkline — right-aligned */}
         <div className="ml-auto">
           <Sparkline
             data={card.sparkline}
@@ -299,40 +275,26 @@ function StatusCard({
         </div>
       </div>
 
-      {/* ─── Secondary metrics ────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 text-[11px] text-ink/40 mb-4 tabular-nums">
-        <span>{card.uploadsLast30d} uploads / 30d</span>
-        <span className="text-ink/15">·</span>
-        <span>
-          {card.daysSinceUpload != null
-            ? card.daysSinceUpload === 0
-              ? 'Uploaded today'
-              : `Last upload ${card.daysSinceUpload}d ago`
-            : 'No upload data'}
-        </span>
+      {/* ─── Cadence line (single, no duplication) ────────────────────── */}
+      <div className="text-[11px] text-ink/40 mb-4">{card.cadenceLine}</div>
+
+      {/* ─── D + E. Decision block: diagnosis + actions ───────────────── */}
+      <div className="rounded-lg p-4 mb-4" style={{ background: SOFT }}>
+        <div className="text-[13px] text-ink/70 leading-snug mb-3">
+          {card.diagnosis}
+        </div>
+        <div className="space-y-1.5">
+          {card.actions.map((action, i) => (
+            <div key={i} className="text-[13px] font-medium leading-snug flex gap-2">
+              <span className="text-ink/30 shrink-0">→</span>
+              <span>{action}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* ─── Context line ─────────────────────────────────────────────── */}
-      {card.contextLine && (
-        <div className="text-[13px] text-ink/55 mb-3 leading-snug">
-          {card.contextLine}
-        </div>
-      )}
-
-      {/* ─── NEXT action ──────────────────────────────────────────────── */}
-      {card.nextAction && (
-        <div
-          className="rounded-lg px-4 py-2.5 mb-4 text-[13px]"
-          style={{ background: INK, color: PAPER }}
-        >
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] opacity-40 mr-2">NEXT</span>
-          <span className="font-medium">{card.nextAction}</span>
-        </div>
-      )}
-
-      {/* ─── Notes ────────────────────────────────────────────────────── */}
+      {/* ─── F. Notes ─────────────────────────────────────────────────── */}
       <div style={{ borderTop: `1px solid ${SOFT}` }} className="pt-3">
-        {/* Latest note inline */}
         {latestNote && (
           <div className="flex items-start gap-2 mb-2">
             <div className="flex-1 min-w-0">
@@ -351,7 +313,6 @@ function StatusCard({
           </div>
         )}
 
-        {/* Expand older notes */}
         {hasMoreNotes && (
           <div className="mb-2">
             <button
@@ -384,7 +345,6 @@ function StatusCard({
           </div>
         )}
 
-        {/* Add note input + Generate Snapshot */}
         <div className="flex items-center gap-2">
           <input
             value={noteInput}
@@ -413,19 +373,9 @@ function StatusCard({
         </div>
       </div>
 
-      {/* Snapshot modal */}
-      {snapshot && (
-        <SnapshotModal text={snapshot} onClose={() => setSnapshot(null)} />
-      )}
+      {snapshot && <SnapshotModal text={snapshot} onClose={() => setSnapshot(null)} />}
     </div>
   );
-}
-
-function deltaColor(v: number | null): string {
-  if (v == null) return 'rgba(14,14,14,0.25)';
-  if (v > 0) return '#0C6A3F';
-  if (v < 0) return '#8A1F0C';
-  return 'rgba(14,14,14,0.4)';
 }
 
 // ─── Board ──────────────────────────────────────────────────────────────────
@@ -459,20 +409,15 @@ export default function CampaignStatusBoard({
     await fetch(`/api/active-campaigns?slug=${slug}`, { method: 'DELETE' });
     const removed = cards.find((c) => c.slug === slug);
     setCards((prev) => prev.filter((c) => c.slug !== slug));
-    if (removed) {
-      setAvailable((prev) => [...prev, { slug: removed.slug, name: removed.name }]);
-    }
+    if (removed) setAvailable((prev) => [...prev, { slug: removed.slug, name: removed.name }]);
   }
 
   function handleNotesChange(slug: string, notes: CampaignNote[]) {
-    setCards((prev) =>
-      prev.map((c) => (c.slug === slug ? { ...c, notes } : c)),
-    );
+    setCards((prev) => prev.map((c) => (c.slug === slug ? { ...c, notes } : c)));
   }
 
   return (
     <>
-      {/* Add campaign */}
       <div className="mb-8">
         {!showAdd ? (
           <button
@@ -487,42 +432,32 @@ export default function CampaignStatusBoard({
               className="rounded-lg border px-3 py-2 text-[13px] outline-none"
               style={{ borderColor: MUTED, background: SOFT }}
               defaultValue=""
-              onChange={(e) => {
-                if (e.target.value) handlePin(e.target.value);
-              }}
+              onChange={(e) => { if (e.target.value) handlePin(e.target.value); }}
               disabled={pinning}
             >
               <option value="" disabled>
                 {available.length === 0 ? 'All artists already added' : 'Select an artist…'}
               </option>
               {available.map((a) => (
-                <option key={a.slug} value={a.slug}>
-                  {a.name}
-                </option>
+                <option key={a.slug} value={a.slug}>{a.name}</option>
               ))}
             </select>
-            <button
-              onClick={() => setShowAdd(false)}
-              className="text-[12px] text-ink/30 hover:text-ink/50"
-            >
+            <button onClick={() => setShowAdd(false)} className="text-[12px] text-ink/30 hover:text-ink/50">
               Cancel
             </button>
           </div>
         )}
       </div>
 
-      {/* Cards */}
       {cards.length === 0 ? (
         <div className="rounded-2xl p-16 text-center" style={{ background: SOFT }}>
           <div className="text-[15px] font-bold mb-1">No campaigns yet</div>
-          <div className="text-[13px] text-ink/40">
-            Add artists to start tracking campaign status.
-          </div>
+          <div className="text-[13px] text-ink/40">Add artists to start tracking campaign status.</div>
         </div>
       ) : (
         <div className="space-y-5">
           {cards.map((card) => (
-            <StatusCard
+            <DecisionCard
               key={card.slug}
               card={card}
               onUnpin={handleUnpin}
