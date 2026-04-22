@@ -316,7 +316,196 @@ type YouTubeMoment = {
   priority: 'high' | 'medium' | 'low';
   tier: MomentTier;          // 1=primary, 2=support, 3=continuous
   parentId?: string;         // for tier-2: ID of the primary moment this supports
+  contentPlan?: ContentPlan;     // auto-generated 4-phase content support plan
 };
+
+// ── CONTENT SUPPORT PLAN ───────────────────────────────────────────────────
+// Auto-generated 4-phase plan around key campaign events.
+// Warm-up → Signal → Release Push → Tail
+
+type ContentPlanPhaseId = 'warmup' | 'signal' | 'push' | 'tail';
+
+type ContentPlanItem = {
+  id: string;
+  label: string;
+  done: boolean;
+};
+
+type ContentPlanPhase = {
+  id: ContentPlanPhaseId;
+  label: string;
+  goal: string;
+  dayStart: number;    // relative to event (negative = before)
+  dayEnd: number;
+  items: ContentPlanItem[];
+};
+
+type ContentPlan = {
+  phases: ContentPlanPhase[];
+  /** User overrides stored — if true, don't regenerate */
+  userEdited?: boolean;
+};
+
+/** Which moment types trigger auto content plan generation */
+const CONTENT_PLAN_TYPES = new Set<YouTubeMomentType>([
+  'official_video', 'album_release', 'album_announce', 'deluxe_release',
+  'tour_announce', 'festival', 'live_show',
+]);
+
+/** Phase templates per moment type */
+const CONTENT_PLAN_TEMPLATES: Record<string, {
+  warmup: string[];
+  signal: string[];
+  push: string[];
+  tail: string[];
+}> = {
+  official_video: {
+    warmup:  ['BTS clip from recording/shoot', 'Personality Short (artist-led)', 'Teaser clip (audio snippet)'],
+    signal:  ['Trailer / structured teaser', 'Countdown Community Post'],
+    push:    ['Video cutdown Short ×2', 'Link Community Post', 'Premiere setup'],
+    tail:    ['Best-performing moment recut', 'Behind-the-scenes extended', 'Fan reaction roundup'],
+  },
+  album_release: {
+    warmup:  ['Track teaser Short ×2', 'BTS studio clip', 'Artist face-to-camera hype', 'Album trailer'],
+    signal:  ['Focus track teaser', 'Pre-save / pre-order CTA', 'Countdown Community Post'],
+    push:    ['Hero asset Short ×3', 'Track cutdowns from standout tracks', 'Link Community Post', 'Listening session clip'],
+    tail:    ['Deep cut highlight Short', 'Best-performing track extension', 'Fan reaction content', 'BTS album story'],
+  },
+  album_announce: {
+    warmup:  ['Personality Short (artist voice)', 'Tease visual / aesthetic reveal'],
+    signal:  ['Announcement trailer', 'Community Post with details'],
+    push:    ['Announcement Short cutdown ×2', 'Track list reveal Short'],
+    tail:    ['Pre-save reminder', 'Next single teaser'],
+  },
+  deluxe_release: {
+    warmup:  ['New track snippet Short', 'BTS of new recordings'],
+    signal:  ['Announcement post', 'Teaser of new content'],
+    push:    ['New track cutdown Short ×2', 'Link Community Post'],
+    tail:    ['Best-performing new track Short', 'Fan reaction clip'],
+  },
+  tour_announce: {
+    warmup:  ['Personality clip (excited about tour)', 'Throwback live Short'],
+    signal:  ['Announcement video / teaser', 'Dates reveal post'],
+    push:    ['City-specific Short ×2', 'Ticket CTA Community Post'],
+    tail:    ['Ticket update Short', 'Rehearsal BTS clip'],
+  },
+  festival: {
+    warmup:  ['Travel prep Short', 'Festival lineup hype clip'],
+    signal:  ['Travel diary Short', 'Arrival clip'],
+    push:    ['Performance Short', 'Crowd reaction Short', 'Backstage clip'],
+    tail:    ['Recap video', 'Best moment recut Short', 'Community Post roundup'],
+  },
+  live_show: {
+    warmup:  ['Venue / city arrival Short', 'Soundcheck clip'],
+    signal:  ['Pre-show backstage Short'],
+    push:    ['Performance highlight Short ×2', 'Crowd energy clip'],
+    tail:    ['Recap Short', 'Best moment clip'],
+  },
+};
+
+/** Default fallback template */
+const DEFAULT_PLAN_TEMPLATE = {
+  warmup:  ['BTS / personality clip', 'Teaser Short'],
+  signal:  ['Structured teaser', 'Community Post'],
+  push:    ['Hero asset cutdown ×2', 'Link Community Post'],
+  tail:    ['Best-performing moment recut', 'Extended BTS clip'],
+};
+
+let _cpItemId = 0;
+
+function generateContentPlan(momentType: YouTubeMomentType): ContentPlan {
+  const template = CONTENT_PLAN_TEMPLATES[momentType] ?? DEFAULT_PLAN_TEMPLATE;
+  const mkItem = (label: string): ContentPlanItem => ({
+    id: `cpi-${++_cpItemId}`,
+    label,
+    done: false,
+  });
+  return {
+    phases: [
+      {
+        id: 'warmup',
+        label: 'Warm-up',
+        goal: 'Wake the audience',
+        dayStart: -7,
+        dayEnd: -3,
+        items: template.warmup.map(mkItem),
+      },
+      {
+        id: 'signal',
+        label: 'Signal',
+        goal: 'Build awareness',
+        dayStart: -2,
+        dayEnd: -1,
+        items: template.signal.map(mkItem),
+      },
+      {
+        id: 'push',
+        label: 'Release Push',
+        goal: 'Drive to main video',
+        dayStart: 0,
+        dayEnd: 2,
+        items: template.push.map(mkItem),
+      },
+      {
+        id: 'tail',
+        label: 'Tail',
+        goal: 'Extend momentum',
+        dayStart: 3,
+        dayEnd: 7,
+        items: template.tail.map(mkItem),
+      },
+    ],
+  };
+}
+
+/** Determine which phase is active based on days until event */
+function getActivePhase(daysUntil: number, plan: ContentPlan): ContentPlanPhaseId | null {
+  for (const p of plan.phases) {
+    if (-daysUntil >= p.dayStart && -daysUntil <= p.dayEnd) return p.id;
+  }
+  // Smart emphasis based on proximity
+  if (daysUntil > 7) return 'warmup';
+  if (daysUntil > 2) return 'warmup';
+  if (daysUntil > 0) return 'signal';
+  if (daysUntil >= -2) return 'push';
+  if (daysUntil >= -7) return 'tail';
+  return null;
+}
+
+/** Generate shareable one-line summary */
+function contentPlanSummary(plan: ContentPlan): string {
+  return plan.phases.map((p) => {
+    const done = p.items.filter((i) => i.done).length;
+    const total = p.items.length;
+    return `${p.label} (${done}/${total})`;
+  }).join(' → ');
+}
+
+/** Generate boss-view text summary */
+function contentPlanShareText(momentTitle: string, eventDate: string, plan: ContentPlan): string {
+  const d = new Date(eventDate + 'T12:00:00');
+  const dateLabel = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const lines: string[] = [
+    `CONTENT PLAN — ${momentTitle.toUpperCase()}`,
+    dateLabel,
+    '',
+  ];
+  for (const p of plan.phases) {
+    const dayRange = p.dayStart === 0
+      ? `Day 0 to +${p.dayEnd}`
+      : p.dayStart < 0
+        ? `${p.dayStart}d to ${p.dayEnd < 0 ? p.dayEnd + 'd' : p.dayEnd === 0 ? 'Day 0' : '+' + p.dayEnd + 'd'}`
+        : `+${p.dayStart}d to +${p.dayEnd}d`;
+    const done = p.items.filter((i) => i.done).length;
+    lines.push(`${p.label.toUpperCase()} · ${p.goal} · ${dayRange} · ${done}/${p.items.length}`);
+    for (const item of p.items) {
+      lines.push(`  ${item.done ? '✓' : '○'} ${item.label}`);
+    }
+    lines.push('');
+  }
+  lines.push(`Summary: ${plan.phases.map((p) => p.label.toLowerCase()).join(' → ')}`);
+  return lines.join('\n');
+}
 
 // ── MOMENTUM SIGNALS ────────────────────────────────────────────────────────
 // Data-driven momentum states attached to planner moments.
@@ -2214,6 +2403,8 @@ function buildYouTubeMoments(
       weekNum,
       priority: cls.priority,
       tier: getMomentTier(cls.type),
+      // Auto-generate content plan for key event types
+      ...(CONTENT_PLAN_TYPES.has(cls.type) ? { contentPlan: generateContentPlan(cls.type) } : {}),
     });
   }
 
@@ -6090,6 +6281,260 @@ function ActionItem({ action, weekNum, onToggleStatus, onEdit, onDelete, dragged
   );
 }
 
+// ──── CONTENT PLAN PANEL ────────────────────────────────────────────────────
+// Compact, collapsible 4-phase content plan embedded inside moment cards.
+// Default: collapsed one-line summary. Expand: full phase breakdown.
+
+const CP_PHASE_COLORS: Record<ContentPlanPhaseId, { bg: string; fg: string; dot: string; active: string }> = {
+  warmup: { bg: 'rgba(91,124,250,0.08)', fg: '#5B7CFA', dot: '#5B7CFA', active: 'rgba(91,124,250,0.15)' },
+  signal: { bg: 'rgba(251,113,133,0.08)', fg: '#fb7185', dot: '#fb7185', active: 'rgba(251,113,133,0.15)' },
+  push:   { bg: 'rgba(255,74,28,0.08)',  fg: '#FF4A1C', dot: '#FF4A1C', active: 'rgba(255,74,28,0.15)' },
+  tail:   { bg: 'rgba(31,190,122,0.08)', fg: '#1FBE7A', dot: '#1FBE7A', active: 'rgba(31,190,122,0.15)' },
+};
+
+function ContentPlanPanel({
+  plan,
+  eventDate,
+  momentTitle,
+  onToggleItem,
+  onUpdatePhase,
+  onAddItem,
+  onRemoveItem,
+}: {
+  plan: ContentPlan;
+  eventDate: string;
+  momentTitle: string;
+  onToggleItem: (phaseId: ContentPlanPhaseId, itemId: string) => void;
+  onUpdatePhase: (phaseId: ContentPlanPhaseId, update: Partial<ContentPlanPhase>) => void;
+  onAddItem: (phaseId: ContentPlanPhaseId, label: string) => void;
+  onRemoveItem: (phaseId: ContentPlanPhaseId, itemId: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [editingPhase, setEditingPhase] = useState<ContentPlanPhaseId | null>(null);
+  const [newItemText, setNewItemText] = useState('');
+  const [showShareText, setShowShareText] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const today = new Date();
+  const eventD = new Date(eventDate + 'T12:00:00');
+  const daysUntil = Math.round((eventD.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+  const activePhaseId = getActivePhase(daysUntil, plan);
+
+  const totalItems = plan.phases.reduce((n, p) => n + p.items.length, 0);
+  const doneItems = plan.phases.reduce((n, p) => n + p.items.filter((i) => i.done).length, 0);
+  const progress = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+
+  // One-line summary: "BTS warm-up → trailer signal → release cutdowns → post-release extension"
+  const summaryLine = plan.phases.map((p) => {
+    const done = p.items.filter((i) => i.done).length;
+    const pc = CP_PHASE_COLORS[p.id];
+    return { label: p.label, done, total: p.items.length, active: p.id === activePhaseId, color: pc.fg };
+  });
+
+  function handleCopyShare() {
+    const text = contentPlanShareText(momentTitle, eventDate, plan);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  if (!expanded) {
+    // ── Collapsed: compact progress bar + phase dots ──
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        className="mt-2 w-full rounded-lg px-3 py-2 text-left transition hover:brightness-[0.97]"
+        style={{ background: 'rgba(14,14,14,0.02)', border: '1px solid rgba(14,14,14,0.06)' }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/40">Content Plan</span>
+            <span className="text-[9px] text-ink/30">·</span>
+            <span className="text-[10px] font-bold text-ink/50">{doneItems}/{totalItems}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {summaryLine.map((s) => (
+              <span
+                key={s.label}
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                style={{
+                  background: s.active ? `${s.color}18` : 'transparent',
+                  color: s.done === s.total ? '#1FBE7A' : s.active ? s.color : 'rgba(14,14,14,0.3)',
+                  fontWeight: s.active ? 900 : 600,
+                }}
+              >
+                {s.label}
+              </span>
+            ))}
+            <span className="text-[10px] text-ink/25 ml-1">▸</span>
+          </div>
+        </div>
+        {/* Mini progress bar */}
+        <div className="mt-1.5 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(14,14,14,0.06)' }}>
+          <div
+            className="h-full rounded-full transition-all"
+            style={{ width: `${progress}%`, background: progress === 100 ? '#1FBE7A' : activePhaseId ? CP_PHASE_COLORS[activePhaseId].fg : '#5B7CFA' }}
+          />
+        </div>
+      </button>
+    );
+  }
+
+  // ── Expanded: full phase breakdown ──
+  return (
+    <div
+      className="mt-2 rounded-lg overflow-hidden"
+      style={{ border: '1px solid rgba(14,14,14,0.08)' }}
+    >
+      {/* Header */}
+      <button
+        onClick={() => setExpanded(false)}
+        className="w-full px-3 py-2 flex items-center justify-between"
+        style={{ background: 'rgba(14,14,14,0.03)' }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/50">Content Plan</span>
+          <span className="text-[10px] font-bold text-ink/40">{doneItems}/{totalItems} · {progress}%</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleCopyShare(); }}
+            className="text-[9px] font-bold text-ink/30 hover:text-ink/60 px-1.5 py-0.5 rounded transition-colors"
+            style={copied ? { color: '#1FBE7A' } : undefined}
+          >
+            {copied ? 'Copied' : 'Share'}
+          </button>
+          <span className="text-[10px] text-ink/25">▾</span>
+        </div>
+      </button>
+
+      {/* Phases */}
+      <div className="px-3 pb-3 space-y-2">
+        {plan.phases.map((phase) => {
+          const pc = CP_PHASE_COLORS[phase.id];
+          const isActive = phase.id === activePhaseId;
+          const phaseDone = phase.items.filter((i) => i.done).length;
+          const isEditing = editingPhase === phase.id;
+
+          // Timing label
+          const dayRange = phase.dayStart === 0
+            ? `Day 0 → +${phase.dayEnd}d`
+            : phase.dayStart < 0
+              ? `${phase.dayStart}d → ${phase.dayEnd < 0 ? phase.dayEnd + 'd' : phase.dayEnd === 0 ? 'Day 0' : '+' + phase.dayEnd + 'd'}`
+              : `+${phase.dayStart}d → +${phase.dayEnd}d`;
+
+          return (
+            <div
+              key={phase.id}
+              className="rounded-lg overflow-hidden"
+              style={{
+                background: isActive ? pc.active : pc.bg,
+                border: isActive ? `1px solid ${pc.fg}33` : '1px solid transparent',
+              }}
+            >
+              {/* Phase header */}
+              <div className="px-2.5 py-1.5 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: pc.dot }} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: pc.fg }}>
+                    {phase.label}
+                  </span>
+                  <span className="text-[9px] font-semibold text-ink/35">{dayRange}</span>
+                  {isActive && (
+                    <span className="text-[8px] font-black uppercase tracking-[0.14em] px-1 py-0.5 rounded" style={{ background: pc.fg, color: '#FAF7F2' }}>
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-bold" style={{ color: phaseDone === phase.items.length && phase.items.length > 0 ? '#1FBE7A' : pc.fg }}>
+                    {phaseDone}/{phase.items.length}
+                  </span>
+                  <button
+                    onClick={() => setEditingPhase(isEditing ? null : phase.id)}
+                    className="text-[9px] text-ink/25 hover:text-ink/50 transition-colors"
+                  >
+                    {isEditing ? '✕' : '✎'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Goal */}
+              <div className="px-2.5 pb-1">
+                <span className="text-[9px] font-semibold text-ink/40">{phase.goal}</span>
+              </div>
+
+              {/* Items */}
+              <div className="px-2.5 pb-2 space-y-0.5">
+                {phase.items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-1.5 group">
+                    <button
+                      onClick={() => onToggleItem(phase.id, item.id)}
+                      className="text-[10px] shrink-0 w-4 h-4 flex items-center justify-center rounded transition-colors"
+                      style={{
+                        background: item.done ? '#1FBE7A' : 'rgba(14,14,14,0.06)',
+                        color: item.done ? '#FAF7F2' : 'rgba(14,14,14,0.3)',
+                      }}
+                    >
+                      {item.done ? '✓' : ''}
+                    </button>
+                    <span
+                      className="text-[10px] font-semibold flex-1"
+                      style={{
+                        color: item.done ? 'rgba(14,14,14,0.35)' : 'rgba(14,14,14,0.65)',
+                        textDecoration: item.done ? 'line-through' : 'none',
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                    {isEditing && (
+                      <button
+                        onClick={() => onRemoveItem(phase.id, item.id)}
+                        className="text-[10px] text-ink/0 group-hover:text-ink/25 hover:!text-ink/50 transition-colors"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {/* Add item (editing mode) */}
+                {isEditing && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <input
+                      value={newItemText}
+                      onChange={(e) => setNewItemText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && newItemText.trim()) {
+                          onAddItem(phase.id, newItemText.trim());
+                          setNewItemText('');
+                        }
+                      }}
+                      placeholder="Add item…"
+                      className="flex-1 text-[10px] px-1.5 py-1 rounded border-0 outline-none"
+                      style={{ background: 'rgba(255,255,255,0.6)', color: '#0E0E0E' }}
+                    />
+                    {newItemText.trim() && (
+                      <button
+                        onClick={() => { onAddItem(phase.id, newItemText.trim()); setNewItemText(''); }}
+                        className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                        style={{ background: pc.fg, color: '#FAF7F2' }}
+                      >
+                        Add
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ──── HERO MOMENT CARD ───────────────────────────────────────────────────────
 // Large card for the anchor System 2 action
 function HeroMoment({ action, weekNum, onToggleStatus, onEdit, onDelete, draggedId, dragOverId, onDragStart, onDragOver, onDrop, isDeleting }: {
@@ -7653,7 +8098,7 @@ function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (mode: V
 
 // ──── PHASE BLOCK ────────────────────────────────────────────────────────────
 // Single expandable phase section
-function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatus, onEditAction, onDeleteAction, onOpenAdd, draggedId, dragOverId, onDragStart, onDragOver, onDrop, showCollapsedSupport, onToggleSupport, deletingIds, onCycleSupportStatus, onAddSupportItem, onRemoveSupportItem }: {
+function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatus, onEditAction, onDeleteAction, onOpenAdd, draggedId, dragOverId, onDragStart, onDragOver, onDrop, showCollapsedSupport, onToggleSupport, deletingIds, onCycleSupportStatus, onAddSupportItem, onRemoveSupportItem, onToggleContentPlanItem, onUpdateContentPlanPhase, onAddContentPlanItem, onRemoveContentPlanItem }: {
   phase: CampaignPhase;
   plan: CampaignPlan;
   expanded: boolean;
@@ -7673,6 +8118,10 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
   onCycleSupportStatus: (planId: string, itemId: string) => void;
   onAddSupportItem: (planId: string, phase: SupportPhase) => void;
   onRemoveSupportItem: (planId: string, itemId: string) => void;
+  onToggleContentPlanItem: (momentId: string, phaseId: ContentPlanPhaseId, itemId: string) => void;
+  onUpdateContentPlanPhase: (momentId: string, phaseId: ContentPlanPhaseId, update: Partial<ContentPlanPhase>) => void;
+  onAddContentPlanItem: (momentId: string, phaseId: ContentPlanPhaseId, label: string) => void;
+  onRemoveContentPlanItem: (momentId: string, phaseId: ContentPlanPhaseId, itemId: string) => void;
 }) {
   // Silence unused-prop warnings — keeping the signature intact for the
   // existing render call site while this section is redesigned for planning.
@@ -8248,6 +8697,19 @@ function PhaseBlock({ phase, plan, expanded, onToggleExpand, onToggleActionStatu
                           {supportCmp.shipped.join(' · ')}
                         </div>
                       </div>
+                    )}
+
+                    {/* ── CONTENT PLAN — 4-phase support strategy ──────── */}
+                    {m.contentPlan && (
+                      <ContentPlanPanel
+                        plan={m.contentPlan}
+                        eventDate={m.date}
+                        momentTitle={m.title}
+                        onToggleItem={(phaseId, itemId) => onToggleContentPlanItem(m.id, phaseId, itemId)}
+                        onUpdatePhase={(phaseId, update) => onUpdateContentPlanPhase(m.id, phaseId, update)}
+                        onAddItem={(phaseId, label) => onAddContentPlanItem(m.id, phaseId, label)}
+                        onRemoveItem={(phaseId, itemId) => onRemoveContentPlanItem(m.id, phaseId, itemId)}
+                      />
                     )}
                   </div>
                 </div>
@@ -9293,6 +9755,92 @@ export default function YouTubeCampaignCoach() {
   }, []);
 
   // ──────────────────────────────────────────────────────────────────────────
+  // CONTENT PLAN HANDLERS — manage the 4-phase content plan on YouTubeMoments
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const toggleContentPlanItem = useCallback((momentId: string, phaseId: ContentPlanPhaseId, itemId: string) => {
+    setPlan((p) => ({
+      ...p,
+      youtubeMoments: (p.youtubeMoments ?? []).map((m) => {
+        if (m.id !== momentId || !m.contentPlan) return m;
+        return {
+          ...m,
+          contentPlan: {
+            ...m.contentPlan,
+            userEdited: true,
+            phases: m.contentPlan.phases.map((ph) =>
+              ph.id !== phaseId ? ph : {
+                ...ph,
+                items: ph.items.map((i) => i.id !== itemId ? i : { ...i, done: !i.done }),
+              }
+            ),
+          },
+        };
+      }),
+    }));
+  }, []);
+
+  const updateContentPlanPhase = useCallback((momentId: string, phaseId: ContentPlanPhaseId, update: Partial<ContentPlanPhase>) => {
+    setPlan((p) => ({
+      ...p,
+      youtubeMoments: (p.youtubeMoments ?? []).map((m) => {
+        if (m.id !== momentId || !m.contentPlan) return m;
+        return {
+          ...m,
+          contentPlan: {
+            ...m.contentPlan,
+            userEdited: true,
+            phases: m.contentPlan.phases.map((ph) =>
+              ph.id !== phaseId ? ph : { ...ph, ...update }
+            ),
+          },
+        };
+      }),
+    }));
+  }, []);
+
+  const addContentPlanItem = useCallback((momentId: string, phaseId: ContentPlanPhaseId, label: string) => {
+    setPlan((p) => ({
+      ...p,
+      youtubeMoments: (p.youtubeMoments ?? []).map((m) => {
+        if (m.id !== momentId || !m.contentPlan) return m;
+        return {
+          ...m,
+          contentPlan: {
+            ...m.contentPlan,
+            userEdited: true,
+            phases: m.contentPlan.phases.map((ph) =>
+              ph.id !== phaseId ? ph : {
+                ...ph,
+                items: [...ph.items, { id: `cpi-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, label, done: false }],
+              }
+            ),
+          },
+        };
+      }),
+    }));
+  }, []);
+
+  const removeContentPlanItem = useCallback((momentId: string, phaseId: ContentPlanPhaseId, itemId: string) => {
+    setPlan((p) => ({
+      ...p,
+      youtubeMoments: (p.youtubeMoments ?? []).map((m) => {
+        if (m.id !== momentId || !m.contentPlan) return m;
+        return {
+          ...m,
+          contentPlan: {
+            ...m.contentPlan,
+            userEdited: true,
+            phases: m.contentPlan.phases.map((ph) =>
+              ph.id !== phaseId ? ph : { ...ph, items: ph.items.filter((i) => i.id !== itemId) }
+            ),
+          },
+        };
+      }),
+    }));
+  }, []);
+
+  // ──────────────────────────────────────────────────────────────────────────
   // RENDER
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -9448,6 +9996,10 @@ export default function YouTubeCampaignCoach() {
             onCycleSupportStatus={cycleSupportStatus}
             onAddSupportItem={addSupportItem}
             onRemoveSupportItem={removeSupportItem}
+            onToggleContentPlanItem={toggleContentPlanItem}
+            onUpdateContentPlanPhase={updateContentPlanPhase}
+            onAddContentPlanItem={addContentPlanItem}
+            onRemoveContentPlanItem={removeContentPlanItem}
           />
         ))}
             <CampaignToolsCard

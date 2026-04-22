@@ -31,11 +31,15 @@ type AvailableArtist = { slug: string; name: string };
 function fmtNoteDate(iso: string) {
   const d = new Date(iso);
   const now = new Date();
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
-  if (diffDays === 0) return 'today';
-  if (diffDays === 1) return 'yesterday';
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  // Compare calendar dates, not raw ms
+  const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const nDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.round((nDay.getTime() - dDay.getTime()) / 86400000);
+  if (diffDays === 0) return `today · ${dateStr}`;
+  if (diffDays === 1) return `yesterday · ${dateStr}`;
+  if (diffDays < 7) return `${diffDays}d ago · ${dateStr}`;
+  return dateStr;
 }
 
 const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string }> = {
