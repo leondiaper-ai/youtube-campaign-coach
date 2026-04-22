@@ -26,6 +26,153 @@ type CardData = {
   notes: CampaignNote[];
 };
 
+// ─── Decision Engine ───────────────────────────────────────────────────────
+type DecisionLabel = 'PUSH' | 'FIX' | 'HOLD';
+type Confidence = 'LOW' | 'MED' | 'HIGH';
+
+type BoardDecision = {
+  label: DecisionLabel;
+  confidence: Confidence;
+  stateLine: string;
+  insight: string;
+  cause: string;
+  effect: string;
+  action: string;
+  secondary: string | null;
+};
+
+/** Map channel state + metrics → PUSH / FIX / HOLD with confidence */
+function deriveDecision(card: CardData): BoardDecision {
+  const { boardStatus, views7Delta, subs7Delta, cadenceLine, sparkline } = card;
+  const hasData = views7Delta != null || subs7Delta != null;
+  const viewsStrong = views7Delta != null && views7Delta > 5000;
+  const viewsUp = views7Delta != null && views7Delta > 0;
+  const subsUp = subs7Delta != null && subs7Delta > 0;
+  const subsFlat = subs7Delta == null || subs7Delta <= 0;
+  const hasCampaign = !!card.campaign;
+  const cadenceStrong = cadenceLine.startsWith('Strong');
+  const cadenceMod = cadenceLine.startsWith('Moderate');
+  const cadenceNone = cadenceLine.startsWith('No recent');
+  const trendUp = sparkline.length >= 4 &&
+    sparkline[sparkline.length - 1].y > sparkline[Math.floor(sparkline.length / 2)].y;
+
+  // ── COLD / no data ──
+  if (boardStatus === 'COLD' || !hasData) {
+    return {
+      label: 'HOLD',
+      confidence: hasData ? 'MED' : 'LOW',
+      stateLine: hasCampaign ? 'DORMANT — NEEDS REACTIVATION' : 'INACTIVE — NO SIGNAL',
+      insight: hasCampaign
+        ? 'Campaign exists but the channel has gone silent — every day without content loses momentum'
+        : 'No uploads or engagement signal to act on yet',
+      cause: 'Channel has been silent for 30+ days',
+      effect: 'Algorithm deprioritises the channel; audience forgets',
+      action: 'Ship 2–3 catalogue Shorts this week to restart the feed',
+      secondary: hasCampaign ? 'Tease campaign content to signal a return' : null,
+    };
+  }
+
+  // ── AT RISK ──
+  if (boardStatus === 'AT RISK') {
+    return {
+      label: 'FIX',
+      confidence: viewsUp ? 'MED' : 'HIGH',
+      stateLine: cadenceNone ? 'STALLING — CADENCE DROPPED' : 'COOLING — LOSING RHYTHM',
+      insight: 'Upload rhythm has broken — the algorithm stops recommending channels that go quiet',
+      cause: cadenceNone
+        ? 'No uploads in 30 days'
+        : 'Upload cadence dropped below sustainable level',
+      effect: 'Recommendation impressions falling; audience disengaging',
+      action: cadenceNone
+        ? 'Ship something this week — a Short or Community Post to restart presence'
+        : 'Add a Short or Premiere this week to rebuild cadence',
+      secondary: hasCampaign
+        ? 'If campaign content exists, bring forward the next asset rather than waiting'
+        : 'Repurpose any existing content into a Short to fill the gap',
+    };
+  }
+
+  // ── WEAK CONVERSION ──
+  if (boardStatus === 'WEAK CONVERSION') {
+    return {
+      label: 'FIX',
+      confidence: viewsStrong ? 'HIGH' : 'MED',
+      stateLine: 'REACHING BUT NOT CONVERTING',
+      insight: 'Content is being discovered but isn\'t compelling enough to turn viewers into subscribers',
+      cause: `Views are ${viewsStrong ? 'strong' : 'positive'} but subscriber growth is flat`,
+      effect: 'Reach is being wasted — views without subs means no long-term audience build',
+      action: 'Go deeper — post a breakdown, BTS, or artist-led context piece that gives viewers a reason to subscribe',
+      secondary: cadenceStrong
+        ? 'Cadence is fine — the issue is content depth, not frequency'
+        : 'Also tighten upload cadence to give the algorithm more to work with',
+    };
+  }
+
+  // ── HEALTHY ──
+  if (boardStatus === 'HEALTHY') {
+    const momentum = subsUp && viewsStrong;
+    return {
+      label: 'PUSH',
+      confidence: momentum ? 'HIGH' : 'MED',
+      stateLine: momentum ? 'COMPOUNDING — FULL MOMENTUM' : 'HEALTHY — MAINTAINING',
+      insight: momentum
+        ? 'Both reach and conversion are positive — this is the best time to push harder'
+        : 'Channel is in a good rhythm — protect this cadence',
+      cause: `${cadenceStrong ? 'Strong' : 'Good'} cadence with ${momentum ? 'views and subs both rising' : 'positive engagement'}`,
+      effect: 'Algorithm is rewarding the channel with increased recommendations',
+      action: momentum
+        ? 'Push now — amplify with paid, collaborations, or your strongest campaign asset'
+        : 'Maintain current approach — don\'t add complexity while it\'s working',
+      secondary: momentum
+        ? 'This is the window to bring forward your biggest content moment'
+        : 'Queue next campaign asset to keep the pipeline loaded',
+    };
+  }
+
+  // ── BUILDING ──
+  // Default: BUILDING state
+  const emerging = trendUp && (viewsUp || subsUp);
+  return {
+    label: emerging ? 'PUSH' : 'HOLD',
+    confidence: emerging ? 'MED' : 'LOW',
+    stateLine: emerging
+      ? 'BUILDING MOMENTUM — EARLY SIGNAL'
+      : cadenceMod
+        ? 'BUILDING — NEEDS CONSISTENCY'
+        : 'EARLY STAGE — ESTABLISHING PRESENCE',
+    insight: emerging
+      ? 'Trend is moving in the right direction — consistent output now will compound'
+      : 'Channel is active but hasn\'t found its rhythm yet — focus on consistency over creativity',
+    cause: emerging
+      ? '30-day trend is upward with some positive signals'
+      : `${cadenceMod ? 'Moderate' : 'Light'} cadence — not yet enough to trigger algorithmic momentum`,
+    effect: emerging
+      ? 'Early algorithmic pickup; audience starting to form'
+      : 'Not enough signal for the algorithm to recommend consistently',
+    action: emerging
+      ? 'Lock this cadence and push — aim for 5+ uploads this month'
+      : 'Focus on weekly consistency first — aim for 2 uploads per week minimum',
+    secondary: hasCampaign
+      ? 'Align uploads with campaign timeline — every post should serve the rollout'
+      : null,
+  };
+}
+
+/** Is this an active campaign card (PUSH/FIX) vs early/building (HOLD)? */
+function isActiveCampaign(decision: BoardDecision, card: CardData): boolean {
+  if (decision.label === 'PUSH' || decision.label === 'FIX') return true;
+  // HOLD with a campaign name and some data = still active
+  if (card.campaign && (card.views7Delta != null || card.subs7Delta != null)) return true;
+  return false;
+}
+
+// ─── Decision label styles ─────────────────────────────────────────────────
+const DECISION_STYLE: Record<DecisionLabel, { bg: string; fg: string; border: string }> = {
+  PUSH: { bg: '#E6F8EE', fg: '#0C6A3F', border: '#B8E8D0' },
+  FIX:  { bg: '#FFF0E6', fg: '#8A4A1A', border: '#FFD4B3' },
+  HOLD: { bg: '#F5F0E4', fg: '#7A6B4E', border: '#E0D6C2' },
+};
+
 type AvailableArtist = { slug: string; name: string };
 
 function fmtNoteDate(iso: string) {
@@ -78,6 +225,7 @@ function subsIsWeak(card: CardData): boolean {
 function generateSnapshot(card: CardData): string {
   const name = card.name.toUpperCase();
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const decision = deriveDecision(card);
 
   const viewsLine = card.views7Delta != null
     ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)} views`
@@ -95,18 +243,24 @@ function generateSnapshot(card: CardData): string {
     `YOUTUBE CAMPAIGN SNAPSHOT — ${name}`,
     today,
     '',
-    `STATE: ${card.boardStatus}`,
+    `DECISION: ${decision.label} (${decision.confidence})`,
+    `STATE: ${decision.stateLine}`,
     '',
     'THIS WEEK',
     viewsLine,
     subsLine,
     card.cadenceLine,
     '',
-    'DIAGNOSIS',
-    card.diagnosis,
+    'CAUSE → EFFECT',
+    decision.cause,
+    `→ ${decision.effect}`,
     '',
     'WHAT TO DO',
-    ...card.actions.map((a) => `→ ${a}`),
+    `PRIMARY → ${decision.action}`,
+    ...(decision.secondary ? [`SECONDARY → ${decision.secondary}`] : []),
+    '',
+    'WHY THIS MATTERS',
+    decision.insight,
     '',
     'CONTEXT',
     `- ${contextLine}`,
@@ -173,6 +327,8 @@ function DecisionCard({
   const [snapshot, setSnapshot] = useState<string | null>(null);
   const style = STATUS_STYLE[card.boardStatus];
   const weak = subsIsWeak(card);
+  const decision = deriveDecision(card);
+  const dStyle = DECISION_STYLE[decision.label];
 
   async function addNote() {
     if (!noteInput.trim()) return;
@@ -204,10 +360,17 @@ function DecisionCard({
   const latestNote = card.notes.length > 0 ? card.notes[0] : null;
   const hasMoreNotes = card.notes.length > 1;
 
+  const isFix = decision.label === 'FIX';
+  const cardBorder = isFix ? dStyle.border : MUTED;
+
   return (
     <div
       className="rounded-2xl p-6 relative group"
-      style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}
+      style={{
+        background: '#FFFFFF',
+        border: `${isFix ? '2px' : '1px'} solid ${cardBorder}`,
+        boxShadow: isFix ? `0 0 0 1px ${dStyle.border}40` : undefined,
+      }}
     >
       {/* Remove — hover only */}
       <button
@@ -218,20 +381,34 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* ─── A. Artist / Campaign + B. Status ────────────────────────── */}
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div className="min-w-0">
-          <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
-          {card.campaign && (
-            <div className="text-[12px] text-ink/40 mt-0.5">{card.campaign}</div>
-          )}
-        </div>
+      {/* ─── A. Decision label + Status badge ─────────────────────────── */}
+      <div className="flex items-center gap-2 mb-3">
         <span
-          className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-[0.1em] shrink-0 mt-1 whitespace-nowrap"
+          className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
+          style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
+        >
+          {decision.label}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
+          {decision.confidence} confidence
+        </span>
+        <span
+          className="ml-auto px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.1em] shrink-0 whitespace-nowrap"
           style={{ background: style.bg, color: style.fg }}
         >
           {card.boardStatus}
         </span>
+      </div>
+
+      {/* ─── B. Artist name + state line ──────────────────────────────── */}
+      <div className="mb-4">
+        <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
+        <div className="text-[11px] font-bold uppercase tracking-[0.1em] mt-1" style={{ color: dStyle.fg }}>
+          {decision.stateLine}
+        </div>
+        {card.campaign && (
+          <div className="text-[11px] text-ink/35 mt-0.5">{card.campaign}</div>
+        )}
       </div>
 
       {/* ─── C. Key metrics + sparkline ───────────────────────────────── */}
@@ -280,22 +457,32 @@ function DecisionCard({
         </div>
       </div>
 
-      {/* ─── Cadence line (single, no duplication) ────────────────────── */}
+      {/* ─── Cadence line ─────────────────────────────────────────────── */}
       <div className="text-[11px] text-ink/40 mb-4">{card.cadenceLine}</div>
 
-      {/* ─── D + E. Decision block: diagnosis + actions ───────────────── */}
-      <div className="rounded-lg p-4 mb-4" style={{ background: SOFT }}>
-        <div className="text-[13px] text-ink/70 leading-snug mb-3">
-          {card.diagnosis}
+      {/* ─── D. Decision block: cause → effect → action ───────────────── */}
+      <div className="rounded-lg p-4 mb-3" style={{ background: isFix ? `${dStyle.bg}` : SOFT }}>
+        <div className="text-[12px] text-ink/50 leading-snug mb-2">
+          <span className="font-bold text-ink/60">CAUSE</span> — {decision.cause}
         </div>
-        <div className="space-y-1.5">
-          {card.actions.map((action, i) => (
-            <div key={i} className="text-[13px] font-medium leading-snug flex gap-2">
-              <span className="text-ink/30 shrink-0">→</span>
-              <span>{action}</span>
-            </div>
-          ))}
+        <div className="text-[12px] text-ink/50 leading-snug mb-3">
+          <span className="font-bold text-ink/60">EFFECT</span> — {decision.effect}
         </div>
+        <div className="text-[13px] font-semibold leading-snug flex gap-2 mb-1">
+          <span style={{ color: dStyle.fg }} className="shrink-0">→</span>
+          <span>{decision.action}</span>
+        </div>
+        {decision.secondary && (
+          <div className="text-[12px] text-ink/50 leading-snug flex gap-2 mt-1.5">
+            <span className="text-ink/25 shrink-0">→</span>
+            <span>{decision.secondary}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ─── E. Insight line ──────────────────────────────────────────── */}
+      <div className="text-[11px] italic leading-snug mb-4" style={{ color: `${dStyle.fg}CC` }}>
+        {decision.insight}
       </div>
 
       {/* ─── F. Notes ─────────────────────────────────────────────────── */}
@@ -459,18 +646,67 @@ export default function CampaignStatusBoard({
           <div className="text-[15px] font-bold mb-1">No campaigns yet</div>
           <div className="text-[13px] text-ink/40">Add artists to start tracking campaign status.</div>
         </div>
-      ) : (
-        <div className="space-y-5">
-          {cards.map((card) => (
-            <DecisionCard
-              key={card.slug}
-              card={card}
-              onUnpin={handleUnpin}
-              onNotesChange={handleNotesChange}
-            />
-          ))}
-        </div>
-      )}
+      ) : (() => {
+        // Split cards into active vs building/early based on decision
+        const active: CardData[] = [];
+        const building: CardData[] = [];
+        for (const card of cards) {
+          const d = deriveDecision(card);
+          if (isActiveCampaign(d, card)) {
+            active.push(card);
+          } else {
+            building.push(card);
+          }
+        }
+        // Sort active: FIX first, then PUSH, then by priority
+        active.sort((a, b) => {
+          const dA = deriveDecision(a);
+          const dB = deriveDecision(b);
+          const order: Record<DecisionLabel, number> = { FIX: 0, PUSH: 1, HOLD: 2 };
+          if (order[dA.label] !== order[dB.label]) return order[dA.label] - order[dB.label];
+          if (a.priority !== b.priority) return a.priority === 'high' ? -1 : 1;
+          return 0;
+        });
+
+        return (
+          <div className="space-y-8">
+            {active.length > 0 && (
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-4">
+                  Active Campaigns
+                </div>
+                <div className="space-y-5">
+                  {active.map((card) => (
+                    <DecisionCard
+                      key={card.slug}
+                      card={card}
+                      onUnpin={handleUnpin}
+                      onNotesChange={handleNotesChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            {building.length > 0 && (
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-4">
+                  Building / Early
+                </div>
+                <div className="space-y-5">
+                  {building.map((card) => (
+                    <DecisionCard
+                      key={card.slug}
+                      card={card}
+                      onUnpin={handleUnpin}
+                      onNotesChange={handleNotesChange}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </>
   );
 }
