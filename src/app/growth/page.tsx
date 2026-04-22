@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ARTISTS, fmtNum, daysSince, type Artist, type LiveSnap } from '@/lib/artists';
+import { ARTISTS, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, STATUS_RANK, type Artist, type LiveSnap, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
@@ -18,74 +18,23 @@ const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STATUS SYSTEM — one label per artist, no interpretation required
+// STATUS SYSTEM — unified 5-state from artists.ts
 // ─────────────────────────────────────────────────────────────────────────────
-type ControlStatus = 'Growing' | 'Flat' | 'At risk';
-
-const STATUS_STYLE: Record<ControlStatus, { bg: string; fg: string; dot: string; rowBg: string }> = {
-  'At risk':  { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C', rowBg: '#FFF8F5' },
-  'Flat':     { bg: '#F6F1E7', fg: '#6B5E4A', dot: '#B0A68E', rowBg: PAPER },
-  'Growing':  { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A', rowBg: '#F8FDF9' },
+const STATE_LABEL: Record<ChannelState, string> = {
+  HEALTHY:           'Healthy',
+  'WEAK CONVERSION': 'Weak Conversion',
+  BUILDING:          'Building',
+  'AT RISK':         'At Risk',
+  COLD:              'Cold',
 };
 
-const STATUS_RANK: Record<ControlStatus, number> = {
-  'At risk': 0,
-  'Flat': 1,
-  'Growing': 2,
+const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string; dot: string; rowBg: string }> = {
+  HEALTHY:           { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A', rowBg: '#F8FDF9' },
+  'WEAK CONVERSION': { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C', rowBg: '#FFFAF5' },
+  BUILDING:          { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C', rowBg: PAPER },
+  'AT RISK':         { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C', rowBg: '#FFF8F5' },
+  COLD:              { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C', rowBg: '#FFF8F5' },
 };
-
-/**
- * Determine status from 7d deltas + upload recency.
- *
- * Growing: positive view OR sub movement in 7d
- * At risk: losing subs, OR no uploads in 30+ days, OR declining views with no uploads in 14d
- * Flat:    everything else
- */
-function deriveStatus(
-  subs7: { delta: number; pct: number } | null,
-  views7: { delta: number; pct: number } | null,
-  lastUpDays: number | null,
-  uploads30d: number,
-): ControlStatus {
-  // At risk: channel gone cold or actively losing
-  if (lastUpDays != null && lastUpDays > 30) return 'At risk';
-  if (uploads30d === 0 && lastUpDays != null) return 'At risk';
-  if (subs7 && subs7.delta < 0 && subs7.pct < -0.002) return 'At risk';
-  if (lastUpDays != null && lastUpDays > 14 && views7 && views7.delta <= 0) return 'At risk';
-
-  // Growing: any meaningful positive movement
-  // Use both % thresholds AND absolute floors so smaller channels aren't penalised
-  if (views7 && views7.delta > 0 && (views7.pct > 0.002 || views7.delta >= 10_000)) return 'Growing';
-  if (subs7 && subs7.delta > 0 && (subs7.pct > 0.001 || subs7.delta >= 50)) return 'Growing';
-
-  return 'Flat';
-}
-
-/** One-line reason for the status — blunt, no jargon */
-function statusReason(
-  status: ControlStatus,
-  subs7: { delta: number; pct: number } | null,
-  views7: { delta: number; pct: number } | null,
-  lastUpDays: number | null,
-  uploads30d: number,
-): string {
-  if (status === 'At risk') {
-    if (lastUpDays != null && lastUpDays > 30) return `No uploads in ${lastUpDays} days`;
-    if (uploads30d === 0) return 'No activity in 30 days';
-    if (subs7 && subs7.delta < 0) return `Losing subscribers (${subs7.delta.toLocaleString()} in 7d)`;
-    if (lastUpDays != null && lastUpDays > 14) return `Not posting. Last upload ${lastUpDays}d ago`;
-    return 'Declining';
-  }
-  if (status === 'Growing') {
-    if (views7 && views7.delta > 0) return `${fmtDelta(views7.delta)} views (7d)`;
-    if (subs7 && subs7.delta > 0) return `+${subs7.delta.toLocaleString()} subs (7d)`;
-    return 'Positive movement';
-  }
-  // Flat
-  if (views7 && views7.delta === 0) return '0 views (7d)';
-  if (!views7 && !subs7) return 'No growth data yet';
-  return 'No meaningful movement (7d)';
-}
 
 function fmtDelta(n: number): string {
   const sign = n >= 0 ? '+' : '';
@@ -105,7 +54,7 @@ type RowData = {
   views7: { delta: number; pct: number } | null;
   lastUpDays: number | null;
   uploads30d: number;
-  status: ControlStatus;
+  status: ChannelState;
   reason: string;
   subsSeries: { x: number; y: number }[];
 };
@@ -126,17 +75,21 @@ export default async function ControlPage() {
       const lastUpDays = daysSince(snap?.lastUploadAt);
       const uploads30d = snap?.uploads30d ?? 0;
       const subsSeries = seriesForField(history, 'subs', 30);
-      const status = deriveStatus(subs7, views7, lastUpDays, uploads30d);
-      const reason = statusReason(status, subs7, views7, lastUpDays, uploads30d);
+      const derived = snap ? deriveFromLive(snap, {
+        subs7Delta: subs7?.delta ?? null,
+        views7Delta: views7?.delta ?? null,
+      }) : null;
+      const status: ChannelState = derived?.status ?? 'COLD';
+      const reason = derived?.reason ?? 'No data yet';
       return { artist: a, snap, subs7, views7, lastUpDays, uploads30d, status, reason, subsSeries };
     })
   );
 
-  // Sort: At risk → Flat → Growing
+  // Sort: worst state first (COLD → AT RISK → WEAK CONVERSION → BUILDING → HEALTHY)
   const sorted = [...rows].sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
 
-  const notGrowing = rows.filter((r) => r.status !== 'Growing').length;
-  const atRisk = rows.filter((r) => r.status === 'At risk').length;
+  const notGrowing = rows.filter((r) => r.status !== 'HEALTHY').length;
+  const atRisk = rows.filter((r) => r.status === 'AT RISK' || r.status === 'COLD').length;
 
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
@@ -233,10 +186,12 @@ export default async function ControlPage() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /** Sparkline colour matched to status */
-const SPARK_COLOR: Record<ControlStatus, { stroke: string; fill: string }> = {
-  'Growing':  { stroke: '#0C6A3F', fill: 'rgba(12,106,63,0.08)' },
-  'Flat':     { stroke: '#B0A68E', fill: 'rgba(176,166,142,0.06)' },
-  'At risk':  { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
+const SPARK_COLOR: Record<ChannelState, { stroke: string; fill: string }> = {
+  HEALTHY:           { stroke: '#0C6A3F', fill: 'rgba(12,106,63,0.08)' },
+  'WEAK CONVERSION': { stroke: '#F08A3C', fill: 'rgba(240,138,60,0.06)' },
+  BUILDING:          { stroke: '#B0A68E', fill: 'rgba(176,166,142,0.06)' },
+  'AT RISK':         { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
+  COLD:              { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
 };
 
 function ControlRow({ row, last }: { row: RowData; last: boolean }) {
@@ -283,7 +238,7 @@ function ControlRow({ row, last }: { row: RowData; last: boolean }) {
           style={{ background: st.bg, color: st.fg }}
         >
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
-          {status}
+          {STATE_LABEL[status]}
         </span>
       </div>
 

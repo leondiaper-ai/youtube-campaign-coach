@@ -30,10 +30,11 @@ const MUTED = '#E9E2D3';
 import { STATUS_COLOR, type ChannelState } from '@/lib/artists';
 
 const STATE_LABEL: Record<ChannelState, string> = {
-  HEALTHY:  'Healthy',
-  BUILDING: 'Building',
-  'AT RISK': 'At Risk',
-  COLD:     'Cold',
+  HEALTHY:           'Healthy',
+  'WEAK CONVERSION': 'Weak Conversion',
+  BUILDING:          'Building',
+  'AT RISK':         'At Risk',
+  COLD:              'Cold',
 };
 
 // Fallback: when derived is null, map decision.type → ChannelState
@@ -59,9 +60,9 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           (1000 * 60 * 60 * 24)
       )
     : null;
-  const derived = live
-    ? deriveFromLive(live, { daysToNextMoment, phase: artist.phase })
-    : null;
+  // Delta data computed below — but we need history first for deriveFromLive.
+  // We'll call deriveFromLive after computing deltas (see below).
+  let derived: ReturnType<typeof deriveFromLive> = null;
   const lastUpDays = daysSince(live?.lastUploadAt);
 
   const opps = detectOpportunities(artist, live, daysToNextMoment).sort(
@@ -72,6 +73,16 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const subs7 = deltaOver(history, 7, 'subs');
   const subs30 = deltaOver(history, 30, 'subs');
   const views7 = deltaOver(history, 7, 'views');
+
+  // Now derive with full conversion context
+  derived = live
+    ? deriveFromLive(live, {
+        daysToNextMoment,
+        phase: artist.phase,
+        subs7Delta: subs7?.delta ?? null,
+        views7Delta: views7?.delta ?? null,
+      })
+    : null;
 
   // Campaign-period tracking
   const campaignStart = artist.campaignStartDate ?? null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { fmtNum } from '@/lib/artists';
+import { fmtNum, STATUS_COLOR, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import Sparkline from './Sparkline';
 
@@ -9,13 +9,6 @@ const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
-
-type BoardStatus =
-  | 'HEALTHY'
-  | 'PUSH — WEAK CONVERSION'
-  | 'BUILDING'
-  | 'COLD'
-  | 'FIX';
 
 type CardData = {
   slug: string;
@@ -25,7 +18,7 @@ type CardData = {
   priority: 'high' | 'normal';
   subs7Delta: number | null;
   views7Delta: number | null;
-  boardStatus: BoardStatus;
+  boardStatus: ChannelState;
   diagnosis: string;
   actions: string[];
   cadenceLine: string;
@@ -45,12 +38,12 @@ function fmtNoteDate(iso: string) {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
-const STATUS_STYLE: Record<BoardStatus, { bg: string; fg: string }> = {
-  HEALTHY:                  { bg: '#E6F8EE', fg: '#0C6A3F' },
-  'PUSH — WEAK CONVERSION': { bg: '#FFEAD6', fg: '#8A4A1A' },
-  BUILDING:                 { bg: '#FFF5D6', fg: '#7A5A00' },
-  COLD:                     { bg: '#FFE2D8', fg: '#8A1F0C' },
-  FIX:                      { bg: '#FFE2D8', fg: '#8A1F0C' },
+const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string }> = {
+  HEALTHY:           { bg: '#E6F8EE', fg: '#0C6A3F' },
+  'WEAK CONVERSION': { bg: '#FFEAD6', fg: '#8A4A1A' },
+  BUILDING:          { bg: '#FFF5D6', fg: '#7A5A00' },
+  'AT RISK':         { bg: '#FFE2D8', fg: '#8A1F0C' },
+  COLD:              { bg: '#FFE2D8', fg: '#8A1F0C' },
 };
 
 function deltaColor(v: number | null): string {

@@ -1,7 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// 4-STATE CHANNEL SYSTEM — one state, one reason, one action. No ambiguity.
+// 5-STATE CHANNEL SYSTEM — one state, one reason, one action. No ambiguity.
+// Conversion-aware: WEAK CONVERSION catches views-up-but-subs-flat.
 // ─────────────────────────────────────────────────────────────────────────────
-export type ChannelState = 'HEALTHY' | 'BUILDING' | 'AT RISK' | 'COLD';
+export type ChannelState = 'HEALTHY' | 'WEAK CONVERSION' | 'BUILDING' | 'AT RISK' | 'COLD';
 
 /** @deprecated Use ChannelState instead. Kept only for type compatibility during migration. */
 export type Status = ChannelState;
@@ -69,15 +70,17 @@ export const ARTISTS: Artist[] = [
 export const STATUS_RANK: Record<ChannelState, number> = {
   'COLD': 0,
   'AT RISK': 1,
-  'BUILDING': 2,
-  'HEALTHY': 3,
+  'WEAK CONVERSION': 2,
+  'BUILDING': 3,
+  'HEALTHY': 4,
 };
 
 export const STATUS_COLOR: Record<ChannelState, { bg: string; fg: string; dot: string }> = {
-  'HEALTHY':   { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-  'BUILDING':  { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
-  'AT RISK':   { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  'COLD':      { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
+  'HEALTHY':          { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
+  'WEAK CONVERSION':  { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
+  'BUILDING':         { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
+  'AT RISK':          { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
+  'COLD':             { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
 };
 
 export type TopComment = {
@@ -143,6 +146,10 @@ export type Derived = {
 export type DeriveCtx = {
   daysToNextMoment?: number | null;
   phase?: Artist['phase'];
+  /** 7-day subscriber delta — enables conversion-aware status when provided */
+  subs7Delta?: number | null;
+  /** 7-day view delta — enables conversion-aware status when provided */
+  views7Delta?: number | null;
 };
 
 export function daysSince(iso?: string | null) {
@@ -153,11 +160,12 @@ export function daysSince(iso?: string | null) {
 /**
  * Derive ONE clear channel state from live YouTube data.
  *
- * Rules (in priority order):
- *  COLD       → 0 uploads in 60+ days (or no data at all)
- *  AT RISK    → 0 uploads in 30 days, OR active but very sparse (<2 in 30d with gap >14d)
- *  BUILDING   → Some activity but inconsistent (2-4 uploads/30d, or gap >7d)
- *  HEALTHY    → Consistent uploads (5+ in 30d and posted within last 7d)
+ * Conversion-aware when ctx.subs7Delta / ctx.views7Delta are provided:
+ *  COLD              → 0 uploads in 60+ days (or no data at all)
+ *  AT RISK           → 0 uploads in 30 days, OR very sparse cadence
+ *  WEAK CONVERSION   → views strong but subs flat — attention not converting
+ *  BUILDING          → Some activity but inconsistent
+ *  HEALTHY           → Cadence + conversion both positive
  */
 export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | null {
   if (live.subs == null) return null;
@@ -173,7 +181,7 @@ export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | n
       status: 'COLD',
       reason,
       watcherRead: reason,
-      nextAction: 'Post 2 Shorts from catalogue this week',
+      nextAction: 'Reawaken the page with 2–3 catalogue Shorts this week',
     };
   }
 
@@ -192,14 +200,40 @@ export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | n
     };
   }
 
-  // ── HEALTHY: consistent output ────────────────────────────────────────
-  if (u >= 5 && last <= 7) {
-    const reason = `Strong output — ${u} uploads in 30 days`;
+  // ── Conversion-aware states (when delta data is available) ────────────
+  const viewsStrong = ctx.views7Delta != null && ctx.views7Delta > 5000;
+  const viewsUp = ctx.views7Delta != null && ctx.views7Delta > 0;
+  const subsFlat = ctx.subs7Delta == null || ctx.subs7Delta <= 0;
+  const subsUp = ctx.subs7Delta != null && ctx.subs7Delta > 0;
+
+  // ── WEAK CONVERSION: views converting but subs not ────────────────────
+  if (u >= 3 && viewsStrong && subsFlat) {
+    return {
+      status: 'WEAK CONVERSION',
+      reason: `Strong output but subs flat — views not converting`,
+      watcherRead: `${u} uploads in 30d driving views, but subscriber growth is flat. Content is reaching people but not building connection.`,
+      nextAction: 'Go deeper — post a breakdown, BTS, or artist-led context piece',
+    };
+  }
+
+  // ── HEALTHY: cadence + conversion both positive ───────────────────────
+  if (u >= 5 && last <= 7 && (!viewsStrong || subsUp)) {
+    const reason = `Strong cadence — ${u} uploads / 30d`;
     return {
       status: 'HEALTHY',
       reason,
       watcherRead: reason,
-      nextAction: 'Maintain cadence — layer a Short on the next drop',
+      nextAction: 'Maintain current approach — don\'t add complexity while it\'s working',
+    };
+  }
+
+  // Catch: high cadence but mild view growth with flat subs
+  if (u >= 5 && last <= 7 && viewsUp && subsFlat) {
+    return {
+      status: 'WEAK CONVERSION',
+      reason: `Strong output but subs flat — views not converting`,
+      watcherRead: `Cadence is strong but subscriber growth is flat. Content is discoverable but not compelling enough to convert.`,
+      nextAction: 'Add a deeper content piece — track breakdown, studio session, or artist-led moment',
     };
   }
 
@@ -213,7 +247,7 @@ export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | n
     watcherRead: reason,
     nextAction: u >= 3
       ? 'Lock weekly cadence — aim for 5+ uploads per month'
-      : 'Increase output — post 2 Shorts this week',
+      : 'Add 2–3 Shorts this week to establish consistent cadence',
   };
 }
 
