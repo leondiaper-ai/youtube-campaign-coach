@@ -197,6 +197,205 @@ function whatsLimiting(p: ReportProps): string[] {
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// SIGNAL → PRIMARY → SECONDARY decision engine
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type SignalType = 'WEAK_CONVERSION' | 'WEAK_REACH' | 'WEAK_CADENCE' | 'COMPOUNDING' | 'COLD';
+
+type Signal = {
+  type: SignalType;
+  line: string;
+};
+
+/** Best-performing recent upload (last 14d) */
+function topRecent(p: ReportProps): RecentUploadEntry | null {
+  if (p.recentUploads.length === 0) return null;
+  return p.recentUploads.reduce((best, u) => u.views > best.views ? u : best, p.recentUploads[0]);
+}
+
+/** Derive the core signal from performance data */
+function deriveSignal(p: ReportProps): Signal {
+  const { stats, conv7 } = p;
+  const viewsUp = stats.views7d != null && stats.views7d > 0;
+  const viewsStrong = stats.views7d != null && stats.views7d > 5_000;
+  const subsFlat = stats.subs7d != null && stats.subs7d <= 0;
+  const subsUp = stats.subs7d != null && stats.subs7d > 0;
+  const cadenceStrong = stats.uploads30d >= 5;
+  const cadenceWeak = stats.uploads30d <= 2;
+  const convWeak = conv7 && conv7.band !== 'INSUFFICIENT' && (conv7.band === 'WEAK' || conv7.band === 'SOFT');
+  const best = topRecent(p);
+
+  // 1. WEAK CONVERSION — views are there but subs aren't following
+  if (viewsStrong && subsFlat) {
+    const trackRef = best ? ` — "${best.title}" is pulling views but not subscribers` : '';
+    return {
+      type: 'WEAK_CONVERSION',
+      line: `Views are landing but subs aren't following${trackRef}. Content isn't building connection.`,
+    };
+  }
+  if (convWeak && viewsUp) {
+    const rate = conv7!.ratePer1k.toFixed(1);
+    return {
+      type: 'WEAK_CONVERSION',
+      line: `Conversion at ${rate}/1k views (${conv7!.band.toLowerCase()}) — audience watches but doesn't commit.`,
+    };
+  }
+
+  // 2. WEAK REACH — low views, algorithm isn't distributing
+  if (!viewsUp && cadenceWeak) {
+    return {
+      type: 'WEAK_REACH',
+      line: 'Low views and low output — the algorithm has nothing to work with.',
+    };
+  }
+  if (!viewsStrong && !cadenceWeak) {
+    return {
+      type: 'WEAK_REACH',
+      line: 'Content is going out but views are flat — format or hook isn\'t catching.',
+    };
+  }
+
+  // 3. WEAK CADENCE — output too low for algorithm traction
+  if (cadenceWeak && viewsUp) {
+    return {
+      type: 'WEAK_CADENCE',
+      line: `Only ${stats.uploads30d} uploads in 30d — not enough signal for the algorithm to sustain distribution.`,
+    };
+  }
+
+  // 4. COMPOUNDING — everything growing
+  if (viewsUp && subsUp && cadenceStrong) {
+    return {
+      type: 'COMPOUNDING',
+      line: 'Views, subs, and cadence all positive — momentum is compounding. Don\'t disrupt it.',
+    };
+  }
+
+  // 5. COLD — no signal at all
+  if (stats.views7d == null || (stats.views7d === 0 && stats.subs7d === 0)) {
+    return {
+      type: 'COLD',
+      line: 'Channel is cold — zero signal in 7d. Needs reactivation before anything else.',
+    };
+  }
+
+  // Fallback
+  return {
+    type: 'WEAK_REACH',
+    line: 'Mixed signals — output is present but not yet converting into growth.',
+  };
+}
+
+/** Derive PRIMARY action — must directly respond to the signal */
+function derivePrimary(p: ReportProps, signal: Signal): string {
+  const { stats, recentUploads, missedReach } = p;
+  const best = topRecent(p);
+  const cadenceStrong = stats.uploads30d >= 5;
+
+  switch (signal.type) {
+    case 'WEAK_CONVERSION': {
+      // Cadence is already strong — do NOT suggest posting more
+      // Need deeper content that builds connection
+      if (best) {
+        return `"${best.title}" has reach but isn't converting. Post a track breakdown, studio session, or artist story piece that gives viewers a reason to subscribe — not another cutdown.`;
+      }
+      return 'Post a BTS, breakdown, or artist-led context piece. The audience is watching but needs a reason to commit — give them the story behind the music.';
+    }
+
+    case 'WEAK_REACH': {
+      // Need discovery formats — Shorts, hooks, frequency
+      const shortsCount = recentUploads.filter((u) => u.kind === 'Short').length;
+      if (shortsCount === 0) {
+        return 'Zero Shorts in rotation — start with 2-3 vertical cutdowns this week. Shorts are the fastest discovery surface on YouTube and the channel isn\'t using them.';
+      }
+      if (best && best.views < 5000) {
+        return `"${best.title}" topped out at ${fmtNum(best.views)} — test a stronger hook format. Lead with the most visual or emotional 3 seconds, not a cold open.`;
+      }
+      // Check for missed format opportunities
+      if (missedReach.length > 0) {
+        const top = missedReach[0];
+        const topFormat = top.formats[0]?.name ?? 'Short';
+        return `"${top.title}" (${fmtNum(top.views)} views) has no ${topFormat}. Cut one — it extends the video's discovery window and compounds existing views.`;
+      }
+      return 'Increase Shorts frequency and test stronger hooks. The algorithm needs consistent signal and the first 3 seconds need to stop the scroll.';
+    }
+
+    case 'WEAK_CADENCE': {
+      if (best && best.views > 10_000) {
+        return `"${best.title}" is performing (${fmtNum(best.views)} views) but it's carrying the channel alone. Cut 2-3 support Shorts from it this week and stack a new upload to build cadence.`;
+      }
+      return `${stats.uploads30d} uploads in 30d is below the threshold for algorithmic momentum. Ship 2-3 Shorts this week to establish rhythm — the algorithm rewards consistency over quality.`;
+    }
+
+    case 'COMPOUNDING': {
+      // Don't break what's working — extend it
+      if (best) {
+        return `"${best.title}" is the momentum carrier at ${fmtNum(best.views)} views. Double down — cut additional formats from it and make sure the next upload lands within 3-4 days to maintain algorithm velocity.`;
+      }
+      return 'Momentum is building — maintain the upload rhythm and don\'t let more than 4 days pass without posting. The algorithm is rewarding the channel right now.';
+    }
+
+    case 'COLD': {
+      return 'Reactivate the channel with 2-3 catalogue Shorts this week — anything on the channel\'s best-performing tracks. The algorithm needs signal before any campaign content will distribute.';
+    }
+
+    default:
+      return p.primaryMove.action;
+  }
+}
+
+/** Derive SECONDARY action — amplify or extend */
+function deriveSecondary(p: ReportProps, signal: Signal): string | null {
+  const { stats, recentUploads, missedReach, structuralGaps } = p;
+  const best = topRecent(p);
+
+  switch (signal.type) {
+    case 'WEAK_CONVERSION': {
+      // Suggest Community Post engagement or cross-platform
+      if (stats.shorts30d > 0 && best) {
+        return `Use a Community Post to ask the audience a question about "${best.title}" — engagement signals help the algorithm and build subscriber intent.`;
+      }
+      return 'Pin a Community Post linking to the best-performing video with a direct subscribe CTA. Make the value proposition explicit.';
+    }
+
+    case 'WEAK_REACH': {
+      // Suggest collaboration or timing
+      if (structuralGaps && structuralGaps.length > 0) {
+        const gapName = structuralGaps[0].name;
+        return `${structuralGaps[0].count} videos missing ${gapName} — batch-create these to unlock reach on existing content that's already proven.`;
+      }
+      return 'Cross-post the strongest Short to TikTok and Instagram Reels — widen the discovery funnel beyond YouTube while cadence builds.';
+    }
+
+    case 'WEAK_CADENCE': {
+      if (missedReach.length > 0) {
+        const names = missedReach.slice(0, 2).map((v) => `"${v.title}"`).join(' and ');
+        return `${names} already have views — cut Shorts from these first. It's faster than creating from scratch and the algorithm already has signal on them.`;
+      }
+      return null;
+    }
+
+    case 'COMPOUNDING': {
+      if (recentUploads.length >= 3) {
+        const sorted = [...recentUploads].sort((a, b) => b.views - a.views);
+        const second = sorted[1];
+        if (second) {
+          return `"${second.title}" is the second-strongest performer — give it a Short cutdown to build a second discovery path alongside the lead.`;
+        }
+      }
+      return 'This is a hold-and-extend phase — don\'t introduce new formats or experiments. Stack what\'s working.';
+    }
+
+    case 'COLD': {
+      return 'Once the first 2-3 uploads are live, post a Community Post reintroducing the channel. Don\'t wait for results — the goal is signal volume, not single-upload performance.';
+    }
+
+    default:
+      return p.secondaryMove?.action ?? null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Report builder — Weekly Campaign Report
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -289,14 +488,24 @@ function buildWeeklyReport(p: ReportProps): string {
 
   // ── 6. WHAT TO DO NEXT ─────────────────────────────────────────────────
   lines.push('6. WHAT TO DO NEXT');
-  lines.push(`PRIMARY → ${p.primaryMove.label}`);
-  lines.push(p.primaryMove.action);
-  if (p.secondaryMove) {
-    lines.push('');
-    lines.push(`SECONDARY → ${p.secondaryMove.label}`);
-    lines.push(p.secondaryMove.action);
-  }
   lines.push('');
+
+  // SIGNAL — sharp one-line diagnosis from data
+  const signal = deriveSignal(p);
+  lines.push(`SIGNAL → ${signal.line}`);
+  lines.push('');
+
+  // PRIMARY — must directly respond to the signal, never repeat what works
+  const primary = derivePrimary(p, signal);
+  lines.push(`PRIMARY → ${primary}`);
+  lines.push('');
+
+  // SECONDARY — amplify or extend
+  const secondary = deriveSecondary(p, signal);
+  if (secondary) {
+    lines.push(`SECONDARY → ${secondary}`);
+    lines.push('');
+  }
 
   // ── FOOTER ─────────────────────────────────────────────────────────────
   lines.push('— Generated by YouTube Campaign Coach');
