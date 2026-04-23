@@ -73,6 +73,37 @@ export async function isPinned(slug: string): Promise<boolean> {
   return list.some((p) => p.slug === slug);
 }
 
+// ── Baseline snapshots ──────────────────────────────────────────────────
+
+export type CampaignBaseline = {
+  capturedAt: string;    // ISO timestamp
+  subs: number;
+  views: number;
+  uploads30d: number;
+  channelState: string;  // ChannelState at capture time
+};
+
+function baselineKey(slug: string) {
+  return `campaigns:baseline:${slug}`;
+}
+
+export async function saveBaseline(
+  slug: string,
+  baseline: CampaignBaseline,
+): Promise<void> {
+  const store = await kv();
+  if (!store) return;
+  await store.set(baselineKey(slug), baseline);
+}
+
+export async function getBaseline(
+  slug: string,
+): Promise<CampaignBaseline | null> {
+  const store = await kv();
+  if (!store) return null;
+  return ((await store.get(baselineKey(slug))) as CampaignBaseline | null) ?? null;
+}
+
 // ── Notes ────────────────────────────────────────────────────────────────
 
 function notesKey(slug: string) {

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ARTISTS, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
-import { listPinned, listNotes, type PinnedCampaign, type CampaignNote } from '@/lib/campaignStore';
+import { listPinned, listNotes, getBaseline, type PinnedCampaign, type CampaignNote } from '@/lib/campaignStore';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
 import CampaignStatusBoard from '@/components/CampaignStatusBoard';
@@ -25,6 +25,16 @@ function cadenceLine(uploads30d: number): string {
   return 'No recent cadence';
 }
 
+// ── Impact data (since takeover) ─────────────────────────────────────────
+export type ImpactData = {
+  daysSinceTakeover: number;
+  subsDelta: number;
+  viewsDelta: number;
+  uploadsShipped: number;           // total uploads in snapshot history since baseline
+  stateAtStart: string;             // ChannelState when pinned
+  stateNow: string;                 // ChannelState now
+};
+
 // ── Card data shape (serializable to client) ────────────────────────────────
 export type StatusCardData = {
   slug: string;
@@ -44,6 +54,8 @@ export type StatusCardData = {
   sparkline: { x: number; y: number }[];
   // Notes
   notes: CampaignNote[];
+  // Impact tracking (null if no baseline captured)
+  impact: ImpactData | null;
 };
 
 async function loadCard(
@@ -67,6 +79,7 @@ async function loadCard(
     cadenceLine: cadenceLine(0),
     sparkline: [],
     notes: await listNotes(artist.slug),
+    impact: null,
   };
 
   const handle = artist.channelHandle ?? artist.name;
@@ -86,15 +99,46 @@ async function loadCard(
     phase: artist.phase,
   });
 
+  const currentStatus = derived?.status ?? 'COLD';
+
+  // ── Impact from baseline ──────────────────────────────────────────────
+  let impact: ImpactData | null = null;
+  try {
+    const baseline = await getBaseline(artist.slug);
+    if (baseline && snap.subs != null) {
+      const daysSinceTakeover = Math.max(
+        1,
+        Math.round((Date.now() - new Date(baseline.capturedAt).getTime()) / 86400000),
+      );
+      // Count uploads in history since baseline
+      const baselineTs = new Date(baseline.capturedAt).getTime();
+      const uploadsSinceBaseline = history.filter(
+        (h) => new Date(h.ts).getTime() >= baselineTs,
+      ).reduce((max, h) => Math.max(max, h.uploads30d), 0);
+
+      impact = {
+        daysSinceTakeover,
+        subsDelta: (snap.subs ?? 0) - baseline.subs,
+        viewsDelta: (snap.views ?? 0) - baseline.views,
+        uploadsShipped: uploadsSinceBaseline,
+        stateAtStart: baseline.channelState,
+        stateNow: currentStatus,
+      };
+    }
+  } catch {
+    // Non-critical
+  }
+
   return {
     ...base,
     subs7Delta: subs7?.delta ?? null,
     views7Delta: views7?.delta ?? null,
-    boardStatus: derived?.status ?? 'COLD',
+    boardStatus: currentStatus,
     diagnosis: derived?.reason ?? 'No data',
     actions: [derived?.nextAction ?? 'Ship something this week'],
     cadenceLine: cadenceLine(snap.uploads30d ?? 0),
     sparkline,
+    impact,
   };
 }
 

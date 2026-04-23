@@ -10,6 +10,15 @@ const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
 
+type ImpactData = {
+  daysSinceTakeover: number;
+  subsDelta: number;
+  viewsDelta: number;
+  uploadsShipped: number;
+  stateAtStart: string;
+  stateNow: string;
+};
+
 type CardData = {
   slug: string;
   name: string;
@@ -24,6 +33,7 @@ type CardData = {
   cadenceLine: string;
   sparkline: { x: number; y: number }[];
   notes: CampaignNote[];
+  impact: ImpactData | null;
 };
 
 // ─── Decision Engine ───────────────────────────────────────────────────────
@@ -225,6 +235,19 @@ function generateSnapshot(card: CardData): string {
 
   const confLine = decision.showConfidence ? ` — ${decision.confidence} CONFIDENCE` : '';
 
+  const impactLines: string[] = [];
+  if (card.impact && card.impact.daysSinceTakeover >= 2) {
+    impactLines.push(
+      '',
+      `SINCE TAKEOVER (${card.impact.daysSinceTakeover} days)`,
+      `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs`,
+      `${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views`,
+    );
+    if (card.impact.stateAtStart !== card.impact.stateNow) {
+      impactLines.push(`${card.impact.stateAtStart} → ${card.impact.stateNow}`);
+    }
+  }
+
   return [
     `YOUTUBE CAMPAIGN SNAPSHOT — ${name}`,
     today,
@@ -237,6 +260,7 @@ function generateSnapshot(card: CardData): string {
     viewsLine,
     subsLine,
     card.cadenceLine,
+    ...impactLines,
     '',
     'DO THIS',
     `→ ${decision.doThis}`,
@@ -441,6 +465,31 @@ function DecisionCard({
 
       {/* ─── Cadence line ─────────────────────────────────────────────── */}
       <div className="text-[11px] text-ink/40 mb-4">{card.cadenceLine}</div>
+
+      {/* ─── Impact strip (since takeover) ────────────────────────────── */}
+      {card.impact && card.impact.daysSinceTakeover >= 2 && (
+        <div className="rounded-lg px-4 py-3 mb-4 flex items-center gap-5" style={{ background: '#F0F7FF', border: '1px solid #D6E8FA' }}>
+          <div className="text-[10px] font-bold uppercase tracking-[0.12em] shrink-0" style={{ color: '#4A7AB5' }}>
+            Since takeover
+            <span className="font-normal ml-1" style={{ color: '#4A7AB599' }}>
+              {card.impact.daysSinceTakeover}d
+            </span>
+          </div>
+          <div className="flex items-center gap-4 text-[12px] font-bold tabular-nums">
+            <span style={{ color: card.impact.subsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }}>
+              {card.impact.subsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.subsDelta)} subs
+            </span>
+            <span style={{ color: card.impact.viewsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }}>
+              {card.impact.viewsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.viewsDelta)} views
+            </span>
+          </div>
+          {card.impact.stateAtStart !== card.impact.stateNow && (
+            <div className="ml-auto text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: '#4A7AB5' }}>
+              {card.impact.stateAtStart} → {card.impact.stateNow}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ─── D. Decision block: headline → do this → note ─────────────── */}
       <div className="rounded-lg p-4 mb-4" style={{ background: isFix ? dStyle.bg : SOFT }}>
