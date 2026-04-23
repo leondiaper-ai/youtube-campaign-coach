@@ -28,27 +28,25 @@ type CardData = {
 
 // ─── Decision Engine ───────────────────────────────────────────────────────
 type DecisionLabel = 'PUSH' | 'FIX' | 'HOLD';
-type Confidence = 'LOW' | 'MED' | 'HIGH';
+type Confidence = 'HIGH' | 'MED' | 'LOW';
 
 type BoardDecision = {
   label: DecisionLabel;
   confidence: Confidence;
-  stateLine: string;
-  insight: string;
-  cause: string;
-  effect: string;
-  action: string;
-  secondary: string | null;
+  showConfidence: boolean;       // only show when it adds clarity
+  stateLine: string;             // prominent state descriptor
+  headline: string;              // single line: what's happening
+  doThis: string;                // single clear action
+  note: string | null;           // optional — only if it adds clarity
 };
 
-/** Map channel state + metrics → PUSH / FIX / HOLD with confidence */
+/** Map channel state + metrics → PUSH / FIX / HOLD */
 function deriveDecision(card: CardData): BoardDecision {
   const { boardStatus, views7Delta, subs7Delta, cadenceLine, sparkline } = card;
   const hasData = views7Delta != null || subs7Delta != null;
   const viewsStrong = views7Delta != null && views7Delta > 5000;
   const viewsUp = views7Delta != null && views7Delta > 0;
   const subsUp = subs7Delta != null && subs7Delta > 0;
-  const subsFlat = subs7Delta == null || subs7Delta <= 0;
   const hasCampaign = !!card.campaign;
   const cadenceStrong = cadenceLine.startsWith('Strong');
   const cadenceMod = cadenceLine.startsWith('Moderate');
@@ -60,15 +58,16 @@ function deriveDecision(card: CardData): BoardDecision {
   if (boardStatus === 'COLD' || !hasData) {
     return {
       label: 'HOLD',
-      confidence: hasData ? 'MED' : 'LOW',
+      confidence: 'LOW',
+      showConfidence: false,
       stateLine: hasCampaign ? 'DORMANT — NEEDS REACTIVATION' : 'INACTIVE — NO SIGNAL',
-      insight: hasCampaign
-        ? 'Campaign exists but the channel has gone silent — every day without content loses momentum'
-        : 'No uploads or engagement signal to act on yet',
-      cause: 'Channel has been silent for 30+ days',
-      effect: 'Algorithm deprioritises the channel; audience forgets',
-      action: 'Ship 2–3 catalogue Shorts this week to restart the feed',
-      secondary: hasCampaign ? 'Tease campaign content to signal a return' : null,
+      headline: hasCampaign
+        ? 'Channel has gone silent — campaign momentum is stalling'
+        : 'No recent uploads or engagement to act on',
+      doThis: hasCampaign
+        ? 'Kickstart the feed — ship 2–3 catalogue Shorts to re-establish presence'
+        : 'Ship 2–3 catalogue Shorts this week to restart signal',
+      note: hasCampaign ? 'Tease campaign content to signal a return' : null,
     };
   }
 
@@ -76,19 +75,16 @@ function deriveDecision(card: CardData): BoardDecision {
   if (boardStatus === 'AT RISK') {
     return {
       label: 'FIX',
-      confidence: viewsUp ? 'MED' : 'HIGH',
+      confidence: 'HIGH',
+      showConfidence: true,
       stateLine: cadenceNone ? 'STALLING — CADENCE DROPPED' : 'COOLING — LOSING RHYTHM',
-      insight: 'Upload rhythm has broken — the algorithm stops recommending channels that go quiet',
-      cause: cadenceNone
-        ? 'No uploads in 30 days'
-        : 'Upload cadence dropped below sustainable level',
-      effect: 'Recommendation impressions falling; audience disengaging',
-      action: cadenceNone
-        ? 'Ship something this week — a Short or Community Post to restart presence'
-        : 'Add a Short or Premiere this week to rebuild cadence',
-      secondary: hasCampaign
-        ? 'If campaign content exists, bring forward the next asset rather than waiting'
-        : 'Repurpose any existing content into a Short to fill the gap',
+      headline: cadenceNone
+        ? 'No uploads in 30 days — algorithm is deprioritising'
+        : 'Cadence has dropped below sustainable level',
+      doThis: cadenceNone
+        ? 'Ship something this week — a Short or Community Post to restart'
+        : 'Add a Short or Premiere this week to rebuild rhythm',
+      note: hasCampaign ? 'Bring forward the next campaign asset rather than waiting' : null,
     };
   }
 
@@ -96,15 +92,14 @@ function deriveDecision(card: CardData): BoardDecision {
   if (boardStatus === 'WEAK CONVERSION') {
     return {
       label: 'FIX',
-      confidence: viewsStrong ? 'HIGH' : 'MED',
+      confidence: 'HIGH',
+      showConfidence: true,
       stateLine: 'REACHING BUT NOT CONVERTING',
-      insight: 'Content is being discovered but isn\'t compelling enough to turn viewers into subscribers',
-      cause: `Views are ${viewsStrong ? 'strong' : 'positive'} but subscriber growth is flat`,
-      effect: 'Reach is being wasted — views without subs means no long-term audience build',
-      action: 'Go deeper — post a breakdown, BTS, or artist-led context piece that gives viewers a reason to subscribe',
-      secondary: cadenceStrong
-        ? 'Cadence is fine — the issue is content depth, not frequency'
-        : 'Also tighten upload cadence to give the algorithm more to work with',
+      headline: `Views are ${viewsStrong ? 'strong' : 'up'} but not converting — no audience build`,
+      doThis: 'Post 1 BTS / breakdown / artist-led piece this week',
+      note: cadenceStrong
+        ? 'Cadence is strong — problem is content depth, not volume'
+        : 'Also tighten upload cadence to give the algorithm more signal',
     };
   }
 
@@ -114,47 +109,36 @@ function deriveDecision(card: CardData): BoardDecision {
     return {
       label: 'PUSH',
       confidence: momentum ? 'HIGH' : 'MED',
+      showConfidence: momentum,
       stateLine: momentum ? 'COMPOUNDING — FULL MOMENTUM' : 'HEALTHY — MAINTAINING',
-      insight: momentum
-        ? 'Both reach and conversion are positive — this is the best time to push harder'
-        : 'Channel is in a good rhythm — protect this cadence',
-      cause: `${cadenceStrong ? 'Strong' : 'Good'} cadence with ${momentum ? 'views and subs both rising' : 'positive engagement'}`,
-      effect: 'Algorithm is rewarding the channel with increased recommendations',
-      action: momentum
-        ? 'Push now — amplify with paid, collaborations, or your strongest campaign asset'
+      headline: momentum
+        ? 'Views and subs both rising — this is the window to push'
+        : 'Good rhythm — protect this cadence',
+      doThis: momentum
+        ? 'Amplify now — paid, collaborations, or your strongest campaign asset'
         : 'Maintain current approach — don\'t add complexity while it\'s working',
-      secondary: momentum
-        ? 'This is the window to bring forward your biggest content moment'
-        : 'Queue next campaign asset to keep the pipeline loaded',
+      note: momentum ? 'Bring forward your biggest content moment while momentum holds' : null,
     };
   }
 
   // ── BUILDING ──
-  // Default: BUILDING state
   const emerging = trendUp && (viewsUp || subsUp);
   return {
     label: emerging ? 'PUSH' : 'HOLD',
     confidence: emerging ? 'MED' : 'LOW',
+    showConfidence: false,
     stateLine: emerging
-      ? 'BUILDING MOMENTUM — EARLY SIGNAL'
+      ? 'MOMENTUM — EARLY SIGNAL'
       : cadenceMod
         ? 'BUILDING — NEEDS CONSISTENCY'
         : 'EARLY STAGE — ESTABLISHING PRESENCE',
-    insight: emerging
-      ? 'Trend is moving in the right direction — consistent output now will compound'
-      : 'Channel is active but hasn\'t found its rhythm yet — focus on consistency over creativity',
-    cause: emerging
-      ? '30-day trend is upward with some positive signals'
-      : `${cadenceMod ? 'Moderate' : 'Light'} cadence — not yet enough to trigger algorithmic momentum`,
-    effect: emerging
-      ? 'Early algorithmic pickup; audience starting to form'
-      : 'Not enough signal for the algorithm to recommend consistently',
-    action: emerging
-      ? 'Lock this cadence and push — aim for 5+ uploads this month'
-      : 'Focus on weekly consistency first — aim for 2 uploads per week minimum',
-    secondary: hasCampaign
-      ? 'Align uploads with campaign timeline — every post should serve the rollout'
-      : null,
+    headline: emerging
+      ? 'Trend is moving up — consistent output now will compound'
+      : 'Active but hasn\'t found its rhythm yet',
+    doThis: emerging
+      ? 'Lock this cadence — aim for 5+ uploads this month'
+      : 'Focus on weekly consistency — aim for 2 uploads per week',
+    note: hasCampaign ? 'Align every upload with the campaign rollout' : null,
   };
 }
 
@@ -239,28 +223,24 @@ function generateSnapshot(card: CardData): string {
     ? `${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`
     : card.campaign ?? 'No notes';
 
+  const confLine = decision.showConfidence ? ` — ${decision.confidence} CONFIDENCE` : '';
+
   return [
     `YOUTUBE CAMPAIGN SNAPSHOT — ${name}`,
     today,
     '',
-    `DECISION: ${decision.label} (${decision.confidence})`,
-    `STATE: ${decision.stateLine}`,
+    `${decision.label}${confLine}`,
+    decision.stateLine,
+    decision.headline,
     '',
     'THIS WEEK',
     viewsLine,
     subsLine,
     card.cadenceLine,
     '',
-    'CAUSE → EFFECT',
-    decision.cause,
-    `→ ${decision.effect}`,
-    '',
-    'WHAT TO DO',
-    `PRIMARY → ${decision.action}`,
-    ...(decision.secondary ? [`SECONDARY → ${decision.secondary}`] : []),
-    '',
-    'WHY THIS MATTERS',
-    decision.insight,
+    'DO THIS',
+    `→ ${decision.doThis}`,
+    ...(decision.note ? [`NOTE: ${decision.note}`] : []),
     '',
     'CONTEXT',
     `- ${contextLine}`,
@@ -381,7 +361,7 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* ─── A. Decision label + Status badge ─────────────────────────── */}
+      {/* ─── A. Decision label + confidence (when earned) ────────────── */}
       <div className="flex items-center gap-2 mb-3">
         <span
           className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
@@ -389,9 +369,11 @@ function DecisionCard({
         >
           {decision.label}
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
-          {decision.confidence} confidence
-        </span>
+        {decision.showConfidence && (
+          <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
+            {decision.confidence} confidence
+          </span>
+        )}
         <span
           className="ml-auto px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.1em] shrink-0 whitespace-nowrap"
           style={{ background: style.bg, color: style.fg }}
@@ -400,10 +382,10 @@ function DecisionCard({
         </span>
       </div>
 
-      {/* ─── B. Artist name + state line ──────────────────────────────── */}
+      {/* ─── B. Artist name + state line (promoted) ──────────────────── */}
       <div className="mb-4">
         <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
-        <div className="text-[11px] font-bold uppercase tracking-[0.1em] mt-1" style={{ color: dStyle.fg }}>
+        <div className="text-[12px] font-black uppercase tracking-[0.1em] mt-1" style={{ color: dStyle.fg }}>
           {decision.stateLine}
         </div>
         {card.campaign && (
@@ -460,29 +442,21 @@ function DecisionCard({
       {/* ─── Cadence line ─────────────────────────────────────────────── */}
       <div className="text-[11px] text-ink/40 mb-4">{card.cadenceLine}</div>
 
-      {/* ─── D. Decision block: cause → effect → action ───────────────── */}
-      <div className="rounded-lg p-4 mb-3" style={{ background: isFix ? `${dStyle.bg}` : SOFT }}>
-        <div className="text-[12px] text-ink/50 leading-snug mb-2">
-          <span className="font-bold text-ink/60">CAUSE</span> — {decision.cause}
+      {/* ─── D. Decision block: headline → do this → note ─────────────── */}
+      <div className="rounded-lg p-4 mb-4" style={{ background: isFix ? dStyle.bg : SOFT }}>
+        <div className="text-[13px] text-ink/70 leading-snug mb-3">
+          {decision.headline}
         </div>
-        <div className="text-[12px] text-ink/50 leading-snug mb-3">
-          <span className="font-bold text-ink/60">EFFECT</span> — {decision.effect}
-        </div>
-        <div className="text-[13px] font-semibold leading-snug flex gap-2 mb-1">
+        <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1.5">Do this</div>
+        <div className="text-[13px] font-semibold leading-snug flex gap-2">
           <span style={{ color: dStyle.fg }} className="shrink-0">→</span>
-          <span>{decision.action}</span>
+          <span>{decision.doThis}</span>
         </div>
-        {decision.secondary && (
-          <div className="text-[12px] text-ink/50 leading-snug flex gap-2 mt-1.5">
-            <span className="text-ink/25 shrink-0">→</span>
-            <span>{decision.secondary}</span>
+        {decision.note && (
+          <div className="text-[11px] text-ink/45 leading-snug mt-2.5 pl-4">
+            {decision.note}
           </div>
         )}
-      </div>
-
-      {/* ─── E. Insight line ──────────────────────────────────────────── */}
-      <div className="text-[11px] italic leading-snug mb-4" style={{ color: `${dStyle.fg}CC` }}>
-        {decision.insight}
       </div>
 
       {/* ─── F. Notes ─────────────────────────────────────────────────── */}
@@ -672,7 +646,7 @@ export default function CampaignStatusBoard({
           <div className="space-y-8">
             {active.length > 0 && (
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-4">
+                <div className="text-[11px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: INK }}>
                   Active Campaigns
                 </div>
                 <div className="space-y-5">
@@ -689,7 +663,7 @@ export default function CampaignStatusBoard({
             )}
             {building.length > 0 && (
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/35 mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/30 mb-4">
                   Building / Early
                 </div>
                 <div className="space-y-5">
