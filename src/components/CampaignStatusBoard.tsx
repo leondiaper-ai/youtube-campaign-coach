@@ -1,8 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { fmtNum, STATUS_COLOR, type ChannelState } from '@/lib/artists';
+import { fmtNum, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
+import {
+  type GrowthInput, type GrowthRead,
+  generateYouTubeGrowthRead,
+  channelStateToGrowthState,
+  DECISION_STYLE, STATE_STYLE as GOS_STATE_STYLE,
+  SPARK_STYLE as GOS_SPARK_STYLE,
+  type DecisionLabel,
+} from '@/lib/youtubeGrowthOS';
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -27,6 +35,8 @@ type CardData = {
   priority: 'high' | 'normal';
   subs7Delta: number | null;
   views7Delta: number | null;
+  uploads30d: number;
+  shorts30d: number;
   boardStatus: ChannelState;
   diagnosis: string;
   actions: string[];
@@ -36,136 +46,35 @@ type CardData = {
   impact: ImpactData | null;
 };
 
-// ─── Decision Engine ───────────────────────────────────────────────────────
-type DecisionLabel = 'PUSH' | 'FIX' | 'HOLD';
-type Confidence = 'HIGH' | 'MED' | 'LOW';
+// ─── Growth OS bridge ──────────────────────────────────────────────────────
+// All state/diagnosis/action logic now lives in /lib/youtubeGrowthOS.ts.
+// This bridge converts CardData → GrowthInput → GrowthRead for rendering.
 
-type BoardDecision = {
-  label: DecisionLabel;
-  confidence: Confidence;
-  showConfidence: boolean;       // only show when it adds clarity
-  stateLine: string;             // prominent state descriptor
-  headline: string;              // single line: what's happening
-  doThis: string;                // single clear action
-  note: string | null;           // optional — only if it adds clarity
-};
-
-/** Map channel state + metrics → PUSH / FIX / HOLD */
-function deriveDecision(card: CardData): BoardDecision {
-  const { boardStatus, views7Delta, subs7Delta, cadenceLine, sparkline } = card;
-  const hasData = views7Delta != null || subs7Delta != null;
-  const viewsStrong = views7Delta != null && views7Delta > 5000;
-  const viewsUp = views7Delta != null && views7Delta > 0;
-  const subsUp = subs7Delta != null && subs7Delta > 0;
-  const hasCampaign = !!card.campaign;
-  const cadenceStrong = cadenceLine.startsWith('Strong');
-  const cadenceMod = cadenceLine.startsWith('Moderate');
-  const cadenceNone = cadenceLine.startsWith('No recent');
-  const trendUp = sparkline.length >= 4 &&
-    sparkline[sparkline.length - 1].y > sparkline[Math.floor(sparkline.length / 2)].y;
-
-  // ── COLD / no data ──
-  if (boardStatus === 'COLD' || !hasData) {
-    return {
-      label: 'HOLD',
-      confidence: 'LOW',
-      showConfidence: false,
-      stateLine: hasCampaign ? 'DORMANT — NEEDS REACTIVATION' : 'INACTIVE — NO SIGNAL',
-      headline: hasCampaign
-        ? 'Channel has gone silent — campaign momentum is stalling'
-        : 'No recent uploads or engagement to act on',
-      doThis: hasCampaign
-        ? 'Kickstart the feed — ship 2–3 catalogue Shorts to re-establish presence'
-        : 'Ship 2–3 catalogue Shorts this week to restart signal',
-      note: hasCampaign ? 'Tease campaign content to signal a return' : null,
-    };
-  }
-
-  // ── AT RISK ──
-  if (boardStatus === 'AT RISK') {
-    return {
-      label: 'FIX',
-      confidence: 'HIGH',
-      showConfidence: true,
-      stateLine: cadenceNone ? 'STALLING — CADENCE DROPPED' : 'COOLING — LOSING RHYTHM',
-      headline: cadenceNone
-        ? 'No uploads in 30 days — algorithm is deprioritising'
-        : 'Cadence has dropped below sustainable level',
-      doThis: cadenceNone
-        ? 'Ship something this week — a Short or Community Post to restart'
-        : 'Add a Short or Premiere this week to rebuild rhythm',
-      note: hasCampaign ? 'Bring forward the next campaign asset rather than waiting' : null,
-    };
-  }
-
-  // ── WEAK CONVERSION ──
-  if (boardStatus === 'WEAK CONVERSION') {
-    return {
-      label: 'FIX',
-      confidence: 'HIGH',
-      showConfidence: true,
-      stateLine: 'REACHING BUT NOT CONVERTING',
-      headline: `Views are ${viewsStrong ? 'strong' : 'up'} but not converting — no audience build`,
-      doThis: 'Post 1 BTS / breakdown / artist-led piece this week',
-      note: cadenceStrong
-        ? 'Cadence is strong — problem is content depth, not volume'
-        : 'Also tighten upload cadence to give the algorithm more signal',
-    };
-  }
-
-  // ── HEALTHY ──
-  if (boardStatus === 'HEALTHY') {
-    const momentum = subsUp && viewsStrong;
-    return {
-      label: 'PUSH',
-      confidence: momentum ? 'HIGH' : 'MED',
-      showConfidence: momentum,
-      stateLine: momentum ? 'COMPOUNDING — FULL MOMENTUM' : 'HEALTHY — MAINTAINING',
-      headline: momentum
-        ? 'Views and subs both rising — this is the window to push'
-        : 'Good rhythm — protect this cadence',
-      doThis: momentum
-        ? 'Amplify now — paid, collaborations, or your strongest campaign asset'
-        : 'Maintain current approach — don\'t add complexity while it\'s working',
-      note: momentum ? 'Bring forward your biggest content moment while momentum holds' : null,
-    };
-  }
-
-  // ── BUILDING ──
-  const emerging = trendUp && (viewsUp || subsUp);
+function cardToGrowthInput(card: CardData): GrowthInput {
+  const daysSince = card.cadenceLine.startsWith('No recent') ? 31
+    : card.boardStatus === 'COLD' ? 60 : 7;
   return {
-    label: emerging ? 'PUSH' : 'HOLD',
-    confidence: emerging ? 'MED' : 'LOW',
-    showConfidence: false,
-    stateLine: emerging
-      ? 'MOMENTUM — EARLY SIGNAL'
-      : cadenceMod
-        ? 'BUILDING — NEEDS CONSISTENCY'
-        : 'EARLY STAGE — ESTABLISHING PRESENCE',
-    headline: emerging
-      ? 'Trend is moving up — consistent output now will compound'
-      : 'Active but hasn\'t found its rhythm yet',
-    doThis: emerging
-      ? 'Lock this cadence — aim for 5+ uploads this month'
-      : 'Focus on weekly consistency — aim for 2 uploads per week',
-    note: hasCampaign ? 'Align every upload with the campaign rollout' : null,
+    subscribers: undefined,
+    views7d: card.views7Delta,
+    subscribers7d: card.subs7Delta,
+    uploads30d: card.uploads30d,
+    shorts30d: card.shorts30d,
+    lastUploadDaysAgo: daysSince,
+    hasActiveCampaign: !!card.campaign,
+    campaignName: card.campaign,
   };
 }
 
+function getGrowthRead(card: CardData): GrowthRead {
+  return generateYouTubeGrowthRead(card.name, cardToGrowthInput(card));
+}
+
 /** Is this an active campaign card (PUSH/FIX) vs early/building (HOLD)? */
-function isActiveCampaign(decision: BoardDecision, card: CardData): boolean {
-  if (decision.label === 'PUSH' || decision.label === 'FIX') return true;
-  // HOLD with a campaign name and some data = still active
+function isActiveCampaign(read: GrowthRead, card: CardData): boolean {
+  if (read.decision === 'PUSH' || read.decision === 'FIX') return true;
   if (card.campaign && (card.views7Delta != null || card.subs7Delta != null)) return true;
   return false;
 }
-
-// ─── Decision label styles ─────────────────────────────────────────────────
-const DECISION_STYLE: Record<DecisionLabel, { bg: string; fg: string; border: string }> = {
-  PUSH: { bg: '#E6F8EE', fg: '#0C6A3F', border: '#B8E8D0' },
-  FIX:  { bg: '#FFF0E6', fg: '#8A4A1A', border: '#FFD4B3' },
-  HOLD: { bg: '#F5F0E4', fg: '#7A6B4E', border: '#E0D6C2' },
-};
 
 type AvailableArtist = { slug: string; name: string };
 
@@ -183,21 +92,9 @@ function fmtNoteDate(iso: string) {
   return dateStr;
 }
 
-const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string }> = {
-  HEALTHY:           { bg: '#E6F8EE', fg: '#0C6A3F' },
-  'WEAK CONVERSION': { bg: '#FFEAD6', fg: '#8A4A1A' },
-  BUILDING:          { bg: '#FFF5D6', fg: '#7A5A00' },
-  'AT RISK':         { bg: '#FFE2D8', fg: '#8A1F0C' },
-  COLD:              { bg: '#FFE2D8', fg: '#8A1F0C' },
-};
-
-const SPARK_STYLE: Record<ChannelState, { stroke: string; fill: string }> = {
-  HEALTHY:           { stroke: '#1FBE7A', fill: 'rgba(31,190,122,0.12)' },
-  'WEAK CONVERSION': { stroke: '#F08A3C', fill: 'rgba(240,138,60,0.10)' },
-  BUILDING:          { stroke: '#C4A94D', fill: 'rgba(196,169,77,0.10)' },
-  'AT RISK':         { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.10)' },
-  COLD:              { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.10)' },
-};
+// Status/spark styles now come from Growth OS (GOS_STATE_STYLE, GOS_SPARK_STYLE).
+// Bridge helper to map ChannelState → GrowthState for style lookup:
+function gsFor(cs: ChannelState) { return channelStateToGrowthState(cs); }
 
 function deltaColor(v: number | null): string {
   if (v == null) return 'rgba(14,14,14,0.25)';
@@ -215,26 +112,11 @@ function subsIsWeak(card: CardData): boolean {
   );
 }
 
-// ─── Snapshot generator ─────────────────────────────────────────────────────
+// ─── Snapshot generator (powered by Growth OS) ─────────────────────────────
 function generateSnapshot(card: CardData): string {
-  const name = card.name.toUpperCase();
-  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  const decision = deriveDecision(card);
+  const read = getGrowthRead(card);
 
-  const viewsLine = card.views7Delta != null
-    ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)} views`
-    : 'No view data';
-  const subsLine = card.subs7Delta != null
-    ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs`
-    : 'No sub data';
-
-  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
-  const contextLine = latestNote
-    ? `${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`
-    : card.campaign ?? 'No notes';
-
-  const confLine = decision.showConfidence ? ` — ${decision.confidence} CONFIDENCE` : '';
-
+  // Append impact + notes context to the Slack copy
   const impactLines: string[] = [];
   if (card.impact && card.impact.daysSinceTakeover >= 2) {
     impactLines.push(
@@ -248,26 +130,15 @@ function generateSnapshot(card: CardData): string {
     }
   }
 
+  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
+  const contextLine = latestNote
+    ? `${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`
+    : '';
+
   return [
-    `YOUTUBE CAMPAIGN SNAPSHOT — ${name}`,
-    today,
-    '',
-    `${decision.label}${confLine}`,
-    decision.stateLine,
-    decision.headline,
-    '',
-    'THIS WEEK',
-    viewsLine,
-    subsLine,
-    card.cadenceLine,
+    read.slackCopy,
     ...impactLines,
-    '',
-    'DO THIS',
-    `→ ${decision.doThis}`,
-    ...(decision.note ? [`NOTE: ${decision.note}`] : []),
-    '',
-    'CONTEXT',
-    `- ${contextLine}`,
+    ...(contextLine ? ['', 'CONTEXT:', `- ${contextLine}`] : []),
   ].join('\n');
 }
 
@@ -329,10 +200,11 @@ function DecisionCard({
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
-  const style = STATUS_STYLE[card.boardStatus];
+  const gs = gsFor(card.boardStatus);
+  const style = GOS_STATE_STYLE[gs];
   const weak = subsIsWeak(card);
-  const decision = deriveDecision(card);
-  const dStyle = DECISION_STYLE[decision.label];
+  const read = getGrowthRead(card);
+  const dStyle = DECISION_STYLE[read.decision];
 
   async function addNote() {
     if (!noteInput.trim()) return;
@@ -364,7 +236,7 @@ function DecisionCard({
   const latestNote = card.notes.length > 0 ? card.notes[0] : null;
   const hasMoreNotes = card.notes.length > 1;
 
-  const isFix = decision.label === 'FIX';
+  const isFix = read.decision === 'FIX';
   const cardBorder = isFix ? dStyle.border : MUTED;
 
   return (
@@ -385,32 +257,32 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* ─── A. Decision label + confidence (when earned) ────────────── */}
+      {/* ─── A. Decision label + confidence ─────────────────────────── */}
       <div className="flex items-center gap-2 mb-3">
         <span
           className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
           style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
         >
-          {decision.label}
+          {read.decision}
         </span>
-        {decision.showConfidence && (
+        {read.showConfidence && (
           <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
-            {decision.confidence} confidence
+            {read.confidence} confidence
           </span>
         )}
-        <span
-          className="ml-auto px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.1em] shrink-0 whitespace-nowrap"
-          style={{ background: style.bg, color: style.fg }}
-        >
-          {card.boardStatus}
-        </span>
       </div>
 
-      {/* ─── B. Artist name + state line (promoted) ──────────────────── */}
+      {/* ─── B. Artist name + state / sub-state ──────────────────────── */}
       <div className="mb-4">
         <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
-        <div className="text-[12px] font-black uppercase tracking-[0.1em] mt-1" style={{ color: dStyle.fg }}>
-          {decision.stateLine}
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[12px] font-black uppercase tracking-[0.1em]" style={{ color: dStyle.fg }}>
+            {read.state.replace('_', ' ')}
+          </span>
+          <span className="text-[10px] text-ink/25">·</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
+            {read.subState.replace(/_/g, ' ')}
+          </span>
         </div>
         {card.campaign && (
           <div className="text-[11px] text-ink/35 mt-0.5">{card.campaign}</div>
@@ -449,15 +321,15 @@ function DecisionCard({
             7d subs{weak ? ' ⚠' : ''}
           </div>
         </div>
-        <div className="ml-auto rounded-lg px-3 py-2" style={{ background: SPARK_STYLE[card.boardStatus].fill }}>
+        <div className="ml-auto rounded-lg px-3 py-2" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
           <Sparkline
             data={card.sparkline}
             width={140}
             height={44}
-            stroke={SPARK_STYLE[card.boardStatus].stroke}
-            fill={SPARK_STYLE[card.boardStatus].fill}
+            stroke={GOS_SPARK_STYLE[gs].stroke}
+            fill={GOS_SPARK_STYLE[gs].fill}
           />
-          <div className="text-[9px] text-right mt-1 uppercase tracking-wider font-bold" style={{ color: SPARK_STYLE[card.boardStatus].stroke }}>
+          <div className="text-[9px] text-right mt-1 uppercase tracking-wider font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
             30d trend
           </div>
         </div>
@@ -491,21 +363,42 @@ function DecisionCard({
         </div>
       )}
 
-      {/* ─── D. Decision block: headline → do this → note ─────────────── */}
+      {/* ─── D. Decision block (powered by Growth OS) ──────────────── */}
       <div className="rounded-lg p-4 mb-4" style={{ background: isFix ? dStyle.bg : SOFT }}>
-        <div className="text-[13px] text-ink/70 leading-snug mb-3">
-          {decision.headline}
+        {/* Signal */}
+        <div className="text-[13px] font-semibold text-ink/80 leading-snug mb-3">
+          {read.signal}
         </div>
-        <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/40 mb-1.5">Do this</div>
-        <div className="text-[13px] font-semibold leading-snug flex gap-2">
-          <span style={{ color: dStyle.fg }} className="shrink-0">→</span>
-          <span>{decision.doThis}</span>
-        </div>
-        {decision.note && (
-          <div className="text-[11px] text-ink/45 leading-snug mt-2.5 pl-4">
-            {decision.note}
+
+        {/* Blocker */}
+        {read.blocker.blocker !== 'NONE' && (
+          <div className="text-[11px] text-ink/55 leading-snug mb-4">
+            <span className="font-bold text-ink/60">Blocker:</span> {read.blocker.label} — {read.blocker.description}
           </div>
         )}
+
+        {/* This week — execution plan */}
+        <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1.5">This week</div>
+        <div className="space-y-1">
+          {read.actions.doNow.map((step, i) => (
+            <div key={i} className="text-[12px] font-medium leading-snug flex gap-2">
+              <span style={{ color: dStyle.fg }} className="shrink-0">→</span>
+              <span>{step}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Next campaign move */}
+        {read.nextCampaignMove && (
+          <div className="text-[11px] text-ink/40 leading-snug mt-2.5 pl-4">
+            Next: {read.nextCampaignMove}
+          </div>
+        )}
+      </div>
+
+      {/* ─── E. Watch metric ─────────────────────────────────────────── */}
+      <div className="text-[11px] text-ink/40 leading-snug mb-4">
+        Watch: {read.watch}
       </div>
 
       {/* ─── F. Notes ─────────────────────────────────────────────────── */}
@@ -674,8 +567,8 @@ export default function CampaignStatusBoard({
         const active: CardData[] = [];
         const building: CardData[] = [];
         for (const card of cards) {
-          const d = deriveDecision(card);
-          if (isActiveCampaign(d, card)) {
+          const r = getGrowthRead(card);
+          if (isActiveCampaign(r, card)) {
             active.push(card);
           } else {
             building.push(card);
@@ -683,10 +576,10 @@ export default function CampaignStatusBoard({
         }
         // Sort active: FIX first, then PUSH, then by priority
         active.sort((a, b) => {
-          const dA = deriveDecision(a);
-          const dB = deriveDecision(b);
+          const rA = getGrowthRead(a);
+          const rB = getGrowthRead(b);
           const order: Record<DecisionLabel, number> = { FIX: 0, PUSH: 1, HOLD: 2 };
-          if (order[dA.label] !== order[dB.label]) return order[dA.label] - order[dB.label];
+          if (order[rA.decision] !== order[rB.decision]) return order[rA.decision] - order[rB.decision];
           if (a.priority !== b.priority) return a.priority === 'high' ? -1 : 1;
           return 0;
         });

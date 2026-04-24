@@ -45,6 +45,9 @@ export type StatusCardData = {
   // Hero metrics
   subs7Delta: number | null;
   views7Delta: number | null;
+  // Cadence data
+  uploads30d: number;
+  shorts30d: number;
   // Unified status from deriveFromLive
   boardStatus: ChannelState;
   diagnosis: string;
@@ -73,6 +76,8 @@ async function loadCard(
     priority: pin.priority ?? 'normal',
     subs7Delta: null,
     views7Delta: null,
+    uploads30d: 0,
+    shorts30d: 0,
     boardStatus: 'COLD',
     diagnosis: 'No data yet',
     actions: ['Reawaken the page with 2–3 catalogue Shorts this week'],
@@ -133,6 +138,8 @@ async function loadCard(
     ...base,
     subs7Delta: subs7?.delta ?? null,
     views7Delta: views7?.delta ?? null,
+    uploads30d: snap.uploads30d ?? 0,
+    shorts30d: snap.shorts30d ?? 0,
     boardStatus: currentStatus,
     diagnosis: derived?.reason ?? 'No data',
     actions: [derived?.nextAction ?? 'Ship something this week'],
