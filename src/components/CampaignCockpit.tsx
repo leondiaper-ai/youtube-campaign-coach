@@ -66,14 +66,14 @@ export default function CampaignCockpit() {
   const [coachPlans, setCoachPlans] = useState<Record<string, CoachPlanSummary | null>>({});
 
   const artists = useMemo<Artist[]>(() => {
-    const seen = new Set<string>();
-    const merged: Artist[] = [];
-    for (const a of [...ARTISTS, ...custom]) {
-      if (seen.has(a.slug)) continue;
-      seen.add(a.slug);
-      merged.push(a);
+    // Merge: custom fields override hardcoded (e.g. campaignStartDate)
+    const map = new Map<string, Artist>();
+    for (const a of ARTISTS) map.set(a.slug, { ...a });
+    for (const c of custom) {
+      const existing = map.get(c.slug);
+      map.set(c.slug, existing ? { ...existing, ...c } : { ...c });
     }
-    return merged;
+    return Array.from(map.values());
   }, [custom]);
 
   async function loadCustom() {

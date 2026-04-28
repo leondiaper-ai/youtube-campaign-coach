@@ -67,6 +67,29 @@ export const ARTISTS: Artist[] = [
   },
 ];
 
+/**
+ * Merge hardcoded + custom artist lists. Custom fields override hardcoded
+ * (e.g. campaignStartDate set via API takes precedence over a missing one
+ * in the ARTISTS array). Non-overlapping artists are appended.
+ */
+export function mergeArtistLists(
+  hardcoded: Artist[],
+  custom: Artist[],
+): Artist[] {
+  const map = new Map<string, Artist>();
+  for (const a of hardcoded) map.set(a.slug, { ...a });
+  for (const c of custom) {
+    const existing = map.get(c.slug);
+    if (existing) {
+      // Merge: custom fields win, but keep hardcoded fields the custom entry lacks
+      map.set(c.slug, { ...existing, ...c });
+    } else {
+      map.set(c.slug, { ...c });
+    }
+  }
+  return Array.from(map.values());
+}
+
 export const STATUS_RANK: Record<ChannelState, number> = {
   'COLD': 0,
   'AT RISK': 1,

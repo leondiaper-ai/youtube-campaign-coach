@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listPinned, pinCampaign, unpinCampaign, saveBaseline, type CampaignBaseline } from '@/lib/campaignStore';
-import { ARTISTS } from '@/lib/artists';
-import { listCustomArtists } from '@/lib/artistStore';
+import { ARTISTS, mergeArtistLists } from '@/lib/artists';
+import { listCustomArtists, addCustomArtist } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { deriveFromLive } from '@/lib/artists';
 
@@ -23,10 +23,23 @@ export async function POST(req: NextRequest) {
   const priority = body?.priority === 'high' ? 'high' : 'normal';
   const pinned = await pinCampaign(slug, priority);
 
-  // Capture baseline snapshot at pin time
+  // Auto-set campaignStartDate if not already set
   try {
     const custom = await listCustomArtists();
-    const allArtists = [...ARTISTS, ...custom];
+    const allArtists = mergeArtistLists(ARTISTS, custom);
+    const artist = allArtists.find((a) => a.slug === slug);
+    if (artist && !artist.campaignStartDate) {
+      const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+      await addCustomArtist({ ...artist, campaignStartDate: today });
+    }
+  } catch (e) {
+    console.warn('[auto-date] Failed to set campaignStartDate:', e);
+  }
+
+  // Capture baseline snapshot at pin time
+  try {
+    const custom2 = await listCustomArtists();
+    const allArtists = mergeArtistLists(ARTISTS, custom2);
     const artist = allArtists.find((a) => a.slug === slug);
     if (artist) {
       const handle = artist.channelHandle ?? artist.name;

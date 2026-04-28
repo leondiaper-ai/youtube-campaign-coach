@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ARTISTS, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, STATUS_RANK, type Artist, type LiveSnap, type ChannelState } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, STATUS_RANK, type Artist, type LiveSnap, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
@@ -61,9 +61,7 @@ type RowData = {
 
 export default async function ControlPage() {
   const custom = await listCustomArtists();
-  const allArtists = [...ARTISTS, ...custom].filter(
-    (a, i, arr) => arr.findIndex((b) => b.slug === a.slug) === i
-  );
+  const allArtists = mergeArtistLists(ARTISTS, custom);
 
   const rows: RowData[] = await Promise.all(
     allArtists.map(async (a) => {

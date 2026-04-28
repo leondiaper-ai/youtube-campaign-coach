@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ARTISTS, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { listCustomArtists } from '@/lib/artistStore';
 import { isPinned } from '@/lib/campaignStore';
@@ -48,7 +48,8 @@ const DECISION_TO_STATE: Record<string, ChannelState> = {
 export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const custom: Artist[] = await listCustomArtists();
-  const artist = ARTISTS.find((a) => a.slug === slug) ?? custom.find((a) => a.slug === slug);
+  const allArtists = mergeArtistLists(ARTISTS, custom);
+  const artist = allArtists.find((a) => a.slug === slug);
   if (!artist) notFound();
 
   const campaignPinned = await isPinned(slug);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ARTISTS } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
 
   // 1. Resolve slug → Artist record
   const custom = await listCustomArtists();
-  const artist = ARTISTS.find((a) => a.slug === slug) ?? custom.find((a) => a.slug === slug);
+  const allArtists = mergeArtistLists(ARTISTS, custom);
+  const artist = allArtists.find((a) => a.slug === slug);
   if (!artist) return NextResponse.json({ error: `Unknown artist slug: ${slug}` }, { status: 404 });
 
   const handle = artist.channelHandle ?? artist.name;

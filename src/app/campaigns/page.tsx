@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ARTISTS, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import {
   listPinned, listNotes, getBaseline,
@@ -378,9 +378,7 @@ async function loadCard(
 export default async function CampaignsPage() {
   const pinned = await listPinned();
   const custom = await listCustomArtists();
-  const allArtists = [...ARTISTS, ...custom].filter(
-    (a, i, arr) => arr.findIndex((x) => x.slug === a.slug) === i,
-  );
+  const allArtists = mergeArtistLists(ARTISTS, custom);
 
   const cards = (
     await Promise.all(pinned.map((p) => loadCard(p, allArtists)))
