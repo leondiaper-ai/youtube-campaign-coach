@@ -218,7 +218,7 @@ async function loadCard(
     campaignName: artist.campaign,
   };
   const gsResult = getYouTubeGrowthState(growthInput);
-  const chHealth = getChannelHealth(gsResult.state);
+  const chHealth = getChannelHealth(gsResult.state, growthInput);
   const campSig = getCampaignSignal(growthInput);
 
   // ── Impact from baseline ──────────────────────────────────────────────

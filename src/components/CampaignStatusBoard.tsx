@@ -146,27 +146,61 @@ function subsPerKViews(card: CardData): number | null {
   return (subs / card.views7Delta) * 1000;
 }
 
+// ─── Conversion metric color ─────────────────────────────────────────────
+function conversionColor(spk: number): string {
+  if (spk >= 2) return '#0C6A3F';   // green — strong
+  if (spk >= 1) return '#7A5A00';   // amber — moderate
+  return '#8A1F0C';                  // red — weak
+}
+
 // ─── Conversion diagnosis one-liner ──────────────────────────────────────
 function conversionDiagnosis(card: CardData): string | null {
   const spk = subsPerKViews(card);
   if (spk == null) return null;
-  if (spk >= 3) return 'Converting well — demand and retention aligned';
-  if (spk >= 1.5) return 'Moderate conversion — room to improve retention';
-  if (card.views7Delta != null && card.views7Delta > 50000 && spk < 0.5) return 'Failing to capture demand';
-  if (card.views7Delta != null && card.views7Delta > 5000 && spk < 1) return 'Demand high, retention low';
+  if (spk >= 2) return 'Demand and retention aligned';
+  if (spk >= 1) return 'Moderate — room to improve retention';
+  if (card.views7Delta != null && card.views7Delta > 50000) return 'Failing to capture demand';
+  if (card.views7Delta != null && card.views7Delta > 5000) return 'Demand high, retention low';
   return 'Low conversion — not enough signal yet';
 }
 
 // ─── Sharper read copy ───────────────────────────────────────────────────
 function sharpenRead(read: GrowthRead, card: CardData): { primary: string; secondary: string | null } {
   const weak = subsIsWeak(card);
-  if (weak) {
+  const spk = subsPerKViews(card);
+  const coldOrRisk = card.boardStatus === 'COLD' || card.boardStatus === 'AT RISK';
+
+  // Weak conversion — high views, no subs
+  if (weak && card.uploads30d >= 5) {
     return {
-      primary: 'People are watching, but not subscribing.',
+      primary: 'People are watching and leaving.',
       secondary: 'Cadence is strong — problem is packaging, not volume.',
     };
   }
-  // Signal is already good from Growth OS, just return it
+  if (weak) {
+    return {
+      primary: 'People are watching and leaving.',
+      secondary: 'Content is reaching people but not building connection.',
+    };
+  }
+
+  // Strong conversion
+  if (spk != null && spk >= 2 && !coldOrRisk) {
+    return {
+      primary: 'Viewers are subscribing at a healthy rate.',
+      secondary: 'Demand and retention are aligned.',
+    };
+  }
+
+  // Cold / at risk
+  if (coldOrRisk) {
+    return {
+      primary: read.signal,
+      secondary: null,
+    };
+  }
+
+  // Default — use Growth OS signal
   return { primary: read.signal, secondary: null };
 }
 
@@ -481,12 +515,12 @@ function DecisionCard({
           <div className="ml-1">
             <div
               className="text-[20px] font-black leading-none tabular-nums"
-              style={{ color: spk >= 2 ? '#0C6A3F' : spk >= 1 ? '#7A5A00' : '#8A1F0C' }}
+              style={{ color: conversionColor(spk) }}
             >
               {spk.toFixed(1)}
             </div>
             <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold" style={{
-              color: spk >= 2 ? '#0C6A3F' : spk >= 1 ? '#7A5A00' : '#8A1F0C',
+              color: conversionColor(spk),
             }}>
               subs / 1K views
             </div>
@@ -510,25 +544,17 @@ function DecisionCard({
       {/* ─── Cadence line (single, no content mix) ───────────────────── */}
       <div className="text-[11px] text-ink/40 mb-3">{card.cadenceLine}</div>
 
-      {/* ─── 4. Campaign window (compact) ────────────────────────────── */}
+      {/* ─── 4. Campaign window (lightweight context line) ────────────── */}
       {cw && (
-        <div className="rounded-lg px-4 py-2.5 mb-3 flex items-center gap-4 flex-wrap" style={{ background: '#F0F4FF', border: '1px solid #D6DFFA' }}>
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#2C6BFF' }} />
-            <span className="text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: '#3B5998' }}>
-              Day {cw.campaignDay}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-[12px] font-bold tabular-nums">
-            <span title="Content views">{fmtNum(cw.contentViews)} <span className="text-[10px] text-ink/35 font-normal">content</span></span>
-            <span style={{ color: cw.channelViewsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }} title="Channel views delta">
-              {cw.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(cw.channelViewsDelta)} <span className="text-[10px] font-normal" style={{ color: 'rgba(14,14,14,0.35)' }}>ch. views</span>
-            </span>
-            <span style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : undefined }} title="Subs gained">
-              {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)} <span className="text-[10px] font-normal" style={{ color: 'rgba(14,14,14,0.35)' }}>subs</span>
-            </span>
-            <span className="text-ink/50" title="Content mix">{cw.contentMix.uploads} uploads</span>
-          </div>
+        <div className="flex items-center gap-1.5 mb-2 text-[11px] text-ink/45">
+          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#2C6BFF' }} />
+          <span className="font-bold" style={{ color: '#3B5998' }}>Day {cw.campaignDay}</span>
+          <span className="text-ink/20">·</span>
+          <span className="tabular-nums">{fmtNum(cw.channelViewsDelta >= 0 ? cw.channelViewsDelta : cw.contentViews)} views</span>
+          <span className="text-ink/20">·</span>
+          <span className="tabular-nums" style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : undefined }}>
+            {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)} subs
+          </span>
         </div>
       )}
 
@@ -540,20 +566,20 @@ function DecisionCard({
         </div>
       )}
 
-      {/* ─── Weekly summary (single line + toggle) ───────────────────── */}
+      {/* ─── Weekly summary (secondary, low emphasis) ────────────────── */}
       {card.weeklyProgress.length > 0 && (
         <div className="mb-3">
-          <div className="flex items-center gap-2 text-[11px]">
+          <div className="flex items-center gap-2 text-[10px] text-ink/30">
             {weeklySummaryLine(card.weeklyProgress) && (
-              <span className="text-ink/40">
-                <span className="font-bold text-ink/40 uppercase tracking-[0.08em] text-[9px]">Weekly:</span>{' '}
+              <span>
+                <span className="uppercase tracking-[0.08em] text-[9px]">Weekly:</span>{' '}
                 <span className="tabular-nums">{weeklySummaryLine(card.weeklyProgress)}</span>
               </span>
             )}
             {card.weeklyProgress.length > 1 && (
               <button
                 onClick={() => setShowWeekly(!showWeekly)}
-                className="text-[10px] text-ink/25 hover:text-ink/50 shrink-0"
+                className="text-[10px] text-ink/20 hover:text-ink/40 shrink-0"
               >
                 {showWeekly ? 'hide' : `${card.weeklyProgress.length} weeks ›`}
               </button>
@@ -585,12 +611,12 @@ function DecisionCard({
       )}
 
       {/* ─── 6. Conversion diagnosis ─────────────────────────────────── */}
-      {diag && (
+      {diag && spk != null && (
         <div className="text-[11px] mb-3 flex items-center gap-1.5">
           <span className="font-bold uppercase tracking-[0.08em] text-[9px]" style={{
-            color: spk != null && spk >= 2 ? '#0C6A3F' : '#8A4A1A',
+            color: conversionColor(spk),
           }}>Conversion:</span>
-          <span style={{ color: spk != null && spk >= 2 ? '#0C6A3F' : '#6B4E30' }}>{diag}</span>
+          <span style={{ color: spk < 2 ? '#6B4E30' : '#0C6A3F' }}>{diag}</span>
         </div>
       )}
 

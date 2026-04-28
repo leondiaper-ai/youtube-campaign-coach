@@ -788,18 +788,29 @@ export const CAMPAIGN_SIGNAL_STYLE: Record<CampaignSignal, { bg: string; fg: str
 };
 
 // ── Channel Health label (simplified, boss-facing) ────────────────────────
-// Maps GrowthState to a clean 4-category channel health label
+// Maps GrowthState + input data to a clean channel health label.
+// "Building" is reserved for early/low-data channels.
+// Established channels with weak conversion are "Active" (not "Building").
 
-export type ChannelHealth = 'Healthy' | 'Building' | 'Cold' | 'At Risk';
+export type ChannelHealth = 'Healthy' | 'Active' | 'Building' | 'Cold' | 'At Risk';
 
-export function getChannelHealth(state: GrowthState): ChannelHealth {
+export function getChannelHealth(state: GrowthState, input?: GrowthInput): ChannelHealth {
+  // Established channel detection: strong cadence or high views = not "building"
+  const established = input && (
+    (input.uploads30d >= 5) ||
+    (input.views7d != null && input.views7d > 10000)
+  );
+
   switch (state) {
     case 'HEALTHY':
     case 'SCALE':
       return 'Healthy';
-    case 'BUILDING':
     case 'WEAK_CONVERSION':
-      return 'Building';
+      // Established channels with weak conversion are Active, not Building
+      return established ? 'Active' : 'Building';
+    case 'BUILDING':
+      // High-cadence channels in BUILDING state are Active
+      return established ? 'Active' : 'Building';
     case 'AT_RISK':
       return 'At Risk';
     case 'COLD':
