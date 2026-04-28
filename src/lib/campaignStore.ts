@@ -104,6 +104,64 @@ export async function getBaseline(
   return ((await store.get(baselineKey(slug))) as CampaignBaseline | null) ?? null;
 }
 
+// ── Weekly snapshots (campaign memory) ──────────────────────────────────
+
+export type CampaignWeeklySnapshot = {
+  id: string;                    // e.g. "2026-W17"
+  snapshotDate: string;          // ISO date
+  campaignDay: number;
+  week: number;                  // 1-indexed week number within campaign
+  // 7-day window metrics
+  views7d: number;
+  subs7d: number;
+  uploads30d: number;
+  shorts30d: number;
+  // Campaign-window cumulative metrics
+  campaignContentViews: number;
+  campaignChannelViews: number;
+  campaignSubsGained: number;
+  contentMix: { uploads: number; shorts: number; videos: number };
+  // State & decision context
+  channelHealth: string;         // HEALTHY / BUILDING / COLD / AT_RISK
+  campaignSignal: string;        // WEAK_CONVERSION / STRONG_MOMENTUM / UNDERFED / etc.
+  signal: string;                // plain English signal line
+  blocker: string;               // blocker label or 'NONE'
+  actionThisWeek: string[];      // top 1-2 actions
+  notes: string;                 // optional context note
+};
+
+function weeklyKey(slug: string) {
+  return `campaigns:weekly:${slug}`;
+}
+
+const MAX_WEEKLY = 52; // 1 year of weekly snapshots
+
+export async function saveWeeklySnapshot(
+  slug: string,
+  snapshot: CampaignWeeklySnapshot,
+): Promise<CampaignWeeklySnapshot[]> {
+  const store = await kv();
+  if (!store) return [snapshot];
+  const list = ((await store.get(weeklyKey(slug))) as CampaignWeeklySnapshot[] | null) ?? [];
+  // Replace existing week if same id, otherwise append
+  const idx = list.findIndex((s) => s.id === snapshot.id);
+  if (idx >= 0) list[idx] = snapshot;
+  else list.push(snapshot);
+  // Keep newest at end, cap at MAX_WEEKLY
+  list.sort((a, b) => a.week - b.week);
+  const trimmed = list.slice(-MAX_WEEKLY);
+  await store.set(weeklyKey(slug), trimmed);
+  return trimmed;
+}
+
+export async function listWeeklySnapshots(
+  slug: string,
+): Promise<CampaignWeeklySnapshot[]> {
+  const store = await kv();
+  if (!store) return [];
+  return ((await store.get(weeklyKey(slug))) as CampaignWeeklySnapshot[] | null) ?? [];
+}
+
 // ── Notes ────────────────────────────────────────────────────────────────
 
 function notesKey(slug: string) {

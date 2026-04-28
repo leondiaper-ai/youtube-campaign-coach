@@ -1,9 +1,17 @@
 import Link from 'next/link';
 import { ARTISTS, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
-import { listPinned, listNotes, getBaseline, type PinnedCampaign, type CampaignNote } from '@/lib/campaignStore';
+import {
+  listPinned, listNotes, getBaseline,
+  listWeeklySnapshots, saveWeeklySnapshot,
+  type PinnedCampaign, type CampaignNote, type CampaignWeeklySnapshot,
+} from '@/lib/campaignStore';
 import { fetchChannelSnap } from '@/lib/youtube';
-import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
+import { readHistory, deltaOver, campaignDelta, seriesForField, type ChannelSnapshot } from '@/lib/snapshots';
+import {
+  generateYouTubeGrowthRead, getCampaignSignal, getChannelHealth,
+  getYouTubeGrowthState, type GrowthInput,
+} from '@/lib/youtubeGrowthOS';
 import CampaignStatusBoard from '@/components/CampaignStatusBoard';
 
 export const revalidate = 600;
@@ -30,9 +38,38 @@ export type ImpactData = {
   daysSinceTakeover: number;
   subsDelta: number;
   viewsDelta: number;
-  uploadsShipped: number;           // total uploads in snapshot history since baseline
-  stateAtStart: string;             // ChannelState when pinned
-  stateNow: string;                 // ChannelState now
+  uploadsShipped: number;
+  stateAtStart: string;
+  stateNow: string;
+};
+
+// ── Campaign window data (full campaign period) ─────────────────────────
+export type CampaignWindowData = {
+  campaignName: string;
+  campaignDay: number;
+  contentViews: number;
+  channelViewsDelta: number;
+  subsGained: number;
+  contentMix: { uploads: number; shorts: number; videos: number };
+};
+
+// ── Campaign trend data ─────────────────────────────────────────────────
+export type CampaignTrendData = {
+  currentWeekViews: number;
+  previousWeekViews: number;
+  bestWeekViews: number;
+  bestWeekNumber: number;
+  totalCampaignViews: number;
+  totalCampaignSubs: number;
+};
+
+// ── Weekly progress entry (for display) ─────────────────────────────────
+export type WeeklyProgressEntry = {
+  week: number;
+  views7d: number;
+  subs7d: number;
+  channelHealth: string;
+  campaignSignal: string;
 };
 
 // ── Card data shape (serializable to client) ────────────────────────────────
@@ -59,7 +96,64 @@ export type StatusCardData = {
   notes: CampaignNote[];
   // Impact tracking (null if no baseline captured)
   impact: ImpactData | null;
+  // Campaign window (null if no campaign start date)
+  campaignWindow: CampaignWindowData | null;
+  // Campaign trend (null if fewer than 1 week of snapshots)
+  campaignTrend: CampaignTrendData | null;
+  // Weekly progress history
+  weeklyProgress: WeeklyProgressEntry[];
+  // Dual state
+  channelHealth: string;
+  campaignSignal: string;
+  campaignSignalLabel: string;
 };
+
+// ── Helpers for weekly snapshot computation ─────────────────────────────
+function getISOWeekId(date: Date): string {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
+function computeWeeklyWindows(
+  history: ChannelSnapshot[],
+  campaignStartDate: string,
+): { week: number; views7d: number; subs7d: number }[] {
+  if (history.length < 2) return [];
+  const startTs = new Date(campaignStartDate).getTime();
+  const windows: { week: number; views7d: number; subs7d: number }[] = [];
+  // Group history into 7-day windows from campaign start
+  const relevantHistory = history.filter((h) => new Date(h.ts).getTime() >= startTs);
+  if (relevantHistory.length < 2) return [];
+
+  let weekNum = 1;
+  let i = 0;
+  while (i < relevantHistory.length) {
+    const weekStartIdx = i;
+    const weekStartTs = new Date(relevantHistory[weekStartIdx].ts).getTime();
+    const weekEndTs = weekStartTs + 7 * 86400000;
+    // Find last entry in this week
+    let weekEndIdx = weekStartIdx;
+    while (weekEndIdx + 1 < relevantHistory.length &&
+           new Date(relevantHistory[weekEndIdx + 1].ts).getTime() < weekEndTs) {
+      weekEndIdx++;
+    }
+    if (weekEndIdx > weekStartIdx) {
+      const first = relevantHistory[weekStartIdx];
+      const last = relevantHistory[weekEndIdx];
+      windows.push({
+        week: weekNum,
+        views7d: last.views - first.views,
+        subs7d: last.subs - first.subs,
+      });
+    }
+    weekNum++;
+    i = weekEndIdx + 1;
+  }
+  return windows;
+}
 
 async function loadCard(
   pin: PinnedCampaign,
@@ -85,6 +179,12 @@ async function loadCard(
     sparkline: [],
     notes: await listNotes(artist.slug),
     impact: null,
+    campaignWindow: null,
+    campaignTrend: null,
+    weeklyProgress: [],
+    channelHealth: 'Cold',
+    campaignSignal: 'NO_CAMPAIGN',
+    campaignSignalLabel: 'No campaign',
   };
 
   const handle = artist.channelHandle ?? artist.name;
@@ -106,6 +206,21 @@ async function loadCard(
 
   const currentStatus = derived?.status ?? 'COLD';
 
+  // ── Growth OS dual state ──────────────────────────────────────────────
+  const growthInput: GrowthInput = {
+    subscribers: snap.subs ?? undefined,
+    views7d: views7?.delta ?? null,
+    subscribers7d: subs7?.delta ?? null,
+    uploads30d: snap.uploads30d ?? 0,
+    shorts30d: snap.shorts30d ?? 0,
+    lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? 60,
+    hasActiveCampaign: !!artist.campaign,
+    campaignName: artist.campaign,
+  };
+  const gsResult = getYouTubeGrowthState(growthInput);
+  const chHealth = getChannelHealth(gsResult.state);
+  const campSig = getCampaignSignal(growthInput);
+
   // ── Impact from baseline ──────────────────────────────────────────────
   let impact: ImpactData | null = null;
   try {
@@ -115,7 +230,6 @@ async function loadCard(
         1,
         Math.round((Date.now() - new Date(baseline.capturedAt).getTime()) / 86400000),
       );
-      // Count uploads in history since baseline
       const baselineTs = new Date(baseline.capturedAt).getTime();
       const uploadsSinceBaseline = history.filter(
         (h) => new Date(h.ts).getTime() >= baselineTs,
@@ -134,6 +248,112 @@ async function loadCard(
     // Non-critical
   }
 
+  // ── Campaign window data ──────────────────────────────────────────────
+  const campaignStart = artist.campaignStartDate ?? null;
+  let campaignWindow: CampaignWindowData | null = null;
+  let campaignTrend: CampaignTrendData | null = null;
+  let weeklyProgress: WeeklyProgressEntry[] = [];
+
+  if (campaignStart) {
+    const startTs = new Date(campaignStart).getTime();
+    const campaignDay = Math.max(1, Math.floor((Date.now() - startTs) / 86400000));
+
+    // Content uploaded since campaign start
+    const campaignUploads = (snap.recentUploads ?? []).filter(
+      (u) => new Date(u.publishedAt).getTime() >= startTs,
+    );
+    const contentViews = campaignUploads.reduce((sum, u) => sum + u.viewCount, 0);
+    const shortsCount = campaignUploads.filter((u) => u.durationSec <= 62).length;
+
+    // Channel-level deltas since campaign
+    const campViewsDelta = campaignDelta(history, campaignStart, 'views');
+    const campSubsDelta = campaignDelta(history, campaignStart, 'subs');
+
+    campaignWindow = {
+      campaignName: artist.campaign ?? 'Active Campaign',
+      campaignDay,
+      contentViews,
+      channelViewsDelta: campViewsDelta?.delta ?? 0,
+      subsGained: campSubsDelta?.delta ?? 0,
+      contentMix: {
+        uploads: campaignUploads.length,
+        shorts: shortsCount,
+        videos: campaignUploads.length - shortsCount,
+      },
+    };
+
+    // ── Weekly windows for trend + progress ────────────────────────────
+    const weeklyWindows = computeWeeklyWindows(history, campaignStart);
+
+    // Load existing weekly snapshots
+    const existingSnapshots = await listWeeklySnapshots(artist.slug);
+    const existingById = new Map(existingSnapshots.map((s) => [s.id, s]));
+
+    // Build weekly progress from windows + existing snapshots
+    weeklyProgress = weeklyWindows.map((w) => {
+      const existing = existingSnapshots.find((s) => s.week === w.week);
+      return {
+        week: w.week,
+        views7d: w.views7d,
+        subs7d: w.subs7d,
+        channelHealth: existing?.channelHealth ?? chHealth,
+        campaignSignal: existing?.campaignSignal ?? campSig.label,
+      };
+    });
+
+    // Campaign trend from weekly windows
+    if (weeklyWindows.length >= 1) {
+      const currentWeek = weeklyWindows[weeklyWindows.length - 1];
+      const previousWeek = weeklyWindows.length >= 2
+        ? weeklyWindows[weeklyWindows.length - 2]
+        : { views7d: 0, subs7d: 0, week: 0 };
+      const bestWeek = weeklyWindows.reduce((best, w) =>
+        w.views7d > best.views7d ? w : best, weeklyWindows[0]);
+
+      campaignTrend = {
+        currentWeekViews: currentWeek.views7d,
+        previousWeekViews: previousWeek.views7d,
+        bestWeekViews: bestWeek.views7d,
+        bestWeekNumber: bestWeek.week,
+        totalCampaignViews: campViewsDelta?.delta ?? contentViews,
+        totalCampaignSubs: campSubsDelta?.delta ?? 0,
+      };
+    }
+
+    // ── Auto-save weekly snapshot (fire-and-forget) ─────────────────────
+    const thisWeekId = getISOWeekId(new Date());
+    if (!existingById.has(thisWeekId)) {
+      const growthRead = generateYouTubeGrowthRead(artist.name, growthInput);
+      const weekNum = weeklyWindows.length > 0 ? weeklyWindows[weeklyWindows.length - 1].week : 1;
+      const weeklySnap: CampaignWeeklySnapshot = {
+        id: thisWeekId,
+        snapshotDate: new Date().toISOString(),
+        campaignDay,
+        week: weekNum,
+        views7d: views7?.delta ?? 0,
+        subs7d: subs7?.delta ?? 0,
+        uploads30d: snap.uploads30d ?? 0,
+        shorts30d: snap.shorts30d ?? 0,
+        campaignContentViews: contentViews,
+        campaignChannelViews: campViewsDelta?.delta ?? 0,
+        campaignSubsGained: campSubsDelta?.delta ?? 0,
+        contentMix: {
+          uploads: campaignUploads.length,
+          shorts: shortsCount,
+          videos: campaignUploads.length - shortsCount,
+        },
+        channelHealth: chHealth,
+        campaignSignal: campSig.label,
+        signal: growthRead.signal,
+        blocker: growthRead.blocker.label,
+        actionThisWeek: growthRead.actions.doNow.slice(0, 2),
+        notes: '',
+      };
+      // Fire-and-forget — don't block render
+      saveWeeklySnapshot(artist.slug, weeklySnap).catch(() => {});
+    }
+  }
+
   return {
     ...base,
     subs7Delta: subs7?.delta ?? null,
@@ -146,6 +366,12 @@ async function loadCard(
     cadenceLine: cadenceLine(snap.uploads30d ?? 0),
     sparkline,
     impact,
+    campaignWindow,
+    campaignTrend,
+    weeklyProgress,
+    channelHealth: chHealth,
+    campaignSignal: campSig.signal,
+    campaignSignalLabel: campSig.label,
   };
 }
 

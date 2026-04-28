@@ -704,6 +704,109 @@ export const SPARK_STYLE: Record<GrowthState, { stroke: string; fill: string }> 
   SCALE:           { stroke: '#1FBE7A', fill: 'rgba(31,190,122,0.12)' },
 };
 
+// ── Campaign Signal (separate from channel health) ────────────────────────
+// Channel Health answers: "Is this channel being run well?"
+// Campaign Signal answers: "Is this campaign converting?"
+// K-Trap can be Healthy (channel) + Weak Conversion (campaign) without contradiction.
+
+export type CampaignSignal =
+  | 'STRONG_MOMENTUM'    // views + subs both up, campaign is working
+  | 'CONVERTING'         // moderate views converting to subs
+  | 'WEAK_CONVERSION'    // views strong, subs flat — people watching, not subscribing
+  | 'UNDERFED'           // low cadence relative to potential
+  | 'NEEDS_SUPPORT'      // campaign not generating enough signal
+  | 'NO_CAMPAIGN';       // no active campaign
+
+export type CampaignSignalResult = {
+  signal: CampaignSignal;
+  label: string;
+  description: string;
+};
+
+export function getCampaignSignal(input: GrowthInput): CampaignSignalResult {
+  if (!input.hasActiveCampaign) {
+    return { signal: 'NO_CAMPAIGN', label: 'No campaign', description: 'No active campaign running' };
+  }
+
+  const viewsStrong = input.views7d != null && input.views7d > 5000;
+  const viewsUp = input.views7d != null && input.views7d > 0;
+  const subsUp = input.subscribers7d != null && input.subscribers7d > 0;
+  const subsFlat = input.subscribers7d == null || input.subscribers7d <= 0;
+  const cadenceLow = input.uploads30d <= 2;
+
+  // Strong momentum — both metrics accelerating
+  if (viewsStrong && subsUp && input.uploads30d >= 4) {
+    return {
+      signal: 'STRONG_MOMENTUM',
+      label: 'Strong momentum',
+      description: 'Views and subscribers both growing — campaign is converting',
+    };
+  }
+
+  // Weak conversion — views but no subs
+  if (viewsStrong && subsFlat) {
+    return {
+      signal: 'WEAK_CONVERSION',
+      label: 'Weak conversion',
+      description: 'People are watching but not subscribing — content is discoverable but not compelling enough to convert',
+    };
+  }
+
+  // Converting — moderate activity with subs growing
+  if (viewsUp && subsUp) {
+    return {
+      signal: 'CONVERTING',
+      label: 'Converting',
+      description: 'Campaign is generating subscriber growth from views',
+    };
+  }
+
+  // Underfed — potential but not enough cadence
+  if (viewsUp && cadenceLow) {
+    return {
+      signal: 'UNDERFED',
+      label: 'Underfed',
+      description: 'Campaign has signal but cadence is too low to compound — needs more content',
+    };
+  }
+
+  // Needs support — not generating enough signal
+  return {
+    signal: 'NEEDS_SUPPORT',
+    label: 'Needs support',
+    description: 'Campaign is not generating enough views or subscriber signal — needs content or format adjustment',
+  };
+}
+
+export const CAMPAIGN_SIGNAL_STYLE: Record<CampaignSignal, { bg: string; fg: string }> = {
+  STRONG_MOMENTUM: { bg: '#E6F8EE', fg: '#0C6A3F' },
+  CONVERTING:      { bg: '#E6F8EE', fg: '#0C6A3F' },
+  WEAK_CONVERSION: { bg: '#FFEAD6', fg: '#8A4A1A' },
+  UNDERFED:        { bg: '#FFF5D6', fg: '#7A5A00' },
+  NEEDS_SUPPORT:   { bg: '#FFE2D8', fg: '#8A1F0C' },
+  NO_CAMPAIGN:     { bg: '#F5F0E4', fg: '#7A6B4E' },
+};
+
+// ── Channel Health label (simplified, boss-facing) ────────────────────────
+// Maps GrowthState to a clean 4-category channel health label
+
+export type ChannelHealth = 'Healthy' | 'Building' | 'Cold' | 'At Risk';
+
+export function getChannelHealth(state: GrowthState): ChannelHealth {
+  switch (state) {
+    case 'HEALTHY':
+    case 'SCALE':
+      return 'Healthy';
+    case 'BUILDING':
+    case 'WEAK_CONVERSION':
+      return 'Building';
+    case 'AT_RISK':
+      return 'At Risk';
+    case 'COLD':
+      return 'Cold';
+  }
+}
+
 // ── ChannelState ↔ GrowthState bridge ──────────────────────────────────────
 // For backwards compatibility during migration — lets existing components
 // that receive ChannelState from deriveFromLive() convert to GrowthState.

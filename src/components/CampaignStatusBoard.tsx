@@ -9,7 +9,9 @@ import {
   channelStateToGrowthState,
   DECISION_STYLE, STATE_STYLE as GOS_STATE_STYLE,
   SPARK_STYLE as GOS_SPARK_STYLE,
+  CAMPAIGN_SIGNAL_STYLE,
   type DecisionLabel,
+  type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
 import Sparkline from './Sparkline';
 
@@ -25,6 +27,32 @@ type ImpactData = {
   uploadsShipped: number;
   stateAtStart: string;
   stateNow: string;
+};
+
+type CampaignWindowData = {
+  campaignName: string;
+  campaignDay: number;
+  contentViews: number;
+  channelViewsDelta: number;
+  subsGained: number;
+  contentMix: { uploads: number; shorts: number; videos: number };
+};
+
+type CampaignTrendData = {
+  currentWeekViews: number;
+  previousWeekViews: number;
+  bestWeekViews: number;
+  bestWeekNumber: number;
+  totalCampaignViews: number;
+  totalCampaignSubs: number;
+};
+
+type WeeklyProgressEntry = {
+  week: number;
+  views7d: number;
+  subs7d: number;
+  channelHealth: string;
+  campaignSignal: string;
 };
 
 type CardData = {
@@ -44,6 +72,12 @@ type CardData = {
   sparkline: { x: number; y: number }[];
   notes: CampaignNote[];
   impact: ImpactData | null;
+  campaignWindow: CampaignWindowData | null;
+  campaignTrend: CampaignTrendData | null;
+  weeklyProgress: WeeklyProgressEntry[];
+  channelHealth: string;
+  campaignSignal: string;
+  campaignSignalLabel: string;
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -112,34 +146,89 @@ function subsIsWeak(card: CardData): boolean {
   );
 }
 
-// ─── Snapshot generator (powered by Growth OS) ─────────────────────────────
+// ─── Campaign Progress Report generator ─────────────────────────────────────
 function generateSnapshot(card: CardData): string {
   const read = getGrowthRead(card);
+  const cw = card.campaignWindow;
+  const ct = card.campaignTrend;
+  const hasCampaign = !!cw;
 
-  // Append impact + notes context to the Slack copy
-  const impactLines: string[] = [];
-  if (card.impact && card.impact.daysSinceTakeover >= 2) {
-    impactLines.push(
-      '',
-      `SINCE TAKEOVER (${card.impact.daysSinceTakeover} days)`,
-      `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs`,
-      `${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views`,
-    );
-    if (card.impact.stateAtStart !== card.impact.stateNow) {
-      impactLines.push(`${card.impact.stateAtStart} → ${card.impact.stateNow}`);
+  const lines: string[] = [];
+
+  // Header
+  if (hasCampaign) {
+    lines.push(`CAMPAIGN PROGRESS REPORT — ${card.name.toUpperCase()}`);
+    lines.push(`Campaign: ${cw!.campaignName} · Day ${cw!.campaignDay}`);
+    lines.push(`Channel Health: ${card.channelHealth} · Campaign Signal: ${card.campaignSignalLabel}`);
+  } else {
+    lines.push(`YOUTUBE GROWTH READ — ${card.name.toUpperCase()}`);
+    lines.push(`Channel Health: ${card.channelHealth}`);
+  }
+
+  // 1. Current week
+  lines.push('', '1. CURRENT WEEK');
+  lines.push(`Views (7d): ${card.views7Delta != null ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}` : '—'}`);
+  lines.push(`Subs (7d): ${card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : '—'}`);
+  lines.push(`Uploads (30d): ${card.uploads30d}`);
+  lines.push(`Shorts (30d): ${card.shorts30d}`);
+
+  // 2. Campaign so far
+  if (hasCampaign && cw && ct) {
+    lines.push('', '2. CAMPAIGN SO FAR');
+    lines.push(`Campaign views: ${fmtNum(ct.totalCampaignViews)}`);
+    lines.push(`Campaign subs: ${ct.totalCampaignSubs >= 0 ? '+' : ''}${fmtNum(ct.totalCampaignSubs)}`);
+    lines.push(`Campaign uploads: ${cw.contentMix.uploads} (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
+    lines.push(`Content views: ${fmtNum(cw.contentViews)}`);
+    if (ct.bestWeekViews > 0) {
+      lines.push(`Best week: Week ${ct.bestWeekNumber} (${fmtNum(ct.bestWeekViews)} views)`);
+    }
+    const trend = ct.currentWeekViews > ct.previousWeekViews ? 'Up' :
+                  ct.currentWeekViews < ct.previousWeekViews ? 'Down' : 'Flat';
+    lines.push(`Trend direction: ${trend}`);
+  }
+
+  // Weekly progress
+  if (card.weeklyProgress.length > 0) {
+    lines.push('', 'WEEKLY PROGRESS:');
+    for (const w of card.weeklyProgress) {
+      lines.push(`Week ${w.week}: ${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views · ${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs · ${w.campaignSignal}`);
     }
   }
 
-  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
-  const contextLine = latestNote
-    ? `${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`
-    : '';
+  // 3. Read
+  lines.push('', `${hasCampaign ? '3' : '2'}. READ`);
+  lines.push(read.signal);
 
-  return [
-    read.slackCopy,
-    ...impactLines,
-    ...(contextLine ? ['', 'CONTEXT:', `- ${contextLine}`] : []),
-  ].join('\n');
+  if (read.blocker.blocker !== 'NONE') {
+    lines.push(`Blocker: ${read.blocker.label} — ${read.blocker.description}`);
+  }
+
+  // 4. Action this week
+  lines.push('', `${hasCampaign ? '4' : '3'}. ACTION THIS WEEK`);
+  read.actions.doNow.forEach((a) => lines.push(`→ ${a}`));
+
+  // 5. Watch next
+  lines.push('', `${hasCampaign ? '5' : '4'}. WATCH NEXT`);
+  lines.push(read.watch);
+
+  // Impact strip
+  if (card.impact && card.impact.daysSinceTakeover >= 2) {
+    lines.push('', `SINCE TAKEOVER (${card.impact.daysSinceTakeover} days)`);
+    lines.push(`${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs`);
+    lines.push(`${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views`);
+    if (card.impact.stateAtStart !== card.impact.stateNow) {
+      lines.push(`${card.impact.stateAtStart} → ${card.impact.stateNow}`);
+    }
+  }
+
+  // Context note
+  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
+  if (latestNote) {
+    lines.push('', 'CONTEXT:');
+    lines.push(`- ${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`);
+  }
+
+  return lines.join('\n');
 }
 
 // ─── Snapshot Modal ─────────────────────────────────────────────────────────
@@ -181,6 +270,50 @@ function SnapshotModal({ text, onClose }: { text: string; onClose: () => void })
         >
           {copied ? 'Copied' : 'Copy to clipboard'}
         </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Weekly Progress Section (expandable) ───────────────────────────────────
+function WeeklyProgressSection({ entries }: { entries: WeeklyProgressEntry[] }) {
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? entries : entries.slice(-3);
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35">
+          Weekly progress
+        </span>
+        {entries.length > 3 && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-[10px] text-ink/30 hover:text-ink/50"
+          >
+            {showAll ? 'Show less' : `Show all ${entries.length} weeks`}
+          </button>
+        )}
+      </div>
+      <div className="space-y-1">
+        {visible.map((w) => (
+          <div
+            key={w.week}
+            className="flex items-center gap-3 text-[11px] rounded-md px-3 py-1.5"
+            style={{ background: SOFT }}
+          >
+            <span className="font-bold text-ink/50 w-[48px] shrink-0">Week {w.week}</span>
+            <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.4)' }}>
+              {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
+            </span>
+            <span className="text-ink/25">·</span>
+            <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.4)' }}>
+              {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
+            </span>
+            <span className="text-ink/25">·</span>
+            <span className="text-[10px] text-ink/40">{w.campaignSignal}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -272,17 +405,27 @@ function DecisionCard({
         )}
       </div>
 
-      {/* ─── B. Artist name + state / sub-state ──────────────────────── */}
+      {/* ─── B. Artist name + dual state (channel health + campaign signal) */}
       <div className="mb-4">
         <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[12px] font-black uppercase tracking-[0.1em]" style={{ color: dStyle.fg }}>
-            {read.state.replace('_', ' ')}
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          <span className="text-[11px] font-black uppercase tracking-[0.1em]" style={{ color: dStyle.fg }}>
+            {card.channelHealth} channel
           </span>
-          <span className="text-[10px] text-ink/25">·</span>
-          <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
-            {read.subState.replace(/_/g, ' ')}
-          </span>
+          {card.campaignSignal !== 'NO_CAMPAIGN' && (
+            <>
+              <span className="text-[10px] text-ink/25">·</span>
+              <span
+                className="text-[11px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded"
+                style={{
+                  background: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.bg ?? SOFT,
+                  color: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.fg ?? INK,
+                }}
+              >
+                {card.campaignSignalLabel} campaign
+              </span>
+            </>
+          )}
         </div>
         {card.campaign && (
           <div className="text-[11px] text-ink/35 mt-0.5">{card.campaign}</div>
@@ -361,6 +504,75 @@ function DecisionCard({
             </div>
           )}
         </div>
+      )}
+
+      {/* ─── Campaign Window (full campaign period) ──────────────────── */}
+      {card.campaignWindow && (
+        <div className="rounded-lg px-4 py-3 mb-4" style={{ background: '#F0F4FF', border: '1px solid #D6DFFA' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#2C6BFF' }} />
+            <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: '#3B5998' }}>
+              Campaign · {card.campaignWindow.campaignName} · Day {card.campaignWindow.campaignDay}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            <div>
+              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Content views</div>
+              <div className="text-[14px] font-black tabular-nums mt-0.5">{fmtNum(card.campaignWindow.contentViews)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Channel views</div>
+              <div className="text-[14px] font-black tabular-nums mt-0.5" style={{ color: card.campaignWindow.channelViewsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }}>
+                {card.campaignWindow.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(card.campaignWindow.channelViewsDelta)}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Subs gained</div>
+              <div className="text-[14px] font-black tabular-nums mt-0.5" style={{ color: card.campaignWindow.subsGained > 0 ? '#0C6A3F' : card.campaignWindow.subsGained < 0 ? '#8A1F0C' : undefined }}>
+                {card.campaignWindow.subsGained >= 0 ? '+' : ''}{fmtNum(card.campaignWindow.subsGained)}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Content mix</div>
+              <div className="text-[12px] font-bold mt-0.5 text-ink/70">
+                {card.campaignWindow.contentMix.uploads} uploads
+              </div>
+              <div className="text-[10px] text-ink/40">
+                {card.campaignWindow.contentMix.shorts} Shorts · {card.campaignWindow.contentMix.videos} videos
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Campaign Trend ──────────────────────────────────────────── */}
+      {card.campaignTrend && card.campaignTrend.currentWeekViews > 0 && (
+        <div className="rounded-lg px-4 py-3 mb-4" style={{ background: SOFT }}>
+          <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-2">Campaign momentum</div>
+          <div className="grid grid-cols-4 gap-2 text-[11px]">
+            <div>
+              <div className="text-ink/40 text-[10px]">This week</div>
+              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.currentWeekViews)} views</div>
+            </div>
+            <div>
+              <div className="text-ink/40 text-[10px]">Prev. week</div>
+              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.previousWeekViews)} views</div>
+            </div>
+            <div>
+              <div className="text-ink/40 text-[10px]">Best week</div>
+              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.bestWeekViews)} views</div>
+            </div>
+            <div>
+              <div className="text-ink/40 text-[10px]">Campaign total</div>
+              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.totalCampaignViews)} views</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Weekly Progress (expandable) ────────────────────────────── */}
+      {card.weeklyProgress.length > 0 && (
+        <WeeklyProgressSection entries={card.weeklyProgress} />
       )}
 
       {/* ─── D. Decision block (powered by Growth OS) ──────────────── */}
@@ -476,7 +688,7 @@ function DecisionCard({
             onClick={() => setSnapshot(generateSnapshot(card))}
             className="text-[10px] text-ink/25 hover:text-ink/50 shrink-0 transition-colors"
           >
-            Generate Snapshot
+            {card.campaignWindow ? 'Generate Campaign Report' : 'Generate Snapshot'}
           </button>
         </div>
       </div>
