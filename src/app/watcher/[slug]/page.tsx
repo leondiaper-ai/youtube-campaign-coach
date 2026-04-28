@@ -5,7 +5,7 @@ import { fetchChannelSnap } from '@/lib/youtube';
 import { listCustomArtists } from '@/lib/artistStore';
 import { isPinned } from '@/lib/campaignStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
-import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
+import { readHistory, deltaOver, campaignDelta, seriesForField } from '@/lib/snapshots';
 import { decideWatcher } from '@/lib/watcherDecision';
 import {
   computeConversion,
@@ -17,6 +17,7 @@ import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoa
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
 import MissedReachSection from '@/components/MissedReachSection';
 import WatcherReport, { type ReportMissedVideo } from '@/components/WatcherReport';
+import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
 
 export const revalidate = 600;
 
@@ -100,6 +101,31 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   const campaignDaysSinceStart = campaignStart
     ? Math.floor((Date.now() - new Date(campaignStart).getTime()) / 86400000)
     : null;
+
+  // ── Launch Module data — daily view deltas for chart + momentum ─────────
+  const viewSeries = seriesForField(history, 'views', 30);
+  const launchViewHistory: { x: number; y: number }[] = (() => {
+    if (viewSeries.length < 2) return [];
+    const sorted = [...viewSeries].sort((a, b) => a.x - b.x);
+    const deltas: { x: number; y: number }[] = [];
+    for (let i = 1; i < sorted.length; i++) {
+      deltas.push({ x: sorted[i].x, y: Math.max(0, sorted[i].y - sorted[i - 1].y) });
+    }
+    return deltas;
+  })();
+  const launchUploads: LaunchVideo[] = (live?.recentUploads ?? []).map((u) => ({
+    videoId: u.id,
+    title: u.title,
+    publishedAt: u.publishedAt,
+    durationSeconds: u.durationSec,
+    kind: (u.durationSec <= 62 ? 'short' : 'video') as 'short' | 'video',
+    views: u.viewCount,
+    likes: u.likeCount,
+    comments: u.commentCount,
+  }));
+  const shorts14d = (live?.recentUploads ?? []).filter(
+    (u) => u.durationSec <= 62 && (Date.now() - new Date(u.publishedAt).getTime()) / 86400000 <= 14
+  ).length;
 
   const conv7 = computeConversion(history, 7);
   const conv30 = computeConversion(history, 30);
@@ -318,6 +344,17 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             )}
           </section>
         )}
+
+        {/* ─── LAUNCH MODULE — only renders if a video published within 10d ── */}
+        <LaunchModule
+          recentUploads={launchUploads}
+          uploads30d={uploads30d}
+          shorts14d={shorts14d}
+          daysSinceLastUpload={lastUpDays}
+          subs7Delta={subs7?.delta ?? null}
+          views7Delta={views7?.delta ?? null}
+          viewHistory={launchViewHistory}
+        />
 
         {/* ─── FIX NOW ────────────────────────────────────────────────────── */}
         {(fixNow.length > 0 || isColdMode) && (
