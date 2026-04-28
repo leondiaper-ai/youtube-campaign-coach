@@ -52,6 +52,30 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ artist, artists: list });
 }
 
+// PATCH — update fields on an existing custom artist (e.g. campaignStartDate)
+export async function PATCH(req: NextRequest) {
+  const body = await req.json().catch(() => null);
+  const slug: string | undefined = body?.slug;
+  if (!slug) return NextResponse.json({ error: 'missing slug' }, { status: 400 });
+
+  const all = await listCustomArtists();
+  const existing = all.find((a) => a.slug === slug);
+  if (!existing) {
+    return NextResponse.json({ error: `Custom artist "${slug}" not found` }, { status: 404 });
+  }
+
+  // Merge allowed fields
+  const updated: Artist = { ...existing };
+  if (body.campaignStartDate !== undefined) updated.campaignStartDate = body.campaignStartDate;
+  if (body.phase !== undefined) updated.phase = body.phase;
+  if (body.campaign !== undefined) updated.campaign = body.campaign;
+  if (body.nextMomentLabel !== undefined) updated.nextMomentLabel = body.nextMomentLabel;
+  if (body.nextMomentDate !== undefined) updated.nextMomentDate = body.nextMomentDate;
+
+  const list = await addCustomArtist(updated);
+  return NextResponse.json({ artist: updated, artists: list });
+}
+
 export async function DELETE(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug');
   if (!slug) return NextResponse.json({ error: 'missing slug' }, { status: 400 });
