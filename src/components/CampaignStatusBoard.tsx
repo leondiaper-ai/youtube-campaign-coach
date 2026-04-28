@@ -81,8 +81,6 @@ type CardData = {
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
-// All state/diagnosis/action logic now lives in /lib/youtubeGrowthOS.ts.
-// This bridge converts CardData → GrowthInput → GrowthRead for rendering.
 
 function cardToGrowthInput(card: CardData): GrowthInput {
   const daysSince = card.cadenceLine.startsWith('No recent') ? 31
@@ -103,7 +101,6 @@ function getGrowthRead(card: CardData): GrowthRead {
   return generateYouTubeGrowthRead(card.name, cardToGrowthInput(card));
 }
 
-/** Is this an active campaign card (PUSH/FIX) vs early/building (HOLD)? */
 function isActiveCampaign(read: GrowthRead, card: CardData): boolean {
   if (read.decision === 'PUSH' || read.decision === 'FIX') return true;
   if (card.campaign && (card.views7Delta != null || card.subs7Delta != null)) return true;
@@ -116,7 +113,6 @@ function fmtNoteDate(iso: string) {
   const d = new Date(iso);
   const now = new Date();
   const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  // Compare calendar dates, not raw ms
   const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const nDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const diffDays = Math.round((nDay.getTime() - dDay.getTime()) / 86400000);
@@ -126,8 +122,6 @@ function fmtNoteDate(iso: string) {
   return dateStr;
 }
 
-// Status/spark styles now come from Growth OS (GOS_STATE_STYLE, GOS_SPARK_STYLE).
-// Bridge helper to map ChannelState → GrowthState for style lookup:
 function gsFor(cs: ChannelState) { return channelStateToGrowthState(cs); }
 
 function deltaColor(v: number | null): string {
@@ -137,7 +131,6 @@ function deltaColor(v: number | null): string {
   return 'rgba(14,14,14,0.4)';
 }
 
-/** Flag weak conversion: views strong but subs flat/negative */
 function subsIsWeak(card: CardData): boolean {
   return (
     card.views7Delta != null &&
@@ -146,7 +139,61 @@ function subsIsWeak(card: CardData): boolean {
   );
 }
 
-// ─── Campaign Progress Report generator ─────────────────────────────────────
+// ─── Conversion metric ───────────────────────────────────────────────────
+function subsPerKViews(card: CardData): number | null {
+  if (card.views7Delta == null || card.views7Delta <= 0) return null;
+  const subs = card.subs7Delta ?? 0;
+  return (subs / card.views7Delta) * 1000;
+}
+
+// ─── Conversion diagnosis one-liner ──────────────────────────────────────
+function conversionDiagnosis(card: CardData): string | null {
+  const spk = subsPerKViews(card);
+  if (spk == null) return null;
+  if (spk >= 3) return 'Converting well — demand and retention aligned';
+  if (spk >= 1.5) return 'Moderate conversion — room to improve retention';
+  if (card.views7Delta != null && card.views7Delta > 50000 && spk < 0.5) return 'Failing to capture demand';
+  if (card.views7Delta != null && card.views7Delta > 5000 && spk < 1) return 'Demand high, retention low';
+  return 'Low conversion — not enough signal yet';
+}
+
+// ─── Sharper read copy ───────────────────────────────────────────────────
+function sharpenRead(read: GrowthRead, card: CardData): { primary: string; secondary: string | null } {
+  const weak = subsIsWeak(card);
+  if (weak) {
+    return {
+      primary: 'People are watching, but not subscribing.',
+      secondary: 'Cadence is strong — problem is packaging, not volume.',
+    };
+  }
+  // Signal is already good from Growth OS, just return it
+  return { primary: read.signal, secondary: null };
+}
+
+// ─── Momentum one-liner ──────────────────────────────────────────────────
+function momentumLine(ct: CampaignTrendData): string {
+  const curr = fmtNum(ct.currentWeekViews);
+  const prev = ct.previousWeekViews > 0 ? fmtNum(ct.previousWeekViews) : null;
+  const total = fmtNum(ct.totalCampaignViews);
+  const arrow = ct.currentWeekViews > ct.previousWeekViews ? '↑' :
+                ct.currentWeekViews < ct.previousWeekViews ? '↓' : '→';
+  if (prev) {
+    return `${curr} this week (${arrow} vs ${prev} last week) · ${total} total`;
+  }
+  return `${curr} this week · ${total} total`;
+}
+
+// ─── Weekly summary one-liner ────────────────────────────────────────────
+function weeklySummaryLine(entries: WeeklyProgressEntry[]): string | null {
+  if (entries.length < 2) return null;
+  const prev = entries[entries.length - 2];
+  const curr = entries[entries.length - 1];
+  const viewsDir = curr.views7d > prev.views7d ? 'growth ↑' : curr.views7d < prev.views7d ? 'growth ↓' : 'views flat';
+  const subsDir = curr.subs7d > prev.subs7d ? 'conversion ↑' : curr.subs7d > 0 ? 'conversion steady' : 'conversion flat';
+  return `${fmtNum(prev.views7d)} → ${fmtNum(curr.views7d)} (${viewsDir}, ${subsDir})`;
+}
+
+// ─── Campaign Progress Report generator (full detail for export) ────────
 function generateSnapshot(card: CardData): string {
   const read = getGrowthRead(card);
   const cw = card.campaignWindow;
@@ -165,12 +212,19 @@ function generateSnapshot(card: CardData): string {
     lines.push(`Channel Health: ${card.channelHealth}`);
   }
 
+  // Conversion metric
+  const spk = subsPerKViews(card);
+  if (spk != null) {
+    lines.push(`Subs / 1K views: ${spk.toFixed(1)} (target: 2+)`);
+  }
+
   // 1. Current week
   lines.push('', '1. CURRENT WEEK');
   lines.push(`Views (7d): ${card.views7Delta != null ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}` : '—'}`);
   lines.push(`Subs (7d): ${card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : '—'}`);
   lines.push(`Uploads (30d): ${card.uploads30d}`);
   lines.push(`Shorts (30d): ${card.shorts30d}`);
+  lines.push(`Cadence: ${card.cadenceLine}`);
 
   // 2. Campaign so far
   if (hasCampaign && cw && ct) {
@@ -182,12 +236,10 @@ function generateSnapshot(card: CardData): string {
     if (ct.bestWeekViews > 0) {
       lines.push(`Best week: Week ${ct.bestWeekNumber} (${fmtNum(ct.bestWeekViews)} views)`);
     }
-    const trend = ct.currentWeekViews > ct.previousWeekViews ? 'Up' :
-                  ct.currentWeekViews < ct.previousWeekViews ? 'Down' : 'Flat';
-    lines.push(`Trend direction: ${trend}`);
+    lines.push(`Momentum: ${momentumLine(ct)}`);
   }
 
-  // Weekly progress
+  // Weekly progress (full detail in report)
   if (card.weeklyProgress.length > 0) {
     lines.push('', 'WEEKLY PROGRESS:');
     for (const w of card.weeklyProgress) {
@@ -197,7 +249,11 @@ function generateSnapshot(card: CardData): string {
 
   // 3. Read
   lines.push('', `${hasCampaign ? '3' : '2'}. READ`);
-  lines.push(read.signal);
+  const sharp = sharpenRead(read, card);
+  lines.push(sharp.primary);
+  if (sharp.secondary) lines.push(sharp.secondary);
+  const diag = conversionDiagnosis(card);
+  if (diag) lines.push(`Conversion status: ${diag}`);
 
   if (read.blocker.blocker !== 'NONE') {
     lines.push(`Blocker: ${read.blocker.label} — ${read.blocker.description}`);
@@ -275,51 +331,7 @@ function SnapshotModal({ text, onClose }: { text: string; onClose: () => void })
   );
 }
 
-// ─── Weekly Progress Section (expandable) ───────────────────────────────────
-function WeeklyProgressSection({ entries }: { entries: WeeklyProgressEntry[] }) {
-  const [showAll, setShowAll] = useState(false);
-  const visible = showAll ? entries : entries.slice(-3);
-
-  return (
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35">
-          Weekly progress
-        </span>
-        {entries.length > 3 && (
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className="text-[10px] text-ink/30 hover:text-ink/50"
-          >
-            {showAll ? 'Show less' : `Show all ${entries.length} weeks`}
-          </button>
-        )}
-      </div>
-      <div className="space-y-1">
-        {visible.map((w) => (
-          <div
-            key={w.week}
-            className="flex items-center gap-3 text-[11px] rounded-md px-3 py-1.5"
-            style={{ background: SOFT }}
-          >
-            <span className="font-bold text-ink/50 w-[48px] shrink-0">Week {w.week}</span>
-            <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.4)' }}>
-              {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
-            </span>
-            <span className="text-ink/25">·</span>
-            <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.4)' }}>
-              {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
-            </span>
-            <span className="text-ink/25">·</span>
-            <span className="text-[10px] text-ink/40">{w.campaignSignal}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── Decision Card ──────────────────────────────────────────────────────────
+// ─── Decision Card (compressed, decision-surface layout) ───────────────────
 function DecisionCard({
   card,
   onUnpin,
@@ -332,12 +344,17 @@ function DecisionCard({
   const [noteInput, setNoteInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showWeekly, setShowWeekly] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
   const gs = gsFor(card.boardStatus);
-  const style = GOS_STATE_STYLE[gs];
   const weak = subsIsWeak(card);
   const read = getGrowthRead(card);
   const dStyle = DECISION_STYLE[read.decision];
+  const spk = subsPerKViews(card);
+  const sharp = sharpenRead(read, card);
+  const diag = conversionDiagnosis(card);
+  const cw = card.campaignWindow;
+  const ct = card.campaignTrend;
 
   async function addNote() {
     if (!noteInput.trim()) return;
@@ -390,7 +407,7 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* ─── A. Decision label + confidence ─────────────────────────── */}
+      {/* ─── 1. Artist name + state ─────────────────────────────────── */}
       <div className="flex items-center gap-2 mb-3">
         <span
           className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
@@ -405,7 +422,6 @@ function DecisionCard({
         )}
       </div>
 
-      {/* ─── B. Artist name + dual state (channel health + campaign signal) */}
       <div className="mb-4">
         <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
         <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -427,13 +443,10 @@ function DecisionCard({
             </>
           )}
         </div>
-        {card.campaign && (
-          <div className="text-[11px] text-ink/35 mt-0.5">{card.campaign}</div>
-        )}
       </div>
 
-      {/* ─── C. Key metrics + sparkline ───────────────────────────────── */}
-      <div className="flex items-end gap-8 mb-3">
+      {/* ─── 2. Views vs subs (headline numbers) + sparkline ────────── */}
+      <div className="flex items-end gap-6 mb-2">
         <div>
           <div
             className="text-[32px] font-black leading-none tabular-nums"
@@ -450,9 +463,7 @@ function DecisionCard({
         <div>
           <div
             className="text-[32px] font-black leading-none tabular-nums"
-            style={{
-              color: weak ? '#8A1F0C' : deltaColor(card.subs7Delta),
-            }}
+            style={{ color: weak ? '#8A1F0C' : deltaColor(card.subs7Delta) }}
           >
             {card.subs7Delta != null
               ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}`
@@ -464,132 +475,138 @@ function DecisionCard({
             7d subs{weak ? ' ⚠' : ''}
           </div>
         </div>
+
+        {/* ─── 3. Conversion metric ──────────────────────────────────── */}
+        {spk != null && (
+          <div className="ml-1">
+            <div
+              className="text-[20px] font-black leading-none tabular-nums"
+              style={{ color: spk >= 2 ? '#0C6A3F' : spk >= 1 ? '#7A5A00' : '#8A1F0C' }}
+            >
+              {spk.toFixed(1)}
+            </div>
+            <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold" style={{
+              color: spk >= 2 ? '#0C6A3F' : spk >= 1 ? '#7A5A00' : '#8A1F0C',
+            }}>
+              subs / 1K views
+            </div>
+          </div>
+        )}
+
         <div className="ml-auto rounded-lg px-3 py-2" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
           <Sparkline
             data={card.sparkline}
-            width={140}
-            height={44}
+            width={120}
+            height={40}
             stroke={GOS_SPARK_STYLE[gs].stroke}
             fill={GOS_SPARK_STYLE[gs].fill}
           />
-          <div className="text-[9px] text-right mt-1 uppercase tracking-wider font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
+          <div className="text-[9px] text-right mt-0.5 uppercase tracking-wider font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
             30d trend
           </div>
         </div>
       </div>
 
-      {/* ─── Cadence line ─────────────────────────────────────────────── */}
-      <div className="text-[11px] text-ink/40 mb-4">{card.cadenceLine}</div>
+      {/* ─── Cadence line (single, no content mix) ───────────────────── */}
+      <div className="text-[11px] text-ink/40 mb-3">{card.cadenceLine}</div>
 
-      {/* ─── Impact strip (since takeover) ────────────────────────────── */}
-      {card.impact && card.impact.daysSinceTakeover >= 2 && (
-        <div className="rounded-lg px-4 py-3 mb-4 flex items-center gap-5" style={{ background: '#F0F7FF', border: '1px solid #D6E8FA' }}>
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em] shrink-0" style={{ color: '#4A7AB5' }}>
-            Since takeover
-            <span className="font-normal ml-1" style={{ color: '#4A7AB599' }}>
-              {card.impact.daysSinceTakeover}d
+      {/* ─── 4. Campaign window (compact) ────────────────────────────── */}
+      {cw && (
+        <div className="rounded-lg px-4 py-2.5 mb-3 flex items-center gap-4 flex-wrap" style={{ background: '#F0F4FF', border: '1px solid #D6DFFA' }}>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#2C6BFF' }} />
+            <span className="text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: '#3B5998' }}>
+              Day {cw.campaignDay}
             </span>
           </div>
           <div className="flex items-center gap-4 text-[12px] font-bold tabular-nums">
-            <span style={{ color: card.impact.subsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }}>
-              {card.impact.subsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.subsDelta)} subs
+            <span title="Content views">{fmtNum(cw.contentViews)} <span className="text-[10px] text-ink/35 font-normal">content</span></span>
+            <span style={{ color: cw.channelViewsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }} title="Channel views delta">
+              {cw.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(cw.channelViewsDelta)} <span className="text-[10px] font-normal" style={{ color: 'rgba(14,14,14,0.35)' }}>ch. views</span>
             </span>
-            <span style={{ color: card.impact.viewsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }}>
-              {card.impact.viewsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.viewsDelta)} views
+            <span style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : undefined }} title="Subs gained">
+              {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)} <span className="text-[10px] font-normal" style={{ color: 'rgba(14,14,14,0.35)' }}>subs</span>
             </span>
+            <span className="text-ink/50" title="Content mix">{cw.contentMix.uploads} uploads</span>
           </div>
-          {card.impact.stateAtStart !== card.impact.stateNow && (
-            <div className="ml-auto text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: '#4A7AB5' }}>
-              {card.impact.stateAtStart} → {card.impact.stateNow}
+        </div>
+      )}
+
+      {/* ─── 5. Momentum (single condensed line) ─────────────────────── */}
+      {ct && ct.currentWeekViews > 0 && (
+        <div className="text-[11px] text-ink/50 mb-1.5 flex items-center gap-1.5">
+          <span className="font-bold text-ink/40 uppercase tracking-[0.08em] text-[9px]">Momentum:</span>
+          <span className="tabular-nums">{momentumLine(ct)}</span>
+        </div>
+      )}
+
+      {/* ─── Weekly summary (single line + toggle) ───────────────────── */}
+      {card.weeklyProgress.length > 0 && (
+        <div className="mb-3">
+          <div className="flex items-center gap-2 text-[11px]">
+            {weeklySummaryLine(card.weeklyProgress) && (
+              <span className="text-ink/40">
+                <span className="font-bold text-ink/40 uppercase tracking-[0.08em] text-[9px]">Weekly:</span>{' '}
+                <span className="tabular-nums">{weeklySummaryLine(card.weeklyProgress)}</span>
+              </span>
+            )}
+            {card.weeklyProgress.length > 1 && (
+              <button
+                onClick={() => setShowWeekly(!showWeekly)}
+                className="text-[10px] text-ink/25 hover:text-ink/50 shrink-0"
+              >
+                {showWeekly ? 'hide' : `${card.weeklyProgress.length} weeks ›`}
+              </button>
+            )}
+          </div>
+          {showWeekly && (
+            <div className="mt-2 space-y-1">
+              {card.weeklyProgress.map((w) => (
+                <div
+                  key={w.week}
+                  className="flex items-center gap-3 text-[11px] rounded-md px-3 py-1.5"
+                  style={{ background: SOFT }}
+                >
+                  <span className="font-bold text-ink/50 w-[48px] shrink-0">Week {w.week}</span>
+                  <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.4)' }}>
+                    {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
+                  </span>
+                  <span className="text-ink/25">·</span>
+                  <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.4)' }}>
+                    {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
+                  </span>
+                  <span className="text-ink/25">·</span>
+                  <span className="text-[10px] text-ink/40">{w.campaignSignal}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
 
-      {/* ─── Campaign Window (full campaign period) ──────────────────── */}
-      {card.campaignWindow && (
-        <div className="rounded-lg px-4 py-3 mb-4" style={{ background: '#F0F4FF', border: '1px solid #D6DFFA' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#2C6BFF' }} />
-            <span className="text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: '#3B5998' }}>
-              Campaign · {card.campaignWindow.campaignName} · Day {card.campaignWindow.campaignDay}
-            </span>
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            <div>
-              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Content views</div>
-              <div className="text-[14px] font-black tabular-nums mt-0.5">{fmtNum(card.campaignWindow.contentViews)}</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Channel views</div>
-              <div className="text-[14px] font-black tabular-nums mt-0.5" style={{ color: card.campaignWindow.channelViewsDelta >= 0 ? '#0C6A3F' : '#8A1F0C' }}>
-                {card.campaignWindow.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(card.campaignWindow.channelViewsDelta)}
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Subs gained</div>
-              <div className="text-[14px] font-black tabular-nums mt-0.5" style={{ color: card.campaignWindow.subsGained > 0 ? '#0C6A3F' : card.campaignWindow.subsGained < 0 ? '#8A1F0C' : undefined }}>
-                {card.campaignWindow.subsGained >= 0 ? '+' : ''}{fmtNum(card.campaignWindow.subsGained)}
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-ink/35 uppercase tracking-wider font-bold">Content mix</div>
-              <div className="text-[12px] font-bold mt-0.5 text-ink/70">
-                {card.campaignWindow.contentMix.uploads} uploads
-              </div>
-              <div className="text-[10px] text-ink/40">
-                {card.campaignWindow.contentMix.shorts} Shorts · {card.campaignWindow.contentMix.videos} videos
-              </div>
-            </div>
-          </div>
+      {/* ─── 6. Conversion diagnosis ─────────────────────────────────── */}
+      {diag && (
+        <div className="text-[11px] mb-3 flex items-center gap-1.5">
+          <span className="font-bold uppercase tracking-[0.08em] text-[9px]" style={{
+            color: spk != null && spk >= 2 ? '#0C6A3F' : '#8A4A1A',
+          }}>Conversion:</span>
+          <span style={{ color: spk != null && spk >= 2 ? '#0C6A3F' : '#6B4E30' }}>{diag}</span>
         </div>
       )}
 
-      {/* ─── Campaign Trend ──────────────────────────────────────────── */}
-      {card.campaignTrend && card.campaignTrend.currentWeekViews > 0 && (
-        <div className="rounded-lg px-4 py-3 mb-4" style={{ background: SOFT }}>
-          <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-2">Campaign momentum</div>
-          <div className="grid grid-cols-4 gap-2 text-[11px]">
-            <div>
-              <div className="text-ink/40 text-[10px]">This week</div>
-              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.currentWeekViews)} views</div>
-            </div>
-            <div>
-              <div className="text-ink/40 text-[10px]">Prev. week</div>
-              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.previousWeekViews)} views</div>
-            </div>
-            <div>
-              <div className="text-ink/40 text-[10px]">Best week</div>
-              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.bestWeekViews)} views</div>
-            </div>
-            <div>
-              <div className="text-ink/40 text-[10px]">Campaign total</div>
-              <div className="font-bold tabular-nums">{fmtNum(card.campaignTrend.totalCampaignViews)} views</div>
-            </div>
-          </div>
+      {/* ─── 7. Decision block: read + actions ─────────────────────────── */}
+      <div className="rounded-lg p-4 mb-3" style={{ background: isFix ? dStyle.bg : SOFT }}>
+        {/* Sharpened read */}
+        <div className="text-[13px] font-semibold text-ink/80 leading-snug mb-1">
+          {sharp.primary}
         </div>
-      )}
-
-      {/* ─── Weekly Progress (expandable) ────────────────────────────── */}
-      {card.weeklyProgress.length > 0 && (
-        <WeeklyProgressSection entries={card.weeklyProgress} />
-      )}
-
-      {/* ─── D. Decision block (powered by Growth OS) ──────────────── */}
-      <div className="rounded-lg p-4 mb-4" style={{ background: isFix ? dStyle.bg : SOFT }}>
-        {/* Signal */}
-        <div className="text-[13px] font-semibold text-ink/80 leading-snug mb-3">
-          {read.signal}
-        </div>
-
-        {/* Blocker */}
-        {read.blocker.blocker !== 'NONE' && (
-          <div className="text-[11px] text-ink/55 leading-snug mb-4">
-            <span className="font-bold text-ink/60">Blocker:</span> {read.blocker.label} — {read.blocker.description}
+        {sharp.secondary && (
+          <div className="text-[12px] text-ink/50 leading-snug mb-3">
+            {sharp.secondary}
           </div>
         )}
 
-        {/* This week — execution plan */}
+        {/* This week — max 2 actions */}
         <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/35 mb-1.5">This week</div>
         <div className="space-y-1">
           {read.actions.doNow.map((step, i) => (
@@ -600,20 +617,19 @@ function DecisionCard({
           ))}
         </div>
 
-        {/* Next campaign move */}
         {read.nextCampaignMove && (
-          <div className="text-[11px] text-ink/40 leading-snug mt-2.5 pl-4">
+          <div className="text-[11px] text-ink/40 leading-snug mt-2 pl-4">
             Next: {read.nextCampaignMove}
           </div>
         )}
       </div>
 
-      {/* ─── E. Watch metric ─────────────────────────────────────────── */}
-      <div className="text-[11px] text-ink/40 leading-snug mb-4">
+      {/* ─── Watch metric ─────────────────────────────────────────────── */}
+      <div className="text-[11px] text-ink/40 leading-snug mb-3">
         Watch: {read.watch}
       </div>
 
-      {/* ─── F. Notes ─────────────────────────────────────────────────── */}
+      {/* ─── Notes ───────────────────────────────────────────────────── */}
       <div style={{ borderTop: `1px solid ${SOFT}` }} className="pt-3">
         {latestNote && (
           <div className="flex items-start gap-2 mb-2">
@@ -688,7 +704,7 @@ function DecisionCard({
             onClick={() => setSnapshot(generateSnapshot(card))}
             className="text-[10px] text-ink/25 hover:text-ink/50 shrink-0 transition-colors"
           >
-            {card.campaignWindow ? 'Generate Campaign Report' : 'Generate Snapshot'}
+            {cw ? 'Generate Campaign Report' : 'Generate Snapshot'}
           </button>
         </div>
       </div>
@@ -775,7 +791,6 @@ export default function CampaignStatusBoard({
           <div className="text-[13px] text-ink/40">Add artists to start tracking campaign status.</div>
         </div>
       ) : (() => {
-        // Split cards into active vs building/early based on decision
         const active: CardData[] = [];
         const building: CardData[] = [];
         for (const card of cards) {
@@ -786,7 +801,6 @@ export default function CampaignStatusBoard({
             building.push(card);
           }
         }
-        // Sort active: FIX first, then PUSH, then by priority
         active.sort((a, b) => {
           const rA = getGrowthRead(a);
           const rB = getGrowthRead(b);
