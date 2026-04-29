@@ -13,7 +13,7 @@ import {
   type DecisionLabel,
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
-import { detectOpportunity, aggregateMissedValue, type ValueOpportunity } from '@/lib/valueModel';
+import { getArtistValueOpportunity, aggregateMissedValue, type ValueOpportunity } from '@/lib/valueModel';
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -187,16 +187,14 @@ function whyCause(read: GrowthRead): string {
   }
 }
 
-// ─── Value model bridge (managed artists only) ────────────────────────
+// ─── Value model bridge (uses shared data layer) ────────────────────────
 function getValueOpportunity(card: CardData): ValueOpportunity | null {
-  // Value model only applies to Virgin Managed artists
-  if (card.artistType && card.artistType !== 'managed') return null;
-  return detectOpportunity({
+  return getArtistValueOpportunity({
     views7d: card.views7Delta,
     subs7d: card.subs7Delta,
-    subsPerKViews: subsPerKViews(card),
     uploads30d: card.uploads30d,
     channelState: card.boardStatus,
+    artistType: card.artistType,
   });
 }
 

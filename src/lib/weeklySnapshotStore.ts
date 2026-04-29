@@ -54,10 +54,23 @@ export type WeeklyChannelSnapshot = {
 
   // Opportunity
   missedOpportunityType: MissedOpportunityType;
+  missedValueLow: number;         // £ missed opportunity (low estimate)
+  missedValueHigh: number;        // £ missed opportunity (high estimate)
   recommendedAction: string;
 
   // Free-text
   notes: string;
+};
+
+export type ClassificationBreakdown = {
+  classification: ArtistClassification;
+  artistCount: number;
+  views7d: number;
+  subscribers7d: number;
+  estimatedValueLow: number;
+  estimatedValueHigh: number;
+  missedValueLow: number;
+  missedValueHigh: number;
 };
 
 export type WeeklyRollup = {
@@ -72,6 +85,9 @@ export type WeeklyRollup = {
   totalSubscribers7d: number;
   totalEstimatedValueLow: number;
   totalEstimatedValueHigh: number;
+  totalMissedValueLow: number;
+  totalMissedValueHigh: number;
+  byClassification: ClassificationBreakdown[];
   biggestImprovers: { slug: string; name: string; viewsWoW: number }[];
   biggestDecliners: { slug: string; name: string; viewsWoW: number }[];
   mostCommonOpportunity: MissedOpportunityType;
@@ -203,6 +219,27 @@ export function computeRollup(
   const totalSubscribers7d = snapshots.reduce((sum, s) => sum + s.subscribers7d, 0);
   const totalEstimatedValueLow = snapshots.reduce((sum, s) => sum + s.estimatedValueLow, 0);
   const totalEstimatedValueHigh = snapshots.reduce((sum, s) => sum + s.estimatedValueHigh, 0);
+  const totalMissedValueLow = snapshots.reduce((sum, s) => sum + (s.missedValueLow ?? 0), 0);
+  const totalMissedValueHigh = snapshots.reduce((sum, s) => sum + (s.missedValueHigh ?? 0), 0);
+
+  // ── Per-classification breakdowns ──────────────────────────────────
+  const classifications: ArtistClassification[] = ['GROWING', 'WEAK_CONVERSION', 'UNDERFED', 'COLD'];
+  const byClassification: ClassificationBreakdown[] = classifications
+    .map((cls) => {
+      const group = snapshots.filter((s) => s.currentClassification === cls);
+      if (group.length === 0) return null;
+      return {
+        classification: cls,
+        artistCount: group.length,
+        views7d: group.reduce((s, g) => s + g.views7d, 0),
+        subscribers7d: group.reduce((s, g) => s + g.subscribers7d, 0),
+        estimatedValueLow: group.reduce((s, g) => s + g.estimatedValueLow, 0),
+        estimatedValueHigh: group.reduce((s, g) => s + g.estimatedValueHigh, 0),
+        missedValueLow: group.reduce((s, g) => s + (g.missedValueLow ?? 0), 0),
+        missedValueHigh: group.reduce((s, g) => s + (g.missedValueHigh ?? 0), 0),
+      };
+    })
+    .filter((b): b is ClassificationBreakdown => b !== null);
 
   // Biggest improvers/decliners by views WoW
   const withWoW = snapshots
@@ -239,6 +276,9 @@ export function computeRollup(
     totalSubscribers7d,
     totalEstimatedValueLow,
     totalEstimatedValueHigh,
+    totalMissedValueLow,
+    totalMissedValueHigh,
+    byClassification,
     biggestImprovers,
     biggestDecliners,
     mostCommonOpportunity: mostCommon ? mostCommon[0] : 'none',

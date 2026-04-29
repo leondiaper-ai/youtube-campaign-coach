@@ -148,6 +148,144 @@ export function aggregateMissedValue(
   };
 }
 
+// ── Per-artist value opportunity (shared bridge) ─────────────────────────
+
+export type ArtistValueInput = {
+  views7d: number | null;
+  subs7d: number | null;
+  uploads30d: number;
+  channelState: string;
+  artistType?: string;
+};
+
+/**
+ * Compute value opportunity for a single artist.
+ * Only applies to managed artists — returns null for others.
+ * This is the canonical entry point; UI components should call this
+ * rather than detectOpportunity directly.
+ */
+export function getArtistValueOpportunity(input: ArtistValueInput): ValueOpportunity | null {
+  if (input.artistType && input.artistType !== 'managed') return null;
+  const v = input.views7d ?? 0;
+  const s = input.subs7d ?? 0;
+  const subsPerKViews = v > 0 ? (s / v) * 1000 : null;
+  return detectOpportunity({
+    views7d: v,
+    subs7d: s,
+    subsPerKViews,
+    uploads30d: input.uploads30d,
+    channelState: input.channelState,
+  });
+}
+
+// ── System-level value aggregation (all managed artists) ─────────────────
+
+import type { ArtistClassification } from './artists';
+
+export type ClassificationValueBreakdown = {
+  classification: ArtistClassification;
+  artistCount: number;
+  totalViews7d: number;
+  totalSubs7d: number;
+  estimatedValueLow: number;
+  estimatedValueHigh: number;
+  missedValueLow: number;
+  missedValueHigh: number;
+};
+
+export type SystemValueSummary = {
+  totalArtists: number;
+  totalViews7d: number;
+  totalSubs7d: number;
+  totalEstimatedValueLow: number;
+  totalEstimatedValueHigh: number;
+  totalMissedValueLow: number;
+  totalMissedValueHigh: number;
+  byClassification: ClassificationValueBreakdown[];
+};
+
+export type ArtistValueData = {
+  views7d: number;
+  subs7d: number;
+  uploads30d: number;
+  channelState: string;
+  classification: ArtistClassification;
+};
+
+/**
+ * Compute system-wide value summary across all managed artists.
+ * Groups totals by classification for reporting and rollups.
+ */
+export function computeSystemValue(artists: ArtistValueData[]): SystemValueSummary {
+  const groups: Record<ArtistClassification, ArtistValueData[]> = {
+    GROWING: [],
+    WEAK_CONVERSION: [],
+    UNDERFED: [],
+    COLD: [],
+  };
+
+  for (const a of artists) {
+    groups[a.classification].push(a);
+  }
+
+  const breakdowns: ClassificationValueBreakdown[] = (
+    ['GROWING', 'WEAK_CONVERSION', 'UNDERFED', 'COLD'] as ArtistClassification[]
+  ).map((cls) => {
+    const group = groups[cls];
+    let totalViews7d = 0;
+    let totalSubs7d = 0;
+    let estLow = 0;
+    let estHigh = 0;
+    let missedLow = 0;
+    let missedHigh = 0;
+
+    for (const a of group) {
+      totalViews7d += a.views7d;
+      totalSubs7d += a.subs7d;
+
+      const rev = viewsToRevenue(a.views7d);
+      const sub = subsToValue(Math.max(0, a.subs7d));
+      estLow += rev.low + sub.low;
+      estHigh += rev.high + sub.high;
+
+      const subsPerK = a.views7d > 0 ? (a.subs7d / a.views7d) * 1000 : null;
+      const opp = detectOpportunity({
+        views7d: a.views7d,
+        subs7d: a.subs7d,
+        subsPerKViews: subsPerK,
+        uploads30d: a.uploads30d,
+        channelState: a.channelState,
+      });
+      if (opp) {
+        missedLow += opp.missedValueRange.low;
+        missedHigh += opp.missedValueRange.high;
+      }
+    }
+
+    return {
+      classification: cls,
+      artistCount: group.length,
+      totalViews7d,
+      totalSubs7d,
+      estimatedValueLow: estLow,
+      estimatedValueHigh: estHigh,
+      missedValueLow: missedLow,
+      missedValueHigh: missedHigh,
+    };
+  });
+
+  return {
+    totalArtists: artists.length,
+    totalViews7d: breakdowns.reduce((s, b) => s + b.totalViews7d, 0),
+    totalSubs7d: breakdowns.reduce((s, b) => s + b.totalSubs7d, 0),
+    totalEstimatedValueLow: breakdowns.reduce((s, b) => s + b.estimatedValueLow, 0),
+    totalEstimatedValueHigh: breakdowns.reduce((s, b) => s + b.estimatedValueHigh, 0),
+    totalMissedValueLow: breakdowns.reduce((s, b) => s + b.missedValueLow, 0),
+    totalMissedValueHigh: breakdowns.reduce((s, b) => s + b.missedValueHigh, 0),
+    byClassification: breakdowns.filter((b) => b.artistCount > 0),
+  };
+}
+
 // ── Formatting ─────────────────────────────────────────────────────────────
 
 function fmtVal(n: number): string {

@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS } from '@/lib/artists';
 import { fetchChannelSnap } from '@/lib/youtube';
+import { captureWeeklySnapshots } from '@/lib/weeklySnapshotCapture';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Allow up to 60s for all artists
 
 /**
- * Daily snapshot cron. Vercel hits this via vercel.json crons config.
- * Iterates every artist, forces a fresh fetch (which writes a
- * time-series entry via snapshots.ts).
+ * Cron endpoint — Vercel calls this via vercel.json crons config.
+ *
+ * 1. Daily: fetches a fresh channel snapshot for every artist
+ *    (writes time-series data via snapshots.ts for sparklines/deltas).
+ * 2. Weekly: captures a weekly snapshot for all managed artists.
+ *    Deduplicates by ISO week — safe to run daily, only captures
+ *    once per week per artist. Saves rollup automatically.
  */
 export async function GET(req: NextRequest) {
   // Vercel Cron sets this header automatically. Block public access.
@@ -16,21 +22,35 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const results: Record<string, string> = {};
+  // ── 1. Daily time-series snapshots ──────────────────────────────────
+  const dailyResults: Record<string, string> = {};
   for (const a of ARTISTS) {
     if (!a.channelHandle) {
-      results[a.slug] = 'no handle';
+      dailyResults[a.slug] = 'no handle';
       continue;
     }
     try {
       const snap = await fetchChannelSnap(a.channelHandle);
-      if (!snap) results[a.slug] = 'no key';
-      else if (snap.error) results[a.slug] = `error: ${snap.error}`;
-      else results[a.slug] = `ok (${snap.subs} subs)`;
+      if (!snap) dailyResults[a.slug] = 'no key';
+      else if (snap.error) dailyResults[a.slug] = `error: ${snap.error}`;
+      else dailyResults[a.slug] = `ok (${snap.subs} subs)`;
     } catch (e: any) {
-      results[a.slug] = `throw: ${e?.message ?? e}`;
+      dailyResults[a.slug] = `throw: ${e?.message ?? e}`;
     }
   }
 
-  return NextResponse.json({ ok: true, at: new Date().toISOString(), results });
+  // ── 2. Weekly snapshot capture (deduped by ISO week) ────────────────
+  let weeklyResult;
+  try {
+    weeklyResult = await captureWeeklySnapshots();
+  } catch (e: any) {
+    weeklyResult = { error: e?.message ?? 'Weekly capture failed' };
+  }
+
+  return NextResponse.json({
+    ok: true,
+    at: new Date().toISOString(),
+    daily: dailyResults,
+    weekly: weeklyResult,
+  });
 }

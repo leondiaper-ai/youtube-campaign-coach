@@ -194,6 +194,8 @@ async function captureArtistSnapshot(
     estimatedValueLow,
     estimatedValueHigh,
     missedOpportunityType,
+    missedValueLow: opp?.missedValueRange.low ?? 0,
+    missedValueHigh: opp?.missedValueRange.high ?? 0,
     recommendedAction: derived?.nextAction ?? 'No data available',
     notes: '',
   };
