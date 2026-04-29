@@ -689,37 +689,54 @@ function DecisionCard({
         </div>
       </div>
 
-      {/* ─── 5. Campaign window + momentum + weekly progress ──────── */}
-      {(cw || (ct && ct.currentWeekViews > 0) || card.weeklyProgress.length > 1) && (
-        <div className="mb-3 space-y-2">
-          {/* Campaign window */}
-          {cw && (
-            <div className="flex items-center gap-1.5 text-[11px] text-ink/45">
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#2C6BFF' }} />
-              <span className="font-bold" style={{ color: '#3B5998' }}>Day {cw.campaignDay}</span>
-              <span className="text-ink/20">·</span>
-              <span className="tabular-nums">{fmtNum(cw.channelViewsDelta >= 0 ? cw.channelViewsDelta : cw.contentViews)} views</span>
-              <span className="text-ink/20">·</span>
-              <span className="tabular-nums" style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : undefined }}>
-                {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)} subs
+      {/* ─── 5. Campaign tracking + weekly progress ────────────────── */}
+      {cw && (
+        <div className="rounded-lg p-3.5 mb-3" style={{ background: 'rgba(14,14,14,0.02)', border: '1px solid rgba(14,14,14,0.06)' }}>
+          {/* Campaign / Tracking header row */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#2C6BFF' }} />
+              <span className="text-[12px] font-black uppercase tracking-[0.08em]" style={{ color: '#3B5998' }}>
+                Day {cw.campaignDay}
               </span>
+              <span className="text-[11px] text-ink/30">·</span>
+              <span className="text-[11px] text-ink/40">{cw.campaignName}</span>
             </div>
-          )}
+          </div>
+
+          {/* Totals since tracking started */}
+          <div className="flex items-center gap-4 mb-2">
+            <div>
+              <span className="text-[16px] font-black tabular-nums" style={{ color: deltaColor(cw.channelViewsDelta) }}>
+                {cw.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(cw.channelViewsDelta)}
+              </span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views</span>
+            </div>
+            <div>
+              <span className="text-[16px] font-black tabular-nums" style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)' }}>
+                {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)}
+              </span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">subs</span>
+            </div>
+            <div className="text-[10px] text-ink/30">
+              {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''} ({cw.contentMix.shorts} Shorts · {cw.contentMix.videos} video{cw.contentMix.videos !== 1 ? 's' : ''})
+            </div>
+          </div>
 
           {/* Momentum */}
           {ct && ct.currentWeekViews > 0 && (
-            <div className="text-[11px] text-ink/40">
-              <span className="font-bold text-ink/35 uppercase tracking-[0.08em] text-[9px]">Momentum:</span>{' '}
+            <div className="text-[10px] text-ink/35 mb-2">
+              <span className="font-bold uppercase tracking-[0.08em] text-ink/30">Momentum:</span>{' '}
               <span className="tabular-nums">{momentumLine(ct)}</span>
             </div>
           )}
 
           {/* Weekly progress (expandable dropdown) */}
-          {card.weeklyProgress.length > 1 && (
-            <div>
+          {card.weeklyProgress.length > 0 && (
+            <div style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }} className="pt-2">
               <button
                 onClick={() => setShowWeeks(!showWeeks)}
-                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/35 hover:text-ink/55 transition-colors"
+                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/35 hover:text-ink/55 transition-colors w-full"
               >
                 <span
                   className="inline-block transition-transform text-[8px]"
@@ -727,16 +744,15 @@ function DecisionCard({
                 >
                   ▶
                 </span>
-                {card.weeklyProgress.length} weeks
-                {(() => {
+                <span>{card.weeklyProgress.length} week{card.weeklyProgress.length !== 1 ? 's' : ''} tracked</span>
+                {card.weeklyProgress.length > 1 && (() => {
                   const first = card.weeklyProgress[0];
                   const last = card.weeklyProgress[card.weeklyProgress.length - 1];
-                  const totalViews = card.weeklyProgress.reduce((s, w) => s + w.views7d, 0);
-                  const totalSubs = card.weeklyProgress.reduce((s, w) => s + w.subs7d, 0);
                   const viewsTrend = last.views7d > first.views7d ? '↑' : last.views7d < first.views7d ? '↓' : '→';
+                  const subsTrend = last.subs7d > first.subs7d ? '↑' : last.subs7d < first.subs7d ? '↓' : '→';
                   return (
-                    <span className="font-semibold normal-case tracking-normal text-ink/30 ml-1">
-                      — {fmtNum(totalViews)} views, {totalSubs >= 0 ? '+' : ''}{fmtNum(totalSubs)} subs (growth {viewsTrend})
+                    <span className="font-semibold normal-case tracking-normal text-ink/25 ml-1">
+                      — views {viewsTrend} · subs {subsTrend}
                     </span>
                   );
                 })()}
@@ -746,14 +762,14 @@ function DecisionCard({
                   {card.weeklyProgress.map((w) => (
                     <div
                       key={w.week}
-                      className="flex items-center gap-3 text-[10px] rounded-md px-2.5 py-1"
+                      className="flex items-center gap-3 text-[10px] rounded-md px-2.5 py-1.5"
                       style={{ background: 'rgba(14,14,14,0.03)' }}
                     >
                       <span className="font-bold text-ink/40 w-[40px] shrink-0">Wk {w.week}</span>
                       <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
                         {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
                       </span>
-                      <span className="text-ink/20">·</span>
+                      <span className="text-ink/15">·</span>
                       <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
                         {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
                       </span>

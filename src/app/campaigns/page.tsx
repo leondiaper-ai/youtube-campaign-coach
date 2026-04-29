@@ -254,7 +254,8 @@ async function loadCard(
   }
 
   // ── Campaign window data ──────────────────────────────────────────────
-  const campaignStart = artist.campaignStartDate ?? null;
+  // Use campaignStartDate if set, otherwise fall back to pin date for tracking
+  const campaignStart = artist.campaignStartDate ?? pin.pinnedAt ?? null;
   let campaignWindow: CampaignWindowData | null = null;
   let campaignTrend: CampaignTrendData | null = null;
   let weeklyProgress: WeeklyProgressEntry[] = [];
@@ -275,7 +276,7 @@ async function loadCard(
     const campSubsDelta = campaignDelta(history, campaignStart, 'subs');
 
     campaignWindow = {
-      campaignName: artist.campaign ?? 'Active Campaign',
+      campaignName: artist.campaign ?? 'Tracking',
       campaignDay,
       contentViews,
       channelViewsDelta: campViewsDelta?.delta ?? 0,
