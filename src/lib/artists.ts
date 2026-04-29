@@ -16,11 +16,16 @@ export type Status = ChannelState;
  * (nextMomentLabel/Date, campaign name) comes from a live Coach plan. No
  * fake strings are stored here.
  */
+/** Artist relationship type — controls which features apply */
+export type ArtistType = 'managed' | 'observed' | 'external';
+
 export type Artist = {
   slug: string;
   name: string;
   channelHandle?: string;
   phase: 'PRE' | 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
+  /** Relationship: managed = Virgin, observed = monitoring, external = benchmark */
+  artistType?: ArtistType;
   // Optional plan metadata — present only when a real Coach timeline exists.
   campaign?: string;
   nextMomentLabel?: string;
@@ -32,18 +37,25 @@ export type Artist = {
   custom?: boolean;
 };
 
+/** Check if an artist is Virgin Managed (default for built-in artists) */
+export function isManaged(a: Artist): boolean {
+  return (a.artistType ?? 'managed') === 'managed';
+}
+
 export const ARTISTS: Artist[] = [
   {
     slug: 'ezra-collective',
     name: 'Ezra Collective',
     phase: 'PRE',
     channelHandle: '@ezracollective',
+    artistType: 'managed',
   },
   {
     slug: 'k-trap',
     name: 'K-Trap',
     phase: 'PUSH',
     channelHandle: '@ktrap',
+    artistType: 'managed',
     campaign: 'TRAPO 2',
     campaignStartDate: '2026-03-22',
   },
@@ -52,18 +64,21 @@ export const ARTISTS: Artist[] = [
     name: 'Tom Odell',
     phase: 'START',
     channelHandle: '@tomodell',
+    artistType: 'managed',
   },
   {
     slug: 'bad-omens',
     name: 'Bad Omens',
     phase: 'PEAK',
     channelHandle: 'UCre_5futd_kGkrSlL83n3pw',
+    artistType: 'managed',
   },
   {
     slug: 'james-blake',
     name: 'James Blake',
     phase: 'SUSTAIN',
     channelHandle: '@jamesblake',
+    artistType: 'managed',
   },
 ];
 

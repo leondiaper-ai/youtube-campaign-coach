@@ -109,6 +109,8 @@ export type StatusCardData = {
   channelHealth: string;
   campaignSignal: string;
   campaignSignalLabel: string;
+  // Artist type for value model scoping
+  artistType?: 'managed' | 'observed' | 'external';
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -380,6 +382,7 @@ async function loadCard(
     channelHealth: chHealth,
     campaignSignal: campSig.signal,
     campaignSignalLabel: campSig.label,
+    artistType: artist.artistType ?? 'managed',
   };
 }
 

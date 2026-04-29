@@ -81,6 +81,8 @@ type CardData = {
   channelHealth: string;
   campaignSignal: string;
   campaignSignalLabel: string;
+  /** Artist relationship type — value model only applies to 'managed' */
+  artistType?: 'managed' | 'observed' | 'external';
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -185,8 +187,10 @@ function whyCause(read: GrowthRead): string {
   }
 }
 
-// ─── Value model bridge ────────────────────────────────────────────────
+// ─── Value model bridge (managed artists only) ────────────────────────
 function getValueOpportunity(card: CardData): ValueOpportunity | null {
+  // Value model only applies to Virgin Managed artists
+  if (card.artistType && card.artistType !== 'managed') return null;
   return detectOpportunity({
     views7d: card.views7Delta,
     subs7d: card.subs7Delta,
@@ -513,6 +517,84 @@ function SectionIssueNote({ cards }: { cards: CardData[] }) {
   return (
     <div className="text-[11px] text-ink/35 mb-3 px-1">
       Common issue: {label} — affects {names.join(', ')}
+    </div>
+  );
+}
+
+// ─── Snapshot History (collapsed by default, inside Show Detail) ────────
+function SnapshotHistory({ slug }: { slug: string }) {
+  const [history, setHistory] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
+  async function loadHistory() {
+    if (history) { setShowHistory(!showHistory); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/weekly-snapshots?slug=${slug}&count=4`);
+      const data = await res.json();
+      setHistory(data.snapshots ?? []);
+      setShowHistory(true);
+    } catch {
+      setHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 pt-2" style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }}>
+      <button
+        onClick={loadHistory}
+        className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/25 hover:text-ink/45 transition-colors"
+      >
+        {loading ? 'Loading…' : showHistory ? 'Hide weekly history' : 'Weekly history'}
+      </button>
+      {showHistory && history && history.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {history.map((s: any) => (
+            <div
+              key={s.weekId}
+              className="flex items-center gap-2 text-[10px] rounded-md px-2.5 py-1.5"
+              style={{ background: 'rgba(14,14,14,0.03)' }}
+            >
+              <span className="font-bold text-ink/40 w-[52px] shrink-0">{s.weekId}</span>
+              <span className="font-bold tabular-nums" style={{ color: s.views7d > 0 ? '#0C6A3F' : s.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                {s.views7d >= 0 ? '+' : ''}{fmtNum(s.views7d)} views
+              </span>
+              <span className="text-ink/15">·</span>
+              <span className="font-bold tabular-nums" style={{ color: s.subscribers7d > 0 ? '#0C6A3F' : s.subscribers7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                {s.subscribers7d >= 0 ? '+' : ''}{fmtNum(s.subscribers7d)} subs
+              </span>
+              <span className="text-ink/15">·</span>
+              <span
+                className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded"
+                style={{
+                  background: s.currentClassification === 'GROWING' ? '#E6F8EE'
+                    : s.currentClassification === 'WEAK_CONVERSION' ? '#FFEAD6'
+                    : s.currentClassification === 'UNDERFED' ? '#FFF5D6'
+                    : '#FFE2D8',
+                  color: s.currentClassification === 'GROWING' ? '#0C6A3F'
+                    : s.currentClassification === 'WEAK_CONVERSION' ? '#8A4A1A'
+                    : s.currentClassification === 'UNDERFED' ? '#7A5A00'
+                    : '#8A1F0C',
+                }}
+              >
+                {s.currentClassification === 'WEAK_CONVERSION' ? 'Weak Conv' : s.currentClassification?.toLowerCase()}
+              </span>
+              {s.missedOpportunityType !== 'none' && (
+                <>
+                  <span className="text-ink/15">·</span>
+                  <span className="text-[9px] text-ink/30">{s.missedOpportunityType.replace(/_/g, ' ')}</span>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {showHistory && history && history.length === 0 && (
+        <div className="mt-2 text-[10px] text-ink/25">No weekly snapshots yet. Click "Save Weekly Snapshot" to start tracking.</div>
+      )}
     </div>
   );
 }
@@ -847,6 +929,9 @@ function DecisionCard({
           <div className="text-[10px] text-ink/35 mt-2">
             Watch: {read.watch}
           </div>
+
+          {/* Weekly snapshot history */}
+          <SnapshotHistory slug={card.slug} />
         </div>
       )}
 
@@ -977,6 +1062,8 @@ export default function CampaignStatusBoard({
   const [available, setAvailable] = useState<AvailableArtist[]>(availableArtists);
   const [showAdd, setShowAdd] = useState(false);
   const [pinning, setPinning] = useState(false);
+  const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null);
+  const [snapshotSaving, setSnapshotSaving] = useState(false);
 
   async function handlePin(slug: string) {
     setPinning(true);
@@ -1001,6 +1088,27 @@ export default function CampaignStatusBoard({
 
   function handleNotesChange(slug: string, notes: CampaignNote[]) {
     setCards((prev) => prev.map((c) => (c.slug === slug ? { ...c, notes } : c)));
+  }
+
+  async function handleSaveSnapshot() {
+    setSnapshotSaving(true);
+    setSnapshotStatus(null);
+    try {
+      const res = await fetch('/api/weekly-snapshots', { method: 'POST' });
+      const data = await res.json();
+      if (data.error) {
+        setSnapshotStatus(`Error: ${data.error}`);
+      } else {
+        setSnapshotStatus(
+          `${data.captured} captured · ${data.skipped} skipped${data.errors?.length ? ` · ${data.errors.length} errors` : ''} (${data.weekId})`
+        );
+      }
+    } catch (e: any) {
+      setSnapshotStatus(`Error: ${e?.message ?? 'Failed'}`);
+    } finally {
+      setSnapshotSaving(false);
+      setTimeout(() => setSnapshotStatus(null), 8000);
+    }
   }
 
   // ─── Group cards by Growth OS decision ─────────────────────────────
@@ -1035,7 +1143,8 @@ export default function CampaignStatusBoard({
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
         {!showAdd ? (
           <button
             onClick={() => setShowAdd(true)}
@@ -1064,6 +1173,19 @@ export default function CampaignStatusBoard({
             </button>
           </div>
         )}
+        </div>
+        <div className="flex items-center gap-3">
+          {snapshotStatus && (
+            <span className="text-[10px] text-ink/40">{snapshotStatus}</span>
+          )}
+          <button
+            onClick={handleSaveSnapshot}
+            disabled={snapshotSaving}
+            className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/25 hover:text-ink/50 transition-colors disabled:opacity-40"
+          >
+            {snapshotSaving ? 'Saving…' : 'Save Weekly Snapshot'}
+          </button>
+        </div>
       </div>
 
       {cards.length === 0 ? (
