@@ -92,6 +92,9 @@ export type StatusCardData = {
   cadenceLine: string;
   // Sparkline (30d subs series)
   sparkline: { x: number; y: number }[];
+  // Channel-level data for aggregation
+  subs: number | null;
+  lastUploadDaysAgo: number | null;
   // Notes
   notes: CampaignNote[];
   // Impact tracking (null if no baseline captured)
@@ -177,6 +180,8 @@ async function loadCard(
     actions: ['Reawaken the page with 2–3 catalogue Shorts this week'],
     cadenceLine: cadenceLine(0),
     sparkline: [],
+    subs: null,
+    lastUploadDaysAgo: null,
     notes: await listNotes(artist.slug),
     impact: null,
     campaignWindow: null,
@@ -358,6 +363,8 @@ async function loadCard(
     ...base,
     subs7Delta: subs7?.delta ?? null,
     views7Delta: views7?.delta ?? null,
+    subs: snap.subs ?? null,
+    lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? null,
     uploads30d: snap.uploads30d ?? 0,
     shorts30d: snap.shorts30d ?? 0,
     boardStatus: currentStatus,
