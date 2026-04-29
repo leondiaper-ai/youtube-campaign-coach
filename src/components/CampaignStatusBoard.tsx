@@ -509,6 +509,7 @@ function DecisionCard({
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
+  const [showWeeks, setShowWeeks] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
   const gs = gsFor(card.boardStatus);
@@ -688,50 +689,12 @@ function DecisionCard({
         </div>
       </div>
 
-      {/* ─── Expand detail toggle ──────────────────────────────────── */}
-      <button
-        onClick={() => setShowDetail(!showDetail)}
-        className="text-[10px] text-ink/25 hover:text-ink/45 mb-2 transition-colors"
-      >
-        {showDetail ? 'Hide detail' : 'Show detail'}
-      </button>
-
-      {showDetail && (
-        <div className="rounded-lg p-4 mb-3" style={{ background: SOFT }}>
-          {/* Hero metrics */}
-          <div className="flex items-end gap-5 mb-3">
-            <div>
-              <div className="text-[22px] font-black tabular-nums leading-none" style={{ color: deltaColor(card.views7Delta) }}>
-                {card.views7Delta != null ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}` : '—'}
-              </div>
-              <div className="text-[9px] text-ink/35 mt-0.5 uppercase tracking-[0.1em] font-bold">7d views</div>
-            </div>
-            <div>
-              <div className="text-[22px] font-black tabular-nums leading-none" style={{ color: deltaColor(card.subs7Delta) }}>
-                {card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : '—'}
-              </div>
-              <div className="text-[9px] text-ink/35 mt-0.5 uppercase tracking-[0.1em] font-bold">7d subs</div>
-            </div>
-            <div className="ml-auto rounded-md px-2 py-1.5" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
-              <Sparkline
-                data={card.sparkline}
-                width={100}
-                height={30}
-                stroke={GOS_SPARK_STYLE[gs].stroke}
-                fill={GOS_SPARK_STYLE[gs].fill}
-              />
-              <div className="text-[8px] text-right uppercase tracking-wider font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
-                30d
-              </div>
-            </div>
-          </div>
-
-          {/* Cadence */}
-          <div className="text-[11px] text-ink/40 mb-2">{card.cadenceLine}</div>
-
+      {/* ─── 5. Campaign window + momentum + weekly progress ──────── */}
+      {(cw || (ct && ct.currentWeekViews > 0) || card.weeklyProgress.length > 1) && (
+        <div className="mb-3 space-y-2">
           {/* Campaign window */}
           {cw && (
-            <div className="flex items-center gap-1.5 mb-2 text-[11px] text-ink/45">
+            <div className="flex items-center gap-1.5 text-[11px] text-ink/45">
               <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: '#2C6BFF' }} />
               <span className="font-bold" style={{ color: '#3B5998' }}>Day {cw.campaignDay}</span>
               <span className="text-ink/20">·</span>
@@ -745,38 +708,80 @@ function DecisionCard({
 
           {/* Momentum */}
           {ct && ct.currentWeekViews > 0 && (
-            <div className="text-[11px] text-ink/40 mb-2">
+            <div className="text-[11px] text-ink/40">
               <span className="font-bold text-ink/35 uppercase tracking-[0.08em] text-[9px]">Momentum:</span>{' '}
               <span className="tabular-nums">{momentumLine(ct)}</span>
             </div>
           )}
 
-          {/* Weekly progress */}
+          {/* Weekly progress (expandable dropdown) */}
           {card.weeklyProgress.length > 1 && (
-            <div className="mt-2 space-y-1">
-              <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/30 mb-1">Weekly progress</div>
-              {card.weeklyProgress.map((w) => (
-                <div
-                  key={w.week}
-                  className="flex items-center gap-3 text-[10px] rounded-md px-2.5 py-1"
-                  style={{ background: 'rgba(14,14,14,0.03)' }}
+            <div>
+              <button
+                onClick={() => setShowWeeks(!showWeeks)}
+                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/35 hover:text-ink/55 transition-colors"
+              >
+                <span
+                  className="inline-block transition-transform text-[8px]"
+                  style={{ transform: showWeeks ? 'rotate(90deg)' : 'rotate(0deg)' }}
                 >
-                  <span className="font-bold text-ink/40 w-[40px] shrink-0">Wk {w.week}</span>
-                  <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                    {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
-                  </span>
-                  <span className="text-ink/20">·</span>
-                  <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                    {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
-                  </span>
+                  ▶
+                </span>
+                {card.weeklyProgress.length} weeks
+                {(() => {
+                  const first = card.weeklyProgress[0];
+                  const last = card.weeklyProgress[card.weeklyProgress.length - 1];
+                  const totalViews = card.weeklyProgress.reduce((s, w) => s + w.views7d, 0);
+                  const totalSubs = card.weeklyProgress.reduce((s, w) => s + w.subs7d, 0);
+                  const viewsTrend = last.views7d > first.views7d ? '↑' : last.views7d < first.views7d ? '↓' : '→';
+                  return (
+                    <span className="font-semibold normal-case tracking-normal text-ink/30 ml-1">
+                      — {fmtNum(totalViews)} views, {totalSubs >= 0 ? '+' : ''}{fmtNum(totalSubs)} subs (growth {viewsTrend})
+                    </span>
+                  );
+                })()}
+              </button>
+              {showWeeks && (
+                <div className="mt-1.5 space-y-1">
+                  {card.weeklyProgress.map((w) => (
+                    <div
+                      key={w.week}
+                      className="flex items-center gap-3 text-[10px] rounded-md px-2.5 py-1"
+                      style={{ background: 'rgba(14,14,14,0.03)' }}
+                    >
+                      <span className="font-bold text-ink/40 w-[40px] shrink-0">Wk {w.week}</span>
+                      <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                        {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
+                      </span>
+                      <span className="text-ink/20">·</span>
+                      <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                        {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ─── Expand detail toggle ──────────────────────────────────── */}
+      <button
+        onClick={() => setShowDetail(!showDetail)}
+        className="text-[10px] text-ink/25 hover:text-ink/45 mb-2 transition-colors"
+      >
+        {showDetail ? 'Hide detail' : 'Show detail'}
+      </button>
+
+      {showDetail && (
+        <div className="rounded-lg p-4 mb-3" style={{ background: SOFT }}>
+          {/* Cadence */}
+          <div className="text-[11px] text-ink/40 mb-2">{card.cadenceLine}</div>
 
           {/* Impact */}
           {card.impact && card.impact.daysSinceTakeover >= 2 && (
-            <div className="mt-3 pt-2 text-[10px] text-ink/35" style={{ borderTop: `1px solid rgba(14,14,14,0.06)` }}>
+            <div className="mt-2 pt-2 text-[10px] text-ink/35" style={{ borderTop: `1px solid rgba(14,14,14,0.06)` }}>
               <span className="font-bold uppercase tracking-[0.08em]">Since takeover ({card.impact.daysSinceTakeover}d):</span>{' '}
               <span className="tabular-nums" style={{ color: card.impact.subsDelta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
                 {card.impact.subsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.subsDelta)} subs
