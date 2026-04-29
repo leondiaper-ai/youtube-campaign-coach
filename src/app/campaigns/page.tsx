@@ -219,8 +219,8 @@ async function loadCard(
     uploads30d: snap.uploads30d ?? 0,
     shorts30d: snap.shorts30d ?? 0,
     lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? 60,
-    hasActiveCampaign: !!artist.campaign,
-    campaignName: artist.campaign,
+    hasActiveCampaign: true, // All pinned cards are actively tracked campaigns
+    campaignName: artist.campaign ?? 'Active Campaign',
   };
   const gsResult = getYouTubeGrowthState(growthInput);
   const chHealth = getChannelHealth(gsResult.state, growthInput);
