@@ -8,8 +8,13 @@ import {
   fmtNum,
   STATUS_COLOR,
   STATUS_RANK,
+  classifyArtist,
+  CLASSIFICATION_LABEL,
+  CLASSIFICATION_STYLE,
+  CLASSIFICATION_RANK,
   type Artist,
   type ChannelState,
+  type ArtistClassification,
   type LiveSnap as BaseLiveSnap,
 } from '@/lib/artists';
 import AddArtistButton from './AddArtistButton';
@@ -130,9 +135,12 @@ export default function CampaignCockpit() {
         const d = l
           ? deriveFromLive(l, { daysToNextMoment, phase: a.phase })
           : null;
+        const status = (d?.status ?? 'COLD') as ChannelState;
+        const uploads30d = l?.uploads30d ?? 0;
         return {
           ...a,
-          status: (d?.status ?? 'COLD') as ChannelState,
+          status,
+          classification: classifyArtist(status, uploads30d),
           reason: d?.reason ?? 'No data yet',
           nextAction: d?.nextAction ?? null,
         };
@@ -140,8 +148,11 @@ export default function CampaignCockpit() {
     [artists, live]
   );
 
-  // Sort: worst state first (COLD → AT RISK → BUILDING → HEALTHY)
+  // Sort within each classification group: worst status first, then by next moment
   const sorted = [...effective].sort((a, b) => {
+    // First by classification group
+    const cRank = CLASSIFICATION_RANK[a.classification] - CLASSIFICATION_RANK[b.classification];
+    if (cRank !== 0) return cRank;
     const s = STATUS_RANK[a.status] - STATUS_RANK[b.status];
     if (s !== 0) return s;
     const aDate = coachPlans[a.slug]?.nextMoment?.date ?? a.nextMomentDate;
@@ -150,6 +161,14 @@ export default function CampaignCockpit() {
     const bd = bDate ? daysFromNow(bDate) : 9999;
     return ad - bd;
   });
+
+  // Group by classification
+  const groups: { classification: ArtistClassification; items: typeof sorted }[] = [];
+  const classOrder: ArtistClassification[] = ['GROWING', 'WEAK_CONVERSION', 'UNDERFED', 'COLD'];
+  for (const cls of classOrder) {
+    const items = sorted.filter((a) => a.classification === cls);
+    if (items.length > 0) groups.push({ classification: cls, items });
+  }
 
   const total = sorted.length;
   const healthy = sorted.filter((a) => a.status === 'HEALTHY').length;
@@ -234,16 +253,35 @@ export default function CampaignCockpit() {
         </div>
       </div>
 
-      {/* Artist list — priority sorted */}
-      <div className="space-y-3">
-        {sorted.map((a) => (
-          <ArtistCard
-            key={a.slug}
-            a={a}
-            live={live[a.slug]}
-            coach={coachPlans[a.slug] ?? null}
-          />
-        ))}
+      {/* Artist list — grouped by classification */}
+      <div className="space-y-8">
+        {groups.map((group) => {
+          const clsStyle = CLASSIFICATION_STYLE[group.classification];
+          return (
+            <div key={group.classification}>
+              <div className="flex items-center gap-3 mb-3">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-[0.12em]"
+                  style={{ background: clsStyle.bg, color: clsStyle.fg }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: clsStyle.dot }} />
+                  {CLASSIFICATION_LABEL[group.classification]}
+                </span>
+                <span className="text-[10px] text-ink/25 tabular-nums">({group.items.length})</span>
+              </div>
+              <div className="space-y-3">
+                {group.items.map((a) => (
+                  <ArtistCard
+                    key={a.slug}
+                    a={a}
+                    live={live[a.slug]}
+                    coach={coachPlans[a.slug] ?? null}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {artists.length === 0 && (
@@ -252,7 +290,22 @@ export default function CampaignCockpit() {
         </div>
       )}
 
-      <div className="mt-12 text-[10px] uppercase tracking-[0.18em] text-ink/30">
+      {/* ─── NAVIGATION FLOW ───────────────────────────────────────── */}
+      <div className="mt-8 flex items-center justify-center gap-3 text-[11px]">
+        <Link href="/growth" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+          Channel Health
+        </Link>
+        <span className="text-ink/25">→</span>
+        <Link href="/campaigns" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+          Active Campaigns
+        </Link>
+        <span className="text-ink/25">→</span>
+        <span className="font-bold text-ink/30 px-3 py-1.5">
+          Coach (per artist)
+        </span>
+      </div>
+
+      <div className="mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/30 text-center">
         Live via YouTube API · Updated {lastRunAt ? `${Math.max(0, Math.round((Date.now() - lastRunAt) / 60000))}m ago` : 'on load'}
       </div>
     </div>

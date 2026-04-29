@@ -274,6 +274,51 @@ export function deriveFromLive(live: LiveSnap, ctx: DeriveCtx = {}): Derived | n
   };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GLOBAL CLASSIFICATION — 4 categories for grouping and filtering
+// Maps the 5-state ChannelState to 4 board-level classifications.
+// ─────────────────────────────────────────────────────────────────────────────
+export type ArtistClassification = 'GROWING' | 'WEAK_CONVERSION' | 'UNDERFED' | 'COLD';
+
+export const CLASSIFICATION_LABEL: Record<ArtistClassification, string> = {
+  GROWING: 'Growing',
+  WEAK_CONVERSION: 'Weak Conversion',
+  UNDERFED: 'Underfed',
+  COLD: 'Cold',
+};
+
+export const CLASSIFICATION_STYLE: Record<ArtistClassification, { bg: string; fg: string; dot: string }> = {
+  GROWING:         { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
+  WEAK_CONVERSION: { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
+  UNDERFED:        { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
+  COLD:            { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
+};
+
+export const CLASSIFICATION_RANK: Record<ArtistClassification, number> = {
+  COLD: 0,
+  UNDERFED: 1,
+  WEAK_CONVERSION: 2,
+  GROWING: 3,
+};
+
+/**
+ * Classify an artist into one of four categories based on channel state
+ * and live metrics. Used for grouping on the All Artists page and for
+ * system-level summaries.
+ */
+export function classifyArtist(
+  status: ChannelState,
+  uploads30d: number,
+): ArtistClassification {
+  if (status === 'COLD') return 'COLD';
+  if (status === 'WEAK CONVERSION') return 'WEAK_CONVERSION';
+  // Underfed: active channel but starved of content
+  if (status === 'AT RISK') return 'UNDERFED';
+  if (status === 'BUILDING' && uploads30d < 3) return 'UNDERFED';
+  // Everything else (HEALTHY, active BUILDING) = Growing
+  return 'GROWING';
+}
+
 export function fmtNum(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
   if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
