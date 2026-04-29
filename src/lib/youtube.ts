@@ -7,9 +7,64 @@ import {
 
 const KEY = process.env.YOUTUBE_API_KEY;
 
+// ── In-memory cache ─────────────────────────────────────────────────────
+// Prevents duplicate YouTube API calls within the same server process.
+// Entries expire after 10 minutes. This dramatically reduces quota usage
+// when multiple pages/routes fetch the same artist in a short window.
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const snapCache = new Map<string, { data: LiveSnap; ts: number }>();
+let quotaExhausted = false;
+let quotaExhaustedAt = 0;
+const QUOTA_COOLDOWN = 15 * 60 * 1000; // 15min cooldown after quota hit
+
+function getCached(key: string): LiveSnap | null {
+  const entry = snapCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) {
+    snapCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key: string, data: LiveSnap) {
+  snapCache.set(key, { data, ts: Date.now() });
+  // Keep cache from growing unbounded
+  if (snapCache.size > 200) {
+    const oldest = snapCache.keys().next().value;
+    if (oldest) snapCache.delete(oldest);
+  }
+}
+
+function isQuotaError(msg: string): boolean {
+  return msg.includes('403') || msg.includes('quotaExceeded') || msg.includes('quota');
+}
+
+function isQuotaCoolingDown(): boolean {
+  if (!quotaExhausted) return false;
+  if (Date.now() - quotaExhaustedAt > QUOTA_COOLDOWN) {
+    quotaExhausted = false;
+    console.log('[YouTube] Quota cooldown expired — resuming API calls');
+    return false;
+  }
+  return true;
+}
+
+// Channel ID cache — these are stable and rarely change
+const channelIdCache = new Map<string, { id: string | null; ts: number }>();
+const CHANNEL_ID_TTL = 60 * 60 * 1000; // 1 hour
+
 async function jget(url: string) {
   const r = await fetch(url, { next: { revalidate: 600 } });
-  if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  if (!r.ok) {
+    const body = await r.text();
+    if (r.status === 403 && body.includes('quota')) {
+      quotaExhausted = true;
+      quotaExhaustedAt = Date.now();
+      console.error('[YouTube] Quota exceeded — entering cooldown');
+    }
+    throw new Error(`${r.status} ${body}`);
+  }
   return r.json();
 }
 
@@ -371,28 +426,72 @@ export async function resolveChannelId(input: string): Promise<string | null> {
   if (!KEY) return null;
   if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
   const handle = input.startsWith('@') ? input : `@${input.replace(/^https?:\/\/.*\/(@?[^/?#]+).*/, '$1')}`;
+
+  // Check cache first
+  const cached = channelIdCache.get(handle);
+  if (cached && Date.now() - cached.ts < CHANNEL_ID_TTL) {
+    console.log(`[YouTube] resolveChannelId cache hit: ${handle} → ${cached.id}`);
+    return cached.id;
+  }
+
+  // If quota is exhausted, return cached value (even if stale) or null
+  if (isQuotaCoolingDown()) {
+    console.log(`[YouTube] resolveChannelId quota cooldown — returning cached/null for ${handle}`);
+    return cached?.id ?? null;
+  }
+
   try {
     const j = await jget(
       `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handle)}&key=${KEY}`
     );
-    if (j.items?.[0]?.id) return j.items[0].id;
-  } catch {}
+    if (j.items?.[0]?.id) {
+      const id = j.items[0].id;
+      channelIdCache.set(handle, { id, ts: Date.now() });
+      return id;
+    }
+  } catch (e: any) {
+    // On quota error, return stale cache if available
+    if (isQuotaError(String(e?.message ?? ''))) {
+      console.warn(`[YouTube] resolveChannelId quota error for ${handle}`);
+      return cached?.id ?? null;
+    }
+  }
   try {
     const q = handle.replace(/^@/, '');
     const j = await jget(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(q)}&key=${KEY}`
     );
-    return j.items?.[0]?.snippet?.channelId ?? j.items?.[0]?.id?.channelId ?? null;
+    const id = j.items?.[0]?.snippet?.channelId ?? j.items?.[0]?.id?.channelId ?? null;
+    channelIdCache.set(handle, { id, ts: Date.now() });
+    return id;
   } catch {
-    return null;
+    return cached?.id ?? null;
   }
 }
 
 export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> {
   if (!KEY) return null;
+
+  // ── 1. Check in-memory cache first ──────────────────────────────────
+  const cacheKey = input.toLowerCase().replace(/^@/, '');
+  const cached = getCached(cacheKey);
+  if (cached) {
+    console.log(`[YouTube] fetchChannelSnap cache hit: ${input}`);
+    return cached;
+  }
+
+  // ── 2. If quota is exhausted, return cached data or a soft error ────
+  if (isQuotaCoolingDown()) {
+    console.log(`[YouTube] fetchChannelSnap quota cooldown — skipping API for ${input}`);
+    return { error: 'quota_exceeded' };
+  }
+
   try {
     const channelId = await resolveChannelId(input);
     if (!channelId) return { error: 'not found' };
+
+    console.log(`[YouTube] fetchChannelSnap API call: ${input} → ${channelId}`);
+
     const ch = await jget(
       `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${KEY}`
     );
@@ -409,13 +508,12 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
     const missingCaptionsVideos: NonNullable<LiveSnap['missingCaptionsVideos']> = [];
 
     if (uploadsId) {
-      // Paginate the uploads playlist to capture the full campaign window.
-      // Each page is 50 items / 1 quota unit — we fetch up to 4 pages (200
-      // items) which covers ~6+ months of an active channel's output.
+      // Paginate uploads — limit to 2 pages (100 items) to conserve quota.
+      // This still covers ~3 months for active channels.
       const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
       const ids: string[] = [];
       let nextPageToken: string | undefined;
-      const MAX_PAGES = 4;
+      const MAX_PAGES = 2;
       for (let page = 0; page < MAX_PAGES; page++) {
         const pageParam = nextPageToken ? `&pageToken=${nextPageToken}` : '';
         const pl = await jget(
@@ -533,8 +631,20 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
     // Fire-and-forget time-series write (KV-backed, no-op if unconfigured)
     writeSnapshot(channelId, snap).catch(() => {});
 
+    // ── Cache the successful result ──
+    setCache(cacheKey, snap);
+    console.log(`[YouTube] fetchChannelSnap cached: ${input} (subs=${snap.subs}, views30d=${snap.uploads30d})`);
+
     return snap;
   } catch (e: any) {
-    return { error: String(e?.message ?? e) };
+    const msg = String(e?.message ?? e);
+    console.error(`[YouTube] fetchChannelSnap error for ${input}: ${msg}`);
+
+    // On quota error, return a distinguishable soft error
+    if (isQuotaError(msg)) {
+      return { error: 'quota_exceeded' };
+    }
+
+    return { error: msg };
   }
 }
