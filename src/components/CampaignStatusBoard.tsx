@@ -13,6 +13,7 @@ import {
   type DecisionLabel,
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
+import { detectOpportunity, aggregateMissedValue, type ValueOpportunity } from '@/lib/valueModel';
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -182,6 +183,17 @@ function whyCause(read: GrowthRead): string {
     case 'CAMPAIGN_ALIGNMENT_GAP': return 'Uploads not serving campaign';
     case 'NONE': return 'No critical blocker identified';
   }
+}
+
+// ─── Value model bridge ────────────────────────────────────────────────
+function getValueOpportunity(card: CardData): ValueOpportunity | null {
+  return detectOpportunity({
+    views7d: card.views7Delta,
+    subs7d: card.subs7Delta,
+    subsPerKViews: subsPerKViews(card),
+    uploads30d: card.uploads30d,
+    channelState: card.boardStatus,
+  });
 }
 
 // ─── Section classification ─────────────────────────────────────────────
@@ -374,7 +386,11 @@ function WeeklySummary({ cards }: { cards: CardData[] }) {
     insights.push(`Key pattern: ${label} is the top blocker across ${topBlocker[1]} channels`);
   }
 
-  if (insights.length === 0) return null;
+  // ── Aggregate missed value across all campaigns ────────────────────────
+  const opportunities = cards.map((c) => getValueOpportunity(c));
+  const missedValue = aggregateMissedValue(opportunities);
+
+  if (insights.length === 0 && !missedValue) return null;
 
   return (
     <div className="rounded-2xl p-6 mb-8" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
@@ -387,6 +403,12 @@ function WeeklySummary({ cards }: { cards: CardData[] }) {
             <span className="text-ink/25 mr-2">·</span>{insight}
           </div>
         ))}
+        {missedValue && (
+          <div className="text-[13px] font-bold leading-snug" style={{ color: '#8A4A1A' }}>
+            <span className="text-ink/25 mr-2">·</span>
+            Estimated missed value this week: £{fmtNum(missedValue.low)}–£{fmtNum(missedValue.high)}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -673,9 +695,21 @@ function DecisionCard({
       <div className="text-[13px] font-semibold text-ink/75 leading-snug mb-1">
         {whatHappening(card)}
       </div>
-      <div className="text-[12px] text-ink/40 mb-3">
+      <div className="text-[12px] text-ink/40 mb-1">
         {whyCause(read)}
       </div>
+
+      {/* ─── Value opportunity (only when there's a clear gap) ────── */}
+      {(() => {
+        const opp = getValueOpportunity(card);
+        if (!opp) return null;
+        const color = opp.gap === 'UPLIFT_POTENTIAL' ? '#0C6A3F' : '#8A4A1A';
+        return (
+          <div className="text-[11px] font-bold mb-3" style={{ color }}>
+            {opp.label}
+          </div>
+        );
+      })()}
 
       {/* ─── 4. Actions (max 3) ───────────────────────────────────── */}
       <div className="rounded-lg p-3.5 mb-3" style={{ background: isFix ? dStyle.bg : SOFT }}>
