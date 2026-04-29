@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import {
   ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive,
-  STATUS_COLOR, STATUS_RANK, classifyArtist,
+  STATUS_COLOR, STATUS_RANK, classifyArtist, isManaged,
   CLASSIFICATION_LABEL, CLASSIFICATION_STYLE,
   type Artist, type LiveSnap, type ChannelState, type ArtistClassification,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
+import { computeSystemValue, fmtVal } from '@/lib/valueModel';
 import Sparkline from '@/components/Sparkline';
 
 export const revalidate = 600;
@@ -126,6 +127,18 @@ export default async function ControlPage() {
   const notGrowing = rows.filter((r) => r.status !== 'HEALTHY').length;
   const atRisk = rows.filter((r) => r.status === 'AT RISK' || r.status === 'COLD').length;
 
+  // System-level value aggregation (managed artists only)
+  const managedRows = rows.filter((r) => isManaged(r.artist));
+  const systemValue = computeSystemValue(
+    managedRows.map((r) => ({
+      views7d: r.views7?.delta ?? 0,
+      subs7d: r.subs7?.delta ?? 0,
+      uploads30d: r.uploads30d,
+      channelState: r.status,
+      classification: r.classification,
+    }))
+  );
+
   // System pattern insights
   const insights: string[] = [];
   if (weakConvCount > 0)
@@ -217,6 +230,43 @@ export default async function ControlPage() {
                   <span className="text-ink/20 mr-2">·</span>{insight}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── VALUE OPPORTUNITY — system-level missed value ────────────── */}
+        {systemValue.totalMissedValueHigh > 0 && (
+          <div className="rounded-xl px-5 py-3.5 mb-6" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">Value Opportunity · Virgin Managed</div>
+            <div className="space-y-1.5">
+              {systemValue.byClassification
+                .filter((b) => b.classification !== 'GROWING' && b.missedValueHigh > 0)
+                .map((b) => {
+                  const style = CLASSIFICATION_STYLE[b.classification];
+                  const label =
+                    b.classification === 'WEAK_CONVERSION' ? 'missed long-term value'
+                    : b.classification === 'UNDERFED' ? 'weekly opportunity'
+                    : 'untapped opportunity';
+                  return (
+                    <div key={b.classification} className="flex items-center gap-2 text-[12px] leading-snug">
+                      <span
+                        className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
+                        style={{ background: style.dot }}
+                      />
+                      <span className="text-ink/50">
+                        {CLASSIFICATION_LABEL[b.classification]} ({b.artistCount}):
+                      </span>
+                      <span className="font-bold text-ink/70">
+                        {'£'}{fmtVal(b.missedValueLow)}{'–'}{'£'}{fmtVal(b.missedValueHigh)} {label}
+                      </span>
+                    </div>
+                  );
+                })}
+              {systemValue.totalMissedValueHigh > 0 && (
+                <div className="text-[11px] text-ink/35 mt-1 pt-1.5" style={{ borderTop: `1px solid ${MUTED}` }}>
+                  Total opportunity: {'£'}{fmtVal(systemValue.totalMissedValueLow)}{'–'}{'£'}{fmtVal(systemValue.totalMissedValueHigh)}/week across {managedRows.length} managed channels
+                </div>
+              )}
             </div>
           </div>
         )}
