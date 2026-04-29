@@ -186,7 +186,7 @@ function whyCause(read: GrowthRead): string {
 
 // ─── Section classification ─────────────────────────────────────────────
 
-const ACTIVE_OVERRIDES = ['the-snuts'];
+const ACTIVE_OVERRIDES = ['thesnuts'];
 
 type BoardSection = 'active' | 'building' | 'at-risk' | 'dormant';
 
@@ -194,6 +194,12 @@ function classifyCard(card: CardData): BoardSection {
   if (card.boardStatus === 'COLD') return 'dormant';
   if (ACTIVE_OVERRIDES.includes(card.slug)) return 'active';
   if (card.campaign) return 'active';
+
+  // Use Growth OS decision to refine — if decision is PUSH with good signals,
+  // the channel is building, not at risk, even if boardStatus says AT RISK
+  const read = getGrowthRead(card);
+  if (read.decision === 'PUSH' && card.boardStatus === 'AT RISK') return 'building';
+
   if (card.boardStatus === 'WEAK CONVERSION' || card.boardStatus === 'AT RISK') return 'at-risk';
   return 'building';
 }
@@ -563,22 +569,22 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* ─── LINE 1: Decision + confidence ─────────────────────────── */}
-      <div className="flex items-center gap-2 mb-2">
-        <span
-          className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
-          style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
-        >
-          {read.decision}
-        </span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.08em]" style={{ color: `${dStyle.fg}99` }}>
-          {read.confidence} confidence
-        </span>
-      </div>
-
-      {/* ─── Artist name + dual state ──────────────────────────────── */}
+      {/* ─── 1. Artist name + decision + dual state ─────────────────── */}
       <div className="mb-3">
-        <h2 className="font-black text-[18px] leading-tight">{card.name}</h2>
+        <div className="flex items-center gap-2.5 mb-1">
+          <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
+          <span
+            className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
+            style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
+          >
+            {read.decision}
+          </span>
+          {read.showConfidence && (
+            <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: `${dStyle.fg}88` }}>
+              {read.confidence}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2 mt-1 flex-wrap text-[11px]">
           <span className="font-bold uppercase tracking-[0.08em] text-ink/50">
             Channel: <span style={{ color: dStyle.fg }}>{card.channelHealth}</span>
@@ -603,29 +609,74 @@ function DecisionCard({
         </div>
       </div>
 
-      {/* ─── LINE 2: What's happening + conversion ─────────────────── */}
-      <div className="flex items-start justify-between gap-4 mb-1.5">
-        <div className="text-[13px] font-semibold text-ink/75 leading-snug">
-          {whatHappening(card)}
-        </div>
-        {spk != null && (
-          <div className="text-right shrink-0">
-            <div className="text-[16px] font-black tabular-nums leading-none" style={{ color: conversionColor(spk) }}>
-              {spk.toFixed(1)}
-            </div>
-            <div className="text-[8px] font-bold uppercase tracking-[0.1em] mt-0.5" style={{ color: conv.color }}>
-              subs/1K · {conv.text}
-            </div>
+      {/* ─── 2. Metrics row (views, subs, conversion, sparkline) ──── */}
+      <div className="flex items-end gap-6 mb-3">
+        <div>
+          <div
+            className="text-[28px] font-black leading-none tabular-nums"
+            style={{ color: deltaColor(card.views7Delta) }}
+          >
+            {card.views7Delta != null
+              ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}`
+              : '—'}
           </div>
-        )}
+          <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
+            7d views
+          </div>
+        </div>
+        <div>
+          <div
+            className="text-[28px] font-black leading-none tabular-nums"
+            style={{ color: deltaColor(card.subs7Delta) }}
+          >
+            {card.subs7Delta != null
+              ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}`
+              : '—'}
+          </div>
+          <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
+            7d subs
+          </div>
+        </div>
+
+        {/* Conversion */}
+        <div>
+          <div
+            className="text-[20px] font-black leading-none tabular-nums"
+            style={{ color: spk != null ? conversionColor(spk) : 'rgba(14,14,14,0.25)' }}
+          >
+            {spk != null ? spk.toFixed(1) : '—'}
+          </div>
+          <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold" style={{
+            color: spk != null ? conv.color : 'rgba(14,14,14,0.25)',
+          }}>
+            subs/1K{spk != null ? ` · ${conv.text}` : ''}
+          </div>
+        </div>
+
+        {/* Sparkline */}
+        <div className="ml-auto rounded-lg px-3 py-2" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
+          <Sparkline
+            data={card.sparkline}
+            width={120}
+            height={40}
+            stroke={GOS_SPARK_STYLE[gs].stroke}
+            fill={GOS_SPARK_STYLE[gs].fill}
+          />
+          <div className="text-[9px] text-right mt-0.5 uppercase tracking-wider font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
+            30d trend
+          </div>
+        </div>
       </div>
 
-      {/* ─── LINE 3: Why ───────────────────────────────────────────── */}
-      <div className="text-[12px] text-ink/45 mb-3">
+      {/* ─── 3. Performance summary ────────────────────────────────── */}
+      <div className="text-[13px] font-semibold text-ink/75 leading-snug mb-1">
+        {whatHappening(card)}
+      </div>
+      <div className="text-[12px] text-ink/40 mb-3">
         {whyCause(read)}
       </div>
 
-      {/* ─── LINE 4: Actions (max 3) ───────────────────────────────── */}
+      {/* ─── 4. Actions (max 3) ───────────────────────────────────── */}
       <div className="rounded-lg p-3.5 mb-3" style={{ background: isFix ? dStyle.bg : SOFT }}>
         <div className="space-y-1">
           {read.actions.doNow.slice(0, 3).map((step, i) => (
@@ -829,31 +880,31 @@ function DecisionCard({
   );
 }
 
-// ─── Section header ─────────────────────────────────────────────────────
-function SectionHeader({
-  title,
+// ─── Decision section header ────────────────────────────────────────────
+function DecisionSectionHeader({
+  decision,
+  subtitle,
   count,
-  variant = 'primary',
 }: {
-  title: string;
+  decision: DecisionLabel | 'BUILD' | 'HOLD';
+  subtitle: string;
   count: number;
-  variant?: 'primary' | 'secondary' | 'warning';
 }) {
-  const styles = {
-    primary: 'text-[11px] font-black uppercase tracking-[0.18em]',
-    secondary: 'text-[10px] font-bold uppercase tracking-[0.18em] text-ink/30',
-    warning: 'text-[10px] font-bold uppercase tracking-[0.18em]',
-  };
-  const colors = {
-    primary: INK,
-    secondary: 'rgba(14,14,14,0.3)',
-    warning: '#8A4A1A',
-  };
+  const dStyle = decision === 'BUILD'
+    ? { bg: '#FFF5D6', fg: '#7A5A00', border: '#E8D590' }
+    : decision === 'HOLD'
+    ? DECISION_STYLE.HOLD
+    : DECISION_STYLE[decision as DecisionLabel];
+
   return (
-    <div className="flex items-center gap-2 mb-4">
-      <span className={styles[variant]} style={{ color: colors[variant] }}>
-        {title}
+    <div className="flex items-center gap-3 mb-4">
+      <span
+        className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
+        style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
+      >
+        {decision}
       </span>
+      <span className="text-[12px] text-ink/40">{subtitle}</span>
       <span className="text-[10px] text-ink/20 tabular-nums">({count})</span>
     </div>
   );
@@ -897,37 +948,35 @@ export default function CampaignStatusBoard({
     setCards((prev) => prev.map((c) => (c.slug === slug ? { ...c, notes } : c)));
   }
 
-  // ─── Group cards into 4 sections ────────────────────────────────────
-  const active: CardData[] = [];
-  const building: CardData[] = [];
-  const atRisk: CardData[] = [];
+  // ─── Group cards by Growth OS decision ─────────────────────────────
+  const pushCards: CardData[] = [];
+  const fixCards: CardData[] = [];
+  const buildCards: CardData[] = [];
+  const holdCards: CardData[] = [];
   const dormant: CardData[] = [];
 
   for (const card of cards) {
-    const section = classifyCard(card);
-    if (section === 'dormant') dormant.push(card);
-    else if (section === 'active') active.push(card);
-    else if (section === 'at-risk') atRisk.push(card);
-    else building.push(card);
+    if (card.boardStatus === 'COLD') {
+      dormant.push(card);
+      continue;
+    }
+    const read = getGrowthRead(card);
+    switch (read.decision) {
+      case 'PUSH': pushCards.push(card); break;
+      case 'FIX': fixCards.push(card); break;
+      case 'HOLD': holdCards.push(card); break;
+    }
   }
 
-  // Sort active: FIX first, then PUSH, then HOLD. Then by priority.
-  active.sort((a, b) => {
-    const rA = getGrowthRead(a);
-    const rB = getGrowthRead(b);
-    const order: Record<DecisionLabel, number> = { FIX: 0, PUSH: 1, HOLD: 2 };
-    if (order[rA.decision] !== order[rB.decision]) return order[rA.decision] - order[rB.decision];
+  // Within each section, sort by priority then by views (highest first)
+  const sortByPriorityAndViews = (a: CardData, b: CardData) => {
     if (a.priority !== b.priority) return a.priority === 'high' ? -1 : 1;
-    return 0;
-  });
-
-  // Sort at-risk: FIX first
-  atRisk.sort((a, b) => {
-    const rA = getGrowthRead(a);
-    const rB = getGrowthRead(b);
-    const order: Record<DecisionLabel, number> = { FIX: 0, PUSH: 1, HOLD: 2 };
-    return order[rA.decision] - order[rB.decision];
-  });
+    return (b.views7Delta ?? 0) - (a.views7Delta ?? 0);
+  };
+  pushCards.sort(sortByPriorityAndViews);
+  fixCards.sort(sortByPriorityAndViews);
+  buildCards.sort(sortByPriorityAndViews);
+  holdCards.sort(sortByPriorityAndViews);
 
   return (
     <>
@@ -972,13 +1021,13 @@ export default function CampaignStatusBoard({
           {/* ─── Weekly YouTube Read ────────────────────────────────── */}
           <WeeklySummary cards={cards} />
 
-          {/* ─── Section 1: Active Campaigns ────────────────────────── */}
-          {active.length > 0 && (
+          {/* ─── PUSH — Strong performance, ready to scale ──────────── */}
+          {pushCards.length > 0 && (
             <div>
-              <SectionHeader title="Active Campaigns" count={active.length} variant="primary" />
-              <SectionIssueNote cards={active} />
+              <DecisionSectionHeader decision="PUSH" subtitle="Strong performance — ready to scale" count={pushCards.length} />
+              <SectionIssueNote cards={pushCards} />
               <div className="space-y-4">
-                {active.map((card) => (
+                {pushCards.map((card) => (
                   <DecisionCard
                     key={card.slug}
                     card={card}
@@ -990,13 +1039,13 @@ export default function CampaignStatusBoard({
             </div>
           )}
 
-          {/* ─── Section 2: Building / Pre-Campaign ─────────────────── */}
-          {building.length > 0 && (
+          {/* ─── FIX — High reach, weak conversion ──────────────────── */}
+          {fixCards.length > 0 && (
             <div>
-              <SectionHeader title="Building / Pre-Campaign" count={building.length} variant="secondary" />
-              <SectionIssueNote cards={building} />
+              <DecisionSectionHeader decision="FIX" subtitle="High reach but weak conversion" count={fixCards.length} />
+              <SectionIssueNote cards={fixCards} />
               <div className="space-y-4">
-                {building.map((card) => (
+                {fixCards.map((card) => (
                   <DecisionCard
                     key={card.slug}
                     card={card}
@@ -1008,13 +1057,13 @@ export default function CampaignStatusBoard({
             </div>
           )}
 
-          {/* ─── Section 3: At Risk / Underperforming ───────────────── */}
-          {atRisk.length > 0 && (
+          {/* ─── BUILD — Early signal or underfed ───────────────────── */}
+          {buildCards.length > 0 && (
             <div>
-              <SectionHeader title="At Risk / Underperforming" count={atRisk.length} variant="warning" />
-              <SectionIssueNote cards={atRisk} />
+              <DecisionSectionHeader decision="BUILD" subtitle="Early signal or underfed channel" count={buildCards.length} />
+              <SectionIssueNote cards={buildCards} />
               <div className="space-y-4">
-                {atRisk.map((card) => (
+                {buildCards.map((card) => (
                   <DecisionCard
                     key={card.slug}
                     card={card}
@@ -1026,7 +1075,24 @@ export default function CampaignStatusBoard({
             </div>
           )}
 
-          {/* ─── Section 4: Dormant / Cold (collapsed) ──────────────── */}
+          {/* ─── HOLD — No clear signal or inactive ─────────────────── */}
+          {holdCards.length > 0 && (
+            <div>
+              <DecisionSectionHeader decision="HOLD" subtitle="No clear signal — waiting" count={holdCards.length} />
+              <div className="space-y-4">
+                {holdCards.map((card) => (
+                  <DecisionCard
+                    key={card.slug}
+                    card={card}
+                    onUnpin={handleUnpin}
+                    onNotesChange={handleNotesChange}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ─── Dormant / Cold (collapsed) ─────────────────────────── */}
           {dormant.length > 0 && (
             <DormantBlock cards={dormant} />
           )}
