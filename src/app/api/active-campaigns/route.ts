@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { listPinned, pinCampaign, unpinCampaign, saveBaseline, type CampaignBaseline } from '@/lib/campaignStore';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists, addCustomArtist } from '@/lib/artistStore';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { deriveFromLive } from '@/lib/artists';
 
 export const dynamic = 'force-dynamic';
@@ -43,8 +43,8 @@ export async function POST(req: NextRequest) {
     const artist = allArtists.find((a) => a.slug === slug);
     if (artist) {
       const handle = artist.channelHandle ?? artist.name;
-      if (handle && process.env.YOUTUBE_API_KEY) {
-        const snap = await fetchChannelSnap(handle);
+      if (handle) {
+        const snap = await readLiveSnapByHandle(handle);
         if (snap && !snap.error && snap.subs != null) {
           const derived = deriveFromLive(snap);
           const baseline: CampaignBaseline = {

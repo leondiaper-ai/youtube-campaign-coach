@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
 
 /**
@@ -27,12 +27,9 @@ export async function GET(req: NextRequest) {
   const handle = artist.channelHandle ?? artist.name;
   if (!handle) return NextResponse.json({ error: 'No channel handle for this artist' }, { status: 404 });
 
-  // 2. Fetch live YouTube data via existing channel API lib
-  if (!process.env.YOUTUBE_API_KEY) {
-    return NextResponse.json({ error: 'YOUTUBE_API_KEY not set' }, { status: 503 });
-  }
-  const snap = await fetchChannelSnap(handle);
-  if (!snap) return NextResponse.json({ error: 'Fetch returned null' }, { status: 502 });
+  // 2. Read cached YouTube data from KV (zero API calls)
+  const snap = await readLiveSnapByHandle(handle);
+  if (!snap) return NextResponse.json({ error: 'No cached data yet. Run a sync first.' }, { status: 404 });
   if (snap.error) return NextResponse.json({ error: snap.error }, { status: 502 });
 
   // 3. Read history for delta calculations

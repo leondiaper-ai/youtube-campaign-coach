@@ -8,7 +8,7 @@ import {
   type Artist, type ChannelState,
 } from './artists';
 import { listCustomArtists } from './artistStore';
-import { fetchChannelSnap } from './youtube';
+import { readLiveSnapByHandle } from './kvCache';
 import { readHistory, deltaOver } from './snapshots';
 import { viewsToRevenue, subsToValue, detectOpportunity } from './valueModel';
 import { getCampaignSignal, getChannelHealth, getYouTubeGrowthState, type GrowthInput } from './youtubeGrowthOS';
@@ -93,10 +93,9 @@ async function captureArtistSnapshot(
   artist: Artist,
   ctx: { snapshotDate: string; weekId: string; weekStartDate: string },
 ): Promise<WeeklyChannelSnapshot> {
+  // Read from KV cache — NO YouTube API calls
   const handle = artist.channelHandle ?? artist.name;
-  const snap = handle && process.env.YOUTUBE_API_KEY
-    ? await fetchChannelSnap(handle)
-    : null;
+  const snap = handle ? await readLiveSnapByHandle(handle) : null;
 
   // Read history for delta calculations
   const history = snap?.channelId && !snap.error

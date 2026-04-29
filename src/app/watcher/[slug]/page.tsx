@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { listCustomArtists } from '@/lib/artistStore';
 import { isPinned } from '@/lib/campaignStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
@@ -55,7 +55,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 
   const campaignPinned = await isPinned(slug);
 
-  const live = artist.channelHandle ? await fetchChannelSnap(artist.channelHandle) : null;
+  const live = artist.channelHandle ? await readLiveSnapByHandle(artist.channelHandle) : null;
   const daysToNextMoment = artist.nextMomentDate
     ? Math.round(
         (new Date(artist.nextMomentDate + 'T00:00:00').getTime() - Date.now()) /

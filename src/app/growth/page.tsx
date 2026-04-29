@@ -6,7 +6,7 @@ import {
   type Artist, type LiveSnap, type ChannelState, type ArtistClassification,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
 import { computeSystemValue, fmtVal } from '@/lib/valueModel';
 import Sparkline from '@/components/Sparkline';
@@ -81,10 +81,17 @@ type RowData = {
 export default async function ControlPage() {
   const custom = await listCustomArtists();
   const allArtists = mergeArtistLists(ARTISTS, custom);
+  const syncMeta = await readSyncMeta();
+
+  // Batch-read all cached snaps from KV (zero YouTube API calls)
+  const handles = allArtists
+    .map((a) => a.channelHandle)
+    .filter(Boolean) as string[];
+  const snapMap = await readAllLiveSnaps(handles);
 
   const rows: RowData[] = await Promise.all(
     allArtists.map(async (a) => {
-      const snap = a.channelHandle ? await fetchChannelSnap(a.channelHandle) : null;
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
       const history =
         snap?.channelId && !snap.error ? await readHistory(snap.channelId) : [];
       const subs7 = deltaOver(history, 7, 'subs');
@@ -110,7 +117,7 @@ export default async function ControlPage() {
       }) : null;
       const status: ChannelState = derived?.status ?? 'COLD';
       const classification = classifyArtist(status, uploads30d);
-      const reason = derived?.reason ?? 'No data yet';
+      const reason = derived?.reason ?? 'No cached data yet';
       return { artist: a, snap, subs7, views7, subs14, views14, subsWoW, viewsWoW, lastUpDays, uploads30d, status, classification, reason, subsSeries };
     })
   );
@@ -195,8 +202,16 @@ export default async function ControlPage() {
               </Link>
             </div>
           </div>
-          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 mt-2">
-            Live · YouTube API
+          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 mt-2 text-right">
+            {syncMeta ? (
+              <>
+                <span>Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                <br />
+                <span className="text-ink/20">{syncMeta.artistsSuccess}/{syncMeta.artistsTotal} artists · from cache</span>
+              </>
+            ) : (
+              <span>No sync data yet</span>
+            )}
           </span>
         </div>
 

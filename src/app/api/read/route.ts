@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { fetchChannelSnap } from '@/lib/youtube';
 import { daysSince } from '@/lib/artists';
 
@@ -112,8 +113,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing channel URL' }, { status: 400 });
     }
 
-    // ── Use the campaign system's data layer ────────────────────────────
-    const snap = await fetchChannelSnap(url);
+    // ── Try KV cache first, fall back to live API for unknown channels ──
+    const cachedSnap = await readLiveSnapByHandle(url);
+    const snap = cachedSnap ?? await fetchChannelSnap(url);
     if (!snap) {
       return NextResponse.json({ error: 'Could not fetch channel data' }, { status: 500 });
     }

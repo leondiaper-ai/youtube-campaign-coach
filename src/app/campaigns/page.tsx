@@ -6,7 +6,7 @@ import {
   listWeeklySnapshots, saveWeeklySnapshot,
   type PinnedCampaign, type CampaignNote, type CampaignWeeklySnapshot,
 } from '@/lib/campaignStore';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readLiveSnapByHandle, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver, campaignDelta, seriesForField, type ChannelSnapshot } from '@/lib/snapshots';
 import {
   generateYouTubeGrowthRead, getCampaignSignal, getChannelHealth,
@@ -195,10 +195,10 @@ async function loadCard(
   };
 
   const handle = artist.channelHandle ?? artist.name;
-  if (!handle || !process.env.YOUTUBE_API_KEY) return base;
+  if (!handle) return base;
 
-  const snap = await fetchChannelSnap(handle);
-  if (!snap || snap.error) return { ...base, diagnosis: 'Could not fetch live data' };
+  const snap = await readLiveSnapByHandle(handle);
+  if (!snap || snap.error) return { ...base, diagnosis: 'No cached data yet' };
 
   const history = snap.channelId ? await readHistory(snap.channelId) : [];
   const subs7 = deltaOver(history, 7, 'subs');

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ARTISTS } from '@/lib/artists';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import {
   detectOpportunities,
   IMPACT_COLOR,
@@ -19,7 +19,7 @@ export default async function OpportunitiesPage() {
   // Run live detection for every artist in parallel
   const results = await Promise.all(
     ARTISTS.map(async (a) => {
-      const snap = a.channelHandle ? await fetchChannelSnap(a.channelHandle) : null;
+      const snap = a.channelHandle ? await readLiveSnapByHandle(a.channelHandle) : null;
       const daysToNextMoment = a.nextMomentDate
         ? Math.round(
             (new Date(a.nextMomentDate + 'T00:00:00').getTime() - Date.now()) /

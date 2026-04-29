@@ -333,7 +333,7 @@ export default function CampaignCockpit() {
       </div>
 
       <div className="mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/30 text-center">
-        Live via YouTube API · Updated {lastRunAt ? `${Math.max(0, Math.round((Date.now() - lastRunAt) / 60000))}m ago` : 'on load'}
+        From cache · Updated {lastRunAt ? `${Math.max(0, Math.round((Date.now() - lastRunAt) / 60000))}m ago` : 'on load'}
       </div>
     </div>
   );

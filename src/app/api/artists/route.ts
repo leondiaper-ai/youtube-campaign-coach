@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchChannelSnap, resolveChannelId } from '@/lib/youtube';
+import { fetchChannelSnapLite, resolveChannelId } from '@/lib/youtube';
+import { writeLiveSnap, writeChannelMapping } from '@/lib/kvCache';
 import { addCustomArtist, listCustomArtists, removeCustomArtist, slugify } from '@/lib/artistStore';
 import type { Artist } from '@/lib/artists';
 
@@ -28,12 +29,20 @@ export async function POST(req: NextRequest) {
   }
 
   // Pull a snap so we have the display name + verify it exists.
-  const snap = await fetchChannelSnap(channelId);
+  // This is a one-time action (adding an artist), so a live API call is OK.
+  const snap = await fetchChannelSnapLite(channelId);
   if (!snap || snap.error || !snap.title) {
     return NextResponse.json(
       { error: `Channel resolved but live fetch failed${snap?.error ? `: ${snap.error}` : ''}.` },
       { status: 502 }
     );
+  }
+
+  // Write to KV cache immediately so the artist shows data right away
+  if (snap.channelId) {
+    await writeLiveSnap(snap.channelId, snap);
+    const handle = snap.handle || channelId;
+    await writeChannelMapping(handle, snap.channelId);
   }
 
   const slug = slugify(snap.handle?.replace(/^@/, '') || snap.title);

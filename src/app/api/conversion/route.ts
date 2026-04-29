@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
-import { fetchChannelSnap } from '@/lib/youtube';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { computeConversion, rateTrend } from '@/lib/conversion';
 
@@ -31,8 +31,8 @@ export async function GET(req: NextRequest) {
     if (!artist.channelHandle) {
       return NextResponse.json({ error: 'Artist has no channel handle' }, { status: 400 });
     }
-    // Resolve handle → channelId via fetchChannelSnap (same path the Watcher uses)
-    const snap = await fetchChannelSnap(artist.channelHandle);
+    // Resolve handle → channelId from KV cache (zero API calls)
+    const snap = await readLiveSnapByHandle(artist.channelHandle);
     channelId = snap?.channelId ?? null;
     if (!channelId) {
       return NextResponse.json({ error: 'Could not resolve channel id' }, { status: 502 });

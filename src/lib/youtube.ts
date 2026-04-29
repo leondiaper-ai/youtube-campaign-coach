@@ -648,3 +648,149 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
     return { error: msg };
   }
 }
+
+/**
+ * Lightweight channel fetch for the daily cron job.
+ * Skips expensive operations to conserve quota:
+ *   - NO search.list for top-ever videos (saves 100 units/artist)
+ *   - NO commentThreads (saves 3-6 units/artist)
+ *   - Only 2 pages of uploads (100 items, ~3 months)
+ *   - NO in-memory cache (cron writes to KV instead)
+ *
+ * Cost: ~6 units per artist (1 channels + 2 playlistItems + 2 videos + 1 resolve)
+ */
+export async function fetchChannelSnapLite(input: string): Promise<LiveSnap | null> {
+  if (!KEY) return null;
+
+  if (isQuotaCoolingDown()) {
+    console.log(`[YouTube] fetchChannelSnapLite quota cooldown — skipping ${input}`);
+    return { error: 'quota_exceeded' };
+  }
+
+  try {
+    const channelId = await resolveChannelId(input);
+    if (!channelId) return { error: 'not found' };
+
+    console.log(`[YouTube] fetchChannelSnapLite: ${input} → ${channelId}`);
+
+    const ch = await jget(
+      `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${KEY}`
+    );
+    const item = ch.items?.[0];
+    if (!item) return { error: 'empty' };
+    const uploadsId = item.contentDetails?.relatedPlaylists?.uploads;
+
+    let uploads30d = 0;
+    let lastUploadAt: string | null = null;
+    const recentUploads: NonNullable<LiveSnap['recentUploads']> = [];
+    let shorts30d = 0;
+    let upcomingCount = 0;
+    let captionsMissing30d = 0;
+    const missingCaptionsVideos: NonNullable<LiveSnap['missingCaptionsVideos']> = [];
+
+    if (uploadsId) {
+      const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const ids: string[] = [];
+      let nextPageToken: string | undefined;
+      for (let page = 0; page < 2; page++) {
+        const pageParam = nextPageToken ? `&pageToken=${nextPageToken}` : '';
+        const pl = await jget(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}${pageParam}`
+        );
+        for (const it of pl.items ?? []) {
+          const t = it.snippet?.publishedAt;
+          const vid = it.snippet?.resourceId?.videoId;
+          if (!t || !vid) continue;
+          if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
+          if (new Date(t).getTime() >= cutoff) uploads30d++;
+          ids.push(vid);
+        }
+        nextPageToken = pl.nextPageToken;
+        if (!nextPageToken) break;
+      }
+
+      if (ids.length) {
+        const allVideoItems: any[] = [];
+        for (let i = 0; i < ids.length; i += 50) {
+          const batch = ids.slice(i, i + 50);
+          const vj = await jget(
+            `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${batch.join(',')}&key=${KEY}`
+          );
+          allVideoItems.push(...(vj.items ?? []));
+        }
+        for (const v of allVideoItems) {
+          const dur = parseDuration(v.contentDetails?.duration);
+          const publishedAt = v.snippet?.publishedAt ?? '';
+          const live = v.snippet?.liveBroadcastContent ?? 'none';
+          const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          const captions = v.contentDetails?.caption === 'true';
+          const viewCount = Number(v.statistics?.viewCount ?? 0);
+          const likeCount = Number(v.statistics?.likeCount ?? 0);
+          const commentCount = Number(v.statistics?.commentCount ?? 0);
+          recentUploads.push({
+            id: v.id,
+            title: v.snippet?.title ?? '',
+            description: v.snippet?.description ?? '',
+            publishedAt,
+            durationSec: dur,
+            live,
+            scheduledStart,
+            captions,
+            viewCount,
+            likeCount,
+            commentCount,
+          });
+          const ageDays = (Date.now() - new Date(publishedAt).getTime()) / 86400000;
+          if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;
+          if (ageDays <= 30 && !captions && live === 'none') {
+            captionsMissing30d++;
+            missingCaptionsVideos.push({ id: v.id, title: v.snippet?.title ?? '', viewCount });
+          }
+          if (live === 'upcoming') upcomingCount++;
+        }
+
+        // Fuzzy companion detection (no top-ever needed)
+        const recentRows = toVideoRows(recentUploads);
+        detectCompanions(recentRows);
+
+        // Top performer flagging
+        const longform = recentUploads.filter((u) => u.live === 'none' && u.durationSec > 60);
+        if (longform.length >= 3) {
+          const sorted = [...longform.map((u) => u.viewCount)].sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)] || 0;
+          for (const u of longform) {
+            if (median > 0 && u.viewCount >= median * 2) u.isTopPerformer = true;
+          }
+        }
+        // NO top comments — skip to save quota
+      }
+    }
+
+    const snap: LiveSnap = {
+      channelId,
+      title: item.snippet?.title,
+      handle: item.snippet?.customUrl,
+      subs: Number(item.statistics?.subscriberCount ?? 0),
+      views: Number(item.statistics?.viewCount ?? 0),
+      uploads30d,
+      lastUploadAt,
+      thumbnail: item.snippet?.thumbnails?.default?.url,
+      recentUploads,
+      topEverVideos: [], // skipped in lite mode
+      shorts30d,
+      upcomingCount,
+      captionsMissing30d,
+      missingCaptionsVideos,
+    };
+
+    // Write time-series snapshot (KV-backed, no-op if unconfigured)
+    writeSnapshot(channelId, snap).catch(() => {});
+
+    return snap;
+  } catch (e: any) {
+    const msg = String(e?.message ?? e);
+    console.error(`[YouTube] fetchChannelSnapLite error for ${input}: ${msg}`);
+    if (isQuotaError(msg)) return { error: 'quota_exceeded' };
+    return { error: msg };
+  }
+}
