@@ -146,6 +146,11 @@ const REFRESH_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
 export async function canRefresh(): Promise<{ allowed: boolean; nextAllowedAt: string | null; lastSyncAt: string | null }> {
   const meta = await readSyncMeta();
   if (!meta) return { allowed: true, nextAllowedAt: null, lastSyncAt: null };
+  // If the last sync completely failed (0 artists), don't enforce cooldown —
+  // no quota was used, so retrying immediately is safe.
+  if (meta.status === 'failed' && meta.artistsSuccess === 0) {
+    return { allowed: true, nextAllowedAt: null, lastSyncAt: meta.lastSyncAt };
+  }
   const elapsed = Date.now() - new Date(meta.lastSyncAt).getTime();
   if (elapsed >= REFRESH_COOLDOWN_MS) {
     return { allowed: true, nextAllowedAt: null, lastSyncAt: meta.lastSyncAt };

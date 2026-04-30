@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
   const durationMs = Date.now() - startTime;
   const nextSync = new Date();
   nextSync.setUTCDate(nextSync.getUTCDate() + 1);
-  nextSync.setUTCHours(4, 0, 0, 0); // Next day at 4am UTC
+  nextSync.setUTCHours(8, 0, 0, 0); // Next day at 8am UTC (after YouTube quota resets at midnight Pacific / 7am UTC)
 
   const syncMeta: SyncMeta = {
     lastSyncAt: new Date().toISOString(),

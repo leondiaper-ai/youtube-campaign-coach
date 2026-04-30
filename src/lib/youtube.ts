@@ -427,12 +427,23 @@ export async function resolveChannelId(input: string): Promise<string | null> {
   if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
   const handle = input.startsWith('@') ? input : `@${input.replace(/^https?:\/\/.*\/(@?[^/?#]+).*/, '$1')}`;
 
-  // Check cache first
+  // Check in-memory cache first
   const cached = channelIdCache.get(handle);
   if (cached && Date.now() - cached.ts < CHANNEL_ID_TTL) {
     console.log(`[YouTube] resolveChannelId cache hit: ${handle} → ${cached.id}`);
     return cached.id;
   }
+
+  // Check KV mapping (permanent, survives cold starts)
+  try {
+    const { readChannelMapping } = await import('./kvCache');
+    const kvId = await readChannelMapping(handle);
+    if (kvId) {
+      console.log(`[YouTube] resolveChannelId KV hit: ${handle} → ${kvId}`);
+      channelIdCache.set(handle, { id: kvId, ts: Date.now() });
+      return kvId;
+    }
+  } catch { /* KV unavailable — fall through to API */ }
 
   // If quota is exhausted, return cached value (even if stale) or null
   if (isQuotaCoolingDown()) {
@@ -440,6 +451,7 @@ export async function resolveChannelId(input: string): Promise<string | null> {
     return cached?.id ?? null;
   }
 
+  // channels.list by handle — 1 unit
   try {
     const j = await jget(
       `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handle)}&key=${KEY}`
@@ -456,16 +468,40 @@ export async function resolveChannelId(input: string): Promise<string | null> {
       return cached?.id ?? null;
     }
   }
+
+  // NOTE: search.list fallback removed — it costs 100 units per call and
+  // triggers quota exhaustion. channels.list by handle is sufficient for
+  // all artists with valid @handles. For edge cases where the handle doesn't
+  // resolve, use resolveChannelIdWithSearch() explicitly (e.g. when adding
+  // a new artist via the UI).
+  console.warn(`[YouTube] resolveChannelId: channels.list found nothing for ${handle}`);
+  return cached?.id ?? null;
+}
+
+/**
+ * Fallback resolver that uses search.list (100 units).
+ * Only used when explicitly adding a new artist — never in cron/refresh.
+ */
+export async function resolveChannelIdWithSearch(input: string): Promise<string | null> {
+  if (!KEY) return null;
+  if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
+
+  // Try the cheap path first
+  const id = await resolveChannelId(input);
+  if (id) return id;
+
+  // Expensive search.list fallback — 100 units
+  const handle = input.startsWith('@') ? input : `@${input.replace(/^https?:\/\/.*\/(@?[^/?#]+).*/, '$1')}`;
   try {
     const q = handle.replace(/^@/, '');
     const j = await jget(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(q)}&key=${KEY}`
     );
-    const id = j.items?.[0]?.snippet?.channelId ?? j.items?.[0]?.id?.channelId ?? null;
-    channelIdCache.set(handle, { id, ts: Date.now() });
-    return id;
+    const searchId = j.items?.[0]?.snippet?.channelId ?? j.items?.[0]?.id?.channelId ?? null;
+    if (searchId) channelIdCache.set(handle, { id: searchId, ts: Date.now() });
+    return searchId;
   } catch {
-    return cached?.id ?? null;
+    return null;
   }
 }
 

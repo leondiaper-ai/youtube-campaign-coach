@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchChannelSnapLite, resolveChannelId } from '@/lib/youtube';
+import { fetchChannelSnapLite, resolveChannelIdWithSearch } from '@/lib/youtube';
 import { writeLiveSnap, writeChannelMapping } from '@/lib/kvCache';
 import { addCustomArtist, listCustomArtists, removeCustomArtist, slugify } from '@/lib/artistStore';
 import type { Artist } from '@/lib/artists';
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Resolve to a channel ID first so we store a stable identifier.
-  const channelId = await resolveChannelId(input);
+  const channelId = await resolveChannelIdWithSearch(input);
   if (!channelId) {
     return NextResponse.json({ error: `Could not find a YouTube channel for "${input}".` }, { status: 404 });
   }

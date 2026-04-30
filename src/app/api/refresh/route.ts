@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
   const durationMs = Date.now() - startTime;
   const nextSync = new Date();
   nextSync.setUTCDate(nextSync.getUTCDate() + 1);
-  nextSync.setUTCHours(4, 0, 0, 0);
+  nextSync.setUTCHours(8, 0, 0, 0);
 
   const syncMeta: SyncMeta = {
     lastSyncAt: new Date().toISOString(),
