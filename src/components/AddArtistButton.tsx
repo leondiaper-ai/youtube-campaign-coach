@@ -13,6 +13,7 @@ export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [phase, setPhase] = useState<(typeof PHASES)[number]>('PRE');
+  const [ownership, setOwnership] = useState<'virgin' | 'observed'>('observed');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -24,7 +25,7 @@ export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
       const r = await fetch('/api/artists', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ input: input.trim(), phase }),
+        body: JSON.stringify({ input: input.trim(), phase, ownership }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? `Failed (${r.status})`);
@@ -100,6 +101,28 @@ export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
                   disabled={busy}
                 >
                   {p}
+                </button>
+              ))}
+            </div>
+
+            <label className="block mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
+              Category
+            </label>
+            <div className="flex gap-1.5 mt-1.5">
+              {([['virgin', 'Virgin Managed'], ['observed', 'Market Watch']] as const).map(([val, label]) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setOwnership(val)}
+                  className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.14em] border"
+                  style={{
+                    borderColor: ownership === val ? INK : MUTED,
+                    background: ownership === val ? INK : 'transparent',
+                    color: ownership === val ? PAPER : INK,
+                  }}
+                  disabled={busy}
+                >
+                  {label}
                 </button>
               ))}
             </div>

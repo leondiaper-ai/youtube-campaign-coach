@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const input: string | undefined = body?.input;
   const phase: Artist['phase'] = body?.phase ?? 'PRE';
+  const ownership: 'virgin' | 'observed' | undefined = body?.ownership;
   if (!input || typeof input !== 'string') {
     return NextResponse.json({ error: 'Missing input (YouTube handle / URL / name).' }, { status: 400 });
   }
@@ -56,6 +57,8 @@ export async function POST(req: NextRequest) {
     channelHandle: snap.handle || channelId,
     phase,
     custom: true,
+    artistType: ownership === 'virgin' ? 'managed' : 'observed',
+    ownership: ownership ?? 'observed',
   };
   const list = await addCustomArtist(artist);
   return NextResponse.json({ artist, artists: list });
@@ -80,6 +83,8 @@ export async function PATCH(req: NextRequest) {
   if (body.campaign !== undefined) updated.campaign = body.campaign;
   if (body.nextMomentLabel !== undefined) updated.nextMomentLabel = body.nextMomentLabel;
   if (body.nextMomentDate !== undefined) updated.nextMomentDate = body.nextMomentDate;
+  if (body.ownership !== undefined) updated.ownership = body.ownership;
+  if (body.artistType !== undefined) updated.artistType = body.artistType;
 
   const list = await addCustomArtist(updated);
   return NextResponse.json({ artist: updated, artists: list });
