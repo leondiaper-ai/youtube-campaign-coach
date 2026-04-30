@@ -188,6 +188,37 @@ export default function CampaignCockpit() {
       .catch(() => {});
   }, []);
 
+  // Toggle ownership between 'virgin' (managed) and 'observed' (market)
+  async function handleOwnershipChange(slug: string, newOwnership: 'virgin' | 'observed') {
+    try {
+      const r = await fetch('/api/artists', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          ownership: newOwnership,
+          artistType: newOwnership === 'virgin' ? 'managed' : 'observed',
+        }),
+      });
+      if (!r.ok) {
+        // Hardcoded artist — need to add as custom override
+        const artist = artists.find((a) => a.slug === slug);
+        if (artist && !artist.custom) {
+          await fetch('/api/artists', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              input: artist.channelHandle ?? artist.name,
+              phase: artist.phase ?? 'PRE',
+              ownership: newOwnership,
+            }),
+          });
+        }
+      }
+      await loadCustom();
+    } catch { /* noop */ }
+  }
+
   const total = sorted.length;
   const healthy = sorted.filter((a) => a.status === 'HEALTHY').length;
   const cold = sorted.filter((a) => a.status === 'COLD').length;
@@ -306,6 +337,7 @@ export default function CampaignCockpit() {
                     a={a}
                     live={live[a.slug]}
                     coach={coachPlans[a.slug] ?? null}
+                    onOwnershipChange={handleOwnershipChange}
                   />
                 ))}
               </div>
@@ -357,10 +389,12 @@ function ArtistCard({
   a,
   live,
   coach,
+  onOwnershipChange,
 }: {
   a: EffectiveArtist;
   live?: LiveSnap;
   coach: CoachPlanSummary | null;
+  onOwnershipChange?: (slug: string, ownership: 'virgin' | 'observed') => void;
 }) {
   const style = STATUS_COLOR[a.status];
   const label = STATE_LABEL[a.status];
@@ -368,6 +402,7 @@ function ArtistCard({
   const nextDate = coach?.nextMoment?.date ?? a.nextMomentDate ?? null;
   const days = nextDate ? daysFromNow(nextDate) : null;
   const isLive = !!live && !live.error && !live.loading && live.subs != null;
+  const isVirgin = a.ownership === 'virgin';
 
   return (
     <Link
@@ -387,6 +422,22 @@ function ArtistCard({
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: style.dot }} />
               {label}
             </span>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onOwnershipChange?.(a.slug, isVirgin ? 'observed' : 'virgin');
+              }}
+              className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.12em] border hover:opacity-80 transition-opacity"
+              style={{
+                borderColor: isVirgin ? '#1FBE7A' : MUTED,
+                background: isVirgin ? '#E8F8F0' : 'transparent',
+                color: isVirgin ? '#0A7A45' : '#999',
+              }}
+              title={`Click to move to ${isVirgin ? 'Market Watch' : 'Virgin Managed'}`}
+            >
+              {isVirgin ? 'Managed' : 'Market'}
+            </button>
             <CoachLiveDot slug={a.slug} />
           </div>
 
