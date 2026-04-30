@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE, CLASSIFICATION_LABEL } from '@/lib/artists';
-import { fmtVal, CONFIDENCE_LABEL, VALUE_DISCLAIMER, type ValueConfidence } from '@/lib/valueModel';
+// Value model imports removed — Opportunity Layer uses real signals only
 import Sparkline from './Sparkline';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -131,217 +131,138 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
   };
 }
 
-// ─── Missed Value computation (Virgin Managed only) ──────────────────────────
+// ─── Opportunity Layer (Virgin Managed only) ─────────────────────────────────
 //
-// RPM:  £1–£3 per 1K views (blended YouTube music RPM)
-// Uplift multiplier: based on gap between current and benchmark cadence
-// Reactivation: dormant subs × conservative views-per-sub estimate
+// Real signals only — no revenue projections. Each row uses observable data
+// (views, subs, uploads, recency) to explain what's happening and what to do.
 //
 
-const RPM_LOW = 1;   // £ per 1K views
-const RPM_HIGH = 3;
-
-type MissedValueRow = {
+type OpportunityRow = {
   name: string;
   slug: string;
-  issueType: 'Underfed' | 'Cold' | 'Weak Conversion';
-  missedViewsLow: number;
-  missedViewsHigh: number;
-  revenueLow: number;
-  revenueHigh: number;
-  cause: string;
+  state: 'Weak Conversion' | 'Underfed' | 'Cold';
+  /** Primary metric line — real numbers only */
+  metrics: string;
+  /** Human-readable interpretation of the situation */
+  interpretation: string;
+  /** Why this matters — plain English, no financial language */
+  explanation: string;
+  /** Specific action for this week */
   action: string;
-  confidence: ValueConfidence;
-  assumptions: {
-    benchmarkUploads: number;
-    currentUploads: number;
-    upliftMultiplier: string;
-    rpm: string;
-    basis: string;
-  };
+  /** Sort weight — higher = more urgent */
+  weight: number;
 };
 
-function computeMissedValue(
+function computeOpportunities(
   rows: RowData[],
   benchmarks: MarketBenchmarks | null,
-): MissedValueRow[] {
-  const results: MissedValueRow[] = [];
+): OpportunityRow[] {
+  const results: OpportunityRow[] = [];
   const benchCadence = benchmarks?.topPerformerCadence ?? 8;
 
-  // ── UNDERFED: cadence gap → missed views → missed revenue
-  const underfed = rows.filter((r) => r.classification === 'UNDERFED');
-  for (const r of underfed) {
-    const weeklyViews = r.views7Delta ?? 0;
-    if (weeklyViews <= 0) continue;
-    const cadenceRatio = benchCadence > 0 && r.uploads30d > 0
-      ? Math.min(benchCadence / r.uploads30d, 4)  // cap at 4× to avoid absurd estimates
-      : 2;
-    const upliftFactor = (cadenceRatio - 1) * 0.5; // conservative: 50% of the theoretical gap
-    const missedLow = Math.round(weeklyViews * upliftFactor * 0.6 * 4); // monthly, low
-    const missedHigh = Math.round(weeklyViews * upliftFactor * 1.2 * 4); // monthly, high
-    const revLow = Math.round((missedLow / 1000) * RPM_LOW);
-    const revHigh = Math.round((missedHigh / 1000) * RPM_HIGH);
-
-    results.push({
-      name: r.name,
-      slug: r.slug,
-      issueType: 'Underfed',
-      missedViewsLow: missedLow,
-      missedViewsHigh: missedHigh,
-      revenueLow: revLow,
-      revenueHigh: revHigh,
-      cause: `Upload cadence too low (${r.uploads30d}/month vs ~${benchCadence} benchmark)`,
-      action: `Increase to ${Math.min(benchCadence, 8)}+ uploads/month. Start with catalogue Shorts — low effort, high cadence.`,
-      confidence: weeklyViews > 10000 ? 'medium' : 'low',
-      assumptions: {
-        benchmarkUploads: benchCadence,
-        currentUploads: r.uploads30d,
-        upliftMultiplier: `${Math.round(upliftFactor * 100)}% of ${cadenceRatio.toFixed(1)}× cadence gap`,
-        rpm: `£${RPM_LOW}–£${RPM_HIGH} per 1K views`,
-        basis: `Based on ${fmtNum(weeklyViews)} current weekly views`,
-      },
-    });
-  }
-
-  // ── COLD: dormant subscribers → reactivation potential
-  const cold = rows.filter((r) => r.classification === 'COLD');
-  for (const r of cold) {
-    const subs = r.subs ?? 0;
-    if (subs <= 0) continue;
-    // Conservative: 1–3% of subs watch a reactivation upload, 4 uploads/month
-    const viewsPerUpload = Math.round(subs * 0.015); // 1.5% midpoint
-    const missedLow = Math.round(viewsPerUpload * 2 * 0.6); // 2 uploads/month, conservative
-    const missedHigh = Math.round(viewsPerUpload * 4 * 1.2); // 4 uploads/month, optimistic
-    const revLow = Math.round((missedLow / 1000) * RPM_LOW);
-    const revHigh = Math.round((missedHigh / 1000) * RPM_HIGH);
-
-    results.push({
-      name: r.name,
-      slug: r.slug,
-      issueType: 'Cold',
-      missedViewsLow: missedLow,
-      missedViewsHigh: missedHigh,
-      revenueLow: revLow,
-      revenueHigh: revHigh,
-      cause: `Channel dormant — ${fmtNum(subs)} subscribers with zero algorithm signal`,
-      action: 'Reactivate with 2–3 catalogue Shorts per week. Low risk, tests appetite.',
-      confidence: 'low',
-      assumptions: {
-        benchmarkUploads: 4,
-        currentUploads: 0,
-        upliftMultiplier: '1–3% subscriber reactivation rate per upload',
-        rpm: `£${RPM_LOW}–£${RPM_HIGH} per 1K views`,
-        basis: `Based on ${fmtNum(subs)} dormant subscribers`,
-      },
-    });
-  }
-
-  // ── WEAK CONVERSION: views exist but subs aren't growing
+  // ── WEAK CONVERSION: high views, low subs growth
   const weakConv = rows.filter((r) => r.classification === 'WEAK_CONVERSION');
   for (const r of weakConv) {
     const weeklyViews = r.views7Delta ?? 0;
     if (weeklyViews <= 0) continue;
-    // If conversion improved to 1.5 subs per 1K views, missed subs × LTV
-    const currentConvRate = (r.subs7Delta ?? 0) > 0 && weeklyViews > 0
-      ? ((r.subs7Delta ?? 0) / weeklyViews) * 1000
-      : 0;
-    const targetConvRate = 1.5; // subs per 1K views
-    if (currentConvRate >= targetConvRate) continue;
-    const missedSubsPerWeek = Math.round(((targetConvRate - currentConvRate) / 1000) * weeklyViews);
-    const missedSubsPerMonth = missedSubsPerWeek * 4;
-    // Subscriber LTV: £1–£5 range
-    const revLow = missedSubsPerMonth * 1;
-    const revHigh = missedSubsPerMonth * 5;
-    // Also estimate missed views from better content
-    const missedViewsLow = Math.round(weeklyViews * 0.15 * 4); // 15% uplift from better content mix
-    const missedViewsHigh = Math.round(weeklyViews * 0.35 * 4);
+    const subs7 = r.subs7Delta ?? 0;
 
     results.push({
       name: r.name,
       slug: r.slug,
-      issueType: 'Weak Conversion',
-      missedViewsLow: missedViewsLow,
-      missedViewsHigh: missedViewsHigh,
-      revenueLow: revLow,
-      revenueHigh: revHigh,
-      cause: `${fmtNum(weeklyViews)} weekly views but only ${fmtNum(r.subs7Delta ?? 0)} new subscribers — audience isn't sticking`,
-      action: 'Add depth content: artist-led pieces, track breakdowns, BTS. Fix the conversion funnel.',
-      confidence: weeklyViews > 50000 ? 'medium' : 'low',
-      assumptions: {
-        benchmarkUploads: benchCadence,
-        currentUploads: r.uploads30d,
-        upliftMultiplier: `Target conversion: ${targetConvRate} subs per 1K views (current: ${currentConvRate.toFixed(1)})`,
-        rpm: 'Subscriber LTV: £1–£5 per new subscriber',
-        basis: `Based on ${fmtNum(weeklyViews)} weekly views × conversion gap`,
-      },
+      state: 'Weak Conversion',
+      metrics: `${fmtNum(weeklyViews)} weekly views · ${subs7 >= 0 ? '+' : ''}${fmtNum(subs7)} subs`,
+      interpretation: 'High attention, low retention — audience isn\'t committing',
+      explanation: `This channel is getting strong view counts but subscribers aren't growing. The audience is watching but not choosing to follow. This usually means the content is discoverable but lacks the depth or personality that makes viewers come back.`,
+      action: 'Add 2–3 artist-led Shorts this week (BTS, personality, breakdowns). Give viewers a reason to subscribe.',
+      weight: weeklyViews, // more views = bigger opportunity
     });
   }
 
-  // Sort by revenue impact (high end, descending)
-  results.sort((a, b) => b.revenueHigh - a.revenueHigh);
+  // ── UNDERFED: low cadence relative to benchmark
+  const underfed = rows.filter((r) => r.classification === 'UNDERFED');
+  for (const r of underfed) {
+    const weeklyViews = r.views7Delta ?? 0;
+    if (weeklyViews <= 0) continue;
+
+    results.push({
+      name: r.name,
+      slug: r.slug,
+      state: 'Underfed',
+      metrics: `${r.uploads30d} uploads/30d · ${fmtNum(weeklyViews)} weekly views`,
+      interpretation: `Upload cadence too low — ${r.uploads30d}/month vs ~${benchCadence} for healthy channels`,
+      explanation: `The channel is generating views when it uploads, but uploads are too infrequent for YouTube to keep recommending the content. Healthy channels in the market are averaging ${benchCadence} uploads/month. More consistent posting would keep the channel in the algorithm's rotation.`,
+      action: `Add ${Math.min(3, Math.max(2, benchCadence - r.uploads30d))} catalogue Shorts per week. Low effort, builds consistency. Target ${Math.min(benchCadence, 8)}+ uploads/month.`,
+      weight: weeklyViews * 0.8, // slightly below weak conversion
+    });
+  }
+
+  // ── COLD: dormant with existing audience
+  const cold = rows.filter((r) => r.classification === 'COLD');
+  for (const r of cold) {
+    const subs = r.subs ?? 0;
+    if (subs <= 0) continue;
+
+    results.push({
+      name: r.name,
+      slug: r.slug,
+      state: 'Cold',
+      metrics: `${fmtNum(subs)} subscribers · 0 uploads in 60+ days`,
+      interpretation: `Dormant channel — large audience sitting idle with no new content`,
+      explanation: `This channel has a significant subscriber base but hasn't uploaded recently. The longer a channel sits dormant, the harder it is to re-engage the audience. Subscribers stop seeing the channel in their feed, and YouTube stops recommending it. A small reactivation test would show whether the audience is still reachable.`,
+      action: 'Test with 2–3 catalogue Shorts this week. Low risk, zero production cost. See if the audience responds.',
+      weight: subs * 0.001, // large audience = worth testing
+    });
+  }
+
+  // Sort by weight (most urgent first)
+  results.sort((a, b) => b.weight - a.weight);
   return results;
 }
 
-function fmtViews(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
-  return String(n);
-}
+// ─── Opportunity Section ─────────────────────────────────────────────────────
 
-function fmtRevenue(n: number): string {
-  if (n >= 1_000_000) return `£${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `£${(n / 1_000).toFixed(1)}K`;
-  return `£${n}`;
-}
-
-// ─── Missed Value Section ────────────────────────────────────────────────────
-
-const ISSUE_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
+const STATE_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
   'Underfed':        { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
   'Cold':            { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
   'Weak Conversion': { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
 };
 
-function MissedValueSection({
-  rows,
-  totalLow,
-  totalHigh,
-  channelCount,
-}: {
-  rows: MissedValueRow[];
-  totalLow: number;
-  totalHigh: number;
-  channelCount: number;
-}) {
+function OpportunitySection({ rows }: { rows: OpportunityRow[] }) {
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Build summary fragments
+  const weakCount = rows.filter((r) => r.state === 'Weak Conversion').length;
+  const underfedCount = rows.filter((r) => r.state === 'Underfed').length;
+  const coldCount = rows.filter((r) => r.state === 'Cold').length;
+  const summaryParts: string[] = [];
+  if (weakCount > 0) summaryParts.push(`High attention, low conversion across ${weakCount} channel${weakCount !== 1 ? 's' : ''}`);
+  if (underfedCount > 0) summaryParts.push(`${underfedCount} channel${underfedCount !== 1 ? 's' : ''} underposting`);
+  if (coldCount > 0) summaryParts.push(`${coldCount} dormant channel${coldCount !== 1 ? 's' : ''} ready for reactivation`);
 
   return (
     <div
       className="rounded-xl px-5 py-5 mb-6"
       style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}
     >
-      {/* ── HEADER: summary line ──────────────────────────────────────── */}
+      {/* ── HEADER ────────────────────────────────────────────────────── */}
       <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">
-        Missed Value · This Month
+        Opportunity · This Week
       </div>
-      <div
-        className="text-[16px] font-black leading-tight mb-1"
-        title={VALUE_DISCLAIMER}
-      >
-        Estimated missed value: {fmtRevenue(totalLow)}–{fmtRevenue(totalHigh)}/month
-        <span className="text-[11px] font-bold text-ink/35 ml-2">
-          across {channelCount} channel{channelCount !== 1 ? 's' : ''}
-        </span>
+      <div className="text-[15px] font-black leading-tight mb-1">
+        Opportunity across {rows.length} channel{rows.length !== 1 ? 's' : ''} this month
       </div>
-      <div className="text-[10px] text-ink/30 mb-4">
-        Directional estimates based on YouTube RPM and performance gaps. Used to highlight opportunity, not exact revenue.
-      </div>
+      {summaryParts.length > 0 && (
+        <div className="text-[11px] text-ink/45 mb-4 leading-snug">
+          {summaryParts.join(' · ')}
+        </div>
+      )}
 
       {/* ── PER-ARTIST ROWS ───────────────────────────────────────────── */}
       <div className="space-y-3">
         {rows.map((row) => {
           const isOpen = expanded === row.slug;
-          const st = ISSUE_STYLE[row.issueType] ?? ISSUE_STYLE['Cold'];
+          const st = STATE_STYLE[row.state] ?? STATE_STYLE['Cold'];
 
           return (
             <div
@@ -349,12 +270,12 @@ function MissedValueSection({
               className="rounded-lg border transition-all"
               style={{ borderColor: isOpen ? st.dot : MUTED, background: PAPER }}
             >
-              {/* ── System 1: always visible ──────────────────────────── */}
+              {/* ── System 1: always visible (2–3 lines) ─────────────── */}
               <div className="px-4 py-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    {/* Name + issue badge */}
-                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    {/* Name + state badge */}
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Link
                         href={`/watcher/${row.slug}`}
                         className="font-black text-[14px] hover:underline"
@@ -366,23 +287,18 @@ function MissedValueSection({
                         style={{ background: st.bg, color: st.fg }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
-                        {row.issueType}
+                        {row.state}
                       </span>
                     </div>
 
-                    {/* Missed views + revenue */}
-                    <div className="flex items-baseline gap-4 flex-wrap">
-                      <span className="text-[13px] font-bold tabular-nums" style={{ color: '#8A1F0C' }}>
-                        +{fmtViews(row.missedViewsLow)}–{fmtViews(row.missedViewsHigh)} missed views/month
-                      </span>
-                      <span className="text-[13px] font-bold tabular-nums" style={{ color: '#7A5A00' }}>
-                        {fmtRevenue(row.revenueLow)}–{fmtRevenue(row.revenueHigh)} est. revenue gap
-                      </span>
+                    {/* Real metrics */}
+                    <div className="text-[13px] font-bold tabular-nums text-ink/70">
+                      {row.metrics}
                     </div>
 
-                    {/* Cause */}
-                    <div className="text-[11px] text-ink/50 mt-1 leading-snug">
-                      Cause: {row.cause}
+                    {/* Interpretation */}
+                    <div className="text-[11px] text-ink/45 mt-1 leading-snug">
+                      → {row.interpretation}
                     </div>
                   </div>
 
@@ -396,41 +312,24 @@ function MissedValueSection({
                 </div>
               </div>
 
-              {/* ── System 2: expanded detail ─────────────────────────── */}
+              {/* ── System 2: expanded ────────────────────────────────── */}
               {isOpen && (
                 <div
                   className="px-4 py-3.5 border-t"
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
+                  {/* Why it matters */}
+                  <div className="text-[11px] text-ink/50 leading-relaxed mb-3">
+                    {row.explanation}
+                  </div>
+
                   {/* Action */}
-                  <div className="text-[12px] font-semibold text-ink/70 leading-snug mb-3 flex gap-2">
+                  <div className="text-[9px] font-black uppercase tracking-[0.14em] text-ink/30 mb-1.5">
+                    Action This Week
+                  </div>
+                  <div className="text-[12px] font-semibold text-ink/70 leading-snug flex gap-2">
                     <span className="text-ink/30 shrink-0">→</span>
                     <span>{row.action}</span>
-                  </div>
-
-                  {/* Assumptions */}
-                  <div className="text-[10px] text-ink/40 space-y-1">
-                    <div className="font-bold uppercase tracking-[0.12em] text-ink/30 mb-1">Assumptions</div>
-                    <div>Benchmark cadence: {row.assumptions.benchmarkUploads} uploads/month (current: {row.assumptions.currentUploads})</div>
-                    <div>Uplift basis: {row.assumptions.upliftMultiplier}</div>
-                    <div>RPM range: {row.assumptions.rpm}</div>
-                    <div>Data source: {row.assumptions.basis}</div>
-                  </div>
-
-                  {/* Confidence */}
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className="text-[9px] font-black uppercase tracking-[0.1em] text-ink/30">
-                      Confidence:
-                    </span>
-                    <span
-                      className="text-[9px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded"
-                      style={{
-                        color: row.confidence === 'high' ? '#0C6A3F' : row.confidence === 'medium' ? '#7A5A00' : '#8A1F0C',
-                        background: row.confidence === 'high' ? '#E6F8EE' : row.confidence === 'medium' ? '#FFF5D6' : '#FFE2D8',
-                      }}
-                    >
-                      {CONFIDENCE_LABEL[row.confidence]}
-                    </span>
                   </div>
                 </div>
               )}
@@ -462,15 +361,10 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
   const underfedCount = activeRows.filter((r) => r.classification === 'UNDERFED').length;
   const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
 
-  // Missed Value (managed view only)
-  const missedValueRows = view === 'managed'
-    ? computeMissedValue(managedRows, marketBenchmarks)
+  // Opportunity rows (managed view only)
+  const opportunityRows = view === 'managed'
+    ? computeOpportunities(managedRows, marketBenchmarks)
     : [];
-
-  // Totals for the summary line
-  const totalMissedRevLow = missedValueRows.reduce((s, r) => s + r.revenueLow, 0);
-  const totalMissedRevHigh = missedValueRows.reduce((s, r) => s + r.revenueHigh, 0);
-  const channelsWithMissedValue = missedValueRows.length;
 
   // Market patterns
   const marketPatterns: string[] = [];
@@ -542,14 +436,9 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
         </div>
       </div>
 
-      {/* ─── MANAGED VIEW: Missed Value ───────────────────────────────── */}
-      {view === 'managed' && missedValueRows.length > 0 && (
-        <MissedValueSection
-          rows={missedValueRows}
-          totalLow={totalMissedRevLow}
-          totalHigh={totalMissedRevHigh}
-          channelCount={channelsWithMissedValue}
-        />
+      {/* ─── MANAGED VIEW: Opportunity ──────────────────────────────────── */}
+      {view === 'managed' && opportunityRows.length > 0 && (
+        <OpportunitySection rows={opportunityRows} />
       )}
 
       {/* ─── MARKET VIEW: Market Patterns ──────────────────────────────── */}
