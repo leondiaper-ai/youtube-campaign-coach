@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE, CLASSIFICATION_LABEL } from '@/lib/artists';
+import { fmtVal, CONFIDENCE_LABEL, VALUE_DISCLAIMER, type ValueConfidence } from '@/lib/valueModel';
 import Sparkline from './Sparkline';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -130,73 +131,315 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
   };
 }
 
-// ─── System Opportunity computation (Virgin Managed only) ─────────────────────
+// ─── Missed Value computation (Virgin Managed only) ──────────────────────────
+//
+// RPM:  £1–£3 per 1K views (blended YouTube music RPM)
+// Uplift multiplier: based on gap between current and benchmark cadence
+// Reactivation: dormant subs × conservative views-per-sub estimate
+//
 
-type OpportunityGroup = {
-  classification: 'WEAK_CONVERSION' | 'UNDERFED' | 'COLD';
-  count: number;
-  channels: string[];
-  insight: string;
-  impact: string;
-  impactColor: string;
+const RPM_LOW = 1;   // £ per 1K views
+const RPM_HIGH = 3;
+
+type MissedValueRow = {
+  name: string;
+  slug: string;
+  issueType: 'Underfed' | 'Cold' | 'Weak Conversion';
+  missedViewsLow: number;
+  missedViewsHigh: number;
+  revenueLow: number;
+  revenueHigh: number;
+  cause: string;
   action: string;
+  confidence: ValueConfidence;
+  assumptions: {
+    benchmarkUploads: number;
+    currentUploads: number;
+    upliftMultiplier: string;
+    rpm: string;
+    basis: string;
+  };
 };
 
-function computeSystemOpportunities(
+function computeMissedValue(
   rows: RowData[],
   benchmarks: MarketBenchmarks | null,
-): OpportunityGroup[] {
-  const groups: OpportunityGroup[] = [];
+): MissedValueRow[] {
+  const results: MissedValueRow[] = [];
+  const benchCadence = benchmarks?.topPerformerCadence ?? 8;
 
-  const weakConv = rows.filter((r) => r.classification === 'WEAK_CONVERSION');
-  if (weakConv.length > 0) {
-    const totalViews = weakConv.reduce((s, r) => s + (r.views7Delta ?? 0), 0);
-    const benchLine = benchmarks && benchmarks.topPerformerCadence > 0
-      ? ` Market avg for healthy channels: ${fmtNum(benchmarks.avgViewsHealthy)} views/week.`
-      : '';
-    groups.push({
-      classification: 'WEAK_CONVERSION',
-      count: weakConv.length,
-      channels: weakConv.map((r) => r.name),
-      insight: `${fmtNum(totalViews)} weekly views not converting to subscribers.${benchLine}`,
-      impact: 'HIGH',
-      impactColor: '#8A1F0C',
-      action: 'Add depth content — artist-led pieces, breakdowns, BTS. Fix the conversion funnel.',
-    });
-  }
-
+  // ── UNDERFED: cadence gap → missed views → missed revenue
   const underfed = rows.filter((r) => r.classification === 'UNDERFED');
-  if (underfed.length > 0) {
-    const avgCadence = Math.round(underfed.reduce((s, r) => s + r.uploads30d, 0) / underfed.length);
-    const benchLine = benchmarks && benchmarks.topPerformerCadence > 0
-      ? ` Market benchmark: ${benchmarks.topPerformerCadence} uploads/month for healthy channels.`
-      : '';
-    groups.push({
-      classification: 'UNDERFED',
-      count: underfed.length,
-      channels: underfed.map((r) => r.name),
-      insight: `Averaging ${avgCadence} uploads/month — too low for algorithm traction.${benchLine}`,
-      impact: 'HIGH CERTAINTY',
-      impactColor: '#7A5A00',
-      action: 'Increase to 5+ uploads/month. Start with catalogue Shorts — low effort, high cadence.',
+  for (const r of underfed) {
+    const weeklyViews = r.views7Delta ?? 0;
+    if (weeklyViews <= 0) continue;
+    const cadenceRatio = benchCadence > 0 && r.uploads30d > 0
+      ? Math.min(benchCadence / r.uploads30d, 4)  // cap at 4× to avoid absurd estimates
+      : 2;
+    const upliftFactor = (cadenceRatio - 1) * 0.5; // conservative: 50% of the theoretical gap
+    const missedLow = Math.round(weeklyViews * upliftFactor * 0.6 * 4); // monthly, low
+    const missedHigh = Math.round(weeklyViews * upliftFactor * 1.2 * 4); // monthly, high
+    const revLow = Math.round((missedLow / 1000) * RPM_LOW);
+    const revHigh = Math.round((missedHigh / 1000) * RPM_HIGH);
+
+    results.push({
+      name: r.name,
+      slug: r.slug,
+      issueType: 'Underfed',
+      missedViewsLow: missedLow,
+      missedViewsHigh: missedHigh,
+      revenueLow: revLow,
+      revenueHigh: revHigh,
+      cause: `Upload cadence too low (${r.uploads30d}/month vs ~${benchCadence} benchmark)`,
+      action: `Increase to ${Math.min(benchCadence, 8)}+ uploads/month. Start with catalogue Shorts — low effort, high cadence.`,
+      confidence: weeklyViews > 10000 ? 'medium' : 'low',
+      assumptions: {
+        benchmarkUploads: benchCadence,
+        currentUploads: r.uploads30d,
+        upliftMultiplier: `${Math.round(upliftFactor * 100)}% of ${cadenceRatio.toFixed(1)}× cadence gap`,
+        rpm: `£${RPM_LOW}–£${RPM_HIGH} per 1K views`,
+        basis: `Based on ${fmtNum(weeklyViews)} current weekly views`,
+      },
     });
   }
 
+  // ── COLD: dormant subscribers → reactivation potential
   const cold = rows.filter((r) => r.classification === 'COLD');
-  if (cold.length > 0) {
-    const totalSubs = cold.reduce((s, r) => s + (r.subs ?? 0), 0);
-    groups.push({
-      classification: 'COLD',
-      count: cold.length,
-      channels: cold.map((r) => r.name),
-      insight: `${fmtNum(totalSubs)} combined subscribers sitting dormant. Zero algorithm signal.`,
-      impact: 'LONGER TERM',
-      impactColor: 'rgba(14,14,14,0.4)',
-      action: 'Reactivate top 3 by audience size. Test 2–3 catalogue Shorts per channel.',
+  for (const r of cold) {
+    const subs = r.subs ?? 0;
+    if (subs <= 0) continue;
+    // Conservative: 1–3% of subs watch a reactivation upload, 4 uploads/month
+    const viewsPerUpload = Math.round(subs * 0.015); // 1.5% midpoint
+    const missedLow = Math.round(viewsPerUpload * 2 * 0.6); // 2 uploads/month, conservative
+    const missedHigh = Math.round(viewsPerUpload * 4 * 1.2); // 4 uploads/month, optimistic
+    const revLow = Math.round((missedLow / 1000) * RPM_LOW);
+    const revHigh = Math.round((missedHigh / 1000) * RPM_HIGH);
+
+    results.push({
+      name: r.name,
+      slug: r.slug,
+      issueType: 'Cold',
+      missedViewsLow: missedLow,
+      missedViewsHigh: missedHigh,
+      revenueLow: revLow,
+      revenueHigh: revHigh,
+      cause: `Channel dormant — ${fmtNum(subs)} subscribers with zero algorithm signal`,
+      action: 'Reactivate with 2–3 catalogue Shorts per week. Low risk, tests appetite.',
+      confidence: 'low',
+      assumptions: {
+        benchmarkUploads: 4,
+        currentUploads: 0,
+        upliftMultiplier: '1–3% subscriber reactivation rate per upload',
+        rpm: `£${RPM_LOW}–£${RPM_HIGH} per 1K views`,
+        basis: `Based on ${fmtNum(subs)} dormant subscribers`,
+      },
     });
   }
 
-  return groups;
+  // ── WEAK CONVERSION: views exist but subs aren't growing
+  const weakConv = rows.filter((r) => r.classification === 'WEAK_CONVERSION');
+  for (const r of weakConv) {
+    const weeklyViews = r.views7Delta ?? 0;
+    if (weeklyViews <= 0) continue;
+    // If conversion improved to 1.5 subs per 1K views, missed subs × LTV
+    const currentConvRate = (r.subs7Delta ?? 0) > 0 && weeklyViews > 0
+      ? ((r.subs7Delta ?? 0) / weeklyViews) * 1000
+      : 0;
+    const targetConvRate = 1.5; // subs per 1K views
+    if (currentConvRate >= targetConvRate) continue;
+    const missedSubsPerWeek = Math.round(((targetConvRate - currentConvRate) / 1000) * weeklyViews);
+    const missedSubsPerMonth = missedSubsPerWeek * 4;
+    // Subscriber LTV: £1–£5 range
+    const revLow = missedSubsPerMonth * 1;
+    const revHigh = missedSubsPerMonth * 5;
+    // Also estimate missed views from better content
+    const missedViewsLow = Math.round(weeklyViews * 0.15 * 4); // 15% uplift from better content mix
+    const missedViewsHigh = Math.round(weeklyViews * 0.35 * 4);
+
+    results.push({
+      name: r.name,
+      slug: r.slug,
+      issueType: 'Weak Conversion',
+      missedViewsLow: missedViewsLow,
+      missedViewsHigh: missedViewsHigh,
+      revenueLow: revLow,
+      revenueHigh: revHigh,
+      cause: `${fmtNum(weeklyViews)} weekly views but only ${fmtNum(r.subs7Delta ?? 0)} new subscribers — audience isn't sticking`,
+      action: 'Add depth content: artist-led pieces, track breakdowns, BTS. Fix the conversion funnel.',
+      confidence: weeklyViews > 50000 ? 'medium' : 'low',
+      assumptions: {
+        benchmarkUploads: benchCadence,
+        currentUploads: r.uploads30d,
+        upliftMultiplier: `Target conversion: ${targetConvRate} subs per 1K views (current: ${currentConvRate.toFixed(1)})`,
+        rpm: 'Subscriber LTV: £1–£5 per new subscriber',
+        basis: `Based on ${fmtNum(weeklyViews)} weekly views × conversion gap`,
+      },
+    });
+  }
+
+  // Sort by revenue impact (high end, descending)
+  results.sort((a, b) => b.revenueHigh - a.revenueHigh);
+  return results;
+}
+
+function fmtViews(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return String(n);
+}
+
+function fmtRevenue(n: number): string {
+  if (n >= 1_000_000) return `£${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `£${(n / 1_000).toFixed(1)}K`;
+  return `£${n}`;
+}
+
+// ─── Missed Value Section ────────────────────────────────────────────────────
+
+const ISSUE_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
+  'Underfed':        { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
+  'Cold':            { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
+  'Weak Conversion': { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
+};
+
+function MissedValueSection({
+  rows,
+  totalLow,
+  totalHigh,
+  channelCount,
+}: {
+  rows: MissedValueRow[];
+  totalLow: number;
+  totalHigh: number;
+  channelCount: number;
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  return (
+    <div
+      className="rounded-xl px-5 py-5 mb-6"
+      style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}
+    >
+      {/* ── HEADER: summary line ──────────────────────────────────────── */}
+      <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">
+        Missed Value · This Month
+      </div>
+      <div
+        className="text-[16px] font-black leading-tight mb-1"
+        title={VALUE_DISCLAIMER}
+      >
+        Estimated missed value: {fmtRevenue(totalLow)}–{fmtRevenue(totalHigh)}/month
+        <span className="text-[11px] font-bold text-ink/35 ml-2">
+          across {channelCount} channel{channelCount !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <div className="text-[10px] text-ink/30 mb-4">
+        Directional estimates based on YouTube RPM and performance gaps. Used to highlight opportunity, not exact revenue.
+      </div>
+
+      {/* ── PER-ARTIST ROWS ───────────────────────────────────────────── */}
+      <div className="space-y-3">
+        {rows.map((row) => {
+          const isOpen = expanded === row.slug;
+          const st = ISSUE_STYLE[row.issueType] ?? ISSUE_STYLE['Cold'];
+
+          return (
+            <div
+              key={row.slug}
+              className="rounded-lg border transition-all"
+              style={{ borderColor: isOpen ? st.dot : MUTED, background: PAPER }}
+            >
+              {/* ── System 1: always visible ──────────────────────────── */}
+              <div className="px-4 py-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    {/* Name + issue badge */}
+                    <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                      <Link
+                        href={`/watcher/${row.slug}`}
+                        className="font-black text-[14px] hover:underline"
+                      >
+                        {row.name}
+                      </Link>
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em]"
+                        style={{ background: st.bg, color: st.fg }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
+                        {row.issueType}
+                      </span>
+                    </div>
+
+                    {/* Missed views + revenue */}
+                    <div className="flex items-baseline gap-4 flex-wrap">
+                      <span className="text-[13px] font-bold tabular-nums" style={{ color: '#8A1F0C' }}>
+                        +{fmtViews(row.missedViewsLow)}–{fmtViews(row.missedViewsHigh)} missed views/month
+                      </span>
+                      <span className="text-[13px] font-bold tabular-nums" style={{ color: '#7A5A00' }}>
+                        {fmtRevenue(row.revenueLow)}–{fmtRevenue(row.revenueHigh)} est. revenue gap
+                      </span>
+                    </div>
+
+                    {/* Cause */}
+                    <div className="text-[11px] text-ink/50 mt-1 leading-snug">
+                      Cause: {row.cause}
+                    </div>
+                  </div>
+
+                  {/* Expand toggle */}
+                  <button
+                    onClick={() => setExpanded(isOpen ? null : row.slug)}
+                    className="text-[10px] font-bold uppercase tracking-[0.1em] text-ink/35 hover:text-ink/60 shrink-0 mt-1 transition-colors"
+                  >
+                    {isOpen ? '▲ Less' : '▼ Detail'}
+                  </button>
+                </div>
+              </div>
+
+              {/* ── System 2: expanded detail ─────────────────────────── */}
+              {isOpen && (
+                <div
+                  className="px-4 py-3.5 border-t"
+                  style={{ borderColor: MUTED, background: SOFT }}
+                >
+                  {/* Action */}
+                  <div className="text-[12px] font-semibold text-ink/70 leading-snug mb-3 flex gap-2">
+                    <span className="text-ink/30 shrink-0">→</span>
+                    <span>{row.action}</span>
+                  </div>
+
+                  {/* Assumptions */}
+                  <div className="text-[10px] text-ink/40 space-y-1">
+                    <div className="font-bold uppercase tracking-[0.12em] text-ink/30 mb-1">Assumptions</div>
+                    <div>Benchmark cadence: {row.assumptions.benchmarkUploads} uploads/month (current: {row.assumptions.currentUploads})</div>
+                    <div>Uplift basis: {row.assumptions.upliftMultiplier}</div>
+                    <div>RPM range: {row.assumptions.rpm}</div>
+                    <div>Data source: {row.assumptions.basis}</div>
+                  </div>
+
+                  {/* Confidence */}
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className="text-[9px] font-black uppercase tracking-[0.1em] text-ink/30">
+                      Confidence:
+                    </span>
+                    <span
+                      className="text-[9px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded"
+                      style={{
+                        color: row.confidence === 'high' ? '#0C6A3F' : row.confidence === 'medium' ? '#7A5A00' : '#8A1F0C',
+                        background: row.confidence === 'high' ? '#E6F8EE' : row.confidence === 'medium' ? '#FFF5D6' : '#FFE2D8',
+                      }}
+                    >
+                      {CONFIDENCE_LABEL[row.confidence]}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 // ─── Board Component ──────────────────────────────────────────────────────────
@@ -219,34 +462,15 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
   const underfedCount = activeRows.filter((r) => r.classification === 'UNDERFED').length;
   const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
 
-  // System Opportunity (managed view only)
-  const opportunities = view === 'managed'
-    ? computeSystemOpportunities(managedRows, marketBenchmarks)
+  // Missed Value (managed view only)
+  const missedValueRows = view === 'managed'
+    ? computeMissedValue(managedRows, marketBenchmarks)
     : [];
 
-  // Managed insights
-  const managedInsights: string[] = [];
-  if (view === 'managed') {
-    if (weakConvCount > 0)
-      managedInsights.push(`${weakConvCount} channel${weakConvCount > 1 ? 's' : ''} with views but weak subscriber conversion`);
-    if (underfedCount > 0)
-      managedInsights.push(`${underfedCount} channel${underfedCount > 1 ? 's' : ''} underfed — cadence too low for growth`);
-    if (coldCount > 0)
-      managedInsights.push(`${coldCount} channel${coldCount > 1 ? 's' : ''} inactive (60+ days)`);
-    const lowCadence = managedRows.filter((r) => r.uploads30d <= 2 && r.classification !== 'COLD');
-    if (lowCadence.length >= 2)
-      managedInsights.push(`${lowCadence.length} channels uploading ≤2 times per month`);
-    // Benchmark gap
-    if (marketBenchmarks && marketBenchmarks.topPerformerCadence > 0) {
-      const managedActive = managedRows.filter((r) => r.status !== 'COLD');
-      const managedAvgCadence = managedActive.length > 0
-        ? Math.round(managedActive.reduce((s, r) => s + r.uploads30d, 0) / managedActive.length)
-        : 0;
-      if (managedAvgCadence > 0 && managedAvgCadence < marketBenchmarks.topPerformerCadence) {
-        managedInsights.push(`Avg cadence ${managedAvgCadence}/month vs market top performers at ${marketBenchmarks.topPerformerCadence}/month`);
-      }
-    }
-  }
+  // Totals for the summary line
+  const totalMissedRevLow = missedValueRows.reduce((s, r) => s + r.revenueLow, 0);
+  const totalMissedRevHigh = missedValueRows.reduce((s, r) => s + r.revenueHigh, 0);
+  const channelsWithMissedValue = missedValueRows.length;
 
   // Market patterns
   const marketPatterns: string[] = [];
@@ -318,70 +542,14 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
         </div>
       </div>
 
-      {/* ─── MANAGED VIEW: System Patterns + System Opportunity ─────────── */}
-      {view === 'managed' && (
-        <>
-          {/* System Patterns */}
-          {managedInsights.length > 0 && (
-            <div className="rounded-xl px-5 py-3.5 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
-              <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">System Patterns</div>
-              <div className="space-y-1">
-                {managedInsights.map((insight, i) => (
-                  <div key={i} className="text-[12px] text-ink/55 leading-snug">
-                    <span className="text-ink/20 mr-2">·</span>{insight}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* System Opportunity */}
-          {opportunities.length > 0 && (
-            <div className="rounded-xl px-5 py-4 mb-6" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
-              <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
-                System Opportunity · This Week
-              </div>
-              <div className="space-y-4">
-                {opportunities.map((opp) => {
-                  const style = CLASSIFICATION_STYLE[opp.classification];
-                  return (
-                    <div key={opp.classification}>
-                      {/* Group header */}
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span
-                          className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                          style={{ background: style.dot }}
-                        />
-                        <span className="text-[13px] font-black" style={{ color: style.fg }}>
-                          {CLASSIFICATION_LABEL[opp.classification]} ({opp.count})
-                        </span>
-                        <span
-                          className="text-[9px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded"
-                          style={{ color: opp.impactColor, background: `${opp.impactColor}12` }}
-                        >
-                          {opp.impact}
-                        </span>
-                      </div>
-                      {/* Insight */}
-                      <div className="text-[12px] text-ink/55 leading-snug mb-1 pl-4">
-                        {opp.insight}
-                      </div>
-                      {/* Action */}
-                      <div className="text-[12px] font-semibold text-ink/70 leading-snug pl-4 flex gap-2">
-                        <span className="text-ink/30 shrink-0">→</span>
-                        <span>{opp.action}</span>
-                      </div>
-                      {/* Channels */}
-                      <div className="text-[10px] text-ink/30 pl-4 mt-1">
-                        {opp.channels.join(', ')}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </>
+      {/* ─── MANAGED VIEW: Missed Value ───────────────────────────────── */}
+      {view === 'managed' && missedValueRows.length > 0 && (
+        <MissedValueSection
+          rows={missedValueRows}
+          totalLow={totalMissedRevLow}
+          totalHigh={totalMissedRevHigh}
+          channelCount={channelsWithMissedValue}
+        />
       )}
 
       {/* ─── MARKET VIEW: Market Patterns ──────────────────────────────── */}
