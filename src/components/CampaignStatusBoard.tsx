@@ -13,7 +13,7 @@ import {
   type DecisionLabel,
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
-import { getArtistValueOpportunity, aggregateMissedValue, type ValueOpportunity } from '@/lib/valueModel';
+import { getArtistValueOpportunity, aggregateMissedValue, midpoint, fmtVal, CONFIDENCE_LABEL, VALUE_DISCLAIMER, type ValueOpportunity } from '@/lib/valueModel';
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -83,6 +83,8 @@ type CardData = {
   campaignSignalLabel: string;
   /** Artist relationship type — value model only applies to 'managed' */
   artistType?: 'managed' | 'observed' | 'external';
+  /** Revenue ownership — only 'virgin' gets value calculations */
+  ownership?: 'virgin' | 'observed';
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -195,6 +197,7 @@ function getValueOpportunity(card: CardData): ValueOpportunity | null {
     uploads30d: card.uploads30d,
     channelState: card.boardStatus,
     artistType: card.artistType,
+    ownership: card.ownership,
   });
 }
 
@@ -408,7 +411,10 @@ function WeeklySummary({ cards }: { cards: CardData[] }) {
         {missedValue && (
           <div className="text-[13px] font-bold leading-snug" style={{ color: '#8A4A1A' }}>
             <span className="text-ink/25 mr-2">·</span>
-            Estimated missed value this week: £{fmtNum(missedValue.low)}–£{fmtNum(missedValue.high)}
+            Estimated missed value this week: ~£{fmtVal(midpoint(missedValue))}
+            <span className="text-[11px] font-normal text-ink/35 ml-1.5">
+              Range: £{fmtVal(missedValue.low)}–£{fmtVal(missedValue.high)}
+            </span>
           </div>
         )}
       </div>
@@ -785,8 +791,9 @@ function DecisionCard({
         if (!opp) return null;
         const color = opp.gap === 'UPLIFT_POTENTIAL' ? '#0C6A3F' : '#8A4A1A';
         return (
-          <div className="text-[11px] font-bold mb-3" style={{ color }}>
-            {opp.label}
+          <div className="text-[11px] mb-3" title={VALUE_DISCLAIMER}>
+            <span className="font-bold" style={{ color }}>{opp.label}</span>
+            <span className="text-ink/30 ml-1.5">({opp.confidenceLabel})</span>
           </div>
         );
       })()}

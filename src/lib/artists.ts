@@ -19,6 +19,9 @@ export type Status = ChannelState;
 /** Artist relationship type — controls which features apply */
 export type ArtistType = 'managed' | 'observed' | 'external';
 
+/** Revenue ownership — only "virgin" artists get value/revenue calculations */
+export type ArtistOwnership = 'virgin' | 'observed';
+
 export type Artist = {
   slug: string;
   name: string;
@@ -26,6 +29,9 @@ export type Artist = {
   phase: 'PRE' | 'START' | 'RELEASE' | 'PUSH' | 'PEAK' | 'SUSTAIN';
   /** Relationship: managed = Virgin, observed = monitoring, external = benchmark */
   artistType?: ArtistType;
+  /** Revenue ownership: only "virgin" artists get value calculations.
+   *  Missing = "observed" (no revenue displayed). */
+  ownership?: ArtistOwnership;
   // Optional plan metadata — present only when a real Coach timeline exists.
   campaign?: string;
   nextMomentLabel?: string;
@@ -42,6 +48,11 @@ export function isManaged(a: Artist): boolean {
   return (a.artistType ?? 'managed') === 'managed';
 }
 
+/** Check if an artist is Virgin-owned (eligible for value/revenue calculations) */
+export function isVirginOwned(a: Artist): boolean {
+  return a.ownership === 'virgin';
+}
+
 export const ARTISTS: Artist[] = [
   {
     slug: 'ezra-collective',
@@ -49,6 +60,7 @@ export const ARTISTS: Artist[] = [
     phase: 'PRE',
     channelHandle: '@ezracollective',
     artistType: 'managed',
+    ownership: 'virgin',
   },
   {
     slug: 'k-trap',
@@ -56,6 +68,7 @@ export const ARTISTS: Artist[] = [
     phase: 'PUSH',
     channelHandle: '@KTrap1',
     artistType: 'managed',
+    ownership: 'virgin',
     campaign: 'TRAPO 2',
     campaignStartDate: '2026-03-22',
   },
@@ -65,6 +78,7 @@ export const ARTISTS: Artist[] = [
     phase: 'START',
     channelHandle: '@tomodell',
     artistType: 'managed',
+    ownership: 'virgin',
   },
   {
     slug: 'bad-omens',
@@ -72,6 +86,7 @@ export const ARTISTS: Artist[] = [
     phase: 'PEAK',
     channelHandle: 'UCre_5futd_kGkrSlL83n3pw',
     artistType: 'managed',
+    ownership: 'virgin',
   },
   {
     slug: 'james-blake',
@@ -79,6 +94,7 @@ export const ARTISTS: Artist[] = [
     phase: 'SUSTAIN',
     channelHandle: '@jamesblake',
     artistType: 'managed',
+    ownership: 'virgin',
   },
 ];
 

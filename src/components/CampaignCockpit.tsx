@@ -17,7 +17,7 @@ import {
   type ArtistClassification,
   type LiveSnap as BaseLiveSnap,
 } from '@/lib/artists';
-import { fmtVal, type ClassificationValueBreakdown } from '@/lib/valueModel';
+import { fmtVal, CONFIDENCE_LABEL, VALUE_DISCLAIMER, type ClassificationValueBreakdown } from '@/lib/valueModel';
 import AddArtistButton from './AddArtistButton';
 import { CoachLiveDot } from './CoachLink';
 import { readCoachPlan, type CoachPlanSummary } from '@/lib/coachPlan';
@@ -290,8 +290,11 @@ export default function CampaignCockpit() {
                   const gv = groupValueMap[group.classification];
                   if (!gv || group.classification === 'GROWING' || gv.missedValueHigh <= 0) return null;
                   return (
-                    <span className="text-[10px] text-ink/35 tabular-nums">
-                      {'· Est. missed value: £'}{fmtVal(gv.missedValueLow)}{'–£'}{fmtVal(gv.missedValueHigh)}
+                    <span className="text-[10px] text-ink/35 tabular-nums" title={VALUE_DISCLAIMER}>
+                      {'· ~£'}{fmtVal(gv.missedValueMidpoint)}{' missed value'}
+                      <span className="text-ink/20 ml-1">
+                        ({CONFIDENCE_LABEL[gv.confidence]})
+                      </span>
                     </span>
                   );
                 })()}

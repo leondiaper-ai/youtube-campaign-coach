@@ -19,6 +19,65 @@ export type ValueRange = {
   high: number;
 };
 
+/** Confidence level for value estimates */
+export type ValueConfidence = 'low' | 'medium' | 'high';
+
+/** Extended value estimate with midpoint and confidence */
+export type ValueEstimate = ValueRange & {
+  midpoint: number;
+  confidence: ValueConfidence;
+  confidenceLabel: string;
+};
+
+/** Compute midpoint from a range */
+export function midpoint(range: ValueRange): number {
+  return Math.round((range.low + range.high) / 2);
+}
+
+/** Format a midpoint as the primary display: "~£180K" */
+export function fmtMidpoint(range: ValueRange): string {
+  return `~£${fmtVal(midpoint(range))}`;
+}
+
+/** Format range as secondary display: "Range: £90K–£450K" */
+export function fmtRange(range: ValueRange): string {
+  return `£${fmtVal(range.low)}–£${fmtVal(range.high)}`;
+}
+
+/** Directional disclaimer text for tooltips */
+export const VALUE_DISCLAIMER =
+  'This is a directional estimate based on YouTube RPM and performance gaps. Used to highlight opportunity, not exact revenue.';
+
+/**
+ * Determine confidence level based on data quality.
+ *   HIGH   → strong signal + repeatable behaviour (healthy channel, stable views, subs converting)
+ *   MEDIUM → consistent data + stable view patterns (active channel, some variability)
+ *   LOW    → RPM-based estimate only (sparse data, cold/unstable channel)
+ */
+export function computeConfidence(input: {
+  views7d: number | null;
+  subs7d: number | null;
+  uploads30d: number;
+  channelState: string;
+}): ValueConfidence {
+  const { views7d, subs7d, uploads30d, channelState } = input;
+  if (channelState === 'COLD' || channelState === 'AT RISK') return 'low';
+  if (uploads30d < 3 || views7d == null || views7d < 1000) return 'low';
+  if (
+    channelState === 'HEALTHY' &&
+    uploads30d >= 5 &&
+    views7d != null && views7d > 10000 &&
+    subs7d != null && subs7d > 0
+  ) return 'high';
+  return 'medium';
+}
+
+export const CONFIDENCE_LABEL: Record<ValueConfidence, string> = {
+  low: 'directional estimate',
+  medium: 'moderate confidence',
+  high: 'strong signal',
+};
+
 /** Estimated weekly revenue proxy from 7-day views. */
 export function viewsToRevenue(views7d: number): ValueRange {
   return {
@@ -53,8 +112,12 @@ export type OpportunityGap =
 
 export type ValueOpportunity = {
   gap: OpportunityGap;
-  label: string;           // One-line text for the card
+  label: string;           // One-line text for the card (midpoint-first)
+  labelRange: string;      // Secondary range text
   missedValueRange: ValueRange; // Estimated missed £ range
+  missedMidpoint: number;  // Primary display value
+  confidence: ValueConfidence;
+  confidenceLabel: string;
 };
 
 /**
@@ -73,6 +136,9 @@ export function detectOpportunity(input: {
   // Skip cold/inactive channels — no meaningful opportunity to size
   if (channelState === 'COLD') return null;
 
+  const conf = computeConfidence({ views7d, subs7d, uploads30d, channelState });
+  const confLabel = CONFIDENCE_LABEL[conf];
+
   // ── CONVERSION GAP ────────────────────────────────────────────────────
   // Strong views but subs flat or weak conversion
   if (
@@ -80,14 +146,17 @@ export function detectOpportunity(input: {
     (subs7d == null || subs7d <= 0) &&
     (subsPerKViews == null || subsPerKViews < 1)
   ) {
-    // Estimate: if conversion improved to healthy (1.5 subs/1K views),
-    // how many subs could they gain?
     const potentialSubs = Math.round((views7d / 1000) * 1.5);
     const missed = subsToValue(potentialSubs);
+    const mid = midpoint(missed);
     return {
       gap: 'CONVERSION_GAP',
-      label: `~£${fmtVal(missed.low)}–£${fmtVal(missed.high)} missed long-term value (conversion gap)`,
+      label: `~£${fmtVal(mid)} missed long-term value (conversion gap)`,
+      labelRange: `Range: ${fmtRange(missed)}`,
       missedValueRange: missed,
+      missedMidpoint: mid,
+      confidence: conf,
+      confidenceLabel: confLabel,
     };
   }
 
@@ -98,14 +167,18 @@ export function detectOpportunity(input: {
     uploads30d <= 2 &&
     channelState !== 'COLD'
   ) {
-    // Estimate: doubling cadence could yield ~30-50% more views
     const additionalViews = Math.round(views7d * 0.4);
     const missed = viewsToRevenue(additionalViews);
     if (missed.high >= 50) {
+      const mid = midpoint(missed);
       return {
         gap: 'VELOCITY_GAP',
-        label: `~£${fmtVal(missed.low)}–£${fmtVal(missed.high)}/week opportunity (velocity gap)`,
+        label: `~£${fmtVal(mid)}/week opportunity (velocity gap)`,
+        labelRange: `Range: ${fmtRange(missed)}`,
         missedValueRange: missed,
+        missedMidpoint: mid,
+        confidence: conf,
+        confidenceLabel: confLabel,
       };
     }
   }
@@ -120,10 +193,15 @@ export function detectOpportunity(input: {
     const currentRevenue = viewsToRevenue(views7d);
     const uplift = upliftRange(currentRevenue);
     if (uplift.high >= 50) {
+      const mid = midpoint(uplift);
       return {
         gap: 'UPLIFT_POTENTIAL',
-        label: `Optimised rollout could add ~£${fmtVal(uplift.low)}–£${fmtVal(uplift.high)}/week (+10–30%)`,
+        label: `Optimisation could add ~£${fmtVal(mid)}/week (+10–30%)`,
+        labelRange: `Range: ${fmtRange(uplift)}`,
         missedValueRange: uplift,
+        missedMidpoint: mid,
+        confidence: conf,
+        confidenceLabel: confLabel,
       };
     }
   }
@@ -156,15 +234,19 @@ export type ArtistValueInput = {
   uploads30d: number;
   channelState: string;
   artistType?: string;
+  /** Revenue ownership — only 'virgin' gets value calculations */
+  ownership?: string;
 };
 
 /**
  * Compute value opportunity for a single artist.
- * Only applies to managed artists — returns null for others.
+ * Only applies to virgin-owned managed artists — returns null for others.
  * This is the canonical entry point; UI components should call this
  * rather than detectOpportunity directly.
  */
 export function getArtistValueOpportunity(input: ArtistValueInput): ValueOpportunity | null {
+  // Gate: only virgin-owned artists get value calculations
+  if (input.ownership !== 'virgin') return null;
   if (input.artistType && input.artistType !== 'managed') return null;
   const v = input.views7d ?? 0;
   const s = input.subs7d ?? 0;
@@ -189,8 +271,11 @@ export type ClassificationValueBreakdown = {
   totalSubs7d: number;
   estimatedValueLow: number;
   estimatedValueHigh: number;
+  estimatedValueMidpoint: number;
   missedValueLow: number;
   missedValueHigh: number;
+  missedValueMidpoint: number;
+  confidence: ValueConfidence;
 };
 
 export type SystemValueSummary = {
@@ -199,8 +284,11 @@ export type SystemValueSummary = {
   totalSubs7d: number;
   totalEstimatedValueLow: number;
   totalEstimatedValueHigh: number;
+  totalEstimatedValueMidpoint: number;
   totalMissedValueLow: number;
   totalMissedValueHigh: number;
+  totalMissedValueMidpoint: number;
+  overallConfidence: ValueConfidence;
   byClassification: ClassificationValueBreakdown[];
 };
 
@@ -262,6 +350,19 @@ export function computeSystemValue(artists: ArtistValueData[]): SystemValueSumma
       }
     }
 
+    // Derive group-level confidence from the worst individual confidence
+    let worstConf: ValueConfidence = 'high';
+    for (const a of group) {
+      const c = computeConfidence({
+        views7d: a.views7d,
+        subs7d: a.subs7d,
+        uploads30d: a.uploads30d,
+        channelState: a.channelState,
+      });
+      if (c === 'low') { worstConf = 'low'; break; }
+      if (c === 'medium') worstConf = 'medium';
+    }
+
     return {
       classification: cls,
       artistCount: group.length,
@@ -269,20 +370,39 @@ export function computeSystemValue(artists: ArtistValueData[]): SystemValueSumma
       totalSubs7d,
       estimatedValueLow: estLow,
       estimatedValueHigh: estHigh,
+      estimatedValueMidpoint: midpoint({ low: estLow, high: estHigh }),
       missedValueLow: missedLow,
       missedValueHigh: missedHigh,
+      missedValueMidpoint: midpoint({ low: missedLow, high: missedHigh }),
+      confidence: worstConf,
     };
   });
+
+  const totalEstLow = breakdowns.reduce((s, b) => s + b.estimatedValueLow, 0);
+  const totalEstHigh = breakdowns.reduce((s, b) => s + b.estimatedValueHigh, 0);
+  const totalMissedLow = breakdowns.reduce((s, b) => s + b.missedValueLow, 0);
+  const totalMissedHigh = breakdowns.reduce((s, b) => s + b.missedValueHigh, 0);
+
+  // Overall confidence: worst across all groups that have artists
+  const activeBreakdowns = breakdowns.filter((b) => b.artistCount > 0);
+  let overallConfidence: ValueConfidence = 'high';
+  for (const b of activeBreakdowns) {
+    if (b.confidence === 'low') { overallConfidence = 'low'; break; }
+    if (b.confidence === 'medium') overallConfidence = 'medium';
+  }
 
   return {
     totalArtists: artists.length,
     totalViews7d: breakdowns.reduce((s, b) => s + b.totalViews7d, 0),
     totalSubs7d: breakdowns.reduce((s, b) => s + b.totalSubs7d, 0),
-    totalEstimatedValueLow: breakdowns.reduce((s, b) => s + b.estimatedValueLow, 0),
-    totalEstimatedValueHigh: breakdowns.reduce((s, b) => s + b.estimatedValueHigh, 0),
-    totalMissedValueLow: breakdowns.reduce((s, b) => s + b.missedValueLow, 0),
-    totalMissedValueHigh: breakdowns.reduce((s, b) => s + b.missedValueHigh, 0),
-    byClassification: breakdowns.filter((b) => b.artistCount > 0),
+    totalEstimatedValueLow: totalEstLow,
+    totalEstimatedValueHigh: totalEstHigh,
+    totalEstimatedValueMidpoint: midpoint({ low: totalEstLow, high: totalEstHigh }),
+    totalMissedValueLow: totalMissedLow,
+    totalMissedValueHigh: totalMissedHigh,
+    totalMissedValueMidpoint: midpoint({ low: totalMissedLow, high: totalMissedHigh }),
+    overallConfidence,
+    byClassification: activeBreakdowns,
   };
 }
 

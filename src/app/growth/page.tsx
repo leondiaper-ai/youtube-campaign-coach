@@ -8,7 +8,7 @@ import {
 import { listCustomArtists } from '@/lib/artistStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
-import { computeSystemValue, fmtVal } from '@/lib/valueModel';
+import { computeSystemValue, fmtVal, midpoint, CONFIDENCE_LABEL, VALUE_DISCLAIMER } from '@/lib/valueModel';
 import Sparkline from '@/components/Sparkline';
 
 export const revalidate = 600;
@@ -251,8 +251,11 @@ export default async function ControlPage() {
 
         {/* ─── VALUE OPPORTUNITY — system-level missed value ────────────── */}
         {systemValue.totalMissedValueHigh > 0 && (
-          <div className="rounded-xl px-5 py-3.5 mb-6" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
-            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">Value Opportunity · Virgin Managed</div>
+          <div className="rounded-xl px-5 py-3.5 mb-6" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }} title={VALUE_DISCLAIMER}>
+            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">
+              Value Opportunity · Virgin Managed
+              <span className="font-normal normal-case tracking-normal text-ink/25 ml-2">({CONFIDENCE_LABEL[systemValue.overallConfidence]})</span>
+            </div>
             <div className="space-y-1.5">
               {systemValue.byClassification
                 .filter((b) => b.classification !== 'GROWING' && b.missedValueHigh > 0)
@@ -272,14 +275,20 @@ export default async function ControlPage() {
                         {CLASSIFICATION_LABEL[b.classification]} ({b.artistCount}):
                       </span>
                       <span className="font-bold text-ink/70">
-                        {'£'}{fmtVal(b.missedValueLow)}{'–'}{'£'}{fmtVal(b.missedValueHigh)} {label}
+                        ~{'£'}{fmtVal(b.missedValueMidpoint)} {label}
+                      </span>
+                      <span className="text-[10px] text-ink/30">
+                        Range: {'£'}{fmtVal(b.missedValueLow)}{'–'}{'£'}{fmtVal(b.missedValueHigh)}
                       </span>
                     </div>
                   );
                 })}
               {systemValue.totalMissedValueHigh > 0 && (
                 <div className="text-[11px] text-ink/35 mt-1 pt-1.5" style={{ borderTop: `1px solid ${MUTED}` }}>
-                  Total opportunity: {'£'}{fmtVal(systemValue.totalMissedValueLow)}{'–'}{'£'}{fmtVal(systemValue.totalMissedValueHigh)}/week across {managedRows.length} managed channels
+                  Total: ~{'£'}{fmtVal(systemValue.totalMissedValueMidpoint)}/week across {managedRows.length} managed channels
+                  <span className="text-ink/20 ml-1.5">
+                    (Range: {'£'}{fmtVal(systemValue.totalMissedValueLow)}{'–'}{'£'}{fmtVal(systemValue.totalMissedValueHigh)})
+                  </span>
                 </div>
               )}
             </div>

@@ -111,6 +111,8 @@ export type StatusCardData = {
   campaignSignalLabel: string;
   // Artist type for value model scoping
   artistType?: 'managed' | 'observed' | 'external';
+  // Revenue ownership — only 'virgin' gets value calculations
+  ownership?: 'virgin' | 'observed';
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -383,6 +385,7 @@ async function loadCard(
     campaignSignal: campSig.signal,
     campaignSignalLabel: campSig.label,
     artistType: artist.artistType ?? 'managed',
+    ownership: artist.ownership,
   };
 }
 
