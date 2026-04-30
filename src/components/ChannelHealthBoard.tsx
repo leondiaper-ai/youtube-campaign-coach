@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE, CLASSIFICATION_LABEL } from '@/lib/artists';
-// Value model imports removed — Opportunity Layer uses real signals only
+import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -29,10 +28,10 @@ type ViewMode = 'managed' | 'market';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const MUTED = '#E9E2D3';
+const INK = '#0E0E0E';
 
 const STATE_LABEL: Record<ChannelState, string> = {
   HEALTHY:           'Healthy',
@@ -88,11 +87,12 @@ function wowColor(v: number | null): string {
 
 type MarketBenchmarks = {
   avgUploads30d: number;
-  avgShortsRatio: number; // shorts / total uploads
-  topPerformerCadence: number; // avg uploads/30d for healthy channels
+  avgShortsRatio: number;
+  topPerformerCadence: number;
   avgViewsHealthy: number;
   avgViewsAll: number;
-  formatMix: { withShorts: number; noShorts: number };
+  avgSubsGainHealthy: number;
+  formatMix: { withShorts: number; noShorts: number; total: number };
 };
 
 function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
@@ -119,6 +119,10 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
     ? Math.round(active.reduce((s, r) => s + (r.views7Delta ?? 0), 0) / active.length)
     : 0;
 
+  const avgSubsGainHealthy = healthy.length > 0
+    ? Math.round(healthy.reduce((s, r) => s + (r.subs7Delta ?? 0), 0) / healthy.length)
+    : 0;
+
   const withShorts = active.filter((r) => r.shorts30d > 0).length;
 
   return {
@@ -127,58 +131,257 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
     topPerformerCadence,
     avgViewsHealthy,
     avgViewsAll,
-    formatMix: { withShorts, noShorts: active.length - withShorts },
+    avgSubsGainHealthy,
+    formatMix: { withShorts, noShorts: active.length - withShorts, total: active.length },
   };
+}
+
+// ─── Insight strip: "What changed this week?" ────────────────────────────────
+
+type Insight = {
+  text: string;
+  tone: 'positive' | 'warning' | 'neutral';
+};
+
+function computeInsights(rows: RowData[]): Insight[] {
+  const insights: Insight[] = [];
+  const withViews = rows.filter((r) => r.views7Delta != null && r.views7Delta > 0);
+  const withSubs = rows.filter((r) => r.subs7Delta != null);
+
+  // Biggest positive mover (subs growth)
+  const topSubGainer = [...withSubs].sort((a, b) => (b.subs7Delta ?? 0) - (a.subs7Delta ?? 0))[0];
+  if (topSubGainer && (topSubGainer.subs7Delta ?? 0) > 0) {
+    const s = topSubGainer.subs7Delta ?? 0;
+    const hasViews = (topSubGainer.views7Delta ?? 0) > 10000;
+    insights.push({
+      text: `${topSubGainer.name}: ${fmtDelta(s)} subs this week${hasViews ? ' — conversion improving' : ''}`,
+      tone: 'positive',
+    });
+  }
+
+  // Conversion leak: high views but flat/zero subs
+  const convLeak = withViews
+    .filter((r) => (r.views7Delta ?? 0) > 5000 && (r.subs7Delta ?? 0) <= 0)
+    .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))[0];
+  if (convLeak) {
+    insights.push({
+      text: `${convLeak.name}: ${fmtNum(convLeak.views7Delta ?? 0)} views but subs flat — conversion leak`,
+      tone: 'warning',
+    });
+  }
+
+  // Latent demand: views but no recent uploads
+  const latent = withViews
+    .filter((r) => (r.views7Delta ?? 0) > 50000 && r.uploads30d === 0)
+    .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))[0];
+  if (latent && latent.slug !== convLeak?.slug) {
+    insights.push({
+      text: `${latent.name}: ${fmtDelta(latent.views7Delta ?? 0)} views but no recent uploads — latent demand`,
+      tone: 'neutral',
+    });
+  }
+
+  // Cadence risk
+  const dormant = rows.filter((r) => r.uploads30d === 0 && (r.subs ?? 0) > 0);
+  if (dormant.length > 0) {
+    insights.push({
+      text: `${dormant.length} channel${dormant.length !== 1 ? 's' : ''} inactive 60+ days — cadence risk`,
+      tone: 'warning',
+    });
+  }
+
+  // Biggest WoW decline
+  if (insights.length < 4) {
+    const bigDrop = [...rows]
+      .filter((r) => r.viewsWoW != null && r.viewsWoW < -30)
+      .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))[0];
+    if (bigDrop && bigDrop.slug !== convLeak?.slug && bigDrop.slug !== latent?.slug) {
+      insights.push({
+        text: `${bigDrop.name}: views ${fmtPct(bigDrop.viewsWoW ?? 0)} week-on-week — attention dropping`,
+        tone: 'warning',
+      });
+    }
+  }
+
+  return insights.slice(0, 4);
+}
+
+const INSIGHT_ICON: Record<Insight['tone'], { dot: string; color: string }> = {
+  positive: { dot: '#1FBE7A', color: '#0C6A3F' },
+  warning:  { dot: '#F08A3C', color: '#8A4A1A' },
+  neutral:  { dot: '#B0A68E', color: 'rgba(14,14,14,0.55)' },
+};
+
+// ─── Top Movers ──────────────────────────────────────────────────────────────
+
+type MoverEntry = { name: string; slug: string; value: string };
+
+function computeTopMovers(rows: RowData[]): {
+  topViews: MoverEntry[];
+  topSubs: MoverEntry[];
+  biggestDecline: MoverEntry[];
+  cadenceRisk: MoverEntry[];
+} {
+  const topViews = [...rows]
+    .filter((r) => (r.views7Delta ?? 0) > 0)
+    .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))
+    .slice(0, 3)
+    .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(r.views7Delta ?? 0) }));
+
+  const topSubs = [...rows]
+    .filter((r) => (r.subs7Delta ?? 0) > 0)
+    .sort((a, b) => (b.subs7Delta ?? 0) - (a.subs7Delta ?? 0))
+    .slice(0, 3)
+    .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(r.subs7Delta ?? 0) }));
+
+  const biggestDecline = [...rows]
+    .filter((r) => r.viewsWoW != null && r.viewsWoW < -10)
+    .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))
+    .slice(0, 3)
+    .map((r) => ({ name: r.name, slug: r.slug, value: fmtPct(r.viewsWoW ?? 0) + ' WoW' }));
+
+  const cadenceRisk = [...rows]
+    .filter((r) => r.uploads30d === 0 && (r.subs ?? 0) > 1000)
+    .sort((a, b) => (b.subs ?? 0) - (a.subs ?? 0))
+    .slice(0, 3)
+    .map((r) => ({ name: r.name, slug: r.slug, value: `${fmtNum(r.subs ?? 0)} subs idle` }));
+
+  return { topViews, topSubs, biggestDecline, cadenceRisk };
+}
+
+// ─── Strategy Profile per artist ─────────────────────────────────────────────
+
+type StrategyProfile = {
+  cadence: 'High' | 'Mid' | 'Low' | 'Dormant';
+  formatMix: 'Shorts-heavy' | 'Balanced' | 'Longform-heavy' | 'Underdeveloped';
+  conversion: 'Strong' | 'Weak' | 'Unknown';
+  momentum: 'Rising' | 'Flat' | 'Falling' | 'Unknown';
+};
+
+function computeProfile(r: RowData): StrategyProfile {
+  // Cadence
+  let cadence: StrategyProfile['cadence'] = 'Mid';
+  if (r.uploads30d === 0) cadence = 'Dormant';
+  else if (r.uploads30d <= 2) cadence = 'Low';
+  else if (r.uploads30d >= 8) cadence = 'High';
+
+  // Format Mix
+  let formatMix: StrategyProfile['formatMix'] = 'Underdeveloped';
+  if (r.uploads30d > 0) {
+    const shortsShare = r.shorts30d / r.uploads30d;
+    if (shortsShare > 0.7) formatMix = 'Shorts-heavy';
+    else if (shortsShare >= 0.3) formatMix = 'Balanced';
+    else formatMix = 'Longform-heavy';
+  }
+
+  // Conversion
+  let conversion: StrategyProfile['conversion'] = 'Unknown';
+  if ((r.views7Delta ?? 0) > 5000) {
+    conversion = (r.subs7Delta ?? 0) > 0 ? 'Strong' : 'Weak';
+  }
+
+  // Momentum
+  let momentum: StrategyProfile['momentum'] = 'Unknown';
+  if (r.viewsWoW != null) {
+    if (r.viewsWoW > 15) momentum = 'Rising';
+    else if (r.viewsWoW < -15) momentum = 'Falling';
+    else momentum = 'Flat';
+  }
+
+  return { cadence, formatMix, conversion, momentum };
+}
+
+const PROFILE_TAG_STYLE: Record<string, { bg: string; fg: string }> = {
+  // Cadence
+  High: { bg: '#E6F8EE', fg: '#0C6A3F' },
+  Mid: { bg: '#FFF5D6', fg: '#7A5A00' },
+  Low: { bg: '#FFEAD6', fg: '#8A4A1A' },
+  Dormant: { bg: '#FFE2D8', fg: '#8A1F0C' },
+  // Format
+  'Shorts-heavy': { bg: '#E8F0FE', fg: '#1A56B8' },
+  Balanced: { bg: '#E6F8EE', fg: '#0C6A3F' },
+  'Longform-heavy': { bg: '#FFF5D6', fg: '#7A5A00' },
+  Underdeveloped: { bg: '#F3F0EA', fg: 'rgba(14,14,14,0.4)' },
+  // Conversion
+  Strong: { bg: '#E6F8EE', fg: '#0C6A3F' },
+  Weak: { bg: '#FFEAD6', fg: '#8A4A1A' },
+  Unknown: { bg: '#F3F0EA', fg: 'rgba(14,14,14,0.4)' },
+  // Momentum
+  Rising: { bg: '#E6F8EE', fg: '#0C6A3F' },
+  Flat: { bg: '#FFF5D6', fg: '#7A5A00' },
+  Falling: { bg: '#FFE2D8', fg: '#8A1F0C' },
+};
+
+// ─── Fix This Week recommendation ────────────────────────────────────────────
+
+function computeFixThisWeek(r: RowData): string {
+  // Dormant with audience
+  if (r.uploads30d === 0 && (r.subs ?? 0) > 0) {
+    return 'Post one Shorts-led reactivation clip this week';
+  }
+  // High views + flat subs
+  if ((r.views7Delta ?? 0) > 5000 && (r.subs7Delta ?? 0) <= 0) {
+    return 'Add artist-led context and pinned CTA to convert viewers';
+  }
+  // Strong Shorts but weak longform
+  if (r.shorts30d > 0 && r.uploads30d > 0 && r.shorts30d / r.uploads30d > 0.8 && (r.views7Delta ?? 0) > 0) {
+    return 'Bridge Shorts audience into an official video or longform piece';
+  }
+  // High cadence but low views
+  if (r.uploads30d >= 6 && (r.views7Delta ?? 0) < 5000 && (r.views7Delta ?? 0) >= 0) {
+    return 'Improve hook and format, not volume — quality over quantity';
+  }
+  // Low cadence, some traction
+  if (r.uploads30d > 0 && r.uploads30d <= 2 && (r.views7Delta ?? 0) > 0) {
+    return 'Increase upload cadence — add 2–3 catalogue Shorts per week';
+  }
+  // No Shorts
+  if (r.shorts30d === 0 && r.uploads30d > 0) {
+    return 'Add 2–3 Shorts from strongest campaign asset';
+  }
+  // Growing well
+  if (r.classification === 'GROWING') {
+    return 'Maintain cadence — channel is healthy';
+  }
+  return 'Review channel strategy and set a content target';
 }
 
 // ─── Board Component ──────────────────────────────────────────────────────────
 
 export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
   const [view, setView] = useState<ViewMode>('managed');
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [moversOpen, setMoversOpen] = useState(false);
 
   const managedRows = rows.filter((r) => r.isVirgin);
   const marketRows = rows.filter((r) => !r.isVirgin);
 
-  // Compute benchmarks from market channels (used in both views)
+  // Compute benchmarks from all channels (used for Market Watch + managed context)
+  const allBenchmarks = rows.length > 0 ? computeMarketBenchmarks(rows) : null;
   const marketBenchmarks = marketRows.length > 0 ? computeMarketBenchmarks(marketRows) : null;
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows].sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
 
-  // Classification counts for active view
+  // Classification counts
   const growingCount = activeRows.filter((r) => r.classification === 'GROWING').length;
   const weakConvCount = activeRows.filter((r) => r.classification === 'WEAK_CONVERSION').length;
   const underfedCount = activeRows.filter((r) => r.classification === 'UNDERFED').length;
   const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
 
-  // Market patterns
-  const marketPatterns: string[] = [];
-  if (view === 'market' && marketBenchmarks) {
-    const active = marketRows.filter((r) => r.status !== 'COLD');
-    const healthy = marketRows.filter((r) => r.status === 'HEALTHY');
-    if (healthy.length > 0)
-      marketPatterns.push(`Top performers averaging ${marketBenchmarks.topPerformerCadence} uploads/month and ${fmtNum(marketBenchmarks.avgViewsHealthy)} views/week`);
-    if (marketBenchmarks.formatMix.withShorts > 0)
-      marketPatterns.push(`${marketBenchmarks.formatMix.withShorts} of ${active.length} active channels using Shorts (${Math.round((marketBenchmarks.formatMix.withShorts / Math.max(1, active.length)) * 100)}%)`);
-    if (marketBenchmarks.avgShortsRatio > 0)
-      marketPatterns.push(`Shorts make up ${Math.round(marketBenchmarks.avgShortsRatio * 100)}% of total uploads across active channels`);
-    const weakConvMarket = marketRows.filter((r) => r.classification === 'WEAK_CONVERSION');
-    if (weakConvMarket.length > 0)
-      marketPatterns.push(`${weakConvMarket.length} channels with strong views but weak subscriber conversion — common pattern`);
-    // Cadence distribution
-    const highCadence = active.filter((r) => r.uploads30d >= 8);
-    const midCadence = active.filter((r) => r.uploads30d >= 3 && r.uploads30d < 8);
-    const lowCad = active.filter((r) => r.uploads30d < 3);
-    if (active.length > 0)
-      marketPatterns.push(`Cadence split: ${highCadence.length} high (8+/mo), ${midCadence.length} mid (3–7/mo), ${lowCad.length} low (<3/mo)`);
-  }
+  // Insights & movers (managed view only)
+  const insights = view === 'managed' ? computeInsights(managedRows) : [];
+  const topMovers = view === 'managed' ? computeTopMovers(managedRows) : null;
+
+  // Market benchmark read (market view)
+  const benchmarkRead = view === 'market' && marketBenchmarks ? buildBenchmarkRead(marketBenchmarks, marketRows) : null;
 
   return (
     <>
-      {/* ─── VIEW TOGGLE ────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 rounded-lg p-1 mb-5" style={{ background: SOFT }}>
+      {/* ─── VIEW TOGGLE + HELPER LINE ──────────────────────────────────── */}
+      <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
         <button
-          onClick={() => setView('managed')}
+          onClick={() => { setView('managed'); setExpandedRow(null); }}
           className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
           style={{
             background: view === 'managed' ? '#FFFFFF' : 'transparent',
@@ -189,7 +392,7 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
           Virgin Managed ({managedRows.length})
         </button>
         <button
-          onClick={() => setView('market')}
+          onClick={() => { setView('market'); setExpandedRow(null); }}
           className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
           style={{
             background: view === 'market' ? '#FFFFFF' : 'transparent',
@@ -199,6 +402,11 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
         >
           Market Watch ({marketRows.length})
         </button>
+      </div>
+      <div className="text-[10px] text-ink/35 mb-5 pl-1">
+        {view === 'managed'
+          ? 'Owned / priority channels we can act on'
+          : 'External channels used to spot patterns, benchmarks and rollout signals'}
       </div>
 
       {/* ─── SUMMARY BAR ────────────────────────────────────────────────── */}
@@ -221,16 +429,85 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
         </div>
       </div>
 
-      {/* ─── MARKET VIEW: Market Patterns ──────────────────────────────── */}
-      {view === 'market' && marketPatterns.length > 0 && (
-        <div className="rounded-xl px-5 py-3.5 mb-6" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2">Market Patterns</div>
-          <div className="space-y-1">
-            {marketPatterns.map((pattern, i) => (
-              <div key={i} className="text-[12px] text-ink/55 leading-snug">
-                <span className="text-ink/20 mr-2">·</span>{pattern}
+      {/* ─── MANAGED VIEW: What Changed This Week ──────────────────────── */}
+      {view === 'managed' && insights.length > 0 && (
+        <div className="rounded-xl px-5 py-3.5 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2.5">
+            What Changed This Week
+          </div>
+          <div className="space-y-1.5">
+            {insights.map((ins, i) => {
+              const ic = INSIGHT_ICON[ins.tone];
+              return (
+                <div key={i} className="flex items-start gap-2 text-[12px] leading-snug" style={{ color: ic.color }}>
+                  <span className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ background: ic.dot }} />
+                  <span>{ins.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ─── MANAGED VIEW: Top Movers (expandable) ─────────────────────── */}
+      {view === 'managed' && topMovers && (
+        topMovers.topViews.length > 0 || topMovers.topSubs.length > 0 ||
+        topMovers.biggestDecline.length > 0 || topMovers.cadenceRisk.length > 0
+      ) && (
+        <div className="rounded-xl mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+          <button
+            onClick={() => setMoversOpen(!moversOpen)}
+            className="w-full flex items-center justify-between px-5 py-3 text-left"
+          >
+            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35">
+              Top Movers
+            </span>
+            <span className="text-[10px] font-bold text-ink/30">
+              {moversOpen ? '▲ Less' : '▼ Show'}
+            </span>
+          </button>
+          {moversOpen && (
+            <div className="grid grid-cols-2 gap-4 px-5 pb-4 lg:grid-cols-4">
+              <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} />
+              <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} />
+              <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} />
+              <MoverColumn title="Cadence Risk" items={topMovers.cadenceRisk} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── MARKET VIEW: Market Benchmark Read ────────────────────────── */}
+      {view === 'market' && benchmarkRead && (
+        <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
+            Market Benchmark Read
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-3 lg:grid-cols-4">
+            {benchmarkRead.stats.map((stat, i) => (
+              <div key={i}>
+                <div className="text-[18px] font-black tabular-nums">{stat.value}</div>
+                <div className="text-[10px] text-ink/40 leading-snug">{stat.label}</div>
               </div>
             ))}
+          </div>
+
+          {/* Patterns */}
+          <div className="space-y-1.5 pt-2 border-t" style={{ borderColor: MUTED }}>
+            {benchmarkRead.winning && (
+              <div className="flex items-start gap-2 text-[12px] leading-snug">
+                <span className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ background: '#1FBE7A' }} />
+                <span style={{ color: '#0C6A3F' }}>{benchmarkRead.winning}</span>
+              </div>
+            )}
+            {benchmarkRead.weakness && (
+              <div className="flex items-start gap-2 text-[12px] leading-snug">
+                <span className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ background: '#F08A3C' }} />
+                <span style={{ color: '#8A4A1A' }}>{benchmarkRead.weakness}</span>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -265,49 +542,194 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
           const viewsColor = r.views7Delta != null
             ? r.views7Delta > 0 ? '#0C6A3F' : r.views7Delta < 0 ? '#8A1F0C' : undefined
             : undefined;
+          const isExpanded = expandedRow === r.slug;
+          const profile = computeProfile(r);
+          const fix = computeFixThisWeek(r);
 
           return (
-            <Link
-              key={r.slug}
-              href={`/watcher/${r.slug}`}
-              className={`grid grid-cols-[1.4fr_0.6fr_0.65fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all ${
-                i === sorted.length - 1 ? '' : 'border-b'
-              }`}
-              style={{ borderColor: MUTED, background: st.rowBg }}
-            >
-              <div className="min-w-0">
-                <div className="font-black text-[14px] truncate">{r.name}</div>
-                <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
+            <div key={r.slug}>
+              <div
+                className={`grid grid-cols-[1.4fr_0.6fr_0.65fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
+                  i === sorted.length - 1 && !isExpanded ? '' : 'border-b'
+                }`}
+                style={{ borderColor: MUTED, background: st.rowBg }}
+                onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/watcher/${r.slug}`}
+                      className="font-black text-[14px] truncate hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {r.name}
+                    </Link>
+                    <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
+                  </div>
+                  <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
+                </div>
+                <div className="flex items-center">
+                  <Sparkline data={r.subsSeries} width={80} height={28} stroke={sp.stroke} fill={sp.fill} />
+                </div>
+                <div>
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em] whitespace-nowrap"
+                    style={{ background: st.bg, color: st.fg }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
+                    {STATE_LABEL[r.status]}
+                  </span>
+                </div>
+                <div className="text-right text-[13px] font-bold tabular-nums">{subsTotal}</div>
+                <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
+                  {fmtSubs7}
+                </div>
+                <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.subsWoW) }}>
+                  {r.subsWoW != null ? fmtPct(r.subsWoW) : '—'}
+                </div>
+                <div className="text-right text-[13px] tabular-nums font-bold" style={viewsColor ? { color: viewsColor } : { color: 'rgba(14,14,14,0.35)' }}>
+                  {fmtViews7}
+                </div>
+                <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.viewsWoW) }}>
+                  {r.viewsWoW != null ? fmtPct(r.viewsWoW) : '—'}
+                </div>
               </div>
-              <div className="flex items-center">
-                <Sparkline data={r.subsSeries} width={80} height={28} stroke={sp.stroke} fill={sp.fill} />
-              </div>
-              <div>
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em] whitespace-nowrap"
-                  style={{ background: st.bg, color: st.fg }}
+
+              {/* ── Expanded: Strategy Profile + Fix This Week ───────── */}
+              {isExpanded && (
+                <div
+                  className={`px-5 py-3.5 ${i === sorted.length - 1 ? '' : 'border-b'}`}
+                  style={{ borderColor: MUTED, background: SOFT }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
-                  {STATE_LABEL[r.status]}
-                </span>
-              </div>
-              <div className="text-right text-[13px] font-bold tabular-nums">{subsTotal}</div>
-              <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
-                {fmtSubs7}
-              </div>
-              <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.subsWoW) }}>
-                {r.subsWoW != null ? fmtPct(r.subsWoW) : '—'}
-              </div>
-              <div className="text-right text-[13px] tabular-nums font-bold" style={viewsColor ? { color: viewsColor } : { color: 'rgba(14,14,14,0.35)' }}>
-                {fmtViews7}
-              </div>
-              <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.viewsWoW) }}>
-                {r.viewsWoW != null ? fmtPct(r.viewsWoW) : '—'}
-              </div>
-            </Link>
+                  <div className="flex flex-wrap items-center gap-4">
+                    {/* Strategy tags */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <ProfileTag label="Cadence" value={profile.cadence} />
+                      <ProfileTag label="Format" value={profile.formatMix} />
+                      <ProfileTag label="Conversion" value={profile.conversion} />
+                      <ProfileTag label="Momentum" value={profile.momentum} />
+                    </div>
+
+                    {/* Fix this week */}
+                    <div className="flex items-start gap-2 ml-auto text-[11px] leading-snug max-w-[360px]">
+                      <span className="text-[9px] font-black uppercase tracking-[0.12em] text-ink/30 shrink-0 mt-px">Fix</span>
+                      <span className="text-ink/60">{fix}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>
     </>
   );
+}
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function ProfileTag({ label, value }: { label: string; value: string }) {
+  const style = PROFILE_TAG_STYLE[value] ?? PROFILE_TAG_STYLE.Unknown;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold"
+      style={{ background: style.bg, color: style.fg }}
+    >
+      <span className="text-[8px] uppercase tracking-[0.08em] opacity-60">{label}</span>
+      {value}
+    </span>
+  );
+}
+
+function MoverColumn({ title, items }: { title: string; items: MoverEntry[] }) {
+  if (items.length === 0) {
+    return (
+      <div>
+        <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/30 mb-1.5">{title}</div>
+        <div className="text-[11px] text-ink/25">No data yet</div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/30 mb-1.5">{title}</div>
+      <div className="space-y-1">
+        {items.map((item, i) => (
+          <div key={item.slug} className="flex items-center justify-between gap-2 text-[11px]">
+            <Link href={`/watcher/${item.slug}`} className="truncate text-ink/60 hover:underline">
+              {i + 1}. {item.name}
+            </Link>
+            <span className="tabular-nums font-bold text-ink/50 shrink-0">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Market Benchmark Read builder ───────────────────────────────────────────
+
+type BenchmarkStat = { value: string; label: string };
+type BenchmarkRead = {
+  stats: BenchmarkStat[];
+  winning: string | null;
+  weakness: string | null;
+};
+
+function buildBenchmarkRead(bench: MarketBenchmarks, rows: RowData[]): BenchmarkRead {
+  const active = rows.filter((r) => r.status !== 'COLD');
+  const hasEnoughData = active.length >= 2;
+
+  if (!hasEnoughData) {
+    return {
+      stats: [],
+      winning: null,
+      weakness: 'Not enough clean data yet.',
+    };
+  }
+
+  const stats: BenchmarkStat[] = [
+    {
+      value: bench.avgUploads30d > 0 ? `${bench.avgUploads30d}/mo` : '—',
+      label: 'Avg uploads (active)',
+    },
+    {
+      value: bench.formatMix.total > 0
+        ? `${Math.round((bench.formatMix.withShorts / bench.formatMix.total) * 100)}%`
+        : '—',
+      label: 'Channels using Shorts',
+    },
+    {
+      value: bench.avgShortsRatio > 0 ? `${Math.round(bench.avgShortsRatio * 100)}%` : '—',
+      label: 'Shorts share of uploads',
+    },
+    {
+      value: bench.avgViewsAll > 0 ? fmtNum(bench.avgViewsAll) : '—',
+      label: 'Avg views/week (active)',
+    },
+  ];
+
+  // Winning pattern
+  let winning: string | null = null;
+  if (bench.topPerformerCadence > 0 && bench.avgViewsHealthy > 0) {
+    const parts: string[] = [];
+    parts.push(`posting ${bench.topPerformerCadence}+ times/month`);
+    if (bench.formatMix.withShorts > 0) parts.push('using Shorts as a discovery layer');
+    if (bench.avgSubsGainHealthy > 0) parts.push('converting when artist-led content is present');
+    winning = `Winning channels are ${parts.join(', ')}.`;
+  }
+
+  // Weakness
+  let weakness: string | null = null;
+  const weakConv = rows.filter((r) => r.classification === 'WEAK_CONVERSION');
+  const dormant = rows.filter((r) => r.uploads30d === 0);
+  if (weakConv.length > 0 && dormant.length > 0) {
+    weakness = `${weakConv.length} channel${weakConv.length !== 1 ? 's' : ''} leaking conversion, ${dormant.length} dormant — common pattern across the market.`;
+  } else if (weakConv.length > 0) {
+    weakness = `${weakConv.length} channel${weakConv.length !== 1 ? 's' : ''} with strong views but weak subscriber conversion.`;
+  } else if (dormant.length > 0) {
+    weakness = `${dormant.length} channel${dormant.length !== 1 ? 's' : ''} inactive with no recent uploads.`;
+  }
+
+  return { stats, winning, weakness };
 }
