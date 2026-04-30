@@ -54,7 +54,7 @@ export const ARTISTS: Artist[] = [
     slug: 'k-trap',
     name: 'K-Trap',
     phase: 'PUSH',
-    channelHandle: '@ktrap',
+    channelHandle: '@KTrap1',
     artistType: 'managed',
     campaign: 'TRAPO 2',
     campaignStartDate: '2026-03-22',
