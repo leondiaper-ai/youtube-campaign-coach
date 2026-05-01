@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readLiveSnapByHandle, readSyncMeta } from '@/lib/kvCache';
+import { readLiveSnapByHandle, readSyncMeta, readChannelMapping } from '@/lib/kvCache';
+import { readHistory, deltaOver } from '@/lib/snapshots';
 
 export const revalidate = 600;
 
@@ -21,11 +22,25 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  // Compute 7-day deltas from snapshot history for consistent state derivation
+  let subs7Delta: number | null = null;
+  let views7Delta: number | null = null;
+  const channelId = await readChannelMapping(q);
+  if (channelId) {
+    const history = await readHistory(channelId);
+    const s7 = deltaOver(history, 7, 'subs');
+    const v7 = deltaOver(history, 7, 'views');
+    if (s7) subs7Delta = s7.delta;
+    if (v7) views7Delta = v7.delta;
+  }
+
   // Include sync metadata for freshness display
   const syncMeta = await readSyncMeta();
 
   return NextResponse.json({
     ...snap,
+    subs7Delta,
+    views7Delta,
     _syncMeta: syncMeta ? {
       lastSyncAt: syncMeta.lastSyncAt,
       nextScheduledSync: syncMeta.nextScheduledSync,

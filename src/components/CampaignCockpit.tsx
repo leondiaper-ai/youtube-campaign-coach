@@ -22,7 +22,7 @@ import AddArtistButton from './AddArtistButton';
 import { CoachLiveDot } from './CoachLink';
 import { readCoachPlan, type CoachPlanSummary } from '@/lib/coachPlan';
 
-type LiveSnap = BaseLiveSnap & { loading?: boolean };
+type LiveSnap = BaseLiveSnap & { loading?: boolean; subs7Delta?: number | null; views7Delta?: number | null };
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
@@ -134,7 +134,12 @@ export default function CampaignCockpit() {
         const l = live[a.slug];
         const daysToNextMoment = a.nextMomentDate ? daysFromNow(a.nextMomentDate) : null;
         const d = l
-          ? deriveFromLive(l, { daysToNextMoment, phase: a.phase })
+          ? deriveFromLive(l, {
+              daysToNextMoment,
+              phase: a.phase,
+              subs7Delta: l.subs7Delta ?? undefined,
+              views7Delta: l.views7Delta ?? undefined,
+            })
           : null;
         const status = (d?.status ?? 'COLD') as ChannelState;
         const uploads30d = l?.uploads30d ?? 0;
