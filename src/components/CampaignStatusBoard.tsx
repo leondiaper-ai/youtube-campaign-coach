@@ -13,7 +13,7 @@ import {
   type DecisionLabel,
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
-import { getArtistValueOpportunity, aggregateMissedValue, midpoint, fmtVal, CONFIDENCE_LABEL, VALUE_DISCLAIMER, type ValueOpportunity } from '@/lib/valueModel';
+// Value model imports removed — revenue estimates taken out for now
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -187,18 +187,6 @@ function whyCause(read: GrowthRead): string {
     case 'CAMPAIGN_ALIGNMENT_GAP': return 'Uploads not serving campaign';
     case 'NONE': return 'No critical blocker identified';
   }
-}
-
-// ─── Value model bridge (uses shared data layer) ────────────────────────
-function getValueOpportunity(card: CardData): ValueOpportunity | null {
-  return getArtistValueOpportunity({
-    views7d: card.views7Delta,
-    subs7d: card.subs7Delta,
-    uploads30d: card.uploads30d,
-    channelState: card.boardStatus,
-    artistType: card.artistType,
-    ownership: card.ownership,
-  });
 }
 
 // ─── Section classification ─────────────────────────────────────────────
@@ -391,11 +379,7 @@ function WeeklySummary({ cards }: { cards: CardData[] }) {
     insights.push(`Key pattern: ${label} is the top blocker across ${topBlocker[1]} channels`);
   }
 
-  // ── Aggregate missed value across all campaigns ────────────────────────
-  const opportunities = cards.map((c) => getValueOpportunity(c));
-  const missedValue = aggregateMissedValue(opportunities);
-
-  if (insights.length === 0 && !missedValue) return null;
+  if (insights.length === 0) return null;
 
   return (
     <div className="rounded-2xl p-6 mb-8" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
@@ -408,15 +392,6 @@ function WeeklySummary({ cards }: { cards: CardData[] }) {
             <span className="text-ink/25 mr-2">·</span>{insight}
           </div>
         ))}
-        {missedValue && (
-          <div className="text-[13px] font-bold leading-snug" style={{ color: '#8A4A1A' }}>
-            <span className="text-ink/25 mr-2">·</span>
-            Estimated missed value this week: ~£{fmtVal(midpoint(missedValue))}
-            <span className="text-[11px] font-normal text-ink/35 ml-1.5">
-              Range: £{fmtVal(missedValue.low)}–£{fmtVal(missedValue.high)}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -785,18 +760,6 @@ function DecisionCard({
         {whyCause(read)}
       </div>
 
-      {/* ─── Value opportunity (only when there's a clear gap) ────── */}
-      {(() => {
-        const opp = getValueOpportunity(card);
-        if (!opp) return null;
-        const color = opp.gap === 'UPLIFT_POTENTIAL' ? '#0C6A3F' : '#8A4A1A';
-        return (
-          <div className="text-[11px] mb-3" title={VALUE_DISCLAIMER}>
-            <span className="font-bold" style={{ color }}>{opp.label}</span>
-            <span className="text-ink/30 ml-1.5">({opp.confidenceLabel})</span>
-          </div>
-        );
-      })()}
 
       {/* ─── 4. Actions (max 3) ───────────────────────────────────── */}
       <div className="rounded-lg p-3.5 mb-3" style={{ background: isFix ? dStyle.bg : SOFT }}>

@@ -17,7 +17,7 @@ import {
   type ArtistClassification,
   type LiveSnap as BaseLiveSnap,
 } from '@/lib/artists';
-import { fmtVal, CONFIDENCE_LABEL, VALUE_DISCLAIMER, type ClassificationValueBreakdown } from '@/lib/valueModel';
+// Value model imports removed — revenue estimates taken out for now
 import AddArtistButton from './AddArtistButton';
 import { CoachLiveDot } from './CoachLink';
 import { readCoachPlan, type CoachPlanSummary } from '@/lib/coachPlan';
@@ -171,23 +171,6 @@ export default function CampaignCockpit() {
     if (items.length > 0) groups.push({ classification: cls, items });
   }
 
-  // Group-level value from system API (fetched once)
-  const [groupValueMap, setGroupValueMap] = useState<
-    Partial<Record<ArtistClassification, ClassificationValueBreakdown>>
-  >({});
-  useEffect(() => {
-    fetch('/api/system-value')
-      .then((r) => r.json())
-      .then((sv) => {
-        if (sv.byClassification) {
-          const map: Partial<Record<ArtistClassification, ClassificationValueBreakdown>> = {};
-          for (const b of sv.byClassification as ClassificationValueBreakdown[]) map[b.classification] = b;
-          setGroupValueMap(map);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   // Toggle ownership between 'virgin' (managed) and 'observed' (market)
   async function handleOwnershipChange(slug: string, newOwnership: 'virgin' | 'observed') {
     try {
@@ -317,18 +300,6 @@ export default function CampaignCockpit() {
                   {CLASSIFICATION_LABEL[group.classification]}
                 </span>
                 <span className="text-[10px] text-ink/25 tabular-nums">({group.items.length})</span>
-                {(() => {
-                  const gv = groupValueMap[group.classification];
-                  if (!gv || group.classification === 'GROWING' || gv.missedValueHigh <= 0) return null;
-                  return (
-                    <span className="text-[10px] text-ink/35 tabular-nums" title={VALUE_DISCLAIMER}>
-                      {'· ~£'}{fmtVal(gv.missedValueMidpoint)}{' missed value'}
-                      <span className="text-ink/20 ml-1">
-                        ({CONFIDENCE_LABEL[gv.confidence]})
-                      </span>
-                    </span>
-                  );
-                })()}
               </div>
               <div className="space-y-3">
                 {group.items.map((a) => (
