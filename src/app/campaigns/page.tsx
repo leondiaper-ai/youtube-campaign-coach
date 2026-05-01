@@ -131,33 +131,44 @@ function computeWeeklyWindows(
   if (history.length < 2) return [];
   const startTs = new Date(campaignStartDate).getTime();
   const windows: { week: number; views7d: number; subs7d: number }[] = [];
-  // Group history into 7-day windows from campaign start
-  const relevantHistory = history.filter((h) => new Date(h.ts).getTime() >= startTs);
+  // Filter to campaign-period history, sorted by time
+  const relevantHistory = history
+    .filter((h) => new Date(h.ts).getTime() >= startTs)
+    .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
   if (relevantHistory.length < 2) return [];
 
+  // Use fixed 7-day windows from campaign start, with the previous
+  // week's last snapshot as the baseline for the next week (no gaps).
+  const firstSnap = relevantHistory[0];
   let weekNum = 1;
-  let i = 0;
-  while (i < relevantHistory.length) {
-    const weekStartIdx = i;
-    const weekStartTs = new Date(relevantHistory[weekStartIdx].ts).getTime();
-    const weekEndTs = weekStartTs + 7 * 86400000;
-    // Find last entry in this week
-    let weekEndIdx = weekStartIdx;
-    while (weekEndIdx + 1 < relevantHistory.length &&
-           new Date(relevantHistory[weekEndIdx + 1].ts).getTime() < weekEndTs) {
-      weekEndIdx++;
-    }
-    if (weekEndIdx > weekStartIdx) {
-      const first = relevantHistory[weekStartIdx];
-      const last = relevantHistory[weekEndIdx];
+  let windowStart = startTs;
+  let baseline = firstSnap; // running baseline from previous week
+
+  while (windowStart < Date.now()) {
+    const windowEnd = windowStart + 7 * 86400000;
+    // Find the latest snapshot within this window
+    const inWindow = relevantHistory.filter((h) => {
+      const t = new Date(h.ts).getTime();
+      return t >= windowStart && t < windowEnd;
+    });
+    // Also include any snapshot before the window for baseline
+    const latestInWindow = inWindow.length > 0 ? inWindow[inWindow.length - 1] : null;
+
+    if (latestInWindow) {
       windows.push({
         week: weekNum,
-        views7d: last.views - first.views,
-        subs7d: last.subs - first.subs,
+        views7d: Math.max(0, latestInWindow.views - baseline.views),
+        subs7d: latestInWindow.subs - baseline.subs,
       });
+      baseline = latestInWindow; // carry forward for next week
+    } else if (windowStart > Date.now()) {
+      break; // future weeks — stop
     }
+    // If no data this week, skip but keep same baseline
     weekNum++;
-    i = weekEndIdx + 1;
+    windowStart = windowEnd;
+    // Stop if we've gone past the last snapshot + 1 week
+    if (windowStart > new Date(relevantHistory[relevantHistory.length - 1].ts).getTime() + 7 * 86400000) break;
   }
   return windows;
 }
