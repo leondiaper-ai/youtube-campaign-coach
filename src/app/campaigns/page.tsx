@@ -12,7 +12,7 @@ import {
   generateYouTubeGrowthRead, getCampaignSignal, getChannelHealth,
   getYouTubeGrowthState, type GrowthInput,
 } from '@/lib/youtubeGrowthOS';
-import { computeDepthSignal, type DepthLabel } from '@/lib/depthSignal';
+import { checkContentStructure, type StructureWarning } from '@/lib/contentStructure';
 import CampaignStatusBoard from '@/components/CampaignStatusBoard';
 
 export const revalidate = 600;
@@ -114,16 +114,8 @@ export type StatusCardData = {
   artistType?: 'managed' | 'observed' | 'external';
   // Revenue ownership — only 'virgin' gets value calculations
   ownership?: 'virgin' | 'observed';
-  // Depth Signal (watch-time proxy)
-  depthSignal?: {
-    label: DepthLabel;
-    title: string;
-    reason: string;
-    score: number;
-    suggestions: string[];
-    longformCount: number;
-    shortsCount: number;
-  } | null;
+  // Content structure warning (only present when a gap exists)
+  structureWarning?: StructureWarning | null;
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -408,24 +400,7 @@ async function loadCard(
     campaignSignalLabel: campSig.label,
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
-    depthSignal: (() => {
-      const uploads = snap.recentUploads ?? [];
-      if (uploads.length === 0) return null;
-      const ds = computeDepthSignal(uploads, {
-        campaignDays: campaignStart
-          ? Math.max(1, Math.floor((Date.now() - new Date(campaignStart).getTime()) / 86400000))
-          : undefined,
-      });
-      return {
-        label: ds.label,
-        title: ds.title,
-        reason: ds.reason,
-        score: ds.score,
-        suggestions: ds.suggestions,
-        longformCount: ds.breakdown.longformCount,
-        shortsCount: ds.breakdown.shortsCount,
-      };
-    })(),
+    structureWarning: checkContentStructure(snap.recentUploads ?? []),
   };
 }
 

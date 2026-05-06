@@ -13,8 +13,7 @@ import {
   type DecisionLabel,
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
-// Value model imports removed — revenue estimates taken out for now
-import { DEPTH_COLORS, DEPTH_DISCLAIMER, type DepthLabel } from '@/lib/depthSignal';
+import type { StructureWarning } from '@/lib/contentStructure';
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -86,16 +85,8 @@ type CardData = {
   artistType?: 'managed' | 'observed' | 'external';
   /** Revenue ownership — only 'virgin' gets value calculations */
   ownership?: 'virgin' | 'observed';
-  /** Depth Signal (watch-time proxy) */
-  depthSignal?: {
-    label: DepthLabel;
-    title: string;
-    reason: string;
-    score: number;
-    suggestions: string[];
-    longformCount: number;
-    shortsCount: number;
-  } | null;
+  /** Content structure warning (only present when a gap exists) */
+  structureWarning?: StructureWarning | null;
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -589,53 +580,20 @@ function SnapshotHistory({ slug }: { slug: string }) {
   );
 }
 
-// ─── Depth Signal Badge (watch-time proxy) ───────────────────────────────
-function DepthSignalBadge({ signal }: {
-  signal: NonNullable<CardData['depthSignal']>;
-}) {
-  const [showTip, setShowTip] = useState(false);
-  const colors = DEPTH_COLORS[signal.label];
+// ─── Content Structure Warning (lightweight, only when relevant) ─────────
+function StructureWarningLine({ warning }: { warning: StructureWarning }) {
   return (
-    <div className="mb-3">
-      <div
-        className="flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer"
-        style={{ background: colors.bg, border: `1px solid ${colors.text}20` }}
-        onClick={() => setShowTip(!showTip)}
-      >
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: colors.dot }}
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-[0.06em]" style={{ color: colors.text }}>
-              {signal.title}
-            </span>
-            <span className="text-[10px]" style={{ color: `${colors.text}80` }}>
-              {signal.longformCount} longform · {signal.shortsCount} Shorts
-            </span>
-          </div>
-          <div className="text-[11px] leading-snug mt-0.5" style={{ color: `${colors.text}CC` }}>
-            {signal.reason}
-          </div>
-        </div>
-        <span className="text-[9px] shrink-0" style={{ color: `${colors.text}60` }}>
-          {showTip ? '▲' : '▼'}
+    <div
+      className="flex items-start gap-2 mb-3 px-3 py-2 rounded text-[11px] leading-snug"
+      style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}
+    >
+      <span className="shrink-0 mt-px" style={{ color: '#92400E', fontSize: 11 }}>⚠</span>
+      <div>
+        <span className="font-bold uppercase tracking-[0.04em]" style={{ color: '#92400E' }}>
+          {warning.headline}
         </span>
+        <span style={{ color: '#78716C' }}> — {warning.detail}</span>
       </div>
-      {showTip && (
-        <div className="mt-1.5 rounded-lg px-3 py-2" style={{ background: SOFT }}>
-          <div className="text-[10px] text-ink/35 leading-relaxed mb-1.5">
-            {DEPTH_DISCLAIMER}
-          </div>
-          {signal.suggestions.length > 0 && (
-            <div className="text-[10px] text-ink/50">
-              <span className="font-bold text-ink/40">Add: </span>
-              {signal.suggestions.slice(0, 4).join(', ')}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -929,9 +887,9 @@ function DecisionCard({
       )}
 
       {/* ─── Expand detail toggle ──────────────────────────────────── */}
-      {/* ─── Depth Signal (watch-time proxy) ────────────────────── */}
-      {card.depthSignal && (
-        <DepthSignalBadge signal={card.depthSignal} />
+      {/* ─── Content Structure Warning ─────────────────────────── */}
+      {card.structureWarning && (
+        <StructureWarningLine warning={card.structureWarning} />
       )}
 
       <button

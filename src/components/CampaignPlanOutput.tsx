@@ -116,6 +116,34 @@ export default function CampaignPlanOutput({
         </p>
       </div>
 
+      {/* ── Campaign Insights ─────────────────────────────────────── */}
+      {plan.campaignInsights.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            marginBottom: 20,
+            paddingLeft: 2,
+          }}
+        >
+          {plan.campaignInsights.map((insight, i) => (
+            <p
+              key={i}
+              style={{
+                fontSize: 12,
+                color: '#6B665E',
+                lineHeight: 1.5,
+                margin: 0,
+                fontStyle: 'italic',
+              }}
+            >
+              {insight}
+            </p>
+          ))}
+        </div>
+      )}
+
       {/* ── Phase strip ───────────────────────────────────────────── */}
       <div
         style={{
@@ -302,6 +330,19 @@ function WeekRow({
             gap: 3,
           }}
         >
+          {week.insight && (
+            <p
+              style={{
+                fontSize: 11,
+                color: '#8B8579',
+                fontStyle: 'italic',
+                margin: '0 0 4px 0',
+                lineHeight: 1.5,
+              }}
+            >
+              {week.insight}
+            </p>
+          )}
           {week.actions.map((a, i) => (
             <ActionRow key={i} action={a} />
           ))}
