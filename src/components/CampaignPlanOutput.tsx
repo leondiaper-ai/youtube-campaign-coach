@@ -4,8 +4,6 @@ import { useState } from 'react';
 import type {
   GeneratedPlan,
   PlanWeek,
-  Watchout,
-  Opportunity,
   PhaseName,
   ContentAction,
 } from '@/lib/planEngine';
@@ -13,16 +11,15 @@ import type {
 // ── Colours ──────────────────────────────────────────────────────────────
 
 const INK = '#0E0E0E';
-const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 const BORDER = '#E8E3DA';
 const MUTED = '#9B9589';
 
 const PHASE_COLOR: Record<PhaseName, string> = {
-  BUILD: '#6366F1',   // indigo
-  RELEASE: '#FF4A1C', // signal red
-  SCALE: '#1FBE7A',   // mint
-  EXTEND: '#F59E0B',  // amber
+  BUILD: '#6366F1',
+  RELEASE: '#FF4A1C',
+  SCALE: '#1FBE7A',
+  EXTEND: '#F59E0B',
 };
 
 const PHASE_BG: Record<PhaseName, string> = {
@@ -41,13 +38,6 @@ const FORMAT_ICON: Record<string, string> = {
   community: '💬',
 };
 
-const INTENT_LABEL: Record<string, { text: string; color: string; bg: string }> = {
-  tease: { text: 'TEASE', color: '#6366F1', bg: '#EEF2FF' },
-  engage: { text: 'ENGAGE', color: '#059669', bg: '#ECFDF5' },
-  convert: { text: 'CONVERT', color: '#DC2626', bg: '#FEF2F2' },
-  distribute: { text: 'DISTRIBUTE', color: '#D97706', bg: '#FFFBEB' },
-};
-
 // ── Main Component ──────────────────────────────────────────────────────
 
 export default function CampaignPlanOutput({
@@ -58,7 +48,6 @@ export default function CampaignPlanOutput({
   onBack: () => void;
 }) {
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(() => {
-    // Auto-expand weeks with actions
     const s = new Set<number>();
     plan.weeks.forEach((w) => {
       if (w.actions.length > 0) s.add(w.weekNum);
@@ -75,28 +64,15 @@ export default function CampaignPlanOutput({
     });
   };
 
-  const expandAll = () => {
-    setExpandedWeeks(new Set(plan.weeks.map((w) => w.weekNum)));
-  };
-
-  const collapseAll = () => {
-    setExpandedWeeks(new Set());
-  };
+  const expandAll = () => setExpandedWeeks(new Set(plan.weeks.map((w) => w.weekNum)));
+  const collapseAll = () => setExpandedWeeks(new Set());
 
   const activeWeeks = plan.weeks.filter((w) => w.actions.length > 0);
   const totalActions = plan.weeks.reduce((s, w) => s + w.actions.length, 0);
-  const shorts = plan.weeks.reduce(
-    (s, w) => s + w.actions.filter((a) => a.format === 'short').length,
-    0
-  );
-  const videos = plan.weeks.reduce(
-    (s, w) => s + w.actions.filter((a) => a.format === 'video' || a.format === 'premiere').length,
-    0
-  );
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      {/* Back button */}
+      {/* Back */}
       <button
         onClick={onBack}
         style={{
@@ -107,29 +83,14 @@ export default function CampaignPlanOutput({
           fontWeight: 600,
           cursor: 'pointer',
           padding: '4px 0',
-          marginBottom: 20,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
+          marginBottom: 24,
         }}
       >
-        ← New plan
+        &larr; New plan
       </button>
 
-      {/* ── Campaign Header ─────────────────────────────────────── */}
-      <div style={{ marginBottom: 32 }}>
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: MUTED,
-            marginBottom: 6,
-          }}
-        >
-          Generated Plan
-        </div>
+      {/* ── Header ────────────────────────────────────────────────── */}
+      <div style={{ marginBottom: 8 }}>
         <h1
           style={{
             fontSize: 28,
@@ -141,182 +102,63 @@ export default function CampaignPlanOutput({
         >
           {plan.campaignName}
         </h1>
-        <div
+        <p
           style={{
-            display: 'flex',
-            gap: 16,
-            marginTop: 10,
-            fontSize: 12,
-            color: MUTED,
+            fontSize: 14,
+            color: '#5A5650',
+            lineHeight: 1.5,
+            marginTop: 8,
+            marginBottom: 0,
+            maxWidth: 580,
           }}
         >
-          <span>{plan.totalWeeks} weeks</span>
-          <span>{plan.events.length} key moments</span>
-          <span>{totalActions} actions</span>
-          <span>{videos} videos · {shorts} Shorts</span>
-        </div>
+          {plan.strategy.priority} {plan.strategy.approach}
+        </p>
       </div>
 
-      {/* ── Strategy ─────────────────────────────────────────────── */}
-      <Section title="Campaign Strategy">
-        <div
-          style={{
-            background: '#FFFFFF',
-            border: `1px solid ${BORDER}`,
-            borderRadius: 10,
-            padding: '16px 20px',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: INK,
-              marginBottom: 6,
-              lineHeight: 1.4,
-            }}
-          >
-            {plan.strategy.priority}
-          </div>
-          <div style={{ fontSize: 13, color: '#5A5650', lineHeight: 1.6 }}>
-            {plan.strategy.approach}
-          </div>
-        </div>
-      </Section>
-
-      {/* ── Phase Bar ─────────────────────────────────────────────── */}
-      <Section title="Campaign Phases">
-        <div
-          style={{
-            display: 'flex',
-            gap: 2,
-            borderRadius: 8,
-            overflow: 'hidden',
-          }}
-        >
-          {plan.phases.map((p) => {
-            const span = p.weekEnd - p.weekStart + 1;
-            const pct = (span / plan.totalWeeks) * 100;
-            return (
-              <div
-                key={p.name}
-                style={{
-                  flex: `0 0 ${pct}%`,
-                  background: PHASE_BG[p.name],
-                  padding: '8px 12px',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 800,
-                    letterSpacing: '0.12em',
-                    color: PHASE_COLOR[p.name],
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {p.name}
-                </div>
-                <div style={{ fontSize: 10, color: MUTED, marginTop: 2 }}>
-                  Wk {p.weekStart}–{p.weekEnd}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Section>
-
-      {/* ── Watchouts ────────────────────────────────────────────── */}
-      {plan.watchouts.length > 0 && (
-        <Section title="Watchouts">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {plan.watchouts.map((w, i) => (
-              <WatchoutRow key={i} watchout={w} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* ── Opportunities ────────────────────────────────────────── */}
-      {plan.opportunities.length > 0 && (
-        <Section title="YouTube Opportunities">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-              gap: 8,
-            }}
-          >
-            {plan.opportunities.map((o, i) => (
-              <OpportunityCard key={i} opp={o} />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* ── Weekly Plan ──────────────────────────────────────────── */}
-      <Section
-        title="Weekly Plan"
-        right={
-          <div style={{ display: 'flex', gap: 8 }}>
-            <SmallButton onClick={expandAll} label="Expand all" />
-            <SmallButton onClick={collapseAll} label="Collapse" />
-          </div>
-        }
+      {/* ── Phase strip ───────────────────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 2,
+          borderRadius: 6,
+          overflow: 'hidden',
+          marginBottom: 28,
+          marginTop: 16,
+        }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {plan.weeks.map((week) => (
-            <WeekRow
-              key={week.weekNum}
-              week={week}
-              expanded={expandedWeeks.has(week.weekNum)}
-              onToggle={() => toggleWeek(week.weekNum)}
-            />
-          ))}
-        </div>
-      </Section>
-
-      {/* ── Key Moments ──────────────────────────────────────────── */}
-      <Section title="Key Moments">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          {plan.events.map((e, i) => (
+        {plan.phases.map((p) => {
+          const span = p.weekEnd - p.weekStart + 1;
+          const pct = (span / plan.totalWeeks) * 100;
+          return (
             <div
-              key={i}
+              key={p.name}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '6px 0',
-                fontSize: 13,
+                flex: `0 0 ${pct}%`,
+                background: PHASE_BG[p.name],
+                padding: '6px 10px',
               }}
             >
-              <span style={{ color: MUTED, fontSize: 12, minWidth: 70 }}>
-                {formatDate(e.dateISO)}
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 800,
+                  letterSpacing: '0.12em',
+                  color: PHASE_COLOR[p.name],
+                  textTransform: 'uppercase',
+                }}
+              >
+                {p.name}
               </span>
-              <KindBadge kind={e.kind} />
-              <span style={{ color: INK, fontWeight: 500 }}>{e.title}</span>
+              <span style={{ fontSize: 9, color: MUTED, marginLeft: 6 }}>
+                Wk {p.weekStart}–{p.weekEnd}
+              </span>
             </div>
-          ))}
-        </div>
-      </Section>
-    </div>
-  );
-}
+          );
+        })}
+      </div>
 
-// ── Sub-components ────────────────────────────────────────────────────────
-
-function Section({
-  title,
-  children,
-  right,
-}: {
-  title: string;
-  children: React.ReactNode;
-  right?: React.ReactNode;
-}) {
-  return (
-    <div style={{ marginBottom: 28 }}>
+      {/* ── Stats line ────────────────────────────────────────────── */}
       <div
         style={{
           display: 'flex',
@@ -325,79 +167,33 @@ function Section({
           marginBottom: 10,
         }}
       >
-        <h2
-          style={{
-            fontSize: 13,
-            fontWeight: 800,
-            color: INK,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            margin: 0,
-          }}
-        >
-          {title}
-        </h2>
-        {right}
+        <div style={{ display: 'flex', gap: 14, fontSize: 11, color: MUTED }}>
+          <span>{plan.totalWeeks} weeks</span>
+          <span>{plan.events.length} moments</span>
+          <span>{totalActions} actions</span>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <SmallButton onClick={expandAll} label="Expand all" />
+          <SmallButton onClick={collapseAll} label="Collapse" />
+        </div>
       </div>
-      {children}
+
+      {/* ── Timeline (THE HERO) ───────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {plan.weeks.map((week) => (
+          <WeekRow
+            key={week.weekNum}
+            week={week}
+            expanded={expandedWeeks.has(week.weekNum)}
+            onToggle={() => toggleWeek(week.weekNum)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-function WatchoutRow({ watchout }: { watchout: Watchout }) {
-  const isHigh = watchout.severity === 'high';
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 8,
-        padding: '8px 12px',
-        borderRadius: 8,
-        background: isHigh ? '#FEF2F2' : '#FFFBEB',
-        border: `1px solid ${isHigh ? '#FECACA' : '#FDE68A'}`,
-        fontSize: 13,
-        lineHeight: 1.5,
-        color: isHigh ? '#991B1B' : '#92400E',
-      }}
-    >
-      <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>
-        {isHigh ? '⚠️' : '⚡'}
-      </span>
-      <span>{watchout.text}</span>
-    </div>
-  );
-}
-
-function OpportunityCard({ opp }: { opp: Opportunity }) {
-  return (
-    <div
-      style={{
-        background: '#FFFFFF',
-        border: `1px solid ${BORDER}`,
-        borderRadius: 8,
-        padding: '12px 14px',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          marginBottom: 4,
-        }}
-      >
-        <span style={{ fontSize: 14 }}>{opp.icon}</span>
-        <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>
-          {opp.title}
-        </span>
-      </div>
-      <div style={{ fontSize: 12, color: '#5A5650', lineHeight: 1.5 }}>
-        {opp.reason}
-      </div>
-    </div>
-  );
-}
+// ── Sub-components ────────────────────────────────────────────────────────
 
 function WeekRow({
   week,
@@ -410,17 +206,17 @@ function WeekRow({
 }) {
   const hasActions = week.actions.length > 0;
   const phaseColor = PHASE_COLOR[week.phase];
+  const isMoment = !!week.momentName;
 
   return (
     <div
       style={{
         background: hasActions ? '#FFFFFF' : 'transparent',
-        border: hasActions ? `1px solid ${BORDER}` : `1px solid transparent`,
+        border: hasActions ? `1px solid ${BORDER}` : '1px solid transparent',
         borderRadius: 8,
         overflow: 'hidden',
       }}
     >
-      {/* Header */}
       <button
         onClick={onToggle}
         style={{
@@ -428,7 +224,7 @@ function WeekRow({
           alignItems: 'center',
           gap: 10,
           width: '100%',
-          padding: hasActions ? '10px 14px' : '6px 14px',
+          padding: hasActions ? '10px 14px' : '5px 14px',
           background: 'none',
           border: 'none',
           cursor: hasActions ? 'pointer' : 'default',
@@ -446,15 +242,8 @@ function WeekRow({
           }}
         />
 
-        {/* Week number */}
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: MUTED,
-            minWidth: 30,
-          }}
-        >
+        {/* Week */}
+        <span style={{ fontSize: 11, fontWeight: 700, color: MUTED, minWidth: 30 }}>
           W{week.weekNum}
         </span>
 
@@ -463,28 +252,12 @@ function WeekRow({
           {week.dateRange}
         </span>
 
-        {/* Phase badge */}
-        <span
-          style={{
-            fontSize: 9,
-            fontWeight: 800,
-            letterSpacing: '0.08em',
-            color: phaseColor,
-            background: PHASE_BG[week.phase],
-            padding: '2px 6px',
-            borderRadius: 3,
-            textTransform: 'uppercase',
-          }}
-        >
-          {week.phase}
-        </span>
-
-        {/* Moment name */}
-        {week.momentName && (
+        {/* Moment name — this is the star */}
+        {isMoment && (
           <span
             style={{
-              fontSize: 12,
-              fontWeight: 600,
+              fontSize: 13,
+              fontWeight: 700,
               color: INK,
               flex: 1,
               overflow: 'hidden',
@@ -495,13 +268,12 @@ function WeekRow({
             {week.momentName}
           </span>
         )}
-
-        {!week.momentName && <span style={{ flex: 1 }} />}
+        {!isMoment && <span style={{ flex: 1 }} />}
 
         {/* Action count */}
         {hasActions && (
           <span style={{ fontSize: 11, color: MUTED }}>
-            {week.actions.length} action{week.actions.length !== 1 ? 's' : ''}
+            {week.actions.length}
           </span>
         )}
 
@@ -509,13 +281,13 @@ function WeekRow({
         {hasActions && (
           <span
             style={{
-              fontSize: 10,
+              fontSize: 9,
               color: MUTED,
               transition: 'transform 0.15s',
               transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)',
             }}
           >
-            ▶
+            &#9654;
           </span>
         )}
       </button>
@@ -527,7 +299,7 @@ function WeekRow({
             padding: '0 14px 12px 44px',
             display: 'flex',
             flexDirection: 'column',
-            gap: 4,
+            gap: 3,
           }}
         >
           {week.actions.map((a, i) => (
@@ -540,8 +312,7 @@ function WeekRow({
 }
 
 function ActionRow({ action }: { action: ContentAction }) {
-  const intent = INTENT_LABEL[action.intent] ?? INTENT_LABEL.engage;
-  const icon = FORMAT_ICON[action.format] ?? '📋';
+  const icon = FORMAT_ICON[action.format] ?? '';
 
   return (
     <div
@@ -550,26 +321,11 @@ function ActionRow({ action }: { action: ContentAction }) {
         alignItems: 'center',
         gap: 8,
         fontSize: 12,
-        padding: '4px 0',
+        padding: '3px 0',
       }}
     >
-      <span style={{ fontSize: 12, flexShrink: 0 }}>{icon}</span>
-      <span style={{ flex: 1, color: INK, fontWeight: 500 }}>
-        {action.title}
-      </span>
-      <span
-        style={{
-          fontSize: 9,
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          color: intent.color,
-          background: intent.bg,
-          padding: '1px 5px',
-          borderRadius: 3,
-        }}
-      >
-        {intent.text}
-      </span>
+      <span style={{ fontSize: 11, flexShrink: 0, opacity: 0.7 }}>{icon}</span>
+      <span style={{ flex: 1, color: INK, fontWeight: 500 }}>{action.title}</span>
       {action.day !== 0 && (
         <span style={{ fontSize: 10, color: MUTED }}>
           {action.day > 0 ? `+${action.day}d` : `${action.day}d`}
@@ -579,37 +335,7 @@ function ActionRow({ action }: { action: ContentAction }) {
   );
 }
 
-function KindBadge({ kind }: { kind: string }) {
-  const label = kind
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/^\s/, '')
-    .toLowerCase();
-  return (
-    <span
-      style={{
-        fontSize: 9,
-        fontWeight: 700,
-        letterSpacing: '0.06em',
-        textTransform: 'uppercase',
-        color: MUTED,
-        background: SOFT,
-        padding: '2px 6px',
-        borderRadius: 3,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function SmallButton({
-  onClick,
-  label,
-}: {
-  onClick: () => void;
-  label: string;
-}) {
+function SmallButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
@@ -627,9 +353,4 @@ function SmallButton({
       {label}
     </button>
   );
-}
-
-function formatDate(iso: string): string {
-  const d = new Date(iso + 'T12:00:00');
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
