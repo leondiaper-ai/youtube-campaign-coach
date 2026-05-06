@@ -21,6 +21,13 @@ import {
 import AddArtistButton from './AddArtistButton';
 import { CoachLiveDot } from './CoachLink';
 import { readCoachPlan, type CoachPlanSummary } from '@/lib/coachPlan';
+import { ChannelScoreBadge } from './ChannelScoreBadge';
+import {
+  type ChannelScore,
+  type ChannelScoreInput,
+  calculateChannelScore,
+  computeBenchmarkPool,
+} from '@/lib/channelScore';
 
 type LiveSnap = BaseLiveSnap & { loading?: boolean; subs7Delta?: number | null; views7Delta?: number | null };
 
@@ -128,31 +135,55 @@ export default function CampaignCockpit() {
     return () => window.removeEventListener('focus', hydrate);
   }, [artists]);
 
-  const effective = useMemo(
-    () =>
-      artists.map((a) => {
-        const l = live[a.slug];
-        const daysToNextMoment = a.nextMomentDate ? daysFromNow(a.nextMomentDate) : null;
-        const d = l
-          ? deriveFromLive(l, {
-              daysToNextMoment,
-              phase: a.phase,
-              subs7Delta: l.subs7Delta ?? undefined,
-              views7Delta: l.views7Delta ?? undefined,
-            })
-          : null;
-        const status = (d?.status ?? 'COLD') as ChannelState;
-        const uploads30d = l?.uploads30d ?? 0;
-        return {
-          ...a,
-          status,
-          classification: classifyArtist(status, uploads30d),
-          reason: d?.reason ?? 'No data yet',
-          nextAction: d?.nextAction ?? null,
-        };
-      }),
-    [artists, live]
-  );
+  const effective = useMemo(() => {
+    // Build score inputs from all channels with live data
+    const scoreInputs: { slug: string; input: ChannelScoreInput }[] = [];
+    for (const a of artists) {
+      const l = live[a.slug];
+      if (l && !l.error && l.subs != null) {
+        scoreInputs.push({
+          slug: a.slug,
+          input: {
+            views7Delta: l.views7Delta ?? null,
+            subs7Delta: l.subs7Delta ?? null,
+            uploads30d: l.uploads30d ?? 0,
+            shorts30d: l.shorts30d ?? 0,
+            lastUploadAt: l.lastUploadAt ?? null,
+            subs: l.subs ?? null,
+            totalViews: l.views ?? null,
+          },
+        });
+      }
+    }
+    const pool = computeBenchmarkPool(scoreInputs.map((s) => s.input));
+    const scoreMap = new Map<string, ChannelScore>();
+    for (const { slug, input } of scoreInputs) {
+      scoreMap.set(slug, calculateChannelScore(input, pool));
+    }
+
+    return artists.map((a) => {
+      const l = live[a.slug];
+      const daysToNextMoment = a.nextMomentDate ? daysFromNow(a.nextMomentDate) : null;
+      const d = l
+        ? deriveFromLive(l, {
+            daysToNextMoment,
+            phase: a.phase,
+            subs7Delta: l.subs7Delta ?? undefined,
+            views7Delta: l.views7Delta ?? undefined,
+          })
+        : null;
+      const status = (d?.status ?? 'COLD') as ChannelState;
+      const uploads30d = l?.uploads30d ?? 0;
+      return {
+        ...a,
+        status,
+        classification: classifyArtist(status, uploads30d),
+        reason: d?.reason ?? 'No data yet',
+        nextAction: d?.nextAction ?? null,
+        score: scoreMap.get(a.slug) ?? null,
+      };
+    });
+  }, [artists, live]);
 
   // Sort within each classification group: worst status first, then by next moment
   const sorted = [...effective].sort((a, b) => {
@@ -359,6 +390,7 @@ type EffectiveArtist = Artist & {
   status: ChannelState;
   reason: string;
   nextAction: string | null;
+  score: ChannelScore | null;
 };
 
 function ArtistCard({
@@ -415,6 +447,11 @@ function ArtistCard({
               {isVirgin ? 'Managed' : 'Market'}
             </button>
             <CoachLiveDot slug={a.slug} />
+            {a.score && (
+              <span onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                <ChannelScoreBadge score={a.score} compact />
+              </span>
+            )}
           </div>
 
           {/* Reason — one line explaining the state */}

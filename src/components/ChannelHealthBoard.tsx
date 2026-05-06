@@ -1,9 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
+import { TopChannelsModule } from './TopChannelsModule';
+import { ChannelScoreBadge } from './ChannelScoreBadge';
+import {
+  type ChannelScore,
+  type ChannelScoreInput,
+  calculateChannelScore,
+  computeBenchmarkPool,
+} from '@/lib/channelScore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +30,8 @@ export type RowData = {
   classification: ArtistClassification;
   reason: string;
   subsSeries: { x: number; y: number }[];
+  /** Total channel views — used for growth % baseline, not as a score driver */
+  totalViews?: number | null;
 };
 
 type ViewMode = 'managed' | 'market';
@@ -360,6 +370,23 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
   const allBenchmarks = rows.length > 0 ? computeMarketBenchmarks(rows) : null;
   const marketBenchmarks = marketRows.length > 0 ? computeMarketBenchmarks(marketRows) : null;
 
+  // Channel scores for all rows — measures execution quality, not artist size
+  const scoreMap = useMemo(() => {
+    const inputs: ChannelScoreInput[] = rows.map((r) => ({
+      views7Delta: r.views7Delta,
+      subs7Delta: r.subs7Delta,
+      uploads30d: r.uploads30d,
+      shorts30d: r.shorts30d,
+      lastUploadAt: null,
+      subs: r.subs,
+      totalViews: r.totalViews ?? null,
+    }));
+    const pool = computeBenchmarkPool(inputs);
+    const map = new Map<string, ChannelScore>();
+    rows.forEach((r, i) => map.set(r.slug, calculateChannelScore(inputs[i], pool)));
+    return map;
+  }, [rows]);
+
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows].sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
 
@@ -512,6 +539,25 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
         </div>
       )}
 
+      {/* ─── BEST PERFORMING / NEEDS ATTENTION ─────────────────────────── */}
+      {view === 'managed' && managedRows.length > 2 && (
+        <div className="mb-4">
+          <TopChannelsModule
+            channels={managedRows.map((r) => ({
+              name: r.name,
+              slug: r.slug,
+              views7Delta: r.views7Delta,
+              subs7Delta: r.subs7Delta,
+              uploads30d: r.uploads30d,
+              shorts30d: r.shorts30d,
+              lastUploadAt: null,
+              subs: r.subs,
+              totalViews: r.totalViews ?? null,
+            }))}
+          />
+        </div>
+      )}
+
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
         <div
@@ -564,6 +610,11 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
                     >
                       {r.name}
                     </Link>
+                    {scoreMap.get(r.slug) && (
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <ChannelScoreBadge score={scoreMap.get(r.slug)!} compact />
+                      </span>
+                    )}
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
                   </div>
                   <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>

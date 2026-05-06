@@ -1,23 +1,168 @@
-import { Suspense } from 'react';
-import YouTubeCampaignCoach from '@/components/YouTubeCampaignCoach';
+import Link from 'next/link';
 
 export const metadata = {
-  title: 'YouTube Campaign Coach',
-  description: 'Plan and track your YouTube rollout around release moments.',
+  title: 'YouTube Campaign System',
+  description: 'Plan, track and grow YouTube campaigns.',
 };
+
+const INK = '#0E0E0E';
+const PAPER = '#FAF7F2';
+const SOFT = '#F6F1E7';
+const BORDER = '#E8E3DA';
+const MUTED = '#9B9589';
 
 export default function HomePage() {
   return (
-    <main className="bg-paper min-h-screen">
-      <Suspense
-        fallback={
-          <div className="min-h-[60vh] flex items-center justify-center">
-            <p className="text-sm text-ink/50">Loading Campaign Coach…</p>
-          </div>
-        }
-      >
-        <YouTubeCampaignCoach />
-      </Suspense>
+    <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
+      <div className="max-w-[680px] mx-auto px-6 py-16">
+        {/* Header */}
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: MUTED,
+            marginBottom: 32,
+          }}
+        >
+          YouTube Campaign System
+        </div>
+
+        {/* Hero */}
+        <h1
+          style={{
+            fontSize: 42,
+            fontWeight: 900,
+            lineHeight: 1.1,
+            color: INK,
+            margin: 0,
+          }}
+        >
+          Plan. Track.
+          <br />
+          Grow.
+        </h1>
+        <p
+          style={{
+            fontSize: 16,
+            color: '#5A5650',
+            lineHeight: 1.6,
+            marginTop: 16,
+            maxWidth: 480,
+          }}
+        >
+          Turn messy campaign timelines into structured YouTube rollouts.
+          Monitor channel health. Track active campaigns. All shaped by real
+          channel intelligence.
+        </p>
+
+        {/* Primary CTA */}
+        <Link
+          href="/plan"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 28,
+            padding: '14px 28px',
+            borderRadius: 10,
+            background: INK,
+            color: '#FFFFFF',
+            fontSize: 15,
+            fontWeight: 800,
+            textDecoration: 'none',
+            letterSpacing: '0.02em',
+          }}
+        >
+          Build Content Plan →
+        </Link>
+
+        {/* Tool grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 10,
+            marginTop: 48,
+          }}
+        >
+          <ToolCard
+            href="/growth"
+            title="Channel Health"
+            desc="Which channels are growing, flat, or at risk."
+          />
+          <ToolCard
+            href="/cockpit"
+            title="All Artists"
+            desc="Live readiness check across every tracked artist."
+          />
+          <ToolCard
+            href="/campaigns"
+            title="Active Campaigns"
+            desc="Campaign status board with decision signals."
+          />
+          <ToolCard
+            href="/plan"
+            title="Content Plan"
+            desc="Build structured YouTube rollouts from messy timelines."
+            highlight
+          />
+        </div>
+
+        <div
+          style={{
+            marginTop: 48,
+            fontSize: 10,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: '#D1C9BD',
+          }}
+        >
+          Channel Health watches · Campaigns track · Plans direct
+        </div>
+      </div>
     </main>
+  );
+}
+
+function ToolCard({
+  href,
+  title,
+  desc,
+  highlight,
+}: {
+  href: string;
+  title: string;
+  desc: string;
+  highlight?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: 'block',
+        padding: '16px 18px',
+        borderRadius: 10,
+        background: highlight ? '#FFFFFF' : SOFT,
+        border: `1px solid ${highlight ? BORDER : 'transparent'}`,
+        textDecoration: 'none',
+        transition: 'border-color 0.15s, box-shadow 0.15s',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 700,
+          color: INK,
+          marginBottom: 4,
+        }}
+      >
+        {title}
+      </div>
+      <div style={{ fontSize: 12, color: MUTED, lineHeight: 1.5 }}>
+        {desc}
+      </div>
+    </Link>
   );
 }

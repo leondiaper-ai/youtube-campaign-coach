@@ -74,6 +74,7 @@ export default async function ControlPage() {
         classification,
         reason,
         subsSeries,
+        totalViews: snap?.views ?? null,
       };
     })
   );
@@ -106,6 +107,12 @@ export default async function ControlPage() {
               >
                 Active Campaigns
               </Link>
+              <Link
+                href="/plan"
+                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+              >
+                Content Plan
+              </Link>
             </div>
           </div>
           <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 mt-2 text-right">
@@ -134,13 +141,13 @@ export default async function ControlPage() {
             Active Campaigns
           </Link>
           <span className="text-ink/25">→</span>
-          <span className="font-bold text-ink/30 px-3 py-1.5">
-            Coach (per artist)
-          </span>
+          <Link href="/plan" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+            Content Plan
+          </Link>
         </div>
 
         <div className="mt-8 text-[10px] uppercase tracking-[0.18em] text-ink/25">
-          Channel Health watches · Watcher diagnoses · Coach plans
+          Channel Health watches · Campaigns track · Plans direct
         </div>
       </div>
     </main>
