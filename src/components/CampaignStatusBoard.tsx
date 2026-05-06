@@ -14,6 +14,7 @@ import {
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
 // Value model imports removed — revenue estimates taken out for now
+import { DEPTH_COLORS, DEPTH_DISCLAIMER, type DepthLabel } from '@/lib/depthSignal';
 import Sparkline from './Sparkline';
 
 const INK = '#0E0E0E';
@@ -85,6 +86,16 @@ type CardData = {
   artistType?: 'managed' | 'observed' | 'external';
   /** Revenue ownership — only 'virgin' gets value calculations */
   ownership?: 'virgin' | 'observed';
+  /** Depth Signal (watch-time proxy) */
+  depthSignal?: {
+    label: DepthLabel;
+    title: string;
+    reason: string;
+    score: number;
+    suggestions: string[];
+    longformCount: number;
+    shortsCount: number;
+  } | null;
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -578,6 +589,57 @@ function SnapshotHistory({ slug }: { slug: string }) {
   );
 }
 
+// ─── Depth Signal Badge (watch-time proxy) ───────────────────────────────
+function DepthSignalBadge({ signal }: {
+  signal: NonNullable<CardData['depthSignal']>;
+}) {
+  const [showTip, setShowTip] = useState(false);
+  const colors = DEPTH_COLORS[signal.label];
+  return (
+    <div className="mb-3">
+      <div
+        className="flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer"
+        style={{ background: colors.bg, border: `1px solid ${colors.text}20` }}
+        onClick={() => setShowTip(!showTip)}
+      >
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ background: colors.dot }}
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-[0.06em]" style={{ color: colors.text }}>
+              {signal.title}
+            </span>
+            <span className="text-[10px]" style={{ color: `${colors.text}80` }}>
+              {signal.longformCount} longform · {signal.shortsCount} Shorts
+            </span>
+          </div>
+          <div className="text-[11px] leading-snug mt-0.5" style={{ color: `${colors.text}CC` }}>
+            {signal.reason}
+          </div>
+        </div>
+        <span className="text-[9px] shrink-0" style={{ color: `${colors.text}60` }}>
+          {showTip ? '▲' : '▼'}
+        </span>
+      </div>
+      {showTip && (
+        <div className="mt-1.5 rounded-lg px-3 py-2" style={{ background: SOFT }}>
+          <div className="text-[10px] text-ink/35 leading-relaxed mb-1.5">
+            {DEPTH_DISCLAIMER}
+          </div>
+          {signal.suggestions.length > 0 && (
+            <div className="text-[10px] text-ink/50">
+              <span className="font-bold text-ink/40">Add: </span>
+              {signal.suggestions.slice(0, 4).join(', ')}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Decision Card (standardised 4-line format) ─────────────────────────
 function DecisionCard({
   card,
@@ -867,6 +929,11 @@ function DecisionCard({
       )}
 
       {/* ─── Expand detail toggle ──────────────────────────────────── */}
+      {/* ─── Depth Signal (watch-time proxy) ────────────────────── */}
+      {card.depthSignal && (
+        <DepthSignalBadge signal={card.depthSignal} />
+      )}
+
       <button
         onClick={() => setShowDetail(!showDetail)}
         className="text-[10px] text-ink/25 hover:text-ink/45 mb-2 transition-colors"

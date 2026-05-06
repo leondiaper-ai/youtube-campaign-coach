@@ -25,6 +25,7 @@ import {
   type ChannelContext,
 } from '@/lib/planEngine';
 import CampaignPlanOutput from './CampaignPlanOutput';
+import { DEPTH_COLORS, DEPTH_DISCLAIMER, type DepthLabel } from '@/lib/depthSignal';
 
 // ── Design tokens ────────────────────────────────────────────────────────
 
@@ -43,9 +44,21 @@ type ArtistOption = {
   channelHandle?: string;
 };
 
+type DepthSignalData = {
+  label: DepthLabel;
+  title: string;
+  reason: string;
+  score: number;
+  suggestions: string[];
+  longformCount: number;
+  shortsCount: number;
+  depthAssetTypes: string[];
+};
+
 type ChannelData = LiveSnap & {
   subs7Delta?: number | null;
   views7Delta?: number | null;
+  depthSignal?: DepthSignalData | null;
 };
 
 type GuidanceBlock = {
@@ -660,6 +673,72 @@ export default function CoachPage({
                 </div>
               </div>
             </div>
+
+            {/* Depth Signal */}
+            {channelData.depthSignal && (() => {
+              const ds = channelData.depthSignal;
+              const dc = DEPTH_COLORS[ds.label];
+              return (
+                <div
+                  style={{
+                    marginBottom: 16,
+                    padding: '12px 16px',
+                    borderRadius: 8,
+                    background: dc.bg,
+                    border: `1px solid ${dc.text}20`,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: dc.dot,
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        color: dc.text,
+                      }}
+                    >
+                      {ds.title}
+                    </span>
+                    <span style={{ fontSize: 10, color: `${dc.text}80` }}>
+                      {ds.longformCount} longform · {ds.shortsCount} Shorts
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: `${dc.text}CC`, lineHeight: 1.5 }}>
+                    {ds.reason}
+                  </div>
+                  {ds.depthAssetTypes.length > 0 && (
+                    <div style={{ fontSize: 10, color: `${dc.text}99`, marginTop: 4 }}>
+                      Detected: {ds.depthAssetTypes.join(', ')}
+                    </div>
+                  )}
+                  {ds.suggestions.length > 0 && (
+                    <div style={{ fontSize: 10, color: `${dc.text}80`, marginTop: 2 }}>
+                      Add: {ds.suggestions.slice(0, 4).join(', ')}
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      fontSize: 9,
+                      color: `${dc.text}50`,
+                      marginTop: 8,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {DEPTH_DISCLAIMER}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Recommendations */}
             {guidance.recommendations.length > 0 && (

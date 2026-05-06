@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readLiveSnapByHandle, readSyncMeta, readChannelMapping } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
+import { computeDepthSignal } from '@/lib/depthSignal';
 
 export const revalidate = 600;
 
@@ -37,10 +38,24 @@ export async function GET(req: NextRequest) {
   // Include sync metadata for freshness display
   const syncMeta = await readSyncMeta();
 
+  // Compute depth signal from recent uploads
+  const uploads = snap.recentUploads ?? [];
+  const depthSignal = uploads.length > 0 ? computeDepthSignal(uploads) : null;
+
   return NextResponse.json({
     ...snap,
     subs7Delta,
     views7Delta,
+    depthSignal: depthSignal ? {
+      label: depthSignal.label,
+      title: depthSignal.title,
+      reason: depthSignal.reason,
+      score: depthSignal.score,
+      suggestions: depthSignal.suggestions,
+      longformCount: depthSignal.breakdown.longformCount,
+      shortsCount: depthSignal.breakdown.shortsCount,
+      depthAssetTypes: depthSignal.breakdown.depthAssetTypes,
+    } : null,
     _syncMeta: syncMeta ? {
       lastSyncAt: syncMeta.lastSyncAt,
       nextScheduledSync: syncMeta.nextScheduledSync,
