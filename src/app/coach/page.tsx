@@ -3,6 +3,7 @@ import {
   mergeArtistLists,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
+import { listPlans } from '@/lib/planStore';
 import CoachPage from '@/components/CoachPage';
 
 export const metadata = {
@@ -20,5 +21,7 @@ export default async function CoachRoute() {
     channelHandle: a.channelHandle ?? undefined,
   }));
 
-  return <CoachPage artistOptions={artistOptions} />;
+  const savedPlans = await listPlans();
+
+  return <CoachPage artistOptions={artistOptions} savedPlans={savedPlans} />;
 }

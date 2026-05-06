@@ -16,6 +16,7 @@ import {
   type GeneratedPlan,
   type ChannelContext,
 } from '@/lib/planEngine';
+import { type PlanIndexEntry } from '@/lib/planStore';
 import CampaignPlanOutput from './CampaignPlanOutput';
 
 // ── Design tokens ────────────────────────────────────────────────────────
@@ -44,8 +45,10 @@ type ChannelData = LiveSnap & {
 
 export default function CoachPage({
   artistOptions,
+  savedPlans = [],
 }: {
   artistOptions: ArtistOption[];
+  savedPlans?: PlanIndexEntry[];
 }) {
   const [selectedSlug, setSelectedSlug] = useState('');
   const [artistName, setArtistName] = useState('');
@@ -58,6 +61,8 @@ export default function CoachPage({
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
   const [planLoading, setPlanLoading] = useState(false);
   const [error, setError] = useState('');
+  const [savedSlug, setSavedSlug] = useState<string | null>(null);
+  const [savedUrl, setSavedUrl] = useState<string | null>(null);
 
   // ── Artist selection ───────────────────────────────────────────────────
 
@@ -122,7 +127,7 @@ export default function CoachPage({
 
   // ── Plan generation ────────────────────────────────────────────────────
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     if (!timeline.trim()) {
       setError('Paste a timeline — even a rough one works.');
       return;
@@ -134,22 +139,44 @@ export default function CoachPage({
     setError('');
     setPlanLoading(true);
 
-    setTimeout(() => {
-      const result = generatePlan(timeline, artistName, channelCtx);
-      if (!result) {
-        setError(
-          'Could not parse any dates from the timeline. Try adding dates like "15 June - single release".'
-        );
-        setPlanLoading(false);
-        return;
-      }
-      setPlan(result);
+    // Generate locally first for instant preview
+    const result = generatePlan(timeline, artistName, channelCtx);
+    if (!result) {
+      setError(
+        'Could not parse any dates from the timeline. Try adding dates like "15 June - single release".'
+      );
       setPlanLoading(false);
-    }, 300);
+      return;
+    }
+    setPlan(result);
+
+    // Save to KV and get the campaign page URL
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist: artistName,
+          timeline,
+          channelCtx,
+        }),
+      });
+      if (res.ok) {
+        const { slug, url } = await res.json();
+        setSavedSlug(slug);
+        setSavedUrl(url);
+      }
+    } catch {
+      // Save failed silently — plan still shows locally
+    }
+
+    setPlanLoading(false);
   }, [timeline, artistName, channelCtx]);
 
   const handleBack = useCallback(() => {
     setPlan(null);
+    setSavedSlug(null);
+    setSavedUrl(null);
   }, []);
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -348,7 +375,103 @@ export default function CoachPage({
         {/* ── Generated Plan (the product) ────────────────────────── */}
         {plan && (
           <div style={{ marginBottom: 28 }}>
+            {savedUrl && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 16px',
+                  background: '#FFFFFF',
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 10,
+                  marginBottom: 20,
+                }}
+              >
+                <span style={{ fontSize: 13, color: '#5A5650' }}>
+                  Campaign saved — shareable page ready.
+                </span>
+                <Link
+                  href={savedUrl}
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: INK,
+                    textDecoration: 'none',
+                    padding: '6px 16px',
+                    borderRadius: 6,
+                    background: SOFT,
+                    border: `1px solid ${BORDER}`,
+                  }}
+                >
+                  Open Campaign Page →
+                </Link>
+              </div>
+            )}
             <CampaignPlanOutput plan={plan} onBack={handleBack} />
+          </div>
+        )}
+
+        {/* ── Saved Campaigns ─────────────────────────────────────── */}
+        {savedPlans.length > 0 && !plan && (
+          <div style={{ marginBottom: 32 }}>
+            <Label text="Saved Campaigns" />
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+              }}
+            >
+              {savedPlans.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/coach/${p.slug}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    background: '#FFFFFF',
+                    border: `1px solid ${BORDER}`,
+                    textDecoration: 'none',
+                    color: INK,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700 }}>
+                      {p.campaignName}
+                    </span>
+                    {p.channelState && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: MUTED,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                        }}
+                      >
+                        {p.channelState}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontSize: 11, color: MUTED }}>
+                      {p.eventCount} moments · {p.totalWeeks}w
+                    </span>
+                    <span style={{ fontSize: 10, color: MUTED }}>
+                      {new Date(p.updatedAt).toLocaleDateString('en-GB', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
+                    </span>
+                    <span style={{ fontSize: 11, color: MUTED }}>→</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
