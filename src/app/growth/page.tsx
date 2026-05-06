@@ -108,10 +108,10 @@ export default async function ControlPage() {
                 Active Campaigns
               </Link>
               <Link
-                href="/plan"
+                href="/coach"
                 className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
               >
-                Content Plan
+                Coach
               </Link>
             </div>
           </div>
@@ -141,8 +141,8 @@ export default async function ControlPage() {
             Active Campaigns
           </Link>
           <span className="text-ink/25">→</span>
-          <Link href="/plan" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
-            Content Plan
+          <Link href="/coach" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+            Coach
           </Link>
         </div>
 

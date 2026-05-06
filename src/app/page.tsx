@@ -39,9 +39,9 @@ export default function HomePage() {
             margin: 0,
           }}
         >
-          Plan. Track.
+          YouTube
           <br />
-          Grow.
+          Campaign Coach
         </h1>
         <p
           style={{
@@ -52,14 +52,14 @@ export default function HomePage() {
             maxWidth: 480,
           }}
         >
-          Turn messy campaign timelines into structured YouTube rollouts.
-          Monitor channel health. Track active campaigns. All shaped by real
-          channel intelligence.
+          Channel-aware campaign planning. Review your channel state, build
+          structured rollouts, and get live guidance shaped by real YouTube
+          intelligence.
         </p>
 
         {/* Primary CTA */}
         <Link
-          href="/plan"
+          href="/coach"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -75,7 +75,7 @@ export default function HomePage() {
             letterSpacing: '0.02em',
           }}
         >
-          Build Content Plan →
+          Open Coach →
         </Link>
 
         {/* Tool grid */}
@@ -89,24 +89,19 @@ export default function HomePage() {
         >
           <ToolCard
             href="/growth"
-            title="Channel Health"
-            desc="Which channels are growing, flat, or at risk."
+            title="Watcher"
+            desc="Channel health monitoring — which channels are growing, flat, or at risk."
           />
           <ToolCard
-            href="/cockpit"
-            title="All Artists"
-            desc="Live readiness check across every tracked artist."
+            href="/coach"
+            title="Coach"
+            desc="Channel-aware campaign planning with live guidance."
+            highlight
           />
           <ToolCard
             href="/campaigns"
             title="Active Campaigns"
             desc="Campaign status board with decision signals."
-          />
-          <ToolCard
-            href="/plan"
-            title="Content Plan"
-            desc="Build structured YouTube rollouts from messy timelines."
-            highlight
           />
         </div>
 
@@ -119,7 +114,7 @@ export default function HomePage() {
             color: '#D1C9BD',
           }}
         >
-          Channel Health watches · Campaigns track · Plans direct
+          Watcher watches · Coach directs · Campaigns track
         </div>
       </div>
     </main>
