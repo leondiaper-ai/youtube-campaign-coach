@@ -80,8 +80,12 @@ export async function readHistory(channelId: string): Promise<ChannelSnapshot[]>
 export function deltaOver(history: ChannelSnapshot[], days: number, field: 'subs' | 'views') {
   if (history.length < 2) return null;
   const last = history[history.length - 1];
-  const cutoff = Date.now() - days * 86400000;
-  // Find the oldest entry within the window
+  // Anchor cutoff to the latest snapshot, not Date.now().
+  // If the cron hasn't run recently, using Date.now() makes the cutoff
+  // land AFTER the latest snapshot, causing baseline === last → delta 0.
+  const lastTs = new Date(last.ts).getTime();
+  const cutoff = lastTs - days * 86400000;
+  // Find the newest entry at or before the cutoff
   const baseline =
     [...history].reverse().find((h) => new Date(h.ts).getTime() <= cutoff) ??
     history[0];
