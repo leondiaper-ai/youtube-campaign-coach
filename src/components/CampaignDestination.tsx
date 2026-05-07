@@ -57,6 +57,7 @@ type CampaignDestinationProps = {
   /** Live channel data for current state strip (optional — page works without it) */
   liveChannel?: {
     subs?: number;
+    views?: number;
     uploads30d?: number;
     shorts30d?: number;
     lastUploadDaysAgo?: number;
@@ -488,11 +489,19 @@ function StateStrip({
         </>
       )}
 
+      {/* Total views */}
+      {'views' in ch && ch.views != null && (
+        <>
+          <Stat label="Views" value={fmtNum(ch.views)} />
+          <Sep />
+        </>
+      )}
+
       {/* Views delta */}
-      {'views7Delta' in ch && ch.views7Delta != null && (
+      {'views7Delta' in ch && ch.views7Delta != null && ch.views7Delta !== 0 && (
         <>
           <Stat
-            label="7d views"
+            label="7d"
             value={`${ch.views7Delta >= 0 ? '+' : ''}${fmtNum(ch.views7Delta)}`}
             color={ch.views7Delta > 0 ? '#0C6A3F' : undefined}
           />

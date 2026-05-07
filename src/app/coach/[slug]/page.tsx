@@ -31,6 +31,7 @@ export default async function CampaignPage({ params }: PageProps) {
   // Try to fetch live channel data for the state strip
   let liveChannel: {
     subs?: number;
+    views?: number;
     uploads30d?: number;
     shorts30d?: number;
     lastUploadDaysAgo?: number;
@@ -63,6 +64,7 @@ export default async function CampaignPage({ params }: PageProps) {
 
         liveChannel = {
           subs: snap.subs ?? undefined,
+          views: snap.views ?? undefined,
           uploads30d: snap.uploads30d ?? undefined,
           shorts30d: snap.shorts30d ?? undefined,
           lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? undefined,
