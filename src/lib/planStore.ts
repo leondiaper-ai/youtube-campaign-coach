@@ -136,6 +136,34 @@ export async function listPlans(): Promise<PlanIndexEntry[]> {
   return index.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
+export async function updateSavedPlan(
+  slug: string,
+  updates: Partial<Pick<SavedPlan, 'plan'>>,
+): Promise<SavedPlan | null> {
+  const store = await kv();
+  if (!store) return null;
+
+  const existing = (await store.get(planKey(slug))) as SavedPlan | null;
+  if (!existing) return null;
+
+  const updated: SavedPlan = {
+    ...existing,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+  await store.set(planKey(slug), updated);
+
+  // Update index timestamp
+  const index = ((await store.get(INDEX_KEY)) as PlanIndexEntry[] | null) ?? [];
+  const idx = index.findIndex((e) => e.slug === slug);
+  if (idx >= 0) {
+    index[idx].updatedAt = updated.updatedAt;
+    await store.set(INDEX_KEY, index);
+  }
+
+  return updated;
+}
+
 export async function deletePlan(slug: string): Promise<void> {
   const store = await kv();
   if (!store) return;

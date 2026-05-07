@@ -35,6 +35,10 @@ export type ContentAction = {
   title: string;
   format: 'short' | 'video' | 'post' | 'live' | 'premiere' | 'community';
   day: number;
+  /** Marked complete by the user — campaign is alive */
+  completed?: boolean;
+  /** User-added action (not generated) */
+  custom?: boolean;
 };
 
 export type PlanWeek = {
@@ -200,6 +204,11 @@ export function parseTimeline(text: string): ParsedEvent[] {
 }
 
 // ── Context-Aware Action Generation ─────────────────────────────────────
+//
+// YouTube strategy principles internalized here — NOT surfaced as docs.
+// The engine thinks in terms of: pre-release system, release day system,
+// post-release system, and channel health shaping. Every action decision
+// is shaped by artist context, not templates.
 
 type ActionContext = {
   channelCtx: ChannelContext | null;
@@ -209,113 +218,213 @@ type ActionContext = {
   collabName?: string;
   campaignHasDoc: boolean;
   campaignHasTour: boolean;
+  campaignHasAlbum: boolean;
   eventScale: ParsedEvent['scale'];
+  /** Days since last upload — shapes pre-release cadence */
+  daysSinceLastUpload?: number;
+  /** Whether Shorts are already active on channel */
+  shortsActive: boolean;
+  /** How many events have already passed in the campaign */
+  eventsBeforeThis: number;
 };
+
+/** Is this channel ready for a Premiere launch? */
+function premiereReady(ctx: ChannelContext | null): boolean {
+  if (!ctx) return false;
+  // Premiere works when audience is warm enough to show up live.
+  // Needs: active channel + meaningful sub base + recent momentum.
+  const warm = ctx.state === 'HEALTHY' || ctx.state === 'BUILDING';
+  const hasSubs = ctx.subs != null && ctx.subs > 25000;
+  const recentActivity = ctx.uploads30d > 0 || ctx.shorts30d > 2;
+  return warm && hasSubs && recentActivity;
+}
+
+/** Should we suggest Afterparty? Higher bar than Premiere. */
+function afterpartyReady(ctx: ChannelContext | null): boolean {
+  if (!ctx) return false;
+  const healthy = ctx.state === 'HEALTHY';
+  const bigSubs = ctx.subs != null && ctx.subs > 50000;
+  const rising = ctx.momentum === 'rising';
+  return healthy && bigSubs && (rising || ctx.shorts30d > 3);
+}
 
 function actionsForEvent(event: ParsedEvent, actx: ActionContext): ContentAction[] {
   const ref = event.title.length > 40 ? event.title.slice(0, 37) + '…' : event.title;
   const ctx = actx.channelCtx;
-  const isHealthy = ctx && (ctx.state === 'HEALTHY' || ctx.state === 'BUILDING');
   const isCold = ctx && (ctx.state === 'COLD' || ctx.state === 'AT RISK');
-  const hasBigSubs = ctx && ctx.subs != null && ctx.subs > 50000;
+  const isWeakConversion = ctx && ctx.state === 'WEAK CONVERSION';
+  const canPremiere = premiereReady(ctx);
+  const canAfterparty = afterpartyReady(ctx);
   const isFirstRelease = actx.releaseIndex === 0;
   const isLaterRelease = actx.releaseIndex > 0;
+  const dormant = ctx && ctx.lastUploadDaysAgo != null && ctx.lastUploadDaysAgo > 30;
 
   switch (event.kind) {
     case 'singleRelease': {
       const actions: ContentAction[] = [];
 
-      // First single gets full treatment; later singles get lighter
+      // ── PRE-RELEASE SYSTEM ──────────────────────────────────────
+      // First single: full pre-release sequence to return audience.
+      // Dormant channels need earlier warm-up; active channels can go tighter.
       if (isFirstRelease || event.scale === 'anchor') {
-        actions.push({ title: `Teaser Short — ${ref}`, format: 'short', day: -3 });
+        if (dormant) {
+          // Dormant channel — start Shorts warm-up earlier
+          actions.push({ title: `Warm-up Short — reintroduce the artist`, format: 'short', day: -5 });
+          actions.push({ title: `Teaser Short — ${ref}`, format: 'short', day: -2 });
+        } else {
+          actions.push({ title: `Teaser Short — ${ref}`, format: 'short', day: -3 });
+        }
+        // Community activation before release to prime the audience
+        actions.push({ title: `Community — something's coming`, format: 'community', day: -2 });
       }
-      if (isFirstRelease) {
+      if (isFirstRelease && !dormant) {
         actions.push({ title: `Snippet Short — ${ref}`, format: 'short', day: -1 });
       }
 
-      // Official video — Premiere if channel supports it
-      if (isHealthy && hasBigSubs) {
+      // ── RELEASE DAY SYSTEM ──────────────────────────────────────
+      if (canPremiere && (isFirstRelease || event.scale === 'anchor')) {
         actions.push({ title: `Premiere — ${ref}`, format: 'premiere', day: 0 });
+        // Afterparty only for artists with highly engaged audiences
+        if (canAfterparty) {
+          actions.push({ title: `Afterparty — live fan moment`, format: 'live', day: 0 });
+        }
       } else {
         actions.push({ title: `Official Video — ${ref}`, format: 'video', day: 0 });
       }
 
       actions.push({ title: `Community — out now`, format: 'community', day: 0 });
 
-      // Collab-specific
+      // ── COLLAB SYSTEM ───────────────────────────────────────────
       if (event.featuredArtist) {
+        // Collab tool unlocks cross-audience reach — use it intentionally
         actions.push({ title: `Collab Short with ${event.featuredArtist}`, format: 'short', day: 1 });
         actions.push({ title: `Cross-channel Community Post`, format: 'community', day: 1 });
-      } else if (isFirstRelease) {
-        // BTS only for first single (avoids repetition)
-        actions.push({ title: `BTS Short — making of ${ref}`, format: 'short', day: 1 });
+        // If this is a cold channel, the collab is the discovery engine
+        if (isCold) {
+          actions.push({ title: `Fan reaction Short — ${event.featuredArtist} audience`, format: 'short', day: 3 });
+        }
       }
 
-      // Lyric/visualizer only for first or anchor release
+      // ── POST-RELEASE SYSTEM ─────────────────────────────────────
+      if (isFirstRelease && !event.featuredArtist) {
+        // BTS extends the release window and deepens fan connection
+        actions.push({ title: `BTS Short — making of ${ref}`, format: 'short', day: 2 });
+      }
+
+      // Sustain format — varies to avoid template fatigue
       if (isFirstRelease) {
-        actions.push({ title: `Lyric Video — ${ref}`, format: 'video', day: 7 });
+        // Lyric video extends watch-time and serves a different audience intent
+        if (isWeakConversion) {
+          // Weak conversion → prioritise deeper connection content
+          actions.push({ title: `Visualizer — ${ref}`, format: 'video', day: 5 });
+        } else {
+          actions.push({ title: `Lyric Video — ${ref}`, format: 'video', day: 7 });
+        }
+      } else if (isLaterRelease && actx.releaseIndex === 1) {
+        // Second single gets a lighter sustain — visualizer, not lyric
+        actions.push({ title: `Visualizer — ${ref}`, format: 'video', day: 5 });
       }
-
-      // Afterparty for big channels on first release
-      if (isFirstRelease && hasBigSubs && isHealthy) {
-        actions.push({ title: `Afterparty activation`, format: 'live', day: 0 });
-      }
+      // Third+ singles get no sustain format — the campaign has enough depth
 
       return actions;
     }
 
     case 'albumRelease': {
       const actions: ContentAction[] = [];
+
+      // ── PRE-RELEASE ─────────────────────────────────────────────
       actions.push({ title: `Album Trailer`, format: 'video', day: -5 });
       if (!isCold) {
         actions.push({ title: `BTS Short — making the album`, format: 'short', day: -3 });
+      } else {
+        // Cold channel: use the album announcement to re-engage
+        actions.push({ title: `Warm-up Short — the album is coming`, format: 'short', day: -4 });
       }
+      actions.push({ title: `Community — pre-save + tracklist`, format: 'community', day: -2 });
 
-      // Premiere for healthy channels, standard drop otherwise
-      if (isHealthy && hasBigSubs) {
+      // ── RELEASE DAY ─────────────────────────────────────────────
+      if (canPremiere) {
         actions.push({ title: `Album Premiere`, format: 'premiere', day: 0 });
-        actions.push({ title: `Afterparty — album listening session`, format: 'live', day: 0 });
+        if (canAfterparty) {
+          actions.push({ title: `Afterparty — album listening session`, format: 'live', day: 0 });
+        }
       } else {
         actions.push({ title: `Album Drop`, format: 'video', day: 0 });
       }
-
       actions.push({ title: `Community — album out now`, format: 'community', day: 0 });
-      actions.push({ title: `Track-by-Track Breakdown`, format: 'video', day: 2 });
-      actions.push({ title: `Lyric Video — lead single`, format: 'video', day: 5 });
 
-      // If there's tour, connect them
+      // ── POST-RELEASE SUSTAIN ────────────────────────────────────
+      // Album needs multi-week sustain — track-by-track, fan reactions, deep cuts
+      actions.push({ title: `Track-by-Track Breakdown`, format: 'video', day: 2 });
+
+      // Pick the right sustain format based on channel needs
+      if (isWeakConversion) {
+        // Need deeper connection → commentary over lyric video
+        actions.push({ title: `Artist Commentary Short — favourite track`, format: 'short', day: 4 });
+      } else {
+        actions.push({ title: `Lyric Video — standout track`, format: 'video', day: 5 });
+      }
+
+      // Fan reaction extends engagement window
+      if (!isCold) {
+        actions.push({ title: `Fan Reactions Short`, format: 'short', day: 7 });
+      }
+
+      // Tour connection — albums and tours should reinforce each other
       if (actx.campaignHasTour) {
-        actions.push({ title: `Community — tour dates reminder`, format: 'community', day: 3 });
+        actions.push({ title: `Community — tour tickets + album`, format: 'community', day: 3 });
       }
 
       return actions;
     }
 
-    case 'albumAnnounce':
-      return [
+    case 'albumAnnounce': {
+      const actions: ContentAction[] = [
         { title: `Announcement Video`, format: 'video', day: 0 },
         { title: `Community — pre-save`, format: 'community', day: 0 },
-        ...(isCold ? [{ title: `Warm-up Short — album incoming`, format: 'short' as const, day: 2 }] : []),
-        { title: `Tracklist Tease Short`, format: 'short', day: 3 },
       ];
+      if (isCold) {
+        // Cold channel gets a warm-up Short to rebuild cadence
+        actions.push({ title: `Warm-up Short — album incoming`, format: 'short', day: 2 });
+      }
+      actions.push({ title: `Tracklist Tease Short`, format: 'short', day: 3 });
+      // If there's a documentary, connect them
+      if (actx.campaignHasDoc) {
+        actions.push({ title: `Community — documentary hint`, format: 'community', day: 4 });
+      }
+      return actions;
+    }
 
     case 'documentaryRelease': {
-      // Documentary is a campaign anchor — scale up
+      // Documentary is a second campaign spike — treat it as an anchor moment.
+      // The strategy: trailer → BTS → Premiere (if ready) → sustain clips.
+      // Key insight: docs serve a different audience intent than music — they
+      // convert casual viewers into fans. Scale support accordingly.
       const actions: ContentAction[] = [
         { title: `Documentary Trailer`, format: 'video', day: -7 },
         { title: `Community — documentary coming`, format: 'community', day: -5 },
         { title: `BTS Short — filming the documentary`, format: 'short', day: -3 },
       ];
-      if (isHealthy) {
+      if (canPremiere) {
         actions.push({ title: `Documentary Premiere`, format: 'premiere', day: 0 });
+        if (canAfterparty) {
+          actions.push({ title: `Afterparty — live Q&A with director/artist`, format: 'live', day: 0 });
+        }
       } else {
         actions.push({ title: `Documentary Release`, format: 'video', day: 0 });
       }
       actions.push({ title: `Community — watch now`, format: 'community', day: 0 });
+
+      // Post-release: docs generate rich clip material
       actions.push({ title: `Fan Reaction Short`, format: 'short', day: 1 });
       actions.push({ title: `Director/Artist Commentary Short`, format: 'short', day: 3 });
-      // Sustain
       actions.push({ title: `Key Scene Short`, format: 'short', day: 5 });
+
+      // Extended sustain — docs have a longer tail than singles
+      if (!isCold) {
+        actions.push({ title: `Community — fan discussion prompt`, format: 'community', day: 7 });
+      }
+
       return actions;
     }
 
@@ -323,28 +432,58 @@ function actionsForEvent(event: ParsedEvent, actx: ActionContext): ContentAction
       return [
         { title: `Documentary Teaser`, format: 'video', day: 0 },
         { title: `Community — documentary announcement`, format: 'community', day: 0 },
+        // Teaser Short clips from the doc to build anticipation
+        ...(actx.shortsActive ? [{ title: `Doc Preview Short`, format: 'short' as const, day: 2 }] : []),
       ];
 
-    case 'tourAnnounce':
-      return [
-        { title: `Tour Announcement`, format: 'video', day: 0 },
+    case 'tourAnnounce': {
+      // Tour announcements should feel like an active YouTube moment,
+      // not just a static announcement. The audience wants to feel part of it.
+      const actions: ContentAction[] = [
+        { title: `Tour Announcement Video`, format: 'video', day: 0 },
         { title: `Community — tour dates + ticket links`, format: 'community', day: 0 },
-        ...(isHealthy ? [{ title: `Tour Hype Short`, format: 'short' as const, day: 1 }] : []),
       ];
+      if (!isCold) {
+        actions.push({ title: `Tour Hype Short — rehearsal/prep clip`, format: 'short', day: 1 });
+      }
+      // If album is part of campaign, connect them
+      if (actx.campaignHasAlbum) {
+        actions.push({ title: `Community — album + tour bundle`, format: 'community', day: 2 });
+      }
+      return actions;
+    }
 
-    case 'tourDate':
-      // Keep tour dates light — avoid repeating the same template per show
-      return [
+    case 'tourDate': {
+      // Tour dates generate live content opportunities.
+      // First show gets more support; later shows stay light.
+      const isFirstShow = actx.eventsBeforeThis === 0 ||
+        !actx.channelCtx; // can't tell, treat as first
+      const actions: ContentAction[] = [
         { title: `Community — tonight's show`, format: 'community', day: 0 },
         { title: `Recap Short`, format: 'short', day: 1 },
       ];
+      if (isFirstShow) {
+        actions.push({ title: `Backstage / Soundcheck Short`, format: 'short', day: 0 });
+      }
+      return actions;
+    }
 
-    case 'festival':
-      return [
+    case 'festival': {
+      // Festivals are high-energy discovery moments.
+      // Shorts captured live cut through algorithmically.
+      const actions: ContentAction[] = [
         { title: `Performance Clip Short`, format: 'short', day: 0 },
         { title: `Crowd / Backstage Short`, format: 'short', day: 1 },
-        ...(event.scale !== 'minor' ? [{ title: `Festival Recap`, format: 'video' as const, day: 4 }] : []),
       ];
+      if (event.scale !== 'minor') {
+        actions.push({ title: `Festival Recap`, format: 'video', day: 4 });
+        // Connect festival energy back to the campaign
+        if (actx.campaignHasAlbum || actx.totalReleases > 0) {
+          actions.push({ title: `Community — festival highlights + music link`, format: 'community', day: 2 });
+        }
+      }
+      return actions;
+    }
 
     case 'liveShow':
       return [
@@ -355,13 +494,21 @@ function actionsForEvent(event: ParsedEvent, actx: ActionContext): ContentAction
     case 'podcast':
       return [
         { title: `Clip Short — best moment`, format: 'short', day: 1 },
+        // Podcasts extend discovery — Community post drives the long-listen
+        { title: `Community — full episode link`, format: 'community', day: 1 },
       ];
 
-    case 'promoTrip':
-      return [
+    case 'promoTrip': {
+      // Promo trips generate artist-led content opportunities
+      const actions: ContentAction[] = [
         { title: `Artist-led Vlog Short`, format: 'short', day: 1 },
-        { title: `Trip Recap`, format: 'video', day: 5 },
       ];
+      // Only add recap if channel is active enough to sustain it
+      if (!isCold) {
+        actions.push({ title: `Trip Recap`, format: 'video', day: 5 });
+      }
+      return actions;
+    }
 
     default:
       return [
@@ -371,86 +518,163 @@ function actionsForEvent(event: ParsedEvent, actx: ActionContext): ContentAction
 }
 
 // ── Gap Detection & Bridge Content ──────────────────────────────────────
+//
+// Gaps kill campaigns. YouTube's algorithm rewards consistency — any gap
+// over 14 days risks losing algorithmic momentum. Bridge content isn't
+// filler; it's strategic continuity.
 
-function detectGaps(events: ParsedEvent[]): { afterEventIdx: number; gapDays: number }[] {
-  const gaps: { afterEventIdx: number; gapDays: number }[] = [];
+type GapInfo = {
+  afterEventIdx: number;
+  gapDays: number;
+  beforeKind: TimelineKind;
+  afterKind: TimelineKind;
+};
+
+function detectGaps(events: ParsedEvent[]): GapInfo[] {
+  const gaps: GapInfo[] = [];
   for (let i = 1; i < events.length; i++) {
     const prev = new Date(events[i - 1].dateISO).getTime();
     const curr = new Date(events[i].dateISO).getTime();
     const gapDays = Math.round((curr - prev) / 86400000);
-    if (gapDays > 18) {
-      gaps.push({ afterEventIdx: i - 1, gapDays });
+    if (gapDays > 14) {
+      gaps.push({
+        afterEventIdx: i - 1,
+        gapDays,
+        beforeKind: events[i - 1].kind,
+        afterKind: events[i].kind,
+      });
     }
   }
   return gaps;
 }
 
-function bridgeActions(ctx: ChannelContext | null): ContentAction[] {
+function bridgeActions(gap: GapInfo, ctx: ChannelContext | null): ContentAction[] {
   const isCold = ctx && (ctx.state === 'COLD' || ctx.state === 'AT RISK');
+  const isWeakConversion = ctx && ctx.state === 'WEAK CONVERSION';
+
+  // Shape bridge content based on what's around the gap
+  const comingFromRelease = gap.beforeKind === 'singleRelease' || gap.beforeKind === 'albumRelease';
+  const goingToRelease = gap.afterKind === 'singleRelease' || gap.afterKind === 'albumRelease';
+  const comingFromTour = gap.beforeKind === 'tourDate' || gap.beforeKind === 'festival';
+
   if (isCold) {
+    // Cold channel: every gap is dangerous — double up
     return [
       { title: `Artist-led Short — keep the channel warm`, format: 'short', day: 0 },
       { title: `Community — fan Q&A or poll`, format: 'community', day: 3 },
     ];
   }
+
+  if (comingFromRelease && goingToRelease) {
+    // Between releases — sustain the previous release while building to the next
+    return [
+      { title: `Fan reaction or remix Short`, format: 'short', day: 0 },
+      ...(gap.gapDays > 21 ? [{ title: `Community — what's next hint`, format: 'community' as const, day: 4 }] : []),
+    ];
+  }
+
+  if (comingFromTour) {
+    // Post-tour gap — capture the live energy before it fades
+    return [
+      { title: `Tour highlight Short — best moment`, format: 'short', day: 0 },
+    ];
+  }
+
+  if (goingToRelease) {
+    // Pre-release gap — build anticipation
+    return [
+      { title: `Anticipation Short — studio/snippet/personal`, format: 'short', day: 0 },
+      ...(isWeakConversion ? [{ title: `Community — artist Q&A`, format: 'community' as const, day: 3 }] : []),
+    ];
+  }
+
+  // Default bridge
   return [
     { title: `Artist-led moment — bridge content`, format: 'short', day: 0 },
   ];
 }
 
 // ── Strategic Insights ──────────────────────────────────────────────────
+//
+// Insights are editorial observations, not documentation.
+// They should read like a strategist's notes, not AI explanations.
 
 function generateCampaignInsights(
   events: ParsedEvent[],
   ctx: ChannelContext | null,
-  gaps: { afterEventIdx: number; gapDays: number }[],
+  gaps: GapInfo[],
 ): string[] {
   const insights: string[] = [];
   const hasRelease = events.some((e) => RELEASE_KINDS.has(e.kind));
   const hasDoc = events.some((e) => e.kind === 'documentaryRelease');
   const hasTour = events.some((e) => e.kind === 'tourDate' || e.kind === 'tourAnnounce');
   const hasCollab = events.some((e) => !!e.featuredArtist);
+  const hasFestival = events.some((e) => e.kind === 'festival');
   const releases = events.filter((e) => e.kind === 'singleRelease' || e.kind === 'albumRelease');
+  const hasAlbum = events.some((e) => e.kind === 'albumRelease');
 
-  // Channel-state insights
+  // Channel-state insights — shaped by what the channel actually needs
   if (ctx) {
     if (ctx.state === 'COLD' && hasRelease) {
-      insights.push('Channel is cold — warm-up Shorts added before the first release.');
+      const daysGap = ctx.lastUploadDaysAgo ?? 0;
+      if (daysGap > 60) {
+        insights.push(`Channel dormant for ${daysGap}+ days — warm-up cadence added to rebuild algorithmic trust before release.`);
+      } else {
+        insights.push('Channel needs reactivation — Shorts warm-up added before the first release window.');
+      }
     }
-    if (ctx.momentum === 'rising' && hasRelease) {
-      insights.push('Current momentum supports a Premiere launch.');
+    if (ctx.momentum === 'rising' && hasRelease && premiereReady(ctx)) {
+      insights.push('Current momentum and audience size support Premiere launches on anchor releases.');
     }
-    if (ctx.state === 'WEAK CONVERSION') {
-      insights.push('Subscriber growth flat despite reach — prioritise deeper artist-connection content.');
+    if (ctx.state === 'WEAK CONVERSION' && hasRelease) {
+      insights.push('Views strong but subscriber conversion weak — prioritising deeper connection content over discovery formats.');
     }
     if (ctx.shorts30d > 4 && ctx.momentum === 'rising') {
-      insights.push('Shorts currently driving discovery — maintain cadence around release moments.');
+      insights.push('Shorts driving active discovery — maintaining cadence around release moments to compound reach.');
+    }
+    if (ctx.state === 'BUILDING' && hasAlbum) {
+      insights.push('Channel building momentum — album drop should accelerate this. Multi-format support added to extend the window.');
     }
   }
 
-  // Campaign shape insights
+  // Campaign shape insights — what the timeline reveals
   if (hasDoc && hasRelease) {
-    insights.push('Documentary acts as a second campaign spike — extend the release window.');
+    insights.push('Documentary creates a second campaign peak — rollout treats it as an anchor moment with full support.');
   }
   if (hasCollab) {
-    insights.push('Feature release creates cross-audience opportunity via YouTube Collab tool.');
+    const collabEvents = events.filter((e) => !!e.featuredArtist);
+    if (collabEvents.length > 1) {
+      insights.push(`${collabEvents.length} feature releases — each one is a cross-audience moment via YouTube Collab tool.`);
+    } else {
+      insights.push(`Feature release unlocks cross-audience reach — Collab tool and cross-channel Community activations added.`);
+    }
   }
   if (hasTour && hasRelease) {
-    insights.push('Tour dates extend the album campaign — use live moments to sustain interest.');
+    insights.push('Tour dates extend the release window — live content sustains campaign momentum between drops.');
+  }
+  if (hasFestival && hasRelease) {
+    insights.push('Festival moments generate high-energy Shorts content that feeds back into the campaign.');
   }
   if (releases.length > 3) {
-    insights.push('Multiple releases — later singles get lighter support to avoid template fatigue.');
+    insights.push('Multiple releases — later singles receive lighter support to avoid template fatigue and maintain audience attention.');
   }
 
-  // Gap insights
+  // Gap insights — operational, specific
   if (gaps.length > 0) {
     const bigGap = gaps.reduce((a, b) => a.gapDays > b.gapDays ? a : b);
     if (bigGap.gapDays > 28) {
-      insights.push(`${bigGap.gapDays}-day gap in the campaign — bridge content added to hold momentum.`);
+      insights.push(`${bigGap.gapDays}-day campaign gap detected — bridge content added to maintain algorithmic consistency.`);
+    } else if (gaps.length > 2) {
+      insights.push(`${gaps.length} content gaps in the campaign — bridge actions added to keep the channel active between moments.`);
     }
   }
 
-  return insights.slice(0, 4); // Max 4 top-level insights
+  // Multi-format ecosystem observation
+  if (hasAlbum && hasDoc && hasTour) {
+    insights.push('Album + documentary + tour creates a multi-peak campaign — each peak is supported with distinct format strategy.');
+  }
+
+  return insights.slice(0, 5); // Max 5 top-level insights
 }
 
 function weekInsight(
@@ -459,6 +683,7 @@ function weekInsight(
   ctx: ChannelContext | null,
   weekEvents: ParsedEvent[],
   gapWeek: boolean,
+  gapInfo: GapInfo | null,
   phase: PhaseName,
 ): string | undefined {
   // Only some weeks get insights — avoid noise
@@ -466,32 +691,50 @@ function weekInsight(
 
   const ev = weekEvents[0];
 
-  if (gapWeek) {
-    return 'Gap between moments — artist-led content maintains audience connection.';
+  // Gap-specific insight — shaped by what's around the gap
+  if (gapWeek && gapInfo) {
+    if (gapInfo.gapDays > 28) {
+      return `${gapInfo.gapDays}-day gap — artist-led content here prevents algorithmic decay before the next moment.`;
+    }
+    if (gapInfo.afterKind === 'singleRelease' || gapInfo.afterKind === 'albumRelease') {
+      return 'Pre-release window — bridge content here builds anticipation for the upcoming drop.';
+    }
+    return 'Campaign continuity — Shorts maintain channel presence between key moments.';
   }
 
   if (ev?.featuredArtist) {
-    return `Feature with ${ev.featuredArtist} — leverage YouTube Collab tool for cross-audience reach.`;
+    return `Feature with ${ev.featuredArtist} — cross-channel activation and Collab tool maximise audience crossover.`;
   }
 
   if (ev?.kind === 'documentaryRelease') {
-    return 'Documentary anchor — this is a major fan engagement moment. Scale support accordingly.';
+    return 'Documentary anchor — serves a different audience intent than music. Supports fan conversion.';
   }
 
   if (ev?.kind === 'albumRelease') {
-    return 'Album drop week — all channels point here. Extend with supporting assets post-release.';
+    return 'Album drop — multi-format support extends the release window. Track-by-track and sustain content follows.';
+  }
+
+  if (ev?.kind === 'singleRelease' && ev.scale === 'anchor') {
+    if (ctx && premiereReady(ctx)) {
+      return 'Anchor release with Premiere — live launch builds community momentum.';
+    }
+    return 'Anchor release — full pre-release and sustain sequence activated.';
   }
 
   if (ev?.kind === 'tourAnnounce') {
-    return 'Tour announcement can become a strong Community moment.';
+    return 'Tour announcement creates a high-engagement Community moment — activate ticket links and hype content.';
   }
 
   if (ev?.kind === 'festival' && ev.scale !== 'minor') {
-    return 'Festival moment — capture live energy for Shorts and recap.';
+    return 'Festival — high-energy Shorts from this event feed back into campaign discovery.';
   }
 
   if (phase === 'BUILD' && ctx?.state === 'COLD') {
-    return 'Channel warming through Shorts — build cadence before release.';
+    return 'Channel warming — rebuilding algorithmic trust through consistent Shorts before launch.';
+  }
+
+  if (phase === 'SCALE' && weekEvents.length > 0) {
+    return 'Scale phase — sustain content extends campaign reach beyond the initial release spike.';
   }
 
   return undefined;
@@ -605,21 +848,43 @@ function generateStrategy(ctx: ChannelContext | null, events: ParsedEvent[]): Ca
 }
 
 // ── Warm-up Actions for Cold Channels ───────────────────────────────────
+//
+// Cold channel warm-up follows YouTube's return-audience principles:
+// Week 1: re-introduce — show the artist is active again
+// Week 2: establish cadence — prove consistency to the algorithm
+// Week 3+: build anticipation — tease what's coming
+// Each week varies to avoid robotic repetition.
 
-function warmUpActions(weekNum: number, totalBuildWeeks: number): ContentAction[] {
-  // Vary the warm-up — don't repeat the same thing every week
+function warmUpActions(weekNum: number, totalBuildWeeks: number, ctx: ChannelContext | null): ContentAction[] {
+  const isVeryCold = ctx && ctx.lastUploadDaysAgo != null && ctx.lastUploadDaysAgo > 60;
+
   if (weekNum === 1) {
-    return [
-      { title: `Artist-led Short — re-introduce`, format: 'short', day: 0 },
+    const actions: ContentAction[] = [
+      { title: isVeryCold
+        ? `Artist-led Short — "I'm back" moment`
+        : `Artist-led Short — re-introduce`,
+        format: 'short', day: 0 },
       { title: `Community — what's coming`, format: 'community', day: 2 },
     ];
+    // Very cold channels need more cadence in week 1
+    if (isVeryCold) {
+      actions.push({ title: `Throwback Short — fan favourite moment`, format: 'short', day: 4 });
+    }
+    return actions;
   }
   if (weekNum === 2) {
     return [
-      { title: `Snippet or throwback Short`, format: 'short', day: 0 },
+      { title: `Snippet or studio Short`, format: 'short', day: 0 },
+      { title: `Community — behind the scenes update`, format: 'community', day: 3 },
+    ];
+  }
+  if (weekNum === 3 && totalBuildWeeks >= 3) {
+    return [
+      { title: `Anticipation Short — tease what's dropping`, format: 'short', day: 0 },
     ];
   }
   if (weekNum <= totalBuildWeeks) {
+    // Later build weeks: maintain presence without overdoing it
     return [
       { title: `Artist-led Short — build anticipation`, format: 'short', day: 0 },
     ];
@@ -644,26 +909,36 @@ export function generatePlan(
   // Campaign shape analysis
   const campaignHasDoc = events.some((e) => e.kind === 'documentaryRelease');
   const campaignHasTour = events.some((e) => e.kind === 'tourDate' || e.kind === 'tourAnnounce');
+  const campaignHasAlbum = events.some((e) => e.kind === 'albumRelease');
   const releases = events.filter((e) =>
     e.kind === 'singleRelease' || e.kind === 'albumRelease'
   );
+  const shortsActive = ctx ? ctx.shorts30d > 2 : false;
 
-  // Date range
-  const startISO = addDays(events[0].dateISO, -7);
+  // Date range — expand window for cold channels (need more warm-up time)
+  const preBuffer = isCold ? 14 : 7;
+  const startISO = addDays(events[0].dateISO, -preBuffer);
   const endISO = addDays(events[events.length - 1].dateISO, 21);
   const startMs = new Date(startISO + 'T12:00:00').getTime();
   const endMs = new Date(endISO + 'T12:00:00').getTime();
   const totalWeeks = Math.max(12, Math.ceil((endMs - startMs) / (7 * 86400000)));
 
-  // Detect gaps
+  // Detect gaps — now with context about surrounding events
   const gaps = detectGaps(events);
-  const gapWeeks = new Set<number>();
+  const gapWeekMap = new Map<number, GapInfo>();
   for (const gap of gaps) {
-    // Add bridge content in the middle of the gap
     const ev = events[gap.afterEventIdx];
     const midDate = addDays(ev.dateISO, Math.floor(gap.gapDays / 2));
     const midWeek = weekForDate(startISO, midDate);
-    gapWeeks.add(midWeek);
+    gapWeekMap.set(midWeek, gap);
+    // For very long gaps (>28 days), add a second bridge point
+    if (gap.gapDays > 28) {
+      const secondDate = addDays(ev.dateISO, Math.floor(gap.gapDays * 0.75));
+      const secondWeek = weekForDate(startISO, secondDate);
+      if (secondWeek !== midWeek) {
+        gapWeekMap.set(secondWeek, gap);
+      }
+    }
   }
 
   // Phases
@@ -675,6 +950,7 @@ export function generatePlan(
   const weeks: PlanWeek[] = [];
   const fmt = (d: Date) => `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
   let releaseCounter = 0;
+  let eventCounter = 0;
 
   for (let i = 0; i < totalWeeks; i++) {
     const ws = new Date(startMs + i * 7 * 86400000);
@@ -691,7 +967,8 @@ export function generatePlan(
 
     // Generate context-aware actions
     const actions: ContentAction[] = [];
-    const isGapWeek = gapWeeks.has(weekNum);
+    const gapInfo = gapWeekMap.get(weekNum) ?? null;
+    const isGapWeek = gapInfo !== null;
 
     for (const ev of weekEvents) {
       const isRelease = ev.kind === 'singleRelease' || ev.kind === 'albumRelease';
@@ -703,7 +980,11 @@ export function generatePlan(
         collabName: ev.featuredArtist,
         campaignHasDoc,
         campaignHasTour,
+        campaignHasAlbum,
         eventScale: ev.scale,
+        daysSinceLastUpload: ctx?.lastUploadDaysAgo,
+        shortsActive,
+        eventsBeforeThis: eventCounter,
       };
 
       const template = actionsForEvent(ev, actx);
@@ -712,17 +993,18 @@ export function generatePlan(
       }
 
       if (isRelease) releaseCounter++;
+      eventCounter++;
     }
 
     // Cold channel warm-up in BUILD phase
     if (phase === 'BUILD' && isCold && weekEvents.length === 0) {
-      const warmUp = warmUpActions(weekNum - (buildPhase?.weekStart ?? 1) + 1, totalBuildWeeks);
+      const warmUp = warmUpActions(weekNum - (buildPhase?.weekStart ?? 1) + 1, totalBuildWeeks, ctx);
       actions.push(...warmUp);
     }
 
     // Bridge content for gap weeks (only if no events this week)
-    if (isGapWeek && weekEvents.length === 0) {
-      actions.push(...bridgeActions(ctx));
+    if (isGapWeek && weekEvents.length === 0 && gapInfo) {
+      actions.push(...bridgeActions(gapInfo, ctx));
     }
 
     // Strategic insight for this week
@@ -732,6 +1014,7 @@ export function generatePlan(
       ctx,
       weekEvents,
       isGapWeek && weekEvents.length === 0,
+      gapInfo,
       phase,
     );
 

@@ -9,6 +9,11 @@ import type {
   ContentAction,
   ChannelContext,
 } from '@/lib/planEngine';
+
+// Deep clone helper
+function clonePlan(plan: GeneratedPlan): GeneratedPlan {
+  return JSON.parse(JSON.stringify(plan));
+}
 import { STATUS_COLOR, fmtNum, type ChannelState } from '@/lib/artists';
 
 // ── Design tokens ──────────────────────────────────────────────────────────
@@ -63,12 +68,16 @@ type CampaignDestinationProps = {
 // ── Main Component ─────────────────────────────────────────────────────────
 
 export default function CampaignDestination({
-  plan,
+  plan: initialPlan,
   channelCtx,
   createdAt,
   slug,
   liveChannel,
 }: CampaignDestinationProps) {
+  const [plan, setPlan] = useState<GeneratedPlan>(initialPlan);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(() => {
     const s = new Set<number>();
     plan.weeks.forEach((w) => {
@@ -76,6 +85,52 @@ export default function CampaignDestination({
     });
     return s;
   });
+
+  // Persist changes to KV
+  const persistPlan = async (updated: GeneratedPlan) => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, plan: updated }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLastSaved(data.updatedAt);
+      }
+    } catch {
+      // Save failed silently
+    }
+    setSaving(false);
+  };
+
+  const toggleActionComplete = (weekNum: number, actionIdx: number) => {
+    const updated = clonePlan(plan);
+    const week = updated.weeks.find((w) => w.weekNum === weekNum);
+    if (!week || !week.actions[actionIdx]) return;
+    week.actions[actionIdx].completed = !week.actions[actionIdx].completed;
+    setPlan(updated);
+    persistPlan(updated);
+  };
+
+  const removeAction = (weekNum: number, actionIdx: number) => {
+    const updated = clonePlan(plan);
+    const week = updated.weeks.find((w) => w.weekNum === weekNum);
+    if (!week) return;
+    week.actions.splice(actionIdx, 1);
+    setPlan(updated);
+    persistPlan(updated);
+  };
+
+  const addAction = (weekNum: number, title: string, format: ContentAction['format']) => {
+    const updated = clonePlan(plan);
+    const week = updated.weeks.find((w) => w.weekNum === weekNum);
+    if (!week) return;
+    week.actions.push({ title, format, day: 0, custom: true });
+    setPlan(updated);
+    persistPlan(updated);
+  };
 
   const toggleWeek = (n: number) => {
     setExpandedWeeks((prev) => {
@@ -126,6 +181,12 @@ export default function CampaignDestination({
             YouTube Campaign System
           </Link>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            {saving && (
+              <span style={{ fontSize: 10, color: MUTED, fontStyle: 'italic' }}>Saving...</span>
+            )}
+            {!saving && lastSaved && (
+              <span style={{ fontSize: 10, color: '#1FBE7A' }}>Saved</span>
+            )}
             <span style={{ fontSize: 10, color: MUTED }}>
               Created {createdDate}
             </span>
@@ -318,6 +379,9 @@ export default function CampaignDestination({
               week={week}
               expanded={expandedWeeks.has(week.weekNum)}
               onToggle={() => toggleWeek(week.weekNum)}
+              onToggleComplete={(idx) => toggleActionComplete(week.weekNum, idx)}
+              onRemove={(idx) => removeAction(week.weekNum, idx)}
+              onAdd={(title, format) => addAction(week.weekNum, title, format)}
             />
           ))}
         </div>
@@ -485,14 +549,33 @@ function WeekRow({
   week,
   expanded,
   onToggle,
+  onToggleComplete,
+  onRemove,
+  onAdd,
 }: {
   week: PlanWeek;
   expanded: boolean;
   onToggle: () => void;
+  onToggleComplete: (actionIdx: number) => void;
+  onRemove: (actionIdx: number) => void;
+  onAdd: (title: string, format: ContentAction['format']) => void;
 }) {
+  const [adding, setAdding] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newFormat, setNewFormat] = useState<ContentAction['format']>('video');
+
   const hasActions = week.actions.length > 0;
   const phaseColor = PHASE_COLOR[week.phase];
   const isMoment = !!week.momentName;
+  const completedCount = week.actions.filter((a) => a.completed).length;
+
+  const handleAdd = () => {
+    const title = newTitle.trim();
+    if (!title) return;
+    onAdd(title, newFormat);
+    setNewTitle('');
+    setAdding(false);
+  };
 
   return (
     <div
@@ -550,7 +633,7 @@ function WeekRow({
         {!isMoment && <span style={{ flex: 1 }} />}
         {hasActions && (
           <span style={{ fontSize: 11, color: MUTED }}>
-            {week.actions.length}
+            {completedCount > 0 ? `${completedCount}/` : ''}{week.actions.length}
           </span>
         )}
         {hasActions && (
@@ -590,18 +673,130 @@ function WeekRow({
             </p>
           )}
           {week.actions.map((a, i) => (
-            <ActionRow key={i} action={a} />
+            <ActionRow
+              key={i}
+              action={a}
+              onToggleComplete={() => onToggleComplete(i)}
+              onRemove={() => onRemove(i)}
+            />
           ))}
+
+          {/* Add action UI */}
+          {!adding ? (
+            <button
+              onClick={() => setAdding(true)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: 11,
+                color: MUTED,
+                cursor: 'pointer',
+                padding: '4px 0',
+                textAlign: 'left',
+                opacity: 0.6,
+              }}
+            >
+              + Add action
+            </button>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                gap: 6,
+                alignItems: 'center',
+                marginTop: 4,
+              }}
+            >
+              <select
+                value={newFormat}
+                onChange={(e) => setNewFormat(e.target.value as ContentAction['format'])}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 4px',
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 4,
+                  background: SOFT,
+                  color: INK,
+                }}
+              >
+                <option value="video">Video</option>
+                <option value="short">Short</option>
+                <option value="post">Post</option>
+                <option value="live">Live</option>
+                <option value="premiere">Premiere</option>
+                <option value="community">Community</option>
+              </select>
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                placeholder="Action title..."
+                autoFocus
+                style={{
+                  flex: 1,
+                  fontSize: 12,
+                  padding: '3px 6px',
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 4,
+                  background: '#FFFFFF',
+                  color: INK,
+                  outline: 'none',
+                }}
+              />
+              <button
+                onClick={handleAdd}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  background: INK,
+                  color: PAPER,
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                }}
+              >
+                Add
+              </button>
+              <button
+                onClick={() => { setAdding(false); setNewTitle(''); }}
+                style={{
+                  fontSize: 11,
+                  padding: '3px 6px',
+                  background: 'none',
+                  border: 'none',
+                  color: MUTED,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function ActionRow({ action }: { action: ContentAction }) {
+function ActionRow({
+  action,
+  onToggleComplete,
+  onRemove,
+}: {
+  action: ContentAction;
+  onToggleComplete: () => void;
+  onRemove: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
   const icon = FORMAT_ICON[action.format] ?? '';
+  const done = !!action.completed;
+
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -610,13 +805,71 @@ function ActionRow({ action }: { action: ContentAction }) {
         padding: '3px 0',
       }}
     >
-      <span style={{ fontSize: 11, flexShrink: 0, opacity: 0.7 }}>{icon}</span>
-      <span style={{ flex: 1, color: INK, fontWeight: 500 }}>{action.title}</span>
+      {/* Completion toggle */}
+      <button
+        onClick={onToggleComplete}
+        title={done ? 'Mark incomplete' : 'Mark complete'}
+        style={{
+          width: 14,
+          height: 14,
+          borderRadius: 3,
+          border: `1.5px solid ${done ? '#1FBE7A' : BORDER}`,
+          background: done ? '#1FBE7A' : 'transparent',
+          cursor: 'pointer',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 0,
+          fontSize: 9,
+          color: '#FFFFFF',
+          lineHeight: 1,
+        }}
+      >
+        {done ? '✓' : ''}
+      </button>
+
+      <span style={{ fontSize: 11, flexShrink: 0, opacity: done ? 0.4 : 0.7 }}>{icon}</span>
+      <span
+        style={{
+          flex: 1,
+          color: done ? MUTED : INK,
+          fontWeight: 500,
+          textDecoration: done ? 'line-through' : 'none',
+          opacity: done ? 0.6 : 1,
+        }}
+      >
+        {action.title}
+        {action.custom && (
+          <span style={{ fontSize: 9, color: MUTED, marginLeft: 6, fontStyle: 'italic' }}>
+            custom
+          </span>
+        )}
+      </span>
       {action.day !== 0 && (
-        <span style={{ fontSize: 10, color: MUTED }}>
+        <span style={{ fontSize: 10, color: MUTED, opacity: done ? 0.5 : 1 }}>
           {action.day > 0 ? `+${action.day}d` : `${action.day}d`}
         </span>
       )}
+
+      {/* Remove button — only visible on hover */}
+      <button
+        onClick={onRemove}
+        title="Remove action"
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: 12,
+          color: '#D4716A',
+          padding: '0 2px',
+          opacity: hovered ? 0.7 : 0,
+          transition: 'opacity 0.15s',
+          flexShrink: 0,
+        }}
+      >
+        ×
+      </button>
     </div>
   );
 }

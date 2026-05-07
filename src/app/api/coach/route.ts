@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { savePlan, listPlans, generateSlug } from '@/lib/planStore';
-import { generatePlan, type ChannelContext } from '@/lib/planEngine';
+import { savePlan, listPlans, generateSlug, updateSavedPlan, loadPlan } from '@/lib/planStore';
+import { generatePlan, type ChannelContext, type GeneratedPlan } from '@/lib/planEngine';
 
 /**
  * POST /api/coach — Generate + save a campaign plan.
@@ -42,6 +42,29 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error('POST /api/coach error:', err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/coach — Update a saved campaign plan.
+ * Body: { slug, plan } — replaces the plan data.
+ * Used for marking actions complete, adding/removing actions.
+ */
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { slug, plan } = body as { slug: string; plan: GeneratedPlan };
+    if (!slug || !plan) {
+      return NextResponse.json({ error: 'slug and plan are required' }, { status: 400 });
+    }
+    const updated = await updateSavedPlan(slug, { plan });
+    if (!updated) {
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true, updatedAt: updated.updatedAt });
+  } catch (err) {
+    console.error('PATCH /api/coach error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
