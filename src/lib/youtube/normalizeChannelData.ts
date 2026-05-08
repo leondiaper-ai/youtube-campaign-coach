@@ -220,7 +220,7 @@ export function normalizeChannelData(
 
   // ── Health note ──
   const healthNote = buildHealthNote(health, confidence, history.length);
-  const dataStatusNote = buildDataStatusNote(dataStatus, history.length);
+  const dataStatusNote = buildDataStatusNote(dataStatus, history.length, snap);
   const missingReasons = buildMissingReasons(snap, subs7d, views7d, history, confidence);
 
   return {
@@ -427,9 +427,9 @@ function emptyNormalized(
     confidence: 'LOW',
     dataFetchedAt: null,
     historyDepthDays: 0,
-    healthNote: 'No channel data available',
-    dataStatusNote: 'Channel data could not be retrieved',
-    missingReasons: [{ field: 'all', reason: 'fetch_failed', detail: 'No cached data available for this channel' }],
+    healthNote: 'Channel could not be reached — will retry on next refresh',
+    dataStatusNote: 'Channel could not be reached — will retry on next scheduled refresh',
+    missingReasons: [{ field: 'all', reason: 'fetch_failed', detail: 'Channel could not be reached — will retry on next scheduled refresh' }],
   };
 }
 
@@ -580,23 +580,23 @@ function buildHealthNote(
   confidence: DataConfidence,
   snapshotCount: number,
 ): string {
-  if (health === 'UNAVAILABLE') return 'No channel data available';
+  if (health === 'UNAVAILABLE') return 'Channel could not be reached — will retry on next refresh';
 
   const parts: string[] = [];
 
   // Health component
   if (health === 'FRESH') parts.push('Data is current');
-  else if (health === 'STALE') parts.push('Data may be outdated');
-  else if (health === 'PARTIAL') parts.push('Partial data only');
-  else if (health === 'LIMITED') parts.push('Limited data available');
+  else if (health === 'STALE') parts.push('Showing last known values');
+  else if (health === 'PARTIAL') parts.push('Some metrics still filling in');
+  else if (health === 'LIMITED') parts.push('Sparse activity');
 
   // Confidence component
   if (confidence === 'LOW') {
     parts.push(snapshotCount <= 1
-      ? 'insufficient history for trends'
-      : 'limited history — trends may be unreliable');
+      ? 'trend history building'
+      : 'comparison data still accumulating');
   } else if (confidence === 'MEDIUM') {
-    parts.push('building history — trends are directional');
+    parts.push('trend history building — comparisons are directional');
   }
   // HIGH confidence: no note needed
 
@@ -636,22 +636,30 @@ function deriveDataStatus(
 function buildDataStatusNote(
   status: DataStatus,
   snapshotCount: number,
+  snap?: LiveSnap | CachedSnap | null,
 ): string {
+  // Use cadence context to write operational notes instead of API-speak
+  const lastUploadDays = snap ? daysSince(snap.lastUploadAt) : null;
+  const isInactive = lastUploadDays != null && lastUploadDays > 90;
+  const isDormant = lastUploadDays != null && lastUploadDays > 180;
+
   switch (status) {
     case 'FRESH':
       return 'Data is current and trends are reliable';
     case 'PARTIAL':
       return snapshotCount < 7
-        ? `Building history (${snapshotCount} snapshots) — trends are directional`
-        : 'Some metric fields are incomplete';
+        ? `Building trend history (${snapshotCount} snapshots so far)`
+        : 'Some comparison metrics still filling in';
     case 'LIMITED':
+      if (isDormant) return 'Channel dormant — weekly movement metrics unavailable during inactivity';
+      if (isInactive) return 'Inactive channel — insufficient recent activity for reliable weekly comparisons';
       return snapshotCount <= 1
-        ? 'Waiting for daily snapshots to build trend history'
-        : `Only ${snapshotCount} snapshots stored — need ${THRESHOLDS.medConfidenceMinDays}+ days for trends`;
+        ? 'Waiting for enough daily snapshots to establish trend baselines'
+        : `Trend history building (${snapshotCount} snapshots) — comparisons improve over the next few days`;
     case 'STALE':
-      return 'Data has not been refreshed recently — values shown are from the last successful fetch';
+      return 'Last refresh was longer ago than expected — showing most recent known values';
     case 'UNAVAILABLE':
-      return 'Channel data could not be retrieved';
+      return 'Channel could not be reached — will retry on next scheduled refresh';
   }
 }
 
@@ -668,6 +676,8 @@ function buildMissingReasons(
 ): MissingReasonEntry[] {
   const reasons: MissingReasonEntry[] = [];
   const depth = computeHistoryDepth(history);
+  const lastUploadDays = daysSince(snap.lastUploadAt);
+  const isInactive = lastUploadDays != null && lastUploadDays > 90;
 
   // ── Subscriber count ──
   if (snap.subs == null) {
@@ -675,7 +685,7 @@ function buildMissingReasons(
       field: 'subs',
       reason: snap.error ? 'fetch_failed' : 'hidden_subscriber_count',
       detail: snap.error
-        ? 'API request failed — subscriber count unavailable'
+        ? 'Channel could not be reached — will retry on next refresh'
         : 'Subscriber count is hidden by the channel owner',
     });
   }
@@ -686,8 +696,8 @@ function buildMissingReasons(
       field: 'views',
       reason: snap.error ? 'fetch_failed' : 'api_field_unavailable',
       detail: snap.error
-        ? 'API request failed — view count unavailable'
-        : 'View count not returned by the API',
+        ? 'Channel could not be reached — will retry on next refresh'
+        : 'View count not available for this channel',
     });
   }
 
@@ -697,26 +707,30 @@ function buildMissingReasons(
       reasons.push({
         field: 'subs7d',
         reason: 'hidden_subscriber_count',
-        detail: 'Cannot compute subscriber growth — count is hidden',
+        detail: 'Subscriber count is hidden — weekly growth cannot be calculated',
       });
     } else if (depth < 2) {
       reasons.push({
         field: 'subs7d',
         reason: 'insufficient_snapshot_history',
-        detail: `Need at least 2 daily snapshots — currently have ${history.length}`,
+        detail: 'Trend history is building — weekly comparison will appear within a few days',
       });
     } else {
       reasons.push({
         field: 'subs7d',
         reason: 'comparison_period_missing',
-        detail: 'Not enough history to compute a 7-day comparison',
+        detail: isInactive
+          ? 'No recent upload activity to drive measurable subscriber movement'
+          : 'Not enough stored history yet for a full 7-day comparison',
       });
     }
   } else if (!subs7d.meaningful) {
     reasons.push({
       field: 'subs7d',
       reason: 'insufficient_snapshot_history',
-      detail: `Delta covers only ${subs7d.daysCovered} day${subs7d.daysCovered === 1 ? '' : 's'} — not enough for a reliable 7-day trend`,
+      detail: isInactive
+        ? 'Channel inactive — subscriber movement is naturally flat'
+        : `Only ${subs7d.daysCovered} day${subs7d.daysCovered === 1 ? '' : 's'} of comparison data — need more for a reliable trend`,
     });
   }
 
@@ -726,26 +740,30 @@ function buildMissingReasons(
       reasons.push({
         field: 'views7d',
         reason: 'api_field_unavailable',
-        detail: 'Cannot compute view growth — view count unavailable',
+        detail: 'View count not available — weekly view growth cannot be calculated',
       });
     } else if (depth < 2) {
       reasons.push({
         field: 'views7d',
         reason: 'insufficient_snapshot_history',
-        detail: `Need at least 2 daily snapshots — currently have ${history.length}`,
+        detail: 'Trend history is building — weekly view comparison will appear within a few days',
       });
     } else {
       reasons.push({
         field: 'views7d',
         reason: 'comparison_period_missing',
-        detail: 'Not enough history to compute a 7-day comparison',
+        detail: isInactive
+          ? 'No recent upload activity to drive measurable view movement'
+          : 'Not enough stored history yet for a full 7-day comparison',
       });
     }
   } else if (!views7d.meaningful) {
     reasons.push({
       field: 'views7d',
       reason: 'insufficient_snapshot_history',
-      detail: `Delta covers only ${views7d.daysCovered} day${views7d.daysCovered === 1 ? '' : 's'} — not enough for a reliable 7-day trend`,
+      detail: isInactive
+        ? 'Channel inactive — view movement is naturally minimal during dormant periods'
+        : `Only ${views7d.daysCovered} day${views7d.daysCovered === 1 ? '' : 's'} of comparison data — need more for a reliable trend`,
     });
   }
 
@@ -760,12 +778,11 @@ function buildMissingReasons(
 
   // ── Upload cadence ──
   if ((snap.uploads30d ?? 0) === 0 && !snap.error) {
-    const lastUploadDays = daysSince(snap.lastUploadAt);
     if (lastUploadDays != null && lastUploadDays > THRESHOLDS.coldLastUploadDays) {
       reasons.push({
         field: 'cadence',
         reason: 'channel_inactive',
-        detail: `Last upload was ${lastUploadDays} days ago — channel appears inactive`,
+        detail: `Last upload was ${lastUploadDays} days ago — channel is dormant`,
       });
     }
   }

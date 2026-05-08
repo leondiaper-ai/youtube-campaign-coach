@@ -86,6 +86,14 @@ const DATA_STATUS_BADGE: Record<string, { background: string; color: string }> =
   UNAVAILABLE: { background: '#FFE2D8', color: '#8A1F0C' },
 };
 
+/** User-facing badge labels — operational language, not API-speak */
+const DATA_STATUS_LABEL: Record<string, string> = {
+  PARTIAL:     'Building',
+  LIMITED:     'Sparse',
+  STALE:       'Stale',
+  UNAVAILABLE: 'Offline',
+};
+
 // ─── Formatting helpers ───────────────────────────────────────────────────────
 
 function fmtDelta(n: number): string {
@@ -657,12 +665,12 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
                         style={DATA_STATUS_BADGE[r.dataStatus] ?? DATA_STATUS_BADGE.LIMITED}
                         title={r.dataStatusNote ?? r.healthNote ?? ''}
                       >
-                        {r.dataStatus === 'UNAVAILABLE' ? 'No Data' : r.dataStatus}
+                        {DATA_STATUS_LABEL[r.dataStatus] ?? r.dataStatus}
                       </span>
                     )}
                     {!r.dataStatus && r.confidence === 'LOW' && (
-                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={r.healthNote ?? 'Limited data'}>
-                        Limited
+                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={r.healthNote ?? 'Sparse activity — comparison metrics less reliable'}>
+                        Sparse
                       </span>
                     )}
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>

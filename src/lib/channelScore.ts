@@ -82,7 +82,7 @@ const ICONS: Record<PillarStatus, string> = {
   strong: '✅',
   average: '⚖️',
   weak: '❌',
-  limited: '❓',
+  limited: '◻️',
 };
 
 // ── Benchmark computation ─────────────────────────────────────────────────
@@ -166,7 +166,7 @@ export function computeGrowthPct(input: ChannelScoreInput): number | null {
  */
 function scoreReach(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult {
   if (input.views7Delta == null) {
-    return { status: 'limited', icon: ICONS.limited, reason: 'No views data available' };
+    return { status: 'limited', icon: ICONS.limited, reason: 'Insufficient recent activity for reach analysis' };
   }
 
   const growthPct = computeGrowthPct(input);
@@ -198,12 +198,12 @@ function scoreReach(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult
   if (v7 >= pool.medianViews7Raw && pool.medianViews7Raw > 0) {
     return { status: 'average', icon: ICONS.average, reason: 'Moderate raw views, limited baseline' };
   }
-  return { status: 'limited', icon: ICONS.limited, reason: 'Raw growth available, no clean baseline' };
+  return { status: 'limited', icon: ICONS.limited, reason: 'Waiting for enough history to establish growth baseline' };
 }
 
 function scoreConversion(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult {
   if (input.subs7Delta == null || input.views7Delta == null || input.views7Delta <= 0) {
-    return { status: 'limited', icon: ICONS.limited, reason: 'Limited data' };
+    return { status: 'limited', icon: ICONS.limited, reason: 'Insufficient recent activity for conversion analysis' };
   }
 
   const convRate = (input.subs7Delta / input.views7Delta) * 1000; // subs per 1K views
