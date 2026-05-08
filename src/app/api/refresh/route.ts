@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnapLite } from '@/lib/youtube';
-import { writeLiveSnap, writeChannelMapping, writeSyncMeta, canRefresh, readSyncMeta, type SyncMeta } from '@/lib/kvCache';
+import { writeLiveSnap, writeChannelMapping, writeSyncMeta, canRefresh, readSyncMeta, readLiveSnap, type SyncMeta } from '@/lib/kvCache';
+import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -83,8 +84,11 @@ export async function POST(req: NextRequest) {
         continue;
       }
 
+      // Safe merge: don't let null API responses overwrite valid cached data
       if (snap.channelId) {
-        await writeLiveSnap(snap.channelId, snap);
+        const existing = await readLiveSnap(snap.channelId);
+        const merged = safeMergeSnap(existing, snap);
+        await writeLiveSnap(snap.channelId, merged);
         await writeChannelMapping(handle, snap.channelId);
       }
 

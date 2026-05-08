@@ -6,7 +6,8 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
-import { readHistory, deltaOver, seriesForField } from '@/lib/snapshots';
+import { readHistory } from '@/lib/snapshots';
+import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 
 export const revalidate = 600;
@@ -36,45 +37,50 @@ export default async function ControlPage() {
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
       const history =
         snap?.channelId && !snap.error ? await readHistory(snap.channelId) : [];
-      const subs7 = deltaOver(history, 7, 'subs');
-      const views7 = deltaOver(history, 7, 'views');
-      const subs14 = deltaOver(history, 14, 'subs');
-      const views14 = deltaOver(history, 14, 'views');
 
-      // Week-on-week: compare this 7d vs previous 7d
-      const prevSubsDelta = subs14 && subs7 ? subs14.delta - subs7.delta : null;
-      const prevViewsDelta = views14 && views7 ? views14.delta - views7.delta : null;
-      const subsWoW = prevSubsDelta != null && prevSubsDelta !== 0 && subs7
-        ? ((subs7.delta - prevSubsDelta) / Math.abs(prevSubsDelta)) * 100 : null;
-      const viewsWoW = prevViewsDelta != null && prevViewsDelta !== 0 && views7
-        ? ((views7.delta - prevViewsDelta) / Math.abs(prevViewsDelta)) * 100 : null;
+      // ── Normalized data layer ───────────────────────────────────────────
+      const nc = normalizeChannelData(snap, history);
 
-      const uploads30d = snap?.uploads30d ?? 0;
-      const subsSeries = seriesForField(history, 'subs', 30);
+      // Week-on-week: compare this 7d delta vs previous 7d delta
+      const subs7Val = rawDelta(nc.subs7d);
+      const views7Val = rawDelta(nc.views7d);
+      const subs14Val = rawDelta(nc.subs30d); // 30d used as proxy for 14d pair
+      const views14Val = rawDelta(nc.views30d);
+      // For WoW we still need the raw 14d deltas — use deltaOver for now
+      const { deltaOver: deltaOverFn } = await import('@/lib/snapshots');
+      const subs14Raw = deltaOverFn(history, 14, 'subs');
+      const views14Raw = deltaOverFn(history, 14, 'views');
+      const prevSubsDelta = subs14Raw && nc.subs7d ? subs14Raw.delta - nc.subs7d.delta : null;
+      const prevViewsDelta = views14Raw && nc.views7d ? views14Raw.delta - nc.views7d.delta : null;
+      const subsWoW = prevSubsDelta != null && prevSubsDelta !== 0 && nc.subs7d
+        ? ((nc.subs7d.delta - prevSubsDelta) / Math.abs(prevSubsDelta)) * 100 : null;
+      const viewsWoW = prevViewsDelta != null && prevViewsDelta !== 0 && nc.views7d
+        ? ((nc.views7d.delta - prevViewsDelta) / Math.abs(prevViewsDelta)) * 100 : null;
+
       const derived = snap ? deriveFromLive(snap, {
-        subs7Delta: subs7?.delta ?? null,
-        views7Delta: views7?.delta ?? null,
+        subs7Delta: subs7Val,
+        views7Delta: views7Val,
       }) : null;
       const status: ChannelState = derived?.status ?? 'COLD';
-      const classification = classifyArtist(status, uploads30d);
+      const classification = classifyArtist(status, nc.cadence.uploads30d);
       const reason = derived?.reason ?? 'No cached data yet';
 
       return {
         slug: a.slug,
         name: a.name,
         isVirgin: isVirginOwned(a),
-        subs: snap?.subs ?? null,
-        subs7Delta: subs7?.delta ?? null,
-        views7Delta: views7?.delta ?? null,
+        subs: nc.subs,
+        subs7Delta: subs7Val,
+        views7Delta: views7Val,
         subsWoW,
         viewsWoW,
-        uploads30d,
-        shorts30d: snap?.shorts30d ?? 0,
+        uploads30d: nc.cadence.uploads30d,
+        shorts30d: nc.cadence.shorts30d,
         status,
         classification,
         reason,
-        subsSeries,
-        totalViews: snap?.views ?? null,
+        subsSeries: nc.sparklineSubs30d,
+        totalViews: nc.views,
       };
     })
   );

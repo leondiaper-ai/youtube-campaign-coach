@@ -5,7 +5,8 @@ import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { listCustomArtists } from '@/lib/artistStore';
 import { isPinned } from '@/lib/campaignStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
-import { readHistory, deltaOver, campaignDelta, seriesForField } from '@/lib/snapshots';
+import { readHistory, campaignDelta } from '@/lib/snapshots';
+import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import { decideWatcher } from '@/lib/watcherDecision';
 import {
   computeConversion,
@@ -72,17 +73,26 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
   );
 
   const history = live?.channelId ? await readHistory(live.channelId) : [];
-  const subs7 = deltaOver(history, 7, 'subs');
-  const subs30 = deltaOver(history, 30, 'subs');
-  const views7 = deltaOver(history, 7, 'views');
+
+  // ── Normalized data layer ─────────────────────────────────────────────
+  const nc = normalizeChannelData(live, history, artist.campaignStartDate ? {
+    campaignName: artist.campaign ?? 'Tracking',
+    campaignStartDate: artist.campaignStartDate,
+    isActive: true,
+  } : null);
+
+  // Legacy aliases for backwards compat in this file
+  const subs7 = nc.subs7d ? { delta: nc.subs7d.delta, pct: nc.subs7d.pct } : null;
+  const subs30 = nc.subs30d ? { delta: nc.subs30d.delta, pct: nc.subs30d.pct } : null;
+  const views7 = nc.views7d ? { delta: nc.views7d.delta, pct: nc.views7d.pct } : null;
 
   // Now derive with full conversion context
   derived = live
     ? deriveFromLive(live, {
         daysToNextMoment,
         phase: artist.phase,
-        subs7Delta: subs7?.delta ?? null,
-        views7Delta: views7?.delta ?? null,
+        subs7Delta: rawDelta(nc.subs7d),
+        views7Delta: rawDelta(nc.views7d),
       })
     : null;
 
@@ -103,7 +113,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     : null;
 
   // ── Launch Module data — daily view deltas for chart + momentum ─────────
-  const viewSeries = seriesForField(history, 'views', 30);
+  const viewSeries = nc.sparklineViews30d;
   const launchViewHistory: { x: number; y: number }[] = (() => {
     if (viewSeries.length < 2) return [];
     const sorted = [...viewSeries].sort((a, b) => a.x - b.x);

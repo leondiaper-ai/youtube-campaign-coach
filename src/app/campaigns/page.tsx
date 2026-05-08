@@ -7,12 +7,13 @@ import {
   type PinnedCampaign, type CampaignNote, type CampaignWeeklySnapshot,
 } from '@/lib/campaignStore';
 import { readLiveSnapByHandle, readSyncMeta } from '@/lib/kvCache';
-import { readHistory, deltaOver, campaignDelta, seriesForField, type ChannelSnapshot } from '@/lib/snapshots';
+import { readHistory, campaignDelta, type ChannelSnapshot } from '@/lib/snapshots';
 import {
   generateYouTubeGrowthRead, getCampaignSignal, getChannelHealth,
   getYouTubeGrowthState, type GrowthInput,
 } from '@/lib/youtubeGrowthOS';
 import { checkContentStructure, type StructureWarning } from '@/lib/contentStructure';
+import { normalizeChannelData, toGrowthInput, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import CampaignStatusBoard from '@/components/CampaignStatusBoard';
 
 export const revalidate = 600;
@@ -219,28 +220,29 @@ async function loadCard(
   if (!snap || snap.error) return { ...base, diagnosis: 'No cached data yet' };
 
   const history = snap.channelId ? await readHistory(snap.channelId) : [];
-  const subs7 = deltaOver(history, 7, 'subs');
-  const views7 = deltaOver(history, 7, 'views');
-  const sparkline = seriesForField(history, 'subs', 30);
+
+  // ── Normalized data layer — single source of truth for metrics ────────
+  const campaignStart = artist.campaignStartDate ?? pin.pinnedAt ?? null;
+  const nc = normalizeChannelData(snap, history, campaignStart ? {
+    campaignName: artist.campaign ?? 'Tracking',
+    campaignStartDate: campaignStart,
+    isActive: true,
+  } : null);
 
   const derived = deriveFromLive(snap, {
-    subs7Delta: subs7?.delta ?? null,
-    views7Delta: views7?.delta ?? null,
+    subs7Delta: rawDelta(nc.subs7d),
+    views7Delta: rawDelta(nc.views7d),
     phase: artist.phase,
   });
 
   const currentStatus = derived?.status ?? 'COLD';
 
-  // ── Growth OS dual state ──────────────────────────────────────────────
+  // ── Growth OS dual state (bridged from normalized data) ───────────────
   const growthInput: GrowthInput = {
-    subscribers: snap.subs ?? undefined,
-    views7d: views7?.delta ?? null,
-    subscribers7d: subs7?.delta ?? null,
-    uploads30d: snap.uploads30d ?? 0,
-    shorts30d: snap.shorts30d ?? 0,
-    lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? 60,
+    ...toGrowthInput(nc, artist),
     hasActiveCampaign: true, // All pinned cards are actively tracked campaigns
     campaignName: artist.campaign ?? 'Active Campaign',
+    lastUploadDaysAgo: nc.cadence.lastUploadDaysAgo ?? 60,
   };
   const gsResult = getYouTubeGrowthState(growthInput);
   const chHealth = getChannelHealth(gsResult.state, growthInput);
@@ -274,8 +276,7 @@ async function loadCard(
   }
 
   // ── Campaign window data ──────────────────────────────────────────────
-  // Use campaignStartDate if set, otherwise fall back to pin date for tracking
-  const campaignStart = artist.campaignStartDate ?? pin.pinnedAt ?? null;
+  // campaignStart already computed above for normalizeChannelData
   let campaignWindow: CampaignWindowData | null = null;
   let campaignTrend: CampaignTrendData | null = null;
   let weeklyProgress: WeeklyProgressEntry[] = [];
@@ -356,8 +357,8 @@ async function loadCard(
         snapshotDate: new Date().toISOString(),
         campaignDay,
         week: weekNum,
-        views7d: views7?.delta ?? 0,
-        subs7d: subs7?.delta ?? 0,
+        views7d: rawDelta(nc.views7d) ?? 0,
+        subs7d: rawDelta(nc.subs7d) ?? 0,
         uploads30d: snap.uploads30d ?? 0,
         shorts30d: snap.shorts30d ?? 0,
         campaignContentViews: contentViews,
@@ -382,18 +383,19 @@ async function loadCard(
 
   return {
     ...base,
-    subs7Delta: subs7?.delta ?? null,
-    views7Delta: views7?.delta ?? null,
-    subs: snap.subs ?? null,
-    views: snap.views ?? null,
-    lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? null,
-    uploads30d: snap.uploads30d ?? 0,
-    shorts30d: snap.shorts30d ?? 0,
+    // Core metrics from normalized data layer
+    subs7Delta: rawDelta(nc.subs7d),
+    views7Delta: rawDelta(nc.views7d),
+    subs: nc.subs,
+    views: nc.views,
+    lastUploadDaysAgo: nc.cadence.lastUploadDaysAgo,
+    uploads30d: nc.cadence.uploads30d,
+    shorts30d: nc.cadence.shorts30d,
     boardStatus: currentStatus,
     diagnosis: derived?.reason ?? 'No data',
     actions: [derived?.nextAction ?? 'Ship something this week'],
-    cadenceLine: cadenceLine(snap.uploads30d ?? 0),
-    sparkline,
+    cadenceLine: nc.cadence.cadenceLine,
+    sparkline: nc.sparklineSubs30d,
     impact,
     campaignWindow,
     campaignTrend,

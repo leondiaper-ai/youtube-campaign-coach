@@ -147,7 +147,12 @@ export function seriesForField(
   field: 'subs' | 'views',
   days = 30
 ): { x: number; y: number }[] {
-  const cutoff = Date.now() - days * 86400000;
+  if (history.length === 0) return [];
+  // Anchor to the latest snapshot, not Date.now(), for consistency
+  // with deltaOver(). If the cron hasn't run recently, Date.now()
+  // makes the cutoff too recent and can exclude valid data points.
+  const anchor = new Date(history[history.length - 1].ts).getTime();
+  const cutoff = anchor - days * 86400000;
   return history
     .filter((h) => new Date(h.ts).getTime() >= cutoff)
     .map((h) => ({ x: new Date(h.ts).getTime(), y: h[field] }));

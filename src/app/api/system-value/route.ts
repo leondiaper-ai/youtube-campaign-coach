@@ -4,7 +4,8 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readAllLiveSnaps } from '@/lib/kvCache';
-import { readHistory, deltaOver } from '@/lib/snapshots';
+import { readHistory } from '@/lib/snapshots';
+import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import { computeSystemValue, type SystemValueSummary } from '@/lib/valueModel';
 
 export const revalidate = 600;
@@ -40,22 +41,20 @@ export async function GET() {
         }
 
         const history = await readHistory(snap.channelId);
-        const subs7 = deltaOver(history, 7, 'subs');
-        const views7 = deltaOver(history, 7, 'views');
-        const uploads30d = snap.uploads30d ?? 0;
+        const nc = normalizeChannelData(snap, history);
 
         const derived = deriveFromLive(snap, {
-          subs7Delta: subs7?.delta ?? null,
-          views7Delta: views7?.delta ?? null,
+          subs7Delta: rawDelta(nc.subs7d),
+          views7Delta: rawDelta(nc.views7d),
         });
         const status = derived?.status ?? 'COLD';
 
         return {
-          views7d: views7?.delta ?? 0,
-          subs7d: subs7?.delta ?? 0,
-          uploads30d,
+          views7d: rawDelta(nc.views7d) ?? 0,
+          subs7d: rawDelta(nc.subs7d) ?? 0,
+          uploads30d: nc.cadence.uploads30d,
           channelState: status,
-          classification: classifyArtist(status, uploads30d),
+          classification: classifyArtist(status, nc.cadence.uploads30d),
         };
       })
     );

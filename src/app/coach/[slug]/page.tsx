@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import { loadPlan } from '@/lib/planStore';
 import { readLiveSnapByHandle, readChannelMapping } from '@/lib/kvCache';
-import { readHistory, deltaOver } from '@/lib/snapshots';
+import { readHistory } from '@/lib/snapshots';
 import { daysSince } from '@/lib/artists';
 import { ARTISTS } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
+import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import CampaignDestination from '@/components/CampaignDestination';
 
 export const revalidate = 600;
@@ -51,25 +52,18 @@ export default async function CampaignPage({ params }: PageProps) {
     try {
       const snap = await readLiveSnapByHandle(artistConfig.channelHandle);
       if (snap) {
-        let views7Delta: number | null = null;
-        let subs7Delta: number | null = null;
         const channelId = await readChannelMapping(artistConfig.channelHandle);
-        if (channelId) {
-          const history = await readHistory(channelId);
-          const v7 = deltaOver(history, 7, 'views');
-          const s7 = deltaOver(history, 7, 'subs');
-          if (v7) views7Delta = v7.delta;
-          if (s7) subs7Delta = s7.delta;
-        }
+        const history = channelId ? await readHistory(channelId) : [];
+        const nc = normalizeChannelData(snap, history);
 
         liveChannel = {
-          subs: snap.subs ?? undefined,
-          views: snap.views ?? undefined,
-          uploads30d: snap.uploads30d ?? undefined,
-          shorts30d: snap.shorts30d ?? undefined,
-          lastUploadDaysAgo: daysSince(snap.lastUploadAt) ?? undefined,
-          views7Delta,
-          subs7Delta,
+          subs: nc.subs ?? undefined,
+          views: nc.views ?? undefined,
+          uploads30d: nc.cadence.uploads30d || undefined,
+          shorts30d: nc.cadence.shorts30d || undefined,
+          lastUploadDaysAgo: nc.cadence.lastUploadDaysAgo ?? undefined,
+          views7Delta: rawDelta(nc.views7d),
+          subs7Delta: rawDelta(nc.subs7d),
         };
       }
     } catch {

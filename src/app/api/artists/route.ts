@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchChannelSnapLite, resolveChannelIdWithSearch } from '@/lib/youtube';
-import { writeLiveSnap, writeChannelMapping } from '@/lib/kvCache';
+import { writeLiveSnap, writeChannelMapping, readLiveSnap } from '@/lib/kvCache';
+import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
 import { addCustomArtist, listCustomArtists, removeCustomArtist, slugify } from '@/lib/artistStore';
 import type { Artist } from '@/lib/artists';
 
@@ -40,8 +41,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Write to KV cache immediately so the artist shows data right away
+  // Safe merge in case there's existing data (re-add scenario)
   if (snap.channelId) {
-    await writeLiveSnap(snap.channelId, snap);
+    const existing = await readLiveSnap(snap.channelId);
+    const merged = safeMergeSnap(existing, snap);
+    await writeLiveSnap(snap.channelId, merged);
     const handle = snap.handle || channelId;
     await writeChannelMapping(handle, snap.channelId);
   }

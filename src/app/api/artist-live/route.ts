@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
-import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
+import { readHistory, campaignDelta } from '@/lib/snapshots';
+import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 
 /**
  * GET /api/artist-live?slug=k-trap
@@ -32,14 +33,21 @@ export async function GET(req: NextRequest) {
   if (!snap) return NextResponse.json({ error: 'No cached data yet. Run a sync first.' }, { status: 404 });
   if (snap.error) return NextResponse.json({ error: snap.error }, { status: 502 });
 
-  // 3. Read history for delta calculations
+  // 3. Read history and normalize via shared data layer
   const history = snap.channelId ? await readHistory(snap.channelId) : [];
-  const subs7 = deltaOver(history, 7, 'subs');
-  const subs30 = deltaOver(history, 30, 'subs');
-  const views7 = deltaOver(history, 7, 'views');
+  const campaignStart = artist.campaignStartDate ?? null;
+  const nc = normalizeChannelData(snap, history, campaignStart ? {
+    campaignName: artist.campaign ?? 'Tracking',
+    campaignStartDate: campaignStart,
+    isActive: true,
+  } : null);
+
+  // Bridge to legacy format for backwards compatibility
+  const subs7 = nc.subs7d ? { delta: nc.subs7d.delta, pct: nc.subs7d.pct } : null;
+  const subs30 = nc.subs30d ? { delta: nc.subs30d.delta, pct: nc.subs30d.pct } : null;
+  const views7 = nc.views7d ? { delta: nc.views7d.delta, pct: nc.views7d.pct } : null;
 
   // 3b. Campaign-period deltas (if campaignStartDate is set)
-  const campaignStart = artist.campaignStartDate ?? null;
   const campaignSubs = campaignStart
     ? campaignDelta(history, campaignStart, 'subs')
     : null;
@@ -108,9 +116,9 @@ export async function GET(req: NextRequest) {
   const state = {
     channelId: snap.channelId ?? '',
     subscriberCount: snap.subs ?? 0,
-    subscriberDelta: subs7?.delta ?? null,
-    viewCount: snap.views ?? 0,
-    viewDelta: views7?.delta ?? null,
+    subscriberDelta: rawDelta(nc.subs7d),
+    viewCount: nc.views ?? 0,
+    viewDelta: rawDelta(nc.views7d),
     videoCount: uploads.length,
     lastUploadDate: snap.lastUploadAt ?? null,
     uploadsLast7Days,
@@ -160,7 +168,7 @@ export async function GET(req: NextRequest) {
     subs7,
     subs30,
     views7,
-    historyDays: history.length,
+    historyDays: nc.historyDepthDays,
     // Campaign-period tracking
     campaign: campaignStart
       ? {
