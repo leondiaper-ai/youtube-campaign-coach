@@ -43,6 +43,12 @@ export async function GET(req: NextRequest) {
     subs7Delta,
     views7Delta,
     structureWarning,
+    _dataQuality: {
+      confidence: nc.confidence,
+      health: nc.health,
+      historyDepthDays: nc.historyDepthDays,
+      note: nc.healthNote,
+    },
     _syncMeta: syncMeta ? {
       lastSyncAt: syncMeta.lastSyncAt,
       nextScheduledSync: syncMeta.nextScheduledSync,

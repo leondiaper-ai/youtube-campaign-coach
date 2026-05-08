@@ -32,6 +32,10 @@ export type RowData = {
   subsSeries: { x: number; y: number }[];
   /** Total channel views — used for growth % baseline, not as a score driver */
   totalViews?: number | null;
+  /** Data confidence level — LOW/MEDIUM/HIGH */
+  confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
+  /** Human-readable data quality note */
+  healthNote?: string;
 };
 
 type ViewMode = 'managed' | 'market';
@@ -613,6 +617,16 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
                     {scoreMap.get(r.slug) && (
                       <span onClick={(e) => e.stopPropagation()}>
                         <ChannelScoreBadge score={scoreMap.get(r.slug)!} compact />
+                      </span>
+                    )}
+                    {r.confidence === 'LOW' && (
+                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={r.healthNote ?? 'Limited data'}>
+                        Limited
+                      </span>
+                    )}
+                    {r.confidence === 'MEDIUM' && (
+                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={r.healthNote ?? 'Partial data'}>
+                        Partial
                       </span>
                     )}
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>

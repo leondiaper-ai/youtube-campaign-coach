@@ -263,7 +263,19 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <span>Watcher</span>
           <CoachCampaignBadge slug={slug} fallback={artist.campaign} />
         </div>
-        <h1 className="font-black text-3xl mt-1">{artist.name}</h1>
+        <div className="flex items-center gap-2 mt-1">
+          <h1 className="font-black text-3xl">{artist.name}</h1>
+          {nc.confidence === 'LOW' && (
+            <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={nc.healthNote}>
+              Limited data
+            </span>
+          )}
+          {nc.confidence === 'MEDIUM' && (
+            <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={nc.healthNote}>
+              Partial data
+            </span>
+          )}
+        </div>
 
         {/* ─── STATE + HEADLINE + CONSEQUENCE ─────────────────────────── */}
         <div className="mt-5 flex items-start gap-3">

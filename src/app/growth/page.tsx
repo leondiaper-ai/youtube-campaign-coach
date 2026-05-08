@@ -7,7 +7,7 @@ import {
 import { listCustomArtists } from '@/lib/artistStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
-import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
+import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 
 export const revalidate = 600;
@@ -44,18 +44,15 @@ export default async function ControlPage() {
       // Week-on-week: compare this 7d delta vs previous 7d delta
       const subs7Val = rawDelta(nc.subs7d);
       const views7Val = rawDelta(nc.views7d);
-      const subs14Val = rawDelta(nc.subs30d); // 30d used as proxy for 14d pair
-      const views14Val = rawDelta(nc.views30d);
-      // For WoW we still need the raw 14d deltas — use deltaOver for now
+      // For WoW we need the raw 14d deltas to derive "previous week"
       const { deltaOver: deltaOverFn } = await import('@/lib/snapshots');
       const subs14Raw = deltaOverFn(history, 14, 'subs');
       const views14Raw = deltaOverFn(history, 14, 'views');
-      const prevSubsDelta = subs14Raw && nc.subs7d ? subs14Raw.delta - nc.subs7d.delta : null;
-      const prevViewsDelta = views14Raw && nc.views7d ? views14Raw.delta - nc.views7d.delta : null;
-      const subsWoW = prevSubsDelta != null && prevSubsDelta !== 0 && nc.subs7d
-        ? ((nc.subs7d.delta - prevSubsDelta) / Math.abs(prevSubsDelta)) * 100 : null;
-      const viewsWoW = prevViewsDelta != null && prevViewsDelta !== 0 && nc.views7d
-        ? ((nc.views7d.delta - prevViewsDelta) / Math.abs(prevViewsDelta)) * 100 : null;
+      // Use centralized WoW calculator with proper guards
+      const subsWoWResult = computeWoW(nc.subs7d, subs14Raw);
+      const viewsWoWResult = computeWoW(nc.views7d, views14Raw);
+      const subsWoW = subsWoWResult?.value ?? null;
+      const viewsWoW = viewsWoWResult?.value ?? null;
 
       const derived = snap ? deriveFromLive(snap, {
         subs7Delta: subs7Val,
@@ -81,6 +78,8 @@ export default async function ControlPage() {
         reason,
         subsSeries: nc.sparklineSubs30d,
         totalViews: nc.views,
+        confidence: nc.confidence,
+        healthNote: nc.healthNote,
       };
     })
   );

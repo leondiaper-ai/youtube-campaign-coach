@@ -16,6 +16,9 @@ export {
   rawDelta,
   rawDeltaOrZero,
 
+  // Week-on-week
+  computeWoW,
+
   // Centralized thresholds
   THRESHOLDS,
 
@@ -27,4 +30,5 @@ export {
   type CampaignMetrics,
   type DataHealth,
   type DataConfidence,
+  type WoWResult,
 } from './normalizeChannelData';

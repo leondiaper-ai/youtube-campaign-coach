@@ -242,6 +242,58 @@ export function safeMergeSnap(
   };
 }
 
+// ── Week-on-Week calculation ─────────────────────────────────────────────
+// Computes WoW change by comparing current 7d delta vs previous 7d delta.
+// Returns null (→ "—" in UI) when data is insufficient for a reliable comparison.
+
+export type WoWResult = {
+  value: number;        // percentage change
+  reliable: boolean;    // false when data is partial or confidence LOW
+  note: string;         // human-readable explanation when unreliable
+};
+
+export function computeWoW(
+  current7d: DeltaResult | null,
+  raw14d: ReturnType<typeof deltaOver>,
+): WoWResult | null {
+  // No current 7d delta → can't compute WoW
+  if (!current7d) return null;
+
+  // Current delta not meaningful (zero from stale data) → skip WoW
+  if (!current7d.meaningful) return null;
+
+  // No 14d data → can't derive previous week
+  if (!raw14d) return null;
+
+  // Guard: if the 14d delta doesn't actually cover significantly more time
+  // than the 7d delta, the "previous week" is just noise.
+  const days14Covered = Math.round(
+    (new Date(raw14d.last.ts).getTime() - new Date(raw14d.baseline.ts).getTime()) / 86400000,
+  );
+
+  // Need at least 10 days of actual data for a 14d window to be meaningful
+  // (otherwise the "previous week" portion is too thin)
+  if (days14Covered < 10) {
+    return null;
+  }
+
+  const prevDelta = raw14d.delta - current7d.delta;
+
+  // Previous period delta is zero → can't compute percentage change
+  if (prevDelta === 0) return null;
+
+  const wow = ((current7d.delta - prevDelta) / Math.abs(prevDelta)) * 100;
+
+  // Reliability check: is the current 7d confidence at least MEDIUM?
+  const reliable = current7d.confidence !== 'LOW' && days14Covered >= 12;
+
+  return {
+    value: wow,
+    reliable,
+    note: !reliable ? 'Limited history — WoW may be unreliable' : '',
+  };
+}
+
 // ── Convenience: extract raw deltas for legacy consumers ──────────────────
 // During migration, some components still expect plain numbers.
 

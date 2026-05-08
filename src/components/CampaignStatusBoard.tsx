@@ -88,6 +88,10 @@ type CardData = {
   ownership?: 'virgin' | 'observed';
   /** Content structure warning (only present when a gap exists) */
   structureWarning?: StructureWarning | null;
+  /** Data confidence level */
+  confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
+  /** Human-readable data quality note */
+  healthNote?: string;
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -678,6 +682,16 @@ function DecisionCard({
       <div className="mb-3">
         <div className="flex items-center gap-2.5 mb-1">
           <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
+          {card.confidence === 'LOW' && (
+            <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={card.healthNote ?? 'Limited data'}>
+              Limited
+            </span>
+          )}
+          {card.confidence === 'MEDIUM' && (
+            <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={card.healthNote ?? 'Partial data'}>
+              Partial
+            </span>
+          )}
           <span
             className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
             style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}

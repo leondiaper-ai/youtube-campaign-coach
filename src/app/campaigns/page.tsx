@@ -118,6 +118,9 @@ export type StatusCardData = {
   ownership?: 'virgin' | 'observed';
   // Content structure warning (only present when a gap exists)
   structureWarning?: StructureWarning | null;
+  // Data quality
+  confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
+  healthNote?: string;
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -406,6 +409,8 @@ async function loadCard(
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
     structureWarning: checkContentStructure(snap.recentUploads ?? []),
+    confidence: nc.confidence,
+    healthNote: nc.healthNote,
   };
 }
 
