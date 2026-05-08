@@ -717,34 +717,48 @@ function DecisionCard({
       {/* ─── 2. Metrics row (views, subs, conversion, sparkline) ──── */}
       <div className="flex items-end gap-6 mb-3">
         <div>
-          <div
-            className="text-[28px] font-black leading-none tabular-nums"
-            style={{ color: card.views7Delta != null ? deltaColor(card.views7Delta) : INK }}
-          >
-            {card.views7Delta != null
-              ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}`
-              : card.views != null
-              ? fmtNum(card.views)
-              : '—'}
-          </div>
-          <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-            {card.views7Delta != null ? '7d views' : 'views'}
-          </div>
+          {(() => {
+            const hasRealDelta = card.views7Delta != null && card.views7Delta !== 0;
+            return (
+              <>
+                <div
+                  className="text-[28px] font-black leading-none tabular-nums"
+                  style={{ color: hasRealDelta ? deltaColor(card.views7Delta) : INK }}
+                >
+                  {hasRealDelta
+                    ? `${card.views7Delta! >= 0 ? '+' : ''}${fmtNum(card.views7Delta!)}`
+                    : card.views != null
+                    ? fmtNum(card.views)
+                    : '—'}
+                </div>
+                <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
+                  {hasRealDelta ? '7d views' : 'views'}
+                </div>
+              </>
+            );
+          })()}
         </div>
         <div>
-          <div
-            className="text-[28px] font-black leading-none tabular-nums"
-            style={{ color: card.subs7Delta != null ? deltaColor(card.subs7Delta) : INK }}
-          >
-            {card.subs7Delta != null
-              ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}`
-              : card.subs != null
-              ? fmtNum(card.subs)
-              : '—'}
-          </div>
-          <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-            {card.subs7Delta != null ? '7d subs' : 'subs'}
-          </div>
+          {(() => {
+            const hasRealDelta = card.subs7Delta != null && card.subs7Delta !== 0;
+            return (
+              <>
+                <div
+                  className="text-[28px] font-black leading-none tabular-nums"
+                  style={{ color: hasRealDelta ? deltaColor(card.subs7Delta) : INK }}
+                >
+                  {hasRealDelta
+                    ? `${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}`
+                    : card.subs != null
+                    ? fmtNum(card.subs)
+                    : '—'}
+                </div>
+                <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
+                  {hasRealDelta ? '7d subs' : 'subs'}
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Conversion */}
