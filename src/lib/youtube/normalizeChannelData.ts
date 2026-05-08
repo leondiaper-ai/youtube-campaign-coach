@@ -50,11 +50,41 @@ export const THRESHOLDS = {
   medConfidenceMinDays: 3,
 } as const;
 
-// ── Data Health ───────────────────────────────────────────────────────────
+// ── Data Status ──────────────────────────────────────────────────────────
+// Clear, user-facing data quality categories. Every row/card shows one.
+//
+// FRESH:       API fetched successfully, enough snapshot history for 7d and WoW
+// PARTIAL:     API fetched, some fields missing or incomplete
+// LIMITED:     API fetched, not enough stored snapshot history for 7d/WoW deltas
+// STALE:       No fresh fetch within expected window, using last known good data
+// UNAVAILABLE: API failed or channel data could not be retrieved
 
-export type DataHealth = 'FRESH' | 'STALE' | 'PARTIAL' | 'NO_DATA';
+export type DataStatus = 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
+
+// Keep old name as alias for backward compat during migration
+export type DataHealth = DataStatus;
 
 export type DataConfidence = 'HIGH' | 'MEDIUM' | 'LOW';
+
+// ── Missing Reasons ─────────────────────────────────────────────────────
+// Every "—" in the UI gets a reason. These are attached to NormalizedChannel
+// so consumers can show tooltips explaining why data is missing.
+
+export type MissingReason =
+  | 'insufficient_snapshot_history'
+  | 'api_field_unavailable'
+  | 'no_recent_uploads'
+  | 'channel_inactive'
+  | 'fetch_failed'
+  | 'comparison_period_missing'
+  | 'hidden_subscriber_count'
+  | 'not_applicable';
+
+export type MissingReasonEntry = {
+  field: string;
+  reason: MissingReason;
+  detail: string;
+};
 
 // ── Delta Result ──────────────────────────────────────────────────────────
 // Wraps a numeric delta with metadata about trustworthiness.
@@ -134,6 +164,8 @@ export type NormalizedChannel = {
 
   // ── Data quality ──
   health: DataHealth;
+  /** Clear user-facing data status label */
+  dataStatus: DataStatus;
   confidence: DataConfidence;
   /** ISO timestamp of when the underlying data was fetched */
   dataFetchedAt: string | null;
@@ -141,6 +173,10 @@ export type NormalizedChannel = {
   historyDepthDays: number;
   /** Human-readable data quality note */
   healthNote: string;
+  /** Short user-facing data status explanation */
+  dataStatusNote: string;
+  /** Reasons why specific fields show "—" */
+  missingReasons: MissingReasonEntry[];
 };
 
 // ── Core normalize function ───────────────────────────────────────────────
@@ -159,6 +195,7 @@ export function normalizeChannelData(
   const cachedAt = 'cachedAt' in snap ? (snap as CachedSnap).cachedAt : null;
   const health = assessHealth(snap, cachedAt);
   const confidence = assessConfidence(history);
+  const dataStatus = deriveDataStatus(health, confidence, snap);
 
   // ── Deltas ──
   const subs7Raw = deltaOver(history, 7, 'subs');
@@ -183,6 +220,8 @@ export function normalizeChannelData(
 
   // ── Health note ──
   const healthNote = buildHealthNote(health, confidence, history.length);
+  const dataStatusNote = buildDataStatusNote(dataStatus, history.length);
+  const missingReasons = buildMissingReasons(snap, subs7d, views7d, history, confidence);
 
   return {
     channelId: snap.channelId ?? null,
@@ -200,10 +239,13 @@ export function normalizeChannelData(
     sparklineViews30d,
     campaign,
     health,
+    dataStatus,
     confidence,
     dataFetchedAt: cachedAt,
     historyDepthDays: computeHistoryDepth(history),
     healthNote,
+    dataStatusNote,
+    missingReasons,
   };
 }
 
@@ -217,8 +259,16 @@ export function safeMergeSnap(
 ): LiveSnap {
   if (!existing) return incoming;
 
-  // If incoming has an error or key metrics are null, preserve existing
+  // If incoming has an error, preserve existing entirely
   if (incoming.error) {
+    return existing;
+  }
+
+  // If incoming is missing both core metrics (subs + views both null),
+  // treat it as a failed fetch even without an explicit error flag.
+  // This prevents a quota-exhausted or partial API response from
+  // clearing valid cached data.
+  if (incoming.subs == null && incoming.views == null) {
     return existing;
   }
 
@@ -372,16 +422,19 @@ function emptyNormalized(
     sparklineSubs30d: [],
     sparklineViews30d: [],
     campaign: campaignCtx ? { campaignDay: 0, viewsDelta: null, subsDelta: null } : null,
-    health: 'NO_DATA',
+    health: 'UNAVAILABLE' as DataHealth,
+    dataStatus: 'UNAVAILABLE',
     confidence: 'LOW',
     dataFetchedAt: null,
     historyDepthDays: 0,
     healthNote: 'No channel data available',
+    dataStatusNote: 'Channel data could not be retrieved',
+    missingReasons: [{ field: 'all', reason: 'fetch_failed', detail: 'No cached data available for this channel' }],
   };
 }
 
 function assessHealth(snap: LiveSnap, cachedAt: string | null): DataHealth {
-  if (snap.subs == null && snap.views == null) return 'NO_DATA';
+  if (snap.subs == null && snap.views == null) return 'UNAVAILABLE';
   if (!cachedAt) return 'PARTIAL';
 
   const ageHours = (Date.now() - new Date(cachedAt).getTime()) / 3600000;
@@ -527,7 +580,7 @@ function buildHealthNote(
   confidence: DataConfidence,
   snapshotCount: number,
 ): string {
-  if (health === 'NO_DATA') return 'No channel data available';
+  if (health === 'UNAVAILABLE') return 'No channel data available';
 
   const parts: string[] = [];
 
@@ -535,6 +588,7 @@ function buildHealthNote(
   if (health === 'FRESH') parts.push('Data is current');
   else if (health === 'STALE') parts.push('Data may be outdated');
   else if (health === 'PARTIAL') parts.push('Partial data only');
+  else if (health === 'LIMITED') parts.push('Limited data available');
 
   // Confidence component
   if (confidence === 'LOW') {
@@ -547,4 +601,174 @@ function buildHealthNote(
   // HIGH confidence: no note needed
 
   return parts.join(' · ');
+}
+
+// ── Data Status derivation ──────────────────────────────────────────────
+// Maps the old health + confidence assessment into the new 5-tier DataStatus.
+// This is the single place where DataStatus is determined.
+
+function deriveDataStatus(
+  health: DataHealth,
+  confidence: DataConfidence,
+  snap: LiveSnap | CachedSnap,
+): DataStatus {
+  // No data at all or fetch error → UNAVAILABLE
+  if (health === 'UNAVAILABLE') return 'UNAVAILABLE';
+  if (snap.error) return 'UNAVAILABLE';
+
+  // Cache is stale (beyond freshMaxHours) → STALE
+  if (health === 'STALE') return 'STALE';
+
+  // Data present but insufficient snapshot history for deltas → LIMITED
+  if (confidence === 'LOW') return 'LIMITED';
+
+  // Data present but some fields missing or confidence not yet HIGH → PARTIAL
+  if (health === 'PARTIAL' || confidence === 'MEDIUM') return 'PARTIAL';
+
+  // Everything looks good → FRESH
+  return 'FRESH';
+}
+
+// ── Data Status note ────────────────────────────────────────────────────
+// Short user-facing explanation for the current data status.
+// Shown as a tooltip or subtitle in UI cards/rows.
+
+function buildDataStatusNote(
+  status: DataStatus,
+  snapshotCount: number,
+): string {
+  switch (status) {
+    case 'FRESH':
+      return 'Data is current and trends are reliable';
+    case 'PARTIAL':
+      return snapshotCount < 7
+        ? `Building history (${snapshotCount} snapshots) — trends are directional`
+        : 'Some metric fields are incomplete';
+    case 'LIMITED':
+      return snapshotCount <= 1
+        ? 'Waiting for daily snapshots to build trend history'
+        : `Only ${snapshotCount} snapshots stored — need ${THRESHOLDS.medConfidenceMinDays}+ days for trends`;
+    case 'STALE':
+      return 'Data has not been refreshed recently — values shown are from the last successful fetch';
+    case 'UNAVAILABLE':
+      return 'Channel data could not be retrieved';
+  }
+}
+
+// ── Missing reasons builder ─────────────────────────────────────────────
+// Scans each key metric field and explains why it's null / shows "—".
+// Consumers use this array to render per-field tooltips in the UI.
+
+function buildMissingReasons(
+  snap: LiveSnap | CachedSnap,
+  subs7d: DeltaResult | null,
+  views7d: DeltaResult | null,
+  history: ChannelSnapshot[],
+  confidence: DataConfidence,
+): MissingReasonEntry[] {
+  const reasons: MissingReasonEntry[] = [];
+  const depth = computeHistoryDepth(history);
+
+  // ── Subscriber count ──
+  if (snap.subs == null) {
+    reasons.push({
+      field: 'subs',
+      reason: snap.error ? 'fetch_failed' : 'hidden_subscriber_count',
+      detail: snap.error
+        ? 'API request failed — subscriber count unavailable'
+        : 'Subscriber count is hidden by the channel owner',
+    });
+  }
+
+  // ── View count ──
+  if (snap.views == null) {
+    reasons.push({
+      field: 'views',
+      reason: snap.error ? 'fetch_failed' : 'api_field_unavailable',
+      detail: snap.error
+        ? 'API request failed — view count unavailable'
+        : 'View count not returned by the API',
+    });
+  }
+
+  // ── 7-day subscriber delta ──
+  if (!subs7d) {
+    if (snap.subs == null) {
+      reasons.push({
+        field: 'subs7d',
+        reason: 'hidden_subscriber_count',
+        detail: 'Cannot compute subscriber growth — count is hidden',
+      });
+    } else if (depth < 2) {
+      reasons.push({
+        field: 'subs7d',
+        reason: 'insufficient_snapshot_history',
+        detail: `Need at least 2 daily snapshots — currently have ${history.length}`,
+      });
+    } else {
+      reasons.push({
+        field: 'subs7d',
+        reason: 'comparison_period_missing',
+        detail: 'Not enough history to compute a 7-day comparison',
+      });
+    }
+  } else if (!subs7d.meaningful) {
+    reasons.push({
+      field: 'subs7d',
+      reason: 'insufficient_snapshot_history',
+      detail: `Delta covers only ${subs7d.daysCovered} day${subs7d.daysCovered === 1 ? '' : 's'} — not enough for a reliable 7-day trend`,
+    });
+  }
+
+  // ── 7-day views delta ──
+  if (!views7d) {
+    if (snap.views == null) {
+      reasons.push({
+        field: 'views7d',
+        reason: 'api_field_unavailable',
+        detail: 'Cannot compute view growth — view count unavailable',
+      });
+    } else if (depth < 2) {
+      reasons.push({
+        field: 'views7d',
+        reason: 'insufficient_snapshot_history',
+        detail: `Need at least 2 daily snapshots — currently have ${history.length}`,
+      });
+    } else {
+      reasons.push({
+        field: 'views7d',
+        reason: 'comparison_period_missing',
+        detail: 'Not enough history to compute a 7-day comparison',
+      });
+    }
+  } else if (!views7d.meaningful) {
+    reasons.push({
+      field: 'views7d',
+      reason: 'insufficient_snapshot_history',
+      detail: `Delta covers only ${views7d.daysCovered} day${views7d.daysCovered === 1 ? '' : 's'} — not enough for a reliable 7-day trend`,
+    });
+  }
+
+  // ── Last upload ──
+  if (snap.lastUploadAt == null && snap.uploads30d === 0) {
+    reasons.push({
+      field: 'lastUploadAt',
+      reason: 'no_recent_uploads',
+      detail: 'No uploads found in the last 30 days',
+    });
+  }
+
+  // ── Upload cadence ──
+  if ((snap.uploads30d ?? 0) === 0 && !snap.error) {
+    const lastUploadDays = daysSince(snap.lastUploadAt);
+    if (lastUploadDays != null && lastUploadDays > THRESHOLDS.coldLastUploadDays) {
+      reasons.push({
+        field: 'cadence',
+        reason: 'channel_inactive',
+        detail: `Last upload was ${lastUploadDays} days ago — channel appears inactive`,
+      });
+    }
+  }
+
+  return reasons;
 }

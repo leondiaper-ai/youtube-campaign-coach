@@ -92,6 +92,10 @@ type CardData = {
   confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
   /** Human-readable data quality note */
   healthNote?: string;
+  /** Clear data status label */
+  dataStatus?: 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
+  /** Short explanation for data status */
+  dataStatusNote?: string;
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────

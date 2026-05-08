@@ -121,6 +121,8 @@ export type StatusCardData = {
   // Data quality
   confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
   healthNote?: string;
+  dataStatus?: 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
+  dataStatusNote?: string;
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -411,6 +413,8 @@ async function loadCard(
     structureWarning: checkContentStructure(snap.recentUploads ?? []),
     confidence: nc.confidence,
     healthNote: nc.healthNote,
+    dataStatus: nc.dataStatus,
+    dataStatusNote: nc.dataStatusNote,
   };
 }
 

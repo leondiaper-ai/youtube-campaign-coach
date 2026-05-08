@@ -249,15 +249,38 @@ const POINTS: Record<PillarStatus, number> = {
   strong: 2,
   average: 1,
   weak: 0,
-  limited: 1, // neutral — don't penalise missing data
+  limited: 0, // unknown data should not inflate score
 };
 
-function computeGrade(total: number, reliablePillars: number): ChannelScore['grade'] {
+function computeGrade(
+  total: number,
+  reliablePillars: number,
+  pillars: ChannelScore['pillars'],
+): ChannelScore['grade'] {
+  // Not enough data to grade meaningfully
   if (reliablePillars <= 1) return 'Limited';
-  if (total >= 5) return 'A';
-  if (total === 4) return 'B';
-  if (total >= 2) return 'C';
-  return 'D';
+
+  // Any weak pillar caps the grade at B — you can't be "A" with a failing dimension
+  const hasWeak = Object.values(pillars).some((p) => p.status === 'weak');
+  // Any limited pillar (insufficient data) caps at C — can't grade highly on incomplete picture
+  const hasLimited = Object.values(pillars).some((p) => p.status === 'limited');
+
+  let maxGrade: ChannelScore['grade'] = 'A';
+  if (hasLimited) maxGrade = 'C';
+  else if (hasWeak) maxGrade = 'B';
+
+  // Point-based grade
+  let grade: ChannelScore['grade'];
+  if (total >= 5) grade = 'A';
+  else if (total >= 4) grade = 'B';
+  else if (total >= 2) grade = 'C';
+  else grade = 'D';
+
+  // Apply cap
+  const gradeOrder: Record<ChannelScore['grade'], number> = { A: 4, B: 3, C: 2, D: 1, Limited: 0 };
+  if (gradeOrder[grade] > gradeOrder[maxGrade]) grade = maxGrade;
+
+  return grade;
 }
 
 /**
@@ -315,7 +338,7 @@ export function calculateChannelScore(
   const totalPoints =
     POINTS[reach.status] + POINTS[conversion.status] + POINTS[cadence.status];
 
-  const grade = computeGrade(totalPoints, reliablePillars);
+  const grade = computeGrade(totalPoints, reliablePillars, pillars);
 
   const dataQuality: ChannelScore['dataQuality'] =
     reliablePillars >= 3 ? 'good' : reliablePillars >= 2 ? 'partial' : 'insufficient';

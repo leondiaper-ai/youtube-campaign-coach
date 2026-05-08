@@ -36,6 +36,10 @@ export type RowData = {
   confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
   /** Human-readable data quality note */
   healthNote?: string;
+  /** Clear data status label */
+  dataStatus?: 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
+  /** Short explanation for data status */
+  dataStatusNote?: string;
 };
 
 type ViewMode = 'managed' | 'market';
@@ -73,6 +77,13 @@ const SPARK_COLOR: Record<ChannelState, { stroke: string; fill: string }> = {
 
 const STATUS_RANK: Record<ChannelState, number> = {
   COLD: 0, 'AT RISK': 1, 'WEAK CONVERSION': 2, BUILDING: 3, HEALTHY: 4,
+};
+
+const DATA_STATUS_BADGE: Record<string, { background: string; color: string }> = {
+  PARTIAL:     { background: '#FFF5D6', color: '#7A5A00' },
+  LIMITED:     { background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' },
+  STALE:       { background: '#FFE2D8', color: '#8A1F0C' },
+  UNAVAILABLE: { background: '#FFE2D8', color: '#8A1F0C' },
 };
 
 // ─── Formatting helpers ───────────────────────────────────────────────────────
@@ -204,10 +215,10 @@ function computeInsights(rows: RowData[]): Insight[] {
     });
   }
 
-  // Biggest WoW decline
+  // Biggest WoW decline — exclude LOW confidence / stale / UNAVAILABLE data
   if (insights.length < 4) {
     const bigDrop = [...rows]
-      .filter((r) => r.viewsWoW != null && r.viewsWoW < -30)
+      .filter((r) => r.viewsWoW != null && r.viewsWoW < -30 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE')
       .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))[0];
     if (bigDrop && bigDrop.slug !== convLeak?.slug && bigDrop.slug !== latent?.slug) {
       insights.push({
@@ -249,7 +260,7 @@ function computeTopMovers(rows: RowData[]): {
     .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(r.subs7Delta ?? 0) }));
 
   const biggestDecline = [...rows]
-    .filter((r) => r.viewsWoW != null && r.viewsWoW < -10)
+    .filter((r) => r.viewsWoW != null && r.viewsWoW < -10 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE')
     .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))
     .slice(0, 3)
     .map((r) => ({ name: r.name, slug: r.slug, value: fmtPct(r.viewsWoW ?? 0) + ' WoW' }));
@@ -366,6 +377,7 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [moversOpen, setMoversOpen] = useState(false);
+  const [explainerOpen, setExplainerOpen] = useState(false);
 
   const managedRows = rows.filter((r) => r.isVirgin);
   const marketRows = rows.filter((r) => !r.isVirgin);
@@ -392,7 +404,7 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
   }, [rows]);
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
-  const sorted = [...activeRows].sort((a, b) => STATUS_RANK[a.status] - STATUS_RANK[b.status]);
+  const sorted = [...activeRows].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status]);
 
   // Classification counts
   const growingCount = activeRows.filter((r) => r.classification === 'GROWING').length;
@@ -562,6 +574,26 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
         </div>
       )}
 
+      {/* ─── EXPLAINER ─────────────────────────────────────────────────── */}
+      <div className="mb-3">
+        <button
+          onClick={() => setExplainerOpen(!explainerOpen)}
+          className="text-[11px] font-medium flex items-center gap-1 hover:underline"
+          style={{ color: 'rgba(14,14,14,0.4)' }}
+        >
+          <span style={{ transform: explainerOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s', display: 'inline-block' }}>▸</span>
+          How to read this page
+        </button>
+        {explainerOpen && (
+          <div className="mt-2 p-4 rounded-lg text-[11px] leading-relaxed space-y-2" style={{ background: SOFT, color: 'rgba(14,14,14,0.6)' }}>
+            <p><strong style={{ color: INK }}>Status</strong> — Each channel gets a health status based on upload cadence, subscriber conversion, and recent activity. Healthy channels are sorted first.</p>
+            <p><strong style={{ color: INK }}>Score (A–D)</strong> — Grades how well the channel is being run across three pillars: reach growth, subscriber conversion efficiency, and posting cadence. Scores measure execution quality, not artist popularity.</p>
+            <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means insufficient snapshot history; hover for the specific reason.</p>
+            <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Limited" or "Partial" indicate how much stored history is available. Metrics improve as daily snapshots accumulate.</p>
+          </div>
+        )}
+      </div>
+
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
         <div
@@ -619,14 +651,18 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
                         <ChannelScoreBadge score={scoreMap.get(r.slug)!} compact />
                       </span>
                     )}
-                    {r.confidence === 'LOW' && (
-                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={r.healthNote ?? 'Limited data'}>
-                        Limited
+                    {r.dataStatus && r.dataStatus !== 'FRESH' && (
+                      <span
+                        className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded"
+                        style={DATA_STATUS_BADGE[r.dataStatus] ?? DATA_STATUS_BADGE.LIMITED}
+                        title={r.dataStatusNote ?? r.healthNote ?? ''}
+                      >
+                        {r.dataStatus === 'UNAVAILABLE' ? 'No Data' : r.dataStatus}
                       </span>
                     )}
-                    {r.confidence === 'MEDIUM' && (
-                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={r.healthNote ?? 'Partial data'}>
-                        Partial
+                    {!r.dataStatus && r.confidence === 'LOW' && (
+                      <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={r.healthNote ?? 'Limited data'}>
+                        Limited
                       </span>
                     )}
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>

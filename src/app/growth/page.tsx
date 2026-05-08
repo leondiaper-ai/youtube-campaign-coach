@@ -80,6 +80,8 @@ export default async function ControlPage() {
         totalViews: nc.views,
         confidence: nc.confidence,
         healthNote: nc.healthNote,
+        dataStatus: nc.dataStatus,
+        dataStatusNote: nc.dataStatusNote,
       };
     })
   );
