@@ -89,6 +89,8 @@ export function deltaOver(history: ChannelSnapshot[], days: number, field: 'subs
   const baseline =
     [...history].reverse().find((h) => new Date(h.ts).getTime() <= cutoff) ??
     history[0];
+  // If baseline and last are the same snapshot, we have no real delta data
+  if (baseline.ts === last.ts) return null;
   const delta = last[field] - baseline[field];
   const pct = baseline[field] > 0 ? delta / baseline[field] : 0;
   return { delta, pct, baseline, last };

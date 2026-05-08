@@ -72,6 +72,7 @@ type CardData = {
   cadenceLine: string;
   sparkline: { x: number; y: number }[];
   subs: number | null;
+  views: number | null;
   lastUploadDaysAgo: number | null;
   notes: CampaignNote[];
   impact: ImpactData | null;
@@ -718,27 +719,31 @@ function DecisionCard({
         <div>
           <div
             className="text-[28px] font-black leading-none tabular-nums"
-            style={{ color: deltaColor(card.views7Delta) }}
+            style={{ color: card.views7Delta != null ? deltaColor(card.views7Delta) : INK }}
           >
             {card.views7Delta != null
               ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}`
+              : card.views != null
+              ? fmtNum(card.views)
               : '—'}
           </div>
           <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-            7d views
+            {card.views7Delta != null ? '7d views' : 'views'}
           </div>
         </div>
         <div>
           <div
             className="text-[28px] font-black leading-none tabular-nums"
-            style={{ color: deltaColor(card.subs7Delta) }}
+            style={{ color: card.subs7Delta != null ? deltaColor(card.subs7Delta) : INK }}
           >
             {card.subs7Delta != null
               ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}`
+              : card.subs != null
+              ? fmtNum(card.subs)
               : '—'}
           </div>
           <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-            7d subs
+            {card.subs7Delta != null ? '7d subs' : 'subs'}
           </div>
         </div>
 
