@@ -107,6 +107,10 @@ export function computeConversion(
     return { ...empty, insufficientReason: 'no-span' };
   }
 
+  // ZERO-SAFETY: if either endpoint has null, we can't compute a delta
+  if (last.subs == null || baseline.subs == null || last.views == null || baseline.views == null) {
+    return { ...empty, insufficientReason: 'no-span' };
+  }
   const subsDelta = last.subs - baseline.subs;
   const viewsDelta = last.views - baseline.views;
 

@@ -49,9 +49,12 @@ export async function GET() {
         });
         const status = derived?.status ?? 'COLD';
 
+        // ZERO-SAFETY: preserve null — computeSystemValue filters them out
+        const v7d = rawDelta(nc.views7d);
+        const s7d = rawDelta(nc.subs7d);
         return {
-          views7d: rawDelta(nc.views7d) ?? 0,
-          subs7d: rawDelta(nc.subs7d) ?? 0,
+          views7d: v7d ?? 0,  // Safe: null means no contribution to aggregate total
+          subs7d: s7d ?? 0,   // Safe: null means no contribution to aggregate total
           uploads30d: nc.cadence.uploads30d,
           channelState: status,
           classification: classifyArtist(status, nc.cadence.uploads30d),

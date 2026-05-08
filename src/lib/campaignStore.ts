@@ -111,15 +111,15 @@ export type CampaignWeeklySnapshot = {
   snapshotDate: string;          // ISO date
   campaignDay: number;
   week: number;                  // 1-indexed week number within campaign
-  // 7-day window metrics
-  views7d: number;
-  subs7d: number;
+  // 7-day window metrics (null = no confirmed data, NOT zero)
+  views7d: number | null;
+  subs7d: number | null;
   uploads30d: number;
   shorts30d: number;
-  // Campaign-window cumulative metrics
+  // Campaign-window cumulative metrics (null = no confirmed data)
   campaignContentViews: number;
-  campaignChannelViews: number;
-  campaignSubsGained: number;
+  campaignChannelViews: number | null;
+  campaignSubsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };
   // State & decision context
   channelHealth: string;         // HEALTHY / BUILDING / COLD / AT_RISK

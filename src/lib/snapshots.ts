@@ -10,8 +10,8 @@ import type { LiveSnap } from './artists';
 
 export type ChannelSnapshot = {
   ts: string;            // ISO date (yyyy-mm-dd, one per day)
-  subs: number;
-  views: number;
+  subs: number | null;
+  views: number | null;
   uploads30d: number;
   shorts30d: number;
   upcomingCount: number;
@@ -41,17 +41,34 @@ function todayKey() {
 export async function writeSnapshot(channelId: string, snap: LiveSnap) {
   const store = await kv();
   if (!store) return;
-  if (snap.subs == null) return;
+
+  // SAFETY: Never write a snapshot where both core metrics are null.
+  // A partial response (subs present, views null) is still worth storing
+  // because we preserve the non-null field. But if BOTH are null, the
+  // API response was empty and writing it would contaminate history.
+  if (snap.subs == null && snap.views == null) return;
 
   const entry: ChannelSnapshot = {
     ts: todayKey(),
-    subs: snap.subs,
-    views: snap.views ?? 0,
+    subs: snap.subs ?? null,   // preserve null — NEVER coerce to 0
+    views: snap.views ?? null, // preserve null — NEVER coerce to 0
     uploads30d: snap.uploads30d ?? 0,
     shorts30d: snap.shorts30d ?? 0,
     upcomingCount: snap.upcomingCount ?? 0,
     lastUploadAt: snap.lastUploadAt ?? null,
   };
+
+  // RUNTIME INVARIANT: catch any future regression where null gets coerced to 0.
+  // A real channel never has literally 0 total views with non-null subs, or vice versa.
+  // If we see subs > 1000 but views === 0, something upstream coerced null → 0.
+  if (entry.views === 0 && entry.subs != null && entry.subs > 1000) {
+    console.warn(`[writeSnapshot] ZERO-SAFETY: Blocked suspicious views=0 for channel ${channelId} (subs=${entry.subs}). Storing as null.`);
+    entry.views = null;
+  }
+  if (entry.subs === 0 && entry.views != null && entry.views > 10000) {
+    console.warn(`[writeSnapshot] ZERO-SAFETY: Blocked suspicious subs=0 for channel ${channelId} (views=${entry.views}). Storing as null.`);
+    entry.subs = null;
+  }
 
   const key = `snap:${channelId}`;
   const history = ((await store.get(key)) as ChannelSnapshot[] | null) ?? [];
@@ -80,19 +97,33 @@ export async function readHistory(channelId: string): Promise<ChannelSnapshot[]>
 export function deltaOver(history: ChannelSnapshot[], days: number, field: 'subs' | 'views') {
   if (history.length < 2) return null;
   const last = history[history.length - 1];
+
+  // SAFETY: if the latest snapshot has a null value for this field,
+  // we cannot compute a delta. Return null instead of producing a fake zero.
+  if (last[field] == null) return null;
+
   // Anchor cutoff to the latest snapshot, not Date.now().
   // If the cron hasn't run recently, using Date.now() makes the cutoff
   // land AFTER the latest snapshot, causing baseline === last → delta 0.
   const lastTs = new Date(last.ts).getTime();
   const cutoff = lastTs - days * 86400000;
-  // Find the newest entry at or before the cutoff
+
+  // Find the newest entry at or before the cutoff that has a real (non-null) value.
+  // Skip any snapshots where the field is null — these are failed/partial fetches
+  // and using them as a baseline would produce a massive fake delta.
   const baseline =
-    [...history].reverse().find((h) => new Date(h.ts).getTime() <= cutoff) ??
-    history[0];
-  // If baseline and last are the same snapshot, we have no real delta data
-  if (baseline.ts === last.ts) return null;
-  const delta = last[field] - baseline[field];
-  const pct = baseline[field] > 0 ? delta / baseline[field] : 0;
+    [...history].reverse().find((h) =>
+      new Date(h.ts).getTime() <= cutoff && h[field] != null
+    ) ??
+    // Fallback: find the oldest snapshot with a real value
+    history.find((h) => h[field] != null);
+
+  // No valid baseline found, or baseline is the same snapshot
+  if (!baseline || baseline.ts === last.ts) return null;
+  if (baseline[field] == null) return null;
+
+  const delta = last[field]! - baseline[field]!;
+  const pct = baseline[field]! > 0 ? delta / baseline[field]! : 0;
   return { delta, pct, baseline, last };
 }
 
@@ -129,13 +160,19 @@ export function campaignDelta(
   if (history.length < 1) return null;
   const last = history[history.length - 1];
 
-  // Find the oldest entry on or after campaign start
+  // SAFETY: if latest snapshot has null for this field, cannot compute delta
+  if (last[field] == null) return null;
+
+  // Find the oldest entry on or after campaign start WITH a real value
   const startTs = new Date(campaignStartDate).getTime();
   const baseline =
-    history.find((h) => new Date(h.ts).getTime() >= startTs) ?? history[0];
+    history.find((h) => new Date(h.ts).getTime() >= startTs && h[field] != null) ??
+    history.find((h) => h[field] != null);
 
-  const delta = last[field] - baseline[field];
-  const pct = baseline[field] > 0 ? delta / baseline[field] : 0;
+  if (!baseline || baseline[field] == null) return null;
+
+  const delta = last[field]! - baseline[field]!;
+  const pct = baseline[field]! > 0 ? delta / baseline[field]! : 0;
   const daysCovered = Math.round(
     (new Date(last.ts).getTime() - new Date(baseline.ts).getTime()) / 86400000
   );
@@ -154,6 +191,6 @@ export function seriesForField(
   const anchor = new Date(history[history.length - 1].ts).getTime();
   const cutoff = anchor - days * 86400000;
   return history
-    .filter((h) => new Date(h.ts).getTime() >= cutoff)
-    .map((h) => ({ x: new Date(h.ts).getTime(), y: h[field] }));
+    .filter((h) => new Date(h.ts).getTime() >= cutoff && h[field] != null)
+    .map((h) => ({ x: new Date(h.ts).getTime(), y: h[field]! }));
 }

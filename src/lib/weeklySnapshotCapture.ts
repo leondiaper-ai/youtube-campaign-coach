@@ -139,15 +139,18 @@ async function captureArtistSnapshot(
   const campSig = getCampaignSignal(growthInput);
 
   // Value model
-  const v7d = views7?.delta ?? 0;
-  const s7d = subs7?.delta ?? 0;
-  const revenue = viewsToRevenue(v7d);
-  const subValue = subsToValue(Math.max(0, s7d));
+  const v7d = views7?.delta ?? null;
+  const s7d = subs7?.delta ?? null;
+  // ZERO-SAFETY: only compute value estimates when we have confirmed data.
+  // null means "no data" — we must NOT treat it as zero revenue.
+  const revenue = v7d != null ? viewsToRevenue(v7d) : { low: 0, high: 0 };
+  const subValue = s7d != null ? subsToValue(Math.max(0, s7d)) : { low: 0, high: 0 };
   const estimatedValueLow = revenue.low + subValue.low;
   const estimatedValueHigh = revenue.high + subValue.high;
 
-  // Conversion
-  const subsPer1kViews = v7d > 0 ? (s7d / v7d) * 1000 : null;
+  // Conversion — only compute when both metrics are confirmed present
+  const subsPer1kViews = (v7d != null && v7d > 0 && s7d != null)
+    ? (s7d / v7d) * 1000 : null;
 
   // Opportunity detection
   const opp = detectOpportunity({
@@ -180,8 +183,8 @@ async function captureArtistSnapshot(
     currentClassification: classification,
     channelState,
     campaignState: campSig.label,
-    subscriberTotal: snap?.subs ?? 0,
-    viewTotal: snap?.views ?? 0,
+    subscriberTotal: snap?.subs ?? null,
+    viewTotal: snap?.views ?? null,
     uploads30d,
     uploads7d: Math.round(uploads30d / 4.3), // Approximate
     shorts7d: Math.round((snap?.shorts30d ?? 0) / 4.3),

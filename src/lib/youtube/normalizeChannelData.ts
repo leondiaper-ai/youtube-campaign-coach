@@ -360,6 +360,11 @@ export function rawDelta(d: DeltaResult | null): number | null {
   return d.meaningful ? d.delta : null;
 }
 
+/**
+ * @deprecated ZERO-SAFETY: This function silently converts missing data to zero.
+ * Use rawDelta() instead, which returns null for missing data.
+ * Only kept for backward compatibility — migrate callers to rawDelta().
+ */
 export function rawDeltaOrZero(d: DeltaResult | null): number {
   return d?.delta ?? 0;
 }

@@ -30,16 +30,16 @@ export type WeeklyChannelSnapshot = {
   channelState: string;           // ChannelState from artists.ts
   campaignState: string;          // Campaign signal label
 
-  // Metrics — totals
-  subscriberTotal: number;
-  viewTotal: number;
+  // Metrics — totals (null = no data available, NOT zero)
+  subscriberTotal: number | null;
+  viewTotal: number | null;
 
   // Metrics — period
   uploads30d: number;
   uploads7d: number;              // Approximated from 30d
   shorts7d: number;               // Approximated from 30d
-  views7d: number;
-  subscribers7d: number;
+  views7d: number | null;         // null = no confirmed data (NOT zero)
+  subscribers7d: number | null;   // null = no confirmed data (NOT zero)
 
   // Week-on-week
   viewsWoW: number | null;        // % change vs previous 7d
@@ -215,8 +215,9 @@ export function computeRollup(
   const underfedCount = snapshots.filter((s) => s.currentClassification === 'UNDERFED').length;
   const coldCount = snapshots.filter((s) => s.currentClassification === 'COLD').length;
 
-  const totalViews7d = snapshots.reduce((sum, s) => sum + s.views7d, 0);
-  const totalSubscribers7d = snapshots.reduce((sum, s) => sum + s.subscribers7d, 0);
+  // ZERO-SAFETY: skip null values in aggregation — they mean "no data", not zero
+  const totalViews7d = snapshots.reduce((sum, s) => sum + (s.views7d ?? 0), 0);
+  const totalSubscribers7d = snapshots.reduce((sum, s) => sum + (s.subscribers7d ?? 0), 0);
   const totalEstimatedValueLow = snapshots.reduce((sum, s) => sum + s.estimatedValueLow, 0);
   const totalEstimatedValueHigh = snapshots.reduce((sum, s) => sum + s.estimatedValueHigh, 0);
   const totalMissedValueLow = snapshots.reduce((sum, s) => sum + (s.missedValueLow ?? 0), 0);
@@ -231,8 +232,8 @@ export function computeRollup(
       return {
         classification: cls,
         artistCount: group.length,
-        views7d: group.reduce((s, g) => s + g.views7d, 0),
-        subscribers7d: group.reduce((s, g) => s + g.subscribers7d, 0),
+        views7d: group.reduce((s, g) => s + (g.views7d ?? 0), 0),
+        subscribers7d: group.reduce((s, g) => s + (g.subscribers7d ?? 0), 0),
         estimatedValueLow: group.reduce((s, g) => s + g.estimatedValueLow, 0),
         estimatedValueHigh: group.reduce((s, g) => s + g.estimatedValueHigh, 0),
         missedValueLow: group.reduce((s, g) => s + (g.missedValueLow ?? 0), 0),

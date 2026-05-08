@@ -45,8 +45,8 @@ export async function GET(req: NextRequest) {
       latestSnapshot: last ? { ts: last.ts, views: last.views, subs: last.subs } : null,
       baseline7d: baseline7 ? { ts: baseline7.ts, views: baseline7.views, subs: baseline7.subs } : null,
       baseline14d: baseline14 ? { ts: baseline14.ts, views: baseline14.views, subs: baseline14.subs } : null,
-      views7dDelta: last && baseline7 ? last.views - baseline7.views : null,
-      subs7dDelta: last && baseline7 ? last.subs - baseline7.subs : null,
+      views7dDelta: last && baseline7 && last.views != null && baseline7.views != null ? last.views - baseline7.views : null,
+      subs7dDelta: last && baseline7 && last.subs != null && baseline7.subs != null ? last.subs - baseline7.subs : null,
     },
     // Last 14 snapshots for quick inspection
     recentSnapshots: history.slice(-14).map((h) => ({

@@ -248,9 +248,11 @@ export function getArtistValueOpportunity(input: ArtistValueInput): ValueOpportu
   // Gate: only virgin-owned artists get value calculations
   if (input.ownership !== 'virgin') return null;
   if (input.artistType && input.artistType !== 'managed') return null;
-  const v = input.views7d ?? 0;
-  const s = input.subs7d ?? 0;
-  const subsPerKViews = v > 0 ? (s / v) * 1000 : null;
+  // ZERO-SAFETY: pass null through — detectOpportunity handles null correctly.
+  // Coercing null to 0 would hide missing data and suppress opportunity detection.
+  const v = input.views7d;
+  const s = input.subs7d;
+  const subsPerKViews = (v != null && v > 0 && s != null) ? (s / v) * 1000 : null;
   return detectOpportunity({
     views7d: v,
     subs7d: s,

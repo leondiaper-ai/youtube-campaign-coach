@@ -23,8 +23,8 @@ const MUTED = '#E9E2D3';
 
 type ImpactData = {
   daysSinceTakeover: number;
-  subsDelta: number;
-  viewsDelta: number;
+  subsDelta: number | null;
+  viewsDelta: number | null;
   uploadsShipped: number;
   stateAtStart: string;
   stateNow: string;
@@ -34,24 +34,24 @@ type CampaignWindowData = {
   campaignName: string;
   campaignDay: number;
   contentViews: number;
-  channelViewsDelta: number;
-  subsGained: number;
+  channelViewsDelta: number | null;
+  subsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };
 };
 
 type CampaignTrendData = {
-  currentWeekViews: number;
-  previousWeekViews: number;
-  bestWeekViews: number;
+  currentWeekViews: number | null;
+  previousWeekViews: number | null;
+  bestWeekViews: number | null;
   bestWeekNumber: number;
-  totalCampaignViews: number;
-  totalCampaignSubs: number;
+  totalCampaignViews: number | null;
+  totalCampaignSubs: number | null;
 };
 
 type WeeklyProgressEntry = {
   week: number;
-  views7d: number;
-  subs7d: number;
+  views7d: number | null;
+  subs7d: number | null;
   channelHealth: string;
   campaignSignal: string;
 };
@@ -223,11 +223,13 @@ function classifyCard(card: CardData): BoardSection {
 
 // ─── Momentum one-liner (kept for reports) ──────────────────────────────
 function momentumLine(ct: CampaignTrendData): string {
-  const curr = fmtNum(ct.currentWeekViews);
-  const prev = ct.previousWeekViews > 0 ? fmtNum(ct.previousWeekViews) : null;
-  const total = fmtNum(ct.totalCampaignViews);
-  const arrow = ct.currentWeekViews > ct.previousWeekViews ? '↑' :
-                ct.currentWeekViews < ct.previousWeekViews ? '↓' : '→';
+  const curr = ct.currentWeekViews != null ? fmtNum(ct.currentWeekViews) : '—';
+  const prev = ct.previousWeekViews != null && ct.previousWeekViews > 0 ? fmtNum(ct.previousWeekViews) : null;
+  const total = ct.totalCampaignViews != null ? fmtNum(ct.totalCampaignViews) : '—';
+  const arrow = (ct.currentWeekViews != null && ct.previousWeekViews != null)
+    ? (ct.currentWeekViews > ct.previousWeekViews ? '↑' :
+       ct.currentWeekViews < ct.previousWeekViews ? '↓' : '→')
+    : '→';
   if (prev) {
     return `${curr} this week (${arrow} vs ${prev} last week) · ${total} total`;
   }
@@ -269,8 +271,8 @@ function generateSnapshot(card: CardData): string {
 
   if (hasCampaign && cw && ct) {
     lines.push('', '3. CAMPAIGN SO FAR');
-    lines.push(`Campaign views: ${fmtNum(ct.totalCampaignViews)}`);
-    lines.push(`Campaign subs: ${ct.totalCampaignSubs >= 0 ? '+' : ''}${fmtNum(ct.totalCampaignSubs)}`);
+    lines.push(`Campaign views: ${ct.totalCampaignViews != null ? fmtNum(ct.totalCampaignViews) : '—'}`);
+    lines.push(`Campaign subs: ${ct.totalCampaignSubs != null ? `${ct.totalCampaignSubs >= 0 ? '+' : ''}${fmtNum(ct.totalCampaignSubs)}` : '—'}`);
     lines.push(`Content: ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
     lines.push(`Momentum: ${momentumLine(ct)}`);
   }
@@ -278,7 +280,7 @@ function generateSnapshot(card: CardData): string {
   if (card.weeklyProgress.length > 0) {
     lines.push('', 'WEEKLY PROGRESS:');
     for (const w of card.weeklyProgress) {
-      lines.push(`Week ${w.week}: ${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views · ${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs · ${w.campaignSignal}`);
+      lines.push(`Week ${w.week}: ${w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'} · ${w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'} · ${w.campaignSignal}`);
     }
   }
 
@@ -291,8 +293,8 @@ function generateSnapshot(card: CardData): string {
 
   if (card.impact && card.impact.daysSinceTakeover >= 2) {
     lines.push('', `SINCE TAKEOVER (${card.impact.daysSinceTakeover} days)`);
-    lines.push(`${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs`);
-    lines.push(`${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views`);
+    lines.push(`${card.impact.subsDelta != null ? `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs` : '— subs'}`);
+    lines.push(`${card.impact.viewsDelta != null ? `${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views` : '— views'}`);
   }
 
   const latestNote = card.notes.length > 0 ? card.notes[0] : null;
@@ -550,12 +552,12 @@ function SnapshotHistory({ slug }: { slug: string }) {
               style={{ background: 'rgba(14,14,14,0.03)' }}
             >
               <span className="font-bold text-ink/40 w-[52px] shrink-0">{s.weekId}</span>
-              <span className="font-bold tabular-nums" style={{ color: s.views7d > 0 ? '#0C6A3F' : s.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                {s.views7d >= 0 ? '+' : ''}{fmtNum(s.views7d)} views
+              <span className="font-bold tabular-nums" style={{ color: s.views7d != null && s.views7d > 0 ? '#0C6A3F' : s.views7d != null && s.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                {s.views7d != null ? `${s.views7d >= 0 ? '+' : ''}${fmtNum(s.views7d)} views` : '— views'}
               </span>
               <span className="text-ink/15">·</span>
-              <span className="font-bold tabular-nums" style={{ color: s.subscribers7d > 0 ? '#0C6A3F' : s.subscribers7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                {s.subscribers7d >= 0 ? '+' : ''}{fmtNum(s.subscribers7d)} subs
+              <span className="font-bold tabular-nums" style={{ color: s.subscribers7d != null && s.subscribers7d > 0 ? '#0C6A3F' : s.subscribers7d != null && s.subscribers7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                {s.subscribers7d != null ? `${s.subscribers7d >= 0 ? '+' : ''}${fmtNum(s.subscribers7d)} subs` : '— subs'}
               </span>
               <span className="text-ink/15">·</span>
               <span
@@ -850,13 +852,13 @@ function DecisionCard({
           <div className="flex items-center gap-4 mb-2">
             <div>
               <span className="text-[16px] font-black tabular-nums" style={{ color: deltaColor(cw.channelViewsDelta) }}>
-                {cw.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(cw.channelViewsDelta)}
+                {cw.channelViewsDelta != null ? `${cw.channelViewsDelta >= 0 ? '+' : ''}${fmtNum(cw.channelViewsDelta)}` : '—'}
               </span>
               <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views (total)</span>
             </div>
             <div>
-              <span className="text-[16px] font-black tabular-nums" style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)' }}>
-                {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)}
+              <span className="text-[16px] font-black tabular-nums" style={{ color: cw.subsGained != null ? (cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)') : 'rgba(14,14,14,0.25)' }}>
+                {cw.subsGained != null ? `${cw.subsGained >= 0 ? '+' : ''}${fmtNum(cw.subsGained)}` : '—'}
               </span>
               <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">subs (total)</span>
             </div>
@@ -866,7 +868,7 @@ function DecisionCard({
           </div>
 
           {/* Momentum */}
-          {ct && ct.currentWeekViews > 0 && (
+          {ct && ct.currentWeekViews != null && ct.currentWeekViews > 0 && (
             <div className="text-[10px] text-ink/35 mb-2">
               <span className="font-bold uppercase tracking-[0.08em] text-ink/30">Momentum:</span>{' '}
               <span className="tabular-nums">{momentumLine(ct)}</span>
@@ -890,8 +892,8 @@ function DecisionCard({
                 {card.weeklyProgress.length > 1 && (() => {
                   const first = card.weeklyProgress[0];
                   const last = card.weeklyProgress[card.weeklyProgress.length - 1];
-                  const viewsTrend = last.views7d > first.views7d ? '↑' : last.views7d < first.views7d ? '↓' : '→';
-                  const subsTrend = last.subs7d > first.subs7d ? '↑' : last.subs7d < first.subs7d ? '↓' : '→';
+                  const viewsTrend = (last.views7d != null && first.views7d != null) ? (last.views7d > first.views7d ? '↑' : last.views7d < first.views7d ? '↓' : '→') : '→';
+                  const subsTrend = (last.subs7d != null && first.subs7d != null) ? (last.subs7d > first.subs7d ? '↑' : last.subs7d < first.subs7d ? '↓' : '→') : '→';
                   return (
                     <span className="font-semibold normal-case tracking-normal text-ink/25 ml-1">
                       — views {viewsTrend} · subs {subsTrend}
@@ -908,12 +910,12 @@ function DecisionCard({
                       style={{ background: 'rgba(14,14,14,0.03)' }}
                     >
                       <span className="font-bold text-ink/40 w-[40px] shrink-0">Wk {w.week}</span>
-                      <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                        {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
+                      <span className="font-bold tabular-nums" style={{ color: w.views7d != null ? (w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)') : 'rgba(14,14,14,0.25)' }}>
+                        {w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'}
                       </span>
                       <span className="text-ink/15">·</span>
-                      <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                        {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
+                      <span className="font-bold tabular-nums" style={{ color: w.subs7d != null ? (w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)') : 'rgba(14,14,14,0.25)' }}>
+                        {w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'}
                       </span>
                     </div>
                   ))}
@@ -946,12 +948,12 @@ function DecisionCard({
           {card.impact && card.impact.daysSinceTakeover >= 2 && (
             <div className="mt-2 pt-2 text-[10px] text-ink/35" style={{ borderTop: `1px solid rgba(14,14,14,0.06)` }}>
               <span className="font-bold uppercase tracking-[0.08em]">Since takeover ({card.impact.daysSinceTakeover}d):</span>{' '}
-              <span className="tabular-nums" style={{ color: card.impact.subsDelta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
-                {card.impact.subsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.subsDelta)} subs
+              <span className="tabular-nums" style={{ color: card.impact.subsDelta != null ? (card.impact.subsDelta > 0 ? '#0C6A3F' : '#8A1F0C') : 'rgba(14,14,14,0.25)' }}>
+                {card.impact.subsDelta != null ? `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs` : '— subs'}
               </span>
               {' · '}
-              <span className="tabular-nums" style={{ color: card.impact.viewsDelta > 0 ? '#0C6A3F' : '#8A1F0C' }}>
-                {card.impact.viewsDelta >= 0 ? '+' : ''}{fmtNum(card.impact.viewsDelta)} views
+              <span className="tabular-nums" style={{ color: card.impact.viewsDelta != null ? (card.impact.viewsDelta > 0 ? '#0C6A3F' : '#8A1F0C') : 'rgba(14,14,14,0.25)' }}>
+                {card.impact.viewsDelta != null ? `${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views` : '— views'}
               </span>
             </div>
           )}

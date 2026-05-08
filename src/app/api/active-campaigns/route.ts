@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
           const derived = deriveFromLive(snap);
           const baseline: CampaignBaseline = {
             capturedAt: new Date().toISOString(),
-            subs: snap.subs ?? 0,
-            views: snap.views ?? 0,
+            subs: snap.subs!,   // guarded by snap.subs != null check above
+            views: snap.views ?? 0, // views may be null even when subs exist
             uploads30d: snap.uploads30d ?? 0,
             channelState: derived?.status ?? 'COLD',
           };

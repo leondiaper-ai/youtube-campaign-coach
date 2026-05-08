@@ -115,9 +115,9 @@ export async function GET(req: NextRequest) {
   // 6. Build a WatcherState-compatible object for the Coach's decision engine
   const state = {
     channelId: snap.channelId ?? '',
-    subscriberCount: snap.subs ?? 0,
+    subscriberCount: snap.subs ?? null,
     subscriberDelta: rawDelta(nc.subs7d),
-    viewCount: nc.views ?? 0,
+    viewCount: nc.views ?? null,
     viewDelta: rawDelta(nc.views7d),
     videoCount: uploads.length,
     lastUploadDate: snap.lastUploadAt ?? null,

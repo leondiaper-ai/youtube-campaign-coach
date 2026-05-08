@@ -38,8 +38,8 @@ function cadenceLine(uploads30d: number): string {
 // ── Impact data (since takeover) ─────────────────────────────────────────
 export type ImpactData = {
   daysSinceTakeover: number;
-  subsDelta: number;
-  viewsDelta: number;
+  subsDelta: number | null;
+  viewsDelta: number | null;
   uploadsShipped: number;
   stateAtStart: string;
   stateNow: string;
@@ -50,26 +50,26 @@ export type CampaignWindowData = {
   campaignName: string;
   campaignDay: number;
   contentViews: number;
-  channelViewsDelta: number;
-  subsGained: number;
+  channelViewsDelta: number | null;
+  subsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };
 };
 
 // ── Campaign trend data ─────────────────────────────────────────────────
 export type CampaignTrendData = {
-  currentWeekViews: number;
-  previousWeekViews: number;
-  bestWeekViews: number;
+  currentWeekViews: number | null;
+  previousWeekViews: number | null;
+  bestWeekViews: number | null;
   bestWeekNumber: number;
-  totalCampaignViews: number;
-  totalCampaignSubs: number;
+  totalCampaignViews: number | null;
+  totalCampaignSubs: number | null;
 };
 
 // ── Weekly progress entry (for display) ─────────────────────────────────
 export type WeeklyProgressEntry = {
   week: number;
-  views7d: number;
-  subs7d: number;
+  views7d: number | null;
+  subs7d: number | null;
   channelHealth: string;
   campaignSignal: string;
 };
@@ -137,13 +137,13 @@ function getISOWeekId(date: Date): string {
 function computeWeeklyWindows(
   history: ChannelSnapshot[],
   campaignStartDate: string,
-): { week: number; views7d: number; subs7d: number }[] {
+): { week: number; views7d: number | null; subs7d: number | null }[] {
   if (history.length < 2) return [];
   const startTs = new Date(campaignStartDate).getTime();
-  const windows: { week: number; views7d: number; subs7d: number }[] = [];
-  // Filter to campaign-period history, sorted by time
+  const windows: { week: number; views7d: number | null; subs7d: number | null }[] = [];
+  // Filter to campaign-period history with at least one real metric, sorted by time
   const relevantHistory = history
-    .filter((h) => new Date(h.ts).getTime() >= startTs)
+    .filter((h) => new Date(h.ts).getTime() >= startTs && (h.views != null || h.subs != null))
     .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
   if (relevantHistory.length < 2) return [];
 
@@ -156,19 +156,27 @@ function computeWeeklyWindows(
 
   while (windowStart < Date.now()) {
     const windowEnd = windowStart + 7 * 86400000;
-    // Find the latest snapshot within this window
+    // Find the latest snapshot within this window that has real values
     const inWindow = relevantHistory.filter((h) => {
       const t = new Date(h.ts).getTime();
       return t >= windowStart && t < windowEnd;
     });
-    // Also include any snapshot before the window for baseline
     const latestInWindow = inWindow.length > 0 ? inWindow[inWindow.length - 1] : null;
 
     if (latestInWindow) {
+      // SAFETY: Only compute delta when BOTH endpoints have real values.
+      // If either is null, the delta is null (unknown), not zero.
+      const viewsDelta = (latestInWindow.views != null && baseline.views != null)
+        ? Math.max(0, latestInWindow.views - baseline.views)
+        : null;
+      const subsDelta = (latestInWindow.subs != null && baseline.subs != null)
+        ? latestInWindow.subs - baseline.subs
+        : null;
+
       windows.push({
         week: weekNum,
-        views7d: Math.max(0, latestInWindow.views - baseline.views),
-        subs7d: latestInWindow.subs - baseline.subs,
+        views7d: viewsDelta,
+        subs7d: subsDelta,
       });
       baseline = latestInWindow; // carry forward for next week
     } else if (windowStart > Date.now()) {
@@ -269,8 +277,8 @@ async function loadCard(
 
       impact = {
         daysSinceTakeover,
-        subsDelta: (snap.subs ?? 0) - baseline.subs,
-        viewsDelta: (snap.views ?? 0) - baseline.views,
+        subsDelta: (snap.subs != null && baseline.subs != null) ? snap.subs - baseline.subs : null,
+        viewsDelta: (snap.views != null && baseline.views != null) ? snap.views - baseline.views : null,
         uploadsShipped: uploadsSinceBaseline,
         stateAtStart: baseline.channelState,
         stateNow: currentStatus,
@@ -305,8 +313,8 @@ async function loadCard(
       campaignName: artist.campaign ?? 'Tracking',
       campaignDay,
       contentViews,
-      channelViewsDelta: campViewsDelta?.delta ?? 0,
-      subsGained: campSubsDelta?.delta ?? 0,
+      channelViewsDelta: campViewsDelta?.delta ?? null,
+      subsGained: campSubsDelta?.delta ?? null,
       contentMix: {
         uploads: campaignUploads.length,
         shorts: shortsCount,
@@ -338,17 +346,17 @@ async function loadCard(
       const currentWeek = weeklyWindows[weeklyWindows.length - 1];
       const previousWeek = weeklyWindows.length >= 2
         ? weeklyWindows[weeklyWindows.length - 2]
-        : { views7d: 0, subs7d: 0, week: 0 };
+        : { views7d: null, subs7d: null, week: 0 };
       const bestWeek = weeklyWindows.reduce((best, w) =>
-        w.views7d > best.views7d ? w : best, weeklyWindows[0]);
+        (w.views7d ?? 0) > (best.views7d ?? 0) ? w : best, weeklyWindows[0]);
 
       campaignTrend = {
         currentWeekViews: currentWeek.views7d,
         previousWeekViews: previousWeek.views7d,
         bestWeekViews: bestWeek.views7d,
         bestWeekNumber: bestWeek.week,
-        totalCampaignViews: campViewsDelta?.delta ?? contentViews,
-        totalCampaignSubs: campSubsDelta?.delta ?? 0,
+        totalCampaignViews: campViewsDelta?.delta ?? null,
+        totalCampaignSubs: campSubsDelta?.delta ?? null,
       };
     }
 
@@ -362,13 +370,13 @@ async function loadCard(
         snapshotDate: new Date().toISOString(),
         campaignDay,
         week: weekNum,
-        views7d: rawDelta(nc.views7d) ?? 0,
-        subs7d: rawDelta(nc.subs7d) ?? 0,
+        views7d: rawDelta(nc.views7d) ?? null,
+        subs7d: rawDelta(nc.subs7d) ?? null,
         uploads30d: snap.uploads30d ?? 0,
         shorts30d: snap.shorts30d ?? 0,
         campaignContentViews: contentViews,
-        campaignChannelViews: campViewsDelta?.delta ?? 0,
-        campaignSubsGained: campSubsDelta?.delta ?? 0,
+        campaignChannelViews: campViewsDelta?.delta ?? null,
+        campaignSubsGained: campSubsDelta?.delta ?? null,
         contentMix: {
           uploads: campaignUploads.length,
           shorts: shortsCount,
