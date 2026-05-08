@@ -143,9 +143,10 @@ function deltaColor(v: number | null): string {
 
 // ─── Conversion metric ───────────────────────────────────────────────────
 function subsPerKViews(card: CardData): number | null {
+  // Both metrics must be present and views must be positive
   if (card.views7Delta == null || card.views7Delta <= 0) return null;
-  const subs = card.subs7Delta ?? 0;
-  return (subs / card.views7Delta) * 1000;
+  if (card.subs7Delta == null) return null;
+  return (card.subs7Delta / card.views7Delta) * 1000;
 }
 
 function conversionColor(spk: number): string {
@@ -732,19 +733,20 @@ function DecisionCard({
       <div className="flex items-end gap-6 mb-3">
         <div>
           {(() => {
-            const hasRealDelta = card.views7Delta != null && card.views7Delta !== 0;
+            const hasRealDelta = card.views7Delta != null;
+            const isZero = card.views7Delta === 0;
             return (
               <>
                 <div
                   className="text-[28px] font-black leading-none tabular-nums"
-                  style={{ color: hasRealDelta ? deltaColor(card.views7Delta) : 'rgba(14,14,14,0.2)' }}
+                  style={{ color: hasRealDelta ? (isZero ? 'rgba(14,14,14,0.35)' : deltaColor(card.views7Delta)) : 'rgba(14,14,14,0.2)' }}
                 >
                   {hasRealDelta
                     ? `${card.views7Delta! >= 0 ? '+' : ''}${fmtNum(card.views7Delta!)}`
                     : '—'}
                 </div>
                 <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  7d views
+                  7d views{!hasRealDelta && card.confidence === 'LOW' ? ' · limited data' : ''}
                 </div>
               </>
             );
@@ -752,12 +754,13 @@ function DecisionCard({
         </div>
         <div>
           {(() => {
-            const hasRealDelta = card.subs7Delta != null && card.subs7Delta !== 0;
+            const hasRealDelta = card.subs7Delta != null;
+            const isZero = card.subs7Delta === 0;
             return (
               <>
                 <div
                   className="text-[28px] font-black leading-none tabular-nums"
-                  style={{ color: hasRealDelta ? deltaColor(card.subs7Delta) : INK }}
+                  style={{ color: hasRealDelta ? (isZero ? 'rgba(14,14,14,0.35)' : deltaColor(card.subs7Delta)) : INK }}
                 >
                   {hasRealDelta
                     ? `${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}`
@@ -766,7 +769,7 @@ function DecisionCard({
                     : '—'}
                 </div>
                 <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  {hasRealDelta ? '7d subs' : 'subs'}
+                  {hasRealDelta ? '7d subs' : 'subs (total)'}
                 </div>
               </>
             );
@@ -839,19 +842,19 @@ function DecisionCard({
             </div>
           </div>
 
-          {/* Totals since tracking started */}
+          {/* Totals since campaign started (not 7d — full campaign period) */}
           <div className="flex items-center gap-4 mb-2">
             <div>
               <span className="text-[16px] font-black tabular-nums" style={{ color: deltaColor(cw.channelViewsDelta) }}>
                 {cw.channelViewsDelta >= 0 ? '+' : ''}{fmtNum(cw.channelViewsDelta)}
               </span>
-              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views</span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views (total)</span>
             </div>
             <div>
               <span className="text-[16px] font-black tabular-nums" style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)' }}>
                 {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)}
               </span>
-              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">subs</span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">subs (total)</span>
             </div>
             <div className="text-[10px] text-ink/30">
               {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''} ({cw.contentMix.shorts} Shorts · {cw.contentMix.videos} video{cw.contentMix.videos !== 1 ? 's' : ''})

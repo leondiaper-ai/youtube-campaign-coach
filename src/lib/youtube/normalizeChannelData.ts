@@ -279,10 +279,18 @@ export function computeWoW(
 
   const prevDelta = raw14d.delta - current7d.delta;
 
-  // Previous period delta is zero → can't compute percentage change
+  // Previous period delta is zero or negligible → can't compute meaningful %
   if (prevDelta === 0) return null;
 
+  // Guard: if both current and previous are very small absolute numbers,
+  // the percentage swing is noise, not signal. Require at least a minimum
+  // magnitude to avoid e.g. +1 vs +2 producing "−50% WoW".
+  if (Math.abs(prevDelta) < 3 && Math.abs(current7d.delta) < 3) return null;
+
   const wow = ((current7d.delta - prevDelta) / Math.abs(prevDelta)) * 100;
+
+  // Cap extreme values — anything beyond ±500% is almost certainly noise
+  if (Math.abs(wow) > 500) return null;
 
   // Reliability check: is the current 7d confidence at least MEDIUM?
   const reliable = current7d.confidence !== 'LOW' && days14Covered >= 12;
@@ -407,16 +415,26 @@ function wrapDelta(
     (new Date(raw.last.ts).getTime() - new Date(raw.baseline.ts).getTime()) / 86400000,
   );
 
-  // A delta of 0 with stale data is not meaningful — it likely means the
-  // cron wrote identical values from a quota-exhausted API response.
-  const meaningful = raw.delta !== 0 && daysCovered >= 1;
-
   // Delta confidence depends on how close the actual window is to the
   // requested window. A "7-day" delta spanning only 2 days is less reliable.
   const windowRatio = daysCovered / requestedDays;
   let confidence: DataConfidence = 'HIGH';
   if (windowRatio < 0.5) confidence = 'LOW';
   else if (windowRatio < 0.8) confidence = 'MEDIUM';
+
+  // Determine if this delta is meaningful:
+  // - Non-zero deltas are always meaningful if they cover at least 1 day.
+  // - Zero deltas ARE meaningful if we have good coverage (>= 40% of requested window)
+  //   because zero change is a real signal. Zero deltas with very thin coverage
+  //   (< 3 days for a 7d window) are likely stale/duplicate cron data.
+  let meaningful: boolean;
+  if (raw.delta !== 0) {
+    meaningful = daysCovered >= 1;
+  } else {
+    // Zero delta: meaningful only with decent coverage
+    const minCoverage = Math.max(3, requestedDays * 0.4);
+    meaningful = daysCovered >= minCoverage;
+  }
 
   return {
     delta: raw.delta,
