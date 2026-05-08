@@ -9,6 +9,9 @@ import type {
   ContentAction,
   ChannelContext,
 } from '@/lib/planEngine';
+import type { MatchResult, MatchedAction, MatchedWeek, ExecutionStatus } from '@/lib/coach/matchEngine';
+import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
+import type { RecentUpload } from '@/lib/artists';
 
 // Deep clone helper
 function clonePlan(plan: GeneratedPlan): GeneratedPlan {
@@ -47,6 +50,22 @@ const FORMAT_ICON: Record<string, string> = {
   community: '💬',
 };
 
+const STATUS_STYLE: Record<ExecutionStatus, { bg: string; fg: string; label: string }> = {
+  completed: { bg: '#ECFDF5', fg: '#0C6A3F', label: 'Done' },
+  live: { bg: '#EFF6FF', fg: '#1D4ED8', label: 'Live' },
+  planned: { bg: '#F9FAFB', fg: '#6B7280', label: 'Planned' },
+  missing: { bg: '#FFF7ED', fg: '#C2410C', label: 'Missing' },
+  late: { bg: '#FEF2F2', fg: '#DC2626', label: 'Late' },
+  optional: { bg: '#F9FAFB', fg: '#9CA3AF', label: 'Optional' },
+  manually_added: { bg: '#F5F3FF', fg: '#7C3AED', label: 'Custom' },
+};
+
+const NUDGE_STYLE: Record<NudgeUrgency, { bg: string; border: string; fg: string; icon: string }> = {
+  critical: { bg: '#FEF2F2', border: '#FECACA', fg: '#DC2626', icon: '🔴' },
+  important: { bg: '#FFF7ED', border: '#FED7AA', fg: '#C2410C', icon: '🟠' },
+  suggestion: { bg: '#EFF6FF', border: '#BFDBFE', fg: '#1D4ED8', icon: '💡' },
+};
+
 // ── Props ──────────────────────────────────────────────────────────────────
 
 type CampaignDestinationProps = {
@@ -54,7 +73,6 @@ type CampaignDestinationProps = {
   channelCtx: ChannelContext | null;
   createdAt: string;
   slug: string;
-  /** Live channel data for current state strip (optional — page works without it) */
   liveChannel?: {
     subs?: number;
     views?: number;
@@ -64,6 +82,9 @@ type CampaignDestinationProps = {
     views7Delta?: number | null;
     subs7Delta?: number | null;
   } | null;
+  matchResult?: MatchResult;
+  nudges?: Nudge[];
+  recentUploads?: RecentUpload[];
 };
 
 // ── Main Component ─────────────────────────────────────────────────────────
@@ -74,6 +95,8 @@ export default function CampaignDestination({
   createdAt,
   slug,
   liveChannel,
+  matchResult,
+  nudges,
 }: CampaignDestinationProps) {
   const [plan, setPlan] = useState<GeneratedPlan>(initialPlan);
   const [saving, setSaving] = useState(false);
@@ -81,9 +104,20 @@ export default function CampaignDestination({
 
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(() => {
     const s = new Set<number>();
-    plan.weeks.forEach((w) => {
-      if (w.actions.length > 0) s.add(w.weekNum);
-    });
+    // If we have match data, auto-expand weeks with issues
+    if (matchResult) {
+      matchResult.weeks.forEach((w) => {
+        const hasIssues = w.actions.some((a) =>
+          a.status === 'late' || a.status === 'missing' || a.status === 'live'
+        );
+        const hasActions = w.actions.length > 0;
+        if (hasIssues || (hasActions && isCurrentWeek(w))) s.add(w.weekNum);
+      });
+    } else {
+      plan.weeks.forEach((w) => {
+        if (w.actions.length > 0) s.add(w.weekNum);
+      });
+    }
     return s;
   });
 
@@ -152,8 +186,8 @@ export default function CampaignDestination({
     year: 'numeric',
   });
 
-  // Determine current phase based on today's date
   const currentPhase = detectCurrentPhase(plan);
+  const stats = matchResult?.stats;
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
@@ -248,8 +282,18 @@ export default function CampaignDestination({
           </p>
         </div>
 
+        {/* ── Execution Summary Strip ─────────────────────────────── */}
+        {stats && (
+          <ExecutionStrip stats={stats} />
+        )}
+
         {/* ── Current State Strip ──────────────────────────────────── */}
         <StateStrip channelCtx={channelCtx} liveChannel={liveChannel} currentPhase={currentPhase} />
+
+        {/* ── Nudges ───────────────────────────────────────────────── */}
+        {nudges && nudges.length > 0 && (
+          <NudgeStrip nudges={nudges} />
+        )}
 
         {/* ── Strategy ────────────────────────────────────────────── */}
         <div
@@ -374,17 +418,24 @@ export default function CampaignDestination({
 
         {/* ── Timeline (THE HERO) ──────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 60 }}>
-          {plan.weeks.map((week) => (
-            <WeekRow
-              key={week.weekNum}
-              week={week}
-              expanded={expandedWeeks.has(week.weekNum)}
-              onToggle={() => toggleWeek(week.weekNum)}
-              onToggleComplete={(idx) => toggleActionComplete(week.weekNum, idx)}
-              onRemove={(idx) => removeAction(week.weekNum, idx)}
-              onAdd={(title, format) => addAction(week.weekNum, title, format)}
-            />
-          ))}
+          {(matchResult?.weeks ?? plan.weeks).map((week) => {
+            const matchedWeek = matchResult
+              ? (week as MatchedWeek)
+              : null;
+
+            return (
+              <WeekRow
+                key={week.weekNum}
+                week={week}
+                matchedWeek={matchedWeek}
+                expanded={expandedWeeks.has(week.weekNum)}
+                onToggle={() => toggleWeek(week.weekNum)}
+                onToggleComplete={(idx) => toggleActionComplete(week.weekNum, idx)}
+                onRemove={(idx) => removeAction(week.weekNum, idx)}
+                onAdd={(title, format) => addAction(week.weekNum, title, format)}
+              />
+            );
+          })}
         </div>
 
         {/* ── Footer ───────────────────────────────────────────────── */}
@@ -424,6 +475,115 @@ export default function CampaignDestination({
   );
 }
 
+// ── Execution Summary Strip ───────────────────────────────────────────────
+
+function ExecutionStrip({ stats }: { stats: MatchResult['stats'] }) {
+  const done = stats.completed + stats.live;
+  const total = stats.total;
+  const rate = Math.round(stats.completionRate);
+  const barPct = total > 0 ? (done / total) * 100 : 0;
+
+  const barColor = rate >= 70 ? '#1FBE7A' : rate >= 40 ? '#F59E0B' : '#DC2626';
+
+  return (
+    <div
+      style={{
+        marginTop: 20,
+        padding: '14px 18px',
+        background: '#FFFFFF',
+        border: `1px solid ${BORDER}`,
+        borderRadius: 10,
+      }}
+    >
+      {/* Progress bar */}
+      <div
+        style={{
+          height: 4,
+          background: '#F3F0EB',
+          borderRadius: 2,
+          overflow: 'hidden',
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${barPct}%`,
+            background: barColor,
+            borderRadius: 2,
+            transition: 'width 0.3s ease',
+          }}
+        />
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>
+          {rate}% executed
+        </span>
+        <Sep />
+        {done > 0 && (
+          <MiniStat label="Done" value={done} color="#0C6A3F" />
+        )}
+        {stats.live > 0 && (
+          <MiniStat label="Live" value={stats.live} color="#1D4ED8" />
+        )}
+        {stats.planned > 0 && (
+          <MiniStat label="Upcoming" value={stats.planned} color="#6B7280" />
+        )}
+        {stats.missing > 0 && (
+          <MiniStat label="Missing" value={stats.missing} color="#C2410C" />
+        )}
+        {stats.late > 0 && (
+          <MiniStat label="Late" value={stats.late} color="#DC2626" />
+        )}
+        {stats.extraUploads > 0 && (
+          <>
+            <Sep />
+            <MiniStat label="Extra" value={stats.extraUploads} color="#7C3AED" />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Nudge Strip ───────────────────────────────────────────────────────────
+
+function NudgeStrip({ nudges }: { nudges: Nudge[] }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
+      {nudges.map((nudge) => {
+        const style = NUDGE_STYLE[nudge.urgency];
+        return (
+          <div
+            key={nudge.id}
+            style={{
+              padding: '10px 14px',
+              background: style.bg,
+              border: `1px solid ${style.border}`,
+              borderRadius: 8,
+              display: 'flex',
+              gap: 10,
+              alignItems: 'flex-start',
+            }}
+          >
+            <span style={{ fontSize: 12, flexShrink: 0, marginTop: 1 }}>{style.icon}</span>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 700, color: style.fg, margin: 0 }}>
+                {nudge.title}
+              </p>
+              <p style={{ fontSize: 11, color: '#5A5650', margin: '2px 0 0 0', lineHeight: 1.5 }}>
+                {nudge.detail}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── State Strip ─────────────────────────────────────────────────────────────
 
 function StateStrip({
@@ -446,7 +606,7 @@ function StateStrip({
         display: 'flex',
         alignItems: 'center',
         gap: 14,
-        marginTop: 20,
+        marginTop: 10,
         padding: '10px 16px',
         borderRadius: 8,
         background: '#FFFFFF',
@@ -455,7 +615,6 @@ function StateStrip({
         flexWrap: 'wrap',
       }}
     >
-      {/* Status */}
       <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
         <span
           style={{
@@ -481,7 +640,6 @@ function StateStrip({
 
       <Sep />
 
-      {/* Subs */}
       {'subs' in ch && ch.subs != null && (
         <>
           <Stat label="Subs" value={fmtNum(ch.subs)} />
@@ -489,7 +647,6 @@ function StateStrip({
         </>
       )}
 
-      {/* Total views */}
       {'views' in ch && ch.views != null && (
         <>
           <Stat label="Views" value={fmtNum(ch.views)} />
@@ -497,7 +654,6 @@ function StateStrip({
         </>
       )}
 
-      {/* Views delta */}
       {'views7Delta' in ch && ch.views7Delta != null && ch.views7Delta !== 0 && (
         <>
           <Stat
@@ -509,7 +665,6 @@ function StateStrip({
         </>
       )}
 
-      {/* Cadence */}
       {'uploads30d' in ch && ch.uploads30d != null && (
         <Stat label="Uploads 30d" value={String(ch.uploads30d)} />
       )}
@@ -520,7 +675,6 @@ function StateStrip({
         </>
       )}
 
-      {/* Last upload */}
       {'lastUploadDaysAgo' in ch && ch.lastUploadDaysAgo != null && (
         <>
           <Sep />
@@ -528,7 +682,6 @@ function StateStrip({
         </>
       )}
 
-      {/* Current phase */}
       {currentPhase && (
         <>
           <Sep />
@@ -556,13 +709,15 @@ function StateStrip({
 
 function WeekRow({
   week,
+  matchedWeek,
   expanded,
   onToggle,
   onToggleComplete,
   onRemove,
   onAdd,
 }: {
-  week: PlanWeek;
+  week: PlanWeek | MatchedWeek;
+  matchedWeek: MatchedWeek | null;
   expanded: boolean;
   onToggle: () => void;
   onToggleComplete: (actionIdx: number) => void;
@@ -573,10 +728,21 @@ function WeekRow({
   const [newTitle, setNewTitle] = useState('');
   const [newFormat, setNewFormat] = useState<ContentAction['format']>('video');
 
-  const hasActions = week.actions.length > 0;
+  const actions = matchedWeek?.actions ?? week.actions;
+  const extraUploads = matchedWeek?.extraUploads ?? [];
+  const hasActions = actions.length > 0 || extraUploads.length > 0;
   const phaseColor = PHASE_COLOR[week.phase];
   const isMoment = !!week.momentName;
-  const completedCount = week.actions.filter((a) => a.completed).length;
+  const isCurrent = isCurrentWeek(week);
+
+  // Compute status summary for collapsed view
+  const statusCounts = matchedWeek
+    ? summarizeStatuses(matchedWeek.actions)
+    : null;
+
+  const completedCount = actions.filter((a) =>
+    'status' in a ? (a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live' : a.completed
+  ).length;
 
   const handleAdd = () => {
     const title = newTitle.trim();
@@ -590,9 +756,12 @@ function WeekRow({
     <div
       style={{
         background: hasActions ? '#FFFFFF' : 'transparent',
-        border: hasActions ? `1px solid ${BORDER}` : '1px solid transparent',
+        border: hasActions
+          ? `1px solid ${isCurrent ? phaseColor + '40' : BORDER}`
+          : '1px solid transparent',
         borderRadius: 8,
         overflow: 'hidden',
+        ...(isCurrent ? { boxShadow: `0 0 0 1px ${phaseColor}20` } : {}),
       }}
     >
       <button
@@ -603,7 +772,7 @@ function WeekRow({
           gap: 10,
           width: '100%',
           padding: hasActions ? '10px 14px' : '5px 14px',
-          background: 'none',
+          background: isCurrent ? `${phaseColor}06` : 'none',
           border: 'none',
           cursor: hasActions ? 'pointer' : 'default',
           textAlign: 'left',
@@ -640,9 +809,25 @@ function WeekRow({
           </span>
         )}
         {!isMoment && <span style={{ flex: 1 }} />}
-        {hasActions && (
+
+        {/* Status indicators (collapsed) */}
+        {hasActions && statusCounts && !expanded && (
+          <div style={{ display: 'flex', gap: 4 }}>
+            {statusCounts.late > 0 && (
+              <StatusDot count={statusCounts.late} color="#DC2626" />
+            )}
+            {statusCounts.missing > 0 && (
+              <StatusDot count={statusCounts.missing} color="#C2410C" />
+            )}
+            {statusCounts.done > 0 && (
+              <StatusDot count={statusCounts.done} color="#1FBE7A" />
+            )}
+          </div>
+        )}
+
+        {hasActions && !statusCounts && (
           <span style={{ fontSize: 11, color: MUTED }}>
-            {completedCount > 0 ? `${completedCount}/` : ''}{week.actions.length}
+            {completedCount > 0 ? `${completedCount}/` : ''}{actions.length}
           </span>
         )}
         {hasActions && (
@@ -681,14 +866,49 @@ function WeekRow({
               {week.insight}
             </p>
           )}
-          {week.actions.map((a, i) => (
-            <ActionRow
-              key={i}
-              action={a}
-              onToggleComplete={() => onToggleComplete(i)}
-              onRemove={() => onRemove(i)}
-            />
-          ))}
+          {actions.map((a, i) => {
+            const matched = 'status' in a ? (a as MatchedAction) : null;
+            return (
+              <ActionRow
+                key={i}
+                action={a}
+                matchedAction={matched}
+                onToggleComplete={() => onToggleComplete(i)}
+                onRemove={() => onRemove(i)}
+              />
+            );
+          })}
+
+          {/* Extra uploads not in the plan */}
+          {extraUploads.length > 0 && (
+            <div style={{ marginTop: 6, paddingTop: 6, borderTop: `1px dashed ${BORDER}` }}>
+              <p style={{ fontSize: 10, color: MUTED, margin: '0 0 4px 0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Extra uploads (not in plan)
+              </p>
+              {extraUploads.map((u) => (
+                <div
+                  key={u.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    fontSize: 12,
+                    padding: '3px 0',
+                  }}
+                >
+                  <span style={{ fontSize: 11, opacity: 0.7 }}>
+                    {u.durationSec <= 62 ? '⚡' : '🎬'}
+                  </span>
+                  <span style={{ flex: 1, color: '#7C3AED', fontWeight: 500 }}>
+                    {u.title}
+                  </span>
+                  <span style={{ fontSize: 10, color: MUTED }}>
+                    {fmtNum(u.viewCount)} views
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Add action UI */}
           {!adding ? (
@@ -791,16 +1011,26 @@ function WeekRow({
 
 function ActionRow({
   action,
+  matchedAction,
   onToggleComplete,
   onRemove,
 }: {
-  action: ContentAction;
+  action: ContentAction | MatchedAction;
+  matchedAction: MatchedAction | null;
   onToggleComplete: () => void;
   onRemove: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const icon = FORMAT_ICON[action.format] ?? '';
-  const done = !!action.completed;
+
+  // Use matched status if available, otherwise fall back to completed flag
+  const status: ExecutionStatus = matchedAction?.status ??
+    (action.completed ? 'completed' : 'planned');
+
+  const done = status === 'completed' || status === 'live';
+  const isLate = status === 'late';
+  const isMissing = status === 'missing';
+  const statusStyle = STATUS_STYLE[status];
 
   return (
     <div
@@ -811,7 +1041,7 @@ function ActionRow({
         alignItems: 'center',
         gap: 8,
         fontSize: 12,
-        padding: '3px 0',
+        padding: '4px 0',
       }}
     >
       {/* Completion toggle */}
@@ -822,7 +1052,7 @@ function ActionRow({
           width: 14,
           height: 14,
           borderRadius: 3,
-          border: `1.5px solid ${done ? '#1FBE7A' : BORDER}`,
+          border: `1.5px solid ${done ? '#1FBE7A' : isLate ? '#DC2626' : isMissing ? '#C2410C' : BORDER}`,
           background: done ? '#1FBE7A' : 'transparent',
           cursor: 'pointer',
           flexShrink: 0,
@@ -842,7 +1072,7 @@ function ActionRow({
       <span
         style={{
           flex: 1,
-          color: done ? MUTED : INK,
+          color: done ? MUTED : isLate ? '#DC2626' : isMissing ? '#C2410C' : INK,
           fontWeight: 500,
           textDecoration: done ? 'line-through' : 'none',
           opacity: done ? 0.6 : 1,
@@ -855,13 +1085,63 @@ function ActionRow({
           </span>
         )}
       </span>
-      {action.day !== 0 && (
-        <span style={{ fontSize: 10, color: MUTED, opacity: done ? 0.5 : 1 }}>
+
+      {/* Status badge */}
+      {matchedAction && status !== 'planned' && status !== 'completed' && (
+        <span
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            padding: '1px 6px',
+            borderRadius: 3,
+            background: statusStyle.bg,
+            color: statusStyle.fg,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            flexShrink: 0,
+          }}
+        >
+          {statusStyle.label}
+        </span>
+      )}
+
+      {/* Match confidence indicator */}
+      {matchedAction?.matchConfidence && matchedAction.matchConfidence !== 'high' && done && (
+        <span
+          style={{
+            fontSize: 9,
+            color: MUTED,
+            flexShrink: 0,
+            fontStyle: 'italic',
+          }}
+          title={`Match confidence: ${matchedAction.matchConfidence}`}
+        >
+          ~match
+        </span>
+      )}
+
+      {/* Matched upload view count */}
+      {matchedAction?.matchedUpload && (
+        <span style={{ fontSize: 10, color: '#0C6A3F', flexShrink: 0 }}>
+          {fmtNum(matchedAction.matchedUpload.viewCount)} views
+        </span>
+      )}
+
+      {/* Day offset (for unmatched) */}
+      {!matchedAction?.matchedUpload && action.day !== 0 && (
+        <span style={{ fontSize: 10, color: MUTED, opacity: done ? 0.5 : 1, flexShrink: 0 }}>
           {action.day > 0 ? `+${action.day}d` : `${action.day}d`}
         </span>
       )}
 
-      {/* Remove button — only visible on hover */}
+      {/* Days overdue */}
+      {matchedAction && (isLate || isMissing) && matchedAction.daysFromDue != null && (
+        <span style={{ fontSize: 10, color: statusStyle.fg, flexShrink: 0 }}>
+          {matchedAction.daysFromDue}d ago
+        </span>
+      )}
+
+      {/* Remove button */}
       <button
         onClick={onRemove}
         title="Remove action"
@@ -896,6 +1176,15 @@ function Stat({ label, value, color }: { label: string; value: string; color?: s
   );
 }
 
+function MiniStat({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <span style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+      <span style={{ fontSize: 10, color: MUTED }}>{label}</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color }}>{value}</span>
+    </span>
+  );
+}
+
 function Sep() {
   return <span style={{ width: 1, height: 14, background: BORDER, flexShrink: 0 }} />;
 }
@@ -920,31 +1209,70 @@ function SmallButton({ onClick, label }: { onClick: () => void; label: string })
   );
 }
 
-function detectCurrentPhase(plan: GeneratedPlan): PhaseName | null {
-  // Try to determine where "now" falls in the campaign
-  const now = new Date();
-  const weeks = plan.weeks;
-  if (weeks.length === 0) return null;
+function StatusDot({ count, color }: { count: number; color: string }) {
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 700,
+        color,
+        background: color + '15',
+        padding: '1px 5px',
+        borderRadius: 3,
+        minWidth: 16,
+        textAlign: 'center',
+      }}
+    >
+      {count}
+    </span>
+  );
+}
 
-  // Parse the first week's date range to get campaign start
-  for (const week of weeks) {
+function summarizeStatuses(actions: MatchedAction[]): {
+  done: number;
+  missing: number;
+  late: number;
+  planned: number;
+} {
+  return {
+    done: actions.filter((a) => a.status === 'completed' || a.status === 'live').length,
+    missing: actions.filter((a) => a.status === 'missing').length,
+    late: actions.filter((a) => a.status === 'late').length,
+    planned: actions.filter((a) => a.status === 'planned').length,
+  };
+}
+
+function isCurrentWeek(week: { dateRange: string }): boolean {
+  const now = new Date();
+  const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
+  if (!match) return false;
+  const monthMap: Record<string, number> = {
+    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+  };
+  const month = monthMap[match[1]];
+  if (month == null) return false;
+  const day = parseInt(match[2], 10);
+  const weekDate = new Date(now.getFullYear(), month, day);
+  const diff = (now.getTime() - weekDate.getTime()) / 86400000;
+  return diff >= -1 && diff <= 7;
+}
+
+function detectCurrentPhase(plan: GeneratedPlan): PhaseName | null {
+  const now = new Date();
+  const monthMap: Record<string, number> = {
+    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+  };
+  for (const week of plan.weeks) {
     const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
     if (!match) continue;
-    const [, monthStr, dayStr] = match;
-    const monthMap: Record<string, number> = {
-      Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-      Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-    };
-    const month = monthMap[monthStr];
+    const month = monthMap[match[1]];
     if (month == null) continue;
-    const day = parseInt(dayStr, 10);
+    const day = parseInt(match[2], 10);
     const weekDate = new Date(now.getFullYear(), month, day);
-    // If this week contains today (within ~7 days)
     const diff = (now.getTime() - weekDate.getTime()) / 86400000;
-    if (diff >= -1 && diff <= 7) {
-      return week.phase;
-    }
+    if (diff >= -1 && diff <= 7) return week.phase;
   }
-
   return null;
 }
