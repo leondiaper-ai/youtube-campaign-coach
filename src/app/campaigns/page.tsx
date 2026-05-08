@@ -123,6 +123,9 @@ export type StatusCardData = {
   healthNote?: string;
   dataStatus?: 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
   dataStatusNote?: string;
+  viewDataFreshness?: 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
+  /** Movement data confidence — drives UI tone (cautious vs assertive) */
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -423,6 +426,8 @@ async function loadCard(
     healthNote: nc.healthNote,
     dataStatus: nc.dataStatus,
     dataStatusNote: nc.dataStatusNote,
+    viewDataFreshness: nc.viewDataFreshness,
+    movementConfidence: nc.movementConfidence,
   };
 }
 

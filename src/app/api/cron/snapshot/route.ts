@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ARTISTS, mergeArtistLists } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnapLite } from '@/lib/youtube';
-import { writeLiveSnap, writeChannelMapping, writeSyncMeta, readLiveSnap, type SyncMeta } from '@/lib/kvCache';
+import { writeLiveSnap, writeChannelMapping, writeSyncMeta, readLiveSnap, readAllLiveSnaps, type SyncMeta } from '@/lib/kvCache';
 import { captureWeeklySnapshots } from '@/lib/weeklySnapshotCapture';
 import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
+import { classifySnapshotPriority, shouldFetchInRun, applyQuotaGuardrails, type SnapshotPriority } from '@/lib/snapshotScheduler';
+import { deriveFromLive } from '@/lib/artists';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // Allow up to 120s for all artists
@@ -15,14 +17,18 @@ export const maxDuration = 120; // Allow up to 120s for all artists
  * This is the ONLY place that calls the YouTube API.
  * All pages read from KV — zero API calls during browsing.
  *
- * 1. Daily: fetches a fresh channel snapshot for every artist using
- *    fetchChannelSnapLite (skips search.list/comments to save quota).
- *    Writes full LiveSnap to KV cache + time-series data for sparklines.
+ * Smart scheduling:
+ *   HIGH priority (active campaign / recent uploads): 2x daily (morning + evening)
+ *   MEDIUM priority (healthy/building/weak conversion): 1x daily (morning only)
+ *   LOW priority (cold/inactive/dormant): 3x weekly (Mon/Wed/Fri morning)
  *
- * 2. Weekly: captures weekly snapshots from KV data (not fresh API calls).
- *    Deduplicates by ISO week — safe to run daily.
+ * Quota guardrails:
+ *   - Estimates cost before fetching
+ *   - Drops LOW-priority artists first if budget is tight
+ *   - Stops on quota exhaustion, doesn't fail entire run
+ *   - Logs every skip with reason
  *
- * Estimated quota cost: ~6 units/artist × 37 artists = ~222 units/day
+ * Estimated quota cost: ~6 units/artist × eligible artists per run
  */
 export async function GET(req: NextRequest) {
   // Vercel Cron sets this header automatically. Block public access.
@@ -41,33 +47,100 @@ export async function GET(req: NextRequest) {
   const allArtists = mergeArtistLists(ARTISTS, custom);
   const withHandles = allArtists.filter((a) => a.channelHandle);
 
-  console.log(`[Cron] Starting daily sync for ${withHandles.length} artists`);
+  // ── 2. Determine run slot ──────────────────────────────────────────────
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  const dayOfWeek = now.getUTCDay();
+  // Morning run: 6-14 UTC, Evening run: 14-23 UTC
+  const runSlot: 'morning' | 'evening' = utcHour < 14 ? 'morning' : 'evening';
 
-  // ── 2. Fetch each artist and write to KV ───────────────────────────────
-  // Process sequentially to avoid hammering the API
-  const dailyResults: Record<string, string> = {};
-  let quotaUnits = 0;
+  console.log(`[Cron] Run slot: ${runSlot} (UTC ${utcHour}:00, day=${dayOfWeek})`);
+
+  // ── 3. Read cached snaps for priority classification ───────────────────
+  const handles = withHandles.map(a => a.channelHandle!);
+  const snapMap = await readAllLiveSnaps(handles);
+
+  // ── 4. Classify each artist and filter by run eligibility ──────────────
+  const artistSchedules: { slug: string; handle: string; schedule: ReturnType<typeof classifySnapshotPriority> }[] = [];
+  const allSchedules: { slug: string; schedule: ReturnType<typeof classifySnapshotPriority> }[] = [];
 
   for (const a of withHandles) {
     const handle = a.channelHandle!;
+    const snap = snapMap.get(handle) ?? null;
+
+    // Derive channel state from cached data (no API call)
+    let channelState: ChannelState | undefined;
+    if (snap && !snap.error) {
+      const derived = deriveFromLive(snap, {
+        subs7Delta: null, // not needed for priority classification
+        views7Delta: null,
+      });
+      channelState = derived?.status;
+    }
+
+    const schedule = classifySnapshotPriority(a, snap, channelState);
+    allSchedules.push({ slug: a.slug, schedule });
+
+    // Check if this artist should be fetched in this specific run
+    if (shouldFetchInRun(schedule.priority, runSlot, dayOfWeek)) {
+      schedule.shouldFetchNow = true;
+      artistSchedules.push({ slug: a.slug, handle, schedule });
+    }
+  }
+
+  // ── 5. Apply quota guardrails ──────────────────────────────────────────
+  const { toFetch, skipped, estimatedCost } = applyQuotaGuardrails(
+    artistSchedules.map(a => ({ slug: a.slug, schedule: a.schedule }))
+  );
+
+  const eligibleMap = new Map(artistSchedules.map(a => [a.slug, a]));
+
+  console.log(`[Cron] ${runSlot} run: ${toFetch.length} to fetch, ${skipped.length} skipped, ~${estimatedCost} quota units`);
+
+  // Log skipped artists
+  for (const s of skipped) {
+    console.log(`[Cron] SKIP: ${s.slug} — ${s.reason}`);
+  }
+
+  // ── 6. Fetch each eligible artist and write to KV ──────────────────────
+  const dailyResults: Record<string, string> = {};
+  let quotaUnits = 0;
+
+  // Mark skipped artists in results
+  for (const s of skipped) {
+    dailyResults[s.slug] = `skipped: ${s.reason}`;
+  }
+
+  // Mark non-eligible artists (wrong run slot)
+  for (const a of withHandles) {
+    if (!toFetch.includes(a.slug) && !skipped.some(s => s.slug === a.slug)) {
+      const sched = allSchedules.find(s => s.slug === a.slug);
+      dailyResults[a.slug] = `not scheduled (${sched?.schedule.priority ?? '?'} — ${runSlot} run)`;
+    }
+  }
+
+  for (const slug of toFetch) {
+    const entry = eligibleMap.get(slug);
+    if (!entry) continue;
+    const { handle } = entry;
+
     try {
       const snap = await fetchChannelSnapLite(handle);
       if (!snap) {
-        dailyResults[a.slug] = 'no key';
+        dailyResults[slug] = 'no key';
         failCount++;
         continue;
       }
       if (snap.error) {
-        dailyResults[a.slug] = `error: ${snap.error}`;
+        dailyResults[slug] = `error: ${snap.error}`;
         failCount++;
-        if (errors.length < 10) errors.push(`${a.slug}: ${snap.error}`);
+        if (errors.length < 10) errors.push(`${slug}: ${snap.error}`);
         // If quota exceeded, stop fetching more artists
         if (snap.error === 'quota_exceeded') {
           console.warn('[Cron] Quota exceeded — stopping further fetches');
-          // Mark remaining artists as skipped
-          const remaining = withHandles.slice(withHandles.indexOf(a) + 1);
+          const remaining = toFetch.slice(toFetch.indexOf(slug) + 1);
           for (const r of remaining) {
-            dailyResults[r.slug] = 'skipped (quota)';
+            dailyResults[r] = 'skipped (quota exhausted mid-run)';
             failCount++;
           }
           break;
@@ -83,22 +156,31 @@ export async function GET(req: NextRequest) {
         await writeChannelMapping(handle, snap.channelId);
       }
 
-      dailyResults[a.slug] = `ok (${snap.subs} subs, ${snap.uploads30d} uploads/30d)`;
+      dailyResults[slug] = `ok [${entry.schedule.priority}] (${snap.subs} subs, ${snap.uploads30d} uploads/30d)`;
       successCount++;
-      // Estimate: 1 resolve + 1 channels + 2 playlistItems + 2 videos = 6 units
       quotaUnits += 6;
     } catch (e: any) {
-      dailyResults[a.slug] = `throw: ${e?.message ?? e}`;
+      dailyResults[slug] = `throw: ${e?.message ?? e}`;
       failCount++;
-      if (errors.length < 10) errors.push(`${a.slug}: ${e?.message ?? e}`);
+      if (errors.length < 10) errors.push(`${slug}: ${e?.message ?? e}`);
+      // Never fail the whole run because one artist fails
     }
   }
 
-  // ── 3. Write sync metadata ─────────────────────────────────────────────
+  // ── 7. Write sync metadata ─────────────────────────────────────────────
   const durationMs = Date.now() - startTime;
-  const nextSync = new Date();
-  nextSync.setUTCDate(nextSync.getUTCDate() + 1);
-  nextSync.setUTCHours(8, 0, 0, 0); // Next day at 8am UTC (after YouTube quota resets at midnight Pacific / 7am UTC)
+  const nextMorning = new Date();
+  nextMorning.setUTCDate(nextMorning.getUTCDate() + (runSlot === 'evening' ? 1 : 0));
+  nextMorning.setUTCHours(8, 0, 0, 0);
+  if (runSlot === 'morning') {
+    // Next run is this evening
+    const nextEvening = new Date();
+    nextEvening.setUTCHours(20, 0, 0, 0);
+  }
+
+  // Priority breakdown for sync metadata
+  const priorityBreakdown: Record<SnapshotPriority, number> = { HIGH: 0, MEDIUM: 0, LOW: 0 };
+  for (const s of allSchedules) priorityBreakdown[s.schedule.priority]++;
 
   const syncMeta: SyncMeta = {
     lastSyncAt: new Date().toISOString(),
@@ -109,25 +191,34 @@ export async function GET(req: NextRequest) {
     errors,
     quotaUnitsEstimate: quotaUnits,
     durationMs,
-    nextScheduledSync: nextSync.toISOString(),
+    nextScheduledSync: nextMorning.toISOString(),
   };
   await writeSyncMeta(syncMeta);
 
-  console.log(`[Cron] Daily sync complete: ${successCount}/${withHandles.length} ok, ~${quotaUnits} quota units, ${durationMs}ms`);
+  console.log(`[Cron] ${runSlot} sync complete: ${successCount}/${toFetch.length} ok (${withHandles.length} total), ~${quotaUnits} quota units, ${durationMs}ms`);
+  console.log(`[Cron] Priority breakdown: HIGH=${priorityBreakdown.HIGH}, MEDIUM=${priorityBreakdown.MEDIUM}, LOW=${priorityBreakdown.LOW}`);
 
-  // ── 4. Weekly snapshot capture (reads from KV, not API) ────────────────
+  // ── 8. Weekly snapshot capture (reads from KV, not API) ────────────────
   let weeklyResult;
-  try {
-    weeklyResult = await captureWeeklySnapshots();
-  } catch (e: any) {
-    weeklyResult = { error: e?.message ?? 'Weekly capture failed' };
+  if (runSlot === 'morning') {
+    try {
+      weeklyResult = await captureWeeklySnapshots();
+    } catch (e: any) {
+      weeklyResult = { error: e?.message ?? 'Weekly capture failed' };
+    }
   }
 
   return NextResponse.json({
     ok: true,
     at: new Date().toISOString(),
+    runSlot,
+    dayOfWeek,
+    priorityBreakdown,
+    fetched: toFetch.length,
+    skipped: skipped.length,
+    estimatedQuota: quotaUnits,
     daily: dailyResults,
-    weekly: weeklyResult,
+    weekly: weeklyResult ?? 'evening run — skipped',
     sync: syncMeta,
   });
 }

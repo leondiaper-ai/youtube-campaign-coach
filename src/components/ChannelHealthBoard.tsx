@@ -40,6 +40,10 @@ export type RowData = {
   dataStatus?: 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
   /** Short explanation for data status */
   dataStatusNote?: string;
+  /** Whether YouTube's view data appears fresh or stale */
+  viewDataFreshness?: 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
+  /** Movement confidence — overall confidence in reported 7d movement */
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
 };
 
 type ViewMode = 'managed' | 'market';
@@ -223,10 +227,10 @@ function computeInsights(rows: RowData[]): Insight[] {
     });
   }
 
-  // Biggest WoW decline — exclude LOW confidence / stale / UNAVAILABLE data
+  // Biggest WoW decline — exclude LOW confidence / stale / UNAVAILABLE data / stale view data
   if (insights.length < 4) {
     const bigDrop = [...rows]
-      .filter((r) => r.viewsWoW != null && r.viewsWoW < -30 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE')
+      .filter((r) => r.viewsWoW != null && r.viewsWoW < -30 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE' && r.viewDataFreshness !== 'stale')
       .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))[0];
     if (bigDrop && bigDrop.slug !== convLeak?.slug && bigDrop.slug !== latent?.slug) {
       insights.push({
@@ -268,7 +272,7 @@ function computeTopMovers(rows: RowData[]): {
     .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(r.subs7Delta ?? 0) }));
 
   const biggestDecline = [...rows]
-    .filter((r) => r.viewsWoW != null && r.viewsWoW < -10 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE')
+    .filter((r) => r.viewsWoW != null && r.viewsWoW < -10 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE' && r.viewDataFreshness !== 'stale')
     .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))
     .slice(0, 3)
     .map((r) => ({ name: r.name, slug: r.slug, value: fmtPct(r.viewsWoW ?? 0) + ' WoW' }));
@@ -348,6 +352,11 @@ const PROFILE_TAG_STYLE: Record<string, { bg: string; fg: string }> = {
 // ─── Fix This Week recommendation ────────────────────────────────────────────
 
 function computeFixThisWeek(r: RowData): string {
+  // Stale movement — don't diagnose from unreliable data
+  if (r.movementConfidence === 'stale') {
+    if (r.uploads30d === 0) return 'Movement data updating — consider posting a reactivation clip';
+    return 'Movement data updating — maintain cadence while totals refresh';
+  }
   // Dormant with audience
   if (r.uploads30d === 0 && (r.subs ?? 0) > 0) {
     return 'Post one Shorts-led reactivation clip this week';
@@ -596,8 +605,8 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
           <div className="mt-2 p-4 rounded-lg text-[11px] leading-relaxed space-y-2" style={{ background: SOFT, color: 'rgba(14,14,14,0.6)' }}>
             <p><strong style={{ color: INK }}>Status</strong> — Each channel gets a health status based on upload cadence, subscriber conversion, and recent activity. Healthy channels are sorted first.</p>
             <p><strong style={{ color: INK }}>Score (A–D)</strong> — Grades how well the channel is being run across three pillars: reach growth, subscriber conversion efficiency, and posting cadence. Scores measure execution quality, not artist popularity.</p>
-            <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means insufficient snapshot history; hover for the specific reason.</p>
-            <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Limited" or "Partial" indicate how much stored history is available. Metrics improve as daily snapshots accumulate.</p>
+            <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means insufficient snapshot history or stale YouTube API data; hover for the specific reason.</p>
+            <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Limited" or "Partial" indicate how much stored history is available. When YouTube returns the same view total across snapshots (stale API data), view deltas show "—" instead of a misleading "+0" or "-100%". Metrics improve as daily snapshots accumulate.</p>
           </div>
         )}
       </div>

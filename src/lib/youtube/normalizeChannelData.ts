@@ -14,7 +14,8 @@
 import type { LiveSnap, Artist } from '../artists';
 import { daysSince } from '../artists';
 import type { ChannelSnapshot } from '../snapshots';
-import { deltaOver, campaignDelta, seriesForField } from '../snapshots';
+import { deltaOver, campaignDelta, seriesForField, detectViewFreshness, detectSubsFreshness } from '../snapshots';
+import type { ViewFreshness } from '../snapshots';
 import type { CachedSnap } from '../kvCache';
 
 // ── Centralized Thresholds ────────────────────────────────────────────────
@@ -78,6 +79,7 @@ export type MissingReason =
   | 'fetch_failed'
   | 'comparison_period_missing'
   | 'hidden_subscriber_count'
+  | 'stale_api_data'
   | 'not_applicable';
 
 export type MissingReasonEntry = {
@@ -85,6 +87,17 @@ export type MissingReasonEntry = {
   reason: MissingReason;
   detail: string;
 };
+
+// ── Movement Confidence ──────────────────────────────────────────────────
+// How much to trust 7d movement (views/subs delta) data.
+// Drives UI tone: stale → "Updating" / "—", not "+0" and negative diagnosis.
+//
+//  high     – fresh totals, enough history, meaningful deltas
+//  medium   – some data gaps but deltas are directionally useful
+//  limited  – insufficient history or partial data; deltas may be unreliable
+//  stale    – YouTube returning unchanged totals; movement is unknown, not zero
+
+export type MovementConfidence = 'high' | 'medium' | 'limited' | 'stale';
 
 // ── Delta Result ──────────────────────────────────────────────────────────
 // Wraps a numeric delta with metadata about trustworthiness.
@@ -177,6 +190,16 @@ export type NormalizedChannel = {
   dataStatusNote: string;
   /** Reasons why specific fields show "—" */
   missingReasons: MissingReasonEntry[];
+
+  // ── Per-metric data freshness ──
+  /** Whether YouTube's view data appears fresh or stale (unchanged totals) */
+  viewDataFreshness: ViewFreshness;
+  /** Whether YouTube's subscriber data appears fresh or stale */
+  subscriberDataFreshness: ViewFreshness;
+
+  // ── Movement confidence ──
+  /** How much to trust 7d movement data. Drives UI tone (cautious vs assertive). */
+  movementConfidence: MovementConfidence;
 };
 
 // ── Core normalize function ───────────────────────────────────────────────
@@ -197,16 +220,35 @@ export function normalizeChannelData(
   const confidence = assessConfidence(history);
   const dataStatus = deriveDataStatus(health, confidence, snap);
 
+  // ── Per-metric freshness detection ──
+  const viewDataFreshness = detectViewFreshness(history, snap.subs ?? null);
+  const subscriberDataFreshness = detectSubsFreshness(history, snap.views ?? null);
+
   // ── Deltas ──
   const subs7Raw = deltaOver(history, 7, 'subs');
   const views7Raw = deltaOver(history, 7, 'views');
   const subs30Raw = deltaOver(history, 30, 'subs');
   const views30Raw = deltaOver(history, 30, 'views');
 
-  const subs7d = wrapDelta(subs7Raw, 7, history);
-  const views7d = wrapDelta(views7Raw, 7, history);
-  const subs30d = wrapDelta(subs30Raw, 30, history);
-  const views30d = wrapDelta(views30Raw, 30, history);
+  let subs7d = wrapDelta(subs7Raw, 7, history);
+  let views7d = wrapDelta(views7Raw, 7, history);
+  let subs30d = wrapDelta(subs30Raw, 30, history);
+  let views30d = wrapDelta(views30Raw, 30, history);
+
+  // STALE DATA SUPPRESSION:
+  // When YouTube returns identical viewCount totals across snapshots,
+  // the computed delta is 0 — but it's not a real zero, it's stale API data.
+  // Mark these deltas as non-meaningful so downstream consumers (WoW,
+  // insights, movers) automatically suppress them instead of showing
+  // misleading "+0" or "-100% WoW".
+  if (viewDataFreshness === 'stale') {
+    if (views7d && views7d.delta === 0) views7d = { ...views7d, meaningful: false };
+    if (views30d && views30d.delta === 0) views30d = { ...views30d, meaningful: false };
+  }
+  if (subscriberDataFreshness === 'stale') {
+    if (subs7d && subs7d.delta === 0) subs7d = { ...subs7d, meaningful: false };
+    if (subs30d && subs30d.delta === 0) subs30d = { ...subs30d, meaningful: false };
+  }
 
   // ── Cadence ──
   const cadence = computeCadence(snap);
@@ -221,7 +263,12 @@ export function normalizeChannelData(
   // ── Health note ──
   const healthNote = buildHealthNote(health, confidence, history.length);
   const dataStatusNote = buildDataStatusNote(dataStatus, history.length, snap);
-  const missingReasons = buildMissingReasons(snap, subs7d, views7d, history, confidence);
+  const missingReasons = buildMissingReasons(snap, subs7d, views7d, history, confidence, viewDataFreshness, subscriberDataFreshness);
+
+  // ── Movement confidence ──
+  const movementConfidence = deriveMovementConfidence(
+    viewDataFreshness, subscriberDataFreshness, views7d, subs7d, confidence,
+  );
 
   return {
     channelId: snap.channelId ?? null,
@@ -246,7 +293,41 @@ export function normalizeChannelData(
     healthNote,
     dataStatusNote,
     missingReasons,
+    viewDataFreshness,
+    subscriberDataFreshness,
+    movementConfidence,
   };
+}
+
+// ── Movement confidence derivation ───────────────────────────────────────
+// Determines how trustworthy the 7d movement data is. If stale, the UI
+// should become more cautious — not more negative.
+
+function deriveMovementConfidence(
+  viewFreshness: ViewFreshness,
+  subsFreshness: ViewFreshness,
+  views7d: DeltaResult | null,
+  subs7d: DeltaResult | null,
+  confidence: DataConfidence,
+): MovementConfidence {
+  // If either core metric has stale totals, movement is untrustworthy
+  if (viewFreshness === 'stale' || subsFreshness === 'stale') return 'stale';
+
+  // If either freshness is unavailable (null data), movement is unknown
+  if (viewFreshness === 'unavailable' && subsFreshness === 'unavailable') return 'stale';
+
+  // If we don't have enough history for reliable deltas
+  if (viewFreshness === 'insufficient_history' || subsFreshness === 'insufficient_history') return 'limited';
+
+  // If deltas exist but aren't meaningful (non-meaningful flag set)
+  if (views7d && !views7d.meaningful) return 'stale';
+  if (subs7d && !subs7d.meaningful) return 'limited';
+
+  // If overall confidence is LOW, deltas exist but may be unreliable
+  if (confidence === 'LOW') return 'limited';
+  if (confidence === 'MEDIUM') return 'medium';
+
+  return 'high';
 }
 
 // ── Safe merge: never let null overwrite valid data ───────────────────────
@@ -435,6 +516,9 @@ function emptyNormalized(
     healthNote: 'Channel could not be reached — will retry on next refresh',
     dataStatusNote: 'Channel could not be reached — will retry on next scheduled refresh',
     missingReasons: [{ field: 'all', reason: 'fetch_failed', detail: 'Channel could not be reached — will retry on next scheduled refresh' }],
+    viewDataFreshness: 'unavailable',
+    subscriberDataFreshness: 'unavailable',
+    movementConfidence: 'stale',
   };
 }
 
@@ -678,6 +762,8 @@ function buildMissingReasons(
   views7d: DeltaResult | null,
   history: ChannelSnapshot[],
   confidence: DataConfidence,
+  viewFreshness?: ViewFreshness,
+  subsFreshness?: ViewFreshness,
 ): MissingReasonEntry[] {
   const reasons: MissingReasonEntry[] = [];
   const depth = computeHistoryDepth(history);
@@ -730,13 +816,21 @@ function buildMissingReasons(
       });
     }
   } else if (!subs7d.meaningful) {
-    reasons.push({
-      field: 'subs7d',
-      reason: 'insufficient_snapshot_history',
-      detail: isInactive
-        ? 'Channel inactive — subscriber movement is naturally flat'
-        : `Only ${subs7d.daysCovered} day${subs7d.daysCovered === 1 ? '' : 's'} of comparison data — need more for a reliable trend`,
-    });
+    if (subsFreshness === 'stale') {
+      reasons.push({
+        field: 'subs7d',
+        reason: 'stale_api_data',
+        detail: 'YouTube is returning the same subscriber total across snapshots — waiting for fresh data from the API',
+      });
+    } else {
+      reasons.push({
+        field: 'subs7d',
+        reason: 'insufficient_snapshot_history',
+        detail: isInactive
+          ? 'Channel inactive — subscriber movement is naturally flat'
+          : `Only ${subs7d.daysCovered} day${subs7d.daysCovered === 1 ? '' : 's'} of comparison data — need more for a reliable trend`,
+      });
+    }
   }
 
   // ── 7-day views delta ──
@@ -763,13 +857,21 @@ function buildMissingReasons(
       });
     }
   } else if (!views7d.meaningful) {
-    reasons.push({
-      field: 'views7d',
-      reason: 'insufficient_snapshot_history',
-      detail: isInactive
-        ? 'Channel inactive — view movement is naturally minimal during dormant periods'
-        : `Only ${views7d.daysCovered} day${views7d.daysCovered === 1 ? '' : 's'} of comparison data — need more for a reliable trend`,
-    });
+    if (viewFreshness === 'stale') {
+      reasons.push({
+        field: 'views7d',
+        reason: 'stale_api_data',
+        detail: 'YouTube is returning the same view total across snapshots — waiting for fresh data from the API',
+      });
+    } else {
+      reasons.push({
+        field: 'views7d',
+        reason: 'insufficient_snapshot_history',
+        detail: isInactive
+          ? 'Channel inactive — view movement is naturally minimal during dormant periods'
+          : `Only ${views7d.daysCovered} day${views7d.daysCovered === 1 ? '' : 's'} of comparison data — need more for a reliable trend`,
+      });
+    }
   }
 
   // ── Last upload ──

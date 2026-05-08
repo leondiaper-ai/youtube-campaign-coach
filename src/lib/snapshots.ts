@@ -92,6 +92,77 @@ export async function readHistory(channelId: string): Promise<ChannelSnapshot[]>
   return history ?? [];
 }
 
+// --- Stale data detection ---
+
+/**
+ * Detect whether a channel's view data is stale (YouTube API returning
+ * the same viewCount total across consecutive snapshots).
+ *
+ * Stale criteria:
+ *   1. Channel is "significant" — totalSubs > 50K OR totalViews > 1M
+ *   2. The 7d views delta is exactly 0
+ *   3. The latest snapshot viewTotal equals the previous snapshot's viewTotal
+ *      (i.e. YouTube literally returned the same number twice)
+ *
+ * Returns a freshness classification.
+ */
+export type ViewFreshness = 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
+
+export function detectViewFreshness(
+  history: ChannelSnapshot[],
+  subs: number | null,
+): ViewFreshness {
+  // No history at all → unavailable
+  if (history.length === 0) return 'unavailable';
+
+  const last = history[history.length - 1];
+
+  // Latest snapshot has null views → unavailable
+  if (last.views == null) return 'unavailable';
+
+  // Need at least 2 snapshots to compare
+  if (history.length < 2) return 'insufficient_history';
+
+  // Find the second-to-last snapshot that has a non-null view value
+  const prev = [...history].slice(0, -1).reverse().find(h => h.views != null);
+  if (!prev) return 'insufficient_history';
+
+  // Check if channel is "significant" enough for stale detection to apply.
+  // Small channels can genuinely have 0 views growth.
+  const isSignificant = (subs != null && subs > 50_000) || last.views > 1_000_000;
+  if (!isSignificant) return 'fresh';
+
+  // Core stale check: YouTube returned identical viewCount totals
+  if (last.views === prev.views) return 'stale';
+
+  return 'fresh';
+}
+
+/**
+ * Same logic for subscriber staleness.
+ */
+export function detectSubsFreshness(
+  history: ChannelSnapshot[],
+  totalViews: number | null,
+): ViewFreshness {
+  if (history.length === 0) return 'unavailable';
+
+  const last = history[history.length - 1];
+  if (last.subs == null) return 'unavailable';
+  if (history.length < 2) return 'insufficient_history';
+
+  const prev = [...history].slice(0, -1).reverse().find(h => h.subs != null);
+  if (!prev) return 'insufficient_history';
+
+  // Significant channel check for subs
+  const isSignificant = (totalViews != null && totalViews > 1_000_000) || last.subs > 50_000;
+  if (!isSignificant) return 'fresh';
+
+  if (last.subs === prev.subs) return 'stale';
+
+  return 'fresh';
+}
+
 // --- helpers for consumers ---
 
 export function deltaOver(history: ChannelSnapshot[], days: number, field: 'subs' | 'views') {

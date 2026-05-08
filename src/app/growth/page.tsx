@@ -82,6 +82,8 @@ export default async function ControlPage() {
         healthNote: nc.healthNote,
         dataStatus: nc.dataStatus,
         dataStatusNote: nc.dataStatusNote,
+        viewDataFreshness: nc.viewDataFreshness,
+        movementConfidence: nc.movementConfidence,
       };
     })
   );

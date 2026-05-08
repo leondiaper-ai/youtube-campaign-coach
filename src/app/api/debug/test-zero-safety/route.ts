@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { deltaOver, campaignDelta, type ChannelSnapshot } from '@/lib/snapshots';
+import { deltaOver, campaignDelta, detectViewFreshness, detectSubsFreshness, type ChannelSnapshot } from '@/lib/snapshots';
 import { viewsToRevenue, subsToValue, detectOpportunity, getArtistValueOpportunity } from '@/lib/valueModel';
-import { rawDelta, rawDeltaOrZero } from '@/lib/youtube/normalizeChannelData';
+import { rawDelta, rawDeltaOrZero, normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ZERO-SAFETY TEST SUITE
@@ -165,6 +165,85 @@ function runTests(): TestResult[] {
     const sum = values.reduce((s: number, v) => s + (v ?? 0), 0);
     eq(sum, 600);
     if (Number.isNaN(sum)) throw new Error('Sum is NaN');
+  });
+
+  // ── 7. Stale view detection ──────────────────────────────────────────
+
+  test('detectViewFreshness returns stale when viewTotal unchanged for significant channel', () => {
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-05-01', subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+      { ts: '2026-05-07', subs: 100100, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+    ];
+    eq(detectViewFreshness(history, 100000), 'stale');
+  });
+
+  test('detectViewFreshness returns fresh when viewTotal changed', () => {
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-05-01', subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+      { ts: '2026-05-07', subs: 100100, views: 5050000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+    ];
+    eq(detectViewFreshness(history, 100000), 'fresh');
+  });
+
+  test('detectViewFreshness returns fresh for small channel even with unchanged views', () => {
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-05-01', subs: 500, views: 10000, uploads30d: 1, shorts30d: 0, upcomingCount: 0, lastUploadAt: null },
+      { ts: '2026-05-07', subs: 500, views: 10000, uploads30d: 1, shorts30d: 0, upcomingCount: 0, lastUploadAt: null },
+    ];
+    eq(detectViewFreshness(history, 500), 'fresh');
+  });
+
+  test('detectViewFreshness returns insufficient_history with only 1 snapshot', () => {
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-05-07', subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+    ];
+    eq(detectViewFreshness(history, 100000), 'insufficient_history');
+  });
+
+  test('detectViewFreshness returns unavailable when latest views is null', () => {
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-05-01', subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+      { ts: '2026-05-07', subs: 100100, views: null, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: null },
+    ];
+    eq(detectViewFreshness(history, 100000), 'unavailable');
+  });
+
+  test('normalizeChannelData marks stale views7d as non-meaningful', () => {
+    const snap = {
+      channelId: 'UCtest', handle: 'test', title: 'Test', thumbnail: undefined,
+      subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0,
+      lastUploadAt: '2026-05-05', recentUploads: [],
+    };
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-04-20', subs: 99800, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+      { ts: '2026-04-25', subs: 99900, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+      { ts: '2026-05-01', subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+      { ts: '2026-05-07', subs: 100100, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+    ];
+    const nc = normalizeChannelData(snap, history);
+    eq(nc.viewDataFreshness, 'stale');
+    // views7d should exist (delta computed) but be non-meaningful
+    if (nc.views7d && nc.views7d.meaningful) {
+      throw new Error('Stale views7d should be non-meaningful');
+    }
+  });
+
+  test('normalizeChannelData stale views produce null rawDelta', () => {
+    const snap = {
+      channelId: 'UCtest', handle: 'test', title: 'Test', thumbnail: undefined,
+      subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0,
+      lastUploadAt: '2026-05-05', recentUploads: [],
+    };
+    const history: ChannelSnapshot[] = [
+      { ts: '2026-04-20', subs: 99800, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+      { ts: '2026-04-25', subs: 99900, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+      { ts: '2026-05-01', subs: 100000, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+      { ts: '2026-05-07', subs: 100100, views: 5000000, uploads30d: 5, shorts30d: 2, upcomingCount: 0, lastUploadAt: '2026-05-05' },
+    ];
+    const nc = normalizeChannelData(snap, history);
+    // rawDelta returns null for non-meaningful deltas
+    const viewsDelta = rawDelta(nc.views7d);
+    eq(viewsDelta, null, 'Stale views should produce null rawDelta');
   });
 
   return results;

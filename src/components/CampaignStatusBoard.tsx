@@ -96,6 +96,10 @@ type CardData = {
   dataStatus?: 'FRESH' | 'PARTIAL' | 'LIMITED' | 'STALE' | 'UNAVAILABLE';
   /** Short explanation for data status */
   dataStatusNote?: string;
+  /** Whether YouTube's view data appears fresh or stale */
+  viewDataFreshness?: 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
+  /** Movement data confidence — drives UI tone (cautious vs assertive) */
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -105,10 +109,13 @@ function cardToGrowthInput(card: CardData): GrowthInput {
     card.cadenceLine.startsWith('No recent') ? 31
     : card.boardStatus === 'COLD' ? 60 : 7
   );
+  const isStale = card.movementConfidence === 'stale';
   return {
     subscribers: card.subs ?? undefined,
-    views7d: card.views7Delta,
-    subscribers7d: card.subs7Delta,
+    // When movement is stale, pass null so Growth OS doesn't diagnose
+    // "algorithm not amplifying" from stale +0 data
+    views7d: isStale ? null : card.views7Delta,
+    subscribers7d: isStale ? null : card.subs7Delta,
     uploads30d: card.uploads30d,
     shorts30d: card.shorts30d,
     lastUploadDaysAgo: daysSince,
@@ -169,6 +176,16 @@ function conversionLabel(spk: number | null): { text: string; color: string } {
 // ─── Simplified card copy ───────────────────────────────────────────────
 
 function whatHappening(card: CardData): string {
+  const isStale = card.movementConfidence === 'stale';
+
+  // STALE MOVEMENT: cautious, not negative
+  if (isStale && card.boardStatus !== 'COLD') {
+    if (card.uploads30d >= 5) return 'Campaign active — waiting for fresh movement data';
+    if (card.uploads30d >= 3) return 'Cadence healthy — movement confidence limited';
+    if (card.uploads30d >= 1) return 'Recent uploads detected — reporting still updating';
+    return 'Waiting for fresh YouTube totals';
+  }
+
   const viewsStrong = card.views7Delta != null && card.views7Delta > 5000;
   const viewsUp = card.views7Delta != null && card.views7Delta > 0;
   const subsUp = card.subs7Delta != null && card.subs7Delta > 0;
@@ -188,12 +205,19 @@ function whatHappening(card: CardData): string {
   return 'Building — not yet at rhythm';
 }
 
-function whyCause(read: GrowthRead): string {
+function whyCause(read: GrowthRead, card?: CardData): string {
+  const isStale = card?.movementConfidence === 'stale';
+
+  // When movement is stale, suppress momentum-based diagnoses
+  if (isStale && read.blocker.blocker === 'MOMENTUM_GAP') {
+    return 'Movement data updating — awaiting fresh YouTube totals';
+  }
+
   switch (read.blocker.blocker) {
     case 'CADENCE_GAP': return 'Low upload cadence';
     case 'CONVERSION_GAP': return 'No depth content / artist connection';
     case 'FORMAT_GAP': return 'No Shorts or supporting formats';
-    case 'MOMENTUM_GAP': return 'Algorithm not amplifying content';
+    case 'MOMENTUM_GAP': return 'View momentum flat — content not being amplified';
     case 'AUDIENCE_CONNECTION_GAP': return 'Content lacks depth and connection';
     case 'ASSET_GAP': return 'Content assets not ready';
     case 'CAMPAIGN_ALIGNMENT_GAP': return 'Uploads not serving campaign';
@@ -261,11 +285,12 @@ function generateSnapshot(card: CardData): string {
 
   lines.push('', '1. WHAT\'S HAPPENING');
   lines.push(whatHappening(card));
-  lines.push(`Why: ${whyCause(read)}`);
+  lines.push(`Why: ${whyCause(read, card)}`);
 
+  const isStaleExport = card.movementConfidence === 'stale';
   lines.push('', '2. CURRENT WEEK');
-  lines.push(`Views (7d): ${card.views7Delta != null ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}` : '—'}`);
-  lines.push(`Subs (7d): ${card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : '—'}`);
+  lines.push(`Views (7d): ${!isStaleExport && card.views7Delta != null ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}` : isStaleExport ? 'Updating' : '—'}`);
+  lines.push(`Subs (7d): ${!isStaleExport && card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : isStaleExport ? 'Updating' : '—'}`);
   lines.push(`Uploads (30d): ${card.uploads30d}`);
   lines.push(`Cadence: ${card.cadenceLine}`);
 
@@ -355,13 +380,15 @@ function WeeklySummary({ cards }: { cards: CardData[] }) {
   const nonCold = cards.filter((c) => c.boardStatus !== 'COLD');
 
   const weakConvCount = nonCold.filter((c) => {
+    if (c.movementConfidence === 'stale') return false;
     return c.views7Delta != null && c.views7Delta > 5000 &&
       (c.subs7Delta == null || c.subs7Delta <= 0);
   }).length;
 
-  const underfedCount = nonCold.filter((c) =>
-    c.uploads30d <= 2 && c.views7Delta != null && c.views7Delta > 0
-  ).length;
+  const underfedCount = nonCold.filter((c) => {
+    if (c.movementConfidence === 'stale') return false;
+    return c.uploads30d <= 2 && c.views7Delta != null && c.views7Delta > 0;
+  }).length;
 
   const coldCount = cards.filter((c) => c.boardStatus === 'COLD').length;
 
@@ -739,8 +766,10 @@ function DecisionCard({
       <div className="flex items-end gap-6 mb-3">
         <div>
           {(() => {
-            const hasRealDelta = card.views7Delta != null;
-            const isZero = card.views7Delta === 0;
+            const isStaleMovement = card.movementConfidence === 'stale';
+            // When movement is stale, suppress +0 — show "—" instead
+            const hasRealDelta = card.views7Delta != null && !(isStaleMovement && card.views7Delta === 0);
+            const isZero = hasRealDelta && card.views7Delta === 0;
             return (
               <>
                 <div
@@ -749,10 +778,10 @@ function DecisionCard({
                 >
                   {hasRealDelta
                     ? `${card.views7Delta! >= 0 ? '+' : ''}${fmtNum(card.views7Delta!)}`
-                    : '—'}
+                    : isStaleMovement ? 'Updating' : '—'}
                 </div>
                 <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  7d views{!hasRealDelta && card.confidence === 'LOW' ? ' · limited data' : ''}
+                  7d views{!hasRealDelta ? (isStaleMovement ? ' · waiting for fresh totals' : card.confidence === 'LOW' ? ' · limited data' : '') : ''}
                 </div>
               </>
             );
@@ -760,8 +789,9 @@ function DecisionCard({
         </div>
         <div>
           {(() => {
-            const hasRealDelta = card.subs7Delta != null;
-            const isZero = card.subs7Delta === 0;
+            const isStaleMovement = card.movementConfidence === 'stale';
+            const hasRealDelta = card.subs7Delta != null && !(isStaleMovement && card.subs7Delta === 0);
+            const isZero = hasRealDelta && card.subs7Delta === 0;
             return (
               <>
                 <div
@@ -770,6 +800,7 @@ function DecisionCard({
                 >
                   {hasRealDelta
                     ? `${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}`
+                    : isStaleMovement && card.subs != null ? fmtNum(card.subs)
                     : card.subs != null
                     ? fmtNum(card.subs)
                     : '—'}
@@ -817,7 +848,7 @@ function DecisionCard({
         {whatHappening(card)}
       </div>
       <div className="text-[12px] text-ink/40 mb-1">
-        {whyCause(read)}
+        {whyCause(read, card)}
       </div>
 
 
@@ -930,6 +961,21 @@ function DecisionCard({
       {/* ─── Content Structure Warning ─────────────────────────── */}
       {card.structureWarning && (
         <StructureWarningLine warning={card.structureWarning} />
+      )}
+
+      {/* ─── Movement confidence indicator ────────────────────── */}
+      {(card.movementConfidence === 'stale' || card.movementConfidence === 'limited') && (
+        <div className="flex items-center gap-1.5 mb-2 mt-1">
+          <span
+            className="inline-block w-[5px] h-[5px] rounded-full"
+            style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
+          />
+          <span className="text-[9px] tracking-[0.04em] text-ink/30 italic">
+            {card.movementConfidence === 'stale'
+              ? 'Public YouTube totals updating'
+              : 'Movement data building — limited history'}
+          </span>
+        </div>
       )}
 
       <button
