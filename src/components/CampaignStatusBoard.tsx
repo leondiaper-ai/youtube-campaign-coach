@@ -723,16 +723,14 @@ function DecisionCard({
               <>
                 <div
                   className="text-[28px] font-black leading-none tabular-nums"
-                  style={{ color: hasRealDelta ? deltaColor(card.views7Delta) : INK }}
+                  style={{ color: hasRealDelta ? deltaColor(card.views7Delta) : 'rgba(14,14,14,0.2)' }}
                 >
                   {hasRealDelta
                     ? `${card.views7Delta! >= 0 ? '+' : ''}${fmtNum(card.views7Delta!)}`
-                    : card.views != null
-                    ? fmtNum(card.views)
                     : '—'}
                 </div>
                 <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  {hasRealDelta ? '7d views' : 'views'}
+                  7d views
                 </div>
               </>
             );
