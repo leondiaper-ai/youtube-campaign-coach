@@ -188,10 +188,10 @@ function whatHappening(card: CardData): string {
 
   // STALE MOVEMENT: cautious, not negative
   if (isStale && card.boardStatus !== 'COLD') {
-    if (card.uploads30d >= 5) return 'Campaign active — waiting for fresh movement data';
-    if (card.uploads30d >= 3) return 'Cadence healthy — movement confidence limited';
-    if (card.uploads30d >= 1) return 'Recent uploads detected — reporting still updating';
-    return 'Waiting for fresh YouTube totals';
+    if (card.uploads30d >= 5) return 'Campaign active — totals updating';
+    if (card.uploads30d >= 3) return 'Cadence healthy — totals updating';
+    if (card.uploads30d >= 1) return 'Uploads active — totals updating';
+    return 'Totals updating';
   }
 
   const viewsStrong = card.views7Delta != null && card.views7Delta > 5000;
@@ -218,7 +218,7 @@ function whyCause(read: GrowthRead, card?: CardData): string {
 
   // When movement is stale, suppress momentum-based diagnoses
   if (isStale && read.blocker.blocker === 'MOMENTUM_GAP') {
-    return 'Movement data updating — awaiting fresh YouTube totals';
+    return 'Totals updating';
   }
 
   switch (read.blocker.blocker) {
@@ -511,7 +511,7 @@ function DormantBlock({ cards }: { cards: CardData[] }) {
                   {card.subs ? fmtNum(card.subs) + ' subs' : '—'}
                 </span>
                 <span className="text-ink/30 shrink-0">
-                  {card.lastUploadDaysAgo ? `${card.lastUploadDaysAgo}d since upload` : 'No data'}
+                  {card.lastUploadDaysAgo ? `${card.lastUploadDaysAgo}d since upload` : '—'}
                 </span>
               </div>
             ))}

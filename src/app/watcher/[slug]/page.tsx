@@ -336,7 +336,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             : ba.source === 'recent_snapshot' ? 'Views (recent)'
             : ba.source === 'campaign_period' ? 'Campaign views'
             : ba.source === 'last_confirmed' ? ba.label
-            : ba.source === 'recent_uploads' ? 'Activity signal'
+            : ba.source === 'recent_uploads' ? 'Content activity'
             : 'Views (7d)';
 
           const subsLabel = ba.source === 'live_7d' ? 'Subs (7d)'
@@ -382,8 +382,8 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
               {ba.source === 'none' && (
                 <div className="mt-2 text-[10px] italic text-ink/30">
                   {nc.movementConfidence === 'limited'
-                    ? 'Recently added to tracking — movement data building'
-                    : 'Public YouTube totals updating — movement data awaiting refresh'}
+                    ? 'Recently added — movement data building'
+                    : 'Totals updating — movement data will refresh shortly'}
                 </div>
               )}
             </>
@@ -394,7 +394,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         {nc.bestAvailable.source === 'none' && nc.cadence.uploads30d > 0 && (
           <div className="mt-3 rounded-lg px-4 py-3 border" style={{ borderColor: MUTED, background: PAPER }}>
             <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
-              Activity signal
+              Content activity
             </div>
             <div className="text-[13px] text-ink/60 leading-snug">
               {nc.cadence.uploads30d} upload{nc.cadence.uploads30d !== 1 ? 's' : ''} in 30 days
@@ -406,7 +406,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
                   : ''}
             </div>
             <div className="text-[10px] text-ink/25 mt-1 italic">
-              Channel totals delayed — cadence used as operational signal
+              Totals updating — uploads confirm channel is active
             </div>
           </div>
         )}

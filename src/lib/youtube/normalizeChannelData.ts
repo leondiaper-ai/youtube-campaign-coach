@@ -221,8 +221,8 @@ export function deriveBestAvailableMovement(
   const none: BestAvailableMovement = {
     viewsValue: null, subsValue: null,
     source: 'none', freshness: 'unknown', confidence: 'low',
-    label: 'Movement', sublabel: 'No data',
-    explanation: 'Insufficient snapshot history for reliable weekly movement.',
+    label: 'Movement', sublabel: 'Awaiting data',
+    explanation: 'Building snapshot history — movement data will appear as daily tracking accumulates.',
     shouldUseInScore: false, shouldUseInTopMovers: false, shouldUseInReport: false,
     ageDays: null,
   };
@@ -268,7 +268,7 @@ export function deriveBestAvailableMovement(
       confidence: 'medium',
       label: 'Views (recent)',
       sublabel: `as of ${dateLabel}`,
-      explanation: `Most recent reliable movement from ${dateLabel}. Channel totals are currently delayed.`,
+      explanation: `Recent movement from ${dateLabel}. Totals updating.`,
       shouldUseInScore: true,
       shouldUseInTopMovers: true,
       shouldUseInReport: true,
@@ -294,7 +294,7 @@ export function deriveBestAvailableMovement(
       confidence: nc.campaign.viewsDelta.confidence === 'HIGH' ? 'high' : 'medium',
       label: 'Campaign period',
       sublabel: `since ${startLabel} · day ${campDay}`,
-      explanation: `Campaign active: ${nc.campaign.viewsDelta.delta >= 0 ? '+' : ''}${nc.campaign.viewsDelta.delta.toLocaleString()} views since launch. Weekly channel totals delayed.`,
+      explanation: `Campaign active: ${nc.campaign.viewsDelta.delta >= 0 ? '+' : ''}${nc.campaign.viewsDelta.delta.toLocaleString()} views since launch. Weekly totals updating.`,
       shouldUseInScore: false, // campaign totals are cumulative, not weekly
       shouldUseInTopMovers: false,
       shouldUseInReport: true,
@@ -317,9 +317,9 @@ export function deriveBestAvailableMovement(
       source: 'recent_uploads',
       freshness: 'delayed',
       confidence: 'low',
-      label: 'Activity signal',
+      label: 'Content activity',
       sublabel: `${uploadCount} upload${uploadCount !== 1 ? 's' : ''} / 30d`,
-      explanation: `Recent uploads still active (${uploadCount} in 30 days${shortsCount > 0 ? `, ${shortsCount} Shorts` : ''}). Public channel totals are delayed.`,
+      explanation: `Uploads active (${uploadCount} in 30 days${shortsCount > 0 ? `, ${shortsCount} Shorts` : ''}). Channel totals updating.`,
       shouldUseInScore: false,
       shouldUseInTopMovers: false,
       shouldUseInReport: true,
@@ -344,8 +344,8 @@ export function deriveBestAvailableMovement(
       label: isHeadlineWorthy ? 'Views (last confirmed)' : 'Views (historical)',
       sublabel: `${age}d ago`,
       explanation: isHeadlineWorthy
-        ? `Last confirmed movement from ${dateLabel}. Channel totals awaiting refresh.`
-        : `Historical movement from ${dateLabel}. Too old for headline display — shown for context only.`,
+        ? `Last confirmed movement from ${dateLabel}. Totals updating.`
+        : `Historical movement from ${dateLabel}. Shown for context — fresher data expected soon.`,
       shouldUseInScore: false,
       shouldUseInTopMovers: isHeadlineWorthy, // only rank if recent enough
       shouldUseInReport: true,
@@ -1063,63 +1063,63 @@ export function getReportingMovementSummary(
   switch (ba.source) {
     case 'live_7d':
       return {
-        headline: `${artistName} — live movement data available`,
-        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views over 7 days` : 'Views data unavailable',
-        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers over 7 days` : 'Subscriber data unavailable',
-        confidenceNote: `Movement confidence: ${ba.confidence}. Data is ${ba.freshness}.`,
-        recommendedWording: `Channel movement is live/recent: ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''}${ba.subsValue != null ? ' and ' + fmtV(ba.subsValue) + ' subs' : ''} over 7d.`,
+        headline: `${artistName} — live movement`,
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views over 7 days` : 'Views updating',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers over 7 days` : 'Subscriber data updating',
+        confidenceNote: `Live data, ${ba.confidence} confidence.`,
+        recommendedWording: `${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''}${ba.subsValue != null ? ' and ' + fmtV(ba.subsValue) + ' subs' : ''} over 7d.`,
       };
 
     case 'recent_snapshot':
       return {
-        headline: `${artistName} — recent movement data (${ba.ageDays}d old)`,
-        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views (as of ${ba.sublabel})` : 'Views data stale',
-        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers (as of ${ba.sublabel})` : 'Subscriber data stale',
-        confidenceNote: `Using recent snapshot from ${ba.ageDays} days ago. Current totals are delayed.`,
-        recommendedWording: `Recent movement (${ba.ageDays}d ago): ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''}. Channel totals currently delayed.`,
+        headline: `${artistName} — recent movement (${ba.ageDays}d ago)`,
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views (${ba.sublabel})` : 'Views updating',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers (${ba.sublabel})` : 'Subscriber data updating',
+        confidenceNote: `Recent snapshot from ${ba.ageDays} days ago. Totals updating.`,
+        recommendedWording: `Recent movement (${ba.ageDays}d ago): ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''}. Totals updating.`,
       };
 
     case 'campaign_period':
       return {
-        headline: `${artistName} — campaign period movement`,
+        headline: `${artistName} — campaign active`,
         viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views ${ba.sublabel}` : 'Campaign views tracking',
-        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers ${ba.sublabel}` : 'Campaign subscriber tracking',
-        confidenceNote: 'Campaign remains active but public channel totals are delayed. Use campaign-period context rather than weekly channel movement.',
-        recommendedWording: `Campaign remains active, ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views since launch' : 'tracking views'}. Weekly channel totals delayed.`,
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers ${ba.sublabel}` : 'Campaign subs tracking',
+        confidenceNote: 'Campaign active. Weekly totals updating — using campaign-period context.',
+        recommendedWording: `Campaign active, ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views since launch' : 'tracking views'}. Weekly totals updating.`,
       };
 
     case 'recent_uploads':
       return {
-        headline: `${artistName} — upload activity detected`,
-        viewsLine: 'Channel view totals are delayed',
-        subsLine: 'Subscriber totals are delayed',
-        confidenceNote: `${ba.sublabel}. Channel totals stale but uploads remain active.`,
-        recommendedWording: `Channel totals delayed. ${ba.explanation}`,
+        headline: `${artistName} — content active`,
+        viewsLine: 'Totals updating',
+        subsLine: 'Totals updating',
+        confidenceNote: `${ba.sublabel}. Uploads active, totals updating.`,
+        recommendedWording: `Totals updating. ${ba.explanation}`,
       };
 
     case 'last_confirmed': {
       const isOld = (ba.ageDays ?? 0) > BEST_AVAILABLE_AGE_LIMITS.lastConfirmedHeadlineMaxDays;
       return {
         headline: `${artistName} — ${isOld ? 'historical' : 'last confirmed'} movement (${ba.ageDays}d ago)`,
-        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views (confirmed ${ba.ageDays}d ago)` : 'No confirmed views movement',
-        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers (confirmed ${ba.ageDays}d ago)` : 'No confirmed subscriber movement',
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views (confirmed ${ba.ageDays}d ago)` : 'Views awaiting refresh',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers (confirmed ${ba.ageDays}d ago)` : 'Subs awaiting refresh',
         confidenceNote: isOld
-          ? `Last confirmed movement is ${ba.ageDays} days old — too old for reliable weekly analysis. Show for context only.`
-          : `Last confirmed movement from ${ba.ageDays} days ago. Channel totals awaiting refresh.`,
+          ? `Last confirmed movement is ${ba.ageDays} days old. Shown for context.`
+          : `Last confirmed movement from ${ba.ageDays} days ago. Totals updating.`,
         recommendedWording: isOld
-          ? `Insufficient recent data for reliable weekly movement. Last confirmed movement was ${ba.ageDays} days ago.`
-          : `Last confirmed: ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''} (${ba.ageDays}d ago). Totals awaiting refresh.`,
+          ? `Last confirmed movement was ${ba.ageDays} days ago. Fresher data expected soon.`
+          : `Last confirmed: ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''} (${ba.ageDays}d ago). Totals updating.`,
       };
     }
 
     case 'none':
     default:
       return {
-        headline: `${artistName} — insufficient movement data`,
-        viewsLine: 'No movement data available',
-        subsLine: 'No movement data available',
-        confidenceNote: 'Insufficient snapshot history for reliable weekly movement.',
-        recommendedWording: 'Insufficient snapshot history for reliable weekly movement.',
+        headline: `${artistName} — building movement history`,
+        viewsLine: 'Movement data building',
+        subsLine: 'Movement data building',
+        confidenceNote: 'Building snapshot history. Movement data will appear as tracking accumulates.',
+        recommendedWording: 'Building snapshot history — movement data will appear soon.',
       };
   }
 }
@@ -1148,7 +1148,7 @@ function emptyNormalized(
       lastUploadDaysAgo: null,
       avgUploadGapDays: null,
       cadenceLabel: 'none',
-      cadenceLine: 'No data',
+      cadenceLine: 'Awaiting data',
     },
     sparklineSubs30d: [],
     sparklineViews30d: [],
@@ -1158,13 +1158,13 @@ function emptyNormalized(
     confidence: 'LOW',
     dataFetchedAt: null,
     historyDepthDays: 0,
-    healthNote: 'Channel could not be reached — will retry on next refresh',
-    dataStatusNote: 'Channel could not be reached — will retry on next scheduled refresh',
-    missingReasons: [{ field: 'all', reason: 'fetch_failed', detail: 'Channel could not be reached — will retry on next scheduled refresh' }],
+    healthNote: 'Channel updating — will refresh on next sync',
+    dataStatusNote: 'Channel updating — will refresh on next scheduled sync',
+    missingReasons: [{ field: 'all', reason: 'fetch_failed', detail: 'Channel updating — will refresh on next scheduled sync' }],
     viewDataFreshness: 'unavailable',
     subscriberDataFreshness: 'unavailable',
     movementConfidence: 'stale',
-    staleReason: 'Channel could not be reached',
+    staleReason: 'Channel updating',
     staleSince: null,
     staleConfidence: null,
     movementFreshness: 'stale',
@@ -1173,8 +1173,8 @@ function emptyNormalized(
     bestAvailable: {
       viewsValue: null, subsValue: null,
       source: 'none', freshness: 'unknown', confidence: 'low',
-      label: 'Movement', sublabel: 'No data',
-      explanation: 'Insufficient snapshot history for reliable weekly movement.',
+      label: 'Movement', sublabel: 'Awaiting data',
+      explanation: 'Building snapshot history — movement data will appear as daily tracking accumulates.',
       shouldUseInScore: false, shouldUseInTopMovers: false, shouldUseInReport: false,
       ageDays: null,
     },

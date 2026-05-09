@@ -420,7 +420,7 @@ async function loadCard(
     uploads30d: nc.cadence.uploads30d,
     shorts30d: nc.cadence.shorts30d,
     boardStatus: currentStatus,
-    diagnosis: derived?.reason ?? 'No data',
+    diagnosis: derived?.reason ?? 'Awaiting data',
     actions: [derived?.nextAction ?? 'Ship something this week'],
     cadenceLine: nc.cadence.cadenceLine,
     sparkline: nc.sparklineSubs30d,

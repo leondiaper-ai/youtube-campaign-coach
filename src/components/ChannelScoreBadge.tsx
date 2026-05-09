@@ -141,7 +141,7 @@ function PillarRow({
       ? 'Average'
       : pillar.status === 'weak'
       ? 'Weak'
-      : 'Insufficient data';
+      : 'Building';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -216,7 +216,7 @@ export function HowScoringWorks() {
             </ul>
             <p style={{ margin: '0 0 8px', fontWeight: 500 }}>Each area is rated:</p>
             <div style={{ margin: '0 0 12px', color: '#4B5563' }}>
-              ✅ Strong &nbsp; ⚖️ Average &nbsp; ❌ Weak &nbsp; ◻️ Insufficient data
+              ✅ Strong &nbsp; ⚖️ Average &nbsp; ❌ Weak &nbsp; ◻️ Building
             </div>
             <p style={{ margin: '0 0 8px', fontWeight: 500 }}>Final score:</p>
             <div style={{ color: '#4B5563' }}>

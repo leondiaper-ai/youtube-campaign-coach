@@ -106,8 +106,8 @@ const DATA_STATUS_BADGE: Record<string, { background: string; color: string }> =
 const DATA_STATUS_LABEL: Record<string, string> = {
   PARTIAL:     'Building',
   LIMITED:     'Building history',
-  STALE:       'Totals delayed',
-  UNAVAILABLE: 'Offline',
+  STALE:       'Totals updating',
+  UNAVAILABLE: 'Updating',
 };
 
 // ─── Formatting helpers ───────────────────────────────────────────────────────
@@ -379,8 +379,8 @@ const PROFILE_TAG_STYLE: Record<string, { bg: string; fg: string }> = {
 function computeFixThisWeek(r: RowData): string {
   // Stale movement — don't diagnose from unreliable data
   if (r.movementConfidence === 'stale') {
-    if (r.uploads30d === 0) return 'Movement data updating — consider posting a reactivation clip';
-    return 'Movement data updating — maintain cadence while totals refresh';
+    if (r.uploads30d === 0) return 'Totals updating — consider posting a reactivation clip';
+    return 'Totals updating — maintain cadence';
   }
   // Dormant with audience
   if (r.uploads30d === 0 && (r.subs ?? 0) > 0) {
@@ -631,8 +631,8 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
           <div className="mt-2 p-4 rounded-lg text-[11px] leading-relaxed space-y-2" style={{ background: SOFT, color: 'rgba(14,14,14,0.6)' }}>
             <p><strong style={{ color: INK }}>Status</strong> — Each channel gets a health status based on upload cadence, subscriber conversion, and recent activity. Healthy channels are sorted first.</p>
             <p><strong style={{ color: INK }}>Score (A–D)</strong> — Grades how well the channel is being run across three pillars: reach growth, subscriber conversion efficiency, and posting cadence. Scores measure execution quality, not artist popularity.</p>
-            <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means insufficient snapshot history or stale YouTube API data; hover for the specific reason.</p>
-            <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Limited" or "Partial" indicate how much stored history is available. When YouTube returns the same view total across snapshots (stale API data), view deltas show "—" instead of a misleading "+0" or "-100%". Metrics improve as daily snapshots accumulate.</p>
+            <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means data is still building or totals are updating; hover for context.</p>
+            <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Building" or "Totals updating" indicate tracking maturity. When totals haven't changed between snapshots, deltas show "—" instead of misleading numbers. Accuracy improves as daily snapshots accumulate.</p>
           </div>
         )}
       </div>
@@ -807,7 +807,7 @@ function MoverColumn({ title, items }: { title: string; items: MoverEntry[] }) {
     return (
       <div>
         <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/30 mb-1.5">{title}</div>
-        <div className="text-[11px] text-ink/25">No data yet</div>
+        <div className="text-[11px] text-ink/25">—</div>
       </div>
     );
   }

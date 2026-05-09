@@ -175,7 +175,7 @@ function scoreReach(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult
     return { status: 'limited', icon: ICONS.limited, reason: 'Channel totals updating — reach score paused' };
   }
   if (input.views7Delta == null) {
-    return { status: 'limited', icon: ICONS.limited, reason: 'Insufficient recent activity for reach analysis' };
+    return { status: 'limited', icon: ICONS.limited, reason: 'Building data — reach score will appear soon' };
   }
 
   const growthPct = computeGrowthPct(input);
@@ -215,7 +215,7 @@ function scoreConversion(input: ChannelScoreInput, pool: BenchmarkPool): PillarR
     return { status: 'limited', icon: ICONS.limited, reason: 'Channel totals updating — conversion score paused' };
   }
   if (input.subs7Delta == null || input.views7Delta == null || input.views7Delta <= 0) {
-    return { status: 'limited', icon: ICONS.limited, reason: 'Insufficient recent activity for conversion analysis' };
+    return { status: 'limited', icon: ICONS.limited, reason: 'Building data — conversion score will appear soon' };
   }
 
   const convRate = (input.subs7Delta / input.views7Delta) * 1000; // subs per 1K views
