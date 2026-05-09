@@ -93,8 +93,8 @@ const DATA_STATUS_BADGE: Record<string, { background: string; color: string }> =
 /** User-facing badge labels — operational language, not API-speak */
 const DATA_STATUS_LABEL: Record<string, string> = {
   PARTIAL:     'Building',
-  LIMITED:     'Sparse',
-  STALE:       'Stale',
+  LIMITED:     'Building history',
+  STALE:       'Totals delayed',
   UNAVAILABLE: 'Offline',
 };
 
@@ -136,6 +136,10 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
   const active = rows.filter((r) => r.status !== 'COLD');
   const healthy = rows.filter((r) => r.status === 'HEALTHY');
 
+  // Filter stale artists out of averages — stale data would deflate them
+  const freshHealthy = healthy.filter(r => r.movementConfidence !== 'stale');
+  const freshActive = active.filter(r => r.movementConfidence !== 'stale');
+
   const avgUploads30d = active.length > 0
     ? Math.round(active.reduce((s, r) => s + r.uploads30d, 0) / active.length)
     : 0;
@@ -144,20 +148,20 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
   const totalUploads = active.reduce((s, r) => s + r.uploads30d, 0);
   const avgShortsRatio = totalUploads > 0 ? totalShorts / totalUploads : 0;
 
-  const topPerformerCadence = healthy.length > 0
-    ? Math.round(healthy.reduce((s, r) => s + r.uploads30d, 0) / healthy.length)
+  const topPerformerCadence = freshHealthy.length > 0
+    ? Math.round(freshHealthy.reduce((s, r) => s + r.uploads30d, 0) / freshHealthy.length)
     : 0;
 
-  const avgViewsHealthy = healthy.length > 0
-    ? Math.round(healthy.reduce((s, r) => s + (r.views7Delta ?? 0), 0) / healthy.length)
+  const avgViewsHealthy = freshHealthy.length > 0
+    ? Math.round(freshHealthy.reduce((s, r) => s + (r.views7Delta ?? 0), 0) / freshHealthy.length)
     : 0;
 
-  const avgViewsAll = active.length > 0
-    ? Math.round(active.reduce((s, r) => s + (r.views7Delta ?? 0), 0) / active.length)
+  const avgViewsAll = freshActive.length > 0
+    ? Math.round(freshActive.reduce((s, r) => s + (r.views7Delta ?? 0), 0) / freshActive.length)
     : 0;
 
-  const avgSubsGainHealthy = healthy.length > 0
-    ? Math.round(healthy.reduce((s, r) => s + (r.subs7Delta ?? 0), 0) / healthy.length)
+  const avgSubsGainHealthy = freshHealthy.length > 0
+    ? Math.round(freshHealthy.reduce((s, r) => s + (r.subs7Delta ?? 0), 0) / freshHealthy.length)
     : 0;
 
   const withShorts = active.filter((r) => r.shorts30d > 0).length;
@@ -182,8 +186,10 @@ type Insight = {
 
 function computeInsights(rows: RowData[]): Insight[] {
   const insights: Insight[] = [];
-  const withViews = rows.filter((r) => r.views7Delta != null && r.views7Delta > 0);
-  const withSubs = rows.filter((r) => r.subs7Delta != null);
+  // Filter to artists with reliable movement data for insight generation
+  const reliable = rows.filter(r => r.movementConfidence !== 'stale');
+  const withViews = reliable.filter((r) => r.views7Delta != null && r.views7Delta > 0);
+  const withSubs = reliable.filter((r) => r.subs7Delta != null);
 
   // Biggest positive mover (subs growth)
   const topSubGainer = [...withSubs].sort((a, b) => (b.subs7Delta ?? 0) - (a.subs7Delta ?? 0))[0];
@@ -197,8 +203,9 @@ function computeInsights(rows: RowData[]): Insight[] {
   }
 
   // Conversion leak: high views but flat/zero subs
+  // GUARD: skip artists with stale movement — null subs7Delta means data gap, not leak
   const convLeak = withViews
-    .filter((r) => (r.views7Delta ?? 0) > 5000 && (r.subs7Delta ?? 0) <= 0)
+    .filter((r) => (r.views7Delta ?? 0) > 5000 && (r.subs7Delta ?? 0) <= 0 && r.movementConfidence !== 'stale')
     .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))[0];
   if (convLeak) {
     insights.push({
@@ -209,7 +216,7 @@ function computeInsights(rows: RowData[]): Insight[] {
 
   // Latent demand: views but no recent uploads
   const latent = withViews
-    .filter((r) => (r.views7Delta ?? 0) > 50000 && r.uploads30d === 0)
+    .filter((r) => (r.views7Delta ?? 0) > 50000 && r.uploads30d === 0 && r.movementConfidence !== 'stale')
     .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))[0];
   if (latent && latent.slug !== convLeak?.slug) {
     insights.push({
@@ -413,6 +420,7 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
       lastUploadAt: null,
       subs: r.subs,
       totalViews: r.totalViews ?? null,
+      movementConfidence: r.movementConfidence,
     }));
     const pool = computeBenchmarkPool(inputs);
     const map = new Map<string, ChannelScore>();

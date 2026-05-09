@@ -200,6 +200,14 @@ export type NormalizedChannel = {
   // ── Movement confidence ──
   /** How much to trust 7d movement data. Drives UI tone (cautious vs assertive). */
   movementConfidence: MovementConfidence;
+
+  // ── Stale enrichment ──
+  /** Why movement data is limited/stale */
+  staleReason: string | null;
+  /** ISO timestamp of when data first became stale (null if fresh) */
+  staleSince: string | null;
+  /** Confidence level in the current stale classification */
+  staleConfidence: 'confirmed' | 'suspected' | null;
 };
 
 // ── Core normalize function ───────────────────────────────────────────────
@@ -270,6 +278,11 @@ export function normalizeChannelData(
     viewDataFreshness, subscriberDataFreshness, views7d, subs7d, confidence,
   );
 
+  // ── Stale enrichment ──
+  const staleEnrichment = deriveStaleEnrichment(
+    viewDataFreshness, subscriberDataFreshness, history, movementConfidence,
+  );
+
   return {
     channelId: snap.channelId ?? null,
     handle: snap.handle ?? null,
@@ -296,6 +309,9 @@ export function normalizeChannelData(
     viewDataFreshness,
     subscriberDataFreshness,
     movementConfidence,
+    staleReason: staleEnrichment.staleReason,
+    staleSince: staleEnrichment.staleSince,
+    staleConfidence: staleEnrichment.staleConfidence,
   };
 }
 
@@ -328,6 +344,57 @@ function deriveMovementConfidence(
   if (confidence === 'MEDIUM') return 'medium';
 
   return 'high';
+}
+
+// ── Stale enrichment derivation ─────────────────────────────────────
+
+function deriveStaleEnrichment(
+  viewFreshness: ViewFreshness,
+  subsFreshness: ViewFreshness,
+  history: ChannelSnapshot[],
+  movementConfidence: MovementConfidence,
+): { staleReason: string | null; staleSince: string | null; staleConfidence: 'confirmed' | 'suspected' | null } {
+  if (movementConfidence !== 'stale') {
+    return { staleReason: null, staleSince: null, staleConfidence: null };
+  }
+
+  // Determine reason
+  let staleReason: string | null = null;
+  if (viewFreshness === 'stale' && subsFreshness === 'stale') {
+    staleReason = 'YouTube public view and subscriber totals unchanged across recent snapshots';
+  } else if (viewFreshness === 'stale') {
+    staleReason = 'YouTube public view totals unchanged across recent snapshots';
+  } else if (subsFreshness === 'stale') {
+    staleReason = 'YouTube public subscriber totals unchanged across recent snapshots';
+  } else if (viewFreshness === 'unavailable' && subsFreshness === 'unavailable') {
+    staleReason = 'Channel data could not be retrieved';
+  } else {
+    staleReason = 'Movement data not currently reliable';
+  }
+
+  // Find staleSince — earliest snapshot where totals stopped changing
+  let staleSince: string | null = null;
+  let staleConfidence: 'confirmed' | 'suspected' | null = null;
+
+  if (history.length >= 2) {
+    const sorted = [...history].sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+    let consecutiveIdentical = 0;
+    for (let i = sorted.length - 1; i > 0; i--) {
+      const curr = sorted[i];
+      const prev = sorted[i - 1];
+      const viewsSame = curr.views != null && prev.views != null && curr.views === prev.views;
+      const subsSame = curr.subs != null && prev.subs != null && curr.subs === prev.subs;
+      if (viewsSame || subsSame) {
+        consecutiveIdentical++;
+        staleSince = prev.ts;
+      } else {
+        break;
+      }
+    }
+    staleConfidence = consecutiveIdentical >= 3 ? 'confirmed' : consecutiveIdentical >= 2 ? 'suspected' : null;
+  }
+
+  return { staleReason, staleSince, staleConfidence };
 }
 
 // ── Safe merge: never let null overwrite valid data ───────────────────────
@@ -519,6 +586,9 @@ function emptyNormalized(
     viewDataFreshness: 'unavailable',
     subscriberDataFreshness: 'unavailable',
     movementConfidence: 'stale',
+    staleReason: 'Channel could not be reached',
+    staleSince: null,
+    staleConfidence: null,
   };
 }
 

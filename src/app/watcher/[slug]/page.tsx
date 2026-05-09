@@ -81,10 +81,10 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     isActive: true,
   } : null);
 
-  // Legacy aliases for backwards compat in this file
-  const subs7 = nc.subs7d ? { delta: nc.subs7d.delta, pct: nc.subs7d.pct } : null;
-  const subs30 = nc.subs30d ? { delta: nc.subs30d.delta, pct: nc.subs30d.pct } : null;
-  const views7 = nc.views7d ? { delta: nc.views7d.delta, pct: nc.views7d.pct } : null;
+  // Legacy aliases — respect the meaningful flag. Stale/non-meaningful deltas → null.
+  const subs7 = nc.subs7d && nc.subs7d.meaningful ? { delta: nc.subs7d.delta, pct: nc.subs7d.pct } : null;
+  const subs30 = nc.subs30d && nc.subs30d.meaningful ? { delta: nc.subs30d.delta, pct: nc.subs30d.pct } : null;
+  const views7 = nc.views7d && nc.views7d.meaningful ? { delta: nc.views7d.delta, pct: nc.views7d.pct } : null;
 
   // Now derive with full conversion context
   derived = live
@@ -151,6 +151,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     history,
     conv7,
     conv30,
+    movementConfidence: nc.movementConfidence,
   });
   const isLive = !!(live && !live.error);
 
@@ -267,12 +268,12 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <h1 className="font-black text-3xl">{artist.name}</h1>
           {nc.confidence === 'LOW' && (
             <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={nc.healthNote}>
-              Limited data
+              Building history
             </span>
           )}
           {nc.confidence === 'MEDIUM' && (
             <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={nc.healthNote}>
-              Partial data
+              Partial history
             </span>
           )}
         </div>
@@ -325,6 +326,35 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           />
         </div>
 
+        {/* ─── MOVEMENT CONFIDENCE INDICATOR ──────────────────────────── */}
+        {(nc.movementConfidence === 'stale' || nc.movementConfidence === 'limited') && (
+          <div className="mt-2 text-[10px] italic text-ink/30">
+            {nc.movementConfidence === 'stale'
+              ? 'Public YouTube totals updating — movement data awaiting refresh'
+              : 'Recently added to tracking — movement data building'}
+          </div>
+        )}
+
+        {/* ─── ACTIVITY SIGNAL FALLBACK (when movement is stale) ──────── */}
+        {nc.movementConfidence === 'stale' && nc.cadence.uploads30d > 0 && (
+          <div className="mt-3 rounded-lg px-4 py-3 border" style={{ borderColor: MUTED, background: PAPER }}>
+            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
+              Activity signal
+            </div>
+            <div className="text-[13px] text-ink/60 leading-snug">
+              {nc.cadence.uploads30d} upload{nc.cadence.uploads30d !== 1 ? 's' : ''} in 30 days
+              {nc.cadence.shorts30d > 0 ? ` (${nc.cadence.shorts30d} Shorts)` : ''}
+              {nc.cadence.lastUploadDaysAgo != null && nc.cadence.lastUploadDaysAgo <= 7
+                ? ' — recent uploads still active'
+                : nc.cadence.lastUploadDaysAgo != null
+                  ? ` — last upload ${nc.cadence.lastUploadDaysAgo}d ago`
+                  : ''}
+            </div>
+            <div className="text-[10px] text-ink/25 mt-1 italic">
+              Channel totals delayed — cadence used as operational signal
+            </div>
+          </div>
+        )}
 
         {/* ─── CAMPAIGN PERFORMANCE — since campaign start ────────────── */}
         {campaignStart && (

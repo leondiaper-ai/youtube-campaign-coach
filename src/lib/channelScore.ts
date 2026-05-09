@@ -59,6 +59,8 @@ export type ChannelScoreInput = {
   totalViews?: number | null;
   /** Previous 7d views delta (i.e. the week before) — best baseline for growth % */
   prevViews7Delta?: number | null;
+  /** Movement confidence — stale data should not drive scores */
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
 };
 
 export type BenchmarkPool = {
@@ -165,6 +167,9 @@ export function computeGrowthPct(input: ChannelScoreInput): number | null {
  * This ensures a smaller channel growing quickly outscores a large stagnant one.
  */
 function scoreReach(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult {
+  if (input.movementConfidence === 'stale') {
+    return { status: 'limited', icon: ICONS.limited, reason: 'Channel totals updating — reach score paused' };
+  }
   if (input.views7Delta == null) {
     return { status: 'limited', icon: ICONS.limited, reason: 'Insufficient recent activity for reach analysis' };
   }
@@ -202,6 +207,9 @@ function scoreReach(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult
 }
 
 function scoreConversion(input: ChannelScoreInput, pool: BenchmarkPool): PillarResult {
+  if (input.movementConfidence === 'stale') {
+    return { status: 'limited', icon: ICONS.limited, reason: 'Channel totals updating — conversion score paused' };
+  }
   if (input.subs7Delta == null || input.views7Delta == null || input.views7Delta <= 0) {
     return { status: 'limited', icon: ICONS.limited, reason: 'Insufficient recent activity for conversion analysis' };
   }

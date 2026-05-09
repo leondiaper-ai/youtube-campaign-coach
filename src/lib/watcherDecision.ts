@@ -72,6 +72,8 @@ export interface DecisionInput {
   history: unknown[]; // length used for confidence only
   conv7?: ConversionResult | null;
   conv30?: ConversionResult | null;
+  /** Movement confidence from normalized data — when stale, suppress metric-based diagnoses */
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
 }
 
 export function decideWatcher(input: DecisionInput): WatcherDecision {
@@ -90,6 +92,9 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   const convLine = convAnchor
     ? `Conversion ${convAnchor.ratePer1k.toFixed(1)}/1k views over ${convAnchor.spanDays}d (${convAnchor.band.toLowerCase()}).`
     : null;
+
+  // ── Stale movement guard ─────────────────────────────────────────────────
+  const staleMovement = input.movementConfidence === 'stale';
 
   // ── Confidence ───────────────────────────────────────────────────────────
   const isLive = !!(live && !live.error && live.subs != null);
@@ -121,8 +126,9 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   const weakCadence = uploads30d <= 2 || (lastUp ?? 999) > 14;
 
   // Subs growing: either 0.5%+ growth OR 50+ absolute gain (protects smaller channels)
-  const subsGrowing = subs7 != null && subs7.delta > 0 && (subs7.pct >= 0.005 || subs7.delta >= 50);
-  const subsFlat = subs7 != null && subs7.delta <= 0;
+  // When movement is stale, don't diagnose from unreliable data — treat as unknown
+  const subsGrowing = !staleMovement && subs7 != null && subs7.delta > 0 && (subs7.pct >= 0.005 || subs7.delta >= 50);
+  const subsFlat = !staleMovement && subs7 != null && subs7.delta <= 0;
 
   const channelOpps = opps.filter((o) => !o.videoId);
   const highChannel = channelOpps.filter((o) => o.impact === 'HIGH');
@@ -215,7 +221,8 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   // ── 2. CORRECT ───────────────────────────────────────────────────────────
   // Working, but suboptimal — something should change.
   // Headlines stay clean (status), actions go to "What to do next".
-  if (highChannel.length > 0 && !subsGrowing) {
+  // GUARD: skip metric-based diagnoses when movement is stale — can't trust conversion data
+  if (highChannel.length > 0 && !subsGrowing && !staleMovement) {
     const top = highChannel[0];
     return {
       type: 'CORRECT',
@@ -245,7 +252,8 @@ export function decideWatcher(input: DecisionInput): WatcherDecision {
   // not cadence — and pushing more uploads won't fix it.
   // Guard: skip if subs are actually growing — conversion rate can be low on
   // niche/smaller channels while still being healthy.
-  if (strongCadence && convWeak && convAnchor && !subsGrowing) {
+  // GUARD: skip conversion diagnosis when movement is stale
+  if (strongCadence && convWeak && convAnchor && !subsGrowing && !staleMovement) {
     return {
       type: 'CORRECT',
       verdict: 'DRIFT',
