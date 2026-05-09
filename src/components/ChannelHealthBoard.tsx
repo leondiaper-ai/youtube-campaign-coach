@@ -44,6 +44,18 @@ export type RowData = {
   viewDataFreshness?: 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
   /** Movement confidence — overall confidence in reported 7d movement */
   movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
+  /** Movement freshness tier */
+  movementFreshness?: 'live' | 'recent' | 'delayed' | 'stale';
+  /** Last known good views 7d delta (retained from history) */
+  lastKnownGoodViews7d?: number | null;
+  /** Last known good subs 7d delta (retained from history) */
+  lastKnownGoodSubs7d?: number | null;
+  /** Days since last known good movement was confirmed */
+  lastKnownGoodDaysAgo?: number | null;
+  /** Best available movement source for this channel */
+  bestAvailableSource?: 'live_7d' | 'recent_snapshot' | 'campaign_period' | 'recent_uploads' | 'last_confirmed' | 'none';
+  /** Whether best available data should be used in Top Movers rankings */
+  bestAvailableShouldUseInTopMovers?: boolean;
 };
 
 type ViewMode = 'managed' | 'market';
@@ -266,17 +278,23 @@ function computeTopMovers(rows: RowData[]): {
   biggestDecline: MoverEntry[];
   cadenceRisk: MoverEntry[];
 } {
+  // Use effective movement: current delta if available, else last-known-good
+  // But only rank if bestAvailable says the data is trustworthy enough
+  const effectiveViews = (r: RowData) => r.views7Delta ?? r.lastKnownGoodViews7d ?? 0;
+  const effectiveSubs = (r: RowData) => r.subs7Delta ?? r.lastKnownGoodSubs7d ?? 0;
+  const canRank = (r: RowData) => r.bestAvailableShouldUseInTopMovers !== false;
+
   const topViews = [...rows]
-    .filter((r) => (r.views7Delta ?? 0) > 0)
-    .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))
+    .filter((r) => effectiveViews(r) > 0 && canRank(r))
+    .sort((a, b) => effectiveViews(b) - effectiveViews(a))
     .slice(0, 3)
-    .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(r.views7Delta ?? 0) }));
+    .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(effectiveViews(r)) }));
 
   const topSubs = [...rows]
-    .filter((r) => (r.subs7Delta ?? 0) > 0)
-    .sort((a, b) => (b.subs7Delta ?? 0) - (a.subs7Delta ?? 0))
+    .filter((r) => effectiveSubs(r) > 0 && canRank(r))
+    .sort((a, b) => effectiveSubs(b) - effectiveSubs(a))
     .slice(0, 3)
-    .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(r.subs7Delta ?? 0) }));
+    .map((r) => ({ name: r.name, slug: r.slug, value: fmtDelta(effectiveSubs(r)) }));
 
   const biggestDecline = [...rows]
     .filter((r) => r.viewsWoW != null && r.viewsWoW < -10 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE' && r.viewDataFreshness !== 'stale')
@@ -639,15 +657,32 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
           const st = STATUS_STYLE[r.status];
           const sp = SPARK_COLOR[r.status];
           const subsTotal = r.subs != null ? fmtNum(r.subs) : '—';
-          const fmtSubs7 = r.subs7Delta != null
-            ? `${r.subs7Delta >= 0 ? '+' : ''}${r.subs7Delta.toLocaleString()}`
+          // fmtSubs7 now uses directional effective value (see fmtSubs7Label above)
+          // Directional reporting: use last-known-good for stale artists
+          const isStaleRow = r.movementConfidence === 'stale';
+          const hasLKGViews = isStaleRow && r.lastKnownGoodViews7d != null;
+          const hasLKGSubs = isStaleRow && r.lastKnownGoodSubs7d != null;
+
+          const effectiveViews7 = r.views7Delta ?? (hasLKGViews ? r.lastKnownGoodViews7d! : null);
+          const effectiveSubs7 = r.subs7Delta ?? (hasLKGSubs ? r.lastKnownGoodSubs7d! : null);
+
+          const fmtViews7 = effectiveViews7 != null ? fmtDelta(effectiveViews7) : '—';
+          const fmtSubs7Label = effectiveSubs7 != null
+            ? `${effectiveSubs7 >= 0 ? '+' : ''}${effectiveSubs7.toLocaleString()}`
             : '—';
-          const fmtViews7 = r.views7Delta != null ? fmtDelta(r.views7Delta) : '—';
-          const subsColor = r.subs7Delta != null
-            ? r.subs7Delta > 0 ? '#0C6A3F' : r.subs7Delta < 0 ? '#8A1F0C' : undefined
+          const subsColor = effectiveSubs7 != null
+            ? effectiveSubs7 > 0
+              ? (hasLKGSubs ? 'rgba(12,106,63,0.45)' : '#0C6A3F')
+              : effectiveSubs7 < 0
+                ? (hasLKGSubs ? 'rgba(138,31,12,0.45)' : '#8A1F0C')
+                : undefined
             : undefined;
-          const viewsColor = r.views7Delta != null
-            ? r.views7Delta > 0 ? '#0C6A3F' : r.views7Delta < 0 ? '#8A1F0C' : undefined
+          const viewsColor = effectiveViews7 != null
+            ? effectiveViews7 > 0
+              ? (hasLKGViews ? 'rgba(12,106,63,0.45)' : '#0C6A3F')
+              : effectiveViews7 < 0
+                ? (hasLKGViews ? 'rgba(138,31,12,0.45)' : '#8A1F0C')
+                : undefined
             : undefined;
           const isExpanded = expandedRow === r.slug;
           const profile = computeProfile(r);
@@ -708,7 +743,7 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
                 </div>
                 <div className="text-right text-[13px] font-bold tabular-nums">{subsTotal}</div>
                 <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
-                  {fmtSubs7}
+                  {fmtSubs7Label}
                 </div>
                 <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.subsWoW) }}>
                   {r.subsWoW != null ? fmtPct(r.subsWoW) : '—'}

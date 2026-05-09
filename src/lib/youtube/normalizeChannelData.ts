@@ -99,6 +99,264 @@ export type MissingReasonEntry = {
 
 export type MovementConfidence = 'high' | 'medium' | 'limited' | 'stale';
 
+// ── Movement Freshness ──────────────────────────────────────────────────
+// 4-level freshness tier for UI display. More granular than MovementConfidence.
+//
+//  live     – fresh API data + fresh snapshots → show current metrics
+//  recent   – valid movement within last few days → show with "as of" label
+//  delayed  – no recent refresh but prior movement retained → show with freshness note
+//  stale    – old/unreliable movement → show last-known-good if available
+//
+// The tool should never feel empty/broken just because public totals stall.
+
+export type MovementFreshness = 'live' | 'recent' | 'delayed' | 'stale';
+
+// ── Last Known Good Movement ────────────────────────────────────────────
+// When current movement confidence is stale/limited, we preserve the last
+// confirmed directional movement so the UI can show retained context
+// instead of collapsing into "—" or "+0".
+//
+// IMPORTANT: This is retained historical context only. Never fake new movement.
+
+export type LastKnownGoodMovement = {
+  /** Last confirmed 7d views delta (raw number) */
+  views7d: number | null;
+  /** Last confirmed 7d subscriber delta (raw number) */
+  subs7d: number | null;
+  /** Last confirmed WoW percentage */
+  viewsWoW: number | null;
+  /** ISO date when this movement was last confirmed fresh */
+  confirmedAt: string | null;
+  /** Days since the movement was confirmed */
+  daysAgo: number | null;
+};
+
+// ── Structural Finding ──────────────────────────────────────────────────
+// Semi-persistent operational insights that should not flicker on/off
+// based on API variance. Retained for a configurable window (default 7d).
+// Only removed when contradicted by fresh evidence.
+
+export type FindingStatus = 'active' | 'pending_refresh' | 'resolved';
+
+export type StructuralFinding = {
+  /** Unique finding ID (e.g. "missing-lyric:videoId") */
+  id: string;
+  /** Category of the finding */
+  category: 'format_gap' | 'missing_support' | 'cadence_issue' | 'conversion_issue';
+  /** Human-readable summary */
+  summary: string;
+  /** When this finding was first detected (ISO) */
+  detectedAt: string;
+  /** When this finding was last confirmed still present (ISO) */
+  lastConfirmedAt: string;
+  /** How many days to retain without re-confirmation before expiring */
+  retentionDays: number;
+  /** Whether this finding is still considered active (backward compat) */
+  active: boolean;
+  /** 3-state status: active (confirmed), pending_refresh (retained within window), resolved (contradicted) */
+  status: FindingStatus;
+  /** What evidence source detected this finding (e.g. "catalogue_scan", "upload_analysis") */
+  evidenceSource: string;
+  /** Confidence in this finding */
+  findingConfidence: 'high' | 'medium' | 'low';
+};
+
+// ── Best Available Movement ─────────────────────────────────────────────
+// Replaces the simple "show last-known-good or nothing" fallback with a
+// ranked signal selection system. The Watcher actively picks the most
+// useful trustworthy signal depending on channel state.
+//
+// Priority order:
+//   1. live_7d         — current 7d delta, high/medium confidence
+//   2. recent_snapshot — valid 7d window from history within 7 days
+//   3. campaign_period — campaign-period delta (active campaigns only)
+//   4. recent_uploads  — upload activity within 14 days (directional only)
+//   5. last_confirmed  — retained historical delta (display-only after 14d)
+//   6. none            — no movement signal available
+
+export type BestAvailableSource =
+  | 'live_7d'
+  | 'recent_snapshot'
+  | 'campaign_period'
+  | 'recent_uploads'
+  | 'last_confirmed'
+  | 'none';
+
+export type BestAvailableMovement = {
+  viewsValue: number | null;
+  subsValue: number | null;
+  source: BestAvailableSource;
+  freshness: MovementFreshness | 'unknown';
+  confidence: 'high' | 'medium' | 'low';
+  /** Primary label for the metric tile (e.g. "Views (7d)", "Campaign period") */
+  label: string;
+  /** Sublabel shown under the value (e.g. "3d ago", "since 22 Mar") */
+  sublabel: string;
+  /** Human-readable explanation for tooltips/reports */
+  explanation: string;
+  /** Whether this data is reliable enough to use in scoring */
+  shouldUseInScore: boolean;
+  /** Whether this data should appear in Top Movers rankings */
+  shouldUseInTopMovers: boolean;
+  /** Whether this data should appear in report headline */
+  shouldUseInReport: boolean;
+  /** Days since the source data was confirmed (null if live) */
+  ageDays: number | null;
+};
+
+// Age limits for each source tier
+const BEST_AVAILABLE_AGE_LIMITS = {
+  /** recent_snapshot: valid up to 7 days */
+  recentSnapshotMaxDays: 7,
+  /** recent_uploads: valid up to 14 days */
+  recentUploadsMaxDays: 14,
+  /** last_confirmed: show as headline up to 14 days, tooltip-only after */
+  lastConfirmedHeadlineMaxDays: 14,
+} as const;
+
+export function deriveBestAvailableMovement(
+  nc: NormalizedChannel,
+  campaignCtx?: CampaignContext | null,
+): BestAvailableMovement {
+  const none: BestAvailableMovement = {
+    viewsValue: null, subsValue: null,
+    source: 'none', freshness: 'unknown', confidence: 'low',
+    label: 'Movement', sublabel: 'No data',
+    explanation: 'Insufficient snapshot history for reliable weekly movement.',
+    shouldUseInScore: false, shouldUseInTopMovers: false, shouldUseInReport: false,
+    ageDays: null,
+  };
+
+  // ── 1. LIVE / CURRENT 7D ─────────────────────────────────────────────
+  // Use when movement confidence is high or medium and deltas are meaningful.
+  if (
+    (nc.movementConfidence === 'high' || nc.movementConfidence === 'medium') &&
+    nc.views7d && nc.views7d.meaningful
+  ) {
+    return {
+      viewsValue: nc.views7d.delta,
+      subsValue: nc.subs7d?.meaningful ? nc.subs7d.delta : null,
+      source: 'live_7d',
+      freshness: nc.movementFreshness,
+      confidence: nc.movementConfidence === 'high' ? 'high' : 'medium',
+      label: 'Views (7d)',
+      sublabel: nc.views7d.pct != null ? `${nc.views7d.delta >= 0 ? '+' : ''}${(nc.views7d.pct * 100).toFixed(1)}%` : '',
+      explanation: `Channel movement is live: ${nc.views7d.delta >= 0 ? '+' : ''}${nc.views7d.delta.toLocaleString()} views over 7 days.`,
+      shouldUseInScore: true,
+      shouldUseInTopMovers: true,
+      shouldUseInReport: true,
+      ageDays: 0,
+    };
+  }
+
+  // ── 2. RECENT VALID SNAPSHOT WINDOW ───────────────────────────────────
+  // Current data is stale but LKG exists within the recent-snapshot age limit.
+  const lkg = nc.lastKnownGood;
+  if (
+    lkg.daysAgo != null &&
+    lkg.daysAgo <= BEST_AVAILABLE_AGE_LIMITS.recentSnapshotMaxDays &&
+    (lkg.views7d != null || lkg.subs7d != null)
+  ) {
+    const dateLabel = lkg.confirmedAt
+      ? new Date(lkg.confirmedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+      : `${lkg.daysAgo}d ago`;
+    return {
+      viewsValue: lkg.views7d,
+      subsValue: lkg.subs7d,
+      source: 'recent_snapshot',
+      freshness: 'recent',
+      confidence: 'medium',
+      label: 'Views (recent)',
+      sublabel: `as of ${dateLabel}`,
+      explanation: `Most recent reliable movement from ${dateLabel}. Channel totals are currently delayed.`,
+      shouldUseInScore: true,
+      shouldUseInTopMovers: true,
+      shouldUseInReport: true,
+      ageDays: lkg.daysAgo,
+    };
+  }
+
+  // ── 3. CAMPAIGN-PERIOD MOVEMENT ──────────────────────────────────────
+  // Active campaign with campaign-period deltas available.
+  if (
+    campaignCtx?.isActive &&
+    nc.campaign &&
+    nc.campaign.viewsDelta &&
+    nc.campaign.viewsDelta.meaningful
+  ) {
+    const campDay = nc.campaign.campaignDay;
+    const startLabel = new Date(campaignCtx.campaignStartDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return {
+      viewsValue: nc.campaign.viewsDelta.delta,
+      subsValue: nc.campaign.subsDelta?.meaningful ? nc.campaign.subsDelta.delta : null,
+      source: 'campaign_period',
+      freshness: 'delayed',
+      confidence: nc.campaign.viewsDelta.confidence === 'HIGH' ? 'high' : 'medium',
+      label: 'Campaign period',
+      sublabel: `since ${startLabel} · day ${campDay}`,
+      explanation: `Campaign active: ${nc.campaign.viewsDelta.delta >= 0 ? '+' : ''}${nc.campaign.viewsDelta.delta.toLocaleString()} views since launch. Weekly channel totals delayed.`,
+      shouldUseInScore: false, // campaign totals are cumulative, not weekly
+      shouldUseInTopMovers: false,
+      shouldUseInReport: true,
+      ageDays: null,
+    };
+  }
+
+  // ── 4. RECENT UPLOAD ACTIVITY ────────────────────────────────────────
+  // Channel totals stale but recent uploads show visible activity.
+  if (
+    nc.cadence.lastUploadDaysAgo != null &&
+    nc.cadence.lastUploadDaysAgo <= BEST_AVAILABLE_AGE_LIMITS.recentUploadsMaxDays &&
+    nc.cadence.uploads30d > 0
+  ) {
+    const uploadCount = nc.cadence.uploads30d;
+    const shortsCount = nc.cadence.shorts30d;
+    return {
+      viewsValue: null, // no numeric views claim
+      subsValue: null,
+      source: 'recent_uploads',
+      freshness: 'delayed',
+      confidence: 'low',
+      label: 'Activity signal',
+      sublabel: `${uploadCount} upload${uploadCount !== 1 ? 's' : ''} / 30d`,
+      explanation: `Recent uploads still active (${uploadCount} in 30 days${shortsCount > 0 ? `, ${shortsCount} Shorts` : ''}). Public channel totals are delayed.`,
+      shouldUseInScore: false,
+      shouldUseInTopMovers: false,
+      shouldUseInReport: true,
+      ageDays: nc.cadence.lastUploadDaysAgo,
+    };
+  }
+
+  // ── 5. LAST CONFIRMED (with age limits) ──────────────────────────────
+  // Historical delta exists but is older than the recent-snapshot window.
+  if (lkg.views7d != null || lkg.subs7d != null) {
+    const age = lkg.daysAgo ?? 999;
+    const isHeadlineWorthy = age <= BEST_AVAILABLE_AGE_LIMITS.lastConfirmedHeadlineMaxDays;
+    const dateLabel = lkg.confirmedAt
+      ? new Date(lkg.confirmedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+      : `${age}d ago`;
+    return {
+      viewsValue: lkg.views7d,
+      subsValue: lkg.subs7d,
+      source: 'last_confirmed',
+      freshness: 'stale',
+      confidence: 'low',
+      label: isHeadlineWorthy ? 'Views (last confirmed)' : 'Views (historical)',
+      sublabel: `${age}d ago`,
+      explanation: isHeadlineWorthy
+        ? `Last confirmed movement from ${dateLabel}. Channel totals awaiting refresh.`
+        : `Historical movement from ${dateLabel}. Too old for headline display — shown for context only.`,
+      shouldUseInScore: false,
+      shouldUseInTopMovers: isHeadlineWorthy, // only rank if recent enough
+      shouldUseInReport: true,
+      ageDays: age,
+    };
+  }
+
+  // ── 6. NONE ──────────────────────────────────────────────────────────
+  return none;
+}
+
 // ── Delta Result ──────────────────────────────────────────────────────────
 // Wraps a numeric delta with metadata about trustworthiness.
 
@@ -208,6 +466,22 @@ export type NormalizedChannel = {
   staleSince: string | null;
   /** Confidence level in the current stale classification */
   staleConfidence: 'confirmed' | 'suspected' | null;
+
+  // ── Movement freshness (4-tier) ──
+  /** Granular freshness tier for UI display decisions */
+  movementFreshness: MovementFreshness;
+
+  // ── Last known good movement ──
+  /** Retained directional movement from the most recent period with reliable data */
+  lastKnownGood: LastKnownGoodMovement;
+
+  // ── Structural findings (retained insights) ──
+  /** Semi-persistent operational findings that survive API variance */
+  structuralFindings: StructuralFinding[];
+
+  // ── Best available movement (ranked signal selection) ──
+  /** The most useful trustworthy movement signal available for this channel */
+  bestAvailable: BestAvailableMovement;
 };
 
 // ── Core normalize function ───────────────────────────────────────────────
@@ -283,7 +557,17 @@ export function normalizeChannelData(
     viewDataFreshness, subscriberDataFreshness, history, movementConfidence,
   );
 
-  return {
+  // ── Movement freshness (4-tier) ──
+  const movementFreshness = deriveMovementFreshness(
+    movementConfidence, dataStatus, views7d, subs7d, cachedAt,
+  );
+
+  // ── Last known good movement ──
+  const lastKnownGood = deriveLastKnownGoodMovement(
+    history, views7d, subs7d, movementConfidence,
+  );
+
+  const result: NormalizedChannel = {
     channelId: snap.channelId ?? null,
     handle: snap.handle ?? null,
     title: snap.title ?? null,
@@ -312,7 +596,16 @@ export function normalizeChannelData(
     staleReason: staleEnrichment.staleReason,
     staleSince: staleEnrichment.staleSince,
     staleConfidence: staleEnrichment.staleConfidence,
+    movementFreshness,
+    lastKnownGood,
+    structuralFindings: [], // populated by caller via deriveStructuralFindings()
+    bestAvailable: null as unknown as BestAvailableMovement, // filled below
   };
+
+  // Derive best available movement from the fully-assembled channel data
+  result.bestAvailable = deriveBestAvailableMovement(result, campaignCtx);
+
+  return result;
 }
 
 // ── Movement confidence derivation ───────────────────────────────────────
@@ -546,6 +839,291 @@ export function toGrowthInput(
   };
 }
 
+// ── Movement Freshness derivation ────────────────────────────────────────
+// More granular than MovementConfidence. Determines what the UI should show.
+
+function deriveMovementFreshness(
+  movementConfidence: MovementConfidence,
+  dataStatus: DataStatus,
+  views7d: DeltaResult | null,
+  subs7d: DeltaResult | null,
+  cachedAt: string | null,
+): MovementFreshness {
+  // If movement is trustworthy and data is current → live
+  if (movementConfidence === 'high' && dataStatus === 'FRESH') return 'live';
+
+  // If movement is OK (high or medium) but data is slightly stale → recent
+  if ((movementConfidence === 'high' || movementConfidence === 'medium') &&
+      (dataStatus === 'FRESH' || dataStatus === 'PARTIAL')) return 'recent';
+
+  // If we have SOME movement data but confidence is limited → recent (if data is fresh)
+  // or delayed (if data is older)
+  if (movementConfidence === 'medium' || movementConfidence === 'limited') {
+    // Check how old the cached data is
+    if (cachedAt) {
+      const hoursOld = (Date.now() - new Date(cachedAt).getTime()) / 3600000;
+      if (hoursOld <= THRESHOLDS.freshMaxHours) return 'recent';
+      if (hoursOld <= THRESHOLDS.staleMaxHours) return 'delayed';
+    }
+    return 'delayed';
+  }
+
+  // Stale movement confidence → stale freshness
+  return 'stale';
+}
+
+// ── Last Known Good Movement derivation ─────────────────────────────────
+// Walks snapshot history backward to find the most recent period where
+// a meaningful (non-zero, non-stale) delta existed.
+//
+// IMPORTANT: We never fabricate data. This retrieves real historical deltas.
+
+function deriveLastKnownGoodMovement(
+  history: ChannelSnapshot[],
+  currentViews7d: DeltaResult | null,
+  currentSubs7d: DeltaResult | null,
+  movementConfidence: MovementConfidence,
+): LastKnownGoodMovement {
+  const empty: LastKnownGoodMovement = {
+    views7d: null, subs7d: null, viewsWoW: null,
+    confirmedAt: null, daysAgo: null,
+  };
+
+  // If current movement is already good, use current data as last-known-good
+  if (movementConfidence === 'high' || movementConfidence === 'medium') {
+    const v = currentViews7d && currentViews7d.meaningful ? currentViews7d.delta : null;
+    const s = currentSubs7d && currentSubs7d.meaningful ? currentSubs7d.delta : null;
+    if (v != null || s != null) {
+      const latestTs = history.length > 0 ? history[history.length - 1].ts : new Date().toISOString().slice(0, 10);
+      return {
+        views7d: v,
+        subs7d: s,
+        confirmedAt: latestTs,
+        daysAgo: 0,
+        viewsWoW: null, // WoW requires extra computation; will be set by caller if available
+      };
+    }
+  }
+
+  // Movement is stale/limited. Walk backward through history to find the
+  // most recent 7-day window where a real, non-zero delta existed.
+  if (history.length < 3) return empty;
+
+  const sorted = [...history].sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+
+  // Walk backward from the end, looking for the latest pair where totals
+  // were actually changing (i.e., not stale identical values)
+  for (let i = sorted.length - 1; i >= 1; i--) {
+    const curr = sorted[i];
+    const currTs = new Date(curr.ts).getTime();
+
+    // Find a snapshot ~7 days before this one
+    const target7dAgo = currTs - 7 * 86400000;
+    let baseline: ChannelSnapshot | null = null;
+    for (let j = i - 1; j >= 0; j--) {
+      const jTs = new Date(sorted[j].ts).getTime();
+      if (jTs <= target7dAgo && sorted[j].views != null) {
+        baseline = sorted[j];
+        break;
+      }
+    }
+
+    if (!baseline) continue;
+    if (baseline.ts === curr.ts) continue;
+
+    const viewsDelta = (curr.views != null && baseline.views != null)
+      ? curr.views - baseline.views : null;
+    const subsDelta = (curr.subs != null && baseline.subs != null)
+      ? curr.subs - baseline.subs : null;
+
+    // Only accept if at least one metric shows real (non-zero) movement
+    const hasRealMovement = (viewsDelta != null && viewsDelta !== 0) ||
+                            (subsDelta != null && subsDelta !== 0);
+
+    if (hasRealMovement) {
+      const daysAgo = Math.floor((Date.now() - currTs) / 86400000);
+      return {
+        views7d: viewsDelta,
+        subs7d: subsDelta,
+        confirmedAt: curr.ts,
+        daysAgo,
+        viewsWoW: null, // WoW is complex to derive historically; omit for now
+      };
+    }
+  }
+
+  return empty;
+}
+
+// ── Structural findings from opportunities ──────────────────────────────
+// Converts current opportunity detections into semi-persistent findings.
+// Findings from previous runs are retained if not contradicted.
+
+export function deriveStructuralFindings(
+  currentOpps: Array<{ id: string; type: string; subtype: string; signal: string }>,
+  existingFindings: StructuralFinding[],
+  now: string = new Date().toISOString(),
+): StructuralFinding[] {
+  const results: StructuralFinding[] = [];
+  const currentIds = new Set(currentOpps.map(o => o.id));
+
+  // Map opportunity type to finding category
+  const typeToCategory = (type: string): StructuralFinding['category'] => {
+    if (type === 'Format gap') return 'format_gap';
+    if (type === 'Missing support') return 'missing_support';
+    if (type === 'Cold channel') return 'cadence_issue';
+    return 'conversion_issue';
+  };
+
+  // Map opportunity subtype to evidence source
+  const evidenceFor = (subtype: string): string => {
+    if (subtype.includes('lyric') || subtype.includes('visual')) return 'catalogue_scan';
+    if (subtype.includes('short') || subtype.includes('Short')) return 'upload_analysis';
+    if (subtype.includes('gap') || subtype.includes('upload')) return 'cadence_check';
+    return 'opportunity_detection';
+  };
+
+  // 1. Update or create findings from current opportunities
+  for (const opp of currentOpps) {
+    const existing = existingFindings.find(f => f.id === opp.id);
+    if (existing) {
+      // Re-confirmed — update lastConfirmedAt, promote to active
+      results.push({
+        ...existing,
+        lastConfirmedAt: now,
+        summary: opp.signal,
+        active: true,
+        status: 'active',
+        findingConfidence: 'high', // re-confirmed = high confidence
+      });
+    } else {
+      // New finding
+      results.push({
+        id: opp.id,
+        category: typeToCategory(opp.type),
+        summary: opp.signal,
+        detectedAt: now,
+        lastConfirmedAt: now,
+        retentionDays: 7,
+        active: true,
+        status: 'active',
+        evidenceSource: evidenceFor(opp.subtype),
+        findingConfidence: 'medium', // new detection = medium until re-confirmed
+      });
+    }
+  }
+
+  // 2. Retain existing findings that aren't in current detections
+  //    but haven't expired yet (within retention window)
+  for (const existing of existingFindings) {
+    if (currentIds.has(existing.id)) continue; // already handled above
+    const ageMs = new Date(now).getTime() - new Date(existing.lastConfirmedAt).getTime();
+    const ageDays = ageMs / 86400000;
+    if (ageDays <= existing.retentionDays) {
+      // Still within retention window — keep as pending_refresh
+      results.push({
+        ...existing,
+        active: true,
+        status: 'pending_refresh',
+        findingConfidence: ageDays <= 3 ? 'medium' : 'low',
+      });
+    } else {
+      // Expired — only mark resolved when contradicted, otherwise just inactive
+      results.push({
+        ...existing,
+        active: false,
+        status: 'resolved',
+        findingConfidence: 'low',
+      });
+    }
+  }
+
+  return results;
+}
+
+// ── Reporting Movement Summary ──────────────────────────────────────────
+// Reusable helper for report generation. Outputs human-readable movement
+// context based on the Best Available Movement source.
+
+export type ReportingMovementSummary = {
+  headline: string;
+  viewsLine: string;
+  subsLine: string;
+  confidenceNote: string;
+  recommendedWording: string;
+};
+
+export function getReportingMovementSummary(
+  nc: NormalizedChannel,
+  artistName: string,
+): ReportingMovementSummary {
+  const ba = nc.bestAvailable;
+  const fmtV = (v: number) => `${v >= 0 ? '+' : ''}${v.toLocaleString()}`;
+
+  switch (ba.source) {
+    case 'live_7d':
+      return {
+        headline: `${artistName} — live movement data available`,
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views over 7 days` : 'Views data unavailable',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers over 7 days` : 'Subscriber data unavailable',
+        confidenceNote: `Movement confidence: ${ba.confidence}. Data is ${ba.freshness}.`,
+        recommendedWording: `Channel movement is live/recent: ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''}${ba.subsValue != null ? ' and ' + fmtV(ba.subsValue) + ' subs' : ''} over 7d.`,
+      };
+
+    case 'recent_snapshot':
+      return {
+        headline: `${artistName} — recent movement data (${ba.ageDays}d old)`,
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views (as of ${ba.sublabel})` : 'Views data stale',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers (as of ${ba.sublabel})` : 'Subscriber data stale',
+        confidenceNote: `Using recent snapshot from ${ba.ageDays} days ago. Current totals are delayed.`,
+        recommendedWording: `Recent movement (${ba.ageDays}d ago): ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''}. Channel totals currently delayed.`,
+      };
+
+    case 'campaign_period':
+      return {
+        headline: `${artistName} — campaign period movement`,
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views ${ba.sublabel}` : 'Campaign views tracking',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers ${ba.sublabel}` : 'Campaign subscriber tracking',
+        confidenceNote: 'Campaign remains active but public channel totals are delayed. Use campaign-period context rather than weekly channel movement.',
+        recommendedWording: `Campaign remains active, ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views since launch' : 'tracking views'}. Weekly channel totals delayed.`,
+      };
+
+    case 'recent_uploads':
+      return {
+        headline: `${artistName} — upload activity detected`,
+        viewsLine: 'Channel view totals are delayed',
+        subsLine: 'Subscriber totals are delayed',
+        confidenceNote: `${ba.sublabel}. Channel totals stale but uploads remain active.`,
+        recommendedWording: `Channel totals delayed. ${ba.explanation}`,
+      };
+
+    case 'last_confirmed': {
+      const isOld = (ba.ageDays ?? 0) > BEST_AVAILABLE_AGE_LIMITS.lastConfirmedHeadlineMaxDays;
+      return {
+        headline: `${artistName} — ${isOld ? 'historical' : 'last confirmed'} movement (${ba.ageDays}d ago)`,
+        viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views (confirmed ${ba.ageDays}d ago)` : 'No confirmed views movement',
+        subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers (confirmed ${ba.ageDays}d ago)` : 'No confirmed subscriber movement',
+        confidenceNote: isOld
+          ? `Last confirmed movement is ${ba.ageDays} days old — too old for reliable weekly analysis. Show for context only.`
+          : `Last confirmed movement from ${ba.ageDays} days ago. Channel totals awaiting refresh.`,
+        recommendedWording: isOld
+          ? `Insufficient recent data for reliable weekly movement. Last confirmed movement was ${ba.ageDays} days ago.`
+          : `Last confirmed: ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views' : ''} (${ba.ageDays}d ago). Totals awaiting refresh.`,
+      };
+    }
+
+    case 'none':
+    default:
+      return {
+        headline: `${artistName} — insufficient movement data`,
+        viewsLine: 'No movement data available',
+        subsLine: 'No movement data available',
+        confidenceNote: 'Insufficient snapshot history for reliable weekly movement.',
+        recommendedWording: 'Insufficient snapshot history for reliable weekly movement.',
+      };
+  }
+}
+
 // ── Internal helpers ──────────────────────────────────────────────────────
 
 function emptyNormalized(
@@ -589,6 +1167,17 @@ function emptyNormalized(
     staleReason: 'Channel could not be reached',
     staleSince: null,
     staleConfidence: null,
+    movementFreshness: 'stale',
+    lastKnownGood: { views7d: null, subs7d: null, viewsWoW: null, confirmedAt: null, daysAgo: null },
+    structuralFindings: [],
+    bestAvailable: {
+      viewsValue: null, subsValue: null,
+      source: 'none', freshness: 'unknown', confidence: 'low',
+      label: 'Movement', sublabel: 'No data',
+      explanation: 'Insufficient snapshot history for reliable weekly movement.',
+      shouldUseInScore: false, shouldUseInTopMovers: false, shouldUseInReport: false,
+      ageDays: null,
+    },
   };
 }
 

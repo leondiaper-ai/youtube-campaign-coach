@@ -300,43 +300,98 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* ─── PERFORMANCE SNAPSHOT — primary data surface ────────────── */}
-        <div className="mt-6 grid grid-cols-4 gap-3">
-          <MetricTile
-            label="Views (7d)"
-            value={views7 ? fmtDelta(views7.delta) : '—'}
-            sub={views7 ? `${views7.delta >= 0 ? '+' : ''}${(views7.pct * 100).toFixed(1)}%` : null}
-            color={views7 ? (views7.delta > 0 ? '#0C6A3F' : views7.delta < 0 ? '#8A1F0C' : undefined) : undefined}
-          />
-          <MetricTile
-            label="Subs (7d)"
-            value={subs7 ? (subs7.delta >= 0 ? '+' : '') + subs7.delta.toLocaleString() : '—'}
-            sub={subs7 ? `${subs7.delta >= 0 ? '+' : ''}${(subs7.pct * 100).toFixed(1)}%` : null}
-            color={subs7 ? (subs7.delta > 0 ? '#0C6A3F' : subs7.delta < 0 ? '#8A1F0C' : undefined) : undefined}
-          />
-          <MetricTile
-            label="Uploads (30d)"
-            value={live?.uploads30d != null ? String(live.uploads30d) : '—'}
-            sub={live?.shorts30d != null ? `${live.shorts30d} Shorts` : null}
-          />
-          <MetricTile
-            label="Last upload"
-            value={lastUpDays != null ? (lastUpDays === 0 ? 'Today' : `${lastUpDays}d ago`) : '—'}
-            sub={null}
-            color={lastUpDays != null ? (lastUpDays <= 3 ? '#0C6A3F' : lastUpDays >= 14 ? '#8A1F0C' : undefined) : undefined}
-          />
-        </div>
+        {(() => {
+          // Best Available Movement: use ranked signal selection instead of simple LKG fallback
+          const ba = nc.bestAvailable;
+          const isLive = ba.source === 'live_7d';
+          const isMuted = !isLive && ba.source !== 'recent_snapshot';
 
-        {/* ─── MOVEMENT CONFIDENCE INDICATOR ──────────────────────────── */}
-        {(nc.movementConfidence === 'stale' || nc.movementConfidence === 'limited') && (
-          <div className="mt-2 text-[10px] italic text-ink/30">
-            {nc.movementConfidence === 'stale'
-              ? 'Public YouTube totals updating — movement data awaiting refresh'
-              : 'Recently added to tracking — movement data building'}
-          </div>
-        )}
+          // Choose what to display based on best available source
+          const viewsDisplay = ba.viewsValue != null
+            ? {
+                value: fmtDelta(ba.viewsValue),
+                sub: ba.sublabel,
+                color: ba.viewsValue > 0
+                  ? (isMuted ? 'rgba(12,106,63,0.45)' : '#0C6A3F')
+                  : ba.viewsValue < 0
+                    ? (isMuted ? 'rgba(138,31,12,0.45)' : '#8A1F0C')
+                    : undefined,
+              }
+            : null;
 
-        {/* ─── ACTIVITY SIGNAL FALLBACK (when movement is stale) ──────── */}
-        {nc.movementConfidence === 'stale' && nc.cadence.uploads30d > 0 && (
+          const subsDisplay = ba.subsValue != null
+            ? {
+                value: (ba.subsValue >= 0 ? '+' : '') + ba.subsValue.toLocaleString(),
+                sub: ba.sublabel,
+                color: ba.subsValue > 0
+                  ? (isMuted ? 'rgba(12,106,63,0.45)' : '#0C6A3F')
+                  : ba.subsValue < 0
+                    ? (isMuted ? 'rgba(138,31,12,0.45)' : '#8A1F0C')
+                    : undefined,
+              }
+            : null;
+
+          // Source-aware labels
+          const viewsLabel = ba.source === 'live_7d' ? 'Views (7d)'
+            : ba.source === 'recent_snapshot' ? 'Views (recent)'
+            : ba.source === 'campaign_period' ? 'Campaign views'
+            : ba.source === 'last_confirmed' ? ba.label
+            : ba.source === 'recent_uploads' ? 'Activity signal'
+            : 'Views (7d)';
+
+          const subsLabel = ba.source === 'live_7d' ? 'Subs (7d)'
+            : ba.source === 'recent_snapshot' ? 'Subs (recent)'
+            : ba.source === 'campaign_period' ? 'Campaign subs'
+            : ba.source === 'last_confirmed' ? 'Subs (last confirmed)'
+            : 'Subs (7d)';
+
+          return (
+            <>
+              <div className="mt-6 grid grid-cols-4 gap-3">
+                <MetricTile
+                  label={viewsLabel}
+                  value={viewsDisplay ? viewsDisplay.value : (ba.source === 'recent_uploads' ? ba.sublabel : '—')}
+                  sub={viewsDisplay ? viewsDisplay.sub : null}
+                  color={viewsDisplay?.color}
+                />
+                <MetricTile
+                  label={subsLabel}
+                  value={subsDisplay ? subsDisplay.value : '—'}
+                  sub={subsDisplay ? subsDisplay.sub : null}
+                  color={subsDisplay?.color}
+                />
+                <MetricTile
+                  label="Uploads (30d)"
+                  value={live?.uploads30d != null ? String(live.uploads30d) : '—'}
+                  sub={live?.shorts30d != null ? `${live.shorts30d} Shorts` : null}
+                />
+                <MetricTile
+                  label="Last upload"
+                  value={lastUpDays != null ? (lastUpDays === 0 ? 'Today' : `${lastUpDays}d ago`) : '—'}
+                  sub={null}
+                  color={lastUpDays != null ? (lastUpDays <= 3 ? '#0C6A3F' : lastUpDays >= 14 ? '#8A1F0C' : undefined) : undefined}
+                />
+              </div>
+
+              {/* ─── MOVEMENT SOURCE INDICATOR ───────────────────────── */}
+              {ba.source !== 'live_7d' && ba.source !== 'none' && (
+                <div className="mt-2 text-[10px] italic text-ink/35">
+                  {ba.explanation}
+                </div>
+              )}
+              {ba.source === 'none' && (
+                <div className="mt-2 text-[10px] italic text-ink/30">
+                  {nc.movementConfidence === 'limited'
+                    ? 'Recently added to tracking — movement data building'
+                    : 'Public YouTube totals updating — movement data awaiting refresh'}
+                </div>
+              )}
+            </>
+          );
+        })()}
+
+        {/* ─── ACTIVITY SIGNAL FALLBACK (when no better signal exists) ──────── */}
+        {nc.bestAvailable.source === 'none' && nc.cadence.uploads30d > 0 && (
           <div className="mt-3 rounded-lg px-4 py-3 border" style={{ borderColor: MUTED, background: PAPER }}>
             <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
               Activity signal

@@ -61,6 +61,10 @@ export type ChannelScoreInput = {
   prevViews7Delta?: number | null;
   /** Movement confidence — stale data should not drive scores */
   movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
+  /** Whether this artist has an active campaign */
+  hasActiveCampaign?: boolean;
+  /** Best available movement source — drives scoring intelligence */
+  bestAvailableSource?: 'live_7d' | 'recent_snapshot' | 'campaign_period' | 'recent_uploads' | 'last_confirmed' | 'none';
 };
 
 export type BenchmarkPool = {
@@ -264,9 +268,30 @@ function computeGrade(
   total: number,
   reliablePillars: number,
   pillars: ChannelScore['pillars'],
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale',
+  hasActiveCampaign?: boolean,
+  bestAvailableSource?: string,
 ): ChannelScore['grade'] {
   // Not enough data to grade meaningfully
-  if (reliablePillars <= 1) return 'Limited';
+  if (reliablePillars <= 1) {
+    // OPERATIONAL SIGNAL OVERRIDE: when movement is stale, use cadence + campaign
+    // activity to avoid collapsing active channels to "Limited".
+    if (movementConfidence === 'stale' || movementConfidence === 'limited') {
+      // Active campaign + any cadence → at least 'C' (campaign is running)
+      if (hasActiveCampaign && pillars.cadence.status !== 'weak') {
+        return 'C';
+      }
+      // Strong cadence without campaign → 'C' (active channel)
+      if (pillars.cadence.status === 'strong') {
+        return 'C';
+      }
+      // Average cadence → 'D' (some activity, but not enough for C)
+      if (pillars.cadence.status === 'average') {
+        return 'D';
+      }
+    }
+    return 'Limited';
+  }
 
   // Any weak pillar caps the grade at B — you can't be "A" with a failing dimension
   const hasWeak = Object.values(pillars).some((p) => p.status === 'weak');
@@ -295,10 +320,32 @@ function computeGrade(
  * Build an execution-focused summary label.
  * These describe HOW WELL the channel is run, not how big the artist is.
  */
-function buildLabel(pillars: ChannelScore['pillars']): string {
+function buildLabel(
+  pillars: ChannelScore['pillars'],
+  movementConfidence?: 'high' | 'medium' | 'limited' | 'stale',
+  hasActiveCampaign?: boolean,
+  bestAvailableSource?: string,
+): string {
   const r = pillars.reach.status;
   const c = pillars.conversion.status;
   const d = pillars.cadence.status;
+
+  // STALE-BUT-ACTIVE patterns — channel is uploading but totals are delayed
+  if (movementConfidence === 'stale' || movementConfidence === 'limited') {
+    // Campaign + cadence → campaign-aware label
+    if (hasActiveCampaign && d !== 'weak') {
+      return 'Campaign active — channel totals updating';
+    }
+    // Recent snapshot available — more specific than generic "totals updating"
+    if (bestAvailableSource === 'recent_snapshot') {
+      if (d === 'strong') return 'Active channel — using recent movement data';
+      return 'Movement data recent — channel totals catching up';
+    }
+    if (d === 'strong') return 'Active channel — totals updating';
+    if (d === 'average') return 'Posting regularly — awaiting totals refresh';
+    // Stale + inactive = genuinely cold
+    if (d === 'weak') return 'Inactive — totals and uploads both stalled';
+  }
 
   // All strong
   if (r === 'strong' && c === 'strong' && d === 'strong') return 'Efficient channel, firing on all cylinders';
@@ -346,7 +393,7 @@ export function calculateChannelScore(
   const totalPoints =
     POINTS[reach.status] + POINTS[conversion.status] + POINTS[cadence.status];
 
-  const grade = computeGrade(totalPoints, reliablePillars, pillars);
+  const grade = computeGrade(totalPoints, reliablePillars, pillars, input.movementConfidence, input.hasActiveCampaign, input.bestAvailableSource);
 
   const dataQuality: ChannelScore['dataQuality'] =
     reliablePillars >= 3 ? 'good' : reliablePillars >= 2 ? 'partial' : 'insufficient';
@@ -354,7 +401,7 @@ export function calculateChannelScore(
   return {
     grade,
     totalPoints,
-    label: buildLabel(pillars),
+    label: buildLabel(pillars, input.movementConfidence, input.hasActiveCampaign, input.bestAvailableSource),
     pillars,
     benchmarkLabel: 'vs tracked artists',
     dataQuality,

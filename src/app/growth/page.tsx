@@ -84,6 +84,12 @@ export default async function ControlPage() {
         dataStatusNote: nc.dataStatusNote,
         viewDataFreshness: nc.viewDataFreshness,
         movementConfidence: nc.movementConfidence,
+        movementFreshness: nc.movementFreshness,
+        lastKnownGoodViews7d: nc.lastKnownGood.views7d,
+        lastKnownGoodSubs7d: nc.lastKnownGood.subs7d,
+        lastKnownGoodDaysAgo: nc.lastKnownGood.daysAgo,
+        bestAvailableSource: nc.bestAvailable.source,
+        bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
       };
     })
   );

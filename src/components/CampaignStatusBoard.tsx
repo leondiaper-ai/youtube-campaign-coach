@@ -100,6 +100,14 @@ type CardData = {
   viewDataFreshness?: 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
   /** Movement data confidence — drives UI tone (cautious vs assertive) */
   movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
+  /** Movement freshness tier */
+  movementFreshness?: 'live' | 'recent' | 'delayed' | 'stale';
+  /** Last known good views 7d delta (retained from history) */
+  lastKnownGoodViews7d?: number | null;
+  /** Last known good subs 7d delta (retained from history) */
+  lastKnownGoodSubs7d?: number | null;
+  /** Days since last known good movement was confirmed */
+  lastKnownGoodDaysAgo?: number | null;
 };
 
 // ─── Growth OS bridge ──────────────────────────────────────────────────────
@@ -963,7 +971,7 @@ function DecisionCard({
         <StructureWarningLine warning={card.structureWarning} />
       )}
 
-      {/* ─── Movement confidence indicator ────────────────────── */}
+      {/* ─── Movement confidence indicator with directional reporting ── */}
       {(card.movementConfidence === 'stale' || card.movementConfidence === 'limited') && (
         <div className="flex items-center gap-1.5 mb-2 mt-1">
           <span
@@ -971,9 +979,11 @@ function DecisionCard({
             style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
           />
           <span className="text-[9px] tracking-[0.04em] text-ink/30 italic">
-            {card.movementConfidence === 'stale'
-              ? 'Public YouTube totals updating'
-              : 'Movement data building — limited history'}
+            {card.movementConfidence === 'stale' && card.lastKnownGoodViews7d != null
+              ? `Last confirmed: ${card.lastKnownGoodViews7d > 0 ? '+' : ''}${fmtNum(card.lastKnownGoodViews7d)} views · ${card.lastKnownGoodDaysAgo ?? '?'}d ago`
+              : card.movementConfidence === 'stale'
+                ? 'Public YouTube totals updating'
+                : 'Movement data building — limited history'}
           </span>
         </div>
       )}

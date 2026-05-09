@@ -126,6 +126,18 @@ export type StatusCardData = {
   viewDataFreshness?: 'fresh' | 'stale' | 'insufficient_history' | 'unavailable';
   /** Movement data confidence — drives UI tone (cautious vs assertive) */
   movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
+  /** Movement freshness tier */
+  movementFreshness?: 'live' | 'recent' | 'delayed' | 'stale';
+  /** Last known good views 7d delta (retained from history) */
+  lastKnownGoodViews7d?: number | null;
+  /** Last known good subs 7d delta (retained from history) */
+  lastKnownGoodSubs7d?: number | null;
+  /** Days since last known good movement was confirmed */
+  lastKnownGoodDaysAgo?: number | null;
+  /** Best available movement source */
+  bestAvailableSource?: 'live_7d' | 'recent_snapshot' | 'campaign_period' | 'recent_uploads' | 'last_confirmed' | 'none';
+  /** Best available explanation for display */
+  bestAvailableExplanation?: string;
 };
 
 // ── Helpers for weekly snapshot computation ─────────────────────────────
@@ -428,6 +440,12 @@ async function loadCard(
     dataStatusNote: nc.dataStatusNote,
     viewDataFreshness: nc.viewDataFreshness,
     movementConfidence: nc.movementConfidence,
+    movementFreshness: nc.movementFreshness,
+    lastKnownGoodViews7d: nc.lastKnownGood.views7d,
+    lastKnownGoodSubs7d: nc.lastKnownGood.subs7d,
+    lastKnownGoodDaysAgo: nc.lastKnownGood.daysAgo,
+    bestAvailableSource: nc.bestAvailable.source,
+    bestAvailableExplanation: nc.bestAvailable.explanation,
   };
 }
 
