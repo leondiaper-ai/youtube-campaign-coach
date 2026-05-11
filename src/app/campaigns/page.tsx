@@ -72,6 +72,8 @@ export type WeeklyProgressEntry = {
   subs7d: number | null;
   channelHealth: string;
   campaignSignal: string;
+  /** Week data status: confirmed = real delta, missing = no snapshot, partial = one metric only */
+  status: 'confirmed' | 'missing' | 'partial';
 };
 
 // ── Card data shape (serializable to client) ────────────────────────────────
@@ -152,10 +154,10 @@ function getISOWeekId(date: Date): string {
 function computeWeeklyWindows(
   history: ChannelSnapshot[],
   campaignStartDate: string,
-): { week: number; views7d: number | null; subs7d: number | null }[] {
+): { week: number; views7d: number | null; subs7d: number | null; status: 'confirmed' | 'missing' | 'partial' }[] {
   if (history.length < 2) return [];
   const startTs = new Date(campaignStartDate).getTime();
-  const windows: { week: number; views7d: number | null; subs7d: number | null }[] = [];
+  const windows: { week: number; views7d: number | null; subs7d: number | null; status: 'confirmed' | 'missing' | 'partial' }[] = [];
   // Filter to campaign-period history with at least one real metric, sorted by time
   const relevantHistory = history
     .filter((h) => new Date(h.ts).getTime() >= startTs && (h.views != null || h.subs != null))
@@ -188,16 +190,44 @@ function computeWeeklyWindows(
         ? latestInWindow.subs - baseline.subs
         : null;
 
+      // Determine status:
+      // - Both metrics null → partial (snapshot exists but no usable values)
+      // - One metric null → partial
+      // - Both are exactly 0 → likely monitoring gap (stale API returned same totals)
+      // - Otherwise → confirmed real movement
+      let status: 'confirmed' | 'missing' | 'partial';
+      if (viewsDelta == null && subsDelta == null) {
+        status = 'partial';
+      } else if (viewsDelta == null || subsDelta == null) {
+        status = 'partial';
+      } else if (viewsDelta === 0 && subsDelta === 0) {
+        // Both metrics show exactly zero change — almost certainly a monitoring gap
+        // in an active campaign (genuine zero growth in both is near-impossible)
+        status = 'missing';
+      } else {
+        status = 'confirmed';
+      }
+
       windows.push({
         week: weekNum,
         views7d: viewsDelta,
         subs7d: subsDelta,
+        status,
       });
       baseline = latestInWindow; // carry forward for next week
-    } else if (windowStart > Date.now()) {
-      break; // future weeks — stop
+    } else {
+      // No snapshot this week at all — emit a missing entry to preserve timeline continuity
+      if (windowStart < Date.now()) {
+        windows.push({
+          week: weekNum,
+          views7d: null,
+          subs7d: null,
+          status: 'missing',
+        });
+      } else {
+        break; // future weeks — stop
+      }
     }
-    // If no data this week, skip but keep same baseline
     weekNum++;
     windowStart = windowEnd;
     // Stop if we've gone past the last snapshot + 1 week
@@ -353,6 +383,7 @@ async function loadCard(
         subs7d: w.subs7d,
         channelHealth: existing?.channelHealth ?? chHealth,
         campaignSignal: existing?.campaignSignal ?? campSig.label,
+        status: w.status,
       };
     });
 

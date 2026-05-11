@@ -54,6 +54,7 @@ type WeeklyProgressEntry = {
   subs7d: number | null;
   channelHealth: string;
   campaignSignal: string;
+  status: 'confirmed' | 'missing' | 'partial';
 };
 
 type CardData = {
@@ -311,9 +312,19 @@ function generateSnapshot(card: CardData): string {
   }
 
   if (card.weeklyProgress.length > 0) {
-    lines.push('', 'WEEKLY PROGRESS:');
+    const gapCount = card.weeklyProgress.filter(w => w.status === 'missing').length;
+    lines.push('', `WEEKLY PROGRESS:${gapCount > 0 ? ` (${gapCount} monitoring gap${gapCount !== 1 ? 's' : ''})` : ''}`);
     for (const w of card.weeklyProgress) {
-      lines.push(`Week ${w.week}: ${w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'} · ${w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'} · ${w.campaignSignal}`);
+      if (w.status === 'missing') {
+        lines.push(`Week ${w.week}: Monitoring gap`);
+      } else if (w.status === 'partial') {
+        const parts: string[] = [];
+        if (w.views7d != null) parts.push(`${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views`);
+        if (w.subs7d != null) parts.push(`${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs`);
+        lines.push(`Week ${w.week}: ${parts.join(' · ')} (partial)`);
+      } else {
+        lines.push(`Week ${w.week}: ${w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'} · ${w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'} · ${w.campaignSignal}`);
+      }
     }
   }
 
@@ -928,16 +939,37 @@ function DecisionCard({
                   ▶
                 </span>
                 <span>{card.weeklyProgress.length} week{card.weeklyProgress.length !== 1 ? 's' : ''} tracked</span>
-                {card.weeklyProgress.length > 1 && (() => {
-                  const first = card.weeklyProgress[0];
-                  const last = card.weeklyProgress[card.weeklyProgress.length - 1];
-                  const viewsTrend = (last.views7d != null && first.views7d != null) ? (last.views7d > first.views7d ? '↑' : last.views7d < first.views7d ? '↓' : '→') : '→';
-                  const subsTrend = (last.subs7d != null && first.subs7d != null) ? (last.subs7d > first.subs7d ? '↑' : last.subs7d < first.subs7d ? '↓' : '→') : '→';
-                  return (
-                    <span className="font-semibold normal-case tracking-normal text-ink/25 ml-1">
-                      — views {viewsTrend} · subs {subsTrend}
-                    </span>
-                  );
+                {(() => {
+                  const gapCount = card.weeklyProgress.filter(w => w.status === 'missing').length;
+                  const confirmedCount = card.weeklyProgress.filter(w => w.status === 'confirmed').length;
+                  const partialCount = card.weeklyProgress.filter(w => w.status === 'partial').length;
+                  if (gapCount > 0) {
+                    return (
+                      <span className="font-normal normal-case tracking-normal text-ink/25 ml-1">
+                        · {gapCount === 1 ? '1 monitoring gap' : `${gapCount} monitoring gaps`}
+                      </span>
+                    );
+                  }
+                  if (partialCount > 0) {
+                    return (
+                      <span className="font-normal normal-case tracking-normal text-ink/25 ml-1">
+                        · {confirmedCount}/{card.weeklyProgress.length} confirmed
+                      </span>
+                    );
+                  }
+                  // All confirmed — show trend arrows
+                  if (card.weeklyProgress.length > 1) {
+                    const first = card.weeklyProgress[0];
+                    const last = card.weeklyProgress[card.weeklyProgress.length - 1];
+                    const viewsTrend = (last.views7d != null && first.views7d != null) ? (last.views7d > first.views7d ? '↑' : last.views7d < first.views7d ? '↓' : '→') : '→';
+                    const subsTrend = (last.subs7d != null && first.subs7d != null) ? (last.subs7d > first.subs7d ? '↑' : last.subs7d < first.subs7d ? '↓' : '→') : '→';
+                    return (
+                      <span className="font-semibold normal-case tracking-normal text-ink/25 ml-1">
+                        — views {viewsTrend} · subs {subsTrend}
+                      </span>
+                    );
+                  }
+                  return null;
                 })()}
               </button>
               {showWeeks && (
@@ -946,16 +978,42 @@ function DecisionCard({
                     <div
                       key={w.week}
                       className="flex items-center gap-3 text-[10px] rounded-md px-2.5 py-1.5"
-                      style={{ background: 'rgba(14,14,14,0.03)' }}
+                      style={{ background: w.status === 'missing' ? 'rgba(14,14,14,0.015)' : 'rgba(14,14,14,0.03)' }}
                     >
-                      <span className="font-bold text-ink/40 w-[40px] shrink-0">Wk {w.week}</span>
-                      <span className="font-bold tabular-nums" style={{ color: w.views7d != null ? (w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)') : 'rgba(14,14,14,0.25)' }}>
-                        {w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'}
+                      <span
+                        className="font-bold w-[40px] shrink-0"
+                        style={{ color: w.status === 'missing' ? 'rgba(14,14,14,0.25)' : 'rgba(14,14,14,0.4)' }}
+                      >
+                        Wk {w.week}
                       </span>
-                      <span className="text-ink/15">·</span>
-                      <span className="font-bold tabular-nums" style={{ color: w.subs7d != null ? (w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)') : 'rgba(14,14,14,0.25)' }}>
-                        {w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'}
-                      </span>
+
+                      {w.status === 'missing' ? (
+                        <span className="text-ink/25 italic font-normal">Monitoring gap</span>
+                      ) : w.status === 'partial' ? (
+                        <>
+                          {w.views7d != null && (
+                            <span className="font-bold tabular-nums" style={{ color: w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                              {w.views7d >= 0 ? '+' : ''}{fmtNum(w.views7d)} views
+                            </span>
+                          )}
+                          {w.subs7d != null && (
+                            <span className="font-bold tabular-nums" style={{ color: w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                              {w.subs7d >= 0 ? '+' : ''}{fmtNum(w.subs7d)} subs
+                            </span>
+                          )}
+                          <span className="text-ink/20 italic font-normal">· partial</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-bold tabular-nums" style={{ color: w.views7d != null ? (w.views7d > 0 ? '#0C6A3F' : w.views7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)') : 'rgba(14,14,14,0.25)' }}>
+                            {w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'}
+                          </span>
+                          <span className="text-ink/15">·</span>
+                          <span className="font-bold tabular-nums" style={{ color: w.subs7d != null ? (w.subs7d > 0 ? '#0C6A3F' : w.subs7d < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)') : 'rgba(14,14,14,0.25)' }}>
+                            {w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'}
+                          </span>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
