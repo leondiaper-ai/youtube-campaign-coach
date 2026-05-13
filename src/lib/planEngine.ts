@@ -898,6 +898,7 @@ export function generatePlan(
   timelineText: string,
   artist: string,
   channelCtx?: ChannelContext | null,
+  campaignStartDate?: string | null,
 ): GeneratedPlan | null {
   const events = parseTimeline(timelineText);
   if (events.length === 0) return null;
@@ -916,8 +917,12 @@ export function generatePlan(
   const shortsActive = ctx ? ctx.shorts30d > 2 : false;
 
   // Date range — expand window for cold channels (need more warm-up time)
+  // If campaignStartDate is provided and earlier than first event, use it as floor
   const preBuffer = isCold ? 14 : 7;
-  const startISO = addDays(events[0].dateISO, -preBuffer);
+  let startISO = addDays(events[0].dateISO, -preBuffer);
+  if (campaignStartDate && campaignStartDate < startISO) {
+    startISO = campaignStartDate;
+  }
   const endISO = addDays(events[events.length - 1].dateISO, 21);
   const startMs = new Date(startISO + 'T12:00:00').getTime();
   const endMs = new Date(endISO + 'T12:00:00').getTime();

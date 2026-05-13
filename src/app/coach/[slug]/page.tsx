@@ -1,13 +1,13 @@
 import { notFound } from 'next/navigation';
-import { loadPlan } from '@/lib/planStore';
+import { loadPlan, savePlan } from '@/lib/planStore';
 import { readLiveSnapByHandle, readChannelMapping } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
-import { daysSince } from '@/lib/artists';
 import { ARTISTS } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import { matchPlanToUploads } from '@/lib/coach/matchEngine';
 import { generateNudges } from '@/lib/coach/nudgeEngine';
+import { generatePlan } from '@/lib/planEngine';
 import CampaignDestination from '@/components/CampaignDestination';
 import type { RecentUpload } from '@/lib/artists';
 
@@ -52,6 +52,38 @@ export default async function CampaignPage({ params }: PageProps) {
     (a) => a.slug === saved.artist.toLowerCase().replace(/\s+/g, '-') ||
            a.name.toLowerCase() === saved.artist.toLowerCase()
   );
+
+  // Auto-extend plan backward if campaignStartDate is earlier than plan's first week
+  if (artistConfig?.campaignStartDate && saved.timelineText) {
+    const firstWeekMatch = saved.plan.weeks[0]?.dateRange.match(/^(\w+)\s+(\d+)/);
+    if (firstWeekMatch) {
+      const monthMap: Record<string, number> = {
+        Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+        Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+      };
+      const m = monthMap[firstWeekMatch[1]];
+      const d = parseInt(firstWeekMatch[2], 10);
+      if (m != null) {
+        const firstWeekDate = new Date(new Date().getFullYear(), m, d);
+        const campStart = new Date(artistConfig.campaignStartDate + 'T12:00:00');
+        // If the plan starts more than 3 days after the campaign start, regenerate
+        const diffDays = (firstWeekDate.getTime() - campStart.getTime()) / 86400000;
+        if (diffDays > 3) {
+          const regen = generatePlan(
+            saved.timelineText,
+            saved.artist,
+            saved.channelCtx,
+            artistConfig.campaignStartDate,
+          );
+          if (regen) {
+            saved.plan = regen;
+            // Persist the regenerated plan
+            savePlan(saved.slug, saved.artist, regen, saved.channelCtx, saved.timelineText).catch(() => {});
+          }
+        }
+      }
+    }
+  }
 
   if (artistConfig?.channelHandle) {
     try {
