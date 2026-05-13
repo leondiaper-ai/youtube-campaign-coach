@@ -61,6 +61,13 @@ function ytThumb(id: string, q: 'maxresdefault' | 'hqdefault' | 'mqdefault' = 'h
   return `https://i.ytimg.com/vi/${id}/${q}.jpg`;
 }
 
+function ytVideoUrl(id: string, durationSec?: number): string {
+  if (durationSec != null && durationSec <= 62) {
+    return `https://youtube.com/shorts/${id}`;
+  }
+  return `https://youtube.com/watch?v=${id}`;
+}
+
 function timeAgo(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
   if (days === 0) return 'Today';
@@ -135,9 +142,6 @@ export default function CampaignDestination({
   nudges,
   recentUploads,
 }: CampaignDestinationProps) {
-  const [exportOpen, setExportOpen] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
   const currentPhase = detectCurrentPhase(plan);
   const pulseSignals = generatePulseSignals(matchResult, liveChannel, recentUploads ?? [], currentPhase, plan);
   const moments = extractMoments(plan, matchResult);
@@ -168,12 +172,6 @@ export default function CampaignDestination({
   const shorts30d = uploads30d.filter((u) => u.durationSec <= 62);
   const long30d = uploads30d.filter((u) => u.durationSec > 62);
   const eraSignal = generateEraSignal(uploads30d, shorts30d, long30d, liveChannel);
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <>
@@ -462,80 +460,8 @@ export default function CampaignDestination({
         )}
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            GENERATE — Export
-        ══════════════════════════════════════════════════════════════════ */}
-        <section style={{
-          maxWidth: 1200, margin: '0 auto', padding: '48px 40px 0',
-        }}>
-          <div style={{
-            borderTop: `1px solid ${BONE}`, paddingTop: 24, paddingBottom: 48,
-          }}>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: GHOST,
-              fontFamily: MONO, marginBottom: 14,
-            }}>
-              Generate
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {[
-                { id: 'summary', label: 'Campaign Summary' },
-                { id: 'update', label: 'Management Update' },
-                { id: 'brief', label: 'YouTube Brief' },
-              ].map(({ id, label }) => (
-                <button
-                  key={id}
-                  onClick={() => setExportOpen(exportOpen === id ? null : id)}
-                  style={{
-                    fontSize: 12, fontWeight: 600, padding: '8px 18px',
-                    background: exportOpen === id ? INK : 'transparent',
-                    color: exportOpen === id ? PAPER : INK,
-                    border: `1px solid ${exportOpen === id ? INK : BONE}`,
-                    borderRadius: 4, cursor: 'pointer', letterSpacing: '0.02em',
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {exportOpen && (
-              <div style={{
-                marginTop: 12, background: WHITE, border: `1px solid ${BONE}`,
-                borderRadius: 6, overflow: 'hidden',
-              }}>
-                <pre style={{
-                  padding: '20px 24px', fontSize: 12, lineHeight: 1.6,
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                  margin: 0, color: INK, fontFamily: MONO,
-                  maxHeight: 400, overflow: 'auto',
-                }}>
-                  {generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)}
-                </pre>
-                <div style={{
-                  padding: '10px 20px', borderTop: `1px solid ${BONE}`,
-                  display: 'flex', justifyContent: 'flex-end',
-                }}>
-                  <button
-                    onClick={() => copyToClipboard(
-                      generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)
-                    )}
-                    style={{
-                      fontSize: 11, fontWeight: 700, padding: '6px 16px',
-                      background: copied ? '#ECFDF5' : INK,
-                      color: copied ? '#059669' : PAPER,
-                      border: 'none', borderRadius: 4, cursor: 'pointer',
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    {copied ? '✓ Copied' : 'Copy'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
+        {/* ── Notes ── */}
+        <NotesSection slug={slug} />
 
         {/* Footer */}
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
@@ -665,77 +591,92 @@ function CampaignWall({
   return (
     <section style={{ background: INK }}>
       {heroUpload && (
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '21/9',
-          overflow: 'hidden',
-        }}>
-          <img
-            src={ytThumb(heroUpload.id, 'maxresdefault')}
-            alt=""
-            style={{
-              width: '100%', height: '100%',
-              objectFit: 'cover',
-              filter: 'brightness(0.55) contrast(1.1)',
-            }}
-          />
+        <a
+          href={ytVideoUrl(heroUpload.id, heroUpload.durationSec)}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+        >
           <div style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            padding: '60px 40px 20px',
-            background: 'linear-gradient(transparent 0%, rgba(10,10,10,0.85) 100%)',
+            position: 'relative',
+            width: '100%',
+            aspectRatio: '21/9',
+            overflow: 'hidden',
           }}>
+            <img
+              src={ytThumb(heroUpload.id, 'maxresdefault')}
+              alt=""
+              style={{
+                width: '100%', height: '100%',
+                objectFit: 'cover',
+                filter: 'brightness(0.55) contrast(1.1)',
+              }}
+            />
             <div style={{
-              maxWidth: 1200, margin: '0 auto',
-              display: 'flex', justifyContent: 'space-between',
-              alignItems: 'flex-end', flexWrap: 'wrap', gap: 12,
+              position: 'absolute',
+              bottom: 0, left: 0, right: 0,
+              padding: '60px 40px 20px',
+              background: 'linear-gradient(transparent 0%, rgba(10,10,10,0.85) 100%)',
             }}>
-              <div style={{ maxWidth: 500 }}>
-                <div style={{
-                  fontSize: 13, color: 'rgba(255,255,255,0.5)',
-                  marginBottom: 4,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {heroUpload.title}
-                </div>
-                <div style={{
-                  display: 'flex', gap: 10, alignItems: 'center',
-                  fontSize: 9, color: 'rgba(255,255,255,0.2)',
-                  fontFamily: MONO, letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                }}>
-                  <span>{timeAgo(heroUpload.publishedAt)}</span>
-                  {isFresh(heroUpload.publishedAt) && (
-                    <span style={{ color: '#34D399', fontWeight: 700 }}>NEW</span>
-                  )}
-                  {heroUpload.likeCount > 0 && <span>{fmtNum(heroUpload.likeCount)} likes</span>}
-                  {heroUpload.commentCount > 0 && <span>{fmtNum(heroUpload.commentCount)} comments</span>}
-                </div>
-              </div>
               <div style={{
-                fontSize: 'clamp(28px, 3.5vw, 48px)',
-                fontWeight: 900,
-                letterSpacing: '-0.03em',
-                color: WHITE, fontFamily: MONO, lineHeight: 1,
+                maxWidth: 1200, margin: '0 auto',
+                display: 'flex', justifyContent: 'space-between',
+                alignItems: 'flex-end', flexWrap: 'wrap', gap: 12,
               }}>
-                {fmtNum(heroUpload.viewCount)}
+                <div style={{ maxWidth: 500 }}>
+                  <div style={{
+                    fontSize: 13, color: 'rgba(255,255,255,0.5)',
+                    marginBottom: 4,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {heroUpload.title}
+                  </div>
+                  <div style={{
+                    display: 'flex', gap: 10, alignItems: 'center',
+                    fontSize: 9, color: 'rgba(255,255,255,0.2)',
+                    fontFamily: MONO, letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                  }}>
+                    <span>{timeAgo(heroUpload.publishedAt)}</span>
+                    {isFresh(heroUpload.publishedAt) && (
+                      <span style={{ color: '#34D399', fontWeight: 700 }}>NEW</span>
+                    )}
+                    {heroUpload.likeCount > 0 && <span>{fmtNum(heroUpload.likeCount)} likes</span>}
+                    {heroUpload.commentCount > 0 && <span>{fmtNum(heroUpload.commentCount)} comments</span>}
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 'clamp(28px, 3.5vw, 48px)',
+                  fontWeight: 900,
+                  letterSpacing: '-0.03em',
+                  color: WHITE, fontFamily: MONO, lineHeight: 1,
+                }}>
+                  {fmtNum(heroUpload.viewCount)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </a>
       )}
 
       {shorts.length > 0 && (
         <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
           {shorts.slice(0, Math.min(shorts.length, 5)).map((s) => (
-            <div key={s.id} style={{
-              flex: '1 1 0',
-              aspectRatio: '9/16',
-              position: 'relative',
-              overflow: 'hidden',
-              minWidth: 0,
-            }}>
+            <a
+              key={s.id}
+              href={ytVideoUrl(s.id, s.durationSec)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flex: '1 1 0',
+                aspectRatio: '9/16',
+                position: 'relative',
+                overflow: 'hidden',
+                minWidth: 0,
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
               <img
                 src={ytThumb(s.id)}
                 alt="" loading="lazy"
@@ -774,7 +715,7 @@ function CampaignWall({
                   boxShadow: '0 0 8px rgba(52,211,153,0.5)',
                 }} />
               )}
-            </div>
+            </a>
           ))}
         </div>
       )}
@@ -788,11 +729,19 @@ function CampaignWall({
           gap: 2, marginTop: 2,
         }}>
           {secondaryLong.map((u, i) => (
-            <div key={u.id} style={{
-              position: 'relative',
-              aspectRatio: '16/9',
-              overflow: 'hidden',
-            }}>
+            <a
+              key={u.id}
+              href={ytVideoUrl(u.id, u.durationSec)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                position: 'relative',
+                aspectRatio: '16/9',
+                overflow: 'hidden',
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
               <img
                 src={ytThumb(u.id)}
                 alt="" loading="lazy"
@@ -825,7 +774,7 @@ function CampaignWall({
                   {fmtNum(u.viewCount)}
                 </span>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       )}
@@ -858,6 +807,120 @@ function CampaignWall({
             TOTAL VIEWS
           </span>
         </div>
+      </div>
+    </section>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// NOTES — Lightweight campaign notes
+// ══════════════════════════════════════════════════════════════════════════════
+
+function NotesSection({ slug }: { slug: string }) {
+  const [notes, setNotes] = useState<string[]>([]);
+  const [draft, setDraft] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const addNote = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setNotes((prev) => [
+      ...prev,
+      text,
+    ]);
+    setDraft('');
+  };
+
+  return (
+    <section style={{
+      maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0',
+    }}>
+      <div style={{ borderTop: `1px solid ${BONE}`, paddingTop: 20, paddingBottom: 32 }}>
+        <button
+          onClick={() => setOpen(!open)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          <span style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+            textTransform: 'uppercase', color: GHOST,
+            fontFamily: MONO,
+          }}>
+            Notes
+          </span>
+          {notes.length > 0 && (
+            <span style={{
+              fontSize: 9, fontWeight: 700, color: SMOKE,
+              fontFamily: MONO,
+            }}>
+              ({notes.length})
+            </span>
+          )}
+          <span style={{
+            fontSize: 7, color: GHOST,
+            transform: open ? 'rotate(90deg)' : 'none',
+            transition: 'transform 0.15s',
+          }}>▶</span>
+        </button>
+
+        {open && (
+          <div style={{ marginTop: 12 }}>
+            {notes.length > 0 && (
+              <div style={{
+                display: 'flex', flexDirection: 'column', gap: 6,
+                marginBottom: 12,
+              }}>
+                {notes.map((note, i) => (
+                  <div key={i} style={{
+                    padding: '8px 12px',
+                    background: WHITE,
+                    border: `1px solid ${BONE}`,
+                    borderRadius: 4,
+                    fontSize: 12, color: INK, lineHeight: 1.5,
+                  }}>
+                    {note}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') addNote(); }}
+                placeholder="Add a note..."
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  fontSize: 12, color: INK,
+                  border: `1px solid ${BONE}`,
+                  borderRadius: 4,
+                  background: WHITE,
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+              <button
+                onClick={addNote}
+                style={{
+                  fontSize: 11, fontWeight: 700, padding: '8px 16px',
+                  background: draft.trim() ? INK : BONE,
+                  color: draft.trim() ? PAPER : GHOST,
+                  border: 'none', borderRadius: 4,
+                  cursor: draft.trim() ? 'pointer' : 'default',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -927,11 +990,19 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
       }}>
         {/* Primary thumbnail */}
         {moment.primaryUpload && (
-          <div style={{
-            position: 'relative',
-            borderRadius: 6, overflow: 'hidden',
-            aspectRatio: '16/9',
-          }}>
+          <a
+            href={ytVideoUrl(moment.primaryUpload.id, moment.primaryUpload.durationSec)}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'block',
+              position: 'relative',
+              borderRadius: 6, overflow: 'hidden',
+              aspectRatio: '16/9',
+              textDecoration: 'none',
+              color: 'inherit',
+            }}
+          >
             <img
               src={ytThumb(moment.primaryUpload.id, 'maxresdefault')}
               alt="" loading="lazy"
@@ -954,7 +1025,7 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
                 <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>views</span>
               </div>
             </div>
-          </div>
+          </a>
         )}
 
         {/* Action cards */}
@@ -962,27 +1033,36 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
           <div style={{
             display: 'flex', flexDirection: 'column', gap: 6,
           }}>
-            {doneActions.map((a, i) => (
-              <div key={`d-${i}`} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '6px 10px',
-                background: '#F0FDF4',
-                borderRadius: 4,
-              }}>
-                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>✓</span>
-                <span style={{
-                  fontSize: 12, color: INK, flex: 1,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            {doneActions.map((a, i) => {
+              const inner = (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '6px 10px',
+                  background: '#F0FDF4',
+                  borderRadius: 4,
                 }}>
-                  {cleanTitle(a.title)}
-                </span>
-                {a.matchedUpload && (
-                  <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
-                    {fmtNum(a.matchedUpload.viewCount)}
+                  <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>✓</span>
+                  <span style={{
+                    fontSize: 12, color: INK, flex: 1,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {cleanTitle(a.title)}
                   </span>
-                )}
-              </div>
-            ))}
+                  {a.matchedUpload && (
+                    <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                      {fmtNum(a.matchedUpload.viewCount)}
+                    </span>
+                  )}
+                </div>
+              );
+              return a.matchedUpload ? (
+                <a key={`d-${i}`} href={ytVideoUrl(a.matchedUpload.id, a.matchedUpload.durationSec)}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ textDecoration: 'none', color: 'inherit' }}>
+                  {inner}
+                </a>
+              ) : <div key={`d-${i}`}>{inner}</div>;
+            })}
 
             {openActions.map((a, i) => (
               <div key={`o-${i}`} style={{
@@ -1052,12 +1132,19 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
           overflowX: 'auto', paddingBottom: 4,
         }}>
           {moment.extraUploads.map((u) => (
-            <div key={u.id} style={{
-              flexShrink: 0,
-              width: u.durationSec <= 62 ? 56 : 96,
-              aspectRatio: u.durationSec <= 62 ? '9/16' : '16/9',
-              borderRadius: 3, overflow: 'hidden', position: 'relative',
-            }}>
+            <a
+              key={u.id}
+              href={ytVideoUrl(u.id, u.durationSec)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flexShrink: 0,
+                width: u.durationSec <= 62 ? 56 : 96,
+                aspectRatio: u.durationSec <= 62 ? '9/16' : '16/9',
+                borderRadius: 3, overflow: 'hidden', position: 'relative',
+                textDecoration: 'none', color: 'inherit',
+              }}
+            >
               <img
                 src={ytThumb(u.id, 'mqdefault')}
                 alt="" loading="lazy"
@@ -1071,7 +1158,7 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
               }}>
                 {fmtNum(u.viewCount)}
               </div>
-            </div>
+            </a>
           ))}
         </div>
       )}
@@ -1354,33 +1441,32 @@ function generateRolloutPressure(
   phase: PhaseName,
 ): string | null {
   const open = moment.supportMissing;
-  const done = moment.supportDone;
 
   // If everything is delivered, no pressure needed
   if (open.length === 0 && moment.actions.every((a) => a.status === 'completed' || a.status === 'live')) {
     return null;
   }
 
-  // If specific formats are open, suggest them collaboratively
+  // Specific open formats
   if (open.length === 1) {
-    return `A ${open[0]} upload could help extend this moment's reach and sustain discovery.`;
+    return `A ${open[0]} would keep this moment visible in the feed longer.`;
   }
   if (open.length > 1) {
-    return `${open.length} supporting formats could strengthen this moment. Additional uploads may help maintain visibility.`;
+    return `${open.length} uploads still open — more content keeps the algorithm serving this moment.`;
   }
 
-  // Phase-aware generic suggestions
+  // Phase-aware suggestions in YouTube language
   if (phase === 'BUILD') {
-    return 'Artist-led uploads and Shorts could help warm the audience ahead of the release window.';
+    return 'Shorts and early uploads get the channel active before the main drop.';
   }
   if (phase === 'RELEASE') {
-    return 'Supporting formats — lyric videos, visualizers, BTS — could help extend the release moment.';
+    return 'Lyric videos, visualizers, and BTS extend how long the release stays in feeds.';
   }
   if (phase === 'SCALE') {
-    return 'Additional content formats could help sustain momentum and expand discovery.';
+    return 'More uploads keep the algorithm recommending the catalogue while momentum is hot.';
   }
   if (phase === 'EXTEND') {
-    return 'Acoustic versions, live sessions, or documentary content may help deepen audience connection.';
+    return 'Acoustic versions, live sessions, or documentary content give fans a reason to come back.';
   }
   return null;
 }
@@ -1413,7 +1499,7 @@ function generatePulseSignals(
         (Date.now() - new Date(upload.publishedAt).getTime()) / 86400000
       );
       signals.push({
-        text: `${cleanTitle(top.title)} is live${daysSince <= 1 ? ' — audience is responding' : ` — ${fmtNum(upload.viewCount)} views in ${daysSince} days`}`,
+        text: `${cleanTitle(top.title)} is live${daysSince <= 1 ? ' — picking up views' : ` — ${fmtNum(upload.viewCount)} views in ${daysSince}d`}`,
         urgency: 'positive',
       });
     }
@@ -1427,7 +1513,7 @@ function generatePulseSignals(
     if (recent.length > 0) {
       const top = recent.sort((a, b) => b.viewCount - a.viewCount)[0];
       signals.push({
-        text: `"${top.title}" is building momentum — ${fmtNum(top.viewCount)} views`,
+        text: `"${top.title}" picking up — ${fmtNum(top.viewCount)} views`,
         urgency: 'positive',
       });
     }
@@ -1436,17 +1522,17 @@ function generatePulseSignals(
   if (liveChannel?.views7Delta != null) {
     if (liveChannel.views7Delta > 10000) {
       signals.push({
-        text: `Momentum is building — ${fmtNum(liveChannel.views7Delta)} views this week`,
+        text: `+${fmtNum(liveChannel.views7Delta)} views this week — the channel is running`,
         urgency: 'positive',
       });
     } else if (liveChannel.views7Delta > 0) {
       signals.push({
-        text: `The audience is active — +${fmtNum(liveChannel.views7Delta)} views this week`,
+        text: `+${fmtNum(liveChannel.views7Delta)} views this week`,
         urgency: 'neutral',
       });
     } else if (liveChannel.views7Delta < 0) {
       signals.push({
-        text: 'Views are cooling this week — a new upload could reignite momentum',
+        text: 'Views slowing — a new upload would get things moving again',
         urgency: 'warning',
       });
     }
@@ -1456,18 +1542,18 @@ function generatePulseSignals(
     const u30 = liveChannel.uploads30d ?? 0;
     const s30 = liveChannel.shorts30d ?? 0;
     if (u30 >= 8) {
-      signals.push({ text: `Active output — ${u30} uploads keeping the channel warm this month`, urgency: 'positive' });
+      signals.push({ text: `${u30} uploads this month — the feed is active`, urgency: 'positive' });
     } else if (s30 >= 3 && u30 >= 3) {
-      signals.push({ text: `Short-form content is driving momentum — ${s30} shorts this month`, urgency: 'positive' });
+      signals.push({ text: `${s30} Shorts this month keeping the channel in feeds`, urgency: 'positive' });
     } else if (u30 === 0) {
-      signals.push({ text: 'The channel is quiet this month — the next upload will restart the conversation', urgency: 'warning' });
+      signals.push({ text: 'No uploads this month — next one restarts the algorithm', urgency: 'warning' });
     }
   }
 
   const lastUpload = liveChannel?.lastUploadDaysAgo;
   if (lastUpload != null && lastUpload > 10) {
     signals.push({
-      text: `${lastUpload} days since last upload${currentPhase === 'RELEASE' ? ' — the release window is open for a new moment' : ' — a new upload could re-engage the audience'}`,
+      text: `${lastUpload}d since last upload${currentPhase === 'RELEASE' ? ' — the release window is still open' : ''}`,
       urgency: lastUpload > 21 ? 'critical' : 'warning',
     });
   }
@@ -1477,12 +1563,12 @@ function generatePulseSignals(
     const pastDue = stats.completed + stats.live + stats.missing + stats.late;
     if (stats.late > 0) {
       signals.push({
-        text: `${stats.late} planned upload${stats.late > 1 ? 's have' : ' has'} open windows — the audience is ready`,
+        text: `${stats.late} planned upload${stats.late > 1 ? 's' : ''} still open — ready to go`,
         urgency: 'warning',
       });
     } else if (pastDue >= 3 && stats.completionRate < 40) {
       signals.push({
-        text: `The rollout is building at its own pace — ${Math.round(stats.completionRate)}% of planned content is live`,
+        text: `${Math.round(stats.completionRate)}% of planned content is live — room to push more`,
         urgency: 'warning',
       });
     }
@@ -1567,104 +1653,6 @@ function extractMoments(
       };
     })
     .sort((a, b) => a.daysAway - b.daysAway);
-}
-
-function generateExportText(
-  type: string,
-  plan: GeneratedPlan,
-  matchResult?: MatchResult,
-  liveChannel?: CampaignDestinationProps['liveChannel'],
-  currentPhase?: PhaseName | null,
-  moments?: CampaignMoment[],
-): string {
-  const artist = plan.artist;
-  const campaign = plan.campaignName.replace(/ Campaign$/i, '');
-  const stats = matchResult?.stats;
-  const phase = currentPhase ?? 'BUILD';
-
-  if (type === 'summary') {
-    let text = `${artist} — ${campaign}\n`;
-    text += `Phase: ${phase}\n`;
-    text += `Strategy: ${plan.strategy.priority}\n\n`;
-
-    if (liveChannel) {
-      text += `Channel: ${liveChannel.subs != null ? fmtNum(liveChannel.subs) + ' subs' : ''}`;
-      if (liveChannel.views7Delta != null) text += ` · ${liveChannel.views7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.views7Delta)} views/7d`;
-      if (liveChannel.uploads30d != null) text += ` · ${liveChannel.uploads30d} uploads/30d`;
-      text += '\n\n';
-    }
-
-    if (stats) {
-      text += `Execution: ${Math.round(stats.completionRate)}% (${stats.completed + stats.live} landed, ${stats.planned} upcoming`;
-      if (stats.missing > 0) text += `, ${stats.missing} open windows`;
-      if (stats.late > 0) text += `, ${stats.late} ready to go`;
-      text += ')\n\n';
-    }
-
-    if (moments && moments.length > 0) {
-      const active = moments.find((m) => m.timing === 'current' || m.timing === 'past');
-      const next = moments.find((m) => m.timing === 'upcoming');
-      if (active) text += `Current moment: ${active.momentName}\n`;
-      if (next) text += `Next moment: ${next.momentName} (${next.dateRange})\n`;
-    }
-
-    return text;
-  }
-
-  if (type === 'update') {
-    let text = `CAMPAIGN UPDATE: ${artist} — ${campaign}\n`;
-    text += `${'─'.repeat(40)}\n\n`;
-    text += `Current phase: ${phase}\n`;
-
-    if (stats) {
-      const rate = Math.round(stats.completionRate);
-      text += `Execution rate: ${rate}%\n`;
-      if (rate >= 70) text += `Status: Strong momentum\n`;
-      else if (rate >= 40) text += `Status: Building steadily\n`;
-      else text += `Status: Early stages — room to accelerate\n`;
-    }
-    text += '\n';
-
-    if (liveChannel?.views7Delta != null) {
-      text += `7-day views: ${liveChannel.views7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.views7Delta)}\n`;
-    }
-    if (liveChannel?.subs7Delta != null) {
-      text += `7-day subs: ${liveChannel.subs7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.subs7Delta)}\n`;
-    }
-    text += '\n';
-
-    if (moments && moments.length > 0) {
-      text += 'KEY MOMENTS:\n';
-      moments.forEach((m) => {
-        const status = m.timing === 'current' ? '→ NOW' : m.timing === 'past' ? '✓ Landed' : '  Upcoming';
-        text += `${status} ${m.momentName} (${m.dateRange})\n`;
-      });
-    }
-
-    return text;
-  }
-
-  if (type === 'brief') {
-    let text = `YOUTUBE BRIEF: ${artist}\n`;
-    text += `Campaign: ${campaign}\n`;
-    text += `Phase: ${phase} — ${PHASE_TONE[phase as PhaseName]?.label ?? ''}\n\n`;
-    text += `Strategy: ${plan.strategy.priority}\n\n`;
-    text += `Approach: ${plan.strategy.approach}\n\n`;
-
-    const next = moments?.find((m) => m.timing === 'upcoming' || m.timing === 'current');
-    if (next) {
-      text += `NEXT MOMENT: ${next.momentName}\n`;
-      text += `Timing: ${next.dateRange}\n`;
-      if (next.supportPlanned.length > 0) {
-        text += `Content opportunities:\n`;
-        next.supportPlanned.forEach((t) => { text += `  • ${t}\n`; });
-      }
-    }
-
-    return text;
-  }
-
-  return '';
 }
 
 function cleanTitle(title: string): string {
