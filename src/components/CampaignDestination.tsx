@@ -15,8 +15,8 @@ import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DESIGN SYSTEM — Cinematic Rollout OS v3
-// Two layers: THE SURFACE (live reality) → THE PLAN (future intent)
+// DESIGN SYSTEM — Cinematic Rollout OS v4
+// Hero → Campaign State → Live Execution → Full Rollout Map
 // ══════════════════════════════════════════════════════════════════════════════
 
 const INK = '#0A0A0A';
@@ -32,22 +32,22 @@ const PHASE_TONE: Record<PhaseName, { accent: string; label: string; narrative: 
   BUILD: {
     accent: '#4338CA',
     label: 'BUILD THE WORLD',
-    narrative: 'Warming the algorithm. Building presence.',
+    narrative: 'Warming the algorithm. Building presence and anticipation.',
   },
   RELEASE: {
     accent: '#DC2626',
     label: 'THE CENTREPIECE',
-    narrative: 'The main event. Maximum pressure.',
+    narrative: 'The main event. Maximum visibility and impact.',
   },
   SCALE: {
     accent: '#059669',
     label: 'SCALE THE STORY',
-    narrative: 'Momentum is real. Push it further.',
+    narrative: 'Momentum is building. Extend the reach further.',
   },
   EXTEND: {
     accent: '#D97706',
     label: 'EXTEND THE WORLD',
-    narrative: 'Keep the universe alive.',
+    narrative: 'Keep the universe alive. Sustain audience connection.',
   },
 };
 
@@ -131,7 +131,7 @@ export default function CampaignDestination({
   nudges,
   recentUploads,
 }: CampaignDestinationProps) {
-  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(true);
   const [exportOpen, setExportOpen] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -144,16 +144,17 @@ export default function CampaignDestination({
   const attentionItems = buildAttentionItems(nudges ?? [], matchResult, liveChannel);
   const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
+  const currentPhaseData = currentPhase
+    ? plan.phases.find((p) => p.name === currentPhase)
+    : null;
 
   // ── Classify uploads for visual treatment ──
-  // SURFACE leads with recency — what the era looks like RIGHT NOW
   const allByRecency = (recentUploads ?? []).sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
   const allByViews = [...allByRecency].sort((a, b) => b.viewCount - a.viewCount);
   const shorts = allByRecency.filter((u) => u.durationSec <= 62);
   const longform = allByRecency.filter((u) => u.durationSec > 62);
-  // Hero = most RECENT longform — this is the current visual tone
   const heroUpload = longform[0] ?? allByRecency[0] ?? null;
   const totalCampaignViews = allByRecency.reduce((s, u) => s + u.viewCount, 0);
 
@@ -176,13 +177,6 @@ export default function CampaignDestination({
       `}} />
 
       <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
-
-        {/* ┌──────────────────────────────────────────────────────────────┐
-            │                                                              │
-            │   T H E   S U R F A C E                                     │
-            │   What the campaign looks and feels like right now.          │
-            │                                                              │
-            └──────────────────────────────────────────────────────────────┘ */}
 
 
         {/* ══════════════════════════════════════════════════════════════════
@@ -300,7 +294,7 @@ export default function CampaignDestination({
               {plan.strategy.priority}
             </p>
 
-            {/* Era reading — what the channel feels like right now */}
+            {/* Era reading */}
             {eraSignal && (
               <div style={{
                 marginTop: 20,
@@ -312,7 +306,7 @@ export default function CampaignDestination({
               </div>
             )}
 
-            {/* Live metrics — understated */}
+            {/* Live metrics */}
             {liveChannel && (
               <div style={{
                 marginTop: 16,
@@ -344,92 +338,16 @@ export default function CampaignDestination({
         )}
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            CAMPAIGN WALL — Editorial collage. Windows into the rollout.
-        ══════════════════════════════════════════════════════════════════ */}
-        {allByRecency.length >= 2 && (
-          <CampaignWall
-            uploads={allByRecency}
-            shorts={shorts}
-            longform={longform}
-            heroUpload={heroUpload}
-            totalViews={totalCampaignViews}
-            uploads30dCount={uploads30d.length}
-            shorts30dCount={shorts30d.length}
-          />
-        )}
-
-
-        {/* ══════════════════════════════════════════════════════════════════
-            SURFACE READING — Era interpretation
-        ══════════════════════════════════════════════════════════════════ */}
-        {uploads30d.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '48px 40px 0',
-          }}>
-            <div style={{
-              maxWidth: 560,
-              display: 'flex', flexDirection: 'column', gap: 8,
-            }}>
-              {pulseSignals.slice(0, 3).map((sig, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                }}>
-                  <span style={{
-                    width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
-                    background: sig.urgency === 'positive' ? '#059669'
-                      : sig.urgency === 'warning' ? '#D97706'
-                      : sig.urgency === 'critical' ? '#DC2626' : GHOST,
-                  }} />
-                  <span style={{ fontSize: 13, color: SMOKE, lineHeight: 1.4 }}>
-                    {sig.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-
         {/* ┌──────────────────────────────────────────────────────────────┐
             │                                                              │
-            │   T H E   P L A N                                           │
-            │   Where this campaign is heading.                            │
+            │   C A M P A I G N   S T A T E                               │
+            │   Where this campaign is right now.                          │
             │                                                              │
             └──────────────────────────────────────────────────────────────┘ */}
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            PLAN SEPARATOR — Transition from surface to strategy
-        ══════════════════════════════════════════════════════════════════ */}
-        <section style={{
-          maxWidth: 1200, margin: '0 auto',
-          padding: '80px 40px 0',
-        }}>
-          <div style={{
-            width: '100%', height: 1, background: BONE,
-            marginBottom: 48,
-          }} />
-          <div style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
-            textTransform: 'uppercase', color: GHOST,
-            fontFamily: MONO, marginBottom: 10,
-          }}>
-            The Plan
-          </div>
-          <div style={{
-            fontSize: 13, color: SMOKE, lineHeight: 1.5,
-            maxWidth: 400,
-          }}>
-            {plan.totalWeeks} weeks · {plan.events.length} moments
-            {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
-          </div>
-        </section>
-
-
-        {/* ══════════════════════════════════════════════════════════════════
-            CHAPTER BREAK — Current phase as narrative act
+            CAMPAIGN PHASE — Current chapter of the rollout
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
           maxWidth: 1200, margin: '0 auto',
@@ -438,12 +356,35 @@ export default function CampaignDestination({
           {currentPhase && phaseTone ? (
             <>
               <div style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.2em',
-                textTransform: 'uppercase', color: GHOST,
-                fontFamily: MONO, marginBottom: 14,
+                display: 'flex', alignItems: 'center', gap: 14,
+                marginBottom: 20,
               }}>
-                Chapter {plan.phases.findIndex((p) => p.name === currentPhase) + 1 || '—'}
+                <span style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: '0.2em',
+                  textTransform: 'uppercase', color: GHOST,
+                  fontFamily: MONO,
+                }}>
+                  Chapter {plan.phases.findIndex((p) => p.name === currentPhase) + 1 || '—'}
+                </span>
+                {currentPhaseData && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, color: SMOKE,
+                    fontFamily: MONO,
+                  }}>
+                    W{currentPhaseData.weekStart}–W{currentPhaseData.weekEnd}
+                  </span>
+                )}
+                <span style={{
+                  fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  padding: '3px 10px', borderRadius: 3,
+                  background: phaseTone.accent, color: WHITE,
+                  animation: 'cpulse 2s ease-in-out infinite',
+                }}>
+                  ACTIVE NOW
+                </span>
               </div>
+
               <h2 style={{
                 fontSize: 'clamp(36px, 5vw, 60px)',
                 fontWeight: 900, lineHeight: 0.92,
@@ -471,6 +412,39 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
+            ROLLOUT OBSERVATIONS — What the system is seeing right now
+        ══════════════════════════════════════════════════════════════════ */}
+        {pulseSignals.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '0 40px',
+            marginBottom: 48,
+          }}>
+            <div style={{
+              maxWidth: 560,
+              display: 'flex', flexDirection: 'column', gap: 8,
+            }}>
+              {pulseSignals.slice(0, 4).map((sig, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                }}>
+                  <span style={{
+                    width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
+                    background: sig.urgency === 'positive' ? '#059669'
+                      : sig.urgency === 'warning' ? '#D97706'
+                      : sig.urgency === 'critical' ? '#DC2626' : GHOST,
+                  }} />
+                  <span style={{ fontSize: 13, color: SMOKE, lineHeight: 1.4 }}>
+                    {sig.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
             LIVE MOMENT — Current campaign beat, hero-scale
         ══════════════════════════════════════════════════════════════════ */}
         {activeMoment && (
@@ -479,7 +453,7 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            ATTENTION — Quiet, decisive
+            OPPORTUNITIES — Where the rollout could go further
         ══════════════════════════════════════════════════════════════════ */}
         {attentionItems.length > 0 && (
           <section style={{
@@ -487,7 +461,7 @@ export default function CampaignDestination({
             marginBottom: 48,
           }}>
             <div style={{
-              borderLeft: `3px solid ${INK}`,
+              borderLeft: `3px solid ${phaseTone?.accent ?? INK}`,
               paddingLeft: 20, maxWidth: 560,
             }}>
               <div style={{
@@ -495,13 +469,13 @@ export default function CampaignDestination({
                 textTransform: 'uppercase', color: SMOKE,
                 fontFamily: MONO, marginBottom: 12,
               }}>
-                Needs Attention
+                Opportunities
               </div>
               {attentionItems.map((item, i) => (
                 <div key={i} style={{
                   fontSize: 14, lineHeight: 1.6, fontWeight: 500,
-                  color: item.urgency === 'critical' ? '#991B1B'
-                    : item.urgency === 'important' ? '#78350F' : INK,
+                  color: item.urgency === 'critical' ? '#78350F'
+                    : item.urgency === 'important' ? '#92400E' : INK,
                   marginBottom: 6,
                 }}>
                   {item.text}
@@ -534,14 +508,76 @@ export default function CampaignDestination({
         )}
 
 
+        {/* ┌──────────────────────────────────────────────────────────────┐
+            │                                                              │
+            │   L I V E   E X E C U T I O N                               │
+            │   The visual world of this rollout.                          │
+            │                                                              │
+            └──────────────────────────────────────────────────────────────┘ */}
+
+
         {/* ══════════════════════════════════════════════════════════════════
-            STORYBOARD — Full timeline
+            CAMPAIGN SURFACE — Visual proof of execution
+        ══════════════════════════════════════════════════════════════════ */}
+        {allByRecency.length >= 2 && (
+          <>
+            <section style={{
+              maxWidth: 1200, margin: '0 auto',
+              padding: '64px 40px 0',
+            }}>
+              <div style={{
+                width: '100%', height: 1, background: BONE,
+                marginBottom: 48,
+              }} />
+              <div style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+                textTransform: 'uppercase', color: GHOST,
+                fontFamily: MONO, marginBottom: 10,
+              }}>
+                Campaign Surface
+              </div>
+              <div style={{
+                fontSize: 13, color: SMOKE, lineHeight: 1.5,
+                maxWidth: 400,
+              }}>
+                The visual world of this rollout — built from live YouTube uploads.
+              </div>
+            </section>
+            <div style={{ marginTop: 32 }}>
+              <CampaignWall
+                uploads={allByRecency}
+                shorts={shorts}
+                longform={longform}
+                heroUpload={heroUpload}
+                totalViews={totalCampaignViews}
+                uploads30dCount={uploads30d.length}
+                shorts30dCount={shorts30d.length}
+              />
+            </div>
+          </>
+        )}
+
+
+        {/* ┌──────────────────────────────────────────────────────────────┐
+            │                                                              │
+            │   F U L L   R O L L O U T   M A P                           │
+            │   The operating system underneath.                           │
+            │                                                              │
+            └──────────────────────────────────────────────────────────────┘ */}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            ROLLOUT MAP — Full campaign timeline
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
-          maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+          maxWidth: 1200, margin: '0 auto', padding: '64px 40px 0',
         }}>
           <div style={{
-            borderTop: `1px solid ${BONE}`, paddingTop: 24, marginBottom: 32,
+            width: '100%', height: 1, background: BONE,
+            marginBottom: 48,
+          }} />
+          <div style={{
+            marginBottom: 32,
           }}>
             <button
               onClick={() => setTimelineOpen(!timelineOpen)}
@@ -553,13 +589,14 @@ export default function CampaignDestination({
             >
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
                 <span style={{
-                  fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+                  fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
                   textTransform: 'uppercase', color: SMOKE, fontFamily: MONO,
                 }}>
-                  Full Timeline
+                  Rollout Map
                 </span>
                 <span style={{ fontSize: 12, color: GHOST }}>
                   {plan.totalWeeks} weeks · {plan.events.length} moments
+                  {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
                 </span>
               </div>
               <span style={{
@@ -580,7 +617,7 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            COMPLETED — Past moments, muted
+            COMPLETED — Past moments
         ══════════════════════════════════════════════════════════════════ */}
         {pastMoments.length > 0 && (
           <section style={{
@@ -735,9 +772,6 @@ export default function CampaignDestination({
 
 // ══════════════════════════════════════════════════════════════════════════════
 // CADENCE STRIP — Visual heartbeat of the last 30 days
-//
-// Each upload is a vertical mark on a timeline. Taller = longform.
-// Density communicates rhythm. Clustering shows burst activity.
 // ══════════════════════════════════════════════════════════════════════════════
 
 function CadenceStrip({
@@ -849,7 +883,6 @@ function CampaignWall({
   uploads30dCount: number;
   shorts30dCount: number;
 }) {
-  // Shorts and longform already arrive sorted by recency from parent
   const secondaryLong = heroUpload
     ? longform.filter((u) => u.id !== heroUpload.id).slice(0, 3)
     : longform.slice(0, 3);
@@ -857,7 +890,7 @@ function CampaignWall({
   return (
     <section style={{ background: INK }}>
 
-      {/* ── HERO FRAME — Cinemascope crop of top upload ─── */}
+      {/* ── HERO FRAME — Cinemascope crop of most recent upload ─── */}
       {heroUpload && (
         <div style={{
           position: 'relative',
@@ -1092,7 +1125,7 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
   const doneActions = moment.actions.filter(
     (a) => a.status === 'completed' || a.status === 'live'
   );
-  const missingActions = moment.actions.filter(
+  const openActions = moment.actions.filter(
     (a) => a.status === 'missing' || a.status === 'late'
   );
   const plannedActions = moment.actions.filter(
@@ -1176,7 +1209,7 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         </div>
       )}
 
-      {(doneActions.length > 0 || missingActions.length > 0 || plannedActions.length > 0) && (
+      {(doneActions.length > 0 || openActions.length > 0 || plannedActions.length > 0) && (
         <div style={{
           marginTop: 16,
           display: 'grid',
@@ -1232,8 +1265,8 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
             </div>
           ))}
 
-          {missingActions.map((a, i) => (
-            <div key={`m-${i}`} style={{
+          {openActions.map((a, i) => (
+            <div key={`o-${i}`} style={{
               aspectRatio: '16/9',
               border: `1px dashed ${GHOST}`,
               borderRadius: 4,
@@ -1248,10 +1281,10 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
                 {cleanTitle(a.title)}
               </span>
               <span style={{
-                fontSize: 8, fontWeight: 800, color: '#DC2626',
+                fontSize: 8, fontWeight: 800, color: '#D97706',
                 letterSpacing: '0.1em', fontFamily: MONO,
               }}>
-                {a.status === 'late' ? 'OVERDUE' : 'MISSING'}
+                {a.status === 'late' ? 'READY TO GO' : 'OPEN'}
               </span>
             </div>
           ))}
@@ -1488,7 +1521,7 @@ function TimelineWeekRow({ week, matchResult }: {
   const done = actions.filter((a) =>
     'status' in a ? ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live') : a.completed
   ).length;
-  const issues = actions.filter((a) =>
+  const openWindows = actions.filter((a) =>
     'status' in a && ((a as MatchedAction).status === 'late' || (a as MatchedAction).status === 'missing')
   ).length;
 
@@ -1529,7 +1562,7 @@ function TimelineWeekRow({ week, matchResult }: {
             fontFamily: MONO,
           }}>
             {done > 0 && <span style={{ color: '#059669', fontWeight: 700 }}>{done}✓</span>}
-            {issues > 0 && <span style={{ color: '#DC2626', fontWeight: 700 }}>{issues}!</span>}
+            {openWindows > 0 && <span style={{ color: '#D97706', fontWeight: 700 }}>{openWindows} open</span>}
             <span style={{
               fontSize: 8,
               transform: expanded ? 'rotate(90deg)' : 'none',
@@ -1545,14 +1578,14 @@ function TimelineWeekRow({ week, matchResult }: {
             const matched = 'status' in a ? (a as MatchedAction) : null;
             const status: ExecutionStatus = matched?.status ?? (a.completed ? 'completed' : 'planned');
             const isDone = status === 'completed' || status === 'live';
-            const isLate = status === 'late';
-            const isMissing = status === 'missing';
+            const isOpen = status === 'late';
+            const isUpcoming = status === 'missing';
 
             return (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 fontSize: 12, padding: '3px 0',
-                color: isDone ? GHOST : isLate ? '#DC2626' : isMissing ? '#C2410C' : INK,
+                color: isDone ? GHOST : isOpen ? '#92400E' : isUpcoming ? '#78350F' : INK,
                 textDecoration: isDone ? 'line-through' : 'none',
                 opacity: isDone ? 0.5 : 1,
               }}>
@@ -1565,14 +1598,14 @@ function TimelineWeekRow({ week, matchResult }: {
                     {fmtNum(matched.matchedUpload.viewCount)}
                   </span>
                 )}
-                {(isLate || isMissing) && (
+                {(isOpen || isUpcoming) && (
                   <span style={{
                     fontSize: 8, fontWeight: 800, padding: '1px 6px', borderRadius: 2,
-                    background: isLate ? '#FEF2F2' : '#FFF7ED',
-                    color: isLate ? '#DC2626' : '#C2410C',
+                    background: isOpen ? '#FFFBEB' : '#FFF7ED',
+                    color: isOpen ? '#D97706' : '#92400E',
                     textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
                   }}>
-                    {isLate ? 'Late' : 'Missing'}
+                    {isOpen ? 'Ready' : 'Open'}
                   </span>
                 )}
               </div>
@@ -1643,7 +1676,7 @@ function generateEraSignal(
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// HELPERS — All logic preserved
+// HELPERS — Collaborative language system
 // ══════════════════════════════════════════════════════════════════════════════
 
 function generatePulseSignals(
@@ -1669,7 +1702,7 @@ function generatePulseSignals(
         (Date.now() - new Date(upload.publishedAt).getTime()) / 86400000
       );
       signals.push({
-        text: `${cleanTitle(top.title)} live${daysSince <= 1 ? ' today' : ` — ${fmtNum(upload.viewCount)} views in ${daysSince} days`}`,
+        text: `${cleanTitle(top.title)} is live${daysSince <= 1 ? ' — audience is responding' : ` — ${fmtNum(upload.viewCount)} views in ${daysSince} days`}`,
         urgency: 'positive',
       });
     }
@@ -1683,7 +1716,7 @@ function generatePulseSignals(
     if (recent.length > 0) {
       const top = recent.sort((a, b) => b.viewCount - a.viewCount)[0];
       signals.push({
-        text: `"${top.title}" uploaded — ${fmtNum(top.viewCount)} views`,
+        text: `"${top.title}" is building momentum — ${fmtNum(top.viewCount)} views`,
         urgency: 'positive',
       });
     }
@@ -1692,17 +1725,17 @@ function generatePulseSignals(
   if (liveChannel?.views7Delta != null) {
     if (liveChannel.views7Delta > 10000) {
       signals.push({
-        text: `Channel momentum strong — ${fmtNum(liveChannel.views7Delta)} views this week`,
+        text: `Momentum is building — ${fmtNum(liveChannel.views7Delta)} views this week`,
         urgency: 'positive',
       });
     } else if (liveChannel.views7Delta > 0) {
       signals.push({
-        text: `+${fmtNum(liveChannel.views7Delta)} views this week`,
+        text: `The audience is active — +${fmtNum(liveChannel.views7Delta)} views this week`,
         urgency: 'neutral',
       });
     } else if (liveChannel.views7Delta < 0) {
       signals.push({
-        text: 'Channel views declining this week',
+        text: 'Views are cooling this week — a new upload could reignite momentum',
         urgency: 'warning',
       });
     }
@@ -1712,18 +1745,18 @@ function generatePulseSignals(
     const u30 = liveChannel.uploads30d ?? 0;
     const s30 = liveChannel.shorts30d ?? 0;
     if (u30 >= 8) {
-      signals.push({ text: `Strong cadence — ${u30} uploads this month`, urgency: 'positive' });
+      signals.push({ text: `Active output — ${u30} uploads keeping the channel warm this month`, urgency: 'positive' });
     } else if (s30 >= 3 && u30 >= 3) {
-      signals.push({ text: `${s30} shorts warming the channel this month`, urgency: 'positive' });
+      signals.push({ text: `Short-form content is driving momentum — ${s30} shorts this month`, urgency: 'positive' });
     } else if (u30 === 0) {
-      signals.push({ text: 'No uploads this month', urgency: 'critical' });
+      signals.push({ text: 'The channel is quiet this month — the next upload will restart the conversation', urgency: 'warning' });
     }
   }
 
   const lastUpload = liveChannel?.lastUploadDaysAgo;
   if (lastUpload != null && lastUpload > 10) {
     signals.push({
-      text: `${lastUpload} days since last upload${currentPhase === 'RELEASE' ? ' — release window is open' : ''}`,
+      text: `${lastUpload} days since last upload${currentPhase === 'RELEASE' ? ' — the release window is open for a new moment' : ' — a new upload could re-engage the audience'}`,
       urgency: lastUpload > 21 ? 'critical' : 'warning',
     });
   }
@@ -1733,12 +1766,12 @@ function generatePulseSignals(
     const pastDue = stats.completed + stats.live + stats.missing + stats.late;
     if (stats.late > 0) {
       signals.push({
-        text: `${stats.late} planned upload${stats.late > 1 ? 's' : ''} significantly overdue`,
-        urgency: 'critical',
+        text: `${stats.late} planned upload${stats.late > 1 ? 's have' : ' has'} open windows — the audience is ready`,
+        urgency: 'warning',
       });
     } else if (pastDue >= 3 && stats.completionRate < 40) {
       signals.push({
-        text: `Only ${Math.round(stats.completionRate)}% of planned content has landed`,
+        text: `The rollout is building at its own pace — ${Math.round(stats.completionRate)}% of planned content is live`,
         urgency: 'warning',
       });
     }
@@ -1845,13 +1878,13 @@ function buildAttentionItems(
     if (stats.late > 0) {
       const lateActions = matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'late');
       items.push({
-        text: `"${lateActions[0].title}" is ${lateActions[0].daysFromDue ?? 0} days overdue. Upload it now or remove from the plan.`,
+        text: `"${lateActions[0].title}" has an open window — uploading now could still capture the moment.`,
         urgency: 'critical',
       });
     }
     if (stats.missing > 0) {
       items.push({
-        text: `${stats.missing} planned upload${stats.missing > 1 ? 's' : ''} expected but not found yet.`,
+        text: `${stats.missing} planned upload${stats.missing > 1 ? 's have' : ' has'} open windows. These could strengthen the rollout.`,
         urgency: 'important',
       });
     }
@@ -1886,9 +1919,9 @@ function generateExportText(
     }
 
     if (stats) {
-      text += `Execution: ${Math.round(stats.completionRate)}% (${stats.completed + stats.live} done, ${stats.planned} upcoming`;
-      if (stats.missing > 0) text += `, ${stats.missing} missing`;
-      if (stats.late > 0) text += `, ${stats.late} late`;
+      text += `Execution: ${Math.round(stats.completionRate)}% (${stats.completed + stats.live} landed, ${stats.planned} upcoming`;
+      if (stats.missing > 0) text += `, ${stats.missing} open windows`;
+      if (stats.late > 0) text += `, ${stats.late} ready to go`;
       text += ')\n\n';
     }
 
@@ -1910,9 +1943,9 @@ function generateExportText(
     if (stats) {
       const rate = Math.round(stats.completionRate);
       text += `Execution rate: ${rate}%\n`;
-      if (rate >= 70) text += `Status: On track\n`;
-      else if (rate >= 40) text += `Status: Needs attention\n`;
-      else text += `Status: Behind schedule\n`;
+      if (rate >= 70) text += `Status: Strong momentum\n`;
+      else if (rate >= 40) text += `Status: Building steadily\n`;
+      else text += `Status: Early stages — room to accelerate\n`;
     }
     text += '\n';
 
@@ -1927,7 +1960,7 @@ function generateExportText(
     if (moments && moments.length > 0) {
       text += 'KEY MOMENTS:\n';
       moments.forEach((m) => {
-        const status = m.timing === 'current' ? '→ NOW' : m.timing === 'past' ? '✓ Done' : '  Upcoming';
+        const status = m.timing === 'current' ? '→ NOW' : m.timing === 'past' ? '✓ Landed' : '  Upcoming';
         text += `${status} ${m.momentName} (${m.dateRange})\n`;
       });
     }
@@ -1947,7 +1980,7 @@ function generateExportText(
       text += `NEXT MOMENT: ${next.momentName}\n`;
       text += `Timing: ${next.dateRange}\n`;
       if (next.supportPlanned.length > 0) {
-        text += `Support needed:\n`;
+        text += `Content opportunities:\n`;
         next.supportPlanned.forEach((t) => { text += `  • ${t}\n`; });
       }
     }
@@ -1968,10 +2001,10 @@ function cleanTitle(title: string): string {
 function buildMomentGuidance(moment: CampaignMoment): string {
   const missing = moment.supportMissing;
   if (missing.length === 1) {
-    return `${missing[0]} hasn't landed yet. Upload support content to extend this moment's reach.`;
+    return `${missing[0]} has an open window. Additional content here could extend the moment's reach.`;
   }
   if (missing.length > 1) {
-    return `${missing.length} support pieces missing. Prioritize ${missing[0]} to keep momentum from this moment.`;
+    return `${missing.length} support pieces could strengthen this moment. Starting with ${missing[0]} would build the most momentum.`;
   }
   return 'All support content is on track.';
 }
