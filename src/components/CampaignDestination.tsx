@@ -15,8 +15,8 @@ import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DESIGN SYSTEM — Cinematic Rollout OS v4
-// Hero → Campaign State → Live Execution → Full Rollout Map
+// DESIGN SYSTEM — Cinematic Rollout OS v5
+// Hero (compressed) → ROLLOUT MAP (the product) → Campaign Surface
 // ══════════════════════════════════════════════════════════════════════════════
 
 const INK = '#0A0A0A';
@@ -28,26 +28,30 @@ const WHITE = '#FFFFFF';
 
 const MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
 
-const PHASE_TONE: Record<PhaseName, { accent: string; label: string; narrative: string }> = {
+const PHASE_TONE: Record<PhaseName, { accent: string; label: string; narrative: string; energy: string }> = {
   BUILD: {
     accent: '#4338CA',
     label: 'BUILD THE WORLD',
     narrative: 'Warming the algorithm. Building presence and anticipation.',
+    energy: 'Discovery · intimacy · artist identity · audience familiarity',
   },
   RELEASE: {
     accent: '#DC2626',
     label: 'THE CENTREPIECE',
     narrative: 'The main event. Maximum visibility and impact.',
+    energy: 'Maximum pressure · event energy · major release moments',
   },
   SCALE: {
     accent: '#059669',
     label: 'SCALE THE STORY',
     narrative: 'Momentum is building. Extend the reach further.',
+    energy: 'Expansion · reactions · sustained discovery · collaboration',
   },
   EXTEND: {
     accent: '#D97706',
     label: 'EXTEND THE WORLD',
     narrative: 'Keep the universe alive. Sustain audience connection.',
+    energy: 'Long-tail attention · catalog support · fan world deepening',
   },
 };
 
@@ -131,7 +135,6 @@ export default function CampaignDestination({
   nudges,
   recentUploads,
 }: CampaignDestinationProps) {
-  const [timelineOpen, setTimelineOpen] = useState(true);
   const [exportOpen, setExportOpen] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -148,7 +151,7 @@ export default function CampaignDestination({
     ? plan.phases.find((p) => p.name === currentPhase)
     : null;
 
-  // ── Classify uploads for visual treatment ──
+  // ── Classify uploads ──
   const allByRecency = (recentUploads ?? []).sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
@@ -180,19 +183,19 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            HERO — Immersive dark opening. Era atmosphere.
+            HERO — Compressed cinematic opening. The movie poster.
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
           background: INK,
           color: PAPER,
           position: 'relative',
           overflow: 'hidden',
-          minHeight: allByRecency.length > 0 ? '72vh' : '50vh',
+          minHeight: allByRecency.length > 0 ? '50vh' : '40vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
         }}>
-          {/* Thumbnail mosaic texture — recent uploads set the era atmosphere */}
+          {/* Thumbnail mosaic texture */}
           {allByRecency.length >= 3 && (
             <div style={{
               position: 'absolute',
@@ -233,103 +236,69 @@ export default function CampaignDestination({
             }}>
               Campaign System
             </Link>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {currentPhase && phaseTone && (
-                <span style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-                  textTransform: 'uppercase', color: phaseTone.accent,
-                  fontFamily: MONO,
-                }}>
-                  {phaseTone.label}
-                </span>
-              )}
-              <Link href="/coach" style={{
-                fontSize: 11, fontWeight: 600, color: SMOKE,
-                textDecoration: 'none', padding: '4px 12px',
-                border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
-              }}>
-                All Campaigns
-              </Link>
-            </div>
+            <Link href="/coach" style={{
+              fontSize: 11, fontWeight: 600, color: SMOKE,
+              textDecoration: 'none', padding: '4px 12px',
+              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+            }}>
+              All Campaigns
+            </Link>
           </div>
 
           {/* Hero content */}
           <div style={{
             position: 'relative', zIndex: 1,
             maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-            paddingBottom: 56, width: '100%',
+            paddingBottom: 40, width: '100%',
             boxSizing: 'border-box',
           }}>
             {phaseTone && (
               <div style={{
                 width: 48, height: 3,
                 background: phaseTone.accent,
-                marginBottom: 28,
+                marginBottom: 20,
               }} />
             )}
 
             <div style={{
-              fontSize: 12, fontWeight: 600, letterSpacing: '0.25em',
+              fontSize: 11, fontWeight: 600, letterSpacing: '0.25em',
               textTransform: 'uppercase', color: GHOST,
-              marginBottom: 18, fontFamily: MONO,
+              marginBottom: 14, fontFamily: MONO,
             }}>
               {plan.artist}
             </div>
 
             <h1 style={{
-              fontSize: 'clamp(52px, 8vw, 100px)',
+              fontSize: 'clamp(44px, 7vw, 84px)',
               fontWeight: 900,
               lineHeight: 0.88,
               letterSpacing: '-0.04em',
               textTransform: 'uppercase',
-              margin: 0, maxWidth: 900, color: WHITE,
+              margin: 0, maxWidth: 800, color: WHITE,
             }}>
               {campaignTitle}
             </h1>
 
-            <p style={{
-              fontSize: 17, color: 'rgba(245,242,237,0.45)', lineHeight: 1.5,
-              marginTop: 28, marginBottom: 0, maxWidth: 480, fontWeight: 400,
+            {/* Era reading + metrics inline */}
+            <div style={{
+              marginTop: 20,
+              display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'baseline',
+              fontSize: 12, color: 'rgba(200,194,184,0.4)',
+              fontFamily: MONO,
             }}>
-              {plan.strategy.priority}
-            </p>
-
-            {/* Era reading */}
-            {eraSignal && (
-              <div style={{
-                marginTop: 20,
-                fontSize: 12, color: 'rgba(200,194,184,0.5)',
-                fontFamily: MONO, lineHeight: 1.6,
-                maxWidth: 500,
-              }}>
-                {eraSignal}
-              </div>
-            )}
-
-            {/* Live metrics */}
-            {liveChannel && (
-              <div style={{
-                marginTop: 16,
-                display: 'flex', gap: 20, flexWrap: 'wrap',
-                fontSize: 12, color: 'rgba(200,194,184,0.35)',
-                fontFamily: MONO,
-              }}>
-                {liveChannel.subs != null && <span>{fmtNum(liveChannel.subs)} subs</span>}
-                {liveChannel.views7Delta != null && (
-                  <span style={{ color: liveChannel.views7Delta > 0 ? 'rgba(52,211,153,0.6)' : undefined }}>
-                    {liveChannel.views7Delta >= 0 ? '+' : ''}{fmtNum(liveChannel.views7Delta)} views/7d
-                  </span>
-                )}
-                {liveChannel.uploads30d != null && <span>{liveChannel.uploads30d} uploads/30d</span>}
-              </div>
-            )}
+              {eraSignal && <span>{eraSignal}</span>}
+              {liveChannel?.subs != null && <span>{fmtNum(liveChannel.subs)} subs</span>}
+              {liveChannel?.views7Delta != null && (
+                <span style={{ color: liveChannel.views7Delta > 0 ? 'rgba(52,211,153,0.6)' : undefined }}>
+                  {liveChannel.views7Delta >= 0 ? '+' : ''}{fmtNum(liveChannel.views7Delta)} views/7d
+                </span>
+              )}
+            </div>
           </div>
         </section>
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            CADENCE STRIP — Upload rhythm of the last 30 days
-        ══════════════════════════════════════════════════════════════════ */}
+        {/* ── CADENCE STRIP ── */}
         {uploads30d.length > 0 && (
           <CadenceStrip
             uploads={uploads30d}
@@ -340,36 +309,43 @@ export default function CampaignDestination({
 
         {/* ┌──────────────────────────────────────────────────────────────┐
             │                                                              │
-            │   C A M P A I G N   S T A T E                               │
-            │   Where this campaign is right now.                          │
+            │   R O L L O U T   M A P                                     │
+            │   The campaign operating system. The product spine.          │
             │                                                              │
             └──────────────────────────────────────────────────────────────┘ */}
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            CAMPAIGN PHASE — Current chapter of the rollout
-        ══════════════════════════════════════════════════════════════════ */}
+        {/* ── Phase + Rollout State ── */}
         <section style={{
           maxWidth: 1200, margin: '0 auto',
-          padding: '48px 40px 40px',
+          padding: '40px 40px 0',
         }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+            textTransform: 'uppercase', color: GHOST,
+            fontFamily: MONO, marginBottom: 28,
+          }}>
+            Rollout Map
+          </div>
+
           {currentPhase && phaseTone ? (
             <>
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                marginBottom: 20,
+                display: 'flex', alignItems: 'center', gap: 12,
+                marginBottom: 16,
               }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 700, letterSpacing: '0.2em',
-                  textTransform: 'uppercase', color: GHOST,
-                  fontFamily: MONO,
+                <h2 style={{
+                  fontSize: 'clamp(28px, 4vw, 44px)',
+                  fontWeight: 900, lineHeight: 0.92,
+                  letterSpacing: '-0.02em', textTransform: 'uppercase',
+                  margin: 0, color: INK,
                 }}>
-                  Chapter {plan.phases.findIndex((p) => p.name === currentPhase) + 1 || '—'}
-                </span>
+                  {phaseTone.label}
+                </h2>
                 {currentPhaseData && (
                   <span style={{
                     fontSize: 10, fontWeight: 600, color: SMOKE,
-                    fontFamily: MONO,
+                    fontFamily: MONO, alignSelf: 'flex-end', paddingBottom: 4,
                   }}>
                     W{currentPhaseData.weekStart}–W{currentPhaseData.weekEnd}
                   </span>
@@ -380,51 +356,61 @@ export default function CampaignDestination({
                   padding: '3px 10px', borderRadius: 3,
                   background: phaseTone.accent, color: WHITE,
                   animation: 'cpulse 2s ease-in-out infinite',
+                  alignSelf: 'flex-end', paddingBottom: 4,
                 }}>
-                  ACTIVE NOW
+                  ACTIVE
                 </span>
               </div>
-
-              <h2 style={{
-                fontSize: 'clamp(36px, 5vw, 60px)',
-                fontWeight: 900, lineHeight: 0.92,
-                letterSpacing: '-0.02em', textTransform: 'uppercase',
-                margin: 0, color: INK,
-              }}>
-                {phaseTone.label}
-              </h2>
               <p style={{
-                fontSize: 16, color: SMOKE, marginTop: 14,
-                fontStyle: 'italic', maxWidth: 400, lineHeight: 1.5,
+                fontSize: 15, color: SMOKE, marginTop: 0, marginBottom: 4,
+                maxWidth: 480, lineHeight: 1.5,
               }}>
                 {phaseTone.narrative}
               </p>
               <div style={{
-                width: 32, height: 2,
-                background: phaseTone.accent,
-                marginTop: 28,
-              }} />
+                fontSize: 11, color: GHOST, fontFamily: MONO,
+                marginBottom: 24,
+              }}>
+                {phaseTone.energy}
+              </div>
             </>
           ) : (
             <div style={{ height: 20 }} />
           )}
+
+          {/* Phase strip — visual progress */}
+          <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
+
+          {/* Rollout health line */}
+          <div style={{
+            marginTop: 16,
+            display: 'flex', gap: 16, flexWrap: 'wrap',
+            fontSize: 11, color: SMOKE, fontFamily: MONO,
+          }}>
+            <span>{plan.totalWeeks} weeks · {plan.events.length} moments</span>
+            {matchResult && (
+              <span>{Math.round(matchResult.stats.completionRate)}% executed</span>
+            )}
+            {matchResult && matchResult.stats.late > 0 && (
+              <span style={{ color: '#D97706' }}>
+                {matchResult.stats.late} open {matchResult.stats.late === 1 ? 'window' : 'windows'}
+              </span>
+            )}
+          </div>
         </section>
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            ROLLOUT OBSERVATIONS — What the system is seeing right now
-        ══════════════════════════════════════════════════════════════════ */}
+        {/* ── Rollout Observations ── */}
         {pulseSignals.length > 0 && (
           <section style={{
             maxWidth: 1200, margin: '0 auto',
-            padding: '0 40px',
-            marginBottom: 48,
+            padding: '28px 40px 0',
           }}>
             <div style={{
               maxWidth: 560,
-              display: 'flex', flexDirection: 'column', gap: 8,
+              display: 'flex', flexDirection: 'column', gap: 6,
             }}>
-              {pulseSignals.slice(0, 4).map((sig, i) => (
+              {pulseSignals.slice(0, 3).map((sig, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                 }}>
@@ -444,21 +430,22 @@ export default function CampaignDestination({
         )}
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            LIVE MOMENT — Current campaign beat, hero-scale
-        ══════════════════════════════════════════════════════════════════ */}
+        {/* ── Current Moment ── */}
         {activeMoment && (
-          <LiveMomentBlock moment={activeMoment} />
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '32px 40px 0',
+          }}>
+            <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
+          </section>
         )}
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            OPPORTUNITIES — Where the rollout could go further
-        ══════════════════════════════════════════════════════════════════ */}
+        {/* ── Rollout Opportunities ── */}
         {attentionItems.length > 0 && (
           <section style={{
-            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-            marginBottom: 48,
+            maxWidth: 1200, margin: '0 auto',
+            padding: '24px 40px 0',
           }}>
             <div style={{
               borderLeft: `3px solid ${phaseTone?.accent ?? INK}`,
@@ -467,16 +454,16 @@ export default function CampaignDestination({
               <div style={{
                 fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
                 textTransform: 'uppercase', color: SMOKE,
-                fontFamily: MONO, marginBottom: 12,
+                fontFamily: MONO, marginBottom: 10,
               }}>
                 Opportunities
               </div>
               {attentionItems.map((item, i) => (
                 <div key={i} style={{
-                  fontSize: 14, lineHeight: 1.6, fontWeight: 500,
+                  fontSize: 13, lineHeight: 1.6, fontWeight: 500,
                   color: item.urgency === 'critical' ? '#78350F'
                     : item.urgency === 'important' ? '#92400E' : INK,
-                  marginBottom: 6,
+                  marginBottom: 4,
                 }}>
                   {item.text}
                 </div>
@@ -486,23 +473,116 @@ export default function CampaignDestination({
         )}
 
 
-        {/* ══════════════════════════════════════════════════════════════════
-            COMING CHAPTERS — Upcoming moments as editorial narrative
-        ══════════════════════════════════════════════════════════════════ */}
+        {/* ── Coming Chapters ── */}
         {upcomingMoments.length > 0 && (
           <section style={{
-            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-            marginBottom: 56,
+            maxWidth: 1200, margin: '0 auto',
+            padding: '28px 40px 0',
           }}>
             <div style={{
               fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
               textTransform: 'uppercase', color: GHOST,
-              fontFamily: MONO, marginBottom: 24,
+              fontFamily: MONO, marginBottom: 12,
             }}>
               Coming Up
             </div>
-            {upcomingMoments.map((m) => (
-              <ChapterRow key={m.weekNum} moment={m} />
+            {upcomingMoments.map((m) => {
+              const tone = PHASE_TONE[m.phase];
+              return (
+                <div key={m.weekNum} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 0',
+                  borderBottom: `1px solid ${BONE}`,
+                }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: GHOST,
+                    fontFamily: MONO, minWidth: 28,
+                  }}>
+                    W{m.weekNum}
+                  </span>
+                  <span style={{
+                    fontSize: 11, color: SMOKE, fontFamily: MONO, minWidth: 56,
+                  }}>
+                    {m.dateRange.split('–')[0]}
+                  </span>
+                  <span style={{
+                    fontSize: 15, fontWeight: 700, color: INK, flex: 1,
+                  }}>
+                    {m.momentName}
+                  </span>
+                  <span style={{
+                    fontSize: 11, color: SMOKE, fontFamily: MONO,
+                  }}>
+                    {m.actions.length} {m.actions.length === 1 ? 'action' : 'actions'}
+                  </span>
+                  <div style={{
+                    width: 3, height: 20,
+                    background: tone.accent,
+                    borderRadius: 2,
+                    flexShrink: 0,
+                  }} />
+                </div>
+              );
+            })}
+          </section>
+        )}
+
+
+        {/* ── Full Timeline ── */}
+        <section style={{
+          maxWidth: 1200, margin: '0 auto',
+          padding: '32px 40px 0',
+        }}>
+          <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} />
+        </section>
+
+
+        {/* ── Completed Moments ── */}
+        {pastMoments.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '24px 40px 0',
+          }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: GHOST,
+              fontFamily: MONO, marginBottom: 8,
+            }}>
+              Landed
+            </div>
+            {pastMoments.map((m) => (
+              <div key={m.weekNum} style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '6px 0', borderBottom: `1px solid ${BONE}`,
+                opacity: 0.4,
+              }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 28,
+                  fontFamily: MONO,
+                }}>
+                  W{m.weekNum}
+                </span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: INK, flex: 1 }}>
+                  {m.momentName}
+                </span>
+                {m.primaryUpload && (
+                  <div style={{
+                    width: 40, height: 24, borderRadius: 2, overflow: 'hidden',
+                    flexShrink: 0,
+                  }}>
+                    <img
+                      src={ytThumb(m.primaryUpload.id, 'mqdefault')}
+                      alt="" loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+                    />
+                  </div>
+                )}
+                {m.totalViews > 0 && (
+                  <span style={{ fontSize: 11, color: SMOKE, fontFamily: MONO }}>
+                    {fmtNum(m.totalViews)}
+                  </span>
+                )}
+              </div>
             ))}
           </section>
         )}
@@ -510,29 +590,25 @@ export default function CampaignDestination({
 
         {/* ┌──────────────────────────────────────────────────────────────┐
             │                                                              │
-            │   L I V E   E X E C U T I O N                               │
-            │   The visual world of this rollout.                          │
+            │   C A M P A I G N   S U R F A C E                           │
+            │   Visual proof of execution.                                 │
             │                                                              │
             └──────────────────────────────────────────────────────────────┘ */}
 
-
-        {/* ══════════════════════════════════════════════════════════════════
-            CAMPAIGN SURFACE — Visual proof of execution
-        ══════════════════════════════════════════════════════════════════ */}
         {allByRecency.length >= 2 && (
           <>
             <section style={{
               maxWidth: 1200, margin: '0 auto',
-              padding: '64px 40px 0',
+              padding: '56px 40px 0',
             }}>
               <div style={{
                 width: '100%', height: 1, background: BONE,
-                marginBottom: 48,
+                marginBottom: 40,
               }} />
               <div style={{
                 fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
                 textTransform: 'uppercase', color: GHOST,
-                fontFamily: MONO, marginBottom: 10,
+                fontFamily: MONO, marginBottom: 8,
               }}>
                 Campaign Surface
               </div>
@@ -543,7 +619,7 @@ export default function CampaignDestination({
                 The visual world of this rollout — built from live YouTube uploads.
               </div>
             </section>
-            <div style={{ marginTop: 32 }}>
+            <div style={{ marginTop: 28 }}>
               <CampaignWall
                 uploads={allByRecency}
                 shorts={shorts}
@@ -558,122 +634,11 @@ export default function CampaignDestination({
         )}
 
 
-        {/* ┌──────────────────────────────────────────────────────────────┐
-            │                                                              │
-            │   F U L L   R O L L O U T   M A P                           │
-            │   The operating system underneath.                           │
-            │                                                              │
-            └──────────────────────────────────────────────────────────────┘ */}
-
-
-        {/* ══════════════════════════════════════════════════════════════════
-            ROLLOUT MAP — Full campaign timeline
-        ══════════════════════════════════════════════════════════════════ */}
-        <section style={{
-          maxWidth: 1200, margin: '0 auto', padding: '64px 40px 0',
-        }}>
-          <div style={{
-            width: '100%', height: 1, background: BONE,
-            marginBottom: 48,
-          }} />
-          <div style={{
-            marginBottom: 32,
-          }}>
-            <button
-              onClick={() => setTimelineOpen(!timelineOpen)}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-                padding: 0, marginBottom: timelineOpen ? 20 : 0,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                <span style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
-                  textTransform: 'uppercase', color: SMOKE, fontFamily: MONO,
-                }}>
-                  Rollout Map
-                </span>
-                <span style={{ fontSize: 12, color: GHOST }}>
-                  {plan.totalWeeks} weeks · {plan.events.length} moments
-                  {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
-                </span>
-              </div>
-              <span style={{
-                fontSize: 11, color: GHOST, transition: 'transform 0.15s',
-                transform: timelineOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-              }}>
-                ▶
-              </span>
-            </button>
-
-            <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
-
-            {timelineOpen && (
-              <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} />
-            )}
-          </div>
-        </section>
-
-
-        {/* ══════════════════════════════════════════════════════════════════
-            COMPLETED — Past moments
-        ══════════════════════════════════════════════════════════════════ */}
-        {pastMoments.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-            marginBottom: 48,
-          }}>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: GHOST,
-              fontFamily: MONO, marginBottom: 12,
-            }}>
-              Completed Moments
-            </div>
-            {pastMoments.map((m) => (
-              <div key={m.weekNum} style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '8px 0', borderBottom: `1px solid ${BONE}`,
-                opacity: 0.45,
-              }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 32,
-                  fontFamily: MONO,
-                }}>
-                  W{m.weekNum}
-                </span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: INK, flex: 1 }}>
-                  {m.momentName}
-                </span>
-                {m.primaryUpload && (
-                  <div style={{
-                    width: 48, height: 28, borderRadius: 2, overflow: 'hidden',
-                    flexShrink: 0,
-                  }}>
-                    <img
-                      src={ytThumb(m.primaryUpload.id, 'mqdefault')}
-                      alt="" loading="lazy"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
-                    />
-                  </div>
-                )}
-                {m.totalViews > 0 && (
-                  <span style={{ fontSize: 12, color: SMOKE, fontFamily: MONO }}>
-                    {fmtNum(m.totalViews)}
-                  </span>
-                )}
-              </div>
-            ))}
-          </section>
-        )}
-
-
         {/* ══════════════════════════════════════════════════════════════════
             GENERATE — Export
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
-          maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+          maxWidth: 1200, margin: '0 auto', padding: '48px 40px 0',
         }}>
           <div style={{
             borderTop: `1px solid ${BONE}`, paddingTop: 24, paddingBottom: 48,
@@ -747,7 +712,7 @@ export default function CampaignDestination({
         {/* Footer */}
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
           <div style={{
-            padding: '24px 0 40px', borderTop: `1px solid ${BONE}`,
+            padding: '20px 0 32px', borderTop: `1px solid ${BONE}`,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
             <span style={{
@@ -796,12 +761,11 @@ function CadenceStrip({
   return (
     <div style={{ background: INK }}>
       <div style={{
-        maxWidth: 1200, margin: '0 auto', padding: '16px 40px 12px',
+        maxWidth: 1200, margin: '0 auto', padding: '12px 40px 10px',
       }}>
-        {/* Strip */}
         <div style={{
           position: 'relative',
-          height: 36,
+          height: 28,
           background: 'rgba(255,255,255,0.03)',
           borderRadius: 2,
           overflow: 'hidden',
@@ -822,9 +786,8 @@ function CadenceStrip({
               }} />
             );
           })}
-          {/* Axis labels */}
           <span style={{
-            position: 'absolute', left: 8, top: 4,
+            position: 'absolute', left: 8, top: 3,
             fontSize: 7, color: 'rgba(200,194,184,0.25)',
             fontFamily: MONO, letterSpacing: '0.12em',
             textTransform: 'uppercase',
@@ -832,28 +795,12 @@ function CadenceStrip({
             30d
           </span>
           <span style={{
-            position: 'absolute', right: 8, top: 4,
+            position: 'absolute', right: 8, top: 3,
             fontSize: 7, color: 'rgba(200,194,184,0.25)',
             fontFamily: MONO, letterSpacing: '0.12em',
             textTransform: 'uppercase',
           }}>
             Now
-          </span>
-        </div>
-        {/* Legend */}
-        <div style={{
-          display: 'flex', gap: 14, marginTop: 6,
-          fontSize: 8, color: 'rgba(200,194,184,0.3)',
-          fontFamily: MONO, letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-        }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 5, height: 10, background: WHITE, opacity: 0.4, borderRadius: 1, display: 'inline-block' }} />
-            Longform
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 3, height: 7, background: accent, opacity: 0.5, borderRadius: 1, display: 'inline-block' }} />
-            Short
           </span>
         </div>
       </div>
@@ -889,8 +836,6 @@ function CampaignWall({
 
   return (
     <section style={{ background: INK }}>
-
-      {/* ── HERO FRAME — Cinemascope crop of most recent upload ─── */}
       {heroUpload && (
         <div style={{
           position: 'relative',
@@ -910,24 +855,24 @@ function CampaignWall({
           <div style={{
             position: 'absolute',
             bottom: 0, left: 0, right: 0,
-            padding: '60px 40px 24px',
+            padding: '60px 40px 20px',
             background: 'linear-gradient(transparent 0%, rgba(10,10,10,0.85) 100%)',
           }}>
             <div style={{
               maxWidth: 1200, margin: '0 auto',
               display: 'flex', justifyContent: 'space-between',
-              alignItems: 'flex-end', flexWrap: 'wrap', gap: 16,
+              alignItems: 'flex-end', flexWrap: 'wrap', gap: 12,
             }}>
               <div style={{ maxWidth: 500 }}>
                 <div style={{
-                  fontSize: 14, color: 'rgba(255,255,255,0.5)',
-                  marginBottom: 6,
+                  fontSize: 13, color: 'rgba(255,255,255,0.5)',
+                  marginBottom: 4,
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                   {heroUpload.title}
                 </div>
                 <div style={{
-                  display: 'flex', gap: 12, alignItems: 'center',
+                  display: 'flex', gap: 10, alignItems: 'center',
                   fontSize: 9, color: 'rgba(255,255,255,0.2)',
                   fontFamily: MONO, letterSpacing: '0.1em',
                   textTransform: 'uppercase',
@@ -936,16 +881,12 @@ function CampaignWall({
                   {isFresh(heroUpload.publishedAt) && (
                     <span style={{ color: '#34D399', fontWeight: 700 }}>NEW</span>
                   )}
-                  {heroUpload.likeCount > 0 && (
-                    <span>{fmtNum(heroUpload.likeCount)} likes</span>
-                  )}
-                  {heroUpload.commentCount > 0 && (
-                    <span>{fmtNum(heroUpload.commentCount)} comments</span>
-                  )}
+                  {heroUpload.likeCount > 0 && <span>{fmtNum(heroUpload.likeCount)} likes</span>}
+                  {heroUpload.commentCount > 0 && <span>{fmtNum(heroUpload.commentCount)} comments</span>}
                 </div>
               </div>
               <div style={{
-                fontSize: 'clamp(32px, 4vw, 56px)',
+                fontSize: 'clamp(28px, 3.5vw, 48px)',
                 fontWeight: 900,
                 letterSpacing: '-0.03em',
                 color: WHITE, fontFamily: MONO, lineHeight: 1,
@@ -957,12 +898,8 @@ function CampaignWall({
         </div>
       )}
 
-
-      {/* ── SHORTS STRIP — Vertical frames. Windows into the campaign. ─── */}
       {shorts.length > 0 && (
-        <div style={{
-          display: 'flex', gap: 2, marginTop: 2,
-        }}>
+        <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
           {shorts.slice(0, Math.min(shorts.length, 5)).map((s) => (
             <div key={s.id} style={{
               flex: '1 1 0',
@@ -986,9 +923,7 @@ function CampaignWall({
                 background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
                 pointerEvents: 'none',
               }} />
-              <div style={{
-                position: 'absolute', bottom: 8, left: 10, right: 10,
-              }}>
+              <div style={{ position: 'absolute', bottom: 8, left: 10, right: 10 }}>
                 <div style={{
                   fontSize: 15, fontWeight: 900, color: WHITE,
                   fontFamily: MONO, letterSpacing: '-0.02em',
@@ -1016,8 +951,6 @@ function CampaignWall({
         </div>
       )}
 
-
-      {/* ── SECONDARY MOSAIC — Asymmetric landscape thumbnails ─── */}
       {secondaryLong.length > 0 && (
         <div style={{
           display: 'grid',
@@ -1051,20 +984,11 @@ function CampaignWall({
                 position: 'absolute', bottom: 8, left: 10, right: 10,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
               }}>
-                <div>
-                  <div style={{
-                    fontSize: 11, color: 'rgba(255,255,255,0.4)',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    maxWidth: '90%',
-                  }}>
-                    {u.title}
-                  </div>
-                  <div style={{
-                    fontSize: 8, color: 'rgba(255,255,255,0.2)',
-                    fontFamily: MONO, marginTop: 2,
-                  }}>
-                    {timeAgo(u.publishedAt)}
-                  </div>
+                <div style={{
+                  fontSize: 8, color: 'rgba(255,255,255,0.2)',
+                  fontFamily: MONO,
+                }}>
+                  {timeAgo(u.publishedAt)}
                 </div>
                 <span style={{
                   fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.6)',
@@ -1078,10 +1002,8 @@ function CampaignWall({
         </div>
       )}
 
-
-      {/* ── STAT BAR — Typography interruption ─── */}
       <div style={{
-        padding: '18px 40px',
+        padding: '14px 40px',
         maxWidth: 1200, margin: '0 auto',
         display: 'flex', justifyContent: 'space-between',
         alignItems: 'baseline', flexWrap: 'wrap', gap: 12,
@@ -1094,7 +1016,7 @@ function CampaignWall({
         </span>
         <div>
           <span style={{
-            fontSize: 28, fontWeight: 900,
+            fontSize: 24, fontWeight: 900,
             letterSpacing: '-0.03em',
             color: 'rgba(200,194,184,0.35)',
             fontFamily: MONO,
@@ -1115,10 +1037,10 @@ function CampaignWall({
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LIVE MOMENT — The operational heartbeat, hero-scale
+// LIVE MOMENT — Current campaign beat with rollout pressure
 // ══════════════════════════════════════════════════════════════════════════════
 
-function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
+function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: PhaseName }) {
   const phaseTone = PHASE_TONE[moment.phase];
   const isLive = moment.timing === 'current';
 
@@ -1132,14 +1054,13 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
     (a) => a.status === 'planned'
   );
 
+  const rolloutPressure = generateRolloutPressure(moment, phase);
+
   return (
-    <section style={{
-      maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-      marginBottom: 64,
-    }}>
+    <div>
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 14,
-        marginBottom: 20,
+        display: 'flex', alignItems: 'center', gap: 12,
+        marginBottom: 14,
       }}>
         <span style={{
           fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
@@ -1160,169 +1081,152 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         )}
       </div>
 
-      <h2 style={{
-        fontSize: 'clamp(28px, 4vw, 48px)',
+      <h3 style={{
+        fontSize: 'clamp(22px, 3vw, 36px)',
         fontWeight: 900, lineHeight: 0.95,
         letterSpacing: '-0.02em', margin: 0, color: INK,
       }}>
         {moment.momentName}
-      </h2>
+      </h3>
 
-      {moment.primaryUpload && (
-        <div style={{
-          marginTop: 28,
-          position: 'relative',
-          borderRadius: 6, overflow: 'hidden',
-          aspectRatio: '16/9',
-        }}>
-          <img
-            src={ytThumb(moment.primaryUpload.id, 'maxresdefault')}
-            alt="" loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
+      {/* Thumbnail + actions grid */}
+      <div style={{
+        marginTop: 20,
+        display: 'grid',
+        gridTemplateColumns: moment.primaryUpload ? '2fr 1fr' : '1fr',
+        gap: 8,
+        alignItems: 'start',
+      }}>
+        {/* Primary thumbnail */}
+        {moment.primaryUpload && (
           <div style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            padding: '48px 28px 20px',
-            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+            position: 'relative',
+            borderRadius: 6, overflow: 'hidden',
+            aspectRatio: '16/9',
           }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{
-                fontSize: 'clamp(24px, 3vw, 40px)',
-                fontWeight: 900, color: WHITE,
-                fontFamily: MONO, letterSpacing: '-0.02em',
-              }}>
-                {fmtNum(moment.primaryUpload.viewCount)}
-              </span>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
-                views
-              </span>
-              {moment.totalViews > moment.primaryUpload.viewCount && (
-                <span style={{
-                  fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: MONO,
-                }}>
-                  · {fmtNum(moment.totalViews)} total
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {(doneActions.length > 0 || openActions.length > 0 || plannedActions.length > 0) && (
-        <div style={{
-          marginTop: 16,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-          gap: 8,
-        }}>
-          {doneActions.map((a, i) => (
-            <div key={`d-${i}`} style={{
-              position: 'relative',
-              aspectRatio: '16/9',
-              background: '#1a1a1a',
-              borderRadius: 4, overflow: 'hidden',
+            <img
+              src={ytThumb(moment.primaryUpload.id, 'maxresdefault')}
+              alt="" loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: 0, left: 0, right: 0,
+              padding: '40px 20px 14px',
+              background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
             }}>
-              {a.matchedUpload ? (
-                <img
-                  src={ytThumb(a.matchedUpload.id)}
-                  alt="" loading="lazy"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div style={{
-                  width: '100%', height: '100%', background: '#1a1a1a',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={{
+                  fontSize: 'clamp(20px, 2.5vw, 32px)',
+                  fontWeight: 900, color: WHITE,
+                  fontFamily: MONO, letterSpacing: '-0.02em',
                 }}>
-                  <span style={{ fontSize: 16, color: '#059669' }}>✓</span>
-                </div>
-              )}
-              <div style={{
-                position: 'absolute', bottom: 0, left: 0, right: 0,
-                padding: '20px 8px 6px',
-                background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
-              }}>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
-                }}>
-                  <span style={{
-                    fontSize: 9, color: 'rgba(255,255,255,0.5)',
-                    fontFamily: MONO, fontWeight: 600,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    maxWidth: '60%',
-                  }}>
-                    {cleanTitle(a.title)}
-                  </span>
-                  {a.matchedUpload && (
-                    <span style={{
-                      fontSize: 10, fontWeight: 800, color: WHITE, fontFamily: MONO,
-                    }}>
-                      {fmtNum(a.matchedUpload.viewCount)}
-                    </span>
-                  )}
-                </div>
+                  {fmtNum(moment.primaryUpload.viewCount)}
+                </span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>views</span>
               </div>
             </div>
-          ))}
+          </div>
+        )}
 
-          {openActions.map((a, i) => (
-            <div key={`o-${i}`} style={{
-              aspectRatio: '16/9',
-              border: `1px dashed ${GHOST}`,
-              borderRadius: 4,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              padding: 12, gap: 4,
-            }}>
-              <span style={{
-                fontSize: 10, color: SMOKE, textAlign: 'center',
-                fontFamily: MONO, lineHeight: 1.4,
+        {/* Action cards */}
+        {(doneActions.length > 0 || openActions.length > 0 || plannedActions.length > 0) && (
+          <div style={{
+            display: 'flex', flexDirection: 'column', gap: 6,
+          }}>
+            {doneActions.map((a, i) => (
+              <div key={`d-${i}`} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px',
+                background: '#F0FDF4',
+                borderRadius: 4,
               }}>
-                {cleanTitle(a.title)}
-              </span>
-              <span style={{
-                fontSize: 8, fontWeight: 800, color: '#D97706',
-                letterSpacing: '0.1em', fontFamily: MONO,
-              }}>
-                {a.status === 'late' ? 'READY TO GO' : 'OPEN'}
-              </span>
-            </div>
-          ))}
+                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>✓</span>
+                <span style={{
+                  fontSize: 12, color: INK, flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {cleanTitle(a.title)}
+                </span>
+                {a.matchedUpload && (
+                  <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                    {fmtNum(a.matchedUpload.viewCount)}
+                  </span>
+                )}
+              </div>
+            ))}
 
-          {plannedActions.map((a, i) => (
-            <div key={`p-${i}`} style={{
-              aspectRatio: '16/9',
-              background: BONE,
-              borderRadius: 4,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              padding: 12, gap: 4,
-            }}>
-              <span style={{
-                fontSize: 10, color: SMOKE, textAlign: 'center', fontFamily: MONO,
+            {openActions.map((a, i) => (
+              <div key={`o-${i}`} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px',
+                border: `1px dashed ${GHOST}`,
+                borderRadius: 4,
               }}>
-                {cleanTitle(a.title)}
-              </span>
-              <span style={{
-                fontSize: 8, fontWeight: 700, color: GHOST,
-                letterSpacing: '0.1em', fontFamily: MONO,
+                <span style={{ fontSize: 11, color: '#D97706', fontWeight: 700 }}>○</span>
+                <span style={{
+                  fontSize: 12, color: SMOKE, flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {cleanTitle(a.title)}
+                </span>
+                <span style={{
+                  fontSize: 8, fontWeight: 800, color: '#D97706',
+                  fontFamily: MONO, letterSpacing: '0.08em',
+                }}>
+                  OPEN
+                </span>
+              </div>
+            ))}
+
+            {plannedActions.map((a, i) => (
+              <div key={`p-${i}`} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px',
+                background: BONE,
+                borderRadius: 4,
               }}>
-                PLANNED
-              </span>
-            </div>
-          ))}
-        </div>
+                <span style={{ fontSize: 11, color: GHOST, fontWeight: 700 }}>·</span>
+                <span style={{
+                  fontSize: 12, color: SMOKE, flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {cleanTitle(a.title)}
+                </span>
+                <span style={{
+                  fontSize: 8, fontWeight: 700, color: GHOST,
+                  fontFamily: MONO, letterSpacing: '0.08em',
+                }}>
+                  PLANNED
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Rollout pressure — gentle format suggestion */}
+      {rolloutPressure && (
+        <p style={{
+          fontSize: 13, color: SMOKE, fontWeight: 400,
+          marginTop: 16, marginBottom: 0, lineHeight: 1.5,
+          paddingLeft: 14, maxWidth: 520,
+          borderLeft: `2px solid ${phaseTone.accent}`,
+          fontStyle: 'italic',
+        }}>
+          {rolloutPressure}
+        </p>
       )}
 
       {moment.extraUploads.length > 0 && (
         <div style={{
-          marginTop: 14, display: 'flex', gap: 6,
+          marginTop: 12, display: 'flex', gap: 6,
           overflowX: 'auto', paddingBottom: 4,
         }}>
           {moment.extraUploads.map((u) => (
             <div key={u.id} style={{
               flexShrink: 0,
-              width: u.durationSec <= 62 ? 72 : 120,
+              width: u.durationSec <= 62 ? 56 : 96,
               aspectRatio: u.durationSec <= 62 ? '9/16' : '16/9',
               borderRadius: 3, overflow: 'hidden', position: 'relative',
             }}>
@@ -1343,66 +1247,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
           ))}
         </div>
       )}
-
-      {moment.supportMissing.length > 0 && (
-        <p style={{
-          fontSize: 14, color: INK, fontWeight: 500,
-          marginTop: 24, marginBottom: 0, lineHeight: 1.6,
-          paddingLeft: 16, maxWidth: 560,
-          borderLeft: `2px solid ${phaseTone.accent}`,
-        }}>
-          {buildMomentGuidance(moment)}
-        </p>
-      )}
-    </section>
-  );
-}
-
-
-// ══════════════════════════════════════════════════════════════════════════════
-// CHAPTER ROW — Upcoming moment as editorial block
-// ══════════════════════════════════════════════════════════════════════════════
-
-function ChapterRow({ moment }: { moment: CampaignMoment }) {
-  const phaseTone = PHASE_TONE[moment.phase];
-  return (
-    <div style={{
-      padding: '20px 0',
-      borderBottom: `1px solid ${BONE}`,
-      display: 'flex', alignItems: 'flex-start', gap: 20,
-    }}>
-      <div style={{
-        minWidth: 90,
-        display: 'flex', flexDirection: 'column', gap: 3,
-      }}>
-        <span style={{
-          fontSize: 10, fontWeight: 700, color: GHOST, fontFamily: MONO,
-        }}>
-          W{moment.weekNum}
-        </span>
-        <span style={{
-          fontSize: 11, color: SMOKE, fontFamily: MONO,
-        }}>
-          {moment.dateRange.split('–')[0]}
-        </span>
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{
-          fontSize: 18, fontWeight: 800, color: INK,
-          lineHeight: 1.2, marginBottom: 4,
-        }}>
-          {moment.momentName}
-        </div>
-        <div style={{ fontSize: 12, color: SMOKE }}>
-          {moment.actions.length} planned {moment.actions.length === 1 ? 'action' : 'actions'}
-        </div>
-      </div>
-      <div style={{
-        width: 4, height: 32,
-        background: phaseTone.accent,
-        borderRadius: 2,
-        flexShrink: 0, alignSelf: 'center',
-      }} />
     </div>
   );
 }
@@ -1419,7 +1263,7 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
 }) {
   return (
     <div style={{
-      display: 'flex', gap: 2, marginTop: 12, borderRadius: 2, overflow: 'hidden',
+      display: 'flex', gap: 2, borderRadius: 2, overflow: 'hidden',
     }}>
       {phases.map((p) => {
         const span = p.weekEnd - p.weekStart + 1;
@@ -1428,7 +1272,7 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
         const tone = PHASE_TONE[p.name];
         return (
           <div key={p.name} style={{
-            flex: `0 0 ${pct}%`, padding: '6px 10px',
+            flex: `0 0 ${pct}%`, padding: '5px 8px',
             background: isCurrent ? `${tone.accent}12` : BONE,
             borderBottom: `2px solid ${isCurrent ? tone.accent : 'transparent'}`,
           }}>
@@ -1448,7 +1292,7 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// TIMELINE DETAIL
+// TIMELINE DETAIL — Condensed, scannable
 // ══════════════════════════════════════════════════════════════════════════════
 
 function TimelineDetail({ plan, matchResult, currentPhase }: {
@@ -1463,7 +1307,7 @@ function TimelineDetail({ plan, matchResult, currentPhase }: {
   }));
 
   return (
-    <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {phases.map((phase) => {
         const isCurrent = currentPhase === phase.name;
         const tone = PHASE_TONE[phase.name];
@@ -1474,9 +1318,9 @@ function TimelineDetail({ plan, matchResult, currentPhase }: {
           <div key={phase.name}>
             <div style={{
               fontSize: 10, fontWeight: 800, letterSpacing: '0.12em',
-              textTransform: 'uppercase', marginBottom: 8,
+              textTransform: 'uppercase', marginBottom: 6,
               color: isCurrent ? tone.accent : GHOST,
-              display: 'flex', alignItems: 'center', gap: 10,
+              display: 'flex', alignItems: 'center', gap: 8,
               fontFamily: MONO,
             }}>
               {tone.label}
@@ -1488,15 +1332,15 @@ function TimelineDetail({ plan, matchResult, currentPhase }: {
               </span>
               {isCurrent && (
                 <span style={{
-                  fontSize: 8, fontWeight: 800, background: tone.accent,
-                  color: WHITE, padding: '1px 7px', borderRadius: 2,
+                  fontSize: 7, fontWeight: 800, background: tone.accent,
+                  color: WHITE, padding: '1px 6px', borderRadius: 2,
                 }}>
                   NOW
                 </span>
               )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               {phaseWeeks.map((week) => (
                 <TimelineWeekRow key={week.weekNum} week={week} matchResult={matchResult} />
               ))}
@@ -1529,28 +1373,29 @@ function TimelineWeekRow({ week, matchResult }: {
     <div style={{
       background: isCurrent ? WHITE : 'transparent',
       border: isCurrent ? `1px solid ${BONE}` : 'none',
-      borderRadius: 4,
+      borderRadius: isCurrent ? 4 : 0,
     }}>
       <button
         onClick={() => actions.length > 0 && setExpanded(!expanded)}
         style={{
-          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-          padding: '6px 12px', background: 'none', border: 'none',
+          display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+          padding: isCurrent ? '5px 10px' : '4px 10px',
+          background: 'none', border: 'none',
           cursor: actions.length > 0 ? 'pointer' : 'default', textAlign: 'left',
         }}
       >
         <span style={{
-          fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 28, fontFamily: MONO,
+          fontSize: 9, fontWeight: 700, color: GHOST, minWidth: 24, fontFamily: MONO,
         }}>
           W{week.weekNum}
         </span>
         <span style={{
-          fontSize: 11, color: GHOST, minWidth: 80, fontFamily: MONO,
+          fontSize: 10, color: GHOST, minWidth: 72, fontFamily: MONO,
         }}>
           {week.dateRange}
         </span>
         <span style={{
-          fontSize: 13, fontWeight: isMoment ? 700 : 400,
+          fontSize: 12, fontWeight: isMoment ? 700 : 400,
           color: isMoment ? INK : SMOKE, flex: 1,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
@@ -1558,13 +1403,13 @@ function TimelineWeekRow({ week, matchResult }: {
         </span>
         {actions.length > 0 && (
           <span style={{
-            fontSize: 10, color: GHOST, display: 'flex', gap: 4, alignItems: 'center',
+            fontSize: 9, color: GHOST, display: 'flex', gap: 4, alignItems: 'center',
             fontFamily: MONO,
           }}>
             {done > 0 && <span style={{ color: '#059669', fontWeight: 700 }}>{done}✓</span>}
             {openWindows > 0 && <span style={{ color: '#D97706', fontWeight: 700 }}>{openWindows} open</span>}
             <span style={{
-              fontSize: 8,
+              fontSize: 7,
               transform: expanded ? 'rotate(90deg)' : 'none',
               transition: 'transform 0.15s',
             }}>▶</span>
@@ -1573,7 +1418,7 @@ function TimelineWeekRow({ week, matchResult }: {
       </button>
 
       {expanded && (
-        <div style={{ padding: '0 12px 8px 52px' }}>
+        <div style={{ padding: '0 10px 6px 44px' }}>
           {actions.map((a, i) => {
             const matched = 'status' in a ? (a as MatchedAction) : null;
             const status: ExecutionStatus = matched?.status ?? (a.completed ? 'completed' : 'planned');
@@ -1583,24 +1428,24 @@ function TimelineWeekRow({ week, matchResult }: {
 
             return (
               <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                fontSize: 12, padding: '3px 0',
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 11, padding: '2px 0',
                 color: isDone ? GHOST : isOpen ? '#92400E' : isUpcoming ? '#78350F' : INK,
                 textDecoration: isDone ? 'line-through' : 'none',
                 opacity: isDone ? 0.5 : 1,
               }}>
-                <span style={{ fontSize: 10, opacity: 0.6, fontFamily: MONO }}>
+                <span style={{ fontSize: 9, opacity: 0.6, fontFamily: MONO }}>
                   {a.format === 'short' ? '⚡' : a.format === 'video' || a.format === 'premiere' ? '▶' : a.format === 'live' ? '◉' : '·'}
                 </span>
                 <span style={{ flex: 1 }}>{a.title}</span>
                 {matched?.matchedUpload && (
-                  <span style={{ fontSize: 10, color: '#059669', fontFamily: MONO }}>
+                  <span style={{ fontSize: 9, color: '#059669', fontFamily: MONO }}>
                     {fmtNum(matched.matchedUpload.viewCount)}
                   </span>
                 )}
                 {(isOpen || isUpcoming) && (
                   <span style={{
-                    fontSize: 8, fontWeight: 800, padding: '1px 6px', borderRadius: 2,
+                    fontSize: 7, fontWeight: 800, padding: '1px 5px', borderRadius: 2,
                     background: isOpen ? '#FFFBEB' : '#FFF7ED',
                     color: isOpen ? '#D97706' : '#92400E',
                     textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
@@ -1619,7 +1464,7 @@ function TimelineWeekRow({ week, matchResult }: {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// ERA SIGNAL — Auto-generated reading of the current campaign era
+// ERA SIGNAL
 // ══════════════════════════════════════════════════════════════════════════════
 
 function generateEraSignal(
@@ -1632,7 +1477,6 @@ function generateEraSignal(
 
   const parts: string[] = [];
 
-  // Cadence character
   if (uploads30d.length >= 12) {
     parts.push('Heavy output phase');
   } else if (uploads30d.length >= 6) {
@@ -1645,7 +1489,6 @@ function generateEraSignal(
     parts.push('Channel quiet');
   }
 
-  // Content mix
   if (shorts30d.length > 0 && long30d.length > 0) {
     if (shorts30d.length > long30d.length * 2) {
       parts.push('shorts-heavy');
@@ -1660,7 +1503,6 @@ function generateEraSignal(
     parts.push('all longform');
   }
 
-  // Recency
   if (liveChannel?.lastUploadDaysAgo != null) {
     if (liveChannel.lastUploadDaysAgo === 0) {
       parts.push('uploaded today');
@@ -1672,6 +1514,47 @@ function generateEraSignal(
   }
 
   return parts.join(' · ');
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ROLLOUT PRESSURE — Gentle format suggestions per moment + phase
+// ══════════════════════════════════════════════════════════════════════════════
+
+function generateRolloutPressure(
+  moment: CampaignMoment,
+  phase: PhaseName,
+): string | null {
+  const open = moment.supportMissing;
+  const done = moment.supportDone;
+
+  // If everything is delivered, no pressure needed
+  if (open.length === 0 && moment.actions.every((a) => a.status === 'completed' || a.status === 'live')) {
+    return null;
+  }
+
+  // If specific formats are open, suggest them collaboratively
+  if (open.length === 1) {
+    return `A ${open[0]} upload could help extend this moment's reach and sustain discovery.`;
+  }
+  if (open.length > 1) {
+    return `${open.length} supporting formats could strengthen this moment. Additional uploads may help maintain visibility.`;
+  }
+
+  // Phase-aware generic suggestions
+  if (phase === 'BUILD') {
+    return 'Artist-led uploads and Shorts could help warm the audience ahead of the release window.';
+  }
+  if (phase === 'RELEASE') {
+    return 'Supporting formats — lyric videos, visualizers, BTS — could help extend the release moment.';
+  }
+  if (phase === 'SCALE') {
+    return 'Additional content formats could help sustain momentum and expand discovery.';
+  }
+  if (phase === 'EXTEND') {
+    return 'Acoustic versions, live sessions, or documentary content may help deepen audience connection.';
+  }
+  return null;
 }
 
 
@@ -1996,17 +1879,6 @@ function cleanTitle(title: string): string {
     .replace(/^(Upload|Post|Create|Film|Record|Publish|Release)\s+/i, '')
     .replace(/\s*(short|video|post|clip)$/i, '')
     .trim() || title;
-}
-
-function buildMomentGuidance(moment: CampaignMoment): string {
-  const missing = moment.supportMissing;
-  if (missing.length === 1) {
-    return `${missing[0]} has an open window. Additional content here could extend the moment's reach.`;
-  }
-  if (missing.length > 1) {
-    return `${missing.length} support pieces could strengthen this moment. Starting with ${missing[0]} would build the most momentum.`;
-  }
-  return 'All support content is on track.';
 }
 
 function isCurrentWeek(week: { dateRange: string }): boolean {
