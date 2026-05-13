@@ -142,14 +142,8 @@ export default function CampaignDestination({
   const pulseSignals = generatePulseSignals(matchResult, liveChannel, recentUploads ?? [], currentPhase, plan);
   const moments = extractMoments(plan, matchResult);
   const activeMoment = moments.find((m) => m.timing === 'current') ?? moments.find((m) => m.timing === 'past');
-  const upcomingMoments = moments.filter((m) => m.timing === 'upcoming').slice(0, 4);
-  const pastMoments = moments.filter((m) => m.timing === 'past').reverse().slice(0, 5);
-  const attentionItems = buildAttentionItems(nudges ?? [], matchResult, liveChannel);
   const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
-  const currentPhaseData = currentPhase
-    ? plan.phases.find((p) => p.name === currentPhase)
-    : null;
 
   // ── Rollout identity stats ──
   const totalPlanned = plan.events.length;
@@ -164,7 +158,6 @@ export default function CampaignDestination({
   const allByRecency = (recentUploads ?? []).sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
-  const allByViews = [...allByRecency].sort((a, b) => b.viewCount - a.viewCount);
   const shorts = allByRecency.filter((u) => u.durationSec <= 62);
   const longform = allByRecency.filter((u) => u.durationSec > 62);
   const heroUpload = longform[0] ?? allByRecency[0] ?? null;
@@ -371,6 +364,24 @@ export default function CampaignDestination({
             {openOpportunities > 0 && <span style={{ color: '#D97706' }}>{openOpportunities} open {openOpportunities === 1 ? 'opportunity' : 'opportunities'}</span>}
             {matchResult && <span>{Math.round(matchResult.stats.completionRate)}% executed</span>}
           </div>
+
+          {/* Inline pulse — top signal only */}
+          {pulseSignals.length > 0 && (
+            <div style={{
+              marginTop: 12,
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <span style={{
+                width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
+                background: pulseSignals[0].urgency === 'positive' ? '#059669'
+                  : pulseSignals[0].urgency === 'warning' ? '#D97706'
+                  : pulseSignals[0].urgency === 'critical' ? '#DC2626' : GHOST,
+              }} />
+              <span style={{ fontSize: 12, color: SMOKE, lineHeight: 1.4 }}>
+                {pulseSignals[0].text}
+              </span>
+            </div>
+          )}
         </section>
 
 
@@ -387,260 +398,28 @@ export default function CampaignDestination({
           maxWidth: 1200, margin: '0 auto',
           padding: '28px 40px 0',
         }}>
-          {currentPhase && phaseTone ? (
-            <>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                marginBottom: 14,
-              }}>
-                <div style={{
-                  width: 4, height: 28,
-                  background: phaseTone.accent,
-                  borderRadius: 2,
-                  flexShrink: 0,
-                }} />
-                <h3 style={{
-                  fontSize: 'clamp(18px, 2.5vw, 26px)',
-                  fontWeight: 900, lineHeight: 1,
-                  letterSpacing: '-0.01em', textTransform: 'uppercase',
-                  margin: 0, color: INK,
-                }}>
-                  {phaseTone.label}
-                </h3>
-                {currentPhaseData && (
-                  <span style={{
-                    fontSize: 10, fontWeight: 600, color: SMOKE,
-                    fontFamily: MONO,
-                  }}>
-                    W{currentPhaseData.weekStart}–W{currentPhaseData.weekEnd}
-                  </span>
-                )}
-                <span style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  padding: '3px 10px', borderRadius: 3,
-                  background: phaseTone.accent, color: WHITE,
-                  animation: 'cpulse 2s ease-in-out infinite',
-                }}>
-                  ACTIVE
-                </span>
-              </div>
-              <p style={{
-                fontSize: 14, color: SMOKE, marginTop: 0, marginBottom: 4,
-                maxWidth: 480, lineHeight: 1.5,
-              }}>
-                {phaseTone.narrative}
-              </p>
-              <div style={{
-                fontSize: 11, color: GHOST, fontFamily: MONO,
-                marginBottom: 20,
-              }}>
-                {phaseTone.energy}
-              </div>
-            </>
-          ) : (
-            <div style={{ height: 12 }} />
-          )}
-
           {/* Phase strip — visual progress */}
           <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
-
-          {/* Phase progress context */}
-          <div style={{
-            marginTop: 14,
-            fontSize: 11, color: GHOST, fontFamily: MONO,
-          }}>
-            {plan.events.length} moments across {plan.totalWeeks} weeks
-          </div>
         </section>
-
-
-        {/* ── Rollout Observations ── */}
-        {pulseSignals.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '28px 40px 0',
-          }}>
-            <div style={{
-              maxWidth: 560,
-              display: 'flex', flexDirection: 'column', gap: 6,
-            }}>
-              {pulseSignals.slice(0, 3).map((sig, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                }}>
-                  <span style={{
-                    width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
-                    background: sig.urgency === 'positive' ? '#059669'
-                      : sig.urgency === 'warning' ? '#D97706'
-                      : sig.urgency === 'critical' ? '#DC2626' : GHOST,
-                  }} />
-                  <span style={{ fontSize: 13, color: SMOKE, lineHeight: 1.4 }}>
-                    {sig.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
 
         {/* ── Current Moment ── */}
         {activeMoment && (
           <section style={{
             maxWidth: 1200, margin: '0 auto',
-            padding: '32px 40px 0',
+            padding: '24px 40px 0',
           }}>
             <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
           </section>
         )}
 
-
-        {/* ── Rollout Opportunities ── */}
-        {attentionItems.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '24px 40px 0',
-          }}>
-            <div style={{
-              borderLeft: `3px solid ${phaseTone?.accent ?? INK}`,
-              paddingLeft: 20, maxWidth: 560,
-            }}>
-              <div style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-                textTransform: 'uppercase', color: SMOKE,
-                fontFamily: MONO, marginBottom: 10,
-              }}>
-                Ways to Extend the Campaign
-              </div>
-              {attentionItems.map((item, i) => (
-                <div key={i} style={{
-                  fontSize: 13, lineHeight: 1.6, fontWeight: 500,
-                  color: item.urgency === 'critical' ? '#78350F'
-                    : item.urgency === 'important' ? '#92400E' : INK,
-                  marginBottom: 4,
-                }}>
-                  {item.text}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-
-        {/* ── Coming Chapters ── */}
-        {upcomingMoments.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '28px 40px 0',
-          }}>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: GHOST,
-              fontFamily: MONO, marginBottom: 12,
-            }}>
-              Coming Up
-            </div>
-            {upcomingMoments.map((m) => {
-              const tone = PHASE_TONE[m.phase];
-              return (
-                <div key={m.weekNum} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 0',
-                  borderBottom: `1px solid ${BONE}`,
-                }}>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, color: GHOST,
-                    fontFamily: MONO, minWidth: 28,
-                  }}>
-                    W{m.weekNum}
-                  </span>
-                  <span style={{
-                    fontSize: 11, color: SMOKE, fontFamily: MONO, minWidth: 56,
-                  }}>
-                    {m.dateRange.split('–')[0]}
-                  </span>
-                  <span style={{
-                    fontSize: 15, fontWeight: 700, color: INK, flex: 1,
-                  }}>
-                    {m.momentName}
-                  </span>
-                  <span style={{
-                    fontSize: 11, color: SMOKE, fontFamily: MONO,
-                  }}>
-                    {m.actions.length} {m.actions.length === 1 ? 'action' : 'actions'}
-                  </span>
-                  <div style={{
-                    width: 3, height: 20,
-                    background: tone.accent,
-                    borderRadius: 2,
-                    flexShrink: 0,
-                  }} />
-                </div>
-              );
-            })}
-          </section>
-        )}
-
-
-        {/* ── Full Timeline ── */}
+        {/* ── Timeline ── */}
         <section style={{
           maxWidth: 1200, margin: '0 auto',
-          padding: '32px 40px 0',
+          padding: '24px 40px 0',
         }}>
           <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} />
         </section>
-
-
-        {/* ── Completed Moments ── */}
-        {pastMoments.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '24px 40px 0',
-          }}>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: GHOST,
-              fontFamily: MONO, marginBottom: 8,
-            }}>
-              Landed
-            </div>
-            {pastMoments.map((m) => (
-              <div key={m.weekNum} style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '6px 0', borderBottom: `1px solid ${BONE}`,
-                opacity: 0.4,
-              }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 28,
-                  fontFamily: MONO,
-                }}>
-                  W{m.weekNum}
-                </span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: INK, flex: 1 }}>
-                  {m.momentName}
-                </span>
-                {m.primaryUpload && (
-                  <div style={{
-                    width: 40, height: 24, borderRadius: 2, overflow: 'hidden',
-                    flexShrink: 0,
-                  }}>
-                    <img
-                      src={ytThumb(m.primaryUpload.id, 'mqdefault')}
-                      alt="" loading="lazy"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
-                    />
-                  </div>
-                )}
-                {m.totalViews > 0 && (
-                  <span style={{ fontSize: 11, color: SMOKE, fontFamily: MONO }}>
-                    {fmtNum(m.totalViews)}
-                  </span>
-                )}
-              </div>
-            ))}
-          </section>
-        )}
 
 
         {/* ┌──────────────────────────────────────────────────────────────┐
@@ -654,27 +433,21 @@ export default function CampaignDestination({
           <>
             <section style={{
               maxWidth: 1200, margin: '0 auto',
-              padding: '56px 40px 0',
+              padding: '40px 40px 0',
             }}>
               <div style={{
                 width: '100%', height: 1, background: BONE,
-                marginBottom: 40,
+                marginBottom: 24,
               }} />
               <div style={{
                 fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
                 textTransform: 'uppercase', color: GHOST,
-                fontFamily: MONO, marginBottom: 8,
+                fontFamily: MONO,
               }}>
                 Campaign Surface
               </div>
-              <div style={{
-                fontSize: 13, color: SMOKE, lineHeight: 1.5,
-                maxWidth: 400,
-              }}>
-                The visual world of this rollout — built from live YouTube uploads.
-              </div>
             </section>
-            <div style={{ marginTop: 28 }}>
+            <div style={{ marginTop: 16 }}>
               <CampaignWall
                 uploads={allByRecency}
                 shorts={shorts}
@@ -1794,41 +1567,6 @@ function extractMoments(
       };
     })
     .sort((a, b) => a.daysAway - b.daysAway);
-}
-
-type AttentionItem = {
-  text: string;
-  urgency: NudgeUrgency;
-};
-
-function buildAttentionItems(
-  nudges: Nudge[],
-  matchResult?: MatchResult,
-  liveChannel?: CampaignDestinationProps['liveChannel'],
-): AttentionItem[] {
-  const items: AttentionItem[] = nudges.map((n) => ({
-    text: n.detail,
-    urgency: n.urgency,
-  }));
-
-  if (items.length === 0 && matchResult) {
-    const { stats } = matchResult;
-    if (stats.late > 0) {
-      const lateActions = matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'late');
-      items.push({
-        text: `"${lateActions[0].title}" — an opportunity to extend the release moment and sustain visibility.`,
-        urgency: 'critical',
-      });
-    }
-    if (stats.missing > 0) {
-      items.push({
-        text: `${stats.missing} format${stats.missing > 1 ? 's' : ''} could deepen audience connection and expand discovery.`,
-        urgency: 'important',
-      });
-    }
-  }
-
-  return items.slice(0, 4);
 }
 
 function generateExportText(
