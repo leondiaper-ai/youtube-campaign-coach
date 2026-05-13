@@ -15,8 +15,8 @@ import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DESIGN SYSTEM — Cinematic Rollout OS v5
-// Hero (compressed) → ROLLOUT MAP (the product) → Campaign Surface
+// DESIGN SYSTEM — YouTube Rollout Map v6
+// Hero (poster) → Rollout Identity → Rollout Map → Campaign Surface
 // ══════════════════════════════════════════════════════════════════════════════
 
 const INK = '#0A0A0A';
@@ -151,6 +151,15 @@ export default function CampaignDestination({
     ? plan.phases.find((p) => p.name === currentPhase)
     : null;
 
+  // ── Rollout identity stats ──
+  const totalPlanned = plan.events.length;
+  const landed = matchResult
+    ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'completed' || a.status === 'live').length
+    : 0;
+  const openOpportunities = matchResult
+    ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'missing' || a.status === 'late').length
+    : 0;
+
   // ── Classify uploads ──
   const allByRecency = (recentUploads ?? []).sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
@@ -190,7 +199,7 @@ export default function CampaignDestination({
           color: PAPER,
           position: 'relative',
           overflow: 'hidden',
-          minHeight: allByRecency.length > 0 ? '50vh' : '40vh',
+          minHeight: allByRecency.length > 0 ? '44vh' : '36vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
@@ -234,7 +243,7 @@ export default function CampaignDestination({
               textTransform: 'uppercase', color: GHOST, textDecoration: 'none',
               fontFamily: MONO,
             }}>
-              Campaign System
+              YouTube Rollout Map
             </Link>
             <Link href="/coach" style={{
               fontSize: 11, fontWeight: 600, color: SMOKE,
@@ -309,6 +318,64 @@ export default function CampaignDestination({
 
         {/* ┌──────────────────────────────────────────────────────────────┐
             │                                                              │
+            │   R O L L O U T   I D E N T I T Y                           │
+            │   Immediate orientation. Label the product clearly.          │
+            │                                                              │
+            └──────────────────────────────────────────────────────────────┘ */}
+
+        <section style={{
+          maxWidth: 1200, margin: '0 auto',
+          padding: '36px 40px 0',
+        }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+            textTransform: 'uppercase', color: GHOST,
+            fontFamily: MONO, marginBottom: 10,
+          }}>
+            YouTube Rollout Map
+          </div>
+
+          <div style={{
+            display: 'flex', alignItems: 'baseline', gap: 12,
+            flexWrap: 'wrap', marginBottom: 8,
+          }}>
+            <h2 style={{
+              fontSize: 'clamp(20px, 3vw, 32px)',
+              fontWeight: 900, lineHeight: 1,
+              letterSpacing: '-0.02em', textTransform: 'uppercase',
+              margin: 0, color: INK,
+            }}>
+              {plan.artist} — {campaignTitle}
+            </h2>
+          </div>
+
+          <div style={{
+            display: 'flex', gap: 16, flexWrap: 'wrap',
+            fontSize: 12, color: SMOKE, fontFamily: MONO,
+            marginBottom: 6,
+          }}>
+            {currentPhase && phaseTone && (
+              <span>
+                Phase: <span style={{ color: phaseTone.accent, fontWeight: 700 }}>{phaseTone.label}</span>
+              </span>
+            )}
+            <span>{plan.totalWeeks}-week rollout</span>
+          </div>
+
+          <div style={{
+            display: 'flex', gap: 16, flexWrap: 'wrap',
+            fontSize: 12, color: SMOKE, fontFamily: MONO,
+          }}>
+            <span>{totalPlanned} planned uploads</span>
+            {landed > 0 && <span style={{ color: '#059669' }}>{landed} landed</span>}
+            {openOpportunities > 0 && <span style={{ color: '#D97706' }}>{openOpportunities} open {openOpportunities === 1 ? 'opportunity' : 'opportunities'}</span>}
+            {matchResult && <span>{Math.round(matchResult.stats.completionRate)}% executed</span>}
+          </div>
+        </section>
+
+
+        {/* ┌──────────────────────────────────────────────────────────────┐
+            │                                                              │
             │   R O L L O U T   M A P                                     │
             │   The campaign operating system. The product spine.          │
             │                                                              │
@@ -318,34 +385,32 @@ export default function CampaignDestination({
         {/* ── Phase + Rollout State ── */}
         <section style={{
           maxWidth: 1200, margin: '0 auto',
-          padding: '40px 40px 0',
+          padding: '28px 40px 0',
         }}>
-          <div style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
-            textTransform: 'uppercase', color: GHOST,
-            fontFamily: MONO, marginBottom: 28,
-          }}>
-            Rollout Map
-          </div>
-
           {currentPhase && phaseTone ? (
             <>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 12,
-                marginBottom: 16,
+                marginBottom: 14,
               }}>
-                <h2 style={{
-                  fontSize: 'clamp(28px, 4vw, 44px)',
-                  fontWeight: 900, lineHeight: 0.92,
-                  letterSpacing: '-0.02em', textTransform: 'uppercase',
+                <div style={{
+                  width: 4, height: 28,
+                  background: phaseTone.accent,
+                  borderRadius: 2,
+                  flexShrink: 0,
+                }} />
+                <h3 style={{
+                  fontSize: 'clamp(18px, 2.5vw, 26px)',
+                  fontWeight: 900, lineHeight: 1,
+                  letterSpacing: '-0.01em', textTransform: 'uppercase',
                   margin: 0, color: INK,
                 }}>
                   {phaseTone.label}
-                </h2>
+                </h3>
                 {currentPhaseData && (
                   <span style={{
                     fontSize: 10, fontWeight: 600, color: SMOKE,
-                    fontFamily: MONO, alignSelf: 'flex-end', paddingBottom: 4,
+                    fontFamily: MONO,
                   }}>
                     W{currentPhaseData.weekStart}–W{currentPhaseData.weekEnd}
                   </span>
@@ -356,46 +421,36 @@ export default function CampaignDestination({
                   padding: '3px 10px', borderRadius: 3,
                   background: phaseTone.accent, color: WHITE,
                   animation: 'cpulse 2s ease-in-out infinite',
-                  alignSelf: 'flex-end', paddingBottom: 4,
                 }}>
                   ACTIVE
                 </span>
               </div>
               <p style={{
-                fontSize: 15, color: SMOKE, marginTop: 0, marginBottom: 4,
+                fontSize: 14, color: SMOKE, marginTop: 0, marginBottom: 4,
                 maxWidth: 480, lineHeight: 1.5,
               }}>
                 {phaseTone.narrative}
               </p>
               <div style={{
                 fontSize: 11, color: GHOST, fontFamily: MONO,
-                marginBottom: 24,
+                marginBottom: 20,
               }}>
                 {phaseTone.energy}
               </div>
             </>
           ) : (
-            <div style={{ height: 20 }} />
+            <div style={{ height: 12 }} />
           )}
 
           {/* Phase strip — visual progress */}
           <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
 
-          {/* Rollout health line */}
+          {/* Phase progress context */}
           <div style={{
-            marginTop: 16,
-            display: 'flex', gap: 16, flexWrap: 'wrap',
-            fontSize: 11, color: SMOKE, fontFamily: MONO,
+            marginTop: 14,
+            fontSize: 11, color: GHOST, fontFamily: MONO,
           }}>
-            <span>{plan.totalWeeks} weeks · {plan.events.length} moments</span>
-            {matchResult && (
-              <span>{Math.round(matchResult.stats.completionRate)}% executed</span>
-            )}
-            {matchResult && matchResult.stats.late > 0 && (
-              <span style={{ color: '#D97706' }}>
-                {matchResult.stats.late} open {matchResult.stats.late === 1 ? 'window' : 'windows'}
-              </span>
-            )}
+            {plan.events.length} moments across {plan.totalWeeks} weeks
           </div>
         </section>
 
@@ -456,7 +511,7 @@ export default function CampaignDestination({
                 textTransform: 'uppercase', color: SMOKE,
                 fontFamily: MONO, marginBottom: 10,
               }}>
-                Opportunities
+                Ways to Extend the Campaign
               </div>
               {attentionItems.map((item, i) => (
                 <div key={i} style={{
@@ -719,7 +774,7 @@ export default function CampaignDestination({
               fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
               color: GHOST, fontFamily: MONO,
             }}>
-              YouTube Campaign System
+              YouTube Rollout Map
             </span>
             <span style={{
               fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
@@ -1174,7 +1229,7 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
                   fontSize: 8, fontWeight: 800, color: '#D97706',
                   fontFamily: MONO, letterSpacing: '0.08em',
                 }}>
-                  OPEN
+                  OPPORTUNITY
                 </span>
               </div>
             ))}
@@ -1356,11 +1411,11 @@ function TimelineWeekRow({ week, matchResult }: {
   week: PlanWeek | MatchedWeek;
   matchResult?: MatchResult;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const matchedWeek = matchResult ? (week as MatchedWeek) : null;
-  const actions = matchedWeek?.actions ?? week.actions;
   const isMoment = !!week.momentName;
   const isCurrent = isCurrentWeek(week);
+  const [expanded, setExpanded] = useState(isCurrent);
+  const matchedWeek = matchResult ? (week as MatchedWeek) : null;
+  const actions = matchedWeek?.actions ?? week.actions;
 
   const done = actions.filter((a) =>
     'status' in a ? ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live') : a.completed
@@ -1450,7 +1505,7 @@ function TimelineWeekRow({ week, matchResult }: {
                     color: isOpen ? '#D97706' : '#92400E',
                     textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
                   }}>
-                    {isOpen ? 'Ready' : 'Open'}
+                    {isOpen ? 'Ready' : 'Opportunity'}
                   </span>
                 )}
               </div>
@@ -1761,13 +1816,13 @@ function buildAttentionItems(
     if (stats.late > 0) {
       const lateActions = matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'late');
       items.push({
-        text: `"${lateActions[0].title}" has an open window — uploading now could still capture the moment.`,
+        text: `"${lateActions[0].title}" — an opportunity to extend the release moment and sustain visibility.`,
         urgency: 'critical',
       });
     }
     if (stats.missing > 0) {
       items.push({
-        text: `${stats.missing} planned upload${stats.missing > 1 ? 's have' : ' has'} open windows. These could strengthen the rollout.`,
+        text: `${stats.missing} format${stats.missing > 1 ? 's' : ''} could deepen audience connection and expand discovery.`,
         urgency: 'important',
       });
     }
