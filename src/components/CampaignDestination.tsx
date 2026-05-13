@@ -15,8 +15,8 @@ import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DESIGN SYSTEM — Cinematic Rollout OS v2
-// Visual immersion > information display. Campaign as lived experience.
+// DESIGN SYSTEM — Cinematic Rollout OS v3
+// Two layers: THE SURFACE (live reality) → THE PLAN (future intent)
 // ══════════════════════════════════════════════════════════════════════════════
 
 const INK = '#0A0A0A';
@@ -66,8 +66,12 @@ function timeAgo(iso: string): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
+function daysAgoNum(iso: string): number {
+  return (Date.now() - new Date(iso).getTime()) / 86400000;
+}
+
 function isFresh(iso: string, withinDays = 3): boolean {
-  return (Date.now() - new Date(iso).getTime()) / 86400000 <= withinDays;
+  return daysAgoNum(iso) <= withinDays;
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -91,14 +95,10 @@ type CampaignDestinationProps = {
   recentUploads?: RecentUpload[];
 };
 
-// ── Pulse Signal Types ─────────────────────────────────────────────────────
-
 type PulseSignal = {
   text: string;
   urgency: 'positive' | 'neutral' | 'warning' | 'critical';
 };
-
-// ── Moment Types ───────────────────────────────────────────────────────────
 
 type CampaignMoment = {
   weekNum: number;
@@ -139,7 +139,6 @@ export default function CampaignDestination({
   const pulseSignals = generatePulseSignals(matchResult, liveChannel, recentUploads ?? [], currentPhase, plan);
   const moments = extractMoments(plan, matchResult);
   const activeMoment = moments.find((m) => m.timing === 'current') ?? moments.find((m) => m.timing === 'past');
-  const nextMoment = moments.find((m) => m.timing === 'upcoming');
   const upcomingMoments = moments.filter((m) => m.timing === 'upcoming').slice(0, 4);
   const pastMoments = moments.filter((m) => m.timing === 'past').reverse().slice(0, 5);
   const attentionItems = buildAttentionItems(nudges ?? [], matchResult, liveChannel);
@@ -153,6 +152,12 @@ export default function CampaignDestination({
   const heroUpload = longform[0] ?? allUploads[0] ?? null;
   const totalCampaignViews = allUploads.reduce((s, u) => s + u.viewCount, 0);
 
+  // ── 30-day era data ──
+  const uploads30d = allUploads.filter((u) => daysAgoNum(u.publishedAt) <= 30);
+  const shorts30d = uploads30d.filter((u) => u.durationSec <= 62);
+  const long30d = uploads30d.filter((u) => u.durationSec > 62);
+  const eraSignal = generateEraSignal(uploads30d, shorts30d, long30d, liveChannel);
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -161,15 +166,22 @@ export default function CampaignDestination({
 
   return (
     <>
-      {/* CSS animations for living elements */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes cpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
       `}} />
 
       <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
 
+        {/* ┌──────────────────────────────────────────────────────────────┐
+            │                                                              │
+            │   T H E   S U R F A C E                                     │
+            │   What the campaign looks and feels like right now.          │
+            │                                                              │
+            └──────────────────────────────────────────────────────────────┘ */}
+
+
         {/* ══════════════════════════════════════════════════════════════════
-            HERO — Immersive dark opening. Campaign as atmosphere.
+            HERO — Immersive dark opening. Era atmosphere.
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
           background: INK,
@@ -249,7 +261,6 @@ export default function CampaignDestination({
             paddingBottom: 56, width: '100%',
             boxSizing: 'border-box',
           }}>
-            {/* Phase accent bar */}
             {phaseTone && (
               <div style={{
                 width: 48, height: 3,
@@ -258,7 +269,6 @@ export default function CampaignDestination({
               }} />
             )}
 
-            {/* Artist name */}
             <div style={{
               fontSize: 12, fontWeight: 600, letterSpacing: '0.25em',
               textTransform: 'uppercase', color: GHOST,
@@ -267,7 +277,6 @@ export default function CampaignDestination({
               {plan.artist}
             </div>
 
-            {/* Campaign title — cinematic scale */}
             <h1 style={{
               fontSize: 'clamp(52px, 8vw, 100px)',
               fontWeight: 900,
@@ -279,7 +288,6 @@ export default function CampaignDestination({
               {campaignTitle}
             </h1>
 
-            {/* Strategy line */}
             <p style={{
               fontSize: 17, color: 'rgba(245,242,237,0.45)', lineHeight: 1.5,
               marginTop: 28, marginBottom: 0, maxWidth: 480, fontWeight: 400,
@@ -287,12 +295,24 @@ export default function CampaignDestination({
               {plan.strategy.priority}
             </p>
 
-            {/* Metrics — understated, woven into atmosphere */}
+            {/* Era reading — what the channel feels like right now */}
+            {eraSignal && (
+              <div style={{
+                marginTop: 20,
+                fontSize: 12, color: 'rgba(200,194,184,0.5)',
+                fontFamily: MONO, lineHeight: 1.6,
+                maxWidth: 500,
+              }}>
+                {eraSignal}
+              </div>
+            )}
+
+            {/* Live metrics — understated */}
             {liveChannel && (
               <div style={{
-                marginTop: 24,
+                marginTop: 16,
                 display: 'flex', gap: 20, flexWrap: 'wrap',
-                fontSize: 12, color: 'rgba(200,194,184,0.4)',
+                fontSize: 12, color: 'rgba(200,194,184,0.35)',
                 fontFamily: MONO,
               }}>
                 {liveChannel.subs != null && <span>{fmtNum(liveChannel.subs)} subs</span>}
@@ -309,6 +329,17 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
+            CADENCE STRIP — Upload rhythm of the last 30 days
+        ══════════════════════════════════════════════════════════════════ */}
+        {uploads30d.length > 0 && (
+          <CadenceStrip
+            uploads={uploads30d}
+            accent={phaseTone?.accent ?? SMOKE}
+          />
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
             CAMPAIGN WALL — Editorial collage. Windows into the rollout.
         ══════════════════════════════════════════════════════════════════ */}
         {allUploads.length >= 2 && (
@@ -318,16 +349,86 @@ export default function CampaignDestination({
             longform={longform}
             heroUpload={heroUpload}
             totalViews={totalCampaignViews}
+            uploads30dCount={uploads30d.length}
+            shorts30dCount={shorts30d.length}
           />
         )}
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            CHAPTER BREAK — Cinematic whitespace. Let the page breathe.
+            SURFACE READING — Era interpretation
+        ══════════════════════════════════════════════════════════════════ */}
+        {uploads30d.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '48px 40px 0',
+          }}>
+            <div style={{
+              maxWidth: 560,
+              display: 'flex', flexDirection: 'column', gap: 8,
+            }}>
+              {pulseSignals.slice(0, 3).map((sig, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                }}>
+                  <span style={{
+                    width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
+                    background: sig.urgency === 'positive' ? '#059669'
+                      : sig.urgency === 'warning' ? '#D97706'
+                      : sig.urgency === 'critical' ? '#DC2626' : GHOST,
+                  }} />
+                  <span style={{ fontSize: 13, color: SMOKE, lineHeight: 1.4 }}>
+                    {sig.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+
+        {/* ┌──────────────────────────────────────────────────────────────┐
+            │                                                              │
+            │   T H E   P L A N                                           │
+            │   Where this campaign is heading.                            │
+            │                                                              │
+            └──────────────────────────────────────────────────────────────┘ */}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            PLAN SEPARATOR — Transition from surface to strategy
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
           maxWidth: 1200, margin: '0 auto',
-          padding: '88px 40px 56px',
+          padding: '80px 40px 0',
+        }}>
+          <div style={{
+            width: '100%', height: 1, background: BONE,
+            marginBottom: 48,
+          }} />
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+            textTransform: 'uppercase', color: GHOST,
+            fontFamily: MONO, marginBottom: 10,
+          }}>
+            The Plan
+          </div>
+          <div style={{
+            fontSize: 13, color: SMOKE, lineHeight: 1.5,
+            maxWidth: 400,
+          }}>
+            {plan.totalWeeks} weeks · {plan.events.length} moments
+            {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
+          </div>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            CHAPTER BREAK — Current phase as narrative act
+        ══════════════════════════════════════════════════════════════════ */}
+        <section style={{
+          maxWidth: 1200, margin: '0 auto',
+          padding: '48px 40px 40px',
         }}>
           {currentPhase && phaseTone ? (
             <>
@@ -359,13 +460,13 @@ export default function CampaignDestination({
               }} />
             </>
           ) : (
-            <div style={{ height: 40 }} />
+            <div style={{ height: 20 }} />
           )}
         </section>
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            LIVE MOMENT — The operational heartbeat, hero-scale
+            LIVE MOMENT — Current campaign beat, hero-scale
         ══════════════════════════════════════════════════════════════════ */}
         {activeMoment && (
           <LiveMomentBlock moment={activeMoment} />
@@ -373,7 +474,7 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            ATTENTION — Quiet, decisive text. No visual clutter.
+            ATTENTION — Quiet, decisive
         ══════════════════════════════════════════════════════════════════ */}
         {attentionItems.length > 0 && (
           <section style={{
@@ -407,38 +508,6 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            PULSE — Live signals, restrained
-        ══════════════════════════════════════════════════════════════════ */}
-        {pulseSignals.length > 0 && (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-            marginBottom: 56,
-          }}>
-            <div style={{
-              maxWidth: 560,
-              display: 'flex', flexDirection: 'column', gap: 8,
-            }}>
-              {pulseSignals.slice(0, 3).map((sig, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                }}>
-                  <span style={{
-                    width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
-                    background: sig.urgency === 'positive' ? '#059669'
-                      : sig.urgency === 'warning' ? '#D97706'
-                      : sig.urgency === 'critical' ? '#DC2626' : GHOST,
-                  }} />
-                  <span style={{ fontSize: 13, color: SMOKE, lineHeight: 1.4 }}>
-                    {sig.text}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-
-        {/* ══════════════════════════════════════════════════════════════════
             COMING CHAPTERS — Upcoming moments as editorial narrative
         ══════════════════════════════════════════════════════════════════ */}
         {upcomingMoments.length > 0 && (
@@ -461,7 +530,7 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            STORYBOARD — Full timeline, collapsible system-2 layer
+            STORYBOARD — Full timeline
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
           maxWidth: 1200, margin: '0 auto', padding: '0 40px',
@@ -486,7 +555,6 @@ export default function CampaignDestination({
                 </span>
                 <span style={{ fontSize: 12, color: GHOST }}>
                   {plan.totalWeeks} weeks · {plan.events.length} moments
-                  {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
                 </span>
               </div>
               <span style={{
@@ -507,7 +575,7 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            COMPLETED — Past moments, muted, compressed
+            COMPLETED — Past moments, muted
         ══════════════════════════════════════════════════════════════════ */}
         {pastMoments.length > 0 && (
           <section style={{
@@ -549,9 +617,7 @@ export default function CampaignDestination({
                   </div>
                 )}
                 {m.totalViews > 0 && (
-                  <span style={{
-                    fontSize: 12, color: SMOKE, fontFamily: MONO,
-                  }}>
+                  <span style={{ fontSize: 12, color: SMOKE, fontFamily: MONO }}>
                     {fmtNum(m.totalViews)}
                   </span>
                 )}
@@ -562,7 +628,7 @@ export default function CampaignDestination({
 
 
         {/* ══════════════════════════════════════════════════════════════════
-            GENERATE — Export controls
+            GENERATE — Export
         ══════════════════════════════════════════════════════════════════ */}
         <section style={{
           maxWidth: 1200, margin: '0 auto', padding: '0 40px',
@@ -636,10 +702,8 @@ export default function CampaignDestination({
           </div>
         </section>
 
-        {/* ── Footer ─────────────────────────────────────────────── */}
-        <div style={{
-          maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-        }}>
+        {/* Footer */}
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
           <div style={{
             padding: '24px 0 40px', borderTop: `1px solid ${BONE}`,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -665,10 +729,102 @@ export default function CampaignDestination({
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// CAMPAIGN WALL — Editorial collage built from live campaign assets
+// CADENCE STRIP — Visual heartbeat of the last 30 days
 //
-// Not a gallery. Not a list. A curated visual storyboard that communicates
-// cadence, energy, and rollout momentum through real campaign imagery.
+// Each upload is a vertical mark on a timeline. Taller = longform.
+// Density communicates rhythm. Clustering shows burst activity.
+// ══════════════════════════════════════════════════════════════════════════════
+
+function CadenceStrip({
+  uploads,
+  accent,
+}: {
+  uploads: RecentUpload[];
+  accent: string;
+}) {
+  const marks = uploads
+    .map((u) => ({
+      daysAgo: daysAgoNum(u.publishedAt),
+      isShort: u.durationSec <= 62,
+      views: u.viewCount,
+      fresh: isFresh(u.publishedAt, 5),
+    }))
+    .filter((m) => m.daysAgo >= 0 && m.daysAgo <= 30)
+    .sort((a, b) => b.daysAgo - a.daysAgo);
+
+  if (marks.length === 0) return null;
+
+  return (
+    <div style={{ background: INK }}>
+      <div style={{
+        maxWidth: 1200, margin: '0 auto', padding: '16px 40px 12px',
+      }}>
+        {/* Strip */}
+        <div style={{
+          position: 'relative',
+          height: 36,
+          background: 'rgba(255,255,255,0.03)',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}>
+          {marks.map((m, i) => {
+            const pct = ((30 - m.daysAgo) / 30) * 100;
+            return (
+              <div key={i} style={{
+                position: 'absolute',
+                left: `${pct}%`,
+                bottom: 0,
+                width: m.isShort ? 3 : 5,
+                height: m.isShort ? '55%' : '100%',
+                background: m.isShort ? accent : WHITE,
+                opacity: m.fresh ? 0.7 : 0.3,
+                borderRadius: 1,
+                transform: 'translateX(-50%)',
+              }} />
+            );
+          })}
+          {/* Axis labels */}
+          <span style={{
+            position: 'absolute', left: 8, top: 4,
+            fontSize: 7, color: 'rgba(200,194,184,0.25)',
+            fontFamily: MONO, letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+          }}>
+            30d
+          </span>
+          <span style={{
+            position: 'absolute', right: 8, top: 4,
+            fontSize: 7, color: 'rgba(200,194,184,0.25)',
+            fontFamily: MONO, letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+          }}>
+            Now
+          </span>
+        </div>
+        {/* Legend */}
+        <div style={{
+          display: 'flex', gap: 14, marginTop: 6,
+          fontSize: 8, color: 'rgba(200,194,184,0.3)',
+          fontFamily: MONO, letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 5, height: 10, background: WHITE, opacity: 0.4, borderRadius: 1, display: 'inline-block' }} />
+            Longform
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 3, height: 7, background: accent, opacity: 0.5, borderRadius: 1, display: 'inline-block' }} />
+            Short
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CAMPAIGN WALL — Editorial collage built from live campaign assets
 // ══════════════════════════════════════════════════════════════════════════════
 
 function CampaignWall({
@@ -677,14 +833,17 @@ function CampaignWall({
   longform,
   heroUpload,
   totalViews,
+  uploads30dCount,
+  shorts30dCount,
 }: {
   uploads: RecentUpload[];
   shorts: RecentUpload[];
   longform: RecentUpload[];
   heroUpload: RecentUpload | null;
   totalViews: number;
+  uploads30dCount: number;
+  shorts30dCount: number;
 }) {
-  // Secondary longform = everything after the hero
   const secondaryLong = heroUpload
     ? longform.filter((u) => u.id !== heroUpload.id).slice(0, 3)
     : longform.slice(0, 3);
@@ -692,7 +851,7 @@ function CampaignWall({
   return (
     <section style={{ background: INK }}>
 
-      {/* ── HERO FRAME — Cinemascope crop of top-performing upload ─── */}
+      {/* ── HERO FRAME — Cinemascope crop of top upload ─── */}
       {heroUpload && (
         <div style={{
           position: 'relative',
@@ -729,18 +888,20 @@ function CampaignWall({
                   {heroUpload.title}
                 </div>
                 <div style={{
+                  display: 'flex', gap: 12, alignItems: 'center',
                   fontSize: 9, color: 'rgba(255,255,255,0.2)',
                   fontFamily: MONO, letterSpacing: '0.1em',
                   textTransform: 'uppercase',
                 }}>
-                  {timeAgo(heroUpload.publishedAt)}
+                  <span>{timeAgo(heroUpload.publishedAt)}</span>
                   {isFresh(heroUpload.publishedAt) && (
-                    <span style={{
-                      marginLeft: 10, color: '#34D399',
-                      fontWeight: 700,
-                    }}>
-                      NEW
-                    </span>
+                    <span style={{ color: '#34D399', fontWeight: 700 }}>NEW</span>
+                  )}
+                  {heroUpload.likeCount > 0 && (
+                    <span>{fmtNum(heroUpload.likeCount)} likes</span>
+                  )}
+                  {heroUpload.commentCount > 0 && (
+                    <span>{fmtNum(heroUpload.commentCount)} comments</span>
                   )}
                 </div>
               </div>
@@ -780,17 +941,14 @@ function CampaignWall({
                   filter: 'brightness(0.7) saturate(1.1)',
                 }}
               />
-              {/* Gradient overlay */}
               <div style={{
                 position: 'absolute',
-                bottom: 0, left: 0, right: 0, height: '40%',
-                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                bottom: 0, left: 0, right: 0, height: '45%',
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
                 pointerEvents: 'none',
               }} />
-              {/* View count */}
               <div style={{
-                position: 'absolute',
-                bottom: 8, left: 10,
+                position: 'absolute', bottom: 8, left: 10, right: 10,
               }}>
                 <div style={{
                   fontSize: 15, fontWeight: 900, color: WHITE,
@@ -798,8 +956,14 @@ function CampaignWall({
                 }}>
                   {fmtNum(s.viewCount)}
                 </div>
+                <div style={{
+                  fontSize: 8, color: 'rgba(255,255,255,0.3)',
+                  fontFamily: MONO, marginTop: 2,
+                  letterSpacing: '0.08em', textTransform: 'uppercase',
+                }}>
+                  {timeAgo(s.publishedAt)}
+                </div>
               </div>
-              {/* Fresh indicator */}
               {isFresh(s.publishedAt) && (
                 <div style={{
                   position: 'absolute', top: 8, right: 8,
@@ -820,10 +984,8 @@ function CampaignWall({
           display: 'grid',
           gridTemplateColumns:
             secondaryLong.length >= 3 ? '5fr 3fr 4fr'
-            : secondaryLong.length === 2 ? '3fr 2fr'
-            : '1fr',
-          gap: 2,
-          marginTop: 2,
+            : secondaryLong.length === 2 ? '3fr 2fr' : '1fr',
+          gap: 2, marginTop: 2,
         }}>
           {secondaryLong.map((u, i) => (
             <div key={u.id} style={{
@@ -850,16 +1012,24 @@ function CampaignWall({
                 position: 'absolute', bottom: 8, left: 10, right: 10,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
               }}>
-                <span style={{
-                  fontSize: 11, color: 'rgba(255,255,255,0.4)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  maxWidth: '65%',
-                }}>
-                  {u.title}
-                </span>
+                <div>
+                  <div style={{
+                    fontSize: 11, color: 'rgba(255,255,255,0.4)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    maxWidth: '90%',
+                  }}>
+                    {u.title}
+                  </div>
+                  <div style={{
+                    fontSize: 8, color: 'rgba(255,255,255,0.2)',
+                    fontFamily: MONO, marginTop: 2,
+                  }}>
+                    {timeAgo(u.publishedAt)}
+                  </div>
+                </div>
                 <span style={{
                   fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.6)',
-                  fontFamily: MONO,
+                  fontFamily: MONO, flexShrink: 0,
                 }}>
                   {fmtNum(u.viewCount)}
                 </span>
@@ -872,7 +1042,7 @@ function CampaignWall({
 
       {/* ── STAT BAR — Typography interruption ─── */}
       <div style={{
-        padding: '20px 40px',
+        padding: '18px 40px',
         maxWidth: 1200, margin: '0 auto',
         display: 'flex', justifyContent: 'space-between',
         alignItems: 'baseline', flexWrap: 'wrap', gap: 12,
@@ -881,7 +1051,7 @@ function CampaignWall({
           fontSize: 10, fontWeight: 600, letterSpacing: '0.16em',
           textTransform: 'uppercase', color: SMOKE, fontFamily: MONO,
         }}>
-          {uploads.length} uploads · {shorts.length} shorts
+          {uploads30dCount} uploads in 30d · {shorts30dCount} shorts
         </span>
         <div>
           <span style={{
@@ -906,14 +1076,13 @@ function CampaignWall({
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LIVE MOMENT — The operational heartbeat. Oversized, visual, decisive.
+// LIVE MOMENT — The operational heartbeat, hero-scale
 // ══════════════════════════════════════════════════════════════════════════════
 
 function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
   const phaseTone = PHASE_TONE[moment.phase];
   const isLive = moment.timing === 'current';
 
-  // Separate matched uploads with thumbnails from text-only actions
   const doneActions = moment.actions.filter(
     (a) => a.status === 'completed' || a.status === 'live'
   );
@@ -929,7 +1098,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
       maxWidth: 1200, margin: '0 auto', padding: '0 40px',
       marginBottom: 64,
     }}>
-      {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 14,
         marginBottom: 20,
@@ -953,7 +1121,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         )}
       </div>
 
-      {/* Moment name — oversized, editorial */}
       <h2 style={{
         fontSize: 'clamp(28px, 4vw, 48px)',
         fontWeight: 900, lineHeight: 0.95,
@@ -962,7 +1129,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         {moment.momentName}
       </h2>
 
-      {/* Primary upload as hero frame with thumbnail */}
       {moment.primaryUpload && (
         <div style={{
           marginTop: 28,
@@ -996,7 +1162,7 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
                 <span style={{
                   fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: MONO,
                 }}>
-                  · {fmtNum(moment.totalViews)} total across moment
+                  · {fmtNum(moment.totalViews)} total
                 </span>
               )}
             </div>
@@ -1004,7 +1170,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         </div>
       )}
 
-      {/* Support content — visual grid of thumbnails + ghost frames */}
       {(doneActions.length > 0 || missingActions.length > 0 || plannedActions.length > 0) && (
         <div style={{
           marginTop: 16,
@@ -1012,7 +1177,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
           gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
           gap: 8,
         }}>
-          {/* Done — with thumbnails where matched */}
           {doneActions.map((a, i) => (
             <div key={`d-${i}`} style={{
               position: 'relative',
@@ -1028,8 +1192,7 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
                 />
               ) : (
                 <div style={{
-                  width: '100%', height: '100%',
-                  background: '#1a1a1a',
+                  width: '100%', height: '100%', background: '#1a1a1a',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <span style={{ fontSize: 16, color: '#059669' }}>✓</span>
@@ -1063,7 +1226,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
             </div>
           ))}
 
-          {/* Missing — ghost frames with dashed borders */}
           {missingActions.map((a, i) => (
             <div key={`m-${i}`} style={{
               aspectRatio: '16/9',
@@ -1088,7 +1250,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
             </div>
           ))}
 
-          {/* Planned — subtle bone frames */}
           {plannedActions.map((a, i) => (
             <div key={`p-${i}`} style={{
               aspectRatio: '16/9',
@@ -1099,8 +1260,7 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
               padding: 12, gap: 4,
             }}>
               <span style={{
-                fontSize: 10, color: SMOKE, textAlign: 'center',
-                fontFamily: MONO,
+                fontSize: 10, color: SMOKE, textAlign: 'center', fontFamily: MONO,
               }}>
                 {cleanTitle(a.title)}
               </span>
@@ -1115,7 +1275,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         </div>
       )}
 
-      {/* Extra uploads as a secondary strip */}
       {moment.extraUploads.length > 0 && (
         <div style={{
           marginTop: 14, display: 'flex', gap: 6,
@@ -1146,7 +1305,6 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
         </div>
       )}
 
-      {/* Editorial guidance */}
       {moment.supportMissing.length > 0 && (
         <p style={{
           fontSize: 14, color: INK, fontWeight: 500,
@@ -1163,7 +1321,7 @@ function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// CHAPTER ROW — Upcoming moment as editorial block, not table row
+// CHAPTER ROW — Upcoming moment as editorial block
 // ══════════════════════════════════════════════════════════════════════════════
 
 function ChapterRow({ moment }: { moment: CampaignMoment }) {
@@ -1212,7 +1370,7 @@ function ChapterRow({ moment }: { moment: CampaignMoment }) {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// PHASE STRIP — Visual progress
+// PHASE STRIP
 // ══════════════════════════════════════════════════════════════════════════════
 
 function PhaseStrip({ phases, totalWeeks, currentPhase }: {
@@ -1251,7 +1409,7 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// TIMELINE DETAIL — System 2 reference layer
+// TIMELINE DETAIL
 // ══════════════════════════════════════════════════════════════════════════════
 
 function TimelineDetail({ plan, matchResult, currentPhase }: {
@@ -1422,7 +1580,64 @@ function TimelineWeekRow({ week, matchResult }: {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// HELPERS — All logic preserved from v1
+// ERA SIGNAL — Auto-generated reading of the current campaign era
+// ══════════════════════════════════════════════════════════════════════════════
+
+function generateEraSignal(
+  uploads30d: RecentUpload[],
+  shorts30d: RecentUpload[],
+  long30d: RecentUpload[],
+  liveChannel?: CampaignDestinationProps['liveChannel'],
+): string | null {
+  if (uploads30d.length === 0 && !liveChannel) return null;
+
+  const parts: string[] = [];
+
+  // Cadence character
+  if (uploads30d.length >= 12) {
+    parts.push('Heavy output phase');
+  } else if (uploads30d.length >= 6) {
+    parts.push('Active cadence');
+  } else if (uploads30d.length >= 2) {
+    parts.push('Building slowly');
+  } else if (uploads30d.length === 1) {
+    parts.push('Single upload in 30 days');
+  } else {
+    parts.push('Channel quiet');
+  }
+
+  // Content mix
+  if (shorts30d.length > 0 && long30d.length > 0) {
+    if (shorts30d.length > long30d.length * 2) {
+      parts.push('shorts-heavy');
+    } else if (long30d.length > shorts30d.length) {
+      parts.push('longform-focused');
+    } else {
+      parts.push('balanced mix');
+    }
+  } else if (shorts30d.length > 0) {
+    parts.push('all Shorts');
+  } else if (long30d.length > 0) {
+    parts.push('all longform');
+  }
+
+  // Recency
+  if (liveChannel?.lastUploadDaysAgo != null) {
+    if (liveChannel.lastUploadDaysAgo === 0) {
+      parts.push('uploaded today');
+    } else if (liveChannel.lastUploadDaysAgo <= 2) {
+      parts.push(`last upload ${liveChannel.lastUploadDaysAgo}d ago`);
+    } else if (liveChannel.lastUploadDaysAgo > 14) {
+      parts.push(`${liveChannel.lastUploadDaysAgo}d since last upload`);
+    }
+  }
+
+  return parts.join(' · ');
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HELPERS — All logic preserved
 // ══════════════════════════════════════════════════════════════════════════════
 
 function generatePulseSignals(
