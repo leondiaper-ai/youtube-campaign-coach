@@ -1001,8 +1001,9 @@ export function generatePlan(
       eventCounter++;
     }
 
-    // Cold channel warm-up in BUILD phase
-    if (phase === 'BUILD' && isCold && weekEvents.length === 0) {
+    // BUILD-phase warm-up: fill empty weeks with content actions
+    // so the timeline shows activity from the campaign start date
+    if (phase === 'BUILD' && weekEvents.length === 0 && actions.length === 0) {
       const warmUp = warmUpActions(weekNum - (buildPhase?.weekStart ?? 1) + 1, totalBuildWeeks, ctx);
       actions.push(...warmUp);
     }
