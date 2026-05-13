@@ -15,7 +15,8 @@ import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DESIGN SYSTEM — Cinematic Rollout OS
+// DESIGN SYSTEM — Cinematic Rollout OS v2
+// Visual immersion > information display. Campaign as lived experience.
 // ══════════════════════════════════════════════════════════════════════════════
 
 const INK = '#0A0A0A';
@@ -24,6 +25,8 @@ const BONE = '#EBE7DF';
 const SMOKE = '#8A847A';
 const GHOST = '#C8C2B8';
 const WHITE = '#FFFFFF';
+
+const MONO = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
 
 const PHASE_TONE: Record<PhaseName, { accent: string; label: string; narrative: string }> = {
   BUILD: {
@@ -47,6 +50,25 @@ const PHASE_TONE: Record<PhaseName, { accent: string; label: string; narrative: 
     narrative: 'Keep the universe alive.',
   },
 };
+
+// ── YouTube thumbnail helpers ─────────────────────────────────────────────
+
+function ytThumb(id: string, q: 'maxresdefault' | 'hqdefault' | 'mqdefault' = 'hqdefault'): string {
+  return `https://i.ytimg.com/vi/${id}/${q}.jpg`;
+}
+
+function timeAgo(iso: string): string {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
+function isFresh(iso: string, withinDays = 3): boolean {
+  return (Date.now() - new Date(iso).getTime()) / 86400000 <= withinDays;
+}
 
 // ── Props ──────────────────────────────────────────────────────────────────
 
@@ -94,6 +116,7 @@ type CampaignMoment = {
   totalViews: number;
 };
 
+
 // ══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════════════════════
@@ -117,11 +140,18 @@ export default function CampaignDestination({
   const moments = extractMoments(plan, matchResult);
   const activeMoment = moments.find((m) => m.timing === 'current') ?? moments.find((m) => m.timing === 'past');
   const nextMoment = moments.find((m) => m.timing === 'upcoming');
-  const upcomingMoments = moments.filter((m) => m.timing === 'upcoming').slice(0, 3);
-  const pastMoments = moments.filter((m) => m.timing === 'past').reverse().slice(0, 4);
+  const upcomingMoments = moments.filter((m) => m.timing === 'upcoming').slice(0, 4);
+  const pastMoments = moments.filter((m) => m.timing === 'past').reverse().slice(0, 5);
   const attentionItems = buildAttentionItems(nudges ?? [], matchResult, liveChannel);
   const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
+
+  // ── Classify uploads for visual treatment ──
+  const allUploads = (recentUploads ?? []).sort((a, b) => b.viewCount - a.viewCount);
+  const shorts = allUploads.filter((u) => u.durationSec <= 62);
+  const longform = allUploads.filter((u) => u.durationSec > 62);
+  const heroUpload = longform[0] ?? allUploads[0] ?? null;
+  const totalCampaignViews = allUploads.reduce((s, u) => s + u.viewCount, 0);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -130,496 +160,783 @@ export default function CampaignDestination({
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
+    <>
+      {/* CSS animations for living elements */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes cpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+      `}} />
 
-      {/* ══════════════════════════════════════════════════════════════════
-          HEADER BAR — Thin, institutional
-      ══════════════════════════════════════════════════════════════════ */}
-      <div style={{
-        borderBottom: `1px solid ${BONE}`,
-        padding: '14px 0',
-      }}>
-        <div style={{
-          maxWidth: 1000, margin: '0 auto', padding: '0 32px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            HERO — Immersive dark opening. Campaign as atmosphere.
+        ══════════════════════════════════════════════════════════════════ */}
+        <section style={{
+          background: INK,
+          color: PAPER,
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: allUploads.length > 0 ? '72vh' : '50vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
         }}>
-          <Link href="/coach" style={{
-            fontSize: 10, fontWeight: 600, letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: GHOST, textDecoration: 'none',
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-          }}>
-            Campaign System
-          </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {currentPhase && (
-              <span style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-                textTransform: 'uppercase', color: phaseTone?.accent,
-                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-              }}>
-                {phaseTone?.label}
-              </span>
-            )}
-            <Link href="/coach" style={{
-              fontSize: 11, fontWeight: 600, color: SMOKE,
-              textDecoration: 'none', padding: '4px 12px',
-              border: `1px solid ${BONE}`, borderRadius: 4,
+          {/* Thumbnail mosaic texture — barely visible, creates atmosphere */}
+          {allUploads.length >= 3 && (
+            <div style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: 'grid',
+              gridTemplateColumns: `repeat(${Math.min(allUploads.length, 5)}, 1fr)`,
+              gridTemplateRows: 'repeat(2, 1fr)',
+              gap: 1,
+              opacity: 0.05,
+              filter: 'grayscale(100%) contrast(1.2)',
+              pointerEvents: 'none',
             }}>
-              All Campaigns
-            </Link>
-          </div>
-        </div>
-      </div>
+              {allUploads.slice(0, 10).map((u) => (
+                <img key={u.id} src={ytThumb(u.id, 'mqdefault')} alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ))}
+            </div>
+          )}
 
-      {/* ══════════════════════════════════════════════════════════════════
-          HERO — Cinematic title block
-      ══════════════════════════════════════════════════════════════════ */}
-      <div style={{
-        maxWidth: 1000, margin: '0 auto', padding: '0 32px',
-        paddingTop: 64, paddingBottom: 40,
-      }}>
-        {/* Artist name — mono label */}
-        <div style={{
-          fontSize: 11, fontWeight: 600, letterSpacing: '0.22em',
-          textTransform: 'uppercase', color: SMOKE, marginBottom: 16,
-          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-        }}>
-          {plan.artist}
-        </div>
-
-        {/* Campaign title — oversized, compressed */}
-        <h1 style={{
-          fontSize: 72, fontWeight: 900, color: INK, margin: 0,
-          lineHeight: 0.92, letterSpacing: '-0.03em',
-          textTransform: 'uppercase',
-          maxWidth: 800,
-        }}>
-          {campaignTitle}
-        </h1>
-
-        {/* Strategic line */}
-        <p style={{
-          fontSize: 17, color: SMOKE, lineHeight: 1.5,
-          marginTop: 20, marginBottom: 0, maxWidth: 560,
-          fontWeight: 400,
-        }}>
-          {plan.strategy.priority}
-        </p>
-
-        {/* Divider line */}
-        <div style={{
-          width: 60, height: 1, background: INK, marginTop: 32,
-        }} />
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          LIVE STRIP — Campaign vital signs
-      ══════════════════════════════════════════════════════════════════ */}
-      {(liveChannel || pulseSignals.length > 0) && (
-        <div style={{ background: INK, color: PAPER }}>
+          {/* Gradient veil */}
           <div style={{
-            maxWidth: 1000, margin: '0 auto', padding: '28px 32px',
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0, height: '70%',
+            background: `linear-gradient(transparent, ${INK} 85%)`,
+            pointerEvents: 'none',
+          }} />
+
+          {/* Navigation */}
+          <div style={{
+            position: 'absolute', top: 20, left: 40, right: 40,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            zIndex: 2,
           }}>
-            {/* Metrics row */}
+            <Link href="/coach" style={{
+              fontSize: 10, fontWeight: 600, letterSpacing: '0.2em',
+              textTransform: 'uppercase', color: GHOST, textDecoration: 'none',
+              fontFamily: MONO,
+            }}>
+              Campaign System
+            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              {currentPhase && phaseTone && (
+                <span style={{
+                  fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+                  textTransform: 'uppercase', color: phaseTone.accent,
+                  fontFamily: MONO,
+                }}>
+                  {phaseTone.label}
+                </span>
+              )}
+              <Link href="/coach" style={{
+                fontSize: 11, fontWeight: 600, color: SMOKE,
+                textDecoration: 'none', padding: '4px 12px',
+                border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+              }}>
+                All Campaigns
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero content */}
+          <div style={{
+            position: 'relative', zIndex: 1,
+            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+            paddingBottom: 56, width: '100%',
+            boxSizing: 'border-box',
+          }}>
+            {/* Phase accent bar */}
+            {phaseTone && (
+              <div style={{
+                width: 48, height: 3,
+                background: phaseTone.accent,
+                marginBottom: 28,
+              }} />
+            )}
+
+            {/* Artist name */}
+            <div style={{
+              fontSize: 12, fontWeight: 600, letterSpacing: '0.25em',
+              textTransform: 'uppercase', color: GHOST,
+              marginBottom: 18, fontFamily: MONO,
+            }}>
+              {plan.artist}
+            </div>
+
+            {/* Campaign title — cinematic scale */}
+            <h1 style={{
+              fontSize: 'clamp(52px, 8vw, 100px)',
+              fontWeight: 900,
+              lineHeight: 0.88,
+              letterSpacing: '-0.04em',
+              textTransform: 'uppercase',
+              margin: 0, maxWidth: 900, color: WHITE,
+            }}>
+              {campaignTitle}
+            </h1>
+
+            {/* Strategy line */}
+            <p style={{
+              fontSize: 17, color: 'rgba(245,242,237,0.45)', lineHeight: 1.5,
+              marginTop: 28, marginBottom: 0, maxWidth: 480, fontWeight: 400,
+            }}>
+              {plan.strategy.priority}
+            </p>
+
+            {/* Metrics — understated, woven into atmosphere */}
             {liveChannel && (
               <div style={{
-                display: 'flex', gap: 40, marginBottom: pulseSignals.length > 0 ? 20 : 0,
-                flexWrap: 'wrap',
+                marginTop: 24,
+                display: 'flex', gap: 20, flexWrap: 'wrap',
+                fontSize: 12, color: 'rgba(200,194,184,0.4)',
+                fontFamily: MONO,
               }}>
-                {liveChannel.subs != null && (
-                  <LiveMetric label="Subscribers" value={fmtNum(liveChannel.subs)} />
-                )}
+                {liveChannel.subs != null && <span>{fmtNum(liveChannel.subs)} subs</span>}
                 {liveChannel.views7Delta != null && (
-                  <LiveMetric
-                    label="Views 7d"
-                    value={`${liveChannel.views7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.views7Delta)}`}
-                    positive={liveChannel.views7Delta > 0}
-                    negative={liveChannel.views7Delta < 0}
-                  />
+                  <span style={{ color: liveChannel.views7Delta > 0 ? 'rgba(52,211,153,0.6)' : undefined }}>
+                    {liveChannel.views7Delta >= 0 ? '+' : ''}{fmtNum(liveChannel.views7Delta)} views/7d
+                  </span>
                 )}
-                {liveChannel.subs7Delta != null && (
-                  <LiveMetric
-                    label="Subs 7d"
-                    value={`${liveChannel.subs7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.subs7Delta)}`}
-                    positive={liveChannel.subs7Delta > 0}
-                  />
-                )}
-                {liveChannel.uploads30d != null && (
-                  <LiveMetric label="Uploads 30d" value={String(liveChannel.uploads30d)} />
-                )}
-                {liveChannel.lastUploadDaysAgo != null && (
-                  <LiveMetric
-                    label="Last upload"
-                    value={`${liveChannel.lastUploadDaysAgo}d`}
-                    negative={liveChannel.lastUploadDaysAgo > 14}
-                  />
-                )}
+                {liveChannel.uploads30d != null && <span>{liveChannel.uploads30d} uploads/30d</span>}
               </div>
             )}
+          </div>
+        </section>
 
-            {/* Pulse signals */}
-            {pulseSignals.length > 0 && (
+
+        {/* ══════════════════════════════════════════════════════════════════
+            CAMPAIGN WALL — Editorial collage. Windows into the rollout.
+        ══════════════════════════════════════════════════════════════════ */}
+        {allUploads.length >= 2 && (
+          <CampaignWall
+            uploads={allUploads}
+            shorts={shorts}
+            longform={longform}
+            heroUpload={heroUpload}
+            totalViews={totalCampaignViews}
+          />
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            CHAPTER BREAK — Cinematic whitespace. Let the page breathe.
+        ══════════════════════════════════════════════════════════════════ */}
+        <section style={{
+          maxWidth: 1200, margin: '0 auto',
+          padding: '88px 40px 56px',
+        }}>
+          {currentPhase && phaseTone ? (
+            <>
               <div style={{
-                display: 'flex', flexDirection: 'column', gap: 6,
-                borderTop: liveChannel ? `1px solid rgba(255,255,255,0.08)` : 'none',
-                paddingTop: liveChannel ? 16 : 0,
-              }}>
-                {pulseSignals.map((sig, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{
-                      width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                      background: sig.urgency === 'positive' ? '#34D399'
-                        : sig.urgency === 'warning' ? '#FBBF24'
-                        : sig.urgency === 'critical' ? '#F87171'
-                        : 'rgba(255,255,255,0.2)',
-                    }} />
-                    <span style={{
-                      fontSize: 13, lineHeight: 1.4, fontWeight: 400,
-                      color: sig.urgency === 'critical' ? '#FCA5A5' : 'rgba(245,242,237,0.7)',
-                    }}>
-                      {sig.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════════
-          CHAPTER BLOCK — Current phase as narrative act
-      ══════════════════════════════════════════════════════════════════ */}
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 32px' }}>
-
-        {currentPhase && phaseTone && (
-          <div style={{ paddingTop: 48, paddingBottom: 32 }}>
-            <div style={{
-              display: 'flex', alignItems: 'baseline', gap: 16,
-            }}>
-              <span style={{
-                fontSize: 11, fontWeight: 700, letterSpacing: '0.16em',
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.2em',
                 textTransform: 'uppercase', color: GHOST,
-                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                fontFamily: MONO, marginBottom: 14,
               }}>
-                Chapter {plan.phases.findIndex(p => p.name === currentPhase) + 1 || '—'}
-              </span>
-            </div>
-            <h2 style={{
-              fontSize: 40, fontWeight: 900, color: INK, margin: 0,
-              lineHeight: 1.0, letterSpacing: '-0.02em',
-              textTransform: 'uppercase', marginTop: 8,
-            }}>
-              {phaseTone.label}
-            </h2>
-            <p style={{
-              fontSize: 15, color: SMOKE, marginTop: 10, marginBottom: 0,
-              fontStyle: 'italic',
-            }}>
-              {phaseTone.narrative}
-            </p>
-          </div>
-        )}
+                Chapter {plan.phases.findIndex((p) => p.name === currentPhase) + 1 || '—'}
+              </div>
+              <h2 style={{
+                fontSize: 'clamp(36px, 5vw, 60px)',
+                fontWeight: 900, lineHeight: 0.92,
+                letterSpacing: '-0.02em', textTransform: 'uppercase',
+                margin: 0, color: INK,
+              }}>
+                {phaseTone.label}
+              </h2>
+              <p style={{
+                fontSize: 16, color: SMOKE, marginTop: 14,
+                fontStyle: 'italic', maxWidth: 400, lineHeight: 1.5,
+              }}>
+                {phaseTone.narrative}
+              </p>
+              <div style={{
+                width: 32, height: 2,
+                background: phaseTone.accent,
+                marginTop: 28,
+              }} />
+            </>
+          ) : (
+            <div style={{ height: 40 }} />
+          )}
+        </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            CURRENT MOMENT — The hero block
-        ══════════════════════════════════════════════════════════════ */}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            LIVE MOMENT — The operational heartbeat, hero-scale
+        ══════════════════════════════════════════════════════════════════ */}
         {activeMoment && (
-          <CinematicMoment moment={activeMoment} isCurrent />
+          <LiveMomentBlock moment={activeMoment} />
         )}
 
-        {/* ══════════════════════════════════════════════════════════════
-            ATTENTION — What needs intervention
-        ══════════════════════════════════════════════════════════════ */}
+
+        {/* ══════════════════════════════════════════════════════════════════
+            ATTENTION — Quiet, decisive text. No visual clutter.
+        ══════════════════════════════════════════════════════════════════ */}
         {attentionItems.length > 0 && (
-          <div style={{
-            marginTop: 8, marginBottom: 32,
-            borderLeft: `3px solid ${INK}`,
-            paddingLeft: 20,
+          <section style={{
+            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+            marginBottom: 48,
           }}>
             <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: SMOKE, marginBottom: 12,
-              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              borderLeft: `3px solid ${INK}`,
+              paddingLeft: 20, maxWidth: 560,
             }}>
-              Needs Attention
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: SMOKE,
+                fontFamily: MONO, marginBottom: 12,
+              }}>
+                Needs Attention
+              </div>
               {attentionItems.map((item, i) => (
                 <div key={i} style={{
-                  fontSize: 14, lineHeight: 1.5, fontWeight: 500,
+                  fontSize: 14, lineHeight: 1.6, fontWeight: 500,
                   color: item.urgency === 'critical' ? '#991B1B'
                     : item.urgency === 'important' ? '#78350F' : INK,
+                  marginBottom: 6,
                 }}>
                   {item.text}
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* ══════════════════════════════════════════════════════════════
-            NEXT — What's coming
-        ══════════════════════════════════════════════════════════════ */}
-        {upcomingMoments.length > 0 && (
-          <div style={{ marginBottom: 40 }}>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            PULSE — Live signals, restrained
+        ══════════════════════════════════════════════════════════════════ */}
+        {pulseSignals.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+            marginBottom: 56,
+          }}>
             <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: GHOST, marginBottom: 16,
-              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              maxWidth: 560,
+              display: 'flex', flexDirection: 'column', gap: 8,
             }}>
-              Coming Up
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {upcomingMoments.map((m) => (
-                <UpcomingRow key={m.weekNum} moment={m} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════
-            TIMELINE — The full storyboard
-        ══════════════════════════════════════════════════════════════ */}
-        <div style={{
-          borderTop: `1px solid ${BONE}`, paddingTop: 24, marginBottom: 32,
-        }}>
-          <button
-            onClick={() => setTimelineOpen(!timelineOpen)}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-              padding: 0, marginBottom: timelineOpen ? 20 : 0,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-              <span style={{
-                fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-                textTransform: 'uppercase', color: SMOKE,
-                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-              }}>
-                Full Timeline
-              </span>
-              <span style={{ fontSize: 12, color: GHOST }}>
-                {plan.totalWeeks} weeks · {plan.events.length} moments
-                {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
-              </span>
-            </div>
-            <span style={{
-              fontSize: 11, color: GHOST, transition: 'transform 0.15s',
-              transform: timelineOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-            }}>
-              ▶
-            </span>
-          </button>
-
-          {/* Phase progress — always visible */}
-          <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
-
-          {/* Expanded timeline */}
-          {timelineOpen && (
-            <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} />
-          )}
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════
-            HISTORY — Past moments (collapsed)
-        ══════════════════════════════════════════════════════════════ */}
-        {pastMoments.length > 0 && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-              textTransform: 'uppercase', color: GHOST, marginBottom: 12,
-              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-            }}>
-              Completed Moments
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {pastMoments.map((m) => (
-                <div key={m.weekNum} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '8px 0',
-                  borderBottom: `1px solid ${BONE}`,
-                  opacity: 0.5,
+              {pulseSignals.slice(0, 3).map((sig, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
                 }}>
                   <span style={{
-                    fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 32,
-                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-                  }}>
-                    W{m.weekNum}
-                  </span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: INK, flex: 1 }}>
-                    {m.momentName}
-                  </span>
-                  {m.totalViews > 0 && (
-                    <span style={{
-                      fontSize: 12, color: SMOKE,
-                      fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-                    }}>
-                      {fmtNum(m.totalViews)} views
-                    </span>
-                  )}
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, color: '#059669',
-                    textTransform: 'uppercase', letterSpacing: '0.06em',
-                  }}>
-                    Done
+                    width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
+                    background: sig.urgency === 'positive' ? '#059669'
+                      : sig.urgency === 'warning' ? '#D97706'
+                      : sig.urgency === 'critical' ? '#DC2626' : GHOST,
+                  }} />
+                  <span style={{ fontSize: 13, color: SMOKE, lineHeight: 1.4 }}>
+                    {sig.text}
                   </span>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* ══════════════════════════════════════════════════════════════
-            EXPORT — Generate & Share
-        ══════════════════════════════════════════════════════════════ */}
-        <div style={{
-          borderTop: `1px solid ${BONE}`, paddingTop: 24, paddingBottom: 48,
+
+        {/* ══════════════════════════════════════════════════════════════════
+            COMING CHAPTERS — Upcoming moments as editorial narrative
+        ══════════════════════════════════════════════════════════════════ */}
+        {upcomingMoments.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+            marginBottom: 56,
+          }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: GHOST,
+              fontFamily: MONO, marginBottom: 24,
+            }}>
+              Coming Up
+            </div>
+            {upcomingMoments.map((m) => (
+              <ChapterRow key={m.weekNum} moment={m} />
+            ))}
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            STORYBOARD — Full timeline, collapsible system-2 layer
+        ══════════════════════════════════════════════════════════════════ */}
+        <section style={{
+          maxWidth: 1200, margin: '0 auto', padding: '0 40px',
         }}>
           <div style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
-            textTransform: 'uppercase', color: GHOST, marginBottom: 14,
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+            borderTop: `1px solid ${BONE}`, paddingTop: 24, marginBottom: 32,
           }}>
-            Generate
-          </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {[
-              { id: 'summary', label: 'Campaign Summary' },
-              { id: 'update', label: 'Management Update' },
-              { id: 'brief', label: 'YouTube Brief' },
-            ].map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setExportOpen(exportOpen === id ? null : id)}
-                style={{
-                  fontSize: 12, fontWeight: 600, padding: '8px 18px',
-                  background: exportOpen === id ? INK : 'transparent',
-                  color: exportOpen === id ? PAPER : INK,
-                  border: `1px solid ${exportOpen === id ? INK : BONE}`,
-                  borderRadius: 4, cursor: 'pointer',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+            <button
+              onClick={() => setTimelineOpen(!timelineOpen)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                padding: 0, marginBottom: timelineOpen ? 20 : 0,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+                  textTransform: 'uppercase', color: SMOKE, fontFamily: MONO,
+                }}>
+                  Full Timeline
+                </span>
+                <span style={{ fontSize: 12, color: GHOST }}>
+                  {plan.totalWeeks} weeks · {plan.events.length} moments
+                  {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
+                </span>
+              </div>
+              <span style={{
+                fontSize: 11, color: GHOST, transition: 'transform 0.15s',
+                transform: timelineOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              }}>
+                ▶
+              </span>
+            </button>
 
-          {exportOpen && (
+            <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
+
+            {timelineOpen && (
+              <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} />
+            )}
+          </div>
+        </section>
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            COMPLETED — Past moments, muted, compressed
+        ══════════════════════════════════════════════════════════════════ */}
+        {pastMoments.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+            marginBottom: 48,
+          }}>
             <div style={{
-              marginTop: 12, background: WHITE, border: `1px solid ${BONE}`,
-              borderRadius: 6, overflow: 'hidden',
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: GHOST,
+              fontFamily: MONO, marginBottom: 12,
             }}>
-              <pre style={{
-                padding: '20px 24px', fontSize: 12, lineHeight: 1.6,
-                whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                margin: 0, color: INK, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-                maxHeight: 400, overflow: 'auto',
+              Completed Moments
+            </div>
+            {pastMoments.map((m) => (
+              <div key={m.weekNum} style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '8px 0', borderBottom: `1px solid ${BONE}`,
+                opacity: 0.45,
               }}>
-                {generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)}
-              </pre>
-              <div style={{
-                padding: '10px 20px', borderTop: `1px solid ${BONE}`,
-                display: 'flex', justifyContent: 'flex-end',
-              }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 32,
+                  fontFamily: MONO,
+                }}>
+                  W{m.weekNum}
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: INK, flex: 1 }}>
+                  {m.momentName}
+                </span>
+                {m.primaryUpload && (
+                  <div style={{
+                    width: 48, height: 28, borderRadius: 2, overflow: 'hidden',
+                    flexShrink: 0,
+                  }}>
+                    <img
+                      src={ytThumb(m.primaryUpload.id, 'mqdefault')}
+                      alt="" loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
+                    />
+                  </div>
+                )}
+                {m.totalViews > 0 && (
+                  <span style={{
+                    fontSize: 12, color: SMOKE, fontFamily: MONO,
+                  }}>
+                    {fmtNum(m.totalViews)}
+                  </span>
+                )}
+              </div>
+            ))}
+          </section>
+        )}
+
+
+        {/* ══════════════════════════════════════════════════════════════════
+            GENERATE — Export controls
+        ══════════════════════════════════════════════════════════════════ */}
+        <section style={{
+          maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+        }}>
+          <div style={{
+            borderTop: `1px solid ${BONE}`, paddingTop: 24, paddingBottom: 48,
+          }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: GHOST,
+              fontFamily: MONO, marginBottom: 14,
+            }}>
+              Generate
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {[
+                { id: 'summary', label: 'Campaign Summary' },
+                { id: 'update', label: 'Management Update' },
+                { id: 'brief', label: 'YouTube Brief' },
+              ].map(({ id, label }) => (
                 <button
-                  onClick={() => copyToClipboard(
-                    generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)
-                  )}
+                  key={id}
+                  onClick={() => setExportOpen(exportOpen === id ? null : id)}
                   style={{
-                    fontSize: 11, fontWeight: 700, padding: '6px 16px',
-                    background: copied ? '#ECFDF5' : INK,
-                    color: copied ? '#059669' : PAPER,
-                    border: 'none', borderRadius: 4, cursor: 'pointer',
-                    letterSpacing: '0.04em',
+                    fontSize: 12, fontWeight: 600, padding: '8px 18px',
+                    background: exportOpen === id ? INK : 'transparent',
+                    color: exportOpen === id ? PAPER : INK,
+                    border: `1px solid ${exportOpen === id ? INK : BONE}`,
+                    borderRadius: 4, cursor: 'pointer', letterSpacing: '0.02em',
                   }}
                 >
-                  {copied ? '✓ Copied' : 'Copy'}
+                  {label}
                 </button>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
+
+            {exportOpen && (
+              <div style={{
+                marginTop: 12, background: WHITE, border: `1px solid ${BONE}`,
+                borderRadius: 6, overflow: 'hidden',
+              }}>
+                <pre style={{
+                  padding: '20px 24px', fontSize: 12, lineHeight: 1.6,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  margin: 0, color: INK, fontFamily: MONO,
+                  maxHeight: 400, overflow: 'auto',
+                }}>
+                  {generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)}
+                </pre>
+                <div style={{
+                  padding: '10px 20px', borderTop: `1px solid ${BONE}`,
+                  display: 'flex', justifyContent: 'flex-end',
+                }}>
+                  <button
+                    onClick={() => copyToClipboard(
+                      generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)
+                    )}
+                    style={{
+                      fontSize: 11, fontWeight: 700, padding: '6px 16px',
+                      background: copied ? '#ECFDF5' : INK,
+                      color: copied ? '#059669' : PAPER,
+                      border: 'none', borderRadius: 4, cursor: 'pointer',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {copied ? '✓ Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* ── Footer ─────────────────────────────────────────────── */}
         <div style={{
-          padding: '24px 0 40px', borderTop: `1px solid ${BONE}`,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          maxWidth: 1200, margin: '0 auto', padding: '0 40px',
         }}>
-          <span style={{
-            fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
-            color: GHOST,
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          <div style={{
+            padding: '24px 0 40px', borderTop: `1px solid ${BONE}`,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            YouTube Campaign System
+            <span style={{
+              fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+              color: GHOST, fontFamily: MONO,
+            }}>
+              YouTube Campaign System
+            </span>
+            <span style={{
+              fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: GHOST, fontFamily: MONO,
+            }}>
+              {plan.artist} · {campaignTitle}
+            </span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CAMPAIGN WALL — Editorial collage built from live campaign assets
+//
+// Not a gallery. Not a list. A curated visual storyboard that communicates
+// cadence, energy, and rollout momentum through real campaign imagery.
+// ══════════════════════════════════════════════════════════════════════════════
+
+function CampaignWall({
+  uploads,
+  shorts,
+  longform,
+  heroUpload,
+  totalViews,
+}: {
+  uploads: RecentUpload[];
+  shorts: RecentUpload[];
+  longform: RecentUpload[];
+  heroUpload: RecentUpload | null;
+  totalViews: number;
+}) {
+  // Secondary longform = everything after the hero
+  const secondaryLong = heroUpload
+    ? longform.filter((u) => u.id !== heroUpload.id).slice(0, 3)
+    : longform.slice(0, 3);
+
+  return (
+    <section style={{ background: INK }}>
+
+      {/* ── HERO FRAME — Cinemascope crop of top-performing upload ─── */}
+      {heroUpload && (
+        <div style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '21/9',
+          overflow: 'hidden',
+        }}>
+          <img
+            src={ytThumb(heroUpload.id, 'maxresdefault')}
+            alt=""
+            style={{
+              width: '100%', height: '100%',
+              objectFit: 'cover',
+              filter: 'brightness(0.55) contrast(1.1)',
+            }}
+          />
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0,
+            padding: '60px 40px 24px',
+            background: 'linear-gradient(transparent 0%, rgba(10,10,10,0.85) 100%)',
+          }}>
+            <div style={{
+              maxWidth: 1200, margin: '0 auto',
+              display: 'flex', justifyContent: 'space-between',
+              alignItems: 'flex-end', flexWrap: 'wrap', gap: 16,
+            }}>
+              <div style={{ maxWidth: 500 }}>
+                <div style={{
+                  fontSize: 14, color: 'rgba(255,255,255,0.5)',
+                  marginBottom: 6,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {heroUpload.title}
+                </div>
+                <div style={{
+                  fontSize: 9, color: 'rgba(255,255,255,0.2)',
+                  fontFamily: MONO, letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}>
+                  {timeAgo(heroUpload.publishedAt)}
+                  {isFresh(heroUpload.publishedAt) && (
+                    <span style={{
+                      marginLeft: 10, color: '#34D399',
+                      fontWeight: 700,
+                    }}>
+                      NEW
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div style={{
+                fontSize: 'clamp(32px, 4vw, 56px)',
+                fontWeight: 900,
+                letterSpacing: '-0.03em',
+                color: WHITE, fontFamily: MONO, lineHeight: 1,
+              }}>
+                {fmtNum(heroUpload.viewCount)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* ── SHORTS STRIP — Vertical frames. Windows into the campaign. ─── */}
+      {shorts.length > 0 && (
+        <div style={{
+          display: 'flex', gap: 2, marginTop: 2,
+        }}>
+          {shorts.slice(0, Math.min(shorts.length, 5)).map((s) => (
+            <div key={s.id} style={{
+              flex: '1 1 0',
+              aspectRatio: '9/16',
+              position: 'relative',
+              overflow: 'hidden',
+              minWidth: 0,
+            }}>
+              <img
+                src={ytThumb(s.id)}
+                alt="" loading="lazy"
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover',
+                  filter: 'brightness(0.7) saturate(1.1)',
+                }}
+              />
+              {/* Gradient overlay */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0, height: '40%',
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                pointerEvents: 'none',
+              }} />
+              {/* View count */}
+              <div style={{
+                position: 'absolute',
+                bottom: 8, left: 10,
+              }}>
+                <div style={{
+                  fontSize: 15, fontWeight: 900, color: WHITE,
+                  fontFamily: MONO, letterSpacing: '-0.02em',
+                }}>
+                  {fmtNum(s.viewCount)}
+                </div>
+              </div>
+              {/* Fresh indicator */}
+              {isFresh(s.publishedAt) && (
+                <div style={{
+                  position: 'absolute', top: 8, right: 8,
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: '#34D399',
+                  boxShadow: '0 0 8px rgba(52,211,153,0.5)',
+                }} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+
+      {/* ── SECONDARY MOSAIC — Asymmetric landscape thumbnails ─── */}
+      {secondaryLong.length > 0 && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns:
+            secondaryLong.length >= 3 ? '5fr 3fr 4fr'
+            : secondaryLong.length === 2 ? '3fr 2fr'
+            : '1fr',
+          gap: 2,
+          marginTop: 2,
+        }}>
+          {secondaryLong.map((u, i) => (
+            <div key={u.id} style={{
+              position: 'relative',
+              aspectRatio: '16/9',
+              overflow: 'hidden',
+            }}>
+              <img
+                src={ytThumb(u.id)}
+                alt="" loading="lazy"
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover',
+                  filter: `brightness(${0.6 - i * 0.05})`,
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0, height: '50%',
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
+                pointerEvents: 'none',
+              }} />
+              <div style={{
+                position: 'absolute', bottom: 8, left: 10, right: 10,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+              }}>
+                <span style={{
+                  fontSize: 11, color: 'rgba(255,255,255,0.4)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  maxWidth: '65%',
+                }}>
+                  {u.title}
+                </span>
+                <span style={{
+                  fontSize: 12, fontWeight: 800, color: 'rgba(255,255,255,0.6)',
+                  fontFamily: MONO,
+                }}>
+                  {fmtNum(u.viewCount)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+
+      {/* ── STAT BAR — Typography interruption ─── */}
+      <div style={{
+        padding: '20px 40px',
+        maxWidth: 1200, margin: '0 auto',
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'baseline', flexWrap: 'wrap', gap: 12,
+      }}>
+        <span style={{
+          fontSize: 10, fontWeight: 600, letterSpacing: '0.16em',
+          textTransform: 'uppercase', color: SMOKE, fontFamily: MONO,
+        }}>
+          {uploads.length} uploads · {shorts.length} shorts
+        </span>
+        <div>
+          <span style={{
+            fontSize: 28, fontWeight: 900,
+            letterSpacing: '-0.03em',
+            color: 'rgba(200,194,184,0.35)',
+            fontFamily: MONO,
+          }}>
+            {fmtNum(totalViews)}
           </span>
           <span style={{
-            fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: GHOST,
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+            fontSize: 9, fontWeight: 700, marginLeft: 8,
+            letterSpacing: '0.12em', color: SMOKE, fontFamily: MONO,
           }}>
-            {plan.artist} · {campaignTitle}
+            TOTAL VIEWS
           </span>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// LIVE METRIC — Dark strip metric
-// ══════════════════════════════════════════════════════════════════════════════
-
-function LiveMetric({ label, value, positive, negative }: {
-  label: string;
-  value: string;
-  positive?: boolean;
-  negative?: boolean;
-}) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <span style={{
-        fontSize: 9, fontWeight: 600, letterSpacing: '0.14em',
-        textTransform: 'uppercase', color: 'rgba(245,242,237,0.35)',
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-      }}>
-        {label}
-      </span>
-      <span style={{
-        fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em',
-        color: positive ? '#34D399' : negative ? '#F87171' : PAPER,
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-      }}>
-        {value}
-      </span>
-    </div>
-  );
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
-// CINEMATIC MOMENT — The hero moment block
+// LIVE MOMENT — The operational heartbeat. Oversized, visual, decisive.
 // ══════════════════════════════════════════════════════════════════════════════
 
-function CinematicMoment({ moment, isCurrent }: {
-  moment: CampaignMoment;
-  isCurrent?: boolean;
-}) {
+function LiveMomentBlock({ moment }: { moment: CampaignMoment }) {
   const phaseTone = PHASE_TONE[moment.phase];
   const isLive = moment.timing === 'current';
 
+  // Separate matched uploads with thumbnails from text-only actions
+  const doneActions = moment.actions.filter(
+    (a) => a.status === 'completed' || a.status === 'live'
+  );
+  const missingActions = moment.actions.filter(
+    (a) => a.status === 'missing' || a.status === 'late'
+  );
+  const plannedActions = moment.actions.filter(
+    (a) => a.status === 'planned'
+  );
+
   return (
-    <div style={{ marginBottom: 32 }}>
-      {/* Moment header */}
+    <section style={{
+      maxWidth: 1200, margin: '0 auto', padding: '0 40px',
+      marginBottom: 64,
+    }}>
+      {/* Header */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 12,
-        marginBottom: 12,
+        display: 'flex', alignItems: 'center', gap: 14,
+        marginBottom: 20,
       }}>
         <span style={{
           fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
-          textTransform: 'uppercase', color: GHOST,
-          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          textTransform: 'uppercase', color: GHOST, fontFamily: MONO,
         }}>
           W{moment.weekNum} · {moment.dateRange}
         </span>
@@ -627,61 +944,204 @@ function CinematicMoment({ moment, isCurrent }: {
           <span style={{
             fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
             textTransform: 'uppercase',
-            padding: '2px 10px', borderRadius: 3,
+            padding: '3px 10px', borderRadius: 3,
             background: phaseTone.accent, color: WHITE,
+            animation: 'cpulse 2s ease-in-out infinite',
           }}>
-            Live
+            LIVE
           </span>
         )}
       </div>
 
-      {/* Moment title — large editorial */}
+      {/* Moment name — oversized, editorial */}
       <h2 style={{
-        fontSize: 36, fontWeight: 800, color: INK, margin: 0,
-        lineHeight: 1.05, letterSpacing: '-0.01em',
+        fontSize: 'clamp(28px, 4vw, 48px)',
+        fontWeight: 900, lineHeight: 0.95,
+        letterSpacing: '-0.02em', margin: 0, color: INK,
       }}>
         {moment.momentName}
       </h2>
 
-      {/* Primary upload performance */}
+      {/* Primary upload as hero frame with thumbnail */}
       {moment.primaryUpload && (
         <div style={{
-          marginTop: 14, display: 'flex', alignItems: 'baseline', gap: 8,
+          marginTop: 28,
+          position: 'relative',
+          borderRadius: 6, overflow: 'hidden',
+          aspectRatio: '16/9',
         }}>
-          <span style={{
-            fontSize: 28, fontWeight: 900, color: '#059669',
-            letterSpacing: '-0.02em',
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          <img
+            src={ytThumb(moment.primaryUpload.id, 'maxresdefault')}
+            alt="" loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0,
+            padding: '48px 28px 20px',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
           }}>
-            {fmtNum(moment.primaryUpload.viewCount)}
-          </span>
-          <span style={{ fontSize: 13, fontWeight: 500, color: SMOKE }}>
-            views
-            {moment.totalViews > moment.primaryUpload.viewCount && (
-              <span style={{ color: GHOST }}>
-                {' '}· {fmtNum(moment.totalViews)} total across support
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: 'clamp(24px, 3vw, 40px)',
+                fontWeight: 900, color: WHITE,
+                fontFamily: MONO, letterSpacing: '-0.02em',
+              }}>
+                {fmtNum(moment.primaryUpload.viewCount)}
               </span>
-            )}
-          </span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>
+                views
+              </span>
+              {moment.totalViews > moment.primaryUpload.viewCount && (
+                <span style={{
+                  fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: MONO,
+                }}>
+                  · {fmtNum(moment.totalViews)} total across moment
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Support content grid */}
-      {moment.actions.length > 0 && (
+      {/* Support content — visual grid of thumbnails + ghost frames */}
+      {(doneActions.length > 0 || missingActions.length > 0 || plannedActions.length > 0) && (
         <div style={{
-          marginTop: 20,
+          marginTop: 16,
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: 6,
+          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+          gap: 8,
         }}>
-          {moment.supportDone.map((title, i) => (
-            <SupportBlock key={`done-${i}`} title={title} status="done" />
+          {/* Done — with thumbnails where matched */}
+          {doneActions.map((a, i) => (
+            <div key={`d-${i}`} style={{
+              position: 'relative',
+              aspectRatio: '16/9',
+              background: '#1a1a1a',
+              borderRadius: 4, overflow: 'hidden',
+            }}>
+              {a.matchedUpload ? (
+                <img
+                  src={ytThumb(a.matchedUpload.id)}
+                  alt="" loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{
+                  width: '100%', height: '100%',
+                  background: '#1a1a1a',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: 16, color: '#059669' }}>✓</span>
+                </div>
+              )}
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                padding: '20px 8px 6px',
+                background: 'linear-gradient(transparent, rgba(0,0,0,0.75))',
+              }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+                }}>
+                  <span style={{
+                    fontSize: 9, color: 'rgba(255,255,255,0.5)',
+                    fontFamily: MONO, fontWeight: 600,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    maxWidth: '60%',
+                  }}>
+                    {cleanTitle(a.title)}
+                  </span>
+                  {a.matchedUpload && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, color: WHITE, fontFamily: MONO,
+                    }}>
+                      {fmtNum(a.matchedUpload.viewCount)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           ))}
-          {moment.supportMissing.map((title, i) => (
-            <SupportBlock key={`miss-${i}`} title={title} status="missing" />
+
+          {/* Missing — ghost frames with dashed borders */}
+          {missingActions.map((a, i) => (
+            <div key={`m-${i}`} style={{
+              aspectRatio: '16/9',
+              border: `1px dashed ${GHOST}`,
+              borderRadius: 4,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              padding: 12, gap: 4,
+            }}>
+              <span style={{
+                fontSize: 10, color: SMOKE, textAlign: 'center',
+                fontFamily: MONO, lineHeight: 1.4,
+              }}>
+                {cleanTitle(a.title)}
+              </span>
+              <span style={{
+                fontSize: 8, fontWeight: 800, color: '#DC2626',
+                letterSpacing: '0.1em', fontFamily: MONO,
+              }}>
+                {a.status === 'late' ? 'OVERDUE' : 'MISSING'}
+              </span>
+            </div>
           ))}
-          {moment.supportPlanned.map((title, i) => (
-            <SupportBlock key={`plan-${i}`} title={title} status="planned" />
+
+          {/* Planned — subtle bone frames */}
+          {plannedActions.map((a, i) => (
+            <div key={`p-${i}`} style={{
+              aspectRatio: '16/9',
+              background: BONE,
+              borderRadius: 4,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              padding: 12, gap: 4,
+            }}>
+              <span style={{
+                fontSize: 10, color: SMOKE, textAlign: 'center',
+                fontFamily: MONO,
+              }}>
+                {cleanTitle(a.title)}
+              </span>
+              <span style={{
+                fontSize: 8, fontWeight: 700, color: GHOST,
+                letterSpacing: '0.1em', fontFamily: MONO,
+              }}>
+                PLANNED
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Extra uploads as a secondary strip */}
+      {moment.extraUploads.length > 0 && (
+        <div style={{
+          marginTop: 14, display: 'flex', gap: 6,
+          overflowX: 'auto', paddingBottom: 4,
+        }}>
+          {moment.extraUploads.map((u) => (
+            <div key={u.id} style={{
+              flexShrink: 0,
+              width: u.durationSec <= 62 ? 72 : 120,
+              aspectRatio: u.durationSec <= 62 ? '9/16' : '16/9',
+              borderRadius: 3, overflow: 'hidden', position: 'relative',
+            }}>
+              <img
+                src={ytThumb(u.id, 'mqdefault')}
+                alt="" loading="lazy"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }}
+              />
+              <div style={{
+                position: 'absolute', bottom: 3, left: 5,
+                fontSize: 9, fontWeight: 700, color: WHITE,
+                fontFamily: MONO,
+                textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+              }}>
+                {fmtNum(u.viewCount)}
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -690,116 +1150,66 @@ function CinematicMoment({ moment, isCurrent }: {
       {moment.supportMissing.length > 0 && (
         <p style={{
           fontSize: 14, color: INK, fontWeight: 500,
-          marginTop: 16, marginBottom: 0, lineHeight: 1.5,
-          paddingLeft: 16,
+          marginTop: 24, marginBottom: 0, lineHeight: 1.6,
+          paddingLeft: 16, maxWidth: 560,
           borderLeft: `2px solid ${phaseTone.accent}`,
         }}>
           {buildMomentGuidance(moment)}
         </p>
       )}
-
-      {/* Extra uploads */}
-      {moment.extraUploads.length > 0 && (
-        <div style={{ marginTop: 16, paddingTop: 12, borderTop: `1px solid ${BONE}` }}>
-          <span style={{
-            fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
-            textTransform: 'uppercase', color: GHOST,
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-          }}>
-            Extra Uploads
-          </span>
-          {moment.extraUploads.map((u) => (
-            <div key={u.id} style={{
-              fontSize: 13, color: SMOKE, marginTop: 6,
-              display: 'flex', gap: 8, alignItems: 'center',
-            }}>
-              <span style={{ fontSize: 10, opacity: 0.5 }}>{u.durationSec <= 62 ? '⚡' : '▶'}</span>
-              <span style={{ flex: 1 }}>{u.title}</span>
-              <span style={{
-                fontSize: 11, color: GHOST,
-                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-              }}>
-                {fmtNum(u.viewCount)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    </section>
   );
 }
 
-// ── Support Block ─────────────────────────────────────────────────────────
 
-function SupportBlock({ title, status }: { title: string; status: 'done' | 'missing' | 'planned' }) {
+// ══════════════════════════════════════════════════════════════════════════════
+// CHAPTER ROW — Upcoming moment as editorial block, not table row
+// ══════════════════════════════════════════════════════════════════════════════
+
+function ChapterRow({ moment }: { moment: CampaignMoment }) {
+  const phaseTone = PHASE_TONE[moment.phase];
   return (
     <div style={{
-      padding: '10px 14px',
-      background: status === 'done' ? '#ECFDF5'
-        : status === 'missing' ? '#FEF2F2'
-        : BONE,
-      borderRadius: 4,
-      borderLeft: `3px solid ${
-        status === 'done' ? '#059669'
-        : status === 'missing' ? '#DC2626'
-        : GHOST
-      }`,
-    }}>
-      <div style={{
-        fontSize: 12, fontWeight: 600,
-        color: status === 'done' ? '#065F46'
-          : status === 'missing' ? '#991B1B'
-          : INK,
-      }}>
-        {title}
-      </div>
-      <div style={{
-        fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
-        textTransform: 'uppercase', marginTop: 4,
-        color: status === 'done' ? '#059669'
-          : status === 'missing' ? '#DC2626'
-          : SMOKE,
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-      }}>
-        {status === 'done' ? 'Shipped' : status === 'missing' ? 'Missing' : 'Planned'}
-      </div>
-    </div>
-  );
-}
-
-// ── Upcoming Row ──────────────────────────────────────────────────────────
-
-function UpcomingRow({ moment }: { moment: CampaignMoment }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12,
-      padding: '10px 0',
+      padding: '20px 0',
       borderBottom: `1px solid ${BONE}`,
+      display: 'flex', alignItems: 'flex-start', gap: 20,
     }}>
-      <span style={{
-        fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 32,
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      <div style={{
+        minWidth: 90,
+        display: 'flex', flexDirection: 'column', gap: 3,
       }}>
-        W{moment.weekNum}
-      </span>
-      <span style={{
-        fontSize: 11, color: SMOKE, minWidth: 80,
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-      }}>
-        {moment.dateRange.split('–')[0]}
-      </span>
-      <span style={{ fontSize: 15, fontWeight: 700, color: INK, flex: 1 }}>
-        {moment.momentName}
-      </span>
-      <span style={{
-        fontSize: 11, color: GHOST,
-        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-      }}>
-        {moment.actions.length} actions
-      </span>
+        <span style={{
+          fontSize: 10, fontWeight: 700, color: GHOST, fontFamily: MONO,
+        }}>
+          W{moment.weekNum}
+        </span>
+        <span style={{
+          fontSize: 11, color: SMOKE, fontFamily: MONO,
+        }}>
+          {moment.dateRange.split('–')[0]}
+        </span>
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{
+          fontSize: 18, fontWeight: 800, color: INK,
+          lineHeight: 1.2, marginBottom: 4,
+        }}>
+          {moment.momentName}
+        </div>
+        <div style={{ fontSize: 12, color: SMOKE }}>
+          {moment.actions.length} planned {moment.actions.length === 1 ? 'action' : 'actions'}
+        </div>
+      </div>
+      <div style={{
+        width: 4, height: 32,
+        background: phaseTone.accent,
+        borderRadius: 2,
+        flexShrink: 0, alignSelf: 'center',
+      }} />
     </div>
   );
 }
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // PHASE STRIP — Visual progress
@@ -828,8 +1238,7 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
             <span style={{
               fontSize: 8, fontWeight: 800, letterSpacing: '0.12em',
               color: isCurrent ? tone.accent : GHOST,
-              textTransform: 'uppercase',
-              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              textTransform: 'uppercase', fontFamily: MONO,
             }}>
               {p.name}
             </span>
@@ -839,6 +1248,7 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
     </div>
   );
 }
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TIMELINE DETAIL — System 2 reference layer
@@ -870,7 +1280,7 @@ function TimelineDetail({ plan, matchResult, currentPhase }: {
               textTransform: 'uppercase', marginBottom: 8,
               color: isCurrent ? tone.accent : GHOST,
               display: 'flex', alignItems: 'center', gap: 10,
-              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              fontFamily: MONO,
             }}>
               {tone.label}
               <span style={{
@@ -933,14 +1343,12 @@ function TimelineWeekRow({ week, matchResult }: {
         }}
       >
         <span style={{
-          fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 28,
-          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 28, fontFamily: MONO,
         }}>
           W{week.weekNum}
         </span>
         <span style={{
-          fontSize: 11, color: GHOST, minWidth: 80,
-          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          fontSize: 11, color: GHOST, minWidth: 80, fontFamily: MONO,
         }}>
           {week.dateRange}
         </span>
@@ -954,7 +1362,7 @@ function TimelineWeekRow({ week, matchResult }: {
         {actions.length > 0 && (
           <span style={{
             fontSize: 10, color: GHOST, display: 'flex', gap: 4, alignItems: 'center',
-            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+            fontFamily: MONO,
           }}>
             {done > 0 && <span style={{ color: '#059669', fontWeight: 700 }}>{done}✓</span>}
             {issues > 0 && <span style={{ color: '#DC2626', fontWeight: 700 }}>{issues}!</span>}
@@ -984,18 +1392,12 @@ function TimelineWeekRow({ week, matchResult }: {
                 textDecoration: isDone ? 'line-through' : 'none',
                 opacity: isDone ? 0.5 : 1,
               }}>
-                <span style={{
-                  fontSize: 10, opacity: 0.6,
-                  fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-                }}>
+                <span style={{ fontSize: 10, opacity: 0.6, fontFamily: MONO }}>
                   {a.format === 'short' ? '⚡' : a.format === 'video' || a.format === 'premiere' ? '▶' : a.format === 'live' ? '◉' : '·'}
                 </span>
                 <span style={{ flex: 1 }}>{a.title}</span>
                 {matched?.matchedUpload && (
-                  <span style={{
-                    fontSize: 10, color: '#059669',
-                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
-                  }}>
+                  <span style={{ fontSize: 10, color: '#059669', fontFamily: MONO }}>
                     {fmtNum(matched.matchedUpload.viewCount)}
                   </span>
                 )}
@@ -1004,8 +1406,7 @@ function TimelineWeekRow({ week, matchResult }: {
                     fontSize: 8, fontWeight: 800, padding: '1px 6px', borderRadius: 2,
                     background: isLate ? '#FEF2F2' : '#FFF7ED',
                     color: isLate ? '#DC2626' : '#C2410C',
-                    textTransform: 'uppercase', letterSpacing: '0.08em',
-                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                    textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
                   }}>
                     {isLate ? 'Late' : 'Missing'}
                   </span>
@@ -1019,8 +1420,9 @@ function TimelineWeekRow({ week, matchResult }: {
   );
 }
 
+
 // ══════════════════════════════════════════════════════════════════════════════
-// HELPERS
+// HELPERS — All logic preserved from v1
 // ══════════════════════════════════════════════════════════════════════════════
 
 function generatePulseSignals(
