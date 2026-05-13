@@ -14,26 +14,38 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 
-// ── Design tokens ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// DESIGN SYSTEM — Cinematic Rollout OS
+// ══════════════════════════════════════════════════════════════════════════════
 
-const INK = '#0E0E0E';
-const PAPER = '#FAF7F2';
-const SOFT = '#F6F1E7';
-const BORDER = '#E8E3DA';
-const MUTED = '#9B9589';
+const INK = '#0A0A0A';
+const PAPER = '#F5F2ED';
+const BONE = '#EBE7DF';
+const SMOKE = '#8A847A';
+const GHOST = '#C8C2B8';
+const WHITE = '#FFFFFF';
 
-const PHASE_COLOR: Record<PhaseName, string> = {
-  BUILD: '#6366F1',
-  RELEASE: '#FF4A1C',
-  SCALE: '#1FBE7A',
-  EXTEND: '#F59E0B',
-};
-
-const PHASE_LABEL: Record<PhaseName, string> = {
-  BUILD: 'Building momentum',
-  RELEASE: 'Release window',
-  SCALE: 'Scaling reach',
-  EXTEND: 'Extending lifecycle',
+const PHASE_TONE: Record<PhaseName, { accent: string; label: string; narrative: string }> = {
+  BUILD: {
+    accent: '#4338CA',
+    label: 'BUILD THE WORLD',
+    narrative: 'Warming the algorithm. Building presence.',
+  },
+  RELEASE: {
+    accent: '#DC2626',
+    label: 'THE CENTREPIECE',
+    narrative: 'The main event. Maximum pressure.',
+  },
+  SCALE: {
+    accent: '#059669',
+    label: 'SCALE THE STORY',
+    narrative: 'Momentum is real. Push it further.',
+  },
+  EXTEND: {
+    accent: '#D97706',
+    label: 'EXTEND THE WORLD',
+    narrative: 'Keep the universe alive.',
+  },
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -75,7 +87,6 @@ type CampaignMoment = {
   daysAway: number;
   actions: MatchedAction[];
   extraUploads: RecentUpload[];
-  // Derived
   primaryUpload: RecentUpload | null;
   supportDone: string[];
   supportMissing: string[];
@@ -83,7 +94,9 @@ type CampaignMoment = {
   totalViews: number;
 };
 
-// ── Main Component ─────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ══════════════════════════════════════════════════════════════════════════════
 
 export default function CampaignDestination({
   plan,
@@ -104,7 +117,11 @@ export default function CampaignDestination({
   const moments = extractMoments(plan, matchResult);
   const activeMoment = moments.find((m) => m.timing === 'current') ?? moments.find((m) => m.timing === 'past');
   const nextMoment = moments.find((m) => m.timing === 'upcoming');
+  const upcomingMoments = moments.filter((m) => m.timing === 'upcoming').slice(0, 3);
+  const pastMoments = moments.filter((m) => m.timing === 'past').reverse().slice(0, 4);
   const attentionItems = buildAttentionItems(nudges ?? [], matchResult, liveChannel);
+  const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
+  const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -114,245 +131,290 @@ export default function CampaignDestination({
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 24px' }}>
 
-        {/* ── Top nav ─────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════
+          HEADER BAR — Thin, institutional
+      ══════════════════════════════════════════════════════════════════ */}
+      <div style={{
+        borderBottom: `1px solid ${BONE}`,
+        padding: '14px 0',
+      }}>
         <div style={{
+          maxWidth: 1000, margin: '0 auto', padding: '0 32px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '16px 0', borderBottom: `1px solid ${BORDER}`,
         }}>
           <Link href="/coach" style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: '0.18em',
-            textTransform: 'uppercase', color: MUTED, textDecoration: 'none',
+            fontSize: 10, fontWeight: 600, letterSpacing: '0.2em',
+            textTransform: 'uppercase', color: GHOST, textDecoration: 'none',
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
           }}>
-            YouTube Campaign System
+            Campaign System
           </Link>
-          <Link href="/coach" style={{
-            fontSize: 11, fontWeight: 600, color: MUTED,
-            textDecoration: 'none', padding: '4px 10px',
-            borderRadius: 5, background: SOFT,
-          }}>
-            All Campaigns
-          </Link>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════
-            1. HERO
-        ══════════════════════════════════════════════════════════ */}
-        <div style={{ paddingTop: 48, paddingBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <span style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: MUTED,
-            }}>
-              {plan.artist}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {currentPhase && (
-              <>
-                <span style={{ color: BORDER }}>·</span>
-                <span style={{
-                  fontSize: 10, fontWeight: 800, letterSpacing: '0.08em',
-                  textTransform: 'uppercase', color: PHASE_COLOR[currentPhase],
-                }}>
-                  {currentPhase}
-                </span>
-              </>
+              <span style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+                textTransform: 'uppercase', color: phaseTone?.accent,
+                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              }}>
+                {phaseTone?.label}
+              </span>
             )}
+            <Link href="/coach" style={{
+              fontSize: 11, fontWeight: 600, color: SMOKE,
+              textDecoration: 'none', padding: '4px 12px',
+              border: `1px solid ${BONE}`, borderRadius: 4,
+            }}>
+              All Campaigns
+            </Link>
           </div>
-          <h1 style={{
-            fontSize: 36, fontWeight: 900, color: INK, margin: 0,
-            lineHeight: 1.1, letterSpacing: '-0.01em',
-          }}>
-            {plan.campaignName.replace(/ Campaign$/i, '')}
-          </h1>
-          <p style={{
-            fontSize: 15, color: '#5A5650', lineHeight: 1.55,
-            marginTop: 10, marginBottom: 0, maxWidth: 560,
-          }}>
-            {plan.strategy.priority}
-          </p>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          HERO — Cinematic title block
+      ══════════════════════════════════════════════════════════════════ */}
+      <div style={{
+        maxWidth: 1000, margin: '0 auto', padding: '0 32px',
+        paddingTop: 64, paddingBottom: 40,
+      }}>
+        {/* Artist name — mono label */}
+        <div style={{
+          fontSize: 11, fontWeight: 600, letterSpacing: '0.22em',
+          textTransform: 'uppercase', color: SMOKE, marginBottom: 16,
+          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+        }}>
+          {plan.artist}
         </div>
 
-        {/* ══════════════════════════════════════════════════════════
-            2. LIVE CAMPAIGN PULSE
-        ══════════════════════════════════════════════════════════ */}
-        {pulseSignals.length > 0 && (
+        {/* Campaign title — oversized, compressed */}
+        <h1 style={{
+          fontSize: 72, fontWeight: 900, color: INK, margin: 0,
+          lineHeight: 0.92, letterSpacing: '-0.03em',
+          textTransform: 'uppercase',
+          maxWidth: 800,
+        }}>
+          {campaignTitle}
+        </h1>
+
+        {/* Strategic line */}
+        <p style={{
+          fontSize: 17, color: SMOKE, lineHeight: 1.5,
+          marginTop: 20, marginBottom: 0, maxWidth: 560,
+          fontWeight: 400,
+        }}>
+          {plan.strategy.priority}
+        </p>
+
+        {/* Divider line */}
+        <div style={{
+          width: 60, height: 1, background: INK, marginTop: 32,
+        }} />
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          LIVE STRIP — Campaign vital signs
+      ══════════════════════════════════════════════════════════════════ */}
+      {(liveChannel || pulseSignals.length > 0) && (
+        <div style={{ background: INK, color: PAPER }}>
           <div style={{
-            background: '#FFFFFF', border: `1px solid ${BORDER}`,
-            borderRadius: 10, padding: '16px 20px', marginBottom: 24,
+            maxWidth: 1000, margin: '0 auto', padding: '28px 32px',
           }}>
+            {/* Metrics row */}
+            {liveChannel && (
+              <div style={{
+                display: 'flex', gap: 40, marginBottom: pulseSignals.length > 0 ? 20 : 0,
+                flexWrap: 'wrap',
+              }}>
+                {liveChannel.subs != null && (
+                  <LiveMetric label="Subscribers" value={fmtNum(liveChannel.subs)} />
+                )}
+                {liveChannel.views7Delta != null && (
+                  <LiveMetric
+                    label="Views 7d"
+                    value={`${liveChannel.views7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.views7Delta)}`}
+                    positive={liveChannel.views7Delta > 0}
+                    negative={liveChannel.views7Delta < 0}
+                  />
+                )}
+                {liveChannel.subs7Delta != null && (
+                  <LiveMetric
+                    label="Subs 7d"
+                    value={`${liveChannel.subs7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.subs7Delta)}`}
+                    positive={liveChannel.subs7Delta > 0}
+                  />
+                )}
+                {liveChannel.uploads30d != null && (
+                  <LiveMetric label="Uploads 30d" value={String(liveChannel.uploads30d)} />
+                )}
+                {liveChannel.lastUploadDaysAgo != null && (
+                  <LiveMetric
+                    label="Last upload"
+                    value={`${liveChannel.lastUploadDaysAgo}d`}
+                    negative={liveChannel.lastUploadDaysAgo > 14}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Pulse signals */}
+            {pulseSignals.length > 0 && (
+              <div style={{
+                display: 'flex', flexDirection: 'column', gap: 6,
+                borderTop: liveChannel ? `1px solid rgba(255,255,255,0.08)` : 'none',
+                paddingTop: liveChannel ? 16 : 0,
+              }}>
+                {pulseSignals.map((sig, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                      background: sig.urgency === 'positive' ? '#34D399'
+                        : sig.urgency === 'warning' ? '#FBBF24'
+                        : sig.urgency === 'critical' ? '#F87171'
+                        : 'rgba(255,255,255,0.2)',
+                    }} />
+                    <span style={{
+                      fontSize: 13, lineHeight: 1.4, fontWeight: 400,
+                      color: sig.urgency === 'critical' ? '#FCA5A5' : 'rgba(245,242,237,0.7)',
+                    }}>
+                      {sig.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════
+          CHAPTER BLOCK — Current phase as narrative act
+      ══════════════════════════════════════════════════════════════════ */}
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 32px' }}>
+
+        {currentPhase && phaseTone && (
+          <div style={{ paddingTop: 48, paddingBottom: 32 }}>
             <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: MUTED, marginBottom: 12,
+              display: 'flex', alignItems: 'baseline', gap: 16,
             }}>
-              Campaign Pulse
+              <span style={{
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: GHOST,
+                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              }}>
+                Chapter {plan.phases.findIndex(p => p.name === currentPhase) + 1 || '—'}
+              </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {pulseSignals.map((sig, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <span style={{
-                    width: 7, height: 7, borderRadius: '50%', flexShrink: 0, marginTop: 5,
-                    background: sig.urgency === 'positive' ? '#1FBE7A'
-                      : sig.urgency === 'warning' ? '#F59E0B'
-                      : sig.urgency === 'critical' ? '#DC2626'
-                      : '#C4BDB0',
-                  }} />
-                  <span style={{
-                    fontSize: 14, lineHeight: 1.45, fontWeight: 500,
-                    color: sig.urgency === 'critical' ? '#991B1B' : INK,
-                  }}>
-                    {sig.text}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <h2 style={{
+              fontSize: 40, fontWeight: 900, color: INK, margin: 0,
+              lineHeight: 1.0, letterSpacing: '-0.02em',
+              textTransform: 'uppercase', marginTop: 8,
+            }}>
+              {phaseTone.label}
+            </h2>
+            <p style={{
+              fontSize: 15, color: SMOKE, marginTop: 10, marginBottom: 0,
+              fontStyle: 'italic',
+            }}>
+              {phaseTone.narrative}
+            </p>
           </div>
         )}
 
-        {/* ── Channel metrics strip ───────────────────────────────── */}
-        {liveChannel && (
-          <div style={{
-            display: 'flex', gap: 20, padding: '12px 20px',
-            background: SOFT, borderRadius: 8, marginBottom: 24,
-            flexWrap: 'wrap', fontSize: 12,
-          }}>
-            {liveChannel.subs != null && (
-              <MetricChip label="Subscribers" value={fmtNum(liveChannel.subs)} />
-            )}
-            {liveChannel.views7Delta != null && (
-              <MetricChip
-                label="Views 7d"
-                value={`${liveChannel.views7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.views7Delta)}`}
-                color={liveChannel.views7Delta > 0 ? '#0C6A3F' : liveChannel.views7Delta < 0 ? '#991B1B' : undefined}
-              />
-            )}
-            {liveChannel.subs7Delta != null && (
-              <MetricChip
-                label="Subs 7d"
-                value={`${liveChannel.subs7Delta >= 0 ? '+' : ''}${fmtNum(liveChannel.subs7Delta)}`}
-                color={liveChannel.subs7Delta > 0 ? '#0C6A3F' : undefined}
-              />
-            )}
-            {liveChannel.uploads30d != null && (
-              <MetricChip label="Uploads 30d" value={String(liveChannel.uploads30d)} />
-            )}
-            {liveChannel.lastUploadDaysAgo != null && (
-              <MetricChip
-                label="Last upload"
-                value={`${liveChannel.lastUploadDaysAgo}d ago`}
-                color={liveChannel.lastUploadDaysAgo > 14 ? '#991B1B' : undefined}
-              />
-            )}
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════
-            3. BIG CURRENT MOMENT
-        ══════════════════════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════════════════════════
+            CURRENT MOMENT — The hero block
+        ══════════════════════════════════════════════════════════════ */}
         {activeMoment && (
-          <MomentBlock moment={activeMoment} label="Current Moment" />
-        )}
-        {nextMoment && nextMoment !== activeMoment && (
-          <MomentBlock moment={nextMoment} label="Next Moment" compact />
+          <CinematicMoment moment={activeMoment} isCurrent />
         )}
 
-        {/* ══════════════════════════════════════════════════════════
-            4. WHAT NEEDS ATTENTION NOW
-        ══════════════════════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════════════════════════
+            ATTENTION — What needs intervention
+        ══════════════════════════════════════════════════════════════ */}
         {attentionItems.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
+          <div style={{
+            marginTop: 8, marginBottom: 32,
+            borderLeft: `3px solid ${INK}`,
+            paddingLeft: 20,
+          }}>
             <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: MUTED, marginBottom: 10,
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: SMOKE, marginBottom: 12,
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
             }}>
               Needs Attention
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {attentionItems.map((item, i) => (
                 <div key={i} style={{
-                  display: 'flex', gap: 10, alignItems: 'flex-start',
-                  padding: '10px 16px', borderRadius: 8,
-                  background: item.urgency === 'critical' ? '#FEF2F2'
-                    : item.urgency === 'important' ? '#FFFBEB' : '#F8FAFC',
-                  border: `1px solid ${
-                    item.urgency === 'critical' ? '#FECACA'
-                    : item.urgency === 'important' ? '#FDE68A' : BORDER
-                  }`,
+                  fontSize: 14, lineHeight: 1.5, fontWeight: 500,
+                  color: item.urgency === 'critical' ? '#991B1B'
+                    : item.urgency === 'important' ? '#78350F' : INK,
                 }}>
-                  <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>
-                    {item.urgency === 'critical' ? '⚠' : item.urgency === 'important' ? '→' : '○'}
-                  </span>
-                  <span style={{
-                    fontSize: 13, lineHeight: 1.5, fontWeight: 500,
-                    color: item.urgency === 'critical' ? '#991B1B'
-                      : item.urgency === 'important' ? '#78350F' : '#374151',
-                  }}>
-                    {item.text}
-                  </span>
+                  {item.text}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ══════════════════════════════════════════════════════════
-            5. CAMPAIGN TIMELINE (System 2 — collapsed by default)
-        ══════════════════════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════════════════════════
+            NEXT — What's coming
+        ══════════════════════════════════════════════════════════════ */}
+        {upcomingMoments.length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: GHOST, marginBottom: 16,
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+            }}>
+              Coming Up
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {upcomingMoments.map((m) => (
+                <UpcomingRow key={m.weekNum} moment={m} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════
+            TIMELINE — The full storyboard
+        ══════════════════════════════════════════════════════════════ */}
         <div style={{
-          borderTop: `1px solid ${BORDER}`, paddingTop: 20, marginBottom: 28,
+          borderTop: `1px solid ${BONE}`, paddingTop: 24, marginBottom: 32,
         }}>
           <button
             onClick={() => setTimelineOpen(!timelineOpen)}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               width: '100%', background: 'none', border: 'none', cursor: 'pointer',
-              padding: 0, marginBottom: timelineOpen ? 16 : 0,
+              padding: 0, marginBottom: timelineOpen ? 20 : 0,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
               <span style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-                textTransform: 'uppercase', color: MUTED,
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+                textTransform: 'uppercase', color: SMOKE,
+                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
               }}>
-                Campaign Timeline
+                Full Timeline
               </span>
-              <span style={{ fontSize: 11, color: MUTED }}>
-                {plan.totalWeeks} weeks · {plan.events.length} moments · {matchResult
-                  ? `${Math.round(matchResult.stats.completionRate)}% executed`
-                  : `${plan.weeks.reduce((s, w) => s + w.actions.length, 0)} actions`}
+              <span style={{ fontSize: 12, color: GHOST }}>
+                {plan.totalWeeks} weeks · {plan.events.length} moments
+                {matchResult ? ` · ${Math.round(matchResult.stats.completionRate)}% executed` : ''}
               </span>
             </div>
             <span style={{
-              fontSize: 11, color: MUTED, transition: 'transform 0.15s',
+              fontSize: 11, color: GHOST, transition: 'transform 0.15s',
               transform: timelineOpen ? 'rotate(90deg)' : 'rotate(0deg)',
             }}>
               ▶
             </span>
           </button>
 
-          {/* Phase progress strip (always visible) */}
-          <div style={{ display: 'flex', gap: 2, borderRadius: 6, overflow: 'hidden', marginTop: 10 }}>
-            {plan.phases.map((p) => {
-              const span = p.weekEnd - p.weekStart + 1;
-              const pct = (span / plan.totalWeeks) * 100;
-              const isCurrent = currentPhase === p.name;
-              return (
-                <div key={p.name} style={{
-                  flex: `0 0 ${pct}%`, padding: '5px 8px',
-                  background: isCurrent ? PHASE_COLOR[p.name] + '18' : SOFT,
-                  borderBottom: isCurrent ? `2px solid ${PHASE_COLOR[p.name]}` : '2px solid transparent',
-                }}>
-                  <span style={{
-                    fontSize: 8, fontWeight: 800, letterSpacing: '0.1em',
-                    color: isCurrent ? PHASE_COLOR[p.name] : MUTED,
-                    textTransform: 'uppercase',
-                  }}>
-                    {p.name}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+          {/* Phase progress — always visible */}
+          <PhaseStrip phases={plan.phases} totalWeeks={plan.totalWeeks} currentPhase={currentPhase} />
 
           {/* Expanded timeline */}
           {timelineOpen && (
@@ -360,17 +422,67 @@ export default function CampaignDestination({
           )}
         </div>
 
-        {/* ══════════════════════════════════════════════════════════
-            6. COPY / EXPORT
-        ══════════════════════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════════════════════════
+            HISTORY — Past moments (collapsed)
+        ══════════════════════════════════════════════════════════════ */}
+        {pastMoments.length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: GHOST, marginBottom: 12,
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+            }}>
+              Completed Moments
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {pastMoments.map((m) => (
+                <div key={m.weekNum} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '8px 0',
+                  borderBottom: `1px solid ${BONE}`,
+                  opacity: 0.5,
+                }}>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 32,
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                  }}>
+                    W{m.weekNum}
+                  </span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: INK, flex: 1 }}>
+                    {m.momentName}
+                  </span>
+                  {m.totalViews > 0 && (
+                    <span style={{
+                      fontSize: 12, color: SMOKE,
+                      fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                    }}>
+                      {fmtNum(m.totalViews)} views
+                    </span>
+                  )}
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: '#059669',
+                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                  }}>
+                    Done
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════════
+            EXPORT — Generate & Share
+        ══════════════════════════════════════════════════════════════ */}
         <div style={{
-          borderTop: `1px solid ${BORDER}`, paddingTop: 20, paddingBottom: 48,
+          borderTop: `1px solid ${BONE}`, paddingTop: 24, paddingBottom: 48,
         }}>
           <div style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
-            textTransform: 'uppercase', color: MUTED, marginBottom: 12,
+            fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+            textTransform: 'uppercase', color: GHOST, marginBottom: 14,
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
           }}>
-            Generate & Share
+            Generate
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
@@ -382,11 +494,12 @@ export default function CampaignDestination({
                 key={id}
                 onClick={() => setExportOpen(exportOpen === id ? null : id)}
                 style={{
-                  fontSize: 12, fontWeight: 600, padding: '8px 16px',
-                  background: exportOpen === id ? INK : '#FFFFFF',
+                  fontSize: 12, fontWeight: 600, padding: '8px 18px',
+                  background: exportOpen === id ? INK : 'transparent',
                   color: exportOpen === id ? PAPER : INK,
-                  border: `1px solid ${exportOpen === id ? INK : BORDER}`,
-                  borderRadius: 6, cursor: 'pointer',
+                  border: `1px solid ${exportOpen === id ? INK : BONE}`,
+                  borderRadius: 4, cursor: 'pointer',
+                  letterSpacing: '0.02em',
                 }}
               >
                 {label}
@@ -396,19 +509,19 @@ export default function CampaignDestination({
 
           {exportOpen && (
             <div style={{
-              marginTop: 12, background: '#FFFFFF', border: `1px solid ${BORDER}`,
-              borderRadius: 8, overflow: 'hidden',
+              marginTop: 12, background: WHITE, border: `1px solid ${BONE}`,
+              borderRadius: 6, overflow: 'hidden',
             }}>
               <pre style={{
-                padding: '16px 20px', fontSize: 12, lineHeight: 1.6,
+                padding: '20px 24px', fontSize: 12, lineHeight: 1.6,
                 whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                margin: 0, color: '#374151', fontFamily: 'inherit',
+                margin: 0, color: INK, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
                 maxHeight: 400, overflow: 'auto',
               }}>
                 {generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)}
               </pre>
               <div style={{
-                padding: '8px 16px', borderTop: `1px solid ${BORDER}`,
+                padding: '10px 20px', borderTop: `1px solid ${BONE}`,
                 display: 'flex', justifyContent: 'flex-end',
               }}>
                 <button
@@ -416,13 +529,14 @@ export default function CampaignDestination({
                     generateExportText(exportOpen, plan, matchResult, liveChannel, currentPhase, moments)
                   )}
                   style={{
-                    fontSize: 11, fontWeight: 700, padding: '5px 14px',
+                    fontSize: 11, fontWeight: 700, padding: '6px 16px',
                     background: copied ? '#ECFDF5' : INK,
-                    color: copied ? '#0C6A3F' : PAPER,
-                    border: 'none', borderRadius: 5, cursor: 'pointer',
+                    color: copied ? '#059669' : PAPER,
+                    border: 'none', borderRadius: 4, cursor: 'pointer',
+                    letterSpacing: '0.04em',
                   }}
                 >
-                  {copied ? '✓ Copied' : 'Copy to clipboard'}
+                  {copied ? '✓ Copied' : 'Copy'}
                 </button>
               </div>
             </div>
@@ -431,11 +545,23 @@ export default function CampaignDestination({
 
         {/* ── Footer ─────────────────────────────────────────────── */}
         <div style={{
-          padding: '20px 0 32px', borderTop: `1px solid ${BORDER}`,
-          fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
-          color: '#D1C9BD',
+          padding: '24px 0 40px', borderTop: `1px solid ${BONE}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
-          YouTube Campaign System
+          <span style={{
+            fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: GHOST,
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          }}>
+            YouTube Campaign System
+          </span>
+          <span style={{
+            fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: GHOST,
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          }}>
+            {plan.artist} · {campaignTitle}
+          </span>
         </div>
       </div>
     </div>
@@ -443,132 +569,158 @@ export default function CampaignDestination({
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// MOMENT BLOCK — The hero of the page
+// LIVE METRIC — Dark strip metric
 // ══════════════════════════════════════════════════════════════════════════════
 
-function MomentBlock({ moment, label, compact }: {
-  moment: CampaignMoment;
+function LiveMetric({ label, value, positive, negative }: {
   label: string;
-  compact?: boolean;
+  value: string;
+  positive?: boolean;
+  negative?: boolean;
 }) {
-  const isLive = moment.timing === 'current';
-  const isPast = moment.timing === 'past';
-  const isUpcoming = moment.timing === 'upcoming';
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <span style={{
+        fontSize: 9, fontWeight: 600, letterSpacing: '0.14em',
+        textTransform: 'uppercase', color: 'rgba(245,242,237,0.35)',
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      }}>
+        {label}
+      </span>
+      <span style={{
+        fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em',
+        color: positive ? '#34D399' : negative ? '#F87171' : PAPER,
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      }}>
+        {value}
+      </span>
+    </div>
+  );
+}
 
-  const statusLabel = isLive ? 'LIVE' : isPast ? 'COMPLETED' : 'UPCOMING';
-  const statusColor = isLive ? '#1D4ED8' : isPast ? '#0C6A3F' : MUTED;
-  const statusBg = isLive ? '#EFF6FF' : isPast ? '#ECFDF5' : SOFT;
+// ══════════════════════════════════════════════════════════════════════════════
+// CINEMATIC MOMENT — The hero moment block
+// ══════════════════════════════════════════════════════════════════════════════
+
+function CinematicMoment({ moment, isCurrent }: {
+  moment: CampaignMoment;
+  isCurrent?: boolean;
+}) {
+  const phaseTone = PHASE_TONE[moment.phase];
+  const isLive = moment.timing === 'current';
 
   return (
-    <div style={{
-      background: '#FFFFFF',
-      border: `1px solid ${isLive ? '#BFDBFE' : BORDER}`,
-      borderRadius: 10,
-      padding: compact ? '14px 20px' : '20px 24px',
-      marginBottom: 20,
-      ...(isLive ? { boxShadow: '0 0 0 1px rgba(29,78,216,0.1)' } : {}),
-    }}>
-      {/* Label + status */}
+    <div style={{ marginBottom: 32 }}>
+      {/* Moment header */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        marginBottom: compact ? 8 : 12,
+        display: 'flex', alignItems: 'center', gap: 12,
+        marginBottom: 12,
       }}>
         <span style={{
-          fontSize: 9, fontWeight: 800, letterSpacing: '0.12em',
-          textTransform: 'uppercase', color: MUTED,
+          fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
+          textTransform: 'uppercase', color: GHOST,
+          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
         }}>
-          {label} · {moment.dateRange}
+          W{moment.weekNum} · {moment.dateRange}
         </span>
-        <span style={{
-          fontSize: 9, fontWeight: 800, letterSpacing: '0.08em',
-          textTransform: 'uppercase', padding: '2px 8px', borderRadius: 4,
-          background: statusBg, color: statusColor,
-        }}>
-          {statusLabel}
-        </span>
+        {isLive && (
+          <span style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            padding: '2px 10px', borderRadius: 3,
+            background: phaseTone.accent, color: WHITE,
+          }}>
+            Live
+          </span>
+        )}
       </div>
 
-      {/* Moment title */}
+      {/* Moment title — large editorial */}
       <h2 style={{
-        fontSize: compact ? 18 : 24, fontWeight: 800, margin: 0,
-        lineHeight: 1.2, color: INK,
+        fontSize: 36, fontWeight: 800, color: INK, margin: 0,
+        lineHeight: 1.05, letterSpacing: '-0.01em',
       }}>
         {moment.momentName}
       </h2>
 
-      {/* Primary upload stats */}
-      {moment.primaryUpload && !compact && (
+      {/* Primary upload performance */}
+      {moment.primaryUpload && (
         <div style={{
-          marginTop: 8, fontSize: 13, color: '#0C6A3F', fontWeight: 600,
+          marginTop: 14, display: 'flex', alignItems: 'baseline', gap: 8,
         }}>
-          {fmtNum(moment.primaryUpload.viewCount)} views
-          {moment.totalViews > moment.primaryUpload.viewCount && (
-            <span style={{ color: MUTED, fontWeight: 400 }}>
-              {' '}· {fmtNum(moment.totalViews)} total across support content
-            </span>
-          )}
+          <span style={{
+            fontSize: 28, fontWeight: 900, color: '#059669',
+            letterSpacing: '-0.02em',
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          }}>
+            {fmtNum(moment.primaryUpload.viewCount)}
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: SMOKE }}>
+            views
+            {moment.totalViews > moment.primaryUpload.viewCount && (
+              <span style={{ color: GHOST }}>
+                {' '}· {fmtNum(moment.totalViews)} total across support
+              </span>
+            )}
+          </span>
         </div>
       )}
 
-      {/* Support status — the key readout */}
-      {!compact && moment.actions.length > 0 && (
+      {/* Support content grid */}
+      {moment.actions.length > 0 && (
         <div style={{
-          display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14,
+          marginTop: 20,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+          gap: 6,
         }}>
           {moment.supportDone.map((title, i) => (
-            <SupportChip key={`done-${i}`} title={title} status="done" />
+            <SupportBlock key={`done-${i}`} title={title} status="done" />
           ))}
           {moment.supportMissing.map((title, i) => (
-            <SupportChip key={`miss-${i}`} title={title} status="missing" />
+            <SupportBlock key={`miss-${i}`} title={title} status="missing" />
           ))}
           {moment.supportPlanned.map((title, i) => (
-            <SupportChip key={`plan-${i}`} title={title} status="planned" />
+            <SupportBlock key={`plan-${i}`} title={title} status="planned" />
           ))}
         </div>
       )}
 
-      {/* Compact: just show counts */}
-      {compact && moment.actions.length > 0 && (
-        <div style={{ fontSize: 12, color: MUTED, marginTop: 6 }}>
-          {moment.supportDone.length > 0 && (
-            <span style={{ color: '#0C6A3F' }}>{moment.supportDone.length} done</span>
-          )}
-          {moment.supportPlanned.length > 0 && (
-            <span style={{ marginLeft: moment.supportDone.length > 0 ? 10 : 0 }}>
-              {moment.supportPlanned.length} planned
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Editorial next step */}
-      {!compact && moment.supportMissing.length > 0 && (
+      {/* Editorial guidance */}
+      {moment.supportMissing.length > 0 && (
         <p style={{
-          fontSize: 13, color: '#78350F', fontWeight: 500,
-          marginTop: 12, marginBottom: 0, lineHeight: 1.5,
-          padding: '8px 12px', background: '#FFFBEB', borderRadius: 6,
+          fontSize: 14, color: INK, fontWeight: 500,
+          marginTop: 16, marginBottom: 0, lineHeight: 1.5,
+          paddingLeft: 16,
+          borderLeft: `2px solid ${phaseTone.accent}`,
         }}>
-          → {buildMomentGuidance(moment)}
+          {buildMomentGuidance(moment)}
         </p>
       )}
 
       {/* Extra uploads */}
-      {!compact && moment.extraUploads.length > 0 && (
-        <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px dashed ${BORDER}` }}>
+      {moment.extraUploads.length > 0 && (
+        <div style={{ marginTop: 16, paddingTop: 12, borderTop: `1px solid ${BONE}` }}>
           <span style={{
-            fontSize: 10, fontWeight: 700, color: '#7C3AED',
-            textTransform: 'uppercase', letterSpacing: '0.06em',
+            fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
+            textTransform: 'uppercase', color: GHOST,
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
           }}>
-            Extra uploads
+            Extra Uploads
           </span>
           {moment.extraUploads.map((u) => (
             <div key={u.id} style={{
-              fontSize: 12, color: '#5A5650', marginTop: 4,
-              display: 'flex', gap: 6, alignItems: 'center',
+              fontSize: 13, color: SMOKE, marginTop: 6,
+              display: 'flex', gap: 8, alignItems: 'center',
             }}>
-              <span style={{ opacity: 0.6 }}>{u.durationSec <= 62 ? '⚡' : '🎬'}</span>
+              <span style={{ fontSize: 10, opacity: 0.5 }}>{u.durationSec <= 62 ? '⚡' : '▶'}</span>
               <span style={{ flex: 1 }}>{u.title}</span>
-              <span style={{ fontSize: 10, color: MUTED }}>{fmtNum(u.viewCount)} views</span>
+              <span style={{
+                fontSize: 11, color: GHOST,
+                fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+              }}>
+                {fmtNum(u.viewCount)}
+              </span>
             </div>
           ))}
         </div>
@@ -577,21 +729,114 @@ function MomentBlock({ moment, label, compact }: {
   );
 }
 
-function SupportChip({ title, status }: { title: string; status: 'done' | 'missing' | 'planned' }) {
-  const icon = status === 'done' ? '✓' : status === 'missing' ? '⚠' : '○';
-  const bg = status === 'done' ? '#ECFDF5' : status === 'missing' ? '#FEF2F2' : '#F9FAFB';
-  const fg = status === 'done' ? '#0C6A3F' : status === 'missing' ? '#DC2626' : '#6B7280';
-  const border = status === 'done' ? '#D1FAE5' : status === 'missing' ? '#FECACA' : '#E5E7EB';
+// ── Support Block ─────────────────────────────────────────────────────────
 
+function SupportBlock({ title, status }: { title: string; status: 'done' | 'missing' | 'planned' }) {
   return (
-    <span style={{
-      fontSize: 11, fontWeight: 600, padding: '3px 10px',
-      borderRadius: 5, background: bg, color: fg,
-      border: `1px solid ${border}`,
-      display: 'inline-flex', alignItems: 'center', gap: 4,
+    <div style={{
+      padding: '10px 14px',
+      background: status === 'done' ? '#ECFDF5'
+        : status === 'missing' ? '#FEF2F2'
+        : BONE,
+      borderRadius: 4,
+      borderLeft: `3px solid ${
+        status === 'done' ? '#059669'
+        : status === 'missing' ? '#DC2626'
+        : GHOST
+      }`,
     }}>
-      <span style={{ fontSize: 10 }}>{icon}</span> {title}
-    </span>
+      <div style={{
+        fontSize: 12, fontWeight: 600,
+        color: status === 'done' ? '#065F46'
+          : status === 'missing' ? '#991B1B'
+          : INK,
+      }}>
+        {title}
+      </div>
+      <div style={{
+        fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
+        textTransform: 'uppercase', marginTop: 4,
+        color: status === 'done' ? '#059669'
+          : status === 'missing' ? '#DC2626'
+          : SMOKE,
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      }}>
+        {status === 'done' ? 'Shipped' : status === 'missing' ? 'Missing' : 'Planned'}
+      </div>
+    </div>
+  );
+}
+
+// ── Upcoming Row ──────────────────────────────────────────────────────────
+
+function UpcomingRow({ moment }: { moment: CampaignMoment }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '10px 0',
+      borderBottom: `1px solid ${BONE}`,
+    }}>
+      <span style={{
+        fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 32,
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      }}>
+        W{moment.weekNum}
+      </span>
+      <span style={{
+        fontSize: 11, color: SMOKE, minWidth: 80,
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      }}>
+        {moment.dateRange.split('–')[0]}
+      </span>
+      <span style={{ fontSize: 15, fontWeight: 700, color: INK, flex: 1 }}>
+        {moment.momentName}
+      </span>
+      <span style={{
+        fontSize: 11, color: GHOST,
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+      }}>
+        {moment.actions.length} actions
+      </span>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PHASE STRIP — Visual progress
+// ══════════════════════════════════════════════════════════════════════════════
+
+function PhaseStrip({ phases, totalWeeks, currentPhase }: {
+  phases: { name: PhaseName; weekStart: number; weekEnd: number }[];
+  totalWeeks: number;
+  currentPhase: PhaseName | null;
+}) {
+  return (
+    <div style={{
+      display: 'flex', gap: 2, marginTop: 12, borderRadius: 2, overflow: 'hidden',
+    }}>
+      {phases.map((p) => {
+        const span = p.weekEnd - p.weekStart + 1;
+        const pct = (span / totalWeeks) * 100;
+        const isCurrent = currentPhase === p.name;
+        const tone = PHASE_TONE[p.name];
+        return (
+          <div key={p.name} style={{
+            flex: `0 0 ${pct}%`, padding: '6px 10px',
+            background: isCurrent ? `${tone.accent}12` : BONE,
+            borderBottom: `2px solid ${isCurrent ? tone.accent : 'transparent'}`,
+          }}>
+            <span style={{
+              fontSize: 8, fontWeight: 800, letterSpacing: '0.12em',
+              color: isCurrent ? tone.accent : GHOST,
+              textTransform: 'uppercase',
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+            }}>
+              {p.name}
+            </span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -605,47 +850,46 @@ function TimelineDetail({ plan, matchResult, currentPhase }: {
   currentPhase: PhaseName | null;
 }) {
   const weeks = matchResult?.weeks ?? plan.weeks;
-
-  // Group by phase
   const phases = plan.phases.map((p) => ({
     ...p,
     weeks: weeks.filter((w) => w.weekNum >= p.weekStart && w.weekNum <= p.weekEnd),
   }));
 
   return (
-    <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {phases.map((phase) => {
         const isCurrent = currentPhase === phase.name;
+        const tone = PHASE_TONE[phase.name];
         const phaseWeeks = phase.weeks.filter((w) => w.actions.length > 0 || w.momentName);
-
         if (phaseWeeks.length === 0) return null;
 
         return (
           <div key={phase.name}>
             <div style={{
-              fontSize: 10, fontWeight: 800, letterSpacing: '0.1em',
-              textTransform: 'uppercase', marginBottom: 6,
-              color: isCurrent ? PHASE_COLOR[phase.name] : MUTED,
-              display: 'flex', alignItems: 'center', gap: 8,
+              fontSize: 10, fontWeight: 800, letterSpacing: '0.12em',
+              textTransform: 'uppercase', marginBottom: 8,
+              color: isCurrent ? tone.accent : GHOST,
+              display: 'flex', alignItems: 'center', gap: 10,
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
             }}>
-              {phase.name}
+              {tone.label}
               <span style={{
-                fontSize: 9, fontWeight: 600, letterSpacing: '0.04em',
-                textTransform: 'none', color: MUTED,
+                fontSize: 9, fontWeight: 600, color: GHOST,
+                textTransform: 'none', letterSpacing: '0.04em',
               }}>
-                Wk {phase.weekStart}–{phase.weekEnd}
+                W{phase.weekStart}–{phase.weekEnd}
               </span>
               {isCurrent && (
                 <span style={{
-                  fontSize: 8, fontWeight: 800, background: PHASE_COLOR[phase.name],
-                  color: '#FFFFFF', padding: '1px 6px', borderRadius: 3,
+                  fontSize: 8, fontWeight: 800, background: tone.accent,
+                  color: WHITE, padding: '1px 7px', borderRadius: 2,
                 }}>
                   NOW
                 </span>
               )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {phaseWeeks.map((week) => (
                 <TimelineWeekRow key={week.weekNum} week={week} matchResult={matchResult} />
               ))}
@@ -667,7 +911,6 @@ function TimelineWeekRow({ week, matchResult }: {
   const isMoment = !!week.momentName;
   const isCurrent = isCurrentWeek(week);
 
-  // Compute stats
   const done = actions.filter((a) =>
     'status' in a ? ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live') : a.completed
   ).length;
@@ -677,69 +920,92 @@ function TimelineWeekRow({ week, matchResult }: {
 
   return (
     <div style={{
-      background: isCurrent ? '#FFFFFF' : 'transparent',
-      border: isCurrent ? `1px solid ${BORDER}` : 'none',
-      borderRadius: 6,
+      background: isCurrent ? WHITE : 'transparent',
+      border: isCurrent ? `1px solid ${BONE}` : 'none',
+      borderRadius: 4,
     }}>
       <button
         onClick={() => actions.length > 0 && setExpanded(!expanded)}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-          padding: '5px 10px', background: 'none', border: 'none',
+          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+          padding: '6px 12px', background: 'none', border: 'none',
           cursor: actions.length > 0 ? 'pointer' : 'default', textAlign: 'left',
         }}
       >
-        <span style={{ fontSize: 10, fontWeight: 700, color: MUTED, minWidth: 28 }}>
+        <span style={{
+          fontSize: 10, fontWeight: 700, color: GHOST, minWidth: 28,
+          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+        }}>
           W{week.weekNum}
         </span>
-        <span style={{ fontSize: 11, color: MUTED, minWidth: 90 }}>
+        <span style={{
+          fontSize: 11, color: GHOST, minWidth: 80,
+          fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+        }}>
           {week.dateRange}
         </span>
         <span style={{
-          fontSize: 12, fontWeight: isMoment ? 700 : 400,
-          color: isMoment ? INK : MUTED, flex: 1,
+          fontSize: 13, fontWeight: isMoment ? 700 : 400,
+          color: isMoment ? INK : SMOKE, flex: 1,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {week.momentName ?? (actions.length > 0 ? `${actions.length} actions` : '')}
         </span>
         {actions.length > 0 && (
-          <span style={{ fontSize: 10, color: MUTED, display: 'flex', gap: 4, alignItems: 'center' }}>
-            {done > 0 && <span style={{ color: '#0C6A3F', fontWeight: 700 }}>{done}✓</span>}
+          <span style={{
+            fontSize: 10, color: GHOST, display: 'flex', gap: 4, alignItems: 'center',
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+          }}>
+            {done > 0 && <span style={{ color: '#059669', fontWeight: 700 }}>{done}✓</span>}
             {issues > 0 && <span style={{ color: '#DC2626', fontWeight: 700 }}>{issues}!</span>}
-            <span style={{ fontSize: 8, transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }}>▶</span>
+            <span style={{
+              fontSize: 8,
+              transform: expanded ? 'rotate(90deg)' : 'none',
+              transition: 'transform 0.15s',
+            }}>▶</span>
           </span>
         )}
       </button>
 
       {expanded && (
-        <div style={{ padding: '0 10px 8px 48px' }}>
+        <div style={{ padding: '0 12px 8px 52px' }}>
           {actions.map((a, i) => {
             const matched = 'status' in a ? (a as MatchedAction) : null;
             const status: ExecutionStatus = matched?.status ?? (a.completed ? 'completed' : 'planned');
             const isDone = status === 'completed' || status === 'live';
             const isLate = status === 'late';
             const isMissing = status === 'missing';
-            const icon = a.format === 'short' ? '⚡' : a.format === 'video' || a.format === 'premiere' ? '🎬' : a.format === 'live' ? '📡' : '📝';
 
             return (
               <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                fontSize: 12, padding: '2px 0',
-                color: isDone ? MUTED : isLate ? '#DC2626' : isMissing ? '#C2410C' : INK,
+                display: 'flex', alignItems: 'center', gap: 8,
+                fontSize: 12, padding: '3px 0',
+                color: isDone ? GHOST : isLate ? '#DC2626' : isMissing ? '#C2410C' : INK,
                 textDecoration: isDone ? 'line-through' : 'none',
-                opacity: isDone ? 0.6 : 1,
+                opacity: isDone ? 0.5 : 1,
               }}>
-                <span style={{ fontSize: 10, opacity: 0.7 }}>{icon}</span>
+                <span style={{
+                  fontSize: 10, opacity: 0.6,
+                  fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                }}>
+                  {a.format === 'short' ? '⚡' : a.format === 'video' || a.format === 'premiere' ? '▶' : a.format === 'live' ? '◉' : '·'}
+                </span>
                 <span style={{ flex: 1 }}>{a.title}</span>
                 {matched?.matchedUpload && (
-                  <span style={{ fontSize: 10, color: '#0C6A3F' }}>{fmtNum(matched.matchedUpload.viewCount)} views</span>
+                  <span style={{
+                    fontSize: 10, color: '#059669',
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
+                  }}>
+                    {fmtNum(matched.matchedUpload.viewCount)}
+                  </span>
                 )}
                 {(isLate || isMissing) && (
                   <span style={{
-                    fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+                    fontSize: 8, fontWeight: 800, padding: '1px 6px', borderRadius: 2,
                     background: isLate ? '#FEF2F2' : '#FFF7ED',
                     color: isLate ? '#DC2626' : '#C2410C',
-                    textTransform: 'uppercase',
+                    textTransform: 'uppercase', letterSpacing: '0.08em',
+                    fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
                   }}>
                     {isLate ? 'Late' : 'Missing'}
                   </span>
@@ -757,20 +1023,6 @@ function TimelineWeekRow({ week, matchResult }: {
 // HELPERS
 // ══════════════════════════════════════════════════════════════════════════════
 
-function MetricChip({ label, value, color }: { label: string; value: string; color?: string }) {
-  return (
-    <span style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-      <span style={{ fontSize: 10, fontWeight: 600, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-        {label}
-      </span>
-      <span style={{ fontWeight: 700, fontSize: 13, color: color ?? INK }}>{value}</span>
-    </span>
-  );
-}
-
-// ── Pulse Signal Generator ──────────────────────────────────────────────────
-// Synthesizes campaign state into editorial language.
-
 function generatePulseSignals(
   matchResult: MatchResult | undefined,
   liveChannel: CampaignDestinationProps['liveChannel'],
@@ -780,7 +1032,6 @@ function generatePulseSignals(
 ): PulseSignal[] {
   const signals: PulseSignal[] = [];
 
-  // 1. Live uploads — what just happened
   if (matchResult) {
     const liveActions = matchResult.weeks
       .flatMap((w) => w.actions)
@@ -801,7 +1052,6 @@ function generatePulseSignals(
     }
   }
 
-  // 2. Recent uploads not in plan
   if (!signals.length && recentUploads.length > 0) {
     const recent = recentUploads.filter((u) => {
       const days = (Date.now() - new Date(u.publishedAt).getTime()) / 86400000;
@@ -816,7 +1066,6 @@ function generatePulseSignals(
     }
   }
 
-  // 3. Channel momentum
   if (liveChannel?.views7Delta != null) {
     if (liveChannel.views7Delta > 10000) {
       signals.push({
@@ -836,7 +1085,6 @@ function generatePulseSignals(
     }
   }
 
-  // 4. Upload cadence
   if (liveChannel) {
     const u30 = liveChannel.uploads30d ?? 0;
     const s30 = liveChannel.shorts30d ?? 0;
@@ -849,7 +1097,6 @@ function generatePulseSignals(
     }
   }
 
-  // 5. Content gap
   const lastUpload = liveChannel?.lastUploadDaysAgo;
   if (lastUpload != null && lastUpload > 10) {
     signals.push({
@@ -858,7 +1105,6 @@ function generatePulseSignals(
     });
   }
 
-  // 6. Execution pressure
   if (matchResult) {
     const { stats } = matchResult;
     const pastDue = stats.completed + stats.live + stats.missing + stats.late;
@@ -875,15 +1121,13 @@ function generatePulseSignals(
     }
   }
 
-  // 7. Phase context
   if (currentPhase && signals.length < 5) {
     signals.push({
-      text: PHASE_LABEL[currentPhase],
+      text: PHASE_TONE[currentPhase].narrative,
       urgency: 'neutral',
     });
   }
 
-  // Cap at 5 signals, prioritize by urgency
   const order: Record<PulseSignal['urgency'], number> = {
     critical: 0, warning: 1, positive: 2, neutral: 3,
   };
@@ -891,8 +1135,6 @@ function generatePulseSignals(
     .sort((a, b) => order[a.urgency] - order[b.urgency])
     .slice(0, 5);
 }
-
-// ── Moment Extraction ───────────────────────────────────────────────────────
 
 function extractMoments(
   plan: GeneratedPlan,
@@ -912,14 +1154,12 @@ function extractMoments(
       if (daysAway >= 0 && daysAway <= 7) timing = 'current';
       else if (daysAway > 7) timing = 'past';
 
-      // Get matched data if available
       const matchedWeek = matchResult?.weeks.find((w) => w.weekNum === week.weekNum);
       const actions: MatchedAction[] = matchedWeek
         ? matchedWeek.actions
         : week.actions.map((a) => ({ ...a, status: 'planned' as ExecutionStatus }));
       const extraUploads = matchedWeek?.extraUploads ?? [];
 
-      // Find primary upload (the biggest matched upload by views)
       let primaryUpload: RecentUpload | null = null;
       const matchedUploads = actions
         .filter((a) => a.matchedUpload)
@@ -933,7 +1173,6 @@ function extractMoments(
         ...extraUploads.map((u) => u.viewCount),
       ].reduce((s, v) => s + v, 0);
 
-      // Categorize support actions
       const supportDone = actions
         .filter((a) => a.status === 'completed' || a.status === 'live')
         .map((a) => cleanTitle(a.title));
@@ -963,8 +1202,6 @@ function extractMoments(
     .sort((a, b) => a.daysAway - b.daysAway);
 }
 
-// ── Attention Items ─────────────────────────────────────────────────────────
-
 type AttentionItem = {
   text: string;
   urgency: NudgeUrgency;
@@ -975,14 +1212,11 @@ function buildAttentionItems(
   matchResult?: MatchResult,
   liveChannel?: CampaignDestinationProps['liveChannel'],
 ): AttentionItem[] {
-  // Use nudges as primary source — they're already well-written
-  // But reformat for editorial feel
   const items: AttentionItem[] = nudges.map((n) => ({
     text: n.detail,
     urgency: n.urgency,
   }));
 
-  // If no nudges, derive from data
   if (items.length === 0 && matchResult) {
     const { stats } = matchResult;
     if (stats.late > 0) {
@@ -1002,8 +1236,6 @@ function buildAttentionItems(
 
   return items.slice(0, 4);
 }
-
-// ── Export Text Generator ───────────────────────────────────────────────────
 
 function generateExportText(
   type: string,
@@ -1083,7 +1315,7 @@ function generateExportText(
   if (type === 'brief') {
     let text = `YOUTUBE BRIEF: ${artist}\n`;
     text += `Campaign: ${campaign}\n`;
-    text += `Phase: ${phase} — ${PHASE_LABEL[phase as PhaseName] ?? ''}\n\n`;
+    text += `Phase: ${phase} — ${PHASE_TONE[phase as PhaseName]?.label ?? ''}\n\n`;
     text += `Strategy: ${plan.strategy.priority}\n\n`;
     text += `Approach: ${plan.strategy.approach}\n\n`;
 
@@ -1103,10 +1335,7 @@ function generateExportText(
   return '';
 }
 
-// ── Shared Helpers ──────────────────────────────────────────────────────────
-
 function cleanTitle(title: string): string {
-  // Remove generic prefixes/suffixes for chip display
   return title
     .replace(/^(Upload|Post|Create|Film|Record|Publish|Release)\s+/i, '')
     .replace(/\s*(short|video|post|clip)$/i, '')
