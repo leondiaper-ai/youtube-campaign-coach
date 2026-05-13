@@ -146,14 +146,19 @@ export default function CampaignDestination({
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
 
   // ── Classify uploads for visual treatment ──
-  const allUploads = (recentUploads ?? []).sort((a, b) => b.viewCount - a.viewCount);
-  const shorts = allUploads.filter((u) => u.durationSec <= 62);
-  const longform = allUploads.filter((u) => u.durationSec > 62);
-  const heroUpload = longform[0] ?? allUploads[0] ?? null;
-  const totalCampaignViews = allUploads.reduce((s, u) => s + u.viewCount, 0);
+  // SURFACE leads with recency — what the era looks like RIGHT NOW
+  const allByRecency = (recentUploads ?? []).sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+  const allByViews = [...allByRecency].sort((a, b) => b.viewCount - a.viewCount);
+  const shorts = allByRecency.filter((u) => u.durationSec <= 62);
+  const longform = allByRecency.filter((u) => u.durationSec > 62);
+  // Hero = most RECENT longform — this is the current visual tone
+  const heroUpload = longform[0] ?? allByRecency[0] ?? null;
+  const totalCampaignViews = allByRecency.reduce((s, u) => s + u.viewCount, 0);
 
   // ── 30-day era data ──
-  const uploads30d = allUploads.filter((u) => daysAgoNum(u.publishedAt) <= 30);
+  const uploads30d = allByRecency.filter((u) => daysAgoNum(u.publishedAt) <= 30);
   const shorts30d = uploads30d.filter((u) => u.durationSec <= 62);
   const long30d = uploads30d.filter((u) => u.durationSec > 62);
   const eraSignal = generateEraSignal(uploads30d, shorts30d, long30d, liveChannel);
@@ -188,26 +193,26 @@ export default function CampaignDestination({
           color: PAPER,
           position: 'relative',
           overflow: 'hidden',
-          minHeight: allUploads.length > 0 ? '72vh' : '50vh',
+          minHeight: allByRecency.length > 0 ? '72vh' : '50vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
         }}>
-          {/* Thumbnail mosaic texture — barely visible, creates atmosphere */}
-          {allUploads.length >= 3 && (
+          {/* Thumbnail mosaic texture — recent uploads set the era atmosphere */}
+          {allByRecency.length >= 3 && (
             <div style={{
               position: 'absolute',
               top: 0, left: 0, right: 0, bottom: 0,
               display: 'grid',
-              gridTemplateColumns: `repeat(${Math.min(allUploads.length, 5)}, 1fr)`,
+              gridTemplateColumns: `repeat(${Math.min(allByRecency.length, 5)}, 1fr)`,
               gridTemplateRows: 'repeat(2, 1fr)',
               gap: 1,
-              opacity: 0.05,
-              filter: 'grayscale(100%) contrast(1.2)',
+              opacity: 0.08,
+              filter: 'contrast(1.2)',
               pointerEvents: 'none',
             }}>
-              {allUploads.slice(0, 10).map((u) => (
-                <img key={u.id} src={ytThumb(u.id, 'mqdefault')} alt=""
+              {allByRecency.slice(0, 10).map((u) => (
+                <img key={u.id} src={ytThumb(u.id, 'hqdefault')} alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ))}
             </div>
@@ -342,9 +347,9 @@ export default function CampaignDestination({
         {/* ══════════════════════════════════════════════════════════════════
             CAMPAIGN WALL — Editorial collage. Windows into the rollout.
         ══════════════════════════════════════════════════════════════════ */}
-        {allUploads.length >= 2 && (
+        {allByRecency.length >= 2 && (
           <CampaignWall
-            uploads={allUploads}
+            uploads={allByRecency}
             shorts={shorts}
             longform={longform}
             heroUpload={heroUpload}
@@ -844,6 +849,7 @@ function CampaignWall({
   uploads30dCount: number;
   shorts30dCount: number;
 }) {
+  // Shorts and longform already arrive sorted by recency from parent
   const secondaryLong = heroUpload
     ? longform.filter((u) => u.id !== heroUpload.id).slice(0, 3)
     : longform.slice(0, 3);
