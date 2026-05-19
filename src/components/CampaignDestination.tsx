@@ -15,7 +15,7 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
-import { buildReleaseClusters, type ReleaseCluster } from '@/lib/coach/releaseClusters';
+import { buildReleaseClusters, type ReleaseCluster, type SupportCategory } from '@/lib/coach/releaseClusters';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -1498,16 +1498,27 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
               coverageLabel === 'Weak'     ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Support opportunity' } :
                                              { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'World building opportunity' };
 
-            // Separate support into longform vs shorts
-            const supportLongform = support.filter(u => u.durationSec > 62);
-            const supportShorts = support.filter(u => u.durationSec <= 62);
+            // Use categorised support links
+            const { supportLinks: links, supportByCategory: byCategory } = cluster;
+            const longformLinks = links.filter(l => l.upload.durationSec > 62);
+            const shortsLinks = links.filter(l => l.upload.durationSec <= 62);
             const presentFormats = coverage.filter(f => f.present);
             const missingFormats = coverage.filter(f => !f.present && ['shorts', 'bts', 'lyric_video', 'visualizer'].includes(f.key));
             const narrative = insights.slice(0, 2).join(' ');
 
             // Top-performing shorts (max 3)
-            const topShorts = [...supportShorts].sort((a, b) => b.viewCount - a.viewCount).slice(0, 3);
-            const totalShortsViews = supportShorts.reduce((s, u) => s + u.viewCount, 0);
+            const topShorts = [...shortsLinks].sort((a, b) => b.upload.viewCount - a.upload.viewCount).slice(0, 3);
+            const totalShortsViews = shortsLinks.reduce((s, l) => s + l.upload.viewCount, 0);
+
+            // Categories that have longform content (ordered strategically)
+            const CATEGORY_ORDER: SupportCategory[] = [
+              'BTS', 'Release Momentum', 'World Building', 'Rollout Diary',
+              'Personality', 'Collaborator Bridge', 'Follow-through', 'Community Layer',
+            ];
+            const longformCategories = CATEGORY_ORDER.filter(cat => {
+              const catLinks = byCategory[cat];
+              return catLinks && catLinks.some(l => l.upload.durationSec > 62);
+            });
 
             return (
               <div key={`pillar-${anchor.id}`} style={{
@@ -1570,89 +1581,97 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
                   </div>
                 </div>
 
-                {/* ── Supportive longform — BTS, vlogs, live sessions, interviews ── */}
-                {supportLongform.length > 0 && (
+                {/* ── Support content grouped by strategic category ── */}
+                {longformCategories.length > 0 && (
                   <div style={{
                     marginTop: 8,
                     borderTop: `1px solid ${BONE}`,
                     paddingTop: 6,
                   }}>
-                    <div style={{
-                      fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
-                      textTransform: 'uppercase', color: GHOST,
-                      fontFamily: MONO, marginBottom: 4,
-                    }}>
-                      Support content
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                      {supportLongform.map((upload) => {
-                        const fmtLabel = classifyUploadFormat(upload);
-                        return (
-                          <a
-                            key={`sl-${upload.id}`}
-                            href={ytVideoUrl(upload.id, upload.durationSec)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 8,
-                              padding: '3px 6px',
-                              background: 'rgba(245,242,237,0.5)',
-                              borderRadius: 3,
-                              textDecoration: 'none', color: 'inherit',
-                            }}
-                          >
-                            <img
-                              src={ytThumb(upload.id, 'mqdefault')}
-                              alt="" loading="lazy"
-                              style={{
-                                width: 40, height: 22,
-                                objectFit: 'cover', borderRadius: 2,
-                              }}
-                            />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{
-                                fontSize: 10, color: INK,
-                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                              }}>
-                                {upload.title}
-                              </div>
-                            </div>
-                            <span style={{
-                              fontSize: 7, fontWeight: 700, color: '#4338CA',
-                              textTransform: 'uppercase', fontFamily: MONO,
-                              flexShrink: 0,
-                            }}>
-                              {fmtLabel}
-                            </span>
-                            <span style={{
-                              fontSize: 8, color: SMOKE, fontFamily: MONO,
-                              flexShrink: 0,
-                            }}>
-                              {fmtNum(upload.viewCount)}
-                            </span>
-                          </a>
-                        );
-                      })}
-                    </div>
+                    {longformCategories.map((cat) => {
+                      const catLinks = (byCategory[cat] ?? []).filter(l => l.upload.durationSec > 62);
+                      if (catLinks.length === 0) return null;
+                      return (
+                        <div key={cat} style={{ marginBottom: 4 }}>
+                          <div style={{
+                            fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+                            textTransform: 'uppercase', color: GHOST,
+                            fontFamily: MONO, marginBottom: 2,
+                          }}>
+                            {cat}
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {catLinks.map((link) => {
+                              const strengthColor = link.strength === 'strong' ? '#059669'
+                                : link.strength === 'moderate' ? '#D97706' : GHOST;
+                              return (
+                                <a
+                                  key={`sl-${link.upload.id}`}
+                                  href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    display: 'flex', alignItems: 'center', gap: 8,
+                                    padding: '3px 6px',
+                                    background: 'rgba(245,242,237,0.5)',
+                                    borderRadius: 3,
+                                    textDecoration: 'none', color: 'inherit',
+                                  }}
+                                >
+                                  <img
+                                    src={ytThumb(link.upload.id, 'mqdefault')}
+                                    alt="" loading="lazy"
+                                    style={{
+                                      width: 40, height: 22,
+                                      objectFit: 'cover', borderRadius: 2,
+                                    }}
+                                  />
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{
+                                      fontSize: 10, color: INK,
+                                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    }}>
+                                      {link.upload.title}
+                                    </div>
+                                  </div>
+                                  <span style={{
+                                    fontSize: 6, fontWeight: 700, color: strengthColor,
+                                    fontFamily: MONO, flexShrink: 0,
+                                    width: 4, height: 4, borderRadius: '50%',
+                                    background: strengthColor, display: 'inline-block',
+                                  }} />
+                                  <span style={{
+                                    fontSize: 8, color: SMOKE, fontFamily: MONO,
+                                    flexShrink: 0,
+                                  }}>
+                                    {fmtNum(link.upload.viewCount)}
+                                  </span>
+                                </a>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
                 {/* ── Shorts cluster — collapsed summary with top performers ── */}
-                {supportShorts.length > 0 && (
+                {shortsLinks.length > 0 && (
                   <div style={{
-                    marginTop: supportLongform.length > 0 ? 6 : 8,
-                    borderTop: supportLongform.length === 0 ? `1px solid ${BONE}` : 'none',
-                    paddingTop: supportLongform.length === 0 ? 6 : 0,
+                    marginTop: longformCategories.length > 0 ? 6 : 8,
+                    borderTop: longformCategories.length === 0 ? `1px solid ${BONE}` : 'none',
+                    paddingTop: longformCategories.length === 0 ? 6 : 0,
                   }}>
                     <div style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       fontSize: 9, color: SMOKE, fontFamily: MONO,
                     }}>
                       <span style={{ fontWeight: 700, color: INK }}>
-                        ⚡ {supportShorts.length} Shorts
+                        ⚡ {shortsLinks.length} Shorts
                       </span>
                       <span>{fmtNum(totalShortsViews)} combined views</span>
-                      {supportShorts.length > 3 && (
+                      {shortsLinks.length > 3 && (
                         <span style={{ color: GHOST }}>Top {topShorts.length}:</span>
                       )}
                     </div>
@@ -1660,10 +1679,10 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
                       <div style={{
                         display: 'flex', gap: 4, marginTop: 3, flexWrap: 'wrap',
                       }}>
-                        {topShorts.map((short) => (
+                        {topShorts.map((link) => (
                           <a
-                            key={`sh-${short.id}`}
-                            href={ytVideoUrl(short.id, short.durationSec)}
+                            key={`sh-${link.upload.id}`}
+                            href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{
@@ -1679,10 +1698,10 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
                               color: SMOKE, maxWidth: 100,
                               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                             }}>
-                              {short.title}
+                              {link.upload.title}
                             </span>
                             <span style={{ color: GHOST, fontFamily: MONO }}>
-                              {fmtNum(short.viewCount)}
+                              {fmtNum(link.upload.viewCount)}
                             </span>
                           </a>
                         ))}

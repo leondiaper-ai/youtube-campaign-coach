@@ -30,6 +30,35 @@ export type ContentRole =
   | 'freestyle'     // Freestyle variant
   | 'other';        // Unclassified support
 
+/** Strategic support category — WHY this content exists in the rollout */
+export type SupportCategory =
+  | 'BTS'                // Behind the scenes, making of
+  | 'World Building'     // Vlogs, day-in-the-life, personality content
+  | 'Rollout Diary'      // Release journey, studio sessions
+  | 'Personality'        // Interviews, podcasts, Q&A
+  | 'Release Momentum'   // Lyric video, visualizer, remix, live session
+  | 'Community Layer'    // Shorts, teasers, engagement clips
+  | 'Follow-through'     // Post-release continuation, reaction content
+  | 'Collaborator Bridge'; // Featuring/collab content that links releases
+
+/** How confidently a support upload links to an anchor */
+export type RelationshipStrength = 'strong' | 'moderate' | 'contextual';
+
+/** A scored support relationship between an upload and an anchor */
+export type SupportLink = {
+  upload: RecentUpload;
+  /** Relationship strength: strong (title match), moderate (description/format), contextual (timing only) */
+  strength: RelationshipStrength;
+  /** Numeric score (0-100) — higher = more confident relationship */
+  score: number;
+  /** Which signals contributed to this link */
+  signals: string[];
+  /** Strategic category for this support content */
+  category: SupportCategory;
+  /** The content role (format-based) */
+  role: ContentRole;
+};
+
 /** A support format that could orbit a release */
 export type SupportFormat = {
   key: string;             // e.g. 'shorts', 'bts', 'lyric_video'
@@ -46,8 +75,12 @@ export type ReleaseCluster = {
   anchor: RecentUpload;
   /** Classified format of the anchor */
   anchorFormat: UploadFormatLabel;
-  /** All support uploads grouped around this release */
+  /** All support uploads grouped around this release (flat list for backward compat) */
   support: RecentUpload[];
+  /** Scored support links with relationship intelligence */
+  supportLinks: SupportLink[];
+  /** Support grouped by strategic category */
+  supportByCategory: Partial<Record<SupportCategory, SupportLink[]>>;
   /** Support matrix — what formats were present/missing */
   coverage: SupportFormat[];
   /** Coverage score: how many of the key formats were present (0-1) */
@@ -141,41 +174,96 @@ export function buildReleaseClusters(
 
   if (anchors.length === 0) return [];
 
-  // 2. For each anchor, find support content within the window
-  const usedIds = new Set<string>();
+  // 2. For each anchor, score all candidates in the window and build support links.
+  //    Allow multi-anchor attachment: a support upload can link to multiple releases,
+  //    but gets assigned to the anchor with the highest relationship score.
+  //    Uploads with score < MIN_RELATIONSHIP_SCORE are excluded.
 
-  const clusters: ReleaseCluster[] = anchors.map((anchor) => {
+  // First pass: score every candidate against every anchor
+  const anchorIds = new Set(anchors.map(a => a.id));
+  const candidateScores: Map<string, { anchorId: string; score: number; signals: string[]; timingDays: number }[]> = new Map();
+
+  for (const anchor of anchors) {
     const anchorDate = new Date(anchor.publishedAt).getTime();
     const windowStart = anchorDate - preWindow * 86400000;
     const windowEnd = anchorDate + postWindow * 86400000;
 
-    // Find support uploads in the window (excluding other anchors)
-    const support: RecentUpload[] = [];
-    let preCount = 0;
-    let postCount = 0;
-
     for (const upload of sorted) {
       if (upload.id === anchor.id) continue;
-      if (usedIds.has(upload.id)) continue;
+      if (anchorIds.has(upload.id)) continue; // Don't score other anchors
 
       const t = new Date(upload.publishedAt).getTime();
       if (t < windowStart || t > windowEnd) continue;
 
-      // Don't steal another anchor's identity
-      const fmt = classifyUploadFormat(upload);
-      if (ANCHOR_FORMATS.includes(fmt) && anchors.some(a => a.id === upload.id)) continue;
+      const timingDays = (t - anchorDate) / 86400000;
+      const { score, signals } = scoreRelationship(anchor, upload, timingDays);
 
-      // Check title relevance — share keywords with the anchor
-      if (isRelated(anchor, upload)) {
-        support.push(upload);
-        if (t < anchorDate) preCount++;
-        else postCount++;
+      if (score >= MIN_RELATIONSHIP_SCORE) {
+        const existing = candidateScores.get(upload.id) ?? [];
+        existing.push({ anchorId: anchor.id, score, signals, timingDays });
+        candidateScores.set(upload.id, existing);
       }
     }
+  }
 
-    // Mark used
-    usedIds.add(anchor.id);
-    support.forEach(u => usedIds.add(u.id));
+  // Second pass: assign each candidate to its best-scoring anchor
+  const assignedToAnchor = new Map<string, { upload: RecentUpload; score: number; signals: string[]; timingDays: number }[]>();
+  for (const anchor of anchors) {
+    assignedToAnchor.set(anchor.id, []);
+  }
+
+  candidateScores.forEach((scores, uploadId) => {
+    // Sort by score descending — assign to highest-scoring anchor
+    scores.sort((a: { score: number }, b: { score: number }) => b.score - a.score);
+    const best = scores[0];
+    const upload = sorted.find(u => u.id === uploadId)!;
+    assignedToAnchor.get(best.anchorId)!.push({
+      upload,
+      score: best.score,
+      signals: best.signals,
+      timingDays: best.timingDays,
+    });
+  });
+
+  // Third pass: build clusters
+  const clusters: ReleaseCluster[] = anchors.map((anchor) => {
+    const anchorDate = new Date(anchor.publishedAt).getTime();
+    const assigned = assignedToAnchor.get(anchor.id) ?? [];
+
+    // Build scored support links
+    const supportLinks: SupportLink[] = assigned
+      .sort((a, b) => b.score - a.score)
+      .map(({ upload, score, signals, timingDays }) => {
+        const role = classifyRole(upload);
+        const category = classifySupportCategory(upload, role, signals, timingDays);
+        return {
+          upload,
+          strength: classifyStrength(score),
+          score,
+          signals,
+          category,
+          role,
+        };
+      });
+
+    // Flat support list for backward compatibility
+    const support = supportLinks.map(sl => sl.upload);
+
+    // Count pre/post
+    let preCount = 0;
+    let postCount = 0;
+    for (const u of support) {
+      const t = new Date(u.publishedAt).getTime();
+      if (t < anchorDate) preCount++;
+      else postCount++;
+    }
+
+    // Group by category
+    const supportByCategory: Partial<Record<SupportCategory, SupportLink[]>> = {};
+    for (const link of supportLinks) {
+      if (!supportByCategory[link.category]) supportByCategory[link.category] = [];
+      supportByCategory[link.category]!.push(link);
+    }
 
     // 3. Build coverage matrix
     const coverage = buildCoverageMatrix(support);
@@ -204,6 +292,8 @@ export function buildReleaseClusters(
       anchor,
       anchorFormat: classifyUploadFormat(anchor),
       support,
+      supportLinks,
+      supportByCategory,
       coverage,
       coverageScore,
       coverageLabel,
@@ -229,17 +319,201 @@ export function buildReleaseClusters(
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+// ── Relationship Scoring Engine ────────────────────────────────────────────
+
 /**
- * Check if a support upload belongs to an anchor's cluster.
- * Since anchors are now strictly Official Videos / Premieres / Docs,
- * we can be more inclusive — everything in the time window is support
- * unless it's another anchor.
+ * Extract meaningful keywords from a title for matching.
+ * Strips common prefixes, suffixes, format markers, and noise words.
  */
-function isRelated(_anchor: RecentUpload, candidate: RecentUpload): boolean {
-  // All content in the window is support infrastructure for the pillar.
-  // Other anchors are excluded by the caller, so anything reaching
-  // this function is a valid support upload.
-  return true;
+function extractTitleKeywords(title: string): string[] {
+  const cleaned = title
+    .toLowerCase()
+    .replace(/\(official\s*(music\s*)?video\)/gi, '')
+    .replace(/\(official\)/gi, '')
+    .replace(/\(lyric\s*video\)/gi, '')
+    .replace(/\(visuali[sz]er\)/gi, '')
+    .replace(/\(audio\)/gi, '')
+    .replace(/\b(ft\.?|feat\.?|featuring)\b/gi, '')
+    .replace(/[''"""\[\](){}|#]/g, ' ')
+    .replace(/[-–—]/g, ' ')
+    .trim();
+
+  return cleaned
+    .split(/\s+/)
+    .filter(w => w.length > 2)
+    .filter(w => !NOISE_WORDS.has(w));
+}
+
+/** Common words that don't carry semantic meaning for matching */
+const NOISE_WORDS = new Set([
+  'the', 'and', 'for', 'with', 'from', 'this', 'that', 'its',
+  'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was',
+  'one', 'our', 'out', 'are', 'has', 'his', 'how', 'man',
+  'new', 'now', 'old', 'see', 'way', 'who', 'boy', 'did',
+  'get', 'got', 'him', 'let', 'say', 'she', 'too', 'use',
+  'video', 'official', 'music', 'lyrics', 'lyric', 'audio',
+  'behind', 'scenes', 'the', 'vlog', 'part', 'episode',
+]);
+
+/**
+ * Extract featured/collaborator names from a title.
+ * Matches patterns like "ft. Artist", "feat. Artist", "x Artist", "& Artist"
+ */
+function extractCollaborators(title: string): string[] {
+  const collabs: string[] = [];
+  const patterns = [
+    /(?:ft\.?|feat\.?|featuring)\s+([A-Z][A-Za-z\s]+?)(?:\s*[(\[,|]|$)/gi,
+    /\bx\s+([A-Z][A-Za-z]+)/g,
+    /&\s+([A-Z][A-Za-z]+)/g,
+  ];
+  for (const pat of patterns) {
+    let match;
+    while ((match = pat.exec(title)) !== null) {
+      collabs.push(match[1].trim().toLowerCase());
+    }
+  }
+  return collabs;
+}
+
+/**
+ * Score how strongly a candidate upload relates to an anchor release.
+ * Returns a score 0-100 and the signals that contributed.
+ */
+function scoreRelationship(
+  anchor: RecentUpload,
+  candidate: RecentUpload,
+  timingDays: number,
+): { score: number; signals: string[] } {
+  let score = 0;
+  const signals: string[] = [];
+
+  const anchorKw = extractTitleKeywords(anchor.title);
+  const candidateKw = extractTitleKeywords(candidate.title);
+  const candidateTitle = candidate.title.toLowerCase();
+  const candidateDesc = (candidate.description || '').toLowerCase().slice(0, 500);
+
+  // ── HIGH SIGNALS (30-40 pts each) ──
+
+  // Title contains the track name (2+ keyword overlap)
+  const kwOverlap = anchorKw.filter(w => candidateKw.includes(w));
+  if (kwOverlap.length >= 3) {
+    score += 40;
+    signals.push(`Title match: "${kwOverlap.slice(0, 3).join(', ')}"`);
+  } else if (kwOverlap.length === 2) {
+    score += 30;
+    signals.push(`Partial title match: "${kwOverlap.join(', ')}"`);
+  } else if (kwOverlap.length === 1 && anchorKw.length <= 3) {
+    // Single keyword match is significant for short titles
+    score += 15;
+    signals.push(`Keyword: "${kwOverlap[0]}"`);
+  }
+
+  // Title contains "BTS" / "behind the scenes" + anchor keywords
+  if (/\b(bts|behind\s*the\s*scenes|making\s*of)\b/.test(candidateTitle) && kwOverlap.length >= 1) {
+    score += 35;
+    signals.push('BTS for this release');
+  }
+
+  // Shared collaborator/featured artist
+  const anchorCollabs = extractCollaborators(anchor.title);
+  const candidateCollabs = extractCollaborators(candidate.title);
+  const sharedCollabs = anchorCollabs.filter(c =>
+    candidateCollabs.includes(c) || candidateTitle.includes(c)
+  );
+  if (sharedCollabs.length > 0) {
+    score += 25;
+    signals.push(`Shared collab: ${sharedCollabs.join(', ')}`);
+  }
+  // Also check if anchor collab name appears in candidate title/desc
+  for (const collab of anchorCollabs) {
+    if (collab.length > 3 && candidateTitle.includes(collab) && !sharedCollabs.includes(collab)) {
+      score += 20;
+      signals.push(`Collab reference: ${collab}`);
+    }
+  }
+
+  // ── MEDIUM SIGNALS (10-20 pts each) ──
+
+  // Description references the track name
+  if (anchorKw.length >= 2) {
+    const descOverlap = anchorKw.filter(w => candidateDesc.includes(w));
+    if (descOverlap.length >= 2) {
+      score += 15;
+      signals.push('Description references release');
+    }
+  }
+
+  // Format-specific role bonus (BTS, lyric video, visualizer inherently support releases)
+  const fmt = classifyUploadFormat(candidate);
+  if (['BTS', 'Lyric Video', 'Visualizer', 'Live Session'].includes(fmt)) {
+    score += 10;
+    signals.push(`${fmt} format`);
+  }
+
+  // ── TIMING SIGNAL (5-15 pts) ──
+  const absDays = Math.abs(timingDays);
+  if (absDays <= 3) {
+    score += 15;
+    signals.push('Same week as release');
+  } else if (absDays <= 7) {
+    score += 12;
+    signals.push('Within 1 week');
+  } else if (absDays <= 14) {
+    score += 8;
+    signals.push('Within 2 weeks');
+  } else {
+    score += 5;
+    signals.push('Within release window');
+  }
+
+  return { score: Math.min(score, 100), signals };
+}
+
+/** Minimum score to count as related support content */
+const MIN_RELATIONSHIP_SCORE = 10;
+
+/** Score thresholds for relationship strength */
+function classifyStrength(score: number): RelationshipStrength {
+  if (score >= 40) return 'strong';
+  if (score >= 20) return 'moderate';
+  return 'contextual';
+}
+
+/**
+ * Classify a support upload into a strategic category based on format + signals.
+ */
+function classifySupportCategory(
+  upload: RecentUpload,
+  role: ContentRole,
+  signals: string[],
+  timingDays: number,
+): SupportCategory {
+  const t = upload.title.toLowerCase();
+  const fmt = classifyUploadFormat(upload);
+
+  // Format-driven categories
+  if (role === 'bts' || /\b(bts|behind\s*the\s*scenes|making\s*of)\b/.test(t)) return 'BTS';
+  if (role === 'lyric' || role === 'visualizer' || role === 'live_session') return 'Release Momentum';
+  if (role === 'interview') return 'Personality';
+  if (role === 'documentary') return 'BTS';
+  if (role === 'freestyle') return 'Release Momentum';
+
+  // Content-driven categories
+  if (/\b(vlog|day\s*in|life|behind|diary|journey|studio\s*session|recording)\b/.test(t)) return 'World Building';
+  if (/\b(rollout|release\s*day|drop\s*day|launch|countdown)\b/.test(t)) return 'Rollout Diary';
+  if (/\b(podcast|q\s*&?\s*a|interview|conversation|chat|talk)\b/.test(t)) return 'Personality';
+  if (/\b(reaction|reacts?|respond|review)\b/.test(t)) return 'Follow-through';
+
+  // Collaborator bridge
+  if (signals.some(s => s.includes('collab') || s.includes('Collab'))) return 'Collaborator Bridge';
+
+  // Shorts are community layer
+  if (fmt === 'Short') return 'Community Layer';
+
+  // Timing-based fallback
+  if (timingDays < 0) return 'World Building'; // Pre-release longform
+  if (timingDays >= 0 && timingDays <= 7) return 'Release Momentum'; // Same week
+  return 'Follow-through'; // Post-release
 }
 
 /** Build the support format coverage matrix */
