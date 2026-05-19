@@ -177,6 +177,42 @@ function scoreMatch(
   return { score, confidence, titleOverlap, timingDays, formatMatch };
 }
 
+/**
+ * Looser match for warm-up/generic actions: format + timing only.
+ * Used when an action title is generic (e.g. "Artist-led Short") and
+ * keyword matching fails, but a format-compatible upload landed within
+ * the week window. Returns a low-confidence match.
+ */
+function scoreFormatTimingMatch(
+  action: ContentAction,
+  upload: RecentUpload,
+  actionDate: Date | null,
+): MatchScore | null {
+  if (action.format === 'community' || action.format === 'post') return null;
+  const formatMatch = formatCompatible(action, upload);
+  if (!formatMatch) return null;
+
+  if (!actionDate) return null;
+  const uploadDate = new Date(upload.publishedAt);
+  const timingDays = Math.abs((uploadDate.getTime() - actionDate.getTime()) / 86400000);
+  // Must land within the week (7 days)
+  if (timingDays > 7) return null;
+
+  const score = 25 + (1 - timingDays / 7) * 15; // 25-40 range
+  return { score, confidence: 'low', titleOverlap: 0, timingDays, formatMatch: true };
+}
+
+/** Check if an action title is generic (warm-up) vs specific (event-driven) */
+function isGenericAction(action: ContentAction): boolean {
+  const generic = [
+    'artist-led', 're-introduce', 'warm-up', 'snippet', 'studio',
+    'anticipation', 'tease', 'build anticipation', 'throwback',
+    'behind the scenes update', 'what\'s coming',
+  ];
+  const lower = action.title.toLowerCase();
+  return generic.some(g => lower.includes(g));
+}
+
 // ── Date resolution ───────────────────────────────────────────────────────
 
 /**
@@ -264,6 +300,17 @@ export function matchPlanToUploads(
         const result = scoreMatch(action, upload, plannedDate);
         if (result && (!bestMatch || result.score > bestMatch.result.score)) {
           bestMatch = { upload, result };
+        }
+      }
+
+      // Fallback for generic warm-up actions: match by format + timing only
+      if (!bestMatch && isGenericAction(action)) {
+        for (const upload of uploads) {
+          if (usedUploadIds.has(upload.id)) continue;
+          const result = scoreFormatTimingMatch(action, upload, plannedDate);
+          if (result && (!bestMatch || result.score > bestMatch.result.score)) {
+            bestMatch = { upload, result };
+          }
         }
       }
 

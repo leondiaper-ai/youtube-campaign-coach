@@ -695,7 +695,7 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
  *
  * Cost: ~6 units per artist (1 channels + 2 playlistItems + 2 videos + 1 resolve)
  */
-export async function fetchChannelSnapLite(input: string): Promise<LiveSnap | null> {
+export async function fetchChannelSnapLite(input: string, opts?: { campaignStartDate?: string }): Promise<LiveSnap | null> {
   if (!KEY) return null;
 
   if (isQuotaCoolingDown()) {
@@ -726,9 +726,15 @@ export async function fetchChannelSnapLite(input: string): Promise<LiveSnap | nu
 
     if (uploadsId) {
       const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      // For campaign artists, paginate deeper to cover the full campaign window
+      const campaignCutoff = opts?.campaignStartDate
+        ? new Date(opts.campaignStartDate + 'T00:00:00').getTime()
+        : null;
+      const maxPages = campaignCutoff ? 6 : 2; // 300 vs 100 items
       const ids: string[] = [];
       let nextPageToken: string | undefined;
-      for (let page = 0; page < 2; page++) {
+      let reachedCampaignStart = false;
+      for (let page = 0; page < maxPages; page++) {
         const pageParam = nextPageToken ? `&pageToken=${nextPageToken}` : '';
         const pl = await jget(
           `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}${pageParam}`
@@ -740,9 +746,13 @@ export async function fetchChannelSnapLite(input: string): Promise<LiveSnap | nu
           if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
           if (new Date(t).getTime() >= cutoff) uploads30d++;
           ids.push(vid);
+          // Stop early if we've reached before the campaign start
+          if (campaignCutoff && new Date(t).getTime() < campaignCutoff) {
+            reachedCampaignStart = true;
+          }
         }
         nextPageToken = pl.nextPageToken;
-        if (!nextPageToken) break;
+        if (!nextPageToken || reachedCampaignStart) break;
       }
 
       if (ids.length) {

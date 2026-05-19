@@ -125,7 +125,11 @@ export async function GET(req: NextRequest) {
     const { handle } = entry;
 
     try {
-      const snap = await fetchChannelSnapLite(handle);
+      // For campaign artists, fetch deeper upload history to cover the full campaign window
+      const artistCfg = allArtists.find(a => a.slug === slug);
+      const snap = await fetchChannelSnapLite(handle, {
+        campaignStartDate: artistCfg?.campaignStartDate ?? undefined,
+      });
       if (!snap) {
         dailyResults[slug] = 'no key';
         failCount++;

@@ -63,7 +63,9 @@ export async function POST(req: NextRequest) {
   for (const a of withHandles) {
     const handle = a.channelHandle!;
     try {
-      const snap = await fetchChannelSnapLite(handle);
+      const snap = await fetchChannelSnapLite(handle, {
+        campaignStartDate: a.campaignStartDate ?? undefined,
+      });
       if (!snap) {
         results[a.slug] = 'no key';
         failCount++;
