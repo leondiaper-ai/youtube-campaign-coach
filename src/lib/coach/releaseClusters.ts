@@ -291,22 +291,22 @@ function generateInsights(
 
   // Single upload release
   if (support.length === 0) {
-    insights.push('Single upload release — no support content detected in the ±3 week window');
+    insights.push('Standalone release — adding support content around future drops could extend momentum');
     return insights;
   }
 
   // Pre-release activity
   if (preCount === 0) {
-    insights.push('No pre-release teasers — the drop had no warm-up content');
+    insights.push('Warm-up content before the drop could build anticipation for future releases');
   } else if (preCount >= 3) {
-    insights.push(`Strong pre-release: ${preCount} uploads before the drop built anticipation`);
+    insights.push(`Strong warm-up: ${preCount} uploads before the drop built anticipation`);
   }
 
   // Post-release follow-through
   if (postCount === 0 && support.length > 0) {
-    insights.push('All support was pre-release — no follow-up content kept momentum alive');
+    insights.push('Follow-through content after the drop would keep the algorithm serving this release longer');
   } else if (postCount >= 4) {
-    insights.push(`Strong follow-through: ${postCount} uploads after the drop kept the algorithm active`);
+    insights.push(`Strong follow-through: ${postCount} uploads after the drop sustained momentum`);
   }
 
   // Shorts support
@@ -314,16 +314,16 @@ function generateInsights(
   if (shorts?.present && shorts.count >= 3) {
     insights.push(`${shorts.count} Shorts kept the channel in feeds around this release`);
   } else if (!shorts?.present) {
-    insights.push('No Shorts support — Shorts drive discovery and would have extended reach');
+    insights.push('Shorts would extend discovery — even 2-3 clips could widen the audience window');
   }
 
-  // Missing key formats
+  // Missing key formats — opportunity framing
   const missing = coverage.filter(c =>
     ['lyric_video', 'visualizer', 'bts'].includes(c.key) && !c.present
   );
   if (missing.length > 0) {
     const names = missing.map(m => m.label).join(', ');
-    insights.push(`Missing: ${names} — these formats extend how long a release stays in feeds`);
+    insights.push(`${names} could extend long-tail discovery further`);
   }
 
   // View distribution

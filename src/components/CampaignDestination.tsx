@@ -1491,27 +1491,34 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
 
           {/* ── Anchor pillar blocks — prominent official video releases ── */}
           {anchorClusters.map((cluster) => {
-            const { anchor, support, coverage, coverageLabel, totalViews, insights } = cluster;
-            const severity =
-              coverageLabel === 'Strong'   ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong support' } :
-              coverageLabel === 'Moderate' ? { bg: '#FFFBEB', border: '#FDE68A', color: '#D97706', label: 'Moderate support' } :
-              coverageLabel === 'Weak'     ? { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626', label: 'Weak support' } :
-                                             { bg: '#FEF2F2', border: '#FECACA', color: '#991B1B', label: 'Unsupported' };
-            const shortCount = support.filter(u => u.durationSec <= 62).length;
+            const { anchor, support, coverage, coverageLabel, insights } = cluster;
+            const tone =
+              coverageLabel === 'Strong'   ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
+              coverageLabel === 'Moderate' ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
+              coverageLabel === 'Weak'     ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Support opportunity' } :
+                                             { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'World building opportunity' };
+
+            // Separate support into longform vs shorts
+            const supportLongform = support.filter(u => u.durationSec > 62);
+            const supportShorts = support.filter(u => u.durationSec <= 62);
             const presentFormats = coverage.filter(f => f.present);
             const missingFormats = coverage.filter(f => !f.present && ['shorts', 'bts', 'lyric_video', 'visualizer'].includes(f.key));
             const narrative = insights.slice(0, 2).join(' ');
 
+            // Top-performing shorts (max 3)
+            const topShorts = [...supportShorts].sort((a, b) => b.viewCount - a.viewCount).slice(0, 3);
+            const totalShortsViews = supportShorts.reduce((s, u) => s + u.viewCount, 0);
+
             return (
               <div key={`pillar-${anchor.id}`} style={{
                 background: WHITE,
-                border: `1px solid ${severity.border}`,
-                borderLeft: `3px solid ${severity.color}`,
+                border: `1px solid ${tone.border}`,
+                borderLeft: `3px solid ${tone.color}`,
                 borderRadius: 5,
                 padding: '10px 14px',
                 marginBottom: 8,
               }}>
-                {/* Anchor header: thumbnail + title + views + severity */}
+                {/* Anchor header: thumbnail + title + views + tone badge */}
                 <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                   <a
                     href={ytVideoUrl(anchor.id, anchor.durationSec)}
@@ -1545,12 +1552,12 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
                       </a>
                       <span style={{
                         fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
-                        textTransform: 'uppercase', color: severity.color,
+                        textTransform: 'uppercase', color: tone.color,
                         padding: '2px 7px', borderRadius: 2,
-                        background: severity.bg, fontFamily: MONO,
+                        background: tone.bg, fontFamily: MONO,
                         whiteSpace: 'nowrap', flexShrink: 0,
                       }}>
-                        {severity.label}
+                        {tone.label}
                       </span>
                     </div>
                     <div style={{
@@ -1559,17 +1566,132 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
                     }}>
                       <span style={{ fontWeight: 700 }}>{fmtNum(anchor.viewCount)} views</span>
                       <span>{timeAgo(anchor.publishedAt)}</span>
-                      {support.length > 0 && (
-                        <span>{support.length} support uploads</span>
-                      )}
-                      {shortCount > 0 && (
-                        <span>{shortCount} Shorts</span>
-                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Support architecture: format chips */}
+                {/* ── Supportive longform — BTS, vlogs, live sessions, interviews ── */}
+                {supportLongform.length > 0 && (
+                  <div style={{
+                    marginTop: 8,
+                    borderTop: `1px solid ${BONE}`,
+                    paddingTop: 6,
+                  }}>
+                    <div style={{
+                      fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+                      textTransform: 'uppercase', color: GHOST,
+                      fontFamily: MONO, marginBottom: 4,
+                    }}>
+                      Support content
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                      {supportLongform.map((upload) => {
+                        const fmtLabel = classifyUploadFormat(upload);
+                        return (
+                          <a
+                            key={`sl-${upload.id}`}
+                            href={ytVideoUrl(upload.id, upload.durationSec)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 8,
+                              padding: '3px 6px',
+                              background: 'rgba(245,242,237,0.5)',
+                              borderRadius: 3,
+                              textDecoration: 'none', color: 'inherit',
+                            }}
+                          >
+                            <img
+                              src={ytThumb(upload.id, 'mqdefault')}
+                              alt="" loading="lazy"
+                              style={{
+                                width: 40, height: 22,
+                                objectFit: 'cover', borderRadius: 2,
+                              }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                fontSize: 10, color: INK,
+                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                              }}>
+                                {upload.title}
+                              </div>
+                            </div>
+                            <span style={{
+                              fontSize: 7, fontWeight: 700, color: '#4338CA',
+                              textTransform: 'uppercase', fontFamily: MONO,
+                              flexShrink: 0,
+                            }}>
+                              {fmtLabel}
+                            </span>
+                            <span style={{
+                              fontSize: 8, color: SMOKE, fontFamily: MONO,
+                              flexShrink: 0,
+                            }}>
+                              {fmtNum(upload.viewCount)}
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Shorts cluster — collapsed summary with top performers ── */}
+                {supportShorts.length > 0 && (
+                  <div style={{
+                    marginTop: supportLongform.length > 0 ? 6 : 8,
+                    borderTop: supportLongform.length === 0 ? `1px solid ${BONE}` : 'none',
+                    paddingTop: supportLongform.length === 0 ? 6 : 0,
+                  }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      fontSize: 9, color: SMOKE, fontFamily: MONO,
+                    }}>
+                      <span style={{ fontWeight: 700, color: INK }}>
+                        ⚡ {supportShorts.length} Shorts
+                      </span>
+                      <span>{fmtNum(totalShortsViews)} combined views</span>
+                      {supportShorts.length > 3 && (
+                        <span style={{ color: GHOST }}>Top {topShorts.length}:</span>
+                      )}
+                    </div>
+                    {topShorts.length > 0 && (
+                      <div style={{
+                        display: 'flex', gap: 4, marginTop: 3, flexWrap: 'wrap',
+                      }}>
+                        {topShorts.map((short) => (
+                          <a
+                            key={`sh-${short.id}`}
+                            href={ytVideoUrl(short.id, short.durationSec)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 4,
+                              padding: '2px 6px',
+                              background: 'rgba(245,242,237,0.5)',
+                              borderRadius: 2,
+                              textDecoration: 'none', color: 'inherit',
+                              fontSize: 8,
+                            }}
+                          >
+                            <span style={{
+                              color: SMOKE, maxWidth: 100,
+                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            }}>
+                              {short.title}
+                            </span>
+                            <span style={{ color: GHOST, fontFamily: MONO }}>
+                              {fmtNum(short.viewCount)}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Support architecture: format chips + opportunity nudges */}
                 {(presentFormats.length > 0 || missingFormats.length > 0) && (
                   <div style={{
                     display: 'flex', gap: 3, flexWrap: 'wrap',
@@ -1586,11 +1708,11 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
                     ))}
                     {missingFormats.length > 0 && (
                       <span style={{
-                        fontSize: 8, fontWeight: 600, color: '#991B1B',
+                        fontSize: 8, fontWeight: 600, color: '#7C3AED',
                         padding: '1px 6px', borderRadius: 2,
-                        background: '#FEF2F2', fontFamily: MONO,
+                        background: '#F5F3FF', fontFamily: MONO,
                       }}>
-                        Missing: {missingFormats.map(f => f.label).join(', ')}
+                        Could extend: {missingFormats.map(f => f.label).join(', ')}
                       </span>
                     )}
                   </div>
@@ -1609,16 +1731,61 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
             );
           })}
 
-          {/* ── Support uploads summary (collapsed) ── */}
-          {weekSupportUploads.length > 0 && anchorClusters.length === 0 && (
-            <div style={{
-              fontSize: 9, color: SMOKE, fontFamily: MONO,
-              padding: '2px 0', marginBottom: 4,
-              letterSpacing: '0.04em',
-            }}>
-              {weekSupportUploads.length} support upload{weekSupportUploads.length > 1 ? 's' : ''} for nearby release{weekSupportUploads.length > 1 ? 's' : ''}
-            </div>
-          )}
+          {/* ── Support uploads for nearby release (collapsed summary) ── */}
+          {weekSupportUploads.length > 0 && anchorClusters.length === 0 && (() => {
+            const supportLong = weekSupportUploads.filter(u => u.durationSec > 62);
+            const supportShort = weekSupportUploads.filter(u => u.durationSec <= 62);
+            return (
+              <div style={{
+                padding: '4px 8px', marginBottom: 4,
+                background: 'rgba(245,242,237,0.4)',
+                borderRadius: 3,
+                borderLeft: `2px solid ${BONE}`,
+              }}>
+                <div style={{
+                  fontSize: 9, color: SMOKE, fontFamily: MONO,
+                  letterSpacing: '0.04em', marginBottom: supportLong.length > 0 ? 3 : 0,
+                }}>
+                  Supporting nearby release
+                  {supportShort.length > 0 && ` · ${supportShort.length} Shorts`}
+                </div>
+                {supportLong.map((upload) => {
+                  const fmtLabel = classifyUploadFormat(upload);
+                  return (
+                    <a
+                      key={`wsl-${upload.id}`}
+                      href={ytVideoUrl(upload.id, upload.durationSec)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        padding: '2px 0',
+                        textDecoration: 'none', color: 'inherit',
+                        fontSize: 9,
+                      }}
+                    >
+                      <span style={{
+                        color: '#4338CA', fontWeight: 700,
+                        textTransform: 'uppercase', fontFamily: MONO,
+                        fontSize: 7,
+                      }}>
+                        {fmtLabel}
+                      </span>
+                      <span style={{
+                        color: INK, flex: 1,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {upload.title}
+                      </span>
+                      <span style={{ color: GHOST, fontFamily: MONO, fontSize: 8 }}>
+                        {fmtNum(upload.viewCount)}
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            );
+          })()}
 
           {/* ── Regular matched uploads (non-anchor, non-support evidence) ── */}
           {isPast && regularMatched.length > 0 && (
