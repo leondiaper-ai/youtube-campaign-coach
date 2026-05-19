@@ -161,6 +161,9 @@ export default function CampaignDestination({
   const releaseClusters = buildReleaseClusters(uploads, {
     minAnchorViews: 5000,
     maxPillars: 6,
+    campaignStartDate,
+    campaignWeeks: plan.totalWeeks,
+    campaignEvents: plan.events,
   });
 
   // ── Rollout identity stats ──

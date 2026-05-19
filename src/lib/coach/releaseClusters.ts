@@ -9,7 +9,7 @@
  */
 
 import type { RecentUpload } from '@/lib/artists';
-import type { PhaseName } from '@/lib/planEngine';
+import type { PhaseName, ParsedEvent } from '@/lib/planEngine';
 import { classifyUploadFormat, type UploadFormatLabel } from './matchEngine';
 
 
@@ -169,6 +169,12 @@ export function buildReleaseClusters(
     postWindowDays?: number;
     /** Maximum number of pillars to return (most-viewed first) */
     maxPillars?: number;
+    /** Campaign start date — only anchors within the campaign window qualify */
+    campaignStartDate?: string;
+    /** Campaign duration in weeks — defines the end of the active campaign window */
+    campaignWeeks?: number;
+    /** Parsed timeline events — anchors matching these are confirmed as campaign releases */
+    campaignEvents?: ParsedEvent[];
   } = {},
 ): ReleaseCluster[] {
   const preWindow = options.preWindowDays ?? PRE_WINDOW_DAYS;
@@ -183,14 +189,47 @@ export function buildReleaseClusters(
     (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
   );
 
+  // ── Campaign window gate ──────────────────────────────────────────────
+  // The planner is the ACTIVE CAMPAIGN WORLD only — not a channel archive.
+  // Only anchors within the campaign timeline window qualify as release moments.
+  // Historical releases outside this window are excluded.
+  const campaignStart = options.campaignStartDate
+    ? new Date(options.campaignStartDate).getTime()
+    : null;
+  const campaignEnd = campaignStart && options.campaignWeeks
+    ? campaignStart + options.campaignWeeks * 7 * 86400000
+    : campaignStart
+      ? campaignStart + 52 * 7 * 86400000 // Default 1-year window if no duration specified
+      : null;
+
+  // Pre-compute campaign event keywords for cross-referencing
+  const eventKeywords: string[][] = (options.campaignEvents ?? []).map(e =>
+    extractTitleKeywords(e.title)
+  );
+
   // 1. Identify anchors — ONLY official videos, premieres, documentaries
+  //    that fall WITHIN the active campaign window.
   //    These are the campaign pillars. Everything else is support infrastructure.
   const anchors: RecentUpload[] = [];
   for (const upload of sorted) {
     const fmt = classifyUploadFormat(upload);
-    if (ANCHOR_FORMATS.includes(fmt) && upload.viewCount >= minViews) {
-      anchors.push(upload);
+    if (!ANCHOR_FORMATS.includes(fmt) || upload.viewCount < minViews) continue;
+
+    const uploadDate = new Date(upload.publishedAt).getTime();
+
+    // Gate 1: Campaign window filter
+    if (campaignStart && campaignEnd) {
+      // Allow a small buffer before campaign start (2 weeks) for pre-campaign releases
+      const windowStart = campaignStart - 14 * 86400000;
+      if (uploadDate < windowStart || uploadDate > campaignEnd) {
+        // Outside campaign window — check if it matches a timeline event
+        if (!matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? [])) {
+          continue; // Skip: not in campaign window and no matching timeline event
+        }
+      }
     }
+
+    anchors.push(upload);
   }
 
   if (anchors.length === 0) return [];
@@ -374,6 +413,36 @@ export function buildReleaseClusters(
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+
+// ── Campaign Window Matching ──────────────────────────────────────────────
+
+/**
+ * Check if an upload matches any timeline event (cross-reference gate).
+ * This confirms an anchor as part of the campaign even if it falls
+ * slightly outside the date window.
+ */
+function matchesTimelineEvent(
+  upload: RecentUpload,
+  eventKeywords: string[][],
+  events: ParsedEvent[],
+): boolean {
+  if (events.length === 0) return false;
+
+  const uploadKw = extractTitleKeywords(upload.title);
+  if (uploadKw.length === 0) return false;
+
+  for (let i = 0; i < events.length; i++) {
+    const evKw = eventKeywords[i];
+    if (evKw.length === 0) continue;
+
+    // Require at least 2 keyword overlap, or 1 for short titles
+    const overlap = uploadKw.filter(w => evKw.includes(w));
+    const threshold = Math.min(uploadKw.length, evKw.length) <= 2 ? 1 : 2;
+    if (overlap.length >= threshold) return true;
+  }
+
+  return false;
+}
 
 // ── Relationship Scoring Engine ────────────────────────────────────────────
 
