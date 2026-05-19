@@ -163,14 +163,6 @@ export default function CampaignDestination({
     minAnchorViews: 500,
   });
 
-  // Debug: log upload data for cluster analysis
-  console.log('[ReleaseClusters]', {
-    uploadCount: uploads.length,
-    longform: uploads.filter(u => u.durationSec > 180).map(u => ({ title: u.title, dur: u.durationSec, views: u.viewCount })),
-    shorts: uploads.filter(u => u.durationSec <= 62).length,
-    clusterCount: releaseClusters.length,
-  });
-
   // ── Rollout identity stats ──
   const totalPlanned = plan.events.length;
   const landed = matchResult
