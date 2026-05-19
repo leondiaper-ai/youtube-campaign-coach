@@ -10,7 +10,7 @@
 
 import type { RecentUpload } from '@/lib/artists';
 import { classifyUploadFormat, type UploadFormatLabel } from './matchEngine';
-import { fmtNum } from '@/lib/artists';
+
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -107,19 +107,20 @@ const SUPPORT_FORMAT_DEFS: { key: string; label: string; match: (f: UploadFormat
 export function buildReleaseClusters(
   uploads: RecentUpload[],
   options: {
-    /** Also treat longform uploads (>3min, non-Short) as anchors even without "Official Video" in title */
-    treatLongformAsAnchor?: boolean;
-    /** Minimum view count to qualify as anchor (prevents noise from low-view longform) */
+    /** Minimum view count to qualify as anchor (prevents noise from low-view releases) */
     minAnchorViews?: number;
     /** Custom pre-window days */
     preWindowDays?: number;
     /** Custom post-window days */
     postWindowDays?: number;
+    /** Maximum number of pillars to return (most-viewed first) */
+    maxPillars?: number;
   } = {},
 ): ReleaseCluster[] {
   const preWindow = options.preWindowDays ?? PRE_WINDOW_DAYS;
   const postWindow = options.postWindowDays ?? POST_WINDOW_DAYS;
-  const minViews = options.minAnchorViews ?? 0;
+  const minViews = options.minAnchorViews ?? 5000;
+  const maxPillars = options.maxPillars ?? 6;
 
   if (uploads.length === 0) return [];
 
@@ -128,27 +129,13 @@ export function buildReleaseClusters(
     (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
   );
 
-  // 1. Identify anchors — major longform drops
+  // 1. Identify anchors — ONLY official videos, premieres, documentaries
+  //    These are the campaign pillars. Everything else is support infrastructure.
   const anchors: RecentUpload[] = [];
   for (const upload of sorted) {
     const fmt = classifyUploadFormat(upload);
-    const isExplicitAnchor = ANCHOR_FORMATS.includes(fmt);
-    const isLongform = options.treatLongformAsAnchor &&
-      upload.durationSec > 180 &&
-      fmt !== 'Short' &&
-      !['BTS', 'Interview', 'Live Session'].includes(fmt);
-
-    if ((isExplicitAnchor || isLongform) && upload.viewCount >= minViews) {
+    if (ANCHOR_FORMATS.includes(fmt) && upload.viewCount >= minViews) {
       anchors.push(upload);
-    }
-  }
-
-  // If no explicit anchors, try to find the highest-view longform as anchor
-  if (anchors.length === 0) {
-    const longform = sorted.filter(u => u.durationSec > 120 && classifyUploadFormat(u) !== 'Short');
-    if (longform.length > 0) {
-      const best = longform.sort((a, b) => b.viewCount - a.viewCount)[0];
-      if (best.viewCount > 1000) anchors.push(best);
     }
   }
 
@@ -229,53 +216,30 @@ export function buildReleaseClusters(
     };
   });
 
-  // Sort most recent first
-  return clusters.sort(
+  // Sort by anchor views (highest first), cap to maxPillars
+  const ranked = clusters
+    .sort((a, b) => b.anchor.viewCount - a.anchor.viewCount)
+    .slice(0, maxPillars);
+
+  // Then sort by date (most recent first) for display
+  return ranked.sort(
     (a, b) => new Date(b.anchor.publishedAt).getTime() - new Date(a.anchor.publishedAt).getTime()
   );
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-/** Check if a support upload is related to the anchor (shared keywords, artist name match) */
-function isRelated(anchor: RecentUpload, candidate: RecentUpload): boolean {
-  // Always include Shorts — they're general channel support
-  if (candidate.durationSec <= 62) return true;
-
-  const anchorWords = extractKeywords(anchor.title);
-  const candWords = extractKeywords(candidate.title);
-
-  // Check for shared meaningful keywords (song name, artist name, project name)
-  const shared = anchorWords.filter(w => candWords.includes(w));
-  if (shared.length >= 1) return true;
-
-  // Check description overlap
-  const anchorDesc = anchor.description.toLowerCase().slice(0, 200);
-  const candDesc = candidate.description.toLowerCase().slice(0, 200);
-  const descWords = extractKeywords(anchor.title);
-  if (descWords.some(w => candDesc.includes(w))) return true;
-  const candTitleWords = extractKeywords(candidate.title);
-  if (candTitleWords.some(w => anchorDesc.includes(w))) return true;
-
-  return false;
-}
-
-/** Extract meaningful keywords from a title (remove noise words) */
-function extractKeywords(title: string): string[] {
-  const noise = new Set([
-    'official', 'video', 'music', 'lyric', 'lyrics', 'visualizer', 'visualiser',
-    'bts', 'behind', 'the', 'scenes', 'making', 'of', 'ft', 'feat', 'featuring',
-    'prod', 'by', 'directed', 'shot', 'x', 'and', 'with', 'in', 'on', 'at',
-    'a', 'an', 'for', 'to', 'from', 'is', 'it', 'my', 'me', 'we', 'us',
-    'shorts', 'short', 'clip', 'new', 'out', 'now', 'live', 'session',
-    'premiere', 'premier', 'freestyle', 'interview', 'podcast',
-  ]);
-
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length >= 3 && !noise.has(w));
+/**
+ * Check if a support upload belongs to an anchor's cluster.
+ * Since anchors are now strictly Official Videos / Premieres / Docs,
+ * we can be more inclusive — everything in the time window is support
+ * unless it's another anchor.
+ */
+function isRelated(_anchor: RecentUpload, candidate: RecentUpload): boolean {
+  // All content in the window is support infrastructure for the pillar.
+  // Other anchors are excluded by the caller, so anything reaching
+  // this function is a valid support upload.
+  return true;
 }
 
 /** Build the support format coverage matrix */
