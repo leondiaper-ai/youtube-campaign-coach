@@ -87,7 +87,7 @@ export type ReleaseCluster = {
   /** Coverage score: how many of the key formats were present (0-1) */
   coverageScore: number;
   /** Coverage label */
-  coverageLabel: 'Strong' | 'Moderate' | 'Weak' | 'Minimal';
+  coverageLabel: 'Strong' | 'Moderate' | 'Expandable' | 'Opportunity';
   /** Total views across anchor + all support */
   totalViews: number;
   /** Total uploads in this cluster (anchor + support) */
@@ -100,6 +100,10 @@ export type ReleaseCluster = {
   activeDays: number;
   /** Strategic notes about what's missing or strong */
   insights: string[];
+  /** Premiere detection status for the anchor */
+  premiereStatus: PremiereStatus;
+  /** Release support checklist with timing guidance */
+  checklist: ChecklistItem[];
 };
 
 /** A self-contained release moment within a campaign phase */
@@ -121,6 +125,191 @@ export type ReleaseMoment = {
   /** Number of support uploads in this moment */
   supportCount: number;
 };
+
+// ── Premiere Detection ────────────────────────────────────────────────────
+
+/** Premiere confirmation status — honest about what we know */
+export type PremiereStatus = 'confirmed' | 'likely' | 'unknown' | 'not_used';
+
+/**
+ * Detect whether an anchor upload used a YouTube Premiere.
+ *
+ * YouTube API signals:
+ * - actualStartTime present + scheduledStartTime present → confirmed premiere
+ * - scheduledStartTime present but no actualStartTime → likely (scheduled, may not have premiered)
+ * - Neither present → unknown (could have premiered but API data was cleared)
+ *
+ * TRUST RULE: If we can't confirm it from API data, we say "unknown" — never fake it.
+ */
+export function detectPremiereStatus(upload: RecentUpload): PremiereStatus {
+  if (upload.actualStart && upload.scheduledStart) return 'confirmed';
+  if (upload.scheduledStart) return 'likely';
+  // Can't determine — YouTube clears liveStreamingDetails for some completed premieres
+  return 'unknown';
+}
+
+// ── Support Checklist ────────────────────────────────────────────────────
+
+/** Timing guidance for a support format relative to the official video */
+export type TimingGuidance = {
+  label: string;         // e.g. "7–10 days after official video"
+  windowStart: number;   // days relative to anchor (negative = before)
+  windowEnd: number;     // days relative to anchor
+  priority: 'core' | 'recommended' | 'optional';
+};
+
+/** A single item in the release support checklist */
+export type ChecklistItem = {
+  key: string;
+  label: string;
+  status: 'present' | 'missing' | 'partial';
+  count: number;
+  totalViews: number;
+  timing: TimingGuidance;
+  /** If present, actual days offset from anchor for the content */
+  actualDaysOffset?: number;
+  /** Whether timing was optimal */
+  timingOptimal?: boolean;
+};
+
+/** The support checklist definitions — timing windows per format */
+const CHECKLIST_DEFS: { key: string; label: string; timing: TimingGuidance; match: (f: UploadFormatLabel) => boolean }[] = [
+  {
+    key: 'premiere',
+    label: 'Premiere',
+    timing: { label: 'Launch moment', windowStart: 0, windowEnd: 0, priority: 'core' },
+    match: () => false, // Special: detected via API, not upload format
+  },
+  {
+    key: 'shorts_pre',
+    label: 'Pre-release Shorts',
+    timing: { label: '3 days before release', windowStart: -3, windowEnd: 0, priority: 'core' },
+    match: (f) => f === 'Short',
+  },
+  {
+    key: 'shorts_post',
+    label: 'Follow-up Shorts',
+    timing: { label: 'Daily around release week', windowStart: 0, windowEnd: 10, priority: 'core' },
+    match: (f) => f === 'Short',
+  },
+  {
+    key: 'bts',
+    label: 'BTS',
+    timing: { label: '3–7 days after official video', windowStart: 3, windowEnd: 7, priority: 'recommended' },
+    match: (f) => f === 'BTS',
+  },
+  {
+    key: 'lyric_video',
+    label: 'Lyric Video',
+    timing: { label: '7–10 days after official video', windowStart: 7, windowEnd: 10, priority: 'recommended' },
+    match: (f) => f === 'Lyric Video',
+  },
+  {
+    key: 'visualizer',
+    label: 'Visualizer',
+    timing: { label: '7–14 days after official video', windowStart: 7, windowEnd: 14, priority: 'recommended' },
+    match: (f) => f === 'Visualizer',
+  },
+  {
+    key: 'community',
+    label: 'Community Post',
+    timing: { label: 'Day of release + follow-up', windowStart: 0, windowEnd: 7, priority: 'recommended' },
+    match: () => false, // Can't detect community posts via uploads API
+  },
+];
+
+/**
+ * Build a release support checklist for a cluster.
+ * Shows which formats are present/missing with timing guidance.
+ */
+export function buildSupportChecklist(
+  cluster: ReleaseCluster,
+): ChecklistItem[] {
+  const anchorDate = new Date(cluster.anchor.publishedAt).getTime();
+
+  return CHECKLIST_DEFS.map(def => {
+    // Special: Premiere is detected via API, not format matching
+    if (def.key === 'premiere') {
+      const premiereStatus = detectPremiereStatus(cluster.anchor);
+      return {
+        key: def.key,
+        label: def.label,
+        status: premiereStatus === 'confirmed' || premiereStatus === 'likely' ? 'present' : 'missing',
+        count: premiereStatus === 'confirmed' || premiereStatus === 'likely' ? 1 : 0,
+        totalViews: 0, // Premiere views are the same as anchor views
+        timing: def.timing,
+      };
+    }
+
+    // Special: Community posts can't be detected via uploads API
+    if (def.key === 'community') {
+      return {
+        key: def.key,
+        label: def.label,
+        status: 'missing' as const, // Can't confirm — always show as opportunity
+        count: 0,
+        totalViews: 0,
+        timing: def.timing,
+      };
+    }
+
+    // For shorts, split by pre/post release
+    if (def.key === 'shorts_pre') {
+      const preShorts = cluster.support.filter(u => {
+        if (classifyUploadFormat(u) !== 'Short') return false;
+        const days = (new Date(u.publishedAt).getTime() - anchorDate) / 86400000;
+        return days >= def.timing.windowStart && days <= def.timing.windowEnd;
+      });
+      return {
+        key: def.key,
+        label: def.label,
+        status: preShorts.length > 0 ? 'present' : 'missing',
+        count: preShorts.length,
+        totalViews: preShorts.reduce((s, u) => s + u.viewCount, 0),
+        timing: def.timing,
+      };
+    }
+
+    if (def.key === 'shorts_post') {
+      const postShorts = cluster.support.filter(u => {
+        if (classifyUploadFormat(u) !== 'Short') return false;
+        const days = (new Date(u.publishedAt).getTime() - anchorDate) / 86400000;
+        return days > 0 && days <= def.timing.windowEnd;
+      });
+      return {
+        key: def.key,
+        label: def.label,
+        status: postShorts.length > 0 ? 'present' : 'missing',
+        count: postShorts.length,
+        totalViews: postShorts.reduce((s, u) => s + u.viewCount, 0),
+        timing: def.timing,
+      };
+    }
+
+    // Standard format matching
+    const matching = cluster.support.filter(u => def.match(classifyUploadFormat(u)));
+    let actualDaysOffset: number | undefined;
+    let timingOptimal: boolean | undefined;
+
+    if (matching.length > 0) {
+      // Use the first matching upload's timing
+      const firstDate = new Date(matching[0].publishedAt).getTime();
+      actualDaysOffset = Math.round((firstDate - anchorDate) / 86400000);
+      timingOptimal = actualDaysOffset >= def.timing.windowStart && actualDaysOffset <= def.timing.windowEnd;
+    }
+
+    return {
+      key: def.key,
+      label: def.label,
+      status: matching.length > 0 ? 'present' : 'missing',
+      count: matching.length,
+      totalViews: matching.reduce((s, u) => s + u.viewCount, 0),
+      timing: def.timing,
+      actualDaysOffset,
+      timingOptimal,
+    };
+  });
+}
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -371,7 +560,7 @@ export function buildReleaseClusters(
     const coverageLabel: ReleaseCluster['coverageLabel'] =
       coverageScore >= 0.75 ? 'Strong' :
       coverageScore >= 0.5 ? 'Moderate' :
-      coverageScore >= 0.25 ? 'Weak' : 'Minimal';
+      coverageScore >= 0.25 ? 'Expandable' : 'Opportunity';
 
     // 5. Calculate active days
     const allDates = [anchor, ...support].map(u => new Date(u.publishedAt).getTime());
@@ -398,8 +587,15 @@ export function buildReleaseClusters(
       postReleaseCount: postCount,
       activeDays,
       insights,
+      premiereStatus: detectPremiereStatus(anchor),
+      checklist: [], // Populated below after cluster is built
     };
   });
+
+  // Build checklists for each cluster (needs the full cluster)
+  for (const cluster of clusters) {
+    cluster.checklist = buildSupportChecklist(cluster);
+  }
 
   // Sort by anchor views (highest first), cap to maxPillars
   const ranked = clusters

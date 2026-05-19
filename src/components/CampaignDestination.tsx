@@ -15,7 +15,7 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
-import { buildReleaseClusters, buildReleaseMoments, type ReleaseCluster, type ReleaseMoment, type SupportCategory } from '@/lib/coach/releaseClusters';
+import { buildReleaseClusters, buildReleaseMoments, type ReleaseCluster, type ReleaseMoment, type SupportCategory, type PremiereStatus } from '@/lib/coach/releaseClusters';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -1405,19 +1405,17 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
   phaseAccent: string;
 }) {
   const { cluster, momentLabel, supportCount, totalEcosystemViews } = moment;
-  const { anchor, coverage, coverageLabel, insights, supportLinks: links, supportByCategory: byCategory } = cluster;
+  const { anchor, coverageLabel, insights, supportLinks: links, supportByCategory: byCategory } = cluster;
   const [expanded, setExpanded] = useState(true);
 
   const tone =
-    coverageLabel === 'Strong'   ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
-    coverageLabel === 'Moderate' ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
-    coverageLabel === 'Weak'     ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Support opportunity' } :
-                                   { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'World building opportunity' };
+    coverageLabel === 'Strong'     ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
+    coverageLabel === 'Moderate'   ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
+    coverageLabel === 'Expandable' ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Long-tail opportunity' } :
+                                     { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'Could extend further' };
 
   const longformLinks = links.filter(l => l.upload.durationSec > 62);
   const shortsLinks = links.filter(l => l.upload.durationSec <= 62);
-  const presentFormats = coverage.filter(f => f.present);
-  const missingFormats = coverage.filter(f => !f.present && ['shorts', 'bts', 'lyric_video', 'visualizer'].includes(f.key));
   const narrative = insights.slice(0, 2).join(' ');
 
   const topShorts = [...shortsLinks].sort((a, b) => b.upload.viewCount - a.upload.viewCount).slice(0, 3);
@@ -1640,32 +1638,8 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
             </div>
           )}
 
-          {/* Format architecture chips */}
-          {(presentFormats.length > 0 || missingFormats.length > 0) && (
-            <div style={{
-              display: 'flex', gap: 3, flexWrap: 'wrap',
-              marginTop: 8,
-            }}>
-              {presentFormats.map((fmt) => (
-                <span key={fmt.key} style={{
-                  fontSize: 8, fontWeight: 600, color: '#065F46',
-                  padding: '1px 6px', borderRadius: 2,
-                  background: '#F0FDF4', fontFamily: MONO,
-                }}>
-                  {fmt.label}{fmt.count > 1 ? ` ×${fmt.count}` : ''}
-                </span>
-              ))}
-              {missingFormats.length > 0 && (
-                <span style={{
-                  fontSize: 8, fontWeight: 600, color: '#7C3AED',
-                  padding: '1px 6px', borderRadius: 2,
-                  background: '#F5F3FF', fontFamily: MONO,
-                }}>
-                  Could extend: {missingFormats.map(f => f.label).join(', ')}
-                </span>
-              )}
-            </div>
-          )}
+          {/* ── Release Support Checklist ── */}
+          <ReleaseChecklist cluster={cluster} />
 
           {/* Narrative insight */}
           {narrative && (
@@ -1676,6 +1650,148 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
               {narrative}
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RELEASE SUPPORT CHECKLIST — Timing guidance + premiere status
+// ══════════════════════════════════════════════════════════════════════════════
+
+function PremiereStatusBadge({ status }: { status: PremiereStatus }) {
+  if (status === 'confirmed') {
+    return (
+      <span style={{
+        fontSize: 8, fontWeight: 700, color: '#065F46',
+        padding: '1px 6px', borderRadius: 2,
+        background: '#F0FDF4', fontFamily: MONO,
+        letterSpacing: '0.04em',
+      }}>
+        ✓ Premiere used
+      </span>
+    );
+  }
+  if (status === 'likely') {
+    return (
+      <span style={{
+        fontSize: 8, fontWeight: 700, color: '#92400E',
+        padding: '1px 6px', borderRadius: 2,
+        background: '#FFFBEB', fontFamily: MONO,
+        letterSpacing: '0.04em',
+      }}>
+        Premiere likely — scheduled start detected
+      </span>
+    );
+  }
+  // 'unknown' — can't confirm from API
+  return (
+    <span style={{
+      fontSize: 8, fontWeight: 600, color: SMOKE,
+      padding: '1px 6px', borderRadius: 2,
+      background: BONE, fontFamily: MONO,
+      letterSpacing: '0.04em',
+    }}>
+      Premiere: manual confirmation needed
+    </span>
+  );
+}
+
+function ReleaseChecklist({ cluster }: { cluster: ReleaseCluster }) {
+  const { checklist, premiereStatus } = cluster;
+  const presentItems = checklist.filter(i => i.status === 'present');
+  const missingItems = checklist.filter(i => i.status === 'missing');
+
+  // Don't show premiere in checklist items (handled by badge)
+  const corePresent = presentItems.filter(i => i.key !== 'premiere');
+  const coreMissing = missingItems.filter(i => i.key !== 'premiere' && i.key !== 'community');
+  const communityItem = checklist.find(i => i.key === 'community');
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      {/* Premiere status badge */}
+      <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <PremiereStatusBadge status={premiereStatus} />
+      </div>
+
+      {/* Core support — what's present */}
+      {corePresent.length > 0 && (
+        <div style={{
+          display: 'flex', gap: 3, flexWrap: 'wrap', marginBottom: 4,
+        }}>
+          {corePresent.map((item) => (
+            <span key={item.key} style={{
+              fontSize: 8, fontWeight: 600, color: '#065F46',
+              padding: '1px 6px', borderRadius: 2,
+              background: '#F0FDF4', fontFamily: MONO,
+            }}>
+              ✓ {item.label}{item.count > 1 ? ` ×${item.count}` : ''}
+              {item.timingOptimal === true && ' · on time'}
+              {item.timingOptimal === false && item.actualDaysOffset != null && (
+                ` · dropped ${item.actualDaysOffset > 0 ? '+' : ''}${item.actualDaysOffset}d`
+              )}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Missing support — opportunities with timing guidance */}
+      {coreMissing.length > 0 && (
+        <div style={{
+          background: '#FAFAF8',
+          border: `1px solid ${BONE}`,
+          borderRadius: 4,
+          padding: '6px 8px',
+        }}>
+          <div style={{
+            fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+            textTransform: 'uppercase', color: '#7C3AED',
+            fontFamily: MONO, marginBottom: 4,
+          }}>
+            Could extend
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {coreMissing.map((item) => (
+              <div key={item.key} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 9, color: INK,
+              }}>
+                <span style={{
+                  width: 5, height: 5, borderRadius: '50%',
+                  border: `1.5px solid ${GHOST}`,
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+                <span style={{ fontWeight: 600 }}>{item.label}</span>
+                <span style={{
+                  fontSize: 8, color: SMOKE, fontFamily: MONO,
+                }}>
+                  — {item.timing.label}
+                </span>
+                {item.timing.priority === 'core' && (
+                  <span style={{
+                    fontSize: 7, fontWeight: 700, color: '#DC2626',
+                    padding: '0px 4px', borderRadius: 2,
+                    background: '#FEF2F2', fontFamily: MONO,
+                    letterSpacing: '0.05em',
+                  }}>
+                    CORE
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Community post — always unknown (can't detect via uploads API) */}
+      {communityItem && communityItem.status === 'missing' && coreMissing.length > 0 && (
+        <div style={{
+          fontSize: 8, color: GHOST, fontFamily: MONO,
+          marginTop: 3, fontStyle: 'italic',
+        }}>
+          Community Post — {communityItem.timing.label} (cannot detect automatically)
         </div>
       )}
     </div>

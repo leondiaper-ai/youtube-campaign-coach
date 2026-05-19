@@ -154,6 +154,8 @@ export type RecentUpload = {
   durationSec: number;
   live: 'none' | 'upcoming' | 'live';
   scheduledStart: string | null;
+  /** Actual start time from liveStreamingDetails — confirms a premiere/live broadcast happened */
+  actualStart: string | null;
   captions: boolean;
   viewCount: number;
   likeCount: number;

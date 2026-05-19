@@ -386,6 +386,7 @@ async function fetchTopEverVideos(
           durationSec: parseDuration(v.contentDetails?.duration),
           live: v.snippet?.liveBroadcastContent ?? 'none',
           scheduledStart: v.liveStreamingDetails?.scheduledStartTime ?? null,
+          actualStart: v.liveStreamingDetails?.actualStartTime ?? null,
           captions: v.contentDetails?.caption === 'true',
           viewCount: Number(v.statistics?.viewCount ?? 0),
           likeCount: Number(v.statistics?.likeCount ?? 0),
@@ -583,6 +584,7 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
           const publishedAt = v.snippet?.publishedAt ?? '';
           const live = v.snippet?.liveBroadcastContent ?? 'none';
           const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          const actualStart = v.liveStreamingDetails?.actualStartTime ?? null;
           const captions = v.contentDetails?.caption === 'true';
           const viewCount = Number(v.statistics?.viewCount ?? 0);
           const likeCount = Number(v.statistics?.likeCount ?? 0);
@@ -595,6 +597,7 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
             durationSec: dur,
             live,
             scheduledStart,
+            actualStart,
             captions,
             viewCount,
             likeCount,
@@ -769,6 +772,7 @@ export async function fetchChannelSnapLite(input: string, opts?: { campaignStart
           const publishedAt = v.snippet?.publishedAt ?? '';
           const live = v.snippet?.liveBroadcastContent ?? 'none';
           const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          const actualStart = v.liveStreamingDetails?.actualStartTime ?? null;
           const captions = v.contentDetails?.caption === 'true';
           const viewCount = Number(v.statistics?.viewCount ?? 0);
           const likeCount = Number(v.statistics?.likeCount ?? 0);
@@ -781,6 +785,7 @@ export async function fetchChannelSnapLite(input: string, opts?: { campaignStart
             durationSec: dur,
             live,
             scheduledStart,
+            actualStart,
             captions,
             viewCount,
             likeCount,
