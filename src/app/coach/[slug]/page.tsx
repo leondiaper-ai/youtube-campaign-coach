@@ -53,33 +53,53 @@ export default async function CampaignPage({ params }: PageProps) {
            a.name.toLowerCase() === saved.artist.toLowerCase()
   );
 
-  // Auto-extend plan backward if campaignStartDate is earlier than plan's first week
-  if (artistConfig?.campaignStartDate && saved.timelineText) {
-    const firstWeekMatch = saved.plan.weeks[0]?.dateRange.match(/^(\w+)\s+(\d+)/);
-    if (firstWeekMatch) {
-      const monthMap: Record<string, number> = {
-        Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-        Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-      };
-      const m = monthMap[firstWeekMatch[1]];
-      const d = parseInt(firstWeekMatch[2], 10);
-      if (m != null) {
-        const firstWeekDate = new Date(new Date().getFullYear(), m, d);
-        const campStart = new Date(artistConfig.campaignStartDate + 'T12:00:00');
-        // If the plan starts more than 3 days after the campaign start, regenerate
-        const diffDays = (firstWeekDate.getTime() - campStart.getTime()) / 86400000;
-        if (diffDays > 3) {
-          const regen = generatePlan(
-            saved.timelineText,
-            saved.artist,
-            saved.channelCtx,
-            artistConfig.campaignStartDate,
-          );
-          if (regen) {
-            saved.plan = regen;
-            // Persist the regenerated plan
-            savePlan(saved.slug, saved.artist, regen, saved.channelCtx, saved.timelineText).catch(() => {});
-          }
+  // Auto-regenerate plan when:
+  // 1. campaignStartDate is earlier than plan's first week, OR
+  // 2. Early BUILD weeks exist but have no actions (engine fix deployed after plan was saved)
+  if (artistConfig?.campaignStartDate) {
+    // Reconstruct timeline from plan events if timelineText is missing
+    const timelineText = saved.timelineText ||
+      (saved.plan.events?.map((e: { dateISO: string; title: string }) =>
+        `${e.dateISO} - ${e.title}`).join('\n') ?? '');
+
+    if (timelineText) {
+      let shouldRegen = false;
+
+      // Check 1: plan starts too late vs campaignStartDate
+      const firstWeekMatch = saved.plan.weeks[0]?.dateRange.match(/^(\w+)\s+(\d+)/);
+      if (firstWeekMatch) {
+        const monthMap: Record<string, number> = {
+          Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+          Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+        };
+        const m = monthMap[firstWeekMatch[1]];
+        const d = parseInt(firstWeekMatch[2], 10);
+        if (m != null) {
+          const firstWeekDate = new Date(new Date().getFullYear(), m, d);
+          const campStart = new Date(artistConfig.campaignStartDate + 'T12:00:00');
+          const diffDays = (firstWeekDate.getTime() - campStart.getTime()) / 86400000;
+          if (diffDays > 3) shouldRegen = true;
+        }
+      }
+
+      // Check 2: early BUILD weeks have no actions (old engine bug)
+      if (!shouldRegen) {
+        const buildWeeks = saved.plan.weeks.filter((w: { phase: string }) => w.phase === 'BUILD');
+        const emptyEarlyBuild = buildWeeks.slice(0, Math.ceil(buildWeeks.length / 2))
+          .some((w: { actions: unknown[] }) => w.actions.length === 0);
+        if (emptyEarlyBuild) shouldRegen = true;
+      }
+
+      if (shouldRegen) {
+        const regen = generatePlan(
+          timelineText,
+          saved.artist,
+          saved.channelCtx,
+          artistConfig.campaignStartDate,
+        );
+        if (regen) {
+          saved.plan = regen;
+          savePlan(saved.slug, saved.artist, regen, saved.channelCtx, timelineText).catch(() => {});
         }
       }
     }
