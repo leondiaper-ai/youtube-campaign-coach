@@ -9,6 +9,7 @@
  */
 
 import type { RecentUpload } from '@/lib/artists';
+import type { PhaseName } from '@/lib/planEngine';
 import { classifyUploadFormat, type UploadFormatLabel } from './matchEngine';
 
 
@@ -101,6 +102,26 @@ export type ReleaseCluster = {
   insights: string[];
 };
 
+/** A self-contained release moment within a campaign phase */
+export type ReleaseMoment = {
+  /** Unique moment ID (anchor upload ID) */
+  id: string;
+  /** The release cluster powering this moment */
+  cluster: ReleaseCluster;
+  /** Campaign phase this moment belongs to */
+  phase: PhaseName | null;
+  /** Chronological position within its phase (0-based) */
+  position: number;
+  /** Human-readable label (derived from anchor title) */
+  momentLabel: string;
+  /** Date range this moment covers (earliest support → latest follow-through) */
+  dateRange: { start: string; end: string };
+  /** Total views across anchor + all support */
+  totalEcosystemViews: number;
+  /** Number of support uploads in this moment */
+  supportCount: number;
+};
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 /** How many days before a release to look for teaser content */
@@ -178,15 +199,50 @@ export function buildReleaseClusters(
   //    Allow multi-anchor attachment: a support upload can link to multiple releases,
   //    but gets assigned to the anchor with the highest relationship score.
   //    Uploads with score < MIN_RELATIONSHIP_SCORE are excluded.
+  //
+  //    BOUNDARY-AWARE WINDOWS: When two anchors are close together, we cap their
+  //    pre/post windows at the midpoint between them to prevent cross-release
+  //    contamination. Each release moment gets a clean, non-overlapping window.
 
-  // First pass: score every candidate against every anchor
+  // Sort anchors chronologically for boundary calculation
+  const chronoAnchors = [...anchors].sort(
+    (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
+  );
+
+  // Calculate boundary-aware windows for each anchor
+  const anchorWindows: { anchor: RecentUpload; windowStart: number; windowEnd: number }[] =
+    chronoAnchors.map((anchor, i) => {
+      const anchorDate = new Date(anchor.publishedAt).getTime();
+      let effectivePre = preWindow;
+      let effectivePost = postWindow;
+
+      // If there's a previous anchor, cap pre-window at midpoint between them
+      if (i > 0) {
+        const prevDate = new Date(chronoAnchors[i - 1].publishedAt).getTime();
+        const gapDays = (anchorDate - prevDate) / 86400000;
+        effectivePre = Math.min(preWindow, Math.floor(gapDays / 2));
+      }
+
+      // If there's a next anchor, cap post-window at midpoint between them
+      if (i < chronoAnchors.length - 1) {
+        const nextDate = new Date(chronoAnchors[i + 1].publishedAt).getTime();
+        const gapDays = (nextDate - anchorDate) / 86400000;
+        effectivePost = Math.min(postWindow, Math.floor(gapDays / 2));
+      }
+
+      return {
+        anchor,
+        windowStart: anchorDate - effectivePre * 86400000,
+        windowEnd: anchorDate + effectivePost * 86400000,
+      };
+    });
+
+  // First pass: score every candidate against every anchor (using boundary-aware windows)
   const anchorIds = new Set(anchors.map(a => a.id));
   const candidateScores: Map<string, { anchorId: string; score: number; signals: string[]; timingDays: number }[]> = new Map();
 
-  for (const anchor of anchors) {
+  for (const { anchor, windowStart, windowEnd } of anchorWindows) {
     const anchorDate = new Date(anchor.publishedAt).getTime();
-    const windowStart = anchorDate - preWindow * 86400000;
-    const windowEnd = anchorDate + postWindow * 86400000;
 
     for (const upload of sorted) {
       if (upload.id === anchor.id) continue;
@@ -607,4 +663,111 @@ function generateInsights(
   }
 
   return insights.slice(0, 4); // Cap at 4 insights
+}
+
+
+// ── Release Moment Builder ────────────────────────────────────────────────
+
+/**
+ * Clean a track name for use as a moment label.
+ * Strips format markers, featured artists keep the "ft." for context.
+ */
+function deriveReleaseMomentLabel(title: string): string {
+  return title
+    .replace(/\(official\s*(music\s*)?video\)/gi, '')
+    .replace(/\(official\)/gi, '')
+    .replace(/\(lyric\s*video\)/gi, '')
+    .replace(/\(visuali[sz]er\)/gi, '')
+    .replace(/\(audio\)/gi, '')
+    .replace(/\(premiere\)/gi, '')
+    .replace(/\[official\s*(music\s*)?video\]/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/**
+ * Build self-contained release moments from clusters, grouped by campaign phase.
+ *
+ * Each release moment is a narrative unit: one official video anchor with its
+ * complete support ecosystem. Moments are grouped by the campaign phase they
+ * fall within (using plan phase date ranges).
+ *
+ * @param clusters Release clusters from buildReleaseClusters()
+ * @param phases Campaign phases with week ranges and dates
+ * @param campaignStartDate ISO date string for week 1
+ * @returns Array of release moments sorted chronologically within each phase
+ */
+export function buildReleaseMoments(
+  clusters: ReleaseCluster[],
+  phases: { name: PhaseName; weekStart: number; weekEnd: number }[],
+  campaignStartDate?: string,
+): ReleaseMoment[] {
+  if (clusters.length === 0) return [];
+
+  // Sort clusters chronologically
+  const chronoClusters = [...clusters].sort(
+    (a, b) => new Date(a.anchor.publishedAt).getTime() - new Date(b.anchor.publishedAt).getTime()
+  );
+
+  // Determine which phase each cluster belongs to using week numbers
+  // (if we have a campaign start date, we can calculate the week; otherwise use position)
+  const startDate = campaignStartDate ? new Date(campaignStartDate).getTime() : null;
+
+  const moments: ReleaseMoment[] = [];
+  const phasePositions: Record<string, number> = {};
+
+  for (const cluster of chronoClusters) {
+    const anchorDate = new Date(cluster.anchor.publishedAt).getTime();
+
+    // Find matching phase
+    let matchedPhase: PhaseName | null = null;
+
+    if (startDate) {
+      const weekNum = Math.floor((anchorDate - startDate) / (7 * 86400000)) + 1;
+      for (const p of phases) {
+        if (weekNum >= p.weekStart && weekNum <= p.weekEnd) {
+          matchedPhase = p.name;
+          break;
+        }
+      }
+    }
+
+    // Fallback: assign by rough position if no date match
+    if (!matchedPhase && phases.length > 0) {
+      // Use the chronological position to guess the phase
+      const idx = chronoClusters.indexOf(cluster);
+      const fraction = idx / Math.max(chronoClusters.length - 1, 1);
+      const phaseIdx = Math.min(Math.floor(fraction * phases.length), phases.length - 1);
+      matchedPhase = phases[phaseIdx].name;
+    }
+
+    // Track position within phase
+    const phaseKey = matchedPhase ?? 'unknown';
+    phasePositions[phaseKey] = (phasePositions[phaseKey] ?? 0);
+    const position = phasePositions[phaseKey]++;
+
+    // Calculate date range across entire ecosystem
+    const allDates = [
+      cluster.anchor.publishedAt,
+      ...cluster.support.map(u => u.publishedAt),
+    ].map(d => new Date(d).getTime()).sort((a, b) => a - b);
+
+    const dateRange = {
+      start: new Date(allDates[0]).toISOString(),
+      end: new Date(allDates[allDates.length - 1]).toISOString(),
+    };
+
+    moments.push({
+      id: cluster.anchor.id,
+      cluster,
+      phase: matchedPhase,
+      position,
+      momentLabel: deriveReleaseMomentLabel(cluster.anchor.title),
+      dateRange,
+      totalEcosystemViews: cluster.totalViews,
+      supportCount: cluster.support.length,
+    });
+  }
+
+  return moments;
 }

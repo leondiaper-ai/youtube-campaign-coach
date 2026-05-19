@@ -15,7 +15,7 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
-import { buildReleaseClusters, type ReleaseCluster, type SupportCategory } from '@/lib/coach/releaseClusters';
+import { buildReleaseClusters, buildReleaseMoments, type ReleaseCluster, type ReleaseMoment, type SupportCategory } from '@/lib/coach/releaseClusters';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -463,7 +463,7 @@ export default function CampaignDestination({
           maxWidth: 1200, margin: '0 auto',
           padding: '24px 40px 0',
         }}>
-          <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} releaseClusters={releaseClusters} />
+          <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} releaseClusters={releaseClusters} campaignStartDate={campaignStartDate} />
         </section>
 
 
@@ -1287,11 +1287,12 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
 // TIMELINE DETAIL — Condensed, scannable
 // ══════════════════════════════════════════════════════════════════════════════
 
-function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters }: {
+function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters, campaignStartDate }: {
   plan: GeneratedPlan;
   matchResult?: MatchResult;
   currentPhase: PhaseName | null;
   releaseClusters: ReleaseCluster[];
+  campaignStartDate?: string;
 }) {
   const weeks = matchResult?.weeks ?? plan.weeks;
   const phases = plan.phases.map((p) => ({
@@ -1299,31 +1300,37 @@ function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters }: {
     weeks: weeks.filter((w) => w.weekNum >= p.weekStart && w.weekNum <= p.weekEnd),
   }));
 
-  // Build a map: anchor upload ID → cluster, for inline rendering
-  const clusterByAnchorId = new Map<string, ReleaseCluster>();
-  for (const c of releaseClusters) {
-    clusterByAnchorId.set(c.anchor.id, c);
-  }
+  // Build release moments — self-contained narrative units within each phase
+  const releaseMoments = buildReleaseMoments(releaseClusters, plan.phases, campaignStartDate);
 
-  // Build a set of all support upload IDs so we can de-dupe them from the timeline
+  // Build lookup sets for de-duplication
+  const anchorIds = new Set(releaseClusters.map(c => c.anchor.id));
   const supportUploadIds = new Set<string>();
   for (const c of releaseClusters) {
     for (const s of c.support) supportUploadIds.add(s.id);
   }
+  const clusterUploadIds = new Set<string>();
+  anchorIds.forEach(id => clusterUploadIds.add(id));
+  supportUploadIds.forEach(id => clusterUploadIds.add(id));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {phases.map((phase) => {
         const isCurrent = currentPhase === phase.name;
         const tone = PHASE_TONE[phase.name];
         const phaseWeeks = phase.weeks.filter((w) => w.actions.length > 0 || w.momentName);
-        if (phaseWeeks.length === 0) return null;
+
+        // Release moments that belong to this phase
+        const phaseMoments = releaseMoments.filter(m => m.phase === phase.name);
+
+        if (phaseWeeks.length === 0 && phaseMoments.length === 0) return null;
 
         return (
           <div key={phase.name}>
+            {/* Phase header */}
             <div style={{
               fontSize: 10, fontWeight: 800, letterSpacing: '0.12em',
-              textTransform: 'uppercase', marginBottom: 6,
+              textTransform: 'uppercase', marginBottom: 10,
               color: isCurrent ? tone.accent : GHOST,
               display: 'flex', alignItems: 'center', gap: 8,
               fontFamily: MONO,
@@ -1343,19 +1350,42 @@ function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters }: {
                   NOW
                 </span>
               )}
+              {phaseMoments.length > 0 && (
+                <span style={{
+                  fontSize: 8, fontWeight: 600, color: SMOKE,
+                  textTransform: 'none', letterSpacing: '0.04em',
+                }}>
+                  {phaseMoments.length} release {phaseMoments.length === 1 ? 'moment' : 'moments'}
+                </span>
+              )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {phaseWeeks.map((week) => (
-                <TimelineWeekRow
-                  key={week.weekNum}
-                  week={week}
-                  matchResult={matchResult}
-                  clusterByAnchorId={clusterByAnchorId}
-                  supportUploadIds={supportUploadIds}
-                />
-              ))}
-            </div>
+            {/* ── Release Moments — primary content blocks ── */}
+            {phaseMoments.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: phaseWeeks.length > 0 ? 10 : 0 }}>
+                {phaseMoments.map((moment) => (
+                  <ReleaseMomentBlock
+                    key={moment.id}
+                    moment={moment}
+                    phaseAccent={tone.accent}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* ── Non-release weeks — secondary timeline ── */}
+            {phaseWeeks.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {phaseWeeks.map((week) => (
+                  <TimelineWeekRow
+                    key={week.weekNum}
+                    week={week}
+                    matchResult={matchResult}
+                    clusterUploadIds={clusterUploadIds}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
@@ -1363,11 +1393,302 @@ function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters }: {
   );
 }
 
-function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadIds }: {
+// ══════════════════════════════════════════════════════════════════════════════
+// RELEASE MOMENT BLOCK — Self-contained release narrative unit
+// ══════════════════════════════════════════════════════════════════════════════
+
+function ReleaseMomentBlock({ moment, phaseAccent }: {
+  moment: ReleaseMoment;
+  phaseAccent: string;
+}) {
+  const { cluster, momentLabel, supportCount, totalEcosystemViews } = moment;
+  const { anchor, coverage, coverageLabel, insights, supportLinks: links, supportByCategory: byCategory } = cluster;
+  const [expanded, setExpanded] = useState(true);
+
+  const tone =
+    coverageLabel === 'Strong'   ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
+    coverageLabel === 'Moderate' ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
+    coverageLabel === 'Weak'     ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Support opportunity' } :
+                                   { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'World building opportunity' };
+
+  const longformLinks = links.filter(l => l.upload.durationSec > 62);
+  const shortsLinks = links.filter(l => l.upload.durationSec <= 62);
+  const presentFormats = coverage.filter(f => f.present);
+  const missingFormats = coverage.filter(f => !f.present && ['shorts', 'bts', 'lyric_video', 'visualizer'].includes(f.key));
+  const narrative = insights.slice(0, 2).join(' ');
+
+  const topShorts = [...shortsLinks].sort((a, b) => b.upload.viewCount - a.upload.viewCount).slice(0, 3);
+  const totalShortsViews = shortsLinks.reduce((s, l) => s + l.upload.viewCount, 0);
+
+  const CATEGORY_ORDER: SupportCategory[] = [
+    'BTS', 'Release Momentum', 'World Building', 'Rollout Diary',
+    'Personality', 'Collaborator Bridge', 'Follow-through', 'Community Layer',
+  ];
+  const longformCategories = CATEGORY_ORDER.filter(cat => {
+    const catLinks = byCategory[cat];
+    return catLinks && catLinks.some(l => l.upload.durationSec > 62);
+  });
+
+  return (
+    <div style={{
+      background: WHITE,
+      border: `1px solid ${BONE}`,
+      borderLeft: `3px solid ${phaseAccent}`,
+      borderRadius: 6,
+      overflow: 'hidden',
+    }}>
+      {/* ── Moment header — clickable to expand/collapse ── */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+          padding: '10px 14px',
+          background: 'none', border: 'none',
+          cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <a
+          href={ytVideoUrl(anchor.id, anchor.durationSec)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{ flexShrink: 0 }}
+        >
+          <img
+            src={ytThumb(anchor.id, 'mqdefault')}
+            alt="" loading="lazy"
+            style={{
+              width: 88, height: 50, objectFit: 'cover',
+              borderRadius: 3, display: 'block',
+            }}
+          />
+        </a>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <span style={{
+              fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: WHITE,
+              padding: '1px 6px', borderRadius: 2,
+              background: phaseAccent, fontFamily: MONO,
+            }}>
+              Release Moment
+            </span>
+            <span style={{
+              fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: tone.color,
+              padding: '1px 6px', borderRadius: 2,
+              background: tone.bg, fontFamily: MONO,
+            }}>
+              {tone.label}
+            </span>
+          </div>
+          <div style={{
+            fontSize: 13, fontWeight: 700, color: INK, lineHeight: 1.3,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {momentLabel}
+          </div>
+          <div style={{
+            display: 'flex', gap: 10, marginTop: 3,
+            fontSize: 9, color: SMOKE, fontFamily: MONO,
+          }}>
+            <span style={{ fontWeight: 700 }}>{fmtNum(anchor.viewCount)} views</span>
+            <span>{timeAgo(anchor.publishedAt)}</span>
+            {supportCount > 0 && (
+              <span>{supportCount} support {supportCount === 1 ? 'upload' : 'uploads'}</span>
+            )}
+            {supportCount > 0 && (
+              <span style={{ color: '#059669' }}>{fmtNum(totalEcosystemViews)} ecosystem views</span>
+            )}
+          </div>
+        </div>
+        <span style={{
+          fontSize: 9, color: GHOST, fontFamily: MONO,
+          transform: expanded ? 'rotate(90deg)' : 'none',
+          transition: 'transform 0.15s',
+          flexShrink: 0,
+        }}>▶</span>
+      </button>
+
+      {/* ── Expanded support ecosystem ── */}
+      {expanded && (
+        <div style={{
+          padding: '0 14px 12px',
+          borderTop: `1px solid ${BONE}`,
+        }}>
+          {/* ── Longform support grouped by strategic category ── */}
+          {longformCategories.length > 0 && (
+            <div style={{ paddingTop: 8 }}>
+              {longformCategories.map((cat) => {
+                const catLinks = (byCategory[cat] ?? []).filter(l => l.upload.durationSec > 62);
+                if (catLinks.length === 0) return null;
+                return (
+                  <div key={cat} style={{ marginBottom: 6 }}>
+                    <div style={{
+                      fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+                      textTransform: 'uppercase', color: GHOST,
+                      fontFamily: MONO, marginBottom: 3,
+                    }}>
+                      {cat}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {catLinks.map((link) => {
+                        const strengthColor = link.strength === 'strong' ? '#059669'
+                          : link.strength === 'moderate' ? '#D97706' : GHOST;
+                        return (
+                          <a
+                            key={`sl-${link.upload.id}`}
+                            href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 8,
+                              padding: '3px 6px',
+                              background: 'rgba(245,242,237,0.5)',
+                              borderRadius: 3,
+                              textDecoration: 'none', color: 'inherit',
+                            }}
+                          >
+                            <img
+                              src={ytThumb(link.upload.id, 'mqdefault')}
+                              alt="" loading="lazy"
+                              style={{
+                                width: 40, height: 22,
+                                objectFit: 'cover', borderRadius: 2,
+                              }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                fontSize: 10, color: INK,
+                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                              }}>
+                                {link.upload.title}
+                              </div>
+                            </div>
+                            <span style={{
+                              width: 4, height: 4, borderRadius: '50%',
+                              background: strengthColor, display: 'inline-block',
+                              flexShrink: 0,
+                            }} />
+                            <span style={{
+                              fontSize: 8, color: SMOKE, fontFamily: MONO,
+                              flexShrink: 0,
+                            }}>
+                              {fmtNum(link.upload.viewCount)}
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── Shorts cluster — collapsed summary with top performers ── */}
+          {shortsLinks.length > 0 && (
+            <div style={{
+              marginTop: longformCategories.length > 0 ? 4 : 8,
+              paddingTop: longformCategories.length === 0 ? 8 : 0,
+            }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                fontSize: 9, color: SMOKE, fontFamily: MONO,
+              }}>
+                <span style={{ fontWeight: 700, color: INK }}>
+                  ⚡ {shortsLinks.length} Shorts
+                </span>
+                <span>{fmtNum(totalShortsViews)} combined views</span>
+                {shortsLinks.length > 3 && (
+                  <span style={{ color: GHOST }}>Top {topShorts.length}:</span>
+                )}
+              </div>
+              {topShorts.length > 0 && (
+                <div style={{ display: 'flex', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
+                  {topShorts.map((link) => (
+                    <a
+                      key={`sh-${link.upload.id}`}
+                      href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        padding: '2px 6px',
+                        background: 'rgba(245,242,237,0.5)',
+                        borderRadius: 2,
+                        textDecoration: 'none', color: 'inherit',
+                        fontSize: 8,
+                      }}
+                    >
+                      <span style={{
+                        color: SMOKE, maxWidth: 100,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {link.upload.title}
+                      </span>
+                      <span style={{ color: GHOST, fontFamily: MONO }}>
+                        {fmtNum(link.upload.viewCount)}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Format architecture chips */}
+          {(presentFormats.length > 0 || missingFormats.length > 0) && (
+            <div style={{
+              display: 'flex', gap: 3, flexWrap: 'wrap',
+              marginTop: 8,
+            }}>
+              {presentFormats.map((fmt) => (
+                <span key={fmt.key} style={{
+                  fontSize: 8, fontWeight: 600, color: '#065F46',
+                  padding: '1px 6px', borderRadius: 2,
+                  background: '#F0FDF4', fontFamily: MONO,
+                }}>
+                  {fmt.label}{fmt.count > 1 ? ` ×${fmt.count}` : ''}
+                </span>
+              ))}
+              {missingFormats.length > 0 && (
+                <span style={{
+                  fontSize: 8, fontWeight: 600, color: '#7C3AED',
+                  padding: '1px 6px', borderRadius: 2,
+                  background: '#F5F3FF', fontFamily: MONO,
+                }}>
+                  Could extend: {missingFormats.map(f => f.label).join(', ')}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Narrative insight */}
+          {narrative && (
+            <div style={{
+              fontSize: 10, color: SMOKE, lineHeight: 1.4,
+              fontStyle: 'italic', marginTop: 6,
+            }}>
+              {narrative}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TIMELINE WEEK ROW — Secondary week actions (non-release content)
+// ══════════════════════════════════════════════════════════════════════════════
+
+function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
   week: PlanWeek | MatchedWeek;
   matchResult?: MatchResult;
-  clusterByAnchorId: Map<string, ReleaseCluster>;
-  supportUploadIds: Set<string>;
+  /** Set of all upload IDs already rendered in release moment blocks */
+  clusterUploadIds: Set<string>;
 }) {
   const isMoment = !!week.momentName;
   const isCurrent = isCurrentWeek(week);
@@ -1378,14 +1699,7 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
   // Extra uploads for this week (unmatched uploads that landed here)
   const extraUploads = matchedWeek?.extraUploads ?? [];
 
-  // Check if this week contains a major release anchor
-  const allWeekMatchedUploads = actions
-    .filter((a) => 'status' in a && (a as MatchedAction).matchedUpload)
-    .map((a) => (a as MatchedAction).matchedUpload!);
-  const allWeekUploadsCheck = [...allWeekMatchedUploads, ...extraUploads];
-  const hasAnchor = allWeekUploadsCheck.some(u => clusterByAnchorId.has(u.id));
-
-  const [expanded, setExpanded] = useState(isCurrent || (isPast && isMoment) || hasAnchor);
+  const [expanded, setExpanded] = useState(isCurrent || (isPast && isMoment));
 
   const done = actions.filter((a) =>
     'status' in a ? ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live') : a.completed
@@ -1399,13 +1713,11 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
 
   return (
     <div style={{
-      background: isCurrent ? WHITE : hasAnchor ? '#FAFAF8' : isPast ? 'rgba(245,242,237,0.5)' : 'transparent',
-      border: isCurrent ? `1px solid ${BONE}` : hasAnchor ? `1px solid ${BONE}` : 'none',
-      borderRadius: isCurrent || hasAnchor ? 4 : 0,
-      borderLeft: hasAnchor ? '3px solid #4338CA'
-        : isPast && done > 0 ? '2px solid #059669'
+      background: isCurrent ? WHITE : isPast ? 'rgba(245,242,237,0.5)' : 'transparent',
+      border: isCurrent ? `1px solid ${BONE}` : 'none',
+      borderRadius: isCurrent ? 4 : 0,
+      borderLeft: isPast && done > 0 ? '2px solid #059669'
         : isPast ? `2px solid ${BONE}` : 'none',
-      marginBottom: hasAnchor ? 4 : 0,
     }}>
       <button
         onClick={() => actions.length > 0 && setExpanded(!expanded)}
@@ -1426,19 +1738,9 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
         }}>
           {week.dateRange}
         </span>
-        {hasAnchor && (
-          <span style={{
-            fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
-            textTransform: 'uppercase', color: WHITE,
-            padding: '1px 6px', borderRadius: 2,
-            background: '#4338CA', fontFamily: MONO,
-          }}>
-            Release
-          </span>
-        )}
         <span style={{
-          fontSize: 12, fontWeight: isMoment || hasAnchor ? 700 : 400,
-          color: isMoment || hasAnchor ? INK : SMOKE, flex: 1,
+          fontSize: 12, fontWeight: isMoment ? 700 : 400,
+          color: isMoment ? INK : SMOKE, flex: 1,
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {week.momentName ?? (actions.length > 0 ? `${actions.length} actions` : '')}
@@ -1461,352 +1763,19 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
       </button>
 
       {expanded && (() => {
-        // Separate anchor uploads from regular evidence
+        // Get uploads that are NOT part of any release moment cluster
         const matchedUploads = actions
           .filter((a) => 'status' in a && (a as MatchedAction).matchedUpload &&
             ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live'))
           .map((a) => (a as MatchedAction).matchedUpload!);
 
-        // Find any anchors in this week's uploads (matched or extra)
-        const allWeekUploads = [...matchedUploads, ...extraUploads];
-        const anchorClusters: ReleaseCluster[] = [];
-        for (const u of allWeekUploads) {
-          const cluster = clusterByAnchorId.get(u.id);
-          if (cluster) anchorClusters.push(cluster);
-        }
-
-        // Regular uploads = not anchors, not support content
-        const regularMatched = matchedUploads.filter(
-          u => !clusterByAnchorId.has(u.id) && !supportUploadIds.has(u.id)
-        );
-        const regularExtra = extraUploads.filter(
-          u => !clusterByAnchorId.has(u.id) && !supportUploadIds.has(u.id)
-        );
-
-        // Collect support uploads that landed in this week (for collapsed summary)
-        const weekSupportUploads = allWeekUploads.filter(u => supportUploadIds.has(u.id));
+        const regularMatched = matchedUploads.filter(u => !clusterUploadIds.has(u.id));
+        const regularExtra = extraUploads.filter(u => !clusterUploadIds.has(u.id));
 
         return (
         <div style={{ padding: '0 10px 6px 44px' }}>
 
-          {/* ── Anchor pillar blocks — prominent official video releases ── */}
-          {anchorClusters.map((cluster) => {
-            const { anchor, support, coverage, coverageLabel, insights } = cluster;
-            const tone =
-              coverageLabel === 'Strong'   ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
-              coverageLabel === 'Moderate' ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
-              coverageLabel === 'Weak'     ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Support opportunity' } :
-                                             { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'World building opportunity' };
-
-            // Use categorised support links
-            const { supportLinks: links, supportByCategory: byCategory } = cluster;
-            const longformLinks = links.filter(l => l.upload.durationSec > 62);
-            const shortsLinks = links.filter(l => l.upload.durationSec <= 62);
-            const presentFormats = coverage.filter(f => f.present);
-            const missingFormats = coverage.filter(f => !f.present && ['shorts', 'bts', 'lyric_video', 'visualizer'].includes(f.key));
-            const narrative = insights.slice(0, 2).join(' ');
-
-            // Top-performing shorts (max 3)
-            const topShorts = [...shortsLinks].sort((a, b) => b.upload.viewCount - a.upload.viewCount).slice(0, 3);
-            const totalShortsViews = shortsLinks.reduce((s, l) => s + l.upload.viewCount, 0);
-
-            // Categories that have longform content (ordered strategically)
-            const CATEGORY_ORDER: SupportCategory[] = [
-              'BTS', 'Release Momentum', 'World Building', 'Rollout Diary',
-              'Personality', 'Collaborator Bridge', 'Follow-through', 'Community Layer',
-            ];
-            const longformCategories = CATEGORY_ORDER.filter(cat => {
-              const catLinks = byCategory[cat];
-              return catLinks && catLinks.some(l => l.upload.durationSec > 62);
-            });
-
-            return (
-              <div key={`pillar-${anchor.id}`} style={{
-                background: WHITE,
-                border: `1px solid ${tone.border}`,
-                borderLeft: `3px solid ${tone.color}`,
-                borderRadius: 5,
-                padding: '10px 14px',
-                marginBottom: 8,
-              }}>
-                {/* Anchor header: thumbnail + title + views + tone badge */}
-                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  <a
-                    href={ytVideoUrl(anchor.id, anchor.durationSec)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ flexShrink: 0 }}
-                  >
-                    <img
-                      src={ytThumb(anchor.id, 'mqdefault')}
-                      alt="" loading="lazy"
-                      style={{
-                        width: 80, height: 45, objectFit: 'cover',
-                        borderRadius: 3, display: 'block',
-                      }}
-                    />
-                  </a>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                      <a
-                        href={ytVideoUrl(anchor.id, anchor.durationSec)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          fontSize: 12, fontWeight: 700, color: INK,
-                          textDecoration: 'none', lineHeight: 1.3,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                          display: 'block', flex: 1,
-                        }}
-                      >
-                        {anchor.title}
-                      </a>
-                      <span style={{
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
-                        textTransform: 'uppercase', color: tone.color,
-                        padding: '2px 7px', borderRadius: 2,
-                        background: tone.bg, fontFamily: MONO,
-                        whiteSpace: 'nowrap', flexShrink: 0,
-                      }}>
-                        {tone.label}
-                      </span>
-                    </div>
-                    <div style={{
-                      display: 'flex', gap: 10, marginTop: 3,
-                      fontSize: 9, color: SMOKE, fontFamily: MONO,
-                    }}>
-                      <span style={{ fontWeight: 700 }}>{fmtNum(anchor.viewCount)} views</span>
-                      <span>{timeAgo(anchor.publishedAt)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Support content grouped by strategic category ── */}
-                {longformCategories.length > 0 && (
-                  <div style={{
-                    marginTop: 8,
-                    borderTop: `1px solid ${BONE}`,
-                    paddingTop: 6,
-                  }}>
-                    {longformCategories.map((cat) => {
-                      const catLinks = (byCategory[cat] ?? []).filter(l => l.upload.durationSec > 62);
-                      if (catLinks.length === 0) return null;
-                      return (
-                        <div key={cat} style={{ marginBottom: 4 }}>
-                          <div style={{
-                            fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
-                            textTransform: 'uppercase', color: GHOST,
-                            fontFamily: MONO, marginBottom: 2,
-                          }}>
-                            {cat}
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            {catLinks.map((link) => {
-                              const strengthColor = link.strength === 'strong' ? '#059669'
-                                : link.strength === 'moderate' ? '#D97706' : GHOST;
-                              return (
-                                <a
-                                  key={`sl-${link.upload.id}`}
-                                  href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{
-                                    display: 'flex', alignItems: 'center', gap: 8,
-                                    padding: '3px 6px',
-                                    background: 'rgba(245,242,237,0.5)',
-                                    borderRadius: 3,
-                                    textDecoration: 'none', color: 'inherit',
-                                  }}
-                                >
-                                  <img
-                                    src={ytThumb(link.upload.id, 'mqdefault')}
-                                    alt="" loading="lazy"
-                                    style={{
-                                      width: 40, height: 22,
-                                      objectFit: 'cover', borderRadius: 2,
-                                    }}
-                                  />
-                                  <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{
-                                      fontSize: 10, color: INK,
-                                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                    }}>
-                                      {link.upload.title}
-                                    </div>
-                                  </div>
-                                  <span style={{
-                                    fontSize: 6, fontWeight: 700, color: strengthColor,
-                                    fontFamily: MONO, flexShrink: 0,
-                                    width: 4, height: 4, borderRadius: '50%',
-                                    background: strengthColor, display: 'inline-block',
-                                  }} />
-                                  <span style={{
-                                    fontSize: 8, color: SMOKE, fontFamily: MONO,
-                                    flexShrink: 0,
-                                  }}>
-                                    {fmtNum(link.upload.viewCount)}
-                                  </span>
-                                </a>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* ── Shorts cluster — collapsed summary with top performers ── */}
-                {shortsLinks.length > 0 && (
-                  <div style={{
-                    marginTop: longformCategories.length > 0 ? 6 : 8,
-                    borderTop: longformCategories.length === 0 ? `1px solid ${BONE}` : 'none',
-                    paddingTop: longformCategories.length === 0 ? 6 : 0,
-                  }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      fontSize: 9, color: SMOKE, fontFamily: MONO,
-                    }}>
-                      <span style={{ fontWeight: 700, color: INK }}>
-                        ⚡ {shortsLinks.length} Shorts
-                      </span>
-                      <span>{fmtNum(totalShortsViews)} combined views</span>
-                      {shortsLinks.length > 3 && (
-                        <span style={{ color: GHOST }}>Top {topShorts.length}:</span>
-                      )}
-                    </div>
-                    {topShorts.length > 0 && (
-                      <div style={{
-                        display: 'flex', gap: 4, marginTop: 3, flexWrap: 'wrap',
-                      }}>
-                        {topShorts.map((link) => (
-                          <a
-                            key={`sh-${link.upload.id}`}
-                            href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 4,
-                              padding: '2px 6px',
-                              background: 'rgba(245,242,237,0.5)',
-                              borderRadius: 2,
-                              textDecoration: 'none', color: 'inherit',
-                              fontSize: 8,
-                            }}
-                          >
-                            <span style={{
-                              color: SMOKE, maxWidth: 100,
-                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                            }}>
-                              {link.upload.title}
-                            </span>
-                            <span style={{ color: GHOST, fontFamily: MONO }}>
-                              {fmtNum(link.upload.viewCount)}
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Support architecture: format chips + opportunity nudges */}
-                {(presentFormats.length > 0 || missingFormats.length > 0) && (
-                  <div style={{
-                    display: 'flex', gap: 3, flexWrap: 'wrap',
-                    marginTop: 8,
-                  }}>
-                    {presentFormats.map((fmt) => (
-                      <span key={fmt.key} style={{
-                        fontSize: 8, fontWeight: 600, color: '#065F46',
-                        padding: '1px 6px', borderRadius: 2,
-                        background: '#F0FDF4', fontFamily: MONO,
-                      }}>
-                        {fmt.label}{fmt.count > 1 ? ` ×${fmt.count}` : ''}
-                      </span>
-                    ))}
-                    {missingFormats.length > 0 && (
-                      <span style={{
-                        fontSize: 8, fontWeight: 600, color: '#7C3AED',
-                        padding: '1px 6px', borderRadius: 2,
-                        background: '#F5F3FF', fontFamily: MONO,
-                      }}>
-                        Could extend: {missingFormats.map(f => f.label).join(', ')}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Narrative insight */}
-                {narrative && (
-                  <div style={{
-                    fontSize: 10, color: SMOKE, lineHeight: 1.4,
-                    fontStyle: 'italic', marginTop: 6,
-                  }}>
-                    {narrative}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* ── Support uploads for nearby release (collapsed summary) ── */}
-          {weekSupportUploads.length > 0 && anchorClusters.length === 0 && (() => {
-            const supportLong = weekSupportUploads.filter(u => u.durationSec > 62);
-            const supportShort = weekSupportUploads.filter(u => u.durationSec <= 62);
-            return (
-              <div style={{
-                padding: '4px 8px', marginBottom: 4,
-                background: 'rgba(245,242,237,0.4)',
-                borderRadius: 3,
-                borderLeft: `2px solid ${BONE}`,
-              }}>
-                <div style={{
-                  fontSize: 9, color: SMOKE, fontFamily: MONO,
-                  letterSpacing: '0.04em', marginBottom: supportLong.length > 0 ? 3 : 0,
-                }}>
-                  Supporting nearby release
-                  {supportShort.length > 0 && ` · ${supportShort.length} Shorts`}
-                </div>
-                {supportLong.map((upload) => {
-                  const fmtLabel = classifyUploadFormat(upload);
-                  return (
-                    <a
-                      key={`wsl-${upload.id}`}
-                      href={ytVideoUrl(upload.id, upload.durationSec)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 6,
-                        padding: '2px 0',
-                        textDecoration: 'none', color: 'inherit',
-                        fontSize: 9,
-                      }}
-                    >
-                      <span style={{
-                        color: '#4338CA', fontWeight: 700,
-                        textTransform: 'uppercase', fontFamily: MONO,
-                        fontSize: 7,
-                      }}>
-                        {fmtLabel}
-                      </span>
-                      <span style={{
-                        color: INK, flex: 1,
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {upload.title}
-                      </span>
-                      <span style={{ color: GHOST, fontFamily: MONO, fontSize: 8 }}>
-                        {fmtNum(upload.viewCount)}
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            );
-          })()}
-
-          {/* ── Regular matched uploads (non-anchor, non-support evidence) ── */}
+          {/* ── Regular matched uploads (non-cluster evidence) ── */}
           {isPast && regularMatched.length > 0 && (
             <div style={{
               display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4,
@@ -1866,7 +1835,7 @@ function TimelineWeekRow({ week, matchResult, clusterByAnchorId, supportUploadId
             </div>
           )}
 
-          {/* Extra uploads that weren't in the plan (excluding anchors/support) */}
+          {/* Extra uploads not in plan (excluding cluster content) */}
           {isPast && regularExtra.length > 0 && (
             <div style={{
               display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4,
