@@ -15,6 +15,7 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
+import { buildReleaseClusters, type ReleaseCluster } from '@/lib/coach/releaseClusters';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -154,6 +155,12 @@ export default function CampaignDestination({
   const activeMoment = moments.find((m) => m.timing === 'current') ?? moments.find((m) => m.timing === 'past');
   const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
+
+  // ── Release clusters — campaign pillars ──
+  const releaseClusters = buildReleaseClusters(recentUploads ?? [], {
+    treatLongformAsAnchor: true,
+    minAnchorViews: 500,
+  });
 
   // ── Rollout identity stats ──
   const totalPlanned = plan.events.length;
@@ -461,6 +468,44 @@ export default function CampaignDestination({
 
         {/* ┌──────────────────────────────────────────────────────────────┐
             │                                                              │
+            │   R E L E A S E   A R C H I T E C T U R E                   │
+            │   How each major drop was supported on YouTube.              │
+            │                                                              │
+            └──────────────────────────────────────────────────────────────┘ */}
+
+        {releaseClusters.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '40px 40px 0',
+          }}>
+            <div style={{
+              width: '100%', height: 1, background: BONE,
+              marginBottom: 24,
+            }} />
+            <div style={{
+              fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+              textTransform: 'uppercase', color: GHOST,
+              fontFamily: MONO, marginBottom: 6,
+            }}>
+              Release Architecture
+            </div>
+            <div style={{
+              fontSize: 12, color: SMOKE, marginBottom: 20, lineHeight: 1.5,
+            }}>
+              How each major release was supported on YouTube
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {releaseClusters.map((cluster) => (
+                <ReleasePillar key={cluster.anchor.id} cluster={cluster} />
+              ))}
+            </div>
+          </section>
+        )}
+
+
+        {/* ┌──────────────────────────────────────────────────────────────┐
+            │                                                              │
             │   C A M P A I G N   S U R F A C E                           │
             │   Visual proof of execution.                                 │
             │                                                              │
@@ -524,6 +569,271 @@ export default function CampaignDestination({
         </div>
       </div>
     </>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RELEASE PILLAR — Campaign node for a major release + support cluster
+// ══════════════════════════════════════════════════════════════════════════════
+
+function ReleasePillar({ cluster }: { cluster: ReleaseCluster }) {
+  const [expanded, setExpanded] = useState(false);
+  const { anchor, support, coverage, coverageScore, coverageLabel, totalViews, insights } = cluster;
+
+  const coverageColor =
+    coverageLabel === 'Strong' ? '#059669' :
+    coverageLabel === 'Moderate' ? '#D97706' :
+    coverageLabel === 'Weak' ? '#DC2626' : '#991B1B';
+
+  const shortCount = support.filter(u => u.durationSec <= 62).length;
+  const longCount = support.filter(u => u.durationSec > 62).length;
+
+  return (
+    <div style={{
+      border: `1px solid ${BONE}`,
+      borderRadius: 6,
+      overflow: 'hidden',
+      background: WHITE,
+    }}>
+      {/* ── Anchor header — the campaign pillar ── */}
+      <div style={{
+        display: 'flex', gap: 0,
+        background: INK,
+        position: 'relative',
+      }}>
+        {/* Thumbnail */}
+        <a
+          href={ytVideoUrl(anchor.id, anchor.durationSec)}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'block', width: 200, minHeight: 112,
+            position: 'relative', flexShrink: 0,
+            textDecoration: 'none', color: 'inherit',
+          }}
+        >
+          <img
+            src={ytThumb(anchor.id, 'hqdefault')}
+            alt="" loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </a>
+
+        {/* Info */}
+        <div style={{
+          flex: 1, padding: '14px 20px',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          minWidth: 0,
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
+          }}>
+            <span style={{
+              fontSize: 8, fontWeight: 800, letterSpacing: '0.12em',
+              textTransform: 'uppercase', color: coverageColor,
+              padding: '2px 8px', borderRadius: 2,
+              background: `${coverageColor}18`,
+              fontFamily: MONO,
+            }}>
+              {coverageLabel} support
+            </span>
+            <span style={{
+              fontSize: 8, fontWeight: 700, color: GHOST,
+              fontFamily: MONO, letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}>
+              {cluster.anchorFormat}
+            </span>
+          </div>
+
+          <div style={{
+            fontSize: 15, fontWeight: 700, color: PAPER,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            lineHeight: 1.3,
+          }}>
+            {anchor.title}
+          </div>
+
+          <div style={{
+            display: 'flex', gap: 14, marginTop: 8,
+            fontSize: 10, color: GHOST, fontFamily: MONO,
+            letterSpacing: '0.04em',
+          }}>
+            <span>{fmtNum(anchor.viewCount)} views</span>
+            <span>{timeAgo(anchor.publishedAt)}</span>
+            <span>{cluster.totalUploads} uploads in cluster</span>
+            {cluster.preReleaseCount > 0 && (
+              <span>{cluster.preReleaseCount} pre-release</span>
+            )}
+          </div>
+        </div>
+
+        {/* Total views badge */}
+        <div style={{
+          padding: '14px 20px', display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', alignItems: 'flex-end', flexShrink: 0,
+        }}>
+          <div style={{
+            fontSize: 24, fontWeight: 900, color: WHITE,
+            fontFamily: MONO, letterSpacing: '-0.03em', lineHeight: 1,
+          }}>
+            {fmtNum(totalViews)}
+          </div>
+          <div style={{
+            fontSize: 8, color: GHOST, fontFamily: MONO,
+            letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 4,
+          }}>
+            Total cluster views
+          </div>
+        </div>
+      </div>
+
+      {/* ── Coverage matrix — the format checklist ── */}
+      <div style={{
+        padding: '12px 20px',
+        display: 'flex', gap: 6, flexWrap: 'wrap',
+        borderBottom: `1px solid ${BONE}`,
+      }}>
+        {coverage.map((fmt) => (
+          <div
+            key={fmt.key}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              padding: '3px 10px',
+              borderRadius: 3,
+              background: fmt.present ? '#F0FDF4' : '#FEF2F2',
+              border: `1px solid ${fmt.present ? '#D1FAE5' : '#FECACA'}`,
+            }}
+          >
+            <span style={{
+              fontSize: 10, fontWeight: 700,
+              color: fmt.present ? '#059669' : '#DC2626',
+            }}>
+              {fmt.present ? '✓' : '✕'}
+            </span>
+            <span style={{
+              fontSize: 10, fontWeight: 600,
+              color: fmt.present ? '#065F46' : '#991B1B',
+            }}>
+              {fmt.label}
+            </span>
+            {fmt.present && fmt.count > 1 && (
+              <span style={{
+                fontSize: 8, fontWeight: 700, color: '#059669',
+                fontFamily: MONO,
+              }}>
+                ×{fmt.count}
+              </span>
+            )}
+            {fmt.present && fmt.totalViews > 0 && (
+              <span style={{
+                fontSize: 8, color: SMOKE, fontFamily: MONO,
+              }}>
+                {fmtNum(fmt.totalViews)}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Insights + expand ── */}
+      <div style={{ padding: '10px 20px' }}>
+        {insights.length > 0 && (
+          <div style={{
+            fontSize: 11, color: SMOKE, lineHeight: 1.5,
+            marginBottom: support.length > 0 ? 8 : 0,
+          }}>
+            {insights[0]}
+          </div>
+        )}
+
+        {support.length > 0 && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: 0, fontSize: 10, color: GHOST,
+              fontFamily: MONO, letterSpacing: '0.06em',
+            }}
+          >
+            <span style={{
+              fontSize: 7,
+              transform: expanded ? 'rotate(90deg)' : 'none',
+              transition: 'transform 0.15s',
+            }}>▶</span>
+            {shortCount > 0 && `${shortCount} Shorts`}
+            {shortCount > 0 && longCount > 0 && ' · '}
+            {longCount > 0 && `${longCount} longform`}
+            {' · '}{fmtNum(support.reduce((s, u) => s + u.viewCount, 0))} support views
+          </button>
+        )}
+
+        {expanded && (
+          <div style={{
+            marginTop: 10,
+            display: 'flex', gap: 6, flexWrap: 'wrap',
+          }}>
+            {support
+              .sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime())
+              .map((upload) => {
+                const fmt = classifyUploadFormat(upload);
+                const isShort = upload.durationSec <= 62;
+                const isPre = new Date(upload.publishedAt) < new Date(anchor.publishedAt);
+                return (
+                  <a
+                    key={upload.id}
+                    href={ytVideoUrl(upload.id, upload.durationSec)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '3px 8px 3px 3px',
+                      background: isPre ? '#EFF6FF' : BONE,
+                      borderRadius: 3,
+                      textDecoration: 'none', color: 'inherit',
+                      border: `1px solid ${isPre ? '#DBEAFE' : GHOST}22`,
+                    }}
+                  >
+                    <img
+                      src={ytThumb(upload.id, 'mqdefault')}
+                      alt="" loading="lazy"
+                      style={{
+                        width: isShort ? 20 : 40,
+                        height: isShort ? 28 : 22,
+                        objectFit: 'cover', borderRadius: 2,
+                      }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 9, color: INK, fontWeight: 500,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        maxWidth: 160,
+                      }}>
+                        {upload.title}
+                      </div>
+                      <div style={{
+                        fontSize: 7, color: GHOST, fontFamily: MONO,
+                        display: 'flex', gap: 4, alignItems: 'center',
+                      }}>
+                        <span style={{
+                          color: isPre ? '#2563EB' : '#059669',
+                          fontWeight: 700, textTransform: 'uppercase',
+                        }}>
+                          {isPre ? 'Pre' : 'Post'}
+                        </span>
+                        <span>{fmt}</span>
+                        <span>{fmtNum(upload.viewCount)}</span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
