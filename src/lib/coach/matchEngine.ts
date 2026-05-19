@@ -263,6 +263,7 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
 
   const t = upload.title.toLowerCase();
   if (/\b(official\s*(music\s*)?video|official\s*vid)\b/.test(t)) return 'Official Video';
+  if (/\[\s*(music\s*video|official\s*video|official\s*music\s*video)\s*\]/i.test(t)) return 'Official Video';
   if (/\blyric\s*(video|vid)?\b/.test(t)) return 'Lyric Video';
   if (/\bvisualise?r\b/.test(t)) return 'Visualizer';
   if (/\b(bts|behind\s*the\s*scenes|making\s*of)\b/.test(t)) return 'BTS';
