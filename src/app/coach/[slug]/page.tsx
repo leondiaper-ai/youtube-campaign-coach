@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { loadPlan, savePlan } from '@/lib/planStore';
+import { loadPlan, savePlan, type CampaignDataCoverage, type HistoricalSource } from '@/lib/planStore';
 import { readLiveSnapByHandle, readChannelMapping } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { ARTISTS } from '@/lib/artists';
@@ -131,6 +131,13 @@ export default async function CampaignPage({ params }: PageProps) {
     }
   }
 
+  // Compute data coverage — how complete is the historical picture?
+  const dataCoverage = computeDataCoverage(
+    recentUploads,
+    artistConfig?.campaignStartDate ?? null,
+    saved.historicalActivity ?? [],
+  );
+
   // Run execution matching
   const matchResult = matchPlanToUploads(saved.plan, recentUploads);
 
@@ -155,11 +162,63 @@ export default async function CampaignPage({ params }: PageProps) {
       matchResult={matchResult}
       nudges={nudges}
       recentUploads={recentUploads}
+      dataCoverage={dataCoverage}
+      campaignStartDate={artistConfig?.campaignStartDate}
     />
   );
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
+
+function computeDataCoverage(
+  uploads: RecentUpload[],
+  campaignStartDate: string | null,
+  historicalActivity: { source: HistoricalSource }[],
+): CampaignDataCoverage {
+  const sources: HistoricalSource[] = [];
+  if (uploads.length > 0) sources.push('kv_cache');
+  if (historicalActivity.some(h => h.source === 'manual')) sources.push('manual');
+  if (historicalActivity.some(h => h.source === 'coach_archive')) sources.push('coach_archive');
+
+  // Check how far back API data goes
+  let apiCoverageFrom: string | undefined;
+  if (uploads.length > 0) {
+    const oldest = uploads.reduce((o, u) =>
+      new Date(u.publishedAt) < new Date(o.publishedAt) ? u : o
+    );
+    apiCoverageFrom = new Date(oldest.publishedAt).toISOString().split('T')[0];
+    sources.push('youtube_api');
+  }
+
+  let fullCoverage = true;
+  let coverageNote = 'Full campaign history from YouTube API';
+
+  if (campaignStartDate && apiCoverageFrom) {
+    const campStart = new Date(campaignStartDate + 'T00:00:00');
+    const apiStart = new Date(apiCoverageFrom + 'T00:00:00');
+    const gapDays = (apiStart.getTime() - campStart.getTime()) / 86400000;
+
+    if (gapDays > 7) {
+      fullCoverage = false;
+      coverageNote = `Partial history — API data starts ${apiCoverageFrom}, campaign began ${campaignStartDate}`;
+      if (historicalActivity.length > 0) {
+        coverageNote += ` (${historicalActivity.length} manual entries fill gaps)`;
+      }
+    }
+  } else if (!uploads.length && historicalActivity.length > 0) {
+    fullCoverage = false;
+    coverageNote = 'Historical activity loaded from saved data — no live API data';
+  } else if (!uploads.length) {
+    fullCoverage = false;
+    coverageNote = 'No historical upload data available';
+  }
+
+  if (sources.includes('manual') && fullCoverage) {
+    coverageNote = 'Full campaign history — includes manual entries';
+  }
+
+  return { sources, apiCoverageFrom, fullCoverage, coverageNote };
+}
 
 function detectCurrentPhase(plan: { weeks: { dateRange: string; phase: string }[] }) {
   const now = new Date();

@@ -13,6 +13,35 @@ import type { GeneratedPlan, ChannelContext } from './planEngine';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+/** Source of a historical activity entry */
+export type HistoricalSource = 'youtube_api' | 'kv_cache' | 'coach_archive' | 'manual';
+
+/** Manual or auto-imported historical activity entry */
+export type HistoricalActivity = {
+  date: string;             // ISO date (yyyy-mm-dd) or partial (yyyy-mm)
+  title: string;
+  format: 'short' | 'video' | 'premiere' | 'live' | 'community' | 'bts' | 'lyric_video' | 'visualizer' | 'other';
+  phase?: string;           // e.g. 'BUILD', 'RELEASE'
+  status: 'completed' | 'live' | 'planned' | 'missing' | 'recommended';
+  source: HistoricalSource;
+  /** YouTube video ID if available */
+  videoId?: string;
+  /** View count if known */
+  viewCount?: number;
+};
+
+/** Where the campaign's historical data came from */
+export type CampaignDataCoverage = {
+  /** Sources that contributed data */
+  sources: HistoricalSource[];
+  /** How far back the YouTube API data goes (ISO date) */
+  apiCoverageFrom?: string;
+  /** Whether the full campaign window is covered */
+  fullCoverage: boolean;
+  /** Human-readable coverage note */
+  coverageNote: string;
+};
+
 export type SavedPlan = {
   slug: string;
   artist: string;
@@ -22,6 +51,10 @@ export type SavedPlan = {
   createdAt: string;      // ISO timestamp
   updatedAt: string;      // ISO timestamp
   timelineText: string;   // original input — useful for re-generation
+  /** Manually seeded or imported historical activity */
+  historicalActivity?: HistoricalActivity[];
+  /** Data coverage metadata */
+  dataCoverage?: CampaignDataCoverage;
 };
 
 export type PlanIndexEntry = {

@@ -10,9 +10,11 @@ import type {
   ChannelContext,
 } from '@/lib/planEngine';
 import type { MatchResult, MatchedAction, MatchedWeek, ExecutionStatus } from '@/lib/coach/matchEngine';
+import { classifyUploadFormat } from '@/lib/coach/matchEngine';
 import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
+import type { CampaignDataCoverage } from '@/lib/planStore';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -104,6 +106,8 @@ type CampaignDestinationProps = {
   matchResult?: MatchResult;
   nudges?: Nudge[];
   recentUploads?: RecentUpload[];
+  dataCoverage?: CampaignDataCoverage;
+  campaignStartDate?: string;
 };
 
 type PulseSignal = {
@@ -141,6 +145,8 @@ export default function CampaignDestination({
   matchResult,
   nudges,
   recentUploads,
+  dataCoverage,
+  campaignStartDate,
 }: CampaignDestinationProps) {
   const currentPhase = detectCurrentPhase(plan);
   const pulseSignals = generatePulseSignals(matchResult, liveChannel, recentUploads ?? [], currentPhase, plan);
@@ -155,7 +161,7 @@ export default function CampaignDestination({
     ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'completed' || a.status === 'live').length
     : 0;
   const openOpportunities = matchResult
-    ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'missing' || a.status === 'late').length
+    ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'missing' || a.status === 'late' || a.status === 'recommended').length
     : 0;
 
   // ── Classify uploads ──
@@ -378,6 +384,39 @@ export default function CampaignDestination({
               <span style={{ fontSize: 12, color: SMOKE, lineHeight: 1.4 }}>
                 {pulseSignals[0].text}
               </span>
+            </div>
+          )}
+
+          {/* Data coverage badge */}
+          {dataCoverage && (
+            <div style={{
+              marginTop: 10,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <span style={{
+                width: 4, height: 4, borderRadius: '50%', flexShrink: 0,
+                background: dataCoverage.fullCoverage ? '#059669' : '#D97706',
+                opacity: 0.6,
+              }} />
+              <span style={{
+                fontSize: 10, color: GHOST, fontFamily: MONO,
+                letterSpacing: '0.04em',
+              }}>
+                {dataCoverage.coverageNote}
+              </span>
+              {dataCoverage.sources.length > 0 && (
+                <span style={{
+                  fontSize: 8, color: GHOST, fontFamily: MONO,
+                  padding: '1px 6px', borderRadius: 2,
+                  border: `1px solid ${BONE}`,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}>
+                  {dataCoverage.sources.includes('youtube_api') ? 'API' :
+                   dataCoverage.sources.includes('kv_cache') ? 'Cache' :
+                   dataCoverage.sources.includes('manual') ? 'Manual' : 'Saved'}
+                </span>
+              )}
             </div>
           )}
         </section>
@@ -941,6 +980,9 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
   const openActions = moment.actions.filter(
     (a) => a.status === 'missing' || a.status === 'late'
   );
+  const recommendedActions = moment.actions.filter(
+    (a) => a.status === 'recommended'
+  );
   const plannedActions = moment.actions.filter(
     (a) => a.status === 'planned'
   );
@@ -1083,6 +1125,30 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
                   fontFamily: MONO, letterSpacing: '0.08em',
                 }}>
                   OPPORTUNITY
+                </span>
+              </div>
+            ))}
+
+            {recommendedActions.map((a, i) => (
+              <div key={`r-${i}`} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px',
+                background: '#F5F3FF',
+                border: '1px solid #EDE9FE',
+                borderRadius: 4,
+              }}>
+                <span style={{ fontSize: 11, color: '#7C3AED', fontWeight: 700 }}>◆</span>
+                <span style={{
+                  fontSize: 12, color: '#5B21B6', flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {cleanTitle(a.title)}
+                </span>
+                <span style={{
+                  fontSize: 8, fontWeight: 800, color: '#7C3AED',
+                  fontFamily: MONO, letterSpacing: '0.08em',
+                }}>
+                  STILL VALUABLE
                 </span>
               </div>
             ))}
@@ -1273,22 +1339,30 @@ function TimelineWeekRow({ week, matchResult }: {
 }) {
   const isMoment = !!week.momentName;
   const isCurrent = isCurrentWeek(week);
-  const [expanded, setExpanded] = useState(isCurrent);
+  const isPast = isWeekPast(week);
+  const [expanded, setExpanded] = useState(isCurrent || (isPast && isMoment));
   const matchedWeek = matchResult ? (week as MatchedWeek) : null;
   const actions = matchedWeek?.actions ?? week.actions;
 
   const done = actions.filter((a) =>
     'status' in a ? ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live') : a.completed
   ).length;
+  const recommended = actions.filter((a) =>
+    'status' in a && (a as MatchedAction).status === 'recommended'
+  ).length;
   const openWindows = actions.filter((a) =>
     'status' in a && ((a as MatchedAction).status === 'late' || (a as MatchedAction).status === 'missing')
   ).length;
 
+  // Extra uploads for this week (unmatched uploads that landed here)
+  const extraUploads = matchedWeek?.extraUploads ?? [];
+
   return (
     <div style={{
-      background: isCurrent ? WHITE : 'transparent',
+      background: isCurrent ? WHITE : isPast ? 'rgba(245,242,237,0.5)' : 'transparent',
       border: isCurrent ? `1px solid ${BONE}` : 'none',
       borderRadius: isCurrent ? 4 : 0,
+      borderLeft: isPast && done > 0 ? '2px solid #059669' : isPast ? `2px solid ${BONE}` : 'none',
     }}>
       <button
         onClick={() => actions.length > 0 && setExpanded(!expanded)}
@@ -1322,6 +1396,7 @@ function TimelineWeekRow({ week, matchResult }: {
             fontFamily: MONO,
           }}>
             {done > 0 && <span style={{ color: '#059669', fontWeight: 700 }}>{done}✓</span>}
+            {recommended > 0 && <span style={{ color: '#7C3AED', fontWeight: 700 }}>{recommended} rec</span>}
             {openWindows > 0 && <span style={{ color: '#D97706', fontWeight: 700 }}>{openWindows} open</span>}
             <span style={{
               fontSize: 7,
@@ -1334,20 +1409,149 @@ function TimelineWeekRow({ week, matchResult }: {
 
       {expanded && (
         <div style={{ padding: '0 10px 6px 44px' }}>
+          {/* Past week evidence: show matched uploads as proof with thumbnails */}
+          {isPast && done > 0 && (
+            <div style={{
+              display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4,
+            }}>
+              {actions
+                .filter((a) => 'status' in a && (a as MatchedAction).matchedUpload &&
+                  ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live'))
+                .map((a, i) => {
+                  const matched = a as MatchedAction;
+                  const upload = matched.matchedUpload!;
+                  const formatLabel = classifyUploadFormat(upload);
+                  return (
+                    <a
+                      key={`ev-${i}`}
+                      href={ytVideoUrl(upload.id, upload.durationSec)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        padding: '4px 8px 4px 4px',
+                        background: '#F0FDF4',
+                        borderRadius: 4,
+                        textDecoration: 'none', color: 'inherit',
+                        border: '1px solid #D1FAE5',
+                      }}
+                    >
+                      <img
+                        src={ytThumb(upload.id, 'mqdefault')}
+                        alt="" loading="lazy"
+                        style={{
+                          width: upload.durationSec <= 62 ? 24 : 48,
+                          height: upload.durationSec <= 62 ? 32 : 27,
+                          objectFit: 'cover', borderRadius: 2,
+                        }}
+                      />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 10, color: INK, fontWeight: 500,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          maxWidth: 200,
+                        }}>
+                          {upload.title}
+                        </div>
+                        <div style={{
+                          display: 'flex', gap: 6, alignItems: 'center',
+                          fontSize: 8, color: SMOKE, fontFamily: MONO,
+                          letterSpacing: '0.04em', marginTop: 1,
+                        }}>
+                          <span style={{
+                            color: '#059669', fontWeight: 700,
+                            textTransform: 'uppercase',
+                          }}>
+                            {formatLabel}
+                          </span>
+                          <span>{fmtNum(upload.viewCount)} views</span>
+                          <span>{timeAgo(upload.publishedAt)}</span>
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+            </div>
+          )}
+
+          {/* Extra uploads that weren't in the plan */}
+          {isPast && extraUploads.length > 0 && (
+            <div style={{
+              display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4,
+            }}>
+              {extraUploads.map((upload, i) => {
+                const formatLabel = classifyUploadFormat(upload);
+                return (
+                  <a
+                    key={`ex-${i}`}
+                    href={ytVideoUrl(upload.id, upload.durationSec)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '3px 8px 3px 3px',
+                      background: '#F5F3FF',
+                      borderRadius: 3,
+                      textDecoration: 'none', color: 'inherit',
+                      border: '1px solid #EDE9FE',
+                    }}
+                  >
+                    <img
+                      src={ytThumb(upload.id, 'mqdefault')}
+                      alt="" loading="lazy"
+                      style={{
+                        width: upload.durationSec <= 62 ? 20 : 40,
+                        height: upload.durationSec <= 62 ? 28 : 22,
+                        objectFit: 'cover', borderRadius: 2,
+                      }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 9, color: SMOKE, fontWeight: 500,
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        maxWidth: 160,
+                      }}>
+                        {upload.title}
+                      </div>
+                      <div style={{
+                        fontSize: 7, color: GHOST, fontFamily: MONO,
+                        letterSpacing: '0.04em',
+                      }}>
+                        <span style={{ color: '#7C3AED', fontWeight: 700, textTransform: 'uppercase' }}>
+                          {formatLabel}
+                        </span>
+                        {' · '}{fmtNum(upload.viewCount)}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Action list — past weeks show as evidence, future as plan */}
           {actions.map((a, i) => {
             const matched = 'status' in a ? (a as MatchedAction) : null;
             const status: ExecutionStatus = matched?.status ?? (a.completed ? 'completed' : 'planned');
             const isDone = status === 'completed' || status === 'live';
+            const isRecommended = status === 'recommended';
             const isOpen = status === 'late';
             const isUpcoming = status === 'missing';
+
+            // In past evidence mode, completed items with thumbnails are already shown above
+            if (isPast && isDone && matched?.matchedUpload) return null;
 
             return (
               <div key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 fontSize: 11, padding: '2px 0',
-                color: isDone ? GHOST : isOpen ? '#92400E' : isUpcoming ? '#78350F' : INK,
+                color: isDone ? GHOST
+                  : isRecommended ? '#5B21B6'
+                  : isOpen ? '#92400E'
+                  : isUpcoming ? '#78350F'
+                  : INK,
                 textDecoration: isDone ? 'line-through' : 'none',
-                opacity: isDone ? 0.5 : 1,
+                opacity: isDone ? 0.5 : isRecommended ? 0.85 : 1,
               }}>
                 <span style={{ fontSize: 9, opacity: 0.6, fontFamily: MONO }}>
                   {a.format === 'short' ? '⚡' : a.format === 'video' || a.format === 'premiere' ? '▶' : a.format === 'live' ? '◉' : '·'}
@@ -1358,14 +1562,44 @@ function TimelineWeekRow({ week, matchResult }: {
                     {fmtNum(matched.matchedUpload.viewCount)}
                   </span>
                 )}
-                {(isOpen || isUpcoming) && (
+                {isRecommended && (
                   <span style={{
                     fontSize: 7, fontWeight: 800, padding: '1px 5px', borderRadius: 2,
-                    background: isOpen ? '#FFFBEB' : '#FFF7ED',
-                    color: isOpen ? '#D97706' : '#92400E',
+                    background: '#F5F3FF',
+                    color: '#7C3AED',
                     textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
                   }}>
-                    {isOpen ? 'Ready' : 'Opportunity'}
+                    Still valuable
+                  </span>
+                )}
+                {isOpen && (
+                  <span style={{
+                    fontSize: 7, fontWeight: 800, padding: '1px 5px', borderRadius: 2,
+                    background: '#FFFBEB',
+                    color: '#D97706',
+                    textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
+                  }}>
+                    Ready
+                  </span>
+                )}
+                {isUpcoming && !isPast && (
+                  <span style={{
+                    fontSize: 7, fontWeight: 800, padding: '1px 5px', borderRadius: 2,
+                    background: '#FFF7ED',
+                    color: '#92400E',
+                    textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
+                  }}>
+                    Opportunity
+                  </span>
+                )}
+                {isUpcoming && isPast && !isRecommended && (
+                  <span style={{
+                    fontSize: 7, fontWeight: 700, padding: '1px 5px', borderRadius: 2,
+                    background: BONE,
+                    color: GHOST,
+                    textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: MONO,
+                  }}>
+                    Skipped
                   </span>
                 )}
               </div>
@@ -1676,6 +1910,22 @@ function isCurrentWeek(week: { dateRange: string }): boolean {
   const weekDate = new Date(now.getFullYear(), month, day);
   const diff = (now.getTime() - weekDate.getTime()) / 86400000;
   return diff >= -1 && diff <= 7;
+}
+
+function isWeekPast(week: { dateRange: string }): boolean {
+  const now = new Date();
+  const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
+  if (!match) return false;
+  const monthMap: Record<string, number> = {
+    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+  };
+  const month = monthMap[match[1]];
+  if (month == null) return false;
+  const day = parseInt(match[2], 10);
+  const weekDate = new Date(now.getFullYear(), month, day);
+  const diff = (now.getTime() - weekDate.getTime()) / 86400000;
+  return diff > 7; // Past if more than 7 days ago
 }
 
 function resolveWeekDate(week: { dateRange: string }): Date | null {

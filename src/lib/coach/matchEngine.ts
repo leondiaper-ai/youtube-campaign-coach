@@ -21,6 +21,7 @@ export type ExecutionStatus =
   | 'missing'       // past due, no match found
   | 'late'          // significantly past due (>3 days)
   | 'optional'      // low-priority action, no penalty for skipping
+  | 'recommended'   // past due but still valuable — e.g. lyric video for a recent drop
   | 'manually_added'; // user-added action outside original plan
 
 export type MatchConfidence = 'high' | 'medium' | 'low';
@@ -213,6 +214,67 @@ function isGenericAction(action: ContentAction): boolean {
   return generic.some(g => lower.includes(g));
 }
 
+// ── Value assessment for past-due actions ─────────────────────────────────
+
+/** Some content formats remain valuable long after the planned date.
+ *  Lyric videos, visualizers, BTS content can land weeks later and still
+ *  extend a release's watch-time window. Community posts are ephemeral. */
+function isStillValuable(action: ContentAction, daysOverdue: number): boolean {
+  const t = action.title.toLowerCase();
+  // These formats have long tail value — worth doing up to 30 days late
+  const longTailFormats = [
+    'lyric', 'visualizer', 'bts', 'behind the scenes', 'making of',
+    'commentary', 'breakdown', 'reaction', 'acoustic', 'live session',
+    'documentary', 'trailer', 'track-by-track',
+  ];
+  if (longTailFormats.some(f => t.includes(f)) && daysOverdue <= 30) return true;
+
+  // Shorts have moderate tail — worth doing up to 14 days late
+  if (action.format === 'short' && daysOverdue <= 14) return true;
+
+  // Community posts are ephemeral — not valuable after 5 days
+  if (action.format === 'community' || action.format === 'post') return false;
+
+  // Videos have some tail — worth doing up to 21 days late
+  if ((action.format === 'video' || action.format === 'premiere') && daysOverdue <= 21) return true;
+
+  return false;
+}
+
+// ── Upload format classification ──────────────────────────────────────────
+
+export type UploadFormatLabel =
+  | 'Official Video'
+  | 'Short'
+  | 'Lyric Video'
+  | 'Visualizer'
+  | 'BTS'
+  | 'Live Session'
+  | 'Premiere'
+  | 'Documentary'
+  | 'Freestyle'
+  | 'Interview'
+  | 'Longform'
+  | 'Upload';
+
+/** Classify a YouTube upload by its title and metadata into a human-readable format label */
+export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
+  if (upload.durationSec <= 62) return 'Short';
+
+  const t = upload.title.toLowerCase();
+  if (/\b(official\s*(music\s*)?video|official\s*vid)\b/.test(t)) return 'Official Video';
+  if (/\blyric\s*(video|vid)?\b/.test(t)) return 'Lyric Video';
+  if (/\bvisualise?r\b/.test(t)) return 'Visualizer';
+  if (/\b(bts|behind\s*the\s*scenes|making\s*of)\b/.test(t)) return 'BTS';
+  if (/\b(live\s*session|acoustic|stripped\s*back|live\s*at|live\s*from)\b/.test(t)) return 'Live Session';
+  if (/\bpremiere\b/.test(t) || upload.live === 'upcoming') return 'Premiere';
+  if (/\b(documentary|mini[\s-]?doc|film)\b/.test(t)) return 'Documentary';
+  if (/\bfreestyle\b/.test(t)) return 'Freestyle';
+  if (/\b(interview|podcast|conversation)\b/.test(t)) return 'Interview';
+  if (upload.durationSec > 600) return 'Longform';
+  return 'Upload';
+}
+
 // ── Date resolution ───────────────────────────────────────────────────────
 
 /**
@@ -343,15 +405,20 @@ export function matchPlanToUploads(
         };
       }
 
-      // No match found — determine if missing or upcoming
+      // No match found — determine if missing, recommended, or upcoming
       const daysFromDue = plannedDate
         ? Math.round((now.getTime() - plannedDate.getTime()) / 86400000)
         : null;
 
       let status: ExecutionStatus = 'planned';
       if (daysFromDue != null) {
-        if (daysFromDue > 5) status = 'late';
-        else if (daysFromDue > 1) status = 'missing';
+        if (daysFromDue > 5) {
+          // Past due — is this still worth doing?
+          // Lyric videos, visualizers, BTS can still add value weeks after release
+          status = isStillValuable(action, daysFromDue) ? 'recommended' : 'late';
+        } else if (daysFromDue > 1) {
+          status = 'missing';
+        }
         // else it's upcoming or today → 'planned'
       }
 
@@ -394,10 +461,11 @@ export function matchPlanToUploads(
   const planned = allActions.filter((a) => a.status === 'planned').length;
   const missing = allActions.filter((a) => a.status === 'missing').length;
   const late = allActions.filter((a) => a.status === 'late').length;
+  const recommended = allActions.filter((a) => a.status === 'recommended').length;
   const extraUploadsCount = matchedWeeks.reduce((s, w) => s + w.extraUploads.length, 0);
 
   const doneCount = completed + live;
-  const pastDueCount = doneCount + missing + late;
+  const pastDueCount = doneCount + missing + late + recommended;
   const completionRate = pastDueCount > 0 ? (doneCount / pastDueCount) * 100 : 0;
 
   return {
