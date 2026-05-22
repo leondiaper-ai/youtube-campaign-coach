@@ -408,13 +408,20 @@ export function buildReleaseClusters(
     extractTitleKeywords(e.title)
   );
 
-  // 1. Identify anchors — ONLY official videos, premieres, documentaries
-  //    that fall WITHIN the active campaign window.
+  // 1. Identify anchors — official videos, premieres, documentaries,
+  //    OR any longform upload that matches a timeline event (plan-aware).
+  //    Must fall WITHIN the active campaign window.
   //    These are the campaign pillars. Everything else is support infrastructure.
   const anchors: RecentUpload[] = [];
   for (const upload of sorted) {
     const fmt = classifyUploadFormat(upload);
-    if (!ANCHOR_FORMATS.includes(fmt) || upload.viewCount < minViews) continue;
+    const isAnchorFormat = ANCHOR_FORMATS.includes(fmt);
+    const isLongform = upload.durationSec > 62;
+    const matchesPlanEvent = isLongform && matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
+
+    // Gate 0: Must be either an anchor format OR a longform that matches a plan event
+    // In both cases, must meet minimum view threshold
+    if ((!isAnchorFormat && !matchesPlanEvent) || upload.viewCount < minViews) continue;
 
     const uploadDate = new Date(upload.publishedAt).getTime();
 
@@ -424,7 +431,7 @@ export function buildReleaseClusters(
       const windowStart = campaignStart - 14 * 86400000;
       if (uploadDate < windowStart || uploadDate > campaignEnd) {
         // Outside campaign window — check if it matches a timeline event
-        if (!matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? [])) {
+        if (!matchesPlanEvent && !matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? [])) {
           continue; // Skip: not in campaign window and no matching timeline event
         }
       }
