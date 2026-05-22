@@ -394,6 +394,11 @@ export function buildReleaseClusters(
   // The planner is the ACTIVE CAMPAIGN WORLD only — not a channel archive.
   // Only anchors within the campaign timeline window qualify as release moments.
   // Historical releases outside this window are excluded.
+  //
+  // Pre-campaign buffer: 30 days before campaign start — catches pre-release
+  // content (teasers, shorts, warm-up) without pulling in ancient history.
+  const PRE_CAMPAIGN_BUFFER_DAYS = 30;
+
   const campaignStart = options.campaignStartDate
     ? new Date(options.campaignStartDate).getTime()
     : null;
@@ -410,8 +415,9 @@ export function buildReleaseClusters(
 
   // 1. Identify anchors — official videos, premieres, documentaries,
   //    OR any longform upload that matches a timeline event (plan-aware).
-  //    Must fall WITHIN the active campaign window.
+  //    Must fall WITHIN the active campaign window (+ 30-day pre-buffer).
   //    These are the campaign pillars. Everything else is support infrastructure.
+  //    HARD RULE: Nothing older than 30 days before campaign start. Ever.
   const anchors: RecentUpload[] = [];
   for (const upload of sorted) {
     const fmt = classifyUploadFormat(upload);
@@ -430,15 +436,11 @@ export function buildReleaseClusters(
 
     const uploadDate = new Date(upload.publishedAt).getTime();
 
-    // Gate 1: Campaign window filter
+    // Gate 1: STRICT campaign window — no exceptions for old content
     if (campaignStart && campaignEnd) {
-      // Allow a small buffer before campaign start (2 weeks) for pre-campaign releases
-      const windowStart = campaignStart - 14 * 86400000;
+      const windowStart = campaignStart - PRE_CAMPAIGN_BUFFER_DAYS * 86400000;
       if (uploadDate < windowStart || uploadDate > campaignEnd) {
-        // Outside campaign window — check if it matches a timeline event
-        if (!matchesPlanEvent && !matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? [])) {
-          continue; // Skip: not in campaign window and no matching timeline event
-        }
+        continue; // Hard cutoff — nothing outside the campaign window
       }
     }
 
