@@ -493,15 +493,39 @@ export function buildReleaseClusters(
   const anchorIds = new Set(anchors.map(a => a.id));
   const candidateScores: Map<string, { anchorId: string; score: number; signals: string[]; timingDays: number }[]> = new Map();
 
+  // Support-format types that are inherently tied to a release — these get an
+  // extended window (up to 45 days post-anchor) when they share title keywords
+  // with the anchor, because BTS / lyric videos sometimes drop weeks after release.
+  const SUPPORT_FORMAT_TYPES = new Set(['BTS', 'Lyric Video', 'Visualizer', 'Live Session']);
+  const EXTENDED_POST_DAYS = 45;
+
   for (const { anchor, windowStart, windowEnd } of anchorWindows) {
     const anchorDate = new Date(anchor.publishedAt).getTime();
+    const anchorKw = extractTitleKeywords(anchor.title);
 
     for (const upload of sorted) {
       if (upload.id === anchor.id) continue;
       if (anchorIds.has(upload.id)) continue; // Don't score other anchors
 
       const t = new Date(upload.publishedAt).getTime();
-      if (t < windowStart || t > windowEnd) continue;
+
+      // Check if this upload is outside the standard window
+      if (t < windowStart || t > windowEnd) {
+        // Extended window: support-format uploads with keyword overlap get more time
+        const fmt = classifyUploadFormat(upload);
+        if (SUPPORT_FORMAT_TYPES.has(fmt)) {
+          const uploadKw = extractTitleKeywords(upload.title);
+          const overlap = anchorKw.filter(w => uploadKw.includes(w));
+          const extendedEnd = anchorDate + EXTENDED_POST_DAYS * 86400000;
+          if (overlap.length >= 1 && t >= windowStart && t <= extendedEnd) {
+            // Allow through — this is clearly support content for this release
+          } else {
+            continue;
+          }
+        } else {
+          continue;
+        }
+      }
 
       const timingDays = (t - anchorDate) / 86400000;
       const { score, signals } = scoreRelationship(anchor, upload, timingDays);
