@@ -528,36 +528,6 @@ export default function CampaignDestination({
           </section>
         )}
 
-        {/* ══════════════════════════════════════════════════════════════
-            SECTION 2: MOMENTUM ANCHOR (conditional)
-            "What release is still driving value?" — driven by narrative
-            engine weighted scoring. Only shows if it's a DIFFERENT
-            centrepiece than the active moment's primary upload.
-            Mystery Box stays visible here but doesn't override the
-            active campaign moment above.
-        ══════════════════════════════════════════════════════════════ */}
-        {narrative.activeMoment && activeMoment && (() => {
-          // Only show momentum anchor if it's a different video than the active moment
-          const activeUploadId = activeMoment.primaryUpload?.id;
-          const narrativeCpId = narrative.activeMoment!.centrepiece.upload.id;
-          if (activeUploadId === narrativeCpId) return null;
-          return (
-            <section style={{
-              maxWidth: 1200, margin: '0 auto',
-              padding: '20px 40px 0',
-            }}>
-              <div style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
-                textTransform: 'uppercase', color: GHOST,
-                fontFamily: MONO, marginBottom: 10,
-              }}>
-                Momentum Anchor
-              </div>
-              <NarrativeHeroBlock moment={narrative.activeMoment!} phase={currentPhase} />
-            </section>
-          );
-        })()}
-
         {/* ── Timeline ── */}
         <section style={{
           maxWidth: 1200, margin: '0 auto',
@@ -1351,16 +1321,16 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
         {moment.momentName}
       </h3>
 
-      {/* Thumbnail + actions grid */}
+      {/* Thumbnail + actions grid (or single-column if no upload) */}
       <div style={{
         marginTop: 20,
         display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
+        gridTemplateColumns: moment.primaryUpload ? '2fr 1fr' : '1fr',
         gap: 8,
         alignItems: 'start',
       }}>
-        {/* Primary thumbnail or placeholder */}
-        {moment.primaryUpload ? (
+        {/* Primary thumbnail — only rendered when there IS an upload */}
+        {moment.primaryUpload && (
           <a
             href={ytVideoUrl(moment.primaryUpload.id, moment.primaryUpload.durationSec)}
             target="_blank"
@@ -1397,34 +1367,6 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
               </div>
             </div>
           </a>
-        ) : (
-          /* Centrepiece placeholder — no primary upload yet */
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            borderRadius: 6, aspectRatio: '16/9',
-            background: BONE,
-            border: `2px dashed ${GHOST}`,
-          }}>
-            <div style={{
-              fontSize: 24, color: GHOST, marginBottom: 8,
-            }}>
-              ▶
-            </div>
-            <div style={{
-              fontSize: 11, fontWeight: 700, color: SMOKE,
-              letterSpacing: '0.08em', textTransform: 'uppercase',
-              fontFamily: MONO,
-            }}>
-              Asset needed
-            </div>
-            <div style={{
-              fontSize: 10, color: GHOST, marginTop: 4,
-              textAlign: 'center', maxWidth: 200,
-            }}>
-              The centrepiece upload for this moment hasn't landed yet
-            </div>
-          </div>
         )}
 
         {/* Action cards */}
