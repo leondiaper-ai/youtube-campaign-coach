@@ -10,20 +10,25 @@ import type {
   ChannelContext,
 } from '@/lib/planEngine';
 import type { MatchResult, MatchedAction, MatchedWeek, ExecutionStatus } from '@/lib/coach/matchEngine';
-import { classifyUploadFormat } from '@/lib/coach/matchEngine';
 import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
-import { buildReleaseClusters, buildReleaseMoments, type ReleaseCluster, type ReleaseMoment, type SupportCategory, type PremiereStatus } from '@/lib/coach/releaseClusters';
+// ── Unified Pipeline — single import for all campaign logic ──
 import {
-  buildCampaignNarrative,
+  buildCampaignPipeline,
+  classifyUploadFormat,
   coverageLabel as narrativeCoverageLabel,
   coverageTone as narrativeCoverageTone,
   arcLabel,
-  type CampaignNarrative,
-  type NarrativeMoment,
-} from '@/lib/coach/campaignNarrative';
+  isCurrentWeek,
+  isWeekPast,
+  parseDateRange,
+  type CampaignPipelineState,
+  type PlanMoment,
+} from '@/lib/coach/campaignPipeline';
+import type { ReleaseCluster, ReleaseMoment, SupportCategory, PremiereStatus } from '@/lib/coach/releaseClusters';
+import type { CampaignNarrative, NarrativeMoment } from '@/lib/coach/campaignNarrative';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -124,21 +129,8 @@ type PulseSignal = {
   urgency: 'positive' | 'neutral' | 'warning' | 'critical';
 };
 
-type CampaignMoment = {
-  weekNum: number;
-  momentName: string;
-  dateRange: string;
-  phase: PhaseName;
-  timing: 'past' | 'current' | 'upcoming';
-  daysAway: number;
-  actions: MatchedAction[];
-  extraUploads: RecentUpload[];
-  primaryUpload: RecentUpload | null;
-  supportDone: string[];
-  supportMissing: string[];
-  supportPlanned: string[];
-  totalViews: number;
-};
+// CampaignMoment is now PlanMoment from the unified pipeline
+type CampaignMoment = PlanMoment;
 
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -157,58 +149,38 @@ export default function CampaignDestination({
   dataCoverage,
   campaignStartDate,
 }: CampaignDestinationProps) {
-  const currentPhase = detectCurrentPhase(plan);
+  // ═══ UNIFIED PIPELINE — single entry point for all campaign logic ═══
+  const pipeline = buildCampaignPipeline({
+    plan,
+    recentUploads,
+    matchResult,
+    campaignStartDate,
+  });
+
+  // Destructure pipeline output — these are the ONLY data sources for rendering
+  const {
+    currentPhase,
+    narrative,
+    heroUpload,
+    activeMoment: narrativeActiveMoment,
+    releaseClusters,
+    planMoments: moments,
+    activePlanMoment: activeMoment,
+    allByRecency,
+    shorts,
+    longform,
+    totalCampaignViews,
+    totalPlanned,
+    landed,
+    openOpportunities,
+    uploads30d,
+    shorts30d,
+    long30d,
+  } = pipeline;
+
   const pulseSignals = generatePulseSignals(matchResult, liveChannel, recentUploads ?? [], currentPhase, plan);
-  const moments = extractMoments(plan, matchResult);
-  const activeMoment = moments.find((m) => m.timing === 'current') ?? moments.find((m) => m.timing === 'past');
   const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
-
-  // ── Campaign Narrative — universal campaign grammar ──
-  const uploads = recentUploads ?? [];
-  const narrative = buildCampaignNarrative(uploads, {
-    campaignStartDate,
-    campaignWeeks: plan.totalWeeks,
-    minCentrepieceViews: 5000,
-    maxMoments: 8,
-    currentPhase,
-    planEvents: plan.events,
-  });
-
-  // ── Campaign Pillars (legacy — still used by TimelineDetail) ──
-  const releaseClusters = buildReleaseClusters(uploads, {
-    minAnchorViews: 5000,
-    maxPillars: 6,
-    campaignStartDate,
-    campaignWeeks: plan.totalWeeks,
-    campaignEvents: plan.events,
-  });
-
-  // ── Rollout identity stats (from narrative engine) ──
-  const totalPlanned = narrative.stats.plannedUploads;
-  const landed = matchResult
-    ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'completed' || a.status === 'live').length
-    : 0;
-  const openOpportunities = matchResult
-    ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'missing' || a.status === 'late' || a.status === 'recommended').length
-    : 0;
-
-  // ── Classify uploads ──
-  const allByRecency = (recentUploads ?? []).sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
-  const shorts = allByRecency.filter((u) => u.durationSec <= 62);
-  const longform = allByRecency.filter((u) => u.durationSec > 62);
-  // Hero upload: active timeline moment's primary upload > narrative centrepiece > most recent longform > any
-  const heroUpload = activeMoment?.primaryUpload
-    ?? narrative.activeMoment?.centrepiece.upload
-    ?? longform[0] ?? allByRecency[0] ?? null;
-  const totalCampaignViews = allByRecency.reduce((s, u) => s + u.viewCount, 0);
-
-  // ── 30-day era data ──
-  const uploads30d = allByRecency.filter((u) => daysAgoNum(u.publishedAt) <= 30);
-  const shorts30d = uploads30d.filter((u) => u.durationSec <= 62);
-  const long30d = uploads30d.filter((u) => u.durationSec > 62);
   const eraSignal = generateEraSignal(uploads30d, shorts30d, long30d, liveChannel);
 
   return (
@@ -585,7 +557,7 @@ export default function CampaignDestination({
           maxWidth: 1200, margin: '0 auto',
           padding: '24px 40px 0',
         }}>
-          <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} releaseClusters={releaseClusters} campaignStartDate={campaignStartDate} />
+          <TimelineDetail plan={plan} matchResult={matchResult} currentPhase={currentPhase} releaseClusters={releaseClusters} releaseMoments={pipeline.releaseMoments} />
         </section>
 
 
@@ -1702,21 +1674,18 @@ function PhaseStrip({ phases, totalWeeks, currentPhase }: {
 // TIMELINE DETAIL — Condensed, scannable
 // ══════════════════════════════════════════════════════════════════════════════
 
-function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters, campaignStartDate }: {
+function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters, releaseMoments }: {
   plan: GeneratedPlan;
   matchResult?: MatchResult;
   currentPhase: PhaseName | null;
   releaseClusters: ReleaseCluster[];
-  campaignStartDate?: string;
+  releaseMoments: ReleaseMoment[];
 }) {
   const weeks = matchResult?.weeks ?? plan.weeks;
   const phases = plan.phases.map((p) => ({
     ...p,
     weeks: weeks.filter((w) => w.weekNum >= p.weekStart && w.weekNum <= p.weekEnd),
   }));
-
-  // Build release moments — self-contained narrative units within each phase
-  const releaseMoments = buildReleaseMoments(releaseClusters, plan.phases, campaignStartDate);
 
   // Build lookup sets for de-duplication
   const anchorIds = new Set(releaseClusters.map(c => c.anchor.id));
@@ -2942,133 +2911,14 @@ function generatePulseSignals(
     .slice(0, 5);
 }
 
-function extractMoments(
-  plan: GeneratedPlan,
-  matchResult?: MatchResult,
-): CampaignMoment[] {
-  const now = new Date();
+// ── extractMoments, parseWeekDate, isCurrentWeek, isWeekPast,
+//    resolveWeekDate, detectCurrentPhase — all moved to campaignPipeline.ts ──
+// CampaignDestination is now a pure renderer that consumes pipeline output.
 
-  return plan.weeks
-    .filter((w) => w.momentName)
-    .map((week) => {
-      const weekStart = resolveWeekDate(week);
-      const daysAway = weekStart
-        ? Math.round((now.getTime() - weekStart.getTime()) / 86400000)
-        : 0;
-
-      let timing: CampaignMoment['timing'] = 'upcoming';
-      if (daysAway >= 0 && daysAway <= 7) timing = 'current';
-      else if (daysAway > 7) timing = 'past';
-
-      const matchedWeek = matchResult?.weeks.find((w) => w.weekNum === week.weekNum);
-      const actions: MatchedAction[] = matchedWeek
-        ? matchedWeek.actions
-        : week.actions.map((a) => ({ ...a, status: 'planned' as ExecutionStatus }));
-      const extraUploads = matchedWeek?.extraUploads ?? [];
-
-      let primaryUpload: RecentUpload | null = null;
-      const matchedUploads = actions
-        .filter((a) => a.matchedUpload)
-        .map((a) => a.matchedUpload!);
-      if (matchedUploads.length > 0) {
-        primaryUpload = matchedUploads.sort((a, b) => b.viewCount - a.viewCount)[0];
-      }
-
-      const totalViews = [
-        ...matchedUploads.map((u) => u.viewCount),
-        ...extraUploads.map((u) => u.viewCount),
-      ].reduce((s, v) => s + v, 0);
-
-      const supportDone = actions
-        .filter((a) => a.status === 'completed' || a.status === 'live')
-        .map((a) => cleanTitle(a.title));
-      const supportMissing = actions
-        .filter((a) => a.status === 'missing' || a.status === 'late')
-        .map((a) => cleanTitle(a.title));
-      const supportPlanned = actions
-        .filter((a) => a.status === 'planned')
-        .map((a) => cleanTitle(a.title));
-
-      return {
-        weekNum: week.weekNum,
-        momentName: week.momentName!,
-        dateRange: week.dateRange,
-        phase: week.phase,
-        timing,
-        daysAway,
-        actions,
-        extraUploads,
-        primaryUpload,
-        supportDone,
-        supportMissing,
-        supportPlanned,
-        totalViews,
-      };
-    })
-    .sort((a, b) => a.daysAway - b.daysAway);
-}
-
+/** Simple title cleanup — strips action verbs and trailing format words */
 function cleanTitle(title: string): string {
   return title
     .replace(/^(Upload|Post|Create|Film|Record|Publish|Release)\s+/i, '')
     .replace(/\s*(short|video|post|clip)$/i, '')
     .trim() || title;
-}
-
-// ── Shared date parser — single source of truth for dateRange strings ──
-const MONTH_MAP: Record<string, number> = {
-  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-};
-
-/**
- * Parse a dateRange like "May 19 – 25" into a Date.
- * Year logic: if the date is >180 days in the past, assume next year.
- * This handles campaigns that span year boundaries correctly.
- */
-function parseWeekDate(dateRange: string): Date | null {
-  const match = dateRange.match(/^(\w+)\s+(\d+)/);
-  if (!match) return null;
-  const month = MONTH_MAP[match[1]];
-  if (month == null) return null;
-  const day = parseInt(match[2], 10);
-  const now = new Date();
-  let year = now.getFullYear();
-  const candidate = new Date(year, month, day);
-  if (candidate.getTime() < now.getTime() - 180 * 86400000) year += 1;
-  return new Date(year, month, day);
-}
-
-function isCurrentWeek(week: { dateRange: string }): boolean {
-  const weekDate = parseWeekDate(week.dateRange);
-  if (!weekDate) return false;
-  const diff = (Date.now() - weekDate.getTime()) / 86400000;
-  return diff >= -1 && diff <= 7;
-}
-
-function isWeekPast(week: { dateRange: string }): boolean {
-  const weekDate = parseWeekDate(week.dateRange);
-  if (!weekDate) return false;
-  const diff = (Date.now() - weekDate.getTime()) / 86400000;
-  return diff > 7;
-}
-
-function resolveWeekDate(week: { dateRange: string }): Date | null {
-  return parseWeekDate(week.dateRange);
-}
-
-function detectCurrentPhase(plan: GeneratedPlan): PhaseName | null {
-  for (const week of plan.weeks) {
-    if (isCurrentWeek(week)) return week.phase;
-  }
-  // Fallback: if no week matches "current", check if we're past all weeks
-  // and return the last phase, or before all weeks and return the first
-  if (plan.weeks.length > 0) {
-    const firstDate = parseWeekDate(plan.weeks[0].dateRange);
-    const lastDate = parseWeekDate(plan.weeks[plan.weeks.length - 1].dateRange);
-    const now = Date.now();
-    if (firstDate && now < firstDate.getTime()) return plan.phases[0]?.name ?? null;
-    if (lastDate && now > lastDate.getTime() + 7 * 86400000) return plan.phases[plan.phases.length - 1]?.name ?? null;
-  }
-  return null;
 }
