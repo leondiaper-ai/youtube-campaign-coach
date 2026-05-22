@@ -201,7 +201,9 @@ export default function CampaignDestination({
   );
   const shorts = allByRecency.filter((u) => u.durationSec <= 62);
   const longform = allByRecency.filter((u) => u.durationSec > 62);
-  const heroUpload = longform[0] ?? allByRecency[0] ?? null;
+  // Hero upload: narrative engine's active centrepiece > most recent longform > any upload
+  const heroUpload = narrative.activeMoment?.centrepiece.upload
+    ?? longform[0] ?? allByRecency[0] ?? null;
   const totalCampaignViews = allByRecency.reduce((s, u) => s + u.viewCount, 0);
 
   // ── 30-day era data ──
@@ -479,8 +481,15 @@ export default function CampaignDestination({
         </section>
 
 
-        {/* ── Current Moment ── */}
-        {activeMoment ? (
+        {/* ── Active Release Moment (narrative-driven hero) ── */}
+        {narrative.activeMoment ? (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '24px 40px 0',
+          }}>
+            <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
+          </section>
+        ) : activeMoment ? (
           <section style={{
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
@@ -506,7 +515,7 @@ export default function CampaignDestination({
                 No active moment
               </div>
               <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5 }}>
-                {moments.length > 0
+                {narrative.moments.length > 0
                   ? 'All campaign moments are either completed or upcoming. Check the timeline below for what\'s next.'
                   : 'No campaign moments scheduled yet. The timeline will populate once releases are planned.'}
               </div>
@@ -1063,7 +1072,225 @@ function NotesSection({ slug }: { slug: string }) {
 
 
 // ══════════════════════════════════════════════════════════════════════════════
-// LIVE MOMENT — Current campaign beat with rollout pressure
+// NARRATIVE HERO BLOCK — Driven by weighted release scoring, not timeline density
+// The highest-weighted active release moment becomes the page hero.
+// An Official Video (weight 100) always beats a community post (35) or tour reminder (20).
+// ══════════════════════════════════════════════════════════════════════════════
+
+function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase: PhaseName | null }) {
+  const phaseTone = phase ? PHASE_TONE[phase] : null;
+  const isLive = moment.state === 'live';
+  const isSustaining = moment.state === 'sustaining';
+  const cp = moment.centrepiece;
+  const coverageTone_ = narrativeCoverageTone(moment.supportCoverage);
+
+  const supportFormats = moment.support.map(a => a.format);
+  const momentumCount = moment.momentum.length;
+  const ecosystemCount = moment.ecosystem.length;
+
+  return (
+    <div>
+      {/* Header: state badge + moment label */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        marginBottom: 14,
+      }}>
+        <span style={{
+          fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+          textTransform: 'uppercase', color: GHOST, fontFamily: MONO,
+        }}>
+          {cp.format} · {timeAgo(cp.upload.publishedAt)}
+        </span>
+        {isLive && (
+          <span style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            padding: '3px 10px', borderRadius: 3,
+            background: phaseTone?.accent ?? '#DC2626', color: WHITE,
+            animation: 'cpulse 2s ease-in-out infinite',
+          }}>
+            LIVE
+          </span>
+        )}
+        {isSustaining && (
+          <span style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            padding: '3px 10px', borderRadius: 3,
+            background: '#059669', color: WHITE,
+          }}>
+            SUSTAINING
+          </span>
+        )}
+        <span style={{
+          fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          padding: '2px 8px', borderRadius: 3,
+          background: coverageTone_.bg, color: coverageTone_.color,
+          border: `1px solid ${coverageTone_.border}`,
+        }}>
+          {narrativeCoverageLabel(moment.supportCoverage)}
+        </span>
+      </div>
+
+      <h3 style={{
+        fontSize: 'clamp(22px, 3vw, 36px)',
+        fontWeight: 900, lineHeight: 0.95,
+        letterSpacing: '-0.02em', margin: 0, color: INK,
+      }}>
+        {moment.label}
+      </h3>
+
+      {/* Centrepiece thumbnail + support orbit grid */}
+      <div style={{
+        marginTop: 20,
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr',
+        gap: 8,
+        alignItems: 'start',
+      }}>
+        {/* Primary centrepiece thumbnail */}
+        <a
+          href={ytVideoUrl(cp.upload.id, cp.upload.durationSec)}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'block',
+            position: 'relative',
+            borderRadius: 6, overflow: 'hidden',
+            aspectRatio: '16/9',
+            textDecoration: 'none',
+            color: 'inherit',
+          }}
+        >
+          <img
+            src={ytThumb(cp.upload.id, 'maxresdefault')}
+            alt="" loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0,
+            padding: '40px 20px 14px',
+            background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{
+                fontSize: 'clamp(20px, 2.5vw, 32px)',
+                fontWeight: 900, color: WHITE,
+                fontFamily: MONO, letterSpacing: '-0.02em',
+              }}>
+                {fmtNum(cp.upload.viewCount)}
+              </span>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>views</span>
+            </div>
+          </div>
+        </a>
+
+        {/* Support orbit panel */}
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 6,
+        }}>
+          {/* Direct support (BTS, Lyric Video, Visualizer) */}
+          {moment.support.slice(0, 4).map((s, i) => (
+            <a
+              key={`s-${i}`}
+              href={ytVideoUrl(s.upload.id, s.upload.durationSec)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px',
+                background: '#F0FDF4',
+                borderRadius: 4,
+              }}>
+                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>✓</span>
+                <span style={{
+                  fontSize: 12, color: INK, flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {s.format}
+                </span>
+                <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                  {fmtNum(s.upload.viewCount)}
+                </span>
+              </div>
+            </a>
+          ))}
+
+          {/* Momentum shorts summary */}
+          {momentumCount > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 10px',
+              background: '#F5F3FF',
+              border: '1px solid #EDE9FE',
+              borderRadius: 4,
+            }}>
+              <span style={{ fontSize: 11, color: '#7C3AED', fontWeight: 700 }}>◆</span>
+              <span style={{ fontSize: 12, color: '#5B21B6', flex: 1 }}>
+                {momentumCount} Short{momentumCount !== 1 ? 's' : ''} reinforcing
+              </span>
+              <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                {fmtNum(moment.momentum.reduce((s, a) => s + a.upload.viewCount, 0))}
+              </span>
+            </div>
+          )}
+
+          {/* Ecosystem / world-building */}
+          {ecosystemCount > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 10px',
+              background: BONE,
+              borderRadius: 4,
+            }}>
+              <span style={{ fontSize: 11, color: SMOKE, fontWeight: 700 }}>●</span>
+              <span style={{ fontSize: 12, color: INK, flex: 1 }}>
+                {ecosystemCount} ecosystem upload{ecosystemCount !== 1 ? 's' : ''}
+              </span>
+              <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                {fmtNum(moment.ecosystem.reduce((s, a) => s + a.upload.viewCount, 0))}
+              </span>
+            </div>
+          )}
+
+          {/* Missing support formats */}
+          {moment.supportCoverage < 1 && (
+            <div style={{
+              fontSize: 10, color: GHOST, fontFamily: MONO,
+              padding: '4px 10px',
+              letterSpacing: '0.04em',
+            }}>
+              {['Short', 'BTS', 'Lyric Video', 'Visualizer']
+                .filter(f => !supportFormats.includes(f as any) && !moment.momentum.some(m => m.format === f))
+                .map(f => `○ ${f}`)
+                .join('  ')}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Ecosystem total */}
+      <div style={{
+        marginTop: 12, display: 'flex', gap: 16, alignItems: 'center',
+        fontSize: 10, color: SMOKE, fontFamily: MONO,
+        letterSpacing: '0.06em',
+      }}>
+        <span>{fmtNum(moment.ecosystemViews)} ecosystem views</span>
+        <span>{moment.support.length} support</span>
+        <span>{momentumCount} shorts</span>
+        {ecosystemCount > 0 && <span>{ecosystemCount} world-building</span>}
+      </div>
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// LIVE MOMENT (LEGACY) — Fallback when narrative engine has no active moment
 // ══════════════════════════════════════════════════════════════════════════════
 
 function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: PhaseName }) {

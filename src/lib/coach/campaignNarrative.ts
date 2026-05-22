@@ -386,11 +386,18 @@ function determineMomentState(centrepiece: ClassifiedAsset): NarrativeMoment['st
 /**
  * Compute the narrative score for a moment. This determines visual hierarchy.
  *
- * Factors:
- * - Centrepiece prominence (weight × decay) — primary signal
- * - Support depth — more support formats = richer narrative
- * - View momentum — high-velocity views boost the moment
- * - State bonus — live moments get a boost, historical get dampened
+ * CRITICAL DESIGN PRINCIPLE:
+ * The score must ensure that a high-weight release (Official Video = 100)
+ * ALWAYS dominates over planning density, community posts, or action count.
+ * A flagship release persists as the hero for its entire active window,
+ * even when many smaller uploads or planning items arrive afterwards.
+ *
+ * Factors (in priority order):
+ * 1. Base release weight (Official Video 100 > Community Post 35 > Tour reminder 20)
+ * 2. State multiplier (live moments get massive boost)
+ * 3. Support ecosystem depth
+ * 4. View velocity
+ * 5. Recency decay (gentle — centrepieces persist for weeks)
  */
 function computeNarrativeScore(
   centrepiece: ClassifiedAsset,
@@ -398,37 +405,54 @@ function computeNarrativeScore(
   momentum: ClassifiedAsset[],
   ecosystem: ClassifiedAsset[],
 ): number {
-  // Base: centrepiece prominence (0-1)
-  let score = centrepiece.prominence;
+  // ── Base: raw release weight (0-100), NOT prominence (which decays) ──
+  // This ensures an Official Video (100) always outscores a Community Post (35)
+  // regardless of recency or planning density.
+  const baseWeight = centrepiece.weight;
 
-  // Support depth bonus (up to +0.3)
+  // ── State multiplier — the biggest lever ──
+  // A live Official Video scores 100 × 3.0 = 300 base
+  // A historical Official Video scores 100 × 0.8 = 80 base
+  // A live Community Post would score 35 × 3.0 = 105 base — still below a sustaining OV
+  const state = determineMomentState(centrepiece);
+  let stateMultiplier: number;
+  if (state === 'live') stateMultiplier = 3.0;
+  else if (state === 'sustaining') stateMultiplier = 2.0;
+  else if (state === 'historical') stateMultiplier = 0.8;
+  else stateMultiplier = 0.3; // upcoming
+
+  let score = baseWeight * stateMultiplier;
+
+  // ── Support depth bonus (up to +40) ──
+  // Rich ecosystems (BTS + Lyric Video + Shorts) reinforce the centrepiece
   const uniqueFormats = new Set(support.map(a => a.format));
   const supportCoverage = uniqueFormats.size / EXPECTED_SUPPORT_FORMATS.length;
-  score += supportCoverage * 0.3;
+  score += supportCoverage * 40;
 
-  // Momentum bonus (up to +0.15)
+  // ── Momentum bonus (up to +20) ──
   const momentumCount = momentum.length;
-  score += Math.min(0.15, momentumCount * 0.03);
+  score += Math.min(20, momentumCount * 4);
 
-  // Ecosystem bonus (up to +0.05)
-  if (ecosystem.length > 0) score += 0.05;
+  // ── Ecosystem bonus (up to +10) ──
+  if (ecosystem.length > 0) score += Math.min(10, ecosystem.length * 3);
 
-  // State multiplier
-  const state = determineMomentState(centrepiece);
-  if (state === 'live') score *= 1.5;
-  else if (state === 'sustaining') score *= 1.0;
-  else if (state === 'historical') score *= 0.6;
-  else score *= 0.4; // upcoming
-
-  // View velocity bonus
+  // ── View velocity bonus (up to +30) ──
   const totalViews = centrepiece.upload.viewCount +
     support.reduce((s, a) => s + a.upload.viewCount, 0) +
     momentum.reduce((s, a) => s + a.upload.viewCount, 0);
   const avgAge = centrepiece.ageDays || 1;
   const viewVelocity = totalViews / avgAge;
-  if (viewVelocity > 50000) score += 0.2;
-  else if (viewVelocity > 10000) score += 0.1;
-  else if (viewVelocity > 1000) score += 0.05;
+  if (viewVelocity > 50000) score += 30;
+  else if (viewVelocity > 10000) score += 15;
+  else if (viewVelocity > 1000) score += 5;
+
+  // ── Gentle recency decay for centrepiece persistence ──
+  // An Official Video should remain dominant for its full active window.
+  // Only apply mild decay after the "sustaining" period ends.
+  const decayFactor = calculateDecayFactor(centrepiece.ageDays, centrepiece.decay);
+  // Blend: 70% raw weight-based score + 30% decay-adjusted
+  // This means a 2-week-old Official Video retains ~85-90% of its score
+  score = score * (0.7 + 0.3 * decayFactor);
 
   return score;
 }
