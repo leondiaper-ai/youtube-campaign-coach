@@ -16,6 +16,16 @@ import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
 import { buildReleaseClusters, buildReleaseMoments, type ReleaseCluster, type ReleaseMoment, type SupportCategory, type PremiereStatus } from '@/lib/coach/releaseClusters';
+import {
+  buildCampaignNarrative,
+  coverageLabel as narrativeCoverageLabel,
+  coverageTone as narrativeCoverageTone,
+  momentStateLabel,
+  arcLabel,
+  type CampaignNarrative,
+  type NarrativeMoment,
+  type ClassifiedAsset,
+} from '@/lib/coach/campaignNarrative';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DESIGN SYSTEM — YouTube Rollout Map v6
@@ -156,8 +166,18 @@ export default function CampaignDestination({
   const phaseTone = currentPhase ? PHASE_TONE[currentPhase] : null;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
 
-  // ── Campaign Pillars — official releases + support architecture ──
+  // ── Campaign Narrative — universal campaign grammar ──
   const uploads = recentUploads ?? [];
+  const narrative = buildCampaignNarrative(uploads, {
+    campaignStartDate,
+    campaignWeeks: plan.totalWeeks,
+    minCentrepieceViews: 5000,
+    maxMoments: 8,
+    currentPhase,
+    planEvents: plan.events,
+  });
+
+  // ── Campaign Pillars (legacy — still used by TimelineDetail) ──
   const releaseClusters = buildReleaseClusters(uploads, {
     minAnchorViews: 5000,
     maxPillars: 6,
@@ -166,10 +186,8 @@ export default function CampaignDestination({
     campaignEvents: plan.events,
   });
 
-  // ── Rollout identity stats ──
-  // Only count events that produce YouTube uploads (exclude tours, festivals, live shows)
-  const NON_UPLOAD_KINDS = new Set(['tourDate', 'festival', 'liveShow']);
-  const totalPlanned = plan.events.filter(e => !NON_UPLOAD_KINDS.has(e.kind)).length;
+  // ── Rollout identity stats (from narrative engine) ──
+  const totalPlanned = narrative.stats.plannedUploads;
   const landed = matchResult
     ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'completed' || a.status === 'live').length
     : 0;
@@ -370,6 +388,11 @@ export default function CampaignDestination({
               </span>
             )}
             <span>{plan.totalWeeks}-week rollout</span>
+            {narrative.arc !== 'dormant' && (
+              <span style={{ fontStyle: 'italic', color: GHOST }}>
+                {arcLabel(narrative.arc)}
+              </span>
+            )}
           </div>
 
           <div style={{
@@ -380,6 +403,9 @@ export default function CampaignDestination({
             {landed > 0 && <span style={{ color: '#059669' }}>{landed} landed</span>}
             {openOpportunities > 0 && <span style={{ color: '#D97706' }}>{openOpportunities} open {openOpportunities === 1 ? 'opportunity' : 'opportunities'}</span>}
             {matchResult && <span>{Math.round(matchResult.stats.completionRate)}% executed</span>}
+            {narrative.stats.totalMoments > 0 && (
+              <span>{narrative.stats.totalMoments} release {narrative.stats.totalMoments === 1 ? 'moment' : 'moments'}</span>
+            )}
           </div>
 
           {/* Inline pulse — top signal only */}
@@ -485,6 +511,35 @@ export default function CampaignDestination({
                   : 'No campaign moments scheduled yet. The timeline will populate once releases are planned.'}
               </div>
             </div>
+          </section>
+        )}
+
+        {/* ── Narrative Moments — campaign story hierarchy ── */}
+        {narrative.moments.length > 0 && (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '24px 40px 0',
+          }}>
+            <div style={{
+              fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+              textTransform: 'uppercase', color: GHOST,
+              fontFamily: MONO, marginBottom: 10,
+            }}>
+              Campaign Story
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {narrative.moments.map((nm) => (
+                <NarrativeMomentCard key={nm.id} moment={nm} />
+              ))}
+            </div>
+            {narrative.unattached.length > 0 && (
+              <div style={{
+                marginTop: 10,
+                fontSize: 10, color: GHOST, fontFamily: MONO,
+              }}>
+                + {narrative.unattached.length} uploads outside release moments
+              </div>
+            )}
           </section>
         )}
 
@@ -1295,6 +1350,208 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
               </div>
             </a>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// NARRATIVE MOMENT CARD — Campaign story hierarchy
+// ══════════════════════════════════════════════════════════════════════════════
+
+function NarrativeMomentCard({ moment: nm }: { moment: NarrativeMoment }) {
+  const [expanded, setExpanded] = useState(nm.isActive || nm.state === 'live');
+  const cp = nm.centrepiece;
+  const tone = narrativeCoverageTone(nm.supportCoverage);
+  const stateLabel = momentStateLabel(nm.state);
+
+  const stateColor = nm.state === 'live' ? '#DC2626'
+    : nm.state === 'sustaining' ? '#059669'
+    : nm.state === 'historical' ? GHOST
+    : '#D97706';
+
+  return (
+    <div style={{
+      background: WHITE,
+      border: `1px solid ${nm.isActive ? stateColor : BONE}`,
+      borderLeft: `3px solid ${stateColor}`,
+      borderRadius: 6,
+      overflow: 'hidden',
+      opacity: nm.state === 'historical' ? 0.7 : 1,
+    }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+          padding: '10px 14px',
+          background: 'none', border: 'none',
+          cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <a
+          href={ytVideoUrl(cp.upload.id, cp.upload.durationSec)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{ flexShrink: 0 }}
+        >
+          <img
+            src={ytThumb(cp.upload.id, 'mqdefault')}
+            alt="" loading="lazy"
+            style={{
+              width: 88, height: 50, objectFit: 'cover',
+              borderRadius: 3, display: 'block',
+            }}
+          />
+        </a>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+            <span style={{
+              fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: WHITE,
+              padding: '1px 6px', borderRadius: 2,
+              background: stateColor, fontFamily: MONO,
+            }}>
+              {stateLabel}
+            </span>
+            <span style={{
+              fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
+              textTransform: 'uppercase', color: tone.color,
+              padding: '1px 6px', borderRadius: 2,
+              background: tone.bg, fontFamily: MONO,
+            }}>
+              {narrativeCoverageLabel(nm.supportCoverage)}
+            </span>
+            <span style={{
+              fontSize: 7, fontWeight: 700, color: GHOST,
+              fontFamily: MONO, letterSpacing: '0.06em',
+            }}>
+              {cp.format}
+            </span>
+          </div>
+          <div style={{
+            fontSize: 13, fontWeight: 700, color: INK, lineHeight: 1.3,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {nm.label}
+          </div>
+          <div style={{
+            display: 'flex', gap: 10, marginTop: 3,
+            fontSize: 9, color: SMOKE, fontFamily: MONO,
+          }}>
+            <span style={{ fontWeight: 700 }}>{fmtNum(cp.upload.viewCount)} views</span>
+            <span>{timeAgo(cp.upload.publishedAt)}</span>
+            {nm.support.length > 0 && (
+              <span>{nm.support.length} support</span>
+            )}
+            {nm.momentum.length > 0 && (
+              <span>{nm.momentum.length} shorts</span>
+            )}
+            <span style={{ color: '#059669' }}>{fmtNum(nm.ecosystemViews)} ecosystem</span>
+          </div>
+        </div>
+        <span style={{
+          fontSize: 9, color: GHOST, fontFamily: MONO,
+          transform: expanded ? 'rotate(90deg)' : 'none',
+          transition: 'transform 0.15s',
+          flexShrink: 0,
+        }}>▶</span>
+      </button>
+
+      {expanded && (nm.support.length > 0 || nm.momentum.length > 0 || nm.ecosystem.length > 0) && (
+        <div style={{
+          padding: '0 14px 10px',
+          borderTop: `1px solid ${BONE}`,
+        }}>
+          {/* Support orbit */}
+          {nm.support.length > 0 && (
+            <div style={{ paddingTop: 6 }}>
+              <div style={{
+                fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+                textTransform: 'uppercase', color: GHOST,
+                fontFamily: MONO, marginBottom: 3,
+              }}>
+                Support
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {nm.support.map(a => (
+                  <a
+                    key={a.upload.id}
+                    href={ytVideoUrl(a.upload.id, a.upload.durationSec)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '2px 6px',
+                      background: 'rgba(245,242,237,0.5)',
+                      borderRadius: 3,
+                      textDecoration: 'none', color: 'inherit',
+                    }}
+                  >
+                    <img
+                      src={ytThumb(a.upload.id, 'mqdefault')}
+                      alt="" loading="lazy"
+                      style={{ width: 36, height: 20, objectFit: 'cover', borderRadius: 2 }}
+                    />
+                    <span style={{
+                      fontSize: 7, fontWeight: 700, color: '#059669',
+                      textTransform: 'uppercase', fontFamily: MONO, flexShrink: 0,
+                    }}>
+                      {a.format}
+                    </span>
+                    <span style={{
+                      fontSize: 10, color: INK, flex: 1, minWidth: 0,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {a.upload.title}
+                    </span>
+                    <span style={{ fontSize: 8, color: SMOKE, fontFamily: MONO, flexShrink: 0 }}>
+                      {fmtNum(a.upload.viewCount)}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Momentum (shorts) */}
+          {nm.momentum.length > 0 && (
+            <div style={{ marginTop: nm.support.length > 0 ? 4 : 6 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 9, color: SMOKE, fontFamily: MONO,
+              }}>
+                <span style={{ fontWeight: 700, color: INK }}>
+                  ⚡ {nm.momentum.length} Shorts
+                </span>
+                <span>
+                  {fmtNum(nm.momentum.reduce((s, a) => s + a.upload.viewCount, 0))} combined views
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Ecosystem */}
+          {nm.ecosystem.length > 0 && (
+            <div style={{ marginTop: 4 }}>
+              <div style={{
+                fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+                textTransform: 'uppercase', color: GHOST,
+                fontFamily: MONO, marginBottom: 2,
+              }}>
+                World Building
+              </div>
+              {nm.ecosystem.map(a => (
+                <div key={a.upload.id} style={{
+                  fontSize: 9, color: SMOKE, padding: '1px 0',
+                }}>
+                  {a.format} · {a.upload.title.slice(0, 50)}{a.upload.title.length > 50 ? '…' : ''} · {fmtNum(a.upload.viewCount)}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
