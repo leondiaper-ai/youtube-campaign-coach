@@ -389,11 +389,6 @@ export default function CampaignDestination({
               </span>
             )}
             <span>{plan.totalWeeks}-week rollout</span>
-            {narrative.arc !== 'dormant' && (
-              <span style={{ fontStyle: 'italic', color: GHOST }}>
-                {arcLabel(narrative.arc)}
-              </span>
-            )}
           </div>
 
           <div style={{
@@ -427,38 +422,7 @@ export default function CampaignDestination({
             </div>
           )}
 
-          {/* Data coverage badge */}
-          {dataCoverage && (
-            <div style={{
-              marginTop: 10,
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              <span style={{
-                width: 4, height: 4, borderRadius: '50%', flexShrink: 0,
-                background: dataCoverage.fullCoverage ? '#059669' : '#D97706',
-                opacity: 0.6,
-              }} />
-              <span style={{
-                fontSize: 10, color: GHOST, fontFamily: MONO,
-                letterSpacing: '0.04em',
-              }}>
-                {dataCoverage.coverageNote}
-              </span>
-              {dataCoverage.sources.length > 0 && (
-                <span style={{
-                  fontSize: 8, color: GHOST, fontFamily: MONO,
-                  padding: '1px 6px', borderRadius: 2,
-                  border: `1px solid ${BONE}`,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                }}>
-                  {dataCoverage.sources.includes('youtube_api') ? 'API' :
-                   dataCoverage.sources.includes('kv_cache') ? 'Cache' :
-                   dataCoverage.sources.includes('manual') ? 'Manual' : 'Saved'}
-                </span>
-              )}
-            </div>
-          )}
+          {/* Data coverage badge — removed per user request */}
         </section>
 
 
