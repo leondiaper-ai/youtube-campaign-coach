@@ -199,8 +199,9 @@ export default function CampaignDestination({
   );
   const shorts = allByRecency.filter((u) => u.durationSec <= 62);
   const longform = allByRecency.filter((u) => u.durationSec > 62);
-  // Hero upload: narrative engine's active centrepiece > most recent longform > any upload
-  const heroUpload = narrative.activeMoment?.centrepiece.upload
+  // Hero upload: active timeline moment's primary upload > narrative centrepiece > most recent longform > any
+  const heroUpload = activeMoment?.primaryUpload
+    ?? narrative.activeMoment?.centrepiece.upload
     ?? longform[0] ?? allByRecency[0] ?? null;
   const totalCampaignViews = allByRecency.reduce((s, u) => s + u.viewCount, 0);
 
@@ -479,20 +480,26 @@ export default function CampaignDestination({
         </section>
 
 
-        {/* ── Active Release Moment (narrative-driven hero) ── */}
-        {narrative.activeMoment ? (
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '24px 40px 0',
-          }}>
-            <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
-          </section>
-        ) : activeMoment ? (
+        {/* ══════════════════════════════════════════════════════════════
+            SECTION 1: ACTIVE CAMPAIGN MOMENT
+            "What is happening now?" — driven by timeline/plan position.
+            This is ALWAYS the top section. It answers where we are
+            in the campaign, not which video is performing best.
+        ══════════════════════════════════════════════════════════════ */}
+        {activeMoment ? (
           <section style={{
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
           }}>
             <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
+          </section>
+        ) : narrative.activeMoment ? (
+          /* No plan-driven active moment — use narrative engine as primary */
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '24px 40px 0',
+          }}>
+            <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
           </section>
         ) : (
           <section style={{
@@ -520,6 +527,36 @@ export default function CampaignDestination({
             </div>
           </section>
         )}
+
+        {/* ══════════════════════════════════════════════════════════════
+            SECTION 2: MOMENTUM ANCHOR (conditional)
+            "What release is still driving value?" — driven by narrative
+            engine weighted scoring. Only shows if it's a DIFFERENT
+            centrepiece than the active moment's primary upload.
+            Mystery Box stays visible here but doesn't override the
+            active campaign moment above.
+        ══════════════════════════════════════════════════════════════ */}
+        {narrative.activeMoment && activeMoment && (() => {
+          // Only show momentum anchor if it's a different video than the active moment
+          const activeUploadId = activeMoment.primaryUpload?.id;
+          const narrativeCpId = narrative.activeMoment!.centrepiece.upload.id;
+          if (activeUploadId === narrativeCpId) return null;
+          return (
+            <section style={{
+              maxWidth: 1200, margin: '0 auto',
+              padding: '20px 40px 0',
+            }}>
+              <div style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.3em',
+                textTransform: 'uppercase', color: GHOST,
+                fontFamily: MONO, marginBottom: 10,
+              }}>
+                Momentum Anchor
+              </div>
+              <NarrativeHeroBlock moment={narrative.activeMoment!} phase={currentPhase} />
+            </section>
+          );
+        })()}
 
         {/* ── Timeline ── */}
         <section style={{
