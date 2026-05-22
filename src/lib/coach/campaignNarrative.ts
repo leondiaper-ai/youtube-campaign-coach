@@ -84,6 +84,7 @@ const FORMAT_ROLE: Record<UploadFormatLabel, NarrativeRole> = {
   'BTS':            'support',
   'Live Session':   'support',
   'Freestyle':      'support',
+  'Trailer':        'support',
   'Short':          'momentum',
   'Interview':      'ecosystem',
   'Longform':       'world-building',
@@ -104,6 +105,7 @@ const FORMAT_WEIGHT: Record<UploadFormatLabel, number> = {
   'Lyric Video':    50,   // Direct support for a release
   'Visualizer':     50,   // Direct support for a release
   'Freestyle':      40,   // Original performance content
+  'Trailer':        70,   // Album/release trailer — strong pre-release longform
   'Interview':      30,   // Ecosystem / press
   'Short':          25,   // Momentum content
   'Collab':         90,   // Cross-channel collab — same weight as Premiere (cross-audience moment)
@@ -122,6 +124,7 @@ const FORMAT_DECAY: Record<UploadFormatLabel, DecayProfile> = {
   'BTS':            { halfLifeDays: 14, floor: 0.1, maxActiveDays: 45 },
   'Live Session':   { halfLifeDays: 14, floor: 0.1, maxActiveDays: 45 },
   'Freestyle':      { halfLifeDays: 14, floor: 0.1, maxActiveDays: 45 },
+  'Trailer':        { halfLifeDays: 21, floor: 0.15, maxActiveDays: 60 },
   'Interview':      { halfLifeDays: 10, floor: 0.05, maxActiveDays: 30 },
   'Longform':       { halfLifeDays: 14, floor: 0.1, maxActiveDays: 45 },
   'Short':          { halfLifeDays: 5,  floor: 0.02, maxActiveDays: 14 },

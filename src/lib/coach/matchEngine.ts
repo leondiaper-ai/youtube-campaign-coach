@@ -254,6 +254,7 @@ export type UploadFormatLabel =
   | 'Documentary'
   | 'Freestyle'
   | 'Interview'
+  | 'Trailer'
   | 'Longform'
   | 'Collab'
   | 'Upload';
@@ -274,6 +275,7 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
   if (/\b(live\s*session|acoustic|stripped\s*back|live\s*at|live\s*from)\b/.test(t)) return 'Live Session';
   if (/\bpremiere\b/.test(t) || upload.live === 'upcoming') return 'Premiere';
   if (/\b(documentary|mini[\s-]?doc|film)\b/.test(t)) return 'Documentary';
+  if (/\b(trailer|teaser\s*video)\b/.test(t)) return 'Trailer';
   if (/\bfreestyle\b/.test(t)) return 'Freestyle';
   if (/\b(interview|podcast|conversation)\b/.test(t)) return 'Interview';
   if (upload.durationSec > 600) return 'Longform';

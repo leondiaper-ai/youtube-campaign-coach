@@ -211,6 +211,18 @@ const CHECKLIST_DEFS: { key: string; label: string; timing: TimingGuidance; matc
     match: (f) => f === 'Visualizer',
   },
   {
+    key: 'trailer',
+    label: 'Trailer',
+    timing: { label: 'Pre-release or day of', windowStart: -7, windowEnd: 3, priority: 'recommended' },
+    match: (f) => f === 'Trailer',
+  },
+  {
+    key: 'live_session',
+    label: 'Live Session',
+    timing: { label: '14–21 days after official video', windowStart: 14, windowEnd: 21, priority: 'optional' },
+    match: (f) => f === 'Live Session',
+  },
+  {
     key: 'community',
     label: 'Community Post',
     timing: { label: 'Day of release + follow-up', windowStart: 0, windowEnd: 7, priority: 'recommended' },
