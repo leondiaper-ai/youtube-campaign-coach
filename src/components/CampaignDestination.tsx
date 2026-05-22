@@ -167,7 +167,9 @@ export default function CampaignDestination({
   });
 
   // ── Rollout identity stats ──
-  const totalPlanned = plan.events.length;
+  // Only count events that produce YouTube uploads (exclude tours, festivals, live shows)
+  const NON_UPLOAD_KINDS = new Set(['tourDate', 'festival', 'liveShow']);
+  const totalPlanned = plan.events.filter(e => !NON_UPLOAD_KINDS.has(e.kind)).length;
   const landed = matchResult
     ? matchResult.weeks.flatMap((w) => w.actions).filter((a) => a.status === 'completed' || a.status === 'live').length
     : 0;
@@ -452,12 +454,37 @@ export default function CampaignDestination({
 
 
         {/* ── Current Moment ── */}
-        {activeMoment && (
+        {activeMoment ? (
           <section style={{
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
           }}>
             <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
+          </section>
+        ) : (
+          <section style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '24px 40px 0',
+          }}>
+            <div style={{
+              padding: '20px 24px',
+              background: WHITE,
+              border: `1px solid ${BONE}`,
+              borderRadius: 6,
+            }}>
+              <div style={{
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', color: GHOST, fontFamily: MONO,
+                marginBottom: 6,
+              }}>
+                No active moment
+              </div>
+              <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5 }}>
+                {moments.length > 0
+                  ? 'All campaign moments are either completed or upcoming. Check the timeline below for what\'s next.'
+                  : 'No campaign moments scheduled yet. The timeline will populate once releases are planned.'}
+              </div>
+            </div>
           </section>
         )}
 
@@ -1040,12 +1067,12 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
       <div style={{
         marginTop: 20,
         display: 'grid',
-        gridTemplateColumns: moment.primaryUpload ? '2fr 1fr' : '1fr',
+        gridTemplateColumns: '2fr 1fr',
         gap: 8,
         alignItems: 'start',
       }}>
-        {/* Primary thumbnail */}
-        {moment.primaryUpload && (
+        {/* Primary thumbnail or placeholder */}
+        {moment.primaryUpload ? (
           <a
             href={ytVideoUrl(moment.primaryUpload.id, moment.primaryUpload.durationSec)}
             target="_blank"
@@ -1082,6 +1109,34 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
               </div>
             </div>
           </a>
+        ) : (
+          /* Centrepiece placeholder — no primary upload yet */
+          <div style={{
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            borderRadius: 6, aspectRatio: '16/9',
+            background: BONE,
+            border: `2px dashed ${GHOST}`,
+          }}>
+            <div style={{
+              fontSize: 24, color: GHOST, marginBottom: 8,
+            }}>
+              ▶
+            </div>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: SMOKE,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              fontFamily: MONO,
+            }}>
+              Asset needed
+            </div>
+            <div style={{
+              fontSize: 10, color: GHOST, marginTop: 4,
+              textAlign: 'center', maxWidth: 200,
+            }}>
+              The centrepiece upload for this moment hasn't landed yet
+            </div>
+          </div>
         )}
 
         {/* Action cards */}
@@ -1316,6 +1371,36 @@ function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters, camp
   anchorIds.forEach(id => clusterUploadIds.add(id));
   supportUploadIds.forEach(id => clusterUploadIds.add(id));
 
+  // Check if the entire timeline is empty
+  const hasAnyContent = phases.some(p => {
+    const pw = p.weeks.filter((w) => w.actions.length > 0 || w.momentName);
+    const pm = releaseMoments.filter(m => m.phase === p.name);
+    return pw.length > 0 || pm.length > 0;
+  });
+
+  if (!hasAnyContent) {
+    return (
+      <div style={{
+        padding: '24px',
+        background: WHITE,
+        border: `1px solid ${BONE}`,
+        borderRadius: 6,
+        textAlign: 'center',
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: '0.12em',
+          textTransform: 'uppercase', color: GHOST, fontFamily: MONO,
+          marginBottom: 8,
+        }}>
+          Timeline
+        </div>
+        <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5 }}>
+          No release moments detected yet. Once uploads land on the channel, the rollout map will populate automatically.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {phases.map((phase) => {
@@ -1379,14 +1464,11 @@ function TimelineDetail({ plan, matchResult, currentPhase, releaseClusters, camp
             {/* ── Non-release weeks — secondary timeline ── */}
             {phaseWeeks.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {phaseWeeks.map((week) => (
-                  <TimelineWeekRow
-                    key={week.weekNum}
-                    week={week}
-                    matchResult={matchResult}
-                    clusterUploadIds={clusterUploadIds}
-                  />
-                ))}
+                <GroupedWeekRows
+                  weeks={phaseWeeks}
+                  matchResult={matchResult}
+                  clusterUploadIds={clusterUploadIds}
+                />
               </div>
             )}
           </div>
@@ -1792,6 +1874,175 @@ function ReleaseChecklist({ cluster }: { cluster: ReleaseCluster }) {
           marginTop: 3, fontStyle: 'italic',
         }}>
           Community Post — {communityItem.timing.label} (cannot detect automatically)
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GROUPED WEEK ROWS — Collapse consecutive planned-only weeks
+// ══════════════════════════════════════════════════════════════════════════════
+
+function GroupedWeekRows({ weeks, matchResult, clusterUploadIds }: {
+  weeks: (PlanWeek | MatchedWeek)[];
+  matchResult?: MatchResult;
+  clusterUploadIds: Set<string>;
+}) {
+  // Classify weeks: "active" = has evidence (completed/live/late actions, extra uploads, is current)
+  // "planned" = only planned/missing actions with no evidence
+  const classified = weeks.map(week => {
+    const matchedWeek = matchResult ? (week as MatchedWeek) : null;
+    const actions = matchedWeek?.actions ?? week.actions;
+    const extraUploads = matchedWeek?.extraUploads ?? [];
+    const isCurrent = isCurrentWeek(week);
+    const isMoment = !!week.momentName;
+
+    const hasEvidence = actions.some(a =>
+      'status' in a && ((a as MatchedAction).status === 'completed' || (a as MatchedAction).status === 'live')
+    );
+    const hasOpenWindows = actions.some(a =>
+      'status' in a && ((a as MatchedAction).status === 'late' || (a as MatchedAction).status === 'recommended')
+    );
+    const hasExtras = extraUploads.filter(u => !clusterUploadIds.has(u.id)).length > 0;
+
+    const isActive = isCurrent || isMoment || hasEvidence || hasOpenWindows || hasExtras;
+    return { week, isActive };
+  });
+
+  // Group consecutive planned-only weeks together
+  const groups: { type: 'active'; week: PlanWeek | MatchedWeek }[] | { type: 'collapsed'; weeks: (PlanWeek | MatchedWeek)[] }[] = [];
+  type GroupItem = { type: 'active'; week: PlanWeek | MatchedWeek } | { type: 'collapsed'; weeks: (PlanWeek | MatchedWeek)[] };
+  const result: GroupItem[] = [];
+
+  let pendingCollapsed: (PlanWeek | MatchedWeek)[] = [];
+
+  for (const { week, isActive } of classified) {
+    if (isActive) {
+      // Flush any pending collapsed weeks
+      if (pendingCollapsed.length > 0) {
+        result.push({ type: 'collapsed', weeks: [...pendingCollapsed] });
+        pendingCollapsed = [];
+      }
+      result.push({ type: 'active', week });
+    } else {
+      pendingCollapsed.push(week);
+    }
+  }
+  // Flush remaining
+  if (pendingCollapsed.length > 0) {
+    result.push({ type: 'collapsed', weeks: pendingCollapsed });
+  }
+
+  return (
+    <>
+      {result.map((group, gi) => {
+        if (group.type === 'active') {
+          return (
+            <TimelineWeekRow
+              key={group.week.weekNum}
+              week={group.week}
+              matchResult={matchResult}
+              clusterUploadIds={clusterUploadIds}
+            />
+          );
+        }
+        // Collapsed group — show as single summary row
+        return (
+          <CollapsedWeekGroup
+            key={`cg-${gi}`}
+            weeks={group.weeks}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+function CollapsedWeekGroup({ weeks }: { weeks: (PlanWeek | MatchedWeek)[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const totalActions = weeks.reduce((s, w) => s + w.actions.length, 0);
+  const firstWeek = weeks[0];
+  const lastWeek = weeks[weeks.length - 1];
+  const weekRange = weeks.length === 1
+    ? `W${firstWeek.weekNum}`
+    : `W${firstWeek.weekNum}–${lastWeek.weekNum}`;
+
+  // Summarize action types
+  const formatCounts: Record<string, number> = {};
+  for (const w of weeks) {
+    for (const a of w.actions) {
+      const key = a.format === 'short' ? 'Shorts' : a.format === 'video' || a.format === 'premiere' ? 'Videos' : a.format === 'post' ? 'Posts' : 'Other';
+      formatCounts[key] = (formatCounts[key] ?? 0) + 1;
+    }
+  }
+  const summary = Object.entries(formatCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${v} ${k}`)
+    .join(', ');
+
+  return (
+    <div style={{
+      borderLeft: `2px solid ${BONE}`,
+    }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+          padding: '4px 10px',
+          background: 'none', border: 'none',
+          cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <span style={{
+          fontSize: 9, fontWeight: 700, color: GHOST, minWidth: 50, fontFamily: MONO,
+        }}>
+          {weekRange}
+        </span>
+        <span style={{
+          fontSize: 10, color: GHOST, minWidth: 72, fontFamily: MONO,
+        }}>
+          {firstWeek.dateRange.split('–')[0].trim()} – {lastWeek.dateRange.split('–').pop()?.trim() ?? ''}
+        </span>
+        <span style={{
+          fontSize: 11, color: SMOKE, flex: 1,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {totalActions} planned · {summary}
+        </span>
+        <span style={{
+          fontSize: 7, color: GHOST, fontFamily: MONO,
+          transform: expanded ? 'rotate(90deg)' : 'none',
+          transition: 'transform 0.15s',
+        }}>▶</span>
+      </button>
+
+      {expanded && (
+        <div style={{ padding: '0 10px 6px 60px' }}>
+          {weeks.map(w => (
+            <div key={w.weekNum} style={{ marginBottom: 4 }}>
+              <div style={{
+                fontSize: 9, fontWeight: 700, color: GHOST, fontFamily: MONO,
+                marginBottom: 2,
+              }}>
+                W{w.weekNum} · {w.dateRange}
+                {w.momentName && <span style={{ color: INK, fontWeight: 700, marginLeft: 6 }}>{w.momentName}</span>}
+              </div>
+              {w.actions.map((a, i) => (
+                <div key={i} style={{
+                  fontSize: 10, color: SMOKE, padding: '1px 0',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  <span style={{ fontSize: 8, opacity: 0.5, fontFamily: MONO }}>
+                    {a.format === 'short' ? '⚡' : a.format === 'video' || a.format === 'premiere' ? '▶' : '·'}
+                  </span>
+                  {a.title}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -2377,46 +2628,21 @@ function cleanTitle(title: string): string {
     .trim() || title;
 }
 
-function isCurrentWeek(week: { dateRange: string }): boolean {
-  const now = new Date();
-  const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
-  if (!match) return false;
-  const monthMap: Record<string, number> = {
-    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-  };
-  const month = monthMap[match[1]];
-  if (month == null) return false;
-  const day = parseInt(match[2], 10);
-  const weekDate = new Date(now.getFullYear(), month, day);
-  const diff = (now.getTime() - weekDate.getTime()) / 86400000;
-  return diff >= -1 && diff <= 7;
-}
+// ── Shared date parser — single source of truth for dateRange strings ──
+const MONTH_MAP: Record<string, number> = {
+  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+};
 
-function isWeekPast(week: { dateRange: string }): boolean {
-  const now = new Date();
-  const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
-  if (!match) return false;
-  const monthMap: Record<string, number> = {
-    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-  };
-  const month = monthMap[match[1]];
-  if (month == null) return false;
-  const day = parseInt(match[2], 10);
-  const weekDate = new Date(now.getFullYear(), month, day);
-  const diff = (now.getTime() - weekDate.getTime()) / 86400000;
-  return diff > 7; // Past if more than 7 days ago
-}
-
-function resolveWeekDate(week: { dateRange: string }): Date | null {
-  const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
+/**
+ * Parse a dateRange like "May 19 – 25" into a Date.
+ * Year logic: if the date is >180 days in the past, assume next year.
+ * This handles campaigns that span year boundaries correctly.
+ */
+function parseWeekDate(dateRange: string): Date | null {
+  const match = dateRange.match(/^(\w+)\s+(\d+)/);
   if (!match) return null;
-  const monthMap: Record<string, number> = {
-    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-  };
-  const month = monthMap[match[1]];
+  const month = MONTH_MAP[match[1]];
   if (month == null) return null;
   const day = parseInt(match[2], 10);
   const now = new Date();
@@ -2426,21 +2652,36 @@ function resolveWeekDate(week: { dateRange: string }): Date | null {
   return new Date(year, month, day);
 }
 
+function isCurrentWeek(week: { dateRange: string }): boolean {
+  const weekDate = parseWeekDate(week.dateRange);
+  if (!weekDate) return false;
+  const diff = (Date.now() - weekDate.getTime()) / 86400000;
+  return diff >= -1 && diff <= 7;
+}
+
+function isWeekPast(week: { dateRange: string }): boolean {
+  const weekDate = parseWeekDate(week.dateRange);
+  if (!weekDate) return false;
+  const diff = (Date.now() - weekDate.getTime()) / 86400000;
+  return diff > 7;
+}
+
+function resolveWeekDate(week: { dateRange: string }): Date | null {
+  return parseWeekDate(week.dateRange);
+}
+
 function detectCurrentPhase(plan: GeneratedPlan): PhaseName | null {
-  const now = new Date();
-  const monthMap: Record<string, number> = {
-    Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
-    Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
-  };
   for (const week of plan.weeks) {
-    const match = week.dateRange.match(/^(\w+)\s+(\d+)/);
-    if (!match) continue;
-    const month = monthMap[match[1]];
-    if (month == null) continue;
-    const day = parseInt(match[2], 10);
-    const weekDate = new Date(now.getFullYear(), month, day);
-    const diff = (now.getTime() - weekDate.getTime()) / 86400000;
-    if (diff >= -1 && diff <= 7) return week.phase;
+    if (isCurrentWeek(week)) return week.phase;
+  }
+  // Fallback: if no week matches "current", check if we're past all weeks
+  // and return the last phase, or before all weeks and return the first
+  if (plan.weeks.length > 0) {
+    const firstDate = parseWeekDate(plan.weeks[0].dateRange);
+    const lastDate = parseWeekDate(plan.weeks[plan.weeks.length - 1].dateRange);
+    const now = Date.now();
+    if (firstDate && now < firstDate.getTime()) return plan.phases[0]?.name ?? null;
+    if (lastDate && now > lastDate.getTime() + 7 * 86400000) return plan.phases[plan.phases.length - 1]?.name ?? null;
   }
   return null;
 }
