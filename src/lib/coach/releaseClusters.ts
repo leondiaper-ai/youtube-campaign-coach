@@ -650,10 +650,12 @@ function matchesTimelineEvent(
     const evKw = eventKeywords[i];
     if (evKw.length === 0) continue;
 
-    // Require at least 2 keyword overlap, or 1 for short titles
+    // Require at least 1 keyword overlap — keywords already exclude noise words,
+    // so a single match (like a song/album name) is a strong signal.
+    // Previously required 2, but this missed cases like "STORM" matching
+    // "Storm I & II release" where the title structure adds generic words.
     const overlap = uploadKw.filter(w => evKw.includes(w));
-    const threshold = Math.min(uploadKw.length, evKw.length) <= 2 ? 1 : 2;
-    if (overlap.length >= threshold) return true;
+    if (overlap.length >= 1) return true;
   }
 
   return false;
