@@ -94,18 +94,18 @@ const FORMAT_ROLE: Record<UploadFormatLabel, NarrativeRole> = {
 // Higher weight = more visually dominant in the campaign narrative.
 
 const FORMAT_WEIGHT: Record<UploadFormatLabel, number> = {
-  'Official Video': 100,
-  'Premiere':       95,
-  'Documentary':    90,
-  'Live Session':   55,
-  'Lyric Video':    50,
-  'Visualizer':     50,
-  'BTS':            45,
-  'Freestyle':      40,
-  'Longform':       35,
-  'Interview':      30,
-  'Short':          15,
-  'Upload':         10,
+  'Official Video': 100,  // Flagship release — always the centrepiece
+  'Premiere':       90,   // Major premiere event
+  'Documentary':    85,   // Longform flagship
+  'Longform':       75,   // Full longform content (album streams, sessions)
+  'BTS':            60,   // Behind-the-scenes — strong support content
+  'Live Session':   55,   // Live performance captures
+  'Lyric Video':    50,   // Direct support for a release
+  'Visualizer':     50,   // Direct support for a release
+  'Freestyle':      40,   // Original performance content
+  'Interview':      30,   // Ecosystem / press
+  'Short':          25,   // Momentum content
+  'Upload':         10,   // Generic / unclassified
 };
 
 // ── Format → Decay profile ───────────────────────────────────────────────
@@ -368,13 +368,21 @@ const NOISE_WORDS = new Set([
  *
  * upcoming  → centrepiece not yet published (planned moments)
  * live      → centrepiece published within the last 7 days
- * sustaining → 7-30 days old, still accumulating support
- * historical → 30+ days old, narrative value preserved but not dominant
+ * sustaining → still accumulating support (duration depends on format weight)
+ *              Official Videos (weight 100) sustain for 90 days
+ *              Premieres (weight 90-95) sustain for 60 days
+ *              Others sustain for 30 days
+ * historical → past sustaining window, narrative value preserved but not dominant
  */
 function determineMomentState(centrepiece: ClassifiedAsset): NarrativeMoment['state'] {
   if (centrepiece.ageDays < 0) return 'upcoming';
   if (centrepiece.ageDays <= 7) return 'live';
-  if (centrepiece.ageDays <= 30) return 'sustaining';
+
+  // Flagship releases sustain much longer — they're the campaign's gravitational centre
+  const sustainingWindow = centrepiece.weight >= 100 ? 90
+    : centrepiece.weight >= 90 ? 60
+    : 30;
+  if (centrepiece.ageDays <= sustainingWindow) return 'sustaining';
   return 'historical';
 }
 
@@ -552,7 +560,11 @@ export function buildCampaignNarrative(
 
   const centrepieces = allAssets.filter(a => {
     if (a.role !== 'centrepiece') return false;
-    if (a.upload.viewCount < minCentrepieceViews) return false;
+
+    // Official Videos and Premieres are ALWAYS centrepieces regardless of views.
+    // Only apply the view threshold to lower-weight centrepieces (Documentaries etc).
+    const isTopTier = a.format === 'Official Video' || a.format === 'Premiere';
+    if (!isTopTier && a.upload.viewCount < minCentrepieceViews) return false;
 
     // Campaign window gate
     if (campaignStart && campaignEnd) {
@@ -696,9 +708,14 @@ export function buildCampaignNarrative(
   // ── Step 6: Sort by narrative score and mark active ──
   moments.sort((a, b) => b.narrativeScore - a.narrativeScore);
 
-  // The active moment: highest narrative score among live/sustaining moments
+  // The active moment: highest narrative score among live/sustaining moments.
+  // If none are live/sustaining, use the best historical moment rather than
+  // falling back to the broken extractMoments system. A campaign always has
+  // a gravitational centre — even if the flagship is past its sustaining window.
   const activeCandidates = moments.filter(m => m.state === 'live' || m.state === 'sustaining');
-  const activeMoment = activeCandidates.length > 0 ? activeCandidates[0] : null;
+  const activeMoment = activeCandidates.length > 0
+    ? activeCandidates[0]
+    : moments.length > 0 ? moments[0] : null; // fallback to highest-scored moment
   if (activeMoment) activeMoment.isActive = true;
 
   // Re-sort for display: active first, then by score
