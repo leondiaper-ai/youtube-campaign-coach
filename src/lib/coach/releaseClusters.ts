@@ -417,7 +417,12 @@ export function buildReleaseClusters(
     const fmt = classifyUploadFormat(upload);
     const isAnchorFormat = ANCHOR_FORMATS.includes(fmt);
     const isLongform = upload.durationSec > 62;
-    const matchesPlanEvent = isLongform && matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
+
+    // Support-only formats should NEVER be promoted to anchor status — they belong
+    // inside a release moment block as support content (e.g. BTS inside the Official Video block).
+    const SUPPORT_ONLY_FORMATS: string[] = ['BTS', 'Lyric Video', 'Visualizer', 'Trailer', 'Live Session', 'Interview', 'Freestyle'];
+    const isSupportFormat = SUPPORT_ONLY_FORMATS.includes(fmt);
+    const matchesPlanEvent = isLongform && !isSupportFormat && matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
 
     // Gate 0: Must be either an anchor format OR a longform that matches a plan event
     // In both cases, must meet minimum view threshold
