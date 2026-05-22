@@ -389,6 +389,11 @@ export default function CampaignDestination({
               </span>
             )}
             <span>{plan.totalWeeks}-week rollout</span>
+            {narrative.arc !== 'dormant' && (
+              <span style={{ fontStyle: 'italic', color: GHOST }}>
+                {arcLabel(narrative.arc)}
+              </span>
+            )}
           </div>
 
           <div style={{
@@ -422,7 +427,38 @@ export default function CampaignDestination({
             </div>
           )}
 
-          {/* Data coverage badge — removed per user request */}
+          {/* Data coverage badge */}
+          {dataCoverage && (
+            <div style={{
+              marginTop: 10,
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <span style={{
+                width: 4, height: 4, borderRadius: '50%', flexShrink: 0,
+                background: dataCoverage.fullCoverage ? '#059669' : '#D97706',
+                opacity: 0.6,
+              }} />
+              <span style={{
+                fontSize: 10, color: GHOST, fontFamily: MONO,
+                letterSpacing: '0.04em',
+              }}>
+                {dataCoverage.coverageNote}
+              </span>
+              {dataCoverage.sources.length > 0 && (
+                <span style={{
+                  fontSize: 8, color: GHOST, fontFamily: MONO,
+                  padding: '1px 6px', borderRadius: 2,
+                  border: `1px solid ${BONE}`,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}>
+                  {dataCoverage.sources.includes('youtube_api') ? 'API' :
+                   dataCoverage.sources.includes('kv_cache') ? 'Cache' :
+                   dataCoverage.sources.includes('manual') ? 'Manual' : 'Saved'}
+                </span>
+              )}
+            </div>
+          )}
         </section>
 
 
@@ -1218,60 +1254,12 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
           )}
         </a>
 
-        {/* Support orbit panel — longform first, shorts collapsed */}
+        {/* Support orbit panel */}
         <div style={{
-          display: 'flex', flexDirection: 'column', gap: 4,
+          display: 'flex', flexDirection: 'column', gap: 6,
         }}>
-          {/* ✓/✗ Asset checklist strip */}
-          <div style={{
-            display: 'flex', gap: 3, flexWrap: 'wrap',
-            padding: '4px 0',
-          }}>
-            {(['BTS', 'Lyric Video', 'Visualizer', 'Trailer', 'Live Session'] as const).map(fmt => {
-              const done = supportFormats.includes(fmt) || moment.momentum.some(m => m.format === fmt);
-              return (
-                <span key={fmt} style={{
-                  fontSize: 8, fontWeight: 600,
-                  padding: '1px 6px', borderRadius: 2,
-                  fontFamily: MONO,
-                  display: 'inline-flex', alignItems: 'center', gap: 3,
-                  ...(done
-                    ? { color: '#065F46', background: '#F0FDF4', border: '1px solid #BBF7D0' }
-                    : { color: GHOST, background: '#FAFAF8', border: `1px solid ${BONE}` }
-                  ),
-                }}>
-                  <span style={{ fontSize: 9 }}>{done ? '✓' : '✗'}</span>
-                  {fmt}
-                </span>
-              );
-            })}
-            {momentumCount > 0 ? (
-              <span style={{
-                fontSize: 8, fontWeight: 600,
-                padding: '1px 6px', borderRadius: 2,
-                fontFamily: MONO,
-                display: 'inline-flex', alignItems: 'center', gap: 3,
-                color: '#065F46', background: '#F0FDF4', border: '1px solid #BBF7D0',
-              }}>
-                <span style={{ fontSize: 9 }}>✓</span>
-                Shorts ×{momentumCount}
-              </span>
-            ) : (
-              <span style={{
-                fontSize: 8, fontWeight: 600,
-                padding: '1px 6px', borderRadius: 2,
-                fontFamily: MONO,
-                display: 'inline-flex', alignItems: 'center', gap: 3,
-                color: GHOST, background: '#FAFAF8', border: `1px solid ${BONE}`,
-              }}>
-                <span style={{ fontSize: 9 }}>✗</span>
-                Shorts
-              </span>
-            )}
-          </div>
-
-          {/* Longform support — full cards, listed first */}
-          {moment.support.filter(s => s.upload.durationSec > 62).map((s, i) => (
+          {/* Direct support (BTS, Lyric Video, Visualizer) */}
+          {moment.support.slice(0, 4).map((s, i) => (
             <a
               key={`s-${i}`}
               href={ytVideoUrl(s.upload.id, s.upload.durationSec)}
@@ -1281,85 +1269,72 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
             >
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                padding: '5px 8px',
-                background: WHITE,
-                border: `1px solid ${BONE}`,
+                padding: '6px 10px',
+                background: '#F0FDF4',
                 borderRadius: 4,
               }}>
-                <img
-                  src={ytThumb(s.upload.id, 'mqdefault')}
-                  alt="" loading="lazy"
-                  style={{ width: 48, height: 27, objectFit: 'cover', borderRadius: 2 }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{
-                    fontSize: 10, color: INK,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    display: 'block',
-                  }}>
-                    {s.format}
-                  </span>
-                  <span style={{ fontSize: 8, color: SMOKE, fontFamily: MONO }}>
-                    {fmtNum(s.upload.viewCount)} · {timeAgo(s.upload.publishedAt)}
-                  </span>
-                </div>
+                <span style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>✓</span>
+                <span style={{
+                  fontSize: 12, color: INK, flex: 1,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {s.format}
+                </span>
+                <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                  {fmtNum(s.upload.viewCount)}
+                </span>
               </div>
             </a>
           ))}
 
-          {/* Ecosystem longform */}
-          {moment.ecosystem.filter(e => e.upload.durationSec > 62).map((e, i) => (
-            <a
-              key={`eco-${i}`}
-              href={ytVideoUrl(e.upload.id, e.upload.durationSec)}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'none', color: 'inherit' }}
-            >
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 8,
-                padding: '5px 8px',
-                background: BONE,
-                borderRadius: 4,
-              }}>
-                <img
-                  src={ytThumb(e.upload.id, 'mqdefault')}
-                  alt="" loading="lazy"
-                  style={{ width: 48, height: 27, objectFit: 'cover', borderRadius: 2 }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{
-                    fontSize: 10, color: INK,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    display: 'block',
-                  }}>
-                    {e.format}
-                  </span>
-                  <span style={{ fontSize: 8, color: SMOKE, fontFamily: MONO }}>
-                    {fmtNum(e.upload.viewCount)} · {timeAgo(e.upload.publishedAt)}
-                  </span>
-                </div>
-              </div>
-            </a>
-          ))}
-
-          {/* Shorts — collapsed summary underneath longform */}
+          {/* Momentum shorts summary */}
           {momentumCount > 0 && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
-              padding: '4px 10px',
+              padding: '6px 10px',
               background: '#F5F3FF',
               border: '1px solid #EDE9FE',
               borderRadius: 4,
-              fontSize: 10,
             }}>
-              <span style={{ color: '#7C3AED', fontWeight: 700 }}>⚡</span>
-              <span style={{ color: '#5B21B6', flex: 1 }}>
-                {momentumCount} Short{momentumCount !== 1 ? 's' : ''}
+              <span style={{ fontSize: 11, color: '#7C3AED', fontWeight: 700 }}>◆</span>
+              <span style={{ fontSize: 12, color: '#5B21B6', flex: 1 }}>
+                {momentumCount} Short{momentumCount !== 1 ? 's' : ''} reinforcing
               </span>
-              <span style={{ fontSize: 9, color: SMOKE, fontFamily: MONO }}>
+              <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
                 {fmtNum(moment.momentum.reduce((s, a) => s + a.upload.viewCount, 0))}
               </span>
+            </div>
+          )}
+
+          {/* Ecosystem / world-building */}
+          {ecosystemCount > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '6px 10px',
+              background: BONE,
+              borderRadius: 4,
+            }}>
+              <span style={{ fontSize: 11, color: SMOKE, fontWeight: 700 }}>●</span>
+              <span style={{ fontSize: 12, color: INK, flex: 1 }}>
+                {ecosystemCount} ecosystem upload{ecosystemCount !== 1 ? 's' : ''}
+              </span>
+              <span style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                {fmtNum(moment.ecosystem.reduce((s, a) => s + a.upload.viewCount, 0))}
+              </span>
+            </div>
+          )}
+
+          {/* Missing support formats */}
+          {moment.supportCoverage < 1 && (
+            <div style={{
+              fontSize: 10, color: GHOST, fontFamily: MONO,
+              padding: '4px 10px',
+              letterSpacing: '0.04em',
+            }}>
+              {['Short', 'BTS', 'Lyric Video', 'Visualizer']
+                .filter(f => !supportFormats.includes(f as any) && !moment.momentum.some(m => m.format === f))
+                .map(f => `○ ${f}`)
+                .join('  ')}
             </div>
           )}
         </div>
@@ -1981,74 +1956,82 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
           padding: '0 14px 12px',
           borderTop: `1px solid ${BONE}`,
         }}>
-          {/* ── 1. ASSET CHECKLIST — immediate ✓/✗ overview ── */}
-          <SupportAssetChecklist cluster={cluster} />
-
-          {/* ── 2. LONGFORM SUPPORT — full card treatment, listed first ── */}
-          {longformLinks.length > 0 && (
-            <div style={{ marginTop: 8 }}>
-              <div style={{
-                fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
-                textTransform: 'uppercase', color: SMOKE,
-                fontFamily: MONO, marginBottom: 4,
-              }}>
-                Longform Support
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {longformLinks.map((link) => {
-                  const fmt = classifyUploadFormat(link.upload);
-                  return (
-                    <a
-                      key={`lf-${link.upload.id}`}
-                      href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        padding: '5px 8px',
-                        background: WHITE,
-                        border: `1px solid ${BONE}`,
-                        borderRadius: 4,
-                        textDecoration: 'none', color: 'inherit',
-                      }}
-                    >
-                      <img
-                        src={ytThumb(link.upload.id, 'mqdefault')}
-                        alt="" loading="lazy"
-                        style={{
-                          width: 64, height: 36,
-                          objectFit: 'cover', borderRadius: 3,
-                        }}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          fontSize: 11, color: INK, fontWeight: 500,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {link.upload.title}
-                        </div>
-                        <div style={{
-                          display: 'flex', gap: 8, alignItems: 'center',
-                          fontSize: 8, color: SMOKE, fontFamily: MONO, marginTop: 2,
-                        }}>
-                          <span style={{ color: '#059669', fontWeight: 700, textTransform: 'uppercase' }}>{fmt}</span>
-                          <span>{fmtNum(link.upload.viewCount)} views</span>
-                          <span>{timeAgo(link.upload.publishedAt)}</span>
-                          {link.upload.isCollab && link.upload.collabChannel && (
-                            <span style={{ color: '#6366F1', fontWeight: 600 }}>via {link.upload.collabChannel}</span>
-                          )}
-                        </div>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
+          {/* ── Longform support grouped by strategic category ── */}
+          {longformCategories.length > 0 && (
+            <div style={{ paddingTop: 8 }}>
+              {longformCategories.map((cat) => {
+                const catLinks = (byCategory[cat] ?? []).filter(l => l.upload.durationSec > 62);
+                if (catLinks.length === 0) return null;
+                return (
+                  <div key={cat} style={{ marginBottom: 6 }}>
+                    <div style={{
+                      fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+                      textTransform: 'uppercase', color: GHOST,
+                      fontFamily: MONO, marginBottom: 3,
+                    }}>
+                      {cat}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {catLinks.map((link) => {
+                        const strengthColor = link.strength === 'strong' ? '#059669'
+                          : link.strength === 'moderate' ? '#D97706' : GHOST;
+                        return (
+                          <a
+                            key={`sl-${link.upload.id}`}
+                            href={ytVideoUrl(link.upload.id, link.upload.durationSec)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 8,
+                              padding: '3px 6px',
+                              background: 'rgba(245,242,237,0.5)',
+                              borderRadius: 3,
+                              textDecoration: 'none', color: 'inherit',
+                            }}
+                          >
+                            <img
+                              src={ytThumb(link.upload.id, 'mqdefault')}
+                              alt="" loading="lazy"
+                              style={{
+                                width: 40, height: 22,
+                                objectFit: 'cover', borderRadius: 2,
+                              }}
+                            />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                fontSize: 10, color: INK,
+                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                              }}>
+                                {link.upload.title}
+                              </div>
+                            </div>
+                            <span style={{
+                              width: 4, height: 4, borderRadius: '50%',
+                              background: strengthColor, display: 'inline-block',
+                              flexShrink: 0,
+                            }} />
+                            <span style={{
+                              fontSize: 8, color: SMOKE, fontFamily: MONO,
+                              flexShrink: 0,
+                            }}>
+                              {fmtNum(link.upload.viewCount)}
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {/* ── 3. SHORTS — collapsed summary underneath longform ── */}
+          {/* ── Shorts cluster — collapsed summary with top performers ── */}
           {shortsLinks.length > 0 && (
-            <div style={{ marginTop: 6 }}>
+            <div style={{
+              marginTop: longformCategories.length > 0 ? 4 : 8,
+              paddingTop: longformCategories.length === 0 ? 8 : 0,
+            }}>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 fontSize: 9, color: SMOKE, fontFamily: MONO,
@@ -2057,6 +2040,9 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
                   ⚡ {shortsLinks.length} Shorts
                 </span>
                 <span>{fmtNum(totalShortsViews)} combined views</span>
+                {shortsLinks.length > 3 && (
+                  <span style={{ color: GHOST }}>Top {topShorts.length}:</span>
+                )}
               </div>
               {topShorts.length > 0 && (
                 <div style={{ display: 'flex', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
@@ -2090,6 +2076,9 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
               )}
             </div>
           )}
+
+          {/* ── Release Support Checklist ── */}
+          <ReleaseChecklist cluster={cluster} />
 
           {/* Narrative insight */}
           {narrative && (
@@ -2163,48 +2152,105 @@ function CollabToolBadge() {
   );
 }
 
-/**
- * SUPPORT ASSET CHECKLIST — ✓/✗ overview for each official video drop.
- * Shows at a glance which support formats have been deployed.
- */
-function SupportAssetChecklist({ cluster }: { cluster: ReleaseCluster }) {
+function ReleaseChecklist({ cluster }: { cluster: ReleaseCluster }) {
   const { checklist, premiereStatus } = cluster;
+  const presentItems = checklist.filter(i => i.status === 'present');
+  const missingItems = checklist.filter(i => i.status === 'missing');
+
+  // Don't show premiere in checklist items (handled by badge)
+  const corePresent = presentItems.filter(i => i.key !== 'premiere');
+  const coreMissing = missingItems.filter(i => i.key !== 'premiere' && i.key !== 'community');
+  const communityItem = checklist.find(i => i.key === 'community');
+
+  // Check if any uploads in this cluster are collabs
   const hasCollab = cluster.anchor.isCollab || cluster.support.some(u => u.isCollab);
 
-  // Core support formats to show (exclude community — can't detect)
-  const displayItems = checklist.filter(i => i.key !== 'community');
-
   return (
-    <div style={{ paddingTop: 8 }}>
-      {/* Premiere + Collab badges */}
+    <div style={{ marginTop: 8 }}>
+      {/* Premiere status badge + Collab badge */}
       <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         <PremiereStatusBadge status={premiereStatus} />
         {hasCollab && <CollabToolBadge />}
       </div>
 
-      {/* ✓/✗ asset checklist row */}
-      <div style={{
-        display: 'flex', gap: 4, flexWrap: 'wrap',
-      }}>
-        {displayItems.map((item) => {
-          const done = item.status === 'present';
-          return (
+      {/* Core support — what's present */}
+      {corePresent.length > 0 && (
+        <div style={{
+          display: 'flex', gap: 3, flexWrap: 'wrap', marginBottom: 4,
+        }}>
+          {corePresent.map((item) => (
             <span key={item.key} style={{
-              fontSize: 9, fontWeight: 600,
-              padding: '2px 8px', borderRadius: 3,
-              fontFamily: MONO, letterSpacing: '0.02em',
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              ...(done
-                ? { color: '#065F46', background: '#F0FDF4', border: '1px solid #BBF7D0' }
-                : { color: GHOST, background: '#FAFAF8', border: `1px solid ${BONE}` }
-              ),
+              fontSize: 8, fontWeight: 600, color: '#065F46',
+              padding: '1px 6px', borderRadius: 2,
+              background: '#F0FDF4', fontFamily: MONO,
             }}>
-              <span style={{ fontSize: 10 }}>{done ? '✓' : '✗'}</span>
-              {item.label}{item.count > 1 ? ` ×${item.count}` : ''}
+              ✓ {item.label}{item.count > 1 ? ` ×${item.count}` : ''}
+              {item.timingOptimal === true && ' · on time'}
+              {item.timingOptimal === false && item.actualDaysOffset != null && (
+                ` · dropped ${item.actualDaysOffset > 0 ? '+' : ''}${item.actualDaysOffset}d`
+              )}
             </span>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* Missing support — opportunities with timing guidance */}
+      {coreMissing.length > 0 && (
+        <div style={{
+          background: '#FAFAF8',
+          border: `1px solid ${BONE}`,
+          borderRadius: 4,
+          padding: '6px 8px',
+        }}>
+          <div style={{
+            fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
+            textTransform: 'uppercase', color: '#7C3AED',
+            fontFamily: MONO, marginBottom: 4,
+          }}>
+            Could extend
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {coreMissing.map((item) => (
+              <div key={item.key} style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 9, color: INK,
+              }}>
+                <span style={{
+                  width: 5, height: 5, borderRadius: '50%',
+                  border: `1.5px solid ${GHOST}`,
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+                <span style={{ fontWeight: 600 }}>{item.label}</span>
+                <span style={{
+                  fontSize: 8, color: SMOKE, fontFamily: MONO,
+                }}>
+                  — {item.timing.label}
+                </span>
+                {item.timing.priority === 'core' && (
+                  <span style={{
+                    fontSize: 7, fontWeight: 700, color: '#DC2626',
+                    padding: '0px 4px', borderRadius: 2,
+                    background: '#FEF2F2', fontFamily: MONO,
+                    letterSpacing: '0.05em',
+                  }}>
+                    CORE
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Community post — always unknown (can't detect via uploads API) */}
+      {communityItem && communityItem.status === 'missing' && coreMissing.length > 0 && (
+        <div style={{
+          fontSize: 8, color: GHOST, fontFamily: MONO,
+          marginTop: 3, fontStyle: 'italic',
+        }}>
+          Community Post — {communityItem.timing.label} (cannot detect automatically)
+        </div>
+      )}
     </div>
   );
 }
