@@ -87,6 +87,7 @@ const FORMAT_ROLE: Record<UploadFormatLabel, NarrativeRole> = {
   'Short':          'momentum',
   'Interview':      'ecosystem',
   'Longform':       'world-building',
+  'Collab':         'centrepiece',
   'Upload':         'unclassified',
 };
 
@@ -105,6 +106,7 @@ const FORMAT_WEIGHT: Record<UploadFormatLabel, number> = {
   'Freestyle':      40,   // Original performance content
   'Interview':      30,   // Ecosystem / press
   'Short':          25,   // Momentum content
+  'Collab':         90,   // Cross-channel collab — same weight as Premiere (cross-audience moment)
   'Upload':         10,   // Generic / unclassified
 };
 
@@ -123,6 +125,7 @@ const FORMAT_DECAY: Record<UploadFormatLabel, DecayProfile> = {
   'Interview':      { halfLifeDays: 10, floor: 0.05, maxActiveDays: 30 },
   'Longform':       { halfLifeDays: 14, floor: 0.1, maxActiveDays: 45 },
   'Short':          { halfLifeDays: 5,  floor: 0.02, maxActiveDays: 14 },
+  'Collab':         { halfLifeDays: 21, floor: 0.25, maxActiveDays: 60 },
   'Upload':         { halfLifeDays: 7,  floor: 0.05, maxActiveDays: 21 },
 };
 

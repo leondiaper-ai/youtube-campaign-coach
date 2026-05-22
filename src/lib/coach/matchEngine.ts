@@ -255,10 +255,14 @@ export type UploadFormatLabel =
   | 'Freestyle'
   | 'Interview'
   | 'Longform'
+  | 'Collab'
   | 'Upload';
 
 /** Classify a YouTube upload by its title and metadata into a human-readable format label */
 export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
+  // Collab videos from other channels get the Collab label — like a Premiere,
+  // it's a cross-audience moment that deserves prominent treatment.
+  if (upload.isCollab) return 'Collab';
   if (upload.durationSec <= 62) return 'Short';
 
   const t = upload.title.toLowerCase();

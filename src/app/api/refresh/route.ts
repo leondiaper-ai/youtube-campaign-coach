@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     try {
       const snap = await fetchChannelSnapLite(handle, {
         campaignStartDate: a.campaignStartDate ?? undefined,
+        collabs: a.collabs,
       });
       if (!snap) {
         results[a.slug] = 'no key';

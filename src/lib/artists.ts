@@ -41,6 +41,10 @@ export type Artist = {
   campaignStartDate?: string;
   // Marks this artist as user-added (vs a built-in seed entry).
   custom?: boolean;
+  // Ad-hoc collab video IDs — videos uploaded to OTHER channels that feature
+  // this artist. Added manually when you know a collab dropped. Zero quota
+  // cost (fetched via videos.list at 1 unit per batch of 50).
+  collabs?: string[];
 };
 
 /** Check if an artist is Virgin Managed (default for built-in artists) */
@@ -71,6 +75,7 @@ export const ARTISTS: Artist[] = [
     ownership: 'virgin',
     campaign: 'TRAPO 2',
     campaignStartDate: '2026-03-22',
+    collabs: ['B63BXwhzzjI'],
   },
   {
     slug: 'tom-odell',
@@ -172,6 +177,10 @@ export type RecentUpload = {
   hasShortSibling?: boolean;
   isTopPerformer?: boolean;
   topComments?: TopComment[];
+  /** True when this video was fetched from another channel via the collabs config */
+  isCollab?: boolean;
+  /** Channel title of the channel that uploaded this collab video */
+  collabChannel?: string;
 };
 
 export type LiveSnap = {

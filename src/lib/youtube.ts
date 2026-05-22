@@ -423,6 +423,66 @@ async function fetchTopEverVideos(
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// COLLAB VIDEO FETCH — ad-hoc videos from other channels
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch collab videos by ID and merge them into an existing uploads array.
+ * These are videos uploaded to OTHER channels that feature this artist.
+ *
+ * Cost: 1 quota unit per batch of 50 IDs (videos.list) — essentially free.
+ * Videos already present in `existing` are skipped (deduplication).
+ */
+async function fetchCollabVideos(
+  collabIds: string[],
+  existing: RecentUpload[],
+): Promise<RecentUpload[]> {
+  if (!KEY || !collabIds.length) return [];
+
+  // Deduplicate — skip IDs we already have from the uploads playlist
+  const existingIds = new Set(existing.map((u) => u.id));
+  const newIds = collabIds.filter((id) => !existingIds.has(id));
+  if (!newIds.length) return [];
+
+  console.log(`[YouTube] fetchCollabVideos: fetching ${newIds.length} collab IDs`);
+
+  try {
+    const collabs: RecentUpload[] = [];
+    // videos.list accepts max 50 IDs per call
+    for (let i = 0; i < newIds.length; i += 50) {
+      const batch = newIds.slice(i, i + 50);
+      const vj = await jget(
+        `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${batch.join(',')}&key=${KEY}`
+      );
+      for (const v of (vj.items ?? [])) {
+        collabs.push({
+          id: v.id,
+          title: v.snippet?.title ?? '',
+          description: v.snippet?.description ?? '',
+          publishedAt: v.snippet?.publishedAt ?? '',
+          durationSec: parseDuration(v.contentDetails?.duration),
+          live: v.snippet?.liveBroadcastContent ?? 'none',
+          scheduledStart: v.liveStreamingDetails?.scheduledStartTime ?? null,
+          actualStart: v.liveStreamingDetails?.actualStartTime ?? null,
+          captions: v.contentDetails?.caption === 'true',
+          viewCount: Number(v.statistics?.viewCount ?? 0),
+          likeCount: Number(v.statistics?.likeCount ?? 0),
+          commentCount: Number(v.statistics?.commentCount ?? 0),
+          isCollab: true,
+          collabChannel: v.snippet?.channelTitle ?? undefined,
+        });
+      }
+    }
+
+    console.log(`[YouTube] fetchCollabVideos: got ${collabs.length} collab videos`);
+    return collabs;
+  } catch (e: any) {
+    console.error(`[YouTube] fetchCollabVideos error: ${e?.message ?? e}`);
+    return [];
+  }
+}
+
 export async function resolveChannelId(input: string): Promise<string | null> {
   if (!KEY) return null;
   if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
@@ -698,7 +758,7 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
  *
  * Cost: ~6 units per artist (1 channels + 2 playlistItems + 2 videos + 1 resolve)
  */
-export async function fetchChannelSnapLite(input: string, opts?: { campaignStartDate?: string }): Promise<LiveSnap | null> {
+export async function fetchChannelSnapLite(input: string, opts?: { campaignStartDate?: string; collabs?: string[] }): Promise<LiveSnap | null> {
   if (!KEY) return null;
 
   if (isQuotaCoolingDown()) {
@@ -814,6 +874,18 @@ export async function fetchChannelSnapLite(input: string, opts?: { campaignStart
           }
         }
         // NO top comments — skip to save quota
+      }
+    }
+
+    // ── Merge collab videos from other channels ─────────────────────────
+    if (opts?.collabs?.length) {
+      const collabVideos = await fetchCollabVideos(opts.collabs, recentUploads);
+      if (collabVideos.length) {
+        recentUploads.push(...collabVideos);
+        // Re-sort by publishedAt descending so collabs slot into timeline correctly
+        recentUploads.sort((a, b) =>
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
       }
     }
 

@@ -129,6 +129,7 @@ export async function GET(req: NextRequest) {
       const artistCfg = allArtists.find(a => a.slug === slug);
       const snap = await fetchChannelSnapLite(handle, {
         campaignStartDate: artistCfg?.campaignStartDate ?? undefined,
+        collabs: artistCfg?.collabs,
       });
       if (!snap) {
         dailyResults[slug] = 'no key';
