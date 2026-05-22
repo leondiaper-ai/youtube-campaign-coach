@@ -491,7 +491,33 @@ export default function CampaignDestination({
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
           }}>
-            <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
+            <div style={{
+              background: WHITE,
+              border: `2px solid ${phaseTone?.accent ?? '#DC2626'}`,
+              borderRadius: 10,
+              padding: '20px 24px 24px',
+              position: 'relative',
+              boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
+            }}>
+              {/* THIS WEEK banner */}
+              <div style={{
+                position: 'absolute',
+                top: -13, left: 20,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  padding: '4px 14px', borderRadius: 4,
+                  background: phaseTone?.accent ?? '#DC2626', color: WHITE,
+                  fontFamily: MONO,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                }}>
+                  This Week
+                </span>
+              </div>
+              <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
+            </div>
           </section>
         ) : narrative.activeMoment ? (
           /* No plan-driven active moment — use narrative engine as primary */
@@ -499,7 +525,33 @@ export default function CampaignDestination({
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
           }}>
-            <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
+            <div style={{
+              background: WHITE,
+              border: `2px solid ${phaseTone?.accent ?? '#DC2626'}`,
+              borderRadius: 10,
+              padding: '20px 24px 24px',
+              position: 'relative',
+              boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
+            }}>
+              {/* RIGHT NOW banner */}
+              <div style={{
+                position: 'absolute',
+                top: -13, left: 20,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  padding: '4px 14px', borderRadius: 4,
+                  background: phaseTone?.accent ?? '#DC2626', color: WHITE,
+                  fontFamily: MONO,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                }}>
+                  Right Now
+                </span>
+              </div>
+              <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
+            </div>
           </section>
         ) : (
           <section style={{
@@ -761,6 +813,9 @@ function CampaignWall({
                     {isFresh(heroUpload.publishedAt) && (
                       <span style={{ color: '#34D399', fontWeight: 700 }}>NEW</span>
                     )}
+                    {heroUpload.isCollab && (
+                      <span style={{ color: '#A5B4FC', fontWeight: 800 }}>COLLAB{heroUpload.collabChannel ? ` · via ${heroUpload.collabChannel}` : ''}</span>
+                    )}
                     {heroUpload.likeCount > 0 && <span>{fmtNum(heroUpload.likeCount)} likes</span>}
                     {heroUpload.commentCount > 0 && <span>{fmtNum(heroUpload.commentCount)} comments</span>}
                   </div>
@@ -877,6 +932,17 @@ function CampaignWall({
                 background: 'linear-gradient(transparent, rgba(0,0,0,0.6))',
                 pointerEvents: 'none',
               }} />
+              {u.isCollab && (
+                <div style={{
+                  position: 'absolute', top: 8, left: 8,
+                  fontSize: 7, fontWeight: 800, color: WHITE,
+                  fontFamily: MONO, letterSpacing: '0.1em',
+                  padding: '2px 6px', borderRadius: 3,
+                  background: 'rgba(99,102,241,0.85)',
+                }}>
+                  COLLAB{u.collabChannel ? ` · ${u.collabChannel}` : ''}
+                </div>
+              )}
               <div style={{
                 position: 'absolute', bottom: 8, left: 10, right: 10,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
@@ -1161,6 +1227,31 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>views</span>
             </div>
           </div>
+          {/* Collab badge overlay */}
+          {cp.upload.isCollab && (
+            <div style={{
+              position: 'absolute', top: 10, left: 10,
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '4px 10px', borderRadius: 4,
+              background: 'rgba(99,102,241,0.9)',
+              backdropFilter: 'blur(4px)',
+            }}>
+              <span style={{
+                fontSize: 9, fontWeight: 800, color: WHITE,
+                fontFamily: MONO, letterSpacing: '0.1em',
+              }}>
+                COLLAB
+              </span>
+              {cp.upload.collabChannel && (
+                <span style={{
+                  fontSize: 8, color: 'rgba(255,255,255,0.7)',
+                  fontFamily: MONO,
+                }}>
+                  via {cp.upload.collabChannel}
+                </span>
+              )}
+            </div>
+          )}
         </a>
 
         {/* Support orbit panel */}
@@ -1366,6 +1457,31 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
                 <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>views</span>
               </div>
             </div>
+            {/* Collab badge overlay */}
+            {moment.primaryUpload.isCollab && (
+              <div style={{
+                position: 'absolute', top: 10, left: 10,
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '4px 10px', borderRadius: 4,
+                background: 'rgba(99,102,241,0.9)',
+                backdropFilter: 'blur(4px)',
+              }}>
+                <span style={{
+                  fontSize: 9, fontWeight: 800, color: WHITE,
+                  fontFamily: MONO, letterSpacing: '0.1em',
+                }}>
+                  COLLAB
+                </span>
+                {moment.primaryUpload.collabChannel && (
+                  <span style={{
+                    fontSize: 8, color: 'rgba(255,255,255,0.7)',
+                    fontFamily: MONO,
+                  }}>
+                    via {moment.primaryUpload.collabChannel}
+                  </span>
+                )}
+              </div>
+            )}
           </a>
         )}
 
@@ -1515,6 +1631,17 @@ function LiveMomentBlock({ moment, phase }: { moment: CampaignMoment; phase: Pha
                 alt="" loading="lazy"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }}
               />
+              {u.isCollab && (
+                <div style={{
+                  position: 'absolute', top: 3, left: 3,
+                  fontSize: 6, fontWeight: 800, color: WHITE,
+                  fontFamily: MONO, letterSpacing: '0.08em',
+                  padding: '1px 4px', borderRadius: 2,
+                  background: 'rgba(99,102,241,0.85)',
+                }}>
+                  COLLAB
+                </div>
+              )}
               <div style={{
                 position: 'absolute', bottom: 3, left: 5,
                 fontSize: 9, fontWeight: 700, color: WHITE,
@@ -2011,6 +2138,20 @@ function PremiereStatusBadge({ status }: { status: PremiereStatus }) {
   );
 }
 
+function CollabToolBadge() {
+  return (
+    <span style={{
+      fontSize: 8, fontWeight: 700, color: '#3730A3',
+      padding: '1px 6px', borderRadius: 2,
+      background: '#EEF2FF', fontFamily: MONO,
+      letterSpacing: '0.04em',
+      border: '1px solid #C7D2FE',
+    }}>
+      ✓ Collab tool used
+    </span>
+  );
+}
+
 function ReleaseChecklist({ cluster }: { cluster: ReleaseCluster }) {
   const { checklist, premiereStatus } = cluster;
   const presentItems = checklist.filter(i => i.status === 'present');
@@ -2021,11 +2162,15 @@ function ReleaseChecklist({ cluster }: { cluster: ReleaseCluster }) {
   const coreMissing = missingItems.filter(i => i.key !== 'premiere' && i.key !== 'community');
   const communityItem = checklist.find(i => i.key === 'community');
 
+  // Check if any uploads in this cluster are collabs
+  const hasCollab = cluster.anchor.isCollab || cluster.support.some(u => u.isCollab);
+
   return (
     <div style={{ marginTop: 8 }}>
-      {/* Premiere status badge */}
-      <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+      {/* Premiere status badge + Collab badge */}
+      <div style={{ marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         <PremiereStatusBadge status={premiereStatus} />
+        {hasCollab && <CollabToolBadge />}
       </div>
 
       {/* Core support — what's present */}
@@ -2382,6 +2527,7 @@ function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
             }}>
               {regularMatched.map((upload, i) => {
                 const formatLabel = classifyUploadFormat(upload);
+                const isCollabVideo = upload.isCollab;
                 return (
                   <a
                     key={`ev-${i}`}
@@ -2391,21 +2537,23 @@ function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
                     style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       padding: '4px 8px 4px 4px',
-                      background: '#F0FDF4',
+                      background: isCollabVideo ? '#EEF2FF' : '#F0FDF4',
                       borderRadius: 4,
                       textDecoration: 'none', color: 'inherit',
-                      border: '1px solid #D1FAE5',
+                      border: isCollabVideo ? '1px solid #C7D2FE' : '1px solid #D1FAE5',
                     }}
                   >
-                    <img
-                      src={ytThumb(upload.id, 'mqdefault')}
-                      alt="" loading="lazy"
-                      style={{
-                        width: upload.durationSec <= 62 ? 24 : 48,
-                        height: upload.durationSec <= 62 ? 32 : 27,
-                        objectFit: 'cover', borderRadius: 2,
-                      }}
-                    />
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                      <img
+                        src={ytThumb(upload.id, 'mqdefault')}
+                        alt="" loading="lazy"
+                        style={{
+                          width: upload.durationSec <= 62 ? 24 : 48,
+                          height: upload.durationSec <= 62 ? 32 : 27,
+                          objectFit: 'cover', borderRadius: 2,
+                        }}
+                      />
+                    </div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{
                         fontSize: 10, color: INK, fontWeight: 500,
@@ -2420,11 +2568,16 @@ function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
                         letterSpacing: '0.04em', marginTop: 1,
                       }}>
                         <span style={{
-                          color: '#059669', fontWeight: 700,
+                          color: isCollabVideo ? '#4F46E5' : '#059669', fontWeight: 700,
                           textTransform: 'uppercase',
                         }}>
                           {formatLabel}
                         </span>
+                        {isCollabVideo && upload.collabChannel && (
+                          <span style={{ color: '#6366F1', fontWeight: 600 }}>
+                            via {upload.collabChannel}
+                          </span>
+                        )}
                         <span>{fmtNum(upload.viewCount)} views</span>
                         <span>{timeAgo(upload.publishedAt)}</span>
                       </div>
@@ -2442,6 +2595,7 @@ function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
             }}>
               {regularExtra.map((upload, i) => {
                 const formatLabel = classifyUploadFormat(upload);
+                const isCollabVideo = upload.isCollab;
                 return (
                   <a
                     key={`ex-${i}`}
@@ -2451,10 +2605,10 @@ function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
                     style={{
                       display: 'flex', alignItems: 'center', gap: 6,
                       padding: '3px 8px 3px 3px',
-                      background: '#F5F3FF',
+                      background: isCollabVideo ? '#EEF2FF' : '#F5F3FF',
                       borderRadius: 3,
                       textDecoration: 'none', color: 'inherit',
-                      border: '1px solid #EDE9FE',
+                      border: isCollabVideo ? '1px solid #C7D2FE' : '1px solid #EDE9FE',
                     }}
                   >
                     <img
@@ -2478,9 +2632,12 @@ function TimelineWeekRow({ week, matchResult, clusterUploadIds }: {
                         fontSize: 7, color: GHOST, fontFamily: MONO,
                         letterSpacing: '0.04em',
                       }}>
-                        <span style={{ color: '#7C3AED', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ color: isCollabVideo ? '#4F46E5' : '#7C3AED', fontWeight: 700, textTransform: 'uppercase' }}>
                           {formatLabel}
                         </span>
+                        {isCollabVideo && upload.collabChannel && (
+                          <>{' · '}<span style={{ color: '#6366F1' }}>via {upload.collabChannel}</span></>
+                        )}
                         {' · '}{fmtNum(upload.viewCount)}
                       </div>
                     </div>
