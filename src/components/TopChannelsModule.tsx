@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   type ChannelScore,
   type ChannelScoreInput,
@@ -34,7 +35,7 @@ export type TopChannelsData = {
   prevViews7Delta?: number | null;
 };
 
-export function TopChannelsModule({ channels }: { channels: TopChannelsData[] }) {
+export function TopChannelsModule({ channels, linkPrefix = '/watcher' }: { channels: TopChannelsData[]; linkPrefix?: string }) {
   const [tab, setTab] = useState<'growth' | 'score'>('score');
 
   // Compute benchmark pool and scores
@@ -129,7 +130,7 @@ export function TopChannelsModule({ channels }: { channels: TopChannelsData[] })
           <div style={{ color: '#9CA3AF', fontSize: 12 }}>No data yet</div>
         )}
         {active.map((s, i) => (
-          <ChannelRow key={s.slug} rank={i + 1} channel={s} />
+          <ChannelRow key={s.slug} rank={i + 1} channel={s} linkPrefix={linkPrefix} />
         ))}
       </div>
 
@@ -149,7 +150,7 @@ export function TopChannelsModule({ channels }: { channels: TopChannelsData[] })
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {needsAttention.map((s, i) => (
-              <ChannelRow key={s.slug} rank={i + 1} channel={s} attention />
+              <ChannelRow key={s.slug} rank={i + 1} channel={s} attention linkPrefix={linkPrefix} />
             ))}
           </div>
         </>
@@ -190,10 +191,12 @@ function ChannelRow({
   rank,
   channel,
   attention = false,
+  linkPrefix = '/watcher',
 }: {
   rank: number;
   channel: ScoredChannel;
   attention?: boolean;
+  linkPrefix?: string;
 }) {
   const color = GRADE_COLOR[channel.score.grade];
   const bg = GRADE_BG[channel.score.grade];
@@ -210,9 +213,13 @@ function ChannelRow({
       <span style={{ width: 16, fontSize: 11, color: '#9CA3AF', textAlign: 'right' }}>
         {rank}.
       </span>
-      <span style={{ flex: 1, fontWeight: 500, color: '#1F2937', fontSize: 12 }}>
+      <Link
+        href={`${linkPrefix}/${channel.slug}`}
+        style={{ flex: 1, fontWeight: 500, color: '#1F2937', fontSize: 12, textDecoration: 'none' }}
+        className="hover:underline"
+      >
         {channel.name}
-      </span>
+      </Link>
       <span
         style={{
           padding: '2px 6px',

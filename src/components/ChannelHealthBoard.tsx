@@ -766,6 +766,7 @@ export default function ChannelHealthBoard({
               subs: r.subs,
               totalViews: r.totalViews ?? null,
             }))}
+            linkPrefix={linkPrefix}
           />
         </div>
       )}
