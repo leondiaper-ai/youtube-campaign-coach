@@ -231,6 +231,9 @@ export default async function TeamWatcherPage() {
             <h1 className="font-black text-[28px] leading-tight mt-1">
               Team Campaign Board
             </h1>
+            <p className="text-[11px] text-ink/35 mt-1">
+              Monitor YouTube channel health, campaign momentum, and upload activity across active artists.
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <AddArtistModal />

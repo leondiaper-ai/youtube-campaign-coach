@@ -95,6 +95,14 @@ const STATUS_RANK: Record<ChannelState, number> = {
   COLD: 0, 'AT RISK': 1, 'WEAK CONVERSION': 2, BUILDING: 3, HEALTHY: 4,
 };
 
+const STATUS_HELP: Record<ChannelState, string> = {
+  HEALTHY:           'Strong cadence and positive momentum',
+  'WEAK CONVERSION': 'Views are growing faster than subscriber conversion',
+  BUILDING:          'Upload activity present but momentum not yet compounding',
+  'AT RISK':         'Declining momentum or extended gaps between uploads',
+  COLD:              'Long periods of inactivity or declining momentum',
+};
+
 const DATA_STATUS_BADGE: Record<string, { background: string; color: string }> = {
   PARTIAL:     { background: '#FFF5D6', color: '#7A5A00' },
   LIMITED:     { background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' },
@@ -593,19 +601,19 @@ export default function ChannelHealthBoard({
 
       {/* ─── SUMMARY BAR ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-4 gap-3 mb-4">
-        <div className="rounded-xl px-4 py-3" style={{ background: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.bg : SOFT }}>
+        <div className="rounded-xl px-4 py-3" style={{ background: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.bg : SOFT }} title="Strong cadence and positive momentum">
           <div className="text-[24px] font-black" style={{ color: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.fg : 'rgba(14,14,14,0.25)' }}>{growingCount}</div>
           <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.fg : 'rgba(14,14,14,0.25)' }}>Growing</div>
         </div>
-        <div className="rounded-xl px-4 py-3" style={{ background: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.bg : SOFT }}>
+        <div className="rounded-xl px-4 py-3" style={{ background: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.bg : SOFT }} title="Views growing faster than subscriber conversion">
           <div className="text-[24px] font-black" style={{ color: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.fg : 'rgba(14,14,14,0.25)' }}>{weakConvCount}</div>
           <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.fg : 'rgba(14,14,14,0.25)' }}>Weak Conversion</div>
         </div>
-        <div className="rounded-xl px-4 py-3" style={{ background: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.bg : SOFT }}>
+        <div className="rounded-xl px-4 py-3" style={{ background: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.bg : SOFT }} title="Low upload activity limiting discovery potential">
           <div className="text-[24px] font-black" style={{ color: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.fg : 'rgba(14,14,14,0.25)' }}>{underfedCount}</div>
           <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.fg : 'rgba(14,14,14,0.25)' }}>Underfed</div>
         </div>
-        <div className="rounded-xl px-4 py-3" style={{ background: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.bg : SOFT }}>
+        <div className="rounded-xl px-4 py-3" style={{ background: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.bg : SOFT }} title="Long periods of inactivity or declining momentum">
           <div className="text-[24px] font-black" style={{ color: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.fg : 'rgba(14,14,14,0.25)' }}>{coldCount}</div>
           <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.fg : 'rgba(14,14,14,0.25)' }}>Cold</div>
         </div>
@@ -839,6 +847,11 @@ export default function ChannelHealthBoard({
         </button>
         {explainerOpen && (
           <div className="mt-2 p-4 rounded-lg text-[11px] leading-relaxed space-y-2" style={{ background: SOFT, color: 'rgba(14,14,14,0.6)' }}>
+            {singleTab && (
+              <p style={{ color: 'rgba(14,14,14,0.5)' }}>
+                This board helps teams quickly monitor YouTube channel health, upload activity, and campaign momentum. Use it to spot channels needing attention, monitor active campaigns, identify strong upload cadence, and track momentum week-to-week. For deeper audience analytics and traffic source analysis, use YouTube Studio.
+              </p>
+            )}
             <p><strong style={{ color: INK }}>Status</strong> — Each channel gets a health status based on upload cadence, subscriber conversion, and recent activity. Healthy channels are sorted first.</p>
             <p><strong style={{ color: INK }}>Score (A–D)</strong> — Grades how well the channel is being run across three pillars: reach growth, subscriber conversion efficiency, and posting cadence. Scores measure execution quality, not artist popularity.</p>
             <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means data is still building or totals are updating; hover for context.</p>
@@ -854,13 +867,13 @@ export default function ChannelHealthBoard({
           style={{ borderColor: MUTED, background: SOFT }}
         >
           <div>Artist</div>
-          <div>30d trend</div>
-          <div>Status</div>
-          <div className="text-right">Subs</div>
-          <div className="text-right">Subs (7d)</div>
-          <div className="text-right">WoW</div>
-          <div className="text-right">Views (7d)</div>
-          <div className="text-right">WoW</div>
+          <div title="Subscriber trend over the last 30 days">30d trend</div>
+          <div title="Channel health based on cadence, conversion, and activity">Status</div>
+          <div className="text-right" title="Total subscriber count">Subs</div>
+          <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
+          <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
+          <div className="text-right" title="Views gained in the last 7 days">Views (7d)</div>
+          <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
         </div>
 
         {sorted.map((r, i) => {
@@ -946,6 +959,7 @@ export default function ChannelHealthBoard({
                   <span
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em] whitespace-nowrap"
                     style={{ background: st.bg, color: st.fg }}
+                    title={STATUS_HELP[r.status]}
                   >
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
                     {STATE_LABEL[r.status]}
