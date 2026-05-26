@@ -56,6 +56,17 @@ export type RowData = {
   bestAvailableSource?: 'live_7d' | 'recent_snapshot' | 'campaign_period' | 'recent_uploads' | 'last_confirmed' | 'none';
   /** Whether best available data should be used in Top Movers rankings */
   bestAvailableShouldUseInTopMovers?: boolean;
+  /** Multiformat strategy — which YouTube formats are active in the last 90d */
+  multiformat?: {
+    hasShorts: boolean;
+    hasOfficialVideo: boolean;
+    hasLyricVideo: boolean;
+    hasVisualizer: boolean;
+    hasBTS: boolean;
+    hasLiveSession: boolean;
+    formatCount: number;
+    score: 'Strong' | 'Good' | 'Partial' | 'Weak' | 'None';
+  };
 };
 
 type ViewMode = 'managed' | 'market';
@@ -552,6 +563,12 @@ export default function ChannelHealthBoard({
   const underfedCount = activeRows.filter((r) => r.classification === 'UNDERFED').length;
   const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
 
+  // Multiformat strategy counts
+  const mfRows = activeRows.filter((r) => r.multiformat);
+  const mfStrong = mfRows.filter((r) => r.multiformat!.score === 'Strong' || r.multiformat!.score === 'Good').length;
+  const mfPartial = mfRows.filter((r) => r.multiformat!.score === 'Partial').length;
+  const mfWeak = mfRows.filter((r) => r.multiformat!.score === 'Weak' || r.multiformat!.score === 'None').length;
+
   // Insights & movers (managed view only)
   const insights = view === 'managed' ? computeInsights(managedRows) : [];
   const topMovers = view === 'managed' ? computeTopMovers(managedRows) : null;
@@ -618,6 +635,22 @@ export default function ChannelHealthBoard({
           <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.fg : 'rgba(14,14,14,0.25)' }}>Cold</div>
         </div>
       </div>
+
+      {/* ─── Multiformat Strategy Summary ──────────────────────────────── */}
+      {mfRows.length > 0 && (
+        <div className="flex items-center gap-4 mb-4 px-1 text-[10px]" style={{ color: 'rgba(14,14,14,0.45)' }}>
+          <span className="font-bold uppercase tracking-[0.12em]" style={{ color: 'rgba(14,14,14,0.3)' }}>Multiformat</span>
+          <span title="Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)">
+            <span className="font-black" style={{ color: '#0C6A3F' }}>{mfStrong}</span> strong
+          </span>
+          <span title="Channels using 2 formats">
+            <span className="font-black" style={{ color: '#7A5A00' }}>{mfPartial}</span> partial
+          </span>
+          <span title="Channels using 0–1 formats — multiformat strategy not active">
+            <span className="font-black" style={{ color: '#8A1F0C' }}>{mfWeak}</span> weak
+          </span>
+        </div>
+      )}
 
       {/* ─── MANAGED VIEW: What Changed This Week ──────────────────────── */}
       {view === 'managed' && insights.length > 0 && (
@@ -863,12 +896,13 @@ export default function ChannelHealthBoard({
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
         <div
-          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
+          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
           style={{ borderColor: MUTED, background: SOFT }}
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
           <div title="Channel health based on cadence, conversion, and activity">Status</div>
+          <div title="Multiformat strategy — Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session">Formats</div>
           <div className="text-right" title="Total subscriber count">Subs</div>
           <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
           <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
@@ -914,7 +948,7 @@ export default function ChannelHealthBoard({
           return (
             <div key={r.slug}>
               <div
-                className={`grid grid-cols-[1.4fr_0.6fr_0.65fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
+                className={`grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
                   i === sorted.length - 1 && !isExpanded ? '' : 'border-b'
                 }`}
                 style={{ borderColor: MUTED, background: st.rowBg }}
@@ -965,6 +999,7 @@ export default function ChannelHealthBoard({
                     {STATE_LABEL[r.status]}
                   </span>
                 </div>
+                <MultiformatCell multiformat={r.multiformat} />
                 <div className="text-right text-[13px] font-bold tabular-nums">{subsTotal}</div>
                 <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
                   {fmtSubs7Label}
@@ -1023,6 +1058,58 @@ function ProfileTag({ label, value }: { label: string; value: string }) {
       <span className="text-[8px] uppercase tracking-[0.08em] opacity-60">{label}</span>
       {value}
     </span>
+  );
+}
+
+// ── Multiformat Strategy Cell ─────────────────────────────────────────────
+
+const FORMAT_DOTS: { key: string; label: string; color: string }[] = [
+  { key: 'hasShorts',        label: 'S',  color: '#7C3AED' }, // Shorts — purple
+  { key: 'hasOfficialVideo', label: 'V',  color: '#DC2626' }, // Official Video — red
+  { key: 'hasLyricVideo',    label: 'L',  color: '#2563EB' }, // Lyric Video — blue
+  { key: 'hasVisualizer',    label: 'Vz', color: '#059669' }, // Visualizer — green
+  { key: 'hasBTS',           label: 'B',  color: '#D97706' }, // BTS — amber
+  { key: 'hasLiveSession',   label: 'Li', color: '#0891B2' }, // Live Session — cyan
+];
+
+const MF_SCORE_STYLE: Record<string, { bg: string; fg: string }> = {
+  Strong:  { bg: '#E6F8EE', fg: '#0C6A3F' },
+  Good:    { bg: '#EEF2FF', fg: '#4338CA' },
+  Partial: { bg: '#FFF5D6', fg: '#7A5A00' },
+  Weak:    { bg: '#FFE2D8', fg: '#8A1F0C' },
+  None:    { bg: '#F3F0EA', fg: 'rgba(14,14,14,0.35)' },
+};
+
+function MultiformatCell({ multiformat }: { multiformat?: RowData['multiformat'] }) {
+  if (!multiformat) {
+    return <div className="text-[9px] text-ink/20">—</div>;
+  }
+
+  const st = MF_SCORE_STYLE[multiformat.score] ?? MF_SCORE_STYLE.None;
+  const activeFormats = FORMAT_DOTS.filter((f) => (multiformat as Record<string, unknown>)[f.key]);
+  const tooltipParts = FORMAT_DOTS.map(
+    (f) => `${(multiformat as Record<string, unknown>)[f.key] ? '●' : '○'} ${f.label === 'S' ? 'Shorts' : f.label === 'V' ? 'Official Video' : f.label === 'L' ? 'Lyric Video' : f.label === 'Vz' ? 'Visualizer' : f.label === 'B' ? 'BTS' : 'Live Session'}`
+  );
+  const tooltip = `${multiformat.score} multiformat (${multiformat.formatCount}/6)\n${tooltipParts.join('\n')}`;
+
+  return (
+    <div className="flex items-center gap-1.5" title={tooltip}>
+      <span
+        className="text-[8px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded whitespace-nowrap"
+        style={{ background: st.bg, color: st.fg }}
+      >
+        {multiformat.formatCount}/6
+      </span>
+      <div className="flex gap-0.5">
+        {activeFormats.map((f) => (
+          <span
+            key={f.key}
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: f.color }}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 

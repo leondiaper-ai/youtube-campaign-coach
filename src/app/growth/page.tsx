@@ -9,6 +9,7 @@ import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
+import { computeMultiformat } from '@/lib/contentStructure';
 
 export const revalidate = 600;
 
@@ -90,6 +91,7 @@ export default async function ControlPage() {
         lastKnownGoodDaysAgo: nc.lastKnownGood.daysAgo,
         bestAvailableSource: nc.bestAvailable.source,
         bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
+        multiformat: snap?.recentUploads ? computeMultiformat(snap.recentUploads) : undefined,
       };
     })
   );

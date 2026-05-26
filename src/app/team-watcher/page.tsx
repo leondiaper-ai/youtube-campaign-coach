@@ -12,7 +12,7 @@ import {
   getYouTubeGrowthState, getCampaignSignal, getChannelHealth,
   type GrowthInput,
 } from '@/lib/youtubeGrowthOS';
-import { checkContentStructure } from '@/lib/contentStructure';
+import { checkContentStructure, computeMultiformat } from '@/lib/contentStructure';
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
@@ -93,6 +93,7 @@ export default async function TeamWatcherPage() {
         lastKnownGoodDaysAgo: nc.lastKnownGood.daysAgo,
         bestAvailableSource: nc.bestAvailable.source,
         bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
+        multiformat: snap?.recentUploads ? computeMultiformat(snap.recentUploads) : undefined,
       };
     }),
   );

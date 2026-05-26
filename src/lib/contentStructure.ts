@@ -139,3 +139,53 @@ export function checkContentStructure(
   // ── No structural issue — return nothing ────────────────────────────
   return null;
 }
+
+// ── Multiformat Strategy Score ──────────────────────────────────────────────
+//
+// YouTube recommends a multiformat approach: Shorts for discovery,
+// Official Videos as anchors, Lyric Videos + Visualizers for catalogue
+// depth, BTS for connection, Live Sessions for authenticity.
+// This function scores how well a channel follows that strategy.
+
+export type MultiformatScore = {
+  hasShorts: boolean;
+  hasOfficialVideo: boolean;
+  hasLyricVideo: boolean;
+  hasVisualizer: boolean;
+  hasBTS: boolean;
+  hasLiveSession: boolean;
+  formatCount: number;
+  score: 'Strong' | 'Good' | 'Partial' | 'Weak' | 'None';
+};
+
+export function computeMultiformat(uploads: RecentUpload[]): MultiformatScore {
+  // Only consider uploads from the last 90 days
+  const cutoff = Date.now() - 90 * 86400000;
+  const recent = uploads.filter(
+    (u) => new Date(u.publishedAt).getTime() >= cutoff
+  );
+
+  const hasShorts = recent.some((u) => u.durationSec > 0 && u.durationSec <= 62);
+  const hasOfficialVideo = recent.some((u) =>
+    /\b(official\s*(music\s*)?video|official\s*vid)\b/i.test(u.title) ||
+    /\[\s*(music\s*video|official\s*video|official\s*music\s*video)\s*\]/i.test(u.title)
+  );
+  const hasLyricVideo = recent.some((u) => /\blyric\s*(video|vid)?\b/i.test(u.title));
+  const hasVisualizer = recent.some((u) => /\bvisualise?r\b/i.test(u.title));
+  const hasBTS = recent.some((u) => /\b(bts|behind\s*the\s*scenes|making\s*of)\b/i.test(u.title));
+  const hasLiveSession = recent.some((u) =>
+    /\b(live\s*session|acoustic|stripped\s*back|live\s*at|live\s*from)\b/i.test(u.title)
+  );
+
+  const formatCount = [hasShorts, hasOfficialVideo, hasLyricVideo, hasVisualizer, hasBTS, hasLiveSession]
+    .filter(Boolean).length;
+
+  let score: MultiformatScore['score'];
+  if (formatCount >= 5) score = 'Strong';
+  else if (formatCount >= 3) score = 'Good';
+  else if (formatCount >= 2) score = 'Partial';
+  else if (formatCount >= 1) score = 'Weak';
+  else score = 'None';
+
+  return { hasShorts, hasOfficialVideo, hasLyricVideo, hasVisualizer, hasBTS, hasLiveSession, formatCount, score };
+}
