@@ -119,7 +119,7 @@ export default function AddArtistModal() {
 
               {step === 'resolving' ? (
                 <div className="text-[13px] text-ink/50 py-8 text-center">
-                  Resolving channel...
+                  Adding channel...
                 </div>
               ) : (
                 <>
@@ -169,7 +169,7 @@ export default function AddArtistModal() {
                         cursor: channelInput.trim() ? 'pointer' : 'not-allowed',
                       }}
                     >
-                      Resolve + Add
+                      Monitor
                     </button>
                   </div>
                 </>
@@ -289,7 +289,7 @@ export function AddArtistModalInline() {
 
               {step === 'resolving' ? (
                 <div className="text-[13px] text-ink/50 py-8 text-center">
-                  Resolving channel...
+                  Adding channel...
                 </div>
               ) : (
                 <>
@@ -339,7 +339,7 @@ export function AddArtistModalInline() {
                         cursor: channelInput.trim() ? 'pointer' : 'not-allowed',
                       }}
                     >
-                      Resolve + Add
+                      Monitor
                     </button>
                   </div>
                 </>
