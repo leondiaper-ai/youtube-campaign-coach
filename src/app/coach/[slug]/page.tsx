@@ -164,6 +164,8 @@ export default async function CampaignPage({ params }: PageProps) {
       recentUploads={recentUploads}
       dataCoverage={dataCoverage}
       campaignStartDate={artistConfig?.campaignStartDate}
+      timelineText={saved.timelineText}
+      artistName={saved.artist}
     />
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type {
   GeneratedPlan,
@@ -122,6 +123,8 @@ type CampaignDestinationProps = {
   recentUploads?: RecentUpload[];
   dataCoverage?: CampaignDataCoverage;
   campaignStartDate?: string;
+  timelineText?: string;
+  artistName?: string;
 };
 
 type PulseSignal = {
@@ -148,6 +151,8 @@ export default function CampaignDestination({
   recentUploads,
   dataCoverage,
   campaignStartDate,
+  timelineText,
+  artistName,
 }: CampaignDestinationProps) {
   // ═══ UNIFIED PIPELINE — single entry point for all campaign logic ═══
   const pipeline = buildCampaignPipeline({
@@ -604,6 +609,17 @@ export default function CampaignDestination({
         )}
 
 
+        {/* ── Edit Timeline ── */}
+        {timelineText != null && (
+          <EditTimelineSection
+            slug={slug}
+            artistName={artistName ?? plan.artist}
+            currentTimeline={timelineText}
+            channelCtx={channelCtx}
+            campaignStartDate={campaignStartDate}
+          />
+        )}
+
         {/* ── Notes ── */}
         <NotesSection slug={slug} />
 
@@ -965,6 +981,168 @@ function CampaignWall({
             TOTAL VIEWS
           </span>
         </div>
+      </div>
+    </section>
+  );
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EDIT TIMELINE — Edit and regenerate the campaign rollout
+// ══════════════════════════════════════════════════════════════════════════════
+
+function EditTimelineSection({
+  slug,
+  artistName,
+  currentTimeline,
+  channelCtx,
+  campaignStartDate,
+}: {
+  slug: string;
+  artistName: string;
+  currentTimeline: string;
+  channelCtx: ChannelContext | null;
+  campaignStartDate?: string;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(currentTimeline);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const hasChanges = draft.trim() !== currentTimeline.trim();
+
+  const handleSave = async () => {
+    if (!hasChanges || saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          artist: artistName,
+          timeline: draft.trim(),
+          channelCtx,
+          customSlug: slug,
+          campaignStartDate: campaignStartDate ?? null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Failed to regenerate plan');
+        return;
+      }
+      setOpen(false);
+      router.refresh();
+    } catch {
+      setError('Network error — please try again');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setDraft(currentTimeline);
+    setError(null);
+    setOpen(false);
+  };
+
+  return (
+    <section style={{
+      maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0',
+    }}>
+      <div style={{ borderTop: `1px solid ${BONE}`, paddingTop: 20 }}>
+        <button
+          onClick={() => setOpen(!open)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          <span style={{
+            fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+            textTransform: 'uppercase', color: GHOST,
+            fontFamily: MONO,
+          }}>
+            Timeline
+          </span>
+          <span style={{
+            fontSize: 7, color: GHOST,
+            transform: open ? 'rotate(90deg)' : 'none',
+            transition: 'transform 0.15s',
+          }}>▶</span>
+        </button>
+
+        {open && (
+          <div style={{ marginTop: 12 }}>
+            <p style={{
+              fontSize: 11, color: SMOKE, marginTop: 0, marginBottom: 10, lineHeight: 1.5,
+            }}>
+              Edit the timeline below and save to regenerate the rollout plan. Each line should be a date followed by an event name.
+            </p>
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={Math.max(6, draft.split('\n').length + 1)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: 12,
+                lineHeight: 1.6,
+                color: INK,
+                border: `1px solid ${hasChanges ? '#D97706' : BONE}`,
+                borderRadius: 4,
+                background: WHITE,
+                outline: 'none',
+                fontFamily: MONO,
+                resize: 'vertical',
+                boxSizing: 'border-box',
+              }}
+            />
+
+            {error && (
+              <div style={{
+                marginTop: 8, fontSize: 11, color: '#DC2626', lineHeight: 1.4,
+              }}>
+                {error}
+              </div>
+            )}
+
+            <div style={{
+              display: 'flex', gap: 8, marginTop: 10,
+            }}>
+              <button
+                onClick={handleSave}
+                disabled={!hasChanges || saving}
+                style={{
+                  fontSize: 11, fontWeight: 700, padding: '8px 20px',
+                  background: hasChanges && !saving ? INK : BONE,
+                  color: hasChanges && !saving ? PAPER : GHOST,
+                  border: 'none', borderRadius: 4,
+                  cursor: hasChanges && !saving ? 'pointer' : 'default',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {saving ? 'Regenerating...' : 'Save & Regenerate'}
+              </button>
+              <button
+                onClick={handleCancel}
+                style={{
+                  fontSize: 11, fontWeight: 600, padding: '8px 16px',
+                  background: 'none',
+                  color: SMOKE,
+                  border: `1px solid ${BONE}`, borderRadius: 4,
+                  cursor: 'pointer',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
