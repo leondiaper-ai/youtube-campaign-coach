@@ -413,9 +413,44 @@ function computeFixThisWeek(r: RowData): string {
   return 'Review channel strategy and set a content target';
 }
 
+// ─── Top Videos type ─────────────────────────────────────────────────────────
+
+export type TopVideo = {
+  videoId: string;
+  title: string;
+  artistName: string;
+  artistSlug: string;
+  views: number;
+  velocity: number;       // views per day since publish
+  publishedAt: string;
+  daysAgo: number;
+  isShort: boolean;
+};
+
+// ─── Market Format Stats type ────────────────────────────────────────────────
+
+export type MarketFormatStats = {
+  longformCount: number;
+  longformViews: number;
+  shortsCount: number;
+  shortsViews: number;
+  totalUploads: number;
+  activeArtists: number;  // artists who uploaded in the period
+};
+
 // ─── Board Component ──────────────────────────────────────────────────────────
 
-export default function ChannelHealthBoard({ rows, linkPrefix = '/watcher' }: { rows: RowData[]; linkPrefix?: string }) {
+export default function ChannelHealthBoard({
+  rows,
+  linkPrefix = '/watcher',
+  topVideos,
+  marketFormatStats,
+}: {
+  rows: RowData[];
+  linkPrefix?: string;
+  topVideos?: TopVideo[];
+  marketFormatStats?: MarketFormatStats;
+}) {
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [moversOpen, setMoversOpen] = useState(false);
@@ -535,6 +570,54 @@ export default function ChannelHealthBoard({ rows, linkPrefix = '/watcher' }: { 
         </div>
       )}
 
+      {/* ─── MANAGED VIEW: Top Performing Videos ───────────────────────── */}
+      {view === 'managed' && topVideos && topVideos.length > 0 && (
+        <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
+            Top Performing Videos This Week
+          </div>
+          <div className="space-y-2">
+            {topVideos.map((v, i) => (
+              <div key={v.videoId} className="flex items-center gap-3 text-[12px]">
+                <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{i + 1}.</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`https://youtube.com/watch?v=${v.videoId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold truncate hover:underline"
+                      style={{ color: INK, textDecoration: 'none' }}
+                    >
+                      {v.title}
+                    </a>
+                    {v.isShort && (
+                      <span className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase shrink-0" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.4)' }}>
+                        Short
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[10px] text-ink/35 mt-0.5">
+                    <Link href={`${linkPrefix}/${v.artistSlug}`} className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>
+                      {v.artistName}
+                    </Link>
+                    {' · '}{v.daysAgo === 0 ? 'today' : v.daysAgo === 1 ? '1d ago' : `${v.daysAgo}d ago`}
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-[14px] font-black tabular-nums" style={{ color: '#0C6A3F' }}>
+                    {fmtNum(v.velocity)}<span className="text-[9px] font-bold text-ink/30">/day</span>
+                  </div>
+                  <div className="text-[9px] text-ink/30 tabular-nums">
+                    {fmtNum(v.views)} total
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ─── MANAGED VIEW: Top Movers (expandable) ─────────────────────── */}
       {view === 'managed' && topMovers && (
         topMovers.topViews.length > 0 || topMovers.topSubs.length > 0 ||
@@ -579,6 +662,32 @@ export default function ChannelHealthBoard({ rows, linkPrefix = '/watcher' }: { 
               </div>
             ))}
           </div>
+
+          {/* Content format breakdown */}
+          {marketFormatStats && marketFormatStats.totalUploads > 0 && (
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-3 pt-2 border-t lg:grid-cols-4" style={{ borderColor: MUTED }}>
+              <div>
+                <div className="text-[18px] font-black tabular-nums">{marketFormatStats.longformCount}</div>
+                <div className="text-[10px] text-ink/40 leading-snug">Long-form uploads (30d)</div>
+              </div>
+              <div>
+                <div className="text-[18px] font-black tabular-nums">{fmtNum(marketFormatStats.longformViews)}</div>
+                <div className="text-[10px] text-ink/40 leading-snug">Long-form views</div>
+              </div>
+              <div>
+                <div className="text-[18px] font-black tabular-nums">
+                  {marketFormatStats.totalUploads > 0
+                    ? `${Math.round((marketFormatStats.longformCount / marketFormatStats.totalUploads) * 100)}%`
+                    : '—'}
+                </div>
+                <div className="text-[10px] text-ink/40 leading-snug">Long-form share</div>
+              </div>
+              <div>
+                <div className="text-[18px] font-black tabular-nums">{marketFormatStats.activeArtists}</div>
+                <div className="text-[10px] text-ink/40 leading-snug">Artists uploading (30d)</div>
+              </div>
+            </div>
+          )}
 
           {/* Patterns */}
           <div className="space-y-1.5 pt-2 border-t" style={{ borderColor: MUTED }}>

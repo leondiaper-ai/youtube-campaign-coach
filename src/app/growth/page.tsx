@@ -8,7 +8,7 @@ import { listCustomArtists } from '@/lib/artistStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
-import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
+import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 
 export const revalidate = 600;
 
@@ -94,6 +94,80 @@ export default async function ControlPage() {
     })
   );
 
+  // ── Top Performing Videos (managed artists, last 14d, ranked by velocity) ──
+  const topVideos: TopVideo[] = (() => {
+    const now = Date.now();
+    const cutoff = 14 * 86400000; // 14 days
+    const videos: TopVideo[] = [];
+
+    for (const a of allArtists) {
+      if (!isVirginOwned(a)) continue;
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+      if (!snap?.recentUploads) continue;
+
+      for (const u of snap.recentUploads) {
+        const ageMs = now - new Date(u.publishedAt).getTime();
+        if (ageMs > cutoff || ageMs < 0) continue; // only last 14 days
+        const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
+        const velocity = Math.round(u.viewCount / daysAgo);
+        if (velocity < 100) continue; // skip negligible
+
+        videos.push({
+          videoId: u.id,
+          title: u.title,
+          artistName: a.name,
+          artistSlug: a.slug,
+          views: u.viewCount,
+          velocity,
+          publishedAt: u.publishedAt,
+          daysAgo,
+          isShort: u.durationSec <= 62,
+        });
+      }
+    }
+
+    return videos
+      .sort((a, b) => b.velocity - a.velocity)
+      .slice(0, 5);
+  })();
+
+  // ── Market Format Stats (long-form vs Shorts across market artists, 30d) ──
+  const marketFormatStats: MarketFormatStats = (() => {
+    let longformCount = 0;
+    let longformViews = 0;
+    let shortsCount = 0;
+    let shortsViews = 0;
+    const activeArtistSlugs = new Set<string>();
+
+    for (const a of allArtists) {
+      if (isVirginOwned(a)) continue; // market only
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+      if (!snap?.recentUploads) continue;
+
+      let hasUpload = false;
+      for (const u of snap.recentUploads) {
+        hasUpload = true;
+        if (u.durationSec <= 62) {
+          shortsCount++;
+          shortsViews += u.viewCount;
+        } else {
+          longformCount++;
+          longformViews += u.viewCount;
+        }
+      }
+      if (hasUpload) activeArtistSlugs.add(a.slug);
+    }
+
+    return {
+      longformCount,
+      longformViews,
+      shortsCount,
+      shortsViews,
+      totalUploads: longformCount + shortsCount,
+      activeArtists: activeArtistSlugs.size,
+    };
+  })();
+
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[1080px] mx-auto px-6 py-10">
@@ -144,7 +218,7 @@ export default async function ControlPage() {
         </div>
 
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard rows={rows} />
+        <ChannelHealthBoard rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} />
 
         {/* Navigation flow */}
         <div className="mt-8 flex items-center justify-center gap-3 text-[11px]">
