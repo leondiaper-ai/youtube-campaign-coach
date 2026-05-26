@@ -496,11 +496,14 @@ export default function ChannelHealthBoard({
   linkPrefix = '/watcher',
   topVideos,
   marketFormatStats,
+  singleTab = false,
 }: {
   rows: RowData[];
   linkPrefix?: string;
   topVideos?: TopVideo[];
   marketFormatStats?: MarketFormatStats;
+  /** Hide the managed/market toggle and show only the managed view */
+  singleTab?: boolean;
 }) {
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -554,35 +557,39 @@ export default function ChannelHealthBoard({
   return (
     <>
       {/* ─── VIEW TOGGLE + HELPER LINE ──────────────────────────────────── */}
-      <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
-        <button
-          onClick={() => { setView('managed'); setExpandedRow(null); }}
-          className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
-          style={{
-            background: view === 'managed' ? '#FFFFFF' : 'transparent',
-            color: view === 'managed' ? INK : 'rgba(14,14,14,0.4)',
-            boxShadow: view === 'managed' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-          }}
-        >
-          Virgin Managed ({managedRows.length})
-        </button>
-        <button
-          onClick={() => { setView('market'); setExpandedRow(null); }}
-          className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
-          style={{
-            background: view === 'market' ? '#FFFFFF' : 'transparent',
-            color: view === 'market' ? INK : 'rgba(14,14,14,0.4)',
-            boxShadow: view === 'market' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-          }}
-        >
-          Market Watch ({marketRows.length})
-        </button>
-      </div>
-      <div className="text-[10px] text-ink/35 mb-5 pl-1">
-        {view === 'managed'
-          ? 'Owned / priority channels we can act on'
-          : 'External channels used to spot patterns, benchmarks and rollout signals'}
-      </div>
+      {!singleTab && (
+        <>
+          <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
+            <button
+              onClick={() => { setView('managed'); setExpandedRow(null); }}
+              className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
+              style={{
+                background: view === 'managed' ? '#FFFFFF' : 'transparent',
+                color: view === 'managed' ? INK : 'rgba(14,14,14,0.4)',
+                boxShadow: view === 'managed' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              Virgin Managed ({managedRows.length})
+            </button>
+            <button
+              onClick={() => { setView('market'); setExpandedRow(null); }}
+              className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
+              style={{
+                background: view === 'market' ? '#FFFFFF' : 'transparent',
+                color: view === 'market' ? INK : 'rgba(14,14,14,0.4)',
+                boxShadow: view === 'market' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              }}
+            >
+              Market Watch ({marketRows.length})
+            </button>
+          </div>
+          <div className="text-[10px] text-ink/35 mb-5 pl-1">
+            {view === 'managed'
+              ? 'Owned / priority channels we can act on'
+              : 'External channels used to spot patterns, benchmarks and rollout signals'}
+          </div>
+        </>
+      )}
 
       {/* ─── SUMMARY BAR ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-4 gap-3 mb-4">

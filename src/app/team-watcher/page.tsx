@@ -257,7 +257,7 @@ export default async function TeamWatcherPage() {
         {/* Channel Health table */}
         {hasEntries && (
           <>
-            <ChannelHealthBoard rows={rows} linkPrefix="/team-watcher" />
+            <ChannelHealthBoard rows={rows} linkPrefix="/team-watcher" singleTab />
 
             {/* Active Campaigns section (pinned entries) */}
             {campaignCards.length > 0 && (
