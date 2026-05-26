@@ -103,6 +103,11 @@ export default function HomePage() {
             title="Active Campaigns"
             desc="Campaign status board with decision signals."
           />
+          <ToolCard
+            href="/team-watcher"
+            title="Team Watcher"
+            desc="Shared team board — add artists, track campaigns, monitor health."
+          />
         </div>
 
         <div
