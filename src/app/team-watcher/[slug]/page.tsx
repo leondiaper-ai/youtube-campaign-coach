@@ -26,7 +26,7 @@ import {
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
 import Sparkline from '@/components/Sparkline';
-import TeamDetailClient from './TeamDetailClient';
+import TeamDetailClient, { type SnapshotData } from './TeamDetailClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -378,12 +378,36 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
           </div>
         </div>
 
-        {/* Team notes — client component for interactivity */}
+        {/* Team notes + snapshot — client component for interactivity */}
         <TeamDetailClient
           channelId={entry.channelId}
           initialNotes={entry.teamNotes}
           campaignState={entry.campaignState}
           regionTag={entry.regionTag}
+          snapshotData={{
+            artistName: entry.displayName,
+            channelState: STATE_LABEL[channelState],
+            campaignState: entry.campaignState,
+            diagnosis: derived?.reason ?? 'No data yet',
+            nextAction: derived?.nextAction ?? null,
+            cadenceLine: nc.cadence.cadenceLine,
+            subs: nc.subs,
+            views7d: views7Val,
+            subs7d: subs7Val,
+            uploads30d: nc.cadence.uploads30d,
+            shorts30d: nc.cadence.shorts30d,
+            lastUpDays: lastUpDays ?? null,
+            spk,
+            viewsWoW: viewsWoW?.value ?? null,
+            subsWoW: subsWoW?.value ?? null,
+            campaignName: entry.campaignName,
+            campaignDay,
+            campaignViewsDelta,
+            campaignSubsDelta,
+            campaignContentViews,
+            campaignContentCount,
+            campaignShortsCount,
+          }}
         />
       </div>
     </main>
