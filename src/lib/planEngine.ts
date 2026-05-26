@@ -190,7 +190,13 @@ export function parseTimeline(text: string): ParsedEvent[] {
     const dt = new Date(Date.UTC(year, month, day, 12, 0, 0));
     const dateISO = dt.toISOString().split('T')[0];
 
-    let rest = line.slice(consumed).replace(/^\s*(?:20\d{2})?\s*/, '').replace(/^\s*[-–—:]+\s*/, '').trim();
+    let rest = line.slice(consumed)
+      .replace(/^\s*(?:20\d{2})?\s*/, '')       // Strip year at start of remainder
+      .replace(/^\s*[-–—:,]+\s*/, '')            // Strip leading separators
+      .replace(/\b20\d{2}\b/g, '')               // Strip any remaining year references
+      .replace(/^\s*[-–—:,]+\s*/, '')            // Clean up separators exposed by year removal
+      .replace(/\s{2,}/g, ' ')                   // Collapse double spaces
+      .trim();
     if (!rest || rest.length < 3) continue;
 
     const kind = classifyEvent(rest);

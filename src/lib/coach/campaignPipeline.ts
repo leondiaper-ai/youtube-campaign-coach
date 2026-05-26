@@ -445,8 +445,11 @@ function extractPlanMoments(
 
 function cleanTitle(title: string): string {
   return title
+    .replace(/,?\s*\b20\d{2}\b/g, '')            // Strip ", 2026" or "2026" year refs
     .replace(/^(Upload|Post|Create|Film|Record|Publish|Release)\s+/i, '')
     .replace(/\s*(short|video|post|clip)$/i, '')
+    .replace(/^\s*[-–—:,]+\s*/, '')               // Clean leading separators exposed by year removal
+    .replace(/\s{2,}/g, ' ')                      // Collapse double spaces
     .trim() || title;
 }
 
