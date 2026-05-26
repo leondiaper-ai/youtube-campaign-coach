@@ -26,7 +26,8 @@ import {
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
 import Sparkline from '@/components/Sparkline';
-import TeamDetailClient, { type SnapshotData } from './TeamDetailClient';
+import TeamDetailClient, { type SnapshotData, type CampaignTrackingData, type WeeklyProgressEntry } from './TeamDetailClient';
+import { checkContentStructure } from '@/lib/contentStructure';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,6 +154,93 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
   const campaignContentViews = campaignUploads.reduce((sum: number, u: { viewCount: number }) => sum + u.viewCount, 0);
   const campaignContentCount = campaignUploads.length;
   const campaignShortsCount = campaignUploads.filter((u: { durationSec: number }) => u.durationSec <= 62).length;
+
+  // ── Campaign tracking data (weekly progress, trend, structure) ────────
+  let campaignTracking: CampaignTrackingData | undefined;
+  if (campaignStart && campaignDay) {
+    const startTs = new Date(campaignStart).getTime();
+    const uploads = campaignUploads as { publishedAt: string; viewCount: number; durationSec: number; id: string; title: string }[];
+
+    // Weekly progress from history
+    const weeklyProgress: WeeklyProgressEntry[] = [];
+    const relevantHistory = history
+      .filter((h: { ts: string; views?: number | null; subs?: number | null }) =>
+        new Date(h.ts).getTime() >= startTs && (h.views != null || h.subs != null)
+      )
+      .sort((a: { ts: string }, b: { ts: string }) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+
+    if (relevantHistory.length >= 2) {
+      let weekNum = 1;
+      let windowStart = startTs;
+      let baseline = relevantHistory[0];
+
+      while (windowStart < Date.now()) {
+        const windowEnd = windowStart + 7 * 86400000;
+        const inWindow = relevantHistory.filter((h: { ts: string }) => {
+          const t = new Date(h.ts).getTime();
+          return t >= windowStart && t < windowEnd;
+        });
+        const latest = inWindow.length > 0 ? inWindow[inWindow.length - 1] : null;
+
+        if (latest) {
+          const vd = (latest.views != null && baseline.views != null)
+            ? Math.max(0, latest.views - baseline.views) : null;
+          const sd = (latest.subs != null && baseline.subs != null)
+            ? latest.subs - baseline.subs : null;
+          const status = (vd == null && sd == null) ? 'partial' as const
+            : (vd != null || sd != null) ? 'confirmed' as const : 'partial' as const;
+          weeklyProgress.push({
+            week: weekNum,
+            views7d: vd,
+            subs7d: sd,
+            channelHealth: STATE_LABEL[channelState],
+            campaignSignal: campSig.label,
+            status,
+          });
+          baseline = latest;
+        } else {
+          weeklyProgress.push({
+            week: weekNum,
+            views7d: null,
+            subs7d: null,
+            channelHealth: STATE_LABEL[channelState],
+            campaignSignal: campSig.label,
+            status: 'missing',
+          });
+        }
+        weekNum++;
+        windowStart = windowEnd;
+      }
+    }
+
+    // Current/previous week views for momentum
+    const currentWeekViews = weeklyProgress.length > 0 ? weeklyProgress[weeklyProgress.length - 1].views7d : null;
+    const previousWeekViews = weeklyProgress.length >= 2 ? weeklyProgress[weeklyProgress.length - 2].views7d : null;
+
+    // Content structure warning — use full recentUploads from snap (includes all required fields)
+    const campaignRecentUploads = (snap?.recentUploads ?? []).filter(
+      (u: { publishedAt: string }) => new Date(u.publishedAt).getTime() >= startTs,
+    );
+    const structureWarning = checkContentStructure(campaignRecentUploads);
+
+    campaignTracking = {
+      campaignName: entry.campaignName || 'Tracking',
+      campaignDay,
+      contentViews: campaignContentViews,
+      channelViewsDelta: campaignViewsDelta,
+      subsGained: campaignSubsDelta,
+      contentMix: {
+        uploads: campaignContentCount,
+        shorts: campaignShortsCount,
+        videos: campaignContentCount - campaignShortsCount,
+      },
+      currentWeekViews,
+      previousWeekViews,
+      weeklyProgress,
+      structureWarning: structureWarning ? { headline: structureWarning.headline, detail: structureWarning.detail } : null,
+      campaignSignalLabel: campSig.label,
+    };
+  }
 
   // Sparkline data
   const sparkColor = (() => {
@@ -319,42 +407,6 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
           </div>
         </div>
 
-        {/* Campaign tracking block */}
-        {campaignDay != null && entry.campaignName && (
-          <section className="mt-8">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full" style={{ background: '#2C6BFF' }} />
-              <h2 className="text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: '#3B5998' }}>
-                Campaign · {entry.campaignName} · Day {campaignDay}
-              </h2>
-            </div>
-            <div className="grid grid-cols-4 gap-3">
-              <MetricTile
-                label="Content views"
-                value={fmtNum(campaignContentViews)}
-                sub={`${campaignContentCount} uploads since ${new Date(campaignStart!).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
-              />
-              <MetricTile
-                label="Channel views"
-                value={campaignViewsDelta != null ? fmtDelta(campaignViewsDelta) : '—'}
-                color={campaignViewsDelta != null ? deltaColor(campaignViewsDelta) : undefined}
-                sub={`Day ${campaignDay}`}
-              />
-              <MetricTile
-                label="Subs gained"
-                value={campaignSubsDelta != null ? fmtDelta(campaignSubsDelta) : '—'}
-                color={campaignSubsDelta != null ? deltaColor(campaignSubsDelta) : undefined}
-                sub={`Day ${campaignDay}`}
-              />
-              <MetricTile
-                label="Content mix"
-                value={`${campaignContentCount} uploads`}
-                sub={`${campaignShortsCount} Shorts · ${campaignContentCount - campaignShortsCount} videos`}
-              />
-            </div>
-          </section>
-        )}
-
         {/* Actions from derived */}
         {derived?.nextAction && (
           <div className="mt-8 rounded-lg p-4" style={{ background: SOFT }}>
@@ -378,12 +430,15 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
           </div>
         </div>
 
-        {/* Team notes + snapshot — client component for interactivity */}
+        {/* Team notes + snapshot + campaign — client component for interactivity */}
         <TeamDetailClient
           channelId={entry.channelId}
           initialNotes={entry.teamNotes}
           campaignState={entry.campaignState}
           regionTag={entry.regionTag}
+          hasCampaign={!!campaignStart && !!entry.campaignName}
+          initialCampaignName={entry.campaignName}
+          campaignTracking={campaignTracking}
           snapshotData={{
             artistName: entry.displayName,
             channelState: STATE_LABEL[channelState],
