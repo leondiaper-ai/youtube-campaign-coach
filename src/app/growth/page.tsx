@@ -126,9 +126,8 @@ export default async function ControlPage() {
       }
     }
 
-    return videos
-      .sort((a, b) => b.velocity - a.velocity)
-      .slice(0, 5);
+    // Return all qualifying videos — component splits into Shorts vs Long-form
+    return videos.sort((a, b) => b.velocity - a.velocity);
   })();
 
   // ── Market Format Stats (long-form vs Shorts across market artists, 30d) ──
