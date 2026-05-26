@@ -311,6 +311,57 @@ function computeTopMovers(rows: RowData[]): {
   return { topViews, topSubs, biggestDecline, cadenceRisk };
 }
 
+// ─── Best in Class: Consistency Leaders ──────────────────────────────────
+
+type ConsistencyEntry = {
+  name: string;
+  slug: string;
+  uploads30d: number;
+  shorts30d: number;
+  longform30d: number;
+  status: ChannelState;
+  classification: ArtistClassification;
+  /** Format split label */
+  formatLabel: string;
+  /** Whether channel is healthy/growing */
+  isHealthy: boolean;
+};
+
+function computeConsistencyLeaders(rows: RowData[], max: number = 5): ConsistencyEntry[] {
+  return [...rows]
+    .filter((r) => r.uploads30d >= 2) // at least 2 uploads to qualify
+    .sort((a, b) => {
+      // Primary: uploads30d (highest cadence first)
+      const cadenceDiff = b.uploads30d - a.uploads30d;
+      if (cadenceDiff !== 0) return cadenceDiff;
+      // Tiebreaker: healthy status ranks higher
+      return STATUS_RANK[b.status] - STATUS_RANK[a.status];
+    })
+    .slice(0, max)
+    .map((r) => {
+      const longform = r.uploads30d - r.shorts30d;
+      let formatLabel = '';
+      if (r.shorts30d > 0 && longform > 0) {
+        formatLabel = `${longform} long-form · ${r.shorts30d} Shorts`;
+      } else if (r.shorts30d > 0) {
+        formatLabel = `${r.shorts30d} Shorts`;
+      } else {
+        formatLabel = `${longform} long-form`;
+      }
+      return {
+        name: r.name,
+        slug: r.slug,
+        uploads30d: r.uploads30d,
+        shorts30d: r.shorts30d,
+        longform30d: longform,
+        status: r.status,
+        classification: r.classification,
+        formatLabel,
+        isHealthy: r.status === 'HEALTHY' || r.classification === 'GROWING',
+      };
+    });
+}
+
 // ─── Strategy Profile per artist ─────────────────────────────────────────────
 
 type StrategyProfile = {
@@ -496,6 +547,9 @@ export default function ChannelHealthBoard({
 
   // Market benchmark read (market view)
   const benchmarkRead = view === 'market' && marketBenchmarks ? buildBenchmarkRead(marketBenchmarks, marketRows) : null;
+
+  // Consistency leaders (both views)
+  const consistencyLeaders = computeConsistencyLeaders(activeRows);
 
   return (
     <>
@@ -723,6 +777,55 @@ export default function ChannelHealthBoard({
               totalViews: r.totalViews ?? null,
             }))}
           />
+        </div>
+      )}
+
+      {/* ─── BEST IN CLASS: Consistency Leaders ──────────────────────── */}
+      {consistencyLeaders.length > 0 && (
+        <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
+            Best in Class — Consistency
+          </div>
+          <div className="space-y-2">
+            {consistencyLeaders.map((c, i) => {
+              const st = STATUS_STYLE[c.status];
+              return (
+                <div key={c.slug} className="flex items-center gap-3 text-[12px]">
+                  <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{i + 1}.</span>
+                  <Link
+                    href={`${linkPrefix}/${c.slug}`}
+                    className="font-bold hover:underline min-w-0 truncate"
+                    style={{ color: INK, textDecoration: 'none' }}
+                  >
+                    {c.name}
+                  </Link>
+                  <span
+                    className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0"
+                    style={{ background: st.bg, color: st.fg }}
+                  >
+                    {STATE_LABEL[c.status]}
+                  </span>
+                  <span className="text-ink/35 text-[11px] shrink-0 ml-auto tabular-nums">
+                    <span className="font-black" style={{ color: INK }}>{c.uploads30d}</span>
+                    <span className="text-ink/30"> uploads</span>
+                  </span>
+                  <span className="text-[10px] text-ink/30 shrink-0 hidden sm:inline">
+                    {c.formatLabel}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {view === 'managed' && (
+            <div className="mt-3 text-[10px] text-ink/30 leading-snug">
+              Channels with the highest sustained upload cadence over the last 30 days.
+            </div>
+          )}
+          {view === 'market' && (
+            <div className="mt-3 text-[10px] text-ink/30 leading-snug">
+              Market artists leading on content consistency — benchmark for cadence targets.
+            </div>
+          )}
         </div>
       )}
 
