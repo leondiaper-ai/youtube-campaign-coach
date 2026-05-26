@@ -399,14 +399,24 @@ export function buildReleaseClusters(
   // content (teasers, shorts, warm-up) without pulling in ancient history.
   const PRE_CAMPAIGN_BUFFER_DAYS = 30;
 
-  const campaignStart = options.campaignStartDate
+  const parsedStart = options.campaignStartDate
     ? new Date(options.campaignStartDate).getTime()
-    : null;
+    : NaN;
+  // Guard against empty/invalid dates — NaN is falsy but also not null
+  const campaignStart = Number.isFinite(parsedStart) ? parsedStart : null;
   const campaignEnd = campaignStart && options.campaignWeeks
     ? campaignStart + options.campaignWeeks * 7 * 86400000
     : campaignStart
       ? campaignStart + 52 * 7 * 86400000 // Default 1-year window if no duration specified
       : null;
+
+  // FALLBACK: If no valid campaign start date, use a hard 6-month lookback
+  // from today. This prevents ancient content (years old) from appearing
+  // as release moments when the campaign date is missing.
+  const MAX_AGE_FALLBACK_DAYS = 180;
+  const fallbackCutoff = campaignStart
+    ? null  // Campaign window handles it
+    : Date.now() - MAX_AGE_FALLBACK_DAYS * 86400000;
 
   // Pre-compute campaign event keywords for cross-referencing
   const eventKeywords: string[][] = (options.campaignEvents ?? []).map(e =>
@@ -442,6 +452,9 @@ export function buildReleaseClusters(
       if (uploadDate < windowStart || uploadDate > campaignEnd) {
         continue; // Hard cutoff — nothing outside the campaign window
       }
+    } else if (fallbackCutoff && uploadDate < fallbackCutoff) {
+      // No campaign date available — use 6-month maximum age fallback
+      continue;
     }
 
     anchors.push(upload);
