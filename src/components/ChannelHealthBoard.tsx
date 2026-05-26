@@ -415,7 +415,7 @@ function computeFixThisWeek(r: RowData): string {
 
 // ─── Board Component ──────────────────────────────────────────────────────────
 
-export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
+export default function ChannelHealthBoard({ rows, linkPrefix = '/watcher' }: { rows: RowData[]; linkPrefix?: string }) {
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [moversOpen, setMoversOpen] = useState(false);
@@ -554,10 +554,10 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
           </button>
           {moversOpen && (
             <div className="grid grid-cols-2 gap-4 px-5 pb-4 lg:grid-cols-4">
-              <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} />
-              <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} />
-              <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} />
-              <MoverColumn title="Cadence Risk" items={topMovers.cadenceRisk} />
+              <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} linkPrefix={linkPrefix} />
+              <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} linkPrefix={linkPrefix} />
+              <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} />
+              <MoverColumn title="Cadence Risk" items={topMovers.cadenceRisk} linkPrefix={linkPrefix} />
             </div>
           )}
         </div>
@@ -700,7 +700,7 @@ export default function ChannelHealthBoard({ rows }: { rows: RowData[] }) {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/watcher/${r.slug}`}
+                      href={`${linkPrefix}/${r.slug}`}
                       className="font-black text-[14px] truncate hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -802,7 +802,7 @@ function ProfileTag({ label, value }: { label: string; value: string }) {
   );
 }
 
-function MoverColumn({ title, items }: { title: string; items: MoverEntry[] }) {
+function MoverColumn({ title, items, linkPrefix = '/watcher' }: { title: string; items: MoverEntry[]; linkPrefix?: string }) {
   if (items.length === 0) {
     return (
       <div>
@@ -817,7 +817,7 @@ function MoverColumn({ title, items }: { title: string; items: MoverEntry[] }) {
       <div className="space-y-1">
         {items.map((item, i) => (
           <div key={item.slug} className="flex items-center justify-between gap-2 text-[11px]">
-            <Link href={`/watcher/${item.slug}`} className="truncate text-ink/60 hover:underline">
+            <Link href={`${linkPrefix}/${item.slug}`} className="truncate text-ink/60 hover:underline">
               {i + 1}. {item.name}
             </Link>
             <span className="tabular-nums font-bold text-ink/50 shrink-0">{item.value}</span>
