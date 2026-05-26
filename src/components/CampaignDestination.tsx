@@ -171,6 +171,7 @@ export default function CampaignDestination({
     releaseClusters,
     planMoments: moments,
     activePlanMoment: activeMoment,
+    activeWindowMoment,
     allByRecency,
     shorts,
     longform,
@@ -464,6 +465,7 @@ export default function CampaignDestination({
             in the campaign, not which video is performing best.
         ══════════════════════════════════════════════════════════════ */}
         {activeMoment ? (
+          /* Plan-driven active moment — no narrative anchor override */
           <section style={{
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
@@ -476,7 +478,6 @@ export default function CampaignDestination({
               position: 'relative',
               boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
             }}>
-              {/* THIS WEEK banner */}
               <div style={{
                 position: 'absolute',
                 top: -13, left: 20,
@@ -490,46 +491,89 @@ export default function CampaignDestination({
                   fontFamily: MONO,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 }}>
-                  This Week
+                  Active Window
                 </span>
               </div>
               <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
             </div>
           </section>
         ) : narrative.activeMoment ? (
-          /* No plan-driven active moment — use narrative engine as primary */
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '24px 40px 0',
-          }}>
-            <div style={{
-              background: WHITE,
-              border: `2px solid ${phaseTone?.accent ?? '#DC2626'}`,
-              borderRadius: 10,
-              padding: '20px 24px 24px',
-              position: 'relative',
-              boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
+          /* Narrative anchor is hero — the flagship release is still the gravitational centre */
+          <>
+            <section style={{
+              maxWidth: 1200, margin: '0 auto',
+              padding: '24px 40px 0',
             }}>
-              {/* RIGHT NOW banner */}
               <div style={{
-                position: 'absolute',
-                top: -13, left: 20,
-                display: 'flex', alignItems: 'center', gap: 8,
+                background: WHITE,
+                border: `2px solid ${phaseTone?.accent ?? '#DC2626'}`,
+                borderRadius: 10,
+                padding: '20px 24px 24px',
+                position: 'relative',
+                boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
               }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  padding: '4px 14px', borderRadius: 4,
-                  background: phaseTone?.accent ?? '#DC2626', color: WHITE,
-                  fontFamily: MONO,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                <div style={{
+                  position: 'absolute',
+                  top: -13, left: 20,
+                  display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  Right Now
-                </span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    padding: '4px 14px', borderRadius: 4,
+                    background: phaseTone?.accent ?? '#DC2626', color: WHITE,
+                    fontFamily: MONO,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  }}>
+                    Campaign Anchor
+                  </span>
+                  {narrative.activeMoment.state === 'sustaining' && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      padding: '3px 10px', borderRadius: 3,
+                      background: '#059669', color: WHITE,
+                    }}>
+                      Sustaining
+                    </span>
+                  )}
+                </div>
+                <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
               </div>
-              <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
-            </div>
-          </section>
+            </section>
+
+            {/* Secondary: Active Window — current tactical moment from the plan */}
+            {activeWindowMoment && activeWindowMoment.timing === 'current' && (
+              <section style={{
+                maxWidth: 1200, margin: '0 auto',
+                padding: '16px 40px 0',
+              }}>
+                <div style={{
+                  background: WHITE,
+                  border: `1px solid ${BONE}`,
+                  borderRadius: 8,
+                  padding: '16px 20px 20px',
+                  position: 'relative',
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: -10, left: 16,
+                  }}>
+                    <span style={{
+                      fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      padding: '3px 10px', borderRadius: 3,
+                      background: BONE, color: SMOKE,
+                      fontFamily: MONO,
+                    }}>
+                      Active Window
+                    </span>
+                  </div>
+                  <LiveMomentBlock moment={activeWindowMoment} phase={currentPhase ?? activeWindowMoment.phase} />
+                </div>
+              </section>
+            )}
+          </>
         ) : (
           <section style={{
             maxWidth: 1200, margin: '0 auto',

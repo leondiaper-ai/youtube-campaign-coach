@@ -193,8 +193,10 @@ export type CampaignPipelineState = {
   // ── Plan Moments ──
   /** Plan-based moments (from generated plan + match result) */
   planMoments: PlanMoment[];
-  /** The active plan moment (current or most recent past) */
+  /** The active plan moment (current or most recent past) — may be null when narrative anchor takes priority */
   activePlanMoment: PlanMoment | null;
+  /** The raw active window moment — always present if a plan moment is current, even when narrative anchor is hero */
+  activeWindowMoment: PlanMoment | null;
 
   // ── Classified Uploads ──
   /** All uploads sorted by recency */
@@ -287,9 +289,32 @@ export function buildCampaignPipeline(input: PipelineInput): CampaignPipelineSta
   // Extract plan-based moments (what the plan says should happen).
   // These complement the narrative moments (what actually happened).
   const planMoments = extractPlanMoments(plan, matchResult);
-  const activePlanMoment = planMoments.find(m => m.timing === 'current')
+  const rawActivePlanMoment = planMoments.find(m => m.timing === 'current')
     ?? planMoments.find(m => m.timing === 'past')
     ?? null;
+
+  // ── Anchor vs. active window arbitration ──
+  // When the narrative engine has a sustaining high-weight anchor (Official Video,
+  // Documentary, Premiere), it should remain the campaign hero. A plan-based
+  // "current" moment (e.g. a tour date or community post) should not override it.
+  // In this case, the plan moment still surfaces as "Active Window" but the
+  // narrative anchor stays as the hero/primary view.
+  const narrativeAnchorActive = narrative.activeMoment
+    && (narrative.activeMoment.state === 'live' || narrative.activeMoment.state === 'sustaining')
+    && narrative.activeMoment.centrepiece.weight >= 80;
+
+  // If the narrative anchor is active AND the plan moment is lighter (no high-weight
+  // matched upload), defer to the narrative anchor for hero selection.
+  const planMomentWeight = rawActivePlanMoment?.primaryUpload
+    ? (rawActivePlanMoment.primaryUpload.durationSec > 62 ? 70 : 30)
+    : 0;
+  const activePlanMoment = (narrativeAnchorActive && planMomentWeight < 80)
+    ? null  // Defer hero to narrative anchor; plan moment renders separately
+    : rawActivePlanMoment;
+
+  // Expose the raw plan moment separately so the renderer can show it
+  // as "Active Window" even when the narrative anchor is the hero.
+  const activeWindowMoment = rawActivePlanMoment;
 
   // ═══ Stage 5: UPLOAD CLASSIFICATION ═══
   const allByRecency = [...uploads].sort(
@@ -328,6 +353,7 @@ export function buildCampaignPipeline(input: PipelineInput): CampaignPipelineSta
     releaseMoments,
     planMoments,
     activePlanMoment,
+    activeWindowMoment,
     allByRecency,
     shorts,
     longform,
@@ -414,7 +440,7 @@ function extractPlanMoments(
         totalViews,
       };
     })
-    .sort((a, b) => a.daysAway - b.daysAway);
+    .sort((a, b) => a.weekNum - b.weekNum); // Strictly chronological by plan order
 }
 
 function cleanTitle(title: string): string {
