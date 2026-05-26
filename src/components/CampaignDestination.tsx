@@ -527,16 +527,7 @@ export default function CampaignDestination({
                   }}>
                     Campaign Anchor
                   </span>
-                  {narrative.activeMoment.state === 'sustaining' && (
-                    <span style={{
-                      fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      padding: '3px 10px', borderRadius: 3,
-                      background: '#059669', color: WHITE,
-                    }}>
-                      Sustaining
-                    </span>
-                  )}
+                  {/* Sustaining badge removed — clean anchor header */}
                 </div>
                 <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
               </div>
@@ -1348,25 +1339,6 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
             LIVE
           </span>
         )}
-        {isSustaining && (
-          <span style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            padding: '3px 10px', borderRadius: 3,
-            background: '#059669', color: WHITE,
-          }}>
-            SUSTAINING
-          </span>
-        )}
-        <span style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          padding: '2px 8px', borderRadius: 3,
-          background: coverageTone_.bg, color: coverageTone_.color,
-          border: `1px solid ${coverageTone_.border}`,
-        }}>
-          {narrativeCoverageLabel(moment.supportCoverage)}
-        </span>
       </div>
 
       <h3 style={{
@@ -1448,10 +1420,17 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
           )}
         </a>
 
-        {/* Support orbit panel */}
+        {/* Multiformat support panel */}
         <div style={{
           display: 'flex', flexDirection: 'column', gap: 6,
         }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+            textTransform: 'uppercase', color: SMOKE,
+            fontFamily: MONO, marginBottom: 2,
+          }}>
+            Multiformat Support
+          </div>
           {/* Direct support (BTS, Lyric Video, Visualizer) */}
           {moment.support.slice(0, 4).map((s, i) => (
             <a
