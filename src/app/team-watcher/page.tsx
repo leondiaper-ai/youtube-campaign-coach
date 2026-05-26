@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import {
   ARTISTS, mergeArtistLists, deriveFromLive, isVirginOwned,
   type Artist, type ChannelState,
@@ -17,6 +16,7 @@ import { checkContentStructure } from '@/lib/contentStructure';
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
+import AddArtistModal, { AddArtistModalInline } from '@/components/AddArtistModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -233,13 +233,7 @@ export default async function TeamWatcherPage() {
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link
-              href="/team-watcher/add"
-              className="px-4 py-2 rounded-lg text-[12px] font-bold"
-              style={{ background: INK, color: PAPER }}
-            >
-              + Add Artist
-            </Link>
+            <AddArtistModal />
             {syncMeta && (
               <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
                 Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
@@ -256,13 +250,7 @@ export default async function TeamWatcherPage() {
               Add your first artist to start monitoring channel health and
               campaign progress across the team.
             </p>
-            <Link
-              href="/team-watcher/add"
-              className="inline-block px-5 py-2.5 rounded-lg text-[13px] font-bold"
-              style={{ background: INK, color: PAPER }}
-            >
-              + Add Artist
-            </Link>
+            <AddArtistModalInline />
           </div>
         )}
 
