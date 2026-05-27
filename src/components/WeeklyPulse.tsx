@@ -665,24 +665,13 @@ export default function WeeklyPulse() {
             <YouTubeLogo height={22} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.03em', color: INK }}>
-                Weekly Intelligence Briefing
-              </div>
-              <div style={{ fontSize: 10, color: SMOKE, marginTop: 1 }}>
-                {data.weekRange}
-              </div>
+            <div style={{ fontSize: 10, color: SMOKE }}>
+              {data.weekRange}
             </div>
-            <div style={{ display: 'flex', gap: 2 }}>
-              <button onClick={() => setViewMode(v => v === 'internal' ? 'partner' : 'internal')}
-                style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
-                {isPartner ? 'Partner' : 'Internal'}
-              </button>
-              <button onClick={() => document.getElementById('pulse-share')?.scrollIntoView({ behavior: 'smooth' })}
-                style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
-                Share
-              </button>
-            </div>
+            <button onClick={() => document.getElementById('pulse-share')?.scrollIntoView({ behavior: 'smooth' })}
+              style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
+              Share
+            </button>
           </div>
         </div>
       )}
