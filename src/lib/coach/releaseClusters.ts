@@ -440,9 +440,16 @@ export function buildReleaseClusters(
     const isSupportFormat = SUPPORT_ONLY_FORMATS.includes(fmt);
     const matchesPlanEvent = isLongform && !isSupportFormat && matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
 
-    // Gate 0: Must be either an anchor format OR a longform that matches a plan event
-    // In both cases, must meet minimum view threshold
-    if ((!isAnchorFormat && !matchesPlanEvent) || upload.viewCount < minViews) continue;
+    // Gate 0: Must be either an anchor format OR a longform that matches a plan event.
+    // View threshold logic:
+    //   - Anchor formats (Official Video, Premiere, Documentary) within a campaign
+    //     window always qualify — they ARE the campaign releases, regardless of view
+    //     count. Smaller artists in early phases shouldn't be excluded by low views.
+    //   - Non-anchor longform that matches a plan event: still needs minViews.
+    //   - Everything else: needs minViews.
+    if (!isAnchorFormat && !matchesPlanEvent) continue;
+    const anchorInCampaign = isAnchorFormat && campaignStart != null;
+    if (upload.viewCount < minViews && !anchorInCampaign) continue;
 
     const uploadDate = new Date(upload.publishedAt).getTime();
 
