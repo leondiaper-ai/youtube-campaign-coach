@@ -73,54 +73,25 @@ function ytUrl(id: string, dur: number): string {
 
 // ── Official Logo Components ─────────────────────────────────────────────────
 
-/** Virgin Music script logo — uses Satisfy (Google Font) for the distinctive hand-brushed look */
+/** Virgin Music logo — actual brand logo from /public SVG */
 function VirginMusicLogo({ height = 36 }: { height?: number }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.75, gap: 0 }}>
-      <span style={{
-        fontFamily: "'Satisfy', 'Dancing Script', cursive",
-        fontWeight: 400,
-        fontSize: height,
-        color: INK,
-        letterSpacing: '-0.01em',
-        lineHeight: 0.85,
-      }}>
-        Virgin
-      </span>
-      <span style={{
-        fontFamily: 'Inter, system-ui, sans-serif',
-        fontWeight: 800,
-        fontSize: height * 0.38,
-        color: INK,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase' as const,
-        lineHeight: 1,
-        marginTop: height * 0.04,
-      }}>
-        Music
-      </span>
-    </div>
+    <img
+      src="/virgin-music-logo.svg"
+      alt="Virgin Music"
+      style={{ height, width: 'auto', display: 'block' }}
+    />
   );
 }
 
-/** YouTube logo — official red rounded-rect play icon + "YouTube" wordmark */
+/** YouTube logo — actual brand logo from /public SVG */
 function YouTubeLogo({ height = 20 }: { height?: number }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: height * 0.35 }}>
-      <svg width={height * 1.42} height={height} viewBox="0 0 71 50" xmlns="http://www.w3.org/2000/svg">
-        <path d="M69.5 7.8C68.7 4.7 66.3 2.3 63.2 1.5 57.6 0 35.5 0 35.5 0S13.4 0 7.8 1.5C4.7 2.3 2.3 4.7 1.5 7.8 0 13.4 0 25 0 25s0 11.6 1.5 17.2c.8 3.1 3.2 5.5 6.3 6.3C13.4 50 35.5 50 35.5 50s22.1 0 27.7-1.5c3.1-.8 5.5-3.2 6.3-6.3C71 36.6 71 25 71 25s0-11.6-1.5-17.2z" fill={YT_RED}/>
-        <polygon points="28.5,36 47,25 28.5,14" fill={WHITE}/>
-      </svg>
-      <span style={{
-        fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
-        fontWeight: 700,
-        fontSize: height * 0.9,
-        color: INK,
-        letterSpacing: '-0.02em',
-      }}>
-        YouTube
-      </span>
-    </div>
+    <img
+      src="/youtube-logo.svg"
+      alt="YouTube"
+      style={{ height, width: 'auto', display: 'block' }}
+    />
   );
 }
 
@@ -216,7 +187,7 @@ export default function WeeklyPulse() {
   return (
     <div ref={pageRef} className="pulse-page" style={{ background: PAPER, minHeight: '100vh', color: INK, overflowX: 'hidden', position: 'relative' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Satisfy&family=Caveat:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@400;500;600;700&display=swap');
         @media print { .no-print { display: none !important; } }
         a.pulse-link { text-decoration: none; color: inherit; }
         a.pulse-link:hover { opacity: 0.85; }
