@@ -245,23 +245,71 @@ export default function WeeklyPulse() {
 
   // ── Signal 2: Multiformat Strategy Score ──
   // How diverse is the content rollout?
-  type MultiformatLevel = 'strong' | 'balanced' | 'shorts-heavy' | 'thin';
-  function assessMultiformat(ch: PulseChannel, vids: PulseVideo[]): MultiformatLevel {
-    const formats = new Set(vids.map(v => v.format.toLowerCase()));
-    const hasShorts = ch.shorts30d >= 2 || formats.has('short');
-    const hasLongform = ch.longform30d >= 1;
-    const formatCount = formats.size;
-    // Check for diverse formats: official video, lyric, visualiser, BTS, live, etc.
-    const richFormats = ['music video', 'official video', 'lyric', 'visualiser', 'visualizer',
-      'bts', 'behind', 'making', 'live', 'session', 'premiere', 'performance'];
-    const richCount = vids.filter(v =>
-      richFormats.some(rf => v.title.toLowerCase().includes(rf) || v.format.toLowerCase().includes(rf))
-    ).length;
+  type MultiformatLevel = 'full-rollout' | 'strong-followthrough' | 'ecosystem-build' | 'multiformat-active' | 'shorts-led' | 'thin';
+  type FormatBreakdown = {
+    hasShorts: boolean; hasOfficialVideo: boolean; hasBTS: boolean;
+    hasVisualiser: boolean; hasLyric: boolean; hasLive: boolean;
+    hasPremiere: boolean; hasFollowUp: boolean; richCount: number;
+    formatTypes: string[];
+  };
 
-    if (hasShorts && hasLongform && (formatCount >= 3 || richCount >= 2)) return 'strong';
-    if (hasShorts && hasLongform) return 'balanced';
-    if (hasShorts && !hasLongform && ch.shorts30d >= 3) return 'shorts-heavy';
+  function detectFormats(ch: PulseChannel, vids: PulseVideo[]): FormatBreakdown {
+    const hasShorts = ch.shorts30d >= 2 || vids.some(v => v.format === 'Short');
+    const titles = vids.map(v => v.title.toLowerCase());
+    const formats = vids.map(v => v.format.toLowerCase());
+    const all = [...titles, ...formats];
+
+    const hasOfficialVideo = all.some(t => t.includes('official') || t.includes('music video'));
+    const hasBTS = all.some(t => t.includes('bts') || t.includes('behind') || t.includes('making of') || t.includes('making-of'));
+    const hasVisualiser = all.some(t => t.includes('visualis') || t.includes('visualiz'));
+    const hasLyric = all.some(t => t.includes('lyric'));
+    const hasLive = all.some(t => t.includes('live') || t.includes('session') || t.includes('performance') || t.includes('acoustic'));
+    const hasPremiere = all.some(t => t.includes('premiere'));
+    // Follow-up = more than 1 upload in the window
+    const hasFollowUp = vids.length >= 2;
+
+    const formatTypes: string[] = [];
+    if (hasShorts) formatTypes.push('Shorts');
+    if (hasOfficialVideo) formatTypes.push('official video');
+    if (hasBTS) formatTypes.push('BTS');
+    if (hasVisualiser) formatTypes.push('visualiser');
+    if (hasLyric) formatTypes.push('lyric video');
+    if (hasLive) formatTypes.push('live session');
+    if (hasPremiere) formatTypes.push('premiere');
+    if (hasFollowUp) formatTypes.push('follow-up uploads');
+
+    const richCount = [hasOfficialVideo, hasBTS, hasVisualiser, hasLyric, hasLive, hasPremiere].filter(Boolean).length;
+
+    return { hasShorts, hasOfficialVideo, hasBTS, hasVisualiser, hasLyric, hasLive, hasPremiere, hasFollowUp, richCount, formatTypes };
+  }
+
+  function assessMultiformat(ch: PulseChannel, vids: PulseVideo[]): MultiformatLevel {
+    const f = detectFormats(ch, vids);
+    const hasLongform = ch.longform30d >= 1;
+
+    // Full Rollout: Shorts + longform + 3+ rich format types + follow-up content
+    if (f.hasShorts && hasLongform && f.richCount >= 2 && f.hasFollowUp && ch.uploads30d >= 5) return 'full-rollout';
+    // Strong Follow-Through: good follow-up output with some format diversity
+    if (f.hasFollowUp && hasLongform && f.richCount >= 1 && ch.uploads30d >= 4) return 'strong-followthrough';
+    // Ecosystem Build: Shorts + longform working together, building depth
+    if (f.hasShorts && hasLongform && f.richCount >= 1) return 'ecosystem-build';
+    // Multiformat Active: has multiple format types present
+    if (f.hasShorts && hasLongform) return 'multiformat-active';
+    // Shorts-Led: heavy Shorts, limited depth
+    if (f.hasShorts && !hasLongform && ch.shorts30d >= 3) return 'shorts-led';
     return 'thin';
+  }
+
+  // Human-readable multiformat label for editorial use
+  function multiformatLabel(level: MultiformatLevel): string {
+    switch (level) {
+      case 'full-rollout': return 'Full Rollout';
+      case 'strong-followthrough': return 'Strong Follow-Through';
+      case 'ecosystem-build': return 'Ecosystem Build';
+      case 'multiformat-active': return 'Multiformat Active';
+      case 'shorts-led': return 'Shorts-Led';
+      case 'thin': return 'Thin Rollout';
+    }
   }
 
   // ── Signal 3: Momentum Efficiency ──
@@ -313,6 +361,11 @@ export default function WeeklyPulse() {
     return 'balanced';
   }
 
+  // Helper: is this a strong multiformat rollout? (top 3 tiers)
+  function isStrongMultiformat(level: MultiformatLevel): boolean {
+    return level === 'full-rollout' || level === 'strong-followthrough' || level === 'ecosystem-build';
+  }
+
   // ── Signal 6: Campaign Distinctiveness ──
   // How unusual or interesting is this channel's behaviour?
   function distinctivenessScore(ch: PulseChannel, vids: PulseVideo[]): number {
@@ -326,7 +379,7 @@ export default function WeeklyPulse() {
     if (wow >= 30) d += 15;                          // sudden growth
     if ((ch.subsPer1kViews ?? 0) >= 5) d += 15;     // unusually strong conversion
     if (ch.uploads30d >= 6 && (ch.subs ?? 0) < 50000) d += 10; // strong cadence, smaller channel
-    if (multiformat === 'strong') d += 10;           // standout multiformat rollout
+    if (isStrongMultiformat(multiformat)) d += 10;    // standout multiformat rollout
     if (followThrough === 'strong') d += 10;         // strong follow-through
     if (reactivation === 'reactivating') d += 15;    // reactivation after inactivity
     if (efficiency === 'outperforming') d += 10;     // overperforming vs size
@@ -366,8 +419,9 @@ export default function WeeklyPulse() {
     // Cadence health
     if (ch.uploads30d >= 4) s += 15;
     // Behaviour-led signals
-    if (signals.multiformat === 'strong') s += 25;
-    else if (signals.multiformat === 'balanced') s += 12;
+    if (signals.multiformat === 'full-rollout') s += 30;
+    else if (isStrongMultiformat(signals.multiformat)) s += 25;
+    else if (signals.multiformat === 'multiformat-active') s += 12;
     if (signals.followThrough === 'strong') s += 25;
     else if (signals.followThrough === 'some') s += 10;
     // Conversion
@@ -409,7 +463,7 @@ export default function WeeklyPulse() {
       return `First new content in a while — a reawakening moment. The catalogue audience is there; fresh uploads are starting to reconnect.`;
     }
     // Strong follow-through + multiformat = the ideal story
-    if (sig.followThrough === 'strong' && sig.multiformat === 'strong') {
+    if (sig.followThrough === 'strong' && isStrongMultiformat(sig.multiformat)) {
       return `Strong post-release follow-through with a rich multiformat rollout. Shorts, longform and supporting content keeping the campaign visible well beyond drop day.`;
     }
     if (sig.followThrough === 'strong' && growing) {
@@ -430,10 +484,13 @@ export default function WeeklyPulse() {
       return `Shorts generating discovery energy, but longform depth could strengthen the audience path. The attention is there — now deepen it.`;
     }
     // Multiformat stories
-    if (sig.multiformat === 'strong' && inPush) {
+    if (isStrongMultiformat(sig.multiformat) && inPush) {
       return `Active campaign with a rich content ecosystem. Multiple formats working together to sustain audience attention across the rollout.`;
     }
-    if (sig.multiformat === 'strong') {
+    if (sig.multiformat === 'full-rollout') {
+      return `Full rollout in motion — Shorts, official video, supporting content and follow-through all working as one ecosystem. This is what a YouTube-native campaign looks like.`;
+    }
+    if (isStrongMultiformat(sig.multiformat)) {
       return `Diverse content strategy building real audience depth. Official video, Shorts and supporting formats creating a YouTube-native ecosystem.`;
     }
     // In-campaign with push phase
@@ -479,11 +536,12 @@ export default function WeeklyPulse() {
   function generateSignalTag(ch: PulseChannel, sig: ChannelSignals): string {
     if (sig.reactivation === 'reactivating') return 'Reactivating';
     if (sig.reactivation === 'reawakening') return 'Reawakening';
-    if (sig.followThrough === 'strong' && sig.multiformat === 'strong') return 'Full Rollout';
+    if (sig.multiformat === 'full-rollout') return 'Full Rollout';
+    if (sig.followThrough === 'strong' && isStrongMultiformat(sig.multiformat)) return 'Full Rollout';
     if (sig.efficiency === 'outperforming') return 'Outperforming';
     if (sig.shortsLongform === 'discovery-converting') return 'Converting';
     if (ch.classification === 'GROWING' && (ch.viewsWoW ?? 0) > 20) return 'Accelerating';
-    if (sig.multiformat === 'strong') return 'Multiformat';
+    if (isStrongMultiformat(sig.multiformat)) return 'Ecosystem';
     if (sig.followThrough === 'strong') return 'Follow-Through';
     if (ch.classification === 'GROWING') return 'Momentum';
     if (ch.phase === 'PUSH') return 'In Campaign';
@@ -507,7 +565,7 @@ export default function WeeklyPulse() {
     if (sig.multiformat === 'thin') {
       return 'Wider format diversity would strengthen the content ecosystem and extend campaign life.';
     }
-    if (sig.multiformat === 'shorts-heavy') {
+    if (sig.multiformat === 'shorts-led') {
       return 'Shorts momentum is real — longform and supporting formats would deepen the audience relationship.';
     }
     if (sig.reactivation === 'reactivating') {
@@ -567,6 +625,48 @@ export default function WeeklyPulse() {
 
   const featuredCampaign = campaignStories[0] ?? null;
   const secondaryCampaigns = campaignStories.slice(1, 4);
+
+  // ── Best Multiformat Rollouts — editorial highlights ──
+  // Surface campaigns with strong ecosystem behaviour, celebrate smart YouTube strategy
+  const multiformatHighlights = managed
+    .filter(ch => ch.thumbnail)
+    .map(ch => {
+      const sig = analyseChannel(ch);
+      const vids = videosBySlug.get(ch.slug) ?? [];
+      const fb = detectFormats(ch, vids);
+      return { channel: ch, signals: sig, formats: fb };
+    })
+    .filter(({ signals }) =>
+      signals.multiformat === 'full-rollout' ||
+      signals.multiformat === 'strong-followthrough' ||
+      signals.multiformat === 'ecosystem-build'
+    )
+    .sort((a, b) => {
+      const tierOrder: Record<MultiformatLevel, number> = {
+        'full-rollout': 4, 'strong-followthrough': 3, 'ecosystem-build': 2,
+        'multiformat-active': 1, 'shorts-led': 0, 'thin': 0,
+      };
+      return tierOrder[b.signals.multiformat] - tierOrder[a.signals.multiformat];
+    })
+    .slice(0, 4)
+    .map(({ channel, signals, formats }) => {
+      // Build a concise format description
+      const activeFormats = formats.formatTypes.slice(0, 4).join(', ');
+      // Generate a one-line editorial read
+      let read = '';
+      if (signals.multiformat === 'full-rollout') {
+        read = `${activeFormats} extending momentum beyond release day.`;
+      } else if (signals.multiformat === 'strong-followthrough') {
+        read = `Consistent follow-through with ${activeFormats} sustaining audience engagement.`;
+      } else {
+        read = `Building content depth with ${activeFormats} across the campaign.`;
+      }
+      return {
+        channel,
+        label: multiformatLabel(signals.multiformat),
+        read,
+      };
+    });
 
   function generateEmailBody(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `${v.channelName} — "${v.title}" (${fmtNum(v.viewCount)} views)`);
@@ -1155,6 +1255,56 @@ export default function WeeklyPulse() {
           </div>
         </div>
       </section>
+
+
+      {/* ═══════ CAMPAIGN ECOSYSTEMS — minimal editorial highlight ═══════ */}
+      {multiformatHighlights.length >= 2 && (
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
+          <div style={{ height: 1, background: BONE, marginBottom: 28 }} />
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
+            Campaign Ecosystems Working Well
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(multiformatHighlights.length, 4)}, 1fr)`, gap: 32 }}>
+            {multiformatHighlights.map(h => {
+              const chUrl = channelUrl(h.channel.channelHandle);
+              return (
+                <div key={h.channel.slug}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                    {h.channel.thumbnail && (
+                      chUrl ? (
+                        <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
+                          <img src={h.channel.thumbnail} alt="" loading="lazy" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                        </a>
+                      ) : (
+                        <img src={h.channel.thumbnail} alt="" loading="lazy" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      )
+                    )}
+                    {chUrl ? (
+                      <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                        <span style={{ fontSize: 13, fontWeight: 800, color: INK, letterSpacing: '-0.01em' }}>{h.channel.name}</span>
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: 13, fontWeight: 800, color: INK, letterSpacing: '-0.01em' }}>{h.channel.name}</span>
+                    )}
+                  </div>
+                  <p style={{
+                    fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.45,
+                    margin: '0 0 6px', fontFamily: 'Inter, system-ui, sans-serif',
+                  }}>
+                    {h.read}
+                  </p>
+                  <span style={{
+                    fontSize: 8, fontWeight: 700, letterSpacing: '0.1em',
+                    textTransform: 'uppercase' as const, color: ACCENT.green,
+                  }}>
+                    {h.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
 
       {/* ═══════ MOMENTUM + OPPORTUNITIES — side by side ═══════ */}
