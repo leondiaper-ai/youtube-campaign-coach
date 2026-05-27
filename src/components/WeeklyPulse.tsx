@@ -73,25 +73,36 @@ function ytUrl(id: string, dur: number): string {
 
 // ── Official Logo Components ─────────────────────────────────────────────────
 
-/** Virgin Music logo — actual brand logo from /public SVG */
+/** Virgin Music logo — official brand PNG */
 function VirginMusicLogo({ height = 36 }: { height?: number }) {
   return (
     <img
-      src="/virgin-music-logo.svg"
+      src="/virgin-music-logo.png"
       alt="Virgin Music"
       style={{ height, width: 'auto', display: 'block' }}
     />
   );
 }
 
-/** YouTube logo — actual brand logo from /public SVG */
+/** YouTube logo — official play icon PNG + wordmark */
 function YouTubeLogo({ height = 20 }: { height?: number }) {
   return (
-    <img
-      src="/youtube-logo.svg"
-      alt="YouTube"
-      style={{ height, width: 'auto', display: 'block' }}
-    />
+    <div style={{ display: 'flex', alignItems: 'center', gap: height * 0.35 }}>
+      <img
+        src="/youtube-icon.png"
+        alt=""
+        style={{ height, width: 'auto', display: 'block' }}
+      />
+      <span style={{
+        fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
+        fontWeight: 700,
+        fontSize: height * 0.85,
+        color: INK,
+        letterSpacing: '-0.02em',
+      }}>
+        YouTube
+      </span>
+    </div>
   );
 }
 
