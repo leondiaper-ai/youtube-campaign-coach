@@ -182,14 +182,25 @@ export default function WeeklyPulse() {
   const consistentMarket = market.filter(c => c.uploads30d >= 5 && c.classification === 'GROWING')
     .sort((a, b) => b.uploads30d - a.uploads30d).slice(0, 4);
 
-  const featureVideo = data.topVideos[0] ?? null;
-  const supportingVideos = data.topVideos.slice(1, 4);
-  // Diverse Shorts selection: max 2 per artist, then backfill with next-best from others
+  // Diverse Moments selection: max 1 video per artist so smaller acts surface
+  const diverseVideos: PulseVideo[] = [];
+  const videosPerArtist = new Map<string, number>();
+  for (const v of data.topVideos) {
+    const count = videosPerArtist.get(v.artistSlug) ?? 0;
+    if (count < 1) {
+      diverseVideos.push(v);
+      videosPerArtist.set(v.artistSlug, count + 1);
+    }
+    if (diverseVideos.length >= 4) break;
+  }
+  const featureVideo = diverseVideos[0] ?? null;
+  const supportingVideos = diverseVideos.slice(1, 4);
+  // Diverse Shorts selection: max 3 per artist, then backfill with next-best from others
   const topShorts: PulseVideo[] = [];
   const shortsPerArtist = new Map<string, number>();
   for (const v of data.topShorts) {
     const count = shortsPerArtist.get(v.artistSlug) ?? 0;
-    if (count < 2) {
+    if (count < 3) {
       topShorts.push(v);
       shortsPerArtist.set(v.artistSlug, count + 1);
     }
