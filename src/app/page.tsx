@@ -108,6 +108,12 @@ export default function HomePage() {
             title="Team Watcher"
             desc="Shared team board — add artists, track campaigns, monitor health."
           />
+          <ToolCard
+            href="/weekly-pulse"
+            title="Weekly Pulse"
+            desc="Weekly YouTube intelligence briefing — signals, moments, and opportunities."
+            highlight
+          />
         </div>
 
         <div
