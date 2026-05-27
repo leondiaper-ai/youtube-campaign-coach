@@ -71,36 +71,31 @@ function ytUrl(id: string, dur: number): string {
   return dur <= 62 ? `https://www.youtube.com/shorts/${id}` : `https://www.youtube.com/watch?v=${id}`;
 }
 
-// ── SVG Logos ─────────────────────────────────────────────────────────────────
+// ── Official Logo Components ─────────────────────────────────────────────────
 
+/** Virgin Music script logo — uses Satisfy (Google Font) for the distinctive hand-brushed look */
 function VirginMusicLogo({ height = 36 }: { height?: number }) {
-  // Approximation of the Virgin Music script wordmark
-  // Uses a flowing italic serif to mimic the brand's calligraphic style
-  const w = height * 2.6;
-  const vH = height;
-  const mH = height * 0.55;
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.85 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.75, gap: 0 }}>
       <span style={{
-        fontFamily: "'Georgia', 'Times New Roman', serif",
-        fontStyle: 'italic',
-        fontWeight: 700,
-        fontSize: vH,
+        fontFamily: "'Satisfy', 'Dancing Script', cursive",
+        fontWeight: 400,
+        fontSize: height,
         color: INK,
-        letterSpacing: '-0.03em',
-        lineHeight: 0.9,
+        letterSpacing: '-0.01em',
+        lineHeight: 0.85,
       }}>
         Virgin
       </span>
       <span style={{
-        fontFamily: "'Georgia', 'Times New Roman', serif",
-        fontStyle: 'italic',
-        fontWeight: 400,
-        fontSize: mH,
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontWeight: 800,
+        fontSize: height * 0.38,
         color: INK,
-        letterSpacing: '0.06em',
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase' as const,
         lineHeight: 1,
-        marginTop: -1,
+        marginTop: height * 0.04,
       }}>
         Music
       </span>
@@ -108,25 +103,20 @@ function VirginMusicLogo({ height = 36 }: { height?: number }) {
   );
 }
 
+/** YouTube logo — official red rounded-rect play icon + "YouTube" wordmark */
 function YouTubeLogo({ height = 20 }: { height?: number }) {
-  // Red rounded-rect play button + "YouTube" wordmark
-  const iconW = height * 1.45;
-  const iconH = height;
-  const playSize = height * 0.4;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: height * 0.3 }}>
-      {/* Red play button icon */}
-      <svg width={iconW} height={iconH} viewBox="0 0 29 20" xmlns="http://www.w3.org/2000/svg">
-        <rect width="29" height="20" rx="5" fill={YT_RED} />
-        <polygon points="11,5 11,15 21,10" fill={WHITE} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: height * 0.35 }}>
+      <svg width={height * 1.42} height={height} viewBox="0 0 71 50" xmlns="http://www.w3.org/2000/svg">
+        <path d="M69.5 7.8C68.7 4.7 66.3 2.3 63.2 1.5 57.6 0 35.5 0 35.5 0S13.4 0 7.8 1.5C4.7 2.3 2.3 4.7 1.5 7.8 0 13.4 0 25 0 25s0 11.6 1.5 17.2c.8 3.1 3.2 5.5 6.3 6.3C13.4 50 35.5 50 35.5 50s22.1 0 27.7-1.5c3.1-.8 5.5-3.2 6.3-6.3C71 36.6 71 25 71 25s0-11.6-1.5-17.2z" fill={YT_RED}/>
+        <polygon points="28.5,36 47,25 28.5,14" fill={WHITE}/>
       </svg>
-      {/* YouTube text */}
       <span style={{
-        fontFamily: 'Inter, system-ui, sans-serif',
+        fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
         fontWeight: 700,
-        fontSize: height * 0.85,
+        fontSize: height * 0.9,
         color: INK,
-        letterSpacing: '-0.01em',
+        letterSpacing: '-0.02em',
       }}>
         YouTube
       </span>
@@ -134,17 +124,17 @@ function YouTubeLogo({ height = 20 }: { height?: number }) {
   );
 }
 
-// ── Play Icon Overlay ────────────────────────────────────────────────────────
-
-function PlayIcon({ size = 32 }: { size?: number }) {
+/** Small play icon for thumbnail overlays */
+function PlayOverlay({ size = 32 }: { size?: number }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%',
-      background: 'rgba(0,0,0,0.65)', display: 'flex',
+      background: 'rgba(0,0,0,0.7)', display: 'flex',
       alignItems: 'center', justifyContent: 'center',
+      backdropFilter: 'blur(4px)',
     }}>
-      <svg width={size * 0.4} height={size * 0.4} viewBox="0 0 12 14" fill="none">
-        <polygon points="0,0 12,7 0,14" fill={WHITE} />
+      <svg width={size * 0.35} height={size * 0.4} viewBox="0 0 10 12" fill="none">
+        <polygon points="0,0 10,6 0,12" fill={WHITE} />
       </svg>
     </div>
   );
@@ -169,13 +159,10 @@ export default function WeeklyPulse() {
       .catch(e => { setError(e.message); setLoading(false); });
   }, []);
 
-  // Loading
   if (loading) return (
     <main style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
-          Preparing briefing
-        </div>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
+        Preparing briefing
       </div>
     </main>
   );
@@ -193,16 +180,15 @@ export default function WeeklyPulse() {
   const managed = data.managedChannels;
   const market = data.marketChannels;
 
-  // Derived data
+  // Derived
   const momentumChannels = managed.filter(c => c.classification === 'GROWING')
-    .sort((a, b) => (b.views7d ?? 0) - (a.views7d ?? 0)).slice(0, 4);
-
+    .sort((a, b) => (b.views7d ?? 0) - (a.views7d ?? 0)).slice(0, 5);
   const issueChannels = managed.filter(c => c.classification !== 'GROWING');
-  type IssueGroup = { label: string; partnerLabel: string; count: number; topChannels: PulseChannel[] };
+  type IssueGroup = { label: string; count: number; topChannels: PulseChannel[] };
   const issueGroups: IssueGroup[] = [
-    { label: 'Conversion opportunity', partnerLabel: 'Conversion opportunity', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 3) },
-    { label: 'Cadence opportunity', partnerLabel: 'Cadence opportunity', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 3) },
-    { label: 'Reactivation ready', partnerLabel: 'Reactivation ready', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 3) },
+    { label: 'Weak Conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
+    { label: 'Underfed', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 4) },
+    { label: 'Cold', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
   ].filter(g => g.count > 0);
 
   const consistentMarket = market.filter(c => c.uploads30d >= 5 && c.classification === 'GROWING')
@@ -210,12 +196,11 @@ export default function WeeklyPulse() {
 
   const featureVideo = data.topVideos[0] ?? null;
   const supportingVideos = data.topVideos.slice(1, 4);
-  const topShorts = data.topShorts.slice(0, 5);
+  const topShorts = data.topShorts.slice(0, 6);
 
-  // Generators
   function generateEmailBody(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `${v.channelName} — "${v.title}" (${fmtNum(v.viewCount)} views)`);
-    return `Subject: YouTube Pulse — ${data!.weekRange}\n\n${data!.editorial}\n\nTop moments:\n${topVids.map(v => `- ${v}`).join('\n')}\n\nSignals: ${data!.signals.growing} growing · ${data!.signals.cold} cold · ${data!.signals.weakConversion} conversion opportunity\n\nPlaybook: ${data!.playbook.title}`;
+    return `Subject: YouTube Pulse — ${data!.weekRange}\n\n${data!.editorial}\n\nTop moments:\n${topVids.map(v => `- ${v}`).join('\n')}\n\nSignals: ${data!.signals.growing} growing · ${data!.signals.cold} cold · ${data!.signals.weakConversion} conversion gap\n\nPlaybook: ${data!.playbook.title}`;
   }
   function generateSlackSummary(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `• ${v.channelName} — ${fmtNum(v.viewCount)} views`);
@@ -228,66 +213,57 @@ export default function WeeklyPulse() {
     });
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════════
-     RENDER — Magazine editorial layout
-  ═══════════════════════════════════════════════════════════════════════════ */
-
   return (
-    <div ref={pageRef} style={{ background: PAPER, minHeight: '100vh', color: INK, overflowX: 'hidden', position: 'relative' }}>
+    <div ref={pageRef} className="pulse-page" style={{ background: PAPER, minHeight: '100vh', color: INK, overflowX: 'hidden', position: 'relative' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Satisfy&family=Caveat:wght@400;500;600;700&display=swap');
         @media print { .no-print { display: none !important; } }
         a.pulse-link { text-decoration: none; color: inherit; }
         a.pulse-link:hover { opacity: 0.85; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .pulse-fade { animation: fadeUp 0.6s ease-out both; }
-        .pulse-grain {
-          position: relative;
-        }
-        .pulse-grain::before {
+
+        /* Page-wide paper grain texture */
+        .pulse-page::after {
           content: '';
-          position: absolute;
+          position: fixed;
           inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
           background-repeat: repeat;
-          background-size: 200px 200px;
+          background-size: 256px 256px;
           pointer-events: none;
-          z-index: 0;
+          z-index: 9999;
+          mix-blend-mode: multiply;
         }
-        .pulse-grain > * { position: relative; z-index: 1; }
-        .shorts-thumb { transition: transform 0.2s ease; }
-        .shorts-thumb:hover { transform: scale(1.03); }
+
+        .shorts-cell { transition: transform 0.15s ease, box-shadow 0.15s ease; border-radius: 6px; overflow: hidden; }
+        .shorts-cell:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
         .momentum-row { transition: background 0.15s ease; }
         .momentum-row:hover { background: rgba(14,14,14,0.03); }
       `}</style>
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          TOP BAR — Logos + controls
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* ═══════ TOP BAR ═══════ */}
       {!screenshotMode && (
         <div className="no-print" style={{
-          maxWidth: 1200, margin: '0 auto', padding: '22px 40px',
+          maxWidth: 1200, margin: '0 auto', padding: '20px 40px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          {/* Left: Virgin Music | YouTube logos */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <VirginMusicLogo height={28} />
-            <div style={{ width: 1, height: 32, background: BONE, flexShrink: 0 }} />
-            <YouTubeLogo height={20} />
+            <VirginMusicLogo height={30} />
+            <div style={{ width: 1, height: 36, background: BONE, flexShrink: 0 }} />
+            <YouTubeLogo height={22} />
           </div>
-
-          {/* Right: Briefing label + date + controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', color: INK }}>
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.03em', color: INK }}>
                 Weekly Intelligence Briefing
               </div>
               <div style={{ fontSize: 10, color: SMOKE, marginTop: 1 }}>
                 {data.weekRange}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 2 }}>
               <button onClick={() => setViewMode(v => v === 'internal' ? 'partner' : 'internal')}
                 style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
                 {isPartner ? 'Partner' : 'Internal'}
@@ -311,26 +287,22 @@ export default function WeeklyPulse() {
       )}
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          HERO — Split layout: title left, Shorts wall right
-      ══════════════════════════════════════════════════════════════════════ */}
-      <header className="pulse-fade pulse-grain" style={{
-        maxWidth: 1200, margin: '0 auto', padding: '50px 40px 60px',
+      {/* ═══════ HERO — Title left, Shorts grid right ═══════ */}
+      <header className="pulse-fade" style={{
+        maxWidth: 1200, margin: '0 auto', padding: '36px 40px 48px',
       }}>
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 380px', gap: 48, alignItems: 'start',
-        }}>
-          {/* Left — Title block */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 40, alignItems: 'start' }}>
+          {/* Left — Title */}
           <div>
             <h1 style={{
-              fontSize: 72, fontWeight: 900, lineHeight: 0.92,
+              fontSize: 76, fontWeight: 900, lineHeight: 0.9,
               letterSpacing: '-0.04em', color: INK,
               margin: '0 0 0 -3px',
               fontFamily: "Georgia, 'Times New Roman', serif",
               fontStyle: 'italic',
             }}>
               Virgin Music.<br />
-              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'normal', fontWeight: 900 }}>
+              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'normal', fontWeight: 900, letterSpacing: '-0.045em' }}>
                 YouTube Pulse.
               </span>
             </h1>
@@ -338,158 +310,137 @@ export default function WeeklyPulse() {
             <div style={{
               marginTop: 24, fontSize: 10, fontWeight: 800,
               letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: SMOKE,
-              maxWidth: 380,
             }}>
               Your weekly dive into what&apos;s driving growth.
             </div>
 
-            {/* Signals — compact row */}
-            <div style={{ display: 'flex', gap: 24, marginTop: 36 }}>
-              {[
-                { n: data.signals.growing, label: 'Growing', color: ACCENT.green },
-                { n: data.signals.weakConversion, label: 'Conversion', color: ACCENT.amber },
-                { n: data.signals.underfed, label: 'Cadence', color: ACCENT.ochre },
-                { n: data.signals.cold, label: 'Cold', color: ACCENT.ember },
-              ].map((sig, i) => (
-                <div key={i} style={{ textAlign: 'left' }}>
-                  <div style={{
-                    fontSize: 36, fontWeight: 900, color: sig.color,
-                    lineHeight: 1, letterSpacing: '-0.03em',
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {sig.n}
-                  </div>
-                  <div style={{ fontSize: 9, fontWeight: 600, color: SMOKE, marginTop: 5, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>
-                    {sig.label}
-                  </div>
-                </div>
-              ))}
+            {/* Editorial lede — right under the title */}
+            <p style={{
+              fontSize: 16, fontWeight: 400, color: WARM, lineHeight: 1.55,
+              margin: '24px 0 0', maxWidth: 480,
+              fontFamily: 'Inter, system-ui, sans-serif',
+            }}>
+              {data.editorial}
+            </p>
+
+            <div style={{ display: 'flex', gap: 16, marginTop: 16, fontSize: 10, color: GHOST }}>
+              <span>{data.signals.totalManaged} managed channels</span>
+              <span>·</span>
+              <span>{data.signals.totalMarket} market watch</span>
+              {data.lastSyncAt && (
+                <>
+                  <span>·</span>
+                  <span>Data synced {timeAgo(data.lastSyncAt)}</span>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Right — Shorts visual wall */}
+          {/* Right — Shorts 3×2 thumbnail grid */}
           <div>
-            <div style={{
-              fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6,
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <rect width="12" height="12" rx="3" fill={YT_RED} />
-                <polygon points="4.5,3 4.5,9 9,6" fill={WHITE} />
-              </svg>
-              Top Shorts This Week
-            </div>
-            <div style={{
-              fontFamily: "'Georgia', serif", fontStyle: 'italic', fontSize: 13,
-              color: SMOKE, marginBottom: 14, lineHeight: 1.3,
-            }}>
-              across our roster
-            </div>
-
-            {/* Shorts stack — vertical thumbnails */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {topShorts.map((v, i) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+              {topShorts.map((v) => (
                 <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
-                  className="pulse-link shorts-thumb">
+                  className="pulse-link shorts-cell" style={{ display: 'block', position: 'relative' }}>
+                  <img src={v.thumbnail} alt="" loading="lazy"
+                    style={{ width: '100%', aspectRatio: '16/12', objectFit: 'cover', display: 'block' }} />
+                  {/* Dark gradient overlay */}
                   <div style={{
-                    display: 'grid', gridTemplateColumns: '90px 1fr', gap: 12,
-                    alignItems: 'center', padding: '8px 10px',
-                    background: i === 0 ? 'rgba(255,0,0,0.04)' : 'transparent',
-                    borderRadius: 6, border: i === 0 ? `1px solid rgba(255,0,0,0.12)` : `1px solid ${BONE}`,
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.55) 100%)',
+                  }} />
+                  {/* Play icon + view count overlay */}
+                  <div style={{
+                    position: 'absolute', bottom: 8, left: 8, right: 8,
+                    display: 'flex', alignItems: 'center', gap: 6,
                   }}>
-                    {/* Thumbnail with play overlay */}
-                    <div style={{ position: 'relative', borderRadius: 4, overflow: 'hidden', aspectRatio: '9/16', maxHeight: 56 }}>
-                      <img src={v.thumbnail} alt="" loading="lazy"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      <div style={{
-                        position: 'absolute', inset: 0, display: 'flex',
-                        alignItems: 'center', justifyContent: 'center',
-                        background: 'rgba(0,0,0,0.2)',
-                      }}>
-                        <PlayIcon size={20} />
-                      </div>
-                    </div>
-                    <div>
-                      <div style={{
-                        fontSize: 12, fontWeight: 700, color: INK, lineHeight: 1.25,
-                        overflow: 'hidden', display: '-webkit-box',
-                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
-                      }}>
-                        {v.title}
-                      </div>
-                      <div style={{ fontSize: 10, color: SMOKE, marginTop: 3, display: 'flex', gap: 6 }}>
-                        <span>{v.channelName}</span>
-                        <span style={{ color: YT_RED, fontWeight: 700 }}>{fmtNum(v.viewCount)}</span>
-                      </div>
-                    </div>
+                    <PlayOverlay size={22} />
+                    <span style={{
+                      fontSize: 13, fontWeight: 800, color: WHITE,
+                      fontFamily: 'Inter, system-ui, sans-serif',
+                      textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+                    }}>
+                      {fmtNum(v.viewCount)}
+                    </span>
                   </div>
                 </a>
               ))}
+            </div>
+
+            {/* Handwritten annotation */}
+            <div style={{
+              marginTop: 10, textAlign: 'right', paddingRight: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6,
+            }}>
+              <span style={{
+                fontFamily: "'Caveat', cursive",
+                fontSize: 18, fontWeight: 500, color: SMOKE,
+                fontStyle: 'italic',
+              }}>
+                Top Shorts this week across our roster
+              </span>
+              {/* Hand-drawn arrow */}
+              <svg width="28" height="16" viewBox="0 0 28 16" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M2 10C6 8 14 4 22 6" stroke={SMOKE} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                <path d="M18 3L23 6L18 9" stroke={SMOKE} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
           </div>
         </div>
       </header>
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          EDITORIAL LEDE — magazine opener
-      ══════════════════════════════════════════════════════════════════════ */}
-      <section className="pulse-fade" style={{
-        maxWidth: 1200, margin: '0 auto', padding: '0 40px 0',
+      {/* ═══════ SIGNALS BAR — full-width row ═══════ */}
+      <section style={{
+        maxWidth: 1200, margin: '0 auto', padding: '0 40px',
       }}>
-        <div style={{ height: 1, background: BONE }} />
-        <div style={{ padding: '40px 0', maxWidth: 640 }}>
-          <p style={{
-            fontSize: 22, fontWeight: 500, color: INK,
-            lineHeight: 1.5, letterSpacing: '-0.01em',
-            margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
-          }}>
-            {data.editorial}
-          </p>
-          <div style={{ display: 'flex', gap: 16, marginTop: 20, fontSize: 10, color: GHOST }}>
-            <span>{data.signals.totalManaged} managed</span>
-            <span style={{ color: BONE }}>|</span>
-            <span>{data.signals.totalMarket} market watch</span>
-            {data.lastSyncAt && (
-              <>
-                <span style={{ color: BONE }}>|</span>
-                <span>Synced {timeAgo(data.lastSyncAt)}</span>
-              </>
-            )}
-          </div>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          borderTop: `1px solid ${BONE}`, borderBottom: `1px solid ${BONE}`,
+          padding: '28px 0',
+        }}>
+          {[
+            { n: data.signals.growing, label: 'Growing', color: ACCENT.green },
+            { n: data.signals.weakConversion, label: 'Weak conversion', color: ACCENT.amber },
+            { n: data.signals.underfed, label: 'Underfed', color: ACCENT.ochre },
+            { n: data.signals.cold, label: 'Cold', color: ACCENT.ember },
+          ].map((sig, i) => (
+            <div key={i} style={{
+              textAlign: 'center',
+              borderLeft: i > 0 ? `1px solid ${BONE}` : 'none',
+            }}>
+              <div style={{
+                fontSize: 48, fontWeight: 900, color: sig.color,
+                lineHeight: 1, letterSpacing: '-0.03em',
+                fontFamily: 'Inter, system-ui, sans-serif',
+              }}>
+                {sig.n}
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: SMOKE, marginTop: 6, letterSpacing: '0.02em' }}>
+                {sig.label}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          BIG READ + MOMENTS — side by side (magazine spread)
-      ══════════════════════════════════════════════════════════════════════ */}
-      <section style={{
-        maxWidth: 1200, margin: '0 auto', padding: '20px 40px 0',
-      }}>
-        <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48,
-        }}>
-          {/* LEFT — The Big Read */}
+      {/* ═══════ BIG READ + MOMENTS — side by side ═══════ */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+          {/* LEFT — Big Read */}
           <div>
-            <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.2em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20,
-            }}>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
               The Big Read
             </div>
-
             {data.insights.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                {data.insights.slice(0, 4).map((insight, i) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {data.insights.slice(0, 5).map((insight, i) => (
                   <p key={i} style={{
-                    fontSize: i === 0 ? 17 : 14,
-                    fontWeight: i === 0 ? 600 : 400,
+                    fontSize: i === 0 ? 16 : 13,
+                    fontWeight: i === 0 ? 700 : 400,
                     color: i === 0 ? INK : WARM,
-                    lineHeight: 1.55, margin: 0,
+                    lineHeight: i === 0 ? 1.4 : 1.5, margin: 0,
                     fontFamily: 'Inter, system-ui, sans-serif',
                   }}>
                     {insight}
@@ -497,184 +448,103 @@ export default function WeeklyPulse() {
                 ))}
               </div>
             )}
-
-            <div style={{ marginTop: 24, fontSize: 10, color: GHOST }}>
-              {data.signals.totalManaged} channels tracked · {data.signals.growing + data.signals.weakConversion + data.signals.underfed + data.signals.cold} classified
-            </div>
           </div>
 
-          {/* RIGHT — Moments This Week */}
+          {/* RIGHT — Moments */}
           <div>
-            <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.2em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20,
-            }}>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
               Moments This Week
             </div>
-
             {featureVideo && (
-              <div>
-                {/* Hero video */}
-                <a href={ytUrl(featureVideo.id, featureVideo.durationSec)} target="_blank" rel="noopener noreferrer"
-                  className="pulse-link">
-                  <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', marginBottom: 12 }}>
+              <>
+                <a href={ytUrl(featureVideo.id, featureVideo.durationSec)} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                  <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', marginBottom: 10 }}>
                     <img src={featureVideo.thumbnail} alt="" loading="lazy"
                       style={{ width: '100%', height: 220, objectFit: 'cover', display: 'block' }} />
-                    <div style={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0,
-                      padding: '40px 20px 16px',
-                      background: 'linear-gradient(transparent 0%, rgba(0,0,0,0.7) 100%)',
-                    }}>
-                      <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>
-                        {featureVideo.format}
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 800, color: WHITE, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-                        {featureVideo.title}
-                      </div>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '36px 16px 14px', background: 'linear-gradient(transparent 0%, rgba(0,0,0,0.7) 100%)' }}>
+                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.55)', marginBottom: 3 }}>{featureVideo.format}</div>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: WHITE, lineHeight: 1.2, letterSpacing: '-0.02em' }}>{featureVideo.title}</div>
                     </div>
-                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                      <PlayIcon size={36} />
-                    </div>
+                    <div style={{ position: 'absolute', top: 10, right: 10 }}><PlayOverlay size={32} /></div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{featureVideo.channelName}</span>
-                    <span style={{ fontSize: 11, color: SMOKE }}>{fmtNum(featureVideo.viewCount)} views</span>
-                    <span style={{ fontSize: 11, color: YT_RED, fontWeight: 600 }}>{fmtNum(featureVideo.velocity)}/day</span>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 11 }}>
+                    <span style={{ fontWeight: 700, color: INK }}>{featureVideo.channelName}</span>
+                    <span style={{ color: SMOKE }}>{fmtNum(featureVideo.viewCount)} views</span>
+                    <span style={{ color: YT_RED, fontWeight: 600 }}>{fmtNum(featureVideo.velocity)}/day</span>
                   </div>
                 </a>
-
-                {/* Supporting videos — compact row */}
-                <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 14 }}>
                   {supportingVideos.map(v => (
-                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
-                      className="pulse-link" style={{ flex: 1 }}>
-                      <div style={{ borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
-                        <img src={v.thumbnail} alt="" loading="lazy"
-                          style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                      <div style={{ borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
+                        <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', height: 70, objectFit: 'cover', display: 'block' }} />
                       </div>
-                      <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>
-                        {v.title}
-                      </div>
-                      <div style={{ fontSize: 9, color: SMOKE, marginTop: 3 }}>
-                        {v.channelName} · {fmtNum(v.viewCount)}
-                      </div>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 2 }}>{v.channelName}</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{v.title}</div>
+                      <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>{fmtNum(v.viewCount)} views · {fmtNum(v.velocity)}/day</div>
                     </a>
                   ))}
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
       </section>
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          MOMENTUM + OPPORTUNITIES — compact 2-column
-      ══════════════════════════════════════════════════════════════════════ */}
-      <section style={{
-        maxWidth: 1200, margin: '0 auto', padding: '60px 40px 0',
-      }}>
-        <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48,
-        }}>
+      {/* ═══════ MOMENTUM + OPPORTUNITIES — side by side ═══════ */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
+        <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 48 }}>
           {/* LEFT — Momentum */}
           <div>
-            <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.2em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
-            }}>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
               Channels With Momentum
             </div>
-            <h2 style={{
-              fontSize: 28, fontWeight: 900, lineHeight: 1.05,
-              letterSpacing: '-0.03em', color: INK, margin: '0 0 20px',
-              fontFamily: 'Inter, system-ui, sans-serif',
-            }}>
-              {momentumChannels.length} channels in{' '}
-              <span style={{ color: ACCENT.green }}>growth state.</span>
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {momentumChannels.map((ch, i) => (
-                <div key={ch.slug} className="momentum-row" style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '14px 8px',
-                  borderBottom: i < momentumChannels.length - 1 ? `1px solid ${BONE}` : 'none',
-                  borderRadius: 4,
-                }}>
-                  {ch.thumbnail && (
-                    <img src={ch.thumbnail} alt="" loading="lazy"
-                      style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: INK }}>{ch.name}</div>
-                    <div style={{ fontSize: 10, color: SMOKE }}>
-                      {ch.uploads30d} uploads/30d · {ch.cadenceLabel}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 16, fontWeight: 900, color: ACCENT.green, letterSpacing: '-0.02em' }}>
-                      {ch.views7d != null ? fmtNum(ch.views7d) : '—'}
-                    </div>
-                    <div style={{ fontSize: 8, color: GHOST, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>7d views</div>
-                  </div>
+            {momentumChannels.map((ch, i) => (
+              <div key={ch.slug} className="momentum-row" style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 6px',
+                borderBottom: i < momentumChannels.length - 1 ? `1px solid ${BONE}` : 'none',
+              }}>
+                {ch.thumbnail && (
+                  <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
+                  <div style={{ fontSize: 9, color: SMOKE }}>{ch.uploads30d} uploads / 30d</div>
                 </div>
-              ))}
-            </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 900, color: ACCENT.green }}>{ch.views7d != null ? fmtNum(ch.views7d) : '—'}</span>
+                  <div style={{ fontSize: 7, color: GHOST, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>views</div>
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* RIGHT — Opportunities */}
+          {/* RIGHT — Opportunities (3 columns) */}
           {issueGroups.length > 0 && (
             <div>
-              <div style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.2em',
-                textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
-              }}>
-                Opportunities
+              <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
+                Open Opportunities
               </div>
-              <h2 style={{
-                fontSize: 28, fontWeight: 900, lineHeight: 1.05,
-                letterSpacing: '-0.03em', color: INK, margin: '0 0 24px',
-                fontFamily: 'Inter, system-ui, sans-serif',
-              }}>
-                Where there&apos;s{' '}
-                <span style={{ fontStyle: 'italic', fontWeight: 500, color: WARM }}>room to grow.</span>
-              </h2>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
                 {issueGroups.map((group, gi) => (
                   <div key={gi}>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12 }}>
-                      <span style={{ fontSize: 28, fontWeight: 900, color: INK, lineHeight: 1, letterSpacing: '-0.02em' }}>
-                        {group.count}
-                      </span>
-                      <span style={{ fontSize: 10, fontWeight: 600, color: SMOKE, textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>
-                        {isPartner ? group.partnerLabel : group.label}
-                      </span>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
+                      <span style={{ fontSize: 24, fontWeight: 900, color: INK, lineHeight: 1 }}>{group.count}</span>
+                      <span style={{ fontSize: 9, fontWeight: 600, color: SMOKE }}>{group.label}</span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {group.topChannels.map(ch => (
-                        <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          {ch.thumbnail && (
-                            <img src={ch.thumbnail} alt="" loading="lazy"
-                              style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                          )}
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: INK }}>{ch.name}</div>
-                            <div style={{ fontSize: 10, color: SMOKE }}>
-                              {ch.nextAction || ch.reason}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {group.count > 3 && (
-                        <div style={{ fontSize: 9, color: GHOST, marginLeft: 32 }}>
-                          + {group.count - 3} more
-                        </div>
-                      )}
-                    </div>
+                    {group.topChannels.map(ch => (
+                      <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                        {ch.thumbnail && (
+                          <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        )}
+                        <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                      </div>
+                    ))}
+                    {group.count > 4 && (
+                      <div style={{ fontSize: 9, color: GHOST, marginTop: 4, marginLeft: 26 }}>+ {group.count - 4} more</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -684,198 +554,124 @@ export default function WeeklyPulse() {
       </section>
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          MARKET WATCH — compact editorial
-      ══════════════════════════════════════════════════════════════════════ */}
-      {(data.marketInsights.length > 0 || consistentMarket.length > 0) && (
-        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 0' }}>
-          <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-
-          <div style={{
-            display: 'grid', gridTemplateColumns: '260px 1fr', gap: 48,
-          }}>
-            <div>
-              <div style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.2em',
-                textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
-              }}>
-                Market Watch
+      {/* ═══════ BOTTOM STRIP — Market Watch + Playbook side by side ═══════ */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
+        <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
+          {/* LEFT — Market Watch */}
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: 24 }}>
+              <div>
+                <h2 style={{
+                  fontSize: 22, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.02em',
+                  color: INK, margin: '0 0 16px', fontFamily: 'Inter, system-ui, sans-serif',
+                  textTransform: 'uppercase' as const,
+                }}>
+                  What the wider market is teaching us.
+                </h2>
+                {data.marketInsights.map((insight, i) => (
+                  <p key={i} style={{
+                    fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.5, margin: '0 0 8px',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                  }}>
+                    {insight}
+                  </p>
+                ))}
               </div>
-              <h2 style={{
-                fontSize: 24, fontWeight: 900, lineHeight: 1.1,
-                letterSpacing: '-0.03em', color: INK, margin: 0,
-                fontFamily: 'Inter, system-ui, sans-serif',
-              }}>
-                What the wider market is{' '}
-                <span style={{ fontStyle: 'italic', fontWeight: 500, color: WARM }}>teaching us.</span>
-              </h2>
-
               {consistentMarket.length > 0 && (
-                <div style={{ marginTop: 24 }}>
+                <div>
                   <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10 }}>
-                    Reference channels
+                    Reference Channels
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {consistentMarket.map(ch => (
-                      <div key={ch.slug} style={{
-                        display: 'flex', alignItems: 'center', gap: 6,
-                        padding: '4px 10px 4px 4px', borderRadius: 20,
-                        border: `1px solid ${BONE}`, background: WHITE,
-                      }}>
-                        {ch.thumbnail && (
-                          <img src={ch.thumbnail} alt="" loading="lazy"
-                            style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} />
-                        )}
-                        <span style={{ fontSize: 10, fontWeight: 600, color: INK }}>{ch.name}</span>
+                  {consistentMarket.map(ch => (
+                    <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      {ch.thumbnail && (
+                        <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                      )}
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</div>
+                        <div style={{ fontSize: 9, color: GHOST }}>{ch.uploads30d} uploads/30d</div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 18, paddingTop: 4 }}>
-              {data.marketInsights.map((insight, i) => (
-                <p key={i} style={{
-                  fontSize: i === 0 ? 16 : 13,
-                  fontWeight: i === 0 ? 500 : 400,
-                  color: i === 0 ? INK : WARM,
-                  lineHeight: 1.55, margin: 0, maxWidth: 520,
-                  fontFamily: 'Inter, system-ui, sans-serif',
-                }}>
-                  {insight}
-                </p>
-              ))}
-            </div>
           </div>
-        </section>
-      )}
 
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          PLAYBOOK — dark premium section
-      ══════════════════════════════════════════════════════════════════════ */}
-      <section className="pulse-grain" style={{
-        background: INK, color: PAPER, marginTop: 60,
-        padding: '64px 0',
-        position: 'relative',
-      }}>
-        {/* Red accent stripe at top */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: YT_RED }} />
-
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60 }}>
-            <div>
-              <div style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-                textTransform: 'uppercase' as const, color: 'rgba(250,247,242,0.35)', marginBottom: 18,
-              }}>
-                Playbook of the Week
-              </div>
-              <h2 style={{
-                fontSize: 36, fontWeight: 900, lineHeight: 1.05,
-                letterSpacing: '-0.03em', color: PAPER, margin: 0,
-                fontFamily: 'Inter, system-ui, sans-serif',
-              }}>
-                {data.playbook.title}
-              </h2>
-              <p style={{
-                fontSize: 15, fontWeight: 400, color: 'rgba(250,247,242,0.65)',
-                lineHeight: 1.6, marginTop: 20, maxWidth: 400,
-                fontFamily: 'Inter, system-ui, sans-serif',
-              }}>
-                {data.playbook.why}
-              </p>
-              <p style={{
-                fontSize: 11, fontStyle: 'italic', color: 'rgba(250,247,242,0.35)',
-                marginTop: 14,
-              }}>
-                {data.playbook.when}
-              </p>
+          {/* RIGHT — Playbook */}
+          <div style={{
+            background: INK, color: PAPER, borderRadius: 8, padding: '28px 28px',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* Red top accent */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: YT_RED }} />
+            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: 'rgba(250,247,242,0.35)', marginBottom: 12 }}>
+              Playbook of the Week
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {data.playbook.actions.map((action, i) => (
-                <div key={i} style={{
-                  display: 'flex', gap: 16, alignItems: 'flex-start',
-                  padding: '20px 0',
-                  borderBottom: i < data.playbook.actions.length - 1 ? '1px solid rgba(250,247,242,0.08)' : 'none',
+            <h3 style={{
+              fontSize: 22, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.02em',
+              color: PAPER, margin: '0 0 12px', fontFamily: 'Inter, system-ui, sans-serif',
+            }}>
+              {data.playbook.title}
+            </h3>
+            <p style={{ fontSize: 12, color: 'rgba(250,247,242,0.6)', lineHeight: 1.5, margin: '0 0 16px' }}>
+              {data.playbook.why}
+            </p>
+            {data.playbook.actions.map((action, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
+                <span style={{
+                  fontSize: 16, fontWeight: 900, color: 'rgba(255,0,0,0.3)', lineHeight: 1,
+                  minWidth: 18, fontFamily: 'Inter, system-ui, sans-serif',
                 }}>
-                  <span style={{
-                    fontSize: 38, fontWeight: 900, color: 'rgba(255,0,0,0.2)',
-                    lineHeight: 1, minWidth: 36,
-                    letterSpacing: '-0.03em',
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {i + 1}
-                  </span>
-                  <p style={{
-                    fontSize: 13, color: 'rgba(250,247,242,0.8)',
-                    lineHeight: 1.55, margin: 0, paddingTop: 8,
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {action}
-                  </p>
-                </div>
-              ))}
-            </div>
+                  {i + 1}
+                </span>
+                <p style={{ fontSize: 11, color: 'rgba(250,247,242,0.75)', lineHeight: 1.45, margin: 0 }}>
+                  {action}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          SHARE + FOOTER
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* ═══════ SHARE + FOOTER ═══════ */}
       {!screenshotMode && (
-        <section id="pulse-share" className="no-print" style={{
-          maxWidth: 1200, margin: '0 auto', padding: '48px 40px',
-        }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          }}>
-            <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.2em',
-              textTransform: 'uppercase' as const, color: GHOST,
-            }}>
+        <section id="pulse-share" className="no-print" style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 40px 0' }}>
+          <div style={{ height: 1, background: BONE, marginBottom: 20 }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
               Share This Briefing
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
-              <ActionPill label={emailCopied ? 'Copied' : 'Email'} onClick={() => copyToClipboard(generateEmailBody(), 'email')} active={emailCopied} />
-              <ActionPill label={slackCopied ? 'Copied' : 'Slack'} onClick={() => copyToClipboard(generateSlackSummary(), 'slack')} active={slackCopied} />
-              <ActionPill label="Screenshot" onClick={() => setScreenshotMode(true)} />
-              <ActionPill label="Print" onClick={() => window.print()} />
+              <Pill label={emailCopied ? 'Copied' : 'Email summary'} onClick={() => copyToClipboard(generateEmailBody(), 'email')} active={emailCopied} />
+              <Pill label={slackCopied ? 'Copied' : 'Slack summary'} onClick={() => copyToClipboard(generateSlackSummary(), 'slack')} active={slackCopied} />
+              <Pill label="Screenshot" onClick={() => setScreenshotMode(true)} />
+              <Pill label="Print / PDF" onClick={() => window.print()} />
             </div>
           </div>
         </section>
       )}
 
-      <footer style={{
-        maxWidth: 1200, margin: '0 auto', padding: '16px 40px 36px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      }}>
+      <footer style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 40px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <VirginMusicLogo height={14} />
-          <div style={{ width: 1, height: 18, background: BONE }} />
-          <YouTubeLogo height={12} />
+          <VirginMusicLogo height={16} />
+          <div style={{ width: 1, height: 20, background: BONE }} />
+          <YouTubeLogo height={13} />
         </div>
-        <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
-          YouTube Pulse · {data.weekRange}
+        <div style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST }}>
+          Questions or feedback? Reply to this email.
         </div>
       </footer>
     </div>
   );
 }
 
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function ActionPill({ label, onClick, active }: {
-  label: string; onClick: () => void; active?: boolean;
-}) {
+function Pill({ label, onClick, active }: { label: string; onClick: () => void; active?: boolean }) {
   return (
     <button onClick={onClick} style={{
-      padding: '6px 16px', borderRadius: 20, border: 'none',
+      padding: '6px 14px', borderRadius: 20, border: 'none',
       background: active ? INK : WHITE, fontSize: 10, fontWeight: 600,
       color: active ? WHITE : INK, cursor: 'pointer', transition: 'all 0.2s',
     }}>
