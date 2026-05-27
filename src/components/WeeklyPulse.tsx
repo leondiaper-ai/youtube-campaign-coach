@@ -298,7 +298,7 @@ export default function WeeklyPulse() {
       <header className="pulse-fade" style={{
         maxWidth: 1200, margin: '0 auto', padding: '36px 40px 48px',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 40, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 480px', gap: 40, alignItems: 'start' }}>
           {/* Left — Title */}
           <div>
             <h1 style={{
@@ -345,12 +345,12 @@ export default function WeeklyPulse() {
 
           {/* Right — Shorts 3×2 thumbnail grid */}
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {topShorts.map((v) => (
                 <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
                   className="pulse-link shorts-cell" style={{ display: 'block', position: 'relative' }}>
                   <img src={v.thumbnail} alt="" loading="lazy"
-                    style={{ width: '100%', aspectRatio: '16/12', objectFit: 'cover', display: 'block' }} />
+                    style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
                   {/* Dark gradient overlay */}
                   <div style={{
                     position: 'absolute', inset: 0,
