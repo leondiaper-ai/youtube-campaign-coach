@@ -166,11 +166,11 @@ export default function WeeklyPulse() {
   const momentumChannels = managed.filter(c => c.classification === 'GROWING')
     .sort((a, b) => (b.views7d ?? 0) - (a.views7d ?? 0)).slice(0, 5);
   const issueChannels = managed.filter(c => c.classification !== 'GROWING');
-  type IssueGroup = { label: string; count: number; topChannels: PulseChannel[] };
+  type IssueGroup = { label: string; id: string; count: number; topChannels: PulseChannel[] };
   const issueGroups: IssueGroup[] = [
-    { label: 'Weak Conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
-    { label: 'Underfed', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 4) },
-    { label: 'Cold', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
+    { label: 'Attention Not Converting', id: 'pulse-conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
+    { label: 'Cadence Opportunity', id: 'pulse-cadence', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 4) },
+    { label: 'Reactivation Window', id: 'pulse-reactivation', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
   ].filter(g => g.count > 0);
 
   const consistentMarket = market.filter(c => c.uploads30d >= 5 && c.classification === 'GROWING')
@@ -222,6 +222,31 @@ export default function WeeklyPulse() {
         .shorts-cell:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
         .momentum-row { transition: background 0.15s ease; }
         .momentum-row:hover { background: rgba(14,14,14,0.03); }
+
+        /* Signal anchor hover — editorial, not dashboard */
+        .signal-anchor {
+          cursor: pointer;
+          transition: transform 0.2s ease, opacity 0.2s ease;
+          position: relative;
+        }
+        .signal-anchor::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 50%;
+          transform: translateX(-50%) scaleX(0);
+          width: 24px;
+          height: 1.5px;
+          background: currentColor;
+          transition: transform 0.25s ease;
+          opacity: 0.4;
+        }
+        .signal-anchor:hover {
+          transform: translateY(-2px);
+        }
+        .signal-anchor:hover::after {
+          transform: translateX(-50%) scaleX(1);
+        }
       `}</style>
 
 
@@ -372,7 +397,7 @@ export default function WeeklyPulse() {
       </header>
 
 
-      {/* ═══════ SIGNALS BAR — full-width row ═══════ */}
+      {/* ═══════ SIGNALS BAR — navigational anchors ═══════ */}
       <section style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 40px',
       }}>
@@ -382,15 +407,25 @@ export default function WeeklyPulse() {
           padding: '28px 0',
         }}>
           {[
-            { n: data.signals.growing, label: 'Growing', color: ACCENT.green },
-            { n: data.signals.weakConversion, label: 'Weak conversion', color: ACCENT.amber },
-            { n: data.signals.underfed, label: 'Underfed', color: ACCENT.ochre },
-            { n: data.signals.cold, label: 'Cold', color: ACCENT.ember },
+            { n: data.signals.growing, label: 'In Growth State', target: 'pulse-momentum', color: ACCENT.green },
+            { n: data.signals.weakConversion, label: 'Attention Not Converting', target: 'pulse-conversion', color: ACCENT.amber },
+            { n: data.signals.underfed, label: 'Cadence Opportunity', target: 'pulse-cadence', color: ACCENT.ochre },
+            { n: data.signals.cold, label: 'Reactivation Window', target: 'pulse-reactivation', color: ACCENT.ember },
           ].map((sig, i) => (
-            <div key={i} style={{
-              textAlign: 'center',
-              borderLeft: i > 0 ? `1px solid ${BONE}` : 'none',
-            }}>
+            <div
+              key={i}
+              className="signal-anchor"
+              role="button"
+              tabIndex={0}
+              onClick={() => document.getElementById(sig.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById(sig.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+              style={{
+                textAlign: 'center',
+                borderLeft: i > 0 ? `1px solid ${BONE}` : 'none',
+                padding: '8px 4px 16px',
+                color: sig.color,
+              }}
+            >
               <div style={{
                 fontSize: 48, fontWeight: 900, color: sig.color,
                 lineHeight: 1, letterSpacing: '-0.03em',
@@ -475,13 +510,13 @@ export default function WeeklyPulse() {
 
 
       {/* ═══════ MOMENTUM + OPPORTUNITIES — side by side ═══════ */}
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
+      <section id="pulse-momentum" style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0', scrollMarginTop: 24 }}>
         <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
         <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 48 }}>
-          {/* LEFT — Momentum */}
+          {/* LEFT — In Growth State */}
           <div>
             <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
-              Channels With Momentum
+              In Growth State
             </div>
             {momentumChannels.map((ch, i) => (
               <div key={ch.slug} className="momentum-row" style={{
@@ -507,11 +542,11 @@ export default function WeeklyPulse() {
           {issueGroups.length > 0 && (
             <div>
               <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
-                Open Opportunities
+                Where There&apos;s Room to Grow
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
                 {issueGroups.map((group, gi) => (
-                  <div key={gi}>
+                  <div key={gi} id={group.id} style={{ scrollMarginTop: 24 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
                       <span style={{ fontSize: 24, fontWeight: 900, color: INK, lineHeight: 1 }}>{group.count}</span>
                       <span style={{ fontSize: 9, fontWeight: 600, color: SMOKE }}>{group.label}</span>
