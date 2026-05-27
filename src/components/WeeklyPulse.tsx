@@ -184,7 +184,17 @@ export default function WeeklyPulse() {
 
   const featureVideo = data.topVideos[0] ?? null;
   const supportingVideos = data.topVideos.slice(1, 4);
-  const topShorts = data.topShorts.slice(0, 9);
+  // Diverse Shorts selection: max 2 per artist, then backfill with next-best from others
+  const topShorts: PulseVideo[] = [];
+  const shortsPerArtist = new Map<string, number>();
+  for (const v of data.topShorts) {
+    const count = shortsPerArtist.get(v.artistSlug) ?? 0;
+    if (count < 2) {
+      topShorts.push(v);
+      shortsPerArtist.set(v.artistSlug, count + 1);
+    }
+    if (topShorts.length >= 9) break;
+  }
 
   // Build slug→channelHandle lookup for linking video artist names to their YT channels
   const allChannels = [...managed, ...market];
