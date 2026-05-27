@@ -174,9 +174,9 @@ export default function WeeklyPulse() {
   const issueChannels = managed.filter(c => c.classification !== 'GROWING');
   type IssueGroup = { label: string; id: string; count: number; topChannels: PulseChannel[] };
   const issueGroups: IssueGroup[] = [
-    { label: 'Attention Not Converting', id: 'pulse-conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
+    { label: 'Working on Subs', id: 'pulse-conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
     { label: 'Cadence Opportunity', id: 'pulse-cadence', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 4) },
-    { label: 'Reactivation Window', id: 'pulse-reactivation', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
+    { label: 'Reactivate the Channel', id: 'pulse-reactivation', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
   ].filter(g => g.count > 0);
 
   const consistentMarket = market.filter(c => c.uploads30d >= 5 && c.classification === 'GROWING')
@@ -800,9 +800,9 @@ export default function WeeklyPulse() {
         }}>
           {[
             { n: data.signals.growing, label: 'In Growth State', target: 'pulse-momentum', color: ACCENT.green },
-            { n: data.signals.weakConversion, label: 'Attention Not Converting', target: 'pulse-conversion', color: ACCENT.amber },
+            { n: data.signals.weakConversion, label: 'Working on Subs', target: 'pulse-conversion', color: ACCENT.amber },
             { n: data.signals.underfed, label: 'Cadence Opportunity', target: 'pulse-cadence', color: ACCENT.ochre },
-            { n: data.signals.cold, label: 'Reactivation Window', target: 'pulse-reactivation', color: ACCENT.ember },
+            { n: data.signals.cold, label: 'Reactivate the Channel', target: 'pulse-reactivation', color: ACCENT.ember },
           ].map((sig, i) => (
             <div
               key={i}
