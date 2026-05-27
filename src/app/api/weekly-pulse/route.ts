@@ -1,29 +1,32 @@
 /**
  * GET /api/weekly-pulse
  *
- * Aggregates all data needed for the Weekly Pulse page in one call:
- * - Team watcher entries with enriched YouTube data
- * - Weekly rollups for trend context
- * - Top-performing videos across all channels this week
- * - Classification counts and signal data
- * - Sync metadata for freshness
+ * Aggregates all data needed for the Weekly Pulse page in one call.
+ * Uses the SAME data source as /growth (Channel Health / Watcher):
+ *   - Hardcoded ARTISTS + custom artists (merged)
+ *   - KV-cached LiveSnaps (zero YouTube API calls)
+ *   - Snapshot history for 7d/30d deltas & WoW
+ *   - Weekly rollups for trend context
+ *   - Sync metadata for freshness
  */
 
 import { NextResponse } from 'next/server';
-import { listEntries, type TeamWatcherEntry, type CampaignState } from '@/lib/teamWatcherStore';
-import { readLiveSnap, type CachedSnap } from '@/lib/kvCache';
-import { readSyncMeta } from '@/lib/kvCache';
 import {
+  ARTISTS,
+  mergeArtistLists,
   deriveFromLive,
   classifyArtist,
-  fmtNum,
+  isVirginOwned,
   daysSince,
-  type LiveSnap,
-  type Derived,
+  type Artist,
   type ChannelState,
   type ArtistClassification,
   type RecentUpload,
 } from '@/lib/artists';
+import { listCustomArtists } from '@/lib/artistStore';
+import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
+import { readHistory, deltaOver } from '@/lib/snapshots';
+import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import { listRollups, type WeeklyRollup } from '@/lib/weeklySnapshotStore';
 import { classifyUploadFormat, type UploadFormatLabel } from '@/lib/coach/matchEngine';
 
@@ -32,29 +35,37 @@ export const dynamic = 'force-dynamic';
 // ── Response Types ────────────────────────────────────────────────────────────
 
 type PulseChannel = {
-  channelId: string;
-  artistSlug: string;
-  displayName: string;
-  campaignName: string;
-  campaignState: CampaignState;
-  regionTag: string;
+  slug: string;
+  name: string;
+  isVirgin: boolean;
+  channelHandle: string | null;
   // YouTube data
   subs: number | null;
-  views: number | null;
+  totalViews: number | null;
+  views7d: number | null;
+  subs7d: number | null;
+  viewsWoW: number | null;
+  subsWoW: number | null;
   uploads30d: number;
   shorts30d: number;
   longform30d: number;
   lastUploadAt: string | null;
   lastUploadDaysAgo: number | null;
   thumbnail: string | null;
+  // Campaign
+  phase: string;
+  campaign: string | null;
+  campaignStartDate: string | null;
   // Health
-  status: ChannelState | null;
-  classification: ArtistClassification | null;
+  status: ChannelState;
+  classification: ArtistClassification;
   reason: string;
   nextAction: string;
   watcherRead: string;
-  // Notes
-  teamNotes: string[];
+  // Cadence
+  cadenceLabel: string;
+  // Subs per 1K views (derived from 7d data)
+  subsPer1kViews: number | null;
 };
 
 type PulseVideo = {
@@ -69,6 +80,8 @@ type PulseVideo = {
   durationSec: number;
   format: UploadFormatLabel;
   thumbnail: string;
+  velocity: number;
+  daysAgo: number;
 };
 
 type PulseSignals = {
@@ -76,6 +89,8 @@ type PulseSignals = {
   weakConversion: number;
   underfed: number;
   cold: number;
+  totalManaged: number;
+  totalMarket: number;
   total: number;
 };
 
@@ -84,147 +99,180 @@ type PulseResponse = {
   generatedAt: string;
   lastSyncAt: string | null;
   signals: PulseSignals;
-  channels: PulseChannel[];
+  managedChannels: PulseChannel[];
+  marketChannels: PulseChannel[];
   topVideos: PulseVideo[];
   topShorts: PulseVideo[];
   rollups: WeeklyRollup[];
   editorial: string;
   insights: string[];
   playbook: { title: string; why: string; when: string; actions: string[] };
+  marketInsights: string[];
 };
 
 // ── GET handler ───────────────────────────────────────────────────────────────
 
 export async function GET() {
   try {
-    const entries = await listEntries();
+    // Load all artists (same as /growth page)
+    const custom = await listCustomArtists();
+    const allArtists = mergeArtistLists(ARTISTS, custom);
+    const syncMeta = await readSyncMeta();
 
-    // Enrich each entry with cached YouTube data
-    const enrichedChannels: PulseChannel[] = [];
-    const allRecentUploads: (RecentUpload & { channelName: string; artistSlug: string })[] = [];
+    // Batch-read all cached snaps from KV (zero YouTube API calls)
+    const handles = allArtists
+      .map(a => a.channelHandle)
+      .filter(Boolean) as string[];
+    const snapMap = await readAllLiveSnaps(handles);
 
-    await Promise.all(
-      entries.map(async (entry) => {
-        const snap = await readLiveSnap(entry.channelId);
-        const health = snap ? deriveFromLive(snap as LiveSnap) : null;
-        const uploads30d = (snap?.uploads30d ?? 0);
-        const shorts30d = (snap?.shorts30d ?? 0);
+    const managedChannels: PulseChannel[] = [];
+    const marketChannels: PulseChannel[] = [];
+    const allRecentVideos: PulseVideo[] = [];
 
-        const channel: PulseChannel = {
-          channelId: entry.channelId,
-          artistSlug: entry.artistSlug,
-          displayName: entry.displayName,
-          campaignName: entry.campaignName,
-          campaignState: entry.campaignState,
-          regionTag: entry.regionTag,
-          subs: snap?.subs ?? null,
-          views: snap?.views ?? null,
-          uploads30d,
-          shorts30d,
-          longform30d: Math.max(0, uploads30d - shorts30d),
-          lastUploadAt: snap?.lastUploadAt ?? null,
-          lastUploadDaysAgo: daysSince(snap?.lastUploadAt),
-          thumbnail: snap?.thumbnail ?? null,
-          status: health?.status ?? null,
-          classification: health ? classifyArtist(health.status, uploads30d) : null,
-          reason: health?.reason ?? '',
-          nextAction: health?.nextAction ?? '',
-          watcherRead: health?.watcherRead ?? '',
-          teamNotes: entry.teamNotes?.map(n => n.text) ?? [],
-        };
+    const now = Date.now();
+    const videoCutoff = 14 * 86400000; // 14 days for top videos
 
-        enrichedChannels.push(channel);
+    for (const a of allArtists) {
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+      const history = snap?.channelId && !snap.error
+        ? await readHistory(snap.channelId)
+        : [];
 
-        // Collect recent uploads for top videos
-        if (snap?.recentUploads) {
-          for (const u of snap.recentUploads) {
-            // Only include uploads from the last 10 days for "this week" feel
-            const age = daysSince(u.publishedAt);
-            if (age != null && age <= 10) {
-              allRecentUploads.push({
-                ...u,
-                channelName: entry.displayName,
-                artistSlug: entry.artistSlug,
-              });
-            }
-          }
-        }
-      }),
-    );
+      // Normalized data layer (same as /growth)
+      const nc = normalizeChannelData(snap, history);
 
-    // Sort and classify top videos
-    const sortedVideos = allRecentUploads.sort((a, b) => b.viewCount - a.viewCount);
+      const subs7Val = rawDelta(nc.subs7d);
+      const views7Val = rawDelta(nc.views7d);
 
-    const topVideos: PulseVideo[] = [];
-    const topShorts: PulseVideo[] = [];
+      const subs14Raw = deltaOver(history, 14, 'subs');
+      const views14Raw = deltaOver(history, 14, 'views');
+      const subsWoWResult = computeWoW(nc.subs7d, subs14Raw);
+      const viewsWoWResult = computeWoW(nc.views7d, views14Raw);
 
-    for (const u of sortedVideos) {
-      const fmt = classifyUploadFormat(u);
-      const video: PulseVideo = {
-        id: u.id,
-        title: u.title,
-        channelName: u.channelName,
-        artistSlug: u.artistSlug,
-        viewCount: u.viewCount,
-        likeCount: u.likeCount,
-        commentCount: u.commentCount,
-        publishedAt: u.publishedAt,
-        durationSec: u.durationSec,
-        format: fmt,
-        thumbnail: `https://i.ytimg.com/vi/${u.id}/mqdefault.jpg`,
+      const derived = snap ? deriveFromLive(snap, {
+        subs7Delta: subs7Val,
+        views7Delta: views7Val,
+      }) : null;
+
+      const status: ChannelState = derived?.status ?? 'COLD';
+      const classification = classifyArtist(status, nc.cadence.uploads30d);
+
+      // Subs per 1K views
+      const subsPer1kViews = views7Val && views7Val > 0 && subs7Val != null
+        ? Math.round((subs7Val / views7Val) * 1000 * 10) / 10
+        : null;
+
+      const channel: PulseChannel = {
+        slug: a.slug,
+        name: a.name,
+        isVirgin: isVirginOwned(a),
+        channelHandle: a.channelHandle ?? null,
+        subs: nc.subs,
+        totalViews: nc.views,
+        views7d: views7Val,
+        subs7d: subs7Val,
+        viewsWoW: viewsWoWResult?.value ?? null,
+        subsWoW: subsWoWResult?.value ?? null,
+        uploads30d: nc.cadence.uploads30d,
+        shorts30d: nc.cadence.shorts30d,
+        longform30d: Math.max(0, nc.cadence.uploads30d - nc.cadence.shorts30d),
+        lastUploadAt: snap?.lastUploadAt ?? null,
+        lastUploadDaysAgo: daysSince(snap?.lastUploadAt),
+        thumbnail: snap?.thumbnail ?? null,
+        phase: a.phase,
+        campaign: a.campaign ?? null,
+        campaignStartDate: a.campaignStartDate ?? null,
+        status,
+        classification,
+        reason: derived?.reason ?? 'No cached data yet',
+        nextAction: derived?.nextAction ?? '',
+        watcherRead: derived?.watcherRead ?? '',
+        cadenceLabel: nc.cadence.cadenceLabel,
+        subsPer1kViews,
       };
 
-      if (fmt === 'Short') {
-        if (topShorts.length < 8) topShorts.push(video);
+      if (isVirginOwned(a)) {
+        managedChannels.push(channel);
       } else {
-        if (topVideos.length < 8) topVideos.push(video);
+        marketChannels.push(channel);
+      }
+
+      // Collect recent uploads for top videos (managed artists only)
+      if (isVirginOwned(a) && snap?.recentUploads) {
+        for (const u of snap.recentUploads) {
+          const ageMs = now - new Date(u.publishedAt).getTime();
+          if (ageMs > videoCutoff || ageMs < 0) continue;
+          const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
+          const velocity = Math.round(u.viewCount / daysAgo);
+          if (velocity < 50) continue;
+
+          const fmt = classifyUploadFormat(u);
+          allRecentVideos.push({
+            id: u.id,
+            title: u.title,
+            channelName: a.name,
+            artistSlug: a.slug,
+            viewCount: u.viewCount,
+            likeCount: u.likeCount,
+            commentCount: u.commentCount,
+            publishedAt: u.publishedAt,
+            durationSec: u.durationSec,
+            format: fmt,
+            thumbnail: `https://i.ytimg.com/vi/${u.id}/mqdefault.jpg`,
+            velocity,
+            daysAgo,
+          });
+        }
       }
     }
 
-    // Compute signals
+    // Sort videos by velocity, split into longform + Shorts
+    allRecentVideos.sort((a, b) => b.velocity - a.velocity);
+    const topVideos = allRecentVideos.filter(v => v.format !== 'Short').slice(0, 8);
+    const topShorts = allRecentVideos.filter(v => v.format === 'Short').slice(0, 8);
+
+    // Signals (managed only)
     const signals: PulseSignals = {
-      growing: enrichedChannels.filter(c => c.classification === 'GROWING').length,
-      weakConversion: enrichedChannels.filter(c => c.classification === 'WEAK_CONVERSION').length,
-      underfed: enrichedChannels.filter(c => c.classification === 'UNDERFED').length,
-      cold: enrichedChannels.filter(c => c.classification === 'COLD').length,
-      total: enrichedChannels.length,
+      growing: managedChannels.filter(c => c.classification === 'GROWING').length,
+      weakConversion: managedChannels.filter(c => c.classification === 'WEAK_CONVERSION').length,
+      underfed: managedChannels.filter(c => c.classification === 'UNDERFED').length,
+      cold: managedChannels.filter(c => c.classification === 'COLD').length,
+      totalManaged: managedChannels.length,
+      totalMarket: marketChannels.length,
+      total: managedChannels.length + marketChannels.length,
     };
 
-    // Fetch weekly rollups (last 4 weeks for trend)
+    // Weekly rollups
     const rollups = await listRollups(4);
 
-    // Sync metadata
-    const syncMeta = await readSyncMeta();
-
-    // Generate editorial read
-    const editorial = generateEditorial(enrichedChannels, signals, topVideos, topShorts);
-
-    // Generate insights
-    const insights = generateInsights(enrichedChannels, signals, topVideos, topShorts);
-
-    // Generate playbook
-    const playbook = generatePlaybook(enrichedChannels, signals, topVideos, topShorts);
+    // Generate content
+    const editorial = generateEditorial(managedChannels, marketChannels, signals, topVideos, topShorts);
+    const insights = generateInsights(managedChannels, signals, topVideos, topShorts);
+    const marketInsights = generateMarketInsights(managedChannels, marketChannels);
+    const playbook = generatePlaybook(managedChannels, signals, topVideos, topShorts);
 
     // Week range
-    const now = new Date();
-    const weekStart = new Date(now);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Monday
+    const nowDate = new Date();
+    const weekStart = new Date(nowDate);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
     const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6); // Sunday
+    weekEnd.setDate(weekEnd.getDate() + 6);
     const weekRange = `${weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${weekEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
     const response: PulseResponse = {
       weekRange,
-      generatedAt: now.toISOString(),
+      generatedAt: nowDate.toISOString(),
       lastSyncAt: syncMeta?.lastSyncAt ?? null,
       signals,
-      channels: enrichedChannels,
+      managedChannels,
+      marketChannels,
       topVideos,
       topShorts,
       rollups,
       editorial,
       insights,
       playbook,
+      marketInsights,
     };
 
     return NextResponse.json(response);
@@ -237,25 +285,28 @@ export async function GET() {
 // ── Insight Generation Engine ─────────────────────────────────────────────────
 
 function generateEditorial(
-  channels: PulseChannel[],
+  managed: PulseChannel[],
+  market: PulseChannel[],
   signals: PulseSignals,
   topVideos: PulseVideo[],
   topShorts: PulseVideo[],
 ): string {
   const parts: string[] = [];
 
-  // Shorts dominance check
-  const totalShorts = channels.reduce((s, c) => s + c.shorts30d, 0);
-  const totalLongform = channels.reduce((s, c) => s + c.longform30d, 0);
+  // Shorts dominance
+  const totalShorts = managed.reduce((s, c) => s + c.shorts30d, 0);
+  const totalLongform = managed.reduce((s, c) => s + c.longform30d, 0);
   const shortsRatio = totalShorts / Math.max(totalShorts + totalLongform, 1);
 
   if (shortsRatio > 0.6) {
-    parts.push('Shorts are driving discovery this week');
+    parts.push('Shorts are driving reach this week, but the strongest channels are the ones turning attention into repeat viewing through cadence and longform support');
+  } else if (shortsRatio < 0.3 && totalLongform > 0) {
+    parts.push('Longform content is leading this week — Shorts could extend discovery further');
   }
 
   // Growth vs issues
-  if (signals.growing > signals.weakConversion + signals.underfed + signals.cold) {
-    parts.push('more channels are growing than struggling');
+  if (signals.growing > signals.weakConversion + signals.underfed + signals.cold && signals.growing >= 2) {
+    parts.push('more channels are growing than struggling — momentum is building');
   } else if (signals.underfed + signals.cold > signals.growing) {
     parts.push('cadence remains the biggest controllable gap across the roster');
   }
@@ -265,22 +316,28 @@ function generateEditorial(
     parts.push('several channels are generating reach without converting it into subscriber growth');
   }
 
+  // Market comparison
+  const marketAvgUploads = market.length > 0
+    ? market.reduce((s, c) => s + c.uploads30d, 0) / market.length
+    : 0;
+  const managedAvgUploads = managed.length > 0
+    ? managed.reduce((s, c) => s + c.uploads30d, 0) / managed.length
+    : 0;
+  if (market.length > 0 && marketAvgUploads > managedAvgUploads * 1.3) {
+    parts.push('market peers are setting a higher baseline for upload consistency');
+  }
+
   // Top video signal
-  if (topVideos.length > 0) {
-    const biggestView = topVideos[0].viewCount;
-    if (biggestView > 100000) {
-      parts.push(`standout moments are breaking through — ${topVideos[0].channelName} leading the way`);
-    }
+  if (topVideos.length > 0 && topVideos[0].viewCount > 100000) {
+    parts.push(`standout moments are breaking through — ${topVideos[0].channelName} leading the way`);
   }
 
   if (parts.length === 0) {
     return 'Steady week across the roster — consistency remains the strongest lever for long-term growth.';
   }
 
-  // Capitalize first part, join with commas, end with period
   const sentence = parts[0].charAt(0).toUpperCase() + parts[0].slice(1) +
     (parts.length > 1 ? ', ' + parts.slice(1).join(', and ') : '') + '.';
-
   return sentence;
 }
 
@@ -292,14 +349,12 @@ function generateInsights(
 ): string[] {
   const insights: string[] = [];
 
-  // Conversion insight
   if (signals.weakConversion >= 2) {
     insights.push(
       `${signals.weakConversion} channels are generating views but not converting into subscriber growth. Deeper content — BTS, breakdowns, artist-led context — can close the gap.`
     );
   }
 
-  // Cadence insight
   const lowCadence = channels.filter(c => c.uploads30d <= 2 && c.status !== 'COLD');
   if (lowCadence.length >= 2) {
     insights.push(
@@ -307,7 +362,6 @@ function generateInsights(
     );
   }
 
-  // Shorts vs longform balance
   const shortHeavy = channels.filter(c => c.shorts30d > 3 && c.longform30d === 0);
   if (shortHeavy.length >= 1) {
     insights.push(
@@ -315,31 +369,88 @@ function generateInsights(
     );
   }
 
-  // Cold channels
   if (signals.cold >= 2) {
     insights.push(
       `${signals.cold} channels are cold — no recent uploads during active campaign windows. Reactivation with catalogue Shorts could restart the algorithm.`
     );
   }
 
-  // Follow-up gap
-  const noFollowUp = channels.filter(c => {
-    return c.campaignState === 'Active' && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 10;
-  });
+  const noFollowUp = channels.filter(c =>
+    c.campaignStartDate != null && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 10
+  );
   if (noFollowUp.length >= 1) {
     insights.push(
-      `${noFollowUp.length} active campaign${noFollowUp.length > 1 ? 's have' : ' has'} gone 10+ days without a new upload. Follow-up content in the 7–10 day window after a release keeps momentum alive.`
+      `${noFollowUp.length} campaign channel${noFollowUp.length > 1 ? 's have' : ' has'} gone 10+ days without a new upload. Follow-up content in the 7–10 day window after a release keeps momentum alive.`
     );
   }
 
-  // Growing channels success
   if (signals.growing >= 3) {
     insights.push(
       `${signals.growing} channels are in a growth state — consistent cadence and conversion are the common thread.`
     );
   }
 
+  // View momentum
+  const bigViewers = channels.filter(c => c.views7d != null && c.views7d > 50000);
+  if (bigViewers.length > 0) {
+    const names = bigViewers.slice(0, 3).map(c => c.name).join(', ');
+    insights.push(
+      `Strong view momentum this week from ${names}. These channels are in a discovery window — supporting with Shorts and follow-up content can compound the effect.`
+    );
+  }
+
   return insights.slice(0, 5);
+}
+
+function generateMarketInsights(
+  managed: PulseChannel[],
+  market: PulseChannel[],
+): string[] {
+  if (market.length === 0) return [];
+  const insights: string[] = [];
+
+  // Cadence comparison
+  const marketAvg = market.reduce((s, c) => s + c.uploads30d, 0) / market.length;
+  const managedAvg = managed.length > 0
+    ? managed.reduce((s, c) => s + c.uploads30d, 0) / managed.length
+    : 0;
+
+  if (marketAvg > managedAvg * 1.3 && market.length >= 2) {
+    insights.push(
+      `Market benchmark channels average ${marketAvg.toFixed(1)} uploads/30d vs ${managedAvg.toFixed(1)} for managed artists. Global peers are setting a higher consistency baseline.`
+    );
+  }
+
+  // Best consistency in market
+  const consistentMarket = market
+    .filter(c => c.uploads30d >= 5)
+    .sort((a, b) => b.uploads30d - a.uploads30d);
+  if (consistentMarket.length > 0) {
+    const names = consistentMarket.slice(0, 3).map(c => c.name).join(', ');
+    insights.push(
+      `Standout consistency from ${names} — ${consistentMarket[0].uploads30d} uploads in 30 days shows what sustained cadence looks like.`
+    );
+  }
+
+  // Shorts usage in market
+  const marketShortsRatio = market.reduce((s, c) => s + c.shorts30d, 0) /
+    Math.max(market.reduce((s, c) => s + c.uploads30d, 0), 1);
+  if (marketShortsRatio > 0.4) {
+    insights.push(
+      `Market peers are leaning heavily into Shorts (${Math.round(marketShortsRatio * 100)}% of uploads). Shorts-first discovery is becoming the norm globally.`
+    );
+  }
+
+  // Growing market channels
+  const growingMarket = market.filter(c => c.classification === 'GROWING');
+  if (growingMarket.length > 0) {
+    const names = growingMarket.slice(0, 3).map(c => c.name).join(', ');
+    insights.push(
+      `${growingMarket.length} market channel${growingMarket.length > 1 ? 's' : ''} in growth state: ${names}. Their strategies offer reference points for managed campaigns.`
+    );
+  }
+
+  return insights.slice(0, 4);
 }
 
 function generatePlaybook(
@@ -348,11 +459,8 @@ function generatePlaybook(
   topVideos: PulseVideo[],
   topShorts: PulseVideo[],
 ): PulseResponse['playbook'] {
-  // Choose playbook based on strongest pattern
-
-  // Pattern: many channels with follow-up gaps
   const activeNoRecent = channels.filter(c =>
-    c.campaignState === 'Active' && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 7
+    c.campaignStartDate != null && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 7
   );
   if (activeNoRecent.length >= 2) {
     return {
@@ -367,7 +475,6 @@ function generatePlaybook(
     };
   }
 
-  // Pattern: weak conversion
   if (signals.weakConversion >= 2) {
     return {
       title: 'When Reach Is High But Subs Are Flat',
@@ -381,7 +488,6 @@ function generatePlaybook(
     };
   }
 
-  // Pattern: Shorts-heavy, no longform
   const shortHeavy = channels.filter(c => c.shorts30d > 3 && c.longform30d === 0);
   if (shortHeavy.length >= 1) {
     return {
@@ -396,7 +502,6 @@ function generatePlaybook(
     };
   }
 
-  // Pattern: cold channels
   if (signals.cold >= 2) {
     return {
       title: 'Turn One Video Into Five Uploads',
@@ -410,7 +515,6 @@ function generatePlaybook(
     };
   }
 
-  // Default
   return {
     title: 'Premiere + Community Post Sequence',
     why: 'Premieres create an event moment that drives simultaneous viewing and live chat engagement. Pairing with a Community Post 24 hours before builds anticipation.',
