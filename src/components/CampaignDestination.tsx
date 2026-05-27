@@ -2016,12 +2016,14 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
   const { cluster, momentLabel, supportCount, totalEcosystemViews } = moment;
   const { anchor, coverageLabel, insights, supportLinks: links, supportByCategory: byCategory } = cluster;
   const [expanded, setExpanded] = useState(true);
+  const isSecondary = cluster.isSecondaryAnchor === true;
 
-  const tone =
-    coverageLabel === 'Strong'     ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
-    coverageLabel === 'Moderate'   ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
-    coverageLabel === 'Expandable' ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Long-tail opportunity' } :
-                                     { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'Could extend further' };
+  const tone = isSecondary
+    ? { bg: '#EEF2FF', border: '#C7D2FE', color: '#4338CA', label: 'Campaign Moment' }
+    : coverageLabel === 'Strong'     ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
+      coverageLabel === 'Moderate'   ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
+      coverageLabel === 'Expandable' ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Long-tail opportunity' } :
+                                       { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'Could extend further' };
 
   const longformLinks = links.filter(l => l.upload.durationSec > 62);
   const shortsLinks = links.filter(l => l.upload.durationSec <= 62);
@@ -2081,7 +2083,7 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
               padding: '1px 6px', borderRadius: 2,
               background: phaseAccent, fontFamily: MONO,
             }}>
-              Release Moment
+              {isSecondary ? 'Campaign Moment' : 'Release Moment'}
             </span>
             <span style={{
               fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
@@ -2247,8 +2249,8 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
             </div>
           )}
 
-          {/* ── Release Support Checklist ── */}
-          <ReleaseChecklist cluster={cluster} />
+          {/* ── Release Support Checklist — skip for secondary anchors (Trailers etc.) ── */}
+          {!isSecondary && <ReleaseChecklist cluster={cluster} />}
 
           {/* Narrative insight */}
           {narrative && (

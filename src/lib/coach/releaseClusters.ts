@@ -104,6 +104,9 @@ export type ReleaseCluster = {
   premiereStatus: PremiereStatus;
   /** Release support checklist with timing guidance */
   checklist: ChecklistItem[];
+  /** Whether this anchor is a secondary format (Trailer, etc.) — gets lighter
+   *  treatment in the UI: no full multiformat checklist, just a prominent moment card. */
+  isSecondaryAnchor?: boolean;
 };
 
 /** A self-contained release moment within a campaign phase */
@@ -338,6 +341,14 @@ const ANCHOR_FORMATS: UploadFormatLabel[] = [
   'Documentary',
 ];
 
+/** Secondary anchor formats — campaign moments that deserve visual prominence
+ *  but don't need the full multiformat checklist. Trailers around album
+ *  announcements, teasers, etc. These only become anchors when they match
+ *  a timeline event (confirming they're a deliberate campaign moment). */
+const SECONDARY_ANCHOR_FORMATS: UploadFormatLabel[] = [
+  'Trailer',
+];
+
 /** The key support formats we check for coverage */
 const SUPPORT_FORMAT_DEFS: { key: string; label: string; match: (f: UploadFormatLabel, role: ContentRole) => boolean }[] = [
   { key: 'shorts',       label: 'Shorts',        match: (f) => f === 'Short' },
@@ -444,6 +455,7 @@ export function buildReleaseClusters(
   //    These are the campaign pillars. Everything else is support infrastructure.
   //    HARD RULE: Nothing older than 30 days before campaign start. Ever.
   const anchors: RecentUpload[] = [];
+  const secondaryAnchorIds = new Set<string>();
   for (const upload of sorted) {
     const fmt = classifyUploadFormat(upload);
     const isAnchorFormat = ANCHOR_FORMATS.includes(fmt);
@@ -451,19 +463,23 @@ export function buildReleaseClusters(
 
     // Support-only formats should NEVER be promoted to anchor status — they belong
     // inside a release moment block as support content (e.g. BTS inside the Official Video block).
-    const SUPPORT_ONLY_FORMATS: string[] = ['BTS', 'Lyric Video', 'Visualizer', 'Trailer', 'Live Session', 'Interview', 'Freestyle'];
+    // Exception: Trailer is a SECONDARY anchor when it matches a plan event.
+    const SUPPORT_ONLY_FORMATS: string[] = ['BTS', 'Lyric Video', 'Visualizer', 'Live Session', 'Interview', 'Freestyle'];
     const isSupportFormat = SUPPORT_ONLY_FORMATS.includes(fmt);
+    const isSecondaryFormat = SECONDARY_ANCHOR_FORMATS.includes(fmt);
     const matchesPlanEvent = isLongform && !isSupportFormat && matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
 
-    // Gate 0: Must be either an anchor format OR a longform that matches a plan event.
-    // View threshold logic:
-    //   - Anchor formats (Official Video, Premiere, Documentary) within a campaign
-    //     window always qualify — they ARE the campaign releases, regardless of view
-    //     count. Smaller artists in early phases shouldn't be excluded by low views.
-    //   - Non-anchor longform that matches a plan event: still needs minViews.
-    //   - Everything else: needs minViews.
-    if (!isAnchorFormat && !matchesPlanEvent) continue;
-    const anchorInCampaign = isAnchorFormat && campaignStart != null;
+    // Secondary anchors (Trailer) only qualify when they match a plan event —
+    // this confirms they're a deliberate campaign moment, not incidental content.
+    const isSecondaryAnchor = isSecondaryFormat && matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
+
+    // Gate 0: Must be an anchor format, secondary anchor (plan-confirmed), or plan-matching longform.
+    // View threshold:
+    //   - Primary anchors within a campaign window: always qualify
+    //   - Secondary anchors matching plan events: always qualify
+    //   - Non-anchor longform matching a plan event: still needs minViews
+    if (!isAnchorFormat && !isSecondaryAnchor && !matchesPlanEvent) continue;
+    const anchorInCampaign = (isAnchorFormat || isSecondaryAnchor) && campaignStart != null;
     if (upload.viewCount < minViews && !anchorInCampaign) continue;
 
     const uploadDate = new Date(upload.publishedAt).getTime();
@@ -482,6 +498,7 @@ export function buildReleaseClusters(
     }
 
     anchors.push(upload);
+    if (isSecondaryAnchor) secondaryAnchorIds.add(upload.id);
   }
 
   if (anchors.length === 0) return [];
@@ -676,6 +693,7 @@ export function buildReleaseClusters(
       insights,
       premiereStatus: detectPremiereStatus(anchor),
       checklist: [], // Populated below after cluster is built
+      isSecondaryAnchor: secondaryAnchorIds.has(anchor.id),
     };
   });
 
