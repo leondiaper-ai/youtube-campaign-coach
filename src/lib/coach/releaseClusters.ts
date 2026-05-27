@@ -423,6 +423,21 @@ export function buildReleaseClusters(
     extractTitleKeywords(e.title)
   );
 
+  // Extend the campaign window back to include the earliest plan event.
+  // The plan's timeline often starts before the formal campaignStartDate
+  // (e.g. a single drops 6 weeks before the campaign officially begins).
+  // These pre-campaign releases are still campaign content.
+  const earliestEventDate = (options.campaignEvents ?? []).reduce((min, e) => {
+    const t = new Date(e.dateISO).getTime();
+    return Number.isFinite(t) && (min === null || t < min) ? t : min;
+  }, null as number | null);
+  const effectiveWindowStart = campaignStart
+    ? Math.min(
+        campaignStart - PRE_CAMPAIGN_BUFFER_DAYS * 86400000,
+        earliestEventDate != null ? earliestEventDate - 7 * 86400000 : Infinity,
+      )
+    : null;
+
   // 1. Identify anchors — official videos, premieres, documentaries,
   //    OR any longform upload that matches a timeline event (plan-aware).
   //    Must fall WITHIN the active campaign window (+ 30-day pre-buffer).
@@ -453,14 +468,13 @@ export function buildReleaseClusters(
 
     const uploadDate = new Date(upload.publishedAt).getTime();
 
-    // Gate 1: Campaign window — uploads outside the window are excluded UNLESS
-    // they explicitly match a timeline event. The plan references them as key
-    // releases, so they belong as release moments even if they pre-date the
-    // formal campaign start (e.g. a single that dropped before rollout began).
+    // Gate 1: Campaign window — uses effectiveWindowStart which extends back
+    // to the earliest plan event (not just campaignStartDate - 30d).
+    // Uploads that match a timeline event also bypass the window entirely.
     const matchesPlanTimeline = matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
     if (campaignStart && campaignEnd) {
-      const windowStart = campaignStart - PRE_CAMPAIGN_BUFFER_DAYS * 86400000;
-      if (uploadDate < windowStart || uploadDate > campaignEnd) {
+      const winStart = effectiveWindowStart ?? (campaignStart - PRE_CAMPAIGN_BUFFER_DAYS * 86400000);
+      if (uploadDate < winStart || uploadDate > campaignEnd) {
         if (!matchesPlanTimeline) continue; // Hard cutoff — unless plan references it
       }
     } else if (fallbackCutoff && uploadDate < fallbackCutoff) {
