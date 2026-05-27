@@ -184,7 +184,7 @@ export default function WeeklyPulse() {
 
   const featureVideo = data.topVideos[0] ?? null;
   const supportingVideos = data.topVideos.slice(1, 4);
-  const topShorts = data.topShorts.slice(0, 6);
+  const topShorts = data.topShorts.slice(0, 9);
 
   // Build slug→channelHandle lookup for linking video artist names to their YT channels
   const allChannels = [...managed, ...market];
