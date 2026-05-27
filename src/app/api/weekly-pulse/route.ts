@@ -229,7 +229,7 @@ export async function GET() {
     // Sort videos by velocity, split into longform + Shorts
     allRecentVideos.sort((a, b) => b.velocity - a.velocity);
     const topVideos = allRecentVideos.filter(v => v.format !== 'Short').slice(0, 8);
-    const topShorts = allRecentVideos.filter(v => v.format === 'Short').slice(0, 8);
+    const topShorts = allRecentVideos.filter(v => v.format === 'Short').slice(0, 12);
 
     // Signals (managed only)
     const signals: PulseSignals = {
