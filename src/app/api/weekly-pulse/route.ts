@@ -367,16 +367,23 @@ function generateInsights(
   }
 
   // ── Narrative 3: What's actually working ──
-  // Celebrate momentum patterns, not just list growing channels
-  const growingWithCadence = channels.filter(c =>
-    c.classification === 'GROWING' && c.uploads30d >= 4
+  // Only celebrate channels that are genuinely GROWING + have healthy cadence
+  // Exclude channels already mentioned negatively (weak conversion, cold, etc.)
+  const negativeNames = new Set([
+    ...weakConvChannels.map(c => c.slug),
+    ...coldChannels.map(c => c.slug),
+    ...lowCadence.map(c => c.slug),
+    ...shortHeavy.map(c => c.slug),
+  ]);
+  const genuinelyGrowing = channels.filter(c =>
+    c.classification === 'GROWING' &&
+    c.uploads30d >= 4 &&
+    c.longform30d >= 1 &&           // must have some format depth
+    (c.viewsWoW ?? 0) >= 0 &&       // not declining week-over-week
+    !negativeNames.has(c.slug)       // not mentioned in a negative narrative
   );
-  const bigViewers = channels.filter(c => c.views7d != null && c.views7d > 50000);
-  if (growingWithCadence.length >= 2 || bigViewers.length >= 2) {
-    const momentumNames = Array.from(new Set([
-      ...growingWithCadence.slice(0, 2).map(c => c.name),
-      ...bigViewers.slice(0, 2).map(c => c.name),
-    ])).slice(0, 3);
+  if (genuinelyGrowing.length >= 2) {
+    const momentumNames = genuinelyGrowing.slice(0, 3).map(c => c.name);
     insights.push(
       `The channels showing real momentum this week — ${momentumNames.join(', ')} — share a pattern: they're posting regularly, mixing formats, and building an ecosystem rather than relying on single releases. That's the model YouTube rewards, and it's compounding.`
     );
@@ -387,11 +394,17 @@ function generateInsights(
   }
 
   // ── Narrative 4: The format story ──
-  // Shorts-to-longform ecosystem health
-  if (shortHeavy.length >= 2) {
-    const names = shortHeavy.slice(0, 2).map(c => c.name).join(' and ');
+  // Shorts-to-longform ecosystem health — exclude channels already named above
+  const shortsOnlyForNarrative = shortHeavy.filter(c => !negativeNames.has(c.slug) || shortHeavy.length <= 2);
+  if (shortsOnlyForNarrative.length >= 2) {
+    const names = shortsOnlyForNarrative.slice(0, 2).map(c => c.name).join(' and ');
     insights.push(
-      `${names} ${shortHeavy.length > 2 ? 'and others are' : 'are'} building discovery momentum through Shorts, but without longform to support it. Shorts open the door — they bring new viewers in — but it's the deeper content that turns a scroll into a subscribe. Even one longform piece per cycle changes the dynamic.`
+      `${names} ${shortsOnlyForNarrative.length > 2 ? 'and others are' : 'are'} building discovery momentum through Shorts, but without longform to support it. Shorts open the door — they bring new viewers in — but it's the deeper content that turns a scroll into a subscribe. Even one longform piece per cycle changes the dynamic.`
+    );
+  } else if (shortHeavy.length >= 2 && insights.length < 3) {
+    // Fallback: use generic copy without names to avoid contradictions
+    insights.push(
+      `Several channels are building discovery momentum through Shorts, but without longform to support it. Shorts open the door — they bring new viewers in — but it's the deeper content that turns a scroll into a subscribe. Even one longform piece per cycle changes the dynamic.`
     );
   }
 
