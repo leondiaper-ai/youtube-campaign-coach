@@ -191,15 +191,11 @@ export default function WeeklyPulse() {
   const slugToHandle = new Map<string, string>();
   allChannels.forEach(ch => { if (ch.channelHandle) slugToHandle.set(ch.slug, ch.channelHandle); });
 
-  // ── "This Week Across Virgin" — curated campaign stories ──
-  // Score channels by narrative interest, not raw views
-  type CampaignStory = {
-    channel: PulseChannel;
-    heroImage: string;       // best available visual
-    signal: string;          // one-word signal tag
-    observation: string;     // editorial one-liner
-    opportunity: string;     // strategic read
-  };
+  // ══════════════════════════════════════════════════════════════════════════
+  // EDITORIAL INTELLIGENCE LAYER
+  // Campaigns are selected for momentum, rollout behaviour and YouTube
+  // strategy signals — not raw scale.
+  // ══════════════════════════════════════════════════════════════════════════
 
   const allVideos = [...data.topVideos, ...data.topShorts];
   const videosBySlug = new Map<string, PulseVideo[]>();
@@ -209,66 +205,265 @@ export default function WeeklyPulse() {
     videosBySlug.set(v.artistSlug, arr);
   });
 
-  function campaignScore(ch: PulseChannel): number {
+  // ── Signal 1: Follow-Through Score ──
+  // Did the campaign keep posting after a major release?
+  type FollowThrough = 'strong' | 'some' | 'release-only' | 'unknown';
+  function assessFollowThrough(ch: PulseChannel, vids: PulseVideo[]): FollowThrough {
+    if (vids.length === 0) return 'unknown';
+    // Find the "anchor" — the oldest video in the 14-day window (likely the official release)
+    const sorted = [...vids].sort((a, b) => b.daysAgo - a.daysAgo);
+    const anchor = sorted[0];
+    if (!anchor) return 'unknown';
+    // Count uploads that came after the anchor (within 7-10 days of it)
+    const followUps = vids.filter(v => v.id !== anchor.id && v.daysAgo < anchor.daysAgo);
+    if (followUps.length >= 3) return 'strong';
+    if (followUps.length >= 1) return 'some';
+    if (vids.length === 1) return 'release-only';
+    return 'unknown';
+  }
+
+  // ── Signal 2: Multiformat Strategy Score ──
+  // How diverse is the content rollout?
+  type MultiformatLevel = 'strong' | 'balanced' | 'shorts-heavy' | 'thin';
+  function assessMultiformat(ch: PulseChannel, vids: PulseVideo[]): MultiformatLevel {
+    const formats = new Set(vids.map(v => v.format.toLowerCase()));
+    const hasShorts = ch.shorts30d >= 2 || formats.has('short');
+    const hasLongform = ch.longform30d >= 1;
+    const formatCount = formats.size;
+    // Check for diverse formats: official video, lyric, visualiser, BTS, live, etc.
+    const richFormats = ['music video', 'official video', 'lyric', 'visualiser', 'visualizer',
+      'bts', 'behind', 'making', 'live', 'session', 'premiere', 'performance'];
+    const richCount = vids.filter(v =>
+      richFormats.some(rf => v.title.toLowerCase().includes(rf) || v.format.toLowerCase().includes(rf))
+    ).length;
+
+    if (hasShorts && hasLongform && (formatCount >= 3 || richCount >= 2)) return 'strong';
+    if (hasShorts && hasLongform) return 'balanced';
+    if (hasShorts && !hasLongform && ch.shorts30d >= 3) return 'shorts-heavy';
+    return 'thin';
+  }
+
+  // ── Signal 3: Momentum Efficiency ──
+  // Outperforming relative to channel size, not raw views
+  type MomentumEfficiency = 'outperforming' | 'on-pace' | 'underperforming' | 'unknown';
+  function assessMomentumEfficiency(ch: PulseChannel): MomentumEfficiency {
+    const views7 = ch.views7d ?? 0;
+    const totalViews = ch.totalViews ?? 0;
+    const subs = ch.subs ?? 0;
+    if (views7 === 0 || totalViews === 0) return 'unknown';
+    // Views-to-subs ratio: a small channel pulling strong weekly views is outperforming
+    const weeklyViewsPerSub = subs > 0 ? views7 / subs : 0;
+    const wow = ch.viewsWoW ?? 0;
+    const strongConversion = (ch.subsPer1kViews ?? 0) >= 3;
+    // Outperforming: high views/sub ratio OR strong WoW growth + good conversion
+    if (weeklyViewsPerSub >= 0.5 || (wow >= 20 && strongConversion)) return 'outperforming';
+    if (weeklyViewsPerSub >= 0.15 || wow >= 5) return 'on-pace';
+    return 'underperforming';
+  }
+
+  // ── Signal 4: Reactivation Signal ──
+  // Channels that were cold but started posting again
+  type ReactivationState = 'reactivating' | 'reawakening' | 'dormant' | 'not-applicable';
+  function assessReactivation(ch: PulseChannel): ReactivationState {
+    // Only relevant for channels that aren't already classified as growing
+    if (ch.classification === 'GROWING') return 'not-applicable';
+    const wasCold = ch.classification === 'COLD';
+    const recentUpload = (ch.lastUploadDaysAgo ?? 999) <= 10;
+    const hasCadence = ch.uploads30d >= 2;
+    if (wasCold && recentUpload && hasCadence) return 'reactivating';
+    if (wasCold && recentUpload) return 'reawakening';
+    if (wasCold) return 'dormant';
+    return 'not-applicable';
+  }
+
+  // ── Signal 5: Shorts-to-Longform Signal ──
+  // Is Shorts discovery supported by deeper viewing paths?
+  type ShortsLongform = 'discovery-converting' | 'discovery-depth-needed' | 'longform-led' | 'shorts-only' | 'balanced';
+  function assessShortsLongform(ch: PulseChannel): ShortsLongform {
+    const hasShorts = ch.shorts30d >= 2;
+    const hasLongform = ch.longform30d >= 1;
+    const strongConversion = (ch.subsPer1kViews ?? 0) >= 2;
+    if (hasShorts && hasLongform && strongConversion) return 'discovery-converting';
+    if (hasShorts && hasLongform) return 'balanced';
+    if (hasShorts && !hasLongform) {
+      return strongConversion ? 'shorts-only' : 'discovery-depth-needed';
+    }
+    if (!hasShorts && hasLongform) return 'longform-led';
+    return 'balanced';
+  }
+
+  // ── Signal 6: Campaign Distinctiveness ──
+  // How unusual or interesting is this channel's behaviour?
+  function distinctivenessScore(ch: PulseChannel, vids: PulseVideo[]): number {
+    let d = 0;
+    const wow = ch.viewsWoW ?? 0;
+    const efficiency = assessMomentumEfficiency(ch);
+    const followThrough = assessFollowThrough(ch, vids);
+    const multiformat = assessMultiformat(ch, vids);
+    const reactivation = assessReactivation(ch);
+
+    if (wow >= 30) d += 15;                          // sudden growth
+    if ((ch.subsPer1kViews ?? 0) >= 5) d += 15;     // unusually strong conversion
+    if (ch.uploads30d >= 6 && (ch.subs ?? 0) < 50000) d += 10; // strong cadence, smaller channel
+    if (multiformat === 'strong') d += 10;           // standout multiformat rollout
+    if (followThrough === 'strong') d += 10;         // strong follow-through
+    if (reactivation === 'reactivating') d += 15;    // reactivation after inactivity
+    if (efficiency === 'outperforming') d += 10;     // overperforming vs size
+    return d;
+  }
+
+  // ── Composite Campaign Score ──
+  // Behaviour-led signals can surface interesting stories alongside manual tags
+  type ChannelSignals = {
+    followThrough: FollowThrough;
+    multiformat: MultiformatLevel;
+    efficiency: MomentumEfficiency;
+    reactivation: ReactivationState;
+    shortsLongform: ShortsLongform;
+    distinctiveness: number;
+  };
+
+  function analyseChannel(ch: PulseChannel): ChannelSignals {
+    const vids = videosBySlug.get(ch.slug) ?? [];
+    return {
+      followThrough: assessFollowThrough(ch, vids),
+      multiformat: assessMultiformat(ch, vids),
+      efficiency: assessMomentumEfficiency(ch),
+      reactivation: assessReactivation(ch),
+      shortsLongform: assessShortsLongform(ch),
+      distinctiveness: distinctivenessScore(ch, vids),
+    };
+  }
+
+  function campaignScore(ch: PulseChannel, signals: ChannelSignals): number {
     let s = 0;
-    // Active campaign gets a big boost
-    if (ch.campaign) s += 40;
-    if (ch.phase === 'PUSH') s += 30;
-    // Momentum — growing channels are interesting
+    // Manual tags still matter
+    if (ch.campaign) s += 25;
+    if (ch.phase === 'PUSH') s += 20;
+    // Classification
     if (ch.classification === 'GROWING') s += 25;
     // Cadence health
     if (ch.uploads30d >= 4) s += 15;
-    if (ch.shorts30d >= 2 && ch.longform30d >= 1) s += 10; // mixed content strategy
-    // Strong conversion is narratively interesting
-    if ((ch.subsPer1kViews ?? 0) >= 3) s += 15;
-    // Week-over-week momentum
-    if ((ch.viewsWoW ?? 0) > 20) s += 10;
+    // Behaviour-led signals
+    if (signals.multiformat === 'strong') s += 25;
+    else if (signals.multiformat === 'balanced') s += 12;
+    if (signals.followThrough === 'strong') s += 25;
+    else if (signals.followThrough === 'some') s += 10;
+    // Conversion
+    if ((ch.subsPer1kViews ?? 0) >= 3) s += 20;
+    else if ((ch.subsPer1kViews ?? 0) >= 1.5) s += 8;
+    // Momentum efficiency — rewards outperforming vs size
+    if (signals.efficiency === 'outperforming') s += 20;
+    else if (signals.efficiency === 'on-pace') s += 8;
+    // Week-over-week
+    if ((ch.viewsWoW ?? 0) > 20) s += 15;
+    else if ((ch.viewsWoW ?? 0) > 5) s += 6;
     // Recent activity
     if ((ch.lastUploadDaysAgo ?? 999) <= 7) s += 10;
-    // Has videos to show
+    // Has strong visual asset
     if ((videosBySlug.get(ch.slug)?.length ?? 0) > 0) s += 10;
+    // Reactivation — interesting narrative
+    if (signals.reactivation === 'reactivating') s += 10;
+    // Shorts-to-longform health
+    if (signals.shortsLongform === 'discovery-converting') s += 15;
+    else if (signals.shortsLongform === 'balanced') s += 8;
+    // Distinctiveness bonus
+    s += signals.distinctiveness;
     return s;
   }
 
-  function generateObservation(ch: PulseChannel): string {
-    const hasShorts = ch.shorts30d >= 2;
-    const hasLongform = ch.longform30d >= 1;
-    const strongConversion = (ch.subsPer1kViews ?? 0) >= 3;
-    const highCadence = ch.uploads30d >= 6;
+  // ── Editorial Copy Generation ──
+  // Uses the full signal set to produce richer, more specific observations
+
+  function generateObservation(ch: PulseChannel, sig: ChannelSignals): string {
     const growing = ch.classification === 'GROWING';
     const inPush = ch.phase === 'PUSH';
-    const recentUpload = (ch.lastUploadDaysAgo ?? 999) <= 3;
     const wow = ch.viewsWoW ?? 0;
 
-    if (inPush && growing && hasShorts && hasLongform) {
-      return `Active rollout with Shorts + longform pairing helping sustain discovery beyond release week.`;
+    // Reactivation stories — supportive, never negative
+    if (sig.reactivation === 'reactivating') {
+      return `Back in motion after a quiet stretch. Early signs of reactivation building — cadence and consistency returning.`;
     }
-    if (strongConversion && growing) {
-      return `Strongest audience conversion signals this week. Cadence and identity clearly compounding.`;
+    if (sig.reactivation === 'reawakening') {
+      return `First new content in a while — a reawakening moment. The catalogue audience is there; fresh uploads are starting to reconnect.`;
     }
-    if (highCadence && growing && wow > 15) {
-      return `Consistent output driving week-over-week momentum. Content ecosystem building real audience depth.`;
+    // Strong follow-through + multiformat = the ideal story
+    if (sig.followThrough === 'strong' && sig.multiformat === 'strong') {
+      return `Strong post-release follow-through with a rich multiformat rollout. Shorts, longform and supporting content keeping the campaign visible well beyond drop day.`;
     }
-    if (inPush && hasShorts) {
-      return `Campaign rollout leveraging Shorts to extend reach. YouTube-native strategy supporting wider push.`;
+    if (sig.followThrough === 'strong' && growing) {
+      return `Post-release follow-through is helping sustain momentum. Continued uploads after the anchor are extending the campaign's reach.`;
     }
-    if (growing && recentUpload) {
-      return `Fresh content landing well. Momentum building with each upload cycle.`;
+    // Outperforming efficiency — the underdog story
+    if (sig.efficiency === 'outperforming' && !growing) {
+      return `Outperforming relative to channel size. Audience engagement running ahead of expectations — a signal the content strategy is landing.`;
     }
-    if (strongConversion) {
-      return `Smaller scale but efficient conversion. Audience quality over quantity — a model worth studying.`;
+    if (sig.efficiency === 'outperforming' && growing) {
+      return `Punching above weight. Growth rate and audience response both running ahead of baseline — momentum efficiency is strong.`;
     }
-    if (hasShorts && hasLongform) {
-      return `Mixed content strategy across formats. Building the ecosystem approach YouTube rewards.`;
+    // Shorts-to-longform narratives
+    if (sig.shortsLongform === 'discovery-converting') {
+      return `Shorts discovery converting into deeper engagement. The short-to-long pipeline is working — audience finding the content and staying.`;
+    }
+    if (sig.shortsLongform === 'discovery-depth-needed') {
+      return `Shorts generating discovery energy, but longform depth could strengthen the audience path. The attention is there — now deepen it.`;
+    }
+    // Multiformat stories
+    if (sig.multiformat === 'strong' && inPush) {
+      return `Active campaign with a rich content ecosystem. Multiple formats working together to sustain audience attention across the rollout.`;
+    }
+    if (sig.multiformat === 'strong') {
+      return `Diverse content strategy building real audience depth. Official video, Shorts and supporting formats creating a YouTube-native ecosystem.`;
+    }
+    // In-campaign with push phase
+    if (inPush && growing && sig.followThrough !== 'release-only') {
+      return `Active rollout with sustained output. Momentum holding through the campaign window — the cadence is supporting discovery.`;
+    }
+    if (inPush && sig.followThrough === 'release-only') {
+      return `Campaign anchor landed. Opportunity now to build follow-through content that extends reach beyond release week.`;
+    }
+    // Strong conversion stories
+    if ((ch.subsPer1kViews ?? 0) >= 4 && growing) {
+      return `Strongest audience conversion signals this week. Identity and cadence clearly compounding — each upload strengthening the channel.`;
+    }
+    if ((ch.subsPer1kViews ?? 0) >= 3) {
+      return `Efficient audience conversion — quality over scale. Content resonating deeply with viewers who find it.`;
+    }
+    // High cadence + momentum
+    if (ch.uploads30d >= 6 && growing && wow > 15) {
+      return `Consistent output driving week-over-week momentum. The content ecosystem is building real audience depth.`;
+    }
+    // Shorts-led
+    if (sig.shortsLongform === 'shorts-only' && growing) {
+      return `Shorts-led momentum building. Discovery is active — longform content could deepen the relationship.`;
+    }
+    // Longform-led
+    if (sig.shortsLongform === 'longform-led' && growing) {
+      return `Longform-led strategy resonating with audience. Shorts could amplify this into broader discovery.`;
+    }
+    // General growing
+    if (growing && wow > 10) {
+      return `Steady growth trajectory with week-over-week momentum. Audience responding well to content and campaign continuity.`;
     }
     if (growing) {
-      return `Steady growth trajectory. Audience responding well to structured content and campaign continuity.`;
+      return `Growth signals building. Content strategy beginning to compound — audience deepening with each cycle.`;
     }
-    return `Active presence on YouTube this week with meaningful campaign behaviour worth watching.`;
+    // Fallback — still editorial, never generic
+    if (ch.uploads30d >= 3) {
+      return `Active presence on YouTube this week. Consistent output building foundation for the next momentum phase.`;
+    }
+    return `Campaign in progress — the YouTube ecosystem is being built. Strategy and cadence will determine the next phase.`;
   }
 
-  function generateSignalTag(ch: PulseChannel): string {
+  function generateSignalTag(ch: PulseChannel, sig: ChannelSignals): string {
+    if (sig.reactivation === 'reactivating') return 'Reactivating';
+    if (sig.reactivation === 'reawakening') return 'Reawakening';
+    if (sig.followThrough === 'strong' && sig.multiformat === 'strong') return 'Full Rollout';
+    if (sig.efficiency === 'outperforming') return 'Outperforming';
+    if (sig.shortsLongform === 'discovery-converting') return 'Converting';
     if (ch.classification === 'GROWING' && (ch.viewsWoW ?? 0) > 20) return 'Accelerating';
+    if (sig.multiformat === 'strong') return 'Multiformat';
+    if (sig.followThrough === 'strong') return 'Follow-Through';
     if (ch.classification === 'GROWING') return 'Momentum';
     if (ch.phase === 'PUSH') return 'In Campaign';
     if ((ch.subsPer1kViews ?? 0) >= 3) return 'Converting';
@@ -277,38 +472,75 @@ export default function WeeklyPulse() {
     return 'Active';
   }
 
-  function generateOpportunity(ch: PulseChannel): string {
-    const weakConversion = ch.classification === 'WEAK_CONVERSION';
-    const underfed = ch.classification === 'UNDERFED';
-    const hasShorts = ch.shorts30d >= 2;
-    const hasLongform = ch.longform30d >= 1;
-
-    if (weakConversion) return 'Opportunity now shifts toward deeper audience conversion.';
-    if (underfed) return 'Cadence increase could unlock the next growth phase.';
-    if (!hasShorts && hasLongform) return 'Shorts strategy could amplify existing longform audience.';
-    if (hasShorts && !hasLongform) return 'Longform content could deepen the audience relationship.';
-    if ((ch.viewsWoW ?? 0) > 25) return 'Momentum is real — sustaining cadence is key right now.';
+  function generateOpportunity(ch: PulseChannel, sig: ChannelSignals): string {
+    // Specific opportunities based on signals
+    if (sig.followThrough === 'release-only') {
+      return 'Post-release follow-through content could extend campaign visibility significantly.';
+    }
+    if (sig.shortsLongform === 'discovery-depth-needed') {
+      return 'Shorts are driving discovery — longform content would create the deeper viewing path.';
+    }
+    if (sig.shortsLongform === 'longform-led') {
+      return 'Shorts could unlock broader discovery for this already-engaged longform audience.';
+    }
+    if (sig.multiformat === 'thin') {
+      return 'Wider format diversity would strengthen the content ecosystem and extend campaign life.';
+    }
+    if (sig.multiformat === 'shorts-heavy') {
+      return 'Shorts momentum is real — longform and supporting formats would deepen the audience relationship.';
+    }
+    if (sig.reactivation === 'reactivating') {
+      return 'Momentum is returning — sustained cadence will determine whether this becomes a full comeback.';
+    }
+    if (sig.reactivation === 'reawakening') {
+      return 'First signs of life — building cadence now could reconnect with the existing audience.';
+    }
+    if (sig.efficiency === 'outperforming' && (ch.viewsWoW ?? 0) > 15) {
+      return 'Momentum is real and efficient — sustaining cadence is the priority right now.';
+    }
+    if (ch.classification === 'WEAK_CONVERSION') {
+      return 'Views are there — opportunity shifts toward converting attention into lasting audience.';
+    }
+    if (ch.classification === 'UNDERFED') {
+      return 'Cadence increase could unlock the next growth phase.';
+    }
+    if ((ch.viewsWoW ?? 0) > 25) {
+      return 'Momentum is accelerating — sustaining output and format diversity keeps this moving.';
+    }
     return 'Continue building the content ecosystem to compound audience growth.';
   }
 
+  // ── Assemble campaign stories ──
+  type CampaignStory = {
+    channel: PulseChannel;
+    signals: ChannelSignals;
+    heroImage: string;
+    signal: string;
+    observation: string;
+    opportunity: string;
+  };
+
   const campaignStories: CampaignStory[] = managed
-    .filter(ch => ch.thumbnail) // must have a visual presence
-    .sort((a, b) => campaignScore(b) - campaignScore(a))
-    .slice(0, 5)
+    .filter(ch => ch.thumbnail)
     .map(ch => {
+      const sig = analyseChannel(ch);
+      return { ch, sig, score: campaignScore(ch, sig) };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(({ ch, sig }) => {
       const chVideos = videosBySlug.get(ch.slug) ?? [];
-      // Best available hero image: highest-velocity video thumbnail, or channel thumbnail
-      const bestVideo = chVideos.sort((a, b) => b.velocity - a.velocity)[0];
+      const bestVideo = [...chVideos].sort((a, b) => b.velocity - a.velocity)[0];
       const heroImage = bestVideo
         ? `https://i.ytimg.com/vi/${bestVideo.id}/hqdefault.jpg`
         : ch.thumbnail!;
-
       return {
         channel: ch,
+        signals: sig,
         heroImage,
-        signal: generateSignalTag(ch),
-        observation: generateObservation(ch),
-        opportunity: generateOpportunity(ch),
+        signal: generateSignalTag(ch, sig),
+        observation: generateObservation(ch, sig),
+        opportunity: generateOpportunity(ch, sig),
       };
     });
 
@@ -1114,6 +1346,20 @@ export default function WeeklyPulse() {
         </div>
       </section>
 
+
+      {/* Philosophy note */}
+      <div style={{
+        maxWidth: 1200, margin: '0 auto', padding: '32px 40px 0',
+        textAlign: 'center',
+      }}>
+        <p style={{
+          fontSize: 9, color: GHOST, letterSpacing: '0.06em', lineHeight: 1.6,
+          fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'italic',
+          margin: 0,
+        }}>
+          Campaigns are selected for momentum, rollout behaviour and YouTube strategy signals — not raw scale.
+        </p>
+      </div>
 
       {/* ═══════ SHARE + FOOTER ═══════ */}
       {!screenshotMode && (
