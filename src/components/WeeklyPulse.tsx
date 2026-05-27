@@ -71,6 +71,12 @@ function ytUrl(id: string, dur: number): string {
   return dur <= 62 ? `https://www.youtube.com/shorts/${id}` : `https://www.youtube.com/watch?v=${id}`;
 }
 
+function channelUrl(handle: string | null): string | null {
+  if (!handle) return null;
+  const h = handle.startsWith('@') ? handle : `@${handle}`;
+  return `https://www.youtube.com/${h}`;
+}
+
 // ── Official Logo Components ─────────────────────────────────────────────────
 
 /** Virgin Music logo — official brand PNG */
@@ -179,6 +185,11 @@ export default function WeeklyPulse() {
   const featureVideo = data.topVideos[0] ?? null;
   const supportingVideos = data.topVideos.slice(1, 4);
   const topShorts = data.topShorts.slice(0, 6);
+
+  // Build slug→channelHandle lookup for linking video artist names to their YT channels
+  const allChannels = [...managed, ...market];
+  const slugToHandle = new Map<string, string>();
+  allChannels.forEach(ch => { if (ch.channelHandle) slugToHandle.set(ch.slug, ch.channelHandle); });
 
   function generateEmailBody(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `${v.channelName} — "${v.title}" (${fmtNum(v.viewCount)} views)`);
@@ -485,7 +496,11 @@ export default function WeeklyPulse() {
                     <div style={{ position: 'absolute', top: 10, right: 10 }}><PlayOverlay size={32} /></div>
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 11 }}>
-                    <span style={{ fontWeight: 700, color: INK }}>{featureVideo.channelName}</span>
+                    {(() => { const h = slugToHandle.get(featureVideo.artistSlug); const u = channelUrl(h ?? null); return u ? (
+                      <a href={u} target="_blank" rel="noopener noreferrer" className="pulse-link"><span style={{ fontWeight: 700, color: INK }}>{featureVideo.channelName}</span></a>
+                    ) : (
+                      <span style={{ fontWeight: 700, color: INK }}>{featureVideo.channelName}</span>
+                    ); })()}
                     <span style={{ color: SMOKE }}>{fmtNum(featureVideo.viewCount)} views</span>
                     <span style={{ color: YT_RED, fontWeight: 600 }}>{fmtNum(featureVideo.velocity)}/day</span>
                   </div>
@@ -496,7 +511,13 @@ export default function WeeklyPulse() {
                       <div style={{ borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
                         <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', height: 70, objectFit: 'cover', display: 'block' }} />
                       </div>
-                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 2 }}>{v.channelName}</div>
+                      {(() => { const h = slugToHandle.get(v.artistSlug); const u = channelUrl(h ?? null); return u ? (
+                        <a href={u} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 2 }}>{v.channelName}</div>
+                        </a>
+                      ) : (
+                        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 2 }}>{v.channelName}</div>
+                      ); })()}
                       <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{v.title}</div>
                       <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>{fmtNum(v.viewCount)} views · {fmtNum(v.velocity)}/day</div>
                     </a>
@@ -518,16 +539,30 @@ export default function WeeklyPulse() {
             <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
               In Growth State
             </div>
-            {momentumChannels.map((ch, i) => (
+            {momentumChannels.map((ch, i) => {
+              const chUrl = channelUrl(ch.channelHandle);
+              return (
               <div key={ch.slug} className="momentum-row" style={{
                 display: 'flex', alignItems: 'center', gap: 10, padding: '10px 6px',
                 borderBottom: i < momentumChannels.length - 1 ? `1px solid ${BONE}` : 'none',
               }}>
                 {ch.thumbnail && (
-                  <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                  chUrl ? (
+                    <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
+                      <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                    </a>
+                  ) : (
+                    <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                  )
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
+                  {chUrl ? (
+                    <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                      <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
+                    </a>
+                  ) : (
+                    <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
+                  )}
                   <div style={{ fontSize: 9, color: SMOKE }}>{ch.uploads30d} uploads / 30d</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -535,7 +570,8 @@ export default function WeeklyPulse() {
                   <div style={{ fontSize: 7, color: GHOST, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>views</div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* RIGHT — Opportunities (3 columns) */}
@@ -551,14 +587,29 @@ export default function WeeklyPulse() {
                       <span style={{ fontSize: 24, fontWeight: 900, color: INK, lineHeight: 1 }}>{group.count}</span>
                       <span style={{ fontSize: 9, fontWeight: 600, color: SMOKE }}>{group.label}</span>
                     </div>
-                    {group.topChannels.map(ch => (
+                    {group.topChannels.map(ch => {
+                      const chUrl = channelUrl(ch.channelHandle);
+                      return (
                       <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                         {ch.thumbnail && (
-                          <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                          chUrl ? (
+                            <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
+                              <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                            </a>
+                          ) : (
+                            <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                          )
                         )}
-                        <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                        {chUrl ? (
+                          <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                            <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                          </a>
+                        ) : (
+                          <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                        )}
                       </div>
-                    ))}
+                      );
+                    })}
                     {group.count > 4 && (
                       <div style={{ fontSize: 9, color: GHOST, marginTop: 4, marginLeft: 26 }}>+ {group.count - 4} more</div>
                     )}
@@ -600,17 +651,32 @@ export default function WeeklyPulse() {
                   <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10 }}>
                     Reference Channels
                   </div>
-                  {consistentMarket.map(ch => (
+                  {consistentMarket.map(ch => {
+                    const chUrl = channelUrl(ch.channelHandle);
+                    return (
                     <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       {ch.thumbnail && (
-                        <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                        chUrl ? (
+                          <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
+                            <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                          </a>
+                        ) : (
+                          <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                        )
                       )}
                       <div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</div>
+                        {chUrl ? (
+                          <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                            <div style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</div>
+                          </a>
+                        ) : (
+                          <div style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</div>
+                        )}
                         <div style={{ fontSize: 9, color: GHOST }}>{ch.uploads30d} uploads/30d</div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
