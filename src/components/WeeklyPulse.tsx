@@ -174,9 +174,9 @@ export default function WeeklyPulse() {
   const issueChannels = managed.filter(c => c.classification !== 'GROWING');
   type IssueGroup = { label: string; id: string; count: number; topChannels: PulseChannel[] };
   const issueGroups: IssueGroup[] = [
-    { label: 'Working on Subs', id: 'pulse-conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
-    { label: 'Cadence Opportunity', id: 'pulse-cadence', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 4) },
-    { label: 'Reactivate the Channel', id: 'pulse-reactivation', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
+    { label: 'Audience Growth Opportunity', id: 'pulse-conversion', count: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').length, topChannels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION').slice(0, 4) },
+    { label: 'Cadence Building', id: 'pulse-cadence', count: issueChannels.filter(c => c.classification === 'UNDERFED').length, topChannels: issueChannels.filter(c => c.classification === 'UNDERFED').slice(0, 4) },
+    { label: 'Catalogue Reawakening', id: 'pulse-reactivation', count: issueChannels.filter(c => c.classification === 'COLD').length, topChannels: issueChannels.filter(c => c.classification === 'COLD').slice(0, 4) },
   ].filter(g => g.count > 0);
 
   const consistentMarket = market.filter(c => c.uploads30d >= 5 && c.classification === 'GROWING')
@@ -455,12 +455,12 @@ export default function WeeklyPulse() {
     const inPush = ch.phase === 'PUSH';
     const wow = ch.viewsWoW ?? 0;
 
-    // Reactivation stories
+    // Reactivation stories — supportive, forward-looking
     if (sig.reactivation === 'reactivating') {
-      return `Back in motion after a quiet stretch. Early reactivation signs — consistency returning.`;
+      return `Back in motion. Early signs of the catalogue reconnecting — consistency building nicely.`;
     }
     if (sig.reactivation === 'reawakening') {
-      return `First new content in a while. The catalogue audience is there; fresh uploads reconnecting.`;
+      return `Fresh content landing. The existing audience is there — new uploads starting to reactivate the catalogue.`;
     }
     // Strong follow-through + multiformat = the ideal story
     if (sig.followThrough === 'strong' && isStrongMultiformat(sig.multiformat)) {
@@ -469,19 +469,19 @@ export default function WeeklyPulse() {
     if (sig.followThrough === 'strong' && growing) {
       return `Post-release follow-through sustaining reach. Continued uploads extending the campaign window.`;
     }
-    // Outperforming efficiency
+    // Efficiency stories — celebrate the overperformance
     if (sig.efficiency === 'outperforming' && !growing) {
-      return `Outperforming relative to size. Engagement ahead of expectations — content strategy landing.`;
+      return `Punching above weight. Audience engagement ahead of expectations — strategy is landing.`;
     }
     if (sig.efficiency === 'outperforming' && growing) {
-      return `Punching above weight. Growth and engagement both ahead of baseline.`;
+      return `Strong efficiency. Growth and engagement both running ahead of baseline.`;
     }
     // Shorts-to-longform narratives
     if (sig.shortsLongform === 'discovery-converting') {
       return `Shorts discovery converting into deeper engagement. The short-to-long pipeline is working.`;
     }
     if (sig.shortsLongform === 'discovery-depth-needed') {
-      return `Shorts generating discovery. Longform depth would strengthen the audience path.`;
+      return `Shorts generating discovery. Longform next would create a deeper audience path.`;
     }
     // Multiformat stories
     if (isStrongMultiformat(sig.multiformat) && inPush) {
@@ -498,7 +498,7 @@ export default function WeeklyPulse() {
       return `Active rollout, sustained output. Cadence supporting discovery through the campaign window.`;
     }
     if (inPush && sig.followThrough === 'release-only') {
-      return `Campaign anchor landed. Follow-through content extends reach beyond release week.`;
+      return `Campaign anchor landed. Follow-through content is the next opportunity to extend reach.`;
     }
     // Strong conversion stories
     if ((ch.subsPer1kViews ?? 0) >= 4 && growing) {
@@ -513,11 +513,11 @@ export default function WeeklyPulse() {
     }
     // Shorts-led
     if (sig.shortsLongform === 'shorts-only' && growing) {
-      return `Shorts-led discovery active. Longform would deepen the relationship.`;
+      return `Shorts-led discovery building well. Longform next would deepen the audience relationship.`;
     }
     // Longform-led
     if (sig.shortsLongform === 'longform-led' && growing) {
-      return `Longform resonating. Shorts could amplify into broader discovery.`;
+      return `Longform resonating well. Shorts could expand into broader discovery.`;
     }
     // General growing
     if (growing && wow > 10) {
@@ -526,26 +526,26 @@ export default function WeeklyPulse() {
     if (growing) {
       return `Growth signals building. Strategy beginning to compound.`;
     }
-    // Fallback
+    // Fallback — always forward-looking
     if (ch.uploads30d >= 3) {
-      return `Active output this week. Building foundation for the next phase.`;
+      return `Active output this week. Foundation building for the next phase.`;
     }
-    return `Campaign in progress. Cadence and strategy will determine what's next.`;
+    return `Ecosystem developing. Strategy and cadence shaping the next opportunity.`;
   }
 
   function generateSignalTag(ch: PulseChannel, sig: ChannelSignals): string {
-    if (sig.reactivation === 'reactivating') return 'Reactivating';
+    if (sig.reactivation === 'reactivating') return 'Building Back';
     if (sig.reactivation === 'reawakening') return 'Reawakening';
     if (sig.multiformat === 'full-rollout') return 'Full Rollout';
     if (sig.followThrough === 'strong' && isStrongMultiformat(sig.multiformat)) return 'Full Rollout';
-    if (sig.efficiency === 'outperforming') return 'Outperforming';
-    if (sig.shortsLongform === 'discovery-converting') return 'Converting';
+    if (sig.efficiency === 'outperforming') return 'Punching Up';
+    if (sig.shortsLongform === 'discovery-converting') return 'Discovery → Depth';
     if (ch.classification === 'GROWING' && (ch.viewsWoW ?? 0) > 20) return 'Accelerating';
     if (isStrongMultiformat(sig.multiformat)) return 'Ecosystem';
-    if (sig.followThrough === 'strong') return 'Follow-Through';
-    if (ch.classification === 'GROWING') return 'Momentum';
+    if (sig.followThrough === 'strong') return 'Strong Follow-Through';
+    if (ch.classification === 'GROWING') return 'Building Momentum';
     if (ch.phase === 'PUSH') return 'In Campaign';
-    if ((ch.subsPer1kViews ?? 0) >= 3) return 'Converting';
+    if ((ch.subsPer1kViews ?? 0) >= 3) return 'Audience Deepening';
     if (ch.uploads30d >= 6) return 'High Cadence';
     if ((ch.lastUploadDaysAgo ?? 999) <= 3) return 'Just Dropped';
     return 'Active';
@@ -553,39 +553,39 @@ export default function WeeklyPulse() {
 
   function generateOpportunity(ch: PulseChannel, sig: ChannelSignals): string {
     if (sig.followThrough === 'release-only') {
-      return 'Follow-through content extends campaign life significantly.';
+      return 'Next move: follow-through content to extend campaign reach.';
     }
     if (sig.shortsLongform === 'discovery-depth-needed') {
-      return 'Longform would create a deeper viewing path from Shorts discovery.';
+      return 'Next move: longform to create a deeper path from Shorts discovery.';
     }
     if (sig.shortsLongform === 'longform-led') {
-      return 'Shorts could unlock broader discovery for this engaged audience.';
+      return 'Next move: Shorts to expand discovery for this engaged audience.';
     }
     if (sig.multiformat === 'thin') {
-      return 'Format diversity would extend campaign life.';
+      return 'Next move: format diversity to extend campaign life.';
     }
     if (sig.multiformat === 'shorts-led') {
-      return 'Longform and supporting formats would deepen the audience relationship.';
+      return 'Next move: longform and supporting formats to deepen audience connection.';
     }
     if (sig.reactivation === 'reactivating') {
-      return 'Sustained cadence determines whether this becomes a full comeback.';
+      return 'Next move: sustained cadence to build on this reactivation.';
     }
     if (sig.reactivation === 'reawakening') {
-      return 'Building cadence now reconnects with the existing audience.';
+      return 'Next move: consistent uploads to reconnect with the existing audience.';
     }
     if (sig.efficiency === 'outperforming' && (ch.viewsWoW ?? 0) > 15) {
-      return 'Efficient growth — sustaining cadence is the priority.';
+      return 'Next move: sustain cadence — the efficiency is there.';
     }
     if (ch.classification === 'WEAK_CONVERSION') {
-      return 'Views are there — convert attention into lasting audience.';
+      return 'Next move: deeper content to turn discovery into lasting audience.';
     }
     if (ch.classification === 'UNDERFED') {
-      return 'More uploads unlock the next growth phase.';
+      return 'Next move: increased uploads to unlock the next growth phase.';
     }
     if ((ch.viewsWoW ?? 0) > 25) {
-      return 'Accelerating — sustain output and format diversity.';
+      return 'Next move: sustain output and format diversity while accelerating.';
     }
-    return 'Keep building the content ecosystem.';
+    return 'Next move: keep building the content ecosystem.';
   }
 
   // ── Assemble campaign stories ──
@@ -669,11 +669,11 @@ export default function WeeklyPulse() {
 
   function generateEmailBody(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `${v.channelName} — "${v.title}" (${fmtNum(v.viewCount)} views)`);
-    return `Subject: YouTube Pulse — ${data!.weekRange}\n\n${data!.editorial}\n\nTop moments:\n${topVids.map(v => `- ${v}`).join('\n')}\n\nSignals: ${data!.signals.growing} growing · ${data!.signals.cold} cold · ${data!.signals.weakConversion} conversion gap\n\nPlaybook: ${data!.playbook.title}`;
+    return `Subject: YouTube Pulse — ${data!.weekRange}\n\n${data!.editorial}\n\nTop moments:\n${topVids.map(v => `- ${v}`).join('\n')}\n\nSignals: ${data!.signals.growing} growing · ${data!.signals.cold} reawakening · ${data!.signals.weakConversion} audience building\n\nPlaybook: ${data!.playbook.title}`;
   }
   function generateSlackSummary(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `• ${v.channelName} — ${fmtNum(v.viewCount)} views`);
-    return `*YouTube Pulse — ${data!.weekRange}*\n\n${data!.editorial}\n\n*Top:*\n${topVids.join('\n')}\n\n*Signals:* ${data!.signals.growing} growing · ${data!.signals.cold} cold\n\n*Play:* ${data!.playbook.title}`;
+    return `*YouTube Pulse — ${data!.weekRange}*\n\n${data!.editorial}\n\n*Top:*\n${topVids.join('\n')}\n\n*Signals:* ${data!.signals.growing} growing · ${data!.signals.cold} reawakening\n\n*Play:* ${data!.playbook.title}`;
   }
   function copyToClipboard(text: string, type: 'email' | 'slack') {
     navigator.clipboard.writeText(text).then(() => {
@@ -909,9 +909,9 @@ export default function WeeklyPulse() {
         }}>
           {[
             { n: data.signals.growing, label: 'In Growth State', target: 'pulse-momentum', color: ACCENT.green },
-            { n: data.signals.weakConversion, label: 'Working on Subs', target: 'pulse-conversion', color: ACCENT.amber },
-            { n: data.signals.underfed, label: 'Cadence Opportunity', target: 'pulse-cadence', color: ACCENT.ochre },
-            { n: data.signals.cold, label: 'Reactivate the Channel', target: 'pulse-reactivation', color: ACCENT.ember },
+            { n: data.signals.weakConversion, label: 'Audience Growth Opportunity', target: 'pulse-conversion', color: ACCENT.amber },
+            { n: data.signals.underfed, label: 'Cadence Building', target: 'pulse-cadence', color: ACCENT.ochre },
+            { n: data.signals.cold, label: 'Catalogue Reawakening', target: 'pulse-reactivation', color: ACCENT.ember },
           ].map((sig, i) => (
             <div
               key={i}
