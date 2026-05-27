@@ -743,17 +743,6 @@ export default function WeeklyPulse() {
               {data.editorial}
             </p>
 
-            <div style={{ display: 'flex', gap: 16, marginTop: 16, fontSize: 10, color: GHOST }}>
-              <span>{data.signals.totalManaged} managed channels</span>
-              <span>·</span>
-              <span>{data.signals.totalMarket} market watch</span>
-              {data.lastSyncAt && (
-                <>
-                  <span>·</span>
-                  <span>Data synced {timeAgo(data.lastSyncAt)}</span>
-                </>
-              )}
-            </div>
           </div>
 
           {/* Right — Shorts 3×2 thumbnail grid */}
