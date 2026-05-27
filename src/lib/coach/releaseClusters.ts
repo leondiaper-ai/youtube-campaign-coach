@@ -453,15 +453,18 @@ export function buildReleaseClusters(
 
     const uploadDate = new Date(upload.publishedAt).getTime();
 
-    // Gate 1: STRICT campaign window — no exceptions for old content
+    // Gate 1: Campaign window — uploads outside the window are excluded UNLESS
+    // they explicitly match a timeline event. The plan references them as key
+    // releases, so they belong as release moments even if they pre-date the
+    // formal campaign start (e.g. a single that dropped before rollout began).
+    const matchesPlanTimeline = matchesTimelineEvent(upload, eventKeywords, options.campaignEvents ?? []);
     if (campaignStart && campaignEnd) {
       const windowStart = campaignStart - PRE_CAMPAIGN_BUFFER_DAYS * 86400000;
       if (uploadDate < windowStart || uploadDate > campaignEnd) {
-        continue; // Hard cutoff — nothing outside the campaign window
+        if (!matchesPlanTimeline) continue; // Hard cutoff — unless plan references it
       }
     } else if (fallbackCutoff && uploadDate < fallbackCutoff) {
-      // No campaign date available — use 6-month maximum age fallback
-      continue;
+      if (!matchesPlanTimeline) continue;
     }
 
     anchors.push(upload);
