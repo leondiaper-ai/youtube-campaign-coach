@@ -130,7 +130,7 @@ export async function GET() {
     const allRecentVideos: PulseVideo[] = [];
 
     const now = Date.now();
-    const videoCutoff = 14 * 86400000; // 14 days for top videos
+    const videoCutoff = 21 * 86400000; // 21 days for top videos
 
     for (const a of allArtists) {
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
@@ -204,7 +204,7 @@ export async function GET() {
           if (ageMs > videoCutoff || ageMs < 0) continue;
           const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
           const velocity = Math.round(u.viewCount / daysAgo);
-          if (velocity < 50) continue;
+          if (velocity < 20) continue;
 
           const fmt = classifyUploadFormat(u);
           allRecentVideos.push({
