@@ -204,9 +204,9 @@ export async function GET() {
           if (ageMs > videoCutoff || ageMs < 0) continue;
           const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
           const velocity = Math.round(u.viewCount / daysAgo);
-          if (velocity < 20) continue;
-
           const fmt = classifyUploadFormat(u);
+          // Longform needs minimum velocity; Shorts always qualify to fill the grid
+          if (fmt !== 'Short' && velocity < 20) continue;
           allRecentVideos.push({
             id: u.id,
             title: u.title,
