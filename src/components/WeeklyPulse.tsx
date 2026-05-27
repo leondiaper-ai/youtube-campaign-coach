@@ -73,42 +73,64 @@ function ytUrl(id: string, dur: number): string {
 
 // ── SVG Logos ─────────────────────────────────────────────────────────────────
 
-function VirginLogo({ size = 120 }: { size?: number }) {
+function VirginMusicLogo({ height = 36 }: { height?: number }) {
+  // Approximation of the Virgin Music script wordmark
+  // Uses a flowing italic serif to mimic the brand's calligraphic style
+  const w = height * 2.6;
+  const vH = height;
+  const mH = height * 0.55;
   return (
-    <svg width={size} height={size * 0.35} viewBox="0 0 200 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="54" fill={INK} fontSize="58" fontWeight="900" fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" letterSpacing="-0.02em">
+    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 0.85 }}>
+      <span style={{
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        fontStyle: 'italic',
+        fontWeight: 700,
+        fontSize: vH,
+        color: INK,
+        letterSpacing: '-0.03em',
+        lineHeight: 0.9,
+      }}>
         Virgin
-      </text>
-    </svg>
-  );
-}
-
-function VirginScriptLogo({ width = 160 }: { width?: number }) {
-  // Script-style "Virgin Music" wordmark
-  const h = width * 0.38;
-  return (
-    <svg width={width} height={h} viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="68" fill={INK} fontSize="62" fontWeight="900" fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" letterSpacing="-0.02em">
-        Virgin
-      </text>
-      <text x="0" y="108" fill={INK} fontSize="38" fontWeight="700" fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" letterSpacing="0.02em">
+      </span>
+      <span style={{
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        fontStyle: 'italic',
+        fontWeight: 400,
+        fontSize: mH,
+        color: INK,
+        letterSpacing: '0.06em',
+        lineHeight: 1,
+        marginTop: -1,
+      }}>
         Music
-      </text>
-    </svg>
+      </span>
+    </div>
   );
 }
 
-function YouTubeLogo({ size = 28 }: { size?: number }) {
+function YouTubeLogo({ height = 20 }: { height?: number }) {
+  // Red rounded-rect play button + "YouTube" wordmark
+  const iconW = height * 1.45;
+  const iconH = height;
+  const playSize = height * 0.4;
   return (
-    <svg width={size * 2.8} height={size} viewBox="0 0 90 32" xmlns="http://www.w3.org/2000/svg">
-      {/* Play button icon */}
-      <rect x="0" y="4" width="28" height="20" rx="5" fill={YT_RED} />
-      <polygon points="11,9 11,19 21,14" fill={WHITE} />
+    <div style={{ display: 'flex', alignItems: 'center', gap: height * 0.3 }}>
+      {/* Red play button icon */}
+      <svg width={iconW} height={iconH} viewBox="0 0 29 20" xmlns="http://www.w3.org/2000/svg">
+        <rect width="29" height="20" rx="5" fill={YT_RED} />
+        <polygon points="11,5 11,15 21,10" fill={WHITE} />
+      </svg>
       {/* YouTube text */}
-      <text x="34" y="21" fill={INK} fontSize="16" fontWeight="800" fontFamily="Inter, system-ui, sans-serif" letterSpacing="0.01em">
+      <span style={{
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontWeight: 700,
+        fontSize: height * 0.85,
+        color: INK,
+        letterSpacing: '-0.01em',
+      }}>
         YouTube
-      </text>
-    </svg>
+      </span>
+    </div>
   );
 }
 
@@ -245,23 +267,36 @@ export default function WeeklyPulse() {
       ══════════════════════════════════════════════════════════════════════ */}
       {!screenshotMode && (
         <div className="no-print" style={{
-          maxWidth: 1200, margin: '0 auto', padding: '18px 40px',
+          maxWidth: 1200, margin: '0 auto', padding: '22px 40px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <VirginScriptLogo width={100} />
-            <span style={{ color: BONE, fontSize: 18, fontWeight: 300 }}>&times;</span>
-            <YouTubeLogo size={22} />
+          {/* Left: Virgin Music | YouTube logos */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <VirginMusicLogo height={28} />
+            <div style={{ width: 1, height: 32, background: BONE, flexShrink: 0 }} />
+            <YouTubeLogo height={20} />
           </div>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <button onClick={() => setViewMode(v => v === 'internal' ? 'partner' : 'internal')}
-              style={{ padding: '5px 14px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 10, fontWeight: 600, color: SMOKE, cursor: 'pointer' }}>
-              {isPartner ? 'Partner' : 'Internal'}
-            </button>
-            <button onClick={() => document.getElementById('pulse-share')?.scrollIntoView({ behavior: 'smooth' })}
-              style={{ padding: '5px 14px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 10, fontWeight: 600, color: SMOKE, cursor: 'pointer' }}>
-              Share
-            </button>
+
+          {/* Right: Briefing label + date + controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.04em', color: INK }}>
+                Weekly Intelligence Briefing
+              </div>
+              <div style={{ fontSize: 10, color: SMOKE, marginTop: 1 }}>
+                {data.weekRange}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+              <button onClick={() => setViewMode(v => v === 'internal' ? 'partner' : 'internal')}
+                style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
+                {isPartner ? 'Partner' : 'Internal'}
+              </button>
+              <button onClick={() => document.getElementById('pulse-share')?.scrollIntoView({ behavior: 'smooth' })}
+                style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
+                Share
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -287,33 +322,25 @@ export default function WeeklyPulse() {
         }}>
           {/* Left — Title block */}
           <div>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32,
-            }}>
-              <VirginScriptLogo width={140} />
-            </div>
-
             <h1 style={{
-              fontSize: 80, fontWeight: 900, lineHeight: 0.88,
-              letterSpacing: '-0.045em', color: INK,
-              margin: '0 0 0 -4px', fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: 72, fontWeight: 900, lineHeight: 0.92,
+              letterSpacing: '-0.04em', color: INK,
+              margin: '0 0 0 -3px',
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontStyle: 'italic',
             }}>
-              YouTube<br />Pulse.
+              Virgin Music.<br />
+              <span style={{ fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'normal', fontWeight: 900 }}>
+                YouTube Pulse.
+              </span>
             </h1>
 
             <div style={{
-              marginTop: 20, fontSize: 10, fontWeight: 800,
+              marginTop: 24, fontSize: 10, fontWeight: 800,
               letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: SMOKE,
               maxWidth: 380,
             }}>
               Your weekly dive into what&apos;s driving growth.
-            </div>
-
-            <div style={{
-              marginTop: 28, fontSize: 11, fontWeight: 500,
-              letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: GHOST,
-            }}>
-              {data.weekRange}
             </div>
 
             {/* Signals — compact row */}
@@ -827,10 +854,10 @@ export default function WeeklyPulse() {
         maxWidth: 1200, margin: '0 auto', padding: '16px 40px 36px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <VirginScriptLogo width={60} />
-          <span style={{ color: BONE, fontSize: 12 }}>&times;</span>
-          <YouTubeLogo size={14} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <VirginMusicLogo height={14} />
+          <div style={{ width: 1, height: 18, background: BONE }} />
+          <YouTubeLogo height={12} />
         </div>
         <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
           YouTube Pulse · {data.weekRange}
