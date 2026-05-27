@@ -191,6 +191,130 @@ export default function WeeklyPulse() {
   const slugToHandle = new Map<string, string>();
   allChannels.forEach(ch => { if (ch.channelHandle) slugToHandle.set(ch.slug, ch.channelHandle); });
 
+  // ── "This Week Across Virgin" — curated campaign stories ──
+  // Score channels by narrative interest, not raw views
+  type CampaignStory = {
+    channel: PulseChannel;
+    heroImage: string;       // best available visual
+    signal: string;          // one-word signal tag
+    observation: string;     // editorial one-liner
+    opportunity: string;     // strategic read
+  };
+
+  const allVideos = [...data.topVideos, ...data.topShorts];
+  const videosBySlug = new Map<string, PulseVideo[]>();
+  allVideos.forEach(v => {
+    const arr = videosBySlug.get(v.artistSlug) ?? [];
+    arr.push(v);
+    videosBySlug.set(v.artistSlug, arr);
+  });
+
+  function campaignScore(ch: PulseChannel): number {
+    let s = 0;
+    // Active campaign gets a big boost
+    if (ch.campaign) s += 40;
+    if (ch.phase === 'PUSH') s += 30;
+    // Momentum — growing channels are interesting
+    if (ch.classification === 'GROWING') s += 25;
+    // Cadence health
+    if (ch.uploads30d >= 4) s += 15;
+    if (ch.shorts30d >= 2 && ch.longform30d >= 1) s += 10; // mixed content strategy
+    // Strong conversion is narratively interesting
+    if ((ch.subsPer1kViews ?? 0) >= 3) s += 15;
+    // Week-over-week momentum
+    if ((ch.viewsWoW ?? 0) > 20) s += 10;
+    // Recent activity
+    if ((ch.lastUploadDaysAgo ?? 999) <= 7) s += 10;
+    // Has videos to show
+    if ((videosBySlug.get(ch.slug)?.length ?? 0) > 0) s += 10;
+    return s;
+  }
+
+  function generateObservation(ch: PulseChannel): string {
+    const hasShorts = ch.shorts30d >= 2;
+    const hasLongform = ch.longform30d >= 1;
+    const strongConversion = (ch.subsPer1kViews ?? 0) >= 3;
+    const highCadence = ch.uploads30d >= 6;
+    const growing = ch.classification === 'GROWING';
+    const inPush = ch.phase === 'PUSH';
+    const recentUpload = (ch.lastUploadDaysAgo ?? 999) <= 3;
+    const wow = ch.viewsWoW ?? 0;
+
+    if (inPush && growing && hasShorts && hasLongform) {
+      return `Active rollout with Shorts + longform pairing helping sustain discovery beyond release week.`;
+    }
+    if (strongConversion && growing) {
+      return `Strongest audience conversion signals this week. Cadence and identity clearly compounding.`;
+    }
+    if (highCadence && growing && wow > 15) {
+      return `Consistent output driving week-over-week momentum. Content ecosystem building real audience depth.`;
+    }
+    if (inPush && hasShorts) {
+      return `Campaign rollout leveraging Shorts to extend reach. YouTube-native strategy supporting wider push.`;
+    }
+    if (growing && recentUpload) {
+      return `Fresh content landing well. Momentum building with each upload cycle.`;
+    }
+    if (strongConversion) {
+      return `Smaller scale but efficient conversion. Audience quality over quantity — a model worth studying.`;
+    }
+    if (hasShorts && hasLongform) {
+      return `Mixed content strategy across formats. Building the ecosystem approach YouTube rewards.`;
+    }
+    if (growing) {
+      return `Steady growth trajectory. Audience responding well to structured content and campaign continuity.`;
+    }
+    return `Active presence on YouTube this week with meaningful campaign behaviour worth watching.`;
+  }
+
+  function generateSignalTag(ch: PulseChannel): string {
+    if (ch.classification === 'GROWING' && (ch.viewsWoW ?? 0) > 20) return 'Accelerating';
+    if (ch.classification === 'GROWING') return 'Momentum';
+    if (ch.phase === 'PUSH') return 'In Campaign';
+    if ((ch.subsPer1kViews ?? 0) >= 3) return 'Converting';
+    if (ch.uploads30d >= 6) return 'High Cadence';
+    if ((ch.lastUploadDaysAgo ?? 999) <= 3) return 'Just Dropped';
+    return 'Active';
+  }
+
+  function generateOpportunity(ch: PulseChannel): string {
+    const weakConversion = ch.classification === 'WEAK_CONVERSION';
+    const underfed = ch.classification === 'UNDERFED';
+    const hasShorts = ch.shorts30d >= 2;
+    const hasLongform = ch.longform30d >= 1;
+
+    if (weakConversion) return 'Opportunity now shifts toward deeper audience conversion.';
+    if (underfed) return 'Cadence increase could unlock the next growth phase.';
+    if (!hasShorts && hasLongform) return 'Shorts strategy could amplify existing longform audience.';
+    if (hasShorts && !hasLongform) return 'Longform content could deepen the audience relationship.';
+    if ((ch.viewsWoW ?? 0) > 25) return 'Momentum is real — sustaining cadence is key right now.';
+    return 'Continue building the content ecosystem to compound audience growth.';
+  }
+
+  const campaignStories: CampaignStory[] = managed
+    .filter(ch => ch.thumbnail) // must have a visual presence
+    .sort((a, b) => campaignScore(b) - campaignScore(a))
+    .slice(0, 5)
+    .map(ch => {
+      const chVideos = videosBySlug.get(ch.slug) ?? [];
+      // Best available hero image: highest-velocity video thumbnail, or channel thumbnail
+      const bestVideo = chVideos.sort((a, b) => b.velocity - a.velocity)[0];
+      const heroImage = bestVideo
+        ? `https://i.ytimg.com/vi/${bestVideo.id}/hqdefault.jpg`
+        : ch.thumbnail!;
+
+      return {
+        channel: ch,
+        heroImage,
+        signal: generateSignalTag(ch),
+        observation: generateObservation(ch),
+        opportunity: generateOpportunity(ch),
+      };
+    });
+
+  const featuredCampaign = campaignStories[0] ?? null;
+  const secondaryCampaigns = campaignStories.slice(1, 4);
+
   function generateEmailBody(): string {
     const topVids = data!.topVideos.slice(0, 3).map(v => `${v.channelName} — "${v.title}" (${fmtNum(v.viewCount)} views)`);
     return `Subject: YouTube Pulse — ${data!.weekRange}\n\n${data!.editorial}\n\nTop moments:\n${topVids.map(v => `- ${v}`).join('\n')}\n\nSignals: ${data!.signals.growing} growing · ${data!.signals.cold} cold · ${data!.signals.weakConversion} conversion gap\n\nPlaybook: ${data!.playbook.title}`;
@@ -257,6 +381,42 @@ export default function WeeklyPulse() {
         }
         .signal-anchor:hover::after {
           transform: translateX(-50%) scaleX(1);
+        }
+
+        /* Campaign cards */
+        .campaign-hero-card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          cursor: pointer;
+        }
+        .campaign-hero-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+        .campaign-hero-card:hover .campaign-hero-img {
+          transform: scale(1.02);
+        }
+        .campaign-secondary-card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          cursor: pointer;
+        }
+        .campaign-secondary-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        .campaign-secondary-card:hover .campaign-secondary-img {
+          transform: scale(1.03);
+        }
+        .campaign-hero-img, .campaign-secondary-img {
+          transition: transform 0.4s ease;
+        }
+        .campaign-signal-tag {
+          display: inline-block;
+          padding: 3px 10px;
+          border-radius: 20px;
+          font-size: 8px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
         }
       `}</style>
 
@@ -451,6 +611,242 @@ export default function WeeklyPulse() {
           ))}
         </div>
       </section>
+
+
+      {/* ═══════ THIS WEEK ACROSS VIRGIN ═══════ */}
+      {featuredCampaign && (
+        <section className="pulse-fade" style={{
+          maxWidth: 1200, margin: '0 auto', padding: '48px 40px 0',
+        }}>
+          <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+
+          {/* Section header */}
+          <div style={{ marginBottom: 36 }}>
+            <div style={{
+              fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+            }}>
+              This Week Across Virgin
+            </div>
+            <p style={{
+              fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
+              maxWidth: 560, margin: 0,
+              fontFamily: 'Inter, system-ui, sans-serif',
+            }}>
+              The campaigns shaping conversation, momentum and audience growth across YouTube this week.
+            </p>
+          </div>
+
+          {/* Asymmetric layout: hero left, stack right */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24, alignItems: 'start' }}>
+
+            {/* ── Featured campaign — large cinematic card ── */}
+            {(() => {
+              const fc = featuredCampaign;
+              const chUrl = channelUrl(fc.channel.channelHandle);
+              return (
+                <a
+                  href={chUrl ?? '#'}
+                  target={chUrl ? '_blank' : undefined}
+                  rel="noopener noreferrer"
+                  className="pulse-link campaign-hero-card"
+                  style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: INK, position: 'relative' }}
+                >
+                  {/* Cinematic hero image */}
+                  <div style={{ position: 'relative', overflow: 'hidden' }}>
+                    <img
+                      src={fc.heroImage}
+                      alt=""
+                      loading="lazy"
+                      className="campaign-hero-img"
+                      style={{
+                        width: '100%', height: 340, objectFit: 'cover', display: 'block',
+                        filter: 'brightness(0.85)',
+                      }}
+                    />
+                    {/* Gradient overlay */}
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(transparent 20%, rgba(14,14,14,0.85) 100%)',
+                    }} />
+                    {/* Signal tag */}
+                    <div style={{ position: 'absolute', top: 20, left: 20 }}>
+                      <span className="campaign-signal-tag" style={{
+                        background: 'rgba(255,255,255,0.15)',
+                        color: WHITE,
+                        backdropFilter: 'blur(8px)',
+                      }}>
+                        {fc.signal}
+                      </span>
+                    </div>
+                    {/* Play indicator */}
+                    <div style={{ position: 'absolute', top: 20, right: 20 }}>
+                      <PlayOverlay size={36} />
+                    </div>
+                    {/* Content overlay */}
+                    <div style={{
+                      position: 'absolute', bottom: 0, left: 0, right: 0,
+                      padding: '0 28px 28px',
+                    }}>
+                      {/* Channel avatar + name */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                        {fc.channel.thumbnail && (
+                          <img src={fc.channel.thumbnail} alt="" style={{
+                            width: 28, height: 28, borderRadius: '50%', objectFit: 'cover',
+                            border: '2px solid rgba(255,255,255,0.3)',
+                          }} />
+                        )}
+                        <span style={{
+                          fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)',
+                          letterSpacing: '0.04em', textTransform: 'uppercase' as const,
+                        }}>
+                          {fc.channel.name}
+                        </span>
+                      </div>
+                      {/* Editorial observation */}
+                      <p style={{
+                        fontSize: 17, fontWeight: 500, color: WHITE, lineHeight: 1.45,
+                        margin: '0 0 14px', maxWidth: 500,
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        &ldquo;{fc.observation}&rdquo;
+                      </p>
+                      {/* Metadata strip */}
+                      <div style={{ display: 'flex', gap: 16, fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>
+                        {fc.channel.views7d != null && (
+                          <span>{fmtNum(fc.channel.views7d)} views this week</span>
+                        )}
+                        {fc.channel.uploads30d > 0 && (
+                          <span>{fc.channel.uploads30d} uploads / 30d</span>
+                        )}
+                        {fc.channel.campaign && (
+                          <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>
+                            {fc.channel.campaign}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Opportunity strip below image */}
+                  <div style={{
+                    padding: '14px 28px 16px', background: '#111',
+                    borderTop: '1px solid rgba(255,255,255,0.06)',
+                  }}>
+                    <div style={{
+                      fontFamily: "'Caveat', cursive",
+                      fontSize: 16, fontWeight: 500, color: 'rgba(255,255,255,0.55)',
+                      fontStyle: 'italic',
+                    }}>
+                      {fc.opportunity}
+                    </div>
+                  </div>
+                </a>
+              );
+            })()}
+
+            {/* ── Secondary campaigns — stacked cards ── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {secondaryCampaigns.map(story => {
+                const chUrl = channelUrl(story.channel.channelHandle);
+                return (
+                  <a
+                    key={story.channel.slug}
+                    href={chUrl ?? '#'}
+                    target={chUrl ? '_blank' : undefined}
+                    rel="noopener noreferrer"
+                    className="pulse-link campaign-secondary-card"
+                    style={{
+                      display: 'grid', gridTemplateColumns: '140px 1fr',
+                      borderRadius: 6, overflow: 'hidden',
+                      background: WHITE,
+                      border: `1px solid ${BONE}`,
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div style={{ position: 'relative', overflow: 'hidden' }}>
+                      <img
+                        src={story.heroImage}
+                        alt=""
+                        loading="lazy"
+                        className="campaign-secondary-img"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 110 }}
+                      />
+                      <div style={{
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.3) 100%)',
+                      }} />
+                      <div style={{ position: 'absolute', bottom: 8, right: 8 }}>
+                        <PlayOverlay size={22} />
+                      </div>
+                      {/* Signal tag */}
+                      <div style={{ position: 'absolute', top: 8, left: 8 }}>
+                        <span className="campaign-signal-tag" style={{
+                          background: 'rgba(0,0,0,0.5)',
+                          color: WHITE,
+                          backdropFilter: 'blur(6px)',
+                          fontSize: 7,
+                        }}>
+                          {story.signal}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        {story.channel.thumbnail && (
+                          <img src={story.channel.thumbnail} alt="" style={{
+                            width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+                          }} />
+                        )}
+                        <span style={{
+                          fontSize: 10, fontWeight: 800, color: INK,
+                          letterSpacing: '0.02em', textTransform: 'uppercase' as const,
+                        }}>
+                          {story.channel.name}
+                        </span>
+                      </div>
+                      <p style={{
+                        fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.4,
+                        margin: '0 0 8px',
+                        fontFamily: 'Inter, system-ui, sans-serif',
+                        overflow: 'hidden', display: '-webkit-box',
+                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+                      }}>
+                        {story.observation}
+                      </p>
+                      <div style={{ display: 'flex', gap: 12, fontSize: 9, color: SMOKE }}>
+                        {story.channel.views7d != null && (
+                          <span>{fmtNum(story.channel.views7d)} views/wk</span>
+                        )}
+                        <span>{story.channel.uploads30d} uploads/30d</span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+
+              {/* Handwritten annotation */}
+              <div style={{
+                marginTop: 4, paddingLeft: 4,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+                  <path d="M10 2C10 8 10 14 10 18" stroke={GHOST} strokeWidth="1.2" fill="none" strokeLinecap="round" strokeDasharray="2 3" />
+                  <path d="M7 15L10 19L13 15" stroke={GHOST} strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: 16, fontWeight: 500, color: GHOST,
+                  fontStyle: 'italic',
+                }}>
+                  campaigns we&apos;re actively watching and learning from
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
 
       {/* ═══════ BIG READ + MOMENTS — side by side ═══════ */}
