@@ -291,54 +291,42 @@ function generateEditorial(
   topVideos: PulseVideo[],
   topShorts: PulseVideo[],
 ): string {
-  const parts: string[] = [];
-
-  // Shorts dominance
+  // Analyse the shape of the week
   const totalShorts = managed.reduce((s, c) => s + c.shorts30d, 0);
   const totalLongform = managed.reduce((s, c) => s + c.longform30d, 0);
   const shortsRatio = totalShorts / Math.max(totalShorts + totalLongform, 1);
+  const growingCount = signals.growing;
+  const issueCount = signals.weakConversion + signals.underfed + signals.cold;
+  const topArtist = topVideos.length > 0 ? topVideos[0].channelName : null;
 
-  if (shortsRatio > 0.6) {
-    parts.push('Shorts are driving reach this week, but the strongest channels are the ones turning attention into repeat viewing through cadence and longform support');
-  } else if (shortsRatio < 0.3 && totalLongform > 0) {
-    parts.push('Longform content is leading this week — Shorts could extend discovery further');
+  // Build a narrative lede, not a stat dump
+  if (growingCount >= issueCount && growingCount >= 3 && topArtist) {
+    if (shortsRatio > 0.55) {
+      return `Shorts are the engine this week — driving discovery across the roster while the channels converting that attention into subscribers are the ones building something lasting. ${topArtist} is leading the standout moments, but the real story is in the campaigns sustaining output beyond a single release.`;
+    }
+    return `A week of building momentum. ${growingCount} channels are in a growth state, and the pattern is clear: the ones posting consistently and mixing formats are the ones the algorithm is rewarding. ${topArtist} is setting the pace, but there's depth developing across the roster.`;
   }
 
-  // Growth vs issues
-  if (signals.growing > signals.weakConversion + signals.underfed + signals.cold && signals.growing >= 2) {
-    parts.push('more channels are growing than struggling — momentum is building');
-  } else if (signals.underfed + signals.cold > signals.growing) {
-    parts.push('cadence remains the biggest controllable gap across the roster');
+  if (signals.underfed + signals.cold > growingCount) {
+    if (topArtist) {
+      return `Cadence is the story this week. There's real talent and campaign energy across the roster, but too many channels are going quiet between releases. The strongest moments — like ${topArtist} — show what happens when content keeps flowing. The opportunity is in follow-through.`;
+    }
+    return `The biggest lever this week is consistency. Several campaigns have strong foundations but are leaving momentum on the table between releases. The channels that are growing share one thing in common: they keep showing up.`;
   }
 
-  // Conversion signal
-  if (signals.weakConversion >= 2) {
-    parts.push('several channels are generating reach without converting it into subscriber growth');
+  if (signals.weakConversion >= 3) {
+    return `The attention is there — the conversion isn't yet. Multiple channels are generating real reach this week, but subscriber growth isn't following at the same rate. The gap usually closes with deeper content: artist-led context, longform storytelling, and formats that give viewers a reason to subscribe.`;
   }
 
-  // Market comparison
-  const marketAvgUploads = market.length > 0
-    ? market.reduce((s, c) => s + c.uploads30d, 0) / market.length
-    : 0;
-  const managedAvgUploads = managed.length > 0
-    ? managed.reduce((s, c) => s + c.uploads30d, 0) / managed.length
-    : 0;
-  if (market.length > 0 && marketAvgUploads > managedAvgUploads * 1.3) {
-    parts.push('market peers are setting a higher baseline for upload consistency');
+  if (shortsRatio > 0.65) {
+    return `Shorts are doing the heavy lifting on discovery this week. The question is whether that attention has somewhere to go — channels pairing Shorts with longform and catalogue content are building audiences, while Shorts-only strategies are generating views without the deeper connection.`;
   }
 
-  // Top video signal
-  if (topVideos.length > 0 && topVideos[0].viewCount > 100000) {
-    parts.push(`standout moments are breaking through — ${topVideos[0].channelName} leading the way`);
+  if (topArtist) {
+    return `A mixed week across the roster. There are standout moments — ${topArtist} breaking through — alongside quieter campaigns where cadence and follow-through could shift the trajectory. The common thread among the channels that are growing: they're treating YouTube as an always-on ecosystem, not a release-day platform.`;
   }
 
-  if (parts.length === 0) {
-    return 'Steady week across the roster — consistency remains the strongest lever for long-term growth.';
-  }
-
-  const sentence = parts[0].charAt(0).toUpperCase() + parts[0].slice(1) +
-    (parts.length > 1 ? ', ' + parts.slice(1).join(', and ') : '') + '.';
-  return sentence;
+  return `Steady week across the roster. The strongest signal remains cadence — channels that post consistently and diversify their content are the ones building real audience depth. Every campaign has a lever to pull.`;
 }
 
 function generateInsights(
@@ -349,57 +337,75 @@ function generateInsights(
 ): string[] {
   const insights: string[] = [];
 
-  if (signals.weakConversion >= 2) {
-    insights.push(
-      `${signals.weakConversion} channels are generating views but not converting into subscriber growth. Deeper content — BTS, breakdowns, artist-led context — can close the gap.`
-    );
-  }
-
-  const lowCadence = channels.filter(c => c.uploads30d <= 2 && c.status !== 'COLD');
-  if (lowCadence.length >= 2) {
-    insights.push(
-      `${lowCadence.length} active channels have 2 or fewer uploads in 30 days. Channels with 5+ uploads generally show healthier momentum.`
-    );
-  }
-
+  // ── Narrative 1: The conversion story ──
+  // Group conversion + content depth together as one read
+  const weakConvChannels = channels.filter(c => c.classification === 'WEAK_CONVERSION');
   const shortHeavy = channels.filter(c => c.shorts30d > 3 && c.longform30d === 0);
-  if (shortHeavy.length >= 1) {
+  if (weakConvChannels.length >= 2 && shortHeavy.length >= 1) {
+    const names = weakConvChannels.slice(0, 2).map(c => c.name).join(' and ');
     insights.push(
-      `${shortHeavy.length} channel${shortHeavy.length > 1 ? 's are' : ' is'} Shorts-heavy with no longform support. Discovery is active, but deeper viewing support is limited.`
+      `There's a conversion gap developing across channels like ${names}. Views are landing, but subscriber growth isn't following — often because the content mix leans heavily on Shorts without deeper formats to give viewers a reason to commit. Adding artist-led context, breakdowns, or even short longform can bridge that gap.`
+    );
+  } else if (weakConvChannels.length >= 2) {
+    insights.push(
+      `Several channels are generating real reach without converting it into lasting audience. The pattern tends to be the same: the content is reaching people, but there isn't enough depth — BTS, longform, artist-led storytelling — to turn a viewer into a subscriber. That's the gap to close.`
     );
   }
 
-  if (signals.cold >= 2) {
+  // ── Narrative 2: The cadence story ──
+  // Group low cadence + cold channels as one theme
+  const lowCadence = channels.filter(c => c.uploads30d <= 2 && c.status !== 'COLD');
+  const coldChannels = channels.filter(c => c.classification === 'COLD');
+  if (lowCadence.length >= 2 || coldChannels.length >= 3) {
+    const quietNames = lowCadence.slice(0, 2).map(c => c.name);
+    const coldNames = coldChannels.slice(0, 2).map(c => c.name);
+    const exampleNames = Array.from(new Set([...quietNames, ...coldNames])).slice(0, 2);
+    const nameStr = exampleNames.length > 0 ? ` — including ${exampleNames.join(' and ')}` : '';
     insights.push(
-      `${signals.cold} channels are cold — no recent uploads during active campaign windows. Reactivation with catalogue Shorts could restart the algorithm.`
+      `Cadence remains the most controllable lever across the roster. A number of channels${nameStr} have gone quiet or are posting infrequently during what should be active campaign windows. YouTube's algorithm rewards consistency above almost everything else; even catalogue Shorts or behind-the-scenes clips can keep the signal alive between major releases.`
     );
   }
 
+  // ── Narrative 3: What's actually working ──
+  // Celebrate momentum patterns, not just list growing channels
+  const growingWithCadence = channels.filter(c =>
+    c.classification === 'GROWING' && c.uploads30d >= 4
+  );
+  const bigViewers = channels.filter(c => c.views7d != null && c.views7d > 50000);
+  if (growingWithCadence.length >= 2 || bigViewers.length >= 2) {
+    const momentumNames = Array.from(new Set([
+      ...growingWithCadence.slice(0, 2).map(c => c.name),
+      ...bigViewers.slice(0, 2).map(c => c.name),
+    ])).slice(0, 3);
+    insights.push(
+      `The channels showing real momentum this week — ${momentumNames.join(', ')} — share a pattern: they're posting regularly, mixing formats, and building an ecosystem rather than relying on single releases. That's the model YouTube rewards, and it's compounding.`
+    );
+  } else if (signals.growing >= 2) {
+    insights.push(
+      `Growth is happening where cadence and content diversity meet. The channels in a growth state this week aren't necessarily the biggest — they're the ones treating YouTube as an ongoing conversation with their audience, not a series of isolated drops.`
+    );
+  }
+
+  // ── Narrative 4: The format story ──
+  // Shorts-to-longform ecosystem health
+  if (shortHeavy.length >= 2) {
+    const names = shortHeavy.slice(0, 2).map(c => c.name).join(' and ');
+    insights.push(
+      `${names} ${shortHeavy.length > 2 ? 'and others are' : 'are'} building discovery momentum through Shorts, but without longform to support it. Shorts open the door — they bring new viewers in — but it's the deeper content that turns a scroll into a subscribe. Even one longform piece per cycle changes the dynamic.`
+    );
+  }
+
+  // ── Narrative 5: Follow-through after release ──
   const noFollowUp = channels.filter(c =>
     c.campaignStartDate != null && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 10
   );
-  if (noFollowUp.length >= 1) {
+  if (noFollowUp.length >= 2 && insights.length < 4) {
     insights.push(
-      `${noFollowUp.length} campaign channel${noFollowUp.length > 1 ? 's have' : ' has'} gone 10+ days without a new upload. Follow-up content in the 7–10 day window after a release keeps momentum alive.`
+      `A few campaigns have gone quiet after their initial release — the 7 to 10 day window after a drop is when follow-through content matters most. Behind-the-scenes, reaction clips, performance edits, even a simple Shorts remix can extend a release's life on the platform significantly.`
     );
   }
 
-  if (signals.growing >= 3) {
-    insights.push(
-      `${signals.growing} channels are in a growth state — consistent cadence and conversion are the common thread.`
-    );
-  }
-
-  // View momentum
-  const bigViewers = channels.filter(c => c.views7d != null && c.views7d > 50000);
-  if (bigViewers.length > 0) {
-    const names = bigViewers.slice(0, 3).map(c => c.name).join(', ');
-    insights.push(
-      `Strong view momentum this week from ${names}. These channels are in a discovery window — supporting with Shorts and follow-up content can compound the effect.`
-    );
-  }
-
-  return insights.slice(0, 5);
+  return insights.slice(0, 4);
 }
 
 function generateMarketInsights(
