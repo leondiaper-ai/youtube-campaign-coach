@@ -13,14 +13,15 @@ const GHOST  = '#C8C2B8';
 const WHITE  = '#FFFFFF';
 const MONO   = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
 
-const CLASSIFICATION_STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
-  GROWING:         { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A' },
-  WEAK_CONVERSION: { bg: '#FFEAD6', fg: '#8A4A1A', dot: '#F08A3C' },
-  UNDERFED:        { bg: '#FFF5D6', fg: '#7A5A00', dot: '#FFD24C' },
-  COLD:            { bg: '#FFE2D8', fg: '#8A1F0C', dot: '#FF4A1C' },
+// Muted editorial palette for signal accents — no bright dashboard colors
+const SIGNAL_TONES: Record<string, { accent: string; muted: string }> = {
+  GROWING:         { accent: '#2D6A4F', muted: '#95B8A6' },
+  WEAK_CONVERSION: { accent: '#9A6324', muted: '#C4A87C' },
+  UNDERFED:        { accent: '#7A6520', muted: '#BBA95E' },
+  COLD:            { accent: '#8A3A2A', muted: '#C48A7C' },
 };
 
-// ── Types (mirrors API response) ──────────────────────────────────────────────
+// ── Types ────────────────────────────────────────────────────────────────────
 
 type PulseChannel = {
   slug: string;
@@ -134,11 +135,11 @@ export default function WeeklyPulse() {
     return (
       <main style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: SMOKE, marginBottom: 12, fontFamily: MONO }}>
-            Loading Weekly Pulse...
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginBottom: 16 }}>
+            Preparing your briefing
           </div>
-          <div style={{ width: 40, height: 3, background: BONE, borderRadius: 2, margin: '0 auto', overflow: 'hidden' }}>
-            <div style={{ width: '60%', height: '100%', background: INK, borderRadius: 2, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ width: 48, height: 2, background: BONE, borderRadius: 1, margin: '0 auto', overflow: 'hidden' }}>
+            <div style={{ width: '50%', height: '100%', background: INK, borderRadius: 1, animation: 'pulse-slide 2s ease-in-out infinite' }} />
           </div>
         </div>
       </main>
@@ -149,7 +150,7 @@ export default function WeeklyPulse() {
     return (
       <main style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', color: SMOKE }}>
-          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Failed to load Weekly Pulse</div>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Failed to load briefing</div>
           <div style={{ fontSize: 11, fontFamily: MONO }}>{error}</div>
         </div>
       </main>
@@ -160,7 +161,7 @@ export default function WeeklyPulse() {
   const managed = data.managedChannels;
   const market = data.marketChannels;
 
-  // Derived data
+  // Derived
   const momentumChannels = managed
     .filter(c => c.classification === 'GROWING')
     .sort((a, b) => (b.views7d ?? 0) - (a.views7d ?? 0))
@@ -168,48 +169,26 @@ export default function WeeklyPulse() {
 
   const issueChannels = managed.filter(c => c.classification !== 'GROWING');
 
-  // Group issues
   type IssueGroup = { label: string; partnerLabel: string; channels: PulseChannel[] };
   const issueGroups: IssueGroup[] = [
-    {
-      label: 'Weak Conversion',
-      partnerLabel: 'Reach strong, audience conversion can improve',
-      channels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION'),
-    },
-    {
-      label: 'Low Cadence / Underfed',
-      partnerLabel: 'Opportunity to increase upload frequency',
-      channels: issueChannels.filter(c => c.classification === 'UNDERFED'),
-    },
-    {
-      label: 'Cold / Needs Reactivation',
-      partnerLabel: 'Reactivation opportunity',
-      channels: issueChannels.filter(c => c.classification === 'COLD'),
-    },
+    { label: 'Weak Conversion', partnerLabel: 'Conversion opportunity', channels: issueChannels.filter(c => c.classification === 'WEAK_CONVERSION') },
+    { label: 'Underfed', partnerLabel: 'Cadence opportunity', channels: issueChannels.filter(c => c.classification === 'UNDERFED') },
+    { label: 'Cold', partnerLabel: 'Reactivation opportunity', channels: issueChannels.filter(c => c.classification === 'COLD') },
   ].filter(g => g.channels.length > 0);
 
-  // No-follow-up channels
-  const noFollowUp = managed.filter(c =>
-    c.campaignStartDate != null && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 10
-  );
-  if (noFollowUp.length > 0 && !issueGroups.some(g => g.channels.some(ch => noFollowUp.includes(ch)))) {
-    issueGroups.push({
-      label: 'No Follow-Up Content',
-      partnerLabel: 'Opportunity to deepen campaign support',
-      channels: noFollowUp,
-    });
-  }
-
-  // Market — best consistency
   const consistentMarket = market
     .filter(c => c.uploads30d >= 5 && c.classification === 'GROWING')
     .sort((a, b) => b.uploads30d - a.uploads30d)
-    .slice(0, 5);
+    .slice(0, 4);
 
-  // ── Email Generator ───────────────────────────────────────────────────────
+  // Feature video = top 1, supporting = next 3
+  const featureVideo = data.topVideos[0] ?? null;
+  const supportingVideos = data.topVideos.slice(1, 4);
+  const topShorts = data.topShorts.slice(0, 3);
+
+  // ── Email / Slack ──────────────────────────────────────────────────────────
 
   function generateEmailBody(): string {
-    const topSignals = data!.insights.slice(0, 3);
     const topVids = data!.topVideos.slice(0, 3).map(v =>
       `${v.channelName} — "${v.title}" (${fmtNum(v.viewCount)} views)`
     );
@@ -228,7 +207,7 @@ This week's read:
 ${data!.editorial}
 
 Top signals:
-${topSignals.map(s => `- ${s}`).join('\n')}
+${data!.insights.slice(0, 3).map(s => `- ${s}`).join('\n')}
 
 Channels/videos worth watching:
 ${topVids.length > 0 ? topVids.map(v => `- ${v}`).join('\n') : '- No standout moments this week'}
@@ -269,226 +248,416 @@ ${topVids.length > 0 ? topVids.join('\n') : '• No standout moments this week'}
     <div ref={pageRef} style={{ background: PAPER, minHeight: '100vh', color: INK }}>
       <style>{`
         @media print { .no-print { display: none !important; } }
-        .pulse-card { background: ${WHITE}; border: 1px solid ${BONE}; border-radius: 10px; overflow: hidden; }
-        .pulse-card-inner { padding: 20px 24px; }
-        @keyframes pulse { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+        @keyframes pulse-slide { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(200%); } }
+        a.vid-link:hover { opacity: 0.88; }
       `}</style>
 
-      <div style={{ maxWidth: 820, margin: '0 auto', padding: screenshotMode ? '24px 24px' : '24px 20px 60px' }}>
+      <div style={{ maxWidth: 740, margin: '0 auto', padding: screenshotMode ? '32px 24px' : '20px 24px 80px' }}>
 
-        {/* ── Controls Bar ── */}
+        {/* ── Nav ── */}
         {!screenshotMode && (
-          <div className="no-print" style={{
+          <nav className="no-print" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginBottom: 20, gap: 8, flexWrap: 'wrap',
+            marginBottom: 48, paddingTop: 12,
           }}>
             <a href="/" style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.18em',
-              textTransform: 'uppercase', color: SMOKE, textDecoration: 'none', fontFamily: MONO,
+              fontSize: 9, fontWeight: 700, letterSpacing: '0.2em',
+              textTransform: 'uppercase', color: GHOST, textDecoration: 'none',
             }}>
-              ← YouTube Campaign System
+              Campaign System
             </a>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setViewMode(v => v === 'internal' ? 'partner' : 'internal')}
-                style={{
-                  padding: '5px 12px', borderRadius: 5, border: `1px solid ${BONE}`,
-                  background: WHITE, fontSize: 10, fontWeight: 700, color: INK,
-                  cursor: 'pointer', fontFamily: MONO,
-                }}
-              >
-                {isPartner ? '🤝 Partner View' : '🔒 Internal View'}
-              </button>
-              <button
-                onClick={() => setScreenshotMode(true)}
-                style={{
-                  padding: '5px 12px', borderRadius: 5, border: `1px solid ${BONE}`,
-                  background: WHITE, fontSize: 10, fontWeight: 700, color: INK,
-                  cursor: 'pointer', fontFamily: MONO,
-                }}
-              >
-                📷 Screenshot
-              </button>
-              <button
-                onClick={() => window.print()}
-                style={{
-                  padding: '5px 12px', borderRadius: 5, border: `1px solid ${BONE}`,
-                  background: WHITE, fontSize: 10, fontWeight: 700, color: INK,
-                  cursor: 'pointer', fontFamily: MONO,
-                }}
-              >
-                🖨 Print / PDF
-              </button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <NavPill label={isPartner ? 'Partner' : 'Internal'} onClick={() => setViewMode(v => v === 'internal' ? 'partner' : 'internal')} />
+              <NavPill label="Share" onClick={() => document.getElementById('pulse-share')?.scrollIntoView({ behavior: 'smooth' })} />
             </div>
-          </div>
+          </nav>
         )}
 
         {screenshotMode && (
-          <div className="no-print" style={{ position: 'fixed', top: 12, right: 12, zIndex: 999 }}>
+          <div className="no-print" style={{ position: 'fixed', top: 16, right: 16, zIndex: 999 }}>
             <button
               onClick={() => setScreenshotMode(false)}
               style={{
-                padding: '6px 14px', borderRadius: 6, border: `1px solid ${BONE}`,
-                background: WHITE, fontSize: 10, fontWeight: 700, color: INK,
-                cursor: 'pointer', fontFamily: MONO, boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                padding: '6px 14px', borderRadius: 20, border: 'none',
+                background: INK, fontSize: 10, fontWeight: 700, color: WHITE,
+                cursor: 'pointer', letterSpacing: '0.04em',
               }}
             >
-              ✕ Exit Screenshot Mode
+              Exit Screenshot
             </button>
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            1. HERO HEADER
-        ═══════════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 32 }}>
+        {/* ═══════════════════════════════════════════════════════════════════
+            HERO — The Week's Read
+        ═══════════════════════════════════════════════════════════════════ */}
+        <header style={{ marginBottom: 72 }}>
           <div style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: '0.22em',
-            textTransform: 'uppercase', color: SMOKE, marginBottom: 8, fontFamily: MONO,
+            fontSize: 9, fontWeight: 700, letterSpacing: '0.22em',
+            textTransform: 'uppercase', color: GHOST, marginBottom: 20,
           }}>
             Weekly Intelligence Briefing
           </div>
 
-          <h1 style={{ fontSize: 36, fontWeight: 900, lineHeight: 1.1, color: INK, margin: 0 }}>
-            YouTube<br />Weekly Pulse
+          <h1 style={{
+            fontSize: 52, fontWeight: 900, lineHeight: 1.0, color: INK,
+            margin: 0, letterSpacing: '-0.02em',
+          }}>
+            Weekly Pulse
           </h1>
 
-          <p style={{
-            fontSize: 14, color: '#5A5650', lineHeight: 1.5, marginTop: 10, maxWidth: 520,
-          }}>
-            UK + Global artist channel intelligence, campaign signals and content opportunities.
-          </p>
-
           <div style={{
-            display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap',
-            fontSize: 10, color: SMOKE, fontFamily: MONO,
+            fontSize: 10, fontWeight: 600, letterSpacing: '0.12em',
+            textTransform: 'uppercase', color: SMOKE, marginTop: 10,
           }}>
-            <span style={{ fontWeight: 700 }}>{data.weekRange}</span>
-            {data.lastSyncAt && <span>Synced {timeAgo(data.lastSyncAt)}</span>}
-            <span>{data.signals.totalManaged} managed artists</span>
-            <span>{data.signals.totalMarket} market watch</span>
+            {data.weekRange}
           </div>
 
-          <div style={{
-            marginTop: 16, padding: '14px 18px',
-            background: WHITE, border: `1px solid ${BONE}`, borderRadius: 8,
-            borderLeft: '3px solid #0E0E0E',
+          {/* Editorial pull quote — the centerpiece */}
+          <blockquote style={{
+            marginTop: 40, marginBottom: 0,
+            paddingLeft: 0, marginLeft: 0, marginRight: 0,
+            borderLeft: 'none',
+            maxWidth: 600,
           }}>
-            <div style={{
-              fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.55, fontStyle: 'italic',
+            <p style={{
+              fontSize: 21, fontWeight: 500, color: INK, lineHeight: 1.5,
+              margin: 0, letterSpacing: '-0.01em',
             }}>
-              &ldquo;{data.editorial}&rdquo;
-            </div>
-          </div>
-        </section>
+              {data.editorial}
+            </p>
+          </blockquote>
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            2. THIS WEEK'S SIGNALS
-        ═══════════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 32 }}>
-          <SectionHeader label="This Week's Signals" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-            <SignalCard label={isPartner ? 'Growing Channels' : 'Growing'} count={data.signals.growing} style={CLASSIFICATION_STYLE.GROWING} detail="Healthy cadence + conversion" />
-            <SignalCard label={isPartner ? 'Conversion Gap' : 'Weak Conversion'} count={data.signals.weakConversion} style={CLASSIFICATION_STYLE.WEAK_CONVERSION} detail="Views up, subs flat" />
-            <SignalCard label={isPartner ? 'Low Cadence' : 'Underfed'} count={data.signals.underfed} style={CLASSIFICATION_STYLE.UNDERFED} detail="Active but starved of content" />
-            <SignalCard label={isPartner ? 'Reactivation' : 'Cold'} count={data.signals.cold} style={CLASSIFICATION_STYLE.COLD} detail="No recent uploads" />
+          <div style={{
+            display: 'flex', gap: 20, marginTop: 28, fontSize: 10, color: SMOKE, letterSpacing: '0.02em',
+          }}>
+            <span>{data.signals.totalManaged} managed channels</span>
+            <span style={{ color: BONE }}>·</span>
+            <span>{data.signals.totalMarket} market watch</span>
+            {data.lastSyncAt && (
+              <>
+                <span style={{ color: BONE }}>·</span>
+                <span>Data synced {timeAgo(data.lastSyncAt)}</span>
+              </>
+            )}
           </div>
-        </section>
+        </header>
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            3. THE BIG READ
-        ═══════════════════════════════════════════════════════════════════════ */}
-        {data.insights.length > 0 && (
-          <section style={{ marginBottom: 32 }}>
-            <SectionHeader label="The Big Read" />
-            <div className="pulse-card">
-              <div className="pulse-card-inner">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {data.insights.map((insight, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <span style={{
-                        fontSize: 10, fontWeight: 800, color: GHOST, fontFamily: MONO,
-                        minWidth: 18, textAlign: 'right', paddingTop: 2,
-                      }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <p style={{
-                        fontSize: 13, color: INK, lineHeight: 1.55, margin: 0,
-                        fontWeight: i === 0 ? 600 : 400,
-                      }}>
-                        {insight}
-                      </p>
-                    </div>
-                  ))}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            SIGNAL LINE — not cards, a single editorial statement
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section style={{ marginBottom: 72 }}>
+          <Divider />
+          <div style={{
+            display: 'flex', gap: 0, marginTop: 28,
+          }}>
+            {[
+              { n: data.signals.growing, label: isPartner ? 'Growing' : 'Growing', tone: SIGNAL_TONES.GROWING },
+              { n: data.signals.weakConversion, label: isPartner ? 'Conversion Gap' : 'Weak Conversion', tone: SIGNAL_TONES.WEAK_CONVERSION },
+              { n: data.signals.underfed, label: isPartner ? 'Low Cadence' : 'Underfed', tone: SIGNAL_TONES.UNDERFED },
+              { n: data.signals.cold, label: isPartner ? 'Reactivation' : 'Cold', tone: SIGNAL_TONES.COLD },
+            ].map((sig, i) => (
+              <div key={i} style={{
+                flex: 1,
+                paddingLeft: i === 0 ? 0 : 20,
+                borderLeft: i === 0 ? 'none' : `1px solid ${BONE}`,
+              }}>
+                <div style={{
+                  fontSize: 36, fontWeight: 900, color: sig.tone.accent,
+                  lineHeight: 1, letterSpacing: '-0.02em',
+                }}>
+                  {sig.n}
+                </div>
+                <div style={{
+                  fontSize: 10, fontWeight: 600, color: SMOKE,
+                  marginTop: 6, letterSpacing: '0.02em',
+                }}>
+                  {sig.label}
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
+
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            THE BIG READ — editorial insights
+        ═══════════════════════════════════════════════════════════════════ */}
+        {data.insights.length > 0 && (
+          <section style={{ marginBottom: 72 }}>
+            <SectionLabel text="The Big Read" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24 }}>
+              {data.insights.map((insight, i) => (
+                <div key={i} style={{
+                  maxWidth: 600,
+                  paddingLeft: i === 0 ? 0 : undefined,
+                }}>
+                  {i === 0 ? (
+                    <p style={{
+                      fontSize: 17, fontWeight: 500, color: INK, lineHeight: 1.6,
+                      margin: 0,
+                    }}>
+                      {insight}
+                    </p>
+                  ) : (
+                    <p style={{
+                      fontSize: 14, fontWeight: 400, color: '#4A4640', lineHeight: 1.65,
+                      margin: 0,
+                    }}>
+                      {insight}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            4. BEST VIDEO MOMENTS THIS WEEK
-        ═══════════════════════════════════════════════════════════════════════ */}
-        {data.topVideos.length > 0 && (
-          <section style={{ marginBottom: 32 }}>
-            <SectionHeader label="Best Video Moments This Week" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-              {data.topVideos.slice(0, 6).map(v => (
-                <VideoCard key={v.id} video={v} isPartner={isPartner} />
-              ))}
-            </div>
 
-            {data.topShorts.length > 0 && (
-              <>
+        {/* ═══════════════════════════════════════════════════════════════════
+            MOMENTS THIS WEEK — feature + supporting
+        ═══════════════════════════════════════════════════════════════════ */}
+        {featureVideo && (
+          <section style={{ marginBottom: 72 }}>
+            <SectionLabel text="Moments This Week" />
+
+            {/* Feature video — large */}
+            <a
+              href={ytUrl(featureVideo.id, featureVideo.durationSec)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="vid-link"
+              style={{
+                display: 'block', textDecoration: 'none', color: 'inherit',
+                marginTop: 24,
+              }}
+            >
+              <div style={{
+                position: 'relative', borderRadius: 8, overflow: 'hidden',
+                marginBottom: 14,
+              }}>
+                <img
+                  src={featureVideo.thumbnail}
+                  alt=""
+                  style={{ width: '100%', height: 320, objectFit: 'cover', display: 'block' }}
+                  loading="lazy"
+                />
                 <div style={{
-                  fontSize: 10, fontWeight: 700, letterSpacing: '0.12em',
-                  textTransform: 'uppercase', color: SMOKE, marginTop: 20, marginBottom: 10, fontFamily: MONO,
+                  position: 'absolute', bottom: 0, left: 0, right: 0,
+                  padding: '40px 24px 20px',
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
                 }}>
-                  Top Shorts
+                  <span style={{
+                    fontSize: 8, fontWeight: 700, letterSpacing: '0.12em',
+                    textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)',
+                  }}>
+                    {featureVideo.format}
+                  </span>
+                  <div style={{
+                    fontSize: 22, fontWeight: 800, color: WHITE, lineHeight: 1.2,
+                    marginTop: 4, letterSpacing: '-0.01em',
+                  }}>
+                    {featureVideo.title}
+                  </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-                  {data.topShorts.slice(0, 4).map(v => (
-                    <VideoCard key={v.id} video={v} isPartner={isPartner} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>
+                  {featureVideo.channelName}
+                </span>
+                <span style={{ fontSize: 11, color: SMOKE }}>
+                  {fmtNum(featureVideo.viewCount)} views
+                </span>
+                <span style={{ fontSize: 11, color: SMOKE }}>
+                  {fmtNum(featureVideo.velocity)}/day
+                </span>
+                <span style={{ fontSize: 11, color: GHOST }}>
+                  {featureVideo.daysAgo}d ago
+                </span>
+              </div>
+            </a>
+
+            {/* Supporting videos — compact row */}
+            {supportingVideos.length > 0 && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${Math.min(supportingVideos.length, 3)}, 1fr)`,
+                gap: 16, marginTop: 28,
+              }}>
+                {supportingVideos.map(v => (
+                  <a
+                    key={v.id}
+                    href={ytUrl(v.id, v.durationSec)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="vid-link"
+                    style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
+                  >
+                    <div style={{ borderRadius: 6, overflow: 'hidden', marginBottom: 10 }}>
+                      <img src={v.thumbnail} alt="" style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block' }} loading="lazy" />
+                    </div>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: SMOKE, marginBottom: 3 }}>
+                      {v.channelName}
+                    </div>
+                    <div style={{
+                      fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}>
+                      {v.title}
+                    </div>
+                    <div style={{ fontSize: 10, color: SMOKE, marginTop: 4 }}>
+                      {fmtNum(v.viewCount)} views · {fmtNum(v.velocity)}/day
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {/* Shorts — minimal mention */}
+            {topShorts.length > 0 && (
+              <div style={{ marginTop: 32 }}>
+                <div style={{
+                  fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
+                  textTransform: 'uppercase', color: GHOST, marginBottom: 12,
+                }}>
+                  Shorts worth noting
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {topShorts.map(v => (
+                    <a
+                      key={v.id}
+                      href={ytUrl(v.id, v.durationSec)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        textDecoration: 'none', color: 'inherit',
+                        padding: '8px 0',
+                      }}
+                    >
+                      <div style={{
+                        width: 48, height: 48, borderRadius: 6, overflow: 'hidden', flexShrink: 0,
+                      }}>
+                        <img src={v.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 12, fontWeight: 600, color: INK,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {v.title}
+                        </div>
+                        <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>
+                          {v.channelName} · {fmtNum(v.viewCount)} views
+                        </div>
+                      </div>
+                    </a>
                   ))}
                 </div>
-              </>
+              </div>
             )}
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            5. CHANNELS WITH MOMENTUM
-        ═══════════════════════════════════════════════════════════════════════ */}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            MOMENTUM — clean, editorial channel mentions
+        ═══════════════════════════════════════════════════════════════════ */}
         {momentumChannels.length > 0 && (
-          <section style={{ marginBottom: 32 }}>
-            <SectionHeader label="Channels With Momentum" />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {momentumChannels.map(ch => (
-                <ChannelCard key={ch.slug} channel={ch} isPartner={isPartner} variant="momentum" />
+          <section style={{ marginBottom: 72 }}>
+            <SectionLabel text="Channels With Momentum" />
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {momentumChannels.map((ch, i) => (
+                <div key={ch.slug} style={{
+                  display: 'flex', alignItems: 'center', gap: 16,
+                  padding: '18px 0',
+                  borderBottom: i < momentumChannels.length - 1 ? `1px solid ${BONE}` : 'none',
+                }}>
+                  {ch.thumbnail && (
+                    <img src={ch.thumbnail} alt="" style={{
+                      width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+                    }} loading="lazy" />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: INK }}>{ch.name}</span>
+                      {ch.campaign && (
+                        <span style={{ fontSize: 10, color: SMOKE }}>{ch.campaign}</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: SMOKE, marginTop: 3, lineHeight: 1.4 }}>
+                      {isPartner
+                        ? 'Strong audience growth and healthy engagement.'
+                        : ch.watcherRead || 'Healthy cadence and conversion.'
+                      }
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    {ch.views7d != null && (
+                      <div style={{ fontSize: 15, fontWeight: 800, color: SIGNAL_TONES.GROWING.accent }}>
+                        {fmtNum(ch.views7d)}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 9, color: GHOST, marginTop: 2 }}>7d views</div>
+                  </div>
+                </div>
               ))}
             </div>
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            6. MISSED OPPORTUNITIES
-        ═══════════════════════════════════════════════════════════════════════ */}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            OPPORTUNITIES — editorial groupings, not card lists
+        ═══════════════════════════════════════════════════════════════════ */}
         {issueGroups.length > 0 && (
-          <section style={{ marginBottom: 32 }}>
-            <SectionHeader label={isPartner ? 'Opportunities' : 'Missed Opportunities'} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <section style={{ marginBottom: 72 }}>
+            <SectionLabel text={isPartner ? 'Opportunities' : 'Open Opportunities'} />
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 36 }}>
               {issueGroups.map((group, gi) => (
                 <div key={gi}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: INK, marginBottom: 8 }}>
-                    {isPartner ? group.partnerLabel : group.label}
-                    <span style={{ fontSize: 9, fontWeight: 700, color: SMOKE, fontFamily: MONO, marginLeft: 8 }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 14,
+                  }}>
+                    <span style={{
+                      fontSize: 14, fontWeight: 700, color: INK,
+                    }}>
+                      {isPartner ? group.partnerLabel : group.label}
+                    </span>
+                    <span style={{ fontSize: 10, color: GHOST }}>
                       {group.channels.length} channel{group.channels.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {group.channels.map(ch => (
-                      <ChannelCard key={ch.slug} channel={ch} isPartner={isPartner} variant="issue" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {group.channels.slice(0, 5).map((ch, i) => (
+                      <div key={ch.slug} style={{
+                        display: 'flex', alignItems: 'center', gap: 14,
+                        padding: '12px 0',
+                        borderBottom: i < Math.min(group.channels.length, 5) - 1 ? `1px solid ${BONE}` : 'none',
+                      }}>
+                        {ch.thumbnail && (
+                          <img src={ch.thumbnail} alt="" style={{
+                            width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+                          }} loading="lazy" />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: INK }}>{ch.name}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: SMOKE, maxWidth: 300, textAlign: 'right' }}>
+                          {isPartner
+                            ? ch.reason.replace(/cold|at risk|starved/gi, 'opportunity')
+                            : ch.nextAction || ch.reason
+                          }
+                        </div>
+                      </div>
                     ))}
+                    {group.channels.length > 5 && (
+                      <div style={{ fontSize: 10, color: GHOST, marginTop: 8 }}>
+                        + {group.channels.length - 5} more
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -496,368 +665,213 @@ ${topVids.length > 0 ? topVids.join('\n') : '• No standout moments this week'}
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            7. MARKET WATCH
-        ═══════════════════════════════════════════════════════════════════════ */}
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            MARKET INTELLIGENCE — editorial prose, not cards
+        ═══════════════════════════════════════════════════════════════════ */}
         {(data.marketInsights.length > 0 || consistentMarket.length > 0) && (
-          <section style={{ marginBottom: 32 }}>
-            <SectionHeader label="Market Watch — What the Wider Market Is Teaching Us" />
-            <div className="pulse-card">
-              <div className="pulse-card-inner">
-                {data.marketInsights.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: consistentMarket.length > 0 ? 16 : 0 }}>
-                    {data.marketInsights.map((insight, i) => (
-                      <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                        <span style={{
-                          fontSize: 10, fontWeight: 800, color: GHOST, fontFamily: MONO,
-                          minWidth: 18, textAlign: 'right', paddingTop: 2,
-                        }}>
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <p style={{ fontSize: 12, color: INK, lineHeight: 1.55, margin: 0 }}>
-                          {insight}
-                        </p>
+          <section style={{ marginBottom: 72 }}>
+            <SectionLabel text="Market Watch" />
+            <div style={{ marginTop: 24 }}>
+              {data.marketInsights.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 600 }}>
+                  {data.marketInsights.map((insight, i) => (
+                    <p key={i} style={{
+                      fontSize: i === 0 ? 15 : 13, fontWeight: 400,
+                      color: i === 0 ? INK : '#4A4640',
+                      lineHeight: 1.6, margin: 0,
+                    }}>
+                      {insight}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {consistentMarket.length > 0 && (
+                <div style={{ marginTop: 32 }}>
+                  <div style={{
+                    fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
+                    textTransform: 'uppercase', color: GHOST, marginBottom: 14,
+                  }}>
+                    Reference channels
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                    {consistentMarket.map(ch => (
+                      <div key={ch.slug} style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '8px 14px 8px 8px',
+                        background: WHITE, borderRadius: 24,
+                      }}>
+                        {ch.thumbnail && (
+                          <img src={ch.thumbnail} alt="" style={{
+                            width: 26, height: 26, borderRadius: '50%', objectFit: 'cover',
+                          }} loading="lazy" />
+                        )}
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.2 }}>{ch.name}</div>
+                          <div style={{ fontSize: 9, color: SMOKE }}>{ch.uploads30d} uploads/30d</div>
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
-
-                {consistentMarket.length > 0 && (
-                  <>
-                    <div style={{
-                      fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
-                      textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 8,
-                    }}>
-                      Standout Global Channels
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {consistentMarket.map(ch => (
-                        <div key={ch.slug} style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          padding: '8px 12px', background: '#FAFAF8', borderRadius: 6,
-                          border: `1px solid ${BONE}`,
-                        }}>
-                          {ch.thumbnail && (
-                            <img src={ch.thumbnail} alt="" style={{
-                              width: 28, height: 28, borderRadius: '50%', objectFit: 'cover',
-                              border: `1px solid ${BONE}`, flexShrink: 0,
-                            }} loading="lazy" />
-                          )}
-                          <div style={{ flex: 1 }}>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</span>
-                          </div>
-                          <div style={{ display: 'flex', gap: 12, fontSize: 10, color: SMOKE, fontFamily: MONO }}>
-                            <span>{ch.uploads30d} uploads/30d</span>
-                            <span>{ch.shorts30d} Shorts</span>
-                            {ch.subs != null && <span>{fmtNum(ch.subs)} subs</span>}
-                            {ch.views7d != null && <span>{fmtNum(ch.views7d)} 7d views</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            8. PLAYBOOK OF THE WEEK
-        ═══════════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 32 }}>
-          <SectionHeader label="Playbook of the Week" />
-          <div className="pulse-card">
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            PLAYBOOK — the strategy recommendation
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section style={{ marginBottom: 72 }}>
+          <Divider />
+          <div style={{ marginTop: 40 }}>
             <div style={{
-              padding: '18px 24px', borderBottom: `1px solid ${BONE}`,
-              background: `linear-gradient(135deg, ${SOFT} 0%, ${WHITE} 100%)`,
+              fontSize: 9, fontWeight: 700, letterSpacing: '0.18em',
+              textTransform: 'uppercase', color: GHOST, marginBottom: 14,
             }}>
-              <div style={{
-                fontSize: 8, fontWeight: 800, letterSpacing: '0.14em',
-                textTransform: 'uppercase', color: SMOKE, fontFamily: MONO, marginBottom: 6,
-              }}>
-                This Week&apos;s Play
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 900, color: INK, lineHeight: 1.2 }}>
-                {data.playbook.title}
-              </div>
+              Playbook of the Week
             </div>
-            <div className="pulse-card-inner">
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 4 }}>
-                  Why It Matters
+
+            <h2 style={{
+              fontSize: 28, fontWeight: 900, color: INK, lineHeight: 1.15,
+              margin: 0, letterSpacing: '-0.01em', maxWidth: 500,
+            }}>
+              {data.playbook.title}
+            </h2>
+
+            <p style={{
+              fontSize: 15, fontWeight: 400, color: '#4A4640', lineHeight: 1.6,
+              marginTop: 20, maxWidth: 560, marginBottom: 0,
+            }}>
+              {data.playbook.why}
+            </p>
+
+            <div style={{
+              fontSize: 12, color: SMOKE, marginTop: 16, fontStyle: 'italic',
+            }}>
+              {data.playbook.when}
+            </div>
+
+            <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {data.playbook.actions.map((action, i) => (
+                <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <span style={{
+                    fontSize: 24, fontWeight: 900, color: BONE,
+                    lineHeight: 1, minWidth: 28,
+                    fontFamily: MONO,
+                  }}>
+                    {i + 1}
+                  </span>
+                  <p style={{
+                    fontSize: 13, color: INK, lineHeight: 1.55, margin: 0,
+                    paddingTop: 4,
+                  }}>
+                    {action}
+                  </p>
                 </div>
-                <p style={{ fontSize: 12, color: INK, lineHeight: 1.55, margin: 0 }}>{data.playbook.why}</p>
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 4 }}>
-                  When to Use It
-                </div>
-                <p style={{ fontSize: 12, color: INK, lineHeight: 1.55, margin: 0 }}>{data.playbook.when}</p>
-              </div>
-              <div>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 8 }}>
-                  Three Actions This Week
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {data.playbook.actions.map((action, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                      <span style={{
-                        fontSize: 11, fontWeight: 800, color: WHITE,
-                        background: INK, borderRadius: '50%',
-                        width: 20, height: 20, display: 'flex',
-                        alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        {i + 1}
-                      </span>
-                      <p style={{ fontSize: 12, color: INK, lineHeight: 1.5, margin: 0 }}>{action}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            9/10. EXPORT / SHARE OPTIONS + EMAIL GENERATOR
-        ═══════════════════════════════════════════════════════════════════════ */}
-        {!screenshotMode && (
-          <section className="no-print" style={{ marginBottom: 32 }}>
-            <SectionHeader label="Share & Export" />
-            <div className="pulse-card">
-              <div className="pulse-card-inner">
-                <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-                  <ShareButton label={emailCopied ? '✓ Copied!' : 'Copy Email Summary'} onClick={() => copyToClipboard(generateEmailBody(), 'email')} active={emailCopied} />
-                  <ShareButton label={slackCopied ? '✓ Copied!' : 'Copy Slack Summary'} onClick={() => copyToClipboard(generateSlackSummary(), 'slack')} active={slackCopied} />
-                  <ShareButton label="Screenshot Mode" onClick={() => setScreenshotMode(true)} />
-                  <ShareButton label="Print / Save PDF" onClick={() => window.print()} />
-                </div>
 
-                <div style={{
-                  fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
-                  textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6,
-                }}>
-                  Email Preview
-                </div>
-                <div style={{
-                  background: '#FAFAF8', border: `1px solid ${BONE}`,
-                  borderRadius: 6, padding: '14px 16px',
-                  fontSize: 11, color: INK, lineHeight: 1.6,
-                  fontFamily: MONO, whiteSpace: 'pre-wrap',
-                  maxHeight: 300, overflow: 'auto',
-                }}>
-                  {generateEmailBody()}
-                </div>
+        {/* ═══════════════════════════════════════════════════════════════════
+            SHARE — minimal, tucked at the end
+        ═══════════════════════════════════════════════════════════════════ */}
+        {!screenshotMode && (
+          <section id="pulse-share" className="no-print" style={{ marginBottom: 48 }}>
+            <Divider />
+            <div style={{ marginTop: 32 }}>
+              <div style={{
+                fontSize: 9, fontWeight: 700, letterSpacing: '0.18em',
+                textTransform: 'uppercase', color: GHOST, marginBottom: 20,
+              }}>
+                Share This Briefing
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <ActionPill
+                  label={emailCopied ? 'Copied' : 'Copy email summary'}
+                  onClick={() => copyToClipboard(generateEmailBody(), 'email')}
+                  active={emailCopied}
+                />
+                <ActionPill
+                  label={slackCopied ? 'Copied' : 'Copy Slack summary'}
+                  onClick={() => copyToClipboard(generateSlackSummary(), 'slack')}
+                  active={slackCopied}
+                />
+                <ActionPill label="Screenshot mode" onClick={() => setScreenshotMode(true)} />
+                <ActionPill label="Print / PDF" onClick={() => window.print()} />
               </div>
             </div>
           </section>
         )}
 
-        {/* ── Footer ── */}
-        {!screenshotMode && (
+
+        {/* ── Colophon ── */}
+        <footer style={{
+          paddingTop: 40, paddingBottom: 32, textAlign: 'center',
+        }}>
           <div style={{
-            textAlign: 'center', fontSize: 10, color: GHOST, fontFamily: MONO,
-            letterSpacing: '0.14em', textTransform: 'uppercase', paddingBottom: 24,
+            fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: GHOST,
           }}>
             YouTube Weekly Pulse · {data.weekRange}
           </div>
-        )}
+        </footer>
+
       </div>
     </div>
   );
 }
+
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function SectionHeader({ label }: { label: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-      <div style={{
-        fontSize: 10, fontWeight: 800, letterSpacing: '0.14em',
-        textTransform: 'uppercase', color: SMOKE, fontFamily: MONO, whiteSpace: 'nowrap',
-      }}>
-        {label}
-      </div>
-      <div style={{ flex: 1, height: 1, background: BONE }} />
-    </div>
-  );
+function Divider() {
+  return <div style={{ height: 1, background: BONE }} />;
 }
 
-function SignalCard({ label, count, style: s, detail }: {
-  label: string; count: number; style: { bg: string; fg: string; dot: string }; detail: string;
-}) {
+function SectionLabel({ text }: { text: string }) {
   return (
     <div style={{
-      background: WHITE, border: `1px solid ${BONE}`, borderRadius: 8,
-      padding: '14px 16px', borderTop: `3px solid ${s.dot}`,
+      fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+      textTransform: 'uppercase', color: SMOKE,
     }}>
-      <div style={{ fontSize: 28, fontWeight: 900, color: s.fg, lineHeight: 1 }}>{count}</div>
-      <div style={{ fontSize: 10, fontWeight: 700, color: INK, marginTop: 4 }}>{label}</div>
-      <div style={{ fontSize: 9, color: SMOKE, marginTop: 2, fontFamily: MONO }}>{detail}</div>
+      {text}
     </div>
   );
 }
 
-function VideoCard({ video, isPartner }: { video: PulseVideo; isPartner: boolean }) {
-  const formatColor: Record<string, { bg: string; fg: string }> = {
-    'Official Video': { bg: '#0E0E0E', fg: '#FFFFFF' },
-    'Short':          { bg: '#E0E7FF', fg: '#3730A3' },
-    'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
-    'Live Session':   { bg: '#E6F8EE', fg: '#0C6A3F' },
-    'Lyric Video':    { bg: '#F5F3FF', fg: '#7C3AED' },
-    'Visualizer':     { bg: '#F5F3FF', fg: '#7C3AED' },
-    'Premiere':       { bg: '#E0E7FF', fg: '#3730A3' },
-    'Documentary':    { bg: '#0E0E0E', fg: '#FFFFFF' },
-    'Trailer':        { bg: '#FFEAD6', fg: '#8A4A1A' },
-    'Interview':      { bg: '#F3F4F6', fg: '#4B5563' },
-    'Freestyle':      { bg: '#FFF5D6', fg: '#7A5A00' },
-  };
-  const fStyle = formatColor[video.format] ?? { bg: BONE, fg: INK };
-
-  const contextLine = video.viewCount > 100000
-    ? (isPartner ? 'Strong discovery moment.' : 'Big reach — check follow-up pipeline.')
-    : video.viewCount > 20000
-    ? (isPartner ? 'Solid performance this week.' : 'Healthy views — keep the cadence up.')
-    : (isPartner ? 'Building audience engagement.' : 'Steady — compound with Shorts support.');
-
+function NavPill({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <a
-      href={ytUrl(video.id, video.durationSec)}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      onClick={onClick}
       style={{
-        display: 'block', textDecoration: 'none', color: 'inherit',
-        background: WHITE, border: `1px solid ${BONE}`, borderRadius: 8, overflow: 'hidden',
+        padding: '5px 14px', borderRadius: 20, border: 'none',
+        background: 'transparent', fontSize: 10, fontWeight: 600,
+        color: SMOKE, cursor: 'pointer', letterSpacing: '0.02em',
       }}
     >
-      <div style={{ position: 'relative' }}>
-        <img src={video.thumbnail} alt="" style={{ width: '100%', height: 135, objectFit: 'cover', display: 'block' }} loading="lazy" />
-        <span style={{
-          position: 'absolute', bottom: 6, left: 6,
-          fontSize: 8, fontWeight: 800, letterSpacing: '0.06em',
-          textTransform: 'uppercase', color: fStyle.fg,
-          padding: '2px 7px', borderRadius: 3, background: fStyle.bg, fontFamily: MONO,
-        }}>
-          {video.format}
-        </span>
-        <span style={{
-          position: 'absolute', bottom: 6, right: 6,
-          fontSize: 9, fontWeight: 700, color: WHITE,
-          padding: '2px 6px', borderRadius: 3, background: 'rgba(0,0,0,0.7)', fontFamily: MONO,
-        }}>
-          {fmtNum(video.viewCount)} views
-        </span>
-      </div>
-      <div style={{ padding: '10px 12px' }}>
-        <div style={{
-          fontSize: 9, fontWeight: 700, color: SMOKE, fontFamily: MONO,
-          marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.06em',
-        }}>
-          {video.channelName}
-        </div>
-        <div style={{
-          fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.35,
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
-          {video.title}
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 4, fontSize: 9, color: SMOKE, fontFamily: MONO }}>
-          <span>{fmtNum(video.velocity)}/day</span>
-          <span>{video.daysAgo}d ago</span>
-        </div>
-        <div style={{ fontSize: 10, color: SMOKE, marginTop: 4, lineHeight: 1.4 }}>
-          {contextLine}
-        </div>
-      </div>
-    </a>
+      {label}
+    </button>
   );
 }
 
-function ChannelCard({ channel, isPartner, variant }: {
-  channel: PulseChannel; isPartner: boolean; variant: 'momentum' | 'issue';
-}) {
-  const cls = CLASSIFICATION_STYLE[channel.classification] ?? null;
-  const isMomentum = variant === 'momentum';
-
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12,
-      background: WHITE, border: `1px solid ${BONE}`, borderRadius: 8,
-      padding: '12px 16px',
-      borderLeft: cls ? `3px solid ${cls.dot}` : undefined,
-    }}>
-      {channel.thumbnail && (
-        <img src={channel.thumbnail} alt="" style={{
-          width: 36, height: 36, borderRadius: '50%', objectFit: 'cover',
-          border: `2px solid ${BONE}`, flexShrink: 0,
-        }} loading="lazy" />
-      )}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{channel.name}</span>
-          {channel.campaign && (
-            <span style={{
-              fontSize: 7, fontWeight: 800, letterSpacing: '0.06em',
-              textTransform: 'uppercase', color: '#3730A3',
-              padding: '1px 6px', borderRadius: 3, background: '#E0E7FF', fontFamily: MONO,
-            }}>
-              {channel.campaign}
-            </span>
-          )}
-          <span style={{
-            fontSize: 7, fontWeight: 800, letterSpacing: '0.06em',
-            textTransform: 'uppercase', color: SMOKE,
-            padding: '1px 6px', borderRadius: 3, background: BONE, fontFamily: MONO,
-          }}>
-            {channel.phase}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: 10, fontSize: 10, color: SMOKE, fontFamily: MONO, flexWrap: 'wrap' }}>
-          {channel.subs != null && <span>{fmtNum(channel.subs)} subs</span>}
-          {channel.views7d != null && <span style={{ fontWeight: 700, color: channel.views7d > 10000 ? '#059669' : SMOKE }}>{fmtNum(channel.views7d)} 7d views</span>}
-          {channel.subs7d != null && <span>{channel.subs7d > 0 ? '+' : ''}{fmtNum(channel.subs7d)} 7d subs</span>}
-          <span>{channel.uploads30d} uploads/30d</span>
-          <span>{channel.shorts30d}S / {channel.longform30d}L</span>
-          {channel.subsPer1kViews != null && (
-            <span style={{ color: channel.subsPer1kViews >= 5 ? '#059669' : channel.subsPer1kViews >= 2 ? '#92400E' : '#DC2626' }}>
-              {channel.subsPer1kViews} subs/1K views
-            </span>
-          )}
-          {channel.lastUploadDaysAgo != null && <span>last upload {channel.lastUploadDaysAgo}d ago</span>}
-        </div>
-
-        <div style={{
-          fontSize: 11, color: isMomentum ? '#059669' : '#92400E',
-          marginTop: 4, lineHeight: 1.4,
-        }}>
-          {isMomentum
-            ? (isPartner
-              ? 'Strong audience growth. Channel is in a healthy momentum state.'
-              : channel.watcherRead || 'Healthy cadence and conversion.')
-            : (isPartner
-              ? channel.reason.replace(/cold|at risk|starved/gi, 'opportunity')
-              : channel.nextAction || channel.reason)
-          }
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ShareButton({ label, onClick, active }: {
+function ActionPill({ label, onClick, active }: {
   label: string; onClick: () => void; active?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
       style={{
-        padding: '8px 16px', borderRadius: 6,
-        border: `1px solid ${active ? '#059669' : BONE}`,
-        background: active ? '#E6F8EE' : WHITE,
-        fontSize: 11, fontWeight: 700, color: active ? '#059669' : INK,
-        cursor: 'pointer', fontFamily: MONO, transition: 'all 0.15s',
+        padding: '8px 18px', borderRadius: 20,
+        border: 'none',
+        background: active ? INK : WHITE,
+        fontSize: 11, fontWeight: 600,
+        color: active ? WHITE : INK,
+        cursor: 'pointer', letterSpacing: '0.01em',
+        transition: 'all 0.2s',
       }}
     >
       {label}
