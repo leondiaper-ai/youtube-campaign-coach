@@ -328,7 +328,7 @@ export async function GET(request: Request) {
     // Cache this snapshot for the week (expires in 8 days as safety margin)
     if (redis) {
       try {
-        await redis.set(weekKey, JSON.stringify(response), { ex: 8 * 86400 });
+        await redis.set(weekKey, response, { ex: 8 * 86400 });
       } catch {
         // Cache write failure is non-fatal
       }
