@@ -534,10 +534,10 @@ export default function PartnerBriefing() {
           );
         })()}
 
-        {/* Secondary campaigns — 2-column grid */}
+        {/* All other campaigns — 2-column grid */}
         {data.focusCampaigns.length > 1 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
-            {data.focusCampaigns.slice(1, 5).map(fc => {
+            {data.focusCampaigns.slice(1).map(fc => {
               const chUrl = channelUrl(fc.channel.channelHandle);
               return (
                 <div key={fc.channel.slug} className="pb-campaign-card" style={{

@@ -24,6 +24,7 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { listPinned } from '@/lib/campaignStore';
+import { loadPlan } from '@/lib/planStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
@@ -256,10 +257,13 @@ export async function GET(request: Request) {
     }
 
     allRecentVideos.sort((a, b) => b.velocity - a.velocity);
-    const topVideos = allRecentVideos.filter(v => v.format !== 'Short').slice(0, 6);
 
-    // Diverse shorts
-    const allShortsSorted = allRecentVideos.filter(v => v.format === 'Short');
+    // Partner briefing: only feature content from pinned campaigns
+    const pinnedVideos = allRecentVideos.filter(v => pinnedSlugs.has(v.artistSlug));
+    const topVideos = pinnedVideos.filter(v => v.format !== 'Short').slice(0, 6);
+
+    // Diverse shorts — pinned artists only
+    const allShortsSorted = pinnedVideos.filter(v => v.format === 'Short');
     const topShorts: BriefingVideo[] = [];
     const shortsCount = new Map<string, number>();
     for (const v of allShortsSorted) {
@@ -304,12 +308,11 @@ export async function GET(request: Request) {
       return s;
     };
 
-    // ONLY pinned active campaigns qualify as focus campaigns
+    // ALL pinned active campaigns appear as focus campaigns, ranked by activity
     const rankedChannels = allChannels
       .filter(ch => pinnedSlugs.has(ch.slug))
       .map(ch => ({ ch, score: campaignRelevance(ch) }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .sort((a, b) => b.score - a.score);
 
     const phaseLabel = (phase: string): string => {
       switch (phase) {
@@ -425,6 +428,15 @@ export async function GET(request: Request) {
     const artistMap = new Map<string, Artist>();
     allArtists.forEach(a => artistMap.set(a.slug, a));
 
+    // Load coach plans ahead of focus campaign building (reused later for moments)
+    const coachPlans = new Map<string, Awaited<ReturnType<typeof loadPlan>>>();
+    await Promise.all(
+      Array.from(pinnedSlugs).map(async (slug) => {
+        const plan = await loadPlan(slug);
+        if (plan) coachPlans.set(slug, plan);
+      })
+    );
+
     const focusCampaigns: FocusCampaign[] = rankedChannels.map(({ ch }) => {
       const vids = videosBySlug.get(ch.slug) ?? [];
       const bestVideo = [...vids].sort((a, b) => b.velocity - a.velocity)[0];
@@ -433,6 +445,27 @@ export async function GET(request: Request) {
         : ch.thumbnail ?? '';
       const artist = artistMap.get(ch.slug);
 
+      // Enrich next moments with coach plan if available
+      const coachPlan = coachPlans.get(ch.slug);
+      let nextMoments = buildNextMoments(ch, artist);
+      if (coachPlan?.plan?.events) {
+        const upcoming = coachPlan.plan.events
+          .filter(e => {
+            const d = new Date(e.dateISO + 'T00:00:00');
+            return (d.getTime() - now) / 86400000 >= -3 && (d.getTime() - now) / 86400000 <= 30;
+          })
+          .sort((a, b) => a.dateISO.localeCompare(b.dateISO))
+          .slice(0, 2);
+        if (upcoming.length > 0) {
+          const parts = upcoming.map(e => {
+            const d = new Date(e.dateISO + 'T00:00:00');
+            const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            return `${e.title} (${dateStr})`;
+          });
+          nextMoments = parts.join(' → ');
+        }
+      }
+
       return {
         channel: ch,
         heroImage,
@@ -440,28 +473,29 @@ export async function GET(request: Request) {
         narrative: buildNarrative(ch),
         contentStrategy: buildContentStrategy(ch),
         ecosystemSignal: buildEcosystemSignal(ch),
-        nextMoments: buildNextMoments(ch, artist),
+        nextMoments,
         formatBreakdown: buildFormatBreakdown(ch, vids),
         recentVideos: vids.slice(0, 3),
       };
     });
 
-    // ── Platform Observations ──────────────────────────────────────────────
+    // ── Platform Observations (scoped to pinned campaigns) ─────────────────
 
+    const pinnedChannels = allChannels.filter(ch => pinnedSlugs.has(ch.slug));
     const platformObservations: string[] = [];
 
     // Shorts + longform pairing
-    const multiFormatGrowing = allChannels.filter(
+    const multiFormatGrowing = pinnedChannels.filter(
       ch => ch.shorts30d >= 1 && ch.longform30d >= 1 && ch.classification === 'GROWING'
     );
     if (multiFormatGrowing.length >= 2) {
       platformObservations.push(
-        `Campaigns pairing Shorts with longform content are sustaining momentum longer. ${multiFormatGrowing.length} Virgin channels running multi-format strategies this week are all in a growth state.`
+        `Campaigns pairing Shorts with longform content are sustaining momentum longer. ${multiFormatGrowing.length} active campaigns running multi-format strategies this week are all in a growth state.`
       );
     }
 
     // Follow-through cadence
-    const highCadenceGrowing = allChannels.filter(
+    const highCadenceGrowing = pinnedChannels.filter(
       ch => ch.uploads30d >= 4 && ch.classification === 'GROWING'
     );
     if (highCadenceGrowing.length >= 2) {
@@ -471,7 +505,7 @@ export async function GET(request: Request) {
     }
 
     // Shorts discovery
-    const shortsActive = allChannels.filter(ch => ch.shorts30d >= 3);
+    const shortsActive = pinnedChannels.filter(ch => ch.shorts30d >= 3);
     if (shortsActive.length >= 2) {
       platformObservations.push(
         `Shorts remain the primary discovery surface. Artist-led context — studio clips, behind-the-scenes, creative process — is improving engagement quality and driving deeper audience connection.`
@@ -479,7 +513,7 @@ export async function GET(request: Request) {
     }
 
     // Cadence consistency
-    const consistentChannels = allChannels.filter(ch => ch.uploads30d >= 3 && (ch.lastUploadDaysAgo ?? 999) <= 7);
+    const consistentChannels = pinnedChannels.filter(ch => ch.uploads30d >= 3 && (ch.lastUploadDaysAgo ?? 999) <= 7);
     if (consistentChannels.length >= 3) {
       platformObservations.push(
         `Cadence consistency continues to outperform isolated drops. Channels maintaining regular upload schedules are seeing compounding recommendation signals across the roster.`
@@ -493,56 +527,110 @@ export async function GET(request: Request) {
       );
     }
 
-    // ── Upcoming Moments ───────────────────────────────────────────────────
+    // ── Upcoming Moments (all pinned campaigns + coach plan dates) ─────────
 
     const upcomingMoments: UpcomingMoment[] = [];
+
+    // Helper: format a date nicely for the timing column
+    const fmtTiming = (iso: string): string => {
+      const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
+      if (isNaN(d.getTime())) return iso;
+      const diffDays = Math.round((d.getTime() - now) / 86400000);
+      const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      if (diffDays === 0) return `${dateStr} (today)`;
+      if (diffDays === 1) return `${dateStr} (tomorrow)`;
+      if (diffDays > 0 && diffDays <= 14) return `${dateStr} (in ${diffDays}d)`;
+      if (diffDays < 0 && diffDays >= -7) return `${dateStr} (${-diffDays}d ago)`;
+      return dateStr;
+    };
+
+    const surfaceForKind = (kind: string): string => {
+      if (kind === 'albumRelease' || kind === 'albumAnnounce') return 'Official Video + Shorts + Supporting';
+      if (kind === 'singleRelease') return 'Official Video + Shorts support';
+      if (kind === 'festival' || kind === 'tourDate' || kind === 'liveShow') return 'Live content + Shorts';
+      if (kind === 'tourAnnounce') return 'Announcement + Shorts';
+      if (kind === 'collab') return 'Collab content + cross-promo';
+      if (kind === 'documentaryRelease' || kind === 'documentaryTease') return 'Longform + BTS';
+      return 'Content support';
+    };
 
     for (const { ch } of rankedChannels) {
       const artist = artistMap.get(ch.slug);
       const vids = videosBySlug.get(ch.slug) ?? [];
+      const coachPlan = coachPlans.get(ch.slug);
 
-      let moment = '';
-      let timing = '';
-      let surface = '';
-      let note = '';
+      // If we have a coach plan, extract upcoming events with real dates
+      if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
+        const futureEvents = coachPlan.plan.events
+          .filter(e => {
+            const d = new Date(e.dateISO + 'T00:00:00');
+            const diff = Math.round((d.getTime() - now) / 86400000);
+            return diff >= -7 && diff <= 60; // show recent past (last week) + next 2 months
+          })
+          .sort((a, b) => a.dateISO.localeCompare(b.dateISO));
 
-      if (artist?.nextMomentLabel && artist?.nextMomentDate) {
-        moment = artist.nextMomentLabel;
-        timing = artist.nextMomentDate;
-        surface = 'Official Video + Shorts support';
-        note = 'Full rollout planned';
-      } else if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
-        moment = ch.campaign ? `${ch.campaign} — continued rollout` : 'Active campaign rollout';
-        timing = 'This week / ongoing';
-        surface = ch.shorts30d >= 1 && ch.longform30d >= 1
-          ? 'Shorts + Longform + Supporting'
-          : ch.shorts30d >= 1 ? 'Shorts-led' : 'Longform-led';
-        note = `${ch.uploads30d} uploads in 30d — cadence active`;
-      } else if (ch.phase === 'PRE') {
-        moment = 'Pre-release content build';
-        timing = 'Upcoming';
-        surface = 'Teasers + Shorts';
-        note = 'Audience priming ahead of release';
-      } else if (vids.length >= 1) {
-        moment = 'Content support and follow-through';
-        timing = 'Ongoing';
-        surface = buildEcosystemSignal(ch);
-        note = `${ch.uploads30d} uploads this month`;
-      } else {
-        // Early-stage campaign — still include, frame as building
-        moment = 'Campaign development';
-        timing = 'Building towards';
-        surface = 'Strategy in progress';
-        note = 'Content plan taking shape';
+        if (futureEvents.length > 0) {
+          for (const evt of futureEvents.slice(0, 3)) { // max 3 per artist
+            upcomingMoments.push({
+              artist: ch.name,
+              moment: evt.title,
+              timing: fmtTiming(evt.dateISO),
+              supportSurface: surfaceForKind(evt.kind),
+              rolloutNote: evt.scale === 'anchor'
+                ? 'Anchor moment — full rollout'
+                : evt.scale === 'major'
+                  ? 'Key moment — campaign support'
+                  : 'Supporting moment',
+            });
+          }
+          continue; // coach plan events replace the generic fallback
+        }
       }
 
-      upcomingMoments.push({
-        artist: ch.name,
-        moment,
-        timing,
-        supportSurface: surface,
-        rolloutNote: note,
-      });
+      // Fallback: use artist metadata or phase-based moments
+      if (artist?.nextMomentLabel && artist?.nextMomentDate) {
+        upcomingMoments.push({
+          artist: ch.name,
+          moment: artist.nextMomentLabel,
+          timing: fmtTiming(artist.nextMomentDate),
+          supportSurface: 'Official Video + Shorts support',
+          rolloutNote: 'Full rollout planned',
+        });
+      } else if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
+        upcomingMoments.push({
+          artist: ch.name,
+          moment: ch.campaign ? `${ch.campaign} — continued rollout` : 'Active campaign rollout',
+          timing: 'This week / ongoing',
+          supportSurface: ch.shorts30d >= 1 && ch.longform30d >= 1
+            ? 'Shorts + Longform + Supporting'
+            : ch.shorts30d >= 1 ? 'Shorts-led' : 'Longform-led',
+          rolloutNote: `${ch.uploads30d} uploads in 30d — cadence active`,
+        });
+      } else if (ch.phase === 'PRE') {
+        upcomingMoments.push({
+          artist: ch.name,
+          moment: 'Pre-release content build',
+          timing: 'Upcoming',
+          supportSurface: 'Teasers + Shorts',
+          rolloutNote: 'Audience priming ahead of release',
+        });
+      } else if (vids.length >= 1) {
+        upcomingMoments.push({
+          artist: ch.name,
+          moment: 'Content support and follow-through',
+          timing: 'Ongoing',
+          supportSurface: buildEcosystemSignal(ch),
+          rolloutNote: `${ch.uploads30d} uploads this month`,
+        });
+      } else {
+        upcomingMoments.push({
+          artist: ch.name,
+          moment: 'Campaign building',
+          timing: 'Building towards',
+          supportSurface: 'Strategy in development',
+          rolloutNote: 'Content plan taking shape',
+        });
+      }
     }
 
     // ── Ecosystem Highlights ──────────────────────────────────────────────
@@ -566,7 +654,7 @@ export async function GET(request: Request) {
       return score;
     }
 
-    const ecosystemHighlights = allChannels
+    const ecosystemHighlights = pinnedChannels
       .filter(ch => ch.uploads30d >= 3 && (ch.shorts30d >= 1 || ch.longform30d >= 1) && (ch.lastUploadDaysAgo ?? 999) <= 14)
       .map(ch => ({ ch, score: ecosystemScore(ch) }))
       .sort((a, b) => b.score - a.score)
@@ -594,7 +682,7 @@ export async function GET(request: Request) {
 
     // ── Playbook ───────────────────────────────────────────────────────────
 
-    const playbook = generatePartnerPlaybook(allChannels, allRecentVideos);
+    const playbook = generatePartnerPlaybook(pinnedChannels, pinnedVideos);
 
     // ── Week range ─────────────────────────────────────────────────────────
 
