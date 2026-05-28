@@ -159,7 +159,17 @@ export async function GET(request: Request) {
     // No cache — generate fresh snapshot
     // Load all artists (same as /growth page)
     const custom = await listCustomArtists();
-    const allArtists = mergeArtistLists(ARTISTS, custom);
+
+    // Exclude non-music channels from the Weekly Pulse
+    const PULSE_EXCLUDE = new Set(['league-of-legends', 'leagueoflegends', 'lol-esports']);
+    const allArtists = mergeArtistLists(ARTISTS, custom)
+      .filter(a => {
+        const slug = a.slug.toLowerCase();
+        const name = a.name.toLowerCase();
+        if (PULSE_EXCLUDE.has(slug)) return false;
+        if (name.includes('league of legends') || name.includes('league-of-legends')) return false;
+        return true;
+      });
     const syncMeta = await readSyncMeta();
 
     // Batch-read all cached snaps from KV (zero YouTube API calls)
