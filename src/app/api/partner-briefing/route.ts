@@ -24,7 +24,8 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { listPinned } from '@/lib/campaignStore';
-import { loadPlan } from '@/lib/planStore';
+import { loadPlan, listPlans } from '@/lib/planStore';
+import type { ParsedEvent } from '@/lib/planEngine';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
@@ -113,10 +114,14 @@ type FocusCampaign = {
 
 type UpcomingMoment = {
   artist: string;
+  slug: string;
   moment: string;
-  timing: string;
+  date: string | null;     // ISO date if known
+  timing: string;          // human readable: "4 Jun (in 7d)" or "This week"
+  eventType: string;       // "Single Release", "Album Drop", "Festival", etc.
   supportSurface: string;
   rolloutNote: string;
+  fromCoachPlan: boolean;  // true if sourced from a saved coach plan
 };
 
 type PartnerBriefingResponse = {
@@ -428,12 +433,36 @@ export async function GET(request: Request) {
     const artistMap = new Map<string, Artist>();
     allArtists.forEach(a => artistMap.set(a.slug, a));
 
-    // Load coach plans ahead of focus campaign building (reused later for moments)
+    // Load coach plans — match by artist slug prefix since plan slugs
+    // are like "k-trap-k-trap-campaign" while artist slugs are "k-trap"
+    const planIndex = await listPlans();
     const coachPlans = new Map<string, Awaited<ReturnType<typeof loadPlan>>>();
+
+    // Build artist-slug → plan-slug mapping
+    const artistSlugToPlanSlug = new Map<string, string>();
+    for (const entry of planIndex) {
+      // Match: plan slug starts with "{artistSlug}-" (e.g. "k-trap-k-trap-campaign" starts with "k-trap-")
+      for (const artistSlug of Array.from(pinnedSlugs)) {
+        if (entry.slug.startsWith(artistSlug + '-') || entry.slug === artistSlug) {
+          // If multiple plans match, pick the most recently updated
+          const existing = artistSlugToPlanSlug.get(artistSlug);
+          if (!existing) {
+            artistSlugToPlanSlug.set(artistSlug, entry.slug);
+          } else {
+            const existingEntry = planIndex.find(e => e.slug === existing);
+            if (existingEntry && entry.updatedAt > existingEntry.updatedAt) {
+              artistSlugToPlanSlug.set(artistSlug, entry.slug);
+            }
+          }
+        }
+      }
+    }
+
+    // Load full plans for matched artists
     await Promise.all(
-      Array.from(pinnedSlugs).map(async (slug) => {
-        const plan = await loadPlan(slug);
-        if (plan) coachPlans.set(slug, plan);
+      Array.from(artistSlugToPlanSlug.entries()).map(async ([artistSlug, planSlug]) => {
+        const plan = await loadPlan(planSlug);
+        if (plan) coachPlans.set(artistSlug, plan);
       })
     );
 
@@ -544,6 +573,26 @@ export async function GET(request: Request) {
       return dateStr;
     };
 
+    // Map event kind → partner-friendly event type label
+    const eventTypeLabel = (kind: string): string => {
+      switch (kind) {
+        case 'singleRelease': return 'New Single';
+        case 'albumRelease': return 'Album Drop';
+        case 'albumAnnounce': return 'Album Announcement';
+        case 'documentaryRelease': return 'Documentary';
+        case 'documentaryTease': return 'Documentary Teaser';
+        case 'festival': return 'Festival';
+        case 'tourDate': return 'Live Show';
+        case 'liveShow': return 'Live Show';
+        case 'tourAnnounce': return 'Tour Announcement';
+        case 'collab': return 'Collaboration';
+        case 'podcast': return 'Podcast / Interview';
+        case 'snippet': return 'Content Teaser';
+        case 'promoTrip': return 'Promo Trip';
+        default: return 'Content Moment';
+      }
+    };
+
     const surfaceForKind = (kind: string): string => {
       if (kind === 'albumRelease' || kind === 'albumAnnounce') return 'Official Video + Shorts + Supporting';
       if (kind === 'singleRelease') return 'Official Video + Shorts support';
@@ -562,25 +611,29 @@ export async function GET(request: Request) {
       // If we have a coach plan, extract upcoming events with real dates
       if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
         const futureEvents = coachPlan.plan.events
-          .filter(e => {
+          .filter((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
-            return diff >= -7 && diff <= 60; // show recent past (last week) + next 2 months
+            return diff >= -7 && diff <= 90; // last week + next 3 months
           })
-          .sort((a, b) => a.dateISO.localeCompare(b.dateISO));
+          .sort((a: ParsedEvent, b: ParsedEvent) => a.dateISO.localeCompare(b.dateISO));
 
         if (futureEvents.length > 0) {
-          for (const evt of futureEvents.slice(0, 3)) { // max 3 per artist
+          for (const evt of futureEvents.slice(0, 4)) { // max 4 per artist
             upcomingMoments.push({
               artist: ch.name,
+              slug: ch.slug,
               moment: evt.title,
+              date: evt.dateISO,
               timing: fmtTiming(evt.dateISO),
+              eventType: eventTypeLabel(evt.kind),
               supportSurface: surfaceForKind(evt.kind),
               rolloutNote: evt.scale === 'anchor'
-                ? 'Anchor moment — full rollout'
+                ? 'Anchor moment — full rollout planned'
                 : evt.scale === 'major'
-                  ? 'Key moment — campaign support'
-                  : 'Supporting moment',
+                  ? 'Key campaign moment'
+                  : 'Supporting content drop',
+              fromCoachPlan: true,
             });
           }
           continue; // coach plan events replace the generic fallback
@@ -591,47 +644,75 @@ export async function GET(request: Request) {
       if (artist?.nextMomentLabel && artist?.nextMomentDate) {
         upcomingMoments.push({
           artist: ch.name,
+          slug: ch.slug,
           moment: artist.nextMomentLabel,
+          date: artist.nextMomentDate,
           timing: fmtTiming(artist.nextMomentDate),
+          eventType: 'Content Moment',
           supportSurface: 'Official Video + Shorts support',
           rolloutNote: 'Full rollout planned',
+          fromCoachPlan: false,
         });
       } else if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
         upcomingMoments.push({
           artist: ch.name,
+          slug: ch.slug,
           moment: ch.campaign ? `${ch.campaign} — continued rollout` : 'Active campaign rollout',
+          date: null,
           timing: 'This week / ongoing',
+          eventType: 'Active Rollout',
           supportSurface: ch.shorts30d >= 1 && ch.longform30d >= 1
             ? 'Shorts + Longform + Supporting'
             : ch.shorts30d >= 1 ? 'Shorts-led' : 'Longform-led',
           rolloutNote: `${ch.uploads30d} uploads in 30d — cadence active`,
+          fromCoachPlan: false,
         });
       } else if (ch.phase === 'PRE') {
         upcomingMoments.push({
           artist: ch.name,
+          slug: ch.slug,
           moment: 'Pre-release content build',
+          date: null,
           timing: 'Upcoming',
+          eventType: 'Pre-Release',
           supportSurface: 'Teasers + Shorts',
           rolloutNote: 'Audience priming ahead of release',
+          fromCoachPlan: false,
         });
       } else if (vids.length >= 1) {
         upcomingMoments.push({
           artist: ch.name,
+          slug: ch.slug,
           moment: 'Content support and follow-through',
+          date: null,
           timing: 'Ongoing',
+          eventType: 'Content Support',
           supportSurface: buildEcosystemSignal(ch),
           rolloutNote: `${ch.uploads30d} uploads this month`,
+          fromCoachPlan: false,
         });
       } else {
         upcomingMoments.push({
           artist: ch.name,
+          slug: ch.slug,
           moment: 'Campaign building',
+          date: null,
           timing: 'Building towards',
+          eventType: 'In Development',
           supportSurface: 'Strategy in development',
           rolloutNote: 'Content plan taking shape',
+          fromCoachPlan: false,
         });
       }
     }
+
+    // Sort: dated events first (by date), then undated events
+    upcomingMoments.sort((a, b) => {
+      if (a.date && b.date) return a.date.localeCompare(b.date);
+      if (a.date && !b.date) return -1;
+      if (!a.date && b.date) return 1;
+      return 0;
+    });
 
     // ── Ecosystem Highlights ──────────────────────────────────────────────
 

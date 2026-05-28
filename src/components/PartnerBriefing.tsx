@@ -51,8 +51,15 @@ type FocusCampaign = {
 };
 
 type UpcomingMoment = {
-  artist: string; moment: string; timing: string;
-  supportSurface: string; rolloutNote: string;
+  artist: string;
+  slug: string;
+  moment: string;
+  date: string | null;
+  timing: string;
+  eventType: string;
+  supportSurface: string;
+  rolloutNote: string;
+  fromCoachPlan: boolean;
 };
 
 type EcosystemHighlight = {
@@ -807,7 +814,7 @@ export default function PartnerBriefing() {
       </section>
 
 
-      {/* ═══════ UPCOMING MOMENTS ═══════ */}
+      {/* ═══════ UPCOMING MOMENTS — KEY DATES & CONTENT DROPS ═══════ */}
       {data.upcomingMoments.length > 0 && (
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
           <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
@@ -816,14 +823,14 @@ export default function PartnerBriefing() {
             fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
             textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
           }}>
-            Upcoming Moments
+            Key Dates &amp; Content Drops
           </div>
           <p style={{
             fontSize: 12, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
-            maxWidth: 500, margin: '0 0 24px',
+            maxWidth: 560, margin: '0 0 24px',
             fontFamily: 'Inter, system-ui, sans-serif',
           }}>
-            Key moments and rollout windows across Virgin Music campaigns in the coming weeks.
+            Confirmed dates and planned content across active campaigns — anchored to artist rollout plans. Dated events first, then ongoing activity.
           </p>
 
           {/* Table */}
@@ -833,37 +840,95 @@ export default function PartnerBriefing() {
           }}>
             {/* Header */}
             <div style={{
-              display: 'grid', gridTemplateColumns: '180px 1fr 140px 160px 1fr',
-              gap: 16, padding: '12px 20px',
-              borderBottom: `1px solid ${BONE}`,
+              display: 'grid', gridTemplateColumns: '140px 120px 1fr 150px 1fr',
+              gap: 12, padding: '12px 20px',
+              borderBottom: `2px solid ${BONE}`,
               fontSize: 8, fontWeight: 800, letterSpacing: '0.14em',
               textTransform: 'uppercase' as const, color: GHOST,
             }}>
               <span>Artist</span>
-              <span>Moment</span>
-              <span>Timing</span>
-              <span>Support Surface</span>
-              <span>Rollout Note</span>
+              <span>Date</span>
+              <span>What&apos;s Coming</span>
+              <span>Event Type</span>
+              <span>Content Approach</span>
             </div>
 
             {/* Rows */}
             {data.upcomingMoments.map((m, i) => (
               <div key={i} className="pb-moment-row" style={{
-                display: 'grid', gridTemplateColumns: '180px 1fr 140px 160px 1fr',
-                gap: 16, padding: '14px 20px',
+                display: 'grid', gridTemplateColumns: '140px 120px 1fr 150px 1fr',
+                gap: 12, padding: '14px 20px',
                 borderBottom: i < data.upcomingMoments.length - 1 ? `1px solid ${BONE}` : 'none',
                 alignItems: 'center',
               }}>
+                {/* Artist */}
                 <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{m.artist}</span>
-                <span style={{ fontSize: 11, fontWeight: 500, color: WARM }}>{m.moment}</span>
-                <span style={{ fontSize: 10, fontWeight: 600, color: SMOKE }}>{m.timing}</span>
+
+                {/* Date / Timing */}
+                <div>
+                  {m.date ? (
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, color: INK,
+                      fontFamily: 'Inter, system-ui, sans-serif',
+                    }}>
+                      {m.timing}
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 10, fontWeight: 500, color: SMOKE,
+                      fontStyle: 'italic',
+                    }}>
+                      {m.timing}
+                    </span>
+                  )}
+                </div>
+
+                {/* What's Coming */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.35 }}>
+                    {m.moment}
+                  </span>
+                  {m.fromCoachPlan && (
+                    <span style={{
+                      display: 'inline-block', padding: '2px 6px', borderRadius: 3,
+                      fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
+                      textTransform: 'uppercase' as const,
+                      background: 'rgba(45,106,79,0.08)', color: ACCENT.green,
+                      flexShrink: 0,
+                    }}>
+                      Planned
+                    </span>
+                  )}
+                </div>
+
+                {/* Event Type */}
                 <span style={{
-                  fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
-                  color: ACCENT.green,
+                  display: 'inline-block',
+                  padding: '3px 10px', borderRadius: 20,
+                  fontSize: 8, fontWeight: 800, letterSpacing: '0.1em',
+                  textTransform: 'uppercase' as const,
+                  background: m.fromCoachPlan ? 'rgba(45,106,79,0.08)' : `rgba(154,99,36,0.08)`,
+                  color: m.fromCoachPlan ? ACCENT.green : ACCENT.amber,
+                  width: 'fit-content',
                 }}>
-                  {m.supportSurface}
+                  {m.eventType}
                 </span>
-                <span style={{ fontSize: 10, color: SMOKE, fontStyle: 'italic' }}>{m.rolloutNote}</span>
+
+                {/* Content Approach — combines supportSurface + rolloutNote */}
+                <div>
+                  <span style={{
+                    fontSize: 10, fontWeight: 600, color: WARM,
+                    display: 'block', marginBottom: 2,
+                  }}>
+                    {m.supportSurface}
+                  </span>
+                  <span style={{
+                    fontSize: 9, color: SMOKE, fontStyle: 'italic',
+                    lineHeight: 1.3,
+                  }}>
+                    {m.rolloutNote}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
