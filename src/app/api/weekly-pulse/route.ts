@@ -442,37 +442,80 @@ function generateInsights(
   }
 
   // ── Narrative 3: The strongest ecosystems ──
-  // Celebrate genuinely GROWING channels; exclude those already mentioned
+  // Holistic ecosystem score — any active channel can qualify, not just GROWING
   const earlierMentions = new Set([
     ...weakConvChannels.map(c => c.slug),
     ...coldChannels.map(c => c.slug),
     ...lowCadence.map(c => c.slug),
     ...shortHeavy.map(c => c.slug),
   ]);
-  const genuinelyGrowing = channels.filter(c =>
-    c.classification === 'GROWING' &&
-    c.uploads30d >= 4 &&
-    c.longform30d >= 1 &&
-    (c.viewsWoW ?? 0) >= 0 &&
+
+  // Ecosystem score: format diversity, cadence, follow-through, efficiency, momentum, scale
+  function ecosystemScore(c: PulseChannel): number {
+    let score = 0;
+    // Format diversity: reward having both shorts AND longform
+    const hasShorts = c.shorts30d >= 1;
+    const hasLongform = c.longform30d >= 1;
+    if (hasShorts && hasLongform) score += 25;
+    else if (hasShorts || hasLongform) score += 8;
+    // Format depth: more variety = better ecosystem
+    score += Math.min(c.shorts30d, 4) * 3;
+    score += Math.min(c.longform30d, 3) * 4;
+    // Cadence: consistent uploading
+    score += Math.min(c.uploads30d, 10) * 2;
+    // Recency: active in last 7 days matters
+    if ((c.lastUploadDaysAgo ?? 999) <= 7) score += 10;
+    // Growth momentum
+    if (c.classification === 'GROWING') score += 15;
+    const wow = c.viewsWoW ?? 0;
+    if (wow > 20) score += 10;
+    else if (wow > 0) score += 5;
+    // Efficiency: high engagement relative to size
+    if ((c.subsPer1kViews ?? 0) >= 2) score += 10;
+    else if ((c.subsPer1kViews ?? 0) >= 1) score += 5;
+    // Scale factor: meaningful audience, but capped so it doesn't dominate
+    const v7d = c.views7d ?? 0;
+    if (v7d >= 100000) score += 12;
+    else if (v7d >= 20000) score += 8;
+    else if (v7d >= 5000) score += 4;
+    return score;
+  }
+
+  // All channels with real multiformat activity
+  const ecosystemCandidates = channels.filter(c =>
+    c.uploads30d >= 3 &&
+    (c.shorts30d >= 1 || c.longform30d >= 1) &&
+    (c.lastUploadDaysAgo ?? 999) <= 14 &&
     !earlierMentions.has(c.slug)
-  ).sort((a, b) => {
-    // Rank by ecosystem strength: format diversity × cadence × momentum
-    const ecosystemScore = (c: PulseChannel) => {
-      const formatMix = Math.min(c.shorts30d, 3) + Math.min(c.longform30d, 3); // reward both formats
-      const cadence = Math.min(c.uploads30d, 12); // cap so volume alone doesn't dominate
-      const momentum = Math.max(0, c.viewsWoW ?? 0);
-      return (formatMix * 2) + cadence + (momentum * 0.5);
-    };
-    return ecosystemScore(b) - ecosystemScore(a);
-  });
-  if (genuinelyGrowing.length >= 2) {
-    const momentumNames = genuinelyGrowing.slice(0, 3).map(c => c.name);
-    const multiFormatGrowers = genuinelyGrowing.filter(c => c.shorts30d >= 1 && c.longform30d >= 1);
-    const ecosystemNote = multiFormatGrowers.length >= 2
+  ).map(c => ({ channel: c, score: ecosystemScore(c) }))
+    .sort((a, b) => b.score - a.score);
+
+  // Pick top 2 established + 1 smaller channel doing it right
+  const ecoEstablished = ecosystemCandidates.filter(e => (e.channel.views7d ?? 0) >= 10000);
+  const ecoEmerging = ecosystemCandidates.filter(e => (e.channel.views7d ?? 0) < 10000 && e.score >= 30);
+  const ecoPicks: PulseChannel[] = [];
+  for (const e of ecoEstablished) {
+    if (ecoPicks.length >= 2) break;
+    ecoPicks.push(e.channel);
+  }
+  // Add 1 emerging channel if available
+  if (ecoEmerging.length > 0 && ecoPicks.length >= 1) {
+    ecoPicks.push(ecoEmerging[0].channel);
+  }
+  // Backfill if we don't have 3 yet
+  for (const e of ecosystemCandidates) {
+    if (ecoPicks.length >= 3) break;
+    if (!ecoPicks.includes(e.channel)) ecoPicks.push(e.channel);
+  }
+
+  if (ecoPicks.length >= 2) {
+    const ecoNames = ecoPicks.map(c => c.name);
+    const multiFormatCount = ecoPicks.filter(c => c.shorts30d >= 1 && c.longform30d >= 1).length;
+    const ecosystemNote = multiFormatCount >= 2
       ? ' Consistent uploads beyond release day — Shorts, longform and supporting formats working together — continue to outperform single-drop strategies.'
       : ' Regular output and format diversity are compounding week over week.';
     insights.push(
-      `The strongest campaign ecosystems this week came from ${momentumNames.join(', ')}.${ecosystemNote}`
+      `The strongest campaign ecosystems this week came from ${ecoNames.join(', ')}.${ecosystemNote}`
     );
   } else if (signals.growing >= 2) {
     insights.push(
