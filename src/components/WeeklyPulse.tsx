@@ -226,23 +226,38 @@ export default function WeeklyPulse() {
   /** Scan a plain string for known artist names → return React nodes with YT links */
   function linkifyArtists(text: string): (string | JSX.Element)[] {
     if (sortedNames.length === 0) return [text];
-    // Build regex matching any known artist name (word-boundary safe)
-    const escaped = sortedNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const re = new RegExp(`(${escaped.join('|')})`, 'g');
-    const parts = text.split(re);
-    return parts.map((part, i) => {
-      const url = nameToUrl.get(part);
+    // Filter out very short names (≤3 chars) to avoid false matches inside words
+    const safeNames = sortedNames.filter(n => n.length > 3);
+    if (safeNames.length === 0) return [text];
+    const escaped = safeNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    // Use word-boundary-like anchors: match only when surrounded by non-letter chars
+    const re = new RegExp(`((?:^|(?<=[^a-zA-Z]))(?:${escaped.join('|')})(?=[^a-zA-Z]|$))`, 'g');
+    const result: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        result.push(text.slice(lastIndex, match.index));
+      }
+      const name = match[1];
+      const url = nameToUrl.get(name);
       if (url) {
-        return (
-          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+        result.push(
+          <a key={match.index} href={url} target="_blank" rel="noopener noreferrer"
             className="pulse-link"
             style={{ color: INK, fontWeight: 700, textDecoration: 'underline', textDecorationColor: GHOST, textUnderlineOffset: '2px' }}>
-            {part}
+            {name}
           </a>
         );
+      } else {
+        result.push(name);
       }
-      return part;
-    });
+      lastIndex = re.lastIndex;
+    }
+    if (lastIndex < text.length) {
+      result.push(text.slice(lastIndex));
+    }
+    return result.length > 0 ? result : [text];
   }
 
   // ══════════════════════════════════════════════════════════════════════════
