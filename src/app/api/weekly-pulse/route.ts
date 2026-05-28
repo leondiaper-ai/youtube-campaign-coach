@@ -247,16 +247,16 @@ export async function GET(request: Request) {
         marketChannels.push(channel);
       }
 
-      // Collect recent uploads — longform from managed only, shorts from everyone
-      if (snap?.recentUploads) {
+      // Collect recent uploads (Virgin managed only)
+      if (isVirginOwned(a) && snap?.recentUploads) {
         for (const u of snap.recentUploads) {
           const ageMs = now - new Date(u.publishedAt).getTime();
           if (ageMs > videoCutoff || ageMs < 0) continue;
           const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
           const velocity = Math.round(u.viewCount / daysAgo);
           const fmt = classifyUploadFormat(u);
-          // Longform: managed only, minimum velocity; Shorts: all artists qualify
-          if (fmt !== 'Short' && (!isVirginOwned(a) || velocity < 20)) continue;
+          // Longform needs minimum velocity; Shorts always qualify to fill the grid
+          if (fmt !== 'Short' && velocity < 20) continue;
           allRecentVideos.push({
             id: u.id,
             title: u.title,
