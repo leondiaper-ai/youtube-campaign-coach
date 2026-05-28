@@ -161,14 +161,11 @@ export async function GET(request: Request) {
     const custom = await listCustomArtists();
 
     // Exclude non-music channels from the Weekly Pulse
-    const PULSE_EXCLUDE = new Set(['league-of-legends', 'leagueoflegends', 'lol-esports']);
+    const PULSE_EXCLUDE_NAMES = ['league of legends'];
     const allArtists = mergeArtistLists(ARTISTS, custom)
       .filter(a => {
-        const slug = a.slug.toLowerCase();
         const name = a.name.toLowerCase();
-        if (PULSE_EXCLUDE.has(slug)) return false;
-        if (name.includes('league of legends') || name.includes('league-of-legends')) return false;
-        return true;
+        return !PULSE_EXCLUDE_NAMES.some(ex => name.includes(ex));
       });
     const syncMeta = await readSyncMeta();
 
