@@ -264,18 +264,23 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
   // Collab videos from other channels get the Collab label — like a Premiere,
   // it's a cross-audience moment that deserves prominent treatment.
   if (upload.isCollab) return 'Collab';
-  if (upload.durationSec <= 62) return 'Short';
 
   const t = upload.title.toLowerCase();
+
+  // Title-based formats take priority over duration — a 40s trailer isn't a Short
   if (/\b(official\s*(music\s*)?video|official\s*vid)\b/.test(t)) return 'Official Video';
   if (/\[\s*(music\s*video|official\s*video|official\s*music\s*video)\s*\]/i.test(t)) return 'Official Video';
   if (/\blyric\s*(video|vid)?\b/.test(t)) return 'Lyric Video';
   if (/\bvisualise?r\b/.test(t)) return 'Visualizer';
+  if (/\b(trailer|teaser\s*video)\b/.test(t)) return 'Trailer';
+  if (/\bpremiere\b/.test(t) || upload.live === 'upcoming') return 'Premiere';
+
+  // Duration-based Short classification (after title exceptions)
+  if (upload.durationSec <= 62) return 'Short';
+
   if (/\b(bts|behind\s*the\s*scenes|making\s*of)\b/.test(t)) return 'BTS';
   if (/\b(live\s*session|acoustic|stripped\s*back|live\s*at|live\s*from)\b/.test(t)) return 'Live Session';
-  if (/\bpremiere\b/.test(t) || upload.live === 'upcoming') return 'Premiere';
   if (/\b(documentary|mini[\s-]?doc|film)\b/.test(t)) return 'Documentary';
-  if (/\b(trailer|teaser\s*video)\b/.test(t)) return 'Trailer';
   if (/\bfreestyle\b/.test(t)) return 'Freestyle';
   if (/\b(interview|podcast|conversation)\b/.test(t)) return 'Interview';
   if (upload.durationSec > 600) return 'Longform';
