@@ -195,16 +195,26 @@ export default function WeeklyPulse() {
   }
   const featureVideo = diverseVideos[0] ?? null;
   const supportingVideos = diverseVideos.slice(1, 4);
-  // Diverse Shorts selection: max 3 per artist, then backfill with next-best from others
+  // Diverse Shorts selection: prefer variety (max 3 per artist first pass), then backfill
   const topShorts: PulseVideo[] = [];
   const shortsPerArtist = new Map<string, number>();
+  const shortsDeferred: PulseVideo[] = [];
   for (const v of data.topShorts) {
     const count = shortsPerArtist.get(v.artistSlug) ?? 0;
     if (count < 3) {
       topShorts.push(v);
       shortsPerArtist.set(v.artistSlug, count + 1);
+    } else {
+      shortsDeferred.push(v);
     }
     if (topShorts.length >= 9) break;
+  }
+  // Backfill if grid not full
+  if (topShorts.length < 9) {
+    for (const v of shortsDeferred) {
+      topShorts.push(v);
+      if (topShorts.length >= 9) break;
+    }
   }
 
   // Build slug→channelHandle lookup for linking video artist names to their YT channels
