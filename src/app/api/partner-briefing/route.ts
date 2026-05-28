@@ -21,9 +21,9 @@ import {
   type Artist,
   type ChannelState,
   type ArtistClassification,
-  type RecentUpload,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
+import { listPinned } from '@/lib/campaignStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
@@ -131,16 +131,8 @@ type PartnerBriefingResponse = {
   ecosystemHighlights: { name: string; label: string; read: string; thumbnail: string | null; channelHandle: string | null }[];
 };
 
-// ── Priority artists for focus campaigns ────────────────────────────────────
-
-const FOCUS_PRIORITY_SLUGS = [
-  'gener8ion',
-  'k-trap',
-  'the-snuts',
-  'french-the-kid',
-  'peter-gabriel',
-  'mary-in-the-junkyard',
-];
+// Focus campaigns are pulled exclusively from pinned active campaigns
+// (managed via /campaigns page). No hardcoded priority list.
 
 // ── GET handler ─────────────────────────────────────────────────────────────
 
@@ -168,6 +160,10 @@ export async function GET(request: Request) {
         return !PULSE_EXCLUDE_NAMES.some(ex => name.includes(ex));
       });
     const syncMeta = await readSyncMeta();
+
+    // Load pinned active campaigns — these are the ONLY source for focus campaigns
+    const pinnedCampaigns = await listPinned();
+    const pinnedSlugs = new Set(pinnedCampaigns.map(p => p.slug));
 
     const handles = allArtists
       .map(a => a.channelHandle)
@@ -286,11 +282,10 @@ export async function GET(request: Request) {
     // ── Build Focus Campaigns ──────────────────────────────────────────────
 
     // Score channels for campaign relevance
+    // Score pinned campaigns — all pinned campaigns appear, ranked by activity
     const campaignRelevance = (ch: BriefingChannel): number => {
       let s = 0;
-      // Priority slug bonus
-      if (FOCUS_PRIORITY_SLUGS.includes(ch.slug)) s += 40;
-      // Active campaign
+      // Active campaign tag
       if (ch.campaign) s += 25;
       if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') s += 20;
       // Growing
@@ -307,10 +302,11 @@ export async function GET(request: Request) {
       if ((ch.views7d ?? 0) >= 50000) s += 10;
       else if ((ch.views7d ?? 0) >= 10000) s += 5;
       return s;
-    }
+    };
 
+    // ONLY pinned active campaigns qualify as focus campaigns
     const rankedChannels = allChannels
-      .filter(ch => ch.uploads30d >= 1 || ch.campaign || FOCUS_PRIORITY_SLUGS.includes(ch.slug))
+      .filter(ch => pinnedSlugs.has(ch.slug))
       .map(ch => ({ ch, score: campaignRelevance(ch) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
@@ -323,9 +319,10 @@ export async function GET(request: Request) {
         case 'PUSH': return 'Active Push';
         case 'PEAK': return 'Peak Momentum';
         case 'SUSTAIN': return 'Sustained Rollout';
+        case 'HOLD': return 'Building Towards';
         default: return 'Active';
       }
-    }
+    };
 
     const buildNarrative = (ch: BriefingChannel): string => {
       const vids = videosBySlug.get(ch.slug) ?? [];
@@ -334,6 +331,7 @@ export async function GET(request: Request) {
       const growing = ch.classification === 'GROWING';
       const wow = ch.viewsWoW ?? 0;
 
+      // Strong campaigns — full momentum
       if (hasShorts && hasLongform && growing && wow > 10) {
         return `Full content ecosystem in play — Shorts driving discovery alongside longform depth. Week-over-week momentum building with each upload.`;
       }
@@ -355,8 +353,15 @@ export async function GET(request: Request) {
       if (vids.length >= 2) {
         return `Active content rollout with multiple touchpoints. Building audience familiarity through the campaign window.`;
       }
-      return `Campaign in motion. Content strategy positioning for the next phase of growth.`;
-    }
+      // Early-stage / building campaigns — always forward-looking
+      if (ch.uploads30d >= 1) {
+        return `Campaign building. Early content establishing the channel's presence ahead of the next phase — laying the foundation for a fuller rollout.`;
+      }
+      if (ch.phase === 'PRE') {
+        return `Pre-release phase. Building towards the campaign launch — content strategy and audience priming in development.`;
+      }
+      return `Campaign just getting started. Content strategy taking shape as we build towards the full rollout window.`;
+    };
 
     const buildContentStrategy = (ch: BriefingChannel): string => {
       const hasShorts = ch.shorts30d >= 1;
@@ -370,8 +375,11 @@ export async function GET(request: Request) {
       if (hasLongform) {
         return `Longform-led: ${ch.longform30d} longform uploads in 30d. Depth-first audience building.`;
       }
-      return `${ch.uploads30d} uploads in 30d. Building content foundation.`;
-    }
+      if (ch.uploads30d >= 1) {
+        return `${ch.uploads30d} upload${ch.uploads30d > 1 ? 's' : ''} in 30d. Building content foundation ahead of the campaign ramp.`;
+      }
+      return `Content strategy in development. Preparing for the upcoming rollout window.`;
+    };
 
     const buildEcosystemSignal = (ch: BriefingChannel): string => {
       const hasShorts = ch.shorts30d >= 1;
@@ -380,8 +388,9 @@ export async function GET(request: Request) {
       if (hasShorts && hasLongform) return 'Multi-Format Active';
       if (hasShorts && ch.shorts30d >= 3) return 'Shorts Momentum';
       if (hasLongform) return 'Longform Depth';
-      return 'Building';
-    }
+      if (ch.uploads30d >= 1) return 'Early Build';
+      return 'Getting Started';
+    };
 
     const buildNextMoments = (ch: BriefingChannel, a: Artist | undefined): string => {
       if (a?.nextMomentLabel && a?.nextMomentDate) {
@@ -520,7 +529,11 @@ export async function GET(request: Request) {
         surface = buildEcosystemSignal(ch);
         note = `${ch.uploads30d} uploads this month`;
       } else {
-        continue; // Skip channels with nothing to report
+        // Early-stage campaign — still include, frame as building
+        moment = 'Campaign development';
+        timing = 'Building towards';
+        surface = 'Strategy in progress';
+        note = 'Content plan taking shape';
       }
 
       upcomingMoments.push({
@@ -592,9 +605,8 @@ export async function GET(request: Request) {
     weekEnd.setDate(weekEnd.getDate() + 6);
     const weekRange = `${weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${weekEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
-    const activeCampaignCount = allChannels.filter(
-      ch => ch.uploads30d >= 1 || ch.campaign
-    ).length;
+    // Active campaign count = number of pinned campaigns
+    const activeCampaignCount = pinnedCampaigns.length;
 
     const response: PartnerBriefingResponse = {
       weekRange,
