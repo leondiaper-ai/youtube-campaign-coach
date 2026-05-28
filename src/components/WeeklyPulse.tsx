@@ -212,6 +212,39 @@ export default function WeeklyPulse() {
   const slugToHandle = new Map<string, string>();
   allChannels.forEach(ch => { if (ch.channelHandle) slugToHandle.set(ch.slug, ch.channelHandle); });
 
+  // Build name→URL lookup for linkifying artist names in editorial copy
+  const nameToUrl = new Map<string, string>();
+  allChannels.forEach(ch => {
+    if (ch.channelHandle) {
+      const url = channelUrl(ch.channelHandle);
+      if (url) nameToUrl.set(ch.name, url);
+    }
+  });
+  // Sort names longest-first so "Tove Lo" matches before "Lo" etc.
+  const sortedNames = Array.from(nameToUrl.keys()).sort((a, b) => b.length - a.length);
+
+  /** Scan a plain string for known artist names → return React nodes with YT links */
+  function linkifyArtists(text: string): (string | JSX.Element)[] {
+    if (sortedNames.length === 0) return [text];
+    // Build regex matching any known artist name (word-boundary safe)
+    const escaped = sortedNames.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const re = new RegExp(`(${escaped.join('|')})`, 'g');
+    const parts = text.split(re);
+    return parts.map((part, i) => {
+      const url = nameToUrl.get(part);
+      if (url) {
+        return (
+          <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+            className="pulse-link"
+            style={{ color: INK, fontWeight: 700, textDecoration: 'underline', textDecorationColor: GHOST, textUnderlineOffset: '2px' }}>
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // EDITORIAL INTELLIGENCE LAYER
   // Campaigns are selected for momentum, rollout behaviour and YouTube
@@ -839,7 +872,7 @@ export default function WeeklyPulse() {
               margin: '24px 0 0', maxWidth: 480,
               fontFamily: 'Inter, system-ui, sans-serif',
             }}>
-              {data.editorial}
+              {linkifyArtists(data.editorial)}
             </p>
 
           </div>
@@ -1197,7 +1230,7 @@ export default function WeeklyPulse() {
                     lineHeight: i === 0 ? 1.4 : 1.5, margin: 0,
                     fontFamily: 'Inter, system-ui, sans-serif',
                   }}>
-                    {insight}
+                    {linkifyArtists(insight)}
                   </p>
                 ))}
               </div>
@@ -1418,7 +1451,7 @@ export default function WeeklyPulse() {
                     fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.5, margin: '0 0 8px',
                     fontFamily: 'Inter, system-ui, sans-serif',
                   }}>
-                    {insight}
+                    {linkifyArtists(insight)}
                   </p>
                 ))}
               </div>
