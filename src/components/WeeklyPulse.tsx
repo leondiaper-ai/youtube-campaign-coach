@@ -195,13 +195,13 @@ export default function WeeklyPulse() {
   }
   const featureVideo = diverseVideos[0] ?? null;
   const supportingVideos = diverseVideos.slice(1, 4);
-  // Diverse Shorts selection: prefer variety (max 3 per artist first pass), then backfill
+  // Diverse Shorts selection: prefer variety (max 2 per artist first pass), then backfill
   const topShorts: PulseVideo[] = [];
   const shortsPerArtist = new Map<string, number>();
   const shortsDeferred: PulseVideo[] = [];
   for (const v of data.topShorts) {
     const count = shortsPerArtist.get(v.artistSlug) ?? 0;
-    if (count < 3) {
+    if (count < 2) {
       topShorts.push(v);
       shortsPerArtist.set(v.artistSlug, count + 1);
     } else {
