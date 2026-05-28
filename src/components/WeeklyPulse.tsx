@@ -519,10 +519,10 @@ export default function WeeklyPulse() {
     }
     // Efficiency stories
     if (sig.efficiency === 'outperforming' && !growing) {
-      return `Punching above weight. Engagement running ahead of expectations — the strategy is landing.`;
+      return `Engagement running ahead of channel size — the strategy is resonating beyond the existing audience.`;
     }
     if (sig.efficiency === 'outperforming' && growing) {
-      return `Strong efficiency. Growth and engagement both running ahead of baseline.`;
+      return `Growth and engagement both outpacing baseline. The campaign is compounding.`;
     }
     // Shorts-to-longform narratives
     if (sig.shortsLongform === 'discovery-converting') {
@@ -586,7 +586,7 @@ export default function WeeklyPulse() {
     if (sig.reactivation === 'reawakening') return 'Reawakening';
     if (sig.multiformat === 'full-rollout') return 'Full Rollout';
     if (sig.followThrough === 'strong' && isStrongMultiformat(sig.multiformat)) return 'Full Rollout';
-    if (sig.efficiency === 'outperforming') return 'Punching Up';
+    if (sig.efficiency === 'outperforming') return 'Outpacing';
     if (sig.shortsLongform === 'discovery-converting') return 'Discovery → Depth';
     if (ch.classification === 'GROWING' && (ch.viewsWoW ?? 0) > 20) return 'Accelerating';
     if (isStrongMultiformat(sig.multiformat)) return 'Ecosystem';
