@@ -273,6 +273,7 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
   if (/\blyric\s*(video|vid)?\b/.test(t)) return 'Lyric Video';
   if (/\bvisualise?r\b/.test(t)) return 'Visualizer';
   if (/\b(trailer|teaser\s*video)\b/.test(t)) return 'Trailer';
+  if (/\b(album\s*out|out\s*now|available\s*now|pre-?save|pre-?order)\b/.test(t)) return 'Trailer';
   if (/\bpremiere\b/.test(t) || upload.live === 'upcoming') return 'Premiere';
 
   // Duration-based Short classification (after title exceptions)
