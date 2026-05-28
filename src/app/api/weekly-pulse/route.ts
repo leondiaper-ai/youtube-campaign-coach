@@ -455,7 +455,16 @@ function generateInsights(
     c.longform30d >= 1 &&
     (c.viewsWoW ?? 0) >= 0 &&
     !earlierMentions.has(c.slug)
-  );
+  ).sort((a, b) => {
+    // Rank by ecosystem strength: format diversity × cadence × momentum
+    const ecosystemScore = (c: PulseChannel) => {
+      const formatMix = Math.min(c.shorts30d, 3) + Math.min(c.longform30d, 3); // reward both formats
+      const cadence = Math.min(c.uploads30d, 12); // cap so volume alone doesn't dominate
+      const momentum = Math.max(0, c.viewsWoW ?? 0);
+      return (formatMix * 2) + cadence + (momentum * 0.5);
+    };
+    return ecosystemScore(b) - ecosystemScore(a);
+  });
   if (genuinelyGrowing.length >= 2) {
     const momentumNames = genuinelyGrowing.slice(0, 3).map(c => c.name);
     const multiFormatGrowers = genuinelyGrowing.filter(c => c.shorts30d >= 1 && c.longform30d >= 1);
