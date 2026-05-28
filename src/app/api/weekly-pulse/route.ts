@@ -32,6 +32,34 @@ import { classifyUploadFormat, type UploadFormatLabel } from '@/lib/coach/matchE
 
 export const dynamic = 'force-dynamic';
 
+// ── KV helpers (snapshot caching) ────────────────────────────────────────────
+
+async function kv() {
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+  if (!url || !token) return null;
+  try {
+    const { Redis } = await import('@upstash/redis');
+    return new Redis({ url, token });
+  } catch {
+    return null;
+  }
+}
+
+/** ISO week key, e.g. "weekly-pulse:2026-W22" */
+function pulseWeekKey(): string {
+  const now = new Date();
+  // ISO week calculation
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  return `weekly-pulse:${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+
 // ── Response Types ────────────────────────────────────────────────────────────
 
 type PulseChannel = {
@@ -112,8 +140,23 @@ type PulseResponse = {
 
 // ── GET handler ───────────────────────────────────────────────────────────────
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const redis = await kv();
+    const weekKey = pulseWeekKey();
+
+    // Check for a cached snapshot for this week (auto-lock on first view)
+    const url = new URL(request.url);
+    const forceRefresh = url.searchParams.get('refresh') === '1';
+
+    if (redis && !forceRefresh) {
+      const cached = await redis.get<PulseResponse>(weekKey);
+      if (cached) {
+        return NextResponse.json(cached);
+      }
+    }
+
+    // No cache — generate fresh snapshot
     // Load all artists (same as /growth page)
     const custom = await listCustomArtists();
     const allArtists = mergeArtistLists(ARTISTS, custom);
@@ -274,6 +317,15 @@ export async function GET() {
       playbook,
       marketInsights,
     };
+
+    // Cache this snapshot for the week (expires in 8 days as safety margin)
+    if (redis) {
+      try {
+        await redis.set(weekKey, JSON.stringify(response), { ex: 8 * 86400 });
+      } catch {
+        // Cache write failure is non-fatal
+      }
+    }
 
     return NextResponse.json(response);
   } catch (e: unknown) {
