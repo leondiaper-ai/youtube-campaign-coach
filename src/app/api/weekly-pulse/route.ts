@@ -279,7 +279,27 @@ export async function GET(request: Request) {
     // Sort videos by velocity, split into longform + Shorts
     allRecentVideos.sort((a, b) => b.velocity - a.velocity);
     const topVideos = allRecentVideos.filter(v => v.format !== 'Short').slice(0, 8);
-    const topShorts = allRecentVideos.filter(v => v.format === 'Short').slice(0, 24);
+
+    // Diverse shorts: max 2 per artist first pass, then backfill to 24
+    const allShortsSorted = allRecentVideos.filter(v => v.format === 'Short');
+    const topShorts: PulseVideo[] = [];
+    const shortsCount = new Map<string, number>();
+    const shortsOverflow: PulseVideo[] = [];
+    for (const v of allShortsSorted) {
+      const n = shortsCount.get(v.artistSlug) ?? 0;
+      if (n < 2) {
+        topShorts.push(v);
+        shortsCount.set(v.artistSlug, n + 1);
+      } else {
+        shortsOverflow.push(v);
+      }
+      if (topShorts.length >= 24) break;
+    }
+    // Backfill if needed
+    for (const v of shortsOverflow) {
+      if (topShorts.length >= 24) break;
+      topShorts.push(v);
+    }
 
     // Signals (managed only)
     const signals: PulseSignals = {
