@@ -195,10 +195,11 @@ export default function WeeklyPulse() {
   }
   const featureVideo = diverseVideos[0] ?? null;
   const supportingVideos = diverseVideos.slice(1, 4);
-  // Diverse Shorts selection: prefer variety (max 1 per artist first pass), then backfill
+  // Diverse Shorts selection: 1 per artist first, then backfill up to 3 per artist, cap at 9
   const topShorts: PulseVideo[] = [];
   const shortsPerArtist = new Map<string, number>();
   const shortsDeferred: PulseVideo[] = [];
+  // First pass: best 1 from each artist
   for (const v of data.topShorts) {
     const count = shortsPerArtist.get(v.artistSlug) ?? 0;
     if (count < 1) {
@@ -209,10 +210,14 @@ export default function WeeklyPulse() {
     }
     if (topShorts.length >= 9) break;
   }
-  // Backfill if grid not full
+  // Second pass: allow up to 3 per artist to fill remaining slots
   if (topShorts.length < 9) {
     for (const v of shortsDeferred) {
-      topShorts.push(v);
+      const count = shortsPerArtist.get(v.artistSlug) ?? 0;
+      if (count < 3) {
+        topShorts.push(v);
+        shortsPerArtist.set(v.artistSlug, count + 1);
+      }
       if (topShorts.length >= 9) break;
     }
   }
@@ -1581,8 +1586,6 @@ export default function WeeklyPulse() {
             <div style={{ display: 'flex', gap: 6 }}>
               <Pill label={emailCopied ? 'Copied' : 'Email summary'} onClick={() => copyToClipboard(generateEmailBody(), 'email')} active={emailCopied} />
               <Pill label={slackCopied ? 'Copied' : 'Slack summary'} onClick={() => copyToClipboard(generateSlackSummary(), 'slack')} active={slackCopied} />
-              <Pill label="Screenshot" onClick={() => setScreenshotMode(true)} />
-              <Pill label="Print / PDF" onClick={() => window.print()} />
             </div>
           </div>
         </section>
@@ -1593,9 +1596,6 @@ export default function WeeklyPulse() {
           <VirginMusicLogo height={16} />
           <div style={{ width: 1, height: 20, background: BONE }} />
           <YouTubeLogo height={13} />
-        </div>
-        <div style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST }}>
-          Questions or feedback? Reply to this email.
         </div>
       </footer>
     </div>
