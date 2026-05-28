@@ -248,6 +248,17 @@ export async function GET(request: Request) {
       }
 
       // Collect recent uploads (Virgin managed only)
+      // Debug: track recentUploads availability per managed channel
+      if (isVirginOwned(a)) {
+        const uploadsLen = snap?.recentUploads?.length ?? 0;
+        const shortsInUploads = (snap?.recentUploads ?? []).filter((u: any) => u.durationSec <= 62).length;
+        (channel as any)._debug = {
+          snapExists: !!snap,
+          recentUploadsCount: uploadsLen,
+          shortsInUploads,
+          hasRecentUploads: !!snap?.recentUploads,
+        };
+      }
       if (isVirginOwned(a) && snap?.recentUploads) {
         for (const u of snap.recentUploads) {
           const ageMs = now - new Date(u.publishedAt).getTime();
