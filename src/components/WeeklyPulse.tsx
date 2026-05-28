@@ -686,7 +686,8 @@ export default function WeeklyPulse() {
     .filter(({ signals }) =>
       signals.multiformat === 'full-rollout' ||
       signals.multiformat === 'strong-followthrough' ||
-      signals.multiformat === 'ecosystem-build'
+      signals.multiformat === 'ecosystem-build' ||
+      signals.multiformat === 'multiformat-active'
     )
     .sort((a, b) => {
       const tierOrder: Record<MultiformatLevel, number> = {
@@ -695,7 +696,7 @@ export default function WeeklyPulse() {
       };
       return tierOrder[b.signals.multiformat] - tierOrder[a.signals.multiformat];
     })
-    .slice(0, 4)
+    .slice(0, 3)
     .map(({ channel, signals, formats }) => {
       // Build a concise format description
       const activeFormats = formats.formatTypes.slice(0, 4).join(', ');
@@ -705,8 +706,10 @@ export default function WeeklyPulse() {
         read = `${activeFormats} extending momentum beyond release day.`;
       } else if (signals.multiformat === 'strong-followthrough') {
         read = `Consistent follow-through with ${activeFormats} sustaining audience engagement.`;
-      } else {
+      } else if (signals.multiformat === 'ecosystem-build') {
         read = `Building content depth with ${activeFormats} across the campaign.`;
+      } else {
+        read = `${activeFormats} working together to broaden the campaign surface.`;
       }
       return {
         channel,
