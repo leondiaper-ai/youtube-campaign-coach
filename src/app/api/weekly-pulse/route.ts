@@ -247,7 +247,7 @@ export async function GET() {
 
     // Generate content
     const editorial = generateEditorial(managedChannels, marketChannels, signals, topVideos, topShorts);
-    const insights = generateInsights(managedChannels, signals, topVideos, topShorts);
+    const insights = generateInsights(managedChannels, marketChannels, signals, topVideos, topShorts);
     const marketInsights = generateMarketInsights(managedChannels, marketChannels);
     const playbook = generatePlaybook(managedChannels, signals, topVideos, topShorts);
 
@@ -299,43 +299,54 @@ function generateEditorial(
   const issueCount = signals.weakConversion + signals.underfed + signals.cold;
   const topArtist = topVideos.length > 0 ? topVideos[0].channelName : null;
 
-  // Build a narrative lede, not a stat dump
+  // Build a narrative lede — roster + market + platform pattern
   if (growingCount >= issueCount && growingCount >= 3 && topArtist) {
     if (shortsRatio > 0.55) {
-      return `Shorts are driving discovery this week. ${topArtist} leads the standout moments, but the real story is which campaigns are converting that attention into subscribers — and sustaining output beyond release day.`;
+      return `Shorts are driving discovery this week. ${topArtist} leads the standout moments, but the emerging pattern is clear: the campaigns converting that attention into subscribers are the ones sustaining output beyond release day — a platform-aligned behaviour the strongest artists are demonstrating.`;
     }
-    return `${growingCount} channels in a growth state this week. The pattern: consistent posting, mixed formats, algorithm reward. ${topArtist} is setting the pace, with depth building across the roster.`;
+    return `${growingCount} channels in a growth state this week. Consistent pattern: the campaigns posting regularly and mixing formats are the ones the platform is rewarding. ${topArtist} is setting the pace, with depth building across the roster.`;
   }
 
   if (signals.underfed + signals.cold > growingCount) {
     if (topArtist) {
-      return `Cadence is the biggest opportunity this week. ${topArtist} shows what sustained content flow looks like — and there's room across the roster to build that consistency.`;
+      return `Cadence is the biggest opportunity this week. ${topArtist} shows what sustained content flow looks like — a consistent behaviour across the strongest campaigns both on-roster and in the wider market. There's real room to build that rhythm across more artists.`;
     }
-    return `The biggest opportunity this week is cadence. Strong foundations across the roster with real room to build consistency between releases. The channels growing share one trait: they keep showing up.`;
+    return `The biggest opportunity this week is cadence. Strong foundations across the roster with room to build the consistency that YouTube's recommendation system rewards. The channels growing share one trait: they keep showing up.`;
   }
 
   if (signals.weakConversion >= 3) {
-    return `Discovery is working — the next opportunity is depth. Multiple channels building real reach, with room to grow the audience relationship through artist-led context, longform and formats that deepen engagement.`;
+    return `Discovery is working — the next opportunity is depth. Multiple channels building real reach, with room to grow the audience relationship. Platform behaviour consistently rewards artist-led context, longform and formats that deepen engagement.`;
   }
 
   if (shortsRatio > 0.65) {
-    return `Shorts doing the heavy lifting on discovery. The next step: giving that attention somewhere to go. Channels pairing Shorts with longform are building deeper audiences — that's the model to expand.`;
+    return `Shorts doing the heavy lifting on discovery. The platform-aligned next step: giving that attention somewhere deeper to go. Channels pairing Shorts with longform are building lasting audiences — a growing trend across the market.`;
   }
 
   if (topArtist) {
-    return `A week of contrasts. ${topArtist} breaking through, with real opportunity across the roster for cadence to shift trajectories. The channels growing are treating YouTube as an always-on ecosystem.`;
+    return `A week of contrasts. ${topArtist} breaking through, with real opportunity across the roster for cadence to shift trajectories. The consistent pattern among growing channels: treating YouTube as an always-on ecosystem.`;
   }
 
-  return `Steady week across the roster. Cadence remains the strongest signal — consistent output and format diversity are building real audience depth.`;
+  return `Steady week across the roster. The strongest signal remains consistent output and format diversity — the platform-aligned behaviours building real audience depth.`;
 }
 
 function generateInsights(
   channels: PulseChannel[],
+  market: PulseChannel[],
   signals: PulseSignals,
   topVideos: PulseVideo[],
   topShorts: PulseVideo[],
 ): string[] {
   const insights: string[] = [];
+
+  // Market context for cross-referencing
+  const marketAvgCadence = market.length > 0
+    ? market.reduce((s, c) => s + c.uploads30d, 0) / market.length : 0;
+  const managedAvgCadence = channels.length > 0
+    ? channels.reduce((s, c) => s + c.uploads30d, 0) / channels.length : 0;
+  const marketShortsRatio = market.length > 0
+    ? market.reduce((s, c) => s + c.shorts30d, 0) / Math.max(market.reduce((s, c) => s + c.uploads30d, 0), 1) : 0;
+  const marketGrowingPct = market.length > 0
+    ? market.filter(c => c.classification === 'GROWING').length / market.length : 0;
 
   // ── Narrative 1: The audience depth story ──
   const weakConvChannels = channels.filter(c => c.classification === 'WEAK_CONVERSION');
@@ -343,11 +354,11 @@ function generateInsights(
   if (weakConvChannels.length >= 2 && shortHeavy.length >= 1) {
     const names = weakConvChannels.slice(0, 2).map(c => c.name).join(' and ');
     insights.push(
-      `Audience growth opportunity for ${names}. Discovery is working — the next step is deeper content to turn that reach into lasting audience. Artist-led context or short longform is the bridge.`
+      `Audience growth opportunity for ${names}. Discovery is working — a pattern emerging where Shorts reach isn't yet converting into lasting audience. Platform behaviour consistently rewards the channels that pair discovery with depth: artist-led context, BTS, or short longform bridges that gap.`
     );
   } else if (weakConvChannels.length >= 2) {
     insights.push(
-      `Discovery is working across several channels. The next step is depth — BTS, longform, storytelling — to turn reach into lasting audience relationships.`
+      `A consistent pattern across several channels: discovery working well, with room to deepen the audience relationship. BTS, longform and storytelling are the formats that turn reach into subscribers — a platform-aligned behaviour the strongest market peers are already demonstrating.`
     );
   }
 
@@ -359,14 +370,17 @@ function generateInsights(
     const coldNames = coldChannels.slice(0, 2).map(c => c.name);
     const exampleNames = Array.from(new Set([...quietNames, ...coldNames])).slice(0, 2);
     const nameStr = exampleNames.length > 0 ? ` — ${exampleNames.join(' and ')} among them` : '';
+    // Cross-reference with market cadence
+    const cadenceContext = marketAvgCadence > managedAvgCadence * 1.2
+      ? ` Market peers are averaging ${marketAvgCadence.toFixed(1)} uploads/30d — a useful benchmark.`
+      : '';
     insights.push(
-      `Cadence building is the biggest opportunity across the roster${nameStr}. Even catalogue Shorts or BTS clips between releases keep the algorithm signal alive and set up the next campaign.`
+      `Cadence building is the biggest opportunity across the roster${nameStr}. Even catalogue Shorts or BTS clips between releases keep the algorithm signal alive.${cadenceContext} This is a roster-wide pattern, not an individual gap.`
     );
   }
 
-  // ── Narrative 3: What's actually working ──
-  // Only celebrate channels that are genuinely GROWING + have healthy cadence
-  // Exclude channels already mentioned in earlier narratives
+  // ── Narrative 3: What's working — ecosystem + market alignment ──
+  // Celebrate genuinely GROWING channels; exclude those already mentioned
   const earlierMentions = new Set([
     ...weakConvChannels.map(c => c.slug),
     ...coldChannels.map(c => c.slug),
@@ -376,42 +390,49 @@ function generateInsights(
   const genuinelyGrowing = channels.filter(c =>
     c.classification === 'GROWING' &&
     c.uploads30d >= 4 &&
-    c.longform30d >= 1 &&           // must have some format depth
-    (c.viewsWoW ?? 0) >= 0 &&       // not declining week-over-week
-    !earlierMentions.has(c.slug)       // not mentioned in a negative narrative
+    c.longform30d >= 1 &&
+    (c.viewsWoW ?? 0) >= 0 &&
+    !earlierMentions.has(c.slug)
   );
   if (genuinelyGrowing.length >= 2) {
     const momentumNames = genuinelyGrowing.slice(0, 3).map(c => c.name);
+    // Check if multi-format is a pattern among growers
+    const multiFormatGrowers = genuinelyGrowing.filter(c => c.shorts30d >= 1 && c.longform30d >= 1);
+    const ecosystemNote = multiFormatGrowers.length >= 2
+      ? ' A growing trend: the campaigns sustaining momentum are the ones building content ecosystems — Shorts, longform, supporting formats all working together.'
+      : ' Consistent behaviour: regular output and format diversity are compounding.';
     insights.push(
-      `The strongest campaigns this week — ${momentumNames.join(', ')} — kept posting after release day. Regular output, mixed formats, ecosystem over single drops. That's what compounds.`
+      `The strongest campaigns this week — ${momentumNames.join(', ')} — kept posting after release day.${ecosystemNote} This is platform-aligned: YouTube's recommendation surface rewards sustained, multi-format presence.`
     );
   } else if (signals.growing >= 2) {
     insights.push(
-      `Growth is meeting cadence and format diversity. The channels in a growth state aren't the biggest — they're the ones treating YouTube as an ongoing conversation, not a series of isolated drops.`
+      `Early momentum building where cadence meets format diversity. The channels in a growth state aren't the biggest — they're the ones treating YouTube as an ongoing conversation. A consistent pattern across both managed roster and market peers.`
     );
   }
 
-  // ── Narrative 4: The format story ──
-  // Shorts-to-longform ecosystem health — exclude channels already named above
+  // ── Narrative 4: Shorts → depth opportunity ──
   const shortsOnlyForNarrative = shortHeavy.filter(c => !earlierMentions.has(c.slug) || shortHeavy.length <= 2);
   if (shortsOnlyForNarrative.length >= 2) {
     const names = shortsOnlyForNarrative.slice(0, 2).map(c => c.name).join(' and ');
+    const marketShortsNote = marketShortsRatio > 0.4
+      ? ` Market peers are leaning into Shorts too (${Math.round(marketShortsRatio * 100)}% of uploads) — but the ones growing pair that with longform depth.`
+      : '';
     insights.push(
-      `${names} ${shortsOnlyForNarrative.length > 2 ? 'and others have' : 'have'} real Shorts discovery energy. The next step is longform — that's what turns a scroll into a subscribe and deepens the audience relationship.`
+      `${names} ${shortsOnlyForNarrative.length > 2 ? 'and others have' : 'have'} real Shorts discovery energy. The platform-aligned next step is longform — that's what turns a scroll into a subscribe.${marketShortsNote}`
     );
   } else if (shortHeavy.length >= 2 && insights.length < 3) {
     insights.push(
-      `Shorts discovery is strong across several channels. The next opportunity: pair that reach with longform. One deeper piece per cycle changes the audience dynamic.`
+      `Shorts discovery is strong across several channels. Pattern emerging: the campaigns that bridge Shorts into longform are the ones building deeper audience relationships. One deeper piece per cycle shifts the dynamic.`
     );
   }
 
-  // ── Narrative 5: Follow-through after release ──
+  // ── Narrative 5: Follow-through — platform behaviour insight ──
   const noFollowUp = channels.filter(c =>
     c.campaignStartDate != null && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 10
   );
   if (noFollowUp.length >= 2 && insights.length < 4) {
     insights.push(
-      `The 7–10 day window after a release is the biggest follow-through opportunity. BTS, reaction clips, a Shorts remix — that's what extends a campaign's life on the platform and keeps the algorithm engaged.`
+      `The 7–10 day window after a release remains the clearest follow-through opportunity. BTS, reaction clips, a Shorts remix — the campaigns extending their life on the platform are the ones that keep the content ecosystem active post-release. This is consistent with what the strongest market peers are doing.`
     );
   }
 
@@ -481,7 +502,7 @@ function generatePlaybook(
   if (activeNoRecent.length >= 2) {
     return {
       title: 'The 7–10 Day Follow-Up Window',
-      why: 'Channels that go silent after an official video lose 40–60% of recommendation surface within two weeks.',
+      why: 'A consistent platform pattern: channels that sustain uploads after an official video retain recommendation surface significantly longer. The strongest campaigns — both on-roster and in the market — treat follow-through as part of the rollout, not an afterthought.',
       when: 'Day 1–10 after any official video, premiere, or major drop.',
       actions: [
         'Day 1–3: Release a Short clip from the video (best moment, reaction, behind the scenes)',
@@ -494,7 +515,7 @@ function generatePlaybook(
   if (signals.weakConversion >= 2) {
     return {
       title: 'Turning Discovery Into Audience Depth',
-      why: 'Views prove discoverability is working. The next step is giving viewers a reason to subscribe — and that\'s almost always depth, not volume.',
+      why: 'Views prove discoverability is working. The platform-aligned next step is giving viewers a reason to subscribe — and that\'s almost always depth and context, not volume. Market peers growing fastest are the ones pairing reach with artist-led content.',
       when: '3+ uploads in 30 days with strong views and room to grow subscriber conversion.',
       actions: [
         'Add one artist-led context piece this week — a track breakdown, studio tour, or honest creative diary',
@@ -508,7 +529,7 @@ function generatePlaybook(
   if (shortHeavy.length >= 1) {
     return {
       title: 'Shorts Ladder Around an Official Video',
-      why: 'Shorts generate reach but don\'t build watch time or loyalty alone. The ladder bridges discovery into longform viewing.',
+      why: 'Shorts generate discovery reach — the growing trend is to ladder that into longform viewing. The campaigns bridging Shorts into deeper content are the ones building lasting audience relationships.',
       when: 'Active with Shorts but no longform in 14+ days.',
       actions: [
         'Build a 3-Short teaser sequence leading up to a longform drop (countdown, snippet, BTS)',
@@ -521,7 +542,7 @@ function generatePlaybook(
   if (signals.cold >= 2) {
     return {
       title: 'Turn One Video Into Five Uploads',
-      why: 'Repurposing one video into multiple formats is the fastest way to build cadence without new production.',
+      why: 'A platform-aligned pattern: repurposing one video into multiple formats builds the cadence YouTube rewards — without requiring new production. Market peers reactivating catalogue channels are using exactly this approach.',
       when: 'Catalogue reawakening opportunity — channel ready for fresh content.',
       actions: [
         'Take the most recent video and extract 2–3 Short clips from the strongest moments',

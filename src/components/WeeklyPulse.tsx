@@ -490,78 +490,78 @@ export default function WeeklyPulse() {
 
     // Reactivation stories — supportive, forward-looking
     if (sig.reactivation === 'reactivating') {
-      return `Back in motion. Early signs of the catalogue reconnecting — consistency building nicely.`;
+      return `Early momentum building. Catalogue reconnecting with fresh content — a reawakening pattern emerging.`;
     }
     if (sig.reactivation === 'reawakening') {
-      return `Fresh content landing. The existing audience is there — new uploads starting to reactivate the catalogue.`;
+      return `Fresh content landing. The existing audience is there — early signs of the catalogue reactivating.`;
     }
     // Strong follow-through + multiformat = the ideal story
     if (sig.followThrough === 'strong' && isStrongMultiformat(sig.multiformat)) {
-      return `Strong follow-through with rich multiformat rollout. Campaign visible well beyond drop day.`;
+      return `Platform-aligned rollout. Strong follow-through with multiformat depth — campaign visible well beyond drop day.`;
     }
     if (sig.followThrough === 'strong' && growing) {
-      return `Post-release follow-through sustaining reach. Continued uploads extending the campaign window.`;
+      return `Consistent behaviour: post-release follow-through sustaining reach. Continued uploads extending the campaign window.`;
     }
     // Efficiency stories — celebrate the overperformance
     if (sig.efficiency === 'outperforming' && !growing) {
-      return `Punching above weight. Audience engagement ahead of expectations — strategy is landing.`;
+      return `Punching above weight. Engagement ahead of expectations — a growing signal the strategy is landing.`;
     }
     if (sig.efficiency === 'outperforming' && growing) {
-      return `Strong efficiency. Growth and engagement both running ahead of baseline.`;
+      return `Strong efficiency. Growth and engagement both running ahead of baseline — consistent pattern building.`;
     }
     // Shorts-to-longform narratives
     if (sig.shortsLongform === 'discovery-converting') {
-      return `Shorts discovery converting into deeper engagement. The short-to-long pipeline is working.`;
+      return `Shorts discovery converting into deeper engagement. The short-to-long pipeline is working — a platform-aligned pattern.`;
     }
     if (sig.shortsLongform === 'discovery-depth-needed') {
-      return `Shorts generating discovery. Longform next would create a deeper audience path.`;
+      return `Shorts generating real discovery energy. Longform next would create a deeper audience path.`;
     }
     // Multiformat stories
     if (isStrongMultiformat(sig.multiformat) && inPush) {
-      return `Active campaign, rich content ecosystem. Multiple formats sustaining attention across the rollout.`;
+      return `Active campaign with a rich content ecosystem. Multiple formats sustaining attention — a consistent pattern among the strongest rollouts.`;
     }
     if (sig.multiformat === 'full-rollout') {
-      return `Full rollout — Shorts, official video, supporting content all working as one ecosystem.`;
+      return `Full rollout in motion — Shorts, official video, supporting content all working as one ecosystem. Platform-aligned behaviour.`;
     }
     if (isStrongMultiformat(sig.multiformat)) {
-      return `Diverse format strategy building audience depth. Official video, Shorts and supporting content in play.`;
+      return `Diverse format strategy building audience depth. A growing trend: multi-format presence compounding discovery.`;
     }
     // In-campaign with push phase
     if (inPush && growing && sig.followThrough !== 'release-only') {
-      return `Active rollout, sustained output. Cadence supporting discovery through the campaign window.`;
+      return `Active rollout, sustained output. Cadence supporting discovery through the campaign window — consistent behaviour.`;
     }
     if (inPush && sig.followThrough === 'release-only') {
-      return `Campaign anchor landed. Follow-through content is the next opportunity to extend reach.`;
+      return `Campaign anchor landed. Follow-through content is the next opportunity — a platform-aligned step to extend reach.`;
     }
     // Strong conversion stories
     if ((ch.subsPer1kViews ?? 0) >= 4 && growing) {
-      return `Strongest conversion signals this week. Identity and cadence compounding with each upload.`;
+      return `Strongest conversion signals this week. Identity and cadence compounding — a consistent pattern building with each upload.`;
     }
     if ((ch.subsPer1kViews ?? 0) >= 3) {
-      return `Efficient conversion — quality over scale. Content resonating deeply.`;
+      return `Efficient audience conversion. Content resonating deeply — quality over scale.`;
     }
     // High cadence + momentum
     if (ch.uploads30d >= 6 && growing && wow > 15) {
-      return `Consistent output driving week-over-week gains. Audience depth building.`;
+      return `Consistent output driving week-over-week gains. A roster-wide signal: cadence is compounding audience depth.`;
     }
     // Shorts-led
     if (sig.shortsLongform === 'shorts-only' && growing) {
-      return `Shorts-led discovery building well. Longform next would deepen the audience relationship.`;
+      return `Shorts-led discovery building well. The platform-aligned next step: longform to deepen the audience relationship.`;
     }
     // Longform-led
     if (sig.shortsLongform === 'longform-led' && growing) {
-      return `Longform resonating well. Shorts could expand into broader discovery.`;
+      return `Longform resonating well. Shorts could expand into broader discovery — a growing trend across the market.`;
     }
     // General growing
     if (growing && wow > 10) {
-      return `Steady growth with week-over-week gains. Audience responding to campaign continuity.`;
+      return `Steady growth trajectory with week-over-week gains. Audience responding to campaign continuity.`;
     }
     if (growing) {
-      return `Growth signals building. Strategy beginning to compound.`;
+      return `Early growth signals building. Strategy beginning to compound.`;
     }
     // Fallback — always forward-looking
     if (ch.uploads30d >= 3) {
-      return `Active output this week. Foundation building for the next phase.`;
+      return `Active output this week. Building the foundation for the next momentum phase.`;
     }
     return `Ecosystem developing. Strategy and cadence shaping the next opportunity.`;
   }
@@ -586,39 +586,39 @@ export default function WeeklyPulse() {
 
   function generateOpportunity(ch: PulseChannel, sig: ChannelSignals): string {
     if (sig.followThrough === 'release-only') {
-      return 'Next move: follow-through content to extend campaign reach.';
+      return 'Opportunity: follow-through content — platform behaviour rewards sustained post-release activity.';
     }
     if (sig.shortsLongform === 'discovery-depth-needed') {
-      return 'Next move: longform to create a deeper path from Shorts discovery.';
+      return 'Opportunity: longform to create a deeper path from Shorts discovery — a growing pattern among the strongest campaigns.';
     }
     if (sig.shortsLongform === 'longform-led') {
-      return 'Next move: Shorts to expand discovery for this engaged audience.';
+      return 'Opportunity: Shorts to expand discovery — the platform rewards multi-format presence.';
     }
     if (sig.multiformat === 'thin') {
-      return 'Next move: format diversity to extend campaign life.';
+      return 'Opportunity: format diversity to extend campaign life and ecosystem depth.';
     }
     if (sig.multiformat === 'shorts-led') {
-      return 'Next move: longform and supporting formats to deepen audience connection.';
+      return 'Opportunity: longform and supporting formats — the bridge from discovery to audience depth.';
     }
     if (sig.reactivation === 'reactivating') {
-      return 'Next move: sustained cadence to build on this reactivation.';
+      return 'Opportunity: sustained cadence to build on this early momentum — consistency is the lever.';
     }
     if (sig.reactivation === 'reawakening') {
-      return 'Next move: consistent uploads to reconnect with the existing audience.';
+      return 'Opportunity: consistent uploads to reconnect with the existing catalogue audience.';
     }
     if (sig.efficiency === 'outperforming' && (ch.viewsWoW ?? 0) > 15) {
-      return 'Next move: sustain cadence — the efficiency is there.';
+      return 'Opportunity: sustain cadence — the efficiency signal is strong and compounding.';
     }
     if (ch.classification === 'WEAK_CONVERSION') {
-      return 'Next move: deeper content to turn discovery into lasting audience.';
+      return 'Opportunity: deeper content to turn discovery into lasting audience — artist-led context bridges the gap.';
     }
     if (ch.classification === 'UNDERFED') {
-      return 'Next move: increased uploads to unlock the next growth phase.';
+      return 'Opportunity: cadence building to unlock the next growth phase.';
     }
     if ((ch.viewsWoW ?? 0) > 25) {
-      return 'Next move: sustain output and format diversity while accelerating.';
+      return 'Opportunity: sustain output and format diversity while momentum is building.';
     }
-    return 'Next move: keep building the content ecosystem.';
+    return 'Opportunity: keep building the content ecosystem — consistent pattern compounds.';
   }
 
   // ── Assemble campaign stories ──
