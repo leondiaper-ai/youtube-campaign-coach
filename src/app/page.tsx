@@ -110,7 +110,7 @@ export default function HomePage() {
           />
           <ToolCard
             href="/weekly-pulse/campaign-briefing"
-            title="Campaign Briefing"
+            title="Priority Campaigns"
             desc="Weekly campaign report — priority campaigns, upcoming moments, and YouTube asks."
             highlight
           />

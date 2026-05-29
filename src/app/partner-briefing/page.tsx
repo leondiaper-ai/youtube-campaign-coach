@@ -1,7 +1,7 @@
 import PartnerBriefing from '@/components/PartnerBriefing';
 
 export const metadata = {
-  title: 'Virgin Music x YouTube — Weekly Campaign Briefing',
+  title: 'Virgin Music x YouTube — Priority Campaigns',
   description: 'Active Virgin Music campaigns, content ecosystems, and rollout strategy across YouTube.',
 };
 

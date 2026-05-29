@@ -416,7 +416,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
               fontFamily: "Georgia, 'Times New Roman', serif",
               fontStyle: 'italic',
             }}>
-              Weekly<br />Campaign<br />Briefing.
+              Priority<br />Campaigns.
             </h1>
 
             <p style={{
