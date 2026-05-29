@@ -194,26 +194,8 @@ export default function ChannelSpotlightPage() {
             {/* Spotlight cards */}
             <WeeklySpotlight channels={data.channels} linkPrefix="/watcher" />
 
-            {/* Handwritten annotation */}
-            {data.channels.length > 0 && (
-              <div
-                style={{
-                  fontFamily: 'Caveat, cursive',
-                  fontSize: 17,
-                  color: ACCENT.amber,
-                  transform: 'rotate(-0.8deg)',
-                  marginTop: 32,
-                  marginLeft: 8,
-                  lineHeight: 1.4,
-                }}
-              >
-                {data.channels.length >= 3
-                  ? `${data.channels.length} channels firing this week — the multi-format approach is paying off across the roster.`
-                  : data.channels.length >= 1
-                    ? `${data.channels[0].name} leading the way — strong execution setting the standard for the roster.`
-                    : 'Building momentum across the roster.'}
-              </div>
-            )}
+            {/* spacer before footer */}
+            <div style={{ marginTop: 32 }} />
 
             {/* Footer */}
             <footer style={{ marginTop: 56, paddingTop: 24, borderTop: `1px solid ${BONE}` }}>
