@@ -528,60 +528,189 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
       </header>
 
 
-      {/* ═══════ WHAT HAPPENS NEXT — Editorial Timeline ═══════ */}
-      {hasDateMoments && (
-        <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
-          <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+      {/* ═══════ RELEASE RADAR — Chronological timeline ═══════ */}
+      {hasDateMoments && (() => {
+        // Merge all dated moments, sort chronologically, group by date
+        const allMoments = [
+          ...grouped.thisWeek,
+          ...grouped.nextTwoWeeks,
+          ...grouped.nextMonth,
+        ].filter(m => m.date).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
 
-          <div style={{ marginBottom: 32 }}>
-            <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
-            }}>
-              What Happens Next
-            </div>
-            <p style={{
-              fontSize: 18, fontWeight: 500, color: WARM, lineHeight: 1.5,
-              maxWidth: 620, margin: 0,
-              fontFamily: "Georgia, 'Times New Roman', serif",
-              fontStyle: 'italic',
-            }}>
-              The key dates and content moments shaping the next four weeks across the roster — pulled from live campaign plans.
-            </p>
-          </div>
+        // Group by date
+        const dateGroups = new Map<string, UpcomingMoment[]>();
+        for (const m of allMoments) {
+          const key = m.date!;
+          const arr = dateGroups.get(key) ?? [];
+          arr.push(m);
+          dateGroups.set(key, arr);
+        }
+        const groups = Array.from(dateGroups.entries());
 
-          {/* 3-column layout — This Week / Next 2 Weeks / Next 30 Days */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32, alignItems: 'start' }}>
-            {[
-              { label: 'This Week', items: grouped.thisWeek },
-              { label: 'Next 7–14 Days', items: grouped.nextTwoWeeks },
-              { label: 'Next 30 Days', items: grouped.nextMonth.slice(0, 8) },
-            ].map((col, ci) => (
-              <div key={ci}>
-                <div style={{
-                  fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
-                  textTransform: 'uppercase' as const, color: INK,
-                  paddingBottom: 10, borderBottom: ci === 0 ? `2px solid ${INK}` : `2px solid ${BONE}`,
-                  marginBottom: 4,
-                }}>
-                  {col.label}
-                </div>
-                {col.items.length > 0 ? col.items.map((m, i) => (
-                  <MomentCard key={`${ci}-${i}`} m={m} />
-                )) : (
-                  <p style={{
-                    fontSize: 12, color: SMOKE, fontStyle: 'italic',
-                    padding: '16px 0', margin: 0,
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    No confirmed dates this window.
-                  </p>
-                )}
+        // Find the "big week" — date with most convergence (3+ campaigns)
+        const bigDay = groups.find(([, ms]) => ms.length >= 3);
+        // Also find dates with 2 campaigns for secondary emphasis
+        const hotDates = new Set(groups.filter(([, ms]) => ms.length >= 2).map(([d]) => d));
+
+        // Priority tier for visual weight
+        const isTier1 = (m: UpcomingMoment) => m.priority >= 80;
+        const nowMs = Date.now();
+
+        return (
+          <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
+            <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
+                textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
+              }}>
+                Release Radar
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+              <p style={{
+                fontSize: 18, fontWeight: 500, color: WARM, lineHeight: 1.5,
+                maxWidth: 620, margin: 0,
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                fontStyle: 'italic',
+              }}>
+                What&apos;s coming next — the key release moments and campaign activity across the roster.
+              </p>
+            </div>
+
+            {/* ── BIG WEEK callout (when 3+ campaigns on same date) ── */}
+            {bigDay && (
+              <div style={{
+                background: INK, borderRadius: 10, padding: '20px 24px',
+                marginBottom: 24, color: WHITE,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
+                  <span style={{
+                    fontSize: 24, fontWeight: 900, lineHeight: 1,
+                    fontFamily: "Georgia, 'Times New Roman', serif",
+                  }}>
+                    {new Date(bigDay[0] + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+                  </span>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.4)' }}>
+                    {bigDay[1].length} campaigns converging
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {bigDay[1].map((m, i) => (
+                    <div key={i} style={{
+                      background: 'rgba(255,255,255,0.08)', borderRadius: 6,
+                      padding: '8px 14px', flex: '1 1 200px',
+                    }}>
+                      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.5)', marginBottom: 3 }}>
+                        {m.artist}
+                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: WHITE, lineHeight: 1.3 }}>
+                        {m.moment}
+                      </div>
+                      <span style={{
+                        display: 'inline-block', marginTop: 4,
+                        padding: '2px 7px', borderRadius: 8,
+                        fontSize: 8, fontWeight: 700,
+                        background: isTier1(m) ? 'rgba(45,106,79,0.3)' : 'rgba(255,255,255,0.08)',
+                        color: isTier1(m) ? '#7DDFB0' : 'rgba(255,255,255,0.4)',
+                      }}>
+                        {m.eventType}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Timeline ── */}
+            <div style={{ position: 'relative', paddingLeft: 24 }}>
+              {/* Vertical line */}
+              <div style={{
+                position: 'absolute', left: 5, top: 4, bottom: 4, width: 2,
+                background: `linear-gradient(${BONE}, ${BONE} 60%, transparent)`,
+              }} />
+
+              {groups.map(([dateStr, moments], gi) => {
+                const dateObj = new Date(dateStr + 'T00:00:00');
+                const diffDays = Math.round((dateObj.getTime() - nowMs) / 86400000);
+                const isPast = diffDays < 0;
+                const isHot = hotDates.has(dateStr);
+                const isBigDay = bigDay && bigDay[0] === dateStr;
+                const fmtDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+
+                // Skip if it's the big day (already shown above)
+                if (isBigDay) return null;
+
+                return (
+                  <div key={dateStr} style={{
+                    display: 'flex', gap: 16, marginBottom: 16,
+                    opacity: isPast ? 0.45 : 1,
+                  }}>
+                    {/* Date dot */}
+                    <div style={{
+                      position: 'absolute', left: 0,
+                      width: 12, height: 12, borderRadius: '50%',
+                      background: isHot ? ACCENT.green : isPast ? GHOST : BONE,
+                      border: `2px solid ${isHot ? ACCENT.green : BONE}`,
+                      marginTop: 4,
+                    }} />
+
+                    {/* Date label */}
+                    <div style={{ width: 70, flexShrink: 0 }}>
+                      <div style={{
+                        fontSize: 12, fontWeight: 800, color: isHot ? ACCENT.green : INK,
+                        letterSpacing: '0.02em',
+                      }}>
+                        {fmtDate}
+                      </div>
+                      {diffDays >= 0 && diffDays <= 7 && (
+                        <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
+                          {diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : `In ${diffDays}d`}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Moments for this date */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {moments.map((m, mi) => (
+                        <div key={mi} style={{
+                          display: 'flex', alignItems: 'baseline', gap: 8,
+                          padding: isTier1(m) ? '6px 10px' : '3px 0',
+                          background: isTier1(m) ? 'rgba(45,106,79,0.04)' : 'transparent',
+                          borderRadius: isTier1(m) ? 6 : 0,
+                          borderLeft: isTier1(m) ? `3px solid ${ACCENT.green}` : 'none',
+                        }}>
+                          <span style={{
+                            fontSize: 10, fontWeight: 800, color: INK,
+                            letterSpacing: '0.02em', textTransform: 'uppercase' as const,
+                            whiteSpace: 'nowrap',
+                          }}>
+                            {m.artist}
+                          </span>
+                          <span style={{
+                            fontSize: 12, fontWeight: isTier1(m) ? 600 : 400,
+                            color: isTier1(m) ? INK : WARM,
+                            lineHeight: 1.3,
+                          }}>
+                            {m.moment}
+                          </span>
+                          <span style={{
+                            display: 'inline-block', padding: '1px 6px', borderRadius: 8,
+                            fontSize: 7, fontWeight: 700, flexShrink: 0,
+                            background: isTier1(m) ? 'rgba(45,106,79,0.08)' : `${BONE}`,
+                            color: isTier1(m) ? ACCENT.green : SMOKE,
+                          }}>
+                            {m.eventType}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })()}
 
 
       {/* ═══════ EDITORIAL PRIORITY CAMPAIGNS ═══════ */}
