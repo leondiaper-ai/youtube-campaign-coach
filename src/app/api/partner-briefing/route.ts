@@ -110,7 +110,9 @@ type FocusCampaign = {
   nextMoments: string;
   currentMoment: string;       // concise: what's happening right now
   nextMoment: string;          // concise: what's coming next
+  upcomingMoment: string;      // concise: what's coming after that
   supportOpportunity: string;  // concise: where YouTube can help
+  hasCoachPlan: boolean;       // true if moments come from coach plan
   formatBreakdown: string[];
   recentVideos: BriefingVideo[];
 };
@@ -477,15 +479,17 @@ export async function GET(request: Request) {
         : ch.thumbnail ?? '';
       const artist = artistMap.get(ch.slug);
 
-      // Derive current / next / support from coach plan events
+      // Derive current / next / upcoming / support from coach plan events
       const coachPlan = coachPlans.get(ch.slug);
       let nextMoments = buildNextMoments(ch, artist);
       let currentMoment = '';
       let nextMoment = '';
+      let upcomingMoment = '';
       let supportOpportunity = '';
+      const hasCoachPlan = !!(coachPlan?.plan?.events && coachPlan.plan.events.length > 0);
 
-      if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
-        const sorted = coachPlan.plan.events
+      if (hasCoachPlan) {
+        const sorted = coachPlan!.plan.events
           .map((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
@@ -493,33 +497,31 @@ export async function GET(request: Request) {
           })
           .sort((a, b) => a.diff - b.diff);
 
-        // Current: event happening within -7 to +3 days
-        const current = sorted.find(e => e.diff >= -7 && e.diff <= 3);
-        // Next: first event more than 3 days out
-        const next = sorted.find(e => e.diff > 3);
+        // Find 3 sequential events from the timeline:
+        // Current: most recent event within -7 days, OR the nearest upcoming event
+        // Next: the event after current
+        // Upcoming: the event after next
+        const recentOrUpcoming = sorted.filter(e => e.diff >= -7);
+        const evt0 = recentOrUpcoming[0] ?? null;
+        const evt1 = recentOrUpcoming[1] ?? null;
+        const evt2 = recentOrUpcoming[2] ?? null;
 
-        if (current) {
-          currentMoment = current.title;
-          const fmtCurr = new Date(current.dateISO + 'T00:00:00')
+        if (evt0) {
+          currentMoment = evt0.title;
+          const fmtDate = new Date(evt0.dateISO + 'T00:00:00')
             .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          nextMoments = current.title + ` (${fmtCurr})`;
-          if (next) {
-            const fmtNext = new Date(next.dateISO + 'T00:00:00')
+          nextMoments = evt0.title + ` (${fmtDate})`;
+          if (evt1) {
+            const fmt1 = new Date(evt1.dateISO + 'T00:00:00')
               .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-            nextMoments += ` → ${next.title} (${fmtNext})`;
+            nextMoments += ` → ${evt1.title} (${fmt1})`;
           }
-        } else if (next) {
-          const fmtNext = new Date(next.dateISO + 'T00:00:00')
-            .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          nextMoments = next.title + ` (${fmtNext})`;
         }
+        if (evt1) nextMoment = evt1.title;
+        if (evt2) upcomingMoment = evt2.title;
 
-        if (next) {
-          nextMoment = next.title;
-        }
-
-        // Support opportunity based on event types
-        const relevantEvt = current ?? next;
+        // Support opportunity based on the most relevant event type
+        const relevantEvt = evt0 ?? evt1;
         if (relevantEvt) {
           const k = relevantEvt.kind;
           if (k === 'albumRelease' || k === 'albumAnnounce') {
@@ -538,26 +540,15 @@ export async function GET(request: Request) {
         }
       }
 
-      // Fallbacks from channel state
+      // Fallbacks — "Timeline being developed" when no coach plan exists
       if (!currentMoment) {
-        if (ch.phase === 'RELEASE' || ch.phase === 'PUSH') {
-          currentMoment = ch.campaign ? `${ch.campaign} — active rollout` : 'Release window';
-        } else if (ch.phase === 'PRE') {
-          currentMoment = 'Pre-release build';
-        } else if (vids.length >= 2) {
-          currentMoment = 'Content rollout active';
-        } else {
-          currentMoment = 'Campaign building';
-        }
+        currentMoment = hasCoachPlan ? 'Campaign planning active' : 'Timeline being developed';
       }
       if (!nextMoment) {
-        if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
-          nextMoment = 'Follow-through content';
-        } else if (ch.phase === 'PRE') {
-          nextMoment = 'Release window approaching';
-        } else {
-          nextMoment = 'Content development';
-        }
+        nextMoment = hasCoachPlan ? 'Campaign planning active' : 'Timeline being developed';
+      }
+      if (!upcomingMoment) {
+        upcomingMoment = hasCoachPlan ? 'To be confirmed' : 'Timeline being developed';
       }
       if (!supportOpportunity) {
         if (ch.shorts30d >= 1 && ch.longform30d >= 1) {
@@ -579,7 +570,9 @@ export async function GET(request: Request) {
         nextMoments,
         currentMoment,
         nextMoment,
+        upcomingMoment,
         supportOpportunity,
+        hasCoachPlan,
         formatBreakdown: buildFormatBreakdown(ch, vids),
         recentVideos: vids.slice(0, 3),
       };

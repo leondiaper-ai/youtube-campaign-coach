@@ -47,7 +47,9 @@ type FocusCampaign = {
   nextMoments: string;
   currentMoment: string;
   nextMoment: string;
+  upcomingMoment: string;
   supportOpportunity: string;
+  hasCoachPlan: boolean;
   formatBreakdown: string[];
   recentVideos: BriefingVideo[];
 };
@@ -631,9 +633,9 @@ export default function PartnerBriefing() {
                     {fc.narrative}
                   </p>
 
-                  {/* Current / Next / Support — editorial triplet */}
+                  {/* Current / Next / Upcoming / Support — editorial quartet */}
                   <div style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16,
+                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14,
                     paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)',
                   }}>
                     <div>
@@ -672,7 +674,22 @@ export default function PartnerBriefing() {
                         textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
                         marginBottom: 5,
                       }}>
-                        Support Opportunity
+                        Upcoming
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.upcomingMoment}
+                      </p>
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Support
                       </div>
                       <p style={{
                         fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
@@ -772,9 +789,9 @@ export default function PartnerBriefing() {
                       {fc.narrative}
                     </p>
 
-                    {/* Current / Next / Support — editorial triplet */}
+                    {/* Current / Next / Upcoming / Support — editorial quartet */}
                     <div style={{
-                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10,
+                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8,
                       paddingTop: 12, borderTop: `1px solid ${BONE}`,
                     }}>
                       <div>
@@ -805,6 +822,21 @@ export default function PartnerBriefing() {
                           fontFamily: 'Inter, system-ui, sans-serif',
                         }}>
                           {fc.nextMoment}
+                        </p>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Upcoming
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.upcomingMoment}
                         </p>
                       </div>
                       <div>
