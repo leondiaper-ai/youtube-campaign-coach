@@ -806,7 +806,7 @@ export async function GET(request: Request) {
           .filter((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
-            return diff >= -7 && diff <= 90; // last week + next 3 months
+            return diff >= -7 && diff <= 35; // last week + next ~5 weeks
           })
           .map((e: ParsedEvent) => {
             const title = cleanTitle(e.title);
