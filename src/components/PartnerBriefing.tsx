@@ -234,7 +234,10 @@ export default function PartnerBriefing() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/partner-briefing')
+    // Forward ?refresh=1 from page URL to API call so cache busting works
+    const params = new URLSearchParams(window.location.search);
+    const refreshParam = params.get('refresh') === '1' ? '?refresh=1' : '';
+    fetch(`/api/partner-briefing${refreshParam}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
