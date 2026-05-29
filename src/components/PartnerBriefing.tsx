@@ -189,58 +189,43 @@ function PlayOverlay({ size = 32 }: { size?: number }) {
 // ── Editorial Moment Card ──────────────────────────────────────────────────
 
 function MomentCard({ m }: { m: UpcomingMoment }) {
+  // Extract short date from timing (e.g. "9 Jun (in 11d)" → "9 Jun")
+  const shortDate = m.timing ? m.timing.replace(/\s*\(.*\)/, '') : '';
+
   return (
     <div style={{
-      padding: '14px 0',
+      padding: '10px 0',
       borderBottom: `1px solid ${BONE}`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{
-            fontSize: 11, fontWeight: 800, color: INK,
-            letterSpacing: '0.02em', textTransform: 'uppercase' as const,
-          }}>
-            {m.artist}
-          </span>
-          {m.fromCoachPlan && (
-            <span style={{
-              fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
-              color: ACCENT.green, opacity: 0.7,
-            }}>
-              From planner
-            </span>
-          )}
-        </div>
-        {m.timing && (
-          <span style={{
-            fontSize: 11, fontWeight: 700, color: ACCENT.green,
-            whiteSpace: 'nowrap',
-          }}>
-            {m.timing}
-          </span>
-        )}
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
+        <span style={{
+          fontSize: 10, fontWeight: 800, color: INK,
+          letterSpacing: '0.02em', textTransform: 'uppercase' as const,
+        }}>
+          {m.artist}
+        </span>
+        <span style={{
+          fontSize: 11, fontWeight: 800, color: ACCENT.green,
+          whiteSpace: 'nowrap',
+        }}>
+          {shortDate}
+        </span>
       </div>
       <p style={{
-        fontSize: 13, fontWeight: 500, color: WARM, lineHeight: 1.4,
-        margin: '0 0 5px',
+        fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.35,
+        margin: '3px 0 0',
         fontFamily: 'Inter, system-ui, sans-serif',
       }}>
         {m.moment}
       </p>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <span style={{
-          display: 'inline-block', padding: '2px 8px', borderRadius: 12,
-          fontSize: 9, fontWeight: 700, color: ACCENT.green,
-          background: 'rgba(45,106,79,0.06)',
-          letterSpacing: '0.04em',
-        }}>
-          {m.eventType}
-        </span>
-        <span style={{ fontSize: 9, color: SMOKE }}>
-          {m.supportSurface}
-        </span>
-      </div>
+      <span style={{
+        display: 'inline-block', marginTop: 4,
+        padding: '2px 7px', borderRadius: 10,
+        fontSize: 8, fontWeight: 700, color: ACCENT.green,
+        background: 'rgba(45,106,79,0.06)',
+      }}>
+        {m.eventType}
+      </span>
     </div>
   );
 }
@@ -424,27 +409,8 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
               margin: '28px 0 0', maxWidth: 460,
               fontFamily: 'Inter, system-ui, sans-serif',
             }}>
-              A snapshot of active Virgin Music campaigns on YouTube — what&apos;s happening now, what&apos;s coming next, and where the key support moments are.
+              What matters on YouTube over the next 30 days — the key release moments, campaign activity, and where support is needed.
             </p>
-
-            <div style={{
-              display: 'flex', gap: 24, marginTop: 28,
-              fontSize: 11, fontWeight: 600, color: SMOKE,
-            }}>
-              <div>
-                <span style={{ fontSize: 28, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {data.activeCampaignCount}
-                </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Active campaigns</span>
-              </div>
-              <div style={{ width: 1, background: BONE }} />
-              <div>
-                <span style={{ fontSize: 28, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {grouped.thisWeek.length + grouped.nextTwoWeeks.length}
-                </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Key moments ahead</span>
-              </div>
-            </div>
           </div>
 
           {/* Right — Shorts grid */}
@@ -552,222 +518,149 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
       )}
 
 
-      {/* ═══════ FOCUS CAMPAIGNS ═══════ */}
-      <section className="pb-fade" style={{
-        maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px',
-      }}>
-        <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+      {/* ═══════ ACTIVE CAMPAIGNS — Tiered by importance ═══════ */}
+      {(() => {
+        // Split: Tier 1 = campaigns with real dated moments (from coach plans)
+        // Tier 2 = everything else (compact list)
+        const tier1 = data.focusCampaigns.filter(fc => fc.hasCoachPlan && fc.currentMomentDate);
+        const tier2 = data.focusCampaigns.filter(fc => !fc.hasCoachPlan || !fc.currentMomentDate);
 
-        <div style={{ marginBottom: 32 }}>
-          <div style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-            textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
-          }}>
-            Active Campaigns
-          </div>
-          <p style={{
-            fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
-            maxWidth: 560, margin: 0,
-            fontFamily: 'Inter, system-ui, sans-serif',
-          }}>
-            Where Virgin Music is focusing content strategy and audience development on YouTube this week.
-          </p>
-        </div>
+        return (
+          <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+            <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
-        {/* Featured campaign — full width hero */}
-        {data.focusCampaigns.length > 0 && (() => {
-          const fc = data.focusCampaigns[0];
-          const chUrl = channelUrl(fc.channel.channelHandle);
-          return (
-            <div className="pb-campaign-card" style={{
-              borderRadius: 10, overflow: 'hidden', background: INK,
-              marginBottom: 24, position: 'relative',
-            }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                {/* Left — hero image */}
-                <div style={{ position: 'relative', overflow: 'hidden' }}>
-                  <img
-                    src={fc.heroImage}
-                    alt=""
-                    loading="lazy"
-                    className="pb-hero-img"
-                    style={{
-                      width: '100%', height: '100%', minHeight: 320, objectFit: 'cover', display: 'block',
-                      filter: 'brightness(0.85)',
-                    }}
-                  />
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'linear-gradient(135deg, transparent 30%, rgba(14,14,14,0.6) 100%)',
-                  }} />
-                  <div style={{ position: 'absolute', top: 20, left: 20 }}>
-                    <span style={{
-                      display: 'inline-block', padding: '4px 12px', borderRadius: 20,
-                      fontSize: 8, fontWeight: 800, letterSpacing: '0.12em',
-                      textTransform: 'uppercase' as const,
-                      background: 'rgba(255,255,255,0.15)', color: WHITE,
-                      backdropFilter: 'blur(8px)',
-                    }}>
-                      {fc.campaignPhase}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right — content */}
-                <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  {/* Artist name */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                    {fc.channel.thumbnail && (
-                      <img src={fc.channel.thumbnail} alt="" style={{
-                        width: 32, height: 32, borderRadius: '50%', objectFit: 'cover',
-                        border: '2px solid rgba(255,255,255,0.2)',
-                      }} />
-                    )}
-                    {chUrl ? (
-                      <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
-                        <span style={{
-                          fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.8)',
-                          letterSpacing: '0.04em', textTransform: 'uppercase' as const,
-                        }}>
-                          {fc.channel.name}
-                        </span>
-                      </a>
-                    ) : (
-                      <span style={{
-                        fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.8)',
-                        letterSpacing: '0.04em', textTransform: 'uppercase' as const,
-                      }}>
-                        {fc.channel.name}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Narrative */}
-                  <p style={{
-                    fontSize: 15, fontWeight: 500, color: WHITE, lineHeight: 1.5,
-                    margin: '0 0 20px',
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {fc.narrative}
-                  </p>
-
-                  {/* Current / Next / Upcoming / Support — editorial quartet */}
-                  <div style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14,
-                    paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)',
-                  }}>
-                    <MomentCell label="Current" title={fc.currentMoment} date={fc.currentMomentDate} color="rgba(255,255,255,0.7)" dateColor="rgba(255,255,255,0.95)" />
-                    <MomentCell label="Next" title={fc.nextMoment} date={fc.nextMomentDate} color="rgba(255,255,255,0.7)" dateColor="rgba(255,255,255,0.95)" />
-                    <MomentCell label="Upcoming" title={fc.upcomingMoment} date={fc.upcomingMomentDate} color="rgba(255,255,255,0.7)" dateColor="rgba(255,255,255,0.95)" />
-                    <MomentCell label="Support" title={fc.supportOpportunity} color="rgba(255,255,255,0.7)" />
-                  </div>
-
-                  {/* Stats row */}
-                  <div style={{ display: 'flex', gap: 20, fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 16 }}>
-                    {fc.channel.views7d != null && (
-                      <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fmtNum(fc.channel.views7d)}</strong> views/wk</span>
-                    )}
-                    <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fc.channel.uploads30d}</strong> uploads/30d</span>
-                    {fc.channel.subs != null && (
-                      <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fmtNum(fc.channel.subs)}</strong> subs</span>
-                    )}
-                  </div>
-                </div>
+            <div style={{ marginBottom: 28 }}>
+              <div style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+                textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+              }}>
+                Active Campaigns
               </div>
+              <p style={{
+                fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
+                maxWidth: 560, margin: 0,
+                fontFamily: 'Inter, system-ui, sans-serif',
+              }}>
+                Campaigns with confirmed YouTube content moments and active rollout plans.
+              </p>
             </div>
-          );
-        })()}
 
-        {/* Remaining campaigns — 2-column cards with editorial triplet */}
-        {data.focusCampaigns.length > 1 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
-            {data.focusCampaigns.slice(1).map(fc => {
-              const chUrl = channelUrl(fc.channel.channelHandle);
-              return (
-                <div key={fc.channel.slug} className="pb-campaign-card" style={{
-                  borderRadius: 8, overflow: 'hidden', background: WHITE,
-                  border: `1px solid ${BONE}`,
+            {/* ── TIER 1: Featured campaigns with dated moments ──── */}
+            {tier1.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, marginBottom: 24 }}>
+                {tier1.map(fc => {
+                  const chUrl = channelUrl(fc.channel.channelHandle);
+                  return (
+                    <div key={fc.channel.slug} className="pb-campaign-card" style={{
+                      borderRadius: 8, overflow: 'hidden', background: WHITE,
+                      border: `1px solid ${BONE}`,
+                    }}>
+                      {/* Hero image */}
+                      <div style={{ position: 'relative', overflow: 'hidden', height: 130 }}>
+                        <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.55) 100%)' }} />
+                        <div style={{ position: 'absolute', top: 12, left: 12 }}>
+                          <span style={{
+                            display: 'inline-block', padding: '3px 10px', borderRadius: 20,
+                            fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                            textTransform: 'uppercase' as const,
+                            background: 'rgba(0,0,0,0.5)', color: WHITE, backdropFilter: 'blur(6px)',
+                          }}>
+                            {fc.campaignPhase}
+                          </span>
+                        </div>
+                        <div style={{ position: 'absolute', bottom: 12, left: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {fc.channel.thumbnail && (
+                            <img src={fc.channel.thumbnail} alt="" style={{
+                              width: 22, height: 22, borderRadius: '50%', objectFit: 'cover',
+                              border: '2px solid rgba(255,255,255,0.3)',
+                            }} />
+                          )}
+                          {chUrl ? (
+                            <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
+                              <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                                {fc.channel.name}
+                              </span>
+                            </a>
+                          ) : (
+                            <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+                              {fc.channel.name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Content — moment pipeline only, no narrative repetition */}
+                      <div style={{ padding: '12px 16px 14px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                          <MomentCell label="Current" title={fc.currentMoment} date={fc.currentMomentDate} color={WARM} />
+                          <MomentCell label="Next" title={fc.nextMoment} date={fc.nextMomentDate} color={WARM} />
+                          <MomentCell label="Upcoming" title={fc.upcomingMoment} date={fc.upcomingMomentDate} color={WARM} />
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: 9, color: ACCENT.green, fontWeight: 600 }}>
+                          {fc.supportOpportunity}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── TIER 2: Other campaigns — compact list ──────── */}
+            {tier2.length > 0 && (
+              <div style={{
+                background: WHITE, borderRadius: 8, border: `1px solid ${BONE}`,
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  padding: '10px 16px', borderBottom: `1px solid ${BONE}`,
+                  fontSize: 9, fontWeight: 800, letterSpacing: '0.12em',
+                  textTransform: 'uppercase' as const, color: GHOST,
                 }}>
-                  {/* Hero image */}
-                  <div style={{ position: 'relative', overflow: 'hidden', height: 140 }}>
-                    <img
-                      src={fc.heroImage}
-                      alt=""
-                      loading="lazy"
-                      className="pb-hero-img"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.5) 100%)',
-                    }} />
-                    <div style={{ position: 'absolute', top: 12, left: 12 }}>
+                  Other Active Campaigns
+                </div>
+                {tier2.map((fc, i) => {
+                  const chUrl = channelUrl(fc.channel.channelHandle);
+                  return (
+                    <div key={fc.channel.slug} style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '10px 16px',
+                      borderBottom: i < tier2.length - 1 ? `1px solid ${BONE}` : 'none',
+                    }}>
+                      {fc.channel.thumbnail && (
+                        <img src={fc.channel.thumbnail} alt="" style={{
+                          width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+                        }} />
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {chUrl ? (
+                          <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
+                            <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{fc.channel.name}</span>
+                          </a>
+                        ) : (
+                          <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{fc.channel.name}</span>
+                        )}
+                      </div>
                       <span style={{
-                        display: 'inline-block', padding: '3px 10px', borderRadius: 20,
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-                        textTransform: 'uppercase' as const,
-                        background: 'rgba(0,0,0,0.5)', color: WHITE,
-                        backdropFilter: 'blur(6px)',
+                        display: 'inline-block', padding: '2px 8px', borderRadius: 10,
+                        fontSize: 8, fontWeight: 700, color: SMOKE,
+                        background: BONE, whiteSpace: 'nowrap',
                       }}>
                         {fc.campaignPhase}
                       </span>
+                      <span style={{ fontSize: 10, color: SMOKE, whiteSpace: 'nowrap' }}>
+                        {fc.ecosystemSignal}
+                      </span>
                     </div>
-                    <div style={{ position: 'absolute', bottom: 12, left: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {fc.channel.thumbnail && (
-                        <img src={fc.channel.thumbnail} alt="" style={{
-                          width: 22, height: 22, borderRadius: '50%', objectFit: 'cover',
-                          border: '2px solid rgba(255,255,255,0.3)',
-                        }} />
-                      )}
-                      {chUrl ? (
-                        <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
-                          <span style={{
-                            fontSize: 11, fontWeight: 800, color: WHITE,
-                            letterSpacing: '0.03em', textTransform: 'uppercase' as const,
-                            textShadow: '0 1px 4px rgba(0,0,0,0.4)',
-                          }}>
-                            {fc.channel.name}
-                          </span>
-                        </a>
-                      ) : (
-                        <span style={{
-                          fontSize: 11, fontWeight: 800, color: WHITE,
-                          letterSpacing: '0.03em', textTransform: 'uppercase' as const,
-                          textShadow: '0 1px 4px rgba(0,0,0,0.4)',
-                        }}>
-                          {fc.channel.name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Content area */}
-                  <div style={{ padding: '14px 18px 18px' }}>
-                    <p style={{
-                      fontSize: 12, fontWeight: 500, color: INK, lineHeight: 1.45,
-                      margin: '0 0 14px',
-                      fontFamily: 'Inter, system-ui, sans-serif',
-                    }}>
-                      {fc.narrative}
-                    </p>
-
-                    {/* Current / Next / Upcoming / Support — editorial quartet */}
-                    <div style={{
-                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8,
-                      paddingTop: 12, borderTop: `1px solid ${BONE}`,
-                    }}>
-                      <MomentCell label="Current" title={fc.currentMoment} date={fc.currentMomentDate} color={WARM} />
-                      <MomentCell label="Next" title={fc.nextMoment} date={fc.nextMomentDate} color={WARM} />
-                      <MomentCell label="Upcoming" title={fc.upcomingMoment} date={fc.upcomingMomentDate} color={WARM} />
-                      <MomentCell label="Support" title={fc.supportOpportunity} color={ACCENT.green} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })()}
 
 
       {/* ═══════ WHAT WE'RE SEEING ON PLATFORM + STANDOUT MOMENTS ═══════ */}
