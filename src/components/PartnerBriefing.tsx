@@ -802,21 +802,48 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             </div>
                           </div>
 
-                          {/* ── Current activity ── */}
-                          <div style={{ marginBottom: 14 }}>
-                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Current</div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
-                            <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
-                          </div>
-
-                          {/* ── Scale (if standout video is different from current) ── */}
-                          {fc.standoutVideo && fc.standoutVideo.viewCount >= 50000 && fc.standoutVideo.id !== fc.recentVideos[0]?.id && (
-                            <div style={{ marginBottom: 14 }}>
-                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Scale</div>
-                              <div style={{ fontSize: 12, fontWeight: 600, color: INK }}>{fc.standoutVideo.title.length > 55 ? fc.standoutVideo.title.slice(0, 52) + '...' : fc.standoutVideo.title}</div>
-                              <div style={{ fontSize: 10, color: SMOKE, marginTop: 1 }}>{fmtNum(fc.standoutVideo.viewCount)} views</div>
-                            </div>
-                          )}
+                          {/* ── Why This Is A Top Project — evidence only ── */}
+                          {(() => {
+                            const bullets: string[] = [];
+                            // Scale signal
+                            if (fc.standoutVideo && fc.standoutVideo.viewCount >= 10000) {
+                              const t = fc.standoutVideo.title.length > 45 ? fc.standoutVideo.title.slice(0, 42) + '...' : fc.standoutVideo.title;
+                              bullets.push(`${t} has reached ${fmtNum(fc.standoutVideo.viewCount)} views`);
+                            }
+                            // Current signal
+                            if (fc.recentVideos[0] && fc.recentVideos[0].daysAgo <= 14 && fc.recentVideos[0].id !== fc.standoutVideo?.id) {
+                              bullets.push(`${fc.nowLabel.length > 40 ? fc.nowLabel.slice(0, 37) + '...' : fc.nowLabel} added ${fmtNum(fc.recentVideos[0].viewCount)} views in ${fc.recentVideos[0].daysAgo} days`);
+                            } else if (fc.channel.uploads30d >= 6) {
+                              bullets.push(`${fc.channel.uploads30d} uploads in the last 30 days`);
+                            }
+                            // Upcoming signal
+                            if (fc.nextDate && fc.nextLabel) {
+                              bullets.push(`${fc.nextLabel.length > 35 ? fc.nextLabel.slice(0, 32) + '...' : fc.nextLabel} lands ${fc.nextDate}`);
+                            }
+                            // Ecosystem signal
+                            const fmts = fc.contentFormats ?? [];
+                            if (fmts.length >= 3) {
+                              bullets.push(`${fmts.slice(0, 4).join(' + ')} active`);
+                            } else if (fmts.length >= 1) {
+                              bullets.push(`${fmts.join(' + ')} active across rollout`);
+                            }
+                            if (bullets.length === 0) return null;
+                            return (
+                              <div style={{ marginBottom: 14 }}>
+                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
+                                  Why This Is A Top Project
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                  {bullets.slice(0, 4).map((b, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'start', gap: 6, fontSize: 11, lineHeight: 1.35 }}>
+                                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: ACCENT.green, marginTop: 5, flexShrink: 0 }} />
+                                      <span style={{ color: WARM }}>{b}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
 
                           {/* ── Recent uploads (thumbnail grid, Spotlight-style) ── */}
                           {topVids.length > 0 && (
