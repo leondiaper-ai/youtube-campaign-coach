@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 
-// ── Design System (shared with Weekly Pulse) ────────────────────────────────
+// ── Design System ───────────────────────────────────────────────────────────
 
 const INK    = '#0E0E0E';
 const PAPER  = '#FAF7F2';
@@ -11,14 +11,13 @@ const GHOST  = '#C8C2B8';
 const BONE   = '#E8E3DA';
 const WHITE  = '#FFFFFF';
 const WARM   = '#4A4640';
-const YT_RED = '#FF0000';
 
 const ACCENT = {
   green:  '#2D6A4F',
   amber:  '#9A6324',
 };
 
-// ── Types ────────────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
 
 type BriefingVideo = {
   id: string; title: string; channelName: string; artistSlug: string;
@@ -46,6 +45,9 @@ type FocusCampaign = {
   contentStrategy: string;
   ecosystemSignal: string;
   nextMoments: string;
+  currentMoment: string;
+  nextMoment: string;
+  supportOpportunity: string;
   formatBreakdown: string[];
   recentVideos: BriefingVideo[];
 };
@@ -78,7 +80,7 @@ type BriefingData = {
   ecosystemHighlights: EcosystemHighlight[];
 };
 
-// ── Utilities ────────────────────────────────────────────────────────────────
+// ── Utilities ───────────────────────────────────────────────────────────────
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
@@ -96,7 +98,40 @@ function channelUrl(handle: string | null): string | null {
   return `https://www.youtube.com/${h}`;
 }
 
-// ── Logo Components ─────────────────────────────────────────────────────────
+/** Group upcoming moments into time buckets for editorial display */
+function groupMomentsByWindow(moments: UpcomingMoment[]): {
+  thisWeek: UpcomingMoment[];
+  nextTwoWeeks: UpcomingMoment[];
+  nextMonth: UpcomingMoment[];
+  ongoing: UpcomingMoment[];
+} {
+  const now = Date.now();
+  const thisWeek: UpcomingMoment[] = [];
+  const nextTwoWeeks: UpcomingMoment[] = [];
+  const nextMonth: UpcomingMoment[] = [];
+  const ongoing: UpcomingMoment[] = [];
+
+  for (const m of moments) {
+    if (!m.date) {
+      ongoing.push(m);
+      continue;
+    }
+    const d = new Date(m.date + 'T00:00:00');
+    const diffDays = Math.round((d.getTime() - now) / 86400000);
+
+    if (diffDays <= 7) {
+      thisWeek.push(m);
+    } else if (diffDays <= 14) {
+      nextTwoWeeks.push(m);
+    } else {
+      nextMonth.push(m);
+    }
+  }
+
+  return { thisWeek, nextTwoWeeks, nextMonth, ongoing };
+}
+
+// ── Logo Components ────────────────────────────────────────────────────────
 
 function VirginMusicLogo({ height = 36 }: { height?: number }) {
   return (
@@ -144,7 +179,54 @@ function PlayOverlay({ size = 32 }: { size?: number }) {
   );
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
+// ── Editorial Moment Card ──────────────────────────────────────────────────
+
+function MomentCard({ m }: { m: UpcomingMoment }) {
+  return (
+    <div style={{
+      padding: '16px 0',
+      borderBottom: `1px solid ${BONE}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+        <span style={{
+          fontSize: 11, fontWeight: 800, color: INK,
+          letterSpacing: '0.02em', textTransform: 'uppercase' as const,
+        }}>
+          {m.artist}
+        </span>
+        {m.fromCoachPlan && (
+          <span style={{
+            fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
+            textTransform: 'uppercase' as const,
+            color: ACCENT.green, opacity: 0.7,
+          }}>
+            From planner
+          </span>
+        )}
+      </div>
+      <p style={{
+        fontSize: 14, fontWeight: 500, color: WARM, lineHeight: 1.45,
+        margin: '0 0 6px',
+        fontFamily: 'Inter, system-ui, sans-serif',
+      }}>
+        {m.moment}
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{
+          fontSize: 10, fontWeight: 600, color: ACCENT.green,
+          letterSpacing: '0.04em',
+        }}>
+          {m.eventType}
+        </span>
+        <span style={{ fontSize: 10, color: SMOKE }}>
+          {m.supportSurface}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ── Component ──────────────────────────────────────────────────────────────
 
 export default function PartnerBriefing() {
   const [data, setData] = useState<BriefingData | null>(null);
@@ -174,6 +256,9 @@ export default function PartnerBriefing() {
       </div>
     </main>
   );
+
+  const grouped = groupMomentsByWindow(data.upcomingMoments);
+  const hasDateMoments = grouped.thisWeek.length > 0 || grouped.nextTwoWeeks.length > 0 || grouped.nextMonth.length > 0;
 
   return (
     <div className="partner-briefing" style={{ background: PAPER, minHeight: '100vh', color: INK, overflowX: 'hidden', position: 'relative' }}>
@@ -208,12 +293,6 @@ export default function PartnerBriefing() {
         }
         .pb-hero-img {
           transition: transform 0.4s ease;
-        }
-        .pb-moment-row {
-          transition: background 0.15s ease;
-        }
-        .pb-moment-row:hover {
-          background: rgba(14,14,14,0.025);
         }
         .shorts-cell {
           transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -282,7 +361,7 @@ export default function PartnerBriefing() {
               margin: '28px 0 0', maxWidth: 460,
               fontFamily: 'Inter, system-ui, sans-serif',
             }}>
-              A snapshot of active Virgin Music campaigns on YouTube — content ecosystems, rollout strategy, platform behaviour, and the moments shaping the week ahead.
+              A snapshot of active Virgin Music campaigns on YouTube — what&apos;s happening now, what&apos;s coming next, and where the key support moments are.
             </p>
 
             <div style={{
@@ -298,16 +377,9 @@ export default function PartnerBriefing() {
               <div style={{ width: 1, background: BONE }} />
               <div>
                 <span style={{ fontSize: 28, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {data.focusCampaigns.length}
+                  {grouped.thisWeek.length + grouped.nextTwoWeeks.length}
                 </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Focus this week</span>
-              </div>
-              <div style={{ width: 1, background: BONE }} />
-              <div>
-                <span style={{ fontSize: 28, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {data.topShorts.length + data.topVideos.length}
-                </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Content moments</span>
+                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Key moments ahead</span>
               </div>
             </div>
           </div>
@@ -361,6 +433,102 @@ export default function PartnerBriefing() {
       </header>
 
 
+      {/* ═══════ WHAT HAPPENS NEXT — Editorial Timeline ═══════ */}
+      {hasDateMoments && (
+        <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
+          <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+
+          <div style={{ marginBottom: 32 }}>
+            <div style={{
+              fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
+              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
+            }}>
+              What Happens Next
+            </div>
+            <p style={{
+              fontSize: 18, fontWeight: 500, color: WARM, lineHeight: 1.5,
+              maxWidth: 620, margin: 0,
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontStyle: 'italic',
+            }}>
+              The key dates and content moments shaping the next four weeks across the roster — pulled from live campaign plans.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32 }}>
+            {/* THIS WEEK */}
+            <div>
+              <div style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+                paddingBottom: 10, borderBottom: `2px solid ${INK}`,
+                marginBottom: 4,
+              }}>
+                This Week
+              </div>
+              {grouped.thisWeek.length > 0 ? (
+                grouped.thisWeek.map((m, i) => <MomentCard key={`tw-${i}`} m={m} />)
+              ) : (
+                <p style={{
+                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
+                  padding: '16px 0', margin: 0,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}>
+                  No confirmed dates this window — campaigns in content support mode.
+                </p>
+              )}
+            </div>
+
+            {/* NEXT TWO WEEKS */}
+            <div>
+              <div style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+                paddingBottom: 10, borderBottom: `2px solid ${BONE}`,
+                marginBottom: 4,
+              }}>
+                Next 7–14 Days
+              </div>
+              {grouped.nextTwoWeeks.length > 0 ? (
+                grouped.nextTwoWeeks.map((m, i) => <MomentCard key={`nt-${i}`} m={m} />)
+              ) : (
+                <p style={{
+                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
+                  padding: '16px 0', margin: 0,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}>
+                  Planning window open — content strategies in development.
+                </p>
+              )}
+            </div>
+
+            {/* NEXT MONTH */}
+            <div>
+              <div style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+                paddingBottom: 10, borderBottom: `2px solid ${BONE}`,
+                marginBottom: 4,
+              }}>
+                Next 30 Days
+              </div>
+              {grouped.nextMonth.length > 0 ? (
+                grouped.nextMonth.map((m, i) => <MomentCard key={`nm-${i}`} m={m} />)
+              ) : (
+                <p style={{
+                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
+                  padding: '16px 0', margin: 0,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}>
+                  Longer-range campaign moments in planning.
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+
       {/* ═══════ FOCUS CAMPAIGNS ═══════ */}
       <section className="pb-fade" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px',
@@ -372,14 +540,14 @@ export default function PartnerBriefing() {
             fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
             textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
           }}>
-            Focus Campaigns
+            Active Campaigns
           </div>
           <p style={{
             fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
             maxWidth: 560, margin: 0,
             fontFamily: 'Inter, system-ui, sans-serif',
           }}>
-            Priority campaigns this week — where Virgin Music is focusing content strategy and audience development on YouTube.
+            Where Virgin Music is focusing content strategy and audience development on YouTube this week.
           </p>
         </div>
 
@@ -409,7 +577,6 @@ export default function PartnerBriefing() {
                     position: 'absolute', inset: 0,
                     background: 'linear-gradient(135deg, transparent 30%, rgba(14,14,14,0.6) 100%)',
                   }} />
-                  {/* Phase badge */}
                   <div style={{ position: 'absolute', top: 20, left: 20 }}>
                     <span style={{
                       display: 'inline-block', padding: '4px 12px', borderRadius: 20,
@@ -421,24 +588,12 @@ export default function PartnerBriefing() {
                       {fc.campaignPhase}
                     </span>
                   </div>
-                  {/* Ecosystem signal badge */}
-                  <div style={{ position: 'absolute', top: 20, right: 20 }}>
-                    <span style={{
-                      display: 'inline-block', padding: '4px 12px', borderRadius: 20,
-                      fontSize: 8, fontWeight: 800, letterSpacing: '0.12em',
-                      textTransform: 'uppercase' as const,
-                      background: 'rgba(45,106,79,0.25)', color: '#7DCFAC',
-                      backdropFilter: 'blur(8px)',
-                    }}>
-                      {fc.ecosystemSignal}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Right — content */}
-                <div style={{ padding: '32px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  {/* Artist name + avatar */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  {/* Artist name */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                     {fc.channel.thumbnail && (
                       <img src={fc.channel.thumbnail} alt="" style={{
                         width: 32, height: 32, borderRadius: '50%', objectFit: 'cover',
@@ -462,78 +617,78 @@ export default function PartnerBriefing() {
                         {fc.channel.name}
                       </span>
                     )}
-                    {fc.channel.campaign && (
-                      <span style={{
-                        fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.4)',
-                        marginLeft: 8,
-                      }}>
-                        {fc.channel.campaign}
-                      </span>
-                    )}
                   </div>
 
                   {/* Narrative */}
                   <p style={{
-                    fontSize: 16, fontWeight: 500, color: WHITE, lineHeight: 1.5,
+                    fontSize: 15, fontWeight: 500, color: WHITE, lineHeight: 1.5,
                     margin: '0 0 20px',
                     fontFamily: 'Inter, system-ui, sans-serif',
                   }}>
                     {fc.narrative}
                   </p>
 
-                  {/* Content strategy */}
-                  <p style={{
-                    fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5,
-                    margin: '0 0 16px',
-                    fontFamily: 'Inter, system-ui, sans-serif',
+                  {/* Current / Next / Support — editorial triplet */}
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16,
+                    paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)',
                   }}>
-                    {fc.contentStrategy}
-                  </p>
-
-                  {/* Format tags */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
-                    {fc.formatBreakdown.map((f, i) => (
-                      <span key={i} style={{
-                        padding: '3px 10px', borderRadius: 20,
-                        fontSize: 8, fontWeight: 700, letterSpacing: '0.1em',
-                        textTransform: 'uppercase' as const,
-                        background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)',
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
                       }}>
-                        {f}
-                      </span>
-                    ))}
+                        Current
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.currentMoment}
+                      </p>
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Next
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.nextMoment}
+                      </p>
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Support Opportunity
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.supportOpportunity}
+                      </p>
+                    </div>
                   </div>
 
                   {/* Stats row */}
-                  <div style={{ display: 'flex', gap: 20, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
+                  <div style={{ display: 'flex', gap: 20, fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 16 }}>
                     {fc.channel.views7d != null && (
-                      <span><strong style={{ color: 'rgba(255,255,255,0.7)' }}>{fmtNum(fc.channel.views7d)}</strong> views this week</span>
+                      <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fmtNum(fc.channel.views7d)}</strong> views/wk</span>
                     )}
-                    <span><strong style={{ color: 'rgba(255,255,255,0.7)' }}>{fc.channel.uploads30d}</strong> uploads / 30d</span>
+                    <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fc.channel.uploads30d}</strong> uploads/30d</span>
                     {fc.channel.subs != null && (
-                      <span><strong style={{ color: 'rgba(255,255,255,0.7)' }}>{fmtNum(fc.channel.subs)}</strong> subscribers</span>
+                      <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fmtNum(fc.channel.subs)}</strong> subs</span>
                     )}
-                  </div>
-
-                  {/* Next moments */}
-                  <div style={{
-                    marginTop: 16, paddingTop: 14,
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <div style={{
-                      fontSize: 8, fontWeight: 700, letterSpacing: '0.14em',
-                      textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
-                      marginBottom: 6,
-                    }}>
-                      Next Moments
-                    </div>
-                    <p style={{
-                      fontSize: 11, color: 'rgba(255,255,255,0.5)', lineHeight: 1.45,
-                      margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
-                      fontStyle: 'italic',
-                    }}>
-                      {fc.nextMoments}
-                    </p>
                   </div>
                 </div>
               </div>
@@ -541,7 +696,7 @@ export default function PartnerBriefing() {
           );
         })()}
 
-        {/* All other campaigns — 2-column grid */}
+        {/* Remaining campaigns — 2-column cards with editorial triplet */}
         {data.focusCampaigns.length > 1 && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
             {data.focusCampaigns.slice(1).map(fc => {
@@ -552,7 +707,7 @@ export default function PartnerBriefing() {
                   border: `1px solid ${BONE}`,
                 }}>
                   {/* Hero image */}
-                  <div style={{ position: 'relative', overflow: 'hidden', height: 160 }}>
+                  <div style={{ position: 'relative', overflow: 'hidden', height: 140 }}>
                     <img
                       src={fc.heroImage}
                       alt=""
@@ -564,7 +719,6 @@ export default function PartnerBriefing() {
                       position: 'absolute', inset: 0,
                       background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.5) 100%)',
                     }} />
-                    {/* Phase */}
                     <div style={{ position: 'absolute', top: 12, left: 12 }}>
                       <span style={{
                         display: 'inline-block', padding: '3px 10px', borderRadius: 20,
@@ -576,19 +730,6 @@ export default function PartnerBriefing() {
                         {fc.campaignPhase}
                       </span>
                     </div>
-                    {/* Ecosystem signal */}
-                    <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                      <span style={{
-                        display: 'inline-block', padding: '3px 10px', borderRadius: 20,
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-                        textTransform: 'uppercase' as const,
-                        background: 'rgba(45,106,79,0.3)', color: '#7DCFAC',
-                        backdropFilter: 'blur(6px)',
-                      }}>
-                        {fc.ecosystemSignal}
-                      </span>
-                    </div>
-                    {/* Artist name overlay */}
                     <div style={{ position: 'absolute', bottom: 12, left: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                       {fc.channel.thumbnail && (
                         <img src={fc.channel.thumbnail} alt="" style={{
@@ -596,65 +737,88 @@ export default function PartnerBriefing() {
                           border: '2px solid rgba(255,255,255,0.3)',
                         }} />
                       )}
-                      <span style={{
-                        fontSize: 11, fontWeight: 800, color: WHITE,
-                        letterSpacing: '0.03em', textTransform: 'uppercase' as const,
-                        textShadow: '0 1px 4px rgba(0,0,0,0.4)',
-                      }}>
-                        {fc.channel.name}
-                      </span>
+                      {chUrl ? (
+                        <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
+                          <span style={{
+                            fontSize: 11, fontWeight: 800, color: WHITE,
+                            letterSpacing: '0.03em', textTransform: 'uppercase' as const,
+                            textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                          }}>
+                            {fc.channel.name}
+                          </span>
+                        </a>
+                      ) : (
+                        <span style={{
+                          fontSize: 11, fontWeight: 800, color: WHITE,
+                          letterSpacing: '0.03em', textTransform: 'uppercase' as const,
+                          textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                        }}>
+                          {fc.channel.name}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* Content area */}
-                  <div style={{ padding: '16px 18px 18px' }}>
+                  <div style={{ padding: '14px 18px 18px' }}>
                     <p style={{
-                      fontSize: 13, fontWeight: 500, color: INK, lineHeight: 1.45,
-                      margin: '0 0 10px',
+                      fontSize: 12, fontWeight: 500, color: INK, lineHeight: 1.45,
+                      margin: '0 0 14px',
                       fontFamily: 'Inter, system-ui, sans-serif',
                     }}>
                       {fc.narrative}
                     </p>
-                    <p style={{
-                      fontSize: 11, fontWeight: 400, color: SMOKE, lineHeight: 1.45,
-                      margin: '0 0 12px',
-                      fontFamily: 'Inter, system-ui, sans-serif',
-                    }}>
-                      {fc.contentStrategy}
-                    </p>
 
-                    {/* Format tags */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
-                      {fc.formatBreakdown.slice(0, 4).map((f, i) => (
-                        <span key={i} className="pb-format-tag">{f}</span>
-                      ))}
-                    </div>
-
-                    {/* Stats */}
-                    <div style={{ display: 'flex', gap: 14, fontSize: 9, color: SMOKE }}>
-                      {fc.channel.views7d != null && (
-                        <span>{fmtNum(fc.channel.views7d)} views/wk</span>
-                      )}
-                      <span>{fc.channel.uploads30d} uploads/30d</span>
-                    </div>
-
-                    {/* Next moments */}
+                    {/* Current / Next / Support — editorial triplet */}
                     <div style={{
-                      marginTop: 12, paddingTop: 10,
-                      borderTop: `1px solid ${BONE}`,
+                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10,
+                      paddingTop: 12, borderTop: `1px solid ${BONE}`,
                     }}>
-                      <div style={{
-                        fontSize: 7, fontWeight: 700, letterSpacing: '0.12em',
-                        textTransform: 'uppercase' as const, color: GHOST, marginBottom: 4,
-                      }}>
-                        Next Moments
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Current
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.currentMoment}
+                        </p>
                       </div>
-                      <p style={{
-                        fontSize: 10, color: SMOKE, lineHeight: 1.4, margin: 0,
-                        fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'italic',
-                      }}>
-                        {fc.nextMoments}
-                      </p>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Next
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.nextMoment}
+                        </p>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Support
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: ACCENT.green, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500,
+                        }}>
+                          {fc.supportOpportunity}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -665,7 +829,7 @@ export default function PartnerBriefing() {
       </section>
 
 
-      {/* ═══════ WHAT WE'RE SEEING ON PLATFORM + ECOSYSTEM HIGHLIGHTS ═══════ */}
+      {/* ═══════ WHAT WE'RE SEEING ON PLATFORM + STANDOUT MOMENTS ═══════ */}
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
         <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
@@ -683,7 +847,7 @@ export default function PartnerBriefing() {
               maxWidth: 400, margin: '0 0 24px',
               fontFamily: 'Inter, system-ui, sans-serif',
             }}>
-              Observations from this week&apos;s campaign activity across Virgin Music on YouTube.
+              Patterns and behaviours across this week&apos;s campaign activity.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -713,9 +877,8 @@ export default function PartnerBriefing() {
             </div>
           </div>
 
-          {/* Right — Ecosystem highlights + top moments */}
+          {/* Right — Ecosystem highlights + standout moments */}
           <div>
-            {/* Ecosystem highlights */}
             {data.ecosystemHighlights.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <div style={{
@@ -726,7 +889,7 @@ export default function PartnerBriefing() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {data.ecosystemHighlights.map((h, i) => {
-                    const chUrl = channelUrl(h.channelHandle);
+                    const chUrlH = channelUrl(h.channelHandle);
                     return (
                       <div key={i} style={{
                         display: 'flex', alignItems: 'center', gap: 12,
@@ -734,8 +897,8 @@ export default function PartnerBriefing() {
                         background: WHITE, border: `1px solid ${BONE}`,
                       }}>
                         {h.thumbnail && (
-                          chUrl ? (
-                            <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link" style={{ flexShrink: 0 }}>
+                          chUrlH ? (
+                            <a href={chUrlH} target="_blank" rel="noopener noreferrer" className="pb-link" style={{ flexShrink: 0 }}>
                               <img src={h.thumbnail} alt="" style={{
                                 width: 28, height: 28, borderRadius: '50%', objectFit: 'cover',
                               }} />
@@ -748,8 +911,8 @@ export default function PartnerBriefing() {
                         )}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {chUrl ? (
-                              <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
+                            {chUrlH ? (
+                              <a href={chUrlH} target="_blank" rel="noopener noreferrer" className="pb-link">
                                 <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{h.name}</span>
                               </a>
                             ) : (
@@ -812,131 +975,6 @@ export default function PartnerBriefing() {
           </div>
         </div>
       </section>
-
-
-      {/* ═══════ UPCOMING MOMENTS — KEY DATES & CONTENT DROPS ═══════ */}
-      {data.upcomingMoments.length > 0 && (
-        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-          <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-
-          <div style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-            textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
-          }}>
-            Key Dates &amp; Content Drops
-          </div>
-          <p style={{
-            fontSize: 12, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
-            maxWidth: 560, margin: '0 0 24px',
-            fontFamily: 'Inter, system-ui, sans-serif',
-          }}>
-            Confirmed dates and planned content across active campaigns — anchored to artist rollout plans. Dated events first, then ongoing activity.
-          </p>
-
-          {/* Table */}
-          <div style={{
-            background: WHITE, borderRadius: 8, border: `1px solid ${BONE}`,
-            overflow: 'hidden',
-          }}>
-            {/* Header */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: '140px 120px 1fr 150px 1fr',
-              gap: 12, padding: '12px 20px',
-              borderBottom: `2px solid ${BONE}`,
-              fontSize: 8, fontWeight: 800, letterSpacing: '0.14em',
-              textTransform: 'uppercase' as const, color: GHOST,
-            }}>
-              <span>Artist</span>
-              <span>Date</span>
-              <span>What&apos;s Coming</span>
-              <span>Event Type</span>
-              <span>Content Approach</span>
-            </div>
-
-            {/* Rows */}
-            {data.upcomingMoments.map((m, i) => (
-              <div key={i} className="pb-moment-row" style={{
-                display: 'grid', gridTemplateColumns: '140px 120px 1fr 150px 1fr',
-                gap: 12, padding: '14px 20px',
-                borderBottom: i < data.upcomingMoments.length - 1 ? `1px solid ${BONE}` : 'none',
-                alignItems: 'center',
-              }}>
-                {/* Artist */}
-                <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{m.artist}</span>
-
-                {/* Date / Timing */}
-                <div>
-                  {m.date ? (
-                    <span style={{
-                      fontSize: 11, fontWeight: 700, color: INK,
-                      fontFamily: 'Inter, system-ui, sans-serif',
-                    }}>
-                      {m.timing}
-                    </span>
-                  ) : (
-                    <span style={{
-                      fontSize: 10, fontWeight: 500, color: SMOKE,
-                      fontStyle: 'italic',
-                    }}>
-                      {m.timing}
-                    </span>
-                  )}
-                </div>
-
-                {/* What's Coming */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.35 }}>
-                    {m.moment}
-                  </span>
-                  {m.fromCoachPlan && (
-                    <span style={{
-                      display: 'inline-block', padding: '2px 6px', borderRadius: 3,
-                      fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
-                      textTransform: 'uppercase' as const,
-                      background: 'rgba(45,106,79,0.08)', color: ACCENT.green,
-                      flexShrink: 0,
-                    }}>
-                      Planned
-                    </span>
-                  )}
-                </div>
-
-                {/* Event Type */}
-                <span style={{
-                  display: 'inline-block',
-                  padding: '3px 10px', borderRadius: 20,
-                  fontSize: 8, fontWeight: 800, letterSpacing: '0.1em',
-                  textTransform: 'uppercase' as const,
-                  background: m.fromCoachPlan ? 'rgba(45,106,79,0.08)' : `rgba(154,99,36,0.08)`,
-                  color: m.fromCoachPlan ? ACCENT.green : ACCENT.amber,
-                  width: 'fit-content',
-                }}>
-                  {m.eventType}
-                </span>
-
-                {/* Content Approach — combines supportSurface + rolloutNote */}
-                <div>
-                  <span style={{
-                    fontSize: 10, fontWeight: 600, color: WARM,
-                    display: 'block', marginBottom: 2,
-                  }}>
-                    {m.supportSurface}
-                  </span>
-                  <span style={{
-                    fontSize: 9, color: SMOKE, fontStyle: 'italic',
-                    lineHeight: 1.3,
-                  }}>
-                    {m.rolloutNote}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-
-      {/* Playbook section removed — partner (YouTube) already knows this */}
 
 
       {/* ═══════ FOOTER ═══════ */}

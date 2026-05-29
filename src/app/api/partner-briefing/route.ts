@@ -108,6 +108,9 @@ type FocusCampaign = {
   contentStrategy: string;
   ecosystemSignal: string;
   nextMoments: string;
+  currentMoment: string;       // concise: what's happening right now
+  nextMoment: string;          // concise: what's coming next
+  supportOpportunity: string;  // concise: where YouTube can help
   formatBreakdown: string[];
   recentVideos: BriefingVideo[];
 };
@@ -474,24 +477,95 @@ export async function GET(request: Request) {
         : ch.thumbnail ?? '';
       const artist = artistMap.get(ch.slug);
 
-      // Enrich next moments with coach plan if available
+      // Derive current / next / support from coach plan events
       const coachPlan = coachPlans.get(ch.slug);
       let nextMoments = buildNextMoments(ch, artist);
-      if (coachPlan?.plan?.events) {
-        const upcoming = coachPlan.plan.events
-          .filter(e => {
+      let currentMoment = '';
+      let nextMoment = '';
+      let supportOpportunity = '';
+
+      if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
+        const sorted = coachPlan.plan.events
+          .map((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
-            return (d.getTime() - now) / 86400000 >= -3 && (d.getTime() - now) / 86400000 <= 30;
+            const diff = Math.round((d.getTime() - now) / 86400000);
+            return { ...e, diff };
           })
-          .sort((a, b) => a.dateISO.localeCompare(b.dateISO))
-          .slice(0, 2);
-        if (upcoming.length > 0) {
-          const parts = upcoming.map(e => {
-            const d = new Date(e.dateISO + 'T00:00:00');
-            const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-            return `${e.title} (${dateStr})`;
-          });
-          nextMoments = parts.join(' → ');
+          .sort((a, b) => a.diff - b.diff);
+
+        // Current: event happening within -7 to +3 days
+        const current = sorted.find(e => e.diff >= -7 && e.diff <= 3);
+        // Next: first event more than 3 days out
+        const next = sorted.find(e => e.diff > 3);
+
+        if (current) {
+          currentMoment = current.title;
+          const fmtCurr = new Date(current.dateISO + 'T00:00:00')
+            .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          nextMoments = current.title + ` (${fmtCurr})`;
+          if (next) {
+            const fmtNext = new Date(next.dateISO + 'T00:00:00')
+              .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+            nextMoments += ` → ${next.title} (${fmtNext})`;
+          }
+        } else if (next) {
+          const fmtNext = new Date(next.dateISO + 'T00:00:00')
+            .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          nextMoments = next.title + ` (${fmtNext})`;
+        }
+
+        if (next) {
+          nextMoment = next.title;
+        }
+
+        // Support opportunity based on event types
+        const relevantEvt = current ?? next;
+        if (relevantEvt) {
+          const k = relevantEvt.kind;
+          if (k === 'albumRelease' || k === 'albumAnnounce') {
+            supportOpportunity = 'Premiere + teaser support';
+          } else if (k === 'singleRelease') {
+            supportOpportunity = 'Official video + Shorts support';
+          } else if (k === 'festival' || k === 'tourDate' || k === 'liveShow') {
+            supportOpportunity = 'Live content + Shorts';
+          } else if (k === 'documentaryRelease' || k === 'documentaryTease') {
+            supportOpportunity = 'Longform premiere + BTS';
+          } else if (k === 'collab') {
+            supportOpportunity = 'Cross-channel collab support';
+          } else {
+            supportOpportunity = 'Content support + Shorts';
+          }
+        }
+      }
+
+      // Fallbacks from channel state
+      if (!currentMoment) {
+        if (ch.phase === 'RELEASE' || ch.phase === 'PUSH') {
+          currentMoment = ch.campaign ? `${ch.campaign} — active rollout` : 'Release window';
+        } else if (ch.phase === 'PRE') {
+          currentMoment = 'Pre-release build';
+        } else if (vids.length >= 2) {
+          currentMoment = 'Content rollout active';
+        } else {
+          currentMoment = 'Campaign building';
+        }
+      }
+      if (!nextMoment) {
+        if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
+          nextMoment = 'Follow-through content';
+        } else if (ch.phase === 'PRE') {
+          nextMoment = 'Release window approaching';
+        } else {
+          nextMoment = 'Content development';
+        }
+      }
+      if (!supportOpportunity) {
+        if (ch.shorts30d >= 1 && ch.longform30d >= 1) {
+          supportOpportunity = 'Multi-format ecosystem support';
+        } else if (ch.shorts30d >= 1) {
+          supportOpportunity = 'Shorts discovery + longform opportunity';
+        } else {
+          supportOpportunity = 'Content strategy + Shorts ramp';
         }
       }
 
@@ -503,6 +577,9 @@ export async function GET(request: Request) {
         contentStrategy: buildContentStrategy(ch),
         ecosystemSignal: buildEcosystemSignal(ch),
         nextMoments,
+        currentMoment,
+        nextMoment,
+        supportOpportunity,
         formatBreakdown: buildFormatBreakdown(ch, vids),
         recentVideos: vids.slice(0, 3),
       };
