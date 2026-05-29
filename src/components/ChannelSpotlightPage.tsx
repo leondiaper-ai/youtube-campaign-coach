@@ -51,11 +51,22 @@ function VirginMusicLogo({ height = 36 }: { height?: number }) {
 
 function YouTubeLogo({ height = 20 }: { height?: number }) {
   return (
-    <img
-      src="/youtube-logo.png"
-      alt="YouTube"
-      style={{ height, width: 'auto', display: 'block' }}
-    />
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: height * 0.35 }}>
+      <img
+        src="/youtube-icon.png"
+        alt=""
+        style={{ height, width: 'auto', display: 'block' }}
+      />
+      <span style={{
+        fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
+        fontWeight: 700,
+        fontSize: height * 0.85,
+        color: INK,
+        letterSpacing: '-0.02em',
+      }}>
+        YouTube
+      </span>
+    </span>
   );
 }
 
