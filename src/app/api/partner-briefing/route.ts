@@ -878,10 +878,10 @@ export async function GET(request: Request) {
     // Sort by editorial priority (highest first)
     focusCampaigns.sort((a, b) => b.editorialPriority - a.editorialPriority);
 
-    // Assign tiers: top 3 = Tier 1, next 3 = Tier 2, rest = Tier 3
+    // Assign tiers: top 3-4 = Tier 1, next 3-4 = Tier 2, rest = Tier 3
     focusCampaigns.forEach((fc, i) => {
-      if (i < 3 && fc.editorialPriority >= 25) fc.tier = 1;
-      else if (i < 6 && fc.editorialPriority >= 15) fc.tier = 2;
+      if (i < 4 && fc.editorialPriority >= 20) fc.tier = 1;
+      else if (i < 8 && fc.editorialPriority >= 8) fc.tier = 2;
       else fc.tier = 3;
     });
 

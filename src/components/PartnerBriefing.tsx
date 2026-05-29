@@ -730,72 +730,134 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                  {tier1.map(fc => (
-                    <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
-                      className="pb-campaign-card pb-link"
-                      style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderRadius: 10, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
-                      {/* Left — hero */}
-                      <div style={{ position: 'relative', overflow: 'hidden', minHeight: 280 }}>
-                        <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.65) 100%)' }} />
-                        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                            {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />}
-                            <span style={{ fontSize: 12, fontWeight: 800, color: WHITE, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>{fc.channel.name}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  {tier1.map(fc => {
+                    const topVids = fc.recentVideos.slice(0, 3);
+                    return (
+                      <div key={fc.channel.slug} className="pb-campaign-card" style={{
+                        borderRadius: 12, overflow: 'hidden', background: WHITE,
+                        border: `1px solid ${BONE}`,
+                      }}>
+                        {/* ── Hero image with artist overlay ── */}
+                        <a href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer" className="pb-link"
+                          style={{ display: 'block', position: 'relative', overflow: 'hidden', height: 200 }}>
+                          <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.65) 100%)' }} />
+                          <div style={{ position: 'absolute', bottom: 14, left: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />}
+                            <span style={{ fontSize: 14, fontWeight: 800, color: WHITE, letterSpacing: '0.02em' }}>{fc.channel.name}</span>
                           </div>
-                          {fc.standoutVideo && fc.standoutVideo.viewCount >= 10000 && (
-                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>
-                              {fc.standoutVideo.title.length > 55 ? fc.standoutVideo.title.slice(0, 52) + '...' : fc.standoutVideo.title} — {fmtNum(fc.standoutVideo.viewCount)} views
+                        </a>
+
+                        {/* ── Card body ── */}
+                        <div style={{ padding: '18px 20px 20px' }}>
+
+                          {/* ── NEXT / AFTER dates — front and centre ── */}
+                          <div style={{
+                            display: 'grid', gridTemplateColumns: fc.afterDate ? '1fr 1fr' : '1fr', gap: 12,
+                            padding: '12px 14px', borderRadius: 8,
+                            background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}`,
+                            marginBottom: 16,
+                          }}>
+                            <div>
+                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 3 }}>Next</div>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nextLabel}</div>
+                              {fc.nextDate && <div style={{ fontSize: 14, fontWeight: 800, color: ACCENT.green, marginTop: 3 }}>{fc.nextDate}</div>}
+                            </div>
+                            {fc.afterDate && (
+                              <div>
+                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 3 }}>After</div>
+                                <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: ACCENT.green, marginTop: 3 }}>{fc.afterDate}</div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* ── Format tags ── */}
+                          <FormatTags videos={fc.recentVideos} />
+
+                          {/* ── Stats grid (Spotlight-style) ── */}
+                          <div style={{
+                            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
+                            padding: '10px 12px', borderRadius: 8, background: PAPER, marginBottom: 14,
+                          }}>
+                            <div>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: INK }}>{fc.channel.subs != null ? fmtNum(fc.channel.subs) : '—'}</div>
+                              <div style={{ fontSize: 8, color: SMOKE }}>Subs</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: fc.channel.views7d && fc.channel.views7d > 0 ? INK : SMOKE }}>{fc.channel.views7d != null ? fmtNum(fc.channel.views7d) : '—'}</div>
+                              <div style={{ fontSize: 8, color: SMOKE }}>Views (7d)</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: fc.channel.uploads30d >= 6 ? ACCENT.green : INK }}>{fc.channel.uploads30d}</div>
+                              <div style={{ fontSize: 8, color: SMOKE }}>Uploads (30d)</div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: (fc.channel.subs7d ?? 0) > 0 ? ACCENT.green : SMOKE }}>
+                                {fc.channel.subs7d != null && fc.channel.subs7d !== 0 ? `${fc.channel.subs7d > 0 ? '+' : ''}${fmtNum(fc.channel.subs7d)}` : '—'}
+                              </div>
+                              <div style={{ fontSize: 8, color: SMOKE }}>Subs (7d)</div>
+                            </div>
+                          </div>
+
+                          {/* ── Current activity ── */}
+                          <div style={{ marginBottom: 14 }}>
+                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Current</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
+                            <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
+                          </div>
+
+                          {/* ── Scale (if standout video is different from current) ── */}
+                          {fc.standoutVideo && fc.standoutVideo.viewCount >= 50000 && fc.standoutVideo.id !== fc.recentVideos[0]?.id && (
+                            <div style={{ marginBottom: 14 }}>
+                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Scale</div>
+                              <div style={{ fontSize: 12, fontWeight: 600, color: INK }}>{fc.standoutVideo.title.length > 55 ? fc.standoutVideo.title.slice(0, 52) + '...' : fc.standoutVideo.title}</div>
+                              <div style={{ fontSize: 10, color: SMOKE, marginTop: 1 }}>{fmtNum(fc.standoutVideo.viewCount)} views</div>
+                            </div>
+                          )}
+
+                          {/* ── Recent uploads (thumbnail grid, Spotlight-style) ── */}
+                          {topVids.length > 0 && (
+                            <div>
+                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>Recent Uploads</div>
+                              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(topVids.length, 3)}, 1fr)`, gap: 8 }}>
+                                {topVids.map(v => (
+                                  <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer" className="pb-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
+                                    <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden' }}>
+                                      <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }} />
+                                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 50%, rgba(0,0,0,0.5) 100%)' }} />
+                                      <span style={{
+                                        position: 'absolute', top: 4, left: 4,
+                                        padding: '2px 6px', borderRadius: 4,
+                                        fontSize: 7, fontWeight: 700, textTransform: 'uppercase' as const,
+                                        background: v.durationSec <= 62 ? 'rgba(107,33,168,0.85)' : 'rgba(26,86,184,0.85)',
+                                        color: WHITE,
+                                      }}>
+                                        {v.durationSec <= 62 ? 'Short' : v.format}
+                                      </span>
+                                    </div>
+                                    <div style={{ fontSize: 10, fontWeight: 600, color: INK, marginTop: 4, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {v.title}
+                                    </div>
+                                    <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
+                                      {fmtNum(v.viewCount)} views · {v.daysAgo}d ago
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
                       </div>
-                      {/* Right — pure evidence */}
-                      <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        {/* Format tags */}
-                        <FormatTags videos={fc.recentVideos} />
-                        {/* CURRENT */}
-                        <div style={{ marginBottom: 14 }}>
-                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Current</div>
-                          <div style={{ fontSize: 14, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
-                          <div style={{ fontSize: 11, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
-                        </div>
-                        {/* SCALE (only if meaningful and different from current) */}
-                        {fc.standoutVideo && fc.standoutVideo.viewCount >= 50000 && fc.standoutVideo.id !== fc.recentVideos[0]?.id && (
-                          <div style={{ marginBottom: 14 }}>
-                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Scale</div>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.standoutVideo.title.length > 50 ? fc.standoutVideo.title.slice(0, 47) + '...' : fc.standoutVideo.title}</div>
-                            <div style={{ fontSize: 11, color: SMOKE, marginTop: 1 }}>{fmtNum(fc.standoutVideo.viewCount)} views</div>
-                          </div>
-                        )}
-                        {/* NEXT + AFTER */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                          <div>
-                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Next</div>
-                            <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
-                            {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>After</div>
-                            <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
-                            {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
-                          </div>
-                        </div>
-                        {/* Activity stat */}
-                        <div style={{ fontSize: 10, color: SMOKE }}>
-                          {fc.channel.uploads30d} uploads in 30 days
-                          {fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}
-                        </div>
-                      </div>
-                    </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}
 
-            {/* ── TIER 2: Medium campaign cards ── */}
+            {/* ── TIER 2: Active campaign cards (richer than grid) ── */}
             {tier2.length > 0 && (
               <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
@@ -809,34 +871,43 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
                       style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
-                      <div style={{ position: 'relative', overflow: 'hidden', height: 110 }}>
+                      <div style={{ position: 'relative', overflow: 'hidden', height: 120 }}>
                         <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
-                        <div style={{ position: 'absolute', bottom: 8, left: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />}
-                          <span style={{ fontSize: 10, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>{fc.channel.name}</span>
+                        <div style={{ position: 'absolute', bottom: 10, left: 12, display: 'flex', alignItems: 'center', gap: 7 }}>
+                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />}
+                          <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>{fc.channel.name}</span>
                         </div>
+                        {/* Next date badge on hero */}
+                        {fc.nextDate && (
+                          <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(6px)' }}>
+                            <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>Next</div>
+                            <div style={{ fontSize: 11, fontWeight: 800, color: ACCENT.green }}>{fc.nextDate}</div>
+                          </div>
+                        )}
                       </div>
-                      <div style={{ padding: '10px 14px 12px' }}>
+                      <div style={{ padding: '12px 14px 14px' }}>
                         <FormatTags videos={fc.recentVideos} />
-                        <div style={{ marginBottom: 8 }}>
+                        {/* CURRENT */}
+                        <div style={{ marginBottom: 10 }}>
                           <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Current</div>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
-                          <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>{fc.nowDetail}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
+                          <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 6 }}>
+                        {/* NEXT + AFTER */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
                           <div>
                             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Next</div>
-                            <div style={{ fontSize: 10, fontWeight: 500, color: WARM, lineHeight: 1.25 }}>{fc.nextLabel}</div>
-                            {fc.nextDate && <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT.green, marginTop: 1 }}>{fc.nextDate}</div>}
+                            <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
+                            {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
                           </div>
                           <div>
                             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>After</div>
-                            <div style={{ fontSize: 10, fontWeight: 500, color: WARM, lineHeight: 1.25 }}>{fc.afterLabel}</div>
-                            {fc.afterDate && <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT.green, marginTop: 1 }}>{fc.afterDate}</div>}
+                            <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
+                            {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
                           </div>
                         </div>
-                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d</div>
+                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
                       </div>
                     </a>
                   ))}
