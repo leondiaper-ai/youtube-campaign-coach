@@ -47,8 +47,11 @@ type FocusCampaign = {
   ecosystemSignal: string;
   nextMoments: string;
   currentMoment: string;
+  currentMomentDate: string | null;
   nextMoment: string;
+  nextMomentDate: string | null;
   upcomingMoment: string;
+  upcomingMomentDate: string | null;
   supportOpportunity: string;
   hasCoachPlan: boolean;
   formatBreakdown: string[];
@@ -188,44 +191,90 @@ function PlayOverlay({ size = 32 }: { size?: number }) {
 function MomentCard({ m }: { m: UpcomingMoment }) {
   return (
     <div style={{
-      padding: '16px 0',
+      padding: '14px 0',
       borderBottom: `1px solid ${BONE}`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-        <span style={{
-          fontSize: 11, fontWeight: 800, color: INK,
-          letterSpacing: '0.02em', textTransform: 'uppercase' as const,
-        }}>
-          {m.artist}
-        </span>
-        {m.fromCoachPlan && (
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8, marginBottom: 5 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <span style={{
-            fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
-            textTransform: 'uppercase' as const,
-            color: ACCENT.green, opacity: 0.7,
+            fontSize: 11, fontWeight: 800, color: INK,
+            letterSpacing: '0.02em', textTransform: 'uppercase' as const,
           }}>
-            From planner
+            {m.artist}
+          </span>
+          {m.fromCoachPlan && (
+            <span style={{
+              fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
+              textTransform: 'uppercase' as const,
+              color: ACCENT.green, opacity: 0.7,
+            }}>
+              From planner
+            </span>
+          )}
+        </div>
+        {m.timing && (
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: ACCENT.green,
+            whiteSpace: 'nowrap',
+          }}>
+            {m.timing}
           </span>
         )}
       </div>
       <p style={{
-        fontSize: 14, fontWeight: 500, color: WARM, lineHeight: 1.45,
-        margin: '0 0 6px',
+        fontSize: 13, fontWeight: 500, color: WARM, lineHeight: 1.4,
+        margin: '0 0 5px',
         fontFamily: 'Inter, system-ui, sans-serif',
       }}>
         {m.moment}
       </p>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{
-          fontSize: 10, fontWeight: 600, color: ACCENT.green,
+          display: 'inline-block', padding: '2px 8px', borderRadius: 12,
+          fontSize: 9, fontWeight: 700, color: ACCENT.green,
+          background: 'rgba(45,106,79,0.06)',
           letterSpacing: '0.04em',
         }}>
           {m.eventType}
         </span>
-        <span style={{ fontSize: 10, color: SMOKE }}>
+        <span style={{ fontSize: 9, color: SMOKE }}>
           {m.supportSurface}
         </span>
       </div>
+    </div>
+  );
+}
+
+// ── Moment Cell (reusable for hero + smaller campaign cards) ──────────────
+
+function MomentCell({ label, title, date, color, dateColor }: {
+  label: string; title: string; date?: string | null;
+  color: string; dateColor?: string;
+}) {
+  return (
+    <div>
+      <div style={{
+        fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+        textTransform: 'uppercase' as const, color: `${color}55`,
+        marginBottom: 4,
+      }}>
+        {label}
+      </div>
+      <p style={{
+        fontSize: 10, color, lineHeight: 1.35, margin: 0,
+        fontFamily: 'Inter, system-ui, sans-serif',
+      }}>
+        {title}
+      </p>
+      {date && (
+        <p style={{
+          fontSize: 10, fontWeight: 700,
+          color: dateColor ?? ACCENT.green,
+          margin: '3px 0 0', lineHeight: 1,
+        }}>
+          {date}
+        </p>
+      )}
     </div>
   );
 }
@@ -647,66 +696,10 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                     display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14,
                     paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)',
                   }}>
-                    <div>
-                      <div style={{
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
-                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
-                        marginBottom: 5,
-                      }}>
-                        Current
-                      </div>
-                      <p style={{
-                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
-                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
-                      }}>
-                        {fc.currentMoment}
-                      </p>
-                    </div>
-                    <div>
-                      <div style={{
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
-                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
-                        marginBottom: 5,
-                      }}>
-                        Next
-                      </div>
-                      <p style={{
-                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
-                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
-                      }}>
-                        {fc.nextMoment}
-                      </p>
-                    </div>
-                    <div>
-                      <div style={{
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
-                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
-                        marginBottom: 5,
-                      }}>
-                        Upcoming
-                      </div>
-                      <p style={{
-                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
-                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
-                      }}>
-                        {fc.upcomingMoment}
-                      </p>
-                    </div>
-                    <div>
-                      <div style={{
-                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
-                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
-                        marginBottom: 5,
-                      }}>
-                        Support
-                      </div>
-                      <p style={{
-                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
-                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
-                      }}>
-                        {fc.supportOpportunity}
-                      </p>
-                    </div>
+                    <MomentCell label="Current" title={fc.currentMoment} date={fc.currentMomentDate} color="rgba(255,255,255,0.7)" dateColor="rgba(255,255,255,0.95)" />
+                    <MomentCell label="Next" title={fc.nextMoment} date={fc.nextMomentDate} color="rgba(255,255,255,0.7)" dateColor="rgba(255,255,255,0.95)" />
+                    <MomentCell label="Upcoming" title={fc.upcomingMoment} date={fc.upcomingMomentDate} color="rgba(255,255,255,0.7)" dateColor="rgba(255,255,255,0.95)" />
+                    <MomentCell label="Support" title={fc.supportOpportunity} color="rgba(255,255,255,0.7)" />
                   </div>
 
                   {/* Stats row */}
@@ -803,66 +796,10 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8,
                       paddingTop: 12, borderTop: `1px solid ${BONE}`,
                     }}>
-                      <div>
-                        <div style={{
-                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-                          textTransform: 'uppercase' as const, color: GHOST,
-                          marginBottom: 4,
-                        }}>
-                          Current
-                        </div>
-                        <p style={{
-                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
-                          fontFamily: 'Inter, system-ui, sans-serif',
-                        }}>
-                          {fc.currentMoment}
-                        </p>
-                      </div>
-                      <div>
-                        <div style={{
-                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-                          textTransform: 'uppercase' as const, color: GHOST,
-                          marginBottom: 4,
-                        }}>
-                          Next
-                        </div>
-                        <p style={{
-                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
-                          fontFamily: 'Inter, system-ui, sans-serif',
-                        }}>
-                          {fc.nextMoment}
-                        </p>
-                      </div>
-                      <div>
-                        <div style={{
-                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-                          textTransform: 'uppercase' as const, color: GHOST,
-                          marginBottom: 4,
-                        }}>
-                          Upcoming
-                        </div>
-                        <p style={{
-                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
-                          fontFamily: 'Inter, system-ui, sans-serif',
-                        }}>
-                          {fc.upcomingMoment}
-                        </p>
-                      </div>
-                      <div>
-                        <div style={{
-                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-                          textTransform: 'uppercase' as const, color: GHOST,
-                          marginBottom: 4,
-                        }}>
-                          Support
-                        </div>
-                        <p style={{
-                          fontSize: 10, color: ACCENT.green, lineHeight: 1.3, margin: 0,
-                          fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500,
-                        }}>
-                          {fc.supportOpportunity}
-                        </p>
-                      </div>
+                      <MomentCell label="Current" title={fc.currentMoment} date={fc.currentMomentDate} color={WARM} />
+                      <MomentCell label="Next" title={fc.nextMoment} date={fc.nextMomentDate} color={WARM} />
+                      <MomentCell label="Upcoming" title={fc.upcomingMoment} date={fc.upcomingMomentDate} color={WARM} />
+                      <MomentCell label="Support" title={fc.supportOpportunity} color={ACCENT.green} />
                     </div>
                   </div>
                 </div>

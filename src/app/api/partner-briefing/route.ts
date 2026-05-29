@@ -110,10 +110,13 @@ type FocusCampaign = {
   contentStrategy: string;
   ecosystemSignal: string;
   nextMoments: string;
-  currentMoment: string;       // concise: what's happening right now
-  nextMoment: string;          // concise: what's coming next
-  upcomingMoment: string;      // concise: what's coming after that
-  supportOpportunity: string;  // concise: where YouTube can help
+  currentMoment: string;
+  currentMomentDate: string | null;
+  nextMoment: string;
+  nextMomentDate: string | null;
+  upcomingMoment: string;
+  upcomingMomentDate: string | null;
+  supportOpportunity: string;
   hasCoachPlan: boolean;       // true if moments come from coach plan
   formatBreakdown: string[];
   recentVideos: BriefingVideo[];
@@ -535,8 +538,11 @@ export async function GET(request: Request) {
       const coachPlan = coachPlans.get(ch.slug);
       let nextMoments = buildNextMoments(ch, artist);
       let currentMoment = '';
+      let currentMomentDate: string | null = null;
       let nextMoment = '';
+      let nextMomentDate: string | null = null;
       let upcomingMoment = '';
+      let upcomingMomentDate: string | null = null;
       let supportOpportunity = '';
       const hasCoachPlan = !!(coachPlan?.plan?.events && coachPlan.plan.events.length > 0);
 
@@ -564,26 +570,25 @@ export async function GET(request: Request) {
         const evt1 = filtered[1] ?? null;
         const evt2 = filtered[2] ?? null;
 
-        // Helper to format event title with date
+        // Helper to format date
         const fmtEvtDate = (iso: string) =>
           new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
         if (evt0) {
-          const d0 = fmtEvtDate(evt0.dateISO);
-          currentMoment = `${evt0.title} — ${d0}`;
-          nextMoments = evt0.title + ` (${d0})`;
+          currentMoment = evt0.title;
+          currentMomentDate = fmtEvtDate(evt0.dateISO);
+          nextMoments = evt0.title + ` (${currentMomentDate})`;
           if (evt1) {
-            const d1 = fmtEvtDate(evt1.dateISO);
-            nextMoments += ` → ${evt1.title} (${d1})`;
+            nextMoments += ` → ${evt1.title} (${fmtEvtDate(evt1.dateISO)})`;
           }
         }
         if (evt1) {
-          const d1 = fmtEvtDate(evt1.dateISO);
-          nextMoment = `${evt1.title} — ${d1}`;
+          nextMoment = evt1.title;
+          nextMomentDate = fmtEvtDate(evt1.dateISO);
         }
         if (evt2) {
-          const d2 = fmtEvtDate(evt2.dateISO);
-          upcomingMoment = `${evt2.title} — ${d2}`;
+          upcomingMoment = evt2.title;
+          upcomingMomentDate = fmtEvtDate(evt2.dateISO);
         }
 
         // Support opportunity based on the most relevant event type
@@ -635,13 +640,23 @@ export async function GET(request: Request) {
         ecosystemSignal: buildEcosystemSignal(ch),
         nextMoments,
         currentMoment,
+        currentMomentDate,
         nextMoment,
+        nextMomentDate,
         upcomingMoment,
+        upcomingMomentDate,
         supportOpportunity,
         hasCoachPlan,
         formatBreakdown: buildFormatBreakdown(ch, vids),
         recentVideos: vids.slice(0, 3),
       };
+    });
+
+    // Sort: campaigns with real dated moments first, then dateless
+    focusCampaigns.sort((a, b) => {
+      const aHasDates = a.currentMomentDate ? 1 : 0;
+      const bHasDates = b.currentMomentDate ? 1 : 0;
+      return bHasDates - aHasDates; // dated first
     });
 
     // ── Platform Observations (scoped to pinned campaigns) ─────────────────
