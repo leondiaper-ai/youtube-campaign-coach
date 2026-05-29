@@ -147,15 +147,10 @@ export default function ChannelSpotlightPage() {
               Top performing Virgin-managed channels this week — what the data says is working across the roster.
             </p>
             {data && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 12 }}>
+              <div style={{ marginTop: 12 }}>
                 <span style={{ fontSize: 11, color: GHOST, letterSpacing: '0.04em' }}>
                   {data.weekRange}
                 </span>
-                {data.syncMeta && (
-                  <span style={{ fontSize: 10, color: GHOST }}>
-                    {data.syncMeta.artistsSuccess}/{data.syncMeta.artistsTotal} artists synced
-                  </span>
-                )}
               </div>
             )}
           </div>
@@ -193,16 +188,8 @@ export default function ChannelSpotlightPage() {
         {/* ── Spotlight Content ───────────────────────────────────── */}
         {data && !loading && (
           <>
-            {/* Summary line */}
-            <div style={{
-              display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 28,
-              paddingBottom: 16, borderBottom: `1px solid ${BONE}`,
-            }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: ACCENT.green }}>{data.channels.length}</span>
-              <span style={{ fontSize: 13, color: SMOKE }}>
-                of {data.totalManaged} managed channels in the spotlight this week
-              </span>
-            </div>
+            {/* Spacer before cards */}
+            <div style={{ marginBottom: 8 }} />
 
             {/* Spotlight cards */}
             <WeeklySpotlight channels={data.channels} linkPrefix="/watcher" />
