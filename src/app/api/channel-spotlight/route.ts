@@ -304,6 +304,25 @@ export async function GET() {
         headline += 'Active channel with room to accelerate cadence and conversion.';
       }
 
+      // Content format tags — which YouTube formats are active (last 90d)
+      const contentFormats: string[] = [];
+      const mf = row.multiformat;
+      if (mf) {
+        if (mf.hasOfficialVideo) contentFormats.push('Official Video');
+        if (mf.hasLyricVideo) contentFormats.push('Lyric Video');
+        if (mf.hasVisualizer) contentFormats.push('Visualiser');
+        if (mf.hasBTS) contentFormats.push('BTS');
+        if (mf.hasLiveSession) contentFormats.push('Live Session');
+        if (mf.hasShorts) contentFormats.push('Shorts');
+      }
+      // Also check recent videos for formats not caught by multiformat detection
+      for (const v of recentVideos) {
+        const fmt = (v as any).format as string;
+        if (/collab/i.test(fmt) && !contentFormats.includes('Collab')) contentFormats.push('Collab');
+        if (/premiere/i.test(fmt) && !contentFormats.includes('Premiere')) contentFormats.push('Premiere');
+        if (/trailer/i.test(fmt) && !contentFormats.includes('Trailer')) contentFormats.push('Trailer');
+      }
+
       // Hero image: top video thumbnail, fallback to channel avatar
       const heroImage = recentVideos.length > 0
         ? `https://i.ytimg.com/vi/${recentVideos[0].id}/hqdefault.jpg`
@@ -324,6 +343,7 @@ export async function GET() {
         thumbnail: snap?.thumbnail ?? null,
         channelHandle: artist?.channelHandle ?? null,
         heroImage,
+        contentFormats,
       };
     });
 

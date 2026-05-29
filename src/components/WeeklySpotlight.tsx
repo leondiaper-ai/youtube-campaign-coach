@@ -45,6 +45,7 @@ export type SpotlightChannel = {
   thumbnail?: string | null;
   channelHandle?: string | null;
   heroImage?: string | null;
+  contentFormats?: string[];
 };
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
@@ -65,6 +66,18 @@ const GRADE_COLOR: Record<string, string> = {
 const GRADE_BG: Record<string, string> = {
   A: '#ECFDF5', B: '#EFF6FF', C: '#FFFBEB', D: '#FEF2F2', Limited: '#F9FAFB',
 };
+const FORMAT_STYLE: Record<string, { bg: string; fg: string }> = {
+  'Official Video': { bg: '#E6F8EE', fg: GREEN },
+  'Lyric Video':    { bg: '#E8F0FE', fg: '#1A56B8' },
+  'Visualiser':     { bg: '#F0E8FE', fg: '#6B21A8' },
+  'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
+  'Live Session':   { bg: '#FFEAD6', fg: '#8A4A1A' },
+  'Shorts':         { bg: '#F3F0EA', fg: WARM },
+  'Collab':         { bg: '#E6F8EE', fg: GREEN },
+  'Premiere':       { bg: '#E8F0FE', fg: '#1A56B8' },
+  'Trailer':        { bg: '#FFF5D6', fg: '#7A5A00' },
+};
+
 const ECO_STYLE: Record<string, { bg: string; fg: string }> = {
   'Full Ecosystem':      { bg: '#E6F8EE', fg: GREEN },
   'Multi-Format Active': { bg: '#E8F0FE', fg: '#1A56B8' },
@@ -241,9 +254,36 @@ export default function WeeklySpotlight({
               )}
 
               {/* Headline */}
-              <p style={{ fontSize: 14, lineHeight: 1.5, color: WARM, margin: '0 0 16px', maxWidth: 600 }}>
+              <p style={{ fontSize: 14, lineHeight: 1.5, color: WARM, margin: '0 0 12px', maxWidth: 600 }}>
                 {ch.headline}
               </p>
+
+              {/* ── Content format tags ────────────────────────── */}
+              {ch.contentFormats && ch.contentFormats.length > 0 && (
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 16 }}>
+                  {ch.contentFormats.map((fmt) => {
+                    const s = FORMAT_STYLE[fmt] ?? { bg: '#F3F0EA', fg: WARM };
+                    return (
+                      <span
+                        key={fmt}
+                        style={{
+                          display: 'inline-block',
+                          padding: '3px 10px',
+                          borderRadius: 20,
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: '0.06em',
+                          textTransform: 'uppercase',
+                          background: s.bg,
+                          color: s.fg,
+                        }}
+                      >
+                        {fmt}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* ── Stats grid ─────────────────────────────────── */}
               <div style={{
