@@ -289,13 +289,15 @@ export async function GET() {
           return { ...e, title, diff, priority: eventPriority(e.kind, title) };
         });
         const upcoming = enriched
-          .filter((e) => e.diff >= -7)
+          .filter((e) => e.diff >= -7 && e.priority >= 60) // YouTube content moments only
           .sort((a, b) => b.priority - a.priority || a.diff - b.diff);
-        const hasHigh = upcoming.some((e) => e.priority >= 60);
-        const filtered = hasHigh ? upcoming.filter((e) => e.priority >= 60) : upcoming;
-        if (filtered.length > 0) currentMoment = filtered[0].title;
-        if (filtered.length > 1) nextMoment = filtered[1].title;
-        if (filtered.length > 2) upcomingMoment = filtered[2].title;
+
+        const fmtEvtDate = (iso: string) =>
+          new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+        if (upcoming.length > 0) currentMoment = `${upcoming[0].title} — ${fmtEvtDate(upcoming[0].dateISO)}`;
+        if (upcoming.length > 1) nextMoment = `${upcoming[1].title} — ${fmtEvtDate(upcoming[1].dateISO)}`;
+        if (upcoming.length > 2) upcomingMoment = `${upcoming[2].title} — ${fmtEvtDate(upcoming[2].dateISO)}`;
       }
 
       const subsPer1kViews =

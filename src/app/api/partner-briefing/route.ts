@@ -564,19 +564,27 @@ export async function GET(request: Request) {
         const evt1 = filtered[1] ?? null;
         const evt2 = filtered[2] ?? null;
 
+        // Helper to format event title with date
+        const fmtEvtDate = (iso: string) =>
+          new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
         if (evt0) {
-          currentMoment = evt0.title;
-          const fmtDate = new Date(evt0.dateISO + 'T00:00:00')
-            .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          nextMoments = evt0.title + ` (${fmtDate})`;
+          const d0 = fmtEvtDate(evt0.dateISO);
+          currentMoment = `${evt0.title} — ${d0}`;
+          nextMoments = evt0.title + ` (${d0})`;
           if (evt1) {
-            const fmt1 = new Date(evt1.dateISO + 'T00:00:00')
-              .toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-            nextMoments += ` → ${evt1.title} (${fmt1})`;
+            const d1 = fmtEvtDate(evt1.dateISO);
+            nextMoments += ` → ${evt1.title} (${d1})`;
           }
         }
-        if (evt1) nextMoment = evt1.title;
-        if (evt2) upcomingMoment = evt2.title;
+        if (evt1) {
+          const d1 = fmtEvtDate(evt1.dateISO);
+          nextMoment = `${evt1.title} — ${d1}`;
+        }
+        if (evt2) {
+          const d2 = fmtEvtDate(evt2.dateISO);
+          upcomingMoment = `${evt2.title} — ${d2}`;
+        }
 
         // Support opportunity based on the most relevant event type
         const relevantEvt = evt0 ?? evt1;
@@ -731,12 +739,16 @@ export async function GET(request: Request) {
       return 'Content support';
     };
 
+    // "What Happens Next" — ONLY real dates tied to real YouTube moments.
+    // If there's no date from a coach plan, don't include it.
+    // YouTube wants to see: singles, official videos, BTS, trailers,
+    // visualisers — anchored to actual dates. Generic "timeline being
+    // developed" or "pre-release content build" adds no value here.
     for (const { ch } of rankedChannels) {
       const artist = artistMap.get(ch.slug);
-      const vids = videosBySlug.get(ch.slug) ?? [];
       const coachPlan = coachPlans.get(ch.slug);
 
-      // If we have a coach plan, extract upcoming events with real dates
+      // Only include moments from coach plans with real dates
       if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
         const scoredEvents = coachPlan.plan.events
           .filter((e: ParsedEvent) => {
@@ -748,107 +760,51 @@ export async function GET(request: Request) {
             const title = cleanTitle(e.title);
             return { ...e, title, priority: eventPriority(e.kind, title) };
           })
+          // Only YouTube content moments (priority >= 60) — no tour/festival/press
+          .filter(e => e.priority >= 60)
           // Sort by priority (desc) then date (asc)
           .sort((a, b) => b.priority - a.priority || a.dateISO.localeCompare(b.dateISO));
 
-        // If higher-priority events exist (≥60), drop tour/festival/press (30)
-        const hasHigh = scoredEvents.some(e => e.priority >= 60);
-        const filtered = hasHigh
-          ? scoredEvents.filter(e => e.priority >= 60)
-          : scoredEvents;
-
-        if (filtered.length > 0) {
-          for (const evt of filtered.slice(0, 4)) { // max 4 per artist
-            upcomingMoments.push({
-              artist: ch.name,
-              slug: ch.slug,
-              moment: evt.title,
-              date: evt.dateISO,
-              timing: fmtTiming(evt.dateISO),
-              eventType: eventTypeLabel(evt.kind),
-              supportSurface: surfaceForKind(evt.kind),
-              rolloutNote: evt.scale === 'anchor'
-                ? 'Anchor moment — full rollout planned'
-                : evt.scale === 'major'
-                  ? 'Key campaign moment'
-                  : 'Supporting content drop',
-              fromCoachPlan: true,
-              priority: evt.priority,
-            });
-          }
-          continue; // coach plan events replace the generic fallback
+        for (const evt of scoredEvents.slice(0, 4)) { // max 4 per artist
+          upcomingMoments.push({
+            artist: ch.name,
+            slug: ch.slug,
+            moment: evt.title,
+            date: evt.dateISO,
+            timing: fmtTiming(evt.dateISO),
+            eventType: eventTypeLabel(evt.kind),
+            supportSurface: surfaceForKind(evt.kind),
+            rolloutNote: evt.scale === 'anchor'
+              ? 'Anchor moment — full rollout planned'
+              : evt.scale === 'major'
+                ? 'Key campaign moment'
+                : 'Supporting content drop',
+            fromCoachPlan: true,
+            priority: evt.priority,
+          });
         }
       }
 
-      // Fallback: use artist metadata or phase-based moments
+      // Also include artist metadata moments IF they have a real date
       if (artist?.nextMomentLabel && artist?.nextMomentDate) {
-        upcomingMoments.push({
-          artist: ch.name,
-          slug: ch.slug,
-          moment: artist.nextMomentLabel,
-          date: artist.nextMomentDate,
-          timing: fmtTiming(artist.nextMomentDate),
-          eventType: 'Content Moment',
-          supportSurface: 'Official Video + Shorts support',
-          rolloutNote: 'Full rollout planned',
-          fromCoachPlan: false,
-          priority: 60,
-        });
-      } else if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
-        upcomingMoments.push({
-          artist: ch.name,
-          slug: ch.slug,
-          moment: ch.campaign ? `${ch.campaign} — continued rollout` : 'Active campaign rollout',
-          date: null,
-          timing: 'This week / ongoing',
-          eventType: 'Active Rollout',
-          supportSurface: ch.shorts30d >= 1 && ch.longform30d >= 1
-            ? 'Shorts + Longform + Supporting'
-            : ch.shorts30d >= 1 ? 'Shorts-led' : 'Longform-led',
-          rolloutNote: `${ch.uploads30d} uploads in 30d — cadence active`,
-          fromCoachPlan: false,
-          priority: 60,
-        });
-      } else if (ch.phase === 'PRE') {
-        upcomingMoments.push({
-          artist: ch.name,
-          slug: ch.slug,
-          moment: 'Pre-release content build',
-          date: null,
-          timing: 'Upcoming',
-          eventType: 'Pre-Release',
-          supportSurface: 'Teasers + Shorts',
-          rolloutNote: 'Audience priming ahead of release',
-          fromCoachPlan: false,
-          priority: 60,
-        });
-      } else if (vids.length >= 1) {
-        upcomingMoments.push({
-          artist: ch.name,
-          slug: ch.slug,
-          moment: 'Content support and follow-through',
-          date: null,
-          timing: 'Ongoing',
-          eventType: 'Content Support',
-          supportSurface: buildEcosystemSignal(ch),
-          rolloutNote: `${ch.uploads30d} uploads this month`,
-          fromCoachPlan: false,
-          priority: 60,
-        });
-      } else {
-        upcomingMoments.push({
-          artist: ch.name,
-          slug: ch.slug,
-          moment: 'Campaign building',
-          date: null,
-          timing: 'Building towards',
-          eventType: 'In Development',
-          supportSurface: 'Strategy in development',
-          rolloutNote: 'Content plan taking shape',
-          fromCoachPlan: false,
-          priority: 60,
-        });
+        // Don't duplicate if coach plan already covers this artist
+        const alreadyHas = upcomingMoments.some(m => m.slug === ch.slug);
+        if (!alreadyHas) {
+          upcomingMoments.push({
+            artist: ch.name,
+            slug: ch.slug,
+            moment: artist.nextMomentLabel,
+            date: artist.nextMomentDate,
+            timing: fmtTiming(artist.nextMomentDate),
+            eventType: 'Content Moment',
+            supportSurface: 'Official Video + Shorts support',
+            rolloutNote: 'Full rollout planned',
+            fromCoachPlan: false,
+            priority: 60,
+          });
+        }
       }
+      // No fallbacks — if there's no date, the artist doesn't appear here
     }
 
     // Sort: highest priority first, then by date within same priority tier
