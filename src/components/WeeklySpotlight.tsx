@@ -223,25 +223,7 @@ export default function WeeklySpotlight({
                     )}
                   </div>
                 </div>
-                {/* Grade badge on image */}
-                <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', gap: 6 }}>
-                  <span style={{
-                    padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 800,
-                    background: 'rgba(255,255,255,0.9)', color: gradeColor,
-                    letterSpacing: '0.04em', textTransform: 'uppercase',
-                    backdropFilter: 'blur(8px)',
-                  }}>
-                    Score {ch.grade}
-                  </span>
-                  <span style={{
-                    padding: '4px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700,
-                    background: 'rgba(255,255,255,0.9)', color: ecoStyle.fg,
-                    letterSpacing: '0.02em',
-                    backdropFilter: 'blur(8px)',
-                  }}>
-                    {ch.ecosystemSignal}
-                  </span>
-                </div>
+                {/* Ecosystem signal on image — kept minimal */}
               </div>
             )}
 
@@ -255,45 +237,8 @@ export default function WeeklySpotlight({
                     <img src={ch.thumbnail} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${BONE}` }} />
                   )}
                   <div style={{ fontSize: 18, fontWeight: 800, color: INK }}>{ch.name}</div>
-                  <span style={{ padding: '3px 8px', borderRadius: 5, fontSize: 10, fontWeight: 700, background: gradeBg, color: gradeColor }}>
-                    {ch.grade}
-                  </span>
-                  <span style={{ padding: '3px 8px', borderRadius: 5, fontSize: 10, fontWeight: 600, background: ecoStyle.bg, color: ecoStyle.fg }}>
-                    {ch.ecosystemSignal}
-                  </span>
                 </div>
               )}
-
-              {/* Tags row */}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                {ch.hasCoachPlan && (
-                  <span style={{
-                    display: 'inline-block', padding: '3px 10px', borderRadius: 20,
-                    fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
-                    background: 'rgba(45,106,79,0.08)', color: GREEN,
-                  }}>
-                    Coach Plan Active
-                  </span>
-                )}
-                {ch.classification === 'GROWING' && (
-                  <span style={{
-                    display: 'inline-block', padding: '3px 10px', borderRadius: 20,
-                    fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
-                    background: '#E6F8EE', color: GREEN,
-                  }}>
-                    Growing
-                  </span>
-                )}
-                {ch.multiformatScore && (ch.multiformatScore === 'Strong' || ch.multiformatScore === 'Good') && (
-                  <span style={{
-                    display: 'inline-block', padding: '3px 10px', borderRadius: 20,
-                    fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
-                    background: '#E8F0FE', color: '#1A56B8',
-                  }}>
-                    Multi-Format {ch.multiformatScore}
-                  </span>
-                )}
-              </div>
 
               {/* Headline */}
               <p style={{ fontSize: 14, lineHeight: 1.5, color: WARM, margin: '0 0 16px', maxWidth: 600 }}>
