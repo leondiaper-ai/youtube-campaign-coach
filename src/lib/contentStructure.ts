@@ -158,6 +158,24 @@ export type MultiformatScore = {
   score: 'Strong' | 'Good' | 'Partial' | 'Weak' | 'None';
 };
 
+/**
+ * Compute multiformat strategy score.
+ *
+ * DESIGN PRINCIPLE: Real multi-format means multiple content types
+ * supporting an anchor release — NOT just Shorts + one random longform.
+ *
+ * An "anchor" is an Official Video, Visualiser, or Lyric Video.
+ * These are the primary pieces of music content that sit at the centre
+ * of a campaign. Supporting formats (BTS, Live Sessions, Shorts) are
+ * only meaningful when they orbit around an anchor.
+ *
+ * Scoring:
+ *   Strong — Anchor + Shorts + 2+ supporting formats (BTS/Live/etc)
+ *   Good   — Anchor + Shorts + 1 supporting format
+ *   Partial — Anchor only, or Shorts + 1 supporting (no anchor)
+ *   Weak   — Only 1 format type active (e.g. just Shorts)
+ *   None   — No content in the last 90 days
+ */
 export function computeMultiformat(uploads: RecentUpload[]): MultiformatScore {
   // Only consider uploads from the last 90 days
   const cutoff = Date.now() - 90 * 86400000;
@@ -180,12 +198,39 @@ export function computeMultiformat(uploads: RecentUpload[]): MultiformatScore {
   const formatCount = [hasShorts, hasOfficialVideo, hasLyricVideo, hasVisualizer, hasBTS, hasLiveSession]
     .filter(Boolean).length;
 
+  // ── Anchor-aware scoring ───────────────────────────────────────────
+  // An anchor is a primary release piece: Official Video, Visualiser, or Lyric Video
+  const hasAnchor = hasOfficialVideo || hasVisualizer || hasLyricVideo;
+  const anchorCount = [hasOfficialVideo, hasVisualizer, hasLyricVideo].filter(Boolean).length;
+  // Supporting formats that orbit the anchor
+  const supportCount = [hasBTS, hasLiveSession].filter(Boolean).length;
+
   let score: MultiformatScore['score'];
-  if (formatCount >= 5) score = 'Strong';
-  else if (formatCount >= 3) score = 'Good';
-  else if (formatCount >= 2) score = 'Partial';
-  else if (formatCount >= 1) score = 'Weak';
-  else score = 'None';
+
+  if (hasAnchor && hasShorts && (supportCount >= 2 || (supportCount >= 1 && anchorCount >= 2))) {
+    // Anchor + Shorts + 2+ supporting, OR anchor types covering 2+ formats + Shorts + 1 supporting
+    // e.g. Official Video + Visualiser + Shorts + BTS = Strong
+    // e.g. Official Video + Shorts + BTS + Live Session = Strong
+    score = 'Strong';
+  } else if (hasAnchor && hasShorts && (supportCount >= 1 || anchorCount >= 2)) {
+    // Anchor + Shorts + 1 supporting format
+    // e.g. Official Video + Shorts + BTS = Good
+    // e.g. Official Video + Lyric Video + Shorts = Good
+    score = 'Good';
+  } else if (hasAnchor && hasShorts) {
+    // Anchor + Shorts but no supporting variety
+    // e.g. Official Video + Shorts only = Partial (strategy exists but thin)
+    score = 'Partial';
+  } else if (hasAnchor || (hasShorts && supportCount >= 1)) {
+    // Has anchor but no Shorts, or has Shorts + BTS/Live but no anchor
+    // e.g. Official Video alone, or Shorts + BTS without a release to support
+    score = 'Partial';
+  } else if (formatCount >= 1) {
+    // Only Shorts, or only one random longform type
+    score = 'Weak';
+  } else {
+    score = 'None';
+  }
 
   return { hasShorts, hasOfficialVideo, hasLyricVideo, hasVisualizer, hasBTS, hasLiveSession, formatCount, score };
 }

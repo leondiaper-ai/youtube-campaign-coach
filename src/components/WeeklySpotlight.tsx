@@ -69,6 +69,7 @@ const ECO_STYLE: Record<string, { bg: string; fg: string }> = {
   'Full Ecosystem':      { bg: '#E6F8EE', fg: GREEN },
   'Multi-Format Active': { bg: '#E8F0FE', fg: '#1A56B8' },
   'Shorts Momentum':     { bg: '#F0E8FE', fg: '#6B21A8' },
+  'Building':            { bg: '#FFF5D6', fg: '#7A5A00' },
   'Getting Started':     { bg: '#F3F0EA', fg: 'rgba(14,14,14,0.4)' },
 };
 

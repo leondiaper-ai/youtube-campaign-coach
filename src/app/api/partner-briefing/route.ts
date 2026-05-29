@@ -30,6 +30,7 @@ import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import { classifyUploadFormat, type UploadFormatLabel } from '@/lib/coach/matchEngine';
+import { computeMultiformat, type MultiformatScore } from '@/lib/contentStructure';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,6 +99,7 @@ type BriefingChannel = {
   campaignStartDate: string | null;
   classification: ArtistClassification;
   subsPer1kViews: number | null;
+  multiformatScore: MultiformatScore['score'] | null;
 };
 
 type FocusCampaign = {
@@ -235,6 +237,7 @@ export async function GET(request: Request) {
         campaignStartDate: a.campaignStartDate ?? null,
         classification,
         subsPer1kViews,
+        multiformatScore: snap?.recentUploads ? computeMultiformat(snap.recentUploads).score : null,
       };
 
       allChannels.push(channel);
@@ -395,14 +398,18 @@ export async function GET(request: Request) {
       return `Content strategy in development. Preparing for the upcoming rollout window.`;
     };
 
+    // Ecosystem signal — uses multiformat score (anchor-aware).
+    // Full Ecosystem requires Strong (anchor + Shorts + 2+ supporting formats).
+    // Multi-Format Active requires Good (anchor + Shorts + 1 supporting).
+    // Just Shorts + one longform is NOT multi-format strategy.
     const buildEcosystemSignal = (ch: BriefingChannel): string => {
-      const hasShorts = ch.shorts30d >= 1;
-      const hasLongform = ch.longform30d >= 1;
-      if (hasShorts && hasLongform && ch.uploads30d >= 5) return 'Full Ecosystem';
-      if (hasShorts && hasLongform) return 'Multi-Format Active';
-      if (hasShorts && ch.shorts30d >= 3) return 'Shorts Momentum';
-      if (hasLongform) return 'Longform Depth';
-      if (ch.uploads30d >= 1) return 'Early Build';
+      if (ch.multiformatScore === 'Strong') return 'Full Ecosystem';
+      if (ch.multiformatScore === 'Good') return 'Multi-Format Active';
+      if (ch.multiformatScore === 'Partial') {
+        return ch.shorts30d >= 1 ? 'Shorts Momentum' : 'Building';
+      }
+      if (ch.shorts30d >= 3) return 'Shorts Momentum';
+      if (ch.uploads30d >= 1) return 'Getting Started';
       return 'Getting Started';
     };
 

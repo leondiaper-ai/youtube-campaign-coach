@@ -100,27 +100,50 @@ export async function GET() {
       score: calculateChannelScore(inputs[i], pool),
     }));
 
-    // Composite spotlight score
-    const withComposite = scored.map(({ row, score }) => {
-      let composite = score.totalPoints * 10;
-      if (row.classification === 'GROWING') composite += 30;
-      if (row.status === 'HEALTHY') composite += 20;
-      if (row.multiformat?.score === 'Strong') composite += 20;
-      else if (row.multiformat?.score === 'Good') composite += 12;
-      if (row.uploads30d >= 8) composite += 15;
-      else if (row.uploads30d >= 4) composite += 8;
+    // ── Minimum thresholds ─────────────────────────────────────────
+    // Channels must have real scale + activity to qualify for spotlight.
+    // This prevents tiny channels (e.g. 27 subs) from appearing just
+    // because any small gain looks disproportionately large.
+    const MIN_SUBS = 500;
+    const MIN_VIEWS_7D = 1000;
+    const MIN_UPLOADS_30D = 2;
+
+    const qualified = scored.filter(({ row }) => {
+      if ((row.subs ?? 0) < MIN_SUBS) return false;
+      if ((row.views7Delta ?? 0) < MIN_VIEWS_7D) return false;
+      if (row.uploads30d < MIN_UPLOADS_30D) return false;
+      if (row.status === 'COLD') return false;
+      return true;
+    });
+
+    // Composite spotlight score — rewards genuine multi-format rollout,
+    // not just Shorts + one upload
+    const withComposite = qualified.map(({ row, score }) => {
+      let composite = score.totalPoints * 10; // 0–60 base
+      if (row.classification === 'GROWING') composite += 25;
+      if (row.status === 'HEALTHY') composite += 15;
+      // Multiformat (now stricter: requires anchor content)
+      if (row.multiformat?.score === 'Strong') composite += 25;
+      else if (row.multiformat?.score === 'Good') composite += 15;
+      else if (row.multiformat?.score === 'Partial') composite += 5;
+      // Cadence
+      if (row.uploads30d >= 8) composite += 12;
+      else if (row.uploads30d >= 4) composite += 6;
+      // Subscriber growth (real conversion signal)
       if ((row.subs7Delta ?? 0) > 0) composite += 10;
-      if (score.grade === 'A') composite += 25;
-      else if (score.grade === 'B') composite += 12;
+      // Channel score grade
+      if (score.grade === 'A') composite += 20;
+      else if (score.grade === 'B') composite += 10;
+      // Views momentum
       if (row.viewsWoW != null && row.viewsWoW > 0) composite += 5;
+      // Penalise stale data
       if (row.movementConfidence === 'stale') composite -= 20;
-      if (row.status === 'COLD') composite -= 30;
       if (row.uploads30d === 0) composite -= 25;
       return { row, score, composite };
     });
 
     const top = withComposite
-      .filter((c) => c.composite > 30)
+      .filter((c) => c.composite > 35)
       .sort((a, b) => b.composite - a.composite)
       .slice(0, 5);
 
@@ -224,13 +247,17 @@ export async function GET() {
           ? (row.subs7Delta / row.views7Delta) * 1000
           : null;
 
+      // Ecosystem signal — stricter: Full Ecosystem requires Strong multiformat
+      // (anchor content + Shorts + supporting formats), not just Shorts + longform
       let ecosystemSignal = 'Getting Started';
-      if (row.multiformat?.score === 'Strong' || row.multiformat?.score === 'Good') {
-        ecosystemSignal = row.shorts30d > 0 && longform30d > 0 ? 'Full Ecosystem' : 'Multi-Format Active';
-      } else if (row.shorts30d > 0 && longform30d === 0) {
-        ecosystemSignal = 'Shorts Momentum';
-      } else if (longform30d > 0 && row.shorts30d === 0) {
-        ecosystemSignal = 'Multi-Format Active';
+      if (row.multiformat?.score === 'Strong') {
+        ecosystemSignal = 'Full Ecosystem'; // Anchor + Shorts + 2+ supporting formats
+      } else if (row.multiformat?.score === 'Good') {
+        ecosystemSignal = 'Multi-Format Active'; // Anchor + Shorts + 1 supporting
+      } else if (row.multiformat?.score === 'Partial') {
+        ecosystemSignal = row.shorts30d > 0 ? 'Shorts Momentum' : 'Building';
+      } else if (row.uploads30d >= 2) {
+        ecosystemSignal = 'Building';
       }
 
       // Auto-generate "what's working" notes
