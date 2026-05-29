@@ -1136,7 +1136,7 @@ export async function GET(request: Request) {
         // ONLY from pinned campaigns — not all Virgin channels
         const seen = new Set<string>();
         const pinnedVids: BriefingVideo[] = [];
-        for (const slug of pinnedSlugs) {
+        for (const slug of Array.from(pinnedSlugs)) {
           const vids = videosBySlug.get(slug);
           if (vids) pinnedVids.push(...vids);
         }
