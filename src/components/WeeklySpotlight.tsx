@@ -305,7 +305,8 @@ export default function WeeklySpotlight({
                 />
                 <StatCell
                   value={`${ch.uploads30d}`}
-                  label={`${ch.longform30d}L · ${ch.shorts30d}S`}
+                  label="Uploads (30d)"
+                  sublabel={`${ch.longform30d} longform · ${ch.shorts30d} Shorts`}
                   color={ch.uploads30d >= 8 ? GREEN : ch.uploads30d >= 4 ? AMBER : undefined}
                 />
               </div>
@@ -481,13 +482,14 @@ export default function WeeklySpotlight({
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function StatCell({ value, label, color }: { value: string; label: string; color?: string }) {
+function StatCell({ value, label, sublabel, color }: { value: string; label: string; sublabel?: string; color?: string }) {
   return (
     <div>
       <div style={{ fontSize: 18, fontWeight: 800, color: color ?? INK, fontVariantNumeric: 'tabular-nums' }}>
         {value}
       </div>
       <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>{label}</div>
+      {sublabel && <div style={{ fontSize: 8, color: GHOST, marginTop: 1 }}>{sublabel}</div>}
     </div>
   );
 }
