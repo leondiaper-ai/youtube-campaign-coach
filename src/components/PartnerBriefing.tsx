@@ -64,6 +64,7 @@ type UpcomingMoment = {
   supportSurface: string;
   rolloutNote: string;
   fromCoachPlan: boolean;
+  priority: number;
 };
 
 type EcosystemHighlight = {

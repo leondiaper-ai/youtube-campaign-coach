@@ -127,6 +127,7 @@ type UpcomingMoment = {
   supportSurface: string;
   rolloutNote: string;
   fromCoachPlan: boolean;  // true if sourced from a saved coach plan
+  priority: number;        // 100=release, 80=supporting video, 60=community, 30=touring/press
 };
 
 type PartnerBriefingResponse = {
@@ -481,6 +482,40 @@ export async function GET(request: Request) {
     const cleanTitle = (t: string) =>
       t.replace(/^[,\s]*\d{4}\s*[–—-]\s*/, '').replace(/^[,\s]+/, '').trim();
 
+    // ── Event priority scoring ───────────────────────────────────────────
+    // Priority 100: Album / Single / Official video / Documentary / Longform
+    // Priority 80:  Trailer / BTS / Visualiser / Lyric video / Live session / Premiere
+    // Priority 60:  Community post / Shorts support / Fan content / Collab
+    // Priority 30:  Tour dates / Festivals / Radio / Press
+    // Tour/festival only surface if no higher-priority content moments exist.
+    const eventPriority = (kind: string, title: string): number => {
+      const t = title.toLowerCase();
+      // Priority 100 — core content releases
+      if (kind === 'albumRelease' || kind === 'albumAnnounce') return 100;
+      if (kind === 'singleRelease') return 100;
+      if (kind === 'documentaryRelease') return 100;
+      if (/\bofficial\s*(music\s*)?video\b/.test(t)) return 100;
+      if (/\blongform\b/.test(t)) return 100;
+      // Priority 80 — supporting video content
+      if (kind === 'documentaryTease') return 80;
+      if (/\btrailer\b/.test(t)) return 80;
+      if (/\b(bts|behind\s*the\s*scenes)\b/.test(t)) return 80;
+      if (/\bvisuali[sz]er\b/.test(t)) return 80;
+      if (/\blyric\s*video\b/.test(t)) return 80;
+      if (/\b(live\s*session|acoustic|performance\s*video)\b/.test(t)) return 80;
+      if (/\bpremiere\b/.test(t)) return 80;
+      // Priority 60 — community & support content
+      if (kind === 'collab') return 60;
+      if (kind === 'snippet') return 60;
+      if (/\b(community|shorts|fan\s*content|reaction)\b/.test(t)) return 60;
+      // Priority 30 — live/touring/press (only show if nothing better exists)
+      if (kind === 'festival' || kind === 'tourDate' || kind === 'liveShow' || kind === 'tourAnnounce') return 30;
+      if (kind === 'promoTrip' || kind === 'podcast') return 30;
+      if (/\b(radio|press|interview)\b/.test(t)) return 30;
+      // Default: treat as mid-tier content
+      return 60;
+    };
+
     const focusCampaigns: FocusCampaign[] = rankedChannels.map(({ ch }) => {
       const vids = videosBySlug.get(ch.slug) ?? [];
       const bestVideo = [...vids].sort((a, b) => b.velocity - a.velocity)[0];
@@ -499,22 +534,28 @@ export async function GET(request: Request) {
       const hasCoachPlan = !!(coachPlan?.plan?.events && coachPlan.plan.events.length > 0);
 
       if (hasCoachPlan) {
-        const sorted = coachPlan!.plan.events
+        const enriched = coachPlan!.plan.events
           .map((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
-            return { ...e, title: cleanTitle(e.title), diff };
-          })
-          .sort((a, b) => a.diff - b.diff);
+            const title = cleanTitle(e.title);
+            return { ...e, title, diff, priority: eventPriority(e.kind, title) };
+          });
 
-        // Find 3 sequential events from the timeline:
-        // Current: most recent event within -7 days, OR the nearest upcoming event
-        // Next: the event after current
-        // Upcoming: the event after next
-        const recentOrUpcoming = sorted.filter(e => e.diff >= -7);
-        const evt0 = recentOrUpcoming[0] ?? null;
-        const evt1 = recentOrUpcoming[1] ?? null;
-        const evt2 = recentOrUpcoming[2] ?? null;
+        // Filter to recent/upcoming window, then sort by priority (desc) then date (asc)
+        const recentOrUpcoming = enriched
+          .filter(e => e.diff >= -7)
+          .sort((a, b) => b.priority - a.priority || a.diff - b.diff);
+
+        // If higher-priority events exist (≥60), drop tour/festival (30) from the picks
+        const hasHighPriority = recentOrUpcoming.some(e => e.priority >= 60);
+        const filtered = hasHighPriority
+          ? recentOrUpcoming.filter(e => e.priority >= 60)
+          : recentOrUpcoming;
+
+        const evt0 = filtered[0] ?? null;
+        const evt1 = filtered[1] ?? null;
+        const evt2 = filtered[2] ?? null;
 
         if (evt0) {
           currentMoment = evt0.title;
@@ -690,20 +731,31 @@ export async function GET(request: Request) {
 
       // If we have a coach plan, extract upcoming events with real dates
       if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
-        const futureEvents = coachPlan.plan.events
+        const scoredEvents = coachPlan.plan.events
           .filter((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
             return diff >= -7 && diff <= 90; // last week + next 3 months
           })
-          .sort((a: ParsedEvent, b: ParsedEvent) => a.dateISO.localeCompare(b.dateISO));
+          .map((e: ParsedEvent) => {
+            const title = cleanTitle(e.title);
+            return { ...e, title, priority: eventPriority(e.kind, title) };
+          })
+          // Sort by priority (desc) then date (asc)
+          .sort((a, b) => b.priority - a.priority || a.dateISO.localeCompare(b.dateISO));
 
-        if (futureEvents.length > 0) {
-          for (const evt of futureEvents.slice(0, 4)) { // max 4 per artist
+        // If higher-priority events exist (≥60), drop tour/festival/press (30)
+        const hasHigh = scoredEvents.some(e => e.priority >= 60);
+        const filtered = hasHigh
+          ? scoredEvents.filter(e => e.priority >= 60)
+          : scoredEvents;
+
+        if (filtered.length > 0) {
+          for (const evt of filtered.slice(0, 4)) { // max 4 per artist
             upcomingMoments.push({
               artist: ch.name,
               slug: ch.slug,
-              moment: cleanTitle(evt.title),
+              moment: evt.title,
               date: evt.dateISO,
               timing: fmtTiming(evt.dateISO),
               eventType: eventTypeLabel(evt.kind),
@@ -714,6 +766,7 @@ export async function GET(request: Request) {
                   ? 'Key campaign moment'
                   : 'Supporting content drop',
               fromCoachPlan: true,
+              priority: evt.priority,
             });
           }
           continue; // coach plan events replace the generic fallback
@@ -732,6 +785,7 @@ export async function GET(request: Request) {
           supportSurface: 'Official Video + Shorts support',
           rolloutNote: 'Full rollout planned',
           fromCoachPlan: false,
+          priority: 60,
         });
       } else if (ch.phase === 'PUSH' || ch.phase === 'RELEASE') {
         upcomingMoments.push({
@@ -746,6 +800,7 @@ export async function GET(request: Request) {
             : ch.shorts30d >= 1 ? 'Shorts-led' : 'Longform-led',
           rolloutNote: `${ch.uploads30d} uploads in 30d — cadence active`,
           fromCoachPlan: false,
+          priority: 60,
         });
       } else if (ch.phase === 'PRE') {
         upcomingMoments.push({
@@ -758,6 +813,7 @@ export async function GET(request: Request) {
           supportSurface: 'Teasers + Shorts',
           rolloutNote: 'Audience priming ahead of release',
           fromCoachPlan: false,
+          priority: 60,
         });
       } else if (vids.length >= 1) {
         upcomingMoments.push({
@@ -770,6 +826,7 @@ export async function GET(request: Request) {
           supportSurface: buildEcosystemSignal(ch),
           rolloutNote: `${ch.uploads30d} uploads this month`,
           fromCoachPlan: false,
+          priority: 60,
         });
       } else {
         upcomingMoments.push({
@@ -782,12 +839,14 @@ export async function GET(request: Request) {
           supportSurface: 'Strategy in development',
           rolloutNote: 'Content plan taking shape',
           fromCoachPlan: false,
+          priority: 60,
         });
       }
     }
 
-    // Sort: dated events first (by date), then undated events
+    // Sort: highest priority first, then by date within same priority tier
     upcomingMoments.sort((a, b) => {
+      if (a.priority !== b.priority) return b.priority - a.priority;
       if (a.date && b.date) return a.date.localeCompare(b.date);
       if (a.date && !b.date) return -1;
       if (!a.date && b.date) return 1;
