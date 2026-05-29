@@ -6,7 +6,7 @@ import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_ST
 import Sparkline from './Sparkline';
 import { TopChannelsModule } from './TopChannelsModule';
 import { ChannelScoreBadge } from './ChannelScoreBadge';
-import WeeklySpotlight, { type SpotlightChannel } from './WeeklySpotlight';
+// WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
 import {
   type ChannelScore,
   type ChannelScoreInput,
@@ -517,7 +517,6 @@ export default function ChannelHealthBoard({
   topVideos,
   marketFormatStats,
   singleTab = false,
-  spotlightChannels,
 }: {
   rows: RowData[];
   linkPrefix?: string;
@@ -525,8 +524,6 @@ export default function ChannelHealthBoard({
   marketFormatStats?: MarketFormatStats;
   /** Hide the managed/market toggle and show only the managed view */
   singleTab?: boolean;
-  /** Top 2-5 channels for Weekly Spotlight section */
-  spotlightChannels?: SpotlightChannel[];
 }) {
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -654,11 +651,6 @@ export default function ChannelHealthBoard({
             <span className="font-black" style={{ color: '#8A1F0C' }}>{mfWeak}</span> weak
           </span>
         </div>
-      )}
-
-      {/* ─── MANAGED VIEW: Weekly Channel Spotlight ─────────────────────── */}
-      {view === 'managed' && spotlightChannels && spotlightChannels.length > 0 && (
-        <WeeklySpotlight channels={spotlightChannels} linkPrefix={linkPrefix} />
       )}
 
       {/* ─── MANAGED VIEW: What Changed This Week ──────────────────────── */}

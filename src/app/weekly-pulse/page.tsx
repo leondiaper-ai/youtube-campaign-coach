@@ -1,4 +1,4 @@
-import WeeklyPulse from '@/components/WeeklyPulse';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'YouTube Weekly Pulse',
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function WeeklyPulsePage() {
-  return <WeeklyPulse />;
+  redirect('/weekly-pulse/campaign-briefing');
 }

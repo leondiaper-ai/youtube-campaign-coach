@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import PulseNav from './PulseNav';
 
 // ── Design System ───────────────────────────────────────────────────────────
 
@@ -231,7 +232,7 @@ function MomentCard({ m }: { m: UpcomingMoment }) {
 
 // ── Component ──────────────────────────────────────────────────────────────
 
-export default function PartnerBriefing() {
+export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav?: boolean } = {}) {
   const [data, setData] = useState<BriefingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -338,6 +339,13 @@ export default function PartnerBriefing() {
         </div>
       </div>
 
+
+      {/* ═══════ PULSE NAV (when embedded in weekly-pulse) ═══════ */}
+      {showPulseNav && (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
+          <PulseNav />
+        </div>
+      )}
 
       {/* ═══════ HERO SECTION ═══════ */}
       <header className="pb-fade" style={{

@@ -109,9 +109,15 @@ export default function HomePage() {
             desc="Shared team board — add artists, track campaigns, monitor health."
           />
           <ToolCard
-            href="/weekly-pulse"
-            title="Weekly Pulse"
-            desc="Weekly YouTube intelligence briefing — signals, moments, and opportunities."
+            href="/weekly-pulse/campaign-briefing"
+            title="Campaign Briefing"
+            desc="Weekly campaign report — priority campaigns, upcoming moments, and YouTube asks."
+            highlight
+          />
+          <ToolCard
+            href="/weekly-pulse/channel-spotlight"
+            title="Channel Spotlight"
+            desc="Top performing channels this week — what the data says is working."
             highlight
           />
         </div>
