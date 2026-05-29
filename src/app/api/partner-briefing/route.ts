@@ -34,6 +34,18 @@ import { computeMultiformat, type MultiformatScore } from '@/lib/contentStructur
 
 export const dynamic = 'force-dynamic';
 
+function fmtNum(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
+  return String(n);
+}
+
+function channelUrl(handle: string | null): string | null {
+  if (!handle) return null;
+  const h = handle.startsWith('@') ? handle : `@${handle}`;
+  return `https://www.youtube.com/${h}`;
+}
+
 // ── KV helpers (snapshot caching) ────────────────────────────────────────────
 
 async function kv() {
@@ -106,19 +118,24 @@ type FocusCampaign = {
   channel: BriefingChannel;
   heroImage: string;
   campaignPhase: string;
-  narrative: string;
-  contentStrategy: string;
-  ecosystemSignal: string;
-  nextMoments: string;
+  // ── Editorial card structure (NOW / NEXT / AFTER / YOUTUBE FOCUS) ──
+  nowLabel: string;            // What just happened — real YouTube activity
+  nowDetail: string;           // e.g. "Uploaded 3 days ago · 147K views"
+  nowThumbnail: string | null; // Thumbnail from the latest relevant upload
+  nextLabel: string;           // What's coming next
+  nextDate: string | null;     // e.g. "12 Jun"
+  afterLabel: string;          // What comes after that
+  afterDate: string | null;
+  youtubeFocus: string;        // One sentence: why it matters on YouTube
+  channelUrl: string | null;   // Direct link to YouTube channel
+  // ── Legacy fields kept for What Happens Next section ──
+  hasCoachPlan: boolean;
   currentMoment: string;
   currentMomentDate: string | null;
   nextMoment: string;
   nextMomentDate: string | null;
   upcomingMoment: string;
   upcomingMomentDate: string | null;
-  supportOpportunity: string;
-  hasCoachPlan: boolean;       // true if moments come from coach plan
-  formatBreakdown: string[];
   recentVideos: BriefingVideo[];
 };
 
@@ -146,6 +163,11 @@ type PartnerBriefingResponse = {
   topShorts: BriefingVideo[];
   topVideos: BriefingVideo[];
   ecosystemHighlights: { name: string; label: string; read: string; thumbnail: string | null; channelHandle: string | null }[];
+  momentsWatching: {
+    id: string; title: string; artistName: string; artistSlug: string;
+    thumbnail: string; viewCount: number; velocity: number; daysAgo: number;
+    format: string; durationSec: number; context: string;
+  }[];
 };
 
 // Focus campaigns are pulled exclusively from pinned active campaigns
@@ -668,23 +690,86 @@ export async function GET(request: Request) {
         }
       }
 
+      // ── NOW: derive from latest real YouTube upload ──────────────
+      const latestVid = vids[0] ?? null;
+      let nowLabel = '';
+      let nowDetail = '';
+      let nowThumbnail: string | null = null;
+
+      if (latestVid) {
+        nowLabel = `${latestVid.title}`;
+        const daysAgo = latestVid.daysAgo;
+        const timeAgo = daysAgo === 0 ? 'Uploaded today'
+          : daysAgo === 1 ? 'Uploaded yesterday'
+          : `Uploaded ${daysAgo} days ago`;
+        nowDetail = latestVid.viewCount > 0
+          ? `${timeAgo} · ${fmtNum(latestVid.viewCount)} views`
+          : timeAgo;
+        nowThumbnail = latestVid.thumbnail;
+      } else if (ch.lastUploadDaysAgo != null && ch.lastUploadDaysAgo <= 14) {
+        nowLabel = 'Recent upload activity';
+        nowDetail = `Last upload ${ch.lastUploadDaysAgo} days ago`;
+      } else {
+        nowLabel = 'No recent uploads';
+        nowDetail = ch.lastUploadDaysAgo != null
+          ? `Last upload ${ch.lastUploadDaysAgo} days ago`
+          : 'Channel inactive';
+      }
+
+      // Hero image: use latest upload thumbnail, not generic campaign art
+      const latestHeroImage = nowThumbnail
+        ? nowThumbnail.replace('/mqdefault.jpg', '/hqdefault.jpg')
+        : heroImage;
+
+      // ── YOUTUBE FOCUS: one real sentence, not generic ─────────
+      let youtubeFocus = '';
+      if (latestVid && currentMomentDate) {
+        const latestFormat = latestVid.format?.toLowerCase() ?? '';
+        if (/official video/i.test(latestFormat)) {
+          youtubeFocus = 'Follow-through content around latest official video.';
+        } else if (/bts|behind/i.test(latestFormat)) {
+          youtubeFocus = 'BTS momentum building into next release.';
+        } else if (/trailer/i.test(latestFormat)) {
+          youtubeFocus = 'Trailer live — bridge to release window.';
+        } else if (/live session|acoustic/i.test(latestFormat)) {
+          youtubeFocus = 'Live session extending release reach.';
+        } else if (/short/i.test(latestFormat) || latestVid.durationSec <= 62) {
+          youtubeFocus = 'Shorts activity keeping channel in recommendations.';
+        } else if (/visuali/i.test(latestFormat)) {
+          youtubeFocus = 'Visualiser adding catalogue depth.';
+        } else {
+          youtubeFocus = 'Maintain upload cadence through campaign window.';
+        }
+      } else if (currentMomentDate) {
+        youtubeFocus = 'Content needed ahead of next dated moment.';
+      } else if (latestVid) {
+        youtubeFocus = 'Keep momentum — follow through on latest upload.';
+      } else {
+        youtubeFocus = 'Needs content plan and upload activity.';
+      }
+
+      const chUrl = channelUrl(ch.channelHandle);
+
       return {
         channel: ch,
-        heroImage,
+        heroImage: latestHeroImage,
         campaignPhase: phaseLabel(ch.phase),
-        narrative: buildNarrative(ch),
-        contentStrategy: buildContentStrategy(ch),
-        ecosystemSignal: buildEcosystemSignal(ch),
-        nextMoments,
+        nowLabel,
+        nowDetail,
+        nowThumbnail,
+        nextLabel: currentMoment || 'To be confirmed',
+        nextDate: currentMomentDate,
+        afterLabel: nextMoment || 'To be confirmed',
+        afterDate: nextMomentDate,
+        youtubeFocus,
+        channelUrl: chUrl,
+        hasCoachPlan,
         currentMoment,
         currentMomentDate,
-        nextMoment,
+        nextMoment: nextMoment,
         nextMomentDate,
         upcomingMoment,
         upcomingMomentDate,
-        supportOpportunity,
-        hasCoachPlan,
-        formatBreakdown: buildFormatBreakdown(ch, vids),
         recentVideos: vids.slice(0, 3),
       };
     });
@@ -942,6 +1027,42 @@ export async function GET(request: Request) {
       topShorts,
       topVideos,
       ecosystemHighlights,
+      // Moments We're Watching — best-performing real content from last 7 days
+      momentsWatching: (() => {
+        // Collect all recent videos sorted by velocity, dedupe by artist (max 1 per)
+        const seen = new Set<string>();
+        const allVids: BriefingVideo[] = [];
+        videosBySlug.forEach((vids) => allVids.push(...vids));
+        return allVids
+          .sort((a, b) => b.velocity - a.velocity)
+          .filter(v => {
+            if (v.daysAgo > 7) return false; // last 7 days only
+            if (seen.has(v.artistSlug)) return false;
+            seen.add(v.artistSlug);
+            return true;
+          })
+          .slice(0, 4)
+          .map(v => ({
+            id: v.id,
+            title: v.title,
+            artistName: v.channelName,
+            artistSlug: v.artistSlug,
+            thumbnail: v.thumbnail,
+            viewCount: v.viewCount,
+            velocity: v.velocity,
+            daysAgo: v.daysAgo,
+            format: v.format,
+            durationSec: v.durationSec,
+            // One-line editorial context
+            context: (() => {
+              const fc = focusCampaigns.find(c => c.channel.slug === v.artistSlug);
+              if (!fc) return '';
+              if (fc.nextDate) return `Building into ${fc.nextLabel} (${fc.nextDate}).`;
+              if (fc.currentMomentDate) return `${fc.currentMoment} campaign active.`;
+              return '';
+            })(),
+          }));
+      })(),
     };
 
     if (redis) {
