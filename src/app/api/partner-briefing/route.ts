@@ -1140,9 +1140,21 @@ export async function GET(request: Request) {
           const vids = videosBySlug.get(slug);
           if (vids) pinnedVids.push(...vids);
         }
+        // Score each longform video: format priority + recency + velocity
+        const formatRank = (fmt: string): number => {
+          if (/official video/i.test(fmt)) return 100;
+          if (/bts|behind/i.test(fmt)) return 80;
+          if (/live session|acoustic/i.test(fmt)) return 70;
+          if (/trailer/i.test(fmt)) return 60;
+          if (/visuali/i.test(fmt)) return 50;
+          if (/lyric/i.test(fmt)) return 40;
+          if (/collab/i.test(fmt)) return 30;
+          return 10;
+        };
         return pinnedVids
-          .filter(v => v.durationSec > 62) // longform only — Shorts covered in hero
-          .sort((a, b) => b.velocity - a.velocity)
+          .filter(v => v.durationSec > 62) // longform only
+          .map(v => ({ ...v, _rank: formatRank(v.format) + (v.daysAgo <= 7 ? 50 : v.daysAgo <= 14 ? 20 : 0) + Math.min(v.velocity / 100, 50) }))
+          .sort((a, b) => (b as any)._rank - (a as any)._rank)
           .filter(v => {
             if (v.daysAgo > 14) return false;
             if (seen.has(v.artistSlug)) return false;
