@@ -444,11 +444,16 @@ export async function GET(request: Request) {
     const coachPlans = new Map<string, Awaited<ReturnType<typeof loadPlan>>>();
 
     // Build artist-slug → plan-slug mapping
+    // Plan slugs hyphenate words ("french-the-kid-french-the-kid-campaign")
+    // while channel slugs are compressed ("frenchthekid"). Normalise both
+    // by stripping hyphens so they can match via prefix comparison.
+    const norm = (s: string) => s.replace(/-/g, '');
     const artistSlugToPlanSlug = new Map<string, string>();
     for (const entry of planIndex) {
-      // Match: plan slug starts with "{artistSlug}-" (e.g. "k-trap-k-trap-campaign" starts with "k-trap-")
+      const planNorm = norm(entry.slug);
       for (const artistSlug of Array.from(pinnedSlugs)) {
-        if (entry.slug.startsWith(artistSlug + '-') || entry.slug === artistSlug) {
+        const artistNorm = norm(artistSlug);
+        if (planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm)) {
           // If multiple plans match, pick the most recently updated
           const existing = artistSlugToPlanSlug.get(artistSlug);
           if (!existing) {
@@ -470,6 +475,11 @@ export async function GET(request: Request) {
         if (plan) coachPlans.set(artistSlug, plan);
       })
     );
+
+    // Clean up event titles that start with stray date fragments
+    // e.g. ", 2026 – Mr. Alligator single release" → "Mr. Alligator single release"
+    const cleanTitle = (t: string) =>
+      t.replace(/^[,\s]*\d{4}\s*[–—-]\s*/, '').replace(/^[,\s]+/, '').trim();
 
     const focusCampaigns: FocusCampaign[] = rankedChannels.map(({ ch }) => {
       const vids = videosBySlug.get(ch.slug) ?? [];
@@ -493,7 +503,7 @@ export async function GET(request: Request) {
           .map((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
-            return { ...e, diff };
+            return { ...e, title: cleanTitle(e.title), diff };
           })
           .sort((a, b) => a.diff - b.diff);
 
@@ -693,7 +703,7 @@ export async function GET(request: Request) {
             upcomingMoments.push({
               artist: ch.name,
               slug: ch.slug,
-              moment: evt.title,
+              moment: cleanTitle(evt.title),
               date: evt.dateISO,
               timing: fmtTiming(evt.dateISO),
               eventType: eventTypeLabel(evt.kind),
