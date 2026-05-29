@@ -1133,14 +1133,17 @@ export async function GET(request: Request) {
       ecosystemHighlights,
       // Moments We're Watching — best-performing real content from last 7 days
       momentsWatching: (() => {
-        // Collect all recent videos sorted by velocity, dedupe by artist (max 1 per)
+        // ONLY from pinned campaigns — not all Virgin channels
         const seen = new Set<string>();
-        const allVids: BriefingVideo[] = [];
-        videosBySlug.forEach((vids) => allVids.push(...vids));
-        return allVids
+        const pinnedVids: BriefingVideo[] = [];
+        for (const slug of pinnedSlugs) {
+          const vids = videosBySlug.get(slug);
+          if (vids) pinnedVids.push(...vids);
+        }
+        return pinnedVids
           .sort((a, b) => b.velocity - a.velocity)
           .filter(v => {
-            if (v.daysAgo > 7) return false; // last 7 days only
+            if (v.daysAgo > 14) return false; // last 14 days
             if (seen.has(v.artistSlug)) return false;
             seen.add(v.artistSlug);
             return true;
