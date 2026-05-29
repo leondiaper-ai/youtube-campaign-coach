@@ -101,12 +101,13 @@ export async function GET() {
     }));
 
     // ── Minimum thresholds ─────────────────────────────────────────
-    // Channels must have real scale + activity to qualify for spotlight.
-    // This prevents tiny channels (e.g. 27 subs) from appearing just
-    // because any small gain looks disproportionately large.
-    const MIN_SUBS = 500;
-    const MIN_VIEWS_7D = 1000;
-    const MIN_UPLOADS_30D = 2;
+    // Channels must have real scale + genuine activity to qualify.
+    // The spotlight should show channels that are performing at
+    // meaningful scale — not micro channels where small gains
+    // look disproportionate.
+    const MIN_SUBS = 1000;
+    const MIN_VIEWS_7D = 5000;
+    const MIN_UPLOADS_30D = 3;
 
     const qualified = scored.filter(({ row }) => {
       if ((row.subs ?? 0) < MIN_SUBS) return false;
@@ -116,34 +117,60 @@ export async function GET() {
       return true;
     });
 
-    // Composite spotlight score — rewards genuine multi-format rollout,
-    // not just Shorts + one upload
+    // ── Composite spotlight score ────────────────────────────────
+    // Focuses on the four pillars that make a channel genuinely
+    // "spotlight-worthy": cadence, format diversity, scale, and conversion.
+    //
+    // Views scale matters here — this is a performance report, so
+    // a channel doing 229K views/week IS performing better than
+    // one doing 2.8K views/week, all else equal.
     const withComposite = qualified.map(({ row, score }) => {
-      let composite = score.totalPoints * 10; // 0–60 base
-      if (row.classification === 'GROWING') composite += 25;
-      if (row.status === 'HEALTHY') composite += 15;
-      // Multiformat (now stricter: requires anchor content)
+      let composite = 0;
+
+      // ── 1. Cadence (max 20) ─────────────────────────────────
+      if (row.uploads30d >= 10) composite += 20;
+      else if (row.uploads30d >= 6) composite += 14;
+      else if (row.uploads30d >= 3) composite += 8;
+
+      // ── 2. Multi-format strategy (max 25) ───────────────────
       if (row.multiformat?.score === 'Strong') composite += 25;
-      else if (row.multiformat?.score === 'Good') composite += 15;
-      else if (row.multiformat?.score === 'Partial') composite += 5;
-      // Cadence
-      if (row.uploads30d >= 8) composite += 12;
-      else if (row.uploads30d >= 4) composite += 6;
-      // Subscriber growth (real conversion signal)
-      if ((row.subs7Delta ?? 0) > 0) composite += 10;
-      // Channel score grade
-      if (score.grade === 'A') composite += 20;
-      else if (score.grade === 'B') composite += 10;
-      // Views momentum
-      if (row.viewsWoW != null && row.viewsWoW > 0) composite += 5;
-      // Penalise stale data
-      if (row.movementConfidence === 'stale') composite -= 20;
-      if (row.uploads30d === 0) composite -= 25;
+      else if (row.multiformat?.score === 'Good') composite += 18;
+      else if (row.multiformat?.score === 'Partial') composite += 8;
+
+      // ── 3. Views scale (max 30) ─────────────────────────────
+      // Performance report — real reach matters
+      const v7 = row.views7Delta ?? 0;
+      if (v7 >= 200000) composite += 30;
+      else if (v7 >= 100000) composite += 25;
+      else if (v7 >= 50000) composite += 20;
+      else if (v7 >= 20000) composite += 14;
+      else if (v7 >= 10000) composite += 8;
+      else if (v7 >= 5000) composite += 4;
+
+      // ── 4. Subscriber conversion (max 15) ───────────────────
+      const s7 = row.subs7Delta ?? 0;
+      if (s7 >= 500) composite += 15;
+      else if (s7 >= 100) composite += 12;
+      else if (s7 > 0) composite += 8;
+
+      // ── Bonuses ─────────────────────────────────────────────
+      // Growing classification — channel health system agrees
+      if (row.classification === 'GROWING') composite += 10;
+      // High channel score grade (execution quality)
+      if (score.grade === 'A') composite += 8;
+      else if (score.grade === 'B') composite += 4;
+
+      // ── Mild penalties ──────────────────────────────────────
+      // Stale data — mild penalty, don't crush active channels
+      if (row.movementConfidence === 'stale') composite -= 5;
+
       return { row, score, composite };
     });
 
+    // Take top 5, but only if they clear the bar (composite >= 40).
+    // Better to show 2 genuinely strong channels than 5 padded with weak ones.
     const top = withComposite
-      .filter((c) => c.composite > 35)
+      .filter((c) => c.composite >= 40)
       .sort((a, b) => b.composite - a.composite)
       .slice(0, 5);
 
