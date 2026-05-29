@@ -1141,9 +1141,10 @@ export async function GET(request: Request) {
           if (vids) pinnedVids.push(...vids);
         }
         return pinnedVids
+          .filter(v => v.durationSec > 62) // longform only — Shorts covered in hero
           .sort((a, b) => b.velocity - a.velocity)
           .filter(v => {
-            if (v.daysAgo > 14) return false; // last 14 days
+            if (v.daysAgo > 14) return false;
             if (seen.has(v.artistSlug)) return false;
             seen.add(v.artistSlug);
             return true;
