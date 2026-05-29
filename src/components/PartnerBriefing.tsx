@@ -518,76 +518,121 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32 }}>
-            {/* THIS WEEK */}
-            <div>
-              <div style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
-                textTransform: 'uppercase' as const, color: INK,
-                paddingBottom: 10, borderBottom: `2px solid ${INK}`,
-                marginBottom: 4,
-              }}>
-                This Week
-              </div>
-              {grouped.thisWeek.length > 0 ? (
-                grouped.thisWeek.map((m, i) => <MomentCard key={`tw-${i}`} m={m} />)
-              ) : (
-                <p style={{
-                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
-                  padding: '16px 0', margin: 0,
-                  fontFamily: 'Inter, system-ui, sans-serif',
-                }}>
-                  No confirmed dates this window — campaigns in content support mode.
-                </p>
-              )}
-            </div>
+          {/* Unified timeline — all moments sorted by date */}
+          {(() => {
+            // Merge all dated moments into a single sorted list
+            const allMoments = [
+              ...grouped.thisWeek,
+              ...grouped.nextTwoWeeks,
+              ...grouped.nextMonth,
+            ].sort((a, b) => {
+              if (a.date && b.date) return a.date.localeCompare(b.date);
+              if (a.date && !b.date) return -1;
+              return 1;
+            });
 
-            {/* NEXT TWO WEEKS */}
-            <div>
+            return (
               <div style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
-                textTransform: 'uppercase' as const, color: INK,
-                paddingBottom: 10, borderBottom: `2px solid ${BONE}`,
-                marginBottom: 4,
+                background: WHITE, borderRadius: 12, border: `1px solid ${BONE}`,
+                overflow: 'hidden',
               }}>
-                Next 7–14 Days
-              </div>
-              {grouped.nextTwoWeeks.length > 0 ? (
-                grouped.nextTwoWeeks.map((m, i) => <MomentCard key={`nt-${i}`} m={m} />)
-              ) : (
-                <p style={{
-                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
-                  padding: '16px 0', margin: 0,
-                  fontFamily: 'Inter, system-ui, sans-serif',
+                {/* Header row */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '80px 1fr 140px 180px',
+                  gap: 12, padding: '10px 20px',
+                  borderBottom: `2px solid ${INK}`,
                 }}>
-                  Planning window open — content strategies in development.
-                </p>
-              )}
-            </div>
+                  <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST }}>Date</span>
+                  <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST }}>Moment</span>
+                  <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST }}>Type</span>
+                  <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST }}>YouTube Surface</span>
+                </div>
 
-            {/* NEXT MONTH */}
-            <div>
-              <div style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
-                textTransform: 'uppercase' as const, color: INK,
-                paddingBottom: 10, borderBottom: `2px solid ${BONE}`,
-                marginBottom: 4,
-              }}>
-                Next 30 Days
+                {allMoments.map((m, i) => {
+                  const dateObj = m.date ? new Date(m.date + (m.date.length === 10 ? 'T00:00:00' : '')) : null;
+                  const fmtDate = dateObj
+                    ? dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+                    : '—';
+                  const now = Date.now();
+                  const diffDays = dateObj ? Math.round((dateObj.getTime() - now) / 86400000) : null;
+                  const isPast = diffDays != null && diffDays < 0;
+                  const isThisWeek = diffDays != null && diffDays >= 0 && diffDays <= 7;
+
+                  return (
+                    <div
+                      key={`m-${i}`}
+                      style={{
+                        display: 'grid', gridTemplateColumns: '80px 1fr 140px 180px',
+                        gap: 12, padding: '12px 20px',
+                        borderBottom: `1px solid ${BONE}`,
+                        background: isThisWeek ? 'rgba(45,106,79,0.03)' : 'transparent',
+                        opacity: isPast ? 0.5 : 1,
+                      }}
+                    >
+                      {/* Date */}
+                      <div>
+                        <span style={{
+                          fontSize: 13, fontWeight: 800, color: isThisWeek ? ACCENT.green : INK,
+                        }}>
+                          {fmtDate}
+                        </span>
+                        {diffDays != null && diffDays >= 0 && diffDays <= 14 && (
+                          <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
+                            {diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : `In ${diffDays}d`}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Artist + moment */}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+                          <span style={{
+                            fontSize: 11, fontWeight: 800, color: INK,
+                            letterSpacing: '0.02em', textTransform: 'uppercase' as const,
+                          }}>
+                            {m.artist}
+                          </span>
+                          {m.fromCoachPlan && (
+                            <span style={{
+                              fontSize: 7, fontWeight: 700, letterSpacing: '0.08em',
+                              textTransform: 'uppercase' as const,
+                              color: ACCENT.green, opacity: 0.6,
+                            }}>
+                              Planner
+                            </span>
+                          )}
+                        </div>
+                        <span style={{
+                          fontSize: 13, fontWeight: 500, color: WARM, lineHeight: 1.35,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {m.moment}
+                        </span>
+                      </div>
+
+                      {/* Event type */}
+                      <div style={{ paddingTop: 2 }}>
+                        <span style={{
+                          display: 'inline-block', padding: '3px 8px', borderRadius: 12,
+                          fontSize: 9, fontWeight: 700, color: ACCENT.green,
+                          background: 'rgba(45,106,79,0.06)',
+                        }}>
+                          {m.eventType}
+                        </span>
+                      </div>
+
+                      {/* Support surface */}
+                      <div style={{ paddingTop: 2 }}>
+                        <span style={{ fontSize: 10, color: SMOKE }}>
+                          {m.supportSurface}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              {grouped.nextMonth.length > 0 ? (
-                grouped.nextMonth.map((m, i) => <MomentCard key={`nm-${i}`} m={m} />)
-              ) : (
-                <p style={{
-                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
-                  padding: '16px 0', margin: 0,
-                  fontFamily: 'Inter, system-ui, sans-serif',
-                }}>
-                  Longer-range campaign moments in planning.
-                </p>
-              )}
-            </div>
-          </div>
+            );
+          })()}
         </section>
       )}
 
