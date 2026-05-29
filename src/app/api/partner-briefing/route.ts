@@ -118,17 +118,16 @@ type FocusCampaign = {
   channel: BriefingChannel;
   heroImage: string;
   campaignPhase: string;
-  // ── Editorial card structure (NOW / NEXT / AFTER / YOUTUBE FOCUS) ──
-  nowLabel: string;            // What just happened — real YouTube activity
-  nowDetail: string;           // e.g. "Uploaded 3 days ago · 147K views"
-  nowThumbnail: string | null; // Thumbnail from the latest relevant upload
-  nextLabel: string;           // What's coming next
-  nextDate: string | null;     // e.g. "12 Jun"
-  afterLabel: string;          // What comes after that
+  // ── Editorial card structure ──
+  nowLabel: string;
+  nowDetail: string;
+  nowThumbnail: string | null;
+  nextLabel: string;
+  nextDate: string | null;
+  afterLabel: string;
   afterDate: string | null;
-  youtubeFocus: string;        // One sentence: why it matters on YouTube
-  channelUrl: string | null;   // Direct link to YouTube channel
-  // ── Legacy fields kept for What Happens Next section ──
+  youtubeFocus: string;
+  channelUrl: string | null;
   hasCoachPlan: boolean;
   currentMoment: string;
   currentMomentDate: string | null;
@@ -137,6 +136,12 @@ type FocusCampaign = {
   upcomingMoment: string;
   upcomingMomentDate: string | null;
   recentVideos: BriefingVideo[];
+  // ── Editorial priority (hidden score, drives hierarchy) ──
+  editorialPriority: number;        // hidden composite score
+  editorialHeadline: string;        // curated editorial lede
+  editorialWhyItMatters: string;    // one paragraph: why this campaign matters now
+  standoutVideo: BriefingVideo | null; // best-performing video for scale proof
+  isPriority: boolean;              // true = large card, false = small card
 };
 
 type UpcomingMoment = {
@@ -585,6 +590,144 @@ export async function GET(request: Request) {
       return 60;
     };
 
+    // ── Editorial Priority Scoring ──────────────────────────────────────
+    // Hidden composite score that drives visual hierarchy.
+    // NOT displayed publicly — only controls card size and ordering.
+    const computeEditorialPriority = (
+      ch: BriefingChannel,
+      vids: BriefingVideo[],
+      hasCoachPlan: boolean,
+      nextDateStr: string | null,
+    ): number => {
+      let score = 0;
+
+      // A. Recent momentum (max 25)
+      const v7 = ch.views7d ?? 0;
+      if (v7 >= 500000) score += 25;
+      else if (v7 >= 100000) score += 20;
+      else if (v7 >= 50000) score += 15;
+      else if (v7 >= 10000) score += 10;
+      else if (v7 >= 5000) score += 5;
+      if ((ch.subs7d ?? 0) > 0) score += 5;
+      if ((ch.subsPer1kViews ?? 0) >= 3) score += 5;
+
+      // B. Recent content quality (max 25)
+      const recentVids = vids.filter(v => v.daysAgo <= 14);
+      if (recentVids.length >= 3) score += 10;
+      else if (recentVids.length >= 1) score += 5;
+      const hasOfficialRecent = recentVids.some(v => /official video/i.test(v.format));
+      const hasBTSRecent = recentVids.some(v => /bts|behind/i.test(v.format));
+      const hasTrailerRecent = recentVids.some(v => /trailer/i.test(v.format));
+      const hasLiveRecent = recentVids.some(v => /live session/i.test(v.format));
+      if (hasOfficialRecent) score += 8;
+      if (hasBTSRecent) score += 4;
+      if (hasTrailerRecent) score += 3;
+      if (hasLiveRecent) score += 3;
+
+      // C. Campaign story (max 20)
+      if (hasCoachPlan) score += 5;
+      if (nextDateStr) {
+        const nextDate = new Date(nextDateStr + 'T00:00:00');
+        const daysUntil = Math.round((nextDate.getTime() - now) / 86400000);
+        if (daysUntil >= 0 && daysUntil <= 14) score += 10;
+        else if (daysUntil >= 0 && daysUntil <= 30) score += 6;
+      }
+      if (ch.uploads30d >= 6) score += 5;
+
+      // D. Ecosystem depth (max 15)
+      if (ch.multiformatScore === 'Strong') score += 15;
+      else if (ch.multiformatScore === 'Good') score += 10;
+      else if (ch.multiformatScore === 'Partial') score += 4;
+
+      // E. Standout scale (max 15)
+      const topVid = vids[0];
+      if (topVid) {
+        if (topVid.viewCount >= 500000) score += 15;
+        else if (topVid.viewCount >= 100000) score += 12;
+        else if (topVid.viewCount >= 50000) score += 8;
+        else if (topVid.viewCount >= 10000) score += 4;
+      }
+
+      return score;
+    }
+
+    // ── Editorial Headline Generator ─────────────────────────────────
+    const generateEditorialHeadline = (
+      ch: BriefingChannel,
+      vids: BriefingVideo[],
+      hasCoachPlan: boolean,
+    ): string => {
+      const topVid = vids[0];
+      const recentVids = vids.filter(v => v.daysAgo <= 14);
+      const hasOfficialRecent = recentVids.some(v => /official video/i.test(v.format));
+      const hasBTS = recentVids.some(v => /bts|behind/i.test(v.format));
+      const hasTrailer = recentVids.some(v => /trailer/i.test(v.format));
+
+      // Standout video scale
+      if (topVid && topVid.viewCount >= 500000) {
+        return `Major video moment with scale. ${topVid.title.split(' - ').pop()?.trim() || topVid.title} driving significant YouTube attention.`;
+      }
+      // Active rollout with multiple formats
+      if (recentVids.length >= 3 && ch.uploads30d >= 6) {
+        return `High-activity campaign window. Multiple content moments and consistent follow-through across the rollout.`;
+      }
+      // Official video just landed
+      if (hasOfficialRecent && topVid) {
+        return `Official video live and building momentum. Strong visual identity anchoring the campaign.`;
+      }
+      // BTS/trailer building toward something
+      if ((hasBTS || hasTrailer) && hasCoachPlan) {
+        return `Campaign world building with supporting content. BTS and trailer activity bridging into the next release.`;
+      }
+      // Strong execution story
+      if (ch.uploads30d >= 4 && ch.classification === 'GROWING') {
+        return `Consistent multi-format execution. Upload cadence and format variety driving sustainable channel growth.`;
+      }
+      // Strong conversion
+      if ((ch.subsPer1kViews ?? 0) >= 3) {
+        return `Strong audience conversion. Content is turning viewers into subscribers at above-average rates.`;
+      }
+      // Large channel ecosystem
+      if ((ch.subs ?? 0) >= 100000 && ch.uploads30d >= 3) {
+        return `Established channel ecosystem. Consistent catalogue visibility and channel depth driving ongoing YouTube value.`;
+      }
+      // Has content but less standout
+      if (recentVids.length >= 1) {
+        return `Active campaign with recent content. Building toward the next key moment.`;
+      }
+      // Fallback
+      return `Campaign in development. Content strategy taking shape.`;
+    }
+
+    // ── "Why It Matters" Generator ───────────────────────────────────
+    const generateWhyItMatters = (
+      ch: BriefingChannel,
+      vids: BriefingVideo[],
+      hasCoachPlan: boolean,
+      nextMoment: string,
+      nextDate: string | null,
+    ): string => {
+      const topVid = vids[0];
+      const recentCount = vids.filter(v => v.daysAgo <= 14).length;
+
+      if (topVid && topVid.viewCount >= 100000 && nextDate) {
+        return `${topVid.title.length > 50 ? topVid.title.slice(0, 47) + '...' : topVid.title} has created a strong foundation. The campaign is now moving from initial impact into ${nextMoment}, with content momentum already established.`;
+      }
+      if (recentCount >= 3 && hasCoachPlan) {
+        return `${recentCount} pieces of content in the last two weeks show a channel running a proper rollout. The cadence and format variety are building compounding recommendation signals.`;
+      }
+      if (nextDate && hasCoachPlan) {
+        return `A clear content plan is in motion. The upcoming ${nextMoment} gives the campaign a defined target, with current content building the audience ahead of the moment.`;
+      }
+      if (ch.uploads30d >= 6) {
+        return `Strong upload consistency — ${ch.uploads30d} uploads in 30 days keeps the channel active in YouTube's recommendation system. This is the kind of sustained activity that builds long-term channel value.`;
+      }
+      if (topVid && topVid.viewCount >= 10000) {
+        return `Recent content is performing and the channel has YouTube's attention. The opportunity is to follow through with supporting uploads to extend the recommendation window.`;
+      }
+      return `Channel activity is present. The focus should be on building a consistent content cadence and connecting uploads to upcoming campaign moments.`;
+    }
+
     const focusCampaigns: FocusCampaign[] = rankedChannels.map(({ ch }) => {
       const vids = videosBySlug.get(ch.slug) ?? [];
       const bestVideo = [...vids].sort((a, b) => b.velocity - a.velocity)[0];
@@ -770,16 +913,46 @@ export async function GET(request: Request) {
         nextMomentDate,
         upcomingMoment,
         upcomingMomentDate,
-        recentVideos: vids.slice(0, 3),
+        recentVideos: vids.slice(0, 5),
+        // Editorial priority fields (computed after all campaigns are built)
+        editorialPriority: 0,
+        editorialHeadline: '',
+        editorialWhyItMatters: '',
+        standoutVideo: vids.length > 0 ? vids[0] : null,
+        isPriority: false,
       };
     });
 
-    // Sort: campaigns with real dated moments first, then dateless
-    focusCampaigns.sort((a, b) => {
-      const aHasDates = a.currentMomentDate ? 1 : 0;
-      const bHasDates = b.currentMomentDate ? 1 : 0;
-      return bHasDates - aHasDates; // dated first
-    });
+    // ── Compute editorial priority and assign hierarchy ──────────────
+    for (const fc of focusCampaigns) {
+      const vids = videosBySlug.get(fc.channel.slug) ?? [];
+      fc.editorialPriority = computeEditorialPriority(
+        fc.channel, vids, fc.hasCoachPlan,
+        fc.currentMomentDate ? fc.currentMoment : null,
+      );
+      fc.editorialHeadline = generateEditorialHeadline(fc.channel, vids, fc.hasCoachPlan);
+      fc.editorialWhyItMatters = generateWhyItMatters(
+        fc.channel, vids, fc.hasCoachPlan, fc.nextLabel, fc.nextDate,
+      );
+      // Standout: pick best-performing video (highest views)
+      const bestVid = [...vids].sort((a, b) => b.viewCount - a.viewCount)[0];
+      if (bestVid) fc.standoutVideo = bestVid;
+    }
+
+    // Sort by editorial priority (highest first)
+    focusCampaigns.sort((a, b) => b.editorialPriority - a.editorialPriority);
+
+    // Top 3-5 are "priority" — get large editorial cards
+    // Minimum score of 30 to qualify as priority
+    const PRIORITY_MIN = 30;
+    const PRIORITY_MAX = 5;
+    let priorityCount = 0;
+    for (const fc of focusCampaigns) {
+      if (priorityCount < PRIORITY_MAX && fc.editorialPriority >= PRIORITY_MIN) {
+        fc.isPriority = true;
+        priorityCount++;
+      }
+    }
 
     // ── Platform Observations (scoped to pinned campaigns) ─────────────────
 

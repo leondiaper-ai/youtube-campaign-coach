@@ -60,6 +60,12 @@ type FocusCampaign = {
   upcomingMoment: string;
   upcomingMomentDate: string | null;
   recentVideos: BriefingVideo[];
+  // Editorial priority
+  editorialPriority: number;
+  editorialHeadline: string;
+  editorialWhyItMatters: string;
+  standoutVideo: BriefingVideo | null;
+  isPriority: boolean;
 };
 
 type UpcomingMoment = {
@@ -529,86 +535,188 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
       )}
 
 
-      {/* ═══════ ACTIVE CAMPAIGNS — NOW / NEXT / AFTER / YOUTUBE FOCUS ═══════ */}
-      <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-        <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+      {/* ═══════ EDITORIAL PRIORITY CAMPAIGNS ═══════ */}
+      {(() => {
+        const priority = data.focusCampaigns.filter(fc => fc.isPriority);
+        const remaining = data.focusCampaigns.filter(fc => !fc.isPriority);
 
-        <div style={{ marginBottom: 28 }}>
-          <div style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-            textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
-          }}>
-            Active Campaigns
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
-          {data.focusCampaigns.map(fc => (
-            <a
-              key={fc.channel.slug}
-              href={fc.channelUrl ?? '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pb-campaign-card pb-link"
-              style={{
-                display: 'block', borderRadius: 8, overflow: 'hidden',
-                background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none',
-              }}
-            >
-              {/* Hero — latest upload thumbnail */}
-              <div style={{ position: 'relative', overflow: 'hidden', height: 120 }}>
-                <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
-                <div style={{ position: 'absolute', bottom: 10, left: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {fc.channel.thumbnail && (
-                    <img src={fc.channel.thumbnail} alt="" style={{
-                      width: 22, height: 22, borderRadius: '50%', objectFit: 'cover',
-                      border: '2px solid rgba(255,255,255,0.3)',
-                    }} />
-                  )}
-                  <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
-                    {fc.channel.name}
-                  </span>
-                </div>
-              </div>
-
-              {/* Editorial card body — NOW / NEXT / AFTER / YOUTUBE FOCUS */}
-              <div style={{ padding: '14px 16px 16px' }}>
-                {/* NOW */}
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Now</div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
-                  <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
-                </div>
-
-                {/* NEXT + AFTER side by side */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Next</div>
-                    <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
-                    {fc.nextDate && <div style={{ fontSize: 10, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
+        return (
+          <>
+            {priority.length > 0 && (
+              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+                <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{
+                    fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+                    textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+                  }}>
+                    Priority Campaigns
                   </div>
-                  <div>
-                    <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>After</div>
-                    <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
-                    {fc.afterDate && <div style={{ fontSize: 10, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
+                  <p style={{
+                    fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
+                    maxWidth: 560, margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                  }}>
+                    The strongest YouTube campaigns this week — selected by performance, content activity, and campaign momentum.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  {priority.map(fc => (
+                    <a
+                      key={fc.channel.slug}
+                      href={fc.channelUrl ?? '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pb-campaign-card pb-link"
+                      style={{
+                        display: 'grid', gridTemplateColumns: '1fr 1fr',
+                        borderRadius: 10, overflow: 'hidden',
+                        background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none',
+                      }}
+                    >
+                      {/* Left — hero image from strongest/latest video */}
+                      <div style={{ position: 'relative', overflow: 'hidden', minHeight: 260 }}>
+                        <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.65) 100%)' }} />
+                        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                            {fc.channel.thumbnail && (
+                              <img src={fc.channel.thumbnail} alt="" style={{
+                                width: 28, height: 28, borderRadius: '50%', objectFit: 'cover',
+                                border: '2px solid rgba(255,255,255,0.3)',
+                              }} />
+                            )}
+                            <span style={{ fontSize: 12, fontWeight: 800, color: WHITE, letterSpacing: '0.04em', textTransform: 'uppercase' as const }}>
+                              {fc.channel.name}
+                            </span>
+                          </div>
+                          {/* Standout video scale proof */}
+                          {fc.standoutVideo && fc.standoutVideo.viewCount >= 10000 && (
+                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>
+                              {fc.standoutVideo.title.length > 60 ? fc.standoutVideo.title.slice(0, 57) + '...' : fc.standoutVideo.title} — {fmtNum(fc.standoutVideo.viewCount)} views
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right — editorial content */}
+                      <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <p style={{
+                          fontSize: 14, fontWeight: 500, color: WARM, lineHeight: 1.5,
+                          margin: '0 0 16px', fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.editorialHeadline}
+                        </p>
+
+                        {/* NOW */}
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Now</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
+                          <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
+                        </div>
+
+                        {/* NEXT + AFTER */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+                          <div>
+                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Next</div>
+                            <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
+                            {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>After</div>
+                            <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
+                            {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
+                          </div>
+                        </div>
+
+                        {/* WHY IT MATTERS */}
+                        <div style={{
+                          padding: '10px 12px', borderRadius: 6,
+                          background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}`,
+                          fontSize: 11, fontWeight: 400, color: WARM, lineHeight: 1.5,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.editorialWhyItMatters}
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ═══════ ALL OTHER ACTIVE CAMPAIGNS (smaller cards) ═══════ */}
+            {remaining.length > 0 && (
+              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+                {priority.length > 0 && <div style={{ height: 1, background: BONE, marginBottom: 40 }} />}
+                {priority.length === 0 && <div style={{ height: 1, background: BONE, marginBottom: 40 }} />}
+
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{
+                    fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+                    textTransform: 'uppercase' as const, color: GHOST,
+                  }}>
+                    {priority.length > 0 ? 'Other Active Campaigns' : 'Active Campaigns'}
                   </div>
                 </div>
 
-                {/* YOUTUBE FOCUS */}
-                <div style={{
-                  padding: '8px 10px', borderRadius: 6,
-                  background: 'rgba(45,106,79,0.04)',
-                  fontSize: 10, fontWeight: 500, color: ACCENT.green, lineHeight: 1.4,
-                }}>
-                  {fc.youtubeFocus}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  {remaining.map(fc => (
+                    <a
+                      key={fc.channel.slug}
+                      href={fc.channelUrl ?? '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pb-campaign-card pb-link"
+                      style={{
+                        display: 'block', borderRadius: 8, overflow: 'hidden',
+                        background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none',
+                      }}
+                    >
+                      <div style={{ position: 'relative', overflow: 'hidden', height: 100 }}>
+                        <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
+                        <div style={{ position: 'absolute', bottom: 8, left: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {fc.channel.thumbnail && (
+                            <img src={fc.channel.thumbnail} alt="" style={{
+                              width: 20, height: 20, borderRadius: '50%', objectFit: 'cover',
+                              border: '2px solid rgba(255,255,255,0.3)',
+                            }} />
+                          )}
+                          <span style={{ fontSize: 10, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
+                            {fc.channel.name}
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ padding: '10px 14px 12px' }}>
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Now</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
+                          <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>{fc.nowDetail}</div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                          <div>
+                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Next</div>
+                            <div style={{ fontSize: 10, fontWeight: 500, color: WARM, lineHeight: 1.25 }}>{fc.nextLabel}</div>
+                            {fc.nextDate && <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT.green, marginTop: 1 }}>{fc.nextDate}</div>}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>After</div>
+                            <div style={{ fontSize: 10, fontWeight: 500, color: WARM, lineHeight: 1.25 }}>{fc.afterLabel}</div>
+                            {fc.afterDate && <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT.green, marginTop: 1 }}>{fc.afterDate}</div>}
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
                 </div>
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
+              </section>
+            )}
+          </>
+        );
+      })()}
 
 
       {/* ═══════ MOMENTS WE'RE WATCHING — Real content, real views ═══════ */}
