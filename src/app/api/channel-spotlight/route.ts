@@ -224,16 +224,18 @@ export async function GET() {
       const snap = artist?.channelHandle ? (snapMap.get(artist.channelHandle) ?? null) : null;
       const longform30d = row.uploads30d - row.shorts30d;
 
-      // Recent videos — top 5 by velocity from last 14d
+      // Recent videos — top 5 by velocity from last 30d
+      // Wider window than watcher (14d) to ensure channels with
+      // steady uploads across the month still show content.
       const recentVideos: any[] = [];
       if (snap?.recentUploads) {
-        const cutoff = 14 * 86400000;
+        const cutoff = 30 * 86400000;
         for (const u of snap.recentUploads) {
           const ageMs = now - new Date(u.publishedAt).getTime();
           if (ageMs > cutoff || ageMs < 0) continue;
           const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
           const velocity = Math.round(u.viewCount / daysAgo);
-          if (velocity < 50) continue;
+          if (velocity < 10) continue; // lower bar — show what the channel is doing
           const isShort = u.durationSec <= 62;
           let format = 'Upload';
           try { format = classifyUploadFormat(u); } catch { /* fallback */ }
