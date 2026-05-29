@@ -752,26 +752,26 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           )}
                         </div>
                       </div>
-                      {/* Right — evidence */}
+                      {/* Right — pure evidence */}
                       <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         {/* Format tags */}
                         <FormatTags videos={fc.recentVideos} />
-                        {/* LATEST */}
+                        {/* CURRENT */}
                         <div style={{ marginBottom: 14 }}>
-                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Latest</div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
-                          <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
+                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Current</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
+                          <div style={{ fontSize: 11, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
                         </div>
-                        {/* BIGGEST MOMENT (if standout video is different from latest) */}
+                        {/* SCALE (only if meaningful and different from current) */}
                         {fc.standoutVideo && fc.standoutVideo.viewCount >= 50000 && fc.standoutVideo.id !== fc.recentVideos[0]?.id && (
                           <div style={{ marginBottom: 14 }}>
                             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Scale</div>
                             <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.standoutVideo.title.length > 50 ? fc.standoutVideo.title.slice(0, 47) + '...' : fc.standoutVideo.title}</div>
-                            <div style={{ fontSize: 10, color: SMOKE, marginTop: 1 }}>{fmtNum(fc.standoutVideo.viewCount)} views</div>
+                            <div style={{ fontSize: 11, color: SMOKE, marginTop: 1 }}>{fmtNum(fc.standoutVideo.viewCount)} views</div>
                           </div>
                         )}
-                        {/* NEXT */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 10 }}>
+                        {/* NEXT + AFTER */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                           <div>
                             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 3 }}>Next</div>
                             <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
@@ -783,9 +783,10 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
                           </div>
                         </div>
-                        {/* YOUTUBE FOCUS */}
-                        <div style={{ padding: '7px 10px', borderRadius: 5, background: 'rgba(45,106,79,0.04)', fontSize: 10, fontWeight: 500, color: ACCENT.green, lineHeight: 1.4 }}>
-                          {fc.youtubeFocus}
+                        {/* Activity stat */}
+                        <div style={{ fontSize: 10, color: SMOKE }}>
+                          {fc.channel.uploads30d} uploads in 30 days
+                          {fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}
                         </div>
                       </div>
                     </a>
@@ -819,11 +820,11 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       <div style={{ padding: '10px 14px 12px' }}>
                         <FormatTags videos={fc.recentVideos} />
                         <div style={{ marginBottom: 8 }}>
-                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Latest</div>
+                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Current</div>
                           <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
                           <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>{fc.nowDetail}</div>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 6 }}>
                           <div>
                             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Next</div>
                             <div style={{ fontSize: 10, fontWeight: 500, color: WARM, lineHeight: 1.25 }}>{fc.nextLabel}</div>
@@ -835,6 +836,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             {fc.afterDate && <div style={{ fontSize: 9, fontWeight: 700, color: ACCENT.green, marginTop: 1 }}>{fc.afterDate}</div>}
                           </div>
                         </div>
+                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d</div>
                       </div>
                     </a>
                   ))}
