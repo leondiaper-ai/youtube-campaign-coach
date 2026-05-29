@@ -281,6 +281,55 @@ function MomentCell({ label, title, date, color, dateColor }: {
   );
 }
 
+// ── Format Tags (content mix at a glance) ────────────────────────────────
+
+const FORMAT_TAG_STYLE: Record<string, { bg: string; fg: string }> = {
+  'Official Video': { bg: '#E6F8EE', fg: '#2D6A4F' },
+  'Lyric Video':    { bg: '#E8F0FE', fg: '#1A56B8' },
+  'Visualizer':     { bg: '#F0E8FE', fg: '#6B21A8' },
+  'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
+  'Live Session':   { bg: '#FFEAD6', fg: '#8A4A1A' },
+  'Short':          { bg: '#F3F0EA', fg: '#4A4640' },
+  'Collab':         { bg: '#E6F8EE', fg: '#2D6A4F' },
+  'Premiere':       { bg: '#E8F0FE', fg: '#1A56B8' },
+  'Trailer':        { bg: '#FFF5D6', fg: '#7A5A00' },
+};
+
+function FormatTags({ videos }: { videos: BriefingVideo[] }) {
+  // Derive unique format types from recent videos
+  const formats = new Set<string>();
+  for (const v of videos) {
+    const fmt = v.format;
+    if (v.durationSec <= 62) formats.add('Short');
+    if (/official video/i.test(fmt)) formats.add('Official Video');
+    else if (/lyric/i.test(fmt)) formats.add('Lyric Video');
+    else if (/visuali/i.test(fmt)) formats.add('Visualizer');
+    else if (/bts|behind/i.test(fmt)) formats.add('BTS');
+    else if (/live session|acoustic/i.test(fmt)) formats.add('Live Session');
+    else if (/collab/i.test(fmt)) formats.add('Collab');
+    else if (/trailer/i.test(fmt)) formats.add('Trailer');
+    else if (/premiere/i.test(fmt)) formats.add('Premiere');
+  }
+  if (formats.size === 0) return null;
+
+  return (
+    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12 }}>
+      {Array.from(formats).map(fmt => {
+        const s = FORMAT_TAG_STYLE[fmt] ?? { bg: '#F3F0EA', fg: '#4A4640' };
+        return (
+          <span key={fmt} style={{
+            display: 'inline-block', padding: '2px 8px', borderRadius: 10,
+            fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+            background: s.bg, color: s.fg,
+          }}>
+            {fmt}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav?: boolean } = {}) {
@@ -604,10 +653,13 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <p style={{
                           fontSize: 14, fontWeight: 500, color: WARM, lineHeight: 1.5,
-                          margin: '0 0 16px', fontFamily: 'Inter, system-ui, sans-serif',
+                          margin: '0 0 12px', fontFamily: 'Inter, system-ui, sans-serif',
                         }}>
                           {fc.editorialHeadline}
                         </p>
+
+                        {/* Content format tags */}
+                        <FormatTags videos={fc.recentVideos} />
 
                         {/* NOW */}
                         <div style={{ marginBottom: 14 }}>
@@ -691,6 +743,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                         </div>
                       </div>
                       <div style={{ padding: '10px 14px 12px' }}>
+                        <FormatTags videos={fc.recentVideos} />
                         <div style={{ marginBottom: 8 }}>
                           <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Now</div>
                           <div style={{ fontSize: 12, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
