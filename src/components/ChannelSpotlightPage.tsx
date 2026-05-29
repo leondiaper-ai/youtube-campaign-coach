@@ -182,45 +182,18 @@ export default function ChannelSpotlightPage() {
         {/* ── Spotlight Content ───────────────────────────────────── */}
         {data && !loading && (
           <>
-            {/* Summary strip */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 24,
-                padding: '14px 20px',
-                background: WHITE,
-                borderRadius: 12,
-                border: `1px solid ${BONE}`,
-                marginBottom: 24,
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: ACCENT.green }}>
-                  {data.channels.length}
-                </div>
-                <div style={{ fontSize: 10, color: SMOKE, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
-                  Spotlight Channels
-                </div>
-              </div>
-              <div style={{ width: 1, height: 32, background: BONE }} />
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: INK }}>
-                  {data.totalManaged}
-                </div>
-                <div style={{ fontSize: 10, color: SMOKE, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
-                  Total Managed
-                </div>
-              </div>
-              <div style={{ width: 1, height: 32, background: BONE }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, color: WARM, lineHeight: 1.5 }}>
-                  These channels are running the strongest combination of content cadence, format diversity, and audience conversion this week.
-                </div>
-              </div>
+            {/* Summary line */}
+            <div style={{
+              display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 28,
+              paddingBottom: 16, borderBottom: `1px solid ${BONE}`,
+            }}>
+              <span style={{ fontSize: 28, fontWeight: 900, color: ACCENT.green }}>{data.channels.length}</span>
+              <span style={{ fontSize: 13, color: SMOKE }}>
+                of {data.totalManaged} managed channels in the spotlight this week
+              </span>
             </div>
 
-            {/* Spotlight cards (reusing the module) */}
+            {/* Spotlight cards */}
             <WeeklySpotlight channels={data.channels} linkPrefix="/watcher" />
 
             {/* Handwritten annotation */}
@@ -228,18 +201,18 @@ export default function ChannelSpotlightPage() {
               <div
                 style={{
                   fontFamily: 'Caveat, cursive',
-                  fontSize: 16,
+                  fontSize: 17,
                   color: ACCENT.amber,
-                  transform: 'rotate(-1deg)',
-                  marginTop: 24,
-                  marginLeft: 12,
+                  transform: 'rotate(-0.8deg)',
+                  marginTop: 32,
+                  marginLeft: 8,
                   lineHeight: 1.4,
                 }}
               >
                 {data.channels.length >= 3
-                  ? `${data.channels.length} channels firing this week — the multi-format approach is paying off.`
+                  ? `${data.channels.length} channels firing this week — the multi-format approach is paying off across the roster.`
                   : data.channels.length >= 1
-                    ? `${data.channels[0].name} leading the pack — strong execution setting the standard.`
+                    ? `${data.channels[0].name} leading the way — strong execution setting the standard for the roster.`
                     : 'Building momentum across the roster.'}
               </div>
             )}

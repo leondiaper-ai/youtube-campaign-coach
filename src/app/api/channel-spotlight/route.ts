@@ -190,6 +190,7 @@ export async function GET() {
           recentVideos.push({
             id: u.id, title: u.title, views: u.viewCount, velocity, daysAgo,
             format: typeof format === 'string' ? format : 'Upload', isShort,
+            thumbnail: `https://i.ytimg.com/vi/${u.id}/mqdefault.jpg`,
           });
         }
         recentVideos.sort((a: any, b: any) => b.velocity - a.velocity);
@@ -276,6 +277,11 @@ export async function GET() {
         headline += 'Active channel with room to accelerate cadence and conversion.';
       }
 
+      // Hero image: top video thumbnail, fallback to channel avatar
+      const heroImage = recentVideos.length > 0
+        ? `https://i.ytimg.com/vi/${recentVideos[0].id}/hqdefault.jpg`
+        : snap?.thumbnail ?? null;
+
       return {
         slug: row.slug, name: row.name, subs: row.subs,
         subs7d: row.subs7Delta, views7d: row.views7Delta,
@@ -288,6 +294,9 @@ export async function GET() {
         currentMoment, nextMoment, upcomingMoment,
         grade: score.grade, scoreLabel: score.label,
         spotlightScore: composite,
+        thumbnail: snap?.thumbnail ?? null,
+        channelHandle: artist?.channelHandle ?? null,
+        heroImage,
       };
     });
 
