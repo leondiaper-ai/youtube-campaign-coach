@@ -224,28 +224,55 @@ export async function GET() {
       const snap = artist?.channelHandle ? (snapMap.get(artist.channelHandle) ?? null) : null;
       const longform30d = row.uploads30d - row.shorts30d;
 
-      // Recent videos — top 5 by velocity from last 30d
-      // Wider window than watcher (14d) to ensure channels with
-      // steady uploads across the month still show content.
+      // Recent videos — latest content, mixing longform + Shorts
+      // Sorted by publish date (newest first), then curated to show
+      // the most recent longform AND most recent Shorts — not just
+      // whatever has the highest all-time velocity.
       const recentVideos: any[] = [];
       if (snap?.recentUploads) {
         const cutoff = 30 * 86400000;
+        const eligible: any[] = [];
         for (const u of snap.recentUploads) {
           const ageMs = now - new Date(u.publishedAt).getTime();
           if (ageMs > cutoff || ageMs < 0) continue;
           const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
           const velocity = Math.round(u.viewCount / daysAgo);
-          if (velocity < 10) continue; // lower bar — show what the channel is doing
           const isShort = u.durationSec <= 62;
           let format = 'Upload';
           try { format = classifyUploadFormat(u); } catch { /* fallback */ }
-          recentVideos.push({
+          eligible.push({
             id: u.id, title: u.title, views: u.viewCount, velocity, daysAgo,
             format: typeof format === 'string' ? format : 'Upload', isShort,
             thumbnail: `https://i.ytimg.com/vi/${u.id}/mqdefault.jpg`,
+            publishedAt: u.publishedAt,
           });
         }
-        recentVideos.sort((a: any, b: any) => b.velocity - a.velocity);
+
+        // Sort by publish date (newest first)
+        eligible.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+        // Pick latest longform (up to 3) and latest Shorts (up to 3),
+        // then interleave — newest content first, mixed formats
+        const longform = eligible.filter((v: any) => !v.isShort);
+        const shorts = eligible.filter((v: any) => v.isShort);
+        const picked = new Set<string>();
+
+        // Take up to 3 latest longform
+        for (const v of longform.slice(0, 3)) {
+          recentVideos.push(v);
+          picked.add(v.id);
+        }
+        // Take up to 2 latest Shorts (3 if no longform)
+        const shortsSlots = longform.length === 0 ? 5 : Math.min(5 - recentVideos.length, 3);
+        for (const v of shorts.slice(0, shortsSlots)) {
+          if (!picked.has(v.id)) {
+            recentVideos.push(v);
+            picked.add(v.id);
+          }
+        }
+
+        // Re-sort final list by publish date (newest first)
+        recentVideos.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
         recentVideos.splice(5);
       }
 
