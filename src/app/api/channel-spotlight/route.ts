@@ -175,18 +175,29 @@ export async function GET() {
       .slice(0, 5);
 
     // ── Load coach plans ─────────────────────────────────────────────────
+    // Three matching strategies: slug prefix, name match, name-in-slug
     const planIndex = await listPlans();
-    const norm = (s: string) => s.replace(/-/g, '');
+    const norm = (s: string) => s.replace(/-/g, '').toLowerCase();
+    const normName = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
     const coachPlans = new Map<string, SavedPlan>();
+
     for (const entry of planIndex) {
       const planNorm = norm(entry.slug);
+      const planArtistNorm = normName(entry.artist);
+
       for (const { row } of top) {
+        if (coachPlans.has(row.slug)) continue;
         const artistNorm = norm(row.slug);
-        if (planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm)) {
-          if (!coachPlans.has(row.slug)) {
-            const plan = await loadPlan(entry.slug);
-            if (plan) coachPlans.set(row.slug, plan);
-          }
+        const artistNameNorm = normName(row.name);
+
+        const matched =
+          planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm) || // slug prefix
+          planArtistNorm === artistNameNorm || // exact name match
+          artistNorm.includes(planArtistNorm) || planArtistNorm.includes(artistNorm); // name-in-slug
+
+        if (matched) {
+          const plan = await loadPlan(entry.slug);
+          if (plan) coachPlans.set(row.slug, plan);
         }
       }
     }

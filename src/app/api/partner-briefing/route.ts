@@ -455,25 +455,62 @@ export async function GET(request: Request) {
     const coachPlans = new Map<string, Awaited<ReturnType<typeof loadPlan>>>();
 
     // Build artist-slug → plan-slug mapping
-    // Plan slugs hyphenate words ("french-the-kid-french-the-kid-campaign")
-    // while channel slugs are compressed ("frenchthekid"). Normalise both
-    // by stripping hyphens so they can match via prefix comparison.
-    const norm = (s: string) => s.replace(/-/g, '');
+    // Uses three matching strategies in order:
+    //   1. Normalized slug prefix (strips hyphens, compares prefixes)
+    //   2. Plan artist name → channel name (case-insensitive)
+    //   3. Plan artist name normalized → channel slug normalized
+    // This handles cases like tovelomusic ↔ tove-lo-campaign and
+    // gener8ionworld ↔ gener8ion-campaign where slug prefixes don't work.
+    const norm = (s: string) => s.replace(/-/g, '').toLowerCase();
+    const normName = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+    // Build a name→slug lookup for all pinned artists
+    const pinnedNameToSlug = new Map<string, string>();
+    for (const artistSlug of Array.from(pinnedSlugs)) {
+      const artist = artistMap.get(artistSlug);
+      if (artist) {
+        pinnedNameToSlug.set(normName(artist.name), artistSlug);
+      }
+    }
+
     const artistSlugToPlanSlug = new Map<string, string>();
+    const tryAssign = (artistSlug: string, entry: { slug: string; updatedAt: string }) => {
+      const existing = artistSlugToPlanSlug.get(artistSlug);
+      if (!existing) {
+        artistSlugToPlanSlug.set(artistSlug, entry.slug);
+      } else {
+        const existingEntry = planIndex.find(e => e.slug === existing);
+        if (existingEntry && entry.updatedAt > existingEntry.updatedAt) {
+          artistSlugToPlanSlug.set(artistSlug, entry.slug);
+        }
+      }
+    };
+
     for (const entry of planIndex) {
       const planNorm = norm(entry.slug);
+
+      // Strategy 1: normalized slug prefix matching
       for (const artistSlug of Array.from(pinnedSlugs)) {
         const artistNorm = norm(artistSlug);
         if (planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm)) {
-          // If multiple plans match, pick the most recently updated
-          const existing = artistSlugToPlanSlug.get(artistSlug);
-          if (!existing) {
-            artistSlugToPlanSlug.set(artistSlug, entry.slug);
-          } else {
-            const existingEntry = planIndex.find(e => e.slug === existing);
-            if (existingEntry && entry.updatedAt > existingEntry.updatedAt) {
-              artistSlugToPlanSlug.set(artistSlug, entry.slug);
-            }
+          tryAssign(artistSlug, entry);
+        }
+      }
+
+      // Strategy 2: match plan artist name to channel name
+      const planArtistNorm = normName(entry.artist);
+      const matchedSlug = pinnedNameToSlug.get(planArtistNorm);
+      if (matchedSlug && !artistSlugToPlanSlug.has(matchedSlug)) {
+        tryAssign(matchedSlug, entry);
+      }
+
+      // Strategy 3: plan artist name normalized → channel slug contains it
+      if (!matchedSlug) {
+        for (const artistSlug of Array.from(pinnedSlugs)) {
+          if (artistSlugToPlanSlug.has(artistSlug)) continue;
+          const artistNorm = norm(artistSlug);
+          if (artistNorm.includes(planArtistNorm) || planArtistNorm.includes(artistNorm)) {
+            tryAssign(artistSlug, entry);
           }
         }
       }
