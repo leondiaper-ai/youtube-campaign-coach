@@ -688,9 +688,9 @@ export async function GET(request: Request) {
         // Filter to recent/upcoming window, then sort by priority (desc) then date (asc)
         const recentOrUpcoming = enriched
           .filter(e => e.diff >= -7)
-          .sort((a, b) => b.priority - a.priority || a.diff - b.diff);
+          .sort((a, b) => a.diff - b.diff); // chronological — next thing first
 
-        // If higher-priority events exist (≥60), drop tour/festival (30) from the picks
+        // Drop tour/festival (30) if higher-priority content exists
         const hasHighPriority = recentOrUpcoming.some(e => e.priority >= 60);
         const filtered = hasHighPriority
           ? recentOrUpcoming.filter(e => e.priority >= 60)
