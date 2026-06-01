@@ -420,11 +420,40 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
           background: rgba(45,106,79,0.08);
           color: ${ACCENT.green};
         }
+
+        /* ── Mobile responsive ────────────────────────────── */
+        @media (max-width: 768px) {
+          .pb-section { padding-left: 16px !important; padding-right: 16px !important; }
+          .pb-hero-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .pb-hero-title { font-size: 42px !important; }
+          .pb-shorts-grid { grid-template-columns: repeat(3, 1fr) !important; }
+          .pb-featured-card { grid-template-columns: 1fr !important; }
+          .pb-featured-card .pb-featured-hero { min-height: 180px !important; height: 180px !important; }
+          .pb-tier2-grid { grid-template-columns: 1fr !important; }
+          .pb-tier3-grid { grid-template-columns: 1fr 1fr !important; }
+          .pb-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .pb-moments-grid { grid-template-columns: 1fr 1fr !important; }
+          .pb-radar-big { padding: 16px !important; }
+          .pb-radar-big-items { flex-direction: column !important; }
+          .pb-radar-row { grid-template-columns: 60px 1fr !important; }
+          .pb-top-bar { padding: 16px !important; }
+          .pb-nav-wrap { padding: 0 16px !important; }
+          .pb-vid-grid { grid-template-columns: 1fr 1fr !important; }
+          .pb-obs-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .pb-campaign-card:hover { transform: none; box-shadow: none; }
+        }
+        @media (max-width: 480px) {
+          .pb-hero-title { font-size: 34px !important; }
+          .pb-shorts-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .pb-tier3-grid { grid-template-columns: 1fr !important; }
+          .pb-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .pb-vid-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
 
       {/* ═══════ TOP BAR ═══════ */}
-      <div style={{
+      <div className="pb-top-bar" style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 40px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
@@ -441,16 +470,16 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
       {/* ═══════ PULSE NAV (when embedded in weekly-pulse) ═══════ */}
       {showPulseNav && (
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
+        <div className="pb-nav-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
           <PulseNav />
         </div>
       )}
 
       {/* ═══════ HERO SECTION ═══════ */}
-      <header className="pb-fade" style={{
+      <header className="pb-fade pb-section" style={{
         maxWidth: 1200, margin: '0 auto', padding: '36px 40px 48px',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: 48, alignItems: 'start' }}>
+        <div className="pb-hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: 48, alignItems: 'start' }}>
           {/* Left — Title + intro */}
           <div>
             <div style={{
@@ -459,7 +488,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             }}>
               Virgin Music x YouTube
             </div>
-            <h1 style={{
+            <h1 className="pb-hero-title" style={{
               fontSize: 64, fontWeight: 900, lineHeight: 0.92,
               letterSpacing: '-0.04em', color: INK,
               margin: '0 0 0 -3px',
@@ -480,7 +509,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
           {/* Right — Shorts grid */}
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div className="pb-shorts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {data.topShorts.slice(0, 6).map((v) => (
                 <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
                   className="pb-link shorts-cell" style={{ display: 'block', position: 'relative' }}>
@@ -556,7 +585,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
         const nowMs = Date.now();
 
         return (
-          <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
+          <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
             <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
             <div style={{ marginBottom: 28 }}>
@@ -578,7 +607,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
             {/* ── BIG WEEK callout (when 3+ campaigns on same date) ── */}
             {bigDay && (
-              <div style={{
+              <div className="pb-radar-big" style={{
                 background: INK, borderRadius: 10, padding: '20px 24px',
                 marginBottom: 24, color: WHITE,
               }}>
@@ -593,7 +622,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                     Major Release Day
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <div className="pb-radar-big-items" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {bigDay[1].map((m, i) => (
                     <div key={i} style={{
                       background: 'rgba(255,255,255,0.08)', borderRadius: 6,
@@ -722,7 +751,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
           <>
             {/* ── TIER 1: Featured Campaigns (large editorial cards) ── */}
             {tier1.length > 0 && (
-              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+              <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
                 <div style={{ marginBottom: 24 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
@@ -778,7 +807,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           <FormatTags videos={fc.recentVideos} />
 
                           {/* ── Stats grid (Spotlight-style) ── */}
-                          <div style={{
+                          <div className="pb-stats-grid" style={{
                             display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
                             padding: '10px 12px', borderRadius: 8, background: PAPER, marginBottom: 14,
                           }}>
@@ -886,14 +915,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
             {/* ── TIER 2: Active campaign cards (richer than grid) ── */}
             {tier2.length > 0 && (
-              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+              <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
                     Active Campaigns
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                <div className="pb-tier2-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
                   {tier2.map(fc => (
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
@@ -944,14 +973,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
             {/* ── TIER 3: Grid view ── */}
             {tier3.length > 0 && (
-              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+              <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
                     Other Campaigns
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                <div className="pb-tier3-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                   {tier3.map(fc => (
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
@@ -1006,7 +1035,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          <div className="pb-moments-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
             {data.momentsWatching.map(m => (
               <a
                 key={m.id}
@@ -1055,7 +1084,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer style={{
+      <footer className="pb-section" style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 40px 40px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
