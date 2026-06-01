@@ -16,6 +16,7 @@ export default function PulseNav() {
 
   return (
     <nav
+      className="pulse-nav"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -32,6 +33,7 @@ export default function PulseNav() {
           <Link
             key={tab.href}
             href={tab.href}
+            className="pulse-nav-tab"
             style={{
               padding: '8px 18px',
               borderRadius: 6,

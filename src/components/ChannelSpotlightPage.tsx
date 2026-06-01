@@ -107,7 +107,7 @@ export default function ChannelSpotlightPage() {
         }}
       />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '48px 32px 64px' }}>
+      <div className="pulse-wrap" style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto', padding: '48px 32px 64px' }}>
         {/* ── Header ─────────────────────────────────────────────── */}
         <header style={{ marginBottom: 32 }}>
           {/* Logos */}

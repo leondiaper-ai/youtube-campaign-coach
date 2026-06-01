@@ -286,7 +286,7 @@ export default function WeeklySpotlight({
               )}
 
               {/* ── Stats grid ─────────────────────────────────── */}
-              <div style={{
+              <div className="spot-stats-grid" style={{
                 display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12,
                 padding: '14px 16px', borderRadius: 10, background: PAPER, marginBottom: 20,
               }}>

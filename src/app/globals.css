@@ -38,3 +38,45 @@ html { scroll-behavior: smooth; }
   text-transform: uppercase;
   font-weight: 600;
 }
+
+/* ===================================================================
+   YouTube Weekly Pulse / Weekly Channel Spotlight — responsive layer
+   -------------------------------------------------------------------
+   These pages are built with inline styles tuned for desktop. The
+   rules below only engage at tablet/mobile widths, collapsing the
+   large grids into stacked single-column sections and turning dense
+   metric rows into compact blocks — without altering the desktop
+   layout, hierarchy, or editorial tone. !important is required to
+   override the component inline styles at these breakpoints.
+   =================================================================== */
+
+/* ── Tablet and below (≈768px) ── */
+@media (max-width: 900px) {
+  /* Hero: title and Shorts grid stack vertically */
+  .pb-hero-grid    { grid-template-columns: 1fr !important; gap: 32px !important; }
+  /* Campaign card grids collapse */
+  .pb-tier2-grid   { grid-template-columns: 1fr !important; }
+  .pb-tier3-grid   { grid-template-columns: repeat(2, 1fr) !important; }
+  .pb-moments-grid { grid-template-columns: 1fr !important; }
+  /* Channel Spotlight 6-up metric row → 3-up */
+  .spot-stats-grid { grid-template-columns: repeat(3, 1fr) !important; }
+}
+
+/* ── Mobile (360–430px) ── */
+@media (max-width: 560px) {
+  /* Generous-but-not-wasteful gutters, no horizontal scroll */
+  .pulse-wrap      { padding-left: 18px !important; padding-right: 18px !important; }
+  .pb-topbar       { padding-top: 16px !important; padding-bottom: 14px !important; }
+  .pb-hero         { padding-top: 24px !important; padding-bottom: 28px !important; }
+  .pb-hero-title   { font-size: 40px !important; }
+  /* Featured-card metric row → 2-up compact blocks */
+  .pb-feat-stats   { grid-template-columns: repeat(2, 1fr) !important; }
+  /* Everything stacks to a single column */
+  .pb-tier3-grid   { grid-template-columns: 1fr !important; }
+  .spot-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  /* Footer stacks instead of squeezing side by side */
+  .pb-footer       { flex-direction: column !important; align-items: flex-start !important; gap: 12px; }
+  /* Pulse nav tabs become full-width, large tap targets */
+  .pulse-nav       { flex-wrap: wrap; }
+  .pulse-nav-tab   { flex: 1 1 0; text-align: center; padding-top: 12px !important; padding-bottom: 12px !important; font-size: 14px !important; }
+}

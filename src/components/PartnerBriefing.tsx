@@ -424,7 +424,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
 
       {/* ═══════ TOP BAR ═══════ */}
-      <div style={{
+      <div className="pulse-wrap pb-topbar" style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 40px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
@@ -441,16 +441,16 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
       {/* ═══════ PULSE NAV (when embedded in weekly-pulse) ═══════ */}
       {showPulseNav && (
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
+        <div className="pulse-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
           <PulseNav />
         </div>
       )}
 
       {/* ═══════ HERO SECTION ═══════ */}
-      <header className="pb-fade" style={{
+      <header className="pb-fade pulse-wrap pb-hero" style={{
         maxWidth: 1200, margin: '0 auto', padding: '36px 40px 48px',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: 48, alignItems: 'start' }}>
+        <div className="pb-hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: 48, alignItems: 'start' }}>
           {/* Left — Title + intro */}
           <div>
             <div style={{
@@ -459,7 +459,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             }}>
               Virgin Music x YouTube
             </div>
-            <h1 style={{
+            <h1 className="pb-hero-title" style={{
               fontSize: 64, fontWeight: 900, lineHeight: 0.92,
               letterSpacing: '-0.04em', color: INK,
               margin: '0 0 0 -3px',
@@ -556,7 +556,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
         const nowMs = Date.now();
 
         return (
-          <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
+          <section className="pb-fade pulse-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
             <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
             <div style={{ marginBottom: 28 }}>
@@ -722,7 +722,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
           <>
             {/* ── TIER 1: Featured Campaigns (large editorial cards) ── */}
             {tier1.length > 0 && (
-              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+              <section className="pb-fade pulse-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
                 <div style={{ marginBottom: 24 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
@@ -778,7 +778,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           <FormatTags videos={fc.recentVideos} />
 
                           {/* ── Stats grid (Spotlight-style) ── */}
-                          <div style={{
+                          <div className="pb-feat-stats" style={{
                             display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
                             padding: '10px 12px', borderRadius: 8, background: PAPER, marginBottom: 14,
                           }}>
@@ -886,14 +886,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
             {/* ── TIER 2: Active campaign cards (richer than grid) ── */}
             {tier2.length > 0 && (
-              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+              <section className="pb-fade pulse-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
                     Active Campaigns
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                <div className="pb-tier2-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
                   {tier2.map(fc => (
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
@@ -944,14 +944,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
             {/* ── TIER 3: Grid view ── */}
             {tier3.length > 0 && (
-              <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+              <section className="pb-fade pulse-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
                     Other Campaigns
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                <div className="pb-tier3-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                   {tier3.map(fc => (
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
@@ -987,7 +987,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
       {/* ═══════ MOMENTS WE'RE WATCHING — Real content, real views ═══════ */}
       {data.momentsWatching && data.momentsWatching.length > 0 && (
-        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+        <section className="pulse-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
           <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
           <div style={{ marginBottom: 24 }}>
@@ -1006,7 +1006,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          <div className="pb-moments-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
             {data.momentsWatching.map(m => (
               <a
                 key={m.id}
@@ -1055,7 +1055,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer style={{
+      <footer className="pulse-wrap pb-footer" style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 40px 40px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
