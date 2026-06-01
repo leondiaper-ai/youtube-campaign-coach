@@ -95,6 +95,7 @@ type CampaignDestinationProps = {
   channelCtx: ChannelContext | null;
   createdAt: string;
   slug: string;
+  timelineText?: string;
   liveChannel?: {
     subs?: number;
     views?: number;
@@ -142,6 +143,7 @@ export default function CampaignDestination({
   channelCtx,
   createdAt,
   slug,
+  timelineText,
   liveChannel,
   matchResult,
   nudges,
@@ -149,6 +151,7 @@ export default function CampaignDestination({
   dataCoverage,
   campaignStartDate,
 }: CampaignDestinationProps) {
+  const [editOpen, setEditOpen] = useState(false);
   const currentPhase = detectCurrentPhase(plan);
   const pulseSignals = generatePulseSignals(matchResult, liveChannel, recentUploads ?? [], currentPhase, plan);
   const moments = extractMoments(plan, matchResult);
@@ -253,13 +256,29 @@ export default function CampaignDestination({
             }}>
               YouTube Rollout Map
             </Link>
-            <Link href="/coach" style={{
-              fontSize: 11, fontWeight: 600, color: SMOKE,
-              textDecoration: 'none', padding: '4px 12px',
-              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
-            }}>
-              All Campaigns
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                onClick={() => setEditOpen(true)}
+                style={{
+                  fontSize: 11, fontWeight: 600, color: SMOKE,
+                  background: 'transparent',
+                  padding: '4px 12px',
+                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+                title="Edit timeline"
+              >
+                Edit Timeline
+              </button>
+              <Link href="/coach" style={{
+                fontSize: 11, fontWeight: 600, color: SMOKE,
+                textDecoration: 'none', padding: '4px 12px',
+                border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+              }}>
+                All Campaigns
+              </Link>
+            </div>
           </div>
 
           {/* Hero content */}
@@ -537,7 +556,213 @@ export default function CampaignDestination({
           </div>
         </div>
       </div>
+
+      {editOpen && (
+        <EditTimelineModal
+          slug={slug}
+          initialTimeline={timelineText ?? ''}
+          campaignStartDate={campaignStartDate}
+          onClose={() => setEditOpen(false)}
+        />
+      )}
     </>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EDIT TIMELINE — Modal for revising the campaign timeline and regenerating
+// ══════════════════════════════════════════════════════════════════════════════
+
+function EditTimelineModal({
+  slug,
+  initialTimeline,
+  campaignStartDate,
+  onClose,
+}: {
+  slug: string;
+  initialTimeline: string;
+  campaignStartDate?: string;
+  onClose: () => void;
+}) {
+  const [timeline, setTimeline] = useState(initialTimeline);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const dirty = timeline !== initialTimeline;
+
+  const save = async () => {
+    if (!timeline.trim()) {
+      setError('Timeline cannot be empty.');
+      return;
+    }
+    setError(null);
+    setSaving(true);
+    try {
+      const res = await fetch('/api/coach', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, timeline, campaignStartDate }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? 'Could not save timeline.');
+        setSaving(false);
+        return;
+      }
+      window.location.reload();
+    } catch {
+      setError('Network error — please try again.');
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(10,10,10,0.55)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 100,
+        padding: 24,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: PAPER,
+          color: INK,
+          width: '100%',
+          maxWidth: 720,
+          maxHeight: '90vh',
+          borderRadius: 10,
+          boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{
+          padding: '18px 24px',
+          borderBottom: `1px solid ${BONE}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <div>
+            <div style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.2em',
+              textTransform: 'uppercase', color: SMOKE, fontFamily: MONO,
+              marginBottom: 4,
+            }}>
+              Edit Timeline
+            </div>
+            <div style={{ fontSize: 13, color: SMOKE }}>
+              Adjust dates or moments. The plan regenerates from the new timeline.
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              fontSize: 20, color: SMOKE, lineHeight: 1, padding: 4,
+            }}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div style={{ padding: 24, overflowY: 'auto', flex: 1 }}>
+          <textarea
+            value={timeline}
+            onChange={(e) => {
+              setTimeline(e.target.value);
+              if (error) setError(null);
+            }}
+            rows={14}
+            placeholder={`Paste dates, releases, tour, festivals — any format:\n\n15 June — Single release "Track Name"\n28 June — Album drop\nJuly — Tour starts`}
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              borderRadius: 8,
+              border: `1px solid ${BONE}`,
+              background: WHITE,
+              fontSize: 14,
+              color: INK,
+              lineHeight: 1.6,
+              resize: 'vertical',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box',
+            }}
+          />
+          {error && (
+            <div style={{
+              marginTop: 12,
+              padding: '10px 14px',
+              borderRadius: 6,
+              background: '#FEF2F2',
+              border: '1px solid #FECACA',
+              color: '#991B1B',
+              fontSize: 13,
+            }}>
+              {error}
+            </div>
+          )}
+          <div style={{
+            marginTop: 12,
+            fontSize: 11,
+            color: SMOKE,
+            lineHeight: 1.5,
+          }}>
+            Saving regenerates the rollout plan. Your notes are preserved.
+          </div>
+        </div>
+
+        <div style={{
+          padding: '14px 24px',
+          borderTop: `1px solid ${BONE}`,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 8,
+          background: WHITE,
+        }}>
+          <button
+            onClick={onClose}
+            disabled={saving}
+            style={{
+              padding: '8px 16px',
+              fontSize: 13, fontWeight: 600,
+              background: 'transparent',
+              color: INK,
+              border: `1px solid ${BONE}`,
+              borderRadius: 6,
+              cursor: saving ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={save}
+            disabled={saving || !dirty}
+            style={{
+              padding: '8px 18px',
+              fontSize: 13, fontWeight: 700,
+              background: saving || !dirty ? GHOST : INK,
+              color: WHITE,
+              border: 'none',
+              borderRadius: 6,
+              cursor: saving || !dirty ? 'not-allowed' : 'pointer',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {saving ? 'Regenerating…' : 'Save & Regenerate'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

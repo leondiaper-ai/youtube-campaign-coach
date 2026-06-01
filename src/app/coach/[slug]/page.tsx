@@ -158,6 +158,7 @@ export default async function CampaignPage({ params }: PageProps) {
       channelCtx={saved.channelCtx}
       createdAt={saved.createdAt}
       slug={saved.slug}
+      timelineText={saved.timelineText ?? ''}
       liveChannel={liveChannel}
       matchResult={matchResult}
       nudges={nudges}

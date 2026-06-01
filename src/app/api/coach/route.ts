@@ -71,6 +71,59 @@ export async function PATCH(req: NextRequest) {
 }
 
 /**
+ * PUT /api/coach — Regenerate a saved plan from a new timeline.
+ * Body: { slug, timeline, campaignStartDate? }
+ * Re-runs the planning engine with the existing artist + channelCtx and
+ * persists both the new timelineText and the regenerated plan.
+ */
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { slug, timeline, campaignStartDate } = body as {
+      slug: string;
+      timeline: string;
+      campaignStartDate?: string | null;
+    };
+
+    if (!slug || !timeline) {
+      return NextResponse.json(
+        { error: 'slug and timeline are required' },
+        { status: 400 },
+      );
+    }
+
+    const existing = await loadPlan(slug);
+    if (!existing) {
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    }
+
+    const plan = generatePlan(
+      timeline,
+      existing.artist,
+      existing.channelCtx,
+      campaignStartDate ?? null,
+    );
+    if (!plan) {
+      return NextResponse.json(
+        { error: 'Could not parse any dates from the timeline.' },
+        { status: 400 },
+      );
+    }
+
+    const saved = await savePlan(slug, existing.artist, plan, existing.channelCtx, timeline);
+    return NextResponse.json({
+      slug: saved.slug,
+      campaignName: saved.campaignName,
+      url: `/coach/${saved.slug}`,
+      updatedAt: saved.updatedAt,
+    });
+  } catch (err) {
+    console.error('PUT /api/coach error:', err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
+/**
  * GET /api/coach — List all saved campaign plans.
  */
 export async function GET() {

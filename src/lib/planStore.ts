@@ -125,10 +125,12 @@ export async function savePlan(
 
   if (!store) return saved;
 
-  // Check if updating existing
+  // Check if updating existing — preserve metadata that isn't recomputed
   const existing = await store.get(planKey(slug)) as SavedPlan | null;
   if (existing) {
     saved.createdAt = existing.createdAt;
+    if (existing.historicalActivity) saved.historicalActivity = existing.historicalActivity;
+    if (existing.dataCoverage) saved.dataCoverage = existing.dataCoverage;
   }
 
   await store.set(planKey(slug), saved);
@@ -171,7 +173,7 @@ export async function listPlans(): Promise<PlanIndexEntry[]> {
 
 export async function updateSavedPlan(
   slug: string,
-  updates: Partial<Pick<SavedPlan, 'plan'>>,
+  updates: Partial<Pick<SavedPlan, 'plan' | 'timelineText'>>,
 ): Promise<SavedPlan | null> {
   const store = await kv();
   if (!store) return null;
@@ -186,11 +188,16 @@ export async function updateSavedPlan(
   };
   await store.set(planKey(slug), updated);
 
-  // Update index timestamp
+  // Update index — refresh plan-derived fields if plan changed
   const index = ((await store.get(INDEX_KEY)) as PlanIndexEntry[] | null) ?? [];
   const idx = index.findIndex((e) => e.slug === slug);
   if (idx >= 0) {
     index[idx].updatedAt = updated.updatedAt;
+    if (updates.plan) {
+      index[idx].totalWeeks = updates.plan.totalWeeks;
+      index[idx].eventCount = updates.plan.events.length;
+      index[idx].campaignName = updates.plan.campaignName;
+    }
     await store.set(INDEX_KEY, index);
   }
 
