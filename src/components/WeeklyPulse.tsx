@@ -1320,121 +1320,145 @@ export default function WeeklyPulse() {
         </section>
       )}
 
-      {/* ═══════ MOMENTS THIS WEEK — full-width content grid ═══════ */}
-      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
-        <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
-        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
-          Moments This Week
-        </div>
+      {/* ═══════ LONGFORM MOMENTS THIS WEEK ═══════ */}
+      {(() => {
+        // Artist diversity tracker — max 2 placements per artist across report
+        const heroSlugs = new Set(campaignStories.map(s => s.channel.slug));
+        const placementCount = new Map<string, number>();
+        heroSlugs.forEach(s => placementCount.set(s, 1));
+        const canPlace = (slug: string) => (placementCount.get(slug) ?? 0) < 2;
+        const markPlaced = (slug: string) => placementCount.set(slug, (placementCount.get(slug) ?? 0) + 1);
 
-        {/* Top longform videos — 2×2 grid */}
-        {(() => {
-          // Merge all managed longform videos, sort by velocity, dedupe by artist
-          const allVids = [...data.topVideos, ...data.topShorts]
-            .filter(v => v.durationSec > 62)
-            .sort((a, b) => b.velocity - a.velocity);
-          const seen = new Set<string>();
-          const moments = allVids.filter(v => {
-            if (seen.has(v.artistSlug)) return false;
-            seen.add(v.artistSlug);
-            return true;
-          }).slice(0, 4);
+        const allLongform = [...data.topVideos, ...data.topShorts]
+          .filter(v => v.durationSec > 62)
+          .sort((a, b) => b.velocity - a.velocity);
+        const seenLF = new Set<string>();
+        const longformMoments = allLongform.filter(v => {
+          if (seenLF.has(v.artistSlug)) return false;
+          if (!canPlace(v.artistSlug)) return false;
+          seenLF.add(v.artistSlug);
+          return true;
+        }).slice(0, 4);
+        longformMoments.forEach(v => markPlaced(v.artistSlug));
 
-          if (moments.length === 0 && featureVideo) {
-            // Fallback: use featureVideo + supporting
-            moments.push(featureVideo, ...supportingVideos.slice(0, 3));
-          }
+        const allShorts = [...data.topShorts]
+          .filter(v => v.durationSec <= 62)
+          .sort((a, b) => b.velocity - a.velocity);
+        const seenSF = new Set<string>();
+        const shortsMoments = allShorts.filter(v => {
+          if (seenSF.has(v.artistSlug)) return false;
+          if (!canPlace(v.artistSlug)) return false;
+          seenSF.add(v.artistSlug);
+          return true;
+        }).slice(0, 3);
+        shortsMoments.forEach(v => markPlaced(v.artistSlug));
 
-          return moments.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-              {moments.map((v, i) => (
-                <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
-                  className="pulse-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
-                  <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
-                    <img src={v.thumbnail} alt="" loading="lazy"
-                      style={{ width: '100%', height: i < 2 ? 200 : 160, objectFit: 'cover', display: 'block' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.65) 100%)' }} />
-                    <div style={{ position: 'absolute', top: 8, left: 8 }}>
-                      <span style={{
-                        padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700,
-                        textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE,
-                      }}>{v.format}</span>
-                    </div>
-                    <div style={{ position: 'absolute', top: 8, right: 8 }}><PlayOverlay size={24} /></div>
-                    <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
-                      <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>
-                        {v.channelName}
-                      </div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: WHITE, lineHeight: 1.2 }}>
-                        {v.title.length > 60 ? v.title.slice(0, 57) + '...' : v.title}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', fontSize: 11, marginTop: 6, padding: '0 2px' }}>
-                    <span style={{ fontWeight: 700, color: INK }}>{fmtNum(v.viewCount)} views</span>
-                    <span style={{ color: YT_RED, fontWeight: 600 }}>{fmtNum(v.velocity)}/day</span>
-                    <span style={{ color: SMOKE }}>{v.daysAgo}d ago</span>
-                  </div>
-                </a>
-              ))}
-            </div>
-          ) : null;
-        })()}
-      </section>
+        // Discovery moments — best conversion / growth from smaller artists
+        const discoveryChannels = managed
+          .filter(ch => canPlace(ch.slug) && (ch.subs ?? 0) < 100000 && (ch.subs7d ?? 0) > 0 && ch.uploads30d >= 2)
+          .sort((a, b) => (b.subsPer1kViews ?? 0) - (a.subsPer1kViews ?? 0))
+          .slice(0, 3);
 
-
-      {/* ═══════ CAMPAIGN ECOSYSTEMS — minimal editorial highlight ═══════ */}
-      {multiformatHighlights.length >= 2 && (
-        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
-          <div style={{ height: 1, background: BONE, marginBottom: 28 }} />
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
-            Campaign Ecosystems Working Well
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(multiformatHighlights.length, 4)}, 1fr)`, gap: 32 }}>
-            {multiformatHighlights.map(h => {
-              const chUrl = channelUrl(h.channel.channelHandle);
-              return (
-                <div key={h.channel.slug}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                    {h.channel.thumbnail && (
-                      chUrl ? (
-                        <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
-                          <img src={h.channel.thumbnail} alt="" loading="lazy" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
-                        </a>
-                      ) : (
-                        <img src={h.channel.thumbnail} alt="" loading="lazy" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                      )
-                    )}
-                    {chUrl ? (
-                      <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                        <span style={{ fontSize: 13, fontWeight: 800, color: INK, letterSpacing: '-0.01em' }}>{h.channel.name}</span>
-                      </a>
-                    ) : (
-                      <span style={{ fontSize: 13, fontWeight: 800, color: INK, letterSpacing: '-0.01em' }}>{h.channel.name}</span>
-                    )}
-                  </div>
-                  {/* Format tags instead of AI text */}
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const, marginBottom: 6 }}>
-                    {h.formatTypes.map((f: string) => (
-                      <span key={f} style={{
-                        padding: '2px 7px', borderRadius: 8, fontSize: 8, fontWeight: 700,
-                        textTransform: 'uppercase' as const,
-                        background: 'rgba(45,106,79,0.06)', color: ACCENT.green,
-                      }}>{f}</span>
-                    ))}
-                  </div>
-                  <span style={{
-                    fontSize: 8, fontWeight: 700, letterSpacing: '0.1em',
-                    textTransform: 'uppercase' as const, color: ACCENT.green,
-                  }}>
-                    {h.label}
-                  </span>
+        return (
+          <>
+            {longformMoments.length > 0 && (
+              <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
+                <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
+                  Longform Moments This Week
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  {longformMoments.map((v, i) => (
+                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
+                      className="pulse-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
+                      <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+                        <img src={v.thumbnail} alt="" loading="lazy"
+                          style={{ width: '100%', height: i < 2 ? 200 : 160, objectFit: 'cover', display: 'block' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.65) 100%)' }} />
+                        <div style={{ position: 'absolute', top: 8, left: 8 }}>
+                          <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700, textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE }}>{v.format}</span>
+                        </div>
+                        <div style={{ position: 'absolute', top: 8, right: 8 }}><PlayOverlay size={24} /></div>
+                        <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
+                          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>{v.channelName}</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: WHITE, lineHeight: 1.2 }}>{v.title.length > 60 ? v.title.slice(0, 57) + '...' : v.title}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', fontSize: 11, marginTop: 6, padding: '0 2px' }}>
+                        <span style={{ fontWeight: 700, color: INK }}>{fmtNum(v.viewCount)} views</span>
+                        <span style={{ color: YT_RED, fontWeight: 600 }}>{fmtNum(v.velocity)}/day</span>
+                        <span style={{ color: SMOKE }}>{v.daysAgo}d ago</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ═══════ SHORTFORM MOMENTS THIS WEEK ═══════ */}
+            {shortsMoments.length > 0 && (
+              <section style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px 0' }}>
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
+                  Shortform Moments This Week
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                  {shortsMoments.map(v => (
+                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
+                      className="pulse-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
+                      <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden' }}>
+                        <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', aspectRatio: '9/16', objectFit: 'cover', display: 'block', maxHeight: 180 }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 50%, rgba(0,0,0,0.6) 100%)' }} />
+                        <div style={{ position: 'absolute', bottom: 8, left: 8, right: 8 }}>
+                          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' as const, marginBottom: 2 }}>{v.channelName}</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: WHITE, lineHeight: 1.2 }}>{v.title.length > 40 ? v.title.slice(0, 37) + '...' : v.title}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, fontSize: 10, marginTop: 4 }}>
+                        <span style={{ fontWeight: 700, color: INK }}>{fmtNum(v.viewCount)}</span>
+                        <span style={{ color: SMOKE }}>{fmtNum(v.velocity)}/day</span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ═══════ DISCOVERY MOMENTS ═══════ */}
+            {discoveryChannels.length > 0 && (
+              <section style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px 0' }}>
+                <div style={{ height: 1, background: BONE, marginBottom: 24 }} />
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
+                  Discovery Moments
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                  {discoveryChannels.map(ch => {
+                    const chUrl = channelUrl(ch.channelHandle);
+                    return (
+                      <div key={ch.slug} style={{ padding: '14px 16px', borderRadius: 8, background: WHITE, border: `1px solid ${BONE}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                          {ch.thumbnail && <img src={ch.thumbnail} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
+                          {chUrl ? (
+                            <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                              <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</span>
+                            </a>
+                          ) : (
+                            <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: 12, fontSize: 10, color: SMOKE }}>
+                          {ch.subs7d != null && ch.subs7d > 0 && <span style={{ color: ACCENT.green, fontWeight: 700 }}>+{ch.subs7d} subs</span>}
+                          {ch.subsPer1kViews != null && <span>{ch.subsPer1kViews.toFixed(1)} subs/1K views</span>}
+                          <span>{ch.uploads30d} uploads/30d</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </>
+        );
+      })()}
 
 
       {/* ═══════ MOMENTUM + OPPORTUNITIES — side by side ═══════ */}
@@ -1533,31 +1557,13 @@ export default function WeeklyPulse() {
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
         <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
-          {/* LEFT — Market Watch */}
+          {/* LEFT — Reference Channels (replaces AI market insights) */}
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 180px', gap: 24 }}>
-              <div>
-                <h2 style={{
-                  fontSize: 22, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.02em',
-                  color: INK, margin: '0 0 16px', fontFamily: 'Inter, system-ui, sans-serif',
-                  textTransform: 'uppercase' as const,
-                }}>
-                  What the wider market is teaching us.
-                </h2>
-                {data.marketInsights.map((insight, i) => (
-                  <p key={i} style={{
-                    fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.5, margin: '0 0 8px',
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {linkifyArtists(insight)}
-                  </p>
-                ))}
-              </div>
-              {consistentMarket.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10 }}>
-                    Reference Channels
-                  </div>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
+              Reference Channels This Week
+            </div>
+            {consistentMarket.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   {consistentMarket.map(ch => {
                     const chUrl = channelUrl(ch.channelHandle);
                     return (
@@ -1584,9 +1590,8 @@ export default function WeeklyPulse() {
                     </div>
                     );
                   })}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* RIGHT — Playbook */}
