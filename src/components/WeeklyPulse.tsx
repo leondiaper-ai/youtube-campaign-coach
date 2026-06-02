@@ -1272,6 +1272,30 @@ export default function WeeklyPulse() {
                 : emergingWinner.ch.classification === 'GROWING' ? 'Growing' : 'Strong Execution'}
             </span>
           </div>
+          {/* Discovery runners-up below the winner */}
+          {discoveryChannels.filter(ch => ch.slug !== emergingWinner.ch.slug).length > 0 && (
+            <div style={{ display: 'flex', gap: 16, marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BONE}` }}>
+              <span style={{ fontSize: 9, fontWeight: 700, color: GHOST, whiteSpace: 'nowrap', marginTop: 2 }}>Also watching:</span>
+              {discoveryChannels.filter(ch => ch.slug !== emergingWinner.ch.slug).slice(0, 3).map(ch => {
+                const dUrl = channelUrl(ch.channelHandle);
+                return (
+                  <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {ch.thumbnail && <img src={ch.thumbnail} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover' }} />}
+                    {dUrl ? (
+                      <a href={dUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                        <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                    )}
+                    {ch.subs7d != null && ch.subs7d >= 20 && (
+                      <span style={{ fontSize: 9, color: ACCENT.green, fontWeight: 700 }}>+{ch.subs7d}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
 
@@ -1407,39 +1431,7 @@ export default function WeeklyPulse() {
 
             {/* Shortform section removed — longform focus only, Shorts covered in hero grid */}
 
-            {/* ═══════ DISCOVERY MOMENTS ═══════ */}
-            {discoveryChannels.length > 0 && (
-              <section style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px 0' }}>
-                <div style={{ height: 1, background: BONE, marginBottom: 24 }} />
-                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
-                  Discovery Moments
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-                  {discoveryChannels.map(ch => {
-                    const chUrl = channelUrl(ch.channelHandle);
-                    return (
-                      <div key={ch.slug} style={{ padding: '14px 16px', borderRadius: 8, background: WHITE, border: `1px solid ${BONE}` }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                          {ch.thumbnail && <img src={ch.thumbnail} alt="" style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover' }} />}
-                          {chUrl ? (
-                            <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                              <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</span>
-                            </a>
-                          ) : (
-                            <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</span>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', gap: 12, fontSize: 10, color: SMOKE }}>
-                          {ch.subs7d != null && ch.subs7d > 0 && <span style={{ color: ACCENT.green, fontWeight: 700 }}>+{ch.subs7d} subs</span>}
-                          {ch.subsPer1kViews != null && <span>{ch.subsPer1kViews.toFixed(1)} subs/1K views</span>}
-                          <span>{ch.uploads30d} uploads/30d</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+            {/* Discovery moments moved to Emerging Ecosystem Winner section */}
           </>
         );
       })()}
