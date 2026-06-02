@@ -1286,21 +1286,40 @@ export default function WeeklyPulse() {
             padding: '16px 20px', borderRadius: 10,
             background: WHITE, border: `1px solid ${BONE}`,
           }}>
-            {emergingWinner.ch.thumbnail && (
-              <img src={emergingWinner.ch.thumbnail} alt="" style={{
-                width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
-                border: `2px solid ${BONE}`, flexShrink: 0,
-              }} />
-            )}
+            {(() => {
+              const ewUrl = channelUrl(emergingWinner.ch.channelHandle);
+              return emergingWinner.ch.thumbnail && ewUrl ? (
+                <a href={ewUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
+                  <img src={emergingWinner.ch.thumbnail} alt="" style={{
+                    width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
+                    border: `2px solid ${BONE}`,
+                  }} />
+                </a>
+              ) : emergingWinner.ch.thumbnail ? (
+                <img src={emergingWinner.ch.thumbnail} alt="" style={{
+                  width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
+                  border: `2px solid ${BONE}`, flexShrink: 0,
+                }} />
+              ) : null;
+            })()}
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green }}>
                   Emerging Ecosystem Winner
                 </span>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{emergingWinner.ch.name}</div>
+              {(() => {
+                const ewUrl = channelUrl(emergingWinner.ch.channelHandle);
+                return ewUrl ? (
+                  <a href={ewUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                    <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{emergingWinner.ch.name}</div>
+                  </a>
+                ) : (
+                  <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{emergingWinner.ch.name}</div>
+                );
+              })()}
               <div style={{ display: 'flex', gap: 12, marginTop: 4, fontSize: 10, color: SMOKE }}>
-                {emergingWinner.ch.subs7d != null && emergingWinner.ch.subs7d > 0 && <span>+{emergingWinner.ch.subs7d} subs this week</span>}
+                {emergingWinner.ch.subs7d != null && emergingWinner.ch.subs7d >= 20 && <span>+{emergingWinner.ch.subs7d} subs this week</span>}
                 <span>{emergingWinner.ch.uploads30d} uploads / 30d</span>
                 {emergingWinner.ch.subsPer1kViews != null && emergingWinner.ch.subsPer1kViews >= 2 && (
                   <span>{emergingWinner.ch.subsPer1kViews.toFixed(1)} subs per 1K views</span>
