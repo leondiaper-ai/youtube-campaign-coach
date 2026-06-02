@@ -975,39 +975,7 @@ export default function WeeklyPulse() {
       </header>
 
 
-      {/* ═══════ SIGNALS BAR — compact inline strip ═══════ */}
-      <section style={{
-        maxWidth: 1200, margin: '0 auto', padding: '0 40px',
-      }}>
-        <div style={{
-          display: 'flex', gap: 24, alignItems: 'center',
-          borderTop: `1px solid ${BONE}`, borderBottom: `1px solid ${BONE}`,
-          padding: '14px 0',
-        }}>
-          {[
-            { n: data.signals.growing, label: 'Growing', target: 'pulse-momentum', color: ACCENT.green },
-            { n: data.signals.weakConversion, label: 'Conversion Opportunity', target: 'pulse-conversion', color: ACCENT.amber },
-            { n: data.signals.underfed, label: 'Cadence Building', target: 'pulse-cadence', color: ACCENT.ochre },
-            { n: data.signals.cold, label: 'Reawakening', target: 'pulse-reactivation', color: ACCENT.ember },
-          ].map((sig, i) => (
-            <div
-              key={i}
-              className="signal-anchor"
-              role="button"
-              tabIndex={0}
-              onClick={() => document.getElementById(sig.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById(sig.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
-              style={{
-                display: 'flex', alignItems: 'baseline', gap: 5,
-                color: sig.color, cursor: 'pointer',
-              }}
-            >
-              <span style={{ fontSize: 16, fontWeight: 900 }}>{sig.n}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: SMOKE }}>{sig.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Signals bar removed — This Week Across Virgin moves up */}
 
 
       {/* ═══════ THIS WEEK ACROSS VIRGIN ═══════ */}
