@@ -1329,8 +1329,8 @@ export default function WeeklyPulse() {
         const canPlace = (slug: string) => (placementCount.get(slug) ?? 0) < 2;
         const markPlaced = (slug: string) => placementCount.set(slug, (placementCount.get(slug) ?? 0) + 1);
 
-        const allLongform = [...data.topVideos, ...data.topShorts]
-          .filter(v => v.durationSec > 62)
+        // Longform: use topVideos (already filtered by API as longform)
+        const allLongform = [...data.topVideos]
           .sort((a, b) => b.velocity - a.velocity);
         const seenLF = new Set<string>();
         const longformMoments = allLongform.filter(v => {
@@ -1339,10 +1339,16 @@ export default function WeeklyPulse() {
           seenLF.add(v.artistSlug);
           return true;
         }).slice(0, 4);
+        // If diversity rule is too strict, relax and fill remaining slots
+        if (longformMoments.length < 4) {
+          const remaining = allLongform.filter(v => !seenLF.has(v.artistSlug)).slice(0, 4 - longformMoments.length);
+          longformMoments.push(...remaining);
+          remaining.forEach(v => seenLF.add(v.artistSlug));
+        }
         longformMoments.forEach(v => markPlaced(v.artistSlug));
 
+        // Shorts: use topShorts (already filtered by API as shorts)
         const allShorts = [...data.topShorts]
-          .filter(v => v.durationSec <= 62)
           .sort((a, b) => b.velocity - a.velocity);
         const seenSF = new Set<string>();
         const shortsMoments = allShorts.filter(v => {
