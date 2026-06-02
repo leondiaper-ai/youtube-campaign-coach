@@ -15,6 +15,8 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
+import type { AssetLibrary, AssetMappingConfig } from '@/lib/driveAssets';
+import DriveAssetPanel from '@/components/DriveAssetPanel';
 // ── Unified Pipeline — single import for all campaign logic ──
 import {
   buildCampaignPipeline,
@@ -125,6 +127,9 @@ type CampaignDestinationProps = {
   campaignStartDate?: string;
   timelineText?: string;
   artistName?: string;
+  driveLibrary?: AssetLibrary | null;
+  driveConfig?: AssetMappingConfig;
+  driveFolderUrl?: string;
 };
 
 type PulseSignal = {
@@ -153,6 +158,9 @@ export default function CampaignDestination({
   campaignStartDate,
   timelineText,
   artistName,
+  driveLibrary,
+  driveConfig,
+  driveFolderUrl,
 }: CampaignDestinationProps) {
   // ═══ UNIFIED PIPELINE — single entry point for all campaign logic ═══
   const pipeline = buildCampaignPipeline({
@@ -643,6 +651,16 @@ export default function CampaignDestination({
           </>
         )}
 
+
+        {/* ── Drive Asset Library ── */}
+        {driveLibrary !== undefined && (
+          <DriveAssetPanel
+            library={driveLibrary}
+            plan={plan}
+            config={driveConfig}
+            folderUrl={driveFolderUrl}
+          />
+        )}
 
         {/* ── Edit Timeline ── */}
         {timelineText != null && (

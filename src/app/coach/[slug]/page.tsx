@@ -8,6 +8,8 @@ import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelDa
 import { matchPlanToUploads } from '@/lib/coach/matchEngine';
 import { generateNudges } from '@/lib/coach/nudgeEngine';
 import { generatePlan } from '@/lib/planEngine';
+import { loadDriveLibrary } from '@/lib/driveStore';
+import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignDestination from '@/components/CampaignDestination';
 import type { RecentUpload } from '@/lib/artists';
 
@@ -152,6 +154,12 @@ export default async function CampaignPage({ params }: PageProps) {
     liveMetrics: liveChannel,
   });
 
+  // Load scanned Google Drive asset library + per-campaign tuning (optional —
+  // page works without either). Both are looked up by slug, no hardcoding.
+  const driveLibrary = await loadDriveLibrary(saved.slug).catch(() => null);
+  const driveConfig = mappingConfigFor(saved.slug);
+  const driveFolderUrl = getCampaignConfig(saved.slug)?.driveFolderUrl;
+
   return (
     <CampaignDestination
       plan={saved.plan}
@@ -166,6 +174,9 @@ export default async function CampaignPage({ params }: PageProps) {
       campaignStartDate={artistConfig?.campaignStartDate}
       timelineText={saved.timelineText}
       artistName={saved.artist}
+      driveLibrary={driveLibrary}
+      driveConfig={driveConfig}
+      driveFolderUrl={driveFolderUrl}
     />
   );
 }
