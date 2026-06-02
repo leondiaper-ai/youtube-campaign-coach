@@ -744,6 +744,7 @@ export default function WeeklyPulse() {
         channel,
         label: multiformatLabel(signals.multiformat),
         read,
+        formatTypes: formats.formatTypes,
       };
     });
 
@@ -910,17 +911,32 @@ export default function WeeklyPulse() {
               marginTop: 24, fontSize: 10, fontWeight: 800,
               letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: SMOKE,
             }}>
-              Your weekly dive into what&apos;s driving growth.
+              {data.weekRange}
             </div>
 
-            {/* Editorial lede — right under the title */}
-            <p style={{
-              fontSize: 16, fontWeight: 400, color: WARM, lineHeight: 1.55,
-              margin: '24px 0 0', maxWidth: 480,
-              fontFamily: 'Inter, system-ui, sans-serif',
-            }}>
-              {linkifyArtists(data.editorial)}
-            </p>
+            {/* Evidence strip — not AI paragraph */}
+            <div style={{ display: 'flex', gap: 20, marginTop: 24, fontSize: 11, color: SMOKE }}>
+              <div>
+                <span style={{ fontSize: 24, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
+                  {data.signals.growing}
+                </span>
+                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Growing</span>
+              </div>
+              <div style={{ width: 1, background: BONE }} />
+              <div>
+                <span style={{ fontSize: 24, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
+                  {data.signals.totalManaged}
+                </span>
+                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Managed channels</span>
+              </div>
+              <div style={{ width: 1, background: BONE }} />
+              <div>
+                <span style={{ fontSize: 24, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
+                  {data.signals.weakConversion}
+                </span>
+                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Conversion opportunity</span>
+              </div>
+            </div>
 
           </div>
 
@@ -1113,41 +1129,45 @@ export default function WeeklyPulse() {
                           {fc.channel.name}
                         </span>
                       </div>
-                      {/* Editorial observation */}
-                      <p style={{
-                        fontSize: 17, fontWeight: 500, color: WHITE, lineHeight: 1.45,
-                        margin: '0 0 14px', maxWidth: 500,
-                        fontFamily: 'Inter, system-ui, sans-serif',
-                      }}>
-                        &ldquo;{fc.observation}&rdquo;
-                      </p>
-                      {/* Metadata strip */}
-                      <div style={{ display: 'flex', gap: 16, fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>
+                      {/* Evidence stats — not AI commentary */}
+                      <div style={{ display: 'flex', gap: 20, fontSize: 11, color: 'rgba(255,255,255,0.65)', marginBottom: 8 }}>
                         {fc.channel.views7d != null && (
-                          <span>{fmtNum(fc.channel.views7d)} views this week</span>
+                          <span><strong style={{ color: WHITE, fontWeight: 700 }}>{fmtNum(fc.channel.views7d)}</strong> views/wk</span>
                         )}
-                        {fc.channel.uploads30d > 0 && (
-                          <span>{fc.channel.uploads30d} uploads / 30d</span>
+                        <span><strong style={{ color: WHITE, fontWeight: 700 }}>{fc.channel.uploads30d}</strong> uploads/30d</span>
+                        {fc.channel.subs != null && (
+                          <span><strong style={{ color: WHITE, fontWeight: 700 }}>{fmtNum(fc.channel.subs)}</strong> subs</span>
                         )}
-                        {fc.channel.campaign && (
-                          <span style={{ color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>
-                            {fc.channel.campaign}
-                          </span>
+                        {fc.channel.subs7d != null && fc.channel.subs7d > 0 && (
+                          <span style={{ color: 'rgba(45,200,120,0.8)' }}>+{fmtNum(fc.channel.subs7d)} this week</span>
                         )}
                       </div>
-                    </div>
-                  </div>
-                  {/* Opportunity strip below image */}
-                  <div style={{
-                    padding: '14px 28px 16px', background: '#111',
-                    borderTop: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <div style={{
-                      fontFamily: "'Caveat', cursive",
-                      fontSize: 16, fontWeight: 500, color: 'rgba(255,255,255,0.55)',
-                      fontStyle: 'italic',
-                    }}>
-                      {fc.opportunity}
+                      {/* Format tags */}
+                      {(() => {
+                        const chVids = videosBySlug.get(fc.channel.slug) ?? [];
+                        const fmts = new Set<string>();
+                        for (const v of chVids) {
+                          if (v.durationSec <= 62) fmts.add('Short');
+                          if (/official video/i.test(v.format)) fmts.add('Official Video');
+                          else if (/bts|behind/i.test(v.format)) fmts.add('BTS');
+                          else if (/trailer/i.test(v.format)) fmts.add('Trailer');
+                          else if (/live session/i.test(v.format)) fmts.add('Live Session');
+                          else if (/visuali/i.test(v.format)) fmts.add('Visualiser');
+                          else if (/lyric/i.test(v.format)) fmts.add('Lyric Video');
+                        }
+                        if (fmts.size === 0) return null;
+                        return (
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const }}>
+                            {Array.from(fmts).map(f => (
+                              <span key={f} style={{
+                                padding: '2px 7px', borderRadius: 8, fontSize: 8, fontWeight: 700,
+                                textTransform: 'uppercase' as const, letterSpacing: '0.04em',
+                                background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)',
+                              }}>{f}</span>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </a>
@@ -1216,20 +1236,18 @@ export default function WeeklyPulse() {
                           {story.channel.name}
                         </span>
                       </div>
-                      <p style={{
-                        fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.4,
-                        margin: '0 0 8px',
-                        fontFamily: 'Inter, system-ui, sans-serif',
-                        overflow: 'hidden', display: '-webkit-box',
-                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
-                      }}>
-                        {story.observation}
-                      </p>
-                      <div style={{ display: 'flex', gap: 12, fontSize: 9, color: SMOKE }}>
+                      {/* Evidence stats */}
+                      <div style={{ display: 'flex', gap: 10, fontSize: 10, color: SMOKE, flexWrap: 'wrap' as const }}>
                         {story.channel.views7d != null && (
-                          <span>{fmtNum(story.channel.views7d)} views/wk</span>
+                          <span><strong style={{ color: INK }}>{fmtNum(story.channel.views7d)}</strong> views/wk</span>
                         )}
-                        <span>{story.channel.uploads30d} uploads/30d</span>
+                        <span><strong style={{ color: INK }}>{story.channel.uploads30d}</strong> uploads/30d</span>
+                        {story.channel.subs7d != null && story.channel.subs7d > 0 && (
+                          <span style={{ color: ACCENT.green }}>+{fmtNum(story.channel.subs7d)} subs</span>
+                        )}
+                        {story.channel.subs != null && (
+                          <span>{fmtNum(story.channel.subs)} subs</span>
+                        )}
                       </div>
                     </div>
                   </a>
@@ -1409,12 +1427,16 @@ export default function WeeklyPulse() {
                       <span style={{ fontSize: 13, fontWeight: 800, color: INK, letterSpacing: '-0.01em' }}>{h.channel.name}</span>
                     )}
                   </div>
-                  <p style={{
-                    fontSize: 12, fontWeight: 400, color: WARM, lineHeight: 1.45,
-                    margin: '0 0 6px', fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {h.read}
-                  </p>
+                  {/* Format tags instead of AI text */}
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const, marginBottom: 6 }}>
+                    {h.formatTypes.map((f: string) => (
+                      <span key={f} style={{
+                        padding: '2px 7px', borderRadius: 8, fontSize: 8, fontWeight: 700,
+                        textTransform: 'uppercase' as const,
+                        background: 'rgba(45,106,79,0.06)', color: ACCENT.green,
+                      }}>{f}</span>
+                    ))}
+                  </div>
                   <span style={{
                     fontSize: 8, fontWeight: 700, letterSpacing: '0.1em',
                     textTransform: 'uppercase' as const, color: ACCENT.green,
