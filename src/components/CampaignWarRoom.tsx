@@ -110,6 +110,18 @@ function tok(s: string): string[] {
 const shareTok = (a: string[], b: string[]) => a.some((x) => b.includes(x));
 const clsLabel = (c: DriveAssetClass) => ASSET_CLASS_META[c].label;
 
+// Identity tokens for a single milestone. Known release titles are only folded
+// in when the milestone title actually references that release — NOT blanket,
+// otherwise one upload matching any known release attaches to every milestone.
+function momentTokens(title: string, knownTitles: string[]): string[] {
+  const out = new Set(tok(title));
+  for (const k of knownTitles) {
+    const kt = tok(k);
+    if (kt.some((x) => out.has(x))) kt.forEach((x) => out.add(x));
+  }
+  return Array.from(out);
+}
+
 const RELEASE_KINDS = new Set<TimelineKind>(['singleRelease', 'albumRelease', 'documentaryRelease']);
 function phaseForDate(iso: string, firstRel?: string, lastRel?: string): PhaseName {
   if (!firstRel) return 'BUILD';
@@ -462,9 +474,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const mt = MOMENT_TONE[type];
   const { present, status, missing, actions } = cardLogic(type, mapping, pool);
 
-  // YouTube context — only CURRENT (non-archive) identity matches.
-  const evTokens = [...tok(ev.title), ...knownTitles.flatMap(tok)];
-  const liveMatch = recentUploads
+  // YouTube context — only CURRENT (non-archive) uploads that identity-match
+  // THIS milestone (known titles fold in only when the milestone references them).
+  const evTokens = momentTokens(ev.title, knownTitles);
+  const liveMatch = evTokens.length === 0 ? undefined : recentUploads
     .filter((u) => shareTok(tok(u.title), evTokens) && uploadAge(u.publishedAt, campaignStart) !== 'archive')
     .sort((a, b) => b.viewCount - a.viewCount)[0];
 
