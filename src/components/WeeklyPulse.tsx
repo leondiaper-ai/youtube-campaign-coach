@@ -675,6 +675,12 @@ export default function WeeklyPulse() {
     .map(ch => ({ ch, sig: analyseChannel(ch), score: campaignScore(ch, analyseChannel(ch)) }))
     .sort((a, b) => b.score - a.score)[0] ?? null;
 
+  // Discovery channels — best conversion from smaller artists (used in Emerging Winner section)
+  const discoveryChannels = managed
+    .filter(ch => (ch.subs ?? 0) < 100000 && (ch.subs7d ?? 0) > 0 && ch.uploads30d >= 2)
+    .sort((a, b) => (b.subsPer1kViews ?? 0) - (a.subsPer1kViews ?? 0))
+    .slice(0, 4);
+
   const campaignStories: CampaignStory[] = managed
     .filter(ch => ch.thumbnail && heroEligible(ch))
     .map(ch => {
@@ -1387,11 +1393,7 @@ export default function WeeklyPulse() {
         }).slice(0, 3);
         shortsMoments.forEach(v => markPlaced(v.artistSlug));
 
-        // Discovery moments — best conversion / growth from smaller artists
-        const discoveryChannels = managed
-          .filter(ch => canPlace(ch.slug) && (ch.subs ?? 0) < 100000 && (ch.subs7d ?? 0) > 0 && ch.uploads30d >= 2)
-          .sort((a, b) => (b.subsPer1kViews ?? 0) - (a.subsPer1kViews ?? 0))
-          .slice(0, 3);
+        // discoveryChannels already computed above
 
         return (
           <>
