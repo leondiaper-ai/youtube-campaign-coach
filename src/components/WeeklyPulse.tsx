@@ -889,11 +889,19 @@ export default function WeeklyPulse() {
 
       {/* ═══════ HERO — Title left, Shorts grid right ═══════ */}
       <header className="pulse-fade" style={{
-        maxWidth: 1200, margin: '0 auto', padding: '36px 40px 32px',
+        maxWidth: 1200, margin: '0 auto', padding: '36px 40px 28px',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 480px', gap: 40, alignItems: 'end' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 480px', gap: 40, alignItems: 'start' }}>
           {/* Left — Title */}
           <div>
+            <div style={{
+              fontSize: 10, fontWeight: 800,
+              letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: SMOKE,
+              marginBottom: 16,
+            }}>
+              {data.weekRange}
+            </div>
+
             <h1 style={{
               fontSize: 76, fontWeight: 900, lineHeight: 0.9,
               letterSpacing: '-0.04em', color: INK,
@@ -907,17 +915,13 @@ export default function WeeklyPulse() {
               </span>
             </h1>
 
-            <div style={{
-              marginTop: 20, fontSize: 10, fontWeight: 600,
-              letterSpacing: '0.08em', color: SMOKE,
-              display: 'flex', gap: 16, alignItems: 'center',
+            <p style={{
+              fontSize: 14, fontWeight: 400, color: WARM, lineHeight: 1.5,
+              margin: '20px 0 0', maxWidth: 460,
+              fontFamily: 'Inter, system-ui, sans-serif',
             }}>
-              <span style={{ fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase' as const }}>{data.weekRange}</span>
-              <span style={{ color: GHOST }}>·</span>
-              <span>{data.signals.totalManaged} channels</span>
-              <span style={{ color: GHOST }}>·</span>
-              <span style={{ color: ACCENT.green }}>{data.signals.growing} growing</span>
-            </div>
+              The campaigns shaping conversation, momentum and audience growth across YouTube this week.
+            </p>
 
           </div>
 
