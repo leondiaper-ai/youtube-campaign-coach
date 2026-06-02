@@ -278,7 +278,28 @@ export async function GET(request: Request) {
 
     // Sort videos by velocity, split into longform + Shorts
     allRecentVideos.sort((a, b) => b.velocity - a.velocity);
-    const topVideos = allRecentVideos.filter(v => v.format !== 'Short').slice(0, 8);
+
+    // Top longform: artist-diverse (max 1 per artist), then fill to 12
+    const longformPool = allRecentVideos.filter(v => v.format !== 'Short');
+    const topVideos: typeof allRecentVideos = [];
+    const seenArtists = new Set<string>();
+    // Pass 1: one per artist (diverse)
+    for (const v of longformPool) {
+      if (topVideos.length >= 12) break;
+      if (seenArtists.has(v.artistSlug)) continue;
+      seenArtists.add(v.artistSlug);
+      topVideos.push(v);
+    }
+    // Pass 2: fill remaining with best velocity (allow repeats)
+    if (topVideos.length < 12) {
+      const usedIds = new Set(topVideos.map(v => v.id));
+      for (const v of longformPool) {
+        if (topVideos.length >= 12) break;
+        if (usedIds.has(v.id)) continue;
+        usedIds.add(v.id);
+        topVideos.push(v);
+      }
+    }
 
     // Diverse shorts: max 2 per artist first pass, then backfill to 24
     const allShortsSorted = allRecentVideos.filter(v => v.format === 'Short');
