@@ -215,6 +215,11 @@ export default function CampaignWarRoom(props: Props) {
         recentUploads={recentUploads}
         lastUploadDays={lastUploadDays}
         shorts30d={shorts30d}
+        pool={{
+          bts: summary.byClass.find((c) => c.cls === 'bts')?.count ?? 0,
+          shorts: summary.byClass.find((c) => c.cls === 'shorts_cutdown')?.count ?? 0,
+          live: summary.byClass.find((c) => c.cls === 'live_performance')?.count ?? 0,
+        }}
       />
 
       <YouTubeContext recentUploads={recentUploads} liveChannel={liveChannel} lastUploadDays={lastUploadDays} shorts30d={shorts30d} />
@@ -372,9 +377,11 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
 // 3. MASTER CAMPAIGN TIMELINE (hero)
 // ══════════════════════════════════════════════════════════════════════════
 
-function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, lastUploadDays, shorts30d }: {
+type Pool = { bts: number; shorts: number; live: number };
+
+function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, lastUploadDays, shorts30d, pool }: {
   events: ParsedEvent[]; mappings: MilestoneMapping[]; phases: PhaseName[]; activeIdx: number;
-  recentUploads: RecentUpload[]; lastUploadDays?: number; shorts30d: number;
+  recentUploads: RecentUpload[]; lastUploadDays?: number; shorts30d: number; pool: Pool;
 }) {
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
@@ -400,6 +407,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, la
               recentUploads={recentUploads}
               lastUploadDays={lastUploadDays}
               shorts30d={shorts30d}
+              pool={pool}
             />
           ))}
           {events.length === 0 && (
@@ -422,9 +430,9 @@ function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   );
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, lastUploadDays, shorts30d }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, lastUploadDays, shorts30d, pool }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
-  recentUploads: RecentUpload[]; lastUploadDays?: number; shorts30d: number;
+  recentUploads: RecentUpload[]; lastUploadDays?: number; shorts30d: number; pool: Pool;
 }) {
   const d = dlabel(ev.dateISO);
   const dfn = daysFromNow(ev.dateISO);
@@ -488,8 +496,13 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Assets available</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {availableClasses.length ? availableClasses.map((c) => <Chip key={c} ok>{clsLabel(c)}</Chip>)
-                : <span style={{ fontSize: 11, color: GHOST, fontFamily: MONO }}>none yet</span>}
+                : <span style={{ fontSize: 11, color: GHOST, fontFamily: MONO }}>none dedicated yet</span>}
             </div>
+            {availableClasses.length === 0 && (pool.bts + pool.shorts + pool.live) > 0 && (
+              <div style={{ fontSize: 10, color: SMOKE, fontFamily: MONO, marginTop: 6 }}>
+                Campaign pool: {[pool.bts && `${pool.bts} BTS`, pool.shorts && `${pool.shorts} Shorts`, pool.live && `${pool.live} Live`].filter(Boolean).join(' · ')} — not milestone-specific
+              </div>
+            )}
           </div>
           {missing.length > 0 && (
             <div style={{ minWidth: 0 }}>

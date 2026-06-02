@@ -626,19 +626,26 @@ export function mapAssetsToTimeline(
     return targets;
   });
 
+  // "Floating" assets match no milestone by name. Attributing them to EVERY
+  // milestone is only safe when there's a single milestone (no ambiguity about
+  // which moment they belong to). With multiple milestones, a pile of session
+  // footage must NOT be stamped onto every one — that's the "✓ Shorts · 19
+  // files matched" overconfidence bug. There, floating assets stay
+  // campaign-level inventory (surfaced via Asset Snapshot + Support Inventory).
+  const allowFloating = events.length <= 1;
+
   return events.map((ev, ei) => {
     const expected = expectedClassesFor(ev.kind, config);
 
-    // Qualifying assets = identity-matched to THIS milestone, plus "floating"
-    // assets that match no milestone at all (shared inventory). Assets that
-    // identity-match a DIFFERENT milestone are excluded — that is the fix for
-    // the cross-milestone leak.
+    // Qualifying assets = identity-matched to THIS milestone (always), plus
+    // floating assets ONLY when attribution is unambiguous (single release).
+    // Assets that identity-match a different milestone are excluded.
     const qualifying: DriveAsset[] = [];
     const classOnly: DriveAsset[] = [];
     lib.assets.forEach((a, ai) => {
       const targets = assetTargets[ai];
       const identityHere = targets.includes(ei);
-      const floating = targets.length === 0;
+      const floating = targets.length === 0 && allowFloating;
       if (identityHere || floating) qualifying.push(a);
       else if (expected.includes(a.assetClass)) classOnly.push(a);
     });
