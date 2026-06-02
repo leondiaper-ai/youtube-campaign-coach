@@ -10,7 +10,7 @@ import { generateNudges } from '@/lib/coach/nudgeEngine';
 import { generatePlan } from '@/lib/planEngine';
 import { loadDriveLibrary } from '@/lib/driveStore';
 import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
-import CampaignDestination from '@/components/CampaignDestination';
+import CampaignWarRoom from '@/components/CampaignWarRoom';
 import type { RecentUpload } from '@/lib/artists';
 
 export const revalidate = 600;
@@ -160,23 +160,23 @@ export default async function CampaignPage({ params }: PageProps) {
   const driveConfig = mappingConfigFor(saved.slug);
   const driveFolderUrl = getCampaignConfig(saved.slug)?.driveFolderUrl;
 
+  // Keep computing matchResult/nudges/dataCoverage above (used for auto-regen
+  // + future surfaces); the V4 war-room view leads with the master timeline.
+  void matchResult; void nudges; void dataCoverage;
+
   return (
-    <CampaignDestination
+    <CampaignWarRoom
       plan={saved.plan}
-      channelCtx={saved.channelCtx}
-      createdAt={saved.createdAt}
       slug={saved.slug}
-      liveChannel={liveChannel}
-      matchResult={matchResult}
-      nudges={nudges}
-      recentUploads={recentUploads}
-      dataCoverage={dataCoverage}
-      campaignStartDate={artistConfig?.campaignStartDate}
-      timelineText={saved.timelineText}
       artistName={saved.artist}
+      timelineText={saved.timelineText}
+      channelCtx={saved.channelCtx}
+      campaignStartDate={artistConfig?.campaignStartDate}
       driveLibrary={driveLibrary}
       driveConfig={driveConfig}
       driveFolderUrl={driveFolderUrl}
+      recentUploads={recentUploads}
+      liveChannel={liveChannel}
     />
   );
 }
