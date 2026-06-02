@@ -1329,40 +1329,71 @@ export default function WeeklyPulse() {
         const canPlace = (slug: string) => (placementCount.get(slug) ?? 0) < 2;
         const markPlaced = (slug: string) => placementCount.set(slug, (placementCount.get(slug) ?? 0) + 1);
 
-        // Longform: use topVideos, prioritise format variety + artist diversity
-        // Score: official videos > BTS > live sessions > other, then velocity
-        const formatWeight = (fmt: string): number => {
-          if (/official video/i.test(fmt)) return 100;
-          if (/bts|behind/i.test(fmt)) return 80;
-          if (/live session|acoustic/i.test(fmt)) return 70;
-          if (/visuali/i.test(fmt)) return 60;
-          if (/trailer/i.test(fmt)) return 50;
-          if (/lyric/i.test(fmt)) return 40;
-          return 20;
+        // Longform: FORMAT-SLOT selection — one per content type, max one per artist
+        // Goal: "interesting formats worth watching" not "biggest videos"
+        const classifyFormat = (fmt: string, title: string): string => {
+          const f = fmt.toLowerCase();
+          const t = title.toLowerCase();
+          if (/official video/i.test(f) || /official.*video/i.test(t)) return 'OFFICIAL VIDEO';
+          if (/visuali/i.test(f) || /visuali/i.test(t)) return 'VISUALISER';
+          if (/bts|behind/i.test(f) || /behind.*scene|making.*of/i.test(t)) return 'BTS';
+          if (/live session|acoustic|stripped|live at|live from/i.test(f) || /live session|acoustic|stripped/i.test(t)) return 'LIVE SESSION';
+          if (/documentary|doc\b|mini.?doc/i.test(f) || /documentary/i.test(t)) return 'DOCUMENTARY';
+          if (/interview|conversation|talks? to/i.test(f) || /interview/i.test(t)) return 'INTERVIEW';
+          if (/vlog|diary|day in|tour life/i.test(t)) return 'VLOG';
+          if (/trailer/i.test(f) || /trailer/i.test(t)) return 'TRAILER';
+          if (/lyric/i.test(f) || /lyric/i.test(t)) return 'LYRIC VIDEO';
+          if (/performance|concert|festival|live\b/i.test(t)) return 'PERFORMANCE';
+          return 'UPLOAD';
         };
-        const allLongform = [...data.topVideos]
-          .map(v => ({ ...v, _score: formatWeight(v.format) + Math.min(v.velocity / 1000, 50) }))
-          .sort((a, b) => (b as any)._score - (a as any)._score);
 
-        // First pass: diverse artists only
-        const seenLF = new Set<string>();
-        const longformMoments: typeof allLongform = [];
-        for (const v of allLongform) {
+        const allLongform = [...data.topVideos]
+          .map(v => ({ ...v, _fmt: classifyFormat(v.format, v.title) }))
+          .sort((a, b) => b.velocity - a.velocity);
+
+        // Format slots — try to fill one per category
+        const FORMAT_SLOTS = ['OFFICIAL VIDEO', 'BTS', 'LIVE SESSION', 'VISUALISER', 'DOCUMENTARY', 'VLOG', 'PERFORMANCE', 'INTERVIEW', 'TRAILER', 'LYRIC VIDEO', 'UPLOAD'];
+        const seenLF = new Set<string>(); // artist diversity
+        const usedFormats = new Set<string>();
+        const longformMoments: (typeof allLongform[0])[] = [];
+
+        // Pass 1: one per format slot, one per artist
+        for (const slot of FORMAT_SLOTS) {
           if (longformMoments.length >= 6) break;
-          if (seenLF.has(v.artistSlug)) continue;
-          seenLF.add(v.artistSlug);
-          longformMoments.push(v);
+          const candidate = allLongform.find(v =>
+            (v as any)._fmt === slot && !seenLF.has(v.artistSlug) && !usedFormats.has(slot)
+          );
+          if (candidate) {
+            longformMoments.push(candidate);
+            seenLF.add(candidate.artistSlug);
+            usedFormats.add(slot);
+          }
         }
-        // Second pass: if under 4, allow repeat artists but different videos
+
+        // Pass 2: fill remaining slots with best velocity, still artist-diverse
+        if (longformMoments.length < 6) {
+          const usedIds = new Set(longformMoments.map(v => v.id));
+          for (const v of allLongform) {
+            if (longformMoments.length >= 6) break;
+            if (usedIds.has(v.id)) continue;
+            if (seenLF.has(v.artistSlug)) continue;
+            longformMoments.push(v);
+            seenLF.add(v.artistSlug);
+            usedIds.add(v.id);
+          }
+        }
+
+        // Pass 3: if still under 4, allow repeat artists
         if (longformMoments.length < 4) {
           const usedIds = new Set(longformMoments.map(v => v.id));
           for (const v of allLongform) {
             if (longformMoments.length >= 6) break;
             if (usedIds.has(v.id)) continue;
-            usedIds.add(v.id);
             longformMoments.push(v);
+            usedIds.add(v.id);
           }
         }
+
         longformMoments.forEach(v => markPlaced(v.artistSlug));
 
         // Shorts: use topShorts (already filtered by API as shorts)
@@ -1400,7 +1431,7 @@ export default function WeeklyPulse() {
                           style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.65) 100%)' }} />
                         <div style={{ position: 'absolute', top: 8, left: 8 }}>
-                          <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700, textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE }}>{v.format}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700, textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE }}>{(v as any)._fmt || v.format}</span>
                         </div>
                         <div style={{ position: 'absolute', top: 8, right: 8 }}><PlayOverlay size={24} /></div>
                         <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
