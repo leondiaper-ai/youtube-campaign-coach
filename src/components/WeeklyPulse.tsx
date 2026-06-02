@@ -1329,21 +1329,39 @@ export default function WeeklyPulse() {
         const canPlace = (slug: string) => (placementCount.get(slug) ?? 0) < 2;
         const markPlaced = (slug: string) => placementCount.set(slug, (placementCount.get(slug) ?? 0) + 1);
 
-        // Longform: use topVideos (already filtered by API as longform)
+        // Longform: use topVideos, prioritise format variety + artist diversity
+        // Score: official videos > BTS > live sessions > other, then velocity
+        const formatWeight = (fmt: string): number => {
+          if (/official video/i.test(fmt)) return 100;
+          if (/bts|behind/i.test(fmt)) return 80;
+          if (/live session|acoustic/i.test(fmt)) return 70;
+          if (/visuali/i.test(fmt)) return 60;
+          if (/trailer/i.test(fmt)) return 50;
+          if (/lyric/i.test(fmt)) return 40;
+          return 20;
+        };
         const allLongform = [...data.topVideos]
-          .sort((a, b) => b.velocity - a.velocity);
+          .map(v => ({ ...v, _score: formatWeight(v.format) + Math.min(v.velocity / 1000, 50) }))
+          .sort((a, b) => (b as any)._score - (a as any)._score);
+
+        // First pass: diverse artists only
         const seenLF = new Set<string>();
-        const longformMoments = allLongform.filter(v => {
-          if (seenLF.has(v.artistSlug)) return false;
-          if (!canPlace(v.artistSlug)) return false;
+        const longformMoments: typeof allLongform = [];
+        for (const v of allLongform) {
+          if (longformMoments.length >= 6) break;
+          if (seenLF.has(v.artistSlug)) continue;
           seenLF.add(v.artistSlug);
-          return true;
-        }).slice(0, 6);
-        // If diversity rule is too strict, relax and fill remaining slots
-        if (longformMoments.length < 6) {
-          const remaining = allLongform.filter(v => !seenLF.has(v.artistSlug)).slice(0, 6 - longformMoments.length);
-          longformMoments.push(...remaining);
-          remaining.forEach(v => seenLF.add(v.artistSlug));
+          longformMoments.push(v);
+        }
+        // Second pass: if under 4, allow repeat artists but different videos
+        if (longformMoments.length < 4) {
+          const usedIds = new Set(longformMoments.map(v => v.id));
+          for (const v of allLongform) {
+            if (longformMoments.length >= 6) break;
+            if (usedIds.has(v.id)) continue;
+            usedIds.add(v.id);
+            longformMoments.push(v);
+          }
         }
         longformMoments.forEach(v => markPlaced(v.artistSlug));
 
