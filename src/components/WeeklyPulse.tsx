@@ -1563,35 +1563,48 @@ export default function WeeklyPulse() {
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
         <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
-          {/* LEFT — Reference Channels (replaces AI market insights) */}
+          {/* LEFT — Reference Channels */}
           <div>
-            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
+            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
               Reference Channels This Week
             </div>
+            <p style={{ fontSize: 12, color: SMOKE, margin: '0 0 16px', lineHeight: 1.4, fontFamily: 'Inter, system-ui, sans-serif' }}>
+              Wider market channels we&apos;re watching — strong execution, consistent cadence, format variety worth learning from.
+            </p>
             {consistentMarket.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  {consistentMarket.map(ch => {
+                  {consistentMarket.slice(0, 6).map(ch => {
                     const chUrl = channelUrl(ch.channelHandle);
+                    // One-line context from data
+                    const longform = ch.longform30d;
+                    const shorts = ch.shorts30d;
+                    let context = `${ch.uploads30d} uploads/30d`;
+                    if (longform > 0 && shorts > 0) context = `${longform} longform + ${shorts} Shorts in 30d`;
+                    else if (shorts > 0) context = `${shorts} Shorts in 30d`;
+                    if (ch.views7d != null && ch.views7d >= 10000) context += ` · ${fmtNum(ch.views7d)} views/wk`;
                     return (
-                    <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div key={ch.slug} style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
+                      borderBottom: `1px solid ${BONE}`,
+                    }}>
                       {ch.thumbnail && (
                         chUrl ? (
                           <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
-                            <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                            <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
                           </a>
                         ) : (
-                          <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                          <img src={ch.thumbnail} alt="" loading="lazy" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
                         )
                       )}
-                      <div>
+                      <div style={{ flex: 1 }}>
                         {chUrl ? (
                           <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                            <div style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
                           </a>
                         ) : (
-                          <div style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
                         )}
-                        <div style={{ fontSize: 9, color: GHOST }}>{ch.uploads30d} uploads/30d</div>
+                        <div style={{ fontSize: 10, color: SMOKE }}>{context}</div>
                       </div>
                     </div>
                     );
