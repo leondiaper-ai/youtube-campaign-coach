@@ -13,7 +13,9 @@ import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
 import type { RecentUpload } from '@/lib/artists';
 
-export const revalidate = 600;
+// Short window while the planner is in active development — drops stale HTML
+// fast on each deploy. Move back to 600 (or on-demand revalidation) once stable.
+export const revalidate = 60;
 
 type PageProps = {
   params: Promise<{ slug: string }>;
