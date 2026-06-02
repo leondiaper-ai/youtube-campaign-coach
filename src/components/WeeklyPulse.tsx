@@ -675,10 +675,20 @@ export default function WeeklyPulse() {
     .map(ch => ({ ch, sig: analyseChannel(ch), score: campaignScore(ch, analyseChannel(ch)) }))
     .sort((a, b) => b.score - a.score)[0] ?? null;
 
-  // Discovery channels — best conversion from smaller artists (used in Emerging Winner section)
+  // Emerging channels — need real activity, not just high conversion on tiny views
   const discoveryChannels = managed
-    .filter(ch => (ch.subs ?? 0) < 100000 && (ch.subs7d ?? 0) > 0 && ch.uploads30d >= 2)
-    .sort((a, b) => (b.subsPer1kViews ?? 0) - (a.subsPer1kViews ?? 0))
+    .filter(ch =>
+      (ch.subs ?? 0) < 100000 &&
+      (ch.subs7d ?? 0) > 0 &&
+      (ch.views7d ?? 0) >= 1000 &&
+      ch.uploads30d >= 3
+    )
+    .sort((a, b) => {
+      // Blend: conversion quality + upload cadence + subs gained
+      const scoreA = (a.subsPer1kViews ?? 0) * 10 + a.uploads30d * 2 + (a.subs7d ?? 0);
+      const scoreB = (b.subsPer1kViews ?? 0) * 10 + b.uploads30d * 2 + (b.subs7d ?? 0);
+      return scoreB - scoreA;
+    })
     .slice(0, 4);
 
   const campaignStories: CampaignStory[] = managed
@@ -1219,89 +1229,48 @@ export default function WeeklyPulse() {
       )}
 
 
-      {/* ═══════ EMERGING ECOSYSTEM WINNER ═══════ */}
-      {emergingWinner && (
+      {/* ═══════ EMERGING CHANNELS ═══════ */}
+      {discoveryChannels.length > 0 && (
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 32px' }}>
-          <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 16,
-            padding: '16px 20px', borderRadius: 10,
-            background: WHITE, border: `1px solid ${BONE}`,
-          }}>
-            {(() => {
-              const ewUrl = channelUrl(emergingWinner.ch.channelHandle);
-              return emergingWinner.ch.thumbnail && ewUrl ? (
-                <a href={ewUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
-                  <img src={emergingWinner.ch.thumbnail} alt="" style={{
-                    width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
-                    border: `2px solid ${BONE}`,
-                  }} />
-                </a>
-              ) : emergingWinner.ch.thumbnail ? (
-                <img src={emergingWinner.ch.thumbnail} alt="" style={{
-                  width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
-                  border: `2px solid ${BONE}`, flexShrink: 0,
-                }} />
-              ) : null;
-            })()}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green }}>
-                  Emerging Ecosystem Winner
-                </span>
-              </div>
-              {(() => {
-                const ewUrl = channelUrl(emergingWinner.ch.channelHandle);
-                return ewUrl ? (
-                  <a href={ewUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                    <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{emergingWinner.ch.name}</div>
-                  </a>
-                ) : (
-                  <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{emergingWinner.ch.name}</div>
-                );
-              })()}
-              <div style={{ display: 'flex', gap: 12, marginTop: 4, fontSize: 10, color: SMOKE }}>
-                {emergingWinner.ch.subs7d != null && emergingWinner.ch.subs7d >= 20 && <span>+{emergingWinner.ch.subs7d} subs this week</span>}
-                <span>{emergingWinner.ch.uploads30d} uploads / 30d</span>
-                {emergingWinner.ch.subsPer1kViews != null && emergingWinner.ch.subsPer1kViews >= 2 && (
-                  <span>{emergingWinner.ch.subsPer1kViews.toFixed(1)} subs per 1K views</span>
-                )}
-              </div>
-            </div>
-            <span style={{
-              fontSize: 10, fontWeight: 600, color: ACCENT.green,
-              padding: '4px 10px', borderRadius: 6, background: 'rgba(45,106,79,0.06)',
-              whiteSpace: 'nowrap',
-            }}>
-              {emergingWinner.sig.multiformat === 'strong-followthrough' || emergingWinner.sig.multiformat === 'ecosystem-build'
-                ? 'Multi-Format Active'
-                : emergingWinner.ch.classification === 'GROWING' ? 'Growing' : 'Strong Execution'}
-            </span>
+          <div style={{ height: 1, background: BONE, marginBottom: 24 }} />
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
+            Emerging Channels
           </div>
-          {/* Discovery runners-up below the winner */}
-          {discoveryChannels.filter(ch => ch.slug !== emergingWinner.ch.slug).length > 0 && (
-            <div style={{ display: 'flex', gap: 16, marginTop: 12, paddingTop: 12, borderTop: `1px solid ${BONE}` }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: GHOST, whiteSpace: 'nowrap', marginTop: 2 }}>Also watching:</span>
-              {discoveryChannels.filter(ch => ch.slug !== emergingWinner.ch.slug).slice(0, 3).map(ch => {
-                const dUrl = channelUrl(ch.channelHandle);
-                return (
-                  <div key={ch.slug} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {ch.thumbnail && <img src={ch.thumbnail} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover' }} />}
-                    {dUrl ? (
-                      <a href={dUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                        <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(discoveryChannels.length, 4)}, 1fr)`, gap: 12 }}>
+            {discoveryChannels.slice(0, 4).map(ch => {
+              const dUrl = channelUrl(ch.channelHandle);
+              return (
+                <div key={ch.slug} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '12px 14px', borderRadius: 8,
+                  background: WHITE, border: `1px solid ${BONE}`,
+                }}>
+                  {ch.thumbnail && (
+                    dUrl ? (
+                      <a href={dUrl} target="_blank" rel="noopener noreferrer" className="pulse-link" style={{ flexShrink: 0 }}>
+                        <img src={ch.thumbnail} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
                       </a>
                     ) : (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: INK }}>{ch.name}</span>
+                      <img src={ch.thumbnail} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    )
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {dUrl ? (
+                      <a href={dUrl} target="_blank" rel="noopener noreferrer" className="pulse-link">
+                        <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
+                      </a>
+                    ) : (
+                      <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
                     )}
-                    {ch.subs7d != null && ch.subs7d >= 20 && (
-                      <span style={{ fontSize: 9, color: ACCENT.green, fontWeight: 700 }}>+{ch.subs7d}</span>
-                    )}
+                    <div style={{ display: 'flex', gap: 8, fontSize: 9, color: SMOKE, marginTop: 2 }}>
+                      {ch.subs7d != null && ch.subs7d >= 20 && <span style={{ color: ACCENT.green, fontWeight: 700 }}>+{ch.subs7d} subs</span>}
+                      <span>{ch.uploads30d} uploads/30d</span>
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
         </section>
       )}
 
