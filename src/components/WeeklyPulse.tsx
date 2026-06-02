@@ -1613,6 +1613,24 @@ export default function WeeklyPulse() {
                 </p>
               </div>
             ))}
+            {/* YouTube resource link */}
+            {(data.playbook as any).resourceUrl && (
+              <a
+                href={(data.playbook as any).resourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  marginTop: 14, padding: '6px 14px', borderRadius: 6,
+                  background: 'rgba(255,255,255,0.08)', color: 'rgba(250,247,242,0.7)',
+                  fontSize: 10, fontWeight: 600, textDecoration: 'none',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                <img src="/youtube-icon.png" alt="" style={{ width: 14, height: 14 }} />
+                {(data.playbook as any).resourceLabel ?? 'YouTube for Artists Resource'}
+              </a>
+            )}
           </div>
         </div>
       </section>
