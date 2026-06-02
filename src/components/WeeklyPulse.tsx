@@ -1338,10 +1338,10 @@ export default function WeeklyPulse() {
           if (!canPlace(v.artistSlug)) return false;
           seenLF.add(v.artistSlug);
           return true;
-        }).slice(0, 4);
+        }).slice(0, 6);
         // If diversity rule is too strict, relax and fill remaining slots
-        if (longformMoments.length < 4) {
-          const remaining = allLongform.filter(v => !seenLF.has(v.artistSlug)).slice(0, 4 - longformMoments.length);
+        if (longformMoments.length < 6) {
+          const remaining = allLongform.filter(v => !seenLF.has(v.artistSlug)).slice(0, 6 - longformMoments.length);
           longformMoments.push(...remaining);
           remaining.forEach(v => seenLF.add(v.artistSlug));
         }
@@ -1373,13 +1373,13 @@ export default function WeeklyPulse() {
                 <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
                   Longform Moments This Week
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
                   {longformMoments.map((v, i) => (
                     <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
                       className="pulse-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
                       <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
                         <img src={v.thumbnail} alt="" loading="lazy"
-                          style={{ width: '100%', height: i < 2 ? 200 : 160, objectFit: 'cover', display: 'block' }} />
+                          style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.65) 100%)' }} />
                         <div style={{ position: 'absolute', top: 8, left: 8 }}>
                           <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700, textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE }}>{v.format}</span>
@@ -1401,33 +1401,7 @@ export default function WeeklyPulse() {
               </section>
             )}
 
-            {/* ═══════ SHORTFORM MOMENTS THIS WEEK ═══════ */}
-            {shortsMoments.length > 0 && (
-              <section style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 40px 0' }}>
-                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
-                  Shortform Moments This Week
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                  {shortsMoments.map(v => (
-                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
-                      className="pulse-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
-                      <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden' }}>
-                        <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', aspectRatio: '9/16', objectFit: 'cover', display: 'block', maxHeight: 180 }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 50%, rgba(0,0,0,0.6) 100%)' }} />
-                        <div style={{ position: 'absolute', bottom: 8, left: 8, right: 8 }}>
-                          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase' as const, marginBottom: 2 }}>{v.channelName}</div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: WHITE, lineHeight: 1.2 }}>{v.title.length > 40 ? v.title.slice(0, 37) + '...' : v.title}</div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: 8, fontSize: 10, marginTop: 4 }}>
-                        <span style={{ fontWeight: 700, color: INK }}>{fmtNum(v.viewCount)}</span>
-                        <span style={{ color: SMOKE }}>{fmtNum(v.velocity)}/day</span>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </section>
-            )}
+            {/* Shortform section removed — longform focus only, Shorts covered in hero grid */}
 
             {/* ═══════ DISCOVERY MOMENTS ═══════ */}
             {discoveryChannels.length > 0 && (
