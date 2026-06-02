@@ -908,34 +908,15 @@ export default function WeeklyPulse() {
             </h1>
 
             <div style={{
-              marginTop: 24, fontSize: 10, fontWeight: 800,
-              letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: SMOKE,
+              marginTop: 20, fontSize: 10, fontWeight: 600,
+              letterSpacing: '0.08em', color: SMOKE,
+              display: 'flex', gap: 16, alignItems: 'center',
             }}>
-              {data.weekRange}
-            </div>
-
-            {/* Evidence strip — not AI paragraph */}
-            <div style={{ display: 'flex', gap: 20, marginTop: 24, fontSize: 11, color: SMOKE }}>
-              <div>
-                <span style={{ fontSize: 24, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {data.signals.growing}
-                </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Growing</span>
-              </div>
-              <div style={{ width: 1, background: BONE }} />
-              <div>
-                <span style={{ fontSize: 24, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {data.signals.totalManaged}
-                </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Managed channels</span>
-              </div>
-              <div style={{ width: 1, background: BONE }} />
-              <div>
-                <span style={{ fontSize: 24, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
-                  {data.signals.weakConversion}
-                </span>
-                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Conversion opportunity</span>
-              </div>
+              <span style={{ fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase' as const }}>{data.weekRange}</span>
+              <span style={{ color: GHOST }}>·</span>
+              <span>{data.signals.totalManaged} channels</span>
+              <span style={{ color: GHOST }}>·</span>
+              <span style={{ color: ACCENT.green }}>{data.signals.growing} growing</span>
             </div>
 
           </div>
@@ -994,20 +975,20 @@ export default function WeeklyPulse() {
       </header>
 
 
-      {/* ═══════ SIGNALS BAR — navigational anchors ═══════ */}
+      {/* ═══════ SIGNALS BAR — compact inline strip ═══════ */}
       <section style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 40px',
       }}>
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          display: 'flex', gap: 24, alignItems: 'center',
           borderTop: `1px solid ${BONE}`, borderBottom: `1px solid ${BONE}`,
-          padding: '28px 0',
+          padding: '14px 0',
         }}>
           {[
-            { n: data.signals.growing, label: 'In Growth State', target: 'pulse-momentum', color: ACCENT.green },
-            { n: data.signals.weakConversion, label: 'Audience Growth Opportunity', target: 'pulse-conversion', color: ACCENT.amber },
+            { n: data.signals.growing, label: 'Growing', target: 'pulse-momentum', color: ACCENT.green },
+            { n: data.signals.weakConversion, label: 'Conversion Opportunity', target: 'pulse-conversion', color: ACCENT.amber },
             { n: data.signals.underfed, label: 'Cadence Building', target: 'pulse-cadence', color: ACCENT.ochre },
-            { n: data.signals.cold, label: 'Catalogue Reawakening', target: 'pulse-reactivation', color: ACCENT.ember },
+            { n: data.signals.cold, label: 'Reawakening', target: 'pulse-reactivation', color: ACCENT.ember },
           ].map((sig, i) => (
             <div
               key={i}
@@ -1017,22 +998,12 @@ export default function WeeklyPulse() {
               onClick={() => document.getElementById(sig.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
               onKeyDown={(e) => { if (e.key === 'Enter') document.getElementById(sig.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
               style={{
-                textAlign: 'center',
-                borderLeft: i > 0 ? `1px solid ${BONE}` : 'none',
-                padding: '8px 4px 16px',
-                color: sig.color,
+                display: 'flex', alignItems: 'baseline', gap: 5,
+                color: sig.color, cursor: 'pointer',
               }}
             >
-              <div style={{
-                fontSize: 48, fontWeight: 900, color: sig.color,
-                lineHeight: 1, letterSpacing: '-0.03em',
-                fontFamily: 'Inter, system-ui, sans-serif',
-              }}>
-                {sig.n}
-              </div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: SMOKE, marginTop: 6, letterSpacing: '0.02em' }}>
-                {sig.label}
-              </div>
+              <span style={{ fontSize: 16, fontWeight: 900 }}>{sig.n}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: SMOKE }}>{sig.label}</span>
             </div>
           ))}
         </div>
