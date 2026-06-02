@@ -990,20 +990,13 @@ export default function WeeklyPulse() {
           <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
           {/* Section header */}
-          <div style={{ marginBottom: 36 }}>
+          <div style={{ marginBottom: 28 }}>
             <div style={{
               fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+              textTransform: 'uppercase' as const, color: GHOST,
             }}>
               This Week Across Virgin
             </div>
-            <p style={{
-              fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
-              maxWidth: 560, margin: 0,
-              fontFamily: 'Inter, system-ui, sans-serif',
-            }}>
-              The campaigns shaping conversation, momentum and audience growth across YouTube this week.
-            </p>
           </div>
 
           {/* Asymmetric layout: hero left, stack right */}
