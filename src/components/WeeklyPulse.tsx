@@ -1320,80 +1320,66 @@ export default function WeeklyPulse() {
         </section>
       )}
 
-      {/* ═══════ THIS WEEK'S OBSERVATION + MOMENTS — side by side ═══════ */}
+      {/* ═══════ MOMENTS THIS WEEK — full-width content grid ═══════ */}
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
-          {/* LEFT — Observation (replaces Big Read essays) */}
-          <div>
-            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
-              This Week&apos;s Observation
-            </div>
-            {data.insights.length > 0 && (
-              <div>
-                <p style={{
-                  fontSize: 15, fontWeight: 600, color: INK, lineHeight: 1.5, margin: '0 0 12px',
-                  fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic',
-                }}>
-                  {linkifyArtists(data.insights[0])}
-                </p>
-                {data.insights[1] && (
-                  <p style={{ fontSize: 12, color: WARM, lineHeight: 1.5, margin: 0, fontFamily: 'Inter, system-ui, sans-serif' }}>
-                    {linkifyArtists(data.insights[1])}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+        <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
+          Moments This Week
+        </div>
 
-          {/* RIGHT — Moments */}
-          <div>
-            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
-              Moments This Week
-            </div>
-            {featureVideo && (
-              <>
-                <a href={ytUrl(featureVideo.id, featureVideo.durationSec)} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                  <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', marginBottom: 10 }}>
-                    <img src={featureVideo.thumbnail} alt="" loading="lazy"
-                      style={{ width: '100%', height: 220, objectFit: 'cover', display: 'block' }} />
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '36px 16px 14px', background: 'linear-gradient(transparent 0%, rgba(0,0,0,0.7) 100%)' }}>
-                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.55)', marginBottom: 3 }}>{featureVideo.format}</div>
-                      <div style={{ fontSize: 16, fontWeight: 800, color: WHITE, lineHeight: 1.2, letterSpacing: '-0.02em' }}>{featureVideo.title}</div>
+        {/* Top longform videos — 2×2 grid */}
+        {(() => {
+          // Merge all managed longform videos, sort by velocity, dedupe by artist
+          const allVids = [...data.topVideos, ...data.topShorts]
+            .filter(v => v.durationSec > 62)
+            .sort((a, b) => b.velocity - a.velocity);
+          const seen = new Set<string>();
+          const moments = allVids.filter(v => {
+            if (seen.has(v.artistSlug)) return false;
+            seen.add(v.artistSlug);
+            return true;
+          }).slice(0, 4);
+
+          if (moments.length === 0 && featureVideo) {
+            // Fallback: use featureVideo + supporting
+            moments.push(featureVideo, ...supportingVideos.slice(0, 3));
+          }
+
+          return moments.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              {moments.map((v, i) => (
+                <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
+                  className="pulse-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
+                  <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
+                    <img src={v.thumbnail} alt="" loading="lazy"
+                      style={{ width: '100%', height: i < 2 ? 200 : 160, objectFit: 'cover', display: 'block' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.65) 100%)' }} />
+                    <div style={{ position: 'absolute', top: 8, left: 8 }}>
+                      <span style={{
+                        padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700,
+                        textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE,
+                      }}>{v.format}</span>
                     </div>
-                    <div style={{ position: 'absolute', top: 10, right: 10 }}><PlayOverlay size={32} /></div>
+                    <div style={{ position: 'absolute', top: 8, right: 8 }}><PlayOverlay size={24} /></div>
+                    <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
+                      <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>
+                        {v.channelName}
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: WHITE, lineHeight: 1.2 }}>
+                        {v.title.length > 60 ? v.title.slice(0, 57) + '...' : v.title}
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 11 }}>
-                    {(() => { const h = slugToHandle.get(featureVideo.artistSlug); const u = channelUrl(h ?? null); return u ? (
-                      <a href={u} target="_blank" rel="noopener noreferrer" className="pulse-link"><span style={{ fontWeight: 700, color: INK }}>{featureVideo.channelName}</span></a>
-                    ) : (
-                      <span style={{ fontWeight: 700, color: INK }}>{featureVideo.channelName}</span>
-                    ); })()}
-                    <span style={{ color: SMOKE }}>{fmtNum(featureVideo.viewCount)} views</span>
-                    <span style={{ color: YT_RED, fontWeight: 600 }}>{fmtNum(featureVideo.velocity)}/day</span>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', fontSize: 11, marginTop: 6, padding: '0 2px' }}>
+                    <span style={{ fontWeight: 700, color: INK }}>{fmtNum(v.viewCount)} views</span>
+                    <span style={{ color: YT_RED, fontWeight: 600 }}>{fmtNum(v.velocity)}/day</span>
+                    <span style={{ color: SMOKE }}>{v.daysAgo}d ago</span>
                   </div>
                 </a>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 14 }}>
-                  {supportingVideos.map(v => (
-                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                      <div style={{ borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
-                        <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', height: 70, objectFit: 'cover', display: 'block' }} />
-                      </div>
-                      {(() => { const h = slugToHandle.get(v.artistSlug); const u = channelUrl(h ?? null); return u ? (
-                        <a href={u} target="_blank" rel="noopener noreferrer" className="pulse-link">
-                          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 2 }}>{v.channelName}</div>
-                        </a>
-                      ) : (
-                        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.02em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 2 }}>{v.channelName}</div>
-                      ); })()}
-                      <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{v.title}</div>
-                      <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>{fmtNum(v.viewCount)} views · {fmtNum(v.velocity)}/day</div>
-                    </a>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          ) : null;
+        })()}
       </section>
 
 
