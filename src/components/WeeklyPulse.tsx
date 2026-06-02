@@ -889,9 +889,9 @@ export default function WeeklyPulse() {
 
       {/* ═══════ HERO — Title left, Shorts grid right ═══════ */}
       <header className="pulse-fade" style={{
-        maxWidth: 1200, margin: '0 auto', padding: '36px 40px 48px',
+        maxWidth: 1200, margin: '0 auto', padding: '36px 40px 32px',
       }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 480px', gap: 40, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 480px', gap: 40, alignItems: 'end' }}>
           {/* Left — Title */}
           <div>
             <h1 style={{
