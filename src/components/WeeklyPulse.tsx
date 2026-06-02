@@ -661,8 +661,22 @@ export default function WeeklyPulse() {
     opportunity: string;
   };
 
+  // ── Hero eligibility: minimum scale for main placement ──
+  // At least ONE of: 50K+ weekly views, 10K+ subs, active priority campaign, or major release
+  const heroEligible = (ch: PulseChannel) =>
+    (ch.views7d ?? 0) >= 50000 ||
+    (ch.subs ?? 0) >= 10000 ||
+    ch.campaign != null ||
+    ch.phase === 'PUSH' || ch.phase === 'RELEASE';
+
+  // ── Emerging Ecosystem Winner: best small artist ──
+  const emergingWinner = managed
+    .filter(ch => ch.thumbnail && !heroEligible(ch) && ch.uploads30d >= 3 && (ch.subs7d ?? 0) > 0)
+    .map(ch => ({ ch, sig: analyseChannel(ch), score: campaignScore(ch, analyseChannel(ch)) }))
+    .sort((a, b) => b.score - a.score)[0] ?? null;
+
   const campaignStories: CampaignStory[] = managed
-    .filter(ch => ch.thumbnail)
+    .filter(ch => ch.thumbnail && heroEligible(ch))
     .map(ch => {
       const sig = analyseChannel(ch);
       return { ch, sig, score: campaignScore(ch, sig) };
@@ -1245,27 +1259,70 @@ export default function WeeklyPulse() {
       )}
 
 
-      {/* ═══════ BIG READ + MOMENTS — side by side ═══════ */}
+      {/* ═══════ EMERGING ECOSYSTEM WINNER ═══════ */}
+      {emergingWinner && (
+        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 32px' }}>
+          <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 16,
+            padding: '16px 20px', borderRadius: 10,
+            background: WHITE, border: `1px solid ${BONE}`,
+          }}>
+            {emergingWinner.ch.thumbnail && (
+              <img src={emergingWinner.ch.thumbnail} alt="" style={{
+                width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
+                border: `2px solid ${BONE}`, flexShrink: 0,
+              }} />
+            )}
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green }}>
+                  Emerging Ecosystem Winner
+                </span>
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: INK }}>{emergingWinner.ch.name}</div>
+              <div style={{ display: 'flex', gap: 12, marginTop: 4, fontSize: 10, color: SMOKE }}>
+                {emergingWinner.ch.subs7d != null && emergingWinner.ch.subs7d > 0 && <span>+{emergingWinner.ch.subs7d} subs this week</span>}
+                <span>{emergingWinner.ch.uploads30d} uploads / 30d</span>
+                {emergingWinner.ch.subsPer1kViews != null && emergingWinner.ch.subsPer1kViews >= 2 && (
+                  <span>{emergingWinner.ch.subsPer1kViews.toFixed(1)} subs per 1K views</span>
+                )}
+              </div>
+            </div>
+            <span style={{
+              fontSize: 10, fontWeight: 600, color: ACCENT.green,
+              padding: '4px 10px', borderRadius: 6, background: 'rgba(45,106,79,0.06)',
+              whiteSpace: 'nowrap',
+            }}>
+              {emergingWinner.sig.multiformat === 'strong-followthrough' || emergingWinner.sig.multiformat === 'ecosystem-build'
+                ? 'Multi-Format Active'
+                : emergingWinner.ch.classification === 'GROWING' ? 'Growing' : 'Strong Execution'}
+            </span>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════ THIS WEEK'S OBSERVATION + MOMENTS — side by side ═══════ */}
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
-          {/* LEFT — Big Read */}
+          {/* LEFT — Observation (replaces Big Read essays) */}
           <div>
             <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16 }}>
-              The Big Read
+              This Week&apos;s Observation
             </div>
             {data.insights.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {data.insights.slice(0, 5).map((insight, i) => (
-                  <p key={i} style={{
-                    fontSize: i === 0 ? 16 : 13,
-                    fontWeight: i === 0 ? 700 : 400,
-                    color: i === 0 ? INK : WARM,
-                    lineHeight: i === 0 ? 1.4 : 1.5, margin: 0,
-                    fontFamily: 'Inter, system-ui, sans-serif',
-                  }}>
-                    {linkifyArtists(insight)}
+              <div>
+                <p style={{
+                  fontSize: 15, fontWeight: 600, color: INK, lineHeight: 1.5, margin: '0 0 12px',
+                  fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic',
+                }}>
+                  {linkifyArtists(data.insights[0])}
+                </p>
+                {data.insights[1] && (
+                  <p style={{ fontSize: 12, color: WARM, lineHeight: 1.5, margin: 0, fontFamily: 'Inter, system-ui, sans-serif' }}>
+                    {linkifyArtists(data.insights[1])}
                   </p>
-                ))}
+                )}
               </div>
             )}
           </div>

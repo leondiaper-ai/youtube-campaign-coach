@@ -629,70 +629,116 @@ function generatePlaybook(
   topVideos: PulseVideo[],
   topShorts: PulseVideo[],
 ): PulseResponse['playbook'] {
-  const activeNoRecent = channels.filter(c =>
-    c.campaignStartDate != null && c.lastUploadDaysAgo != null && c.lastUploadDaysAgo > 7
-  );
-  if (activeNoRecent.length >= 2) {
-    return {
-      title: 'The 7–10 Day Follow-Up Window',
-      why: 'Channels that sustain uploads after an official video retain recommendation surface significantly longer. The strongest campaigns treat follow-through as part of the rollout, not an afterthought.',
+  // Rotating playbook library — cycles weekly, not conditional
+  const PLAYBOOKS: PulseResponse['playbook'][] = [
+    {
+      title: 'The 7–10 Day Follow-Through Window',
+      why: 'Channels that sustain uploads after an official video retain recommendation surface significantly longer.',
       when: 'Day 1–10 after any official video, premiere, or major drop.',
       actions: [
-        'Day 1–3: Release a Short clip from the video (best moment, reaction, behind the scenes)',
-        'Day 3–7: Post a BTS or making-of video — even a simple 3-minute studio session works',
-        'Day 7–10: Drop a lyric video, visualiser, or acoustic version to keep the track alive in recommendations',
+        'Day 1–3: Release a Short clip from the video — best moment, reaction, or BTS',
+        'Day 3–7: Post a making-of or studio session to add depth',
+        'Day 7–10: Drop a lyric video, visualiser, or acoustic version',
       ],
-    };
-  }
-
-  if (signals.weakConversion >= 2) {
-    return {
-      title: 'Turning Discovery Into Audience Depth',
-      why: 'Views prove discoverability is working. The next step is giving viewers a reason to subscribe — and that\'s almost always depth and context, not volume.',
-      when: '3+ uploads in 30 days with strong views and room to grow subscriber conversion.',
+    },
+    {
+      title: 'Premiere Strategy',
+      why: 'Premieres drive simultaneous viewing and live chat engagement. YouTube\'s algorithm treats premieres as a launch event.',
+      when: 'Any major drop — official videos, documentaries, longform releases.',
       actions: [
-        'Add one artist-led context piece this week — a track breakdown, studio tour, or honest creative diary',
-        'Pin a strong subscribe CTA as a comment on the top 3 recent videos',
-        'Create a Short that teases upcoming content ("next week we\'re dropping...") to build anticipation',
+        'Schedule the premiere 48–72 hours in advance for recommendation pre-load',
+        'Post a Community Post 24 hours before with teaser image',
+        'Be active in premiere chat for the first 30 minutes — creator engagement counts',
       ],
-    };
-  }
-
-  const shortHeavy = channels.filter(c => c.shorts30d > 3 && c.longform30d === 0);
-  if (shortHeavy.length >= 1) {
-    return {
-      title: 'Shorts Ladder Around an Official Video',
-      why: 'Shorts generate discovery reach but don\'t build watch time or loyalty alone. The campaigns bridging Shorts into deeper content are the ones building lasting audiences.',
-      when: 'Active with Shorts but no longform in 14+ days.',
+    },
+    {
+      title: 'Shorts → Longform Bridge',
+      why: 'Shorts generate discovery reach but don\'t build loyalty alone. Bridging Shorts viewers into longform content builds lasting audiences.',
+      when: 'Active with Shorts but limited longform support.',
       actions: [
-        'Build a 3-Short teaser sequence leading up to a longform drop (countdown, snippet, BTS)',
-        'Release the longform video with a same-day Short that clips the best 15 seconds',
-        'Follow up 3–5 days later with a reaction Short or outtake to drive back to the main video',
+        'Build a 3-Short teaser sequence leading to a longform drop',
+        'Release the longform with a same-day Short clipping the best 15 seconds',
+        'Follow up 3–5 days later with a reaction Short driving back to the main video',
       ],
-    };
-  }
-
-  if (signals.cold >= 2) {
-    return {
-      title: 'Turn One Video Into Five Uploads',
-      why: 'Repurposing one video into multiple formats builds the cadence YouTube rewards — without requiring new production. The fastest way to restart a quiet channel.',
-      when: 'Catalogue reawakening opportunity — channel ready for fresh content.',
+    },
+    {
+      title: 'Release Week Content Stack',
+      why: 'The first 72 hours after a release determine its algorithmic trajectory. A content stack maximises the launch window.',
+      when: 'Release week for any single, album, or major video.',
       actions: [
-        'Take the most recent video and extract 2–3 Short clips from the strongest moments',
-        'Create a lyric video or visualiser using the same audio with minimal production',
-        'Post a simple BTS photo montage or studio session clip to humanise the channel',
+        'Day 0: Official video + announcement Short + Community Post',
+        'Day 1–2: BTS or making-of content showing the creative process',
+        'Day 3–5: Lyric video or visualiser to give the track a second surface',
       ],
-    };
-  }
+    },
+    {
+      title: 'Visualiser Strategy',
+      why: 'Visualisers give every album track a video presence. They\'re low-cost, high-searchability, and extend the catalogue window on YouTube.',
+      when: 'Post-release — especially for album tracks without official videos.',
+      actions: [
+        'Create visualisers for the top 3 album tracks within 2 weeks of release',
+        'Use consistent visual branding across all visualisers for album identity',
+        'Add end screens linking to the official video and next visualiser',
+      ],
+    },
+    {
+      title: 'Live Session Amplification',
+      why: 'Live sessions and acoustic performances are among the highest-retention content on music YouTube. They signal authenticity and build deep audience connection.',
+      when: 'Between release cycles or alongside tour activity.',
+      actions: [
+        'Capture a 3–5 minute stripped-back performance of the strongest track',
+        'Release a Short teaser the day before the full session',
+        'Pin a comment linking to the official version for cross-pollination',
+      ],
+    },
+    {
+      title: 'Catalogue Reactivation',
+      why: 'Dormant channels still have recommendation history. A strategic re-entry can reactivate YouTube\'s signals faster than starting cold.',
+      when: 'Channel inactive 30+ days with existing catalogue.',
+      actions: [
+        'Extract 2–3 Short clips from the most-viewed existing videos',
+        'Create a lyric video or visualiser from the strongest catalogue track',
+        'Post a "coming soon" Community Post to signal the channel is returning',
+      ],
+    },
+    {
+      title: 'Tour Content Framework',
+      why: 'Tour and live content builds the catalogue between release cycles. It keeps the channel active and gives YouTube fresh signals to recommend.',
+      when: 'Active touring or festival season.',
+      actions: [
+        'Capture 30–60 second Shorts at each show — crowd moments, backstage, soundcheck',
+        'Compile a 3–5 minute highlight reel from a key show within 48 hours',
+        'Post a Short the morning after each show while the audience is still engaged',
+      ],
+    },
+    {
+      title: 'Community Post Ladder',
+      why: 'Community Posts cost zero production effort and keep the channel algorithmically active between uploads. They prime the audience for upcoming content.',
+      when: 'Between uploads — especially during quiet periods.',
+      actions: [
+        'Post a poll ("which track should we make a video for next?")',
+        'Share a BTS photo with a one-line tease about what\'s coming',
+        'Repost the strongest recent video with a new comment or context',
+      ],
+    },
+    {
+      title: 'Archive Footage Strategy',
+      why: 'Archive and vault footage fills content gaps without new production. Fans engage heavily with unseen material, and it keeps cadence consistent.',
+      when: 'Between singles or during campaign planning periods.',
+      actions: [
+        'Dig out unreleased rehearsal, studio, or tour footage from the last 12 months',
+        'Cut into 2–3 Shorts and one longer "vault" video',
+        'Frame as exclusive/unseen content to drive engagement',
+      ],
+    },
+  ];
 
-  return {
-    title: 'Premiere + Community Post Sequence',
-    why: 'Premieres drive simultaneous viewing and live chat. A Community Post 24 hours before builds anticipation.',
-    when: 'Any major drop — official videos, documentaries, longform releases.',
-    actions: [
-      'Schedule the premiere 48–72 hours in advance to build YouTube\'s recommendation pre-load',
-      'Post a Community Post 24 hours before with a teaser image and countdown',
-      'Be active in the premiere chat for the first 30 minutes — YouTube\'s algorithm counts creator engagement',
-    ],
-  };
+  // Rotate based on ISO week number
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  return PLAYBOOKS[weekNo % PLAYBOOKS.length];
 }
