@@ -73,6 +73,14 @@ const STD = {
   reference: { label: 'Reference', color: GHOST },
 };
 
+// Tidy display titles that carry a leading date artifact from pasted timelines,
+// e.g. ", 2026 – 'Mouse' IG release" → "'Mouse' IG release". Display-only — the
+// raw title is still used for matching.
+function cleanTitle(s: string): string {
+  const out = s.replace(/^\s*,?\s*20\d{2}\s*[–—-]\s*/, '').replace(/^\s*[,–—-]\s*/, '').trim();
+  return out || s;
+}
+
 function momentType(ev: ParsedEvent): MomentType {
   const t = ev.title.toLowerCase();
   const k = ev.kind;
@@ -121,6 +129,9 @@ const ageBadge: Record<Age, { label: string; color: string }> = {
   archive: { label: 'Archive reference', color: SMOKE },
 };
 const isShort = (u: RecentUpload) => u.durationSec > 0 && u.durationSec <= 62;
+// A pre-release teaser (pre-save / coming soon) — identity-matches a moment but
+// does NOT mean its content is live yet, so it must not flip a status to Live.
+const isTeaser = (u: RecentUpload) => /pre-?save|pre-?order|coming soon|🔜|link in bio|out (this|next|fri|mon|tue|wed|thu|sat|sun)/i.test(u.title);
 const ytThumb = (id: string, q: 'hqdefault' | 'maxresdefault' = 'hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
 const ytUrl = (u: RecentUpload) => isShort(u) ? `https://youtube.com/shorts/${u.id}` : `https://youtube.com/watch?v=${u.id}`;
 
@@ -246,7 +257,7 @@ export default function CampaignWarRoom(props: Props) {
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
         datesMapped={events.length > 0}
         pipelineReady={hasAssets}
-        nextTitle={nextMoment?.e.title}
+        nextTitle={nextMoment ? cleanTitle(nextMoment.e.title) : undefined}
         nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
         focus={focus}
       />
@@ -401,8 +412,8 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
   const contextLine = !relevant
     ? 'Reference release informing the upcoming rollout'
     : age === 'recent'
-      ? (isShort(hero) ? 'Current active surface — most recent campaign upload' : 'Current active release — most recent campaign upload')
-      : 'Recent campaign release';
+      ? (isShort(hero) ? 'Current active surface — leading campaign Short' : 'Current active release — leading campaign upload')
+      : 'Recent campaign release informing the rollout';
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
@@ -645,7 +656,11 @@ function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
 
 // Valid hero asset classes — any ONE satisfies hero coverage for a release.
 const HERO_CLS: DriveAssetClass[] = ['official_video', 'visualiser', 'lyric_video', 'documentary'];
-const isHeroUploadTitle = (t: string) => /official\s*(music\s*)?video|visuali[sz]er|\blyric\b/i.test(t);
+// Hero-asset titles: explicit "official video / visualiser / lyric", plus the
+// common bare "(Official)" parenthetical artists use for the official video on
+// their channel. "(Official Audio)" is deliberately NOT matched (no closing
+// paren straight after "official").
+const isHeroUploadTitle = (t: string) => /official\s*(music\s*)?video|visuali[sz]er|\blyric\b|\(official\)/i.test(t);
 
 // When the timeline names a SPECIFIC deliverable, be specific about it rather
 // than listing generic hero alternatives.
@@ -764,7 +779,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const pt = PHASE_TONE[phase];
   const type = momentType(ev);
   const mt = MOMENT_TONE[type];
-  const displayTitle = titleOverride ?? ev.title;
+  const displayTitle = cleanTitle(titleOverride ?? ev.title);
   const named = namedHeroAsset(includes && includes.length ? includes.join(' ') : ev.title); // specific deliverable named in the timeline
   const { present, missing, actions, hasContent } = cardLogic(type, mapping, pool, named);
 
@@ -785,6 +800,12 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const shortLives = isSupportType ? (live?.shorts ?? []) : [];        // supporting Shorts, if live
   const heroInDrive = !!mapping?.anchorPresent;
   const mainFormat = type === 'live' ? 'full performance' : 'longform';
+  // A non-release moment whose title identity-matches a genuinely live upload
+  // the kind-based matcher didn't surface (a freestyle, a featured drop). Keeps
+  // the status honest — no PLANNED chip sitting above an "already live" video.
+  const softLive = (!heroLive && !primaryLive && shortLives.length === 0
+    && type !== 'release' && type !== 'archive'
+    && liveMatch && !isTeaser(liveMatch)) ? liveMatch : undefined;
 
   // ── Standardised primary status ─────────────────────────────────────────
   // Every card resolves to ONE of five labels: LIVE / READY / IN PRODUCTION /
@@ -810,6 +831,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   } else if (shortLives.length) {
     displayStatus = STD.live; statusNote = `Supporting Short live — main ${mainFormat} still to come`;
     statusHref = ytUrl(shortLives[0]); statusTitle = 'Watch on YouTube';
+  } else if (softLive) {
+    displayStatus = STD.live;
+    statusNote = type === 'live' ? 'Performance live on YouTube' : 'Already live on YouTube';
+    statusHref = ytUrl(softLive); statusTitle = 'Watch on YouTube';
   } else if (type === 'release') {
     if (heroInDrive) { displayStatus = STD.ready; statusNote = 'Hero asset in the YouTube library'; }
     else if (named) { displayStatus = STD.production; statusNote = `${named} in production — not in the library yet`; }
@@ -835,7 +860,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   if (type === 'release') mainLive = heroLive;
   else if (primaryLive) { mainLive = primaryLive; supportingShorts = shortLives; }
   else if (shortLives.length) { mainLive = shortLives[0]; supportingShorts = shortLives.slice(1); }
-  else mainLive = liveMatch;
+  else mainLive = softLive ?? (type === 'archive' ? liveMatch : undefined);
 
   const liveLabel = heroLive ? 'Hero asset live on YouTube'
     : primaryLive ? (type === 'live' ? 'Performance live' : 'Longform live')
@@ -849,7 +874,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         ? [`Supporting Short live — the main ${mainFormat} is still to come`]
         : actions;
 
-  const isLive = !!(heroLive || primaryLive || shortLives.length);
+  const isLive = !!(heroLive || primaryLive || shortLives.length || softLive);
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
@@ -882,7 +907,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
                 <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, fontFamily: MONO }}>Includes</span>
                 {includes.map((t, k) => (
                   <span key={k} style={{ fontSize: 10, fontWeight: 700, fontFamily: MONO, color: mt.color, background: `${mt.color}12`, border: `1px solid ${mt.color}33`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
-                    {t.replace(/:.*$/, '').trim()}
+                    {cleanTitle(t).replace(/:.*$/, '').trim()}
                   </span>
                 ))}
               </div>
