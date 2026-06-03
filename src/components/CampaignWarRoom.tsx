@@ -237,7 +237,6 @@ export default function CampaignWarRoom(props: Props) {
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} />
-      <ReadinessStrip readiness={m.readiness} support={m.support} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
@@ -293,16 +292,6 @@ function currentFocus(primaryGap: string, phase: PhaseName): string {
     : 'Extending the campaign with catalogue support.';
 }
 
-function MiniScore({ label, value, band, color, dark }: { label: string; value: number; band: string; color: string; dark?: boolean }) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
-      <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: dark ? GHOST : SMOKE, fontFamily: MONO }}>{label}</span>
-      <span style={{ fontSize: 14, fontWeight: 900, fontFamily: MONO, color: dark ? WHITE : INK }}>{value}</span>
-      <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color, fontFamily: MONO }}>{band}</span>
-    </span>
-  );
-}
-
 function CampaignRead({ artist, title, phase, momentum, nextTitle, nextDate, focus }: {
   artist: string; title: string; phase: PhaseName;
   momentum: string; nextTitle?: string; nextDate?: string; focus: string;
@@ -336,23 +325,6 @@ function CampaignRead({ artist, title, phase, momentum, nextTitle, nextDate, foc
           {nextTitle && <Field label="Next YouTube milestone" value={`${nextTitle}${nextDate ? ` — ${nextDate}` : ''}`} />}
           <Field label="Current YouTube focus" value={focus} />
         </div>
-      </div>
-    </section>
-  );
-}
-
-// Slim, secondary score strip — the readiness detail lives below the hero,
-// not in the headline.
-function ReadinessStrip({ readiness, support }: {
-  readiness: ReturnType<typeof readinessScore>; support: ReturnType<typeof supportInventory>;
-}) {
-  const relColor = readiness.band === 'Ready' || readiness.band === 'On track' ? ACCENT : readiness.band === 'Building' ? AMBER : RED;
-  const supColor = support.band === 'Deep' || support.band === 'Strong' ? ACCENT : support.band === 'Building' ? AMBER : SMOKE;
-  return (
-    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 40px 0' }}>
-      <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap', alignItems: 'baseline' }}>
-        <MiniScore label="YouTube Release Readiness" value={readiness.score} band={readiness.band} color={relColor} />
-        <MiniScore label="Multi-Format Asset Coverage" value={support.score} band={support.band} color={supColor} />
       </div>
     </section>
   );
@@ -528,8 +500,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
-      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
-      <div style={{ fontSize: 12, color: SMOKE, marginBottom: 24 }}>What&rsquo;s happening · what exists · what&rsquo;s missing · what&rsquo;s ready for YouTube</div>
+      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
