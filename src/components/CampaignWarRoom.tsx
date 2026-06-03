@@ -482,7 +482,9 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
   // upload never lights up every BTS episode).
   const liveByMoment = (() => {
     const map = new Map<number, RecentUpload>();
-    const recent = recentUploads.filter((u) => uploadAge(u.publishedAt, campaignStart) !== 'archive');
+    // Only genuinely RECENT uploads mark a moment live — so old catalogue
+    // reposts don't light up future milestones.
+    const recent = recentUploads.filter((u) => uploadAge(u.publishedAt, campaignStart) === 'recent');
     const wantList = events
       .map((e, i) => ({ i, want: momentWantsKind(momentType(e)), ms: new Date(e.dateISO + 'T12:00:00').getTime() }))
       .filter((w) => w.want);
