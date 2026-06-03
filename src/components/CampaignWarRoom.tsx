@@ -408,22 +408,9 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
   const shorts30 = within30.filter(isShort).length;
   const long30 = within30.filter((u) => !isShort(u)).length;
 
-  // Why this surface is featured — never show a big hero video without context.
-  const contextLine = !relevant
-    ? 'Reference release informing the upcoming rollout'
-    : age === 'recent'
-      ? (isShort(hero) ? 'Current active surface — leading campaign Short' : 'Current active release — leading campaign upload')
-      : 'Recent campaign release informing the rollout';
-
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
-        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, display: 'flex', alignItems: 'center', gap: 7 }}><YTMark h={11} /> Live YouTube Surface</div>
-        <div style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
-          <span style={{ fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: GHOST }}>Campaign Context</span>
-          <span style={{ margin: '0 7px', color: GHOST }}>·</span>{contextLine}
-        </div>
-      </div>
+      <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 7 }}><YTMark h={11} /> Live YouTube Surface</div>
       <a href={ytUrl(hero)} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
         <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: INK, aspectRatio: '21 / 8' }}>
           <img src={ytThumb(hero.id, 'maxresdefault')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.62 }} />
