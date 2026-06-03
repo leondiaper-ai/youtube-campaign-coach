@@ -653,7 +653,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
     statusHref = heroLive ? ytUrl(heroLive) : (hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined);
     if (heroLive) statusTitle = 'Watch the hero asset on YouTube';
   } else if (supportLive) {
-    displayStatus = { label: 'Live on YouTube', color: ACCENT };
+    // A Short is supportive content; the longform is the main asset. Distinguish
+    // so a Short-only moment doesn't read as "main content posted".
+    const shortLive = supportLive.durationSec > 0 && supportLive.durationSec <= 62;
+    displayStatus = shortLive ? { label: 'Supporting Short Live', color: AMBER } : { label: 'Live on YouTube', color: ACCENT };
     statusHref = ytUrl(supportLive);
     statusTitle = 'Watch on YouTube';
   } else {
@@ -663,10 +666,18 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
 
   // The upload to surface, and the forward action when a moment is already live.
   const liveUpload = heroLive ?? supportLive ?? liveMatch;
-  const liveLabel = heroLive ? 'Hero asset live on YouTube' : supportLive ? 'Live on YouTube' : 'Already live';
-  const shownActions = (heroLive || supportLive)
+  const supportShort = !!supportLive && supportLive.durationSec > 0 && supportLive.durationSec <= 62;
+  const mainFormat = type === 'live' ? 'full performance' : 'longform';
+  const liveLabel = heroLive ? 'Hero asset live on YouTube'
+    : supportLive ? (supportShort ? 'Supporting Short live' : `${type === 'live' ? 'Performance' : 'Longform'} live`)
+    : 'Already live';
+  const shownActions = heroLive
     ? ['Live — amplify with a Community post, Shorts and a playlist add']
-    : actions;
+    : supportLive
+      ? (supportShort
+          ? [`Supporting Short live — the main ${mainFormat} is still to come`]
+          : ['Main asset live — amplify with a Community post and a playlist add'])
+      : actions;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
