@@ -103,9 +103,11 @@ const ytThumb = (id: string, q: 'hqdefault' | 'maxresdefault' = 'hqdefault') => 
 const ytUrl = (u: RecentUpload) => isShort(u) ? `https://youtube.com/shorts/${u.id}` : `https://youtube.com/watch?v=${u.id}`;
 
 // ── Identity tokens (shared with driveAssets vocabulary) ──
-const STOP = new Set(['the', 'and', 'a', 'an', 'for', 'out', 'now', 'feat', 'ft', 'with', 'release', 'single', 'album', 'video', 'official', 'lyric', 'visualiser', 'visualizer', 'live', 'tour', 'day', 'song', 'announcement', 'announce', 'new', 'music', 'shorts', 'short', 'episode', 'recording', 'session', 'content', 'our', 'feature']);
+const STOP = new Set(['the', 'and', 'a', 'an', 'for', 'out', 'now', 'feat', 'ft', 'with', 'release', 'single', 'album', 'video', 'official', 'lyric', 'visualiser', 'visualizer', 'live', 'tour', 'day', 'song', 'announcement', 'announce', 'new', 'music', 'shorts', 'short', 'episode', 'recording', 'session', 'content', 'our', 'feature', 'mix', 'vol', 'dub', 'pre', 'ist']);
+// Tokens >= 3 chars so short song codenames (PTS, NPC) match — aligned with
+// the Drive identity matcher in driveAssets.ts.
 function tok(s: string): string[] {
-  return (s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((t) => t.length >= 4 && !STOP.has(t));
+  return (s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((t) => t.length >= 3 && !STOP.has(t));
 }
 const shareTok = (a: string[], b: string[]) => a.some((x) => b.includes(x));
 
@@ -464,24 +466,29 @@ function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   return <span style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: ok ? 'rgba(45,106,79,0.08)' : 'rgba(185,28,28,0.06)', border: `1px solid ${color}30`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>{ok ? '✓' : '✕'} {children}</span>;
 }
 
+// Valid hero asset classes — any ONE satisfies hero coverage for a release.
+const HERO_CLS: DriveAssetClass[] = ['official_video', 'visualiser', 'lyric_video', 'documentary'];
+const isHeroUploadTitle = (t: string) => /official\s*(music\s*)?video|visuali[sz]er|\blyric\b/i.test(t);
+
 // A matched-asset chip that links to its Google Drive file/folder when known.
-function AssetChip({ cls, href }: { cls: DriveAssetClass; href?: string }) {
+function AssetChip({ cls, href, suffix }: { cls: DriveAssetClass; href?: string; suffix?: string }) {
   const base: React.CSSProperties = {
     fontSize: 10, fontFamily: MONO, fontWeight: 700, color: ACCENT,
     background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`,
     padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap',
     display: 'inline-flex', alignItems: 'center', gap: 4,
   };
+  const label = clsLabel(cls) + (suffix ? ` ${suffix}` : '');
   if (href) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library"
         style={{ ...base, textDecoration: 'none', cursor: 'pointer' }}>
-        ✓ {clsLabel(cls)} <span style={{ opacity: 0.55, fontSize: 9 }}>↗</span>
+        ✓ {label} <span style={{ opacity: 0.55, fontSize: 9 }}>↗</span>
       </a>
     );
   }
   // No Drive URL — visually softer, not clickable.
-  return <span style={{ ...base, color: SMOKE, background: 'rgba(133,127,116,0.08)', border: `1px solid ${BONE}`, opacity: 0.85 }}>✓ {clsLabel(cls)}</span>;
+  return <span style={{ ...base, color: SMOKE, background: 'rgba(133,127,116,0.08)', border: `1px solid ${BONE}`, opacity: 0.85 }}>✓ {label}</span>;
 }
 
 // Per-type status + actions — no generic repetition.
@@ -494,11 +501,12 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
   const actions: string[] = [];
 
   if (type === 'release') {
-    status = anchor && (mapping?.missing.length === 0)
-      ? { label: 'YouTube Ready', color: ACCENT }
-      : anchor ? { label: 'Hero Asset Ready', color: AMBER } : { label: 'Needs Hero YouTube Asset', color: RED };
-    missing = (mapping?.missing ?? []).filter((c) => ['official_video', 'visualiser', 'lyric_video', 'artwork'].includes(c));
-    if (!anchor) actions.push('Lock official video / visualiser before release week');
+    // Status is finalised in the card via the hero hierarchy (Drive vs YouTube).
+    status = anchor ? { label: 'Hero Asset Ready', color: AMBER } : { label: 'Needs Hero YouTube Asset', color: RED };
+    // Hero coverage is "any one valid hero asset" — never list missing hero
+    // alternatives. Only flag non-hero gaps (packaging).
+    missing = (mapping?.missing ?? []).filter((c) => c === 'artwork');
+    if (!anchor) actions.push('Lock a hero asset (official video / visualiser / lyric video) before release week');
     else actions.push('Schedule the Premiere + Community moment');
     actions.push(hasShortPool ? 'Cut Shorts from the pool to bridge release week' : 'Plan release-week Shorts Support');
   } else if (type === 'announce') {
@@ -541,8 +549,6 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const type = momentType(ev);
   const mt = MOMENT_TONE[type];
   const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool);
-  // When content exists, the status badge links to the matched Drive file, else the asset-library folder.
-  const statusHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
 
   // YouTube context — only CURRENT (non-archive) uploads that identity-match
   // THIS milestone (known titles fold in only when the milestone references them).
@@ -550,6 +556,21 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const liveMatch = evTokens.length === 0 ? undefined : recentUploads
     .filter((u) => shareTok(tok(u.title), evTokens) && uploadAge(u.publishedAt, campaignStart) !== 'archive')
     .sort((a, b) => b.viewCount - a.viewCount)[0];
+
+  // ── Hero asset coverage (releases) ──────────────────────────────────────
+  // Any ONE valid hero asset satisfies coverage. Surface the highest known
+  // state — Live on YouTube > Available in Drive > none — and never enumerate
+  // which alternative hero is "missing".
+  const heroLive = type === 'release' && liveMatch && isHeroUploadTitle(liveMatch.title) ? liveMatch : undefined;
+  const heroInDrive = !!mapping?.anchorPresent;
+  const displayStatus = type !== 'release' ? status
+    : heroLive ? { label: 'Hero Asset Live', color: ACCENT }
+    : heroInDrive ? { label: 'Hero Asset Ready', color: AMBER }
+    : { label: 'Needs Hero YouTube Asset', color: RED };
+  const statusHref = heroLive ? ytUrl(heroLive)
+    : hasContent ? (present[0] ? linkFor(present[0]) : folderUrl)
+    : undefined;
+  const statusTitle = heroLive ? 'Watch the hero asset on YouTube' : 'Open in YouTube Asset Library';
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
@@ -570,12 +591,12 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{ev.title}</div>
           </div>
           {statusHref ? (
-            <a href={statusHref} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library"
-              style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: status.color, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-              {status.label} <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
+            <a href={statusHref} target="_blank" rel="noopener noreferrer" title={statusTitle}
+              style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: displayStatus.color, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              {displayStatus.label} <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
             </a>
           ) : (
-            <span style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: status.color, padding: '4px 10px', borderRadius: 3 }}>{status.label}</span>
+            <span style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: displayStatus.color, padding: '4px 10px', borderRadius: 3 }}>{displayStatus.label}</span>
           )}
         </div>
 
@@ -585,7 +606,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             {present.length > 0 && (
               <div>
                 <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Matched assets</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} />)}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} suffix={HERO_CLS.includes(c) ? 'Available' : undefined} />)}</div>
               </div>
             )}
             {missing.length > 0 && (
@@ -603,7 +624,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             <a href={ytUrl(liveMatch)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
               <img src={ytThumb(liveMatch.id)} alt="" style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
               <span style={{ fontSize: 11, color: ACCENT, fontWeight: 600, lineHeight: 1.3 }}>
-                ✓ Already live: {liveMatch.title.length > 46 ? liveMatch.title.slice(0, 43) + '…' : liveMatch.title} · {fmtNum(liveMatch.viewCount)} views · {relDays(liveMatch.publishedAt)}
+                ✓ {heroLive ? 'Hero asset live on YouTube' : 'Already live'}: {liveMatch.title.length > 46 ? liveMatch.title.slice(0, 43) + '…' : liveMatch.title} · {fmtNum(liveMatch.viewCount)} views · {relDays(liveMatch.publishedAt)}
               </span>
             </a>
           </div>
