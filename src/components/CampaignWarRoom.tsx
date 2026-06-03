@@ -108,7 +108,25 @@ function tok(s: string): string[] {
   return (s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((t) => t.length >= 4 && !STOP.has(t));
 }
 const shareTok = (a: string[], b: string[]) => a.some((x) => b.includes(x));
-const clsLabel = (c: DriveAssetClass) => ASSET_CLASS_META[c].label;
+
+// YouTube-native display labels (override the generic asset-class labels).
+const YT_LABEL: Partial<Record<DriveAssetClass, string>> = {
+  shorts_cutdown: 'Shorts Support',
+  bts: 'BTS / Making-of',
+  live_performance: 'Live Performance',
+  audio: 'Audio / Master',
+};
+const clsLabel = (c: DriveAssetClass) => YT_LABEL[c] ?? ASSET_CLASS_META[c].label;
+
+// Subtle YouTube play mark.
+function YTMark({ h = 13 }: { h?: number }) {
+  return (
+    <svg width={Math.round(h * 1.42)} height={h} viewBox="0 0 28 20" aria-hidden style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <rect width="28" height="20" rx="5" fill="#FF0000" />
+      <path d="M11.2 5.8 18.5 10l-7.3 4.2V5.8Z" fill="#fff" />
+    </svg>
+  );
+}
 
 // Identity tokens for a single milestone. Known release titles are only folded
 // in when the milestone title actually references that release — NOT blanket,
@@ -200,6 +218,7 @@ export default function CampaignWarRoom(props: Props) {
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
+        folderUrl={lib.folderUrl || driveFolderUrl}
       />
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
@@ -215,17 +234,28 @@ export default function CampaignWarRoom(props: Props) {
 // ══════════════════════════════════════════════════════════════════════════
 
 function readSentence(support: ReturnType<typeof supportInventory>, primaryGap: string): string {
-  const sup = support.band === 'Deep' ? 'A deep support library'
-    : support.band === 'Strong' ? 'A strong support library'
-    : support.band === 'Building' ? 'A building support library'
-    : 'Support material is still thin';
-  if (primaryGap.startsWith('None')) return `${sup}, and the release anchors are in place — time to execute.`;
-  if (primaryGap === 'No assets scanned') return 'No asset library connected yet — scan the campaign folder to ground the plan.';
-  const gap = primaryGap === 'Official Video Assets' ? 'the release anchors — official video and visualiser — are still missing'
+  const sup = support.band === 'Deep' ? 'A deep multi-format asset library'
+    : support.band === 'Strong' ? 'A strong multi-format asset library'
+    : support.band === 'Building' ? 'A building multi-format asset library'
+    : 'Multi-format assets are still thin';
+  if (primaryGap.startsWith('None')) return `${sup}, and the core YouTube release anchors are in place — time to execute.`;
+  if (primaryGap === 'No assets scanned') return 'No YouTube asset library connected yet — scan the campaign folder to ground the plan.';
+  const gap = primaryGap === 'Official Video Assets' ? 'the core YouTube release anchors — official video and visualiser — are still missing'
     : primaryGap === 'Finished Shorts' ? 'finished Shorts are still to be cut'
-    : primaryGap === 'Artwork / Packaging' ? 'artwork and packaging are still to come'
+    : primaryGap === 'Artwork / Packaging' ? 'artwork and Community packaging are still to come'
     : `${primaryGap.toLowerCase()} is still missing`;
   return `${sup}, but ${gap}.`;
+}
+
+function ecosystemLine(support: ReturnType<typeof supportInventory>, primaryGap: string): string {
+  const sup = support.band === 'Deep' || support.band === 'Strong' ? 'multi-format support is strong'
+    : support.band === 'Building' ? 'multi-format support is building'
+    : 'multi-format support is thin';
+  const anchors = primaryGap === 'Official Video Assets' ? 'hero release anchors missing'
+    : primaryGap.startsWith('None') ? 'release anchors in place'
+    : primaryGap === 'No assets scanned' ? 'no assets scanned'
+    : `${primaryGap.toLowerCase()} outstanding`;
+  return `${sup} · ${anchors}`;
 }
 
 function MiniScore({ label, value, band, color, dark }: { label: string; value: number; band: string; color: string; dark?: boolean }) {
@@ -249,7 +279,9 @@ function CampaignRead({ artist, title, phase, readiness, support, primaryGap }: 
     <section style={{ background: INK, color: PAPER }}>
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '20px 40px 26px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Link href="/coach" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, textDecoration: 'none', fontFamily: MONO }}>← Rollout Map</Link>
+          <Link href="/coach" style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, textDecoration: 'none', fontFamily: MONO }}>
+            <YTMark h={12} /> YouTube Rollout Map
+          </Link>
           <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: pt.color, padding: '3px 10px', borderRadius: 3 }}>{pt.label} phase</span>
         </div>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>{artist}</div>
@@ -262,9 +294,14 @@ function CampaignRead({ artist, title, phase, readiness, support, primaryGap }: 
 
         {/* Scores, secondary */}
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'baseline' }}>
-          <MiniScore label="Release Readiness" value={readiness.score} band={readiness.band} color={relColor} dark />
-          <MiniScore label="Support Inventory" value={support.score} band={support.band} color={supColor} dark />
+          <MiniScore label="YouTube Release Readiness" value={readiness.score} band={readiness.band} color={relColor} dark />
+          <MiniScore label="Multi-Format Asset Coverage" value={support.score} band={support.band} color={supColor} dark />
           <span style={{ fontSize: 10, color: GHOST, fontFamily: MONO }}>Primary gap: <span style={{ color: primaryGap.startsWith('None') ? '#86EFAC' : '#FCA5A5', fontWeight: 700 }}>{primaryGap.replace(/ —.*/, '')}</span></span>
+        </div>
+
+        {/* YouTube ecosystem descriptor — a read, not a score */}
+        <div style={{ marginTop: 12, fontSize: 11, color: GHOST, fontFamily: MONO, letterSpacing: '0.04em' }}>
+          <span style={{ fontWeight: 800, color: SMOKE }}>YouTube Ecosystem:</span> {ecosystemLine(support, primaryGap)}
         </div>
       </div>
     </section>
@@ -298,7 +335,7 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
-      <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12 }}>Current YouTube Surface</div>
+      <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 7 }}><YTMark h={11} /> Live YouTube Surface</div>
       <a href={ytUrl(hero)} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
         <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: INK, aspectRatio: '21 / 8' }}>
           <img src={ytThumb(hero.id, 'maxresdefault')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.62 }} />
@@ -360,16 +397,17 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: hasAssets ? 14 : 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: hasAssets ? 4 : 0 }}>
           <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
-            Asset Snapshot{library.folderName ? ` · ${library.folderName}` : ''}
+            YouTube Content Pipeline{library.folderName ? ` · ${library.folderName}` : ''}
           </div>
-          {folderUrl && <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '5px 12px', borderRadius: 4, textDecoration: 'none' }}>Open Drive ↗</a>}
+          {folderUrl && <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '5px 12px', borderRadius: 4, textDecoration: 'none' }}>Open YouTube Asset Library ↗</a>}
         </div>
         {!hasAssets ? (
-          <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5, paddingTop: 14 }}>No asset library connected yet. Add a Drive folder or paste asset scan results to map this campaign&rsquo;s raw assets to the timeline below.</div>
+          <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5, paddingTop: 14 }}>No YouTube asset library connected yet. Add a Drive folder or paste asset scan results to map this campaign&rsquo;s content supply to the timeline below.</div>
         ) : (
           <>
+          <div style={{ fontSize: 11, color: SMOKE, margin: '6px 0 14px' }}>The YouTube content supply feeding this campaign.</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
               {counts.map((c) => (
                 <div key={c.k}>
@@ -381,7 +419,7 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${BONE}` }}>
               {bankedStatuses(library).map((b) => {
                 const color = b.ready ? ACCENT : b.partial ? AMBER : RED;
-                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources` : `${b.label} Missing`;
+                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources Available` : `${b.label} Missing`;
                 return <span key={b.label} style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: WHITE, border: `1px solid ${color}33`, padding: '3px 9px', borderRadius: 3 }}>{b.ready ? '✓' : b.partial ? '◐' : '✕'} {text}</span>;
               })}
             </div>
@@ -396,14 +434,14 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
 // 4. MASTER TIMELINE (type-aware cards)
 // ══════════════════════════════════════════════════════════════════════════
 
-function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool }: {
+function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl }: {
   events: ParsedEvent[]; mappings: MilestoneMapping[]; phases: PhaseName[]; activeIdx: number;
-  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool;
+  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
 }) {
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
-      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 4 }}>Master Campaign Timeline</div>
-      <div style={{ fontSize: 12, color: SMOKE, marginBottom: 24 }}>What&rsquo;s coming · what exists · what&rsquo;s missing · what&rsquo;s already live</div>
+      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
+      <div style={{ fontSize: 12, color: SMOKE, marginBottom: 24 }}>What&rsquo;s happening · what exists · what&rsquo;s missing · what&rsquo;s ready for YouTube</div>
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -411,7 +449,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
             <MilestoneCard
               key={`${ev.dateISO}-${i}`} ev={ev} mapping={mappings[i]} phase={phases[i]} active={i === activeIdx}
               showPhaseLabel={i === 0 || phases[i] !== phases[i - 1]}
-              recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool}
+              recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
             />
           ))}
           {events.length === 0 && <div style={{ fontSize: 13, color: SMOKE, padding: '20px 0 0 80px' }}>No campaign moments parsed yet. Add a timeline below to populate the master view.</div>}
@@ -426,6 +464,26 @@ function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   return <span style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: ok ? 'rgba(45,106,79,0.08)' : 'rgba(185,28,28,0.06)', border: `1px solid ${color}30`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>{ok ? '✓' : '✕'} {children}</span>;
 }
 
+// A matched-asset chip that links to its Google Drive file/folder when known.
+function AssetChip({ cls, href }: { cls: DriveAssetClass; href?: string }) {
+  const base: React.CSSProperties = {
+    fontSize: 10, fontFamily: MONO, fontWeight: 700, color: ACCENT,
+    background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`,
+    padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap',
+    display: 'inline-flex', alignItems: 'center', gap: 4,
+  };
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library"
+        style={{ ...base, textDecoration: 'none', cursor: 'pointer' }}>
+        ✓ {clsLabel(cls)} <span style={{ opacity: 0.55, fontSize: 9 }}>↗</span>
+      </a>
+    );
+  }
+  // No Drive URL — visually softer, not clickable.
+  return <span style={{ ...base, color: SMOKE, background: 'rgba(133,127,116,0.08)', border: `1px solid ${BONE}`, opacity: 0.85 }}>✓ {clsLabel(cls)}</span>;
+}
+
 // Per-type status + actions — no generic repetition.
 function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool: Pool) {
   const present = Array.from(new Set((mapping?.assets ?? []).map((a) => a.assetClass).filter((c) => c !== 'press_doc' && c !== 'other'))) as DriveAssetClass[];
@@ -437,36 +495,39 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
 
   if (type === 'release') {
     status = anchor && (mapping?.missing.length === 0)
-      ? { label: 'Ready', color: ACCENT }
-      : anchor ? { label: 'Anchor ready', color: AMBER } : { label: 'Needs anchor', color: RED };
+      ? { label: 'YouTube Ready', color: ACCENT }
+      : anchor ? { label: 'Hero Asset Ready', color: AMBER } : { label: 'Needs Hero YouTube Asset', color: RED };
     missing = (mapping?.missing ?? []).filter((c) => ['official_video', 'visualiser', 'lyric_video', 'artwork'].includes(c));
-    if (!anchor) actions.push('Lock the official video / visualiser before this drop');
-    else actions.push('Schedule the Premiere + community moment');
-    actions.push(hasShortPool ? 'Cut Shorts from the pool to bridge release week' : 'Plan release-week Shorts');
+    if (!anchor) actions.push('Lock official video / visualiser before release week');
+    else actions.push('Schedule the Premiere + Community moment');
+    actions.push(hasShortPool ? 'Cut Shorts from the pool to bridge release week' : 'Plan release-week Shorts Support');
   } else if (type === 'announce') {
-    status = present.length ? { label: 'Assets partial', color: AMBER } : { label: 'Planned', color: SMOKE };
+    status = present.length ? { label: 'Assets Partial', color: AMBER } : { label: 'Planned', color: SMOKE };
     missing = (mapping?.missing ?? []).filter((c) => ['trailer', 'artwork'].includes(c));
-    actions.push('Announcement trailer + artwork pack');
-    actions.push('Community post + pre-save / pre-order');
+    actions.push('Prepare announcement trailer, artwork and Community post');
+    actions.push('Premiere + pre-save / pre-order moment');
   } else if (type === 'live') {
-    status = (present.length || pool.live > 0) ? { label: 'Source ready', color: ACCENT } : { label: 'Planned', color: SMOKE };
-    actions.push('Capture vertical performance Shorts');
-    if (pool.live > 0 || present.includes('live_performance')) actions.push('Edit a performance upload from live footage');
+    status = (present.length || pool.live > 0) ? { label: 'Content Available', color: ACCENT } : { label: 'Planned', color: SMOKE };
+    actions.push('Cut vertical performance Shorts');
+    if (pool.live > 0 || present.includes('live_performance')) actions.push('Cut a live performance upload from this footage');
   } else if (type === 'archive') {
     status = { label: 'Reference', color: GHOST };
-    actions.push('Reference only — link in description / playlist');
+    actions.push('Archive reference — useful for catalogue context only');
   } else { // support
-    status = (present.length || pool.bts > 0 || pool.shorts > 0) ? { label: 'Source ready', color: ACCENT } : { label: 'Planned', color: SMOKE };
-    if (pool.bts > 0 || pool.shorts > 0 || present.includes('bts')) actions.push('Edit a Short from this session footage');
-    else actions.push('Capture content for this moment');
+    status = (present.length || pool.bts > 0 || pool.shorts > 0) ? { label: 'Content Available', color: ACCENT } : { label: 'Planned', color: SMOKE };
+    if (pool.bts > 0 || pool.shorts > 0 || present.includes('bts')) actions.push('Cut Shorts from this session footage');
+    else actions.push('Capture YouTube content for this moment');
   }
   return { present, status, missing, actions: actions.slice(0, 2) };
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
-  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool;
+  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
 }) {
+  // Direct Drive link for a matched asset class: the matching file, else the folder.
+  const linkFor = (c: DriveAssetClass) =>
+    (mapping?.assets ?? []).find((a) => a.assetClass === c && a.webViewLink)?.webViewLink ?? folderUrl;
   const d = dlabel(ev.dateISO);
   const dfn = daysFromNow(ev.dateISO);
   const pt = PHASE_TONE[phase];
@@ -508,7 +569,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             {present.length > 0 && (
               <div>
                 <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Matched assets</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <Chip key={c} ok>{clsLabel(c)}</Chip>)}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} />)}</div>
               </div>
             )}
             {missing.length > 0 && (
