@@ -208,15 +208,25 @@ export default function CampaignWarRoom(props: Props) {
     live: m.summary.byClass.find((c) => c.cls === 'live_performance')?.count ?? 0,
   };
 
+  // Next YouTube milestone — the next upcoming RELEASE moment, else the next moment.
+  const upcoming = events.map((e) => ({ e, mt: momentType(e) })).filter((x) => x.e.dateISO >= t);
+  const nextMoment = upcoming.find((x) => x.mt === 'release') ?? upcoming[0];
+  const momentum = momentumSentence(m.summary, m.support);
+  const focus = currentFocus(m.primaryGap, m.currentPhase);
+
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
       <CampaignRead
         artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
-        readiness={m.readiness} support={m.support} primaryGap={m.primaryGap}
+        momentum={momentum}
+        nextTitle={nextMoment?.e.title}
+        nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
+        focus={focus}
       />
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} />
+      <ReadinessStrip readiness={m.readiness} support={m.support} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
@@ -235,29 +245,41 @@ export default function CampaignWarRoom(props: Props) {
 // 1. CAMPAIGN READ (editorial header)
 // ══════════════════════════════════════════════════════════════════════════
 
-function readSentence(support: ReturnType<typeof supportInventory>, primaryGap: string): string {
-  const sup = support.band === 'Deep' ? 'A deep multi-format asset library'
-    : support.band === 'Strong' ? 'A strong multi-format asset library'
-    : support.band === 'Building' ? 'A building multi-format asset library'
-    : 'Multi-format assets are still thin';
-  if (primaryGap.startsWith('None')) return `${sup}, and a hero YouTube asset is in place — time to execute.`;
-  if (primaryGap === 'No assets scanned') return 'No YouTube asset library connected yet — scan the campaign folder to ground the plan.';
-  const gap = primaryGap === 'Hero YouTube Asset' ? 'it still needs a hero YouTube asset — an official video, visualiser or lyric video'
-    : primaryGap === 'Finished Shorts' ? 'finished Shorts are still to be cut'
-    : primaryGap === 'Artwork / Packaging' ? 'artwork and Community packaging are still to come'
-    : `${primaryGap.toLowerCase()} is still missing`;
-  return `${sup}, but ${gap}.`;
+function fmtDay(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  const mo = MONTHS[d.getUTCMonth()];
+  return `${d.getUTCDate()} ${mo[0]}${mo.slice(1).toLowerCase()}`;
 }
 
-function ecosystemLine(support: ReturnType<typeof supportInventory>, primaryGap: string): string {
-  const sup = support.band === 'Deep' || support.band === 'Strong' ? 'multi-format support is strong'
-    : support.band === 'Building' ? 'multi-format support is building'
-    : 'multi-format support is thin';
-  const anchors = primaryGap === 'Hero YouTube Asset' ? 'hero asset missing'
-    : primaryGap.startsWith('None') ? 'hero asset in place'
-    : primaryGap === 'No assets scanned' ? 'no assets scanned'
-    : `${primaryGap.toLowerCase()} outstanding`;
-  return `${sup} · ${anchors}`;
+// Momentum line — what's already in place (positive, never an audit).
+function momentumSentence(summary: ReturnType<typeof summarizeLibrary>, support: ReturnType<typeof supportInventory>): string {
+  if (summary.total === 0) return 'Asset library not connected yet — scan the campaign folder to ground the rollout.';
+  const byc = (c: DriveAssetClass) => summary.byClass.find((x) => x.cls === c)?.count ?? 0;
+  const cats: { label: string; count: number }[] = [];
+  if (byc('bts')) cats.push({ label: 'BTS', count: byc('bts') });
+  if (byc('shorts_cutdown')) cats.push({ label: 'Shorts', count: byc('shorts_cutdown') });
+  if (byc('live_performance')) cats.push({ label: 'live content', count: byc('live_performance') });
+  if (summary.images) cats.push({ label: 'artwork', count: summary.images });
+  if (summary.audio) cats.push({ label: 'audio masters', count: summary.audio });
+  cats.sort((a, b) => b.count - a.count);
+  const top = cats.slice(0, 3).map((c) => c.label);
+  const list = top.length === 0 ? 'content'
+    : top.length === 1 ? top[0]
+    : `${top.slice(0, -1).join(', ')} and ${top[top.length - 1]}`;
+  const adj = support.band === 'Deep' ? 'Deep' : support.band === 'Strong' ? 'Strong' : support.band === 'Building' ? 'Growing' : 'Early';
+  return `${adj} multi-format content pipeline already in place across ${list}.`;
+}
+
+// Current focus — the next action stage, framed forward (no "missing/needs").
+function currentFocus(primaryGap: string, phase: PhaseName): string {
+  if (primaryGap === 'No assets scanned') return 'Connecting the YouTube asset library.';
+  if (primaryGap === 'Hero YouTube Asset') return 'Preparing hero release assets.';
+  if (primaryGap === 'Finished Shorts') return 'Cutting Shorts to drive discovery.';
+  if (primaryGap === 'Artwork / Packaging') return 'Finishing artwork and Community packaging.';
+  return phase === 'BUILD' ? 'Building anticipation ahead of the release window.'
+    : phase === 'RELEASE' ? 'Executing the release rollout.'
+    : phase === 'SCALE' ? 'Scaling reach with sustain content.'
+    : 'Extending the campaign with catalogue support.';
 }
 
 function MiniScore({ label, value, band, color, dark }: { label: string; value: number; band: string; color: string; dark?: boolean }) {
@@ -270,41 +292,56 @@ function MiniScore({ label, value, band, color, dark }: { label: string; value: 
   );
 }
 
-function CampaignRead({ artist, title, phase, readiness, support, primaryGap }: {
+function CampaignRead({ artist, title, phase, momentum, nextTitle, nextDate, focus }: {
   artist: string; title: string; phase: PhaseName;
-  readiness: ReturnType<typeof readinessScore>; support: ReturnType<typeof supportInventory>; primaryGap: string;
+  momentum: string; nextTitle?: string; nextDate?: string; focus: string;
 }) {
-  const relColor = readiness.band === 'Ready' || readiness.band === 'On track' ? ACCENT : readiness.band === 'Building' ? AMBER : RED;
-  const supColor = support.band === 'Deep' || support.band === 'Strong' ? ACCENT : support.band === 'Building' ? AMBER : SMOKE;
   const pt = PHASE_TONE[phase];
+  const Field = ({ label, value }: { label: string; value: string }) => (
+    <div>
+      <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>{value}</div>
+    </div>
+  );
   return (
     <section style={{ background: INK, color: PAPER }}>
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '20px 40px 26px' }}>
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '20px 40px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Link href="/coach" style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, textDecoration: 'none', fontFamily: MONO }}>
-            <YTMark h={12} /> YouTube Rollout Map
+            <YTMark h={12} /> YouTube Rollout Status
           </Link>
           <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: pt.color, padding: '3px 10px', borderRadius: 3 }}>{pt.label} phase</span>
         </div>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>{artist}</div>
         <h1 style={{ fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 900, lineHeight: 0.95, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 16px', color: WHITE }}>{title}</h1>
 
-        {/* The editorial read — the most prominent line */}
-        <p style={{ fontSize: 'clamp(17px, 2.2vw, 22px)', fontWeight: 600, lineHeight: 1.35, letterSpacing: '-0.01em', color: WHITE, margin: '0 0 16px', maxWidth: 820 }}>
-          {readSentence(support, primaryGap)}
+        {/* Momentum — what's already in place */}
+        <p style={{ fontSize: 'clamp(17px, 2.2vw, 22px)', fontWeight: 600, lineHeight: 1.35, letterSpacing: '-0.01em', color: WHITE, margin: '0 0 20px', maxWidth: 860 }}>
+          {momentum}
         </p>
 
-        {/* Scores, secondary */}
-        <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', alignItems: 'baseline' }}>
-          <MiniScore label="YouTube Release Readiness" value={readiness.score} band={readiness.band} color={relColor} dark />
-          <MiniScore label="Multi-Format Asset Coverage" value={support.score} band={support.band} color={supColor} dark />
-          <span style={{ fontSize: 10, color: GHOST, fontFamily: MONO }}>Primary gap: <span style={{ color: primaryGap.startsWith('None') ? '#86EFAC' : '#FCA5A5', fontWeight: 700 }}>{primaryGap.replace(/ —.*/, '')}</span></span>
+        {/* Next milestone + current focus */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, maxWidth: 760 }}>
+          {nextTitle && <Field label="Next YouTube milestone" value={`${nextTitle}${nextDate ? ` — ${nextDate}` : ''}`} />}
+          <Field label="Current YouTube focus" value={focus} />
         </div>
+      </div>
+    </section>
+  );
+}
 
-        {/* YouTube ecosystem descriptor — a read, not a score */}
-        <div style={{ marginTop: 12, fontSize: 11, color: GHOST, fontFamily: MONO, letterSpacing: '0.04em' }}>
-          <span style={{ fontWeight: 800, color: SMOKE }}>YouTube Ecosystem:</span> {ecosystemLine(support, primaryGap)}
-        </div>
+// Slim, secondary score strip — the readiness detail lives below the hero,
+// not in the headline.
+function ReadinessStrip({ readiness, support }: {
+  readiness: ReturnType<typeof readinessScore>; support: ReturnType<typeof supportInventory>;
+}) {
+  const relColor = readiness.band === 'Ready' || readiness.band === 'On track' ? ACCENT : readiness.band === 'Building' ? AMBER : RED;
+  const supColor = support.band === 'Deep' || support.band === 'Strong' ? ACCENT : support.band === 'Building' ? AMBER : SMOKE;
+  return (
+    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 40px 0' }}>
+      <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap', alignItems: 'baseline' }}>
+        <MiniScore label="YouTube Release Readiness" value={readiness.score} band={readiness.band} color={relColor} />
+        <MiniScore label="Multi-Format Asset Coverage" value={support.score} band={support.band} color={supColor} />
       </div>
     </section>
   );
