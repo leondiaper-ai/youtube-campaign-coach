@@ -528,6 +528,17 @@ function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
 const HERO_CLS: DriveAssetClass[] = ['official_video', 'visualiser', 'lyric_video', 'documentary'];
 const isHeroUploadTitle = (t: string) => /official\s*(music\s*)?video|visuali[sz]er|\blyric\b/i.test(t);
 
+// When the timeline names a SPECIFIC deliverable, be specific about it rather
+// than listing generic hero alternatives.
+function namedHeroAsset(title: string): string | null {
+  const t = title.toLowerCase();
+  if (/visuali[sz]er/.test(t)) return 'Visualiser';
+  if (/lyric/.test(t)) return 'Lyric Video';
+  if (/official\s*(music\s*)?video|\bomv\b/.test(t)) return 'Official Video';
+  if (/trailer/.test(t)) return 'Trailer';
+  return null;
+}
+
 // What kind of moment a recent upload reflects — used to mark support/live
 // moments as "Live on YouTube" even when titles don't share identity tokens.
 type UploadKind = 'hero' | 'bts' | 'live' | 'short' | 'other';
@@ -565,7 +576,7 @@ function AssetChip({ cls, href, suffix }: { cls: DriveAssetClass; href?: string;
 }
 
 // Per-type status + actions — no generic repetition.
-function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool: Pool) {
+function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool: Pool, named: string | null = null) {
   const present = Array.from(new Set((mapping?.assets ?? []).map((a) => a.assetClass).filter((c) => c !== 'press_doc' && c !== 'other'))) as DriveAssetClass[];
   const anchor = !!mapping?.anchorPresent;
   const hasShortPool = pool.shorts > 0;
@@ -579,7 +590,9 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
     // Hero coverage is "any one valid hero asset" — never list missing hero
     // alternatives. Only flag non-hero gaps (packaging).
     missing = (mapping?.missing ?? []).filter((c) => c === 'artwork');
-    if (!anchor) actions.push('Lock a hero asset (official video / visualiser / lyric video) before release week');
+    if (!anchor) actions.push(named
+      ? `Produce the ${named} ahead of release week — not in the asset library yet`
+      : 'Lock a hero asset (official video / visualiser / lyric video) before release week');
     else actions.push('Schedule the Premiere + Community moment');
     actions.push(hasShortPool ? 'Cut Shorts from the pool to bridge release week' : 'Plan release-week Shorts Support');
   } else if (type === 'announce') {
@@ -621,7 +634,8 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const pt = PHASE_TONE[phase];
   const type = momentType(ev);
   const mt = MOMENT_TONE[type];
-  const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool);
+  const named = namedHeroAsset(ev.title); // the specific deliverable the timeline names, if any
+  const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool, named);
 
   // YouTube context — current (non-archive) uploads that identity-match THIS
   // milestone (known titles fold in only when the milestone references them).
@@ -647,6 +661,9 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   if (type === 'release') {
     displayStatus = heroLive ? { label: 'Hero Asset Live', color: ACCENT }
       : heroInDrive ? { label: 'Hero Asset Ready', color: AMBER }
+      // The timeline names a specific deliverable that isn't in Drive yet —
+      // be specific ("Visualiser Incoming") rather than listing alternatives.
+      : named ? { label: `${named} Incoming`, color: INDIGO }
       : { label: 'Needs Hero YouTube Asset', color: RED };
     statusHref = heroLive ? ytUrl(heroLive) : (hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined);
     if (heroLive) statusTitle = 'Watch the hero asset on YouTube';
