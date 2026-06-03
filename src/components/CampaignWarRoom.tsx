@@ -195,12 +195,12 @@ export default function CampaignWarRoom(props: Props) {
         readiness={m.readiness} support={m.support} primaryGap={m.primaryGap}
       />
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
+      <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
       />
-      <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
         channelCtx={props.channelCtx} campaignStartDate={props.campaignStartDate}
@@ -562,8 +562,8 @@ function RecentActivity({ recentUploads, liveChannel, campaignStart }: {
   const v7 = liveChannel?.views7Delta, s7 = liveChannel?.subs7Delta;
 
   return (
-    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '36px 40px 0' }}>
-      <div style={{ borderTop: `1px solid ${BONE}`, paddingTop: 18 }}>
+    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
+      <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
           <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Recent Activity · Channel Pulse</div>
           <div style={{ display: 'flex', gap: 16, fontSize: 11, color: SMOKE, fontFamily: MONO, flexWrap: 'wrap' }}>
