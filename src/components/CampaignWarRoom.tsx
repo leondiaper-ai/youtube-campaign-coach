@@ -192,7 +192,7 @@ export default function CampaignWarRoom(props: Props) {
     const shortsGap = releaseMaps.some((x) => x.missing.includes('shorts_cutdown'));
     const artGap = releaseMaps.some((x) => x.missing.includes('artwork'));
     const primaryGap = !hasAssets ? 'No assets scanned'
-      : anchorGap ? 'Official Video Assets'
+      : anchorGap ? 'Hero YouTube Asset'
       : shortsGap ? 'Finished Shorts'
       : artGap ? 'Artwork / Packaging'
       : 'None — on track';
@@ -240,9 +240,9 @@ function readSentence(support: ReturnType<typeof supportInventory>, primaryGap: 
     : support.band === 'Strong' ? 'A strong multi-format asset library'
     : support.band === 'Building' ? 'A building multi-format asset library'
     : 'Multi-format assets are still thin';
-  if (primaryGap.startsWith('None')) return `${sup}, and the core YouTube release anchors are in place — time to execute.`;
+  if (primaryGap.startsWith('None')) return `${sup}, and a hero YouTube asset is in place — time to execute.`;
   if (primaryGap === 'No assets scanned') return 'No YouTube asset library connected yet — scan the campaign folder to ground the plan.';
-  const gap = primaryGap === 'Official Video Assets' ? 'the core YouTube release anchors — official video and visualiser — are still missing'
+  const gap = primaryGap === 'Hero YouTube Asset' ? 'it still needs a hero YouTube asset — an official video, visualiser or lyric video'
     : primaryGap === 'Finished Shorts' ? 'finished Shorts are still to be cut'
     : primaryGap === 'Artwork / Packaging' ? 'artwork and Community packaging are still to come'
     : `${primaryGap.toLowerCase()} is still missing`;
@@ -253,8 +253,8 @@ function ecosystemLine(support: ReturnType<typeof supportInventory>, primaryGap:
   const sup = support.band === 'Deep' || support.band === 'Strong' ? 'multi-format support is strong'
     : support.band === 'Building' ? 'multi-format support is building'
     : 'multi-format support is thin';
-  const anchors = primaryGap === 'Official Video Assets' ? 'hero release anchors missing'
-    : primaryGap.startsWith('None') ? 'release anchors in place'
+  const anchors = primaryGap === 'Hero YouTube Asset' ? 'hero asset missing'
+    : primaryGap.startsWith('None') ? 'hero asset in place'
     : primaryGap === 'No assets scanned' ? 'no assets scanned'
     : `${primaryGap.toLowerCase()} outstanding`;
   return `${sup} · ${anchors}`;
