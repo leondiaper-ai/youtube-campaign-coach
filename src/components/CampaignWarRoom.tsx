@@ -481,22 +481,36 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
   // recent BTS/live upload to the NEAREST-by-date moment of that kind (so one
   // upload never lights up every BTS episode).
   const liveByMoment = (() => {
-    const map = new Map<number, RecentUpload>();
-    // Only genuinely RECENT uploads mark a moment live — so old catalogue
-    // reposts don't light up future milestones.
+    // Group a longform (the MAIN asset) with its supporting Shorts onto ONE
+    // moment, rather than spreading them across separate dates. Only genuinely
+    // RECENT uploads count, so old catalogue reposts don't light up the future.
+    const map = new Map<number, { primary?: RecentUpload; shorts: RecentUpload[] }>();
     const recent = recentUploads.filter((u) => uploadAge(u.publishedAt, campaignStart) === 'recent');
     const wantList = events
       .map((e, i) => ({ i, want: momentWantsKind(momentType(e)), ms: new Date(e.dateISO + 'T12:00:00').getTime() }))
       .filter((w) => w.want);
-    const ups = [...recent].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-    for (const u of ups) {
-      const k = uploadKind(u);
-      if (k !== 'bts' && k !== 'live') continue;
-      const pub = new Date(u.publishedAt).getTime();
-      const cands = wantList.filter((w) => w.want === k && !map.has(w.i));
-      if (!cands.length) continue;
+    const matchable = recent.filter((u) => { const k = uploadKind(u); return k === 'bts' || k === 'live'; });
+    const newest = (a: RecentUpload, b: RecentUpload) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    const nearest = (k: UploadKind, pub: number, pred: (i: number) => boolean) => {
+      const cands = wantList.filter((w) => w.want === k && pred(w.i));
+      if (!cands.length) return undefined;
       cands.sort((a, b) => Math.abs(a.ms - pub) - Math.abs(b.ms - pub));
-      map.set(cands[0].i, u);
+      return cands[0].i;
+    };
+    // 1. Longforms → their own nearest moment (one main asset per moment).
+    for (const u of matchable.filter((u) => u.durationSec > 62).sort(newest)) {
+      const i = nearest(uploadKind(u), new Date(u.publishedAt).getTime(), (idx) => !map.has(idx));
+      if (i == null) continue;
+      map.set(i, { primary: u, shorts: [] });
+    }
+    // 2. Shorts → group onto the nearest moment that already has a longform of
+    //    the same kind; otherwise mark their own nearest free moment.
+    for (const u of matchable.filter((u) => u.durationSec > 0 && u.durationSec <= 62).sort(newest)) {
+      const k = uploadKind(u); const pub = new Date(u.publishedAt).getTime();
+      const grouped = nearest(k, pub, (idx) => map.get(idx)?.primary != null);
+      if (grouped != null) { map.get(grouped)!.shorts.push(u); continue; }
+      const i = nearest(k, pub, (idx) => !map.has(idx));
+      if (i != null) map.set(i, { shorts: [u] });
     }
     return map;
   })();
@@ -513,7 +527,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
               key={`${ev.dateISO}-${i}`} ev={ev} mapping={mappings[i]} phase={phases[i]} active={i === activeIdx}
               showPhaseLabel={i === 0 || phases[i] !== phases[i - 1]}
               recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
-              assignedLive={liveByMoment.get(i)}
+              live={liveByMoment.get(i)}
             />
           ))}
           {events.length === 0 && <div style={{ fontSize: 13, color: SMOKE, padding: '20px 0 0 80px' }}>No campaign moments parsed yet. Add a timeline below to populate the master view.</div>}
@@ -613,10 +627,10 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
   return { present, status, missing, actions: actions.slice(0, 2), hasContent };
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, assignedLive }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
-  assignedLive?: RecentUpload;
+  live?: { primary?: RecentUpload; shorts: RecentUpload[] };
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -640,8 +654,11 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // Support/live: a type-matched recent upload assigned to this moment (so the
   // timeline reflects when a BTS / live moment actually goes live).
   const heroLive = type === 'release' && liveMatch && isHeroUploadTitle(liveMatch.title) ? liveMatch : undefined;
-  const supportLive = (type === 'support' || type === 'live') ? assignedLive : undefined;
+  const isSupportType = type === 'support' || type === 'live';
+  const primaryLive = isSupportType ? live?.primary : undefined;       // the main longform asset, if live
+  const shortLives = isSupportType ? (live?.shorts ?? []) : [];        // supporting Shorts, if live
   const heroInDrive = !!mapping?.anchorPresent;
+  const mainFormat = type === 'live' ? 'full performance' : 'longform';
 
   let displayStatus: { label: string; color: string };
   let statusHref: string | undefined;
@@ -652,32 +669,38 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
       : { label: 'Needs Hero YouTube Asset', color: RED };
     statusHref = heroLive ? ytUrl(heroLive) : (hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined);
     if (heroLive) statusTitle = 'Watch the hero asset on YouTube';
-  } else if (supportLive) {
-    // A Short is supportive content; the longform is the main asset. Distinguish
-    // so a Short-only moment doesn't read as "main content posted".
-    const shortLive = supportLive.durationSec > 0 && supportLive.durationSec <= 62;
-    displayStatus = shortLive ? { label: 'Supporting Short Live', color: AMBER } : { label: 'Live on YouTube', color: ACCENT };
-    statusHref = ytUrl(supportLive);
+  } else if (primaryLive) {
+    displayStatus = { label: 'Live on YouTube', color: ACCENT };       // main asset posted
+    statusHref = ytUrl(primaryLive);
+    statusTitle = 'Watch on YouTube';
+  } else if (shortLives.length) {
+    displayStatus = { label: 'Supporting Short Live', color: AMBER };  // only supportive content up
+    statusHref = ytUrl(shortLives[0]);
     statusTitle = 'Watch on YouTube';
   } else {
     displayStatus = status;
     statusHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
   }
 
-  // The upload to surface, and the forward action when a moment is already live.
-  const liveUpload = heroLive ?? supportLive ?? liveMatch;
-  const supportShort = !!supportLive && supportLive.durationSec > 0 && supportLive.durationSec <= 62;
-  const mainFormat = type === 'live' ? 'full performance' : 'longform';
+  // The main upload to surface + any supporting Shorts shown on the SAME card.
+  let mainLive: RecentUpload | undefined;
+  let supportingShorts: RecentUpload[] = [];
+  if (type === 'release') mainLive = heroLive;
+  else if (primaryLive) { mainLive = primaryLive; supportingShorts = shortLives; }
+  else if (shortLives.length) { mainLive = shortLives[0]; supportingShorts = shortLives.slice(1); }
+  else mainLive = liveMatch;
+
   const liveLabel = heroLive ? 'Hero asset live on YouTube'
-    : supportLive ? (supportShort ? 'Supporting Short live' : `${type === 'live' ? 'Performance' : 'Longform'} live`)
+    : primaryLive ? (type === 'live' ? 'Performance live' : 'Longform live')
+    : shortLives.length ? 'Supporting Short live'
     : 'Already live';
   const shownActions = heroLive
     ? ['Live — amplify with a Community post, Shorts and a playlist add']
-    : supportLive
-      ? (supportShort
-          ? [`Supporting Short live — the main ${mainFormat} is still to come`]
-          : ['Main asset live — amplify with a Community post and a playlist add'])
-      : actions;
+    : primaryLive
+      ? ['Main asset live — amplify with a Community post and a playlist add']
+      : shortLives.length
+        ? [`Supporting Short live — the main ${mainFormat} is still to come`]
+        : actions;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
@@ -725,15 +748,26 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         )}
 
-        {/* YouTube context — a current upload that reflects this moment */}
-        {liveUpload && (
-          <div style={{ marginTop: 11, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <a href={ytUrl(liveUpload)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
-              <img src={ytThumb(liveUpload.id)} alt="" style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+        {/* YouTube context — the main live upload, with supporting Shorts on the same card */}
+        {mainLive && (
+          <div style={{ marginTop: 11 }}>
+            <a href={ytUrl(mainLive)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
+              <img src={ytThumb(mainLive.id)} alt="" style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
               <span style={{ fontSize: 11, color: ACCENT, fontWeight: 600, lineHeight: 1.3 }}>
-                ✓ {liveLabel}: {liveUpload.title.length > 46 ? liveUpload.title.slice(0, 43) + '…' : liveUpload.title} · {fmtNum(liveUpload.viewCount)} views · {relDays(liveUpload.publishedAt)}
+                ✓ {liveLabel}: {mainLive.title.length > 46 ? mainLive.title.slice(0, 43) + '…' : mainLive.title} · {fmtNum(mainLive.viewCount)} views · {relDays(mainLive.publishedAt)}
               </span>
             </a>
+            {supportingShorts.length > 0 && (
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Supporting Shorts</span>
+                {supportingShorts.slice(0, 4).map((s) => (
+                  <a key={s.id} href={ytUrl(s)} target="_blank" rel="noopener noreferrer" title={s.title} style={{ position: 'relative', display: 'block', textDecoration: 'none' }}>
+                    <img src={ytThumb(s.id)} alt="" style={{ width: 46, height: 26, objectFit: 'cover', borderRadius: 3, border: `1px solid ${BONE}` }} />
+                    <span style={{ position: 'absolute', bottom: 1, right: 2, fontSize: 7, fontWeight: 800, color: WHITE, fontFamily: MONO, textShadow: '0 0 3px rgba(0,0,0,0.9)' }}>{fmtNum(s.viewCount)}</span>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
