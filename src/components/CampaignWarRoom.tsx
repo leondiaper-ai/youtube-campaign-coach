@@ -474,8 +474,15 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
       .filter((w) => w.want);
     const matchable = recent.filter((u) => { const k = uploadKind(u); return k === 'bts' || k === 'live'; });
     const newest = (a: RecentUpload, b: RecentUpload) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+    // An upload only counts as a moment going live when it's TIME-ALIGNED with
+    // that moment's planned date. Without this gate the matcher attaches a recent
+    // upload to the nearest same-kind moment no matter how far apart — so a
+    // catalogue live performance from weeks ago lights up a planned vlog in the
+    // future ("NOW LIVE" on something that hasn't happened). A 21-day window keeps
+    // genuine on-time / slightly-early drops while rejecting unrelated content.
+    const WINDOW_MS = 21 * 86400000;
     const nearest = (k: UploadKind, pub: number, pred: (i: number) => boolean) => {
-      const cands = wantList.filter((w) => w.want === k && pred(w.i));
+      const cands = wantList.filter((w) => w.want === k && pred(w.i) && Math.abs(w.ms - pub) <= WINDOW_MS);
       if (!cands.length) return undefined;
       cands.sort((a, b) => Math.abs(a.ms - pub) - Math.abs(b.ms - pub));
       return cands[0].i;
