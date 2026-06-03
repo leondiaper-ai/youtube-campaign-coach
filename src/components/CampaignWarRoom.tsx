@@ -76,6 +76,17 @@ function momentType(ev: ParsedEvent): MomentType {
 // ── Date / age helpers ──
 const todayISO = () => new Date().toISOString().split('T')[0];
 function dlabel(iso: string) { const d = new Date(iso + 'T12:00:00'); return { mon: MONTHS[d.getUTCMonth()], day: String(d.getUTCDate()) }; }
+// The calendar week (Mon–Sun) a date falls in — gives the timeline breathing room.
+function weekRange(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  const dow = (d.getUTCDay() + 6) % 7; // 0 = Monday
+  const mon = new Date(d); mon.setUTCDate(d.getUTCDate() - dow);
+  const sun = new Date(mon); sun.setUTCDate(mon.getUTCDate() + 6);
+  const M = (x: Date) => MONTHS[x.getUTCMonth()];
+  return mon.getUTCMonth() === sun.getUTCMonth()
+    ? `${M(mon)} ${mon.getUTCDate()}–${sun.getUTCDate()}`
+    : `${M(mon)} ${mon.getUTCDate()} – ${M(sun)} ${sun.getUTCDate()}`;
+}
 function daysFromNow(iso: string) { return Math.round((new Date(iso + 'T12:00:00').getTime() - Date.now()) / 86400000); }
 function daysAgoNum(iso: string) { return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000); }
 function relDays(iso: string) {
@@ -635,7 +646,6 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
     (mapping?.assets ?? []).find((a) => a.assetClass === c && a.webViewLink)?.webViewLink ?? folderUrl;
-  const d = dlabel(ev.dateISO);
   const dfn = daysFromNow(ev.dateISO);
   const pt = PHASE_TONE[phase];
   const type = momentType(ev);
@@ -702,16 +712,26 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         ? [`Supporting Short live — the main ${mainFormat} is still to come`]
         : actions;
 
+  const isLive = !!(heroLive || primaryLive || shortLives.length);
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
       <div style={{ position: 'relative', paddingTop: 4 }}>
         {showPhaseLabel && <div style={{ position: 'absolute', top: -22, left: 0, fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: pt.color, fontFamily: MONO }}>{pt.label}</div>}
         <div style={{ textAlign: 'right', paddingRight: 22 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', color: SMOKE, fontFamily: MONO }}>{d.mon}</div>
-          <div style={{ fontSize: 26, fontWeight: 900, lineHeight: 1, color: INK, fontFamily: MONO, letterSpacing: '-0.03em' }}>{d.day}</div>
-          <div style={{ fontSize: 8, color: GHOST, fontFamily: MONO, marginTop: 2 }}>{dfn >= 0 ? `in ${dfn}d` : `${-dfn}d ago`}</div>
+          {isLive ? (
+            <>
+              <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.08em', color: ACCENT, fontFamily: MONO, lineHeight: 1.1 }}>NOW LIVE</div>
+              <div style={{ fontSize: 8, color: GHOST, fontFamily: MONO, marginTop: 5 }}>planned {weekRange(ev.dateISO)}</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 13, fontWeight: 800, color: INK, fontFamily: MONO, letterSpacing: '0', lineHeight: 1.3 }}>{weekRange(ev.dateISO)}</div>
+              <div style={{ fontSize: 8, color: GHOST, fontFamily: MONO, marginTop: 5 }}>{dfn >= 0 ? `in ${dfn}d` : `${-dfn}d ago`}</div>
+            </>
+          )}
         </div>
-        <div style={{ position: 'absolute', right: -5, top: 8, width: 12, height: 12, borderRadius: '50%', background: active ? mt.color : WHITE, border: `2px solid ${mt.color}`, zIndex: 1 }} />
+        <div style={{ position: 'absolute', right: -5, top: 8, width: 12, height: 12, borderRadius: '50%', background: isLive ? ACCENT : (active ? mt.color : WHITE), border: `2px solid ${isLive ? ACCENT : mt.color}`, zIndex: 1 }} />
       </div>
 
       <div style={{ background: WHITE, border: active ? `2px solid ${mt.color}` : `1px solid ${BONE}`, boxShadow: active ? `0 0 0 4px ${mt.color}12` : 'none', borderRadius: 10, padding: '13px 18px 15px', borderLeft: `3px solid ${mt.color}` }}>
