@@ -507,18 +507,25 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
     actions.push('Prepare announcement trailer, artwork and Community post');
     actions.push('Premiere + pre-save / pre-order moment');
   } else if (type === 'live') {
-    status = (present.length || pool.live > 0) ? { label: 'Content Available', color: ACCENT } : { label: 'Planned', color: SMOKE };
+    status = (present.length || pool.live > 0) ? { label: 'Content Ready', color: ACCENT } : { label: 'Planned', color: SMOKE };
     actions.push('Cut vertical performance Shorts');
     if (pool.live > 0 || present.includes('live_performance')) actions.push('Cut a live performance upload from this footage');
   } else if (type === 'archive') {
     status = { label: 'Reference', color: GHOST };
     actions.push('Archive reference — useful for catalogue context only');
   } else { // support
-    status = (present.length || pool.bts > 0 || pool.shorts > 0) ? { label: 'Content Available', color: ACCENT } : { label: 'Planned', color: SMOKE };
+    status = (present.length || pool.bts > 0 || pool.shorts > 0) ? { label: 'Content Ready', color: ACCENT } : { label: 'Planned', color: SMOKE };
     if (pool.bts > 0 || pool.shorts > 0 || present.includes('bts')) actions.push('Cut Shorts from this session footage');
     else actions.push('Capture YouTube content for this moment');
   }
-  return { present, status, missing, actions: actions.slice(0, 2) };
+  // Is there real YouTube content behind this moment (so the status can link to Drive)?
+  const hasContent =
+    type === 'archive' ? true
+    : type === 'release' ? (anchor || present.length > 0)
+    : type === 'announce' ? present.length > 0
+    : type === 'live' ? (present.length > 0 || pool.live > 0)
+    : (present.length > 0 || pool.bts > 0 || pool.shorts > 0); // support
+  return { present, status, missing, actions: actions.slice(0, 2), hasContent };
 }
 
 function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl }: {
@@ -533,7 +540,9 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const pt = PHASE_TONE[phase];
   const type = momentType(ev);
   const mt = MOMENT_TONE[type];
-  const { present, status, missing, actions } = cardLogic(type, mapping, pool);
+  const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool);
+  // When content exists, the status badge links to the matched Drive file, else the asset-library folder.
+  const statusHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
 
   // YouTube context — only CURRENT (non-archive) uploads that identity-match
   // THIS milestone (known titles fold in only when the milestone references them).
@@ -560,7 +569,14 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: mt.color, fontFamily: MONO }}>{mt.label}</span>
             <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{ev.title}</div>
           </div>
-          <span style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: status.color, padding: '4px 10px', borderRadius: 3 }}>{status.label}</span>
+          {statusHref ? (
+            <a href={statusHref} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library"
+              style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: status.color, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              {status.label} <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
+            </a>
+          ) : (
+            <span style={{ flexShrink: 0, fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: status.color, padding: '4px 10px', borderRadius: 3 }}>{status.label}</span>
+          )}
         </div>
 
         {/* Assets — only when something is genuinely present or missing */}
