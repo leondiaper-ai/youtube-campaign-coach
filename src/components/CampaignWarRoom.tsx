@@ -791,8 +791,13 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: mt.color, fontFamily: MONO }}>{mt.label}{includes && includes.length ? ` · ${includes.length} moments` : ''}</span>
             <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{displayTitle}</div>
             {includes && includes.length > 0 && (
-              <div style={{ fontSize: 11, color: SMOKE, marginTop: 5, lineHeight: 1.35 }}>
-                Includes: {includes.map((t) => t.replace(/:.*$/, '')).join(' · ')}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8 }}>
+                <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, fontFamily: MONO }}>Includes</span>
+                {includes.map((t, k) => (
+                  <span key={k} style={{ fontSize: 10, fontWeight: 700, fontFamily: MONO, color: mt.color, background: `${mt.color}12`, border: `1px solid ${mt.color}33`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
+                    {t.replace(/:.*$/, '').trim()}
+                  </span>
+                ))}
               </div>
             )}
           </div>
