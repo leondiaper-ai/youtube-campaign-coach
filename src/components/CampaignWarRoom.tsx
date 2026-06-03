@@ -62,6 +62,17 @@ const MOMENT_TONE: Record<MomentType, { label: string; color: string }> = {
   archive: { label: 'Archive', color: SMOKE },
 };
 
+// ── Standardised timeline status vocabulary ──
+// Every milestone card resolves to exactly one of these. Specifics live in a
+// supporting note line, never in the chip.
+const STD = {
+  live: { label: 'Live', color: ACCENT },
+  ready: { label: 'Ready', color: AMBER },
+  production: { label: 'In Production', color: INDIGO },
+  planned: { label: 'Planned', color: SMOKE },
+  reference: { label: 'Reference', color: GHOST },
+};
+
 function momentType(ev: ParsedEvent): MomentType {
   const t = ev.title.toLowerCase();
   const k = ev.kind;
@@ -230,6 +241,11 @@ export default function CampaignWarRoom(props: Props) {
       <CampaignRead
         artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
         momentum={momentum}
+      />
+      <CampaignStatus
+        rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
+        datesMapped={events.length > 0}
+        pipelineReady={hasAssets}
         nextTitle={nextMoment?.e.title}
         nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
         focus={focus}
@@ -292,17 +308,10 @@ function currentFocus(primaryGap: string, phase: PhaseName): string {
     : 'Extending the campaign with catalogue support.';
 }
 
-function CampaignRead({ artist, title, phase, momentum, nextTitle, nextDate, focus }: {
-  artist: string; title: string; phase: PhaseName;
-  momentum: string; nextTitle?: string; nextDate?: string; focus: string;
+function CampaignRead({ artist, title, phase, momentum }: {
+  artist: string; title: string; phase: PhaseName; momentum: string;
 }) {
   const pt = PHASE_TONE[phase];
-  const Field = ({ label, value }: { label: string; value: string }) => (
-    <div>
-      <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>{label}</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: WHITE, lineHeight: 1.3 }}>{value}</div>
-    </div>
-  );
   return (
     <section style={{ background: INK, color: PAPER }}>
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '20px 40px 28px' }}>
@@ -316,14 +325,47 @@ function CampaignRead({ artist, title, phase, momentum, nextTitle, nextDate, foc
         <h1 style={{ fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 900, lineHeight: 0.95, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 16px', color: WHITE }}>{title}</h1>
 
         {/* Momentum — what's already in place */}
-        <p style={{ fontSize: 'clamp(17px, 2.2vw, 22px)', fontWeight: 600, lineHeight: 1.35, letterSpacing: '-0.01em', color: WHITE, margin: '0 0 20px', maxWidth: 860 }}>
+        <p style={{ fontSize: 'clamp(17px, 2.2vw, 22px)', fontWeight: 600, lineHeight: 1.35, letterSpacing: '-0.01em', color: WHITE, margin: 0, maxWidth: 860 }}>
           {momentum}
         </p>
+      </div>
+    </section>
+  );
+}
 
-        {/* Next milestone + current focus */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, maxWidth: 760 }}>
-          {nextTitle && <Field label="Next YouTube milestone" value={`${nextTitle}${nextDate ? ` — ${nextDate}` : ''}`} />}
-          <Field label="Current YouTube focus" value={focus} />
+// ── Campaign Status — compact, dynamic readout right below the hero ──
+function CampaignStatus({ rolloutActive, datesMapped, pipelineReady, nextTitle, nextDate, focus }: {
+  rolloutActive: boolean; datesMapped: boolean; pipelineReady: boolean;
+  nextTitle?: string; nextDate?: string; focus: string;
+}) {
+  const checks = [
+    { ok: rolloutActive, on: 'Content rollout active', off: 'Content rollout pending' },
+    { ok: datesMapped, on: 'Campaign dates mapped', off: 'Campaign dates not set' },
+    { ok: pipelineReady, on: 'Asset pipeline established', off: 'Asset pipeline not connected' },
+  ];
+  const Field = ({ label, value }: { label: string; value: string }) => (
+    <div>
+      <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>{label}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: INK, lineHeight: 1.3 }}>{value}</div>
+    </div>
+  );
+  return (
+    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
+      <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12 }}>Campaign Status</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+          {checks.map((c) => {
+            const color = c.ok ? ACCENT : SMOKE;
+            return (
+              <span key={c.on} style={{ fontSize: 11, fontFamily: MONO, fontWeight: 700, color, background: c.ok ? 'rgba(45,106,79,0.07)' : 'rgba(133,127,116,0.06)', border: `1px solid ${color}33`, padding: '4px 11px', borderRadius: 4 }}>
+                {c.ok ? '✓' : '○'} {c.ok ? c.on : c.off}
+              </span>
+            );
+          })}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18, paddingTop: 14, borderTop: `1px solid ${BONE}` }}>
+          {nextTitle && <Field label="Next Major Moment" value={`${nextTitle}${nextDate ? ` — ${nextDate}` : ''}`} />}
+          <Field label="Current Focus" value={focus} />
         </div>
       </div>
     </section>
@@ -355,9 +397,22 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
   const shorts30 = within30.filter(isShort).length;
   const long30 = within30.filter((u) => !isShort(u)).length;
 
+  // Why this surface is featured — never show a big hero video without context.
+  const contextLine = !relevant
+    ? 'Reference release informing the upcoming rollout'
+    : age === 'recent'
+      ? (isShort(hero) ? 'Current active surface — most recent campaign upload' : 'Current active release — most recent campaign upload')
+      : 'Recent campaign release';
+
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
-      <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 7 }}><YTMark h={11} /> Live YouTube Surface</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 10, marginBottom: 12 }}>
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, display: 'flex', alignItems: 'center', gap: 7 }}><YTMark h={11} /> Live YouTube Surface</div>
+        <div style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+          <span style={{ fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: GHOST }}>Campaign Context</span>
+          <span style={{ margin: '0 7px', color: GHOST }}>·</span>{contextLine}
+        </div>
+      </div>
       <a href={ytUrl(hero)} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
         <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: INK, aspectRatio: '21 / 8' }}>
           <img src={ytThumb(hero.id, 'maxresdefault')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.62 }} />
@@ -392,16 +447,19 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
 // 3. ASSET SNAPSHOT
 // ══════════════════════════════════════════════════════════════════════════
 
-function bankedStatuses(lib: AssetLibrary) {
+function bankedStatuses(lib: AssetLibrary, folderUrl?: string) {
   const n = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
+  // First Drive link for a class, falling back to the campaign folder.
+  const href = (match: (a: AssetLibrary['assets'][number]) => boolean) =>
+    lib.assets.find((a) => match(a) && a.webViewLink)?.webViewLink ?? folderUrl;
   const finished = lib.assets.filter((a) => a.assetClass === 'shorts_cutdown' && a.classConfidence === 'high').length;
   const sources = n('shorts_cutdown');
   return [
-    { label: 'Official Video', ready: n('official_video') > 0 },
-    { label: 'BTS', ready: n('bts') > 0 },
-    { label: 'Shorts', ready: finished > 0, partial: finished === 0 && sources > 0 },
-    { label: 'Live Performance', ready: n('live_performance') > 0 },
-    { label: 'Artwork', ready: lib.assets.some((a) => a.mediaType === 'image') },
+    { label: 'Official Video', ready: n('official_video') > 0, href: href((a) => a.assetClass === 'official_video') },
+    { label: 'BTS', ready: n('bts') > 0, href: href((a) => a.assetClass === 'bts') },
+    { label: 'Shorts', ready: finished > 0, partial: finished === 0 && sources > 0, href: href((a) => a.assetClass === 'shorts_cutdown') },
+    { label: 'Live Performance', ready: n('live_performance') > 0, href: href((a) => a.assetClass === 'live_performance') },
+    { label: 'Artwork', ready: lib.assets.some((a) => a.mediaType === 'image'), href: href((a) => a.mediaType === 'image') },
   ];
 }
 
@@ -438,11 +496,21 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
                 </div>
               ))}
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${BONE}` }}>
-              {bankedStatuses(library).map((b) => {
-                const color = b.ready ? ACCENT : b.partial ? AMBER : RED;
-                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources Available` : `${b.label} Missing`;
-                return <span key={b.label} style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: WHITE, border: `1px solid ${color}33`, padding: '3px 9px', borderRadius: 3 }}>{b.ready ? '✓' : b.partial ? '◐' : '✕'} {text}</span>;
+            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${BONE}`, marginBottom: 8 }}>Multi-Format Asset Coverage</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {bankedStatuses(library, folderUrl).map((b) => {
+                const color = b.ready ? ACCENT : b.partial ? AMBER : SMOKE;
+                const mark = b.ready ? '✓' : b.partial ? '◐' : '○';
+                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources` : `${b.label} To Source`;
+                const chipStyle: React.CSSProperties = { fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: WHITE, border: `1px solid ${color}33`, padding: '3px 9px', borderRadius: 3, display: 'inline-flex', alignItems: 'center', gap: 4 };
+                // Clickable when there's a Drive destination AND something to point at.
+                return (b.href && (b.ready || b.partial)) ? (
+                  <a key={b.label} href={b.href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library" style={{ ...chipStyle, textDecoration: 'none', cursor: 'pointer' }}>
+                    {mark} {text} <span style={{ opacity: 0.5, fontSize: 9 }}>↗</span>
+                  </a>
+                ) : (
+                  <span key={b.label} style={chipStyle}>{mark} {text}</span>
+                );
               })}
             </div>
           </>
@@ -698,7 +766,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const mt = MOMENT_TONE[type];
   const displayTitle = titleOverride ?? ev.title;
   const named = namedHeroAsset(includes && includes.length ? includes.join(' ') : ev.title); // specific deliverable named in the timeline
-  const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool, named);
+  const { present, missing, actions, hasContent } = cardLogic(type, mapping, pool, named);
 
   // YouTube context — current (non-archive) uploads that identity-match THIS
   // milestone (known titles fold in only when the milestone references them).
@@ -718,29 +786,47 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const heroInDrive = !!mapping?.anchorPresent;
   const mainFormat = type === 'live' ? 'full performance' : 'longform';
 
+  // ── Standardised primary status ─────────────────────────────────────────
+  // Every card resolves to ONE of five labels: LIVE / READY / IN PRODUCTION /
+  // PLANNED / REFERENCE. The specific detail (which hero asset, what's live,
+  // what's still to source) moves to the supporting note line under the title —
+  // never into the status chip itself.
   let displayStatus: { label: string; color: string };
+  let statusNote: string;
   let statusHref: string | undefined;
   let statusTitle = 'Open in YouTube Asset Library';
-  if (type === 'release') {
-    displayStatus = heroLive ? { label: 'Hero Asset Live', color: ACCENT }
-      : heroInDrive ? { label: 'Hero Asset Ready', color: AMBER }
-      // The timeline names a specific deliverable that isn't in Drive yet —
-      // be specific ("Visualiser Incoming") rather than listing alternatives.
-      : named ? { label: `${named} Incoming`, color: INDIGO }
-      : { label: 'Needs Hero YouTube Asset', color: RED };
-    statusHref = heroLive ? ytUrl(heroLive) : (hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined);
-    if (heroLive) statusTitle = 'Watch the hero asset on YouTube';
+  const driveHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
+
+  if (type === 'archive') {
+    displayStatus = STD.reference; statusNote = 'Catalogue reference informing the rollout';
+    statusHref = driveHref;
+  } else if (heroLive) {
+    displayStatus = STD.live; statusNote = 'Hero asset live on YouTube';
+    statusHref = ytUrl(heroLive); statusTitle = 'Watch the hero asset on YouTube';
   } else if (primaryLive) {
-    displayStatus = { label: 'Live on YouTube', color: ACCENT };       // main asset posted
-    statusHref = ytUrl(primaryLive);
-    statusTitle = 'Watch on YouTube';
+    displayStatus = STD.live;
+    statusNote = type === 'live' ? 'Full performance live on YouTube' : 'Longform asset live on YouTube';
+    statusHref = ytUrl(primaryLive); statusTitle = 'Watch on YouTube';
   } else if (shortLives.length) {
-    displayStatus = { label: 'Supporting Short Live', color: AMBER };  // only supportive content up
-    statusHref = ytUrl(shortLives[0]);
-    statusTitle = 'Watch on YouTube';
-  } else {
-    displayStatus = status;
-    statusHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
+    displayStatus = STD.live; statusNote = `Supporting Short live — main ${mainFormat} still to come`;
+    statusHref = ytUrl(shortLives[0]); statusTitle = 'Watch on YouTube';
+  } else if (type === 'release') {
+    if (heroInDrive) { displayStatus = STD.ready; statusNote = 'Hero asset in the YouTube library'; }
+    else if (named) { displayStatus = STD.production; statusNote = `${named} in production — not in the library yet`; }
+    else { displayStatus = STD.planned; statusNote = 'Hero asset still to be locked for release week'; }
+    statusHref = driveHref;
+  } else if (type === 'announce') {
+    if (present.length) { displayStatus = STD.ready; statusNote = 'Announcement assets partly in place'; }
+    else { displayStatus = STD.planned; statusNote = 'Announcement trailer and artwork to prepare'; }
+    statusHref = driveHref;
+  } else if (type === 'live') {
+    if (present.length || pool.live > 0) { displayStatus = STD.ready; statusNote = 'Performance content in the library'; }
+    else { displayStatus = STD.planned; statusNote = 'Performance capture planned'; }
+    statusHref = driveHref;
+  } else { // support
+    if (present.length || pool.bts > 0 || pool.shorts > 0) { displayStatus = STD.ready; statusNote = 'Session content in the library'; }
+    else { displayStatus = STD.planned; statusNote = 'Content capture planned for this moment'; }
+    statusHref = driveHref;
   }
 
   // The main upload to surface + any supporting Shorts shown on the SAME card.
@@ -790,6 +876,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           <div style={{ minWidth: 0 }}>
             <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: mt.color, fontFamily: MONO }}>{mt.label}{includes && includes.length ? ` · ${includes.length} moments` : ''}</span>
             <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{displayTitle}</div>
+            <div style={{ fontSize: 11.5, color: SMOKE, marginTop: 4, lineHeight: 1.35 }}>{statusNote}</div>
             {includes && includes.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8 }}>
                 <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, fontFamily: MONO }}>Includes</span>
@@ -822,7 +909,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             )}
             {missing.length > 0 && (
               <div>
-                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Missing</div>
+                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Still to source</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{missing.map((c) => <Chip key={c} ok={false}>{clsLabel(c)}</Chip>)}</div>
               </div>
             )}
