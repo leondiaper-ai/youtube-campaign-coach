@@ -477,6 +477,28 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
   events: ParsedEvent[]; mappings: MilestoneMapping[]; phases: PhaseName[]; activeIdx: number;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
 }) {
+  // Reflect when a support/live moment's content actually goes live: assign each
+  // recent BTS/live upload to the NEAREST-by-date moment of that kind (so one
+  // upload never lights up every BTS episode).
+  const liveByMoment = (() => {
+    const map = new Map<number, RecentUpload>();
+    const recent = recentUploads.filter((u) => uploadAge(u.publishedAt, campaignStart) !== 'archive');
+    const wantList = events
+      .map((e, i) => ({ i, want: momentWantsKind(momentType(e)), ms: new Date(e.dateISO + 'T12:00:00').getTime() }))
+      .filter((w) => w.want);
+    const ups = [...recent].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    for (const u of ups) {
+      const k = uploadKind(u);
+      if (k !== 'bts' && k !== 'live') continue;
+      const pub = new Date(u.publishedAt).getTime();
+      const cands = wantList.filter((w) => w.want === k && !map.has(w.i));
+      if (!cands.length) continue;
+      cands.sort((a, b) => Math.abs(a.ms - pub) - Math.abs(b.ms - pub));
+      map.set(cands[0].i, u);
+    }
+    return map;
+  })();
+
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
@@ -489,6 +511,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
               key={`${ev.dateISO}-${i}`} ev={ev} mapping={mappings[i]} phase={phases[i]} active={i === activeIdx}
               showPhaseLabel={i === 0 || phases[i] !== phases[i - 1]}
               recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
+              assignedLive={liveByMoment.get(i)}
             />
           ))}
           {events.length === 0 && <div style={{ fontSize: 13, color: SMOKE, padding: '20px 0 0 80px' }}>No campaign moments parsed yet. Add a timeline below to populate the master view.</div>}
@@ -506,6 +529,21 @@ function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
 // Valid hero asset classes — any ONE satisfies hero coverage for a release.
 const HERO_CLS: DriveAssetClass[] = ['official_video', 'visualiser', 'lyric_video', 'documentary'];
 const isHeroUploadTitle = (t: string) => /official\s*(music\s*)?video|visuali[sz]er|\blyric\b/i.test(t);
+
+// What kind of moment a recent upload reflects — used to mark support/live
+// moments as "Live on YouTube" even when titles don't share identity tokens.
+type UploadKind = 'hero' | 'bts' | 'live' | 'short' | 'other';
+function uploadKind(u: RecentUpload): UploadKind {
+  const t = u.title.toLowerCase();
+  if (isHeroUploadTitle(t)) return 'hero';
+  if (/behind\s*the\s*scenes|\bbts\b|making\s*of|in\s*the\s*studio|recording|\bsession\b|\bvlog\b|day\s*in\s*the\s*life|diary|bandycam/.test(t)) return 'bts';
+  if (/\blive\b|performance|\bgig\b|festival|on\s*tour|acoustic|live\s*from|live\s*at/.test(t)) return 'live';
+  if (u.durationSec > 0 && u.durationSec <= 62) return 'short';
+  return 'other';
+}
+function momentWantsKind(type: MomentType): UploadKind | null {
+  return type === 'support' ? 'bts' : type === 'live' ? 'live' : null;
+}
 
 // A matched-asset chip that links to its Google Drive file/folder when known.
 function AssetChip({ cls, href, suffix }: { cls: DriveAssetClass; href?: string; suffix?: string }) {
@@ -573,9 +611,10 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
   return { present, status, missing, actions: actions.slice(0, 2), hasContent };
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, assignedLive }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
+  assignedLive?: RecentUpload;
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -587,27 +626,45 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const mt = MOMENT_TONE[type];
   const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool);
 
-  // YouTube context — only CURRENT (non-archive) uploads that identity-match
-  // THIS milestone (known titles fold in only when the milestone references them).
+  // YouTube context — current (non-archive) uploads that identity-match THIS
+  // milestone (known titles fold in only when the milestone references them).
   const evTokens = momentTokens(ev.title, knownTitles);
   const liveMatch = evTokens.length === 0 ? undefined : recentUploads
     .filter((u) => shareTok(tok(u.title), evTokens) && uploadAge(u.publishedAt, campaignStart) !== 'archive')
     .sort((a, b) => b.viewCount - a.viewCount)[0];
 
-  // ── Hero asset coverage (releases) ──────────────────────────────────────
-  // Any ONE valid hero asset satisfies coverage. Surface the highest known
-  // state — Live on YouTube > Available in Drive > none — and never enumerate
-  // which alternative hero is "missing".
+  // ── Live-on-YouTube + hero coverage ─────────────────────────────────────
+  // Release: a hero-type upload identity-matched to this milestone.
+  // Support/live: a type-matched recent upload assigned to this moment (so the
+  // timeline reflects when a BTS / live moment actually goes live).
   const heroLive = type === 'release' && liveMatch && isHeroUploadTitle(liveMatch.title) ? liveMatch : undefined;
+  const supportLive = (type === 'support' || type === 'live') ? assignedLive : undefined;
   const heroInDrive = !!mapping?.anchorPresent;
-  const displayStatus = type !== 'release' ? status
-    : heroLive ? { label: 'Hero Asset Live', color: ACCENT }
-    : heroInDrive ? { label: 'Hero Asset Ready', color: AMBER }
-    : { label: 'Needs Hero YouTube Asset', color: RED };
-  const statusHref = heroLive ? ytUrl(heroLive)
-    : hasContent ? (present[0] ? linkFor(present[0]) : folderUrl)
-    : undefined;
-  const statusTitle = heroLive ? 'Watch the hero asset on YouTube' : 'Open in YouTube Asset Library';
+
+  let displayStatus: { label: string; color: string };
+  let statusHref: string | undefined;
+  let statusTitle = 'Open in YouTube Asset Library';
+  if (type === 'release') {
+    displayStatus = heroLive ? { label: 'Hero Asset Live', color: ACCENT }
+      : heroInDrive ? { label: 'Hero Asset Ready', color: AMBER }
+      : { label: 'Needs Hero YouTube Asset', color: RED };
+    statusHref = heroLive ? ytUrl(heroLive) : (hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined);
+    if (heroLive) statusTitle = 'Watch the hero asset on YouTube';
+  } else if (supportLive) {
+    displayStatus = { label: 'Live on YouTube', color: ACCENT };
+    statusHref = ytUrl(supportLive);
+    statusTitle = 'Watch on YouTube';
+  } else {
+    displayStatus = status;
+    statusHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
+  }
+
+  // The upload to surface, and the forward action when a moment is already live.
+  const liveUpload = heroLive ?? supportLive ?? liveMatch;
+  const liveLabel = heroLive ? 'Hero asset live on YouTube' : supportLive ? 'Live on YouTube' : 'Already live';
+  const shownActions = (heroLive || supportLive)
+    ? ['Live — amplify with a Community post, Shorts and a playlist add']
+    : actions;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
@@ -655,13 +712,13 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         )}
 
-        {/* YouTube context — current matches only */}
-        {liveMatch && (
+        {/* YouTube context — a current upload that reflects this moment */}
+        {liveUpload && (
           <div style={{ marginTop: 11, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <a href={ytUrl(liveMatch)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
-              <img src={ytThumb(liveMatch.id)} alt="" style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+            <a href={ytUrl(liveUpload)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
+              <img src={ytThumb(liveUpload.id)} alt="" style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
               <span style={{ fontSize: 11, color: ACCENT, fontWeight: 600, lineHeight: 1.3 }}>
-                ✓ {heroLive ? 'Hero asset live on YouTube' : 'Already live'}: {liveMatch.title.length > 46 ? liveMatch.title.slice(0, 43) + '…' : liveMatch.title} · {fmtNum(liveMatch.viewCount)} views · {relDays(liveMatch.publishedAt)}
+                ✓ {liveLabel}: {liveUpload.title.length > 46 ? liveUpload.title.slice(0, 43) + '…' : liveUpload.title} · {fmtNum(liveUpload.viewCount)} views · {relDays(liveUpload.publishedAt)}
               </span>
             </a>
           </div>
@@ -669,7 +726,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
 
         {/* One or two tailored actions */}
         <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {actions.map((a, i) => (
+          {shownActions.map((a, i) => (
             <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.35, display: 'flex', gap: 8 }}>
               <span style={{ color: mt.color, fontWeight: 800 }}>›</span>{a}
             </div>
