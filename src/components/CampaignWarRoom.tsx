@@ -498,20 +498,64 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     return map;
   })();
 
+  // Cluster adjacent same-type moments within a 3-day window into ONE card —
+  // the timeline shows campaign moments, not database rows.
+  const types = events.map(momentType);
+  const CLUSTER_TYPES = new Set<MomentType>(['release', 'announce', 'live', 'support']);
+  const clusters: number[][] = [];
+  for (let i = 0; i < events.length; i++) {
+    const prev = clusters[clusters.length - 1];
+    if (prev) {
+      const j = prev[0];
+      const within3 = Math.abs((new Date(events[i].dateISO + 'T12:00:00').getTime() - new Date(events[j].dateISO + 'T12:00:00').getTime()) / 86400000) <= 3;
+      if (types[j] === types[i] && within3 && CLUSTER_TYPES.has(types[i])) { prev.push(i); continue; }
+    }
+    clusters.push([i]);
+  }
+
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {events.map((ev, i) => (
-            <MilestoneCard
-              key={`${ev.dateISO}-${i}`} ev={ev} mapping={mappings[i]} phase={phases[i]} active={i === activeIdx}
-              showPhaseLabel={i === 0 || phases[i] !== phases[i - 1]}
-              recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
-              live={liveByMoment.get(i)}
-            />
-          ))}
+          {clusters.map((idxs, ci) => {
+            const i0 = idxs[0];
+            const ev = events[i0];
+            const isCluster = idxs.length > 1;
+            const showPhaseLabel = ci === 0 || phases[i0] !== phases[clusters[ci - 1][0]];
+            const active = idxs.includes(activeIdx);
+            let mapping = mappings[i0];
+            let liveInfo = liveByMoment.get(i0);
+            let titleOverride: string | undefined;
+            let includes: string[] | undefined;
+            if (isCluster) {
+              const maps = idxs.map((i) => mappings[i]);
+              const seen = new Set<string>();
+              const assets = maps.flatMap((m) => m.assets).filter((a) => (seen.has(a.id) ? false : (seen.add(a.id), true)));
+              mapping = {
+                ...maps[0],
+                assets,
+                present: Array.from(new Set(maps.flatMap((m) => m.present))),
+                missing: Array.from(new Set(maps.flatMap((m) => m.missing))),
+                anchorPresent: maps.some((m) => m.anchorPresent),
+              };
+              const lives = idxs.map((i) => liveByMoment.get(i)).filter(Boolean) as { primary?: RecentUpload; shorts: RecentUpload[] }[];
+              const primary = lives.map((l) => l.primary).find(Boolean);
+              const shorts = lives.flatMap((l) => l.shorts ?? []);
+              liveInfo = (primary || shorts.length) ? { primary, shorts } : undefined;
+              titleOverride = clusterTitle(types[i0], idxs.map((i) => events[i].title));
+              includes = idxs.map((i) => events[i].title);
+            }
+            return (
+              <MilestoneCard
+                key={`${ev.dateISO}-${i0}`} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
+                showPhaseLabel={showPhaseLabel}
+                recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
+                live={liveInfo} titleOverride={titleOverride} includes={includes}
+              />
+            );
+          })}
           {events.length === 0 && <div style={{ fontSize: 13, color: SMOKE, padding: '20px 0 0 80px' }}>No campaign moments parsed yet. Add a timeline below to populate the master view.</div>}
         </div>
       </div>
@@ -537,6 +581,16 @@ function namedHeroAsset(title: string): string | null {
   if (/official\s*(music\s*)?video|\bomv\b/.test(t)) return 'Official Video';
   if (/trailer/.test(t)) return 'Trailer';
   return null;
+}
+
+// A name for a cluster of same-type moments in the same window.
+function clusterTitle(type: MomentType, titles: string[]): string {
+  const t = titles.join(' ').toLowerCase();
+  if (type === 'release') return 'Release Week';
+  if (type === 'announce') return /album/.test(t) ? 'Album Announcement Week' : 'Announcement Week';
+  if (type === 'live') return 'Live Week';
+  if (type === 'support') return /recording|bts|studio/.test(t) ? 'Recording Week' : 'Content Week';
+  return 'Campaign Week';
 }
 
 // What kind of moment a recent upload reflects — used to mark support/live
@@ -622,10 +676,11 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
   return { present, status, missing, actions: actions.slice(0, 2), hasContent };
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
   live?: { primary?: RecentUpload; shorts: RecentUpload[] };
+  titleOverride?: string; includes?: string[];
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -634,7 +689,8 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const pt = PHASE_TONE[phase];
   const type = momentType(ev);
   const mt = MOMENT_TONE[type];
-  const named = namedHeroAsset(ev.title); // the specific deliverable the timeline names, if any
+  const displayTitle = titleOverride ?? ev.title;
+  const named = namedHeroAsset(includes && includes.length ? includes.join(' ') : ev.title); // specific deliverable named in the timeline
   const { present, status, missing, actions, hasContent } = cardLogic(type, mapping, pool, named);
 
   // YouTube context — current (non-archive) uploads that identity-match THIS
@@ -725,8 +781,13 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
       <div style={{ background: WHITE, border: active ? `2px solid ${mt.color}` : `1px solid ${BONE}`, boxShadow: active ? `0 0 0 4px ${mt.color}12` : 'none', borderRadius: 10, padding: '13px 18px 15px', borderLeft: `3px solid ${mt.color}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ minWidth: 0 }}>
-            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: mt.color, fontFamily: MONO }}>{mt.label}</span>
-            <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{ev.title}</div>
+            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: mt.color, fontFamily: MONO }}>{mt.label}{includes && includes.length ? ` · ${includes.length} moments` : ''}</span>
+            <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{displayTitle}</div>
+            {includes && includes.length > 0 && (
+              <div style={{ fontSize: 11, color: SMOKE, marginTop: 5, lineHeight: 1.35 }}>
+                Includes: {includes.map((t) => t.replace(/:.*$/, '')).join(' · ')}
+              </div>
+            )}
           </div>
           {statusHref ? (
             <a href={statusHref} target="_blank" rel="noopener noreferrer" title={statusTitle}
