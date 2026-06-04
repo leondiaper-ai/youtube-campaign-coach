@@ -22,26 +22,49 @@ import { saveDriveLibrary, loadDriveLibrary, deleteDriveLibrary } from '@/lib/dr
  * the Drive read stays in the connected MCP where the credentials live.
  */
 
-/** POST /api/coach/drive-assets — scan results in, classified library persisted. */
+/**
+ * POST /api/coach/drive-assets
+ *
+ * Two modes, both keyed by slug:
+ *   • Attach a folder URL (no `files`) — saves/updates the campaign's Drive
+ *     folder link so the page can show it and the timeline can deep-link into
+ *     it. Any already-scanned assets are preserved. This is what the in-app
+ *     "Connect Drive folder" control uses.
+ *   • Full scan (`files[]` provided) — classifies the raw file list and
+ *     replaces the asset library. Used by the agent after a Drive MCP scan.
+ */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { slug, folderUrl, files, folderName } = body as {
       slug: string;
       folderUrl: string;
-      files: RawDriveFile[];
+      files?: RawDriveFile[];
       folderName?: string;
     };
 
-    if (!slug || !folderUrl || !Array.isArray(files)) {
+    if (!slug || !folderUrl) {
       return NextResponse.json(
-        { error: 'slug, folderUrl and files[] are required' },
+        { error: 'slug and folderUrl are required' },
         { status: 400 },
       );
     }
 
     const folderId = parseDriveFolderId(folderUrl) ?? undefined;
-    const library = buildLibrary(slug, folderUrl, files, { folderId, folderName });
+
+    let library;
+    if (Array.isArray(files)) {
+      // Full scan: classify and replace.
+      library = buildLibrary(slug, folderUrl, files, { folderId, folderName });
+    } else {
+      // URL-only attach: keep any existing scanned assets, just (re)point the
+      // folder. loadDriveLibrary falls back to a baked seed where one exists.
+      const existing = await loadDriveLibrary(slug);
+      library = existing
+        ? { ...existing, folderUrl, folderId, folderName: folderName ?? existing.folderName }
+        : { slug, folderUrl, folderId, folderName, scannedAt: '', assets: [] };
+    }
+
     await saveDriveLibrary(library);
 
     return NextResponse.json({

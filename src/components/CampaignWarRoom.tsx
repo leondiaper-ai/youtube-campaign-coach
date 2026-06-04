@@ -263,7 +263,7 @@ export default function CampaignWarRoom(props: Props) {
       />
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
-      <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} />
+      <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
@@ -461,8 +461,63 @@ function bankedStatuses(lib: AssetLibrary, folderUrl?: string) {
   ];
 }
 
-function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
-  summary: ReturnType<typeof summarizeLibrary>; library: AssetLibrary; hasAssets: boolean; folderUrl?: string;
+// Connect / change a campaign's Drive folder URL inline. Saves to KV via the
+// drive-assets API (URL-only attach — no scan), then refreshes the page so the
+// link goes live immediately. Classification still happens on a later scan.
+function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: string }) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(folderUrl ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const openBtn: React.CSSProperties = { fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '5px 12px', borderRadius: 4, textDecoration: 'none' };
+  const ghostBtn: React.CSSProperties = { fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: SMOKE, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px' };
+
+  const save = async () => {
+    const url = draft.trim();
+    if (!url || saving) return;
+    if (!/drive\.google\.com|docs\.google\.com/.test(url)) { setError('Enter a Google Drive folder link'); return; }
+    setSaving(true); setError(null);
+    try {
+      const res = await fetch('/api/coach/drive-assets', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, folderUrl: url }),
+      });
+      if (!res.ok) throw new Error('save failed');
+      setEditing(false);
+      router.refresh();
+    } catch { setError('Could not save — please try again'); }
+    finally { setSaving(false); }
+  };
+
+  if (folderUrl && !editing) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={openBtn}>Open YouTube Asset Library ↗</a>
+        <button onClick={() => { setDraft(folderUrl); setEditing(true); }} style={ghostBtn}>Change</button>
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 300 }}>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <input
+          value={draft} onChange={(e) => { setDraft(e.target.value); setError(null); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
+          placeholder="Paste Google Drive folder URL"
+          style={{ flex: 1, minWidth: 200, fontSize: 11, fontFamily: MONO, color: INK, background: WHITE, border: `1px solid ${BONE}`, borderRadius: 4, padding: '6px 9px', outline: 'none' }}
+        />
+        <button onClick={save} disabled={saving || !draft.trim()} style={{ ...openBtn, border: 'none', cursor: saving || !draft.trim() ? 'default' : 'pointer', opacity: saving || !draft.trim() ? 0.5 : 1 }}>{saving ? 'Saving…' : 'Connect'}</button>
+        {folderUrl && <button onClick={() => { setEditing(false); setError(null); }} style={ghostBtn}>Cancel</button>}
+      </div>
+      {error && <div style={{ fontSize: 9, color: RED, fontFamily: MONO }}>{error}</div>}
+    </div>
+  );
+}
+
+function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
+  summary: ReturnType<typeof summarizeLibrary>; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
 }) {
   const counts = [
     { k: 'Total', v: summary.total },
@@ -479,10 +534,14 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl }: {
           <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
             YouTube Content Pipeline{library.folderName ? ` · ${library.folderName}` : ''}
           </div>
-          {folderUrl && <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '5px 12px', borderRadius: 4, textDecoration: 'none' }}>Open YouTube Asset Library ↗</a>}
+          <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
         </div>
         {!hasAssets ? (
-          <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5, paddingTop: 14 }}>No YouTube asset library connected yet. Add a Drive folder or paste asset scan results to map this campaign&rsquo;s content supply to the timeline below.</div>
+          <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5, paddingTop: 14 }}>
+            {folderUrl
+              ? 'Drive folder connected. The classified asset library and timeline mapping appear here once the folder is scanned.'
+              : 'No YouTube asset library connected yet. Paste this campaign’s Drive folder URL above to connect it — the link goes live straight away, and assets map onto the timeline once the folder is scanned.'}
+          </div>
         ) : (
           <>
           <div style={{ fontSize: 11, color: SMOKE, margin: '6px 0 14px' }}>The YouTube content supply feeding this campaign.</div>

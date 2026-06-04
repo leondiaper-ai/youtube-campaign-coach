@@ -160,7 +160,9 @@ export default async function CampaignPage({ params }: PageProps) {
   // page works without either). Both are looked up by slug, no hardcoding.
   const driveLibrary = await loadDriveLibrary(saved.slug).catch(() => null);
   const driveConfig = mappingConfigFor(saved.slug);
-  const driveFolderUrl = getCampaignConfig(saved.slug)?.driveFolderUrl;
+  // A folder URL attached at runtime (saved to KV via the in-app control) wins
+  // over the baked-in config, so any campaign can connect its own folder.
+  const driveFolderUrl = driveLibrary?.folderUrl || getCampaignConfig(saved.slug)?.driveFolderUrl;
 
   // Keep computing matchResult/nudges/dataCoverage above (used for auto-regen
   // + future surfaces); the V4 war-room view leads with the master timeline.
