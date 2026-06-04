@@ -329,6 +329,126 @@ function FormatTags({ videos }: { videos: BriefingVideo[] }) {
   );
 }
 
+// ── Campaign status (strongest signal on the page) ───────────────────────
+// One immediate, high-visibility label per campaign, derived from existing data.
+type CampaignStatus = { label: string; color: string };
+const ST_RELEASE_WEEK: CampaignStatus = { label: 'Release Week', color: '#C0392B' }; // 🔴
+const ST_NEXT_RELEASE: CampaignStatus = { label: 'Next Release', color: '#2D6A4F' }; // 🟢
+const ST_BUILDING:     CampaignStatus = { label: 'Building',     color: '#9A6324' }; // 🟡
+const ST_ACTIVE:       CampaignStatus = { label: 'Active',       color: '#1A56B8' }; // 🔵
+const ST_MONITORING:   CampaignStatus = { label: 'Monitoring',   color: '#8A847A' }; // ⚪
+
+const RELEASE_RE = /release|album|single|drop|official\s*video|visuali|lyric|\bep\b|mixtape|deluxe|premiere/i;
+
+/** Parse a "12 Jun" style label into days-from-now (assumes nearest occurrence). */
+function daysUntilLabel(d: string | null): number | null {
+  if (!d) return null;
+  const m = d.match(/(\d{1,2})\s+([A-Za-z]{3})/);
+  if (!m) return null;
+  const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const mon = months.indexOf(m[2].toLowerCase());
+  if (mon < 0) return null;
+  const day = parseInt(m[1], 10);
+  const now = new Date();
+  let dt = new Date(now.getFullYear(), mon, day);
+  const diff = Math.round((dt.getTime() - now.getTime()) / 86400000);
+  if (diff < -120) dt = new Date(now.getFullYear() + 1, mon, day); // wrapped into next year
+  return Math.round((dt.getTime() - Date.now()) / 86400000);
+}
+
+function deriveStatus(fc: FocusCampaign): CampaignStatus {
+  const du = daysUntilLabel(fc.nextDate);
+  const isRelease = RELEASE_RE.test(fc.nextLabel || '') || RELEASE_RE.test(fc.afterLabel || '');
+  if (du != null && du >= -3 && du <= 10 && isRelease) return ST_RELEASE_WEEK;
+  if (du != null && du >= -3 && du <= 45 && isRelease) return ST_NEXT_RELEASE;
+  const ph = fc.channel.phase;
+  if (ph === 'PRE' || ph === 'HOLD' || ph === 'START') return ST_BUILDING;
+  const active = ph === 'PUSH' || ph === 'RELEASE' || ph === 'PEAK' || ph === 'SUSTAIN'
+    || fc.channel.classification === 'GROWING' || fc.channel.uploads30d >= 5;
+  if (active) return ST_ACTIVE;
+  if (fc.channel.uploads30d >= 1) return ST_BUILDING;
+  return ST_MONITORING;
+}
+
+function StatusChip({ status, big = false }: { status: CampaignStatus; big?: boolean }) {
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: big ? 7 : 5,
+      padding: big ? '6px 13px' : '3px 9px', borderRadius: 20,
+      background: status.color, color: WHITE,
+      fontSize: big ? 11 : 9, fontWeight: 800,
+      letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.18)', whiteSpace: 'nowrap',
+    }}>
+      <span style={{ width: big ? 7 : 6, height: big ? 7 : 6, borderRadius: '50%', background: 'rgba(255,255,255,0.95)' }} />
+      {status.label}
+    </span>
+  );
+}
+
+// ── Genre tags (programming area at a glance) ─────────────────────────────
+const GENRE_BY_ARTIST: Record<string, string> = {
+  'k-trap': 'UK Rap', 'french the kid': 'Rap', 'mary in the junkyard': 'Indie',
+  'tove lo': 'Electronic Pop', 'peter gabriel': 'Legacy / Rock', 'the snuts': 'Indie Rock',
+  'anna lille': 'Pop', 'jamie webster': 'Indie / Folk', 'gener8ion': 'Electronic',
+  'antony szmierek': 'Alt / Spoken Word', 'kurupt fm': 'UK Garage', 'man woman chainsaw': 'Indie / Post-Punk',
+  'jjerome87': 'Rap', 'ezra collective': 'Jazz', 'tom odell': 'Pop', 'bad omens': 'Rock / Metal',
+  'james blake': 'Electronic', 'tove lo music': 'Electronic Pop',
+};
+function genreFor(name: string): string | null {
+  return GENRE_BY_ARTIST[name.trim().toLowerCase()] ?? null;
+}
+
+function GenreTag({ genre, onDark = false }: { genre: string; onDark?: boolean }) {
+  return (
+    <span style={{
+      display: 'inline-block', padding: '2px 8px', borderRadius: 4,
+      fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+      background: onDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.04)',
+      color: onDark ? 'rgba(255,255,255,0.95)' : SMOKE,
+      border: onDark ? 'none' : `1px solid ${BONE}`, whiteSpace: 'nowrap',
+    }}>
+      {genre}
+    </span>
+  );
+}
+
+// ── Ecosystem strip (is there an active content ecosystem? answer in 2s) ──
+function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
+  const f = new Set(fc.contentFormats);
+  const items: { label: string; on: boolean; count?: number }[] = [
+    { label: 'Official Video', on: f.has('Official Video') },
+    { label: 'Shorts', on: fc.channel.shorts30d > 0, count: fc.channel.shorts30d },
+    { label: 'BTS', on: f.has('BTS') },
+    { label: 'Live', on: f.has('Live Session') },
+  ];
+  return (
+    <div>
+      {!compact && (
+        <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 7 }}>
+          Content Ecosystem
+        </div>
+      )}
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', gap: compact ? 10 : 14,
+        padding: compact ? 0 : '10px 14px', borderRadius: 8,
+        background: compact ? 'transparent' : PAPER, border: compact ? 'none' : `1px solid ${BONE}`,
+      }}>
+        {items.map((it) => (
+          <span key={it.label} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            fontSize: compact ? 10 : 12, fontWeight: 700,
+            color: it.on ? INK : GHOST,
+          }}>
+            <span style={{ color: it.on ? ACCENT.green : GHOST, fontWeight: 900, fontSize: compact ? 11 : 13 }}>{it.on ? '✓' : '✗'}</span>
+            {it.label}{it.on && it.count ? <span style={{ color: ACCENT.green, fontWeight: 900 }}>&nbsp;{it.count}</span> : ''}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav?: boolean } = {}) {
@@ -752,9 +872,12 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             {/* ── TIER 1: Featured Campaigns (large editorial cards) ── */}
             {tier1.length > 0 && (
               <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-                <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
+                <div style={{ height: 2, background: INK, marginBottom: 18 }} />
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
+                    Priority
+                  </div>
+                  <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em', color: INK, fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic' }}>
                     Featured Campaigns
                   </div>
                 </div>
@@ -762,6 +885,8 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                   {tier1.map(fc => {
                     const topVids = fc.recentVideos.slice(0, 3);
+                    const status = deriveStatus(fc);
+                    const genre = genreFor(fc.channel.name);
                     return (
                       <div key={fc.channel.slug} className="pb-campaign-card" style={{
                         borderRadius: 12, overflow: 'hidden', background: WHITE,
@@ -769,13 +894,21 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       }}>
                         {/* ── Hero image with artist overlay ── */}
                         <a href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer" className="pb-link"
-                          style={{ display: 'block', position: 'relative', overflow: 'hidden', height: 200 }}>
+                          style={{ display: 'block', position: 'relative', overflow: 'hidden', height: 220 }}>
                           <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.65) 100%)' }} />
-                          <div style={{ position: 'absolute', bottom: 14, left: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />}
-                            <span style={{ fontSize: 14, fontWeight: 800, color: WHITE, letterSpacing: '0.02em' }}>{fc.channel.name}</span>
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 25%, rgba(0,0,0,0.72) 100%)' }} />
+                          {/* Status — strongest signal, top-right */}
+                          <div style={{ position: 'absolute', top: 14, right: 16 }}>
+                            <StatusChip status={status} big />
+                          </div>
+                          {/* Artist → genre, bottom-left, enlarged */}
+                          <div style={{ position: 'absolute', bottom: 16, left: 18, right: 18, display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+                            {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.35)', flexShrink: 0 }} />}
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontSize: 26, fontWeight: 900, color: WHITE, letterSpacing: '-0.01em', lineHeight: 1.05, textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}>{fc.channel.name}</div>
+                              {genre && <div style={{ marginTop: 6 }}><GenreTag genre={genre} onDark /></div>}
+                            </div>
                           </div>
                         </a>
 
@@ -790,21 +923,23 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             marginBottom: 16,
                           }}>
                             <div>
-                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 3 }}>Next</div>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nextLabel}</div>
-                              {fc.nextDate && <div style={{ fontSize: 14, fontWeight: 800, color: ACCENT.green, marginTop: 3 }}>{fc.nextDate}</div>}
+                              <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 4 }}>Next Release</div>
+                              <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.25 }}>{fc.nextLabel}</div>
+                              {fc.nextDate && <div style={{ fontSize: 22, fontWeight: 900, color: ACCENT.green, marginTop: 4, letterSpacing: '-0.01em' }}>{fc.nextDate}</div>}
                             </div>
                             {fc.afterDate && (
                               <div>
-                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 3 }}>After</div>
-                                <div style={{ fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
-                                <div style={{ fontSize: 12, fontWeight: 700, color: ACCENT.green, marginTop: 3 }}>{fc.afterDate}</div>
+                                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 4 }}>After</div>
+                                <div style={{ fontSize: 13, fontWeight: 600, color: WARM, lineHeight: 1.25 }}>{fc.afterLabel}</div>
+                                <div style={{ fontSize: 15, fontWeight: 800, color: ACCENT.green, marginTop: 4 }}>{fc.afterDate}</div>
                               </div>
                             )}
                           </div>
 
-                          {/* ── Format tags ── */}
-                          <FormatTags videos={fc.recentVideos} />
+                          {/* ── Content ecosystem (is the ecosystem active?) ── */}
+                          <div style={{ marginBottom: 14 }}>
+                            <EcosystemStrip fc={fc} />
+                          </div>
 
                           {/* ── Stats grid (Spotlight-style) ── */}
                           <div className="pb-stats-grid" style={{
@@ -858,14 +993,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             }
                             if (bullets.length === 0) return null;
                             return (
-                              <div style={{ marginBottom: 14 }}>
-                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
-                                  Why This Is A Top Project
+                              <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 8, background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}` }}>
+                                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 7 }}>
+                                  Why This Matters
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                  {bullets.slice(0, 4).map((b, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'start', gap: 6, fontSize: 11, lineHeight: 1.35 }}>
-                                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: ACCENT.green, marginTop: 5, flexShrink: 0 }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                  {bullets.slice(0, 3).map((b, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'start', gap: 7, fontSize: 12, lineHeight: 1.4 }}>
+                                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: ACCENT.green, marginTop: 5, flexShrink: 0 }} />
                                       <span style={{ color: WARM }}>{b}</span>
                                     </div>
                                   ))}
@@ -916,34 +1051,45 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             {/* ── TIER 2: Active campaign cards (richer than grid) ── */}
             {tier2.length > 0 && (
               <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-                <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
+                <div style={{ height: 1, background: BONE, marginBottom: 22 }} />
+                <div style={{ marginBottom: 22 }}>
+                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 5 }}>
+                    In Rotation
+                  </div>
+                  <div style={{ fontSize: 23, fontWeight: 800, lineHeight: 1, letterSpacing: '-0.01em', color: INK, fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic' }}>
                     Active Campaigns
                   </div>
                 </div>
                 <div className="pb-tier2-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-                  {tier2.map(fc => (
+                  {tier2.map(fc => {
+                    const status = deriveStatus(fc);
+                    const genre = genreFor(fc.channel.name);
+                    return (
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
                       style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
-                      <div style={{ position: 'relative', overflow: 'hidden', height: 120 }}>
+                      <div style={{ position: 'relative', overflow: 'hidden', height: 130 }}>
                         <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
-                        <div style={{ position: 'absolute', bottom: 10, left: 12, display: 'flex', alignItems: 'center', gap: 7 }}>
-                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />}
-                          <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>{fc.channel.name}</span>
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.66) 100%)' }} />
+                        {/* Status — top-left, strong signal */}
+                        <div style={{ position: 'absolute', top: 10, left: 12 }}>
+                          <StatusChip status={status} />
+                        </div>
+                        <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)', flexShrink: 0 }} />}
+                          <span style={{ fontSize: 16, fontWeight: 900, color: WHITE, letterSpacing: '-0.01em', textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}>{fc.channel.name}</span>
+                          {genre && <span style={{ marginLeft: 'auto' }}><GenreTag genre={genre} onDark /></span>}
                         </div>
                         {/* Next date badge on hero */}
                         {fc.nextDate && (
-                          <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(6px)' }}>
+                          <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}>
                             <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>Next</div>
-                            <div style={{ fontSize: 11, fontWeight: 800, color: ACCENT.green }}>{fc.nextDate}</div>
+                            <div style={{ fontSize: 12, fontWeight: 900, color: ACCENT.green }}>{fc.nextDate}</div>
                           </div>
                         )}
                       </div>
                       <div style={{ padding: '12px 14px 14px' }}>
-                        <FormatTags videos={fc.recentVideos} />
+                        <div style={{ marginBottom: 10 }}><EcosystemStrip fc={fc} compact /></div>
                         {/* CURRENT */}
                         <div style={{ marginBottom: 10 }}>
                           <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Current</div>
@@ -966,7 +1112,8 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                         <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
                       </div>
                     </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}
@@ -974,26 +1121,35 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             {/* ── TIER 3: Grid view ── */}
             {tier3.length > 0 && (
               <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-                <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST }}>
+                <div style={{ height: 1, background: BONE, marginBottom: 22 }} />
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: WARM }}>
                     Other Campaigns
                   </div>
                 </div>
                 <div className="pb-tier3-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                  {tier3.map(fc => (
+                  {tier3.map(fc => {
+                    const status = deriveStatus(fc);
+                    const genre = genreFor(fc.channel.name);
+                    return (
                     <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
                       className="pb-campaign-card pb-link"
                       style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
                       <div style={{ position: 'relative', overflow: 'hidden', height: 80 }}>
                         <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.55) 100%)' }} />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
+                        {/* Status dot — small but present */}
+                        <div style={{ position: 'absolute', top: 7, right: 8, display: 'flex', alignItems: 'center', gap: 4, padding: '2px 7px', borderRadius: 10, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: status.color }} />
+                          <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: WHITE }}>{status.label}</span>
+                        </div>
                         <div style={{ position: 'absolute', bottom: 6, left: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 16, height: 16, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.3)' }} />}
-                          <span style={{ fontSize: 9, fontWeight: 800, color: WHITE, letterSpacing: '0.03em', textTransform: 'uppercase' as const, textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>{fc.channel.name}</span>
+                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.3)' }} />}
+                          <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.02em', textShadow: '0 1px 2px rgba(0,0,0,0.45)' }}>{fc.channel.name}</span>
                         </div>
                       </div>
                       <div style={{ padding: '8px 10px 10px' }}>
+                        {genre && <div style={{ marginBottom: 5 }}><GenreTag genre={genre} /></div>}
                         <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {fc.nowLabel}
                         </div>
@@ -1005,7 +1161,8 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                         )}
                       </div>
                     </a>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}
