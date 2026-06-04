@@ -263,8 +263,7 @@ export default function CampaignWarRoom(props: Props) {
       />
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
-      <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
-      <ContentPlan events={events} library={lib} />
+      <ContentSupply events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
@@ -446,23 +445,54 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
 // 3. ASSET SNAPSHOT
 // ══════════════════════════════════════════════════════════════════════════
 
-function bankedStatuses(lib: AssetLibrary, folderUrl?: string) {
-  const n = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
-  // First Drive link for a class, falling back to the campaign folder.
-  const href = (match: (a: AssetLibrary['assets'][number]) => boolean) =>
-    lib.assets.find((a) => match(a) && a.webViewLink)?.webViewLink ?? folderUrl;
-  const finished = lib.assets.filter((a) => a.assetClass === 'shorts_cutdown' && a.classConfidence === 'high').length;
-  const sources = n('shorts_cutdown');
-  // Hero formats + Shorts are expected (show as gaps "to source"). BTS / Live are
-  // optional — only surfaced when present, never flagged missing.
-  return [
-    { label: 'Official Video', ready: n('official_video') > 0, href: href((a) => a.assetClass === 'official_video') },
-    { label: 'Visualiser', ready: n('visualiser') > 0, href: href((a) => a.assetClass === 'visualiser') },
-    { label: 'Lyric Video', ready: n('lyric_video') > 0, href: href((a) => a.assetClass === 'lyric_video') },
-    { label: 'Shorts', ready: finished > 0, partial: finished === 0 && sources > 0, href: href((a) => a.assetClass === 'shorts_cutdown') },
-    { label: 'BTS', ready: n('bts') > 0, optional: true, href: href((a) => a.assetClass === 'bts') },
-    { label: 'Live', ready: n('live_performance') > 0, optional: true, href: href((a) => a.assetClass === 'live_performance') },
+// ── Content Supply — recommended volumes calculated from the timeline ───────
+// Not a score and not fixed numbers: ranges scale with campaign length, the
+// number of singles, album presence and release cadence. Shows teams what a
+// well-supported YouTube campaign could look like for THIS timeline.
+type SupplyRow = {
+  cls: DriveAssetClass | 'community';
+  label: string; have: number | null; lo: number; hi: number; note: string; href?: string;
+};
+function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUrl?: string) {
+  const isSingle = (e: ParsedEvent) => {
+    if (momentType(e) !== 'release') return false;
+    if (namedHeroAsset(e.title)) return false;
+    const t = e.title.toLowerCase();
+    if (/\balbum\b|\bep\b|bundle|acoustic|deluxe|pre-?order|focus\s*track|documentary/.test(t)) return false;
+    return /\bsingle\b/.test(t) || e.kind === 'singleRelease';
+  };
+  const singles = events.filter(isSingle).length;
+  const hasAlbum = events.some((e) => {
+    if (e.kind === 'albumRelease') return true;
+    const t = e.title.toLowerCase();
+    // The word "album" in a release context — but not an announcement, pre-order,
+    // trailer, tracklist or generic "album build / story" support moment.
+    return /\balbum\b/.test(t) && !/announce|pre-?order|trailer|tracklist|build|story|creation|countdown|teaser|diary/.test(t);
+  });
+  const ms = events.map((e) => new Date(e.dateISO + 'T12:00:00').getTime()).filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
+  const days = ms.length > 1 ? (ms[ms.length - 1] - ms[0]) / 86400000 : 30;
+  const months = Math.max(1, Math.round(days / 30.4));
+
+  const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
+  const href = (cls: DriveAssetClass) => lib.assets.find((a) => a.assetClass === cls && a.webViewLink)?.webViewLink ?? folderUrl;
+  const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
+  // Shorts: campaign-length bucket, scaled by number of singles.
+  const bucket = months <= 3 ? [10, 20] : months <= 6 ? [20, 40] : [40, 80];
+  const shortsLo = singles > 0 ? clamp(singles * 10, bucket[0], bucket[1]) : bucket[0];
+  const shortsHi = singles > 0 ? clamp(singles * 15, bucket[0], bucket[1]) : bucket[1];
+  const large = hasAlbum || singles >= 3;
+
+  const rows: SupplyRow[] = [
+    { cls: 'official_video', label: 'Official Video', have: cnt('official_video'), lo: Math.max(1, singles), hi: Math.max(1, singles) + (hasAlbum ? 1 : 0), note: `One per single${hasAlbum ? ' + focus track' : ''}`, href: href('official_video') },
+    { cls: 'visualiser', label: 'Visualiser', have: cnt('visualiser'), lo: Math.max(1, singles), hi: Math.max(1, singles), note: 'Supports singles when an official video isn’t available', href: href('visualiser') },
+    { cls: 'lyric_video', label: 'Lyric Video', have: cnt('lyric_video'), lo: Math.max(1, singles), hi: Math.max(1, singles), note: 'Typically 7–10 days after a single to extend activity', href: href('lyric_video') },
+    { cls: 'shorts_cutdown', label: 'Shorts', have: cnt('shorts_cutdown'), lo: shortsLo, hi: shortsHi, note: 'Based on campaign length and release cadence', href: href('shorts_cutdown') },
+    { cls: 'bts', label: 'BTS', have: cnt('bts'), lo: Math.max(4, singles * 2), hi: Math.max(6, singles * 3), note: 'Studio, behind-the-video, songwriting and storytelling moments', href: href('bts') },
+    { cls: 'live_performance', label: 'Live / Acoustic', have: cnt('live_performance'), lo: large ? 4 : 2, hi: large ? 8 : 4, note: 'Acoustic versions, live sessions and performance content', href: href('live_performance') },
+    { cls: 'community', label: 'Community Posts', have: null, lo: singles * 3 + 3, hi: singles * 5 + 5, note: 'Steady community cadence across the campaign', href: undefined },
   ];
+  return { singles, hasAlbum, months, rows };
 }
 
 // Connect / change a campaign's Drive folder URL inline. Saves to KV via the
@@ -524,138 +554,57 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
   );
 }
 
-function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
-  summary: ReturnType<typeof summarizeLibrary>; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
+// One card — the single source of truth for campaign assets: what's in hand vs
+// the recommended volume for THIS timeline (merges the old Pipeline + Coverage).
+function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
+  events: ParsedEvent[]; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
 }) {
-  const nCls = (cls: DriveAssetClass) => library.assets.filter((a) => a.assetClass === cls).length;
-  const counts = [
-    { k: 'Official Video', v: nCls('official_video') },
-    { k: 'Visualiser', v: nCls('visualiser') },
-    { k: 'Lyric Video', v: nCls('lyric_video') },
-    { k: 'Shorts', v: nCls('shorts_cutdown') },
-    { k: 'BTS', v: nCls('bts') },
-    { k: 'Live', v: nCls('live_performance') },
-  ];
-  void summary;
-  return (
-    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
-      <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: hasAssets ? 4 : 0 }}>
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
-            YouTube Content Pipeline{library.folderName ? ` · ${library.folderName}` : ''}
-          </div>
-          <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
-        </div>
-        {!hasAssets ? (
-          <div style={{ fontSize: 13, color: SMOKE, lineHeight: 1.5, paddingTop: 14 }}>
-            {folderUrl
-              ? 'Drive folder connected. The classified asset library and timeline mapping appear here once the folder is scanned.'
-              : 'No YouTube asset library connected yet. Paste this campaign’s Drive folder URL above to connect it — the link goes live straight away, and assets map onto the timeline once the folder is scanned.'}
-          </div>
-        ) : (
-          <>
-          <div style={{ fontSize: 11, color: SMOKE, margin: '6px 0 14px' }}>The YouTube content supply feeding this campaign.</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
-              {counts.map((c) => (
-                <div key={c.k}>
-                  <div style={{ fontSize: 26, fontWeight: 900, color: INK, fontFamily: MONO, lineHeight: 1, letterSpacing: '-0.03em' }}>{c.v}</div>
-                  <div style={{ fontSize: 8, fontWeight: 800, color: SMOKE, fontFamily: MONO, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 5 }}>{c.k}</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${BONE}`, marginBottom: 8 }}>Multi-Format Asset Coverage</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {bankedStatuses(library, folderUrl)
-                .filter((b) => !((b as { optional?: boolean }).optional && !b.ready)) // BTS/Live only shown when present
-                .map((b) => {
-                const color = b.ready ? ACCENT : b.partial ? AMBER : SMOKE;
-                const mark = b.ready ? '✓' : b.partial ? '◐' : '○';
-                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources` : `${b.label} Suggested`;
-                const chipStyle: React.CSSProperties = { fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: WHITE, border: `1px solid ${color}33`, padding: '3px 9px', borderRadius: 3, display: 'inline-flex', alignItems: 'center', gap: 4 };
-                // Clickable when there's a Drive destination AND something to point at.
-                return (b.href && (b.ready || b.partial)) ? (
-                  <a key={b.label} href={b.href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library" style={{ ...chipStyle, textDecoration: 'none', cursor: 'pointer' }}>
-                    {mark} {text} <span style={{ opacity: 0.5, fontSize: 9 }}>↗</span>
-                  </a>
-                ) : (
-                  <span key={b.label} style={chipStyle}>{mark} {text}</span>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
-    </section>
-  );
-}
+  const supply = computeContentSupply(events, library, folderUrl);
+  const range = (lo: number, hi: number) => (lo === hi ? String(lo) : `${lo}–${hi}`);
 
-// ══════════════════════════════════════════════════════════════════════════
-// IDEAL CONTENT PLAN — reads the timeline, suggests the content that should exist
-// ══════════════════════════════════════════════════════════════════════════
-
-// Ideal hero set per release = Official Video + Visualiser + Lyric Video.
-// Shorts run on a weekly cadence that intensifies around releases.
-function computeContentPlan(events: ParsedEvent[], lib: AssetLibrary) {
-  // The hero set (Official Video + Visualiser + Lyric Video) is needed per SINGLE.
-  // Exclude: hero-asset deliverable moments (a single's own visualiser/lyric/OV),
-  // and non-single releases (album, EP, deluxe, bundle, acoustic, focus track,
-  // pre-order) — so "4 singles" means 4 of each, not one per timeline row.
-  const isSingle = (e: ParsedEvent) => {
-    if (momentType(e) !== 'release') return false;
-    if (namedHeroAsset(e.title)) return false; // deliverable moment, not a release
-    const t = e.title.toLowerCase();
-    if (/\balbum\b|\bep\b|bundle|acoustic|deluxe|pre-?order|focus\s*track|documentary/.test(t)) return false;
-    return /\bsingle\b/.test(t) || e.kind === 'singleRelease';
-  };
-  const releaseEvents = events.filter(isSingle);
-  const releases = releaseEvents.length;
-  const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
-  const hero = [
-    { label: 'Official Video', have: cnt('official_video'), note: 'Typical album campaign: one per single + focus track' },
-    { label: 'Visualiser', have: cnt('visualiser'), note: 'Often used to support singles when an official video isn’t available' },
-    { label: 'Lyric Video', have: cnt('lyric_video'), note: 'Typically released 7–10 days after a single to extend activity' },
-  ];
-  // Shorts as a friendly cadence range rather than one big number — most active
-  // campaigns keep short-form activity between every major release moment.
-  const shortsLo = Math.max(8, releases * 5);
-  const shortsHi = Math.max(12, releases * 7);
-  return { releases, hero, shortsLo, shortsHi, shortsHave: cnt('shorts_cutdown') };
-}
-
-function ContentPlan({ events, library }: { events: ParsedEvent[]; library: AssetLibrary }) {
-  const plan = computeContentPlan(events, library);
-  if (plan.releases === 0) return null;
-
-  // Guides, never audits — show the count, a friendly target and an educational
-  // line. The bar fills as content lands; no "missing" or gap counters.
-  const Row = ({ label, have, need, needHi, needDisplay, note }: { label: string; have: number; need: number; needHi?: number; needDisplay: string; note: string }) => {
-    const pct = need > 0 ? Math.min(100, Math.round((have / need) * 100)) : 0;
-    const done = have >= need;
-    const color = done ? ACCENT : have > 0 ? AMBER : GHOST;
-    return (
+  const Row = ({ r }: { r: SupplyRow }) => {
+    const have = r.have;
+    const pct = r.lo > 0 && have != null ? Math.min(100, Math.round((have / r.lo) * 100)) : 0;
+    const met = have != null && have >= r.lo;
+    const color = met ? ACCENT : (have ?? 0) > 0 ? AMBER : GHOST;
+    const body = (
       <div style={{ padding: '11px 0', borderBottom: `1px solid ${BONE}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{label}</span>
-          <span style={{ fontSize: 12, color: SMOKE, fontFamily: MONO, whiteSpace: 'nowrap' }}><span style={{ color: INK, fontWeight: 800 }}>{have}</span> / {needDisplay}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{r.label}{r.href && (have ?? 0) > 0 ? <span style={{ color: ACCENT, fontSize: 9, marginLeft: 6 }}>↗</span> : null}</span>
+          <span style={{ fontSize: 12, color: SMOKE, fontFamily: MONO, whiteSpace: 'nowrap' }}>
+            <span style={{ color: INK, fontWeight: 800 }}>{have == null ? '—' : have}</span> / {range(r.lo, r.hi)}
+          </span>
         </div>
         <div style={{ height: 4, background: BONE, borderRadius: 3, margin: '7px 0 6px', overflow: 'hidden', maxWidth: 340 }}>
           <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3 }} />
         </div>
-        <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.4 }}>{note}{needHi != null && have >= need ? ' · on a strong cadence' : ''}</div>
+        <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.4 }}>{r.note}</div>
       </div>
     );
+    return r.href && (have ?? 0) > 0
+      ? <a href={r.href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>{body}</a>
+      : body;
   };
 
   return (
-    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 40px 0' }}>
+    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
-        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>Asset Coverage</div>
-        <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, marginBottom: 10, maxWidth: 720 }}>
-          {plan.releases} single{plan.releases > 1 ? 's' : ''} on this timeline. A typical rollout gives each single an Official Video, Visualiser and Lyric Video — here&rsquo;s the content that could support the campaign.
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
+            YouTube Content Supply{library.folderName ? ` · ${library.folderName}` : ''}
+          </div>
+          <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
         </div>
-        {plan.hero.map((h) => <Row key={h.label} label={h.label} have={h.have} need={plan.releases} needDisplay={String(plan.releases)} note={h.note} />)}
-        <Row label="Shorts" have={plan.shortsHave} need={plan.shortsLo} needHi={plan.shortsHi} needDisplay={`${plan.shortsLo}–${plan.shortsHi}`} note="Most active campaigns keep short-form activity between every major release moment" />
-        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>BTS &amp; Live are added opportunity — tracked when present, never required.</div>
+        <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
+          Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign. Guidance to support the rollout, not targets to hit.
+        </div>
+        {!hasAssets && (
+          <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.5, marginBottom: 12, padding: '8px 11px', background: PAPER, border: `1px solid ${BONE}`, borderRadius: 6 }}>
+            {folderUrl ? 'Folder connected — your counts populate here once the folder is scanned.' : 'Connect a Drive or Dropbox folder above to track what you already have against these recommendations.'}
+          </div>
+        )}
+        {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
+        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence. Community Posts aren&rsquo;t Drive assets — shown as a cadence guide.</div>
       </div>
     </section>
   );
@@ -777,11 +726,6 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
       </div>
     </section>
   );
-}
-
-function Chip({ ok, children }: { ok: boolean; children: React.ReactNode }) {
-  const color = ok ? ACCENT : RED;
-  return <span style={{ fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: ok ? 'rgba(45,106,79,0.08)' : 'rgba(185,28,28,0.06)', border: `1px solid ${color}30`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>{ok ? '✓' : '✕'} {children}</span>;
 }
 
 // Valid hero asset classes — any ONE satisfies hero coverage for a release.
@@ -983,9 +927,16 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   const pt = PHASE_TONE[phase];
   const type = momentType(ev);
   const mt = MOMENT_TONE[type];
+  // Visual hierarchy: hero moments (singles / album / announcement) carry the
+  // most weight; support (BTS / live / tour) sits a notch down; archive lowest.
+  // So tour/live activity never visually outweighs music release moments.
+  const heroMoment = type === 'release' || type === 'announce';
+  const titleSize = heroMoment ? 17 : type === 'archive' ? 13 : 14.5;
+  const borderW = heroMoment ? 4 : type === 'archive' ? 2 : 3;
+  const titleColor = type === 'archive' ? SMOKE : INK;
   const displayTitle = cleanTitle(titleOverride ?? ev.title);
   const named = namedHeroAsset(includes && includes.length ? includes.join(' ') : ev.title); // specific deliverable named in the timeline
-  const { present, missing, actions, hasContent } = cardLogic(type, mapping, pool, named);
+  const { present, actions, hasContent } = cardLogic(type, mapping, pool, named);
 
   // YouTube context — current (non-archive) uploads that identity-match THIS
   // milestone (known titles fold in only when the milestone references them).
@@ -1102,11 +1053,11 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         <div style={{ position: 'absolute', right: -5, top: 8, width: 12, height: 12, borderRadius: '50%', background: isLive ? ACCENT : (active ? mt.color : WHITE), border: `2px solid ${isLive ? ACCENT : mt.color}`, zIndex: 1 }} />
       </div>
 
-      <div style={{ background: WHITE, border: active ? `2px solid ${mt.color}` : `1px solid ${BONE}`, boxShadow: active ? `0 0 0 4px ${mt.color}12` : 'none', borderRadius: 10, padding: '13px 18px 15px', borderLeft: `3px solid ${mt.color}` }}>
+      <div style={{ background: WHITE, border: active ? `2px solid ${mt.color}` : `1px solid ${BONE}`, boxShadow: active ? `0 0 0 4px ${mt.color}12` : 'none', borderRadius: 10, padding: heroMoment ? '14px 18px 16px' : '12px 18px 13px', borderLeft: `${borderW}px solid ${mt.color}`, opacity: type === 'archive' ? 0.9 : 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: mt.color, fontFamily: MONO }}>{mt.label}{includes && includes.length ? ` · ${includes.length} moments` : ''}</span>
-            <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: INK, lineHeight: 1.15, marginTop: 3 }}>{displayTitle}</div>
+            <div style={{ fontSize: titleSize, fontWeight: 900, letterSpacing: '-0.01em', textTransform: 'uppercase', color: titleColor, lineHeight: 1.15, marginTop: 3 }}>{displayTitle}</div>
             <div style={{ fontSize: 11.5, color: SMOKE, marginTop: 4, lineHeight: 1.35 }}>{statusNote}</div>
             {includes && includes.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginTop: 8 }}>
