@@ -584,7 +584,12 @@ const STOP = new Set([
 ]);
 
 function tokenize(s: string): Set<string> {
-  return new Set((s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((t) => t.length >= 3 && !STOP.has(t)));
+  // Split camelCase / concatenated tokens so export-style filenames like
+  // "ThatsAYear" or "AnnaLille" line up with spaced titles ("That's A Year").
+  const split = s
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')      // lower/digit → Upper
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');   // Upper → Upper+lower (e.g. "AYear" → "A Year")
+  return new Set((split.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((t) => t.length >= 3 && !STOP.has(t)));
 }
 
 /** Distinctive identity tokens for a milestone, canonicalised via known titles. */
