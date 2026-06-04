@@ -270,6 +270,10 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormatLabel {
   // Title-based formats take priority over duration — a 40s trailer isn't a Short
   if (/\b(official\s*(music\s*)?video|official\s*vid)\b/.test(t)) return 'Official Video';
   if (/\[\s*(music\s*video|official\s*video|official\s*music\s*video)\s*\]/i.test(t)) return 'Official Video';
+  // Bare "(Official)" parenthetical on a longform almost always denotes the
+  // official video. Guard by duration so a short teaser isn't caught, and the
+  // closing paren means "(Official Audio)" won't match.
+  if (upload.durationSec > 62 && /\(official\)/.test(t)) return 'Official Video';
   if (/\blyric\s*(video|vid)?\b/.test(t)) return 'Lyric Video';
   if (/\bvisualise?r\b/.test(t)) return 'Visualizer';
   if (/\b(trailer|teaser\s*video)\b/.test(t)) return 'Trailer';
