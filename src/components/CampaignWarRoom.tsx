@@ -596,10 +596,18 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
 // Ideal hero set per release = Official Video + Visualiser + Lyric Video.
 // Shorts run on a weekly cadence that intensifies around releases.
 function computeContentPlan(events: ParsedEvent[], lib: AssetLibrary) {
-  // Count distinct RELEASES (singles / album), not the hero-asset deliverable
-  // moments that belong to them — e.g. "That's A Year Visualiser" is a deliverable
-  // for the "That's A Year" single, not a separate release needing its own set.
-  const releaseEvents = events.filter((e) => momentType(e) === 'release' && !namedHeroAsset(e.title));
+  // The hero set (Official Video + Visualiser + Lyric Video) is needed per SINGLE.
+  // Exclude: hero-asset deliverable moments (a single's own visualiser/lyric/OV),
+  // and non-single releases (album, EP, deluxe, bundle, acoustic, focus track,
+  // pre-order) — so "4 singles" means 4 of each, not one per timeline row.
+  const isSingle = (e: ParsedEvent) => {
+    if (momentType(e) !== 'release') return false;
+    if (namedHeroAsset(e.title)) return false; // deliverable moment, not a release
+    const t = e.title.toLowerCase();
+    if (/\balbum\b|\bep\b|bundle|acoustic|deluxe|pre-?order|focus\s*track|documentary/.test(t)) return false;
+    return /\bsingle\b/.test(t) || e.kind === 'singleRelease';
+  };
+  const releaseEvents = events.filter(isSingle);
   const releases = releaseEvents.length;
   const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
   const hero = [
@@ -649,7 +657,7 @@ function ContentPlan({ events, library }: { events: ParsedEvent[]; library: Asse
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
         <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>Ideal Content Plan</div>
         <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, marginBottom: 10, maxWidth: 720 }}>
-          Across {plan.releases} release{plan.releases > 1 ? 's' : ''} on this timeline, the ideal hero set is an Official Video, Visualiser and Lyric Video for each — here&rsquo;s what&rsquo;s still to produce.
+          {plan.releases} single{plan.releases > 1 ? 's' : ''} on this timeline — the ideal hero set is an Official Video, Visualiser and Lyric Video for each, so here&rsquo;s what&rsquo;s still to produce.
         </div>
         {plan.hero.map((h) => <Row key={h.label} label={h.label} have={h.have} need={h.need} />)}
         <Row label="Shorts" sub="3 per release + 1–2 / week" have={plan.shortsHave} need={plan.shortsTarget} target />
