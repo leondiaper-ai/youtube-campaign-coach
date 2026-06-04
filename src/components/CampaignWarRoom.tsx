@@ -18,7 +18,7 @@
  * attached to future milestones or counted as readiness.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { GeneratedPlan, ParsedEvent, PhaseName, TimelineKind, ChannelContext } from '@/lib/planEngine';
@@ -467,17 +467,20 @@ function bankedStatuses(lib: AssetLibrary, folderUrl?: string) {
 function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: string }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(folderUrl ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Read straight from the input on save rather than mirroring into React state —
+  // robust no matter how the value is entered (typing, paste, autofill).
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const openBtn: React.CSSProperties = { fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '5px 12px', borderRadius: 4, textDecoration: 'none' };
   const ghostBtn: React.CSSProperties = { fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: SMOKE, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px' };
 
   const save = async () => {
-    const url = draft.trim();
-    if (!url || saving) return;
-    if (!/drive\.google\.com|docs\.google\.com/.test(url)) { setError('Enter a Google Drive folder link'); return; }
+    if (saving) return;
+    const url = (inputRef.current?.value ?? '').trim();
+    if (!url) { setError('Paste a Google Drive folder link'); return; }
+    if (!/drive\.google\.com|docs\.google\.com/.test(url)) { setError('That doesn’t look like a Google Drive link'); return; }
     setSaving(true); setError(null);
     try {
       const res = await fetch('/api/coach/drive-assets', {
@@ -495,7 +498,7 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={openBtn}>Open YouTube Asset Library ↗</a>
-        <button onClick={() => { setDraft(folderUrl); setEditing(true); }} style={ghostBtn}>Change</button>
+        <button onClick={() => setEditing(true)} style={ghostBtn}>Change</button>
       </div>
     );
   }
@@ -503,12 +506,13 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 300 }}>
       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
         <input
-          value={draft} onChange={(e) => { setDraft(e.target.value); setError(null); }}
+          ref={inputRef} defaultValue={folderUrl ?? ''}
+          onChange={() => { if (error) setError(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
           placeholder="Paste Google Drive folder URL"
           style={{ flex: 1, minWidth: 200, fontSize: 11, fontFamily: MONO, color: INK, background: WHITE, border: `1px solid ${BONE}`, borderRadius: 4, padding: '6px 9px', outline: 'none' }}
         />
-        <button onClick={save} disabled={saving || !draft.trim()} style={{ ...openBtn, border: 'none', cursor: saving || !draft.trim() ? 'default' : 'pointer', opacity: saving || !draft.trim() ? 0.5 : 1 }}>{saving ? 'Saving…' : 'Connect'}</button>
+        <button onClick={save} disabled={saving} style={{ ...openBtn, border: 'none', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.5 : 1 }}>{saving ? 'Saving…' : 'Connect'}</button>
         {folderUrl && <button onClick={() => { setEditing(false); setError(null); }} style={ghostBtn}>Cancel</button>}
       </div>
       {error && <div style={{ fontSize: 9, color: RED, fontFamily: MONO }}>{error}</div>}
