@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
-import { TopChannelsModule } from './TopChannelsModule';
 import { ChannelScoreBadge } from './ChannelScoreBadge';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
 import {
@@ -797,26 +796,6 @@ export default function ChannelHealthBoard({
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* ─── BEST PERFORMING / NEEDS ATTENTION ─────────────────────────── */}
-      {view === 'managed' && managedRows.length > 2 && (
-        <div className="mb-4">
-          <TopChannelsModule
-            channels={managedRows.map((r) => ({
-              name: r.name,
-              slug: r.slug,
-              views7Delta: r.views7Delta,
-              subs7Delta: r.subs7Delta,
-              uploads30d: r.uploads30d,
-              shorts30d: r.shorts30d,
-              lastUploadAt: null,
-              subs: r.subs,
-              totalViews: r.totalViews ?? null,
-            }))}
-            linkPrefix={linkPrefix}
-          />
         </div>
       )}
 
