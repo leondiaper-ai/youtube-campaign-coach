@@ -1157,14 +1157,26 @@ function RecentActivity({ recentUploads, liveChannel, campaignStart }: {
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Recent Activity · Channel Pulse</div>
-          <div style={{ display: 'flex', gap: 16, fontSize: 11, color: SMOKE, fontFamily: MONO, flexWrap: 'wrap' }}>
-            {lastDays != null && <span>Last upload {lastDays === 0 ? 'today' : `${lastDays}d ago`}</span>}
-            <span>{shorts30} Shorts / {long30} longform · 30d</span>
-            {liveChannel?.subs != null && <span>{fmtNum(liveChannel.subs)} subs</span>}
-            {v7 != null && <span style={{ color: v7 > 0 ? ACCENT : SMOKE }}>{v7 >= 0 ? '+' : ''}{fmtNum(v7)} views/7d</span>}
-            {s7 != null && <span style={{ color: s7 > 0 ? ACCENT : SMOKE }}>{s7 >= 0 ? '+' : ''}{fmtNum(s7)} subs/7d</span>}
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 22, flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+            {(() => {
+              const Stat = ({ value, label, color = INK }: { value: string; label: string; color?: string }) => (
+                <div style={{ textAlign: 'right', lineHeight: 1.05 }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, color, fontFamily: MONO, letterSpacing: '-0.02em' }}>{value}</div>
+                  <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: SMOKE, fontFamily: MONO, marginTop: 4 }}>{label}</div>
+                </div>
+              );
+              return (
+                <>
+                  {lastDays != null && <Stat value={lastDays === 0 ? 'Today' : `${lastDays}d`} label="Last upload" />}
+                  <Stat value={`${shorts30}/${long30}`} label="Shorts / Long · 30d" />
+                  {liveChannel?.subs != null && <Stat value={fmtNum(liveChannel.subs)} label="Subs" />}
+                  {v7 != null && <Stat value={`${v7 >= 0 ? '+' : ''}${fmtNum(v7)}`} label="Views · 7d" color={v7 > 0 ? ACCENT : INK} />}
+                  {s7 != null && <Stat value={`${s7 >= 0 ? '+' : ''}${fmtNum(s7)}`} label="Subs · 7d" color={s7 > 0 ? ACCENT : INK} />}
+                </>
+              );
+            })()}
           </div>
         </div>
         {recent.length > 0 ? (
