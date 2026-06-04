@@ -413,7 +413,15 @@ function GenreTag({ genre, onDark = false }: { genre: string; onDark?: boolean }
   );
 }
 
-// ── Ecosystem strip (is there an active content ecosystem? answer in 2s) ──
+// ── Ecosystem strip — coloured pills (matches the Channel Spotlight palette) ──
+// Present formats render as filled brand-coloured buttons; absent ones drop to a
+// subtle outline so the gap still reads. Same colour language across both pages.
+const ECO_PILL: Record<string, { bg: string; fg: string }> = {
+  'Official Video': { bg: '#E6F8EE', fg: '#2D6A4F' },
+  'Shorts':         { bg: '#F0E8FE', fg: '#6B21A8' },
+  'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
+  'Live':           { bg: '#FFEAD6', fg: '#8A4A1A' },
+};
 function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
   const f = new Set(fc.contentFormats);
   const items: { label: string; on: boolean; count?: number }[] = [
@@ -425,25 +433,38 @@ function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: 
   return (
     <div>
       {!compact && (
-        <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 7 }}>
+        <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>
           Content Ecosystem
         </div>
       )}
-      <div style={{
-        display: 'flex', flexWrap: 'wrap', gap: compact ? 10 : 14,
-        padding: compact ? 0 : '10px 14px', borderRadius: 8,
-        background: compact ? 'transparent' : PAPER, border: compact ? 'none' : `1px solid ${BONE}`,
-      }}>
-        {items.map((it) => (
-          <span key={it.label} style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            fontSize: compact ? 10 : 12, fontWeight: 700,
-            color: it.on ? INK : GHOST,
-          }}>
-            <span style={{ color: it.on ? ACCENT.green : GHOST, fontWeight: 900, fontSize: compact ? 11 : 13 }}>{it.on ? '✓' : '✗'}</span>
-            {it.label}{it.on && it.count ? <span style={{ color: ACCENT.green, fontWeight: 900 }}>&nbsp;{it.count}</span> : ''}
-          </span>
-        ))}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+        {items.map((it) => {
+          const s = ECO_PILL[it.label];
+          const pad = compact ? '3px 9px' : '4px 11px';
+          const fs = compact ? 9 : 10.5;
+          if (it.on) {
+            return (
+              <span key={it.label} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: pad, borderRadius: 20, background: s.bg, color: s.fg,
+                fontSize: fs, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+              }}>
+                {it.label}
+                {it.count ? <span style={{ fontWeight: 900, opacity: 0.95 }}>{it.count}</span> : null}
+              </span>
+            );
+          }
+          return (
+            <span key={it.label} style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: pad, borderRadius: 20, background: 'transparent',
+              border: `1px solid ${BONE}`, color: GHOST,
+              fontSize: fs, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+            }}>
+              <span style={{ fontSize: fs - 1 }}>✕</span>{it.label}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
