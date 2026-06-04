@@ -87,7 +87,11 @@ function momentType(ev: ParsedEvent): MomentType {
   if (/archive|catalogue|catalog|throwback|reference/.test(t)) return 'archive';
   if (k === 'singleRelease' || k === 'albumRelease' || k === 'documentaryRelease'
     || /official\s*video|visuali[sz]er|lyric\s*video|\bsingle\b|album\s*release|deluxe|focus\s*track/.test(t)) return 'release';
-  if (k === 'albumAnnounce' || k === 'tourAnnounce' || /announce|pre-?order|reveal/.test(t)) return 'announce';
+  // World-building / content support — even when titled "reveal" (photography,
+  // visual world, storytelling, BTS, diary). These group into a phase, not an
+  // announcement.
+  if (/photo(graphy)?|visual\s*world|artwork|aesthetic|imagery|storytelling|behind\s*the|\bbts\b|making\s*of/.test(t)) return 'support';
+  if (k === 'albumAnnounce' || k === 'tourAnnounce' || /announce|pre-?order|reveal|tracklist/.test(t)) return 'announce';
   if (k === 'tourDate' || k === 'liveShow' || k === 'festival' || /\blive\b|performance|tour|festival|\bgig\b|\bshow\b|vlog/.test(t)) return 'live';
   return 'support';
 }
@@ -663,19 +667,34 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     return map;
   })();
 
-  // Cluster adjacent same-type moments within a 3-day window into ONE card —
-  // the timeline shows campaign moments, not database rows.
+  // ── Condensing ──────────────────────────────────────────────────────────
+  // Hero moments (release / announce) stay separate — clustered only within a
+  // 3-day window (one release week). A run of 3+ consecutive support / live
+  // moments collapses into ONE phase card; the original events stay visible as
+  // sub-items. This cuts repeated "Shorts / Community" cards without losing any
+  // campaign moment. Release support sequences are NOT collapsed.
   const types = events.map(momentType);
-  const CLUSTER_TYPES = new Set<MomentType>(['release', 'announce', 'live', 'support']);
-  const clusters: number[][] = [];
-  for (let i = 0; i < events.length; i++) {
-    const prev = clusters[clusters.length - 1];
-    if (prev) {
-      const j = prev[0];
-      const within3 = Math.abs((new Date(events[i].dateISO + 'T12:00:00').getTime() - new Date(events[j].dateISO + 'T12:00:00').getTime()) / 86400000) <= 3;
-      if (types[j] === types[i] && within3 && CLUSTER_TYPES.has(types[i])) { prev.push(i); continue; }
+  const within3 = (a: number, b: number) => Math.abs((new Date(events[a].dateISO + 'T12:00:00').getTime() - new Date(events[b].dateISO + 'T12:00:00').getTime()) / 86400000) <= 3;
+  type Group = { idxs: number[]; mode: 'hero' | 'phase' | 'single' };
+  const groups: Group[] = [];
+  for (let i = 0; i < events.length;) {
+    const ti = types[i];
+    if (ti === 'release' || ti === 'announce') {
+      const run = [i]; let j = i + 1;
+      while (j < events.length && types[j] === ti && within3(j, run[0])) { run.push(j); j++; }
+      groups.push({ idxs: run, mode: 'hero' });
+      i = j;
+    } else if (ti === 'support' || ti === 'live') {
+      const run = [i]; let j = i + 1;
+      while (j < events.length && types[j] === ti) { run.push(j); j++; }
+      if (run.length >= 3) groups.push({ idxs: run, mode: 'phase' });
+      else if (run.length === 2 && within3(run[1], run[0])) groups.push({ idxs: run, mode: 'hero' });
+      else run.forEach((k) => groups.push({ idxs: [k], mode: 'single' }));
+      i = j;
+    } else {
+      groups.push({ idxs: [i], mode: 'single' });
+      i++;
     }
-    clusters.push([i]);
   }
 
   return (
@@ -684,17 +703,20 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {clusters.map((idxs, ci) => {
+          {groups.map(({ idxs, mode }, ci) => {
             const i0 = idxs[0];
             const ev = events[i0];
-            const isCluster = idxs.length > 1;
-            const showPhaseLabel = ci === 0 || phases[i0] !== phases[clusters[ci - 1][0]];
+            const isMulti = idxs.length > 1;
+            const showPhaseLabel = ci === 0 || phases[i0] !== phases[groups[ci - 1].idxs[0]];
             const active = idxs.includes(activeIdx);
+            // Support / live cards use a compact cadence instead of the repeated
+            // verbose Suggested Support list (keeps the timeline scannable).
+            const compact = types[i0] === 'support' || types[i0] === 'live';
             let mapping = mappings[i0];
             let liveInfo = liveByMoment.get(i0);
             let titleOverride: string | undefined;
             let includes: string[] | undefined;
-            if (isCluster) {
+            if (isMulti) {
               const maps = idxs.map((i) => mappings[i]);
               const seen = new Set<string>();
               const assets = maps.flatMap((m) => m.assets).filter((a) => (seen.has(a.id) ? false : (seen.add(a.id), true)));
@@ -709,13 +731,15 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
               const primary = lives.map((l) => l.primary).find(Boolean);
               const shorts = lives.flatMap((l) => l.shorts ?? []);
               liveInfo = (primary || shorts.length) ? { primary, shorts } : undefined;
-              titleOverride = clusterTitle(types[i0], idxs.map((i) => events[i].title));
+              titleOverride = mode === 'phase'
+                ? phaseTitle(types[i0], idxs.map((i) => events[i].title))
+                : clusterTitle(types[i0], idxs.map((i) => events[i].title));
               includes = idxs.map((i) => events[i].title);
             }
             return (
               <MilestoneCard
                 key={`${ev.dateISO}-${i0}`} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
-                showPhaseLabel={showPhaseLabel}
+                showPhaseLabel={showPhaseLabel} compact={compact}
                 recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
                 live={liveInfo} titleOverride={titleOverride} includes={includes}
               />
@@ -745,6 +769,21 @@ function namedHeroAsset(title: string): string | null {
   if (/official\s*(music\s*)?video|\bomv\b/.test(t)) return 'Official Video';
   if (/trailer/.test(t)) return 'Trailer';
   return null;
+}
+
+// A name for a longer RUN of same-type support/live moments (a campaign phase).
+function phaseTitle(type: MomentType, titles: string[]): string {
+  const t = titles.join(' ').toLowerCase();
+  if (type === 'live') {
+    if (/tour|festival|\bgig\b|\bshow\b|road/.test(t)) return 'Tour Content Phase';
+    return 'Live Content Phase';
+  }
+  // support
+  if (/photo|visual|world|aesthetic|\bart\b|imagery/.test(t)) return 'World Building Phase';
+  if (/record|studio|\bbts\b|behind|making|session/.test(t)) return 'Recording Phase';
+  if (/story|songwriting|diary|personality|fan|creation/.test(t)) return 'Storytelling Phase';
+  if (/acoustic|live/.test(t)) return 'Acoustic Phase';
+  return 'Content Phase';
 }
 
 // A name for a cluster of same-type moments in the same window.
@@ -914,11 +953,11 @@ function suggestedSupport(type: MomentType, present: DriveAssetClass[], pool: Po
   return []; // archive
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
   live?: { primary?: RecentUpload; shorts: RecentUpload[] };
-  titleOverride?: string; includes?: string[];
+  titleOverride?: string; includes?: string[]; compact?: boolean;
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -1111,7 +1150,8 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         )}
 
-        {/* Live → amplification nudge. Otherwise → Suggested Support. */}
+        {/* Live → amplification nudge. Compact support/live → cadence line.
+            Otherwise (release/announce) → full sequenced Suggested Support. */}
         {isLive ? (
           <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
             {shownActions.map((a, i) => (
@@ -1119,6 +1159,13 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
                 <span style={{ color: mt.color, fontWeight: 800 }}>›</span>{a}
               </div>
             ))}
+          </div>
+        ) : compact ? (
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Suggested Cadence</span>
+            <span style={{ fontSize: 12, color: INK, fontWeight: 600 }}>
+              {type === 'live' ? 'Performance Shorts · Live upload · Community Post' : 'Shorts · Community Posts'}
+            </span>
           </div>
         ) : suggestions.length > 0 ? (
           <div style={{ marginTop: 13 }}>
