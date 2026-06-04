@@ -65,7 +65,9 @@ export async function POST(req: NextRequest) {
     ownership: ownership ?? 'observed',
   };
   const list = await addCustomArtist(artist);
-  return NextResponse.json({ artist, artists: list });
+  // Return channelId at the top level too — callers (e.g. the Team Board modal)
+  // need it to register the channel for tracking.
+  return NextResponse.json({ channelId: snap.channelId, artist, artists: list });
 }
 
 // PATCH — update fields on an existing custom artist (e.g. campaignStartDate)

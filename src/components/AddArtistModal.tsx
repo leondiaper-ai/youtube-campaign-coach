@@ -33,7 +33,7 @@ export default function AddArtistModal() {
       const resolveRes = await fetch('/api/artists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelHandle: channelInput.trim() }),
+        body: JSON.stringify({ input: channelInput.trim() }),
       });
 
       if (!resolveRes.ok) {
@@ -206,7 +206,7 @@ export function AddArtistModalInline() {
       const resolveRes = await fetch('/api/artists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channelHandle: channelInput.trim() }),
+        body: JSON.stringify({ input: channelInput.trim() }),
       });
 
       if (!resolveRes.ok) {
