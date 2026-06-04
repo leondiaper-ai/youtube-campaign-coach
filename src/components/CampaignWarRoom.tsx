@@ -479,8 +479,8 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
   const save = async () => {
     if (saving) return;
     const url = (inputRef.current?.value ?? '').trim();
-    if (!url) { setError('Paste a Google Drive folder link'); return; }
-    if (!/drive\.google\.com|docs\.google\.com/.test(url)) { setError('That doesn’t look like a Google Drive link'); return; }
+    if (!url) { setError('Paste a Drive or Dropbox folder link'); return; }
+    if (!/drive\.google\.com|docs\.google\.com|dropbox\.com/.test(url)) { setError('That doesn’t look like a Drive or Dropbox link'); return; }
     setSaving(true); setError(null);
     try {
       const res = await fetch('/api/coach/drive-assets', {
@@ -509,7 +509,7 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
           ref={inputRef} defaultValue={folderUrl ?? ''}
           onChange={() => { if (error) setError(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
-          placeholder="Paste Google Drive folder URL"
+          placeholder="Paste Google Drive or Dropbox folder URL"
           style={{ flex: 1, minWidth: 200, fontSize: 11, fontFamily: MONO, color: INK, background: WHITE, border: `1px solid ${BONE}`, borderRadius: 4, padding: '6px 9px', outline: 'none' }}
         />
         <button onClick={save} disabled={saving} style={{ ...openBtn, border: 'none', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.5 : 1 }}>{saving ? 'Saving…' : 'Connect'}</button>

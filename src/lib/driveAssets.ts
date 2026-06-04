@@ -201,8 +201,13 @@ export function classifyDriveAssetDetailed(
   folderPath?: string,
 ): ClassResult {
   const n = name ?? '';
+  // Normalise separators to spaces so word-boundary patterns still match tokens
+  // embedded in real-world filenames like "Track_Visualizer_V04.mp4" or
+  // "Asset02_365_9x16_V02.mov" — underscores/dots are word chars, which would
+  // otherwise defeat the \b anchors in the class patterns.
+  const nNorm = n.replace(/[_.\-]+/g, ' ');
   for (const [re, cls] of CLASS_PATTERNS) {
-    if (re.test(n)) return { assetClass: cls, confidence: 'high' };
+    if (re.test(nNorm) || re.test(n)) return { assetClass: cls, confidence: 'high' };
   }
   // Contextual fallback — the containing folder often names the asset type,
   // but this is weaker evidence than the filename itself.
