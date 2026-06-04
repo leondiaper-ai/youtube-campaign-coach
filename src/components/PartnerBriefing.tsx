@@ -767,8 +767,15 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       background: 'rgba(255,255,255,0.08)', borderRadius: 6,
                       padding: '8px 14px', flex: '1 1 200px',
                     }}>
-                      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.5)', marginBottom: 3 }}>
-                        {m.artist}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.5)' }}>
+                          {m.artist}
+                        </span>
+                        {genreFor(m.artist) && (
+                          <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.14)', borderRadius: 4, padding: '1px 5px' }}>
+                            {genreFor(m.artist)}
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: WHITE, lineHeight: 1.3 }}>
                         {m.moment}
@@ -853,6 +860,15 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           }}>
                             {m.artist}
                           </span>
+                          {genreFor(m.artist) && (
+                            <span style={{
+                              fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+                              color: SMOKE, background: 'rgba(0,0,0,0.04)', border: `1px solid ${BONE}`,
+                              borderRadius: 4, padding: '1px 6px', flexShrink: 0, whiteSpace: 'nowrap', alignSelf: 'center',
+                            }}>
+                              {genreFor(m.artist)}
+                            </span>
+                          )}
                           <span style={{
                             fontSize: 12, fontWeight: isTier1(m) ? 600 : 400,
                             color: isTier1(m) ? INK : WARM,
