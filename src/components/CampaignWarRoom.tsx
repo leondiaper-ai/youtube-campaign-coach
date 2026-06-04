@@ -570,7 +570,7 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
                 .map((b) => {
                 const color = b.ready ? ACCENT : b.partial ? AMBER : SMOKE;
                 const mark = b.ready ? '✓' : b.partial ? '◐' : '○';
-                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources` : `${b.label} To Source`;
+                const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources` : `${b.label} Suggested`;
                 const chipStyle: React.CSSProperties = { fontSize: 10, fontFamily: MONO, fontWeight: 700, color, background: WHITE, border: `1px solid ${color}33`, padding: '3px 9px', borderRadius: 3, display: 'inline-flex', alignItems: 'center', gap: 4 };
                 // Clickable when there's a Drive destination AND something to point at.
                 return (b.href && (b.ready || b.partial)) ? (
@@ -611,43 +611,37 @@ function computeContentPlan(events: ParsedEvent[], lib: AssetLibrary) {
   const releases = releaseEvents.length;
   const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
   const hero = [
-    { label: 'Official Video', need: releases, have: cnt('official_video') },
-    { label: 'Visualiser', need: releases, have: cnt('visualiser') },
-    { label: 'Lyric Video', need: releases, have: cnt('lyric_video') },
+    { label: 'Official Video', have: cnt('official_video'), note: 'Typical album campaign: one per single + focus track' },
+    { label: 'Visualiser', have: cnt('visualiser'), note: 'Often used to support singles when an official video isn’t available' },
+    { label: 'Lyric Video', have: cnt('lyric_video'), note: 'Typically released 7–10 days after a single to extend activity' },
   ];
-  // Shorts target: ~3 around each release (tease / drop-day / follow-up) plus
-  // ~1.5 a week across the quieter stretches of the campaign.
-  const ms = events.map((e) => new Date(e.dateISO + 'T12:00:00').getTime()).filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
-  const spanWeeks = ms.length > 1 ? Math.max(1, Math.round((ms[ms.length - 1] - ms[0]) / (7 * 86400000))) : 1;
-  const quietWeeks = Math.max(0, spanWeeks - releases);
-  const shortsTarget = Math.round(releases * 3 + quietWeeks * 1.5);
-  return { releases, hero, shortsTarget, shortsHave: cnt('shorts_cutdown'), spanWeeks };
+  // Shorts as a friendly cadence range rather than one big number — most active
+  // campaigns keep short-form activity between every major release moment.
+  const shortsLo = Math.max(8, releases * 5);
+  const shortsHi = Math.max(12, releases * 7);
+  return { releases, hero, shortsLo, shortsHi, shortsHave: cnt('shorts_cutdown') };
 }
 
 function ContentPlan({ events, library }: { events: ParsedEvent[]; library: AssetLibrary }) {
   const plan = computeContentPlan(events, library);
   if (plan.releases === 0) return null;
 
-  const Row = ({ label, sub, have, need, target }: { label: string; sub?: string; have: number; need: number; target?: boolean }) => {
-    const gap = Math.max(0, need - have);
-    const done = gap === 0;
-    const color = done ? ACCENT : have > 0 ? AMBER : RED;
+  // Guides, never audits — show the count, a friendly target and an educational
+  // line. The bar fills as content lands; no "missing" or gap counters.
+  const Row = ({ label, have, need, needHi, needDisplay, note }: { label: string; have: number; need: number; needHi?: number; needDisplay: string; note: string }) => {
     const pct = need > 0 ? Math.min(100, Math.round((have / need) * 100)) : 0;
+    const done = have >= need;
+    const color = done ? ACCENT : have > 0 ? AMBER : GHOST;
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px 96px', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: `1px solid ${BONE}` }}>
-        <div>
+      <div style={{ padding: '11px 0', borderBottom: `1px solid ${BONE}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{label}</span>
-          {sub && <span style={{ fontSize: 10.5, color: SMOKE, marginLeft: 8 }}>{sub}</span>}
-          <div style={{ height: 4, background: BONE, borderRadius: 3, marginTop: 7, overflow: 'hidden', maxWidth: 280 }}>
-            <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3 }} />
-          </div>
+          <span style={{ fontSize: 12, color: SMOKE, fontFamily: MONO, whiteSpace: 'nowrap' }}><span style={{ color: INK, fontWeight: 800 }}>{have}</span> / {needDisplay}</span>
         </div>
-        <div style={{ fontSize: 12, color: SMOKE, fontFamily: MONO, textAlign: 'right' }}>
-          <span style={{ color: INK, fontWeight: 800 }}>{have}</span> / {target ? '~' : ''}{need}
+        <div style={{ height: 4, background: BONE, borderRadius: 3, margin: '7px 0 6px', overflow: 'hidden', maxWidth: 340 }}>
+          <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3 }} />
         </div>
-        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color, textAlign: 'right' }}>
-          {done ? '✓ Covered' : target ? `Ramp +${gap}` : `Produce ${gap}`}
-        </div>
+        <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.4 }}>{note}{needHi != null && have >= need ? ' · on a strong cadence' : ''}</div>
       </div>
     );
   };
@@ -655,13 +649,13 @@ function ContentPlan({ events, library }: { events: ParsedEvent[]; library: Asse
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 40px 0' }}>
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
-        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>Ideal Content Plan</div>
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>Asset Coverage</div>
         <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, marginBottom: 10, maxWidth: 720 }}>
-          {plan.releases} single{plan.releases > 1 ? 's' : ''} on this timeline — the ideal hero set is an Official Video, Visualiser and Lyric Video for each, so here&rsquo;s what&rsquo;s still to produce.
+          {plan.releases} single{plan.releases > 1 ? 's' : ''} on this timeline. A typical rollout gives each single an Official Video, Visualiser and Lyric Video — here&rsquo;s the content that could support the campaign.
         </div>
-        {plan.hero.map((h) => <Row key={h.label} label={h.label} have={h.have} need={h.need} />)}
-        <Row label="Shorts" sub="3 per release + 1–2 / week" have={plan.shortsHave} need={plan.shortsTarget} target />
-        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>BTS &amp; Live are tracked when present — not required gaps.</div>
+        {plan.hero.map((h) => <Row key={h.label} label={h.label} have={h.have} need={plan.releases} needDisplay={String(plan.releases)} note={h.note} />)}
+        <Row label="Shorts" have={plan.shortsHave} need={plan.shortsLo} needHi={plan.shortsHi} needDisplay={`${plan.shortsLo}–${plan.shortsHi}`} note="Most active campaigns keep short-form activity between every major release moment" />
+        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>BTS &amp; Live are added opportunity — tracked when present, never required.</div>
       </div>
     </section>
   );
@@ -902,6 +896,80 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
   return { present, status, missing, actions: actions.slice(0, 2), hasContent };
 }
 
+// ── Suggested Support ──────────────────────────────────────────────────────
+// A YouTube strategist's nudge: what content could support this moment. Always
+// framed as opportunity, filtered by what's already available, with sequencing.
+type Suggestion = { label: string; timing?: string };
+function suggestedSupport(type: MomentType, present: DriveAssetClass[], pool: Pool, named: string | null, title: string): Suggestion[] {
+  const has = (c: DriveAssetClass) => present.includes(c);
+  const t = title.toLowerCase();
+
+  if (type === 'announce') {
+    return [
+      { label: 'Announcement trailer' },
+      { label: 'Community Post' },
+      { label: 'Tour announcement content' },
+      { label: 'Short-form cutdowns' },
+      { label: 'Pre-order messaging' },
+    ];
+  }
+  if (type === 'release') {
+    // Official-video moment
+    if (named === 'Official Video') {
+      return [
+        { label: 'Premiere', timing: 'Release day' },
+        { label: 'Premiere reminder Short', timing: '24h before' },
+        { label: 'Community Post' },
+        { label: 'BTS follow-up', timing: '+3–7 days' },
+        { label: 'Reaction / behind-the-scenes', timing: '+7 days' },
+      ];
+    }
+    // Visualiser moment
+    if (named === 'Visualiser') {
+      return [
+        ...(!has('lyric_video') ? [{ label: 'Lyric Video', timing: '+7–10 days' }] : []),
+        { label: 'Shorts cutdowns' },
+        { label: 'Community Post' },
+      ];
+    }
+    // Album release
+    if (/\balbum\b/.test(t)) {
+      return [
+        { label: 'Focus track video', timing: 'Release week' },
+        { label: 'Album trailer' },
+        { label: 'Community Posts' },
+        { label: 'Shorts across release week' },
+        { label: 'Live performance content' },
+        { label: 'Fan-focused content' },
+      ];
+    }
+    // Single release — filter by what's already in hand
+    const out: Suggestion[] = [];
+    if (!has('official_video') && !has('visualiser') && !has('lyric_video')) out.push({ label: 'Official Video or Visualiser', timing: 'Release week' });
+    out.push({ label: 'Community Post', timing: 'Release week' });
+    if (!has('shorts_cutdown') && pool.shorts < 2) out.push({ label: '2 Shorts cutdowns', timing: 'Release week' });
+    if (!has('lyric_video')) out.push({ label: 'Lyric Video', timing: '+7–10 days' });
+    out.push({ label: 'BTS clip', timing: '+14–21 days' });
+    out.push({ label: 'Acoustic / live session', timing: '+14–21 days' });
+    out.push({ label: 'Story behind the song', timing: '+14–21 days' });
+    return out;
+  }
+  if (type === 'live') {
+    return [
+      { label: 'Vertical performance Shorts' },
+      { label: 'Live performance upload' },
+      { label: 'Community Post' },
+    ];
+  }
+  if (type === 'support') {
+    return [
+      { label: '1–2 Shorts from this session' },
+      { label: 'Community Post' },
+    ];
+  }
+  return []; // archive
+}
+
 function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
@@ -1011,6 +1079,8 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         : actions;
 
   const isLive = !!(heroLive || primaryLive || shortLives.length || softLive);
+  // What content could support this moment (only when it hasn't already gone live).
+  const suggestions = isLive ? [] : suggestedSupport(type, present, pool, named, ev.title);
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
@@ -1059,21 +1129,11 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           )}
         </div>
 
-        {/* Assets — only when something is genuinely present or missing */}
-        {(present.length > 0 || missing.length > 0) && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 11 }}>
-            {present.length > 0 && (
-              <div>
-                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Matched assets</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} suffix={HERO_CLS.includes(c) ? 'Available' : undefined} />)}</div>
-              </div>
-            )}
-            {missing.length > 0 && (
-              <div>
-                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Still to source</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{missing.map((c) => <Chip key={c} ok={false}>{clsLabel(c)}</Chip>)}</div>
-              </div>
-            )}
+        {/* Assets currently available for this moment */}
+        {present.length > 0 && (
+          <div style={{ marginTop: 11 }}>
+            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Assets Available</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} suffix={HERO_CLS.includes(c) ? 'Available' : undefined} />)}</div>
           </div>
         )}
 
@@ -1100,14 +1160,28 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         )}
 
-        {/* One or two tailored actions */}
-        <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {shownActions.map((a, i) => (
-            <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.35, display: 'flex', gap: 8 }}>
-              <span style={{ color: mt.color, fontWeight: 800 }}>›</span>{a}
+        {/* Live → amplification nudge. Otherwise → Suggested Support. */}
+        {isLive ? (
+          <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {shownActions.map((a, i) => (
+              <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.35, display: 'flex', gap: 8 }}>
+                <span style={{ color: mt.color, fontWeight: 800 }}>›</span>{a}
+              </div>
+            ))}
+          </div>
+        ) : suggestions.length > 0 ? (
+          <div style={{ marginTop: 13 }}>
+            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 7 }}>Suggested Support</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              {suggestions.map((s, i) => (
+                <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.3, display: 'flex', gap: 8, alignItems: 'baseline' }}>
+                  <span style={{ color: mt.color, fontWeight: 800, flexShrink: 0 }}>+</span>
+                  <span>{s.label}{s.timing && <span style={{ color: SMOKE, fontSize: 11, marginLeft: 7 }}>· {s.timing}</span>}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
