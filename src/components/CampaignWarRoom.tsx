@@ -1157,12 +1157,12 @@ function RecentActivity({ recentUploads, liveChannel, campaignStart }: {
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Recent Activity · Channel Pulse</div>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 22, flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12 }}>Recent Activity · Channel Pulse</div>
+          <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-end' }}>
             {(() => {
               const Stat = ({ value, label, color = INK }: { value: string; label: string; color?: string }) => (
-                <div style={{ textAlign: 'right', lineHeight: 1.05 }}>
+                <div style={{ textAlign: 'left', lineHeight: 1.05 }}>
                   <div style={{ fontSize: 18, fontWeight: 900, color, fontFamily: MONO, letterSpacing: '-0.02em' }}>{value}</div>
                   <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: SMOKE, fontFamily: MONO, marginTop: 4 }}>{label}</div>
                 </div>
