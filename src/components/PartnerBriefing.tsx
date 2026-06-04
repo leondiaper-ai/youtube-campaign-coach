@@ -424,12 +424,21 @@ const ECO_PILL: Record<string, { bg: string; fg: string }> = {
 };
 function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
   const f = new Set(fc.contentFormats);
+  // Robust official-video detection — counts a dropped official video even if it
+  // slipped classification, including the bare "(Official)" title style (longform).
+  const hasOfficial = f.has('Official Video')
+    || fc.recentVideos.some((v) => v.durationSec > 62 && /official\s*(music\s*)?video|\(official\)/i.test(v.title));
+  // Only present formats are shown — no "missing" markers. If we don't see it,
+  // we simply don't list it.
   const items: { label: string; on: boolean; count?: number }[] = [
-    { label: 'Official Video', on: f.has('Official Video') },
+    { label: 'Official Video', on: hasOfficial },
     { label: 'Shorts', on: fc.channel.shorts30d > 0, count: fc.channel.shorts30d },
     { label: 'BTS', on: f.has('BTS') },
     { label: 'Live', on: f.has('Live Session') },
-  ];
+  ].filter((it) => it.on);
+
+  if (items.length === 0) return null;
+
   return (
     <div>
       {!compact && (
@@ -440,28 +449,14 @@ function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
         {items.map((it) => {
           const s = ECO_PILL[it.label];
-          const pad = compact ? '3px 9px' : '4px 11px';
-          const fs = compact ? 9 : 10.5;
-          if (it.on) {
-            return (
-              <span key={it.label} style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: pad, borderRadius: 20, background: s.bg, color: s.fg,
-                fontSize: fs, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-              }}>
-                {it.label}
-                {it.count ? <span style={{ fontWeight: 900, opacity: 0.95 }}>{it.count}</span> : null}
-              </span>
-            );
-          }
           return (
             <span key={it.label} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              padding: pad, borderRadius: 20, background: 'transparent',
-              border: `1px solid ${BONE}`, color: GHOST,
-              fontSize: fs, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: compact ? '3px 9px' : '4px 11px', borderRadius: 20, background: s.bg, color: s.fg,
+              fontSize: compact ? 9 : 10.5, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
             }}>
-              <span style={{ fontSize: fs - 1 }}>✕</span>{it.label}
+              {it.label}
+              {it.count ? <span style={{ fontWeight: 900, opacity: 0.95 }}>{it.count}</span> : null}
             </span>
           );
         })}
@@ -767,8 +762,15 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       background: 'rgba(255,255,255,0.08)', borderRadius: 6,
                       padding: '8px 14px', flex: '1 1 200px',
                     }}>
-                      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.5)', marginBottom: 3 }}>
-                        {m.artist}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.5)' }}>
+                          {m.artist}
+                        </span>
+                        {genreFor(m.artist) && (
+                          <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.14)', borderRadius: 4, padding: '1px 5px' }}>
+                            {genreFor(m.artist)}
+                          </span>
+                        )}
                       </div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: WHITE, lineHeight: 1.3 }}>
                         {m.moment}
@@ -853,6 +855,15 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           }}>
                             {m.artist}
                           </span>
+                          {genreFor(m.artist) && (
+                            <span style={{
+                              fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+                              color: SMOKE, background: 'rgba(0,0,0,0.04)', border: `1px solid ${BONE}`,
+                              borderRadius: 4, padding: '1px 6px', flexShrink: 0, whiteSpace: 'nowrap', alignSelf: 'center',
+                            }}>
+                              {genreFor(m.artist)}
+                            </span>
+                          )}
                           <span style={{
                             fontSize: 12, fontWeight: isTier1(m) ? 600 : 400,
                             color: isTier1(m) ? INK : WARM,
