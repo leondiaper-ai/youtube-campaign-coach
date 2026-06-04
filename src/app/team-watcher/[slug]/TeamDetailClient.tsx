@@ -260,19 +260,6 @@ export default function TeamDetailClient({
 
   return (
     <>
-      {/* ─── CAMPAIGN TRACKING ──────────────────────────────────────── */}
-      {!hasCampaign && !showStartCampaign && (
-        <div className="mt-8 flex items-center justify-center">
-          <button
-            onClick={() => setShowStartCampaign(true)}
-            className="px-5 py-2.5 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em] inline-flex items-center gap-2 transition-colors cursor-pointer"
-            style={{ background: INK, color: PAPER, border: 'none' }}
-          >
-            Start Campaign
-          </button>
-        </div>
-      )}
-
       {/* Start Campaign Form */}
       {showStartCampaign && (
         <div className="mt-8 rounded-lg p-5 border" style={{ borderColor: '#2C6BFF40', background: '#F8FAFF' }}>
@@ -465,34 +452,6 @@ export default function TeamDetailClient({
           </div>
         </div>
       )}
-
-      {/* Campaign state selector */}
-      <div className="mt-8">
-        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-3">
-          Campaign State
-        </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {CAMPAIGN_STATES.map((s) => {
-            const active = s === campaignState;
-            const style = CAMPAIGN_STATE_STYLE[s];
-            return (
-              <button
-                key={s}
-                onClick={() => handleStateChange(s)}
-                className="px-3 py-1.5 rounded text-[11px] font-bold transition-all"
-                style={{
-                  background: active ? style.bg : 'transparent',
-                  color: active ? style.fg : 'rgba(14,14,14,0.35)',
-                  border: active ? `1px solid ${style.fg}30` : `1px solid ${BONE}`,
-                  cursor: 'pointer',
-                }}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Notes section */}
       <div className="mt-8">
