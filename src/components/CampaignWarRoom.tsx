@@ -596,7 +596,10 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
 // Ideal hero set per release = Official Video + Visualiser + Lyric Video.
 // Shorts run on a weekly cadence that intensifies around releases.
 function computeContentPlan(events: ParsedEvent[], lib: AssetLibrary) {
-  const releaseEvents = events.filter((e) => momentType(e) === 'release');
+  // Count distinct RELEASES (singles / album), not the hero-asset deliverable
+  // moments that belong to them — e.g. "That's A Year Visualiser" is a deliverable
+  // for the "That's A Year" single, not a separate release needing its own set.
+  const releaseEvents = events.filter((e) => momentType(e) === 'release' && !namedHeroAsset(e.title));
   const releases = releaseEvents.length;
   const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
   const hero = [
