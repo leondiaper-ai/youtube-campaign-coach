@@ -264,6 +264,7 @@ export default function CampaignWarRoom(props: Props) {
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <AssetSnapshot summary={m.summary} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
+      <ContentPlan events={events} library={lib} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
@@ -452,12 +453,15 @@ function bankedStatuses(lib: AssetLibrary, folderUrl?: string) {
     lib.assets.find((a) => match(a) && a.webViewLink)?.webViewLink ?? folderUrl;
   const finished = lib.assets.filter((a) => a.assetClass === 'shorts_cutdown' && a.classConfidence === 'high').length;
   const sources = n('shorts_cutdown');
+  // Hero formats + Shorts are expected (show as gaps "to source"). BTS / Live are
+  // optional — only surfaced when present, never flagged missing.
   return [
     { label: 'Official Video', ready: n('official_video') > 0, href: href((a) => a.assetClass === 'official_video') },
-    { label: 'BTS', ready: n('bts') > 0, href: href((a) => a.assetClass === 'bts') },
+    { label: 'Visualiser', ready: n('visualiser') > 0, href: href((a) => a.assetClass === 'visualiser') },
+    { label: 'Lyric Video', ready: n('lyric_video') > 0, href: href((a) => a.assetClass === 'lyric_video') },
     { label: 'Shorts', ready: finished > 0, partial: finished === 0 && sources > 0, href: href((a) => a.assetClass === 'shorts_cutdown') },
-    { label: 'Live Performance', ready: n('live_performance') > 0, href: href((a) => a.assetClass === 'live_performance') },
-    { label: 'Artwork', ready: lib.assets.some((a) => a.mediaType === 'image'), href: href((a) => a.mediaType === 'image') },
+    { label: 'BTS', ready: n('bts') > 0, optional: true, href: href((a) => a.assetClass === 'bts') },
+    { label: 'Live', ready: n('live_performance') > 0, optional: true, href: href((a) => a.assetClass === 'live_performance') },
   ];
 }
 
@@ -523,14 +527,16 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
 function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
   summary: ReturnType<typeof summarizeLibrary>; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
 }) {
+  const nCls = (cls: DriveAssetClass) => library.assets.filter((a) => a.assetClass === cls).length;
   const counts = [
-    { k: 'Total', v: summary.total },
-    { k: 'BTS', v: summary.byClass.find((c) => c.cls === 'bts')?.count ?? 0 },
-    { k: 'Shorts', v: summary.byClass.find((c) => c.cls === 'shorts_cutdown')?.count ?? 0 },
-    { k: 'Live', v: summary.byClass.find((c) => c.cls === 'live_performance')?.count ?? 0 },
-    { k: 'Artwork', v: summary.images },
-    { k: 'Audio', v: summary.audio },
+    { k: 'Official Video', v: nCls('official_video') },
+    { k: 'Visualiser', v: nCls('visualiser') },
+    { k: 'Lyric Video', v: nCls('lyric_video') },
+    { k: 'Shorts', v: nCls('shorts_cutdown') },
+    { k: 'BTS', v: nCls('bts') },
+    { k: 'Live', v: nCls('live_performance') },
   ];
+  void summary;
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
@@ -559,7 +565,9 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
             </div>
             <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginTop: 14, paddingTop: 12, borderTop: `1px solid ${BONE}`, marginBottom: 8 }}>Multi-Format Asset Coverage</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {bankedStatuses(library, folderUrl).map((b) => {
+              {bankedStatuses(library, folderUrl)
+                .filter((b) => !((b as { optional?: boolean }).optional && !b.ready)) // BTS/Live only shown when present
+                .map((b) => {
                 const color = b.ready ? ACCENT : b.partial ? AMBER : SMOKE;
                 const mark = b.ready ? '✓' : b.partial ? '◐' : '○';
                 const text = b.ready ? `${b.label} Ready` : b.partial ? `${b.label} Sources` : `${b.label} To Source`;
@@ -576,6 +584,73 @@ function AssetSnapshot({ summary, library, hasAssets, folderUrl, slug }: {
             </div>
           </>
         )}
+      </div>
+    </section>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// IDEAL CONTENT PLAN — reads the timeline, suggests the content that should exist
+// ══════════════════════════════════════════════════════════════════════════
+
+// Ideal hero set per release = Official Video + Visualiser + Lyric Video.
+// Shorts run on a weekly cadence that intensifies around releases.
+function computeContentPlan(events: ParsedEvent[], lib: AssetLibrary) {
+  const releaseEvents = events.filter((e) => momentType(e) === 'release');
+  const releases = releaseEvents.length;
+  const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
+  const hero = [
+    { label: 'Official Video', need: releases, have: cnt('official_video') },
+    { label: 'Visualiser', need: releases, have: cnt('visualiser') },
+    { label: 'Lyric Video', need: releases, have: cnt('lyric_video') },
+  ];
+  // Shorts target: ~3 around each release (tease / drop-day / follow-up) plus
+  // ~1.5 a week across the quieter stretches of the campaign.
+  const ms = events.map((e) => new Date(e.dateISO + 'T12:00:00').getTime()).filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
+  const spanWeeks = ms.length > 1 ? Math.max(1, Math.round((ms[ms.length - 1] - ms[0]) / (7 * 86400000))) : 1;
+  const quietWeeks = Math.max(0, spanWeeks - releases);
+  const shortsTarget = Math.round(releases * 3 + quietWeeks * 1.5);
+  return { releases, hero, shortsTarget, shortsHave: cnt('shorts_cutdown'), spanWeeks };
+}
+
+function ContentPlan({ events, library }: { events: ParsedEvent[]; library: AssetLibrary }) {
+  const plan = computeContentPlan(events, library);
+  if (plan.releases === 0) return null;
+
+  const Row = ({ label, sub, have, need, target }: { label: string; sub?: string; have: number; need: number; target?: boolean }) => {
+    const gap = Math.max(0, need - have);
+    const done = gap === 0;
+    const color = done ? ACCENT : have > 0 ? AMBER : RED;
+    const pct = need > 0 ? Math.min(100, Math.round((have / need) * 100)) : 0;
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px 96px', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: `1px solid ${BONE}` }}>
+        <div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{label}</span>
+          {sub && <span style={{ fontSize: 10.5, color: SMOKE, marginLeft: 8 }}>{sub}</span>}
+          <div style={{ height: 4, background: BONE, borderRadius: 3, marginTop: 7, overflow: 'hidden', maxWidth: 280 }}>
+            <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3 }} />
+          </div>
+        </div>
+        <div style={{ fontSize: 12, color: SMOKE, fontFamily: MONO, textAlign: 'right' }}>
+          <span style={{ color: INK, fontWeight: 800 }}>{have}</span> / {target ? '~' : ''}{need}
+        </div>
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color, textAlign: 'right' }}>
+          {done ? '✓ Covered' : target ? `Ramp +${gap}` : `Produce ${gap}`}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '16px 40px 0' }}>
+      <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 5 }}>Ideal Content Plan</div>
+        <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, marginBottom: 10, maxWidth: 720 }}>
+          Across {plan.releases} release{plan.releases > 1 ? 's' : ''} on this timeline, the ideal hero set is an Official Video, Visualiser and Lyric Video for each — here&rsquo;s what&rsquo;s still to produce.
+        </div>
+        {plan.hero.map((h) => <Row key={h.label} label={h.label} have={h.have} need={h.need} />)}
+        <Row label="Shorts" sub="3 per release + 1–2 / week" have={plan.shortsHave} need={plan.shortsTarget} target />
+        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>BTS &amp; Live are tracked when present — not required gaps.</div>
       </div>
     </section>
   );
@@ -788,7 +863,7 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
       ? `Produce the ${named} ahead of release week — not in the asset library yet`
       : 'Lock a hero asset (official video / visualiser / lyric video) before release week');
     else actions.push('Schedule the Premiere + Community moment');
-    actions.push(hasShortPool ? 'Cut Shorts from the pool to bridge release week' : 'Plan release-week Shorts Support');
+    actions.push(hasShortPool ? 'Drop 3 Shorts around release — tease, drop-day, follow-up' : 'Plan 3 release Shorts — tease, drop-day, follow-up');
   } else if (type === 'announce') {
     status = present.length ? { label: 'Assets Partial', color: AMBER } : { label: 'Planned', color: SMOKE };
     missing = (mapping?.missing ?? []).filter((c) => ['trailer', 'artwork'].includes(c));
@@ -803,8 +878,8 @@ function cardLogic(type: MomentType, mapping: MilestoneMapping | undefined, pool
     actions.push('Archive reference — useful for catalogue context only');
   } else { // support
     status = (present.length || pool.bts > 0 || pool.shorts > 0) ? { label: 'Content Ready', color: ACCENT } : { label: 'Planned', color: SMOKE };
-    if (pool.bts > 0 || pool.shorts > 0 || present.includes('bts')) actions.push('Cut Shorts from this session footage');
-    else actions.push('Capture YouTube content for this moment');
+    if (pool.bts > 0 || pool.shorts > 0 || present.includes('bts')) actions.push('Cut 1–2 Shorts from this session to keep the week active');
+    else actions.push('Capture content + 1–2 Shorts for this week');
   }
   // Is there real YouTube content behind this moment (so the status can link to Drive)?
   const hasContent =
