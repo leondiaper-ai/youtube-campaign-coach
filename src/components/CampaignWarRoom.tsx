@@ -498,7 +498,6 @@ function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUr
     { cls: 'shorts_cutdown', label: 'Shorts', have: cnt('shorts_cutdown'), lo: shortsLo, hi: shortsHi, note: 'Based on campaign length and release cadence', href: href('shorts_cutdown') },
     { cls: 'bts', label: 'BTS', have: cnt('bts'), lo: Math.max(4, singles * 2), hi: Math.max(6, singles * 3), note: 'Studio, behind-the-video, songwriting and storytelling moments', href: href('bts') },
     { cls: 'live_performance', label: 'Live / Acoustic', have: cnt('live_performance'), lo: large ? 4 : 2, hi: large ? 8 : 4, note: 'Acoustic versions, live sessions and performance content', href: href('live_performance') },
-    { cls: 'community', label: 'Community Posts', have: null, lo: singles * 3 + 3, hi: singles * 5 + 5, note: 'Steady community cadence across the campaign', href: undefined },
   ];
   return { singles, hasAlbum, months, rows };
 }
@@ -612,7 +611,7 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
           </div>
         )}
         {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
-        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence. Community Posts aren&rsquo;t Drive assets — shown as a cadence guide.</div>
+        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence.</div>
       </div>
     </section>
   );
