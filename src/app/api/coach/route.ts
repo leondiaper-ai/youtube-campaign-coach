@@ -50,21 +50,25 @@ export async function POST(req: NextRequest) {
 
 /**
  * PATCH /api/coach — Update a saved campaign plan.
- * Body: { slug, plan } — replaces the plan data.
- * Used for marking actions complete, adding/removing actions.
+ * Body: { slug, plan? , campaignName? }
+ *   - plan: replaces the plan data (marking actions complete, etc.)
+ *   - campaignName: renames the campaign (slug/URL stays the same)
  */
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { slug, plan } = body as { slug: string; plan: GeneratedPlan };
-    if (!slug || !plan) {
-      return NextResponse.json({ error: 'slug and plan are required' }, { status: 400 });
+    const { slug, plan, campaignName } = body as { slug: string; plan?: GeneratedPlan; campaignName?: string };
+    if (!slug || (!plan && !campaignName)) {
+      return NextResponse.json({ error: 'slug and one of plan or campaignName are required' }, { status: 400 });
     }
-    const updated = await updateSavedPlan(slug, { plan });
+    const updates: { plan?: GeneratedPlan; campaignName?: string } = {};
+    if (plan) updates.plan = plan;
+    if (typeof campaignName === 'string') updates.campaignName = campaignName;
+    const updated = await updateSavedPlan(slug, updates);
     if (!updated) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
-    return NextResponse.json({ ok: true, updatedAt: updated.updatedAt });
+    return NextResponse.json({ ok: true, campaignName: updated.campaignName, updatedAt: updated.updatedAt });
   } catch (err) {
     console.error('PATCH /api/coach error:', err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });

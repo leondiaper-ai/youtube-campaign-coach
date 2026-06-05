@@ -171,7 +171,7 @@ export async function listPlans(): Promise<PlanIndexEntry[]> {
 
 export async function updateSavedPlan(
   slug: string,
-  updates: Partial<Pick<SavedPlan, 'plan'>>,
+  updates: Partial<Pick<SavedPlan, 'plan' | 'campaignName'>>,
 ): Promise<SavedPlan | null> {
   const store = await kv();
   if (!store) return null;
@@ -184,13 +184,22 @@ export async function updateSavedPlan(
     ...updates,
     updatedAt: new Date().toISOString(),
   };
+  // Renaming the campaign keeps the slug/URL stable but updates every place the
+  // name surfaces: the SavedPlan, the embedded plan, and the archive index.
+  const rename = typeof updates.campaignName === 'string' && updates.campaignName.trim();
+  if (rename) {
+    const name = updates.campaignName!.trim();
+    updated.campaignName = name;
+    updated.plan = { ...updated.plan, campaignName: name };
+  }
   await store.set(planKey(slug), updated);
 
-  // Update index timestamp
+  // Update index timestamp (and name, if renamed)
   const index = ((await store.get(INDEX_KEY)) as PlanIndexEntry[] | null) ?? [];
   const idx = index.findIndex((e) => e.slug === slug);
   if (idx >= 0) {
     index[idx].updatedAt = updated.updatedAt;
+    if (rename) index[idx].campaignName = updated.campaignName;
     await store.set(INDEX_KEY, index);
   }
 
