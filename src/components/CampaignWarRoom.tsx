@@ -317,6 +317,9 @@ function momentumSentence(summary: ReturnType<typeof summarizeLibrary>, support:
   if (summary.total === 0) return 'Asset library not connected yet — scan the campaign folder to ground the rollout.';
   const byc = (c: DriveAssetClass) => summary.byClass.find((x) => x.cls === c)?.count ?? 0;
   const cats: { label: string; count: number }[] = [];
+  if (byc('official_video')) cats.push({ label: 'official video', count: byc('official_video') });
+  if (byc('visualiser')) cats.push({ label: 'visualisers', count: byc('visualiser') });
+  if (byc('lyric_video')) cats.push({ label: 'lyric videos', count: byc('lyric_video') });
   if (byc('bts')) cats.push({ label: 'BTS', count: byc('bts') });
   if (byc('shorts_cutdown')) cats.push({ label: 'Shorts', count: byc('shorts_cutdown') });
   if (byc('live_performance')) cats.push({ label: 'live content', count: byc('live_performance') });
@@ -324,11 +327,12 @@ function momentumSentence(summary: ReturnType<typeof summarizeLibrary>, support:
   if (summary.audio) cats.push({ label: 'audio masters', count: summary.audio });
   cats.sort((a, b) => b.count - a.count);
   const top = cats.slice(0, 3).map((c) => c.label);
-  const list = top.length === 0 ? 'content'
-    : top.length === 1 ? top[0]
-    : `${top.slice(0, -1).join(', ')} and ${top[top.length - 1]}`;
+  const list = top.length === 1 ? top[0] : `${top.slice(0, -1).join(', ')} and ${top[top.length - 1]}`;
   const adj = support.band === 'Deep' ? 'Deep' : support.band === 'Strong' ? 'Strong' : support.band === 'Building' ? 'Growing' : 'Early';
-  return `${adj} multi-format content pipeline already in place across ${list}.`;
+  // Only claim "multi-format" when 2+ formats are genuinely present.
+  if (cats.length >= 2) return `${adj} multi-format library already in place — ${list}.`;
+  if (cats.length === 1) return `${adj} ${top[0]} content already in the library — room to build out other formats.`;
+  return `${adj} asset library connected — ready to ground the rollout.`;
 }
 
 // Current focus — the next action stage, framed forward (no "missing/needs").
