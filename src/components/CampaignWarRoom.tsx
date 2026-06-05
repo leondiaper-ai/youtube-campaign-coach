@@ -181,6 +181,23 @@ function momentTokens(title: string, knownTitles: string[]): string[] {
   return Array.from(out);
 }
 
+// A short descriptor of what KIND of campaign this is, so the planner makes the
+// "world" obvious (Album / EP / Single / Documentary campaign).
+function campaignKindLabel(events: ParsedEvent[]): string {
+  const titles = events.map((e) => e.title.toLowerCase());
+  const kinds = events.map((e) => e.kind);
+  const hasAlbum = kinds.includes('albumRelease')
+    || titles.some((t) => /\balbum\b/.test(t) && !/announce|pre-?order|trailer|tracklist|build|story|creation|countdown|teaser|diary|photo|visual|behind|\bbts\b|making/.test(t));
+  if (hasAlbum) return 'Album Campaign';
+  if (titles.some((t) => /\bep\b/.test(t))) return 'EP Campaign';
+  if (kinds.includes('documentaryRelease')) return 'Documentary Campaign';
+  // Count actual release moments via the same classifier the timeline uses.
+  const releases = events.filter((e) => momentType(e) === 'release').length;
+  if (releases > 1) return 'Singles Campaign';
+  if (releases === 1) return 'Single Campaign';
+  return 'Campaign';
+}
+
 const RELEASE_KINDS = new Set<TimelineKind>(['singleRelease', 'albumRelease', 'documentaryRelease']);
 function phaseForDate(iso: string, firstRel?: string, lastRel?: string): PhaseName {
   if (!firstRel) return 'BUILD';
@@ -212,6 +229,7 @@ type Pool = { bts: number; shorts: number; live: number };
 export default function CampaignWarRoom(props: Props) {
   const { plan, driveLibrary, driveConfig, driveFolderUrl, recentUploads = [], liveChannel, campaignStartDate } = props;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
+  const campaignKind = campaignKindLabel(plan.events ?? []);
   const lib: AssetLibrary = driveLibrary ?? { slug: props.slug, folderUrl: driveFolderUrl ?? '', scannedAt: '', assets: [] };
   const hasAssets = lib.assets.length > 0;
   const knownTitles = driveConfig?.knownTitles ?? [];
@@ -257,7 +275,7 @@ export default function CampaignWarRoom(props: Props) {
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
       <CampaignRead
         artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
-        momentum={momentum}
+        momentum={momentum} kindLabel={campaignKind}
       />
       <CampaignStatus
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
@@ -325,8 +343,8 @@ function currentFocus(primaryGap: string, phase: PhaseName): string {
     : 'Extending the campaign with catalogue support.';
 }
 
-function CampaignRead({ artist, title, phase, momentum }: {
-  artist: string; title: string; phase: PhaseName; momentum: string;
+function CampaignRead({ artist, title, phase, momentum, kindLabel }: {
+  artist: string; title: string; phase: PhaseName; momentum: string; kindLabel?: string;
 }) {
   const pt = PHASE_TONE[phase];
   return (
@@ -340,7 +358,12 @@ function CampaignRead({ artist, title, phase, momentum }: {
           </div>
           <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: pt.color, padding: '3px 10px', borderRadius: 3 }}>{pt.label} phase</span>
         </div>
-        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>{artist}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>{artist}</span>
+          {kindLabel && (
+            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, border: `1px solid ${GHOST}66`, padding: '2px 8px', borderRadius: 3 }}>{kindLabel}</span>
+          )}
+        </div>
         <h1 style={{ fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 900, lineHeight: 0.95, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 16px', color: WHITE }}>{title}</h1>
 
         {/* Momentum — what's already in place */}
