@@ -20,7 +20,6 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import type { GeneratedPlan, ParsedEvent, PhaseName, TimelineKind, ChannelContext } from '@/lib/planEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
@@ -331,9 +330,11 @@ function CampaignRead({ artist, title, phase, momentum }: {
     <section style={{ background: INK, color: PAPER }}>
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '20px 40px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Link href="/coach" style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, textDecoration: 'none', fontFamily: MONO }}>
+          {/* Static branding — no link back to the watcher, so a shared planner
+              never lets external viewers navigate into the internal app. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 9, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
             <YTMark h={12} /> YouTube Rollout Status
-          </Link>
+          </div>
           <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: pt.color, padding: '3px 10px', borderRadius: 3 }}>{pt.label} phase</span>
         </div>
         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>{artist}</div>
