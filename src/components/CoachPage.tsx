@@ -52,6 +52,7 @@ export default function CoachPage({
 }) {
   const [selectedSlug, setSelectedSlug] = useState('');
   const [artistName, setArtistName] = useState('');
+  const [campaignName, setCampaignName] = useState('');
   const [channelData, setChannelData] = useState<ChannelData | null>(null);
   const [derived, setDerived] = useState<Derived | null>(null);
   const [channelCtx, setChannelCtx] = useState<ChannelContext | null>(null);
@@ -140,7 +141,7 @@ export default function CoachPage({
     setPlanLoading(true);
 
     // Generate locally first for instant preview
-    const result = generatePlan(timeline, artistName, channelCtx);
+    const result = generatePlan(timeline, artistName, channelCtx, null, campaignName || null);
     if (!result) {
       setError(
         'Could not parse any dates from the timeline. Try adding dates like "15 June - single release".'
@@ -159,6 +160,7 @@ export default function CoachPage({
           artist: artistName,
           timeline,
           channelCtx,
+          campaignName: campaignName || null,
         }),
       });
       if (res.ok) {
@@ -288,6 +290,29 @@ export default function CoachPage({
               }}
             />
           )}
+        </div>
+
+        {/* Campaign / release name — the "world" of the campaign */}
+        <div style={{ marginBottom: 24 }}>
+          <Label text="Campaign Name" />
+          <input
+            type="text"
+            value={campaignName}
+            onChange={(e) => setCampaignName(e.target.value)}
+            placeholder={'Album, EP or single name — e.g. "Master Complicator"'}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              borderRadius: 8,
+              border: `1px solid ${BORDER}`,
+              background: '#FFFFFF',
+              fontSize: 14,
+              color: INK,
+            }}
+          />
+          <div style={{ fontSize: 11, color: MUTED, marginTop: 6 }}>
+            Names the rollout so everyone knows the world they&rsquo;re in. Optional — defaults to the artist name.
+          </div>
         </div>
 
         {loadingChannel && (

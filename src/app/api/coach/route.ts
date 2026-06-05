@@ -10,12 +10,13 @@ import { generatePlan, type ChannelContext, type GeneratedPlan } from '@/lib/pla
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { artist, timeline, channelCtx, customSlug, campaignStartDate } = body as {
+    const { artist, timeline, channelCtx, customSlug, campaignStartDate, campaignName } = body as {
       artist: string;
       timeline: string;
       channelCtx?: ChannelContext | null;
       customSlug?: string;
       campaignStartDate?: string | null;
+      campaignName?: string | null;
     };
 
     if (!artist || !timeline) {
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const plan = generatePlan(timeline, artist, channelCtx ?? null, campaignStartDate ?? null);
+    const plan = generatePlan(timeline, artist, channelCtx ?? null, campaignStartDate ?? null, campaignName ?? null);
     if (!plan) {
       return NextResponse.json(
         { error: 'Could not parse any dates from the timeline.' },

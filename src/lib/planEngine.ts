@@ -905,12 +905,17 @@ export function generatePlan(
   artist: string,
   channelCtx?: ChannelContext | null,
   campaignStartDate?: string | null,
+  campaignLabel?: string | null,
 ): GeneratedPlan | null {
   const events = parseTimeline(timelineText);
   if (events.length === 0) return null;
 
   const ctx = channelCtx ?? null;
-  const campaignName = artist ? `${artist} Campaign` : 'YouTube Campaign';
+  // An explicit release/album/EP name (the "world" of the campaign) takes
+  // precedence; otherwise fall back to "{Artist} Campaign".
+  const campaignName = campaignLabel && campaignLabel.trim()
+    ? campaignLabel.trim()
+    : artist ? `${artist} Campaign` : 'YouTube Campaign';
   const isCold = ctx && (ctx.state === 'COLD' || ctx.state === 'AT RISK');
 
   // Campaign shape analysis
