@@ -701,6 +701,62 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     }
   }
 
+  // ── First-90-days view ────────────────────────────────────────────────────
+  // Long campaigns (often 6–12 months) are a huge scroll. Show the campaign's
+  // first 90 days inline, then roll everything beyond that into one expandable
+  // section. Uses a native <details> so it works in shared / read-only planners
+  // with no client JS.
+  const groupTs = (g: Group) => new Date(events[g.idxs[0]].dateISO + 'T12:00:00').getTime();
+  const cutoff = groups.length ? groupTs(groups[0]) + 90 * 86400000 : 0;
+  let splitIdx = groups.findIndex((g) => groupTs(g) > cutoff);
+  if (splitIdx < 0) splitIdx = groups.length;
+  // Only bother collapsing when there's a meaningful tail to hide.
+  const collapse = splitIdx >= 1 && groups.length - splitIdx >= 3;
+  const visN = collapse ? splitIdx : groups.length;
+  const fmtShort = (iso: string) => new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  const renderCard = (g: Group, ci: number) => {
+    const { idxs, mode } = g;
+    const i0 = idxs[0];
+    const ev = events[i0];
+    const isMulti = idxs.length > 1;
+    const showPhaseLabel = ci === 0 || phases[i0] !== phases[groups[ci - 1].idxs[0]];
+    const active = idxs.includes(activeIdx);
+    const compact = types[i0] === 'support' || types[i0] === 'live';
+    let mapping = mappings[i0];
+    let liveInfo = liveByMoment.get(i0);
+    let titleOverride: string | undefined;
+    let includes: string[] | undefined;
+    if (isMulti) {
+      const maps = idxs.map((i) => mappings[i]);
+      const seen = new Set<string>();
+      const assets = maps.flatMap((m) => m.assets).filter((a) => (seen.has(a.id) ? false : (seen.add(a.id), true)));
+      mapping = {
+        ...maps[0],
+        assets,
+        present: Array.from(new Set(maps.flatMap((m) => m.present))),
+        missing: Array.from(new Set(maps.flatMap((m) => m.missing))),
+        anchorPresent: maps.some((m) => m.anchorPresent),
+      };
+      const lives = idxs.map((i) => liveByMoment.get(i)).filter(Boolean) as { primary?: RecentUpload; shorts: RecentUpload[] }[];
+      const primary = lives.map((l) => l.primary).find(Boolean);
+      const shorts = lives.flatMap((l) => l.shorts ?? []);
+      liveInfo = (primary || shorts.length) ? { primary, shorts } : undefined;
+      titleOverride = mode === 'phase'
+        ? phaseTitle(types[i0], idxs.map((i) => events[i].title))
+        : clusterTitle(types[i0], idxs.map((i) => events[i].title));
+      includes = idxs.map((i) => events[i].title);
+    }
+    return (
+      <MilestoneCard
+        key={`${ev.dateISO}-${i0}`} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
+        showPhaseLabel={showPhaseLabel} compact={compact}
+        recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
+        live={liveInfo} titleOverride={titleOverride} includes={includes}
+      />
+    );
+  };
+
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
@@ -719,48 +775,28 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {groups.map(({ idxs, mode }, ci) => {
-            const i0 = idxs[0];
-            const ev = events[i0];
-            const isMulti = idxs.length > 1;
-            const showPhaseLabel = ci === 0 || phases[i0] !== phases[groups[ci - 1].idxs[0]];
-            const active = idxs.includes(activeIdx);
-            // Support / live cards use a compact cadence instead of the repeated
-            // verbose Suggested Support list (keeps the timeline scannable).
-            const compact = types[i0] === 'support' || types[i0] === 'live';
-            let mapping = mappings[i0];
-            let liveInfo = liveByMoment.get(i0);
-            let titleOverride: string | undefined;
-            let includes: string[] | undefined;
-            if (isMulti) {
-              const maps = idxs.map((i) => mappings[i]);
-              const seen = new Set<string>();
-              const assets = maps.flatMap((m) => m.assets).filter((a) => (seen.has(a.id) ? false : (seen.add(a.id), true)));
-              mapping = {
-                ...maps[0],
-                assets,
-                present: Array.from(new Set(maps.flatMap((m) => m.present))),
-                missing: Array.from(new Set(maps.flatMap((m) => m.missing))),
-                anchorPresent: maps.some((m) => m.anchorPresent),
-              };
-              const lives = idxs.map((i) => liveByMoment.get(i)).filter(Boolean) as { primary?: RecentUpload; shorts: RecentUpload[] }[];
-              const primary = lives.map((l) => l.primary).find(Boolean);
-              const shorts = lives.flatMap((l) => l.shorts ?? []);
-              liveInfo = (primary || shorts.length) ? { primary, shorts } : undefined;
-              titleOverride = mode === 'phase'
-                ? phaseTitle(types[i0], idxs.map((i) => events[i].title))
-                : clusterTitle(types[i0], idxs.map((i) => events[i].title));
-              includes = idxs.map((i) => events[i].title);
-            }
+          {groups.slice(0, visN).map((g, ci) => renderCard(g, ci))}
+          {collapse && (() => {
+            const hidden = groups.slice(splitIdx);
+            const moments = hidden.reduce((n, g) => n + g.idxs.length, 0);
+            const first = events[hidden[0].idxs[0]].dateISO;
+            const last = events[hidden[hidden.length - 1].idxs[0]].dateISO;
             return (
-              <MilestoneCard
-                key={`${ev.dateISO}-${i0}`} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
-                showPhaseLabel={showPhaseLabel} compact={compact}
-                recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
-                live={liveInfo} titleOverride={titleOverride} includes={includes}
-              />
+              <>
+                <style>{`.tl-rollup>summary{list-style:none}.tl-rollup>summary::-webkit-details-marker{display:none}.tl-rollup .tl-chev{display:inline-block;transition:transform .15s ease}.tl-rollup[open] .tl-chev{transform:rotate(90deg)}.tl-rollup[open] .tl-show{display:none}.tl-rollup:not([open]) .tl-hide{display:none}.tl-rollup>summary:hover{background:#F4F1EB}`}</style>
+                <details className="tl-rollup">
+                  <summary style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 28, padding: '13px 16px', background: '#FAF8F4', border: `1px solid ${BONE}`, borderRadius: 8, cursor: 'pointer', fontFamily: MONO, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: INK }}>
+                    <span className="tl-chev" style={{ color: SMOKE, fontSize: 12 }}>▸</span>
+                    <span className="tl-show">Later in the campaign · {moments} more moments · {fmtShort(first)} – {fmtShort(last)}</span>
+                    <span className="tl-hide">Hide later moments</span>
+                  </summary>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+                    {hidden.map((g, off) => renderCard(g, splitIdx + off))}
+                  </div>
+                </details>
+              </>
             );
-          })}
+          })()}
           {events.length === 0 && <div style={{ fontSize: 13, color: SMOKE, padding: '20px 0 0 80px' }}>No campaign moments parsed yet. Add a timeline below to populate the master view.</div>}
         </div>
       </div>
