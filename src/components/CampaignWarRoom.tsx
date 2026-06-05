@@ -85,7 +85,10 @@ function momentType(ev: ParsedEvent): MomentType {
   const k = ev.kind;
   if (/archive|catalogue|catalog|throwback|reference/.test(t)) return 'archive';
   if (k === 'singleRelease' || k === 'albumRelease' || k === 'documentaryRelease'
-    || /official\s*video|visuali[sz]er|lyric\s*video|\bsingle\b|album\s*release|deluxe|focus\s*track/.test(t)) return 'release';
+    || /official\s*video|visuali[sz]er|lyric\s*video|\bsingle\b|album\s*release|deluxe|focus\s*track/.test(t)
+    // A bare "album" drop is a release too — but not an announce / pre-order /
+    // tracklist / world-building moment that merely mentions the album.
+    || (/\balbum\b/.test(t) && !/announce|pre-?order|trailer|tracklist|build|story|creation|countdown|teaser|diary|photo|visual/.test(t))) return 'release';
   // World-building / content support — even when titled "reveal" (photography,
   // visual world, storytelling, BTS, diary). These group into a phase, not an
   // announcement.
@@ -700,7 +703,19 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
-      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
+      <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
+      {(() => {
+        const sr = shortsRecommendation(events);
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 24 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: SHORTS_PURPLE, background: '#F0E8FE', border: `1px solid ${SHORTS_PURPLE}33`, padding: '3px 10px', borderRadius: 20 }}>
+              <svg width="9" height="11" viewBox="0 0 10 12" aria-hidden><polygon points="0,0 10,6 0,12" fill={SHORTS_PURPLE} /></svg>
+              ~{sr.lo}–{sr.hi} Shorts
+            </span>
+            <span style={{ fontSize: 11, color: SMOKE }}>across the campaign — cluster <strong style={{ color: INK }}>3 around every release</strong>, keep <strong style={{ color: INK }}>1–2 a week</strong> between. Each moment below shows when to drop.</span>
+          </div>
+        );
+      })()}
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -954,6 +969,43 @@ function suggestedSupport(type: MomentType, present: DriveAssetClass[], pool: Po
   return []; // archive
 }
 
+// ── Shorts cadence ─────────────────────────────────────────────────────────
+// How many Shorts to drop around a given moment, and when — so teams scanning
+// the timeline see the short-form rhythm and where best to post.
+const SHORTS_PURPLE = '#6B21A8';
+function shortsForMoment(type: MomentType, title: string): { count: string; when: string } | null {
+  const t = title.toLowerCase();
+  if (type === 'release') {
+    if (/\balbum\b/.test(t)) return { count: '4–5', when: 'across release week' };
+    return { count: '3', when: 'tease · drop-day · follow-up' };
+  }
+  if (type === 'announce') return { count: '2', when: 'announcement cutdowns' };
+  if (type === 'live') return { count: '1–2', when: 'vertical performance' };
+  if (type === 'support') return { count: '1–2', when: 'this week' };
+  return null; // archive
+}
+
+// Campaign-wide Shorts recommendation (range), used for the timeline cadence
+// line. Mirrors the Content Supply calc: length bucket scaled by singles.
+function shortsRecommendation(events: ParsedEvent[]): { lo: number; hi: number } {
+  const isSingle = (e: ParsedEvent) => {
+    if (momentType(e) !== 'release') return false;
+    if (namedHeroAsset(e.title)) return false;
+    const t = e.title.toLowerCase();
+    if (/\balbum\b|\bep\b|bundle|acoustic|deluxe|pre-?order|focus\s*track|documentary/.test(t)) return false;
+    return /\bsingle\b/.test(t) || e.kind === 'singleRelease';
+  };
+  const singles = events.filter(isSingle).length;
+  const ms = events.map((e) => new Date(e.dateISO + 'T12:00:00').getTime()).filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
+  const months = Math.max(1, Math.round((ms.length > 1 ? (ms[ms.length - 1] - ms[0]) / 86400000 : 30) / 30.4));
+  const bucket = months <= 3 ? [10, 20] : months <= 6 ? [20, 40] : [40, 80];
+  const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+  return {
+    lo: singles > 0 ? clamp(singles * 10, bucket[0], bucket[1]) : bucket[0],
+    hi: singles > 0 ? clamp(singles * 15, bucket[0], bucket[1]) : bucket[1],
+  };
+}
+
 function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
@@ -1070,8 +1122,11 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         : actions;
 
   const isLive = !!(heroLive || primaryLive || shortLives.length || softLive);
-  // What content could support this moment (only when it hasn't already gone live).
-  const suggestions = isLive ? [] : suggestedSupport(type, present, pool, named, ev.title);
+  // Shorts get their own prominent cue (below) — strip them from the verbose
+  // suggestion list so the rhythm isn't duplicated.
+  const suggestions = (isLive ? [] : suggestedSupport(type, present, pool, named, ev.title)).filter((s) => !/short/i.test(s.label));
+  // How many Shorts to drop around this moment, and when.
+  const shortsCue = !isLive && type !== 'archive' ? shortsForMoment(type, ev.title) : null;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
@@ -1120,6 +1175,17 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           )}
         </div>
 
+        {/* Shorts cue — where best to drop short-form for this moment */}
+        {shortsCue && (
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: SHORTS_PURPLE, background: '#F0E8FE', border: `1px solid ${SHORTS_PURPLE}33`, padding: '3px 10px', borderRadius: 20 }}>
+              <svg width="9" height="11" viewBox="0 0 10 12" aria-hidden><polygon points="0,0 10,6 0,12" fill={SHORTS_PURPLE} /></svg>
+              {shortsCue.count} Shorts
+            </span>
+            <span style={{ fontSize: 11.5, color: SMOKE }}>{shortsCue.when}</span>
+          </div>
+        )}
+
         {/* Assets currently available for this moment */}
         {present.length > 0 && (
           <div style={{ marginTop: 11 }}>
@@ -1163,9 +1229,9 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         ) : compact ? (
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Suggested Cadence</span>
+            <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>Also</span>
             <span style={{ fontSize: 12, color: INK, fontWeight: 600 }}>
-              {type === 'live' ? 'Performance Shorts · Live upload · Community Post' : 'Shorts · Community Posts'}
+              {type === 'live' ? 'Live performance upload · Community Post' : 'Community Posts'}
             </span>
           </div>
         ) : suggestions.length > 0 ? (
