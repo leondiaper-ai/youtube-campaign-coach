@@ -769,12 +769,18 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
         : clusterTitle(types[i0], idxs.map((i) => events[i].title));
       includes = idxs.map((i) => events[i].title);
     }
+    // Gap to the NEXT timeline group — drives the support Shorts cadence so a
+    // long quiet stretch reads "~1 a week through <next>" instead of "this week".
+    const nextG = groups[ci + 1];
+    const gapDays = nextG ? Math.round((groupTs(nextG) - groupTs(g)) / 86400000) : undefined;
+    const nextLabel = nextG ? fmtShort(events[nextG.idxs[0]].dateISO) : undefined;
     return (
       <MilestoneCard
         key={`${ev.dateISO}-${i0}`} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
         showPhaseLabel={showPhaseLabel} compact={compact}
         recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
         live={liveInfo} titleOverride={titleOverride} includes={includes}
+        gapDays={gapDays} nextLabel={nextLabel}
       />
     );
   };
@@ -1064,11 +1070,11 @@ function shortsRecommendation(events: ParsedEvent[]): { lo: number; hi: number }
   };
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
   live?: { primary?: RecentUpload; shorts: RecentUpload[] };
-  titleOverride?: string; includes?: string[]; compact?: boolean;
+  titleOverride?: string; includes?: string[]; compact?: boolean; gapDays?: number; nextLabel?: string;
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -1184,7 +1190,14 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // suggestion list so the rhythm isn't duplicated.
   const suggestions = (isLive ? [] : suggestedSupport(type, present, pool, named, ev.title)).filter((s) => !/short/i.test(s.label));
   // How many Shorts to drop around this moment, and when.
-  const shortsCue = !isLive && type !== 'archive' ? shortsForMoment(type, ev.title) : null;
+  let shortsCue = !isLive && type !== 'archive' ? shortsForMoment(type, ev.title) : null;
+  // Gap-aware support cadence: when a support/world-building moment sits a long
+  // way before the next content moment, "this week" undersells it. Keep ~1 a
+  // week running through the gap so the channel never goes quiet.
+  if (shortsCue && type === 'support' && gapDays && gapDays >= 11) {
+    const weeks = Math.max(2, Math.round(gapDays / 7));
+    shortsCue = { count: `${weeks}`, when: nextLabel ? `~1 a week through ${nextLabel}` : '~1 a week through the gap' };
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '108px 1fr', alignItems: 'start' }}>
