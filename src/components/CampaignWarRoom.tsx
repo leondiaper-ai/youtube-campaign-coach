@@ -88,7 +88,7 @@ function momentType(ev: ParsedEvent): MomentType {
     || /official\s*video|visuali[sz]er|lyric\s*video|\bsingle\b|album\s*release|deluxe|focus\s*track/.test(t)
     // A bare "album" drop is a release too — but not an announce / pre-order /
     // tracklist / world-building moment that merely mentions the album.
-    || (/\balbum\b/.test(t) && !/announce|pre-?order|trailer|tracklist|build|story|creation|countdown|teaser|diary|photo|visual/.test(t))) return 'release';
+    || (/\balbum\b/.test(t) && !/announce|pre-?order|trailer|tracklist|build|story|creation|countdown|teaser|diary|photo|visual|behind|\bbts\b|making/.test(t))) return 'release';
   // World-building / content support — even when titled "reveal" (photography,
   // visual world, storytelling, BTS, diary). These group into a phase, not an
   // announcement.
