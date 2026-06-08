@@ -1130,9 +1130,14 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // A non-release moment whose title identity-matches a genuinely live upload
   // the kind-based matcher didn't surface (a freestyle, a featured drop). Keeps
   // the status honest — no PLANNED chip sitting above an "already live" video.
+  // GUARD: never let a future-planned moment show as "live" just because a
+  // recent upload shares a title token. Without this, Episode 4 planned for
+  // August lights up because "BTS" appears in both titles.
+  const eventMs = new Date(ev.dateISO + 'T12:00:00').getTime();
   const softLive = (!heroLive && !primaryLive && shortLives.length === 0
     && type !== 'release' && type !== 'archive'
-    && liveMatch && !isTeaser(liveMatch)) ? liveMatch : undefined;
+    && liveMatch && !isTeaser(liveMatch)
+    && eventMs <= Date.now() + 7 * 86400000) ? liveMatch : undefined;
 
   // ── Standardised primary status ─────────────────────────────────────────
   // Every card resolves to ONE of five labels: LIVE / READY / IN PRODUCTION /
