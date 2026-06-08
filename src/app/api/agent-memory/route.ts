@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readAllLiveSnaps, type CachedSnap } from '@/lib/kvCache';
-import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
-import { listPlans, loadPlan, type PlanIndexEntry, type SavedPlan } from '@/lib/planStore';
+import { readHistory } from '@/lib/snapshots';
+import { listPlans, loadPlan, type SavedPlan } from '@/lib/planStore';
 import { ARTISTS, mergeArtistLists, deriveFromLive, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import {
@@ -10,7 +10,7 @@ import {
 import {
   getYouTubeGrowthState, getPrimaryBlocker, getRecommendedActions,
   getCampaignSignal, getChannelHealth,
-  type GrowthInput, type GrowthState, type RecommendedActions, type BlockerResult,
+  type GrowthInput,
 } from '@/lib/youtubeGrowthOS';
 import { computeMultiformat, type MultiformatScore } from '@/lib/contentStructure';
 
@@ -18,184 +18,131 @@ export const dynamic = 'force-dynamic';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type ConfidenceLevel = 'high' | 'medium' | 'experimental';
-
-type Pattern = {
-  title: string;
-  description: string;
-  confidence: ConfidenceLevel;
-  evidenceCount: number;
-  campaignsObserved: string[];
-  lastUpdated: string;
-};
-
-type TimelineEvent = {
-  date: string;
-  title: string;
-  kind: string;
-  scale: string;
-};
-
-type PlanPhase = {
-  name: string;
-  weekStart: number;
-  weekEnd: number;
-};
-
-type PlannedAction = {
-  title: string;
-  format: string;
-  weekNum: number;
-  phase: string;
-  completed?: boolean;
-};
-
-type CampaignIntelligence = {
+type EmergingWinner = {
   artist: string;
   slug: string;
-  region: string;
-  campaignName: string;
-  campaignState: string;
-  campaignType: string;
-  releaseDate: string | null;
-  watcher: {
-    healthStatus: string;
-    momentumStatus: string;
-    uploadCadence: number;
-    shortsRatio: number;
-    longformRatio: number;
-    conversionScore: string;
-    subs: number | null;
-    views7d: number | null;
-    subs7d: number | null;
-  };
-  coach: {
-    currentRecommendation: string;
-    nextBestAction: string;
-    assetGaps: string[];
-    confidence: string;
-    hasPlan: boolean;
-    planWeeks: number;
-    strategy: { priority: string; approach: string } | null;
-    campaignInsights: string[];
-    timeline: TimelineEvent[];
-    phases: PlanPhase[];
-    plannedActions: PlannedAction[];
-    completedActions: number;
-    totalActions: number;
-    completionRate: number;
-    channelStateAtPlan: string | null;
-  };
-};
-
-type Decision = {
-  artist: string;
-  slug: string;
-  recommendation: string;
-  why: string;
-  confidence: ConfidenceLevel;
-  supportingEvidence: string[];
-  outcome: 'positive' | 'neutral' | 'negative' | 'pending';
-  decisionQuality: string;
-  blocker: string;
-};
-
-type EpistemicEntry = {
-  artist: string;
-  slug: string;
-  knowns: string[];
-  beliefs: string[];
-  unknowns: string[];
-};
-
-type RecAccuracy = {
-  type: string;
-  timesUsed: number;
-  positive: number;
-  neutral: number;
-  negative: number;
-  pending: number;
-};
-
-type Hypothesis = {
-  title: string;
-  description: string;
-  confidence: ConfidenceLevel;
-  campaignsTested: number;
-  evidenceCount: number;
-  status: 'testing' | 'growing_confidence' | 'high_confidence' | 'rejected';
-  supportingCampaigns: string[];
-};
-
-type LearningNote = {
-  text: string;
+  subs: number | null;
+  whyInteresting: string[];
+  potentialSuccessFactors: string[];
+  questions: string[];
+  score: number;
+  healthStatus: string;
+  uploadCadence: number;
+  formatCount: number;
+  conversionLabel: string;
   campaign: string;
-  date: string;
-  type: 'positive' | 'neutral' | 'negative';
 };
 
-type Principle = {
-  id: number;
-  title: string;
-  description: string;
+type EcosystemEntry = {
+  artist: string;
+  slug: string;
+  score: number;
+  uploads30d: number;
+  shorts30d: number;
+  longform30d: number;
+  formatCount: number;
+  formats: string[];
+  healthStatus: string;
+  conversionLabel: string;
+  standoutReasons: string[];
+  campaign: string;
+};
+
+type PlaybookEntry = {
+  artist: string;
+  slug: string;
+  campaign: string;
+  whatHappened: { totalUploads: number; shorts: number; longform: number; formats: string[] };
+  whatWorked: string[];
+  wouldReuse: boolean;
+  tags: string[];
+  healthStatus: string;
+  planWeeks: number;
+  strategy: string | null;
+  timeline: { date: string; title: string; kind: string }[];
+  completionRate: number;
+};
+
+type OutlierEntry = {
+  artist: string;
+  slug: string;
+  observation: string;
+  details: string[];
+  category: 'overperformer' | 'underperformer' | 'unexpected_pattern' | 'dormant_interest';
+  campaign: string;
+  healthStatus: string;
+  subs: number | null;
+};
+
+type AssetType = 'Official Video' | 'Visualiser' | 'Lyric Video' | 'BTS' | 'Live Session' | 'Shorts' | 'Community' | 'Premiere';
+
+type AssetIntel = {
+  assetType: AssetType;
+  available: number;
+  missing: number;
+  total: number;
+  percentage: number;
+  campaigns: string[];
+};
+
+type AssetPattern = {
+  assetType: string;
+  withAsset: { count: number; avgCadence: number; avgFormatCount: number; healthyPct: number };
+  withoutAsset: { count: number; avgCadence: number; avgFormatCount: number; healthyPct: number };
+};
+
+type OpenQuestion = {
+  question: string;
+  status: 'gathering_evidence' | 'early_signal' | 'needs_investigation';
+  evidenceCount: number;
   relatedCampaigns: string[];
 };
 
-type Counterfactual = {
-  artist: string;
-  slug: string;
-  contentSupport: number;
-  releaseEvent: number;
-  externalDiscovery: number;
-  interventionConfidence: ConfidenceLevel;
-  note: string;
+type WeeklyLearning = {
+  text: string;
+  campaign: string;
+  category: 'confirmed' | 'challenged' | 'unknown';
 };
 
 export type AgentMemoryData = {
-  patterns: Pattern[];
-  campaigns: CampaignIntelligence[];
-  decisions: Decision[];
-  epistemicMap: EpistemicEntry[];
-  recAccuracy: RecAccuracy[];
-  hypotheses: Hypothesis[];
-  learningNotes: LearningNote[];
-  principles: Principle[];
-  counterfactuals: Counterfactual[];
-  meta: { lastUpdated: string; campaignCount: number; artistCount: number };
+  emergingWinners: EmergingWinner[];
+  ecosystems: EcosystemEntry[];
+  playbooks: PlaybookEntry[];
+  outliers: OutlierEntry[];
+  assetIntel: AssetIntel[];
+  assetPatterns: AssetPattern[];
+  openQuestions: OpenQuestion[];
+  weeklyLearnings: WeeklyLearning[];
+  meta: { lastUpdated: string; channelCount: number; campaignCount: number };
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function inferCampaignTypeFromArtist(artist: Artist, plan: SavedPlan | null): string {
-  if (plan) {
-    const events = plan.plan.events || [];
-    const hasAlbum = events.some((e) => e.kind === 'albumRelease');
-    const hasSingle = events.some((e) => e.kind === 'singleRelease');
-    const hasTour = events.some((e) => e.kind === 'tourDate');
-    if (hasAlbum) return 'Album';
-    if (hasTour && hasSingle) return 'Tour + Single';
-    if (hasTour) return 'Tour';
-    if (hasSingle) return 'Single';
-  }
-  const name = (artist.campaign || '').toLowerCase();
-  if (name.includes('album') || name.includes('lp')) return 'Album';
-  if (name.includes('ep')) return 'EP';
-  if (name.includes('deluxe')) return 'Deluxe';
-  if (name.includes('tour')) return 'Tour';
-  if (name.includes('single')) return 'Single';
-  return 'Campaign';
-}
-
-function inferReleaseDate(plan: SavedPlan | null): string | null {
-  if (!plan) return null;
-  const events = plan.plan.events || [];
-  const release = events.find((e) =>
-    e.kind === 'albumRelease' || e.kind === 'singleRelease'
-  );
-  return release?.dateISO ?? null;
-}
-
 const today = new Date().toISOString().split('T')[0];
+
+/** Per-channel working data accumulated in the main loop. */
+type ChannelProfile = {
+  artist: Artist;
+  snap: CachedSnap | null;
+  subs: number | null;
+  views7d: number | null;
+  subs7d: number | null;
+  uploads30d: number;
+  shorts30d: number;
+  longform30d: number;
+  status: ChannelState;
+  mf: MultiformatScore | null;
+  convLabel: string;
+  blocker: string;
+  blockerLabel: string;
+  plan: SavedPlan | null;
+  formatCount: number;
+  formats: string[];
+  campaignSignal: string;
+  gsConfidence: string;
+  doNow: string[];
+  doNext: string[];
+};
 
 // ── Route ────────────────────────────────────────────────────────────────────
 
@@ -205,34 +152,13 @@ export async function GET() {
     const allArtists = mergeArtistLists(ARTISTS, custom);
     const planIndex = await listPlans();
 
-    // Batch-read all cached snaps from KV — same as /growth page
     const handles = allArtists
       .map((a) => a.channelHandle)
       .filter(Boolean) as string[];
     const snapMap = await readAllLiveSnaps(handles);
 
-    // ── Build per-campaign intelligence ────────────────────────────────────
-    const campaigns: CampaignIntelligence[] = [];
-    const decisions: Decision[] = [];
-    const epistemicMap: EpistemicEntry[] = [];
-    const learningNotes: LearningNote[] = [];
-    const counterfactuals: Counterfactual[] = [];
-    const recTypeCounts: Record<string, { total: number; positive: number; neutral: number; negative: number; pending: number }> = {};
-
-    // Track pattern evidence
-    let multiformat_healthy = 0;
-    let multiformat_total_healthy = 0;
-    let shorts_only_healthy = 0;
-    let shorts_only_total = 0;
-    let bts_cadence_high = 0;
-    let bts_total = 0;
-    let vis_campaigns = 0;
-    let vis_healthy = 0;
-    let community_active = 0;
-    let community_healthy = 0;
-    let lyric_campaigns = 0;
-    let lyric_retention = 0;
-    let longBTS_campaigns = 0;
+    // ── Build per-channel profiles ──────────────────────────────────────
+    const profiles: ChannelProfile[] = [];
 
     for (const artist of allArtists) {
       const snap = artist.channelHandle ? (snapMap.get(artist.channelHandle) ?? null) : null;
@@ -260,7 +186,6 @@ export async function GET() {
       const blocker = getPrimaryBlocker(growthInput);
       const actions = getRecommendedActions(growthInput);
       const campSig = getCampaignSignal(growthInput);
-      const chHealth = getChannelHealth(gsResult.state, growthInput);
       const mf = snap?.recentUploads ? computeMultiformat(snap.recentUploads) : null;
 
       // Find matching plan
@@ -268,8 +193,6 @@ export async function GET() {
         p.slug === artist.slug || p.artist.toLowerCase() === artist.name.toLowerCase()
       );
       const plan = matchingPlanEntry ? await loadPlan(matchingPlanEntry.slug) : null;
-      const campType = inferCampaignTypeFromArtist(artist, plan);
-      const releaseDate = inferReleaseDate(plan);
 
       // Conversion score
       const spk = (views7Val != null && views7Val > 0 && subs7Val != null)
@@ -279,742 +202,656 @@ export async function GET() {
         : spk >= 1 ? 'Moderate'
         : 'Weak';
 
-      const shortsRatio = nc.cadence.uploads30d > 0
-        ? nc.cadence.shorts30d / nc.cadence.uploads30d : 0;
-      const longformRatio = nc.cadence.uploads30d > 0
-        ? (nc.cadence.uploads30d - nc.cadence.shorts30d) / nc.cadence.uploads30d : 0;
+      const shorts30d = nc.cadence.shorts30d;
+      const longform30d = nc.cadence.uploads30d - shorts30d;
+      const formatCount = mf?.formatCount ?? 0;
+      const formats = buildFormatList(mf);
 
-      // ── Campaign Intelligence ──────────────────────────────────
-      campaigns.push({
-        artist: artist.name,
-        slug: artist.slug,
-        region: 'UK',
-        campaignName: artist.campaign || 'Monitoring',
-        campaignState: artist.campaign ? artist.phase : 'Monitoring',
-        campaignType: campType,
-        releaseDate,
-        watcher: {
-          healthStatus: currentStatus,
-          momentumStatus: campSig.label,
-          uploadCadence: nc.cadence.uploads30d,
-          shortsRatio: Math.round(shortsRatio * 100),
-          longformRatio: Math.round(longformRatio * 100),
-          conversionScore: convLabel,
-          subs: nc.subs,
-          views7d: views7Val,
-          subs7d: subs7Val,
-        },
-        coach: buildCoachIntelligence(plan, actions, gsResult.confidence, mf, nc.cadence),
+      profiles.push({
+        artist,
+        snap,
+        subs: nc.subs,
+        views7d: views7Val,
+        subs7d: subs7Val,
+        uploads30d: nc.cadence.uploads30d,
+        shorts30d,
+        longform30d,
+        status: currentStatus,
+        mf,
+        convLabel,
+        blocker: blocker.blocker,
+        blockerLabel: blocker.label,
+        plan,
+        formatCount,
+        formats,
+        campaignSignal: campSig.label,
+        gsConfidence: gsResult.confidence,
+        doNow: actions.doNow,
+        doNext: actions.doNext,
       });
-
-      // ── Decision Intelligence ──────────────────────────────────
-      const outcome = inferOutcome(currentStatus, nc.cadence.uploads30d, views7Val, subs7Val);
-      const dq = inferDecisionQuality(blocker.blocker, outcome, nc.cadence.uploads30d);
-
-      decisions.push({
-        artist: artist.name,
-        slug: artist.slug,
-        recommendation: actions.doNow[0] || 'Maintain current approach',
-        why: blocker.description || 'Channel is operating well',
-        confidence: gsResult.confidence === 'HIGH' ? 'high' : gsResult.confidence === 'MED' ? 'medium' : 'experimental',
-        supportingEvidence: buildEvidence(blocker, nc.cadence, mf, views7Val, subs7Val),
-        outcome,
-        decisionQuality: dq,
-        blocker: blocker.label,
-      });
-
-      // Track recommendation types
-      const recTypes = categorizeRecommendations(actions);
-      for (const rt of recTypes) {
-        if (!recTypeCounts[rt]) recTypeCounts[rt] = { total: 0, positive: 0, neutral: 0, negative: 0, pending: 0 };
-        recTypeCounts[rt].total++;
-        recTypeCounts[rt][outcome]++;
-      }
-
-      // ── Epistemic Map ──────────────────────────────────────────
-      epistemicMap.push({
-        artist: artist.name,
-        slug: artist.slug,
-        knowns: buildKnownsFromArtist(snap, nc, mf, plan, artist),
-        beliefs: buildBeliefs(blocker, actions, mf, nc.cadence, plan),
-        unknowns: buildUnknowns(snap, plan, nc),
-      });
-
-      // ── Learning Notes ─────────────────────────────────────────
-      const note = generateLearningNoteFromArtist(artist, nc, currentStatus, actions, mf);
-      if (note) learningNotes.push(note);
-
-      // ── Counterfactual ─────────────────────────────────────────
-      if (artist.campaign) {
-        counterfactuals.push(buildCounterfactualFromArtist(artist, nc, currentStatus, mf));
-      }
-
-      // ── Pattern evidence accumulation ──────────────────────────
-      const isHealthy = currentStatus === 'HEALTHY';
-      if (mf) {
-        const hasLongformAndShorts = mf.hasShorts && (mf.hasOfficialVideo || mf.hasLyricVideo || mf.hasVisualizer || mf.hasBTS || mf.hasLiveSession);
-        if (hasLongformAndShorts) { multiformat_total_healthy++; if (isHealthy) multiformat_healthy++; }
-        if (mf.hasShorts && !mf.hasOfficialVideo && !mf.hasLyricVideo && !mf.hasVisualizer && !mf.hasBTS && !mf.hasLiveSession) {
-          shorts_only_total++; if (isHealthy) shorts_only_healthy++;
-        }
-        if (mf.hasBTS) { bts_total++; if (nc.cadence.uploads30d >= 5) bts_cadence_high++; }
-        if (mf.hasVisualizer) { vis_campaigns++; if (isHealthy) vis_healthy++; }
-        if (mf.hasLyricVideo) { lyric_campaigns++; if (isHealthy) lyric_retention++; }
-      }
     }
 
-    // ── Section 1: Pattern Watch ───────────────────────────────────────────
-    const patterns = buildPatterns(
-      allArtists, multiformat_healthy, multiformat_total_healthy,
-      shorts_only_healthy, shorts_only_total,
-      bts_cadence_high, bts_total,
-      vis_campaigns, vis_healthy,
-      lyric_campaigns, lyric_retention,
-    );
+    // ── Section 1: Emerging Winners ────────────────────────────────────
+    const emergingWinners = buildEmergingWinners(profiles);
 
-    // ── Section 5: Recommendation Accuracy ─────────────────────────────────
-    const recAccuracy: RecAccuracy[] = Object.entries(recTypeCounts)
-      .map(([type, counts]) => ({
-        type,
-        timesUsed: counts.total,
-        positive: counts.positive,
-        neutral: counts.neutral,
-        negative: counts.negative,
-        pending: counts.pending,
-      }))
-      .sort((a, b) => b.timesUsed - a.timesUsed);
+    // ── Section 2: Best Ecosystems ─────────────────────────────────────
+    const ecosystems = buildEcosystems(profiles);
 
-    // ── Section 6: Hypothesis Tracker ──────────────────────────────────────
-    const hypotheses = buildHypotheses(
-      allArtists, multiformat_healthy, multiformat_total_healthy,
-      bts_cadence_high, bts_total,
-      vis_campaigns, vis_healthy, lyric_campaigns,
-      shorts_only_healthy, shorts_only_total,
-    );
+    // ── Section 3: Playbooks Worth Banking ─────────────────────────────
+    const playbooks = buildPlaybooks(profiles);
 
-    // ── Section 8: First Principles ────────────────────────────────────────
-    const principles = buildPrinciples(allArtists, campaigns);
+    // ── Section 4: Interesting Outliers ─────────────────────────────────
+    const outliers = buildOutliers(profiles);
+
+    // ── Section 5: Asset Intelligence ──────────────────────────────────
+    const assetIntel = buildAssetIntel(profiles);
+
+    // ── Section 6: Asset Success Patterns ──────────────────────────────
+    const assetPatterns = buildAssetPatterns(profiles);
+
+    // ── Section 7: Open Questions ──────────────────────────────────────
+    const openQuestions = buildOpenQuestions(profiles);
+
+    // ── Section 8: Weekly Learnings ────────────────────────────────────
+    const weeklyLearnings = buildWeeklyLearnings(profiles);
 
     const data: AgentMemoryData = {
-      patterns,
-      campaigns,
-      decisions,
-      epistemicMap,
-      recAccuracy,
-      hypotheses,
-      learningNotes: learningNotes.sort((a, b) => b.date.localeCompare(a.date)),
-      principles,
-      counterfactuals,
+      emergingWinners,
+      ecosystems,
+      playbooks,
+      outliers,
+      assetIntel,
+      assetPatterns,
+      openQuestions,
+      weeklyLearnings,
       meta: {
         lastUpdated: new Date().toISOString(),
+        channelCount: allArtists.length,
         campaignCount: allArtists.filter((a) => a.campaign).length,
-        artistCount: allArtists.length,
       },
     };
 
     return NextResponse.json(data);
   } catch (err) {
-    console.error('[agent-memory] Error:', err);
-    return NextResponse.json({ error: 'Failed to build agent memory' }, { status: 500 });
+    console.error('[intelligence-lab] Error:', err);
+    return NextResponse.json({ error: 'Failed to build intelligence lab' }, { status: 500 });
   }
 }
 
-// ── Builder functions ────────────────────────────────────────────────────────
+// ── Builder helpers ─────────────────────────────────────────────────────────
 
-function buildCoachIntelligence(
-  plan: SavedPlan | null,
-  actions: RecommendedActions,
-  confidence: string,
-  mf: MultiformatScore | null,
-  cadence: { uploads30d: number; shorts30d: number },
-): CampaignIntelligence['coach'] {
-  // Extract real plan data when available
-  const timeline: TimelineEvent[] = [];
-  const phases: PlanPhase[] = [];
-  const plannedActions: PlannedAction[] = [];
-  let completedActions = 0;
-  let totalActions = 0;
-  let strategy: { priority: string; approach: string } | null = null;
-  let campaignInsights: string[] = [];
-  let channelStateAtPlan: string | null = null;
+function buildFormatList(mf: MultiformatScore | null): string[] {
+  if (!mf) return [];
+  const f: string[] = [];
+  if (mf.hasShorts) f.push('Shorts');
+  if (mf.hasOfficialVideo) f.push('Official Video');
+  if (mf.hasLyricVideo) f.push('Lyric Video');
+  if (mf.hasVisualizer) f.push('Visualiser');
+  if (mf.hasBTS) f.push('BTS');
+  if (mf.hasLiveSession) f.push('Live Session');
+  return f;
+}
 
-  if (plan) {
-    // Timeline events from plan
-    for (const evt of plan.plan.events || []) {
-      timeline.push({
-        date: evt.dateISO,
-        title: evt.title,
-        kind: evt.kind,
-        scale: evt.scale || 'medium',
+// ── Section 1: Emerging Winners ─────────────────────────────────────────────
+
+function buildEmergingWinners(profiles: ChannelProfile[]): EmergingWinner[] {
+  // Score channels on "interesting-ness" — not size
+  const scored = profiles.map((p) => {
+    let score = 0;
+    const why: string[] = [];
+    const factors: string[] = [];
+    const questions: string[] = [];
+
+    // Strong conversion is interesting
+    if (p.convLabel === 'Strong') { score += 25; why.push('Strong subscriber conversion'); }
+    else if (p.convLabel === 'Moderate') { score += 10; }
+
+    // Consistent cadence is interesting
+    if (p.uploads30d >= 8) { score += 20; why.push(`High cadence: ${p.uploads30d} uploads in 30 days`); factors.push('Consistent upload rhythm'); }
+    else if (p.uploads30d >= 4) { score += 12; why.push(`Consistent cadence: ${p.uploads30d} uploads in 30 days`); factors.push('Regular upload schedule'); }
+
+    // Multiformat is interesting
+    if (p.formatCount >= 4) { score += 25; why.push(`${p.formatCount} active formats`); factors.push('Multi-format rollout'); }
+    else if (p.formatCount >= 3) { score += 15; why.push(`${p.formatCount} formats active`); factors.push('Format diversity'); }
+
+    // Healthy despite small scale is interesting
+    if (p.status === 'HEALTHY' && p.subs != null && p.subs < 100000) {
+      score += 20; why.push('Healthy status despite smaller scale');
+    }
+    if (p.status === 'HEALTHY') { score += 15; }
+    else if (p.status === 'BUILDING' && p.uploads30d >= 3) { score += 10; why.push('Building momentum with active upload schedule'); }
+
+    // Shorts + Longform balance is interesting
+    if (p.shorts30d > 0 && p.longform30d > 0) { score += 10; factors.push('Shorts + Longform balance'); }
+
+    // BTS support is interesting
+    if (p.mf?.hasBTS) { score += 8; factors.push('BTS content support'); }
+    if (p.mf?.hasLiveSession) { score += 5; factors.push('Live session content'); }
+
+    // Growing subs is interesting
+    if (p.subs7d != null && p.subs7d > 0) { score += 10; why.push(`+${p.subs7d.toLocaleString()} subscribers in 7 days`); }
+
+    // Questions
+    if (p.status === 'HEALTHY' && p.formatCount >= 3) questions.push('Is this multiformat approach repeatable for similar campaigns?');
+    if (p.convLabel === 'Strong') questions.push('What is driving the strong conversion?');
+    if (p.uploads30d >= 8) questions.push('How is this cadence sustained? Internal team or external support?');
+    if (p.subs != null && p.subs < 50000 && p.status === 'HEALTHY') questions.push('Can this pattern scale to larger channels?');
+    if (questions.length === 0) questions.push('What can we learn from this channel?');
+
+    return {
+      artist: p.artist.name,
+      slug: p.artist.slug,
+      subs: p.subs,
+      whyInteresting: why,
+      potentialSuccessFactors: factors,
+      questions,
+      score,
+      healthStatus: p.status,
+      uploadCadence: p.uploads30d,
+      formatCount: p.formatCount,
+      conversionLabel: p.convLabel,
+      campaign: p.artist.campaign || 'Monitoring',
+    };
+  });
+
+  return scored
+    .filter((s) => s.score >= 30) // Must be actually interesting
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 12);
+}
+
+// ── Section 2: Best Ecosystems ──────────────────────────────────────────────
+
+function buildEcosystems(profiles: ChannelProfile[]): EcosystemEntry[] {
+  const scored = profiles.map((p) => {
+    let score = 0;
+    const reasons: string[] = [];
+
+    // Upload consistency (weight: 25)
+    if (p.uploads30d >= 8) { score += 25; reasons.push(`Strong cadence: ${p.uploads30d} uploads/month`); }
+    else if (p.uploads30d >= 5) { score += 18; reasons.push(`Good cadence: ${p.uploads30d} uploads/month`); }
+    else if (p.uploads30d >= 3) { score += 10; }
+
+    // Format diversity (weight: 25)
+    score += Math.min(p.formatCount * 5, 25);
+    if (p.formatCount >= 4) reasons.push(`${p.formatCount} content formats active`);
+
+    // Shorts + Longform balance (weight: 15)
+    if (p.shorts30d > 0 && p.longform30d > 0) {
+      const ratio = Math.min(p.shorts30d, p.longform30d) / Math.max(p.shorts30d, p.longform30d);
+      score += Math.round(ratio * 15);
+      if (ratio >= 0.3) reasons.push('Balanced Shorts + Longform mix');
+    }
+
+    // Health status (weight: 20)
+    if (p.status === 'HEALTHY') { score += 20; reasons.push('Healthy channel state'); }
+    else if (p.status === 'BUILDING') { score += 12; }
+
+    // Campaign support (weight: 10)
+    if (p.artist.campaign && p.uploads30d >= 3) { score += 10; reasons.push('Active campaign with content support'); }
+
+    // Conversion (weight: 5)
+    if (p.convLabel === 'Strong') { score += 5; reasons.push('Strong subscriber conversion'); }
+
+    return {
+      artist: p.artist.name,
+      slug: p.artist.slug,
+      score,
+      uploads30d: p.uploads30d,
+      shorts30d: p.shorts30d,
+      longform30d: p.longform30d,
+      formatCount: p.formatCount,
+      formats: p.formats,
+      healthStatus: p.status,
+      conversionLabel: p.convLabel,
+      standoutReasons: reasons,
+      campaign: p.artist.campaign || 'Monitoring',
+    };
+  });
+
+  return scored
+    .filter((s) => s.uploads30d > 0) // Must have some activity
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 15);
+}
+
+// ── Section 3: Playbooks Worth Banking ──────────────────────────────────────
+
+function buildPlaybooks(profiles: ChannelProfile[]): PlaybookEntry[] {
+  // Only campaigns with enough data to learn from
+  const candidates = profiles.filter((p) =>
+    p.uploads30d >= 3 && p.artist.campaign
+  );
+
+  return candidates.map((p) => {
+    const whatWorked: string[] = [];
+    const tags: string[] = [];
+
+    // What worked?
+    if (p.status === 'HEALTHY') whatWorked.push('Achieved healthy channel state');
+    if (p.uploads30d >= 8) whatWorked.push(`Strong upload cadence (${p.uploads30d} in 30 days)`);
+    if (p.convLabel === 'Strong') whatWorked.push('Strong subscriber conversion');
+    if (p.formatCount >= 3) whatWorked.push(`Format diversity (${p.formatCount} types active)`);
+    if (p.shorts30d > 0 && p.longform30d > 0) whatWorked.push('Shorts + Longform follow-through');
+    if (p.mf?.hasBTS) whatWorked.push('BTS content support');
+    if (p.mf?.hasLiveSession) whatWorked.push('Live session content');
+    if (p.subs7d != null && p.subs7d > 0) whatWorked.push(`Subscriber growth (+${p.subs7d.toLocaleString()} in 7d)`);
+    if (p.campaignSignal === 'Momentum' || p.campaignSignal === 'Strong Signal') whatWorked.push('Release momentum maintained');
+
+    if (whatWorked.length === 0) whatWorked.push('Campaign active with regular content');
+
+    // Tags
+    if (p.artist.campaign) {
+      const name = p.artist.campaign.toLowerCase();
+      if (name.includes('album') || name.includes('lp')) tags.push('Album');
+      else if (name.includes('ep')) tags.push('EP');
+      else if (name.includes('single')) tags.push('Single');
+      else if (name.includes('deluxe')) tags.push('Deluxe');
+      else if (name.includes('tour')) tags.push('Tour');
+      else tags.push('Campaign');
+    }
+    if (p.shorts30d >= 10) tags.push('Heavy Shorts');
+    else if (p.shorts30d > 0) tags.push('Shorts Active');
+    if (p.longform30d >= 3) tags.push('Longform Support');
+    if (p.uploads30d >= 8) tags.push('High Support');
+    else if (p.uploads30d >= 4) tags.push('Moderate Support');
+    if (p.mf?.hasBTS) tags.push('BTS');
+    if (p.mf?.hasLiveSession) tags.push('Live');
+
+    // Would we reuse?
+    const wouldReuse = p.status === 'HEALTHY' || (p.status === 'BUILDING' && p.uploads30d >= 5 && p.formatCount >= 2);
+
+    // Plan data
+    const timeline: { date: string; title: string; kind: string }[] = [];
+    let planWeeks = 0;
+    let strategy: string | null = null;
+    let completionRate = 0;
+
+    if (p.plan) {
+      planWeeks = p.plan.plan.totalWeeks;
+      if (p.plan.plan.strategy) strategy = p.plan.plan.strategy.priority;
+      for (const evt of p.plan.plan.events || []) {
+        timeline.push({ date: evt.dateISO, title: evt.title, kind: evt.kind });
+      }
+      const totalActs = (p.plan.plan.weeks || []).reduce((s, w) => s + (w.actions?.length || 0), 0);
+      const completedActs = (p.plan.plan.weeks || []).reduce((s, w) =>
+        s + (w.actions || []).filter((a) => a.completed).length, 0);
+      completionRate = totalActs > 0 ? Math.round((completedActs / totalActs) * 100) : 0;
+    }
+
+    return {
+      artist: p.artist.name,
+      slug: p.artist.slug,
+      campaign: p.artist.campaign || '',
+      whatHappened: {
+        totalUploads: p.uploads30d,
+        shorts: p.shorts30d,
+        longform: p.longform30d,
+        formats: p.formats,
+      },
+      whatWorked,
+      wouldReuse,
+      tags,
+      healthStatus: p.status,
+      planWeeks,
+      strategy,
+      timeline,
+      completionRate,
+    };
+  }).sort((a, b) => {
+    // Reusable first, then by upload count
+    if (a.wouldReuse !== b.wouldReuse) return a.wouldReuse ? -1 : 1;
+    return b.whatHappened.totalUploads - a.whatHappened.totalUploads;
+  });
+}
+
+// ── Section 4: Interesting Outliers ─────────────────────────────────────────
+
+function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
+  const outliers: OutlierEntry[] = [];
+  const avgCadence = profiles.reduce((s, p) => s + p.uploads30d, 0) / (profiles.length || 1);
+
+  for (const p of profiles) {
+    // Large channel, very low activity
+    if (p.subs != null && p.subs >= 100000 && p.uploads30d <= 1) {
+      outliers.push({
+        artist: p.artist.name,
+        slug: p.artist.slug,
+        observation: 'Large channel with minimal activity',
+        details: [
+          `${p.subs.toLocaleString()} subscribers`,
+          `${p.uploads30d} uploads in 30 days`,
+          'Significant audience but limited content investment',
+        ],
+        category: 'underperformer',
+        campaign: p.artist.campaign || 'Monitoring',
+        healthStatus: p.status,
+        subs: p.subs,
+      });
+      continue;
+    }
+
+    // Small channel, performing well
+    if (p.subs != null && p.subs < 30000 && p.status === 'HEALTHY' && p.uploads30d >= 3) {
+      outliers.push({
+        artist: p.artist.name,
+        slug: p.artist.slug,
+        observation: 'Small channel punching above its weight',
+        details: [
+          `Only ${p.subs.toLocaleString()} subscribers`,
+          `${p.uploads30d} uploads in 30 days`,
+          `Healthy status with ${p.formatCount} formats`,
+        ],
+        category: 'overperformer',
+        campaign: p.artist.campaign || 'Monitoring',
+        healthStatus: p.status,
+        subs: p.subs,
+      });
+      continue;
+    }
+
+    // High cadence but unhealthy — effort not translating
+    if (p.uploads30d >= 8 && (p.status === 'COLD' || p.status === 'AT RISK')) {
+      outliers.push({
+        artist: p.artist.name,
+        slug: p.artist.slug,
+        observation: 'High activity but no momentum',
+        details: [
+          `${p.uploads30d} uploads in 30 days`,
+          `Status: ${p.status}`,
+          'Content volume is not translating to growth',
+        ],
+        category: 'unexpected_pattern',
+        campaign: p.artist.campaign || 'Monitoring',
+        healthStatus: p.status,
+        subs: p.subs,
+      });
+      continue;
+    }
+
+    // Healthy with zero or minimal uploads — catalogue strength?
+    if (p.status === 'HEALTHY' && p.uploads30d <= 1 && p.views7d != null && p.views7d > 10000) {
+      outliers.push({
+        artist: p.artist.name,
+        slug: p.artist.slug,
+        observation: 'Healthy despite minimal uploads — possible catalogue strength',
+        details: [
+          `${p.uploads30d} uploads in 30 days`,
+          `${p.views7d?.toLocaleString()} views in 7 days`,
+          'Growth driven by existing content rather than new uploads',
+        ],
+        category: 'dormant_interest',
+        campaign: p.artist.campaign || 'Monitoring',
+        healthStatus: p.status,
+        subs: p.subs,
+      });
+      continue;
+    }
+
+    // Shorts-only but doing well
+    if (p.shorts30d >= 5 && p.longform30d === 0 && p.status === 'HEALTHY') {
+      outliers.push({
+        artist: p.artist.name,
+        slug: p.artist.slug,
+        observation: 'Shorts-only but maintaining healthy status',
+        details: [
+          `${p.shorts30d} Shorts, 0 Longform`,
+          'Challenges the multiformat hypothesis',
+        ],
+        category: 'unexpected_pattern',
+        campaign: p.artist.campaign || 'Monitoring',
+        healthStatus: p.status,
+        subs: p.subs,
+      });
+      continue;
+    }
+
+    // Very high interest despite limited output
+    if (p.views7d != null && p.views7d > 50000 && p.uploads30d <= 2) {
+      outliers.push({
+        artist: p.artist.name,
+        slug: p.artist.slug,
+        observation: 'High interest despite limited output',
+        details: [
+          `${p.views7d.toLocaleString()} views in 7 days`,
+          `Only ${p.uploads30d} uploads in 30 days`,
+          'Audience demand exceeding content supply',
+        ],
+        category: 'dormant_interest',
+        campaign: p.artist.campaign || 'Monitoring',
+        healthStatus: p.status,
+        subs: p.subs,
       });
     }
-
-    // Phase breakdown
-    for (const ph of plan.plan.phases || []) {
-      phases.push({
-        name: ph.name,
-        weekStart: ph.weekStart,
-        weekEnd: ph.weekEnd,
-      });
-    }
-
-    // Week-by-week actions with phase context
-    for (const week of plan.plan.weeks || []) {
-      for (const action of week.actions || []) {
-        totalActions++;
-        if (action.completed) completedActions++;
-        plannedActions.push({
-          title: action.title,
-          format: action.format,
-          weekNum: week.weekNum,
-          phase: week.phase,
-          completed: action.completed,
-        });
-      }
-    }
-
-    // Strategy
-    if (plan.plan.strategy) {
-      strategy = {
-        priority: plan.plan.strategy.priority,
-        approach: plan.plan.strategy.approach,
-      };
-    }
-
-    // Campaign insights
-    campaignInsights = plan.plan.campaignInsights || [];
-
-    // Channel state at time of plan generation
-    channelStateAtPlan = plan.channelCtx?.state ?? null;
-
-    // Also pull insights from historical activity if present
-    if (plan.historicalActivity && plan.historicalActivity.length > 0) {
-      const completed = plan.historicalActivity.filter((h) => h.status === 'completed' || h.status === 'live');
-      const missing = plan.historicalActivity.filter((h) => h.status === 'missing');
-      if (completed.length > 0 && missing.length > 0) {
-        campaignInsights.push(
-          `${completed.length} historical assets delivered, ${missing.length} identified gaps in content timeline`
-        );
-      }
-    }
   }
 
-  const completionRate = totalActions > 0 ? Math.round((completedActions / totalActions) * 100) : 0;
-
-  return {
-    currentRecommendation: actions.doNow[0] || 'No current recommendation',
-    nextBestAction: actions.doNext[0] || 'Maintain cadence',
-    assetGaps: buildAssetGaps(mf, cadence.uploads30d, cadence.shorts30d),
-    confidence,
-    hasPlan: !!plan,
-    planWeeks: plan?.plan.totalWeeks ?? 0,
-    strategy,
-    campaignInsights,
-    timeline,
-    phases,
-    plannedActions,
-    completedActions,
-    totalActions,
-    completionRate,
-    channelStateAtPlan,
-  };
+  return outliers.slice(0, 15);
 }
 
-function buildAssetGaps(mf: MultiformatScore | null, uploads30d: number, shorts30d: number): string[] {
-  const gaps: string[] = [];
-  if (!mf) { gaps.push('No recent upload data'); return gaps; }
-  if (!mf.hasShorts) gaps.push('No Shorts activity');
-  if (!mf.hasOfficialVideo) gaps.push('No official video');
-  if (!mf.hasLyricVideo) gaps.push('No lyric video');
-  if (!mf.hasVisualizer) gaps.push('No visualiser');
-  if (!mf.hasBTS) gaps.push('No BTS content');
-  if (!mf.hasLiveSession) gaps.push('No live session');
-  if (uploads30d === 0) gaps.push('No uploads in 30 days');
-  if (uploads30d > 0 && shorts30d === 0) gaps.push('No Shorts in upload mix');
-  return gaps;
-}
+// ── Section 5: Asset Intelligence ───────────────────────────────────────────
 
-function inferOutcome(
-  status: ChannelState, uploads30d: number,
-  views7d: number | null, subs7d: number | null,
-): 'positive' | 'neutral' | 'negative' | 'pending' {
-  if (uploads30d === 0) return 'pending';
-  if (status === 'HEALTHY') return 'positive';
-  if (status === 'BUILDING' && (views7d ?? 0) > 0) return 'neutral';
-  if (status === 'COLD' || status === 'AT RISK') return 'negative';
-  return 'neutral';
-}
+function buildAssetIntel(profiles: ChannelProfile[]): AssetIntel[] {
+  // Only consider channels with some activity
+  const active = profiles.filter((p) => p.uploads30d > 0);
+  const total = active.length;
+  if (total === 0) return [];
 
-function inferDecisionQuality(
-  blocker: string, outcome: string, uploads30d: number,
-): string {
-  if (outcome === 'pending') return 'Awaiting evidence';
-  if (outcome === 'positive' && blocker === 'NONE') return 'Good Decision / Good Outcome';
-  if (outcome === 'positive') return 'Good Decision / Good Outcome';
-  if (outcome === 'negative' && uploads30d === 0) return 'Good Decision / Bad Outcome — no action taken';
-  if (outcome === 'negative') return 'Needs review — blocker persists';
-  return 'Neutral — insufficient signal';
-}
+  const assets: { type: AssetType; check: (p: ChannelProfile) => boolean }[] = [
+    { type: 'Official Video', check: (p) => !!p.mf?.hasOfficialVideo },
+    { type: 'Visualiser', check: (p) => !!p.mf?.hasVisualizer },
+    { type: 'Lyric Video', check: (p) => !!p.mf?.hasLyricVideo },
+    { type: 'BTS', check: (p) => !!p.mf?.hasBTS },
+    { type: 'Live Session', check: (p) => !!p.mf?.hasLiveSession },
+    { type: 'Shorts', check: (p) => p.shorts30d > 0 },
+  ];
 
-function buildEvidence(
-  blocker: BlockerResult,
-  cadence: { uploads30d: number; shorts30d: number; lastUploadDaysAgo: number | null },
-  mf: MultiformatScore | null,
-  views7d: number | null,
-  subs7d: number | null,
-): string[] {
-  const ev: string[] = [];
-  if (cadence.uploads30d === 0) ev.push('No uploads in 30 days');
-  else ev.push(`${cadence.uploads30d} uploads in 30 days (${cadence.shorts30d} Shorts)`);
-  if (views7d != null) ev.push(`${views7d.toLocaleString()} views in 7 days`);
-  if (subs7d != null) ev.push(`${subs7d >= 0 ? '+' : ''}${subs7d.toLocaleString()} subscribers in 7 days`);
-  if (mf) ev.push(`Multiformat score: ${mf.score} (${mf.formatCount}/6 formats)`);
-  if (blocker.blocker !== 'NONE') ev.push(`Primary blocker: ${blocker.label}`);
-  return ev;
-}
-
-function categorizeRecommendations(actions: RecommendedActions): string[] {
-  const all = [...actions.doNow, ...actions.doNext];
-  const types: string[] = [];
-  const text = all.join(' ').toLowerCase();
-  if (text.includes('bts') || text.includes('behind')) types.push('Add BTS');
-  if (text.includes('short')) types.push('Increase Shorts');
-  if (text.includes('premiere')) types.push('Create Premiere');
-  if (text.includes('community')) types.push('Community Post');
-  if (text.includes('visuali')) types.push('Visualiser');
-  if (text.includes('lyric')) types.push('Lyric Video');
-  if (text.includes('longform') || text.includes('long-form') || text.includes('official')) types.push('Longform Follow-Up');
-  if (text.includes('cadence') || text.includes('consistency') || text.includes('upload')) types.push('Improve Cadence');
-  if (text.includes('conversion') || text.includes('cta') || text.includes('subscribe')) types.push('Improve Conversion');
-  if (types.length === 0) types.push('General Strategy');
-  return types;
-}
-
-function buildKnownsFromArtist(
-  snap: CachedSnap | null,
-  nc: ReturnType<typeof normalizeChannelData>,
-  mf: MultiformatScore | null,
-  plan: SavedPlan | null,
-  artist: Artist,
-): string[] {
-  const k: string[] = [];
-  if (nc.subs != null) k.push(`Subscriber count: ${nc.subs.toLocaleString()}`);
-  k.push(`Upload cadence: ${nc.cadence.uploads30d} in last 30 days`);
-  if (nc.cadence.shorts30d > 0) k.push(`Shorts activity: ${nc.cadence.shorts30d} in 30 days`);
-  if (mf) {
-    const active: string[] = [];
-    if (mf.hasShorts) active.push('Shorts');
-    if (mf.hasOfficialVideo) active.push('Official Video');
-    if (mf.hasLyricVideo) active.push('Lyric Video');
-    if (mf.hasVisualizer) active.push('Visualiser');
-    if (mf.hasBTS) active.push('BTS');
-    if (mf.hasLiveSession) active.push('Live Session');
-    if (active.length > 0) k.push(`Active formats: ${active.join(', ')}`);
-  }
-  if (artist.campaign) k.push(`Campaign: ${artist.campaign}`);
-  k.push(`Phase: ${artist.phase}`);
-  if (plan) {
-    k.push(`Coach plan exists (${plan.plan.totalWeeks} weeks)`);
-    if (plan.plan.strategy) {
-      k.push(`Strategy: ${plan.plan.strategy.priority}`);
-    }
-    const totalActs = (plan.plan.weeks || []).reduce((sum, w) => sum + (w.actions?.length || 0), 0);
-    const completedActs = (plan.plan.weeks || []).reduce((sum, w) =>
-      sum + (w.actions || []).filter((a) => a.completed).length, 0);
-    if (totalActs > 0) {
-      k.push(`Planned assets: ${totalActs} (${completedActs} completed, ${totalActs - completedActs} remaining)`);
-    }
-    const events = plan.plan.events || [];
-    const upcoming = events.filter((e) => e.dateISO >= today);
-    if (upcoming.length > 0) {
-      k.push(`Upcoming events: ${upcoming.map((e) => `${e.title} (${e.dateISO})`).join(', ')}`);
-    }
-    if (plan.plan.phases?.length > 0) {
-      k.push(`Phases: ${plan.plan.phases.map((p) => `${p.name} (wk ${p.weekStart}–${p.weekEnd})`).join(', ')}`);
-    }
-    if (plan.historicalActivity && plan.historicalActivity.length > 0) {
-      const delivered = plan.historicalActivity.filter((h) => h.status === 'completed' || h.status === 'live').length;
-      k.push(`Historical activity: ${delivered} assets delivered`);
-    }
-  }
-  return k;
-}
-
-function buildBeliefs(
-  blocker: BlockerResult,
-  actions: RecommendedActions,
-  mf: MultiformatScore | null,
-  cadence: { uploads30d: number; shorts30d: number },
-  plan: SavedPlan | null,
-): string[] {
-  const b: string[] = [];
-  if (blocker.blocker !== 'NONE') b.push(`${blocker.label} appears to be limiting growth`);
-  if (actions.doNow[0]) b.push(`${actions.doNow[0]} may improve performance`);
-  if (mf && !mf.hasBTS && cadence.uploads30d > 0) b.push('BTS content could improve continuity between releases');
-  if (mf && !mf.hasShorts && cadence.uploads30d > 0) b.push('Shorts may help with discovery and feed presence');
-  if (cadence.shorts30d > 0 && cadence.uploads30d === cadence.shorts30d) b.push('Longform content may strengthen channel identity');
-
-  // Coach plan-derived beliefs
-  if (plan) {
-    if (plan.plan.strategy) {
-      b.push(`Coach strategy: "${plan.plan.strategy.priority}" — ${plan.plan.strategy.approach}`);
-    }
-    for (const insight of (plan.plan.campaignInsights || []).slice(0, 2)) {
-      b.push(`Coach insight: ${insight}`);
-    }
-    // Phase-based beliefs
-    const currentPhase = inferCurrentPhase(plan);
-    if (currentPhase) {
-      b.push(`Currently in ${currentPhase} phase — recommendations tailored accordingly`);
-    }
-  }
-  return b;
-}
-
-function inferCurrentPhase(plan: SavedPlan): string | null {
-  const now = new Date();
-  for (const week of plan.plan.weeks || []) {
-    // Parse dateRange like "Mar 22 – Mar 28"
-    const match = week.dateRange?.match(/^(\w+ \d+)/);
-    if (match) {
-      const yearGuess = now.getFullYear();
-      const weekStart = new Date(`${match[1]}, ${yearGuess}`);
-      const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-      if (now >= weekStart && now <= weekEnd) {
-        return week.phase;
-      }
-    }
-  }
-  // Fallback: check phases array
-  if (plan.plan.phases?.length > 0) {
-    return plan.plan.phases[plan.plan.phases.length - 1]?.name ?? null;
-  }
-  return null;
-}
-
-function buildUnknowns(
-  snap: CachedSnap | null,
-  plan: SavedPlan | null,
-  nc: ReturnType<typeof normalizeChannelData>,
-): string[] {
-  const u: string[] = [];
-  if (!plan) {
-    u.push('No Coach plan — future content schedule unknown');
-    u.push('Whether additional assets will be delivered');
-  } else {
-    const totalActs = (plan.plan.weeks || []).reduce((sum, w) => sum + (w.actions?.length || 0), 0);
-    const completedActs = (plan.plan.weeks || []).reduce((sum, w) =>
-      sum + (w.actions || []).filter((a) => a.completed).length, 0);
-    if (completedActs < totalActs) {
-      u.push(`${totalActs - completedActs} planned assets not yet delivered — execution status unknown`);
-    }
-    if (!plan.historicalActivity || plan.historicalActivity.length === 0) {
-      u.push('No historical activity data — cannot compare plan vs actual delivery');
-    }
-    if (plan.dataCoverage && !plan.dataCoverage.fullCoverage) {
-      u.push(`Incomplete data coverage: ${plan.dataCoverage.coverageNote}`);
-    }
-  }
-  u.push('Whether YouTube algorithmic support will materialise');
-  if (nc.confidence === 'LOW') u.push('Movement data limited — true momentum unclear');
-  if (!snap?.recentUploads?.length) u.push('No recent upload data to assess content quality');
-  u.push('Audience retention patterns (requires YouTube Studio access)');
-  return u;
-}
-
-function generateLearningNoteFromArtist(
-  artist: Artist,
-  nc: ReturnType<typeof normalizeChannelData>,
-  status: ChannelState,
-  actions: RecommendedActions,
-  mf: MultiformatScore | null,
-): LearningNote | null {
-  const name = artist.name;
-
-  if (status === 'HEALTHY' && nc.cadence.uploads30d >= 5 && mf && mf.formatCount >= 3) {
+  return assets.map(({ type, check }) => {
+    const available = active.filter(check).length;
+    const missing = total - available;
+    const campaigns = active.filter(check).map((p) => p.artist.name);
     return {
-      text: `${name} maintains healthy status with ${nc.cadence.uploads30d} uploads across ${mf.formatCount} formats. Multiformat strategy appears to be sustaining momentum.`,
-      campaign: artist.campaign || name,
-      date: today,
-      type: 'positive',
+      assetType: type,
+      available,
+      missing,
+      total,
+      percentage: Math.round((available / total) * 100),
+      campaigns: campaigns.slice(0, 6),
     };
-  }
+  }).sort((a, b) => a.percentage - b.percentage); // Most missing first
+}
 
-  if (status === 'COLD' && nc.cadence.uploads30d === 0) {
+// ── Section 6: Asset Success Patterns ───────────────────────────────────────
+
+function buildAssetPatterns(profiles: ChannelProfile[]): AssetPattern[] {
+  const active = profiles.filter((p) => p.uploads30d > 0);
+  if (active.length === 0) return [];
+
+  const assetChecks: { type: string; check: (p: ChannelProfile) => boolean }[] = [
+    { type: 'BTS', check: (p) => !!p.mf?.hasBTS },
+    { type: 'Visualiser', check: (p) => !!p.mf?.hasVisualizer },
+    { type: 'Lyric Video', check: (p) => !!p.mf?.hasLyricVideo },
+    { type: 'Live Session', check: (p) => !!p.mf?.hasLiveSession },
+    { type: 'Official Video', check: (p) => !!p.mf?.hasOfficialVideo },
+    { type: 'Shorts + Longform', check: (p) => p.shorts30d > 0 && p.longform30d > 0 },
+  ];
+
+  return assetChecks.map(({ type, check }) => {
+    const withAsset = active.filter(check);
+    const withoutAsset = active.filter((p) => !check(p));
+
+    const avg = (arr: ChannelProfile[], fn: (p: ChannelProfile) => number) =>
+      arr.length > 0 ? Math.round(arr.reduce((s, p) => s + fn(p), 0) / arr.length) : 0;
+
+    const healthyPct = (arr: ChannelProfile[]) =>
+      arr.length > 0 ? Math.round(arr.filter((p) => p.status === 'HEALTHY').length / arr.length * 100) : 0;
+
     return {
-      text: `${name} remains cold with no uploads in 30 days. Recommended reactivation via Shorts. No action observed yet.`,
-      campaign: artist.campaign || name,
-      date: today,
-      type: 'negative',
+      assetType: type,
+      withAsset: {
+        count: withAsset.length,
+        avgCadence: avg(withAsset, (p) => p.uploads30d),
+        avgFormatCount: avg(withAsset, (p) => p.formatCount),
+        healthyPct: healthyPct(withAsset),
+      },
+      withoutAsset: {
+        count: withoutAsset.length,
+        avgCadence: avg(withoutAsset, (p) => p.uploads30d),
+        avgFormatCount: avg(withoutAsset, (p) => p.formatCount),
+        healthyPct: healthyPct(withoutAsset),
+      },
     };
-  }
-
-  if (status === 'BUILDING' && nc.cadence.uploads30d >= 3) {
-    return {
-      text: `${name} is building with ${nc.cadence.uploads30d} uploads. Cadence established but momentum not yet compounding. Conversion and format diversity may be the next levers.`,
-      campaign: artist.campaign || name,
-      date: today,
-      type: 'neutral',
-    };
-  }
-
-  if (mf && mf.hasShorts && !mf.hasOfficialVideo && !mf.hasLyricVideo && !mf.hasVisualizer) {
-    return {
-      text: `${name} is Shorts-only. Coach recommended longform content. Channel identity may be limited without anchor content.`,
-      campaign: artist.campaign || name,
-      date: today,
-      type: 'neutral',
-    };
-  }
-
-  return null;
+  });
 }
 
-function buildCounterfactualFromArtist(
-  artist: Artist,
-  nc: ReturnType<typeof normalizeChannelData>,
-  status: ChannelState,
-  mf: MultiformatScore | null,
-): Counterfactual {
-  const hasStrongContent = nc.cadence.uploads30d >= 5 && mf && mf.formatCount >= 3;
-  const hasCampaign = !!artist.campaign;
+// ── Section 7: Open Questions ───────────────────────────────────────────────
 
-  let content = hasStrongContent ? 45 : nc.cadence.uploads30d >= 2 ? 30 : 10;
-  let release = hasCampaign ? 35 : 15;
-  let external = 100 - content - release;
-
-  const conf: ConfidenceLevel = nc.cadence.uploads30d >= 3 ? 'medium' : 'experimental';
-
-  let note = '';
-  if (hasStrongContent && status === 'HEALTHY') {
-    note = 'Content support appears to be a significant contributor. Without it, momentum would likely have been weaker.';
-  } else if (nc.cadence.uploads30d === 0) {
-    note = 'No content support observed. Any growth is likely driven by catalogue discovery or external factors.';
-    content = 5; release = 25; external = 70;
-  } else {
-    note = 'Mixed signals — some content support present but not yet sufficient to isolate impact.';
-  }
-
-  return {
-    artist: artist.name,
-    slug: artist.slug,
-    contentSupport: content,
-    releaseEvent: release,
-    externalDiscovery: external,
-    interventionConfidence: conf,
-    note,
-  };
-}
-
-function buildPatterns(
-  artists: Artist[],
-  mf_healthy: number, mf_total: number,
-  so_healthy: number, so_total: number,
-  bts_high: number, bts_total: number,
-  vis_total: number, vis_healthy: number,
-  lyric_total: number, lyric_healthy: number,
-): Pattern[] {
-  const patterns: Pattern[] = [];
-  const names = artists.map((a) => a.name);
-
-  if (mf_total >= 2) {
-    const mfRate = mf_total > 0 ? mf_healthy / mf_total : 0;
-    const soRate = so_total > 0 ? so_healthy / so_total : 0;
-    const conf: ConfidenceLevel = mf_total >= 5 ? 'high' : mf_total >= 3 ? 'medium' : 'experimental';
-    patterns.push({
-      title: 'Multiformat channels appear healthier than Shorts-only channels',
-      description: `Channels with both longform and Shorts support show a ${Math.round(mfRate * 100)}% healthy rate vs ${Math.round(soRate * 100)}% for Shorts-only. This suggests format diversity contributes to channel resilience.`,
-      confidence: conf,
-      evidenceCount: mf_total + so_total,
-      campaignsObserved: names.slice(0, 6),
-      lastUpdated: today,
-    });
-  }
-
-  if (bts_total >= 2) {
-    const btsRate = bts_total > 0 ? bts_high / bts_total : 0;
-    patterns.push({
-      title: 'BTS content appears to correlate with stronger upload cadence',
-      description: `${Math.round(btsRate * 100)}% of channels with BTS content maintain 5+ uploads per month. BTS may provide an easier content bridge between major releases.`,
-      confidence: bts_total >= 4 ? 'medium' : 'experimental',
-      evidenceCount: bts_total,
-      campaignsObserved: names.slice(0, 4),
-      lastUpdated: today,
-    });
-  }
-
-  if (vis_total >= 1) {
-    patterns.push({
-      title: 'Visualisers may extend campaign presence beyond release week',
-      description: `${vis_total} campaign${vis_total !== 1 ? 's' : ''} include visualiser content. Early evidence suggests these provide passive viewing options that sustain impressions after initial release activity.`,
-      confidence: vis_total >= 3 ? 'medium' : 'experimental',
-      evidenceCount: vis_total,
-      campaignsObserved: names.slice(0, 4),
-      lastUpdated: today,
-    });
-  }
-
-  if (lyric_total >= 1) {
-    patterns.push({
-      title: 'Lyric videos may improve post-release retention',
-      description: `${lyric_total} campaign${lyric_total !== 1 ? 's' : ''} include lyric video content. These appear to serve repeat viewers and may contribute to longer campaign tails.`,
-      confidence: 'experimental',
-      evidenceCount: lyric_total,
-      campaignsObserved: names.slice(0, 3),
-      lastUpdated: today,
-    });
-  }
-
-  // Cadence pattern
-  const activeArtists = artists.filter((a) => a.campaign);
-  if (activeArtists.length >= 2 || artists.length >= 3) {
-    patterns.push({
-      title: 'Consistent upload cadence appears more valuable than sporadic bursts',
-      description: `Across ${artists.length} monitored channels, sustained weekly uploads correlate with healthier channel states more reliably than occasional high-volume weeks.`,
-      confidence: artists.length >= 8 ? 'high' : 'medium',
-      evidenceCount: artists.length,
-      campaignsObserved: names.slice(0, 5),
-      lastUpdated: today,
-    });
-  }
-
-  // Shorts discovery pattern
-  if (so_total >= 1) {
-    patterns.push({
-      title: 'Shorts-only strategies may limit subscriber conversion',
-      description: `Channels relying exclusively on Shorts appear to show weaker subscriber conversion. Shorts drive discovery but may not build sufficient channel identity for follow-through.`,
-      confidence: so_total >= 3 ? 'medium' : 'experimental',
-      evidenceCount: so_total,
-      campaignsObserved: names.slice(0, 4),
-      lastUpdated: today,
-    });
-  }
-
-  return patterns;
-}
-
-function buildHypotheses(
-  artists: Artist[],
-  mf_healthy: number, mf_total: number,
-  bts_high: number, bts_total: number,
-  vis_total: number, vis_healthy: number,
-  lyric_total: number,
-  so_healthy: number, so_total: number,
-): Hypothesis[] {
-  const names = artists.map((a) => a.name);
-  const hypotheses: Hypothesis[] = [];
-
-  hypotheses.push({
-    title: 'Multiformat campaigns outperform single-format campaigns',
-    description: 'Campaigns that deploy content across 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualiser, BTS, Live Session) maintain healthier channel states than those relying on fewer formats.',
-    confidence: mf_total >= 5 ? 'high' : mf_total >= 3 ? 'medium' : 'experimental',
-    campaignsTested: mf_total + so_total,
-    evidenceCount: mf_total + so_total,
-    status: mf_total >= 5 ? 'high_confidence' : mf_total >= 3 ? 'growing_confidence' : 'testing',
-    supportingCampaigns: names.slice(0, 5),
-  });
-
-  hypotheses.push({
-    title: 'BTS content improves upload cadence during campaign periods',
-    description: 'Channels that include behind-the-scenes content appear to maintain higher upload frequency. BTS may reduce the creative overhead of content production.',
-    confidence: bts_total >= 3 ? 'medium' : 'experimental',
-    campaignsTested: bts_total,
-    evidenceCount: bts_total,
-    status: bts_total >= 3 ? 'growing_confidence' : 'testing',
-    supportingCampaigns: names.slice(0, 4),
-  });
-
-  hypotheses.push({
-    title: 'Visualisers extend campaign tail beyond release week',
-    description: 'Visualiser content provides a passive viewing option that may sustain impressions after the initial release event. This could reduce the post-release momentum drop.',
-    confidence: 'experimental',
-    campaignsTested: vis_total,
-    evidenceCount: vis_total,
-    status: vis_total >= 3 ? 'growing_confidence' : 'testing',
-    supportingCampaigns: names.slice(0, 3),
-  });
-
-  hypotheses.push({
-    title: 'Community Posts improve campaign continuity',
-    description: 'Regular Community Posts between uploads may maintain subscriber engagement and signal channel activity to the algorithm. Early observations suggest channels using Community Posts show less momentum decay.',
-    confidence: 'experimental',
-    campaignsTested: 0,
-    evidenceCount: 0,
-    status: 'testing',
-    supportingCampaigns: [],
-  });
-
-  hypotheses.push({
-    title: 'Shorts-only channels have weaker subscriber conversion',
-    description: 'Channels that rely exclusively on Shorts may attract views but fail to convert viewers into subscribers. Anchor content (official videos, lyric videos) appears necessary for identity formation.',
-    confidence: so_total >= 3 ? 'medium' : 'experimental',
-    campaignsTested: so_total,
-    evidenceCount: so_total,
-    status: so_total >= 3 ? 'growing_confidence' : 'testing',
-    supportingCampaigns: names.slice(0, 3),
-  });
-
-  hypotheses.push({
-    title: 'Campaign planning confidence increases with asset visibility',
-    description: 'When the Coach system can see more planned assets and timeline dates, recommendation quality appears higher. Incomplete campaign data reduces decision confidence.',
-    confidence: 'medium',
-    campaignsTested: artists.length,
-    evidenceCount: artists.length,
-    status: 'growing_confidence',
-    supportingCampaigns: names.slice(0, 4),
-  });
-
-  return hypotheses;
-}
-
-function buildPrinciples(artists: Artist[], campaigns: CampaignIntelligence[]): Principle[] {
-  const healthy = campaigns.filter((c) => c.watcher.healthStatus === 'HEALTHY').map((c) => c.artist);
-  const multiformat = campaigns.filter((c) => c.coach.assetGaps.length <= 2).map((c) => c.artist);
-  const consistent = campaigns.filter((c) => c.watcher.uploadCadence >= 5).map((c) => c.artist);
-  const withPlans = campaigns.filter((c) => c.coach.hasPlan).map((c) => c.artist);
+function buildOpenQuestions(profiles: ChannelProfile[]): OpenQuestion[] {
+  const active = profiles.filter((p) => p.uploads30d > 0);
+  const withBTS = active.filter((p) => p.mf?.hasBTS);
+  const withVis = active.filter((p) => p.mf?.hasVisualizer);
+  const withLyric = active.filter((p) => p.mf?.hasLyricVideo);
+  const withLive = active.filter((p) => p.mf?.hasLiveSession);
+  const shortsOnly = active.filter((p) => p.shorts30d > 0 && p.longform30d === 0);
+  const multiformat = active.filter((p) => p.formatCount >= 3);
+  const strongConv = active.filter((p) => p.convLabel === 'Strong');
 
   return [
     {
-      id: 1,
-      title: 'Channels need reasons for viewers to return between releases',
-      description: 'A release is an event; a channel is a relationship. Without content between releases, audience attention disperses. BTS, Shorts, and Community Posts provide return triggers.',
-      relatedCampaigns: consistent.slice(0, 3),
+      question: 'Do visualisers extend campaign lifespan beyond release week?',
+      status: withVis.length >= 5 ? 'early_signal' : 'gathering_evidence',
+      evidenceCount: withVis.length,
+      relatedCampaigns: withVis.map((p) => p.artist.name).slice(0, 4),
     },
     {
-      id: 2,
-      title: 'Longform content builds stronger channel identity than Shorts alone',
-      description: 'Shorts drive discovery, but viewers form channel loyalty through longer-form experiences. Official videos, live sessions, and BTS create the identity that converts viewers to subscribers.',
-      relatedCampaigns: multiformat.slice(0, 3),
+      question: 'How many Shorts per week is optimal during a campaign?',
+      status: 'needs_investigation',
+      evidenceCount: active.filter((p) => p.shorts30d > 0).length,
+      relatedCampaigns: active.filter((p) => p.shorts30d >= 5).map((p) => p.artist.name).slice(0, 4),
     },
     {
-      id: 3,
-      title: 'Asset diversity improves campaign resilience',
-      description: 'Campaigns with multiple content formats are less dependent on any single piece performing. If a music video underperforms, Shorts, lyric videos, and BTS can sustain momentum.',
-      relatedCampaigns: multiformat.slice(0, 3),
+      question: 'Do BTS videos improve campaign follow-through more than lyric videos?',
+      status: withBTS.length >= 3 && withLyric.length >= 3 ? 'early_signal' : 'gathering_evidence',
+      evidenceCount: withBTS.length + withLyric.length,
+      relatedCampaigns: [...withBTS, ...withLyric].map((p) => p.artist.name).slice(0, 4),
     },
     {
-      id: 4,
-      title: 'Consistency generally outperforms sporadic bursts of activity',
-      description: 'YouTube algorithms reward sustained upload cadence more than occasional bursts. Regular weekly uploads build algorithmic confidence in recommending the channel.',
-      relatedCampaigns: healthy.slice(0, 3),
+      question: 'What drives subscriber conversion most effectively?',
+      status: strongConv.length >= 5 ? 'early_signal' : 'gathering_evidence',
+      evidenceCount: strongConv.length,
+      relatedCampaigns: strongConv.map((p) => p.artist.name).slice(0, 4),
     },
     {
-      id: 5,
-      title: 'Campaign planning confidence increases when asset visibility improves',
-      description: 'The quality of campaign recommendations is directly related to how much we know about planned assets, timeline, and available content. Uncertainty should be acknowledged, not hidden.',
-      relatedCampaigns: withPlans.slice(0, 3),
+      question: 'Can Shorts-only channels sustain long-term growth?',
+      status: shortsOnly.length >= 3 ? 'early_signal' : 'gathering_evidence',
+      evidenceCount: shortsOnly.length,
+      relatedCampaigns: shortsOnly.map((p) => p.artist.name).slice(0, 4),
     },
     {
-      id: 6,
-      title: 'Decision quality matters more than outcome quality',
-      description: 'Good decisions can produce bad outcomes due to factors outside our control. Bad decisions can produce good outcomes through luck. We should evaluate the reasoning process, not just the result.',
-      relatedCampaigns: [],
+      question: 'Does live session content improve audience loyalty?',
+      status: withLive.length >= 3 ? 'early_signal' : 'gathering_evidence',
+      evidenceCount: withLive.length,
+      relatedCampaigns: withLive.map((p) => p.artist.name).slice(0, 4),
     },
     {
-      id: 7,
-      title: 'Uncertainty should be expressed, not suppressed',
-      description: 'Expressing confidence levels honestly — "we believe" vs "we know" — leads to better decisions than false certainty. Tracking what we don\'t know is as valuable as tracking what we do.',
-      relatedCampaigns: [],
+      question: 'Is there an optimal format mix for different campaign types (album vs single vs tour)?',
+      status: multiformat.length >= 5 ? 'early_signal' : 'needs_investigation',
+      evidenceCount: multiformat.length,
+      relatedCampaigns: multiformat.map((p) => p.artist.name).slice(0, 4),
+    },
+    {
+      question: 'How much does release timing affect campaign momentum?',
+      status: 'needs_investigation',
+      evidenceCount: profiles.filter((p) => p.plan).length,
+      relatedCampaigns: profiles.filter((p) => p.plan).map((p) => p.artist.name).slice(0, 4),
     },
   ];
+}
+
+// ── Section 8: Weekly Learnings ─────────────────────────────────────────────
+
+function buildWeeklyLearnings(profiles: ChannelProfile[]): WeeklyLearning[] {
+  const learnings: WeeklyLearning[] = [];
+  const active = profiles.filter((p) => p.uploads30d > 0);
+  const healthy = active.filter((p) => p.status === 'HEALTHY');
+  const multiformat = active.filter((p) => p.formatCount >= 3);
+  const mfHealthy = multiformat.filter((p) => p.status === 'HEALTHY');
+  const shortsOnly = active.filter((p) => p.shorts30d > 0 && p.longform30d === 0);
+  const soHealthy = shortsOnly.filter((p) => p.status === 'HEALTHY');
+  const withBTS = active.filter((p) => p.mf?.hasBTS);
+  const btsHealthy = withBTS.filter((p) => p.status === 'HEALTHY');
+  const withVis = active.filter((p) => p.mf?.hasVisualizer);
+  const visHealthy = withVis.filter((p) => p.status === 'HEALTHY');
+
+  // Confirmed
+  if (multiformat.length >= 3 && mfHealthy.length / multiformat.length >= 0.5) {
+    learnings.push({
+      text: `Channels with 3+ content formats continue to show stronger health scores (${mfHealthy.length}/${multiformat.length} healthy vs ${healthy.length}/${active.length} overall).`,
+      campaign: `${multiformat.length} campaigns`,
+      category: 'confirmed',
+    });
+  }
+
+  if (active.length > 0) {
+    const highCadence = active.filter((p) => p.uploads30d >= 5);
+    const hcHealthy = highCadence.filter((p) => p.status === 'HEALTHY');
+    if (highCadence.length >= 3 && hcHealthy.length / highCadence.length >= 0.4) {
+      learnings.push({
+        text: `Channels with 5+ monthly uploads are more likely to be healthy (${hcHealthy.length}/${highCadence.length}) compared to overall (${healthy.length}/${active.length}).`,
+        campaign: `${highCadence.length} campaigns`,
+        category: 'confirmed',
+      });
+    }
+  }
+
+  if (withBTS.length >= 2 && btsHealthy.length / withBTS.length >= 0.5) {
+    learnings.push({
+      text: `BTS content correlates with healthier channels (${btsHealthy.length}/${withBTS.length} healthy). Possible continuity benefit.`,
+      campaign: withBTS.map((p) => p.artist.name).slice(0, 3).join(', '),
+      category: 'confirmed',
+    });
+  }
+
+  // Challenged
+  if (withVis.length >= 2) {
+    const visHealthyPct = visHealthy.length / withVis.length;
+    const overallHealthyPct = healthy.length / (active.length || 1);
+    if (visHealthyPct <= overallHealthyPct) {
+      learnings.push({
+        text: `Visualisers have not significantly outperformed the average health rate this period (${visHealthy.length}/${withVis.length} vs ${healthy.length}/${active.length}).`,
+        campaign: withVis.map((p) => p.artist.name).slice(0, 3).join(', '),
+        category: 'challenged',
+      });
+    }
+  }
+
+  if (shortsOnly.length >= 2 && soHealthy.length > 0) {
+    learnings.push({
+      text: `Some Shorts-only channels are achieving healthy status (${soHealthy.length}/${shortsOnly.length}), partially challenging the multi-format requirement.`,
+      campaign: shortsOnly.map((p) => p.artist.name).slice(0, 3).join(', '),
+      category: 'challenged',
+    });
+  }
+
+  // Unknown
+  learnings.push({
+    text: 'Community Post impact remains difficult to isolate — no reliable signal available from YouTube Data API.',
+    campaign: 'All campaigns',
+    category: 'unknown',
+  });
+
+  learnings.push({
+    text: 'Audience retention patterns cannot be assessed without YouTube Studio access.',
+    campaign: 'All campaigns',
+    category: 'unknown',
+  });
+
+  if (profiles.filter((p) => p.plan).length > 0) {
+    learnings.push({
+      text: `${profiles.filter((p) => p.plan).length} campaigns have Coach plans, but plan-vs-actual execution tracking is limited.`,
+      campaign: profiles.filter((p) => p.plan).map((p) => p.artist.name).slice(0, 3).join(', '),
+      category: 'unknown',
+    });
+  }
+
+  return learnings;
 }

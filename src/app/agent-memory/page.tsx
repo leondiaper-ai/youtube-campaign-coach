@@ -3,8 +3,8 @@ import AgentMemory from '@/components/AgentMemory';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'YouTube Agent Memory — Internal Intelligence',
-  description: 'Campaign patterns, decision quality, hypotheses, and emerging intelligence.',
+  title: 'YouTube Intelligence Lab — Research Desk',
+  description: 'Emerging winners, campaign playbooks, asset patterns, and open questions across 135+ channels.',
 };
 
 export default function AgentMemoryPage() {
