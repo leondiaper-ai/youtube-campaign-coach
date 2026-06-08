@@ -29,6 +29,27 @@ type Pattern = {
   lastUpdated: string;
 };
 
+type TimelineEvent = {
+  date: string;
+  title: string;
+  kind: string;
+  scale: string;
+};
+
+type PlanPhase = {
+  name: string;
+  weekStart: number;
+  weekEnd: number;
+};
+
+type PlannedAction = {
+  title: string;
+  format: string;
+  weekNum: number;
+  phase: string;
+  completed?: boolean;
+};
+
 type CampaignIntelligence = {
   artist: string;
   slug: string;
@@ -55,6 +76,15 @@ type CampaignIntelligence = {
     confidence: string;
     hasPlan: boolean;
     planWeeks: number;
+    strategy: { priority: string; approach: string } | null;
+    campaignInsights: string[];
+    timeline: TimelineEvent[];
+    phases: PlanPhase[];
+    plannedActions: PlannedAction[];
+    completedActions: number;
+    totalActions: number;
+    completionRate: number;
+    channelStateAtPlan: string | null;
   };
 };
 
@@ -274,14 +304,7 @@ export async function GET() {
           views7d: views7Val,
           subs7d: subs7Val,
         },
-        coach: {
-          currentRecommendation: actions.doNow[0] || 'No current recommendation',
-          nextBestAction: actions.doNext[0] || 'Maintain cadence',
-          assetGaps: buildAssetGaps(mf, nc.cadence.uploads30d, nc.cadence.shorts30d),
-          confidence: gsResult.confidence,
-          hasPlan: !!plan,
-          planWeeks: plan?.plan.totalWeeks ?? 0,
-        },
+        coach: buildCoachIntelligence(plan, actions, gsResult.confidence, mf, nc.cadence),
       });
 
       // ── Decision Intelligence ──────────────────────────────────
@@ -313,7 +336,7 @@ export async function GET() {
         artist: artist.name,
         slug: artist.slug,
         knowns: buildKnownsFromArtist(snap, nc, mf, plan, artist),
-        beliefs: buildBeliefs(blocker, actions, mf, nc.cadence),
+        beliefs: buildBeliefs(blocker, actions, mf, nc.cadence, plan),
         unknowns: buildUnknowns(snap, plan, nc),
       });
 
@@ -397,6 +420,105 @@ export async function GET() {
 }
 
 // ── Builder functions ────────────────────────────────────────────────────────
+
+function buildCoachIntelligence(
+  plan: SavedPlan | null,
+  actions: RecommendedActions,
+  confidence: string,
+  mf: MultiformatScore | null,
+  cadence: { uploads30d: number; shorts30d: number },
+): CampaignIntelligence['coach'] {
+  // Extract real plan data when available
+  const timeline: TimelineEvent[] = [];
+  const phases: PlanPhase[] = [];
+  const plannedActions: PlannedAction[] = [];
+  let completedActions = 0;
+  let totalActions = 0;
+  let strategy: { priority: string; approach: string } | null = null;
+  let campaignInsights: string[] = [];
+  let channelStateAtPlan: string | null = null;
+
+  if (plan) {
+    // Timeline events from plan
+    for (const evt of plan.plan.events || []) {
+      timeline.push({
+        date: evt.dateISO,
+        title: evt.title,
+        kind: evt.kind,
+        scale: evt.scale || 'medium',
+      });
+    }
+
+    // Phase breakdown
+    for (const ph of plan.plan.phases || []) {
+      phases.push({
+        name: ph.name,
+        weekStart: ph.weekStart,
+        weekEnd: ph.weekEnd,
+      });
+    }
+
+    // Week-by-week actions with phase context
+    for (const week of plan.plan.weeks || []) {
+      for (const action of week.actions || []) {
+        totalActions++;
+        if (action.completed) completedActions++;
+        plannedActions.push({
+          title: action.title,
+          format: action.format,
+          weekNum: week.weekNum,
+          phase: week.phase,
+          completed: action.completed,
+        });
+      }
+    }
+
+    // Strategy
+    if (plan.plan.strategy) {
+      strategy = {
+        priority: plan.plan.strategy.priority,
+        approach: plan.plan.strategy.approach,
+      };
+    }
+
+    // Campaign insights
+    campaignInsights = plan.plan.campaignInsights || [];
+
+    // Channel state at time of plan generation
+    channelStateAtPlan = plan.channelCtx?.state ?? null;
+
+    // Also pull insights from historical activity if present
+    if (plan.historicalActivity && plan.historicalActivity.length > 0) {
+      const completed = plan.historicalActivity.filter((h) => h.status === 'completed' || h.status === 'live');
+      const missing = plan.historicalActivity.filter((h) => h.status === 'missing');
+      if (completed.length > 0 && missing.length > 0) {
+        campaignInsights.push(
+          `${completed.length} historical assets delivered, ${missing.length} identified gaps in content timeline`
+        );
+      }
+    }
+  }
+
+  const completionRate = totalActions > 0 ? Math.round((completedActions / totalActions) * 100) : 0;
+
+  return {
+    currentRecommendation: actions.doNow[0] || 'No current recommendation',
+    nextBestAction: actions.doNext[0] || 'Maintain cadence',
+    assetGaps: buildAssetGaps(mf, cadence.uploads30d, cadence.shorts30d),
+    confidence,
+    hasPlan: !!plan,
+    planWeeks: plan?.plan.totalWeeks ?? 0,
+    strategy,
+    campaignInsights,
+    timeline,
+    phases,
+    plannedActions,
+    completedActions,
+    totalActions,
+    completionRate,
+    channelStateAtPlan,
+  };
+}
 
 function buildAssetGaps(mf: MultiformatScore | null, uploads30d: number, shorts30d: number): string[] {
   const gaps: string[] = [];
@@ -491,7 +613,30 @@ function buildKnownsFromArtist(
   }
   if (artist.campaign) k.push(`Campaign: ${artist.campaign}`);
   k.push(`Phase: ${artist.phase}`);
-  if (plan) k.push(`Coach plan exists (${plan.plan.totalWeeks} weeks)`);
+  if (plan) {
+    k.push(`Coach plan exists (${plan.plan.totalWeeks} weeks)`);
+    if (plan.plan.strategy) {
+      k.push(`Strategy: ${plan.plan.strategy.priority}`);
+    }
+    const totalActs = (plan.plan.weeks || []).reduce((sum, w) => sum + (w.actions?.length || 0), 0);
+    const completedActs = (plan.plan.weeks || []).reduce((sum, w) =>
+      sum + (w.actions || []).filter((a) => a.completed).length, 0);
+    if (totalActs > 0) {
+      k.push(`Planned assets: ${totalActs} (${completedActs} completed, ${totalActs - completedActs} remaining)`);
+    }
+    const events = plan.plan.events || [];
+    const upcoming = events.filter((e) => e.dateISO >= today);
+    if (upcoming.length > 0) {
+      k.push(`Upcoming events: ${upcoming.map((e) => `${e.title} (${e.dateISO})`).join(', ')}`);
+    }
+    if (plan.plan.phases?.length > 0) {
+      k.push(`Phases: ${plan.plan.phases.map((p) => `${p.name} (wk ${p.weekStart}–${p.weekEnd})`).join(', ')}`);
+    }
+    if (plan.historicalActivity && plan.historicalActivity.length > 0) {
+      const delivered = plan.historicalActivity.filter((h) => h.status === 'completed' || h.status === 'live').length;
+      k.push(`Historical activity: ${delivered} assets delivered`);
+    }
+  }
   return k;
 }
 
@@ -500,6 +645,7 @@ function buildBeliefs(
   actions: RecommendedActions,
   mf: MultiformatScore | null,
   cadence: { uploads30d: number; shorts30d: number },
+  plan: SavedPlan | null,
 ): string[] {
   const b: string[] = [];
   if (blocker.blocker !== 'NONE') b.push(`${blocker.label} appears to be limiting growth`);
@@ -507,7 +653,43 @@ function buildBeliefs(
   if (mf && !mf.hasBTS && cadence.uploads30d > 0) b.push('BTS content could improve continuity between releases');
   if (mf && !mf.hasShorts && cadence.uploads30d > 0) b.push('Shorts may help with discovery and feed presence');
   if (cadence.shorts30d > 0 && cadence.uploads30d === cadence.shorts30d) b.push('Longform content may strengthen channel identity');
+
+  // Coach plan-derived beliefs
+  if (plan) {
+    if (plan.plan.strategy) {
+      b.push(`Coach strategy: "${plan.plan.strategy.priority}" — ${plan.plan.strategy.approach}`);
+    }
+    for (const insight of (plan.plan.campaignInsights || []).slice(0, 2)) {
+      b.push(`Coach insight: ${insight}`);
+    }
+    // Phase-based beliefs
+    const currentPhase = inferCurrentPhase(plan);
+    if (currentPhase) {
+      b.push(`Currently in ${currentPhase} phase — recommendations tailored accordingly`);
+    }
+  }
   return b;
+}
+
+function inferCurrentPhase(plan: SavedPlan): string | null {
+  const now = new Date();
+  for (const week of plan.plan.weeks || []) {
+    // Parse dateRange like "Mar 22 – Mar 28"
+    const match = week.dateRange?.match(/^(\w+ \d+)/);
+    if (match) {
+      const yearGuess = now.getFullYear();
+      const weekStart = new Date(`${match[1]}, ${yearGuess}`);
+      const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+      if (now >= weekStart && now <= weekEnd) {
+        return week.phase;
+      }
+    }
+  }
+  // Fallback: check phases array
+  if (plan.plan.phases?.length > 0) {
+    return plan.plan.phases[plan.plan.phases.length - 1]?.name ?? null;
+  }
+  return null;
 }
 
 function buildUnknowns(
@@ -516,8 +698,23 @@ function buildUnknowns(
   nc: ReturnType<typeof normalizeChannelData>,
 ): string[] {
   const u: string[] = [];
-  if (!plan) u.push('No Coach plan — future content schedule unknown');
-  u.push('Whether additional assets will be delivered');
+  if (!plan) {
+    u.push('No Coach plan — future content schedule unknown');
+    u.push('Whether additional assets will be delivered');
+  } else {
+    const totalActs = (plan.plan.weeks || []).reduce((sum, w) => sum + (w.actions?.length || 0), 0);
+    const completedActs = (plan.plan.weeks || []).reduce((sum, w) =>
+      sum + (w.actions || []).filter((a) => a.completed).length, 0);
+    if (completedActs < totalActs) {
+      u.push(`${totalActs - completedActs} planned assets not yet delivered — execution status unknown`);
+    }
+    if (!plan.historicalActivity || plan.historicalActivity.length === 0) {
+      u.push('No historical activity data — cannot compare plan vs actual delivery');
+    }
+    if (plan.dataCoverage && !plan.dataCoverage.fullCoverage) {
+      u.push(`Incomplete data coverage: ${plan.dataCoverage.coverageNote}`);
+    }
+  }
   u.push('Whether YouTube algorithmic support will materialise');
   if (nc.confidence === 'LOW') u.push('Movement data limited — true momentum unclear');
   if (!snap?.recentUploads?.length) u.push('No recent upload data to assess content quality');

@@ -163,57 +163,210 @@ export default function AgentMemory() {
           open={openSections.campaigns}
           toggle={() => toggle('campaigns')}
         >
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-              <thead>
-                <tr style={{ borderBottom: `2px solid ${BORDER}` }}>
-                  {['Artist', 'Campaign', 'Type', 'State', 'Health', 'Cadence', 'Formats', 'Conversion', 'Coach Action'].map((h) => (
-                    <th key={h} style={{ textAlign: 'left', padding: '8px 10px', fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 700 }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.campaigns.map((c) => (
-                  <tr key={c.slug} style={{ borderBottom: `1px solid ${BORDER}` }}>
-                    <td style={{ padding: '10px 10px', fontWeight: 700 }}>
-                      <Link href={`/team-watcher/${c.slug}`} style={{ color: INK, textDecoration: 'none' }} className="hover:underline">
-                        {c.artist}
-                      </Link>
-                    </td>
-                    <td style={{ padding: '10px 10px', color: MUTED }}>{c.campaignName}</td>
-                    <td style={{ padding: '10px 10px' }}>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: ACCENT }}>
-                        {c.campaignType}
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 10px' }}>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: ACCENT }}>
-                        {c.campaignState}
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 10px' }}>
-                      <HealthDot status={c.watcher.healthStatus} />
-                    </td>
-                    <td style={{ padding: '10px 10px', fontFamily: 'monospace', fontSize: 11 }}>
-                      {c.watcher.uploadCadence}/30d
-                    </td>
-                    <td style={{ padding: '10px 10px', fontSize: 10, color: MUTED }}>
-                      {c.watcher.shortsRatio}% S · {c.watcher.longformRatio}% L
-                    </td>
-                    <td style={{ padding: '10px 10px' }}>
-                      <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: c.watcher.conversionScore === 'Strong' ? '#ECFDF5' : c.watcher.conversionScore === 'Weak' ? '#FEF2F2' : '#F9FAFB', color: c.watcher.conversionScore === 'Strong' ? GREEN : c.watcher.conversionScore === 'Weak' ? RED : MUTED }}>
-                        {c.watcher.conversionScore}
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 10px', fontSize: 11, color: MUTED, maxWidth: 200 }}>
-                      {c.coach.currentRecommendation}
-                    </td>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Summary table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                <thead>
+                  <tr style={{ borderBottom: `2px solid ${BORDER}` }}>
+                    {['Artist', 'Campaign', 'Type', 'State', 'Health', 'Cadence', 'Formats', 'Conversion', 'Plan'].map((h) => (
+                      <th key={h} style={{ textAlign: 'left', padding: '8px 10px', fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 700 }}>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.campaigns.map((c) => (
+                    <tr key={c.slug} style={{ borderBottom: `1px solid ${BORDER}` }}>
+                      <td style={{ padding: '10px 10px', fontWeight: 700 }}>
+                        <Link href={`/team-watcher/${c.slug}`} style={{ color: INK, textDecoration: 'none' }} className="hover:underline">
+                          {c.artist}
+                        </Link>
+                      </td>
+                      <td style={{ padding: '10px 10px', color: MUTED }}>{c.campaignName}</td>
+                      <td style={{ padding: '10px 10px' }}>
+                        <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: ACCENT }}>
+                          {c.campaignType}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px 10px' }}>
+                        <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: ACCENT }}>
+                          {c.campaignState}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px 10px' }}>
+                        <HealthDot status={c.watcher.healthStatus} />
+                      </td>
+                      <td style={{ padding: '10px 10px', fontFamily: 'monospace', fontSize: 11 }}>
+                        {c.watcher.uploadCadence}/30d
+                      </td>
+                      <td style={{ padding: '10px 10px', fontSize: 10, color: MUTED }}>
+                        {c.watcher.shortsRatio}% S · {c.watcher.longformRatio}% L
+                      </td>
+                      <td style={{ padding: '10px 10px' }}>
+                        <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: c.watcher.conversionScore === 'Strong' ? '#ECFDF5' : c.watcher.conversionScore === 'Weak' ? '#FEF2F2' : '#F9FAFB', color: c.watcher.conversionScore === 'Strong' ? GREEN : c.watcher.conversionScore === 'Weak' ? RED : MUTED }}>
+                          {c.watcher.conversionScore}
+                        </span>
+                      </td>
+                      <td style={{ padding: '10px 10px' }}>
+                        {c.coach.hasPlan ? (
+                          <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#ECFDF5', color: GREEN, fontWeight: 600 }}>
+                            {c.coach.planWeeks}wk plan
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 9, fontFamily: 'monospace', color: MUTED }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Coach Plan Deep Dives — only campaigns with plans */}
+            {data.campaigns.filter((c) => c.coach.hasPlan).length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.15em', color: BLUE, marginBottom: 12, fontWeight: 700 }}>
+                  Coach Plan Intelligence
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {data.campaigns.filter((c) => c.coach.hasPlan).map((c) => (
+                    <div key={`plan-${c.slug}`} style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '16px 20px' }}>
+                      {/* Plan header */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 700 }}>{c.artist}</div>
+                          <div style={{ fontSize: 11, color: MUTED }}>{c.campaignName} · {c.campaignType}</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          {c.coach.channelStateAtPlan && (
+                            <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#F3F4F6', color: ACCENT }}>
+                              was {c.coach.channelStateAtPlan}
+                            </span>
+                          )}
+                          <span style={{ fontSize: 9, fontFamily: 'monospace', padding: '2px 6px', borderRadius: 4, background: '#EFF6FF', color: BLUE, fontWeight: 600 }}>
+                            {c.coach.planWeeks} weeks
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Strategy */}
+                      {c.coach.strategy && (
+                        <div style={{ marginBottom: 14, padding: '10px 14px', background: '#F8FAFC', borderRadius: 6, borderLeft: `3px solid ${BLUE}` }}>
+                          <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: BLUE, fontWeight: 700, marginBottom: 4 }}>
+                            Strategy
+                          </div>
+                          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{c.coach.strategy.priority}</div>
+                          <div style={{ fontSize: 11, color: MUTED, lineHeight: 1.5 }}>{c.coach.strategy.approach}</div>
+                        </div>
+                      )}
+
+                      {/* Phases */}
+                      {c.coach.phases.length > 0 && (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 700, marginBottom: 8 }}>
+                            Phase Breakdown
+                          </div>
+                          <div style={{ display: 'flex', gap: 0, borderRadius: 4, overflow: 'hidden', height: 24 }}>
+                            {c.coach.phases.map((ph, idx) => {
+                              const total = c.coach.planWeeks || 1;
+                              const width = ((ph.weekEnd - ph.weekStart + 1) / total) * 100;
+                              const phaseColors: Record<string, string> = { BUILD: '#3B82F6', RELEASE: '#EF4444', SCALE: '#F59E0B', EXTEND: '#8B5CF6' };
+                              return (
+                                <div key={idx} style={{ width: `${width}%`, background: phaseColors[ph.name] || MUTED, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontFamily: 'monospace', color: '#fff', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap', overflow: 'hidden', padding: '0 4px' }}>
+                                  {ph.name} (wk {ph.weekStart}–{ph.weekEnd})
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Timeline events */}
+                      {c.coach.timeline.length > 0 && (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 700, marginBottom: 8 }}>
+                            Timeline Events
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                            {c.coach.timeline.map((evt, idx) => {
+                              const kindColors: Record<string, string> = { albumRelease: RED, singleRelease: AMBER, tourDate: PURPLE, videoRelease: BLUE, promo: MUTED };
+                              const col = kindColors[evt.kind] || MUTED;
+                              return (
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: `${col}08`, border: `1px solid ${col}20`, borderRadius: 6, fontSize: 10 }}>
+                                  <span style={{ fontFamily: 'monospace', fontWeight: 600, color: col }}>{evt.date}</span>
+                                  <span style={{ color: INK }}>{evt.title}</span>
+                                  <span style={{ fontSize: 8, fontFamily: 'monospace', color: col, textTransform: 'uppercase' }}>{evt.kind}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Asset tracker */}
+                      {c.coach.totalActions > 0 && (
+                        <div style={{ marginBottom: 14 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 700 }}>
+                              Planned Assets
+                            </div>
+                            <div style={{ fontSize: 10, fontFamily: 'monospace' }}>
+                              <span style={{ color: GREEN, fontWeight: 700 }}>{c.coach.completedActions}</span>
+                              <span style={{ color: MUTED }}> / {c.coach.totalActions} completed</span>
+                              <span style={{ marginLeft: 8, color: c.coach.completionRate >= 50 ? GREEN : c.coach.completionRate >= 25 ? AMBER : MUTED, fontWeight: 600 }}>
+                                ({c.coach.completionRate}%)
+                              </span>
+                            </div>
+                          </div>
+                          {/* Progress bar */}
+                          <div style={{ height: 4, background: `${GREEN}15`, borderRadius: 2, marginBottom: 10 }}>
+                            <div style={{ height: '100%', width: `${c.coach.completionRate}%`, background: GREEN, borderRadius: 2, transition: 'width 0.3s' }} />
+                          </div>
+                          {/* Grouped by format */}
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                            {Object.entries(
+                              c.coach.plannedActions.reduce((acc, a) => {
+                                acc[a.format] = (acc[a.format] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>)
+                            ).sort((a, b) => b[1] - a[1]).map(([fmt, count]) => {
+                              const fmtColors: Record<string, string> = { short: '#F59E0B', video: '#3B82F6', post: '#6B7280', live: '#EF4444', premiere: '#8B5CF6', community: '#10B981' };
+                              return (
+                                <span key={fmt} style={{ fontSize: 9, fontFamily: 'monospace', padding: '3px 8px', borderRadius: 4, background: `${fmtColors[fmt] || MUTED}10`, color: fmtColors[fmt] || MUTED, fontWeight: 600 }}>
+                                  {count}× {fmt}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Campaign insights */}
+                      {c.coach.campaignInsights.length > 0 && (
+                        <div style={{ marginBottom: 8 }}>
+                          <div style={{ fontSize: 9, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: MUTED, fontWeight: 700, marginBottom: 6 }}>
+                            Coach Insights
+                          </div>
+                          {c.coach.campaignInsights.slice(0, 4).map((ins, idx) => (
+                            <div key={idx} style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, paddingLeft: 10, borderLeft: `2px solid ${BLUE}20`, marginBottom: 4 }}>
+                              {ins}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Current actions */}
+                      <div style={{ display: 'flex', gap: 16, fontSize: 10, color: MUTED, fontFamily: 'monospace', paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
+                        <span><strong style={{ color: ACCENT }}>Now:</strong> {c.coach.currentRecommendation}</span>
+                        <span><strong style={{ color: ACCENT }}>Next:</strong> {c.coach.nextBestAction}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </Section>
 
