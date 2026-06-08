@@ -672,9 +672,21 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     // catalogue live performance from weeks ago lights up a planned vlog in the
     // future ("NOW LIVE" on something that hasn't happened). A 21-day window keeps
     // genuine on-time / slightly-early drops while rejecting unrelated content.
+    //
+    // FORWARD CAP: a live upload must NOT jump to a moment that's far in the
+    // future. If there are 5 BTS episodes planned across the campaign and 2 are
+    // already live, only the moments whose planned date is at-or-near today
+    // should light up — not Episode 4 in August. We allow a 7-day forward
+    // lookahead so "this week" drops still match, but nothing beyond that.
     const WINDOW_MS = 21 * 86400000;
+    const NOW_MS = Date.now();
+    const FORWARD_CAP_MS = 7 * 86400000;
     const nearest = (k: UploadKind, pub: number, pred: (i: number) => boolean) => {
-      const cands = wantList.filter((w) => w.want === k && pred(w.i) && Math.abs(w.ms - pub) <= WINDOW_MS);
+      const cands = wantList.filter((w) =>
+        w.want === k && pred(w.i) &&
+        Math.abs(w.ms - pub) <= WINDOW_MS &&
+        w.ms <= NOW_MS + FORWARD_CAP_MS          // ← don't jump to future moments
+      );
       if (!cands.length) return undefined;
       cands.sort((a, b) => Math.abs(a.ms - pub) - Math.abs(b.ms - pub));
       return cands[0].i;
