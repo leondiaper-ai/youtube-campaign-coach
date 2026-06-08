@@ -956,7 +956,7 @@ export default function ChannelHealthBoard({
                 style={{ borderColor: MUTED, background: st.rowBg }}
                 onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
               >
-                <div className="min-w-0">
+                <div className="min-w-0 relative">
                   <div className="flex items-center gap-2">
                     <Link
                       href={`${linkPrefix}/${r.slug}`}
@@ -985,24 +985,24 @@ export default function ChannelHealthBoard({
                       </span>
                     )}
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
-                    {removable && r.channelId && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
-                        disabled={removingId === r.channelId}
-                        className="ml-1 w-5 h-5 flex items-center justify-center rounded-full text-[11px] font-bold shrink-0 transition-all opacity-0 group-hover/row:opacity-100 hover:!opacity-100 focus:!opacity-100"
-                        style={{
-                          color: removingId === r.channelId ? 'rgba(14,14,14,0.15)' : 'rgba(14,14,14,0.25)',
-                          background: 'transparent',
-                        }}
-                        title={`Remove ${r.name} from watcher`}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = '#8A1F0C'; e.currentTarget.style.background = 'rgba(138,31,12,0.08)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(14,14,14,0.25)'; e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        {removingId === r.channelId ? '…' : '✕'}
-                      </button>
-                    )}
                   </div>
                   <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
+                  {removable && r.channelId && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
+                      disabled={removingId === r.channelId}
+                      className="absolute -right-1 top-0 w-5 h-5 flex items-center justify-center rounded-full text-[11px] font-bold transition-all opacity-0 group-hover/row:opacity-100 hover:!opacity-100 focus:!opacity-100"
+                      style={{
+                        color: removingId === r.channelId ? 'rgba(14,14,14,0.15)' : 'rgba(14,14,14,0.25)',
+                        background: 'transparent',
+                      }}
+                      title={`Remove ${r.name} from watcher`}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = '#8A1F0C'; e.currentTarget.style.background = 'rgba(138,31,12,0.08)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(14,14,14,0.25)'; e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      {removingId === r.channelId ? '…' : '✕'}
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center">
                   <Sparkline data={r.subsSeries} width={80} height={28} stroke={sp.stroke} fill={sp.fill} />
