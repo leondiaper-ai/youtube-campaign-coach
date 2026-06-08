@@ -21,7 +21,7 @@ import AddArtistModal, { AddArtistModalInline } from '@/components/AddArtistModa
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Team Campaign Board — YouTube Campaign System',
+  title: 'Nordics Team Campaign Board — YouTube Campaign System',
   description: 'Shared team view — monitor channel health and campaign progress.',
 };
 
@@ -231,7 +231,7 @@ export default async function TeamWatcherPage() {
               YouTube Campaign System
             </div>
             <h1 className="font-black text-[28px] leading-tight mt-1">
-              Team Campaign Board
+              Nordics Team Campaign Board
             </h1>
             <p className="text-[11px] text-ink/35 mt-1">
               Monitor YouTube channel health, campaign momentum, and upload activity across active artists.
