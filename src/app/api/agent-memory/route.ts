@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
-import { readLiveSnap, type CachedSnap } from '@/lib/kvCache';
+import { readAllLiveSnaps, type CachedSnap } from '@/lib/kvCache';
 import { readHistory, deltaOver, campaignDelta } from '@/lib/snapshots';
 import { listPlans, loadPlan, type PlanIndexEntry, type SavedPlan } from '@/lib/planStore';
-import { ARTISTS, mergeArtistLists, deriveFromLive, type ChannelState } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists, deriveFromLive, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import {
   normalizeChannelData, rawDelta, toGrowthInput,
@@ -137,7 +136,7 @@ export type AgentMemoryData = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function inferCampaignType(entry: TeamWatcherEntry, plan: SavedPlan | null): string {
+function inferCampaignTypeFromArtist(artist: Artist, plan: SavedPlan | null): string {
   if (plan) {
     const events = plan.plan.events || [];
     const hasAlbum = events.some((e) => e.kind === 'albumRelease');
@@ -148,7 +147,7 @@ function inferCampaignType(entry: TeamWatcherEntry, plan: SavedPlan | null): str
     if (hasTour) return 'Tour';
     if (hasSingle) return 'Single';
   }
-  const name = (entry.campaignName || '').toLowerCase();
+  const name = (artist.campaign || '').toLowerCase();
   if (name.includes('album') || name.includes('lp')) return 'Album';
   if (name.includes('ep')) return 'EP';
   if (name.includes('deluxe')) return 'Deluxe';
@@ -172,10 +171,15 @@ const today = new Date().toISOString().split('T')[0];
 
 export async function GET() {
   try {
-    const entries = await listEntries();
     const custom = await listCustomArtists();
     const allArtists = mergeArtistLists(ARTISTS, custom);
     const planIndex = await listPlans();
+
+    // Batch-read all cached snaps from KV — same as /growth page
+    const handles = allArtists
+      .map((a) => a.channelHandle)
+      .filter(Boolean) as string[];
+    const snapMap = await readAllLiveSnaps(handles);
 
     // ── Build per-campaign intelligence ────────────────────────────────────
     const campaigns: CampaignIntelligence[] = [];
@@ -200,12 +204,12 @@ export async function GET() {
     let lyric_retention = 0;
     let longBTS_campaigns = 0;
 
-    for (const entry of entries) {
-      const snap = await readLiveSnap(entry.channelId);
-      const history = snap?.channelId ? await readHistory(snap.channelId) : [];
-      const campaignStart = entry.campaignStartDate || null;
+    for (const artist of allArtists) {
+      const snap = artist.channelHandle ? (snapMap.get(artist.channelHandle) ?? null) : null;
+      const history = snap?.channelId && !snap.error ? await readHistory(snap.channelId) : [];
+      const campaignStart = artist.campaignStartDate || null;
       const nc = normalizeChannelData(snap, history, campaignStart ? {
-        campaignName: entry.campaignName || 'Tracking',
+        campaignName: artist.campaign || 'Tracking',
         campaignStartDate: campaignStart,
         isActive: true,
       } : undefined);
@@ -215,11 +219,10 @@ export async function GET() {
       const derived = snap ? deriveFromLive(snap, { subs7Delta: subs7Val, views7Delta: views7Val }) : null;
       const currentStatus: ChannelState = derived?.status ?? 'COLD';
 
-      const artist = allArtists.find((a) => a.slug === entry.artistSlug);
       const growthInput: GrowthInput = {
-        ...toGrowthInput(nc, artist ?? { slug: entry.artistSlug, name: entry.displayName, phase: 'PRE' as const }),
-        hasActiveCampaign: !!entry.campaignName,
-        campaignName: entry.campaignName || undefined,
+        ...toGrowthInput(nc, artist),
+        hasActiveCampaign: !!artist.campaign,
+        campaignName: artist.campaign || undefined,
         lastUploadDaysAgo: nc.cadence.lastUploadDaysAgo ?? 60,
       };
 
@@ -232,10 +235,10 @@ export async function GET() {
 
       // Find matching plan
       const matchingPlanEntry = planIndex.find((p) =>
-        p.slug === entry.artistSlug || p.artist.toLowerCase() === entry.displayName.toLowerCase()
+        p.slug === artist.slug || p.artist.toLowerCase() === artist.name.toLowerCase()
       );
       const plan = matchingPlanEntry ? await loadPlan(matchingPlanEntry.slug) : null;
-      const campType = inferCampaignType(entry, plan);
+      const campType = inferCampaignTypeFromArtist(artist, plan);
       const releaseDate = inferReleaseDate(plan);
 
       // Conversion score
@@ -253,11 +256,11 @@ export async function GET() {
 
       // ── Campaign Intelligence ──────────────────────────────────
       campaigns.push({
-        artist: entry.displayName,
-        slug: entry.artistSlug,
-        region: entry.regionTag || 'Nordics',
-        campaignName: entry.campaignName || 'Monitoring',
-        campaignState: entry.campaignState,
+        artist: artist.name,
+        slug: artist.slug,
+        region: 'UK',
+        campaignName: artist.campaign || 'Monitoring',
+        campaignState: artist.campaign ? artist.phase : 'Monitoring',
         campaignType: campType,
         releaseDate,
         watcher: {
@@ -286,8 +289,8 @@ export async function GET() {
       const dq = inferDecisionQuality(blocker.blocker, outcome, nc.cadence.uploads30d);
 
       decisions.push({
-        artist: entry.displayName,
-        slug: entry.artistSlug,
+        artist: artist.name,
+        slug: artist.slug,
         recommendation: actions.doNow[0] || 'Maintain current approach',
         why: blocker.description || 'Channel is operating well',
         confidence: gsResult.confidence === 'HIGH' ? 'high' : gsResult.confidence === 'MED' ? 'medium' : 'experimental',
@@ -307,20 +310,20 @@ export async function GET() {
 
       // ── Epistemic Map ──────────────────────────────────────────
       epistemicMap.push({
-        artist: entry.displayName,
-        slug: entry.artistSlug,
-        knowns: buildKnowns(snap, nc, mf, plan, entry),
+        artist: artist.name,
+        slug: artist.slug,
+        knowns: buildKnownsFromArtist(snap, nc, mf, plan, artist),
         beliefs: buildBeliefs(blocker, actions, mf, nc.cadence),
         unknowns: buildUnknowns(snap, plan, nc),
       });
 
       // ── Learning Notes ─────────────────────────────────────────
-      const note = generateLearningNote(entry, nc, currentStatus, actions, mf);
+      const note = generateLearningNoteFromArtist(artist, nc, currentStatus, actions, mf);
       if (note) learningNotes.push(note);
 
       // ── Counterfactual ─────────────────────────────────────────
-      if (entry.campaignName) {
-        counterfactuals.push(buildCounterfactual(entry, nc, currentStatus, mf));
+      if (artist.campaign) {
+        counterfactuals.push(buildCounterfactualFromArtist(artist, nc, currentStatus, mf));
       }
 
       // ── Pattern evidence accumulation ──────────────────────────
@@ -339,7 +342,7 @@ export async function GET() {
 
     // ── Section 1: Pattern Watch ───────────────────────────────────────────
     const patterns = buildPatterns(
-      entries, multiformat_healthy, multiformat_total_healthy,
+      allArtists, multiformat_healthy, multiformat_total_healthy,
       shorts_only_healthy, shorts_only_total,
       bts_cadence_high, bts_total,
       vis_campaigns, vis_healthy,
@@ -360,14 +363,14 @@ export async function GET() {
 
     // ── Section 6: Hypothesis Tracker ──────────────────────────────────────
     const hypotheses = buildHypotheses(
-      entries, multiformat_healthy, multiformat_total_healthy,
+      allArtists, multiformat_healthy, multiformat_total_healthy,
       bts_cadence_high, bts_total,
       vis_campaigns, vis_healthy, lyric_campaigns,
       shorts_only_healthy, shorts_only_total,
     );
 
     // ── Section 8: First Principles ────────────────────────────────────────
-    const principles = buildPrinciples(entries, campaigns);
+    const principles = buildPrinciples(allArtists, campaigns);
 
     const data: AgentMemoryData = {
       patterns,
@@ -381,8 +384,8 @@ export async function GET() {
       counterfactuals,
       meta: {
         lastUpdated: new Date().toISOString(),
-        campaignCount: entries.filter((e) => e.campaignName).length,
-        artistCount: entries.length,
+        campaignCount: allArtists.filter((a) => a.campaign).length,
+        artistCount: allArtists.length,
       },
     };
 
@@ -465,12 +468,12 @@ function categorizeRecommendations(actions: RecommendedActions): string[] {
   return types;
 }
 
-function buildKnowns(
+function buildKnownsFromArtist(
   snap: CachedSnap | null,
   nc: ReturnType<typeof normalizeChannelData>,
   mf: MultiformatScore | null,
   plan: SavedPlan | null,
-  entry: TeamWatcherEntry,
+  artist: Artist,
 ): string[] {
   const k: string[] = [];
   if (nc.subs != null) k.push(`Subscriber count: ${nc.subs.toLocaleString()}`);
@@ -486,8 +489,8 @@ function buildKnowns(
     if (mf.hasLiveSession) active.push('Live Session');
     if (active.length > 0) k.push(`Active formats: ${active.join(', ')}`);
   }
-  if (entry.campaignName) k.push(`Campaign: ${entry.campaignName}`);
-  if (entry.campaignState) k.push(`Campaign state: ${entry.campaignState}`);
+  if (artist.campaign) k.push(`Campaign: ${artist.campaign}`);
+  k.push(`Phase: ${artist.phase}`);
   if (plan) k.push(`Coach plan exists (${plan.plan.totalWeeks} weeks)`);
   return k;
 }
@@ -522,19 +525,19 @@ function buildUnknowns(
   return u;
 }
 
-function generateLearningNote(
-  entry: TeamWatcherEntry,
+function generateLearningNoteFromArtist(
+  artist: Artist,
   nc: ReturnType<typeof normalizeChannelData>,
   status: ChannelState,
   actions: RecommendedActions,
   mf: MultiformatScore | null,
 ): LearningNote | null {
-  const name = entry.displayName;
+  const name = artist.name;
 
   if (status === 'HEALTHY' && nc.cadence.uploads30d >= 5 && mf && mf.formatCount >= 3) {
     return {
       text: `${name} maintains healthy status with ${nc.cadence.uploads30d} uploads across ${mf.formatCount} formats. Multiformat strategy appears to be sustaining momentum.`,
-      campaign: entry.campaignName || name,
+      campaign: artist.campaign || name,
       date: today,
       type: 'positive',
     };
@@ -543,7 +546,7 @@ function generateLearningNote(
   if (status === 'COLD' && nc.cadence.uploads30d === 0) {
     return {
       text: `${name} remains cold with no uploads in 30 days. Recommended reactivation via Shorts. No action observed yet.`,
-      campaign: entry.campaignName || name,
+      campaign: artist.campaign || name,
       date: today,
       type: 'negative',
     };
@@ -552,7 +555,7 @@ function generateLearningNote(
   if (status === 'BUILDING' && nc.cadence.uploads30d >= 3) {
     return {
       text: `${name} is building with ${nc.cadence.uploads30d} uploads. Cadence established but momentum not yet compounding. Conversion and format diversity may be the next levers.`,
-      campaign: entry.campaignName || name,
+      campaign: artist.campaign || name,
       date: today,
       type: 'neutral',
     };
@@ -561,7 +564,7 @@ function generateLearningNote(
   if (mf && mf.hasShorts && !mf.hasOfficialVideo && !mf.hasLyricVideo && !mf.hasVisualizer) {
     return {
       text: `${name} is Shorts-only. Coach recommended longform content. Channel identity may be limited without anchor content.`,
-      campaign: entry.campaignName || name,
+      campaign: artist.campaign || name,
       date: today,
       type: 'neutral',
     };
@@ -570,14 +573,14 @@ function generateLearningNote(
   return null;
 }
 
-function buildCounterfactual(
-  entry: TeamWatcherEntry,
+function buildCounterfactualFromArtist(
+  artist: Artist,
   nc: ReturnType<typeof normalizeChannelData>,
   status: ChannelState,
   mf: MultiformatScore | null,
 ): Counterfactual {
   const hasStrongContent = nc.cadence.uploads30d >= 5 && mf && mf.formatCount >= 3;
-  const hasCampaign = !!entry.campaignName;
+  const hasCampaign = !!artist.campaign;
 
   let content = hasStrongContent ? 45 : nc.cadence.uploads30d >= 2 ? 30 : 10;
   let release = hasCampaign ? 35 : 15;
@@ -596,8 +599,8 @@ function buildCounterfactual(
   }
 
   return {
-    artist: entry.displayName,
-    slug: entry.artistSlug,
+    artist: artist.name,
+    slug: artist.slug,
     contentSupport: content,
     releaseEvent: release,
     externalDiscovery: external,
@@ -607,7 +610,7 @@ function buildCounterfactual(
 }
 
 function buildPatterns(
-  entries: TeamWatcherEntry[],
+  artists: Artist[],
   mf_healthy: number, mf_total: number,
   so_healthy: number, so_total: number,
   bts_high: number, bts_total: number,
@@ -615,7 +618,7 @@ function buildPatterns(
   lyric_total: number, lyric_healthy: number,
 ): Pattern[] {
   const patterns: Pattern[] = [];
-  const names = entries.map((e) => e.displayName);
+  const names = artists.map((a) => a.name);
 
   if (mf_total >= 2) {
     const mfRate = mf_total > 0 ? mf_healthy / mf_total : 0;
@@ -666,13 +669,13 @@ function buildPatterns(
   }
 
   // Cadence pattern
-  const activeEntries = entries.filter((e) => e.campaignState === 'Active' || e.campaignState === 'Launch Week');
-  if (activeEntries.length >= 2) {
+  const activeArtists = artists.filter((a) => a.campaign);
+  if (activeArtists.length >= 2 || artists.length >= 3) {
     patterns.push({
       title: 'Consistent upload cadence appears more valuable than sporadic bursts',
-      description: `Across ${entries.length} monitored channels, sustained weekly uploads correlate with healthier channel states more reliably than occasional high-volume weeks.`,
-      confidence: entries.length >= 8 ? 'high' : 'medium',
-      evidenceCount: entries.length,
+      description: `Across ${artists.length} monitored channels, sustained weekly uploads correlate with healthier channel states more reliably than occasional high-volume weeks.`,
+      confidence: artists.length >= 8 ? 'high' : 'medium',
+      evidenceCount: artists.length,
       campaignsObserved: names.slice(0, 5),
       lastUpdated: today,
     });
@@ -694,14 +697,14 @@ function buildPatterns(
 }
 
 function buildHypotheses(
-  entries: TeamWatcherEntry[],
+  artists: Artist[],
   mf_healthy: number, mf_total: number,
   bts_high: number, bts_total: number,
   vis_total: number, vis_healthy: number,
   lyric_total: number,
   so_healthy: number, so_total: number,
 ): Hypothesis[] {
-  const names = entries.map((e) => e.displayName);
+  const names = artists.map((a) => a.name);
   const hypotheses: Hypothesis[] = [];
 
   hypotheses.push({
@@ -758,8 +761,8 @@ function buildHypotheses(
     title: 'Campaign planning confidence increases with asset visibility',
     description: 'When the Coach system can see more planned assets and timeline dates, recommendation quality appears higher. Incomplete campaign data reduces decision confidence.',
     confidence: 'medium',
-    campaignsTested: entries.length,
-    evidenceCount: entries.length,
+    campaignsTested: artists.length,
+    evidenceCount: artists.length,
     status: 'growing_confidence',
     supportingCampaigns: names.slice(0, 4),
   });
@@ -767,7 +770,7 @@ function buildHypotheses(
   return hypotheses;
 }
 
-function buildPrinciples(entries: TeamWatcherEntry[], campaigns: CampaignIntelligence[]): Principle[] {
+function buildPrinciples(artists: Artist[], campaigns: CampaignIntelligence[]): Principle[] {
   const healthy = campaigns.filter((c) => c.watcher.healthStatus === 'HEALTHY').map((c) => c.artist);
   const multiformat = campaigns.filter((c) => c.coach.assetGaps.length <= 2).map((c) => c.artist);
   const consistent = campaigns.filter((c) => c.watcher.uploadCadence >= 5).map((c) => c.artist);
