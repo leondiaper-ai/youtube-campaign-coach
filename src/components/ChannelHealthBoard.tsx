@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
@@ -19,6 +20,8 @@ export type RowData = {
   slug: string;
   name: string;
   isVirgin: boolean;
+  /** Channel ID — needed for remove functionality on team watcher */
+  channelId?: string;
   subs: number | null;
   subs7Delta: number | null;
   views7Delta: number | null;
@@ -516,6 +519,7 @@ export default function ChannelHealthBoard({
   topVideos,
   marketFormatStats,
   singleTab = false,
+  removable = false,
 }: {
   rows: RowData[];
   linkPrefix?: string;
@@ -523,11 +527,29 @@ export default function ChannelHealthBoard({
   marketFormatStats?: MarketFormatStats;
   /** Hide the managed/market toggle and show only the managed view */
   singleTab?: boolean;
+  /** Show ✕ remove button on each row (team watcher mode) */
+  removable?: boolean;
 }) {
+  const router = useRouter();
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [moversOpen, setMoversOpen] = useState(false);
   const [explainerOpen, setExplainerOpen] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  const handleRemove = useCallback(async (channelId: string, name: string) => {
+    if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
+    setRemovingId(channelId);
+    try {
+      const res = await fetch(`/api/team-watcher?channelId=${encodeURIComponent(channelId)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to remove');
+      router.refresh();
+    } catch {
+      alert('Failed to remove artist. Please try again.');
+    } finally {
+      setRemovingId(null);
+    }
+  }, [router]);
 
   const managedRows = rows.filter((r) => r.isVirgin);
   const marketRows = rows.filter((r) => !r.isVirgin);
@@ -928,7 +950,7 @@ export default function ChannelHealthBoard({
           return (
             <div key={r.slug}>
               <div
-                className={`grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
+                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
                   i === sorted.length - 1 && !isExpanded ? '' : 'border-b'
                 }`}
                 style={{ borderColor: MUTED, background: st.rowBg }}
@@ -963,6 +985,22 @@ export default function ChannelHealthBoard({
                       </span>
                     )}
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
+                    {removable && r.channelId && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
+                        disabled={removingId === r.channelId}
+                        className="ml-1 w-5 h-5 flex items-center justify-center rounded-full text-[11px] font-bold shrink-0 transition-all opacity-0 group-hover/row:opacity-100 hover:!opacity-100 focus:!opacity-100"
+                        style={{
+                          color: removingId === r.channelId ? 'rgba(14,14,14,0.15)' : 'rgba(14,14,14,0.25)',
+                          background: 'transparent',
+                        }}
+                        title={`Remove ${r.name} from watcher`}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#8A1F0C'; e.currentTarget.style.background = 'rgba(138,31,12,0.08)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(14,14,14,0.25)'; e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        {removingId === r.channelId ? '…' : '✕'}
+                      </button>
+                    )}
                   </div>
                   <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
                 </div>

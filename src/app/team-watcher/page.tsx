@@ -68,6 +68,7 @@ export default async function TeamWatcherPage() {
       return {
         slug: entry.artistSlug,
         name: entry.displayName,
+        channelId: entry.channelId,
         isVirgin: true, // Team watcher shows all in managed view
         subs: nc.subs,
         subs7Delta: subs7Val,
@@ -261,7 +262,7 @@ export default async function TeamWatcherPage() {
         {/* Channel Health table */}
         {hasEntries && (
           <>
-            <ChannelHealthBoard rows={rows} linkPrefix="/team-watcher" singleTab />
+            <ChannelHealthBoard rows={rows} linkPrefix="/team-watcher" singleTab removable />
 
             {/* Active Campaigns section (pinned entries) */}
             {campaignCards.length > 0 && (
