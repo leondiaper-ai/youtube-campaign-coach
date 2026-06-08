@@ -418,12 +418,10 @@ function buildEcosystems(profiles: ChannelProfile[]): EcosystemEntry[] {
 // ── Section 3: Playbooks Worth Banking ──────────────────────────────────────
 
 function buildPlaybooks(profiles: ChannelProfile[]): PlaybookEntry[] {
-  // Only campaigns with enough data to learn from
-  const candidates = profiles.filter((p) =>
-    p.uploads30d >= 3 && p.artist.campaign
-  );
+  // Any channel with enough activity to learn from — not just formal campaigns
+  const candidates = profiles.filter((p) => p.uploads30d >= 3);
 
-  return candidates.map((p) => {
+  const entries = candidates.map((p) => {
     const whatWorked: string[] = [];
     const tags: string[] = [];
 
@@ -438,7 +436,7 @@ function buildPlaybooks(profiles: ChannelProfile[]): PlaybookEntry[] {
     if (p.subs7d != null && p.subs7d > 0) whatWorked.push(`Subscriber growth (+${p.subs7d.toLocaleString()} in 7d)`);
     if (p.campaignSignal === 'Momentum' || p.campaignSignal === 'Strong Signal') whatWorked.push('Release momentum maintained');
 
-    if (whatWorked.length === 0) whatWorked.push('Campaign active with regular content');
+    if (whatWorked.length === 0) whatWorked.push('Active with regular content');
 
     // Tags
     if (p.artist.campaign) {
@@ -449,6 +447,8 @@ function buildPlaybooks(profiles: ChannelProfile[]): PlaybookEntry[] {
       else if (name.includes('deluxe')) tags.push('Deluxe');
       else if (name.includes('tour')) tags.push('Tour');
       else tags.push('Campaign');
+    } else {
+      tags.push('Active Channel');
     }
     if (p.shorts30d >= 10) tags.push('Heavy Shorts');
     else if (p.shorts30d > 0) tags.push('Shorts Active');
@@ -482,7 +482,7 @@ function buildPlaybooks(profiles: ChannelProfile[]): PlaybookEntry[] {
     return {
       artist: p.artist.name,
       slug: p.artist.slug,
-      campaign: p.artist.campaign || '',
+      campaign: p.artist.campaign || 'Active Channel',
       whatHappened: {
         totalUploads: p.uploads30d,
         shorts: p.shorts30d,
@@ -503,18 +503,25 @@ function buildPlaybooks(profiles: ChannelProfile[]): PlaybookEntry[] {
     if (a.wouldReuse !== b.wouldReuse) return a.wouldReuse ? -1 : 1;
     return b.whatHappened.totalUploads - a.whatHappened.totalUploads;
   });
+
+  return entries.slice(0, 20); // Top 20 case studies
 }
 
 // ── Section 4: Interesting Outliers ─────────────────────────────────────────
 
 function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
-  const outliers: OutlierEntry[] = [];
-  const avgCadence = profiles.reduce((s, p) => s + p.uploads30d, 0) / (profiles.length || 1);
+  // Collect outliers by category, then take the most interesting from each
+  const byCategory: Record<string, (OutlierEntry & { interestScore: number })[]> = {
+    overperformer: [],
+    underperformer: [],
+    unexpected_pattern: [],
+    dormant_interest: [],
+  };
 
   for (const p of profiles) {
-    // Large channel, very low activity
+    // Large channel, very low activity — rank by subscriber count (most wasted potential first)
     if (p.subs != null && p.subs >= 100000 && p.uploads30d <= 1) {
-      outliers.push({
+      byCategory.underperformer.push({
         artist: p.artist.name,
         slug: p.artist.slug,
         observation: 'Large channel with minimal activity',
@@ -527,13 +534,14 @@ function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
         campaign: p.artist.campaign || 'Monitoring',
         healthStatus: p.status,
         subs: p.subs,
+        interestScore: p.subs,
       });
       continue;
     }
 
     // Small channel, performing well
     if (p.subs != null && p.subs < 30000 && p.status === 'HEALTHY' && p.uploads30d >= 3) {
-      outliers.push({
+      byCategory.overperformer.push({
         artist: p.artist.name,
         slug: p.artist.slug,
         observation: 'Small channel punching above its weight',
@@ -546,13 +554,14 @@ function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
         campaign: p.artist.campaign || 'Monitoring',
         healthStatus: p.status,
         subs: p.subs,
+        interestScore: p.uploads30d * p.formatCount,
       });
       continue;
     }
 
     // High cadence but unhealthy — effort not translating
     if (p.uploads30d >= 8 && (p.status === 'COLD' || p.status === 'AT RISK')) {
-      outliers.push({
+      byCategory.unexpected_pattern.push({
         artist: p.artist.name,
         slug: p.artist.slug,
         observation: 'High activity but no momentum',
@@ -565,13 +574,14 @@ function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
         campaign: p.artist.campaign || 'Monitoring',
         healthStatus: p.status,
         subs: p.subs,
+        interestScore: p.uploads30d,
       });
       continue;
     }
 
     // Healthy with zero or minimal uploads — catalogue strength?
     if (p.status === 'HEALTHY' && p.uploads30d <= 1 && p.views7d != null && p.views7d > 10000) {
-      outliers.push({
+      byCategory.dormant_interest.push({
         artist: p.artist.name,
         slug: p.artist.slug,
         observation: 'Healthy despite minimal uploads — possible catalogue strength',
@@ -584,13 +594,14 @@ function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
         campaign: p.artist.campaign || 'Monitoring',
         healthStatus: p.status,
         subs: p.subs,
+        interestScore: p.views7d,
       });
       continue;
     }
 
     // Shorts-only but doing well
     if (p.shorts30d >= 5 && p.longform30d === 0 && p.status === 'HEALTHY') {
-      outliers.push({
+      byCategory.unexpected_pattern.push({
         artist: p.artist.name,
         slug: p.artist.slug,
         observation: 'Shorts-only but maintaining healthy status',
@@ -602,13 +613,14 @@ function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
         campaign: p.artist.campaign || 'Monitoring',
         healthStatus: p.status,
         subs: p.subs,
+        interestScore: p.shorts30d * 10,
       });
       continue;
     }
 
     // Very high interest despite limited output
     if (p.views7d != null && p.views7d > 50000 && p.uploads30d <= 2) {
-      outliers.push({
+      byCategory.dormant_interest.push({
         artist: p.artist.name,
         slug: p.artist.slug,
         observation: 'High interest despite limited output',
@@ -621,11 +633,20 @@ function buildOutliers(profiles: ChannelProfile[]): OutlierEntry[] {
         campaign: p.artist.campaign || 'Monitoring',
         healthStatus: p.status,
         subs: p.subs,
+        interestScore: p.views7d,
       });
     }
   }
 
-  return outliers.slice(0, 15);
+  // Take the top entries from each category for a balanced mix
+  const result: OutlierEntry[] = [];
+  for (const cat of ['overperformer', 'unexpected_pattern', 'dormant_interest', 'underperformer'] as const) {
+    const entries = byCategory[cat]
+      .sort((a, b) => b.interestScore - a.interestScore)
+      .slice(0, 4); // Max 4 per category
+    result.push(...entries.map(({ interestScore: _, ...entry }) => entry));
+  }
+  return result;
 }
 
 // ── Section 5: Asset Intelligence ───────────────────────────────────────────
