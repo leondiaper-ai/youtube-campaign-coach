@@ -633,8 +633,8 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
   const save = async () => {
     if (saving) return;
     const url = (inputRef.current?.value ?? '').trim();
-    if (!url) { setError('Paste a Drive or Dropbox folder link'); return; }
-    if (!/drive\.google\.com|docs\.google\.com|dropbox\.com/.test(url)) { setError('That doesn’t look like a Drive or Dropbox link'); return; }
+    if (!url) { setError('Paste a Drive, Dropbox or Frame.io link'); return; }
+    if (!/drive\.google\.com|docs\.google\.com|dropbox\.com|frame\.io/.test(url)) { setError('That doesn’t look like a Drive, Dropbox or Frame.io link'); return; }
     setSaving(true); setError(null);
     try {
       const res = await fetch('/api/coach/drive-assets', {
@@ -651,7 +651,7 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
   if (folderUrl && !editing) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={openBtn}>Open YouTube Asset Library ↗</a>
+        <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={openBtn}>Open Asset Library ↗</a>
         <button onClick={() => setEditing(true)} style={ghostBtn}>Change</button>
       </div>
     );
@@ -663,7 +663,7 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
           ref={inputRef} defaultValue={folderUrl ?? ''}
           onChange={() => { if (error) setError(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
-          placeholder="Paste Google Drive or Dropbox folder URL"
+          placeholder="Paste Google Drive, Dropbox or Frame.io URL"
           style={{ flex: 1, minWidth: 200, fontSize: 11, fontFamily: MONO, color: INK, background: WHITE, border: `1px solid ${BONE}`, borderRadius: 4, padding: '6px 9px', outline: 'none' }}
         />
         <button onClick={save} disabled={saving} style={{ ...openBtn, border: 'none', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.5 : 1 }}>{saving ? 'Saving…' : 'Connect'}</button>
@@ -738,7 +738,7 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
       </div>
     );
     return r.href && (have ?? 0) > 0
-      ? <a href={r.href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>{body}</a>
+      ? <a href={r.href} target="_blank" rel="noopener noreferrer" title="Open in Asset Library" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>{body}</a>
       : body;
   };
 
@@ -1091,7 +1091,7 @@ function AssetChip({ cls, href, suffix }: { cls: DriveAssetClass; href?: string;
   const label = clsLabel(cls) + (suffix ? ` ${suffix}` : '');
   if (href) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" title="Open in YouTube Asset Library"
+      <a href={href} target="_blank" rel="noopener noreferrer" title="Open in Asset Library"
         style={{ ...base, textDecoration: 'none', cursor: 'pointer' }}>
         ✓ {label} <span style={{ opacity: 0.55, fontSize: 9 }}>↗</span>
       </a>
@@ -1403,7 +1403,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   let displayStatus: { label: string; color: string };
   let statusNote: string;
   let statusHref: string | undefined;
-  let statusTitle = 'Open in YouTube Asset Library';
+  let statusTitle = 'Open in Asset Library';
   const driveHref = hasContent ? (present[0] ? linkFor(present[0]) : folderUrl) : undefined;
 
   if (type === 'archive') {
