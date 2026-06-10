@@ -536,6 +536,7 @@ export default function ChannelHealthBoard({
   const [moversOpen, setMoversOpen] = useState(false);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
   const handleRemove = useCallback(async (channelId: string, name: string) => {
     if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
@@ -578,6 +579,9 @@ export default function ChannelHealthBoard({
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status]);
+  const filtered = search.trim()
+    ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
+    : sorted;
 
   // Classification counts
   const growingCount = activeRows.filter((r) => r.classification === 'GROWING').length;
@@ -608,7 +612,7 @@ export default function ChannelHealthBoard({
         <>
           <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
             <button
-              onClick={() => { setView('managed'); setExpandedRow(null); }}
+              onClick={() => { setView('managed'); setExpandedRow(null); setSearch(''); }}
               className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
               style={{
                 background: view === 'managed' ? '#FFFFFF' : 'transparent',
@@ -619,7 +623,7 @@ export default function ChannelHealthBoard({
               Virgin Managed ({managedRows.length})
             </button>
             <button
-              onClick={() => { setView('market'); setExpandedRow(null); }}
+              onClick={() => { setView('market'); setExpandedRow(null); setSearch(''); }}
               className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
               style={{
                 background: view === 'market' ? '#FFFFFF' : 'transparent',
@@ -895,6 +899,38 @@ export default function ChannelHealthBoard({
         )}
       </div>
 
+      {/* ─── SEARCH ─────────────────────────────────────────────────────── */}
+      <div className="mb-3 relative max-w-xs">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search artists…"
+          className="w-full px-3 py-2 pl-8 pr-7 rounded-lg text-[12px] outline-none transition-colors"
+          style={{
+            background: SOFT,
+            color: INK,
+            border: `1px solid ${MUTED}`,
+          }}
+        />
+        <svg
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(14,14,14,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+        </svg>
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-[14px] leading-none hover:opacity-70"
+            style={{ color: 'rgba(14,14,14,0.3)' }}
+            title="Clear search"
+          >
+            &times;
+          </button>
+        )}
+      </div>
+
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
         <div
@@ -912,7 +948,7 @@ export default function ChannelHealthBoard({
           <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
         </div>
 
-        {sorted.map((r, i) => {
+        {filtered.map((r, i) => {
           const st = STATUS_STYLE[r.status];
           const sp = SPARK_COLOR[r.status];
           const subsTotal = r.subs != null ? fmtNum(r.subs) : '—';
@@ -951,7 +987,7 @@ export default function ChannelHealthBoard({
             <div key={r.slug}>
               <div
                 className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
-                  i === sorted.length - 1 && !isExpanded ? '' : 'border-b'
+                  i === filtered.length - 1 && !isExpanded ? '' : 'border-b'
                 }`}
                 style={{ borderColor: MUTED, background: st.rowBg }}
                 onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
@@ -1036,7 +1072,7 @@ export default function ChannelHealthBoard({
               {/* ── Expanded: Strategy Profile + Fix This Week ───────── */}
               {isExpanded && (
                 <div
-                  className={`px-5 py-3.5 ${i === sorted.length - 1 ? '' : 'border-b'}`}
+                  className={`px-5 py-3.5 ${i === filtered.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
                   <div className="flex flex-wrap items-center gap-4">
@@ -1059,6 +1095,11 @@ export default function ChannelHealthBoard({
             </div>
           );
         })}
+        {search && filtered.length === 0 && (
+          <div className="px-5 py-8 text-center text-[12px]" style={{ color: 'rgba(14,14,14,0.35)' }}>
+            No artists matching &ldquo;{search}&rdquo;
+          </div>
+        )}
       </div>
     </>
   );
