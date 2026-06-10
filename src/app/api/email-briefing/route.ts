@@ -88,7 +88,8 @@ const LANDING_URL = 'https://youtube-campaign-coach.vercel.app/weekly-pulse/camp
 
 // YouTube logo (red play icon SVG as base64 data URI — renders in most email clients)
 const YT_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/120px-YouTube_full-color_icon_%282017%29.svg.png';
-const VIRGIN_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Virgin_logo.svg/120px-Virgin_logo.svg.png';
+// Virgin logo: use text fallback since SVG hotlinks are unreliable in email clients
+const VIRGIN_LOGO = '';
 
 // ── Email HTML builder ──────────────────────────────────────────────────────
 
@@ -159,8 +160,8 @@ function buildEmailHtml(data: BriefingData): string {
       <td style="font-size:13px;font-weight:700;color:#1A1A1A;letter-spacing:0.3px;" valign="middle">
         YouTube Campaign Update
       </td>
-      <td width="60" align="right" valign="middle">
-        <img src="${VIRGIN_LOGO}" width="48" alt="Virgin Music" style="display:block;" />
+      <td align="right" valign="middle" style="font-size:13px;font-weight:700;color:#E2001A;letter-spacing:0.3px;">
+        Virgin Music
       </td>
     </tr></table>
   </td></tr>
