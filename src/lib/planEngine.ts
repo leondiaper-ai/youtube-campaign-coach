@@ -29,6 +29,8 @@ export type ParsedEvent = {
   featuredArtist?: string;
   /** Is this a major campaign moment? */
   scale: 'anchor' | 'major' | 'standard' | 'minor';
+  /** YouTube video ID — for unlisted/scheduled videos linked before publication */
+  videoId?: string;
 };
 
 export type ContentAction = {

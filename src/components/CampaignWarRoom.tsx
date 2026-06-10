@@ -1139,6 +1139,15 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
     && liveMatch && !isTeaser(liveMatch)
     && eventMs <= Date.now() + 7 * 86400000) ? liveMatch : undefined;
 
+  // ── Linked video (unlisted/scheduled asset attached directly to event) ──
+  // When a ParsedEvent carries a videoId, the video is a known asset (typically
+  // unlisted on YouTube, ready to publish). Treat it as "READY" — the team can
+  // preview it but it hasn't gone live yet.
+  const linkedVideoId = ev.videoId;
+  const linkedVideoUrl = linkedVideoId
+    ? `https://youtube.com/watch?v=${linkedVideoId}`
+    : undefined;
+
   // ── Standardised primary status ─────────────────────────────────────────
   // Every card resolves to ONE of five labels: LIVE / READY / IN PRODUCTION /
   // PLANNED / REFERENCE. The specific detail (which hero asset, what's live,
@@ -1153,6 +1162,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   if (type === 'archive') {
     displayStatus = STD.reference; statusNote = 'Catalogue reference informing the rollout';
     statusHref = driveHref;
+  } else if (linkedVideoId && !heroLive) {
+    // Unlisted/scheduled video linked directly — treat as READY
+    displayStatus = STD.ready; statusNote = 'Video linked — unlisted and ready to publish';
+    statusHref = linkedVideoUrl; statusTitle = 'Preview the linked video on YouTube';
   } else if (heroLive) {
     displayStatus = STD.live; statusNote = 'Hero asset live on YouTube';
     statusHref = ytUrl(heroLive); statusTitle = 'Watch the hero asset on YouTube';
@@ -1306,6 +1319,18 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Linked unlisted video — shows when no public match exists */}
+        {linkedVideoId && !mainLive && (
+          <div style={{ marginTop: 11 }}>
+            <a href={linkedVideoUrl!} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
+              <img src={`https://i.ytimg.com/vi/${linkedVideoId}/mqdefault.jpg`} alt="" style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: '#B45309', fontWeight: 600, lineHeight: 1.3 }}>
+                Unlisted — ready to publish. Click to preview.
+              </span>
+            </a>
           </div>
         )}
 
