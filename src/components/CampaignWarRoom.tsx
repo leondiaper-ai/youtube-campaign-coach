@@ -286,7 +286,7 @@ export default function CampaignWarRoom(props: Props) {
         nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
         focus={focus}
       />
-      <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} />
+      <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <ContentSupply events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
       <MasterTimeline
@@ -457,9 +457,50 @@ function CampaignStatus({ rolloutActive, datesMapped, pipelineReady, nextTitle, 
 // 2. CURRENT YOUTUBE SURFACE (one strong visual)
 // ══════════════════════════════════════════════════════════════════════════
 
-function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles }: {
+function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles, nextLinkedEvent }: {
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[];
+  nextLinkedEvent?: ParsedEvent;
 }) {
+  // If the next timeline event has a linked (unlisted) video, promote it as
+  // the hero — this is the single YouTube needs to know is coming next.
+  if (nextLinkedEvent?.videoId) {
+    const vid = nextLinkedEvent.videoId;
+    const name = extractEventName(nextLinkedEvent);
+    const date = fmtDay(nextLinkedEvent.dateISO);
+    const today = todayISO();
+    const dDays = Math.round((new Date(nextLinkedEvent.dateISO + 'T12:00:00').getTime() - new Date(today + 'T12:00:00').getTime()) / 86400000);
+    const when = dDays <= 0 ? 'Dropping today' : dDays === 1 ? 'Dropping tomorrow' : dDays <= 7 ? `This week — ${date}` : date;
+
+    return (
+      <section style={{ maxWidth: 1180, margin: '0 auto', padding: '22px 40px 0' }}>
+        <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.26em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 7 }}><YTMark h={11} /> Next Up on YouTube</div>
+        <a href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+          <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', background: INK, aspectRatio: '21 / 8' }}>
+            <img src={ytThumb(vid, 'maxresdefault')} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.72 }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,10,10,0.82) 0%, rgba(10,10,10,0.18) 70%)' }} />
+            <div style={{ position: 'absolute', top: 14, left: 16, display: 'flex', gap: 6 }}>
+              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: RED, padding: '4px 10px', borderRadius: 3 }}>
+                Next Single
+              </span>
+              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: 'rgba(255,255,255,0.14)', padding: '4px 10px', borderRadius: 3 }}>Unlisted</span>
+            </div>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px 22px' }}>
+              <div style={{ fontSize: 'clamp(18px, 2.4vw, 28px)', fontWeight: 900, color: WHITE, lineHeight: 1.15, maxWidth: 680, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>{name}</div>
+              <div style={{ display: 'flex', gap: 16, marginTop: 10, fontSize: 11, color: 'rgba(255,255,255,0.6)', fontFamily: MONO, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ color: WHITE, fontWeight: 800, fontSize: 13 }}>{when}</span>
+                <span>Unlisted — click to preview</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: ACCENT, display: 'inline-block' }} />
+                  Video ready
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </section>
+    );
+  }
+
   if (recentUploads.length === 0) return null;
 
   const titleTokens = knownTitles.flatMap(tok);
