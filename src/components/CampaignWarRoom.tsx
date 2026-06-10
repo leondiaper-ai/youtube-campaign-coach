@@ -229,7 +229,8 @@ type Pool = { bts: number; shorts: number; live: number };
 export default function CampaignWarRoom(props: Props) {
   const { plan, driveLibrary, driveConfig, driveFolderUrl, recentUploads = [], liveChannel, campaignStartDate } = props;
   const campaignTitle = plan.campaignName.replace(/ Campaign$/i, '');
-  const campaignKind = campaignKindLabel(plan.events ?? []);
+  // campaignKindLabel kept for future surfaces but no longer shown in the header.
+  void campaignKindLabel;
   const lib: AssetLibrary = driveLibrary ?? { slug: props.slug, folderUrl: driveFolderUrl ?? '', scannedAt: '', assets: [] };
   const hasAssets = lib.assets.length > 0;
   const knownTitles = driveConfig?.knownTitles ?? [];
@@ -268,14 +269,14 @@ export default function CampaignWarRoom(props: Props) {
   // Next YouTube milestone — the next upcoming RELEASE moment, else the next moment.
   const upcoming = events.map((e) => ({ e, mt: momentType(e) })).filter((x) => x.e.dateISO >= t);
   const nextMoment = upcoming.find((x) => x.mt === 'release') ?? upcoming[0];
-  const momentum = momentumSentence(m.summary, m.support);
+  const headline = headlineSentence(events, nextMoment);
   const focus = currentFocus(m.primaryGap, m.currentPhase);
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
       <CampaignRead
         artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
-        momentum={momentum} kindLabel={campaignKind}
+        headline={headline}
       />
       <CampaignStatus
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
@@ -312,27 +313,57 @@ function fmtDay(iso: string): string {
   return `${d.getUTCDate()} ${mo[0]}${mo.slice(1).toLowerCase()}`;
 }
 
-// Momentum line — what's already in place (positive, never an audit).
-function momentumSentence(summary: ReturnType<typeof summarizeLibrary>, support: ReturnType<typeof supportInventory>): string {
-  if (summary.total === 0) return 'Asset library not connected yet — scan the campaign folder to ground the rollout.';
-  const byc = (c: DriveAssetClass) => summary.byClass.find((x) => x.cls === c)?.count ?? 0;
-  const cats: { label: string; count: number }[] = [];
-  if (byc('official_video')) cats.push({ label: 'official video', count: byc('official_video') });
-  if (byc('visualiser')) cats.push({ label: 'visualisers', count: byc('visualiser') });
-  if (byc('lyric_video')) cats.push({ label: 'lyric videos', count: byc('lyric_video') });
-  if (byc('bts')) cats.push({ label: 'BTS', count: byc('bts') });
-  if (byc('shorts_cutdown')) cats.push({ label: 'Shorts', count: byc('shorts_cutdown') });
-  if (byc('live_performance')) cats.push({ label: 'live content', count: byc('live_performance') });
-  if (summary.images) cats.push({ label: 'artwork', count: summary.images });
-  if (summary.audio) cats.push({ label: 'audio masters', count: summary.audio });
-  cats.sort((a, b) => b.count - a.count);
-  const top = cats.slice(0, 3).map((c) => c.label);
-  const list = top.length === 1 ? top[0] : `${top.slice(0, -1).join(', ')} and ${top[top.length - 1]}`;
-  const adj = support.band === 'Deep' ? 'Deep' : support.band === 'Strong' ? 'Strong' : support.band === 'Building' ? 'Growing' : 'Early';
-  // Only claim "multi-format" when 2+ formats are genuinely present.
-  if (cats.length >= 2) return `${adj} multi-format library already in place — ${list}.`;
-  if (cats.length === 1) return `${adj} ${top[0]} content already in the library — room to build out other formats.`;
-  return `${adj} asset library connected — ready to ground the rollout.`;
+// Dynamic headline — always leads with the next timeline moment, never the
+// asset library. Keeps the campaign page feeling current on every load.
+function headlineSentence(
+  events: ParsedEvent[],
+  nextMoment: { e: ParsedEvent; mt: MomentType } | undefined,
+): string {
+  if (!nextMoment) {
+    // All events in the past — campaign is done.
+    if (events.length > 0) return 'Campaign rollout complete.';
+    return 'Timeline being mapped.';
+  }
+  const e = nextMoment.e;
+  const name = extractEventName(e);
+  const date = fmtDay(e.dateISO);
+  const today = todayISO();
+  const dDays = Math.round((new Date(e.dateISO + 'T12:00:00').getTime() - new Date(today + 'T12:00:00').getTime()) / 86400000);
+  const when = dDays <= 0 ? 'today' : dDays === 1 ? 'tomorrow' : dDays <= 7 ? `this week — ${date}` : date;
+
+  if (nextMoment.mt === 'release') {
+    if (e.videoId) return `Video in for ${name} — dropping ${when}.`;
+    if (dDays <= 14) return `${name} drops ${when} — lock the hero asset.`;
+    return `Next up: ${name} on ${when}.`;
+  }
+  if (nextMoment.mt === 'announce') return `${name} going out ${when}.`;
+  return `${name} coming ${when}.`;
+}
+
+// Pull the human-readable event name from a timeline title.
+// "Single 3 Release - 'CAN'T SAY NO' with Young Adz" → "Can't Say No with Young Adz"
+function extractEventName(e: ParsedEvent): string {
+  const t = e.title;
+  // Try quoted name first (single/double curly or straight quotes)
+  const quoted = t.match(/[''‘’]([^''‘’]+)[''‘’]/);
+  if (quoted) {
+    const feat = t.match(/\bwith\s+(.+?)(?:\s*[-–(]|$)/i);
+    const base = toTitleCase(quoted[1]);
+    return feat ? `${base} with ${feat[1].trim()}` : base;
+  }
+  // Strip common prefixes like "Single 3 Release - ", "Documentary Release", etc.
+  const stripped = t
+    .replace(/^single\s*\d*\s*release\s*[-–—:]\s*/i, '')
+    .replace(/^album\s*release\s*[-–—:+]\s*/i, '')
+    .replace(/^documentary\s*/i, 'Documentary ')
+    .replace(/\(on youtube\)/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return stripped || t;
+}
+
+function toTitleCase(s: string): string {
+  return s.toLowerCase().replace(/(?:^|\s)\S/g, (c) => c.toUpperCase());
 }
 
 // Current focus — the next action stage, framed forward (no "missing/needs").
@@ -347,8 +378,8 @@ function currentFocus(primaryGap: string, phase: PhaseName): string {
     : 'Extending the campaign with catalogue support.';
 }
 
-function CampaignRead({ artist, title, phase, momentum, kindLabel }: {
-  artist: string; title: string; phase: PhaseName; momentum: string; kindLabel?: string;
+function CampaignRead({ artist, title, phase, headline }: {
+  artist: string; title: string; phase: PhaseName; headline: string;
 }) {
   const pt = PHASE_TONE[phase];
   return (
@@ -362,17 +393,14 @@ function CampaignRead({ artist, title, phase, momentum, kindLabel }: {
           </div>
           <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: pt.color, padding: '3px 10px', borderRadius: 3 }}>{pt.label} phase</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+        <div style={{ marginBottom: 6 }}>
           <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>{artist}</span>
-          {kindLabel && (
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, border: `1px solid ${GHOST}66`, padding: '2px 8px', borderRadius: 3 }}>{kindLabel}</span>
-          )}
         </div>
         <h1 style={{ fontSize: 'clamp(26px, 4vw, 44px)', fontWeight: 900, lineHeight: 0.95, letterSpacing: '-0.03em', textTransform: 'uppercase', margin: '0 0 16px', color: WHITE }}>{title}</h1>
 
-        {/* Momentum — what's already in place */}
+        {/* Dynamic headline — always about the next timeline moment */}
         <p style={{ fontSize: 'clamp(17px, 2.2vw, 22px)', fontWeight: 600, lineHeight: 1.35, letterSpacing: '-0.01em', color: WHITE, margin: 0, maxWidth: 860 }}>
-          {momentum}
+          {headline}
         </p>
       </div>
     </section>
