@@ -291,7 +291,7 @@ export default function CampaignWarRoom(props: Props) {
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
-        folderUrl={lib.folderUrl || driveFolderUrl}
+        folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug}
       />
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
@@ -488,7 +488,7 @@ type SupplyRow = {
   cls: DriveAssetClass | 'community';
   label: string; have: number | null; lo: number; hi: number; note: string; href?: string;
 };
-function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUrl?: string) {
+function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUrl?: string, linkedVideoCount?: number) {
   const isSingle = (e: ParsedEvent) => {
     if (momentType(e) !== 'release') return false;
     if (namedHeroAsset(e.title)) return false;
@@ -519,7 +519,7 @@ function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUr
   const large = hasAlbum || singles >= 3;
 
   const rows: SupplyRow[] = [
-    { cls: 'official_video', label: 'Official Video', have: cnt('official_video'), lo: Math.max(1, singles), hi: Math.max(1, singles) + (hasAlbum ? 1 : 0), note: `One per single${hasAlbum ? ' + focus track' : ''}`, href: href('official_video') },
+    { cls: 'official_video', label: 'Official Video', have: cnt('official_video') + (linkedVideoCount ?? 0), lo: Math.max(1, singles), hi: Math.max(1, singles) + (hasAlbum ? 1 : 0), note: `One per single${hasAlbum ? ' + focus track' : ''}${(linkedVideoCount ?? 0) > 0 ? ` · ${linkedVideoCount} linked` : ''}`, href: href('official_video') },
     { cls: 'visualiser', label: 'Visualiser', have: cnt('visualiser'), lo: Math.max(1, singles), hi: Math.max(1, singles), note: 'Supports singles when an official video isn’t available', href: href('visualiser') },
     { cls: 'lyric_video', label: 'Lyric Video', have: cnt('lyric_video'), lo: Math.max(1, singles), hi: Math.max(1, singles), note: 'Typically 7–10 days after a single to extend activity', href: href('lyric_video') },
     { cls: 'shorts_cutdown', label: 'Shorts', have: cnt('shorts_cutdown'), lo: shortsLo, hi: shortsHi, note: 'Based on campaign length and release cadence', href: href('shorts_cutdown') },
@@ -593,7 +593,9 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
 function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
   events: ParsedEvent[]; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
 }) {
-  const supply = computeContentSupply(events, library, folderUrl);
+  // Count events with linked videos as banked Official Video assets
+  const linkedVideoCount = events.filter((e) => e.videoId).length;
+  const supply = computeContentSupply(events, library, folderUrl, linkedVideoCount);
   const range = (lo: number, hi: number) => (lo === hi ? String(lo) : `${lo}–${hi}`);
 
   const Row = ({ r }: { r: SupplyRow }) => {
@@ -634,7 +636,10 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
         </div>
         {!hasAssets && (
           <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.5, marginBottom: 12, padding: '8px 11px', background: PAPER, border: `1px solid ${BONE}`, borderRadius: 6 }}>
-            {folderUrl ? 'Folder connected — your counts populate here once the folder is scanned.' : 'Connect a Drive or Dropbox folder above to track what you already have against these recommendations.'}
+            {linkedVideoCount > 0
+              ? `${linkedVideoCount} video${linkedVideoCount > 1 ? 's' : ''} linked from the timeline — connect a Drive folder to track the rest.`
+              : folderUrl ? 'Folder connected — your counts populate here once the folder is scanned.'
+              : 'Connect a Drive or Dropbox folder above to track what you already have against these recommendations.'}
           </div>
         )}
         {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
@@ -648,9 +653,9 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
 // 4. MASTER TIMELINE (type-aware cards)
 // ══════════════════════════════════════════════════════════════════════════
 
-function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl }: {
+function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl, slug }: {
   events: ParsedEvent[]; mappings: MilestoneMapping[]; phases: PhaseName[]; activeIdx: number;
-  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
+  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string; slug: string;
 }) {
   // Reflect when a support/live moment's content actually goes live: assign each
   // recent BTS/live upload to the NEAREST-by-date moment of that kind (so one
@@ -796,7 +801,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
         showPhaseLabel={showPhaseLabel} compact={compact}
         recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
         live={liveInfo} titleOverride={titleOverride} includes={includes}
-        gapDays={gapDays} nextLabel={nextLabel}
+        gapDays={gapDays} nextLabel={nextLabel} slug={slug}
       />
     );
   };
@@ -1086,11 +1091,85 @@ function shortsRecommendation(events: ParsedEvent[]): { lo: number; hi: number }
   };
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel }: {
+// ── Link Video — inline paste field on milestone cards ────────────────────
+// Lets the team paste a YouTube URL directly onto a timeline moment, linking
+// the unlisted/scheduled video as a banked Official Video asset.
+function LinkVideoButton({ slug, eventTitle }: { slug: string; eventTitle: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const extractVideoId = (url: string): string | null => {
+    const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+    return m?.[1] ?? null;
+  };
+
+  const save = async () => {
+    if (saving) return;
+    const raw = (inputRef.current?.value ?? '').trim();
+    if (!raw) { setError('Paste a YouTube URL'); return; }
+    const videoId = extractVideoId(raw);
+    if (!videoId) { setError('Could not find a YouTube video ID'); return; }
+    setSaving(true); setError(null);
+    try {
+      const res = await fetch('/api/coach/link-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planSlug: slug, videoId, videoTitle: eventTitle, matchEventTitle: eventTitle }),
+      });
+      if (!res.ok) throw new Error('link failed');
+      setOpen(false);
+      router.refresh();
+    } catch { setError('Could not link — please try again'); }
+    finally { setSaving(false); }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        title="Link an unlisted YouTube video to this moment"
+        style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: AMBER, background: `${AMBER}12`, border: `1px solid ${AMBER}33`, borderRadius: 4, padding: '3px 9px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }}
+      >
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden>
+          <path d="M6.5 3.5L11 8l-4.5 4.5M2 8h9" stroke={AMBER} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        Link Video
+      </button>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+        <input
+          ref={inputRef} autoFocus
+          onChange={() => { if (error) setError(null); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setOpen(false); }}
+          placeholder="Paste YouTube URL"
+          style={{ flex: 1, minWidth: 180, fontSize: 11, fontFamily: MONO, color: INK, background: WHITE, border: `1px solid ${BONE}`, borderRadius: 4, padding: '5px 8px', outline: 'none' }}
+        />
+        <button
+          onClick={save} disabled={saving}
+          style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: AMBER, border: 'none', borderRadius: 4, padding: '5px 10px', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.5 : 1 }}
+        >{saving ? 'Linking…' : 'Link'}</button>
+        <button
+          onClick={() => { setOpen(false); setError(null); }}
+          style={{ fontSize: 9, fontWeight: 700, fontFamily: MONO, color: SMOKE, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px' }}
+        >Cancel</button>
+      </div>
+      {error && <div style={{ fontSize: 9, color: RED, fontFamily: MONO }}>{error}</div>}
+    </div>
+  );
+}
+
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
   live?: { primary?: RecentUpload; shorts: RecentUpload[] };
-  titleOverride?: string; includes?: string[]; compact?: boolean; gapDays?: number; nextLabel?: string;
+  titleOverride?: string; includes?: string[]; compact?: boolean; gapDays?: number; nextLabel?: string; slug: string;
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -1331,6 +1410,13 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
                 Unlisted — ready to publish. Click to preview.
               </span>
             </a>
+          </div>
+        )}
+
+        {/* Link Video button — release/announce moments without a linked video */}
+        {heroMoment && !linkedVideoId && !isLive && (
+          <div style={{ marginTop: 11 }}>
+            <LinkVideoButton slug={slug} eventTitle={ev.title} />
           </div>
         )}
 
