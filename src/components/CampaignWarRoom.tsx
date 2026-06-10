@@ -341,13 +341,15 @@ function headlineSentence(
 }
 
 // Pull the human-readable event name from a timeline title.
-// "Single 3 Release - 'CAN'T SAY NO' with Young Adz" → "Can't Say No with Young Adz"
+// "Single 3 Release - ‘CAN’T SAY NO’ with Young Adz" → "Can’t Say No with Young Adz"
 function extractEventName(e: ParsedEvent): string {
   const t = e.title;
-  // Try quoted name first (single/double curly or straight quotes)
-  const quoted = t.match(/[''‘’]([^''‘’]+)[''‘’]/);
+  // Try quoted name first — greedy match between first and last quote so
+  // apostrophes inside (CAN’T, DON’T) aren’t mistaken for closing delimiters.
+  const quoted = t.match(/[‘’’’’"](.+)[‘’’’’"](?:\s+with\b|\s*$)/i)
+    || t.match(/[‘’’’’"](.+)[‘’’’’"]/);
   if (quoted) {
-    const feat = t.match(/\bwith\s+(.+?)(?:\s*[-–(]|$)/i);
+    const feat = t.match(/[‘’’’’’"]\s*with\s+(.+?)(?:\s*[-–(]|$)/i);
     const base = toTitleCase(quoted[1]);
     return feat ? `${base} with ${feat[1].trim()}` : base;
   }
