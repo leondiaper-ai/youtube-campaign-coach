@@ -103,3 +103,77 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+
+/**
+ * DELETE /api/coach/link-video
+ *
+ * Remove an event from a plan by videoId or exact title match.
+ * Body: { planSlug: string; videoId?: string; title?: string }
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { planSlug, videoId, title } = body as {
+      planSlug: string;
+      videoId?: string;
+      title?: string;
+    };
+
+    if (!planSlug || (!videoId && !title)) {
+      return NextResponse.json(
+        { error: 'planSlug and one of videoId or title are required' },
+        { status: 400 },
+      );
+    }
+
+    const saved = await loadPlan(planSlug);
+    if (!saved) {
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    }
+
+    const plan = { ...saved.plan };
+    const before = (plan.events ?? []).length;
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    plan.events = (plan.events ?? []).filter((e) => {
+      if (videoId && e.videoId === videoId) return false;
+      if (title && norm(e.title) === norm(title)) return false;
+      return true;
+    });
+    const removed = before - plan.events.length;
+
+    const updated = await updateSavedPlan(planSlug, { plan });
+
+    return NextResponse.json({
+      ok: true,
+      removed,
+      eventCount: plan.events.length,
+      updatedAt: updated?.updatedAt,
+    });
+  } catch (err) {
+    console.error('DELETE /api/coach/link-video error:', err);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
+}
+
+/**
+ * GET /api/coach/link-video?slug=...
+ *
+ * Return all events with their videoId fields (diagnostic).
+ */
+export async function GET(req: NextRequest) {
+  const slug = req.nextUrl.searchParams.get('slug');
+  if (!slug) {
+    return NextResponse.json({ error: 'slug query param required' }, { status: 400 });
+  }
+  const saved = await loadPlan(slug);
+  if (!saved) {
+    return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+  }
+  const events = (saved.plan.events ?? []).map((e) => ({
+    dateISO: e.dateISO,
+    title: e.title,
+    kind: e.kind,
+    videoId: e.videoId ?? null,
+  }));
+  return NextResponse.json({ slug, eventCount: events.length, events });
+}
