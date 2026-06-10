@@ -102,6 +102,30 @@ export default async function CampaignPage({ params }: PageProps) {
           artistConfig.campaignStartDate,
         );
         if (regen) {
+          // Preserve videoId fields from old events that were manually linked
+          // via /api/coach/link-video (unlisted/scheduled videos). Match by
+          // title normalisation so linked assets survive regeneration.
+          const oldEvents = saved.plan.events ?? [];
+          const videoMap = new Map<string, string>();
+          const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+          for (const e of oldEvents) {
+            if (e.videoId) videoMap.set(norm(e.title), e.videoId);
+          }
+          // Transfer videoId to matching regen events
+          for (const e of regen.events) {
+            const vid = videoMap.get(norm(e.title));
+            if (vid) e.videoId = vid;
+          }
+          // Append any old events with videoId that have no match in the regen
+          // (these were added as brand-new events by the link-video endpoint)
+          const regenNorms = new Set(regen.events.map(e => norm(e.title)));
+          for (const e of oldEvents) {
+            if (e.videoId && !regenNorms.has(norm(e.title))) {
+              regen.events.push(e);
+            }
+          }
+          regen.events.sort((a, b) => a.dateISO.localeCompare(b.dateISO));
+
           saved.plan = regen;
           savePlan(saved.slug, saved.artist, regen, saved.channelCtx, timelineText).catch(() => {});
         }
