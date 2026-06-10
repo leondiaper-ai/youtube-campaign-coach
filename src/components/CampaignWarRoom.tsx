@@ -607,6 +607,7 @@ function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUr
     { cls: 'official_video', label: 'Official Video', have: cnt('official_video') + (linkedVideoCount ?? 0), lo: Math.max(1, singles), hi: Math.max(1, singles) + (hasAlbum ? 1 : 0), note: `One per single${hasAlbum ? ' + focus track' : ''}${(linkedVideoCount ?? 0) > 0 ? ` · ${linkedVideoCount} linked` : ''}`, href: href('official_video') },
     { cls: 'visualiser', label: 'Visualiser', have: cnt('visualiser'), lo: Math.max(1, singles), hi: Math.max(1, singles), note: 'Supports singles when an official video isn’t available', href: href('visualiser') },
     { cls: 'lyric_video', label: 'Lyric Video', have: cnt('lyric_video'), lo: Math.max(1, singles), hi: Math.max(1, singles), note: 'Typically 7–10 days after a single to extend activity', href: href('lyric_video') },
+    { cls: 'trailer', label: 'Trailer / Teaser', have: cnt('trailer'), lo: 1, hi: singles >= 2 ? 3 : 2, note: 'Campaign teasers, album trailers and announcement clips', href: href('trailer') },
     { cls: 'shorts_cutdown', label: 'Shorts', have: cnt('shorts_cutdown'), lo: shortsLo, hi: shortsHi, note: 'Based on campaign length and release cadence', href: href('shorts_cutdown') },
     { cls: 'bts', label: 'BTS', have: cnt('bts'), lo: Math.max(4, singles * 2), hi: Math.max(6, singles * 3), note: 'Studio, behind-the-video, songwriting and storytelling moments', href: href('bts') },
     { cls: 'live_performance', label: 'Live / Acoustic', have: cnt('live_performance'), lo: large ? 4 : 2, hi: large ? 8 : 4, note: 'Acoustic versions, live sessions and performance content', href: href('live_performance') },
@@ -683,15 +684,49 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
   const supply = computeContentSupply(events, library, folderUrl, linkedVideoCount);
   const range = (lo: number, hi: number) => (lo === hi ? String(lo) : `${lo}–${hi}`);
 
+  // ── Scan freshness ──────────────────────────────────────────────────
+  const scanAge = useMemo(() => {
+    if (!library.scannedAt) return null;
+    const ms = Date.now() - new Date(library.scannedAt).getTime();
+    if (!Number.isFinite(ms) || ms < 0) return null;
+    const mins = Math.floor(ms / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  }, [library.scannedAt]);
+
+  // ── New-asset tracking (from scan diff) ─────────────────────────────
+  const newIds = useMemo(() => new Set(library.newAssetIds ?? []), [library.newAssetIds]);
+  const newByClass = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const a of library.assets) {
+      if (newIds.has(a.id)) map.set(a.assetClass, (map.get(a.assetClass) ?? 0) + 1);
+    }
+    return map;
+  }, [library.assets, newIds]);
+  const totalNew = newIds.size;
+  const totalRemoved = library.removedAssetIds?.length ?? 0;
+
   const Row = ({ r }: { r: SupplyRow }) => {
     const have = r.have;
     const pct = r.lo > 0 && have != null ? Math.min(100, Math.round((have / r.lo) * 100)) : 0;
     const met = have != null && have >= r.lo;
     const color = met ? ACCENT : (have ?? 0) > 0 ? AMBER : GHOST;
+    const classNew = newByClass.get(r.cls) ?? 0;
     const body = (
       <div style={{ padding: '11px 0', borderBottom: `1px solid ${BONE}` }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>{r.label}{r.href && (have ?? 0) > 0 ? <span style={{ color: ACCENT, fontSize: 9, marginLeft: 6 }}>↗</span> : null}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: INK }}>
+            {r.label}
+            {r.href && (have ?? 0) > 0 ? <span style={{ color: ACCENT, fontSize: 9, marginLeft: 6 }}>↗</span> : null}
+            {classNew > 0 && (
+              <span style={{ fontSize: 8, fontWeight: 800, fontFamily: MONO, letterSpacing: '0.06em', color: ACCENT, background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`, padding: '1px 5px', borderRadius: 3, marginLeft: 8, verticalAlign: 'middle' }}>
+                +{classNew} NEW
+              </span>
+            )}
+          </span>
           <span style={{ fontSize: 12, color: SMOKE, fontFamily: MONO, whiteSpace: 'nowrap' }}>
             <span style={{ color: INK, fontWeight: 800 }}>{have == null ? '—' : have}</span> / {range(r.lo, r.hi)}
           </span>
@@ -750,8 +785,25 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
-            YouTube Content Supply{library.folderName ? ` · ${library.folderName}` : ''}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
+              YouTube Content Supply{library.folderName ? ` · ${library.folderName}` : ''}
+            </span>
+            {scanAge && (
+              <span style={{ fontSize: 9, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.7 }}>
+                Scanned {scanAge}
+              </span>
+            )}
+            {totalNew > 0 && (
+              <span style={{ fontSize: 8.5, fontWeight: 800, fontFamily: MONO, letterSpacing: '0.06em', color: ACCENT, background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
+                +{totalNew} new asset{totalNew > 1 ? 's' : ''}
+              </span>
+            )}
+            {totalRemoved > 0 && (
+              <span style={{ fontSize: 8.5, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.6 }}>
+                {totalRemoved} removed
+              </span>
+            )}
           </div>
           <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
         </div>

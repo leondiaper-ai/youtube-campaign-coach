@@ -88,6 +88,13 @@ export type AssetLibrary = {
   folderName?: string;
   scannedAt: string;       // ISO timestamp
   assets: DriveAsset[];
+  // ── Scan diff — what changed since the previous scan ──
+  /** Timestamp of the previous scan (so the UI can say "3 new since June 2"). */
+  previousScannedAt?: string;
+  /** Asset IDs that are new since the previous scan. */
+  newAssetIds?: string[];
+  /** Asset IDs that were removed since the previous scan. */
+  removedAssetIds?: string[];
 };
 
 // ── Asset class metadata ───────────────────────────────────────────────────
@@ -159,7 +166,7 @@ const CLASS_PATTERNS: [RegExp, DriveAssetClass][] = [
   [/\blyric(s)?\b/i, 'lyric_video'],
   [/\b(documentary|mini[\s-]?doc|\bdoc\b)\b/i, 'documentary'],
   [/\b(behind\s*the\s*scenes|\bbts\b|making\s*of)\b/i, 'bts'],
-  [/\b(trailer|teaser|announce(ment)?)\b/i, 'trailer'],
+  [/\b(trailer|teaser|announce(ment)?)\d*\b/i, 'trailer'],
   [/\b(short(s)?|cut[\s_-]?down|cutdown|vertical|9x16|9[:x]16|reel|tiktok|\btt\b)\b/i, 'shorts_cutdown'],
   [/\b(live\s*(session|performance|at|from)|acoustic|stripped\s*back|session)\b/i, 'live_performance'],
   [/\b(interview|conversation|q\s*&\s*a|q\s*and\s*a|press\s*junket)\b/i, 'interview'],

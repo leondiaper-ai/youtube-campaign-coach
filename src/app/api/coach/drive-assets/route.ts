@@ -56,6 +56,21 @@ export async function POST(req: NextRequest) {
     if (Array.isArray(files)) {
       // Full scan: classify and replace.
       library = buildLibrary(slug, folderUrl, files, { folderId, folderName });
+
+      // ── Compute scan diff against previous scan ─────────────────────
+      // Lets the UI show "3 new assets since last scan" without re-scanning.
+      const existing = await loadDriveLibrary(slug);
+      if (existing && existing.assets.length > 0) {
+        const prevIds = new Set(existing.assets.map((a) => a.id));
+        const currIds = new Set(library.assets.map((a) => a.id));
+        library.previousScannedAt = existing.scannedAt;
+        library.newAssetIds = library.assets
+          .filter((a) => !prevIds.has(a.id))
+          .map((a) => a.id);
+        library.removedAssetIds = existing.assets
+          .filter((a) => !currIds.has(a.id))
+          .map((a) => a.id);
+      }
     } else {
       // URL-only attach: keep any existing scanned assets, just (re)point the
       // folder. loadDriveLibrary falls back to a baked seed where one exists.
@@ -72,6 +87,8 @@ export async function POST(req: NextRequest) {
       slug,
       assetCount: library.assets.length,
       scannedAt: library.scannedAt,
+      newAssets: library.newAssetIds?.length ?? 0,
+      removedAssets: library.removedAssetIds?.length ?? 0,
     });
   } catch (err) {
     console.error('POST /api/coach/drive-assets error:', err);
