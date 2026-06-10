@@ -1048,8 +1048,31 @@ export async function GET(request: Request) {
       // No fallbacks — if there's no date, the artist doesn't appear here
     }
 
+    // ── Merge same-artist, same-date moments into one combined card ────
+    // e.g. "SINGLE 3: Defibrillator" + "Defibrillator Visualiser" on 15 Jun
+    // becomes one card: "SINGLE 3: Defibrillator + Defibrillator Visualiser"
+    const mergeKey = (m: UpcomingMoment) => `${m.slug}::${m.date ?? ''}`;
+    const mergedMap = new Map<string, UpcomingMoment>();
+    for (const m of upcomingMoments) {
+      const key = mergeKey(m);
+      const existing = mergedMap.get(key);
+      if (existing) {
+        // Combine titles, keep highest priority, best event type
+        existing.moment = existing.moment + ' + ' + m.moment;
+        if (m.priority > existing.priority) {
+          existing.priority = m.priority;
+          existing.eventType = m.eventType;
+          existing.supportSurface = m.supportSurface;
+          existing.rolloutNote = m.rolloutNote;
+        }
+      } else {
+        mergedMap.set(key, { ...m });
+      }
+    }
+    const mergedMoments = Array.from(mergedMap.values());
+
     // Sort: highest priority first, then by date within same priority tier
-    upcomingMoments.sort((a, b) => {
+    mergedMoments.sort((a, b) => {
       if (a.priority !== b.priority) return b.priority - a.priority;
       if (a.date && b.date) return a.date.localeCompare(b.date);
       if (a.date && !b.date) return -1;
@@ -1126,7 +1149,7 @@ export async function GET(request: Request) {
       activeCampaignCount,
       focusCampaigns,
       platformObservations: platformObservations.slice(0, 4),
-      upcomingMoments,
+      upcomingMoments: mergedMoments,
       playbook,
       topShorts,
       topVideos,
