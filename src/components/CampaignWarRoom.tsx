@@ -292,7 +292,7 @@ export default function CampaignWarRoom(props: Props) {
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
-        folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug}
+        folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} hasAssets={hasAssets}
       />
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
@@ -375,7 +375,14 @@ function toTitleCase(s: string): string {
 
 // Current focus — the next action stage, framed forward (no "missing/needs").
 function currentFocus(primaryGap: string, phase: PhaseName): string {
-  if (primaryGap === 'No assets scanned') return 'Connecting the YouTube asset library.';
+  // When no assets are scanned, skip asset-focused messaging — the phase message
+  // is more useful until the folder is connected.
+  if (primaryGap === 'No assets scanned') {
+    return phase === 'BUILD' ? 'Building anticipation ahead of the release window.'
+      : phase === 'RELEASE' ? 'Executing the release rollout.'
+      : phase === 'SCALE' ? 'Scaling reach with sustain content.'
+      : 'Extending the campaign with catalogue support.';
+  }
   if (primaryGap === 'Hero YouTube Asset') return 'Preparing hero release assets.';
   if (primaryGap === 'Finished Shorts') return 'Cutting Shorts to drive discovery.';
   if (primaryGap === 'Artwork / Packaging') return 'Finishing artwork and Community packaging.';
@@ -419,10 +426,12 @@ function CampaignStatus({ rolloutActive, datesMapped, pipelineReady, nextTitle, 
   rolloutActive: boolean; datesMapped: boolean; pipelineReady: boolean;
   nextTitle?: string; nextDate?: string; focus: string;
 }) {
+  // When the asset pipeline isn't connected, hide that chip entirely — the
+  // Content Supply section handles the connect CTA. Only surface it once live.
   const checks = [
     { ok: rolloutActive, on: 'Content rollout active', off: 'Content rollout pending' },
     { ok: datesMapped, on: 'Campaign dates mapped', off: 'Campaign dates not set' },
-    { ok: pipelineReady, on: 'Asset pipeline established', off: 'Asset pipeline not connected' },
+    ...(pipelineReady ? [{ ok: true as const, on: 'Asset pipeline established', off: '' }] : []),
   ];
   const Field = ({ label, value }: { label: string; value: string }) => (
     <div>
@@ -698,6 +707,45 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
       : body;
   };
 
+  // ── Collapsed view when the asset folder isn't connected ──────────────
+  // Roll up the supply table into a compact bar so it doesn't dominate the
+  // page with empty counts. The connect CTA stays visible. Teams can expand
+  // to see recommendations before connecting.
+  if (!hasAssets) {
+    return (
+      <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
+        <style>{`.supply-rollup>summary{list-style:none;cursor:pointer}.supply-rollup>summary::-webkit-details-marker{display:none}.supply-rollup .supply-chev{display:inline-block;transition:transform .15s ease}.supply-rollup[open] .supply-chev{transform:rotate(90deg)}.supply-rollup>summary:hover{background:rgba(0,0,0,0.015)}`}</style>
+        <details className="supply-rollup">
+          <summary style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <span className="supply-chev" style={{ color: SMOKE, fontSize: 11, flexShrink: 0 }}>▸</span>
+              <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, flexShrink: 0 }}>
+                YouTube Content Supply
+              </span>
+              {linkedVideoCount > 0 && (
+                <span style={{ fontSize: 10, fontWeight: 700, fontFamily: MONO, color: ACCENT, background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
+                  {linkedVideoCount} video{linkedVideoCount > 1 ? 's' : ''} linked
+                </span>
+              )}
+              <span style={{ fontSize: 11, color: SMOKE }}>Connect asset folder to track</span>
+            </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
+            </div>
+          </summary>
+          <div style={{ background: WHITE, borderLeft: `1px solid ${BONE}`, borderRight: `1px solid ${BONE}`, borderBottom: `1px solid ${BONE}`, borderRadius: '0 0 10px 10px', padding: '4px 20px 16px', marginTop: -1 }}>
+            <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '10px 0 12px', maxWidth: 770 }}>
+              Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign. Guidance to support the rollout, not targets to hit.
+            </div>
+            {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
+            <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence.</div>
+          </div>
+        </details>
+      </section>
+    );
+  }
+
+  // ── Full view when assets are connected ────────────────────────────────
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
       <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
@@ -710,14 +758,6 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
         <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
           Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign. Guidance to support the rollout, not targets to hit.
         </div>
-        {!hasAssets && (
-          <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.5, marginBottom: 12, padding: '8px 11px', background: PAPER, border: `1px solid ${BONE}`, borderRadius: 6 }}>
-            {linkedVideoCount > 0
-              ? `${linkedVideoCount} video${linkedVideoCount > 1 ? 's' : ''} linked from the timeline — connect a Drive folder to track the rest.`
-              : folderUrl ? 'Folder connected — your counts populate here once the folder is scanned.'
-              : 'Connect a Drive or Dropbox folder above to track what you already have against these recommendations.'}
-          </div>
-        )}
         {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
         <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence.</div>
       </div>
@@ -729,9 +769,9 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
 // 4. MASTER TIMELINE (type-aware cards)
 // ══════════════════════════════════════════════════════════════════════════
 
-function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl, slug }: {
+function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl, slug, hasAssets }: {
   events: ParsedEvent[]; mappings: MilestoneMapping[]; phases: PhaseName[]; activeIdx: number;
-  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string; slug: string;
+  recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string; slug: string; hasAssets: boolean;
 }) {
   // Reflect when a support/live moment's content actually goes live: assign each
   // recent BTS/live upload to the NEAREST-by-date moment of that kind (so one
@@ -877,7 +917,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
         showPhaseLabel={showPhaseLabel} compact={compact}
         recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
         live={liveInfo} titleOverride={titleOverride} includes={includes}
-        gapDays={gapDays} nextLabel={nextLabel} slug={slug}
+        gapDays={gapDays} nextLabel={nextLabel} slug={slug} hasAssets={hasAssets}
       />
     );
   };
@@ -1241,11 +1281,11 @@ function LinkVideoButton({ slug, eventTitle }: { slug: string; eventTitle: strin
   );
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug, hasAssets }: {
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
   live?: { primary?: RecentUpload; shorts: RecentUpload[] };
-  titleOverride?: string; includes?: string[]; compact?: boolean; gapDays?: number; nextLabel?: string; slug: string;
+  titleOverride?: string; includes?: string[]; compact?: boolean; gapDays?: number; nextLabel?: string; slug: string; hasAssets: boolean;
 }) {
   // Direct Drive link for a matched asset class: the matching file, else the folder.
   const linkFor = (c: DriveAssetClass) =>
@@ -1337,8 +1377,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
     statusHref = ytUrl(softLive); statusTitle = 'Watch on YouTube';
   } else if (type === 'release') {
     if (heroInDrive) { displayStatus = STD.ready; statusNote = 'Hero asset in the YouTube library'; }
-    else if (named) { displayStatus = STD.production; statusNote = `${named} in production — not in the library yet`; }
-    else { displayStatus = STD.planned; statusNote = 'Hero asset still to be locked for release week'; }
+    else if (named && hasAssets) { displayStatus = STD.production; statusNote = `${named} in production — not in the library yet`; }
+    else if (named) { displayStatus = STD.planned; statusNote = `${named} to prepare for release week`; }
+    else if (hasAssets) { displayStatus = STD.planned; statusNote = 'Hero asset still to be locked for release week'; }
+    else { displayStatus = STD.planned; statusNote = 'Release week planned'; }
     statusHref = driveHref;
   } else if (type === 'announce') {
     if (present.length) { displayStatus = STD.ready; statusNote = 'Announcement assets partly in place'; }
