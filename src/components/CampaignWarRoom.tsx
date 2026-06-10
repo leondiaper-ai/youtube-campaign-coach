@@ -346,21 +346,26 @@ function extractEventName(e: ParsedEvent): string {
   const t = e.title;
   // Try quoted name first — greedy match between first and last quote so
   // apostrophes inside (CAN’T, DON’T) aren’t mistaken for closing delimiters.
-  const quoted = t.match(/[‘’’’’"](.+)[‘’’’’"](?:\s+with\b|\s*$)/i)
-    || t.match(/[‘’’’’"](.+)[‘’’’’"]/);
+  // Use simple quote chars — timeline titles use straight quotes in practice.
+  const quoted = t.match(/’(.+)’\s+with\b/i) || t.match(/’(.+)’/);
   if (quoted) {
-    const feat = t.match(/[‘’’’’’"]\s*with\s+(.+?)(?:\s*[-–(]|$)/i);
+    const afterQuote = t.slice(t.lastIndexOf("’"));
+    const feat = afterQuote.match(/’\s*with\s+(.+?)(?:\s*[-–(]|$)/i);
     const base = toTitleCase(quoted[1]);
     return feat ? `${base} with ${feat[1].trim()}` : base;
   }
-  // Strip common prefixes like "Single 3 Release - ", "Documentary Release", etc.
-  const stripped = t
+  // Strip common prefixes and trim long album/tour titles.
+  let stripped = t
     .replace(/^single\s*\d*\s*release\s*[-–—:]\s*/i, '')
-    .replace(/^album\s*release\s*[-–—:+]\s*/i, '')
-    .replace(/^documentary\s*/i, 'Documentary ')
     .replace(/\(on youtube\)/i, '')
+    .replace(/\(.*?\)/g, '')               // remove parentheticals
     .replace(/\s+/g, ' ')
     .trim();
+  // "TRAPO 2 Album Release + Tour Announce UK..." → "TRAPO 2"
+  const albumParts = stripped.match(/^(.+?)\s+album\s+release/i);
+  if (albumParts) stripped = albumParts[1] + ' album';
+  // "Documentary Release" / "Documentary Tease" → keep as is
+  if (/^documentary\b/i.test(stripped)) stripped = stripped.replace(/^documentary\s*/i, 'Documentary ').trim();
   return stripped || t;
 }
 
