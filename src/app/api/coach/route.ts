@@ -57,13 +57,14 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { slug, plan, campaignName } = body as { slug: string; plan?: GeneratedPlan; campaignName?: string };
-    if (!slug || (!plan && !campaignName)) {
-      return NextResponse.json({ error: 'slug and one of plan or campaignName are required' }, { status: 400 });
+    const { slug, plan, campaignName, timelineText } = body as { slug: string; plan?: GeneratedPlan; campaignName?: string; timelineText?: string };
+    if (!slug || (!plan && !campaignName && !timelineText)) {
+      return NextResponse.json({ error: 'slug and one of plan, campaignName, or timelineText are required' }, { status: 400 });
     }
-    const updates: { plan?: GeneratedPlan; campaignName?: string } = {};
+    const updates: { plan?: GeneratedPlan; campaignName?: string; timelineText?: string } = {};
     if (plan) updates.plan = plan;
     if (typeof campaignName === 'string') updates.campaignName = campaignName;
+    if (typeof timelineText === 'string') updates.timelineText = timelineText;
     const updated = await updateSavedPlan(slug, updates);
     if (!updated) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });

@@ -171,7 +171,7 @@ export async function listPlans(): Promise<PlanIndexEntry[]> {
 
 export async function updateSavedPlan(
   slug: string,
-  updates: Partial<Pick<SavedPlan, 'plan' | 'campaignName'>>,
+  updates: Partial<Pick<SavedPlan, 'plan' | 'campaignName' | 'timelineText'>>,
 ): Promise<SavedPlan | null> {
   const store = await kv();
   if (!store) return null;
