@@ -1018,19 +1018,24 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     }
   }
 
-  // ── First-90-days view ────────────────────────────────────────────────────
-  // Long campaigns (often 6–12 months) are a huge scroll. Show the campaign's
-  // first 90 days inline, then roll everything beyond that into one expandable
-  // section. Uses a native <details> so it works in shared / read-only planners
-  // with no client JS.
-  const groupTs = (g: Group) => new Date(events[g.idxs[0]].dateISO + 'T12:00:00').getTime();
-  const cutoff = groups.length ? groupTs(groups[0]) + 90 * 86400000 : 0;
-  let splitIdx = groups.findIndex((g) => groupTs(g) > cutoff);
-  if (splitIdx < 0) splitIdx = groups.length;
-  // Only bother collapsing when there's a meaningful tail to hide.
-  const collapse = splitIdx >= 1 && groups.length - splitIdx >= 3;
-  const visN = collapse ? splitIdx : groups.length;
+  // ── Past-events rollup ──────────────────────────────────────────────────
+  // Collapse completed milestones into a dropdown so the page leads with the
+  // current / next milestone. A group is "past" when ALL its event indices are
+  // before activeIdx (i.e. their dateISO < today).
   const fmtShort = (iso: string) => new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const pastSplit = groups.findIndex((g) => g.idxs.some((i) => i >= activeIdx));
+  const pastCount = pastSplit < 0 ? groups.length : pastSplit; // all past if activeIdx beyond end
+  const collapsePast = pastCount >= 2; // worth collapsing if 2+ past groups
+
+  // ── Future tail rollup ────────────────────────────────────────────────────
+  // After the past rollup, also collapse a long future tail (90+ days from the
+  // first VISIBLE group) so the page stays focused.
+  const groupTs = (g: Group) => new Date(events[g.idxs[0]].dateISO + 'T12:00:00').getTime();
+  const presentStart = collapsePast ? pastCount : 0;
+  const cutoff = groups.length > presentStart ? groupTs(groups[presentStart]) + 90 * 86400000 : 0;
+  let futureSplit = groups.findIndex((g, gi) => gi > presentStart && groupTs(g) > cutoff);
+  if (futureSplit < 0) futureSplit = groups.length;
+  const collapseFuture = futureSplit >= presentStart + 1 && groups.length - futureSplit >= 3;
 
   const renderCard = (g: Group, ci: number) => {
     const { idxs, mode } = g;
@@ -1098,26 +1103,48 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
       <div style={{ position: 'relative' }}>
         <div style={{ position: 'absolute', left: 54, top: 6, bottom: 6, width: 2, background: BONE }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {groups.slice(0, visN).map((g, ci) => renderCard(g, ci))}
-          {collapse && (() => {
-            const hidden = groups.slice(splitIdx);
+          <style>{`.tl-rollup>summary{list-style:none}.tl-rollup>summary::-webkit-details-marker{display:none}.tl-rollup .tl-chev{display:inline-block;transition:transform .15s ease}.tl-rollup[open] .tl-chev{transform:rotate(90deg)}.tl-rollup[open] .tl-show{display:none}.tl-rollup:not([open]) .tl-hide{display:none}.tl-rollup>summary:hover{background:#F4F1EB}`}</style>
+          {/* ── Past moments rollup ── */}
+          {collapsePast && (() => {
+            const past = groups.slice(0, pastCount);
+            const moments = past.reduce((n, g) => n + g.idxs.length, 0);
+            const first = events[past[0].idxs[0]].dateISO;
+            const last = events[past[past.length - 1].idxs[0]].dateISO;
+            return (
+              <details className="tl-rollup">
+                <summary style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 28, padding: '13px 16px', background: '#FAF8F4', border: `1px solid ${BONE}`, borderRadius: 8, cursor: 'pointer', fontFamily: MONO, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: INK }}>
+                  <span className="tl-chev" style={{ color: SMOKE, fontSize: 12 }}>▸</span>
+                  <span className="tl-show">Past moments · {moments} completed · {fmtShort(first)} – {fmtShort(last)}</span>
+                  <span className="tl-hide">Hide past moments</span>
+                </summary>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+                  {past.map((g, ci) => renderCard(g, ci))}
+                </div>
+              </details>
+            );
+          })()}
+          {/* ── Current + future moments (visible) ── */}
+          {groups.slice(collapsePast ? pastCount : 0, collapseFuture ? futureSplit : groups.length).map((g, off) => {
+            const ci = (collapsePast ? pastCount : 0) + off;
+            return renderCard(g, ci);
+          })}
+          {/* ── Future tail rollup ── */}
+          {collapseFuture && (() => {
+            const hidden = groups.slice(futureSplit);
             const moments = hidden.reduce((n, g) => n + g.idxs.length, 0);
             const first = events[hidden[0].idxs[0]].dateISO;
             const last = events[hidden[hidden.length - 1].idxs[0]].dateISO;
             return (
-              <>
-                <style>{`.tl-rollup>summary{list-style:none}.tl-rollup>summary::-webkit-details-marker{display:none}.tl-rollup .tl-chev{display:inline-block;transition:transform .15s ease}.tl-rollup[open] .tl-chev{transform:rotate(90deg)}.tl-rollup[open] .tl-show{display:none}.tl-rollup:not([open]) .tl-hide{display:none}.tl-rollup>summary:hover{background:#F4F1EB}`}</style>
-                <details className="tl-rollup">
-                  <summary style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 28, padding: '13px 16px', background: '#FAF8F4', border: `1px solid ${BONE}`, borderRadius: 8, cursor: 'pointer', fontFamily: MONO, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: INK }}>
-                    <span className="tl-chev" style={{ color: SMOKE, fontSize: 12 }}>▸</span>
-                    <span className="tl-show">Later in the campaign · {moments} more moments · {fmtShort(first)} – {fmtShort(last)}</span>
-                    <span className="tl-hide">Hide later moments</span>
-                  </summary>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
-                    {hidden.map((g, off) => renderCard(g, splitIdx + off))}
-                  </div>
-                </details>
-              </>
+              <details className="tl-rollup">
+                <summary style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 28, padding: '13px 16px', background: '#FAF8F4', border: `1px solid ${BONE}`, borderRadius: 8, cursor: 'pointer', fontFamily: MONO, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: INK }}>
+                  <span className="tl-chev" style={{ color: SMOKE, fontSize: 12 }}>▸</span>
+                  <span className="tl-show">Later in the campaign · {moments} more moments · {fmtShort(first)} – {fmtShort(last)}</span>
+                  <span className="tl-hide">Hide later moments</span>
+                </summary>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+                  {hidden.map((g, off) => renderCard(g, futureSplit + off))}
+                </div>
+              </details>
             );
           })()}
           {events.length === 0 && <div style={{ fontSize: 13, color: SMOKE, padding: '20px 0 0 80px' }}>No campaign moments parsed yet. Add a timeline below to populate the master view.</div>}
