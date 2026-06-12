@@ -786,27 +786,97 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
     );
   }
 
-  // ── Hero mode: single-asset or small library ──────────────────────────
-  // When we only have 1–3 files (common: label sends a single official video
-  // folder), the full supply table is mostly empty. Instead we surface a
-  // prominent "asset ready" hero card with thumbnail + direct link so the
-  // YouTube team can't miss it.
+  // ── Visual asset showcase ─────────────────────────────────────────────
+  // Lead with what's available — thumbnails, classification badges, file
+  // names. The category-based supply table collapses beneath: useful for
+  // gap analysis but shouldn't dominate when there are strong assets to
+  // show YouTube.
   const anchorAssets = library.assets.filter((a) => ASSET_CLASS_META[a.assetClass].anchor);
-  const isHeroMode = hasAssets && library.assets.length > 0 && library.assets.length <= 3;
+  const sorted = [...library.assets].sort((a, b) => {
+    const ap = ASSET_CLASS_META[a.assetClass].anchor ? 0 : 1;
+    const bp = ASSET_CLASS_META[b.assetClass].anchor ? 0 : 1;
+    return ap - bp || a.name.localeCompare(b.name);
+  });
+  const hero = anchorAssets[0] ?? sorted[0];
+  const isAnchor = ASSET_CLASS_META[hero.assetClass].anchor;
+  const heroLabel = ASSET_CLASS_META[hero.assetClass].label;
+  const thumb = hero.thumbnailUrl;
+  const heroHref = hero.webViewLink ?? folderUrl;
 
-  if (isHeroMode) {
-    const hero = anchorAssets[0] ?? library.assets[0];
-    const heroLabel = ASSET_CLASS_META[hero.assetClass].label;
-    const isAnchor = ASSET_CLASS_META[hero.assetClass].anchor;
-    const thumb = hero.thumbnailUrl;
-    const heroHref = hero.webViewLink ?? folderUrl;
+  // Summary line: "3 Official Video · 2 Other"
+  const classCounts = new Map<string, number>();
+  for (const a of library.assets) {
+    const label = ASSET_CLASS_META[a.assetClass].label;
+    classCounts.set(label, (classCounts.get(label) ?? 0) + 1);
+  }
+  const summaryParts = Array.from(classCounts.entries())
+    .sort(([, a], [, b]) => b - a)
+    .map(([label, count]) => `${count} ${label}`);
 
-    return (
-      <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
-        <div style={{ background: WHITE, border: `1.5px solid ${isAnchor ? ACCENT : AMBER}40`, borderRadius: 12, overflow: 'hidden' }}>
-          {/* Hero banner */}
+  const useGrid = library.assets.length > 3;
+
+  return (
+    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
+      <div style={{ background: WHITE, border: `1.5px solid ${isAnchor ? ACCENT : AMBER}40`, borderRadius: 12, overflow: 'hidden' }}>
+        {/* Header bar — asset count + type summary + library link */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '14px 20px', borderBottom: useGrid ? `1px solid ${BONE}` : 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '3px 10px', borderRadius: 3 }}>
+              {library.assets.length} Asset{library.assets.length !== 1 ? 's' : ''} Ready
+            </span>
+            <span style={{ fontSize: 10, fontWeight: 600, fontFamily: MONO, color: SMOKE }}>
+              {summaryParts.join(' · ')}
+            </span>
+            {scanAge && (
+              <span style={{ fontSize: 9, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.7 }}>
+                Scanned {scanAge}
+              </span>
+            )}
+            {totalNew > 0 && (
+              <span style={{ fontSize: 8.5, fontWeight: 800, fontFamily: MONO, letterSpacing: '0.06em', color: ACCENT, background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`, padding: '2px 8px', borderRadius: 3 }}>
+                +{totalNew} new
+              </span>
+            )}
+          </div>
+          <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
+        </div>
+
+        {useGrid ? (
+          /* ── Grid showcase for 4+ files ── */
+          <div style={{ padding: '14px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
+            {sorted.map((a) => {
+              const aHref = a.webViewLink ?? folderUrl;
+              const aAnchor = ASSET_CLASS_META[a.assetClass].anchor;
+              const aLabel = ASSET_CLASS_META[a.assetClass].label;
+              return (
+                <a key={a.id} href={aHref ?? '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', borderRadius: 6, overflow: 'hidden', border: `1px solid ${BONE}`, textDecoration: 'none', color: 'inherit', background: PAPER }}>
+                  {a.thumbnailUrl ? (
+                    <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#111', overflow: 'hidden' }}>
+                      <img src={a.thumbnailUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.1)' }}>
+                        <svg width="24" height="24" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,0.85)" /><polygon points="20,15 20,33 34,24" fill={aAnchor ? ACCENT : AMBER} /></svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ height: 56, background: aAnchor ? 'rgba(45,106,79,0.04)' : 'rgba(180,83,9,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="28" height="28" viewBox="0 0 48 48" fill="none"><rect x="6" y="12" width="36" height="22" rx="3" stroke={aAnchor ? ACCENT : AMBER} strokeWidth="1.5" fill="none" /><polygon points="20,17 20,29 30,23" fill={aAnchor ? ACCENT : AMBER} opacity="0.5" /></svg>
+                    </div>
+                  )}
+                  <div style={{ padding: '6px 8px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <span style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: MONO, color: aAnchor ? ACCENT : SMOKE }}>
+                      {aLabel}
+                    </span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: INK, fontFamily: MONO, lineHeight: 1.3, wordBreak: 'break-word' }}>
+                      {a.name.length > 35 ? a.name.slice(0, 32) + '…' : a.name}
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        ) : (
+          /* ── Single-hero layout for 1–3 files ── */
           <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
-            {/* Thumbnail area */}
             {thumb ? (
               <a href={heroHref} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: 220, minHeight: 124, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#111' }}>
                 <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -819,23 +889,7 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="9" width="40" height="26" rx="4" stroke={isAnchor ? ACCENT : AMBER} strokeWidth="2" fill="none" /><polygon points="19,15 19,31 33,23" fill={isAnchor ? ACCENT : AMBER} opacity="0.7" /><rect x="12" y="38" width="24" height="3" rx="1.5" fill={isAnchor ? ACCENT : AMBER} opacity="0.3" /></svg>
               </a>
             )}
-            {/* Info area */}
             <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '3px 10px', borderRadius: 3 }}>
-                  {isAnchor ? `${heroLabel} Ready` : `${heroLabel} in Library`}
-                </span>
-                {library.assets.length > 1 && (
-                  <span style={{ fontSize: 9, fontWeight: 700, fontFamily: MONO, color: SMOKE }}>
-                    + {library.assets.length - 1} more file{library.assets.length > 2 ? 's' : ''}
-                  </span>
-                )}
-                {scanAge && (
-                  <span style={{ fontSize: 9, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.7 }}>
-                    Scanned {scanAge}
-                  </span>
-                )}
-              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {library.assets.map((a) => (
                   <span key={a.id} style={{ fontSize: 12, fontWeight: 600, color: INK, fontFamily: MONO, lineHeight: 1.35 }}>
@@ -843,70 +897,27 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
                   </span>
                 ))}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 2 }}>
-                {heroHref && (
-                  <a href={heroHref} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '6px 14px', borderRadius: 4, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                    View Asset <span style={{ opacity: 0.6, fontSize: 9 }}>↗</span>
-                  </a>
-                )}
-                <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
-              </div>
+              {heroHref && (
+                <a href={heroHref} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '6px 14px', borderRadius: 4, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, alignSelf: 'flex-start' }}>
+                  View Asset <span style={{ opacity: 0.6, fontSize: 9 }}>↗</span>
+                </a>
+              )}
             </div>
           </div>
-          {/* Collapsed supply table below */}
-          <details style={{ borderTop: `1px solid ${BONE}` }}>
-            <summary style={{ padding: '10px 20px', cursor: 'pointer', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: MONO, color: GHOST, listStyle: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 8 }}>▸</span> Full Content Supply
-            </summary>
-            <div style={{ padding: '0 20px 16px' }}>
-              <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
-                Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign.
-              </div>
-              {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
-            </div>
-          </details>
-        </div>
-      </section>
-    );
-  }
+        )}
 
-  // ── Full view when assets are connected ────────────────────────────────
-  return (
-    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
-      <div style={{ background: WHITE, border: `1px solid ${BONE}`, borderRadius: 10, padding: '16px 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 4 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
-              YouTube Content Supply{library.folderName ? ` · ${library.folderName}` : ''}
-            </span>
-            {library.assets.length > 0 && (
-              <span style={{ fontSize: 9, fontWeight: 800, fontFamily: MONO, letterSpacing: '0.06em', color: INK, background: 'rgba(14,14,14,0.06)', padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
-                {library.assets.length} file{library.assets.length === 1 ? '' : 's'}
-              </span>
-            )}
-            {scanAge && (
-              <span style={{ fontSize: 9, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.7 }}>
-                Scanned {scanAge}
-              </span>
-            )}
-            {totalNew > 0 && (
-              <span style={{ fontSize: 8.5, fontWeight: 800, fontFamily: MONO, letterSpacing: '0.06em', color: ACCENT, background: 'rgba(45,106,79,0.08)', border: `1px solid ${ACCENT}30`, padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
-                +{totalNew} new asset{totalNew > 1 ? 's' : ''}
-              </span>
-            )}
-            {totalRemoved > 0 && (
-              <span style={{ fontSize: 8.5, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.6 }}>
-                {totalRemoved} removed
-              </span>
-            )}
+        {/* Collapsed supply table — gap analysis available on demand */}
+        <details style={{ borderTop: `1px solid ${BONE}` }}>
+          <summary style={{ padding: '10px 20px', cursor: 'pointer', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: MONO, color: GHOST, listStyle: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 8 }}>▸</span> Full Content Supply
+          </summary>
+          <div style={{ padding: '0 20px 16px' }}>
+            <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
+              Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign.
+            </div>
+            {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
           </div>
-          <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
-        </div>
-        <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
-          Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign. Guidance to support the rollout, not targets to hit.
-        </div>
-        {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
-        <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence.</div>
+        </details>
       </div>
     </section>
   );
