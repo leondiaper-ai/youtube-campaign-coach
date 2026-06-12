@@ -519,7 +519,13 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles, next
     const rel = shareTok(tok(u.title), titleTokens) ? 1.4 : 1;
     return ageW * rel * Math.log10(Math.max(10, u.viewCount));
   };
-  const hero = [...recentUploads].sort((a, b) => score(b) - score(a))[0];
+  // When every upload is archive (no recent campaign activity), prefer the
+  // most-recently-published video — a 400-day-old upload is more representative
+  // than an 8-year-old catalogue hit, regardless of view count.
+  const allArchive = recentUploads.every((u) => uploadAge(u.publishedAt, campaignStart) === 'archive');
+  const hero = allArchive
+    ? [...recentUploads].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())[0]
+    : [...recentUploads].sort((a, b) => score(b) - score(a))[0];
   const age = uploadAge(hero.publishedAt, campaignStart);
   const ab = ageBadge[age];
   const relevant = age !== 'archive' || shareTok(tok(hero.title), titleTokens);
@@ -789,6 +795,11 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
             <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO }}>
               YouTube Content Supply{library.folderName ? ` · ${library.folderName}` : ''}
             </span>
+            {library.assets.length > 0 && (
+              <span style={{ fontSize: 9, fontWeight: 800, fontFamily: MONO, letterSpacing: '0.06em', color: INK, background: 'rgba(14,14,14,0.06)', padding: '2px 8px', borderRadius: 3, whiteSpace: 'nowrap' }}>
+                {library.assets.length} file{library.assets.length === 1 ? '' : 's'}
+              </span>
+            )}
             {scanAge && (
               <span style={{ fontSize: 9, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.7 }}>
                 Scanned {scanAge}
@@ -1540,11 +1551,57 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         )}
 
-        {/* Assets currently available for this moment */}
-        {present.length > 0 && (
-          <div style={{ marginTop: 11 }}>
-            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: GHOST, fontFamily: MONO, marginBottom: 6 }}>Assets Available</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>{present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} suffix={HERO_CLS.includes(c) ? 'Available' : undefined} />)}</div>
+        {/* Assets currently available for this moment — prominent green banner */}
+        {(present.length > 0 || (heroInDrive && mapping)) && (
+          <div style={{ marginTop: 11, background: 'rgba(45,106,79,0.06)', border: `1px solid ${ACCENT}30`, borderRadius: 6, padding: '8px 12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10, fontWeight: 900, color: ACCENT, fontFamily: MONO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  {heroInDrive ? '✓ Hero Asset Ready' : '✓ Assets Available'}
+                </span>
+                {present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} />)}
+              </div>
+              {folderUrl && (
+                <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  View in Library <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
+                </a>
+              )}
+            </div>
+            {mapping && mapping.assets.length > 0 && (
+              <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: '3px 12px' }}>
+                {mapping.assets.slice(0, 4).map((a) => (
+                  <span key={a.id} style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                    {a.name.length > 40 ? a.name.slice(0, 37) + '…' : a.name}
+                  </span>
+                ))}
+                {mapping.assets.length > 4 && <span style={{ fontSize: 10, color: GHOST, fontFamily: MONO }}>+{mapping.assets.length - 4} more</span>}
+              </div>
+            )}
+          </div>
+        )}
+        {/* Fallback: show raw file count when assets exist but aren't classified into known types */}
+        {present.length === 0 && !heroInDrive && mapping && mapping.assets.length > 0 && (
+          <div style={{ marginTop: 11, background: 'rgba(180,83,9,0.06)', border: `1px solid ${AMBER}30`, borderRadius: 6, padding: '8px 12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 10, fontWeight: 900, color: AMBER, fontFamily: MONO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  {mapping.assets.length} file{mapping.assets.length === 1 ? '' : 's'} in library
+                </span>
+              </div>
+              {folderUrl && (
+                <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: AMBER, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  View in Library <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
+                </a>
+              )}
+            </div>
+            <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: '3px 12px' }}>
+              {mapping.assets.slice(0, 4).map((a) => (
+                <span key={a.id} style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                  {a.name.length > 40 ? a.name.slice(0, 37) + '…' : a.name}
+                </span>
+              ))}
+              {mapping.assets.length > 4 && <span style={{ fontSize: 10, color: GHOST, fontFamily: MONO }}>+{mapping.assets.length - 4} more</span>}
+            </div>
           </div>
         )}
 

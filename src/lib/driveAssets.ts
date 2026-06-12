@@ -162,6 +162,10 @@ export function mediaTypeFromMime(mime: string | undefined, name = ''): DriveMed
 
 const CLASS_PATTERNS: [RegExp, DriveAssetClass][] = [
   [/\b(official\s*(music\s*)?video|official\s*vid|\bomv\b|\bovid\b)\b/i, 'official_video'],
+  // Production edits — "Edit 19b", "DC Edit 2 - Graded", "Director's Cut" etc.
+  [/\bedit\s*\d/i, 'official_video'],
+  [/\b(dc|director'?s?\s*cut)\b/i, 'official_video'],
+  [/\bgraded\b/i, 'official_video'],
   [/\bvisuali[sz]er\b/i, 'visualiser'],
   [/\blyric(s)?\b/i, 'lyric_video'],
   [/\b(documentary|mini[\s-]?doc|\bdoc\b)\b/i, 'documentary'],
@@ -180,6 +184,7 @@ const CLASS_PATTERNS: [RegExp, DriveAssetClass][] = [
 // but higher than the bare media-type fallback. Lets a "Recording BTS" or
 // "Shorts : Vertical Cuts" folder classify its otherwise-unlabelled files.
 const FOLDER_PATTERNS: [RegExp, DriveAssetClass][] = [
+  [/official\s*(music\s*)?video|official\s*vid|\bomv\b/i, 'official_video'],
   [/short|vertical|cut[\s_-]?down|cutdown|reel/i, 'shorts_cutdown'],
   [/visuali[sz]er/i, 'visualiser'],
   [/lyric/i, 'lyric_video'],
