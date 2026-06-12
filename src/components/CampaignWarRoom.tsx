@@ -786,6 +786,90 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
     );
   }
 
+  // ── Hero mode: single-asset or small library ──────────────────────────
+  // When we only have 1–3 files (common: label sends a single official video
+  // folder), the full supply table is mostly empty. Instead we surface a
+  // prominent "asset ready" hero card with thumbnail + direct link so the
+  // YouTube team can't miss it.
+  const anchorAssets = library.assets.filter((a) => ASSET_CLASS_META[a.assetClass].anchor);
+  const isHeroMode = hasAssets && library.assets.length > 0 && library.assets.length <= 3;
+
+  if (isHeroMode) {
+    const hero = anchorAssets[0] ?? library.assets[0];
+    const heroLabel = ASSET_CLASS_META[hero.assetClass].label;
+    const isAnchor = ASSET_CLASS_META[hero.assetClass].anchor;
+    const thumb = hero.thumbnailUrl;
+    const heroHref = hero.webViewLink ?? folderUrl;
+
+    return (
+      <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
+        <div style={{ background: WHITE, border: `1.5px solid ${isAnchor ? ACCENT : AMBER}40`, borderRadius: 12, overflow: 'hidden' }}>
+          {/* Hero banner */}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+            {/* Thumbnail area */}
+            {thumb ? (
+              <a href={heroHref} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: 220, minHeight: 124, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#111' }}>
+                <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.15)' }}>
+                  <svg width="36" height="36" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="23" fill="rgba(255,255,255,0.9)" /><polygon points="19,15 19,33 35,24" fill={isAnchor ? ACCENT : AMBER} /></svg>
+                </div>
+              </a>
+            ) : (
+              <a href={heroHref ?? '#'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 140, minHeight: 124, flexShrink: 0, background: isAnchor ? 'rgba(45,106,79,0.06)' : 'rgba(180,83,9,0.06)', textDecoration: 'none' }}>
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="4" y="9" width="40" height="26" rx="4" stroke={isAnchor ? ACCENT : AMBER} strokeWidth="2" fill="none" /><polygon points="19,15 19,31 33,23" fill={isAnchor ? ACCENT : AMBER} opacity="0.7" /><rect x="12" y="38" width="24" height="3" rx="1.5" fill={isAnchor ? ACCENT : AMBER} opacity="0.3" /></svg>
+              </a>
+            )}
+            {/* Info area */}
+            <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '3px 10px', borderRadius: 3 }}>
+                  {isAnchor ? `${heroLabel} Ready` : `${heroLabel} in Library`}
+                </span>
+                {library.assets.length > 1 && (
+                  <span style={{ fontSize: 9, fontWeight: 700, fontFamily: MONO, color: SMOKE }}>
+                    + {library.assets.length - 1} more file{library.assets.length > 2 ? 's' : ''}
+                  </span>
+                )}
+                {scanAge && (
+                  <span style={{ fontSize: 9, fontWeight: 600, fontFamily: MONO, color: SMOKE, opacity: 0.7 }}>
+                    Scanned {scanAge}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {library.assets.map((a) => (
+                  <span key={a.id} style={{ fontSize: 12, fontWeight: 600, color: INK, fontFamily: MONO, lineHeight: 1.35 }}>
+                    {a.name.length > 55 ? a.name.slice(0, 52) + '…' : a.name}
+                  </span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 2 }}>
+                {heroHref && (
+                  <a href={heroHref} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '6px 14px', borderRadius: 4, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    View Asset <span style={{ opacity: 0.6, fontSize: 9 }}>↗</span>
+                  </a>
+                )}
+                <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
+              </div>
+            </div>
+          </div>
+          {/* Collapsed supply table below */}
+          <details style={{ borderTop: `1px solid ${BONE}` }}>
+            <summary style={{ padding: '10px 20px', cursor: 'pointer', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: MONO, color: GHOST, listStyle: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 8 }}>▸</span> Full Content Supply
+            </summary>
+            <div style={{ padding: '0 20px 16px' }}>
+              <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
+                Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign.
+              </div>
+              {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
+            </div>
+          </details>
+        </div>
+      </section>
+    );
+  }
+
   // ── Full view when assets are connected ────────────────────────────────
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
@@ -1552,33 +1636,49 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         )}
 
         {/* Assets currently available for this moment — prominent green banner */}
-        {(present.length > 0 || (heroInDrive && mapping)) && (
-          <div style={{ marginTop: 11, background: 'rgba(45,106,79,0.06)', border: `1px solid ${ACCENT}30`, borderRadius: 6, padding: '8px 12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 10, fontWeight: 900, color: ACCENT, fontFamily: MONO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                  {heroInDrive ? '✓ Hero Asset Ready' : '✓ Assets Available'}
-                </span>
-                {present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} />)}
-              </div>
-              {folderUrl && (
-                <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  View in Library <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
+        {(present.length > 0 || (heroInDrive && mapping)) && (() => {
+          const thumbAsset = mapping?.assets.find((a) => a.thumbnailUrl);
+          const thumbUrl = thumbAsset?.thumbnailUrl;
+          const assetHref = thumbAsset?.webViewLink ?? folderUrl;
+          return (
+            <div style={{ marginTop: 11, background: 'rgba(45,106,79,0.06)', border: `1px solid ${ACCENT}30`, borderRadius: 6, padding: 0, overflow: 'hidden', display: 'flex', alignItems: 'stretch' }}>
+              {/* Thumbnail preview if available */}
+              {thumbUrl && (
+                <a href={assetHref} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: 88, minHeight: 56, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#111' }}>
+                  <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.12)' }}>
+                    <svg width="22" height="22" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,0.85)" /><polygon points="20,15 20,33 34,24" fill={ACCENT} /></svg>
+                  </div>
                 </a>
               )}
-            </div>
-            {mapping && mapping.assets.length > 0 && (
-              <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: '3px 12px' }}>
-                {mapping.assets.slice(0, 4).map((a) => (
-                  <span key={a.id} style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
-                    {a.name.length > 40 ? a.name.slice(0, 37) + '…' : a.name}
-                  </span>
-                ))}
-                {mapping.assets.length > 4 && <span style={{ fontSize: 10, color: GHOST, fontFamily: MONO }}>+{mapping.assets.length - 4} more</span>}
+              <div style={{ flex: 1, padding: '8px 12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 10, fontWeight: 900, color: ACCENT, fontFamily: MONO, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      {heroInDrive ? '✓ Hero Asset Ready' : '✓ Assets Available'}
+                    </span>
+                    {present.map((c) => <AssetChip key={c} cls={c} href={linkFor(c)} />)}
+                  </div>
+                  {folderUrl && (
+                    <a href={folderUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: ACCENT, padding: '4px 10px', borderRadius: 3, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      View in Library <span style={{ opacity: 0.6, fontSize: 8 }}>↗</span>
+                    </a>
+                  )}
+                </div>
+                {mapping && mapping.assets.length > 0 && (
+                  <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: '3px 12px' }}>
+                    {mapping.assets.slice(0, 4).map((a) => (
+                      <span key={a.id} style={{ fontSize: 10, color: SMOKE, fontFamily: MONO }}>
+                        {a.name.length > 40 ? a.name.slice(0, 37) + '…' : a.name}
+                      </span>
+                    ))}
+                    {mapping.assets.length > 4 && <span style={{ fontSize: 10, color: GHOST, fontFamily: MONO }}>+{mapping.assets.length - 4} more</span>}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          );
+        })()}
         {/* Fallback: show raw file count when assets exist but aren't classified into known types */}
         {present.length === 0 && !heroInDrive && mapping && mapping.assets.length > 0 && (
           <div style={{ marginTop: 11, background: 'rgba(180,83,9,0.06)', border: `1px solid ${AMBER}30`, borderRadius: 6, padding: '8px 12px' }}>

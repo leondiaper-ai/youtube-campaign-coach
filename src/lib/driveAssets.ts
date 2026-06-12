@@ -63,6 +63,8 @@ export type DriveAsset = {
   sizeBytes?: number;
   modifiedTime?: string;
   webViewLink?: string;
+  /** Preview/thumbnail URL for visual assets (from Frame.io, Drive, etc.). */
+  thumbnailUrl?: string;
 };
 
 /** Raw file shape as returned by the Drive MCP (loosely typed on purpose). */
@@ -78,6 +80,8 @@ export type RawDriveFile = {
   webViewLink?: string;
   /** Name of the containing sub-folder — used as a classification fallback. */
   folderPath?: string;
+  /** Preview/thumbnail URL (e.g. from Frame.io or Drive). */
+  thumbnailUrl?: string;
 };
 
 /** A scanned + classified asset folder, persisted per campaign slug. */
@@ -266,6 +270,7 @@ export function buildAsset(raw: RawDriveFile): DriveAsset {
     sizeBytes: toSizeBytes(raw.fileSize ?? raw.size),
     modifiedTime: raw.modifiedTime,
     webViewLink: raw.webViewLink ?? raw.viewUrl,
+    thumbnailUrl: raw.thumbnailUrl,
   };
 }
 
@@ -635,6 +640,17 @@ export function mapAssetsToTimeline(
   const events: ParsedEvent[] = plan.events ?? [];
   const milestoneTokens = events.map((ev) => milestoneIdentity(ev.title, config));
   const assetTokenSets = lib.assets.map(assetIdentity);
+
+  // Folder name tokens — labels often name files with project codes (e.g.
+  // "0144 Koffee Edit 19a") while the folder carries the song title ("Koffee —
+  // Rapid Fiyah Official Video"). Merging folder tokens into each asset's
+  // identity lets us bridge this naming gap.
+  const folderTokens = lib.folderName ? tokenize(lib.folderName) : new Set<string>();
+  if (folderTokens.size > 0) {
+    for (const ts of assetTokenSets) {
+      folderTokens.forEach((t) => ts.add(t));
+    }
+  }
 
   // For each asset, which milestone indices it identity-matches.
   const assetTargets = lib.assets.map((_, ai) => {
