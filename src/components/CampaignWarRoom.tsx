@@ -631,7 +631,14 @@ function computeContentSupply(events: ParsedEvent[], lib: AssetLibrary, folderUr
   const months = Math.max(1, Math.round(days / 30.4));
 
   const cnt = (cls: DriveAssetClass) => lib.assets.filter((a) => a.assetClass === cls).length;
-  const href = (cls: DriveAssetClass) => lib.assets.find((a) => a.assetClass === cls && a.webViewLink)?.webViewLink ?? folderUrl;
+  // When a class has multiple assets, link to the folder — clicking through to
+  // one random clip isn't useful. For 1–2 assets, the specific file link is fine.
+  const href = (cls: DriveAssetClass) => {
+    const matches = lib.assets.filter((a) => a.assetClass === cls && a.webViewLink);
+    if (matches.length === 0) return folderUrl;
+    if (matches.length <= 2) return matches[0].webViewLink;
+    return folderUrl;
+  };
   const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
   // Shorts: campaign-length bucket, scaled by number of singles.
