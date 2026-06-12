@@ -176,6 +176,8 @@ const CLASS_PATTERNS: [RegExp, DriveAssetClass][] = [
   [/\b(behind\s*the\s*scenes|\bbts\b|making\s*of)\b/i, 'bts'],
   [/\b(trailer|teaser|announce(ment)?)\d*\b/i, 'trailer'],
   [/\b(short(s)?|cut[\s_-]?down|cutdown|vertical|9x16|9[:x]16|reel|tiktok|\btt\b)\b/i, 'shorts_cutdown'],
+  [/\b(promo|caption|canvas)\b/i, 'shorts_cutdown'],
+  [/\b(clip|snippet|hook)\b/i, 'shorts_cutdown'],
   [/\b(live\s*(session|performance|at|from)|acoustic|stripped\s*back|session)\b/i, 'live_performance'],
   [/\b(interview|conversation|q\s*&\s*a|q\s*and\s*a|press\s*junket)\b/i, 'interview'],
   [/\b(artwork|key\s*art|cover\s*art|packshot|pack\s*shot|single\s*art|poster|thumb(nail)?|cover)\b/i, 'artwork'],
@@ -189,7 +191,9 @@ const CLASS_PATTERNS: [RegExp, DriveAssetClass][] = [
 // "Shorts : Vertical Cuts" folder classify its otherwise-unlabelled files.
 const FOLDER_PATTERNS: [RegExp, DriveAssetClass][] = [
   [/official\s*(music\s*)?video|official\s*vid|\bomv\b/i, 'official_video'],
+  [/master\s*video/i, 'official_video'],
   [/short|vertical|cut[\s_-]?down|cutdown|reel/i, 'shorts_cutdown'],
+  [/promo|caption|canvas|social|clip/i, 'shorts_cutdown'],
   [/visuali[sz]er/i, 'visualiser'],
   [/lyric/i, 'lyric_video'],
   [/documentary|mini[\s-]?doc/i, 'documentary'],
@@ -215,6 +219,7 @@ export function classifyDriveAssetDetailed(
   name: string,
   mime: string | undefined,
   folderPath?: string,
+  sizeBytes?: number,
 ): ClassResult {
   const n = name ?? '';
   // Normalise separators to spaces so word-boundary patterns still match tokens
@@ -232,8 +237,24 @@ export function classifyDriveAssetDetailed(
       if (re.test(folderPath)) return { assetClass: cls, confidence: 'medium' };
     }
   }
-  // Media-type fallback so nothing is lost.
+
+  // ── Production-naming heuristic ──────────────────────────────────────────
+  // Numbered packs like "#001_THERAPY_.mov", "#003_LONELY ROAD.mov" are
+  // almost always Shorts / vertical cutdowns delivered in a batch.
   const media = mediaTypeFromMime(mime, n);
+  if (media === 'video' && /^#?\d{2,4}[\s_\-]/.test(n)) {
+    return { assetClass: 'shorts_cutdown', confidence: 'medium' };
+  }
+
+  // ── File-size heuristic for MP4s ─────────────────────────────────────────
+  // Small H.264 MP4s (under 15 MB) are almost certainly short clips.
+  // ProRes .mov files are excluded — they're huge even for short content.
+  const ext = n.toLowerCase().split('.').pop() ?? '';
+  if (media === 'video' && ext === 'mp4' && sizeBytes != null && sizeBytes > 0 && sizeBytes < 15_000_000) {
+    return { assetClass: 'shorts_cutdown', confidence: 'medium' };
+  }
+
+  // Media-type fallback so nothing is lost.
   if (media === 'audio') return { assetClass: 'audio', confidence: 'high' };   // MIME is authoritative
   if (media === 'doc') return { assetClass: 'press_doc', confidence: 'medium' };
   if (media === 'image') return { assetClass: 'artwork', confidence: 'low' };  // could be photography
@@ -245,8 +266,9 @@ export function classifyDriveAsset(
   name: string,
   mime: string | undefined,
   folderPath?: string,
+  sizeBytes?: number,
 ): DriveAssetClass {
-  return classifyDriveAssetDetailed(name, mime, folderPath).assetClass;
+  return classifyDriveAssetDetailed(name, mime, folderPath, sizeBytes).assetClass;
 }
 
 function toSizeBytes(v: string | number | undefined): number | undefined {
@@ -259,7 +281,8 @@ function toSizeBytes(v: string | number | undefined): number | undefined {
 export function buildAsset(raw: RawDriveFile): DriveAsset {
   const name = raw.name ?? raw.title ?? 'Untitled';
   const mime = raw.mimeType ?? '';
-  const { assetClass, confidence } = classifyDriveAssetDetailed(name, mime, raw.folderPath);
+  const size = toSizeBytes(raw.fileSize ?? raw.size);
+  const { assetClass, confidence } = classifyDriveAssetDetailed(name, mime, raw.folderPath, size);
   return {
     id: raw.id,
     name,
