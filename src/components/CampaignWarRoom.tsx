@@ -1460,10 +1460,16 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
     .sort((a, b) => b.viewCount - a.viewCount)[0];
 
   // ── Live-on-YouTube + hero coverage ─────────────────────────────────────
-  // Release: a hero-type upload identity-matched to this milestone.
+  // Release: an identity-matched upload that looks like the actual release (not
+  // BTS, a Short, live performance, or a teaser/pre-save).  Previously required
+  // isHeroUploadTitle, but many releases don't tag "Official Video" in the title
+  // — so we now accept any upload that isn't obviously support content.
   // Support/live: a type-matched recent upload assigned to this moment (so the
   // timeline reflects when a BTS / live moment actually goes live).
-  const heroLive = type === 'release' && liveMatch && isHeroUploadTitle(liveMatch.title) ? liveMatch : undefined;
+  const liveKind = liveMatch ? uploadKind(liveMatch) : undefined;
+  const heroLive = type === 'release' && liveMatch
+    && (liveKind === 'hero' || (liveKind === 'other' && !isTeaser(liveMatch)))
+    ? liveMatch : undefined;
   const isSupportType = type === 'support' || type === 'live';
   const primaryLive = isSupportType ? live?.primary : undefined;       // the main longform asset, if live
   const shortLives = isSupportType ? (live?.shorts ?? []) : [];        // supporting Shorts, if live
@@ -1635,8 +1641,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
           </div>
         )}
 
-        {/* Assets currently available for this moment — prominent green banner */}
-        {(present.length > 0 || (heroInDrive && mapping)) && (() => {
+        {/* Assets currently available for this moment — prominent green banner.
+            Hidden when the content is already live on YouTube — no point linking
+            to the library for something the audience can already watch. */}
+        {!isLive && (present.length > 0 || (heroInDrive && mapping)) && (() => {
           const thumbAsset = mapping?.assets.find((a) => a.thumbnailUrl);
           const thumbUrl = thumbAsset?.thumbnailUrl;
           const assetHref = thumbAsset?.webViewLink ?? folderUrl;
@@ -1679,8 +1687,9 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
             </div>
           );
         })()}
-        {/* Fallback: show raw file count when assets exist but aren't classified into known types */}
-        {present.length === 0 && !heroInDrive && mapping && mapping.assets.length > 0 && (
+        {/* Fallback: show raw file count when assets exist but aren't classified into known types.
+            Also hidden when live — same reasoning as the green banner above. */}
+        {!isLive && present.length === 0 && !heroInDrive && mapping && mapping.assets.length > 0 && (
           <div style={{ marginTop: 11, background: 'rgba(180,83,9,0.06)', border: `1px solid ${AMBER}30`, borderRadius: 6, padding: '8px 12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
