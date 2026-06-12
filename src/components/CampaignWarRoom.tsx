@@ -517,7 +517,14 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles, next
     const age = uploadAge(u.publishedAt, campaignStart);
     const ageW = age === 'recent' ? 3 : age === 'campaign' ? 2 : 1;
     const rel = shareTok(tok(u.title), titleTokens) ? 1.4 : 1;
-    return ageW * rel * Math.log10(Math.max(10, u.viewCount));
+    // Recency boost: a video uploaded in the last 7 days gets a strong bump so
+    // brand-new releases surface as the hero even when an older Short has more
+    // views (e.g. 264K-view Album Trailer vs 10K-view new official video).
+    // Longform also gets a slight preference over Shorts for the hero slot.
+    const days = daysAgoNum(u.publishedAt);
+    const freshW = days <= 1 ? 3 : days <= 7 ? 2 : 1;
+    const formatW = !isShort(u) ? 1.3 : 1;
+    return ageW * rel * freshW * formatW * Math.log10(Math.max(10, u.viewCount));
   };
   // When every upload is archive (no recent campaign activity), prefer the
   // most-recently-published video — a 400-day-old upload is more representative
@@ -1493,9 +1500,20 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // YouTube context — current (non-archive) uploads that identity-match THIS
   // milestone (known titles fold in only when the milestone references them).
   const evTokens = momentTokens(ev.title, knownTitles);
-  const liveMatch = evTokens.length === 0 ? undefined : recentUploads
-    .filter((u) => shareTok(tok(u.title), evTokens) && uploadAge(u.publishedAt, campaignStart) !== 'archive')
-    .sort((a, b) => b.viewCount - a.viewCount)[0];
+  const idMatched = evTokens.length === 0 ? [] : recentUploads
+    .filter((u) => shareTok(tok(u.title), evTokens) && uploadAge(u.publishedAt, campaignStart) !== 'archive');
+  // For release milestones, prefer a longform hero-eligible upload over a Short
+  // with more views. A 264K-view Album Trailer (Short) was shadowing a 10K-view
+  // official music video — the Short isn't hero-eligible, so the whole match was
+  // lost. Sort hero-eligible longforms first, then by views within each tier.
+  const isHeroEligible = (u: RecentUpload) => {
+    const k = uploadKind(u);
+    return k === 'hero' || (k === 'other' && !isTeaser(u));
+  };
+  const liveMatch = type === 'release'
+    ? (idMatched.filter(isHeroEligible).sort((a, b) => b.viewCount - a.viewCount)[0]
+       ?? idMatched.sort((a, b) => b.viewCount - a.viewCount)[0])
+    : idMatched.sort((a, b) => b.viewCount - a.viewCount)[0];
 
   // ── Live-on-YouTube + hero coverage ─────────────────────────────────────
   // Release: an identity-matched upload that looks like the actual release (not
