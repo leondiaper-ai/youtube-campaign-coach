@@ -281,7 +281,7 @@ export default function CampaignWarRoom(props: Props) {
     return candidates.some(isHeroEligible);
   })();
   const headline = headlineSentence(events, nextMoment, heroIsLive);
-  const focus = currentFocus(m.primaryGap, m.currentPhase, heroIsLive);
+  const focus = currentFocus(m.primaryGap, m.currentPhase, heroIsLive, nextMoment?.e.title);
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
@@ -388,12 +388,16 @@ function toTitleCase(s: string): string {
 }
 
 // Current focus — the next action stage, framed forward (no "missing/needs").
-function currentFocus(primaryGap: string, phase: PhaseName, heroIsLive = false): string {
-  // Hero asset is already live on YouTube — shift focus to release execution.
-  if (heroIsLive) {
-    return phase === 'RELEASE' ? 'Release live — driving playlist adds and discovery.'
-      : phase === 'SCALE' ? 'Scaling reach post-release.'
-      : 'Release is out — sustaining momentum.';
+function currentFocus(primaryGap: string, phase: PhaseName, heroIsLive = false, milestoneTitle?: string): string {
+  // Hero asset is already live on YouTube — shift focus to Shorts + discovery.
+  if (heroIsLive && milestoneTitle) {
+    const tl = milestoneTitle.toLowerCase();
+    const isAlbum = /album/.test(tl);
+    const hasMV = /official\s*(music\s*)?video|music\s*video/i.test(tl);
+    if (isAlbum && hasMV) return 'Album out — build Shorts around the official video to drive discovery.';
+    if (isAlbum) return 'Album out — build Shorts and visual content to sustain momentum.';
+    if (hasMV) return 'Official video live — build Shorts around it to drive discovery.';
+    return 'Release out — build Shorts and support content to drive discovery.';
   }
   // When no assets are scanned, skip asset-focused messaging — the phase message
   // is more useful until the folder is connected.
