@@ -844,13 +844,17 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
     .sort(([, a], [, b]) => b - a)
     .map(([label, count]) => `${count} ${label}`);
 
-  const useGrid = library.assets.length > 3;
+  // When a scanned folder has 7+ files, skip the visual grid — it's just noise
+  // for production folders. Show the supply checklist as the primary view with
+  // matched counts ticked off. For 1–6 curated files, keep the visual showcase.
+  const useChecklist = library.assets.length >= 7;
+  const useGrid = !useChecklist && library.assets.length > 3;
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '24px 40px 0' }}>
       <div style={{ background: WHITE, border: `1.5px solid ${isAnchor ? ACCENT : AMBER}40`, borderRadius: 12, overflow: 'hidden' }}>
         {/* Header bar — asset count + type summary + library link */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '14px 20px', borderBottom: useGrid ? `1px solid ${BONE}` : 'none' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '14px 20px', borderBottom: `1px solid ${BONE}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: MONO, color: WHITE, background: isAnchor ? ACCENT : AMBER, padding: '3px 10px', borderRadius: 3 }}>
               {library.assets.length} Asset{library.assets.length !== 1 ? 's' : ''} Ready
@@ -872,8 +876,18 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
           <ConnectDriveFolder slug={slug} folderUrl={folderUrl} />
         </div>
 
-        {useGrid ? (
-          /* ── Grid showcase for 4+ files ── */
+        {useChecklist ? (
+          /* ── Checklist-first view for scanned folders (7+ files) ── */
+          /* The supply table IS the view — matched counts ticked off. No card grid. */
+          <div style={{ padding: '0 20px 16px' }}>
+            <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '12px 0 10px', maxWidth: 770 }}>
+              Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign.
+            </div>
+            {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
+            <div style={{ fontSize: 9.5, color: GHOST, fontFamily: MONO, marginTop: 9 }}>Recommendation scales with campaign length and release cadence.</div>
+          </div>
+        ) : useGrid ? (
+          /* ── Grid showcase for 4–6 curated files ── */
           <div style={{ padding: '14px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
             {sorted.map((a) => {
               const aHref = a.webViewLink ?? folderUrl;
@@ -937,18 +951,20 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
           </div>
         )}
 
-        {/* Collapsed supply table — gap analysis available on demand */}
-        <details style={{ borderTop: `1px solid ${BONE}` }}>
-          <summary style={{ padding: '10px 20px', cursor: 'pointer', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: MONO, color: GHOST, listStyle: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 8 }}>▸</span> Full Content Supply
-          </summary>
-          <div style={{ padding: '0 20px 16px' }}>
-            <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
-              Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign.
+        {/* Collapsed supply table — only shown for visual modes (grid/hero), not checklist */}
+        {!useChecklist && (
+          <details style={{ borderTop: `1px solid ${BONE}` }}>
+            <summary style={{ padding: '10px 20px', cursor: 'pointer', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: MONO, color: GHOST, listStyle: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 8 }}>▸</span> Full Content Supply
+            </summary>
+            <div style={{ padding: '0 20px 16px' }}>
+              <div style={{ fontSize: 11.5, color: SMOKE, lineHeight: 1.45, margin: '6px 0 12px', maxWidth: 770 }}>
+                Recommended for this timeline — based on {supply.singles} single{supply.singles === 1 ? '' : 's'} · {supply.hasAlbum ? 'album release' : 'no album release'} · {supply.months}-month campaign.
+              </div>
+              {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
             </div>
-            {supply.rows.map((r) => <Row key={r.cls} r={r} />)}
-          </div>
-        </details>
+          </details>
+        )}
       </div>
     </section>
   );
