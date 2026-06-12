@@ -9,6 +9,7 @@ import { matchPlanToUploads } from '@/lib/coach/matchEngine';
 import { generateNudges } from '@/lib/coach/nudgeEngine';
 import { generatePlan } from '@/lib/planEngine';
 import { loadDriveLibrary } from '@/lib/driveStore';
+import { reclassifyFromPlan } from '@/lib/driveAssets';
 import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
 import type { RecentUpload } from '@/lib/artists';
@@ -135,7 +136,33 @@ export default async function CampaignPage({ params }: PageProps) {
 
   if (artistConfig?.channelHandle) {
     try {
-      const snap = await readLiveSnapByHandle(artistConfig.channelHandle);
+      let snap = await readLiveSnapByHandle(artistConfig.channelHandle);
+
+      // ── Channel auto-heal ────────────────────────────────────────────
+      // If no cached snap exists, the channel mapping may be broken or
+      // missing. Attempt a one-time resolve + cache so the page self-heals
+      // without manual intervention. This costs one YouTube API call per
+      // broken channel, per ISR window (60s), and writes the correct
+      // mapping so future loads are free.
+      if (!snap && process.env.YOUTUBE_API_KEY) {
+        try {
+          const { fetchChannelSnapLite } = await import('@/lib/youtube');
+          const { writeChannelMapping, writeLiveSnap } = await import('@/lib/kvCache');
+          const { safeMergeSnap } = await import('@/lib/youtube/normalizeChannelData');
+          const fresh = await fetchChannelSnapLite(artistConfig.channelHandle);
+          if (fresh && !fresh.error && fresh.channelId) {
+            const existing = await (await import('@/lib/kvCache')).readLiveSnap(fresh.channelId);
+            const merged = safeMergeSnap(existing, fresh);
+            await writeLiveSnap(fresh.channelId, merged);
+            await writeChannelMapping(artistConfig.channelHandle, fresh.channelId);
+            // Re-read through the normal path so channelId is available below
+            snap = await readLiveSnapByHandle(artistConfig.channelHandle);
+          }
+        } catch {
+          // Auto-heal is best-effort — page still works without it
+        }
+      }
+
       if (snap) {
         const channelId = await readChannelMapping(artistConfig.channelHandle);
         const history = channelId ? await readHistory(channelId) : [];
@@ -182,8 +209,14 @@ export default async function CampaignPage({ params }: PageProps) {
 
   // Load scanned Google Drive asset library + per-campaign tuning (optional —
   // page works without either). Both are looked up by slug, no hardcoding.
-  const driveLibrary = await loadDriveLibrary(saved.slug).catch(() => null);
+  const rawDriveLibrary = await loadDriveLibrary(saved.slug).catch(() => null);
   const driveConfig = mappingConfigFor(saved.slug);
+  // Plan-aware reclassification: upgrade "other" assets when their name matches
+  // a plan milestone. Bridges the gap between files named by song title and the
+  // production-keyword classifier. Safe when library or plan is null.
+  const driveLibrary = rawDriveLibrary
+    ? reclassifyFromPlan(rawDriveLibrary, saved.plan, driveConfig)
+    : null;
   // A folder URL attached at runtime (saved to KV via the in-app control) wins
   // over the baked-in config, so any campaign can connect its own folder.
   const driveFolderUrl = driveLibrary?.folderUrl || getCampaignConfig(saved.slug)?.driveFolderUrl;

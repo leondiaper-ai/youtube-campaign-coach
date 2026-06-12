@@ -305,6 +305,87 @@ export function buildLibrary(
   };
 }
 
+// ── Plan-aware reclassification ───────────────────────────────────────────
+//
+// Pattern-based classification fails for files named by song title alone
+// (e.g. "Love & Tears.mp4", "STORM V3.8.mp4"). When a plan is available,
+// reclassifyFromPlan() matches "other" assets against plan milestone titles
+// and upgrades them based on the milestone's kind. This bridges the gap
+// between how labels name files (by song) and what the tool needs to know
+// (what type of YouTube content the file becomes).
+
+/** Milestone kind → inferred asset class for unnamed video files. */
+const KIND_TO_CLASS: Partial<Record<TimelineKind, DriveAssetClass>> = {
+  singleRelease: 'official_video',
+  albumRelease: 'official_video',
+  documentaryRelease: 'documentary',
+  documentaryTease: 'trailer',
+  albumAnnounce: 'trailer',
+};
+
+/**
+ * Upgrade "other" (low-confidence) assets to a plan-inferred class when
+ * their name tokens overlap a plan milestone. Returns a new AssetLibrary
+ * with upgraded classifications (original is not mutated).
+ *
+ * Safe to call when plan is null or has no events — returns the library
+ * unchanged.
+ */
+export function reclassifyFromPlan(
+  lib: AssetLibrary,
+  plan: GeneratedPlan | null,
+  config?: AssetMappingConfig,
+): AssetLibrary {
+  if (!plan || !plan.events?.length) return lib;
+  const events = plan.events;
+
+  // Only reclassify assets that the pattern classifier gave up on.
+  const needsReclass = lib.assets.some(
+    (a) => a.assetClass === 'other' && a.classConfidence === 'low' && a.mediaType === 'video',
+  );
+  if (!needsReclass) return lib;
+
+  // Pre-tokenize milestone titles (reuse the same logic as mapAssetsToTimeline).
+  const milestoneTokenSets = events.map((ev) => milestoneIdentity(ev.title, config));
+
+  // Folder tokens — merged into asset identity, same as mapAssetsToTimeline.
+  const folderTokens = lib.folderName ? tokenize(lib.folderName) : new Set<string>();
+
+  const upgraded = lib.assets.map((a) => {
+    // Only reclassify low-confidence "other" videos.
+    if (a.assetClass !== 'other' || a.classConfidence !== 'low' || a.mediaType !== 'video') {
+      return a;
+    }
+
+    const at = assetIdentity(a);
+    if (folderTokens.size > 0) folderTokens.forEach((t) => at.add(t));
+    if (at.size === 0) return a;
+
+    // Find the best matching milestone (most token overlap).
+    let bestIdx = -1;
+    let bestOverlap = 0;
+    milestoneTokenSets.forEach((mt, ei) => {
+      let overlap = 0;
+      at.forEach((t) => { if (mt.has(t)) overlap++; });
+      if (overlap > bestOverlap) { bestOverlap = overlap; bestIdx = ei; }
+    });
+
+    if (bestIdx < 0 || bestOverlap === 0) return a;
+
+    const kind = events[bestIdx].kind;
+    const inferred = KIND_TO_CLASS[kind];
+    // Default: any video file matching a release milestone → official_video.
+    // This catches the common case where an entire folder is release assets.
+    const isRelease = kind === 'singleRelease' || kind === 'albumRelease' || kind === 'documentaryRelease';
+    const cls = inferred ?? (isRelease ? 'official_video' as DriveAssetClass : undefined);
+    if (!cls) return a;
+
+    return { ...a, assetClass: cls, classConfidence: 'medium' as ClassConfidence };
+  });
+
+  return { ...lib, assets: upgraded };
+}
+
 // ── 1 + 2. Library summary ─────────────────────────────────────────────────
 
 export type LibrarySummary = {
