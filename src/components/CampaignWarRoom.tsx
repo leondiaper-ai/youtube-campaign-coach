@@ -269,8 +269,19 @@ export default function CampaignWarRoom(props: Props) {
   // Next YouTube milestone — the next upcoming RELEASE moment, else the next moment.
   const upcoming = events.map((e) => ({ e, mt: momentType(e) })).filter((x) => x.e.dateISO >= t);
   const nextMoment = upcoming.find((x) => x.mt === 'release') ?? upcoming[0];
-  const headline = headlineSentence(events, nextMoment);
-  const focus = currentFocus(m.primaryGap, m.currentPhase);
+  // Is the hero asset for the next release already live on YouTube?
+  const heroIsLive = (() => {
+    if (!nextMoment || nextMoment.mt !== 'release') return false;
+    const evToks = momentTokens(nextMoment.e.title, knownTitles);
+    if (evToks.length === 0) return false;
+    const candidates = recentUploads.filter((u) =>
+      shareTok(tok(u.title), evToks) && uploadAge(u.publishedAt, campaignStartDate) !== 'archive'
+    );
+    const isHeroEligible = (u: RecentUpload) => { const k = uploadKind(u); return k === 'hero' || (k === 'other' && !isTeaser(u)); };
+    return candidates.some(isHeroEligible);
+  })();
+  const headline = headlineSentence(events, nextMoment, heroIsLive);
+  const focus = currentFocus(m.primaryGap, m.currentPhase, heroIsLive);
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
@@ -318,6 +329,7 @@ function fmtDay(iso: string): string {
 function headlineSentence(
   events: ParsedEvent[],
   nextMoment: { e: ParsedEvent; mt: MomentType } | undefined,
+  heroIsLive = false,
 ): string {
   if (!nextMoment) {
     // All events in the past — campaign is done.
@@ -332,6 +344,8 @@ function headlineSentence(
   const when = dDays <= 0 ? 'today' : dDays === 1 ? 'tomorrow' : dDays <= 7 ? `this week — ${date}` : date;
 
   if (nextMoment.mt === 'release') {
+    if (heroIsLive && dDays <= 0) return `${name} is out — drive discovery and playlist adds.`;
+    if (heroIsLive) return `${name} — hero asset live, dropping ${when}.`;
     if (e.videoId) return `Video in for ${name} — dropping ${when}.`;
     if (dDays <= 14) return `${name} drops ${when} — lock the hero asset.`;
     return `Next up: ${name} on ${when}.`;
@@ -374,7 +388,13 @@ function toTitleCase(s: string): string {
 }
 
 // Current focus — the next action stage, framed forward (no "missing/needs").
-function currentFocus(primaryGap: string, phase: PhaseName): string {
+function currentFocus(primaryGap: string, phase: PhaseName, heroIsLive = false): string {
+  // Hero asset is already live on YouTube — shift focus to release execution.
+  if (heroIsLive) {
+    return phase === 'RELEASE' ? 'Release live — driving playlist adds and discovery.'
+      : phase === 'SCALE' ? 'Scaling reach post-release.'
+      : 'Release is out — sustaining momentum.';
+  }
   // When no assets are scanned, skip asset-focused messaging — the phase message
   // is more useful until the folder is connected.
   if (primaryGap === 'No assets scanned') {
