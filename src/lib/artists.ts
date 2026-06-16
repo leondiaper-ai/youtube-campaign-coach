@@ -101,6 +101,18 @@ export const ARTISTS: Artist[] = [
     artistType: 'managed',
     ownership: 'virgin',
   },
+  {
+        slug: 'tovelomusic',
+        name: 'Tove Lo',
+        phase: 'PUSH',
+        channelHandle: '@tovelomusic',
+        artistType: 'managed',
+        ownership: 'virgin',
+        campaign: 'Tove Lo',
+        campaignStartDate: '2026-05-01',
+        nextMomentLabel: 'des fleurs x stromae — Official Video Premiere',
+        nextMomentDate: '2026-06-20',
+  },
 ];
 
 /**
