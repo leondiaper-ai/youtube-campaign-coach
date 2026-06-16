@@ -103,9 +103,10 @@ function buildEmailHtml(data: BriefingData): string {
   const headlineNames = tier1.slice(0, 3).map(fc => esc(fc.channel.name));
   const otherCount = data.activeCampaignCount - headlineNames.length;
 
-  // Upcoming moments — just the next 3-4 with dates
+  // Upcoming moments — just the next 3-4 with dates (future only)
+  const nowMs = Date.now();
   const nextMoments = data.upcomingMoments
-    .filter(m => m.date)
+    .filter(m => m.date && new Date(m.date + 'T00:00:00').getTime() >= nowMs - 86400000)
     .slice(0, 4);
 
   // Campaign list — just names grouped by tier

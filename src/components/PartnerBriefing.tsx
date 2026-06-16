@@ -142,6 +142,9 @@ function groupMomentsByWindow(moments: UpcomingMoment[]): {
     const d = new Date(m.date + 'T00:00:00');
     const diffDays = Math.round((d.getTime() - now) / 86400000);
 
+    // Skip past events — Release Radar is forward-looking ("What's coming next")
+    if (diffDays < 0) continue;
+
     if (diffDays <= 7) {
       thisWeek.push(m);
     } else if (diffDays <= 14) {
@@ -709,8 +712,11 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
         }
         const groups = Array.from(dateGroups.entries());
 
-        // Find the "big week" — date with most convergence (3+ campaigns)
-        const bigDay = groups.find(([, ms]) => ms.length >= 3);
+        // Find the "big week" — date with most convergence (3+ campaigns), today or future only
+        const bigDay = groups.find(([d, ms]) => {
+          const dd = new Date(d + 'T00:00:00');
+          return ms.length >= 3 && dd.getTime() >= nowMs - 86400000; // allow today
+        });
         // Also find dates with 2 campaigns for secondary emphasis
         const hotDates = new Set(groups.filter(([, ms]) => ms.length >= 2).map(([d]) => d));
 
