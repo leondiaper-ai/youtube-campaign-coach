@@ -712,6 +712,10 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
         }
         const groups = Array.from(dateGroups.entries());
 
+        // Priority tier for visual weight
+        const isTier1 = (m: UpcomingMoment) => m.priority >= 80;
+        const nowMs = Date.now();
+
         // Find the "big week" — date with most convergence (3+ campaigns), today or future only
         const bigDay = groups.find(([d, ms]) => {
           const dd = new Date(d + 'T00:00:00');
@@ -719,10 +723,6 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
         });
         // Also find dates with 2 campaigns for secondary emphasis
         const hotDates = new Set(groups.filter(([, ms]) => ms.length >= 2).map(([d]) => d));
-
-        // Priority tier for visual weight
-        const isTier1 = (m: UpcomingMoment) => m.priority >= 80;
-        const nowMs = Date.now();
 
         return (
           <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
