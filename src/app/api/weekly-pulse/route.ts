@@ -57,7 +57,7 @@ function pulseWeekKey(): string {
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  return `weekly-pulse:${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+  return `weekly-pulse:${new Date().toISOString().slice(0, 10)}`;
 }
 
 // ── Response Types ────────────────────────────────────────────────────────────
