@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS, mergeArtistLists, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnapLite } from '@/lib/youtube';
-import { writeLiveSnap, writeChannelMapping, writeSyncMeta, readLiveSnap, readAllLiveSnaps, type SyncMeta } from '@/lib/kvCache';
+import { writeLiveSnap, writeChannelMapping, writeSyncMeta, readSyncMeta, readLiveSnap, readAllLiveSnaps, type SyncMeta } from '@/lib/kvCache';
 import { captureWeeklySnapshots } from '@/lib/weeklySnapshotCapture';
 import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
 import { classifySnapshotPriority, shouldFetchInRun, applyQuotaGuardrails, type SnapshotPriority } from '@/lib/snapshotScheduler';
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const startTime = Date.now();
+  const _londonHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', hour12: false }).format(new Date())); if (process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`) { if (_londonHour !== 6) { return NextResponse.json({ skipped: true, reason: 'before 06:00 UK' }); } const _prevMeta = await readSyncMeta(); const _todayLondon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()); const _prevLondonDay = _prevMeta && _prevMeta.lastSyncAt ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date(_prevMeta.lastSyncAt)) : null; if (_prevLondonDay === _todayLondon) { return NextResponse.json({ skipped: true, reason: 'already synced today (UK)' }); } } const startTime = Date.now();
   const errors: string[] = [];
   let successCount = 0;
   let failCount = 0;
