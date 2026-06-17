@@ -166,7 +166,7 @@ export function shouldFetchInRun(
     case 'LOW':
       // Mon/Wed/Fri morning only
       if (runSlot !== 'morning') return false;
-      return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5;
+      return true;
   }
 }
 
