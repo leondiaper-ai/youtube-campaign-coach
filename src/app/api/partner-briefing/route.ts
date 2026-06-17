@@ -859,15 +859,16 @@ export async function GET(request: Request) {
       // Standout: best-performing video (highest views)
       const bestVid = [...vids].sort((a, b) => b.viewCount - a.viewCount)[0];
       if (bestVid) fc.standoutVideo = bestVid;
-      // Content format tags
+      // Content format tags — check both classifier format AND video title
       const formats = new Set<string>();
       for (const v of vids) {
         if (v.durationSec <= 62) formats.add('Short');
-        if (/official video/i.test(v.format)) formats.add('Official Video');
-        else if (/lyric/i.test(v.format)) formats.add('Lyric Video');
-        else if (/visuali/i.test(v.format)) formats.add('Visualiser');
-        else if (/bts|behind/i.test(v.format)) formats.add('BTS');
-        else if (/live session|acoustic/i.test(v.format)) formats.add('Live Session');
+        const fmtAndTitle = `${v.format} | ${v.title}`;
+        if (/official\s*(music\s*)?video/i.test(fmtAndTitle)) formats.add('Official Video');
+        else if (/lyric\s*video/i.test(fmtAndTitle)) formats.add('Lyric Video');
+        else if (/visuali[sz]er/i.test(fmtAndTitle)) formats.add('Visualiser');
+        else if (/bts|behind the scenes/i.test(fmtAndTitle)) formats.add('BTS');
+        else if (/live session|acoustic session/i.test(fmtAndTitle)) formats.add('Live Session');
         else if (/collab/i.test(v.format)) formats.add('Collab');
         else if (/trailer/i.test(v.format)) formats.add('Trailer');
         else if (/premiere/i.test(v.format)) formats.add('Premiere');

@@ -421,9 +421,14 @@ function GenreTag({ genre, onDark = false }: { genre: string; onDark?: boolean }
 // subtle outline so the gap still reads. Same colour language across both pages.
 const ECO_PILL: Record<string, { bg: string; fg: string }> = {
   'Official Video': { bg: '#E6F8EE', fg: '#2D6A4F' },
+  'Music Video':    { bg: '#E6F8EE', fg: '#2D6A4F' },
+  'Lyric Video':    { bg: '#E0F0FF', fg: '#1A5276' },
+  'Visualiser':     { bg: '#EDE8F5', fg: '#4A2880' },
   'Shorts':         { bg: '#F0E8FE', fg: '#6B21A8' },
+  'Long-form':      { bg: '#E8F0E6', fg: '#3D6B35' },
   'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
   'Live':           { bg: '#FFEAD6', fg: '#8A4A1A' },
+  'Collab':         { bg: '#FDE8EE', fg: '#9B1C47' },
 };
 function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
   const f = new Set(fc.contentFormats);
@@ -433,11 +438,19 @@ function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: 
     || fc.recentVideos.some((v) => v.durationSec > 62 && /official\s*(music\s*)?video|\(official\)/i.test(v.title));
   // Only present formats are shown — no "missing" markers. If we don't see it,
   // we simply don't list it.
+  const hasLyric = f.has('Lyric Video')
+    || fc.recentVideos.some((v) => v.durationSec > 62 && /lyric\s*video/i.test(v.title));
+  const hasVisualiser = f.has('Visualiser')
+    || fc.recentVideos.some((v) => v.durationSec > 62 && /visuali[sz]er/i.test(v.title));
   const items: { label: string; on: boolean; count?: number }[] = [
     { label: 'Official Video', on: hasOfficial },
+    { label: 'Lyric Video', on: hasLyric && !hasOfficial },
+    { label: 'Visualiser', on: hasVisualiser && !hasOfficial },
     { label: 'Shorts', on: fc.channel.shorts30d > 0, count: fc.channel.shorts30d },
+    { label: 'Long-form', on: (fc.channel.longform30d ?? 0) > 0, count: fc.channel.longform30d },
     { label: 'BTS', on: f.has('BTS') },
     { label: 'Live', on: f.has('Live Session') },
+    { label: 'Collab', on: f.has('Collab') },
   ].filter((it) => it.on);
 
   if (items.length === 0) return null;
@@ -952,25 +965,48 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                         <div style={{ padding: '18px 20px 20px' }}>
 
                           {/* ── NEXT / AFTER dates — front and centre ── */}
-                          <div style={{
-                            display: 'grid', gridTemplateColumns: fc.afterDate ? '1fr 1fr' : '1fr', gap: 12,
-                            padding: '12px 14px', borderRadius: 8,
-                            background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}`,
-                            marginBottom: 16,
-                          }}>
-                            <div>
-                              <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 4 }}>Next Release</div>
-                              <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.25 }}>{fc.nextLabel}</div>
-                              {fc.nextDate && <div style={{ fontSize: 22, fontWeight: 900, color: ACCENT.green, marginTop: 4, letterSpacing: '-0.01em' }}>{fc.nextDate}</div>}
-                            </div>
-                            {fc.afterDate && (
-                              <div>
-                                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: SMOKE, marginBottom: 4 }}>After</div>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: WARM, lineHeight: 1.25 }}>{fc.afterLabel}</div>
-                                <div style={{ fontSize: 15, fontWeight: 800, color: ACCENT.green, marginTop: 4 }}>{fc.afterDate}</div>
+                          {(() => {
+                            // Determine if "next" date is actually in the past
+                            const parseShortDate = (d: string | null) => {
+                              if (!d) return null;
+                              const p = new Date(d + ' ' + new Date().getFullYear());
+                              return isNaN(p.getTime()) ? null : p;
+                            };
+                            const nextDateObj = parseShortDate(fc.nextDate);
+                            const isNextPast = nextDateObj != null && nextDateObj.getTime() < Date.now() - 86400000;
+
+                            // If the "next" event already happened, shift labels:
+                            // past event → "Last Release", after event → "Next Release"
+                            const primaryLabel = isNextPast ? 'Last Release' : 'Next Release';
+                            const primaryName = fc.nextLabel;
+                            const primaryDate = fc.nextDate;
+                            const secondaryLabel = isNextPast ? 'Next Release' : 'After';
+                            const secondaryName = isNextPast ? fc.afterLabel : fc.afterLabel;
+                            const secondaryDate = isNextPast ? fc.afterDate : fc.afterDate;
+                            const showSecondary = isNextPast ? !!fc.afterDate : !!fc.afterDate;
+
+                            return (
+                              <div style={{
+                                display: 'grid', gridTemplateColumns: showSecondary ? '1fr 1fr' : '1fr', gap: 12,
+                                padding: '12px 14px', borderRadius: 8,
+                                background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}`,
+                                marginBottom: 16,
+                              }}>
+                                <div>
+                                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? SMOKE : ACCENT.green, marginBottom: 4 }}>{primaryLabel}</div>
+                                  <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.25 }}>{primaryName}</div>
+                                  {primaryDate && <div style={{ fontSize: 22, fontWeight: 900, color: isNextPast ? SMOKE : ACCENT.green, marginTop: 4, letterSpacing: '-0.01em' }}>{primaryDate}</div>}
+                                </div>
+                                {showSecondary && (
+                                  <div>
+                                    <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? ACCENT.green : SMOKE, marginBottom: 4 }}>{secondaryLabel}</div>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: WARM, lineHeight: 1.25 }}>{secondaryName}</div>
+                                    {secondaryDate && <div style={{ fontSize: 15, fontWeight: 800, color: ACCENT.green, marginTop: 4 }}>{secondaryDate}</div>}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
+                            );
+                          })()}
 
                           {/* ── Content ecosystem (is the ecosystem active?) ── */}
                           <div style={{ marginBottom: 14 }}>
@@ -1117,12 +1153,16 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           {genre && <span style={{ marginLeft: 'auto' }}><GenreTag genre={genre} onDark /></span>}
                         </div>
                         {/* Next date badge on hero */}
-                        {fc.nextDate && (
-                          <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}>
-                            <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>Next</div>
-                            <div style={{ fontSize: 12, fontWeight: 900, color: ACCENT.green }}>{fc.nextDate}</div>
-                          </div>
-                        )}
+                        {fc.nextDate && (() => {
+                          const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
+                          const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
+                          return (
+                            <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}>
+                              <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>{isPast ? 'Last' : 'Next'}</div>
+                              <div style={{ fontSize: 12, fontWeight: 900, color: isPast ? SMOKE : ACCENT.green }}>{fc.nextDate}</div>
+                            </div>
+                          );
+                        })()}
                       </div>
                       <div style={{ padding: '12px 14px 14px' }}>
                         <div style={{ marginBottom: 10 }}><EcosystemStrip fc={fc} compact /></div>
@@ -1132,19 +1172,25 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
                           <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
                         </div>
-                        {/* NEXT + AFTER */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
-                          <div>
-                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Next</div>
-                            <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
-                            {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>After</div>
-                            <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
-                            {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
-                          </div>
-                        </div>
+                        {/* NEXT + AFTER — date-aware labels */}
+                        {(() => {
+                          const p = fc.nextDate ? new Date(fc.nextDate + ' ' + new Date().getFullYear()) : null;
+                          const isPast = p != null && !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
+                          return (
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+                              <div>
+                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Last' : 'Next'}</div>
+                                <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
+                                {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: isPast ? SMOKE : ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Next' : 'After'}</div>
+                                <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
+                                {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
+                              </div>
+                            </div>
+                          );
+                        })()}
                         <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
                       </div>
                     </a>
@@ -1190,11 +1236,15 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           {fc.nowLabel}
                         </div>
                         <div style={{ fontSize: 9, color: SMOKE }}>{fc.nowDetail}</div>
-                        {fc.nextDate && (
-                          <div style={{ fontSize: 9, color: ACCENT.green, fontWeight: 700, marginTop: 4 }}>
-                            Next: {fc.nextDate}
+                        {fc.nextDate && (() => {
+                          const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
+                          const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
+                          return (
+                          <div style={{ fontSize: 9, color: isPast ? SMOKE : ACCENT.green, fontWeight: 700, marginTop: 4 }}>
+                            {isPast ? 'Last' : 'Next'}: {fc.nextDate}
                           </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     </a>
                     );
