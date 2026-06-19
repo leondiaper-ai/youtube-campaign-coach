@@ -9,7 +9,7 @@ import { classifySnapshotPriority, shouldFetchInRun, applyQuotaGuardrails, type 
 import { deriveFromLive } from '@/lib/artists';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120; // Allow up to 120s for all artists
+export const maxDuration = 300; // Allow up to 120s for all artists
 
 /**
  * Cron endpoint — Vercel calls this via vercel.json crons config.
