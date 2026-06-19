@@ -198,7 +198,7 @@ export async function GET(req: NextRequest) {
     durationMs,
     nextScheduledSync: nextMorning.toISOString(),
   };
-  await writeSyncMeta(syncMeta);
+  await writeSyncMeta(syncMeta); try { await fetch(new URL('/api/weekly-pulse?refresh=1', req.url).toString(), { cache: 'no-store' }); } catch {}
 
   console.log(`[Cron] ${runSlot} sync complete: ${successCount}/${toFetch.length} ok (${withHandles.length} total), ~${quotaUnits} quota units, ${durationMs}ms`);
   console.log(`[Cron] Priority breakdown: HIGH=${priorityBreakdown.HIGH}, MEDIUM=${priorityBreakdown.MEDIUM}, LOW=${priorityBreakdown.LOW}`);
