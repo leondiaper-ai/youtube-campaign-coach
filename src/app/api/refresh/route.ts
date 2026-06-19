@@ -6,7 +6,7 @@ import { writeLiveSnap, writeChannelMapping, writeSyncMeta, canRefresh, readSync
 import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 /**
  * GET /api/refresh — check refresh status (cooldown, last sync, quota estimate)
