@@ -64,9 +64,11 @@ export type CampaignConfig = {
 // ── Registry ─────────────────────────────────────────────────────────────────
 
 import { SNUTS_CONFIG } from './campaigns/the-snuts';
+import { KTRAP_CONFIG } from './campaigns/k-trap';
 
 export const CAMPAIGN_CONFIGS: Record<string, CampaignConfig> = {
   [SNUTS_CONFIG.slug]: SNUTS_CONFIG,
+  [KTRAP_CONFIG.slug]: KTRAP_CONFIG,
 };
 
 // ── Accessors ────────────────────────────────────────────────────────────────
