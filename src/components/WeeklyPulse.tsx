@@ -1011,6 +1011,9 @@ export default function WeeklyPulse() {
             }}>
               This Week Across Virgin
             </div>
+            <p style={{ fontSize: 12, color: SMOKE, margin: '6px 0 0', lineHeight: 1.4, fontFamily: 'Inter, system-ui, sans-serif' }}>
+              Our managed campaigns ranked by YouTube momentum this week — Outpacing means views and growth are beating their baseline, Building Momentum shows rising trajectory, and In Campaign flags an active rollout window.
+            </p>
           </div>
 
           {/* Asymmetric layout: hero left, stack right */}
