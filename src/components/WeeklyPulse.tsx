@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 // ── Design System ────────────────────────────────────────────────────────────
 
 const INK    = '#0E0E0E';
-const PAPER  = '#FAF7F2'
+const PAPER  = '#FAF7F2';
 const SMOKE  = '#8A847A';
 const GHOST  = '#C8C2B8';
 const BONE   = '#E8E3DA';
@@ -987,7 +987,6 @@ export default function WeeklyPulse() {
                 </a>
               ))}
             </div>
-
           </div>
         </div>
       </header>
@@ -1006,8 +1005,8 @@ export default function WeeklyPulse() {
           {/* Section header */}
           <div style={{ marginBottom: 28 }}>
             <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-              textTransform: 'uppercase' as const, color: GHOST,
+              fontSize: 13, fontWeight: 900, letterSpacing: '0.18em',
+              textTransform: 'uppercase' as const, color: INK,
             }}>
               This Week Across Virgin
             </div>
@@ -1234,7 +1233,7 @@ export default function WeeklyPulse() {
       {discoveryChannels.length > 0 && (
         <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 32px' }}>
           <div style={{ height: 1, background: BONE, marginBottom: 24 }} />
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
+          <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: INK, marginBottom: 14 }}>
             Emerging Channels
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(discoveryChannels.length, 4)}, 1fr)`, gap: 12 }}>
@@ -1370,7 +1369,7 @@ export default function WeeklyPulse() {
             {longformMoments.length > 0 && (
               <section style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 40px 0' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 32 }} />
-                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: INK, marginBottom: 20 }}>
                   Longform Moments This Week
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
@@ -1415,7 +1414,7 @@ export default function WeeklyPulse() {
         <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 48 }}>
           {/* LEFT — In Growth State */}
           <div>
-            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: INK, marginBottom: 14 }}>
               In Growth State
             </div>
             {momentumChannels.map((ch, i) => {
@@ -1456,7 +1455,7 @@ export default function WeeklyPulse() {
           {/* RIGHT — Opportunities (3 columns) */}
           {issueGroups.length > 0 && (
             <div>
-              <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: INK, marginBottom: 14 }}>
                 Where There&apos;s Room to Grow
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
@@ -1507,7 +1506,7 @@ export default function WeeklyPulse() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
           {/* LEFT — Reference Channels */}
           <div>
-            <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase' as const, color: INK, marginBottom: 6 }}>
               Reference Channels This Week
             </div>
             <p style={{ fontSize: 12, color: SMOKE, margin: '0 0 16px', lineHeight: 1.4, fontFamily: 'Inter, system-ui, sans-serif' }}>
