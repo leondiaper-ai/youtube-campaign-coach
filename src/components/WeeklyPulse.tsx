@@ -941,8 +941,24 @@ export default function WeeklyPulse() {
 
           </div>
 
-          {/* Right — Shorts 3×2 thumbnail grid */}
+          {/* Right — Shorts 3×3 thumbnail grid */}
           <div>
+            {/* Section label — prominent, above the grid */}
+            <div style={{
+              marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <svg width="20" height="20" viewBox="0 0 28 28" aria-hidden="true" style={{ flexShrink: 0 }}>
+                <rect width="28" height="28" rx="6" fill="#FF0000" />
+                <polygon points="11,7 11,21 22,14" fill="#FFF" />
+              </svg>
+              <span style={{
+                fontSize: 15, fontWeight: 800, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+              }}>
+                Top Shorts This Week
+              </span>
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {topShorts.map((v) => (
                 <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
@@ -972,24 +988,6 @@ export default function WeeklyPulse() {
               ))}
             </div>
 
-            {/* Handwritten annotation */}
-            <div style={{
-              marginTop: 10, textAlign: 'right', paddingRight: 8,
-              display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6,
-            }}>
-              <span style={{
-                fontFamily: "'Caveat', cursive",
-                fontSize: 18, fontWeight: 500, color: SMOKE,
-                fontStyle: 'italic',
-              }}>
-                Top Shorts this week across our roster
-              </span>
-              {/* Hand-drawn arrow */}
-              <svg width="28" height="16" viewBox="0 0 28 16" fill="none" style={{ flexShrink: 0 }}>
-                <path d="M2 10C6 8 14 4 22 6" stroke={SMOKE} strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                <path d="M18 3L23 6L18 9" stroke={SMOKE} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
           </div>
         </div>
       </header>
