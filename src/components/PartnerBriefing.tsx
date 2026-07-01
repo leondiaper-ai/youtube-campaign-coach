@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties, type ReactNode } from 'react';
 import PulseNav from './PulseNav';
 
 // ── Design System ───────────────────────────────────────────────────────────
@@ -79,6 +79,8 @@ type UpcomingMoment = {
   rolloutNote: string;
   fromCoachPlan: boolean;
   priority: number;
+  coachPlanSlug: string | null;
+  channelUrl: string | null;
 };
 
 type EcosystemHighlight = {
@@ -135,6 +137,34 @@ function campaignLink(fc: FocusCampaign): { href: string; internal: boolean } {
 /** target/rel props — only external (YouTube) links open in a new tab. */
 function linkTarget(internal: boolean) {
   return internal ? {} : { target: '_blank', rel: 'noopener noreferrer' };
+}
+
+/**
+ * Wraps a Release Radar moment row in a link to its Coach plan (same tab) or,
+ * when no single plan matches, the artist's YouTube channel (new tab). If
+ * neither destination exists it renders a plain div so nothing else changes.
+ */
+function MomentLink({
+  m, style, className, children,
+}: {
+  m: UpcomingMoment;
+  style?: CSSProperties;
+  className?: string;
+  children: ReactNode;
+}) {
+  const href = m.coachPlanSlug ? `/coach/${m.coachPlanSlug}` : (m.channelUrl ?? null);
+  if (!href) return <div style={style} className={className}>{children}</div>;
+  const internal = !!m.coachPlanSlug;
+  return (
+    <a
+      href={href}
+      {...linkTarget(internal)}
+      className={className}
+      style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer', ...style }}
+    >
+      {children}
+    </a>
+  );
 }
 
 /** Group upcoming moments into time buckets for editorial display */
@@ -793,7 +823,8 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                 </div>
                 <div className="pb-radar-big-items" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {bigDay[1].map((m, i) => (
-                    <div key={i} style={{
+                    <MomentLink key={i} m={m} style={{
+                      display: 'block',
                       background: 'rgba(255,255,255,0.08)', borderRadius: 6,
                       padding: '8px 14px', flex: '1 1 200px',
                     }}>
@@ -819,7 +850,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                       }}>
                         {m.eventType}
                       </span>
-                    </div>
+                    </MomentLink>
                   ))}
                 </div>
               </div>
@@ -876,7 +907,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                     {/* Moments for this date */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {moments.map((m, mi) => (
-                        <div key={mi} style={{
+                        <MomentLink key={mi} m={m} style={{
                           display: 'flex', alignItems: 'baseline', gap: 8,
                           padding: isTier1(m) ? '6px 10px' : '3px 0',
                           background: isTier1(m) ? 'rgba(45,106,79,0.04)' : 'transparent',
@@ -914,7 +945,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           }}>
                             {m.eventType}
                           </span>
-                        </div>
+                        </MomentLink>
                       ))}
                     </div>
                   </div>

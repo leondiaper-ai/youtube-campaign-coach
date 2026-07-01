@@ -155,6 +155,8 @@ type UpcomingMoment = {
   rolloutNote: string;
   fromCoachPlan: boolean;  // true if sourced from a saved coach plan
   priority: number;        // 100=release, 80=supporting video, 60=community, 30=touring/press
+  coachPlanSlug: string | null; // /coach/[slug] target when a single plan matches
+  channelUrl: string | null;    // YouTube channel fallback
 };
 
 type PartnerBriefingResponse = {
@@ -1002,9 +1004,18 @@ export async function GET(request: Request) {
     // YouTube wants to see: singles, official videos, BTS, trailers,
     // visualisers — anchored to actual dates. Generic "timeline being
     // developed" or "pre-release content build" adds no value here.
+    // Resolve a moment's link target: its Coach plan when exactly one plan
+    // matches the artist, otherwise the YouTube channel (same rule as cards).
+    const resolveCoachSlug = (artistSlug: string): string | null => {
+      const count = planCandidates.get(artistSlug)?.size ?? 0;
+      return count === 1 ? (artistSlugToPlanSlug.get(artistSlug) ?? null) : null;
+    };
+
     for (const { ch } of rankedChannels) {
       const artist = artistMap.get(ch.slug);
       const coachPlan = coachPlans.get(ch.slug);
+      const momentCoachSlug = resolveCoachSlug(ch.slug);
+      const momentChannelUrl = channelUrl(ch.channelHandle);
 
       // Only include moments from coach plans with real dates
       if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
@@ -1039,6 +1050,8 @@ export async function GET(request: Request) {
                 : 'Supporting content drop',
             fromCoachPlan: true,
             priority: evt.priority,
+            coachPlanSlug: momentCoachSlug,
+            channelUrl: momentChannelUrl,
           });
         }
       }
@@ -1059,6 +1072,8 @@ export async function GET(request: Request) {
             rolloutNote: 'Full rollout planned',
             fromCoachPlan: false,
             priority: 60,
+            coachPlanSlug: momentCoachSlug,
+            channelUrl: momentChannelUrl,
           });
         }
       }
