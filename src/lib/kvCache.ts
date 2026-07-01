@@ -94,19 +94,47 @@ export async function readLiveSnapByHandle(handle: string): Promise<CachedSnap |
 }
 
 /**
+ * Chunked mget — splits keys into batches to stay under Upstash's 10 MB
+ * max-request-size limit on the free plan. Each LiveSnap can be large
+ * (video descriptions, comments, etc.), so we fetch at most CHUNK_SIZE
+ * keys per round-trip.
+ */
+const MGET_CHUNK = 5;
+
+async function chunkedMget<T>(
+  store: Exclude<Awaited<ReturnType<typeof kv>>, null>,
+  keys: string[],
+): Promise<(T | null)[]> {
+  if (keys.length === 0) return [];
+  if (keys.length <= MGET_CHUNK) {
+    return store.mget<(T | null)[]>(...keys);
+  }
+  const results: (T | null)[] = [];
+  for (let i = 0; i < keys.length; i += MGET_CHUNK) {
+    const chunk = keys.slice(i, i + MGET_CHUNK);
+    const batch = await store.mget<(T | null)[]>(...chunk);
+    results.push(...batch);
+  }
+  return results;
+}
+
+/**
  * Read all cached LiveSnaps for a list of handles.
  * Returns a Map of handle → CachedSnap (only entries with data).
+ *
+ * Uses chunked mget to avoid exceeding Upstash's 10 MB request-size limit.
  */
 export async function readAllLiveSnaps(handles: string[]): Promise<Map<string, CachedSnap>> {
   const store = await kv();
   const result = new Map<string, CachedSnap>();
   if (!store) return result;
 
-  // Batch: resolve all handles → channelIds
+  // Batch: resolve all handles → channelIds (small strings, safe in one call
+  // but chunked anyway for consistency)
   const mappingKeys = handles.map((h) => `chanmap:${normalizeHandle(h)}`);
-  const channelIds = (await store.mget<(string | null)[]>(...mappingKeys));
+  const channelIds = await chunkedMget<string>(store, mappingKeys);
 
-  // Batch: fetch all live snaps
+  // Batch: fetch live snaps in small chunks (these are the large objects)
   const liveKeys: string[] = [];
   const handleForKey: string[] = [];
   channelIds.forEach((id, i) => {
@@ -117,7 +145,7 @@ export async function readAllLiveSnaps(handles: string[]): Promise<Map<string, C
   });
 
   if (liveKeys.length === 0) return result;
-  const snaps = (await store.mget<(CachedSnap | null)[]>(...liveKeys));
+  const snaps = await chunkedMget<CachedSnap>(store, liveKeys);
   snaps.forEach((snap, i) => {
     if (snap) result.set(handleForKey[i], snap);
   });
