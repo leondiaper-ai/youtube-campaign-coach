@@ -167,6 +167,53 @@ function MomentLink({
   );
 }
 
+// Small red YouTube play glyph used on planner CTAs.
+function YtGlyph({ w = 15, h = 11 }: { w?: number; h?: number }) {
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+      width: w, height: h, borderRadius: 3, background: '#FF0000', flexShrink: 0,
+    }}>
+      <svg width={w * 0.4} height={h * 0.55} viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12" fill="#fff" /></svg>
+    </span>
+  );
+}
+
+/**
+ * Visible call-to-action button for a campaign card. Links to the artist's
+ * Coach content planner when one exists, otherwise offers the YouTube channel.
+ */
+function PlannerCTA({ fc }: { fc: FocusCampaign }) {
+  if (fc.coachPlanSlug) {
+    return (
+      <a href={`/coach/${fc.coachPlanSlug}`} className="pb-link" style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: '9px 15px', borderRadius: 8, background: INK, color: PAPER,
+        fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+      }}>
+        <YtGlyph />
+        YouTube Content Planner
+        <span style={{ marginLeft: 1, fontSize: 13 }}>→</span>
+      </a>
+    );
+  }
+  if (fc.channelUrl) {
+    return (
+      <a href={fc.channelUrl} target="_blank" rel="noopener noreferrer" className="pb-link" style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: '9px 15px', borderRadius: 8, background: 'transparent', color: SMOKE,
+        border: `1px solid ${BONE}`,
+        fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+      }}>
+        View channel on YouTube
+        <span style={{ marginLeft: 1, fontSize: 12 }}>↗</span>
+      </a>
+    );
+  }
+  return null;
+}
+
+
 /** Group upcoming moments into time buckets for editorial display */
 function groupMomentsByWindow(moments: UpcomingMoment[]): {
   thisWeek: UpcomingMoment[];
@@ -1012,6 +1059,11 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                         {/* ── Card body ── */}
                         <div style={{ padding: '18px 20px 20px' }}>
 
+                          {/* ── Content planner CTA ── */}
+                          <div style={{ marginBottom: 16 }}>
+                            <PlannerCTA fc={fc} />
+                          </div>
+
                           {/* ── NEXT / AFTER dates — front and centre ── */}
                           {(() => {
                             // Determine if "next" date is actually in the past
@@ -1240,7 +1292,16 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             </div>
                           );
                         })()}
-                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0,
+                            fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+                            color: fc.coachPlanSlug ? INK : SMOKE,
+                          }}>
+                            {fc.coachPlanSlug ? <><YtGlyph w={13} h={9} /> Content Planner <span style={{ fontSize: 11 }}>→</span></> : <>YouTube <span style={{ fontSize: 10 }}>↗</span></>}
+                          </span>
+                        </div>
                       </div>
                     </a>
                     );
@@ -1295,6 +1356,9 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           </div>
                           );
                         })()}
+                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${BONE}`, display: 'flex', alignItems: 'center', gap: 5, fontSize: 8.5, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: fc.coachPlanSlug ? INK : SMOKE }}>
+                          {fc.coachPlanSlug ? <><YtGlyph w={12} h={8} /> Content Planner <span style={{ fontSize: 10 }}>→</span></> : <>YouTube <span style={{ fontSize: 9 }}>↗</span></>}
+                        </div>
                       </div>
                     </a>
                     );
