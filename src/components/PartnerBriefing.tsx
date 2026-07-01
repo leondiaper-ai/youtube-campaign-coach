@@ -53,6 +53,7 @@ type FocusCampaign = {
   youtubeFocus: string;
   channelUrl: string | null;
   hasCoachPlan: boolean;
+  coachPlanSlug: string | null;
   currentMoment: string;
   currentMomentDate: string | null;
   nextMoment: string;
@@ -119,6 +120,21 @@ function channelUrl(handle: string | null): string | null {
   if (!handle) return null;
   const h = handle.startsWith('@') ? handle : `@${handle}`;
   return `https://www.youtube.com/${h}`;
+}
+
+/**
+ * Where a campaign card should link:
+ *  - to its saved Coach content plan (/coach/[slug]) when one exists → same tab
+ *  - otherwise to the artist's YouTube channel → new tab
+ */
+function campaignLink(fc: FocusCampaign): { href: string; internal: boolean } {
+  if (fc.coachPlanSlug) return { href: `/coach/${fc.coachPlanSlug}`, internal: true };
+  return { href: fc.channelUrl ?? '#', internal: false };
+}
+
+/** target/rel props — only external (YouTube) links open in a new tab. */
+function linkTarget(internal: boolean) {
+  return internal ? {} : { target: '_blank', rel: 'noopener noreferrer' };
 }
 
 /** Group upcoming moments into time buckets for editorial display */
@@ -936,13 +952,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                     const topVids = fc.recentVideos.slice(0, 3);
                     const status = deriveStatus(fc);
                     const genre = genreFor(fc.channel.name);
+                    const link = campaignLink(fc);
                     return (
                       <div key={fc.channel.slug} className="pb-campaign-card" style={{
                         borderRadius: 12, overflow: 'hidden', background: WHITE,
                         border: `1px solid ${BONE}`,
                       }}>
                         {/* ── Hero image with artist overlay ── */}
-                        <a href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer" className="pb-link"
+                        <a href={link.href} {...linkTarget(link.internal)} className="pb-link"
                           style={{ display: 'block', position: 'relative', overflow: 'hidden', height: 220 }}>
                           <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -1136,8 +1153,9 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                   {tier2.map(fc => {
                     const status = deriveStatus(fc);
                     const genre = genreFor(fc.channel.name);
+                    const link = campaignLink(fc);
                     return (
-                    <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
+                    <a key={fc.channel.slug} href={link.href} {...linkTarget(link.internal)}
                       className="pb-campaign-card pb-link"
                       style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
                       <div style={{ position: 'relative', overflow: 'hidden', height: 130 }}>
@@ -1213,8 +1231,9 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                   {tier3.map(fc => {
                     const status = deriveStatus(fc);
                     const genre = genreFor(fc.channel.name);
+                    const link = campaignLink(fc);
                     return (
-                    <a key={fc.channel.slug} href={fc.channelUrl ?? '#'} target="_blank" rel="noopener noreferrer"
+                    <a key={fc.channel.slug} href={link.href} {...linkTarget(link.internal)}
                       className="pb-campaign-card pb-link"
                       style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
                       <div style={{ position: 'relative', overflow: 'hidden', height: 80 }}>

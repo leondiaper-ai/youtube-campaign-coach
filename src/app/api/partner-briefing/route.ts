@@ -129,6 +129,7 @@ type FocusCampaign = {
   youtubeFocus: string;
   channelUrl: string | null;
   hasCoachPlan: boolean;
+  coachPlanSlug: string | null; // /coach/[slug] target when a single plan matches
   currentMoment: string;
   currentMomentDate: string | null;
   nextMoment: string;
@@ -500,7 +501,14 @@ export async function GET(request: Request) {
     }
 
     const artistSlugToPlanSlug = new Map<string, string>();
+    // Track every plan that matches an artist so we can detect ambiguity
+    // (e.g. Antony Szmierek has two saved plans). Ambiguous artists fall back
+    // to their YouTube channel rather than guessing a plan.
+    const planCandidates = new Map<string, Set<string>>();
     const tryAssign = (artistSlug: string, entry: { slug: string; updatedAt: string }) => {
+      const candidates = planCandidates.get(artistSlug) ?? new Set<string>();
+      candidates.add(entry.slug);
+      planCandidates.set(artistSlug, candidates);
       const existing = artistSlugToPlanSlug.get(artistSlug);
       if (!existing) {
         artistSlugToPlanSlug.set(artistSlug, entry.slug);
@@ -821,6 +829,13 @@ export async function GET(request: Request) {
 
       const chUrl = channelUrl(ch.channelHandle);
 
+      // Link the card to its saved Coach plan only when exactly one plan matches.
+      // Multiple matches (ambiguous) → fall back to the YouTube channel.
+      const candidateCount = planCandidates.get(ch.slug)?.size ?? 0;
+      const coachPlanSlug = hasCoachPlan && candidateCount === 1
+        ? (artistSlugToPlanSlug.get(ch.slug) ?? null)
+        : null;
+
       return {
         channel: ch,
         heroImage: latestHeroImage,
@@ -835,6 +850,7 @@ export async function GET(request: Request) {
         youtubeFocus,
         channelUrl: chUrl,
         hasCoachPlan,
+        coachPlanSlug,
         currentMoment,
         currentMomentDate,
         nextMoment: nextMoment,
