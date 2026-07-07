@@ -308,16 +308,14 @@ export async function GET(request: Request) {
     const pinnedVideos = allRecentVideos.filter(v => pinnedSlugs.has(v.artistSlug));
     const topVideos = pinnedVideos.filter(v => v.format !== 'Short').slice(0, 6);
 
-    // Diverse shorts — pinned artists only
+    // Diverse shorts — pinned artists only, max 1 per artist
     const allShortsSorted = pinnedVideos.filter(v => v.format === 'Short');
     const topShorts: BriefingVideo[] = [];
-    const shortsCount = new Map<string, number>();
+    const shortsSeen = new Set<string>();
     for (const v of allShortsSorted) {
-      const n = shortsCount.get(v.artistSlug) ?? 0;
-      if (n < 2) {
-        topShorts.push(v);
-        shortsCount.set(v.artistSlug, n + 1);
-      }
+      if (shortsSeen.has(v.artistSlug)) continue;
+      topShorts.push(v);
+      shortsSeen.add(v.artistSlug);
       if (topShorts.length >= 9) break;
     }
 
