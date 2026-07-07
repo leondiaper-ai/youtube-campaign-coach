@@ -213,6 +213,30 @@ function PlannerCTA({ fc }: { fc: FocusCampaign }) {
   return null;
 }
 
+/**
+ * Compact, full-width planner button for the smaller Active/Other cards.
+ * Rendered as a span (the card itself is already the link) styled as a button —
+ * filled dark for a Coach planner, outlined for the YouTube fallback.
+ */
+function PlannerButton({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
+  const hasPlan = !!fc.coachPlanSlug;
+  return (
+    <span style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      width: '100%', padding: compact ? '6px 8px' : '7px 10px', borderRadius: 7,
+      background: hasPlan ? INK : 'transparent',
+      color: hasPlan ? PAPER : SMOKE,
+      border: hasPlan ? 'none' : `1px solid ${BONE}`,
+      fontSize: compact ? 8.5 : 9.5, fontWeight: 800,
+      letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+    }}>
+      {hasPlan
+        ? <><YtGlyph w={13} h={9} /> Content Planner <span style={{ fontSize: compact ? 10 : 11 }}>→</span></>
+        : <>View on YouTube <span style={{ fontSize: 10 }}>↗</span></>}
+    </span>
+  );
+}
+
 
 /** Group upcoming moments into time buckets for editorial display */
 function groupMomentsByWindow(moments: UpcomingMoment[]): {
@@ -490,6 +514,10 @@ const GENRE_BY_ARTIST: Record<string, string> = {
   'antony szmierek': 'Alt / Spoken Word', 'kurupt fm': 'UK Garage', 'man woman chainsaw': 'Indie / Post-Punk',
   'jjerome87': 'Rap', 'ezra collective': 'Jazz', 'tom odell': 'Pop', 'bad omens': 'Rock / Metal',
   'james blake': 'Electronic', 'tove lo music': 'Electronic Pop',
+  'freak slug': 'Indie Pop', 'original koffee': 'Reggae / Dancehall',
+  'precious pepala': 'Alt Pop', 'catch': 'UK Rap', 'nickelback': 'Legacy / Rock',
+  'bloc party': 'Indie Rock', 'angus and julia stone': 'Indie / Folk',
+  'jigitz': 'UK Garage', 'the big moon': 'Indie Rock', 'david kushner': 'Alt / Folk',
 };
 function genreFor(name: string): string | null {
   return GENRE_BY_ARTIST[name.trim().toLowerCase()] ?? null;
@@ -1292,16 +1320,8 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                             </div>
                           );
                         })()}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                          <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0,
-                            fontSize: 9, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-                            color: fc.coachPlanSlug ? INK : SMOKE,
-                          }}>
-                            {fc.coachPlanSlug ? <><YtGlyph w={13} h={9} /> Content Planner <span style={{ fontSize: 11 }}>→</span></> : <>YouTube <span style={{ fontSize: 10 }}>↗</span></>}
-                          </span>
-                        </div>
+                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
+                        <div style={{ marginTop: 10 }}><PlannerButton fc={fc} /></div>
                       </div>
                     </a>
                     );
@@ -1356,9 +1376,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                           </div>
                           );
                         })()}
-                        <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${BONE}`, display: 'flex', alignItems: 'center', gap: 5, fontSize: 8.5, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: fc.coachPlanSlug ? INK : SMOKE }}>
-                          {fc.coachPlanSlug ? <><YtGlyph w={12} h={8} /> Content Planner <span style={{ fontSize: 10 }}>→</span></> : <>YouTube <span style={{ fontSize: 9 }}>↗</span></>}
-                        </div>
+                        <div style={{ marginTop: 10 }}><PlannerButton fc={fc} compact /></div>
                       </div>
                     </a>
                     );
