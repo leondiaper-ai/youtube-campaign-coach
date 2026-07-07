@@ -109,11 +109,17 @@ export async function GET() {
     const MIN_VIEWS_7D = 5000;
     const MIN_UPLOADS_30D = 3;
 
+    // ── Diagnostics: track the filtering funnel ─────────────────
+    const filteredBySubs: string[] = [];
+    const filteredByViews: string[] = [];
+    const filteredByUploads: string[] = [];
+    const filteredByCold: string[] = [];
+
     const qualified = scored.filter(({ row }) => {
-      if ((row.subs ?? 0) < MIN_SUBS) return false;
-      if ((row.views7Delta ?? 0) < MIN_VIEWS_7D) return false;
-      if (row.uploads30d < MIN_UPLOADS_30D) return false;
-      if (row.status === 'COLD') return false;
+      if ((row.subs ?? 0) < MIN_SUBS) { filteredBySubs.push(`${row.name} (${row.subs ?? 0})`); return false; }
+      if ((row.views7Delta ?? 0) < MIN_VIEWS_7D) { filteredByViews.push(`${row.name} (${row.views7Delta ?? 0})`); return false; }
+      if (row.uploads30d < MIN_UPLOADS_30D) { filteredByUploads.push(`${row.name} (${row.uploads30d})`); return false; }
+      if (row.status === 'COLD') { filteredByCold.push(row.name); return false; }
       return true;
     });
 
@@ -169,9 +175,12 @@ export async function GET() {
 
     // Take top 5, but only if they clear the bar (composite >= 40).
     // Better to show 2 genuinely strong channels than 5 padded with weak ones.
-    const top = withComposite
+    const sortedByComposite = [...withComposite].sort((a, b) => b.composite - a.composite);
+    const filteredByComposite = sortedByComposite
+      .filter((c) => c.composite < 40)
+      .map((c) => `${c.row.name} (${c.composite})`);
+    const top = sortedByComposite
       .filter((c) => c.composite >= 40)
-      .sort((a, b) => b.composite - a.composite)
       .slice(0, 5);
 
     // ── Load coach plans ─────────────────────────────────────────────────
@@ -434,6 +443,31 @@ export async function GET() {
         artistsSuccess: syncMeta.artistsSuccess,
         artistsTotal: syncMeta.artistsTotal,
       } : null,
+      // ── Filtering funnel diagnostics ──────────────────────────
+      // Shows exactly how many channels pass each stage so we can
+      // verify full roster coverage and understand spotlight selection.
+      diagnostics: {
+        totalScanned: managedRows.length,
+        passedThresholds: qualified.length,
+        passedComposite: top.length,
+        funnel: {
+          filteredBySubs: { count: filteredBySubs.length, channels: filteredBySubs },
+          filteredByViews: { count: filteredByViews.length, channels: filteredByViews },
+          filteredByUploads: { count: filteredByUploads.length, channels: filteredByUploads },
+          filteredByCold: { count: filteredByCold.length, channels: filteredByCold },
+          filteredByComposite: { count: filteredByComposite.length, channels: filteredByComposite },
+        },
+        // All channels that passed thresholds with their composite scores
+        qualifiedPool: sortedByComposite.map((c) => ({
+          name: c.row.name,
+          composite: c.composite,
+          views7d: c.row.views7Delta,
+          subs: c.row.subs,
+          uploads30d: c.row.uploads30d,
+          status: c.row.status,
+          grade: c.score.grade,
+        })),
+      },
     });
   } catch (err) {
     console.error('[channel-spotlight] Error:', err);
