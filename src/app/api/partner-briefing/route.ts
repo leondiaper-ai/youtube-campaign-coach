@@ -829,10 +829,9 @@ export async function GET(request: Request) {
 
       const chUrl = channelUrl(ch.channelHandle);
 
-      // Link the card to its saved Coach plan only when exactly one plan matches.
-      // Multiple matches (ambiguous) → fall back to the YouTube channel.
-      const candidateCount = planCandidates.get(ch.slug)?.size ?? 0;
-      const coachPlanSlug = hasCoachPlan && candidateCount === 1
+      // Link the card to its saved Coach plan — when multiple plans exist for the
+      // same artist, tryAssign already resolves to the most recently updated one.
+      const coachPlanSlug = hasCoachPlan
         ? (artistSlugToPlanSlug.get(ch.slug) ?? null)
         : null;
 
@@ -1002,11 +1001,10 @@ export async function GET(request: Request) {
     // YouTube wants to see: singles, official videos, BTS, trailers,
     // visualisers — anchored to actual dates. Generic "timeline being
     // developed" or "pre-release content build" adds no value here.
-    // Resolve a moment's link target: its Coach plan when exactly one plan
-    // matches the artist, otherwise the YouTube channel (same rule as cards).
+    // Resolve a moment's link target: its Coach plan (most recently updated
+    // when multiple plans exist — already resolved by tryAssign above).
     const resolveCoachSlug = (artistSlug: string): string | null => {
-      const count = planCandidates.get(artistSlug)?.size ?? 0;
-      return count === 1 ? (artistSlugToPlanSlug.get(artistSlug) ?? null) : null;
+      return artistSlugToPlanSlug.get(artistSlug) ?? null;
     };
 
     for (const { ch } of rankedChannels) {
