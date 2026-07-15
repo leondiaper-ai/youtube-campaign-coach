@@ -1,18 +1,18 @@
 'use client';
 
 /**
- * CampaignBehaviour V2 — Content-First Channel Behaviour View
+ * CampaignBehaviour V3 — Single Overlay Channel Behaviour View
  *
  * Visual story: CHANNEL BASELINE → CONTENT ACTIVITY → FORMAT/TIMING →
  *               CHANNEL RESPONSE → GAPS/CHANGES → CURRENT DIRECTION
  *
- * Architecture: One unified chart with three aligned layers:
- *   1. View velocity (compact, above)
- *   2. Content activity timeline (main spine, center)
- *   3. Subscriber momentum (compact, below)
+ * Architecture: Single overlay chart with dual Y-axes:
+ *   - View velocity (signal red, left Y-axis, area + line)
+ *   - Subscriber momentum (mint green, right Y-axis, line)
+ *   - Content markers placed within the chart (bottom zone)
  *
- * All layers share the same dateToX() function and horizontal axis.
- * Shared crosshair tracks across all layers simultaneously.
+ * Everything shares the same dateToX() function and horizontal axis.
+ * Single crosshair spans the entire chart.
  *
  * Long-form uploads are large labelled markers: ● OMV · ★ LIVE · ◆ LYRIC · ■ VIS
  * Shorts are small understated markers.
@@ -190,22 +190,16 @@ function starPath(cx: number, cy: number, outerR: number, innerR: number, points
 
 // ── Chart layout constants ──────────────────────────────────────────────
 
-const M = { left: 56, right: 24, top: 4, bottom: 4 };
+const M = { left: 56, right: 56, top: 4, bottom: 4 }; // Right margin wider for right Y-axis
 
-// V2: Content activity is the main spine — tallest section
-const VELOCITY_H = 100;      // Compact view velocity
-const CONTENT_H  = 180;      // Main content spine — tallest
-const SUBS_H     = 64;       // Compact subscriber growth
-const AXIS_H     = 24;       // Shared date axis
-const LAYER_GAP  = 2;        // Gap between layers
+// V3: Single overlay chart — views and subs overlaid, content markers at bottom
+const CHART_H    = 280;       // Main chart area (views + subs overlay)
+const MARKER_ZONE = 60;       // Bottom zone of CHART_H reserved for content markers
+const DATA_H     = CHART_H - MARKER_ZONE; // 220px for the line/area data
+const AXIS_H     = 24;        // Shared date axis below chart
 
-const TOTAL_CHART_H = VELOCITY_H + CONTENT_H + SUBS_H + AXIS_H + LAYER_GAP * 3;
-
-// Layer Y offsets (within the SVG, after M.top)
-const VELOCITY_Y = 0;
-const CONTENT_Y  = VELOCITY_H + LAYER_GAP;
-const SUBS_Y     = CONTENT_Y + CONTENT_H + LAYER_GAP;
-const AXIS_Y     = SUBS_Y + SUBS_H + LAYER_GAP;
+const TOTAL_CHART_H = CHART_H + AXIS_H;
+const AXIS_Y     = CHART_H;
 
 // ── Unified Chart ───────────────────────────────────────────────────────
 
@@ -235,7 +229,7 @@ function UnifiedChart({
 
   function toX(date: string) { return dateToX(date, startDate, endDate, chartW); }
 
-  // ── Shared date axis ticks ──
+  // ── Date axis ticks ──
   const axisTicks = useMemo(() => {
     const tickCount = Math.min(8, Math.floor(chartW / 70));
     const startTs = new Date(startDate).getTime();
@@ -248,14 +242,14 @@ function UnifiedChart({
     });
   }, [startDate, endDate, chartW]);
 
-  // ── Velocity data ──
+  // ── View velocity data (left Y-axis) ──
   const velocityValid = data.viewVelocity.filter((d) => d.rollingAvg7d != null);
   const velMax = velocityValid.length > 0 ? Math.max(...velocityValid.map((d) => d.rollingAvg7d!)) : 0;
   const velMin = velocityValid.length > 0 ? Math.min(0, Math.min(...velocityValid.map((d) => d.rollingAvg7d!))) : 0;
   const velRange = velMax - velMin || 1;
-  function velToY(val: number) { return VELOCITY_H - ((val - velMin) / velRange) * VELOCITY_H; }
+  function velToY(val: number) { return DATA_H - ((val - velMin) / velRange) * DATA_H; }
 
-  // Velocity line and area
+  // View velocity line and area
   const velLineParts = velocityValid.map((p, i) => {
     const x = toX(p.date);
     const y = velToY(p.rollingAvg7d!);
@@ -264,16 +258,16 @@ function UnifiedChart({
   const velLine = velLineParts.join(' ');
   const velArea = velocityValid.length > 1
     ? velLine +
-      ` L${toX(velocityValid[velocityValid.length - 1].date).toFixed(1)},${VELOCITY_H}` +
-      ` L${toX(velocityValid[0].date).toFixed(1)},${VELOCITY_H} Z`
+      ` L${toX(velocityValid[velocityValid.length - 1].date).toFixed(1)},${DATA_H}` +
+      ` L${toX(velocityValid[0].date).toFixed(1)},${DATA_H} Z`
     : '';
 
-  // ── Subscriber data ──
+  // ── Subscriber data (right Y-axis) ──
   const subsValid = data.subscriberGains.filter((d) => d.rollingAvg7d != null);
   const subsMax = subsValid.length > 0 ? Math.max(...subsValid.map((d) => d.rollingAvg7d!)) : 0;
   const subsMin = subsValid.length > 0 ? Math.min(0, Math.min(...subsValid.map((d) => d.rollingAvg7d!))) : 0;
   const subsRange = subsMax - subsMin || 1;
-  function subsToY(val: number) { return SUBS_H - ((val - subsMin) / subsRange) * SUBS_H; }
+  function subsToY(val: number) { return DATA_H - ((val - subsMin) / subsRange) * DATA_H; }
 
   const subsLineParts = subsValid.map((p, i) => {
     const x = toX(p.date);
@@ -283,11 +277,11 @@ function UnifiedChart({
   const subsLine = subsLineParts.join(' ');
   const subsArea = subsValid.length > 1
     ? subsLine +
-      ` L${toX(subsValid[subsValid.length - 1].date).toFixed(1)},${SUBS_H}` +
-      ` L${toX(subsValid[0].date).toFixed(1)},${SUBS_H} Z`
+      ` L${toX(subsValid[subsValid.length - 1].date).toFixed(1)},${DATA_H}` +
+      ` L${toX(subsValid[0].date).toFixed(1)},${DATA_H} Z`
     : '';
 
-  // ── Content timeline data ──
+  // ── Content markers (positioned in bottom zone of chart) ──
   const longform = data.uploads.filter((u) => u.formatMeta.isLongform);
   const shorts = data.uploads.filter((u) => u.format === 'short');
 
@@ -304,17 +298,26 @@ function UnifiedChart({
     }
   }
 
-  // Content lane vertical positions
-  const contentMidY = CONTENT_H / 2;
-  const lfY = contentMidY - 14;    // Long-form markers above center
-  const shortY = contentMidY + 30;  // Shorts below center
-  const seqY = contentMidY + 6;     // Sequence text line
+  // Marker Y positions (within the bottom MARKER_ZONE of the chart)
+  const lfY = DATA_H + 20;           // Long-form markers
+  const shortY = DATA_H + 46;        // Shorts below long-form
 
-  // ── Build format sequence string for the content spine ──
-  // e.g. "▼ ▼ ▼ → ● OMV → ▼ ▼ → ★ LIVE"
-  const sortedUploads = [...data.uploads].sort(
-    (a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
-  );
+  // ── Y-axis scale ticks ──
+  const velTicks = useMemo(() => {
+    const count = 4;
+    return Array.from({ length: count + 1 }).map((_, i) => {
+      const val = velMin + (velRange * i) / count;
+      return { val, y: velToY(val) };
+    });
+  }, [velMin, velRange]);
+
+  const subsTicks = useMemo(() => {
+    const count = 4;
+    return Array.from({ length: count + 1 }).map((_, i) => {
+      const val = subsMin + (subsRange * i) / count;
+      return { val, y: subsToY(val) };
+    });
+  }, [subsMin, subsRange]);
 
   // ── Hover detection ──
   const handleMouseMove = useCallback((e: React.MouseEvent<SVGRectElement>) => {
@@ -339,14 +342,14 @@ function UnifiedChart({
     >
       <g transform={`translate(${M.left},${M.top})`}>
 
-        {/* ═══ GAP OVERLAYS (span all layers) ═══ */}
+        {/* ═══ GAP OVERLAYS (span full chart) ═══ */}
         {data.gaps.filter((g) => g.type === 'all_content').map((gap, i) => {
           const x1 = Math.max(0, toX(gap.startDate));
           const x2 = Math.min(chartW, toX(gap.endDate));
           const w = Math.max(0, x2 - x1);
           return (
             <rect key={`gap-${i}`}
-              x={x1} y={0} width={w} height={VELOCITY_H + CONTENT_H + SUBS_H + LAYER_GAP * 2}
+              x={x1} y={0} width={w} height={CHART_H}
               fill={SIGNAL} opacity={0.04} rx={2}
             />
           );
@@ -357,13 +360,13 @@ function UnifiedChart({
           const w = Math.max(0, x2 - x1);
           return (
             <rect key={`lfgap-${i}`}
-              x={x1} y={CONTENT_Y} width={w} height={CONTENT_H}
+              x={x1} y={DATA_H} width={w} height={MARKER_ZONE}
               fill={SUN} opacity={0.06} rx={2}
             />
           );
         })}
 
-        {/* ═══ MILESTONE LINES (span all layers) ═══ */}
+        {/* ═══ MILESTONE LINES (span full chart) ═══ */}
         {data.milestones.map((m, i) => {
           const x = toX(m.date);
           if (x < 0 || x > chartW) return null;
@@ -371,7 +374,7 @@ function UnifiedChart({
           return (
             <g key={`ms-${i}`}>
               <line
-                x1={x} y1={0} x2={x} y2={VELOCITY_H + CONTENT_H + SUBS_H + LAYER_GAP * 2}
+                x1={x} y1={0} x2={x} y2={CHART_H}
                 stroke={isCampaignStart ? GHOST : ELECTRIC}
                 strokeWidth={isCampaignStart ? 1 : 1.5}
                 strokeDasharray={isCampaignStart ? '3,6' : '6,4'}
@@ -390,227 +393,179 @@ function UnifiedChart({
           );
         })}
 
-        {/* ═══ LAYER 1: VIEW VELOCITY (compact, top) ═══ */}
-        <g transform={`translate(0,${VELOCITY_Y})`}>
-          {/* Label */}
-          <text x={-8} y={12} textAnchor="end" fontSize={9} fill={SIGNAL} fontWeight={600}
-            style={{ textTransform: 'uppercase' } as React.CSSProperties}>
-            Views
-          </text>
+        {/* ═══ LEFT Y-AXIS: VIEWS ═══ */}
+        <text x={-8} y={10} textAnchor="end" fontSize={9} fill={SIGNAL} fontWeight={600}
+          style={{ textTransform: 'uppercase' } as React.CSSProperties}>
+          Views/d
+        </text>
+        {velTicks.map((t, i) => (
+          <g key={`vt-${i}`}>
+            <line x1={-4} y1={t.y} x2={0} y2={t.y} stroke={BONE} strokeWidth={1} />
+            {(i === 0 || i === velTicks.length - 1) && (
+              <text x={-8} y={t.y + 3} textAnchor="end" fontSize={8} fill={GHOST}>
+                {formatNum(Math.round(t.val))}
+              </text>
+            )}
+          </g>
+        ))}
 
-          {/* Y-axis reference */}
-          <text x={-8} y={VELOCITY_H - 2} textAnchor="end" fontSize={8} fill={GHOST}>0</text>
-          {velMax > 0 && (
-            <text x={-8} y={14} textAnchor="end" fontSize={8} fill={GHOST}>
-              {formatNum(velMax)}
+        {/* ═══ RIGHT Y-AXIS: SUBS ═══ */}
+        <text x={chartW + 8} y={10} textAnchor="start" fontSize={9} fill={MINT} fontWeight={600}
+          style={{ textTransform: 'uppercase' } as React.CSSProperties}>
+          Subs/d
+        </text>
+        {subsTicks.map((t, i) => (
+          <g key={`st-${i}`}>
+            <line x1={chartW} y1={t.y} x2={chartW + 4} y2={t.y} stroke={BONE} strokeWidth={1} />
+            {(i === 0 || i === subsTicks.length - 1) && (
+              <text x={chartW + 8} y={t.y + 3} textAnchor="start" fontSize={8} fill={GHOST}>
+                {formatNum(Math.round(t.val))}
+              </text>
+            )}
+          </g>
+        ))}
+
+        {/* ═══ GRID LINES ═══ */}
+        <line x1={0} y1={DATA_H} x2={chartW} y2={DATA_H} stroke={BONE} strokeWidth={1} />
+        <line x1={0} y1={0} x2={chartW} y2={0} stroke={BONE} strokeWidth={0.5} opacity={0.5} />
+        {/* Mid-grid */}
+        <line x1={0} y1={DATA_H / 2} x2={chartW} y2={DATA_H / 2} stroke={BONE} strokeWidth={0.5} opacity={0.3} />
+
+        {/* ═══ BASELINE REFERENCE LINES ═══ */}
+        {baseline?.avgDailyViews != null && baseline.avgDailyViews > 0 && (
+          <g>
+            <line
+              x1={0} y1={velToY(baseline.avgDailyViews)}
+              x2={chartW} y2={velToY(baseline.avgDailyViews)}
+              stroke={SIGNAL} strokeWidth={1} strokeDasharray="2,4" opacity={0.35}
+            />
+            <text
+              x={-8} y={velToY(baseline.avgDailyViews) + 3}
+              textAnchor="end" fontSize={7} fill={SIGNAL} opacity={0.6}>
+              base
             </text>
-          )}
+          </g>
+        )}
+        {baseline?.avgDailySubs != null && (
+          <g>
+            <line
+              x1={0} y1={subsToY(baseline.avgDailySubs)}
+              x2={chartW} y2={subsToY(baseline.avgDailySubs)}
+              stroke={MINT} strokeWidth={1} strokeDasharray="2,4" opacity={0.35}
+            />
+            <text
+              x={chartW + 8} y={subsToY(baseline.avgDailySubs) + 3}
+              textAnchor="start" fontSize={7} fill={MINT} opacity={0.6}>
+              base
+            </text>
+          </g>
+        )}
 
-          {/* Grid */}
-          <line x1={0} y1={VELOCITY_H} x2={chartW} y2={VELOCITY_H} stroke={BONE} strokeWidth={1} />
+        {/* ═══ VIEW VELOCITY: AREA + LINE (signal red) ═══ */}
+        {velArea && <path d={velArea} fill={SIGNAL} opacity={0.08} />}
+        {velLine && <path d={velLine} fill="none" stroke={SIGNAL} strokeWidth={1.5} />}
 
-          {/* Baseline reference line */}
-          {baseline?.avgDailyViews != null && baseline.avgDailyViews > 0 && (
-            <g>
-              <line
-                x1={0} y1={velToY(baseline.avgDailyViews)}
-                x2={chartW} y2={velToY(baseline.avgDailyViews)}
-                stroke={SMOKE} strokeWidth={1} strokeDasharray="2,4" opacity={0.5}
+        {/* ═══ SUBSCRIBER GROWTH: AREA + LINE (mint green) ═══ */}
+        {subsArea && <path d={subsArea} fill={MINT} opacity={0.06} />}
+        {subsLine && <path d={subsLine} fill="none" stroke={MINT} strokeWidth={1.5} strokeDasharray="6,3" />}
+
+        {/* ═══ CONTENT MARKER ZONE SEPARATOR ═══ */}
+        <line x1={0} y1={DATA_H} x2={chartW} y2={DATA_H} stroke={BONE} strokeWidth={1} />
+
+        {/* ═══ GAP DURATION LABELS ═══ */}
+        {data.gaps.filter((g) => g.type === 'all_content' && g.durationDays >= 7).map((gap, i) => {
+          const x1 = Math.max(0, toX(gap.startDate));
+          const x2 = Math.min(chartW, toX(gap.endDate));
+          const cx = (x1 + x2) / 2;
+          return (
+            <text key={`gl-${i}`} x={cx} y={DATA_H + 12} textAnchor="middle"
+              fontSize={8} fill={SIGNAL} fontWeight={700} opacity={0.5}>
+              {gap.durationDays}d gap
+            </text>
+          );
+        })}
+
+        {/* Long-form gap labels */}
+        {data.gaps.filter((g) => g.type === 'longform_only' && g.durationDays >= 14).map((gap, i) => {
+          const x1 = Math.max(0, toX(gap.startDate));
+          const x2 = Math.min(chartW, toX(gap.endDate));
+          const cx = (x1 + x2) / 2;
+          return (
+            <text key={`lfgl-${i}`} x={cx} y={lfY - 8} textAnchor="middle"
+              fontSize={7} fill={SUN} fontWeight={600} opacity={0.8}>
+              {gap.durationDays}d no LF
+            </text>
+          );
+        })}
+
+        {/* ═══ SHORT GROUPS — small understated markers ═══ */}
+        {shortGroups.map((group, i) => {
+          const isSelected = group.uploads.some((u) => u.id === selectedUpload);
+          return (
+            <g key={`sg-${i}`}
+              style={{ cursor: 'pointer' }}
+              onClick={() => onSelectUpload(group.uploads[0].id)}
+            >
+              <path
+                d={getFormatShape('short', group.x, shortY, group.count > 1 ? 5 : 4)}
+                fill={FORMAT_COLORS.short}
+                opacity={isSelected ? 1 : 0.5}
               />
-              <text
-                x={chartW + 4} y={velToY(baseline.avgDailyViews) + 3}
-                fontSize={7} fill={SMOKE} opacity={0.7}>
-                baseline
+              {group.count > 1 && (
+                <text x={group.x} y={shortY + 12} textAnchor="middle"
+                  fontSize={7} fill={SMOKE} opacity={0.7}>
+                  x{group.count}
+                </text>
+              )}
+            </g>
+          );
+        })}
+
+        {/* ═══ LONG-FORM MARKERS — LARGE, labelled, very obvious ═══ */}
+        {longform.map((u) => {
+          const x = toX(u.publishedAt);
+          const isSelected = selectedUpload === u.id;
+          const size = isSelected ? 10 : 8;
+
+          return (
+            <g key={u.id} style={{ cursor: 'pointer' }}
+              onClick={() => onSelectUpload(isSelected ? null : u.id)}
+            >
+              {/* Selection ring */}
+              {isSelected && (
+                <circle cx={x} cy={lfY} r={size + 5}
+                  fill="none" stroke={FORMAT_COLORS[u.format]} strokeWidth={2}
+                  opacity={0.3}
+                />
+              )}
+
+              {/* Vertical connector line from marker up into data area */}
+              <line x1={x} y1={DATA_H} x2={x} y2={lfY - size - 2}
+                stroke={FORMAT_COLORS[u.format]} strokeWidth={1} opacity={0.15}
+              />
+
+              {/* The marker — big and obvious */}
+              <path
+                d={getFormatShape(u.format, x, lfY, size)}
+                fill={u.format === 'audio' ? 'none' : FORMAT_COLORS[u.format]}
+                stroke={FORMAT_COLORS[u.format]}
+                strokeWidth={u.format === 'audio' ? 2.5 : isSelected ? 2 : 0}
+                opacity={isSelected ? 1 : 0.9}
+              />
+
+              {/* Format label — ALWAYS visible, below marker */}
+              <text x={x} y={lfY + size + 10} textAnchor="middle"
+                fontSize={8} fill={FORMAT_COLORS[u.format]} fontWeight={700}>
+                {u.formatMeta.shortLabel}
               </text>
             </g>
-          )}
+          );
+        })}
 
-          {/* Area + Line */}
-          {velArea && <path d={velArea} fill={SIGNAL} opacity={0.08} />}
-          {velLine && <path d={velLine} fill="none" stroke={SIGNAL} strokeWidth={1.5} />}
+        {/* ═══ BOTTOM BORDER ═══ */}
+        <line x1={0} y1={CHART_H} x2={chartW} y2={CHART_H} stroke={BONE} strokeWidth={1} />
 
-          {/* Hover dot */}
-          {hoveredDate && (() => {
-            const point = data.viewVelocity.find((d) => d.date === hoveredDate);
-            if (!point?.rollingAvg7d) return null;
-            const x = toX(hoveredDate);
-            const y = velToY(point.rollingAvg7d);
-            if (x < 0 || x > chartW) return null;
-            return (
-              <g>
-                <circle cx={x} cy={y} r={4} fill={SIGNAL} />
-                <rect x={x - 32} y={y - 20} width={64} height={16} rx={3} fill={INK} opacity={0.9} />
-                <text x={x} y={y - 9} textAnchor="middle" fontSize={9} fill="white" fontWeight={600}>
-                  {formatNum(point.rollingAvg7d)}/d
-                </text>
-              </g>
-            );
-          })()}
-        </g>
-
-        {/* ═══ LAYER 2: CONTENT ACTIVITY (main spine, center) ═══ */}
-        <g transform={`translate(0,${CONTENT_Y})`}>
-          {/* Background */}
-          <rect x={0} y={0} width={chartW} height={CONTENT_H} fill="white" opacity={0.3} rx={4} />
-
-          {/* Label */}
-          <text x={-8} y={14} textAnchor="end" fontSize={9} fill={INK} fontWeight={700}
-            style={{ textTransform: 'uppercase' } as React.CSSProperties}>
-            Content
-          </text>
-          <text x={-8} y={lfY + 4} textAnchor="end" fontSize={7} fill={SMOKE}>LF</text>
-          <text x={-8} y={shortY + 3} textAnchor="end" fontSize={7} fill={SMOKE}>S</text>
-
-          {/* Center reference line */}
-          <line x1={0} y1={contentMidY} x2={chartW} y2={contentMidY}
-            stroke={BONE} strokeWidth={1} opacity={0.5} />
-
-          {/* Gap duration labels */}
-          {data.gaps.filter((g) => g.type === 'all_content' && g.durationDays >= 7).map((gap, i) => {
-            const x1 = Math.max(0, toX(gap.startDate));
-            const x2 = Math.min(chartW, toX(gap.endDate));
-            const cx = (x1 + x2) / 2;
-            return (
-              <g key={`gl-${i}`}>
-                <text x={cx} y={contentMidY - 2} textAnchor="middle"
-                  fontSize={9} fill={SIGNAL} fontWeight={700} opacity={0.6}>
-                  {gap.durationDays}d gap
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Long-form gap labels */}
-          {data.gaps.filter((g) => g.type === 'longform_only' && g.durationDays >= 14).map((gap, i) => {
-            const x1 = Math.max(0, toX(gap.startDate));
-            const x2 = Math.min(chartW, toX(gap.endDate));
-            const cx = (x1 + x2) / 2;
-            return (
-              <text key={`lfgl-${i}`} x={cx} y={lfY - 18} textAnchor="middle"
-                fontSize={8} fill={SUN} fontWeight={600} opacity={0.8}>
-                {gap.durationDays}d no long-form
-              </text>
-            );
-          })}
-
-          {/* Short groups — small understated markers */}
-          {shortGroups.map((group, i) => {
-            const isSelected = group.uploads.some((u) => u.id === selectedUpload);
-            return (
-              <g key={`sg-${i}`}
-                style={{ cursor: 'pointer' }}
-                onClick={() => onSelectUpload(group.uploads[0].id)}
-              >
-                <path
-                  d={getFormatShape('short', group.x, shortY, group.count > 1 ? 5 : 4)}
-                  fill={FORMAT_COLORS.short}
-                  opacity={isSelected ? 1 : 0.5}
-                />
-                {group.count > 1 && (
-                  <text x={group.x} y={shortY + 14} textAnchor="middle"
-                    fontSize={7} fill={SMOKE} opacity={0.7}>
-                    x{group.count}
-                  </text>
-                )}
-              </g>
-            );
-          })}
-
-          {/* Long-form markers — LARGE, labelled, very obvious */}
-          {longform.map((u) => {
-            const x = toX(u.publishedAt);
-            const isSelected = selectedUpload === u.id;
-            const size = isSelected ? 12 : 10;
-
-            return (
-              <g key={u.id} style={{ cursor: 'pointer' }}
-                onClick={() => onSelectUpload(isSelected ? null : u.id)}
-              >
-                {/* Selection ring */}
-                {isSelected && (
-                  <circle cx={x} cy={lfY} r={size + 5}
-                    fill="none" stroke={FORMAT_COLORS[u.format]} strokeWidth={2}
-                    opacity={0.3}
-                  />
-                )}
-
-                {/* Connector line from marker to sequence row */}
-                <line x1={x} y1={lfY + size + 2} x2={x} y2={seqY - 2}
-                  stroke={FORMAT_COLORS[u.format]} strokeWidth={1} opacity={0.2}
-                />
-
-                {/* The marker — big and obvious */}
-                <path
-                  d={getFormatShape(u.format, x, lfY, size)}
-                  fill={u.format === 'audio' ? 'none' : FORMAT_COLORS[u.format]}
-                  stroke={FORMAT_COLORS[u.format]}
-                  strokeWidth={u.format === 'audio' ? 2.5 : isSelected ? 2 : 0}
-                  opacity={isSelected ? 1 : 0.9}
-                />
-
-                {/* Format label — ALWAYS visible, below marker */}
-                <text x={x} y={lfY + size + 14} textAnchor="middle"
-                  fontSize={9} fill={FORMAT_COLORS[u.format]} fontWeight={700}>
-                  {u.formatMeta.shortLabel}
-                </text>
-
-                {/* View count below label */}
-                <text x={x} y={lfY + size + 24} textAnchor="middle"
-                  fontSize={7} fill={SMOKE}>
-                  {formatNum(u.viewCount)}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Bottom border */}
-          <line x1={0} y1={CONTENT_H} x2={chartW} y2={CONTENT_H} stroke={BONE} strokeWidth={1} />
-        </g>
-
-        {/* ═══ LAYER 3: SUBSCRIBER GROWTH (compact, bottom) ═══ */}
-        <g transform={`translate(0,${SUBS_Y})`}>
-          {/* Label */}
-          <text x={-8} y={12} textAnchor="end" fontSize={9} fill={MINT} fontWeight={600}
-            style={{ textTransform: 'uppercase' } as React.CSSProperties}>
-            Subs
-          </text>
-
-          {/* Zero line */}
-          {subsMin < 0 && (
-            <line x1={0} y1={subsToY(0)} x2={chartW} y2={subsToY(0)}
-              stroke={SMOKE} strokeWidth={1} opacity={0.3} />
-          )}
-
-          {/* Baseline reference line */}
-          {baseline?.avgDailySubs != null && (
-            <g>
-              <line
-                x1={0} y1={subsToY(baseline.avgDailySubs)}
-                x2={chartW} y2={subsToY(baseline.avgDailySubs)}
-                stroke={SMOKE} strokeWidth={1} strokeDasharray="2,4" opacity={0.5}
-              />
-            </g>
-          )}
-
-          {/* Area + Line */}
-          {subsArea && <path d={subsArea} fill={MINT} opacity={0.08} />}
-          {subsLine && <path d={subsLine} fill="none" stroke={MINT} strokeWidth={1.5} />}
-
-          {/* Hover dot */}
-          {hoveredDate && (() => {
-            const point = data.subscriberGains.find((d) => d.date === hoveredDate);
-            if (!point?.rollingAvg7d) return null;
-            const x = toX(hoveredDate);
-            const y = subsToY(point.rollingAvg7d);
-            if (x < 0 || x > chartW) return null;
-            return <circle cx={x} cy={y} r={3} fill={MINT} />;
-          })()}
-
-          {/* Bottom border */}
-          <line x1={0} y1={SUBS_H} x2={chartW} y2={SUBS_H} stroke={BONE} strokeWidth={1} />
-        </g>
-
-        {/* ═══ SHARED DATE AXIS ═══ */}
+        {/* ═══ DATE AXIS ═══ */}
         <g transform={`translate(0,${AXIS_Y})`}>
           {axisTicks.map((tick, i) => (
             <g key={i}>
@@ -622,29 +577,70 @@ function UnifiedChart({
           ))}
         </g>
 
-        {/* ═══ SHARED CROSSHAIR (spans all layers) ═══ */}
+        {/* ═══ CROSSHAIR (spans full chart) ═══ */}
         {hoverX != null && hoverX >= 0 && hoverX <= chartW && (
           <line
             x1={hoverX} y1={0}
-            x2={hoverX} y2={VELOCITY_H + CONTENT_H + SUBS_H + LAYER_GAP * 2}
+            x2={hoverX} y2={CHART_H}
             stroke={INK} strokeWidth={1} opacity={0.12}
           />
         )}
 
-        {/* Date label at crosshair */}
-        {hoveredDate && hoverX != null && hoverX >= 0 && hoverX <= chartW && (
-          <g transform={`translate(0,${AXIS_Y})`}>
-            <rect x={hoverX - 24} y={-2} width={48} height={14} rx={3} fill={INK} opacity={0.85} />
-            <text x={hoverX} y={9} textAnchor="middle" fontSize={8} fill="white" fontWeight={600}>
-              {formatDate(hoveredDate)}
-            </text>
-          </g>
-        )}
+        {/* ═══ HOVER TOOLTIPS (views + subs combined) ═══ */}
+        {hoveredDate && hoverX != null && hoverX >= 0 && hoverX <= chartW && (() => {
+          const velPoint = data.viewVelocity.find((d) => d.date === hoveredDate);
+          const subPoint = data.subscriberGains.find((d) => d.date === hoveredDate);
+          const hasVel = velPoint?.rollingAvg7d != null;
+          const hasSub = subPoint?.rollingAvg7d != null;
+
+          // Position tooltip — flip if near right edge
+          const tooltipW = 100;
+          const tooltipX = hoverX + tooltipW + 10 > chartW ? hoverX - tooltipW - 8 : hoverX + 8;
+
+          return (
+            <g>
+              {/* View velocity dot */}
+              {hasVel && (
+                <circle cx={hoverX} cy={velToY(velPoint!.rollingAvg7d!)} r={4} fill={SIGNAL} />
+              )}
+              {/* Subscriber dot */}
+              {hasSub && (
+                <circle cx={hoverX} cy={subsToY(subPoint!.rollingAvg7d!)} r={3} fill={MINT} />
+              )}
+
+              {/* Combined tooltip card */}
+              {(hasVel || hasSub) && (
+                <g>
+                  <rect x={tooltipX} y={8} width={tooltipW} height={hasSub && hasVel ? 38 : 22}
+                    rx={4} fill={INK} opacity={0.9} />
+                  {hasVel && (
+                    <text x={tooltipX + 8} y={22} fontSize={9} fill={SIGNAL} fontWeight={600}>
+                      {formatNum(velPoint!.rollingAvg7d!)}/d views
+                    </text>
+                  )}
+                  {hasSub && (
+                    <text x={tooltipX + 8} y={hasVel ? 38 : 22} fontSize={9} fill={MINT} fontWeight={600}>
+                      {subPoint!.rollingAvg7d! >= 0 ? '+' : ''}{formatNum(subPoint!.rollingAvg7d!)}/d subs
+                    </text>
+                  )}
+                </g>
+              )}
+
+              {/* Date label at axis */}
+              <g transform={`translate(0,${AXIS_Y})`}>
+                <rect x={hoverX - 24} y={-2} width={48} height={14} rx={3} fill={INK} opacity={0.85} />
+                <text x={hoverX} y={9} textAnchor="middle" fontSize={8} fill="white" fontWeight={600}>
+                  {formatDate(hoveredDate)}
+                </text>
+              </g>
+            </g>
+          );
+        })()}
 
         {/* ═══ HOVER DETECTION OVERLAY ═══ */}
         <rect
           x={0} y={0}
-          width={chartW} height={VELOCITY_H + CONTENT_H + SUBS_H + LAYER_GAP * 2}
+          width={chartW} height={CHART_H}
           fill="transparent"
           onMouseMove={handleMouseMove}
           style={{ cursor: 'crosshair' }}
