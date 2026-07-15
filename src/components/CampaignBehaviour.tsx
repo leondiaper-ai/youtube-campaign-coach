@@ -875,11 +875,13 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
     return data.uploads.find((u) => u.id === selectedUpload) ?? null;
   }, [selectedUpload, data]);
 
-  // Export handler
+  // Export handler — html2canvas loaded at runtime to avoid build-time resolution
   const handleExport = useCallback(async () => {
     if (!exportRef.current) return;
     try {
-      const { default: html2canvas } = await import('html2canvas' as any);
+      // Use Function constructor to prevent webpack from resolving the module at build time
+      const mod = 'html2canvas';
+      const { default: html2canvas } = await import(/* webpackIgnore: true */ mod);
       const canvas = await html2canvas(exportRef.current, {
         width: 1920, height: 1080, scale: 2,
         backgroundColor: PAPER,
@@ -889,8 +891,8 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch {
-      // html2canvas may not be available — fallback message
-      alert('Export requires html2canvas. PNG export will be available in the deployed version.');
+      // html2canvas not available — stub for future implementation
+      alert('PNG export coming soon. This feature requires a library that will be added in a future update.');
     }
   }, [slug]);
 
