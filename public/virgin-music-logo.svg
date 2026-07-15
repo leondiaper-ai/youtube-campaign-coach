@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 100">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&amp;display=swap');
+    </style>
+  </defs>
+  <text x="8" y="62" font-family="'Permanent Marker', cursive" font-size="68" fill="#E20000" letter-spacing="-2">Virgin</text>
+  <text x="95" y="92" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="30" fill="#E20000" letter-spacing="3">MUSIC</text>
+</svg>

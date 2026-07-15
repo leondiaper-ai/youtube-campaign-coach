@@ -8,10 +8,15 @@ import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelDa
 import { matchPlanToUploads } from '@/lib/coach/matchEngine';
 import { generateNudges } from '@/lib/coach/nudgeEngine';
 import { generatePlan } from '@/lib/planEngine';
-import CampaignDestination from '@/components/CampaignDestination';
+import { loadDriveLibrary } from '@/lib/driveStore';
+import { reclassifyFromPlan } from '@/lib/driveAssets';
+import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
+import CampaignWarRoom from '@/components/CampaignWarRoom';
 import type { RecentUpload } from '@/lib/artists';
 
-export const revalidate = 600;
+// Short window while the planner is in active development — drops stale HTML
+// fast on each deploy. Move back to 600 (or on-demand revalidation) once stable.
+export const revalidate = 60;
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -98,6 +103,30 @@ export default async function CampaignPage({ params }: PageProps) {
           artistConfig.campaignStartDate,
         );
         if (regen) {
+          // Preserve videoId fields from old events that were manually linked
+          // via /api/coach/link-video (unlisted/scheduled videos). Match by
+          // title normalisation so linked assets survive regeneration.
+          const oldEvents = saved.plan.events ?? [];
+          const videoMap = new Map<string, string>();
+          const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+          for (const e of oldEvents) {
+            if (e.videoId) videoMap.set(norm(e.title), e.videoId);
+          }
+          // Transfer videoId to matching regen events
+          for (const e of regen.events) {
+            const vid = videoMap.get(norm(e.title));
+            if (vid) e.videoId = vid;
+          }
+          // Append any old events with videoId that have no match in the regen
+          // (these were added as brand-new events by the link-video endpoint)
+          const regenNorms = new Set(regen.events.map(e => norm(e.title)));
+          for (const e of oldEvents) {
+            if (e.videoId && !regenNorms.has(norm(e.title))) {
+              regen.events.push(e);
+            }
+          }
+          regen.events.sort((a, b) => a.dateISO.localeCompare(b.dateISO));
+
           saved.plan = regen;
           savePlan(saved.slug, saved.artist, regen, saved.channelCtx, timelineText).catch(() => {});
         }
@@ -107,7 +136,33 @@ export default async function CampaignPage({ params }: PageProps) {
 
   if (artistConfig?.channelHandle) {
     try {
-      const snap = await readLiveSnapByHandle(artistConfig.channelHandle);
+      let snap = await readLiveSnapByHandle(artistConfig.channelHandle);
+
+      // ── Channel auto-heal ────────────────────────────────────────────
+      // If no cached snap exists, the channel mapping may be broken or
+      // missing. Attempt a one-time resolve + cache so the page self-heals
+      // without manual intervention. This costs one YouTube API call per
+      // broken channel, per ISR window (60s), and writes the correct
+      // mapping so future loads are free.
+      if (!snap && process.env.YOUTUBE_API_KEY) {
+        try {
+          const { fetchChannelSnapLite } = await import('@/lib/youtube');
+          const { writeChannelMapping, writeLiveSnap } = await import('@/lib/kvCache');
+          const { safeMergeSnap } = await import('@/lib/youtube/normalizeChannelData');
+          const fresh = await fetchChannelSnapLite(artistConfig.channelHandle);
+          if (fresh && !fresh.error && fresh.channelId) {
+            const existing = await (await import('@/lib/kvCache')).readLiveSnap(fresh.channelId);
+            const merged = safeMergeSnap(existing, fresh);
+            await writeLiveSnap(fresh.channelId, merged);
+            await writeChannelMapping(artistConfig.channelHandle, fresh.channelId);
+            // Re-read through the normal path so channelId is available below
+            snap = await readLiveSnapByHandle(artistConfig.channelHandle);
+          }
+        } catch {
+          // Auto-heal is best-effort — page still works without it
+        }
+      }
+
       if (snap) {
         const channelId = await readChannelMapping(artistConfig.channelHandle);
         const history = channelId ? await readHistory(channelId) : [];
@@ -152,20 +207,37 @@ export default async function CampaignPage({ params }: PageProps) {
     liveMetrics: liveChannel,
   });
 
+  // Load scanned Google Drive asset library + per-campaign tuning (optional —
+  // page works without either). Both are looked up by slug, no hardcoding.
+  const rawDriveLibrary = await loadDriveLibrary(saved.slug).catch(() => null);
+  const driveConfig = mappingConfigFor(saved.slug);
+  // Plan-aware reclassification: upgrade "other" assets when their name matches
+  // a plan milestone. Bridges the gap between files named by song title and the
+  // production-keyword classifier. Safe when library or plan is null.
+  const driveLibrary = rawDriveLibrary
+    ? reclassifyFromPlan(rawDriveLibrary, saved.plan, driveConfig)
+    : null;
+  // A folder URL attached at runtime (saved to KV via the in-app control) wins
+  // over the baked-in config, so any campaign can connect its own folder.
+  const driveFolderUrl = driveLibrary?.folderUrl || getCampaignConfig(saved.slug)?.driveFolderUrl;
+
+  // Keep computing matchResult/nudges/dataCoverage above (used for auto-regen
+  // + future surfaces); the V4 war-room view leads with the master timeline.
+  void matchResult; void nudges; void dataCoverage;
+
   return (
-    <CampaignDestination
+    <CampaignWarRoom
       plan={saved.plan}
-      channelCtx={saved.channelCtx}
-      createdAt={saved.createdAt}
       slug={saved.slug}
-      liveChannel={liveChannel}
-      matchResult={matchResult}
-      nudges={nudges}
-      recentUploads={recentUploads}
-      dataCoverage={dataCoverage}
-      campaignStartDate={artistConfig?.campaignStartDate}
-      timelineText={saved.timelineText}
       artistName={saved.artist}
+      timelineText={saved.timelineText}
+      channelCtx={saved.channelCtx}
+      campaignStartDate={artistConfig?.campaignStartDate}
+      driveLibrary={driveLibrary}
+      driveConfig={driveConfig}
+      driveFolderUrl={driveFolderUrl}
+      recentUploads={recentUploads}
+      liveChannel={liveChannel}
     />
   );
 }

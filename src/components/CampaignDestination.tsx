@@ -15,6 +15,8 @@ import type { Nudge, NudgeUrgency } from '@/lib/coach/nudgeEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
 import type { CampaignDataCoverage } from '@/lib/planStore';
+import type { AssetLibrary, AssetMappingConfig } from '@/lib/driveAssets';
+import DriveAssetPanel from '@/components/DriveAssetPanel';
 // ── Unified Pipeline — single import for all campaign logic ──
 import {
   buildCampaignPipeline,
@@ -125,6 +127,9 @@ type CampaignDestinationProps = {
   campaignStartDate?: string;
   timelineText?: string;
   artistName?: string;
+  driveLibrary?: AssetLibrary | null;
+  driveConfig?: AssetMappingConfig;
+  driveFolderUrl?: string;
 };
 
 type PulseSignal = {
@@ -153,6 +158,9 @@ export default function CampaignDestination({
   campaignStartDate,
   timelineText,
   artistName,
+  driveLibrary,
+  driveConfig,
+  driveFolderUrl,
 }: CampaignDestinationProps) {
   // ═══ UNIFIED PIPELINE — single entry point for all campaign logic ═══
   const pipeline = buildCampaignPipeline({
@@ -171,6 +179,7 @@ export default function CampaignDestination({
     releaseClusters,
     planMoments: moments,
     activePlanMoment: activeMoment,
+    activeWindowMoment,
     allByRecency,
     shorts,
     longform,
@@ -464,6 +473,7 @@ export default function CampaignDestination({
             in the campaign, not which video is performing best.
         ══════════════════════════════════════════════════════════════ */}
         {activeMoment ? (
+          /* Plan-driven active moment — no narrative anchor override */
           <section style={{
             maxWidth: 1200, margin: '0 auto',
             padding: '24px 40px 0',
@@ -476,7 +486,6 @@ export default function CampaignDestination({
               position: 'relative',
               boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
             }}>
-              {/* THIS WEEK banner */}
               <div style={{
                 position: 'absolute',
                 top: -13, left: 20,
@@ -490,46 +499,80 @@ export default function CampaignDestination({
                   fontFamily: MONO,
                   boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 }}>
-                  This Week
+                  Active Window
                 </span>
               </div>
               <LiveMomentBlock moment={activeMoment} phase={currentPhase ?? activeMoment.phase} />
             </div>
           </section>
         ) : narrative.activeMoment ? (
-          /* No plan-driven active moment — use narrative engine as primary */
-          <section style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '24px 40px 0',
-          }}>
-            <div style={{
-              background: WHITE,
-              border: `2px solid ${phaseTone?.accent ?? '#DC2626'}`,
-              borderRadius: 10,
-              padding: '20px 24px 24px',
-              position: 'relative',
-              boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
+          /* Narrative anchor is hero — the flagship release is still the gravitational centre */
+          <>
+            <section style={{
+              maxWidth: 1200, margin: '0 auto',
+              padding: '24px 40px 0',
             }}>
-              {/* RIGHT NOW banner */}
               <div style={{
-                position: 'absolute',
-                top: -13, left: 20,
-                display: 'flex', alignItems: 'center', gap: 8,
+                background: WHITE,
+                border: `2px solid ${phaseTone?.accent ?? '#DC2626'}`,
+                borderRadius: 10,
+                padding: '20px 24px 24px',
+                position: 'relative',
+                boxShadow: `0 0 0 4px ${(phaseTone?.accent ?? '#DC2626')}12`,
               }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  padding: '4px 14px', borderRadius: 4,
-                  background: phaseTone?.accent ?? '#DC2626', color: WHITE,
-                  fontFamily: MONO,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                <div style={{
+                  position: 'absolute',
+                  top: -13, left: 20,
+                  display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  Right Now
-                </span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 900, letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    padding: '4px 14px', borderRadius: 4,
+                    background: phaseTone?.accent ?? '#DC2626', color: WHITE,
+                    fontFamily: MONO,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  }}>
+                    Campaign Anchor
+                  </span>
+                  {/* Sustaining badge removed — clean anchor header */}
+                </div>
+                <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
               </div>
-              <NarrativeHeroBlock moment={narrative.activeMoment} phase={currentPhase} />
-            </div>
-          </section>
+            </section>
+
+            {/* Secondary: Active Window — current tactical moment from the plan */}
+            {activeWindowMoment && activeWindowMoment.timing === 'current' && (
+              <section style={{
+                maxWidth: 1200, margin: '0 auto',
+                padding: '16px 40px 0',
+              }}>
+                <div style={{
+                  background: WHITE,
+                  border: `1px solid ${BONE}`,
+                  borderRadius: 8,
+                  padding: '16px 20px 20px',
+                  position: 'relative',
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: -10, left: 16,
+                  }}>
+                    <span style={{
+                      fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      padding: '3px 10px', borderRadius: 3,
+                      background: BONE, color: SMOKE,
+                      fontFamily: MONO,
+                    }}>
+                      Active Window
+                    </span>
+                  </div>
+                  <LiveMomentBlock moment={activeWindowMoment} phase={currentPhase ?? activeWindowMoment.phase} />
+                </div>
+              </section>
+            )}
+          </>
         ) : (
           <section style={{
             maxWidth: 1200, margin: '0 auto',
@@ -608,6 +651,16 @@ export default function CampaignDestination({
           </>
         )}
 
+
+        {/* ── Drive Asset Library ── */}
+        {driveLibrary !== undefined && (
+          <DriveAssetPanel
+            library={driveLibrary}
+            plan={plan}
+            config={driveConfig}
+            folderUrl={driveFolderUrl}
+          />
+        )}
 
         {/* ── Edit Timeline ── */}
         {timelineText != null && (
@@ -1304,25 +1357,6 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
             LIVE
           </span>
         )}
-        {isSustaining && (
-          <span style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            padding: '3px 10px', borderRadius: 3,
-            background: '#059669', color: WHITE,
-          }}>
-            SUSTAINING
-          </span>
-        )}
-        <span style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          padding: '2px 8px', borderRadius: 3,
-          background: coverageTone_.bg, color: coverageTone_.color,
-          border: `1px solid ${coverageTone_.border}`,
-        }}>
-          {narrativeCoverageLabel(moment.supportCoverage)}
-        </span>
       </div>
 
       <h3 style={{
@@ -1404,10 +1438,17 @@ function NarrativeHeroBlock({ moment, phase }: { moment: NarrativeMoment; phase:
           )}
         </a>
 
-        {/* Support orbit panel */}
+        {/* Multiformat support panel */}
         <div style={{
           display: 'flex', flexDirection: 'column', gap: 6,
         }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.14em',
+            textTransform: 'uppercase', color: SMOKE,
+            fontFamily: MONO, marginBottom: 2,
+          }}>
+            Multiformat Support
+          </div>
           {/* Direct support (BTS, Lyric Video, Visualizer) */}
           {moment.support.slice(0, 4).map((s, i) => (
             <a
@@ -1993,12 +2034,14 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
   const { cluster, momentLabel, supportCount, totalEcosystemViews } = moment;
   const { anchor, coverageLabel, insights, supportLinks: links, supportByCategory: byCategory } = cluster;
   const [expanded, setExpanded] = useState(true);
+  const isSecondary = cluster.isSecondaryAnchor === true;
 
-  const tone =
-    coverageLabel === 'Strong'     ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
-    coverageLabel === 'Moderate'   ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
-    coverageLabel === 'Expandable' ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Long-tail opportunity' } :
-                                     { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'Could extend further' };
+  const tone = isSecondary
+    ? { bg: '#EEF2FF', border: '#C7D2FE', color: '#4338CA', label: 'Campaign Moment' }
+    : coverageLabel === 'Strong'     ? { bg: '#F0FDF4', border: '#BBF7D0', color: '#059669', label: 'Strong rollout' } :
+      coverageLabel === 'Moderate'   ? { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', label: 'Expandable rollout' } :
+      coverageLabel === 'Expandable' ? { bg: '#F5F3FF', border: '#E9D5FF', color: '#7C3AED', label: 'Long-tail opportunity' } :
+                                       { bg: '#F8FAFC', border: '#E2E8F0', color: '#64748B', label: 'Could extend further' };
 
   const longformLinks = links.filter(l => l.upload.durationSec > 62);
   const shortsLinks = links.filter(l => l.upload.durationSec <= 62);
@@ -2058,7 +2101,7 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
               padding: '1px 6px', borderRadius: 2,
               background: phaseAccent, fontFamily: MONO,
             }}>
-              Release Moment
+              {isSecondary ? 'Campaign Moment' : 'Release Moment'}
             </span>
             <span style={{
               fontSize: 7, fontWeight: 800, letterSpacing: '0.08em',
@@ -2224,8 +2267,8 @@ function ReleaseMomentBlock({ moment, phaseAccent }: {
             </div>
           )}
 
-          {/* ── Release Support Checklist ── */}
-          <ReleaseChecklist cluster={cluster} />
+          {/* ── Release Support Checklist — skip for secondary anchors (Trailers etc.) ── */}
+          {!isSecondary && <ReleaseChecklist cluster={cluster} />}
 
           {/* Narrative insight */}
           {narrative && (

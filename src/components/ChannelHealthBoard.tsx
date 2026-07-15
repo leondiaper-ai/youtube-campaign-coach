@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
-import { TopChannelsModule } from './TopChannelsModule';
 import { ChannelScoreBadge } from './ChannelScoreBadge';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
 import {
@@ -20,6 +20,8 @@ export type RowData = {
   slug: string;
   name: string;
   isVirgin: boolean;
+  /** Channel ID — needed for remove functionality on team watcher */
+  channelId?: string;
   subs: number | null;
   subs7Delta: number | null;
   views7Delta: number | null;
@@ -517,6 +519,7 @@ export default function ChannelHealthBoard({
   topVideos,
   marketFormatStats,
   singleTab = false,
+  removable = false,
 }: {
   rows: RowData[];
   linkPrefix?: string;
@@ -524,11 +527,30 @@ export default function ChannelHealthBoard({
   marketFormatStats?: MarketFormatStats;
   /** Hide the managed/market toggle and show only the managed view */
   singleTab?: boolean;
+  /** Show ✕ remove button on each row (team watcher mode) */
+  removable?: boolean;
 }) {
+  const router = useRouter();
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [moversOpen, setMoversOpen] = useState(false);
   const [explainerOpen, setExplainerOpen] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+
+  const handleRemove = useCallback(async (channelId: string, name: string) => {
+    if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
+    setRemovingId(channelId);
+    try {
+      const res = await fetch(`/api/team-watcher?channelId=${encodeURIComponent(channelId)}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to remove');
+      router.refresh();
+    } catch {
+      alert('Failed to remove artist. Please try again.');
+    } finally {
+      setRemovingId(null);
+    }
+  }, [router]);
 
   const managedRows = rows.filter((r) => r.isVirgin);
   const marketRows = rows.filter((r) => !r.isVirgin);
@@ -557,6 +579,9 @@ export default function ChannelHealthBoard({
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status]);
+  const filtered = search.trim()
+    ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
+    : sorted;
 
   // Classification counts
   const growingCount = activeRows.filter((r) => r.classification === 'GROWING').length;
@@ -587,7 +612,7 @@ export default function ChannelHealthBoard({
         <>
           <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
             <button
-              onClick={() => { setView('managed'); setExpandedRow(null); }}
+              onClick={() => { setView('managed'); setExpandedRow(null); setSearch(''); }}
               className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
               style={{
                 background: view === 'managed' ? '#FFFFFF' : 'transparent',
@@ -598,7 +623,7 @@ export default function ChannelHealthBoard({
               Virgin Managed ({managedRows.length})
             </button>
             <button
-              onClick={() => { setView('market'); setExpandedRow(null); }}
+              onClick={() => { setView('market'); setExpandedRow(null); setSearch(''); }}
               className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
               style={{
                 background: view === 'market' ? '#FFFFFF' : 'transparent',
@@ -800,26 +825,6 @@ export default function ChannelHealthBoard({
         </div>
       )}
 
-      {/* ─── BEST PERFORMING / NEEDS ATTENTION ─────────────────────────── */}
-      {view === 'managed' && managedRows.length > 2 && (
-        <div className="mb-4">
-          <TopChannelsModule
-            channels={managedRows.map((r) => ({
-              name: r.name,
-              slug: r.slug,
-              views7Delta: r.views7Delta,
-              subs7Delta: r.subs7Delta,
-              uploads30d: r.uploads30d,
-              shorts30d: r.shorts30d,
-              lastUploadAt: null,
-              subs: r.subs,
-              totalViews: r.totalViews ?? null,
-            }))}
-            linkPrefix={linkPrefix}
-          />
-        </div>
-      )}
-
       {/* ─── BEST IN CLASS: Consistency Leaders ──────────────────────── */}
       {consistencyLeaders.length > 0 && (
         <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
@@ -894,6 +899,38 @@ export default function ChannelHealthBoard({
         )}
       </div>
 
+      {/* ─── SEARCH ─────────────────────────────────────────────────────── */}
+      <div className="mb-3 relative max-w-xs">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search artists…"
+          className="w-full px-3 py-2 pl-8 pr-7 rounded-lg text-[12px] outline-none transition-colors"
+          style={{
+            background: SOFT,
+            color: INK,
+            border: `1px solid ${MUTED}`,
+          }}
+        />
+        <svg
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(14,14,14,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+        </svg>
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-[14px] leading-none hover:opacity-70"
+            style={{ color: 'rgba(14,14,14,0.3)' }}
+            title="Clear search"
+          >
+            &times;
+          </button>
+        )}
+      </div>
+
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
       <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
         <div
@@ -911,7 +948,7 @@ export default function ChannelHealthBoard({
           <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
         </div>
 
-        {sorted.map((r, i) => {
+        {filtered.map((r, i) => {
           const st = STATUS_STYLE[r.status];
           const sp = SPARK_COLOR[r.status];
           const subsTotal = r.subs != null ? fmtNum(r.subs) : '—';
@@ -949,13 +986,13 @@ export default function ChannelHealthBoard({
           return (
             <div key={r.slug}>
               <div
-                className={`grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
-                  i === sorted.length - 1 && !isExpanded ? '' : 'border-b'
+                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
+                  i === filtered.length - 1 && !isExpanded ? '' : 'border-b'
                 }`}
                 style={{ borderColor: MUTED, background: st.rowBg }}
                 onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
               >
-                <div className="min-w-0">
+                <div className="min-w-0 relative">
                   <div className="flex items-center gap-2">
                     <Link
                       href={`${linkPrefix}/${r.slug}`}
@@ -986,6 +1023,22 @@ export default function ChannelHealthBoard({
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
                   </div>
                   <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
+                  {removable && r.channelId && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
+                      disabled={removingId === r.channelId}
+                      className="absolute -right-1 top-0 w-5 h-5 flex items-center justify-center rounded-full text-[11px] font-bold transition-all opacity-0 group-hover/row:opacity-100 hover:!opacity-100 focus:!opacity-100"
+                      style={{
+                        color: removingId === r.channelId ? 'rgba(14,14,14,0.15)' : 'rgba(14,14,14,0.25)',
+                        background: 'transparent',
+                      }}
+                      title={`Remove ${r.name} from watcher`}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = '#8A1F0C'; e.currentTarget.style.background = 'rgba(138,31,12,0.08)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(14,14,14,0.25)'; e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      {removingId === r.channelId ? '…' : '✕'}
+                    </button>
+                  )}
                 </div>
                 <div className="flex items-center">
                   <Sparkline data={r.subsSeries} width={80} height={28} stroke={sp.stroke} fill={sp.fill} />
@@ -1019,7 +1072,7 @@ export default function ChannelHealthBoard({
               {/* ── Expanded: Strategy Profile + Fix This Week ───────── */}
               {isExpanded && (
                 <div
-                  className={`px-5 py-3.5 ${i === sorted.length - 1 ? '' : 'border-b'}`}
+                  className={`px-5 py-3.5 ${i === filtered.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
                   <div className="flex flex-wrap items-center gap-4">
@@ -1042,6 +1095,11 @@ export default function ChannelHealthBoard({
             </div>
           );
         })}
+        {search && filtered.length === 0 && (
+          <div className="px-5 py-8 text-center text-[12px]" style={{ color: 'rgba(14,14,14,0.35)' }}>
+            No artists matching &ldquo;{search}&rdquo;
+          </div>
+        )}
       </div>
     </>
   );

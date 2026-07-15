@@ -1,0 +1,919 @@
+import type { LiveSnap, RecentUpload, CompanionConfidence } from './artists';
+import {
+  writeSnapshot,
+  readTopEverCache,
+  writeTopEverCache,
+} from './snapshots';
+
+const KEY = process.env.YOUTUBE_API_KEY;
+
+// ── In-memory cache ─────────────────────────────────────────────────────
+// Prevents duplicate YouTube API calls within the same server process.
+// Entries expire after 10 minutes. This dramatically reduces quota usage
+// when multiple pages/routes fetch the same artist in a short window.
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const snapCache = new Map<string, { data: LiveSnap; ts: number }>();
+let quotaExhausted = false;
+let quotaExhaustedAt = 0;
+const QUOTA_COOLDOWN = 15 * 60 * 1000; // 15min cooldown after quota hit
+
+function getCached(key: string): LiveSnap | null {
+  const entry = snapCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL) {
+    snapCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCache(key: string, data: LiveSnap) {
+  snapCache.set(key, { data, ts: Date.now() });
+  // Keep cache from growing unbounded
+  if (snapCache.size > 200) {
+    const oldest = snapCache.keys().next().value;
+    if (oldest) snapCache.delete(oldest);
+  }
+}
+
+function isQuotaError(msg: string): boolean {
+  return msg.includes('403') || msg.includes('quotaExceeded') || msg.includes('quota');
+}
+
+function isQuotaCoolingDown(): boolean {
+  if (!quotaExhausted) return false;
+  if (Date.now() - quotaExhaustedAt > QUOTA_COOLDOWN) {
+    quotaExhausted = false;
+    console.log('[YouTube] Quota cooldown expired — resuming API calls');
+    return false;
+  }
+  return true;
+}
+
+// Channel ID cache — these are stable and rarely change
+const channelIdCache = new Map<string, { id: string | null; ts: number }>();
+const CHANNEL_ID_TTL = 60 * 60 * 1000; // 1 hour
+
+async function jget(url: string) {
+  const r = await fetch(url, { next: { revalidate: 600 } });
+  if (!r.ok) {
+    const body = await r.text();
+    if (r.status === 403 && body.includes('quota')) {
+      quotaExhausted = true;
+      quotaExhaustedAt = Date.now();
+      console.error('[YouTube] Quota exceeded — entering cooldown');
+    }
+    throw new Error(`${r.status} ${body}`);
+  }
+  return r.json();
+}
+
+function parseDuration(iso?: string): number {
+  if (!iso) return 0;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  return (+(m?.[1] ?? 0)) * 3600 + (+(m?.[2] ?? 0)) * 60 + (+(m?.[3] ?? 0));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TITLE NORMALISATION & KEYWORD EXTRACTION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Pull the core track name from an upload title by stripping common suffixes
+// like "(Official Video)", "[Lyric Video]", "- Visualizer", "| Audio", etc.
+function normaliseTitle(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\(.*?\)|\[.*?\]/g, ' ')
+    .replace(
+      /\b(official\s*(music\s*)?video|lyric(s)?\s*video|lyrics?|visualiz(er|ation)|audio(\s*only)?|mv|live|acoustic|performance|session|premiere|short|teaser|trailer|snippet|clip|remix|instrumental|radio\s*edit|extended|sped\s*up|slowed)\b/g,
+      ' '
+    )
+    .replace(/[-–—_:|]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Words too common to be meaningful for track matching */
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+  'of', 'with', 'by', 'from', 'is', 'it', 'my', 'me', 'we', 'you', 'your',
+  'this', 'that', 'i', 'am', 'be', 'do', 'so', 'no', 'not', 'if', 'up',
+  'out', 'new', 'now', 'all', 'one', 'two', 'just', 'got', 'like', 'get',
+  'go', 'been', 'have', 'has', 'had', 'can', 'will', 'way', 'day',
+  // Music-specific filler
+  'official', 'video', 'music', 'audio', 'lyric', 'lyrics', 'visualizer',
+  'visualiser', 'visualization', 'short', 'shorts', 'clip', 'teaser',
+  'trailer', 'premiere', 'session', 'performance', 'live', 'acoustic',
+  'remix', 'instrumental', 'extended', 'version', 'edit', 'radio',
+  'feat', 'ft', 'featuring', 'prod', 'produced', 'dir', 'directed',
+  'mv', 'hd', '4k', 'hq', 'vevo',
+]);
+
+/** Extract meaningful keywords from a video title for fuzzy matching */
+function extractKeywords(title: string): Set<string> {
+  const cleaned = title
+    .toLowerCase()
+    .replace(/\(.*?\)|\[.*?\]/g, ' ')     // strip parentheticals
+    .replace(/[-–—_:|/\\#@]+/g, ' ')       // strip punctuation
+    .replace(/[''"".,!?;:]+/g, '')         // strip quotes/commas
+    .replace(/\s+/g, ' ')
+    .trim();
+  const words = cleaned.split(' ').filter((w) => w.length >= 2 && !STOP_WORDS.has(w));
+  return new Set(words);
+}
+
+/** Normalize feat./ft./featuring variants so they match */
+function normaliseFeaturing(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/\bfeaturing\b/g, 'feat')
+    .replace(/\bft\.?\b/g, 'feat')
+    .replace(/\bfeat\.?\b/g, 'feat');
+}
+
+function titleHasTag(title: string, tag: RegExp): boolean {
+  return tag.test(title.toLowerCase());
+}
+
+const LYRIC_RX = /\blyric(s)?|sing\s*along|with\s+words\b/;
+const VISUALIZER_RX = /\bvisualiz(er|ation)|visualis(er|ation)\b/;
+const AUDIO_RX = /\baudio\b/;
+const SHORTS_TITLE_RX = /\b(short|shorts|#shorts)\b/i;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FUZZY COMPANION MATCHING ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+type VideoRow = {
+  u: RecentUpload;
+  key: string;        // normalised title
+  ts: number;         // publish timestamp
+  keywords: Set<string>;
+  descLower: string;  // first 500 chars of description, lowercased
+};
+
+/**
+ * Score how likely `candidate` is a companion of `target` for a given format.
+ * Returns a numeric score — higher = stronger match.
+ *
+ * Thresholds:
+ *   >= 6  → confirmed companion
+ *   >= 3  → likely companion
+ *   <  3  → no match
+ */
+function scoreCompanion(
+  target: VideoRow,
+  candidate: VideoRow,
+  format: 'short' | 'lyric' | 'visualizer' | 'audio',
+): number {
+  if (target.u.id === candidate.u.id) return 0;
+
+  let score = 0;
+  const c = candidate;
+  const t = target;
+
+  // ── 1. FORMAT TAG in candidate title (STRONG: +3) ──
+  const cTitle = c.u.title.toLowerCase();
+  if (format === 'short') {
+    const isShortDuration = c.u.durationSec > 0 && c.u.durationSec <= 60;
+    if (isShortDuration) score += 3;
+    else return 0; // can't be a Short if it's not short
+    if (SHORTS_TITLE_RX.test(c.u.title)) score += 1; // bonus for explicit #shorts tag
+  } else if (format === 'lyric') {
+    if (LYRIC_RX.test(cTitle)) score += 3;
+    else return 0; // not a lyric video if title doesn't say so
+  } else if (format === 'visualizer') {
+    if (VISUALIZER_RX.test(cTitle)) score += 3;
+    else if (/\bofficial\s+audio\b/.test(cTitle)) score += 2; // "Official Audio" is effectively a visualizer
+    else return 0;
+  } else if (format === 'audio') {
+    if (AUDIO_RX.test(cTitle) && !/\baudio\s*(description|commentary|book)\b/.test(cTitle)) score += 3;
+    else return 0;
+  }
+
+  // ── 2. NORMALISED TITLE MATCH (STRONG: +4) ──
+  // If normalised titles are substring-matches (existing logic), it's a strong signal
+  if (t.key && c.key && t.key.length >= 3 && c.key.length >= 3) {
+    if (t.key === c.key) {
+      score += 4;
+    } else if (t.key.includes(c.key) || c.key.includes(t.key)) {
+      score += 3;
+    }
+  }
+
+  // ── 3. KEYWORD OVERLAP (MEDIUM: up to +3) ──
+  // Count how many meaningful track-name words the candidate shares
+  if (t.keywords.size > 0 && c.keywords.size > 0) {
+    let overlap = 0;
+    t.keywords.forEach((w) => {
+      if (c.keywords.has(w)) overlap++;
+    });
+    // Score based on overlap ratio relative to target keywords
+    const ratio = overlap / Math.max(t.keywords.size, 1);
+    if (ratio >= 0.8 && overlap >= 2) score += 3;       // strong keyword match
+    else if (ratio >= 0.5 && overlap >= 2) score += 2;  // decent keyword match
+    else if (overlap >= 1) score += 1;                   // weak partial match
+  }
+
+  // ── 4. DESCRIPTION CROSS-REFERENCE (MEDIUM: +2) ──
+  // Check if candidate's description mentions the target title or vice versa
+  const tTitle = normaliseTitle(t.u.title);
+  if (tTitle.length >= 4) {
+    if (c.descLower.includes(tTitle)) score += 2;
+  }
+  const cNorm = normaliseTitle(c.u.title);
+  if (cNorm.length >= 4) {
+    if (t.descLower.includes(cNorm)) score += 1;
+  }
+
+  // ── 5. DATE PROXIMITY (MEDIUM: up to +2) ──
+  const daysDiff = Math.abs(c.ts - t.ts) / 86400000;
+  if (format === 'short') {
+    // Shorts can come weeks or months after the main video
+    if (daysDiff <= 7) score += 2;
+    else if (daysDiff <= 30) score += 1.5;
+    else if (daysDiff <= 90) score += 1;
+    else if (daysDiff <= 180) score += 0.5;
+    // Beyond 180d: no date bonus, but don't penalise — catalogue Shorts are valid
+  } else {
+    // Lyric/visualizer/audio usually land near the main video
+    if (daysDiff <= 7) score += 2;
+    else if (daysDiff <= 30) score += 1.5;
+    else if (daysDiff <= 90) score += 1;
+    else if (daysDiff <= 365) score += 0.5;
+  }
+
+  // ── 6. FEATURING ARTIST MATCH (WEAK: +1) ──
+  const tFeat = normaliseFeaturing(t.u.title);
+  const cFeat = normaliseFeaturing(c.u.title);
+  const featMatch = tFeat.match(/feat\s+(\w+)/);
+  if (featMatch && cFeat.includes(featMatch[1])) score += 1;
+
+  return score;
+}
+
+/** Convert numeric score to confidence level */
+function scoreToConfidence(score: number): CompanionConfidence {
+  if (score >= 6) return 'confirmed';
+  if (score >= 3) return 'likely';
+  return 'none';
+}
+
+/**
+ * Run fuzzy companion detection across all videos in the set.
+ * Updates each video's companion confidence fields + legacy boolean flags.
+ *
+ * @param rows      - all videos to scan (both targets and candidates)
+ * @param targetIds - which video IDs to compute companions for (if null, all)
+ */
+function detectCompanions(rows: VideoRow[], targetIds?: Set<string>): void {
+  for (const target of rows) {
+    if (targetIds && !targetIds.has(target.u.id)) continue;
+    // Skip Shorts themselves — we only detect companions for longform
+    if (target.u.durationSec > 0 && target.u.durationSec <= 60) continue;
+
+    let bestShort = 0;
+    let bestLyric = 0;
+    let bestViz = 0;
+    let bestAudio = 0;
+
+    for (const candidate of rows) {
+      if (candidate.u.id === target.u.id) continue;
+
+      const sShort = scoreCompanion(target, candidate, 'short');
+      const sLyric = scoreCompanion(target, candidate, 'lyric');
+      const sViz = scoreCompanion(target, candidate, 'visualizer');
+      const sAudio = scoreCompanion(target, candidate, 'audio');
+
+      if (sShort > bestShort) bestShort = sShort;
+      if (sLyric > bestLyric) bestLyric = sLyric;
+      if (sViz > bestViz) bestViz = sViz;
+      if (sAudio > bestAudio) bestAudio = sAudio;
+    }
+
+    target.u.shortCompanion = scoreToConfidence(bestShort);
+    target.u.lyricCompanion = scoreToConfidence(bestLyric);
+    target.u.visualizerCompanion = scoreToConfidence(bestViz);
+    target.u.audioCompanion = scoreToConfidence(bestAudio);
+
+    // Legacy boolean flags: treat both 'confirmed' and 'likely' as true
+    // (safety rule: false negatives worse than uncertainty)
+    target.u.hasShortSibling = bestShort >= 3;
+    target.u.hasLyricSibling = bestLyric >= 3;
+    target.u.hasVisualizerSibling = bestViz >= 3;
+    target.u.hasAudioSibling = bestAudio >= 3;
+  }
+}
+
+/** Build VideoRow array from uploads for the matching engine */
+function toVideoRows(uploads: RecentUpload[]): VideoRow[] {
+  return uploads.map((u) => ({
+    u,
+    key: normaliseTitle(u.title),
+    ts: new Date(u.publishedAt).getTime(),
+    keywords: extractKeywords(u.title),
+    descLower: (u.description ?? '').toLowerCase().slice(0, 500),
+  }));
+}
+
+type CommentRes = { items?: Array<{ snippet?: { topLevelComment?: { snippet?: { textDisplay?: string; likeCount?: number; authorDisplayName?: string } } } }> };
+
+async function fetchTopComments(videoId: string, max = 5) {
+  try {
+    const j = (await jget(
+      `https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&order=relevance&maxResults=${max}&videoId=${videoId}&key=${KEY}`
+    )) as CommentRes;
+    return (j.items ?? [])
+      .map((it) => {
+        const s = it.snippet?.topLevelComment?.snippet;
+        if (!s?.textDisplay) return null;
+        return {
+          text: s.textDisplay.replace(/<[^>]+>/g, '').slice(0, 300),
+          likeCount: Number(s.likeCount ?? 0),
+          authorName: s.authorDisplayName ?? '',
+        };
+      })
+      .filter(Boolean) as { text: string; likeCount: number; authorName: string }[];
+  } catch {
+    return [];
+  }
+}
+
+const TOP_EVER_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+async function fetchTopEverVideos(
+  channelId: string,
+  recentUploads: RecentUpload[]
+): Promise<RecentUpload[]> {
+  if (!KEY) return [];
+  try {
+    // Try cache first
+    const cache = await readTopEverCache(channelId);
+    let videoIds: string[] = [];
+    const fresh =
+      cache && Date.now() - new Date(cache.fetchedAt).getTime() < TOP_EVER_TTL_MS;
+    if (fresh && cache?.videoIds?.length) {
+      videoIds = cache.videoIds;
+    } else {
+      // search.list ordered by viewCount — returns the channel's all-time top videos
+      const s = await jget(
+        `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&order=viewCount&type=video&maxResults=10&key=${KEY}`
+      );
+      videoIds = (s.items ?? [])
+        .map((it: any) => it.id?.videoId)
+        .filter(Boolean);
+      if (videoIds.length) {
+        writeTopEverCache(channelId, videoIds).catch(() => {});
+      }
+    }
+    if (!videoIds.length) return [];
+
+    // Reuse any already-detailed uploads from recent to save quota
+    const recentById = new Map(recentUploads.map((u) => [u.id, u]));
+    const toFetch = videoIds.filter((id) => !recentById.has(id));
+
+    const fetched: RecentUpload[] = [];
+    if (toFetch.length) {
+      const vj = await jget(
+        `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${toFetch.join(',')}&key=${KEY}`
+      );
+      for (const v of vj.items ?? []) {
+        fetched.push({
+          id: v.id,
+          title: v.snippet?.title ?? '',
+          description: v.snippet?.description ?? '',
+          publishedAt: v.snippet?.publishedAt ?? '',
+          durationSec: parseDuration(v.contentDetails?.duration),
+          live: v.snippet?.liveBroadcastContent ?? 'none',
+          scheduledStart: v.liveStreamingDetails?.scheduledStartTime ?? null,
+          actualStart: v.liveStreamingDetails?.actualStartTime ?? null,
+          captions: v.contentDetails?.caption === 'true',
+          viewCount: Number(v.statistics?.viewCount ?? 0),
+          likeCount: Number(v.statistics?.likeCount ?? 0),
+          commentCount: Number(v.statistics?.commentCount ?? 0),
+        });
+      }
+    }
+
+    // Assemble in the search-returned order (views desc)
+    const assembled: RecentUpload[] = videoIds
+      .map((id) => recentById.get(id) ?? fetched.find((f) => f.id === id))
+      .filter(Boolean) as RecentUpload[];
+
+    // Fuzzy companion detection across the combined set (recent + top-ever)
+    const combined = [...recentUploads, ...assembled.filter((a) => !recentById.has(a.id))];
+    const combinedRows = toVideoRows(combined);
+    const topEverIds = new Set(videoIds);
+    detectCompanions(combinedRows, topEverIds);
+    // Mark top-ever videos as top performers
+    for (const row of combinedRows) {
+      if (topEverIds.has(row.u.id)) row.u.isTopPerformer = true;
+    }
+
+    // Top comments for top 3 all-time (cheap: 3 more units when cache is cold)
+    const top3 = assembled.slice(0, 3);
+    const results = await Promise.all(top3.map((u) => fetchTopComments(u.id, 5)));
+    top3.forEach((u, i) => {
+      u.topComments = results[i];
+    });
+
+    return assembled;
+  } catch {
+    return [];
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COLLAB VIDEO FETCH — ad-hoc videos from other channels
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch collab videos by ID and merge them into an existing uploads array.
+ * These are videos uploaded to OTHER channels that feature this artist.
+ *
+ * Cost: 1 quota unit per batch of 50 IDs (videos.list) — essentially free.
+ * Videos already present in `existing` are skipped (deduplication).
+ */
+async function fetchCollabVideos(
+  collabIds: string[],
+  existing: RecentUpload[],
+): Promise<RecentUpload[]> {
+  if (!KEY || !collabIds.length) return [];
+
+  // Deduplicate — skip IDs we already have from the uploads playlist
+  const existingIds = new Set(existing.map((u) => u.id));
+  const newIds = collabIds.filter((id) => !existingIds.has(id));
+  if (!newIds.length) return [];
+
+  console.log(`[YouTube] fetchCollabVideos: fetching ${newIds.length} collab IDs`);
+
+  try {
+    const collabs: RecentUpload[] = [];
+    // videos.list accepts max 50 IDs per call
+    for (let i = 0; i < newIds.length; i += 50) {
+      const batch = newIds.slice(i, i + 50);
+      const vj = await jget(
+        `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${batch.join(',')}&key=${KEY}`
+      );
+      for (const v of (vj.items ?? [])) {
+        collabs.push({
+          id: v.id,
+          title: v.snippet?.title ?? '',
+          description: v.snippet?.description ?? '',
+          publishedAt: v.snippet?.publishedAt ?? '',
+          durationSec: parseDuration(v.contentDetails?.duration),
+          live: v.snippet?.liveBroadcastContent ?? 'none',
+          scheduledStart: v.liveStreamingDetails?.scheduledStartTime ?? null,
+          actualStart: v.liveStreamingDetails?.actualStartTime ?? null,
+          captions: v.contentDetails?.caption === 'true',
+          viewCount: Number(v.statistics?.viewCount ?? 0),
+          likeCount: Number(v.statistics?.likeCount ?? 0),
+          commentCount: Number(v.statistics?.commentCount ?? 0),
+          isCollab: true,
+          collabChannel: v.snippet?.channelTitle ?? undefined,
+        });
+      }
+    }
+
+    console.log(`[YouTube] fetchCollabVideos: got ${collabs.length} collab videos`);
+    return collabs;
+  } catch (e: any) {
+    console.error(`[YouTube] fetchCollabVideos error: ${e?.message ?? e}`);
+    return [];
+  }
+}
+
+export async function resolveChannelId(input: string): Promise<string | null> {
+  if (!KEY) return null;
+  if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
+  const handle = input.startsWith('@') ? input : `@${input.replace(/^https?:\/\/.*\/(@?[^/?#]+).*/, '$1')}`;
+
+  // Check in-memory cache first
+  const cached = channelIdCache.get(handle);
+  if (cached && Date.now() - cached.ts < CHANNEL_ID_TTL) {
+    console.log(`[YouTube] resolveChannelId cache hit: ${handle} → ${cached.id}`);
+    return cached.id;
+  }
+
+  // Check KV mapping (permanent, survives cold starts)
+  try {
+    const { readChannelMapping } = await import('./kvCache');
+    const kvId = await readChannelMapping(handle);
+    if (kvId) {
+      console.log(`[YouTube] resolveChannelId KV hit: ${handle} → ${kvId}`);
+      channelIdCache.set(handle, { id: kvId, ts: Date.now() });
+      return kvId;
+    }
+  } catch { /* KV unavailable — fall through to API */ }
+
+  // If quota is exhausted, return cached value (even if stale) or null
+  if (isQuotaCoolingDown()) {
+    console.log(`[YouTube] resolveChannelId quota cooldown — returning cached/null for ${handle}`);
+    return cached?.id ?? null;
+  }
+
+  // channels.list by handle — 1 unit
+  try {
+    const j = await jget(
+      `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handle)}&key=${KEY}`
+    );
+    if (j.items?.[0]?.id) {
+      const id = j.items[0].id;
+      channelIdCache.set(handle, { id, ts: Date.now() });
+      return id;
+    }
+  } catch (e: any) {
+    // On quota error, return stale cache if available
+    if (isQuotaError(String(e?.message ?? ''))) {
+      console.warn(`[YouTube] resolveChannelId quota error for ${handle}`);
+      return cached?.id ?? null;
+    }
+  }
+
+  // NOTE: search.list fallback removed — it costs 100 units per call and
+  // triggers quota exhaustion. channels.list by handle is sufficient for
+  // all artists with valid @handles. For edge cases where the handle doesn't
+  // resolve, use resolveChannelIdWithSearch() explicitly (e.g. when adding
+  // a new artist via the UI).
+  console.warn(`[YouTube] resolveChannelId: channels.list found nothing for ${handle}`);
+  return cached?.id ?? null;
+}
+
+/**
+ * Fallback resolver that uses search.list (100 units).
+ * Only used when explicitly adding a new artist — never in cron/refresh.
+ */
+export async function resolveChannelIdWithSearch(input: string): Promise<string | null> {
+  if (!KEY) return null;
+  if (/^UC[A-Za-z0-9_-]{20,}$/.test(input)) return input;
+
+  // Try the cheap path first
+  const id = await resolveChannelId(input);
+  if (id) return id;
+
+  // Expensive search.list fallback — 100 units
+  const handle = input.startsWith('@') ? input : `@${input.replace(/^https?:\/\/.*\/(@?[^/?#]+).*/, '$1')}`;
+  try {
+    const q = handle.replace(/^@/, '');
+    const j = await jget(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&maxResults=1&q=${encodeURIComponent(q)}&key=${KEY}`
+    );
+    const searchId = j.items?.[0]?.snippet?.channelId ?? j.items?.[0]?.id?.channelId ?? null;
+    if (searchId) channelIdCache.set(handle, { id: searchId, ts: Date.now() });
+    return searchId;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> {
+  if (!KEY) return null;
+
+  // ── 1. Check in-memory cache first ──────────────────────────────────
+  const cacheKey = input.toLowerCase().replace(/^@/, '');
+  const cached = getCached(cacheKey);
+  if (cached) {
+    console.log(`[YouTube] fetchChannelSnap cache hit: ${input}`);
+    return cached;
+  }
+
+  // ── 2. If quota is exhausted, return cached data or a soft error ────
+  if (isQuotaCoolingDown()) {
+    console.log(`[YouTube] fetchChannelSnap quota cooldown — skipping API for ${input}`);
+    return { error: 'quota_exceeded' };
+  }
+
+  try {
+    const channelId = await resolveChannelId(input);
+    if (!channelId) return { error: 'not found' };
+
+    console.log(`[YouTube] fetchChannelSnap API call: ${input} → ${channelId}`);
+
+    const ch = await jget(
+      `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${KEY}`
+    );
+    const item = ch.items?.[0];
+    if (!item) return { error: 'empty' };
+    const uploadsId = item.contentDetails?.relatedPlaylists?.uploads;
+
+    let uploads30d = 0;
+    let lastUploadAt: string | null = null;
+    const recentUploads: NonNullable<LiveSnap['recentUploads']> = [];
+    let shorts30d = 0;
+    let upcomingCount = 0;
+    let captionsMissing30d = 0;
+    const missingCaptionsVideos: NonNullable<LiveSnap['missingCaptionsVideos']> = [];
+
+    if (uploadsId) {
+      // Paginate uploads — limit to 2 pages (100 items) to conserve quota.
+      // This still covers ~3 months for active channels.
+      const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const ids: string[] = [];
+      let nextPageToken: string | undefined;
+      const MAX_PAGES = 2;
+      for (let page = 0; page < MAX_PAGES; page++) {
+        const pageParam = nextPageToken ? `&pageToken=${nextPageToken}` : '';
+        const pl = await jget(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}${pageParam}`
+        );
+        for (const it of pl.items ?? []) {
+          const t = it.snippet?.publishedAt;
+          const vid = it.snippet?.resourceId?.videoId;
+          if (!t || !vid) continue;
+          if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
+          if (new Date(t).getTime() >= cutoff) uploads30d++;
+          ids.push(vid);
+        }
+        nextPageToken = pl.nextPageToken;
+        if (!nextPageToken) break; // no more pages
+      }
+      // Fetch full video details in batches of 50 (videos.list limit)
+      const sliceIds = ids;
+      if (sliceIds.length) {
+        // videos.list accepts max 50 IDs per call — batch if we have more
+        const allVideoItems: any[] = [];
+        for (let i = 0; i < sliceIds.length; i += 50) {
+          const batch = sliceIds.slice(i, i + 50);
+          const vj = await jget(
+            `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${batch.join(',')}&key=${KEY}`
+          );
+          allVideoItems.push(...(vj.items ?? []));
+        }
+        for (const v of allVideoItems) {
+          const dur = parseDuration(v.contentDetails?.duration);
+          const publishedAt = v.snippet?.publishedAt ?? '';
+          const live = v.snippet?.liveBroadcastContent ?? 'none';
+          const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          const actualStart = v.liveStreamingDetails?.actualStartTime ?? null;
+          const captions = v.contentDetails?.caption === 'true';
+          const viewCount = Number(v.statistics?.viewCount ?? 0);
+          const likeCount = Number(v.statistics?.likeCount ?? 0);
+          const commentCount = Number(v.statistics?.commentCount ?? 0);
+          recentUploads.push({
+            id: v.id,
+            title: v.snippet?.title ?? '',
+            description: v.snippet?.description ?? '',
+            publishedAt,
+            durationSec: dur,
+            live,
+            scheduledStart,
+            actualStart,
+            captions,
+            viewCount,
+            likeCount,
+            commentCount,
+          });
+          const ageDays =
+            (Date.now() - new Date(publishedAt).getTime()) / 86400000;
+          if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;
+          if (ageDays <= 30 && !captions && live === 'none') {
+            captionsMissing30d++;
+            missingCaptionsVideos.push({
+              id: v.id,
+              title: v.snippet?.title ?? '',
+              viewCount,
+            });
+          }
+          if (live === 'upcoming') upcomingCount++;
+        }
+
+        // ---- Fuzzy companion detection (across recent window) ----
+        const recentRows = toVideoRows(recentUploads);
+        detectCompanions(recentRows);
+
+        // ---- Top performer flagging (long-form, non-live) ----
+        const longform = recentUploads.filter((u) => u.live === 'none' && u.durationSec > 60);
+        if (longform.length >= 3) {
+          const sorted = [...longform.map((u) => u.viewCount)].sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)] || 0;
+          for (const u of longform) {
+            if (median > 0 && u.viewCount >= median * 2) u.isTopPerformer = true;
+          }
+        }
+
+        // ---- Top comments for top 3 performers (by views) ----
+        const topPerformers = [...recentUploads]
+          .filter((u) => u.isTopPerformer)
+          .sort((a, b) => b.viewCount - a.viewCount)
+          .slice(0, 3);
+        if (topPerformers.length) {
+          const results = await Promise.all(
+            topPerformers.map((u) => fetchTopComments(u.id, 5))
+          );
+          topPerformers.forEach((u, i) => {
+            u.topComments = results[i];
+          });
+        }
+      }
+    }
+
+    // ---- All-time top-10 (weekly cache) ----
+    const topEverVideos = await fetchTopEverVideos(channelId, recentUploads);
+
+    const snap: LiveSnap = {
+      channelId,
+      title: item.snippet?.title,
+      handle: item.snippet?.customUrl,
+      subs: Number(item.statistics?.subscriberCount ?? 0),
+      views: Number(item.statistics?.viewCount ?? 0),
+      uploads30d,
+      lastUploadAt,
+      thumbnail: item.snippet?.thumbnails?.default?.url,
+      recentUploads,
+      topEverVideos,
+      shorts30d,
+      upcomingCount,
+      captionsMissing30d,
+      missingCaptionsVideos,
+    };
+
+    // Fire-and-forget time-series write (KV-backed, no-op if unconfigured)
+    writeSnapshot(channelId, snap).catch(() => {});
+
+    // ── Cache the successful result ──
+    setCache(cacheKey, snap);
+    console.log(`[YouTube] fetchChannelSnap cached: ${input} (subs=${snap.subs}, views30d=${snap.uploads30d})`);
+
+    return snap;
+  } catch (e: any) {
+    const msg = String(e?.message ?? e);
+    console.error(`[YouTube] fetchChannelSnap error for ${input}: ${msg}`);
+
+    // On quota error, return a distinguishable soft error
+    if (isQuotaError(msg)) {
+      return { error: 'quota_exceeded' };
+    }
+
+    return { error: msg };
+  }
+}
+
+/**
+ * Lightweight channel fetch for the daily cron job.
+ * Skips expensive operations to conserve quota:
+ *   - NO search.list for top-ever videos (saves 100 units/artist)
+ *   - NO commentThreads (saves 3-6 units/artist)
+ *   - Only 2 pages of uploads (100 items, ~3 months)
+ *   - NO in-memory cache (cron writes to KV instead)
+ *
+ * Cost: ~6 units per artist (1 channels + 2 playlistItems + 2 videos + 1 resolve)
+ */
+export async function fetchChannelSnapLite(input: string, opts?: { campaignStartDate?: string; collabs?: string[] }): Promise<LiveSnap | null> {
+  if (!KEY) return null;
+
+  if (isQuotaCoolingDown()) {
+    console.log(`[YouTube] fetchChannelSnapLite quota cooldown — skipping ${input}`);
+    return { error: 'quota_exceeded' };
+  }
+
+  try {
+    const channelId = await resolveChannelId(input);
+    if (!channelId) return { error: 'not found' };
+
+    console.log(`[YouTube] fetchChannelSnapLite: ${input} → ${channelId}`);
+
+    const ch = await jget(
+      `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${KEY}`
+    );
+    const item = ch.items?.[0];
+    if (!item) return { error: 'empty' };
+    const uploadsId = item.contentDetails?.relatedPlaylists?.uploads;
+
+    let uploads30d = 0;
+    let lastUploadAt: string | null = null;
+    const recentUploads: NonNullable<LiveSnap['recentUploads']> = [];
+    let shorts30d = 0;
+    let upcomingCount = 0;
+    let captionsMissing30d = 0;
+    const missingCaptionsVideos: NonNullable<LiveSnap['missingCaptionsVideos']> = [];
+
+    if (uploadsId) {
+      const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      // For campaign artists, paginate deeper to cover the full campaign window
+      const campaignCutoff = opts?.campaignStartDate
+        ? new Date(opts.campaignStartDate + 'T00:00:00').getTime()
+        : null;
+      const maxPages = campaignCutoff ? 6 : 2; // 300 vs 100 items
+      const ids: string[] = [];
+      let nextPageToken: string | undefined;
+      let reachedCampaignStart = false;
+      for (let page = 0; page < maxPages; page++) {
+        const pageParam = nextPageToken ? `&pageToken=${nextPageToken}` : '';
+        const pl = await jget(
+          `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${KEY}${pageParam}`
+        );
+        for (const it of pl.items ?? []) {
+          const t = it.snippet?.publishedAt;
+          const vid = it.snippet?.resourceId?.videoId;
+          if (!t || !vid) continue;
+          if (!lastUploadAt || t > lastUploadAt) lastUploadAt = t;
+          if (new Date(t).getTime() >= cutoff) uploads30d++;
+          ids.push(vid);
+          // Stop early if we've reached before the campaign start
+          if (campaignCutoff && new Date(t).getTime() < campaignCutoff) {
+            reachedCampaignStart = true;
+          }
+        }
+        nextPageToken = pl.nextPageToken;
+        if (!nextPageToken || reachedCampaignStart) break;
+      }
+
+      if (ids.length) {
+        const allVideoItems: any[] = [];
+        for (let i = 0; i < ids.length; i += 50) {
+          const batch = ids.slice(i, i + 50);
+          const vj = await jget(
+            `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,liveStreamingDetails&id=${batch.join(',')}&key=${KEY}`
+          );
+          allVideoItems.push(...(vj.items ?? []));
+        }
+        for (const v of allVideoItems) {
+          const dur = parseDuration(v.contentDetails?.duration);
+          const publishedAt = v.snippet?.publishedAt ?? '';
+          const live = v.snippet?.liveBroadcastContent ?? 'none';
+          const scheduledStart = v.liveStreamingDetails?.scheduledStartTime ?? null;
+          const actualStart = v.liveStreamingDetails?.actualStartTime ?? null;
+          const captions = v.contentDetails?.caption === 'true';
+          const viewCount = Number(v.statistics?.viewCount ?? 0);
+          const likeCount = Number(v.statistics?.likeCount ?? 0);
+          const commentCount = Number(v.statistics?.commentCount ?? 0);
+          recentUploads.push({
+            id: v.id,
+            title: v.snippet?.title ?? '',
+            description: v.snippet?.description ?? '',
+            publishedAt,
+            durationSec: dur,
+            live,
+            scheduledStart,
+            actualStart,
+            captions,
+            viewCount,
+            likeCount,
+            commentCount,
+          });
+          const ageDays = (Date.now() - new Date(publishedAt).getTime()) / 86400000;
+          if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;
+          if (ageDays <= 30 && !captions && live === 'none') {
+            captionsMissing30d++;
+            missingCaptionsVideos.push({ id: v.id, title: v.snippet?.title ?? '', viewCount });
+          }
+          if (live === 'upcoming') upcomingCount++;
+        }
+
+        // Fuzzy companion detection (no top-ever needed)
+        const recentRows = toVideoRows(recentUploads);
+        detectCompanions(recentRows);
+
+        // Top performer flagging
+        const longform = recentUploads.filter((u) => u.live === 'none' && u.durationSec > 60);
+        if (longform.length >= 3) {
+          const sorted = [...longform.map((u) => u.viewCount)].sort((a, b) => a - b);
+          const median = sorted[Math.floor(sorted.length / 2)] || 0;
+          for (const u of longform) {
+            if (median > 0 && u.viewCount >= median * 2) u.isTopPerformer = true;
+          }
+        }
+        // NO top comments — skip to save quota
+      }
+    }
+
+    // ── Merge collab videos from other channels ─────────────────────────
+    if (opts?.collabs?.length) {
+      const collabVideos = await fetchCollabVideos(opts.collabs, recentUploads);
+      if (collabVideos.length) {
+        recentUploads.push(...collabVideos);
+        // Re-sort by publishedAt descending so collabs slot into timeline correctly
+        recentUploads.sort((a, b) =>
+          new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
+      }
+    }
+
+    const snap: LiveSnap = {
+      channelId,
+      title: item.snippet?.title,
+      handle: item.snippet?.customUrl,
+      subs: Number(item.statistics?.subscriberCount ?? 0),
+      views: Number(item.statistics?.viewCount ?? 0),
+      uploads30d,
+      lastUploadAt,
+      thumbnail: item.snippet?.thumbnails?.default?.url,
+      recentUploads,
+      topEverVideos: [], // skipped in lite mode
+      shorts30d,
+      upcomingCount,
+      captionsMissing30d,
+      missingCaptionsVideos,
+    };
+
+    // Write time-series snapshot (KV-backed, no-op if unconfigured)
+    writeSnapshot(channelId, snap).catch(() => {});
+
+    return snap;
+  } catch (e: any) {
+    const msg = String(e?.message ?? e);
+    console.error(`[YouTube] fetchChannelSnapLite error for ${input}: ${msg}`);
+    if (isQuotaError(msg)) return { error: 'quota_exceeded' };
+    return { error: msg };
+  }
+}

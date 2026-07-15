@@ -100,43 +100,113 @@ export async function GET() {
       score: calculateChannelScore(inputs[i], pool),
     }));
 
-    // Composite spotlight score
-    const withComposite = scored.map(({ row, score }) => {
-      let composite = score.totalPoints * 10;
-      if (row.classification === 'GROWING') composite += 30;
-      if (row.status === 'HEALTHY') composite += 20;
-      if (row.multiformat?.score === 'Strong') composite += 20;
-      else if (row.multiformat?.score === 'Good') composite += 12;
-      if (row.uploads30d >= 8) composite += 15;
-      else if (row.uploads30d >= 4) composite += 8;
-      if ((row.subs7Delta ?? 0) > 0) composite += 10;
-      if (score.grade === 'A') composite += 25;
-      else if (score.grade === 'B') composite += 12;
-      if (row.viewsWoW != null && row.viewsWoW > 0) composite += 5;
-      if (row.movementConfidence === 'stale') composite -= 20;
-      if (row.status === 'COLD') composite -= 30;
-      if (row.uploads30d === 0) composite -= 25;
+    // ── Minimum thresholds ─────────────────────────────────────────
+    // Channels must have real scale + genuine activity to qualify.
+    // The spotlight should show channels that are performing at
+    // meaningful scale — not micro channels where small gains
+    // look disproportionate.
+    const MIN_SUBS = 1000;
+    const MIN_VIEWS_7D = 5000;
+    const MIN_UPLOADS_30D = 3;
+
+    // ── Diagnostics: track the filtering funnel ─────────────────
+    const filteredBySubs: string[] = [];
+    const filteredByViews: string[] = [];
+    const filteredByUploads: string[] = [];
+    const filteredByCold: string[] = [];
+
+    const qualified = scored.filter(({ row }) => {
+      if ((row.subs ?? 0) < MIN_SUBS) { filteredBySubs.push(`${row.name} (${row.subs ?? 0})`); return false; }
+      if ((row.views7Delta ?? 0) < MIN_VIEWS_7D) { filteredByViews.push(`${row.name} (${row.views7Delta ?? 0})`); return false; }
+      if (row.uploads30d < MIN_UPLOADS_30D) { filteredByUploads.push(`${row.name} (${row.uploads30d})`); return false; }
+      if (row.status === 'COLD') { filteredByCold.push(row.name); return false; }
+      return true;
+    });
+
+    // ── Composite spotlight score ────────────────────────────────
+    // Focuses on the four pillars that make a channel genuinely
+    // "spotlight-worthy": cadence, format diversity, scale, and conversion.
+    //
+    // Views scale matters here — this is a performance report, so
+    // a channel doing 229K views/week IS performing better than
+    // one doing 2.8K views/week, all else equal.
+    const withComposite = qualified.map(({ row, score }) => {
+      let composite = 0;
+
+      // ── 1. Cadence (max 20) ─────────────────────────────────
+      if (row.uploads30d >= 10) composite += 20;
+      else if (row.uploads30d >= 6) composite += 14;
+      else if (row.uploads30d >= 3) composite += 8;
+
+      // ── 2. Multi-format strategy (max 25) ───────────────────
+      if (row.multiformat?.score === 'Strong') composite += 25;
+      else if (row.multiformat?.score === 'Good') composite += 18;
+      else if (row.multiformat?.score === 'Partial') composite += 8;
+
+      // ── 3. Views scale (max 30) ─────────────────────────────
+      // Performance report — real reach matters
+      const v7 = row.views7Delta ?? 0;
+      if (v7 >= 200000) composite += 30;
+      else if (v7 >= 100000) composite += 25;
+      else if (v7 >= 50000) composite += 20;
+      else if (v7 >= 20000) composite += 14;
+      else if (v7 >= 10000) composite += 8;
+      else if (v7 >= 5000) composite += 4;
+
+      // ── 4. Subscriber conversion (max 15) ───────────────────
+      const s7 = row.subs7Delta ?? 0;
+      if (s7 >= 500) composite += 15;
+      else if (s7 >= 100) composite += 12;
+      else if (s7 > 0) composite += 8;
+
+      // ── Bonuses ─────────────────────────────────────────────
+      // Growing classification — channel health system agrees
+      if (row.classification === 'GROWING') composite += 10;
+      // High channel score grade (execution quality)
+      if (score.grade === 'A') composite += 8;
+      else if (score.grade === 'B') composite += 4;
+
+      // ── Mild penalties ──────────────────────────────────────
+      // Stale data — mild penalty, don't crush active channels
+      if (row.movementConfidence === 'stale') composite -= 5;
+
       return { row, score, composite };
     });
 
-    const top = withComposite
-      .filter((c) => c.composite > 30)
-      .sort((a, b) => b.composite - a.composite)
+    // Take top 5, but only if they clear the bar (composite >= 40).
+    // Better to show 2 genuinely strong channels than 5 padded with weak ones.
+    const sortedByComposite = [...withComposite].sort((a, b) => b.composite - a.composite);
+    const filteredByComposite = sortedByComposite
+      .filter((c) => c.composite < 40)
+      .map((c) => `${c.row.name} (${c.composite})`);
+    const top = sortedByComposite
+      .filter((c) => c.composite >= 40)
       .slice(0, 5);
 
     // ── Load coach plans ─────────────────────────────────────────────────
+    // Three matching strategies: slug prefix, name match, name-in-slug
     const planIndex = await listPlans();
-    const norm = (s: string) => s.replace(/-/g, '');
+    const norm = (s: string) => s.replace(/-/g, '').toLowerCase();
+    const normName = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
     const coachPlans = new Map<string, SavedPlan>();
+
     for (const entry of planIndex) {
       const planNorm = norm(entry.slug);
+      const planArtistNorm = normName(entry.artist);
+
       for (const { row } of top) {
+        if (coachPlans.has(row.slug)) continue;
         const artistNorm = norm(row.slug);
-        if (planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm)) {
-          if (!coachPlans.has(row.slug)) {
-            const plan = await loadPlan(entry.slug);
-            if (plan) coachPlans.set(row.slug, plan);
-          }
+        const artistNameNorm = normName(row.name);
+
+        const matched =
+          planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm) || // slug prefix
+          planArtistNorm === artistNameNorm || // exact name match
+          artistNorm.includes(planArtistNorm) || planArtistNorm.includes(artistNorm); // name-in-slug
+
+        if (matched) {
+          const plan = await loadPlan(entry.slug);
+          if (plan) coachPlans.set(row.slug, plan);
         }
       }
     }
@@ -174,25 +244,55 @@ export async function GET() {
       const snap = artist?.channelHandle ? (snapMap.get(artist.channelHandle) ?? null) : null;
       const longform30d = row.uploads30d - row.shorts30d;
 
-      // Recent videos — top 5 by velocity from last 14d
+      // Recent videos — latest content, mixing longform + Shorts
+      // Sorted by publish date (newest first), then curated to show
+      // the most recent longform AND most recent Shorts — not just
+      // whatever has the highest all-time velocity.
       const recentVideos: any[] = [];
       if (snap?.recentUploads) {
-        const cutoff = 14 * 86400000;
+        const cutoff = 30 * 86400000;
+        const eligible: any[] = [];
         for (const u of snap.recentUploads) {
           const ageMs = now - new Date(u.publishedAt).getTime();
           if (ageMs > cutoff || ageMs < 0) continue;
           const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
           const velocity = Math.round(u.viewCount / daysAgo);
-          if (velocity < 50) continue;
           const isShort = u.durationSec <= 62;
           let format = 'Upload';
           try { format = classifyUploadFormat(u); } catch { /* fallback */ }
-          recentVideos.push({
+          eligible.push({
             id: u.id, title: u.title, views: u.viewCount, velocity, daysAgo,
             format: typeof format === 'string' ? format : 'Upload', isShort,
+            thumbnail: `https://i.ytimg.com/vi/${u.id}/mqdefault.jpg`,
+            publishedAt: u.publishedAt,
           });
         }
-        recentVideos.sort((a: any, b: any) => b.velocity - a.velocity);
+
+        // Sort by publish date (newest first)
+        eligible.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+        // Pick latest longform (up to 3) and latest Shorts (up to 3),
+        // then interleave — newest content first, mixed formats
+        const longform = eligible.filter((v: any) => !v.isShort);
+        const shorts = eligible.filter((v: any) => v.isShort);
+        const picked = new Set<string>();
+
+        // Take up to 3 latest longform
+        for (const v of longform.slice(0, 3)) {
+          recentVideos.push(v);
+          picked.add(v.id);
+        }
+        // Take up to 2 latest Shorts (3 if no longform)
+        const shortsSlots = longform.length === 0 ? 5 : Math.min(5 - recentVideos.length, 3);
+        for (const v of shorts.slice(0, shortsSlots)) {
+          if (!picked.has(v.id)) {
+            recentVideos.push(v);
+            picked.add(v.id);
+          }
+        }
+
+        // Re-sort final list by publish date (newest first)
+        recentVideos.sort((a: any, b: any) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
         recentVideos.splice(5);
       }
 
@@ -209,13 +309,15 @@ export async function GET() {
           return { ...e, title, diff, priority: eventPriority(e.kind, title) };
         });
         const upcoming = enriched
-          .filter((e) => e.diff >= -7)
+          .filter((e) => e.diff >= -7 && e.priority >= 60) // YouTube content moments only
           .sort((a, b) => b.priority - a.priority || a.diff - b.diff);
-        const hasHigh = upcoming.some((e) => e.priority >= 60);
-        const filtered = hasHigh ? upcoming.filter((e) => e.priority >= 60) : upcoming;
-        if (filtered.length > 0) currentMoment = filtered[0].title;
-        if (filtered.length > 1) nextMoment = filtered[1].title;
-        if (filtered.length > 2) upcomingMoment = filtered[2].title;
+
+        const fmtEvtDate = (iso: string) =>
+          new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+        if (upcoming.length > 0) currentMoment = `${upcoming[0].title} — ${fmtEvtDate(upcoming[0].dateISO)}`;
+        if (upcoming.length > 1) nextMoment = `${upcoming[1].title} — ${fmtEvtDate(upcoming[1].dateISO)}`;
+        if (upcoming.length > 2) upcomingMoment = `${upcoming[2].title} — ${fmtEvtDate(upcoming[2].dateISO)}`;
       }
 
       const subsPer1kViews =
@@ -223,13 +325,17 @@ export async function GET() {
           ? (row.subs7Delta / row.views7Delta) * 1000
           : null;
 
+      // Ecosystem signal — stricter: Full Ecosystem requires Strong multiformat
+      // (anchor content + Shorts + supporting formats), not just Shorts + longform
       let ecosystemSignal = 'Getting Started';
-      if (row.multiformat?.score === 'Strong' || row.multiformat?.score === 'Good') {
-        ecosystemSignal = row.shorts30d > 0 && longform30d > 0 ? 'Full Ecosystem' : 'Multi-Format Active';
-      } else if (row.shorts30d > 0 && longform30d === 0) {
-        ecosystemSignal = 'Shorts Momentum';
-      } else if (longform30d > 0 && row.shorts30d === 0) {
-        ecosystemSignal = 'Multi-Format Active';
+      if (row.multiformat?.score === 'Strong') {
+        ecosystemSignal = 'Full Ecosystem'; // Anchor + Shorts + 2+ supporting formats
+      } else if (row.multiformat?.score === 'Good') {
+        ecosystemSignal = 'Multi-Format Active'; // Anchor + Shorts + 1 supporting
+      } else if (row.multiformat?.score === 'Partial') {
+        ecosystemSignal = row.shorts30d > 0 ? 'Shorts Momentum' : 'Building';
+      } else if (row.uploads30d >= 2) {
+        ecosystemSignal = 'Building';
       }
 
       // Auto-generate "what's working" notes
@@ -276,6 +382,30 @@ export async function GET() {
         headline += 'Active channel with room to accelerate cadence and conversion.';
       }
 
+      // Content format tags — which YouTube formats are active (last 90d)
+      const contentFormats: string[] = [];
+      const mf = row.multiformat;
+      if (mf) {
+        if (mf.hasOfficialVideo) contentFormats.push('Official Video');
+        if (mf.hasLyricVideo) contentFormats.push('Lyric Video');
+        if (mf.hasVisualizer) contentFormats.push('Visualiser');
+        if (mf.hasBTS) contentFormats.push('BTS');
+        if (mf.hasLiveSession) contentFormats.push('Live Session');
+        if (mf.hasShorts) contentFormats.push('Shorts');
+      }
+      // Also check recent videos for formats not caught by multiformat detection
+      for (const v of recentVideos) {
+        const fmt = (v as any).format as string;
+        if (/collab/i.test(fmt) && !contentFormats.includes('Collab')) contentFormats.push('Collab');
+        if (/premiere/i.test(fmt) && !contentFormats.includes('Premiere')) contentFormats.push('Premiere');
+        if (/trailer/i.test(fmt) && !contentFormats.includes('Trailer')) contentFormats.push('Trailer');
+      }
+
+      // Hero image: top video thumbnail, fallback to channel avatar
+      const heroImage = recentVideos.length > 0
+        ? `https://i.ytimg.com/vi/${recentVideos[0].id}/hqdefault.jpg`
+        : snap?.thumbnail ?? null;
+
       return {
         slug: row.slug, name: row.name, subs: row.subs,
         subs7d: row.subs7Delta, views7d: row.views7Delta,
@@ -288,6 +418,10 @@ export async function GET() {
         currentMoment, nextMoment, upcomingMoment,
         grade: score.grade, scoreLabel: score.label,
         spotlightScore: composite,
+        thumbnail: snap?.thumbnail ?? null,
+        channelHandle: artist?.channelHandle ?? null,
+        heroImage,
+        contentFormats,
       };
     });
 
@@ -309,6 +443,31 @@ export async function GET() {
         artistsSuccess: syncMeta.artistsSuccess,
         artistsTotal: syncMeta.artistsTotal,
       } : null,
+      // ── Filtering funnel diagnostics ──────────────────────────
+      // Shows exactly how many channels pass each stage so we can
+      // verify full roster coverage and understand spotlight selection.
+      diagnostics: {
+        totalScanned: managedRows.length,
+        passedThresholds: qualified.length,
+        passedComposite: top.length,
+        funnel: {
+          filteredBySubs: { count: filteredBySubs.length, channels: filteredBySubs },
+          filteredByViews: { count: filteredByViews.length, channels: filteredByViews },
+          filteredByUploads: { count: filteredByUploads.length, channels: filteredByUploads },
+          filteredByCold: { count: filteredByCold.length, channels: filteredByCold },
+          filteredByComposite: { count: filteredByComposite.length, channels: filteredByComposite },
+        },
+        // All channels that passed thresholds with their composite scores
+        qualifiedPool: sortedByComposite.map((c) => ({
+          name: c.row.name,
+          composite: c.composite,
+          views7d: c.row.views7Delta,
+          subs: c.row.subs,
+          uploads30d: c.row.uploads30d,
+          status: c.row.status,
+          grade: c.score.grade,
+        })),
+      },
     });
   } catch (err) {
     console.error('[channel-spotlight] Error:', err);
