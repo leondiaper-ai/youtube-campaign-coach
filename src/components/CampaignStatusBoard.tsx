@@ -728,7 +728,7 @@ function DecisionCard({
       {/* Remove — hover only */}
       <button
         onClick={() => onUnpin(card.slug)}
-        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/25 hover:!text-ink/50 hover:bg-black/5 transition-all"
+        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5 transition-all"
         title="Remove"
       >
         &times;
@@ -738,7 +738,7 @@ function DecisionCard({
       {onViewBehaviour && (
         <button
           onClick={() => onViewBehaviour(card.slug)}
-          className="absolute top-3 right-10 text-[9px] font-bold uppercase tracking-[0.08em] text-ink/0 group-hover:text-ink/25 hover:!text-ink/50 transition-all px-2 py-1 rounded"
+          className="absolute top-3 right-10 text-[9px] font-bold uppercase tracking-[0.08em] text-ink/0 group-hover:text-ink/60 hover:!text-ink hover:bg-black/5 transition-all px-2 py-1 rounded"
           title="View channel behaviour"
         >
           Behaviour
