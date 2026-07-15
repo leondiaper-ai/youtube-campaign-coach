@@ -569,9 +569,9 @@ function StoryChart({
 
   // ── Hover detection ──
   const handleMouseMove = useCallback(
-    (e: React.MouseEvent<SVGRectElement>) => {
+    (e: React.MouseEvent<SVGSVGElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
+      const mouseX = e.clientX - rect.left - M.left;
       const ratio = mouseX / chartW;
       const startTs = new Date(startDate).getTime();
       const endTs = new Date(endDate).getTime();
@@ -606,6 +606,7 @@ function StoryChart({
       width={width}
       height={svgH}
       style={{ display: 'block', userSelect: 'none' }}
+      onMouseMove={handleMouseMove}
       onMouseLeave={() => {
         onHover(null);
         onShortGroupHover(null, null);
@@ -1011,8 +1012,7 @@ function StoryChart({
         <rect
           x={0} y={0} width={chartW} height={VIEWS_H + CONTENT_H}
           fill="transparent"
-          onMouseMove={handleMouseMove}
-          style={{ cursor: 'crosshair' }}
+          style={{ cursor: 'crosshair', pointerEvents: 'none' }}
         />
       </g>
     </svg>
