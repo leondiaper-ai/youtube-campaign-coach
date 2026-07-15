@@ -29,6 +29,7 @@ import {
   type ClassifiedUpload,
   type UploadFormat,
   type FormatMeta,
+  type ShortType,
 } from '@/lib/formatClassifier';
 
 export const dynamic = 'force-dynamic';
@@ -70,19 +71,33 @@ type FormatBreakdown = {
   recentDirection: 'accelerating' | 'stable' | 'declining' | 'insufficient';
 };
 
+type FollowUpWindowContent = {
+  uploads: { title: string; format: UploadFormat; shortTitle: string; daysAfter: number; isLongform: boolean }[];
+  longformCount: number;
+  shortsCount: number;
+  summary: string;
+};
+
+type FollowUpSignal = '✓ Long-form follow-up' | 'Shorts only' | 'No follow-up activity';
+
 type UploadObservation = {
   uploadId: string;
   title: string;
+  shortTitle: string;
   format: UploadFormat;
   publishedAt: string;
   viewsBefore7d: number | null;
   viewsAfter7d: number | null;
+  viewsAfter14d: number | null;
   subsBefore7d: number | null;
   subsAfter7d: number | null;
+  subsAfter14d: number | null;
   viewVelocityChange: number | null;    // percentage
   subsVelocityChange: number | null;    // percentage
   nextUpload: { title: string; format: UploadFormat; daysAfter: number } | null;
   nextLongform: { title: string; format: UploadFormat; daysAfter: number } | null;
+  followUpWindow: FollowUpWindowContent | null;  // Day +7 to Day +14 content
+  followUpSignal: FollowUpSignal;
   observation: string;
 };
 
@@ -354,24 +369,28 @@ function computeUploadObservation(
 
   const uploadTs = new Date(upload.publishedAt).getTime();
   const uploadDate = upload.publishedAt.slice(0, 10);
-
-  // Use 14-day after window for long-form moments, 7-day for shorts
   const dayMs = 86400000;
-  const beforeDays = 7;
-  const afterDays = upload.formatMeta.isLongform ? 14 : 7;
-  const before7Start = uploadTs - beforeDays * dayMs;
-  const after7End = uploadTs + afterDays * dayMs;
 
+  // ── Before window (7 days) ──
+  const before7Start = uploadTs - 7 * dayMs;
   const snapsBeforeWindow = history.filter((h) => {
     const ts = new Date(h.ts).getTime();
     return ts >= before7Start && ts < uploadTs && h.views != null;
   });
-  const snapsAfterWindow = history.filter((h) => {
+
+  // ── After windows (7 days and 14 days) ──
+  const after7End = uploadTs + 7 * dayMs;
+  const after14End = uploadTs + 14 * dayMs;
+  const snapsAfter7 = history.filter((h) => {
     const ts = new Date(h.ts).getTime();
     return ts > uploadTs && ts <= after7End && h.views != null;
   });
+  const snapsAfter14 = history.filter((h) => {
+    const ts = new Date(h.ts).getTime();
+    return ts > uploadTs && ts <= after14End && h.views != null;
+  });
 
-  // Views gained in 7 days before/after
+  // Views gained in 7 days before
   let viewsBefore7d: number | null = null;
   if (snapsBeforeWindow.length >= 2) {
     const first = snapsBeforeWindow[0];
@@ -381,26 +400,30 @@ function computeUploadObservation(
     }
   }
 
+  // Views gained in 7 days after
   let viewsAfter7d: number | null = null;
-  // Use upload-day snapshot as baseline for "after"
   const uploadDaySnap = history.find((h) => h.ts === uploadDate && h.views != null);
-  if (uploadDaySnap && snapsAfterWindow.length >= 1) {
-    const lastAfter = snapsAfterWindow[snapsAfterWindow.length - 1];
+  if (uploadDaySnap && snapsAfter7.length >= 1) {
+    const lastAfter = snapsAfter7[snapsAfter7.length - 1];
     if (uploadDaySnap.views != null && lastAfter.views != null) {
       viewsAfter7d = lastAfter.views - uploadDaySnap.views;
     }
   }
 
-  // Same for subscribers
+  // Views gained in 14 days after
+  let viewsAfter14d: number | null = null;
+  if (uploadDaySnap && snapsAfter14.length >= 1) {
+    const lastAfter = snapsAfter14[snapsAfter14.length - 1];
+    if (uploadDaySnap.views != null && lastAfter.views != null) {
+      viewsAfter14d = lastAfter.views - uploadDaySnap.views;
+    }
+  }
+
+  // Subscribers — before
   const subsBefore = history.filter((h) => {
     const ts = new Date(h.ts).getTime();
     return ts >= before7Start && ts < uploadTs && h.subs != null;
   });
-  const subsAfter = history.filter((h) => {
-    const ts = new Date(h.ts).getTime();
-    return ts > uploadTs && ts <= after7End && h.subs != null;
-  });
-
   let subsBefore7d: number | null = null;
   if (subsBefore.length >= 2) {
     const first = subsBefore[0];
@@ -408,16 +431,34 @@ function computeUploadObservation(
     if (first.subs != null && last.subs != null) subsBefore7d = last.subs - first.subs;
   }
 
+  // Subscribers — after 7d
+  const subsAfter7 = history.filter((h) => {
+    const ts = new Date(h.ts).getTime();
+    return ts > uploadTs && ts <= after7End && h.subs != null;
+  });
   let subsAfter7d: number | null = null;
   const uploadDaySubSnap = history.find((h) => h.ts === uploadDate && h.subs != null);
-  if (uploadDaySubSnap && subsAfter.length >= 1) {
-    const lastAfter = subsAfter[subsAfter.length - 1];
+  if (uploadDaySubSnap && subsAfter7.length >= 1) {
+    const lastAfter = subsAfter7[subsAfter7.length - 1];
     if (uploadDaySubSnap.subs != null && lastAfter.subs != null) {
       subsAfter7d = lastAfter.subs - uploadDaySubSnap.subs;
     }
   }
 
-  // Velocity change percentages
+  // Subscribers — after 14d
+  const subsAfter14 = history.filter((h) => {
+    const ts = new Date(h.ts).getTime();
+    return ts > uploadTs && ts <= after14End && h.subs != null;
+  });
+  let subsAfter14d: number | null = null;
+  if (uploadDaySubSnap && subsAfter14.length >= 1) {
+    const lastAfter = subsAfter14[subsAfter14.length - 1];
+    if (uploadDaySubSnap.subs != null && lastAfter.subs != null) {
+      subsAfter14d = lastAfter.subs - uploadDaySubSnap.subs;
+    }
+  }
+
+  // Velocity change percentages (7d window)
   let viewVelocityChange: number | null = null;
   if (viewsBefore7d != null && viewsAfter7d != null && viewsBefore7d > 0) {
     viewVelocityChange = Math.round(((viewsAfter7d - viewsBefore7d) / viewsBefore7d) * 100);
@@ -447,6 +488,62 @@ function computeUploadObservation(
     }
   }
 
+  // ── Follow-up window: Day +7 to Day +14 ──
+  let followUpWindow: FollowUpWindowContent | null = null;
+  let followUpSignal: FollowUpSignal = 'No follow-up activity';
+
+  if (upload.formatMeta.isLongform) {
+    const followStart = uploadTs + 7 * dayMs;
+    const followEnd = uploadTs + 14 * dayMs;
+    const followUploads = uploads
+      .filter((u) => {
+        const ts = new Date(u.publishedAt).getTime();
+        return ts >= followStart && ts <= followEnd && u.id !== uploadId;
+      })
+      .map((u) => ({
+        title: u.title,
+        format: u.format,
+        shortTitle: u.shortTitle,
+        daysAfter: Math.round((new Date(u.publishedAt).getTime() - uploadTs) / dayMs),
+        isLongform: u.formatMeta.isLongform,
+      }));
+
+    const lfCount = followUploads.filter((u) => u.isLongform).length;
+    const shCount = followUploads.filter((u) => !u.isLongform).length;
+
+    // Build summary text
+    let summary = '';
+    if (followUploads.length === 0) {
+      summary = 'No content published in the Day 7–14 follow-up window.';
+    } else {
+      const parts: string[] = [];
+      if (lfCount > 0) {
+        const lfItems = followUploads.filter((u) => u.isLongform);
+        parts.push(lfItems.map((u) => `${getFormatMeta(u.format).label} · Day +${u.daysAfter}`).join(', '));
+      }
+      if (shCount > 0) {
+        parts.push(`${shCount} supporting Short${shCount !== 1 ? 's' : ''}`);
+      }
+      summary = parts.join(', ');
+    }
+
+    followUpWindow = {
+      uploads: followUploads,
+      longformCount: lfCount,
+      shortsCount: shCount,
+      summary,
+    };
+
+    // Classify follow-up signal
+    if (lfCount > 0) {
+      followUpSignal = '✓ Long-form follow-up';
+    } else if (shCount > 0) {
+      followUpSignal = 'Shorts only';
+    } else {
+      followUpSignal = 'No follow-up activity';
+    }
+  }
+
   // Generate observation text
   const observation = generateObservationText(
     upload, viewsBefore7d, viewsAfter7d, subsBefore7d, subsAfter7d
@@ -455,16 +552,21 @@ function computeUploadObservation(
   return {
     uploadId: upload.id,
     title: upload.title,
+    shortTitle: upload.shortTitle,
     format: upload.format,
     publishedAt: upload.publishedAt,
     viewsBefore7d,
     viewsAfter7d,
+    viewsAfter14d,
     subsBefore7d,
     subsAfter7d,
+    subsAfter14d,
     viewVelocityChange,
     subsVelocityChange,
     nextUpload,
     nextLongform,
+    followUpWindow,
+    followUpSignal,
     observation,
   };
 }
@@ -774,7 +876,7 @@ export async function GET(
 
   // ── Classify uploads ──
   const recentUploads = liveSnap.recentUploads ?? [];
-  const uploads = classifyUploads(recentUploads, actualStartDate, latestDate);
+  const uploads = classifyUploads(recentUploads, actualStartDate, latestDate, artist.name);
 
   // ── Content gaps ──
   const gaps = detectGaps(uploads);

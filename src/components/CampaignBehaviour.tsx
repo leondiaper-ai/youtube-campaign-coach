@@ -1,23 +1,34 @@
 'use client';
 
 /**
- * CampaignBehaviour V4 — Visual Story
+ * CampaignBehaviour V5 — Content Intelligence Timeline
  *
  * Design principle: WHAT DID WE POST? → WHAT HAPPENED TO MOMENTUM?
  *
- * Four visual concepts, in strict hierarchy:
- *   1. VIEW MOMENTUM — 7-day rolling average, clean hero line (SIGNAL red)
- *   2. CONTENT MOMENTS — Long-form markers with format labels on timeline
- *   3. SHORTS RHYTHM — Grouped neutral markers showing cadence
+ * Five visual concepts, in strict hierarchy:
+ *   1. VIEW MOMENTUM — 7-day rolling average, clean hero line (SIGNAL red) — BIGGER
+ *   2. CONTENT MOMENTS — Long-form markers with TWO-LINE labels (format + title)
+ *   3. SHORTS RHYTHM — Grouped neutral markers with HOVER tooltips
  *   4. SUBSCRIBER MOVEMENT — Secondary sparkline strip beneath
+ *   5. FOLLOW-UP WINDOW — Highlighted region on Day+7 to Day+14 for selected upload
  *
  * No dual axes. No large legend. No gap shading.
  * One headline insight above the chart.
  * A marketing team should understand the story in 5–10 seconds.
+ *
+ * V5 changes from V4:
+ *  - 44% larger views chart area
+ *  - Two-line content markers (format label + short title)
+ *  - Label collision avoidance (stagger above/below)
+ *  - Shorts hover tooltip (HTML overlay)
+ *  - Enhanced detail panel with follow-up window
+ *  - Follow-up window highlight on chart
+ *  - Improved headline generator
+ *  - PNG export updates
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { FORMAT_COLORS, type UploadFormat, type ClassifiedUpload } from '@/lib/formatClassifier';
+import { FORMAT_COLORS, SHORT_TYPE_LABELS, type UploadFormat, type ClassifiedUpload, type ShortType } from '@/lib/formatClassifier';
 
 // ── Design tokens ────────────────────────────────────────────────────────
 
@@ -71,16 +82,26 @@ type FormatBreakdown = {
 type UploadObservation = {
   uploadId: string;
   title: string;
+  shortTitle: string;
   format: UploadFormat;
   publishedAt: string;
   viewsBefore7d: number | null;
   viewsAfter7d: number | null;
+  viewsAfter14d: number | null;
   subsBefore7d: number | null;
   subsAfter7d: number | null;
+  subsAfter14d: number | null;
   viewVelocityChange: number | null;
   subsVelocityChange: number | null;
   nextUpload: { title: string; format: UploadFormat; daysAfter: number } | null;
   nextLongform: { title: string; format: UploadFormat; daysAfter: number } | null;
+  followUpWindow: {
+    uploads: { title: string; format: UploadFormat; shortTitle: string; daysAfter: number; isLongform: boolean }[];
+    longformCount: number;
+    shortsCount: number;
+    summary: string;
+  } | null;
+  followUpSignal: '✓ Long-form follow-up' | 'Shorts only' | 'No follow-up activity';
   observation: string;
 };
 
@@ -126,6 +147,13 @@ type Props = {
   onClose?: () => void;
 };
 
+type ShortGroupData = {
+  x: number;
+  count: number;
+  uploads: ClassifiedUpload[];
+  centerDate: string;
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────
 
 function formatNum(n: number): string {
@@ -153,20 +181,40 @@ function getFormatShape(format: UploadFormat, cx: number, cy: number, size: numb
   const s = size;
   switch (format) {
     case 'omv':
+      // Circle
       return `M${cx},${cy - s} A${s},${s} 0 1,1 ${cx},${cy + s} A${s},${s} 0 1,1 ${cx},${cy - s}`;
+    case 'acoustic': {
+      // Circle at 85% size
+      const sa = s * 0.85;
+      return `M${cx},${cy - sa} A${sa},${sa} 0 1,1 ${cx},${cy + sa} A${sa},${sa} 0 1,1 ${cx},${cy - sa}`;
+    }
     case 'lyric':
+    case 'interview':
+      // Diamond
       return `M${cx},${cy - s} L${cx + s},${cy} L${cx},${cy + s} L${cx - s},${cy} Z`;
     case 'visualiser':
+    case 'documentary':
+      // Square
       return `M${cx - s},${cy - s} L${cx + s},${cy - s} L${cx + s},${cy + s} L${cx - s},${cy + s} Z`;
     case 'live':
+      // Star
       return starPath(cx, cy, s, s * 0.45, 5);
+    case 'tour': {
+      // Star at 85% size
+      const st = s * 0.85;
+      return starPath(cx, cy, st, st * 0.45, 5);
+    }
     case 'bts':
+      // Triangle
       return `M${cx},${cy - s} L${cx + s},${cy + s * 0.7} L${cx - s},${cy + s * 0.7} Z`;
     case 'audio':
+      // Diamond (same as lyric)
       return `M${cx},${cy - s} L${cx + s},${cy} L${cx},${cy + s} L${cx - s},${cy} Z`;
     case 'short':
+      // Inverted triangle
       return `M${cx - s},${cy - s * 0.5} L${cx + s},${cy - s * 0.5} L${cx},${cy + s * 0.7} Z`;
     default:
+      // Default circle
       return `M${cx},${cy - s} A${s},${s} 0 1,1 ${cx},${cy + s} A${s},${s} 0 1,1 ${cx},${cy - s}`;
   }
 }
@@ -183,7 +231,7 @@ function starPath(cx: number, cy: number, outerR: number, innerR: number, points
   return parts.join(' ') + ' Z';
 }
 
-// ── Headline generator ─────────────────────────────────────────────────
+// ── Headline generator (V5 — behaviour-focused) ─────────────────────────
 
 function generateHeadline(data: BehaviourData): string {
   const vel = data.viewVelocity.filter((v) => v.rollingAvg7d != null);
@@ -224,24 +272,35 @@ function generateHeadline(data: BehaviourData): string {
     .filter((f) => f.meta.isLongform && f.count >= 2)
     .sort((a, b) => b.avgViews - a.avgViews)[0];
 
-  // Rising + content
+  // Track upload sequence for pattern detection
+  const recentLF = longform.slice(-3);
+  const recentLFTitles = recentLF.map((u) => u.shortTitle).filter(Boolean);
+
+  // Rising + content — reference specific content
   if (change > 0.15 && longform.length >= 2) {
+    if (strongest && recentLFTitles.length > 0) {
+      return `View momentum strengthened during this period, coinciding with ${strongest.meta.label} releases including ${recentLFTitles[recentLFTitles.length - 1]}.`;
+    }
     if (strongest) {
       return `Channel momentum strengthened during this period, with ${strongest.meta.label} content associated with the strongest view periods.`;
     }
     return 'Channel momentum strengthened as content activity increased.';
   }
 
-  // Declining + gap
+  // Declining + gap — behaviour-focused
   if (change < -0.15 && longestGap && longestGap.durationDays >= 14) {
     if (daysSince != null && daysSince <= 7) {
-      return `Views declined during a ${longestGap.durationDays}-day content gap and appear to be recovering as activity resumed.`;
+      return `Views declined during a ${longestGap.durationDays}-day content gap and began recovering as activity resumed.`;
     }
-    return `Views declined during a ${longestGap.durationDays}-day content gap.`;
+    return `Views declined during a ${longestGap.durationDays}-day content gap. Consistent upload cadence is associated with sustained momentum.`;
   }
 
   // Declining + recent inactivity
   if (change < -0.15 && daysSince != null && daysSince > 14) {
+    const lastTitle = lastUpload?.shortTitle;
+    if (lastTitle) {
+      return `Channel momentum has slowed since ${lastTitle} (${daysSince} days ago). Resuming uploads is associated with recovery.`;
+    }
     return `Channel momentum has slowed, with the most recent upload ${daysSince} days ago.`;
   }
 
@@ -250,13 +309,19 @@ function generateHeadline(data: BehaviourData): string {
     return 'View momentum has gradually declined across the observation window.';
   }
 
-  // Shorts-heavy, few longform
+  // Shorts-heavy, few longform — reference pattern
   if (shorts.length > longform.length * 3 && longform.length <= 2 && shorts.length >= 5) {
-    return 'Shorts activity has remained consistent, but long-form uploads have been limited.';
+    if (longform.length === 0) {
+      return `Shorts activity remained consistent (${shorts.length} uploads), but no long-form content was released during this period.`;
+    }
+    return `Shorts activity has remained consistent, but long-form uploads have been limited to ${longform.length} during this window.`;
   }
 
-  // Stable + active
+  // Stable + active — reference content
   if (Math.abs(change) <= 0.15 && uploads.length >= 5) {
+    if (strongest) {
+      return `Channel views have remained stable, with ${strongest.meta.label} content performing most strongly at ${formatNum(strongest.avgViews)} average views.`;
+    }
     return 'Channel views have remained stable throughout the observation period.';
   }
 
@@ -265,23 +330,70 @@ function generateHeadline(data: BehaviourData): string {
     return `Limited upload activity — ${uploads.length} upload${uploads.length !== 1 ? 's' : ''} across ${data.observationWindow.days} days.`;
   }
 
+  // Default — mention cadence
+  const daysSinceValues = uploads
+    .map((u) => u.daysSincePrevious)
+    .filter((d): d is number => d != null);
+  if (daysSinceValues.length >= 2) {
+    const avgCadence = daysSinceValues.reduce((s, d) => s + d, 0) / daysSinceValues.length;
+    return `Channel activity spans ${uploads.length} uploads over ${data.observationWindow.days} days, averaging one upload every ${avgCadence.toFixed(0)} days.`;
+  }
+
   return `Channel activity spans ${uploads.length} uploads over ${data.observationWindow.days} days.`;
 }
 
-// ── Chart layout constants ──────────────────────────────────────────────
+// ── Chart layout constants (V5) ────────────────────────────────────────
 
 const M = { left: 44, right: 16, top: 4, bottom: 4 };
 
-const VIEWS_H   = 180;   // Hero: view momentum line area
-const CONTENT_H = 44;    // Content markers zone (longform + shorts)
+const VIEWS_H   = 260;   // Hero: view momentum line area (44% larger)
+const CONTENT_H = 70;    // Content markers zone (room for two-line labels + shorts)
 const AXIS_H    = 20;    // Date tick labels
 const SUBS_GAP  = 6;     // Gap between axis and subs strip
 const SUBS_H    = 24;    // Subscriber sparkline strip
 
-const LF_OFFSET = 14;    // Long-form marker Y within content zone
-const SH_OFFSET = 34;    // Short marker Y within content zone
+const LF_OFFSET = 18;    // Long-form marker Y within content zone
+const SH_OFFSET = 54;    // Short marker Y within content zone
 
 const TOTAL_CHART_H = VIEWS_H + CONTENT_H + AXIS_H + SUBS_GAP + SUBS_H;
+
+// ── Label collision avoidance ──────────────────────────────────────────
+
+function computeLabelPositions(
+  longform: ClassifiedUpload[],
+  toX: (date: string) => number,
+): Map<string, boolean> {
+  // Map of uploadId -> labelAbove (true = above marker, false = below)
+  const positions = new Map<string, boolean>();
+
+  // Compute x positions for all longform
+  const xPositions = longform.map((u) => ({
+    id: u.id,
+    x: toX(u.publishedAt),
+  }));
+
+  // Simple pass: check pairwise distances and alternate
+  for (let i = 0; i < xPositions.length; i++) {
+    if (i === 0) {
+      positions.set(xPositions[i].id, false); // First is always below
+      continue;
+    }
+
+    const prevX = xPositions[i - 1].x;
+    const currX = xPositions[i].x;
+    const prevAbove = positions.get(xPositions[i - 1].id) ?? false;
+
+    if (Math.abs(currX - prevX) < 50) {
+      // Too close — alternate from previous
+      positions.set(xPositions[i].id, !prevAbove);
+    } else {
+      // Far enough apart — default to below
+      positions.set(xPositions[i].id, false);
+    }
+  }
+
+  return positions;
+}
 
 // ── Story Chart ─────────────────────────────────────────────────────────
 
@@ -295,6 +407,8 @@ function StoryChart({
   selectedUpload,
   onSelectUpload,
   baseline,
+  onShortGroupHover,
+  hoveredShortGroup,
 }: {
   data: BehaviourData;
   startDate: string;
@@ -305,6 +419,8 @@ function StoryChart({
   selectedUpload: string | null;
   onSelectUpload: (id: string | null) => void;
   baseline: Baseline | null;
+  onShortGroupHover: (group: ShortGroupData | null, rect: DOMRect | null) => void;
+  hoveredShortGroup: ShortGroupData | null;
 }) {
   const chartW = width - M.left - M.right;
   const svgH = TOTAL_CHART_H + M.top + M.bottom;
@@ -375,7 +491,7 @@ function StoryChart({
   const shorts = data.uploads.filter((u) => u.format === 'short');
 
   // Group nearby shorts
-  const shortGroups: { x: number; count: number; uploads: ClassifiedUpload[] }[] = [];
+  const shortGroups: ShortGroupData[] = [];
   for (const s of shorts) {
     const x = toX(s.publishedAt);
     const existing = shortGroups.find((g) => Math.abs(g.x - x) < 14);
@@ -383,9 +499,39 @@ function StoryChart({
       existing.count++;
       existing.uploads.push(s);
     } else {
-      shortGroups.push({ x, count: 1, uploads: [s] });
+      shortGroups.push({ x, count: 1, uploads: [s], centerDate: s.publishedAt });
     }
   }
+
+  // ── Label collision avoidance ──
+  const labelPositions = useMemo(
+    () => computeLabelPositions(longform, toX),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [longform, startDate, endDate, chartW],
+  );
+
+  // ── Follow-up window highlight ──
+  const followUpHighlight = useMemo(() => {
+    if (!selectedUpload) return null;
+    const upload = data.uploads.find((u) => u.id === selectedUpload);
+    if (!upload || !upload.formatMeta.isLongform) return null;
+
+    const publishTs = new Date(upload.publishedAt).getTime();
+    const day7Date = new Date(publishTs + 7 * 86400000).toISOString().slice(0, 10);
+    const day14Date = new Date(publishTs + 14 * 86400000).toISOString().slice(0, 10);
+
+    const x1 = toX(day7Date);
+    const x2 = toX(day14Date);
+
+    // Only show if within chart bounds
+    if (x2 < 0 || x1 > chartW) return null;
+
+    return {
+      x1: Math.max(0, x1),
+      x2: Math.min(chartW, x2),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUpload, data.uploads, startDate, endDate, chartW]);
 
   // ── Significant gaps (max 1–2 annotations) ──
   const significantGaps = useMemo(() => {
@@ -440,20 +586,95 @@ function StoryChart({
   // Computed Y positions
   const subsStripY = VIEWS_H + CONTENT_H + AXIS_H + SUBS_GAP;
 
+  // Handle short group hover
+  const handleShortGroupMouseEnter = useCallback(
+    (group: ShortGroupData, e: React.MouseEvent<SVGGElement>) => {
+      const svgRect = e.currentTarget.closest('svg')?.getBoundingClientRect();
+      if (svgRect) {
+        onShortGroupHover(group, svgRect);
+      }
+    },
+    [onShortGroupHover],
+  );
+
+  const handleShortGroupMouseLeave = useCallback(() => {
+    onShortGroupHover(null, null);
+  }, [onShortGroupHover]);
+
   return (
     <svg
       width={width}
       height={svgH}
       style={{ display: 'block', userSelect: 'none' }}
-      onMouseLeave={() => onHover(null)}
+      onMouseLeave={() => {
+        onHover(null);
+        onShortGroupHover(null, null);
+      }}
     >
       <g transform={`translate(${M.left},${M.top})`}>
+        {/* ═══ FOLLOW-UP WINDOW HIGHLIGHT (Day+7 to Day+14) ═══ */}
+        {followUpHighlight && (
+          <g>
+            {/* Subtle background rect spanning full chart height */}
+            <rect
+              x={followUpHighlight.x1}
+              y={0}
+              width={followUpHighlight.x2 - followUpHighlight.x1}
+              height={VIEWS_H + CONTENT_H}
+              fill={SIGNAL}
+              opacity={0.04}
+            />
+            {/* Dashed vertical line at Day+7 */}
+            <line
+              x1={followUpHighlight.x1}
+              y1={0}
+              x2={followUpHighlight.x1}
+              y2={VIEWS_H + CONTENT_H}
+              stroke={SIGNAL}
+              strokeWidth={0.5}
+              strokeDasharray="3,3"
+              opacity={0.2}
+            />
+            {/* Dashed vertical line at Day+14 */}
+            <line
+              x1={followUpHighlight.x2}
+              y1={0}
+              x2={followUpHighlight.x2}
+              y2={VIEWS_H + CONTENT_H}
+              stroke={SIGNAL}
+              strokeWidth={0.5}
+              strokeDasharray="3,3"
+              opacity={0.2}
+            />
+            {/* Label */}
+            <text
+              x={(followUpHighlight.x1 + followUpHighlight.x2) / 2}
+              y={VIEWS_H - 4}
+              textAnchor="middle"
+              fontSize={7}
+              fill={SIGNAL}
+              opacity={0.4}
+              fontWeight={600}
+            >
+              Day 7–14
+            </text>
+          </g>
+        )}
+
         {/* ═══ VIEWS AREA BACKGROUND ═══ */}
         {/* Subtle grid lines for scale context */}
         <line x1={0} y1={VIEWS_H} x2={chartW} y2={VIEWS_H} stroke={BONE} strokeWidth={1} />
         <line
           x1={0} y1={VIEWS_H / 2} x2={chartW} y2={VIEWS_H / 2}
           stroke={BONE} strokeWidth={0.5} opacity={0.3}
+        />
+        <line
+          x1={0} y1={VIEWS_H / 4} x2={chartW} y2={VIEWS_H / 4}
+          stroke={BONE} strokeWidth={0.5} opacity={0.15}
+        />
+        <line
+          x1={0} y1={(VIEWS_H * 3) / 4} x2={chartW} y2={(VIEWS_H * 3) / 4}
+          stroke={BONE} strokeWidth={0.5} opacity={0.15}
         />
         {/* Zero label */}
         <text x={-6} y={VIEWS_H + 3} textAnchor="end" fontSize={8} fill={GHOST}>
@@ -536,10 +757,10 @@ function StoryChart({
 
           {/* ── Gap annotations (max 1–2, text only) ── */}
           {significantGaps.map((gap, i) => {
-            const x1 = Math.max(0, toX(gap.startDate));
-            const x2 = Math.min(chartW, toX(gap.endDate));
-            const midX = (x1 + x2) / 2;
-            const gapW = x2 - x1;
+            const gx1 = Math.max(0, toX(gap.startDate));
+            const gx2 = Math.min(chartW, toX(gap.endDate));
+            const midX = (gx1 + gx2) / 2;
+            const gapW = gx2 - gx1;
             if (gapW < 40) return null; // Too narrow to label
             const label =
               gap.type === 'all_content'
@@ -548,7 +769,7 @@ function StoryChart({
             return (
               <g key={`gap-${i}`}>
                 <line
-                  x1={x1 + 4} y1={6} x2={x2 - 4} y2={6}
+                  x1={gx1 + 4} y1={6} x2={gx2 - 4} y2={6}
                   stroke={SMOKE} strokeWidth={0.5} strokeDasharray="3,2" opacity={0.4}
                 />
                 <text
@@ -562,11 +783,17 @@ function StoryChart({
             );
           })}
 
-          {/* ── Long-form markers — LARGE, labelled with format ── */}
+          {/* ── Long-form markers — LARGE, two-line labels ── */}
           {longform.map((u) => {
             const x = toX(u.publishedAt);
             const isSelected = selectedUpload === u.id;
             const size = isSelected ? 10 : 8;
+            const labelAbove = labelPositions.get(u.id) ?? false;
+
+            // Truncate shortTitle for label if needed
+            const shortTitle = u.shortTitle && u.shortTitle.length > 14
+              ? u.shortTitle.slice(0, 12) + '…'
+              : (u.shortTitle || '');
 
             return (
               <g
@@ -598,14 +825,50 @@ function StoryChart({
                   opacity={isSelected ? 1 : 0.9}
                 />
 
-                {/* Format label — ALWAYS visible */}
-                <text
-                  x={x} y={LF_OFFSET + size + 9} textAnchor="middle"
-                  fontSize={7} fill={FORMAT_COLORS[u.format]} fontWeight={700}
-                  style={{ textTransform: 'uppercase' } as React.CSSProperties}
-                >
-                  {u.formatMeta.shortLabel}
-                </text>
+                {/* Two-line labels */}
+                {labelAbove ? (
+                  <>
+                    {/* Line 2 (shortTitle) — ABOVE, furthest from marker */}
+                    {shortTitle && (
+                      <text
+                        x={x} y={LF_OFFSET - size - 14} textAnchor="middle"
+                        fontSize={7} fill={FORMAT_COLORS[u.format]} opacity={0.7}
+                        fontWeight={400}
+                      >
+                        {shortTitle}
+                      </text>
+                    )}
+                    {/* Line 1 (format label) — ABOVE, closer to marker */}
+                    <text
+                      x={x} y={LF_OFFSET - size - 4} textAnchor="middle"
+                      fontSize={8} fill={FORMAT_COLORS[u.format]} fontWeight={700}
+                      style={{ textTransform: 'uppercase' } as React.CSSProperties}
+                    >
+                      {u.formatMeta.shortLabel}
+                    </text>
+                  </>
+                ) : (
+                  <>
+                    {/* Line 1 (format label) — BELOW marker */}
+                    <text
+                      x={x} y={LF_OFFSET + size + 9} textAnchor="middle"
+                      fontSize={8} fill={FORMAT_COLORS[u.format]} fontWeight={700}
+                      style={{ textTransform: 'uppercase' } as React.CSSProperties}
+                    >
+                      {u.formatMeta.shortLabel}
+                    </text>
+                    {/* Line 2 (shortTitle) — BELOW, further from marker */}
+                    {shortTitle && (
+                      <text
+                        x={x} y={LF_OFFSET + size + 19} textAnchor="middle"
+                        fontSize={7} fill={FORMAT_COLORS[u.format]} opacity={0.7}
+                        fontWeight={400}
+                      >
+                        {shortTitle}
+                      </text>
+                    )}
+                  </>
+                )}
               </g>
             );
           })}
@@ -613,22 +876,25 @@ function StoryChart({
           {/* ── Short groups — small, neutral, showing cadence ── */}
           {shortGroups.map((group, i) => {
             const isSelected = group.uploads.some((u) => u.id === selectedUpload);
+            const isHovered = hoveredShortGroup === group;
             const dotR = group.count > 1 ? 3 : 2.5;
             return (
               <g
                 key={`sg-${i}`}
                 style={{ cursor: 'pointer' }}
                 onClick={() => onSelectUpload(group.uploads[0].id)}
+                onMouseEnter={(e) => handleShortGroupMouseEnter(group, e)}
+                onMouseLeave={handleShortGroupMouseLeave}
               >
                 <circle
                   cx={group.x} cy={SH_OFFSET} r={dotR}
                   fill={FORMAT_COLORS.short}
-                  opacity={isSelected ? 1 : 0.4}
+                  opacity={isSelected || isHovered ? 1 : 0.4}
                 />
                 {group.count > 1 && (
                   <text
                     x={group.x} y={SH_OFFSET + 10} textAnchor="middle"
-                    fontSize={7} fill={SMOKE} opacity={0.6}
+                    fontSize={7} fill={SMOKE} opacity={isHovered ? 0.9 : 0.6}
                   >
                     ×{group.count}
                   </text>
@@ -753,7 +1019,7 @@ function StoryChart({
   );
 }
 
-// ── Upload detail panel ──────────────────────────────────────────────────
+// ── Upload detail panel (V5 — enhanced) ─────────────────────────────────
 
 function UploadDetailPanel({
   upload,
@@ -764,6 +1030,20 @@ function UploadDetailPanel({
   observation: UploadObservation | null;
   onClose: () => void;
 }) {
+  const followUpSignalColor = (signal?: string): string => {
+    if (!signal) return SMOKE;
+    if (signal.includes('Long-form follow-up')) return MINT;
+    if (signal === 'Shorts only') return SUN;
+    return SMOKE;
+  };
+
+  const followUpSignalBg = (signal?: string): string => {
+    if (!signal) return CREAM;
+    if (signal.includes('Long-form follow-up')) return '#E8F8F0';
+    if (signal === 'Shorts only') return '#FFF8E1';
+    return CREAM;
+  };
+
   return (
     <div
       style={{
@@ -798,6 +1078,11 @@ function UploadDetailPanel({
             >
               {upload.formatMeta.label}
             </span>
+            {upload.shortTitle && (
+              <span style={{ fontSize: 13, fontWeight: 600, color: INK }}>
+                {upload.shortTitle}
+              </span>
+            )}
             <span style={{ fontSize: 12, color: SMOKE }}>
               {formatDate(upload.publishedAt)}
             </span>
@@ -824,12 +1109,12 @@ function UploadDetailPanel({
         </button>
       </div>
 
-      {/* Before / After metrics */}
+      {/* Before / After metrics — 3-column grid */}
       {observation && (
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
+            gridTemplateColumns: observation.viewsAfter14d != null ? '1fr 1fr 1fr' : '1fr 1fr',
             gap: 12,
             marginBottom: 12,
           }}
@@ -867,7 +1152,7 @@ function UploadDetailPanel({
                 marginBottom: 4,
               }}
             >
-              {upload.formatMeta.isLongform ? '14 Days After' : '7 Days After'}
+              7 Days After
             </div>
             <div style={{ fontSize: 13, color: INK }}>
               {observation.viewsAfter7d != null
@@ -880,6 +1165,29 @@ function UploadDetailPanel({
               </div>
             )}
           </div>
+          {observation.viewsAfter14d != null && (
+            <div style={{ background: PAPER, borderRadius: 8, padding: '10px 12px' }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  color: SMOKE,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  marginBottom: 4,
+                }}
+              >
+                14 Days After
+              </div>
+              <div style={{ fontSize: 13, color: INK }}>
+                +{formatNum(observation.viewsAfter14d)} views
+              </div>
+              {observation.subsAfter14d != null && (
+                <div style={{ fontSize: 12, color: SMOKE }}>
+                  +{formatNum(observation.subsAfter14d)} subs
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -899,6 +1207,92 @@ function UploadDetailPanel({
             {observation.nextLongform.daysAfter}
           </div>
         )}
+
+      {/* ═══ FOLLOW-UP WINDOW SECTION (V5) ═══ */}
+      {observation && upload.formatMeta.isLongform && observation.followUpSignal && (
+        <div
+          style={{
+            borderTop: `1px solid ${BONE}`,
+            paddingTop: 10,
+            marginTop: 10,
+            marginBottom: 10,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                color: SMOKE,
+              }}
+            >
+              Day 7–14 Follow-up
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: 4,
+                background: followUpSignalBg(observation.followUpSignal),
+                color: followUpSignalColor(observation.followUpSignal),
+                border: `1px solid ${followUpSignalColor(observation.followUpSignal)}20`,
+              }}
+            >
+              {observation.followUpSignal}
+            </span>
+          </div>
+
+          {/* Summary text */}
+          {observation.followUpWindow?.summary && (
+            <div style={{ fontSize: 12, color: INK, lineHeight: 1.5, marginBottom: 6 }}>
+              {observation.followUpWindow.summary}
+            </div>
+          )}
+
+          {/* Follow-up uploads list */}
+          {observation.followUpWindow &&
+            observation.followUpWindow.uploads.length > 0 && (
+              <div style={{ marginTop: 4 }}>
+                {observation.followUpWindow.uploads.map((fu, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 11,
+                      color: SMOKE,
+                      marginBottom: 2,
+                    }}
+                  >
+                    <svg width={10} height={10}>
+                      <path
+                        d={getFormatShape(fu.format, 5, 5, 3)}
+                        fill={fu.format === 'audio' ? 'none' : FORMAT_COLORS[fu.format]}
+                        stroke={FORMAT_COLORS[fu.format]}
+                        strokeWidth={fu.format === 'audio' ? 1 : 0}
+                      />
+                    </svg>
+                    <span style={{ color: INK, fontWeight: 500 }}>
+                      {fu.shortTitle || fu.title}
+                    </span>
+                    <span>Day +{fu.daysAfter}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+        </div>
+      )}
 
       {/* Observation text */}
       {observation?.observation && (
@@ -1029,13 +1423,80 @@ function PeriodSelector({
   );
 }
 
-// ── PNG Export ───────────────────────────────────────────────────────────
+// ── Shorts hover tooltip (HTML overlay) ─────────────────────────────────
+
+function ShortsTooltip({
+  group,
+  svgRect,
+  containerRect,
+}: {
+  group: ShortGroupData;
+  svgRect: DOMRect;
+  containerRect: DOMRect;
+}) {
+  // Position the tooltip relative to the container
+  const tooltipX = svgRect.left - containerRect.left + M.left + group.x;
+  const tooltipY = svgRect.top - containerRect.top + M.top + VIEWS_H + SH_OFFSET - 12;
+
+  const tooltipWidth = 240;
+
+  // Adjust horizontal position so tooltip doesn't overflow
+  let adjustedX = tooltipX - tooltipWidth / 2;
+  if (adjustedX < 0) adjustedX = 4;
+  if (adjustedX + tooltipWidth > containerRect.width) {
+    adjustedX = containerRect.width - tooltipWidth - 4;
+  }
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        left: adjustedX,
+        top: tooltipY - (group.count > 1 ? group.count * 18 + 36 : 40),
+        width: tooltipWidth,
+        background: INK,
+        color: 'white',
+        borderRadius: 8,
+        padding: '8px 12px',
+        fontSize: 11,
+        lineHeight: 1.5,
+        zIndex: 10,
+        pointerEvents: 'none',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+      }}
+    >
+      {/* Header */}
+      <div style={{ fontWeight: 700, fontSize: 10, marginBottom: 4, opacity: 0.7, textTransform: 'uppercase' }}>
+        SHORTS · {formatDate(group.centerDate)}
+      </div>
+
+      {/* List of shorts */}
+      {group.uploads.map((u, i) => {
+        const typeLabel = u.shortTypeLabel || 'Short';
+        return (
+          <div key={i} style={{ marginBottom: i < group.uploads.length - 1 ? 2 : 0 }}>
+            <span style={{ opacity: 0.6 }}>• </span>
+            <span style={{ fontWeight: 600 }}>{typeLabel}</span>
+            <span style={{ opacity: 0.7 }}> — </span>
+            <span>{u.shortTitle || u.title}</span>
+            <span style={{ opacity: 0.5, marginLeft: 4 }}>
+              {formatNum(u.viewCount)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── PNG Export (V5) ─────────────────────────────────────────────────────
 
 async function exportToPNG(
   slug: string,
   data: BehaviourData,
   headline: string,
   chartSvgElement: SVGSVGElement | null,
+  uploadObs: UploadObservation | null,
 ): Promise<void> {
   if (!chartSvgElement) return;
 
@@ -1071,7 +1532,6 @@ async function exportToPNG(
   if (headline) {
     ctx.fillStyle = INK;
     ctx.font = 'italic 15px Inter, system-ui, sans-serif';
-    // Word-wrap headline if needed
     const maxW = W - 80;
     const words = headline.split(' ');
     let line = '';
@@ -1089,11 +1549,12 @@ async function exportToPNG(
     if (line) ctx.fillText(line, 40, lineY);
   }
 
-  // Chart SVG → Image → Canvas
+  // Chart SVG -> Image -> Canvas (V5 — bigger chart height)
+  const chartRenderH = 600;
   try {
     const svgClone = chartSvgElement.cloneNode(true) as SVGSVGElement;
     svgClone.setAttribute('width', String(W - 80));
-    svgClone.setAttribute('height', '460');
+    svgClone.setAttribute('height', String(chartRenderH));
     const svgData = new XMLSerializer().serializeToString(svgClone);
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
@@ -1105,21 +1566,21 @@ async function exportToPNG(
       img.src = url;
     });
 
-    ctx.drawImage(img, 40, 160, W - 80, 460);
+    ctx.drawImage(img, 40, 160, W - 80, chartRenderH);
     URL.revokeObjectURL(url);
   } catch {
     ctx.fillStyle = BONE;
-    ctx.fillRect(40, 160, W - 80, 460);
+    ctx.fillRect(40, 160, W - 80, chartRenderH);
     ctx.fillStyle = SMOKE;
     ctx.font = '16px Inter, system-ui, sans-serif';
-    ctx.fillText('Chart rendering — see live view', W / 2 - 120, 390);
+    ctx.fillText('Chart rendering — see live view', W / 2 - 120, 160 + chartRenderH / 2);
   }
 
   // What We're Learning (bottom section)
-  const learnY = 660;
+  const learnY = 160 + chartRenderH + 30;
   ctx.fillStyle = INK;
   ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-  ctx.fillText('WHAT WE\'RE LEARNING', 40, learnY);
+  ctx.fillText("WHAT WE'RE LEARNING", 40, learnY);
 
   // Strongest format
   const strongest = data.formatBreakdown
@@ -1151,6 +1612,22 @@ async function exportToPNG(
       40,
       learnY + 78,
     );
+  }
+
+  // Follow-up signal (V5 addition)
+  if (uploadObs && uploadObs.followUpSignal) {
+    ctx.font = 'bold 9px Inter, system-ui, sans-serif';
+    ctx.fillStyle = SMOKE;
+    ctx.fillText('FOLLOW-UP PATTERN', W / 2, learnY + 22);
+    ctx.font = '13px Inter, system-ui, sans-serif';
+    if (uploadObs.followUpSignal.includes('Long-form follow-up')) {
+      ctx.fillStyle = MINT;
+    } else if (uploadObs.followUpSignal === 'Shorts only') {
+      ctx.fillStyle = SUN;
+    } else {
+      ctx.fillStyle = SMOKE;
+    }
+    ctx.fillText(uploadObs.followUpSignal, W / 2, learnY + 38);
   }
 
   // Summary stats
@@ -1196,8 +1673,19 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState<number>(9999);
   const [showFormats, setShowFormats] = useState(false);
+  const [hoveredShortGroup, setHoveredShortGroup] = useState<ShortGroupData | null>(null);
+  const [shortGroupSvgRect, setShortGroupSvgRect] = useState<DOMRect | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(700);
+
+  // Handle short group hover
+  const handleShortGroupHover = useCallback(
+    (group: ShortGroupData | null, rect: DOMRect | null) => {
+      setHoveredShortGroup(group);
+      setShortGroupSvgRect(rect);
+    },
+    [],
+  );
 
   // Fetch data
   useEffect(() => {
@@ -1318,8 +1806,8 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
   const handleExport = useCallback(async () => {
     if (!data) return;
     const svgEl = containerRef.current?.querySelector('svg') as SVGSVGElement | null;
-    await exportToPNG(slug, data, headline, svgEl);
-  }, [slug, data, headline]);
+    await exportToPNG(slug, data, headline, svgEl, uploadObs);
+  }, [slug, data, headline, uploadObs]);
 
   const handlePeriodChange = useCallback((days: number) => {
     setPeriodDays(days);
@@ -1364,7 +1852,6 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
     observationWindow,
     uploads,
     formatBreakdown,
-    artist,
     lastUpdated,
     baseline,
     availableWindows,
@@ -1410,6 +1897,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         borderRadius: 12,
         padding: '20px 24px',
         border: `1px solid ${BONE}`,
+        position: 'relative',
       }}
     >
       {/* ═══ HEADER ═══ */}
@@ -1515,18 +2003,31 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         </div>
       )}
 
-      {/* ═══ STORY CHART ═══ */}
-      <StoryChart
-        data={data}
-        startDate={observationWindow.startDate}
-        endDate={observationWindow.endDate}
-        width={chartWidth}
-        hoveredDate={hoveredDate}
-        onHover={setHoveredDate}
-        selectedUpload={selectedUpload}
-        onSelectUpload={setSelectedUpload}
-        baseline={baseline}
-      />
+      {/* ═══ STORY CHART (V5 — bigger) ═══ */}
+      <div style={{ position: 'relative' }}>
+        <StoryChart
+          data={data}
+          startDate={observationWindow.startDate}
+          endDate={observationWindow.endDate}
+          width={chartWidth}
+          hoveredDate={hoveredDate}
+          onHover={setHoveredDate}
+          selectedUpload={selectedUpload}
+          onSelectUpload={setSelectedUpload}
+          baseline={baseline}
+          onShortGroupHover={handleShortGroupHover}
+          hoveredShortGroup={hoveredShortGroup}
+        />
+
+        {/* ═══ SHORTS HOVER TOOLTIP (HTML overlay) ═══ */}
+        {hoveredShortGroup && shortGroupSvgRect && containerRef.current && (
+          <ShortsTooltip
+            group={hoveredShortGroup}
+            svgRect={shortGroupSvgRect}
+            containerRect={containerRef.current.getBoundingClientRect()}
+          />
+        )}
+      </div>
 
       {/* ═══ UPLOAD DETAIL PANEL (on marker click) ═══ */}
       {selectedUploadData && (
