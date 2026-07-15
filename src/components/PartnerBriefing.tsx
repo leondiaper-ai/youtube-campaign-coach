@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type CSSProperties, type ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import PulseNav from './PulseNav';
 
 // ── Design System ───────────────────────────────────────────────────────────
@@ -42,30 +42,17 @@ type FocusCampaign = {
   channel: BriefingChannel;
   heroImage: string;
   campaignPhase: string;
-  // Editorial card (NOW / NEXT / AFTER / YOUTUBE FOCUS)
-  nowLabel: string;
-  nowDetail: string;
-  nowThumbnail: string | null;
-  nextLabel: string;
-  nextDate: string | null;
-  afterLabel: string;
-  afterDate: string | null;
-  youtubeFocus: string;
-  channelUrl: string | null;
-  hasCoachPlan: boolean;
-  coachPlanSlug: string | null;
+  narrative: string;
+  contentStrategy: string;
+  ecosystemSignal: string;
+  nextMoments: string;
   currentMoment: string;
-  currentMomentDate: string | null;
   nextMoment: string;
-  nextMomentDate: string | null;
   upcomingMoment: string;
-  upcomingMomentDate: string | null;
+  supportOpportunity: string;
+  hasCoachPlan: boolean;
+  formatBreakdown: string[];
   recentVideos: BriefingVideo[];
-  // Editorial priority
-  editorialPriority: number;
-  standoutVideo: BriefingVideo | null;
-  tier: 1 | 2 | 3;
-  contentFormats: string[];
 };
 
 type UpcomingMoment = {
@@ -79,19 +66,11 @@ type UpcomingMoment = {
   rolloutNote: string;
   fromCoachPlan: boolean;
   priority: number;
-  coachPlanSlug: string | null;
-  channelUrl: string | null;
 };
 
 type EcosystemHighlight = {
   name: string; label: string; read: string;
   thumbnail: string | null; channelHandle: string | null;
-};
-
-type MomentWatching = {
-  id: string; title: string; artistName: string; artistSlug: string;
-  thumbnail: string; viewCount: number; velocity: number; daysAgo: number;
-  format: string; durationSec: number; context: string;
 };
 
 type BriefingData = {
@@ -103,7 +82,6 @@ type BriefingData = {
   topShorts: BriefingVideo[];
   topVideos: BriefingVideo[];
   ecosystemHighlights: EcosystemHighlight[];
-  momentsWatching: MomentWatching[];
 };
 
 // ── Utilities ───────────────────────────────────────────────────────────────
@@ -123,120 +101,6 @@ function channelUrl(handle: string | null): string | null {
   const h = handle.startsWith('@') ? handle : `@${handle}`;
   return `https://www.youtube.com/${h}`;
 }
-
-/**
- * Where a campaign card should link:
- *  - to its saved Coach content plan (/coach/[slug]) when one exists → same tab
- *  - otherwise to the artist's YouTube channel → new tab
- */
-function campaignLink(fc: FocusCampaign): { href: string; internal: boolean } {
-  if (fc.coachPlanSlug) return { href: `/coach/${fc.coachPlanSlug}`, internal: true };
-  return { href: fc.channelUrl ?? '#', internal: false };
-}
-
-/** target/rel props — only external (YouTube) links open in a new tab. */
-function linkTarget(internal: boolean) {
-  return internal ? {} : { target: '_blank', rel: 'noopener noreferrer' };
-}
-
-/**
- * Wraps a Release Radar moment row in a link to its Coach plan (same tab) or,
- * when no single plan matches, the artist's YouTube channel (new tab). If
- * neither destination exists it renders a plain div so nothing else changes.
- */
-function MomentLink({
-  m, style, className, children,
-}: {
-  m: UpcomingMoment;
-  style?: CSSProperties;
-  className?: string;
-  children: ReactNode;
-}) {
-  const href = m.coachPlanSlug ? `/coach/${m.coachPlanSlug}` : (m.channelUrl ?? null);
-  if (!href) return <div style={style} className={className}>{children}</div>;
-  const internal = !!m.coachPlanSlug;
-  return (
-    <a
-      href={href}
-      {...linkTarget(internal)}
-      className={className}
-      style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer', ...style }}
-    >
-      {children}
-    </a>
-  );
-}
-
-// Small red YouTube play glyph used on planner CTAs.
-function YtGlyph({ w = 15, h = 11 }: { w?: number; h?: number }) {
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      width: w, height: h, borderRadius: 3, background: '#FF0000', flexShrink: 0,
-    }}>
-      <svg width={w * 0.4} height={h * 0.55} viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12" fill="#fff" /></svg>
-    </span>
-  );
-}
-
-/**
- * Visible call-to-action button for a campaign card. Links to the artist's
- * Coach content planner when one exists, otherwise offers the YouTube channel.
- */
-function PlannerCTA({ fc }: { fc: FocusCampaign }) {
-  if (fc.coachPlanSlug) {
-    return (
-      <a href={`/coach/${fc.coachPlanSlug}`} className="pb-link" style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        padding: '9px 15px', borderRadius: 8, background: INK, color: PAPER,
-        fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-      }}>
-        <YtGlyph />
-        YouTube Content Planner
-        <span style={{ marginLeft: 1, fontSize: 13 }}>→</span>
-      </a>
-    );
-  }
-  if (fc.channelUrl) {
-    return (
-      <a href={fc.channelUrl} target="_blank" rel="noopener noreferrer" className="pb-link" style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        padding: '9px 15px', borderRadius: 8, background: 'transparent', color: SMOKE,
-        border: `1px solid ${BONE}`,
-        fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-      }}>
-        View channel on YouTube
-        <span style={{ marginLeft: 1, fontSize: 12 }}>↗</span>
-      </a>
-    );
-  }
-  return null;
-}
-
-/**
- * Compact, full-width planner button for the smaller Active/Other cards.
- * Rendered as a span (the card itself is already the link) styled as a button —
- * filled dark for a Coach planner, outlined for the YouTube fallback.
- */
-function PlannerButton({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
-  const hasPlan = !!fc.coachPlanSlug;
-  return (
-    <span style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-      width: '100%', padding: compact ? '6px 8px' : '7px 10px', borderRadius: 7,
-      background: hasPlan ? INK : 'transparent',
-      color: hasPlan ? PAPER : SMOKE,
-      border: hasPlan ? 'none' : `1px solid ${BONE}`,
-      fontSize: compact ? 8.5 : 9.5, fontWeight: 800,
-      letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-    }}>
-      {hasPlan
-        ? <><YtGlyph w={13} h={9} /> Content Planner <span style={{ fontSize: compact ? 10 : 11 }}>→</span></>
-        : <>View on YouTube <span style={{ fontSize: 10 }}>↗</span></>}
-    </span>
-  );
-}
-
 
 /** Group upcoming moments into time buckets for editorial display */
 function groupMomentsByWindow(moments: UpcomingMoment[]): {
@@ -258,9 +122,6 @@ function groupMomentsByWindow(moments: UpcomingMoment[]): {
     }
     const d = new Date(m.date + 'T00:00:00');
     const diffDays = Math.round((d.getTime() - now) / 86400000);
-
-    // Skip past events — Release Radar is forward-looking ("What's coming next")
-    if (diffDays < 0) continue;
 
     if (diffDays <= 7) {
       thisWeek.push(m);
@@ -325,278 +186,45 @@ function PlayOverlay({ size = 32 }: { size?: number }) {
 // ── Editorial Moment Card ──────────────────────────────────────────────────
 
 function MomentCard({ m }: { m: UpcomingMoment }) {
-  // Extract short date from timing (e.g. "9 Jun (in 11d)" → "9 Jun")
-  const shortDate = m.timing ? m.timing.replace(/\s*\(.*\)/, '') : '';
-
   return (
     <div style={{
-      padding: '10px 0',
+      padding: '16px 0',
       borderBottom: `1px solid ${BONE}`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
         <span style={{
-          fontSize: 10, fontWeight: 800, color: INK,
+          fontSize: 11, fontWeight: 800, color: INK,
           letterSpacing: '0.02em', textTransform: 'uppercase' as const,
         }}>
           {m.artist}
         </span>
-        <span style={{
-          fontSize: 11, fontWeight: 800, color: ACCENT.green,
-          whiteSpace: 'nowrap',
-        }}>
-          {shortDate}
-        </span>
+        {m.fromCoachPlan && (
+          <span style={{
+            fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
+            textTransform: 'uppercase' as const,
+            color: ACCENT.green, opacity: 0.7,
+          }}>
+            From planner
+          </span>
+        )}
       </div>
       <p style={{
-        fontSize: 12, fontWeight: 500, color: WARM, lineHeight: 1.35,
-        margin: '3px 0 0',
+        fontSize: 14, fontWeight: 500, color: WARM, lineHeight: 1.45,
+        margin: '0 0 6px',
         fontFamily: 'Inter, system-ui, sans-serif',
       }}>
         {m.moment}
       </p>
-      <span style={{
-        display: 'inline-block', marginTop: 4,
-        padding: '2px 7px', borderRadius: 10,
-        fontSize: 8, fontWeight: 700, color: ACCENT.green,
-        background: 'rgba(45,106,79,0.06)',
-      }}>
-        {m.eventType}
-      </span>
-    </div>
-  );
-}
-
-// ── Moment Cell (reusable for hero + smaller campaign cards) ──────────────
-
-function MomentCell({ label, title, date, color, dateColor }: {
-  label: string; title: string; date?: string | null;
-  color: string; dateColor?: string;
-}) {
-  return (
-    <div>
-      <div style={{
-        fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
-        textTransform: 'uppercase' as const, color: `${color}55`,
-        marginBottom: 4,
-      }}>
-        {label}
-      </div>
-      <p style={{
-        fontSize: 10, color, lineHeight: 1.35, margin: 0,
-        fontFamily: 'Inter, system-ui, sans-serif',
-      }}>
-        {title}
-      </p>
-      {date && (
-        <p style={{
-          fontSize: 10, fontWeight: 700,
-          color: dateColor ?? ACCENT.green,
-          margin: '3px 0 0', lineHeight: 1,
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{
+          fontSize: 10, fontWeight: 600, color: ACCENT.green,
+          letterSpacing: '0.04em',
         }}>
-          {date}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ── Format Tags (content mix at a glance) ────────────────────────────────
-
-const FORMAT_TAG_STYLE: Record<string, { bg: string; fg: string }> = {
-  'Official Video': { bg: '#E6F8EE', fg: '#2D6A4F' },
-  'Lyric Video':    { bg: '#E8F0FE', fg: '#1A56B8' },
-  'Visualizer':     { bg: '#F0E8FE', fg: '#6B21A8' },
-  'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
-  'Live Session':   { bg: '#FFEAD6', fg: '#8A4A1A' },
-  'Short':          { bg: '#F3F0EA', fg: '#4A4640' },
-  'Collab':         { bg: '#E6F8EE', fg: '#2D6A4F' },
-  'Premiere':       { bg: '#E8F0FE', fg: '#1A56B8' },
-  'Trailer':        { bg: '#FFF5D6', fg: '#7A5A00' },
-};
-
-function FormatTags({ videos }: { videos: BriefingVideo[] }) {
-  // Derive unique format types from recent videos
-  const formats = new Set<string>();
-  for (const v of videos) {
-    const fmt = v.format;
-    if (v.durationSec <= 62) formats.add('Short');
-    if (/official video/i.test(fmt)) formats.add('Official Video');
-    else if (/lyric/i.test(fmt)) formats.add('Lyric Video');
-    else if (/visuali/i.test(fmt)) formats.add('Visualizer');
-    else if (/bts|behind/i.test(fmt)) formats.add('BTS');
-    else if (/live session|acoustic/i.test(fmt)) formats.add('Live Session');
-    else if (/collab/i.test(fmt)) formats.add('Collab');
-    else if (/trailer/i.test(fmt)) formats.add('Trailer');
-    else if (/premiere/i.test(fmt)) formats.add('Premiere');
-  }
-  if (formats.size === 0) return null;
-
-  return (
-    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12 }}>
-      {Array.from(formats).map(fmt => {
-        const s = FORMAT_TAG_STYLE[fmt] ?? { bg: '#F3F0EA', fg: '#4A4640' };
-        return (
-          <span key={fmt} style={{
-            display: 'inline-block', padding: '2px 8px', borderRadius: 10,
-            fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
-            background: s.bg, color: s.fg,
-          }}>
-            {fmt}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Campaign status (strongest signal on the page) ───────────────────────
-// One immediate, high-visibility label per campaign, derived from existing data.
-type CampaignStatus = { label: string; color: string };
-const ST_RELEASE_WEEK: CampaignStatus = { label: 'Release Week', color: '#C0392B' }; // 🔴
-const ST_NEXT_RELEASE: CampaignStatus = { label: 'Next Release', color: '#2D6A4F' }; // 🟢
-const ST_BUILDING:     CampaignStatus = { label: 'Building',     color: '#9A6324' }; // 🟡
-const ST_ACTIVE:       CampaignStatus = { label: 'Active',       color: '#1A56B8' }; // 🔵
-const ST_MONITORING:   CampaignStatus = { label: 'Monitoring',   color: '#8A847A' }; // ⚪
-
-const RELEASE_RE = /release|album|single|drop|official\s*video|visuali|lyric|\bep\b|mixtape|deluxe|premiere/i;
-
-/** Parse a "12 Jun" style label into days-from-now (assumes nearest occurrence). */
-function daysUntilLabel(d: string | null): number | null {
-  if (!d) return null;
-  const m = d.match(/(\d{1,2})\s+([A-Za-z]{3})/);
-  if (!m) return null;
-  const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-  const mon = months.indexOf(m[2].toLowerCase());
-  if (mon < 0) return null;
-  const day = parseInt(m[1], 10);
-  const now = new Date();
-  let dt = new Date(now.getFullYear(), mon, day);
-  const diff = Math.round((dt.getTime() - now.getTime()) / 86400000);
-  if (diff < -120) dt = new Date(now.getFullYear() + 1, mon, day); // wrapped into next year
-  return Math.round((dt.getTime() - Date.now()) / 86400000);
-}
-
-function deriveStatus(fc: FocusCampaign): CampaignStatus {
-  const du = daysUntilLabel(fc.nextDate);
-  const isRelease = RELEASE_RE.test(fc.nextLabel || '') || RELEASE_RE.test(fc.afterLabel || '');
-  if (du != null && du >= -3 && du <= 10 && isRelease) return ST_RELEASE_WEEK;
-  if (du != null && du >= -3 && du <= 45 && isRelease) return ST_NEXT_RELEASE;
-  const ph = fc.channel.phase;
-  if (ph === 'PRE' || ph === 'HOLD' || ph === 'START') return ST_BUILDING;
-  const active = ph === 'PUSH' || ph === 'RELEASE' || ph === 'PEAK' || ph === 'SUSTAIN'
-    || fc.channel.classification === 'GROWING' || fc.channel.uploads30d >= 5;
-  if (active) return ST_ACTIVE;
-  if (fc.channel.uploads30d >= 1) return ST_BUILDING;
-  return ST_MONITORING;
-}
-
-function StatusChip({ status, big = false }: { status: CampaignStatus; big?: boolean }) {
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: big ? 7 : 5,
-      padding: big ? '6px 13px' : '3px 9px', borderRadius: 20,
-      background: status.color, color: WHITE,
-      fontSize: big ? 11 : 9, fontWeight: 800,
-      letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-      boxShadow: '0 1px 4px rgba(0,0,0,0.18)', whiteSpace: 'nowrap',
-    }}>
-      <span style={{ width: big ? 7 : 6, height: big ? 7 : 6, borderRadius: '50%', background: 'rgba(255,255,255,0.95)' }} />
-      {status.label}
-    </span>
-  );
-}
-
-// ── Genre tags (programming area at a glance) ─────────────────────────────
-const GENRE_BY_ARTIST: Record<string, string> = {
-  'k-trap': 'UK Rap', 'french the kid': 'Rap', 'mary in the junkyard': 'Indie',
-  'tove lo': 'Electronic Pop', 'peter gabriel': 'Legacy / Rock', 'the snuts': 'Indie Rock',
-  'anna lille': 'Pop', 'jamie webster': 'Indie / Folk', 'gener8ion': 'Electronic',
-  'antony szmierek': 'Alt / Spoken Word', 'kurupt fm': 'UK Garage', 'man woman chainsaw': 'Indie / Post-Punk',
-  'jjerome87': 'Rap', 'ezra collective': 'Jazz', 'tom odell': 'Pop', 'bad omens': 'Rock / Metal',
-  'james blake': 'Electronic', 'tove lo music': 'Electronic Pop',
-  'freak slug': 'Indie Pop', 'original koffee': 'Reggae / Dancehall',
-  'precious pepala': 'Alt Pop', 'catch': 'UK Rap', 'nickelback': 'Legacy / Rock',
-  'bloc party': 'Indie Rock', 'angus and julia stone': 'Indie / Folk',
-  'jigitz': 'UK Garage', 'the big moon': 'Indie Rock', 'david kushner': 'Alt / Folk',
-};
-function genreFor(name: string): string | null {
-  return GENRE_BY_ARTIST[name.trim().toLowerCase()] ?? null;
-}
-
-function GenreTag({ genre, onDark = false }: { genre: string; onDark?: boolean }) {
-  return (
-    <span style={{
-      display: 'inline-block', padding: '2px 8px', borderRadius: 4,
-      fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-      background: onDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.04)',
-      color: onDark ? 'rgba(255,255,255,0.95)' : SMOKE,
-      border: onDark ? 'none' : `1px solid ${BONE}`, whiteSpace: 'nowrap',
-    }}>
-      {genre}
-    </span>
-  );
-}
-
-// ── Ecosystem strip — coloured pills (matches the Channel Spotlight palette) ──
-// Present formats render as filled brand-coloured buttons; absent ones drop to a
-// subtle outline so the gap still reads. Same colour language across both pages.
-const ECO_PILL: Record<string, { bg: string; fg: string }> = {
-  'Official Video': { bg: '#E6F8EE', fg: '#2D6A4F' },
-  'Music Video':    { bg: '#E6F8EE', fg: '#2D6A4F' },
-  'Lyric Video':    { bg: '#E0F0FF', fg: '#1A5276' },
-  'Visualiser':     { bg: '#EDE8F5', fg: '#4A2880' },
-  'Shorts':         { bg: '#F0E8FE', fg: '#6B21A8' },
-  'Long-form':      { bg: '#E8F0E6', fg: '#3D6B35' },
-  'BTS':            { bg: '#FFF5D6', fg: '#7A5A00' },
-  'Live':           { bg: '#FFEAD6', fg: '#8A4A1A' },
-  'Collab':         { bg: '#FDE8EE', fg: '#9B1C47' },
-};
-function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: boolean }) {
-  const f = new Set(fc.contentFormats);
-  // Robust official-video detection — counts a dropped official video even if it
-  // slipped classification, including the bare "(Official)" title style (longform).
-  const hasOfficial = f.has('Official Video')
-    || fc.recentVideos.some((v) => v.durationSec > 62 && /official\s*(music\s*)?video|\(official\)/i.test(v.title));
-  // Only present formats are shown — no "missing" markers. If we don't see it,
-  // we simply don't list it.
-  const hasLyric = f.has('Lyric Video')
-    || fc.recentVideos.some((v) => v.durationSec > 62 && /lyric\s*video/i.test(v.title));
-  const hasVisualiser = f.has('Visualiser')
-    || fc.recentVideos.some((v) => v.durationSec > 62 && /visuali[sz]er/i.test(v.title));
-  const items: { label: string; on: boolean; count?: number }[] = [
-    { label: 'Official Video', on: hasOfficial },
-    { label: 'Lyric Video', on: hasLyric && !hasOfficial },
-    { label: 'Visualiser', on: hasVisualiser && !hasOfficial },
-    { label: 'Shorts', on: fc.channel.shorts30d > 0, count: fc.channel.shorts30d },
-    { label: 'Long-form', on: (fc.channel.longform30d ?? 0) > 0, count: fc.channel.longform30d },
-    { label: 'BTS', on: f.has('BTS') },
-    { label: 'Live', on: f.has('Live Session') },
-    { label: 'Collab', on: f.has('Collab') },
-  ].filter((it) => it.on);
-
-  if (items.length === 0) return null;
-
-  return (
-    <div>
-      {!compact && (
-        <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>
-          Content Ecosystem
-        </div>
-      )}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-        {items.map((it) => {
-          const s = ECO_PILL[it.label];
-          return (
-            <span key={it.label} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: compact ? '3px 9px' : '4px 11px', borderRadius: 20, background: s.bg, color: s.fg,
-              fontSize: compact ? 9 : 10.5, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-            }}>
-              {it.label}
-              {it.count ? <span style={{ fontWeight: 900, opacity: 0.95 }}>{it.count}</span> : null}
-            </span>
-          );
-        })}
+          {m.eventType}
+        </span>
+        <span style={{ fontSize: 10, color: SMOKE }}>
+          {m.supportSurface}
+        </span>
       </div>
     </div>
   );
@@ -693,40 +321,11 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
           background: rgba(45,106,79,0.08);
           color: ${ACCENT.green};
         }
-
-        /* ── Mobile responsive ────────────────────────────── */
-        @media (max-width: 768px) {
-          .pb-section { padding-left: 16px !important; padding-right: 16px !important; }
-          .pb-hero-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
-          .pb-hero-title { font-size: 42px !important; }
-          .pb-shorts-grid { grid-template-columns: repeat(3, 1fr) !important; }
-          .pb-featured-card { grid-template-columns: 1fr !important; }
-          .pb-featured-card .pb-featured-hero { min-height: 180px !important; height: 180px !important; }
-          .pb-tier2-grid { grid-template-columns: 1fr !important; }
-          .pb-tier3-grid { grid-template-columns: 1fr 1fr !important; }
-          .pb-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .pb-moments-grid { grid-template-columns: 1fr 1fr !important; }
-          .pb-radar-big { padding: 16px !important; }
-          .pb-radar-big-items { flex-direction: column !important; }
-          .pb-radar-row { grid-template-columns: 60px 1fr !important; }
-          .pb-top-bar { padding: 16px !important; }
-          .pb-nav-wrap { padding: 0 16px !important; }
-          .pb-vid-grid { grid-template-columns: 1fr 1fr !important; }
-          .pb-obs-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-          .pb-campaign-card:hover { transform: none; box-shadow: none; }
-        }
-        @media (max-width: 480px) {
-          .pb-hero-title { font-size: 34px !important; }
-          .pb-shorts-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .pb-tier3-grid { grid-template-columns: 1fr !important; }
-          .pb-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .pb-vid-grid { grid-template-columns: 1fr !important; }
-        }
       `}</style>
 
 
       {/* ═══════ TOP BAR ═══════ */}
-      <div className="pb-top-bar" style={{
+      <div style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 40px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
@@ -743,16 +342,16 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
 
       {/* ═══════ PULSE NAV (when embedded in weekly-pulse) ═══════ */}
       {showPulseNav && (
-        <div className="pb-nav-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
           <PulseNav />
         </div>
       )}
 
       {/* ═══════ HERO SECTION ═══════ */}
-      <header className="pb-fade pb-section" style={{
+      <header className="pb-fade" style={{
         maxWidth: 1200, margin: '0 auto', padding: '36px 40px 48px',
       }}>
-        <div className="pb-hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: 48, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: 48, alignItems: 'start' }}>
           {/* Left — Title + intro */}
           <div>
             <div style={{
@@ -761,14 +360,14 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
             }}>
               Virgin Music x YouTube
             </div>
-            <h1 className="pb-hero-title" style={{
+            <h1 style={{
               fontSize: 64, fontWeight: 900, lineHeight: 0.92,
               letterSpacing: '-0.04em', color: INK,
               margin: '0 0 0 -3px',
               fontFamily: "Georgia, 'Times New Roman', serif",
               fontStyle: 'italic',
             }}>
-              Priority<br />Campaigns.
+              Weekly<br />Campaign<br />Briefing.
             </h1>
 
             <p style={{
@@ -776,27 +375,32 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
               margin: '28px 0 0', maxWidth: 460,
               fontFamily: 'Inter, system-ui, sans-serif',
             }}>
-              What matters on YouTube over the next 30 days — the key release moments, campaign activity, and where support is needed.
+              A snapshot of active Virgin Music campaigns on YouTube — what&apos;s happening now, what&apos;s coming next, and where the key support moments are.
             </p>
+
+            <div style={{
+              display: 'flex', gap: 24, marginTop: 28,
+              fontSize: 11, fontWeight: 600, color: SMOKE,
+            }}>
+              <div>
+                <span style={{ fontSize: 28, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
+                  {data.activeCampaignCount}
+                </span>
+                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Active campaigns</span>
+              </div>
+              <div style={{ width: 1, background: BONE }} />
+              <div>
+                <span style={{ fontSize: 28, fontWeight: 900, color: INK, display: 'block', lineHeight: 1 }}>
+                  {grouped.thisWeek.length + grouped.nextTwoWeeks.length}
+                </span>
+                <span style={{ fontSize: 9, letterSpacing: '0.06em' }}>Key moments ahead</span>
+              </div>
+            </div>
           </div>
 
           {/* Right — Shorts grid */}
           <div>
-            {/* Top-left header — unmissable */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-                color: WHITE, background: '#FF0000', padding: '5px 10px', borderRadius: 6,
-              }}>
-                <svg width="11" height="13" viewBox="0 0 10 12" fill="none"><polygon points="0,0 10,6 0,12" fill={WHITE} /></svg>
-                Shorts
-              </span>
-              <span style={{ fontSize: 19, fontWeight: 800, color: INK, letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-                This week&apos;s Shorts across the roster
-              </span>
-            </div>
-            <div className="pb-shorts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
               {data.topShorts.slice(0, 6).map((v) => (
                 <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
                   className="pb-link shorts-cell" style={{ display: 'block', position: 'relative' }}>
@@ -822,644 +426,603 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
                 </a>
               ))}
             </div>
+            <div style={{
+              marginTop: 10, textAlign: 'right', paddingRight: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6,
+            }}>
+              <span style={{
+                fontFamily: "'Caveat', cursive",
+                fontSize: 17, fontWeight: 500, color: SMOKE,
+                fontStyle: 'italic',
+              }}>
+                This week&apos;s Shorts across the roster
+              </span>
+              <svg width="28" height="16" viewBox="0 0 28 16" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M2 10C6 8 14 4 22 6" stroke={SMOKE} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                <path d="M18 3L23 6L18 9" stroke={SMOKE} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
           </div>
         </div>
       </header>
 
 
-      {/* ═══════ RELEASE RADAR — Chronological timeline ═══════ */}
-      {hasDateMoments && (() => {
-        // Merge all dated moments, sort chronologically, group by date
-        const allMoments = [
-          ...grouped.thisWeek,
-          ...grouped.nextTwoWeeks,
-          ...grouped.nextMonth,
-        ].filter(m => m.date).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
-
-        // Group by date
-        const dateGroups = new Map<string, UpcomingMoment[]>();
-        for (const m of allMoments) {
-          const key = m.date!;
-          const arr = dateGroups.get(key) ?? [];
-          arr.push(m);
-          dateGroups.set(key, arr);
-        }
-        const groups = Array.from(dateGroups.entries());
-
-        // Priority tier for visual weight
-        const isTier1 = (m: UpcomingMoment) => m.priority >= 80;
-        const nowMs = Date.now();
-
-        // Find the "big week" — date with most convergence (3+ campaigns), today or future only
-        const bigDay = groups.find(([d, ms]) => {
-          const dd = new Date(d + 'T00:00:00');
-          return ms.length >= 3 && dd.getTime() >= nowMs - 86400000; // allow today
-        });
-        // Also find dates with 2 campaigns for secondary emphasis
-        const hotDates = new Set(groups.filter(([, ms]) => ms.length >= 2).map(([d]) => d));
-
-        return (
-          <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
-            <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
-
-            <div style={{ marginBottom: 28 }}>
-              <div style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
-                textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
-              }}>
-                Release Radar
-              </div>
-              <p style={{
-                fontSize: 18, fontWeight: 500, color: WARM, lineHeight: 1.5,
-                maxWidth: 620, margin: 0,
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                fontStyle: 'italic',
-              }}>
-                What&apos;s coming next — the key release moments and campaign activity across the roster.
-              </p>
-            </div>
-
-            {/* ── BIG WEEK callout (when 3+ campaigns on same date) ── */}
-            {bigDay && (
-              <div className="pb-radar-big" style={{
-                background: INK, borderRadius: 10, padding: '20px 24px',
-                marginBottom: 24, color: WHITE,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 12 }}>
-                  <span style={{
-                    fontSize: 24, fontWeight: 900, lineHeight: 1,
-                    fontFamily: "Georgia, 'Times New Roman', serif",
-                  }}>
-                    {new Date(bigDay[0] + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
-                  </span>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.4)' }}>
-                    Major Release Day
-                  </span>
-                </div>
-                <div className="pb-radar-big-items" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {bigDay[1].map((m, i) => (
-                    <MomentLink key={i} m={m} style={{
-                      display: 'block',
-                      background: 'rgba(255,255,255,0.08)', borderRadius: 6,
-                      padding: '8px 14px', flex: '1 1 200px',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
-                        <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.5)' }}>
-                          {m.artist}
-                        </span>
-                        {genreFor(m.artist) && (
-                          <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.14)', borderRadius: 4, padding: '1px 5px' }}>
-                            {genreFor(m.artist)}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: WHITE, lineHeight: 1.3 }}>
-                        {m.moment}
-                      </div>
-                      <span style={{
-                        display: 'inline-block', marginTop: 4,
-                        padding: '2px 7px', borderRadius: 8,
-                        fontSize: 8, fontWeight: 700,
-                        background: isTier1(m) ? 'rgba(45,106,79,0.3)' : 'rgba(255,255,255,0.08)',
-                        color: isTier1(m) ? '#7DDFB0' : 'rgba(255,255,255,0.4)',
-                      }}>
-                        {m.eventType}
-                      </span>
-                    </MomentLink>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ── Timeline ── */}
-            <div style={{ position: 'relative', paddingLeft: 24 }}>
-              {/* Vertical line */}
-              <div style={{
-                position: 'absolute', left: 5, top: 4, bottom: 4, width: 2,
-                background: `linear-gradient(${BONE}, ${BONE} 60%, transparent)`,
-              }} />
-
-              {groups.map(([dateStr, moments], gi) => {
-                const dateObj = new Date(dateStr + 'T00:00:00');
-                const diffDays = Math.round((dateObj.getTime() - nowMs) / 86400000);
-                const isPast = diffDays < 0;
-                const isHot = hotDates.has(dateStr);
-                const isBigDay = bigDay && bigDay[0] === dateStr;
-                const fmtDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
-
-                // Skip if it's the big day (already shown above)
-                if (isBigDay) return null;
-
-                return (
-                  <div key={dateStr} style={{
-                    display: 'flex', gap: 16, marginBottom: 16,
-                    opacity: isPast ? 0.45 : 1,
-                  }}>
-                    {/* Date dot */}
-                    <div style={{
-                      position: 'absolute', left: 0,
-                      width: 12, height: 12, borderRadius: '50%',
-                      background: isHot ? ACCENT.green : isPast ? GHOST : BONE,
-                      border: `2px solid ${isHot ? ACCENT.green : BONE}`,
-                      marginTop: 4,
-                    }} />
-
-                    {/* Date label */}
-                    <div style={{ width: 70, flexShrink: 0 }}>
-                      <div style={{
-                        fontSize: 12, fontWeight: 800, color: isHot ? ACCENT.green : INK,
-                        letterSpacing: '0.02em',
-                      }}>
-                        {fmtDate}
-                      </div>
-                      {diffDays >= 0 && diffDays <= 7 && (
-                        <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
-                          {diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : `In ${diffDays}d`}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Moments for this date */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {moments.map((m, mi) => (
-                        <MomentLink key={mi} m={m} style={{
-                          display: 'flex', alignItems: 'baseline', gap: 8,
-                          padding: isTier1(m) ? '6px 10px' : '3px 0',
-                          background: isTier1(m) ? 'rgba(45,106,79,0.04)' : 'transparent',
-                          borderRadius: isTier1(m) ? 6 : 0,
-                          borderLeft: isTier1(m) ? `3px solid ${ACCENT.green}` : 'none',
-                        }}>
-                          <span style={{
-                            fontSize: 10, fontWeight: 800, color: INK,
-                            letterSpacing: '0.02em', textTransform: 'uppercase' as const,
-                            whiteSpace: 'nowrap',
-                          }}>
-                            {m.artist}
-                          </span>
-                          {genreFor(m.artist) && (
-                            <span style={{
-                              fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
-                              color: SMOKE, background: 'rgba(0,0,0,0.04)', border: `1px solid ${BONE}`,
-                              borderRadius: 4, padding: '1px 6px', flexShrink: 0, whiteSpace: 'nowrap', alignSelf: 'center',
-                            }}>
-                              {genreFor(m.artist)}
-                            </span>
-                          )}
-                          <span style={{
-                            fontSize: 12, fontWeight: isTier1(m) ? 600 : 400,
-                            color: isTier1(m) ? INK : WARM,
-                            lineHeight: 1.3,
-                          }}>
-                            {m.moment}
-                          </span>
-                          <span style={{
-                            display: 'inline-block', padding: '1px 6px', borderRadius: 8,
-                            fontSize: 7, fontWeight: 700, flexShrink: 0,
-                            background: isTier1(m) ? 'rgba(45,106,79,0.08)' : `${BONE}`,
-                            color: isTier1(m) ? ACCENT.green : SMOKE,
-                          }}>
-                            {m.eventType}
-                          </span>
-                        </MomentLink>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        );
-      })()}
-
-
-      {/* ═══════ CAMPAIGNS — 3-Tier Hierarchy ═══════ */}
-      {(() => {
-        const tier1 = data.focusCampaigns.filter(fc => fc.tier === 1);
-        const tier2 = data.focusCampaigns.filter(fc => fc.tier === 2);
-        const tier3 = data.focusCampaigns.filter(fc => fc.tier === 3);
-
-        return (
-          <>
-            {/* ── TIER 1: Featured Campaigns (large editorial cards) ── */}
-            {tier1.length > 0 && (
-              <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-                <div style={{ height: 2, background: INK, marginBottom: 18 }} />
-                <div style={{ marginBottom: 28 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
-                    Priority
-                  </div>
-                  <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em', color: INK, fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic' }}>
-                    Featured Campaigns
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                  {tier1.map(fc => {
-                    const topVids = fc.recentVideos.slice(0, 3);
-                    const status = deriveStatus(fc);
-                    const genre = genreFor(fc.channel.name);
-                    const link = campaignLink(fc);
-                    return (
-                      <div key={fc.channel.slug} className="pb-campaign-card" style={{
-                        borderRadius: 12, overflow: 'hidden', background: WHITE,
-                        border: `1px solid ${BONE}`,
-                      }}>
-                        {/* ── Hero image with artist overlay ── */}
-                        <a href={link.href} {...linkTarget(link.internal)} className="pb-link"
-                          style={{ display: 'block', position: 'relative', overflow: 'hidden', height: 220 }}>
-                          <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 25%, rgba(0,0,0,0.72) 100%)' }} />
-                          {/* Status — strongest signal, top-right */}
-                          <div style={{ position: 'absolute', top: 14, right: 16 }}>
-                            <StatusChip status={status} big />
-                          </div>
-                          {/* Artist → genre, bottom-left, enlarged */}
-                          <div style={{ position: 'absolute', bottom: 16, left: 18, right: 18, display: 'flex', alignItems: 'flex-end', gap: 12 }}>
-                            {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.35)', flexShrink: 0 }} />}
-                            <div style={{ minWidth: 0 }}>
-                              <div style={{ fontSize: 26, fontWeight: 900, color: WHITE, letterSpacing: '-0.01em', lineHeight: 1.05, textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}>{fc.channel.name}</div>
-                              {genre && <div style={{ marginTop: 6 }}><GenreTag genre={genre} onDark /></div>}
-                            </div>
-                          </div>
-                        </a>
-
-                        {/* ── Card body ── */}
-                        <div style={{ padding: '18px 20px 20px' }}>
-
-                          {/* ── Content planner CTA ── */}
-                          <div style={{ marginBottom: 16 }}>
-                            <PlannerCTA fc={fc} />
-                          </div>
-
-                          {/* ── NEXT / AFTER dates — front and centre ── */}
-                          {(() => {
-                            // Determine if "next" date is actually in the past
-                            const parseShortDate = (d: string | null) => {
-                              if (!d) return null;
-                              const p = new Date(d + ' ' + new Date().getFullYear());
-                              return isNaN(p.getTime()) ? null : p;
-                            };
-                            const nextDateObj = parseShortDate(fc.nextDate);
-                            const isNextPast = nextDateObj != null && nextDateObj.getTime() < Date.now() - 86400000;
-
-                            // If the "next" event already happened, shift labels:
-                            // past event → "Last Release", after event → "Next Release"
-                            const primaryLabel = isNextPast ? 'Last Release' : 'Next Release';
-                            const primaryName = fc.nextLabel;
-                            const primaryDate = fc.nextDate;
-                            const secondaryLabel = isNextPast ? 'Next Release' : 'After';
-                            const secondaryName = isNextPast ? fc.afterLabel : fc.afterLabel;
-                            const secondaryDate = isNextPast ? fc.afterDate : fc.afterDate;
-                            const showSecondary = isNextPast ? !!fc.afterDate : !!fc.afterDate;
-
-                            return (
-                              <div style={{
-                                display: 'grid', gridTemplateColumns: showSecondary ? '1fr 1fr' : '1fr', gap: 12,
-                                padding: '12px 14px', borderRadius: 8,
-                                background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}`,
-                                marginBottom: 16,
-                              }}>
-                                <div>
-                                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? SMOKE : ACCENT.green, marginBottom: 4 }}>{primaryLabel}</div>
-                                  <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.25 }}>{primaryName}</div>
-                                  {primaryDate && <div style={{ fontSize: 22, fontWeight: 900, color: isNextPast ? SMOKE : ACCENT.green, marginTop: 4, letterSpacing: '-0.01em' }}>{primaryDate}</div>}
-                                </div>
-                                {showSecondary && (
-                                  <div>
-                                    <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? ACCENT.green : SMOKE, marginBottom: 4 }}>{secondaryLabel}</div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, color: WARM, lineHeight: 1.25 }}>{secondaryName}</div>
-                                    {secondaryDate && <div style={{ fontSize: 15, fontWeight: 800, color: ACCENT.green, marginTop: 4 }}>{secondaryDate}</div>}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
-
-                          {/* ── Content ecosystem (is the ecosystem active?) ── */}
-                          <div style={{ marginBottom: 14 }}>
-                            <EcosystemStrip fc={fc} />
-                          </div>
-
-                          {/* ── Stats grid (Spotlight-style) ── */}
-                          <div className="pb-stats-grid" style={{
-                            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
-                            padding: '10px 12px', borderRadius: 8, background: PAPER, marginBottom: 14,
-                          }}>
-                            <div>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: INK }}>{fc.channel.subs != null ? fmtNum(fc.channel.subs) : '—'}</div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Subs</div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: fc.channel.views7d && fc.channel.views7d > 0 ? INK : SMOKE }}>{fc.channel.views7d != null ? fmtNum(fc.channel.views7d) : '—'}</div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Views (7d)</div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: fc.channel.uploads30d >= 6 ? ACCENT.green : INK }}>{fc.channel.uploads30d}</div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Uploads (30d)</div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 16, fontWeight: 800, color: (fc.channel.subs7d ?? 0) > 0 ? ACCENT.green : SMOKE }}>
-                                {fc.channel.subs7d != null && fc.channel.subs7d !== 0 ? `${fc.channel.subs7d > 0 ? '+' : ''}${fmtNum(fc.channel.subs7d)}` : '—'}
-                              </div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Subs (7d)</div>
-                            </div>
-                          </div>
-
-                          {/* ── Why This Is A Top Project — evidence only ── */}
-                          {(() => {
-                            const bullets: string[] = [];
-                            // Scale signal
-                            if (fc.standoutVideo && fc.standoutVideo.viewCount >= 10000) {
-                              const t = fc.standoutVideo.title.length > 45 ? fc.standoutVideo.title.slice(0, 42) + '...' : fc.standoutVideo.title;
-                              bullets.push(`${t} has reached ${fmtNum(fc.standoutVideo.viewCount)} views`);
-                            }
-                            // Current signal
-                            if (fc.recentVideos[0] && fc.recentVideos[0].daysAgo <= 14 && fc.recentVideos[0].id !== fc.standoutVideo?.id) {
-                              bullets.push(`${fc.nowLabel.length > 40 ? fc.nowLabel.slice(0, 37) + '...' : fc.nowLabel} added ${fmtNum(fc.recentVideos[0].viewCount)} views in ${fc.recentVideos[0].daysAgo} days`);
-                            } else if (fc.channel.uploads30d >= 6) {
-                              bullets.push(`${fc.channel.uploads30d} uploads in the last 30 days`);
-                            }
-                            // Upcoming signal
-                            if (fc.nextDate && fc.nextLabel) {
-                              bullets.push(`${fc.nextLabel.length > 35 ? fc.nextLabel.slice(0, 32) + '...' : fc.nextLabel} lands ${fc.nextDate}`);
-                            }
-                            // Ecosystem signal
-                            const fmts = fc.contentFormats ?? [];
-                            if (fmts.length >= 3) {
-                              bullets.push(`${fmts.slice(0, 4).join(' + ')} active`);
-                            } else if (fmts.length >= 1) {
-                              bullets.push(`${fmts.join(' + ')} active across rollout`);
-                            }
-                            if (bullets.length === 0) return null;
-                            return (
-                              <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 8, background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}` }}>
-                                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 7 }}>
-                                  Why This Matters
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                                  {bullets.slice(0, 3).map((b, i) => (
-                                    <div key={i} style={{ display: 'flex', alignItems: 'start', gap: 7, fontSize: 12, lineHeight: 1.4 }}>
-                                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: ACCENT.green, marginTop: 5, flexShrink: 0 }} />
-                                      <span style={{ color: WARM }}>{b}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })()}
-
-                          {/* ── Recent uploads (thumbnail grid, Spotlight-style) ── */}
-                          {topVids.length > 0 && (
-                            <div>
-                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>Recent Uploads</div>
-                              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(topVids.length, 3)}, 1fr)`, gap: 8 }}>
-                                {topVids.map(v => (
-                                  <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer" className="pb-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
-                                    <div style={{ position: 'relative', borderRadius: 6, overflow: 'hidden' }}>
-                                      <img src={v.thumbnail} alt="" loading="lazy" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }} />
-                                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 50%, rgba(0,0,0,0.5) 100%)' }} />
-                                      <span style={{
-                                        position: 'absolute', top: 4, left: 4,
-                                        padding: '2px 6px', borderRadius: 4,
-                                        fontSize: 7, fontWeight: 700, textTransform: 'uppercase' as const,
-                                        background: v.durationSec <= 62 ? 'rgba(107,33,168,0.85)' : 'rgba(26,86,184,0.85)',
-                                        color: WHITE,
-                                      }}>
-                                        {v.durationSec <= 62 ? 'Short' : v.format}
-                                      </span>
-                                    </div>
-                                    <div style={{ fontSize: 10, fontWeight: 600, color: INK, marginTop: 4, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                      {v.title}
-                                    </div>
-                                    <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
-                                      {fmtNum(v.viewCount)} views · {v.daysAgo}d ago
-                                    </div>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* ── TIER 2: Active campaign cards (richer than grid) ── */}
-            {tier2.length > 0 && (
-              <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-                <div style={{ height: 1, background: BONE, marginBottom: 22 }} />
-                <div style={{ marginBottom: 22 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 5 }}>
-                    In Rotation
-                  </div>
-                  <div style={{ fontSize: 23, fontWeight: 800, lineHeight: 1, letterSpacing: '-0.01em', color: INK, fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic' }}>
-                    Active Campaigns
-                  </div>
-                </div>
-                <div className="pb-tier2-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-                  {tier2.map(fc => {
-                    const status = deriveStatus(fc);
-                    const genre = genreFor(fc.channel.name);
-                    const link = campaignLink(fc);
-                    return (
-                    <a key={fc.channel.slug} href={link.href} {...linkTarget(link.internal)}
-                      className="pb-campaign-card pb-link"
-                      style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
-                      <div style={{ position: 'relative', overflow: 'hidden', height: 130 }}>
-                        <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.66) 100%)' }} />
-                        {/* Status — top-left, strong signal */}
-                        <div style={{ position: 'absolute', top: 10, left: 12 }}>
-                          <StatusChip status={status} />
-                        </div>
-                        <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)', flexShrink: 0 }} />}
-                          <span style={{ fontSize: 16, fontWeight: 900, color: WHITE, letterSpacing: '-0.01em', textShadow: '0 1px 3px rgba(0,0,0,0.45)' }}>{fc.channel.name}</span>
-                          {genre && <span style={{ marginLeft: 'auto' }}><GenreTag genre={genre} onDark /></span>}
-                        </div>
-                        {/* Next date badge on hero */}
-                        {fc.nextDate && (() => {
-                          const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
-                          const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
-                          return (
-                            <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}>
-                              <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>{isPast ? 'Last' : 'Next'}</div>
-                              <div style={{ fontSize: 12, fontWeight: 900, color: isPast ? SMOKE : ACCENT.green }}>{fc.nextDate}</div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                      <div style={{ padding: '12px 14px 14px' }}>
-                        <div style={{ marginBottom: 10 }}><EcosystemStrip fc={fc} compact /></div>
-                        {/* CURRENT */}
-                        <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Current</div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
-                          <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
-                        </div>
-                        {/* NEXT + AFTER — date-aware labels */}
-                        {(() => {
-                          const p = fc.nextDate ? new Date(fc.nextDate + ' ' + new Date().getFullYear()) : null;
-                          const isPast = p != null && !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
-                          return (
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
-                              <div>
-                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Last' : 'Next'}</div>
-                                <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
-                                {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: isPast ? SMOKE : ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
-                              </div>
-                              <div>
-                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Next' : 'After'}</div>
-                                <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
-                                {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
-                              </div>
-                            </div>
-                          );
-                        })()}
-                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
-                        <div style={{ marginTop: 10 }}><PlannerButton fc={fc} /></div>
-                      </div>
-                    </a>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-
-            {/* ── TIER 3: Grid view ── */}
-            {tier3.length > 0 && (
-              <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
-                <div style={{ height: 1, background: BONE, marginBottom: 22 }} />
-                <div style={{ marginBottom: 18 }}>
-                  <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' as const, color: WARM }}>
-                    Other Campaigns
-                  </div>
-                </div>
-                <div className="pb-tier3-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                  {tier3.map(fc => {
-                    const status = deriveStatus(fc);
-                    const genre = genreFor(fc.channel.name);
-                    const link = campaignLink(fc);
-                    return (
-                    <a key={fc.channel.slug} href={link.href} {...linkTarget(link.internal)}
-                      className="pb-campaign-card pb-link"
-                      style={{ display: 'block', borderRadius: 8, overflow: 'hidden', background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none' }}>
-                      <div style={{ position: 'relative', overflow: 'hidden', height: 80 }}>
-                        <img src={fc.heroImage} alt="" loading="lazy" className="pb-hero-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
-                        {/* Status dot — small but present */}
-                        <div style={{ position: 'absolute', top: 7, right: 8, display: 'flex', alignItems: 'center', gap: 4, padding: '2px 7px', borderRadius: 10, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: status.color }} />
-                          <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: WHITE }}>{status.label}</span>
-                        </div>
-                        <div style={{ position: 'absolute', bottom: 6, left: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-                          {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.3)' }} />}
-                          <span style={{ fontSize: 11, fontWeight: 800, color: WHITE, letterSpacing: '0.02em', textShadow: '0 1px 2px rgba(0,0,0,0.45)' }}>{fc.channel.name}</span>
-                        </div>
-                      </div>
-                      <div style={{ padding: '8px 10px 10px' }}>
-                        {genre && <div style={{ marginBottom: 5 }}><GenreTag genre={genre} /></div>}
-                        <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {fc.nowLabel}
-                        </div>
-                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.nowDetail}</div>
-                        {fc.nextDate && (() => {
-                          const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
-                          const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
-                          return (
-                          <div style={{ fontSize: 9, color: isPast ? SMOKE : ACCENT.green, fontWeight: 700, marginTop: 4 }}>
-                            {isPast ? 'Last' : 'Next'}: {fc.nextDate}
-                          </div>
-                          );
-                        })()}
-                        <div style={{ marginTop: 10 }}><PlannerButton fc={fc} compact /></div>
-                      </div>
-                    </a>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
-          </>
-        );
-      })()}
-
-
-      {/* ═══════ MOMENTS WE'RE WATCHING — Real content, real views ═══════ */}
-      {data.momentsWatching && data.momentsWatching.length > 0 && (
-        <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+      {/* ═══════ WHAT HAPPENS NEXT — Editorial Timeline ═══════ */}
+      {hasDateMoments && (
+        <section className="pb-fade" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 56px' }}>
           <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
 
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 32 }}>
             <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
-              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+              fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
+              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
             }}>
-              Moments We&apos;re Watching
+              What Happens Next
             </div>
             <p style={{
-              fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
-              maxWidth: 500, margin: 0,
-              fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: 18, fontWeight: 500, color: WARM, lineHeight: 1.5,
+              maxWidth: 620, margin: 0,
+              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontStyle: 'italic',
             }}>
-              The content driving attention across priority campaigns this week.
+              The key dates and content moments shaping the next four weeks across the roster — pulled from live campaign plans.
             </p>
           </div>
 
-          <div className="pb-moments-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-            {data.momentsWatching.map(m => (
-              <a
-                key={m.id}
-                href={m.durationSec <= 62
-                  ? `https://www.youtube.com/shorts/${m.id}`
-                  : `https://www.youtube.com/watch?v=${m.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pb-campaign-card pb-link"
-                style={{
-                  display: 'block', borderRadius: 8, overflow: 'hidden',
-                  background: WHITE, border: `1px solid ${BONE}`, textDecoration: 'none',
-                }}
-              >
-                <div style={{ position: 'relative', overflow: 'hidden', height: 160 }}>
-                  <img src={m.thumbnail} alt="" loading="lazy" className="pb-hero-img"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.6) 100%)' }} />
-                  <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
-                    <div style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.04em', textTransform: 'uppercase' as const, marginBottom: 4 }}>
-                      {m.artistName}
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: WHITE, lineHeight: 1.25, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
-                      {m.title}
-                    </div>
-                  </div>
-                  <div style={{ position: 'absolute', top: 10, right: 10 }}>
-                    <PlayOverlay size={28} />
-                  </div>
-                </div>
-                <div style={{ padding: '10px 12px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>
-                    {fmtNum(m.viewCount)} views
-                  </span>
-                  {m.context && (
-                    <span style={{ fontSize: 10, color: SMOKE, fontStyle: 'italic' }}>
-                      {m.context}
-                    </span>
-                  )}
-                </div>
-              </a>
-            ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 32 }}>
+            {/* THIS WEEK */}
+            <div>
+              <div style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+                paddingBottom: 10, borderBottom: `2px solid ${INK}`,
+                marginBottom: 4,
+              }}>
+                This Week
+              </div>
+              {grouped.thisWeek.length > 0 ? (
+                grouped.thisWeek.map((m, i) => <MomentCard key={`tw-${i}`} m={m} />)
+              ) : (
+                <p style={{
+                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
+                  padding: '16px 0', margin: 0,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}>
+                  No confirmed dates this window — campaigns in content support mode.
+                </p>
+              )}
+            </div>
+
+            {/* NEXT TWO WEEKS */}
+            <div>
+              <div style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+                paddingBottom: 10, borderBottom: `2px solid ${BONE}`,
+                marginBottom: 4,
+              }}>
+                Next 7–14 Days
+              </div>
+              {grouped.nextTwoWeeks.length > 0 ? (
+                grouped.nextTwoWeeks.map((m, i) => <MomentCard key={`nt-${i}`} m={m} />)
+              ) : (
+                <p style={{
+                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
+                  padding: '16px 0', margin: 0,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}>
+                  Planning window open — content strategies in development.
+                </p>
+              )}
+            </div>
+
+            {/* NEXT MONTH */}
+            <div>
+              <div style={{
+                fontSize: 11, fontWeight: 900, letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const, color: INK,
+                paddingBottom: 10, borderBottom: `2px solid ${BONE}`,
+                marginBottom: 4,
+              }}>
+                Next 30 Days
+              </div>
+              {grouped.nextMonth.length > 0 ? (
+                grouped.nextMonth.map((m, i) => <MomentCard key={`nm-${i}`} m={m} />)
+              ) : (
+                <p style={{
+                  fontSize: 12, color: SMOKE, fontStyle: 'italic',
+                  padding: '16px 0', margin: 0,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                }}>
+                  Longer-range campaign moments in planning.
+                </p>
+              )}
+            </div>
           </div>
         </section>
       )}
 
 
+      {/* ═══════ FOCUS CAMPAIGNS ═══════ */}
+      <section className="pb-fade" style={{
+        maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px',
+      }}>
+        <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+
+        <div style={{ marginBottom: 32 }}>
+          <div style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+            textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+          }}>
+            Active Campaigns
+          </div>
+          <p style={{
+            fontSize: 15, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
+            maxWidth: 560, margin: 0,
+            fontFamily: 'Inter, system-ui, sans-serif',
+          }}>
+            Where Virgin Music is focusing content strategy and audience development on YouTube this week.
+          </p>
+        </div>
+
+        {/* Featured campaign — full width hero */}
+        {data.focusCampaigns.length > 0 && (() => {
+          const fc = data.focusCampaigns[0];
+          const chUrl = channelUrl(fc.channel.channelHandle);
+          return (
+            <div className="pb-campaign-card" style={{
+              borderRadius: 10, overflow: 'hidden', background: INK,
+              marginBottom: 24, position: 'relative',
+            }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                {/* Left — hero image */}
+                <div style={{ position: 'relative', overflow: 'hidden' }}>
+                  <img
+                    src={fc.heroImage}
+                    alt=""
+                    loading="lazy"
+                    className="pb-hero-img"
+                    style={{
+                      width: '100%', height: '100%', minHeight: 320, objectFit: 'cover', display: 'block',
+                      filter: 'brightness(0.85)',
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(135deg, transparent 30%, rgba(14,14,14,0.6) 100%)',
+                  }} />
+                  <div style={{ position: 'absolute', top: 20, left: 20 }}>
+                    <span style={{
+                      display: 'inline-block', padding: '4px 12px', borderRadius: 20,
+                      fontSize: 8, fontWeight: 800, letterSpacing: '0.12em',
+                      textTransform: 'uppercase' as const,
+                      background: 'rgba(255,255,255,0.15)', color: WHITE,
+                      backdropFilter: 'blur(8px)',
+                    }}>
+                      {fc.campaignPhase}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right — content */}
+                <div style={{ padding: '28px 32px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  {/* Artist name */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                    {fc.channel.thumbnail && (
+                      <img src={fc.channel.thumbnail} alt="" style={{
+                        width: 32, height: 32, borderRadius: '50%', objectFit: 'cover',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                      }} />
+                    )}
+                    {chUrl ? (
+                      <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
+                        <span style={{
+                          fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.8)',
+                          letterSpacing: '0.04em', textTransform: 'uppercase' as const,
+                        }}>
+                          {fc.channel.name}
+                        </span>
+                      </a>
+                    ) : (
+                      <span style={{
+                        fontSize: 13, fontWeight: 800, color: 'rgba(255,255,255,0.8)',
+                        letterSpacing: '0.04em', textTransform: 'uppercase' as const,
+                      }}>
+                        {fc.channel.name}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Narrative */}
+                  <p style={{
+                    fontSize: 15, fontWeight: 500, color: WHITE, lineHeight: 1.5,
+                    margin: '0 0 20px',
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                  }}>
+                    {fc.narrative}
+                  </p>
+
+                  {/* Current / Next / Upcoming / Support — editorial quartet */}
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 14,
+                    paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)',
+                  }}>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Current
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.currentMoment}
+                      </p>
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Next
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.nextMoment}
+                      </p>
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Upcoming
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.upcomingMoment}
+                      </p>
+                    </div>
+                    <div>
+                      <div style={{
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.14em',
+                        textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
+                        marginBottom: 5,
+                      }}>
+                        Support
+                      </div>
+                      <p style={{
+                        fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.35,
+                        margin: 0, fontFamily: 'Inter, system-ui, sans-serif',
+                      }}>
+                        {fc.supportOpportunity}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Stats row */}
+                  <div style={{ display: 'flex', gap: 20, fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 16 }}>
+                    {fc.channel.views7d != null && (
+                      <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fmtNum(fc.channel.views7d)}</strong> views/wk</span>
+                    )}
+                    <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fc.channel.uploads30d}</strong> uploads/30d</span>
+                    {fc.channel.subs != null && (
+                      <span><strong style={{ color: 'rgba(255,255,255,0.6)' }}>{fmtNum(fc.channel.subs)}</strong> subs</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Remaining campaigns — 2-column cards with editorial triplet */}
+        {data.focusCampaigns.length > 1 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20 }}>
+            {data.focusCampaigns.slice(1).map(fc => {
+              const chUrl = channelUrl(fc.channel.channelHandle);
+              return (
+                <div key={fc.channel.slug} className="pb-campaign-card" style={{
+                  borderRadius: 8, overflow: 'hidden', background: WHITE,
+                  border: `1px solid ${BONE}`,
+                }}>
+                  {/* Hero image */}
+                  <div style={{ position: 'relative', overflow: 'hidden', height: 140 }}>
+                    <img
+                      src={fc.heroImage}
+                      alt=""
+                      loading="lazy"
+                      className="pb-hero-img"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.5) 100%)',
+                    }} />
+                    <div style={{ position: 'absolute', top: 12, left: 12 }}>
+                      <span style={{
+                        display: 'inline-block', padding: '3px 10px', borderRadius: 20,
+                        fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                        textTransform: 'uppercase' as const,
+                        background: 'rgba(0,0,0,0.5)', color: WHITE,
+                        backdropFilter: 'blur(6px)',
+                      }}>
+                        {fc.campaignPhase}
+                      </span>
+                    </div>
+                    <div style={{ position: 'absolute', bottom: 12, left: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      {fc.channel.thumbnail && (
+                        <img src={fc.channel.thumbnail} alt="" style={{
+                          width: 22, height: 22, borderRadius: '50%', objectFit: 'cover',
+                          border: '2px solid rgba(255,255,255,0.3)',
+                        }} />
+                      )}
+                      {chUrl ? (
+                        <a href={chUrl} target="_blank" rel="noopener noreferrer" className="pb-link">
+                          <span style={{
+                            fontSize: 11, fontWeight: 800, color: WHITE,
+                            letterSpacing: '0.03em', textTransform: 'uppercase' as const,
+                            textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                          }}>
+                            {fc.channel.name}
+                          </span>
+                        </a>
+                      ) : (
+                        <span style={{
+                          fontSize: 11, fontWeight: 800, color: WHITE,
+                          letterSpacing: '0.03em', textTransform: 'uppercase' as const,
+                          textShadow: '0 1px 4px rgba(0,0,0,0.4)',
+                        }}>
+                          {fc.channel.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Content area */}
+                  <div style={{ padding: '14px 18px 18px' }}>
+                    <p style={{
+                      fontSize: 12, fontWeight: 500, color: INK, lineHeight: 1.45,
+                      margin: '0 0 14px',
+                      fontFamily: 'Inter, system-ui, sans-serif',
+                    }}>
+                      {fc.narrative}
+                    </p>
+
+                    {/* Current / Next / Upcoming / Support — editorial quartet */}
+                    <div style={{
+                      display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8,
+                      paddingTop: 12, borderTop: `1px solid ${BONE}`,
+                    }}>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Current
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.currentMoment}
+                        </p>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Next
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.nextMoment}
+                        </p>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Upcoming
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: WARM, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif',
+                        }}>
+                          {fc.upcomingMoment}
+                        </p>
+                      </div>
+                      <div>
+                        <div style={{
+                          fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+                          textTransform: 'uppercase' as const, color: GHOST,
+                          marginBottom: 4,
+                        }}>
+                          Support
+                        </div>
+                        <p style={{
+                          fontSize: 10, color: ACCENT.green, lineHeight: 1.3, margin: 0,
+                          fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500,
+                        }}>
+                          {fc.supportOpportunity}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+
+      {/* ═══════ WHAT WE'RE SEEING ON PLATFORM + STANDOUT MOMENTS ═══════ */}
+      <section style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
+        <div style={{ height: 1, background: BONE, marginBottom: 40 }} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+          {/* Left — Platform observations */}
+          <div>
+            <div style={{
+              fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+              textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
+            }}>
+              What We&apos;re Seeing on Platform
+            </div>
+            <p style={{
+              fontSize: 12, fontWeight: 400, color: SMOKE, lineHeight: 1.5,
+              maxWidth: 400, margin: '0 0 24px',
+              fontFamily: 'Inter, system-ui, sans-serif',
+            }}>
+              Patterns and behaviours across this week&apos;s campaign activity.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {data.platformObservations.map((obs, i) => (
+                <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: '50%',
+                    background: `rgba(45,106,79,${i === 0 ? '0.1' : '0.06'})`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, marginTop: 1,
+                  }}>
+                    <span style={{ fontSize: 10, fontWeight: 800, color: ACCENT.green }}>
+                      {i + 1}
+                    </span>
+                  </div>
+                  <p style={{
+                    fontSize: i === 0 ? 14 : 12,
+                    fontWeight: i === 0 ? 600 : 400,
+                    color: i === 0 ? INK : WARM,
+                    lineHeight: 1.5, margin: 0,
+                    fontFamily: 'Inter, system-ui, sans-serif',
+                  }}>
+                    {obs}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — Ecosystem highlights + standout moments */}
+          <div>
+            {data.ecosystemHighlights.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <div style={{
+                  fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+                  textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16,
+                }}>
+                  Strongest Ecosystems This Week
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {data.ecosystemHighlights.map((h, i) => {
+                    const chUrlH = channelUrl(h.channelHandle);
+                    return (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '10px 14px', borderRadius: 8,
+                        background: WHITE, border: `1px solid ${BONE}`,
+                      }}>
+                        {h.thumbnail && (
+                          chUrlH ? (
+                            <a href={chUrlH} target="_blank" rel="noopener noreferrer" className="pb-link" style={{ flexShrink: 0 }}>
+                              <img src={h.thumbnail} alt="" style={{
+                                width: 28, height: 28, borderRadius: '50%', objectFit: 'cover',
+                              }} />
+                            </a>
+                          ) : (
+                            <img src={h.thumbnail} alt="" style={{
+                              width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+                            }} />
+                          )
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {chUrlH ? (
+                              <a href={chUrlH} target="_blank" rel="noopener noreferrer" className="pb-link">
+                                <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{h.name}</span>
+                              </a>
+                            ) : (
+                              <span style={{ fontSize: 12, fontWeight: 700, color: INK }}>{h.name}</span>
+                            )}
+                            <span className="pb-format-tag">{h.label}</span>
+                          </div>
+                          <p style={{
+                            fontSize: 10, color: SMOKE, lineHeight: 1.4, margin: '4px 0 0',
+                            fontFamily: 'Inter, system-ui, sans-serif',
+                          }}>
+                            {h.read}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Top video moments */}
+            {data.topVideos.length > 0 && (
+              <div>
+                <div style={{
+                  fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+                  textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
+                }}>
+                  Standout Moments
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                  {data.topVideos.slice(0, 3).map(v => (
+                    <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer"
+                      className="pb-link">
+                      <div style={{ borderRadius: 6, overflow: 'hidden', marginBottom: 6, position: 'relative' }}>
+                        <img src={v.thumbnail} alt="" loading="lazy"
+                          style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
+                        <div style={{ position: 'absolute', bottom: 4, right: 4 }}>
+                          <PlayOverlay size={18} />
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: SMOKE, letterSpacing: '0.02em', textTransform: 'uppercase' as const, marginBottom: 2 }}>
+                        {v.channelName}
+                      </div>
+                      <div style={{
+                        fontSize: 10, fontWeight: 600, color: INK, lineHeight: 1.25,
+                        overflow: 'hidden', display: '-webkit-box',
+                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+                      }}>
+                        {v.title}
+                      </div>
+                      <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>
+                        {fmtNum(v.viewCount)} views
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+
       {/* ═══════ FOOTER ═══════ */}
-      <footer className="pb-section" style={{
+      <footer style={{
         maxWidth: 1200, margin: '0 auto', padding: '20px 40px 40px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>

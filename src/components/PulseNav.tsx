@@ -7,7 +7,7 @@ const INK = '#0E0E0E';
 const BONE = '#E8E3DA';
 
 const TABS = [
-  { href: '/weekly-pulse/campaign-briefing', label: 'Priority Campaigns' },
+  { href: '/weekly-pulse/campaign-briefing', label: 'Campaign Briefing' },
   { href: '/weekly-pulse/channel-spotlight', label: 'Channel Spotlight' },
 ] as const;
 

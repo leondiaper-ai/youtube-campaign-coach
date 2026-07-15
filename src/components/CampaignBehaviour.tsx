@@ -1,22 +1,19 @@
 'use client';
 
 /**
- * CampaignBehaviour V3 — Single Overlay Channel Behaviour View
+ * CampaignBehaviour V4 — Visual Story
  *
- * Visual story: CHANNEL BASELINE → CONTENT ACTIVITY → FORMAT/TIMING →
- *               CHANNEL RESPONSE → GAPS/CHANGES → CURRENT DIRECTION
+ * Design principle: WHAT DID WE POST? → WHAT HAPPENED TO MOMENTUM?
  *
- * Architecture: Single overlay chart with dual Y-axes:
- *   - View velocity (signal red, left Y-axis, area + line)
- *   - Subscriber momentum (mint green, right Y-axis, line)
- *   - Content markers placed within the chart (bottom zone)
+ * Four visual concepts, in strict hierarchy:
+ *   1. VIEW MOMENTUM — 7-day rolling average, clean hero line (SIGNAL red)
+ *   2. CONTENT MOMENTS — Long-form markers with format labels on timeline
+ *   3. SHORTS RHYTHM — Grouped neutral markers showing cadence
+ *   4. SUBSCRIBER MOVEMENT — Secondary sparkline strip beneath
  *
- * Everything shares the same dateToX() function and horizontal axis.
- * Single crosshair spans the entire chart.
- *
- * Long-form uploads are large labelled markers: ● OMV · ★ LIVE · ◆ LYRIC · ■ VIS
- * Shorts are small understated markers.
- * Format sequence is readable without hovering.
+ * No dual axes. No large legend. No gap shading.
+ * One headline insight above the chart.
+ * A marketing team should understand the story in 5–10 seconds.
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -31,7 +28,6 @@ const SMOKE  = '#8A847A';
 const GHOST  = '#D4CFC6';
 const SIGNAL = '#FF4A1C';
 const MINT   = '#1FBE7A';
-const ELECTRIC = '#2C25FF';
 const SUN    = '#FFD24C';
 const CREAM  = '#F6F1E7';
 
@@ -153,25 +149,24 @@ function dateToX(date: string, startDate: string, endDate: string, width: number
   return ((current - start) / range) * width;
 }
 
-// Format shape paths for SVG markers
 function getFormatShape(format: UploadFormat, cx: number, cy: number, size: number): string {
   const s = size;
   switch (format) {
-    case 'omv':       // Large filled circle
+    case 'omv':
       return `M${cx},${cy - s} A${s},${s} 0 1,1 ${cx},${cy + s} A${s},${s} 0 1,1 ${cx},${cy - s}`;
-    case 'lyric':     // Diamond
+    case 'lyric':
       return `M${cx},${cy - s} L${cx + s},${cy} L${cx},${cy + s} L${cx - s},${cy} Z`;
-    case 'visualiser': // Square
+    case 'visualiser':
       return `M${cx - s},${cy - s} L${cx + s},${cy - s} L${cx + s},${cy + s} L${cx - s},${cy + s} Z`;
-    case 'live':      // Star (5-point)
+    case 'live':
       return starPath(cx, cy, s, s * 0.45, 5);
-    case 'bts':       // Upward triangle
+    case 'bts':
       return `M${cx},${cy - s} L${cx + s},${cy + s * 0.7} L${cx - s},${cy + s * 0.7} Z`;
-    case 'audio':     // Hollow diamond
+    case 'audio':
       return `M${cx},${cy - s} L${cx + s},${cy} L${cx},${cy + s} L${cx - s},${cy} Z`;
-    case 'short':     // Small downward triangle
+    case 'short':
       return `M${cx - s},${cy - s * 0.5} L${cx + s},${cy - s * 0.5} L${cx},${cy + s * 0.7} Z`;
-    default:          // Hollow circle
+    default:
       return `M${cx},${cy - s} A${s},${s} 0 1,1 ${cx},${cy + s} A${s},${s} 0 1,1 ${cx},${cy - s}`;
   }
 }
@@ -188,22 +183,109 @@ function starPath(cx: number, cy: number, outerR: number, innerR: number, points
   return parts.join(' ') + ' Z';
 }
 
+// ── Headline generator ─────────────────────────────────────────────────
+
+function generateHeadline(data: BehaviourData): string {
+  const vel = data.viewVelocity.filter((v) => v.rollingAvg7d != null);
+  const uploads = data.uploads;
+  const longform = uploads.filter((u) => u.formatMeta.isLongform);
+  const shorts = uploads.filter((u) => u.format === 'short');
+
+  if (vel.length < 7) {
+    if (uploads.length === 0) return 'No upload activity recorded during this observation window.';
+    return `${uploads.length} upload${uploads.length !== 1 ? 's' : ''} recorded across ${data.observationWindow.days} days.`;
+  }
+
+  // Split velocity into thirds for trend detection
+  const third = Math.max(3, Math.floor(vel.length / 3));
+  const recent = vel.slice(-third);
+  const earlier = vel.slice(0, third);
+
+  const recentAvg = recent.reduce((s, v) => s + (v.rollingAvg7d ?? 0), 0) / recent.length;
+  const earlierAvg = earlier.reduce((s, v) => s + (v.rollingAvg7d ?? 0), 0) / earlier.length;
+
+  const change = earlierAvg > 100 ? (recentAvg - earlierAvg) / earlierAvg : 0;
+
+  const lastUpload = uploads.length > 0 ? uploads[uploads.length - 1] : null;
+  const daysSince = lastUpload
+    ? Math.round(
+        (new Date(data.observationWindow.endDate).getTime() -
+          new Date(lastUpload.publishedAt).getTime()) /
+          86400000,
+      )
+    : null;
+
+  const sortedGaps = [...data.gaps]
+    .filter((g) => g.type === 'all_content')
+    .sort((a, b) => b.durationDays - a.durationDays);
+  const longestGap = sortedGaps[0];
+
+  const strongest = data.formatBreakdown
+    .filter((f) => f.meta.isLongform && f.count >= 2)
+    .sort((a, b) => b.avgViews - a.avgViews)[0];
+
+  // Rising + content
+  if (change > 0.15 && longform.length >= 2) {
+    if (strongest) {
+      return `Channel momentum strengthened during this period, with ${strongest.meta.label} content associated with the strongest view periods.`;
+    }
+    return 'Channel momentum strengthened as content activity increased.';
+  }
+
+  // Declining + gap
+  if (change < -0.15 && longestGap && longestGap.durationDays >= 14) {
+    if (daysSince != null && daysSince <= 7) {
+      return `Views declined during a ${longestGap.durationDays}-day content gap and appear to be recovering as activity resumed.`;
+    }
+    return `Views declined during a ${longestGap.durationDays}-day content gap.`;
+  }
+
+  // Declining + recent inactivity
+  if (change < -0.15 && daysSince != null && daysSince > 14) {
+    return `Channel momentum has slowed, with the most recent upload ${daysSince} days ago.`;
+  }
+
+  // Declining generally
+  if (change < -0.15) {
+    return 'View momentum has gradually declined across the observation window.';
+  }
+
+  // Shorts-heavy, few longform
+  if (shorts.length > longform.length * 3 && longform.length <= 2 && shorts.length >= 5) {
+    return 'Shorts activity has remained consistent, but long-form uploads have been limited.';
+  }
+
+  // Stable + active
+  if (Math.abs(change) <= 0.15 && uploads.length >= 5) {
+    return 'Channel views have remained stable throughout the observation period.';
+  }
+
+  // Very few uploads
+  if (uploads.length <= 2) {
+    return `Limited upload activity — ${uploads.length} upload${uploads.length !== 1 ? 's' : ''} across ${data.observationWindow.days} days.`;
+  }
+
+  return `Channel activity spans ${uploads.length} uploads over ${data.observationWindow.days} days.`;
+}
+
 // ── Chart layout constants ──────────────────────────────────────────────
 
-const M = { left: 56, right: 56, top: 4, bottom: 4 }; // Right margin wider for right Y-axis
+const M = { left: 44, right: 16, top: 4, bottom: 4 };
 
-// V3: Single overlay chart — views and subs overlaid, content markers at bottom
-const CHART_H    = 280;       // Main chart area (views + subs overlay)
-const MARKER_ZONE = 60;       // Bottom zone of CHART_H reserved for content markers
-const DATA_H     = CHART_H - MARKER_ZONE; // 220px for the line/area data
-const AXIS_H     = 24;        // Shared date axis below chart
+const VIEWS_H   = 180;   // Hero: view momentum line area
+const CONTENT_H = 44;    // Content markers zone (longform + shorts)
+const AXIS_H    = 20;    // Date tick labels
+const SUBS_GAP  = 6;     // Gap between axis and subs strip
+const SUBS_H    = 24;    // Subscriber sparkline strip
 
-const TOTAL_CHART_H = CHART_H + AXIS_H;
-const AXIS_Y     = CHART_H;
+const LF_OFFSET = 14;    // Long-form marker Y within content zone
+const SH_OFFSET = 34;    // Short marker Y within content zone
 
-// ── Unified Chart ───────────────────────────────────────────────────────
+const TOTAL_CHART_H = VIEWS_H + CONTENT_H + AXIS_H + SUBS_GAP + SUBS_H;
 
-function UnifiedChart({
+// ── Story Chart ─────────────────────────────────────────────────────────
+
+function StoryChart({
   data,
   startDate,
   endDate,
@@ -227,61 +309,68 @@ function UnifiedChart({
   const chartW = width - M.left - M.right;
   const svgH = TOTAL_CHART_H + M.top + M.bottom;
 
-  function toX(date: string) { return dateToX(date, startDate, endDate, chartW); }
+  function toX(date: string) {
+    return dateToX(date, startDate, endDate, chartW);
+  }
 
-  // ── Date axis ticks ──
-  const axisTicks = useMemo(() => {
-    const tickCount = Math.min(8, Math.floor(chartW / 70));
-    const startTs = new Date(startDate).getTime();
-    const endTs = new Date(endDate).getTime();
-    const step = (endTs - startTs) / tickCount;
-    return Array.from({ length: tickCount + 1 }).map((_, i) => {
-      const ts = startTs + step * i;
-      const date = new Date(ts).toISOString().slice(0, 10);
-      return { date, x: toX(date) };
-    });
-  }, [startDate, endDate, chartW]);
-
-  // ── View velocity data (left Y-axis) ──
+  // ── View velocity data ──
   const velocityValid = data.viewVelocity.filter((d) => d.rollingAvg7d != null);
-  const velMax = velocityValid.length > 0 ? Math.max(...velocityValid.map((d) => d.rollingAvg7d!)) : 0;
-  const velMin = velocityValid.length > 0 ? Math.min(0, Math.min(...velocityValid.map((d) => d.rollingAvg7d!))) : 0;
+  const velMax =
+    velocityValid.length > 0
+      ? Math.max(...velocityValid.map((d) => d.rollingAvg7d!))
+      : 0;
+  const velMin =
+    velocityValid.length > 0
+      ? Math.min(0, Math.min(...velocityValid.map((d) => d.rollingAvg7d!)))
+      : 0;
   const velRange = velMax - velMin || 1;
-  function velToY(val: number) { return DATA_H - ((val - velMin) / velRange) * DATA_H; }
+  function velToY(val: number) {
+    return VIEWS_H - ((val - velMin) / velRange) * VIEWS_H;
+  }
 
-  // View velocity line and area
+  // View line + subtle area
   const velLineParts = velocityValid.map((p, i) => {
     const x = toX(p.date);
     const y = velToY(p.rollingAvg7d!);
     return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
   });
   const velLine = velLineParts.join(' ');
-  const velArea = velocityValid.length > 1
-    ? velLine +
-      ` L${toX(velocityValid[velocityValid.length - 1].date).toFixed(1)},${DATA_H}` +
-      ` L${toX(velocityValid[0].date).toFixed(1)},${DATA_H} Z`
-    : '';
+  const velArea =
+    velocityValid.length > 1
+      ? velLine +
+        ` L${toX(velocityValid[velocityValid.length - 1].date).toFixed(1)},${VIEWS_H}` +
+        ` L${toX(velocityValid[0].date).toFixed(1)},${VIEWS_H} Z`
+      : '';
 
-  // ── Subscriber data (right Y-axis) ──
+  // ── Subscriber sparkline data ──
   const subsValid = data.subscriberGains.filter((d) => d.rollingAvg7d != null);
-  const subsMax = subsValid.length > 0 ? Math.max(...subsValid.map((d) => d.rollingAvg7d!)) : 0;
-  const subsMin = subsValid.length > 0 ? Math.min(0, Math.min(...subsValid.map((d) => d.rollingAvg7d!))) : 0;
+  const subsMax =
+    subsValid.length > 0
+      ? Math.max(...subsValid.map((d) => d.rollingAvg7d!))
+      : 0;
+  const subsMin =
+    subsValid.length > 0
+      ? Math.min(0, Math.min(...subsValid.map((d) => d.rollingAvg7d!)))
+      : 0;
   const subsRange = subsMax - subsMin || 1;
-  function subsToY(val: number) { return DATA_H - ((val - subsMin) / subsRange) * DATA_H; }
+  function subsToStripY(val: number) {
+    return SUBS_H - ((val - subsMin) / subsRange) * SUBS_H;
+  }
 
   const subsLineParts = subsValid.map((p, i) => {
     const x = toX(p.date);
-    const y = subsToY(p.rollingAvg7d!);
+    const y = subsToStripY(p.rollingAvg7d!);
     return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
   });
-  const subsLine = subsLineParts.join(' ');
-  const subsArea = subsValid.length > 1
-    ? subsLine +
-      ` L${toX(subsValid[subsValid.length - 1].date).toFixed(1)},${DATA_H}` +
-      ` L${toX(subsValid[0].date).toFixed(1)},${DATA_H} Z`
-    : '';
+  const subsSparkline = subsLineParts.join(' ');
+  const subsSparkArea =
+    subsValid.length > 1
+      ? subsSparkline +
+        ` L${toX(subsValid[subsValid.length - 1].date).toFixed(1)},${SUBS_H}` +
+        ` L${toX(subsValid[0].date).toFixed(1)},${SUBS_H} Z`
+      : '';
 
-  // ── Content markers (positioned in bottom zone of chart) ──
+  // ── Content markers ──
   const longform = data.uploads.filter((u) => u.formatMeta.isLongform);
   const shorts = data.uploads.filter((u) => u.format === 'short');
 
@@ -298,40 +387,58 @@ function UnifiedChart({
     }
   }
 
-  // Marker Y positions (within the bottom MARKER_ZONE of the chart)
-  const lfY = DATA_H + 20;           // Long-form markers
-  const shortY = DATA_H + 46;        // Shorts below long-form
+  // ── Significant gaps (max 1–2 annotations) ──
+  const significantGaps = useMemo(() => {
+    const result: ContentGap[] = [];
+    const allContentSorted = [...data.gaps]
+      .filter((g) => g.type === 'all_content' && g.durationDays >= 10)
+      .sort((a, b) => b.durationDays - a.durationDays);
+    if (allContentSorted[0]) result.push(allContentSorted[0]);
 
-  // ── Y-axis scale ticks ──
-  const velTicks = useMemo(() => {
-    const count = 4;
-    return Array.from({ length: count + 1 }).map((_, i) => {
-      const val = velMin + (velRange * i) / count;
-      return { val, y: velToY(val) };
-    });
-  }, [velMin, velRange]);
+    const lfSorted = [...data.gaps]
+      .filter((g) => g.type === 'longform_only' && g.durationDays >= 21)
+      .sort((a, b) => b.durationDays - a.durationDays);
+    if (
+      lfSorted[0] &&
+      (!result[0] || lfSorted[0].startDate !== result[0].startDate)
+    ) {
+      result.push(lfSorted[0]);
+    }
+    return result.slice(0, 2);
+  }, [data.gaps]);
 
-  const subsTicks = useMemo(() => {
-    const count = 4;
-    return Array.from({ length: count + 1 }).map((_, i) => {
-      const val = subsMin + (subsRange * i) / count;
-      return { val, y: subsToY(val) };
-    });
-  }, [subsMin, subsRange]);
-
-  // ── Hover detection ──
-  const handleMouseMove = useCallback((e: React.MouseEvent<SVGRectElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const ratio = mouseX / chartW;
+  // ── Date axis ticks ──
+  const axisTicks = useMemo(() => {
+    const tickCount = Math.min(8, Math.floor(chartW / 70));
     const startTs = new Date(startDate).getTime();
     const endTs = new Date(endDate).getTime();
-    const hoverTs = startTs + ratio * (endTs - startTs);
-    onHover(new Date(hoverTs).toISOString().slice(0, 10));
-  }, [chartW, startDate, endDate, onHover]);
+    const step = (endTs - startTs) / tickCount;
+    return Array.from({ length: tickCount + 1 }).map((_, i) => {
+      const ts = startTs + step * i;
+      const date = new Date(ts).toISOString().slice(0, 10);
+      return { date, x: toX(date) };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate, chartW]);
 
-  // Hovered crosshair X
+  // ── Hover detection ──
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<SVGRectElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const ratio = mouseX / chartW;
+      const startTs = new Date(startDate).getTime();
+      const endTs = new Date(endDate).getTime();
+      const hoverTs = startTs + ratio * (endTs - startTs);
+      onHover(new Date(hoverTs).toISOString().slice(0, 10));
+    },
+    [chartW, startDate, endDate, onHover],
+  );
+
   const hoverX = hoveredDate ? toX(hoveredDate) : null;
+
+  // Computed Y positions
+  const subsStripY = VIEWS_H + CONTENT_H + AXIS_H + SUBS_GAP;
 
   return (
     <svg
@@ -341,311 +448,306 @@ function UnifiedChart({
       onMouseLeave={() => onHover(null)}
     >
       <g transform={`translate(${M.left},${M.top})`}>
-
-        {/* ═══ GAP OVERLAYS (span full chart) ═══ */}
-        {data.gaps.filter((g) => g.type === 'all_content').map((gap, i) => {
-          const x1 = Math.max(0, toX(gap.startDate));
-          const x2 = Math.min(chartW, toX(gap.endDate));
-          const w = Math.max(0, x2 - x1);
-          return (
-            <rect key={`gap-${i}`}
-              x={x1} y={0} width={w} height={CHART_H}
-              fill={SIGNAL} opacity={0.04} rx={2}
-            />
-          );
-        })}
-        {data.gaps.filter((g) => g.type === 'longform_only').map((gap, i) => {
-          const x1 = Math.max(0, toX(gap.startDate));
-          const x2 = Math.min(chartW, toX(gap.endDate));
-          const w = Math.max(0, x2 - x1);
-          return (
-            <rect key={`lfgap-${i}`}
-              x={x1} y={DATA_H} width={w} height={MARKER_ZONE}
-              fill={SUN} opacity={0.06} rx={2}
-            />
-          );
-        })}
-
-        {/* ═══ MILESTONE LINES (span full chart) ═══ */}
-        {data.milestones.map((m, i) => {
-          const x = toX(m.date);
-          if (x < 0 || x > chartW) return null;
-          const isCampaignStart = m.type === 'campaign_start';
-          return (
-            <g key={`ms-${i}`}>
-              <line
-                x1={x} y1={0} x2={x} y2={CHART_H}
-                stroke={isCampaignStart ? GHOST : ELECTRIC}
-                strokeWidth={isCampaignStart ? 1 : 1.5}
-                strokeDasharray={isCampaignStart ? '3,6' : '6,4'}
-                opacity={isCampaignStart ? 0.5 : 0.6}
-              />
-              <text
-                x={x} y={-2}
-                textAnchor="middle" fontSize={isCampaignStart ? 8 : 9}
-                fill={isCampaignStart ? SMOKE : ELECTRIC}
-                fontWeight={isCampaignStart ? 400 : 600}
-                opacity={isCampaignStart ? 0.6 : 1}
-              >
-                {m.label.length > 24 ? m.label.slice(0, 24) + '...' : m.label}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* ═══ LEFT Y-AXIS: VIEWS ═══ */}
-        <text x={-8} y={10} textAnchor="end" fontSize={9} fill={SIGNAL} fontWeight={600}
-          style={{ textTransform: 'uppercase' } as React.CSSProperties}>
-          Views/d
+        {/* ═══ VIEWS AREA BACKGROUND ═══ */}
+        {/* Subtle grid lines for scale context */}
+        <line x1={0} y1={VIEWS_H} x2={chartW} y2={VIEWS_H} stroke={BONE} strokeWidth={1} />
+        <line
+          x1={0} y1={VIEWS_H / 2} x2={chartW} y2={VIEWS_H / 2}
+          stroke={BONE} strokeWidth={0.5} opacity={0.3}
+        />
+        {/* Zero label */}
+        <text x={-6} y={VIEWS_H + 3} textAnchor="end" fontSize={8} fill={GHOST}>
+          0
         </text>
-        {velTicks.map((t, i) => (
-          <g key={`vt-${i}`}>
-            <line x1={-4} y1={t.y} x2={0} y2={t.y} stroke={BONE} strokeWidth={1} />
-            {(i === 0 || i === velTicks.length - 1) && (
-              <text x={-8} y={t.y + 3} textAnchor="end" fontSize={8} fill={GHOST}>
-                {formatNum(Math.round(t.val))}
-              </text>
-            )}
-          </g>
-        ))}
 
-        {/* ═══ RIGHT Y-AXIS: SUBS ═══ */}
-        <text x={chartW + 8} y={10} textAnchor="start" fontSize={9} fill={MINT} fontWeight={600}
-          style={{ textTransform: 'uppercase' } as React.CSSProperties}>
-          Subs/d
-        </text>
-        {subsTicks.map((t, i) => (
-          <g key={`st-${i}`}>
-            <line x1={chartW} y1={t.y} x2={chartW + 4} y2={t.y} stroke={BONE} strokeWidth={1} />
-            {(i === 0 || i === subsTicks.length - 1) && (
-              <text x={chartW + 8} y={t.y + 3} textAnchor="start" fontSize={8} fill={GHOST}>
-                {formatNum(Math.round(t.val))}
-              </text>
-            )}
-          </g>
-        ))}
+        {/* ═══ CAMPAIGN START — very subtle ═══ */}
+        {data.milestones
+          .filter((m) => m.type === 'campaign_start')
+          .map((m, i) => {
+            const x = toX(m.date);
+            if (x < 0 || x > chartW) return null;
+            return (
+              <g key={`cs-${i}`}>
+                <line
+                  x1={x} y1={0} x2={x} y2={VIEWS_H}
+                  stroke={GHOST} strokeWidth={0.5} strokeDasharray="2,6" opacity={0.4}
+                />
+                <text
+                  x={x} y={-2} textAnchor="middle"
+                  fontSize={7} fill={GHOST} opacity={0.5}
+                >
+                  Campaign Start
+                </text>
+              </g>
+            );
+          })}
 
-        {/* ═══ GRID LINES ═══ */}
-        <line x1={0} y1={DATA_H} x2={chartW} y2={DATA_H} stroke={BONE} strokeWidth={1} />
-        <line x1={0} y1={0} x2={chartW} y2={0} stroke={BONE} strokeWidth={0.5} opacity={0.5} />
-        {/* Mid-grid */}
-        <line x1={0} y1={DATA_H / 2} x2={chartW} y2={DATA_H / 2} stroke={BONE} strokeWidth={0.5} opacity={0.3} />
+        {/* ═══ NON-CAMPAIGN MILESTONES ═══ */}
+        {data.milestones
+          .filter((m) => m.type !== 'campaign_start')
+          .map((m, i) => {
+            const x = toX(m.date);
+            if (x < 0 || x > chartW) return null;
+            return (
+              <g key={`ms-${i}`}>
+                <line
+                  x1={x} y1={0} x2={x} y2={VIEWS_H}
+                  stroke={SMOKE} strokeWidth={1} strokeDasharray="4,4" opacity={0.3}
+                />
+                <text
+                  x={x} y={-2} textAnchor="middle"
+                  fontSize={8} fill={SMOKE} opacity={0.7}
+                >
+                  {m.label.length > 20 ? m.label.slice(0, 20) + '…' : m.label}
+                </text>
+              </g>
+            );
+          })}
 
-        {/* ═══ BASELINE REFERENCE LINES ═══ */}
+        {/* ═══ BASELINE REFERENCE ═══ */}
         {baseline?.avgDailyViews != null && baseline.avgDailyViews > 0 && (
           <g>
             <line
               x1={0} y1={velToY(baseline.avgDailyViews)}
               x2={chartW} y2={velToY(baseline.avgDailyViews)}
-              stroke={SIGNAL} strokeWidth={1} strokeDasharray="2,4" opacity={0.35}
+              stroke={SMOKE} strokeWidth={0.5} strokeDasharray="2,4" opacity={0.3}
             />
             <text
-              x={-8} y={velToY(baseline.avgDailyViews) + 3}
-              textAnchor="end" fontSize={7} fill={SIGNAL} opacity={0.6}>
-              base
-            </text>
-          </g>
-        )}
-        {baseline?.avgDailySubs != null && (
-          <g>
-            <line
-              x1={0} y1={subsToY(baseline.avgDailySubs)}
-              x2={chartW} y2={subsToY(baseline.avgDailySubs)}
-              stroke={MINT} strokeWidth={1} strokeDasharray="2,4" opacity={0.35}
-            />
-            <text
-              x={chartW + 8} y={subsToY(baseline.avgDailySubs) + 3}
-              textAnchor="start" fontSize={7} fill={MINT} opacity={0.6}>
-              base
+              x={-6} y={velToY(baseline.avgDailyViews) + 3}
+              textAnchor="end" fontSize={7} fill={GHOST}
+            >
+              avg
             </text>
           </g>
         )}
 
-        {/* ═══ VIEW VELOCITY: AREA + LINE (signal red) ═══ */}
-        {velArea && <path d={velArea} fill={SIGNAL} opacity={0.08} />}
-        {velLine && <path d={velLine} fill="none" stroke={SIGNAL} strokeWidth={1.5} />}
+        {/* ═══ VIEW MOMENTUM — subtle area fill ═══ */}
+        {velArea && <path d={velArea} fill={SIGNAL} opacity={0.06} />}
 
-        {/* ═══ SUBSCRIBER GROWTH: AREA + LINE (mint green) ═══ */}
-        {subsArea && <path d={subsArea} fill={MINT} opacity={0.06} />}
-        {subsLine && <path d={subsLine} fill="none" stroke={MINT} strokeWidth={1.5} strokeDasharray="6,3" />}
+        {/* ═══ VIEW MOMENTUM — THE HERO LINE ═══ */}
+        {velLine && (
+          <path d={velLine} fill="none" stroke={SIGNAL} strokeWidth={2} />
+        )}
 
-        {/* ═══ CONTENT MARKER ZONE SEPARATOR ═══ */}
-        <line x1={0} y1={DATA_H} x2={chartW} y2={DATA_H} stroke={BONE} strokeWidth={1} />
+        {/* ═══ CONTENT MARKER ZONE ═══ */}
+        <g transform={`translate(0,${VIEWS_H})`}>
+          {/* Separator line */}
+          <line x1={0} y1={0} x2={chartW} y2={0} stroke={BONE} strokeWidth={1} />
 
-        {/* ═══ GAP DURATION LABELS ═══ */}
-        {data.gaps.filter((g) => g.type === 'all_content' && g.durationDays >= 7).map((gap, i) => {
-          const x1 = Math.max(0, toX(gap.startDate));
-          const x2 = Math.min(chartW, toX(gap.endDate));
-          const cx = (x1 + x2) / 2;
-          return (
-            <text key={`gl-${i}`} x={cx} y={DATA_H + 12} textAnchor="middle"
-              fontSize={8} fill={SIGNAL} fontWeight={700} opacity={0.5}>
-              {gap.durationDays}d gap
-            </text>
-          );
-        })}
-
-        {/* Long-form gap labels */}
-        {data.gaps.filter((g) => g.type === 'longform_only' && g.durationDays >= 14).map((gap, i) => {
-          const x1 = Math.max(0, toX(gap.startDate));
-          const x2 = Math.min(chartW, toX(gap.endDate));
-          const cx = (x1 + x2) / 2;
-          return (
-            <text key={`lfgl-${i}`} x={cx} y={lfY - 8} textAnchor="middle"
-              fontSize={7} fill={SUN} fontWeight={600} opacity={0.8}>
-              {gap.durationDays}d no LF
-            </text>
-          );
-        })}
-
-        {/* ═══ SHORT GROUPS — small understated markers ═══ */}
-        {shortGroups.map((group, i) => {
-          const isSelected = group.uploads.some((u) => u.id === selectedUpload);
-          return (
-            <g key={`sg-${i}`}
-              style={{ cursor: 'pointer' }}
-              onClick={() => onSelectUpload(group.uploads[0].id)}
-            >
-              <path
-                d={getFormatShape('short', group.x, shortY, group.count > 1 ? 5 : 4)}
-                fill={FORMAT_COLORS.short}
-                opacity={isSelected ? 1 : 0.5}
-              />
-              {group.count > 1 && (
-                <text x={group.x} y={shortY + 12} textAnchor="middle"
-                  fontSize={7} fill={SMOKE} opacity={0.7}>
-                  x{group.count}
-                </text>
-              )}
-            </g>
-          );
-        })}
-
-        {/* ═══ LONG-FORM MARKERS — LARGE, labelled, very obvious ═══ */}
-        {longform.map((u) => {
-          const x = toX(u.publishedAt);
-          const isSelected = selectedUpload === u.id;
-          const size = isSelected ? 10 : 8;
-
-          return (
-            <g key={u.id} style={{ cursor: 'pointer' }}
-              onClick={() => onSelectUpload(isSelected ? null : u.id)}
-            >
-              {/* Selection ring */}
-              {isSelected && (
-                <circle cx={x} cy={lfY} r={size + 5}
-                  fill="none" stroke={FORMAT_COLORS[u.format]} strokeWidth={2}
-                  opacity={0.3}
+          {/* ── Gap annotations (max 1–2, text only) ── */}
+          {significantGaps.map((gap, i) => {
+            const x1 = Math.max(0, toX(gap.startDate));
+            const x2 = Math.min(chartW, toX(gap.endDate));
+            const midX = (x1 + x2) / 2;
+            const gapW = x2 - x1;
+            if (gapW < 40) return null; // Too narrow to label
+            const label =
+              gap.type === 'all_content'
+                ? `${gap.durationDays}d no content`
+                : `${gap.durationDays}d no long-form`;
+            return (
+              <g key={`gap-${i}`}>
+                <line
+                  x1={x1 + 4} y1={6} x2={x2 - 4} y2={6}
+                  stroke={SMOKE} strokeWidth={0.5} strokeDasharray="3,2" opacity={0.4}
                 />
-              )}
+                <text
+                  x={midX} y={4} textAnchor="middle"
+                  fontSize={7} fill={SMOKE} fontWeight={600} opacity={0.6}
+                  style={{ textTransform: 'uppercase' } as React.CSSProperties}
+                >
+                  {label}
+                </text>
+              </g>
+            );
+          })}
 
-              {/* Vertical connector line from marker up into data area */}
-              <line x1={x} y1={DATA_H} x2={x} y2={lfY - size - 2}
-                stroke={FORMAT_COLORS[u.format]} strokeWidth={1} opacity={0.15}
-              />
+          {/* ── Long-form markers — LARGE, labelled with format ── */}
+          {longform.map((u) => {
+            const x = toX(u.publishedAt);
+            const isSelected = selectedUpload === u.id;
+            const size = isSelected ? 10 : 8;
 
-              {/* The marker — big and obvious */}
-              <path
-                d={getFormatShape(u.format, x, lfY, size)}
-                fill={u.format === 'audio' ? 'none' : FORMAT_COLORS[u.format]}
-                stroke={FORMAT_COLORS[u.format]}
-                strokeWidth={u.format === 'audio' ? 2.5 : isSelected ? 2 : 0}
-                opacity={isSelected ? 1 : 0.9}
-              />
+            return (
+              <g
+                key={u.id}
+                style={{ cursor: 'pointer' }}
+                onClick={() => onSelectUpload(isSelected ? null : u.id)}
+              >
+                {/* Selection ring */}
+                {isSelected && (
+                  <circle
+                    cx={x} cy={LF_OFFSET} r={size + 5}
+                    fill="none" stroke={FORMAT_COLORS[u.format]} strokeWidth={2}
+                    opacity={0.3}
+                  />
+                )}
 
-              {/* Format label — ALWAYS visible, below marker */}
-              <text x={x} y={lfY + size + 10} textAnchor="middle"
-                fontSize={8} fill={FORMAT_COLORS[u.format]} fontWeight={700}>
-                {u.formatMeta.shortLabel}
-              </text>
-            </g>
-          );
-        })}
+                {/* Vertical connector — links marker to views area */}
+                <line
+                  x1={x} y1={0} x2={x} y2={LF_OFFSET - size - 2}
+                  stroke={FORMAT_COLORS[u.format]} strokeWidth={0.5} opacity={0.12}
+                />
 
-        {/* ═══ BOTTOM BORDER ═══ */}
-        <line x1={0} y1={CHART_H} x2={chartW} y2={CHART_H} stroke={BONE} strokeWidth={1} />
+                {/* The marker — big and obvious */}
+                <path
+                  d={getFormatShape(u.format, x, LF_OFFSET, size)}
+                  fill={u.format === 'audio' ? 'none' : FORMAT_COLORS[u.format]}
+                  stroke={FORMAT_COLORS[u.format]}
+                  strokeWidth={u.format === 'audio' ? 2.5 : isSelected ? 2 : 0}
+                  opacity={isSelected ? 1 : 0.9}
+                />
+
+                {/* Format label — ALWAYS visible */}
+                <text
+                  x={x} y={LF_OFFSET + size + 9} textAnchor="middle"
+                  fontSize={7} fill={FORMAT_COLORS[u.format]} fontWeight={700}
+                  style={{ textTransform: 'uppercase' } as React.CSSProperties}
+                >
+                  {u.formatMeta.shortLabel}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* ── Short groups — small, neutral, showing cadence ── */}
+          {shortGroups.map((group, i) => {
+            const isSelected = group.uploads.some((u) => u.id === selectedUpload);
+            const dotR = group.count > 1 ? 3 : 2.5;
+            return (
+              <g
+                key={`sg-${i}`}
+                style={{ cursor: 'pointer' }}
+                onClick={() => onSelectUpload(group.uploads[0].id)}
+              >
+                <circle
+                  cx={group.x} cy={SH_OFFSET} r={dotR}
+                  fill={FORMAT_COLORS.short}
+                  opacity={isSelected ? 1 : 0.4}
+                />
+                {group.count > 1 && (
+                  <text
+                    x={group.x} y={SH_OFFSET + 10} textAnchor="middle"
+                    fontSize={7} fill={SMOKE} opacity={0.6}
+                  >
+                    ×{group.count}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </g>
 
         {/* ═══ DATE AXIS ═══ */}
-        <g transform={`translate(0,${AXIS_Y})`}>
+        <g transform={`translate(0,${VIEWS_H + CONTENT_H})`}>
+          <line x1={0} y1={0} x2={chartW} y2={0} stroke={BONE} strokeWidth={0.5} opacity={0.5} />
           {axisTicks.map((tick, i) => (
             <g key={i}>
-              <line x1={tick.x} y1={0} x2={tick.x} y2={4} stroke={BONE} strokeWidth={1} />
-              <text x={tick.x} y={16} textAnchor="middle" fontSize={9} fill={SMOKE}>
+              <line x1={tick.x} y1={0} x2={tick.x} y2={3} stroke={BONE} strokeWidth={1} />
+              <text x={tick.x} y={14} textAnchor="middle" fontSize={9} fill={SMOKE}>
                 {formatDate(tick.date)}
               </text>
             </g>
           ))}
         </g>
 
-        {/* ═══ CROSSHAIR (spans full chart) ═══ */}
+        {/* ═══ SUBSCRIBER SPARKLINE STRIP ═══ */}
+        <g transform={`translate(0,${subsStripY})`}>
+          {/* Strip background */}
+          <rect
+            x={0} y={0} width={chartW} height={SUBS_H}
+            fill={BONE} opacity={0.2} rx={3}
+          />
+          {/* Zero reference line (if range spans negative) */}
+          {subsMin < 0 && (
+            <line
+              x1={0} y1={subsToStripY(0)} x2={chartW} y2={subsToStripY(0)}
+              stroke={GHOST} strokeWidth={0.5} opacity={0.3}
+            />
+          )}
+          {/* Sparkline area */}
+          {subsSparkArea && (
+            <path d={subsSparkArea} fill={MINT} opacity={0.12} />
+          )}
+          {/* Sparkline line */}
+          {subsSparkline && (
+            <path
+              d={subsSparkline} fill="none"
+              stroke={MINT} strokeWidth={1.5} opacity={0.45}
+            />
+          )}
+          {/* SUBS label */}
+          <text
+            x={-6} y={SUBS_H / 2 + 3} textAnchor="end"
+            fontSize={7} fill={MINT} fontWeight={600} opacity={0.5}
+          >
+            SUBS
+          </text>
+        </g>
+
+        {/* ═══ CROSSHAIR (views area + content zone only) ═══ */}
         {hoverX != null && hoverX >= 0 && hoverX <= chartW && (
           <line
-            x1={hoverX} y1={0}
-            x2={hoverX} y2={CHART_H}
-            stroke={INK} strokeWidth={1} opacity={0.12}
+            x1={hoverX} y1={0} x2={hoverX} y2={VIEWS_H + CONTENT_H}
+            stroke={INK} strokeWidth={1} opacity={0.1}
           />
         )}
 
-        {/* ═══ HOVER TOOLTIPS (views + subs combined) ═══ */}
-        {hoveredDate && hoverX != null && hoverX >= 0 && hoverX <= chartW && (() => {
-          const velPoint = data.viewVelocity.find((d) => d.date === hoveredDate);
-          const subPoint = data.subscriberGains.find((d) => d.date === hoveredDate);
-          const hasVel = velPoint?.rollingAvg7d != null;
-          const hasSub = subPoint?.rollingAvg7d != null;
-
-          // Position tooltip — flip if near right edge
-          const tooltipW = 100;
-          const tooltipX = hoverX + tooltipW + 10 > chartW ? hoverX - tooltipW - 8 : hoverX + 8;
-
-          return (
-            <g>
-              {/* View velocity dot */}
-              {hasVel && (
-                <circle cx={hoverX} cy={velToY(velPoint!.rollingAvg7d!)} r={4} fill={SIGNAL} />
-              )}
-              {/* Subscriber dot */}
-              {hasSub && (
-                <circle cx={hoverX} cy={subsToY(subPoint!.rollingAvg7d!)} r={3} fill={MINT} />
-              )}
-
-              {/* Combined tooltip card */}
-              {(hasVel || hasSub) && (
+        {/* ═══ HOVER TOOLTIP — views only ═══ */}
+        {hoveredDate && hoverX != null && hoverX >= 0 && hoverX <= chartW && (
+          <g>
+            {(() => {
+              const velPoint = data.viewVelocity.find((d) => d.date === hoveredDate);
+              if (!velPoint?.rollingAvg7d) return null;
+              const yDot = velToY(velPoint.rollingAvg7d);
+              const tooltipW = 80;
+              const tooltipX =
+                hoverX + tooltipW + 10 > chartW
+                  ? hoverX - tooltipW - 8
+                  : hoverX + 8;
+              return (
                 <g>
-                  <rect x={tooltipX} y={8} width={tooltipW} height={hasSub && hasVel ? 38 : 22}
-                    rx={4} fill={INK} opacity={0.9} />
-                  {hasVel && (
-                    <text x={tooltipX + 8} y={22} fontSize={9} fill={SIGNAL} fontWeight={600}>
-                      {formatNum(velPoint!.rollingAvg7d!)}/d views
-                    </text>
-                  )}
-                  {hasSub && (
-                    <text x={tooltipX + 8} y={hasVel ? 38 : 22} fontSize={9} fill={MINT} fontWeight={600}>
-                      {subPoint!.rollingAvg7d! >= 0 ? '+' : ''}{formatNum(subPoint!.rollingAvg7d!)}/d subs
-                    </text>
-                  )}
-                </g>
-              )}
+                  {/* Dot on view line */}
+                  <circle cx={hoverX} cy={yDot} r={4} fill={SIGNAL} />
 
-              {/* Date label at axis */}
-              <g transform={`translate(0,${AXIS_Y})`}>
-                <rect x={hoverX - 24} y={-2} width={48} height={14} rx={3} fill={INK} opacity={0.85} />
-                <text x={hoverX} y={9} textAnchor="middle" fontSize={8} fill="white" fontWeight={600}>
-                  {formatDate(hoveredDate)}
-                </text>
-              </g>
+                  {/* Tooltip card */}
+                  <rect
+                    x={tooltipX} y={Math.max(4, yDot - 12)} width={tooltipW} height={20}
+                    rx={4} fill={INK} opacity={0.85}
+                  />
+                  <text
+                    x={tooltipX + 8} y={Math.max(4, yDot - 12) + 14}
+                    fontSize={10} fill="white" fontWeight={600}
+                  >
+                    {formatNum(velPoint.rollingAvg7d)}/d
+                  </text>
+                </g>
+              );
+            })()}
+
+            {/* Date label at axis */}
+            <g transform={`translate(0,${VIEWS_H + CONTENT_H})`}>
+              <rect
+                x={hoverX - 24} y={-2} width={48} height={14}
+                rx={3} fill={INK} opacity={0.8}
+              />
+              <text
+                x={hoverX} y={9} textAnchor="middle"
+                fontSize={8} fill="white" fontWeight={600}
+              >
+                {formatDate(hoveredDate)}
+              </text>
             </g>
-          );
-        })()}
+          </g>
+        )}
 
         {/* ═══ HOVER DETECTION OVERLAY ═══ */}
         <rect
-          x={0} y={0}
-          width={chartW} height={CHART_H}
+          x={0} y={0} width={chartW} height={VIEWS_H + CONTENT_H}
           fill="transparent"
           onMouseMove={handleMouseMove}
           style={{ cursor: 'crosshair' }}
         />
-
       </g>
     </svg>
   );
@@ -654,49 +756,94 @@ function UnifiedChart({
 // ── Upload detail panel ──────────────────────────────────────────────────
 
 function UploadDetailPanel({
-  upload, observation, onClose,
+  upload,
+  observation,
+  onClose,
 }: {
   upload: ClassifiedUpload;
   observation: UploadObservation | null;
   onClose: () => void;
 }) {
-  const afterLabel = upload.formatMeta.isLongform ? '14 Days After' : '7 Days After';
-
   return (
-    <div style={{
-      background: 'white', border: `1px solid ${BONE}`, borderRadius: 10,
-      padding: '16px 20px', marginTop: 12,
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+    <div
+      style={{
+        background: 'white',
+        border: `1px solid ${BONE}`,
+        borderRadius: 10,
+        padding: '16px 20px',
+        marginTop: 12,
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 12,
+        }}
+      >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{
-              background: FORMAT_COLORS[upload.format],
-              color: 'white', fontSize: 10, fontWeight: 700, padding: '2px 8px',
-              borderRadius: 4, textTransform: 'uppercase',
-            }}>
+            <span
+              style={{
+                background: FORMAT_COLORS[upload.format],
+                color: 'white',
+                fontSize: 10,
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: 4,
+                textTransform: 'uppercase',
+              }}
+            >
               {upload.formatMeta.label}
             </span>
-            <span style={{ fontSize: 12, color: SMOKE }}>{formatDate(upload.publishedAt)}</span>
+            <span style={{ fontSize: 12, color: SMOKE }}>
+              {formatDate(upload.publishedAt)}
+            </span>
           </div>
           <div style={{ fontSize: 14, fontWeight: 600, color: INK }}>{upload.title}</div>
           <div style={{ fontSize: 12, color: SMOKE, marginTop: 2 }}>
             {formatNum(upload.viewCount)} views
-            {upload.daysSincePrevious != null && ` · ${upload.daysSincePrevious}d since previous upload`}
+            {upload.daysSincePrevious != null &&
+              ` · ${upload.daysSincePrevious}d since previous upload`}
           </div>
         </div>
-        <button onClick={onClose} style={{
-          background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: SMOKE,
-          padding: '0 4px',
-        }}>
+        <button
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: 18,
+            color: SMOKE,
+            padding: '0 4px',
+          }}
+        >
           ×
         </button>
       </div>
 
+      {/* Before / After metrics */}
       {observation && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 12,
+            marginBottom: 12,
+          }}
+        >
           <div style={{ background: PAPER, borderRadius: 8, padding: '10px 12px' }}>
-            <div style={{ fontSize: 9, color: SMOKE, fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
+            <div
+              style={{
+                fontSize: 9,
+                color: SMOKE,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                marginBottom: 4,
+              }}
+            >
               7 Days Before
             </div>
             <div style={{ fontSize: 13, color: INK }}>
@@ -711,8 +858,16 @@ function UploadDetailPanel({
             )}
           </div>
           <div style={{ background: PAPER, borderRadius: 8, padding: '10px 12px' }}>
-            <div style={{ fontSize: 9, color: SMOKE, fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>
-              {afterLabel}
+            <div
+              style={{
+                fontSize: 9,
+                color: SMOKE,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                marginBottom: 4,
+              }}
+            >
+              {upload.formatMeta.isLongform ? '14 Days After' : '7 Days After'}
             </div>
             <div style={{ fontSize: 13, color: INK }}>
               {observation.viewsAfter7d != null
@@ -728,25 +883,36 @@ function UploadDetailPanel({
         </div>
       )}
 
+      {/* Next uploads */}
       {observation?.nextUpload && (
         <div style={{ fontSize: 12, color: SMOKE, marginBottom: 4 }}>
-          Next upload: <strong style={{ color: INK }}>{observation.nextUpload.title}</strong>
-          {' '}— Day +{observation.nextUpload.daysAfter}
+          Next upload:{' '}
+          <strong style={{ color: INK }}>{observation.nextUpload.title}</strong> — Day +
+          {observation.nextUpload.daysAfter}
         </div>
       )}
-      {observation?.nextLongform && observation.nextLongform.daysAfter !== observation.nextUpload?.daysAfter && (
-        <div style={{ fontSize: 12, color: SMOKE, marginBottom: 4 }}>
-          Next long-form: <strong style={{ color: INK }}>{observation.nextLongform.title}</strong>
-          {' '}— Day +{observation.nextLongform.daysAfter}
-        </div>
-      )}
+      {observation?.nextLongform &&
+        observation.nextLongform.daysAfter !== observation.nextUpload?.daysAfter && (
+          <div style={{ fontSize: 12, color: SMOKE, marginBottom: 4 }}>
+            Next long-form:{' '}
+            <strong style={{ color: INK }}>{observation.nextLongform.title}</strong> — Day +
+            {observation.nextLongform.daysAfter}
+          </div>
+        )}
 
+      {/* Observation text */}
       {observation?.observation && (
-        <div style={{
-          fontSize: 12, color: INK, lineHeight: 1.5,
-          borderTop: `1px solid ${BONE}`, paddingTop: 8, marginTop: 8,
-          fontStyle: 'italic',
-        }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: INK,
+            lineHeight: 1.5,
+            borderTop: `1px solid ${BONE}`,
+            paddingTop: 8,
+            marginTop: 8,
+            fontStyle: 'italic',
+          }}
+        >
           {observation.observation}
         </div>
       )}
@@ -754,104 +920,7 @@ function UploadDetailPanel({
   );
 }
 
-// ── Format legend ────────────────────────────────────────────────────────
-
-function FormatLegend({ breakdown }: { breakdown: FormatBreakdown[] }) {
-  return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px' }}>
-      {breakdown.map((fb) => (
-        <div key={fb.format} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <svg width={14} height={14}>
-            <path
-              d={getFormatShape(fb.format, 7, 7, 5)}
-              fill={fb.format === 'audio' ? 'none' : FORMAT_COLORS[fb.format]}
-              stroke={FORMAT_COLORS[fb.format]}
-              strokeWidth={fb.format === 'audio' ? 1.5 : 0}
-            />
-          </svg>
-          <span style={{ fontSize: 10, color: SMOKE }}>
-            {fb.meta.label} ({fb.count})
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── Baseline panel ──────────────────────────────────────────────────────
-
-function BaselinePanel({ baseline }: { baseline: Baseline }) {
-  return (
-    <div style={{
-      background: 'white', border: `1px solid ${BONE}`, borderRadius: 8,
-      padding: '10px 14px', display: 'flex', gap: 20, alignItems: 'center',
-    }}>
-      <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: SMOKE }}>
-        Pre-Activity Baseline
-      </div>
-      <div style={{ fontSize: 9, color: GHOST }}>
-        {baseline.period.days}d average before first upload
-      </div>
-      {baseline.avgDailyViews != null && (
-        <div style={{ fontSize: 12, color: INK }}>
-          <span style={{ color: SIGNAL, fontWeight: 600 }}>{formatNum(baseline.avgDailyViews)}</span>
-          <span style={{ fontSize: 9, color: SMOKE }}> views/day</span>
-        </div>
-      )}
-      {baseline.avgDailySubs != null && (
-        <div style={{ fontSize: 12, color: INK }}>
-          <span style={{ color: MINT, fontWeight: 600 }}>{baseline.avgDailySubs >= 0 ? '+' : ''}{formatNum(baseline.avgDailySubs)}</span>
-          <span style={{ fontSize: 9, color: SMOKE }}> subs/day</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── Learnings panel ──────────────────────────────────────────────────────
-
-function LearningsPanel({ learnings }: { learnings: Learning[] }) {
-  if (learnings.length === 0) return null;
-
-  const confColor: Record<Learning['confidence'], string> = {
-    observation: SMOKE,
-    pattern: ELECTRIC,
-    strong: MINT,
-  };
-
-  return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: SMOKE, marginBottom: 8 }}>
-        Observations
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {learnings.map((l, i) => (
-          <div key={i} style={{
-            background: 'white', border: `1px solid ${BONE}`, borderRadius: 8,
-            padding: '10px 14px',
-          }}>
-            <div style={{ fontSize: 13, color: INK, lineHeight: 1.5, marginBottom: 4 }}>
-              {l.text}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, color: SMOKE }}>{l.evidence}</span>
-              <span style={{
-                fontSize: 9, fontWeight: 700, textTransform: 'uppercase',
-                color: confColor[l.confidence],
-                padding: '1px 6px', borderRadius: 3,
-                border: `1px solid ${confColor[l.confidence]}`,
-              }}>
-                {l.confidence}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Format breakdown panel ───────────────────────────────────────────────
+// ── Format breakdown (hidden by default) ────────────────────────────────
 
 function FormatBreakdownPanel({ breakdown }: { breakdown: FormatBreakdown[] }) {
   if (breakdown.length === 0) return null;
@@ -870,37 +939,49 @@ function FormatBreakdownPanel({ breakdown }: { breakdown: FormatBreakdown[] }) {
   };
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: SMOKE, marginBottom: 8 }}>
-        Format Performance
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 8 }}>
-        {breakdown.map((fb) => (
-          <div key={fb.format} style={{
-            background: 'white', border: `1px solid ${BONE}`, borderRadius: 8,
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+        gap: 8,
+        marginTop: 8,
+      }}
+    >
+      {breakdown.map((fb) => (
+        <div
+          key={fb.format}
+          style={{
+            background: 'white',
+            border: `1px solid ${BONE}`,
+            borderRadius: 8,
             padding: '10px 12px',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-              <svg width={12} height={12}>
-                <path
-                  d={getFormatShape(fb.format, 6, 6, 4)}
-                  fill={fb.format === 'audio' ? 'none' : FORMAT_COLORS[fb.format]}
-                  stroke={FORMAT_COLORS[fb.format]}
-                  strokeWidth={fb.format === 'audio' ? 1.5 : 0}
-                />
-              </svg>
-              <span style={{ fontSize: 12, fontWeight: 600, color: INK }}>{fb.meta.label}</span>
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <svg width={12} height={12}>
+              <path
+                d={getFormatShape(fb.format, 6, 6, 4)}
+                fill={fb.format === 'audio' ? 'none' : FORMAT_COLORS[fb.format]}
+                stroke={FORMAT_COLORS[fb.format]}
+                strokeWidth={fb.format === 'audio' ? 1.5 : 0}
+              />
+            </svg>
+            <span style={{ fontSize: 12, fontWeight: 600, color: INK }}>
+              {fb.meta.label}
+            </span>
+          </div>
+          <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.6 }}>
+            <div>
+              {fb.count} upload{fb.count !== 1 ? 's' : ''} · Avg:{' '}
+              {formatNum(fb.avgViews)}
             </div>
-            <div style={{ fontSize: 11, color: SMOKE, lineHeight: 1.6 }}>
-              <div>{fb.count} upload{fb.count !== 1 ? 's' : ''} · Avg: {formatNum(fb.avgViews)}</div>
-              {fb.count >= 3 && <div>Median: {formatNum(fb.medianViews)}</div>}
-              <div style={{ color: dirColor[fb.recentDirection] }}>
-                {dirLabel[fb.recentDirection]}
-              </div>
+            {fb.count >= 3 && <div>Median: {formatNum(fb.medianViews)}</div>}
+            <div style={{ color: dirColor[fb.recentDirection] }}>
+              {dirLabel[fb.recentDirection]}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -918,38 +999,42 @@ function PeriodSelector({
 }) {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      {windows.filter((w) => w.available).map((w) => {
-        const isActive = (w.days >= 9999 && currentDays >= 9999) ||
-          (w.days < 9999 && currentDays === w.days);
-        return (
-          <button
-            key={w.label}
-            onClick={() => onSelect(w.days)}
-            style={{
-              background: isActive ? INK : 'transparent',
-              color: isActive ? 'white' : SMOKE,
-              border: `1px solid ${isActive ? INK : BONE}`,
-              borderRadius: 4,
-              padding: '3px 10px',
-              fontSize: 10,
-              fontWeight: 700,
-              cursor: 'pointer',
-              letterSpacing: '0.04em',
-            }}
-          >
-            {w.label}
-          </button>
-        );
-      })}
+      {windows
+        .filter((w) => w.available)
+        .map((w) => {
+          const isActive =
+            (w.days >= 9999 && currentDays >= 9999) ||
+            (w.days < 9999 && currentDays === w.days);
+          return (
+            <button
+              key={w.label}
+              onClick={() => onSelect(w.days)}
+              style={{
+                background: isActive ? INK : 'transparent',
+                color: isActive ? 'white' : SMOKE,
+                border: `1px solid ${isActive ? INK : BONE}`,
+                borderRadius: 4,
+                padding: '3px 10px',
+                fontSize: 10,
+                fontWeight: 700,
+                cursor: 'pointer',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {w.label}
+            </button>
+          );
+        })}
     </div>
   );
 }
 
-// ── PNG Export (native SVG-to-Canvas) ────────────────────────────────────
+// ── PNG Export ───────────────────────────────────────────────────────────
 
 async function exportToPNG(
   slug: string,
   data: BehaviourData,
+  headline: string,
   chartSvgElement: SVGSVGElement | null,
 ): Promise<void> {
   if (!chartSvgElement) return;
@@ -957,7 +1042,7 @@ async function exportToPNG(
   const W = 1920;
   const H = 1080;
   const canvas = document.createElement('canvas');
-  canvas.width = W * 2;  // 2x for retina
+  canvas.width = W * 2;
   canvas.height = H * 2;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -968,7 +1053,7 @@ async function exportToPNG(
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, W, H);
 
-  // Header area
+  // Header
   ctx.fillStyle = INK;
   ctx.font = 'bold 11px Inter, system-ui, sans-serif';
   ctx.fillText('CHANNEL BEHAVIOUR', 40, 40);
@@ -977,22 +1062,38 @@ async function exportToPNG(
   ctx.fillStyle = SMOKE;
   ctx.font = '14px Inter, system-ui, sans-serif';
   ctx.fillText(
-    `${data.observationWindow.label} · ${data.observationWindow.startDate} to ${data.observationWindow.endDate}`,
-    40, 96
+    `${data.observationWindow.startDate} to ${data.observationWindow.endDate} · ${data.observationWindow.days} days`,
+    40,
+    96,
   );
 
-  // Current state badge
-  if (data.artist.channelState) {
-    ctx.fillStyle = SIGNAL;
-    ctx.font = 'bold 12px Inter, system-ui, sans-serif';
-    ctx.fillText(data.artist.channelState.toUpperCase(), W - 200, 40);
+  // Headline insight
+  if (headline) {
+    ctx.fillStyle = INK;
+    ctx.font = 'italic 15px Inter, system-ui, sans-serif';
+    // Word-wrap headline if needed
+    const maxW = W - 80;
+    const words = headline.split(' ');
+    let line = '';
+    let lineY = 126;
+    for (const word of words) {
+      const test = line + (line ? ' ' : '') + word;
+      if (ctx.measureText(test).width > maxW && line) {
+        ctx.fillText(line, 40, lineY);
+        line = word;
+        lineY += 20;
+      } else {
+        line = test;
+      }
+    }
+    if (line) ctx.fillText(line, 40, lineY);
   }
 
   // Chart SVG → Image → Canvas
   try {
     const svgClone = chartSvgElement.cloneNode(true) as SVGSVGElement;
     svgClone.setAttribute('width', String(W - 80));
-    svgClone.setAttribute('height', '500');
+    svgClone.setAttribute('height', '460');
     const svgData = new XMLSerializer().serializeToString(svgClone);
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
@@ -1004,51 +1105,58 @@ async function exportToPNG(
       img.src = url;
     });
 
-    ctx.drawImage(img, 40, 120, W - 80, 500);
+    ctx.drawImage(img, 40, 160, W - 80, 460);
     URL.revokeObjectURL(url);
   } catch {
-    // If SVG rendering fails, draw a placeholder
     ctx.fillStyle = BONE;
-    ctx.fillRect(40, 120, W - 80, 500);
+    ctx.fillRect(40, 160, W - 80, 460);
     ctx.fillStyle = SMOKE;
     ctx.font = '16px Inter, system-ui, sans-serif';
-    ctx.fillText('Chart rendering — see live view', W / 2 - 120, 370);
+    ctx.fillText('Chart rendering — see live view', W / 2 - 120, 390);
   }
 
-  // Key observations (bottom left)
-  const obsY = 660;
+  // What We're Learning (bottom section)
+  const learnY = 660;
   ctx.fillStyle = INK;
   ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-  ctx.fillText('KEY OBSERVATIONS', 40, obsY);
-  ctx.font = '13px Inter, system-ui, sans-serif';
-  ctx.fillStyle = INK;
-  data.learnings.slice(0, 3).forEach((l, i) => {
-    const y = obsY + 22 + i * 36;
-    ctx.fillStyle = INK;
-    ctx.fillText(`${i + 1}. ${l.text}`, 40, y);
-    ctx.fillStyle = SMOKE;
-    ctx.font = '11px Inter, system-ui, sans-serif';
-    ctx.fillText(l.evidence, 56, y + 16);
-    ctx.font = '13px Inter, system-ui, sans-serif';
-  });
+  ctx.fillText('WHAT WE\'RE LEARNING', 40, learnY);
 
-  // Format performance (bottom right)
-  ctx.fillStyle = INK;
-  ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-  ctx.fillText('FORMAT PERFORMANCE', W / 2 + 40, obsY);
-  ctx.font = '12px Inter, system-ui, sans-serif';
-  data.formatBreakdown.slice(0, 6).forEach((fb, i) => {
-    const y = obsY + 22 + i * 22;
-    ctx.fillStyle = FORMAT_COLORS[fb.format];
-    ctx.fillText('●', W / 2 + 40, y);
+  // Strongest format
+  const strongest = data.formatBreakdown
+    .filter((f) => f.meta.isLongform && f.count >= 1)
+    .sort((a, b) => b.avgViews - a.avgViews)[0];
+  if (strongest) {
+    ctx.font = 'bold 9px Inter, system-ui, sans-serif';
+    ctx.fillStyle = SMOKE;
+    ctx.fillText('STRONGEST', 40, learnY + 22);
+    ctx.font = '13px Inter, system-ui, sans-serif';
     ctx.fillStyle = INK;
-    ctx.fillText(`${fb.meta.label}: ${fb.count} uploads, avg ${formatNum(fb.avgViews)} views`, W / 2 + 56, y);
-  });
+    ctx.fillText(
+      `${strongest.meta.label} — ${strongest.count} uploads, avg ${formatNum(strongest.avgViews)}`,
+      40,
+      learnY + 38,
+    );
+  }
+
+  // Shorts
+  const shortsData = data.formatBreakdown.find((f) => f.format === 'short');
+  if (shortsData) {
+    ctx.font = 'bold 9px Inter, system-ui, sans-serif';
+    ctx.fillStyle = SMOKE;
+    ctx.fillText('SHORTS', 40, learnY + 62);
+    ctx.font = '13px Inter, system-ui, sans-serif';
+    ctx.fillStyle = INK;
+    ctx.fillText(
+      `${shortsData.count} uploads · Avg: ${formatNum(shortsData.avgViews)}`,
+      40,
+      learnY + 78,
+    );
+  }
 
   // Summary stats
-  const statsY = obsY + 22 + Math.max(data.learnings.length * 36, data.formatBreakdown.length * 22) + 20;
-  ctx.fillStyle = INK;
+  const statsY = learnY + 110;
   ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+  ctx.fillStyle = INK;
   ctx.fillText('SUMMARY', 40, statsY);
   ctx.font = '12px Inter, system-ui, sans-serif';
   ctx.fillStyle = SMOKE;
@@ -1056,8 +1164,9 @@ async function exportToPNG(
   const lfCount = data.uploads.filter((u) => u.formatMeta.isLongform).length;
   const shortCount = data.uploads.filter((u) => u.format === 'short').length;
   ctx.fillText(
-    `${totalUploads} uploads (${lfCount} long-form, ${shortCount} Shorts) · ${data.gaps.filter((g) => g.type === 'all_content').length} content gaps`,
-    40, statsY + 18
+    `${totalUploads} uploads (${lfCount} long-form, ${shortCount} Shorts) · ${data.observationWindow.days}-day window`,
+    40,
+    statsY + 18,
   );
 
   // Footer
@@ -1065,7 +1174,8 @@ async function exportToPNG(
   ctx.font = '10px Inter, system-ui, sans-serif';
   ctx.fillText(
     `YouTube Campaign Coach · Last updated: ${new Date(data.lastUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`,
-    40, H - 24
+    40,
+    H - 24,
   );
 
   // Download
@@ -1084,9 +1194,9 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
   const [selectedUpload, setSelectedUpload] = useState<string | null>(null);
   const [uploadObs, setUploadObs] = useState<UploadObservation | null>(null);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
-  const [periodDays, setPeriodDays] = useState<number>(9999); // Default to MAX
+  const [periodDays, setPeriodDays] = useState<number>(9999);
+  const [showFormats, setShowFormats] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<SVGSVGElement>(null);
   const [chartWidth, setChartWidth] = useState(700);
 
   // Fetch data
@@ -1120,7 +1230,10 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
 
   // Fetch upload observation when selected
   useEffect(() => {
-    if (!selectedUpload || !data) { setUploadObs(null); return; }
+    if (!selectedUpload || !data) {
+      setUploadObs(null);
+      return;
+    }
     if (data.uploadObservation?.uploadId === selectedUpload) {
       setUploadObs(data.uploadObservation);
       return;
@@ -1137,12 +1250,76 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
     return data.uploads.find((u) => u.id === selectedUpload) ?? null;
   }, [selectedUpload, data]);
 
+  // Headline
+  const headline = useMemo(() => (data ? generateHeadline(data) : ''), [data]);
+
+  // What We're Learning computations
+  const learningData = useMemo(() => {
+    if (!data) return null;
+
+    const strongest = data.formatBreakdown
+      .filter((f) => f.meta.isLongform && f.count >= 1)
+      .sort((a, b) => b.avgViews - a.avgViews)[0] || null;
+
+    const shorts = data.formatBreakdown.find((f) => f.format === 'short') || null;
+
+    // Notable insight
+    let notableText = '';
+    let notableDetail = '';
+
+    const lastLF = [...data.uploads]
+      .filter((u) => u.formatMeta.isLongform)
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0];
+    const daysSinceLastLF = lastLF
+      ? Math.round(
+          (new Date(data.observationWindow.endDate).getTime() -
+            new Date(lastLF.publishedAt).getTime()) /
+            86400000,
+        )
+      : null;
+
+    const lfGaps = [...data.gaps]
+      .filter((g) => g.type === 'longform_only')
+      .sort((a, b) => b.durationDays - a.durationDays);
+    const allGaps = [...data.gaps]
+      .filter((g) => g.type === 'all_content')
+      .sort((a, b) => b.durationDays - a.durationDays);
+
+    if (daysSinceLastLF != null && daysSinceLastLF >= 14) {
+      notableText = `${daysSinceLastLF} days since last long-form`;
+      notableDetail = lastLF ? `Last: ${formatDate(lastLF.publishedAt)}` : '';
+    } else if (lfGaps[0] && lfGaps[0].durationDays >= 21) {
+      notableText = `${lfGaps[0].durationDays}-day long-form gap`;
+      notableDetail = `${formatDate(lfGaps[0].startDate)} – ${formatDate(lfGaps[0].endDate)}`;
+    } else if (allGaps[0] && allGaps[0].durationDays >= 10) {
+      notableText = `${allGaps[0].durationDays}-day content gap`;
+      notableDetail = `${formatDate(allGaps[0].startDate)} – ${formatDate(allGaps[0].endDate)}`;
+    } else if (data.uploads.length >= 3) {
+      const daysSinceValues = data.uploads
+        .map((u) => u.daysSincePrevious)
+        .filter((d): d is number => d != null);
+      if (daysSinceValues.length >= 2) {
+        const avgCadence =
+          daysSinceValues.reduce((s, d) => s + d, 0) / daysSinceValues.length;
+        notableText = `Upload every ${avgCadence.toFixed(1)} days`;
+        notableDetail = `${data.uploads.length} uploads in window`;
+      } else {
+        notableText = `${data.uploads.length} uploads`;
+        notableDetail = `${data.observationWindow.days}-day window`;
+      }
+    } else {
+      notableText = `${data.uploads.length} total uploads`;
+      notableDetail = `${data.observationWindow.days}-day window`;
+    }
+
+    return { strongest, shorts, notableText, notableDetail };
+  }, [data]);
+
   const handleExport = useCallback(async () => {
     if (!data) return;
-    // Find the SVG element inside our container
     const svgEl = containerRef.current?.querySelector('svg') as SVGSVGElement | null;
-    await exportToPNG(slug, data, svgEl);
-  }, [slug, data]);
+    await exportToPNG(slug, data, headline, svgEl);
+  }, [slug, data, headline]);
 
   const handlePeriodChange = useCallback((days: number) => {
     setPeriodDays(days);
@@ -1150,10 +1327,16 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
 
   if (loading) {
     return (
-      <div style={{
-        background: PAPER, borderRadius: 12, padding: '40px 24px',
-        textAlign: 'center', color: SMOKE, fontSize: 13,
-      }}>
+      <div
+        style={{
+          background: PAPER,
+          borderRadius: 12,
+          padding: '40px 24px',
+          textAlign: 'center',
+          color: SMOKE,
+          fontSize: 13,
+        }}
+      >
         Loading channel behaviour data...
       </div>
     );
@@ -1161,24 +1344,40 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
 
   if (error || !data) {
     return (
-      <div style={{
-        background: PAPER, borderRadius: 12, padding: '24px',
-        color: SMOKE, fontSize: 13,
-      }}>
+      <div
+        style={{
+          background: PAPER,
+          borderRadius: 12,
+          padding: '24px',
+          color: SMOKE,
+          fontSize: 13,
+        }}
+      >
         {error === '404'
           ? 'Insufficient historical data for this artist. At least 2 daily snapshots are required.'
-          : `Unable to load behaviour data: ${error}`
-        }
+          : `Unable to load behaviour data: ${error}`}
       </div>
     );
   }
 
-  const { observationWindow, uploads, formatBreakdown, learnings, artist, lastUpdated, baseline, availableWindows } = data;
+  const {
+    observationWindow,
+    uploads,
+    formatBreakdown,
+    artist,
+    lastUpdated,
+    baseline,
+    availableWindows,
+  } = data;
 
-  // Determine activity state for the header
+  // Activity state
   const lastUpload = uploads.length > 0 ? uploads[uploads.length - 1] : null;
   const daysSinceLastUpload = lastUpload
-    ? Math.round((new Date(observationWindow.endDate).getTime() - new Date(lastUpload.publishedAt).getTime()) / 86400000)
+    ? Math.round(
+        (new Date(observationWindow.endDate).getTime() -
+          new Date(lastUpload.publishedAt).getTime()) /
+          86400000,
+      )
     : null;
 
   let activityState = 'Unknown';
@@ -1187,69 +1386,137 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
     else if (daysSinceLastUpload <= 21) activityState = 'Slowing';
     else activityState = 'Quiet';
   } else if (uploads.length === 0) {
-    activityState = 'No uploads in window';
+    activityState = 'No uploads';
   }
 
+  const dirLabel: Record<string, string> = {
+    accelerating: 'Accelerating',
+    stable: 'Stable',
+    declining: 'Declining',
+    insufficient: '—',
+  };
+  const dirColor: Record<string, string> = {
+    accelerating: MINT,
+    stable: SMOKE,
+    declining: SIGNAL,
+    insufficient: GHOST,
+  };
+
   return (
-    <div ref={containerRef} style={{
-      background: PAPER, borderRadius: 12, padding: '20px 24px',
-      border: `1px solid ${BONE}`,
-    }}>
+    <div
+      ref={containerRef}
+      style={{
+        background: PAPER,
+        borderRadius: 12,
+        padding: '20px 24px',
+        border: `1px solid ${BONE}`,
+      }}
+    >
       {/* ═══ HEADER ═══ */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 8,
+        }}
+      >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: SIGNAL }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: SIGNAL,
+              }}
+            >
               Channel Behaviour
             </span>
-            <span style={{
-              fontSize: 9, fontWeight: 600, textTransform: 'uppercase',
-              color: activityState === 'Active' ? MINT : activityState === 'Slowing' ? SUN : SMOKE,
-              padding: '1px 6px', borderRadius: 3,
-              border: `1px solid ${activityState === 'Active' ? MINT : activityState === 'Slowing' ? SUN : GHOST}`,
-            }}>
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                color:
+                  activityState === 'Active'
+                    ? MINT
+                    : activityState === 'Slowing'
+                      ? SUN
+                      : SMOKE,
+                padding: '1px 6px',
+                borderRadius: 3,
+                border: `1px solid ${activityState === 'Active' ? MINT : activityState === 'Slowing' ? SUN : GHOST}`,
+              }}
+            >
               {activityState}
             </span>
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, color: INK }}>{artistName}</div>
           <div style={{ fontSize: 11, color: SMOKE, marginTop: 2 }}>
-            {observationWindow.startDate} to {observationWindow.endDate} · {observationWindow.days} days
+            {observationWindow.startDate} to {observationWindow.endDate} ·{' '}
+            {observationWindow.days} days
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Period selector */}
           <PeriodSelector
             windows={availableWindows || []}
             currentDays={periodDays}
             onSelect={handlePeriodChange}
           />
-          <button onClick={handleExport} style={{
-            background: INK, color: 'white', border: 'none', borderRadius: 6,
-            padding: '6px 12px', fontSize: 10, fontWeight: 600, cursor: 'pointer',
-          }}>
+          <button
+            onClick={handleExport}
+            style={{
+              background: INK,
+              color: 'white',
+              border: 'none',
+              borderRadius: 6,
+              padding: '6px 12px',
+              fontSize: 10,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
             PNG
           </button>
           {onClose && (
-            <button onClick={onClose} style={{
-              background: 'none', border: `1px solid ${BONE}`, borderRadius: 6,
-              padding: '5px 10px', fontSize: 11, cursor: 'pointer', color: SMOKE,
-            }}>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'none',
+                border: `1px solid ${BONE}`,
+                borderRadius: 6,
+                padding: '5px 10px',
+                fontSize: 11,
+                cursor: 'pointer',
+                color: SMOKE,
+              }}
+            >
               ← Summary
             </button>
           )}
         </div>
       </div>
 
-      {/* ═══ FORMAT LEGEND ═══ */}
-      <div style={{ marginBottom: 8 }}>
-        <FormatLegend breakdown={formatBreakdown} />
-      </div>
+      {/* ═══ HEADLINE INSIGHT ═══ */}
+      {headline && (
+        <div
+          style={{
+            fontSize: 13,
+            color: INK,
+            lineHeight: 1.5,
+            fontStyle: 'italic',
+            marginBottom: 12,
+            maxWidth: 640,
+          }}
+        >
+          {headline}
+        </div>
+      )}
 
-      {/* ═══ BASELINE (if available) ═══ */}
-      {baseline && <div style={{ marginBottom: 8 }}><BaselinePanel baseline={baseline} /></div>}
-
-      {/* ═══ UNIFIED CHART ═══ */}
-      <UnifiedChart
+      {/* ═══ STORY CHART ═══ */}
+      <StoryChart
         data={data}
         startDate={observationWindow.startDate}
         endDate={observationWindow.endDate}
@@ -1261,7 +1528,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         baseline={baseline}
       />
 
-      {/* ═══ UPLOAD DETAIL PANEL ═══ */}
+      {/* ═══ UPLOAD DETAIL PANEL (on marker click) ═══ */}
       {selectedUploadData && (
         <UploadDetailPanel
           upload={selectedUploadData}
@@ -1271,35 +1538,80 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       )}
 
       {/* ═══ SUMMARY STATS ═══ */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-        gap: 8, marginTop: 16,
-      }}>
-        <div style={{ background: 'white', border: `1px solid ${BONE}`, borderRadius: 8, padding: '8px 12px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+          gap: 8,
+          marginTop: 16,
+        }}
+      >
+        <div
+          style={{
+            background: 'white',
+            border: `1px solid ${BONE}`,
+            borderRadius: 8,
+            padding: '8px 12px',
+          }}
+        >
           <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>{uploads.length}</div>
           <div style={{ fontSize: 10, color: SMOKE }}>Uploads</div>
         </div>
-        <div style={{ background: 'white', border: `1px solid ${BONE}`, borderRadius: 8, padding: '8px 12px' }}>
+        <div
+          style={{
+            background: 'white',
+            border: `1px solid ${BONE}`,
+            borderRadius: 8,
+            padding: '8px 12px',
+          }}
+        >
           <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>
             {uploads.filter((u) => u.formatMeta.isLongform).length}
           </div>
           <div style={{ fontSize: 10, color: SMOKE }}>Long-form</div>
         </div>
-        <div style={{ background: 'white', border: `1px solid ${BONE}`, borderRadius: 8, padding: '8px 12px' }}>
+        <div
+          style={{
+            background: 'white',
+            border: `1px solid ${BONE}`,
+            borderRadius: 8,
+            padding: '8px 12px',
+          }}
+        >
           <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>
             {uploads.filter((u) => u.format === 'short').length}
           </div>
           <div style={{ fontSize: 10, color: SMOKE }}>Shorts</div>
         </div>
-        <div style={{ background: 'white', border: `1px solid ${BONE}`, borderRadius: 8, padding: '8px 12px' }}>
+        <div
+          style={{
+            background: 'white',
+            border: `1px solid ${BONE}`,
+            borderRadius: 8,
+            padding: '8px 12px',
+          }}
+        >
           <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>
             {data.gaps.filter((g) => g.type === 'all_content').length}
           </div>
           <div style={{ fontSize: 10, color: SMOKE }}>Gaps (7d+)</div>
         </div>
         {daysSinceLastUpload != null && (
-          <div style={{ background: 'white', border: `1px solid ${BONE}`, borderRadius: 8, padding: '8px 12px' }}>
-            <div style={{ fontSize: 20, fontWeight: 700, color: daysSinceLastUpload > 14 ? SIGNAL : INK }}>
+          <div
+            style={{
+              background: 'white',
+              border: `1px solid ${BONE}`,
+              borderRadius: 8,
+              padding: '8px 12px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: daysSinceLastUpload > 14 ? SIGNAL : INK,
+              }}
+            >
               {daysSinceLastUpload}d
             </div>
             <div style={{ fontSize: 10, color: SMOKE }}>Since Last Upload</div>
@@ -1307,17 +1619,162 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         )}
       </div>
 
-      {/* ═══ LEARNINGS ═══ */}
-      <LearningsPanel learnings={learnings} />
+      {/* ═══ WHAT WE'RE LEARNING ═══ */}
+      {learningData && (
+        <div style={{ marginTop: 16 }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: SMOKE,
+              marginBottom: 10,
+            }}
+          >
+            What We're Learning
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 8,
+            }}
+          >
+            {/* STRONGEST */}
+            {learningData.strongest && (
+              <div
+                style={{
+                  background: 'white',
+                  border: `1px solid ${BONE}`,
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: SMOKE,
+                    marginBottom: 4,
+                  }}
+                >
+                  Strongest
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: INK, marginBottom: 2 }}>
+                  {learningData.strongest.meta.label}
+                </div>
+                <div style={{ fontSize: 11, color: SMOKE }}>
+                  {learningData.strongest.count} uploads ·{' '}
+                  {formatNum(learningData.strongest.avgViews)} average
+                </div>
+              </div>
+            )}
 
-      {/* ═══ FORMAT BREAKDOWN ═══ */}
-      <FormatBreakdownPanel breakdown={formatBreakdown} />
+            {/* SHORTS */}
+            {learningData.shorts && learningData.shorts.count > 0 && (
+              <div
+                style={{
+                  background: 'white',
+                  border: `1px solid ${BONE}`,
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: SMOKE,
+                    marginBottom: 4,
+                  }}
+                >
+                  Shorts
+                </div>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: dirColor[learningData.shorts.recentDirection] || SMOKE,
+                    marginBottom: 2,
+                  }}
+                >
+                  {dirLabel[learningData.shorts.recentDirection] || '—'}
+                </div>
+                <div style={{ fontSize: 11, color: SMOKE }}>
+                  {learningData.shorts.count} uploads · Avg:{' '}
+                  {formatNum(learningData.shorts.avgViews)}
+                </div>
+              </div>
+            )}
+
+            {/* NOTABLE */}
+            {learningData.notableText && (
+              <div
+                style={{
+                  background: 'white',
+                  border: `1px solid ${BONE}`,
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    color: SMOKE,
+                    marginBottom: 4,
+                  }}
+                >
+                  Notable
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: INK, marginBottom: 2 }}>
+                  {learningData.notableText}
+                </div>
+                {learningData.notableDetail && (
+                  <div style={{ fontSize: 11, color: SMOKE }}>
+                    {learningData.notableDetail}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Toggle format breakdown */}
+          <button
+            onClick={() => setShowFormats(!showFormats)}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '8px 0',
+              fontSize: 11,
+              color: SMOKE,
+              cursor: 'pointer',
+              marginTop: 6,
+            }}
+          >
+            {showFormats ? '← Hide Format Breakdown' : 'View Format Breakdown →'}
+          </button>
+
+          {showFormats && <FormatBreakdownPanel breakdown={formatBreakdown} />}
+        </div>
+      )}
 
       {/* ═══ FOOTER ═══ */}
       <div style={{ marginTop: 16, fontSize: 10, color: GHOST, textAlign: 'right' }}>
-        Last updated: {new Date(lastUpdated).toLocaleString('en-GB', {
-          day: 'numeric', month: 'short', year: 'numeric',
-          hour: '2-digit', minute: '2-digit',
+        Last updated:{' '}
+        {new Date(lastUpdated).toLocaleString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
         })}
       </div>
     </div>

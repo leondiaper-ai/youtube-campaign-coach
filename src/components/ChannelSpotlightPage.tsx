@@ -51,22 +51,11 @@ function VirginMusicLogo({ height = 36 }: { height?: number }) {
 
 function YouTubeLogo({ height = 20 }: { height?: number }) {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: height * 0.35 }}>
-      <img
-        src="/youtube-icon.png"
-        alt=""
-        style={{ height, width: 'auto', display: 'block' }}
-      />
-      <span style={{
-        fontFamily: "'Inter', 'Roboto', system-ui, sans-serif",
-        fontWeight: 700,
-        fontSize: height * 0.85,
-        color: INK,
-        letterSpacing: '-0.02em',
-      }}>
-        YouTube
-      </span>
-    </span>
+    <img
+      src="/youtube-logo.png"
+      alt="YouTube"
+      style={{ height, width: 'auto', display: 'block' }}
+    />
   );
 }
 
@@ -147,10 +136,15 @@ export default function ChannelSpotlightPage() {
               Top performing Virgin-managed channels this week — what the data says is working across the roster.
             </p>
             {data && (
-              <div style={{ marginTop: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 12 }}>
                 <span style={{ fontSize: 11, color: GHOST, letterSpacing: '0.04em' }}>
                   {data.weekRange}
                 </span>
+                {data.syncMeta && (
+                  <span style={{ fontSize: 10, color: GHOST }}>
+                    {data.syncMeta.artistsSuccess}/{data.syncMeta.artistsTotal} artists synced
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -188,14 +182,67 @@ export default function ChannelSpotlightPage() {
         {/* ── Spotlight Content ───────────────────────────────────── */}
         {data && !loading && (
           <>
-            {/* Spacer before cards */}
-            <div style={{ marginBottom: 8 }} />
+            {/* Summary strip */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 24,
+                padding: '14px 20px',
+                background: WHITE,
+                borderRadius: 12,
+                border: `1px solid ${BONE}`,
+                marginBottom: 24,
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: ACCENT.green }}>
+                  {data.channels.length}
+                </div>
+                <div style={{ fontSize: 10, color: SMOKE, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                  Spotlight Channels
+                </div>
+              </div>
+              <div style={{ width: 1, height: 32, background: BONE }} />
+              <div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: INK }}>
+                  {data.totalManaged}
+                </div>
+                <div style={{ fontSize: 10, color: SMOKE, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                  Total Managed
+                </div>
+              </div>
+              <div style={{ width: 1, height: 32, background: BONE }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: WARM, lineHeight: 1.5 }}>
+                  These channels are running the strongest combination of content cadence, format diversity, and audience conversion this week.
+                </div>
+              </div>
+            </div>
 
-            {/* Spotlight cards */}
+            {/* Spotlight cards (reusing the module) */}
             <WeeklySpotlight channels={data.channels} linkPrefix="/watcher" />
 
-            {/* spacer before footer */}
-            <div style={{ marginTop: 32 }} />
+            {/* Handwritten annotation */}
+            {data.channels.length > 0 && (
+              <div
+                style={{
+                  fontFamily: 'Caveat, cursive',
+                  fontSize: 16,
+                  color: ACCENT.amber,
+                  transform: 'rotate(-1deg)',
+                  marginTop: 24,
+                  marginLeft: 12,
+                  lineHeight: 1.4,
+                }}
+              >
+                {data.channels.length >= 3
+                  ? `${data.channels.length} channels firing this week — the multi-format approach is paying off.`
+                  : data.channels.length >= 1
+                    ? `${data.channels[0].name} leading the pack — strong execution setting the standard.`
+                    : 'Building momentum across the roster.'}
+              </div>
+            )}
 
             {/* Footer */}
             <footer style={{ marginTop: 56, paddingTop: 24, borderTop: `1px solid ${BONE}` }}>
