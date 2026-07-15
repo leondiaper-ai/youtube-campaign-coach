@@ -734,11 +734,11 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* Channel Behaviour button — hover only */}
+      {/* Channel Behaviour button — always visible */}
       {onViewBehaviour && (
         <button
           onClick={() => onViewBehaviour(card.slug)}
-          className="absolute top-3 right-10 text-[9px] font-bold uppercase tracking-[0.08em] text-ink/0 group-hover:text-ink/60 hover:!text-ink hover:bg-black/5 transition-all px-2 py-1 rounded"
+          className="absolute top-3 right-10 text-[9px] font-bold uppercase tracking-[0.08em] text-ink/30 hover:text-ink hover:bg-black/5 transition-all px-2 py-1 rounded"
           title="View channel behaviour"
         >
           Behaviour

@@ -92,6 +92,20 @@ type Learning = {
   confidence: 'observation' | 'pattern' | 'strong';
 };
 
+type Baseline = {
+  period: { start: string; end: string; days: number };
+  avgDailyViews: number | null;
+  avgDailySubs: number | null;
+  weeklyViews: number | null;
+  weeklySubs: number | null;
+};
+
+type AvailableWindow = {
+  days: number;
+  label: string;
+  available: boolean;
+};
+
 type CampaignBehaviourResponse = {
   artist: { slug: string; name: string; channelState?: string };
   observationWindow: { startDate: string; endDate: string; days: number; label: string };
@@ -103,6 +117,8 @@ type CampaignBehaviourResponse = {
   formatBreakdown: FormatBreakdown[];
   learnings: Learning[];
   uploadObservation: UploadObservation | null;
+  baseline: Baseline | null;
+  availableWindows: AvailableWindow[];
   lastUpdated: string;
 };
 
@@ -339,10 +355,12 @@ function computeUploadObservation(
   const uploadTs = new Date(upload.publishedAt).getTime();
   const uploadDate = upload.publishedAt.slice(0, 10);
 
-  // Find snapshots for 7 days before and after
+  // Use 14-day after window for long-form moments, 7-day for shorts
   const dayMs = 86400000;
-  const before7Start = uploadTs - 7 * dayMs;
-  const after7End = uploadTs + 7 * dayMs;
+  const beforeDays = 7;
+  const afterDays = upload.formatMeta.isLongform ? 14 : 7;
+  const before7Start = uploadTs - beforeDays * dayMs;
+  const after7End = uploadTs + afterDays * dayMs;
 
   const snapsBeforeWindow = history.filter((h) => {
     const ts = new Date(h.ts).getTime();
@@ -485,7 +503,7 @@ function generateObservationText(
   }
 
   if (parts.length === 0) {
-    return 'Insufficient snapshot data around this upload to generate an observation.';
+    return 'Not enough historical data is available before this upload for a reliable comparison.';
   }
 
   return parts.join(' ');
@@ -614,6 +632,62 @@ function generateLearnings(
   return learnings.slice(0, 3);
 }
 
+function computeBaseline(
+  history: ChannelSnapshot[],
+  uploads: ClassifiedUpload[],
+  windowStart: string,
+): Baseline | null {
+  // Find the first upload in the window
+  if (uploads.length === 0) return null;
+  const firstUploadDate = uploads[0].publishedAt.slice(0, 10);
+  const firstUploadTs = new Date(firstUploadDate).getTime();
+
+  // Get snapshots before the first upload (within our window)
+  const windowStartTs = new Date(windowStart).getTime();
+  const preCampaignSnaps = history.filter((h) => {
+    const ts = new Date(h.ts).getTime();
+    return ts >= windowStartTs && ts < firstUploadTs;
+  });
+
+  if (preCampaignSnaps.length < 7) return null;
+
+  // Compute daily view gains in the pre-campaign period
+  const viewGains: number[] = [];
+  const subGains: number[] = [];
+  for (let i = 1; i < preCampaignSnaps.length; i++) {
+    const prev = preCampaignSnaps[i - 1];
+    const curr = preCampaignSnaps[i];
+    if (prev.views != null && curr.views != null) {
+      const gain = curr.views - prev.views;
+      if (gain >= 0) viewGains.push(gain);
+    }
+    if (prev.subs != null && curr.subs != null) {
+      subGains.push(curr.subs - prev.subs);
+    }
+  }
+
+  const avgDailyViews = viewGains.length >= 3
+    ? Math.round(viewGains.reduce((s, g) => s + g, 0) / viewGains.length)
+    : null;
+  const avgDailySubs = subGains.length >= 3
+    ? Math.round(subGains.reduce((s, g) => s + g, 0) / subGains.length)
+    : null;
+
+  const periodStart = preCampaignSnaps[0].ts;
+  const periodEnd = preCampaignSnaps[preCampaignSnaps.length - 1].ts;
+  const periodDays = Math.round(
+    (new Date(periodEnd).getTime() - new Date(periodStart).getTime()) / 86400000
+  );
+
+  return {
+    period: { start: periodStart, end: periodEnd, days: periodDays },
+    avgDailyViews,
+    avgDailySubs,
+    weeklyViews: avgDailyViews != null ? avgDailyViews * 7 : null,
+    weeklySubs: avgDailySubs != null ? avgDailySubs * 7 : null,
+  };
+}
+
 function formatNumber(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
@@ -629,7 +703,10 @@ export async function GET(
   const { slug } = params;
   const uploadIdParam = req.nextUrl.searchParams.get('upload');
   const daysParam = req.nextUrl.searchParams.get('days');
-  const observationDays = daysParam ? parseInt(daysParam, 10) : 90;
+  // Default to max available — show all historical data
+  const observationDays = daysParam && daysParam !== 'max'
+    ? parseInt(daysParam, 10)
+    : 9999; // Will be capped by actual available data
 
   // ── Resolve artist ──
   const customArtists = await listCustomArtists();
@@ -675,9 +752,21 @@ export async function GET(
     (latestTs - new Date(actualStartDate).getTime()) / 86400000
   );
 
-  const windowLabel = actualDays < observationDays
-    ? `Last ${actualDays} days`
-    : `Last ${observationDays} days`;
+  const windowLabel = observationDays >= 9999
+    ? `All available (${actualDays} days)`
+    : actualDays < observationDays
+      ? `Last ${actualDays} days`
+      : `Last ${observationDays} days`;
+
+  // Compute available window options
+  const totalHistoryDays = Math.round(
+    (latestTs - new Date(earliestDate).getTime()) / 86400000
+  );
+  const availableWindows: AvailableWindow[] = [
+    { days: 90, label: '90D', available: totalHistoryDays >= 30 },
+    { days: 180, label: '180D', available: totalHistoryDays >= 90 },
+    { days: 9999, label: 'MAX', available: true },
+  ];
 
   // ── Compute series ──
   const viewVelocity = computeVelocity(history, actualStartDate);
@@ -701,9 +790,13 @@ export async function GET(
     uploads, viewVelocity, subscriberGains, gaps, formatBreakdown
   );
 
+  // ── Baseline (pre-activity) ──
+  const baseline = computeBaseline(history, uploads, actualStartDate);
+
   // ── Upload observation (optional) ──
   let uploadObservation: UploadObservation | null = null;
   if (uploadIdParam) {
+    // Use 14-day after window for long-form, 7-day for shorts
     uploadObservation = computeUploadObservation(uploadIdParam, uploads, history);
   }
 
@@ -731,6 +824,8 @@ export async function GET(
     formatBreakdown,
     learnings,
     uploadObservation,
+    baseline,
+    availableWindows,
     lastUpdated: (liveSnap as any).cachedAt ?? new Date().toISOString(),
   };
 
