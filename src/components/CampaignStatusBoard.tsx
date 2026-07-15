@@ -15,6 +15,7 @@ import {
 } from '@/lib/youtubeGrowthOS';
 import type { StructureWarning } from '@/lib/contentStructure';
 import Sparkline from './Sparkline';
+import CampaignBehaviour from './CampaignBehaviour';
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
@@ -661,10 +662,12 @@ function DecisionCard({
   card,
   onUnpin,
   onNotesChange,
+  onViewBehaviour,
 }: {
   card: CardData;
   onUnpin: (slug: string) => void;
   onNotesChange: (slug: string, notes: CampaignNote[]) => void;
+  onViewBehaviour?: (slug: string) => void;
 }) {
   const [noteInput, setNoteInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -730,6 +733,17 @@ function DecisionCard({
       >
         &times;
       </button>
+
+      {/* Channel Behaviour button — hover only */}
+      {onViewBehaviour && (
+        <button
+          onClick={() => onViewBehaviour(card.slug)}
+          className="absolute top-3 right-10 text-[9px] font-bold uppercase tracking-[0.08em] text-ink/0 group-hover:text-ink/25 hover:!text-ink/50 transition-all px-2 py-1 rounded"
+          title="View channel behaviour"
+        >
+          Behaviour
+        </button>
+      )}
 
       {/* ─── 1. Artist name + decision + dual state ─────────────────── */}
       <div className="mb-3">
@@ -1211,6 +1225,7 @@ export default function CampaignStatusBoard({
   const [pinning, setPinning] = useState(false);
   const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
+  const [behaviourSlug, setBehaviourSlug] = useState<string | null>(null);
 
   async function handlePin(slug: string) {
     setPinning(true);
@@ -1288,6 +1303,18 @@ export default function CampaignStatusBoard({
   buildCards.sort(sortByPriorityAndViews);
   holdCards.sort(sortByPriorityAndViews);
 
+  // ─── Behaviour view ────────────────────────────────────────────
+  const behaviourCard = behaviourSlug ? cards.find((c) => c.slug === behaviourSlug) : null;
+  if (behaviourSlug && behaviourCard) {
+    return (
+      <CampaignBehaviour
+        slug={behaviourSlug}
+        artistName={behaviourCard.name}
+        onClose={() => setBehaviourSlug(null)}
+      />
+    );
+  }
+
   return (
     <>
       <div className="mb-6 flex items-center justify-between">
@@ -1357,6 +1384,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
+                    onViewBehaviour={setBehaviourSlug}
                   />
                 ))}
               </div>
@@ -1375,6 +1403,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
+                    onViewBehaviour={setBehaviourSlug}
                   />
                 ))}
               </div>
@@ -1393,6 +1422,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
+                    onViewBehaviour={setBehaviourSlug}
                   />
                 ))}
               </div>
@@ -1410,6 +1440,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
+                    onViewBehaviour={setBehaviourSlug}
                   />
                 ))}
               </div>
