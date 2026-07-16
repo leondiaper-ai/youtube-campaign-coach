@@ -41,6 +41,7 @@ const SIGNAL = '#FF4A1C';
 const MINT   = '#1FBE7A';
 const SUN    = '#FFD24C';
 const CREAM  = '#F6F1E7';
+const ELECTRIC = '#2C25FF';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -510,26 +511,36 @@ function StoryChart({
     [longform, startDate, endDate, chartW],
   );
 
-  // ── Follow-up window highlight ──
-  const followUpHighlight = useMemo(() => {
+  // ── Impact window highlights (Day 0–7 + Day 7–14) ──
+  const windowHighlights = useMemo(() => {
     if (!selectedUpload) return null;
     const upload = data.uploads.find((u) => u.id === selectedUpload);
     if (!upload || !upload.formatMeta.isLongform) return null;
 
     const publishTs = new Date(upload.publishedAt).getTime();
+    const publishDate = upload.publishedAt.slice(0, 10);
     const day7Date = new Date(publishTs + 7 * 86400000).toISOString().slice(0, 10);
     const day14Date = new Date(publishTs + 14 * 86400000).toISOString().slice(0, 10);
 
-    const x1 = toX(day7Date);
-    const x2 = toX(day14Date);
+    const xPublish = toX(publishDate);
+    const x7 = toX(day7Date);
+    const x14 = toX(day14Date);
 
-    // Only show if within chart bounds
-    if (x2 < 0 || x1 > chartW) return null;
+    // Day 0–7 window
+    const impactWindow =
+      x7 >= 0 && xPublish <= chartW
+        ? { x1: Math.max(0, xPublish), x2: Math.min(chartW, x7) }
+        : null;
 
-    return {
-      x1: Math.max(0, x1),
-      x2: Math.min(chartW, x2),
-    };
+    // Day 7–14 window
+    const followUpWindow =
+      x14 >= 0 && x7 <= chartW
+        ? { x1: Math.max(0, x7), x2: Math.min(chartW, x14) }
+        : null;
+
+    if (!impactWindow && !followUpWindow) return null;
+
+    return { impactWindow, followUpWindow };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUpload, data.uploads, startDate, endDate, chartW]);
 
@@ -613,43 +624,84 @@ function StoryChart({
       }}
     >
       <g transform={`translate(${M.left},${M.top})`}>
-        {/* ═══ FOLLOW-UP WINDOW HIGHLIGHT (Day+7 to Day+14) ═══ */}
-        {followUpHighlight && (
+        {/* ═══ IMPACT WINDOW HIGHLIGHTS (Day 0–7 + Day 7–14) ═══ */}
+        {windowHighlights?.impactWindow && (
           <g>
-            {/* Subtle background rect spanning full chart height */}
+            {/* Day 0–7: Initial impact window */}
             <rect
-              x={followUpHighlight.x1}
+              x={windowHighlights.impactWindow.x1}
               y={0}
-              width={followUpHighlight.x2 - followUpHighlight.x1}
+              width={windowHighlights.impactWindow.x2 - windowHighlights.impactWindow.x1}
+              height={VIEWS_H + CONTENT_H}
+              fill={ELECTRIC}
+              opacity={0.03}
+            />
+            <line
+              x1={windowHighlights.impactWindow.x1}
+              y1={0}
+              x2={windowHighlights.impactWindow.x1}
+              y2={VIEWS_H + CONTENT_H}
+              stroke={ELECTRIC}
+              strokeWidth={0.5}
+              strokeDasharray="3,3"
+              opacity={0.15}
+            />
+            <line
+              x1={windowHighlights.impactWindow.x2}
+              y1={0}
+              x2={windowHighlights.impactWindow.x2}
+              y2={VIEWS_H + CONTENT_H}
+              stroke={ELECTRIC}
+              strokeWidth={0.5}
+              strokeDasharray="3,3"
+              opacity={0.15}
+            />
+            <text
+              x={(windowHighlights.impactWindow.x1 + windowHighlights.impactWindow.x2) / 2}
+              y={VIEWS_H - 4}
+              textAnchor="middle"
+              fontSize={7}
+              fill={ELECTRIC}
+              opacity={0.4}
+              fontWeight={600}
+            >
+              Day 0–7
+            </text>
+          </g>
+        )}
+        {windowHighlights?.followUpWindow && (
+          <g>
+            {/* Day 7–14: Follow-up window */}
+            <rect
+              x={windowHighlights.followUpWindow.x1}
+              y={0}
+              width={windowHighlights.followUpWindow.x2 - windowHighlights.followUpWindow.x1}
               height={VIEWS_H + CONTENT_H}
               fill={SIGNAL}
               opacity={0.04}
             />
-            {/* Dashed vertical line at Day+7 */}
             <line
-              x1={followUpHighlight.x1}
+              x1={windowHighlights.followUpWindow.x1}
               y1={0}
-              x2={followUpHighlight.x1}
+              x2={windowHighlights.followUpWindow.x1}
               y2={VIEWS_H + CONTENT_H}
               stroke={SIGNAL}
               strokeWidth={0.5}
               strokeDasharray="3,3"
               opacity={0.2}
             />
-            {/* Dashed vertical line at Day+14 */}
             <line
-              x1={followUpHighlight.x2}
+              x1={windowHighlights.followUpWindow.x2}
               y1={0}
-              x2={followUpHighlight.x2}
+              x2={windowHighlights.followUpWindow.x2}
               y2={VIEWS_H + CONTENT_H}
               stroke={SIGNAL}
               strokeWidth={0.5}
               strokeDasharray="3,3"
               opacity={0.2}
             />
-            {/* Label */}
             <text
-              x={(followUpHighlight.x1 + followUpHighlight.x2) / 2}
+              x={(windowHighlights.followUpWindow.x1 + windowHighlights.followUpWindow.x2) / 2}
               y={VIEWS_H - 4}
               textAnchor="middle"
               fontSize={7}
