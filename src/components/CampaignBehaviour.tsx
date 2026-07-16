@@ -957,12 +957,13 @@ function StoryChart({
           <line
             x1={hoverX} y1={0} x2={hoverX} y2={VIEWS_H + CONTENT_H}
             stroke={INK} strokeWidth={1} opacity={0.1}
+            style={{ pointerEvents: 'none' }}
           />
         )}
 
         {/* ═══ HOVER TOOLTIP — views only ═══ */}
         {hoveredDate && hoverX != null && hoverX >= 0 && hoverX <= chartW && (
-          <g>
+          <g style={{ pointerEvents: 'none' }}>
             {(() => {
               const velPoint = data.viewVelocity.find((d) => d.date === hoveredDate);
               if (!velPoint?.rollingAvg7d) return null;
