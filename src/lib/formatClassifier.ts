@@ -112,13 +112,17 @@ export const SHORT_TYPE_LABELS: Record<ShortType, string> = {
  *
  * Priority order matters: more specific patterns match first.
  * Short detection uses duration (≤60s) as the primary signal.
+ * A late catch at ≤90s picks up edge cases just over the threshold.
+ * We don't extend to YouTube's 3-minute (180s) Short limit because
+ * music channels commonly have untagged 2-3 minute releases.
  * Long-form sub-classification uses title + description keywords.
  */
 export function classifyUploadFormat(upload: RecentUpload): UploadFormat {
   // ── Level 1: Short detection ───────────────────────────────────────
+  // Classic threshold: ≤60s is always a Short
   if (upload.durationSec > 0 && upload.durationSec <= 60) return 'short';
 
-  // Also check title for #shorts marker (some videos have duration > 60 but are Shorts)
+  // Check title for #shorts marker (works for any duration, including 0)
   const titleLower = upload.title.toLowerCase();
   if (/#shorts?\b/.test(titleLower)) return 'short';
 
@@ -145,11 +149,19 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormat {
   }
 
   // Live / Performance — check BEFORE official to avoid "Official Live Video" → omv
-  if (/\b(live\s+(session|performance|video|at|from|in\b)|performance\s+video|tiny\s+desk|colors?\s+show|plugged|vevo\s+live|live\s+lounge)\b/.test(haystack)) {
+  // Matches: "Live at ...", "Live Session", "(Live)", "[Live]", "- Live",
+  // "Tiny Desk", "Colors Show", "Vevo Live", etc.
+  if (/\b(live\s+(session|performance|video|at|from|in\b)|performance\s+video|tiny\s+desk|colors?\s+show|plugged|vevo\s+live|live\s+lounge)\b/.test(haystack) ||
+      /[\(\[]live[\)\]]/.test(titleOnly) ||
+      /\b-\s+live\b/i.test(titleOnly) ||
+      /\blive\s+version\b/.test(haystack)) {
     return 'live';
   }
-  // Also flag if the upload was actually a live broadcast
-  if (upload.actualStart && upload.live !== 'upcoming') return 'live';
+  // Also flag if the upload was actually a live broadcast.
+  // IMPORTANT: YouTube Premieres also set actualStart, so we require duration > 600s
+  // (10+ minutes) to distinguish genuine live streams / live sessions from premiered
+  // music releases (which are typically 2-5 minutes).
+  if (upload.actualStart && upload.live !== 'upcoming' && upload.durationSec > 600) return 'live';
 
   // Tour / Festival
   if (/\b(tour\s+(diary|vlog|video|recap|highlights?)|festival\s+(recap|highlights?|set|performance)|on\s+tour|tour\s+life|backstage\s+at)\b/.test(haystack)) {
@@ -183,6 +195,15 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormat {
 
   // Audio
   if (/\b(official\s+audio|audio\s+only|\baudio\b)\b/.test(haystack)) return 'audio';
+
+  // ── Late Short catch (edge cases just over 60s) ────────────────────
+  // Videos 61-90s that didn't match any format keyword are almost certainly
+  // Shorts — they're just barely over the classic 60s threshold.
+  // We DON'T extend to 180s because music channels commonly release
+  // untagged 2-3 minute tracks that would be misclassified as Shorts.
+  // Videos with durationSec === 0 (API parsing issues) fall through to
+  // the longform catch-all as a safe default.
+  if (upload.durationSec > 0 && upload.durationSec <= 90) return 'short';
 
   // Catch-all: other long-form
   return 'longform';
