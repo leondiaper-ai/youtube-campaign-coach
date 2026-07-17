@@ -129,6 +129,7 @@ type AvailableWindow = {
 type BehaviourData = {
   artist: { slug: string; name: string; channelState?: string };
   observationWindow: { startDate: string; endDate: string; days: number; label: string };
+  projectedEndDate: string | null;
   viewVelocity: VelocityPoint[];
   subscriberGains: SubsPoint[];
   uploads: ClassifiedUpload[];
@@ -347,7 +348,7 @@ function generateHeadline(data: BehaviourData): string {
 
 const M = { left: 44, right: 16, top: 4, bottom: 4 };
 
-const VIEWS_H   = 260;   // Hero: view momentum line area (44% larger)
+const VIEWS_H   = 320;   // Hero: view momentum line area (expanded for full-screen feel)
 const CONTENT_H = 70;    // Content markers zone (room for two-line labels + shorts)
 const AXIS_H    = 20;    // Date tick labels
 const SUBS_GAP  = 6;     // Gap between axis and subs strip
@@ -402,6 +403,7 @@ function StoryChart({
   data,
   startDate,
   endDate,
+  projectedEndDate,
   width,
   hoveredDate,
   onHover,
@@ -414,6 +416,7 @@ function StoryChart({
   data: BehaviourData;
   startDate: string;
   endDate: string;
+  projectedEndDate: string | null;
   width: number;
   hoveredDate: string | null;
   onHover: (date: string | null) => void;
@@ -426,9 +429,16 @@ function StoryChart({
   const chartW = width - M.left - M.right;
   const svgH = TOTAL_CHART_H + M.top + M.bottom;
 
+  // Use projected end date (future) to extend the chart x-axis for planning
+  const effectiveEndDate = projectedEndDate || endDate;
+
   function toX(date: string) {
-    return dateToX(date, startDate, endDate, chartW);
+    return dateToX(date, startDate, effectiveEndDate, chartW);
   }
+
+  // Compute the "today" line position for future projection
+  const todayX = projectedEndDate ? toX(endDate) : null;
+  const futureStartX = todayX != null ? Math.max(0, Math.min(chartW, todayX)) : null;
 
   // ── View velocity data ──
   const velocityValid = data.viewVelocity.filter((d) => d.rollingAvg7d != null);
@@ -542,7 +552,7 @@ function StoryChart({
 
     return { impactWindow, followUpWindow };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUpload, data.uploads, startDate, endDate, chartW]);
+  }, [selectedUpload, data.uploads, startDate, effectiveEndDate, chartW]);
 
   // ── Significant gaps (max 1–2 annotations) ──
   const significantGaps = useMemo(() => {
@@ -568,7 +578,7 @@ function StoryChart({
   const axisTicks = useMemo(() => {
     const tickCount = Math.min(8, Math.floor(chartW / 70));
     const startTs = new Date(startDate).getTime();
-    const endTs = new Date(endDate).getTime();
+    const endTs = new Date(effectiveEndDate).getTime();
     const step = (endTs - startTs) / tickCount;
     return Array.from({ length: tickCount + 1 }).map((_, i) => {
       const ts = startTs + step * i;
@@ -576,7 +586,7 @@ function StoryChart({
       return { date, x: toX(date) };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate, chartW]);
+  }, [startDate, effectiveEndDate, chartW]);
 
   // ── Hover detection ──
   const handleMouseMove = useCallback(
@@ -624,6 +634,55 @@ function StoryChart({
       }}
     >
       <g transform={`translate(${M.left},${M.top})`}>
+        {/* ═══ FUTURE ZONE — greyed out area beyond today ═══ */}
+        {futureStartX != null && futureStartX < chartW && (
+          <g>
+            {/* Dimmed future background */}
+            <rect
+              x={futureStartX}
+              y={0}
+              width={chartW - futureStartX}
+              height={VIEWS_H + CONTENT_H + AXIS_H + SUBS_GAP + SUBS_H}
+              fill={BONE}
+              opacity={0.15}
+            />
+            {/* "Today" divider line */}
+            <line
+              x1={futureStartX}
+              y1={0}
+              x2={futureStartX}
+              y2={VIEWS_H + CONTENT_H}
+              stroke={SMOKE}
+              strokeWidth={1}
+              strokeDasharray="4,3"
+              opacity={0.4}
+            />
+            <text
+              x={futureStartX + 4}
+              y={12}
+              fontSize={8}
+              fill={SMOKE}
+              opacity={0.6}
+              fontWeight={600}
+            >
+              TODAY
+            </text>
+            {/* "PLANNING" label in the future zone */}
+            <text
+              x={(futureStartX + chartW) / 2}
+              y={VIEWS_H / 2}
+              textAnchor="middle"
+              fontSize={9}
+              fill={SMOKE}
+              opacity={0.3}
+              fontWeight={700}
+              letterSpacing="0.12em"
+            >
+              PLANNING WINDOW
+            </text>
+          </g>
+        )}
+
         {/* ═══ IMPACT WINDOW HIGHLIGHTS (Day 0–7 + Day 7–14) ═══ */}
         {windowHighlights?.impactWindow && (
           <g>
@@ -1871,8 +1930,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       <div
         style={{
           background: PAPER,
-          borderRadius: 12,
-          padding: '40px 24px',
+          padding: '40px 20px',
           textAlign: 'center',
           color: SMOKE,
           fontSize: 13,
@@ -1888,8 +1946,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       <div
         style={{
           background: PAPER,
-          borderRadius: 12,
-          padding: '24px',
+          padding: '24px 20px',
           color: SMOKE,
           fontSize: 13,
         }}
@@ -1947,9 +2004,8 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       ref={containerRef}
       style={{
         background: PAPER,
-        borderRadius: 12,
-        padding: '20px 24px',
-        border: `1px solid ${BONE}`,
+        borderRadius: 0,
+        padding: '16px 0',
         position: 'relative',
       }}
     >
@@ -1960,6 +2016,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           marginBottom: 8,
+          padding: '0 20px',
         }}
       >
         <div>
@@ -2050,6 +2107,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
             fontStyle: 'italic',
             marginBottom: 12,
             maxWidth: 640,
+            padding: '0 20px',
           }}
         >
           {headline}
@@ -2062,6 +2120,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           data={data}
           startDate={observationWindow.startDate}
           endDate={observationWindow.endDate}
+          projectedEndDate={data.projectedEndDate ?? null}
           width={chartWidth}
           hoveredDate={hoveredDate}
           onHover={setHoveredDate}
@@ -2084,11 +2143,13 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
 
       {/* ═══ UPLOAD DETAIL PANEL (on marker click) ═══ */}
       {selectedUploadData && (
-        <UploadDetailPanel
-          upload={selectedUploadData}
-          observation={uploadObs}
-          onClose={() => setSelectedUpload(null)}
-        />
+        <div style={{ padding: '0 20px' }}>
+          <UploadDetailPanel
+            upload={selectedUploadData}
+            observation={uploadObs}
+            onClose={() => setSelectedUpload(null)}
+          />
+        </div>
       )}
 
       {/* ═══ SUMMARY STATS ═══ */}
@@ -2098,6 +2159,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
           gap: 8,
           marginTop: 16,
+          padding: '0 20px',
         }}
       >
         <div
@@ -2175,7 +2237,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
 
       {/* ═══ WHAT WE'RE LEARNING ═══ */}
       {learningData && (
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 16, padding: '0 20px' }}>
           <div
             style={{
               fontSize: 10,
@@ -2321,7 +2383,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       )}
 
       {/* ═══ FOOTER ═══ */}
-      <div style={{ marginTop: 16, fontSize: 10, color: GHOST, textAlign: 'right' }}>
+      <div style={{ marginTop: 16, fontSize: 10, color: GHOST, textAlign: 'right', padding: '0 20px' }}>
         Last updated:{' '}
         {new Date(lastUpdated).toLocaleString('en-GB', {
           day: 'numeric',

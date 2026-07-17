@@ -124,6 +124,7 @@ type AvailableWindow = {
 type CampaignBehaviourResponse = {
   artist: { slug: string; name: string; channelState?: string };
   observationWindow: { startDate: string; endDate: string; days: number; label: string };
+  projectedEndDate: string | null; // extends chart into future for planning windows
   viewVelocity: VelocityPoint[];
   subscriberGains: SubsPoint[];
   uploads: ClassifiedUpload[];
@@ -179,7 +180,41 @@ function computeVelocity(history: ChannelSnapshot[], startDate: string): Velocit
     }
   }
 
-  return dailyGains;
+  // Interpolate null gaps in rollingAvg7d so the velocity line stays continuous.
+  // For each null run, linearly interpolate between the nearest valid values
+  // on each side. Leading/trailing nulls carry forward/backward the nearest value.
+  const interpolated = dailyGains.map((p) => ({ ...p }));
+  let i = 0;
+  while (i < interpolated.length) {
+    if (interpolated[i].rollingAvg7d == null) {
+      // Find the start of the null gap
+      const gapStart = i;
+      while (i < interpolated.length && interpolated[i].rollingAvg7d == null) i++;
+      const gapEnd = i; // first non-null after gap (or length)
+
+      const leftVal = gapStart > 0 ? interpolated[gapStart - 1].rollingAvg7d : null;
+      const rightVal = gapEnd < interpolated.length ? interpolated[gapEnd].rollingAvg7d : null;
+
+      for (let j = gapStart; j < gapEnd; j++) {
+        if (leftVal != null && rightVal != null) {
+          // Linear interpolation
+          const t = (j - gapStart + 1) / (gapEnd - gapStart + 1);
+          interpolated[j].rollingAvg7d = Math.round(leftVal + t * (rightVal - leftVal));
+        } else if (leftVal != null) {
+          // Trailing gap — carry forward
+          interpolated[j].rollingAvg7d = leftVal;
+        } else if (rightVal != null) {
+          // Leading gap — carry backward
+          interpolated[j].rollingAvg7d = rightVal;
+        }
+        // If both null, leave as null (no data at all)
+      }
+    } else {
+      i++;
+    }
+  }
+
+  return interpolated;
 }
 
 function computeSubsGains(history: ChannelSnapshot[], startDate: string): SubsPoint[] {
@@ -864,10 +899,14 @@ export async function GET(
   const totalHistoryDays = Math.round(
     (latestTs - new Date(earliestDate).getTime()) / 86400000
   );
+  // Window options — each only shows when it would display a meaningfully
+  // different range than the next-largest option. Prevents e.g. 90D and MAX
+  // showing identical data when totalHistoryDays < 90.
   const availableWindows: AvailableWindow[] = [
-    { days: 90, label: '90D', available: totalHistoryDays >= 30 },
-    { days: 180, label: '180D', available: totalHistoryDays >= 90 },
-    { days: 9999, label: 'MAX', available: true },
+    { days: 30,   label: '30D',  available: totalHistoryDays > 35 },
+    { days: 90,   label: '90D',  available: totalHistoryDays > 95 },
+    { days: 180,  label: '180D', available: totalHistoryDays > 185 },
+    { days: 9999, label: 'MAX',  available: true },
   ];
 
   // ── Compute series ──
@@ -906,6 +945,24 @@ export async function GET(
   const { deriveFromLive } = await import('@/lib/artists');
   const derived = deriveFromLive(liveSnap);
 
+  // ── Project chart end date into future for planning windows ──
+  // If the most recent long-form upload is within 14 days of the chart end,
+  // extend the timeline so the full Day 7–14 follow-up window is visible.
+  let projectedEndDate: string | null = null;
+  const longformUploads = uploads.filter((u) => u.formatMeta.isLongform);
+  if (longformUploads.length > 0) {
+    const mostRecentLF = longformUploads.reduce((a, b) =>
+      new Date(a.publishedAt) > new Date(b.publishedAt) ? a : b
+    );
+    const lfPublishTs = new Date(mostRecentLF.publishedAt).getTime();
+    const day14End = lfPublishTs + 14 * 86400000;
+    const latestDateTs = new Date(latestDate).getTime();
+    // Only project if the 14-day window extends beyond our data end
+    if (day14End > latestDateTs) {
+      projectedEndDate = new Date(day14End).toISOString().slice(0, 10);
+    }
+  }
+
   const response: CampaignBehaviourResponse = {
     artist: {
       slug: artist.slug,
@@ -918,6 +975,7 @@ export async function GET(
       days: actualDays,
       label: windowLabel,
     },
+    projectedEndDate,
     viewVelocity,
     subscriberGains,
     uploads,
