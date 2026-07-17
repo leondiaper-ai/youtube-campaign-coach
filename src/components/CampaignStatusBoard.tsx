@@ -1303,15 +1303,125 @@ export default function CampaignStatusBoard({
   buildCards.sort(sortByPriorityAndViews);
   holdCards.sort(sortByPriorityAndViews);
 
-  // ─── Behaviour view ────────────────────────────────────────────
+  // ─── Behaviour view with Spotify-style sidebar ──────────────────
   const behaviourCard = behaviourSlug ? cards.find((c) => c.slug === behaviourSlug) : null;
   if (behaviourSlug && behaviourCard) {
+    // All active (non-COLD, non-dormant) campaigns for sidebar
+    const sidebarCampaigns = cards
+      .filter((c) => c.boardStatus !== 'COLD' && c.lastUploadDaysAgo !== null && (c.lastUploadDaysAgo ?? 999) < 60)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const statusDot = (status: string) => {
+      if (status === 'PUSH') return '#1FBE7A';
+      if (status === 'FIX') return '#FF4A1C';
+      if (status === 'BUILD') return '#2C25FF';
+      return '#8A847A';
+    };
+
     return (
-      <CampaignBehaviour
-        slug={behaviourSlug}
-        artistName={behaviourCard.name}
-        onClose={() => setBehaviourSlug(null)}
-      />
+      <div style={{ display: 'flex', minHeight: '100vh', marginLeft: -20, marginRight: -20 }}>
+        {/* ─── Sidebar ─── */}
+        <div
+          style={{
+            width: 56,
+            minWidth: 56,
+            background: '#0E0E0E',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            paddingTop: 12,
+            gap: 4,
+            overflowY: 'auto',
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+          }}
+        >
+          {/* Back arrow */}
+          <button
+            onClick={() => setBehaviourSlug(null)}
+            title="Back to board"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.08)',
+              color: '#FAF7F2',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              marginBottom: 8,
+              flexShrink: 0,
+            }}
+          >
+            &#x2190;
+          </button>
+
+          {/* Campaign list */}
+          {sidebarCampaigns.map((c) => {
+            const isActive = c.slug === behaviourSlug;
+            const initials = c.name
+              .split(/\s+/)
+              .map((w) => w[0])
+              .join('')
+              .substring(0, 2)
+              .toUpperCase();
+            return (
+              <button
+                key={c.slug}
+                onClick={() => setBehaviourSlug(c.slug)}
+                title={c.name}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  border: isActive ? '2px solid #FAF7F2' : '2px solid transparent',
+                  background: isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)',
+                  color: isActive ? '#FAF7F2' : 'rgba(250,247,242,0.5)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: '0.02em',
+                  position: 'relative',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {initials}
+                {/* Status dot */}
+                <span
+                  style={{
+                    position: 'absolute',
+                    bottom: -1,
+                    right: -1,
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: statusDot(c.boardStatus),
+                    border: '1.5px solid #0E0E0E',
+                  }}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ─── Main content ─── */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <CampaignBehaviour
+            slug={behaviourSlug}
+            artistName={behaviourCard.name}
+            onClose={() => setBehaviourSlug(null)}
+            noBreakout
+          />
+        </div>
+      </div>
     );
   }
 

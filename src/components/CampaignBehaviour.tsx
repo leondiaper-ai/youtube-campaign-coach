@@ -155,6 +155,7 @@ type Props = {
   slug: string;
   artistName: string;
   onClose?: () => void;
+  noBreakout?: boolean;
 };
 
 type ShortGroupData = {
@@ -1855,7 +1856,7 @@ async function exportToPNG(
 
 // ── Main component ───────────────────────────────────────────────────────
 
-export default function CampaignBehaviour({ slug, artistName, onClose }: Props) {
+export default function CampaignBehaviour({ slug, artistName, onClose, noBreakout }: Props) {
   const [data, setData] = useState<BehaviourData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -2028,8 +2029,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           textAlign: 'center',
           color: SMOKE,
           fontSize: 13,
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)',
+          ...(noBreakout ? { width: '100%' } : { width: '100vw', marginLeft: 'calc(-50vw + 50%)' }),
         }}
       >
         Loading channel behaviour data...
@@ -2046,8 +2046,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           padding: '24px 20px',
           color: SMOKE,
           fontSize: 13,
-          width: '100vw',
-          marginLeft: 'calc(-50vw + 50%)',
+          ...(noBreakout ? { width: '100%' } : { width: '100vw', marginLeft: 'calc(-50vw + 50%)' }),
         }}
       >
         {error === '404'
@@ -2093,10 +2092,9 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         borderRadius: 0,
         padding: '12px 0',
         position: 'relative',
-        // Break out of parent max-w-4xl container to go full-width
-        width: '100vw',
-        marginLeft: 'calc(-50vw + 50%)',
         overflowX: 'hidden',
+        // Break out of parent max-w-4xl container to go full-width (skip if inside sidebar layout)
+        ...(noBreakout ? { width: '100%' } : { width: '100vw', marginLeft: 'calc(-50vw + 50%)' }),
       }}
     >
       {/* ═══ HEADER ═══ */}
