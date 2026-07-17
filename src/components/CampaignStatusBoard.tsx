@@ -1319,7 +1319,13 @@ export default function CampaignStatusBoard({
     };
 
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', marginLeft: -20, marginRight: -20 }}>
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        position: 'relative',
+      }}>
         {/* ─── Sidebar ─── */}
         <div
           style={{
