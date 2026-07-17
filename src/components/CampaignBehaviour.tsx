@@ -1222,6 +1222,8 @@ function UploadDetailPanel({
   observation: UploadObservation | null;
   onClose: () => void;
 }) {
+  const [playing, setPlaying] = useState(false);
+
   const followUpSignalColor = (signal?: string): string => {
     if (!signal) return SMOKE;
     if (signal.includes('Long-form follow-up')) return MINT;
@@ -1236,6 +1238,13 @@ function UploadDetailPanel({
     return CREAM;
   };
 
+  const thumbnailUrl = `https://img.youtube.com/vi/${upload.id}/mqdefault.jpg`;
+  const youtubeUrl = `https://www.youtube.com/watch?v=${upload.id}`;
+  const isShort = upload.format === 'short';
+  const embedUrl = isShort
+    ? `https://www.youtube.com/embed/${upload.id}?autoplay=1&loop=1`
+    : `https://www.youtube.com/embed/${upload.id}?autoplay=1`;
+
   return (
     <div
       style={{
@@ -1246,16 +1255,102 @@ function UploadDetailPanel({
         marginTop: 12,
       }}
     >
-      {/* Header */}
+      {/* Header with thumbnail */}
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          gap: 16,
           alignItems: 'flex-start',
           marginBottom: 12,
         }}
       >
-        <div>
+        {/* Video thumbnail / player */}
+        <div style={{ flexShrink: 0 }}>
+          {playing ? (
+            <div
+              style={{
+                width: isShort ? 120 : 200,
+                height: isShort ? 214 : 112,
+                borderRadius: 8,
+                overflow: 'hidden',
+                background: INK,
+              }}
+            >
+              <iframe
+                src={embedUrl}
+                width={isShort ? 120 : 200}
+                height={isShort ? 214 : 112}
+                style={{ border: 'none', borderRadius: 8 }}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <div
+              onClick={() => setPlaying(true)}
+              style={{
+                position: 'relative',
+                width: isShort ? 120 : 200,
+                height: isShort ? 214 : 112,
+                borderRadius: 8,
+                overflow: 'hidden',
+                cursor: 'pointer',
+                background: INK,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={thumbnailUrl}
+                alt={upload.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
+              {/* Play button overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  background: 'rgba(0,0,0,0.7)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <svg width={16} height={16} viewBox="0 0 16 16" fill="white">
+                  <path d="M4 2l10 6-10 6V2z" />
+                </svg>
+              </div>
+            </div>
+          )}
+          {/* Watch on YouTube link */}
+          <a
+            href={youtubeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              fontSize: 10,
+              color: SMOKE,
+              marginTop: 4,
+              textDecoration: 'none',
+            }}
+          >
+            Watch on YouTube ↗
+          </a>
+        </div>
+
+        {/* Text info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <span
               style={{
@@ -1295,6 +1390,7 @@ function UploadDetailPanel({
             fontSize: 18,
             color: SMOKE,
             padding: '0 4px',
+            flexShrink: 0,
           }}
         >
           ×
