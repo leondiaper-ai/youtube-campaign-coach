@@ -980,19 +980,25 @@ export async function GET(
   // ── Project chart end date into future for planning windows ──
   // If the most recent long-form upload is within 14 days of the chart end,
   // extend the timeline so the full Day 7–14 follow-up window is visible.
+  // ALWAYS guarantee at least 7 days of future space for planning purposes,
+  // even when no recent long-form upload exists.
   let projectedEndDate: string | null = null;
   const longformUploads = uploads.filter((u) => u.formatMeta.isLongform);
+  const latestDateTs = new Date(latestDate).getTime();
   if (longformUploads.length > 0) {
     const mostRecentLF = longformUploads.reduce((a, b) =>
       new Date(a.publishedAt) > new Date(b.publishedAt) ? a : b
     );
     const lfPublishTs = new Date(mostRecentLF.publishedAt).getTime();
     const day14End = lfPublishTs + 14 * 86400000;
-    const latestDateTs = new Date(latestDate).getTime();
     // Only project if the 14-day window extends beyond our data end
     if (day14End > latestDateTs) {
       projectedEndDate = new Date(day14End).toISOString().slice(0, 10);
     }
+  }
+  // Guarantee a minimum 7-day planning window for ALL channels
+  if (!projectedEndDate) {
+    projectedEndDate = new Date(latestDateTs + 7 * 86400000).toISOString().slice(0, 10);
   }
 
   // ── Channel stats for headline bar ──
