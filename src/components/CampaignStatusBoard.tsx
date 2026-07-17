@@ -1347,6 +1347,14 @@ export default function CampaignStatusBoard({
             borderRight: '1px solid rgba(255,255,255,0.06)',
           }}
         >
+          {/* Logos */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 20, filter: 'brightness(0) invert(1)', opacity: 0.7 }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 12, filter: 'brightness(0) invert(1)', opacity: 0.5 }} />
+          </div>
+
           {/* Back arrow */}
           <button
             onClick={() => setBehaviourSlug(null)}
