@@ -355,7 +355,7 @@ function generateHeadline(data: BehaviourData): string {
 
 // ── Chart layout constants (V5) ────────────────────────────────────────
 
-const M = { left: 20, right: 4, top: 4, bottom: 4 };
+const M = { left: 20, right: 24, top: 4, bottom: 4 };
 
 const VIEWS_H   = 340;   // Hero: view momentum line area (expanded for full-screen feel)
 const CONTENT_H = 70;    // Content markers zone (room for two-line labels + shorts)
@@ -1065,11 +1065,16 @@ function StoryChart({
             );
           })}
 
-          {/* ── Short groups — small, neutral, showing cadence ── */}
+          {/* ── Short groups — small dots with labels for visibility ── */}
           {shortGroups.map((group, i) => {
             const isSelected = group.uploads.some((u) => u.id === selectedUpload);
             const isHovered = hoveredShortGroup === group;
-            const dotR = group.count > 1 ? 3 : 2.5;
+            const dotR = group.count > 1 ? 3.5 : 3;
+            // Show the first short's title when hovered or selected
+            const firstShort = group.uploads[0];
+            const shortLabel = firstShort.shortTitle && firstShort.shortTitle.length > 12
+              ? firstShort.shortTitle.slice(0, 10) + '…'
+              : (firstShort.shortTitle || '');
             return (
               <g
                 key={`sg-${i}`}
@@ -1081,14 +1086,26 @@ function StoryChart({
                 <circle
                   cx={group.x} cy={SH_OFFSET} r={dotR}
                   fill={FORMAT_COLORS.short}
-                  opacity={isSelected || isHovered ? 1 : 0.4}
+                  opacity={isSelected || isHovered ? 1 : 0.5}
                 />
+                {/* Count badge — always visible for multi-shorts */}
                 {group.count > 1 && (
                   <text
-                    x={group.x} y={SH_OFFSET + 10} textAnchor="middle"
-                    fontSize={7} fill={SMOKE} opacity={isHovered ? 0.9 : 0.6}
+                    x={group.x} y={SH_OFFSET - dotR - 3} textAnchor="middle"
+                    fontSize={7} fill={SMOKE} fontWeight={600}
+                    opacity={isHovered || isSelected ? 0.9 : 0.5}
                   >
                     ×{group.count}
+                  </text>
+                )}
+                {/* Short title label — visible on hover/select for context */}
+                {(isHovered || isSelected) && shortLabel && (
+                  <text
+                    x={group.x} y={SH_OFFSET + dotR + 10} textAnchor="middle"
+                    fontSize={7} fill={FORMAT_COLORS.short} fontWeight={500}
+                    opacity={0.8}
+                  >
+                    {shortLabel}
                   </text>
                 )}
               </g>
@@ -1136,7 +1153,7 @@ function StoryChart({
           )}
           {/* SUBS label */}
           <text
-            x={-6} y={SUBS_H / 2 + 3} textAnchor="end"
+            x={6} y={SUBS_H / 2 + 3} textAnchor="start"
             fontSize={7} fill={MINT} fontWeight={600} opacity={0.5}
           >
             SUBS
