@@ -160,12 +160,6 @@ function computeVelocity(
 
   if (filtered.length < 2) return [];
 
-  // Is this channel significant enough that zero-gain likely means stale API data?
-  // Channels with >50K subs or >1M total views should always be gaining some views.
-  const lastViews = filtered[filtered.length - 1].views ?? 0;
-  const isSignificant =
-    (totalSubs != null && totalSubs > 50_000) || lastViews > 1_000_000;
-
   // Compute daily gains — time-aware: divide by actual days between snapshots
   // so multi-day gaps from LOW-priority scheduling don't create spikes.
   const dailyGains: VelocityPoint[] = [];
@@ -190,14 +184,6 @@ function computeVelocity(
         (new Date(curr.ts).getTime() - new Date(prev.ts).getTime()) / 86400000
       )
     );
-
-    // For significant channels, treat zero gain as stale API data (null),
-    // not genuine zero views. The interpolation system will fill these in
-    // with a smooth transition instead of dropping the line to the floor.
-    if (totalGain === 0 && isSignificant) {
-      dailyGains.push({ date: curr.ts, dailyViewGain: null, rollingAvg7d: null });
-      continue;
-    }
 
     // Distribute the gain evenly across the actual number of days
     const dailyRate = Math.round(totalGain / daysBetween);
@@ -266,6 +252,35 @@ function computeVelocity(
     const next = interpolated[j + 1].rollingAvg7d;
     if (prev != null && curr != null && next != null) {
       smoothed[j].rollingAvg7d = Math.round(prev * 0.2 + curr * 0.6 + next * 0.2);
+    }
+  }
+
+  // ── Velocity floor for significant channels ──
+  // YouTube's API can return stale/cached viewCounts, producing 0-gain periods
+  // that drop the line to the floor. For channels with real audience (>50K subs
+  // or >1M total views), this is almost never genuine — they're always getting
+  // some passive views. Instead of nulling the data (which loses shape), we
+  // apply a soft floor: the line can go low but never hits absolute zero.
+  // Floor = 5% of the median non-zero velocity in the window.
+  const lastViews = filtered[filtered.length - 1].views ?? 0;
+  const isSignificant =
+    (totalSubs != null && totalSubs > 50_000) || lastViews > 1_000_000;
+
+  if (isSignificant) {
+    const nonZeroVals = smoothed
+      .map((p) => p.rollingAvg7d)
+      .filter((v): v is number => v != null && v > 0)
+      .sort((a, b) => a - b);
+
+    if (nonZeroVals.length > 0) {
+      const median = nonZeroVals[Math.floor(nonZeroVals.length / 2)];
+      const floor = Math.max(1, Math.round(median * 0.05));
+
+      for (const pt of smoothed) {
+        if (pt.rollingAvg7d != null && pt.rollingAvg7d < floor) {
+          pt.rollingAvg7d = floor;
+        }
+      }
     }
   }
 
