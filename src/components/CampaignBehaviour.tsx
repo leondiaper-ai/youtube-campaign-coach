@@ -1895,7 +1895,8 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       .finally(() => setLoading(false));
   }, [slug, periodDays]);
 
-  // Responsive width
+  // Responsive width — re-run when loading changes since containerRef
+  // points to different DOM elements during loading vs loaded states
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
@@ -1905,7 +1906,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   // Fetch upload observation when selected
   useEffect(() => {
@@ -2004,15 +2005,31 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
     setPeriodDays(days);
   }, []);
 
+  const dirLabel: Record<string, string> = {
+    accelerating: 'Accelerating',
+    stable: 'Stable',
+    declining: 'Declining',
+    insufficient: '—',
+  };
+  const dirColor: Record<string, string> = {
+    accelerating: MINT,
+    stable: SMOKE,
+    declining: SIGNAL,
+    insufficient: GHOST,
+  };
+
   if (loading) {
     return (
       <div
+        ref={containerRef}
         style={{
           background: PAPER,
           padding: '40px 20px',
           textAlign: 'center',
           color: SMOKE,
           fontSize: 13,
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
         }}
       >
         Loading channel behaviour data...
@@ -2023,11 +2040,14 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
   if (error || !data) {
     return (
       <div
+        ref={containerRef}
         style={{
           background: PAPER,
           padding: '24px 20px',
           color: SMOKE,
           fontSize: 13,
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
         }}
       >
         {error === '404'
@@ -2064,19 +2084,6 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
   } else if (uploads.length === 0) {
     activityState = 'No uploads';
   }
-
-  const dirLabel: Record<string, string> = {
-    accelerating: 'Accelerating',
-    stable: 'Stable',
-    declining: 'Declining',
-    insufficient: '—',
-  };
-  const dirColor: Record<string, string> = {
-    accelerating: MINT,
-    stable: SMOKE,
-    declining: SIGNAL,
-    insufficient: GHOST,
-  };
 
   return (
     <div
