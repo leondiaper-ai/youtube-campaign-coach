@@ -1323,11 +1323,28 @@ export default function CampaignStatusBoard({
     return (
       <div style={{
         display: 'flex',
+        flexDirection: 'column',
         minHeight: '100vh',
         width: '100vw',
         marginLeft: 'calc(-50vw + 50%)',
         position: 'relative',
       }}>
+        {/* ─── Logo strip above sidebar ─── */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '12px 20px',
+          background: PAPER,
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 24 }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
+        </div>
+
+        {/* ─── Sidebar + Content row ─── */}
+        <div style={{ display: 'flex', flex: 1 }}>
         {/* ─── Sidebar ─── */}
         <div
           style={{
@@ -1343,18 +1360,10 @@ export default function CampaignStatusBoard({
             overflowY: 'auto',
             position: 'sticky',
             top: 0,
-            height: '100vh',
+            height: 'calc(100vh - 52px)',
             borderRight: '1px solid rgba(255,255,255,0.06)',
           }}
         >
-          {/* Logos */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 20, filter: 'brightness(0) invert(1)', opacity: 0.7 }} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 12, filter: 'brightness(0) invert(1)', opacity: 0.5 }} />
-          </div>
-
           {/* Back arrow */}
           <button
             onClick={() => setBehaviourSlug(null)}
@@ -1456,6 +1465,7 @@ export default function CampaignStatusBoard({
             noBreakout
           />
         </div>
+        </div>{/* close sidebar+content row */}
       </div>
     );
   }
