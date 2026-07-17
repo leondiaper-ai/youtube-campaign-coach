@@ -126,8 +126,16 @@ type AvailableWindow = {
   available: boolean;
 };
 
+type ChannelStats = {
+  totalSubs: number | null;
+  totalViews: number | null;
+  subsPerMille: number | null;
+  weeklyAvgViews: number | null;
+};
+
 type BehaviourData = {
   artist: { slug: string; name: string; channelState?: string };
+  channelStats?: ChannelStats;
   observationWindow: { startDate: string; endDate: string; days: number; label: string };
   projectedEndDate: string | null;
   viewVelocity: VelocityPoint[];
@@ -346,9 +354,9 @@ function generateHeadline(data: BehaviourData): string {
 
 // ── Chart layout constants (V5) ────────────────────────────────────────
 
-const M = { left: 44, right: 16, top: 4, bottom: 4 };
+const M = { left: 28, right: 8, top: 4, bottom: 4 };
 
-const VIEWS_H   = 320;   // Hero: view momentum line area (expanded for full-screen feel)
+const VIEWS_H   = 340;   // Hero: view momentum line area (expanded for full-screen feel)
 const CONTENT_H = 70;    // Content markers zone (room for two-line labels + shorts)
 const AXIS_H    = 20;    // Date tick labels
 const SUBS_GAP  = 6;     // Gap between axis and subs strip
@@ -395,6 +403,88 @@ function computeLabelPositions(
   }
 
   return positions;
+}
+
+// ── Smooth curve helper (monotone cubic Hermite interpolation) ────────
+
+/**
+ * Convert an array of {x, y} points into a smooth SVG path using
+ * monotone cubic Hermite splines (Fritsch–Carlson method).
+ * Produces curves that pass through every data point and never overshoot
+ * between points — ideal for time-series like Spotify's smooth lines.
+ */
+function toSmoothPath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return '';
+  if (points.length === 1) return `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+  if (points.length === 2) {
+    return `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)} L${points[1].x.toFixed(1)},${points[1].y.toFixed(1)}`;
+  }
+
+  const n = points.length;
+
+  // Step 1: compute secants (slopes between consecutive points)
+  const delta: number[] = [];
+  const h: number[] = [];
+  for (let i = 0; i < n - 1; i++) {
+    h.push(points[i + 1].x - points[i].x);
+    delta.push(h[i] === 0 ? 0 : (points[i + 1].y - points[i].y) / h[i]);
+  }
+
+  // Step 2: Fritsch–Carlson monotone tangent slopes
+  const m: number[] = new Array(n);
+  m[0] = delta[0];
+  m[n - 1] = delta[n - 2];
+  for (let i = 1; i < n - 1; i++) {
+    if (delta[i - 1] * delta[i] <= 0) {
+      m[i] = 0; // flat at local extrema
+    } else {
+      m[i] = (delta[i - 1] + delta[i]) / 2;
+    }
+  }
+
+  // Step 3: Fritsch–Carlson correction to ensure monotonicity
+  for (let i = 0; i < n - 1; i++) {
+    if (Math.abs(delta[i]) < 1e-12) {
+      m[i] = 0;
+      m[i + 1] = 0;
+    } else {
+      const alpha = m[i] / delta[i];
+      const beta = m[i + 1] / delta[i];
+      const s = alpha * alpha + beta * beta;
+      if (s > 9) {
+        const t = 3 / Math.sqrt(s);
+        m[i] = t * alpha * delta[i];
+        m[i + 1] = t * beta * delta[i];
+      }
+    }
+  }
+
+  // Step 4: build SVG cubic bezier path
+  let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const dx = (points[i + 1].x - points[i].x) / 3;
+    const cp1x = points[i].x + dx;
+    const cp1y = points[i].y + m[i] * dx;
+    const cp2x = points[i + 1].x - dx;
+    const cp2y = points[i + 1].y - m[i + 1] * dx;
+    path += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${points[i + 1].x.toFixed(1)},${points[i + 1].y.toFixed(1)}`;
+  }
+
+  return path;
+}
+
+/**
+ * Build a smooth closed area path: smooth line + straight baseline close.
+ */
+function toSmoothArea(
+  points: { x: number; y: number }[],
+  baselineY: number,
+): string {
+  if (points.length < 2) return '';
+  const line = toSmoothPath(points);
+  const last = points[points.length - 1];
+  const first = points[0];
+  return `${line} L${last.x.toFixed(1)},${baselineY.toFixed(1)} L${first.x.toFixed(1)},${baselineY.toFixed(1)} Z`;
 }
 
 // ── Story Chart ─────────────────────────────────────────────────────────
@@ -455,19 +545,13 @@ function StoryChart({
     return VIEWS_H - ((val - velMin) / velRange) * VIEWS_H;
   }
 
-  // View line + subtle area
-  const velLineParts = velocityValid.map((p, i) => {
-    const x = toX(p.date);
-    const y = velToY(p.rollingAvg7d!);
-    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  const velLine = velLineParts.join(' ');
-  const velArea =
-    velocityValid.length > 1
-      ? velLine +
-        ` L${toX(velocityValid[velocityValid.length - 1].date).toFixed(1)},${VIEWS_H}` +
-        ` L${toX(velocityValid[0].date).toFixed(1)},${VIEWS_H} Z`
-      : '';
+  // View line + subtle area — smooth monotone cubic curves
+  const velPoints = velocityValid.map((p) => ({
+    x: toX(p.date),
+    y: velToY(p.rollingAvg7d!),
+  }));
+  const velLine = toSmoothPath(velPoints);
+  const velArea = toSmoothArea(velPoints, VIEWS_H);
 
   // ── Subscriber sparkline data ──
   const subsValid = data.subscriberGains.filter((d) => d.rollingAvg7d != null);
@@ -484,18 +568,13 @@ function StoryChart({
     return SUBS_H - ((val - subsMin) / subsRange) * SUBS_H;
   }
 
-  const subsLineParts = subsValid.map((p, i) => {
-    const x = toX(p.date);
-    const y = subsToStripY(p.rollingAvg7d!);
-    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  const subsSparkline = subsLineParts.join(' ');
-  const subsSparkArea =
-    subsValid.length > 1
-      ? subsSparkline +
-        ` L${toX(subsValid[subsValid.length - 1].date).toFixed(1)},${SUBS_H}` +
-        ` L${toX(subsValid[0].date).toFixed(1)},${SUBS_H} Z`
-      : '';
+  // Subs sparkline — smooth monotone cubic curves
+  const subsPoints = subsValid.map((p) => ({
+    x: toX(p.date),
+    y: subsToStripY(p.rollingAvg7d!),
+  }));
+  const subsSparkline = toSmoothPath(subsPoints);
+  const subsSparkArea = toSmoothArea(subsPoints, SUBS_H);
 
   // ── Content markers ──
   const longform = data.uploads.filter((u) => u.formatMeta.isLongform);
@@ -2005,7 +2084,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
       style={{
         background: PAPER,
         borderRadius: 0,
-        padding: '16px 0',
+        padding: '12px 0',
         position: 'relative',
       }}
     >
@@ -2097,6 +2176,73 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         </div>
       </div>
 
+      {/* ═══ CHANNEL STATS BAR (Spotify-style) ═══ */}
+      {data.channelStats && (
+        <div
+          style={{
+            display: 'flex',
+            gap: 0,
+            padding: '0 20px',
+            marginBottom: 12,
+            borderBottom: `1px solid ${BONE}`,
+            paddingBottom: 12,
+          }}
+        >
+          {data.channelStats.totalSubs != null && (
+            <div style={{ paddingRight: 24 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.1 }}>
+                {formatNum(data.channelStats.totalSubs)}
+              </div>
+              <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>Subscribers</div>
+            </div>
+          )}
+          {data.channelStats.totalViews != null && (
+            <div style={{ paddingRight: 24 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.1 }}>
+                {formatNum(data.channelStats.totalViews)}
+              </div>
+              <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>Total Views</div>
+            </div>
+          )}
+          {data.channelStats.weeklyAvgViews != null && (
+            <div style={{ paddingRight: 24 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.1 }}>
+                {formatNum(data.channelStats.weeklyAvgViews)}
+              </div>
+              <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>Views/Week</div>
+            </div>
+          )}
+          {data.channelStats.subsPerMille != null && (
+            <div style={{ paddingRight: 24 }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: INK, lineHeight: 1.1 }}>
+                {data.channelStats.subsPerMille.toFixed(1)}
+              </div>
+              <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>
+                Subs/1K Views
+              </div>
+            </div>
+          )}
+          <div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color:
+                  activityState === 'Active'
+                    ? MINT
+                    : activityState === 'Slowing'
+                      ? SUN
+                      : SMOKE,
+                lineHeight: 1.1,
+              }}
+            >
+              {activityState}
+            </div>
+            <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>Channel State</div>
+          </div>
+        </div>
+      )}
+
       {/* ═══ HEADLINE INSIGHT ═══ */}
       {headline && (
         <div
@@ -2152,86 +2298,47 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         </div>
       )}
 
-      {/* ═══ SUMMARY STATS ═══ */}
+      {/* ═══ CONTENT SUMMARY (compact) ═══ */}
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-          gap: 8,
-          marginTop: 16,
+          display: 'flex',
+          gap: 16,
+          marginTop: 12,
           padding: '0 20px',
+          fontSize: 11,
+          color: SMOKE,
         }}
       >
-        <div
-          style={{
-            background: 'white',
-            border: `1px solid ${BONE}`,
-            borderRadius: 8,
-            padding: '8px 12px',
-          }}
-        >
-          <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>{uploads.length}</div>
-          <div style={{ fontSize: 10, color: SMOKE }}>Uploads</div>
-        </div>
-        <div
-          style={{
-            background: 'white',
-            border: `1px solid ${BONE}`,
-            borderRadius: 8,
-            padding: '8px 12px',
-          }}
-        >
-          <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>
+        <span>
+          <strong style={{ color: INK }}>{uploads.length}</strong> uploads
+        </span>
+        <span>
+          <strong style={{ color: INK }}>
             {uploads.filter((u) => u.formatMeta.isLongform).length}
-          </div>
-          <div style={{ fontSize: 10, color: SMOKE }}>Long-form</div>
-        </div>
-        <div
-          style={{
-            background: 'white',
-            border: `1px solid ${BONE}`,
-            borderRadius: 8,
-            padding: '8px 12px',
-          }}
-        >
-          <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>
+          </strong>{' '}
+          long-form
+        </span>
+        <span>
+          <strong style={{ color: INK }}>
             {uploads.filter((u) => u.format === 'short').length}
-          </div>
-          <div style={{ fontSize: 10, color: SMOKE }}>Shorts</div>
-        </div>
-        <div
-          style={{
-            background: 'white',
-            border: `1px solid ${BONE}`,
-            borderRadius: 8,
-            padding: '8px 12px',
-          }}
-        >
-          <div style={{ fontSize: 20, fontWeight: 700, color: INK }}>
+          </strong>{' '}
+          shorts
+        </span>
+        <span>
+          <strong style={{ color: INK }}>
             {data.gaps.filter((g) => g.type === 'all_content').length}
-          </div>
-          <div style={{ fontSize: 10, color: SMOKE }}>Gaps (7d+)</div>
-        </div>
+          </strong>{' '}
+          gaps (7d+)
+        </span>
         {daysSinceLastUpload != null && (
-          <div
-            style={{
-              background: 'white',
-              border: `1px solid ${BONE}`,
-              borderRadius: 8,
-              padding: '8px 12px',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: daysSinceLastUpload > 14 ? SIGNAL : INK,
-              }}
+          <span>
+            <strong
+              style={{ color: daysSinceLastUpload > 14 ? SIGNAL : INK }}
             >
               {daysSinceLastUpload}d
-            </div>
-            <div style={{ fontSize: 10, color: SMOKE }}>Since Last Upload</div>
-          </div>
+            </strong>{' '}
+            since last upload
+          </span>
         )}
       </div>
 

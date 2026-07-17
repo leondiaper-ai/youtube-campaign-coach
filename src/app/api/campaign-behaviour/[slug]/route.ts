@@ -121,8 +121,16 @@ type AvailableWindow = {
   available: boolean;
 };
 
+type ChannelStats = {
+  totalSubs: number | null;
+  totalViews: number | null;
+  subsPerMille: number | null; // subs per 1,000 views
+  weeklyAvgViews: number | null; // avg daily views × 7 from recent history
+};
+
 type CampaignBehaviourResponse = {
   artist: { slug: string; name: string; channelState?: string };
+  channelStats: ChannelStats;
   observationWindow: { startDate: string; endDate: string; days: number; label: string };
   projectedEndDate: string | null; // extends chart into future for planning windows
   viewVelocity: VelocityPoint[];
@@ -963,12 +971,40 @@ export async function GET(
     }
   }
 
+  // ── Channel stats for headline bar ──
+  const totalSubs = liveSnap.subs ?? null;
+  const totalViews = liveSnap.views ?? null;
+  const subsPerMille =
+    totalSubs != null && totalViews != null && totalViews > 0
+      ? Math.round((totalSubs / totalViews) * 1000 * 10) / 10
+      : null;
+
+  // Weekly avg views from recent velocity data
+  const recentVelocity = viewVelocity.slice(-14);
+  const validDailyGains = recentVelocity
+    .map((v) => v.dailyViewGain)
+    .filter((g): g is number => g != null && g >= 0);
+  const weeklyAvgViews =
+    validDailyGains.length > 0
+      ? Math.round(
+          (validDailyGains.reduce((s, g) => s + g, 0) / validDailyGains.length) * 7
+        )
+      : null;
+
+  const channelStats: ChannelStats = {
+    totalSubs,
+    totalViews,
+    subsPerMille,
+    weeklyAvgViews,
+  };
+
   const response: CampaignBehaviourResponse = {
     artist: {
       slug: artist.slug,
       name: artist.name,
       channelState: derived?.status,
     },
+    channelStats,
     observationWindow: {
       startDate: actualStartDate,
       endDate: latestDate,
