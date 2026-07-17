@@ -1820,13 +1820,9 @@ async function exportToPNG(
   ctx.fillRect(0, 0, W, H);
 
   // Header
-  ctx.fillStyle = SMOKE;
-  ctx.font = '11px Inter, system-ui, sans-serif';
-  ctx.fillText('Virgin Music × YouTube', 40, 38);
   ctx.fillStyle = SIGNAL;
   ctx.font = 'bold 11px Inter, system-ui, sans-serif';
-  const brandW = ctx.measureText('Virgin Music × YouTube  ').width;
-  ctx.fillText('CHANNEL BEHAVIOUR', 40 + brandW, 38);
+  ctx.fillText('CHANNEL BEHAVIOUR', 40, 38);
   // Reset for artist name below
   ctx.fillStyle = INK;
   ctx.font = 'bold 28px Inter, system-ui, sans-serif';
@@ -2227,13 +2223,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/virgin-music-logo.svg" alt="Virgin Music" style={{ height: 18, opacity: 0.6 }} />
-            <span style={{ fontSize: 14, fontWeight: 300, color: `${INK}25` }}>×</span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 13, opacity: 0.6 }} />
-            <span style={{ fontSize: 14, fontWeight: 300, color: `${INK}15`, margin: '0 2px' }}>|</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <span
               style={{
                 fontSize: 10,
