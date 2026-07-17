@@ -84,6 +84,8 @@ type CardData = {
   channelHealth: string;
   campaignSignal: string;
   campaignSignalLabel: string;
+  /** YouTube channel thumbnail URL */
+  thumbnail?: string;
   /** Artist relationship type — value model only applies to 'managed' */
   artistType?: 'managed' | 'observed' | 'external';
   /** Revenue ownership — only 'virgin' gets value calculations */
@@ -1329,18 +1331,20 @@ export default function CampaignStatusBoard({
         {/* ─── Sidebar ─── */}
         <div
           style={{
-            width: 56,
-            minWidth: 56,
-            background: '#0E0E0E',
+            width: 72,
+            minWidth: 72,
+            background: '#1A1A1A',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            paddingTop: 12,
-            gap: 4,
+            paddingTop: 16,
+            paddingBottom: 16,
+            gap: 6,
             overflowY: 'auto',
             position: 'sticky',
             top: 0,
             height: '100vh',
+            borderRight: '1px solid rgba(255,255,255,0.06)',
           }}
         >
           {/* Back arrow */}
@@ -1348,19 +1352,20 @@ export default function CampaignStatusBoard({
             onClick={() => setBehaviourSlug(null)}
             title="Back to board"
             style={{
-              width: 36,
-              height: 36,
+              width: 42,
+              height: 42,
               borderRadius: '50%',
               border: 'none',
-              background: 'rgba(255,255,255,0.08)',
-              color: '#FAF7F2',
+              background: 'rgba(255,255,255,0.06)',
+              color: 'rgba(250,247,242,0.7)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 16,
-              marginBottom: 8,
+              fontSize: 18,
+              marginBottom: 10,
               flexShrink: 0,
+              transition: 'background 0.15s ease',
             }}
           >
             &#x2190;
@@ -1381,36 +1386,52 @@ export default function CampaignStatusBoard({
                 onClick={() => setBehaviourSlug(c.slug)}
                 title={c.name}
                 style={{
-                  width: 36,
-                  height: 36,
+                  width: 42,
+                  height: 42,
                   borderRadius: '50%',
-                  border: isActive ? '2px solid #FAF7F2' : '2px solid transparent',
-                  background: isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)',
+                  border: isActive ? '2.5px solid #FAF7F2' : '2.5px solid transparent',
+                  background: c.thumbnail ? 'transparent' : (isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'),
                   color: isActive ? '#FAF7F2' : 'rgba(250,247,242,0.5)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: 700,
                   letterSpacing: '0.02em',
                   position: 'relative',
                   flexShrink: 0,
                   transition: 'all 0.15s ease',
+                  padding: 0,
+                  overflow: 'hidden',
+                  opacity: isActive ? 1 : 0.7,
                 }}
               >
-                {initials}
+                {c.thumbnail ? (
+                  <img
+                    src={c.thumbnail}
+                    alt={c.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '50%',
+                    }}
+                  />
+                ) : (
+                  initials
+                )}
                 {/* Status dot */}
                 <span
                   style={{
                     position: 'absolute',
-                    bottom: -1,
-                    right: -1,
-                    width: 8,
-                    height: 8,
+                    bottom: 0,
+                    right: 0,
+                    width: 10,
+                    height: 10,
                     borderRadius: '50%',
                     background: statusDot(c.boardStatus),
-                    border: '1.5px solid #0E0E0E',
+                    border: '2px solid #1A1A1A',
                   }}
                 />
               </button>

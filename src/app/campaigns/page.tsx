@@ -114,6 +114,8 @@ export type StatusCardData = {
   channelHealth: string;
   campaignSignal: string;
   campaignSignalLabel: string;
+  // YouTube channel thumbnail URL
+  thumbnail?: string;
   // Artist type for value model scoping
   artistType?: 'managed' | 'observed' | 'external';
   // Revenue ownership — only 'virgin' gets value calculations
@@ -462,6 +464,7 @@ async function loadCard(
     channelHealth: chHealth,
     campaignSignal: campSig.signal,
     campaignSignalLabel: campSig.label,
+    thumbnail: snap.thumbnail ?? undefined,
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
     structureWarning: checkContentStructure(snap.recentUploads ?? []),
