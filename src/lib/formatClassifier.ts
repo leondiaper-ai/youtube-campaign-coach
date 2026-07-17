@@ -124,6 +124,19 @@ export function classifyUploadFormat(upload: RecentUpload): UploadFormat {
 
   // ── Level 2: Long-form sub-classification ──────────────────────────
   const haystack = `${upload.title} ${upload.description ?? ''}`.toLowerCase();
+  const titleOnly = upload.title.toLowerCase();
+
+  // ── Early OMV guard (title-only) ──────────────────────────────────
+  // Check TITLE for high-confidence OMV markers BEFORE description-based
+  // checks. This prevents premiered OMVs from being classified as "live"
+  // (via actualStart) and tour keywords in descriptions from overriding
+  // clear title signals like "(Official)" or "(Official Music Video)".
+  if (
+    /\b(official\s+(music\s+)?video|music\s+video)\b/.test(titleOnly) ||
+    /\(official\)/.test(titleOnly)
+  ) {
+    return 'omv';
+  }
 
   // Acoustic / Stripped / Unplugged — check BEFORE live to avoid
   // "Acoustic Live Session" → live when acoustic is the primary format
@@ -250,13 +263,24 @@ export function extractShortTitle(fullTitle: string, artistName?: string): strin
 
   // Step 1: Remove artist name prefix (Artist - , Artist | , Artist: )
   if (artistName) {
+    // Normalize slashes to spaces in both title and artist name so
+    // "Man/Woman/Chainsaw" matches stored name "Man Woman Chainsaw"
+    const normalizedTitle = title.replace(/\//g, ' ').replace(/\s+/g, ' ');
+    const normalizedArtist = artistName.replace(/\//g, ' ').replace(/\s+/g, ' ');
+
     // Build a pattern that matches the artist name followed by a separator
-    const escaped = artistName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = normalizedArtist.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const prefixPattern = new RegExp(
-      `^${escaped}(?:\\s+(?:feat\\.?|ft\\.?|x|&|and|with)\\s+[^\\-–—|:]+)?\\s*[-–—|:]\\s*`,
+      `^${escaped}(?:\\s+(?:feat(?:uring)?\\.?|ft\\.?|x|&|and|with)\\s+[^\\-–—|:]+)?\\s*[-–—|:]\\s*`,
       'i'
     );
-    title = title.replace(prefixPattern, '');
+    // Apply to normalized version, then strip same length from original
+    const normalizedResult = normalizedTitle.replace(prefixPattern, '');
+    if (normalizedResult !== normalizedTitle) {
+      // Prefix was stripped — calculate how many chars were removed
+      const charsRemoved = normalizedTitle.length - normalizedResult.length;
+      title = title.slice(charsRemoved);
+    }
   } else {
     // No artist name — try to split on common separators
     const sepMatch = title.match(/^[^-–—|]+?\s*[-–—|]\s+(.+)$/);
@@ -267,7 +291,7 @@ export function extractShortTitle(fullTitle: string, artistName?: string): strin
 
   // Step 2: Remove format identifiers in parentheses or brackets
   title = title.replace(
-    /\s*[\(\[](official\s*(music\s*)?video|lyric(?:s)?\s*video|visuali[sz]er|audio|official\s+audio|live(?:\s+(?:at|from|in)\s+[^\)]+)?|acoustic(?:\s+version)?|behind\s+the\s+scenes|making\s+of|bts|official|hd|4k|hq|\d+p|remastered|explicit|clean|full\s+video|music\s+video|mv)[\)\]]/gi,
+    /\s*[\(\[](official\s*(music\s*)?video|official\s+lyric(?:s)?\s*video|official\s+visuali[sz]er|lyric(?:s)?\s*visuali[sz]er|lyric(?:s)?\s*video|visuali[sz]er|audio|official\s+audio|live(?:\s+(?:at|from|in)\s+[^\)]+)?|acoustic(?:\s+version)?|behind\s+the\s+scenes|making\s+of|bts|official|hd|4k|hq|\d+p|remastered|explicit|clean|full\s+video|music\s+video|mv)[\)\]]/gi,
     ''
   );
 
