@@ -505,13 +505,18 @@ export default async function CampaignsPage() {
       className="min-h-screen"
       style={{ background: PAPER, color: INK, fontFamily: 'system-ui, -apple-system, sans-serif' }}
     >
-      <div className="max-w-4xl mx-auto px-5 py-10">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/40 mb-1">
-              YouTube Campaign System
+      <div className="max-w-6xl mx-auto px-5 py-10">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/virgin-music-logo.svg" alt="Virgin Music" style={{ height: 22, opacity: 0.7 }} />
+            <span className="text-ink/15 text-[18px] font-light">×</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
+            <span className="text-ink/15 text-[18px] font-light ml-2">|</span>
+            <div className="ml-2">
+              <h1 className="font-black text-[22px] leading-tight">Campaign Status Board</h1>
             </div>
-            <h1 className="font-black text-[28px] leading-tight">Campaign Status Board</h1>
           </div>
           <div className="flex items-center gap-4">
             <Link
