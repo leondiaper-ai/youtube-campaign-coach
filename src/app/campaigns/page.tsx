@@ -506,24 +506,6 @@ export default async function CampaignsPage() {
       style={{ background: PAPER, color: INK, fontFamily: 'system-ui, -apple-system, sans-serif' }}
     >
       <div className="max-w-6xl mx-auto px-5 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 28 }} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/cockpit"
-              className="text-[11px] uppercase tracking-[0.14em] text-ink/35 hover:text-ink/60 transition-colors"
-            >
-              All Artists
-            </Link>
-            <span className="text-[10px] text-ink/20">·</span>
-            <span className="text-[10px] uppercase tracking-[0.14em] text-ink/25">Live</span>
-          </div>
-        </div>
 
         <CampaignStatusBoard
           initialCards={cards}
