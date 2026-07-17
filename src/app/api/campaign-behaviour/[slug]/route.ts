@@ -148,7 +148,11 @@ type CampaignBehaviourResponse = {
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
-function computeVelocity(history: ChannelSnapshot[], startDate: string): VelocityPoint[] {
+function computeVelocity(
+  history: ChannelSnapshot[],
+  startDate: string,
+  totalSubs: number | null = null,
+): VelocityPoint[] {
   const startTs = new Date(startDate).getTime();
   const filtered = history.filter(
     (h) => new Date(h.ts).getTime() >= startTs && h.views != null
@@ -156,7 +160,14 @@ function computeVelocity(history: ChannelSnapshot[], startDate: string): Velocit
 
   if (filtered.length < 2) return [];
 
-  // Compute daily gains
+  // Is this channel significant enough that zero-gain likely means stale API data?
+  // Channels with >50K subs or >1M total views should always be gaining some views.
+  const lastViews = filtered[filtered.length - 1].views ?? 0;
+  const isSignificant =
+    (totalSubs != null && totalSubs > 50_000) || lastViews > 1_000_000;
+
+  // Compute daily gains — time-aware: divide by actual days between snapshots
+  // so multi-day gaps from LOW-priority scheduling don't create spikes.
   const dailyGains: VelocityPoint[] = [];
   for (let i = 1; i < filtered.length; i++) {
     const prev = filtered[i - 1];
@@ -165,11 +176,34 @@ function computeVelocity(history: ChannelSnapshot[], startDate: string): Velocit
       dailyGains.push({ date: curr.ts, dailyViewGain: null, rollingAvg7d: null });
       continue;
     }
-    const gain = curr.views - prev.views;
+    const totalGain = curr.views - prev.views;
     // Guard against negative gains (can happen if YouTube adjusts view counts)
+    if (totalGain < 0) {
+      dailyGains.push({ date: curr.ts, dailyViewGain: null, rollingAvg7d: null });
+      continue;
+    }
+
+    // Calculate actual days between snapshots (may be >1 for LOW-priority channels)
+    const daysBetween = Math.max(
+      1,
+      Math.round(
+        (new Date(curr.ts).getTime() - new Date(prev.ts).getTime()) / 86400000
+      )
+    );
+
+    // For significant channels, treat zero gain as stale API data (null),
+    // not genuine zero views. The interpolation system will fill these in
+    // with a smooth transition instead of dropping the line to the floor.
+    if (totalGain === 0 && isSignificant) {
+      dailyGains.push({ date: curr.ts, dailyViewGain: null, rollingAvg7d: null });
+      continue;
+    }
+
+    // Distribute the gain evenly across the actual number of days
+    const dailyRate = Math.round(totalGain / daysBetween);
     dailyGains.push({
       date: curr.ts,
-      dailyViewGain: gain >= 0 ? gain : null,
+      dailyViewGain: dailyRate,
       rollingAvg7d: null,
     });
   }
@@ -942,7 +976,7 @@ export async function GET(
   ];
 
   // ── Compute series ──
-  const viewVelocity = computeVelocity(history, actualStartDate);
+  const viewVelocity = computeVelocity(history, actualStartDate, liveSnap.subs ?? null);
   const subscriberGains = computeSubsGains(history, actualStartDate);
 
   // ── Classify uploads ──
