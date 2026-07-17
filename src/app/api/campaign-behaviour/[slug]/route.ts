@@ -222,7 +222,20 @@ function computeVelocity(history: ChannelSnapshot[], startDate: string): Velocit
     }
   }
 
-  return interpolated;
+  // Second smoothing pass: 3-point weighted average to soften remaining spikes.
+  // This produces a Spotify-style smooth line while preserving overall shape.
+  // Weights: [0.2, 0.6, 0.2] — center-heavy to keep shape but gentle transitions.
+  const smoothed = interpolated.map((p) => ({ ...p }));
+  for (let j = 1; j < smoothed.length - 1; j++) {
+    const prev = interpolated[j - 1].rollingAvg7d;
+    const curr = interpolated[j].rollingAvg7d;
+    const next = interpolated[j + 1].rollingAvg7d;
+    if (prev != null && curr != null && next != null) {
+      smoothed[j].rollingAvg7d = Math.round(prev * 0.2 + curr * 0.6 + next * 0.2);
+    }
+  }
+
+  return smoothed;
 }
 
 function computeSubsGains(history: ChannelSnapshot[], startDate: string): SubsPoint[] {
@@ -262,7 +275,18 @@ function computeSubsGains(history: ChannelSnapshot[], startDate: string): SubsPo
     }
   }
 
-  return dailyGains;
+  // Second smoothing pass: 3-point weighted average
+  const smoothed = dailyGains.map((p) => ({ ...p }));
+  for (let j = 1; j < smoothed.length - 1; j++) {
+    const prev = dailyGains[j - 1].rollingAvg7d;
+    const curr = dailyGains[j].rollingAvg7d;
+    const next = dailyGains[j + 1].rollingAvg7d;
+    if (prev != null && curr != null && next != null) {
+      smoothed[j].rollingAvg7d = Math.round(prev * 0.2 + curr * 0.6 + next * 0.2);
+    }
+  }
+
+  return smoothed;
 }
 
 function detectGaps(uploads: ClassifiedUpload[]): ContentGap[] {

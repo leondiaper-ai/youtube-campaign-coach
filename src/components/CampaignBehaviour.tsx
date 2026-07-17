@@ -354,7 +354,7 @@ function generateHeadline(data: BehaviourData): string {
 
 // ── Chart layout constants (V5) ────────────────────────────────────────
 
-const M = { left: 28, right: 8, top: 4, bottom: 4 };
+const M = { left: 20, right: 4, top: 4, bottom: 4 };
 
 const VIEWS_H   = 340;   // Hero: view momentum line area (expanded for full-screen feel)
 const CONTENT_H = 70;    // Content markers zone (room for two-line labels + shorts)
@@ -2086,6 +2086,10 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
         borderRadius: 0,
         padding: '12px 0',
         position: 'relative',
+        // Break out of parent max-w-4xl container to go full-width
+        width: '100vw',
+        marginLeft: 'calc(-50vw + 50%)',
+        overflowX: 'hidden',
       }}
     >
       {/* ═══ HEADER ═══ */}
@@ -2095,7 +2099,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           justifyContent: 'space-between',
           alignItems: 'flex-start',
           marginBottom: 8,
-          padding: '0 20px',
+          padding: '0 16px',
         }}
       >
         <div>
@@ -2182,7 +2186,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           style={{
             display: 'flex',
             gap: 0,
-            padding: '0 20px',
+            padding: '0 16px',
             marginBottom: 12,
             borderBottom: `1px solid ${BONE}`,
             paddingBottom: 12,
@@ -2253,7 +2257,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
             fontStyle: 'italic',
             marginBottom: 12,
             maxWidth: 640,
-            padding: '0 20px',
+            padding: '0 16px',
           }}
         >
           {headline}
@@ -2304,7 +2308,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose }: Props) 
           display: 'flex',
           gap: 16,
           marginTop: 12,
-          padding: '0 20px',
+          padding: '0 16px',
           fontSize: 11,
           color: SMOKE,
         }}
