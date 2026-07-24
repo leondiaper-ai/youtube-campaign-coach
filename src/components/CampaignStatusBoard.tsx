@@ -354,6 +354,55 @@ function generateSnapshot(card: CardData): string {
   return lines.join('\n');
 }
 
+// ─── Slack / Email update builders (card-level) ───────────────────────
+function generateSlackUpdate(card: CardData): string {
+  const read = getGrowthRead(card);
+  const cw = card.campaignWindow;
+  const ct = card.campaignTrend;
+  const campaignContext = card.campaign ? ` following ${card.campaign}` : '';
+
+  const lines: string[] = [];
+  lines.push(`Quick ${card.name} YouTube update${campaignContext}:`);
+  lines.push('');
+
+  // What's happening
+  lines.push(`• ${whatHappening(card)} — ${whyCause(read, card)}`);
+
+  // Metrics
+  const isStale = card.movementConfidence === 'stale';
+  if (!isStale && card.views7Delta != null) {
+    lines.push(`• ${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)} views (7d)${card.subs7Delta != null ? ` · ${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs (7d)` : ''}`);
+  }
+
+  // Campaign totals
+  if (cw && ct) {
+    lines.push(`• Day ${cw.campaignDay} — ${ct.totalCampaignViews != null ? fmtNum(ct.totalCampaignViews) + ' views' : '—'}${ct.totalCampaignSubs != null ? ` · ${ct.totalCampaignSubs >= 0 ? '+' : ''}${fmtNum(ct.totalCampaignSubs)} subs` : ''} since campaign start`);
+    lines.push(`• ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
+  } else {
+    lines.push(`• ${card.uploads30d} uploads in 30 days · ${card.cadenceLine}`);
+  }
+
+  // Conversion
+  const spk = subsPerKViews(card);
+  if (spk != null) {
+    lines.push(`• Conversion: ${spk.toFixed(1)} subs/1K views (${conversionLabel(spk).text})`);
+  }
+
+  lines.push('');
+  lines.push('This week:');
+  read.actions.doNow.slice(0, 2).forEach((a) => lines.push(`→ ${a}`));
+
+  return lines.join('\n');
+}
+
+function generateEmailUpdate(card: CardData): string {
+  const lines: string[] = [];
+  lines.push('Hi all,');
+  lines.push('');
+  lines.push(generateSlackUpdate(card));
+  return lines.join('\n');
+}
+
 // ─── Snapshot Modal ─────────────────────────────────────────────────────
 function SnapshotModal({ text, onClose }: { text: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
@@ -678,6 +727,15 @@ function DecisionCard({
   const [showDetail, setShowDetail] = useState(false);
   const [showWeeks, setShowWeeks] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
+  const [cardCopied, setCardCopied] = useState<'idle' | 'slack' | 'email'>('idle');
+
+  function copyCardText(type: 'slack' | 'email') {
+    const text = type === 'slack' ? generateSlackUpdate(card) : generateEmailUpdate(card);
+    navigator.clipboard.writeText(text).then(() => {
+      setCardCopied(type);
+      setTimeout(() => setCardCopied('idle'), 2000);
+    });
+  }
 
   const gs = gsFor(card.boardStatus);
   const read = getGrowthRead(card);
@@ -737,21 +795,11 @@ function DecisionCard({
         &times;
       </button>
 
-      {/* Channel Behaviour button — always visible */}
-      {onViewBehaviour && (
-        <button
-          onClick={() => onViewBehaviour(card.slug)}
-          className="absolute top-3 right-10 text-[9px] font-bold uppercase tracking-[0.08em] text-ink/30 hover:text-ink hover:bg-black/5 transition-all px-2 py-1 rounded"
-          title="View channel behaviour"
-        >
-          Behaviour
-        </button>
-      )}
-
       {/* ─── 1. Artist name + decision + dual state ─────────────────── */}
       <div className="mb-3">
-        <div className="flex items-center gap-2.5 mb-1">
-          <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2.5">
+            <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
           {card.confidence === 'LOW' && (
             <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={card.healthNote ?? 'Limited data'}>
               Limited
@@ -773,6 +821,40 @@ function DecisionCard({
               {read.confidence}
             </span>
           )}
+          </div>{/* close inner name+badges row */}
+
+          {/* ─── Action buttons: Channel Behaviour + Slack + Email ──── */}
+          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {onViewBehaviour && (
+              <button
+                onClick={() => onViewBehaviour(card.slug)}
+                className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
+                style={{ background: '#2C25FF', color: '#fff' }}
+              >
+                Channel Behaviour
+              </button>
+            )}
+            <button
+              onClick={() => copyCardText('slack')}
+              className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
+              style={{
+                background: cardCopied === 'slack' ? '#E6F8EE' : SOFT,
+                color: cardCopied === 'slack' ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
+              }}
+            >
+              {cardCopied === 'slack' ? 'Copied' : 'Slack'}
+            </button>
+            <button
+              onClick={() => copyCardText('email')}
+              className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
+              style={{
+                background: cardCopied === 'email' ? '#E6F8EE' : SOFT,
+                color: cardCopied === 'email' ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
+              }}
+            >
+              {cardCopied === 'email' ? 'Copied' : 'Email'}
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-2 mt-1 flex-wrap text-[11px]">
           <span className="font-bold uppercase tracking-[0.08em] text-ink/50">
