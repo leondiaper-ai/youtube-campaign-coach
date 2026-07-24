@@ -526,9 +526,9 @@ function computeUploadObservation(
     }
   }
 
-  // Views gained in 14 days after
+  // Views gained in 14 days after (only if the full 14-day window has elapsed)
   let viewsAfter14d: number | null = null;
-  if (uploadDaySnap && snapsAfter14.length >= 1) {
+  if (after14End <= Date.now() && uploadDaySnap && snapsAfter14.length >= 1) {
     const lastAfter = snapsAfter14[snapsAfter14.length - 1];
     if (uploadDaySnap.views != null && lastAfter.views != null) {
       viewsAfter14d = lastAfter.views - uploadDaySnap.views;
@@ -561,13 +561,13 @@ function computeUploadObservation(
     }
   }
 
-  // Subscribers — after 14d
+  // Subscribers — after 14d (only if the full 14-day window has elapsed)
   const subsAfter14 = history.filter((h) => {
     const ts = new Date(h.ts).getTime();
     return ts > uploadTs && ts <= after14End && h.subs != null;
   });
   let subsAfter14d: number | null = null;
-  if (uploadDaySubSnap && subsAfter14.length >= 1) {
+  if (after14End <= Date.now() && uploadDaySubSnap && subsAfter14.length >= 1) {
     const lastAfter = subsAfter14[subsAfter14.length - 1];
     if (uploadDaySubSnap.subs != null && lastAfter.subs != null) {
       subsAfter14d = lastAfter.subs - uploadDaySubSnap.subs;
