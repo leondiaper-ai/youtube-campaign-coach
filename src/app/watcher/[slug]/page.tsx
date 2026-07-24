@@ -247,13 +247,15 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             ← Dashboard
           </Link>
           <div className="flex items-center gap-3">
-            <Link
-              href={`/campaigns?behaviour=${slug}`}
-              className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] no-underline transition-colors"
-              style={{ background: '#2C25FF', color: '#fff' }}
-            >
-              Behaviour
-            </Link>
+            {campaignPinned && (
+              <Link
+                href={`/campaigns?behaviour=${slug}`}
+                className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] no-underline transition-colors"
+                style={{ background: '#2C25FF', color: '#fff' }}
+              >
+                Behaviour
+              </Link>
+            )}
             <PinCampaignButton slug={slug} initiallyPinned={campaignPinned} />
           </div>
         </div>
