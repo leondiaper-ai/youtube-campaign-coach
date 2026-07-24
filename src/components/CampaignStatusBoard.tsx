@@ -1564,6 +1564,9 @@ export default function CampaignStatusBoard({
     <>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
+          <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 4 }}>
+            ← Dashboard
+          </Link>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 28 }} />
           {/* eslint-disable-next-line @next/next/no-img-element */}

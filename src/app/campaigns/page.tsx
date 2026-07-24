@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import {
@@ -507,11 +506,6 @@ export default async function CampaignsPage() {
       style={{ background: PAPER, color: INK, fontFamily: 'system-ui, -apple-system, sans-serif' }}
     >
       <div className="max-w-6xl mx-auto px-5 py-6">
-        <div className="mb-4">
-          <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
-            ← Dashboard
-          </Link>
-        </div>
 
         <Suspense fallback={null}>
           <CampaignStatusBoard
