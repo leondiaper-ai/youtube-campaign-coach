@@ -10,6 +10,7 @@ import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
+import AddArtistButton from '@/components/AddArtistButton';
 
 export const revalidate = 600;
 
@@ -186,12 +187,6 @@ export default async function ControlPage() {
                 Channel Health
               </span>
               <Link
-                href="/cockpit"
-                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-              >
-                All Artists
-              </Link>
-              <Link
                 href="/campaigns"
                 className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
               >
@@ -205,17 +200,20 @@ export default async function ControlPage() {
               </Link>
             </div>
           </div>
-          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 mt-2 text-right">
-            {syncMeta ? (
-              <>
-                <span>Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                <br />
-                <span className="text-ink/20">{syncMeta.artistsSuccess}/{syncMeta.artistsTotal} artists · from cache</span>
-              </>
-            ) : (
-              <span>No sync data yet</span>
-            )}
-          </span>
+          <div className="flex items-center gap-4 shrink-0 mt-2">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
+              {syncMeta ? (
+                <>
+                  <span>Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                  <br />
+                  <span className="text-ink/20">{syncMeta.artistsSuccess}/{syncMeta.artistsTotal} artists · from cache</span>
+                </>
+              ) : (
+                <span>No sync data yet</span>
+              )}
+            </span>
+            <AddArtistButton />
+          </div>
         </div>
 
         {/* Client-side board with toggle */}

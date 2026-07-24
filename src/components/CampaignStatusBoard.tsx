@@ -1480,8 +1480,6 @@ export default function CampaignStatusBoard({
           <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
         </div>
         <div className="flex items-center gap-4">
-          <a href="/cockpit" className="text-[11px] uppercase tracking-[0.14em] text-ink/35 hover:text-ink/60 transition-colors">All Artists</a>
-          <span className="text-[10px] text-ink/20">&middot;</span>
           <span className="text-[10px] uppercase tracking-[0.14em] text-ink/25">Live</span>
         </div>
       </div>
