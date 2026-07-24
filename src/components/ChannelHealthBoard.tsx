@@ -5,14 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
-import { ChannelScoreBadge } from './ChannelScoreBadge';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
-import {
-  type ChannelScore,
-  type ChannelScoreInput,
-  calculateChannelScore,
-  computeBenchmarkPool,
-} from '@/lib/channelScore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -559,23 +552,6 @@ export default function ChannelHealthBoard({
   const allBenchmarks = rows.length > 0 ? computeMarketBenchmarks(rows) : null;
   const marketBenchmarks = marketRows.length > 0 ? computeMarketBenchmarks(marketRows) : null;
 
-  // Channel scores for all rows — measures execution quality, not artist size
-  const scoreMap = useMemo(() => {
-    const inputs: ChannelScoreInput[] = rows.map((r) => ({
-      views7Delta: r.views7Delta,
-      subs7Delta: r.subs7Delta,
-      uploads30d: r.uploads30d,
-      shorts30d: r.shorts30d,
-      lastUploadAt: null,
-      subs: r.subs,
-      totalViews: r.totalViews ?? null,
-      movementConfidence: r.movementConfidence,
-    }));
-    const pool = computeBenchmarkPool(inputs);
-    const map = new Map<string, ChannelScore>();
-    rows.forEach((r, i) => map.set(r.slug, calculateChannelScore(inputs[i], pool)));
-    return map;
-  }, [rows]);
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status]);
@@ -892,7 +868,6 @@ export default function ChannelHealthBoard({
               </p>
             )}
             <p><strong style={{ color: INK }}>Status</strong> — Each channel gets a health status based on upload cadence, subscriber conversion, and recent activity. Healthy channels are sorted first.</p>
-            <p><strong style={{ color: INK }}>Score (A–D)</strong> — Grades how well the channel is being run across three pillars: reach growth, subscriber conversion efficiency, and posting cadence. Scores measure execution quality, not artist popularity.</p>
             <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means data is still building or totals are updating; hover for context.</p>
             <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Building" or "Totals updating" indicate tracking maturity. When totals haven't changed between snapshots, deltas show "—" instead of misleading numbers. Accuracy improves as daily snapshots accumulate.</p>
           </div>
@@ -1001,11 +976,6 @@ export default function ChannelHealthBoard({
                     >
                       {r.name}
                     </Link>
-                    {scoreMap.get(r.slug) && (
-                      <span onClick={(e) => e.stopPropagation()}>
-                        <ChannelScoreBadge score={scoreMap.get(r.slug)!} compact />
-                      </span>
-                    )}
                     {r.dataStatus && r.dataStatus !== 'FRESH' && (
                       <span
                         className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded"
