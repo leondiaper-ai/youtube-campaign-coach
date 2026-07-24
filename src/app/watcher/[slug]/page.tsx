@@ -271,18 +271,53 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           <span>Watcher</span>
           <CoachCampaignBadge slug={slug} fallback={artist.campaign} />
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          <h1 className="font-black text-3xl">{artist.name}</h1>
-          {nc.confidence === 'LOW' && (
-            <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={nc.healthNote}>
-              Building history
-            </span>
-          )}
-          {nc.confidence === 'MEDIUM' && (
-            <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={nc.healthNote}>
-              Partial history
-            </span>
-          )}
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center gap-2">
+            <h1 className="font-black text-3xl">{artist.name}</h1>
+            {nc.confidence === 'LOW' && (
+              <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={nc.healthNote}>
+                Building history
+              </span>
+            )}
+            {nc.confidence === 'MEDIUM' && (
+              <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={nc.healthNote}>
+                Partial history
+              </span>
+            )}
+          </div>
+          <ReportButtonBar props={{
+            artistName: artist.name,
+            channelState,
+            stateReason: derived?.reason ?? decision.headline,
+            riskLine: null,
+            primaryMove: { label: '', action: '' },
+            secondaryMove: null,
+            missedReach: [],
+            stats: {
+              subs: live?.subs ?? null,
+              views7d: rawDelta(nc.views7d),
+              subs7d: rawDelta(nc.subs7d),
+              uploads30d,
+              lastUpDays,
+              shorts30d: live?.shorts30d ?? 0,
+            },
+            campaign: artist.campaign ?? null,
+            campaignContentViews,
+            campaignContentCount,
+            campaignShortsCount,
+            campaignDaysSinceStart,
+            campaignSubsDelta: campSubs?.delta ?? null,
+            campaignViewsDelta: campViews?.delta ?? null,
+            recentUploads: (live?.recentUploads ?? []).filter(
+              (u) => (Date.now() - new Date(u.publishedAt).getTime()) / 86400000 <= 14
+            ).map((u) => ({
+              title: u.title,
+              views: u.viewCount,
+              kind: (u.durationSec <= 62 ? 'Short' : 'Video') as 'Short' | 'Video',
+              daysAgo: Math.floor((Date.now() - new Date(u.publishedAt).getTime()) / 86400000),
+            })),
+            conv7,
+          }} />
         </div>
 
         {/* ─── STATE + HEADLINE + CONSEQUENCE ─────────────────────────── */}
