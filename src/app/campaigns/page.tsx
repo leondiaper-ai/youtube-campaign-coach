@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
@@ -507,10 +508,12 @@ export default async function CampaignsPage() {
     >
       <div className="max-w-6xl mx-auto px-5 py-6">
 
-        <CampaignStatusBoard
-          initialCards={cards}
-          availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))}
-        />
+        <Suspense fallback={null}>
+          <CampaignStatusBoard
+            initialCards={cards}
+            availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))}
+          />
+        </Suspense>
       </div>
     </div>
   );

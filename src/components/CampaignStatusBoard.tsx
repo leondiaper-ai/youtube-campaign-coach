@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { fmtNum, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import {
@@ -1227,7 +1228,10 @@ export default function CampaignStatusBoard({
   const [pinning, setPinning] = useState(false);
   const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
-  const [behaviourSlug, setBehaviourSlug] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [behaviourSlug, setBehaviourSlug] = useState<string | null>(
+    searchParams.get('behaviour')
+  );
 
   async function handlePin(slug: string) {
     setPinning(true);

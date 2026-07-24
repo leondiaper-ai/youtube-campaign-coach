@@ -1039,12 +1039,26 @@ export default function ChannelHealthBoard({
                 </div>
               </div>
 
-              {/* ── Expanded: Strategy Profile + Fix This Week ───────── */}
+              {/* ── Expanded: Actions + Strategy Profile + Fix This Week ───────── */}
               {isExpanded && (
                 <div
                   className={`px-5 py-3.5 ${i === filtered.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
+                  {/* Action buttons row */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <Link
+                      href={`/campaigns?behaviour=${r.slug}`}
+                      className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors no-underline"
+                      style={{ background: '#2C25FF', color: '#fff' }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Behaviour
+                    </Link>
+                    <QuickCopyButton row={r} type="slack" />
+                    <QuickCopyButton row={r} type="email" />
+                  </div>
+
                   <div className="flex flex-wrap items-center gap-4">
                     {/* Strategy tags */}
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1266,4 +1280,111 @@ function buildBenchmarkRead(bench: MarketBenchmarks, rows: RowData[]): Benchmark
   }
 
   return { stats, winning, weakness };
+}
+
+
+// ─── Quick Copy Buttons (Slack/Email from RowData) ──────────────────────────
+
+function buildQuickUpdate(r: RowData, type: 'slack' | 'email'): string {
+  const lines: string[] = [];
+  if (type === 'email') {
+    lines.push('Hi all,');
+    lines.push('');
+  }
+  lines.push(`Quick ${r.name} YouTube update:`);
+  lines.push('');
+
+  // Gather insights — prioritised
+  type Insight = { p: number; t: string };
+  const pool: Insight[] = [];
+
+  if (r.views7Delta != null && r.views7Delta > 0) {
+    pool.push({ p: 8, t: `${fmtDelta(r.views7Delta)} channel views in the last 7 days` });
+  }
+  if (r.subs7Delta != null && r.subs7Delta > 0) {
+    pool.push({ p: 7, t: `${fmtDelta(r.subs7Delta)} subscribers in the last 7 days` });
+  }
+  if (r.subs7Delta != null && r.subs7Delta <= 0 && r.views7Delta != null && r.views7Delta > 5000) {
+    pool.push({ p: 6, t: 'Views are climbing but subscribers are flat — audience is watching without committing' });
+  }
+  if (r.uploads30d >= 8) {
+    const sn = r.shorts30d > 0 ? `, including ${r.shorts30d} Shorts` : '';
+    pool.push({ p: 5, t: `Excellent publishing cadence with ${r.uploads30d} uploads in 30 days${sn}` });
+  } else if (r.uploads30d >= 4) {
+    const sn = r.shorts30d > 0 ? `, including ${r.shorts30d} Shorts` : '';
+    pool.push({ p: 5, t: `Good publishing cadence with ${r.uploads30d} uploads in 30 days${sn}` });
+  } else if (r.uploads30d <= 2 && r.uploads30d > 0) {
+    pool.push({ p: 5, t: `Only ${r.uploads30d} upload${r.uploads30d !== 1 ? 's' : ''} in 30 days — below the threshold for consistent algorithmic push` });
+  }
+  if (r.views7Delta != null && r.views7Delta > 50000 && r.uploads30d >= 4) {
+    pool.push({ p: 4, t: 'Strong view volume with consistent uploads — YouTube is likely actively recommending the channel' });
+  }
+  if (r.viewsWoW != null && r.viewsWoW > 20) {
+    pool.push({ p: 3, t: `Views up ${Math.round(r.viewsWoW)}% week-on-week — momentum is accelerating` });
+  }
+  if (r.viewsWoW != null && r.viewsWoW < -20) {
+    pool.push({ p: 3, t: `Views down ${Math.abs(Math.round(r.viewsWoW))}% week-on-week — momentum is fading` });
+  }
+  if (r.multiformat) {
+    if (r.multiformat.score === 'Strong') {
+      pool.push({ p: 2, t: `Strong multiformat strategy — ${r.multiformat.formatCount} of 6 format types active` });
+    } else if (r.multiformat.score === 'Weak' || r.multiformat.score === 'None') {
+      pool.push({ p: 2, t: `Weak multiformat coverage (${r.multiformat.formatCount}/6) — limited discovery surfaces` });
+    }
+  }
+
+  pool.sort((a, b) => b.p - a.p);
+  const bullets = pool.slice(0, 5).map(i => i.t);
+
+  // Ensure at least one bullet
+  if (bullets.length === 0) {
+    bullets.push('Channel tracking established — monitoring for movement');
+  }
+
+  for (const b of bullets) lines.push(`• ${b}`);
+  lines.push('');
+
+  // Recommendation
+  lines.push('Recommendation');
+  if (r.classification === 'GROWING' || r.status === 'HEALTHY') {
+    lines.push('Maintain the current upload rhythm and continue stacking content while momentum is positive.');
+  } else if (r.classification === 'WEAK_CONVERSION') {
+    lines.push('Views are landing but subscribers aren\'t following. Prioritise a behind-the-scenes or artist story piece that gives viewers a reason to subscribe.');
+  } else if (r.classification === 'UNDERFED') {
+    lines.push('Upload cadence is too low. Ship 2–3 Shorts this week to build consistent signal for the algorithm.');
+  } else if (r.classification === 'COLD' || r.status === 'COLD') {
+    lines.push('Channel is cold — reactivate with 2–3 catalogue Shorts to generate signal before any campaign content will distribute.');
+  } else {
+    lines.push('Increase upload frequency and prioritise Shorts alongside any long-form releases to build consistent algorithmic signal.');
+  }
+
+  return lines.join('\n');
+}
+
+function QuickCopyButton({ row, type }: { row: RowData; type: 'slack' | 'email' }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    const text = buildQuickUpdate(row, type);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [row, type]);
+
+  const label = type === 'slack' ? 'Slack' : 'Email';
+
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+      className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors cursor-pointer"
+      style={{
+        background: copied ? '#E6F8EE' : '#F6F1E7',
+        color: copied ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
+        border: 'none',
+      }}
+    >
+      {copied ? 'Copied' : `${label} Update`}
+    </button>
+  );
 }

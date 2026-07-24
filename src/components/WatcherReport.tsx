@@ -2,10 +2,13 @@
 
 import { useState, useCallback } from 'react';
 import type { ConversionResult } from '@/lib/conversion';
-import { generateYouTubeGrowthRead, type GrowthInput } from '@/lib/youtubeGrowthOS';
 
 const INK = '#0E0E0E';
+const SIGNAL = '#FF4A1C';
+const ELECTRIC = '#2C25FF';
+const MINT = '#1FBE7A';
 const MUTED = '#E9E2D3';
+const SOFT = '#F6F1E7';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Types
@@ -75,148 +78,169 @@ function fmtDelta(n: number): string {
   return `${sign}${n}`;
 }
 
-/** Interpret performance — not just numbers but what they mean */
-function interpretPerformance(p: ReportProps): string {
-  const { stats, conv7 } = p;
-  const subsUp = stats.subs7d != null && stats.subs7d > 0;
-  const subsFlat = stats.subs7d != null && stats.subs7d <= 0;
-  const viewsUp = stats.views7d != null && stats.views7d > 0;
-  const convWeak = conv7 && conv7.band !== 'INSUFFICIENT' && (conv7.band === 'WEAK' || conv7.band === 'SOFT');
+// ═══════════════════════════════════════════════════════════════════════════════
+// Insight prioritisation engine
+// Priority: 1. Major campaign growth → 2. Launch performance → 3. Channel movement
+// → 4. Content cadence → 5. Discovery signals → 6. Behaviour observations
+// ═══════════════════════════════════════════════════════════════════════════════
 
-  if (subsFlat && viewsUp) {
-    return 'Views are climbing but subscribers are flat — people are watching without committing. The conversion funnel is leaking.';
-  }
-  if (subsUp && viewsUp) {
-    return 'Views and subscribers both growing — the algorithm is distributing and the audience is converting.';
-  }
-  if (convWeak && viewsUp) {
-    return `Conversion is ${conv7!.band.toLowerCase()} at ${conv7!.ratePer1k.toFixed(1)}/1k views. Volume is there but the channel isn't converting watchers to subscribers.`;
-  }
-  if (stats.uploads30d >= 5 && stats.lastUpDays != null && stats.lastUpDays <= 3) {
-    return 'Strong upload cadence. The algorithm has consistent signal to work with.';
-  }
-  if (stats.uploads30d <= 2) {
-    return 'Upload volume is low. The algorithm doesn\'t have enough signal to distribute effectively.';
-  }
-  return 'Mixed signals — output is present but not yet compounding.';
-}
+type Insight = { priority: number; text: string };
 
-/** Discovery signals — auto-detect from data */
-function discoverySignals(p: ReportProps): string[] {
-  const signals: string[] = [];
-  const { stats, recentUploads } = p;
+function gatherInsights(p: ReportProps): string[] {
+  const pool: Insight[] = [];
+  const { stats, recentUploads, conv7, campaign } = p;
 
-  const shortsCount = recentUploads.filter((u) => u.kind === 'Short').length;
-  const videosCount = recentUploads.filter((u) => u.kind === 'Video').length;
-
-  if (shortsCount >= 3) {
-    signals.push(`${shortsCount} Shorts in 14d — feeding the algorithm consistently.`);
-  } else if (shortsCount === 0 && recentUploads.length > 0) {
-    signals.push('Zero Shorts in 14d — missing the fastest discovery surface on YouTube.');
+  // ── 1. Major campaign growth ───────────────────────────────────────────
+  if (p.campaignViewsDelta != null && p.campaignViewsDelta > 100_000) {
+    pool.push({
+      priority: 10,
+      text: `${fmtDelta(p.campaignViewsDelta)} channel views since campaign start${p.campaignDaysSinceStart ? ` (day ${p.campaignDaysSinceStart})` : ''}`,
+    });
+  }
+  if (p.campaignSubsDelta != null && p.campaignSubsDelta > 500) {
+    pool.push({
+      priority: 9,
+      text: `${fmtDelta(p.campaignSubsDelta)} subscribers gained during the campaign period`,
+    });
   }
 
-  if (stats.uploads30d >= 6) {
-    signals.push(`${stats.uploads30d} uploads in 30d — strong cadence the algorithm rewards.`);
+  // ── 2. Launch performance ──────────────────────────────────────────────
+  const videos = recentUploads.filter((u) => u.kind === 'Video');
+  const sortedVids = [...videos].sort((a, b) => b.views - a.views);
+  if (sortedVids.length > 0) {
+    const top = sortedVids[0];
+    const vpd = top.daysAgo > 0 ? Math.round(top.views / top.daysAgo) : top.views;
+    if (top.views >= 10_000) {
+      pool.push({
+        priority: 8,
+        text: `${top.title}: ${fmtNum(top.views)} views in ${top.daysAgo} day${top.daysAgo !== 1 ? 's' : ''} (~${fmtNum(vpd)} views/day)`,
+      });
+    }
+  }
+
+  // Compare latest vs previous video velocity
+  if (sortedVids.length >= 2) {
+    const latest = [...videos].sort((a, b) => a.daysAgo - b.daysAgo);
+    const curr = latest[0];
+    const prev = latest[1];
+    const currVpd = curr.daysAgo > 0 ? Math.round(curr.views / curr.daysAgo) : curr.views;
+    const prevVpd = prev.daysAgo > 0 ? Math.round(prev.views / prev.daysAgo) : prev.views;
+    if (currVpd > prevVpd && prevVpd > 0) {
+      const pct = Math.round(((currVpd - prevVpd) / prevVpd) * 100);
+      if (pct >= 20) {
+        pool.push({
+          priority: 7,
+          text: `7-day channel views increased ${pct}% compared to the previous release`,
+        });
+      }
+    }
+  }
+
+  // ── 3. Channel movement ────────────────────────────────────────────────
+  if (stats.views7d != null && stats.views7d > 0) {
+    pool.push({
+      priority: 6,
+      text: `${fmtDelta(stats.views7d)} channel views in the last 7 days`,
+    });
+  }
+  if (stats.subs7d != null && stats.subs7d > 0) {
+    pool.push({
+      priority: 5.5,
+      text: `${fmtDelta(stats.subs7d)} subscribers in the last 7 days`,
+    });
+  }
+  if (stats.subs7d != null && stats.subs7d <= 0 && stats.views7d != null && stats.views7d > 5000) {
+    pool.push({
+      priority: 5,
+      text: `Views are climbing but subscribers are flat — audience is watching without committing`,
+    });
+  }
+
+  // ── 4. Content cadence ─────────────────────────────────────────────────
+  if (stats.uploads30d >= 8) {
+    const shortsNote = stats.shorts30d > 0 ? `, including ${stats.shorts30d} Shorts` : '';
+    pool.push({
+      priority: 4,
+      text: `Excellent publishing cadence with ${stats.uploads30d} uploads in 30 days${shortsNote}`,
+    });
+  } else if (stats.uploads30d >= 4) {
+    const shortsNote = stats.shorts30d > 0 ? `, including ${stats.shorts30d} Shorts` : '';
+    pool.push({
+      priority: 4,
+      text: `Good publishing cadence with ${stats.uploads30d} uploads in 30 days${shortsNote}`,
+    });
   } else if (stats.uploads30d <= 2 && stats.uploads30d > 0) {
-    signals.push(`Only ${stats.uploads30d} uploads in 30d — below the threshold for consistent algorithmic push.`);
+    pool.push({
+      priority: 4,
+      text: `Only ${stats.uploads30d} upload${stats.uploads30d !== 1 ? 's' : ''} in 30 days — below the threshold for consistent algorithmic push`,
+    });
+  } else if (stats.uploads30d === 0) {
+    pool.push({
+      priority: 4,
+      text: `No uploads in 30 days — the algorithm has no signal to work with`,
+    });
   }
 
-  if (videosCount >= 2 && shortsCount >= 2) {
-    signals.push('Good content mix — both long-form and Shorts active.');
-  }
-
-  const topRecent = recentUploads.length > 0
-    ? recentUploads.reduce((best, u) => u.views > best.views ? u : best, recentUploads[0])
-    : null;
-  if (topRecent && topRecent.views >= 50_000 && topRecent.daysAgo <= 7) {
-    signals.push(`"${topRecent.title}" trending at ${fmtNum(topRecent.views)} in ${topRecent.daysAgo}d — velocity signal.`);
-  }
-
-  return signals;
-}
-
-/** What's working — pull from cadence + formats */
-function whatsWorking(p: ReportProps): string[] {
-  const working: string[] = [];
-  const { stats, recentUploads } = p;
-
-  if (stats.uploads30d >= 5) working.push('Upload cadence is consistent — algorithm has signal.');
-  if (stats.subs7d != null && stats.subs7d > 0) working.push(`+${stats.subs7d.toLocaleString()} subs in 7d — audience is converting.`);
-  if (stats.views7d != null && stats.views7d > 50_000) working.push(`+${fmtNum(stats.views7d)} views in 7d — content is reaching.`);
-
-  const shortsCount = recentUploads.filter((u) => u.kind === 'Short').length;
-  if (shortsCount >= 2) working.push(`${shortsCount} Shorts in 14d — discovery layer active.`);
-
-  if (p.conv7 && p.conv7.band !== 'INSUFFICIENT' && (p.conv7.band === 'STRONG' || p.conv7.band === 'HEALTHY')) {
-    working.push(`Conversion rate ${p.conv7.ratePer1k.toFixed(1)}/1k views (${p.conv7.band.toLowerCase()}).`);
-  }
-
-  if (working.length === 0) working.push('Baseline established — tracking signals.');
-  return working.slice(0, 3);
-}
-
-/** What's limiting growth */
-function whatsLimiting(p: ReportProps): string[] {
-  const limits: string[] = [];
-  const { stats, missedReach, structuralGaps, conv7 } = p;
-
-  // Conversion gap
-  if (stats.subs7d != null && stats.subs7d <= 0 && stats.views7d != null && stats.views7d > 0) {
-    limits.push('Views up, subs flat — watching but not subscribing.');
-  }
-
-  if (conv7 && conv7.band !== 'INSUFFICIENT' && (conv7.band === 'WEAK' || conv7.band === 'SOFT')) {
-    limits.push(`Weak conversion (${conv7.ratePer1k.toFixed(1)}/1k views) — funnel from viewer to subscriber is leaking.`);
-  }
-
-  // Missing formats
-  if (missedReach.length > 0) {
-    const gapCounts: Record<string, number> = {};
-    for (const v of missedReach) {
-      for (const f of v.formats) gapCounts[f.name] = (gapCounts[f.name] ?? 0) + 1;
-    }
-    const topGap = Object.entries(gapCounts).sort((a, b) => b[1] - a[1])[0];
-    if (topGap) {
-      limits.push(`${topGap[1]} videos missing ${topGap[0]} — structural gap limiting reach.`);
+  // ── 5. Discovery signals ───────────────────────────────────────────────
+  // Conversion quality
+  if (conv7 && conv7.band !== 'INSUFFICIENT') {
+    if (conv7.band === 'STRONG' || conv7.band === 'HEALTHY') {
+      pool.push({
+        priority: 3.5,
+        text: `Strong subscriber conversion at ${conv7.ratePer1k.toFixed(1)} per 1K views — audience is committing`,
+      });
+    } else if (conv7.band === 'WEAK' || conv7.band === 'SOFT') {
+      pool.push({
+        priority: 3.5,
+        text: `Subscriber conversion is ${conv7.band.toLowerCase()} at ${conv7.ratePer1k.toFixed(1)} per 1K views — the funnel from viewer to subscriber needs attention`,
+      });
     }
   }
 
-  // Structural gaps
-  if (structuralGaps && structuralGaps.length > 0) {
-    const names = structuralGaps.slice(0, 2).map((g) => g.name).join(' + ');
-    limits.push(`Catalogue-wide ${names} gap — every video without support formats caps its lifecycle.`);
+  // Browse/recommendation signal
+  // We don't have browse % in current props, but we can infer from views + cadence
+  if (stats.views7d != null && stats.views7d > 50_000 && stats.uploads30d >= 4) {
+    pool.push({
+      priority: 3,
+      text: 'Strong view volume with consistent uploads — YouTube is likely actively recommending the channel',
+    });
   }
 
-  // Shorts gap
-  if (stats.shorts30d === 0 && stats.uploads30d > 0) {
-    limits.push('Zero Shorts — invisible to non-subscribers on mobile.');
+  // Shorts activity
+  const shorts14d = recentUploads.filter((u) => u.kind === 'Short').length;
+  if (shorts14d >= 3) {
+    pool.push({
+      priority: 2.5,
+      text: `${shorts14d} Shorts in the last 14 days — discovery layer is active`,
+    });
+  } else if (shorts14d === 0 && recentUploads.length > 0) {
+    pool.push({
+      priority: 2.5,
+      text: 'No Shorts in the last 14 days — missing the fastest discovery surface on YouTube',
+    });
   }
 
-  if (limits.length === 0) limits.push('No critical blockers detected.');
-  return limits.slice(0, 3);
+  // ── 6. Behaviour observations ──────────────────────────────────────────
+  if (campaign && p.campaignDaysSinceStart != null) {
+    if (p.campaignDaysSinceStart >= 7 && p.campaignDaysSinceStart <= 14) {
+      pool.push({
+        priority: 2,
+        text: 'Channel is within the 7–14 day follow-up window — ideal timing to release another long-form asset while recommendation signals remain elevated',
+      });
+    }
+  }
+
+  // Sort by priority descending, take top 5
+  pool.sort((a, b) => b.priority - a.priority);
+  return pool.slice(0, 5).map((i) => i.text);
 }
 
-
 // ═══════════════════════════════════════════════════════════════════════════════
-// SIGNAL → PRIMARY → SECONDARY decision engine
+// Recommendation engine — one clear next action
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type SignalType = 'WEAK_CONVERSION' | 'WEAK_REACH' | 'WEAK_CADENCE' | 'COMPOUNDING' | 'COLD';
-
-type Signal = {
-  type: SignalType;
-  line: string;
-};
-
-/** Best-performing recent upload (last 14d) */
-function topRecent(p: ReportProps): RecentUploadEntry | null {
-  if (p.recentUploads.length === 0) return null;
-  return p.recentUploads.reduce((best, u) => u.views > best.views ? u : best, p.recentUploads[0]);
-}
-
-/** Derive the core signal from performance data */
-function deriveSignal(p: ReportProps): Signal {
-  const { stats, conv7 } = p;
+function generateRecommendation(p: ReportProps): string {
+  const { stats, recentUploads, conv7, campaign } = p;
   const viewsUp = stats.views7d != null && stats.views7d > 0;
   const viewsStrong = stats.views7d != null && stats.views7d > 5_000;
   const subsFlat = stats.subs7d != null && stats.subs7d <= 0;
@@ -224,219 +248,126 @@ function deriveSignal(p: ReportProps): Signal {
   const cadenceStrong = stats.uploads30d >= 5;
   const cadenceWeak = stats.uploads30d <= 2;
   const convWeak = conv7 && conv7.band !== 'INSUFFICIENT' && (conv7.band === 'WEAK' || conv7.band === 'SOFT');
-  const best = topRecent(p);
+  const shorts14d = recentUploads.filter((u) => u.kind === 'Short').length;
 
-  // 1. WEAK CONVERSION — views are there but subs aren't following
+  // Follow-up window — highest priority if in window
+  if (campaign && p.campaignDaysSinceStart != null && p.campaignDaysSinceStart >= 5 && p.campaignDaysSinceStart <= 14) {
+    return 'Continue momentum by releasing another long-form asset within the 7–14 day follow-up window while recommendation signals remain elevated.';
+  }
+
+  // Compounding — don't disrupt
+  if (viewsUp && subsUp && cadenceStrong) {
+    return 'Momentum is building — maintain the current upload rhythm and release the next asset within 3–4 days to keep algorithmic velocity high.';
+  }
+
+  // Weak conversion
   if (viewsStrong && subsFlat) {
-    const trackRef = best ? ` — "${best.title}" is pulling views but not subscribers` : '';
-    return {
-      type: 'WEAK_CONVERSION',
-      line: `Views are landing but subs aren't following${trackRef}. Content isn't building connection.`,
-    };
+    return 'Views are landing but subscribers aren\'t following. Prioritise a behind-the-scenes or artist story piece that gives viewers a reason to subscribe.';
   }
   if (convWeak && viewsUp) {
-    const rate = conv7!.ratePer1k.toFixed(1);
-    return {
-      type: 'WEAK_CONVERSION',
-      line: `Conversion at ${rate}/1k views (${conv7!.band.toLowerCase()}) — audience watches but doesn't commit.`,
-    };
+    return 'Conversion is soft — the audience is watching but not committing. Add an artist-led context piece (BTS, breakdown, or commentary) to build subscriber intent.';
   }
 
-  // 2. WEAK REACH — low views, algorithm isn't distributing
-  if (!viewsUp && cadenceWeak) {
-    return {
-      type: 'WEAK_REACH',
-      line: 'Low views and low output — the algorithm has nothing to work with.',
-    };
-  }
-  if (!viewsStrong && !cadenceWeak) {
-    return {
-      type: 'WEAK_REACH',
-      line: 'Content is going out but views are flat — format or hook isn\'t catching.',
-    };
-  }
-
-  // 3. WEAK CADENCE — output too low for algorithm traction
+  // Weak cadence
   if (cadenceWeak && viewsUp) {
-    return {
-      type: 'WEAK_CADENCE',
-      line: `Only ${stats.uploads30d} uploads in 30d — not enough signal for the algorithm to sustain distribution.`,
-    };
+    return `Upload cadence is too low at ${stats.uploads30d} in 30 days. Ship 2–3 Shorts this week to build consistent signal for the algorithm.`;
   }
 
-  // 4. COMPOUNDING — everything growing
-  if (viewsUp && subsUp && cadenceStrong) {
-    return {
-      type: 'COMPOUNDING',
-      line: 'Views, subs, and cadence all positive — momentum is compounding. Don\'t disrupt it.',
-    };
+  // Weak reach — no Shorts
+  if (shorts14d === 0 && recentUploads.length > 0) {
+    return 'Start posting Shorts — 2–3 vertical cutdowns this week will activate the fastest discovery surface on YouTube.';
   }
 
-  // 5. COLD — no signal at all
-  if (stats.views7d == null || (stats.views7d === 0 && stats.subs7d === 0)) {
-    return {
-      type: 'COLD',
-      line: 'Channel is cold — zero signal in 7d. Needs reactivation before anything else.',
-    };
+  // Cold
+  if (stats.views7d == null || (stats.views7d === 0 && (stats.subs7d == null || stats.subs7d === 0))) {
+    return 'Channel is cold — reactivate with 2–3 catalogue Shorts this week to generate signal before any campaign content will distribute.';
   }
 
-  // Fallback
-  return {
-    type: 'WEAK_REACH',
-    line: 'Mixed signals — output is present but not yet converting into growth.',
-  };
+  // Generic fallback
+  if (cadenceStrong) {
+    return 'Cadence is strong — continue the upload rhythm and monitor which formats are generating the most subscriber conversion.';
+  }
+  return 'Increase upload frequency and prioritise Shorts alongside any long-form releases to build consistent algorithmic signal.';
 }
 
-/** Derive PRIMARY action — must directly respond to the signal */
-function derivePrimary(p: ReportProps, signal: Signal): string {
-  const { stats, recentUploads, missedReach } = p;
-  const best = topRecent(p);
-  const cadenceStrong = stats.uploads30d >= 5;
-
-  switch (signal.type) {
-    case 'WEAK_CONVERSION': {
-      // Cadence is already strong — do NOT suggest posting more
-      // Need deeper content that builds connection
-      if (best) {
-        return `"${best.title}" has reach but isn't converting. Post a track breakdown, studio session, or artist story piece that gives viewers a reason to subscribe — not another cutdown.`;
-      }
-      return 'Post a BTS, breakdown, or artist-led context piece. The audience is watching but needs a reason to commit — give them the story behind the music.';
-    }
-
-    case 'WEAK_REACH': {
-      // Need discovery formats — Shorts, hooks, frequency
-      const shortsCount = recentUploads.filter((u) => u.kind === 'Short').length;
-      if (shortsCount === 0) {
-        return 'Zero Shorts in rotation — start with 2-3 vertical cutdowns this week. Shorts are the fastest discovery surface on YouTube and the channel isn\'t using them.';
-      }
-      if (best && best.views < 5000) {
-        return `"${best.title}" topped out at ${fmtNum(best.views)} — test a stronger hook format. Lead with the most visual or emotional 3 seconds, not a cold open.`;
-      }
-      // Check for missed format opportunities
-      if (missedReach.length > 0) {
-        const top = missedReach[0];
-        const topFormat = top.formats[0]?.name ?? 'Short';
-        return `"${top.title}" (${fmtNum(top.views)} views) has no ${topFormat}. Cut one — it extends the video's discovery window and compounds existing views.`;
-      }
-      return 'Increase Shorts frequency and test stronger hooks. The algorithm needs consistent signal and the first 3 seconds need to stop the scroll.';
-    }
-
-    case 'WEAK_CADENCE': {
-      if (best && best.views > 10_000) {
-        return `"${best.title}" is performing (${fmtNum(best.views)} views) but it's carrying the channel alone. Cut 2-3 support Shorts from it this week and stack a new upload to build cadence.`;
-      }
-      return `${stats.uploads30d} uploads in 30d is below the threshold for algorithmic momentum. Ship 2-3 Shorts this week to establish rhythm — the algorithm rewards consistency over quality.`;
-    }
-
-    case 'COMPOUNDING': {
-      // Don't break what's working — extend it
-      if (best) {
-        return `"${best.title}" is the momentum carrier at ${fmtNum(best.views)} views. Double down — cut additional formats from it and make sure the next upload lands within 3-4 days to maintain algorithm velocity.`;
-      }
-      return 'Momentum is building — maintain the upload rhythm and don\'t let more than 4 days pass without posting. The algorithm is rewarding the channel right now.';
-    }
-
-    case 'COLD': {
-      return 'Reactivate the channel with 2-3 catalogue Shorts this week — anything on the channel\'s best-performing tracks. The algorithm needs signal before any campaign content will distribute.';
-    }
-
-    default:
-      return p.primaryMove.action;
-  }
-}
-
-/** Derive SECONDARY action — amplify or extend */
-function deriveSecondary(p: ReportProps, signal: Signal): string | null {
-  const { stats, recentUploads, missedReach, structuralGaps } = p;
-  const best = topRecent(p);
-
-  switch (signal.type) {
-    case 'WEAK_CONVERSION': {
-      // Suggest Community Post engagement or cross-platform
-      if (stats.shorts30d > 0 && best) {
-        return `Use a Community Post to ask the audience a question about "${best.title}" — engagement signals help the algorithm and build subscriber intent.`;
-      }
-      return 'Pin a Community Post linking to the best-performing video with a direct subscribe CTA. Make the value proposition explicit.';
-    }
-
-    case 'WEAK_REACH': {
-      // Suggest collaboration or timing
-      if (structuralGaps && structuralGaps.length > 0) {
-        const gapName = structuralGaps[0].name;
-        return `${structuralGaps[0].count} videos missing ${gapName} — batch-create these to unlock reach on existing content that's already proven.`;
-      }
-      return 'Cross-post the strongest Short to TikTok and Instagram Reels — widen the discovery funnel beyond YouTube while cadence builds.';
-    }
-
-    case 'WEAK_CADENCE': {
-      if (missedReach.length > 0) {
-        const names = missedReach.slice(0, 2).map((v) => `"${v.title}"`).join(' and ');
-        return `${names} already have views — cut Shorts from these first. It's faster than creating from scratch and the algorithm already has signal on them.`;
-      }
-      return null;
-    }
-
-    case 'COMPOUNDING': {
-      if (recentUploads.length >= 3) {
-        const sorted = [...recentUploads].sort((a, b) => b.views - a.views);
-        const second = sorted[1];
-        if (second) {
-          return `"${second.title}" is the second-strongest performer — give it a Short cutdown to build a second discovery path alongside the lead.`;
-        }
-      }
-      return 'This is a hold-and-extend phase — don\'t introduce new formats or experiments. Stack what\'s working.';
-    }
-
-    case 'COLD': {
-      return 'Once the first 2-3 uploads are live, post a Community Post reintroducing the channel. Don\'t wait for results — the goal is signal volume, not single-upload performance.';
-    }
-
-    default:
-      return p.secondaryMove?.action ?? null;
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// Report builder — Weekly Campaign Report
+// Communication update builders
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function buildWeeklyReport(p: ReportProps): string {
+function buildSlackUpdate(p: ReportProps): string {
+  const bullets = gatherInsights(p);
+  const rec = generateRecommendation(p);
+  const campaignContext = p.campaign
+    ? ` following ${p.campaign}`
+    : '';
+
+  const lines: string[] = [];
+  lines.push(`Quick ${p.artistName} YouTube update${campaignContext}:`);
+  lines.push('');
+  for (const b of bullets) {
+    lines.push(`• ${b}`);
+  }
+  lines.push('');
+  lines.push('Recommendation');
+  lines.push(rec);
+
+  return lines.join('\n');
+}
+
+function buildEmailUpdate(p: ReportProps): string {
+  const bullets = gatherInsights(p);
+  const rec = generateRecommendation(p);
+  const campaignContext = p.campaign
+    ? ` following ${p.campaign}`
+    : '';
+
+  const lines: string[] = [];
+  lines.push('Hi all,');
+  lines.push('');
+  lines.push(`Quick ${p.artistName} YouTube update${campaignContext}:`);
+  lines.push('');
+  for (const b of bullets) {
+    lines.push(`• ${b}`);
+  }
+  lines.push('');
+  lines.push('Recommendation');
+  lines.push(rec);
+
+  return lines.join('\n');
+}
+
+function buildFullReport(p: ReportProps): string {
   const date = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
+  const bullets = gatherInsights(p);
+  const rec = generateRecommendation(p);
 
   const lines: string[] = [];
-  const state = p.channelState.toUpperCase();
-
-  // ── HEADER ──────────────────────────────────────────────────────────────
-  lines.push(`WEEKLY CAMPAIGN REPORT — ${p.artistName.toUpperCase()}`);
+  lines.push(`CAMPAIGN UPDATE — ${p.artistName.toUpperCase()}`);
   if (p.campaign) lines.push(`Campaign: ${p.campaign}`);
-  lines.push(`${date} · STATE: ${state}`);
+  lines.push(`${date} · ${p.channelState.toUpperCase()}`);
   lines.push('');
 
-  // ── 1. PERFORMANCE SNAPSHOT ──────────────────────────────────────────────
-  lines.push('1. PERFORMANCE SNAPSHOT');
+  // Performance snapshot
+  lines.push('PERFORMANCE');
   const snapParts: string[] = [];
   if (p.stats.subs != null) snapParts.push(`Subs: ${fmtNum(p.stats.subs)}`);
   if (p.stats.views7d != null) snapParts.push(`Views (7d): ${fmtDelta(p.stats.views7d)}`);
   if (p.stats.subs7d != null) snapParts.push(`Subs (7d): ${fmtDelta(p.stats.subs7d)}`);
   snapParts.push(`Uploads (30d): ${p.stats.uploads30d}`);
-  snapParts.push(`Shorts (30d): ${p.stats.shorts30d}`);
-  if (p.stats.lastUpDays != null) {
-    snapParts.push(`Last upload: ${p.stats.lastUpDays === 0 ? 'today' : `${p.stats.lastUpDays}d ago`}`);
-  }
+  if (p.stats.shorts30d > 0) snapParts.push(`Shorts (30d): ${p.stats.shorts30d}`);
   lines.push(snapParts.join(' · '));
   lines.push('');
-  lines.push(interpretPerformance(p));
-  lines.push('');
 
-  // ── Campaign period (if active) ──────────────────────────────────────────
+  // Campaign period
   if (p.campaignDaysSinceStart != null) {
     lines.push(`CAMPAIGN PERIOD (Day ${p.campaignDaysSinceStart})`);
     const campParts: string[] = [];
-    campParts.push(`Content: ${p.campaignContentCount} uploads (${p.campaignShortsCount} Shorts, ${p.campaignContentCount - p.campaignShortsCount} videos)`);
+    campParts.push(`Content: ${p.campaignContentCount} uploads (${p.campaignShortsCount} Shorts, ${p.campaignContentCount - p.campaignShortsCount} long-form)`);
     campParts.push(`Content views: ${fmtNum(p.campaignContentViews)}`);
     if (p.campaignViewsDelta != null) campParts.push(`Channel views: ${fmtDelta(p.campaignViewsDelta)}`);
     if (p.campaignSubsDelta != null) campParts.push(`Subs gained: ${fmtDelta(p.campaignSubsDelta)}`);
@@ -444,128 +375,174 @@ function buildWeeklyReport(p: ReportProps): string {
     lines.push('');
   }
 
-  // ── 2. DROP COMPARISON ──────────────────────────────────────────────────
-  const recentVideos = p.recentUploads.filter((u) => u.kind === 'Video');
-  if (recentVideos.length >= 2) {
-    lines.push('2. DROP COMPARISON');
-    const sorted = [...recentVideos].sort((a, b) => a.daysAgo - b.daysAgo);
-    const latest = sorted[0];
-    const previous = sorted[1];
-    const latestVpd = latest.daysAgo > 0 ? Math.round(latest.views / latest.daysAgo) : latest.views;
-    const prevVpd = previous.daysAgo > 0 ? Math.round(previous.views / previous.daysAgo) : previous.views;
-    lines.push(`Latest: "${latest.title}" — ${fmtNum(latest.views)} views in ${latest.daysAgo}d (~${fmtNum(latestVpd)}/day)`);
-    lines.push(`Previous: "${previous.title}" — ${fmtNum(previous.views)} views in ${previous.daysAgo}d (~${fmtNum(prevVpd)}/day)`);
-    if (latestVpd > prevVpd) {
-      const pct = prevVpd > 0 ? Math.round(((latestVpd - prevVpd) / prevVpd) * 100) : 0;
-      lines.push(`→ Latest is ${pct > 0 ? pct + '% ' : ''}faster velocity. Momentum is building.`);
-    } else if (prevVpd > latestVpd) {
-      const pct = latestVpd > 0 ? Math.round(((prevVpd - latestVpd) / prevVpd) * 100) : 0;
-      lines.push(`→ Previous had ${pct > 0 ? pct + '% ' : ''}stronger velocity. Latest needs support formats to catch up.`);
-    } else {
-      lines.push('→ Similar velocity. Consistent performance.');
-    }
-    lines.push('');
+  // Key insights
+  lines.push('KEY INSIGHTS');
+  for (const b of bullets) {
+    lines.push(`• ${b}`);
   }
-
-  // ── 3. DISCOVERY SIGNALS ────────────────────────────────────────────────
-  const disco = discoverySignals(p);
-  if (disco.length > 0) {
-    lines.push('3. DISCOVERY SIGNALS');
-    for (const s of disco) lines.push(`→ ${s}`);
-    lines.push('');
-  }
-
-  // ── 4. WHAT'S WORKING ──────────────────────────────────────────────────
-  const working = whatsWorking(p);
-  lines.push('4. WHAT\'S WORKING');
-  for (const w of working) lines.push(`→ ${w}`);
   lines.push('');
 
-  // ── 5. WHAT'S LIMITING GROWTH ──────────────────────────────────────────
-  const limiting = whatsLimiting(p);
-  lines.push('5. WHAT\'S LIMITING GROWTH');
-  for (const l of limiting) lines.push(`→ ${l}`);
-  lines.push('');
-
-  // ── 6. WHAT TO DO NEXT (powered by Growth OS) ──────────────────────────
-  const gosInput: GrowthInput = {
-    subscribers: p.stats.subs ?? undefined,
-    views7d: p.stats.views7d,
-    subscribers7d: p.stats.subs7d,
-    uploads30d: p.stats.uploads30d,
-    shorts30d: p.stats.shorts30d,
-    lastUploadDaysAgo: p.stats.lastUpDays,
-    hasActiveCampaign: !!p.campaign,
-    campaignName: p.campaign ?? undefined,
-    campaignContentViews: p.campaignContentViews || undefined,
-    campaignUploads: p.campaignContentCount || undefined,
-    campaignShorts: p.campaignShortsCount || undefined,
-  };
-  const growthRead = generateYouTubeGrowthRead(p.artistName, gosInput);
-
-  lines.push('6. WHAT TO DO NEXT');
-  lines.push('');
-  lines.push(`STATE → ${growthRead.state.replace('_', ' ')} · ${growthRead.subState.replace(/_/g, ' ')}`);
-  lines.push('');
-  lines.push(`SIGNAL → ${growthRead.signal}`);
-  lines.push('');
-  if (growthRead.blocker.blocker !== 'NONE') {
-    lines.push(`BLOCKER → ${growthRead.blocker.label} — ${growthRead.blocker.description}`);
-    lines.push('');
-  }
-  lines.push('THIS WEEK:');
-  for (const a of growthRead.actions.doNow) lines.push(`→ ${a}`);
-  lines.push('');
-  if (growthRead.actions.dontDoYet.length > 0) {
-    lines.push('DON\'T DO YET:');
-    for (const a of growthRead.actions.dontDoYet) lines.push(`× ${a}`);
-    lines.push('');
-  }
-  lines.push(`WATCH → ${growthRead.watch}`);
-  lines.push('');
-
-  // ── FOOTER ─────────────────────────────────────────────────────────────
-  lines.push('— Generated by YouTube Campaign Coach');
+  // Recommendation
+  lines.push('RECOMMENDATION');
+  lines.push(rec);
 
   return lines.join('\n');
 }
 
+
 // ═══════════════════════════════════════════════════════════════════════════════
-// Component
+// Shared button components — reusable across pages
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export default function WatcherReport(props: ReportProps) {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = useCallback(() => {
-    const text = buildWeeklyReport(props);
+type CopyState = 'idle' | 'slack' | 'email' | 'report';
+
+function useCopyUpdate(props: ReportProps) {
+  const [copied, setCopied] = useState<CopyState>('idle');
+
+  const copy = useCallback((type: 'slack' | 'email' | 'report') => {
+    let text: string;
+    if (type === 'slack') text = buildSlackUpdate(props);
+    else if (type === 'email') text = buildEmailUpdate(props);
+    else text = buildFullReport(props);
+
     navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopied(type);
+      setTimeout(() => setCopied('idle'), 2000);
     });
   }, [props]);
 
+  return { copied, copy };
+}
+
+
+/** Compact inline buttons for embedding in table rows / card headers */
+export function ReportActions({ props, showBehaviour, onBehaviour }: {
+  props: ReportProps;
+  showBehaviour?: boolean;
+  onBehaviour?: () => void;
+}) {
+  const { copied, copy } = useCopyUpdate(props);
+
   return (
-    <div className="mt-10 flex items-center justify-center">
+    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+      {showBehaviour && onBehaviour && (
+        <button
+          onClick={onBehaviour}
+          className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
+          style={{ background: ELECTRIC, color: '#fff' }}
+        >
+          Behaviour
+        </button>
+      )}
       <button
-        onClick={handleCopy}
-        className="px-5 py-2.5 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em] inline-flex items-center gap-2 transition-colors cursor-pointer"
+        onClick={() => copy('slack')}
+        className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
         style={{
-          background: copied ? '#E6F8EE' : 'transparent',
-          color: copied ? '#0C6A3F' : INK,
-          border: `1px solid ${copied ? '#1FBE7A' : MUTED}`,
+          background: copied === 'slack' ? '#E6F8EE' : SOFT,
+          color: copied === 'slack' ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
         }}
       >
-        {copied ? (
-          <>
-            <CheckIcon /> Copied to clipboard
-          </>
-        ) : (
-          <>
-            <ClipboardIcon /> Generate weekly report
-          </>
-        )}
+        {copied === 'slack' ? 'Copied' : 'Slack'}
+      </button>
+      <button
+        onClick={() => copy('email')}
+        className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
+        style={{
+          background: copied === 'email' ? '#E6F8EE' : SOFT,
+          color: copied === 'email' ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
+        }}
+      >
+        {copied === 'email' ? 'Copied' : 'Email'}
       </button>
     </div>
+  );
+}
+
+/** Full-size buttons for the detail page header */
+export function ReportButtonBar({ props }: { props: ReportProps }) {
+  const { copied, copy } = useCopyUpdate(props);
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => copy('slack')}
+        className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
+        style={{
+          background: copied === 'slack' ? '#E6F8EE' : SOFT,
+          color: copied === 'slack' ? '#0C6A3F' : INK,
+          border: `1px solid ${copied === 'slack' ? MINT : MUTED}`,
+        }}
+      >
+        {copied === 'slack' ? <CheckIcon /> : <SlackIcon />}
+        {copied === 'slack' ? 'Copied' : 'Slack Update'}
+      </button>
+      <button
+        onClick={() => copy('email')}
+        className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
+        style={{
+          background: copied === 'email' ? '#E6F8EE' : SOFT,
+          color: copied === 'email' ? '#0C6A3F' : INK,
+          border: `1px solid ${copied === 'email' ? MINT : MUTED}`,
+        }}
+      >
+        {copied === 'email' ? <CheckIcon /> : <EmailIcon />}
+        {copied === 'email' ? 'Copied' : 'Email Update'}
+      </button>
+      <button
+        onClick={() => copy('report')}
+        className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
+        style={{
+          background: copied === 'report' ? '#E6F8EE' : 'transparent',
+          color: copied === 'report' ? '#0C6A3F' : 'rgba(14,14,14,0.45)',
+          border: `1px solid ${copied === 'report' ? MINT : MUTED}`,
+        }}
+      >
+        {copied === 'report' ? <CheckIcon /> : <ClipboardIcon />}
+        {copied === 'report' ? 'Copied' : 'Full Report'}
+      </button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Default export — backwards compatible with existing watcher detail page
+// Now renders the full button bar instead of a single "Generate weekly report"
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export default function WatcherReport(props: ReportProps) {
+  return (
+    <div className="mt-10 flex items-center justify-center">
+      <ReportButtonBar props={props} />
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Icons
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function SlackIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z" />
+      <path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
+      <path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z" />
+      <path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z" />
+      <path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z" />
+      <path d="M14 20.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5z" />
+      <path d="M10 9.5C10 10.33 9.33 11 8.5 11h-5C2.67 11 2 10.33 2 9.5S2.67 8 3.5 8h5c.83 0 1.5.67 1.5 1.5z" />
+      <path d="M10 3.5C10 4.33 9.33 5 8.5 5S7 4.33 7 3.5 7.67 2 8.5 2s1.5.67 1.5 1.5z" />
+    </svg>
+  );
+}
+
+function EmailIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </svg>
   );
 }
 

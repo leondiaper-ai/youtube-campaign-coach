@@ -17,7 +17,7 @@ import PinCampaignButton from '@/components/PinCampaignButton';
 import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
 import MissedReachSection from '@/components/MissedReachSection';
-import WatcherReport, { type ReportMissedVideo } from '@/components/WatcherReport';
+import WatcherReport, { type ReportMissedVideo, ReportButtonBar } from '@/components/WatcherReport';
 import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
 
 export const revalidate = 600;
@@ -248,6 +248,13 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             ← All artists
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              href={`/campaigns?behaviour=${slug}`}
+              className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] no-underline transition-colors"
+              style={{ background: '#2C25FF', color: '#fff' }}
+            >
+              Behaviour
+            </Link>
             {isLive && (
               <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35">
                 Live · YouTube API
