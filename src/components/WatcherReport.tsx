@@ -403,7 +403,7 @@ function useCopyUpdate(props: ReportProps) {
     let text: string;
     if (type === 'slack') text = buildSlackUpdate(props);
     else if (type === 'email') text = buildEmailUpdate(props);
-    else text = buildFullReport(props);
+    else text = buildEmailUpdate(props);
 
     navigator.clipboard.writeText(text).then(() => {
       setCopied(type);
@@ -497,8 +497,8 @@ export function ReportButtonBar({ props }: { props: ReportProps }) {
           border: `1px solid ${copied === 'report' ? MINT : MUTED}`,
         }}
       >
-        {copied === 'report' ? <CheckIcon /> : <ClipboardIcon />}
-        {copied === 'report' ? 'Copied' : 'Full Report'}
+        {copied === 'report' ? <CheckIcon /> : <EmailIcon />}
+        {copied === 'report' ? 'Copied' : 'Email Report'}
       </button>
     </div>
   );
