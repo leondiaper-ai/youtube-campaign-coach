@@ -1572,9 +1572,7 @@ export default function CampaignStatusBoard({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/25">Live</span>
-        </div>
+        <div className="flex items-center gap-4" />
       </div>
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -1607,18 +1605,7 @@ export default function CampaignStatusBoard({
           </div>
         )}
         </div>
-        <div className="flex items-center gap-3">
-          {snapshotStatus && (
-            <span className="text-[10px] text-ink/40">{snapshotStatus}</span>
-          )}
-          <button
-            onClick={handleSaveSnapshot}
-            disabled={snapshotSaving}
-            className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/25 hover:text-ink/50 transition-colors disabled:opacity-40"
-          >
-            {snapshotSaving ? 'Saving…' : 'Save Weekly Snapshot'}
-          </button>
-        </div>
+        <div className="flex items-center gap-3" />
       </div>
 
       {cards.length === 0 ? (
