@@ -12,12 +12,11 @@ import {
   computeConversion,
   type ConversionResult,
 } from '@/lib/conversion';
-import CoachLink from '@/components/CoachLink';
 import PinCampaignButton from '@/components/PinCampaignButton';
-import { CoachCampaignBadge, NextMomentFromCoach } from '@/components/WatcherCoachOverlay';
+import { CoachCampaignBadge } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
 import MissedReachSection from '@/components/MissedReachSection';
-import WatcherReport, { type ReportMissedVideo, ReportButtonBar } from '@/components/WatcherReport';
+import { ReportButtonBar } from '@/components/WatcherReport';
 import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
 
 export const revalidate = 600;
@@ -653,77 +652,6 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           </div>
         )}
 
-
-        {/* ─── WEEKLY REPORT ────────────────────────────────────────────── */}
-        {(() => {
-          const reportGaps = scanVideoGaps(live?.recentUploads ?? []);
-          const reportMoves = whatToDoNow(decision, live?.recentUploads ?? [], reportGaps, {
-            isColdMode,
-            daysToNextMoment,
-            momentLabel: artist.nextMomentLabel ?? null,
-            uploads30d,
-            lastUpDays,
-            subs7delta: subs7?.delta ?? null,
-            views7delta: views7?.delta ?? null,
-          });
-          return (
-            <WatcherReport
-              artistName={artist.name}
-              channelState={channelState}
-              stateReason={derived?.reason ?? decision.headline}
-              riskLine={decision.type === 'FIX' || decision.type === 'CORRECT' ? decision.ifIgnored : null}
-              primaryMove={reportMoves.primary}
-              secondaryMove={reportMoves.secondary}
-              missedReach={allMissedOpps.map((v): ReportMissedVideo => ({
-                title: v.title,
-                views: v.views,
-                formats: v.items.map((o) => ({
-                  name: formatName(o.subtype),
-                  impact: formatImpact(o.subtype),
-                })),
-              }))}
-              structuralGaps={structuralGaps}
-              stats={{
-                subs: live?.subs ?? null,
-                views7d: views7?.delta ?? null,
-                subs7d: subs7?.delta ?? null,
-                uploads30d,
-                lastUpDays,
-                shorts30d: live?.shorts30d ?? 0,
-              }}
-              campaign={artist.campaign ?? null}
-              campaignContentViews={campaignContentViews}
-              campaignContentCount={campaignContentCount}
-              campaignShortsCount={campaignShortsCount}
-              campaignDaysSinceStart={campaignDaysSinceStart}
-              campaignSubsDelta={campSubs?.delta ?? null}
-              campaignViewsDelta={campViews?.delta ?? null}
-              recentUploads={(live?.recentUploads ?? []).filter(
-                (u) => (Date.now() - new Date(u.publishedAt).getTime()) / 86400000 <= 14
-              ).map((u) => ({
-                title: u.title,
-                views: u.viewCount,
-                kind: (u.durationSec <= 62 ? 'Short' : 'Video') as 'Short' | 'Video',
-                daysAgo: Math.floor((Date.now() - new Date(u.publishedAt).getTime()) / 86400000),
-              }))}
-              conv7={conv7}
-            />
-          );
-        })()}
-
-
-        {/* ─── NEXT MOMENT ────────────────────────────────────────────────── */}
-        <NextMomentFromCoach
-          slug={slug}
-          fallbackLabel={artist.nextMomentLabel}
-          fallbackDate={artist.nextMomentDate}
-        />
-
-
-        {/* ─── COACH CTA (secondary, bottom) ────────────────────────────── */}
-        <div className="mt-12 flex items-center justify-center">
-          <CoachLink slug={slug} />
-        </div>
 
         <div className="mt-10 text-[10px] uppercase tracking-[0.18em] text-ink/25">
           Watcher watches · Coach plans · You decide
