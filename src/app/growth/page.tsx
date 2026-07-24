@@ -6,6 +6,7 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
+import { listPinned } from '@/lib/campaignStore';
 import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
@@ -27,6 +28,8 @@ export default async function ControlPage() {
   const custom = await listCustomArtists();
   const allArtists = mergeArtistLists(ARTISTS, custom);
   const syncMeta = await readSyncMeta();
+  const pinned = await listPinned();
+  const pinnedSlugs = pinned.map((p) => p.slug);
 
   // Batch-read all cached snaps from KV (zero YouTube API calls)
   const handles = allArtists
@@ -217,7 +220,7 @@ export default async function ControlPage() {
         </div>
 
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} />
+        <ChannelHealthBoard rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
         {/* Navigation flow */}
         <div className="mt-8 flex items-center justify-center gap-3 text-[11px]">

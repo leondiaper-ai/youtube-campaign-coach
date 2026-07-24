@@ -513,6 +513,7 @@ export default function ChannelHealthBoard({
   marketFormatStats,
   singleTab = false,
   removable = false,
+  pinnedSlugs = [],
 }: {
   rows: RowData[];
   linkPrefix?: string;
@@ -522,6 +523,8 @@ export default function ChannelHealthBoard({
   singleTab?: boolean;
   /** Show ✕ remove button on each row (team watcher mode) */
   removable?: boolean;
+  /** Only show Behaviour button for artists with pinned campaigns */
+  pinnedSlugs?: string[];
 }) {
   const router = useRouter();
   const [view, setView] = useState<ViewMode>('managed');
@@ -1047,14 +1050,16 @@ export default function ChannelHealthBoard({
                 >
                   {/* Action buttons row */}
                   <div className="flex items-center gap-2 mb-3">
-                    <Link
-                      href={`/campaigns?behaviour=${r.slug}`}
-                      className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors no-underline"
-                      style={{ background: '#2C25FF', color: '#fff' }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Behaviour
-                    </Link>
+                    {pinnedSlugs.includes(r.slug) && (
+                      <Link
+                        href={`/campaigns?behaviour=${r.slug}`}
+                        className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors no-underline"
+                        style={{ background: '#2C25FF', color: '#fff' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Behaviour
+                      </Link>
+                    )}
                     <QuickCopyButton row={r} type="slack" />
                     <QuickCopyButton row={r} type="email" />
                   </div>
