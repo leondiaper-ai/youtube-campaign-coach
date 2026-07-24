@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { fmtNum, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import {
@@ -1423,6 +1424,9 @@ export default function CampaignStatusBoard({
           padding: '12px 20px',
           background: PAPER,
         }}>
+          <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 8 }}>
+            ← Dashboard
+          </Link>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 24 }} />
           {/* eslint-disable-next-line @next/next/no-img-element */}

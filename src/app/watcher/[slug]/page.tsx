@@ -243,8 +243,8 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
       <div className="max-w-[880px] mx-auto px-6 py-10">
         {/* Breadcrumb + Active Campaign CTA */}
         <div className="flex items-center justify-between mb-8">
-          <Link href="/cockpit" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
-            ← All artists
+          <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
+            ← Dashboard
           </Link>
           <div className="flex items-center gap-3">
             <Link

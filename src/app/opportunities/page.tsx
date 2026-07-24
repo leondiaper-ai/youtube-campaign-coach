@@ -42,7 +42,7 @@ export default async function OpportunitiesPage() {
             href="/growth"
             className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
           >
-            ← All Artists
+            ← Dashboard
           </Link>
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
             Scanner · live
