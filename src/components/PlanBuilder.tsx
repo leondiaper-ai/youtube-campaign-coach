@@ -402,7 +402,7 @@ function Nav() {
           Channel Health
         </Link>
         <Link
-          href="/cockpit"
+          href="/growth"
           className="px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors"
           style={{ color: MUTED }}
         >

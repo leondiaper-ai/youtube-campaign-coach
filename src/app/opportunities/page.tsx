@@ -39,10 +39,10 @@ export default async function OpportunitiesPage() {
       <div className="max-w-[860px] mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-6">
           <Link
-            href="/cockpit"
+            href="/growth"
             className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
           >
-            ← Cockpit
+            ← All Artists
           </Link>
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/50">
             Scanner · live

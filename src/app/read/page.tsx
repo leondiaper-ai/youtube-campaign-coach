@@ -71,7 +71,7 @@ export default function ReadPage() {
               YouTube Instant Read
             </h1>
             <Link
-              href="/cockpit"
+              href="/growth"
               className="text-[10px] uppercase tracking-[0.14em] text-neutral-600 hover:text-neutral-400 transition-colors"
             >
               Campaign System →
