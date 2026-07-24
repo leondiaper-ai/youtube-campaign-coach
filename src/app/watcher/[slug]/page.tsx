@@ -255,13 +255,7 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             >
               Behaviour
             </Link>
-            {isLive && (
-              <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35">
-                Live · YouTube API
-              </span>
-            )}
             <PinCampaignButton slug={slug} initiallyPinned={campaignPinned} />
-            <CoachLink slug={slug} size="sm" />
           </div>
         </div>
 
