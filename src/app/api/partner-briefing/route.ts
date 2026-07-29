@@ -62,16 +62,16 @@ async function kv() {
   }
 }
 
-/** ISO week key, e.g. "partner-briefing:2026-W22" */
-function briefingWeekKey(): string {
-  const now = new Date();
-  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  return `partner-briefing:${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
-}
+/**
+ * Cache key for the briefing response.
+ *
+ * Previously this was an ISO-week key held for 8 days, which meant a coach
+ * plan edited on Tuesday would not reach the briefing until the following
+ * week. The briefing now shares a short TTL with /campaigns (600s) so plan
+ * timelines stay in step across coach, campaigns and briefing.
+ */
+const BRIEFING_CACHE_KEY = 'partner-briefing:current';
+const BRIEFING_CACHE_TTL = 600; // seconds — matches /campaigns revalidate
 
 // ── Response Types ───────────────────────────────────────────────────────────
 
@@ -185,7 +185,7 @@ type PartnerBriefingResponse = {
 export async function GET(request: Request) {
   try {
     const redis = await kv();
-    const weekKey = briefingWeekKey();
+    const weekKey = BRIEFING_CACHE_KEY;
 
     const url = new URL(request.url);
     const forceRefresh = url.searchParams.get('refresh') === '1';
@@ -197,19 +197,22 @@ export async function GET(request: Request) {
       }
     }
 
+    // Load pinned active campaigns — these are the ONLY source for focus
+    // campaigns, and they are exempt from the curation filters below so the
+    // briefing always covers the same campaigns as /campaigns and the coach.
+    const pinnedCampaigns = await listPinned();
+    const pinnedSlugs = new Set(pinnedCampaigns.map(p => p.slug));
+
     // Load all artists
     const custom = await listCustomArtists();
     const PULSE_EXCLUDE_NAMES = ['league of legends'];
     const allArtists = mergeArtistLists(ARTISTS, custom)
       .filter(a => {
+        if (pinnedSlugs.has(a.slug)) return true; // pinned always survives
         const name = a.name.toLowerCase();
         return !PULSE_EXCLUDE_NAMES.some(ex => name.includes(ex));
       });
     const syncMeta = await readSyncMeta();
-
-    // Load pinned active campaigns — these are the ONLY source for focus campaigns
-    const pinnedCampaigns = await listPinned();
-    const pinnedSlugs = new Set(pinnedCampaigns.map(p => p.slug));
 
     const handles = allArtists
       .map(a => a.channelHandle)
@@ -222,7 +225,9 @@ export async function GET(request: Request) {
     const videoCutoff = 21 * 86400000;
 
     for (const a of allArtists) {
-      if (!isVirginOwned(a)) continue; // Partner briefing: Virgin managed only
+      // Partner briefing is Virgin-managed only, except for pinned campaigns —
+      // if it's an active campaign on /campaigns it belongs in the briefing.
+      if (!isVirginOwned(a) && !pinnedSlugs.has(a.slug)) continue;
 
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
       const history = snap?.channelId && !snap.error
@@ -481,11 +486,9 @@ export async function GET(request: Request) {
     const planIndex = await listPlans();
     const coachPlans = new Map<string, Awaited<ReturnType<typeof loadPlan>>>();
 
-    // Build artist-slug → plan-slug mapping
-    // Uses three matching strategies in order:
-    //   1. Normalized slug prefix (strips hyphens, compares prefixes)
-    //   2. Plan artist name → channel name (case-insensitive)
-    //   3. Plan artist name normalized → channel slug normalized
+    // Build artist-slug → plan-slug mapping.
+    // Every (artist, plan) pair is scored by how strong the link is and the
+    // strongest wins, so the result does not depend on plan iteration order.
     // This handles cases like tovelomusic ↔ tove-lo-campaign and
     // gener8ionworld ↔ gener8ion-campaign where slug prefixes don't work.
     const norm = (s: string) => s.replace(/-/g, '').toLowerCase();
@@ -501,53 +504,56 @@ export async function GET(request: Request) {
     }
 
     const artistSlugToPlanSlug = new Map<string, string>();
-    // Track every plan that matches an artist so we can detect ambiguity
-    // (e.g. Antony Szmierek has two saved plans). Ambiguous artists fall back
-    // to their YouTube channel rather than guessing a plan.
-    const planCandidates = new Map<string, Set<string>>();
-    const tryAssign = (artistSlug: string, entry: { slug: string; updatedAt: string }) => {
-      const candidates = planCandidates.get(artistSlug) ?? new Set<string>();
-      candidates.add(entry.slug);
-      planCandidates.set(artistSlug, candidates);
-      const existing = artistSlugToPlanSlug.get(artistSlug);
-      if (!existing) {
-        artistSlugToPlanSlug.set(artistSlug, entry.slug);
-      } else {
-        const existingEntry = planIndex.find(e => e.slug === existing);
-        if (existingEntry && entry.updatedAt > existingEntry.updatedAt) {
-          artistSlugToPlanSlug.set(artistSlug, entry.slug);
-        }
+    // Deterministic match: score every (artist, plan) pair by how strong the
+    // link is, keep the strongest. Ties break on most-recently-updated plan.
+    // Scoring beats "last write wins" because an artist with two saved plans
+    // (e.g. Antony Szmierek) now resolves to the plan that actually names
+    // them rather than whichever happened to be edited last.
+    //   4 = exact slug          3 = plan names this artist exactly
+    //   2 = slug prefix         1 = name contains
+    // Exact name outranks slug prefix: a plan that names the artist is a
+    // stronger signal than a slug that merely happens to share a prefix.
+    const best = new Map<string, { slug: string; score: number; updatedAt: string }>();
+    const tryAssign = (
+      artistSlug: string,
+      entry: { slug: string; updatedAt: string },
+      score: number,
+    ) => {
+      const existing = best.get(artistSlug);
+      if (
+        !existing ||
+        score > existing.score ||
+        (score === existing.score && entry.updatedAt > existing.updatedAt)
+      ) {
+        best.set(artistSlug, { slug: entry.slug, score, updatedAt: entry.updatedAt });
       }
     };
 
     for (const entry of planIndex) {
       const planNorm = norm(entry.slug);
+      const planArtistNorm = normName(entry.artist);
 
-      // Strategy 1: normalized slug prefix matching
       for (const artistSlug of Array.from(pinnedSlugs)) {
         const artistNorm = norm(artistSlug);
-        if (planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm)) {
-          tryAssign(artistSlug, entry);
+
+        // Strongest → weakest. Only the best score per artist is kept.
+        if (planNorm === artistNorm) {
+          tryAssign(artistSlug, entry, 4);
+        } else if (pinnedNameToSlug.get(planArtistNorm) === artistSlug) {
+          tryAssign(artistSlug, entry, 3);
+        } else if (planNorm.startsWith(artistNorm) || artistNorm.startsWith(planNorm)) {
+          tryAssign(artistSlug, entry, 2);
+        } else if (
+          planArtistNorm.length >= 4 &&
+          (artistNorm.includes(planArtistNorm) || planArtistNorm.includes(artistNorm))
+        ) {
+          tryAssign(artistSlug, entry, 1);
         }
       }
+    }
 
-      // Strategy 2: match plan artist name to channel name
-      const planArtistNorm = normName(entry.artist);
-      const matchedSlug = pinnedNameToSlug.get(planArtistNorm);
-      if (matchedSlug && !artistSlugToPlanSlug.has(matchedSlug)) {
-        tryAssign(matchedSlug, entry);
-      }
-
-      // Strategy 3: plan artist name normalized → channel slug contains it
-      if (!matchedSlug) {
-        for (const artistSlug of Array.from(pinnedSlugs)) {
-          if (artistSlugToPlanSlug.has(artistSlug)) continue;
-          const artistNorm = norm(artistSlug);
-          if (artistNorm.includes(planArtistNorm) || planArtistNorm.includes(artistNorm)) {
-            tryAssign(artistSlug, entry);
-          }
-        }
-      }
+    for (const [artistSlug, match] of Array.from(best.entries())) {
+      artistSlugToPlanSlug.set(artistSlug, match.slug);
     }
 
     // Load full plans for matched artists
@@ -829,8 +835,8 @@ export async function GET(request: Request) {
 
       const chUrl = channelUrl(ch.channelHandle);
 
-      // Link the card to its saved Coach plan — when multiple plans exist for the
-      // same artist, tryAssign already resolves to the most recently updated one.
+      // Link the card to its saved Coach plan — when multiple plans exist for
+      // the same artist, the scored match above already picked the strongest.
       const coachPlanSlug = hasCoachPlan
         ? (artistSlugToPlanSlug.get(ch.slug) ?? null)
         : null;
@@ -1001,8 +1007,8 @@ export async function GET(request: Request) {
     // YouTube wants to see: singles, official videos, BTS, trailers,
     // visualisers — anchored to actual dates. Generic "timeline being
     // developed" or "pre-release content build" adds no value here.
-    // Resolve a moment's link target: its Coach plan (most recently updated
-    // when multiple plans exist — already resolved by tryAssign above).
+    // Resolve a moment's link target: its Coach plan (strongest scored match
+    // when multiple plans exist — already resolved above).
     const resolveCoachSlug = (artistSlug: string): string | null => {
       return artistSlugToPlanSlug.get(artistSlug) ?? null;
     };
@@ -1015,20 +1021,28 @@ export async function GET(request: Request) {
 
       // Only include moments from coach plans with real dates
       if (coachPlan?.plan?.events && coachPlan.plan.events.length > 0) {
-        const scoredEvents = coachPlan.plan.events
+        const inWindow = coachPlan.plan.events
           .filter((e: ParsedEvent) => {
             const d = new Date(e.dateISO + 'T00:00:00');
             const diff = Math.round((d.getTime() - now) / 86400000);
-            return diff >= -7 && diff <= 35; // last week + next ~5 weeks
+            // Forward-looking only. The client drops past-dated moments when it
+            // renders, so including them here would let stale events eat the
+            // 4-per-artist cap and silently empty an artist's Release Radar.
+            return diff >= 0 && diff <= 35; // today + next ~5 weeks
           })
           .map((e: ParsedEvent) => {
             const title = cleanTitle(e.title);
             return { ...e, title, priority: eventPriority(e.kind, title) };
-          })
-          // Only YouTube content moments (priority >= 60) — no tour/festival/press
-          .filter(e => e.priority >= 60)
-          // Sort by priority (desc) then date (asc)
-          .sort((a, b) => b.priority - a.priority || a.dateISO.localeCompare(b.dateISO));
+          });
+
+        // Same rules as the focus-campaign card so both surfaces name the same
+        // "next" moment: drop tour/festival/press only when real YouTube content
+        // exists, then order chronologically — next thing first.
+        const hasContentMoment = inWindow.some(e => e.priority >= 60);
+        const scoredEvents = (hasContentMoment
+          ? inWindow.filter(e => e.priority >= 60)
+          : inWindow
+        ).sort((a, b) => a.dateISO.localeCompare(b.dateISO));
 
         for (const evt of scoredEvents.slice(0, 4)) { // max 4 per artist
           upcomingMoments.push({
@@ -1099,13 +1113,15 @@ export async function GET(request: Request) {
     }
     const mergedMoments = Array.from(mergedMap.values());
 
-    // Sort: highest priority first, then by date within same priority tier
+    // Sort chronologically — next thing first — matching the coach timeline and
+    // the focus-campaign card. Priority only breaks ties on the same date, so a
+    // moment 30 days out can no longer outrank one happening tomorrow.
+    // Undated moments sort last.
     mergedMoments.sort((a, b) => {
-      if (a.priority !== b.priority) return b.priority - a.priority;
-      if (a.date && b.date) return a.date.localeCompare(b.date);
+      if (a.date && b.date && a.date !== b.date) return a.date.localeCompare(b.date);
       if (a.date && !b.date) return -1;
       if (!a.date && b.date) return 1;
-      return 0;
+      return b.priority - a.priority;
     });
 
     // ── Ecosystem Highlights ──────────────────────────────────────────────
@@ -1238,7 +1254,7 @@ export async function GET(request: Request) {
 
     if (redis) {
       try {
-        await redis.set(weekKey, response, { ex: 8 * 86400 });
+        await redis.set(weekKey, response, { ex: BRIEFING_CACHE_TTL });
       } catch {
         // Cache write failure is non-fatal
       }
