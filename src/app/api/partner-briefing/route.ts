@@ -28,6 +28,12 @@ import { loadPlan, listPlans } from '@/lib/planStore';
 import type { ParsedEvent } from '@/lib/planEngine';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistories, deltaOver } from '@/lib/snapshots';
+import {
+  BRIEFING_CACHE_KEY,
+  BRIEFING_CACHE_TTL,
+  BRIEFING_FRESH_MS,
+  BRIEFING_LOCK_KEY,
+} from '@/lib/briefingCache';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import { classifyUploadFormat, type UploadFormatLabel } from '@/lib/coach/matchEngine';
 import { computeMultiformat, type MultiformatScore } from '@/lib/contentStructure';
@@ -81,12 +87,13 @@ async function kv() {
  * Instead the entry is kept for a day and carries its own build time:
  *   - fresher than FRESH_MS  → serve as-is
  *   - older than FRESH_MS    → serve immediately, rebuild for the next caller
- * So readers never block on a rebuild, and coach edits still land within
- * roughly ten minutes.
+ * So readers never block on a rebuild.
+ *
+ * Saving a coach plan clears the key outright (see lib/briefingCache.ts), so a
+ * timeline edit shows up on the next load rather than waiting out the
+ * freshness window. The constants live in that module so the writer here and
+ * the invalidator there can never drift apart on the key name.
  */
-const BRIEFING_CACHE_KEY = 'partner-briefing:current';
-const BRIEFING_CACHE_TTL = 86400; // seconds a cached copy is retained
-const BRIEFING_FRESH_MS = 10 * 60 * 1000; // treated as fresh for 10 minutes
 
 // ── Response Types ───────────────────────────────────────────────────────────
 
@@ -219,7 +226,7 @@ export async function GET(request: Request) {
         // concurrent readers from all triggering their own rebuild.
         let shouldRebuild = true;
         try {
-          const gotLock = await redis.set(`${weekKey}:rebuilding`, '1', {
+          const gotLock = await redis.set(BRIEFING_LOCK_KEY, '1', {
             ex: 300,
             nx: true,
           });
@@ -1311,7 +1318,7 @@ export async function GET(request: Request) {
       try {
         await redis.set(weekKey, response, { ex: BRIEFING_CACHE_TTL });
         // Release the rebuild lock so the next stale read can refresh again.
-        await redis.del(`${weekKey}:rebuilding`);
+        await redis.del(BRIEFING_LOCK_KEY);
       } catch {
         // Cache write failure is non-fatal
       }

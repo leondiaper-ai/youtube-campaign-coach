@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { savePlan, listPlans, generateSlug, updateSavedPlan, loadPlan } from '@/lib/planStore';
 import { generatePlan, type ChannelContext, type GeneratedPlan } from '@/lib/planEngine';
+import { invalidateBriefingCache } from '@/lib/briefingCache';
 
 /**
  * POST /api/coach — Generate + save a campaign plan.
@@ -37,6 +38,10 @@ export async function POST(req: NextRequest) {
     const slug = customSlug || generateSlug(artist, plan.campaignName);
     const saved = await savePlan(slug, artist, plan, channelCtx ?? null, timeline);
 
+    // The briefing renders these plan dates, so a timeline edit here must show
+    // up there immediately rather than waiting out the cache freshness window.
+    await invalidateBriefingCache();
+
     return NextResponse.json({
       slug: saved.slug,
       campaignName: saved.campaignName,
@@ -69,6 +74,11 @@ export async function PATCH(req: NextRequest) {
     if (!updated) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
+
+    // Same reasoning as POST — the briefing reads these plans, so any edit
+    // here should be reflected on the next briefing load.
+    await invalidateBriefingCache();
+
     return NextResponse.json({ ok: true, campaignName: updated.campaignName, updatedAt: updated.updatedAt });
   } catch (err) {
     console.error('PATCH /api/coach error:', err);

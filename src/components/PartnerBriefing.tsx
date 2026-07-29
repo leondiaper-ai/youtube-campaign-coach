@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type CSSProperties, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, type CSSProperties, type ReactNode } from 'react';
 import PulseNav from './PulseNav';
 
 // ── Design System ───────────────────────────────────────────────────────────
@@ -608,16 +608,37 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
   const [data, setData] = useState<BriefingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  /**
+   * force=true rebuilds server-side rather than reading the cache. Used by the
+   * Refresh control, so a coach timeline edit can be pulled in on demand
+   * without waiting for the cache to age out.
+   */
+  const load = useCallback(async (force: boolean) => {
+    if (force) setRefreshing(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/partner-briefing${force ? '?refresh=1' : ''}`, {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const d = await res.json();
+      if (d?.error) throw new Error(d.error);
+      setData(d);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    // Forward ?refresh=1 from page URL to API call so cache busting works
-    const params = new URLSearchParams(window.location.search);
-    const refreshParam = params.get('refresh') === '1' ? '?refresh=1' : '';
-    fetch(`/api/partner-briefing${refreshParam}`)
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(e => { setError(e.message); setLoading(false); });
-  }, []);
+    // Honour ?refresh=1 on the page URL as a manual cache bust.
+    const forced = new URLSearchParams(window.location.search).get('refresh') === '1';
+    void load(forced);
+  }, [load]);
 
   if (loading) return (
     <main style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -627,7 +648,9 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
     </main>
   );
 
-  if (error || !data) return (
+  // Only take over the page when there is nothing to show. A failed *refresh*
+  // keeps the briefing on screen and reports the problem inline instead.
+  if (!data) return (
     <main style={{ background: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center', color: SMOKE }}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Failed to load</div>
@@ -735,8 +758,29 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
           <div style={{ width: 1, height: 36, background: BONE, flexShrink: 0 }} />
           <YouTubeLogo height={22} />
         </div>
-        <div style={{ fontSize: 10, color: SMOKE }}>
-          {data.weekRange}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ fontSize: 10, color: SMOKE }}>
+            {data.weekRange}
+          </div>
+          <button
+            onClick={() => void load(true)}
+            disabled={refreshing}
+            title="Rebuild from the latest coach timelines"
+            style={{
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: refreshing ? GHOST : SMOKE,
+              background: 'none',
+              border: `1px solid ${BONE}`,
+              borderRadius: 4,
+              padding: '5px 10px',
+              cursor: refreshing ? 'default' : 'pointer',
+            }}
+          >
+            {refreshing ? 'Refreshing…' : 'Refresh'}
+          </button>
         </div>
       </div>
 
