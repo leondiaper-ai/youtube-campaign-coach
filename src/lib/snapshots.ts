@@ -92,6 +92,58 @@ export async function readHistory(channelId: string): Promise<ChannelSnapshot[]>
   return history ?? [];
 }
 
+/** Keys per mget round-trip. Snapshot arrays are large, so keep chunks small
+ *  to stay under the KV max-request-size limit. */
+const HISTORY_MGET_CHUNK = 5;
+
+/**
+ * Batch-read snapshot history for many channels at once.
+ *
+ * Callers that need history for a whole roster should use this instead of
+ * awaiting readHistory() per channel in a loop — that pattern costs one
+ * sequential KV round-trip per channel and is the difference between a
+ * sub-second response and a timeout on a 140-channel roster.
+ *
+ * Chunks are issued in parallel; duplicate ids are only fetched once.
+ */
+export async function readHistories(
+  channelIds: string[],
+): Promise<Map<string, ChannelSnapshot[]>> {
+  const result = new Map<string, ChannelSnapshot[]>();
+  const store = await kv();
+  if (!store) return result;
+
+  const unique = Array.from(new Set(channelIds.filter(Boolean)));
+  if (unique.length === 0) return result;
+
+  const chunks: string[][] = [];
+  for (let i = 0; i < unique.length; i += HISTORY_MGET_CHUNK) {
+    chunks.push(unique.slice(i, i + HISTORY_MGET_CHUNK));
+  }
+
+  const batches = await Promise.all(
+    chunks.map(async (chunk) => {
+      const keys = chunk.map((id) => `snap:${id}`);
+      try {
+        return await store.mget<(ChannelSnapshot[] | null)[]>(...keys);
+      } catch {
+        // A failed chunk degrades to empty history rather than failing the
+        // whole request — the caller already handles channels with no history.
+        return chunk.map(() => null);
+      }
+    }),
+  );
+
+  chunks.forEach((chunk, ci) => {
+    const batch = batches[ci] ?? [];
+    chunk.forEach((id, i) => {
+      result.set(id, batch[i] ?? []);
+    });
+  });
+
+  return result;
+}
+
 // --- Stale data detection ---
 
 /**

@@ -27,12 +27,16 @@ import { listPinned } from '@/lib/campaignStore';
 import { loadPlan, listPlans } from '@/lib/planStore';
 import type { ParsedEvent } from '@/lib/planEngine';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
-import { readHistory, deltaOver } from '@/lib/snapshots';
+import { readHistories, deltaOver } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import { classifyUploadFormat, type UploadFormatLabel } from '@/lib/coach/matchEngine';
 import { computeMultiformat, type MultiformatScore } from '@/lib/contentStructure';
 
 export const dynamic = 'force-dynamic';
+/** Building the briefing walks the whole roster. Without this the route runs
+ *  on Vercel's short default limit and a cold rebuild is killed part-way,
+ *  leaving the page stuck on "Preparing briefing". Matches /api/refresh. */
+export const maxDuration = 300;
 
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
@@ -63,15 +67,26 @@ async function kv() {
 }
 
 /**
- * Cache key for the briefing response.
+ * Cache for the briefing response.
  *
- * Previously this was an ISO-week key held for 8 days, which meant a coach
- * plan edited on Tuesday would not reach the briefing until the following
- * week. The briefing now shares a short TTL with /campaigns (600s) so plan
- * timelines stay in step across coach, campaigns and briefing.
+ * This was an ISO-week key held for 8 days, which meant a coach plan edited
+ * on Tuesday would not reach the briefing until the following week.
+ *
+ * It is now stale-while-revalidate rather than a plain short TTL. Building the
+ * briefing is expensive (whole roster, snapshot histories, saved plans), so a
+ * plain 10-minute TTL would make every request that lands on an expired cache
+ * wait for a full rebuild — slow enough to hit the function time limit and
+ * leave the page stuck on "Preparing briefing".
+ *
+ * Instead the entry is kept for a day and carries its own build time:
+ *   - fresher than FRESH_MS  → serve as-is
+ *   - older than FRESH_MS    → serve immediately, rebuild for the next caller
+ * So readers never block on a rebuild, and coach edits still land within
+ * roughly ten minutes.
  */
 const BRIEFING_CACHE_KEY = 'partner-briefing:current';
-const BRIEFING_CACHE_TTL = 600; // seconds — matches /campaigns revalidate
+const BRIEFING_CACHE_TTL = 86400; // seconds a cached copy is retained
+const BRIEFING_FRESH_MS = 10 * 60 * 1000; // treated as fresh for 10 minutes
 
 // ── Response Types ───────────────────────────────────────────────────────────
 
@@ -193,6 +208,35 @@ export async function GET(request: Request) {
     if (redis && !forceRefresh) {
       const cached = await redis.get<PartnerBriefingResponse>(weekKey);
       if (cached) {
+        const builtAt = Date.parse(cached.generatedAt ?? '');
+        const isFresh =
+          Number.isFinite(builtAt) && Date.now() - builtAt < BRIEFING_FRESH_MS;
+
+        if (isFresh) return NextResponse.json(cached);
+
+        // Stale: hand back the existing copy straight away and rebuild out of
+        // band, so no one waits on a full regeneration. The lock keeps
+        // concurrent readers from all triggering their own rebuild.
+        let shouldRebuild = true;
+        try {
+          const gotLock = await redis.set(`${weekKey}:rebuilding`, '1', {
+            ex: 300,
+            nx: true,
+          });
+          shouldRebuild = gotLock !== null;
+        } catch {
+          shouldRebuild = false;
+        }
+
+        if (shouldRebuild) {
+          void fetch(`${url.origin}/api/partner-briefing?refresh=1`, {
+            cache: 'no-store',
+          }).catch(() => {
+            // Best-effort. If it doesn't land, the lock expires and the next
+            // reader retries; the stale copy keeps serving in the meantime.
+          });
+        }
+
         return NextResponse.json(cached);
       }
     }
@@ -224,14 +268,25 @@ export async function GET(request: Request) {
     const now = Date.now();
     const videoCutoff = 21 * 86400000;
 
-    for (const a of allArtists) {
-      // Partner briefing is Virgin-managed only, except for pinned campaigns —
-      // if it's an active campaign on /campaigns it belongs in the briefing.
-      if (!isVirginOwned(a) && !pinnedSlugs.has(a.slug)) continue;
+    // Artists that will actually be rendered. Resolved up front so their
+    // snapshot histories can be fetched in one batched, parallel read —
+    // reading them one-by-one inside the loop costs a sequential KV
+    // round-trip per channel and times the endpoint out on a full roster.
+    const briefingArtists = allArtists.filter(
+      (a) => isVirginOwned(a) || pinnedSlugs.has(a.slug),
+    );
+    const historyIds = briefingArtists
+      .map((a) => {
+        const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+        return snap?.channelId && !snap.error ? snap.channelId : null;
+      })
+      .filter(Boolean) as string[];
+    const historyMap = await readHistories(historyIds);
 
+    for (const a of briefingArtists) {
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
       const history = snap?.channelId && !snap.error
-        ? await readHistory(snap.channelId)
+        ? (historyMap.get(snap.channelId) ?? [])
         : [];
 
       const nc = normalizeChannelData(snap, history);
@@ -1255,6 +1310,8 @@ export async function GET(request: Request) {
     if (redis) {
       try {
         await redis.set(weekKey, response, { ex: BRIEFING_CACHE_TTL });
+        // Release the rebuild lock so the next stale read can refresh again.
+        await redis.del(`${weekKey}:rebuilding`);
       } catch {
         // Cache write failure is non-fatal
       }

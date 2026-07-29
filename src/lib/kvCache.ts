@@ -109,12 +109,28 @@ async function chunkedMget<T>(
   if (keys.length <= MGET_CHUNK) {
     return store.mget<(T | null)[]>(...keys);
   }
-  const results: (T | null)[] = [];
+  // Chunks are issued in parallel. Awaiting them one at a time costs a
+  // sequential round-trip per chunk, which on a full roster is the difference
+  // between a fast response and a function timeout.
+  const chunks: string[][] = [];
   for (let i = 0; i < keys.length; i += MGET_CHUNK) {
-    const chunk = keys.slice(i, i + MGET_CHUNK);
-    const batch = await store.mget<(T | null)[]>(...chunk);
-    results.push(...batch);
+    chunks.push(keys.slice(i, i + MGET_CHUNK));
   }
+  const batches = await Promise.all(
+    chunks.map(async (chunk) => {
+      try {
+        return await store.mget<(T | null)[]>(...chunk);
+      } catch {
+        // Degrade a failed chunk to nulls rather than failing every key.
+        return chunk.map(() => null) as (T | null)[];
+      }
+    }),
+  );
+  const results: (T | null)[] = [];
+  batches.forEach((batch, ci) => {
+    const expected = chunks[ci].length;
+    for (let i = 0; i < expected; i++) results.push(batch?.[i] ?? null);
+  });
   return results;
 }
 
