@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { fmtNum, type ChannelState } from '@/lib/artists';
+import { fmtNum, trustedViewDelta, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import {
   type GrowthInput, type GrowthRead,
@@ -303,7 +303,8 @@ function generateSnapshot(card: CardData): string {
 
   const isStaleExport = card.movementConfidence === 'stale';
   lines.push('', '2. CURRENT WEEK');
-  lines.push(`Views (7d): ${!isStaleExport && card.views7Delta != null ? `${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)}` : isStaleExport ? 'Updating' : '—'}`);
+  const exportViews7d = trustedViewDelta(card.views7Delta);
+  lines.push(`Views (7d): ${!isStaleExport && exportViews7d != null ? `+${fmtNum(exportViews7d)}` : isStaleExport || exportViews7d == null ? 'Updating' : '—'}`);
   lines.push(`Subs (7d): ${!isStaleExport && card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : isStaleExport ? 'Updating' : '—'}`);
   lines.push(`Uploads (30d): ${card.uploads30d}`);
   lines.push(`Cadence: ${card.cadenceLine}`);
@@ -371,8 +372,9 @@ function generateSlackUpdate(card: CardData): string {
 
   // Metrics
   const isStale = card.movementConfidence === 'stale';
-  if (!isStale && card.views7Delta != null) {
-    lines.push(`• ${card.views7Delta >= 0 ? '+' : ''}${fmtNum(card.views7Delta)} views (7d)${card.subs7Delta != null ? ` · ${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs (7d)` : ''}`);
+  const slackViews7d = trustedViewDelta(card.views7Delta);
+  if (!isStale && slackViews7d != null) {
+    lines.push(`• +${fmtNum(slackViews7d)} views (7d)${card.subs7Delta != null ? ` · ${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs (7d)` : ''}`);
   }
 
   // Campaign totals
@@ -886,21 +888,26 @@ function DecisionCard({
         <div>
           {(() => {
             const isStaleMovement = card.movementConfidence === 'stale';
+            // Negative view movement means the two totals disagree, not a loss —
+            // treat it exactly like stale data rather than showing "-32M".
+            const views7d = trustedViewDelta(card.views7Delta);
+            const isBadReading = card.views7Delta != null && views7d == null;
             // When movement is stale, suppress +0 — show "—" instead
-            const hasRealDelta = card.views7Delta != null && !(isStaleMovement && card.views7Delta === 0);
-            const isZero = hasRealDelta && card.views7Delta === 0;
+            const hasRealDelta = views7d != null && !(isStaleMovement && views7d === 0);
+            const isZero = hasRealDelta && views7d === 0;
+            const showUpdating = isStaleMovement || isBadReading;
             return (
               <>
                 <div
                   className="text-[28px] font-black leading-none tabular-nums"
-                  style={{ color: hasRealDelta ? (isZero ? 'rgba(14,14,14,0.35)' : deltaColor(card.views7Delta)) : 'rgba(14,14,14,0.2)' }}
+                  style={{ color: hasRealDelta ? (isZero ? 'rgba(14,14,14,0.35)' : deltaColor(views7d)) : 'rgba(14,14,14,0.2)' }}
                 >
                   {hasRealDelta
-                    ? `${card.views7Delta! >= 0 ? '+' : ''}${fmtNum(card.views7Delta!)}`
-                    : isStaleMovement ? 'Updating' : '—'}
+                    ? `+${fmtNum(views7d!)}`
+                    : showUpdating ? 'Updating' : '—'}
                 </div>
                 <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  7d views{!hasRealDelta ? (isStaleMovement ? ' · waiting for fresh totals' : card.confidence === 'LOW' ? ' · limited data' : '') : ''}
+                  7d views{!hasRealDelta ? (showUpdating ? ' · waiting for fresh totals' : card.confidence === 'LOW' ? ' · limited data' : '') : ''}
                 </div>
               </>
             );
@@ -1001,9 +1008,19 @@ function DecisionCard({
           {/* Totals since campaign started (not 7d — full campaign period) */}
           <div className="flex items-center gap-4 mb-2">
             <div>
-              <span className="text-[16px] font-black tabular-nums" style={{ color: deltaColor(cw.channelViewsDelta) }}>
-                {cw.channelViewsDelta != null ? `${cw.channelViewsDelta >= 0 ? '+' : ''}${fmtNum(cw.channelViewsDelta)}` : '—'}
-              </span>
+              {(() => {
+                // Same rule as the headline: a negative campaign-window total
+                // is a snapshot disagreement, not views lost.
+                const campViews = trustedViewDelta(cw.channelViewsDelta);
+                return (
+                  <span
+                    className="text-[16px] font-black tabular-nums"
+                    style={{ color: campViews != null ? deltaColor(campViews) : 'rgba(14,14,14,0.25)' }}
+                  >
+                    {campViews != null ? `+${fmtNum(campViews)}` : 'Updating'}
+                  </span>
+                );
+              })()}
               <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views (total)</span>
             </div>
             <div>
@@ -1137,8 +1154,8 @@ function DecisionCard({
             style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
           />
           <span className="text-[9px] tracking-[0.04em] text-ink/30 italic">
-            {card.movementConfidence === 'stale' && card.lastKnownGoodViews7d != null
-              ? `Last confirmed: ${card.lastKnownGoodViews7d > 0 ? '+' : ''}${fmtNum(card.lastKnownGoodViews7d)} views · ${card.lastKnownGoodDaysAgo ?? '?'}d ago`
+            {card.movementConfidence === 'stale' && trustedViewDelta(card.lastKnownGoodViews7d) != null
+              ? `Last confirmed: +${fmtNum(trustedViewDelta(card.lastKnownGoodViews7d)!)} views · ${card.lastKnownGoodDaysAgo ?? '?'}d ago`
               : card.movementConfidence === 'stale'
                 ? 'Public YouTube totals updating'
                 : 'Movement data building — limited history'}

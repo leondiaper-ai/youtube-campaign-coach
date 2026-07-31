@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fmtNum, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
+import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
 
@@ -936,10 +936,16 @@ export default function ChannelHealthBoard({
           const hasLKGViews = isStaleRow && r.lastKnownGoodViews7d != null;
           const hasLKGSubs = isStaleRow && r.lastKnownGoodSubs7d != null;
 
-          const effectiveViews7 = r.views7Delta ?? (hasLKGViews ? r.lastKnownGoodViews7d! : null);
+          // View totals only climb, so a negative reading is two snapshots
+          // disagreeing rather than views lost. Show it as still updating.
+          const rawViews7 = r.views7Delta ?? (hasLKGViews ? r.lastKnownGoodViews7d! : null);
+          const effectiveViews7 = trustedViewDelta(rawViews7);
+          const viewsUnavailable = rawViews7 != null && effectiveViews7 == null;
           const effectiveSubs7 = r.subs7Delta ?? (hasLKGSubs ? r.lastKnownGoodSubs7d! : null);
 
-          const fmtViews7 = effectiveViews7 != null ? fmtDelta(effectiveViews7) : '—';
+          const fmtViews7 = effectiveViews7 != null
+            ? fmtDelta(effectiveViews7)
+            : viewsUnavailable ? 'Updating' : '—';
           const fmtSubs7Label = effectiveSubs7 != null
             ? `${effectiveSubs7 >= 0 ? '+' : ''}${effectiveSubs7.toLocaleString()}`
             : '—';

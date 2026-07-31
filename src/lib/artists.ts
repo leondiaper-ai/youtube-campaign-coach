@@ -373,8 +373,28 @@ export function classifyArtist(
   return 'GROWING';
 }
 
+/**
+ * Channel view totals only ever go up, so a negative change between two
+ * snapshots is a data artefact — a corrected total, a spam purge, or a stale
+ * baseline — not views the campaign actually lost. Returning null lets the UI
+ * say the totals are still updating rather than printing "-32M views", which
+ * reads as a catastrophic result and isn't traceable to anything real.
+ *
+ * Subscriber deltas are deliberately NOT passed through this: unsubscribes are
+ * genuine and a negative subscriber number is a real, reportable movement.
+ */
+export function trustedViewDelta(n: number | null | undefined): number | null {
+  if (n == null || !Number.isFinite(n) || n < 0) return null;
+  return n;
+}
+
 export function fmtNum(n: number) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1) + 'M';
-  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1) + 'K';
+  // Compact on the magnitude, then re-apply the sign. Comparing the raw value
+  // meant negatives failed both thresholds and printed unabbreviated
+  // (e.g. "-31856183" instead of "-32M").
+  const sign = n < 0 ? '-' : '';
+  const v = Math.abs(n);
+  if (v >= 1_000_000) return sign + (v / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1) + 'M';
+  if (v >= 1_000) return sign + (v / 1_000).toFixed(v >= 10_000 ? 0 : 1) + 'K';
   return String(n);
 }
