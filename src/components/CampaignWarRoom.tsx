@@ -137,7 +137,10 @@ const ageBadge: Record<Age, { label: string; color: string }> = {
 const isShort = (u: RecentUpload) => u.durationSec > 0 && u.durationSec <= 62;
 // A pre-release teaser (pre-save / coming soon) — identity-matches a moment but
 // does NOT mean its content is live yet, so it must not flip a status to Live.
-const isTeaser = (u: RecentUpload) => /pre-?save|pre-?order|coming soon|🔜|link in bio|out (this|next|fri|mon|tue|wed|thu|sat|sun)/i.test(u.title);
+// Promotional lead-in content, never the release itself. "Trailer"/"teaser"
+// are included because an album or documentary trailer is build-up for a drop
+// — treating one as the hero asset marks the release as already delivered.
+const isTeaser = (u: RecentUpload) => /pre-?save|pre-?order|coming soon|🔜|link in bio|trailer|teaser|snippet|out (this|next|fri|mon|tue|wed|thu|sat|sun)/i.test(u.title);
 const ytThumb = (id: string, q: 'hqdefault' | 'maxresdefault' = 'hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
 const ytUrl = (u: RecentUpload) => isShort(u) ? `https://youtube.com/shorts/${u.id}` : `https://youtube.com/watch?v=${u.id}`;
 
@@ -1570,7 +1573,15 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // Support/live: a type-matched recent upload assigned to this moment (so the
   // timeline reflects when a BTS / live moment actually goes live).
   const liveKind = liveMatch ? uploadKind(liveMatch) : undefined;
-  const heroLive = type === 'release' && liveMatch
+  // Declared before heroLive because the same forward cap applies to both.
+  const eventMs = new Date(ev.dateISO + 'T12:00:00').getTime();
+  // GUARD: a release moment planned weeks out must not read as LIVE just
+  // because an earlier upload identity-matches its title. Every release moment
+  // in a campaign shares tokens with the album, so without this cap a single
+  // trailer lights up every future release card at once. Mirrors the softLive
+  // cap below — 7 days of lookahead so a slightly-early drop still counts.
+  const withinLiveWindow = eventMs <= Date.now() + 7 * 86400000;
+  const heroLive = type === 'release' && liveMatch && withinLiveWindow
     && (liveKind === 'hero' || (liveKind === 'other' && !isTeaser(liveMatch)))
     ? liveMatch : undefined;
   const isSupportType = type === 'support' || type === 'live';
@@ -1584,11 +1595,10 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
   // GUARD: never let a future-planned moment show as "live" just because a
   // recent upload shares a title token. Without this, Episode 4 planned for
   // August lights up because "BTS" appears in both titles.
-  const eventMs = new Date(ev.dateISO + 'T12:00:00').getTime();
   const softLive = (!heroLive && !primaryLive && shortLives.length === 0
     && type !== 'release' && type !== 'archive'
     && liveMatch && !isTeaser(liveMatch)
-    && eventMs <= Date.now() + 7 * 86400000) ? liveMatch : undefined;
+    && withinLiveWindow) ? liveMatch : undefined;
 
   // ── Linked video (unlisted/scheduled asset attached directly to event) ──
   // When a ParsedEvent carries a videoId, the video is a known asset (typically

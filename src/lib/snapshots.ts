@@ -73,6 +73,21 @@ export async function writeSnapshot(channelId: string, snap: LiveSnap) {
   const key = `snap:${channelId}`;
   const history = ((await store.get(key)) as ChannelSnapshot[] | null) ?? [];
 
+  // OBSERVABILITY: lifetime view totals should only ever climb. A drop is
+  // usually YouTube revising a total (spam purge, or videos removed/privated)
+  // and is stored as-is because it is the channel's real current total — but
+  // it will read as a negative delta for the next 7 days, so record it. If
+  // this fires for many channels at once, suspect a platform-wide recount
+  // rather than anything campaign-related.
+  const prevWithViews = [...history].reverse().find((h) => h.views != null);
+  if (prevWithViews?.views != null && entry.views != null && entry.views < prevWithViews.views) {
+    const drop = prevWithViews.views - entry.views;
+    const pct = ((drop / prevWithViews.views) * 100).toFixed(2);
+    console.warn(
+      `[writeSnapshot] VIEWS DROP: ${channelId} ${prevWithViews.views} (${prevWithViews.ts}) -> ${entry.views} (${entry.ts}) = -${drop} (-${pct}%)`,
+    );
+  }
+
   // One entry per day — replace today's if it already exists
   const idx = history.findIndex((h) => h.ts === entry.ts);
   if (idx >= 0) history[idx] = entry;

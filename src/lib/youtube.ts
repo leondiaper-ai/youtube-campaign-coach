@@ -17,6 +17,24 @@ let quotaExhausted = false;
 let quotaExhaustedAt = 0;
 const QUOTA_COOLDOWN = 15 * 60 * 1000; // 15min cooldown after quota hit
 
+/**
+ * Parse a YouTube `statistics` counter.
+ *
+ * Missing, blank or unparseable values return undefined — never 0. This
+ * matters because these values are persisted as snapshot history: a fabricated
+ * zero total becomes a baseline, and the next real reading then computes a
+ * delta of roughly the channel's entire lifetime view count. Leaving it
+ * undefined lets writeSnapshot skip the entry instead of poisoning the series.
+ *
+ * (Channels that hide their subscriber count legitimately omit the field, so
+ * this is a normal response shape, not just an error case.)
+ */
+function statCount(raw: unknown): number | undefined {
+  if (raw == null || raw === '') return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
 function getCached(key: string): LiveSnap | null {
   const entry = snapCache.get(key);
   if (!entry) return null;
@@ -714,8 +732,8 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
       channelId,
       title: item.snippet?.title,
       handle: item.snippet?.customUrl,
-      subs: Number(item.statistics?.subscriberCount ?? 0),
-      views: Number(item.statistics?.viewCount ?? 0),
+      subs: statCount(item.statistics?.subscriberCount),
+      views: statCount(item.statistics?.viewCount),
       uploads30d,
       lastUploadAt,
       thumbnail: item.snippet?.thumbnails?.default?.url,
@@ -893,8 +911,8 @@ export async function fetchChannelSnapLite(input: string, opts?: { campaignStart
       channelId,
       title: item.snippet?.title,
       handle: item.snippet?.customUrl,
-      subs: Number(item.statistics?.subscriberCount ?? 0),
-      views: Number(item.statistics?.viewCount ?? 0),
+      subs: statCount(item.statistics?.subscriberCount),
+      views: statCount(item.statistics?.viewCount),
       uploads30d,
       lastUploadAt,
       thumbnail: item.snippet?.thumbnails?.default?.url,
