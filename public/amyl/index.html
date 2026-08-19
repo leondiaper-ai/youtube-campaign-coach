@@ -416,10 +416,16 @@ const ARTIST = {
       longform:{n:36,pctUploads:39.1,views:48402996,pctViews:92.6,median:354910},
       shorts:{n:56,pctUploads:60.9,views:3867392,pctViews:7.4,median:28077},
     },
+    /* The residual longform bucket was previously labelled 'BTS / making-of', but
+       it held four different kinds of upload. Split out so each tier's label
+       actually describes its contents. Reconciles to 92 uploads / 52,270,388 views. */
     tiers:[
-      {name:'Official music videos',n:10,median:3431087,total:40766006},
+      {name:'Official music videos',n:10,median:3431086,total:40766006},
+      {name:'Early catalogue videos',n:4,median:516722,total:2187167},
       {name:'Live longform',n:14,median:210737,total:5000341},
-      {name:'BTS / making-of',n:12,median:72368,total:2636649},
+      {name:'Fan Q&A',n:1,median:78105,total:78105},
+      {name:'Official audio',n:3,median:48800,total:214795},
+      {name:'Behind the scenes',n:4,median:38012,total:156582},
       {name:'Shorts',n:56,median:28077,total:3867392},
     ],
     engagement:[
@@ -756,7 +762,7 @@ function slides(){
         <div class="sub2">Median of 14 live longform uploads</div></div>
       <div class="stat"><div class="num" style="color:var(--signal)">7.5×</div><div class="cap">A typical Short</div>
         <div class="sub2">Like-for-like, typical vs typical</div></div>
-      <div class="stat"><div class="num" style="color:var(--signal)">2.9×</div><div class="cap">A typical behind-the-scenes upload</div>
+      <div class="stat"><div class="num" style="color:var(--signal)">5.5×</div><div class="cap">A typical behind-the-scenes upload</div>
         <div class="sub2">Like-for-like, typical vs typical</div></div>
     </div>
     <div class="srcbar reveal"><span class="src snap">Public video statistics · YouTube API</span></div>
@@ -923,7 +929,7 @@ function slides(){
     <h3 class="display mid reveal" style="margin-top:2rem">More impact ≠ more obligations.</h3>
     <p class="sub reveal" style="margin-top:.6rem">We'd prioritise the work that makes existing moments go
       further. Behind-the-scenes sits last because it's the weakest-performing longform on the channel — a typical
-      72K against 211K for live — and it asks the most of you.</p>
+      38K across the four making-of films against 211K for live — and it asks the most of you.</p>
   </div>
 </section>`,
 
@@ -1049,11 +1055,13 @@ function renderStats(){
     const OMV_IDS   = new Set(S.omvs.map(o=>o.id));
     const LIVE_EXTRA = new Set(['AaGu-fR2wrU']); // "Guided By Angels (Live)" — the API types this 'unknown'
     const formatOf = v =>
-      v.kind === 'short'                                   ? 'Short' :
-      OMV_IDS.has(v.videoId)                               ? 'Music video' :
+      v.kind === 'short'                                    ? 'Short' :
+      OMV_IDS.has(v.videoId)                                ? 'Music video' :
       (v.videoType === 'live' || LIVE_EXTRA.has(v.videoId)) ? 'Live' :
-      /making of/i.test(v.title)                            ? 'Behind the scenes' :
-                                                              'Other longform';
+      /making of|behind the scenes/i.test(v.title)          ? 'Behind the scenes' :
+      /offici?al audio/i.test(v.title)                      ? 'Official audio' :  // 'Offical' is a typo in one real title
+      /q\s*&\s*a/i.test(v.title)                            ? 'Fan Q&A' :
+                                                              'Early catalogue video';
 
     const byViews = [...vids2].sort((a,b) => b.views - a.views);
     const wanted  = ['Music video','Live','Behind the scenes','Short'];
@@ -1236,22 +1244,38 @@ document.getElementById('appendixBody').innerHTML = `
         <td class="n">${(t.n/up*100).toFixed(1)}%</td>
         <td class="n">${(t.total/tot*100).toFixed(1)}%</td></tr>`).join('')})()}
   </table>
+  ${(()=>{const T=n=>S.tiers.find(t=>t.name===n), tot=S.tiers.reduce((a,t)=>a+t.total,0),
+    up=S.tiers.reduce((a,t)=>a+t.n,0), omv=T('Official music videos'), live=T('Live longform'),
+    sh=T('Shorts'), bts=T('Behind the scenes');
+    return `
   <p><strong>Official music videos are the standout format</strong> — a typical one draws
-  ${Math.round(S.tiers[0].median/S.tiers[3].median)}× a typical Short, and ten of them carry
-  ${(S.tiers[0].total/S.tiers.reduce((a,t)=>a+t.total,0)*100).toFixed(0)}% of all visible catalogue views from
-  ${(S.tiers[0].n/92*100).toFixed(0)}% of the uploads. <strong>Live longform is the clear second tier</strong>, and it is
+  ${Math.round(omv.median/sh.median)}× a typical Short, and ${omv.n} of them carry
+  ${(omv.total/tot*100).toFixed(0)}% of all visible catalogue views from
+  ${(omv.n/up*100).toFixed(0)}% of the uploads. <strong>Live longform is the clear second tier</strong>, and it is
   the one with room to move: a typical live upload already outperforms a typical Short by
-  ${(S.tiers[1].median/S.tiers[3].median).toFixed(1)}× and a typical behind-the-scenes upload by
-  ${(S.tiers[1].median/S.tiers[2].median).toFixed(1)}×.</p>
-  <p><strong>Shorts are the inverse case.</strong> They are ${(56/92*100).toFixed(0)}% of everything published and
-  ${(S.tiers[3].total/S.tiers.reduce((a,t)=>a+t.total,0)*100).toFixed(1)}% of the views. That is not an argument
+  ${(live.median/sh.median).toFixed(1)}× and a typical behind-the-scenes upload by
+  ${(live.median/bts.median).toFixed(1)}×.</p>
+  <p><strong>Shorts are the inverse case.</strong> They are ${(sh.n/up*100).toFixed(0)}% of everything published and
+  ${(sh.total/tot*100).toFixed(1)}% of the views. That is not an argument
   against Shorts — they are cheap, fast and serve a different job — but it does mean upload volume in that format
   is a weak lever on channel views compared with one more music video or one well-packaged live asset.</p>
+  <p><strong>Read the small tiers with care.</strong> Behind the scenes is only ${bts.n} uploads and official audio
+  only ${T('Official audio').n}, so their medians are indicative rather than reliable. They are shown separately
+  because folding them together would describe none of them accurately.</p>`;})()}
   <p class="cav" style="color:var(--smoke);font-size:.85rem"><em>Caveat: these are lifetime view totals, so older
   uploads have had longer to accumulate. Format ranking by median is robust to that, but the gap between tiers is
   not a controlled measurement of what a new upload would do today.</em></p>
 
   <h3>Format tiers</h3>
+  <div class="note"><strong>How the longform tiers are defined.</strong> Official music videos are the ten
+  verified official releases. Live longform is every live capture over 62 seconds. The rest of the longform
+  catalogue used to sit in one bucket labelled "BTS / making-of", which described only part of it — so it is now
+  split. <strong>Behind the scenes</strong> is the four uploads that say so in the title (three "making of" films
+  plus the Comfort To Me behind-the-scenes). <strong>Official audio</strong> is the three audio-only uploads.
+  <strong>Fan Q&amp;A</strong> is a single 2021 upload. <strong>Early catalogue videos</strong> are four song
+  uploads from 2016–2019 (70's Street Munchies, Balaclava Lover Boogie, Monsoon Rock, Gacked on Anger) whose
+  format is not stated in their metadata; they are almost certainly early music videos but are held separate
+  from the verified ten rather than folded in on an assumption.</div>
   <table><tr><th>Tier</th><th>Count</th><th>Median views</th><th>Total views</th></tr>
     ${S.tiers.map(t=>`<tr><td>${t.name}</td><td class="n">${t.n}</td><td class="n">${t.median.toLocaleString()}</td><td class="n">${t.total.toLocaleString()}</td></tr>`).join('')}
   </table>
