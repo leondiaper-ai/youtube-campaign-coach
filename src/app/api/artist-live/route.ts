@@ -15,23 +15,45 @@ import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelDa
  */
 export const revalidate = 600;
 
+/**
+ * Read-only cross-origin access.
+ *
+ * Standalone artist presentations (e.g. the Amyl signing deck) are plain HTML
+ * files opened from disk or served from another host, so they cannot reach this
+ * route without CORS. Allowing it here means those decks reuse this single
+ * YouTube pipeline instead of shipping an API key inside a file that gets sent
+ * to a band or their management.
+ *
+ * Safe to expose: this endpoint is GET-only and returns public channel figures
+ * that anyone can already read off the YouTube page.
+ */
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS });
+}
+
 export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug');
-  if (!slug) return NextResponse.json({ error: 'missing slug' }, { status: 400 });
+  if (!slug) return NextResponse.json({ error: 'missing slug' }, { status: 400, headers: CORS });
 
   // 1. Resolve slug → Artist record
   const custom = await listCustomArtists();
   const allArtists = mergeArtistLists(ARTISTS, custom);
   const artist = allArtists.find((a) => a.slug === slug);
-  if (!artist) return NextResponse.json({ error: `Unknown artist slug: ${slug}` }, { status: 404 });
+  if (!artist) return NextResponse.json({ error: `Unknown artist slug: ${slug}` }, { status: 404, headers: CORS });
 
   const handle = artist.channelHandle ?? artist.name;
-  if (!handle) return NextResponse.json({ error: 'No channel handle for this artist' }, { status: 404 });
+  if (!handle) return NextResponse.json({ error: 'No channel handle for this artist' }, { status: 404, headers: CORS });
 
   // 2. Read cached YouTube data from KV (zero API calls)
   const snap = await readLiveSnapByHandle(handle);
-  if (!snap) return NextResponse.json({ error: 'No cached data yet. Run a sync first.' }, { status: 404 });
-  if (snap.error) return NextResponse.json({ error: snap.error }, { status: 502 });
+  if (!snap) return NextResponse.json({ error: 'No cached data yet. Run a sync first.' }, { status: 404, headers: CORS });
+  if (snap.error) return NextResponse.json({ error: snap.error }, { status: 502, headers: CORS });
 
   // 3. Read history and normalize via shared data layer
   const history = snap.channelId ? await readHistory(snap.channelId) : [];
@@ -185,5 +207,5 @@ export async function GET(req: NextRequest) {
           ),
         }
       : null,
-  });
+  }, { headers: CORS });
 }
