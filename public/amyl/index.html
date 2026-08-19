@@ -535,6 +535,24 @@ const ARTIST = {
       url:'https://www.youtube.com/watch?v=1fz60gNnSdU',
     },
 
+    /* Formats absent from the catalogue. Counted across all 92 uploads; the
+       per-song flags are keyword matches against every upload naming that song. */
+    formatGaps:{
+      lyric:0, visualiser:0, premiere:0, officialAudio:3, officialAudioLatest:2018,
+      songs:[
+        {t:"Some Mutts (Can't Be Muzzled)",v:7726261,lyric:false,vis:false,live:false},
+        {t:'Guided By Angels',            v:7255988,lyric:false,vis:false,live:true },
+        {t:'Hertz',                       v:5416240,lyric:false,vis:false,live:false},
+        {t:'U Should Not Be Doing That',  v:5037291,lyric:false,vis:false,live:true },
+        {t:'Security',                    v:3876528,lyric:false,vis:false,live:false},
+        {t:'Got You',                     v:2985645,lyric:false,vis:false,live:false},
+        {t:'Big Dreams',                  v:2689436,lyric:false,vis:false,live:false},
+        {t:'Gacked On Anger',             v:2360406,lyric:false,vis:false,live:true },
+        {t:'Chewing Gum',                 v:1771318,lyric:false,vis:false,live:false},
+        {t:"Jerkin'",                     v:1646893,lyric:false,vis:false,live:true },
+      ],
+    },
+
     /* What outside-in analysis can and cannot see. Drives slide 17. */
     canSee:['Subscribers','Public view counts','Upload behaviour & cadence','Format mix',
       'Public video performance','Campaign sequencing','Catalogue behaviour'],
@@ -1266,6 +1284,24 @@ document.getElementById('appendixBody').innerHTML = `
   <table><tr><th>Tier</th><th>Count</th><th>Median views</th><th>Total views</th></tr>
     ${S.tiers.map(t=>`<tr><td>${t.name}</td><td class="n">${t.n}</td><td class="n">${t.median.toLocaleString()}</td><td class="n">${t.total.toLocaleString()}</td></tr>`).join('')}
   </table>
+
+  <h3>Formats the catalogue doesn't have</h3>
+  <p>Across all 92 uploads there are <strong>no lyric videos, no visualisers and no premieres</strong>.
+  The only audio-led assets are ${S.formatGaps.officialAudio} official audio uploads, the most recent from
+  ${S.formatGaps.officialAudioLatest}.</p>
+  <table><tr><th>Song</th><th>OMV views</th><th>Lyric video</th><th>Visualiser</th><th>Live version</th></tr>
+    ${S.formatGaps.songs.map(g=>{const y=b=>b?'<td class="n">Yes</td>':'<td class="n" style="color:var(--signal)">—</td>';
+      return `<tr><td>${esc(g.t)}</td><td class="n">${g.v.toLocaleString()}</td>${y(g.lyric)}${y(g.vis)}${y(g.live)}</tr>`;}).join('')}
+  </table>
+  ${(()=>{const g=S.formatGaps.songs, n=g.length,
+      empty=g.filter(x=>!x.lyric).length + g.filter(x=>!x.vis).length,
+      noLive=g.filter(x=>!x.live).length,
+      views=g.reduce((a,x)=>a+x.v,0);
+    return `<p>Every one of the ten biggest songs is missing both a lyric video and a visualiser —
+    <strong>${empty} of ${n*2} slots empty</strong> — and ${noLive} of ${n} have no live version either.
+    Together these songs carry ${views.toLocaleString()} views, the highest-attention material on the channel.</p>
+    <p>These are the cheapest assets to make, need no artist time, and are exactly what the
+    <strong>7–14 day window</strong> after a release is currently missing.</p>`;})()}
 
   <h3>Longform vs Shorts</h3>
   <table><tr><th></th><th>Uploads</th><th>% uploads</th><th>Views</th><th>% views</th><th>Median</th></tr>
