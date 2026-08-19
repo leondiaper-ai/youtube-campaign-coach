@@ -1041,11 +1041,32 @@ function renderStats(){
   const vids2 = (ARTIST.liveData && ARTIST.liveData.latestVideos) || null;
   const grid = document.getElementById('latestGrid');
   if (vids2 && vids2.length){
-    grid.innerHTML = vids2.slice(0,4).map(v=>`
+    /* Show one card per format rather than the four newest uploads.
+       The newest uploads are almost always Shorts, which made this read as a
+       Shorts feed and hid the fact that the channel has assets across formats.
+       Each card is the best-performing example of its format, so the strip
+       shows range and scale at the same time. */
+    const OMV_IDS   = new Set(S.omvs.map(o=>o.id));
+    const LIVE_EXTRA = new Set(['AaGu-fR2wrU']); // "Guided By Angels (Live)" — the API types this 'unknown'
+    const formatOf = v =>
+      v.kind === 'short'                                   ? 'Short' :
+      OMV_IDS.has(v.videoId)                               ? 'Music video' :
+      (v.videoType === 'live' || LIVE_EXTRA.has(v.videoId)) ? 'Live' :
+      /making of/i.test(v.title)                            ? 'Behind the scenes' :
+                                                              'Other longform';
+
+    const byViews = [...vids2].sort((a,b) => b.views - a.views);
+    const wanted  = ['Music video','Live','Behind the scenes','Short'];
+    const picked  = [];
+    wanted.forEach(f => { const hit = byViews.find(v => formatOf(v) === f); if (hit) picked.push([f, hit]); });
+    // If a format is missing entirely, top up with the next best of anything unused.
+    byViews.forEach(v => { if (picked.length < 4 && !picked.some(([,p]) => p.videoId === v.videoId)) picked.push([formatOf(v), v]); });
+
+    grid.innerHTML = picked.slice(0,4).map(([label,v])=>`
       <a class="tcard" href="${yt(v.videoId)}" target="_blank" rel="noopener">
         <img src="${thumb(v.videoId)}" alt="${esc(v.title)}" loading="lazy">
         <div class="tmeta">
-          <div class="tsub" style="color:var(--signal)">${v.kind==='short'?'Short':'Longform'} · ${new Date(v.publishedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+          <div class="tsub" style="color:var(--signal)">${label} · ${new Date(v.publishedAt).getFullYear()}</div>
           <div class="ttitle" style="margin-top:.3rem">${esc(v.title)}</div>
           <div class="tviews">${fmt(v.views)}</div></div></a>`).join('');
   } else {
