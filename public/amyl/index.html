@@ -249,6 +249,13 @@ body.present .src{font-size:.66rem}
   padding:.5rem .85rem;border-radius:6px;border:1px solid var(--hair);background:transparent;color:var(--paper);cursor:pointer;transition:all .2s}
 .btn:hover{background:rgba(255,255,255,.1)}
 .btn.primary{background:var(--signal);border-color:var(--signal);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+/* Icon-only refresh: square so it reads as an affordance, not a third label
+   competing with Present and Analysis. Spins while the fetch is in flight. */
+.btn.icon{padding:0;width:1.95rem;height:1.95rem;display:inline-flex;align-items:center;justify-content:center}
+.btn.icon svg{display:block}
+.btn.icon.spinning svg{animation:spin .8s linear infinite;transform-origin:50% 50%}
+@keyframes spin{to{transform:rotate(360deg)}}
 body.present .chrome{display:none}
 body.present{overflow:hidden}
 
@@ -329,9 +336,15 @@ td.n{font-family:'Anton',sans-serif;font-size:.95rem;color:var(--ink)}
     <span id="dataState" class="pill snap">YOUTUBE DATA · 19 AUG 2026</span>
   </div>
   <div class="chrome-r">
-    <button class="btn" onclick="refreshLive()" id="refreshBtn">Refresh YouTube Data</button>
-    <button class="btn" onclick="openSheet('appendix')">Analysis</button>
     <button class="btn primary" onclick="startPresent()">Present</button>
+    <button class="btn" onclick="openSheet('appendix')">Analysis</button>
+    <button class="btn icon" onclick="refreshLive()" id="refreshBtn"
+            title="Refresh YouTube data" aria-label="Refresh YouTube data">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+           stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -1099,8 +1112,7 @@ function renderStats(){
 
 async function refreshLive(){
   const btn = document.getElementById('refreshBtn');
-  const prev = btn.textContent;
-  btn.textContent = 'Refreshing…'; btn.disabled = true;
+  btn.classList.add('spinning'); btn.disabled = true;
   try{
     const ctrl = new AbortController();
     const t = setTimeout(()=>ctrl.abort(), 6000);
@@ -1123,7 +1135,7 @@ async function refreshLive(){
     ARTIST.liveData = null;
   }
   renderStats();
-  btn.textContent = prev; btn.disabled = false;
+  btn.classList.remove('spinning'); btn.disabled = false;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
