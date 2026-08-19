@@ -678,18 +678,13 @@ function slides(){
 /* 5 ── WHAT WE LOOK FOR ─────────────────────────────────────────── */
 `<section class="slide" data-t="What we look for">
   <div class="inner">
-    <div class="label reveal">How we read a channel</div>
+    <div class="label reveal">The lens</div>
     <h2 class="display big reveal" style="max-width:16ch">We look at what<br>happens between<br>the uploads.</h2>
-    <div class="flow-row stagger" style="display:flex;gap:.9rem;flex-wrap:wrap;margin-top:2.6rem">
-      ${[['01','The whole channel','All 92 public uploads. The full picture, so the opportunities we find are real ones.'],
-         ['02','Every upload classified','Music video, live, Short, audio — so like is compared with like.'],
-         ['03','The gaps, not just the peaks','What follows a release, and how long the channel waits.'],
-         ['04','Typical, not average','Medians throughout. A few huge videos would otherwise flatter everything.']]
-        .map(([n,t,d],i)=>`<div class="flow-step${i===2?' key':''}">
-          <div class="flow-when">${n}</div><div class="flow-what">${t}</div><div class="flow-note">${d}</div></div>`).join('')}
+    <div class="hub-out stagger" style="margin-top:3rem">
+      ${['Moment','Follow-through','Discovery','Conversion','Catalogue']
+        .map((s,i)=>`<div class="hub-node" style="${i===1?'border-color:var(--signal);color:var(--signal)':''}">${s}</div>`).join('')}
     </div>
-    <p class="sub reveal" style="margin-top:1.8rem">Most campaigns are measured upload by upload. The value tends
-      to sit in the spaces in between — which is where we spend our time.</p>
+    <p class="sub reveal">Most campaigns are measured upload by upload. The value tends to sit in the spaces in between.</p>
   </div>
 </section>`,
 
@@ -705,10 +700,10 @@ function slides(){
       <strong>7–14 days</strong> are when it's still there to build on. That's the window we'd programme
       into every campaign.
     </p>
-    <div class="display reveal" style="font-size:clamp(5rem,17vw,14rem);color:var(--signal);line-height:.8;margin-top:1.5rem">4</div>
+    <div class="display reveal" style="font-size:clamp(5rem,17vw,14rem);color:var(--signal);line-height:.8;margin-top:1.5rem">0/4</div>
     <p class="statement reveal" style="margin-top:1rem">
-      windows still open across the Cartoon Darkness music videos — four chances to carry that attention
-      further next campaign.
+      Cartoon Darkness music videos followed by meaningful longform inside that window — four chances to
+      carry that attention further next campaign.
     </p>
     <div style="margin-top:3rem" class="stagger">
       ${c.omvFollowThrough.map(o=>`
