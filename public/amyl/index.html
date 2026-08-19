@@ -621,7 +621,7 @@ function slides(){
 /* 3 ── VISUAL FRANCHISE ─────────────────────────────────────────── */
 `<section class="slide light" data-t="The videos travel">
   <div class="inner">
-    <div class="label reveal">Act I · What already works</div>
+    <div class="label reveal">What already works</div>
     <h2 class="display big reveal">The videos<br>already travel.</h2>
     <div class="stat-row stagger">
       ${[[String(TIER('Official music videos').n),'Official music videos'],
@@ -637,14 +637,13 @@ function slides(){
           <div class="tmeta"><div class="ttitle">${esc(o.t)}</div>
           <div class="tviews">${fmt(o.v)}</div><div class="tsub">${o.y}</div></div></a>`).join('')}
     </div>
-    <div class="srcbar reveal"><span class="src snap">Public video statistics · YouTube API</span></div>
   </div>
 </section>`,
 
 /* 4 ── BIGGER THAN A GENRE ──────────────────────────────────────── */
 `<section class="slide cream" data-t="Crossover">
   <div class="inner">
-    <div class="label reveal">Act I · Positioning</div>
+    <div class="label reveal">Positioning</div>
     <h2 class="display big reveal">The crossover is<br>already happening.</h2>
     <p class="sub reveal">You don't need to change what Amyl are to make the audience bigger.</p>
     <div class="thumb-grid stagger">
@@ -655,31 +654,26 @@ function slides(){
           <div class="ttitle" style="margin-top:.3rem">${esc(x.t)}</div>
           <div class="tviews">${fmt(x.v)}</div></div></a>`).join('')}
     </div>
-    <div class="srcbar reveal">
-      <span class="src snap">Public video statistics</span>
-      <span class="src opp">We can see what content did — not who watched it</span>
-    </div>
   </div>
 </section>`,
 
 /* 5 ── WHAT WE LOOK FOR ─────────────────────────────────────────── */
 `<section class="slide" data-t="What we look for">
   <div class="inner">
-    <div class="label reveal">Act II · The lens</div>
+    <div class="label reveal">The lens</div>
     <h2 class="display big reveal" style="max-width:16ch">We look at what<br>happens between<br>the uploads.</h2>
     <div class="hub-out stagger" style="margin-top:3rem">
       ${['Moment','Follow-through','Discovery','Conversion','Catalogue']
         .map((s,i)=>`<div class="hub-node" style="${i===1?'border-color:var(--signal);color:var(--signal)':''}">${s}</div>`).join('')}
     </div>
     <p class="sub reveal">Most campaigns are measured upload by upload. The value tends to sit in the spaces in between.</p>
-    <div class="srcbar reveal"><span class="src opp">How VMG reads a channel</span></div>
   </div>
 </section>`,
 
 /* 6 ── THE ATTENTION GAP ────────────────────────────────────────── */
 `<section class="slide" data-t="0 of 4">
   <div class="inner">
-    <div class="label reveal">Act II · The window we look at</div>
+    <div class="label reveal">The window we look at</div>
     <p class="sub reveal" style="margin-top:0;max-width:860px;font-size:clamp(.95rem,1.4vw,1.15rem)">
       <strong>VMG campaign learning.</strong> Our broader analysis repeatedly identifies an opportunity to follow
       major release moments with meaningful content while attention is still elevated. We use the first
@@ -707,17 +701,13 @@ function slides(){
         Measured to the next <em>longform</em> upload. Shorts continued throughout — see next slide.
       </p>
     </div>
-    <div class="srcbar reveal">
-      <span class="src snap">Upload history · YouTube API</span>
-      <span class="src opp">VMG campaign learning + YouTube's principle of sustained programming</span>
-    </div>
   </div>
 </section>`,
 
 /* 7 ── AFTER THE MOMENT ─────────────────────────────────────────── */
 `<section class="slide" data-t="It went short">
   <div class="inner">
-    <div class="label reveal">Act II · Cartoon Darkness, album week</div>
+    <div class="label reveal">Cartoon Darkness, album week</div>
     <h2 class="display big reveal">The channel<br>didn't go quiet.</h2>
     <h3 class="display mid reveal" style="color:var(--signal);margin-top:.6rem">It went short.</h3>
     <div class="tl" id="albumTl"></div>
@@ -728,14 +718,13 @@ function slides(){
       longform does the most work, because more new people are arriving at the channel than at any other moment.
       It's the clearest single place we'd aim to improve.
     </p>
-    <div class="srcbar reveal"><span class="src snap">Public upload history · 21 Oct 2024 – 1 Apr 2025</span></div>
   </div>
 </section>`,
 
 /* 8 ── 61 / 7 ──────────────────────────────────────────────────── */
 `<section class="slide light" data-t="Shorts need somewhere to go">
   <div class="inner">
-    <div class="label reveal">Act II · Format mix</div>
+    <div class="label reveal">Format mix</div>
     <div style="display:flex;gap:clamp(1.5rem,6vw,5rem);flex-wrap:wrap;align-items:flex-end" class="stagger">
       <div><div class="display" style="font-size:clamp(4rem,12vw,9rem);color:var(--ink)">${pct(shareUploads('Shorts'))}</div>
         <div class="cap" style="font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)">of uploads are Shorts</div></div>
@@ -760,10 +749,6 @@ function slides(){
     <p class="sub reveal" style="margin-top:1.2rem;font-size:.8rem;opacity:.85">
       A strategic model, not observed causation — returning-viewer and subscriber-attribution data sit behind
       authorised YouTube Analytics.</p>
-    <div class="srcbar reveal">
-      <span class="src snap">Public video statistics · 92 videos</span>
-      <span class="src opp">The opportunity isn't replacing Shorts — it's what they lead to</span>
-    </div>
   </div>
 </section>`,
 
@@ -771,7 +756,7 @@ function slides(){
 `<section class="slide" data-t="Live">
   <div class="bleed">${heroImg(ARTIST.heroImages.live)}</div>
   <div class="inner">
-    <div class="label reveal">Act II · The opportunity</div>
+    <div class="label reveal">The opportunity</div>
     <p class="statement reveal" style="max-width:20ch;font-size:clamp(1.1rem,2vw,1.6rem)">
       The biggest YouTube opportunity is already Amyl's superpower.</p>
     <h2 class="display reveal" style="font-size:clamp(6rem,22vw,18rem);color:var(--signal);line-height:.85;margin:1rem 0">Live.</h2>
@@ -786,14 +771,13 @@ function slides(){
       <div class="stat"><div class="num" style="color:var(--signal)">${times('Live longform','Behind the scenes')}</div><div class="cap">A typical behind-the-scenes upload</div>
         <div class="sub2">Like-for-like, typical vs typical</div></div>
     </div>
-    <div class="srcbar reveal"><span class="src snap">Public video statistics · YouTube API</span></div>
   </div>
 </section>`,
 
 /* 10 ── FULL SHOW VS SONG ───────────────────────────────────────── */
 `<section class="slide light" data-t="Full show vs song">
   <div class="inner">
-    <div class="label reveal">Act II · The packaging insight</div>
+    <div class="label reveal">The packaging insight</div>
     <h2 class="display big reveal">The footage isn't<br>the problem.</h2>
     <h3 class="display mid reveal" style="color:var(--signal);margin-top:.5rem">The packaging is the opportunity.</h3>
     <div class="split reveal">
@@ -825,17 +809,13 @@ function slides(){
         <div class="cap" style="font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--signal)">Individual song assets</div>
         <p class="sub" style="margin-top:.3rem">Create additional discovery opportunities.</p></div>
     </div>
-    <div class="srcbar reveal">
-      <span class="src snap">Public video statistics</span>
-      <span class="src opp">Pattern observed across examples · not a rule for every show</span>
-    </div>
   </div>
 </section>`,
 
 /* 11 ── THE LIVE LIBRARY ────────────────────────────────────────── */
 `<section class="slide cream" data-t="The live library">
   <div class="inner">
-    <div class="label reveal">Act II · The existing library</div>
+    <div class="label reveal">The existing library</div>
     <h2 class="display big reveal">The next content opportunity<br>may already be sitting in the archive.</h2>
     <p class="sub reveal">These aren't things we'd ask you to film again. They're performances already captured
       that may be capable of producing further high-value YouTube assets.</p>
@@ -859,14 +839,13 @@ function slides(){
         <div class="flow-what" style="color:var(--mint)">Zero</div>
         <div class="flow-note">The performances already happened</div></div>
     </div>
-    <div class="srcbar reveal"><span class="src snap">14 live longform assets · captured over ten years</span></div>
   </div>
 </section>`,
 
 /* 12 ── ONE NIGHT ───────────────────────────────────────────────── */
 `<section class="slide" data-t="One night">
   <div class="inner">
-    <div class="label reveal">Act III · What VMG would do</div>
+    <div class="label reveal">What VMG would do</div>
     <h2 class="display big reveal" style="text-align:center">One live capture<br>can become a programme.</h2>
     <p class="sub reveal" style="text-align:center;margin:1rem auto 0;max-width:720px">
       An illustrative model — using either footage that already exists, or a performance already happening
@@ -884,16 +863,13 @@ function slides(){
       <p class="sub" style="margin:.9rem auto 0;max-width:660px;font-size:.78rem">
         The exact asset mix would depend on the footage and the campaign moment — this isn't a content quota.</p>
     </div>
-    <div class="srcbar reveal" style="justify-content:center">
-      <span class="src opp">Illustrative framework · not a prescribed content plan</span>
-    </div>
   </div>
 </section>`,
 
 /* 13 ── AMYL TV ─────────────────────────────────────────────────── */
 `<section class="slide" data-t="Amyl TV">
   <div class="inner">
-    <div class="label reveal">Act III · Platform opportunity</div>
+    <div class="label reveal">Platform opportunity</div>
     <h2 class="display big reveal">What if Amyl<br>was always on?</h2>
     <div class="display reveal" style="font-size:clamp(3rem,9vw,7rem);color:var(--signal);margin:1.5rem 0">Amyl TV</div>
     <p class="sub reveal">A programmed YouTube channel built entirely from material that already exists.
@@ -930,7 +906,7 @@ function slides(){
 /* 14 ── ALWAYS ON ≠ ALWAYS WORKING ──────────────────────────────── */
 `<section class="slide light" data-t="Always-on ≠ always working">
   <div class="inner">
-    <div class="label reveal">Act III · What we'd prioritise</div>
+    <div class="label reveal">What we'd prioritise</div>
     <h2 class="display big reveal">Always-on shouldn't<br>mean always working.</h2>
     <div class="prio stagger">
       <div class="prio-col p1">
@@ -962,7 +938,7 @@ function slides(){
 /* 15 ── CONNECT THE MOMENTS ─────────────────────────────────────── */
 `<section class="slide cream" data-t="Connect the moments">
   <div class="inner">
-    <div class="label reveal">Act III · Next album architecture</div>
+    <div class="label reveal">Next album architecture</div>
     <h2 class="display big reveal">Never let a great video<br>become an isolated spike.</h2>
     <div class="flow stagger">
       ${[['Hero single','Official music video','The cultural moment'],
@@ -979,14 +955,13 @@ function slides(){
       7–14 day follow-up planned before the first asset goes live.</p>
     <p class="sub reveal" style="margin-top:.8rem"><strong>The goal isn't more content.</strong> It's keeping
       attention moving between major moments as we build towards a bigger UK and European album campaign.</p>
-    <div class="srcbar reveal"><span class="src opp">Proposed campaign architecture</span></div>
   </div>
 </section>`,
 
 /* 17 ── WHAT WE'D MEASURE ───────────────────────────────────────── */
 `<section class="slide light" data-t="From views to behaviour">
   <div class="inner">
-    <div class="label reveal">Act III · What we can see, and what we'd unlock</div>
+    <div class="label reveal">What we can see, and what we'd unlock</div>
     <h2 class="display big reveal">This is what we can see<br>from the outside.</h2>
     <div class="states reveal">
       <div class="state">
