@@ -1285,24 +1285,9 @@ document.getElementById('appendixBody').innerHTML = `
   <p><strong>Shorts are the inverse case.</strong> They are ${(sh.n/up*100).toFixed(0)}% of everything published and
   ${(sh.total/tot*100).toFixed(1)}% of the views. That is not an argument
   against Shorts — they are cheap, fast and serve a different job — but it does mean upload volume in that format
-  is a weak lever on channel views compared with one more music video or one well-packaged live asset.</p>
-  <p><strong>Read the small tiers with care.</strong> Behind the scenes is only ${bts.n} uploads and official audio
-  only ${T('Official audio').n}, so their medians are indicative rather than reliable. They are shown separately
-  because folding them together would describe none of them accurately.</p>`;})()}
-  <p class="cav" style="color:var(--smoke);font-size:.85rem"><em>Caveat: these are lifetime view totals, so older
-  uploads have had longer to accumulate. Format ranking by median is robust to that, but the gap between tiers is
-  not a controlled measurement of what a new upload would do today.</em></p>
+  is a weak lever on channel views compared with one more music video or one well-packaged live asset.</p>`;})()}
 
   <h3>Format tiers</h3>
-  <div class="note"><strong>How the longform tiers are defined.</strong> Official music videos are the ten
-  verified official releases. Live longform is every live capture over 62 seconds. The rest of the longform
-  catalogue used to sit in one bucket labelled "BTS / making-of", which described only part of it — so it is now
-  split. <strong>Behind the scenes</strong> is the four uploads that say so in the title (three "making of" films
-  plus the Comfort To Me behind-the-scenes). <strong>Official audio</strong> is the three audio-only uploads.
-  <strong>Fan Q&amp;A</strong> is a single 2021 upload. <strong>Early catalogue videos</strong> are four song
-  uploads from 2016–2019 (70's Street Munchies, Balaclava Lover Boogie, Monsoon Rock, Gacked on Anger) whose
-  format is not stated in their metadata; they are almost certainly early music videos but are held separate
-  from the verified ten rather than folded in on an assumption.</div>
   <table><tr><th>Tier</th><th>Count</th><th>Median views</th><th>Total views</th></tr>
     ${S.tiers.map(t=>`<tr><td>${t.name}</td><td class="n">${t.n}</td><td class="n">${t.median.toLocaleString()}</td><td class="n">${t.total.toLocaleString()}</td></tr>`).join('')}
   </table>
@@ -1350,24 +1335,7 @@ document.getElementById('appendixBody').innerHTML = `
   <h3>Data not available</h3>
   <p>Requires channel-owner analytics authorisation:</p>
   <ul>${S.notAvailable.map(x=>`<li>${x}</li>`).join('')}</ul>
-  <p>We do not model, estimate or extrapolate any of the above. Where the deck is silent on territory,
-  retention or discovery, that silence is deliberate.</p>
 
-  <h3>Claims this analysis deliberately does not make</h3>
-  <ul>
-    <li><strong>That cadence causes growth.</strong> Testing it needs per-video time series; we hold lifetime totals and ${S.historyDays} days of channel history.</li>
-    <li><strong>That recent videos are declining.</strong> Cartoon Darkness videos sit below the 2019–21 peaks, but those have had years longer to accumulate. Likely catalogue maturity, not performance.</li>
-    <li><strong>That crossover content reaches new demographics.</strong> We observe content behaviour, not audience composition.</li>
-  </ul>
-
-  <h3>Source &amp; method</h3>
-  <div class="note"><strong>Source &amp; method.</strong> Public YouTube Data API, 19 Aug 2026 12:27 UTC.
-  <strong>No YouTube Studio / YouTube Analytics access has been used</strong> — this is an outside-in analysis built
-  entirely from publicly visible channel and video statistics plus our own stored readings.
-  All 92 of 92 public videos captured. The 92 videos sum to ${S.catalogueViews.toLocaleString()} views against a
-  channel lifetime total of ${S.lifetimeViews.toLocaleString()} — the ${(100-S.coveragePct).toFixed(1)}% gap is views from
-  content since removed, made private or delisted. Percentages "of catalogue" refer to the visible ${fmt(S.catalogueViews)}.
-  <strong>We hold ${S.historyDays} days of stored channel history</strong>, which is the binding limit on any trend claim.</div>
 `;
 
 /* ═══════════════════════════════════════════════════════════════════
