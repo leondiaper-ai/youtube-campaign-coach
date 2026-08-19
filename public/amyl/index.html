@@ -678,13 +678,18 @@ function slides(){
 /* 5 ── WHAT WE LOOK FOR ─────────────────────────────────────────── */
 `<section class="slide" data-t="What we look for">
   <div class="inner">
-    <div class="label reveal">The lens</div>
+    <div class="label reveal">How we read a channel</div>
     <h2 class="display big reveal" style="max-width:16ch">We look at what<br>happens between<br>the uploads.</h2>
-    <div class="hub-out stagger" style="margin-top:3rem">
-      ${['Moment','Follow-through','Discovery','Conversion','Catalogue']
-        .map((s,i)=>`<div class="hub-node" style="${i===1?'border-color:var(--signal);color:var(--signal)':''}">${s}</div>`).join('')}
+    <div class="flow-row stagger" style="display:flex;gap:.9rem;flex-wrap:wrap;margin-top:2.6rem">
+      ${[['01','The whole channel','All 92 public uploads. The full picture, so the opportunities we find are real ones.'],
+         ['02','Every upload classified','Music video, live, Short, audio — so like is compared with like.'],
+         ['03','The gaps, not just the peaks','What follows a release, and how long the channel waits.'],
+         ['04','Typical, not average','Medians throughout. A few huge videos would otherwise flatter everything.']]
+        .map(([n,t,d],i)=>`<div class="flow-step${i===2?' key':''}">
+          <div class="flow-when">${n}</div><div class="flow-what">${t}</div><div class="flow-note">${d}</div></div>`).join('')}
     </div>
-    <p class="sub reveal">Most campaigns are measured upload by upload. The value tends to sit in the spaces in between.</p>
+    <p class="sub reveal" style="margin-top:1.8rem">Most campaigns are measured upload by upload. The value tends
+      to sit in the spaces in between — which is where we spend our time.</p>
   </div>
 </section>`,
 
@@ -696,13 +701,14 @@ function slides(){
       <strong>Two things point the same way.</strong> YouTube pushes sustained programming and multi-format
       rollout — Shorts and longform feeding each other, not one upload standing on its own. Our campaign work
       keeps finding the same thing.<br><br>
-      <strong>So we put a number on it.</strong> A big release lands, attention spikes, then weeks pass before
-      anything substantial follows. The first <strong>7–14 days</strong> are where that attention is still
-      there to use.
+      <strong>So we put a number on it.</strong> When a release lands, attention spikes — and the first
+      <strong>7–14 days</strong> are when it's still there to build on. That's the window we'd programme
+      into every campaign.
     </p>
-    <div class="display reveal" style="font-size:clamp(5rem,17vw,14rem);color:var(--signal);line-height:.8;margin-top:1.5rem">0/4</div>
+    <div class="display reveal" style="font-size:clamp(5rem,17vw,14rem);color:var(--signal);line-height:.8;margin-top:1.5rem">4</div>
     <p class="statement reveal" style="margin-top:1rem">
-      Cartoon Darkness music videos followed by meaningful longform inside that window.
+      windows still open across the Cartoon Darkness music videos — four chances to carry that attention
+      further next campaign.
     </p>
     <div style="margin-top:3rem" class="stagger">
       ${c.omvFollowThrough.map(o=>`
@@ -733,9 +739,9 @@ function slides(){
     <p class="sub reveal">Eight Shorts across album week, every one under 35 seconds — seven of them inside the
       fourteen days after the video. No substantial longform for five months.</p>
     <p class="sub reveal" style="margin-top:1rem;max-width:840px">
-      <strong>Album week is usually the most active window a campaign gets</strong> — the point where supporting
-      longform does the most work, because more new people are arriving at the channel than at any other moment.
-      It's the clearest single place we'd aim to improve.
+      <strong>The Shorts did their job</strong> — two of them cleared 185K and 293K. Album week is when the most
+      new people arrive at a channel, which makes it the single biggest opportunity to give them somewhere
+      further to go.
     </p>
   </div>
 </section>`,
@@ -753,8 +759,8 @@ function slides(){
     <h3 class="display mid reveal" style="margin-top:2.2rem">Keep the Shorts.</h3>
     <p class="statement reveal" style="margin-top:.4rem;color:var(--signal)">Build more places for them to lead.</p>
     <p class="sub reveal">Shorts earn the highest engagement on the channel — a typical 38.7 likes per 1,000 views
-      against 14.7 for music videos. They're doing the job of fan conversation well. What's missing isn't more
-      Shorts, and it isn't fewer. It's more <strong>purposeful longform</strong> for them to lead into.</p>
+      against 14.7 for music videos. They're doing the job of fan conversation well. The gain isn't more Shorts,
+      and it isn't fewer — it's more <strong>purposeful longform</strong> for them to lead into.</p>
     <div class="funnel stagger">
       <div class="fn"><div class="fn-t">Shorts</div><div class="fn-d">Discovery · personality · cultural moments</div></div>
       <div class="fn-arrow">↓</div>
@@ -970,7 +976,7 @@ function slides(){
         .map(([w,t,n],i)=>`<div class="flow-step${i===2?' key':''}">
           <div class="flow-when">${w}</div><div class="flow-what">${t}</div><div class="flow-note">${n}</div></div>`).join('')}
     </div>
-    <p class="sub reveal">The highlighted step is the one currently missing. Hero releases would have their
+    <p class="sub reveal">The highlighted step is the one we'd add. Hero releases would have their
       7–14 day follow-up planned before the first asset goes live.</p>
     <p class="sub reveal" style="margin-top:.8rem"><strong>The goal isn't more content.</strong> It's keeping
       attention moving between major moments as we build towards a bigger UK and European album campaign.</p>
@@ -1285,10 +1291,10 @@ document.getElementById('appendixBody').innerHTML = `
     ${S.tiers.map(t=>`<tr><td>${t.name}</td><td class="n">${t.n}</td><td class="n">${t.median.toLocaleString()}</td><td class="n">${t.total.toLocaleString()}</td></tr>`).join('')}
   </table>
 
-  <h3>Formats the catalogue doesn't have</h3>
-  <p>Across all 92 uploads there are <strong>no lyric videos, no visualisers and no premieres</strong>.
-  The only audio-led assets are ${S.formatGaps.officialAudio} official audio uploads, the most recent from
-  ${S.formatGaps.officialAudioLatest}.</p>
+  <h3>Formats still available to build</h3>
+  <p>Across all 92 uploads the catalogue has <strong>no lyric videos, no visualisers and no premieres</strong>
+  — three proven formats entirely untapped. The only audio-led assets are ${S.formatGaps.officialAudio} official
+  audio uploads, the most recent from ${S.formatGaps.officialAudioLatest}.</p>
   <table><tr><th>Song</th><th>OMV views</th><th>Lyric video</th><th>Visualiser</th><th>Live version</th></tr>
     ${S.formatGaps.songs.map(g=>{const y=b=>b?'<td class="n">Yes</td>':'<td class="n" style="color:var(--signal)">—</td>';
       return `<tr><td>${esc(g.t)}</td><td class="n">${g.v.toLocaleString()}</td>${y(g.lyric)}${y(g.vis)}${y(g.live)}</tr>`;}).join('')}
@@ -1297,11 +1303,11 @@ document.getElementById('appendixBody').innerHTML = `
       empty=g.filter(x=>!x.lyric).length + g.filter(x=>!x.vis).length,
       noLive=g.filter(x=>!x.live).length,
       views=g.reduce((a,x)=>a+x.v,0);
-    return `<p>Every one of the ten biggest songs is missing both a lyric video and a visualiser —
-    <strong>${empty} of ${n*2} slots empty</strong> — and ${noLive} of ${n} have no live version either.
-    Together these songs carry ${views.toLocaleString()} views, the highest-attention material on the channel.</p>
-    <p>These are the cheapest assets to make, need no artist time, and are exactly what the
-    <strong>7–14 day window</strong> after a release is currently missing.</p>`;})()}
+    return `<p>None of the ten biggest songs has a lyric video or a visualiser yet, and ${noLive} of ${n} have
+    no live version — <strong>${empty} assets available to make</strong> against songs already carrying
+    ${views.toLocaleString()} views between them.</p>
+    <p>They are the cheapest formats to produce, need no artist time, and are exactly what the
+    <strong>7–14 day window</strong> is built to hold.</p>`;})()}
 
   <h3>Longform vs Shorts</h3>
   <table><tr><th></th><th>Uploads</th><th>% uploads</th><th>Views</th><th>% views</th><th>Median</th></tr>
