@@ -634,7 +634,7 @@ function slides(){
       ${[[String(TIER('Official music videos').n),'Official music videos'],
          [fmt(TIER('Official music videos').total),'Catalogue views'],
          [fmt(TIER('Official music videos').median),'Typical performance'],
-         [pct(shareViews('Official music videos')),'Of visible catalogue']]
+         [pct(shareViews('Official music videos')),'Of catalogue views come from music videos']]
         .map(([n,l])=>`<div class="stat"><div class="num" style="color:var(--signal)">${n}</div><div class="cap">${l}</div></div>`).join('')}
     </div>
     <div class="thumb-grid stagger">
