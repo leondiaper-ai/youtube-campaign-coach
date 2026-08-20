@@ -572,6 +572,7 @@ const shareUploads  = n => TIER(n).n     / TIER_UPLOADS * 100;
 const shareViews    = n => TIER(n).total / TIER_VIEWS   * 100;
 const pct           = (v,d=0) => v.toFixed(d) + '%';
 const times         = (a,b) => ratio(a,b).toFixed(1) + '\u00d7';
+const fmtM          = n => (n/1e6).toFixed(1) + 'M';
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => n>=1e6 ? (n/1e6).toFixed(n>=1e7?0:1)+'M' : n>=1e3 ? (n/1e3).toFixed(n>=1e4?0:1)+'K' : String(n);
 const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
@@ -612,7 +613,7 @@ function slides(){
   <div class="inner">
     <div class="srcbar reveal" style="margin-top:0;margin-bottom:1.5rem">
       <span class="src live">Live public YouTube API</span>
-      <span class="src snap">92 / 92 public uploads analysed</span>
+      <span class="src snap">Full public catalogue analysed</span>
     </div>
     <div class="label reveal">The channel today</div>
     <h2 class="display big reveal" style="max-width:14ch">A channel<br>already at scale</h2>
@@ -632,11 +633,14 @@ function slides(){
     <h2 class="display big reveal">The videos<br>already travel.</h2>
     <div class="stat-row stagger">
       ${[[String(TIER('Official music videos').n),'Official music videos'],
-         [fmt(TIER('Official music videos').total),'Catalogue views'],
-         [fmt(TIER('Official music videos').median),'Typical performance'],
-         [pct(shareViews('Official music videos')),'Of catalogue views come from music videos']]
+         [fmtM(TIER('Official music videos').total),'Music video views'],
+         [fmt(TIER('Official music videos').median),'Typical music video'],
+         [pct(shareViews('Official music videos')),'Of visible video views']]
         .map(([n,l])=>`<div class="stat"><div class="num" style="color:var(--signal)">${n}</div><div class="cap">${l}</div></div>`).join('')}
     </div>
+    <p class="reveal" style="font-size:.7rem;color:var(--smoke);margin-top:.9rem">
+      ${fmtM(TIER('Official music videos').total)} of ${fmtM(TIER_VIEWS)} views across the
+      ${TIER_UPLOADS}-video public catalogue.</p>
     <div class="thumb-grid stagger">
       ${S.omvs.slice(0,6).map(o=>`
         <a class="tcard" href="${yt(o.id)}" target="_blank" rel="noopener">
