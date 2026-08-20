@@ -76,15 +76,6 @@ h3.mid{font-size:clamp(1.7rem,3.6vw,2.9rem)}
 .stat .cap{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke);margin-top:.7rem}
 .stat .sub2{font-size:.7rem;color:var(--smoke);margin-top:.35rem;opacity:.75}
 
-/* ── Live pill ──────────────────────────────────────────────────── */
-.pill{display:inline-flex;align-items:center;gap:.5rem;font-size:.58rem;font-weight:700;letter-spacing:.14em;
-  text-transform:uppercase;padding:.4rem .75rem;border-radius:100px;border:1px solid var(--hair)}
-.pill.live{color:#fff;background:rgba(255,0,0,.14);border-color:rgba(255,0,0,.45)}
-.pill.snap{color:var(--smoke)}
-.slide.light .pill.snap,.slide.cream .pill.snap{border-color:var(--bone)}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--yt);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-
 /* ── Thumbnails ─────────────────────────────────────────────────── */
 .thumb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-top:2.5rem}
 .tcard{display:block;text-decoration:none;color:inherit;border-radius:10px;overflow:hidden;
@@ -333,7 +324,6 @@ td.n{font-family:'Anton',sans-serif;font-size:.95rem;color:var(--ink)}
 <div class="chrome">
   <div class="chrome-l">
     <span style="color:var(--signal)">AMYL × YOUTUBE</span>
-    <span id="dataState" class="pill snap">YOUTUBE DATA · 19 AUG 2026</span>
   </div>
   <div class="chrome-r">
     <button class="btn primary" onclick="startPresent()">Present</button>
@@ -1045,7 +1035,6 @@ function renderStats(){
   const subs   = liveOr('subscriberCount', S.subscribers);
   const views  = liveOr('viewCount',       S.lifetimeViews);
   const vids   = liveOr('videoCount',      S.publicVideos);
-  const anyLive = subs.live || views.live || vids.live;
 
   document.getElementById('liveStats').innerHTML = [
     [fmt(subs.v),  'Subscribers'],
@@ -1058,9 +1047,6 @@ function renderStats(){
       <div class="cap">${l}</div>
     </div>`).join('');
 
-  const badge = document.getElementById('dataState');
-  badge.className = anyLive ? 'pill live' : 'pill snap';
-  badge.innerHTML = anyLive ? '<span class="dot"></span>LIVE YOUTUBE DATA' : 'YOUTUBE DATA · 19 AUG 2026';
 
   /* Latest uploads strip */
   const vids2 = (ARTIST.liveData && ARTIST.liveData.latestVideos) || null;
