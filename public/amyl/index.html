@@ -407,11 +407,10 @@ const ARTIST = {
     subsPer1kRecent:0.32,
     subs30d:1000,
     subs7d:0,
-    /* The API's 7-day view delta, measured to 19 Aug 2026. The calculation
-       anchors to the latest stored reading and looks back seven days for a
-       baseline; if a daily reading was missed it falls back to the nearest
-       earlier one, so the window can be slightly longer than seven days.
-       The figure itself is exact — only the window length can vary. */
+    /* The API's recent-window view delta, measured to 19 Aug 2026. It anchors to
+       the latest stored reading and looks back roughly a week; if a daily reading
+       was missed the window stretches a little further, so the deck says 'recent'
+       rather than naming a number of days. The figure itself is exact. */
     recentWindowViews:3148897,
     historyDays:23,
 
@@ -1040,7 +1039,7 @@ function renderStats(){
     [fmt(subs.v),  'Subscribers'],
     [fmt(views.v), 'Lifetime views'],
     [vids.v,       'Public videos'],
-    ['+'+fmt(S.recentWindowViews), 'Views in the last 7 days'],
+    ['+'+fmt(S.recentWindowViews), 'Recent views'],
   ].map(([n,l])=>`
     <div class="stat">
       <div class="num" ${l==='Views arriving recently'?'style="color:var(--mint)"':''}>${n}</div>
