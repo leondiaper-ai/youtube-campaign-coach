@@ -78,6 +78,11 @@ h3.mid{font-size:clamp(1.7rem,3.6vw,2.9rem)}
 
 /* ── Thumbnails ─────────────────────────────────────────────────── */
 .thumb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-top:2.5rem}
+/* Ten music videos, two rows of five. auto-fit would reflow to an uneven last
+   row at some widths, so the column count is fixed and steps down explicitly. */
+.thumb-grid.five{grid-template-columns:repeat(5,1fr)}
+@media(max-width:1100px){.thumb-grid.five{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.thumb-grid.five{grid-template-columns:repeat(2,1fr)}}
 .tcard{display:block;text-decoration:none;color:inherit;border-radius:10px;overflow:hidden;
   background:rgba(255,255,255,.04);border:1px solid var(--hair);transition:transform .3s ease}
 .slide.light .tcard,.slide.cream .tcard{background:#fff;border-color:var(--bone)}
@@ -641,8 +646,8 @@ function slides(){
     <p class="reveal" style="font-size:.7rem;color:var(--smoke);margin-top:.9rem">
       ${fmtM(TIER('Official music videos').total)} of ${fmtM(TIER_VIEWS)} views across the
       ${TIER_UPLOADS}-video public catalogue.</p>
-    <div class="thumb-grid stagger">
-      ${S.omvs.slice(0,6).map(o=>`
+    <div class="thumb-grid five stagger">
+      ${S.omvs.map(o=>`
         <a class="tcard" href="${yt(o.id)}" target="_blank" rel="noopener">
           <img src="${thumb(o.id)}" alt="${esc(o.t)}" loading="lazy">
           <div class="tmeta"><div class="ttitle">${esc(o.t)}</div>
