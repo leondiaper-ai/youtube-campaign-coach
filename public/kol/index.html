@@ -266,8 +266,27 @@ const ARTIST = {
     capturedAt:'24 Aug 2026',
   },
 
-  /* Hero imagery — swappable. Any public YouTube video ID from the catalogue. */
-  heroImages:{ open:'RF0HhrwIwp0', bridge:'kxmHkxpxoaE', close:'gnhXHvRoUd0' },
+  /* Hero imagery — swappable. Any public YouTube video ID from the catalogue.
+     The deck moves from catalogue-era imagery to current-era imagery as the
+     story moves from diagnosis to September, so the pictures carry the argument
+     alongside the numbers. */
+  heroImages:{ open:'RF0HhrwIwp0', bridge:'kxmHkxpxoaE', close:'ZJdHNwUgsPI' },
+
+  /* Era contrast — the same band, sixteen years apart. */
+  eraImages:{
+    classic:[{id:'RF0HhrwIwp0',t:'Sex on Fire',y:2009},{id:'gnhXHvRoUd0',t:'Use Somebody',y:2009},
+             {id:'gFp7q-IJqno',t:'Pyro',y:2010}],
+    current:[{id:'ZJdHNwUgsPI',t:"We're Onto Something",y:2025},{id:'wMJyD23nKrk',t:'Mustang',y:2024},
+             {id:'4C9i8E05bgI',t:'Nowhere to Run',y:2024}],
+  },
+
+  /* Current-era assets — used through the strategy half. */
+  currentEra:[
+    {id:'ZJdHNwUgsPI',t:"We're Onto Something (ft. Zach Bryan)",v:2042060,y:2025},
+    {id:'wMJyD23nKrk',t:'Mustang',v:1713198,y:2024},
+    {id:'4C9i8E05bgI',t:'Nowhere to Run',v:1655262,y:2024},
+    {id:'lb2BnpVUxEE',t:'To Space (Visualizer)',v:1009267,y:2025},
+  ],
 
   /* Channel-level figures. Live values override these when the API responds. */
   channel:{
@@ -462,14 +481,28 @@ function slides(){ return [
     <div class="label reveal">Viewing vs uploading</div>
     <h2 class="display big reveal" style="max-width:19ch">Viewing lives in ${classicEra.label}.<br>
       Uploading lives in ${modernEra.label}.</h2>
-    <div class="eras stagger">
-      ${A.eras.map((e,i)=>`
-        <div class="era${i===0||i===A.eras.length-1?' key':''}">
-          <div class="era-yr">${e.label}</div>
-          <div class="era-big">${pct(eraShare(e))}</div>
-          <div class="era-n">of visible views</div>
-          <div class="era-n" style="margin-top:.7rem">${e.uploads} uploads · ${fmt(e.views)} views</div>
-        </div>`).join('')}
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1.4rem;align-items:center;margin-top:2rem" class="reveal">
+      <div>
+        <div class="label" style="margin-bottom:.6rem">Where the viewing is · ${classicEra.label}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
+          ${A.eraImages.classic.map(o=>`<img src="${thumb(o.id)}" alt="${esc(o.t)}" loading="lazy"
+            style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;border:1px solid var(--bone)">`).join('')}
+        </div>
+        <div style="font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(2rem,5vw,3.4rem);
+          color:var(--ember);margin-top:.7rem;line-height:1">${pct(eraShare(classicEra))}</div>
+        <div class="era-n">${classicEra.uploads} uploads · ${fmt(classicEra.views)} views</div>
+      </div>
+      <div style="font-family:'Oswald',sans-serif;font-size:1.8rem;color:var(--smoke)">vs</div>
+      <div>
+        <div class="label" style="margin-bottom:.6rem">Where the uploading is · ${modernEra.label}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem">
+          ${A.eraImages.current.map(o=>`<img src="${thumb(o.id)}" alt="${esc(o.t)}" loading="lazy"
+            style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;border:1px solid var(--bone)">`).join('')}
+        </div>
+        <div style="font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(2rem,5vw,3.4rem);
+          color:var(--signal);margin-top:.7rem;line-height:1">${pct(eraShare(modernEra))}</div>
+        <div class="era-n">${modernEra.uploads} uploads · ${fmt(modernEra.views)} views</div>
+      </div>
     </div>
     <p class="sub reveal"><strong>${pct(eraUplPct(modernEra),0)} of everything we can retrieve was
       uploaded since 2024. It accounts for ${pct(eraShare(modernEra))} of visible viewing.</strong>
@@ -522,8 +555,9 @@ function slides(){ return [
       <div class="stat"><div class="num">5–8<span style="font-size:.5em"> days</span></div>
         <div class="cap">Rhythm through May–June</div></div>
     </div>
-    <p class="sub reveal"><strong>This is broadly the behaviour our framework recommends — and it was
-      already happening.</strong> Viewing still declined across the campaign. Cadence is not the constraint here.</p>
+    <p class="sub reveal"><strong>They already know how to programme a campaign.</strong> Viewing still
+      declined across it. The opportunity isn't better cadence — it's getting more of the existing
+      audience into the campaign in the first place.</p>
   </div>
 </section>`,
 
@@ -552,12 +586,15 @@ function slides(){ return [
       <div><div class="display" style="font-size:clamp(3.4rem,10vw,7.4rem);color:var(--signal)">${engGap.toFixed(1)}×</div>
         <div class="cap" style="font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)">engagement vs music videos</div></div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:2.2rem">Engaged. Not yet at scale.</h3>
+    <h3 class="display mid reveal" style="margin-top:2.2rem">Keep short-form active.<br>Put something substantial behind it.</h3>
     <p class="sub reveal">${A.formats.shorts.n} Shorts, typically ${fmt(A.formats.shorts.median)} views —
       but <strong>${A.formats.shorts.likesPer1k} likes per 1,000 views against
-      ${A.formats.omv.likesPer1k} on music videos</strong>. The people Shorts reach are the most
-      responsive audience on the channel. They just aren't the catalogue audience, and there is
-      currently little for them to go on to.</p>
+      ${A.formats.omv.likesPer1k} on music videos</strong>. Shorts are keeping the conversation active.
+      Now the campaign needs a deeper destination before the album arrives.</p>
+    <div class="srcbar reveal">
+      ${['Music video','Live performance','Album visual','Performance film','Lyric / visualiser']
+        .map(x=>`<span class="src opp">${x}</span>`).join('')}
+    </div>
   </div>
 </section>`,
 
@@ -596,9 +633,11 @@ function slides(){ return [
           <div class="tmeta"><div class="ttitle">${esc(o.t)}</div>
           <div class="tviews">${fmt(o.v)}</div><div class="tsub">${o.y}</div></div></a>`).join('')}
     </div>
-    <p class="sub reveal">Live is the second strongest format on the channel after music videos.
-      <strong>All ${A.formats.live.n} are already song-length — there are no full sets to cut down.</strong>
-      Kings of Leon worked that out years ago. The opportunity isn't the format. It's what the format connects.</p>
+    <h3 class="display mid reveal" style="margin-top:2rem;color:var(--signal)">Live can connect the band
+      people already love with the record we're building.</h3>
+    <p class="sub reveal">All ${A.formats.live.n} are already song-length — there are no full sets to cut
+      down. Kings of Leon worked that out years ago. The opportunity isn't the format. It's what the
+      format connects.</p>
   </div>
 </section>`,
 
@@ -608,19 +647,18 @@ function slides(){ return [
     <div class="label reveal">The opportunity</div>
     <h2 class="display big reveal" style="max-width:18ch">Use the catalogue<br>as the front door.</h2>
     <div class="funnel stagger">
-      <div class="fn"><div class="fn-t">Catalogue attention</div>
-        <div class="fn-d">Sex on Fire · Use Somebody · historic music videos · archive live</div></div>
+      <div class="fn"><div class="fn-t">Catalogue front doors</div>
+        <div class="fn-d">Sex on Fire · Use Somebody · historic live · major legacy videos</div></div>
       <div class="fn-arrow">↓</div>
-      <div class="fn key"><div class="fn-t" style="color:var(--signal)">The bridge</div>
-        <div class="fn-d">Current live pairing classic and new · Shorts tied to campaign moments ·
-          playlists · channel-home programming · Community · archive sequencing</div></div>
+      <div class="fn key"><div class="fn-t" style="color:var(--signal)">Campaign bridges</div>
+        <div class="fn-d">Current live · playlists · end screens · channel homepage · Community ·
+          Shorts · archive programming · Station</div></div>
       <div class="fn-arrow">↓</div>
-      <div class="fn"><div class="fn-t">The new record</div>
-        <div class="fn-d">New music videos · new live · album visual world · album event</div></div>
+      <div class="fn"><div class="fn-t">September destinations</div>
+        <div class="fn-d">New single · new live · album visual · album event · new-record playlists</div></div>
     </div>
-    <p class="sub reveal">Not nostalgia bait. The aim is a natural path from the songs people already
-      watch to the music we want them to find — so the catalogue works as an entry point rather than
-      a separate business.</p>
+    <h3 class="display mid reveal" style="margin-top:1.8rem">We're not rebuilding the audience.<br>
+      We're redirecting attention that already exists.</h3>
   </div>
 </section>`,
 
@@ -630,16 +668,16 @@ function slides(){ return [
     <div class="label reveal">A specific idea</div>
     <h2 class="display big reveal" style="max-width:20ch">One performance.<br>Both audiences.</h2>
     <div class="flow stagger">
-      ${[['Capture','One current performance','A show already happening inside the campaign'],
-         ['Set','Classic · new · classic · new','The pairing is the bridge, not a separate asset'],
-         ['Publish','Individual song releases','Every song its own destination, as they already do'],
-         ['Connect','Catalogue viewers meet new music','In the same current live world, not a nostalgia lane']]
-        .map(([w,t,n],i)=>`<div class="flow-step${i===1?' key':''}">
+      ${[['Current performance','Classic song + new song','A show already happening inside the campaign'],
+         ['Publish','Individual YouTube assets','Song by song, exactly as they already do'],
+         ['Result','One current world','Existing fans and the new record in the same place']]
+        .map(([w,t,n],i)=>`<div class="flow-step${i===2?' key':''}">
           <div class="flow-when">${w}</div><div class="flow-what">${t}</div><div class="flow-note">${n}</div></div>`).join('')}
     </div>
-    <p class="sub reveal">Kings of Leon already publish song-level live and it already outperforms
-      everything except music videos. This asks nothing new of the band — it changes what goes in
-      the set and how the results are sequenced.</p>
+    <p class="sub reveal">Where live performances already contain catalogue and new music, we'd programme
+      those moments together on YouTube. <strong>Don't separate catalogue and new music into different
+      lanes if the show naturally contains both.</strong> Set changes are still an artist ask — the aim
+      is minimal additional burden, not none.</p>
     <div class="srcbar reveal"><span class="src opp">Strategic concept · not a production plan</span></div>
   </div>
 </section>`,
@@ -661,16 +699,18 @@ function slides(){ return [
           <div class="tsub">Metallica · YouTube</div></div></a>
       </div>
       <div>
-        <div class="label" style="margin-bottom:.7rem">What we'd explore</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
-          ${[['Classics','Sex on Fire · Use Somebody · the album eras'],
-             ['Live','Festival · broadcast · archive · current'],
-             ['Archive','Tour films · documentaries · interviews'],
-             ['New era','New videos · new live · album world']]
-            .map(([t,d])=>`<div style="border:1px solid var(--hair);border-radius:6px;padding:.75rem">
-              <div style="font-size:.72rem;font-weight:700;color:var(--signal)">${t}</div>
-              <div style="font-size:.63rem;color:var(--smoke);margin-top:.25rem;line-height:1.4">${d}</div></div>`).join('')}
+        <div class="label" style="margin-bottom:.7rem">What we'd explore — one programme wall</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem">
+          ${[{id:'RF0HhrwIwp0',l:'Classics'},{id:'kxmHkxpxoaE',l:'Live'},
+             {id:'jOellGm2OS8',l:'Archive'},{id:'ZJdHNwUgsPI',l:'New album'}]
+            .map(o=>`<div>
+              <img src="${thumb(o.id)}" alt="${o.l}" loading="lazy"
+                style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;border:1px solid var(--hair)">
+              <div style="font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                color:var(--signal);margin-top:.35rem">${o.l}</div></div>`).join('')}
         </div>
+        <p style="font-size:.78rem;color:var(--smoke);margin-top:.9rem;line-height:1.5">
+          An always-on environment where the old and new catalogue stop behaving like separate worlds.</p>
       </div>
     </div>
     <p class="statement reveal" style="margin-top:1.8rem;max-width:42ch">
@@ -719,15 +759,17 @@ function slides(){ return [
     <div class="label reveal">September architecture</div>
     <h2 class="display big reveal" style="max-width:19ch">One connected<br>campaign.</h2>
     <div class="flow stagger" style="margin-top:2rem">
-      ${[['Now','Reintroduce longform','Give current Shorts a destination. Start catalogue bridges.'],
-         ['Hero','Major visual moment','The record’s front door.'],
-         ['+7–14d','Follow-through','A meaningful destination while attention is still up.'],
-         ['Bridge','Catalogue → new','Live pairing, playlists, channel home.'],
-         ['Album week','A YouTube event','Not a set of uploads published on the same day.'],
-         ['After','Keep programming','The campaign shouldn’t end when release week does.']]
+      ${[['Now','Put longform back in the mix','Give current Shorts a deeper destination. Begin catalogue → current connections.'],
+         ['Hero moment','The new record’s front door','Major visual / longform moment.'],
+         ['+7–14 days','Give the attention somewhere else to go','Meaningful follow-through while it is still elevated.'],
+         ['Bridge','Connect catalogue + current','Live · playlists · channel home · archive · Community.'],
+         ['Album week','One YouTube moment','Not ten disconnected assets landing together.'],
+         ['After','Keep the campaign alive','Continue live, catalogue and album programming.']]
         .map(([w,t,n],i)=>`<div class="flow-step${i===0||i===3?' key':''}">
           <div class="flow-when">${w}</div><div class="flow-what">${t}</div><div class="flow-note">${n}</div></div>`).join('')}
     </div>
+    <h3 class="display mid reveal" style="margin-top:1.6rem">The goal isn't more uploads. It's making each
+      major moment lead naturally into the next.</h3>
     <p class="sub reveal">A sequence, not a content calendar. The exact assets depend on what's being
       captured and what the campaign plan already commits to.</p>
   </div>
@@ -752,14 +794,14 @@ function slides(){ return [
           'Catalogue depth, live archive and a new record is exactly the material a Station is built from.',
           'Confirm eligibility with YouTube and scope what programming would look like.'],
          ['05','Make album week an event',
-          `The 2024 campaign sequenced well (${FOLLOW_OK}/${FOLLOW_N} inside 14 days) but read as separate uploads.`,
+          `2024 sequenced well — ${FOLLOW_OK}/${FOLLOW_N} inside 14 days — but read as separate uploads.`,
           'Give release week a single centre of gravity on the channel.']]
         .map(([n,t,o,a])=>`
         <div class="rec">
           <div class="rec-n">${n}</div>
           <div><div class="rec-t">${t}</div>
-            <div class="rec-o">${o}</div>
-            <div class="rec-a"><strong>→</strong> ${a}</div></div>
+            <div class="rec-o"><em>${o}</em></div>
+            <div class="rec-a"><strong style="color:var(--signal)">DO</strong> &nbsp;${a}</div></div>
         </div>`).join('')}
     </div>
   </div>
@@ -794,11 +836,11 @@ function slides(){ return [
   <div class="bleed"><img src="${hero(A.heroImages.close)}" alt=""
     onerror="this.src='${thumb(A.heroImages.close)}'"></div>
   <div class="inner">
-    <h2 class="display reveal" style="font-size:clamp(2.2rem,6.6vw,5.6rem);line-height:.98;max-width:22ch">
-      The hard part is<br>already done.<br>
-      <span style="color:var(--signal)">The audience exists.</span></h2>
-    <p class="statement reveal" style="margin-top:1.8rem;max-width:40ch;color:rgba(239,234,227,.85)">
-      September is about pointing it at the new record.</p>
+    <h2 class="display reveal" style="font-size:clamp(2.2rem,6.6vw,5.6rem);line-height:.98;max-width:24ch">
+      The audience is<br>already here.<br>
+      <span style="color:var(--signal)">Now give them a way<br>into the new record.</span></h2>
+    <p class="statement reveal" style="margin-top:1.8rem;max-width:44ch;color:rgba(239,234,227,.8)">
+      ${fmt(C.lifetimeViews)} views later, the next chapter shouldn't start from zero.</p>
   </div>
 </section>`,
   ];
