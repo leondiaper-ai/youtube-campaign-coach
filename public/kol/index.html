@@ -162,6 +162,55 @@ body.present{overflow:hidden}
   .bm-row{grid-template-columns:2rem 1fr;row-gap:.4rem}
   .bm-v{grid-column:2;text-align:left}
 }
+
+/* ── Campaign phases / format bars ───────────────────────────────── */
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.8rem}
+.ph-c{border:1px solid var(--hair);border-radius:10px;padding:1.05rem;background:rgba(239,234,227,.03)}
+.slide.light .ph-c{border-color:var(--bone);background:#fff}
+.ph-n{font-size:.57rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--signal)}
+.ph-w{font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:600;margin:.3rem 0 .1rem}
+.ph-d{font-size:.62rem;color:var(--smoke);margin-bottom:.5rem}
+.ph-b{font-size:.72rem;line-height:1.5}
+
+/* ── Learning → Action → Tool map ────────────────────────────────── */
+.map{margin-top:1.7rem;display:flex;flex-direction:column;gap:.5rem}
+.map-r{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.8rem;align-items:center;
+  border:1px solid var(--hair);border-radius:8px;padding:.75rem .95rem;background:rgba(239,234,227,.03)}
+.slide.light .map-r{border-color:var(--bone);background:#fff}
+.map-l{font-size:.76rem;line-height:1.35;color:var(--smoke)}
+.map-a{font-size:.8rem;line-height:1.35;font-weight:700}
+.map-t{font-size:.68rem;line-height:1.35;color:var(--signal);font-weight:700;text-align:right}
+.map-x{color:var(--signal);font-size:.8rem}
+.map-h{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:.8rem;padding:0 .95rem .3rem;
+  font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+.map-h span:last-child{text-align:right}
+
+/* ── Toolkit ─────────────────────────────────────────────────────── */
+.kit{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1.7rem}
+.kit-c{border:1px solid var(--hair);border-radius:9px;padding:.9rem .85rem;background:rgba(239,234,227,.03)}
+.slide.light .kit-c{border-color:var(--bone);background:#fff}
+.kit-n{font-family:'Oswald',sans-serif;font-size:1.02rem;font-weight:600;margin-bottom:.15rem}
+.kit-j{font-size:.6rem;font-weight:700;letter-spacing:.05em;color:var(--signal);margin-bottom:.42rem;line-height:1.3}
+.kit-b{font-size:.65rem;line-height:1.48;color:var(--smoke)}
+
+/* ── Then / now connected diagram ────────────────────────────────── */
+.tn{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.8rem}
+.tn-c{border:1px solid var(--hair);border-radius:10px;padding:1.2rem 1.1rem;background:rgba(239,234,227,.03)}
+.slide.light .tn-c{border-color:var(--bone);background:#fff}
+.tn-c.key{border-color:var(--signal)}
+.tn-h{font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--smoke);margin-bottom:.85rem}
+.tn-c.key .tn-h{color:var(--signal)}
+.tn-s{font-size:.85rem;font-weight:700;padding:.42rem 0;line-height:1.3}
+.tn-ar{color:var(--smoke);font-size:.72rem;padding-left:.1rem}
+.tn-c.key .tn-ar{color:var(--signal)}
+.tn-w{font-size:.66rem;color:var(--smoke);font-weight:400;display:block;margin-top:.1rem}
+@media(max-width:900px){
+  .ph,.tn{grid-template-columns:1fr}
+  .kit{grid-template-columns:repeat(2,1fr)}
+  .map-r,.map-h{grid-template-columns:1fr;gap:.3rem}
+  .map-t,.map-h span:last-child{text-align:left}
+  .map-x{display:none}
+}
 .funnel{margin-top:2rem;max-width:660px}
 .fn{border:1px solid var(--hair);border-left:3px solid var(--hair);border-radius:6px;
   padding:.85rem 1rem;background:rgba(239,234,227,.03)}
@@ -372,57 +421,94 @@ const ARTIST = {
 
   /* The 2024 album campaign, in published order. gap = days to the next
      meaningful longform destination (any non-Short, non-interview upload). */
+  /* The 2024 Mustang campaign, reconstructed from the uploads playlist.
+     gap = days from this hero to the next meaningful long-form destination
+     (any non-Short over 40k views). Eleven heroes, not ten: the earlier list
+     omitted Ease Me On (23 May, 218k). */
   campaign2024:[
-    {id:'wMJyD23nKrk',t:'Mustang',            v:1713159,d:'22 Feb',gap:19},
-    {id:'iqn4zVsv5zk',t:'Nothing To Do',      v:611909, d:'19 Apr',gap:6},
-    {id:'4C9i8E05bgI',t:'Nowhere to Run',     v:1655262,d:'10 May',gap:5},
-    {id:'R4UpX5XJRP4',t:'Rainbow Ball',       v:535171, d:'31 May',gap:5},
-    {id:'t9KDvkRWEDM',t:"Don't Stop The Bleeding",v:239735,d:'5 Jun',gap:8},
-    {id:'L3ySEsVs2n0',t:'Ballerina Radio',    v:854654, d:'13 Jun',gap:7},
-    {id:'r8IdmIKWqt0',t:'Actual Daydream',    v:282114, d:'20 Jun',gap:28},
-    {id:'aqk5uBBJzsY',t:'Hesitation Gen',     v:161560, d:'18 Jul',gap:21},
-    {id:'3Jykoa-Fgn0',t:'Split Screen',       v:486364, d:'8 Aug', gap:70},
-    {id:'JzTThTQUAbo',t:'M Television',       v:358199, d:'17 Oct',gap:15},
+    {id:'wMJyD23nKrk',t:'Mustang',            v:1713499,d:'22 Feb',rel:-78, gap:19},
+    {id:'iqn4zVsv5zk',t:'Nothing To Do',      v:611988, d:'19 Apr',rel:-21, gap:5},
+    {id:'4C9i8E05bgI',t:'Nowhere to Run',     v:1655840,d:'10 May',rel:0,   gap:4},
+    {id:'',           t:'Ease Me On',         v:217534, d:'23 May',rel:13,  gap:8},
+    {id:'R4UpX5XJRP4',t:'Rainbow Ball',       v:535358, d:'31 May',rel:21,  gap:5},
+    {id:'t9KDvkRWEDM',t:"Don't Stop The Bleeding",v:239863,d:'5 Jun',rel:26,gap:8},
+    {id:'L3ySEsVs2n0',t:'Ballerina Radio',    v:855139, d:'13 Jun',rel:34,  gap:7},
+    {id:'r8IdmIKWqt0',t:'Actual Daydream',    v:282306, d:'20 Jun',rel:41,  gap:28},
+    {id:'aqk5uBBJzsY',t:'Hesitation Gen',     v:161610, d:'18 Jul',rel:69,  gap:21},
+    {id:'3Jykoa-Fgn0',t:'Split Screen',       v:486951, d:'8 Aug', rel:90,  gap:27},
+    {id:'JzTThTQUAbo',t:'M Television',       v:358376, d:'17 Oct',rel:160, gap:15},
   ],
 
   /* Current publishing signal, from the monitored channel record. */
   now:{ uploads30d:8, shorts30d:8, lastLongform:'9 July 2026' },
 
-  /* ── The Mustang campaign, as planning intel for the next one ──────────
-     No new campaign has started, so nothing here compares "now" against 2024.
-     This is the last album campaign measured on its own terms, so the next one
-     has numbers to beat.
-
-     Album date 2024-05-10 is evidenced, not assumed: ten long-form album assets
-     were published that single day (nine track lyric videos + the Nowhere to
-     Run music video).
-
-     A "destination" is any upload of 100 seconds or more — a real watch
-     destination rather than a vertical social post.
-     Premieres are counted only where the API returns BOTH a scheduled and an
-     actual start time, which confirms the broadcast happened.                */
-  mustang:{
-    album:'10 May 2024', totalDest:26, totalViews:'9.5m',
+  /* ── The 2024 Mustang campaign, fully reconstructed ────────────────────
+     Window established from the uploads playlist, not assumed:
+       opens  22 Feb 2024 — Mustang official music video, first campaign asset
+       album  10 May 2024 — ten long-form album assets published that one day
+                            (nine track lyric videos + Nowhere to Run OMV)
+       closes 17 Oct 2024 — M Television, the last album music video
+     Premieres counted only where the API returns BOTH a scheduled and an
+     actual start time, which confirms the broadcast aired.                  */
+  last:{
+    opens:'22 Feb 2024', album:'10 May 2024', closes:'17 Oct 2024',
+    uploads:134, views:'11.2m', lifetimeShare:'0.45%',
     phases:[
-      ['Run-up','T-152 → T-1',6,'3.4m','387k'],
-      ['Album day','10 May',10,'2.6m','110k'],
-      ['After','T+1 → T+120',10,'3.5m','264k'],
+      ['Pre-release','22 Feb → 9 May','78 days','Two music videos, a Tonight Show performance, two lyric videos'],
+      ['Release week','10 → 16 May','7 days','22 uploads · 3.3m views · ten album assets on day one'],
+      ['Post-release','17 May → 17 Oct','5 months','Seven more music videos, live, visualiser, Shorts'],
     ],
     formats:[
-      ['Music video',10,'6.8m','511k'],
-      ['Lyric video',12,'1.9m','106k'],
-      ['Live / session',3,'460k','163k'],
-      ['Visualiser',1,'380k','380k'],
+      ['OMV',11,'7.12m',63.6,'487k'],
+      ['Lyric',12,'1.88m',16.8,'106k'],
+      ['Shorts',106,'1.31m',11.7,'8.6k'],
+      ['Live',3,'460k',4.1,'163k'],
+      ['Visualiser',1,'380k',3.4,'380k'],
     ],
-    mvShare:71, premieres:7, leadSingle:'T-78', leadViews:'1.71m',
-    medianGap:8, longestGap:28,
-    dumpMv:'1.66m', dumpLyric:'961k', dumpN:9,
-    targets:[
-      ['01','Lead with a music video, early','Mustang landed 78 days before release and returned 1.71m — the biggest single asset of the campaign.','T-78'],
-      ['02','Music videos carry the campaign','Ten music videos returned 6.8m of the 9.5m total. A typical one did 511k against 106k for a typical lyric video.','71%'],
-      ['03','Premiere the hero moments','Seven premieres, all on music videos, all confirmed as aired. This part is already a strength.','7'],
-      ['04','Keep publishing after release','Ten destinations across the four months after the album returned 3.5m — more than the run-up did.','3.5m'],
-      ['05','Never leave a long gap','Median eight days between destinations across the whole campaign. The longest gap was 28 days.','8 days'],
+    shortsUplPct:79, shortsViewPct:11.7, lfUplPct:21, lfViewPct:88.3,
+    followOk:6, followN:11, medianGap:8,
+    mjDrops:8, mjLo:2, mjHi:8,
+    premieres:7, premieredHeroes:7,
+    top5Pct:50, first3:'1.33m', last3:'336k', decline:75,
+    dayMv:'1.66m', dayLyric:'961k', dayLyricN:9, dayLyricMed:'105k',
+    worked:[
+      ['Rhythm held','Median eight days between meaningful long-form destinations. Through May and June, eight drops with gaps of two to eight days.'],
+      ['Hero moments were premiered','Seven of the eleven music videos ran as confirmed YouTube Premieres — appointment moments, not silent uploads.'],
+      ['Follow-through was real','Six of eleven heroes had another meaningful long-form destination inside fourteen days.'],
+      ['Shorts stayed active','106 Shorts across the campaign kept the channel publishing between hero moments.'],
+      ['Formats were varied','Music video, lyric, live, visualiser and behind-the-song all used — not a single-format campaign.'],
+    ],
+    tools:[
+      ['Shorts','Discovery and engagement','106 Shorts returned 11.7% of campaign views. They start journeys well; they need somewhere to send people.'],
+      ['Long-form','Depth and destinations','21% of uploads, 88.3% of views. This is where the campaign actually lives.'],
+      ['Live','The catalogue-to-current bridge','Only 3 live assets last campaign, against 51 across the channel at a typical 410k. Underused.'],
+      ['Premieres','Hero moments','Already a strength — 7 confirmed. Keep it selective so the moments stay moments.'],
+      ['Playlists','Audience pathways','Turn a single catalogue view into a session that reaches the new record.'],
+      ['Channel home','The campaign front door','If someone arrives through the catalogue, the current record should be impossible to miss.'],
+      ['Community','Low-lift fan activation','Reach the existing subscriber base without another shoot.'],
+      ['Station','Always-on programming','Where catalogue and new music can sit in the same environment permanently.'],
+    ],
+    map:[
+      ['Cadence was already strong','Keep the sequencing discipline','Long-form · Shorts'],
+      ['Hero reach fell across the campaign','Build pathways into each release','Playlists · Channel home · End screens'],
+      ['Catalogue dwarfs the campaign','Connect the eras deliberately','Live · Station'],
+      ['Shorts engage but end there','Give every Short a destination','Shorts → long-form'],
+      ['Nine album assets landed in one day','Give release week a centre of gravity','Premiere · Live · Station'],
+    ],
+    blueprint:[
+      ['Phase 1 · Now','Reconnect the channel','Purposeful long-form returns. Catalogue pathways, homepage and playlists built. Station conversation opens with YouTube.'],
+      ['Phase 2 · Hero single','Create the front door','Major long-form asset, premiered. Shorts point toward it. Community supports it.'],
+      ['Phase 3 · Follow-through','Don\u2019t waste the attention','A second meaningful destination inside 7–14 days, while attention is still elevated.'],
+      ['Phase 4 · Album week','Make it one event','Programme it across the week. Do not publish everything at once.'],
+      ['Phase 5 · After','Keep people in the record','Live, song-level assets, archive and catalogue bridges keep working for months.'],
+    ],
+    validate:[
+      ['Catalogue overlap','Do the people watching Sex on Fire also watch the new record?'],
+      ['Suggested','Are new releases surfacing after catalogue videos?'],
+      ['Browse','Is the current record reaching existing subscribers?'],
+      ['Returning viewers','Do campaign viewers come back across the campaign?'],
+      ['Retention','Do the new long-form destinations hold attention?'],
+      ['Living room','How much of this audience watches on a television?'],
     ],
   },
 
@@ -605,33 +691,81 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 07 ── 2024 CAMPAIGN ──────────────────────────────────────────── */
-`<section class="slide light" data-t="2024">
+/* 07 ── THE LAST CAMPAIGN ──────────────────────────────────────── */
+`<section class="slide light" data-t="The last campaign">
   <div class="inner">
-    <div class="label reveal">The last campaign</div>
-    <h2 class="display big reveal">The programming<br>wasn't the problem.</h2>
-    <p class="sub reveal" style="margin-top:1rem;max-width:74ch">Ten music videos between February and
-      October 2024. Days to the next meaningful longform destination:</p>
-    <div style="margin-top:1.6rem;display:flex;gap:.45rem;flex-wrap:wrap;align-items:flex-end" class="stagger">
+    <div class="label reveal">Mustang · ${A.last.opens} → ${A.last.closes} · reconstructed from the uploads playlist</div>
+    <h2 class="display big reveal" style="max-width:20ch">${A.last.uploads} uploads.<br>${A.last.views} views.</h2>
+    <div class="ph stagger">
+      ${A.last.phases.map(([n,w,d,b])=>`
+        <div class="ph-c"><div class="ph-n">${n}</div><div class="ph-w">${w}</div>
+          <div class="ph-d">${d}</div><div class="ph-b">${b}</div></div>`).join('')}
+    </div>
+    <div style="margin-top:1.7rem;display:flex;gap:2.6rem;flex-wrap:wrap" class="stagger">
+      <div class="stat"><div class="num">${A.last.lfUplPct}%<span style="font-size:.42em"> of uploads</span></div>
+        <div class="cap">Long-form — and ${A.last.lfViewPct}% of the views</div></div>
+      <div class="stat"><div class="num">${A.last.shortsUplPct}%<span style="font-size:.42em"> of uploads</span></div>
+        <div class="cap">Shorts — and ${A.last.shortsViewPct}% of the views</div></div>
+      <div class="stat"><div class="num">${A.last.lifetimeShare}</div>
+        <div class="cap">Of the channel's lifetime viewing</div></div>
+    </div>
+    <p class="sub reveal">Album day published ten long-form assets at once. The single music video among
+      them out-drew all ${A.last.dayLyricN} lyric videos beside it — ${A.last.dayMv} against
+      ${A.last.dayLyric} combined, a typical ${A.last.dayLyricMed} each.</p>
+  </div>
+</section>`,
+
+/* 07b ── WHAT WORKED ───────────────────────────────────────────── */
+`<section class="slide" data-t="What worked">
+  <div class="inner">
+    <div class="label reveal">Start here — this campaign got a lot right</div>
+    <h2 class="display big reveal" style="max-width:19ch">The programming<br>wasn't the problem.</h2>
+    <div style="margin-top:1.5rem;display:flex;gap:.45rem;flex-wrap:wrap;align-items:flex-end" class="stagger">
       ${A.campaign2024.map(c=>`
-        <div style="flex:1 0 88px;text-align:center">
-          <div style="font-family:'Oswald',sans-serif;font-weight:600;font-size:1.25rem;
+        <div style="flex:1 0 80px;text-align:center">
+          <div style="font-family:'Oswald',sans-serif;font-weight:600;font-size:1.1rem;
             color:${c.gap<=14?'var(--mint)':'var(--ember)'}">+${c.gap}d</div>
-          <div style="height:${Math.max(8,Math.min(70,c.v/1713159*70))}px;background:${c.gap<=14?'var(--mint)':'var(--ember)'};
-            opacity:.75;border-radius:3px;margin:.35rem 0"></div>
-          <div style="font-size:.6rem;font-weight:600;line-height:1.25">${esc(c.t)}</div>
-          <div style="font-size:.56rem;color:var(--smoke)">${c.d} · ${fmt(c.v)}</div>
+          <div style="height:${Math.max(8,Math.min(64,c.v/1713499*64))}px;background:${c.gap<=14?'var(--mint)':'var(--ember)'};
+            opacity:.75;border-radius:3px;margin:.3rem 0"></div>
+          <div style="font-size:.56rem;font-weight:600;line-height:1.2">${esc(c.t)}</div>
+          <div style="font-size:.53rem;color:var(--smoke)">${c.d} · ${fmt(c.v)}</div>
         </div>`).join('')}
     </div>
-    <div style="margin-top:2rem;display:flex;gap:3rem;flex-wrap:wrap" class="stagger">
-      <div class="stat"><div class="num" style="color:var(--mint)">${FOLLOW_OK} / ${FOLLOW_N}</div>
-        <div class="cap">Followed by longform inside 14 days</div></div>
-      <div class="stat"><div class="num">5–8<span style="font-size:.5em"> days</span></div>
-        <div class="cap">Rhythm through May–June</div></div>
+    <div class="vs stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.6rem">
+      ${[[`${A.last.followOk} / ${A.last.followN}`,'Heroes with meaningful long-form inside 14 days'],
+         [`${A.last.mjLo}–${A.last.mjHi} days`,`Gaps through the May–June stretch (${A.last.mjDrops} drops)`],
+         [`${A.last.premieres}`,'Confirmed YouTube Premieres, all on music videos']]
+        .map(([n,l])=>`<div class="vs-col"><div class="vs-n">${n}</div><div class="vs-lab">${l}</div></div>`).join('')}
     </div>
-    <p class="sub reveal"><strong>They already know how to programme a campaign.</strong> Viewing still
-      declined across it. The opportunity isn't better cadence — it's getting more of the existing
-      audience into the campaign in the first place.</p>
+    <p class="sub reveal">Eleven hero releases, a median eight days apart, most of them premiered.
+      This is the behaviour our framework asks for — and it is already in place.
+      <strong>Nothing here needs fixing.</strong></p>
+  </div>
+</section>`,
+
+/* 07c ── WHAT DIDN'T TRANSLATE ─────────────────────────────────── */
+`<section class="slide coal" data-t="What didn't translate">
+  <div class="inner">
+    <div class="label reveal">And yet</div>
+    <h2 class="display big reveal" style="max-width:20ch">The rhythm held.<br>The reach didn't follow.</h2>
+    <div style="margin-top:1.6rem;display:flex;gap:.4rem;align-items:flex-end;height:150px" class="stagger">
+      ${A.campaign2024.map(c=>`
+        <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:flex-end;height:100%">
+          <div style="font-size:.56rem;color:var(--smoke);margin-bottom:.25rem">${fmt(c.v)}</div>
+          <div style="height:${Math.max(4,c.v/1713499*105)}px;background:var(--signal);opacity:.8;border-radius:3px 3px 0 0"></div>
+          <div style="font-size:.53rem;color:var(--smoke);margin-top:.3rem">${c.d}</div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:1.5rem;display:flex;gap:2.8rem;flex-wrap:wrap" class="stagger">
+      <div class="stat"><div class="num">${A.last.first3}</div><div class="cap">Average of the first three heroes</div></div>
+      <div class="stat"><div class="num" style="color:var(--ember)">${A.last.last3}</div><div class="cap">Average of the last three</div></div>
+      <div class="stat"><div class="num">${A.last.top5Pct}%</div><div class="cap">Of campaign views came from five assets</div></div>
+    </div>
+    <p class="sub reveal">Not a straight line down — Ballerina Radio reached 855k in June. But the three
+      biggest moments all sit in the first half, and no release after album week passed a million.
+      More programming did not produce more scale. Public data shows the pattern but
+      cannot explain it — whether catalogue viewers were being served the new music is a Browse and
+      Suggested question that sits behind authorised Studio access.</p>
   </div>
 </section>`,
 
@@ -680,8 +814,8 @@ function slides(){ return [
       ${A.now.shorts30d}/${A.now.uploads30d}</div>
     <p class="statement reveal" style="margin-top:1rem;max-width:38ch">
       uploads in the last 30 days are Shorts. The last longform upload was ${A.now.lastLongform}.</p>
-    <p class="sub reveal">With a September album approaching, short form is doing the talking and there
-      is no deeper destination attached to it. <strong>Keep the Shorts running — they're working.
+    <p class="sub reveal">Short form is doing the talking, with no deeper destination attached to it.
+      This is the channel's resting state between campaigns — and the position the next campaign starts from. <strong>Keep the Shorts running — they're working.
       The opportunity is giving them somewhere to lead.</strong></p>
     <div class="srcbar reveal"><span class="src">Monitored channel record · ${A.meta.capturedAt}</span></div>
   </div>
@@ -712,27 +846,6 @@ function slides(){ return [
     <p class="sub reveal">All ${A.formats.live.n} are already song-length — there are no full sets to cut
       down. Kings of Leon worked that out years ago. The opportunity isn't the format. It's what the
       format connects.</p>
-  </div>
-</section>`,
-
-/* 12 ── THE BRIDGE ─────────────────────────────────────────────── */
-`<section class="slide light" data-t="The bridge">
-  <div class="inner">
-    <div class="label reveal">The opportunity</div>
-    <h2 class="display big reveal" style="max-width:18ch">Use the catalogue<br>as the front door.</h2>
-    <div class="funnel stagger">
-      <div class="fn"><div class="fn-t">Catalogue front doors</div>
-        <div class="fn-d">Sex on Fire · Use Somebody · historic live · major legacy videos</div></div>
-      <div class="fn-arrow">↓</div>
-      <div class="fn key"><div class="fn-t" style="color:var(--signal)">Campaign bridges</div>
-        <div class="fn-d">Current live · playlists · end screens · channel homepage · Community ·
-          Shorts · archive programming · Station</div></div>
-      <div class="fn-arrow">↓</div>
-      <div class="fn"><div class="fn-t">September destinations</div>
-        <div class="fn-d">New single · new live · album visual · album event · new-record playlists</div></div>
-    </div>
-    <h3 class="display mid reveal" style="margin-top:1.8rem">We're not rebuilding the audience.<br>
-      We're redirecting attention that already exists.</h3>
   </div>
 </section>`,
 
@@ -827,92 +940,108 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 15b ── THE LAST CAMPAIGN, IN FULL ────────────────────────────── */
-`<section class="slide" data-t="The last campaign">
+/* 15b ── LAST TIME → THIS TIME ─────────────────────────────────── */
+`<section class="slide" data-t="Last time → this time">
   <div class="inner">
-    <div class="label reveal">Mustang · album ${A.mustang.album} · the campaign to beat</div>
-    <h2 class="display big reveal" style="max-width:20ch">${A.mustang.totalDest} releases.<br>${A.mustang.totalViews} views.<br>Here is where they came from.</h2>
-    <div class="vs stagger" style="grid-template-columns:repeat(3,1fr)">
-      ${A.mustang.phases.map(([name,when,n,views,med])=>`
-        <div class="vs-col">
-          <div class="vs-yr">${name} · ${when}</div>
-          <div class="vs-n">${n}</div>
-          <div class="vs-lab">destinations published</div>
-          <ul class="vs-list">
-            <li><span>Views returned</span><span class="vs-v">${views}</span></li>
-            <li><span>Typical asset</span><span class="vs-v">${med}</span></li>
-          </ul>
-        </div>`).join('')}
+    <div class="label reveal">The single most useful slide in this deck</div>
+    <h2 class="display big reveal" style="max-width:22ch">Last time: a strong content sequence.<br>
+      <span style="color:var(--signal)">This time: a connected campaign.</span></h2>
+    <div class="tn stagger">
+      <div class="tn-c">
+        <div class="tn-h">Mustang · 2024</div>
+        ${['New release','Content','Content','Content']
+          .map((x,i)=>`<div class="tn-s">${x}</div>${i<3?'<div class="tn-ar">↓</div>':''}`).join('')}
+        <p class="tn-w" style="margin-top:.9rem">Each asset landed well. Each asset finished on its own.</p>
+      </div>
+      <div class="tn-c key">
+        <div class="tn-h">September 2026</div>
+        <div class="tn-s">Catalogue · Live · Shorts · Community<span class="tn-w">Four ways in, not one</span></div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s" style="color:var(--signal)">The hero release</div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s">Meaningful long-form<span class="tn-w">Inside 7–14 days, while attention is still up</span></div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s">Playlists · Channel home · Station</div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s" style="color:var(--signal)">The next moment</div>
+      </div>
     </div>
-    <p class="sub reveal">The run-up published six things and returned 3.4m. Album day published ten
-      and returned 2.6m — <strong>the one music video that day out-drew all ${A.mustang.dumpN} lyric
-      videos beside it</strong> (${A.mustang.dumpMv} against ${A.mustang.dumpLyric} combined).
-      The four months after release returned more than the run-up did.</p>
+    <h3 class="display mid reveal" style="margin-top:1.6rem">Don't throw out what worked.<br>Add the missing connections.</h3>
   </div>
 </section>`,
 
-/* 15c ── WHAT TO BEAT ──────────────────────────────────────────── */
-`<section class="slide light" data-t="What to beat">
+/* 15c ── LEARNING → ACTION → TOOL ──────────────────────────────── */
+`<section class="slide light" data-t="Learning → tool">
   <div class="inner">
-    <div class="label reveal">Benchmarks for the next campaign, from their own last one</div>
-    <h2 class="display big reveal" style="max-width:18ch">Five numbers<br>to build against.</h2>
-    <div class="bm stagger">
-      ${A.mustang.targets.map(([n,t,d,v])=>`
-        <div class="bm-row">
-          <div class="bm-n">${n}</div>
-          <div><div class="bm-t">${t}</div><div class="bm-d">${d}</div></div>
-          <div class="bm-v">${v}</div>
+    <div class="label reveal">Every recommendation traces back to something the last campaign showed us</div>
+    <h2 class="display big reveal" style="max-width:17ch">What we learned.<br>What we'd do.</h2>
+    <div class="map-h reveal"><span>Last campaign showed</span><span></span><span>September response</span><span></span><span>YouTube tool</span></div>
+    <div class="map stagger">
+      ${A.last.map.map(([l,act,t])=>`
+        <div class="map-r">
+          <div class="map-l">${l}</div><div class="map-x">→</div>
+          <div class="map-a">${act}</div><div class="map-x">→</div>
+          <div class="map-t">${t}</div>
         </div>`).join('')}
     </div>
-    <p class="sub reveal">Every figure counts uploads of 100 seconds or more, so announcement clips
-      aren't credited as content. Premieres are counted only where YouTube confirms both a scheduled
-      and an actual start — all ${A.mustang.premieres} are verified as aired.</p>
+    <p class="sub reveal">No tool goes in because it exists. Each one is here because the last campaign
+      showed us a specific job that needs doing.</p>
   </div>
 </section>`,
 
-/* 16 ── SEPTEMBER ──────────────────────────────────────────────── */
-`<section class="slide" data-t="September">
+/* 15d ── THE TOOLKIT ───────────────────────────────────────────── */
+`<section class="slide" data-t="The toolkit">
+  <div class="inner">
+    <div class="label reveal">What each format is actually for</div>
+    <h2 class="display big reveal" style="max-width:19ch">Eight tools.<br>Eight jobs.</h2>
+    <div class="kit stagger">
+      ${A.last.tools.map(([n,j,b])=>`
+        <div class="kit-c"><div class="kit-n">${n}</div><div class="kit-j">${j}</div>
+          <div class="kit-b">${b}</div></div>`).join('')}
+    </div>
+    <p class="sub reveal">Kings of Leon TV sits at the end of that list deliberately — it's the one that
+      runs continuously rather than campaign by campaign. YouTube Stations is an emerging product;
+      eligibility and access would need confirming directly with YouTube.</p>
+  </div>
+</section>`,
+
+/* 16 ── SEPTEMBER BLUEPRINT ───────────────────────────────────── */
+`<section class="slide" data-t="September blueprint">
   <div class="inner">
     <div class="label reveal">September architecture</div>
-    <h2 class="display big reveal" style="max-width:19ch">One connected<br>campaign.</h2>
-    <div class="flow stagger" style="margin-top:2rem">
-      ${[['Now','Put longform back in the mix','Give current Shorts a deeper destination. Begin catalogue → current connections.'],
-         ['Hero moment','The new record’s front door','Major visual / longform moment.'],
-         ['+7–14 days','Give the attention somewhere else to go','Meaningful follow-through while it is still elevated.'],
-         ['Bridge','Connect catalogue + current','Live · playlists · channel home · archive · Community.'],
-         ['Album week','One YouTube moment','Not ten disconnected assets landing together.'],
-         ['After','Keep the campaign alive','Continue live, catalogue and album programming.']]
-        .map(([w,t,n],i)=>`<div class="flow-step${i===0||i===3?' key':''}">
-          <div class="flow-when">${w}</div><div class="flow-what">${t}</div><div class="flow-note">${n}</div></div>`).join('')}
+    <h2 class="display big reveal" style="max-width:19ch">Five phases.<br>One campaign.</h2>
+    <div class="flow stagger" style="margin-top:1.8rem">
+      ${A.last.blueprint.map(([w,t,n],i)=>`<div class="flow-step${i===0||i===3?' key':''}">
+        <div class="flow-when">${w}</div><div class="flow-what">${t}</div><div class="flow-note">${n}</div></div>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.6rem">The goal isn't more uploads. It's making each
-      major moment lead naturally into the next.</h3>
-    <p class="sub reveal">A sequence, not a content calendar. The exact assets depend on what's being
-      captured and what the campaign plan already commits to.</p>
+    <h3 class="display mid reveal" style="margin-top:1.6rem">Every asset has a job.<br>
+      Every major moment has a next destination.</h3>
+    <p class="sub reveal">The last campaign put ten album assets out on one day. Programming release week
+      across the week — rather than into a single morning — is the clearest single change available.</p>
   </div>
 </section>`,
 
 /* 17 ── FIVE THINGS ────────────────────────────────────────────── */
 `<section class="slide light" data-t="Five things">
   <div class="inner">
-    <div class="label reveal">Recommendations</div>
-    <h2 class="display big reveal" style="margin-bottom:1.6rem">Five things we'd do.</h2>
+    <div class="label reveal">Recommendations — each one answering something the last campaign showed</div>
+    <h2 class="display big reveal" style="margin-bottom:1.4rem">Five things we'd do.</h2>
     <div class="stagger">
-      ${[['01','Build the catalogue bridge',
-          `${pct(A.concentration[2].pct)} of visible viewing sits in ten videos, most of them 15 years old.`,
-          'Make the catalogue an entry point to September — playlists, channel home, end screens, sequencing.'],
-         ['02','Reintroduce purposeful longform',
-          `${A.now.shorts30d} of ${A.now.uploads30d} recent uploads are Shorts; last longform ${A.now.lastLongform}.`,
-          'Put a substantial destination back in the mix now, before the hero moment lands.'],
-         ['03','Use live as the connective format',
-          `Live is the strongest format after music videos — typically ${fmt(A.formats.live.median)}, ${liveVsShort.toFixed(0)}× a Short.`,
-          'Pair classic and new songs in one current performance, then release song by song.'],
+      ${[['01','Keep the programming discipline',
+          `2024 ran ${A.last.followN} heroes a median ${A.last.medianGap} days apart, ${A.last.followOk} with long-form follow-through inside 14 days.`,
+          'This already works. Protect it — the changes below sit on top of it, not instead of it.'],
+         ['02','Build the catalogue → current bridge',
+          `The whole campaign was ${A.last.lifetimeShare} of the channel's lifetime viewing.`,
+          'Use live, playlists, channel home and archive to connect existing demand to the new record.'],
+         ['03','Give Shorts deeper destinations',
+          `106 Shorts returned ${A.last.shortsViewPct}% of campaign views — strong engagement, no onward journey.`,
+          'Keep the volume. Point every Short at a long-form destination that already exists.'],
          ['04','Explore Kings of Leon TV',
-          'Catalogue depth, live archive and a new record is exactly the material a Station is built from.',
-          'Confirm eligibility with YouTube and scope what programming would look like.'],
-         ['05','Make album week an event',
-          `2024 sequenced well — ${FOLLOW_OK}/${FOLLOW_N} inside 14 days — but read as separate uploads.`,
-          'Give release week a single centre of gravity on the channel.']]
+          'Catalogue depth, a live archive and a new record is exactly the material a Station is built from.',
+          'Confirm eligibility with YouTube and scope what always-on programming would look like.'],
+         ['05','Make album week one event',
+          `Last time ten album assets published on a single day; the one music video out-drew the other nine combined.`,
+          'Programme release week across the week, with a single centre of gravity on the channel.']]
         .map(([n,t,o,a])=>`
         <div class="rec">
           <div class="rec-n">${n}</div>
@@ -924,26 +1053,20 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 18 ── SEE / UNLOCK ───────────────────────────────────────────── */
-`<section class="slide coal" data-t="See and unlock">
+/* 18 ── WHAT WE'D VALIDATE ────────────────────────────────────── */
+`<section class="slide coal" data-t="What we'd validate">
   <div class="inner">
-    <div class="label reveal">What we can see, and what we'd add</div>
-    <h2 class="display big reveal" style="max-width:20ch">This is the view<br>from outside.</h2>
-    <div class="states reveal">
-      <div class="state">
-        <h4>Today · public YouTube API</h4>
-        <ul>${A.canSee.map(x=>`<li>${x}</li>`).join('')}</ul>
-      </div>
-      <div class="state-arrow">→</div>
-      <div class="state future">
-        <h4>With authorised Studio access</h4>
-        <ul>${A.wouldAdd.map(x=>`<li>${x}</li>`).join('')}</ul>
-      </div>
+    <div class="label reveal">How we'd know September beat Mustang</div>
+    <h2 class="display big reveal" style="max-width:20ch">Success isn't<br>more views.</h2>
+    <div class="kit stagger" style="grid-template-columns:repeat(3,1fr)">
+      ${A.last.validate.map(([n,q])=>`
+        <div class="kit-c"><div class="kit-n">${n}</div><div class="kit-b">${q}</div></div>`).join('')}
     </div>
-    <p class="statement reveal" style="margin-top:1.8rem;max-width:44ch;color:var(--signal)">
+    <p class="statement reveal" style="margin-top:1.6rem;max-width:46ch;color:var(--signal)">
       Are catalogue viewers actually being served the new music?</p>
-    <p class="sub reveal">That is a Browse, Suggested and audience-overlap question. Public data cannot
-      answer it — and it is the single thing that would most sharpen this strategy.</p>
+    <p class="sub reveal">Every question above sits behind authorised Studio access. Public data showed us
+      the pattern in 2024 — it cannot tell us why, and it is the single thing that would most sharpen
+      this strategy. Everything on this slide is measurable the moment access exists.</p>
     <div class="srcbar reveal"><span class="src">No YouTube Studio data has been used in this analysis</span></div>
   </div>
 </section>`,
