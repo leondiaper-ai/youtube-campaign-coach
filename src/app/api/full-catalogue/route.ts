@@ -97,6 +97,12 @@ export async function GET(req: NextRequest) {
           likes: Number(v.statistics?.likeCount ?? 0),
           comments: Number(v.statistics?.commentCount ?? 0),
           wasLive: !!v.liveStreamingDetails,
+          // Premiere confirmation. `wasLive` alone is not evidence of a Premiere —
+          // it is true for scheduled-but-never-aired Premieres and for genuine live
+          // streams alike. Only actualStart proves a broadcast actually happened.
+          // See detectPremiereStatus() in lib/coach/releaseClusters.ts for the rule.
+          scheduledStart: v.liveStreamingDetails?.scheduledStartTime ?? null,
+          actualStart: v.liveStreamingDetails?.actualStartTime ?? null,
           tags: v.snippet?.tags?.slice(0, 12) ?? [],
         });
       }
