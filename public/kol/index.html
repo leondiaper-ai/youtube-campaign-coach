@@ -127,6 +127,41 @@ body.present{overflow:hidden}
   color:var(--signal);margin-bottom:.45rem}
 .flow-what{font-size:.83rem;font-weight:700;line-height:1.3}
 .flow-note{font-size:.65rem;color:var(--smoke);margin-top:.35rem;line-height:1.42}
+/* ── Same-point comparison against the 2024 campaign ─────────────── */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1.9rem}
+.vs-col{border:1px solid var(--hair);border-radius:10px;padding:1.15rem 1.1rem;
+  background:rgba(239,234,227,.03)}
+.slide.light .vs-col{border-color:var(--bone);background:#fff}
+.vs-col.now{border-color:var(--ember)}
+.vs-yr{font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.55rem}
+.vs-col.now .vs-yr{color:var(--ember)}
+.vs-n{font-family:'Oswald',sans-serif;font-size:3rem;line-height:.95;font-weight:600;color:var(--signal)}
+.vs-col.now .vs-n{color:var(--ember)}
+.vs-lab{font-size:.68rem;color:var(--smoke);margin-bottom:.5rem;line-height:1.4}
+.vs-list{list-style:none;margin-top:.5rem}
+.vs-list li{font-size:.71rem;line-height:1.45;padding:.3rem 0;border-top:1px solid var(--hair);
+  display:flex;gap:.55rem;align-items:baseline}
+.slide.light .vs-list li{border-top-color:var(--bone)}
+.vs-t{color:var(--signal);font-weight:700;flex:0 0 2.5rem;font-size:.6rem;letter-spacing:.04em}
+.vs-v{margin-left:auto;color:var(--smoke);font-size:.62rem;white-space:nowrap;padding-left:.5rem}
+.vs-none{font-size:.72rem;color:var(--ember);padding:.55rem 0;line-height:1.5}
+
+/* ── The 2024 campaign shape, as targets ─────────────────────────── */
+.bm{margin-top:1.9rem;display:flex;flex-direction:column;gap:.5rem}
+.bm-row{display:grid;grid-template-columns:2.2rem 1fr auto;gap:1rem;align-items:center;
+  border:1px solid var(--hair);border-radius:8px;padding:.8rem 1rem;background:rgba(239,234,227,.03)}
+.slide.light .bm-row{border-color:var(--bone);background:#fff}
+.bm-n{font-size:.58rem;font-weight:700;letter-spacing:.12em;color:var(--signal)}
+.bm-t{font-size:.83rem;font-weight:700;line-height:1.3}
+.bm-d{font-size:.66rem;color:var(--smoke);margin-top:.22rem;line-height:1.45}
+.bm-v{font-family:'Oswald',sans-serif;font-size:1.35rem;font-weight:600;color:var(--signal);
+  white-space:nowrap;text-align:right}
+@media(max-width:860px){
+  .vs{grid-template-columns:1fr}
+  .bm-row{grid-template-columns:2rem 1fr;row-gap:.4rem}
+  .bm-v{grid-column:2;text-align:left}
+}
 .funnel{margin-top:2rem;max-width:660px}
 .fn{border:1px solid var(--hair);border-left:3px solid var(--hair);border-radius:6px;
   padding:.85rem 1rem;background:rgba(239,234,227,.03)}
@@ -352,6 +387,46 @@ const ARTIST = {
 
   /* Current publishing signal, from the monitored channel record. */
   now:{ uploads30d:8, shorts30d:8, lastLongform:'9 July 2026' },
+
+  /* ── The Mustang campaign as this campaign's benchmark ──────────────────
+     Album dates are evidenced, not assumed:
+       2024-05-10 — 10 long-form album assets published that single day
+                    (9 track lyric videos + the Nowhere to Run music video)
+       2026-09-10 — two independent countdown Shorts agree:
+                    12 Aug "29 days 'til…" and 17 Aug "24 days 'til…"
+     A "destination" is any upload of 100 seconds or more — a real watch
+     destination rather than a vertical social post. The same rule is applied
+     to both campaigns, so neither side gets credit for announcement clips.  */
+  benchmark:{
+    album24:'10 May 2024', album26:'10 Sep 2026', tMinus:16,
+    daysSinceLongform:47,
+    /* Matched window: album-152d through album-16d, both campaigns. */
+    matched:{
+      d24:6, d26:1,        // content destinations (>=100s)
+      mv24:2, mv26:0,      // premiered music videos
+      up24:44, up26:12,    // all uploads
+    },
+    /* What 2024 published in that same stretch, by days before album. */
+    ladder24:[
+      ['T-78','Mustang — official music video','1.71m'],
+      ['T-59','Mustang — Live on The Tonight Show','163k'],
+      ['T-57','Mustang — official lyric video','107k'],
+      ['T-42','Split Screen — official lyric video','762k'],
+      ['T-21','Nothing To Do — official video','612k'],
+      ['T-16','Nothing To Do — lyric video','51k'],
+    ],
+    ladder26:[['T-67','A tour thank-you post','13k']],
+    /* The 2024 campaign shape, as five targets. */
+    targets:[
+      ['01','Lead the album with a music video','Mustang landed 78 days before release and did 1.71m — the campaign’s single biggest asset.','T-78'],
+      ['02','Six destinations before release','Music video, live performance, two lyric videos, second music video, second lyric video.','6'],
+      ['03','Make album day a full day','Ten long-form assets published on 10 May 2024 — every track, plus a music video.','10'],
+      ['04','Keep going after release','Ten more destinations across the following four months, through to M Television in October.','10'],
+      ['05','Never leave a long gap','Median eight days between destinations across the whole campaign. Longest gap: 28 days.','8 days'],
+    ],
+    /* The encouraging half: most of 2024's output came on album day or later. */
+    stillAhead:20, totalDest:26,
+  },
 
   /* Real YouTube Station product reference. */
   metallica:{ id:'1fz60gNnSdU', label:'Metallica TV' },
@@ -751,6 +826,55 @@ function slides(){ return [
     </div>
     <p class="sub reveal">Almost everything in Priority 1 uses material that already exists or footage
       already being captured. The band's time is the scarcest input in the campaign.</p>
+  </div>
+</section>`,
+
+/* 15b ── SAME POINT, LAST ALBUM ────────────────────────────────── */
+`<section class="slide" data-t="Same point, last album">
+  <div class="inner">
+    <div class="label reveal">Mustang, 2024 · this campaign, 2026 — measured at the same point</div>
+    <h2 class="display big reveal" style="max-width:19ch">Sixteen days out.<br>Last time, six things<br>had already landed.</h2>
+    <div class="vs stagger">
+      <div class="vs-col">
+        <div class="vs-yr">Mustang · album 10 May 2024</div>
+        <div class="vs-n">${A.benchmark.matched.d24}</div>
+        <div class="vs-lab">watch destinations published by this point,<br>including ${A.benchmark.matched.mv24} premiered music videos</div>
+        <ul class="vs-list">${A.benchmark.ladder24
+          .map(([t,n,v])=>`<li><span class="vs-t">${t}</span><span>${n}</span><span class="vs-v">${v}</span></li>`).join('')}</ul>
+      </div>
+      <div class="vs-col now">
+        <div class="vs-yr">This campaign · album 10 Sep 2026</div>
+        <div class="vs-n">${A.benchmark.matched.d26}</div>
+        <div class="vs-lab">watch destination${A.benchmark.matched.d26===1?'':'s'} published by this point,<br>and no music videos</div>
+        <ul class="vs-list">${A.benchmark.ladder26
+          .map(([t,n,v])=>`<li><span class="vs-t">${t}</span><span>${n}</span><span class="vs-v">${v}</span></li>`).join('')}</ul>
+        <p class="vs-none">${A.benchmark.daysSinceLongform} days since the last long-form upload.
+          The ten uploads in that stretch were all Shorts.</p>
+      </div>
+    </div>
+    <p class="sub reveal">Both columns count uploads of 100 seconds or more, so neither side is
+      credited for vertical social posts. The 2024 campaign is the fairest benchmark available —
+      same channel, same audience, same catalogue behind it.</p>
+  </div>
+</section>`,
+
+/* 15c ── THE 2024 SHAPE ────────────────────────────────────────── */
+`<section class="slide light" data-t="The benchmark">
+  <div class="inner">
+    <div class="label reveal">What good looked like, in their own hands</div>
+    <h2 class="display big reveal" style="max-width:18ch">They already know<br>how to do this.</h2>
+    <div class="bm stagger">
+      ${A.benchmark.targets.map(([n,t,d,v])=>`
+        <div class="bm-row">
+          <div class="bm-n">${n}</div>
+          <div><div class="bm-t">${t}</div><div class="bm-d">${d}</div></div>
+          <div class="bm-v">${v}</div>
+        </div>`).join('')}
+    </div>
+    <p class="sub reveal"><strong>${A.benchmark.stillAhead} of the
+      ${A.benchmark.totalDest} destinations in the 2024 campaign came on album day or after.</strong>
+      The pre-release window is mostly spent — but the larger half of what worked last time
+      is still completely available.</p>
   </div>
 </section>`,
 
