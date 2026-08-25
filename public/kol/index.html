@@ -583,7 +583,7 @@ function slides(){ return [
   <div class="inner">
     <div class="label reveal">Where we start from</div>
     <h2 class="display reveal" style="font-size:clamp(3rem,10vw,8rem);line-height:.9">
-      ${fmt(C.lifetimeViews)}<span style="color:var(--signal)">.</span></h2>
+      <span id="liveLifetime">${fmt(C.lifetimeViews)}</span><span style="color:var(--signal)">.</span></h2>
     <p class="statement reveal" style="margin-top:.8rem;max-width:30ch">Lifetime views on the channel.</p>
     <div class="thumb-grid stagger" style="margin-top:2.2rem;grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px">
       ${A.topCatalogue.slice(0,2).map(v=>`
@@ -825,7 +825,7 @@ function slides(){ return [
       The audience is<br>already here.<br>
       <span style="color:var(--signal)">Give them a way in.</span></h2>
     <p class="statement reveal" style="margin-top:1.6rem;color:rgba(239,234,227,.8);max-width:34ch">
-      ${fmt(C.lifetimeViews)} views later, the next chapter shouldn't start from zero.</p>
+      <span id="liveLifetime2">${fmt(C.lifetimeViews)}</span> views later, the next chapter shouldn't start from zero.</p>
   </div>
 </section>`,
 
@@ -840,15 +840,24 @@ document.getElementById('deck').innerHTML = slides().join('');
 function renderStats(){
   const subs  = liveOr('subscriberCount', C.subscribers);
   const views = liveOr('viewCount',       C.lifetimeViews);
-  document.getElementById('liveStats').innerHTML = [
+
+  /* The headline lifetime figure appears on the scale slide and in the close. */
+  ['liveLifetime','liveLifetime2'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt(views.v);
+  });
+
+  /* Optional stats grid — only present in layouts that carry one. */
+  const grid = document.getElementById('liveStats');
+  if(!grid) return;
+  grid.innerHTML = [
     [fmt(subs.v),                'Subscribers'],
     [fmt(views.v),               'Lifetime channel views'],
     [String(C.retrievedUploads), 'Retrievable public uploads'],
     [fmt(C.visibleViews),        'Attributable visible views'],
   ].map(([n,l])=>`
     <div class="stat"><div class="num">${n}</div><div class="cap">${l}</div></div>`).join('');
-  [...document.getElementById('liveStats').children]
-    .forEach((c,i)=>setTimeout(()=>c.classList.add('visible'), i*70));
+  [...grid.children].forEach((c,i)=>setTimeout(()=>c.classList.add('visible'), i*70));
 }
 
 async function refreshLive(){
@@ -1065,10 +1074,14 @@ document.getElementById('appendixBody').innerHTML = `
   question. It requires authorised Studio access. We do not model, estimate or infer it.</p>
 `;
 
-/* ── Init ──────────────────────────────────────────────────────── */
-renderStats();
+/* ── Init ──────────────────────────────────────────────────────────
+   observeAll() runs FIRST and unguarded. Everything on a slide starts at
+   opacity:0 and is revealed by observers, so if anything above it throws
+   the whole deck renders blank. The live-data layer is optional and must
+   never be able to take the presentation down with it.                  */
 observeAll();
-refreshLive();
+try{ renderStats(); }catch(e){ console.warn('[deck] stats unavailable', e); }
+try{ refreshLive(); }catch(e){ console.warn('[deck] live refresh unavailable', e); }
 </script>
 </body>
 </html>
