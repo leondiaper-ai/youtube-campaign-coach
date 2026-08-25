@@ -211,6 +211,35 @@ body.present{overflow:hidden}
   .map-t,.map-h span:last-child{text-align:left}
   .map-x{display:none}
 }
+/* ── Programme wall — the channel's own assets as a grid ─────────── */
+.wall{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:1.4rem}
+.wall img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block}
+.wall-c{position:relative}
+.wall-l{position:absolute;left:.35rem;bottom:.3rem;font-size:.5rem;font-weight:700;
+  letter-spacing:.04em;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+
+/* ── A fan journey, step by step ─────────────────────────────────── */
+.jr{margin-top:1.5rem;display:flex;flex-direction:column;gap:.45rem}
+.jr-s{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:center;
+  border:1px solid var(--hair);border-radius:8px;padding:.75rem .95rem;background:rgba(239,234,227,.03)}
+.slide.light .jr-s{border-color:var(--bone);background:#fff}
+.jr-s.key{border-color:var(--signal)}
+.jr-n{font-family:'Oswald',sans-serif;font-size:.95rem;font-weight:600;color:var(--signal)}
+.jr-t{font-size:.86rem;font-weight:700;line-height:1.3}
+.jr-d{font-size:.68rem;color:var(--smoke);margin-top:.15rem;line-height:1.45}
+.jr-ar{text-align:center;color:var(--signal);font-size:.8rem;line-height:1}
+
+/* ── Low artist lift ─────────────────────────────────────────────── */
+.lift{margin-top:1.3rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
+.lift-h{font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mint);margin-right:.35rem}
+.lift-p{font-size:.62rem;padding:.2rem .55rem;border:1px solid var(--hair);border-radius:20px;color:var(--smoke)}
+.slide.light .lift-p{border-color:var(--bone)}
+
+/* ── Big hero thumbnails ─────────────────────────────────────────── */
+.bigthumbs{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;margin-top:1.8rem}
+.bigthumbs .tcard img{aspect-ratio:16/9;object-fit:cover}
+@media(max-width:860px){.wall{grid-template-columns:repeat(2,1fr)}.bigthumbs{grid-template-columns:1fr}}
 .funnel{margin-top:2rem;max-width:660px}
 .fn{border:1px solid var(--hair);border-left:3px solid var(--hair);border-radius:6px;
   padding:.85rem 1rem;background:rgba(239,234,227,.03)}
@@ -512,6 +541,10 @@ const ARTIST = {
     ],
   },
 
+  /* Things that can happen without another ask of the band. */
+  lowLift:['Channel homepage','Playlists','Archive','Existing live footage',
+           'Shorts from footage already captured','Community posts','End screens','Station programming'],
+
   /* Real YouTube Station product reference. */
   metallica:{ id:'1fz60gNnSdU', label:'Metallica TV' },
 
@@ -582,113 +615,124 @@ function slides(){ return [
 `<section class="slide coal" data-t="The scale">
   <div class="inner">
     <div class="label reveal">Where we start from</div>
-    <h2 class="display reveal" style="font-size:clamp(3rem,10vw,8rem);line-height:.9">
+    <h2 class="display reveal" style="font-size:clamp(2.8rem,9vw,7rem);line-height:.9">
       <span id="liveLifetime">${fmt(C.lifetimeViews)}</span><span style="color:var(--signal)">.</span></h2>
-    <p class="statement reveal" style="margin-top:.8rem;max-width:30ch">Lifetime views on the channel.</p>
-    <div class="thumb-grid stagger" style="margin-top:2.2rem;grid-template-columns:repeat(2,minmax(0,1fr));max-width:760px">
+    <p class="statement reveal" style="margin-top:.7rem;max-width:36ch">A billion views across two songs.
+      The audience isn't something we need to find.</p>
+    <div class="bigthumbs stagger">
       ${A.topCatalogue.slice(0,2).map(v=>`
         <a class="tcard" href="${yt(v.id)}" target="_blank" rel="noopener">
-          <img src="${thumb(v.id)}" alt="">
+          <img src="${thumb(v.id,'maxresdefault')}" alt="${esc(v.t)}"
+            onerror="this.src='${thumb(v.id)}'">
           <div class="tmeta"><div class="ttitle">${esc(v.t)}</div>
             <div class="tviews">${fmt(v.v)}</div><div class="tsub">${v.y}</div></div>
         </a>`).join('')}
     </div>
-    <p class="sub reveal" style="margin-top:1.6rem">Kings of Leon already have the thing most campaigns
-      are trying to build: <strong>audience.</strong></p>
+    <h3 class="display mid reveal" style="margin-top:1.5rem">The job is giving that audience<br>
+      a route into September.</h3>
   </div>
 </section>`,
 
-/* 03 ── THE BIG INSIGHT ────────────────────────────────────────── */
-`<section class="slide light" data-t="Where the attention lives">
+/* 03 ── WHERE THE ATTENTION LIVES ──────────────────────────────── */
+`<section class="slide light" data-t="Where attention lives">
   <div class="inner">
     <div class="label reveal">The one thing that shapes everything else</div>
     <h2 class="display big reveal" style="max-width:17ch">The audience is huge.<br>
       It mostly lives<br>in the catalogue.</h2>
-    <div class="vs stagger" style="margin-top:1.9rem">
+    <div class="vs stagger" style="margin-top:1.7rem">
       <div class="vs-col">
-        <div class="vs-yr">2008–13</div>
+        <div class="vs-yr">2008–13 · the classics</div>
         <div class="vs-n">${pct(eraShare(A.eras[0]))}</div>
         <div class="vs-lab">of visible viewing, from ${A.eras[0].uploads} uploads</div>
-        <div class="thumb-grid" style="grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.9rem">
-          ${A.eraImages.classic.map(v=>`<img src="${thumb(v.id,'mqdefault')}" alt="${esc(v.t)}"
-            style="width:100%;border-radius:5px;display:block">`).join('')}
+        <div class="wall" style="grid-template-columns:repeat(2,1fr)">
+          ${[...A.topCatalogue.slice(0,3),A.topLive[2]].map(v=>`
+            <div class="wall-c"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+              <div class="wall-l">${esc(v.t.split('—')[0].trim())} · ${fmt(v.v)}</div></div>`).join('')}
         </div>
       </div>
       <div class="vs-col now">
-        <div class="vs-yr">2024–26</div>
+        <div class="vs-yr">2024–26 · now</div>
         <div class="vs-n">${pct(eraShare(modernEra))}</div>
         <div class="vs-lab">of visible viewing, from ${modernEra.uploads} uploads —
           <strong>${pct(eraUplPct(modernEra),0)} of everything ever posted</strong></div>
-        <div class="thumb-grid" style="grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:.9rem">
-          ${A.eraImages.current.map(v=>`<img src="${thumb(v.id,'mqdefault')}" alt="${esc(v.t)}"
-            style="width:100%;border-radius:5px;display:block">`).join('')}
+        <div class="wall" style="grid-template-columns:repeat(2,1fr)">
+          ${A.currentEra.map(v=>`
+            <div class="wall-c"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+              <div class="wall-l">${esc(v.t.split('(')[0].trim())} · ${fmt(v.v)}</div></div>`).join('')}
         </div>
       </div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.7rem">The channel has stayed extremely active.<br>
-      The attention hasn't moved with the uploading.</h3>
+    <h3 class="display mid reveal" style="margin-top:1.6rem">The channel is still active.<br>
+      The audience's biggest way in is still the classics.</h3>
   </div>
 </section>`,
 
-/* 04 ── WHAT HAPPENED LAST ALBUM ───────────────────────────────── */
+/* 04 ── MUSTANG WAS WELL PROGRAMMED ────────────────────────────── */
 `<section class="slide" data-t="Last album">
   <div class="inner">
     <div class="label reveal">Mustang · ${A.last.opens} → ${A.last.closes}</div>
-    <h2 class="display big reveal" style="max-width:20ch">The last campaign was active —<br>
-      and well programmed.</h2>
-    <div class="vs stagger" style="grid-template-columns:repeat(5,1fr);margin-top:1.9rem">
-      ${[[A.last.uploads,'uploads'],[A.last.views,'visible campaign views'],
-         [`${A.last.followOk}/${A.last.followN}`,'heroes with long-form follow-through inside 14 days'],
-         [`${A.last.medianGap} days`,'median gap between long-form destinations'],
-         [A.last.premieres,'confirmed Premieres']]
+    <h2 class="display big reveal" style="max-width:21ch">Mustang was already a<br>
+      well-programmed campaign.</h2>
+    <div class="vs stagger" style="grid-template-columns:repeat(4,1fr);margin-top:1.6rem">
+      ${[[A.last.followN,'hero releases'],
+         [`${A.last.medianGap} days`,'typical gap between long-form releases'],
+         [A.last.premieres,'Premieres, all on music videos'],
+         ['5 months','of activity after the album landed']]
         .map(([n,l])=>`<div class="vs-col"><div class="vs-n">${n}</div><div class="vs-lab">${l}</div></div>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.8rem">
+    <div class="wall stagger">
+      ${[0,2,6,9].map(i=>A.campaign2024[i]).map(c=>`
+        <div class="wall-c"><img src="${thumb(c.id)}" alt="${esc(c.t)}">
+          <div class="wall-l">${esc(c.t)} · ${fmt(c.v)}</div></div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.5rem">
       ${A.last.shortsUplPct}% of uploads were Shorts.<br>
-      <span style="color:var(--signal)">${A.last.lfViewPct}% of the views came from long-form.</span></h3>
-    <div class="srcbar reveal"><span class="src">Full eleven-release reconstruction in the Analysis appendix</span></div>
+      <span style="color:var(--signal)">${Math.round(A.last.lfViewPct)}% of the views came from long-form.</span></h3>
+    <p class="sub reveal">There was already plenty of activity. The opportunity is what that activity
+      leads people to next.</p>
   </div>
 </section>`,
 
-/* 05 ── THE LEARNING ───────────────────────────────────────────── */
+/* 05 ── THE BRIDGE IN THE ARGUMENT ─────────────────────────────── */
 `<section class="slide light" data-t="The learning">
   <div class="inner">
     <div class="label reveal">Which is why this matters</div>
     <h2 class="display big reveal" style="max-width:18ch">The programming<br>wasn't the problem.</h2>
-    <p class="sub reveal" style="margin-top:1rem;max-width:70ch">The last campaign already did most of what
-      we would normally recommend — consistent hero moments, regular follow-through, active Shorts,
-      seven Premieres, and sustained activity for five months after release.</p>
-    <div style="margin-top:1.8rem;display:flex;gap:3rem;flex-wrap:wrap;align-items:flex-start" class="stagger">
-      <div class="stat"><div class="num" style="color:var(--ember)">${A.last.lifetimeShare}</div>
-        <div class="cap">Of the channel's lifetime viewing</div></div>
-      <p class="sub" style="max-width:40ch;margin:0">Lifetime viewing accumulated across eighteen years, so
-        this isn't a fair scoreboard for one campaign. It is a scale comparison — and the gap between the
-        two numbers is the whole opportunity.</p>
+    <div class="vs stagger" style="grid-template-columns:repeat(5,1fr);margin-top:1.7rem">
+      ${['Hero moments','Follow-through','Shorts','Premieres','Five months after release']
+        .map(x=>`<div class="vs-col" style="padding:.95rem"><div class="vs-lab"
+          style="margin:0;font-weight:700;color:var(--ink);font-size:.8rem">${x}</div></div>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.9rem">More content isn't the answer.<br>
-      <span style="color:var(--signal)">Better connection is.</span></h3>
+    <p class="statement reveal" style="margin-top:1.6rem;max-width:44ch">The last campaign already had
+      all of it. So we wouldn't start by asking the band to make more.</p>
+    <h3 class="display mid reveal" style="margin-top:1.2rem">We'd make what already exists<br>
+      <span style="color:var(--signal)">work harder together.</span></h3>
   </div>
 </section>`,
 
-/* 06 ── DON'T DUMP THE ALBUM ───────────────────────────────────── */
+/* 06 ── PROGRAMME THE ALBUM ────────────────────────────────────── */
 `<section class="slide coal" data-t="Programme the album">
   <div class="inner">
     <div class="label reveal">The clearest practical lesson from 2024</div>
-    <h2 class="display big reveal" style="max-width:16ch">Don't dump<br>the album.<br>
+    <h2 class="display big reveal" style="max-width:17ch">Don't just release<br>the album.<br>
       <span style="color:var(--signal)">Programme it.</span></h2>
-    <p class="sub reveal" style="margin-top:1rem">Ten long-form assets published on album day, ${A.last.album}.</p>
-    <div class="vs stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.4rem">
+    <p class="sub reveal" style="margin-top:.9rem">Ten long-form assets published on album day, ${A.last.album}.</p>
+    <div class="vs stagger" style="grid-template-columns:repeat(2,1fr);margin-top:1.2rem;max-width:720px">
       <div class="vs-col"><div class="vs-n">${A.last.dayMv}</div>
-        <div class="vs-lab">The one official music video</div></div>
-      <div class="vs-col"><div class="vs-n">${A.last.dayLyric}</div>
+        <div class="vs-lab">Nowhere to Run — the one music video</div></div>
+      <div class="vs-col now"><div class="vs-n">${A.last.dayLyric}</div>
         <div class="vs-lab">All ${A.last.dayLyricN} lyric videos combined</div></div>
-      <div class="vs-col"><div class="vs-n">~${A.last.dayLyricMed}</div>
-        <div class="vs-lab">A typical lyric video that day</div></div>
     </div>
-    <p class="sub reveal" style="margin-top:1.5rem">One hero moment created more visible demand than nine
-      supporting assets combined. We can't say staggering them would have raised the total — but we can
-      say the hero carried the day.</p>
-    <h3 class="display mid reveal" style="margin-top:1.2rem">This time, give release week<br>a centre of gravity.</h3>
+    <div class="jr stagger" style="margin-top:1.4rem">
+      ${[['01','One hero moment on release day','The music video, premiered, with nothing competing against it'],
+         ['02','Supporting assets across the week','Lyric videos and visuals spread out, each getting its own day'],
+         ['03','A live performance 7–14 days later','While people are still arriving from the hero video']]
+        .map(([n,t,d],i)=>`${i?'<div class="jr-ar">↓</div>':''}
+        <div class="jr-s${i===0?' key':''}"><div class="jr-n">${n}</div>
+          <div><div class="jr-t">${t}</div><div class="jr-d">${d}</div></div></div>`).join('')}
+    </div>
+    <p class="sub reveal">We can't say spreading them out would have raised the total. The point is that
+      one moment can carry a week, and nine assets on one morning compete with each other.</p>
   </div>
 </section>`,
 
@@ -696,52 +740,69 @@ function slides(){ return [
 `<section class="slide" data-t="Last time → this time">
   <div class="inner">
     <div class="label reveal">The recommendation, in one picture</div>
-    <h2 class="display big reveal" style="max-width:22ch">Last time: a strong content sequence.<br>
-      <span style="color:var(--signal)">This time: a connected campaign.</span></h2>
+    <h2 class="display big reveal" style="max-width:24ch">Last time we programmed the releases.<br>
+      <span style="color:var(--signal)">This time we'd programme the journey too.</span></h2>
     <div class="tn stagger">
       <div class="tn-c">
         <div class="tn-h">Mustang · 2024</div>
-        ${['New release','Content','Content','Content']
-          .map((x,i)=>`<div class="tn-s">${x}</div>${i<3?'<div class="tn-ar">↓</div>':''}`).join('')}
-        <p class="tn-w" style="margin-top:.9rem">Each asset landed well. Each asset finished on its own.</p>
+        <div class="wall" style="grid-template-columns:repeat(2,1fr);margin-top:0;margin-bottom:.8rem">
+          ${[A.campaign2024[2],A.campaign2024[6]].map(c=>`
+            <div class="wall-c"><img src="${thumb(c.id)}" alt="${esc(c.t)}">
+              <div class="wall-l">${esc(c.t)}</div></div>`).join('')}
+        </div>
+        <div class="tn-s">Nowhere to Run — hero video</div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s">Nine lyric videos, same day</div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s">Shorts</div>
+        <div class="tn-ar">↓</div>
+        <div class="tn-s">Next hero video<span class="tn-w">Each one landed well. Each one finished on its own.</span></div>
       </div>
       <div class="tn-c key">
         <div class="tn-h">September 2026</div>
-        <div class="tn-s">Catalogue · Live · Shorts · Community<span class="tn-w">Four ways in, not one</span></div>
+        <div class="wall" style="grid-template-columns:repeat(2,1fr);margin-top:0;margin-bottom:.8rem">
+          ${[A.topCatalogue[0],A.topLive[0]].map(c=>`
+            <div class="wall-c"><img src="${thumb(c.id)}" alt="${esc(c.t)}">
+              <div class="wall-l">${esc(c.t.split('—')[0].trim())} · ${fmt(c.v)}</div></div>`).join('')}
+        </div>
+        <div class="tn-s">Start where the people already are<span class="tn-w">Sex on Fire, Use Somebody, the historic live</span></div>
         <div class="tn-ar">↓</div>
-        <div class="tn-s" style="color:var(--signal)">The hero release</div>
+        <div class="tn-s">Meet the band as they are now<span class="tn-w">Current live, Shorts, tour, Community</span></div>
         <div class="tn-ar">↓</div>
-        <div class="tn-s">Meaningful long-form<span class="tn-w">Inside 7–14 days, while attention is still up</span></div>
+        <div class="tn-s" style="color:var(--signal)">The new hero video</div>
         <div class="tn-ar">↓</div>
-        <div class="tn-s">Playlists · Channel home · Station</div>
-        <div class="tn-ar">↓</div>
-        <div class="tn-s" style="color:var(--signal)">The next moment</div>
+        <div class="tn-s">A live performance next<span class="tn-w">Then playlists, channel home, Kings of Leon TV</span></div>
       </div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.5rem">Don't throw out what worked.<br>Add the missing connections.</h3>
   </div>
 </section>`,
 
-/* 08 ── THE BRIDGE ─────────────────────────────────────────────── */
-`<section class="slide light" data-t="The bridge">
+/* 08 ── WHAT IT LOOKS LIKE FOR A FAN ───────────────────────────── */
+`<section class="slide light" data-t="A fan journey">
   <div class="inner">
-    <div class="label reveal">How the connection actually gets made</div>
-    <h2 class="display big reveal" style="max-width:20ch">Use what already works<br>to lead into what's new.</h2>
-    <div class="vs stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.8rem">
-      <div class="vs-col"><div class="vs-yr">Catalogue</div><div class="vs-n">${fmt(TOP2)}</div>
-        <div class="vs-lab">across two videos — the enormous existing front door</div></div>
-      <div class="vs-col"><div class="vs-yr">Live</div><div class="vs-n">${A.formats.live.n}</div>
-        <div class="vs-lab">song-level performances, typically ${fmt(A.formats.live.median)} —
-          the one format that naturally holds catalogue and new music together</div></div>
-      <div class="vs-col"><div class="vs-yr">Shorts</div><div class="vs-n">${A.formats.shorts.likesPer1k}</div>
-        <div class="vs-lab">likes per 1,000 views — ${engGap.toFixed(0)}× the rate on music videos.
-          Already active, already engaging</div></div>
+    <div class="label reveal">What this actually looks like for one person</div>
+    <h2 class="display big reveal" style="max-width:20ch">Someone watches<br>Sex on Fire in September.</h2>
+    <div class="jr stagger">
+      ${[['01','They arrive through a 2009 music video',`${fmt(A.topCatalogue[0].v)} views. This happens every day, without us doing anything.`],
+         ['02','They see Kings of Leon as they are now','A current live performance, a Short from the tour, a Community post'],
+         ['03','They reach the new record','The hero video, a new live performance, the album visual'],
+         ['04','They have somewhere to go next','A playlist, the channel homepage, Kings of Leon TV, the next release']]
+        .map(([n,t,d],i)=>`${i?'<div class="jr-ar">↓</div>':''}
+        <div class="jr-s${i===2?' key':''}"><div class="jr-n">${n}</div>
+          <div><div class="jr-t">${t}</div><div class="jr-d">${d}</div></div></div>`).join('')}
     </div>
-    <div class="flow-note reveal" style="text-align:center;font-size:1.4rem;color:var(--signal);margin:1.1rem 0">↓</div>
-    <h3 class="display mid reveal" style="text-align:center">All three point at the new record.</h3>
-    <p class="sub reveal" style="margin-top:1rem">Shorts start journeys. Live connects eras. The catalogue
-      supplies the scale. The destination is a hero video, a live performance, an album film — something
-      substantial enough to be worth arriving at.</p>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1.4rem;
+      align-items:center;margin-top:1.6rem" class="stagger">
+      <div class="wall" style="grid-template-columns:repeat(2,1fr);margin:0">
+        ${A.topLive.slice(0,2).map(v=>`
+          <div class="wall-c"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+            <div class="wall-l">${fmt(v.v)}</div></div>`).join('')}
+      </div>
+      <p class="sub" style="margin:0">Fans already know this band through live performance —
+        <strong>${A.formats.live.n} performances on the channel, typically ${fmt(A.formats.live.median)} views each.</strong>
+        Mustang leaned hard on Shorts: ${A.last.formats[2][1]} of them, against ${A.last.formats[3][1]} live assets.
+        For September we'd look for more chances to let live do the connecting.</p>
+    </div>
   </div>
 </section>`,
 
@@ -749,74 +810,64 @@ function slides(){ return [
 `<section class="slide" data-t="Kings of Leon TV">
   <div class="inner">
     <div class="label reveal">The one genuinely new idea</div>
-    <h2 class="display big reveal" style="max-width:16ch">Kings of Leon TV</h2>
-    <p class="statement reveal" style="margin-top:.9rem;max-width:38ch">Turn eighteen years of catalogue
-      into an always-on campaign asset.</p>
-    <div style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1.6rem;
-      align-items:center;margin-top:1.7rem" class="stagger">
+    <h2 class="display big reveal" style="max-width:22ch">Imagine turning eighteen years<br>
+      into a live campaign environment.</h2>
+    <div class="wall stagger" style="grid-template-columns:repeat(6,1fr)">
+      ${[A.topCatalogue[0],A.topCatalogue[1],A.topLive[0],A.topLive[1],
+         A.campaign2024[0],A.currentEra[0]].map(v=>`
+        <div class="wall-c"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+          <div class="wall-l">${esc(v.t.split('—')[0].split('(')[0].trim())}</div></div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1.5rem;
+      align-items:center;margin-top:1.5rem" class="stagger">
       <a class="tcard" href="${yt(A.metallica.id)}" target="_blank" rel="noopener">
         <img src="${thumb(A.metallica.id,'maxresdefault')}" alt="${esc(A.metallica.label)}"
           onerror="this.src='${thumb(A.metallica.id)}'">
         <div class="tmeta"><div class="ttitle">${esc(A.metallica.label)}</div>
-          <div class="tsub">A YouTube Station already running</div></div>
+          <div class="tsub">A YouTube Station already running — this format is real</div></div>
       </a>
       <div>
-        <div class="funnel" style="margin-top:0">
-          <div class="fn"><div class="fn-t">Classics · Live · Archive · New album</div>
-            <div class="fn-d">Four things the channel already owns</div></div>
-          <div class="fn-arrow">↓</div>
-          <div class="fn key"><div class="fn-t" style="color:var(--signal)">One programmed environment</div>
-            <div class="fn-d">Where catalogue and current music sit together permanently, rather than
-              campaign by campaign</div></div>
-        </div>
+        <h3 class="display mid">Kings of Leon TV</h3>
+        <p class="sub" style="margin-top:.7rem">Classics, historic live, the Mustang era and the new record,
+          programmed together in one place that runs whether or not there's a campaign on.</p>
+        <p class="statement" style="margin-top:.9rem;color:var(--signal)">Someone arrives for Sex on Fire.
+          They leave having met the new record.</p>
       </div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.5rem">Someone watches Sex on Fire in September.<br>
-      What do we want them to find next?</h3>
-    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging / beta opportunity —
-      eligibility and access need confirming directly with YouTube</span></div>
+    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging / beta product —
+      eligibility and access need confirming with YouTube</span></div>
   </div>
 </section>`,
 
-/* 10 ── SEPTEMBER PLAN ─────────────────────────────────────────── */
-`<section class="slide light" data-t="September plan">
+/* 10 ── WHAT WE'D DO ───────────────────────────────────────────── */
+`<section class="slide light" data-t="What we'd do">
   <div class="inner">
-    <div class="label reveal">The campaign architecture</div>
-    <h2 class="display big reveal" style="max-width:18ch">Five moments.<br>One campaign.</h2>
-    <div class="flow stagger" style="margin-top:1.8rem">
-      ${[['Now','Reconnect the channel','A long-form destination. Homepage, playlists, and the Station conversation with YouTube.'],
-         ['Hero moment','Give the campaign a front door','Major long-form asset, selectively premiered.'],
-         ['+7–14 days','Give attention somewhere to go','Live, performance, or a meaningful second destination.'],
-         ['Album week','Programme the record','One centre of gravity — not everything landing simultaneously.'],
-         ['After','Keep catalogue and current connected','Live, archive, song-level assets, Station.']]
-        .map(([w,t,n],i)=>`<div class="flow-step${i===1||i===3?' key':''}">
-          <div class="flow-when">${w}</div><div class="flow-what">${t}</div><div class="flow-note">${n}</div></div>`).join('')}
-    </div>
-    <h3 class="display mid reveal" style="margin-top:1.7rem">Every major moment<br>has a next destination.</h3>
-  </div>
-</section>`,
-
-/* 11 ── FIVE THINGS ────────────────────────────────────────────── */
-`<section class="slide" data-t="Five things">
-  <div class="inner">
-    <div class="label reveal">What we'd actually do</div>
-    <h2 class="display big reveal" style="margin-bottom:1.5rem">Five things.</h2>
+    <div class="label reveal">September</div>
+    <h2 class="display big reveal" style="margin-bottom:1.3rem">What we'd do.</h2>
     <div class="stagger">
-      ${[['01','Keep what worked','Protect the sequencing discipline from 2024.'],
-         ['02','Programme release week','One hero moment. Supporting assets released deliberately around it.'],
-         ['03','Connect catalogue → current','Live, playlists, channel home, existing catalogue.'],
-         ['04','Give Shorts a destination','Keep the engagement. Point it at something substantial.'],
-         ['05','Explore Kings of Leon TV','An always-on home for catalogue, live, archive and the new record.']]
+      ${[['01','Keep the rhythm','Releases roughly eight days apart, premiered. 2024 already did this well.'],
+         ['02','Build one unmistakable hero moment','A single music video that opens the era, with nothing competing against it.'],
+         ['03','Connect the classics to the new record','Put it beside Sex on Fire and Use Somebody using playlists, the channel homepage and live.'],
+         ['04','Programme album week','One release-day moment, supporting assets across the following days, a live performance 7–14 days later.'],
+         ['05','Explore Kings of Leon TV','Keep the classics and the new record in the same place after release week ends.']]
         .map(([n,t,a])=>`
         <div class="rec">
           <div class="rec-n">${n}</div>
           <div><div class="rec-t">${t}</div><div class="rec-a">${a}</div></div>
         </div>`).join('')}
     </div>
+    <div class="flow stagger" style="margin-top:1.5rem">
+      ${[['Now','Reconnect'],['Hero','One clear moment'],['+7–14 days','Live performance'],
+         ['Album week','Programmed, not simultaneous'],['After','Keep it running']]
+        .map(([w,t],i)=>`<div class="flow-step${i===1||i===3?' key':''}">
+          <div class="flow-when">${w}</div><div class="flow-what">${t}</div></div>`).join('')}
+    </div>
+    <div class="lift reveal"><span class="lift-h">Little or no extra band time</span>
+      ${A.lowLift.map(x=>`<span class="lift-p">${x}</span>`).join('')}</div>
   </div>
 </section>`,
 
-/* 12 ── CLOSE ──────────────────────────────────────────────────── */
+/* 11 ── CLOSE ──────────────────────────────────────────────────── */
 `<section class="slide" data-t="Close">
   <div class="bleed"><img src="${hero(A.heroImages.close)}" alt=""
     onerror="this.src='${thumb(A.heroImages.close)}'"></div>
@@ -825,7 +876,8 @@ function slides(){ return [
       The audience is<br>already here.<br>
       <span style="color:var(--signal)">Give them a way in.</span></h2>
     <p class="statement reveal" style="margin-top:1.6rem;color:rgba(239,234,227,.8);max-width:34ch">
-      <span id="liveLifetime2">${fmt(C.lifetimeViews)}</span> views later, the next chapter shouldn't start from zero.</p>
+      <span id="liveLifetime2">${fmt(C.lifetimeViews)}</span> views later, the next chapter
+      shouldn't start from zero.</p>
   </div>
 </section>`,
 
