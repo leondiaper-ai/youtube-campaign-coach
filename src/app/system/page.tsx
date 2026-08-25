@@ -1,8 +1,31 @@
 import type { Metadata } from 'next';
 
+/**
+ * Metadata is overridden rather than inherited. The site-wide defaults are
+ * internal-facing ("YouTube Campaign Coach", site name "Decision System") and
+ * this link gets pasted into email and chat by people sharing it with YouTube,
+ * so the unfurled preview needs to say Virgin Music, not the tool's name.
+ * `title.absolute` also suppresses the "— Decision System" template suffix.
+ */
+const SHARE_TITLE = 'Virgin Music × YouTube';
+const SHARE_DESC =
+  'Using YouTube API data to monitor a growing pool of artist channels, surface emerging activity and turn those signals into campaign action.';
+
 export const metadata: Metadata = {
-  title: 'Virgin Music × YouTube — the system',
-  description: 'From roster activity to actionable YouTube strategy.',
+  title: { absolute: SHARE_TITLE },
+  description: SHARE_DESC,
+  openGraph: {
+    title: SHARE_TITLE,
+    description: SHARE_DESC,
+    siteName: 'Virgin Music Group',
+    url: 'https://youtube-campaign-coach.vercel.app/system',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SHARE_TITLE,
+    description: SHARE_DESC,
+  },
 };
 
 /**
