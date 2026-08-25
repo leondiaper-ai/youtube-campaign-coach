@@ -388,44 +388,42 @@ const ARTIST = {
   /* Current publishing signal, from the monitored channel record. */
   now:{ uploads30d:8, shorts30d:8, lastLongform:'9 July 2026' },
 
-  /* ── The Mustang campaign as this campaign's benchmark ──────────────────
-     Album dates are evidenced, not assumed:
-       2024-05-10 — 10 long-form album assets published that single day
-                    (9 track lyric videos + the Nowhere to Run music video)
-       2026-09-10 — two independent countdown Shorts agree:
-                    12 Aug "29 days 'til…" and 17 Aug "24 days 'til…"
+  /* ── The Mustang campaign, as planning intel for the next one ──────────
+     No new campaign has started, so nothing here compares "now" against 2024.
+     This is the last album campaign measured on its own terms, so the next one
+     has numbers to beat.
+
+     Album date 2024-05-10 is evidenced, not assumed: ten long-form album assets
+     were published that single day (nine track lyric videos + the Nowhere to
+     Run music video).
+
      A "destination" is any upload of 100 seconds or more — a real watch
-     destination rather than a vertical social post. The same rule is applied
-     to both campaigns, so neither side gets credit for announcement clips.  */
-  benchmark:{
-    album24:'10 May 2024', album26:'10 Sep 2026', tMinus:16,
-    daysSinceLongform:47,
-    /* Matched window: album-152d through album-16d, both campaigns. */
-    matched:{
-      d24:6, d26:1,        // content destinations (>=100s)
-      mv24:2, mv26:0,      // premiered music videos
-      up24:44, up26:12,    // all uploads
-    },
-    /* What 2024 published in that same stretch, by days before album. */
-    ladder24:[
-      ['T-78','Mustang — official music video','1.71m'],
-      ['T-59','Mustang — Live on The Tonight Show','163k'],
-      ['T-57','Mustang — official lyric video','107k'],
-      ['T-42','Split Screen — official lyric video','762k'],
-      ['T-21','Nothing To Do — official video','612k'],
-      ['T-16','Nothing To Do — lyric video','51k'],
+     destination rather than a vertical social post.
+     Premieres are counted only where the API returns BOTH a scheduled and an
+     actual start time, which confirms the broadcast happened.                */
+  mustang:{
+    album:'10 May 2024', totalDest:26, totalViews:'9.5m',
+    phases:[
+      ['Run-up','T-152 → T-1',6,'3.4m','387k'],
+      ['Album day','10 May',10,'2.6m','110k'],
+      ['After','T+1 → T+120',10,'3.5m','264k'],
     ],
-    ladder26:[['T-67','A tour thank-you post','13k']],
-    /* The 2024 campaign shape, as five targets. */
+    formats:[
+      ['Music video',10,'6.8m','511k'],
+      ['Lyric video',12,'1.9m','106k'],
+      ['Live / session',3,'460k','163k'],
+      ['Visualiser',1,'380k','380k'],
+    ],
+    mvShare:71, premieres:7, leadSingle:'T-78', leadViews:'1.71m',
+    medianGap:8, longestGap:28,
+    dumpMv:'1.66m', dumpLyric:'961k', dumpN:9,
     targets:[
-      ['01','Lead the album with a music video','Mustang landed 78 days before release and did 1.71m — the campaign’s single biggest asset.','T-78'],
-      ['02','Six destinations before release','Music video, live performance, two lyric videos, second music video, second lyric video.','6'],
-      ['03','Make album day a full day','Ten long-form assets published on 10 May 2024 — every track, plus a music video.','10'],
-      ['04','Keep going after release','Ten more destinations across the following four months, through to M Television in October.','10'],
-      ['05','Never leave a long gap','Median eight days between destinations across the whole campaign. Longest gap: 28 days.','8 days'],
+      ['01','Lead with a music video, early','Mustang landed 78 days before release and returned 1.71m — the biggest single asset of the campaign.','T-78'],
+      ['02','Music videos carry the campaign','Ten music videos returned 6.8m of the 9.5m total. A typical one did 511k against 106k for a typical lyric video.','71%'],
+      ['03','Premiere the hero moments','Seven premieres, all on music videos, all confirmed as aired. This part is already a strength.','7'],
+      ['04','Keep publishing after release','Ten destinations across the four months after the album returned 3.5m — more than the run-up did.','3.5m'],
+      ['05','Never leave a long gap','Median eight days between destinations across the whole campaign. The longest gap was 28 days.','8 days'],
     ],
-    /* The encouraging half: most of 2024's output came on album day or later. */
-    stillAhead:20, totalDest:26,
   },
 
   /* Real YouTube Station product reference. */
@@ -829,52 +827,46 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 15b ── SAME POINT, LAST ALBUM ────────────────────────────────── */
-`<section class="slide" data-t="Same point, last album">
+/* 15b ── THE LAST CAMPAIGN, IN FULL ────────────────────────────── */
+`<section class="slide" data-t="The last campaign">
   <div class="inner">
-    <div class="label reveal">Mustang, 2024 · this campaign, 2026 — measured at the same point</div>
-    <h2 class="display big reveal" style="max-width:19ch">Sixteen days out.<br>Last time, six things<br>had already landed.</h2>
-    <div class="vs stagger">
-      <div class="vs-col">
-        <div class="vs-yr">Mustang · album 10 May 2024</div>
-        <div class="vs-n">${A.benchmark.matched.d24}</div>
-        <div class="vs-lab">watch destinations published by this point,<br>including ${A.benchmark.matched.mv24} premiered music videos</div>
-        <ul class="vs-list">${A.benchmark.ladder24
-          .map(([t,n,v])=>`<li><span class="vs-t">${t}</span><span>${n}</span><span class="vs-v">${v}</span></li>`).join('')}</ul>
-      </div>
-      <div class="vs-col now">
-        <div class="vs-yr">This campaign · album 10 Sep 2026</div>
-        <div class="vs-n">${A.benchmark.matched.d26}</div>
-        <div class="vs-lab">watch destination${A.benchmark.matched.d26===1?'':'s'} published by this point,<br>and no music videos</div>
-        <ul class="vs-list">${A.benchmark.ladder26
-          .map(([t,n,v])=>`<li><span class="vs-t">${t}</span><span>${n}</span><span class="vs-v">${v}</span></li>`).join('')}</ul>
-        <p class="vs-none">${A.benchmark.daysSinceLongform} days since the last long-form upload.
-          The ten uploads in that stretch were all Shorts.</p>
-      </div>
+    <div class="label reveal">Mustang · album ${A.mustang.album} · the campaign to beat</div>
+    <h2 class="display big reveal" style="max-width:20ch">${A.mustang.totalDest} releases.<br>${A.mustang.totalViews} views.<br>Here is where they came from.</h2>
+    <div class="vs stagger" style="grid-template-columns:repeat(3,1fr)">
+      ${A.mustang.phases.map(([name,when,n,views,med])=>`
+        <div class="vs-col">
+          <div class="vs-yr">${name} · ${when}</div>
+          <div class="vs-n">${n}</div>
+          <div class="vs-lab">destinations published</div>
+          <ul class="vs-list">
+            <li><span>Views returned</span><span class="vs-v">${views}</span></li>
+            <li><span>Typical asset</span><span class="vs-v">${med}</span></li>
+          </ul>
+        </div>`).join('')}
     </div>
-    <p class="sub reveal">Both columns count uploads of 100 seconds or more, so neither side is
-      credited for vertical social posts. The 2024 campaign is the fairest benchmark available —
-      same channel, same audience, same catalogue behind it.</p>
+    <p class="sub reveal">The run-up published six things and returned 3.4m. Album day published ten
+      and returned 2.6m — <strong>the one music video that day out-drew all ${A.mustang.dumpN} lyric
+      videos beside it</strong> (${A.mustang.dumpMv} against ${A.mustang.dumpLyric} combined).
+      The four months after release returned more than the run-up did.</p>
   </div>
 </section>`,
 
-/* 15c ── THE 2024 SHAPE ────────────────────────────────────────── */
-`<section class="slide light" data-t="The benchmark">
+/* 15c ── WHAT TO BEAT ──────────────────────────────────────────── */
+`<section class="slide light" data-t="What to beat">
   <div class="inner">
-    <div class="label reveal">What good looked like, in their own hands</div>
-    <h2 class="display big reveal" style="max-width:18ch">They already know<br>how to do this.</h2>
+    <div class="label reveal">Benchmarks for the next campaign, from their own last one</div>
+    <h2 class="display big reveal" style="max-width:18ch">Five numbers<br>to build against.</h2>
     <div class="bm stagger">
-      ${A.benchmark.targets.map(([n,t,d,v])=>`
+      ${A.mustang.targets.map(([n,t,d,v])=>`
         <div class="bm-row">
           <div class="bm-n">${n}</div>
           <div><div class="bm-t">${t}</div><div class="bm-d">${d}</div></div>
           <div class="bm-v">${v}</div>
         </div>`).join('')}
     </div>
-    <p class="sub reveal"><strong>${A.benchmark.stillAhead} of the
-      ${A.benchmark.totalDest} destinations in the 2024 campaign came on album day or after.</strong>
-      The pre-release window is mostly spent — but the larger half of what worked last time
-      is still completely available.</p>
+    <p class="sub reveal">Every figure counts uploads of 100 seconds or more, so announcement clips
+      aren't credited as content. Premieres are counted only where YouTube confirms both a scheduled
+      and an actual start — all ${A.mustang.premieres} are verified as aired.</p>
   </div>
 </section>`,
 
