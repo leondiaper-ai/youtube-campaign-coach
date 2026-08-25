@@ -21,15 +21,17 @@ const STAGES = [
     name: 'Monitor',
     lede: 'A growing pool of relevant YouTube channels',
     body: 'We monitor a mix of priority projects, active YouTube campaigns and other relevant artist channels.',
-    note: 'Not every Virgin release has a YouTube strategy or significant YouTube activity. Priority projects can also be monitored specifically to identify where a stronger opportunity could exist.',
+    key: null as string | null,
+    note: 'Not every priority release will already have a YouTube strategy or significant platform activity. Priority projects can also be monitored to identify where a stronger YouTube opportunity could exist.',
     list: null as string[] | null,
   },
   {
     n: '02',
     name: 'Surface',
     lede: 'Activity determines what rises into focus',
-    body: 'Once an artist is in the monitored pool, the system tracks:',
+    body: 'Once an artist is in the monitored pool, the system tracks changes in:',
     list: ['Channel activity', 'Upload cadence', 'Views and momentum', 'Subscriber growth', 'Content behaviour'],
+    key: 'As activity and traction build, artists naturally rise into focus.',
     note: 'Attention isn’t determined solely by a fixed priority list. Channel behaviour can surface opportunities too.',
   },
   {
@@ -44,6 +46,7 @@ const STAGES = [
       'Where campaign gaps or opportunities exist',
       'What appears to be working repeatedly',
     ],
+    key: null,
     note: null,
   },
   {
@@ -58,6 +61,7 @@ const STAGES = [
       'Where YouTube strategy could be strengthened',
       'Where additional support may be valuable',
     ],
+    key: null,
     note: null,
   },
 ];
@@ -82,7 +86,7 @@ const CARDS = [
   {
     kicker: 'Weekly priorities',
     title: 'YouTube Weekly Priority View',
-    body: 'The weekly view: highlighting the artists, campaigns and releases where YouTube activity or opportunity is particularly relevant right now.',
+    body: 'The weekly view: highlighting key active campaigns and projects where YouTube support, activity or opportunity is particularly relevant right now.',
     cta: 'View weekly priorities',
     href: '/weekly-pulse/campaign-briefing',
     external: false,
@@ -113,6 +117,8 @@ export default function SystemPage() {
         .sys-list li{font-size:.8rem;line-height:1.5;color:#5C5C5C;padding:.16rem 0 .16rem .8rem;position:relative}
         .sys-list li::before{content:'';position:absolute;left:0;top:.62rem;width:3px;height:3px;border-radius:50%;background:${RED};opacity:.7}
         .sys-note{font-size:.74rem;line-height:1.55;color:#8A8A8A;margin-top:.85rem;padding-top:.75rem;border-top:1px solid #EFEFEF}
+        .sys-key{font-size:.9rem;font-weight:700;line-height:1.45;color:#111;margin-top:.9rem}
+        .sys-stage-key .sys-name{color:${RED}}
 
         .sys-flowline{display:flex;align-items:center;justify-content:center;gap:.9rem;
           padding:2.6rem 0 4.5rem;flex-wrap:wrap}
@@ -153,8 +159,8 @@ export default function SystemPage() {
           <h1 className="sys-h1">Virgin Music × YouTube</h1>
           <p className="sys-lede">From roster activity to actionable YouTube strategy</p>
           <p className="sys-sub">
-            A growing monitoring system designed to help identify where YouTube activity is building,
-            understand what is driving it, and turn those signals into campaign action.
+            Using YouTube API data to monitor a growing pool of artist channels, surface emerging
+            activity and turn those signals into campaign action.
           </p>
         </div>
       </div>
@@ -165,7 +171,7 @@ export default function SystemPage() {
       <div className="sys-wrap">
         <div className="sys-stages">
           {STAGES.map((s) => (
-            <div className="sys-stage" key={s.n}>
+            <div className={`sys-stage${s.key ? ' sys-stage-key' : ''}`} key={s.n}>
               <div className="sys-num">{s.n}</div>
               <div className="sys-name">{s.name}</div>
               <div className="sys-stage-lede">{s.lede}</div>
@@ -175,6 +181,7 @@ export default function SystemPage() {
                   {s.list.map((x) => <li key={x}>{x}</li>)}
                 </ul>
               )}
+              {s.key && <p className="sys-key">{s.key}</p>}
               {s.note && <p className="sys-note">{s.note}</p>}
             </div>
           ))}
@@ -218,13 +225,9 @@ export default function SystemPage() {
         <div className="sys-scope">
           <div className="sys-scope-h">Current scope</div>
           <p>
-            The monitored pool does not yet represent the entire Virgin Music roster. Channels are
-            continually added as new campaigns arrive, projects become priorities or YouTube activity
-            becomes relevant.
-          </p>
-          <p>
-            Once an artist is in the monitored pool, changing activity and traction can automatically
-            influence how prominently they surface for attention.
+            The monitored pool is continually expanding as new campaigns arrive, projects become
+            priorities or YouTube activity becomes relevant. Once monitored, changing activity and
+            traction helps determine what rises into focus.
           </p>
         </div>
       </div>
