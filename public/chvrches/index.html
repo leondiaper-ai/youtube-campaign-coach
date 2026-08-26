@@ -189,6 +189,21 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
   .swall{grid-template-columns:repeat(2,1fr)}
   .split{grid-template-columns:1fr;gap:1.6rem}
 }
+/* ── Station: the reference, and the always-on run ───────────────── */
+.ref{display:block;border:1px solid var(--hair);border-radius:12px;overflow:hidden;
+  text-decoration:none;color:inherit;background:rgba(243,241,247,.03);transition:border-color .18s}
+.ref:hover{border-color:var(--cyan)}
+.ref img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.ref-b{padding:.85rem 1rem}
+.ref-k{font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.ref-t{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;margin-top:.25rem}
+.ref-d{font-size:.68rem;color:var(--smoke);line-height:1.5;margin-top:.3rem}
+.sw.nu{outline:2px solid var(--signal);outline-offset:-2px}
+.sw.nu::after{background:linear-gradient(to top,rgba(255,45,120,.55),transparent 62%)}
+.sw-n{position:absolute;top:.3rem;left:.35rem;z-index:3;font-size:.48rem;font-weight:700;
+  letter-spacing:.1em;background:var(--signal);color:#fff;padding:.1rem .34rem;border-radius:3px}
+.run{display:flex;align-items:center;gap:.5rem;margin-top:.9rem;font-size:.6rem;color:var(--smoke)}
+.run i{width:10px;height:10px;border-radius:2px;display:inline-block}
 .srcbar{margin-top:1.5rem;padding-top:.8rem;border-top:1px solid var(--hair)}
 .slide.light .srcbar{border-top-color:var(--bone)}
 .src{font-size:.6rem;color:var(--smoke);letter-spacing:.03em}
@@ -358,15 +373,19 @@ const ARTIST = {
   /* Real YouTube Station reference. */
   station:{
     id:'1fz60gNnSdU', label:'Metallica TV',
+    /* The backbone is catalogue. New material is dropped into the run
+       rather than replacing it — that is the whole point of always-on. */
     wall:[
       {id:'_mTRvJ9fugM',t:'The Mother We Share'},
       {id:'fGiqCmZvkJ8',t:'Live at House of Vans'},
+      {id:'RntlEwS6os8',t:'CHV5',nu:true},
       {id:'BZyzX4c1vIs',t:'Clearest Blue'},
       {id:'7U_LhzgwJ4U',t:'How Not To Drown'},
+      {id:'4Eo84jDIMKI',t:'Leave A Trace'},
+      {id:'SLfeY3TSDkg',t:'New single',nu:true},
       {id:'e1YqueG2gtQ',t:'Miracle'},
       {id:'Wr2fl9WNkvo',t:'Ancienne Belgique'},
-      {id:'4Eo84jDIMKI',t:'Leave A Trace'},
-      {id:'RntlEwS6os8',t:'CHV5'},
+      {id:'B9BLMNn0PrQ',t:'Bury It'},
     ],
   },
 
@@ -571,27 +590,41 @@ function slides(){ return [
   ${bleedImg(A.heroImages.station)}
   <div class="inner">
     <div class="label reveal">An opportunity to explore with YouTube</div>
-    <h2 class="display big reveal" style="max-width:15ch">CHVRCHES TV</h2>
-    <p class="statement reveal" style="margin-top:.7rem;max-width:34ch;color:var(--cyan)">
-      Catalogue × live × archive × CHV5</p>
-    <div class="swall stagger">
-      ${A.station.wall.map(v=>`
-        <div class="sw"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
-          <div class="sw-t">${esc(v.t)}</div></div>`).join('')}
-    </div>
-    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:26ch">
-      ${fmt(A.dormant.perDay)} views arrive every day.<br>
-      <span style="color:var(--signal)">Give them somewhere to go next.</span></h3>
-    <div style="display:flex;gap:1rem;align-items:center;margin-top:1.3rem;max-width:640px" class="reveal">
-      <a href="${yt(A.station.id)}" target="_blank" rel="noopener" style="flex:0 0 150px;display:block;
-        border-radius:7px;overflow:hidden;border:1px solid var(--hair)">
-        <img src="${thumb(A.station.id)}" alt="${esc(A.station.label)}" style="width:100%;display:block">
+    <h2 class="display big reveal" style="max-width:24ch">A channel that's on<br>
+      <span style="color:var(--signal)">even when nobody's working on it.</span></h2>
+    <div style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1.6rem;
+      align-items:center;margin-top:1.5rem" class="stagger">
+      <a class="ref" href="${yt(A.station.id)}" target="_blank" rel="noopener">
+        <img src="${hero(A.station.id)}" alt="${esc(A.station.label)}" onerror="${FB(A.station.id)}">
+        <div class="ref-b"><div class="ref-k">The format is real</div>
+          <div class="ref-t">${esc(A.station.label)}</div>
+          <div class="ref-d">A YouTube Station already running — a continuous, programmed channel
+            built from an artist's own catalogue.</div></div>
       </a>
-      <p class="src" style="font-size:.63rem;line-height:1.55">
-        <strong style="color:var(--paper)">${esc(A.station.label)}</strong> — a YouTube Station already
-        running, so the format is real. Stations is an emerging / beta product: eligibility and access
-        would need discussing with YouTube. This is an opportunity to explore, not something we launch alone.</p>
+      <div>
+        <div class="split" style="margin-top:0;gap:1.6rem">
+          <div><div class="huge" style="font-size:clamp(2.6rem,6vw,4.6rem)">${fmt(A.dormant.perDay)}</div>
+            <div class="huge-l">views arriving daily</div></div>
+          <div><div class="huge" style="font-size:clamp(2.6rem,6vw,4.6rem);color:var(--signal)">${A.dormant.annualised}</div>
+            <div class="huge-l">a year, with no campaign on</div></div>
+        </div>
+        <p class="sub" style="margin-top:1.1rem">That traffic never stops, so the programming shouldn't
+          either. <strong>The catalogue is the backbone — it runs continuously.</strong> New material gets
+          dropped into the run as it arrives rather than launching into silence and disappearing again.</p>
+      </div>
     </div>
+    <div class="swall stagger" style="grid-template-columns:repeat(5,1fr)">
+      ${A.station.wall.map(v=>`
+        <div class="sw${v.nu?' nu':''}"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+          ${v.nu?'<div class="sw-n">NEW</div>':''}<div class="sw-t">${esc(v.t)}</div></div>`).join('')}
+    </div>
+    <div class="run reveal">
+      <span><i style="background:var(--smoke)"></i></span> Catalogue · always running
+      <span style="margin-left:.7rem"><i style="background:var(--signal)"></i></span> New music · peppered through the run
+    </div>
+    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging / beta product.
+      Eligibility and access would need discussing with YouTube — an opportunity to explore,
+      not something we launch alone.</span></div>
   </div>
 </section>`,
 
