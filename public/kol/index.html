@@ -710,29 +710,32 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 06 ── PROGRAMME THE ALBUM ────────────────────────────────────── */
-`<section class="slide coal" data-t="Programme the album">
+/* 06 ── RELEASE, THEN KEEP PROGRAMMING ─────────────────────────── */
+`<section class="slide coal" data-t="Keep programming it">
   <div class="inner">
-    <div class="label reveal">The clearest practical lesson from 2024</div>
-    <h2 class="display big reveal" style="max-width:17ch">Don't just release<br>the album.<br>
-      <span style="color:var(--signal)">Programme it.</span></h2>
-    <p class="sub reveal" style="margin-top:.9rem">Ten long-form assets published on album day, ${A.last.album}.</p>
-    <div class="vs stagger" style="grid-template-columns:repeat(2,1fr);margin-top:1.2rem;max-width:720px">
+    <div class="label reveal">The most useful lesson from 2024</div>
+    <h2 class="display big reveal" style="max-width:17ch">Release the album.<br>
+      <span style="color:var(--signal)">Then keep programming it.</span></h2>
+    <p class="sub reveal" style="margin-top:.9rem">Album day — ${A.last.album}</p>
+    <div class="vs stagger" style="grid-template-columns:repeat(2,1fr);margin-top:1rem;max-width:720px">
       <div class="vs-col"><div class="vs-n">${A.last.dayMv}</div>
-        <div class="vs-lab">Nowhere to Run — the one music video</div></div>
-      <div class="vs-col now"><div class="vs-n">${A.last.dayLyric}</div>
-        <div class="vs-lab">All ${A.last.dayLyricN} lyric videos combined</div></div>
+        <div class="vs-lab">Nowhere to Run — official music video</div></div>
+      <div class="vs-col"><div class="vs-n">${A.last.dayLyric}</div>
+        <div class="vs-lab">${A.last.dayLyricN} lyric videos combined</div></div>
     </div>
-    <div class="jr stagger" style="margin-top:1.4rem">
-      ${[['01','One hero moment on release day','The music video, premiered, with nothing competing against it'],
-         ['02','Supporting assets across the week','Lyric videos and visuals spread out, each getting its own day'],
-         ['03','A live performance 7–14 days later','While people are still arriving from the hero video']]
+    <p class="sub reveal" style="margin-top:.9rem">The full album had a YouTube destination on day one.
+      The hero video drew the biggest single audience. Two different jobs.</p>
+    <div class="jr stagger" style="margin-top:1.3rem">
+      ${[['Day 0','Release the record','Hero music video plus every song available. Give the whole album a home.'],
+         ['Days 3–7','Watch what moves','Which songs gain traction, how Shorts perform, where the comments go.'],
+         ['Days 7–14','Build the second wave','Live performance, a visual, Shorts — behind the songs showing demand.'],
+         ['Weeks 2–4','Keep backing the winners','Continue programming around what audiences are actually responding to.']]
         .map(([n,t,d],i)=>`${i?'<div class="jr-ar">↓</div>':''}
-        <div class="jr-s${i===0?' key':''}"><div class="jr-n">${n}</div>
+        <div class="jr-s${i===2?' key':''}"><div class="jr-n">${n}</div>
           <div><div class="jr-t">${t}</div><div class="jr-d">${d}</div></div></div>`).join('')}
     </div>
-    <p class="sub reveal">We can't say spreading them out would have raised the total. The point is that
-      one moment can carry a week, and nine assets on one morning compete with each other.</p>
+    <h3 class="display mid reveal" style="margin-top:1.3rem">Day one gives every song a destination.<br>
+      <span style="color:var(--signal)">What happens next should follow the audience.</span></h3>
   </div>
 </section>`,
 
@@ -846,9 +849,9 @@ function slides(){ return [
     <h2 class="display big reveal" style="margin-bottom:1.3rem">What we'd do.</h2>
     <div class="stagger">
       ${[['01','Keep the rhythm','Releases roughly eight days apart, premiered. 2024 already did this well.'],
-         ['02','Build one unmistakable hero moment','A single music video that opens the era, with nothing competing against it.'],
+         ['02','Build one unmistakable hero moment','A single music video that opens the era and carries the launch.'],
          ['03','Connect the classics to the new record','Put it beside Sex on Fire and Use Somebody using playlists, the channel homepage and live.'],
-         ['04','Programme album week','One release-day moment, supporting assets across the following days, a live performance 7–14 days later.'],
+         ['04','Programme album week','Give every song a destination on day one, then build the second wave around what the audience responds to.'],
          ['05','Explore Kings of Leon TV','Keep the classics and the new record in the same place after release week ends.']]
         .map(([n,t,a])=>`
         <div class="rec">
