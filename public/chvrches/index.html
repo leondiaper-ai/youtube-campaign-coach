@@ -130,6 +130,60 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .lift-p{font-size:.62rem;padding:.2rem .55rem;border:1px solid var(--hair);border-radius:20px;color:var(--smoke)}
 .slide.light .lift-p{border-color:var(--bone)}
 
+/* ── Full-bleed statement slides ─────────────────────────────────── */
+.huge{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:.86;letter-spacing:-.03em;
+  font-size:clamp(4.5rem,15vw,13rem)}
+.huge-l{font-size:clamp(.75rem,1.5vw,1.05rem);font-weight:500;color:var(--smoke);
+  letter-spacing:.02em;margin-top:.3rem}
+.split{display:grid;grid-template-columns:repeat(2,1fr);gap:2.5rem;align-items:end;margin-top:1rem}
+
+/* ── Catalogue mosaic ────────────────────────────────────────────── */
+.mosaic{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:1.6rem}
+.mo{position:relative;border-radius:8px;overflow:hidden;display:block;text-decoration:none;color:inherit}
+.mo img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;transition:transform .3s}
+.mo:hover img{transform:scale(1.04)}
+.mo::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,7,13,.92) 0%,rgba(8,7,13,.15) 55%,transparent 100%)}
+.mo-m{position:absolute;left:.7rem;right:.7rem;bottom:.6rem;z-index:2}
+.mo-t{font-size:.72rem;font-weight:600;color:#fff;line-height:1.25}
+.mo-v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.25rem;color:var(--signal);line-height:1.1}
+
+/* ── Campaign sequence ───────────────────────────────────────────── */
+.seq{display:flex;align-items:stretch;gap:.5rem;margin-top:1.6rem;flex-wrap:wrap}
+.seq-i{flex:1 1 150px;position:relative;border-radius:8px;overflow:hidden}
+.seq-i img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.seq-i::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,7,13,.9),transparent 62%)}
+.seq-m{position:absolute;left:.55rem;right:.55rem;bottom:.45rem;z-index:2}
+.seq-d{font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--signal)}
+.seq-t{font-size:.68rem;font-weight:600;color:#fff;line-height:1.25;margin-top:.1rem}
+.seq-v{font-size:.6rem;color:rgba(243,241,247,.72)}
+.seq-ar{align-self:center;color:var(--signal);font-size:1.05rem}
+
+/* ── Format jobs with real frames ────────────────────────────────── */
+.jobs{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1.6rem}
+.job{border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:rgba(243,241,247,.03)}
+.slide.light .job{border-color:var(--bone);background:#fff}
+.job.key{border-color:var(--signal)}
+.job img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.job-b{padding:.7rem .8rem}
+.job-n{font-size:.56rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.job.key .job-n{color:var(--signal)}
+.job-t{font-size:.85rem;font-weight:700;line-height:1.25;margin-top:.2rem}
+.job-d{font-size:.65rem;color:var(--smoke);line-height:1.45;margin-top:.25rem}
+
+/* ── Station wall ────────────────────────────────────────────────── */
+.swall{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:1.4rem}
+.sw{position:relative;border-radius:5px;overflow:hidden}
+.sw img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.sw::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,13,.85),transparent 60%)}
+.sw-t{position:absolute;left:.4rem;bottom:.3rem;z-index:2;font-size:.55rem;font-weight:600;color:#fff}
+
+@media(max-width:860px){
+  .mosaic,.jobs{grid-template-columns:repeat(2,1fr)}
+  .swall{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr;gap:1.6rem}
+}
 .srcbar{margin-top:1.5rem;padding-top:.8rem;border-top:1px solid var(--hair)}
 .slide.light .srcbar{border-top-color:var(--bone)}
 .src{font-size:.6rem;color:var(--smoke);letter-spacing:.03em}
@@ -288,18 +342,27 @@ const ARTIST = {
 
   /* Different formats, different jobs. */
   jobs:[
-    ['Official music video','Create the big moments','Used selectively, around the priority singles. Still 73.6% of visible viewing.'],
-    ['Lyric video','A proven long-form home for a song','Lower lift, historically strong here. Ready to deploy around singles and album tracks.'],
-    ['Pre-party + Premiere','Bring the core fans together','Already a CHVRCHES habit. Four singles, four pre-parties, all confirmed.'],
-    ['Live','Deepen the world','15 assets and 5 full sets already on the channel. Use the archive; capture new selectively.'],
-    ['Shorts','Entry points and texture','38 uploads, 0.4% of views. They start journeys well — they are not the destination.'],
-    ['Community + programming','Reconnect before release','Homepage, playlists and posts reach the existing audience without a shoot.'],
+    ['7U_LhzgwJ4U','Official music video','The hero moment','Around the priority singles. Still 73.6% of visible viewing.'],
+    ['fB4gjiMVKFI','Lyric video','Proven long-form support','Lower lift, historically strong here. Ready across singles and album tracks.'],
+    ['0XoMu7Bz7YE','Pre-party + Premiere','Bring the core fans together','Four singles, four pre-parties, all confirmed.'],
+    ['fGiqCmZvkJ8','Live','Deepen the world','15 assets, 5 full sets, already on the channel.'],
+    ['e68Wy_z9mzw','Shorts','Create entry points','They start journeys well. They are not the destination.'],
+    ['SLfeY3TSDkg','Community + programming','Reconnect before release','Reach the existing audience without a shoot.'],
   ],
 
   /* Real YouTube Station reference. */
   station:{
     id:'1fz60gNnSdU', label:'Metallica TV',
-    wall:['_mTRvJ9fugM','4Eo84jDIMKI','BZyzX4c1vIs','e1YqueG2gtQ','B9BLMNn0PrQ','fGiqCmZvkJ8'],
+    wall:[
+      {id:'_mTRvJ9fugM',t:'The Mother We Share'},
+      {id:'fGiqCmZvkJ8',t:'Live at House of Vans'},
+      {id:'BZyzX4c1vIs',t:'Clearest Blue'},
+      {id:'7U_LhzgwJ4U',t:'How Not To Drown'},
+      {id:'e1YqueG2gtQ',t:'Miracle'},
+      {id:'Wr2fl9WNkvo',t:'Ancienne Belgique'},
+      {id:'4Eo84jDIMKI',t:'Leave A Trace'},
+      {id:'RntlEwS6os8',t:'CHV5'},
+    ],
   },
 
   /* Screen Violence -> CHV5, as an evolution rather than a correction. */
@@ -313,7 +376,24 @@ const ARTIST = {
     ['Always on','CHVRCHES Station','Catalogue, live and CHV5 in one place, between campaigns as well as during'],
   ],
 
-  heroImages:{ open:'4Eo84jDIMKI', close:'_mTRvJ9fugM' },
+  heroImages:{ open:'4Eo84jDIMKI', quiet:'BZyzX4c1vIs', sv:'7U_LhzgwJ4U',
+                party:'0XoMu7Bz7YE', live:'fGiqCmZvkJ8', station:'e1YqueG2gtQ',
+                close:'_mTRvJ9fugM' },
+
+  /* The Screen Violence campaign as a visual sequence. */
+  svSeq:[
+    {id:'fyyiJc0Wk2M',t:'He Said She Said',v:2876339,d:'22 Apr'},
+    {id:'7U_LhzgwJ4U',t:'How Not To Drown',v:7993559,d:'3 Jun'},
+    {id:'du4kNAyjVCg',t:'Good Girls',v:4596808,d:'15 Jul'},
+    {id:'ixhWUXZJsDw',t:'Screen Violence — release day',v:1304823,d:'27 Aug'},
+  ],
+
+  /* The ritual, in the order a fan experiences it. */
+  ritual:[
+    {id:'0XoMu7Bz7YE',t:'Pre-party',d:'19 minutes, live, before anything drops'},
+    {id:'7U_LhzgwJ4U',t:'Premiere',d:'Everyone watching the same thing at the same moment'},
+    {id:'du4kNAyjVCg',t:'The video',d:'Then it belongs to everyone else'},
+  ],
 
   canSee:['Public subscriber and view totals','Upload history and cadence','Format mix',
     'Public video performance','Premiere confirmation','Campaign sequencing','Public engagement'],
@@ -354,95 +434,84 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 02 ── THE AUDIENCE DIDN'T LEAVE ──────────────────────────────── */
-`<section class="slide coal" data-t="The audience stayed">
+/* 02 ── 340 DAYS ──────────────────────────────────────────────── */
+`<section class="slide" data-t="340 days">
+  <div class="bleed"><img src="${hero(A.heroImages.quiet)}" alt=""
+    onerror="this.src='${thumb(A.heroImages.quiet)}'"></div>
   <div class="inner">
     <div class="label reveal">Where we start from</div>
-    <h2 class="display big reveal" style="max-width:19ch">The channel has been quiet<br>
-      for <span style="color:var(--signal)">${A.dormant.daysSilent} days.</span></h2>
-    <div class="cols stagger" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card"><div class="c-h">Last upload</div>
-        <div class="c-n">${A.dormant.lastUpload.split(' ')[0]} ${A.dormant.lastUpload.split(' ')[1]}</div>
-        <div class="c-l">${A.dormant.lastUpload.split(' ')[2]} — a Short, no long-form since</div></div>
-      <div class="card key"><div class="c-h">Still arriving, every day</div>
-        <div class="c-n">${fmt(A.dormant.perDay)}</div>
-        <div class="c-l">views a day across the last ${A.dormant.windowDays} days, with nothing published</div></div>
-      <div class="card cy"><div class="c-h">At that rate</div>
-        <div class="c-n">${A.dormant.annualised}</div>
-        <div class="c-l">views a year from the catalogue on its own</div></div>
+    <div class="split stagger">
+      <div>
+        <div class="huge">${A.dormant.daysSilent}</div>
+        <div class="huge-l">days without an upload</div>
+      </div>
+      <div>
+        <div class="huge" style="color:var(--signal)">${fmt(A.dormant.perDay)}</div>
+        <div class="huge-l">views a day, still arriving</div>
+      </div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.8rem">The audience didn't leave.<br>
-      <span style="color:var(--signal)">They're still showing up.</span></h3>
-    <div class="srcbar reveal"><span class="src">YouTube Data API v3 · retrieved ${A.meta.capturedAt} ·
-      no YouTube Studio data used</span></div>
+    <h3 class="display mid reveal" style="margin-top:2.2rem">The audience didn't leave.<br>
+      They're still showing up.</h3>
   </div>
 </section>`,
 
-/* 03 ── A BROAD CATALOGUE ──────────────────────────────────────── */
+/* 03 ── MANY DOORS ────────────────────────────────────────────── */
 `<section class="slide light" data-t="Many doors">
   <div class="inner">
-    <div class="label reveal">What that audience is actually watching</div>
-    <h2 class="display big reveal" style="max-width:18ch">This isn't a<br>two-song catalogue.</h2>
-    <div class="bigthumbs stagger" style="grid-template-columns:repeat(3,1fr)">
-      ${A.topCatalogue.slice(0,3).map(v=>`
-        <a class="tcard" href="${yt(v.id)}" target="_blank" rel="noopener">
+    <div class="label reveal">What they're watching</div>
+    <h2 class="display big reveal" style="max-width:20ch">There isn't one way<br>into CHVRCHES.</h2>
+    <div class="mosaic stagger">
+      ${A.topCatalogue.map(v=>`
+        <a class="mo" href="${yt(v.id)}" target="_blank" rel="noopener">
           <img src="${thumb(v.id,'maxresdefault')}" alt="${esc(v.t)}" onerror="this.src='${thumb(v.id)}'">
-          <div class="tmeta"><div class="ttitle">${esc(v.t)}</div>
-            <div class="tviews">${fmt(v.v)}</div><div class="tsub">${v.y}</div></div>
+          <div class="mo-m"><div class="mo-v">${fmt(v.v)}</div><div class="mo-t">${esc(v.t)}</div></div>
         </a>`).join('')}
     </div>
-    <div class="cols stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.4rem">
-      ${[[pct(A.concentration[0].pct),'from the single biggest video'],
-         [pct(A.concentration[3].pct),'from the top ten'],
-         [pct(COVERAGE),'of lifetime views are in the catalogue we can see']]
-        .map(([n,l])=>`<div class="card"><div class="c-n">${n}</div><div class="c-l">${l}</div></div>`).join('')}
-    </div>
-    <p class="sub reveal">Ten videos carry ${pct(A.concentration[3].pct)} of the viewing, and no single track
-      dominates. That means several genuine ways in — not one song holding the door open for everything else.</p>
+    <p class="sub reveal">Six songs, four eras, ${pct(A.concentration[3].pct)} of all viewing in the top ten
+      — and the biggest single video is only ${pct(A.concentration[0].pct)} of it. Several real doors,
+      not one holding open for the rest.</p>
   </div>
 </section>`,
 
-/* 04 ── THE LAST ALBUM CAMPAIGN ────────────────────────────────── */
+/* 04 ── SCREEN VIOLENCE ───────────────────────────────────────── */
 `<section class="slide" data-t="Screen Violence">
+  <div class="bleed"><img src="${hero(A.heroImages.sv)}" alt=""
+    onerror="this.src='${thumb(A.heroImages.sv)}'"></div>
   <div class="inner">
-    <div class="label reveal">Screen Violence · ${A.last.opens} → ${A.last.album}</div>
-    <h2 class="display big reveal" style="max-width:21ch">Three singles.<br>
-      Three premieres.<br>Then the whole record in one day.</h2>
-    <div class="wall stagger" style="grid-template-columns:repeat(3,1fr)">
-      ${A.last.singles.map(s=>`
-        <div class="wc"><img src="${thumb(s.id)}" alt="${esc(s.t)}">
-          <div class="wl">${esc(s.t)} · ${fmt(s.v)}</div></div>`).join('')}
+    <div class="label reveal">The last album campaign · ${A.last.opens} → ${A.last.album}</div>
+    <h2 class="display big reveal" style="max-width:16ch">Three singles.<br>Three Premieres.<br>
+      <span style="color:var(--signal)">Then the whole record.</span></h2>
+    <div class="seq stagger">
+      ${A.svSeq.map((v,i)=>`
+        ${i?'<div class="seq-ar">→</div>':''}
+        <div class="seq-i"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+          <div class="seq-m"><div class="seq-d">${v.d}</div><div class="seq-t">${esc(v.t)}</div>
+            <div class="seq-v">${fmt(v.v)}</div></div></div>`).join('')}
     </div>
-    <div class="cols stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.3rem">
-      <div class="card"><div class="c-n">${A.last.lead}</div>
-        <div class="c-l">days from first single to album</div></div>
-      <div class="card"><div class="c-n">${A.last.albumDayAssets}</div>
-        <div class="c-l">album assets published on release day, ${A.last.albumDayViews} between them</div></div>
-      <div class="card key"><div class="c-n">${A.last.premieresConfirmed}</div>
-        <div class="c-l">confirmed Premieres across the channel — both a scheduled and an actual start time</div></div>
-    </div>
-    <p class="sub reveal">A clear, well-sequenced campaign. Every single premiered, and release day gave
-      the whole album a home on the channel at once.</p>
+    <p class="sub reveal">${A.last.lead} days from first single to release, and
+      ${A.last.albumDayAssets} album assets published on the day itself — ${A.last.albumDayViews}
+      between them. A clear, well-sequenced campaign.</p>
   </div>
 </section>`,
 
-/* 05 ── THE PRE-PARTY ──────────────────────────────────────────── */
-`<section class="slide coal" data-t="The pre-party">
+/* 05 ── THE RITUAL ────────────────────────────────────────────── */
+`<section class="slide coal" data-t="The ritual">
+  <div class="bleed"><img src="${hero(A.heroImages.party)}" alt=""
+    onerror="this.src='${thumb(A.heroImages.party)}'"></div>
   <div class="inner">
-    <div class="label reveal">Something they do that almost nobody else does</div>
-    <h2 class="display big reveal" style="max-width:18ch">They built a ritual<br>
-      <span style="color:var(--signal)">around the premiere.</span></h2>
-    <div class="jr stagger">
-      ${A.last.singles.concat([A.last.over]).map((s,i)=>`
-        <div class="jr-s${i===1?' key':''}"><div class="jr-n">${s.d}</div>
-          <div><div class="jr-t">${esc(s.t)} — ${fmt(s.v)}</div>
-            <div class="jr-d">Preceded by a ${s.party.min}-minute pre-party stream · ${fmt(s.party.v)} views</div></div>
-        </div>`).join('')}
+    <div class="label reveal">Something almost nobody else does</div>
+    <h2 class="display big reveal" style="max-width:19ch">They already built a room<br>
+      <span style="color:var(--signal)">for the core fans.</span></h2>
+    <div class="seq stagger">
+      ${A.ritual.map((v,i)=>`
+        ${i?'<div class="seq-ar">→</div>':''}
+        <div class="seq-i"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+          <div class="seq-m"><div class="seq-d">${esc(v.t)}</div>
+            <div class="seq-v">${esc(v.d)}</div></div></div>`).join('')}
     </div>
-    <p class="sub reveal">Four singles, four pre-parties, every one a confirmed Premiere. The parties draw
-      a small, committed audience — under 1% of what the video goes on to do. <strong>That is what makes them
-      useful: this is the room where the people who care most are already standing.</strong> Worth keeping,
-      and worth being clear-eyed about the job it does.</p>
+    <p class="sub reveal">Four singles, four pre-parties, every one a confirmed Premiere. They draw a
+      small, committed crowd — under 1% of what the video goes on to do.
+      <strong>That is the point: this is where the people who care most are already standing.</strong></p>
   </div>
 </section>`,
 
@@ -467,65 +536,59 @@ function slides(){ return [
       controlled for — so this isn't a like-for-like test. What it does show is that lyric videos are a
       proven part of the CHVRCHES YouTube language, and worth having ready across the campaign.
       Music videos remain ${pct(A.mvSharePct)} of visible viewing.</p>
+    <div class="srcbar reveal"><span class="src">All figures: YouTube Data API v3, retrieved
+      ${A.meta.capturedAt} · no YouTube Studio data used</span></div>
   </div>
 </section>`,
 
-/* 07 ── DIFFERENT FORMATS, DIFFERENT JOBS ─────────────────────── */
+/* 07 ── DIFFERENT JOBS ────────────────────────────────────────── */
 `<section class="slide" data-t="Different jobs">
+  <div class="bleed"><img src="${hero(A.heroImages.live)}" alt=""
+    onerror="this.src='${thumb(A.heroImages.live)}'"></div>
   <div class="inner">
     <div class="label reveal">The shape of the campaign</div>
     <h2 class="display big reveal" style="max-width:19ch">Don't ask one format<br>to do every job.</h2>
-    <div class="jr stagger">
-      ${A.jobs.map(([n,j,d],i)=>`
-        <div class="jr-s${i===0?' key':''}"><div class="jr-n" style="min-width:9.5rem">${n}</div>
-          <div><div class="jr-t">${j}</div><div class="jr-d">${d}</div></div></div>`).join('')}
+    <div class="jobs stagger">
+      ${A.jobs.map(([id,n,j,d],i)=>`
+        <div class="job${i===0?' key':''}">
+          <img src="${thumb(id)}" alt="${esc(n)}">
+          <div class="job-b"><div class="job-n">${n}</div><div class="job-t">${j}</div>
+            <div class="job-d">${d}</div></div>
+        </div>`).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:1.3rem;
-      align-items:center;margin-top:1.4rem" class="stagger">
-      <a class="tcard" href="${yt(A.live.top[0].id)}" target="_blank" rel="noopener">
-        <img src="${thumb(A.live.top[0].id,'maxresdefault')}" alt="${esc(A.live.top[0].t)}"
-          onerror="this.src='${thumb(A.live.top[0].id)}'">
-        <div class="tmeta"><div class="ttitle">${esc(A.live.top[0].t)}</div>
-          <div class="tviews">${fmt(A.live.top[0].v)}</div>
-          <div class="tsub">${A.live.top[0].mins} minutes · ${A.live.top[0].y}</div></div>
-      </a>
-      <p class="sub" style="margin:0">Live is the clearest example of a job already covered.
-        <strong>${A.live.n} live assets are on the channel and ${A.live.fullSets} are full-length sets</strong>,
-        including 101 minutes at House of Vans. Many heritage channels have only song-length clips.
-        This is material that can carry a campaign moment without the band filming anything new.</p>
-    </div>
+    <p class="sub reveal">Every one of these is already on the channel. Live alone runs to
+      <strong>${A.live.n} assets and ${A.live.fullSets} full-length sets</strong>, including 101 minutes
+      at House of Vans — hours of material that can reopen the channel without the band filming anything new.</p>
   </div>
 </section>`,
 
-/* 08 ── CHVRCHES STATION ───────────────────────────────────────── */
-`<section class="slide coal" data-t="CHVRCHES Station">
+/* 08 ── CHVRCHES TV ───────────────────────────────────────────── */
+`<section class="slide coal" data-t="CHVRCHES TV">
+  <div class="bleed"><img src="${hero(A.heroImages.station)}" alt=""
+    onerror="this.src='${thumb(A.heroImages.station)}'"></div>
   <div class="inner">
     <div class="label reveal">An opportunity to explore with YouTube</div>
-    <h2 class="display big reveal" style="max-width:20ch">CHVRCHES Station</h2>
-    <p class="statement reveal" style="margin-top:.8rem;max-width:40ch">Turn an already-active catalogue
-      into an always-on campaign environment.</p>
-    <div class="wall stagger" style="grid-template-columns:repeat(6,1fr)">
-      ${A.station.wall.map(id=>`<div class="wc"><img src="${thumb(id)}" alt=""></div>`).join('')}
+    <h2 class="display big reveal" style="max-width:15ch">CHVRCHES TV</h2>
+    <p class="statement reveal" style="margin-top:.7rem;max-width:34ch;color:var(--cyan)">
+      Catalogue × live × archive × CHV5</p>
+    <div class="swall stagger">
+      ${A.station.wall.map(v=>`
+        <div class="sw"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+          <div class="sw-t">${esc(v.t)}</div></div>`).join('')}
     </div>
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1.4rem;
-      align-items:center;margin-top:1.4rem" class="stagger">
-      <a class="tcard" href="${yt(A.station.id)}" target="_blank" rel="noopener">
-        <img src="${thumb(A.station.id,'maxresdefault')}" alt="${esc(A.station.label)}"
-          onerror="this.src='${thumb(A.station.id)}'">
-        <div class="tmeta"><div class="ttitle">${esc(A.station.label)}</div>
-          <div class="tsub">A YouTube Station already running — the format is real</div></div>
+    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:26ch">
+      ${fmt(A.dormant.perDay)} views arrive every day.<br>
+      <span style="color:var(--signal)">Give them somewhere to go next.</span></h3>
+    <div style="display:flex;gap:1rem;align-items:center;margin-top:1.3rem;max-width:640px" class="reveal">
+      <a href="${yt(A.station.id)}" target="_blank" rel="noopener" style="flex:0 0 150px;display:block;
+        border-radius:7px;overflow:hidden;border:1px solid var(--hair)">
+        <img src="${thumb(A.station.id)}" alt="${esc(A.station.label)}" style="width:100%;display:block">
       </a>
-      <div>
-        <p class="sub" style="margin-top:0">The classics, the full live sets, the Screen Violence world
-          and CHV5 — programmed together in one place that keeps running between campaigns as well as
-          during them.</p>
-        <p class="statement" style="margin-top:.9rem;color:var(--signal)">${fmt(A.dormant.perDay)} views
-          are already arriving every day. What do we want those viewers to find next?</p>
-      </div>
+      <p class="src" style="font-size:.63rem;line-height:1.55">
+        <strong style="color:var(--paper)">${esc(A.station.label)}</strong> — a YouTube Station already
+        running, so the format is real. Stations is an emerging / beta product: eligibility and access
+        would need discussing with YouTube. This is an opportunity to explore, not something we launch alone.</p>
     </div>
-    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging / beta format.
-      Eligibility and access would need to be discussed with YouTube — this is an opportunity to explore,
-      not something we can launch on our own.</span></div>
   </div>
 </section>`,
 
@@ -585,15 +648,17 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 10 ── CLOSE ──────────────────────────────────────────────────── */
+/* 11 ── CLOSE ─────────────────────────────────────────────────── */
 `<section class="slide" data-t="Close">
   <div class="bleed"><img src="${hero(A.heroImages.close)}" alt=""
     onerror="this.src='${thumb(A.heroImages.close)}'"></div>
   <div class="inner">
-    <h2 class="display reveal" style="font-size:clamp(2.2rem,6.4vw,5.4rem);line-height:1;max-width:20ch">
-      Nothing published<br>for ${A.dormant.daysSilent} days.<br>
-      <span style="color:var(--signal)">${A.dormant.annualised} views a year anyway.</span></h2>
-    <p class="statement reveal" style="margin-top:1.6rem;color:rgba(243,241,247,.82);max-width:36ch">
+    <div class="huge reveal" style="font-size:clamp(3.2rem,10vw,8.5rem)">${A.dormant.daysSilent} days</div>
+    <div class="huge-l reveal" style="font-size:clamp(.9rem,2vw,1.5rem);color:var(--paper)">without an upload.</div>
+    <div class="huge reveal" style="font-size:clamp(3.2rem,10vw,8.5rem);color:var(--signal);margin-top:1.1rem">
+      ${A.dormant.annualised}</div>
+    <div class="huge-l reveal" style="font-size:clamp(.9rem,2vw,1.5rem);color:var(--paper)">views a year anyway.</div>
+    <p class="statement reveal" style="margin-top:2rem;color:rgba(243,241,247,.8);max-width:34ch">
       The hard part is already done. The channel just needs turning back on.</p>
   </div>
 </section>`,
