@@ -276,8 +276,42 @@ const ARTIST = {
     {id:'SLfeY3TSDkg',t:'Happy Bones anniversary… #chv5',v:14866,l:654,d:'20 Sep 2025'},
   ],
 
-  lowLift:['Channel homepage','Playlists','Archive live','Lyric videos','Shorts from existing footage',
-           'Community posts','End screens','Catalogue sequencing'],
+  lowLift:['Channel homepage','Playlists','Archive live','Community posts',
+           'Catalogue clips','Existing footage','End screens','Catalogue sequencing'],
+
+  /* Music videos remain the hero format — 73.6% of visible viewing.
+     The lyric-video median is a real signal but it is NOT a controlled
+     comparison: song popularity, asset age and which track got which
+     treatment are all uncontrolled. It supports one component of the
+     plan; it is not the plan. */
+  mvSharePct:73.6,
+
+  /* Different formats, different jobs. */
+  jobs:[
+    ['Official music video','Create the big moments','Used selectively, around the priority singles. Still 73.6% of visible viewing.'],
+    ['Lyric video','A proven long-form home for a song','Lower lift, historically strong here. Ready to deploy around singles and album tracks.'],
+    ['Pre-party + Premiere','Bring the core fans together','Already a CHVRCHES habit. Four singles, four pre-parties, all confirmed.'],
+    ['Live','Deepen the world','15 assets and 5 full sets already on the channel. Use the archive; capture new selectively.'],
+    ['Shorts','Entry points and texture','38 uploads, 0.4% of views. They start journeys well — they are not the destination.'],
+    ['Community + programming','Reconnect before release','Homepage, playlists and posts reach the existing audience without a shoot.'],
+  ],
+
+  /* Real YouTube Station reference. */
+  station:{
+    id:'1fz60gNnSdU', label:'Metallica TV',
+    wall:['_mTRvJ9fugM','4Eo84jDIMKI','BZyzX4c1vIs','e1YqueG2gtQ','B9BLMNn0PrQ','fGiqCmZvkJ8'],
+  },
+
+  /* Screen Violence -> CHV5, as an evolution rather than a correction. */
+  arc:[
+    ['Pre-campaign','Reopen the channel','Catalogue, archive live, Community, playlists — before any announcement'],
+    ['Single','Hero moment','Official music video with the pre-party Premiere they already run'],
+    ['+7–14 days','A second destination','Lyric video, live, or a performance while attention is still up'],
+    ['Next single','Another hero moment',''],
+    ['Release day','Give every song a home','As Screen Violence did — seven assets on the day'],
+    ['After release','Back what moves','Let the audience response decide what gets more support'],
+    ['Always on','CHVRCHES Station','Catalogue, live and CHV5 in one place, between campaigns as well as during'],
+  ],
 
   heroImages:{ open:'4Eo84jDIMKI', close:'_mTRvJ9fugM' },
 
@@ -412,13 +446,12 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 06 ── THE LYRIC VIDEO FINDING ────────────────────────────────── */
+/* 06 ── LYRIC VIDEOS HAVE EARNED THEIR PLACE ───────────────────── */
 `<section class="slide light" data-t="Lyric videos">
   <div class="inner">
-    <div class="label reveal">The most surprising thing in the data</div>
-    <h2 class="display big reveal" style="max-width:20ch">Their lyric videos<br>
-      outperform their music videos.</h2>
-    <div class="cols stagger" style="grid-template-columns:repeat(2,1fr);max-width:760px">
+    <div class="label reveal">A format that works unusually well here</div>
+    <h2 class="display big reveal" style="max-width:20ch">Lyric videos have<br>earned their place.</h2>
+    <div class="cols stagger" style="grid-template-columns:repeat(2,1fr);max-width:720px">
       <div class="card key"><div class="c-h">Lyric video</div><div class="c-n">${A.lyricMedian}</div>
         <div class="c-l">typical views, across ${A.lyricN} of them</div></div>
       <div class="card"><div class="c-h">Music video</div><div class="c-n">${A.mvMedian}</div>
@@ -429,19 +462,26 @@ function slides(){ return [
         <div class="wc"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
           <div class="wl">${esc(v.t)} · ${fmt(v.v)}</div></div>`).join('')}
     </div>
-    <p class="sub reveal">Fewer of them, but each one typically does more than twice what a music video does.
-      Warning Call at ${fmt(A.topLyric[0].v)}, Forever at ${fmt(A.topLyric[1].v)}.
-      <strong>The cheapest long-form format on the channel is also one of the strongest.</strong></p>
+    <p class="sub reveal"><strong>This does not mean lyric videos should replace music videos.</strong>
+      Different songs got different treatments, the assets are different ages, and song popularity isn't
+      controlled for — so this isn't a like-for-like test. What it does show is that lyric videos are a
+      proven part of the CHVRCHES YouTube language, and worth having ready across the campaign.
+      Music videos remain ${pct(A.mvSharePct)} of visible viewing.</p>
   </div>
 </section>`,
 
-/* 07 ── LIVE ───────────────────────────────────────────────────── */
-`<section class="slide" data-t="Live">
+/* 07 ── DIFFERENT FORMATS, DIFFERENT JOBS ─────────────────────── */
+`<section class="slide" data-t="Different jobs">
   <div class="inner">
-    <div class="label reveal">An asset already sitting on the channel</div>
-    <h2 class="display big reveal" style="max-width:19ch">Full shows.<br>Not just song cuts.</h2>
-    <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.5rem;
-      align-items:center;margin-top:1.6rem" class="stagger">
+    <div class="label reveal">The shape of the campaign</div>
+    <h2 class="display big reveal" style="max-width:19ch">Don't ask one format<br>to do every job.</h2>
+    <div class="jr stagger">
+      ${A.jobs.map(([n,j,d],i)=>`
+        <div class="jr-s${i===0?' key':''}"><div class="jr-n" style="min-width:9.5rem">${n}</div>
+          <div><div class="jr-t">${j}</div><div class="jr-d">${d}</div></div></div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:1.3rem;
+      align-items:center;margin-top:1.4rem" class="stagger">
       <a class="tcard" href="${yt(A.live.top[0].id)}" target="_blank" rel="noopener">
         <img src="${thumb(A.live.top[0].id,'maxresdefault')}" alt="${esc(A.live.top[0].t)}"
           onerror="this.src='${thumb(A.live.top[0].id)}'">
@@ -449,80 +489,99 @@ function slides(){ return [
           <div class="tviews">${fmt(A.live.top[0].v)}</div>
           <div class="tsub">${A.live.top[0].mins} minutes · ${A.live.top[0].y}</div></div>
       </a>
-      <div>
-        <div class="cols" style="grid-template-columns:1fr;gap:.7rem;margin-top:0">
-          <div class="card"><div class="c-n">${A.live.n}</div>
-            <div class="c-l">live assets on the channel, typically ${A.live.median} views</div></div>
-          <div class="card cy"><div class="c-n">${A.live.fullSets}</div>
-            <div class="c-l">of them are full-length sets, including a 101-minute show</div></div>
-        </div>
-        <p class="sub" style="margin-top:1rem">Plenty of heritage channels have only song-length clips.
-          CHVRCHES already have complete performances — material that can carry a campaign moment
-          without asking the band to film anything new.</p>
-      </div>
+      <p class="sub" style="margin:0">Live is the clearest example of a job already covered.
+        <strong>${A.live.n} live assets are on the channel and ${A.live.fullSets} are full-length sets</strong>,
+        including 101 minutes at House of Vans. Many heritage channels have only song-length clips.
+        This is material that can carry a campaign moment without the band filming anything new.</p>
     </div>
   </div>
 </section>`,
 
-/* 08 ── LAST TIME → THIS TIME ──────────────────────────────────── */
-`<section class="slide light" data-t="Last time → this time">
+/* 08 ── CHVRCHES STATION ───────────────────────────────────────── */
+`<section class="slide coal" data-t="CHVRCHES Station">
   <div class="inner">
-    <div class="label reveal">The recommendation, in one picture</div>
-    <h2 class="display big reveal" style="max-width:24ch">Last time the channel woke up for the campaign.<br>
-      <span style="color:var(--signal)">This time we'd wake it up first.</span></h2>
-    <div class="cols stagger" style="grid-template-columns:repeat(2,1fr)">
+    <div class="label reveal">An opportunity to explore with YouTube</div>
+    <h2 class="display big reveal" style="max-width:20ch">CHVRCHES Station</h2>
+    <p class="statement reveal" style="margin-top:.8rem;max-width:40ch">Turn an already-active catalogue
+      into an always-on campaign environment.</p>
+    <div class="wall stagger" style="grid-template-columns:repeat(6,1fr)">
+      ${A.station.wall.map(id=>`<div class="wc"><img src="${thumb(id)}" alt=""></div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1.4rem;
+      align-items:center;margin-top:1.4rem" class="stagger">
+      <a class="tcard" href="${yt(A.station.id)}" target="_blank" rel="noopener">
+        <img src="${thumb(A.station.id,'maxresdefault')}" alt="${esc(A.station.label)}"
+          onerror="this.src='${thumb(A.station.id)}'">
+        <div class="tmeta"><div class="ttitle">${esc(A.station.label)}</div>
+          <div class="tsub">A YouTube Station already running — the format is real</div></div>
+      </a>
+      <div>
+        <p class="sub" style="margin-top:0">The classics, the full live sets, the Screen Violence world
+          and CHV5 — programmed together in one place that keeps running between campaigns as well as
+          during them.</p>
+        <p class="statement" style="margin-top:.9rem;color:var(--signal)">${fmt(A.dormant.perDay)} views
+          are already arriving every day. What do we want those viewers to find next?</p>
+      </div>
+    </div>
+    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging / beta format.
+      Eligibility and access would need to be discussed with YouTube — this is an opportunity to explore,
+      not something we can launch on our own.</span></div>
+  </div>
+</section>`,
+
+/* 09 ── SCREEN VIOLENCE → CHV5 ─────────────────────────────────── */
+`<section class="slide light" data-t="Screen Violence → CHV5">
+  <div class="inner">
+    <div class="label reveal">The evolution, not a correction</div>
+    <h2 class="display big reveal" style="max-width:22ch">Keep the ritual.<br>
+      <span style="color:var(--signal)">Add the format depth.</span></h2>
+    <div class="cols stagger" style="grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)">
       <div class="card">
-        <div class="c-h">Screen Violence · 2021</div>
+        <div class="c-h">Screen Violence did well</div>
         <div class="jr" style="margin-top:.7rem">
-          ${['Channel quiet','First single + pre-party','Two more singles','Whole album in one day','Quiet again']
-            .map((x,i)=>`<div class="jr-s"><div class="jr-n">${i+1}</div><div><div class="jr-t">${x}</div></div></div>`).join('')}
+          ${['Three singles','Three Premieres','A pre-party for each','The full album on release day']
+            .map(x=>`<div class="jr-s"><div class="jr-n">✓</div><div><div class="jr-t">${x}</div></div></div>`).join('')}
         </div>
+        <p class="c-b" style="margin-top:.9rem;color:var(--smoke)">A well-sequenced campaign on a channel
+          that woke up for it and went quiet afterwards.</p>
       </div>
       <div class="card key">
         <div class="c-h">CHV5</div>
         <div class="jr" style="margin-top:.7rem">
-          ${[['1','Reopen the channel','Archive live, lyric videos, catalogue sequencing — before any announcement'],
-             ['2','First single + pre-party','The ritual they already own'],
-             ['3','A second destination inside 7–14 days','Live, lyric, or a performance while attention is up'],
-             ['4','Release day','Give every song a home, as they did in 2021'],
-             ['5','Keep going','Back whatever the audience actually responds to']]
-            .map(([n,t,d])=>`<div class="jr-s${n==='1'?' key':''}"><div class="jr-n">${n}</div>
+          ${A.arc.map(([w,t,d],i)=>`
+            <div class="jr-s${i===0||i===6?' key':''}"><div class="jr-n" style="min-width:6.6rem">${w}</div>
               <div><div class="jr-t">${t}</div>${d?`<div class="jr-d">${d}</div>`:''}</div></div>`).join('')}
         </div>
       </div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.5rem">Album five shouldn't land<br>on a silent channel.</h3>
+    <h3 class="display mid reveal" style="margin-top:1.4rem">Album five shouldn't land<br>on a silent channel.</h3>
   </div>
 </section>`,
 
-/* 09 ── WHAT WE'D DO ───────────────────────────────────────────── */
+/* 10 ── WHAT WE'D DO ───────────────────────────────────────────── */
 `<section class="slide" data-t="What we'd do">
   <div class="inner">
     <div class="label reveal">For CHV5</div>
-    <h2 class="display big reveal" style="margin-bottom:1.2rem">What we'd do.</h2>
+    <h2 class="display big reveal" style="margin-bottom:1.1rem">What we'd do.</h2>
     <div class="stagger">
-      ${[['01','Reopen the channel before the announcement',
-          `${A.dormant.daysSilent} days quiet. Publish something worth watching now, using material that already exists.`],
-         ['02','Lead with lyric videos',
-          `Typically ${A.lyricMedian} against ${A.mvMedian} for a music video — the cheapest long-form format is one of the strongest.`],
-         ['03','Keep the pre-party',
-          'Four singles, four pre-parties, all confirmed Premieres. It is theirs, and the superfans are already there.'],
-         ['04','Put the live archive to work',
-          `${A.live.fullSets} full-length sets are already on the channel, including 101 minutes at House of Vans.`],
-         ['05','Give release day a follow-up',
-          '2021 gave every song a home on day one. The opportunity is what comes 7–14 days later.']]
+      ${[['01','Reopen the channel',
+          `${A.dormant.daysSilent} days quiet. Use archive, live, Community and catalogue programming before the campaign starts.`],
+         ['02','Build a multi-format campaign',
+          `Music videos create the hero moments — still ${pct(A.mvSharePct)} of viewing. Lyric videos are proven support. Live, Shorts and Premieres each have a different job.`],
+         ['03','Keep the pre-party ritual',
+          'Four singles, four pre-parties, all confirmed Premieres. It is distinctive CHVRCHES behaviour and it gives the superfans a room.'],
+         ['04','Give every hero a next destination',
+          'Follow a major release inside 7–14 days with a lyric video, a live performance or another substantial asset.'],
+         ['05','Explore CHVRCHES Station',
+          'Connect the catalogue, the live archive and CHV5 in one always-on environment. To be discussed with YouTube.']]
         .map(([n,t,a])=>`
         <div class="rec"><div class="rec-n">${n}</div>
           <div><div class="rec-t">${t}</div><div class="rec-a">${a}</div></div></div>`).join('')}
     </div>
-    <div class="flow stagger">
-      ${[['Now','Reopen'],['Single one','Pre-party premiere'],['+7–14 days','Second destination'],
-         ['Release','Every song a home'],['After','Back what moves']]
-        .map(([w,t],i)=>`<div class="fs${i===0||i===2?' key':''}">
-          <div class="fs-w">${w}</div><div class="fs-t">${t}</div></div>`).join('')}
-    </div>
-    <div class="lift reveal"><span class="lift-h">Little or no extra band time</span>
+    <div class="lift reveal"><span class="lift-h">Little or no extra band time where possible</span>
       ${A.lowLift.map(x=>`<span class="lift-p">${x}</span>`).join('')}</div>
+    <p class="sub reveal">This is intelligent programming of what already exists, rather than a request
+      for the band to make twice as much.</p>
   </div>
 </section>`,
 
