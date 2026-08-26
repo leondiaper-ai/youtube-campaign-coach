@@ -6,6 +6,7 @@ const nextConfig = {
       // This rewrite gives it a clean shareable URL (/amyl) instead of /amyl/index.html.
       { source: '/amyl', destination: '/amyl/index.html' },
       { source: '/kol',  destination: '/kol/index.html' },
+      { source: '/chvrches', destination: '/chvrches/index.html' },
     ];
   },
 };

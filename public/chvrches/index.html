@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHVRCHES × YouTube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   CHVRCHES × YOUTUBE — CHV5 campaign strategy
+
+   Identity is deliberately its own: cold near-black, bleached paper,
+   electric magenta as the single accent with a cyan second. Nothing
+   borrowed from the Amyl or Kings of Leon decks except the structure,
+   because the argument here is different — this channel is dormant and
+   still earning, which is the opposite of a channel that is publishing
+   into silence.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#08070D;
+  --coal:#0F0E17;
+  --paper:#F3F1F7;
+  --bone:#DAD6E4;
+  --signal:#FF2D78;   /* electric magenta */
+  --cyan:#3DE0D5;     /* cold second accent */
+  --smoke:#8B87A0;
+  --hair:rgba(243,241,247,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.display{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.02}
+.big{font-size:clamp(2rem,4.8vw,4rem)}
+.mid{font-size:clamp(1.5rem,3.4vw,2.7rem)}
+
+.deck{width:100%}
+.slide{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;
+  padding:5.5rem 0 4rem;border-bottom:1px solid var(--hair)}
+.slide.light{background:var(--paper);color:var(--ink)}
+.slide.light .display{color:var(--ink)}
+.slide.coal{background:var(--coal)}
+.inner{width:100%;max-width:1180px;margin:0 auto;padding:0 2.4rem;position:relative;z-index:2}
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;opacity:.3}
+.bleed::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--ink) 22%,rgba(8,7,13,.72) 62%,rgba(8,7,13,.45) 100%)}
+
+.label{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:1.1rem}
+.sub{font-size:.88rem;line-height:1.68;color:var(--smoke);margin-top:1.1rem;max-width:70ch}
+.slide.light .sub{color:#5A5670}
+.statement{font-size:clamp(1rem,1.8vw,1.4rem);line-height:1.45;font-weight:500}
+
+.stat .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.9rem,3.6vw,3rem);
+  line-height:1;color:var(--paper)}
+.slide.light .stat .num{color:var(--ink)}
+.stat .cap{font-size:.68rem;color:var(--smoke);margin-top:.4rem;max-width:22ch;line-height:1.45}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .75s ease,transform .75s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+.stagger>*.visible{opacity:1;transform:none}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
+
+.cols{display:grid;gap:1.1rem;margin-top:1.8rem}
+.card{border:1px solid var(--hair);border-radius:11px;padding:1.15rem 1.1rem;
+  background:rgba(243,241,247,.03)}
+.slide.light .card{border-color:var(--bone);background:#fff}
+.card.key{border-color:var(--signal)}
+.card.cy{border-color:var(--cyan)}
+.c-h{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.55rem}
+.card.key .c-h{color:var(--signal)}
+.card.cy .c-h{color:var(--cyan)}
+.c-n{font-family:'Space Grotesk',sans-serif;font-size:2.5rem;line-height:.95;font-weight:700;color:var(--signal)}
+.card.cy .c-n{color:var(--cyan)}
+.slide.light .c-n{color:var(--signal)}
+.c-l{font-size:.7rem;color:var(--smoke);line-height:1.45;margin-top:.5rem}
+.c-b{font-size:.76rem;line-height:1.55;margin-top:.5rem}
+
+.wall{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:1.4rem}
+.wall img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block}
+.wc{position:relative}
+.wl{position:absolute;left:.35rem;bottom:.3rem;font-size:.5rem;font-weight:700;color:#fff;
+  text-shadow:0 1px 5px rgba(0,0,0,.95)}
+
+.bigthumbs{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;margin-top:1.7rem}
+.tcard{display:block;border:1px solid var(--hair);border-radius:11px;overflow:hidden;
+  text-decoration:none;color:inherit;background:rgba(243,241,247,.03);transition:border-color .18s,transform .18s}
+.slide.light .tcard{border-color:var(--bone);background:#fff}
+.tcard:hover{border-color:var(--signal);transform:translateY(-2px)}
+.tcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.tmeta{padding:.7rem .85rem}
+.ttitle{font-size:.75rem;font-weight:600;line-height:1.3}
+.tviews{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.15rem;color:var(--signal);margin-top:.3rem}
+.tsub{font-size:.62rem;color:var(--smoke);margin-top:.15rem}
+
+.jr{margin-top:1.5rem;display:flex;flex-direction:column;gap:.45rem}
+.jr-s{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:center;
+  border:1px solid var(--hair);border-radius:8px;padding:.75rem .95rem;background:rgba(243,241,247,.03)}
+.slide.light .jr-s{border-color:var(--bone);background:#fff}
+.jr-s.key{border-color:var(--signal)}
+.jr-n{font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;color:var(--signal);white-space:nowrap}
+.jr-t{font-size:.86rem;font-weight:600;line-height:1.3}
+.jr-d{font-size:.68rem;color:var(--smoke);margin-top:.15rem;line-height:1.45}
+.jr-ar{text-align:center;color:var(--signal);font-size:.8rem;line-height:1}
+
+.rec{display:grid;grid-template-columns:2.2rem 1fr;gap:1rem;padding:.85rem 0;
+  border-top:1px solid var(--hair)}
+.slide.light .rec{border-top-color:var(--bone)}
+.rec-n{font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;color:var(--signal);padding-top:.15rem}
+.rec-t{font-size:.98rem;font-weight:700;line-height:1.3}
+.rec-a{font-size:.75rem;color:var(--smoke);margin-top:.22rem;line-height:1.5}
+
+.flow{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.5rem}
+.fs{flex:1 0 140px;border:1px solid var(--hair);border-radius:8px;padding:.85rem .8rem;
+  background:rgba(243,241,247,.03)}
+.slide.light .fs{border-color:var(--bone);background:#fff}
+.fs.key{border-color:var(--signal)}
+.fs-w{font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:.4rem}
+.fs-t{font-size:.8rem;font-weight:700;line-height:1.3}
+
+.lift{margin-top:1.3rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
+.lift-h{font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cyan);margin-right:.35rem}
+.lift-p{font-size:.62rem;padding:.2rem .55rem;border:1px solid var(--hair);border-radius:20px;color:var(--smoke)}
+.slide.light .lift-p{border-color:var(--bone)}
+
+.srcbar{margin-top:1.5rem;padding-top:.8rem;border-top:1px solid var(--hair)}
+.slide.light .srcbar{border-top-color:var(--bone)}
+.src{font-size:.6rem;color:var(--smoke);letter-spacing:.03em}
+
+.chrome{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;
+  align-items:center;padding:.85rem 1.6rem;background:rgba(8,7,13,.82);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--hair)}
+body.present .chrome{display:none}
+.chrome-l{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.chrome-r{display:flex;gap:.5rem}
+.btn{font:inherit;font-size:.66rem;font-weight:600;padding:.45rem .9rem;border-radius:6px;
+  border:1px solid var(--hair);background:transparent;color:var(--paper);cursor:pointer}
+.btn:hover{border-color:var(--signal);color:var(--signal)}
+.pbar{position:fixed;top:0;left:0;height:2px;background:var(--signal);z-index:60;width:0}
+.pcount{position:fixed;bottom:1.2rem;right:1.6rem;z-index:50;font-size:.62rem;color:var(--smoke);
+  font-family:'Space Grotesk',sans-serif}
+.phint{position:fixed;bottom:1.2rem;left:1.6rem;z-index:50;font-size:.58rem;color:var(--smoke);display:none}
+body.present .phint{display:block}
+body.present .slide{scroll-snap-align:start}
+body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
+
+.sheet{position:fixed;inset:0;z-index:80;background:var(--paper);color:var(--ink);
+  overflow-y:auto;display:none;padding:3rem 2rem}
+.sheet.open{display:block}
+.sheet-in{max-width:940px;margin:0 auto}
+.sheet h2{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;margin-bottom:.3rem}
+.sheet h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;margin:2rem 0 .6rem;color:var(--signal)}
+.sheet table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:.6rem}
+.sheet th{text-align:left;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--smoke);padding:.4rem .5rem;border-bottom:1px solid var(--bone)}
+.sheet td{padding:.4rem .5rem;border-bottom:1px solid #EDEAF3}
+.sheet td.n{text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500}
+.sheet p{font-size:.78rem;line-height:1.65;color:#5A5670;margin-bottom:.5rem}
+.sheet .close{position:sticky;top:0;float:right;font-size:.7rem;padding:.4rem .9rem;border:1px solid var(--bone);
+  border-radius:6px;background:#fff;cursor:pointer}
+
+@media(max-width:960px){
+  .wall{grid-template-columns:repeat(2,1fr)}
+  .bigthumbs{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="pbar" id="pbar"></div>
+<div class="chrome">
+  <div class="chrome-l">CHVRCHES × YouTube — CHV5</div>
+  <div class="chrome-r">
+    <button class="btn" onclick="togglePresent()">Present</button>
+    <button class="btn" onclick="openSheet('appendix')">Analysis</button>
+  </div>
+</div>
+<div class="pcount" id="pcount"></div>
+<div class="phint">← → navigate · esc exit</div>
+
+<div class="deck" id="deck"></div>
+<div class="sheet" id="sheet-appendix"><div class="sheet-in" id="appendixBody"></div></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DATA — every figure retrieved from the YouTube Data API v3 on
+   26 Aug 2026 via /api/full-catalogue?handle=@chvrches and
+   /api/artist-live?slug=chvrches. No YouTube Studio data is used.
+
+   Album five is INFERRED from two Shorts on the channel. There is no
+   confirmed title, date or tracklist, and nothing in this deck assumes
+   one. Where a recommendation depends on timing it is expressed
+   relative to release, never as a calendar date.
+   ═══════════════════════════════════════════════════════════════════ */
+const ARTIST = {
+  meta:{ slug:'chvrches', apiBase:'https://youtube-campaign-coach.vercel.app/api/artist-live',
+         capturedAt:'26 Aug 2026' },
+
+  channel:{
+    subscribers:549000, lifetimeViews:316658266, publicVideoCount:90,
+    retrievedUploads:132, visibleViews:229371490, since:'17 Sep 2012',
+  },
+
+  /* Silence, and what the catalogue earned during it. */
+  dormant:{
+    lastUpload:'20 Sep 2025', daysSilent:340,
+    windowDays:79, windowViews:5866985, perDay:74266, annualised:'27.1M',
+    subsDelta:1000, subsFrom:548000, subsTo:549000,
+  },
+
+  /* The catalogue is broad — no single video dominates the way it does
+     on some heritage channels. Top 1 is 14.1%, not 36%. */
+  concentration:[{n:1,pct:14.1},{n:2,pct:27.6},{n:5,pct:43.2},{n:10,pct:60.6},{n:20,pct:83.1}],
+
+  topCatalogue:[
+    {id:'4Eo84jDIMKI',t:'Leave A Trace',v:32272749,y:2015},
+    {id:'_mTRvJ9fugM',t:'The Mother We Share',v:31057288,y:2013},
+    {id:'BZyzX4c1vIs',t:'Clearest Blue',v:15297196,y:2016},
+    {id:'81RqEnvczV8',t:'Lies',v:10325248,y:2013},
+    {id:'e1YqueG2gtQ',t:'Miracle',v:10124294,y:2018},
+    {id:'B9BLMNn0PrQ',t:'Bury It ft. Hayley Williams',v:9366573,y:2016},
+  ],
+
+  /* Format returns across the whole retrieved catalogue. */
+  formats:[
+    ['Music video',44,'168.8M',73.6,'937K'],
+    ['Lyric video',11,'33.0M',14.4,'2.04M'],
+    ['Audio',15,'22.1M',9.6,'392K'],
+    ['Live',15,'4.1M',1.8,'104K'],
+    ['Shorts',38,'897K',0.4,'22K'],
+  ],
+  lyricMedian:'2.04M', mvMedian:'937K', lyricN:11, mvN:44,
+  topLyric:[
+    {id:'fB4gjiMVKFI',t:'Warning Call',v:6857586,y:2016},
+    {id:'RJdOYscmlyo',t:'Forever',v:6446790,y:2020},
+    {id:'AU9_0pxiDjY',t:'Never Ending Circles',v:5379274,y:2015},
+    {id:'QpFXXPruuqU',t:'Clearest Blue',v:5062348,y:2015},
+  ],
+
+  /* Screen Violence, the last album campaign. Window established from
+     upload behaviour: first single 22 Apr 2021, album 27 Aug 2021
+     (seven album assets published that day, plus the ONE WEEK
+     CELEBRATION stream six days later). */
+  last:{
+    album:'27 Aug 2021', opens:'22 Apr 2021', lead:127,
+    albumDayAssets:7, albumDayViews:'6.94M',
+    singles:[
+      {id:'fyyiJc0Wk2M',t:'He Said She Said',v:2876339,d:'22 Apr',party:{id:'058_PrUU2tg',v:26583,min:13}},
+      {id:'7U_LhzgwJ4U',t:'How Not To Drown',v:7993559,d:'3 Jun',party:{id:'0XoMu7Bz7YE',v:30383,min:19}},
+      {id:'du4kNAyjVCg',t:'Good Girls',v:4596808,d:'15 Jul',party:{id:'tOygf0t0amc',v:17883,min:19}},
+    ],
+    over:{id:'8ecVwQIUTHA',t:'Over',v:3605474,d:'24 Feb 2023',party:{id:'ECjhy15xwz0',v:16217,min:14}},
+    premieresConfirmed:13,
+  },
+
+  /* Live, including full-length sets — an asset many heritage channels
+     simply do not have. */
+  live:{
+    n:15, median:'104K', fullSets:5,
+    top:[
+      {id:'fGiqCmZvkJ8',t:'Live at House of Vans',v:104365,mins:101,y:2018},
+      {id:'Wr2fl9WNkvo',t:'Live at Ancienne Belgique, Brussels',v:29351,mins:27,y:2023},
+    ],
+  },
+
+  /* The only public signals that album five exists. */
+  chv5:[
+    {id:'RntlEwS6os8',t:'Jvmpscare. CHV 5 in progress.',v:30278,l:1929,d:'1 Jul 2025'},
+    {id:'SLfeY3TSDkg',t:'Happy Bones anniversary… #chv5',v:14866,l:654,d:'20 Sep 2025'},
+  ],
+
+  lowLift:['Channel homepage','Playlists','Archive live','Lyric videos','Shorts from existing footage',
+           'Community posts','End screens','Catalogue sequencing'],
+
+  heroImages:{ open:'4Eo84jDIMKI', close:'_mTRvJ9fugM' },
+
+  canSee:['Public subscriber and view totals','Upload history and cadence','Format mix',
+    'Public video performance','Premiere confirmation','Campaign sequencing','Public engagement'],
+  wouldAdd:['Browse / Suggested / Search split','Watch time and retention','New vs returning viewers',
+    'Where the 27M annual views actually come from','Territories and demographics',
+    'Subscriber attribution by video','Living Room share','Paid vs organic'],
+
+  liveData:null,
+};
+
+const A = ARTIST, C = A.channel;
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => n>=1e9 ? (n/1e9).toFixed(2)+'BN' : n>=1e6 ? (n/1e6).toFixed(n>=1e8?0:1)+'M'
+                 : n>=1e3 ? Math.round(n/1e3)+'K' : String(n);
+const pct = (v,d=1) => v.toFixed(d)+'%';
+const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
+const hero  = id => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+const yt    = id => `https://www.youtube.com/watch?v=${id}`;
+const liveOr = (key, fallback) => {
+  const d = A.liveData;
+  return d && typeof d[key] === 'number' ? {v:d[key], live:true} : {v:fallback, live:false};
+};
+const COVERAGE = C.visibleViews / C.lifetimeViews * 100;
+
+/* ═══════════════════════════════════════════════════════════════════
+   SLIDES
+   ═══════════════════════════════════════════════════════════════════ */
+function slides(){ return [
+
+/* 01 ── COVER ──────────────────────────────────────────────────── */
+`<section class="slide" data-t="Cover">
+  <div class="bleed"><img src="${hero(A.heroImages.open)}" alt="CHVRCHES"
+    onerror="this.src='${thumb(A.heroImages.open)}'"></div>
+  <div class="inner">
+    <div class="label reveal">Virgin Music Group × YouTube</div>
+    <h1 class="display reveal" style="font-size:clamp(2.6rem,9vw,7.2rem);line-height:.94">
+      CHVRCHES<br><span style="color:var(--signal)">× YouTube</span></h1>
+  </div>
+</section>`,
+
+/* 02 ── THE AUDIENCE DIDN'T LEAVE ──────────────────────────────── */
+`<section class="slide coal" data-t="The audience stayed">
+  <div class="inner">
+    <div class="label reveal">Where we start from</div>
+    <h2 class="display big reveal" style="max-width:19ch">The channel has been quiet<br>
+      for <span style="color:var(--signal)">${A.dormant.daysSilent} days.</span></h2>
+    <div class="cols stagger" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card"><div class="c-h">Last upload</div>
+        <div class="c-n">${A.dormant.lastUpload.split(' ')[0]} ${A.dormant.lastUpload.split(' ')[1]}</div>
+        <div class="c-l">${A.dormant.lastUpload.split(' ')[2]} — a Short, no long-form since</div></div>
+      <div class="card key"><div class="c-h">Still arriving, every day</div>
+        <div class="c-n">${fmt(A.dormant.perDay)}</div>
+        <div class="c-l">views a day across the last ${A.dormant.windowDays} days, with nothing published</div></div>
+      <div class="card cy"><div class="c-h">At that rate</div>
+        <div class="c-n">${A.dormant.annualised}</div>
+        <div class="c-l">views a year from the catalogue on its own</div></div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.8rem">The audience didn't leave.<br>
+      <span style="color:var(--signal)">They're still showing up.</span></h3>
+    <div class="srcbar reveal"><span class="src">YouTube Data API v3 · retrieved ${A.meta.capturedAt} ·
+      no YouTube Studio data used</span></div>
+  </div>
+</section>`,
+
+/* 03 ── A BROAD CATALOGUE ──────────────────────────────────────── */
+`<section class="slide light" data-t="Many doors">
+  <div class="inner">
+    <div class="label reveal">What that audience is actually watching</div>
+    <h2 class="display big reveal" style="max-width:18ch">This isn't a<br>two-song catalogue.</h2>
+    <div class="bigthumbs stagger" style="grid-template-columns:repeat(3,1fr)">
+      ${A.topCatalogue.slice(0,3).map(v=>`
+        <a class="tcard" href="${yt(v.id)}" target="_blank" rel="noopener">
+          <img src="${thumb(v.id,'maxresdefault')}" alt="${esc(v.t)}" onerror="this.src='${thumb(v.id)}'">
+          <div class="tmeta"><div class="ttitle">${esc(v.t)}</div>
+            <div class="tviews">${fmt(v.v)}</div><div class="tsub">${v.y}</div></div>
+        </a>`).join('')}
+    </div>
+    <div class="cols stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.4rem">
+      ${[[pct(A.concentration[0].pct),'from the single biggest video'],
+         [pct(A.concentration[3].pct),'from the top ten'],
+         [pct(COVERAGE),'of lifetime views are in the catalogue we can see']]
+        .map(([n,l])=>`<div class="card"><div class="c-n">${n}</div><div class="c-l">${l}</div></div>`).join('')}
+    </div>
+    <p class="sub reveal">Ten videos carry ${pct(A.concentration[3].pct)} of the viewing, and no single track
+      dominates. That means several genuine ways in — not one song holding the door open for everything else.</p>
+  </div>
+</section>`,
+
+/* 04 ── THE LAST ALBUM CAMPAIGN ────────────────────────────────── */
+`<section class="slide" data-t="Screen Violence">
+  <div class="inner">
+    <div class="label reveal">Screen Violence · ${A.last.opens} → ${A.last.album}</div>
+    <h2 class="display big reveal" style="max-width:21ch">Three singles.<br>
+      Three premieres.<br>Then the whole record in one day.</h2>
+    <div class="wall stagger" style="grid-template-columns:repeat(3,1fr)">
+      ${A.last.singles.map(s=>`
+        <div class="wc"><img src="${thumb(s.id)}" alt="${esc(s.t)}">
+          <div class="wl">${esc(s.t)} · ${fmt(s.v)}</div></div>`).join('')}
+    </div>
+    <div class="cols stagger" style="grid-template-columns:repeat(3,1fr);margin-top:1.3rem">
+      <div class="card"><div class="c-n">${A.last.lead}</div>
+        <div class="c-l">days from first single to album</div></div>
+      <div class="card"><div class="c-n">${A.last.albumDayAssets}</div>
+        <div class="c-l">album assets published on release day, ${A.last.albumDayViews} between them</div></div>
+      <div class="card key"><div class="c-n">${A.last.premieresConfirmed}</div>
+        <div class="c-l">confirmed Premieres across the channel — both a scheduled and an actual start time</div></div>
+    </div>
+    <p class="sub reveal">A clear, well-sequenced campaign. Every single premiered, and release day gave
+      the whole album a home on the channel at once.</p>
+  </div>
+</section>`,
+
+/* 05 ── THE PRE-PARTY ──────────────────────────────────────────── */
+`<section class="slide coal" data-t="The pre-party">
+  <div class="inner">
+    <div class="label reveal">Something they do that almost nobody else does</div>
+    <h2 class="display big reveal" style="max-width:18ch">They built a ritual<br>
+      <span style="color:var(--signal)">around the premiere.</span></h2>
+    <div class="jr stagger">
+      ${A.last.singles.concat([A.last.over]).map((s,i)=>`
+        <div class="jr-s${i===1?' key':''}"><div class="jr-n">${s.d}</div>
+          <div><div class="jr-t">${esc(s.t)} — ${fmt(s.v)}</div>
+            <div class="jr-d">Preceded by a ${s.party.min}-minute pre-party stream · ${fmt(s.party.v)} views</div></div>
+        </div>`).join('')}
+    </div>
+    <p class="sub reveal">Four singles, four pre-parties, every one a confirmed Premiere. The parties draw
+      a small, committed audience — under 1% of what the video goes on to do. <strong>That is what makes them
+      useful: this is the room where the people who care most are already standing.</strong> Worth keeping,
+      and worth being clear-eyed about the job it does.</p>
+  </div>
+</section>`,
+
+/* 06 ── THE LYRIC VIDEO FINDING ────────────────────────────────── */
+`<section class="slide light" data-t="Lyric videos">
+  <div class="inner">
+    <div class="label reveal">The most surprising thing in the data</div>
+    <h2 class="display big reveal" style="max-width:20ch">Their lyric videos<br>
+      outperform their music videos.</h2>
+    <div class="cols stagger" style="grid-template-columns:repeat(2,1fr);max-width:760px">
+      <div class="card key"><div class="c-h">Lyric video</div><div class="c-n">${A.lyricMedian}</div>
+        <div class="c-l">typical views, across ${A.lyricN} of them</div></div>
+      <div class="card"><div class="c-h">Music video</div><div class="c-n">${A.mvMedian}</div>
+        <div class="c-l">typical views, across ${A.mvN} of them</div></div>
+    </div>
+    <div class="wall stagger" style="grid-template-columns:repeat(4,1fr)">
+      ${A.topLyric.map(v=>`
+        <div class="wc"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+          <div class="wl">${esc(v.t)} · ${fmt(v.v)}</div></div>`).join('')}
+    </div>
+    <p class="sub reveal">Fewer of them, but each one typically does more than twice what a music video does.
+      Warning Call at ${fmt(A.topLyric[0].v)}, Forever at ${fmt(A.topLyric[1].v)}.
+      <strong>The cheapest long-form format on the channel is also one of the strongest.</strong></p>
+  </div>
+</section>`,
+
+/* 07 ── LIVE ───────────────────────────────────────────────────── */
+`<section class="slide" data-t="Live">
+  <div class="inner">
+    <div class="label reveal">An asset already sitting on the channel</div>
+    <h2 class="display big reveal" style="max-width:19ch">Full shows.<br>Not just song cuts.</h2>
+    <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.5rem;
+      align-items:center;margin-top:1.6rem" class="stagger">
+      <a class="tcard" href="${yt(A.live.top[0].id)}" target="_blank" rel="noopener">
+        <img src="${thumb(A.live.top[0].id,'maxresdefault')}" alt="${esc(A.live.top[0].t)}"
+          onerror="this.src='${thumb(A.live.top[0].id)}'">
+        <div class="tmeta"><div class="ttitle">${esc(A.live.top[0].t)}</div>
+          <div class="tviews">${fmt(A.live.top[0].v)}</div>
+          <div class="tsub">${A.live.top[0].mins} minutes · ${A.live.top[0].y}</div></div>
+      </a>
+      <div>
+        <div class="cols" style="grid-template-columns:1fr;gap:.7rem;margin-top:0">
+          <div class="card"><div class="c-n">${A.live.n}</div>
+            <div class="c-l">live assets on the channel, typically ${A.live.median} views</div></div>
+          <div class="card cy"><div class="c-n">${A.live.fullSets}</div>
+            <div class="c-l">of them are full-length sets, including a 101-minute show</div></div>
+        </div>
+        <p class="sub" style="margin-top:1rem">Plenty of heritage channels have only song-length clips.
+          CHVRCHES already have complete performances — material that can carry a campaign moment
+          without asking the band to film anything new.</p>
+      </div>
+    </div>
+  </div>
+</section>`,
+
+/* 08 ── LAST TIME → THIS TIME ──────────────────────────────────── */
+`<section class="slide light" data-t="Last time → this time">
+  <div class="inner">
+    <div class="label reveal">The recommendation, in one picture</div>
+    <h2 class="display big reveal" style="max-width:24ch">Last time the channel woke up for the campaign.<br>
+      <span style="color:var(--signal)">This time we'd wake it up first.</span></h2>
+    <div class="cols stagger" style="grid-template-columns:repeat(2,1fr)">
+      <div class="card">
+        <div class="c-h">Screen Violence · 2021</div>
+        <div class="jr" style="margin-top:.7rem">
+          ${['Channel quiet','First single + pre-party','Two more singles','Whole album in one day','Quiet again']
+            .map((x,i)=>`<div class="jr-s"><div class="jr-n">${i+1}</div><div><div class="jr-t">${x}</div></div></div>`).join('')}
+        </div>
+      </div>
+      <div class="card key">
+        <div class="c-h">CHV5</div>
+        <div class="jr" style="margin-top:.7rem">
+          ${[['1','Reopen the channel','Archive live, lyric videos, catalogue sequencing — before any announcement'],
+             ['2','First single + pre-party','The ritual they already own'],
+             ['3','A second destination inside 7–14 days','Live, lyric, or a performance while attention is up'],
+             ['4','Release day','Give every song a home, as they did in 2021'],
+             ['5','Keep going','Back whatever the audience actually responds to']]
+            .map(([n,t,d])=>`<div class="jr-s${n==='1'?' key':''}"><div class="jr-n">${n}</div>
+              <div><div class="jr-t">${t}</div>${d?`<div class="jr-d">${d}</div>`:''}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.5rem">Album five shouldn't land<br>on a silent channel.</h3>
+  </div>
+</section>`,
+
+/* 09 ── WHAT WE'D DO ───────────────────────────────────────────── */
+`<section class="slide" data-t="What we'd do">
+  <div class="inner">
+    <div class="label reveal">For CHV5</div>
+    <h2 class="display big reveal" style="margin-bottom:1.2rem">What we'd do.</h2>
+    <div class="stagger">
+      ${[['01','Reopen the channel before the announcement',
+          `${A.dormant.daysSilent} days quiet. Publish something worth watching now, using material that already exists.`],
+         ['02','Lead with lyric videos',
+          `Typically ${A.lyricMedian} against ${A.mvMedian} for a music video — the cheapest long-form format is one of the strongest.`],
+         ['03','Keep the pre-party',
+          'Four singles, four pre-parties, all confirmed Premieres. It is theirs, and the superfans are already there.'],
+         ['04','Put the live archive to work',
+          `${A.live.fullSets} full-length sets are already on the channel, including 101 minutes at House of Vans.`],
+         ['05','Give release day a follow-up',
+          '2021 gave every song a home on day one. The opportunity is what comes 7–14 days later.']]
+        .map(([n,t,a])=>`
+        <div class="rec"><div class="rec-n">${n}</div>
+          <div><div class="rec-t">${t}</div><div class="rec-a">${a}</div></div></div>`).join('')}
+    </div>
+    <div class="flow stagger">
+      ${[['Now','Reopen'],['Single one','Pre-party premiere'],['+7–14 days','Second destination'],
+         ['Release','Every song a home'],['After','Back what moves']]
+        .map(([w,t],i)=>`<div class="fs${i===0||i===2?' key':''}">
+          <div class="fs-w">${w}</div><div class="fs-t">${t}</div></div>`).join('')}
+    </div>
+    <div class="lift reveal"><span class="lift-h">Little or no extra band time</span>
+      ${A.lowLift.map(x=>`<span class="lift-p">${x}</span>`).join('')}</div>
+  </div>
+</section>`,
+
+/* 10 ── CLOSE ──────────────────────────────────────────────────── */
+`<section class="slide" data-t="Close">
+  <div class="bleed"><img src="${hero(A.heroImages.close)}" alt=""
+    onerror="this.src='${thumb(A.heroImages.close)}'"></div>
+  <div class="inner">
+    <h2 class="display reveal" style="font-size:clamp(2.2rem,6.4vw,5.4rem);line-height:1;max-width:20ch">
+      Nothing published<br>for ${A.dormant.daysSilent} days.<br>
+      <span style="color:var(--signal)">${A.dormant.annualised} views a year anyway.</span></h2>
+    <p class="statement reveal" style="margin-top:1.6rem;color:rgba(243,241,247,.82);max-width:36ch">
+      The hard part is already done. The channel just needs turning back on.</p>
+  </div>
+</section>`,
+
+];}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════════ */
+document.getElementById('deck').innerHTML = slides().join('');
+
+function allSlides(){ return [...document.querySelectorAll('.slide')]; }
+
+function observeAll(){
+  const ro = new IntersectionObserver((es,o)=>es.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('visible'); o.unobserve(e.target); }
+  }),{threshold:.15});
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el=>ro.observe(el));
+
+  const so = new IntersectionObserver((es,o)=>es.forEach(e=>{
+    if(e.isIntersecting){
+      [...e.target.children].forEach((c,i)=>setTimeout(()=>c.classList.add('visible'), i*80));
+      o.unobserve(e.target);
+    }
+  }),{threshold:.1});
+  document.querySelectorAll('.stagger').forEach(el=>so.observe(el));
+}
+
+/* ── Progress + counter ────────────────────────────────────────── */
+function updateProgress(){
+  const h = document.documentElement;
+  const p = h.scrollTop / Math.max(1,(h.scrollHeight - h.clientHeight));
+  document.getElementById('pbar').style.width = (p*100)+'%';
+  const S = allSlides();
+  const i = S.findIndex(s=>s.getBoundingClientRect().bottom > window.innerHeight*0.5);
+  document.getElementById('pcount').textContent =
+    (i<0?S.length:i+1) + ' / ' + S.length;
+}
+window.addEventListener('scroll', updateProgress, {passive:true});
+window.addEventListener('resize', updateProgress);
+
+/* ── Presentation mode ─────────────────────────────────────────── */
+function togglePresent(){
+  document.body.classList.toggle('present');
+  document.querySelectorAll('.reveal,.stagger>*').forEach(e=>e.classList.add('visible'));
+  updateProgress();
+}
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') document.body.classList.remove('present');
+  if(!document.body.classList.contains('present')) return;
+  const S = allSlides();
+  const i = S.findIndex(s=>s.getBoundingClientRect().top > window.innerHeight*0.5);
+  if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){
+    e.preventDefault(); (S[i] || S[S.length-1]).scrollIntoView({behavior:'smooth'});
+  }
+  if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    const cur = i<0 ? S.length-1 : i-1;
+    (S[Math.max(0,cur-1)] || S[0]).scrollIntoView({behavior:'smooth'});
+  }
+});
+
+/* ── Sheets ────────────────────────────────────────────────────── */
+function openSheet(id){ document.getElementById('sheet-'+id).classList.add('open'); }
+function closeSheet(id){ document.getElementById('sheet-'+id).classList.remove('open'); }
+
+document.getElementById('appendixBody').innerHTML = `
+  <button class="close" onclick="closeSheet('appendix')">Close</button>
+  <h2>Analysis Appendix</h2>
+  <p style="color:var(--smoke);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase">CHVRCHES × YouTube · CHV5</p>
+
+  <h3>Channel and coverage</h3>
+  <table><tr><th>Metric</th><th>Value</th></tr>
+    ${[['Subscribers',C.subscribers.toLocaleString()],
+       ['Lifetime channel views',C.lifetimeViews.toLocaleString()],
+       ['Uploads retrieved from the playlist',C.retrievedUploads],
+       ['Views across those uploads',C.visibleViews.toLocaleString()],
+       ['Catalogue coverage',pct(COVERAGE)+' of lifetime views'],
+       ['Channel created',C.since],
+       ['Last upload',A.dormant.lastUpload],
+       ['Days silent',A.dormant.daysSilent]]
+      .map(([k,v])=>`<tr><td>${k}</td><td class="n">${v}</td></tr>`).join('')}
+  </table>
+
+  <h3>Dormancy window</h3>
+  <table><tr><th>Metric</th><th>Value</th></tr>
+    ${[['Window','8 Jun 2026 → 26 Aug 2026'],['Days',A.dormant.windowDays],
+       ['Uploads in window','0'],
+       ['Views gained',A.dormant.windowViews.toLocaleString()],
+       ['Views per day',A.dormant.perDay.toLocaleString()],
+       ['Annualised at that rate',A.dormant.annualised],
+       ['Subscribers',`${A.dormant.subsFrom.toLocaleString()} → ${A.dormant.subsTo.toLocaleString()}`]]
+      .map(([k,v])=>`<tr><td>${k}</td><td class="n">${v}</td></tr>`).join('')}
+  </table>
+  <p>Public subscriber counts round to the nearest 1,000 at this scale, so the +1,000 movement is
+  coarse. The view figure is not rounded in the same way.</p>
+
+  <h3>Concentration</h3>
+  <table><tr><th>Top N videos</th><th>Share of visible views</th></tr>
+    ${A.concentration.map(c=>`<tr><td>Top ${c.n}</td><td class="n">${pct(c.pct)}</td></tr>`).join('')}
+  </table>
+
+  <h3>Format returns</h3>
+  <table><tr><th>Format</th><th>Uploads</th><th>Views</th><th>% of visible</th><th>Median</th></tr>
+    ${A.formats.map(([f,n,v,p,m])=>`<tr><td>${f}</td><td class="n">${n}</td><td class="n">${v}</td>
+      <td class="n">${p}%</td><td class="n">${m}</td></tr>`).join('')}
+  </table>
+  <p>Lyric videos carry the highest median of any format on the channel — ${A.lyricMedian} against
+  ${A.mvMedian} for a music video — from only ${A.lyricN} uploads. Shorts return 0.4% of visible views
+  from 38 uploads, a pattern seen across most channels in the monitored pool.</p>
+
+  <h3>Screen Violence — the last album campaign</h3>
+  <table><tr><th>Release</th><th>Date</th><th>Views</th><th>Pre-party</th></tr>
+    ${A.last.singles.concat([A.last.over]).map(s=>`<tr><td>${esc(s.t)}</td><td>${s.d}</td>
+      <td class="n">${s.v.toLocaleString()}</td><td class="n">${s.party.v.toLocaleString()} · ${s.party.min}min</td></tr>`).join('')}
+  </table>
+  <p>Album released ${A.last.album}. The window was established from upload behaviour, not from a
+  release announcement: ${A.last.albumDayAssets} album assets were published on that single day,
+  totalling ${A.last.albumDayViews}, followed by a ONE WEEK CELEBRATION stream six days later.
+  Every single and every pre-party is a confirmed Premiere — the API returns both a scheduled and an
+  actual start time, which proves the broadcast aired.</p>
+
+  <h3>Source and method</h3>
+  <p>All figures retrieved ${A.meta.capturedAt} from the YouTube Data API v3 via
+  <code>/api/full-catalogue?handle=@chvrches</code> and <code>/api/artist-live?slug=chvrches</code>.
+  Shorts are classified as uploads of 62 seconds or less — a duration proxy, since YouTube extended
+  Shorts to three minutes in late 2024 and the API does not expose the designation directly.</p>
+
+  <h3>Known limitations</h3>
+  <p>132 uploads were parsed from a playlist reporting 142; the shortfall is at the oldest end of the
+  catalogue, before August 2013. The channel statistics endpoint reports ${C.publicVideoCount} public
+  videos against 142 playlist entries — most likely a Shorts counting difference. Flagged, not resolved.</p>
+  <p>Views are cumulative to the retrieval date, not views-at-age, so older uploads have had longer to
+  accumulate. Any comparison between eras is directional rather than controlled.</p>
+
+  <h3>Album five</h3>
+  <p><strong>Nothing about album five is confirmed.</strong> Its existence is inferred from two Shorts
+  on the channel — "Jvmpscare. CHV 5 in progress." (1 Jul 2025) and a Bones anniversary post tagged
+  #chv5 (20 Sep 2025). There is no public title, date or tracklist, and no recommendation in this deck
+  depends on one. Timing is expressed relative to release throughout.</p>
+
+  <h3>What public data cannot answer</h3>
+  <p>Where the 27M annual views actually come from — Browse, Suggested, Search or external — is a
+  Studio question. So is whether the people watching the catalogue would be reached by a new release.
+  We do not model, estimate or infer it.</p>
+`;
+
+/* ── Live refresh ──────────────────────────────────────────────── */
+async function refreshLive(){
+  try{
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 7000);
+    const r = await fetch(`${A.meta.apiBase}?slug=${A.meta.slug}`, {cache:'no-store', signal:ctrl.signal});
+    clearTimeout(t);
+    if(!r.ok) throw new Error('status '+r.status);
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    A.liveData = d.state || null;
+    renderStats();
+  }catch(e){
+    console.warn('[CHVRCHES deck] live refresh unavailable — keeping captured data', e.message);
+  }
+}
+
+function renderStats(){
+  const views = liveOr('viewCount', C.lifetimeViews);
+  ['liveLifetime'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt(views.v);
+  });
+}
+
+/* ── Init ──────────────────────────────────────────────────────────
+   observeAll() runs FIRST and unguarded. Everything starts at
+   opacity:0 and is revealed by observers, so anything that throws
+   above it renders a blank deck. The live layer is optional and must
+   never be able to take the presentation down with it.            */
+observeAll();
+updateProgress();
+try{ renderStats(); }catch(e){ console.warn('[deck] stats unavailable', e); }
+try{ refreshLive(); }catch(e){ console.warn('[deck] live refresh unavailable', e); }
+</script>
+</body>
+</html>
