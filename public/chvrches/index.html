@@ -44,9 +44,14 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
 .slide.coal{background:var(--coal)}
 .inner{width:100%;max-width:1180px;margin:0 auto;padding:0 2.4rem;position:relative;z-index:2}
 .bleed{position:absolute;inset:0;z-index:0}
-.bleed img{width:100%;height:100%;object-fit:cover;opacity:.3}
+.bleed img{width:100%;height:100%;object-fit:cover;opacity:.62}
 .bleed::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,var(--ink) 22%,rgba(8,7,13,.72) 62%,rgba(8,7,13,.45) 100%)}
+  background:linear-gradient(90deg,rgba(8,7,13,.95) 0%,rgba(8,7,13,.78) 38%,rgba(8,7,13,.34) 72%,rgba(8,7,13,.22) 100%)}
+/* Cover and closing statements carry less text, so the image can come further forward. */
+.bleed.strong img{opacity:.78}
+.bleed.strong::after{background:
+  linear-gradient(90deg,rgba(8,7,13,.9) 0%,rgba(8,7,13,.62) 42%,rgba(8,7,13,.2) 78%,rgba(8,7,13,.08) 100%),
+  linear-gradient(180deg,rgba(8,7,13,.75) 0%,transparent 26%,transparent 74%,rgba(8,7,13,.6) 100%)}
 
 .label{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
   color:var(--signal);margin-bottom:1.1rem}
@@ -411,6 +416,10 @@ const fmt = n => n>=1e9 ? (n/1e9).toFixed(2)+'BN' : n>=1e6 ? (n/1e6).toFixed(n>=
 const pct = (v,d=1) => v.toFixed(d)+'%';
 const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
 const hero  = id => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+/* One safe fallback step, then give up. */
+const FB = id => `this.onerror=null;this.src='${thumb(id,'hqdefault')}'`;
+const bleedImg = (id,cls='') => `<div class="bleed${cls?' '+cls:''}">` +
+  `<img src="${hero(id)}" alt="" onerror="${FB(id)}"></div>`;
 const yt    = id => `https://www.youtube.com/watch?v=${id}`;
 const liveOr = (key, fallback) => {
   const d = A.liveData;
@@ -425,8 +434,7 @@ function slides(){ return [
 
 /* 01 ── COVER ──────────────────────────────────────────────────── */
 `<section class="slide" data-t="Cover">
-  <div class="bleed"><img src="${hero(A.heroImages.open)}" alt="CHVRCHES"
-    onerror="this.src='${thumb(A.heroImages.open)}'"></div>
+  ${bleedImg(A.heroImages.open,'strong')}
   <div class="inner">
     <div class="label reveal">Virgin Music Group × YouTube</div>
     <h1 class="display reveal" style="font-size:clamp(2.6rem,9vw,7.2rem);line-height:.94">
@@ -436,8 +444,7 @@ function slides(){ return [
 
 /* 02 ── 340 DAYS ──────────────────────────────────────────────── */
 `<section class="slide" data-t="340 days">
-  <div class="bleed"><img src="${hero(A.heroImages.quiet)}" alt=""
-    onerror="this.src='${thumb(A.heroImages.quiet)}'"></div>
+  ${bleedImg(A.heroImages.quiet)}
   <div class="inner">
     <div class="label reveal">Where we start from</div>
     <div class="split stagger">
@@ -475,8 +482,7 @@ function slides(){ return [
 
 /* 04 ── SCREEN VIOLENCE ───────────────────────────────────────── */
 `<section class="slide" data-t="Screen Violence">
-  <div class="bleed"><img src="${hero(A.heroImages.sv)}" alt=""
-    onerror="this.src='${thumb(A.heroImages.sv)}'"></div>
+  ${bleedImg(A.heroImages.sv)}
   <div class="inner">
     <div class="label reveal">The last album campaign · ${A.last.opens} → ${A.last.album}</div>
     <h2 class="display big reveal" style="max-width:16ch">Three singles.<br>Three Premieres.<br>
@@ -496,8 +502,7 @@ function slides(){ return [
 
 /* 05 ── THE RITUAL ────────────────────────────────────────────── */
 `<section class="slide coal" data-t="The ritual">
-  <div class="bleed"><img src="${hero(A.heroImages.party)}" alt=""
-    onerror="this.src='${thumb(A.heroImages.party)}'"></div>
+  ${bleedImg(A.heroImages.party)}
   <div class="inner">
     <div class="label reveal">Something almost nobody else does</div>
     <h2 class="display big reveal" style="max-width:19ch">They already built a room<br>
@@ -543,8 +548,7 @@ function slides(){ return [
 
 /* 07 ── DIFFERENT JOBS ────────────────────────────────────────── */
 `<section class="slide" data-t="Different jobs">
-  <div class="bleed"><img src="${hero(A.heroImages.live)}" alt=""
-    onerror="this.src='${thumb(A.heroImages.live)}'"></div>
+  ${bleedImg(A.heroImages.live)}
   <div class="inner">
     <div class="label reveal">The shape of the campaign</div>
     <h2 class="display big reveal" style="max-width:19ch">Don't ask one format<br>to do every job.</h2>
@@ -564,8 +568,7 @@ function slides(){ return [
 
 /* 08 ── CHVRCHES TV ───────────────────────────────────────────── */
 `<section class="slide coal" data-t="CHVRCHES TV">
-  <div class="bleed"><img src="${hero(A.heroImages.station)}" alt=""
-    onerror="this.src='${thumb(A.heroImages.station)}'"></div>
+  ${bleedImg(A.heroImages.station)}
   <div class="inner">
     <div class="label reveal">An opportunity to explore with YouTube</div>
     <h2 class="display big reveal" style="max-width:15ch">CHVRCHES TV</h2>
@@ -650,8 +653,7 @@ function slides(){ return [
 
 /* 11 ── CLOSE ─────────────────────────────────────────────────── */
 `<section class="slide" data-t="Close">
-  <div class="bleed"><img src="${hero(A.heroImages.close)}" alt=""
-    onerror="this.src='${thumb(A.heroImages.close)}'"></div>
+  ${bleedImg(A.heroImages.close,'strong')}
   <div class="inner">
     <div class="huge reveal" style="font-size:clamp(3.2rem,10vw,8.5rem)">${A.dormant.daysSilent} days</div>
     <div class="huge-l reveal" style="font-size:clamp(.9rem,2vw,1.5rem);color:var(--paper)">without an upload.</div>
