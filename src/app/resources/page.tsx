@@ -101,6 +101,7 @@ export default function ResourcesPage() {
                     <div className="text-[10px] uppercase tracking-[0.12em] text-ink/30 mt-1.5">
                       {r.updated}
                       {r.download && ' · Downloads'}
+                      {r.offsite && ' · Opens in a new tab'}
                     </div>
                   </>
                 );
@@ -109,15 +110,17 @@ export default function ResourcesPage() {
                   'block bg-white rounded-lg px-4 py-3 no-underline ' +
                   'border border-black/5 hover:border-black/15 transition-colors';
 
-                return r.download ? (
-                  <a key={r.href} href={r.href} download className={cls}>
-                    {inner}
-                  </a>
-                ) : (
-                  <Link key={r.href} href={r.href} className={cls}>
-                    {inner}
-                  </Link>
-                );
+                if (r.download) {
+                  return <a key={r.href} href={r.href} download className={cls}>{inner}</a>;
+                }
+                if (r.offsite) {
+                  return (
+                    <a key={r.href} href={r.href} target="_blank" rel="noopener noreferrer" className={cls}>
+                      {inner}
+                    </a>
+                  );
+                }
+                return <Link key={r.href} href={r.href} className={cls}>{inner}</Link>;
               })}
             </div>
           </section>

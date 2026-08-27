@@ -25,6 +25,11 @@ export interface Resource {
   download?: boolean;
   /** Safe to send outside Virgin. Everything else is internal by default. */
   external?: boolean;
+  /**
+   * Lives on another host. Needs a plain anchor with target/rel — next/link
+   * would attempt a client-side route transition and fail on an absolute URL.
+   */
+  offsite?: boolean;
 }
 
 export interface ResourceGroup {
@@ -84,9 +89,18 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'The Virgin-wide work behind the benchmarks the artist decks quote.',
     items: [
       {
+        title: 'YouTube Campaign Observatory',
+        blurb:
+          'How successful YouTube campaigns are built — 138 channels, 3,554 videos, eight campaigns worth studying. Opens as a live page.',
+        href: 'https://youtube-insights-pi.vercel.app/preview.html',
+        kind: 'Page',
+        updated: 'July 2026',
+        offsite: true,
+      },
+      {
         title: 'YouTube Market Intelligence — V11',
         blurb:
-          'The current presentation. Campaign case studies and cross-channel benchmarks. Supersedes V7 to V10.',
+          'The same work as slides, for presenting offline. Supersedes V7 to V10.',
         href: '/resources/V11_YouTube_Market_Intelligence.pptx',
         kind: 'Deck',
         updated: 'July 2026',
