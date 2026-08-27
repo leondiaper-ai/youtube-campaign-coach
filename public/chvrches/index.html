@@ -184,9 +184,14 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .fs-r{font-size:.58rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
   color:var(--smoke);margin-top:.3rem}
 .fstage.hero .fs-r{color:var(--signal)}
-.fs-im{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem;margin-top:.65rem}
-.fs-a img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;display:block;background:#222}
-.fs-a span{display:block;font-size:.55rem;color:var(--smoke);margin-top:.25rem;line-height:1.3}
+.fs-f{font-size:.72rem;font-weight:700;color:var(--paper);margin-top:.5rem;line-height:1.3}
+.fstage.hero .fs-f{font-size:clamp(.8rem,1.5vw,1rem)}
+/* One image per stage. The hero's is unconstrained and fills its wider column,
+   so it ends up roughly twice the area of the other two — that size gap is the
+   point being made, not decoration. */
+.fs-im{margin-top:.6rem}
+.fs-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
+.fstage.hero .fs-im img{border-radius:6px}
 .fs-n{font-size:.65rem;color:var(--smoke);line-height:1.45;margin-top:.6rem}
 .farrow{display:flex;align-items:center;color:var(--smoke);font-size:1.1rem;opacity:.5}
 .always{margin-top:.55rem;border:1px dashed var(--hair);border-radius:8px;
@@ -403,18 +408,24 @@ const ARTIST = {
      that the middle stage matters more than the two either side of it. The
      layout carries that: stage 02 is roughly twice the width of 01 and 03. */
   flow:[
+    /* One image per stage, not two. Six thumbnails at matching size rebuilds the
+       taxonomy the layout is trying to escape — the eye counts six things again.
+       The formats are named in text; only the hero gets a picture with weight. */
     { n:'01', stage:'Create attention',
       role:'Discovery and re-engagement',
-      note:'Before the release. Reactivate the people already there and open a way in for people who are not.',
-      assets:[['e68Wy_z9mzw','Shorts'],['SLfeY3TSDkg','Community']] },
+      formats:'Shorts + Community',
+      img:'e68Wy_z9mzw',
+      note:'Before the release. Reactivate the people already there and open a way in for people who are not. A start, not the destination.' },
     { n:'02', stage:'The hero moment', hero:true,
       role:'The release itself',
-      note:'Music videos still carry 73.6% of visible viewing. A pre-party and Premiere can make the biggest ones feel like an event — four singles, four pre-parties, all confirmed.',
-      assets:[['7U_LhzgwJ4U','Official music video'],['0XoMu7Bz7YE','Pre-party + Premiere']] },
+      formats:'Official music video + Premiere',
+      img:'7U_LhzgwJ4U',
+      note:'Music videos still carry 73.6% of visible viewing. A pre-party and Premiere can make the biggest ones feel like an event — four singles, four pre-parties, all confirmed.' },
     { n:'03', stage:'Extend the moment',
       role:'Somewhere for that attention to go',
-      note:'Inside 7–14 days. Proven support that does not need another hero-scale shoot to earn its place.',
-      assets:[['fB4gjiMVKFI','Lyric video'],['fGiqCmZvkJ8','Live']] },
+      formats:'Lyric video + Live',
+      img:'fB4gjiMVKFI',
+      note:'Inside 7–14 days. Proven support that does not need another hero-scale shoot to earn its place.' },
   ],
 
   /* Runs underneath all three stages rather than sitting inside one. */
@@ -678,10 +689,9 @@ function slides(){ return [
           <div class="fn">${s.n}</div>
           <div class="fs-t">${esc(s.stage)}</div>
           <div class="fs-r">${esc(s.role)}</div>
-          <div class="fs-im">
-            ${s.assets.map(([id,n])=>`
-              <div class="fs-a"><img src="${thumb(id)}" alt="${esc(n)}"><span>${esc(n)}</span></div>`).join('')}
-          </div>
+          <div class="fs-f">${esc(s.formats)}</div>
+          <div class="fs-im"><img src="${s.hero?hero(s.img):thumb(s.img)}" alt="${esc(s.formats)}"
+            ${s.hero?`onerror="${FB(s.img)}"`:''}></div>
           <div class="fs-n">${s.note}</div>
         </div>`).join('')}
     </div>
