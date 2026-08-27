@@ -17,6 +17,7 @@ import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
 import AddArtistModal, { AddArtistModalInline } from '@/components/AddArtistModal';
+import WatcherNav from '@/components/WatcherNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -246,6 +247,8 @@ export default async function TeamWatcherPage() {
             )}
           </div>
         </div>
+
+        <WatcherNav />
 
         {/* Empty state */}
         {!hasEntries && (
