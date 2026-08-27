@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import WatcherNav from '@/components/WatcherNav';
 import { RESOURCE_GROUPS, type ResourceKind } from '@/lib/resources';
 
 export const metadata = {
@@ -9,6 +8,8 @@ export const metadata = {
 
 const PAPER = '#FAF7F2';
 const INK = '#0E0E0E';
+/* Active-pill background. Matches /growth so the nav reads identically. */
+const SOFT = '#F6F1E7';
 
 /* Badge tints. Distinct enough to scan a column for "the spreadsheet" without
    reading titles, muted enough that they do not compete with them. */
@@ -25,19 +26,41 @@ export default function ResourcesPage() {
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[1080px] mx-auto px-6 py-10">
-        {/* Header */}
+        {/* Header. Mirrors the pill nav on /growth so this reads as one of the
+            main boards rather than a page that arrived from somewhere else. */}
         <div className="mb-6">
-          <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
             YouTube Campaign System
           </div>
-          <h1 className="font-black text-[28px] leading-tight mt-1">Resources</h1>
+          <div className="flex items-center gap-1 mt-2">
+            <Link
+              href="/growth"
+              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+            >
+              Channel Health
+            </Link>
+            <Link
+              href="/campaigns"
+              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+            >
+              Active Campaigns
+            </Link>
+            <Link
+              href="/coach"
+              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
+            >
+              Coach
+            </Link>
+            <span className="px-3 py-1.5 rounded-md text-[13px] font-black" style={{ background: SOFT }}>
+              Resources
+            </span>
+          </div>
+          <h1 className="font-black text-[28px] leading-tight mt-4">Resources</h1>
           <p className="text-[11px] text-ink/35 mt-1 max-w-[560px]">
             Everything produced for Virgin Music on YouTube — artist decks, market analysis,
             and the method behind the numbers. Current versions only.
           </p>
         </div>
-
-        <WatcherNav />
 
         {RESOURCE_GROUPS.map((group) => (
           <section key={group.heading} className="mb-9">

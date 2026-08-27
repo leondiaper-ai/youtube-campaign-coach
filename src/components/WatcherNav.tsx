@@ -15,7 +15,7 @@ const BONE = '#E8E3DA';
 
 const TABS = [
   { href: '/team-watcher', label: 'Campaign Board' },
-  { href: '/team-watcher/resources', label: 'Resources' },
+  { href: '/resources', label: 'Resources' },
 ] as const;
 
 export default function WatcherNav() {
