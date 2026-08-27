@@ -413,11 +413,17 @@ const ARTIST = {
   ],
 
   /* The ritual, in the order a fan experiences it. */
+  /* Verified from liveStreamingDetails: for all four singles the pre-party
+     stream started 12-20 minutes before the video premiered, and every video
+     premiered on the hour. A routine, not an occasional flourish.
+     The API confirms a live broadcast ran ahead of each premiere; it cannot
+     confirm who appeared on it. */
   ritual:[
-    {id:'0XoMu7Bz7YE',t:'Pre-party',d:'19 minutes, live, before anything drops'},
-    {id:'7U_LhzgwJ4U',t:'Premiere',d:'Everyone watching the same thing at the same moment'},
-    {id:'du4kNAyjVCg',t:'The video',d:'Then it belongs to everyone else'},
+    {id:'0XoMu7Bz7YE',t:'Pre-party',d:'The band go live and talk to fans directly'},
+    {id:'7U_LhzgwJ4U',t:'Premiere',d:'Everyone moves into the new release together'},
+    {id:'du4kNAyjVCg',t:'The video',d:'The moment opens to the wider audience'},
   ],
+  ritualRun:'12–20 minutes', ritualN:4,
 
   canSee:['Public subscriber and view totals','Upload history and cadence','Format mix',
     'Public video performance','Premiere confirmation','Campaign sequencing','Public engagement'],
@@ -525,9 +531,9 @@ function slides(){ return [
 `<section class="slide coal" data-t="The ritual">
   ${bleedImg(A.heroImages.party)}
   <div class="inner">
-    <div class="label reveal">Something almost nobody else does</div>
-    <h2 class="display big reveal" style="max-width:19ch">They already built a room<br>
-      <span style="color:var(--signal)">for the core fans.</span></h2>
+    <div class="label reveal">A distinctive CHVRCHES YouTube ritual</div>
+    <h2 class="display big reveal" style="max-width:20ch">They don't just premiere a video.<br>
+      <span style="color:var(--signal)">They show up before it.</span></h2>
     <div class="seq stagger">
       ${A.ritual.map((v,i)=>`
         ${i?'<div class="seq-ar">→</div>':''}
@@ -535,9 +541,11 @@ function slides(){ return [
           <div class="seq-m"><div class="seq-d">${esc(v.t)}</div>
             <div class="seq-v">${esc(v.d)}</div></div></div>`).join('')}
     </div>
-    <p class="sub reveal">Four singles, four pre-parties, every one a confirmed Premiere. They draw a
-      small, committed crowd — under 1% of what the video goes on to do.
-      <strong>That is the point: this is where the people who care most are already standing.</strong></p>
+    <p class="sub reveal" style="margin-top:1.1rem">All ${A.ritualN} singles, every time — a live stream
+      opening <strong>${A.ritualRun} before</strong> the video premiered on the hour. A small,
+      high-intent audience, and a YouTube ritual we rarely see any artist run this consistently.</p>
+    <h3 class="display mid reveal" style="margin-top:.9rem;max-width:28ch">Keep the ritual for CHV5.<br>
+      <span style="color:var(--signal)">Let the core fans meet each new era first — with the band there.</span></h3>
   </div>
 </section>`,
 
