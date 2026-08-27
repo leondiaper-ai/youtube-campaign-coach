@@ -504,9 +504,8 @@ function slides(){ return [
 `<section class="slide" data-t="Screen Violence">
   ${bleedImg(A.heroImages.sv)}
   <div class="inner">
-    <div class="label reveal">The last album campaign · ${A.last.opens} → ${A.last.album}</div>
-    <h2 class="display big reveal" style="max-width:16ch">Three singles.<br>Three Premieres.<br>
-      <span style="color:var(--signal)">Then the whole record.</span></h2>
+    <div class="label reveal">What Screen Violence got right</div>
+    <h2 class="display big reveal" style="max-width:15ch">A well-programmed<br>album campaign.</h2>
     <div class="seq stagger">
       ${A.svSeq.map((v,i)=>`
         ${i?'<div class="seq-ar">→</div>':''}
@@ -514,9 +513,11 @@ function slides(){ return [
           <div class="seq-m"><div class="seq-d">${v.d}</div><div class="seq-t">${esc(v.t)}</div>
             <div class="seq-v">${fmt(v.v)}</div></div></div>`).join('')}
     </div>
-    <p class="sub reveal">${A.last.lead} days from first single to release, and
-      ${A.last.albumDayAssets} album assets published on the day itself — ${A.last.albumDayViews}
-      between them. A clear, well-sequenced campaign.</p>
+    <p class="sub reveal" style="margin-top:1.1rem">Three singles. Three Premieres. Then the full album
+      on release day — ${A.last.albumDayAssets} assets at once, ${A.last.albumDayViews} between them,
+      ${A.last.lead} days after the campaign opened.</p>
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:26ch">The structure worked.<br>
+      <span style="color:var(--signal)">CHV5 is about building more around each moment.</span></h3>
   </div>
 </section>`,
 
