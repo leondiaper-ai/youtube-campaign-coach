@@ -166,16 +166,40 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .seq-ar{align-self:center;color:var(--signal);font-size:1.05rem}
 
 /* ── Format jobs with real frames ────────────────────────────────── */
-.jobs{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:1.6rem}
-.job{border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:rgba(243,241,247,.03)}
-.slide.light .job{border-color:var(--bone);background:#fff}
-.job.key{border-color:var(--signal)}
-.job img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
-.job-b{padding:.7rem .8rem}
-.job-n{font-size:.56rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
-.job.key .job-n{color:var(--signal)}
-.job-t{font-size:.85rem;font-weight:700;line-height:1.25;margin-top:.2rem}
-.job-d{font-size:.65rem;color:var(--smoke);line-height:1.45;margin-top:.25rem}
+/* ── Campaign flow (slide 07) ───────────────────────────────────────
+   Three stages, centre weighted. The arrow columns are fixed-width so the
+   stage columns keep their 1 : 1.9 : 1 relationship at any viewport — the
+   hero must stay visibly bigger, that ratio is the argument. */
+.flow-row{display:grid;grid-template-columns:1fr auto 1.9fr auto 1fr;
+  gap:.55rem;align-items:stretch;margin-top:1.5rem}
+.fstage{border:1px solid var(--hair);border-radius:10px;padding:.85rem .9rem;
+  background:rgba(243,241,247,.03);display:flex;flex-direction:column}
+.fstage.hero{border-color:var(--signal);border-width:2px;
+  background:rgba(255,45,120,.06)}
+.fn{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.7rem;
+  letter-spacing:.1em;color:var(--smoke)}
+.fstage.hero .fn{color:var(--signal)}
+.fs-t{font-size:.95rem;font-weight:700;line-height:1.15;margin-top:.25rem}
+.fstage.hero .fs-t{font-size:clamp(1.05rem,2.1vw,1.6rem)}
+.fs-r{font-size:.58rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.3rem}
+.fstage.hero .fs-r{color:var(--signal)}
+.fs-im{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem;margin-top:.65rem}
+.fs-a img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;display:block;background:#222}
+.fs-a span{display:block;font-size:.55rem;color:var(--smoke);margin-top:.25rem;line-height:1.3}
+.fs-n{font-size:.65rem;color:var(--smoke);line-height:1.45;margin-top:.6rem}
+.farrow{display:flex;align-items:center;color:var(--smoke);font-size:1.1rem;opacity:.5}
+.always{margin-top:.55rem;border:1px dashed var(--hair);border-radius:8px;
+  padding:.6rem .9rem;font-size:.65rem;letter-spacing:.03em;color:var(--smoke);text-align:center}
+.exists{margin-top:1.1rem;border-left:3px solid var(--cyan);padding:.7rem 1rem;
+  background:rgba(61,224,213,.07);border-radius:0 8px 8px 0}
+.exists-h{font-size:.95rem;font-weight:700;line-height:1.3}
+.exists-d{font-size:.68rem;color:var(--smoke);line-height:1.5;margin-top:.25rem}
+@media(max-width:900px){
+  .flow-row{grid-template-columns:1fr;gap:.5rem}
+  .farrow{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+}
+
 
 /* ── Station wall ────────────────────────────────────────────────── */
 .swall{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:1.4rem}
@@ -185,7 +209,7 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .sw-t{position:absolute;left:.4rem;bottom:.3rem;z-index:2;font-size:.55rem;font-weight:600;color:#fff}
 
 @media(max-width:860px){
-  .mosaic,.jobs{grid-template-columns:repeat(2,1fr)}
+  .mosaic{grid-template-columns:repeat(2,1fr)}
   .swall{grid-template-columns:repeat(2,1fr)}
   .split{grid-template-columns:1fr;gap:1.6rem}
 }
@@ -372,14 +396,29 @@ const ARTIST = {
   mvSharePct:73.6,
 
   /* Different formats, different jobs. */
-  jobs:[
-    ['7U_LhzgwJ4U','Official music video','The hero moment','Around the priority singles. Still 73.6% of visible viewing.'],
-    ['fB4gjiMVKFI','Lyric video','Proven long-form support','Lower lift, historically strong here. Ready across singles and album tracks.'],
-    ['0XoMu7Bz7YE','Pre-party + Premiere','Bring the core fans together','Four singles, four pre-parties, all confirmed.'],
-    ['fGiqCmZvkJ8','Live','Deepen the world','15 assets, 5 full sets, already on the channel.'],
-    ['e68Wy_z9mzw','Shorts','Create entry points','They start journeys well. They are not the destination.'],
-    ['SLfeY3TSDkg','Community + programming','Reconnect before release','Reach the existing audience without a shoot.'],
+  /* The campaign as three stages rather than six formats.
+     Six equally-sized cards read as a taxonomy — here is everything the channel
+     can make — which is not the recommendation. The recommendation is that these
+     formats do different jobs at different points around one hero release, and
+     that the middle stage matters more than the two either side of it. The
+     layout carries that: stage 02 is roughly twice the width of 01 and 03. */
+  flow:[
+    { n:'01', stage:'Create attention',
+      role:'Discovery and re-engagement',
+      note:'Before the release. Reactivate the people already there and open a way in for people who are not.',
+      assets:[['e68Wy_z9mzw','Shorts'],['SLfeY3TSDkg','Community']] },
+    { n:'02', stage:'The hero moment', hero:true,
+      role:'The release itself',
+      note:'Music videos still carry 73.6% of visible viewing. A pre-party and Premiere can make the biggest ones feel like an event — four singles, four pre-parties, all confirmed.',
+      assets:[['7U_LhzgwJ4U','Official music video'],['0XoMu7Bz7YE','Pre-party + Premiere']] },
+    { n:'03', stage:'Extend the moment',
+      role:'Somewhere for that attention to go',
+      note:'Inside 7–14 days. Proven support that does not need another hero-scale shoot to earn its place.',
+      assets:[['fB4gjiMVKFI','Lyric video'],['fGiqCmZvkJ8','Live']] },
   ],
+
+  /* Runs underneath all three stages rather than sitting inside one. */
+  alwaysOn:'Catalogue · Community · Station — running underneath all of it',
 
   /* Real YouTube Station reference. */
   station:{
@@ -617,24 +656,44 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 07 ── DIFFERENT JOBS ────────────────────────────────────────── */
-`<section class="slide" data-t="Different jobs">
+/* 07 ── BUILD AROUND THE HERO MOMENT ──────────────────────────────
+   Replaces an earlier six-card format grid. That version was accurate but read
+   as a taxonomy — six things the channel can make, all the same size — which
+   invited the wrong conclusion: make more of everything. The argument is that
+   one release is the hero and the other formats exist to move people into and
+   out of it, so the middle stage is deliberately the largest object on screen. */
+`<section class="slide" data-t="Hero moment">
   ${bleedImg(A.heroImages.live)}
   <div class="inner">
     <div class="label reveal">The shape of the campaign</div>
-    <h2 class="display big reveal" style="max-width:19ch">Every format here<br>
-      <span style="color:var(--signal)">already has a job.</span></h2>
-    <div class="jobs stagger">
-      ${A.jobs.map(([id,n,j,d],i)=>`
-        <div class="job${i===0?' key':''}">
-          <img src="${thumb(id)}" alt="${esc(n)}">
-          <div class="job-b"><div class="job-n">${n}</div><div class="job-t">${j}</div>
-            <div class="job-d">${d}</div></div>
+    <h2 class="display big reveal" style="max-width:16ch">Build around<br>
+      <span style="color:var(--signal)">the hero moment.</span></h2>
+    <p class="sub reveal" style="margin-top:.9rem;max-width:60ch">Different formats moving people
+      into, through and beyond each major release — rather than six separate content plans.</p>
+
+    <div class="flow-row stagger">
+      ${A.flow.map((s,i)=>`
+        ${i ? '<div class="farrow">→</div>' : ''}
+        <div class="fstage${s.hero?' hero':''}">
+          <div class="fn">${s.n}</div>
+          <div class="fs-t">${esc(s.stage)}</div>
+          <div class="fs-r">${esc(s.role)}</div>
+          <div class="fs-im">
+            ${s.assets.map(([id,n])=>`
+              <div class="fs-a"><img src="${thumb(id)}" alt="${esc(n)}"><span>${esc(n)}</span></div>`).join('')}
+          </div>
+          <div class="fs-n">${s.note}</div>
         </div>`).join('')}
     </div>
-    <p class="sub reveal">Every one of these is already on the channel. Live alone runs to
-      <strong>${A.live.n} assets and ${A.live.fullSets} full-length sets</strong>, including 101 minutes
-      at House of Vans — hours of material that can reopen the channel without the band filming anything new.</p>
+
+    <div class="always reveal">${esc(A.alwaysOn)}</div>
+
+    <div class="exists reveal">
+      <div class="exists-h">The channel already has the raw material.</div>
+      <div class="exists-d">Live alone runs to <strong>${A.live.n} assets and ${A.live.fullSets}
+        full-length sets</strong>, including 101 minutes at House of Vans. Most of stage 03 can be
+        programmed from what is already there — the opportunity is programming, not production.</div>
+    </div>
   </div>
 </section>`,
 
