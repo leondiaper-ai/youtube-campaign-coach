@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════════════════
-   CHVRCHES × YOUTUBE — CHV5 campaign strategy
+   CHVRCHES × YOUTUBE — the next album campaign
 
    Identity is deliberately its own: cold near-black, bleached paper,
    electric magenta as the single accent with a cyan second. Nothing
@@ -254,7 +254,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 <div class="pbar" id="pbar"></div>
 <div class="chrome">
-  <div class="chrome-l">CHVRCHES × YouTube — CHV5</div>
+  <div class="chrome-l">CHVRCHES × YouTube — the next album</div>
   <div class="chrome-r">
     <button class="btn" onclick="togglePresent()">Present</button>
     <button class="btn" onclick="openSheet('appendix')">Analysis</button>
@@ -384,7 +384,7 @@ const ARTIST = {
     wall:[
       {id:'_mTRvJ9fugM',t:'The Mother We Share'},
       {id:'fGiqCmZvkJ8',t:'Live at House of Vans'},
-      {id:'RntlEwS6os8',t:'CHV5',nu:true},
+      {id:'RntlEwS6os8',t:'New album',nu:true},
       {id:'BZyzX4c1vIs',t:'Clearest Blue'},
       {id:'7U_LhzgwJ4U',t:'How Not To Drown'},
       {id:'4Eo84jDIMKI',t:'Leave A Trace'},
@@ -395,7 +395,7 @@ const ARTIST = {
     ],
   },
 
-  /* Screen Violence -> CHV5, as an evolution rather than a correction. */
+  /* Screen Violence -> the next album, as an evolution rather than a correction. */
   arc:[
     ['Pre-campaign','Reopen the channel','Catalogue, archive live, Community, playlists — before any announcement'],
     ['Single','Hero moment','Official music video with the pre-party Premiere they already run'],
@@ -403,7 +403,7 @@ const ARTIST = {
     ['Next single','Another hero moment',''],
     ['Release day','Give every song a home','As Screen Violence did — seven assets on the day'],
     ['After release','Back what moves','Let the audience response decide what gets more support'],
-    ['Always on','CHVRCHES Station','Catalogue, live and CHV5 in one place, between campaigns as well as during'],
+    ['Always on','CHVRCHES Station','Catalogue, live and the new record in one place, between campaigns as well as during'],
   ],
 
   heroImages:{ open:'4Eo84jDIMKI', quiet:'BZyzX4c1vIs', sv:'7U_LhzgwJ4U',
@@ -549,7 +549,7 @@ function slides(){ return [
       meaningful land in the 7–14 day window.</strong> Assets clustered around each single, then six weeks
       of quiet until the next.</p>
     <h3 class="display mid reveal" style="margin-top:.9rem;max-width:28ch">The moments were strong.<br>
-      <span style="color:var(--signal)">For CHV5, the opportunity is the weeks between them.</span></h3>
+      <span style="color:var(--signal)">For the next album, the opportunity is the weeks between them.</span></h3>
   </div>
 </section>`,
 
@@ -571,7 +571,7 @@ function slides(){ return [
       opening ${A.ritualRun} before the video premiered on the hour. Born from a very different 2021
       campaign environment, when everyone was leaning on livestreaming — but the principle still works:
       <strong>direct artist engagement turns a release into an event.</strong></p>
-    <h3 class="display mid reveal" style="margin-top:.9rem;max-width:30ch">For CHV5: keep the lean-in.<br>
+    <h3 class="display mid reveal" style="margin-top:.9rem;max-width:30ch">For the next album: keep the lean-in.<br>
       <span style="color:var(--signal)">Not necessarily the same format.</span></h3>
     <p class="sub reveal" style="margin-top:.5rem">Live, Premieres and Community used selectively to give
       core fans direct access around the biggest moments — a short Q&amp;A, a first look, fan questions
@@ -670,8 +670,8 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 09 ── SCREEN VIOLENCE → CHV5 ─────────────────────────────────── */
-`<section class="slide light" data-t="Screen Violence → CHV5">
+/* 09 ── SCREEN VIOLENCE → NEXT ALBUM ──────────────────────────── */
+`<section class="slide light" data-t="Screen Violence → next album">
   <div class="inner">
     <div class="label reveal">The evolution, not a correction</div>
     <h2 class="display big reveal" style="max-width:22ch">Keep the ritual.<br>
@@ -687,7 +687,7 @@ function slides(){ return [
           that woke up for it and went quiet afterwards.</p>
       </div>
       <div class="card key">
-        <div class="c-h">CHV5</div>
+        <div class="c-h">The next album</div>
         <div class="jr" style="margin-top:.7rem">
           ${A.arc.map(([w,t,d],i)=>`
             <div class="jr-s${i===0||i===6?' key':''}"><div class="jr-n" style="min-width:6.6rem">${w}</div>
@@ -702,7 +702,7 @@ function slides(){ return [
 /* 10 ── WHAT WE'D DO ───────────────────────────────────────────── */
 `<section class="slide" data-t="What we'd do">
   <div class="inner">
-    <div class="label reveal">For CHV5</div>
+    <div class="label reveal">For the next album</div>
     <h2 class="display big reveal" style="margin-bottom:1.1rem">What we'd do.</h2>
     <div class="stagger">
       ${[['01','Reopen the channel',
@@ -714,7 +714,7 @@ function slides(){ return [
          ['04','Give every hero a next destination',
           'Follow a major release inside 7–14 days with a lyric video, a live performance or another substantial asset.'],
          ['05','Explore CHVRCHES Station',
-          'Connect the catalogue, the live archive and CHV5 in one always-on environment. To be discussed with YouTube.']]
+          'Connect the catalogue, the live archive and the new record in one always-on environment. To be discussed with YouTube.']]
         .map(([n,t,a])=>`
         <div class="rec"><div class="rec-n">${n}</div>
           <div><div class="rec-t">${t}</div><div class="rec-a">${a}</div></div></div>`).join('')}
@@ -805,7 +805,7 @@ function closeSheet(id){ document.getElementById('sheet-'+id).classList.remove('
 document.getElementById('appendixBody').innerHTML = `
   <button class="close" onclick="closeSheet('appendix')">Close</button>
   <h2>Analysis Appendix</h2>
-  <p style="color:var(--smoke);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase">CHVRCHES × YouTube · CHV5</p>
+  <p style="color:var(--smoke);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase">CHVRCHES × YouTube · the next album campaign</p>
 
   <h3>Channel and coverage</h3>
   <table><tr><th>Metric</th><th class="n">Value</th></tr>
