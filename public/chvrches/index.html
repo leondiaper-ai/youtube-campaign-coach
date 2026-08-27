@@ -211,15 +211,18 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .src{font-size:.6rem;color:var(--smoke);letter-spacing:.03em}
 
 .chrome{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;
-  align-items:center;padding:.85rem 1.6rem;background:rgba(8,7,13,.82);
-  backdrop-filter:blur(14px);border-bottom:1px solid var(--hair)}
+  align-items:center;padding:.85rem 1.6rem;background:rgba(8,7,13,.92);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--hair);
+  transform:translateZ(0);will-change:transform;backface-visibility:hidden}
 body.present .chrome{display:none}
 .chrome-l{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
 .chrome-r{display:flex;gap:.5rem}
 .btn{font:inherit;font-size:.66rem;font-weight:600;padding:.45rem .9rem;border-radius:6px;
   border:1px solid var(--hair);background:transparent;color:var(--paper);cursor:pointer}
 .btn:hover{border-color:var(--signal);color:var(--signal)}
-.pbar{position:fixed;top:0;left:0;height:2px;background:var(--signal);z-index:60;width:0}
+.pbar{position:fixed;top:0;left:0;height:2px;background:var(--signal);z-index:60;width:100%;
+  transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 .pcount{position:fixed;bottom:1.2rem;right:1.6rem;z-index:50;font-size:.62rem;color:var(--smoke);
   font-family:'Space Grotesk',sans-serif}
 .phint{position:fixed;bottom:1.2rem;left:1.6rem;z-index:50;font-size:.58rem;color:var(--smoke);display:none}
@@ -754,7 +757,11 @@ function slides(){ return [
    ═══════════════════════════════════════════════════════════════════ */
 document.getElementById('deck').innerHTML = slides().join('');
 
-function allSlides(){ return [...document.querySelectorAll('.slide')]; }
+let SLIDE_CACHE = null;
+function allSlides(){
+  if(!SLIDE_CACHE || !SLIDE_CACHE.length) SLIDE_CACHE = [...document.querySelectorAll('.slide')];
+  return SLIDE_CACHE;
+}
 
 function observeAll(){
   const ro = new IntersectionObserver((es,o)=>es.forEach(e=>{
@@ -771,18 +778,38 @@ function observeAll(){
   document.querySelectorAll('.stagger').forEach(el=>so.observe(el));
 }
 
-/* ── Progress + counter ────────────────────────────────────────── */
-function updateProgress(){
+/* ── Progress + counter ──────────────────────────────────────────
+   Reading getBoundingClientRect on every slide inside a raw scroll
+   handler forces a layout recalculation dozens of times a second,
+   which is what makes a fixed bar judder. Measure once per frame,
+   cache the DOM refs, and drive the bar with a transform so the
+   compositor handles it instead of the paint thread.            */
+let _pbar, _pcount, _ticking = false, _lastIdx = -1;
+function measure(){
+  _ticking = false;
+  if(!_pbar)   _pbar   = document.getElementById('pbar');
+  if(!_pcount) _pcount = document.getElementById('pcount');
   const h = document.documentElement;
   const p = h.scrollTop / Math.max(1,(h.scrollHeight - h.clientHeight));
-  document.getElementById('pbar').style.width = (p*100)+'%';
+  if(_pbar) _pbar.style.transform = 'scaleX(' + Math.min(1,Math.max(0,p)) + ')';
   const S = allSlides();
-  const i = S.findIndex(s=>s.getBoundingClientRect().bottom > window.innerHeight*0.5);
-  document.getElementById('pcount').textContent =
-    (i<0?S.length:i+1) + ' / ' + S.length;
+  if(!S.length || !_pcount) return;
+  const mid = window.innerHeight * 0.5;
+  let i = 0;
+  for(; i < S.length; i++){ if(S[i].getBoundingClientRect().bottom > mid) break; }
+  const idx = Math.min(i, S.length - 1);
+  if(idx !== _lastIdx){                       // only touch the DOM when it changes
+    _lastIdx = idx;
+    _pcount.textContent = (idx + 1) + ' / ' + S.length;
+  }
+}
+function updateProgress(){
+  if(_ticking) return;
+  _ticking = true;
+  requestAnimationFrame(measure);
 }
 window.addEventListener('scroll', updateProgress, {passive:true});
-window.addEventListener('resize', updateProgress);
+window.addEventListener('resize', ()=>{ SLIDE_CACHE = null; updateProgress(); }, {passive:true});
 
 /* ── Presentation mode ─────────────────────────────────────────── */
 function togglePresent(){
