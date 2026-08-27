@@ -500,9 +500,9 @@ function slides(){ return [
           <div class="mo-m"><div class="mo-v">${fmt(v.v)}</div><div class="mo-t">${esc(v.t)}</div></div>
         </a>`).join('')}
     </div>
-    <p class="sub reveal">Six songs, four eras, ${pct(A.concentration[3].pct)} of all viewing in the top ten
-      — and the biggest single video is only ${pct(A.concentration[0].pct)} of it. Several real doors,
-      not one holding open for the rest.</p>
+    <p class="sub reveal">${pct(A.concentration[3].pct)} of all viewing sits in the top ten, and the
+      biggest single video is only ${pct(A.concentration[0].pct)} of it — several real ways in,
+      rather than one holding the door open for the rest.</p>
   </div>
 </section>`,
 
@@ -580,7 +580,8 @@ function slides(){ return [
   ${bleedImg(A.heroImages.live)}
   <div class="inner">
     <div class="label reveal">The shape of the campaign</div>
-    <h2 class="display big reveal" style="max-width:19ch">Don't ask one format<br>to do every job.</h2>
+    <h2 class="display big reveal" style="max-width:19ch">Every format here<br>
+      <span style="color:var(--signal)">already has a job.</span></h2>
     <div class="jobs stagger">
       ${A.jobs.map(([id,n,j,d],i)=>`
         <div class="job${i===0?' key':''}">
