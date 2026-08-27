@@ -413,7 +413,9 @@ const ARTIST = {
 
   heroImages:{ open:'4Eo84jDIMKI', quiet:'BZyzX4c1vIs', sv:'7U_LhzgwJ4U',
                 party:'0XoMu7Bz7YE', live:'fGiqCmZvkJ8', station:'e1YqueG2gtQ',
-                close:'_mTRvJ9fugM' },
+                /* Brussels 2023 — the most recent live asset on the channel.
+                   The close needs to read as the next era, not the archive. */
+                close:'Wr2fl9WNkvo' },
 
   /* The Screen Violence campaign as a visual sequence. */
   svSeq:[
@@ -736,17 +738,30 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 11 ── CLOSE ─────────────────────────────────────────────────── */
+/* 11 ── CLOSE ─────────────────────────────────────────────────────
+   The two figures are evidence; the last line is the argument, so it is set
+   larger than them rather than as a footnote beneath them.
+
+   The line deliberately stops short of promising conversion. Public API data
+   shows demand arriving daily against a dormant channel — it cannot show
+   whether those viewers would find or follow a new release, because that
+   requires Studio-side traffic and audience-retention data we do not have.
+   "Give them a way in" states the job without claiming it is already won.
+
+   Image is the 2023 Brussels set, not a 2013 music video: the close should
+   look forward to the next era rather than back at the catalogue.           */
 `<section class="slide" data-t="Close">
   ${bleedImg(A.heroImages.close,'strong')}
   <div class="inner">
-    <div class="huge reveal" style="font-size:clamp(3.2rem,10vw,8.5rem)">${A.dormant.daysSilent} days</div>
-    <div class="huge-l reveal" style="font-size:clamp(.9rem,2vw,1.5rem);color:var(--paper)">without an upload.</div>
-    <div class="huge reveal" style="font-size:clamp(3.2rem,10vw,8.5rem);color:var(--signal);margin-top:1.1rem">
+    <div class="huge reveal" style="font-size:clamp(2.6rem,7.5vw,6rem)">${A.dormant.daysSilent} days</div>
+    <div class="huge-l reveal" style="font-size:clamp(.85rem,1.7vw,1.25rem);color:var(--paper)">without an upload.</div>
+    <div class="huge reveal" style="font-size:clamp(2.6rem,7.5vw,6rem);color:var(--signal);margin-top:.9rem">
       ${A.dormant.annualised}</div>
-    <div class="huge-l reveal" style="font-size:clamp(.9rem,2vw,1.5rem);color:var(--paper)">views a year anyway.</div>
-    <p class="statement reveal" style="margin-top:2rem;color:rgba(243,241,247,.8);max-width:34ch">
-      The hard part is already done. The channel just needs turning back on.</p>
+    <div class="huge-l reveal" style="font-size:clamp(.85rem,1.7vw,1.25rem);color:var(--paper)">views a year anyway.</div>
+    <p class="display reveal" style="margin-top:clamp(2.4rem,5vw,3.8rem);
+      font-size:clamp(1.5rem,3.6vw,2.9rem);line-height:1.12;max-width:19ch;color:var(--paper)">
+      The audience is already showing up.<br>
+      <span style="color:var(--signal)">Give them a way into what comes next.</span></p>
   </div>
 </section>`,
 
