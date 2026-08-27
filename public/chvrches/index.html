@@ -198,10 +198,12 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .ref-k{font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
 .ref-t{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;font-weight:700;margin-top:.25rem}
 .ref-d{font-size:.68rem;color:var(--smoke);line-height:1.5;margin-top:.3rem}
-.sw.nu{outline:2px solid var(--signal);outline-offset:-2px}
-.sw.nu::after{background:linear-gradient(to top,rgba(255,45,120,.55),transparent 62%)}
-.sw-n{position:absolute;top:.3rem;left:.35rem;z-index:3;font-size:.48rem;font-weight:700;
-  letter-spacing:.1em;background:var(--signal);color:#fff;padding:.1rem .34rem;border-radius:3px}
+.sw.slot{aspect-ratio:16/9;border:1.5px dashed var(--signal);border-radius:5px;
+  background:rgba(255,45,120,.09);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.2rem;text-align:center;padding:.4rem}
+.sw.slot::after{display:none}
+.slot-p{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--signal);line-height:1}
+.slot-t{font-size:.56rem;font-weight:600;color:var(--signal);letter-spacing:.03em}
 .run{display:flex;align-items:center;gap:.5rem;margin-top:.9rem;font-size:.6rem;color:var(--smoke)}
 .run i{width:10px;height:10px;border-radius:2px;display:inline-block}
 .srcbar{margin-top:1.5rem;padding-top:.8rem;border-top:1px solid var(--hair)}
@@ -384,11 +386,11 @@ const ARTIST = {
     wall:[
       {id:'_mTRvJ9fugM',t:'The Mother We Share'},
       {id:'fGiqCmZvkJ8',t:'Live at House of Vans'},
-      {id:'RntlEwS6os8',t:'New album',nu:true},
+      {slot:true,t:'New single'},
       {id:'BZyzX4c1vIs',t:'Clearest Blue'},
       {id:'7U_LhzgwJ4U',t:'How Not To Drown'},
       {id:'4Eo84jDIMKI',t:'Leave A Trace'},
-      {id:'SLfeY3TSDkg',t:'New single',nu:true},
+      {slot:true,t:'New live'},
       {id:'e1YqueG2gtQ',t:'Miracle'},
       {id:'Wr2fl9WNkvo',t:'Ancienne Belgique'},
       {id:'B9BLMNn0PrQ',t:'Bury It'},
@@ -656,13 +658,14 @@ function slides(){ return [
       </div>
     </div>
     <div class="swall stagger" style="grid-template-columns:repeat(5,1fr)">
-      ${A.station.wall.map(v=>`
-        <div class="sw${v.nu?' nu':''}"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
-          ${v.nu?'<div class="sw-n">NEW</div>':''}<div class="sw-t">${esc(v.t)}</div></div>`).join('')}
+      ${A.station.wall.map(v=> v.slot
+        ? `<div class="sw slot"><div class="slot-p">+</div><div class="slot-t">${esc(v.t)}</div></div>`
+        : `<div class="sw"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+             <div class="sw-t">${esc(v.t)}</div></div>`).join('')}
     </div>
     <div class="run reveal">
       <span><i style="background:var(--smoke)"></i></span> Catalogue · always running
-      <span style="margin-left:.7rem"><i style="background:var(--signal)"></i></span> New music · peppered through the run
+      <span style="margin-left:.7rem"><i style="background:transparent;border:1.5px dashed var(--signal)"></i></span> Slots for new releases as they arrive
     </div>
     <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging / beta product.
       Eligibility and access would need discussing with YouTube — an opportunity to explore,
