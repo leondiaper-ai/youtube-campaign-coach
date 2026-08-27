@@ -907,29 +907,6 @@ document.getElementById('appendixBody').innerHTML = `
   <p>Companion assets published the same day as a release are not counted as follow-through. The measure
   is whether attention had somewhere new to go afterwards, not whether anything was published.</p>
 
-  <h3>Source and method</h3>
-  <p>All figures retrieved ${A.meta.capturedAt} from the YouTube Data API v3 via
-  <code>/api/full-catalogue?handle=@chvrches</code> and <code>/api/artist-live?slug=chvrches</code>.
-  Shorts are classified as uploads of 62 seconds or less — a duration proxy, since YouTube extended
-  Shorts to three minutes in late 2024 and the API does not expose the designation directly.</p>
-
-  <h3>Known limitations</h3>
-  <p>132 uploads were parsed from a playlist reporting 142; the shortfall is at the oldest end of the
-  catalogue, before August 2013. The channel statistics endpoint reports ${C.publicVideoCount} public
-  videos against 142 playlist entries — most likely a Shorts counting difference. Flagged, not resolved.</p>
-  <p>Views are cumulative to the retrieval date, not views-at-age, so older uploads have had longer to
-  accumulate. Any comparison between eras is directional rather than controlled.</p>
-
-  <h3>Album five</h3>
-  <p><strong>Nothing about album five is confirmed.</strong> Its existence is inferred from two Shorts
-  on the channel — "Jvmpscare. CHV 5 in progress." (1 Jul 2025) and a Bones anniversary post tagged
-  #chv5 (20 Sep 2025). There is no public title, date or tracklist, and no recommendation in this deck
-  depends on one. Timing is expressed relative to release throughout.</p>
-
-  <h3>What public data cannot answer</h3>
-  <p>Where the 27M annual views actually come from — Browse, Suggested, Search or external — is a
-  Studio question. So is whether the people watching the catalogue would be reached by a new release.
-  We do not model, estimate or infer it.</p>
 `;
 
 /* ── Live refresh ──────────────────────────────────────────────── */
