@@ -46,6 +46,16 @@ export async function GET(req: NextRequest) {
 
   const handle = req.nextUrl.searchParams.get('handle');
   const cap = Math.min(Number(req.nextUrl.searchParams.get('cap') || 2000), 5000);
+  /**
+   * slim=1 drops `tags` and `description`. Those two fields are roughly two
+   * thirds of the payload by weight and are irrelevant to catalogue analysis,
+   * but they push a 400-video heritage channel past the size ceiling of some
+   * clients — which silently truncates the response mid-object, losing the
+   * OLDEST uploads because the playlist returns newest-first. On a heritage
+   * act the oldest uploads are the entire catalogue story, so the truncation
+   * removes exactly the rows the analysis needs.
+   */
+  const slim = req.nextUrl.searchParams.get('slim') === '1';
   if (!handle) return NextResponse.json({ error: 'missing handle' }, { status: 400, headers: CORS });
 
   try {
@@ -89,7 +99,7 @@ export async function GET(req: NextRequest) {
         videos.push({
           id: v.id,
           title: v.snippet?.title ?? '',
-          description: (v.snippet?.description ?? '').slice(0, 400),
+          ...(slim ? {} : { description: (v.snippet?.description ?? '').slice(0, 400) }),
           publishedAt: v.snippet?.publishedAt ?? null,
           durationSec: dur,
           isShort: dur > 0 && dur <= 62,
@@ -103,7 +113,7 @@ export async function GET(req: NextRequest) {
           // See detectPremiereStatus() in lib/coach/releaseClusters.ts for the rule.
           scheduledStart: v.liveStreamingDetails?.scheduledStartTime ?? null,
           actualStart: v.liveStreamingDetails?.actualStartTime ?? null,
-          tags: v.snippet?.tags?.slice(0, 12) ?? [],
+          ...(slim ? {} : { tags: v.snippet?.tags?.slice(0, 12) ?? [] }),
         });
       }
     }
