@@ -36,9 +36,16 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
 .display.mid{font-size:clamp(1.7rem,3.9vw,3.2rem)}
 
 /* ── Chrome ─────────────────────────────────────────────────────── */
+/* The fixed bar sits over scrolling content and blurs whatever passes beneath it.
+   Without its own compositing layer the browser re-rasterises that blur against
+   the page on every frame, which reads as the bar tearing or flickering while
+   you scroll. transform/backface promote it to a layer so scrolling only moves
+   pixels the compositor already holds. */
 .chrome{position:fixed;top:0;left:0;right:0;height:58px;background:rgba(11,11,12,.93);
-  backdrop-filter:blur(14px);border-bottom:1px solid var(--hair);display:flex;
-  align-items:center;justify-content:space-between;padding:0 1.6rem;z-index:900}
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--hair);display:flex;
+  align-items:center;justify-content:space-between;padding:0 1.6rem;z-index:900;
+  transform:translateZ(0);backface-visibility:hidden;will-change:transform}
 .chrome-l{display:flex;align-items:center;gap:.9rem;font-size:.6rem;font-weight:700;
   letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
 .chrome-r{display:flex;gap:.5rem;flex-wrap:wrap}
@@ -304,8 +311,11 @@ body.present .deck{padding-top:0}
 body.present .slide{display:none;min-height:100vh;height:100vh;padding:3.5rem 4vw}
 body.present .slide.active{display:flex}
 body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
-.pbar{position:fixed;top:0;left:0;height:2px;background:var(--signal);width:0;z-index:1000;
-  transition:width .3s;display:none}
+/* Animate scaleX, not width. Width changes force layout on every frame; a
+   transform is handled entirely by the compositor. */
+.pbar{position:fixed;top:0;left:0;height:2px;background:var(--signal);width:100%;z-index:1000;
+  transform:scaleX(0);transform-origin:0 50%;transition:transform .3s;display:none;
+  will-change:transform}
 body.present .pbar{display:block}
 .pcount{position:fixed;bottom:1.1rem;right:1.4rem;font-size:.62rem;letter-spacing:.14em;
   color:var(--smoke);z-index:1000;display:none}
@@ -328,7 +338,11 @@ body.sheet-open .deck{display:none}
 .sheet th{text-align:left;font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;
   color:var(--smoke);padding:.5rem .6rem;border-bottom:2px solid var(--ink)}
 .sheet td{padding:.5rem .6rem;border-bottom:1px solid var(--bone)}
-.sheet td.n{font-family:'Oswald',sans-serif;font-weight:600;text-align:right}
+/* Numeric columns are right-aligned, so their headers must be too — otherwise the
+   label sits left while the figures sit right and the column reads as broken. */
+.sheet th.n{text-align:right}
+.sheet td.n{font-family:'Oswald',sans-serif;font-weight:600;text-align:right;
+  font-variant-numeric:tabular-nums}
 .sheet .note{background:rgba(11,11,12,.05);border-left:3px solid var(--ember);
   padding:.9rem 1.1rem;font-size:.82rem;line-height:1.6;margin:1rem 0;color:#3D3931}
 </style>
@@ -410,9 +424,16 @@ const ARTIST = {
   },
 
   /* Share of visible catalogue views held by the top N videos. */
+  /* Concentration. `label` names the videos rather than saying "Top 1" — the
+     figure only lands when you can see it is Sex on Fire carrying 36.6% of
+     everything the channel has ever accumulated. Boundary titles for n=1 and
+     n=5 come from topCatalogue below; beyond that the tail is unnamed. */
   concentration:[
-    {n:1,  pct:36.6}, {n:5,  pct:68.4}, {n:10, pct:80.2},
-    {n:20, pct:89.8}, {n:50, pct:97.3},
+    {n:1,  pct:36.6, label:'Sex on Fire, on its own'},
+    {n:5,  pct:68.4, label:'Top 5 — Sex on Fire through Beautiful War'},
+    {n:10, pct:80.2, label:'Top 10 videos'},
+    {n:20, pct:89.8, label:'Top 20 videos'},
+    {n:50, pct:97.3, label:'Top 50 videos'},
   ],
 
   /* Eras. omvMedian = median official music video views published in that era. */
@@ -991,8 +1012,10 @@ function showSlide(i){
   const S = allSlides();
   cur = Math.max(0, Math.min(S.length-1, i));
   S.forEach((s,n)=>s.classList.toggle('active', n===cur));
-  document.getElementById('pbar').style.width = ((cur+1)/S.length*100)+'%';
-  document.getElementById('pcount').textContent = (cur+1)+' / '+S.length;
+  const pb = document.getElementById('pbar');
+  if(pb) pb.style.transform = 'scaleX(' + ((cur+1)/S.length) + ')';
+  const pc = document.getElementById('pcount');
+  if(pc) pc.textContent = (cur+1)+' / '+S.length;
   const active = S[cur];
   active.querySelectorAll('.bar-fill').forEach((b,n)=>
     setTimeout(()=>b.style.width=b.dataset.w+'%', 90+n*100));
@@ -1017,7 +1040,7 @@ document.getElementById('appendixBody').innerHTML = `
   <p style="color:var(--smoke);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase">Kings of Leon × YouTube · September 2026</p>
 
   <h3>Channel and coverage</h3>
-  <table><tr><th>Metric</th><th>Value</th></tr>
+  <table><tr><th>Metric</th><th class="n">Value</th></tr>
     ${[['Subscribers',C.subscribers.toLocaleString()],
        ['Lifetime channel views',C.lifetimeViews.toLocaleString()],
        ['Retrievable public uploads',C.retrievedUploads],
@@ -1029,19 +1052,19 @@ document.getElementById('appendixBody').innerHTML = `
   </table>
 
   <h3>Concentration</h3>
-  <table><tr><th>Top N videos</th><th>Share of visible views</th></tr>
-    ${A.concentration.map(c=>`<tr><td>Top ${c.n}</td><td class="n">${pct(c.pct)}</td></tr>`).join('')}
+  <table><tr><th>Videos</th><th class="n">Share of visible views</th></tr>
+    ${A.concentration.map(c=>`<tr><td>${esc(c.label)}</td><td class="n">${pct(c.pct)}</td></tr>`).join('')}
   </table>
 
   <h3>Eras</h3>
-  <table><tr><th>Era</th><th>Uploads</th><th>Views</th><th>Share</th><th>Typical music video</th></tr>
+  <table><tr><th>Era</th><th class="n">Uploads</th><th class="n">Views</th><th class="n">Share</th><th class="n">Typical music video</th></tr>
     ${A.eras.map(e=>`<tr><td>${e.label}</td><td class="n">${e.uploads}</td>
       <td class="n">${e.views.toLocaleString()}</td><td class="n">${pct(eraShare(e))}</td>
       <td class="n">${e.omvMedian.toLocaleString()}</td></tr>`).join('')}
   </table>
 
   <h3>Formats</h3>
-  <table><tr><th>Format</th><th>Uploads</th><th>Typical views</th><th>Likes / 1k</th></tr>
+  <table><tr><th>Format</th><th class="n">Uploads</th><th class="n">Typical views</th><th class="n">Likes / 1k</th></tr>
     ${[['Official music video',A.formats.omv.n,A.formats.omv.median,A.formats.omv.likesPer1k],
        ['Live performance',A.formats.live.n,A.formats.live.median,'—'],
        ['Lyric video',A.formats.lyric.n,A.formats.lyric.median,'—'],
@@ -1052,7 +1075,7 @@ document.getElementById('appendixBody').innerHTML = `
   catalogue, so the full-set versus song-cut comparison cannot be tested for this artist.</p>
 
   <h3>2024 Mustang campaign — reconstruction</h3>
-  <table><tr><th>Metric</th><th>Value</th></tr>
+  <table><tr><th>Metric</th><th class="n">Value</th></tr>
     ${[['Campaign window',`${A.last.opens} → ${A.last.closes}`],
        ['Album release',A.last.album],
        ['Total uploads',A.last.uploads],
@@ -1080,18 +1103,18 @@ document.getElementById('appendixBody').innerHTML = `
   855k in June, after two smaller releases.</p>
 
   <h3>Campaign phases</h3>
-  <table><tr><th>Phase</th><th>Dates</th><th>Length</th><th>Content</th></tr>
+  <table><tr><th>Phase</th><th>Dates</th><th class="n">Length</th><th>Content</th></tr>
     ${A.last.phases.map(([n,w,d,b])=>`<tr><td>${n}</td><td>${w}</td><td class="n">${d}</td><td>${b}</td></tr>`).join('')}
   </table>
 
   <h3>Campaign format mix</h3>
-  <table><tr><th>Format</th><th>Uploads</th><th>Views</th><th>% of campaign views</th><th>Median</th></tr>
+  <table><tr><th>Format</th><th class="n">Uploads</th><th class="n">Views</th><th class="n">% of campaign views</th><th class="n">Median</th></tr>
     ${A.last.formats.map(([f,n,v,p,m])=>`<tr><td>${f}</td><td class="n">${n}</td>
       <td class="n">${v}</td><td class="n">${p}%</td><td class="n">${m}</td></tr>`).join('')}
   </table>
 
   <h3>2024 campaign sequencing</h3>
-  <table><tr><th>Release</th><th>Date</th><th>Views</th><th>Next longform</th></tr>
+  <table><tr><th>Release</th><th class="n">Date</th><th class="n">Views</th><th class="n">Next longform</th></tr>
     ${A.campaign2024.map(c=>`<tr><td>${esc(c.t)}</td><td>${c.d} 2024</td>
       <td class="n">${c.v.toLocaleString()}</td><td class="n">+${c.gap}d</td></tr>`).join('')}
   </table>
