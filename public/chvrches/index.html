@@ -233,9 +233,13 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .sheet h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;margin:2rem 0 .6rem;color:var(--signal)}
 .sheet table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:.6rem}
 .sheet th{text-align:left;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--smoke);padding:.4rem .5rem;border-bottom:1px solid var(--bone)}
+  color:var(--smoke);padding:.4rem .5rem;border-bottom:1px solid var(--bone);white-space:nowrap}
+.sheet th.n{text-align:right}
 .sheet td{padding:.4rem .5rem;border-bottom:1px solid #EDEAF3}
-.sheet td.n{text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500}
+.sheet td.n{text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:500;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.sheet td.sub{color:var(--smoke);font-size:.72rem}
+.sheet tr.group td{border-top:1px solid var(--bone)}
 .sheet p{font-size:.78rem;line-height:1.65;color:#5A5670;margin-bottom:.5rem}
 .sheet .close{position:sticky;top:0;float:right;font-size:.7rem;padding:.4rem .9rem;border:1px solid var(--bone);
   border-radius:6px;background:#fff;cursor:pointer}
@@ -349,6 +353,8 @@ const ARTIST = {
     {id:'RntlEwS6os8',t:'Jvmpscare. CHV 5 in progress.',v:30278,l:1929,d:'1 Jul 2025'},
     {id:'SLfeY3TSDkg',t:'Happy Bones anniversary… #chv5',v:14866,l:654,d:'20 Sep 2025'},
   ],
+
+  runTotals:[14.1,27.6,34.3,38.8,43.2],
 
   lowLift:['Channel homepage','Playlists','Archive live','Community posts',
            'Catalogue clips','Existing footage','End screens','Catalogue sequencing'],
@@ -782,7 +788,7 @@ document.getElementById('appendixBody').innerHTML = `
   <p style="color:var(--smoke);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase">CHVRCHES × YouTube · CHV5</p>
 
   <h3>Channel and coverage</h3>
-  <table><tr><th>Metric</th><th>Value</th></tr>
+  <table><tr><th>Metric</th><th class="n">Value</th></tr>
     ${[['Subscribers',C.subscribers.toLocaleString()],
        ['Lifetime channel views',C.lifetimeViews.toLocaleString()],
        ['Uploads retrieved from the playlist',C.retrievedUploads],
@@ -795,7 +801,7 @@ document.getElementById('appendixBody').innerHTML = `
   </table>
 
   <h3>Dormancy window</h3>
-  <table><tr><th>Metric</th><th>Value</th></tr>
+  <table><tr><th>Metric</th><th class="n">Value</th></tr>
     ${[['Window','8 Jun 2026 → 26 Aug 2026'],['Days',A.dormant.windowDays],
        ['Uploads in window','0'],
        ['Views gained',A.dormant.windowViews.toLocaleString()],
@@ -807,13 +813,19 @@ document.getElementById('appendixBody').innerHTML = `
   <p>Public subscriber counts round to the nearest 1,000 at this scale, so the +1,000 movement is
   coarse. The view figure is not rounded in the same way.</p>
 
-  <h3>Concentration</h3>
-  <table><tr><th>Top N videos</th><th>Share of visible views</th></tr>
-    ${A.concentration.map(c=>`<tr><td>Top ${c.n}</td><td class="n">${pct(c.pct)}</td></tr>`).join('')}
+  <h3>Where the viewing sits</h3>
+  <table><tr><th>Video</th><th class="n">Share</th><th class="n">Running total</th></tr>
+    ${A.topCatalogue.slice(0,5).map(v=>`<tr><td>${esc(v.t)} <span class="sub">${v.y}</span></td>
+      <td class="n">${pct(v.v/C.visibleViews*100)}</td>
+      <td class="n">${pct(A.runTotals[A.topCatalogue.indexOf(v)])}</td></tr>`).join('')}
+    <tr class="group"><td class="sub">The next five</td><td class="n">17.4%</td><td class="n">60.6%</td></tr>
+    <tr><td class="sub">The next ten</td><td class="n">22.5%</td><td class="n">83.1%</td></tr>
   </table>
+  <p>No single video dominates. The biggest is 14.1% of visible viewing — for comparison, a
+  catalogue-heavy channel can sit above a third on one video alone.</p>
 
   <h3>Format returns</h3>
-  <table><tr><th>Format</th><th>Uploads</th><th>Views</th><th>% of visible</th><th>Median</th></tr>
+  <table><tr><th>Format</th><th class="n">Uploads</th><th class="n">Views</th><th class="n">% of visible</th><th class="n">Median</th></tr>
     ${A.formats.map(([f,n,v,p,m])=>`<tr><td>${f}</td><td class="n">${n}</td><td class="n">${v}</td>
       <td class="n">${p}%</td><td class="n">${m}</td></tr>`).join('')}
   </table>
@@ -822,7 +834,7 @@ document.getElementById('appendixBody').innerHTML = `
   from 38 uploads, a pattern seen across most channels in the monitored pool.</p>
 
   <h3>Screen Violence — the last album campaign</h3>
-  <table><tr><th>Release</th><th>Date</th><th>Views</th><th>Pre-party</th></tr>
+  <table><tr><th>Release</th><th>Date</th><th class="n">Views</th><th class="n">Pre-party</th></tr>
     ${A.last.singles.concat([A.last.over]).map(s=>`<tr><td>${esc(s.t)}</td><td>${s.d}</td>
       <td class="n">${s.v.toLocaleString()}</td><td class="n">${s.party.v.toLocaleString()} · ${s.party.min}min</td></tr>`).join('')}
   </table>
