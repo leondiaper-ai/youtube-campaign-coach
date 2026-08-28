@@ -555,7 +555,7 @@ const ARTIST = {
 
   /* The 2024 album campaign, in published order. gap = days to the next
      meaningful longform destination (any non-Short, non-interview upload). */
-  /* The 2024 Mustang campaign, reconstructed from the uploads playlist.
+  /* The 2024 Can We Please Have Fun campaign, reconstructed from the uploads playlist.
      gap = days from this hero to the next meaningful long-form destination
      (any non-Short over 40k views). Eleven heroes, not ten: the earlier list
      omitted Ease Me On (23 May, 218k). */
@@ -576,9 +576,9 @@ const ARTIST = {
   /* Current publishing signal, from the monitored channel record. */
   now:{ uploads30d:8, shorts30d:8, lastLongform:'9 July 2026' },
 
-  /* ── The 2024 Mustang campaign, fully reconstructed ────────────────────
+  /* ── The 2024 Can We Please Have Fun campaign, fully reconstructed ─────
      Window established from the uploads playlist, not assumed:
-       opens  22 Feb 2024 — Mustang official music video, first campaign asset
+       opens  22 Feb 2024 — Mustang (lead single) music video, first campaign asset
        album  10 May 2024 — ten long-form album assets published that one day
                             (nine track lyric videos + Nowhere to Run OMV)
        closes 17 Oct 2024 — M Television, the last album music video
@@ -610,16 +610,28 @@ const ARTIST = {
        destinations. Rates are per 30.4 days over each period's real length.  */
     halves:{
       splitLabel:'20 June 2024',
-      /* `formats` counts distinct long-form format types published in each half
-         — official video, lyric, live, visualiser. The first half used all
-         four; the second used two. This is the mechanism behind the gaps:
-         lyric videos and visualisers are the affordable formats that sit
-         between expensive hero videos. Stop making them and only heroes are
-         left, so the spacing stretches. */
-      early:{ label:'22 Feb → 20 Jun', days:120, lfPerMonth:'4.3',
-              follow:'6 of 8', prem:'6 of 8', formats:'4' },
+      /* LIKE-FOR-LIKE POST-ALBUM WINDOWS.
+         Both periods sit after release day, so neither contains the 10-16 May
+         album week when twelve long-form assets landed in seven days. Including
+         that week put the first period at 5.8 destinations a month, which is a
+         release spike rather than a cadence and is not comparable to anything.
+
+         A previous version labelled this column "22 Feb → 20 Jun" while showing
+         4.3 — a figure that was only ever true of 17 May → 20 Jun. Every metric
+         below is now recomputed for the exact window stated.
+
+         The format count was removed. Across 17 May → 20 Jun every long-form
+         destination was an official video — one format, against two in the
+         later period. The multi-format comparison only worked because album
+         week supplied the lyric videos and the visualiser, so on a like-for-
+         like basis it inverts and cannot support the point it was making.
+
+         20 June is an observed breakpoint in the upload record, not a date
+         anyone planned around. */
+      early:{ label:'17 May → 20 Jun', days:35, lfPerMonth:'4.3',
+              follow:'4 of 5', prem:'3 of 5' },
       late:{  label:'21 Jun → 17 Oct', days:119, lfPerMonth:'1.0',
-              follow:'0 of 3', prem:'1 of 3', formats:'2' },
+              follow:'0 of 3', prem:'1 of 3' },
       lateGaps:[28,21,27,43],
     },
 
@@ -667,7 +679,7 @@ const ARTIST = {
          assets at a median of 838k — fewer, larger, and around 1.9 hours in
          total with no full-length sets. Stated this way it agrees with the
          capture recommendation rather than contradicting it. */
-      ['Live','The catalogue-to-current bridge','30 live destinations on the channel at a typical 838k — but only 1.9 hours in total and no full sets. Mustang used 3.'],
+      ['Live','The catalogue-to-current bridge','30 live destinations on the channel at a typical 838k — but only 1.9 hours in total and no full sets. The last campaign used 3.'],
       ['Premieres','Hero moments','Already a strength — 7 confirmed. Keep it selective so the moments stay moments.'],
       ['Playlists','Audience pathways','Turn a single catalogue view into a session that reaches the new record.'],
       ['Channel home','The campaign front door','If someone arrives through the catalogue, the current record should be impossible to miss.'],
@@ -825,9 +837,9 @@ function slides(){ return [
 /* 04 ── MUSTANG WAS WELL PROGRAMMED ────────────────────────────── */
 `<section class="slide" data-t="Last album">
   <div class="inner">
-    <div class="label reveal">Mustang · ${A.last.opens} → ${A.last.closes}</div>
-    <h2 class="display big reveal" style="max-width:21ch">Mustang got a lot of it<br>
-      right first time.</h2>
+    <div class="label reveal">Can We Please Have Fun · ${A.last.opens} → ${A.last.closes}</div>
+    <h2 class="display big reveal" style="max-width:21ch">The last campaign<br>
+      got a lot right.</h2>
     <div class="vs stagger" style="grid-template-columns:repeat(4,1fr);margin-top:1.6rem">
       ${[[A.last.followN,'hero releases'],
          [`${A.last.medianGap} days`,'typical gap between long-form releases'],
@@ -843,8 +855,9 @@ function slides(){ return [
     <h3 class="display mid reveal" style="margin-top:1.5rem">
       ${A.last.shortsUplPct}% of uploads were Shorts.<br>
       <span style="color:var(--signal)">${Math.round(A.last.lfViewPct)}% of the views came from long-form.</span></h3>
-    <p class="sub reveal">There was already plenty of activity. The opportunity is what that activity
-      leads people to next.</p>
+    <p class="sub reveal"><strong>Can We Please Have Fun</strong> was released 10 May 2024; Mustang was
+      the lead single that opened the campaign in February. There was already plenty of activity — the
+      opportunity is what that activity leads people to next.</p>
   </div>
 </section>`,
 
@@ -856,9 +869,9 @@ function slides(){ return [
    a strong model and then stopping running it.                              */
 `<section class="slide light" data-t="The learning">
   <div class="inner">
-    <div class="label reveal">What Mustang taught us</div>
-    <h2 class="display big reveal" style="max-width:16ch">One campaign.<br>
-      <span style="color:var(--signal)">Two very different halves.</span></h2>
+    <div class="label reveal">What the last campaign taught us</div>
+    <h2 class="display big reveal" style="max-width:20ch">After release,<br>
+      <span style="color:var(--signal)">two very different campaigns.</span></h2>
 
     <div class="halves stagger">
       <div class="half">
@@ -869,8 +882,6 @@ function slides(){ return [
           <span class="half-l">heroes followed within 14 days</span></div>
         <div class="half-r"><span class="half-n">${A.last.halves.early.prem}</span>
           <span class="half-l">music videos premiered</span></div>
-        <div class="half-r"><span class="half-n">${A.last.halves.early.formats}</span>
-          <span class="half-l">long-form formats used</span></div>
       </div>
       <div class="half-sep">→</div>
       <div class="half late">
@@ -881,13 +892,11 @@ function slides(){ return [
           <span class="half-l">heroes followed within 14 days</span></div>
         <div class="half-r"><span class="half-n">${A.last.halves.late.prem}</span>
           <span class="half-l">music videos premiered</span></div>
-        <div class="half-r"><span class="half-n">${A.last.halves.late.formats}</span>
-          <span class="half-l">long-form formats used</span></div>
       </div>
     </div>
 
     <div class="gapline reveal">
-      <span class="gapline-l">Gaps between long-form in the second half</span>
+      <span class="gapline-l">Gaps between long-form destinations after 20 June</span>
       ${A.last.halves.lateGaps.map(g=>`<span class="gapchip">${g} days</span>`).join('')}
     </div>
 
@@ -896,10 +905,12 @@ function slides(){ return [
          give people somewhere to go, follow it up while attention is still
          elevated, and make the big moments feel like events. Stated as
          behaviours Mustang performed, not as a rule YouTube publishes. -->
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:30ch">Four formats kept the gaps
-      short. <span style="color:var(--signal)">Two stretched them to a month.</span></h3>
-    <p class="sub reveal" style="max-width:52ch">Lyric videos and visualisers are the affordable
-      assets between hero moments. Drop them and only the expensive ones are left.</p>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:32ch">For six weeks after release
+      the campaign kept programming. <span style="color:var(--signal)">Then it thinned out for four
+      months.</span></h3>
+    <p class="sub reveal" style="max-width:54ch">Both periods sit after album day, so neither is
+      flattered by release week. 20 June is where the upload record changes — not a date anyone
+      planned around.</p>
   </div>
 </section>`,
 
@@ -933,7 +944,7 @@ function slides(){ return [
 
     <div class="onestat reveal">
       <span class="onestat-n">${A.last.lfUplPct}%</span>
-      <span class="onestat-t">of Mustang uploads were long-form.<br>
+      <span class="onestat-t">of campaign uploads were long-form.<br>
         They earned <strong>${A.last.lfViewPct}%</strong> of campaign views.</span>
     </div>
 
@@ -943,36 +954,44 @@ function slides(){ return [
 </section>`,
 
 /* 06b ── SPLIT SCREEN ─────────────────────────────────────────────
-   The clearest piece of campaign intelligence in the data. Deliberately framed
-   as a sequence and a question, not as proof: lifetime view windows differ and
-   the lyric video may have absorbed some of the song's demand, so we cannot
-   say the later video underperformed *because* it was late. What we can say is
-   that the signal was public, unusually large, and arrived very early.        */
+   REFRAMED after verification. An earlier version read this as an organic
+   demand signal — "Split Screen showed its hand early". That was wrong.
+   Split Screen was the second pre-release single, announced 29 March with
+   national press coverage, and Caleb named it the track he most looked
+   forward to playing live. Its lyric video did not surface because the
+   audience found it; it was a promoted single, and the lyric video was the
+   only YouTube destination that single had for 132 days.
+
+   What remains true and useful is narrower: a priority release led with a
+   lyric video rather than a hero visual. We do not claim that was a mistake,
+   that the official video would have done better earlier, or anything about
+   how the algorithm treated either asset — none of that is observable here. */
 `<section class="slide light" data-t="Split Screen">
   <div class="inner">
-    <div class="label reveal">One song told us something</div>
-    <h2 class="display big reveal" style="max-width:22ch">Split Screen showed demand<br>
-      <span style="color:var(--signal)">six weeks before the album.</span></h2>
+    <div class="label reveal">One release worth looking at</div>
+    <h2 class="display big reveal" style="max-width:24ch">A priority single led with<br>
+      <span style="color:var(--signal)">a lyric video.</span></h2>
 
     <div class="ss stagger">
-      ${A.last.splitScreen.map((s,i)=>`
+      ${A.last.splitScreen.map((st,i)=>`
         ${i?'<div class="ss-ar">↓</div>':''}
-        <div class="ss-r${s.big?' key':''}${s.v===null?' plain':''}">
-          <div class="ss-d">${s.d}</div>
-          <div class="ss-t">${esc(s.t)}${s.note?`<span class="ss-note">${esc(s.note)}</span>`:''}</div>
-          <div class="ss-v">${s.v===null?'':fmt(s.v)}</div>
+        <div class="ss-r${st.big?' key':''}${st.v===null?' plain':''}">
+          <div class="ss-d">${st.d}</div>
+          <div class="ss-t">${esc(st.t)}${st.note?`<span class="ss-note">${esc(st.note)}</span>`:''}</div>
+          <div class="ss-v">${st.v===null?'':fmt(st.v)}</div>
         </div>`).join('')}
     </div>
 
-    <div class="onestat reveal" style="margin-top:1.3rem">
-      <span class="onestat-n">${A.last.splitScreenMultiple}</span>
-      <span class="onestat-t">bigger than any other<br>Mustang lyric video</span>
-    </div>
+    <p class="sub reveal" style="margin-top:1.2rem;max-width:58ch">Split Screen was the second
+      pre-release single, announced with press coverage six weeks before the album. For 132 days its
+      lyric video was the only place on YouTube that single existed — and it became the biggest lyric
+      video of the campaign, ${A.last.splitScreenMultiple} the next largest.</p>
 
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:26ch">Lock the first wave.
-      <span style="color:var(--signal)">Keep the second wave flexible.</span></h3>
-    <div class="srcbar reveal"><span class="src">This does not prove the official video should have
-      come earlier — it shows why keeping some post-release plans flexible could be valuable</span></div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:30ch">For the priority tracks,
+      <span style="color:var(--signal)">lead with the asset you want to build around.</span></h3>
+    <div class="srcbar reveal"><span class="src">Not a claim that the official video would have done
+      better earlier — only that the decision about a single's primary YouTube destination is
+      worth taking deliberately</span></div>
   </div>
 </section>`,
 
@@ -1008,8 +1027,8 @@ function slides(){ return [
           <div><div class="jr-t">${t}</div><div class="jr-d">${d}</div></div></div>`).join('')}
     </div>
 
-    <p class="sub reveal" style="margin-top:1.4rem;max-width:60ch">Mustang programmed each release
-      well. Each one also finished on its own. The opportunity is the route between them — someone
+    <p class="sub reveal" style="margin-top:1.4rem;max-width:60ch">The last campaign programmed each
+      release well. Each one also finished on its own. The opportunity is the route between them — someone
       arriving through a 2009 music video should have a clear way into the current campaign, and
       somewhere meaningful to go after it.</p>
   </div>
@@ -1042,7 +1061,7 @@ function slides(){ return [
       </a>
       <div>
         <h3 class="display mid">Kings of Leon TV</h3>
-        <p class="sub" style="margin-top:.7rem">The iconic videos, selected live, the Mustang era and the
+        <p class="sub" style="margin-top:.7rem">The iconic videos, selected live, the last album era and the
           new record — programmed together in one place that runs whether or not there's a campaign on.</p>
         <p class="statement" style="margin-top:.9rem;color:var(--signal)">Someone arrives for Sex on Fire.
           They leave having met the new record.</p>
@@ -1059,7 +1078,7 @@ function slides(){ return [
     <div class="label reveal">September</div>
     <h2 class="display big reveal" style="margin-bottom:1.3rem">What we'd do.</h2>
     <div class="stagger">
-      ${[['01','Protect the long-form cadence','Keep meaningful destinations running across the whole campaign window — not just to release. Mustang ran at 4.3 a month, then 1.0.'],
+      ${[['01','Protect the long-form cadence','Keep meaningful destinations running across the whole campaign window — not just to release. The last campaign ran at 4.3 a month after release, then 1.0.'],
          ['02','Keep the second wave flexible','Lock the first wave. Leave room to react when a song starts moving, the way Split Screen did in March.'],
          ['03','Premiere the hero moments','Already Kings of Leon behaviour — 7 of 11 music videos. It just stopped halfway through. If it is a hero moment, treat it like one.'],
          ['04','Make Shorts point somewhere','Keep them active. Around each hero, weight them towards performance and personality rather than repeating the announcement.'],
@@ -1266,7 +1285,7 @@ document.getElementById('appendixBody').innerHTML = `
   <p>All ${A.formats.live.n} live performances are song-length. No full sets appear in the retrieved
   catalogue, so the full-set versus song-cut comparison cannot be tested for this artist.</p>
 
-  <h3>2024 Mustang campaign — reconstruction</h3>
+  <h3>Can We Please Have Fun — 2024 campaign reconstruction</h3>
   <table><tr><th>Metric</th><th class="n">Value</th></tr>
     ${[['Campaign window',`${A.last.opens} → ${A.last.closes}`],
        ['Album release',A.last.album],
