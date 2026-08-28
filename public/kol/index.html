@@ -610,10 +610,16 @@ const ARTIST = {
        destinations. Rates are per 30.4 days over each period's real length.  */
     halves:{
       splitLabel:'20 June 2024',
+      /* `formats` counts distinct long-form format types published in each half
+         — official video, lyric, live, visualiser. The first half used all
+         four; the second used two. This is the mechanism behind the gaps:
+         lyric videos and visualisers are the affordable formats that sit
+         between expensive hero videos. Stop making them and only heroes are
+         left, so the spacing stretches. */
       early:{ label:'22 Feb → 20 Jun', days:120, lfPerMonth:'4.3',
-              follow:'6 of 8', prem:'6 of 8' },
+              follow:'6 of 8', prem:'6 of 8', formats:'4' },
       late:{  label:'21 Jun → 17 Oct', days:119, lfPerMonth:'1.0',
-              follow:'0 of 3', prem:'1 of 3' },
+              follow:'0 of 3', prem:'1 of 3', formats:'2' },
       lateGaps:[28,21,27,43],
     },
 
@@ -863,6 +869,8 @@ function slides(){ return [
           <span class="half-l">heroes followed within 14 days</span></div>
         <div class="half-r"><span class="half-n">${A.last.halves.early.prem}</span>
           <span class="half-l">music videos premiered</span></div>
+        <div class="half-r"><span class="half-n">${A.last.halves.early.formats}</span>
+          <span class="half-l">long-form formats used</span></div>
       </div>
       <div class="half-sep">→</div>
       <div class="half late">
@@ -873,6 +881,8 @@ function slides(){ return [
           <span class="half-l">heroes followed within 14 days</span></div>
         <div class="half-r"><span class="half-n">${A.last.halves.late.prem}</span>
           <span class="half-l">music videos premiered</span></div>
+        <div class="half-r"><span class="half-n">${A.last.halves.late.formats}</span>
+          <span class="half-l">long-form formats used</span></div>
       </div>
     </div>
 
@@ -886,9 +896,12 @@ function slides(){ return [
          give people somewhere to go, follow it up while attention is still
          elevated, and make the big moments feel like events. Stated as
          behaviours Mustang performed, not as a rule YouTube publishes. -->
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:34ch">Regular destinations.
-      Follow-through while attention was still up. Premiered moments.
-      <span style="color:var(--signal)">Mustang did all three — for four months.</span></h3>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:36ch">The multi-format rollout is
+      what keeps the gaps short. <span style="color:var(--signal)">Four formats, and the channel
+      surfaced regularly. Two, and the gaps stretched to a month.</span></h3>
+    <p class="sub reveal" style="max-width:58ch">Lyric videos and visualisers are the affordable
+      assets that sit between hero moments. Stop making them and only the expensive ones are left —
+      which is how a campaign that is still publishing ends up with nowhere to send anyone.</p>
   </div>
 </section>`,
 
