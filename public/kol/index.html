@@ -385,6 +385,10 @@ body.present{overflow:hidden}
 .ss-note{display:block;font-size:.63rem;font-weight:500;color:var(--smoke);margin-top:.15rem}
 .ss-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.1rem,2.2vw,1.6rem);line-height:1}
 .ss-r.key .ss-v{color:var(--signal)}
+/* Later-video figure is deliberately quieter than the lyric video it follows.
+   Shown at equal weight the pair reads as cause and effect, which is a claim
+   this data cannot support. */
+.ss-r:not(.key):not(.plain) .ss-v{font-size:.95rem;color:var(--smoke);font-weight:500}
 .ss-ar{text-align:center;color:var(--smoke);opacity:.45;font-size:.9rem;padding:.25rem 0}
 @media(max-width:700px){.ss-r{grid-template-columns:1fr;gap:.25rem}}
 
@@ -1085,7 +1089,7 @@ function slides(){ return [
     <h2 class="display big reveal" style="margin-bottom:1.3rem">What we'd do.</h2>
     <div class="stagger">
       ${[['01','Protect the long-form cadence','Keep meaningful destinations running across the whole campaign window — not just to release. The last campaign ran at 4.3 a month after release, then 1.0.'],
-         ['02','Keep the second wave flexible','Lock the first wave. Leave room to react when a song starts moving, the way Split Screen did in March.'],
+         ['02','Keep the second wave flexible','Lock the first wave. Leave room to respond later in the campaign, rather than committing every post-release asset months ahead.'],
          ['03','Premiere the hero moments','Already Kings of Leon behaviour — 7 of 11 music videos. It just stopped halfway through. If it is a hero moment, treat it like one.'],
          ['04','Make Shorts point somewhere','Keep them active. Around each hero, weight them towards performance and personality rather than repeating the announcement.'],
          ['05','Capture live if it matters','The deep live archive is not already there — around 1.9 hours on the channel. If live is part of this era, make something worth owning.']]
