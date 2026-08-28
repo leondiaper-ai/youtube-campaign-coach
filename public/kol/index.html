@@ -323,6 +323,10 @@ body.present{overflow:hidden}
 .half.late .half-n{color:var(--signal)}
 .half-l{font-size:.68rem;color:var(--smoke);line-height:1.35}
 .half-sep{display:flex;align-items:center;color:var(--smoke);font-size:1.3rem;opacity:.45}
+.zoomnote{display:inline-block;margin-top:1rem;font-size:.6rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);
+  border:1px solid var(--bone);border-radius:99px;padding:.32rem .8rem}
+.slide:not(.light) .zoomnote{border-color:var(--hair)}
 .gapline{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
 .gapline-l{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
 .gapchip{font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;padding:.2rem .6rem;
@@ -861,17 +865,23 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 05 ── THE TWO HALVES ────────────────────────────────────────────
-   Replaces "The programming wasn't the problem", which was true of the first
-   four months and not the last four. Every metric on this slide turns at the
-   same date, which is why the split is worth showing rather than averaging
-   away. Framing matters: this is not Mustang failing — it is Mustang showing
-   a strong model and then stopping running it.                              */
+/* 05 ── TWO PHASES AFTER RELEASE ──────────────────────────────────
+   A ZOOM, not the whole campaign. The Can We Please Have Fun campaign runs
+   22 Feb → 17 Oct 2024 and slide 4 shows it in full. This slide deliberately
+   isolates the post-album period and drops release week (10-16 May), because
+   twelve long-form assets landed in those seven days and including them
+   describes a launch spike rather than a cadence.
+
+   The risk this creates is a reader assuming the campaign started in May, so
+   the slide says in three places that it began in February with Mustang.
+   Two PHASES of one campaign — never "two campaigns".                      */
 `<section class="slide light" data-t="The learning">
   <div class="inner">
     <div class="label reveal">What the last campaign taught us</div>
     <h2 class="display big reveal" style="max-width:20ch">After release,<br>
-      <span style="color:var(--signal)">two very different campaigns.</span></h2>
+      <span style="color:var(--signal)">two very different phases.</span></h2>
+
+    <div class="zoomnote reveal">Post-album programming · excluding release week</div>
 
     <div class="halves stagger">
       <div class="half">
@@ -900,17 +910,13 @@ function slides(){ return [
       ${A.last.halves.lateGaps.map(g=>`<span class="gapchip">${g} days</span>`).join('')}
     </div>
 
-    <!-- "A strong model" was abstract. Naming the three behaviours makes the
-         point concrete and connects it to how YouTube campaigns are built:
-         give people somewhere to go, follow it up while attention is still
-         elevated, and make the big moments feel like events. Stated as
-         behaviours Mustang performed, not as a rule YouTube publishes. -->
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:32ch">For six weeks after release
-      the campaign kept programming. <span style="color:var(--signal)">Then it thinned out for four
-      months.</span></h3>
-    <p class="sub reveal" style="max-width:54ch">Both periods sit after album day, so neither is
-      flattered by release week. 20 June is where the upload record changes — not a date anyone
-      planned around.</p>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:28ch">For six weeks after
+      release, the campaign kept programming.
+      <span style="color:var(--signal)">Then it thinned out.</span></h3>
+    <p class="sub reveal" style="max-width:56ch">The campaign began with Mustang in February. This
+      comparison isolates the post-album period, excluding release week.</p>
+    <p class="src reveal" style="display:block;margin-top:.5rem;max-width:56ch">20 June is an observed
+      change in upload behaviour, not a date the campaign was planned around.</p>
   </div>
 </section>`,
 
