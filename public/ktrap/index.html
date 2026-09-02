@@ -179,15 +179,22 @@ body.present{overflow:hidden}
   color:var(--smoke);max-width:24ch;line-height:1.35}
 .qual{font-size:.56rem;color:var(--smoke);margin-top:.6rem;line-height:1.5;max-width:40ch}
 
-/* Secondary evidence — breakout scale. */
-.conc{font-family:'Oswald',sans-serif;font-weight:600;line-height:.84;
-  font-size:clamp(2.2rem,5.2vw,3.7rem);color:var(--signal);margin-top:.8rem}
-.conc-n{font-size:.58rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
-  color:var(--smoke);line-height:1.4;margin-top:.35rem;max-width:26ch}
-.conc-l{margin-top:.5rem;display:grid;gap:.16rem}
-.conc-l span{font-size:.6rem;color:var(--smoke);display:flex;justify-content:space-between;
-  max-width:22ch;border-bottom:1px solid var(--hair);padding-bottom:.15rem}
-.conc-l b{color:var(--paper);font-weight:700}
+/* Secondary evidence — the actual 2026 peer distribution. A ranked numeric
+   list, not a proportional bar chart: Dave's 126.8M would render every other
+   artist as a hairline and the point here is PLACEMENT, not scale. */
+.peer{margin-top:.55rem;display:grid;gap:0}
+.peer-h{font-size:.5rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--smoke);line-height:1.4;margin-bottom:.35rem}
+.pr{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:baseline;
+  padding:.2rem 0;border-bottom:1px solid var(--hair)}
+.pr-a{font-size:.63rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--smoke)}
+.pr-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:.86rem;line-height:1;color:var(--smoke)}
+.pr.kt .pr-a,.pr.kt .pr-v{color:var(--signal)}
+.pr.kt{border-bottom-color:var(--signal)}
+.pr.med .pr-a,.pr.med .pr-v{color:var(--paper)}
+.pr-tag{font-size:.46rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--smoke);margin-left:.4rem}
+.pr.kt .pr-tag{color:var(--signal)}
 
 /* Tertiary — the "is the market just quiet?" check, reduced to one thin row.
    The five-bar chart is gone; the series survives as a single text line so
@@ -204,6 +211,10 @@ body.present{overflow:hidden}
   color:var(--smoke);max-width:13ch;line-height:1.3}
 .hist{flex-basis:100%;font-size:.55rem;letter-spacing:.05em;color:var(--smoke);margin:.15rem 0 0}
 .hist b{color:var(--paper);font-weight:700}
+
+.cohort{margin-top:.5rem;font-size:.56rem;line-height:1.5;color:var(--smoke);max-width:86ch}
+.cohort b{color:var(--paper);font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  font-size:.52rem}
 
 /* ── Winners (slide 6) ─────────────────────────────────────────── */
 .win{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
@@ -382,8 +393,27 @@ const A = {
     /* 2024 -> 2025 direction of travel. The contraction is concentrated,
        not general, which is why the slide never calls it a market decline. */
     reduced:5, increased:4, flat:2,
-    /* Top 10 of all 256 heroes by CURRENT public views. */
-    topCC:8, topDave:2, topOther:0,
+    /* The nine artists with 2026 hero releases aged >=90 days at 2 Sep 2026,
+       ranked by ARTIST-LEVEL MEDIAN current views (never individual video
+       views, and never a mean — Dave at 126.8M would destroy any average).
+       Two of the eleven, Nines and Potter Payper, have no qualifying 2026
+       release, which is why the cohort is 11 but the ranking is 9.
+       With nine artists the median IS the fifth row, so Headie One's
+       1,034,329 and the cohort median are the same number by definition. */
+    peers:[
+      { a:'Dave',           v:'126.8M' },
+      { a:'Central Cee',    v:'7.28M'  },
+      { a:'Fredo',          v:'3.02M'  },
+      { a:'D-Block Europe', v:'1.95M'  },
+      { a:'Headie One',     v:'1.03M', median:true },
+      { a:'K-Trap',         v:'942K',  kt:true },
+      { a:'Digga D',        v:'611K'   },
+      { a:'Clavish',        v:'444K'   },
+      { a:'Unknown T',      v:'173K'   },
+    ],
+    cohortNames:'K-Trap · Headie One · Digga D · Nines · Potter Payper · Fredo · '
+      + 'Unknown T · Clavish · Central Cee · Dave · D-Block Europe',
+    qualifying:9,
     /* 2026 heroes aged >=90 days at 2 Sep 2026. FULL 11-artist cohort is the
        benchmark. The 776,599 "established-only" median is deliberately NOT
        used — it excludes Central Cee, Dave and D-Block Europe and flatters
@@ -602,21 +632,30 @@ const slides = () => [
 /* 08 ── UK RAP MARKET CONTEXT ──────────────────────────────────────
    Placed AFTER the decline, never before it. Context, not mitigation.
 
-   The slide answers one question and answers it in the headline. The
-   answer is "NOT MATERIALLY" — not "performing strongly", not
-   "outperforming", and specifically not "TRAPO 2 performed in line with
-   the market", which would imply the whole campaign was benchmarked when
-   only two mature 2026 heroes were.
+   The slide answers one question in its headline, then SHOWS the answer
+   rather than asking anyone to trust the interpretation: the full ranked
+   peer set is on the slide, so a viewer can see K-Trap sitting mid-table
+   instead of being told he does.
 
-   K-Trap is measured against the FULL 11-artist cohort median. The
-   776,599 established-only median is deliberately unused: it drops
-   Central Cee, Dave and D-Block Europe and would flatter him. The 9% gap
-   to the cohort median is not dramatised in either direction — on n=2 it
-   is noise, and that is exactly what "not materially" encodes.
+   An earlier version used "10 of the 10 biggest heroes are Central Cee or
+   Dave". True, and interesting, but it was a second market insight rather
+   than evidence about K-Trap — it never actually bore on the question the
+   slide asks. The ranked distribution replaces it and does.
 
-   The five-bar release chart is gone. It was competing with the K-Trap
-   benchmark for attention while only ever being a supporting check, so
-   the series survives as one line of text.                             */
+   The 11-vs-9 gap is stated explicitly on the slide. Nines and Potter
+   Payper have no 2026 hero aged >=90 days, so they cannot appear in a
+   performance ranking; leaving that unexplained invited the reasonable
+   question "why 11 artists but 9 rows?".
+
+   Note the ranking is ARTIST-LEVEL MEDIANS, never individual videos and
+   never a mean — Dave at 126.8M would wreck any average. With nine
+   artists the median is the fifth row, so Headie One's 1.03M and the
+   cohort median are necessarily the same figure.
+
+   "NOT MATERIALLY" is the ceiling of what n=2 supports. Copy must never
+   escalate to "outperforming", "performing strongly", or "in line with
+   the market" — the last would imply the whole TRAPO 2 campaign was
+   benchmarked when only two mature 2026 heroes were.                   */
 `<section class="slide coal" data-t="Market context">
   <div class="inner">
     <div class="label reveal">The wider picture</div>
@@ -632,6 +671,7 @@ const slides = () => [
       <span class="snap-v">${A.market.window}</span>
       <span class="snap-v">Public YouTube Data API v3</span>
     </div>
+    <p class="cohort reveal"><b>Cohort</b> ${A.market.cohortNames}</p>
 
     <div class="two">
       <div>
@@ -644,21 +684,21 @@ const slides = () => [
             <div class="duel-n">${fmt(A.market.cohortMedian)}</div>
             <div class="duel-l">Median current views</div></div>
         </div>
-        <div class="rankrow reveal"><b>${A.market.ktRank}</b>
-          <span>Artists with comparable mature 2026 releases</span></div>
-        <p class="qual">K-Trap n=${A.market.ktN} · 2026 hero releases aged 90 days or more ·
-          current public views at 2 Sep 2026.</p>
+        <div class="rankrow reveal"><b>${A.market.ktRank.replace(' of ',' / ')}</b>
+          <span>Qualifying artists</span></div>
+        <p class="qual">${A.market.channels} artists analysed · ${A.market.qualifying} had 2026 hero
+          releases aged 90+ days · K-Trap n=${A.market.ktN}.</p>
       </div>
 
       <div>
-        <h3 class="obs-h">The gap is breakout scale.</h3>
-        <div class="conc">${A.market.topCC + A.market.topDave} / 10</div>
-        <div class="conc-n">Biggest hero releases in the ${A.market.heroes}-video dataset
-          are Central Cee + Dave</div>
-        <div class="conc-l stagger">
-          <span>Central Cee <b>${A.market.topCC}</b></span>
-          <span>Dave <b>${A.market.topDave}</b></span>
-          <span>Everyone else <b>${A.market.topOther}</b></span>
+        <div class="peer-h">2026 mature hero performance · artist-level median current views ·
+          hero releases aged 90+ days</div>
+        <div class="peer stagger">
+          ${A.market.peers.map(p=>`
+            <div class="pr${p.kt?' kt':''}${p.median?' med':''}">
+              <span class="pr-a">${esc(p.a)}${p.median?'<span class="pr-tag">Cohort median</span>':''}${p.kt?'<span class="pr-tag">6th / 9</span>':''}</span>
+              <span class="pr-v">${p.v}</span>
+            </div>`).join('')}
         </div>
       </div>
     </div>
@@ -675,13 +715,13 @@ const slides = () => [
       <p class="hist">${A.market.years.map(r=>`${r.y}${r.ytd?' YTD':''} <b>${r.heroes}</b>`).join(' · ')}</p>
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1rem;max-width:52ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">TRAPO 2
-      hasn't recreated the previous breakout. <span style="color:var(--signal)">K-Trap isn't currently
-      an outlier against the 2026 market.</span></h3>
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:54ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">TRAPO 2
+      hasn't recreated the previous breakout. <span style="color:var(--signal)">But K-Trap sits around
+      the middle of the 2026 UK rap peer set.</span></h3>
 
-    <div class="srcbar reveal"><span class="src">Official artist channels only · primary music
-      destinations · current public views · historical audience demand cannot be reconstructed
-      from public API data</span></div>
+    <div class="srcbar reveal"><span class="src">2026 benchmark: artist-level median current views ·
+      hero releases aged 90+ days · 9 of 11 artists qualify · K-Trap n=2 · source: public YouTube
+      Data API v3 · official artist channels only · primary music destinations</span></div>
   </div>
 </section>`,
 
