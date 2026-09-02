@@ -133,6 +133,29 @@ body.present{overflow:hidden}
   font-size:.5rem;letter-spacing:.07em;color:#fff;
   background:rgba(8,8,10,.7);padding:.12rem .3rem;border-radius:2px}
 
+/* ── UK rap market context (slide 8) ───────────────────────────── */
+.mkt{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.5rem;max-width:56ch}
+.mkt-c{display:flex;flex-direction:column}
+.mkt-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
+  font-size:clamp(1.8rem,4.4vw,3.3rem);color:var(--smoke)}
+.mkt-c.low .mkt-n{color:var(--signal)}
+.mkt-bar{height:76px;display:flex;align-items:flex-end;margin:.5rem 0 .45rem}
+.mkt-bar span{display:block;width:100%;background:var(--smoke);opacity:.34;border-radius:2px}
+.mkt-c.low .mkt-bar span{background:var(--signal);opacity:1}
+.mkt-y{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.mkt-y em{font-style:normal;color:var(--smoke);font-size:.86em}
+.mkt-s{font-size:.58rem;color:var(--smoke);margin-top:.28rem;line-height:1.45}
+
+.mkt-kt{margin-top:1.4rem;padding-top:.9rem;border-top:1px solid var(--hair);
+  display:grid;grid-template-columns:auto auto 1fr;gap:.4rem 1.5rem;align-items:baseline;max-width:70ch}
+.mkt-kt-h{font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--smoke);grid-row:1}
+.mkt-kt-v{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;
+  font-size:clamp(1.3rem,2.6vw,2rem);grid-row:2;color:var(--smoke)}
+.mkt-kt-v.hot{color:var(--signal)}
+.mkt-kt-p{grid-column:3;grid-row:1 / span 2;margin:0;align-self:center;
+  font-size:.72rem;line-height:1.6;color:var(--smoke);max-width:44ch}
+
 /* ── Winners (slide 6) ─────────────────────────────────────────── */
 .win{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
 .win-c{border-top:2px solid var(--signal);padding-top:.8rem}
@@ -263,6 +286,40 @@ const A = {
     { id:'aJGJh-DHnUc', t:'Mobsters',       v:2124925 },
     { id:'OWi6St6IPdQ', t:'Whistle',        v:1828632 },
   ],
+
+  /* ── UK RAP MARKET CONTEXT ────────────────────────────────────────
+     From a separate cohort pull, 2 Sep 2026, across eight established UK
+     rap channels: K-Trap, Headie One, Digga D, Nines, Potter Payper,
+     Fredo, Unknown T, Clavish. Central Cee and Dave are excluded as
+     global-scale outliers; D-Block Europe is excluded because its release
+     volume behaves differently from the cohort.
+
+     Hero release = a public upload of 100-900s functioning as a primary
+     music destination. BTS, vlogs, trailers, interviews, promo clips and
+     lyric-video dumps are excluded. Where 4+ qualifying uploads landed on
+     one day as an album-style dump, only the largest counts as that day's
+     hero — without that rule SMILE?'s 17 album-day lyric videos and
+     Headie One's same-day upload wall would inflate release volume.
+
+     CRITICAL — this slide deliberately plots SUPPLY ACROSS YEARS and
+     PERFORMANCE WITHIN A YEAR ONLY. Cross-year median views are NOT shown
+     and must never be added: a 2023 upload has had three years to
+     accumulate views and a 2026 upload has had months, and no historical
+     per-video snapshots exist to correct for it (the Watcher captures
+     channel-level data only, and starts 15 April 2026). Release counts
+     carry no such bias, which is why they are the only trend on the slide. */
+  market:{
+    years:[
+      { y:'2023', heroes:49, active:'8 / 8', perArtist:5 },
+      { y:'2024', heroes:42, active:'7 / 8', perArtist:5 },
+      { y:'2025', heroes:22, active:'6 / 8', perArtist:2, low:true },
+      { y:'2026', heroes:32, active:'8 / 8', perArtist:5, ytd:true },
+    ],
+    /* Same-year comparisons only. Every release in a given year has had
+       broadly the same time on platform, so these are age-fair. */
+    kt2025:569117, cohort2025:1032733,
+    kt2026:942360, cohort2026:776600,
+  },
 };
 
 const fmt = n => n>=1e6 ? (n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M'
@@ -471,7 +528,48 @@ const slides = () => [
   </div>
 </section>`,
 
-/* 08 ── WHAT WE TAKE FORWARD ───────────────────────────────────────
+/* 08 ── UK RAP MARKET CONTEXT ──────────────────────────────────────
+   Placed AFTER the decline, never before it. Context, not mitigation.
+   The headline says "release moments", not "the market was quieter",
+   because the second implies demand and the data cannot support that.
+   The caveat sits at readable size on the slide, not in footnote text. */
+`<section class="slide coal" data-t="Market context">
+  <div class="inner">
+    <div class="label reveal">The wider picture</div>
+    <h2 class="display big reveal" style="max-width:19ch">UK rap had
+      <span style="color:var(--signal)">fewer big release moments.</span></h2>
+    <p class="sub reveal" style="margin-top:.9rem">Across eight established UK rap channels,
+      hero releases fell from 49 in 2023 to 22 in 2025.</p>
+
+    <div class="mkt stagger">
+      ${A.market.years.map(r=>`
+        <div class="mkt-c${r.low?' low':''}">
+          <div class="mkt-n">${r.heroes}</div>
+          <div class="mkt-bar"><span style="height:${Math.round(r.heroes/49*100)}%"></span></div>
+          <div class="mkt-y">${r.y}${r.ytd?' <em>YTD</em>':''}</div>
+          <div class="mkt-s">${r.active} artists · ${r.perArtist} median each</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="mkt-kt reveal">
+      <div class="mkt-kt-h">K-Trap 2026 hero median</div>
+      <div class="mkt-kt-v hot">${fmt(A.market.kt2026)}</div>
+      <div class="mkt-kt-h">Established cohort</div>
+      <div class="mkt-kt-v">${fmt(A.market.cohort2026)}</div>
+      <p class="mkt-kt-p">K-Trap's 2026 hero releases are currently performing above the
+        established cohort median. Same-year comparison only — in 2025 he sat below it
+        (${fmt(A.market.kt2025)} against ${fmt(A.market.cohort2025)}).</p>
+    </div>
+
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:34ch">Public data can measure
+      release supply. <span style="color:var(--signal)">It cannot prove demand declined.</span></h3>
+    <div class="srcbar reveal"><span class="src">8 established UK rap artist channels ·
+      public YouTube Data API v3 · primary music destinations only · same-day album dumps
+      collapsed to one hero · 2026 through 2 Sep · Central Cee, Dave and D-Block Europe excluded</span></div>
+  </div>
+</section>`,
+
+/* 09 ── WHAT WE TAKE FORWARD ───────────────────────────────────────
    Three decisions. The third is the actual learning from slide 7 turned
    into an action, which is what stops the deck being a post-mortem.    */
 `<section class="slide light" data-t="Take forward">
