@@ -326,6 +326,15 @@ body.present{overflow:hidden}
 .plan-t li{font-size:.66rem;color:var(--smoke);line-height:1.75;position:relative;padding-left:.75rem}
 .plan-t li::before{content:'';position:absolute;left:0;top:.62em;width:3px;height:3px;
   border-radius:50%;background:var(--smoke);opacity:.5}
+/* Second-glance evidence. Sits below the tool list and is set small on
+   purpose — it should support EXTEND, not compete with the three words. */
+.plan-p{margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bone)}
+.slide:not(.light) .plan-p{border-color:var(--hair)}
+.plan-ph{font-size:.52rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.plan-pb{display:flex;align-items:baseline;gap:.4rem;margin-top:.3rem}
+.plan-pn{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.05rem;line-height:1;color:var(--signal)}
+.plan-pl{font-size:.55rem;color:var(--smoke)}
+.plan-ps{font-size:.55rem;color:var(--smoke);opacity:.8;margin-top:.15rem}
 .plan-ar{color:var(--smoke);opacity:.35;font-size:1.3rem;padding-top:1.4rem}
 
 /* Always-on runs beneath all three stages — a layer, not a fourth step. */
@@ -636,7 +645,9 @@ const ARTIST = {
         img:'4C9i8E05bgI',
         tools:['Official video','Premiere','Live / fan moment into it'] },
       { k:'Extend', line:'Keep the moment moving',
-        tools:['Live','Performance','Lyric','Shorts','Next destination'] },
+        tools:['Live','Performance','Lyric','Shorts','Next destination'],
+        proof:{ head:'Supporting formats', big:'~2.7m',
+                lab:'views last campaign', sub:'Lyric · Live · Visualiser' } },
     ],
 
     /* Spans the three stages rather than following them. */
@@ -876,7 +887,8 @@ function slides(){ return [
    running underneath, and nothing else needs to land.                       */
 `<section class="slide light" data-t="The plan">
   <div class="inner">
-    <div class="label reveal">The YouTube plan for the next campaign</div>
+    <div class="label reveal">The YouTube plan for the next campaign ·
+      <span style="opacity:.7">built around YouTube's multi-format release approach</span></div>
     <h2 class="display big reveal" style="max-width:16ch">Every priority release<br>
       <span style="color:var(--signal)">gets a journey.</span></h2>
 
@@ -889,6 +901,10 @@ function slides(){ return [
           ${st.img?`<div class="plan-im"><img src="${thumb(st.img,'maxresdefault')}" alt=""
             onerror="this.onerror=null;this.src='${thumb(st.img)}'"></div>`:''}
           <ul class="plan-t">${st.tools.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+          ${st.proof?`<div class="plan-p"><div class="plan-ph">${esc(st.proof.head)}</div>
+            <div class="plan-pb"><span class="plan-pn">${st.proof.big}</span>
+              <span class="plan-pl">${esc(st.proof.lab)}</span></div>
+            <div class="plan-ps">${esc(st.proof.sub)}</div></div>`:''}
         </div>`).join('')}
     </div>
 
