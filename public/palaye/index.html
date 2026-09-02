@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Palaye Royale × YouTube — The Album Campaign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   PALAYE ROYALE × YOUTUBE — THE ALBUM CAMPAIGN
+
+   Every figure is from a YouTube Data API v3 pull taken 2 September 2026:
+   the complete @PalayeRoyale uploads playlist (340 of 340) plus the
+   auto-generated "Palaye Royale - Topic" channel (154 tracks).
+   No YouTube Studio or Analytics data is used anywhere in this deck.
+
+   AUDIENCE: artist and management. That governs the tone throughout.
+   Everything here is framed as what is available to build on, never as a
+   verdict on past decisions. The channel's recent output is described by
+   what it is, never as a failure — the band has been touring and posting
+   from the road, and the deck's job is to show what the four upcoming
+   music videos can do, not to relitigate the last cycle.
+
+   THE ARGUMENT. Four music videos are scheduled between 2 Oct 2026 and
+   22 Jan 2027. The artist channel has not published one since April 2024.
+   Meanwhile the audience for the recent singles is real and measurable —
+   it is just landing on the auto-generated Topic channel, which the band
+   cannot programme, cannot build subscribers on, and cannot route anyone
+   from. That is the single biggest available change and the deck is built
+   around it.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+  --ink:#08070A;           /* near-black ground */
+  --coal:#0F0D13;
+  --paper:#F2EFEA;         /* bone */
+  --bone:#D8D2C9;
+  --smoke:#8B8590;
+  --signal:#C4162E;        /* oxblood — the band's own register */
+  --gold:#C9A227;          /* used once, on the owned-asset slide */
+  --hair:rgba(242,239,234,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.display{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:-.01em;line-height:.94;margin:0}
+.display.big{font-size:clamp(2.3rem,6.4vw,5.3rem)}
+.display.mid{font-size:clamp(1.5rem,3.5vw,2.9rem)}
+
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;
+  align-items:center;justify-content:space-between;padding:.85rem 1.6rem;
+  background:rgba(8,7,10,.82);border-bottom:1px solid var(--hair)}
+.chrome-t{font-size:.6rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:var(--smoke)}
+.btn{font:inherit;font-size:.62rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  padding:.5rem .9rem;border-radius:99px;border:1px solid var(--hair);
+  background:transparent;color:var(--paper);cursor:pointer}
+.btn.on{background:var(--signal);border-color:var(--signal);color:#fff}
+body.present .chrome{display:none}
+body.present{overflow:hidden}
+#pbar{position:fixed;top:0;left:0;height:2px;width:100%;background:var(--signal);
+  transform:scaleX(0);transform-origin:left;z-index:60;display:none}
+body.present #pbar{display:block}
+#pcount{position:fixed;bottom:1.1rem;right:1.4rem;z-index:60;display:none;
+  font-size:.6rem;font-weight:700;letter-spacing:.14em;color:var(--smoke)}
+body.present #pcount{display:block}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.deck{padding-top:3rem}
+.slide{min-height:100vh;display:flex;align-items:center;position:relative;
+  padding:5rem 1.6rem;border-bottom:1px solid var(--hair);overflow:hidden}
+.slide .inner{max-width:1240px;margin:0 auto;width:100%;position:relative;z-index:2}
+.slide.coal{background:var(--coal)}
+body.present .slide{display:none;min-height:100vh}
+body.present .slide.active{display:flex}
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bleed img{width:100%;height:100%;object-fit:cover;opacity:.30}
+.bleed::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--ink) 4%,rgba(8,7,10,.76) 50%,rgba(8,7,10,.42))}
+
+.label{font-size:.62rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:1.05rem}
+.sub{font-size:clamp(.9rem,1.25vw,1.06rem);line-height:1.62;color:var(--smoke);max-width:62ch;margin-top:1.1rem}
+.srcbar{margin-top:1.1rem;padding-top:.7rem;border-top:1px solid var(--hair)}
+.src{font-size:.56rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+
+/* ── Reveal ─────────────────────────────────────────────────────── */
+.reveal,.stagger>*{opacity:0;transform:translateY(14px);
+  transition:opacity .6s ease,transform .6s ease}
+.reveal.in,.stagger.in>*{opacity:1;transform:none}
+.stagger.in>*:nth-child(2){transition-delay:.07s}
+.stagger.in>*:nth-child(3){transition-delay:.14s}
+.stagger.in>*:nth-child(4){transition-delay:.21s}
+.stagger.in>*:nth-child(5){transition-delay:.28s}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
+
+/* ── Big numbers ────────────────────────────────────────────────── */
+.bignums{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1.6rem;margin-top:1.5rem}
+.bn-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
+  font-size:clamp(2.1rem,5.4vw,4.1rem)}
+.bn-n.hot{color:var(--signal)}
+.bn-l{font-size:.68rem;color:var(--smoke);margin-top:.45rem;line-height:1.45;max-width:24ch}
+
+/* ── Two-up ─────────────────────────────────────────────────────── */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;margin-top:1.2rem}
+@media(max-width:900px){.two{grid-template-columns:1fr;gap:1.5rem}}
+.card{border-top:2px solid var(--hair);padding-top:.8rem}
+.card.hot{border-top-color:var(--signal)}
+.card.gold{border-top-color:var(--gold)}
+.card-k{font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.card-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.86;margin-top:.4rem;
+  font-size:clamp(1.9rem,4.4vw,3.1rem)}
+.card.hot .card-n{color:var(--signal)}
+.card.gold .card-n{color:var(--gold)}
+.card-l{font-size:.62rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--paper);margin-top:.35rem;max-width:26ch;line-height:1.35}
+.card-s{font-size:.62rem;color:var(--smoke);line-height:1.6;margin-top:.5rem;max-width:36ch}
+
+/* ── Release timeline (slide 4 / 7) ─────────────────────────────── */
+.tl{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-top:1.4rem}
+@media(max-width:900px){.tl{grid-template-columns:repeat(2,1fr)}}
+.tl-c{border-top:2px solid var(--hair);padding-top:.7rem}
+.tl-c.hot{border-top-color:var(--signal)}
+.tl-c.now{border-top-color:var(--paper)}
+.tl-d{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.9rem,1.75vw,1.25rem);line-height:1.05}
+.tl-c.hot .tl-d{color:var(--signal)}
+.tl-y{font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);margin-top:.15rem}
+.tl-t{font-size:.62rem;font-weight:700;margin-top:.45rem;line-height:1.35}
+.tl-s{font-size:.56rem;color:var(--smoke);margin-top:.25rem;line-height:1.5}
+
+/* ── Phases (slide 7) ───────────────────────────────────────────── */
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem}
+@media(max-width:900px){.ph{grid-template-columns:1fr}}
+.ph-c{border-top:2px solid var(--hair);padding-top:.75rem}
+.ph-c.hot{border-top-color:var(--signal)}
+.ph-k{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1rem,2vw,1.4rem);line-height:1}
+.ph-w{font-size:.52rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--signal);margin-top:.28rem}
+.ph-l{list-style:none;margin:.55rem 0 0;padding:0}
+.ph-l li{font-size:.63rem;color:var(--smoke);line-height:1.7;position:relative;padding-left:.75rem}
+.ph-l li::before{content:'';position:absolute;left:0;top:.62em;width:3px;height:3px;
+  border-radius:50%;background:var(--smoke);opacity:.6}
+
+/* ── Asset strip ────────────────────────────────────────────────── */
+.strip{display:grid;gap:.45rem;margin-top:1.1rem}
+.as{position:relative;border-radius:5px;overflow:hidden}
+.as img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#17151c}
+.as::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(8,7,10,.9),rgba(8,7,10,.1) 56%,transparent 76%)}
+.as-m{position:absolute;left:.45rem;right:.45rem;bottom:.35rem;z-index:2}
+.as-t{font-size:.55rem;font-weight:700;color:#fff;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.as-v{font-size:.62rem;font-weight:700;color:var(--signal);font-family:'Oswald',sans-serif}
+
+/* ── Decisions (slide 8) ────────────────────────────────────────── */
+.dec{display:grid;grid-template-columns:auto 1fr;gap:1rem;padding:.85rem 0;
+  border-bottom:1px solid var(--hair);align-items:start}
+.dec-n{font-family:'Oswald',sans-serif;font-weight:600;color:var(--signal);
+  font-size:1.5rem;line-height:1}
+.dec-t{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1rem,2vw,1.35rem);line-height:1.05}
+.dec-a{font-size:.66rem;color:var(--smoke);line-height:1.65;margin-top:.3rem;max-width:62ch}
+</style>
+</head>
+<body>
+<div id="pbar"></div><div id="pcount"></div>
+<div class="chrome">
+  <span class="chrome-t">Palaye Royale × YouTube · Album campaign</span>
+  <button class="btn" id="presentBtn">Present</button>
+</div>
+<div class="deck" id="deck"></div>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DATA — every figure recomputed 2 Sep 2026 from the complete
+   @PalayeRoyale uploads playlist (340 of 340) and the auto-generated
+   "Palaye Royale - Topic" channel. Nothing is carried forward.
+   ═══════════════════════════════════════════════════════════════════ */
+const A = {
+  channel:{ subs:272000, lifetime:58617481, uploads:340, since:'2011' },
+
+  /* Morning Light, 8 Mar 2012. 22,733,144 views = 38.8% of everything the
+     channel has ever done. Share is taken against the channel's OFFICIAL
+     lifetime figure, not against the sum of retrieved uploads — the latter
+     gives a flattering 60% because ~21m lifetime views sit outside the
+     current uploads playlist. Always use the conservative number. */
+  morningLight:{ id:'WZ9ALGG11CA', title:'Morning Light', year:'2012',
+    views:22733144, share:'38.8%' },
+
+  /* The recent singles. Both live on the Topic channel — auto-generated
+     from the audio distribution — and neither has a music video on the
+     artist channel. This is the finding the deck is built around. */
+  topic:{ subs:37400, lifetime:21082685, tracks:154,
+    /* 669,128 + 321,083. An earlier draft used 1,013,496 by also adding a
+       second "Feel Something, Great." audio page (23,285) — that double-counts
+       one song across two uploads, so it is excluded. Never say "over a
+       million" off this figure; it is just under. */
+    sadGeneration:669128, feelSomething:321083, combined:990211,
+    best:[['Lonely',2285909],['Mr. Doctor Man',849778],['Death or Glory',749772]] },
+
+  /* Last music video on the artist channel: Happy Together, 10 Apr 2024. */
+  lastMV:{ id:'E62W5G9Ezqg', title:'Happy Together', date:'April 2024',
+    views:255395, daysSince:875 },
+
+  /* Royal Television — 84 episodes across five seasons. Most bands have no
+     owned long-form franchise at all; this is a genuine asset and the deck
+     treats it as one. Median episode is 31,888 against a median Short of
+     3,394 over the last two years. */
+  royalTV:{ episodes:84, seasons:5, totalViews:3424254, median:31888,
+    best:179709, medianMins:'14', hero:'vV38F4W8Phc' },
+
+  /* Last 24 months on the artist channel. Stated neutrally: this is what
+     the channel has been, not a criticism of it. */
+  recent:{ uploads:137, shorts:123, shortsPct:90, longform:14,
+    medianShort:3394, bestShort:117110, shortsShareOfLifetime:'2.1%' },
+
+  dormantDays:81, lastUpload:'13 June 2026',
+
+  /* The campaign as supplied. Day counts from 2 Sep 2026. */
+  plan:[
+    { d:'2 Oct',  y:'2026', t:'Lost In Translation', s:'Single + music video · LP announce and pre-order', hot:true },
+    { d:'27 Oct', y:'2026', t:'Single two',          s:'Single + music video', hot:true },
+    { d:'19 Nov', y:'2026', t:'Single three',        s:'Single + music video', hot:true },
+    { d:'22 Jan', y:'2027', t:'The album',           s:'Focus track + music video', hot:true },
+    { d:'25 Jan', y:'2027', t:'Digital deluxe',      s:'Extended release', hot:false },
+  ],
+  daysToFirst:30, daysToAlbum:142, campaignDays:115,
+
+  stills:['j33Z_Kxf0Bk','9c-CcUvL2ww','AyFkjFJe-28','CcKKKRk-M_Q','1O54biUuX4Q'],
+};
+
+const fmt = n => n>=1e6 ? (n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M'
+              : n>=1e3 ? Math.round(n/1e3)+'K' : String(n);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
+
+/* ═══════════════════════════════════════════════════════════════════
+   SLIDES — one job each.
+   ═══════════════════════════════════════════════════════════════════ */
+const slides = () => [
+
+/* 01 ── COVER ──────────────────────────────────────────────────── */
+`<section class="slide" data-t="Cover">
+  <div class="bleed"><img src="${thumb(A.morningLight.id,'maxresdefault')}" alt=""></div>
+  <div class="inner">
+    <div class="label reveal">Palaye Royale × YouTube</div>
+    <h1 class="display big reveal" style="max-width:17ch">The album campaign<br>
+      <span style="color:var(--signal)">starts in 30 days.</span></h1>
+    <p class="sub reveal">Four music videos between 2 October and 22 January.
+      This is what the channel can do with them.</p>
+    <div class="srcbar reveal"><span class="src">Public YouTube data · 2 September 2026</span></div>
+  </div>
+</section>`,
+
+/* 02 ── THE AUDIENCE IS ALREADY THERE ──────────────────────────────
+   Opens on strength. Everything that follows is about where to point
+   an audience that already exists, never about building one.        */
+`<section class="slide coal" data-t="The audience">
+  <div class="inner">
+    <div class="label reveal">Where you're starting from</div>
+    <h2 class="display big reveal" style="max-width:19ch">You already have<br>
+      <span style="color:var(--signal)">the audience.</span></h2>
+    <div class="bignums stagger">
+      <div><div class="bn-n">${fmt(A.channel.subs)}</div><div class="bn-l">Subscribers</div></div>
+      <div><div class="bn-n">${fmt(A.channel.lifetime)}</div><div class="bn-l">Views on the channel since ${A.channel.since}</div></div>
+      <div><div class="bn-n hot">${fmt(A.topic.combined)}</div><div class="bn-l">Views on the last two singles in their first months</div></div>
+    </div>
+    <p class="sub reveal">Sad Generation and Feel Something, Great. pulled close to a million views
+      between them. The demand for new Palaye Royale music on YouTube is not in question.</p>
+    <div class="srcbar reveal"><span class="src">Channel figures from the @PalayeRoyale channel ·
+      single figures from the Palaye Royale audio pages on YouTube</span></div>
+  </div>
+</section>`,
+
+/* 03 ── WHERE IT LANDED ────────────────────────────────────────────
+   The pivot. Framed as a routing problem, which is what it is — not
+   as anyone's mistake. The Topic channel is described plainly so the
+   band understands what it is without needing the jargon.           */
+`<section class="slide" data-t="Where it landed">
+  <div class="inner">
+    <div class="label reveal">The one thing worth changing</div>
+    <h2 class="display big reveal" style="max-width:22ch">Those views didn't land<br>
+      <span style="color:var(--signal)">on your channel.</span></h2>
+    <div class="two">
+      <div class="card hot stagger">
+        <div class="card-k">Where the singles played</div>
+        <div class="card-n">${fmt(A.topic.combined)}</div>
+        <div class="card-l">On the automatic audio pages</div>
+        <p class="card-s">YouTube creates these on its own from the music distribution.
+          Nobody programmes them, nobody can post to them, and the ${fmt(A.topic.subs)} people
+          subscribed there aren't subscribed to you.</p>
+      </div>
+      <div class="card stagger">
+        <div class="card-k">On your channel, same period</div>
+        <div class="card-n">No music video</div>
+        <div class="card-l">The last one was ${A.lastMV.date}</div>
+        <p class="card-s">Happy Together, ${fmt(A.lastMV.views)} views — still the most recent
+          music video the channel has published.</p>
+      </div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:40ch">The songs are working.
+      <span style="color:var(--signal)">They're just working somewhere you can't build on.</span></h3>
+    <div class="srcbar reveal"><span class="src">Views on the automatic audio pages don't add
+      subscribers to your channel, don't appear on your homepage, and can't link anyone anywhere</span></div>
+  </div>
+</section>`,
+
+/* 04 ── WHAT'S COMING ──────────────────────────────────────────────
+   The supplied schedule, unaltered. Four videos is the story — it is
+   stated as the opportunity rather than as a gap being filled.      */
+`<section class="slide coal" data-t="What's coming">
+  <div class="inner">
+    <div class="label reveal">The campaign</div>
+    <h2 class="display big reveal" style="max-width:20ch">Four music videos.<br>
+      <span style="color:var(--signal)">Sixteen weeks.</span></h2>
+    <div class="tl stagger">
+      ${A.plan.map(p=>`
+        <div class="tl-c${p.hot?' hot':''}">
+          <div class="tl-d">${esc(p.d)}</div>
+          <div class="tl-y">${p.y}</div>
+          <div class="tl-t">${esc(p.t)}</div>
+          <div class="tl-s">${esc(p.s)}</div>
+        </div>`).join('')}
+    </div>
+    <p class="sub reveal">This is the most music video the channel will have carried in a decade.
+      Four hero moments, spaced four to nine weeks apart, running into the album.
+      That rhythm is the campaign.</p>
+    <div class="srcbar reveal"><span class="src">${A.daysToFirst} days to the first single ·
+      ${A.daysToAlbum} days to the album · ${A.campaignDays} days from Lost In Translation to the deluxe</span></div>
+  </div>
+</section>`,
+
+/* 05 ── THE ONE CHANGE ─────────────────────────────────────────────
+   The single decision the deck exists to argue for. Kept to one idea
+   and one instruction so it survives being repeated second-hand.    */
+`<section class="slide" data-t="The one change">
+  <div class="inner">
+    <div class="label reveal">The single biggest move</div>
+    <h2 class="display big reveal" style="max-width:22ch">Put the videos<br>
+      <span style="color:var(--signal)">on your own channel.</span></h2>
+    <p class="sub reveal" style="max-width:56ch">Every one of the four. Announced there, premiered there,
+      pinned there. The audience that turns up for Lost In Translation becomes an audience you keep
+      rather than one that visits an automatic page and leaves.</p>
+    <div class="bignums stagger" style="margin-top:1.4rem">
+      <div><div class="bn-n hot">4</div><div class="bn-l">Music videos to place</div></div>
+      <div><div class="bn-n">${fmt(A.channel.subs)}</div><div class="bn-l">People already subscribed and waiting</div></div>
+      <div><div class="bn-n">${A.dormantDays} days</div><div class="bn-l">Since the channel last posted — the runway to warm it up</div></div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:42ch">One release can only
+      build a channel <span style="color:var(--signal)">if it happens on the channel.</span></h3>
+  </div>
+</section>`,
+
+/* 06 ── WHAT YOU ALREADY OWN ───────────────────────────────────────
+   Royal Television. Genuinely rare, genuinely theirs, and the answer
+   to "what happens in the weeks between the four videos". Gold is
+   used here and nowhere else so the asset reads as distinct.        */
+`<section class="slide coal" data-t="What you own">
+  <div class="inner">
+    <div class="label reveal">The part most bands don't have</div>
+    <h2 class="display big reveal" style="max-width:20ch">You already built<br>
+      <span style="color:var(--gold)">a television show.</span></h2>
+    <div class="two">
+      <div class="stagger">
+        <div class="strip"><div class="as">
+          <img src="${thumb(A.royalTV.hero,'maxresdefault')}" alt="Royal Television">
+          <div class="as-m"><span class="as-t">Royal Television</span>
+            <span class="as-v">${fmt(A.royalTV.best)} on the best episode</span></div>
+        </div></div>
+      </div>
+      <div class="card gold stagger">
+        <div class="card-k">Five seasons, and counting</div>
+        <div class="card-n">${A.royalTV.episodes} episodes</div>
+        <div class="card-l">${fmt(A.royalTV.totalViews)} views · typically ${A.royalTV.medianMins} minutes long</div>
+        <p class="card-s">A typical episode does ${fmt(A.royalTV.median)} views — around nine times
+          a typical Short. It's the thing that keeps people on the channel in the weeks when
+          there's no single out.</p>
+      </div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:44ch">The videos bring people in.
+      <span style="color:var(--gold)">Royal Television is what keeps them there.</span></h3>
+  </div>
+</section>`,
+
+/* 07 ── THE PLAN ───────────────────────────────────────────────────
+   Three phases mapped onto the real dates. Deliberately light on
+   instruction — this is a shape to agree, not a content calendar.   */
+`<section class="slide" data-t="The plan">
+  <div class="inner">
+    <div class="label reveal">How the sixteen weeks work</div>
+    <h2 class="display big reveal" style="max-width:16ch">Warm up.<br>Hit hard.<br>
+      <span style="color:var(--signal)">Keep going.</span></h2>
+    <div class="ph stagger">
+      <div class="ph-c">
+        <div class="ph-k">Warm up</div>
+        <div class="ph-w">Now → 2 October</div>
+        <ul class="ph-l">
+          <li>Wake the channel back up before the single, not on the day</li>
+          <li>Trail Lost In Translation where the subscribers already are</li>
+          <li>Get the back catalogue tidy so new arrivals find more than one thing</li>
+        </ul>
+      </div>
+      <div class="ph-c hot">
+        <div class="ph-k">Hit hard</div>
+        <div class="ph-w">2 Oct · 27 Oct · 19 Nov · 22 Jan</div>
+        <ul class="ph-l">
+          <li>Every music video premieres on the channel</li>
+          <li>Announce, release, then follow up — three beats per single, not one</li>
+          <li>The album video gets the biggest build of the four</li>
+        </ul>
+      </div>
+      <div class="ph-c">
+        <div class="ph-k">Keep going</div>
+        <div class="ph-w">Between and after</div>
+        <ul class="ph-l">
+          <li>Royal Television carries the quiet weeks</li>
+          <li>Live and festival footage — you already film it</li>
+          <li>Nothing goes dark between one single and the next</li>
+        </ul>
+      </div>
+    </div>
+    <p class="sub reveal">The gaps between the singles are four to nine weeks. That is enough time
+      for a channel to go quiet, and enough time to keep it awake. The plan is mostly about the gaps.</p>
+  </div>
+</section>`,
+
+/* 08 ── WHAT WE'D DO ───────────────────────────────────────────────
+   Three decisions, in priority order. The first is the whole deck.  */
+`<section class="slide coal" data-t="Three decisions">
+  <div class="inner">
+    <div class="label reveal">What we'd agree now</div>
+    <h2 class="display big reveal" style="max-width:18ch">Three decisions<br>
+      <span style="color:var(--signal)">before 2 October.</span></h2>
+    <div class="stagger" style="margin-top:1.2rem">
+      ${[['01','All four videos live on the channel',
+          'The one that matters. Every music video premieres on @PalayeRoyale so the audience each song brings is an audience you keep.'],
+         ['02','Start before the single, not on it',
+          `The channel has been quiet since ${A.lastUpload}. There are ${A.daysToFirst} days to warm it back up so Lost In Translation lands to a room that is already awake.`],
+         ['03','Give the gaps something to do',
+          'Royal Television, live footage, whatever is being filmed anyway. Four to nine weeks between singles is a long time to leave empty.']]
+        .map(([n,t,a])=>`
+        <div class="dec"><div class="dec-n">${n}</div>
+          <div><div class="dec-t">${t}</div><div class="dec-a">${a}</div></div></div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.4rem;max-width:38ch">The songs are already working.
+      <span style="color:var(--signal)">This is about where they work.</span></h3>
+  </div>
+</section>`,
+
+/* 09 ── CLOSE ──────────────────────────────────────────────────────
+   Ends on the catalogue fact, reframed forward: the channel has done
+   something enormous once, and has four chances to do it again.     */
+`<section class="slide" data-t="Close">
+  <div class="bleed"><img src="${thumb(A.morningLight.id,'maxresdefault')}" alt=""></div>
+  <div class="inner">
+    <div class="label reveal">Where this goes</div>
+    <h2 class="display big reveal" style="max-width:20ch">One video from ${A.morningLight.year}
+      <span style="color:var(--signal)">is still ${A.morningLight.share} of the channel.</span></h2>
+    <p class="sub reveal" style="max-width:54ch">Morning Light has ${fmt(A.morningLight.views)} views and has been
+      working for fourteen years. It's proof of what one video on your own channel can become —
+      and there are four of them coming.</p>
+    <div class="srcbar reveal"><span class="src">All figures from public YouTube data ·
+      @PalayeRoyale channel and Palaye Royale audio pages · 2 September 2026 ·
+      no private or Analytics data used</span></div>
+  </div>
+</section>`,
+];
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════════ */
+document.getElementById('deck').innerHTML = slides().join('');
+
+const io = new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) e.target.classList.add('in');
+}),{threshold:.14});
+document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+
+/* ── Presentation mode ─────────────────────────────────────────── */
+let cur = 0;
+const allSlides = () => [...document.querySelectorAll('.slide')];
+function startPresent(){
+  document.body.classList.add('present');
+  if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  showSlide(0);
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  allSlides().forEach(s=>s.classList.remove('active'));
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+}
+function showSlide(i){
+  const S = allSlides();
+  cur = Math.max(0, Math.min(S.length-1, i));
+  S.forEach((s,n)=>s.classList.toggle('active', n===cur));
+  const pb=document.getElementById('pbar');
+  if(pb) pb.style.transform='scaleX('+((cur+1)/S.length)+')';
+  const pc=document.getElementById('pcount');
+  if(pc) pc.textContent=(cur+1)+' / '+S.length;
+  fitActive();
+  allSlides()[cur].querySelectorAll('img').forEach(img=>{
+    if(!img.complete) img.addEventListener('load', fitActive, { once:true });
+  });
+}
+
+/* Fit the active slide to whatever screen it lands on. Decks get presented
+   on laptops, not on the 1080p frame they were designed against — a 14"
+   MacBook is 982px tall, and without this the tallest slides lose their
+   headline off the top. The whole slide scales as one object, so nothing
+   reflows and nothing rewraps. A slide that already fits is untouched. */
+function fitActive(){
+  if(!document.body.classList.contains('present')) return;
+  const el = allSlides()[cur]; if(!el) return;
+  const inner = el.querySelector('.inner'); if(!inner) return;
+  inner.style.transform = '';
+  const cs = getComputedStyle(el);
+  const avail = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const need = inner.scrollHeight;
+  if(avail > 0 && need > avail){
+    const k = Math.max(0.72, avail / need);
+    inner.style.transformOrigin = 'center center';
+    inner.style.transform = 'scale(' + k.toFixed(4) + ')';
+  }
+}
+let fitTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(fitTimer); fitTimer=setTimeout(fitActive,120); });
+document.addEventListener('fullscreenchange', ()=> setTimeout(fitActive,260));
+
+document.addEventListener('keydown', e=>{
+  if(!document.body.classList.contains('present')) return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();showSlide(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();showSlide(cur-1);}
+  else if(e.key==='Escape'){exitPresent();}
+});
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent();
+});
+</script>
+</body>
+</html>
+</script></body></html>

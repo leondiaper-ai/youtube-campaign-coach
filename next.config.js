@@ -8,6 +8,7 @@ const nextConfig = {
       { source: '/kol',  destination: '/kol/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
+      { source: '/palaye', destination: '/palaye/index.html' },
     ];
   },
 };

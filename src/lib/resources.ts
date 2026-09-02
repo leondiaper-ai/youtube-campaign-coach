@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'Palaye Royale',
+        blurb:
+          'Strategy for the album campaign running October to January \u2014 four music videos, and where they should land.',
+        href: '/palaye',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'K-Trap — TRAPO 2',
         blurb:
           'End-of-campaign review against SMILE? on matched 159-day windows, plus where K-Trap sits in an 11-artist UK rap cohort.',
