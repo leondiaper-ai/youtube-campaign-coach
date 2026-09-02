@@ -134,27 +134,64 @@ body.present{overflow:hidden}
   background:rgba(8,8,10,.7);padding:.12rem .3rem;border-radius:2px}
 
 /* ── UK rap market context (slide 8) ───────────────────────────── */
-.mkt{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.5rem;max-width:56ch}
-.mkt-c{display:flex;flex-direction:column}
-.mkt-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
-  font-size:clamp(1.8rem,4.4vw,3.3rem);color:var(--smoke)}
-.mkt-c.low .mkt-n{color:var(--signal)}
-.mkt-bar{height:76px;display:flex;align-items:flex-end;margin:.5rem 0 .45rem}
-.mkt-bar span{display:block;width:100%;background:var(--smoke);opacity:.34;border-radius:2px}
-.mkt-c.low .mkt-bar span{background:var(--signal);opacity:1}
-.mkt-y{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-.mkt-y em{font-style:normal;color:var(--smoke);font-size:.86em}
-.mkt-s{font-size:.58rem;color:var(--smoke);margin-top:.28rem;line-height:1.45}
+/* The dataset definition is a visible panel, not footnote text — the
+   whole point of the slide is that nobody has to guess what was counted. */
+.snap{border:1px solid var(--hair);border-radius:6px;padding:.75rem .95rem;margin-top:.95rem;
+  display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;align-items:baseline;max-width:88ch}
+.snap-k{font-size:.55rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--signal);width:100%}
+.snap-v{font-size:.72rem;font-weight:700;letter-spacing:.04em}
+.snap-v em{font-style:normal;color:var(--smoke);font-weight:500}
 
-.mkt-kt{margin-top:1.4rem;padding-top:.9rem;border-top:1px solid var(--hair);
-  display:grid;grid-template-columns:auto auto 1fr;gap:.4rem 1.5rem;align-items:baseline;max-width:70ch}
-.mkt-kt-h{font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--smoke);grid-row:1}
-.mkt-kt-v{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;
-  font-size:clamp(1.3rem,2.6vw,2rem);grid-row:2;color:var(--smoke)}
-.mkt-kt-v.hot{color:var(--signal)}
-.mkt-kt-p{grid-column:3;grid-row:1 / span 2;margin:0;align-self:center;
-  font-size:.72rem;line-height:1.6;color:var(--smoke);max-width:44ch}
+.two{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:2.2rem;margin-top:1.1rem}
+@media(max-width:900px){.two{grid-template-columns:1fr;gap:1.5rem}}
+.obs-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;line-height:1;
+  font-size:clamp(1.05rem,2.1vw,1.55rem);margin:0 0 .1rem}
+.obs-s{font-size:.62rem;color:var(--smoke);margin-top:.3rem;line-height:1.5}
+
+/* Five-bar release series. 2026 is tinted differently and labelled YTD so it
+   can never be mistaken for a complete year. */
+.bars{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;margin-top:.9rem}
+.bar-c{display:flex;flex-direction:column}
+.bar-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
+  font-size:clamp(1.35rem,3.1vw,2.3rem);color:var(--paper)}
+.bar-c.low .bar-n{color:var(--signal)}
+.bar-t{height:82px;display:flex;align-items:flex-end;margin:.4rem 0 .4rem}
+.bar-t span{display:block;width:100%;background:var(--paper);opacity:.26;border-radius:2px}
+.bar-c.low .bar-t span{background:var(--signal);opacity:1}
+.bar-c.ytd .bar-t span{background:transparent;border:1px solid var(--smoke);
+  border-bottom:2px solid var(--paper)}
+.bar-y{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.bar-c.low .bar-y,.bar-c.ytd .bar-y{color:var(--paper)}
+.bar-y small{display:block;font-size:.82em;letter-spacing:.06em;color:var(--smoke);font-weight:600}
+
+.pair{display:grid;grid-template-columns:auto auto;gap:.15rem 1.6rem;margin-top:1rem;width:max-content}
+.pair-v{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;font-size:clamp(1.1rem,2.2vw,1.6rem)}
+.pair-v.hot{color:var(--signal)}
+.pair-l{font-size:.55rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
+
+.conc{font-family:'Oswald',sans-serif;font-weight:600;line-height:.86;
+  font-size:clamp(3.2rem,8vw,6rem);color:var(--signal);margin-top:.7rem}
+.conc-n{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1.1rem,2.3vw,1.7rem);line-height:1.05;margin-top:.3rem}
+.conc-l{margin-top:.5rem;display:grid;gap:.2rem}
+.conc-l span{font-size:.63rem;color:var(--smoke);display:flex;justify-content:space-between;
+  max-width:24ch;border-bottom:1px solid var(--hair);padding-bottom:.18rem}
+.conc-l b{color:var(--paper);font-weight:700}
+
+/* K-Trap line: deliberately the smallest thing on the slide. */
+.ktline{margin-top:1.1rem;padding-top:.85rem;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;gap:.5rem 2.1rem;align-items:baseline}
+.ktline-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.9rem,1.7vw,1.2rem);line-height:1}
+.ktline-i{display:flex;gap:.5rem;align-items:baseline}
+.ktline-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.15rem;line-height:1}
+.ktline-v.hot{color:var(--signal)}
+.ktline-k{font-size:.55rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
+.ktline-n{font-size:.6rem;color:var(--smoke);flex-basis:100%;line-height:1.5}
+
+.defn{margin-top:.85rem;font-size:.68rem;line-height:1.6;color:var(--smoke);max-width:80ch}
+.defn b{color:var(--paper);font-weight:700}
 
 /* ── Winners (slide 6) ─────────────────────────────────────────── */
 .win{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
@@ -288,37 +325,59 @@ const A = {
   ],
 
   /* ── UK RAP MARKET CONTEXT ────────────────────────────────────────
-     From a separate cohort pull, 2 Sep 2026, across eight established UK
-     rap channels: K-Trap, Headie One, Digga D, Nines, Potter Payper,
-     Fredo, Unknown T, Clavish. Central Cee and Dave are excluded as
-     global-scale outliers; D-Block Europe is excluded because its release
-     volume behaves differently from the cohort.
+     Separate cohort pull, 2 Sep 2026, across ELEVEN leading UK rap artist
+     channels: K-Trap, Headie One, Digga D, Nines, Potter Payper, Fredo,
+     Unknown T, Clavish, Central Cee, Dave, D-Block Europe.
 
-     Hero release = a public upload of 100-900s functioning as a primary
-     music destination. BTS, vlogs, trailers, interviews, promo clips and
-     lyric-video dumps are excluded. Where 4+ qualifying uploads landed on
-     one day as an album-style dump, only the largest counts as that day's
-     hero — without that rule SMILE?'s 17 album-day lyric videos and
-     Headie One's same-day upload wall would inflate release volume.
+     This replaces an earlier EIGHT-artist version of this slide, which was
+     wrong in three ways and should not be resurrected:
+       1. @unknwnt9 was labelled "Potter Payper". It is Unknown T's channel.
+          Potter Payper (@PotterPayper) was never pulled at all.
+       2. Central Cee, Dave and D-Block Europe were excluded. One hero
+          release is one hero release regardless of how big the artist is,
+          so excluding them from a RELEASE COUNT had no justification.
+       3. The series started at 2023, which happened to be the peak year and
+          made 2025 look like a collapse. Adding 2022 shows it was a dip.
+     Every channel below is now verified by its API `channel.title`, not by
+     assuming the handle is right — two of eleven handles resolved to
+     auto-generated "- Topic" channels.
 
-     CRITICAL — this slide deliberately plots SUPPLY ACROSS YEARS and
-     PERFORMANCE WITHIN A YEAR ONLY. Cross-year median views are NOT shown
-     and must never be added: a 2023 upload has had three years to
-     accumulate views and a 2026 upload has had months, and no historical
-     per-video snapshots exist to correct for it (the Watcher captures
-     channel-level data only, and starts 15 April 2026). Release counts
-     carry no such bias, which is why they are the only trend on the slide. */
+     Hero release = a public official-channel upload of 100-900s, not a
+     Short, functioning as a primary music destination. BTS, vlogs,
+     trailers, interviews, documentaries, tour and promo content excluded.
+     Where 4+ qualifying music assets landed on one day (an album-style
+     dump), that day counts as ONE hero — the other 292 such assets across
+     the period are held separately rather than deleted.
+
+     CRITICAL — cross-year VIEW comparisons are absent by design and must
+     never be added. Median hero age runs from 1,497 days (2022) to 118 days
+     (2026), and no historical per-video snapshots exist to correct for it.
+     Release counts carry no age bias; the top-10 and the K-Trap line are
+     both explicitly current-lifetime-views-as-of-2-Sep-2026. */
   market:{
+    channels:11, heroes:256, window:'Jan 2022 → 2 Sep 2026',
+    /* Sensitivity-checked: 2025 is the lowest year under all three rule
+       sets tried (collapsed 49/65/57/40/45, uncollapsed 57/166/158/81/86,
+       strict-excluding-lyric-and-live 44/48/48/37/42). */
     years:[
-      { y:'2023', heroes:49, active:'8 / 8', perArtist:5 },
-      { y:'2024', heroes:42, active:'7 / 8', perArtist:5 },
-      { y:'2025', heroes:22, active:'6 / 8', perArtist:2, low:true },
-      { y:'2026', heroes:32, active:'8 / 8', perArtist:5, ytd:true },
+      { y:'2022', heroes:49 },
+      { y:'2023', heroes:65 },
+      { y:'2024', heroes:57 },
+      { y:'2025', heroes:40, low:true },
+      { y:'2026', heroes:45, ytd:true },
     ],
-    /* Same-year comparisons only. Every release in a given year has had
-       broadly the same time on platform, so these are age-fair. */
-    kt2025:569117, cohort2025:1032733,
-    kt2026:942360, cohort2026:776600,
+    active2025:'9 / 11', active2026:'11 / 11',
+    /* 2024 -> 2025 direction of travel. The contraction is concentrated,
+       not general, which is why the slide never calls it a market decline. */
+    reduced:5, increased:4, flat:2,
+    /* Top 10 of all 256 heroes by CURRENT public views. */
+    topCC:8, topDave:2, topOther:0,
+    /* 2026 heroes aged >=90 days at 2 Sep 2026. FULL 11-artist cohort is the
+       benchmark. The 776,599 "established-only" median is deliberately NOT
+       used — it excludes Central Cee, Dave and D-Block Europe and flatters
+       K-Trap. n=2 is shown on the slide because two releases is not a median
+       in any meaningful sense. */
+    ktMedian:942358, ktN:2, ktRank:'6th of 9', cohortMedian:1034329,
   },
 };
 
@@ -530,42 +589,90 @@ const slides = () => [
 
 /* 08 ── UK RAP MARKET CONTEXT ──────────────────────────────────────
    Placed AFTER the decline, never before it. Context, not mitigation.
-   The headline says "release moments", not "the market was quieter",
-   because the second implies demand and the data cannot support that.
-   The caveat sits at readable size on the slide, not in footnote text. */
+
+   The headline is neutral on purpose — it names the subject and lets the
+   three observations speak, because the analysis does not cleanly establish
+   that UK rap declined and a headline claiming it would be unsupportable.
+
+   The dataset definition is a visible panel at the top, not a footnote:
+   the single most likely way this slide gets misread is someone taking it
+   for "all UK rap on YouTube" rather than 11 official artist channels.
+
+   K-Trap is the smallest element by design, is benchmarked against the FULL
+   cohort rather than the flattering established-only median, and carries
+   n=2 on its face.                                                       */
 `<section class="slide coal" data-t="Market context">
   <div class="inner">
     <div class="label reveal">The wider picture</div>
-    <h2 class="display big reveal" style="max-width:19ch">UK rap had
-      <span style="color:var(--signal)">fewer big release moments.</span></h2>
-    <p class="sub reveal" style="margin-top:.9rem">Across eight established UK rap channels,
-      hero releases fell from 49 in 2023 to 22 in 2025.</p>
+    <h2 class="display big reveal" style="max-width:14ch">The UK rap<br>
+      <span style="color:var(--signal)">YouTube picture.</span></h2>
 
-    <div class="mkt stagger">
-      ${A.market.years.map(r=>`
-        <div class="mkt-c${r.low?' low':''}">
-          <div class="mkt-n">${r.heroes}</div>
-          <div class="mkt-bar"><span style="height:${Math.round(r.heroes/49*100)}%"></span></div>
-          <div class="mkt-y">${r.y}${r.ytd?' <em>YTD</em>':''}</div>
-          <div class="mkt-s">${r.active} artists · ${r.perArtist} median each</div>
-        </div>`).join('')}
+    <div class="snap reveal">
+      <span class="snap-k">YouTube data snapshot</span>
+      <span class="snap-v">${A.market.channels} leading UK rap artist channels</span>
+      <span class="snap-v">${A.market.heroes} hero releases</span>
+      <span class="snap-v">${A.market.window}</span>
+      <span class="snap-v"><em>Public YouTube Data API v3 · official artist channels only</em></span>
     </div>
 
-    <div class="mkt-kt reveal">
-      <div class="mkt-kt-h">K-Trap 2026 hero median</div>
-      <div class="mkt-kt-v hot">${fmt(A.market.kt2026)}</div>
-      <div class="mkt-kt-h">Established cohort</div>
-      <div class="mkt-kt-v">${fmt(A.market.cohort2026)}</div>
-      <p class="mkt-kt-p">K-Trap's 2026 hero releases are currently performing above the
-        established cohort median. Same-year comparison only — in 2025 he sat below it
-        (${fmt(A.market.kt2025)} against ${fmt(A.market.cohort2025)}).</p>
+    <div class="two">
+      <div>
+        <h3 class="obs-h">2025 was the quietest release year.</h3>
+        <div class="bars stagger">
+          ${A.market.years.map(r=>`
+            <div class="bar-c${r.low?' low':''}${r.ytd?' ytd':''}">
+              <div class="bar-n">${r.heroes}</div>
+              <div class="bar-t"><span style="height:${Math.round(r.heroes/65*100)}%"></span></div>
+              <div class="bar-y">${r.y}${r.ytd?'<small>Jan → 2 Sep</small>':''}</div>
+            </div>`).join('')}
+        </div>
+        <div class="pair stagger">
+          <span class="pair-v hot">${A.market.active2026}</span><span class="pair-v">${A.market.active2025}</span>
+          <span class="pair-l">Artists active 2026</span><span class="pair-l">Artists active 2025</span>
+        </div>
+        <p class="obs-s">45 hero releases in the first eight months of 2026, against 40 across the
+          whole of 2025. Release activity has picked back up. The 2025 dip was also concentrated
+          rather than general — ${A.market.reduced} of ${A.market.channels} artists reduced output
+          from 2024, ${A.market.increased} increased it and ${A.market.flat} held flat.</p>
+      </div>
+
+      <div>
+        <h3 class="obs-h">The biggest moments are highly concentrated.</h3>
+        <div class="conc">${A.market.topCC + A.market.topDave} / 10</div>
+        <div class="conc-n">Of the biggest hero releases<br>are Central Cee or Dave</div>
+        <div class="conc-l stagger">
+          <span>Central Cee <b>${A.market.topCC}</b></span>
+          <span>Dave <b>${A.market.topDave}</b></span>
+          <span>Every other artist <b>${A.market.topOther}</b></span>
+        </div>
+        <p class="obs-s">Top 10 of all ${A.market.heroes} hero releases by current public views.
+          It is why a cohort average is not a usable benchmark.</p>
+      </div>
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:34ch">Public data can measure
-      release supply. <span style="color:var(--signal)">It cannot prove demand declined.</span></h3>
-    <div class="srcbar reveal"><span class="src">8 established UK rap artist channels ·
-      public YouTube Data API v3 · primary music destinations only · same-day album dumps
-      collapsed to one hero · 2026 through 2 Sep · Central Cee, Dave and D-Block Europe excluded</span></div>
+    <div class="ktline reveal">
+      <div class="ktline-h">K-Trap sits mid-table in 2026.</div>
+      <div class="ktline-i"><span class="ktline-v hot">${fmt(A.market.ktMedian)}</span>
+        <span class="ktline-k">K-Trap median · n=${A.market.ktN}</span></div>
+      <div class="ktline-i"><span class="ktline-v">${fmt(A.market.cohortMedian)}</span>
+        <span class="ktline-k">Full cohort median</span></div>
+      <div class="ktline-i"><span class="ktline-v">${A.market.ktRank}</span>
+        <span class="ktline-k">Rank</span></div>
+      <p class="ktline-n">2026 hero releases aged 90 days or more at 2 September 2026, current
+        public views. Two releases qualify, so this places K-Trap rather than measures him.</p>
+    </div>
+
+    <p class="defn"><b>Hero release</b> = a primary music destination on the artist's own channel.
+      100–900s music uploads · Shorts, BTS, vlogs, trailers, interviews and documentaries excluded ·
+      same-day album dumps collapsed to one primary hero.</p>
+
+    <h3 class="display mid reveal" style="margin-top:.95rem;max-width:52ch;font-size:clamp(1.25rem,2.6vw,2.05rem)">Public data shows what was
+      released and what it has reached today.
+      <span style="color:var(--signal)">It cannot reconstruct historical audience demand.</span></h3>
+    <div class="srcbar reveal"><span class="src">All view counts are current lifetime views as at
+      2 September 2026 and are not age-adjusted · median hero age ranges from 1,497 days (2022) to
+      118 days (2026), so years are never compared on views · channel identities verified by API
+      channel title</span></div>
   </div>
 </section>`,
 
