@@ -306,33 +306,42 @@ body.present{overflow:hidden}
 .stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 .stagger>*.visible{opacity:1;transform:none}
 
-/* ── Two halves (slide 5) ───────────────────────────────────────────
-   Side by side so the drop is read as one comparison, not two lists. The
-   late column is tinted rather than coloured red — the point is that the
-   model was right and stopped, not that the campaign failed. */
-.halves{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:stretch;margin-top:1.6rem}
-.half{border:1px solid var(--bone);border-radius:10px;padding:1.1rem 1.2rem;background:#fff}
-.slide:not(.light) .half{border-color:var(--hair);background:rgba(239,234,227,.04)}
-.half.late{background:rgba(11,11,12,.045)}
-.half-h{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--smoke);margin-bottom:.9rem}
-.half-r{display:flex;align-items:baseline;gap:.6rem;padding:.5rem 0;border-top:1px solid var(--bone)}
-.half-r:first-of-type{border-top:none}
-.half-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.3rem,2.6vw,2rem);
-  line-height:1;min-width:3.4ch}
-.half.late .half-n{color:var(--signal)}
-.half-l{font-size:.68rem;color:var(--smoke);line-height:1.35}
-.half-sep{display:flex;align-items:center;color:var(--smoke);font-size:1.3rem;opacity:.45}
-.zoomnote{display:inline-block;margin-top:1rem;font-size:.6rem;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);
-  border:1px solid var(--bone);border-radius:99px;padding:.32rem .8rem}
-.slide:not(.light) .zoomnote{border-color:var(--hair)}
-.gapline{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
-.gapline-l{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
-.gapchip{font-family:'Oswald',sans-serif;font-weight:600;font-size:.75rem;padding:.2rem .6rem;
-  border:1px solid var(--hair);border-radius:99px;color:var(--signal)}
-.slide.light .gapchip{border-color:var(--bone)}
-@media(max-width:820px){.halves{grid-template-columns:1fr}.half-sep{transform:rotate(90deg);justify-content:center}}
+/* ── Campaign rollout (slide 5) ─────────────────────────────────────
+   Four chronological stages, release week widened so the campaign's shape is
+   legible before any copy is read: build, peak, sustain, thin. The peak column
+   is ~1.7x the others and is the only one carrying an image at size. */
+.roll{display:grid;grid-template-columns:1fr auto 1.7fr auto 1fr auto 1fr;
+  gap:.45rem;align-items:stretch;margin-top:1.5rem}
+.roll-s{border:1px solid var(--bone);border-radius:10px;padding:.85rem .9rem;background:#fff;
+  display:flex;flex-direction:column}
+.slide:not(.light) .roll-s{border-color:var(--hair);background:rgba(239,234,227,.04)}
+.roll-s.peak{border-color:var(--signal);border-width:2px;background:rgba(214,150,58,.06)}
+.roll-h{display:flex;align-items:baseline;gap:.45rem}
+.roll-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:.7rem;color:var(--smoke)}
+.roll-s.peak .roll-n{color:var(--signal)}
+.roll-name{font-size:.82rem;font-weight:700;letter-spacing:.01em}
+.roll-d{font-size:.6rem;letter-spacing:.06em;color:var(--smoke);margin-top:.2rem}
+.roll-big{font-family:'Oswald',sans-serif;font-weight:600;line-height:1;
+  font-size:clamp(1.8rem,4vw,2.9rem);margin-top:.7rem}
+.roll-biglab{font-size:.6rem;color:var(--smoke);line-height:1.3;margin-top:.2rem}
+.roll-sub{font-size:.62rem;font-weight:700;color:var(--signal);margin-top:.4rem;line-height:1.3}
+.roll-th{display:grid;grid-template-columns:repeat(2,1fr);gap:.3rem;margin-top:.6rem}
+.roll-th img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:3px;display:block;background:#222}
+.roll-hero{display:block;margin-top:.6rem;text-decoration:none;color:inherit}
+.roll-hero img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
+.roll-hv{font-family:'Oswald',sans-serif;font-weight:600;line-height:1;color:var(--signal);
+  font-size:clamp(1.6rem,3.4vw,2.5rem);margin-top:.45rem}
+.roll-ht{font-size:.6rem;color:var(--smoke);line-height:1.3;margin-top:.15rem}
+.roll-plus{text-align:center;color:var(--smoke);font-size:.9rem;margin:.45rem 0 .1rem}
+.roll-side{text-align:center}
+.roll-sv{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.05rem;line-height:1}
+.roll-st{display:block;font-size:.58rem;color:var(--smoke);margin-top:.15rem}
+.roll-note{font-size:.62rem;color:var(--smoke);line-height:1.4;margin-top:auto;padding-top:.7rem}
+.roll-ar{display:flex;align-items:center;color:var(--smoke);opacity:.4;font-size:.95rem}
+@media(max-width:1000px){
+  .roll{grid-template-columns:1fr}
+  .roll-ar{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+}
 
 /* ── September as the hero of slide 6 ───────────────────────────────
    Promoted from a side panel to the main object on the page. Three numbers,
@@ -610,38 +619,35 @@ const ARTIST = {
     shortsUplPct:79, shortsViewPct:11.7, lfUplPct:21, lfViewPct:88.3,
     followOk:6, followN:11, medianGap:8,
 
-    /* ── The two halves ────────────────────────────────────────────────
-       Recalculated 27 Aug 2026 from the uploads playlist. The split at
-       20 June is not chosen for effect — it is where Actual Daydream lands,
-       and every metric moves at the same point. Long-form here means an
-       upload of 100 seconds or more; 63-99s announcement clips are not
-       destinations. Rates are per 30.4 days over each period's real length.  */
-    halves:{
-      splitLabel:'20 June 2024',
-      /* LIKE-FOR-LIKE POST-ALBUM WINDOWS.
-         Both periods sit after release day, so neither contains the 10-16 May
-         album week when twelve long-form assets landed in seven days. Including
-         that week put the first period at 5.8 destinations a month, which is a
-         release spike rather than a cadence and is not comparable to anything.
+    /* The campaign rollout, as four stages. Boundaries are the campaign's own
+       events — album day, end of release week, last hero of the run — not
+       analytical picks. Long-form means an upload of 100 seconds or more;
+       63-99s announcement clips are not destinations.
 
-         A previous version labelled this column "22 Feb → 20 Jun" while showing
-         4.3 — a figure that was only ever true of 17 May → 20 Jun. Every metric
-         below is now recomputed for the exact window stated.
-
-         The format count was removed. Across 17 May → 20 Jun every long-form
-         destination was an official video — one format, against two in the
-         later period. The multi-format comparison only worked because album
-         week supplied the lyric videos and the visualiser, so on a like-for-
-         like basis it inverts and cannot support the point it was making.
-
-         20 June is an observed breakpoint in the upload record, not a date
-         anyone planned around. */
-      early:{ label:'17 May → 20 Jun', days:35, lfPerMonth:'4.3',
-              follow:'4 of 5', prem:'3 of 5' },
-      late:{  label:'21 Jun → 17 Oct', days:119, lfPerMonth:'1.0',
-              follow:'0 of 3', prem:'1 of 3' },
-      lateGaps:[28,21,27,43],
-    },
+       Supersedes an earlier `halves` structure that drove a 4.3-vs-1.0
+       comparison. Those rates and the gap figures still stand and remain in
+       the review pack; they were simply the wrong thing to lead a slide with.  */
+    stages:[
+      { n:'01', name:'Build', dates:'22 Feb → 9 May',
+        big:'6', bigLab:'long-form destinations',
+        note:'The campaign opens with Mustang and builds toward the album.',
+        thumbs:['wMJyD23nKrk','iqn4zVsv5zk'] },
+      { n:'02', name:'Release', dates:'10 → 16 May', peak:true,
+        big:'12', bigLab:'long-form destinations',
+        note:'One hero moment, and the whole album there to explore.',
+        hero:{ id:'4C9i8E05bgI', t:'Nowhere to Run — Official Video', v:'1.66m' },
+        side:{ t:'9 album lyric videos', v:'961k combined' } },
+      { n:'03', name:'Follow through', dates:'17 May → 20 Jun',
+        big:'5', bigLab:'long-form destinations',
+        sub:'4 of 5 heroes followed within 14 days',
+        note:'Meaningful destinations kept coming after album week.',
+        thumbs:['R4UpX5XJRP4','L3ySEsVs2n0'] },
+      { n:'04', name:'Tail', dates:'21 Jun → 17 Oct',
+        big:'4', bigLab:'long-form destinations',
+        sub:'alongside 43 Shorts',
+        note:'The campaign stayed active. Meaningful destinations became less frequent.',
+        thumbs:['aqk5uBBJzsY','3Jykoa-Fgn0'] },
+    ],
 
     /* September 2024 — the single clearest month. Shorts performed normally;
        there was simply almost nothing for them to lead to. */
@@ -869,58 +875,56 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 05 ── TWO PHASES AFTER RELEASE ──────────────────────────────────
-   A ZOOM, not the whole campaign. The Can We Please Have Fun campaign runs
-   22 Feb → 17 Oct 2024 and slide 4 shows it in full. This slide deliberately
-   isolates the post-album period and drops release week (10-16 May), because
-   twelve long-form assets landed in those seven days and including them
-   describes a launch spike rather than a cadence.
+/* 05 ── HOW THE CAMPAIGN WAS PROGRAMMED ───────────────────────────
+   A rollout, read left to right, with album week as the visual peak. The eye
+   should take the shape before it reads a word: build, spike, sustain, thin.
 
-   The risk this creates is a reader assuming the campaign started in May, so
-   the slide says in three places that it began in February with Mustang.
-   Two PHASES of one campaign — never "two campaigns".                      */
-`<section class="slide light" data-t="The learning">
+   Release week deliberately shows two figures side by side rather than one.
+   The nine lyric videos are NOT presented as competition for the hero video —
+   they are the album being available to explore. Two jobs, one week.        */
+`<section class="slide light" data-t="How it was programmed">
   <div class="inner">
-    <div class="label reveal">What the last campaign taught us</div>
-    <h2 class="display big reveal" style="max-width:20ch">After release,<br>
-      <span style="color:var(--signal)">two very different phases.</span></h2>
+    <div class="label reveal">Can We Please Have Fun · Feb → Oct 2024</div>
+    <h2 class="display big reveal" style="max-width:18ch">How the last campaign<br>
+      <span style="color:var(--signal)">was programmed.</span></h2>
 
-    <div class="zoomnote reveal">Post-album programming · excluding release week</div>
+    <div class="roll stagger">
+      ${A.last.stages.map((st,i)=>`
+        ${i?'<div class="roll-ar">→</div>':''}
+        <div class="roll-s${st.peak?' peak':''}">
+          <div class="roll-h"><span class="roll-n">${st.n}</span>
+            <span class="roll-name">${esc(st.name)}</span></div>
+          <div class="roll-d">${esc(st.dates)}</div>
 
-    <div class="halves stagger">
-      <div class="half">
-        <div class="half-h">${A.last.halves.early.label}</div>
-        <div class="half-r"><span class="half-n">${A.last.halves.early.lfPerMonth}</span>
-          <span class="half-l">long-form destinations per month</span></div>
-        <div class="half-r"><span class="half-n">${A.last.halves.early.follow}</span>
-          <span class="half-l">heroes followed within 14 days</span></div>
-        <div class="half-r"><span class="half-n">${A.last.halves.early.prem}</span>
-          <span class="half-l">music videos premiered</span></div>
-      </div>
-      <div class="half-sep">→</div>
-      <div class="half late">
-        <div class="half-h">${A.last.halves.late.label}</div>
-        <div class="half-r"><span class="half-n">${A.last.halves.late.lfPerMonth}</span>
-          <span class="half-l">long-form destinations per month</span></div>
-        <div class="half-r"><span class="half-n">${A.last.halves.late.follow}</span>
-          <span class="half-l">heroes followed within 14 days</span></div>
-        <div class="half-r"><span class="half-n">${A.last.halves.late.prem}</span>
-          <span class="half-l">music videos premiered</span></div>
-      </div>
+          ${st.hero ? `
+            <div class="roll-big">${st.big}</div>
+            <div class="roll-biglab">${esc(st.bigLab)}</div>
+            <a class="roll-hero" href="${yt(st.hero.id)}" target="_blank" rel="noopener">
+              <img src="${thumb(st.hero.id,'maxresdefault')}" alt="${esc(st.hero.t)}"
+                onerror="this.onerror=null;this.src='${thumb(st.hero.id)}'">
+              <div class="roll-hv">${st.hero.v}</div>
+              <div class="roll-ht">${esc(st.hero.t)}</div>
+            </a>
+            <div class="roll-plus">+</div>
+            <div class="roll-side"><span class="roll-sv">${st.side.v}</span>
+              <span class="roll-st">${esc(st.side.t)}</span></div>
+          ` : `
+            <div class="roll-big">${st.big}</div>
+            <div class="roll-biglab">${esc(st.bigLab)}</div>
+            ${st.sub?`<div class="roll-sub">${esc(st.sub)}</div>`:''}
+            ${st.thumbs?`<div class="roll-th">${st.thumbs.map(id=>
+              `<img src="${thumb(id)}" alt="">`).join('')}</div>`:''}
+          `}
+
+          <div class="roll-note">${esc(st.note)}</div>
+        </div>`).join('')}
     </div>
 
-    <div class="gapline reveal">
-      <span class="gapline-l">Gaps between long-form destinations after 20 June</span>
-      ${A.last.halves.lateGaps.map(g=>`<span class="gapchip">${g} days</span>`).join('')}
-    </div>
-
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:28ch">For six weeks after
-      release, the campaign kept programming.
-      <span style="color:var(--signal)">Then it thinned out.</span></h3>
-    <p class="sub reveal" style="max-width:56ch">The campaign began with Mustang in February. This
-      comparison isolates the post-album period, excluding release week.</p>
-    <p class="src reveal" style="display:block;margin-top:.5rem;max-width:56ch">20 June is an observed
-      change in upload behaviour, not a date the campaign was planned around.</p>
+    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">Keep the release-week
+      discipline <span style="color:var(--signal)">running through the campaign.</span></h3>
+    <p class="sub reveal" style="max-width:58ch">The opportunity isn't simply more content. It's
+      keeping clear hero moments and meaningful destinations around the priority releases that
+      follow.</p>
   </div>
 </section>`,
 
