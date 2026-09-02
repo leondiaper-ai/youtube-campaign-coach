@@ -134,64 +134,76 @@ body.present{overflow:hidden}
   background:rgba(8,8,10,.7);padding:.12rem .3rem;border-radius:2px}
 
 /* ── UK rap market context (slide 8) ───────────────────────────── */
-/* The dataset definition is a visible panel, not footnote text — the
-   whole point of the slide is that nobody has to guess what was counted. */
-.snap{border:1px solid var(--hair);border-radius:6px;padding:.75rem .95rem;margin-top:.95rem;
-  display:flex;flex-wrap:wrap;gap:.35rem 1.4rem;align-items:baseline;max-width:88ch}
-.snap-k{font-size:.55rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
-  color:var(--signal);width:100%}
-.snap-v{font-size:.72rem;font-weight:700;letter-spacing:.04em}
-.snap-v em{font-style:normal;color:var(--smoke);font-weight:500}
+/* The slide answers ONE question: is K-Trap underperforming the wider
+   market? Question and answer are the whole top of the slide; everything
+   below is the evidence for that answer, in descending order of weight.
 
-.two{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:2.2rem;margin-top:1.1rem}
-@media(max-width:900px){.two{grid-template-columns:1fr;gap:1.5rem}}
-.obs-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;line-height:1;
-  font-size:clamp(1.05rem,2.1vw,1.55rem);margin:0 0 .1rem}
-.obs-s{font-size:.62rem;color:var(--smoke);margin-top:.3rem;line-height:1.5}
+   "NOT MATERIALLY" is chosen precisely. It is not a claim of equivalence
+   — 942K against a 1,034,329 cohort median is ~9% below, on n=2 — it is
+   the strongest claim two mature releases can support. Copy must never
+   escalate it to "performing strongly", "outperforming", or "in line with
+   the market" (that last one would wrongly imply the whole TRAPO 2
+   campaign was compared, when only two 2026 heroes were).             */
+.qa{margin-top:.2rem}
+.qa-q{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:-.01em;line-height:.98;font-size:clamp(1.6rem,3.7vw,2.9rem);
+  margin:0;max-width:17ch}
+.qa-a{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:-.01em;line-height:.9;font-size:clamp(2.6rem,6.6vw,5rem);
+  color:var(--signal);margin:.3rem 0 0}
 
-/* Five-bar release series. 2026 is tinted differently and labelled YTD so it
-   can never be mistaken for a complete year. */
-.bars{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;margin-top:.9rem}
-.bar-c{display:flex;flex-direction:column}
-.bar-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
-  font-size:clamp(1.35rem,3.1vw,2.3rem);color:var(--paper)}
-.bar-c.low .bar-n{color:var(--signal)}
-.bar-t{height:82px;display:flex;align-items:flex-end;margin:.4rem 0 .4rem}
-.bar-t span{display:block;width:100%;background:var(--paper);opacity:.26;border-radius:2px}
-.bar-c.low .bar-t span{background:var(--signal);opacity:1}
-.bar-c.ytd .bar-t span{background:transparent;border:1px solid var(--smoke);
-  border-bottom:2px solid var(--paper)}
-.bar-y{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
-.bar-c.low .bar-y,.bar-c.ytd .bar-y{color:var(--paper)}
-.bar-y small{display:block;font-size:.82em;letter-spacing:.06em;color:var(--smoke);font-weight:600}
+.snap{display:flex;flex-wrap:wrap;gap:.3rem 1.25rem;align-items:baseline;margin-top:.85rem;max-width:92ch}
+.snap-k{font-size:.55rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:var(--signal)}
+.snap-v{font-size:.66rem;font-weight:700;letter-spacing:.04em;color:var(--paper)}
 
-.pair{display:grid;grid-template-columns:auto auto;gap:.15rem 1.6rem;margin-top:1rem;width:max-content}
-.pair-v{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;font-size:clamp(1.1rem,2.2vw,1.6rem)}
-.pair-v.hot{color:var(--signal)}
-.pair-l{font-size:.55rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
+.two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:2.4rem;margin-top:1.2rem}
+@media(max-width:900px){.two{grid-template-columns:1fr;gap:1.6rem}}
+.obs-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;line-height:1.02;
+  font-size:clamp(1.05rem,2.1vw,1.5rem);margin:0}
 
-.conc{font-family:'Oswald',sans-serif;font-weight:600;line-height:.86;
-  font-size:clamp(3.2rem,8vw,6rem);color:var(--signal);margin-top:.7rem}
-.conc-n{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
-  font-size:clamp(1.1rem,2.3vw,1.7rem);line-height:1.05;margin-top:.3rem}
-.conc-l{margin-top:.5rem;display:grid;gap:.2rem}
-.conc-l span{font-size:.63rem;color:var(--smoke);display:flex;justify-content:space-between;
-  max-width:24ch;border-bottom:1px solid var(--hair);padding-bottom:.18rem}
+/* Primary evidence. The two figures are set at identical size on purpose:
+   making K-Trap's bigger would editorialise n=2 into a result. */
+.duel{display:flex;gap:1.4rem;align-items:flex-end;margin-top:.8rem}
+.duel-k{font-size:.52rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.3rem}
+.duel-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.84;
+  font-size:clamp(2.3rem,5.5vw,4rem)}
+.duel-n.hot{color:var(--signal)}
+.duel-l{font-size:.52rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.35rem}
+.duel-vs{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--smoke);padding-bottom:1rem}
+.rankrow{display:flex;gap:.6rem;align-items:baseline;margin-top:.8rem}
+.rankrow b{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;line-height:1}
+.rankrow span{font-size:.53rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--smoke);max-width:24ch;line-height:1.35}
+.qual{font-size:.56rem;color:var(--smoke);margin-top:.6rem;line-height:1.5;max-width:40ch}
+
+/* Secondary evidence — breakout scale. */
+.conc{font-family:'Oswald',sans-serif;font-weight:600;line-height:.84;
+  font-size:clamp(2.2rem,5.2vw,3.7rem);color:var(--signal);margin-top:.8rem}
+.conc-n{font-size:.58rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--smoke);line-height:1.4;margin-top:.35rem;max-width:26ch}
+.conc-l{margin-top:.5rem;display:grid;gap:.16rem}
+.conc-l span{font-size:.6rem;color:var(--smoke);display:flex;justify-content:space-between;
+  max-width:22ch;border-bottom:1px solid var(--hair);padding-bottom:.15rem}
 .conc-l b{color:var(--paper);font-weight:700}
 
-/* K-Trap line: deliberately the smallest thing on the slide. */
-.ktline{margin-top:1.1rem;padding-top:.85rem;border-top:1px solid var(--hair);
-  display:flex;flex-wrap:wrap;gap:.5rem 2.1rem;align-items:baseline}
-.ktline-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
-  font-size:clamp(.9rem,1.7vw,1.2rem);line-height:1}
-.ktline-i{display:flex;gap:.5rem;align-items:baseline}
-.ktline-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.15rem;line-height:1}
-.ktline-v.hot{color:var(--signal)}
-.ktline-k{font-size:.55rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
-.ktline-n{font-size:.6rem;color:var(--smoke);flex-basis:100%;line-height:1.5}
-
-.defn{margin-top:.85rem;font-size:.68rem;line-height:1.6;color:var(--smoke);max-width:80ch}
-.defn b{color:var(--paper);font-weight:700}
+/* Tertiary — the "is the market just quiet?" check, reduced to one thin row.
+   The five-bar chart is gone; the series survives as a single text line so
+   it can never compete with the K-Trap benchmark above it. */
+.qrow{margin-top:1.05rem;padding-top:.8rem;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;gap:.55rem 1.7rem;align-items:baseline}
+.qrow-q{font-size:.6rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--smoke);max-width:19ch;line-height:1.4}
+.qrow-a{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.6rem;line-height:1;
+  color:var(--signal)}
+.qrow-i{display:flex;gap:.45rem;align-items:baseline}
+.qrow-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.5rem;line-height:1}
+.qrow-k{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--smoke);max-width:13ch;line-height:1.3}
+.hist{flex-basis:100%;font-size:.55rem;letter-spacing:.05em;color:var(--smoke);margin:.15rem 0 0}
+.hist b{color:var(--paper);font-weight:700}
 
 /* ── Winners (slide 6) ─────────────────────────────────────────── */
 .win{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
@@ -590,89 +602,86 @@ const slides = () => [
 /* 08 ── UK RAP MARKET CONTEXT ──────────────────────────────────────
    Placed AFTER the decline, never before it. Context, not mitigation.
 
-   The headline is neutral on purpose — it names the subject and lets the
-   three observations speak, because the analysis does not cleanly establish
-   that UK rap declined and a headline claiming it would be unsupportable.
+   The slide answers one question and answers it in the headline. The
+   answer is "NOT MATERIALLY" — not "performing strongly", not
+   "outperforming", and specifically not "TRAPO 2 performed in line with
+   the market", which would imply the whole campaign was benchmarked when
+   only two mature 2026 heroes were.
 
-   The dataset definition is a visible panel at the top, not a footnote:
-   the single most likely way this slide gets misread is someone taking it
-   for "all UK rap on YouTube" rather than 11 official artist channels.
+   K-Trap is measured against the FULL 11-artist cohort median. The
+   776,599 established-only median is deliberately unused: it drops
+   Central Cee, Dave and D-Block Europe and would flatter him. The 9% gap
+   to the cohort median is not dramatised in either direction — on n=2 it
+   is noise, and that is exactly what "not materially" encodes.
 
-   K-Trap is the smallest element by design, is benchmarked against the FULL
-   cohort rather than the flattering established-only median, and carries
-   n=2 on its face.                                                       */
+   The five-bar release chart is gone. It was competing with the K-Trap
+   benchmark for attention while only ever being a supporting check, so
+   the series survives as one line of text.                             */
 `<section class="slide coal" data-t="Market context">
   <div class="inner">
     <div class="label reveal">The wider picture</div>
-    <h2 class="display big reveal" style="max-width:14ch">The UK rap<br>
-      <span style="color:var(--signal)">YouTube picture.</span></h2>
+    <div class="qa reveal">
+      <h2 class="qa-q">Is K-Trap underperforming the market?</h2>
+      <p class="qa-a">Not materially.</p>
+    </div>
 
     <div class="snap reveal">
       <span class="snap-k">YouTube data snapshot</span>
-      <span class="snap-v">${A.market.channels} leading UK rap artist channels</span>
+      <span class="snap-v">${A.market.channels} UK rap artist channels</span>
       <span class="snap-v">${A.market.heroes} hero releases</span>
       <span class="snap-v">${A.market.window}</span>
-      <span class="snap-v"><em>Public YouTube Data API v3 · official artist channels only</em></span>
+      <span class="snap-v">Public YouTube Data API v3</span>
     </div>
 
     <div class="two">
       <div>
-        <h3 class="obs-h">2025 was the quietest release year.</h3>
-        <div class="bars stagger">
-          ${A.market.years.map(r=>`
-            <div class="bar-c${r.low?' low':''}${r.ytd?' ytd':''}">
-              <div class="bar-n">${r.heroes}</div>
-              <div class="bar-t"><span style="height:${Math.round(r.heroes/65*100)}%"></span></div>
-              <div class="bar-y">${r.y}${r.ytd?'<small>Jan → 2 Sep</small>':''}</div>
-            </div>`).join('')}
+        <div class="duel stagger">
+          <div><div class="duel-k">K-Trap</div>
+            <div class="duel-n hot">${fmt(A.market.ktMedian)}</div>
+            <div class="duel-l">Median current views</div></div>
+          <div class="duel-vs">vs</div>
+          <div><div class="duel-k">UK rap cohort</div>
+            <div class="duel-n">${fmt(A.market.cohortMedian)}</div>
+            <div class="duel-l">Median current views</div></div>
         </div>
-        <div class="pair stagger">
-          <span class="pair-v hot">${A.market.active2026}</span><span class="pair-v">${A.market.active2025}</span>
-          <span class="pair-l">Artists active 2026</span><span class="pair-l">Artists active 2025</span>
-        </div>
-        <p class="obs-s">45 hero releases in the first eight months of 2026, against 40 across the
-          whole of 2025. Release activity has picked back up. The 2025 dip was also concentrated
-          rather than general — ${A.market.reduced} of ${A.market.channels} artists reduced output
-          from 2024, ${A.market.increased} increased it and ${A.market.flat} held flat.</p>
+        <div class="rankrow reveal"><b>${A.market.ktRank}</b>
+          <span>Artists with comparable mature 2026 releases</span></div>
+        <p class="qual">K-Trap n=${A.market.ktN} · 2026 hero releases aged 90 days or more ·
+          current public views at 2 Sep 2026.</p>
       </div>
 
       <div>
-        <h3 class="obs-h">The biggest moments are highly concentrated.</h3>
+        <h3 class="obs-h">The gap is breakout scale.</h3>
         <div class="conc">${A.market.topCC + A.market.topDave} / 10</div>
-        <div class="conc-n">Of the biggest hero releases<br>are Central Cee or Dave</div>
+        <div class="conc-n">Biggest hero releases in the ${A.market.heroes}-video dataset
+          are Central Cee + Dave</div>
         <div class="conc-l stagger">
           <span>Central Cee <b>${A.market.topCC}</b></span>
           <span>Dave <b>${A.market.topDave}</b></span>
-          <span>Every other artist <b>${A.market.topOther}</b></span>
+          <span>Everyone else <b>${A.market.topOther}</b></span>
         </div>
-        <p class="obs-s">Top 10 of all ${A.market.heroes} hero releases by current public views.
-          It is why a cohort average is not a usable benchmark.</p>
       </div>
     </div>
 
-    <div class="ktline reveal">
-      <div class="ktline-h">K-Trap sits mid-table in 2026.</div>
-      <div class="ktline-i"><span class="ktline-v hot">${fmt(A.market.ktMedian)}</span>
-        <span class="ktline-k">K-Trap median · n=${A.market.ktN}</span></div>
-      <div class="ktline-i"><span class="ktline-v">${fmt(A.market.cohortMedian)}</span>
-        <span class="ktline-k">Full cohort median</span></div>
-      <div class="ktline-i"><span class="ktline-v">${A.market.ktRank}</span>
-        <span class="ktline-k">Rank</span></div>
-      <p class="ktline-n">2026 hero releases aged 90 days or more at 2 September 2026, current
-        public views. Two releases qualify, so this places K-Trap rather than measures him.</p>
+    <div class="qrow reveal">
+      <div class="qrow-q">Is 2026 simply a quiet release market?</div>
+      <div class="qrow-a">No.</div>
+      <div class="qrow-i"><span class="qrow-v">45</span>
+        <span class="qrow-k">Hero releases Jan → 2 Sep 2026</span></div>
+      <div class="qrow-i"><span class="qrow-v">40</span>
+        <span class="qrow-k">Across all of 2025</span></div>
+      <div class="qrow-i"><span class="qrow-v">${A.market.active2026}</span>
+        <span class="qrow-k">Artists active in 2026</span></div>
+      <p class="hist">${A.market.years.map(r=>`${r.y}${r.ytd?' YTD':''} <b>${r.heroes}</b>`).join(' · ')}</p>
     </div>
 
-    <p class="defn"><b>Hero release</b> = a primary music destination on the artist's own channel.
-      100–900s music uploads · Shorts, BTS, vlogs, trailers, interviews and documentaries excluded ·
-      same-day album dumps collapsed to one primary hero.</p>
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:52ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">TRAPO 2
+      hasn't recreated the previous breakout. <span style="color:var(--signal)">K-Trap isn't currently
+      an outlier against the 2026 market.</span></h3>
 
-    <h3 class="display mid reveal" style="margin-top:.95rem;max-width:52ch;font-size:clamp(1.25rem,2.6vw,2.05rem)">Public data shows what was
-      released and what it has reached today.
-      <span style="color:var(--signal)">It cannot reconstruct historical audience demand.</span></h3>
-    <div class="srcbar reveal"><span class="src">All view counts are current lifetime views as at
-      2 September 2026 and are not age-adjusted · median hero age ranges from 1,497 days (2022) to
-      118 days (2026), so years are never compared on views · channel identities verified by API
-      channel title</span></div>
+    <div class="srcbar reveal"><span class="src">Official artist channels only · primary music
+      destinations · current public views · historical audience demand cannot be reconstructed
+      from public API data</span></div>
   </div>
 </section>`,
 
