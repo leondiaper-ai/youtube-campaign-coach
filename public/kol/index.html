@@ -275,7 +275,7 @@ body.present{overflow:hidden}
 .sp{border-top:2px solid var(--hair);padding-top:.8rem}
 .sp.peak{border-color:var(--signal)}
 .sp-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;
-  font-size:clamp(2.4rem,6vw,4.4rem)}
+  font-size:clamp(3rem,7.4vw,5.6rem)}
 .sp.peak .sp-n{color:var(--signal)}
 .sp-l{font-size:.74rem;color:var(--smoke);margin-top:.4rem;line-height:1.4;max-width:22ch}
 
@@ -708,7 +708,13 @@ const ARTIST = {
      actual start time, which confirms the broadcast aired.                  */
   last:{
     opens:'22 Feb 2024', album:'10 May 2024', closes:'17 Oct 2024',
-    uploads:134, views:'11.2m', lifetimeShare:'0.45%',
+    /* Re-verified 2 Sep 2026 against the complete 404-upload playlist.
+       Was 134 / 11.2m / 79 / 88.3 from the 25 Aug pull; two uploads are no
+       longer in the playlist and views moved. The finding is unchanged —
+       roughly four fifths of uploads were Shorts, roughly seven eighths of
+       views accrued on long-form — but the deck and the review pack now
+       agree to the decimal. */
+    uploads:132, views:'10.86m', lifetimeShare:'0.44%',
     phases:[
       ['Pre-release','22 Feb → 9 May','78 days','Two music videos, a Tonight Show performance, two lyric videos'],
       ['Release week','10 → 16 May','7 days','22 uploads · 3.3m views · ten album assets on day one'],
@@ -721,7 +727,7 @@ const ARTIST = {
       ['Live',3,'460k',4.1,'163k'],
       ['Visualiser',1,'380k',3.4,'380k'],
     ],
-    shortsUplPct:79, shortsViewPct:11.7, lfUplPct:21, lfViewPct:88.3,
+    shortsUplPct:80, shortsViewPct:11.9, lfUplPct:20, lfViewPct:88.1,
     followOk:6, followN:11, medianGap:8,
 
     /* THE PLAN, NOT THE POST-MORTEM.
@@ -977,7 +983,7 @@ const ARTIST = {
     { id:'ZJdHNwUgsPI', t:"We're Onto Something", y:'2025' },
     { slot:true,        t:'Live / new era',       y:'Next' },
     { id:'hYECLfqjdnw', t:'Closer · Live',        y:'2013' },
-    { id:'gnhXHvRoUd0', t:'Use Somebody',         y:'2009' },
+    { id:'coWbxJFgSdY', t:'Walk-on music',        y:'2026' },
   ],
 
   /* Outside-in limits. */
@@ -1094,13 +1100,17 @@ function slides(){ return [
     <div class="nowfacts reveal">
       <span><b>${A.nowEra.uploads}</b> uploads since July</span>
       <span><b>${A.nowEra.shorts}</b> Shorts</span>
-      <span><b>${A.nowEra.tour}</b> tour posts</span>
-      <span><b>${A.nowEra.countdowns}</b> countdowns \u00b7 one date \u00b7 ${A.nowEra.date}</span>
+      <span><b>${A.nowEra.countdowns}</b> countdowns</span>
+      <span><b>${A.nowEra.date}</b></span>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:34ch">The band are already
-      building curiosity.<br><span style="color:var(--signal)">Now the next moment has to land.</span></h3>
-    <div class="srcbar reveal"><span class="src">Lyrics, rehearsal footage, tour moments and a
-      countdown — no music destination on the channel yet</span></div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:34ch">The story is already
+      unfolding.<br><span style="color:var(--signal)">Now the next moment has to land.</span></h3>
+    <!-- The absence of a destination is the reason the deck exists, but it is
+         not what this slide is for. It sits in the source bar at source-bar
+         size: accurate, checkable, and not the thing anyone remembers. The
+         slide is meant to feel like something is happening. -->
+    <div class="srcbar reveal"><span class="src">Lyrics, rehearsal footage, tour moments and
+      countdowns — the hero release is still ahead</span></div>
   </div>
 </section>`,
 
@@ -1133,17 +1143,25 @@ function slides(){ return [
     <div class="split2 stagger">
       <div class="sp"><div class="sp-n">${A.last.shortsUplPct}%</div>
         <div class="sp-l">of that campaign's uploads were Shorts</div></div>
-      <div class="sp peak"><div class="sp-n">${Math.round(A.last.lfViewPct)}%</div>
+      <div class="sp peak"><div class="sp-n">${A.last.lfViewPct}%</div>
         <div class="sp-l">of that campaign's views came from long-form</div></div>
     </div>
-    <div class="wall stagger">
-      ${[0,2,6,9].map(i=>A.campaign2024[i]).map(c=>`
+    <!-- Two thumbnails, not four. This slide's job is the reveal, not a
+         summary of the campaign — the numbers are the slide and everything
+         else was competing with them. -->
+    <div class="wall stagger" style="grid-template-columns:repeat(2,1fr);max-width:52ch">
+      ${[0,2].map(i=>A.campaign2024[i]).map(c=>`
         <div class="wall-c"><img src="${thumb(c.id)}" alt="${esc(c.t)}">
           <span class="jn-yr">2024</span>
           <div class="wall-l">${esc(c.t)} · ${fmt(c.v)}</div></div>`).join('')}
     </div>
     <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:34ch">Shorts build the moment.<br>
       <span style="color:var(--signal)">Long-form gives it somewhere to land.</span></h3>
+    <!-- The numbers above are an observation about where views accrued. The
+         line above is our recommendation. The deck must not let the second
+         borrow the authority of the first. -->
+    <div class="srcbar reveal"><span class="src">Where views accrued, not what caused them —
+      the principle is our recommendation, not a finding</span></div>
   </div>
 </section>`,
 
