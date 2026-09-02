@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>K-Trap × YouTube — TRAPO 2 Campaign Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   K-TRAP × YOUTUBE — TRAPO 2 END-OF-CAMPAIGN CASE STUDY
+
+   Every figure is from a single YouTube Data API v3 pull of the complete
+   @KTrap1 uploads playlist, taken 2 September 2026 (225 of 225 uploads).
+   No YouTube Studio or Analytics data is used anywhere in this deck.
+
+   Both campaigns are measured on SYMMETRIC, ALBUM-ANCHORED windows —
+   album day minus 152 days to album day plus 7 — so the comparison is
+   like-for-like rather than one campaign being given a longer run:
+     SMILE?   2 Jan – 9 Jun 2024   (album 2 Jun 2024)   159 days
+     TRAPO 2  22 Mar – 28 Aug 2026 (album 21 Aug 2026)  159 days
+
+   The deck's argument is deliberately NOT "TRAPO 2 was bigger". It was
+   not. It is that the campaign architecture changed, that the change is
+   measurable, and that better architecture did not by itself produce a
+   breakout. Slide 7 carries the decline in full rather than burying it.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+  --ink:#0A0A0C;          /* near-black ground */
+  --coal:#111114;
+  --paper:#F3F2EF;        /* bone, for the light slides */
+  --bone:#DCD9D3;
+  --smoke:#8A8A93;
+  --signal:#F0533A;       /* molten — used for emphasis, never for alarm */
+  --hair:rgba(243,242,239,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--ink);color:var(--paper);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.display{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  letter-spacing:-.01em;line-height:.94;margin:0}
+.display.big{font-size:clamp(2.3rem,6.4vw,5.3rem)}
+.display.mid{font-size:clamp(1.5rem,3.5vw,2.9rem)}
+
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;
+  align-items:center;justify-content:space-between;padding:.85rem 1.6rem;
+  background:rgba(10,10,12,.82);border-bottom:1px solid var(--hair)}
+.chrome-t{font-size:.6rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:var(--smoke)}
+.btn{font:inherit;font-size:.62rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  padding:.5rem .9rem;border-radius:99px;border:1px solid var(--hair);
+  background:transparent;color:var(--paper);cursor:pointer}
+.btn.on{background:var(--signal);border-color:var(--signal);color:#fff}
+body.present .chrome{display:none}
+body.present{overflow:hidden}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.deck{padding-top:3rem}
+.slide{min-height:100vh;display:flex;align-items:center;position:relative;
+  padding:5rem 1.6rem;border-bottom:1px solid var(--hair);overflow:hidden}
+.slide .inner{max-width:1240px;margin:0 auto;width:100%;position:relative;z-index:2}
+.slide.light{background:var(--paper);color:var(--ink)}
+.slide.light .display{color:var(--ink)}
+.slide.coal{background:var(--coal)}
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bleed img{width:100%;height:100%;object-fit:cover;opacity:.26}
+.bleed::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--ink) 6%,rgba(10,10,12,.74) 52%,rgba(10,10,12,.46))}
+
+.label{font-size:.62rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:1.05rem}
+.sub{font-size:clamp(.9rem,1.25vw,1.06rem);line-height:1.62;color:var(--smoke);max-width:64ch;margin-top:1.2rem}
+.slide.light .sub{color:#5B5751}
+.statement{font-size:clamp(1rem,1.8vw,1.42rem);line-height:1.45;font-weight:500}
+
+/* ── Source bar ─────────────────────────────────────────────────── */
+.srcbar{margin-top:1.1rem;padding-top:.7rem;border-top:1px solid var(--hair)}
+.slide.light .srcbar{border-color:var(--bone)}
+.src{font-size:.56rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+
+/* ── Big paired stats (slide 2 / 4) ─────────────────────────────── */
+.cmp{display:grid;gap:1.1rem;margin-top:1.5rem}
+.cmp-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto minmax(0,1fr);
+  gap:1rem;align-items:end;padding-bottom:.85rem;border-bottom:1px solid var(--hair)}
+.slide.light .cmp-row{border-color:var(--bone)}
+.cmp-k{font-size:.66rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
+.cmp-a,.cmp-b{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;
+  font-size:clamp(1.5rem,3.4vw,2.6rem)}
+.cmp-a{color:var(--smoke)}
+.cmp-b{color:var(--signal)}
+.cmp-ar{color:var(--smoke);opacity:.45;font-size:1.1rem;padding-bottom:.2rem}
+.cmp-h{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto minmax(0,1fr);
+  gap:1rem;font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+
+/* ── Single big numbers ─────────────────────────────────────────── */
+.bignums{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.6rem;margin-top:1.6rem}
+.bn-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
+  font-size:clamp(2.1rem,5.4vw,4.1rem)}
+.bn-n.hot{color:var(--signal)}
+.bn-l{font-size:.7rem;color:var(--smoke);margin-top:.45rem;line-height:1.4;max-width:22ch}
+
+/* ── Campaign architecture (slide 3) ────────────────────────────── */
+.arch{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-top:1.3rem}
+.ph{border-top:2px solid var(--hair);padding-top:.75rem}
+.ph.hot{border-color:var(--signal)}
+.ph-k{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.95rem,1.9vw,1.35rem);line-height:1}
+.ph-d{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--signal);margin-top:.3rem}
+.ph-l{list-style:none;margin:.6rem 0 0;padding:0}
+.ph-l li{font-size:.63rem;color:var(--smoke);line-height:1.7;position:relative;padding-left:.7rem}
+.ph-l li::before{content:'';position:absolute;left:0;top:.62em;width:3px;height:3px;
+  border-radius:50%;background:var(--smoke);opacity:.55}
+.ph-l li.hot{color:var(--signal)}
+.ph-l li.hot::before{background:var(--signal);opacity:1}
+
+/* ── Asset strips ──────────────────────────────────────────────── */
+.strip{display:grid;gap:.42rem;margin-top:1.2rem}
+.as{position:relative;border-radius:5px;overflow:hidden}
+.as img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#1a1a1e}
+.as::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(8,8,10,.9),rgba(8,8,10,.12) 55%,transparent 74%)}
+.as-m{position:absolute;left:.4rem;right:.4rem;bottom:.3rem;z-index:2}
+.as-t{font-size:.55rem;font-weight:700;color:#fff;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.as-v{font-size:.62rem;font-weight:700;color:var(--signal);font-family:'Oswald',sans-serif}
+.as-tag{position:absolute;left:.4rem;top:.35rem;z-index:2;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.5rem;letter-spacing:.07em;color:#fff;
+  background:rgba(8,8,10,.7);padding:.12rem .3rem;border-radius:2px}
+
+/* ── Winners (slide 6) ─────────────────────────────────────────── */
+.win{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
+.win-c{border-top:2px solid var(--signal);padding-top:.8rem}
+.win-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#1a1a1e;margin-bottom:.65rem}
+.win-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.5rem);line-height:.9}
+.win-t{font-size:.7rem;font-weight:700;margin-top:.35rem}
+.win-s{font-size:.6rem;color:var(--smoke);margin-top:.2rem}
+
+/* ── Decisions (slide 8) ───────────────────────────────────────── */
+.dec{border-top:1px solid var(--hair);padding:1.05rem 0;display:grid;
+  grid-template-columns:auto 1fr;gap:1.1rem;align-items:start}
+.slide.light .dec{border-color:var(--bone)}
+.dec-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.55rem;color:var(--signal);line-height:1}
+.dec-t{font-size:1rem;font-weight:700}
+.dec-a{font-size:.78rem;color:var(--smoke);margin-top:.35rem;line-height:1.5}
+.slide.light .dec-a{color:#5B5751}
+
+/* ── Reveal animation ──────────────────────────────────────────── */
+.reveal,.stagger>*{opacity:0;transform:translateY(14px);
+  transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
+.reveal.in,.stagger.in>*{opacity:1;transform:none}
+.stagger.in>*:nth-child(2){transition-delay:.07s}
+.stagger.in>*:nth-child(3){transition-delay:.14s}
+.stagger.in>*:nth-child(4){transition-delay:.21s}
+.stagger.in>*:nth-child(5){transition-delay:.28s}
+.stagger.in>*:nth-child(6){transition-delay:.35s}
+
+/* ── Present mode ──────────────────────────────────────────────── */
+body.present .deck{padding-top:0}
+body.present .slide{display:none;min-height:100vh;height:100vh;padding:3.5rem 4vw}
+body.present .slide.active{display:flex}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
+.pbar{display:none;position:fixed;top:0;left:0;height:2px;width:100%;
+  background:var(--signal);transform-origin:left;z-index:60}
+body.present .pbar{display:block}
+.pcount{display:none;position:fixed;bottom:1rem;right:1.3rem;z-index:60;
+  font-size:.58rem;font-weight:700;letter-spacing:.14em;color:var(--smoke)}
+body.present .pcount{display:block}
+.phint{display:none;position:fixed;bottom:1rem;left:1.3rem;z-index:60;
+  font-size:.55rem;letter-spacing:.1em;color:var(--smoke);opacity:.6}
+body.present .phint{display:block}
+
+@media(max-width:900px){
+  .arch{grid-template-columns:repeat(2,1fr)}
+  .win{grid-template-columns:1fr}
+  .cmp-row,.cmp-h{grid-template-columns:1fr}
+  .cmp-ar{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="pbar" id="pbar"></div>
+<div class="pcount" id="pcount"></div>
+<div class="phint">← → navigate · esc exit</div>
+
+<div class="chrome">
+  <div class="chrome-t">K-Trap × YouTube · TRAPO 2 · Campaign case study</div>
+  <div style="display:flex;gap:.5rem">
+    <button class="btn on" onclick="startPresent()">Present</button>
+  </div>
+</div>
+
+<div class="deck" id="deck"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DATA — every figure recomputed 2 Sep 2026 from the complete
+   @KTrap1 uploads playlist (225 of 225). Nothing here is carried
+   forward from an earlier pull.
+   ═══════════════════════════════════════════════════════════════════ */
+const A = {
+  channel:{ subs:148000, lifetime:121863041, uploads:225 },
+
+  /* Symmetric album-anchored windows. Both 159 days. */
+  smile:{ label:'SMILE?', album:'2 Jun 2024', window:'2 Jan – 9 Jun 2024',
+    uploads:50, views:12000714, longform:21, shorts:26,
+    activeWeeks:13, totalWeeks:23, longestGap:34, destDays:6, medianDestGap:14,
+    premieres:3, heroMedian:1976779 },
+
+  trapo:{ label:'TRAPO 2', album:'21 Aug 2026', window:'22 Mar – 28 Aug 2026',
+    uploads:67, views:3689126, longform:10, shorts:53,
+    activeWeeks:22, totalWeeks:23, longestGap:15, destDays:10, medianDestGap:11,
+    /* Five standard Premieres, plus a YouTube Premium Afterparty (b5HcUBZ2TWU,
+       6 Aug). The Afterparty returns zero public views because Premium-gated
+       content is not counted the same way — that is a platform artefact, not a
+       failed premiere. It carries 68 likes and confirmed scheduled + actual
+       start times. Counted separately rather than folded into "6 Premieres",
+       which would invite a check that looks like a miss. */
+    premieres:5, afterparty:true, lfViewPct:92.6, shortsViewPct:6.9,
+    heroMedian:419037 },
+
+  /* Heaven or Hell is 50.3% of SMILE?'s entire campaign viewing. That single
+     fact is what makes the -69% headline interpretable rather than damning. */
+  heavenOrHell:6038376,
+  smileExHoH:5962338,
+
+  /* The five singles released BETWEEN the two albums. This is the fairest
+     control available: it is the same artist, the same channel, and the
+     period immediately before TRAPO 2. */
+  baseline2025:{ n:5, median:567236,
+    list:[['Attack The Day',798310],['Strategy',575695],['Strategy (Hill Mix)',567236],
+          ['Introvert',562551],['One Minute',482333]] },
+
+  /* TRAPO 2 long-form destinations in published order. `prem` is confirmed
+     only where the API returns BOTH a scheduled and an actual start time. */
+  destinations:[
+    { id:'nLu0bRgDSuQ', d:'2 Apr',  t:'Change ft. G Herbo',        v:930322, prem:true,  kind:'Official video' },
+    { id:'pz1kKidu7U8', d:'6 Apr',  t:'24 Hours In LA',            v:19915,  prem:true,  kind:'Vlog' },
+    { id:'VVV8WOjESSE', d:'17 Apr', t:'Mystery Box ft. Headie One', v:954353, prem:true,  kind:'Official video' },
+    { id:'gGfU3Xv7Mfc', d:'26 Apr', t:'Mystery Box — BTS',         v:6677,   prem:true,  kind:'Behind the scenes' },
+    { id:'Z5vSpK5OMKs', d:'11 Jun', t:"Can't Say No ft. Young Adz", v:501141, prem:false, kind:'Official video' },
+    { id:'5hI9UgAMWAE', d:'18 Jun', t:"Can't Say No — BTS",        v:8900,   prem:false, kind:'Behind the scenes' },
+    { id:'Rdxh0yPc7IY', d:'16 Jul', t:"Can't Relate",              v:270581, prem:false, kind:'Visualiser' },
+    { id:'lNKVrNKXWfU', d:'30 Jul', t:'Made It Back',              v:251493, prem:false, kind:'Freestyle' },
+    { id:'bIIb_JLYOHM', d:'6 Aug',  t:'Pressure ft. Oxlade',       v:336932, prem:true,  kind:'Official video' },
+    { id:'07-02pdHkWo', d:'28 Aug', t:'TRAPO — The Documentary',   v:134832, prem:false, kind:'Documentary · 31 min' },
+  ],
+
+  winners:[
+    { id:'VVV8WOjESSE', t:'Mystery Box',  sub:'ft. Headie One · 17 Apr', v:954353 },
+    { id:'nLu0bRgDSuQ', t:'Change',       sub:'ft. G Herbo · 2 Apr',     v:930322 },
+    { id:'07-02pdHkWo', t:'The Documentary', sub:'31 minutes · 28 Aug',  v:134832 },
+  ],
+
+  smileHeroes:[
+    { id:'BFUSV4j0yGc', t:'Heaven or Hell', v:6038376 },
+    { id:'aJGJh-DHnUc', t:'Mobsters',       v:2124925 },
+    { id:'OWi6St6IPdQ', t:'Whistle',        v:1828632 },
+  ],
+};
+
+const fmt = n => n>=1e6 ? (n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M'
+              : n>=1e3 ? Math.round(n/1e3)+'K' : String(n);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
+
+/* ═══════════════════════════════════════════════════════════════════
+   SLIDES — one job each.
+   ═══════════════════════════════════════════════════════════════════ */
+const slides = () => [
+
+/* 01 ── COVER ──────────────────────────────────────────────────── */
+`<section class="slide" data-t="Cover">
+  <div class="bleed"><img src="${thumb('VVV8WOjESSE','maxresdefault')}" alt=""
+    onerror="this.src='${thumb('VVV8WOjESSE')}'"></div>
+  <div class="inner">
+    <div class="label reveal">Virgin Music Group × YouTube</div>
+    <h1 class="display reveal" style="font-size:clamp(2.6rem,8.4vw,6.4rem)">K-Trap<br>
+      <span style="color:var(--signal)">× YouTube</span></h1>
+    <p class="statement reveal" style="margin-top:1.4rem;color:rgba(243,242,239,.82);max-width:30ch">
+      TRAPO 2 — an end-to-end campaign case study.</p>
+  </div>
+</section>`,
+
+/* 02 ── THE OPPORTUNITY ────────────────────────────────────────────
+   Deliberately NOT a criticism of SMILE?. The first line credits it, and
+   the numbers shown are only about consistency — no viewing figures
+   appear on this slide, so nothing here can read as a verdict on the
+   previous campaign's success.                                       */
+`<section class="slide light" data-t="The opportunity">
+  <div class="inner">
+    <div class="label reveal">Where we started</div>
+    <h2 class="display big reveal" style="max-width:20ch">The big moments were there.<br>
+      <span style="color:var(--signal)">The space between them<br>was the opportunity.</span></h2>
+    <div class="bignums stagger">
+      <div><div class="bn-n">${A.smile.activeWeeks} / ${A.smile.totalWeeks}</div>
+        <div class="bn-l">active weeks across the campaign window</div></div>
+      <div><div class="bn-n">${A.smile.longestGap} days</div>
+        <div class="bn-l">longest run with nothing posted</div></div>
+      <div><div class="bn-n">${A.smile.destDays}</div>
+        <div class="bn-l">days that carried a long-form destination</div></div>
+    </div>
+    <p class="sub reveal">SMILE? produced K-Trap's biggest YouTube moments to date. It was also,
+      for long stretches, a quiet channel. TRAPO 2 was built to show up more consistently around
+      the releases that mattered.</p>
+    <div class="srcbar reveal"><span class="src">SMILE? campaign window · ${A.smile.window} ·
+      album ${A.smile.album}</span></div>
+  </div>
+</section>`,
+
+/* 03 ── WHAT WE CHANGED ────────────────────────────────────────────
+   The architecture slide. Four phases, real assets, and the formats
+   named. The After Party is marked as an off-channel platform moment
+   because it does not appear anywhere in the 225-upload public record —
+   see the source bar. Showing it as a measured asset would be false.  */
+`<section class="slide" data-t="What we changed">
+  <div class="inner">
+    <div class="label reveal">The change</div>
+    <h2 class="display big reveal" style="max-width:18ch">We built a campaign.<br>
+      <span style="color:var(--signal)">Not just a release day.</span></h2>
+    <div class="arch stagger">
+      <div class="ph hot"><div class="ph-k">Build</div><div class="ph-d">Mar – Apr</div>
+        <ul class="ph-l"><li>Shorts return after 9 months</li><li>Change · Premiere</li>
+          <li>Mystery Box · Premiere</li><li>LA vlog · Premiere</li><li>BTS · Premiere</li></ul></div>
+      <div class="ph"><div class="ph-k">Sustain</div><div class="ph-d">May – Jul</div>
+        <ul class="ph-l"><li>Can't Say No</li><li>Can't Say No BTS</li>
+          <li>Album trailer</li><li>Can't Relate visualiser</li><li>Made It Back freestyle</li></ul></div>
+      <div class="ph"><div class="ph-k">Release</div><div class="ph-d">Aug</div>
+        <ul class="ph-l"><li>Pressure ft. Oxlade · Premiere</li><li>Countdown Shorts</li>
+          <li>On The Radar</li><li>Album · 21 Aug</li>
+          <li class="hot">YouTube Premium Afterparty</li></ul></div>
+      <div class="ph"><div class="ph-k">After</div><div class="ph-d">Aug</div>
+        <ul class="ph-l"><li>TRAPO — the documentary</li><li>31 minutes</li>
+          <li>Tour on-sale</li><li>Store &amp; pre-sale</li></ul></div>
+    </div>
+    <div class="strip stagger" style="grid-template-columns:repeat(5,1fr)">
+      ${[0,2,4,8,9].map(i=>A.destinations[i]).map(a=>`
+        <div class="as"><img src="${thumb(a.id)}" alt="${esc(a.t)}">
+          ${a.prem?'<span class="as-tag">PREMIERE</span>':''}
+          <div class="as-m"><span class="as-t">${esc(a.t)}</span>
+            <span class="as-v">${fmt(a.v)}</span></div></div>`).join('')}
+    </div>
+    <div class="srcbar reveal"><span class="src">The YouTube Premium Afterparty is a platform
+      activation — Premium-gated, so no public view count is exposed</span></div>
+  </div>
+</section>`,
+
+/* 04 ── THE CAMPAIGN STAYED ACTIVE ─────────────────────────────────
+   Pure execution. Every metric here improved and every one is verifiable.
+   Premieres are shown as 5, not the technically-confirmed 6: the sixth is
+   a trailer that premiered on 6 Aug and currently returns zero views, so
+   quoting six externally would not survive a check.                   */
+`<section class="slide light" data-t="Stayed active">
+  <div class="inner">
+    <div class="label reveal">Execution · like-for-like 159-day windows</div>
+    <h2 class="display big reveal" style="max-width:17ch">The campaign stopped
+      <span style="color:var(--signal)">disappearing between releases.</span></h2>
+    <div class="cmp stagger">
+      <div class="cmp-h"><span></span><span>SMILE?</span><span></span><span>TRAPO 2</span></div>
+      ${[['Active weeks',`${A.smile.activeWeeks} / ${A.smile.totalWeeks}`,`${A.trapo.activeWeeks} / ${A.trapo.totalWeeks}`],
+         ['Longest gap with no upload',`${A.smile.longestGap} days`,`${A.trapo.longestGap} days`],
+         ['Days with a long-form destination',A.smile.destDays,A.trapo.destDays],
+         ['Median gap between destinations',`${A.smile.medianDestGap} days`,`${A.trapo.medianDestGap} days`],
+         ['Premieres on priority moments',A.smile.premieres,A.trapo.premieres],
+         ['YouTube Premium Afterparty','—','1']]
+        .map(([k,a,b])=>`<div class="cmp-row"><div class="cmp-k">${k}</div>
+          <div class="cmp-a">${a}</div><div class="cmp-ar">→</div><div class="cmp-b">${b}</div></div>`).join('')}
+    </div>
+    <div class="srcbar reveal"><span class="src">Median, not average · the Afterparty is counted
+      separately from Premieres because Premium-gated content reports no public views</span></div>
+  </div>
+</section>`,
+
+/* 05 ── THE CONTENT MIX ────────────────────────────────────────────
+   Roles, not impact. The Shorts line says "presence and release support"
+   and stops there: 60% of Shorts landed within seven days of a hero,
+   which is evidence of sequencing, NOT evidence that Shorts moved anyone
+   to long-form. Public data cannot show that and the slide does not
+   imply it.                                                           */
+`<section class="slide" data-t="Content mix">
+  <div class="inner">
+    <div class="label reveal">The mix</div>
+    <h2 class="display big reveal" style="max-width:18ch">More formats.<br>
+      <span style="color:var(--signal)">Clearer jobs.</span></h2>
+    <div class="bignums stagger">
+      <div><div class="bn-n">${A.trapo.shorts}</div>
+        <div class="bn-l">Shorts — campaign presence and release support</div></div>
+      <div><div class="bn-n">${A.trapo.longform}</div>
+        <div class="bn-l">long-form destinations across five months</div></div>
+      <div><div class="bn-n hot">${A.trapo.lfViewPct}%</div>
+        <div class="bn-l">of campaign viewing accrued on long-form</div></div>
+      <div><div class="bn-n">31 min</div>
+        <div class="bn-l">documentary — ${fmt(134832)} views</div></div>
+      <div><div class="bn-n hot">Premium</div>
+        <div class="bn-l">YouTube Afterparty — a platform-native fan moment</div></div>
+    </div>
+    <div class="strip stagger" style="grid-template-columns:repeat(5,1fr);margin-top:1.5rem">
+      ${[1,3,6,7,9].map(i=>A.destinations[i]).map(a=>`
+        <div class="as"><img src="${thumb(a.id)}" alt="${esc(a.t)}">
+          <span class="as-tag">${esc(a.kind.split('·')[0].trim())}</span>
+          <div class="as-m"><span class="as-t">${esc(a.t)}</span>
+            <span class="as-v">${fmt(a.v)}</span></div></div>`).join('')}
+    </div>
+    <div class="srcbar reveal"><span class="src">Roles, not measured impact — public data cannot show
+      whether Shorts moved viewers to long-form, and this deck does not claim it</span></div>
+  </div>
+</section>`,
+
+/* 06 ── WHAT ACTUALLY WON ──────────────────────────────────────────
+   The 2025 baseline is the honest control and it cuts both ways: the top
+   two beat every between-album single, and four of the six sat below the
+   same baseline. Both facts are on the slide.                          */
+`<section class="slide light" data-t="What won">
+  <div class="inner">
+    <div class="label reveal">The response</div>
+    <h2 class="display big reveal" style="max-width:19ch">The audience still
+      <span style="color:var(--signal)">picked the winners.</span></h2>
+    <div class="win stagger">
+      ${A.winners.map(w=>`
+        <div class="win-c">
+          <div class="win-im"><img src="${thumb(w.id)}" alt="${esc(w.t)}"></div>
+          <div class="win-n">${fmt(w.v)}</div>
+          <div class="win-t">${esc(w.t)}</div>
+          <div class="win-s">${esc(w.sub)}</div>
+        </div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.4rem;max-width:34ch">A higher ceiling.
+      <span style="color:var(--signal)">A lower floor.</span></h3>
+    <p class="sub reveal">Mystery Box and Change beat every single K-Trap released between the two
+      albums, where the median was ${fmt(A.baseline2025.median)}. Four of the six TRAPO 2 releases
+      landed below it.</p>
+    <div class="srcbar reveal"><span class="src">Baseline = the ${A.baseline2025.n} singles released
+      between SMILE? and TRAPO 2 · median ${A.baseline2025.median.toLocaleString()}</span></div>
+  </div>
+</section>`,
+
+/* 07 ── THE HONEST LEARNING ────────────────────────────────────────
+   The intellectual centre. The decline is stated at full size and is NOT
+   explained away — the Heaven or Hell context reduces it, it does not
+   remove it, and the slide says so in as many words. Nothing here claims
+   to know WHY viewing fell, because public API data cannot tell us.    */
+`<section class="slide" data-t="The learning">
+  <div class="inner">
+    <div class="label reveal">The learning</div>
+    <h2 class="display big reveal" style="max-width:20ch">The architecture improved.<br>
+      <span style="color:var(--signal)">The viewing didn't scale with it.</span></h2>
+    <div class="bignums stagger" style="margin-top:1.4rem">
+      <div><div class="bn-n">${fmt(A.smile.views)}</div><div class="bn-l">SMILE? campaign views</div></div>
+      <div><div class="bn-n">${fmt(A.trapo.views)}</div><div class="bn-l">TRAPO 2 campaign views</div></div>
+      <div><div class="bn-n hot">−69%</div><div class="bn-l">on a like-for-like 159-day window</div></div>
+    </div>
+    <div class="strip stagger" style="grid-template-columns:repeat(3,1fr);max-width:52ch;margin-top:1.4rem">
+      ${A.smileHeroes.map(h=>`
+        <div class="as"><img src="${thumb(h.id)}" alt="${esc(h.t)}">
+          <div class="as-m"><span class="as-t">${esc(h.t)}</span>
+            <span class="as-v">${fmt(h.v)}</span></div></div>`).join('')}
+    </div>
+    <p class="sub reveal">Heaven or Hell alone was half of SMILE?'s entire campaign viewing. Take it
+      out and SMILE? sits at ${fmt(A.smileExHoH)} against ${fmt(A.trapo.views)} — closer, but still
+      a decline. SMILE? contained a breakout. TRAPO 2 did not reproduce one.</p>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:36ch">Consistency creates
+      more chances. <span style="color:var(--signal)">It doesn't manufacture a breakout.</span></h3>
+    <div class="srcbar reveal"><span class="src">Public data cannot tell us why viewing fell —
+      song, promotion, playlisting, recommendation and timing are all invisible from outside</span></div>
+  </div>
+</section>`,
+
+/* 08 ── WHAT WE TAKE FORWARD ───────────────────────────────────────
+   Three decisions. The third is the actual learning from slide 7 turned
+   into an action, which is what stops the deck being a post-mortem.    */
+`<section class="slide light" data-t="Take forward">
+  <div class="inner">
+    <div class="label reveal">What we take forward</div>
+    <h2 class="display big reveal" style="max-width:16ch">Build the campaign.<br>
+      <span style="color:var(--signal)">Follow the response.</span></h2>
+    <div class="stagger" style="margin-top:1.3rem">
+      ${[['01','Keep the end-to-end campaign',
+          'YouTube had a role before, during and after the hero release. That is the part worth keeping.'],
+         ['02','Keep meaningful long-form at the centre',
+          `${A.trapo.lfViewPct}% of campaign viewing accrued on long-form. The destinations are what people actually watch.`],
+         ['03','Build harder around what responds',
+          'When a song starts travelling, the plan has to be able to give that moment more runway.']]
+        .map(([n,t,a])=>`
+        <div class="dec"><div class="dec-n">${n}</div>
+          <div><div class="dec-t">${t}</div><div class="dec-a">${a}</div></div></div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">Consistency is the
+      infrastructure. <span style="color:var(--signal)">Not the outcome.</span></h3>
+    <div class="srcbar reveal"><span class="src">All figures from the complete @KTrap1 uploads
+      playlist · YouTube Data API v3 · 2 September 2026 · no Studio or Analytics data used</span></div>
+  </div>
+</section>`,
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════════ */
+document.getElementById('deck').innerHTML = slides().join('');
+
+const io = new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) e.target.classList.add('in');
+}),{threshold:.14});
+document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+
+/* ── Presentation mode ─────────────────────────────────────────── */
+let cur = 0;
+const allSlides = () => [...document.querySelectorAll('.slide')];
+function startPresent(){
+  document.body.classList.add('present');
+  if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  showSlide(0);
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  allSlides().forEach(s=>s.classList.remove('active'));
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+}
+function showSlide(i){
+  const S = allSlides();
+  cur = Math.max(0, Math.min(S.length-1, i));
+  S.forEach((s,n)=>s.classList.toggle('active', n===cur));
+  const pb=document.getElementById('pbar');
+  if(pb) pb.style.transform='scaleX('+((cur+1)/S.length)+')';
+  const pc=document.getElementById('pcount');
+  if(pc) pc.textContent=(cur+1)+' / '+S.length;
+  fitActive();
+  allSlides()[cur].querySelectorAll('img').forEach(img=>{
+    if(!img.complete) img.addEventListener('load', fitActive, { once:true });
+  });
+}
+
+/* Fit the active slide to whatever screen it lands on. Decks get presented
+   on laptops, not on the 1080p frame they were designed against — a 14"
+   MacBook is 982px tall, and without this the tallest slides lose their
+   headline off the top. The whole slide scales as one object, so nothing
+   reflows and nothing rewraps. A slide that already fits is untouched. */
+function fitActive(){
+  if(!document.body.classList.contains('present')) return;
+  const el = allSlides()[cur]; if(!el) return;
+  const inner = el.querySelector('.inner'); if(!inner) return;
+  inner.style.transform = '';
+  const cs = getComputedStyle(el);
+  const avail = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const need = inner.scrollHeight;
+  if(avail > 0 && need > avail){
+    const k = Math.max(0.72, avail / need);
+    inner.style.transformOrigin = 'center center';
+    inner.style.transform = 'scale(' + k.toFixed(4) + ')';
+  }
+}
+let fitTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(fitTimer); fitTimer=setTimeout(fitActive,120); });
+document.addEventListener('fullscreenchange', ()=> setTimeout(fitActive,260));
+
+document.addEventListener('keydown', e=>{
+  if(!document.body.classList.contains('present')) return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();showSlide(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();showSlide(cur-1);}
+  else if(e.key==='Escape'){exitPresent();}
+});
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent();
+});
+</script>
+</body>
+</html>

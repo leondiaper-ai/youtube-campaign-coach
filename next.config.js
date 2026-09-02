@@ -7,6 +7,7 @@ const nextConfig = {
       { source: '/amyl', destination: '/amyl/index.html' },
       { source: '/kol',  destination: '/kol/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
+      { source: '/ktrap', destination: '/ktrap/index.html' },
     ];
   },
 };
