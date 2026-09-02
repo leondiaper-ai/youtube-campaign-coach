@@ -642,7 +642,12 @@ const ARTIST = {
          channel now, not a claim about what it leads to — the recent Shorts
          carry lyrics, rehearsal footage and a countdown with nothing
          announced. It earns the framework instead of asserting it.          */
-      { k:'Build',  line:'Tease the story',
+      /* The countdown frame — "29 days 'til our ship comes in", 12 Aug 2026.
+         Chosen over the other countdown Short because the on-screen text is
+         legible in the thumbnail, so BUILD proves itself at a glance. HERO
+         still owns the peak: its column is 1.6fr against BUILD's 1fr, so its
+         image is roughly two and a half times the area. */
+      { k:'Build',  line:'Tease the story', img:'tTTtYFqZxFU',
         note:'Already happening: lyrics, rehearsal footage + a countdown before the reveal.',
         tools:['Shorts','Community','Premiere page','Reminders'] },
       { k:'Hero',   line:'Define the moment', peak:true,
@@ -1062,15 +1067,15 @@ function slides(){ return [
 `<section class="slide light" data-t="What we'd do">
   <div class="inner">
     <!-- One current-era frame, sized to sit beside the headline rather than
-         above the list. tTTtYFqZxFU is the 12 Aug 2026 Short whose on-screen
-         text reads "29 days 'til our ship comes in" — the countdown carrying a
-         lyric. It puts the recommendations in the world they apply to without
-         adding a line of copy. Kept to one column so it cannot dominate. -->
+         above the list. L9OhxJ_OhLo is the 17 Aug 2026 "24 days 'til…" Short —
+         rehearsal-room texture rather than the countdown card, which now sits
+         on slide 5 under BUILD. Two different frames so no image repeats
+         across the deck. Kept to one column so it cannot dominate. -->
     <div class="label reveal">September</div>
     <div class="recshead reveal">
       <h2 class="display big" style="margin:0">What we'd do.</h2>
-      <div class="recshead-im"><img src="${thumb('tTTtYFqZxFU')}"
-        alt="Kings of Leon Short, 12 August 2026"></div>
+      <div class="recshead-im"><img src="${thumb('L9OhxJ_OhLo')}"
+        alt="Kings of Leon Short, 17 August 2026"></div>
     </div>
     <div class="stagger">
       ${[['01','Programme each priority release','Build → hero → extend. Every release that matters gets a run, not a post.'],
