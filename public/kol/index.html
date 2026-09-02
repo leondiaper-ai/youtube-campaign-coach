@@ -219,7 +219,7 @@ body.present{overflow:hidden}
    Five across, two rows. A scrim under each label rather than a text-shadow:
    these thumbnails carry their own baked-in VEVO logos, and a shadow alone
    left the titles fighting them. */
-.swall{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-top:1rem}
+.swall{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-top:.7rem}
 .sw{position:relative;border-radius:5px;overflow:hidden}
 .sw img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
 .sw::after{content:'';position:absolute;inset:0;pointer-events:none;
@@ -236,12 +236,17 @@ body.present{overflow:hidden}
   align-items:center;justify-content:center;gap:.15rem;text-align:center;padding:.4rem}
 .slot-p{font-family:'Oswald',sans-serif;font-size:1.1rem;line-height:1;color:var(--signal)}
 .slot-t{font-size:.5rem;font-weight:700;color:var(--signal);letter-spacing:.04em}
-.run{display:flex;align-items:center;flex-wrap:wrap;margin-top:.7rem;
-  font-size:.56rem;color:var(--smoke)}
+.run{display:flex;align-items:center;flex-wrap:wrap;margin-top:.45rem;
+  font-size:.54rem;color:var(--smoke)}
 .run i{display:inline-block;width:9px;height:9px;border-radius:2px;
   margin-right:.32rem;vertical-align:-1px}
 .run-d{background:var(--smoke);opacity:.55}
 .run-s{background:transparent;border:1.5px dashed var(--signal)}
+/* The station slide runs two rows of tiles plus the reference card, so it is
+   the tightest in the deck after the plan. These trims keep the source bar on
+   screen at 1080p without shrinking the headline. */
+.slide[data-t="Kings of Leon TV"] .srcbar{margin-top:.5rem;padding-top:.45rem}
+.slide[data-t="Kings of Leon TV"] .tmeta{padding:.6rem .8rem}
 @media(max-width:860px){ .swall{grid-template-columns:repeat(2,1fr)} }
 
 /* ── A fan journey, step by step ─────────────────────────────────── */
@@ -1103,7 +1108,7 @@ function slides(){ return [
       <span style="margin-left:.9rem"><i class="run-s"></i></span> Slots for the new record as it arrives
     </div>
     <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1.5rem;
-      align-items:center;margin-top:1rem" class="stagger">
+      align-items:center;margin-top:.6rem" class="stagger">
       <a class="tcard" href="${yt(A.metallica.id)}" target="_blank" rel="noopener">
         <img src="${thumb(A.metallica.id,'maxresdefault')}" alt="${esc(A.metallica.label)}"
           onerror="this.src='${thumb(A.metallica.id)}'">
