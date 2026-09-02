@@ -306,33 +306,53 @@ body.present{overflow:hidden}
 .stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 .stagger>*.visible{opacity:1;transform:none}
 
-/* ── The priority moment (slide 5) ──────────────────────────────────
-   Four stages read as words first. The stage name is the largest thing in
-   each column by a wide margin; the stat, note and tool list are all set
-   small so the eye takes BEFORE / HERO / AFTER / ALWAYS ON in one pass. */
-.mom{display:grid;grid-template-columns:1fr auto 1.25fr auto 1fr auto 1fr;
-  gap:.5rem;align-items:stretch;margin-top:1.6rem}
-.mom-c{border:1px solid var(--bone);border-radius:10px;padding:1rem .95rem;background:#fff;
+/* ── The priority release (slide 5) ─────────────────────────────────
+   Three stages, hero weighted. The peak column is ~1.5x the others and its
+   image is unconstrained, so it reads as the centre of gravity rather than
+   one of three equals. ALWAYS ON is a band beneath, not a fourth column. */
+.mom{display:grid;grid-template-columns:1fr auto 1.5fr auto 1fr;gap:.5rem;
+  align-items:stretch;margin-top:1.5rem}
+.mom-c{border:1px solid var(--bone);border-radius:10px;padding:.9rem .9rem;background:#fff;
   display:flex;flex-direction:column}
 .slide:not(.light) .mom-c{border-color:var(--hair);background:rgba(239,234,227,.04)}
 .mom-c.peak{border-color:var(--signal);border-width:2px;background:rgba(214,150,58,.06)}
-.mom-k{font-family:'Oswald',sans-serif;font-weight:600;line-height:.95;letter-spacing:-.01em;
-  font-size:clamp(1.35rem,2.9vw,2.15rem);text-transform:uppercase}
-.mom-c.peak .mom-k{color:var(--signal)}
-.mom-j{font-size:.72rem;font-weight:700;color:var(--smoke);margin-top:.35rem;line-height:1.3}
-.mom-stat{display:flex;align-items:baseline;gap:.4rem;margin-top:.9rem;
-  padding-top:.7rem;border-top:1px solid var(--bone)}
+.mom-k{font-family:'Oswald',sans-serif;font-weight:600;line-height:.95;
+  font-size:clamp(1.25rem,2.6vw,1.95rem);text-transform:uppercase}
+.mom-c.peak .mom-k{color:var(--signal);font-size:clamp(1.5rem,3.2vw,2.4rem)}
+.mom-j{font-size:.68rem;font-weight:700;color:var(--smoke);margin-top:.3rem;line-height:1.3}
+.mom-im{margin-top:.7rem}
+.mom-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
+.mom-cap{display:block;font-size:.55rem;color:var(--smoke);margin-top:.3rem;line-height:1.3}
+.mom-stat{display:flex;align-items:baseline;gap:.4rem;margin-top:.7rem;
+  padding-top:.6rem;border-top:1px solid var(--bone)}
 .slide:not(.light) .mom-stat{border-color:var(--hair)}
-.mom-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.35rem;line-height:1}
-.mom-c.peak .mom-n{color:var(--signal)}
-.mom-nl{font-size:.56rem;color:var(--smoke);line-height:1.25}
-.mom-note{font-size:.64rem;color:var(--smoke);line-height:1.45;margin-top:.55rem}
-.mom-t{font-size:.56rem;letter-spacing:.02em;color:var(--smoke);opacity:.75;line-height:1.5;
-  margin-top:auto;padding-top:.8rem}
+.mom-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;line-height:1}
+.mom-c.peak .mom-n{color:var(--signal);font-size:1.75rem}
+.mom-nl{font-size:.55rem;color:var(--smoke);line-height:1.25}
+.mom-note{font-size:.62rem;color:var(--smoke);line-height:1.45;margin-top:.5rem}
+.mom-t{font-size:.55rem;color:var(--smoke);opacity:.75;line-height:1.5;margin-top:auto;padding-top:.7rem}
 .mom-ar{display:flex;align-items:center;color:var(--smoke);opacity:.4;font-size:.95rem}
+
+/* Always-on band. Deliberately full width and visually quieter — a layer under
+   the campaign, not the next step in it. */
+.ao{display:grid;grid-template-columns:auto auto 1fr;gap:1.2rem;align-items:center;
+  margin-top:.55rem;border:1px dashed var(--bone);border-radius:10px;padding:.85rem 1.1rem}
+.slide:not(.light) .ao{border-color:var(--hair)}
+.ao-k{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.1rem,2.2vw,1.6rem);
+  line-height:.95;text-transform:uppercase}
+.ao-j{font-size:.62rem;font-weight:700;color:var(--smoke);margin-top:.2rem}
+.ao-pair{display:flex;align-items:center;gap:.5rem}
+.ao-pair img{width:104px;aspect-ratio:16/9;object-fit:cover;border-radius:4px;display:block;background:#222}
+.ao-ar{color:var(--signal);font-size:.9rem}
+.ao-stat{display:flex;align-items:baseline;gap:.4rem}
+.ao-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.15rem;line-height:1;color:var(--signal)}
+.ao-nl{font-size:.55rem;color:var(--smoke)}
+.ao-note{font-size:.62rem;color:var(--smoke);line-height:1.4;margin-top:.25rem}
+.ao-t{font-size:.55rem;color:var(--smoke);opacity:.75;margin-top:.35rem}
 @media(max-width:1000px){
   .mom{grid-template-columns:1fr}
   .mom-ar{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+  .ao{grid-template-columns:1fr;gap:.7rem}
 }
 
 /* ── September as the hero of slide 6 ───────────────────────────────
@@ -611,35 +631,48 @@ const ARTIST = {
     shortsUplPct:79, shortsViewPct:11.7, lfUplPct:21, lfViewPct:88.3,
     followOk:6, followN:11, medianGap:8,
 
-    /* THE SHAPE OF A PRIORITY MOMENT.
-       Slide 4 answers "what happened last time". This answers "what would we
-       build on" — so it is forward-looking and deliberately NOT another
-       campaign timeline. A previous version replayed the rollout here, which
-       made slide 5 a restatement of slide 4 rather than a second idea.
+    /* THE SHAPE OF A PRIORITY RELEASE.
+       Three stages run across the top — before, hero, after — and ALWAYS ON
+       sits beneath them as a band, because it is not a fourth step in the
+       sequence. It is the layer running underneath all of it.
 
-       One proof point per stage, chosen to support that stage's recommendation
-       and not repeated from slide 4's set. `tools` are platform capabilities,
-       offered as opportunities — public API data cannot tell us whether the
-       last campaign used Community posts, reminders, Premiere chat, end
-       screens or channel shelves, so nothing here is framed as a miss.        */
+       HERO is the centre of gravity: widest column, largest image, gold. The
+       other two carry real campaign stills rather than icons so the slide
+       reads as Kings of Leon rather than a consultancy framework.
+
+       `tools` are platform capabilities offered as opportunities. Public API
+       data cannot show whether the last campaign used Community posts,
+       reminders, Premiere chat, end screens or channel shelves, so none of
+       this is framed as something they failed to do.                        */
     moment:[
       { k:'Before', job:'Build anticipation',
+        img:'wMJyD23nKrk', imgCap:'Mustang — lead single',
         tools:'Premiere watch page · Community · Shorts · reminders',
         stat:'7', statLab:'Premieres last campaign',
         note:'The behaviour is already there. The opportunity is programming around a Premiere, not only publishing with one.' },
       { k:'Hero', job:'Make it the event', peak:true,
+        img:'4C9i8E05bgI', imgCap:'Nowhere to Run — Official Video',
         tools:'Official video · Premiere · a live or fan moment into it',
-        stat:'1.66m', statLab:'Nowhere to Run, album day',
+        stat:'1.66m', statLab:'album day',
         note:'When the moment was built properly, it worked.' },
-      { k:'After', job:'Give the attention somewhere to go',
+      { k:'After', job:'Extend the moment',
+        img:'kxmHkxpxoaE', imgCap:'Sex On Fire — iTunes Festival',
         tools:'Live · lyric · performance cut · the next destination',
-        stat:'3', statLab:'live assets in the whole campaign',
-        note:'One great live capture can become a full performance, song cuts, Shorts and future programming.' },
-      { k:'Always on', job:'Keep the current era visible',
-        tools:'Featured video · Releases · playlists · Kings of Leon TV',
-        stat:'86.6%', statLab:'of visible viewing is 2008–13',
-        note:'When fans reach the channel, make the current era impossible to miss.' },
+        stat:'3', statLab:'live assets across the campaign',
+        note:'One great live capture becomes a full performance, song cuts, Shorts and future programming.' },
     ],
+
+    /* Runs underneath all three stages rather than following them. */
+    alwaysOn:{
+      k:'Always on', job:'Keep the current era visible',
+      tools:'Featured video · Releases · playlists · Kings of Leon TV',
+      stat:'86.6%', statLab:'of visible viewing is 2008–13',
+      note:'When fans reach the channel, make the current era impossible to miss.',
+      /* catalogue on the left, current era on the right — a direction of
+         travel we are recommending, not a routing we have measured. */
+      from:{ id:'RF0HhrwIwp0', t:'Sex on Fire · 2009' },
+      to:{ id:'ZJdHNwUgsPI', t:"We're Onto Something · 2025" },
+    },
 
     /* September 2024 — the single clearest month. Shorts performed normally;
        there was simply almost nothing for them to lead to. */
@@ -867,19 +900,15 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 05 ── THE SHAPE OF A PRIORITY MOMENT ────────────────────────────
-   Slide 4 diagnoses; this prescribes. Four words carry the slide — the reader
-   should get it from BEFORE / HERO / AFTER / ALWAYS ON before reading a line
-   of supporting copy. Everything else is deliberately small.
-
-   Not a feature matrix: one recommendation, one KOL proof point and a short
-   tool list per stage. Platform capabilities are opportunities to confirm,
-   never measured failures.                                                   */
-`<section class="slide light" data-t="Every priority moment">
+/* 05 ── THE SHAPE OF A PRIORITY RELEASE ───────────────────────────
+   Three stages across, ALWAYS ON as a band beneath — it supports the whole
+   campaign rather than following the other three. HERO is deliberately the
+   largest object on the page: widest column, biggest image, gold.           */
+`<section class="slide light" data-t="Every priority release">
   <div class="inner">
     <div class="label reveal">What we'd build on next time</div>
-    <h2 class="display big reveal" style="max-width:20ch">The music was there.<br>
-      <span style="color:var(--signal)">Build more around the moments.</span></h2>
+    <h2 class="display big reveal" style="max-width:20ch">The moments were there.<br>
+      <span style="color:var(--signal)">Build more around them.</span></h2>
 
     <div class="mom stagger">
       ${A.last.moment.map((m,i)=>`
@@ -887,6 +916,11 @@ function slides(){ return [
         <div class="mom-c${m.peak?' peak':''}">
           <div class="mom-k">${esc(m.k)}</div>
           <div class="mom-j">${esc(m.job)}</div>
+          <div class="mom-im">
+            <img src="${m.peak?thumb(m.img,'maxresdefault'):thumb(m.img)}" alt="${esc(m.imgCap)}"
+              ${m.peak?`onerror="this.onerror=null;this.src='${thumb(m.img)}'"`:''}>
+            <span class="mom-cap">${esc(m.imgCap)}</span>
+          </div>
           <div class="mom-stat"><span class="mom-n">${m.stat}</span>
             <span class="mom-nl">${esc(m.statLab)}</span></div>
           <div class="mom-note">${esc(m.note)}</div>
@@ -894,7 +928,25 @@ function slides(){ return [
         </div>`).join('')}
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">Every priority moment needs
+    <div class="ao reveal">
+      <div class="ao-l">
+        <div class="ao-k">${esc(A.last.alwaysOn.k)}</div>
+        <div class="ao-j">${esc(A.last.alwaysOn.job)}</div>
+      </div>
+      <div class="ao-pair">
+        <img src="${thumb(A.last.alwaysOn.from.id)}" alt="${esc(A.last.alwaysOn.from.t)}">
+        <span class="ao-ar">→</span>
+        <img src="${thumb(A.last.alwaysOn.to.id)}" alt="${esc(A.last.alwaysOn.to.t)}">
+      </div>
+      <div class="ao-r">
+        <div class="ao-stat"><span class="ao-n">${A.last.alwaysOn.stat}</span>
+          <span class="ao-nl">${esc(A.last.alwaysOn.statLab)}</span></div>
+        <div class="ao-note">${esc(A.last.alwaysOn.note)}</div>
+        <div class="ao-t">${esc(A.last.alwaysOn.tools)}</div>
+      </div>
+    </div>
+
+    <h3 class="display mid reveal" style="margin-top:1.4rem;max-width:30ch">Every priority release needs
       <span style="color:var(--signal)">a before, a hero and an after.</span></h3>
     <p class="sub reveal" style="max-width:52ch">The opportunity isn't more content. It's getting more
       from each priority release.</p>
