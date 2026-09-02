@@ -783,14 +783,14 @@ const ARTIST = {
        Descriptions are stripped back for the same reason: tool lists survive
        only on the two current-era slots, where they are actionable. */
     journey:[
-      { k:'Early KOL', tag:'Where they came from', img:'uLaJkbkG5NI', yr:'2003',
+      { k:'Early KOL', tag:'Where the story started', img:'uLaJkbkG5NI', yr:'2003',
         cap:"Molly's Chambers" },
-      { k:'The catalogue', tag:'The front door', img:'RF0HhrwIwp0', yr:'2009',
+      { k:'The catalogue', tag:'The songs that still define the channel', img:'RF0HhrwIwp0', yr:'2009',
         cap:'Sex on Fire', big:'86.6%', bigLab:'of visible viewing is 2008\u201313' },
-      { k:'KOL now', tag:'Who they are now', img:'coWbxJFgSdY', yr:'2026', now:true,
+      { k:'KOL now', tag:'The story is already moving', img:'coWbxJFgSdY', yr:'2026', now:true,
         cap:'\u201cAnyone pick up on our new walk-on music?\u201d',
         tools:'Featured video \u00b7 Community \u00b7 Shorts' },
-      { k:'This era', tag:'Where it\u2019s going', img:'mZ9CCoGbMpg', yr:'2026', now:true,
+      { k:'This era', tag:'Where it goes next', img:'mZ9CCoGbMpg', yr:'2026', now:true,
         cap:'A new visual world is already emerging.',
         tools:'Hero video \u00b7 Premiere \u00b7 Releases \u00b7 playlists' },
     ],
@@ -1131,11 +1131,15 @@ function slides(){ return [
    legible before any copy. Framed throughout as a routing OPPORTUNITY: the
    public API shows where viewing sits, not whether catalogue viewers reach new
    music, so nothing here says they do not.                                   */
-`<section class="slide" data-t="The front door">
+`<section class="slide" data-t="The story">
   <div class="inner">
     <div class="label reveal">The channel opportunity</div>
-    <h2 class="display big reveal" style="max-width:20ch">The catalogue is still the front door.<br>
-      <span style="color:var(--signal)">Make the new era easy to find.</span></h2>
+    <!-- Reframed from routing to story. The strategic content is unchanged —
+         86.6%, the four-stage progression and the caveat all still say the
+         same thing — but the surface language is now artist-facing. The
+         analytics sit underneath rather than on top. -->
+    <h2 class="display big reveal" style="max-width:20ch">The catalogue already<br>tells the story.<br>
+      <span style="color:var(--signal)">Make the new era<br>the next chapter.</span></h2>
 
     <div class="jn stagger">
       ${A.last.journey.map((j,i)=>`
@@ -1151,8 +1155,8 @@ function slides(){ return [
         </div>`).join('')}
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">The catalogue brings the
-      attention. <span style="color:var(--signal)">The channel can point to what's next.</span></h3>
+    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:32ch">YouTube holds twenty years<br>of
+      Kings of Leon.<br><span style="color:var(--signal)">Use it to tell<br>what comes next.</span></h3>
     <div class="srcbar reveal"><span class="src">A routing opportunity, not a measured gap — public
       data cannot show whether catalogue viewers currently reach new releases</span></div>
   </div>
