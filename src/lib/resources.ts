@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'K-Trap — TRAPO 2',
+        blurb:
+          'End-of-campaign review against SMILE? on matched 159-day windows, plus where K-Trap sits in an 11-artist UK rap cohort.',
+        href: '/ktrap',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'Kings of Leon',
         blurb:
           'The Mustang campaign reconstructed — what the last album cycle did, and the benchmarks for the next one.',
