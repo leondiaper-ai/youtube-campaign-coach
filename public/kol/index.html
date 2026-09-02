@@ -242,6 +242,11 @@ body.present{overflow:hidden}
   margin-right:.32rem;vertical-align:-1px}
 .run-d{background:var(--smoke);opacity:.55}
 .run-s{background:transparent;border:1.5px dashed var(--signal)}
+/* Precedent, kept on the legend line so it costs no height. Deliberately not a
+   claim that 2008 and 2026 are connected — only that this band has told an
+   album's story here, over time, before. */
+.run-n{margin-left:auto;opacity:.6;font-size:.52rem;text-align:right;max-width:46ch}
+@media(max-width:1100px){ .run-n{display:none} }
 /* The station slide runs two rows of tiles plus the reference card, so it is
    the tightest in the deck after the plan. These trims keep the source bar on
    screen at 1080p without shrinking the headline. */
@@ -341,7 +346,14 @@ body.present{overflow:hidden}
 .jn-c{border-top:2px solid var(--hair);padding-top:.85rem}
 .slide.light .jn-c{border-color:var(--bone)}
 .jn-c.door{border-color:var(--signal)}
+.jn-im{position:relative}
 .jn-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
+/* Archive-style year stamp. System monospace so it costs no font request, and
+   set small enough to read as a filing mark rather than a caption. */
+.jn-yr{position:absolute;left:.4rem;top:.35rem;z-index:2;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.56rem;letter-spacing:.08em;color:#fff;
+  background:rgba(10,10,10,.62);padding:.12rem .3rem;border-radius:2px}
 /* The two current-era frames carry a signal edge so the eye finds them first.
    Outline rather than border: it draws outside the box, so the tiles keep
    their exact size and slide 6 gains no height. The glow matters most on the
@@ -386,6 +398,14 @@ body.present{overflow:hidden}
    wins the glance. */
 .plan-n{font-size:.62rem;color:var(--signal);margin-top:.45rem;line-height:1.45;max-width:24ch}
 .plan-im{margin-top:.7rem}
+.plan-im.pair{display:grid;grid-template-columns:1fr 1fr;gap:.25rem}
+.plan-im.pair .pf{position:relative;display:block}
+.plan-im.pair img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:4px;
+  display:block;background:#222}
+.plan-im.pair .pf-y{position:absolute;left:.25rem;top:.2rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.5rem;letter-spacing:.07em;color:#fff;
+  background:rgba(10,10,10,.62);padding:.1rem .24rem;border-radius:2px}
 .plan-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block;background:#222}
 .plan-t{list-style:none;margin:.7rem 0 0;padding:0}
 .plan-t li{font-size:.66rem;color:var(--smoke);line-height:1.75;position:relative;padding-left:.75rem}
@@ -688,7 +708,15 @@ const ARTIST = {
          legible in the thumbnail, so BUILD proves itself at a glance. HERO
          still owns the peak: its column is 1.6fr against BUILD's 1fr, so its
          image is roughly two and a half times the area. */
-      { k:'Build',  line:'Tease the story', img:'tTTtYFqZxFU', vertical:true,
+      /* THE RHYME, NOT A HISTORY LESSON. Two frames in the space the single
+         rehearsal still used, so the slide gains no height: Molly's Chambers
+         (2003, a Holy Roller Novocaine track) beside the 29-days countdown
+         (2026). Both are the band in a room at a mic, twenty-three years
+         apart. The year stamps carry it — there is no sentence explaining the
+         connection, because the moment it needs a sentence it stops being a
+         visual rhyme and becomes another analytical point. */
+      { k:'Build',  line:'Tease the story', vertical:true,
+        pair:[{ id:'uLaJkbkG5NI', yr:'2003' }, { id:'tTTtYFqZxFU', yr:'2026' }],
         note:'Already happening: lyrics, rehearsal footage + a countdown before the reveal.',
         tools:['Shorts','Community','Premiere page','Reminders'] },
       { k:'Hero',   line:'Define the moment', peak:true,
@@ -711,36 +739,41 @@ const ARTIST = {
        viewing sits; it cannot show audience overlap, traffic sources, homepage
        journeys, playlist routing or whether catalogue viewers reach new music.
        Nothing here claims that they do not. */
-    /* The spine is now a story rather than a funnel: where they came from,
-       who they are now, where the album takes them. Same four stages, same
-       86.6% proof — the change is that the middle two carry CURRENT assets
-       instead of 2024/2025 ones, so the slide shows the era rather than
-       describing it.
+    /* THE SPINE IS A BAND STORY, NOT A FUNNEL.
+       Same four slots and the same strategic job — the catalogue is the front
+       door, make the new era easy to find — but the imagery now runs across
+       eras rather than across channel surfaces, so the twenty years are felt
+       rather than asserted.
 
-       Imagery verified 2 Sep 2026:
-         RF0HhrwIwp0 = Sex on Fire (Official Video)      — checked on YouTube
-         coWbxJFgSdY = walk-on music Short, 24 Jul 2026, 36,003 views
-         mZ9CCoGbMpg = "label me what you will", 19 Aug 2026 — night truck-stop
-                       frame, one of the cinematic clips running alongside the
-                       phone footage
-         kxmHkxpxoaE = Sex on Fire (Live from iTunes Festival, 2013)
+       Verified on the official channel, 2 Sep 2026:
+         uLaJkbkG5NI  Molly's Chambers (Official Video) — a Holy Roller
+                      Novocaine track, 14.8m. The band in a room at a mic.
+         RF0HhrwIwp0  Sex on Fire (Official Video), 2009 — checked on YouTube,
+                      carries the 86.6% proof.
+         coWbxJFgSdY  walk-on music Short, 24 Jul 2026, 36,003.
+         mZ9CCoGbMpg  "label me what you will", 19 Aug 2026 — night truck stop.
 
-       The new-album caption says a visual world is EMERGING. One frame from a
-       teaser is not proof of the record's finished visual identity, and the
-       deck should not say it is — the picture carries the character, the
-       words stay careful. */
+       THE CONTRAST IS THE POINT, and it is deliberately not explained. Slots
+       one to three all show the same thing across three decades: the band, in
+       a room, playing. Slot four does not — it is a landscape at night with
+       nobody in it. Research found no roadside-night ancestor anywhere in the
+       2003-08 videos, which are almost entirely interior performance. So the
+       jump between the third and fourth image is real, and the slide lets the
+       pictures carry it rather than claiming a lineage that is not there.
+
+       Descriptions are stripped back for the same reason: tool lists survive
+       only on the two current-era slots, where they are actionable. */
     journey:[
-      { k:'Catalogue', tag:'Where they came from', img:'RF0HhrwIwp0',
-        cap:'Sex on Fire · 2009', big:'86.6%', bigLab:'of visible viewing is 2008–13' },
-      { k:'KOL now', tag:'Who they are now', img:'coWbxJFgSdY', now:true,
-        cap:'“Anyone pick up on our new walk-on music?” · 36K',
-        tools:'Featured video · Community · Shorts · tour moments' },
-      { k:'New album', tag:'Where the album takes them', img:'mZ9CCoGbMpg', now:true,
+      { k:'Early KOL', tag:'Where they came from', img:'uLaJkbkG5NI', yr:'2003',
+        cap:"Molly's Chambers" },
+      { k:'The catalogue', tag:'The front door', img:'RF0HhrwIwp0', yr:'2009',
+        cap:'Sex on Fire', big:'86.6%', bigLab:'of visible viewing is 2008\u201313' },
+      { k:'KOL now', tag:'Who they are now', img:'coWbxJFgSdY', yr:'2026', now:true,
+        cap:'\u201cAnyone pick up on our new walk-on music?\u201d',
+        tools:'Featured video \u00b7 Community \u00b7 Shorts' },
+      { k:'This era', tag:'Where it\u2019s going', img:'mZ9CCoGbMpg', yr:'2026', now:true,
         cap:'A new visual world is already emerging.',
-        tools:'Hero video · Premiere · Releases · campaign playlist' },
-      { k:'Keep going', tag:'Not a dead end', img:'kxmHkxpxoaE',
-        cap:'Live · iTunes Festival',
-        tools:'Live · next single · playlists · Kings of Leon TV' },
+        tools:'Hero video \u00b7 Premiere \u00b7 Releases \u00b7 playlists' },
     ],
 
     /* September 2024. No longer shown on a slide — the destination-gap slide
@@ -850,17 +883,26 @@ const ARTIST = {
      only things here that do not exist yet, and they are drawn as outlines so
      nobody reads them as shipped. Five columns, so each row carries one slot
      in a different position. */
+  /* The run now opens in 2003, so "twenty years" is shown rather than
+     claimed. Molly's Chambers and The Bucket replace Pyro (2010) and WALLS
+     (2016) — the two mid-catalogue tiles carrying the least weight. Both new
+     assets were verified on the channel and both hold a full 1280x720 master,
+     so they stand up at slide scale despite their age.
+
+     The Bucket is a quiet joke nobody needs to get: its own 2004 video is cut
+     as a 2x2 grid of band moments, so an early KOL grid now sits inside the
+     grid this slide already was. */
   stationWall:[
-    { id:'RF0HhrwIwp0', t:'Sex on Fire',          y:'2009' },
+    { id:'uLaJkbkG5NI', t:"Molly's Chambers",     y:'2003' },
     { slot:true,        t:'New single',           y:'Next' },
     { id:'lb2BnpVUxEE', t:'To Space',             y:'2025' },
-    { id:'gnhXHvRoUd0', t:'Use Somebody',         y:'2009' },
+    { id:'RF0HhrwIwp0', t:'Sex on Fire',          y:'2009' },
     { id:'4C9i8E05bgI', t:'Nowhere to Run',       y:'2024' },
-    { id:'gFp7q-IJqno', t:'Pyro',                 y:'2010' },
+    { id:'kWaFVvVoj4o', t:'The Bucket',           y:'2004' },
     { id:'ZJdHNwUgsPI', t:"We're Onto Something", y:'2025' },
     { slot:true,        t:'Live / new era',       y:'Next' },
     { id:'hYECLfqjdnw', t:'Closer · Live',        y:'2013' },
-    { id:'BdF41Ne2cnQ', t:'WALLS',                y:'2016' },
+    { id:'gnhXHvRoUd0', t:'Use Somebody',         y:'2009' },
   ],
 
   /* Outside-in limits. */
@@ -1032,6 +1074,9 @@ function slides(){ return [
           <div class="plan-k">${esc(st.k)}</div>
           <div class="plan-l">${esc(st.line)}</div>
           ${st.note?`<div class="plan-n">${esc(st.note)}</div>`:''}
+          ${st.pair?`<div class="plan-im pair">${st.pair.map(f=>`
+            <span class="pf"><img src="${thumb(f.id)}" alt="">
+              <span class="pf-y">${esc(f.yr)}</span></span>`).join('')}</div>`:''}
           ${st.img?`<div class="plan-im"><img alt=""
             src="${st.vertical?thumb(st.img):thumb(st.img,'maxresdefault')}"
             onerror="this.onerror=null;this.src='${thumb(st.img)}'"></div>`:''}
@@ -1076,8 +1121,9 @@ function slides(){ return [
     <div class="jn stagger">
       ${A.last.journey.map((j,i)=>`
         ${i?'<div class="jn-ar">→</div>':''}
-        <div class="jn-c${i===0?' door':''}">
-          <div class="jn-im${j.now?' now':''}"><img src="${thumb(j.img)}" alt="${esc(j.cap)}"></div>
+        <div class="jn-c${i===1?' door':''}">
+          <div class="jn-im${j.now?' now':''}"><img src="${thumb(j.img)}" alt="${esc(j.cap)}">
+            ${j.yr?`<span class="jn-yr">${esc(j.yr)}</span>`:''}</div>
           <div class="jn-k">${esc(j.k)}</div>
           <div class="jn-tag">${esc(j.tag)}</div>
           ${j.big?`<div class="jn-big">${j.big}</div><div class="jn-biglab">${esc(j.bigLab)}</div>`:''}
@@ -1120,6 +1166,8 @@ function slides(){ return [
     <div class="run reveal">
       <span><i class="run-d"></i></span> Catalogue · already running
       <span style="margin-left:.9rem"><i class="run-s"></i></span> Slots for the new record as it arrives
+      <span class="run-n">Kings of Leon have serialised an album here before —
+        24 Home Movies during Only By The Night, 2008</span>
     </div>
     <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1.5rem;
       align-items:center;margin-top:.6rem" class="stagger">
