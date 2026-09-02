@@ -647,7 +647,7 @@ const ARTIST = {
          legible in the thumbnail, so BUILD proves itself at a glance. HERO
          still owns the peak: its column is 1.6fr against BUILD's 1fr, so its
          image is roughly two and a half times the area. */
-      { k:'Build',  line:'Tease the story', img:'tTTtYFqZxFU',
+      { k:'Build',  line:'Tease the story', img:'tTTtYFqZxFU', vertical:true,
         note:'Already happening: lyrics, rehearsal footage + a countdown before the reveal.',
         tools:['Shorts','Community','Premiere page','Reminders'] },
       { k:'Hero',   line:'Define the moment', peak:true,
@@ -961,7 +961,8 @@ function slides(){ return [
           <div class="plan-k">${esc(st.k)}</div>
           <div class="plan-l">${esc(st.line)}</div>
           ${st.note?`<div class="plan-n">${esc(st.note)}</div>`:''}
-          ${st.img?`<div class="plan-im"><img src="${thumb(st.img,'maxresdefault')}" alt=""
+          ${st.img?`<div class="plan-im"><img alt=""
+            src="${st.vertical?thumb(st.img):thumb(st.img,'maxresdefault')}"
             onerror="this.onerror=null;this.src='${thumb(st.img)}'"></div>`:''}
           <ul class="plan-t">${st.tools.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
           ${st.proof?`<div class="plan-p"><div class="plan-ph">${esc(st.proof.head)}</div>
