@@ -1474,7 +1474,45 @@ function showSlide(i){
   const active = S[cur];
   active.querySelectorAll('.bar-fill').forEach((b,n)=>
     setTimeout(()=>b.style.width=b.dataset.w+'%', 90+n*100));
+  fitActive();
+  /* Thumbnails arrive after the slide does, and each one that lands changes
+     the height. Re-fit as they load rather than fitting once against a
+     half-built slide. */
+  active.querySelectorAll('img').forEach(img=>{
+    if(!img.complete) img.addEventListener('load', fitActive, { once:true });
+  });
 }
+
+/* ── Fit the active slide to the screen ────────────────────────────
+   Every slide was authored against a 1080p frame, but the deck gets presented
+   on whatever is in the room — a 14" laptop is 982px tall, and at that height
+   the tallest slides lost their headline off the top and their takeaway off
+   the bottom. Reflowing is not an option: these layouts are tuned, and text
+   that rewraps at every screen size cannot be checked.
+
+   So the whole slide scales as one object. Nothing moves relative to anything
+   else, nothing rewraps, and the deck is safe on any display instead of only
+   the one it was measured on. Scaling only ever shrinks — a slide that fits
+   is left completely alone.                                                */
+function fitActive(){
+  if(!document.body.classList.contains('present')) return;
+  const el = allSlides()[cur]; if(!el) return;
+  const inner = el.querySelector('.inner'); if(!inner) return;
+  inner.style.transform = '';                    // measure unscaled
+  const cs = getComputedStyle(el);
+  const avail = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const need  = inner.scrollHeight;
+  if(avail > 0 && need > avail){
+    /* 0.72 floor: past that the body copy stops being readable from the back
+       of a room, and the honest fix is less on the slide, not more shrinking. */
+    const k = Math.max(0.72, avail / need);
+    inner.style.transformOrigin = 'center center';
+    inner.style.transform = 'scale(' + k.toFixed(4) + ')';
+  }
+}
+let fitTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(fitTimer); fitTimer = setTimeout(fitActive, 120); });
+document.addEventListener('fullscreenchange', ()=> setTimeout(fitActive, 260));
 document.addEventListener('keydown', e=>{
   if(document.body.classList.contains('sheet-open')){ if(e.key==='Escape') closeSheets(); return; }
   if(!document.body.classList.contains('present')) return;
