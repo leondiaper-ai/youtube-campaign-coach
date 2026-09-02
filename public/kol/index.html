@@ -306,41 +306,33 @@ body.present{overflow:hidden}
 .stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 .stagger>*.visible{opacity:1;transform:none}
 
-/* ── Campaign rollout (slide 5) ─────────────────────────────────────
-   Four chronological stages, release week widened so the campaign's shape is
-   legible before any copy is read: build, peak, sustain, thin. The peak column
-   is ~1.7x the others and is the only one carrying an image at size. */
-.roll{display:grid;grid-template-columns:1fr auto 1.7fr auto 1fr auto 1fr;
-  gap:.45rem;align-items:stretch;margin-top:1.5rem}
-.roll-s{border:1px solid var(--bone);border-radius:10px;padding:.85rem .9rem;background:#fff;
+/* ── The priority moment (slide 5) ──────────────────────────────────
+   Four stages read as words first. The stage name is the largest thing in
+   each column by a wide margin; the stat, note and tool list are all set
+   small so the eye takes BEFORE / HERO / AFTER / ALWAYS ON in one pass. */
+.mom{display:grid;grid-template-columns:1fr auto 1.25fr auto 1fr auto 1fr;
+  gap:.5rem;align-items:stretch;margin-top:1.6rem}
+.mom-c{border:1px solid var(--bone);border-radius:10px;padding:1rem .95rem;background:#fff;
   display:flex;flex-direction:column}
-.slide:not(.light) .roll-s{border-color:var(--hair);background:rgba(239,234,227,.04)}
-.roll-s.peak{border-color:var(--signal);border-width:2px;background:rgba(214,150,58,.06)}
-.roll-h{display:flex;align-items:baseline;gap:.45rem}
-.roll-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:.7rem;color:var(--smoke)}
-.roll-s.peak .roll-n{color:var(--signal)}
-.roll-name{font-size:.82rem;font-weight:700;letter-spacing:.01em}
-.roll-d{font-size:.6rem;letter-spacing:.06em;color:var(--smoke);margin-top:.2rem}
-.roll-big{font-family:'Oswald',sans-serif;font-weight:600;line-height:1;
-  font-size:clamp(1.8rem,4vw,2.9rem);margin-top:.7rem}
-.roll-biglab{font-size:.6rem;color:var(--smoke);line-height:1.3;margin-top:.2rem}
-.roll-sub{font-size:.62rem;font-weight:700;color:var(--signal);margin-top:.4rem;line-height:1.3}
-.roll-th{display:grid;grid-template-columns:repeat(2,1fr);gap:.3rem;margin-top:.6rem}
-.roll-th img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:3px;display:block;background:#222}
-.roll-hero{display:block;margin-top:.6rem;text-decoration:none;color:inherit}
-.roll-hero img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
-.roll-hv{font-family:'Oswald',sans-serif;font-weight:600;line-height:1;color:var(--signal);
-  font-size:clamp(1.6rem,3.4vw,2.5rem);margin-top:.45rem}
-.roll-ht{font-size:.6rem;color:var(--smoke);line-height:1.3;margin-top:.15rem}
-.roll-plus{text-align:center;color:var(--smoke);font-size:.9rem;margin:.45rem 0 .1rem}
-.roll-side{text-align:center}
-.roll-sv{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.05rem;line-height:1}
-.roll-st{display:block;font-size:.58rem;color:var(--smoke);margin-top:.15rem}
-.roll-note{font-size:.62rem;color:var(--smoke);line-height:1.4;margin-top:auto;padding-top:.7rem}
-.roll-ar{display:flex;align-items:center;color:var(--smoke);opacity:.4;font-size:.95rem}
+.slide:not(.light) .mom-c{border-color:var(--hair);background:rgba(239,234,227,.04)}
+.mom-c.peak{border-color:var(--signal);border-width:2px;background:rgba(214,150,58,.06)}
+.mom-k{font-family:'Oswald',sans-serif;font-weight:600;line-height:.95;letter-spacing:-.01em;
+  font-size:clamp(1.35rem,2.9vw,2.15rem);text-transform:uppercase}
+.mom-c.peak .mom-k{color:var(--signal)}
+.mom-j{font-size:.72rem;font-weight:700;color:var(--smoke);margin-top:.35rem;line-height:1.3}
+.mom-stat{display:flex;align-items:baseline;gap:.4rem;margin-top:.9rem;
+  padding-top:.7rem;border-top:1px solid var(--bone)}
+.slide:not(.light) .mom-stat{border-color:var(--hair)}
+.mom-n{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.35rem;line-height:1}
+.mom-c.peak .mom-n{color:var(--signal)}
+.mom-nl{font-size:.56rem;color:var(--smoke);line-height:1.25}
+.mom-note{font-size:.64rem;color:var(--smoke);line-height:1.45;margin-top:.55rem}
+.mom-t{font-size:.56rem;letter-spacing:.02em;color:var(--smoke);opacity:.75;line-height:1.5;
+  margin-top:auto;padding-top:.8rem}
+.mom-ar{display:flex;align-items:center;color:var(--smoke);opacity:.4;font-size:.95rem}
 @media(max-width:1000px){
-  .roll{grid-template-columns:1fr}
-  .roll-ar{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+  .mom{grid-template-columns:1fr}
+  .mom-ar{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
 }
 
 /* ── September as the hero of slide 6 ───────────────────────────────
@@ -619,34 +611,34 @@ const ARTIST = {
     shortsUplPct:79, shortsViewPct:11.7, lfUplPct:21, lfViewPct:88.3,
     followOk:6, followN:11, medianGap:8,
 
-    /* The campaign rollout, as four stages. Boundaries are the campaign's own
-       events — album day, end of release week, last hero of the run — not
-       analytical picks. Long-form means an upload of 100 seconds or more;
-       63-99s announcement clips are not destinations.
+    /* THE SHAPE OF A PRIORITY MOMENT.
+       Slide 4 answers "what happened last time". This answers "what would we
+       build on" — so it is forward-looking and deliberately NOT another
+       campaign timeline. A previous version replayed the rollout here, which
+       made slide 5 a restatement of slide 4 rather than a second idea.
 
-       Supersedes an earlier `halves` structure that drove a 4.3-vs-1.0
-       comparison. Those rates and the gap figures still stand and remain in
-       the review pack; they were simply the wrong thing to lead a slide with.  */
-    stages:[
-      { n:'01', name:'Build', dates:'22 Feb → 9 May',
-        big:'6', bigLab:'long-form destinations',
-        note:'The campaign opens with Mustang and builds toward the album.',
-        thumbs:['wMJyD23nKrk','iqn4zVsv5zk'] },
-      { n:'02', name:'Release', dates:'10 → 16 May', peak:true,
-        big:'12', bigLab:'long-form destinations',
-        note:'One hero moment, and the whole album there to explore.',
-        hero:{ id:'4C9i8E05bgI', t:'Nowhere to Run — Official Video', v:'1.66m' },
-        side:{ t:'9 album lyric videos', v:'961k combined' } },
-      { n:'03', name:'Follow through', dates:'17 May → 20 Jun',
-        big:'5', bigLab:'long-form destinations',
-        sub:'4 of 5 heroes followed within 14 days',
-        note:'Meaningful destinations kept coming after album week.',
-        thumbs:['R4UpX5XJRP4','L3ySEsVs2n0'] },
-      { n:'04', name:'Tail', dates:'21 Jun → 17 Oct',
-        big:'4', bigLab:'long-form destinations',
-        sub:'alongside 43 Shorts',
-        note:'The campaign stayed active. Meaningful destinations became less frequent.',
-        thumbs:['aqk5uBBJzsY','3Jykoa-Fgn0'] },
+       One proof point per stage, chosen to support that stage's recommendation
+       and not repeated from slide 4's set. `tools` are platform capabilities,
+       offered as opportunities — public API data cannot tell us whether the
+       last campaign used Community posts, reminders, Premiere chat, end
+       screens or channel shelves, so nothing here is framed as a miss.        */
+    moment:[
+      { k:'Before', job:'Build anticipation',
+        tools:'Premiere watch page · Community · Shorts · reminders',
+        stat:'7', statLab:'Premieres last campaign',
+        note:'The behaviour is already there. The opportunity is programming around a Premiere, not only publishing with one.' },
+      { k:'Hero', job:'Make it the event', peak:true,
+        tools:'Official video · Premiere · a live or fan moment into it',
+        stat:'1.66m', statLab:'Nowhere to Run, album day',
+        note:'When the moment was built properly, it worked.' },
+      { k:'After', job:'Give the attention somewhere to go',
+        tools:'Live · lyric · performance cut · the next destination',
+        stat:'3', statLab:'live assets in the whole campaign',
+        note:'One great live capture can become a full performance, song cuts, Shorts and future programming.' },
+      { k:'Always on', job:'Keep the current era visible',
+        tools:'Featured video · Releases · playlists · Kings of Leon TV',
+        stat:'86.6%', statLab:'of visible viewing is 2008–13',
+        note:'When fans reach the channel, make the current era impossible to miss.' },
     ],
 
     /* September 2024 — the single clearest month. Shorts performed normally;
@@ -875,56 +867,39 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 05 ── HOW THE CAMPAIGN WAS PROGRAMMED ───────────────────────────
-   A rollout, read left to right, with album week as the visual peak. The eye
-   should take the shape before it reads a word: build, spike, sustain, thin.
+/* 05 ── THE SHAPE OF A PRIORITY MOMENT ────────────────────────────
+   Slide 4 diagnoses; this prescribes. Four words carry the slide — the reader
+   should get it from BEFORE / HERO / AFTER / ALWAYS ON before reading a line
+   of supporting copy. Everything else is deliberately small.
 
-   Release week deliberately shows two figures side by side rather than one.
-   The nine lyric videos are NOT presented as competition for the hero video —
-   they are the album being available to explore. Two jobs, one week.        */
-`<section class="slide light" data-t="How it was programmed">
+   Not a feature matrix: one recommendation, one KOL proof point and a short
+   tool list per stage. Platform capabilities are opportunities to confirm,
+   never measured failures.                                                   */
+`<section class="slide light" data-t="Every priority moment">
   <div class="inner">
-    <div class="label reveal">Can We Please Have Fun · Feb → Oct 2024</div>
-    <h2 class="display big reveal" style="max-width:18ch">How the last campaign<br>
-      <span style="color:var(--signal)">was programmed.</span></h2>
+    <div class="label reveal">What we'd build on next time</div>
+    <h2 class="display big reveal" style="max-width:20ch">The music was there.<br>
+      <span style="color:var(--signal)">Build more around the moments.</span></h2>
 
-    <div class="roll stagger">
-      ${A.last.stages.map((st,i)=>`
-        ${i?'<div class="roll-ar">→</div>':''}
-        <div class="roll-s${st.peak?' peak':''}">
-          <div class="roll-h"><span class="roll-n">${st.n}</span>
-            <span class="roll-name">${esc(st.name)}</span></div>
-          <div class="roll-d">${esc(st.dates)}</div>
-
-          ${st.hero ? `
-            <div class="roll-big">${st.big}</div>
-            <div class="roll-biglab">${esc(st.bigLab)}</div>
-            <a class="roll-hero" href="${yt(st.hero.id)}" target="_blank" rel="noopener">
-              <img src="${thumb(st.hero.id,'maxresdefault')}" alt="${esc(st.hero.t)}"
-                onerror="this.onerror=null;this.src='${thumb(st.hero.id)}'">
-              <div class="roll-hv">${st.hero.v}</div>
-              <div class="roll-ht">${esc(st.hero.t)}</div>
-            </a>
-            <div class="roll-plus">+</div>
-            <div class="roll-side"><span class="roll-sv">${st.side.v}</span>
-              <span class="roll-st">${esc(st.side.t)}</span></div>
-          ` : `
-            <div class="roll-big">${st.big}</div>
-            <div class="roll-biglab">${esc(st.bigLab)}</div>
-            ${st.sub?`<div class="roll-sub">${esc(st.sub)}</div>`:''}
-            ${st.thumbs?`<div class="roll-th">${st.thumbs.map(id=>
-              `<img src="${thumb(id)}" alt="">`).join('')}</div>`:''}
-          `}
-
-          <div class="roll-note">${esc(st.note)}</div>
+    <div class="mom stagger">
+      ${A.last.moment.map((m,i)=>`
+        ${i?'<div class="mom-ar">→</div>':''}
+        <div class="mom-c${m.peak?' peak':''}">
+          <div class="mom-k">${esc(m.k)}</div>
+          <div class="mom-j">${esc(m.job)}</div>
+          <div class="mom-stat"><span class="mom-n">${m.stat}</span>
+            <span class="mom-nl">${esc(m.statLab)}</span></div>
+          <div class="mom-note">${esc(m.note)}</div>
+          <div class="mom-t">${esc(m.tools)}</div>
         </div>`).join('')}
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">Keep the release-week
-      discipline <span style="color:var(--signal)">running through the campaign.</span></h3>
-    <p class="sub reveal" style="max-width:58ch">The opportunity isn't simply more content. It's
-      keeping clear hero moments and meaningful destinations around the priority releases that
-      follow.</p>
+    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">Every priority moment needs
+      <span style="color:var(--signal)">a before, a hero and an after.</span></h3>
+    <p class="sub reveal" style="max-width:52ch">The opportunity isn't more content. It's getting more
+      from each priority release.</p>
+    <div class="srcbar reveal"><span class="src">Platform capabilities listed as opportunities to
+      confirm — public data cannot show which were used last campaign</span></div>
   </div>
 </section>`,
 
