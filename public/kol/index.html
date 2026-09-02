@@ -342,6 +342,13 @@ body.present{overflow:hidden}
 .slide.light .jn-c{border-color:var(--bone)}
 .jn-c.door{border-color:var(--signal)}
 .jn-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
+/* The two current-era frames carry a signal edge so the eye finds them first.
+   Outline rather than border: it draws outside the box, so the tiles keep
+   their exact size and slide 6 gains no height. The glow matters most on the
+   truck-stop still, which is a night shot and otherwise reads as a black
+   rectangle against a black slide. */
+.jn-im.now img{outline:1.5px solid var(--signal);outline-offset:0;
+  box-shadow:0 0 0 5px rgba(200,150,62,.10), 0 6px 22px rgba(200,150,62,.16)}
 .jn-k{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
   font-size:clamp(1rem,2.1vw,1.5rem);line-height:1;margin-top:.7rem}
 .jn-c.door .jn-k{color:var(--signal)}
@@ -725,10 +732,10 @@ const ARTIST = {
     journey:[
       { k:'Catalogue', tag:'Where they came from', img:'RF0HhrwIwp0',
         cap:'Sex on Fire · 2009', big:'86.6%', bigLab:'of visible viewing is 2008–13' },
-      { k:'KOL now', tag:'Who they are now', img:'coWbxJFgSdY',
+      { k:'KOL now', tag:'Who they are now', img:'coWbxJFgSdY', now:true,
         cap:'“Anyone pick up on our new walk-on music?” · 36K',
         tools:'Featured video · Community · Shorts · tour moments' },
-      { k:'New album', tag:'Where the album takes them', img:'mZ9CCoGbMpg',
+      { k:'New album', tag:'Where the album takes them', img:'mZ9CCoGbMpg', now:true,
         cap:'A new visual world is already emerging.',
         tools:'Hero video · Premiere · Releases · campaign playlist' },
       { k:'Keep going', tag:'Not a dead end', img:'kxmHkxpxoaE',
@@ -1070,7 +1077,7 @@ function slides(){ return [
       ${A.last.journey.map((j,i)=>`
         ${i?'<div class="jn-ar">→</div>':''}
         <div class="jn-c${i===0?' door':''}">
-          <div class="jn-im"><img src="${thumb(j.img)}" alt="${esc(j.cap)}"></div>
+          <div class="jn-im${j.now?' now':''}"><img src="${thumb(j.img)}" alt="${esc(j.cap)}"></div>
           <div class="jn-k">${esc(j.k)}</div>
           <div class="jn-tag">${esc(j.tag)}</div>
           ${j.big?`<div class="jn-big">${j.big}</div><div class="jn-biglab">${esc(j.bigLab)}</div>`:''}
