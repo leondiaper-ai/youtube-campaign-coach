@@ -411,7 +411,7 @@ const A = {
       { a:'Clavish',        v:'444K'   },
       { a:'Unknown T',      v:'173K'   },
     ],
-    cohortNames:'K-Trap · Headie One · Digga D · Nines · Potter Payper · Fredo · '
+    artistsAnalysed:'K-Trap · Headie One · Digga D · Nines · Potter Payper · Fredo · '
       + 'Unknown T · Clavish · Central Cee · Dave · D-Block Europe',
     qualifying:9,
     /* 2026 heroes aged >=90 days at 2 Sep 2026. FULL 11-artist cohort is the
@@ -667,11 +667,11 @@ const slides = () => [
     <div class="snap reveal">
       <span class="snap-k">YouTube data snapshot</span>
       <span class="snap-v">${A.market.channels} UK rap artist channels</span>
-      <span class="snap-v">${A.market.heroes} hero releases</span>
+      <span class="snap-v">${A.market.heroes} music releases</span>
       <span class="snap-v">${A.market.window}</span>
       <span class="snap-v">Public YouTube Data API v3</span>
     </div>
-    <p class="cohort reveal"><b>Cohort</b> ${A.market.cohortNames}</p>
+    <p class="cohort reveal"><b>Artists analysed</b> ${A.market.artistsAnalysed}</p>
 
     <div class="two">
       <div>
@@ -680,23 +680,23 @@ const slides = () => [
             <div class="duel-n hot">${fmt(A.market.ktMedian)}</div>
             <div class="duel-l">Median current views</div></div>
           <div class="duel-vs">vs</div>
-          <div><div class="duel-k">UK rap cohort</div>
+          <div><div class="duel-k">UK rap peers</div>
             <div class="duel-n">${fmt(A.market.cohortMedian)}</div>
             <div class="duel-l">Median current views</div></div>
         </div>
         <div class="rankrow reveal"><b>${A.market.ktRank.replace(' of ',' / ')}</b>
           <span>Qualifying artists</span></div>
-        <p class="qual">${A.market.channels} artists analysed · ${A.market.qualifying} had 2026 hero
-          releases aged 90+ days · K-Trap n=${A.market.ktN}.</p>
+        <p class="qual">${A.market.channels} artists analysed · ${A.market.qualifying} had 2026 releases
+          aged 90+ days · ${A.market.ktN} K-Trap releases qualify.</p>
       </div>
 
       <div>
-        <div class="peer-h">2026 mature hero performance · artist-level median current views ·
-          hero releases aged 90+ days</div>
+        <div class="peer-h">2026 music release performance<br>
+          Releases at least 90 days old · median current views by artist</div>
         <div class="peer stagger">
           ${A.market.peers.map(p=>`
             <div class="pr${p.kt?' kt':''}${p.median?' med':''}">
-              <span class="pr-a">${esc(p.a)}${p.median?'<span class="pr-tag">Cohort median</span>':''}${p.kt?'<span class="pr-tag">6th / 9</span>':''}</span>
+              <span class="pr-a">${esc(p.a)}${p.median?'<span class="pr-tag">Median</span>':''}${p.kt?'<span class="pr-tag">6th / 9</span>':''}</span>
               <span class="pr-v">${p.v}</span>
             </div>`).join('')}
         </div>
@@ -707,7 +707,7 @@ const slides = () => [
       <div class="qrow-q">Is 2026 simply a quiet release market?</div>
       <div class="qrow-a">No.</div>
       <div class="qrow-i"><span class="qrow-v">45</span>
-        <span class="qrow-k">Hero releases Jan → 2 Sep 2026</span></div>
+        <span class="qrow-k">Music releases Jan → 2 Sep 2026</span></div>
       <div class="qrow-i"><span class="qrow-v">40</span>
         <span class="qrow-k">Across all of 2025</span></div>
       <div class="qrow-i"><span class="qrow-v">${A.market.active2026}</span>
@@ -719,9 +719,9 @@ const slides = () => [
       hasn't recreated the previous breakout. <span style="color:var(--signal)">But K-Trap sits around
       the middle of the 2026 UK rap peer set.</span></h3>
 
-    <div class="srcbar reveal"><span class="src">2026 benchmark: artist-level median current views ·
-      hero releases aged 90+ days · 9 of 11 artists qualify · K-Trap n=2 · source: public YouTube
-      Data API v3 · official artist channels only · primary music destinations</span></div>
+    <div class="srcbar reveal"><span class="src">2026 benchmark: median current views per artist ·
+      releases at least 90 days old · 9 of 11 artists qualify · 2 K-Trap releases qualify ·
+      source: public YouTube Data API v3 · official artist channels only</span></div>
   </div>
 </section>`,
 
