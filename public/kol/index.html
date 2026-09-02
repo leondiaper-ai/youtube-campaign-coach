@@ -328,8 +328,11 @@ body.present{overflow:hidden}
    the slide after the headline; tools are set small and quiet. HERO is ~1.6x
    the width of the others and is the only stage carrying an image, so the
    peak is unmistakable without any number attached to it. */
+/* Vertical rhythm tightened so the slide clears a 1080p frame. The stage
+   words, the hero image and the takeaway all have to be on screen together —
+   whitespace is the only thing here that can give. */
 .plan{display:grid;grid-template-columns:1fr auto 1.6fr auto 1fr;gap:.7rem;
-  align-items:start;margin-top:2rem}
+  align-items:start;margin-top:1.3rem}
 .plan-s{border-top:2px solid var(--bone);padding-top:.9rem}
 .slide:not(.light) .plan-s{border-color:var(--hair)}
 .plan-s.peak{border-color:var(--signal)}
@@ -341,15 +344,15 @@ body.present{overflow:hidden}
    rather than another tool, but kept below body size so the stage word still
    wins the glance. */
 .plan-n{font-size:.62rem;color:var(--signal);margin-top:.45rem;line-height:1.45;max-width:24ch}
-.plan-im{margin-top:.9rem}
+.plan-im{margin-top:.7rem}
 .plan-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block;background:#222}
-.plan-t{list-style:none;margin:.9rem 0 0;padding:0}
+.plan-t{list-style:none;margin:.7rem 0 0;padding:0}
 .plan-t li{font-size:.66rem;color:var(--smoke);line-height:1.75;position:relative;padding-left:.75rem}
 .plan-t li::before{content:'';position:absolute;left:0;top:.62em;width:3px;height:3px;
   border-radius:50%;background:var(--smoke);opacity:.5}
 /* Second-glance evidence. Sits below the tool list and is set small on
    purpose — it should support EXTEND, not compete with the three words. */
-.plan-p{margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--bone)}
+.plan-p{margin-top:.7rem;padding-top:.6rem;border-top:1px solid var(--bone)}
 .slide:not(.light) .plan-p{border-color:var(--hair)}
 .plan-ph{font-size:.52rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
 .plan-pb{display:flex;align-items:baseline;gap:.4rem;margin-top:.3rem}
@@ -357,10 +360,12 @@ body.present{overflow:hidden}
 .plan-pl{font-size:.55rem;color:var(--smoke)}
 .plan-ps{font-size:.55rem;color:var(--smoke);opacity:.8;margin-top:.15rem}
 .plan-ar{color:var(--smoke);opacity:.35;font-size:1.3rem;padding-top:1.4rem}
+/* The plan slide is the tightest in the deck; its source bar sits closer. */
+.slide[data-t="The plan"] .srcbar{margin-top:.6rem;padding-top:.5rem}
 
 /* Always-on runs beneath all three stages — a layer, not a fourth step. */
-.ao{display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-top:1.5rem;
-  border-top:1px dashed var(--bone);padding-top:.9rem}
+.ao{display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-top:1rem;
+  border-top:1px dashed var(--bone);padding-top:.7rem}
 .slide:not(.light) .ao{border-color:var(--hair)}
 .ao-k{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
   font-size:clamp(1rem,2vw,1.4rem);line-height:1}
@@ -970,7 +975,7 @@ function slides(){ return [
     <!-- "Not more content" framed the choice as less-vs-more, which is not the
          argument — slide 4 already shows the last campaign had plenty. The move
          being recommended is volume to orchestration. -->
-    <h3 class="display mid reveal" style="margin-top:1.6rem;max-width:26ch">Less about volume.
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:26ch">Less about volume.
       <span style="color:var(--signal)">More around the releases that matter.</span></h3>
     <div class="srcbar reveal"><span class="src">Built around YouTube's multi-format release
       approach</span></div>
