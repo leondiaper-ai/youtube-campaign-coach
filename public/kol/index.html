@@ -201,16 +201,6 @@ body.present{overflow:hidden}
 .kit-b{font-size:.65rem;line-height:1.48;color:var(--smoke)}
 
 /* ── Then / now connected diagram ────────────────────────────────── */
-.tn{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.8rem}
-.tn-c{border:1px solid var(--hair);border-radius:10px;padding:1.2rem 1.1rem;background:rgba(239,234,227,.03)}
-.slide.light .tn-c{border-color:var(--bone);background:#fff}
-.tn-c.key{border-color:var(--signal)}
-.tn-h{font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--smoke);margin-bottom:.85rem}
-.tn-c.key .tn-h{color:var(--signal)}
-.tn-s{font-size:.85rem;font-weight:700;padding:.42rem 0;line-height:1.3}
-.tn-ar{color:var(--smoke);font-size:.72rem;padding-left:.1rem}
-.tn-c.key .tn-ar{color:var(--signal)}
-.tn-w{font-size:.66rem;color:var(--smoke);font-weight:400;display:block;margin-top:.1rem}
 @media(max-width:900px){
   .ph,.tn{grid-template-columns:1fr}
   .kit{grid-template-columns:repeat(2,1fr)}
@@ -226,15 +216,7 @@ body.present{overflow:hidden}
   letter-spacing:.04em;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9)}
 
 /* ── A fan journey, step by step ─────────────────────────────────── */
-.jr{margin-top:1.5rem;display:flex;flex-direction:column;gap:.45rem}
-.jr-s{display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:center;
   border:1px solid var(--hair);border-radius:8px;padding:.75rem .95rem;background:rgba(239,234,227,.03)}
-.slide.light .jr-s{border-color:var(--bone);background:#fff}
-.jr-s.key{border-color:var(--signal)}
-.jr-n{font-family:'Oswald',sans-serif;font-size:.95rem;font-weight:600;color:var(--signal)}
-.jr-t{font-size:.86rem;font-weight:700;line-height:1.3}
-.jr-d{font-size:.68rem;color:var(--smoke);margin-top:.15rem;line-height:1.45}
-.jr-ar{text-align:center;color:var(--signal);font-size:.8rem;line-height:1}
 
 /* ── Low artist lift ─────────────────────────────────────────────── */
 .lift{margin-top:1.3rem;display:flex;gap:.35rem;flex-wrap:wrap;align-items:center}
@@ -306,6 +288,31 @@ body.present{overflow:hidden}
 .stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 .stagger>*.visible{opacity:1;transform:none}
 
+/* ── The channel journey (slide 6) ──────────────────────────────────
+   Four eras, image first. The catalogue panel is marked as the door with a
+   gold rule; the rest are equal, because the point is the route rather than a
+   ranking. */
+.jn{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:.5rem;
+  align-items:start;margin-top:1.6rem}
+.jn-c{border-top:2px solid var(--hair);padding-top:.85rem}
+.slide.light .jn-c{border-color:var(--bone)}
+.jn-c.door{border-color:var(--signal)}
+.jn-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;background:#222}
+.jn-k{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1rem,2.1vw,1.5rem);line-height:1;margin-top:.7rem}
+.jn-c.door .jn-k{color:var(--signal)}
+.jn-tag{font-size:.62rem;font-weight:700;color:var(--smoke);margin-top:.25rem;line-height:1.3}
+.jn-big{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.4rem,3vw,2.1rem);
+  line-height:1;color:var(--signal);margin-top:.6rem}
+.jn-biglab{font-size:.56rem;color:var(--smoke);line-height:1.3;margin-top:.15rem}
+.jn-t{font-size:.58rem;color:var(--smoke);line-height:1.6;margin-top:.6rem;opacity:.85}
+.jn-cap{font-size:.53rem;color:var(--smoke);opacity:.6;margin-top:.6rem}
+.jn-ar{display:flex;align-items:center;color:var(--smoke);opacity:.4;font-size:1rem;padding-top:3rem}
+@media(max-width:1000px){
+  .jn{grid-template-columns:1fr}
+  .jn-ar{justify-content:center;transform:rotate(90deg);padding:.1rem 0}
+}
+
 /* ── The plan (slide 5) ─────────────────────────────────────────────
    Typography does the work. The three stage words are the largest things on
    the slide after the headline; tools are set small and quiet. HERO is ~1.6x
@@ -371,21 +378,10 @@ body.present{overflow:hidden}
 @media(max-width:820px){.sept{grid-template-columns:1fr}}
 
 /* ── Split Screen sequence (slide 6b) ───────────────────────────── */
-.ss{margin-top:1.5rem;max-width:760px}
-.ss-r{display:grid;grid-template-columns:7.5rem 1fr auto;gap:1rem;align-items:baseline;
   border:1px solid var(--bone);border-radius:9px;padding:.8rem 1rem;background:#fff}
-.slide:not(.light) .ss-r{border-color:var(--hair);background:rgba(239,234,227,.04)}
-.ss-r.key{border-color:var(--signal);border-width:2px}
-.ss-d{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--smoke)}
-.ss-t{font-size:.9rem;font-weight:700;line-height:1.3}
-.ss-note{display:block;font-size:.63rem;font-weight:500;color:var(--smoke);margin-top:.15rem}
-.ss-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(1.1rem,2.2vw,1.6rem);line-height:1}
-.ss-r.key .ss-v{color:var(--signal)}
 /* Later-video figure is deliberately quieter than the lyric video it follows.
    Shown at equal weight the pair reads as cause and effect, which is a claim
    this data cannot support. */
-.ss-r:not(.key):not(.plain) .ss-v{font-size:.95rem;color:var(--smoke);font-weight:500}
-.ss-ar{text-align:center;color:var(--smoke);opacity:.45;font-size:.9rem;padding:.25rem 0}
 @media(max-width:700px){.ss-r{grid-template-columns:1fr;gap:.25rem}}
 
 /* ── Presentation mode ──────────────────────────────────────────── */
@@ -632,6 +628,27 @@ const ARTIST = {
     alwaysOn:{ k:'Always on', line:'Keep the current era visible',
       tools:['Featured video','Releases','Playlists','Community','Kings of Leon TV'] },
 
+    /* The channel journey — a different job from slide 5, which owns the
+       release-level journey. This one owns the catalogue-to-current-era route.
+
+       Framed as a routing OPPORTUNITY throughout. Public API data shows where
+       viewing sits; it cannot show audience overlap, traffic sources, homepage
+       journeys, playlist routing or whether catalogue viewers reach new music.
+       Nothing here claims that they do not. */
+    journey:[
+      { k:'Catalogue', tag:'The front door', img:'RF0HhrwIwp0',
+        cap:'Sex on Fire · 2009', big:'86.6%', bigLab:'of visible viewing is 2008–13' },
+      { k:'KOL now', tag:'The band as they are', img:'ZJdHNwUgsPI',
+        cap:"We're Onto Something · 2025",
+        tools:'Featured video · Community · Shorts · tour moments' },
+      { k:'New album', tag:'Where the era opens', img:'4C9i8E05bgI',
+        cap:'Hero video · Premiere',
+        tools:'Hero video · Premiere · Releases · campaign playlist' },
+      { k:'Keep going', tag:'Not a dead end', img:'kxmHkxpxoaE',
+        cap:'Live · iTunes Festival',
+        tools:'Live · next single · playlists · Kings of Leon TV' },
+    ],
+
     /* September 2024. No longer shown on a slide — the destination-gap slide
        was removed once slide 4 carried the format split and slide 5 carried
        the response. Retained here because it is cited in the review pack and
@@ -651,6 +668,12 @@ const ARTIST = {
     /* Three steps, not four. "Behind the Song with Caleb" (29 Apr, 46,168) is
        real and sits in the written analysis, but it is not needed to see the
        point and a fourth row flattens the shape of the story. */
+    /* Split Screen no longer has a slide. The sequence is real and sits in the
+       review pack, but it could not carry an artist-facing headline: the lyric
+       video performed well, and public data cannot show that an earlier
+       official video would have done better. The safe version of the lesson —
+       decide each priority release's hero destination deliberately — is now
+       carried by slide 5. Retained here as the source of that finding. */
     splitScreen:[
       { id:'', d:'29 Mar 2024', t:'Official Lyric Video', v:762332, note:'42 days before the album', big:true },
       { id:'', d:'10 May 2024', t:'Album release', v:null, note:'' },
@@ -902,88 +925,41 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 06 ── SPLIT SCREEN ─────────────────────────────────────────────
-   REFRAMED after verification. An earlier version read this as an organic
-   demand signal — "Split Screen showed its hand early". That was wrong.
-   Split Screen was the second pre-release single, announced 29 March with
-   national press coverage, and Caleb named it the track he most looked
-   forward to playing live. Its lyric video did not surface because the
-   audience found it; it was a promoted single, and the lyric video was the
-   only YouTube destination that single had for 132 days.
+/* 06 ── THE CHANNEL JOURNEY ───────────────────────────────────────
+   Slide 5 owns the release-level journey. This owns the channel one: where the
+   attention already arrives, and how the current era gets found from there.
 
-   What remains true and useful is narrower: a priority release led with a
-   lyric video rather than a hero visual. We do not claim that was a mistake,
-   that the official video would have done better earlier, or anything about
-   how the algorithm treated either asset — none of that is observable here. */
-`<section class="slide light" data-t="Split Screen">
+   Image-led on purpose — four real assets carrying the eras, so the route is
+   legible before any copy. Framed throughout as a routing OPPORTUNITY: the
+   public API shows where viewing sits, not whether catalogue viewers reach new
+   music, so nothing here says they do not.                                   */
+`<section class="slide" data-t="The front door">
   <div class="inner">
-    <div class="label reveal">One release worth looking at</div>
-    <h2 class="display big reveal" style="max-width:24ch">A priority single led with<br>
-      <span style="color:var(--signal)">a lyric video.</span></h2>
+    <div class="label reveal">The channel opportunity</div>
+    <h2 class="display big reveal" style="max-width:20ch">The catalogue is still the front door.<br>
+      <span style="color:var(--signal)">Make the new era easy to find.</span></h2>
 
-    <div class="ss stagger">
-      ${A.last.splitScreen.map((st,i)=>`
-        ${i?'<div class="ss-ar">↓</div>':''}
-        <div class="ss-r${st.big?' key':''}${st.v===null?' plain':''}">
-          <div class="ss-d">${st.d}</div>
-          <div class="ss-t">${esc(st.t)}${st.note?`<span class="ss-note">${esc(st.note)}</span>`:''}</div>
-          <div class="ss-v">${st.v===null?'':fmt(st.v)}</div>
+    <div class="jn stagger">
+      ${A.last.journey.map((j,i)=>`
+        ${i?'<div class="jn-ar">→</div>':''}
+        <div class="jn-c${i===0?' door':''}">
+          <div class="jn-im"><img src="${thumb(j.img)}" alt="${esc(j.cap)}"></div>
+          <div class="jn-k">${esc(j.k)}</div>
+          <div class="jn-tag">${esc(j.tag)}</div>
+          ${j.big?`<div class="jn-big">${j.big}</div><div class="jn-biglab">${esc(j.bigLab)}</div>`:''}
+          ${j.tools?`<div class="jn-t">${esc(j.tools)}</div>`:''}
+          <div class="jn-cap">${esc(j.cap)}</div>
         </div>`).join('')}
     </div>
 
-    <p class="sub reveal" style="margin-top:1.2rem;max-width:58ch">Split Screen was the second
-      pre-release single, announced with press coverage six weeks before the album. For 132 days its
-      lyric video was the only place on YouTube that single existed — and it became the biggest lyric
-      video of the campaign, ${A.last.splitScreenMultiple} the next largest.</p>
-
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:30ch">For the priority tracks,
-      <span style="color:var(--signal)">lead with the asset you want to build around.</span></h3>
-    <div class="srcbar reveal"><span class="src">Not a claim that the official video would have done
-      better earlier — only that the decision about a single's primary YouTube destination is
-      worth taking deliberately</span></div>
+    <h3 class="display mid reveal" style="margin-top:1.5rem;max-width:30ch">The catalogue brings the
+      attention. <span style="color:var(--signal)">The channel can point to what's next.</span></h3>
+    <div class="srcbar reveal"><span class="src">A routing opportunity, not a measured gap — public
+      data cannot show whether catalogue viewers currently reach new releases</span></div>
   </div>
 </section>`,
 
-/* 07 ── PROGRAMME THE JOURNEY ─────────────────────────────────────
-   Merges the old "Last time / This time" comparison with the fan-journey slide.
-   Both were making the same argument from two angles, which meant the deck told
-   its own recommendation twice and neither telling was as strong as one would
-   have been. The fan's route is the better vehicle, so that survives; the
-   last-time contrast becomes a single line above it.
-
-   Deliberately framed as an opportunity, not a diagnosis: public API data
-   cannot show whether catalogue viewers currently reach new releases, so
-   nothing here claims a measured routing failure.                            */
-`<section class="slide light" data-t="Programme the journey">
-  <div class="inner">
-    <div class="label reveal">The recommendation, in one picture</div>
-    <h2 class="display big reveal" style="max-width:24ch">Last time we programmed the releases.<br>
-      <span style="color:var(--signal)">This time we\'d programme the journey too.</span></h2>
-
-    <div class="jr stagger" style="margin-top:1.5rem">
-      ${[['01','Someone arrives through the catalogue',
-          `Sex on Fire, Use Somebody, the classics — ${fmt(A.topCatalogue[0].v)} views on one video. This happens every day, without us doing anything.`],
-         ['02','They meet the band as they are now',
-          'A current performance, a Short from the tour, a Community post'],
-         ['03','They reach the new album',
-          'The hero video, premiered — the moment the era opens'],
-         ['04','They have somewhere to go next',
-          'A new live performance, the next song, the album'],
-         ['05','The journey keeps going',
-          'Playlists, the channel homepage, Kings of Leon TV, the next release']]
-        .map(([n,t,d],i)=>`${i?'<div class="jr-ar">↓</div>':''}
-        <div class="jr-s${i===2?' key':''}"><div class="jr-n">${n}</div>
-          <div><div class="jr-t">${t}</div><div class="jr-d">${d}</div></div></div>`).join('')}
-    </div>
-
-    <p class="sub reveal" style="margin-top:1.4rem;max-width:60ch">The last campaign programmed each
-      release well. Each one also finished on its own. The opportunity is the route between them — someone
-      arriving through a 2009 music video should have a clear way into the current campaign, and
-      somewhere meaningful to go after it.</p>
-  </div>
-</section>`,
-
-/* 08 ── KINGS OF LEON TV ───────────────────────────────────────── */
+/* 07 ── KINGS OF LEON TV ───────────────────────────────────────── */
 `<section class="slide" data-t="Kings of Leon TV">
   <div class="inner">
     <!-- Rationale changed after the deeper audit. An earlier version implied a
@@ -1021,17 +997,21 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 09 ── WHAT WE'D DO ───────────────────────────────────────────── */
+/* 08 ── WHAT WE'D DO ─────────────────────────────────────────────
+   Five decisions, each laddering to a slide the deck has already made. The
+   earlier list carried its own supporting statistics, which made the closing
+   page argue the case a second time; the evidence now sits on slides 4, 5 and
+   6, so these simply state what we would do.                                */
 `<section class="slide light" data-t="What we'd do">
   <div class="inner">
     <div class="label reveal">September</div>
     <h2 class="display big reveal" style="margin-bottom:1.3rem">What we'd do.</h2>
     <div class="stagger">
-      ${[['01','Protect the long-form cadence','Keep meaningful destinations running across the whole campaign window — not just to release. The last campaign ran at 4.3 a month after release, then 1.0.'],
-         ['02','Keep the second wave flexible','Lock the first wave. Leave room to respond later in the campaign, rather than committing every post-release asset months ahead.'],
-         ['03','Premiere the hero moments','Already Kings of Leon behaviour — 7 of 11 music videos. But 3 of 5 in the weeks after release, then 1 of 3. If it is a hero moment, treat it like one.'],
-         ['04','Make Shorts point somewhere','Keep them active. Around each hero, weight them towards performance and personality rather than repeating the announcement.'],
-         ['05','Capture live if it matters','The deep live archive is not already there — around 1.9 hours on the channel. If live is part of this era, make something worth owning.']]
+      ${[['01','Programme each priority release','Build → hero → extend. Every release that matters gets a run, not a post.'],
+         ['02','Use the supporting formats deliberately','Lyric, live and visualiser each have a job around the hero. They are not filler.'],
+         ['03','Make the hero moments events','Premieres are already Kings of Leon behaviour. Use them where the moment earns it.'],
+         ['04','Programme the channel, not just the releases','Make the current era prominent across the surfaces we control.'],
+         ['05','Capture live selectively','One strong capture becomes a performance, song cuts, Shorts and future programming.']]
         .map(([n,t,a])=>`
         <div class="rec">
           <div class="rec-n">${n}</div>
@@ -1049,7 +1029,7 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 10 ── CLOSE ──────────────────────────────────────────────────── */
+/* 09 ── CLOSE ──────────────────────────────────────────────────── */
 `<section class="slide" data-t="Close">
   <div class="bleed"><img src="${hero(A.heroImages.close)}" alt=""
     onerror="this.src='${thumb(A.heroImages.close)}'"></div>
