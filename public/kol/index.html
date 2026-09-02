@@ -215,6 +215,35 @@ body.present{overflow:hidden}
 .wall-l{position:absolute;left:.35rem;bottom:.3rem;font-size:.5rem;font-weight:700;
   letter-spacing:.04em;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.9)}
 
+/* ── The station run (slide 7) ───────────────────────────────────────
+   Five across, two rows. A scrim under each label rather than a text-shadow:
+   these thumbnails carry their own baked-in VEVO logos, and a shadow alone
+   left the titles fighting them. */
+.swall{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-top:1rem}
+.sw{position:relative;border-radius:5px;overflow:hidden}
+.sw img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
+.sw::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,10,10,.88),rgba(10,10,10,.15) 52%,transparent 72%)}
+.sw-m{position:absolute;left:.4rem;right:.4rem;bottom:.28rem;z-index:2;
+  display:flex;align-items:baseline;justify-content:space-between;gap:.3rem}
+.sw-t{font-size:.53rem;font-weight:700;color:#fff;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw-y{font-size:.46rem;font-weight:700;color:rgba(255,255,255,.62);flex:none}
+/* Slots are the only things on this grid that do not exist yet, so they are
+   drawn as outlines — never as a filled tile that could read as shipped. */
+.sw.slot{aspect-ratio:16/9;border:1.5px dashed var(--signal);border-radius:5px;
+  background:rgba(200,160,90,.09);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:.15rem;text-align:center;padding:.4rem}
+.slot-p{font-family:'Oswald',sans-serif;font-size:1.1rem;line-height:1;color:var(--signal)}
+.slot-t{font-size:.5rem;font-weight:700;color:var(--signal);letter-spacing:.04em}
+.run{display:flex;align-items:center;flex-wrap:wrap;margin-top:.7rem;
+  font-size:.56rem;color:var(--smoke)}
+.run i{display:inline-block;width:9px;height:9px;border-radius:2px;
+  margin-right:.32rem;vertical-align:-1px}
+.run-d{background:var(--smoke);opacity:.55}
+.run-s{background:transparent;border:1.5px dashed var(--signal)}
+@media(max-width:860px){ .swall{grid-template-columns:repeat(2,1fr)} }
+
 /* ── A fan journey, step by step ─────────────────────────────────── */
   border:1px solid var(--hair);border-radius:8px;padding:.75rem .95rem;background:rgba(239,234,227,.03)}
 
@@ -792,6 +821,29 @@ const ARTIST = {
   /* Real YouTube Station product reference. */
   metallica:{ id:'1fz60gNnSdU', label:'Metallica TV' },
 
+  /* THE STATION RUN — the old and new worlds in one grid.
+     The backbone is catalogue, because that is what carries the channel:
+     2009 to 2025 running in published order. New material drops INTO the run
+     rather than replacing it, which is the whole argument for always-on — so
+     two dashed slots sit in the sequence rather than at the end.
+
+     Every id is a real asset already on the channel. The two slots are the
+     only things here that do not exist yet, and they are drawn as slots so
+     nobody reads them as shipped. Years are shown because the point of the
+     grid is the span: sixteen years of catalogue meeting the new record. */
+  stationWall:[
+    { id:'RF0HhrwIwp0', t:'Sex on Fire',      y:'2009' },
+    { id:'gnhXHvRoUd0', t:'Use Somebody',     y:'2009' },
+    { id:'gFp7q-IJqno', t:'Pyro',             y:'2010' },
+    { id:'hYECLfqjdnw', t:'Closer · Live',    y:'2013' },
+    { id:'BdF41Ne2cnQ', t:'WALLS',            y:'2016' },
+    { id:'4C9i8E05bgI', t:'Nowhere to Run',   y:'2024' },
+    { id:'ZJdHNwUgsPI', t:"We're Onto Something", y:'2025' },
+    { id:'lb2BnpVUxEE', t:'To Space',         y:'2025' },
+    { slot:true, t:'New single',      y:'Next' },
+    { slot:true, t:'Live / new era',  y:'Next' },
+  ],
+
   /* Outside-in limits. */
   canSee:['Public subscriber and view totals','Upload history and cadence','Format mix',
     'Public video performance','Campaign sequencing','Visible catalogue behaviour','Public engagement'],
@@ -1033,14 +1085,25 @@ function slides(){ return [
     <div class="label reveal">The one genuinely new idea</div>
     <h2 class="display big reveal" style="max-width:22ch">Twenty years of Kings of Leon,<br>
       programmed in one place.</h2>
-    <div class="wall stagger" style="grid-template-columns:repeat(6,1fr)">
-      ${[A.topCatalogue[0],A.topCatalogue[1],A.topLive[0],A.topLive[1],
-         A.campaign2024[0],A.currentEra[0]].map(v=>`
-        <div class="wall-c"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
-          <div class="wall-l">${esc(v.t.split('—')[0].split('(')[0].trim())}</div></div>`).join('')}
+    <!-- The run, not a thumbnail strip. Catalogue in published order with two
+         slots sitting inside the sequence, so the grid shows new material
+         joining the old rather than following it. The earlier version drew six
+         tiles with labels straight on the image, which collided with the VEVO
+         watermarks baked into the thumbnails and repeated Sex on Fire twice —
+         each tile now carries a scrim and appears once. -->
+    <div class="swall stagger">
+      ${A.stationWall.map(v=> v.slot
+        ? `<div class="sw slot"><div class="slot-p">+</div><div class="slot-t">${esc(v.t)}</div></div>`
+        : `<div class="sw"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+             <div class="sw-m"><span class="sw-t">${esc(v.t)}</span>
+               <span class="sw-y">${esc(v.y)}</span></div></div>`).join('')}
+    </div>
+    <div class="run reveal">
+      <span><i class="run-d"></i></span> Catalogue · already running
+      <span style="margin-left:.9rem"><i class="run-s"></i></span> Slots for the new record as it arrives
     </div>
     <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1.5rem;
-      align-items:center;margin-top:1.5rem" class="stagger">
+      align-items:center;margin-top:1rem" class="stagger">
       <a class="tcard" href="${yt(A.metallica.id)}" target="_blank" rel="noopener">
         <img src="${thumb(A.metallica.id,'maxresdefault')}" alt="${esc(A.metallica.label)}"
           onerror="this.src='${thumb(A.metallica.id)}'">
