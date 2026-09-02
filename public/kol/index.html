@@ -253,6 +253,16 @@ body.present{overflow:hidden}
   border-radius:50%;background:currentColor;opacity:.55}
 
 /* ── Recommendations ────────────────────────────────────────────── */
+/* Headline and one current-era frame on a row. The image column is fixed and
+   narrow so the recommendations stay the subject of the slide. */
+.recshead{display:grid;grid-template-columns:1fr minmax(0,190px);gap:1.4rem;
+  align-items:end;margin-bottom:1.3rem}
+.recshead-im img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:center 40%;
+  border-radius:6px;display:block;background:#222}
+@media(max-width:760px){
+  .recshead{grid-template-columns:1fr}
+  .recshead-im{display:none}
+}
 .rec{border-top:1px solid var(--hair);padding:1.1rem 0;display:grid;
   grid-template-columns:2.5rem 1fr;gap:1.2rem;align-items:start}
 .slide.light .rec{border-color:var(--bone)}
@@ -327,6 +337,10 @@ body.present{overflow:hidden}
   font-size:clamp(1.7rem,4vw,3rem)}
 .plan-s.peak .plan-k{color:var(--signal);font-size:clamp(2.3rem,5.6vw,4.2rem)}
 .plan-l{font-size:.75rem;font-weight:700;color:var(--smoke);margin-top:.35rem;line-height:1.3}
+/* Observation under BUILD only. Signal-coloured so it reads as live evidence
+   rather than another tool, but kept below body size so the stage word still
+   wins the glance. */
+.plan-n{font-size:.62rem;color:var(--signal);margin-top:.45rem;line-height:1.45;max-width:24ch}
 .plan-im{margin-top:.9rem}
 .plan-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block;background:#222}
 .plan-t{list-style:none;margin:.9rem 0 0;padding:0}
@@ -613,19 +627,30 @@ const ARTIST = {
        capabilities for the next campaign — public data cannot show which of
        them the last campaign used, so none is framed as a gap.              */
     plan:[
-      { k:'Build',  line:'Build the moment',
+      /* The stage lines are storytelling jobs, not mechanical ones — a format
+         is a way to tell part of the story, so BUILD teases it, HERO defines
+         it and EXTEND deepens it. The words replace the earlier operational
+         lines rather than sitting alongside them; two lines per stage made a
+         slide whose whole job is three words read as a paragraph.
+
+         `note` is on BUILD only. It is an observation about what is on the
+         channel now, not a claim about what it leads to — the recent Shorts
+         carry lyrics, rehearsal footage and a countdown with nothing
+         announced. It earns the framework instead of asserting it.          */
+      { k:'Build',  line:'Tease the story',
+        note:'Already happening: lyrics, rehearsal footage + a countdown before the reveal.',
         tools:['Shorts','Community','Premiere page','Reminders'] },
-      { k:'Hero',   line:'Make it the event', peak:true,
+      { k:'Hero',   line:'Define the moment', peak:true,
         img:'4C9i8E05bgI',
         tools:['Official video','Premiere','Live / fan moment into it'] },
-      { k:'Extend', line:'Keep the moment moving',
+      { k:'Extend', line:'Deepen the world',
         tools:['Live','Performance','Lyric','Shorts','Next destination'],
         proof:{ head:'Supporting formats', big:'~2.7m',
                 lab:'views last campaign', sub:'Lyric · Live · Visualiser' } },
     ],
 
     /* Spans the three stages rather than following them. */
-    alwaysOn:{ k:'Always on', line:'Keep the current era visible',
+    alwaysOn:{ k:'Always on', line:'Keep the era visible',
       tools:['Featured video','Releases','Playlists','Community','Kings of Leon TV'] },
 
     /* The channel journey — a different job from slide 5, which owns the
@@ -635,14 +660,32 @@ const ARTIST = {
        viewing sits; it cannot show audience overlap, traffic sources, homepage
        journeys, playlist routing or whether catalogue viewers reach new music.
        Nothing here claims that they do not. */
+    /* The spine is now a story rather than a funnel: where they came from,
+       who they are now, where the album takes them. Same four stages, same
+       86.6% proof — the change is that the middle two carry CURRENT assets
+       instead of 2024/2025 ones, so the slide shows the era rather than
+       describing it.
+
+       Imagery verified 2 Sep 2026:
+         RF0HhrwIwp0 = Sex on Fire (Official Video)      — checked on YouTube
+         coWbxJFgSdY = walk-on music Short, 24 Jul 2026, 36,003 views
+         mZ9CCoGbMpg = "label me what you will", 19 Aug 2026 — night truck-stop
+                       frame, one of the cinematic clips running alongside the
+                       phone footage
+         kxmHkxpxoaE = Sex on Fire (Live from iTunes Festival, 2013)
+
+       The new-album caption says a visual world is EMERGING. One frame from a
+       teaser is not proof of the record's finished visual identity, and the
+       deck should not say it is — the picture carries the character, the
+       words stay careful. */
     journey:[
-      { k:'Catalogue', tag:'The front door', img:'RF0HhrwIwp0',
+      { k:'Catalogue', tag:'Where they came from', img:'RF0HhrwIwp0',
         cap:'Sex on Fire · 2009', big:'86.6%', bigLab:'of visible viewing is 2008–13' },
-      { k:'KOL now', tag:'The band as they are', img:'ZJdHNwUgsPI',
-        cap:"We're Onto Something · 2025",
+      { k:'KOL now', tag:'Who they are now', img:'coWbxJFgSdY',
+        cap:'“Anyone pick up on our new walk-on music?” · 36K',
         tools:'Featured video · Community · Shorts · tour moments' },
-      { k:'New album', tag:'Where the era opens', img:'4C9i8E05bgI',
-        cap:'Hero video · Premiere',
+      { k:'New album', tag:'Where the album takes them', img:'mZ9CCoGbMpg',
+        cap:'A new visual world is already emerging.',
         tools:'Hero video · Premiere · Releases · campaign playlist' },
       { k:'Keep going', tag:'Not a dead end', img:'kxmHkxpxoaE',
         cap:'Live · iTunes Festival',
@@ -890,8 +933,14 @@ function slides(){ return [
    running underneath, and nothing else needs to land.                       */
 `<section class="slide light" data-t="The plan">
   <div class="inner">
-    <div class="label reveal">The YouTube plan for the next campaign ·
-      <span style="opacity:.7">built around YouTube's multi-format release approach</span></div>
+    <!-- The eyebrow carries the storytelling thought so the headline does not
+         have to. It stays one line and stays quiet: the three stage words are
+         still the loudest thing on the slide after the headline. The
+         multi-format attribution moved to the source bar rather than being
+         dropped — separating YouTube's principle from our own recommendation
+         matters more than where the sentence sits. -->
+    <div class="label reveal">YouTube isn't only where the campaign runs ·
+      <span style="opacity:.7">it's one of the best places to tell the story of this era</span></div>
     <h2 class="display big reveal" style="max-width:16ch">Every priority release<br>
       <span style="color:var(--signal)">gets a journey.</span></h2>
 
@@ -901,6 +950,7 @@ function slides(){ return [
         <div class="plan-s${st.peak?' peak':''}">
           <div class="plan-k">${esc(st.k)}</div>
           <div class="plan-l">${esc(st.line)}</div>
+          ${st.note?`<div class="plan-n">${esc(st.note)}</div>`:''}
           ${st.img?`<div class="plan-im"><img src="${thumb(st.img,'maxresdefault')}" alt=""
             onerror="this.onerror=null;this.src='${thumb(st.img)}'"></div>`:''}
           <ul class="plan-t">${st.tools.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
@@ -922,6 +972,8 @@ function slides(){ return [
          being recommended is volume to orchestration. -->
     <h3 class="display mid reveal" style="margin-top:1.6rem;max-width:26ch">Less about volume.
       <span style="color:var(--signal)">More around the releases that matter.</span></h3>
+    <div class="srcbar reveal"><span class="src">Built around YouTube's multi-format release
+      approach</span></div>
   </div>
 </section>`,
 
@@ -1004,8 +1056,17 @@ function slides(){ return [
    6, so these simply state what we would do.                                */
 `<section class="slide light" data-t="What we'd do">
   <div class="inner">
+    <!-- One current-era frame, sized to sit beside the headline rather than
+         above the list. tTTtYFqZxFU is the 12 Aug 2026 Short whose on-screen
+         text reads "29 days 'til our ship comes in" — the countdown carrying a
+         lyric. It puts the recommendations in the world they apply to without
+         adding a line of copy. Kept to one column so it cannot dominate. -->
     <div class="label reveal">September</div>
-    <h2 class="display big reveal" style="margin-bottom:1.3rem">What we'd do.</h2>
+    <div class="recshead reveal">
+      <h2 class="display big" style="margin:0">What we'd do.</h2>
+      <div class="recshead-im"><img src="${thumb('tTTtYFqZxFU')}"
+        alt="Kings of Leon Short, 12 August 2026"></div>
+    </div>
     <div class="stagger">
       ${[['01','Programme each priority release','Build → hero → extend. Every release that matters gets a run, not a post.'],
          ['02','Use the supporting formats deliberately','Lyric, live and visualiser each have a job around the hero. They are not filler.'],
