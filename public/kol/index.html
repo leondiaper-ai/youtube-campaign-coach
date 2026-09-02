@@ -1120,18 +1120,26 @@ function slides(){ return [
    survive in the review pack.                                              */
 `<section class="slide" data-t="Last album">
   <div class="inner">
-    <div class="label reveal">Can We Please Have Fun · ${A.last.opens} → ${A.last.closes}</div>
+    <!-- Slide 3 is entirely 2026, so this slide has to say WHICH campaign
+         before it says anything else — otherwise the percentages read as
+         current. Three signals, none of them a sentence: the eyebrow leads on
+         the window rather than the album title, every thumbnail carries a
+         2024 stamp, and the stat labels say "campaign" rather than leaving it
+         implied. -->
+    <div class="label reveal">The last album campaign ·
+      <span style="opacity:.7">Can We Please Have Fun · ${A.last.opens} → ${A.last.closes}</span></div>
     <h2 class="display big reveal" style="max-width:22ch">Shorts kept it moving.<br>
       <span style="color:var(--signal)">Long-form carried it.</span></h2>
     <div class="split2 stagger">
       <div class="sp"><div class="sp-n">${A.last.shortsUplPct}%</div>
-        <div class="sp-l">of uploads were Shorts</div></div>
+        <div class="sp-l">of that campaign's uploads were Shorts</div></div>
       <div class="sp peak"><div class="sp-n">${Math.round(A.last.lfViewPct)}%</div>
-        <div class="sp-l">of the views came from long-form</div></div>
+        <div class="sp-l">of that campaign's views came from long-form</div></div>
     </div>
     <div class="wall stagger">
       ${[0,2,6,9].map(i=>A.campaign2024[i]).map(c=>`
         <div class="wall-c"><img src="${thumb(c.id)}" alt="${esc(c.t)}">
+          <span class="jn-yr">2024</span>
           <div class="wall-l">${esc(c.t)} · ${fmt(c.v)}</div></div>`).join('')}
     </div>
     <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:34ch">Shorts build the moment.<br>
