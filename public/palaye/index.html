@@ -210,6 +210,39 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
 .wall .as img{aspect-ratio:16/9}
 .wall .as::after{background:linear-gradient(to top,rgba(8,7,10,.55),transparent 60%)}
 
+/* ── The Station run (slide 6) ──────────────────────────────────── */
+/* Mirrors the CHVRCHES station wall: real catalogue interleaved with
+   campaign slots, so new material visibly joins the run rather than
+   replacing it. Slots are dashed and gold — clearly proposed, not real. */
+.stn{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:1.6rem;margin-top:1.1rem;align-items:start}
+@media(max-width:900px){.stn{grid-template-columns:1fr;gap:1.2rem}}
+.stn-run{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem}
+.sw{position:relative;border-radius:5px;overflow:hidden}
+.sw img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#17151c}
+.sw::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(8,7,10,.7),transparent 55%)}
+.sw-s{position:absolute;left:.3rem;bottom:.25rem;z-index:2;font-size:.48rem;font-weight:700;
+  letter-spacing:.1em;color:#fff;opacity:.85}
+.sw.slot{aspect-ratio:16/9;border:1.5px dashed var(--gold);border-radius:5px;
+  background:rgba(201,162,39,.09);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.15rem;text-align:center;padding:.3rem}
+.sw.slot::after{display:none}
+.slot-p{font-family:'Oswald',sans-serif;font-size:1rem;font-weight:600;color:var(--gold);line-height:1}
+.slot-t{font-size:.46rem;font-weight:700;color:var(--gold);letter-spacing:.04em;line-height:1.2}
+.ref{display:block;border:1px solid var(--hair);border-radius:8px;overflow:hidden;
+  text-decoration:none;color:inherit;background:rgba(242,239,234,.03);transition:border-color .18s}
+.ref:hover{border-color:var(--gold)}
+.ref img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.ref-b{padding:.7rem .85rem}
+.ref-k{font-size:.5rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+.ref-t{font-family:'Oswald',sans-serif;font-size:1.05rem;font-weight:600;margin-top:.2rem;text-transform:uppercase}
+.ref-d{font-size:.58rem;color:var(--smoke);line-height:1.5;margin-top:.25rem}
+.stn-n{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.1rem}
+@media(max-width:900px){.stn-n{grid-template-columns:repeat(2,1fr)}}
+.stn-n b{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;display:block;
+  font-size:clamp(1.5rem,3.4vw,2.4rem)}
+.stn-n span{font-size:.6rem;color:var(--smoke);margin-top:.35rem;display:block;line-height:1.45}
+
 /* ── Routing flow + format options (slide 7) ────────────────────── */
 .flow{display:flex;align-items:stretch;gap:.9rem;margin-top:1.3rem;flex-wrap:wrap}
 .flow-c{border-top:2px solid var(--hair);padding-top:.7rem;min-width:150px;flex:1}
@@ -284,11 +317,43 @@ const A = {
     bio:'Our brand new album, Death or Glory out now.',
     videosTabTop:'Royal Television, Season 05', videosTabAge:'a year ago' },
 
-  /* Royal Television — CURRENT season figures only. */
+  /* ── ROYAL TELEVISION AS THE STATION ──────────────────────────────
+     Same framing as the CHVRCHES and Amyl decks: an always-on programmed
+     run built from the artist's own catalogue, with Metallica TV as the
+     live platform reference (verified via oEmbed, 2 Sep 2026 — title
+     "Metallica TV", channel Metallica). We reference the format only and
+     never reproduce Metallica branding.
+
+     The difference here, and the reason this slide is stronger than the
+     equivalent in the other decks: CHVRCHES and Amyl would be starting a
+     programmed series from nothing. Palaye Royale already run one. Royal
+     Television is 84 episodes across five seasons, so the ask is to
+     restart and programme it around the album rather than invent it.
+
+     CURRENT-season figures only. Season 05 medians 12,682 against a
+     median recent Short of 3,394 (~3.7x). The all-time median of 31,888
+     is not used — the 2018 seasons have had eight years to accumulate
+     and would flatter a series that has cooled.
+
+     NOTE: YouTube Stations is an emerging / beta product. Eligibility and
+     access would need confirming with YouTube. The slide says so. */
   rtv:{ episodes:84, seasons:5, views:3424254,
     s05:18, s05median:12682, medianShort:3394, multiple:'3.7', last:'July 2025',
-    wall:['vV38F4W8Phc','Q27iB0fzleo','u36hwUA3qn4','DEyMQzRKebM',
-          'S63WP7t_Olw','urZJNTcb6N4','A7pWrbseGCE','CHKm3EHMS0I'] },
+    station:{ id:'1fz60gNnSdU', label:'Metallica TV', channel:'Metallica' },
+    /* The run: real episodes spanning four seasons, with campaign slots
+       dropped in — new material joins the run rather than replacing it. */
+    run:[
+      { id:'vV38F4W8Phc', s:'S01' },
+      { id:'Q27iB0fzleo', s:'S01' },
+      { slot:true, t:'Lost In Translation' },
+      { id:'6wS-xFtJrnE', s:'S03' },
+      { id:'7Pg1xKEbzDA', s:'S04' },
+      { slot:true, t:'Live / tour' },
+      { id:'Wl7Mtp7XZrc', s:'S05' },
+      { id:'NHW5Ds_EZJc', s:'S05' },
+      { slot:true, t:'Album episode' },
+      { id:'ENBRRpyozn0', s:'S04' },
+    ] },
 
   /* Programming reference only. No scale or performance comparison. */
   metallica:{ activeMonths:'24 / 24', live:111, making:34, bts:41 },
@@ -434,25 +499,51 @@ const slides = () => [
   </div>
 </section>`,
 
-/* 06 ── ROYAL TELEVISION ───────────────────────────────────────────
-   The owned asset, and the answer to "why would anyone visit the
-   artist channel". Leads on existence, not decline.               */
+/* 06 ── ROYAL TELEVISION AS THE STATION ────────────────────────────
+   The owned asset, framed with the same Station language used on the
+   CHVRCHES and Amyl decks — but with the opposite starting point. Those
+   bands would be building a programmed run from nothing. Palaye already
+   have one, so the ask is restart rather than invent.
+
+   The run shows real episodes across four seasons with campaign slots
+   dropped in, to make the point that new material JOINS the run instead
+   of replacing it. Metallica TV is a platform reference only; we never
+   reproduce their branding, and the Stations beta caveat is on-slide. */
 `<section class="slide coal" data-t="Royal Television">
   <div class="inner">
     <div class="label reveal">The part most bands don't have</div>
-    <h2 class="display big reveal" style="max-width:20ch">You already built<br>
+    <h2 class="display big reveal" style="max-width:22ch">You already built<br>
       <span style="color:var(--gold)">the station.</span></h2>
-    <div class="wall stagger">
-      ${A.rtv.wall.map(id=>`<div class="as"><img src="${thumb(id)}" alt="Royal Television"></div>`).join('')}
+
+    <div class="stn">
+      <div class="stn-run stagger">
+        ${A.rtv.run.map(r=>r.slot
+          ? `<div class="sw slot"><span class="slot-p">+</span><span class="slot-t">${esc(r.t)}</span></div>`
+          : `<div class="sw"><img src="${thumb(r.id)}" alt="Royal Television"><span class="sw-s">${r.s}</span></div>`).join('')}
+      </div>
+      <a class="ref" href="https://www.youtube.com/watch?v=${A.rtv.station.id}" target="_blank" rel="noopener">
+        <img src="${thumb(A.rtv.station.id,'maxresdefault')}" alt="Metallica TV">
+        <div class="ref-b">
+          <div class="ref-k">The format, running elsewhere</div>
+          <div class="ref-t">${esc(A.rtv.station.label)}</div>
+          <div class="ref-d">${esc(A.rtv.station.channel)} keep a programmed channel running between
+            releases — posting in ${A.metallica.activeMonths} months, mostly live and behind the scenes.</div>
+        </div>
+      </a>
     </div>
-    <div class="bignums stagger" style="margin-top:1.1rem">
-      <div><div class="bn-n" style="color:var(--gold)">${A.rtv.episodes}</div><div class="bn-l">Episodes across ${A.rtv.seasons} seasons</div></div>
-      <div><div class="bn-n">${fmt(A.rtv.views)}</div><div class="bn-l">Views on the series so far</div></div>
-      <div><div class="bn-n">${A.rtv.multiple}×</div><div class="bn-l">A recent episode against a recent Short</div></div>
+
+    <div class="stn-n stagger">
+      <div><b style="color:var(--gold)">${A.rtv.episodes}</b><span>Episodes across ${A.rtv.seasons} seasons</span></div>
+      <div><b>${fmt(A.rtv.views)}</b><span>Views on the series so far</span></div>
+      <div><b>${A.rtv.multiple}×</b><span>A recent episode against a recent Short</span></div>
+      <div><b>${esc(A.rtv.last)}</b><span>The last episode</span></div>
     </div>
-    <p class="sub reveal">The last episode went out in ${esc(A.rtv.last)}. Great artist channels stay
-      programmed between releases — Metallica have posted in ${A.metallica.activeMonths} months,
-      mostly live and behind-the-scenes. You don't need a new format. You already made one.</p>
+
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:50ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Most
+      bands would have to invent this. <span style="color:var(--gold)">You'd just be turning it back on.</span></h3>
+    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging product — eligibility
+      would need confirming with YouTube. Royal Television works as a programmed run either way ·
+      Metallica referenced as a format example only</span></div>
   </div>
 </section>`,
 
