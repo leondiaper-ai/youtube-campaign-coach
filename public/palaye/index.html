@@ -11,25 +11,43 @@
 /* ═══════════════════════════════════════════════════════════════════
    PALAYE ROYALE × YOUTUBE — THE ALBUM CAMPAIGN
 
-   Every figure is from a YouTube Data API v3 pull taken 2 September 2026:
-   the complete @PalayeRoyale uploads playlist (340 of 340) plus the
-   auto-generated "Palaye Royale - Topic" channel (154 tracks).
-   No YouTube Studio or Analytics data is used anywhere in this deck.
+   Figures from a YouTube Data API v3 pull taken 2 September 2026 across
+   three channels: @PalayeRoyale (340 of 340 uploads), @SumerianRecords
+   (3,664 uploads, of which 114 are Palaye Royale), and the auto-generated
+   Palaye Royale - Topic channel (154 tracks). No Studio or Analytics data.
 
-   AUDIENCE: artist and management. That governs the tone throughout.
-   Everything here is framed as what is available to build on, never as a
-   verdict on past decisions. The channel's recent output is described by
-   what it is, never as a failure — the band has been touring and posting
-   from the road, and the deck's job is to show what the four upcoming
-   music videos can do, not to relitigate the last cycle.
+   AUDIENCE: artist and management. Everything is framed as what is
+   available to build on. Sumerian is treated throughout as a reach
+   partner that has built something valuable, never as a problem.
 
-   THE ARGUMENT. Four music videos are scheduled between 2 Oct 2026 and
-   22 Jan 2027. The artist channel has not published one since April 2024.
-   Meanwhile the audience for the recent singles is real and measurable —
-   it is just landing on the auto-generated Topic channel, which the band
-   cannot programme, cannot build subscribers on, and cannot route anyone
-   from. That is the single biggest available change and the deck is built
-   around it.
+   ── THE CORRECTION THAT PRODUCED THIS VERSION ──────────────────────
+   An earlier build argued that Palaye's recent music videos "didn't land
+   on the artist channel" and that the four upcoming videos should be
+   placed there. That was WRONG and is now removed entirely.
+
+   The videos exist. Feel Something, Great. (717,799) and Sad Generation
+   (529,008) are official videos on Sumerian, and both outperformed their
+   Topic audio pages. The old deck's 990,211 figure counted only the audio
+   surfaces and understated the true response by 56%.
+
+   Mapped ecosystem: Sumerian 142,460,149 (64.1%) · artist channel
+   58,617,481 (26.4%) · Topic 21,082,685 (9.5%) = 222,160,315. Verified
+   ZERO shared video IDs across the three, so the sum is of distinct
+   uploads — but it is always described as OBSERVED views across THREE
+   MAPPED destinations, never as total Palaye YouTube views. Roughly 20.9m
+   of artist-channel lifetime sits in videos no longer in the playlist,
+   and collaborator surfaces are unmapped.
+
+   NEVER claim: that views were lost or diverted to the label; that the
+   videos were uploaded in the wrong place; that the artist channel would
+   have done better; that the hybrid model will increase views; that
+   Royal Television converts subscribers; that Shorts route to long-form.
+   None of that is supported by public data.
+
+   Royal Television uses the CURRENT season (05 median 12,682 against a
+   median recent Short of 3,394, ~3.7x). The all-time median of 31,888 and
+   the "nine times a Short" line are gone — they were propped up by the
+   2018 seasons and flattered a declining franchise.
    ═══════════════════════════════════════════════════════════════════ */
 
 :root{
@@ -159,6 +177,63 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .as-v{font-size:.62rem;font-weight:700;color:var(--signal);font-family:'Oswald',sans-serif}
 
+/* ── Ecosystem map (slide 3) ────────────────────────────────────── */
+/* Sumerian is the largest bar and is coloured as the signal, because it
+   is the asset the slide is arguing FROM, not a problem being flagged. */
+.eco{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;margin-top:1.4rem}
+@media(max-width:900px){.eco{grid-template-columns:1fr;gap:1.1rem}}
+.eco-c{border-top:1px solid var(--hair);padding-top:.85rem}
+.eco-bar{height:6px;background:rgba(242,239,234,.10);border-radius:3px;overflow:hidden;margin-bottom:.8rem}
+.eco-bar span{display:block;height:100%;background:var(--smoke);border-radius:3px}
+.eco-c.hot .eco-bar span{background:var(--signal)}
+.eco-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;
+  font-size:clamp(1.8rem,4.2vw,3rem)}
+.eco-c.hot .eco-n{color:var(--signal)}
+.eco-p{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.1rem;color:var(--smoke);margin-top:.15rem}
+.eco-k{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:.5rem}
+.eco-s{font-size:.58rem;color:var(--smoke);margin-top:.2rem}
+
+/* ── Roles (slide 5) ────────────────────────────────────────────── */
+.roles{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:1.3rem}
+@media(max-width:900px){.roles{grid-template-columns:1fr;gap:1rem}}
+.role{border-top:2px solid var(--hair);padding-top:.8rem}
+.role.hot{border-top-color:var(--signal)}
+.role-k{font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.role-t{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1.05rem,2.1vw,1.5rem);line-height:1.05;margin-top:.35rem}
+.role.hot .role-t{color:var(--signal)}
+.role-d{font-size:.63rem;color:var(--smoke);line-height:1.65;margin-top:.5rem}
+
+/* ── Royal Television wall (slide 6) ────────────────────────────── */
+.wall{display:grid;grid-template-columns:repeat(8,1fr);gap:.35rem;margin-top:1.1rem}
+@media(max-width:900px){.wall{grid-template-columns:repeat(4,1fr)}}
+.wall .as img{aspect-ratio:16/9}
+.wall .as::after{background:linear-gradient(to top,rgba(8,7,10,.55),transparent 60%)}
+
+/* ── Routing flow + format options (slide 7) ────────────────────── */
+.flow{display:flex;align-items:stretch;gap:.9rem;margin-top:1.3rem;flex-wrap:wrap}
+.flow-c{border-top:2px solid var(--hair);padding-top:.7rem;min-width:150px;flex:1}
+.flow-c.hot{border-top-color:var(--signal)}
+.flow-k{font-size:.52rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke)}
+.flow-t{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1rem,2vw,1.35rem);line-height:1.05;margin-top:.3rem}
+.flow-c.hot .flow-t{color:var(--signal)}
+.flow-a{color:var(--smoke);align-self:center;font-size:1.1rem;opacity:.5}
+.opts{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1.2rem}
+.opt{font-size:.6rem;font-weight:700;letter-spacing:.04em;padding:.4rem .7rem;
+  border:1px solid var(--hair);border-radius:99px;display:flex;gap:.5rem;align-items:center}
+.opt span{font-size:.48rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.opt.new{border-color:rgba(201,162,39,.5)}
+.opt.new span{color:var(--gold)}
+
+/* ── Campaign band (slide 8) ────────────────────────────────────── */
+.band{display:flex;flex-wrap:wrap;gap:.55rem .8rem;align-items:center;margin-top:1.2rem;
+  padding-top:.85rem;border-top:1px solid var(--hair)}
+.band span{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.85rem,1.6vw,1.15rem);line-height:1}
+.band span.hot{color:var(--signal)}
+.band i{font-style:normal;color:var(--smoke);opacity:.45}
+
 /* ── Decisions (slide 8) ────────────────────────────────────────── */
 .dec{display:grid;grid-template-columns:auto 1fr;gap:1rem;padding:.85rem 0;
   border-bottom:1px solid var(--hair);align-items:start}
@@ -183,56 +258,52 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
    "Palaye Royale - Topic" channel. Nothing is carried forward.
    ═══════════════════════════════════════════════════════════════════ */
 const A = {
-  channel:{ subs:272000, lifetime:58617481, uploads:340, since:'2011' },
+  /* ── The three mapped destinations. Zero shared video IDs between them,
+     verified, so these are distinct uploads. Always described as OBSERVED
+     views across MAPPED destinations. ─────────────────────────────── */
+  eco:{
+    total:222160315,
+    sumerian:{ name:'Sumerian', videos:114, views:142460149, pct:64,
+      subs:2980000, lifetime:2809335853, musicVideos:32, mvViews:115574799 },
+    artist:{ name:'Palaye Royale', videos:340, views:58617481, pct:26, subs:272000 },
+    topic:{ name:'Palaye Royale audio', videos:154, views:21082685, pct:10 },
+  },
 
-  /* Morning Light, 8 Mar 2012. 22,733,144 views = 38.8% of everything the
-     channel has ever done. Share is taken against the channel's OFFICIAL
-     lifetime figure, not against the sum of retrieved uploads — the latter
-     gives a flattering 60% because ~21m lifetime views sit outside the
-     current uploads playlist. Always use the conservative number. */
-  morningLight:{ id:'WZ9ALGG11CA', title:'Morning Light', year:'2012',
-    views:22733144, share:'38.8%' },
-
-  /* The recent singles. Both live on the Topic channel — auto-generated
-     from the audio distribution — and neither has a music video on the
-     artist channel. This is the finding the deck is built around. */
-  topic:{ subs:37400, lifetime:21082685, tracks:154,
-    /* 669,128 + 321,083. An earlier draft used 1,013,496 by also adding a
-       second "Feel Something, Great." audio page (23,285) — that double-counts
-       one song across two uploads, so it is excluded. Never say "over a
-       million" off this figure; it is just under. */
-    sadGeneration:669128, feelSomething:321083, combined:990211,
-    best:[['Lonely',2285909],['Mr. Doctor Man',849778],['Death or Glory',749772]] },
-
-  /* Last music video on the artist channel: Happy Together, 10 Apr 2024. */
-  lastMV:{ id:'E62W5G9Ezqg', title:'Happy Together', date:'April 2024',
-    views:255395, daysSince:875 },
-
-  /* Royal Television — 84 episodes across five seasons. Most bands have no
-     owned long-form franchise at all; this is a genuine asset and the deck
-     treats it as one. Median episode is 31,888 against a median Short of
-     3,394 over the last two years. */
-  royalTV:{ episodes:84, seasons:5, totalViews:3424254, median:31888,
-    best:179709, medianMins:'14', hero:'vV38F4W8Phc' },
-
-  /* Last 24 months on the artist channel. Stated neutrally: this is what
-     the channel has been, not a criticism of it. */
-  recent:{ uploads:137, shorts:123, shortsPct:90, longform:14,
-    medianShort:3394, bestShort:117110, shortsShareOfLifetime:'2.1%' },
-
-  dormantDays:81, lastUpload:'13 June 2026',
-
-  /* The campaign as supplied. Day counts from 2 Sep 2026. */
-  plan:[
-    { d:'2 Oct',  y:'2026', t:'Lost In Translation', s:'Single + music video · LP announce and pre-order', hot:true },
-    { d:'27 Oct', y:'2026', t:'Single two',          s:'Single + music video', hot:true },
-    { d:'19 Nov', y:'2026', t:'Single three',        s:'Single + music video', hot:true },
-    { d:'22 Jan', y:'2027', t:'The album',           s:'Focus track + music video', hot:true },
-    { d:'25 Jan', y:'2027', t:'Digital deluxe',      s:'Extended release', hot:false },
+  /* Sumerian's biggest Palaye music videos — the reach that already exists. */
+  sumerianMV:[
+    { id:'nzM134EhSFQ', t:'Mr. Doctor Man',        v:19264331, y:'2016' },
+    { id:'f5Nc4kiBaIs', t:'Lonely',                v:11303052, y:'2020' },
+    { id:'CrUM4tVpmRc', t:'Broken',                v:7765122,  y:'2022' },
+    { id:'0WzprXZGoLs', t:'Punching Bag',          v:6248015,  y:'2021' },
+    { id:'qePhiiz7dtc', t:'No Love In LA',         v:5749157,  y:'2021' },
+    { id:'4AnmemzByVY', t:'Dying In A Hot Tub',    v:5525435,  y:'2019' },
   ],
-  daysToFirst:30, daysToAlbum:142, campaignDays:115,
 
-  stills:['j33Z_Kxf0Bk','9c-CcUvL2ww','AyFkjFJe-28','CcKKKRk-M_Q','1O54biUuX4Q'],
+  /* Current artist-channel state. Stated as evidence, never as an insult. */
+  channelNow:{ dormantDays:81, lastUpload:'13 June 2026',
+    bio:'Our brand new album, Death or Glory out now.',
+    videosTabTop:'Royal Television, Season 05', videosTabAge:'a year ago' },
+
+  /* Royal Television — CURRENT season figures only. */
+  rtv:{ episodes:84, seasons:5, views:3424254,
+    s05:18, s05median:12682, medianShort:3394, multiple:'3.7', last:'July 2025',
+    wall:['vV38F4W8Phc','Q27iB0fzleo','u36hwUA3qn4','DEyMQzRKebM',
+          'S63WP7t_Olw','urZJNTcb6N4','A7pWrbseGCE','CHKm3EHMS0I'] },
+
+  /* Programming reference only. No scale or performance comparison. */
+  metallica:{ activeMonths:'24 / 24', live:111, making:34, bts:41 },
+
+  plan:[
+    { d:'2 Oct',  y:'2026', t:'Lost In Translation', s:'Music video · album announce', hot:true },
+    { d:'27 Oct', y:'2026', t:'Single two',          s:'Music video', hot:true },
+    { d:'19 Nov', y:'2026', t:'Single three',        s:'Music video', hot:true },
+    { d:'22 Jan', y:'2027', t:'The album',           s:'Focus track · music video', hot:true },
+    { d:'25 Jan', y:'2027', t:'Deluxe',              s:'Extended release', hot:false },
+  ],
+  daysToFirst:30,
+
+  morningLight:{ id:'WZ9ALGG11CA', views:22733144 },
+  shorts:['j33Z_Kxf0Bk','9c-CcUvL2ww','1O54biUuX4Q','AyFkjFJe-28'],
 };
 
 const fmt = n => n>=1e6 ? (n/1e6).toFixed(2).replace(/\.?0+$/,'')+'M'
@@ -247,78 +318,180 @@ const slides = () => [
 
 /* 01 ── COVER ──────────────────────────────────────────────────── */
 `<section class="slide" data-t="Cover">
-  <div class="bleed"><img src="${thumb(A.morningLight.id,'maxresdefault')}" alt=""></div>
+  <div class="bleed"><img src="${thumb(A.sumerianMV[0].id,'maxresdefault')}" alt=""></div>
   <div class="inner">
     <div class="label reveal">Palaye Royale × YouTube</div>
-    <h1 class="display big reveal" style="max-width:17ch">The album campaign<br>
-      <span style="color:var(--signal)">starts in 30 days.</span></h1>
+    <h1 class="display big reveal" style="max-width:16ch">The album campaign<br>
+      <span style="color:var(--signal)">starts in ${A.daysToFirst} days.</span></h1>
     <p class="sub reveal">Four music videos between 2 October and 22 January.
-      This is what the channel can do with them.</p>
+      Here is where they can take you.</p>
     <div class="srcbar reveal"><span class="src">Public YouTube data · 2 September 2026</span></div>
   </div>
 </section>`,
 
-/* 02 ── THE AUDIENCE IS ALREADY THERE ──────────────────────────────
-   Opens on strength. Everything that follows is about where to point
-   an audience that already exists, never about building one.        */
-`<section class="slide coal" data-t="The audience">
+/* 02 ── THE SCALE ──────────────────────────────────────────────────
+   Opens on the true size of the audience, which the previous version
+   badly understated by counting only the artist channel.            */
+`<section class="slide coal" data-t="The scale">
   <div class="inner">
     <div class="label reveal">Where you're starting from</div>
-    <h2 class="display big reveal" style="max-width:19ch">You already have<br>
-      <span style="color:var(--signal)">the audience.</span></h2>
-    <div class="bignums stagger">
-      <div><div class="bn-n">${fmt(A.channel.subs)}</div><div class="bn-l">Subscribers</div></div>
-      <div><div class="bn-n">${fmt(A.channel.lifetime)}</div><div class="bn-l">Views on the channel since ${A.channel.since}</div></div>
-      <div><div class="bn-n hot">${fmt(A.topic.combined)}</div><div class="bn-l">Views on the last two singles in their first months</div></div>
+    <h2 class="display big reveal" style="max-width:15ch">222 million views.<br>
+      <span style="color:var(--signal)">One band.</span></h2>
+    <p class="sub reveal" style="max-width:52ch">That is the observed viewing on Palaye Royale
+      music and video across the three YouTube destinations we mapped. The audience is already
+      enormous. The question is only what happens next with it.</p>
+    <div class="strip stagger" style="grid-template-columns:repeat(6,1fr);margin-top:1.5rem">
+      ${A.sumerianMV.map(m=>`
+        <div class="as"><img src="${thumb(m.id)}" alt="${esc(m.t)}">
+          <div class="as-m"><span class="as-t">${esc(m.t)}</span>
+            <span class="as-v">${fmt(m.v)}</span></div></div>`).join('')}
     </div>
-    <p class="sub reveal">Sad Generation and Feel Something, Great. pulled close to a million views
-      between them. The demand for new Palaye Royale music on YouTube is not in question.</p>
-    <div class="srcbar reveal"><span class="src">Channel figures from the @PalayeRoyale channel ·
-      single figures from the Palaye Royale audio pages on YouTube</span></div>
+    <div class="srcbar reveal"><span class="src">Observed views across three mapped YouTube
+      destinations · public data only · not a complete account of every Palaye Royale video
+      on the platform</span></div>
   </div>
 </section>`,
 
-/* 03 ── WHERE IT LANDED ────────────────────────────────────────────
-   The pivot. Framed as a routing problem, which is what it is — not
-   as anyone's mistake. The Topic channel is described plainly so the
-   band understands what it is without needing the jargon.           */
-`<section class="slide" data-t="Where it landed">
+/* 03 ── THE ECOSYSTEM ──────────────────────────────────────────────
+   The reveal. Framed as distribution, never as loss. Sumerian is the
+   biggest number on the slide and is presented as an asset.        */
+`<section class="slide" data-t="Three destinations">
   <div class="inner">
-    <div class="label reveal">The one thing worth changing</div>
-    <h2 class="display big reveal" style="max-width:22ch">Those views didn't land<br>
-      <span style="color:var(--signal)">on your channel.</span></h2>
-    <div class="two">
-      <div class="card hot stagger">
-        <div class="card-k">Where the singles played</div>
-        <div class="card-n">${fmt(A.topic.combined)}</div>
-        <div class="card-l">On the automatic audio pages</div>
-        <p class="card-s">YouTube creates these on its own from the music distribution.
-          Nobody programmes them, nobody can post to them, and the ${fmt(A.topic.subs)} people
-          subscribed there aren't subscribed to you.</p>
-      </div>
-      <div class="card stagger">
-        <div class="card-k">On your channel, same period</div>
-        <div class="card-n">No music video</div>
-        <div class="card-l">The last one was ${A.lastMV.date}</div>
-        <p class="card-s">Happy Together, ${fmt(A.lastMV.views)} views — still the most recent
-          music video the channel has published.</p>
-      </div>
+    <div class="label reveal">The picture</div>
+    <h2 class="display big reveal" style="max-width:18ch">One artist.<br>
+      <span style="color:var(--signal)">Three destinations.</span></h2>
+    <div class="eco stagger">
+      ${[[A.eco.sumerian,'hot'],[A.eco.artist,''],[A.eco.topic,'']].map(([d,c])=>`
+        <div class="eco-c ${c}">
+          <div class="eco-bar"><span style="width:${d.pct}%"></span></div>
+          <div class="eco-n">${fmt(d.views)}</div>
+          <div class="eco-p">${d.pct}%</div>
+          <div class="eco-k">${esc(d.name)}</div>
+          <div class="eco-s">${d.videos} videos</div>
+        </div>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:40ch">The songs are working.
-      <span style="color:var(--signal)">They're just working somewhere you can't build on.</span></h3>
-    <div class="srcbar reveal"><span class="src">Views on the automatic audio pages don't add
-      subscribers to your channel, don't appear on your homepage, and can't link anyone anywhere</span></div>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:38ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">The
+      audience isn't missing. <span style="color:var(--signal)">It's distributed.</span></h3>
+    <div class="srcbar reveal"><span class="src">Sumerian has ${fmt(A.eco.sumerian.subs)} subscribers and
+      carries ${A.eco.sumerian.musicVideos} Palaye Royale music videos going back a decade —
+      that reach is real and it already belongs to the story</span></div>
   </div>
 </section>`,
 
-/* 04 ── WHAT'S COMING ──────────────────────────────────────────────
-   The supplied schedule, unaltered. Four videos is the story — it is
-   stated as the opportunity rather than as a gap being filled.      */
-`<section class="slide coal" data-t="What's coming">
+/* 04 ── THE CHANNEL NOW ────────────────────────────────────────────
+   The honest observation, evidenced from the public channel surface
+   rather than asserted. Tone: the music kept going, the channel
+   didn't. Never "you neglected it".                                */
+`<section class="slide coal" data-t="The destination">
+  <div class="inner">
+    <div class="label reveal">The gap</div>
+    <h2 class="display big reveal" style="max-width:19ch">The music is active.<br>
+      <span style="color:var(--signal)">The destination isn't.</span></h2>
+    <div class="two">
+      <div class="card stagger">
+        <div class="card-k">On the channel right now</div>
+        <div class="card-n">${A.channelNow.dormantDays} days</div>
+        <div class="card-l">Since the last upload</div>
+        <p class="card-s">The Videos tab still opens on ${esc(A.channelNow.videosTabTop)},
+          posted ${esc(A.channelNow.videosTabAge)}. The bio still reads
+          &ldquo;${esc(A.channelNow.bio)}&rdquo;</p>
+      </div>
+      <div class="card hot stagger">
+        <div class="card-k">Meanwhile</div>
+        <div class="card-n">2 singles</div>
+        <div class="card-l">Released with videos in that window</div>
+        <p class="card-s">Feel Something, Great. and Sad Generation both went out with official
+          videos and both found an audience. The music never stopped — the channel around it
+          went quiet.</p>
+      </div>
+    </div>
+    <p class="sub reveal">There are ${A.daysToFirst} days until Lost In Translation. That is
+      enough time to make the channel feel like something is about to happen.</p>
+  </div>
+</section>`,
+
+/* 05 ── THE HYBRID ─────────────────────────────────────────────────
+   The strategic ask. Deliberately NOT "move the videos" — that was
+   the previous version's mistake. Sumerian keeps the heroes.       */
+`<section class="slide" data-t="The model">
+  <div class="inner">
+    <div class="label reveal">What we'd do</div>
+    <h2 class="display big reveal" style="max-width:16ch">Keep the reach.<br>
+      <span style="color:var(--signal)">Build the home.</span></h2>
+    <div class="roles stagger">
+      ${[['Sumerian','The music videos','Where the videos go out. It has the subscribers, the genre audience and ten years of your catalogue. Nothing about that needs changing.'],
+         ['Palaye Royale','The campaign home','Royal Television, live, behind the scenes, Shorts, playlists. Everything that turns a video into an era.'],
+         ['The audio pages','Passive listening','Automatic, and working. Leave them alone.']]
+        .map(([k,t,d],i)=>`
+        <div class="role${i===1?' hot':''}">
+          <div class="role-k">${esc(k)}</div>
+          <div class="role-t">${esc(t)}</div>
+          <p class="role-d">${esc(d)}</p>
+        </div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:46ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Sumerian
+      built the reach. <span style="color:var(--signal)">Now make every release build your world too.</span></h3>
+  </div>
+</section>`,
+
+/* 06 ── ROYAL TELEVISION ───────────────────────────────────────────
+   The owned asset, and the answer to "why would anyone visit the
+   artist channel". Leads on existence, not decline.               */
+`<section class="slide coal" data-t="Royal Television">
+  <div class="inner">
+    <div class="label reveal">The part most bands don't have</div>
+    <h2 class="display big reveal" style="max-width:20ch">You already built<br>
+      <span style="color:var(--gold)">the station.</span></h2>
+    <div class="wall stagger">
+      ${A.rtv.wall.map(id=>`<div class="as"><img src="${thumb(id)}" alt="Royal Television"></div>`).join('')}
+    </div>
+    <div class="bignums stagger" style="margin-top:1.1rem">
+      <div><div class="bn-n" style="color:var(--gold)">${A.rtv.episodes}</div><div class="bn-l">Episodes across ${A.rtv.seasons} seasons</div></div>
+      <div><div class="bn-n">${fmt(A.rtv.views)}</div><div class="bn-l">Views on the series so far</div></div>
+      <div><div class="bn-n">${A.rtv.multiple}×</div><div class="bn-l">A recent episode against a recent Short</div></div>
+    </div>
+    <p class="sub reveal">The last episode went out in ${esc(A.rtv.last)}. Great artist channels stay
+      programmed between releases — Metallica have posted in ${A.metallica.activeMonths} months,
+      mostly live and behind-the-scenes. You don't need a new format. You already made one.</p>
+  </div>
+</section>`,
+
+/* 07 ── ROUTING ────────────────────────────────────────────────────
+   The actual strategic unlock, and deliberately a routing slide
+   rather than a format checklist. Formats are options, not orders.
+   Lyric and visualiser are marked OPPORTUNITY because Palaye have
+   no visualiser history and only three lyric videos.              */
+`<section class="slide" data-t="Every video needs a next">
+  <div class="inner">
+    <div class="label reveal">The idea worth taking away</div>
+    <h2 class="display big reveal" style="max-width:18ch">Every video<br>
+      <span style="color:var(--signal)">needs a next.</span></h2>
+    <div class="flow stagger">
+      <div class="flow-c"><div class="flow-k">The video lands</div><div class="flow-t">Music video</div></div>
+      <div class="flow-a">→</div>
+      <div class="flow-c hot"><div class="flow-k">Somewhere to go</div><div class="flow-t">Your channel</div></div>
+      <div class="flow-a">→</div>
+      <div class="flow-c"><div class="flow-k">And then</div><div class="flow-t">The next release</div></div>
+    </div>
+    <div class="opts stagger">
+      ${[['Royal Television','Have it'],['Live &amp; performance','Have it'],['Behind the scenes','Have it'],
+         ['Shorts','Have it'],['Lyric video','Opportunity'],['Visualiser','Opportunity'],['Playlists','Opportunity']]
+        .map(([t,tag])=>`<div class="opt${tag==='Opportunity'?' new':''}">${t}<span>${tag}</span></div>`).join('')}
+    </div>
+    <p class="sub reveal">Not all of them, and not for every single. When a song starts moving,
+      give that attention somewhere worth going. <strong style="color:var(--paper)">Build around
+      what responds.</strong></p>
+  </div>
+</section>`,
+
+/* 08 ── THE CAMPAIGN ───────────────────────────────────────────────
+   The supplied dates, with Royal Television recurring in the gaps.
+   Kept light — a shape to agree, not a content calendar.          */
+`<section class="slide coal" data-t="Four moments">
   <div class="inner">
     <div class="label reveal">The campaign</div>
-    <h2 class="display big reveal" style="max-width:20ch">Four music videos.<br>
-      <span style="color:var(--signal)">Sixteen weeks.</span></h2>
+    <h2 class="display big reveal" style="max-width:20ch">Four moments.<br>
+      <span style="color:var(--signal)">One connected campaign.</span></h2>
     <div class="tl stagger">
       ${A.plan.map(p=>`
         <div class="tl-c${p.hot?' hot':''}">
@@ -328,149 +501,31 @@ const slides = () => [
           <div class="tl-s">${esc(p.s)}</div>
         </div>`).join('')}
     </div>
-    <p class="sub reveal">This is the most music video the channel will have carried in a decade.
-      Four hero moments, spaced four to nine weeks apart, running into the album.
-      That rhythm is the campaign.</p>
-    <div class="srcbar reveal"><span class="src">${A.daysToFirst} days to the first single ·
-      ${A.daysToAlbum} days to the album · ${A.campaignDays} days from Lost In Translation to the deluxe</span></div>
-  </div>
-</section>`,
-
-/* 05 ── THE ONE CHANGE ─────────────────────────────────────────────
-   The single decision the deck exists to argue for. Kept to one idea
-   and one instruction so it survives being repeated second-hand.    */
-`<section class="slide" data-t="The one change">
-  <div class="inner">
-    <div class="label reveal">The single biggest move</div>
-    <h2 class="display big reveal" style="max-width:22ch">Put the videos<br>
-      <span style="color:var(--signal)">on your own channel.</span></h2>
-    <p class="sub reveal" style="max-width:56ch">Every one of the four. Announced there, premiered there,
-      pinned there. The audience that turns up for Lost In Translation becomes an audience you keep
-      rather than one that visits an automatic page and leaves.</p>
-    <div class="bignums stagger" style="margin-top:1.4rem">
-      <div><div class="bn-n hot">4</div><div class="bn-l">Music videos to place</div></div>
-      <div><div class="bn-n">${fmt(A.channel.subs)}</div><div class="bn-l">People already subscribed and waiting</div></div>
-      <div><div class="bn-n">${A.dormantDays} days</div><div class="bn-l">Since the channel last posted — the runway to warm it up</div></div>
+    <div class="band reveal">
+      <span>Build</span><i>→</i><span class="hot">Hero</span><i>→</i><span>Extend</span>
+      <i>→</i><span>Connect</span><i>→</i><span>Next</span>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:42ch">One release can only
-      build a channel <span style="color:var(--signal)">if it happens on the channel.</span></h3>
+    <p class="sub reveal">The videos go out where the reach is. Between them, the channel keeps
+      running — Royal Television, live, whatever is being filmed anyway. The gaps are four to
+      nine weeks. That is the part worth planning.</p>
   </div>
 </section>`,
 
-/* 06 ── WHAT YOU ALREADY OWN ───────────────────────────────────────
-   Royal Television. Genuinely rare, genuinely theirs, and the answer
-   to "what happens in the weeks between the four videos". Gold is
-   used here and nowhere else so the asset reads as distinct.        */
-`<section class="slide coal" data-t="What you own">
-  <div class="inner">
-    <div class="label reveal">The part most bands don't have</div>
-    <h2 class="display big reveal" style="max-width:20ch">You already built<br>
-      <span style="color:var(--gold)">a television show.</span></h2>
-    <div class="two">
-      <div class="stagger">
-        <div class="strip"><div class="as">
-          <img src="${thumb(A.royalTV.hero,'maxresdefault')}" alt="Royal Television">
-          <div class="as-m"><span class="as-t">Royal Television</span>
-            <span class="as-v">${fmt(A.royalTV.best)} on the best episode</span></div>
-        </div></div>
-      </div>
-      <div class="card gold stagger">
-        <div class="card-k">Five seasons, and counting</div>
-        <div class="card-n">${A.royalTV.episodes} episodes</div>
-        <div class="card-l">${fmt(A.royalTV.totalViews)} views · typically ${A.royalTV.medianMins} minutes long</div>
-        <p class="card-s">A typical episode does ${fmt(A.royalTV.median)} views — around nine times
-          a typical Short. It's the thing that keeps people on the channel in the weeks when
-          there's no single out.</p>
-      </div>
-    </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:44ch">The videos bring people in.
-      <span style="color:var(--gold)">Royal Television is what keeps them there.</span></h3>
-  </div>
-</section>`,
-
-/* 07 ── THE PLAN ───────────────────────────────────────────────────
-   Three phases mapped onto the real dates. Deliberately light on
-   instruction — this is a shape to agree, not a content calendar.   */
-`<section class="slide" data-t="The plan">
-  <div class="inner">
-    <div class="label reveal">How the sixteen weeks work</div>
-    <h2 class="display big reveal" style="max-width:16ch">Warm up.<br>Hit hard.<br>
-      <span style="color:var(--signal)">Keep going.</span></h2>
-    <div class="ph stagger">
-      <div class="ph-c">
-        <div class="ph-k">Warm up</div>
-        <div class="ph-w">Now → 2 October</div>
-        <ul class="ph-l">
-          <li>Wake the channel back up before the single, not on the day</li>
-          <li>Trail Lost In Translation where the subscribers already are</li>
-          <li>Get the back catalogue tidy so new arrivals find more than one thing</li>
-        </ul>
-      </div>
-      <div class="ph-c hot">
-        <div class="ph-k">Hit hard</div>
-        <div class="ph-w">2 Oct · 27 Oct · 19 Nov · 22 Jan</div>
-        <ul class="ph-l">
-          <li>Every music video premieres on the channel</li>
-          <li>Announce, release, then follow up — three beats per single, not one</li>
-          <li>The album video gets the biggest build of the four</li>
-        </ul>
-      </div>
-      <div class="ph-c">
-        <div class="ph-k">Keep going</div>
-        <div class="ph-w">Between and after</div>
-        <ul class="ph-l">
-          <li>Royal Television carries the quiet weeks</li>
-          <li>Live and festival footage — you already film it</li>
-          <li>Nothing goes dark between one single and the next</li>
-        </ul>
-      </div>
-    </div>
-    <p class="sub reveal">The gaps between the singles are four to nine weeks. That is enough time
-      for a channel to go quiet, and enough time to keep it awake. The plan is mostly about the gaps.</p>
-  </div>
-</section>`,
-
-/* 08 ── WHAT WE'D DO ───────────────────────────────────────────────
-   Three decisions, in priority order. The first is the whole deck.  */
-`<section class="slide coal" data-t="Three decisions">
-  <div class="inner">
-    <div class="label reveal">What we'd agree now</div>
-    <h2 class="display big reveal" style="max-width:18ch">Three decisions<br>
-      <span style="color:var(--signal)">before 2 October.</span></h2>
-    <div class="stagger" style="margin-top:1.2rem">
-      ${[['01','All four videos live on the channel',
-          'The one that matters. Every music video premieres on @PalayeRoyale so the audience each song brings is an audience you keep.'],
-         ['02','Start before the single, not on it',
-          `The channel has been quiet since ${A.lastUpload}. There are ${A.daysToFirst} days to warm it back up so Lost In Translation lands to a room that is already awake.`],
-         ['03','Give the gaps something to do',
-          'Royal Television, live footage, whatever is being filmed anyway. Four to nine weeks between singles is a long time to leave empty.']]
-        .map(([n,t,a])=>`
-        <div class="dec"><div class="dec-n">${n}</div>
-          <div><div class="dec-t">${t}</div><div class="dec-a">${a}</div></div></div>`).join('')}
-    </div>
-    <h3 class="display mid reveal" style="margin-top:1.4rem;max-width:38ch">The songs are already working.
-      <span style="color:var(--signal)">This is about where they work.</span></h3>
-  </div>
-</section>`,
-
-/* 09 ── CLOSE ──────────────────────────────────────────────────────
-   Ends on the catalogue fact, reframed forward: the channel has done
-   something enormous once, and has four chances to do it again.     */
+/* 09 ── CLOSE ──────────────────────────────────────────────────── */
 `<section class="slide" data-t="Close">
   <div class="bleed"><img src="${thumb(A.morningLight.id,'maxresdefault')}" alt=""></div>
   <div class="inner">
     <div class="label reveal">Where this goes</div>
-    <h2 class="display big reveal" style="max-width:20ch">One video from ${A.morningLight.year}
-      <span style="color:var(--signal)">is still ${A.morningLight.share} of the channel.</span></h2>
-    <p class="sub reveal" style="max-width:54ch">Morning Light has ${fmt(A.morningLight.views)} views and has been
-      working for fourteen years. It's proof of what one video on your own channel can become —
-      and there are four of them coming.</p>
+    <h2 class="display big reveal" style="max-width:20ch">Make every moment<br>
+      <span style="color:var(--signal)">lead back into your world.</span></h2>
+    <p class="sub reveal" style="max-width:50ch">Four videos, sixteen weeks, and an audience
+      of 222 million already out there across YouTube. Keep the reach. Build the home.</p>
     <div class="srcbar reveal"><span class="src">All figures from public YouTube data ·
-      @PalayeRoyale channel and Palaye Royale audio pages · 2 September 2026 ·
-      no private or Analytics data used</span></div>
+      artist, label and audio surfaces mapped · 2 September 2026 · no private or Analytics data used</span></div>
   </div>
 </section>`,
 ];
+
 /* ═══════════════════════════════════════════════════════════════════
    RENDER
    ═══════════════════════════════════════════════════════════════════ */
