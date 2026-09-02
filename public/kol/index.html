@@ -827,26 +827,33 @@ const ARTIST = {
   metallica:{ id:'1fz60gNnSdU', label:'Metallica TV' },
 
   /* THE STATION RUN — the old and new worlds in one grid.
-     The backbone is catalogue, because that is what carries the channel:
-     2009 to 2025 running in published order. New material drops INTO the run
-     rather than replacing it, which is the whole argument for always-on — so
-     two dashed slots sit in the sequence rather than at the end.
+
+     Deliberately NOT chronological. An earlier version listed 2009 to 2025 in
+     published order with the two slots appended at the end, which drew a
+     timeline: the new material arrived after the catalogue finished. That is
+     the opposite of the argument. A Station is a schedule, not an archive —
+     eras sit next to each other and new releases drop into the rotation.
+
+     So the run alternates: a 2009 video beside a 2025 one, with the empty
+     slots sitting between real assets rather than after them. The years are
+     kept precisely because the order ignores them — that is what makes the
+     mixing visible at a glance.
 
      Every id is a real asset already on the channel. The two slots are the
-     only things here that do not exist yet, and they are drawn as slots so
-     nobody reads them as shipped. Years are shown because the point of the
-     grid is the span: sixteen years of catalogue meeting the new record. */
+     only things here that do not exist yet, and they are drawn as outlines so
+     nobody reads them as shipped. Five columns, so each row carries one slot
+     in a different position. */
   stationWall:[
-    { id:'RF0HhrwIwp0', t:'Sex on Fire',      y:'2009' },
-    { id:'gnhXHvRoUd0', t:'Use Somebody',     y:'2009' },
-    { id:'gFp7q-IJqno', t:'Pyro',             y:'2010' },
-    { id:'hYECLfqjdnw', t:'Closer · Live',    y:'2013' },
-    { id:'BdF41Ne2cnQ', t:'WALLS',            y:'2016' },
-    { id:'4C9i8E05bgI', t:'Nowhere to Run',   y:'2024' },
+    { id:'RF0HhrwIwp0', t:'Sex on Fire',          y:'2009' },
+    { slot:true,        t:'New single',           y:'Next' },
+    { id:'lb2BnpVUxEE', t:'To Space',             y:'2025' },
+    { id:'gnhXHvRoUd0', t:'Use Somebody',         y:'2009' },
+    { id:'4C9i8E05bgI', t:'Nowhere to Run',       y:'2024' },
+    { id:'gFp7q-IJqno', t:'Pyro',                 y:'2010' },
     { id:'ZJdHNwUgsPI', t:"We're Onto Something", y:'2025' },
-    { id:'lb2BnpVUxEE', t:'To Space',         y:'2025' },
-    { slot:true, t:'New single',      y:'Next' },
-    { slot:true, t:'Live / new era',  y:'Next' },
+    { slot:true,        t:'Live / new era',       y:'Next' },
+    { id:'hYECLfqjdnw', t:'Closer · Live',        y:'2013' },
+    { id:'BdF41Ne2cnQ', t:'WALLS',                y:'2016' },
   ],
 
   /* Outside-in limits. */
