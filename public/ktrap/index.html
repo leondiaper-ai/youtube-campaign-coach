@@ -179,16 +179,32 @@ body.present{overflow:hidden}
   color:var(--smoke);max-width:24ch;line-height:1.35}
 .qual{font-size:.56rem;color:var(--smoke);margin-top:.6rem;line-height:1.5;max-width:40ch}
 
-/* Secondary evidence — the actual 2026 peer distribution. A ranked numeric
-   list, not a proportional bar chart: Dave's 126.8M would render every other
-   artist as a hairline and the point here is PLACEMENT, not scale. */
-.peer{margin-top:.55rem;display:grid;gap:0}
+/* Primary comparison — the breakout, and what followed it. */
+.sub-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1.1rem,2.3vw,1.65rem);line-height:1;margin:.75rem 0 0}
+.brk{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1rem}
+@media(max-width:900px){.brk{grid-template-columns:1fr;gap:1.4rem}}
+.brk-c{border-top:2px solid var(--hair);padding-top:.75rem}
+.brk-c.hot{border-top-color:var(--signal)}
+.brk-k{font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.brk-n{font-family:'Oswald',sans-serif;font-weight:600;line-height:.86;margin-top:.4rem;
+  font-size:clamp(2rem,4.6vw,3.3rem)}
+.brk-c.hot .brk-n{color:var(--signal)}
+.brk-l{font-size:.6rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--paper);margin-top:.35rem;max-width:26ch;line-height:1.35}
+.brk-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.15rem;margin-top:.5rem;color:var(--smoke)}
+.brk-s{font-size:.6rem;color:var(--smoke);line-height:1.55;margin-top:.5rem;max-width:34ch}
+
+/* The ranked 2026 distribution. A numeric list, not a proportional bar
+   chart: Dave's 126.8M would render everyone else as a hairline, and the
+   point here is placement, not scale. */
+.peer{margin-top:.5rem;display:grid;gap:0}
 .peer-h{font-size:.5rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
-  color:var(--smoke);line-height:1.4;margin-bottom:.35rem}
+  color:var(--smoke);line-height:1.4;margin-bottom:.3rem}
 .pr{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:baseline;
-  padding:.2rem 0;border-bottom:1px solid var(--hair)}
-.pr-a{font-size:.63rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--smoke)}
-.pr-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:.86rem;line-height:1;color:var(--smoke)}
+  padding:.16rem 0;border-bottom:1px solid var(--hair)}
+.pr-a{font-size:.61rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--smoke)}
+.pr-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:.84rem;line-height:1;color:var(--smoke)}
 .pr.kt .pr-a,.pr.kt .pr-v{color:var(--signal)}
 .pr.kt{border-bottom-color:var(--signal)}
 .pr.med .pr-a,.pr.med .pr-v{color:var(--paper)}
@@ -196,25 +212,56 @@ body.present{overflow:hidden}
   color:var(--smoke);margin-left:.4rem}
 .pr.kt .pr-tag{color:var(--signal)}
 
-/* Tertiary — the "is the market just quiet?" check, reduced to one thin row.
-   The five-bar chart is gone; the series survives as a single text line so
-   it can never compete with the K-Trap benchmark above it. */
-.qrow{margin-top:1.05rem;padding-top:.8rem;border-top:1px solid var(--hair);
-  display:flex;flex-wrap:wrap;gap:.55rem 1.7rem;align-items:baseline}
-.qrow-q{font-size:.6rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
-  color:var(--smoke);max-width:19ch;line-height:1.4}
-.qrow-a{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.6rem;line-height:1;
-  color:var(--signal)}
-.qrow-i{display:flex;gap:.45rem;align-items:baseline}
-.qrow-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.5rem;line-height:1}
-.qrow-k{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--smoke);max-width:13ch;line-height:1.3}
-.hist{flex-basis:100%;font-size:.55rem;letter-spacing:.05em;color:var(--smoke);margin:.15rem 0 0}
-.hist b{color:var(--paper);font-weight:700}
+/* Breakout context — one row, subordinate to the peer evidence above it. */
+.bctx{margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;gap:.4rem 1.9rem;align-items:baseline}
+.bctx-h{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.9rem,1.7vw,1.15rem);line-height:1}
+.bctx-i{font-size:.62rem;color:var(--smoke);line-height:1.45;max-width:30ch}
+.bctx-i b{color:var(--signal);font-weight:700}
+.bctx-i em{font-style:normal;color:var(--paper);font-weight:700}
+
+/* Secondary — the 2026 peer check, deliberately small. */
+.chk{margin-top:1.05rem;padding-top:.8rem;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;gap:.5rem 1.9rem;align-items:baseline}
+.chk-h{font-size:.55rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--signal)}
+.chk-i{display:flex;gap:.45rem;align-items:baseline}
+.chk-v{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;line-height:1}
+.chk-v.hot{color:var(--signal)}
+.chk-k{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--smoke);max-width:12ch;line-height:1.3}
+.chk-n{font-size:.56rem;color:var(--smoke);flex-basis:100%;margin:.1rem 0 0}
+
 
 .cohort{margin-top:.5rem;font-size:.56rem;line-height:1.5;color:var(--smoke);max-width:86ch}
 .cohort b{color:var(--paper);font-weight:700;letter-spacing:.11em;text-transform:uppercase;
   font-size:.52rem}
+
+/* ── The learning (slide 7) ────────────────────────────────────── */
+/* Heaven or Hell dominates by design: it is the evidence, and the other two
+   SMILE? heroes exist only to show how far clear of them it sat. */
+.lrn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:2.2rem;margin-top:1rem}
+@media(max-width:900px){.lrn{grid-template-columns:1fr;gap:1.5rem}}
+.lrn-im{position:relative;border-radius:6px;overflow:hidden;max-width:430px}
+.lrn-im img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#1a1a1e}
+.lrn-im::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(8,8,10,.92),rgba(8,8,10,.1) 58%,transparent 78%)}
+.lrn-cap{position:absolute;left:.7rem;right:.7rem;bottom:.55rem;z-index:2}
+.lrn-t{font-size:.62rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#fff}
+.lrn-v{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;
+  font-size:clamp(1.6rem,3.6vw,2.6rem);color:#fff;margin-top:.15rem}
+.lrn-x{font-family:'Oswald',sans-serif;font-weight:600;line-height:.88;color:var(--signal);
+  font-size:clamp(2rem,4.8vw,3.4rem);margin-top:.6rem}
+.lrn-xl{font-size:.62rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  margin-top:.3rem;max-width:26ch;line-height:1.35}
+.lrn-s{font-size:.6rem;color:var(--smoke);line-height:1.55;margin-top:.45rem;max-width:34ch}
+.lrn-side{display:flex;flex-direction:column;justify-content:flex-start}
+.lrn-pct{font-family:'Oswald',sans-serif;font-weight:600;line-height:.86;
+  font-size:clamp(2.6rem,6vw,4.4rem)}
+.lrn-pl{font-size:.62rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  margin-top:.35rem;max-width:24ch;line-height:1.4}
+.lrn-min{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1.1rem}
+.lrn-min .as img{aspect-ratio:16/9}
 
 /* ── Winners (slide 6) ─────────────────────────────────────────── */
 .win{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.4rem}
@@ -309,7 +356,13 @@ const A = {
     heroMedian:419037 },
 
   /* Heaven or Hell is 50.3% of SMILE?'s entire campaign viewing. That single
-     fact is what makes the -69% headline interpretable rather than damning. */
+     fact is why the slide leads on concentration rather than on campaign
+     totals. NOTE: A.smile.views and A.trapo.views are deliberately NOT
+     rendered anywhere. The 159-day windows are symmetric in SELECTION, but
+     the view totals are CURRENT lifetime views of the uploads inside them,
+     and SMILE?'s have had ~2 extra years to accumulate. Presenting
+     12M vs 3.69M, or any percentage derived from it, states an audience
+     decline the data cannot support. */
   heavenOrHell:6038376,
   smileExHoH:5962338,
 
@@ -393,13 +446,41 @@ const A = {
     /* 2024 -> 2025 direction of travel. The contraction is concentrated,
        not general, which is why the slide never calls it a market decline. */
     reduced:5, increased:4, flat:2,
-    /* The nine artists with 2026 hero releases aged >=90 days at 2 Sep 2026,
-       ranked by ARTIST-LEVEL MEDIAN current views (never individual video
-       views, and never a mean — Dave at 126.8M would destroy any average).
-       Two of the eleven, Nines and Potter Payper, have no qualifying 2026
-       release, which is why the cohort is 11 but the ranking is 9.
-       With nine artists the median IS the fifth row, so Headie One's
-       1,034,329 and the cohort median are the same number by definition. */
+    /* ---- Heaven or Hell breakout benchmark -------------------------------
+       Every K-Trap release is compared against UK rap releases from the other
+       ten artists uploaded within +/-90 days of it. Everything in such a band
+       has near-identical time on platform, which is the only condition under
+       which CURRENT lifetime views are a fair comparison. It is not an
+       early-life measure: no per-video history exists anywhere in the system
+       (ChannelSnapshot is channel-level and capped at 180 days; TopEverCache
+       holds IDs only), so D7/D30/D90 cannot be reconstructed for any video.
+
+       Heaven or Hell at 3.22x the +/-90d peer median is stable: 3.04x at
+       +/-30, 2.86x at +/-60, 3.04x at +/-120, and it STRENGTHENS to 3.04-3.42x
+       when Central Cee and Dave are removed. 82nd percentile. It is also 7.56x
+       K-Trap's own 2022+ median and 2nd of his 29 releases.
+
+       The six TRAPO 2 heroes run 0.68x-1.32x on the same +/-90d basis. Against
+       a K-Trap career median of 0.68x across 29 releases, that is at or above
+       his normal position -- which is why the slide says the breakout was the
+       exception rather than that the campaign collapsed. Can't Say No swings
+       3.20x -> 1.08x across narrower bands on n=5 and is not quoted. */
+    artistsAnalysed:'K-Trap · Headie One · Digga D · Nines · Potter Payper · Fredo · '
+      + 'Unknown T · Clavish · Central Cee · Dave · D-Block Europe',
+    /* The nine artists with a 2026 music release at least 90 days old at
+       2 Sep 2026, ranked by that artist's MEDIAN current views — never
+       individual videos, and never a mean, since Dave at 126.8M would wreck
+       any average. Nines and Potter Payper have no qualifying 2026 release,
+       which is why 11 artists were analysed but 9 are ranked. With nine
+       artists the median IS the fifth row, so Headie One's 1.03M and the
+       peer median are the same figure by construction.
+
+       "Music release" not "music video": of the 25 qualifying assets, 21
+       carry explicit music-video markers and 4 do not (Dave's Raindance and
+       The Boy Who Played the Harp — his channel doesn't use [Music Video]
+       suffixes — plus Digga's LugaVellz (Tribute) and Unknown T's BOY BETTER
+       KNOW LIKE JME). Calling the whole set music videos would be tidier
+       and wrong. */
     peers:[
       { a:'Dave',           v:'126.8M' },
       { a:'Central Cee',    v:'7.28M'  },
@@ -411,15 +492,15 @@ const A = {
       { a:'Clavish',        v:'444K'   },
       { a:'Unknown T',      v:'173K'   },
     ],
-    artistsAnalysed:'K-Trap · Headie One · Digga D · Nines · Potter Payper · Fredo · '
-      + 'Unknown T · Clavish · Central Cee · Dave · D-Block Europe',
     qualifying:9,
-    /* 2026 heroes aged >=90 days at 2 Sep 2026. FULL 11-artist cohort is the
-       benchmark. The 776,599 "established-only" median is deliberately NOT
-       used — it excludes Central Cee, Dave and D-Block Europe and flatters
-       K-Trap. n=2 is shown on the slide because two releases is not a median
-       in any meaningful sense. */
-    ktMedian:942358, ktN:2, ktRank:'6th of 9', cohortMedian:1034329,
+    /* Heaven or Hell appears here only as context for the market read; slide
+       07 carries the full treatment. The 72.7% share-of-gap figure is
+       deliberately absent: it is arithmetically right but derives from
+       current lifetime campaign totals whose videos differ in age by ~2
+       years, so it needs more caveat than a slide can carry. */
+    hohMultiple:'~3×',
+
+    ktMedian:942358, ktN:2, ktRank:'6th / 9', cohortMedian:1034329,
   },
 };
 
@@ -599,63 +680,90 @@ const slides = () => [
 </section>`,
 
 /* 07 ── THE HONEST LEARNING ────────────────────────────────────────
-   The intellectual centre. The decline is stated at full size and is NOT
-   explained away — the Heaven or Hell context reduces it, it does not
-   remove it, and the slide says so in as many words. Nothing here claims
-   to know WHY viewing fell, because public API data cannot tell us.    */
+   The intellectual centre, and the slide most easily got wrong.
+
+   An earlier version led on "12M vs 3.69M, -69% on a like-for-like 159-day
+   window". That was a mistake and it is gone. The windows are symmetric in
+   which uploads they SELECT; they do nothing about the fact that the view
+   totals are CURRENT lifetime views and SMILE?'s uploads have had roughly
+   two extra years to accumulate them. Calling that a 69% decline asserts an
+   audience drop the data cannot support, so no campaign totals and no
+   derived percentage appear anywhere on this slide.
+
+   What replaces it is stronger and actually age-fair: Heaven or Hell
+   measured against UK rap releases uploaded around the same time, where
+   everything compared has had near-identical time on platform. 3.22x the
+   median at +/-90 days, and stable at 3.04x / 2.86x / 3.04x across +/-30,
+   +/-60 and +/-120 — which is why "~3x" is safe to state plainly.
+
+   The 73% share-of-gap figure lives on slide 08, not here: slide 07 is the
+   CAMPAIGN learning, slide 08 is the MARKET context.                    */
 `<section class="slide" data-t="The learning">
   <div class="inner">
     <div class="label reveal">The learning</div>
-    <h2 class="display big reveal" style="max-width:20ch">The architecture improved.<br>
-      <span style="color:var(--signal)">The viewing didn't scale with it.</span></h2>
-    <div class="bignums stagger" style="margin-top:1.4rem">
-      <div><div class="bn-n">${fmt(A.smile.views)}</div><div class="bn-l">SMILE? campaign views</div></div>
-      <div><div class="bn-n">${fmt(A.trapo.views)}</div><div class="bn-l">TRAPO 2 campaign views</div></div>
-      <div><div class="bn-n hot">−69%</div><div class="bn-l">on a like-for-like 159-day window</div></div>
+    <h2 class="display big reveal" style="max-width:26ch">The architecture improved.<br>
+      <span style="color:var(--signal)">The breakout didn't repeat.</span></h2>
+
+    <div class="lrn">
+      <div class="stagger">
+        <div class="lrn-im">
+          <img src="${thumb(A.smileHeroes[0].id, 'maxresdefault')}" alt="Heaven or Hell">
+          <div class="lrn-cap">
+            <div class="lrn-t">${esc(A.smileHeroes[0].t)}</div>
+            <div class="lrn-v">${fmt(A.smileHeroes[0].v)} current views</div>
+          </div>
+        </div>
+        <div class="lrn-x">~3× above</div>
+        <div class="lrn-xl">Comparable UK rap releases</div>
+        <p class="lrn-s">Compared with UK rap music releases uploaded around the same time.</p>
+      </div>
+
+      <div class="lrn-side reveal">
+        <div class="lrn-pct">50%</div>
+        <div class="lrn-pl">Of SMILE?'s current observed campaign viewing sits in
+          Heaven or Hell alone</div>
+        <div class="lrn-min stagger">
+          ${A.smileHeroes.slice(1).map(h=>`
+            <div class="as"><img src="${thumb(h.id)}" alt="${esc(h.t)}">
+              <div class="as-m"><span class="as-t">${esc(h.t)}</span>
+                <span class="as-v">${fmt(h.v)}</span></div></div>`).join('')}
+        </div>
+      </div>
     </div>
-    <div class="strip stagger" style="grid-template-columns:repeat(3,1fr);max-width:52ch;margin-top:1.4rem">
-      ${A.smileHeroes.map(h=>`
-        <div class="as"><img src="${thumb(h.id)}" alt="${esc(h.t)}">
-          <div class="as-m"><span class="as-t">${esc(h.t)}</span>
-            <span class="as-v">${fmt(h.v)}</span></div></div>`).join('')}
-    </div>
-    <p class="sub reveal">Heaven or Hell alone was half of SMILE?'s entire campaign viewing. Take it
-      out and SMILE? sits at ${fmt(A.smileExHoH)} against ${fmt(A.trapo.views)} — closer, but still
-      a decline. SMILE? contained a breakout. TRAPO 2 did not reproduce one.</p>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:36ch">Consistency creates
+
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:44ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">SMILE?
+      contained an exceptional breakout. <span style="color:var(--signal)">TRAPO 2 hasn't repeated
+      it yet.</span></h3>
+    <h3 class="display mid reveal" style="margin-top:.6rem;max-width:40ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Consistency creates
       more chances. <span style="color:var(--signal)">It doesn't manufacture a breakout.</span></h3>
-    <div class="srcbar reveal"><span class="src">Public data cannot tell us why viewing fell —
-      song, promotion, playlisting, recommendation and timing are all invisible from outside</span></div>
+
+    <div class="srcbar reveal"><span class="src">Public YouTube data cannot reconstruct historical
+      30/60/90-day performance · comparable releases are UK rap music releases uploaded around
+      the same time</span></div>
   </div>
 </section>`,
 
 /* 08 ── UK RAP MARKET CONTEXT ──────────────────────────────────────
-   Placed AFTER the decline, never before it. Context, not mitigation.
+   Slide 07 is the CAMPAIGN learning; this is the MARKET read. The two must
+   not duplicate each other, so Heaven or Hell appears here as a single
+   context line rather than a second full treatment.
 
-   The slide answers one question in its headline, then SHOWS the answer
-   rather than asking anyone to trust the interpretation: the full ranked
-   peer set is on the slide, so a viewer can see K-Trap sitting mid-table
-   instead of being told he does.
+   The question is answered in the headline, then SHOWN: the full ranked
+   2026 distribution is on the slide so a viewer can see K-Trap sitting one
+   row below the median instead of being told he does.
 
-   An earlier version used "10 of the 10 biggest heroes are Central Cee or
-   Dave". True, and interesting, but it was a second market insight rather
-   than evidence about K-Trap — it never actually bore on the question the
-   slide asks. The ranked distribution replaces it and does.
+   What the ranking is: each artist's median current views on 2026 releases
+   at least 90 days old, so everything compared has had near-identical time
+   on platform. That is the only basis on which current lifetime views are
+   fair — and it is why NO comparison of SMILE? and TRAPO 2 campaign totals
+   appears anywhere on this slide or in this deck. Those totals are current
+   lifetime views of uploads roughly two years apart in age; the 159-day
+   windows are symmetric in what they SELECT, not in accumulated time. The
+   -69%, the 12M vs 3.69M pairing and the 72.7% share-of-gap figure have all
+   been removed for that reason and should not be reinstated.
 
-   The 11-vs-9 gap is stated explicitly on the slide. Nines and Potter
-   Payper have no 2026 hero aged >=90 days, so they cannot appear in a
-   performance ranking; leaving that unexplained invited the reasonable
-   question "why 11 artists but 9 rows?".
-
-   Note the ranking is ARTIST-LEVEL MEDIANS, never individual videos and
-   never a mean — Dave at 126.8M would wreck any average. With nine
-   artists the median is the fifth row, so Headie One's 1.03M and the
-   cohort median are necessarily the same figure.
-
-   "NOT MATERIALLY" is the ceiling of what n=2 supports. Copy must never
-   escalate to "outperforming", "performing strongly", or "in line with
-   the market" — the last would imply the whole TRAPO 2 campaign was
-   benchmarked when only two mature 2026 heroes were.                   */
+   The quiet-market release-activity block is also gone. It was true but
+   tertiary, and it competed with the peer evidence for attention.        */
 `<section class="slide coal" data-t="Market context">
   <div class="inner">
     <div class="label reveal">The wider picture</div>
@@ -663,15 +771,6 @@ const slides = () => [
       <h2 class="qa-q">Is K-Trap underperforming the market?</h2>
       <p class="qa-a">Not materially.</p>
     </div>
-
-    <div class="snap reveal">
-      <span class="snap-k">YouTube data snapshot</span>
-      <span class="snap-v">${A.market.channels} UK rap artist channels</span>
-      <span class="snap-v">${A.market.heroes} music releases</span>
-      <span class="snap-v">${A.market.window}</span>
-      <span class="snap-v">Public YouTube Data API v3</span>
-    </div>
-    <p class="cohort reveal"><b>Artists analysed</b> ${A.market.artistsAnalysed}</p>
 
     <div class="two">
       <div>
@@ -684,10 +783,10 @@ const slides = () => [
             <div class="duel-n">${fmt(A.market.cohortMedian)}</div>
             <div class="duel-l">Median current views</div></div>
         </div>
-        <div class="rankrow reveal"><b>${A.market.ktRank.replace(' of ',' / ')}</b>
+        <div class="rankrow reveal"><b>${A.market.ktRank}</b>
           <span>Qualifying artists</span></div>
-        <p class="qual">${A.market.channels} artists analysed · ${A.market.qualifying} had 2026 releases
-          aged 90+ days · ${A.market.ktN} K-Trap releases qualify.</p>
+        <p class="qual">${A.market.channels} artists analysed · ${A.market.qualifying} had 2026 music
+          releases at least 90 days old · 2 K-Trap releases qualify.</p>
       </div>
 
       <div>
@@ -696,32 +795,28 @@ const slides = () => [
         <div class="peer stagger">
           ${A.market.peers.map(p=>`
             <div class="pr${p.kt?' kt':''}${p.median?' med':''}">
-              <span class="pr-a">${esc(p.a)}${p.median?'<span class="pr-tag">Median</span>':''}${p.kt?'<span class="pr-tag">6th / 9</span>':''}</span>
+              <span class="pr-a">${esc(p.a)}${p.median?'<span class="pr-tag">Median</span>':''}</span>
               <span class="pr-v">${p.v}</span>
             </div>`).join('')}
         </div>
       </div>
     </div>
 
-    <div class="qrow reveal">
-      <div class="qrow-q">Is 2026 simply a quiet release market?</div>
-      <div class="qrow-a">No.</div>
-      <div class="qrow-i"><span class="qrow-v">45</span>
-        <span class="qrow-k">Music releases Jan → 2 Sep 2026</span></div>
-      <div class="qrow-i"><span class="qrow-v">40</span>
-        <span class="qrow-k">Across all of 2025</span></div>
-      <div class="qrow-i"><span class="qrow-v">${A.market.active2026}</span>
-        <span class="qrow-k">Artists active in 2026</span></div>
-      <p class="hist">${A.market.years.map(r=>`${r.y}${r.ytd?' YTD':''} <b>${r.heroes}</b>`).join(' · ')}</p>
+    <div class="bctx reveal">
+      <div class="bctx-h">The difference is the breakout.</div>
+      <p class="bctx-i"><em>Heaven or Hell</em> <b>${A.market.hohMultiple} above</b> comparable
+        UK rap releases</p>
+      <p class="bctx-i"><em>TRAPO 2</em> current releases sit around the wider peer range</p>
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1rem;max-width:54ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">TRAPO 2
-      hasn't recreated the previous breakout. <span style="color:var(--signal)">But K-Trap sits around
-      the middle of the 2026 UK rap peer set.</span></h3>
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:56ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">TRAPO 2
+      hasn't repeated SMILE?'s breakout moment. <span style="color:var(--signal)">But K-Trap sits
+      around the middle of the 2026 UK rap peer set.</span></h3>
 
-    <div class="srcbar reveal"><span class="src">2026 benchmark: median current views per artist ·
-      releases at least 90 days old · 9 of 11 artists qualify · 2 K-Trap releases qualify ·
-      source: public YouTube Data API v3 · official artist channels only</span></div>
+    <p class="cohort reveal"><b>Artists analysed</b> ${A.market.artistsAnalysed}</p>
+    <div class="srcbar reveal"><span class="src">Public YouTube Data API v3 · current public views ·
+      comparable releases = UK rap music releases uploaded around the same time · historical
+      30/60/90-day views are unavailable, so this does not measure early-life performance</span></div>
   </div>
 </section>`,
 
