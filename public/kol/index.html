@@ -400,12 +400,8 @@ body.present{overflow:hidden}
 .plan-im{margin-top:.7rem}
 .plan-im.pair{display:grid;grid-template-columns:1fr 1fr;gap:.25rem}
 .plan-im.pair .pf{position:relative;display:block}
-.plan-im.pair img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:4px;
+.plan-im.pair img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:4px;
   display:block;background:#222}
-.plan-im.pair .pf-y{position:absolute;left:.25rem;top:.2rem;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:.5rem;letter-spacing:.07em;color:#fff;
-  background:rgba(10,10,10,.62);padding:.1rem .24rem;border-radius:2px}
 .plan-im img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block;background:#222}
 .plan-t{list-style:none;margin:.7rem 0 0;padding:0}
 .plan-t li{font-size:.66rem;color:var(--smoke);line-height:1.75;position:relative;padding-left:.75rem}
@@ -724,15 +720,22 @@ const ARTIST = {
          legible in the thumbnail, so BUILD proves itself at a glance. HERO
          still owns the peak: its column is 1.6fr against BUILD's 1fr, so its
          image is roughly two and a half times the area. */
-      /* THE RHYME, NOT A HISTORY LESSON. Two frames in the space the single
-         rehearsal still used, so the slide gains no height: Molly's Chambers
-         (2003, a Holy Roller Novocaine track) beside the 29-days countdown
-         (2026). Both are the band in a room at a mic, twenty-three years
-         apart. The year stamps carry it — there is no sentence explaining the
-         connection, because the moment it needs a sentence it stops being a
-         visual rhyme and becomes another analytical point. */
+      /* BOTH REGISTERS OF THE CURRENT CAMPAIGN, side by side. The bowling
+         alley at night sets the world the record is being shot in; the
+         rehearsal room shows where the band actually is. Between them they
+         are what "tease the story" currently looks like on this channel.
+
+         An earlier version paired a 2003 frame with the 2026 one as a visual
+         rhyme. It read as history on a slide whose whole job is the plan, so
+         the archive reference moved to slides 6 and 7 where it belongs and
+         BUILD stays in the present.
+
+         3:2 rather than square: these are night frames, and a square crop
+         takes so narrow a slice that the bowling alley goes almost entirely
+         black. Wider keeps the lit band. Year stamps dropped — both are 2026,
+         so stamping them twice was noise. */
       { k:'Build',  line:'Tease the story', vertical:true,
-        pair:[{ id:'uLaJkbkG5NI', yr:'2003' }, { id:'tTTtYFqZxFU', yr:'2026' }],
+        pair:[{ id:'lQHxK30MXkk' }, { id:'tTTtYFqZxFU' }],
         note:'Already happening: lyrics, rehearsal footage + a countdown before the reveal.',
         tools:['Shorts','Community','Premiere page','Reminders'] },
       { k:'Hero',   line:'Define the moment', peak:true,
@@ -1091,8 +1094,8 @@ function slides(){ return [
           <div class="plan-l">${esc(st.line)}</div>
           ${st.note?`<div class="plan-n">${esc(st.note)}</div>`:''}
           ${st.pair?`<div class="plan-im pair">${st.pair.map(f=>`
-            <span class="pf"><img src="${thumb(f.id)}" alt="">
-              <span class="pf-y">${esc(f.yr)}</span></span>`).join('')}</div>`:''}
+            <span class="pf"><img src="${thumb(f.id,'maxresdefault')}" alt=""
+              onerror="this.onerror=null;this.src='${thumb(f.id)}'"></span>`).join('')}</div>`:''}
           ${st.img?`<div class="plan-im"><img alt=""
             src="${st.vertical?thumb(st.img):thumb(st.img,'maxresdefault')}"
             onerror="this.onerror=null;this.src='${thumb(st.img)}'"></div>`:''}
