@@ -555,7 +555,23 @@ const ARTIST = {
      The deck moves from catalogue-era imagery to current-era imagery as the
      story moves from diagnosis to September, so the pictures carry the argument
      alongside the numbers. */
-  heroImages:{ open:'RF0HhrwIwp0', bridge:'kxmHkxpxoaE', close:'ZJdHNwUgsPI' },
+  /* Full-bleed backgrounds. Both render at 30% opacity under a hard
+     left-to-right gradient, so these read as texture rather than as pictures
+     — which is why source brightness matters far less here than crop does.
+
+     open  5Jw570Rp9BU  Wasted Time, 2003 — a Holy Roller Novocaine track and
+           the only frame in the deck with all four of them in it. Every other
+           image we use is one man at a microphone, so the cover is the one
+           place a group portrait earns its keep.
+     close kWaFVvVoj4o  The Bucket, 2004 — its own video is cut as a 2x2 grid
+           of band moments, so behind the closing line it reads as a faint
+           grid of twenty-year-old footage. Also on slide 7, but at full
+           opacity as a tile there and as texture here; the repeat is not
+           legible as a repeat.
+
+     The cover copy still points forward. The image is the history sitting
+     behind it, not the subject of it. */
+  heroImages:{ open:'5Jw570Rp9BU', bridge:'kxmHkxpxoaE', close:'kWaFVvVoj4o' },
 
   /* Era contrast — the same band, sixteen years apart. */
   eraImages:{
