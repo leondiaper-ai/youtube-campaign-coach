@@ -1038,18 +1038,26 @@ const slides = () => [
 
          At 15ch the second line wrapped, giving a three-line headline;
          with the bridge added that left the slide at 855px against an
-         862px budget. Widening to 24ch changed nothing — 24ch computes
-         to about 1272px at this font size and the line measures 1273px,
-         so it was still one pixel over the cap and still wrapped.
+         862px budget. Widening the max-width did nothing, twice, because
+         the cap was never the binding constraint — the line is simply
+         wider than the 1280px container.
 
-         So: 30ch takes the cap out of play entirely (the 1280px container
-         becomes the constraint), and the font-size is capped at 5.5rem
-         rather than inheriting .big's 6.1rem. That leaves the line about
-         130px inside the container instead of 7px, which is the
-         difference between a layout that holds and one that re-wraps on
-         any machine whose font metrics differ slightly from ours.
-         Two lines also simply reads better. -->
-    <h2 class="display big reveal" style="max-width:30ch;font-size:clamp(2rem,6vw,5.5rem)">Busy.<br>
+         MEASURED PROPERLY: "But between the videos?" renders across two
+         line boxes of 917px + 412px = 1329px at .big's size. It needs the
+         font under about 85px to fit on one line, so the cap here is 5rem
+         (80px), which lands the line near 1208px — roughly 70px inside
+         the container rather than balanced on the edge.
+
+         If you ever need to re-measure this: take the real line boxes
+         with a Range over the element (getClientRects). A hidden probe
+         span built from the getComputedStyle font shorthand reports about
+         1147px here, because the shorthand drops the custom family and
+         silently measures a fallback. That wrong number is what made the
+         previous attempt look correct.
+
+         (No backticks in this comment — it sits inside a template
+         literal, so a backtick would close the string. Third time.) -->
+    <h2 class="display big reveal" style="max-width:30ch;font-size:clamp(2rem,5.4vw,5rem)">Busy.<br>
       <span style="color:var(--red)">But between the videos?</span></h2>
     <div class="tape stagger">
       ${A.gaps.map(g=>`
