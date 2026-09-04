@@ -1033,7 +1033,12 @@ const slides = () => [
 `<section class="slide" data-t="The gaps">
   <div class="inner">
     <div class="label reveal">TANGK · between the videos</div>
-    <h2 class="display big reveal" style="max-width:15ch">Busy.<br>
+    <!-- 24ch, not 15ch. At 15ch the second line wrapped, making a
+         three-line headline; adding the bridge below then left the slide
+         at 855px against an 862px budget — inside fit, but close enough
+         that a font fallback would push it over. Two lines reads better
+         anyway and buys ~88px of real headroom. -->
+    <h2 class="display big reveal" style="max-width:24ch">Busy.<br>
       <span style="color:var(--red)">But between the videos?</span></h2>
     <div class="tape stagger">
       ${A.gaps.map(g=>`
