@@ -382,8 +382,15 @@ body.present #pcount{display:block}
    genuinely interesting but it is a SECONDARY reveal — the primary
    fact on that slide is the zero. Folding it into one compact strip
    keeps the slide to a single idea and saves a whole page. */
-.used{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);gap:1.5rem;align-items:center;
+/* align-items:start, not center. The three labels wrap to different line
+   counts ("VIDEOS PREMIERED SINCE 2021" is three lines, the others two),
+   so centring each cell independently pushed the numbers off a shared
+   baseline — the red 0 visibly floated above the other two. Top-aligning
+   the cells puts all three numbers on one line; the sentence is then
+   re-centred on its own. */
+.used{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);gap:1.5rem;align-items:start;
   margin-top:.8rem;padding-top:.7rem;border-top:1px solid var(--hair)}
+.used>p{align-self:center}
 @media(max-width:900px){.used{grid-template-columns:repeat(3,1fr)}.used p{grid-column:1/-1}}
 .us-n{font-family:'Archivo Black',sans-serif;font-size:clamp(1.1rem,2.4vw,1.75rem);
   line-height:.9;color:var(--bone)}
