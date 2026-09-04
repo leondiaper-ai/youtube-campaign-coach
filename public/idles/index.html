@@ -1049,7 +1049,13 @@ const slides = () => [
     <div class="label reveal">Programming the world</div>
     <h2 class="display big reveal" style="max-width:21ch">The content exists.
       <span style="color:var(--red)">Give it a home.</span></h2>
-    <div class="prog stagger" style="grid-template-columns:minmax(0,.85fr) minmax(0,1fr);
+    <!-- Metallica is capped at a fixed 340px column, not a fraction. At
+         .85fr it rendered a 324px-tall image — taller than the wall
+         beneath it and the biggest thing on the slide, which inverts the
+         hierarchy: the wall is the argument, Metallica is the reference
+         that explains it. The cap also keeps the slide inside unscaled
+         fit at 982 (979px before, ~820 after). -->
+    <div class="prog stagger" style="grid-template-columns:minmax(0,340px) minmax(0,1fr);
       gap:1.6rem;margin-top:1rem;align-items:center">
       <div>
         <a class="prog-img" href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}"
