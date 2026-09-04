@@ -478,73 +478,32 @@ body.present #pcount{display:block}
   padding:.4rem 0;border-bottom:1px solid var(--bonehair)}
 .draw span:last-child{border-bottom:0}
 
-/* ── V4: THE STATION WALL (slide 08) ─────────────────────────────────
-   Same device as the CHVRCHES and Amyl decks: real thumbnails for what
-   already exists, dashed cells for what the next album drops into the
-   run. It replaces the four-word `.draw` list, which asked the room to
-   take "the content exists" on trust. Showing it is the whole point.
+/* ── V6: THE STATION SLIDE (slide 08) ────────────────────
+   Replaces the wall / legend / asks CSS that V4 and V5 used here. That
+   markup is gone: the slide makes one argument with one reference now,
+   so it needs a two-column split and a content list, nothing more.
 
-   Butted to a 3px gutter so ten cells read as one programmed strip
-   rather than ten cards. Grayscale + contrast matches the treatment on
-   every other image strip in this deck; the slots are the only colour
-   in the row, which is what makes the new material legible at a glance.
-
-   No view counts here. This slide is a programming idea and the
-   Metallica reference has no numbers next to it — putting figures on
-   the wall would turn it into a performance comparison.            */
-.swall{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:1.1rem}
-@media(max-width:900px){.swall{grid-template-columns:repeat(2,1fr)}}
-.sw{position:relative;overflow:hidden;background:#1A181A}
-.sw img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
-  filter:grayscale(.55) contrast(1.08)}
-.sw::after{content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(to top,rgba(10,9,10,.88),transparent 62%)}
-.sw-t{position:absolute;left:.45rem;right:.45rem;bottom:.35rem;z-index:2;
-  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
-  letter-spacing:.09em;text-transform:uppercase;color:#fff;line-height:1.15}
-.sw.slot{aspect-ratio:16/9;border:2px dashed var(--red);background:rgba(214,40,40,.07);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:.1rem;text-align:center;padding:.3rem}
-.sw.slot::after{display:none}
-.slot-p{font-family:'Archivo Black',sans-serif;font-size:1.3rem;color:var(--red);line-height:1}
-.slot-t{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
-  letter-spacing:.09em;text-transform:uppercase;color:var(--red);line-height:1.15}
-.swl{display:flex;align-items:center;gap:.45rem;margin-top:.6rem;
-  font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
-  letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
-.swl i{width:10px;height:10px;display:inline-block;flex:none}
-
-/* ── V4: COLUMN VERDICT + EVIDENCE (slide 07) ────────────────────────
-   The badge is the verdict, the .col-e line is the finding underneath
-   it. KEEP is deliberately quieter than CHANGE — two of the three
-   columns are things IDLES already do well, and the slide should not
-   shout at them about those. Only EXTEND is a change, so only EXTEND
-   is red. */
-.col-b{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;
-  font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.16rem .45rem;
-  border:1px solid var(--smoke);color:var(--smoke);margin-bottom:.4rem}
-.col-b.ch{border-color:var(--red);background:var(--red);color:#fff}
-.col-e{font-size:.72rem;color:var(--smoke);line-height:1.5;margin-top:.35rem;
-  padding-left:.6rem;border-left:2px solid var(--hair)}
-.slide.light .col-e,.slide.bone .col-e{border-left-color:var(--bonehair)}
-.col-say{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;line-height:1.2;margin-top:.6rem;color:var(--red)}
-.col.w .col-say{color:var(--bone)}
-
-/* ── V4: THE PARTNER ASKS (slide 08) ─────────────────────────────────
-   Replaces a generic "premium features" block. Each ask states its
-   real status first — one is already adopted, one has no mapped
-   evidence, one is not open — so nothing on this slide can be mistaken
-   for a feature that can simply be switched on. */
-.asks{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:1.1rem}
-@media(max-width:900px){.asks{grid-template-columns:1fr;gap:1rem}}
-.ask{border-top:2px solid var(--bonehair);padding-top:.7rem}
-.ask.go{border-top-color:var(--red)}
-.ask-n{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;line-height:1.15}
-.ask-s{font-family:'Barlow Condensed',sans-serif;font-size:.66rem;font-weight:700;
-  letter-spacing:.13em;text-transform:uppercase;color:var(--red);margin-top:.2rem}
-.ask-d{font-size:.74rem;color:var(--smoke);line-height:1.5;margin-top:.35rem}
+   The Metallica column is capped rather than fractional for the same
+   reason as before — it is the reference, not the proposition, and it
+   must not become the biggest object on the page. */
+.stn{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:2.2rem;
+  margin-top:1.2rem;align-items:start}
+@media(max-width:900px){.stn{grid-template-columns:1fr;gap:1.4rem}}
+.stn-n{font-family:'Archivo Black',sans-serif;font-size:clamp(1.3rem,2.6vw,1.9rem);
+  text-transform:uppercase;line-height:1}
+.stn-s{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-top:.25rem}
+.stn-d{font-size:.82rem;color:var(--smoke);line-height:1.6;margin-top:.6rem;max-width:52ch}
+.stn-l{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:1rem;
+  padding-top:.85rem;border-top:2px solid var(--red)}
+.stn-k{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-right:.3rem;flex:none}
+.stn-l span:not(.stn-k){font-family:'Barlow Condensed',sans-serif;font-size:.82rem;
+  font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1;
+  padding:.32rem .6rem;border:1px solid var(--ink);color:var(--ink)}
+/* Rights-dependent, so it must never look like the owned assets beside
+   it. Dashed and muted — a maybe, not an inventory item. */
+.stn-l span.soft{border-style:dashed;border-color:var(--smoke);color:var(--smoke)}
 
 /* ── V5: THE MULTI-FORMAT BRIDGE (slide 04) ──────────────────────────
    One line of diagram under the gap evidence. Sized to sit between the
@@ -801,49 +760,11 @@ const A = {
     stationsWhy:'24 live events · 4 named series · a full concert film · 30 owned live assets',
     afterpartyNote:'No Premium Afterparty found in the mapped public campaign evidence',
 
-    /* ── V4: THE WALL ─────────────────────────────────────────────────
-       The slide claims "the content exists". A list of four words does
-       not evidence that; thumbnails do. Every `id` below is a REAL
-       IDLES-OWNED upload already verified in the 367/367 pull — this is
-       inventory the band already has, shown as inventory.
-
-       IDLES-OWNED ONLY. The four BBC performances are the strongest
-       live assets in this analysis but they sit on BBC channels, so
-       they cannot appear in a wall of what IDLES would programme. Do
-       not add them here however good the thumbnails look.
-
-       The dashed `slot` cells are the other half of the argument: what
-       the next album adds to a run that is already there. Keep the mix
-       weighted to real over slot — the point is that most of this
-       exists today. No view counts anywhere on this slide; it is a
-       programming idea, not a performance claim.                    */
-    wall:[
-      { id:'0lbH_Z-Xi1Q', t:'Le Bataclan' },
-      { id:'hHsbPcYdi34', t:'Balley TV' },
-      { id:'A3ZZj5y6Qt4', t:'Dancer' },
-      { slot:true,        t:'Album film' },
-      { id:'_HQrM5L9T1g', t:'Gift Horse' },
-      { id:'XBdspjpXBm4', t:'Live Q&A' },
-      { slot:true,        t:'Next hero' },
-      { id:'gLY1PkEOJP4', t:'Roy · lyric' },
-      { id:'jc4XigR4HaQ', t:'Mother · live' },
-      { slot:true,        t:'New performances' },
-    ],
-    /* VERIFIED 4 Sep 2026 against handle=idlesband →
-       UCVm7tYTZONPLVujGX0rAJdw, channel.title "IDLES", 368 uploads,
-       uncapped. All seven ids present. Titles as returned:
-         0lbH_Z-Xi1Q  IDLES live at Le Bataclan in Paris, Dec 2018 (Full Concert)
-         hHsbPcYdi34  BALLEY TV - Episode 1 with Mike Skinner and Nadya Tolokonnikova
-         A3ZZj5y6Qt4  IDLES - DANCER (Official Video)
-         _HQrM5L9T1g  IDLES - GIFT HORSE (Official Video)
-         XBdspjpXBm4  Part 5 Live Q&A with Joe
-         gLY1PkEOJP4  IDLES - ROY (Official Lyric Video)
-         jc4XigR4HaQ  IDLES - MOTHER (Live at Le Bataclan)
-       The last one was labelled "Live songs" on first pass, which the
-       API title does not support — it is one song from the Bataclan
-       shoot. Relabelled "Mother · live". It sits deliberately next to
-       the full concert: same night, two assets, which is the argument
-       this slide is making. */
+    /* The verified IDLES inventory wall that V4/V5 rendered on slide 08
+       was removed in V6 — the slide argues one thing now. The eight ids
+       and their API-confirmed titles are in git history (commit b1359db)
+       if the wall is ever wanted back; they were checked against
+       handle=idlesband, channel.title "IDLES", 368 uploads, uncapped. */
   },
 
   /* ── V3: THE MULTI-FORMAT EVIDENCE (slide 07) ─────────────────────
@@ -1257,70 +1178,69 @@ const slides = () => [
   </div>
 </section>`,
 
-/* 08 ── WHAT WE'D TAKE TO YOUTUBE ──────────────────────────────────
-   V4 REBUILD. V3 made this "here is Metallica TV, IDLES could have one
-   too", with a large Metallica image as the biggest object on the page.
-   That borrows someone else's scale to make an IDLES point, and the
-   IDLES evidence does not need the loan. Metallica is now one line at
-   the bottom.
+/* 08 ── PROGRAMME THE CHANNEL ──────────────────────────────────────
+   V6 REBUILD, and the change is subtraction.
 
-   The slide states three partner items with their REAL STATUS FIRST,
-   so none of them can be mistaken for a switch that can be flipped:
-     Premieres  — already adopted, 13 of 13. Nothing to ask for.
-     Afterparty — no mapped evidence of one during TANGK. A pitch, for
-                  the biggest hero moment only, never a guarantee.
-     Stations   — beta, access is not open. A separate programming
-                  opportunity for the live and archive world.
-   The wall underneath belongs to the Stations ask: it is the inventory
-   that makes that conversation worth having.
+   V4/V5 had this slide carrying Premieres, Premium Afterparty, Stations,
+   an eight-tile inventory wall, three dashed future-asset tiles, a
+   legend and a Metallica link. Seven ideas on the page that has the
+   least to prove. It read as a YouTube feature checklist, which is the
+   one impression this deck exists to avoid.
 
-   NO VIEW COUNTS ON THIS SLIDE. It is a programming idea. If a number
-   ever appears next to Metallica here, it is wrong.                 */
-`<section class="slide bone" data-t="What we'd pitch">
+   Premieres and Afterparty are gone from here, not downgraded. Premieres
+   are already stated as a strength on slide 07 (13 of 13) and Afterparty
+   already sits in the slide 09 rollout as a selective pitch for the
+   biggest moment. Repeating them turns recommendations into a features
+   list. This page now argues ONE thing: Stations, because it is the only
+   item that follows directly from the diagnosis the deck has built —
+   a channel that needs destinations between hero releases.
+
+   RIGHTS CARE. The four BBC performances are the strongest live assets
+   in this analysis and the temptation is to list them as Station
+   content. We have no basis to assume they can be programmed into an
+   IDLES Station, so the line reads "partner performances where rights
+   allow" and nothing on this slide implies otherwise.
+
+   METALLICA IS A PROGRAMMING REFERENCE, NOT A BENCHMARK. No view counts,
+   no scale comparison, no suggestion IDLES should match them. If a
+   number ever appears next to Metallica here, it is wrong.            */
+`<section class="slide bone" data-t="Programme the channel">
   <div class="inner">
     <div class="label reveal">Working with YouTube</div>
-    <h2 class="display big reveal" style="max-width:24ch">Three asks.
-      <span style="color:var(--red)">One already answered.</span></h2>
-    <div class="asks stagger">
-      <div class="ask">
-        <div class="ask-n">Premieres</div>
-        <div class="ask-s" style="color:var(--smoke)">Already yours &middot; 13 of 13</div>
-        <div class="ask-d">Nothing to ask for. IDLES Premiere more consistently than most of the
-          roster — the recommendation is simply to keep doing it.</div>
+    <h2 class="display big reveal" style="max-width:22ch;font-size:clamp(2rem,5.4vw,5rem)">Programme the channel.<br>
+      <span style="color:var(--red)">Not just the release.</span></h2>
+    <div class="stn stagger">
+      <div>
+        <div class="stn-n">YouTube Stations</div>
+        <div class="stn-s">Beta &middot; VMG to pitch</div>
+        <p class="stn-d">IDLES already have the ingredients — music videos, live performances,
+          archive and band-world content. The opportunity is to bring that library together into one
+          programmed destination, so the channel has somewhere to live between hero releases and
+          between album campaigns.</p>
+        <div class="stn-l">
+          <span class="stn-k">IDLES Station</span>
+          <span>Hero videos</span><span>Le Bataclan / owned live</span><span>Archive</span>
+          <span>Lyric / visual assets</span><span>New album-era performances</span>
+          <span class="soft">Partner performances where rights allow</span>
+        </div>
+        <h3 class="display mid reveal" style="margin-top:1.1rem;max-width:26ch">Pitch the Station.
+          <span style="color:var(--red)">Build the library around it.</span></h3>
       </div>
-      <div class="ask go">
-        <div class="ask-n">Premium Afterparty</div>
-        <div class="ask-s">No mapped evidence during TANGK</div>
-        <div class="ask-d">Pitch it for the biggest hero moment of the campaign. One or two a
-          cycle, not every single, and only if secured.</div>
-      </div>
-      <div class="ask go">
-        <div class="ask-n">YouTube Stations</div>
-        <div class="ask-s">Beta &middot; access isn't open</div>
-        <div class="ask-d">A separate opportunity — a programmed home for the live and archive
-          world, running between campaigns as well as during them.</div>
+      <div>
+        <a class="prog-img" href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}"
+          target="_blank" rel="noopener">
+          <img src="${thumb(A.pitch.metallica.id,'maxresdefault')}" alt="Metallica TV"
+            onerror="this.src='${thumb(A.pitch.metallica.id)}'"></a>
+        <div class="prog-cap"><b>${esc(A.pitch.metallica.label)}</b>
+          <span style="color:var(--red);font-family:'Barlow Condensed',sans-serif;font-weight:700;
+            letter-spacing:.14em;text-transform:uppercase;font-size:.66rem">A programming reference</span>
+          <span>A reference for turning an artist's video and archive catalogue into a programmed
+            destination.</span></div>
       </div>
     </div>
-    <!-- V4: the wall. Real IDLES uploads, then dashed cells for what the
-         next album adds. IDLES-OWNED ONLY — see the pitch.wall data
-         comment before adding anything here. NOTE: this comment sits
-         inside a template literal, so it must not contain a backtick or
-         a dollar-brace — both are parsed, not treated as comment text. -->
-    <div class="swall stagger">
-      ${A.pitch.wall.map(v=> v.slot
-        ? `<div class="sw slot"><div class="slot-p">+</div><div class="slot-t">${esc(v.t)}</div></div>`
-        : `<div class="sw"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
-             <div class="sw-t">${esc(v.t)}</div></div>`).join('')}
-    </div>
-    <div class="swl reveal">
-      <i style="background:var(--ink);opacity:.55"></i> Already on the channel
-      <i style="border:2px dashed var(--red);margin-left:.7rem"></i>
-      <span style="color:var(--red)">Added by the next album</span>
-      <span style="margin-left:auto;opacity:.8;letter-spacing:.06em;text-transform:none;
-        font-weight:600">Closest live example:
-        <a href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}" target="_blank"
-          rel="noopener" style="color:var(--ink)"><b>${esc(A.pitch.metallica.label)}</b></a></span>
-    </div>
+    <div class="srcbar reveal"><span class="src">YouTube Stations is a beta partner opportunity;
+      access not guaranteed &middot; Metallica shown as a programming reference, not a performance
+      benchmark</span></div>
   </div>
 </section>`,
 
