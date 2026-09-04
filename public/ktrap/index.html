@@ -17,7 +17,10 @@
 
    Both campaigns are measured on SYMMETRIC, ALBUM-ANCHORED windows —
    album day minus 152 days to album day plus 7 — so the comparison is
-   like-for-like rather than one campaign being given a longer run:
+   matched rather than one campaign being given a longer run. NOTE the
+   slide says "matched", never "like-for-like": the windows are symmetric
+   in what they SELECT, but current lifetime views inside them are not
+   age-equivalent. Only activity metrics are compared on that slide:
      SMILE?   2 Jan – 9 Jun 2024   (album 2 Jun 2024)   159 days
      TRAPO 2  22 Mar – 28 Aug 2026 (album 21 Aug 2026)  159 days
 
@@ -391,7 +394,13 @@ const A = {
   winners:[
     { id:'VVV8WOjESSE', t:'Mystery Box',  sub:'ft. Headie One · 17 Apr', v:954353 },
     { id:'nLu0bRgDSuQ', t:'Change',       sub:'ft. G Herbo · 2 Apr',     v:930322 },
-    { id:'07-02pdHkWo', t:'The Documentary', sub:'31 minutes · 28 Aug',  v:134832 },
+    /* The Documentary was here and has been removed. This slide exists to
+       show the audience response to the TRAPO 2 MUSIC releases and to carry
+       "a higher ceiling, a lower floor" — putting a 31-minute documentary
+       beside two music videos invited a comparison between formats with
+       different jobs. Its 134,832 stays on the formats slide, where the
+       point is that the campaign carried more kinds of asset. */
+    { id:'Z5vSpK5OMKs', t:"Can't Say No", sub:'ft. Young Adz · 11 Jun',  v:501141 },
   ],
 
   smileHeroes:[
@@ -597,7 +606,7 @@ const slides = () => [
    quoting six externally would not survive a check.                   */
 `<section class="slide light" data-t="Stayed active">
   <div class="inner">
-    <div class="label reveal">Execution · like-for-like 159-day windows</div>
+    <div class="label reveal">Execution · matched 159-day campaign windows</div>
     <h2 class="display big reveal" style="max-width:17ch">The campaign stopped
       <span style="color:var(--signal)">disappearing between releases.</span></h2>
     <div class="cmp stagger">
@@ -769,7 +778,7 @@ const slides = () => [
     <div class="label reveal">The wider picture</div>
     <div class="qa reveal">
       <h2 class="qa-q">Is K-Trap underperforming the market?</h2>
-      <p class="qa-a">Not materially.</p>
+      <p class="qa-a">Not dramatically.</p>
     </div>
 
     <div class="two">
