@@ -80,6 +80,16 @@ body.present{overflow:hidden}
 .slide.light .sub{color:#5B5751}
 .statement{font-size:clamp(1rem,1.8vw,1.42rem);line-height:1.45;font-weight:500}
 
+/* ── Strategic lens (slide 2) ───────────────────────────────────────
+   The wider-analysis line. Sized DELIBERATELY between .statement and
+   .sub: it must read as the frame around the headline, never compete
+   with it. The red rule does the work of signalling "this is the lens",
+   which is why the type itself stays quiet.                          */
+.lens{margin-top:1.3rem;padding-left:1rem;border-left:2px solid var(--signal);
+  font-size:clamp(.92rem,1.35vw,1.15rem);line-height:1.5;font-weight:500;
+  color:var(--paper);max-width:54ch}
+.slide.light .lens{color:var(--ink)}
+
 /* ── Source bar ─────────────────────────────────────────────────── */
 .srcbar{margin-top:1.1rem;padding-top:.7rem;border-top:1px solid var(--hair)}
 .slide.light .srcbar{border-color:var(--bone)}
@@ -538,26 +548,46 @@ const slides = () => [
 </section>`,
 
 /* 02 ── THE OPPORTUNITY ────────────────────────────────────────────
-   Deliberately NOT a criticism of SMILE?. The first line credits it, and
-   the numbers shown are only about consistency — no viewing figures
-   appear on this slide, so nothing here can read as a verdict on the
-   previous campaign's success.                                       */
+   This slide has to do FOUR things in about five seconds, in this order:
+     1. the wider Virgin learning        (.lens)
+     2. K-Trap already had big moments   (headline, first line)
+     3. the concrete gaps around them    (.bignums)
+     4. what TRAPO 2 therefore became    (.sub, and slide 03)
+   Read the headline and the lens together: the headline says the
+   opportunity was BUILDING AROUND the moments, which is the strategic
+   response, not merely the problem. An earlier version said "the space
+   between them was the opportunity" — that named the gap and stopped
+   there, so the deck started halfway through its own argument.
+
+   CLAIM DISCIPLINE. The lens is observational and must stay that way.
+   Public data cannot show that posting more causes views, that formats
+   drive recommendations, that Shorts feed long-form, or that SMILE?
+   was held back by inactivity. "The opportunity wasn't simply more
+   content — it was more consistent programming" is a strategic
+   principle, not a causal finding. Do not sharpen it into one.
+
+   Also deliberately NOT a criticism of SMILE?. The first line of the
+   headline and the first line of the bridge both credit it, and no
+   viewing figures appear anywhere on this slide — the three numbers
+   are about consistency only, so nothing here can read as a verdict
+   on the previous campaign's success.                                */
 `<section class="slide light" data-t="The opportunity">
   <div class="inner">
-    <div class="label reveal">Where we started</div>
-    <h2 class="display big reveal" style="max-width:20ch">The big moments were there.<br>
-      <span style="color:var(--signal)">The space between them<br>was the opportunity.</span></h2>
+    <div class="label reveal">What we learned &rarr; what we tested</div>
+    <h2 class="display big reveal" style="max-width:20ch">The big moments were already there.<br>
+      <span style="color:var(--signal)">The opportunity was<br>building around them.</span></h2>
+    <p class="lens reveal">Across our wider YouTube analysis, the opportunity wasn't simply more
+      content. It was more consistent programming around the releases that matter.</p>
     <div class="bignums stagger">
       <div><div class="bn-n">${A.smile.activeWeeks} / ${A.smile.totalWeeks}</div>
-        <div class="bn-l">active weeks across the campaign window</div></div>
+        <div class="bn-l">weeks active</div></div>
       <div><div class="bn-n">${A.smile.longestGap} days</div>
-        <div class="bn-l">longest run with nothing posted</div></div>
-      <div><div class="bn-n">${A.smile.destDays}</div>
-        <div class="bn-l">days that carried a long-form destination</div></div>
+        <div class="bn-l">longest quiet period</div></div>
+      <div><div class="bn-n">${A.smile.destDays} days</div>
+        <div class="bn-l">with a long-form destination</div></div>
     </div>
-    <p class="sub reveal">SMILE? produced K-Trap's biggest YouTube moments to date. It was also,
-      for long stretches, a quiet channel. TRAPO 2 was built to show up more consistently around
-      the releases that mattered.</p>
+    <p class="sub reveal">SMILE? delivered K-Trap's biggest YouTube moments to date. TRAPO 2 was
+      our chance to build a more connected campaign around them.</p>
     <div class="srcbar reveal"><span class="src">SMILE? campaign window · ${A.smile.window} ·
       album ${A.smile.album}</span></div>
   </div>
