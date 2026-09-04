@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IDLES × YouTube — What TANGK Taught Us</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   IDLES × YOUTUBE — TANGK REVIEW · DECK V1
+   Built 4 Sep 2026 for the Partisan Records conversation.
+
+   SOURCE OF TRUTH: IDLES_TANGK_Review_v1.md. Every figure on every
+   slide traces to that document, which in turn traces to a single
+   YouTube Data API v3 pull of 367/367 current uploads on 4 Sep 2026.
+   If a number here is not in that document, it is an error.
+
+   ── THE ARGUMENT, IN ORDER ────────────────────────────────────────
+   02  TANGK worked at the top. Say so first and mean it.
+   03  But uploads tripled while long-form destinations FELL.
+   04  The gaps: 89 days / 1 destination. 30 days / 0. 61 days / 0.
+   05  The reveal: ZERO owned live across the whole campaign.
+   06  And yet — don't make the lazy "more live" call. 26 owned live
+       assets sit at a 10,010 median. Le Bataclan is the exception.
+   07  The model: hero → owned performance → band world.
+   08  Shorts carry the band, not the campaign.
+   09  Close.
+
+   ── CLAIM DISCIPLINE, NON-NEGOTIABLE ──────────────────────────────
+   Public API data only. NOTHING on retention, traffic sources,
+   Browse/Suggested, subscriber conversion, unique or returning
+   viewers, audience overlap, Shorts→long-form conversion, playlist
+   routing, end screens, or incremental Premiere effect.
+
+   Every view figure is CURRENT OBSERVED VIEWS — a lifetime snapshot,
+   never campaign-period performance. Owned totals are FLOORS: 22.2m
+   of channel lifetime sits in videos no longer public.
+
+   CRAWLER is used for ARCHITECTURE ONLY. Its assets have had longer
+   to accumulate current views, so cross-campaign view totals are not
+   like-for-like and no slide compares them.
+
+   The 16.7x Bataclan figure is a DESCRIPTION OF THE PAST, not an
+   expected uplift. Slide 06 says "worth testing", never "will work".
+
+   ── VISUAL SYSTEM ─────────────────────────────────────────────────
+   Black ground, bone off-white, TANGK red. Archivo Black for the
+   shouting, Barlow Condensed for structure, Inter for anything the
+   reader has to actually read. Asymmetric, poster-like, deliberately
+   imperfect alignment — gig poster and fanzine, not dashboard.
+   No floating KPI cards. Numbers are set enormous and allowed to
+   collide with things.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root{
+  --ink:#0A0A0A;
+  --coal:#131113;
+  --bone:#EDE9E3;
+  --paper:#F5F2ED;
+  --red:#E8232A;        /* TANGK red */
+  --blush:#F2646A;
+  --smoke:#8E8880;
+  --hair:rgba(237,233,227,.15);
+  --bonehair:rgba(10,10,10,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--bone);
+  font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+.display{font-family:'Archivo Black','Barlow Condensed',sans-serif;
+  text-transform:uppercase;letter-spacing:-.022em;line-height:.9}
+.display.big{font-size:clamp(2.4rem,7.4vw,6.1rem)}
+.display.mid{font-size:clamp(1.5rem,3.6vw,2.8rem);line-height:.95}
+.cond{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;
+  font-weight:700;letter-spacing:.02em}
+
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;height:3rem;z-index:60;
+  display:flex;align-items:center;justify-content:space-between;padding:0 1.2rem;
+  background:rgba(10,10,10,.85);border-bottom:1px solid var(--hair);
+  backdrop-filter:blur(8px)}
+.chrome-t{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--smoke)}
+.btn{font:inherit;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;padding:.42rem 1rem;border-radius:0;
+  border:1px solid var(--red);background:var(--red);color:#fff;cursor:pointer}
+body.present .chrome{display:none}
+body.present{overflow:hidden}
+#pbar{position:fixed;top:0;left:0;height:3px;background:var(--red);z-index:70;
+  width:100%;transform:scaleX(0);transform-origin:0 50%;transition:transform .3s}
+#pcount{position:fixed;bottom:1rem;right:1.3rem;z-index:70;display:none;
+  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  letter-spacing:.16em;color:var(--smoke)}
+body.present #pcount{display:block}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.deck{padding-top:3rem}
+.slide{min-height:100vh;display:flex;align-items:center;position:relative;
+  padding:4.5rem 1.6rem;border-bottom:1px solid var(--hair);overflow:hidden}
+.slide .inner{max-width:1280px;margin:0 auto;width:100%;position:relative;z-index:2}
+.slide.bone{background:var(--paper);color:var(--ink)}
+.slide.bone .display{color:var(--ink)}
+.slide.red{background:var(--red);color:#fff}
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bleed img{width:100%;height:100%;object-fit:cover}
+.bleed::after{content:'';position:absolute;inset:0}
+
+.label{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--red);margin-bottom:1rem}
+.slide.red .label{color:#fff;opacity:.75}
+.sub{font-size:clamp(.92rem,1.25vw,1.06rem);line-height:1.6;color:var(--smoke);
+  max-width:60ch;margin-top:1.1rem}
+.slide.bone .sub{color:#4A4640}
+.slide.red .sub{color:rgba(255,255,255,.9)}
+
+/* ── Source bar ─────────────────────────────────────────────────── */
+.srcbar{margin-top:1.15rem;padding-top:.7rem;border-top:1px solid var(--hair)}
+.slide.bone .srcbar{border-color:var(--bonehair)}
+.slide.red .srcbar{border-color:rgba(255,255,255,.28)}
+.src{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.slide.red .src{color:rgba(255,255,255,.78)}
+
+/* ── Cover ──────────────────────────────────────────────────────── */
+.cover-wrap{position:relative}
+.cover-x{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;
+  letter-spacing:.3em;text-transform:uppercase;color:var(--red)}
+
+/* ── Big stat row ───────────────────────────────────────────────── */
+.stats{display:flex;flex-wrap:wrap;gap:2.6rem;margin-top:1.5rem;align-items:flex-end}
+.st-n{font-family:'Archivo Black',sans-serif;line-height:.82;
+  font-size:clamp(2.6rem,7vw,5.4rem);color:var(--red)}
+.slide.red .st-n{color:#fff}
+.st-l{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--smoke);margin-top:.5rem;max-width:16ch}
+.slide.bone .st-l{color:#5C5850}
+.slide.red .st-l{color:rgba(255,255,255,.85)}
+
+/* ── Four-panel hero strip (slide 02) ───────────────────────────────
+   Contact-sheet treatment rather than four floating cards. The images
+   butt against each other with a 2px gutter so it reads as one strip. */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:1.4rem}
+@media(max-width:900px){.strip{grid-template-columns:repeat(2,1fr)}}
+.pan{position:relative;overflow:hidden;background:#1A181A}
+.pan img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;
+  filter:grayscale(.28) contrast(1.06)}
+.pan::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,10,10,.94),rgba(10,10,10,.15) 62%,transparent)}
+.pan-m{position:absolute;left:.7rem;right:.7rem;bottom:.6rem;z-index:2}
+.pan-v{font-family:'Archivo Black',sans-serif;font-size:clamp(1.15rem,2.5vw,1.9rem);
+  line-height:.9;color:#fff}
+.pan-t{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-top:.28rem}
+
+/* ── The contradiction (slide 03) ───────────────────────────────────
+   127 is set enormous and 14 deliberately small next to it. The point
+   is made by the SIZE RELATIONSHIP, not by the caption underneath. */
+.contra{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;margin-top:1.5rem;align-items:center}
+@media(max-width:900px){.contra{grid-template-columns:1fr;gap:1.4rem}}
+.cx{border-left:3px solid var(--hair);padding-left:1.3rem}
+.cx.hot{border-left-color:var(--red)}
+.cx-k{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--smoke);margin-bottom:.5rem}
+.cx-row{display:flex;align-items:baseline;gap:1.1rem;flex-wrap:wrap}
+.huge{font-family:'Archivo Black',sans-serif;line-height:.8}
+.huge.up{font-size:clamp(3.4rem,11vw,8.4rem);color:var(--bone)}
+.huge.dn{font-size:clamp(1.5rem,3.4vw,2.6rem);color:var(--red)}
+.cx-lab{font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);display:block;margin-top:.3rem}
+
+/* ── Gap timeline (slide 04) ────────────────────────────────────────
+   A tape strip, not a chart. Hero markers are solid red blocks; the
+   gaps between them are the empty runs, labelled with what was
+   actually in them. Reads top to bottom in about three seconds. */
+.tape{margin-top:1.4rem;border-top:2px solid var(--red);padding-top:1.1rem}
+.trow{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:1.4rem;
+  align-items:center;padding:.55rem 0}
+.thero{font-family:'Archivo Black',sans-serif;font-size:clamp(1rem,2.1vw,1.5rem);
+  line-height:1;color:#fff;background:var(--red);padding:.42rem .7rem;white-space:nowrap}
+.tgap{display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap;
+  border-left:2px dashed rgba(237,233,227,.3);padding-left:1.1rem;margin-left:.3rem}
+.tg-d{font-family:'Archivo Black',sans-serif;font-size:clamp(1.3rem,3vw,2.2rem);
+  line-height:1;color:var(--bone)}
+.tg-w{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.tg-w b{color:var(--red);font-weight:700}
+
+/* ── The zero (slide 05) ────────────────────────────────────────────
+   The single most important number in the deck and it is a zero, so
+   it gets the most space. Everything else on the slide is smaller
+   than it by a wide margin. */
+.zero{font-family:'Archivo Black',sans-serif;line-height:.72;
+  font-size:clamp(7rem,26vw,20rem);color:var(--red);margin:.1rem 0 .2rem}
+.bbc{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:1.1rem}
+@media(max-width:900px){.bbc{grid-template-columns:repeat(2,1fr)}}
+
+/* ── Strike-through (slide 06) ──────────────────────────────────── */
+.struck{position:relative;display:inline-block}
+.struck::after{content:'';position:absolute;left:-1%;right:-1%;top:52%;height:8px;
+  background:var(--red);transform:rotate(-1.6deg)}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.4rem}
+@media(max-width:900px){.vs{grid-template-columns:1fr;gap:1.2rem}}
+.vs-c{padding:1rem 1.1rem;border:1px solid var(--hair)}
+.vs-c.win{border-color:var(--red);background:rgba(232,35,42,.09)}
+.vs-k{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.vs-n{font-family:'Archivo Black',sans-serif;font-size:clamp(1.7rem,4vw,3rem);
+  line-height:.9;margin-top:.4rem}
+.vs-c.win .vs-n{color:var(--red)}
+.vs-s{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.35rem}
+.bat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:1.1rem}
+@media(max-width:900px){.bat-strip{grid-template-columns:repeat(2,1fr)}}
+.bat-strip img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  filter:grayscale(.5) contrast(1.1)}
+
+/* ── The model (slide 07) ───────────────────────────────────────── */
+.model{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-top:1.4rem}
+@media(max-width:900px){.model{grid-template-columns:1fr}}
+.mo{border-top:3px solid var(--hair);padding-top:.85rem}
+.mo.one{border-top-color:var(--red)}
+.mo.two{border-top-color:var(--red)}
+.mo-k{font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
+.mo.three .mo-k{color:var(--smoke)}
+.mo-t{font-family:'Archivo Black',sans-serif;font-size:clamp(1.05rem,2.3vw,1.6rem);
+  line-height:.98;text-transform:uppercase;margin-top:.35rem}
+.mo-d{font-size:.86rem;color:var(--smoke);line-height:1.55;margin-top:.5rem}
+.feeds{margin-top:1.2rem;padding-top:.85rem;border-top:1px solid var(--hair);
+  font-family:'Barlow Condensed',sans-serif;font-size:.86rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.feeds b{color:var(--bone);font-weight:700}
+
+/* ── Shorts collage (slide 08) ──────────────────────────────────────
+   Vertical crops, uneven vertical offsets — a pinboard, not a grid.
+   The offsets are intentional; do not "fix" them to a straight line. */
+.pins{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-top:1.3rem}
+@media(max-width:900px){.pins{grid-template-columns:repeat(3,1fr)}}
+.pin{position:relative;overflow:hidden;background:#1A181A}
+.pin:nth-child(2){transform:translateY(14px)}
+.pin:nth-child(3){transform:translateY(-8px)}
+.pin:nth-child(4){transform:translateY(18px)}
+.pin:nth-child(5){transform:translateY(4px)}
+.pin img{width:100%;aspect-ratio:9/13;object-fit:cover;display:block;
+  filter:grayscale(.2) contrast(1.05)}
+.pin::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,10,10,.92),transparent 58%)}
+.pin-m{position:absolute;left:.5rem;right:.5rem;bottom:.5rem;z-index:2}
+.pin-v{font-family:'Archivo Black',sans-serif;font-size:clamp(.85rem,1.6vw,1.15rem);
+  line-height:.95;color:var(--red)}
+.pin-t{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-top:.18rem;line-height:1.15}
+
+/* ── Close (slide 09) ───────────────────────────────────────────── */
+.princ{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;margin-top:1.6rem}
+@media(max-width:900px){.princ{grid-template-columns:1fr;gap:1rem}}
+.pr-k{font-family:'Archivo Black',sans-serif;font-size:clamp(1.1rem,2.6vw,1.9rem);
+  line-height:.92;text-transform:uppercase;color:#fff}
+.pr-d{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);margin-top:.4rem}
+.footer-line{margin-top:1.8rem;font-family:'Barlow Condensed',sans-serif;font-size:.86rem;
+  font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+
+/* ── Reveal ─────────────────────────────────────────────────────── */
+.reveal,.stagger>*{opacity:0;transform:translateY(14px);
+  transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
+.reveal.in,.stagger.in>*{opacity:1;transform:none}
+.stagger.in>*:nth-child(2){transition-delay:.07s}
+.stagger.in>*:nth-child(3){transition-delay:.14s}
+.stagger.in>*:nth-child(4){transition-delay:.21s}
+.stagger.in>*:nth-child(5){transition-delay:.28s}
+.pin,.pan{transition:none}
+.stagger.in>.pin,.stagger.in>.pan{opacity:1}
+
+/* ── Present mode ───────────────────────────────────────────────── */
+body.present .deck{padding-top:0}
+body.present .slide{display:none;height:100vh;min-height:100vh}
+body.present .slide.active{display:flex}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div id="pbar"></div><div id="pcount"></div>
+<div class="chrome">
+  <span class="chrome-t">IDLES × YouTube · TANGK → Next Album</span>
+  <button class="btn" id="presentBtn" onclick="startPresent()">Present</button>
+</div>
+<div class="deck" id="deck"></div>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DATA — every figure from IDLES_TANGK_Review_v1.md, which recomputed
+   all of it from a 4 Sep 2026 API pull of 367/367 current uploads.
+
+   All thumbnail IDs are REAL and were verified against the pull. No
+   generic press imagery is used anywhere: every image on this deck is
+   an actual TANGK-campaign or IDLES-catalogue asset.
+   ═══════════════════════════════════════════════════════════════ */
+const A = {
+  /* The four heroes. 3.1% of uploads, 64.1% of observed viewing. */
+  heroes:[
+    { id:'A3ZZj5y6Qt4', t:'Dancer',      v:'6.21M' },
+    { id:'_HQrM5L9T1g', t:'Gift Horse',  v:'3.18M' },
+    { id:'huWfQdG2_ws', t:'Pop Pop Pop', v:'1.98M' },
+    { id:'gnd4jIBRfHE', t:'Grace',       v:'1.11M' },
+  ],
+  heroTotal:'12.5M', heroShare:'64%', heroCount:'4',
+
+  /* CRAWLER used for ARCHITECTURE ONLY — never view totals. Its assets
+     have had longer to accumulate, so cross-campaign view comparison
+     would not be like-for-like and does not appear on any slide.    */
+  crawler:{ uploads:43, longForm:21, shortsPct:'51%' },
+  tangk:{   uploads:127, longForm:14, shortsPct:'89%' },
+
+  /* The gaps. Each figure is a date difference from the upload record,
+     and the "destinations" count is long-form assets only.          */
+  gaps:[
+    { hero:'Dancer',      days:89, shorts:'18 Shorts',  dest:'1 long-form destination' },
+    { hero:'Gift Horse',  days:30, shorts:'6 uploads',  dest:'0 long-form' },
+    { hero:'Grace / album', days:61, shorts:'album day, then quiet', dest:'no new music destination' },
+  ],
+  lastHero:'Pop Pop Pop',
+
+  /* THE REVEAL. Zero owned live/performance long-form across the whole
+     campaign window (1 Aug 2023 – 30 Dec 2024, 127 uploads).        */
+  bbc:[
+    { id:'LLCy9Ic9aIQ', t:'Dancer · Glastonbury',  v:'724K' },
+    { id:'OYymMu2WoDM', t:'Gift Horse · Jools',    v:'576K' },
+    { id:'3NqFrrj0Pcg', t:'Gratitude · Glastonbury', v:'225K' },
+    { id:'yKdHXNq4rko', t:'A Gospel · Jools',      v:'184K' },
+  ],
+  bbcTotal:'1.71M',
+
+  /* The Bataclan exception. 16.7x is a DESCRIPTION OF WHAT HAPPENED,
+     not a forecast. Slide 06 says "worth testing" and must keep
+     saying that — never "will deliver".                             */
+  bataclan:[ '0lbH_Z-Xi1Q','jc4XigR4HaQ','aU0RhVzp268','ggFrG6Wliiw' ],
+  liveOther:{ n:'26 assets', med:'10K median' },
+  liveBat:{   n:'5 assets',  med:'167K median' },
+  multiple:'16.7×',
+
+  /* Personality Shorts. The point is NOT that personality causes
+     performance — it is that the clearest breakouts looked like the
+     band rather than like promotion.                                */
+  pins:[
+    { id:'G2Wm-FLWTx0', t:'Flynn!',                  v:'699K' },
+    { id:'BO-_X0Av7G8', t:"Who's the best Dancer?",  v:'221K' },
+    { id:'vzxVnIQ1878', t:'All is love.',            v:'202K' },
+    { id:'_rUdHbvT8ws', t:'Hello!',                  v:'197K' },
+    { id:'Rp0F4L6CtHk', t:'I kissed a boy…',         v:'122K' },
+  ],
+  shortsN:'113', shortsMed:'17K',
+};
+
+const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ═══════════════════════════════════════════════════════════════════
+   SLIDES — nine. Each one job.
+   ═══════════════════════════════════════════════════════════════ */
+const slides = () => [
+
+/* 01 ── COVER ──────────────────────────────────────────────────────
+   No stats, no paragraph. This is a record campaign presentation, not
+   a research summary, and the first slide should feel like one.    */
+`<section class="slide" data-t="Cover">
+  <div class="bleed"><img src="${thumb('A3ZZj5y6Qt4','maxresdefault')}" alt=""
+    onerror="this.src='${thumb('A3ZZj5y6Qt4')}'"
+    style="filter:grayscale(.55) contrast(1.1);opacity:.42"></div>
+  <div class="inner cover-wrap">
+    <div class="cover-x">IDLES × YouTube</div>
+    <h1 class="display reveal" style="font-size:clamp(2.8rem,10vw,8rem);margin-top:1.1rem">
+      What TANGK<br>taught us.<br>
+      <span style="color:var(--red)">What we'd try next.</span></h1>
+    <div class="srcbar reveal" style="margin-top:2rem;max-width:34ch">
+      <span class="src">TANGK → next album · Partisan Records</span></div>
+  </div>
+</section>`,
+
+/* 02 ── THE HEROES WORKED ──────────────────────────────────────────
+   Credit first. The strategy Partisan chose was correct and the deck
+   has to say so plainly before it says anything else — otherwise the
+   room hears criticism and stops listening.                        */
+`<section class="slide" data-t="Heroes">
+  <div class="inner">
+    <div class="label reveal">TANGK · what worked</div>
+    <h2 class="display big reveal" style="max-width:16ch">Four videos did<br>
+      <span style="color:var(--red)">most of the work.</span></h2>
+    <div class="stats stagger">
+      <div><div class="st-n">${A.heroCount}</div><div class="st-l">Official music videos</div></div>
+      <div><div class="st-n">${A.heroTotal}</div><div class="st-l">Current observed views</div></div>
+      <div><div class="st-n">${A.heroShare}</div><div class="st-l">Of campaign viewing</div></div>
+    </div>
+    <div class="strip stagger">
+      ${A.heroes.map(h=>`
+        <div class="pan"><img src="${thumb(h.id,'maxresdefault')}" alt="${esc(h.t)}"
+          onerror="this.src='${thumb(h.id)}'">
+          <div class="pan-m"><div class="pan-v">${h.v}</div>
+            <div class="pan-t">${esc(h.t)}</div></div></div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.3rem">When the music arrived big,
+      <span style="color:var(--red)">people watched.</span></h3>
+    <div class="srcbar reveal"><span class="src">Four official videos = 3.1% of campaign uploads ·
+      current observed views, public YouTube data, 4 Sep 2026</span></div>
+  </div>
+</section>`,
+
+/* 03 ── THE CONTRADICTION ──────────────────────────────────────────
+   Architecture only. No view totals anywhere near this slide — the
+   CRAWLER assets are older and comparing their view counts to TANGK's
+   would not be like-for-like.                                       */
+`<section class="slide bone" data-t="Contradiction">
+  <div class="inner">
+    <div class="label reveal">TANGK · under the heroes</div>
+    <h2 class="display big reveal" style="max-width:14ch">More active.<br>
+      <span style="color:var(--red)">Fewer destinations.</span></h2>
+    <div class="contra stagger">
+      <div class="cx">
+        <div class="cx-k">Crawler</div>
+        <div class="cx-row">
+          <div><span class="huge up" style="color:var(--ink)">${A.crawler.uploads}</span>
+            <span class="cx-lab">Uploads</span></div>
+          <div><span class="huge dn">${A.crawler.longForm}</span>
+            <span class="cx-lab">Long-form destinations</span></div>
+        </div>
+        <div class="cx-lab" style="margin-top:.7rem">${A.crawler.shortsPct} Shorts</div>
+      </div>
+      <div class="cx hot">
+        <div class="cx-k" style="color:var(--red)">TANGK</div>
+        <div class="cx-row">
+          <div><span class="huge up" style="color:var(--ink)">${A.tangk.uploads}</span>
+            <span class="cx-lab">Uploads</span></div>
+          <div><span class="huge dn">${A.tangk.longForm}</span>
+            <span class="cx-lab">Long-form destinations</span></div>
+        </div>
+        <div class="cx-lab" style="margin-top:.7rem">${A.tangk.shortsPct} Shorts</div>
+      </div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.4rem;max-width:34ch">More activity didn't mean
+      <span style="color:var(--red)">more places to watch.</span></h3>
+    <div class="srcbar reveal"><span class="src">Campaign architecture only · CRAWLER assets have had
+      longer to accumulate current views, so cross-campaign view totals are not like-for-like and are
+      not compared here</span></div>
+  </div>
+</section>`,
+
+/* 04 ── THE GAPS ───────────────────────────────────────────────────
+   Tape strip. Must be readable in five seconds: red block = hero,
+   dashed run = the gap, and what was actually in it. Never says
+   Shorts failed and never claims audience was lost — this is
+   observed architecture, nothing more.                             */
+`<section class="slide" data-t="The gaps">
+  <div class="inner">
+    <div class="label reveal">TANGK · between the videos</div>
+    <h2 class="display big reveal" style="max-width:15ch">Busy.<br>
+      <span style="color:var(--red)">But between the videos?</span></h2>
+    <div class="tape stagger">
+      ${A.gaps.map(g=>`
+        <div class="trow">
+          <div class="thero">${esc(g.hero)}</div>
+          <div class="tgap"><span class="tg-d">${g.days} days</span>
+            <span class="tg-w">${esc(g.shorts)} · <b>${esc(g.dest)}</b></span></div>
+        </div>`).join('')}
+      <div class="trow"><div class="thero">${esc(A.lastHero)}</div><div></div></div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:32ch">The calendar was full.
+      <span style="color:var(--red)">The music destinations weren't.</span></h3>
+    <div class="srcbar reveal"><span class="src">Gaps measured between official video releases ·
+      destinations counted as long-form uploads only · observed campaign structure, not a claim
+      about audience behaviour</span></div>
+  </div>
+</section>`,
+
+/* 05 ── THE ZERO ───────────────────────────────────────────────────
+   The reveal. The zero gets more space than anything else in the deck
+   because it is the finding Partisan is least likely to have framed
+   this way. The BBC is presented as a strength, never as a problem,
+   and the deck never suggests those views could have transferred.  */
+`<section class="slide" data-t="Zero live">
+  <div class="inner">
+    <div class="label reveal">TANGK · the missing format</div>
+    <h2 class="display big reveal" style="max-width:18ch">IDLES are a live band.</h2>
+    <div class="zero reveal">0</div>
+    <div class="cx-lab reveal" style="font-size:.9rem;letter-spacing:.2em;max-width:40ch">
+      Owned live / performance long-form across the entire TANGK campaign</div>
+    <h3 class="display mid reveal" style="margin-top:1.6rem;max-width:30ch">The live story existed.
+      <span style="color:var(--red)">Just not on their own channel.</span></h3>
+    <div class="bbc stagger">
+      ${A.bbc.map(b=>`
+        <div class="pan"><img src="${thumb(b.id,'maxresdefault')}" alt="${esc(b.t)}"
+          onerror="this.src='${thumb(b.id)}'">
+          <div class="pan-m"><div class="pan-v">${b.v}</div>
+            <div class="pan-t">${esc(b.t)}</div></div></div>`).join('')}
+    </div>
+    <div class="srcbar reveal"><span class="src">${A.bbcTotal} current observed views across four
+      mapped BBC Music performances · partner for reach, build an owned expression alongside it ·
+      no claim that this viewing could have accrued elsewhere</span></div>
+  </div>
+</section>`,
+
+/* 06 ── NOT THE LAZY ANSWER ────────────────────────────────────────
+   The most important slide. Without it the room walks out with "make
+   more live videos", which IDLES' OWN DATA REJECTS — 26 owned live
+   assets at a 10,010 median.
+
+   The 16.7x is descriptive. It is what already happened, on n=5,
+   with assets 6-7 years old. Never present it as expected uplift and
+   never claim production caused the performance.                    */
+`<section class="slide bone" data-t="One live world">
+  <div class="inner">
+    <div class="label reveal">The recommendation</div>
+    <h2 class="display big reveal" style="max-width:18ch">
+      <span class="struck">So… more live videos?</span></h2>
+    <h2 class="display big reveal" style="color:var(--red);margin-top:.7rem">Not quite.</h2>
+    <div class="vs stagger">
+      <div class="vs-c">
+        <div class="vs-k">Other owned live</div>
+        <div class="vs-n" style="color:var(--ink)">${A.liveOther.med}</div>
+        <div class="vs-s">${A.liveOther.n}</div>
+      </div>
+      <div class="vs-c win">
+        <div class="vs-k">Le Bataclan</div>
+        <div class="vs-n">${A.liveBat.med}</div>
+        <div class="vs-s">${A.liveBat.n} · ${A.multiple} the rest</div>
+      </div>
+    </div>
+    <div class="bat-strip stagger">
+      ${A.bataclan.map(id=>`<img src="${thumb(id,'maxresdefault')}" alt="Le Bataclan"
+        onerror="this.src='${thumb(id)}'">`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:34ch">Don't make more live content.
+      <span style="color:var(--red)">Build one live world.</span></h3>
+    <div class="srcbar reveal"><span class="src">One night · one name · one world · full concert plus
+      individual songs · Le Bataclan is the clearest positive exception in the owned live catalogue —
+      a pattern worth testing, on five assets six to seven years old, not a predicted uplift</span></div>
+  </div>
+</section>`,
+
+/* 07 ── THE MODEL ──────────────────────────────────────────────────
+   One creative idea with several meaningful expressions — explicitly
+   NOT one shoot with seventeen deliverables. The "feeds" line stays
+   short for that reason.                                            */
+`<section class="slide" data-t="The model">
+  <div class="inner">
+    <div class="label reveal">Next album · the shape</div>
+    <h2 class="display big reveal" style="max-width:15ch">One hero.<br>
+      <span style="color:var(--red)">Then another way in.</span></h2>
+    <div class="model stagger">
+      <div class="mo one"><div class="mo-k">Hero</div>
+        <div class="mo-t">Official<br>music video</div>
+        <p class="mo-d">Keep doing exactly what TANGK did. Four videos carried the campaign.</p></div>
+      <div class="mo two"><div class="mo-k">Second music moment</div>
+        <div class="mo-t">Owned<br>performance</div>
+        <p class="mo-d">One recognisable place the record can return to, between the videos.</p></div>
+      <div class="mo three"><div class="mo-k">The world around it</div>
+        <div class="mo-t">Shorts</div>
+        <p class="mo-d">Cut from the above. The band, not the campaign.</p></div>
+    </div>
+    <div class="feeds reveal">One place, made once → <b>full songs</b> · <b>a longer film</b> ·
+      <b>behind it</b> · <b>Shorts</b></div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:32ch">Make the place once.
+      <span style="color:var(--red)">Let the record keep coming back to it.</span></h3>
+  </div>
+</section>`,
+
+/* 08 ── SHORTS ─────────────────────────────────────────────────────
+   Shorts are treated intelligently, not dismissed. 113 at a 17,051
+   median is a real observation, but the breakouts were the band being
+   itself. The slide says the clearest breakouts LOOKED LIKE the band —
+   it does not claim personality causes performance, and public data
+   cannot show discovery or conversion either way.                   */
+`<section class="slide" data-t="Shorts">
+  <div class="inner">
+    <div class="label reveal">TANGK · short form</div>
+    <h2 class="display big reveal" style="max-width:20ch">Shorts don't need to carry the campaign.<br>
+      <span style="color:var(--red)">Let them carry the band.</span></h2>
+    <div class="pins stagger">
+      ${A.pins.map(p=>`
+        <div class="pin"><img src="${thumb(p.id,'maxresdefault')}" alt="${esc(p.t)}"
+          onerror="this.src='${thumb(p.id)}'">
+          <div class="pin-m"><div class="pin-v">${p.v}</div>
+            <div class="pin-t">${esc(p.t)}</div></div></div>`).join('')}
+    </div>
+    <div class="stats stagger" style="margin-top:1.2rem">
+      <div><div class="st-n" style="font-size:clamp(1.8rem,4vw,3rem)">${A.shortsN}</div>
+        <div class="st-l">Shorts in the campaign</div></div>
+      <div><div class="st-n" style="font-size:clamp(1.8rem,4vw,3rem)">${A.shortsMed}</div>
+        <div class="st-l">Median current views</div></div>
+      <div><div class="st-n" style="font-size:clamp(1.8rem,4vw,3rem)">6 / 10</div>
+        <div class="st-l">Of the top ten looked like the band, not the campaign</div></div>
+    </div>
+    <div class="srcbar reveal"><span class="src">Heroes for the music. Shorts for the humans ·
+      a creative signal from observed viewing, not evidence that personality drives performance ·
+      public data cannot show discovery or conversion</span></div>
+  </div>
+</section>`,
+
+/* 09 ── CLOSE ──────────────────────────────────────────────────── */
+`<section class="slide red" data-t="Close">
+  <div class="inner">
+    <div class="label reveal">Where this goes</div>
+    <h2 class="display big reveal" style="max-width:17ch;color:#fff">The next campaign
+      doesn't need more content.</h2>
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:24ch;color:rgba(255,255,255,.92)">
+      It needs more places for the music to live.</h3>
+    <div class="princ stagger">
+      <div><div class="pr-k">Keep</div><div class="pr-d">The hero videos</div></div>
+      <div><div class="pr-k">Build</div><div class="pr-d">A second music destination</div></div>
+      <div><div class="pr-k">Let Shorts show</div><div class="pr-d">The band</div></div>
+    </div>
+    <div class="footer-line reveal">Hero → Performance → World</div>
+  </div>
+</section>`,
+];
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById('deck').innerHTML = slides().join('');
+
+const io = new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) e.target.classList.add('in');
+}),{threshold:.14});
+document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+
+/* ── Presentation mode ─────────────────────────────────────────── */
+let cur = 0;
+const allSlides = () => [...document.querySelectorAll('.slide')];
+function startPresent(){
+  document.body.classList.add('present');
+  if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
+  showSlide(0);
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  allSlides().forEach(s=>s.classList.remove('active'));
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+}
+function showSlide(i){
+  const S = allSlides();
+  cur = Math.max(0, Math.min(S.length-1, i));
+  S.forEach((s,n)=>s.classList.toggle('active', n===cur));
+  const pb=document.getElementById('pbar');
+  if(pb) pb.style.transform='scaleX('+((cur+1)/S.length)+')';
+  const pc=document.getElementById('pcount');
+  if(pc) pc.textContent=(cur+1)+' / '+S.length;
+  fitActive();
+  allSlides()[cur].querySelectorAll('img').forEach(img=>{
+    if(!img.complete) img.addEventListener('load', fitActive, { once:true });
+  });
+}
+document.addEventListener('keydown', e=>{
+  if(!document.body.classList.contains('present')) return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); showSlide(cur+1); }
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); showSlide(cur-1); }
+  if(e.key==='Escape') exitPresent();
+});
+
+/* Fit the active slide to whatever screen it lands on. Decks get shown
+   on laptops, not on the 1080p frame they were designed against — a
+   14" MacBook is 982px tall. The whole slide scales as one object so
+   nothing reflows and nothing rewraps. A slide that already fits is
+   left completely alone. */
+function fitActive(){
+  if(!document.body.classList.contains('present')) return;
+  const el = allSlides()[cur]; if(!el) return;
+  const inner = el.querySelector('.inner'); if(!inner) return;
+  inner.style.transform = '';
+  const cs = getComputedStyle(el);
+  const avail = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const need = inner.scrollHeight;
+  if(avail > 0 && need > avail){
+    const k = Math.max(0.72, avail / need);
+    inner.style.transformOrigin = 'center center';
+    inner.style.transform = 'scale(' + k.toFixed(4) + ')';
+  }
+}
+let fitTimer;
+window.addEventListener('resize', ()=>{ clearTimeout(fitTimer); fitTimer=setTimeout(fitActive,120); });
+document.addEventListener('fullscreenchange', ()=> setTimeout(fitActive,260));
+</script>
+</body>
+</html>

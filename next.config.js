@@ -9,6 +9,7 @@ const nextConfig = {
       { source: '/chvrches', destination: '/chvrches/index.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
       { source: '/palaye', destination: '/palaye/index.html' },
+      { source: '/idles', destination: '/idles/index.html' },
     ];
   },
 };

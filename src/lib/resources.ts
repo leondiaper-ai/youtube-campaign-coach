@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'IDLES — TANGK',
+        blurb:
+          'What the TANGK campaign did on YouTube, and what to try next — including the live format that never appeared.',
+        href: '/idles',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'Palaye Royale',
         blurb:
           'Strategy for the album campaign running October to January \u2014 four music videos, and where they should land.',
