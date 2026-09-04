@@ -293,8 +293,11 @@ body.present #pcount{display:block}
 .pa-n.dead{color:var(--red)}
 .pa-l{font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;
   letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem;max-width:18ch}
+/* max-width caps the thumbnails: at full container width each was 603px
+   wide and 339px tall, which alone pushed this slide past unscaled fit. */
 .night{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:1.1rem;
-  align-items:center;margin-top:1.3rem;padding-top:1.1rem;border-top:2px solid var(--red)}
+  align-items:center;margin-top:1.1rem;padding-top:.95rem;border-top:2px solid var(--red);
+  max-width:800px}
 @media(max-width:900px){.night{grid-template-columns:1fr;gap:.7rem}}
 .ni{position:relative;overflow:hidden;background:#1A181A}
 .ni img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;filter:grayscale(.3) contrast(1.06)}
@@ -340,10 +343,13 @@ body.present #pcount{display:block}
 .pi-t{font-family:'Archivo Black',sans-serif;font-size:clamp(1rem,2.1vw,1.5rem);
   text-transform:uppercase;line-height:1}
 .pi-d{font-size:.78rem;color:var(--smoke);line-height:1.55;margin-top:.35rem}
-.inv{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:.6rem}
-.inv .pan img{aspect-ratio:16/10}
+/* Heights capped rather than left to aspect ratio. The reference card
+   and the four inventory crops together ran to 734px, which is more
+   room than a supporting column should take from the argument. */
+.inv{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:.5rem}
+.inv .pan img{aspect-ratio:auto;height:104px}
 .metref{position:relative;overflow:hidden;border:1px solid var(--hair)}
-.metref img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;filter:grayscale(.55) contrast(1.08)}
+.metref img{width:100%;height:172px;object-fit:cover;display:block;filter:grayscale(.55) contrast(1.08)}
 .metref::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(to top,rgba(10,10,10,.9),transparent 60%)}
 .metref-m{position:absolute;left:.7rem;right:.7rem;bottom:.55rem;z-index:2}
@@ -352,8 +358,8 @@ body.present #pcount{display:block}
    Vertical run. Each step is one line. Bracketed steps are the ones
    that depend on a VMG pitch and are marked so nobody reads them as
    available today. */
-.run{margin-top:1.2rem;border-left:2px solid var(--red);padding-left:1.3rem}
-.step{padding:.5rem 0}
+.run{margin-top:1rem;border-left:2px solid var(--red);padding-left:1.3rem}
+.step{padding:.34rem 0}
 .st-k{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
   letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
 .st-t{font-family:'Archivo Black',sans-serif;font-size:clamp(.95rem,2vw,1.4rem);
@@ -687,7 +693,12 @@ const slides = () => [
 `<section class="slide" data-t="You used to">
   <div class="inner">
     <div class="label reveal">And here's the thing</div>
-    <h2 class="display big reveal" style="max-width:19ch">You already premiere everything.<br>
+    <!-- Not .big: this is the longest headline in the deck and at full
+         poster scale it wrapped to six lines and pushed the slide to
+         1171px. The paired thumbnails below are the proof and they
+         need the room more than the type does. -->
+    <h2 class="display reveal" style="max-width:27ch;font-size:clamp(1.9rem,4.6vw,3.5rem);line-height:.95">You
+      already premiere everything.<br>
       <span style="color:var(--red)">You used to programme around it.</span></h2>
     <div class="past stagger">
       <div><div class="pa-n">${A.past.events}</div><div class="pa-l">Live broadcast events</div></div>
@@ -812,8 +823,8 @@ const slides = () => [
 `<section class="slide bone" data-t="The pitch">
   <div class="inner">
     <div class="label reveal">What VMG would take to YouTube</div>
-    <h2 class="display big reveal" style="max-width:20ch">The asset is one half.
-      <span style="color:var(--red)">Programming is the other.</span></h2>
+    <h2 class="display reveal" style="max-width:28ch;font-size:clamp(1.9rem,4.6vw,3.5rem);line-height:.95">The
+      asset is one half. <span style="color:var(--red)">Programming is the other.</span></h2>
     <div class="pitch stagger">
       <div>
         <div class="pitem">
@@ -867,8 +878,8 @@ const slides = () => [
 `<section class="slide red" data-t="The moment">
   <div class="inner">
     <div class="label reveal" style="color:#fff;opacity:.8">The shape of one release</div>
-    <h2 class="display big reveal" style="max-width:16ch;color:#fff">Turn the release
-      into a YouTube moment.</h2>
+    <h2 class="display reveal" style="max-width:24ch;color:#fff;font-size:clamp(2rem,5vw,3.8rem);line-height:.95">Turn
+      the release into a YouTube moment.</h2>
     <div class="run stagger" style="border-left-color:rgba(255,255,255,.5)">
       <div class="step"><div class="st-k" style="color:#fff">Before</div>
         <div class="st-t" style="color:#fff">Premiere scheduled · Shorts point at it</div></div>
