@@ -546,25 +546,45 @@ body.present #pcount{display:block}
   letter-spacing:.13em;text-transform:uppercase;color:var(--red);margin-top:.2rem}
 .ask-d{font-size:.74rem;color:var(--smoke);line-height:1.5;margin-top:.35rem}
 
+/* ── V4: WHAT ONE SHOOT YIELDS (slide 06) ────────────────────────────
+   First pass reused .swl for this and it rendered at source-line scale,
+   directly above the actual source line — so the room read it as a
+   second footnote rather than as the operational answer to "isn't one
+   live world a lot of production?". It is the load-bearing line on the
+   slide: it is what makes ONE shoot a realistic recommendation instead
+   of a standing commitment to film gigs. Sized as content. */
+.yield{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:.85rem}
+.yield-k{font-family:'Archivo Black',sans-serif;font-size:clamp(.95rem,1.7vw,1.25rem);
+  text-transform:uppercase;line-height:1}
+.yield-a{color:var(--red);font-size:1.1rem;margin:0 .1rem}
+.yield span:not(.yield-k):not(.yield-a){font-family:'Barlow Condensed',sans-serif;
+  font-size:clamp(.8rem,1.35vw,1rem);font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;line-height:1;padding:.32rem .6rem;
+  border:1px solid var(--red);color:var(--red)}
+
 /* ── V4: THE ARCHITECTURE CONTRAST (slide 10) ────────────────────────
    Two rows of chips. The top row is what TANGK did, the bottom is what
    we would test. Chips rather than a timeline because neither row is a
    schedule — they are shapes, and putting dates on them would imply a
    precision the recommendation does not have. */
-.arc{margin-top:1.2rem}
-.arc-r{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
-.arc-r+.arc-r{margin-top:.9rem;padding-top:.9rem;border-top:1px solid rgba(255,255,255,.22)}
-.arc-k{font-family:'Barlow Condensed',sans-serif;font-size:.66rem;font-weight:700;
-  letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.75;
-  min-width:5.5rem;flex:none}
-.arc-c{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;
-  letter-spacing:.07em;text-transform:uppercase;padding:.28rem .6rem;line-height:1.1;
-  border:1px solid rgba(255,255,255,.4);color:#fff}
+/* Sized up after the first render: the slide came in at 461px against
+   an 862px budget, so the two rows that ARE the payoff were sitting
+   small in a lot of empty red. This is the last thing the room sees —
+   it should be the size of a conclusion. */
+.arc{margin-top:1.6rem}
+.arc-r{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem}
+.arc-r+.arc-r{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,.22)}
+.arc-k{font-family:'Archivo Black',sans-serif;font-size:clamp(.85rem,1.5vw,1.15rem);
+  text-transform:uppercase;color:#fff;opacity:.7;min-width:5.5rem;flex:none;line-height:1}
+.arc-r.next .arc-k{opacity:1}
+.arc-c{font-family:'Barlow Condensed',sans-serif;font-size:clamp(.9rem,1.6vw,1.2rem);
+  font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.42rem .8rem;
+  line-height:1.1;border:1px solid rgba(255,255,255,.45);color:#fff}
 .arc-r.next .arc-c{background:#fff;color:var(--red);border-color:#fff}
-.arc-r.next .arc-c.dim{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
-.arc-a{color:#fff;opacity:.55;font-size:.85rem;flex:none}
-.arc-p{margin-top:1rem;padding-top:.7rem;border-top:1px solid rgba(255,255,255,.22);
-  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+.arc-r.next .arc-c.dim{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.arc-a{color:#fff;opacity:.55;font-size:1.05rem;flex:none}
+.arc-p{margin-top:1.3rem;padding-top:.9rem;border-top:1px solid rgba(255,255,255,.22);
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(.8rem,1.3vw,.95rem);font-weight:700;
   letter-spacing:.11em;text-transform:uppercase;color:#fff;opacity:.85}
 
 /* ── V3: ROLLOUT TIMELINE (slide 09) ─────────────────────────────────
@@ -1099,13 +1119,11 @@ const slides = () => [
          that is operationally realistic and one that reads as "film more
          gigs". Bataclan is the proof it works as a pattern — one night, one
          name, a full concert AND individual songs off the same shoot. -->
-    <div class="swl reveal" style="margin-top:.7rem;color:var(--ink);flex-wrap:wrap;gap:.55rem">
-      One shoot →
-      <span style="color:var(--red)">Full performance</span> ·
-      <span style="color:var(--red)">Individual songs</span> ·
-      <span style="color:var(--red)">Behind it</span> ·
-      <span style="color:var(--red)">Shorts</span> ·
-      <span style="color:var(--red)">Interview / Q&amp;A</span>
+    <div class="yield reveal">
+      <span class="yield-k">One shoot</span>
+      <span class="yield-a">&rarr;</span>
+      <span>Full performance</span><span>Individual songs</span><span>Behind it</span>
+      <span>Shorts</span><span>Interview / Q&amp;A</span>
     </div>
     <div class="srcbar reveal"><span class="src">Le Bataclan is the clearest positive exception in the
       owned live catalogue — a pattern worth testing, on five assets six to seven years old, not a
