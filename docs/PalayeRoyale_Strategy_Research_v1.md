@@ -321,7 +321,9 @@ Maximum three. I would not rebuild the deck.
 | Bad Omens | 12 | 1 | 6/24 | 92% | — |
 | **Palaye Royale** | **136** | **14** | **17/24** | **90%** | **70d** |
 
-**OBSERVED.** Palaye upload more often than four of the six peers and produce fewer meaningful long-form destinations than all but Bad Omens. **INTERPRETATION.** The channel is busy, not programmed.
+**OBSERVED.** Palaye upload more often than **five of the six** peers — everyone except YUNGBLUD — and produce fewer meaningful long-form destinations than all but Bad Omens. **INTERPRETATION.** The channel is busy, not programmed.
+
+*Corrected 4 Sep 2026: this originally read "four of the six", which understated it. 136 uploads beats BMTH 110, FIR 40, MIW 37, Sleep Token 22 and Bad Omens 12; only YUNGBLUD's 353 is higher. The error did not reach the deck, whose copy says "most bands we looked at" — true either way.*
 
 ---
 
