@@ -1033,12 +1033,23 @@ const slides = () => [
 `<section class="slide" data-t="The gaps">
   <div class="inner">
     <div class="label reveal">TANGK · between the videos</div>
-    <!-- 24ch, not 15ch. At 15ch the second line wrapped, making a
-         three-line headline; adding the bridge below then left the slide
-         at 855px against an 862px budget — inside fit, but close enough
-         that a font fallback would push it over. Two lines reads better
-         anyway and buys ~88px of real headroom. -->
-    <h2 class="display big reveal" style="max-width:24ch">Busy.<br>
+    <!-- TWO fixes here, because the first one didn't work and the reason
+         is worth recording.
+
+         At 15ch the second line wrapped, giving a three-line headline;
+         with the bridge added that left the slide at 855px against an
+         862px budget. Widening to 24ch changed nothing — 24ch computes
+         to about 1272px at this font size and the line measures 1273px,
+         so it was still one pixel over the cap and still wrapped.
+
+         So: 30ch takes the cap out of play entirely (the 1280px container
+         becomes the constraint), and the font-size is capped at 5.5rem
+         rather than inheriting .big's 6.1rem. That leaves the line about
+         130px inside the container instead of 7px, which is the
+         difference between a layout that holds and one that re-wraps on
+         any machine whose font metrics differ slightly from ours.
+         Two lines also simply reads better. -->
+    <h2 class="display big reveal" style="max-width:30ch;font-size:clamp(2rem,6vw,5.5rem)">Busy.<br>
       <span style="color:var(--red)">But between the videos?</span></h2>
     <div class="tape stagger">
       ${A.gaps.map(g=>`
