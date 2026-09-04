@@ -282,6 +282,26 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
   font-size:clamp(1.5rem,3.4vw,2.4rem)}
 .stn-n span{font-size:.6rem;color:var(--smoke);margin-top:.35rem;display:block;line-height:1.45}
 
+/* ── Collaboration strip (slide 5) ───────────────────────────────────
+   Sumerian ALREADY use YouTube Collaborations. This is therefore not a
+   new tactic to introduce and must never be pitched as one — the badge
+   reads "already in use" precisely so the room hears recognition, not
+   instruction. The recommendation is CONSISTENCY: make it the rule on
+   all four hero videos rather than something that happens sometimes.
+
+   Deliberately does not explain how Collaborations works and makes no
+   claim about incremental reach — public data cannot show that, and
+   the point here is campaign architecture, not a reach promise.     */
+.collab{display:flex;align-items:center;gap:.95rem;margin-top:1.1rem;padding:.7rem .95rem;
+  border:1px solid rgba(240,83,58,.4);background:rgba(240,83,58,.07);border-radius:8px}
+.collab-b{flex:none;font-size:.46rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:#fff;background:var(--signal);padding:.26rem .46rem;border-radius:3px}
+.collab-x{min-width:0}
+.collab-t{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.9rem,1.8vw,1.15rem);line-height:1.06}
+.collab-d{font-size:.62rem;color:var(--smoke);line-height:1.5;margin-top:.22rem}
+@media(max-width:900px){.collab{align-items:flex-start;flex-direction:column;gap:.55rem}}
+
 /* ── World-building reference (slide 7) ──────────────────────────────
    Three environments as full-bleed image cards, not a table and not a
    chart — the visual has to do the work, because the point is that
@@ -763,7 +783,23 @@ const slides = () => [
 
 /* 05 ── THE HYBRID ─────────────────────────────────────────────────
    The strategic ask. Deliberately NOT "move the videos" — that was
-   the previous version's mistake. Sumerian keeps the heroes.       */
+   the previous version's mistake. Sumerian keeps the heroes.
+
+   THE COLLABORATION STRIP IS A RECOGNITION, NOT A PITCH. Sumerian
+   already use YouTube Collaborations, so presenting it as a new idea
+   would be both wrong and faintly insulting. The badge says "already
+   in use" for that reason. The ask is CONSISTENCY — every hero video,
+   not most of them.
+
+   It also resolves a question the deck otherwise invites: if the hero
+   videos stay on Sumerian, what does the artist channel get out of the
+   release itself? The answer is that the release lands on both. That
+   makes "keep the reach, build the home" one architecture rather than
+   two separate asks.
+
+   No mechanics, and no reach claim — public data cannot show what a
+   collaboration adds, and this is campaign architecture, not a
+   promise.                                                          */
 `<section class="slide" data-t="The model">
   <div class="inner">
     <div class="label reveal">What we'd do</div>
@@ -780,7 +816,16 @@ const slides = () => [
           <p class="role-d">${esc(d)}</p>
         </div>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:46ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Sumerian
+    <div class="collab reveal">
+      <span class="collab-b">Already in use</span>
+      <div class="collab-x">
+        <div class="collab-t">One hero. <span style="color:var(--signal)">Connected channels.</span></div>
+        <p class="collab-d">Sumerian and Palaye Royale are already linked through YouTube
+          Collaborations. Make it the rule on all four hero videos, and the release lands on
+          both channels at once.</p>
+      </div>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.1rem;max-width:46ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Sumerian
       built the reach. <span style="color:var(--signal)">Now make every release build your world too.</span></h3>
     <div class="srcbar reveal"><span class="src">The 2024 campaign's five music videos on Sumerian
       median ${A.mvBase.campaign2024median.toLocaleString()} views, topping at
