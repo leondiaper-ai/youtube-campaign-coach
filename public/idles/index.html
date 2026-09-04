@@ -17,16 +17,40 @@
    YouTube Data API v3 pull of 367/367 current uploads on 4 Sep 2026.
    If a number here is not in that document, it is an error.
 
+   ── V2. WHAT CHANGED, AND WHY ─────────────────────────────────────
+   V1 diagnosed TANGK. V2 keeps every one of those findings but moves
+   the centre of gravity from "here's what TANGK didn't do" to "here's
+   what we'd build with you next", and it does that on the back of a
+   second source document: IDLES_Product_Activation_Audit_v1.md.
+
+   THE AUDIT CHANGED THE RECOMMENDATION. We thought we were going to
+   tell IDLES to build activation around their Premieres. It turns out
+   THEY ALREADY DID THAT — 24 live broadcast events across four named
+   series, and on 13 Dec 2021 a Premiere paired with a same-day
+   47-minute Q&A about that song. Then it stopped. Zero live events in
+   the whole TANGK campaign.
+
+   So the deck is no longer teaching IDLES how to use YouTube. It is
+   reconnecting behaviours they already had to the much stronger hero
+   strategy they have now. That is slide 06 and it is the hinge of the
+   whole thing.
+
    ── THE ARGUMENT, IN ORDER ────────────────────────────────────────
    02  TANGK worked at the top. Say so first and mean it.
    03  But uploads tripled while long-form destinations FELL.
    04  The gaps: 89 days / 1 destination. 30 days / 0. 61 days / 0.
    05  The reveal: ZERO owned live across the whole campaign.
-   06  And yet — don't make the lazy "more live" call. 26 owned live
-       assets sit at a 10,010 median. Le Bataclan is the exception.
-   07  The model: hero → owned performance → band world.
-   08  Shorts carry the band, not the campaign.
-   09  Close.
+   06  THE HINGE: you used to programme around the hero. 24 live
+       events, four named series, and one Premiere+Q&A night.
+   07  Don't make the lazy "more live" call. 26 owned live assets sit
+       at a 10,010 median. Le Bataclan is the exception.
+   08  Four actions, stated as actions — not "considerations".
+   09  Stations and Afterparty: what VMG would pitch YouTube for.
+   10  Turn the release into a moment, then give it somewhere to go.
+
+   TONE RULE FOR V2: by slide 06 the deck must have turned from
+   diagnosis to possibility. Partisan should leave thinking "we could
+   do this", not "interesting audit".
 
    ── CLAIM DISCIPLINE, NON-NEGOTIABLE ──────────────────────────────
    Public API data only. NOTHING on retention, traffic sources,
@@ -257,6 +281,89 @@ body.present #pcount{display:block}
 .pin-t{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-top:.18rem;line-height:1.15}
 
+/* ── V2: THE HINGE (slide 06) ────────────────────────────────────────
+   Two-part slide. The top is the dormant capability as raw counts; the
+   bottom is the one night they did it, shown as two real thumbnails
+   with an arrow between them. The night is the proof that the
+   recommendation is a restoration, not an invention. */
+.past{display:grid;grid-template-columns:repeat(4,1fr);gap:1.6rem;margin-top:1.3rem}
+@media(max-width:900px){.past{grid-template-columns:repeat(2,1fr)}}
+.pa-n{font-family:'Archivo Black',sans-serif;font-size:clamp(2rem,5vw,3.6rem);
+  line-height:.85;color:var(--bone)}
+.pa-n.dead{color:var(--red)}
+.pa-l{font-family:'Barlow Condensed',sans-serif;font-size:.76rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem;max-width:18ch}
+.night{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:1.1rem;
+  align-items:center;margin-top:1.3rem;padding-top:1.1rem;border-top:2px solid var(--red)}
+@media(max-width:900px){.night{grid-template-columns:1fr;gap:.7rem}}
+.ni{position:relative;overflow:hidden;background:#1A181A}
+.ni img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;filter:grayscale(.3) contrast(1.06)}
+.ni::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,10,10,.92),transparent 62%)}
+.ni-m{position:absolute;left:.75rem;right:.75rem;bottom:.6rem;z-index:2}
+.ni-v{font-family:'Archivo Black',sans-serif;font-size:clamp(1rem,2.1vw,1.5rem);line-height:.9;color:var(--red)}
+.ni-t{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:#fff;margin-top:.22rem;line-height:1.1}
+.ni-s{font-size:.62rem;color:#B9B3AA;margin-top:.15rem;line-height:1.35}
+.ni-arrow{font-family:'Archivo Black',sans-serif;font-size:clamp(1.4rem,3vw,2.4rem);color:var(--red)}
+@media(max-width:900px){.ni-arrow{transform:rotate(90deg)}}
+
+/* ── V2: THE FOUR ACTIONS (slide 08) ─────────────────────────────────
+   Numbered rows, not cards. Action 01 is styled the same as the others
+   on purpose — "keep" is as much of an instruction as "build". */
+.acts{display:grid;gap:.55rem;margin-top:1.2rem}
+.act{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:1.1rem;align-items:baseline;
+  padding:.7rem .9rem;border-left:3px solid var(--red);background:rgba(232,35,42,.07)}
+@media(max-width:900px){.act{grid-template-columns:auto 1fr}.act p{grid-column:1/-1}}
+.act-n{font-family:'Archivo Black',sans-serif;font-size:clamp(.95rem,1.9vw,1.3rem);
+  color:var(--red);line-height:1}
+.act-k{font-family:'Barlow Condensed',sans-serif;font-size:.74rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);min-width:9ch}
+.act-t{font-family:'Archivo Black',sans-serif;font-size:clamp(.95rem,1.9vw,1.35rem);
+  text-transform:uppercase;line-height:1}
+.act-d{font-size:.8rem;color:var(--smoke);line-height:1.5;margin-top:.2rem}
+.hier{margin-top:1.1rem;padding-top:.8rem;border-top:1px solid var(--hair);
+  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--smoke);line-height:1.7}
+.hier b{color:var(--bone)}
+
+/* ── V2: THE PITCH (slide 09) ────────────────────────────────────────
+   Two columns: what VMG would pitch, and the inventory that makes the
+   Stations case unusual. The BETA/PITCH badge is non-negotiable — it
+   is what stops this reading as a feature IDLES can switch on. */
+.pitch{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:1.6rem;margin-top:1.2rem}
+@media(max-width:900px){.pitch{grid-template-columns:1fr}}
+.pbadge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:.62rem;
+  font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:var(--red);
+  padding:.26rem .5rem;margin-bottom:.6rem}
+.pitem{border-top:2px solid var(--red);padding-top:.7rem;margin-bottom:1rem}
+.pi-t{font-family:'Archivo Black',sans-serif;font-size:clamp(1rem,2.1vw,1.5rem);
+  text-transform:uppercase;line-height:1}
+.pi-d{font-size:.78rem;color:var(--smoke);line-height:1.55;margin-top:.35rem}
+.inv{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:.6rem}
+.inv .pan img{aspect-ratio:16/10}
+.metref{position:relative;overflow:hidden;border:1px solid var(--hair)}
+.metref img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;filter:grayscale(.55) contrast(1.08)}
+.metref::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,10,10,.9),transparent 60%)}
+.metref-m{position:absolute;left:.7rem;right:.7rem;bottom:.55rem;z-index:2}
+
+/* ── V2: THE MOMENT MAP (slide 10) ───────────────────────────────────
+   Vertical run. Each step is one line. Bracketed steps are the ones
+   that depend on a VMG pitch and are marked so nobody reads them as
+   available today. */
+.run{margin-top:1.2rem;border-left:2px solid var(--red);padding-left:1.3rem}
+.step{padding:.5rem 0}
+.st-k{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
+.st-t{font-family:'Archivo Black',sans-serif;font-size:clamp(.95rem,2vw,1.4rem);
+  text-transform:uppercase;line-height:1.02;margin-top:.18rem}
+.st-t.soft{color:var(--smoke)}
+.st-d{font-size:.74rem;color:var(--smoke);line-height:1.45;margin-top:.15rem}
+.miniPins{display:flex;gap:.35rem;margin-top:.45rem}
+.miniPins img{width:52px;aspect-ratio:9/13;object-fit:cover;display:block;
+  filter:grayscale(.2) contrast(1.05)}
+
 /* ── Close (slide 09) ───────────────────────────────────────────── */
 .princ{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;margin-top:1.6rem}
 @media(max-width:900px){.princ{grid-template-columns:1fr;gap:1rem}}
@@ -355,6 +462,66 @@ const A = {
     { id:'Rp0F4L6CtHk', t:'I kissed a boy…',         v:'122K' },
   ],
   shortsN:'113', shortsMed:'17K',
+
+  /* ── V2: THE HINGE (slide 06) ─────────────────────────────────────
+     All VERIFIED from the activation audit. IDLES ran 24 live
+     broadcast events across four named series between Apr 2020 and
+     Dec 2021, then none at all during TANGK.
+
+     The 13 Dec 2021 pairing is the single most useful fact in this
+     deck: a Premiere and a 47-minute Q&A about that same song, on the
+     same day. It is the only Premiere+live pairing in the channel's
+     history, and it is exactly the shape we are recommending. This is
+     why the slide can say "you used to" rather than "you should".  */
+  past:{
+    events:'24', series:'4', qas:'5',
+    span:'Apr 2020 → Dec 2021', duringTangk:'0',
+    premiereAdoption:'13 / 13',
+    night:{
+      mv:{ id:'nyLlswYB_zY', t:'When The Lights Come On', s:'Official video · premiere', v:'982K' },
+      qa:{ id:'vB2P3eaUPm8', t:'Q&A with Lee Kiernan', s:'Live · 47 minutes · same day', v:'17K' },
+      date:'13 December 2021',
+    },
+    /* Real inventory, shown to make the Stations argument concrete. */
+    inventory:[
+      { id:'hHsbPcYdi34', t:'BALLEY TV', s:'7 episodes' },
+      { id:'XBdspjpXBm4', t:'Live Q&As',  s:'5 broadcasts' },
+      { id:'0lbH_Z-Xi1Q', t:'Le Bataclan', s:'Full concert film' },
+      { id:'jc4XigR4HaQ', t:'Live songs',  s:'30 owned live assets' },
+    ],
+  },
+
+  /* ── V2: THE FOUR ACTIONS (slide 08) ──────────────────────────────
+     Stated as actions, not considerations. Action 01 is deliberately
+     "keep" — IDLES are better at Premieres than most of the roster and
+     the deck must never imply otherwise.                            */
+  actions:[
+    { n:'01', k:'Keep', t:'Premiere every major video',
+      d:'13 of 13 official videos since 2021. All four TANGK heroes. Already exceptional — change nothing.' },
+    { n:'02', k:'Build', t:'One owned live world',
+      d:'One recognisable album-era place. Not random live uploads, not a weekly series.' },
+    { n:'03', k:'Restore', t:'The night around the premiere',
+      d:'Premiere, then a live moment the same night. You did exactly this in December 2021.' },
+    { n:'04', k:'Programme', t:'The channel itself',
+      d:'Live, archive, performance and band world, given one programmed home.' },
+  ],
+
+  /* ── V2: THE PITCH LAYER (slide 09) ───────────────────────────────
+     CRITICAL SEPARATION. Creator features IDLES can switch on
+     themselves are NOT the same as partner products VMG must broker,
+     and the deck must not present them with equal certainty.
+
+     Metallica is a PROGRAMMING reference only. No view counts, no
+     scale comparison, no suggestion IDLES should copy them.
+
+     Afterparty: the audit found NO evidence in mapped public campaign
+     material. That is NOT "they have never done one" — it is Premium
+     gated and may not surface publicly. Wording stays exact.       */
+  pitch:{
+    metallica:{ id:'1fz60gNnSdU', label:'Metallica TV' },
+    stationsWhy:'24 live events · 4 named series · a full concert film · 30 owned live assets',
+    afterpartyNote:'No Premium Afterparty found in the mapped public campaign evidence',
+  },
 };
 
 const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
@@ -503,7 +670,55 @@ const slides = () => [
   </div>
 </section>`,
 
-/* 06 ── NOT THE LAZY ANSWER ────────────────────────────────────────
+/* 06 ── THE HINGE ──────────────────────────────────────────────────
+   THE MOST IMPORTANT SLIDE IN V2 AND THE POINT THE DECK TURNS.
+
+   Everything before this is diagnosis. Everything after is possibility.
+   The finding — that IDLES already ran 24 live events, four named
+   series, and one Premiere+Q&A night — converts the entire
+   recommendation from "here is a thing you should try" into "here is
+   a thing you already did".
+
+   Do not soften "0". It is the whole rhetorical move: enormous
+   capability, then nothing, across a campaign where they premiered
+   every single video.
+
+   All figures VERIFIED in IDLES_Product_Activation_Audit_v1.md.     */
+`<section class="slide" data-t="You used to">
+  <div class="inner">
+    <div class="label reveal">And here's the thing</div>
+    <h2 class="display big reveal" style="max-width:19ch">You already premiere everything.<br>
+      <span style="color:var(--red)">You used to programme around it.</span></h2>
+    <div class="past stagger">
+      <div><div class="pa-n">${A.past.events}</div><div class="pa-l">Live broadcast events</div></div>
+      <div><div class="pa-n">${A.past.series}</div><div class="pa-l">Named live series</div></div>
+      <div><div class="pa-n">${A.past.premiereAdoption}</div><div class="pa-l">Videos premiered since 2021</div></div>
+      <div><div class="pa-n dead">${A.past.duringTangk}</div><div class="pa-l">Live events during TANGK</div></div>
+    </div>
+    <div class="night stagger">
+      <a class="ni" href="https://www.youtube.com/watch?v=${A.past.night.mv.id}" target="_blank" rel="noopener">
+        <img src="${thumb(A.past.night.mv.id,'maxresdefault')}" alt=""
+          onerror="this.src='${thumb(A.past.night.mv.id)}'">
+        <div class="ni-m"><div class="ni-v">${A.past.night.mv.v}</div>
+          <div class="ni-t">${esc(A.past.night.mv.t)}</div>
+          <div class="ni-s">${esc(A.past.night.mv.s)}</div></div></a>
+      <div class="ni-arrow">→</div>
+      <a class="ni" href="https://www.youtube.com/watch?v=${A.past.night.qa.id}" target="_blank" rel="noopener">
+        <img src="${thumb(A.past.night.qa.id,'maxresdefault')}" alt=""
+          onerror="this.src='${thumb(A.past.night.qa.id)}'">
+        <div class="ni-m"><div class="ni-v">${A.past.night.qa.v}</div>
+          <div class="ni-t">${esc(A.past.night.qa.t)}</div>
+          <div class="ni-s">${esc(A.past.night.qa.s)}</div></div></a>
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem">${esc(A.past.night.date)}.
+      <span style="color:var(--red)">That's the bit that stopped.</span></h3>
+    <div class="srcbar reveal"><span class="src">Live broadcast events verified from the upload
+      record · ${esc(A.past.span)} · the only premiere paired with a same-day live moment in the
+      channel's history</span></div>
+  </div>
+</section>`,
+
+/* 07 ── NOT THE LAZY ANSWER ────────────────────────────────────────
    The most important slide. Without it the room walks out with "make
    more live videos", which IDLES' OWN DATA REJECTS — 26 owned live
    assets at a 10,010 median.
@@ -541,84 +756,140 @@ const slides = () => [
   </div>
 </section>`,
 
-/* 07 ── THE MODEL ──────────────────────────────────────────────────
-   One creative idea with several meaningful expressions — explicitly
-   NOT one shoot with seventeen deliverables. The "feeds" line stays
-   short for that reason.                                            */
-`<section class="slide" data-t="The model">
+/* 08 ── THE FOUR ACTIONS ───────────────────────────────────────────
+   Stated as actions, not "considerations" or a "framework". Partisan
+   should be able to read this slide and know precisely what we are
+   proposing.
+
+   ACTION 01 IS "KEEP" ON PURPOSE. IDLES premiere better than most of
+   the roster and the deck must never imply we are introducing them to
+   the feature. Leading with what they already do well is also what
+   earns permission for actions 02-04.
+
+   The hierarchy line at the bottom is where the Shorts finding now
+   lives — V1 gave it a whole slide, which made the deck too long once
+   the hinge and the pitch layer were added.                        */
+`<section class="slide" data-t="Four actions">
   <div class="inner">
-    <div class="label reveal">Next album · the shape</div>
-    <h2 class="display big reveal" style="max-width:15ch">One hero.<br>
-      <span style="color:var(--red)">Then another way in.</span></h2>
-    <div class="model stagger">
-      <div class="mo one"><div class="mo-k">Hero</div>
-        <div class="mo-t">Official<br>music video</div>
-        <p class="mo-d">Keep doing exactly what TANGK did. Four videos carried the campaign.</p></div>
-      <div class="mo two"><div class="mo-k">Second music moment</div>
-        <div class="mo-t">Owned<br>performance</div>
-        <p class="mo-d">One recognisable place the record can return to, between the videos.</p></div>
-      <div class="mo three"><div class="mo-k">The world around it</div>
-        <div class="mo-t">Shorts</div>
-        <p class="mo-d">Cut from the above. The band, not the campaign.</p></div>
+    <div class="label reveal">Next album</div>
+    <h2 class="display big reveal" style="max-width:17ch">For the next album,
+      <span style="color:var(--red)">we'd do four things.</span></h2>
+    <div class="acts stagger">
+      ${A.actions.map(a=>`
+        <div class="act">
+          <div class="act-n">${a.n}</div>
+          <div class="act-k">${esc(a.k)}</div>
+          <div><div class="act-t">${esc(a.t)}</div><p class="act-d">${esc(a.d)}</p></div>
+        </div>`).join('')}
     </div>
-    <div class="feeds reveal">One place, made once → <b>full songs</b> · <b>a longer film</b> ·
-      <b>behind it</b> · <b>Shorts</b></div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:32ch">Make the place once.
-      <span style="color:var(--red)">Let the record keep coming back to it.</span></h3>
+    <div class="hier reveal">
+      <b>Hero videos</b> = the release · <b>Performance</b> = the second music moment ·
+      <b>Shorts</b> = the band · <b>Station</b> = the programmed world
+    </div>
   </div>
 </section>`,
 
-/* 08 ── SHORTS ─────────────────────────────────────────────────────
-   Shorts are treated intelligently, not dismissed. 113 at a 17,051
-   median is a real observation, but the breakouts were the band being
-   itself. The slide says the clearest breakouts LOOKED LIKE the band —
-   it does not claim personality causes performance, and public data
-   cannot show discovery or conversion either way.                   */
-`<section class="slide" data-t="Shorts">
+/* 09 ── THE PITCH LAYER ────────────────────────────────────────────
+   THE SEPARATION ON THIS SLIDE IS THE WHOLE POINT. Everything on it
+   is a PARTNER opportunity VMG would broker with YouTube — not a
+   feature IDLES can switch on. The red BETA / PITCH badges carry that
+   and must not be removed.
+
+   METALLICA IS A PROGRAMMING REFERENCE ONLY. No view counts, no scale
+   comparison, no "IDLES should copy Metallica". The reference is
+   about product behaviour: turning an artist's live and archive
+   material into a programmed destination.
+
+   AFTERPARTY WORDING IS EXACT AND MUST STAY EXACT. The audit found no
+   evidence in mapped public campaign material. That is NOT the same as
+   "IDLES have never done one" — an Afterparty is Premium-gated and may
+   never surface as a public upload. Do not tighten this into a
+   negative claim.
+
+   The Stations argument is genuinely strong here and it is worth
+   protecting: most artists pitching for Stations would be proposing to
+   programme a library they have not made. IDLES already have theirs.  */
+`<section class="slide bone" data-t="The pitch">
   <div class="inner">
-    <div class="label reveal">TANGK · short form</div>
-    <!-- Sized down from .big deliberately: this headline is the longest
-         in the deck and at full poster scale it wrapped to four lines,
-         pushing the slide to 1040px and forcing a scale-down at 982.
-         The pinboard is the thing that should dominate here anyway. -->
-    <h2 class="display reveal" style="max-width:26ch;font-size:clamp(1.9rem,4.6vw,3.5rem);line-height:.94">Shorts
-      don't need to carry the campaign.<br>
-      <span style="color:var(--red)">Let them carry the band.</span></h2>
-    <div class="pins stagger">
-      ${A.pins.map(p=>`
-        <div class="pin"><img src="${thumb(p.id,'maxresdefault')}" alt="${esc(p.t)}"
-          onerror="this.src='${thumb(p.id)}'">
-          <div class="pin-m"><div class="pin-v">${p.v}</div>
-            <div class="pin-t">${esc(p.t)}</div></div></div>`).join('')}
+    <div class="label reveal">What VMG would take to YouTube</div>
+    <h2 class="display big reveal" style="max-width:20ch">The asset is one half.
+      <span style="color:var(--red)">Programming is the other.</span></h2>
+    <div class="pitch stagger">
+      <div>
+        <div class="pitem">
+          <span class="pbadge">Beta · VMG to pitch</span>
+          <div class="pi-t">YouTube Stations</div>
+          <p class="pi-d">A programmed home for live, archive, performance and band world —
+            alongside the hero videos. You wouldn't be building the library from nothing.
+            <strong style="color:var(--ink)">${esc(A.pitch.stationsWhy)}.</strong></p>
+        </div>
+        <div class="pitem">
+          <span class="pbadge">Pitch opportunity</span>
+          <div class="pi-t">Premium Afterparty</div>
+          <p class="pi-d">A Premium live room straight after a premiere. It follows naturally from
+            what you already do — every video premiered, and a history of live Q&amp;As.
+            ${esc(A.pitch.afterpartyNote)}.</p>
+        </div>
+      </div>
+      <div>
+        <a class="metref" href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}"
+          target="_blank" rel="noopener">
+          <img src="${thumb(A.pitch.metallica.id,'maxresdefault')}" alt="Metallica TV"
+            onerror="this.src='${thumb(A.pitch.metallica.id)}'">
+          <div class="metref-m"><div class="ni-t" style="color:#fff">${esc(A.pitch.metallica.label)}</div>
+            <div class="ni-s">A reference for turning an artist's live and archive material into a
+              programmed destination</div></div>
+        </a>
+        <div class="inv">
+          ${A.past.inventory.map(i=>`
+            <div class="pan"><img src="${thumb(i.id,'maxresdefault')}" alt="${esc(i.t)}"
+              onerror="this.src='${thumb(i.id)}'">
+              <div class="pan-m"><div class="pan-t" style="color:var(--red)">${esc(i.t)}</div>
+                <div class="ni-s" style="color:#D8D2CA">${esc(i.s)}</div></div></div>`).join('')}
+        </div>
+      </div>
     </div>
-    <div class="stats stagger" style="margin-top:1.2rem">
-      <div><div class="st-n" style="font-size:clamp(1.8rem,4vw,3rem)">${A.shortsN}</div>
-        <div class="st-l">Shorts in the campaign</div></div>
-      <div><div class="st-n" style="font-size:clamp(1.8rem,4vw,3rem)">${A.shortsMed}</div>
-        <div class="st-l">Median current views</div></div>
-      <div><div class="st-n" style="font-size:clamp(1.8rem,4vw,3rem)">6 / 10</div>
-        <div class="st-l">Of the top ten looked like the band, not the campaign</div></div>
-    </div>
-    <div class="srcbar reveal"><span class="src">Heroes for the music. Shorts for the humans ·
-      a creative signal from observed viewing, not evidence that personality drives performance ·
-      public data cannot show discovery or conversion</span></div>
+    <div class="srcbar reveal"><span class="src">Both are partner opportunities, not features to
+      switch on — access is not guaranteed · Metallica referenced for programming behaviour only,
+      with no comparison of scale or performance</span></div>
   </div>
 </section>`,
 
-/* 09 ── CLOSE ──────────────────────────────────────────────────── */
-`<section class="slide red" data-t="Close">
+/* 10 ── THE MOMENT MAP · CLOSE ─────────────────────────────────────
+   The slide Partisan should photograph. One release, mapped end to
+   end, so the whole recommendation is legible in one look.
+
+   Bracketed steps depend on a VMG pitch and are styled soft and
+   labelled "if secured" so nobody plans around something we have not
+   got yet. The Shorts imagery lives here now — it keeps the band in
+   the room right at the close, which V1 got right and V2 should not
+   lose just because the Shorts slide was folded away.              */
+`<section class="slide red" data-t="The moment">
   <div class="inner">
-    <div class="label reveal">Where this goes</div>
-    <h2 class="display big reveal" style="max-width:17ch;color:#fff">The next campaign
-      doesn't need more content.</h2>
-    <h3 class="display mid reveal" style="margin-top:1rem;max-width:24ch;color:rgba(255,255,255,.92)">
-      It needs more places for the music to live.</h3>
-    <div class="princ stagger">
-      <div><div class="pr-k">Keep</div><div class="pr-d">The hero videos</div></div>
-      <div><div class="pr-k">Build</div><div class="pr-d">A second music destination</div></div>
-      <div><div class="pr-k">Let Shorts show</div><div class="pr-d">The band</div></div>
+    <div class="label reveal" style="color:#fff;opacity:.8">The shape of one release</div>
+    <h2 class="display big reveal" style="max-width:16ch;color:#fff">Turn the release
+      into a YouTube moment.</h2>
+    <div class="run stagger" style="border-left-color:rgba(255,255,255,.5)">
+      <div class="step"><div class="st-k" style="color:#fff">Before</div>
+        <div class="st-t" style="color:#fff">Premiere scheduled · Shorts point at it</div></div>
+      <div class="step"><div class="st-k" style="color:#fff">Release</div>
+        <div class="st-t" style="color:#fff">Official video premiere</div>
+        <div class="st-d" style="color:rgba(255,255,255,.8)">13 of 13 since 2021. Already yours.</div></div>
+      <div class="step"><div class="st-k" style="color:#fff">Same night</div>
+        <div class="st-t" style="color:#fff">Live Q&amp;A · or Premium Afterparty <span style="opacity:.7">if secured</span></div>
+        <div class="st-d" style="color:rgba(255,255,255,.8)">You did this on 13 Dec 2021.</div></div>
+      <div class="step"><div class="st-k" style="color:#fff">Next 7–14 days</div>
+        <div class="st-t" style="color:#fff">Owned performance from the album's live world</div></div>
+      <div class="step"><div class="st-k" style="color:#fff">Between heroes</div>
+        <div class="st-t" style="color:#fff">The band</div>
+        <div class="miniPins">${A.pins.slice(0,5).map(p=>`<img src="${thumb(p.id)}" alt="${esc(p.t)}">`).join('')}</div></div>
+      <div class="step"><div class="st-k" style="color:#fff">Across the campaign</div>
+        <div class="st-t" style="color:#fff;opacity:.72">Programmed destination · Station <span style="opacity:.8">if secured</span></div></div>
     </div>
-    <div class="footer-line reveal">Hero → Performance → World</div>
+    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:30ch;color:#fff">Then give that moment
+      <span style="opacity:.75">somewhere to go.</span></h3>
+    <div class="footer-line reveal" style="color:rgba(255,255,255,.75);margin-top:1.1rem">
+      Keep the hero · Build the live world · Programme the destination · Let Shorts show the band</div>
   </div>
 </section>`,
 ];
