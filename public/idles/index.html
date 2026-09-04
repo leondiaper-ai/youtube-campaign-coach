@@ -466,6 +466,42 @@ body.present #pcount{display:block}
   padding:.4rem 0;border-bottom:1px solid var(--bonehair)}
 .draw span:last-child{border-bottom:0}
 
+/* ── V4: THE STATION WALL (slide 08) ─────────────────────────────────
+   Same device as the CHVRCHES and Amyl decks: real thumbnails for what
+   already exists, dashed cells for what the next album drops into the
+   run. It replaces the four-word `.draw` list, which asked the room to
+   take "the content exists" on trust. Showing it is the whole point.
+
+   Butted to a 3px gutter so ten cells read as one programmed strip
+   rather than ten cards. Grayscale + contrast matches the treatment on
+   every other image strip in this deck; the slots are the only colour
+   in the row, which is what makes the new material legible at a glance.
+
+   No view counts here. This slide is a programming idea and the
+   Metallica reference has no numbers next to it — putting figures on
+   the wall would turn it into a performance comparison.            */
+.swall{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:1.1rem}
+@media(max-width:900px){.swall{grid-template-columns:repeat(2,1fr)}}
+.sw{position:relative;overflow:hidden;background:#1A181A}
+.sw img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  filter:grayscale(.55) contrast(1.08)}
+.sw::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(10,9,10,.88),transparent 62%)}
+.sw-t{position:absolute;left:.45rem;right:.45rem;bottom:.35rem;z-index:2;
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;color:#fff;line-height:1.15}
+.sw.slot{aspect-ratio:16/9;border:2px dashed var(--red);background:rgba(214,40,40,.07);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.1rem;text-align:center;padding:.3rem}
+.sw.slot::after{display:none}
+.slot-p{font-family:'Archivo Black',sans-serif;font-size:1.3rem;color:var(--red);line-height:1}
+.slot-t{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--red);line-height:1.15}
+.swl{display:flex;align-items:center;gap:.45rem;margin-top:.6rem;
+  font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
+.swl i{width:10px;height:10px;display:inline-block;flex:none}
+
 /* ── V3: ROLLOUT TIMELINE (slide 09) ─────────────────────────────────
    Replaces V2's wordier run. Each row is a moment and its job, nothing
    else. Soft rows are the ones that depend on a VMG pitch. */
@@ -656,6 +692,50 @@ const A = {
     metallica:{ id:'1fz60gNnSdU', label:'Metallica TV' },
     stationsWhy:'24 live events · 4 named series · a full concert film · 30 owned live assets',
     afterpartyNote:'No Premium Afterparty found in the mapped public campaign evidence',
+
+    /* ── V4: THE WALL ─────────────────────────────────────────────────
+       The slide claims "the content exists". A list of four words does
+       not evidence that; thumbnails do. Every `id` below is a REAL
+       IDLES-OWNED upload already verified in the 367/367 pull — this is
+       inventory the band already has, shown as inventory.
+
+       IDLES-OWNED ONLY. The four BBC performances are the strongest
+       live assets in this analysis but they sit on BBC channels, so
+       they cannot appear in a wall of what IDLES would programme. Do
+       not add them here however good the thumbnails look.
+
+       The dashed `slot` cells are the other half of the argument: what
+       the next album adds to a run that is already there. Keep the mix
+       weighted to real over slot — the point is that most of this
+       exists today. No view counts anywhere on this slide; it is a
+       programming idea, not a performance claim.                    */
+    wall:[
+      { id:'0lbH_Z-Xi1Q', t:'Le Bataclan' },
+      { id:'hHsbPcYdi34', t:'Balley TV' },
+      { id:'A3ZZj5y6Qt4', t:'Dancer' },
+      { slot:true,        t:'Album film' },
+      { id:'_HQrM5L9T1g', t:'Gift Horse' },
+      { id:'XBdspjpXBm4', t:'Live Q&A' },
+      { slot:true,        t:'Next hero' },
+      { id:'gLY1PkEOJP4', t:'Roy · lyric' },
+      { id:'jc4XigR4HaQ', t:'Mother · live' },
+      { slot:true,        t:'New performances' },
+    ],
+    /* VERIFIED 4 Sep 2026 against handle=idlesband →
+       UCVm7tYTZONPLVujGX0rAJdw, channel.title "IDLES", 368 uploads,
+       uncapped. All seven ids present. Titles as returned:
+         0lbH_Z-Xi1Q  IDLES live at Le Bataclan in Paris, Dec 2018 (Full Concert)
+         hHsbPcYdi34  BALLEY TV - Episode 1 with Mike Skinner and Nadya Tolokonnikova
+         A3ZZj5y6Qt4  IDLES - DANCER (Official Video)
+         _HQrM5L9T1g  IDLES - GIFT HORSE (Official Video)
+         XBdspjpXBm4  Part 5 Live Q&A with Joe
+         gLY1PkEOJP4  IDLES - ROY (Official Lyric Video)
+         jc4XigR4HaQ  IDLES - MOTHER (Live at Le Bataclan)
+       The last one was labelled "Live songs" on first pass, which the
+       API title does not support — it is one song from the Bataclan
+       shoot. Relabelled "Mother · live". It sits deliberately next to
+       the full concert: same night, two assets, which is the argument
+       this slide is making. */
   },
 
   /* ── V3: THE MULTI-FORMAT EVIDENCE (slide 07) ─────────────────────
@@ -967,9 +1047,10 @@ const slides = () => [
 `<section class="slide bone" data-t="Programme">
   <div class="inner">
     <div class="label reveal">Programming the world</div>
-    <h2 class="display big reveal" style="max-width:16ch">The content exists.<br>
+    <h2 class="display big reveal" style="max-width:21ch">The content exists.
       <span style="color:var(--red)">Give it a home.</span></h2>
-    <div class="prog stagger">
+    <div class="prog stagger" style="grid-template-columns:minmax(0,.85fr) minmax(0,1fr);
+      gap:1.6rem;margin-top:1rem;align-items:center">
       <div>
         <a class="prog-img" href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}"
           target="_blank" rel="noopener">
@@ -980,17 +1061,29 @@ const slides = () => [
             destination.</span></div>
       </div>
       <div>
-        <div class="col-k" style="margin-bottom:.5rem">What an IDLES version would draw on</div>
-        <div class="draw">
-          <span>Le Bataclan</span>
-          <span>Balley TV</span>
-          <span>Hero videos</span>
-          <span>New album performances</span>
-        </div>
-        <div style="margin-top:1rem"><span class="pbadge">YouTube Stations · Beta</span>
+        <div class="col-k">What an IDLES version would draw on</div>
+        <div class="col-d" style="margin-top:.35rem">Most of it is already on the channel. The next
+          album drops into a run that's running, instead of launching into silence.</div>
+        <div style="margin-top:.9rem"><span class="pbadge">YouTube Stations · Beta</span>
           <div class="col-d" style="margin-top:.15rem">Partner opportunity. VMG would pitch this
             to YouTube — access isn't open.</div></div>
       </div>
+    </div>
+    <!-- V4: the wall. Real IDLES uploads, then dashed cells for what the
+         next album adds. IDLES-OWNED ONLY — see the pitch.wall data
+         comment before adding anything here. NOTE: this comment sits
+         inside a template literal, so it must not contain a backtick or
+         a dollar-brace — both are parsed, not treated as comment text. -->
+    <div class="swall stagger">
+      ${A.pitch.wall.map(v=> v.slot
+        ? `<div class="sw slot"><div class="slot-p">+</div><div class="slot-t">${esc(v.t)}</div></div>`
+        : `<div class="sw"><img src="${thumb(v.id)}" alt="${esc(v.t)}">
+             <div class="sw-t">${esc(v.t)}</div></div>`).join('')}
+    </div>
+    <div class="swl reveal">
+      <i style="background:var(--ink);opacity:.55"></i> Already on the channel
+      <i style="border:2px dashed var(--red);margin-left:.7rem"></i>
+      <span style="color:var(--red)">Added by the next album</span>
     </div>
   </div>
 </section>`,
