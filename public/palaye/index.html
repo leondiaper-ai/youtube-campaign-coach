@@ -292,7 +292,22 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
    total, so "11 assets" is never mistaken for "11 million".          */
 .worlds{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.3rem}
 @media(max-width:900px){.worlds{grid-template-columns:1fr}}
-.wld{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--hair);min-width:0}
+/* Cards are anchors. The point is that management can click through and
+   SEE what "a recognisable performance world" means rather than take
+   our description of it — an inspiration slide that cannot be explored
+   is just an assertion. Opens in a new tab so the deck is never lost. */
+.wld{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--hair);min-width:0;
+  display:block;text-decoration:none;color:inherit;transition:border-color .18s,transform .18s}
+.wld:hover{border-color:var(--signal);transform:translateY(-2px)}
+.wld.g:hover{border-color:var(--gold)}
+/* Always visible, not hover-only: in a presented deck nobody discovers
+   a hover state, and the affordance has to read from the back of a room. */
+.wld-w{position:absolute;top:.55rem;right:.55rem;z-index:3;
+  font-size:.46rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--paper);background:rgba(8,7,10,.62);backdrop-filter:blur(3px);
+  border:1px solid rgba(242,239,234,.22);border-radius:3px;padding:.24rem .42rem}
+.wld:hover .wld-w{border-color:var(--signal);background:rgba(240,83,58,.85)}
+.wld.g:hover .wld-w{border-color:var(--gold);background:rgba(201,162,39,.85);color:var(--coal)}
 .wld img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#17151c}
 .wld::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(to top,rgba(8,7,10,.9),rgba(8,7,10,.2) 58%,transparent)}
@@ -306,6 +321,10 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
    recurrence, not scale. It was 8.8px, which is source-bar size for a
    line that is doing headline work. There is room on a 252px card. */
 .wld-s{font-size:.62rem;color:#B9B3AA;line-height:1.42;margin-top:.22rem}
+/* The four ways back into that world. Deliberately a quiet list, not a
+   fourth tier — it answers "made of what?" without becoming a brief. */
+.ways{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.55rem}
 
 /* ── Format hierarchy (slide 7) ──────────────────────────────────────
    Replaces a flat seven-tile menu. The whole point of this slide is
@@ -591,12 +610,24 @@ const A = {
      times Palaye's subscribers. Never imply Palaye would reach these
      numbers, that live causes reach or recommendation, or that Hansa
      Studios caused anything. His MV median and the format ratios stay
-     in the research document and OFF this slide.                     */
+     in the research document and OFF this slide.
+
+     EACH CARD TEACHES A DIFFERENT PRINCIPLE. This matters: with three
+     cards all captioned "live performance", a cold viewer reads the
+     slide as "YUNGBLUD has successful live videos", which is NOT the
+     insight. The insight is that he repeatedly builds recognisable
+     PLACES around the music. The sub-lines carry that and must stay
+     three distinct lessons, not three descriptions of a format.
+
+     Cards link to the real videos so management can click and see what
+     is meant rather than take our word for it.                       */
   yb:{ envs:[
     { id:'3T5qM2mH3mw', name:'Hansa Studios', fig:'11 assets', gold:true,
-      sub:'A performance world they keep coming back to' },
-    { id:'IZAgVmowDOU', name:'BLUDFEST',   fig:'9.1M',  sub:'Live performance' },
-    { id:'oJZmO5mByVY', name:'Villa Park', fig:'18.2M', sub:'Live performance' },
+      sub:'Build a recognisable performance world' },
+    { id:'IZAgVmowDOU', name:'BLUDFEST',   fig:'9.1M',
+      sub:'Turn an owned world into a music moment' },
+    { id:'oJZmO5mByVY', name:'Villa Park', fig:'18.2M',
+      sub:'Let major live moments become campaign assets' },
   ] },
 
   plan:[
@@ -841,18 +872,22 @@ const slides = () => [
       <span style="color:var(--signal)">Make another place<br>the record can live.</span></h2>
     <div class="worlds stagger">
       ${A.yb.envs.map(e=>`
-        <div class="wld${e.gold?' g':''}">
+        <a class="wld${e.gold?' g':''}" href="https://www.youtube.com/watch?v=${e.id}"
+          target="_blank" rel="noopener">
           <img src="${thumb(e.id,'maxresdefault')}" alt="${esc(e.name)}"
             onerror="this.src='${thumb(e.id)}'">
+          <span class="wld-w">Watch example &#8599;</span>
           <div class="wld-m">
             <div class="wld-f">${esc(e.fig)}</div>
             <div class="wld-n">${esc(e.name)}</div>
             <div class="wld-s">${esc(e.sub)}</div>
           </div>
-        </div>`).join('')}
+        </a>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:40ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">The
-      same songs. <span style="color:var(--signal)">Another way in.</span></h3>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:46ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">One
+      recognisable world, returned to all campaign.
+      <span style="color:var(--signal)">What's the Palaye version?</span></h3>
+    <p class="ways reveal">Performances · Royal Television · Behind the scenes · Shorts</p>
     <div class="srcbar reveal"><span class="src">YUNGBLUD · public YouTube data · current views ·
       a much larger channel than yours · a reference for how the space between releases is used,
       not a performance benchmark</span></div>
