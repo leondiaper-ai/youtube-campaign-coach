@@ -192,8 +192,11 @@ body.present #pcount{display:block}
    The single most important number in the deck and it is a zero, so
    it gets the most space. Everything else on the slide is smaller
    than it by a wide margin. */
+/* Capped at 16rem rather than 20rem. It still dominates the slide by a
+   wide margin — the next largest thing on it is a 3rem headline — and
+   the larger cap pushed the slide past unscaled fit at 982. */
 .zero{font-family:'Archivo Black',sans-serif;line-height:.72;
-  font-size:clamp(7rem,26vw,20rem);color:var(--red);margin:.1rem 0 .2rem}
+  font-size:clamp(6rem,22vw,16rem);color:var(--red);margin:.1rem 0 .2rem}
 .bbc{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:1.1rem}
 @media(max-width:900px){.bbc{grid-template-columns:repeat(2,1fr)}}
 
@@ -574,7 +577,12 @@ const slides = () => [
 `<section class="slide" data-t="Shorts">
   <div class="inner">
     <div class="label reveal">TANGK · short form</div>
-    <h2 class="display big reveal" style="max-width:20ch">Shorts don't need to carry the campaign.<br>
+    <!-- Sized down from .big deliberately: this headline is the longest
+         in the deck and at full poster scale it wrapped to four lines,
+         pushing the slide to 1040px and forcing a scale-down at 982.
+         The pinboard is the thing that should dominate here anyway. -->
+    <h2 class="display reveal" style="max-width:26ch;font-size:clamp(1.9rem,4.6vw,3.5rem);line-height:.94">Shorts
+      don't need to carry the campaign.<br>
       <span style="color:var(--red)">Let them carry the band.</span></h2>
     <div class="pins stagger">
       ${A.pins.map(p=>`
