@@ -44,7 +44,7 @@
    deliberately produced live world for the next album, not a rebuild
    of the 2020 livestream setup.
 
-   ── THE ARGUMENT, IN ORDER (V3 — 9 slides) ────────────────────────
+   ── THE ARGUMENT, IN ORDER (V4 — 10 slides) ───────────────────────
    02  TANGK worked at the top. Say so first and mean it.
    03  But uploads tripled while long-form destinations FELL.
    04  The gaps: 89 days / 1 destination. 30 days / 0. 61 days / 0.
@@ -52,10 +52,22 @@
        folded in underneath, the pandemic-era precedent that proves
        they can run this channel as an event space.
    06  Don't make the lazy "more live" call. 26 owned live assets sit
-       at a 10,010 median. Le Bataclan is the exception.
-   07  Hero → Extend → World: the format hierarchy.
-   08  Stations and Afterparty: what VMG would pitch YouTube for.
-   09  One song, more than one moment. The programme.
+       at a 10,010 median. Le Bataclan is the exception, and one shoot
+       yields performance, songs, BTS, Shorts and interview.
+   07  Hero → Extend → World, each column carrying its own evidence.
+   08  What we'd take to YouTube: Premieres, Afterparty, Stations.
+   09  The shape of one big single, with the finding behind each row.
+   10  The payoff: what actually changes, as architecture not volume.
+
+   ── V4. THE ALPHA PASS ────────────────────────────────────────────
+   V3 was clean but the strategy section had drifted generic: HERO →
+   EXTEND → WORLD and ONE SONG, MORE THAN ONE MOMENT are good
+   frameworks that could have been shown to almost any artist. V4
+   attaches every recommendation to something we actually found, so the
+   room can see it could only have come from analysing IDLES.
+
+   The test to apply to any future edit here: cover the artist name.
+   If the slide still makes sense, it is too generic and has regressed.
 
    TONE RULE: by slide 05 the deck must have turned from diagnosis to
    possibility. Partisan should leave thinking "we could do this", not
@@ -502,6 +514,59 @@ body.present #pcount{display:block}
   letter-spacing:.11em;text-transform:uppercase;color:var(--smoke)}
 .swl i{width:10px;height:10px;display:inline-block;flex:none}
 
+/* ── V4: COLUMN VERDICT + EVIDENCE (slide 07) ────────────────────────
+   The badge is the verdict, the .col-e line is the finding underneath
+   it. KEEP is deliberately quieter than CHANGE — two of the three
+   columns are things IDLES already do well, and the slide should not
+   shout at them about those. Only EXTEND is a change, so only EXTEND
+   is red. */
+.col-b{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:.6rem;
+  font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:.16rem .45rem;
+  border:1px solid var(--smoke);color:var(--smoke);margin-bottom:.4rem}
+.col-b.ch{border-color:var(--red);background:var(--red);color:#fff}
+.col-e{font-size:.72rem;color:var(--smoke);line-height:1.5;margin-top:.35rem;
+  padding-left:.6rem;border-left:2px solid var(--hair)}
+.slide.light .col-e,.slide.bone .col-e{border-left-color:var(--bonehair)}
+.col-say{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;line-height:1.2;margin-top:.6rem;color:var(--red)}
+.col.w .col-say{color:var(--bone)}
+
+/* ── V4: THE PARTNER ASKS (slide 08) ─────────────────────────────────
+   Replaces a generic "premium features" block. Each ask states its
+   real status first — one is already adopted, one has no mapped
+   evidence, one is not open — so nothing on this slide can be mistaken
+   for a feature that can simply be switched on. */
+.asks{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:1.1rem}
+@media(max-width:900px){.asks{grid-template-columns:1fr;gap:1rem}}
+.ask{border-top:2px solid var(--bonehair);padding-top:.7rem}
+.ask.go{border-top-color:var(--red)}
+.ask-n{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;line-height:1.15}
+.ask-s{font-family:'Barlow Condensed',sans-serif;font-size:.66rem;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--red);margin-top:.2rem}
+.ask-d{font-size:.74rem;color:var(--smoke);line-height:1.5;margin-top:.35rem}
+
+/* ── V4: THE ARCHITECTURE CONTRAST (slide 10) ────────────────────────
+   Two rows of chips. The top row is what TANGK did, the bottom is what
+   we would test. Chips rather than a timeline because neither row is a
+   schedule — they are shapes, and putting dates on them would imply a
+   precision the recommendation does not have. */
+.arc{margin-top:1.2rem}
+.arc-r{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
+.arc-r+.arc-r{margin-top:.9rem;padding-top:.9rem;border-top:1px solid rgba(255,255,255,.22)}
+.arc-k{font-family:'Barlow Condensed',sans-serif;font-size:.66rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:#fff;opacity:.75;
+  min-width:5.5rem;flex:none}
+.arc-c{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;padding:.28rem .6rem;line-height:1.1;
+  border:1px solid rgba(255,255,255,.4);color:#fff}
+.arc-r.next .arc-c{background:#fff;color:var(--red);border-color:#fff}
+.arc-r.next .arc-c.dim{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+.arc-a{color:#fff;opacity:.55;font-size:.85rem;flex:none}
+.arc-p{margin-top:1rem;padding-top:.7rem;border-top:1px solid rgba(255,255,255,.22);
+  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;
+  letter-spacing:.11em;text-transform:uppercase;color:#fff;opacity:.85}
+
 /* ── V3: ROLLOUT TIMELINE (slide 09) ─────────────────────────────────
    Replaces V2's wordier run. Each row is a moment and its job, nothing
    else. Soft rows are the ones that depend on a VMG pitch. */
@@ -754,39 +819,82 @@ const A = {
   lyric:{ n:'9', total:'2.64M', med:'270K', albumDay:'8 of 9',
     top:{ id:'gLY1PkEOJP4', t:'Roy', v:'538K' } },
 
-  /* The three jobs. Deliberately short — this slide has to read at a
-     glance, and the formats under EXTEND are options to choose from,
-     never a checklist to produce.                                   */
+  /* ── V4: EACH COLUMN NOW CARRIES ITS OWN EVIDENCE ──────────────────
+     V3's three columns were a good framework and could have been shown
+     to almost any artist. The fix is not more design, it is attribution:
+     every column now says what IDLES already do, what the data showed,
+     and what we would change. `badge` is the verdict, `ev` is the
+     finding it rests on, `say` is the principle.
+
+     THE WORLD COLUMN NEEDS CARE. The honest reading of the Shorts data
+     is NOT "personality Shorts perform better" — the medians are
+     strikingly flat across every subtype, 14,058 to 17,726. What is
+     true is that the only Shorts to BREAK OUT were personality-led:
+     FLYNN! at 699,263, and six of the top ten. So the claim on the
+     slide is about the top of the distribution, not the average, and
+     it must stay worded that way.
+
+     The EXTEND column is options, never deliverables. The whole
+     analysis argues against volume. If it ever reads as a checklist to
+     produce, it has been broken.                                     */
   system:[
-    { k:'01', n:'Hero', t:'Official music video',
+    { k:'01', n:'Hero', badge:'Keep', t:'Official music video',
+      ev:'4 music videos took 64% of observed campaign viewing. 13 of 13 Premiered since 2021.',
+      say:'The hero isn’t the problem.',
       d:'The release moment. Premiere it. Already yours — 13 of 13 since 2021.',
       items:['Premiere every major video'] },
-    { k:'02', n:'Extend', t:'Another music moment',
+    { k:'02', n:'Extend', badge:'Change', t:'A second music moment',
+      ev:'The biggest opportunity. 89 days after DANCER with one long-form destination in the gap.',
+      say:'One hero. Then another way into the song.',
       d:'Pick per song, per gap. Not all of them, not every time.',
-      items:['Live / performance','Lyric','Visualiser','Acoustic / session','Q&A or Afterparty on the biggest'] },
-    { k:'03', n:'World', t:'The band',
+      items:['Owned performance — the preferred test','Lyric','Visualiser','Acoustic / session','Alternate version'] },
+    { k:'03', n:'World', badge:'Keep · clearer job', t:'The band',
+      ev:'113 Shorts, medians flat across every subtype. The only ones that broke out were personality — FLYNN! at 699K, six of the top ten.',
+      say:'Let Shorts show the band. Let long-form carry the music.',
       d:'Around the music, not instead of it.',
-      items:['Shorts','Behind the scenes','Rehearsal','Tour'] },
+      items:['Personality','Tour','Rehearsal','Behind it','Reaction'] },
   ],
 
   /* ── V3: THE ROLLOUT (slide 09) ───────────────────────────────────
      One song, mapped. Timings are illustrative and the slide says so.
      "Response-led" on the extend step matters: it is the difference
      between a multi-format strategy and a content treadmill.       */
+  /* V4: the third column is no longer a category label ("Hero", "World")
+     — it is the finding the row rests on. That single change is what
+     stops this reading as a generic release calendar. Every row that
+     can cite something now cites it; the rows that cannot say plainly
+     what they are (a judgement, a preference) rather than dressing an
+     opinion as evidence. */
   rollout:[
-    { d:'Day 0',        t:'Official video premiere',        r:'Hero' },
-    { d:'Day 0 / +1',   t:'Live Q&A · or Afterparty',       r:'Event', soft:true },
-    { d:'Day 7–14',     t:'Owned performance',              r:'Second music moment' },
-    { d:'Response-led', t:'Lyric · visualiser · alternate', r:'Extend the song' },
-    { d:'Throughout',   t:'Shorts · behind it · band world', r:'World' },
+    { d:'Before',        t:'Premiere scheduled',              r:'Shorts and band world point at the hero' },
+    { d:'Day 0',         t:'Official video premiere',         r:'Already a strength — 13 of 13 since 2021' },
+    { d:'Day 0 / +1',    t:'Event layer — Q&A or Afterparty', r:'Biggest moments only, not every single', soft:true },
+    { d:'Day +7–14',     t:'Second music moment',             r:'Preferably from the album’s own live world' },
+    { d:'Response-led',  t:'Lyric · visualiser · alternate',  r:'8 of TANGK’s 9 lyric videos landed on album day' },
+    { d:'Throughout',    t:'The band',                        r:'Shorts · behind it · rehearsal · tour' },
+    { d:'Between heroes',t:'Don’t leave the music empty',     r:'89 days after DANCER · one long-form destination' },
   ],
+
+  /* ── V4: THE PAYOFF (slide 10) ────────────────────────────────────
+     The one slide that has to survive the room. It states the change in
+     campaign ARCHITECTURE rather than in content volume, because "make
+     more videos" is the misreading this whole deck exists to prevent.
+
+     Both rows are descriptions of shape, not counts. The TANGK row is
+     OBSERVED — that is what the upload record shows. The next row is a
+     PROPOSAL and the slide says so. Nothing here forecasts a result. */
+  arc:{
+    now:['Big hero','Lots of activity','Next big hero'],
+    next:['Big hero','Second music moment','Band / world','Response-led extension','Next big hero'],
+    premium:'Premiere → event → performance → response-led extension',
+  },
 };
 
 const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ═══════════════════════════════════════════════════════════════════
-   SLIDES — nine. Each one job.
+   SLIDES — ten. Each one job.
    ═══════════════════════════════════════════════════════════════ */
 const slides = () => [
 
@@ -946,8 +1054,8 @@ const slides = () => [
           style="color:var(--bone)"><b>a premiere</b></a> and
         <a href="https://www.youtube.com/watch?v=${A.past.night.qa.id}" target="_blank" rel="noopener"
           style="color:var(--bone)"><b>a 47-minute Q&amp;A</b></a> on the same day,
-        ${esc(A.past.night.date)} — turned one video into a bigger moment.
-        <b style="color:var(--red)">The behaviour exists. Build the next version.</b></p>
+        ${esc(A.past.night.date)}. <b style="color:var(--red)">They’ve built bigger YouTube moments
+        before. The next version doesn’t need to look like 2020.</b></p>
     </div>
     <div class="srcbar reveal"><span class="src">${A.bbcTotal} current observed views across four
       mapped BBC Music performances · partner for reach, build an owned expression alongside it ·
@@ -985,11 +1093,23 @@ const slides = () => [
       ${A.bataclan.map(id=>`<img src="${thumb(id,'maxresdefault')}" alt="Le Bataclan"
         onerror="this.src='${thumb(id)}'">`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:34ch">Don't make more live content.
+    <h3 class="display mid reveal" style="margin-top:.9rem;max-width:34ch">Don't make more live content.
       <span style="color:var(--red)">Build one live world.</span></h3>
-    <div class="srcbar reveal"><span class="src">One night · one name · one world · full concert plus
-      individual songs · Le Bataclan is the clearest positive exception in the owned live catalogue —
-      a pattern worth testing, on five assets six to seven years old, not a predicted uplift</span></div>
+    <!-- V4: what one shoot yields. This is the line between a recommendation
+         that is operationally realistic and one that reads as "film more
+         gigs". Bataclan is the proof it works as a pattern — one night, one
+         name, a full concert AND individual songs off the same shoot. -->
+    <div class="swl reveal" style="margin-top:.7rem;color:var(--ink);flex-wrap:wrap;gap:.55rem">
+      One shoot →
+      <span style="color:var(--red)">Full performance</span> ·
+      <span style="color:var(--red)">Individual songs</span> ·
+      <span style="color:var(--red)">Behind it</span> ·
+      <span style="color:var(--red)">Shorts</span> ·
+      <span style="color:var(--red)">Interview / Q&amp;A</span>
+    </div>
+    <div class="srcbar reveal"><span class="src">Le Bataclan is the clearest positive exception in the
+      owned live catalogue — a pattern worth testing, on five assets six to seven years old, not a
+      predicted uplift</span></div>
   </div>
 </section>`,
 
@@ -1020,59 +1140,68 @@ const slides = () => [
       ${A.system.map((c,i)=>`
         <div class="col${i===2?' w':''}">
           <div class="col-k">${c.k}</div>
+          <div class="col-b${c.badge==='Change'?' ch':''}">${esc(c.badge)}</div>
           <div class="col-n">${esc(c.n)}</div>
           <div class="col-t">${esc(c.t)}</div>
-          <p class="col-d">${esc(c.d)}</p>
+          <p class="col-e">${esc(c.ev)}</p>
           <div class="col-i">${c.items.map(x=>`<span>${x}</span>`).join('')}</div>
+          <div class="col-say">${esc(c.say)}</div>
         </div>`).join('')}
     </div>
-    <div class="prog-note reveal">TANGK's ${A.lyric.n} lyric videos took ${A.lyric.total} —
-      but ${A.lyric.albumDay} landed on album day. <b>Don't just add formats. Place them where the
-      campaign needs them.</b></div>
+    <!-- V4: the lyric finding promoted out of footnote territory. It is the
+         most actionable IDLES-specific thing in the deck — the format is
+         already proven for them, so the recommendation is purely about
+         timing. We cannot claim holding assets back would raise viewing, so
+         this states the observation and calls the change a test. -->
+    <div class="prog-note reveal">${A.lyric.n} lyric videos took ${A.lyric.total} —
+      but ${A.lyric.albumDay} landed on album day.
+      <b>The format isn't new. The timing is.</b> Test holding some back as
+      response-led extensions.</div>
   </div>
 </section>`,
 
-/* 08 ── PROGRAMMING ────────────────────────────────────────────────
-   REBUILT FROM SCRATCH for V3. V2's version carried Afterparty, four
-   inventory thumbnails and two badges on one page and was busy and
-   awkward. Afterparty has moved to slide 07 where it belongs as one
-   option among several. This page now does one thing.
+/* 08 ── WHAT WE'D TAKE TO YOUTUBE ──────────────────────────────────
+   V4 REBUILD. V3 made this "here is Metallica TV, IDLES could have one
+   too", with a large Metallica image as the biggest object on the page.
+   That borrows someone else's scale to make an IDLES point, and the
+   IDLES evidence does not need the loan. Metallica is now one line at
+   the bottom.
 
-   METALLICA IS A PROGRAMMING REFERENCE. No view counts, no scale
-   comparison, no suggestion IDLES should copy them. If a number ever
-   appears next to Metallica on this slide, it is wrong.
+   The slide states three partner items with their REAL STATUS FIRST,
+   so none of them can be mistaken for a switch that can be flipped:
+     Premieres  — already adopted, 13 of 13. Nothing to ask for.
+     Afterparty — no mapped evidence of one during TANGK. A pitch, for
+                  the biggest hero moment only, never a guarantee.
+     Stations   — beta, access is not open. A separate programming
+                  opportunity for the live and archive world.
+   The wall underneath belongs to the Stations ask: it is the inventory
+   that makes that conversation worth having.
 
-   Stations stays clearly badged as a beta/partner opportunity VMG
-   would pitch — never a feature IDLES can switch on.                */
-`<section class="slide bone" data-t="Programme">
+   NO VIEW COUNTS ON THIS SLIDE. It is a programming idea. If a number
+   ever appears next to Metallica here, it is wrong.                 */
+`<section class="slide bone" data-t="What we'd pitch">
   <div class="inner">
-    <div class="label reveal">Programming the world</div>
-    <h2 class="display big reveal" style="max-width:21ch">The content exists.
-      <span style="color:var(--red)">Give it a home.</span></h2>
-    <!-- Metallica is capped at a fixed 340px column, not a fraction. At
-         .85fr it rendered a 324px-tall image — taller than the wall
-         beneath it and the biggest thing on the slide, which inverts the
-         hierarchy: the wall is the argument, Metallica is the reference
-         that explains it. The cap also keeps the slide inside unscaled
-         fit at 982 (979px before, ~820 after). -->
-    <div class="prog stagger" style="grid-template-columns:minmax(0,340px) minmax(0,1fr);
-      gap:1.6rem;margin-top:1rem;align-items:center">
-      <div>
-        <a class="prog-img" href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}"
-          target="_blank" rel="noopener">
-          <img src="${thumb(A.pitch.metallica.id,'maxresdefault')}" alt="Metallica TV"
-            onerror="this.src='${thumb(A.pitch.metallica.id)}'"></a>
-        <div class="prog-cap"><b>${esc(A.pitch.metallica.label)}</b>
-          <span>A reference for turning an artist's music, live and archive into a programmed
-            destination.</span></div>
+    <div class="label reveal">Working with YouTube</div>
+    <h2 class="display big reveal" style="max-width:24ch">Three asks.
+      <span style="color:var(--red)">One already answered.</span></h2>
+    <div class="asks stagger">
+      <div class="ask">
+        <div class="ask-n">Premieres</div>
+        <div class="ask-s" style="color:var(--smoke)">Already yours &middot; 13 of 13</div>
+        <div class="ask-d">Nothing to ask for. IDLES Premiere more consistently than most of the
+          roster — the recommendation is simply to keep doing it.</div>
       </div>
-      <div>
-        <div class="col-k">What an IDLES version would draw on</div>
-        <div class="col-d" style="margin-top:.35rem">Most of it is already on the channel. The next
-          album drops into a run that's running, instead of launching into silence.</div>
-        <div style="margin-top:.9rem"><span class="pbadge">YouTube Stations · Beta</span>
-          <div class="col-d" style="margin-top:.15rem">Partner opportunity. VMG would pitch this
-            to YouTube — access isn't open.</div></div>
+      <div class="ask go">
+        <div class="ask-n">Premium Afterparty</div>
+        <div class="ask-s">No mapped evidence during TANGK</div>
+        <div class="ask-d">Pitch it for the biggest hero moment of the campaign. One or two a
+          cycle, not every single, and only if secured.</div>
+      </div>
+      <div class="ask go">
+        <div class="ask-n">YouTube Stations</div>
+        <div class="ask-s">Beta &middot; access isn't open</div>
+        <div class="ask-d">A separate opportunity — a programmed home for the live and archive
+          world, running between campaigns as well as during them.</div>
       </div>
     </div>
     <!-- V4: the wall. Real IDLES uploads, then dashed cells for what the
@@ -1090,23 +1219,33 @@ const slides = () => [
       <i style="background:var(--ink);opacity:.55"></i> Already on the channel
       <i style="border:2px dashed var(--red);margin-left:.7rem"></i>
       <span style="color:var(--red)">Added by the next album</span>
+      <span style="margin-left:auto;opacity:.8;letter-spacing:.06em;text-transform:none;
+        font-weight:600">Closest live example:
+        <a href="https://www.youtube.com/watch?v=${A.pitch.metallica.id}" target="_blank"
+          rel="noopener" style="color:var(--ink)"><b>${esc(A.pitch.metallica.label)}</b></a></span>
     </div>
   </div>
 </section>`,
 
-/* 09 ── ONE SONG, MORE THAN ONE MOMENT · CLOSE ─────────────────────
-   The slide Partisan should photograph. One song mapped end to end so
-   the whole recommendation is legible at a glance.
+/* 09 ── ONE SONG, MORE THAN ONE MOMENT ─────────────────────────────
+   V4: no longer the closing slide, and no longer red — slide 10 takes
+   that job. This is the working page: the shape of one big single,
+   with the finding behind each row in the right-hand column.
 
-   Timings are illustrative and the source line says so. The Afterparty
-   row is soft and marked "if secured". "Response-led" on the extend
-   row is doing real work — it is the difference between a multi-format
-   strategy and a content treadmill.                                  */
-`<section class="slide red" data-t="One song">
+   THAT RIGHT COLUMN IS THE WHOLE POINT OF THE V4 PASS. In V3 it held
+   category labels — "Hero", "Event", "World" — which made a good
+   framework that could have been shown to any artist. Now every row
+   that can cite an IDLES finding does, and the rows that cannot say
+   plainly that they are a preference.
+
+   Timings are illustrative and the source line says so. The event row
+   stays soft and marked "if secured". "Response-led" is doing real
+   work: it is the difference between programming and a treadmill.  */
+`<section class="slide" data-t="One song">
   <div class="inner">
-    <div class="label reveal" style="color:#fff;opacity:.8">The shape of one release</div>
-    <h2 class="display reveal" style="max-width:20ch;color:#fff;font-size:clamp(2rem,5.4vw,4.2rem);line-height:.94">One song.<br>
-      More than one moment.</h2>
+    <div class="label reveal">The shape of one big single</div>
+    <h2 class="display big reveal" style="max-width:22ch">You already do most of this.
+      <span style="color:var(--red)">TANGK didn't connect it around the biggest songs.</span></h2>
     <div class="tl2 stagger">
       ${A.rollout.map(r=>`
         <div class="tl2row${r.soft?' soft':''}">
@@ -1115,10 +1254,44 @@ const slides = () => [
           <div class="tl2-r">${esc(r.r)}</div>
         </div>`).join('')}
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:34ch;color:#fff">Keep the hero.
-      <span style="opacity:.75">Give the music more ways to live.</span></h3>
+    <div class="prog-note reveal">Keep the hero. Build the second moment.
+      <b>Let the response decide what comes next.</b></div>
     <div class="srcbar reveal"><span class="src">Timings illustrative &middot; choose the extend
       format per song and per gap, not for every release</span></div>
+  </div>
+</section>`,
+
+/* 10 ── THE PAYOFF · CLOSE ─────────────────────────────────────────
+   The slide Partisan should photograph, and the one that has to stop
+   the deck being heard as "make more videos". It states the change as
+   ARCHITECTURE, not volume — same hero, same band, different shape
+   between the heroes.
+
+   The top row is OBSERVED: that is what the TANGK upload record shows.
+   The bottom row is a PROPOSAL and the source line says so. Neither
+   row carries counts or dates, because neither is a schedule and
+   putting numbers on them would imply a precision this recommendation
+   does not have. Nothing here forecasts a result.                   */
+`<section class="slide red" data-t="What changes">
+  <div class="inner">
+    <div class="label reveal" style="color:#fff;opacity:.8">What actually changes</div>
+    <h2 class="display reveal" style="max-width:26ch;color:#fff;font-size:clamp(1.8rem,4.6vw,3.5rem);line-height:.98">TANGK proved people will show up for the big videos.<br>
+      <span style="opacity:.75">Next time, give those videos somewhere to lead.</span></h2>
+    <div class="arc stagger">
+      <div class="arc-r">
+        <span class="arc-k">TANGK</span>
+        ${A.arc.now.map((c,i)=>`${i?'<span class="arc-a">&rarr;</span>':''}<span class="arc-c">${esc(c)}</span>`).join('')}
+      </div>
+      <div class="arc-r next">
+        <span class="arc-k">Next</span>
+        ${A.arc.next.map((c,i)=>`${i?'<span class="arc-a">&rarr;</span>':''}<span class="arc-c${i===2?' dim':''}">${esc(c)}</span>`).join('')}
+      </div>
+      <div class="arc-p">For the biggest moments: ${esc(A.arc.premium)}</div>
+    </div>
+    <div class="srcbar reveal" style="border-top-color:rgba(255,255,255,.22)">
+      <span class="src" style="color:rgba(255,255,255,.72)">Not more content &mdash; better programmed
+      music moments. A pattern to test, not a content quota: not every single needs everything, and
+      one produced live world can supply several of the second moments</span></div>
   </div>
 </section>`,
 
