@@ -30,13 +30,18 @@
    Topic audio pages. The old deck's 990,211 figure counted only the audio
    surfaces and understated the true response by 56%.
 
-   Mapped ecosystem: Sumerian 142,460,149 (64.1%) · artist channel
-   58,617,481 (26.4%) · Topic 21,082,685 (9.5%) = 222,160,315. Verified
-   ZERO shared video IDs across the three, so the sum is of distinct
-   uploads — but it is always described as OBSERVED views across THREE
-   MAPPED destinations, never as total Palaye YouTube views. Roughly 20.9m
-   of artist-channel lifetime sits in videos no longer in the playlist,
-   and collaborator surfaces are unmapped.
+   Mapped ecosystem, CONSISTENT BASIS, all three the sum of currently
+   visible uploads (4 Sep 2026): Sumerian 142,510,177 · artist channel
+   37,762,412 · Topic 21,239,143 = 201,511,732. Verified ZERO shared video
+   IDs across the three, so the sum is of distinct uploads — but it is
+   always described as CURRENT OBSERVED VIEWS across THREE MAPPED
+   destinations, never as total Palaye YouTube views and NEVER as an
+   audience. Views are not people.
+
+   The earlier 222,160,315 was withdrawn. It used the artist channel's
+   lifetime `viewCount` of 58,617,481 while the other two rows were
+   per-video sums — so it counted ~20.9m of views on deleted or private
+   videos on one row only. Collaborator surfaces remain unmapped.
 
    NEVER claim: that views were lost or diverted to the label; that the
    videos were uploaded in the wrong place; that the artist channel would
@@ -44,10 +49,22 @@
    Royal Television converts subscribers; that Shorts route to long-form.
    None of that is supported by public data.
 
-   Royal Television uses the CURRENT season (05 median 12,682 against a
-   median recent Short of 3,394, ~3.7x). The all-time median of 31,888 and
-   the "nine times a Short" line are gone — they were propped up by the
-   2018 seasons and flattered a declining franchise.
+   Royal Television is 69 REAL EPISODES, not 84 — 15 of the 84 matching
+   uploads are 17-45 second promo clips. Season 05 is 12 episodes at a
+   median of 22,318. Both the earlier 12,682 median and the "~3.7x a
+   recent Short" comparison are gone: the first mixed promo clips in with
+   episodes, and the second was never age-matched. The all-time median of
+   31,888 and the "nine times a Short" line are also gone.
+
+   THE FORMAT HIERARCHY (slide 7) is the spine of this revision. Three
+   formats, three jobs: music video = hero (Sumerian), Royal Television =
+   story, live/performance = the second music moment. Shorts support them;
+   lyric and visualiser are response-led only. This replaced a flat menu
+   of seven equally-weighted tiles, and it must not drift back into one.
+
+   The peer research behind it (YUNGBLUD, BMTH, Bad Omens and others)
+   stays OFF the artist-facing surface by instruction. It lives in
+   PalayeRoyale_Strategy_Research_v1.md.
    ═══════════════════════════════════════════════════════════════════ */
 
 :root{
@@ -237,11 +254,77 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
 .ref-k{font-size:.5rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
 .ref-t{font-family:'Oswald',sans-serif;font-size:1.05rem;font-weight:600;margin-top:.2rem;text-transform:uppercase}
 .ref-d{font-size:.58rem;color:var(--smoke);line-height:1.5;margin-top:.25rem}
+
+/* ── Stations beta note (slide 6) ────────────────────────────────────
+   Deliberately ON the slide rather than in the source bar. Stations is
+   a new YouTube product in beta — that is not a disclaimer to bury, it
+   is part of the ask: we would be pitching YouTube for access, and the
+   room needs to know that before anyone plans around it. Sits directly
+   under the Metallica card because that is the thing it qualifies.
+   Gold, matching the slot styling, so "proposed / not yet real" reads
+   consistently across the slide.                                     */
+/* The beta note sits UNDER THE RUN, not under the Metallica card. The
+   reference card is much taller than the two-row run, so the left column
+   had ~296px of dead space; putting the note there costs the slide no
+   height at all, where hanging it off the reference card pushed the
+   slide past unscaled fit on a 982px laptop. */
+.stn-main{min-width:0}
+.beta{margin-top:.6rem;border:1px solid rgba(201,162,39,.42);border-radius:8px;
+  background:rgba(201,162,39,.07);padding:.6rem .75rem}
+.beta-k{display:inline-block;font-size:.46rem;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--coal);background:var(--gold);
+  padding:.16rem .38rem;border-radius:3px;vertical-align:.06rem}
+.beta-t{font-size:.58rem;color:var(--smoke);line-height:1.55;margin-top:.4rem}
+.beta-t b{color:var(--gold);font-weight:700}
 .stn-n{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem;margin-top:1.1rem}
 @media(max-width:900px){.stn-n{grid-template-columns:repeat(2,1fr)}}
 .stn-n b{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;display:block;
   font-size:clamp(1.5rem,3.4vw,2.4rem)}
 .stn-n span{font-size:.6rem;color:var(--smoke);margin-top:.35rem;display:block;line-height:1.45}
+
+/* ── Format hierarchy (slide 7) ──────────────────────────────────────
+   Replaces a flat seven-tile menu. The whole point of this slide is
+   that these formats DO NOT have equal strategic value, so the layout
+   must not present them as equals. Three full-width tiers, each with a
+   rank numeral and a stated job, then a visibly demoted support strip.
+
+   Tier 1 carries the signal colour and the largest numeral. Tiers 2-3
+   step down in accent weight but keep the same type size, because they
+   are both real destinations — the step change is between the three
+   tiers and the support strip, not within them.                     */
+.tiers{display:grid;gap:.6rem;margin-top:1.15rem}
+.tier{display:grid;grid-template-columns:auto minmax(0,.95fr) minmax(0,1.35fr);gap:1.1rem;
+  align-items:center;padding:.7rem .95rem;border-radius:0 7px 7px 0;
+  border-left:3px solid var(--hair);background:rgba(242,239,234,.035)}
+.tier.t1{border-left-color:var(--signal);background:rgba(240,83,58,.075)}
+.tier.t2{border-left-color:var(--gold);background:rgba(201,162,39,.06)}
+.tier.t3{border-left-color:var(--gold);background:rgba(201,162,39,.06)}
+.tier-r{font-family:'Oswald',sans-serif;font-weight:600;line-height:.85;
+  font-size:clamp(1.5rem,3vw,2.3rem);color:var(--smoke);opacity:.5;min-width:1.1ch}
+.tier.t1 .tier-r{color:var(--signal);opacity:1}
+.tier.t2 .tier-r,.tier.t3 .tier-r{color:var(--gold);opacity:.9}
+.tier-k{font-size:.48rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--smoke)}
+.tier.t1 .tier-k{color:var(--signal)}
+.tier.t2 .tier-k,.tier.t3 .tier-k{color:var(--gold)}
+.tier-t{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(1rem,2.1vw,1.5rem);line-height:1.04;margin-top:.15rem}
+.tier-w{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);
+  margin-top:.28rem}
+.tier-d{font-size:.63rem;color:var(--smoke);line-height:1.6}
+@media(max-width:900px){.tier{grid-template-columns:auto 1fr}.tier-d{grid-column:1/-1}}
+/* The demoted strip. Deliberately hairline-only, no fill, no numeral —
+   it must read as a different class of thing, not tier 4 and 5.     */
+.support{display:grid;grid-template-columns:repeat(2,1fr);gap:1.3rem;margin-top:.9rem;
+  padding-top:.7rem;border-top:1px solid var(--hair)}
+/* Support text is deliberately quiet but must still be READABLE from the
+   back of a room — the demotion is carried by the hairline rule, the
+   absent numeral and the absent fill, not by shrinking type to the
+   point of uselessness. 9.3px was too small; these sit just under the
+   tier body at 10.08px and the hierarchy still reads. */
+.sup-t{font-size:.6rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--smoke)}
+.sup-d{font-size:.62rem;color:var(--smoke);opacity:.82;line-height:1.55;margin-top:.24rem}
 
 /* ── Routing flow + format options (slide 7) ────────────────────── */
 .flow{display:flex;align-items:stretch;gap:.9rem;margin-top:1.3rem;flex-wrap:wrap}
@@ -294,28 +377,99 @@ const A = {
   /* ── The three mapped destinations. Zero shared video IDs between them,
      verified, so these are distinct uploads. Always described as OBSERVED
      views across MAPPED destinations. ─────────────────────────────── */
+  /* CONSISTENT BASIS. Every one of these three numbers is the sum of the
+     CURRENTLY VISIBLE uploads on that surface, pulled 4 Sep 2026.
+
+     The previous version totalled 222,160,315 and was wrong — not
+     arithmetically, but because it mixed measurement bases. Sumerian and
+     the audio pages were per-video sums, while the artist channel used
+     the channel-level lifetime `viewCount` of 58,617,481. That lifetime
+     figure includes ~20.9m of views on videos that have been deleted or
+     made private, so the artist row was counting content nobody can
+     watch while the Sumerian row counted only live videos.
+
+     Correcting it DROPS the artist channel from 26% to 19%, which makes
+     the deck's own argument look stronger. That is exactly why it was
+     checked rather than adopted quietly: it is used here because it is
+     the consistent basis, not because it flatters the recommendation.
+
+     Percentages are deliberately NOT all printed on the slide — 70.7 /
+     18.7 / 10.5 rounds to 71/19/11 and visibly sums to 101. The bars
+     carry the proportion; only Sumerian's share is stated in words.   */
   eco:{
-    total:222160315,
-    sumerian:{ name:'Sumerian', videos:114, views:142460149, pct:64,
-      subs:2980000, lifetime:2809335853, musicVideos:32, mvViews:115574799 },
-    artist:{ name:'Palaye Royale', videos:340, views:58617481, pct:26, subs:272000 },
-    topic:{ name:'Palaye Royale audio', videos:154, views:21082685, pct:10 },
+    total:201511732,
+    sumerian:{ name:'Sumerian', videos:114, views:142510177, pct:71,
+      subs:2980000, musicVideos:32 },
+    artist:{ name:'Palaye Royale', videos:340, views:37762412, pct:19, subs:272000 },
+    topic:{ name:'Palaye Royale audio', videos:154, views:21239143, pct:11 },
   },
+
+  /* The 2024 Death or Glory campaign on Sumerian — five hero videos,
+     median 1,182,195. This is the SCALE THE ARTIST CHANNEL COMPLEMENTS,
+     and the reason the deck never argues for moving videos off Sumerian. */
+  mvBase:{ campaign2024median:1182195, top2024:2364949,
+    single1:{ t:'Feel Something, Great.', v:718736 },
+    single2:{ t:'Sad Generation',         v:530805 } },
+
+  /* ── THE DIAGNOSIS ────────────────────────────────────────────────
+     Trailing 24 months on the artist channel. The channel is BUSY —
+     it uploads more often than four of the six peers analysed. What it
+     lacks is destinations, not activity.
+
+     CLAIM DISCIPLINE: these are observed view counts only. Public data
+     cannot see discovery, subscriber acquisition, or whether a Short
+     leads anyone to long-form. The deck must never say Shorts "don't
+     work" or "don't drive discovery" — only that they dominate the
+     activity while the destinations are missing.                     */
+  activity:{ uploads24:136, shorts24:135, shortsPct:90, nonShort24:14,
+    shortsViews:1384951, shortsMedian:4068, activeMonths:'17 / 24' },
 
   /* Sumerian's biggest Palaye music videos — the reach that already exists. */
   sumerianMV:[
-    { id:'nzM134EhSFQ', t:'Mr. Doctor Man',        v:19264331, y:'2016' },
-    { id:'f5Nc4kiBaIs', t:'Lonely',                v:11303052, y:'2020' },
-    { id:'CrUM4tVpmRc', t:'Broken',                v:7765122,  y:'2022' },
-    { id:'0WzprXZGoLs', t:'Punching Bag',          v:6248015,  y:'2021' },
-    { id:'qePhiiz7dtc', t:'No Love In LA',         v:5749157,  y:'2021' },
-    { id:'4AnmemzByVY', t:'Dying In A Hot Tub',    v:5525435,  y:'2019' },
+    { id:'nzM134EhSFQ', t:'Mr. Doctor Man',        v:19267727, y:'2016' },
+    { id:'f5Nc4kiBaIs', t:'Lonely',                v:11305166, y:'2020' },
+    { id:'CrUM4tVpmRc', t:'Broken',                v:7767605,  y:'2022' },
+    { id:'0WzprXZGoLs', t:'Punching Bag',          v:6250503,  y:'2021' },
+    { id:'qePhiiz7dtc', t:'No Love In LA',         v:5750915,  y:'2021' },
+    { id:'4AnmemzByVY', t:'Dying In A Hot Tub',    v:5526782,  y:'2019' },
   ],
 
-  /* Current artist-channel state. Stated as evidence, never as an insult. */
-  channelNow:{ dormantDays:81, lastUpload:'13 June 2026',
-    bio:'Our brand new album, Death or Glory out now.',
-    videosTabTop:'Royal Television, Season 05', videosTabAge:'a year ago' },
+  /* ── LIVE: THE SECOND MUSIC MOMENT ────────────────────────────────
+     The strongest new recommendation in the deck, and it rests on
+     PALAYE'S OWN history, not on a peer's. These four 2020 performances
+     are the best-performing non-music-video assets the artist channel
+     has ever carried. Median 133,828 — six times Royal Television's
+     current-season median of 22,318, DESPITE being five years older,
+     which cuts against them on age rather than for them.
+
+     Nothing live has been posted to the channel since 2021.
+
+     The peer work sits underneath this and is deliberately NOT on the
+     slide: live is the only non-music-video format that cleared 10% of
+     an artist's own contemporary MV median across more than one
+     catalogue. That is why the recommendation is live and not lyric
+     videos. The deck states the conclusion, not the peer table — this
+     is an artist-facing surface, not a benchmark report.
+
+     CLAIM DISCIPLINE: never say live "drives" discovery, and never
+     imply Palaye would reproduce another artist's numbers.          */
+  live:{ lastPosted:'2021', median:133828, n:4,
+    best:[
+      { t:'Mr. Doctor Man',      s:'Live Acoustic · 2020', v:283747 },
+      { t:'Hang On To Yourself', s:'Live Acoustic · 2020', v:157980 },
+      { t:'Dying In A Hot Tub',  s:'Live · 2020',          v:109675 },
+      { t:'Black Sheep',         s:'Live Acoustic · 2020', v:101121 },
+    ] },
+
+  /* channelNow (81 dormant days, the stale bio, the Videos-tab observation)
+     was REMOVED, not lost. It powered the old slide 04, which argued the
+     channel had gone quiet. The research contradicted that: 136 uploads in
+     24 months is a higher rate than most of the peer set. The channel is
+     not dormant, so "81 days since the last upload" was a true number
+     making a false point, and the stale-bio line read as criticism of the
+     team for a problem that is not the actual problem. Slide 04 now argues
+     busy-without-destinations instead. Do not reinstate these fields
+     without re-checking the diagnosis they support.                    */
 
   /* ── ROYAL TELEVISION AS THE STATION ──────────────────────────────
      Same framing as the CHVRCHES and Amyl decks: an always-on programmed
@@ -327,18 +481,40 @@ const A = {
      The difference here, and the reason this slide is stronger than the
      equivalent in the other decks: CHVRCHES and Amyl would be starting a
      programmed series from nothing. Palaye Royale already run one. Royal
-     Television is 84 episodes across five seasons, so the ask is to
+     Television is 69 episodes across five seasons, so the ask is to
      restart and programme it around the album rather than invent it.
 
-     CURRENT-season figures only. Season 05 medians 12,682 against a
-     median recent Short of 3,394 (~3.7x). The all-time median of 31,888
-     is not used — the 2018 seasons have had eight years to accumulate
-     and would flatter a series that has cooled.
+     EPISODE COUNT CORRECTED. 84 uploads match "Royal Television", but
+     15 of them are 17-45 second PROMO CLIPS advertising the episodes
+     (median duration 40s, median 6,192 views). The series is 69 real
+     episodes, and 3,308,906 views on those episodes — not 84 and not
+     3,424,574. Do not restate 84.
 
-     NOTE: YouTube Stations is an emerging / beta product. Eligibility and
-     access would need confirming with YouTube. The slide says so. */
-  rtv:{ episodes:84, seasons:5, views:3424254,
-    s05:18, s05median:12682, medianShort:3394, multiple:'3.7', last:'July 2025',
+     Season 05 is 12 real episodes at a median of 22,318, median length
+     27 minutes. The earlier 12,682 figure was wrong: it averaged the
+     promo clips in with the episodes. The all-time median of 31,888 is
+     also not used — the 2018 seasons have had eight years to accumulate.
+
+     THE 3.7x vs SHORTS COMPARISON IS GONE and must not come back. It
+     was never age-matched, and the argument no longer needs it: the
+     case for Royal Television is that it is owned, established and
+     narrative, not that it beats a Short.
+
+     The strategic point has changed. Season 05 began weekly on 28 Jan
+     and then slipped to gaps of 14, 21 and 70 days before stopping.
+     Restarting a weekly treadmill would repeat that. Four episodes tied
+     to the four hero moments is the recommendation.
+
+     STATIONS IS A BETA PRODUCT AND THE SLIDE MUST SAY SO ON THE SLIDE,
+     not in the source bar. It was in the source bar and that was wrong:
+     down there it read as a disclaimer, when it is actually part of the
+     ask — access is not open, so this is something we would pitch
+     YouTube for. A manager planning around it needs to know that before
+     they plan, not after. The note also has to keep the fallback
+     visible: Royal Television works as a programmed run with or without
+     Stations, so the slide never depends on a product we cannot promise. */
+  rtv:{ episodes:69, promoClips:15, seasons:5, views:3308906,
+    s05:12, s05median:22318, s05dur:'27 min', last:'July 2025',
     station:{ id:'1fz60gNnSdU', label:'Metallica TV', channel:'Metallica' },
     /* The run: real episodes spanning four seasons, with campaign slots
        dropped in — new material joins the run rather than replacing it. */
@@ -365,7 +541,7 @@ const A = {
     { d:'22 Jan', y:'2027', t:'The album',           s:'Focus track · music video', hot:true },
     { d:'25 Jan', y:'2027', t:'Deluxe',              s:'Extended release', hot:false },
   ],
-  daysToFirst:30,
+  daysToFirst:28,
 
   morningLight:{ id:'WZ9ALGG11CA', views:22733144 },
   shorts:['j33Z_Kxf0Bk','9c-CcUvL2ww','1O54biUuX4Q','AyFkjFJe-28'],
@@ -400,20 +576,20 @@ const slides = () => [
 `<section class="slide coal" data-t="The scale">
   <div class="inner">
     <div class="label reveal">Where you're starting from</div>
-    <h2 class="display big reveal" style="max-width:15ch">222 million views.<br>
+    <h2 class="display big reveal" style="max-width:15ch">201 million views.<br>
       <span style="color:var(--signal)">One band.</span></h2>
-    <p class="sub reveal" style="max-width:52ch">That is the observed viewing on Palaye Royale
-      music and video across the three YouTube destinations we mapped. The audience is already
-      enormous. The question is only what happens next with it.</p>
+    <p class="sub reveal" style="max-width:52ch">Current observed views on Palaye Royale music and
+      video across the three YouTube destinations we mapped. The reach is already there. The
+      question is what happens next with it.</p>
     <div class="strip stagger" style="grid-template-columns:repeat(6,1fr);margin-top:1.5rem">
       ${A.sumerianMV.map(m=>`
         <div class="as"><img src="${thumb(m.id)}" alt="${esc(m.t)}">
           <div class="as-m"><span class="as-t">${esc(m.t)}</span>
             <span class="as-v">${fmt(m.v)}</span></div></div>`).join('')}
     </div>
-    <div class="srcbar reveal"><span class="src">Observed views across three mapped YouTube
-      destinations · public data only · not a complete account of every Palaye Royale video
-      on the platform</span></div>
+    <div class="srcbar reveal"><span class="src">Sum of currently public uploads on three mapped
+      YouTube destinations · views, not people · public data only · not a complete account of
+      every Palaye Royale video on the platform</span></div>
   </div>
 </section>`,
 
@@ -430,48 +606,62 @@ const slides = () => [
         <div class="eco-c ${c}">
           <div class="eco-bar"><span style="width:${d.pct}%"></span></div>
           <div class="eco-n">${fmt(d.views)}</div>
-          <div class="eco-p">${d.pct}%</div>
           <div class="eco-k">${esc(d.name)}</div>
           <div class="eco-s">${d.videos} videos</div>
         </div>`).join('')}
     </div>
     <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:38ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">The
       audience isn't missing. <span style="color:var(--signal)">It's distributed.</span></h3>
-    <div class="srcbar reveal"><span class="src">Sumerian has ${fmt(A.eco.sumerian.subs)} subscribers and
-      carries ${A.eco.sumerian.musicVideos} Palaye Royale music videos going back a decade —
-      that reach is real and it already belongs to the story</span></div>
+    <div class="srcbar reveal"><span class="src">${A.eco.sumerian.pct}% of observed viewing sits on
+      Sumerian, which has ${fmt(A.eco.sumerian.subs)} subscribers and carries
+      ${A.eco.sumerian.musicVideos} Palaye Royale music videos going back a decade — that reach
+      is real and it already belongs to the story</span></div>
   </div>
 </section>`,
 
-/* 04 ── THE CHANNEL NOW ────────────────────────────────────────────
-   The honest observation, evidenced from the public channel surface
-   rather than asserted. Tone: the music kept going, the channel
-   didn't. Never "you neglected it".                                */
+/* 04 ── THE DIAGNOSIS ──────────────────────────────────────────────
+   THE MOST IMPORTANT REFRAME IN THE DECK. The previous version said
+   the channel had gone quiet and implied the fix was to post more.
+   The research says the opposite: 136 uploads in 24 months makes this
+   channel MORE active than four of the six peers analysed. It is not
+   quiet. It is busy without destinations — 90% Shorts, 14 non-Shorts.
+
+   "Don't post more. Give the channel a job." is the spine of the deck
+   and this is where it lands.
+
+   CLAIM DISCIPLINE, and this matters more here than anywhere else:
+   the slide must NEVER say Shorts don't work, don't drive discovery,
+   or are wasted. Public data cannot see discovery, subscriber
+   acquisition, or Shorts-to-long-form journeys. The ONLY safe reading
+   is that Shorts dominate the ACTIVITY while destinations are thin.
+   The 4,068 median is stated as an observation, never as a verdict.
+
+   Tone stays constructive — this is effort being redirected, not
+   effort being criticised.                                          */
 `<section class="slide coal" data-t="The destination">
   <div class="inner">
-    <div class="label reveal">The gap</div>
-    <h2 class="display big reveal" style="max-width:19ch">The music is active.<br>
-      <span style="color:var(--signal)">The destination isn't.</span></h2>
+    <div class="label reveal">The diagnosis</div>
+    <h2 class="display big reveal" style="max-width:19ch">The channel isn't quiet.<br>
+      <span style="color:var(--signal)">It's busy without a job.</span></h2>
     <div class="two">
       <div class="card stagger">
-        <div class="card-k">On the channel right now</div>
-        <div class="card-n">${A.channelNow.dormantDays} days</div>
-        <div class="card-l">Since the last upload</div>
-        <p class="card-s">The Videos tab still opens on ${esc(A.channelNow.videosTabTop)},
-          posted ${esc(A.channelNow.videosTabAge)}. The bio still reads
-          &ldquo;${esc(A.channelNow.bio)}&rdquo;</p>
+        <div class="card-k">Last 24 months</div>
+        <div class="card-n">${A.activity.shortsPct}%</div>
+        <div class="card-l">Of uploads are Shorts</div>
+        <p class="card-s">${A.activity.uploads24} uploads, ${A.activity.shorts24} of them Shorts —
+          active in ${A.activity.activeMonths} months. That is a higher upload rate than most bands
+          we looked at. The effort is already going in.</p>
       </div>
       <div class="card hot stagger">
-        <div class="card-k">Meanwhile</div>
-        <div class="card-n">2 singles</div>
-        <div class="card-l">Released with videos in that window</div>
-        <p class="card-s">Feel Something, Great. and Sad Generation both went out with official
-          videos and both found an audience. The music never stopped — the channel around it
-          went quiet.</p>
+        <div class="card-k">In the same period</div>
+        <div class="card-n">${A.activity.nonShort24}</div>
+        <div class="card-l">Longer pieces to actually watch</div>
+        <p class="card-s">Two singles went out with videos and found an audience. What the channel
+          hasn't had is somewhere for that attention to land afterwards.</p>
       </div>
     </div>
-    <p class="sub reveal">There are ${A.daysToFirst} days until Lost In Translation. That is
-      enough time to make the channel feel like something is about to happen.</p>
+    <p class="sub reveal">There are ${A.daysToFirst} days until Lost In Translation. The opportunity
+      isn't more activity. <strong style="color:var(--paper)">It's more to watch.</strong></p>
   </div>
 </section>`,
 
@@ -496,6 +686,10 @@ const slides = () => [
     </div>
     <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:46ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Sumerian
       built the reach. <span style="color:var(--signal)">Now make every release build your world too.</span></h3>
+    <div class="srcbar reveal"><span class="src">The 2024 campaign's five music videos on Sumerian
+      median ${A.mvBase.campaign2024median.toLocaleString()} views, topping at
+      ${fmt(A.mvBase.top2024)} — that is the reach the artist channel complements rather than
+      competes with</span></div>
   </div>
 </section>`,
 
@@ -516,10 +710,18 @@ const slides = () => [
       <span style="color:var(--gold)">the station.</span></h2>
 
     <div class="stn">
+      <div class="stn-main">
       <div class="stn-run stagger">
         ${A.rtv.run.map(r=>r.slot
           ? `<div class="sw slot"><span class="slot-p">+</span><span class="slot-t">${esc(r.t)}</span></div>`
           : `<div class="sw"><img src="${thumb(r.id)}" alt="Royal Television"><span class="sw-s">${r.s}</span></div>`).join('')}
+      </div>
+        <div class="beta reveal">
+          <span class="beta-k">New · in beta</span>
+          <p class="beta-t">YouTube Stations is a <b>new product still in beta</b> — access isn't
+            open to everyone yet, so this is one we'd pitch YouTube for. Worth being early on.
+            Royal Television works as a programmed run whether or not we get it.</p>
+        </div>
       </div>
       <a class="ref" href="https://www.youtube.com/watch?v=${A.rtv.station.id}" target="_blank" rel="noopener">
         <img src="${thumb(A.rtv.station.id,'maxresdefault')}" alt="Metallica TV">
@@ -535,43 +737,70 @@ const slides = () => [
     <div class="stn-n stagger">
       <div><b style="color:var(--gold)">${A.rtv.episodes}</b><span>Episodes across ${A.rtv.seasons} seasons</span></div>
       <div><b>${fmt(A.rtv.views)}</b><span>Views on the series so far</span></div>
-      <div><b>${A.rtv.multiple}×</b><span>A recent episode against a recent Short</span></div>
+      <div><b>${A.rtv.s05median.toLocaleString()}</b><span>Median episode, most recent season</span></div>
       <div><b>${esc(A.rtv.last)}</b><span>The last episode</span></div>
     </div>
 
-    <h3 class="display mid reveal" style="margin-top:1rem;max-width:50ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Most
-      bands would have to invent this. <span style="color:var(--gold)">You'd just be turning it back on.</span></h3>
-    <div class="srcbar reveal"><span class="src">YouTube Stations is an emerging product — eligibility
-      would need confirming with YouTube. Royal Television works as a programmed run either way ·
-      Metallica referenced as a format example only</span></div>
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:52ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">Don't
+      restart a weekly series. <span style="color:var(--gold)">Make four episodes matter.</span></h3>
+    <div class="srcbar reveal"><span class="src">${A.rtv.episodes} episodes excludes
+      ${A.rtv.promoClips} short promo clips · median episode figure is Season 05 only, median
+      length ${A.rtv.s05dur} · Metallica referenced as a format example only, with no comparison
+      of scale drawn</span></div>
   </div>
 </section>`,
 
-/* 07 ── ROUTING ────────────────────────────────────────────────────
-   The actual strategic unlock, and deliberately a routing slide
-   rather than a format checklist. Formats are options, not orders.
-   Lyric and visualiser are marked OPPORTUNITY because Palaye have
-   no visualiser history and only three lyric videos.              */
+/* 07 ── THE FORMAT HIERARCHY ───────────────────────────────────────
+   The biggest strategic change in this revision. The previous version
+   showed seven formats as equal tiles tagged "Have it / Opportunity",
+   which is a CONTENT MENU. The research says these formats have very
+   different value, so the slide now has to be a PROGRAMMING SYSTEM:
+   three formats, three jobs, and everything else demoted below a rule.
+
+   Live is tier 3 by sequence, not by importance — it is the newest and
+   strongest recommendation in the deck. Palaye's four 2020 live
+   performances median 133,828, six times Royal Television's current
+   season, despite being five years older. Nothing live since 2021.
+
+   The peer evidence stays UNDERNEATH. No YUNGBLUD, no benchmark table,
+   no ratios on this slide. The research earned the conclusion; the
+   artist-facing surface states it.
+
+   Lyric and visualiser are deliberately below the rule and described
+   as response-led. They are not "opportunities" to be delivered — the
+   evidence says they are the weakest default commitments here.     */
 `<section class="slide" data-t="Every video needs a next">
   <div class="inner">
     <div class="label reveal">The idea worth taking away</div>
-    <h2 class="display big reveal" style="max-width:18ch">Every video<br>
-      <span style="color:var(--signal)">needs a next.</span></h2>
-    <div class="flow stagger">
-      <div class="flow-c"><div class="flow-k">The video lands</div><div class="flow-t">Music video</div></div>
-      <div class="flow-a">→</div>
-      <div class="flow-c hot"><div class="flow-k">Somewhere to go</div><div class="flow-t">Your channel</div></div>
-      <div class="flow-a">→</div>
-      <div class="flow-c"><div class="flow-k">And then</div><div class="flow-t">The next release</div></div>
+    <h2 class="display big reveal" style="max-width:20ch">Three formats.<br>
+      <span style="color:var(--signal)">Three different jobs.</span></h2>
+    <div class="tiers stagger">
+      ${[['t1','1','Hero','Official music video','Sumerian',
+          'The release itself. This is where the reach is, and it stays there.'],
+         ['t2','2','Story','Royal Television','Your channel',
+          'The narrative around the record. Four episodes, tied to the four moments.'],
+         ['t3','3','Performance','Live, acoustic or session','Your channel',
+          'The second music moment — so there is somewhere to go between the videos.']]
+        .map(([c,r,k,t,w,d])=>`
+        <div class="tier ${c}">
+          <div class="tier-r">${r}</div>
+          <div><div class="tier-k">${k}</div><div class="tier-t">${t}</div>
+            <div class="tier-w">${w}</div></div>
+          <p class="tier-d">${d}</p>
+        </div>`).join('')}
     </div>
-    <div class="opts stagger">
-      ${[['Royal Television','Have it'],['Live &amp; performance','Have it'],['Behind the scenes','Have it'],
-         ['Shorts','Have it'],['Lyric video','Opportunity'],['Visualiser','Opportunity'],['Playlists','Opportunity']]
-        .map(([t,tag])=>`<div class="opt${tag==='Opportunity'?' new':''}">${t}<span>${tag}</span></div>`).join('')}
+    <div class="support reveal">
+      <div><div class="sup-t">Shorts · support</div>
+        <p class="sup-d">Cut from the three above, not commissioned on their own. They point at
+          the work — they aren't the work.</p></div>
+      <div><div class="sup-t">Lyric &amp; visualiser · response-led</div>
+        <p class="sup-d">Only when a particular song is already moving. Not automatic campaign
+          deliverables.</p></div>
     </div>
-    <p class="sub reveal">Not all of them, and not for every single. When a song starts moving,
-      give that attention somewhere worth going. <strong style="color:var(--paper)">Build around
-      what responds.</strong></p>
+    <div class="srcbar reveal"><span class="src">Performance earns its place on your own evidence —
+      the ${A.live.n} live and acoustic videos from 2020 median
+      ${A.live.median.toLocaleString()} views, the strongest non-music-video assets the channel has
+      ever carried · nothing live since ${A.live.lastPosted}</span></div>
   </div>
 </section>`,
 
@@ -596,9 +825,9 @@ const slides = () => [
       <span>Build</span><i>→</i><span class="hot">Hero</span><i>→</i><span>Extend</span>
       <i>→</i><span>Connect</span><i>→</i><span>Next</span>
     </div>
-    <p class="sub reveal">The videos go out where the reach is. Between them, the channel keeps
-      running — Royal Television, live, whatever is being filmed anyway. The gaps are four to
-      nine weeks. That is the part worth planning.</p>
+    <p class="sub reveal">The videos go out where the reach is. Between them: an episode, and a
+      performance. The gaps are three to nine weeks &mdash; and the run into January is the long
+      one. <strong style="color:var(--paper)">That is the part worth planning.</strong></p>
   </div>
 </section>`,
 
@@ -609,10 +838,9 @@ const slides = () => [
     <div class="label reveal">Where this goes</div>
     <h2 class="display big reveal" style="max-width:20ch">Make every moment<br>
       <span style="color:var(--signal)">lead back into your world.</span></h2>
-    <p class="sub reveal" style="max-width:50ch">Four videos, sixteen weeks, and an audience
-      of 222 million already out there across YouTube. Keep the reach. Build the home.</p>
-    <div class="srcbar reveal"><span class="src">All figures from public YouTube data ·
-      artist, label and audio surfaces mapped · 2 September 2026 · no private or Analytics data used</span></div>
+    <p class="sub reveal" style="max-width:50ch">Four videos, sixteen weeks, and 201 million views
+      already out there across three destinations. Keep the reach where it is. Give the channel
+      a job.</p>
   </div>
 </section>`,
 ];
