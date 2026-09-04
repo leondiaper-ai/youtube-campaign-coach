@@ -546,6 +546,29 @@ body.present #pcount{display:block}
   letter-spacing:.13em;text-transform:uppercase;color:var(--red);margin-top:.2rem}
 .ask-d{font-size:.74rem;color:var(--smoke);line-height:1.5;margin-top:.35rem}
 
+/* ── V5: THE MULTI-FORMAT BRIDGE (slide 04) ──────────────────────────
+   One line of diagram under the gap evidence. Sized to sit between the
+   headline and the source line without becoming a second analytics
+   block — if this ever grows into a panel it has defeated its purpose.
+
+   The middle chip is the only outlined one: it is the interval, not an
+   asset, and it is the part of the diagram we are proposing rather than
+   observing. */
+.bridge{margin-top:1.1rem;padding-top:.85rem;border-top:2px solid var(--red)}
+.br-row{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem}
+.br-k{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-right:.4rem;flex:none}
+.br-c{font-family:'Archivo Black',sans-serif;font-size:clamp(.85rem,1.5vw,1.15rem);
+  text-transform:uppercase;line-height:1;padding:.36rem .7rem;background:var(--bone);color:var(--ink)}
+.br-c.gap{background:transparent;color:var(--red);border:1.5px dashed var(--red)}
+.br-c.on{background:var(--red);color:#fff}
+.br-a{color:var(--red);font-size:1rem;flex:none}
+.br-f{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
+.br-s{font-size:.78rem;color:var(--smoke);line-height:1.5;margin-top:.45rem}
+.br-s b{color:var(--bone);font-weight:700}
+.slide.light .br-s b,.slide.bone .br-s b{color:var(--ink)}
+
 /* ── V4: WHAT ONE SHOOT YIELDS (slide 06) ────────────────────────────
    First pass reused .swl for this and it rendered at source-line scale,
    directly above the actual source line — so the room read it as a
@@ -860,17 +883,17 @@ const A = {
   system:[
     { k:'01', n:'Hero', badge:'Keep', t:'Official music video',
       ev:'4 music videos took 64% of observed campaign viewing. 13 of 13 Premiered since 2021.',
-      say:'The hero isn’t the problem.',
+      say:'The hero worked.',
       d:'The release moment. Premiere it. Already yours — 13 of 13 since 2021.',
       items:['Premiere every major video'] },
     { k:'02', n:'Extend', badge:'Change', t:'A second music moment',
       ev:'The biggest opportunity. 89 days after DANCER with one long-form destination in the gap.',
-      say:'One hero. Then another way into the song.',
+      say:'This is the missing layer.',
       d:'Pick per song, per gap. Not all of them, not every time.',
       items:['Owned performance — the preferred test','Lyric','Visualiser','Acoustic / session','Alternate version'] },
     { k:'03', n:'World', badge:'Keep · clearer job', t:'The band',
       ev:'113 Shorts, medians flat across every subtype. The only ones that broke out were personality — FLYNN! at 699K, six of the top ten.',
-      say:'Let Shorts show the band. Let long-form carry the music.',
+      say:'Don’t ask Shorts to do the music’s job.',
       d:'Around the music, not instead of it.',
       items:['Personality','Tour','Rehearsal','Behind it','Reaction'] },
   ],
@@ -1021,11 +1044,43 @@ const slides = () => [
         </div>`).join('')}
       <div class="trow"><div class="thero">${esc(A.lastHero)}</div><div></div></div>
     </div>
-    <h3 class="display mid reveal" style="margin-top:1.3rem;max-width:32ch">The calendar was full.
+    <h3 class="display mid reveal" style="margin-top:1rem;max-width:32ch">The calendar was full.
       <span style="color:var(--red)">The music destinations weren't.</span></h3>
+    <!-- V5: the strategic bridge. Until this was here the deck proved the
+         gaps on slide 04 and only explained why they mattered on slide 07,
+         three slides later. This is the pivot from WHAT WAS MISSING to THE
+         PRINCIPLE, and it is deliberately one line of diagram, not another
+         analytics block.
+
+         "~7–14 days" IS OURS, NOT YOUTUBE'S. We have no verified YouTube
+         source claiming that window as a proven rule, so it is stated as a
+         target to test and the source line says so in terms. If anyone
+         ever rewrites this as "YouTube's sweet spot", that is a fabricated
+         citation — the honest version is that it is informed by
+         multi-format thinking and by the specific gaps measured above.
+
+         The multi-format line matters as much as the diagram: IDLES
+         already run official videos, Shorts, lyric videos and Premieres.
+         Nobody needs telling to "go multi-format". The finding is about
+         cadence, so the copy says cadence. -->
+    <div class="bridge reveal">
+      <div class="br-row">
+        <span class="br-k">The opportunity</span>
+        <span class="br-c">Hero OMV</span>
+        <span class="br-a">&rarr;</span>
+        <span class="br-c gap">~7&ndash;14 days</span>
+        <span class="br-a">&rarr;</span>
+        <span class="br-c on">Another music moment</span>
+      </div>
+      <div class="br-f">Live / performance &middot; Lyric &middot; Visualiser &middot; Acoustic / session
+        &nbsp;—&nbsp; not every format, not every song</div>
+      <div class="br-s">Multi-format isn't more content. It's giving the same song more than one moment.
+        <b>You already have the formats. The next step is the cadence.</b></div>
+    </div>
     <div class="srcbar reveal"><span class="src">Gaps measured between official video releases ·
-      destinations counted as long-form uploads only · observed campaign structure, not a claim
-      about audience behaviour</span></div>
+      destinations counted as long-form uploads only · the 7–14 day window is our recommended
+      operating pattern to test, informed by multi-format campaign thinking and the gaps above —
+      not a claimed YouTube rule</span></div>
   </div>
 </section>`,
 
@@ -1272,8 +1327,8 @@ const slides = () => [
           <div class="tl2-r">${esc(r.r)}</div>
         </div>`).join('')}
     </div>
-    <div class="prog-note reveal">Keep the hero. Build the second moment.
-      <b>Let the response decide what comes next.</b></div>
+    <div class="prog-note reveal">Keep the hero. <b>Build the follow-through.</b>
+      &nbsp;·&nbsp; One priority song &rarr; more than one music moment.</div>
     <div class="srcbar reveal"><span class="src">Timings illustrative &middot; choose the extend
       format per song and per gap, not for every release</span></div>
   </div>
