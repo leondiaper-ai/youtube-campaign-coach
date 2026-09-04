@@ -1207,7 +1207,13 @@ const slides = () => [
 `<section class="slide bone" data-t="Programme the channel">
   <div class="inner">
     <div class="label reveal">Working with YouTube</div>
-    <h2 class="display big reveal" style="max-width:22ch;font-size:clamp(2rem,5.4vw,5rem)">Programme the channel.<br>
+    <!-- 30ch, i.e. no effective cap — same trap as slide 04. At 22ch the
+         max-width computed to 1174px while "Programme the channel."
+         needs 1219px (measured as line boxes, 771 + 448), so the cap was
+         the binding constraint and the headline broke to three lines.
+         With the container's 1280px doing the work it sits on two lines
+         with about 60px of slack. -->
+    <h2 class="display big reveal" style="max-width:30ch;font-size:clamp(2rem,5.4vw,5rem)">Programme the channel.<br>
       <span style="color:var(--red)">Not just the release.</span></h2>
     <div class="stn stagger">
       <div>
