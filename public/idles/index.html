@@ -232,6 +232,18 @@ body.present #pcount{display:block}
 .tg-w{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;
   letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
 .tg-w b{color:var(--red);font-weight:700}
+/* The zero has to be unmissable — it is the strongest row on the slide.
+   The clustered row is deliberately NOT red: eight assets did exist, the
+   problem is only that they arrived together, so colouring it like the
+   zero would overstate it. */
+.tg-w b.z{font-family:'Archivo Black',sans-serif;font-size:1.15em;letter-spacing:0}
+.tg-w b.c{color:var(--bone)}
+.tg-n{color:var(--smoke);font-weight:400;text-transform:none;letter-spacing:.02em;
+  font-style:italic}
+.th-a{opacity:.55;font-size:.85em}
+.tape-p{margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--hair);
+  font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--red)}
 
 /* ── The zero (slide 05) ────────────────────────────────────────────
    The single most important number in the deck and it is a zero, so
@@ -646,12 +658,34 @@ const A = {
 
   /* The gaps. Each figure is a date difference from the upload record,
      and the "destinations" count is long-form assets only.          */
+  /* ── V7: GAPS RESTATED AS HERO-TO-HERO PAIRS ──────────────────────
+     The old shape listed a hero and the gap that followed it, which let
+     "Dancer · 89 days · 1 long-form" be read as Dancer BEING the one
+     long-form. It is not — the single follow-up in that gap was the
+     GRACE lyric video, so the pair is now named on the row.
+
+     AND IT CORRECTED A REAL ERROR. The third row read 61 days. The
+     Grace → Pop Pop Pop gap is 63 days; 61 is a different figure, the
+     post-album quiet run (16 Feb → 17 Apr 2024). The old row had
+     collapsed the two into one number. They are now separate: the row
+     carries 63, and the 61-day run is stated on its own line beneath.
+
+     The third gap is NOT a story about absence — there were eight
+     long-form assets in it. The finding is that all eight landed on
+     album day rather than being spread across the 63 days, so the row
+     must always carry the "all on album day" qualifier. Without it the
+     row argues against itself.
+
+     All figures from IDLES_TANGK_Review_v1.md, gap table. */
   gaps:[
-    { hero:'Dancer',      days:89, shorts:'18 Shorts',  dest:'1 long-form destination' },
-    { hero:'Gift Horse',  days:30, shorts:'6 uploads',  dest:'0 long-form' },
-    { hero:'Grace / album', days:61, shorts:'album day, then quiet', dest:'no new music destination' },
+    { from:'Dancer', to:'Gift Horse', days:89,
+      a:'18 Shorts', b:'1 long-form follow-up', note:'Grace lyric video' },
+    { from:'Gift Horse', to:'Grace', days:30,
+      a:'6 uploads', b:'0 long-form follow-up', zero:true },
+    { from:'Grace / album', to:'Pop Pop Pop', days:63,
+      a:'8 long-form assets', b:'All on album day', clustered:true },
   ],
-  lastHero:'Pop Pop Pop',
+  postAlbum:'61 days without a new music destination after album day',
 
   /* THE REVEAL. Zero owned live/performance long-form across the whole
      campaign window (1 Aug 2023 – 30 Dec 2024, 127 uploads).        */
@@ -983,14 +1017,16 @@ const slides = () => [
     <div class="tape stagger">
       ${A.gaps.map(g=>`
         <div class="trow">
-          <div class="thero">${esc(g.hero)}</div>
+          <div class="thero">${esc(g.from)} <span class="th-a">&rarr;</span> ${esc(g.to)}</div>
           <div class="tgap"><span class="tg-d">${g.days} days</span>
-            <span class="tg-w">${esc(g.shorts)} · <b>${esc(g.dest)}</b></span></div>
+            <span class="tg-w">${esc(g.a)} &middot;
+              <b class="${g.zero?'z':g.clustered?'c':''}">${esc(g.b)}</b>${
+              g.note?` <span class="tg-n">${esc(g.note)}</span>`:''}</span></div>
         </div>`).join('')}
-      <div class="trow"><div class="thero">${esc(A.lastHero)}</div><div></div></div>
+      <div class="tape-p reveal">${esc(A.postAlbum)}</div>
     </div>
     <h3 class="display mid reveal" style="margin-top:1rem;max-width:32ch">The calendar was full.
-      <span style="color:var(--red)">The music destinations weren't.</span></h3>
+      <span style="color:var(--red)">The music follow-through wasn't.</span></h3>
     <!-- V5: the strategic bridge. Until this was here the deck proved the
          gaps on slide 04 and only explained why they mattered on slide 07,
          three slides later. This is the pivot from WHAT WAS MISSING to THE
@@ -1019,8 +1055,8 @@ const slides = () => [
       </div>
       <div class="br-f">Live / performance &middot; Lyric &middot; Visualiser &middot; Acoustic / session
         &nbsp;—&nbsp; not every format, not every song</div>
-      <div class="br-s">Multi-format isn't more content. It's giving the same song more than one moment.
-        <b>You already have the formats. The next step is the cadence.</b></div>
+      <div class="br-s">Multi-format isn't more content. It's giving the same song more than one
+        moment. <b>You already have the formats. The next step is the cadence.</b></div>
     </div>
     <div class="srcbar reveal"><span class="src">Gaps measured between official video releases ·
       destinations counted as long-form uploads only · the 7–14 day window is our recommended
