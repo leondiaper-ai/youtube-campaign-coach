@@ -282,6 +282,31 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
   font-size:clamp(1.5rem,3.4vw,2.4rem)}
 .stn-n span{font-size:.6rem;color:var(--smoke);margin-top:.35rem;display:block;line-height:1.45}
 
+/* ── World-building reference (slide 7) ──────────────────────────────
+   Three environments as full-bleed image cards, not a table and not a
+   chart — the visual has to do the work, because the point is that
+   these places FEEL like places. Deliberately reuses the deck's
+   existing image-card language rather than introducing a new component.
+
+   The gold modifier marks Hansa's figure as a COUNT rather than a view
+   total, so "11 assets" is never mistaken for "11 million".          */
+.worlds{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.3rem}
+@media(max-width:900px){.worlds{grid-template-columns:1fr}}
+.wld{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--hair);min-width:0}
+.wld img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:#17151c}
+.wld::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(8,7,10,.9),rgba(8,7,10,.2) 58%,transparent)}
+.wld-m{position:absolute;left:.85rem;right:.85rem;bottom:.75rem;z-index:2}
+.wld-f{font-family:'Oswald',sans-serif;font-weight:600;line-height:.9;
+  font-size:clamp(1.15rem,2.5vw,1.85rem);color:var(--signal)}
+.wld.g .wld-f{color:var(--gold)}
+.wld-n{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
+  font-size:clamp(.82rem,1.6vw,1.05rem);line-height:1.05;margin-top:.28rem;color:var(--paper)}
+/* Hansa's sub-line is the sentence that carries the whole lesson —
+   recurrence, not scale. It was 8.8px, which is source-bar size for a
+   line that is doing headline work. There is room on a 252px card. */
+.wld-s{font-size:.62rem;color:#B9B3AA;line-height:1.42;margin-top:.22rem}
+
 /* ── Format hierarchy (slide 7) ──────────────────────────────────────
    Replaces a flat seven-tile menu. The whole point of this slide is
    that these formats DO NOT have equal strategic value, so the layout
@@ -531,8 +556,48 @@ const A = {
       { id:'ENBRRpyozn0', s:'S04' },
     ] },
 
-  /* Programming reference only. No scale or performance comparison. */
-  metallica:{ activeMonths:'24 / 24', live:111, making:34, bts:41 },
+  /* ── METALLICA = THE PROGRAMMING REFERENCE ────────────────────────
+     Kept deliberately. Metallica and YUNGBLUD teach DIFFERENT things
+     and the deck needs both:
+       Metallica → what a programmed artist DESTINATION looks like
+       YUNGBLUD  → what WORLD BUILDING around the music looks like
+     Neither is a benchmark and neither is a template to copy.
+
+     "posting in 24 / 24 months" WAS on this card and has been removed.
+     It is true — verified 4 Sep 2026, Metallica are active in all 24 —
+     but it sat two lines above "Don't restart a weekly series" and so
+     argued for exactly what we tell Palaye not to do. The lesson is the
+     MODEL, not the FREQUENCY. Do not put a cadence stat back here.
+
+     NO COMPOSITION NUMBERS EITHER. An earlier version carried 111 live
+     / 34 making-of / 41 BTS. Re-pulled 4 Sep 2026 those do not
+     reproduce (188 / 59 / 39 on my classifier), and 1,763 of Metallica's
+     2,482 uploads fall outside it entirely — the catalogue is too large
+     and too song-titled to classify reliably. The card is therefore
+     qualitative. Do not add a statistic here without re-deriving it.  */
+  metallica:{ channelId:'UCbulh9WdLtEXiooRcYK7SWw', subs:12600000 },
+
+  /* ── YUNGBLUD = THE WORLD-BUILDING REFERENCE ──────────────────────
+     Three recognisable environments, all verified 4 Sep 2026 from the
+     YUNGBLUD uploads playlist (UCd3Llj2WWJh8ItfYl32eJ4Q).
+
+     Hansa leads ON PURPOSE. Its figure is a COUNT, not views — the
+     lesson there is recurrence, and leading on Villa Park's 18.2M would
+     make the slide about scale, which is the one reading to avoid. The
+     gold styling on Hansa's figure marks it as a different kind of
+     number so nobody reads "11 assets" as a view count.
+
+     CLAIM DISCIPLINE: reference only. YUNGBLUD has roughly fourteen
+     times Palaye's subscribers. Never imply Palaye would reach these
+     numbers, that live causes reach or recommendation, or that Hansa
+     Studios caused anything. His MV median and the format ratios stay
+     in the research document and OFF this slide.                     */
+  yb:{ envs:[
+    { id:'3T5qM2mH3mw', name:'Hansa Studios', fig:'11 assets', gold:true,
+      sub:'A performance world they keep coming back to' },
+    { id:'IZAgVmowDOU', name:'BLUDFEST',   fig:'9.1M',  sub:'Live performance' },
+    { id:'oJZmO5mByVY', name:'Villa Park', fig:'18.2M', sub:'Live performance' },
+  ] },
 
   plan:[
     { d:'2 Oct',  y:'2026', t:'Lost In Translation', s:'Music video · album announce', hot:true },
@@ -728,8 +793,9 @@ const slides = () => [
         <div class="ref-b">
           <div class="ref-k">The format, running elsewhere</div>
           <div class="ref-t">${esc(A.rtv.station.label)}</div>
-          <div class="ref-d">${esc(A.rtv.station.channel)} keep a programmed channel running between
-            releases — posting in ${A.metallica.activeMonths} months, mostly live and behind the scenes.</div>
+          <div class="ref-d">${esc(A.rtv.station.channel)} run their channel as one programmed
+            destination — catalogue, live and video held together in a single place, rather than a
+            sequence of separate uploads.</div>
         </div>
       </a>
     </div>
@@ -750,7 +816,50 @@ const slides = () => [
   </div>
 </section>`,
 
-/* 07 ── THE FORMAT HIERARCHY ───────────────────────────────────────
+/* 07 ── WORLD BUILDING · THE YUNGBLUD REFERENCE ────────────────────
+   Sits between Royal Television and the format hierarchy on purpose:
+   the audience has just seen the asset Palaye already own, and is
+   about to be told what to programme. This slide is the bridge — it
+   shows what the space between hero releases can BE.
+
+   Metallica (slide 06) shows a programmed destination. This shows
+   world building. Two references, two different lessons, and the deck
+   needs both. Neither is a benchmark.
+
+   The whole slide is one idea: these are not extra assets, they are
+   the same songs given somewhere else to live. Do not add ratios,
+   medians or a comparison to Palaye's numbers — the moment a number
+   from a 3.87m-subscriber channel is set against a 272k one, the slide
+   stops being a creative reference and becomes a false promise.
+
+   The closing line hands off deliberately: "Another way in." here,
+   "Multiple ways in." on the next slide.                            */
+`<section class="slide coal" data-t="World building">
+  <div class="inner">
+    <div class="label reveal">A contemporary reference</div>
+    <h2 class="display big reveal" style="max-width:21ch">Don't just make another asset.<br>
+      <span style="color:var(--signal)">Make another place<br>the record can live.</span></h2>
+    <div class="worlds stagger">
+      ${A.yb.envs.map(e=>`
+        <div class="wld${e.gold?' g':''}">
+          <img src="${thumb(e.id,'maxresdefault')}" alt="${esc(e.name)}"
+            onerror="this.src='${thumb(e.id)}'">
+          <div class="wld-m">
+            <div class="wld-f">${esc(e.fig)}</div>
+            <div class="wld-n">${esc(e.name)}</div>
+            <div class="wld-s">${esc(e.sub)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <h3 class="display mid reveal" style="margin-top:1.2rem;max-width:40ch;font-size:clamp(1.15rem,2.4vw,1.85rem)">The
+      same songs. <span style="color:var(--signal)">Another way in.</span></h3>
+    <div class="srcbar reveal"><span class="src">YUNGBLUD · public YouTube data · current views ·
+      a much larger channel than yours · a reference for how the space between releases is used,
+      not a performance benchmark</span></div>
+  </div>
+</section>`,
+
+/* 08 ── THE FORMAT HIERARCHY ───────────────────────────────────────
    The biggest strategic change in this revision. The previous version
    showed seven formats as equal tiles tagged "Have it / Opportunity",
    which is a CONTENT MENU. The research says these formats have very
@@ -771,7 +880,7 @@ const slides = () => [
    evidence says they are the weakest default commitments here.     */
 `<section class="slide" data-t="Every video needs a next">
   <div class="inner">
-    <div class="label reveal">The idea worth taking away</div>
+    <div class="label reveal">One world. Multiple ways in.</div>
     <h2 class="display big reveal" style="max-width:20ch">Three formats.<br>
       <span style="color:var(--signal)">Three different jobs.</span></h2>
     <div class="tiers stagger">
@@ -836,8 +945,8 @@ const slides = () => [
   <div class="bleed"><img src="${thumb(A.morningLight.id,'maxresdefault')}" alt=""></div>
   <div class="inner">
     <div class="label reveal">Where this goes</div>
-    <h2 class="display big reveal" style="max-width:20ch">Make every moment<br>
-      <span style="color:var(--signal)">lead back into your world.</span></h2>
+    <h2 class="display big reveal" style="max-width:20ch">Keep the reach.<br>
+      <span style="color:var(--signal)">Build the world around it.</span></h2>
     <p class="sub reveal" style="max-width:50ch">Four videos, sixteen weeks, and 201 million views
       already out there across three destinations. Keep the reach where it is. Give the channel
       a job.</p>
