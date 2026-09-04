@@ -219,9 +219,16 @@ body.present #pcount{display:block}
 /* Capped at 16rem rather than 20rem. It still dominates the slide by a
    wide margin — the next largest thing on it is a 3rem headline — and
    the larger cap pushed the slide past unscaled fit at 982. */
+/* Capped again for V3 at 11rem: this slide now also carries the folded-in
+   "they used to" strip, and the zero was the only element on it with real
+   slack to give back. At 176px it is still roughly three times the height
+   of the headline beneath it, so it loses none of its authority — and the
+   whole slide now fits unscaled on a 14" screen, which the 16rem version
+   did not once the strip was added. */
 .zero{font-family:'Archivo Black',sans-serif;line-height:.72;
-  font-size:clamp(6rem,22vw,16rem);color:var(--red);margin:.1rem 0 .2rem}
-.bbc{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:1.1rem}
+  font-size:clamp(4.5rem,17vw,11rem);color:var(--red);margin:.05rem 0 .15rem}
+.bbc{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:.9rem}
+.bbc .pan img{aspect-ratio:16/9}
 @media(max-width:900px){.bbc{grid-template-columns:repeat(2,1fr)}}
 
 /* ── Strike-through (slide 06) ──────────────────────────────────── */
@@ -376,7 +383,7 @@ body.present #pcount{display:block}
    fact on that slide is the zero. Folding it into one compact strip
    keeps the slide to a single idea and saves a whole page. */
 .used{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);gap:1.5rem;align-items:center;
-  margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--hair)}
+  margin-top:.8rem;padding-top:.7rem;border-top:1px solid var(--hair)}
 @media(max-width:900px){.used{grid-template-columns:repeat(3,1fr)}.used p{grid-column:1/-1}}
 .us-n{font-family:'Archivo Black',sans-serif;font-size:clamp(1.1rem,2.4vw,1.75rem);
   line-height:.9;color:var(--bone)}
@@ -782,7 +789,7 @@ const slides = () => [
     <div class="zero reveal">0</div>
     <div class="cx-lab reveal" style="font-size:.9rem;letter-spacing:.2em;max-width:40ch">
       Owned live / performance long-form across the entire TANGK campaign</div>
-    <h3 class="display mid reveal" style="margin-top:1.6rem;max-width:30ch">The live story existed.
+    <h3 class="display mid reveal" style="margin-top:1.1rem;max-width:30ch">The live story existed.
       <span style="color:var(--red)">Just not on their own channel.</span></h3>
     <div class="bbc stagger">
       ${A.bbc.map(b=>`
