@@ -160,6 +160,17 @@ h1,h2,h3{margin:0}
 .seam h2{font-size:clamp(1.4rem,3vw,2.2rem);margin-top:.6rem}
 .seam p{font-size:.85rem;color:var(--dim);margin:.7rem auto 0;max-width:46ch}
 .dive{width:100%;height:100vh;border:0;display:block}
+/* The deck is mounted on demand rather than always present. An iframe that
+   tall at the bottom of the document pulled the browser's initial scroll
+   position down to it, so the page opened on the deck cover instead of the
+   cockpit — the exact opposite of the intended hierarchy. Loading it on
+   click also avoids fetching the entire deck on every cockpit visit. */
+#diveMount{background:var(--ink);padding:0 0 3.5rem;text-align:center}
+.opendive{font:inherit;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;padding:.8rem 1.8rem;border-radius:100px;
+  border:2px solid rgba(255,255,255,.35);background:transparent;color:#fff;cursor:pointer;
+  transition:.15s}
+.opendive:hover{background:#fff;color:var(--ink);border-color:#fff}
 
 .skel{color:var(--smoke);font-size:.85rem}
 .skel.on-dark{color:var(--dim)}
@@ -262,7 +273,7 @@ h1,h2,h3{margin:0}
   </div>
 </div>
 
-<iframe class="dive" src="/ktrap" title="K-Trap deep dive" loading="lazy"></iframe>
+<div id="diveMount"><button class="opendive" id="opendive">Open the deep dive</button></div>
 
 <div class="scrim" id="scrim"></div>
 <aside class="panel" id="panel" aria-hidden="true">
@@ -489,6 +500,14 @@ async function ask(q,type,title){
   }catch(e){ $('pb').innerHTML=`<p class="skel">Could not reach the Coach (${esc(e.message)}).</p>`; }
   finally{ clearTimeout(t); }
 }
+
+$('opendive').onclick = e => {
+  const f = document.createElement('iframe');
+  f.className = 'dive'; f.src = '/ktrap'; f.title = 'K-Trap deep dive';
+  const m = $('diveMount');
+  m.innerHTML = ''; m.style.padding = '0'; m.appendChild(f);
+  f.scrollIntoView({ behavior:'smooth', block:'start' });
+};
 
 /* The pattern chart is clickable — the one place someone will want the
    working, because it is the one place a claim is being made visually. */
