@@ -298,19 +298,40 @@ const BRIEF_Q = `Write the strategic summary for this campaign, in the voice of 
 
 Use these exact headings and nothing else:
 
+###HEADLINE
+One line, under 70 characters, in the voice of a deck cover. It should say what
+is true about this campaign right now in a way a marketing team would want to
+read. Not a status label, not a warning.
+
 ###READ
-Two short paragraphs. The first says how the campaign is actually doing. The second names the single most useful thing to understand right now.
+Two short paragraphs. The first says how the campaign is actually doing. The
+second names the single most useful thing to understand right now.
 
 ###WORKING
-Up to three items, one per line, formatted "Label — one sentence". Only include what the evidence genuinely supports. Two is better than three padded out. Zero is acceptable if nothing stands out.
+Only things that are genuinely GOING WELL. One per line, "Label — one sentence".
+This section is not a summary and not a balanced view: a risk, a gap, a decline
+or an absence must NEVER appear here. If only one thing is working, write one
+line. If nothing is, write the single word: none. Do not pad to three.
+
+###FIGURES
+Two to four of the most telling numbers, one per line, formatted exactly
+"Label | Value" with a pipe. Value must be short enough to set in large type —
+"Day 22", "0.80x", "+603K", "34 days". Label is at most five words. Use only
+figures that appear in the evidence you gathered.
 
 ###OPPORTUNITY
-A short title line, then two or three sentences. Frame this as something to build on rather than something that went wrong — a pattern worth repeating, a sequence worth tightening. Do not manufacture a positive: if the honest read is that the campaign is struggling, say so plainly and point forward.
+A short title line, then two or three sentences. Frame this as something to
+build on rather than something that went wrong — a pattern worth repeating, a
+sequence worth tightening. Do not manufacture a positive: if the honest read is
+that the campaign is struggling, say so plainly and point forward.
 
 ###MOVES
-Two or three strategic moves, one per line, formatted "Label — one sentence". High level, not a task list.
+Two or three strategic moves, one per line, "Label — one sentence". High level,
+not a task list.
 
-Rules: be specific to this artist and name real assets and numbers. Do not grade the team. Do not use the words "failed", "missed" or "poor". Keep every line short enough to read on a slide.`;
+Rules: be specific to this artist and name real assets and numbers. Do not grade
+the team. Avoid "failed", "missed", "poor", "risk" and "underperforming". Keep
+every line short enough to read on a slide.`;
 
 function splitBrief(text){
   const out = {};
@@ -334,23 +355,28 @@ const pairs = block => String(block||'').split('\n').map(l=>l.replace(/^[-•*\d
    ═══════════════════════════════════════════════════════════════════ */
 function renderRead(){
   const c = S.coach||{}, b = S.brief||{};
-  if (!c.headline && !b.READ){
+  if (!c.headline && !b.READ && !b.HEADLINE){
     $('read').innerHTML = `<div class="label">Campaign read</div>
       <h2 class="display">The read is unavailable right now</h2>
       <div class="body"><p>The numbers above are unaffected — they come straight from the public YouTube API.</p></div>`;
     return;
   }
+  const headline = (b.HEADLINE||'').split('\n')[0].trim() || c.headline || '';
   const paras = (b.READ||c.interpretation||'').split(/\n{2,}|\n/).filter(Boolean).slice(0,2);
   const move = (b.MOVES ? pairs(b.MOVES)[0]?.v : null) || c.recommendation;
   $('read').innerHTML = `
     <div class="label">Campaign read</div>
-    <h2 class="display">${esc(c.headline||'')}</h2>
+    <h2 class="display">${esc(headline)}</h2>
     <div class="body">${paras.map(p=>`<p>${esc(p)}</p>`).join('')}</div>
     ${move?`<div class="move"><div class="label">Best next move</div><p>${esc(move)}</p></div>`:''}`;
 }
 
 function renderWorking(){
-  const items = pairs(S.brief?.WORKING).slice(0,3);
+  const raw = String(S.brief?.WORKING||'').trim();
+  /* "none" is an allowed and honest answer. Rendering it as a card headed
+     What's Working would be the exact padding the section exists to avoid. */
+  if (!raw || /^none\.?$/i.test(raw)) return;
+  const items = pairs(raw).slice(0,3);
   if (!items.length) return;
   $('worksWrap').hidden = false;
   $('works').innerHTML = items.map((it,i)=>`
@@ -370,17 +396,17 @@ function renderOpportunity(){
   $('oppWrap').hidden = false;
   $('oppText').innerHTML = `<h2 class="display">${esc(title)}</h2>${body?`<p>${esc(body)}</p>`:''}`;
 
-  /* The ladder is measured, not written: whatever numeric evidence the
-     Coach cited, shown as figures rather than buried in a sentence. */
-  const ev = (S.coach?.evidence||[]).filter(e=>e.sourceType==='WATCHER');
-  const rungs = ev.map(e=>{
-    const m = e.claim.match(/^(.{3,58}?)[:,]?\s*((?:[+-]?[\d.,]+\s*(?:days?|x|%)?)|(?:Day\s*\d+))\b(.*)$/i);
-    return m ? { t:m[1].trim(), v:m[2].trim() } : null;
-  }).filter(Boolean).slice(0,4);
-  $('oppLadder').innerHTML = rungs.length
-    ? rungs.map((r,i)=>`<div class="rung${i===rungs.length-1?' hot':''}">
-        <span class="t">${esc(r.t)}</span><span class="v">${esc(r.v)}</span></div>`).join('')
-    : '';
+  /* The figures come back as explicit "Label | Value" pairs rather than
+     being regex-scraped out of prose. The first version guessed at numbers
+     inside sentences and rendered "," and "+2.1" as headline figures — a
+     parser confident enough to print garbage is worse than no parser. */
+  const rungs = String(S.brief?.FIGURES||'').split('\n')
+    .map(l=>l.replace(/^[-•*\s]+/,'').split('|'))
+    .filter(p=>p.length===2 && p[0].trim() && p[1].trim())
+    .map(p=>({ t:p[0].trim(), v:p[1].trim() })).slice(0,4);
+  $('oppLadder').innerHTML = rungs.map((r,i)=>
+    `<div class="rung${i===rungs.length-1?' hot':''}">
+       <span class="t">${esc(r.t)}</span><span class="v">${esc(r.v)}</span></div>`).join('');
 }
 
 function renderMoves(){
