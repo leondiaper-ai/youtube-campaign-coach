@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>K-Trap · Live Campaign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  THE LIVE CAMPAIGN COCKPIT  ·  K-Trap
+  ══════════════════════════════════════════════════════════════════════
+
+  One artist, one page. Cockpit above, the existing Deep Dive below,
+  untouched — /ktrap is embedded verbatim, not rebuilt. The deck is
+  already a validated object for these teams; this adds an operating
+  layer on top of it rather than replacing it.
+
+  ── THE DESIGN RULE THAT DRIVES EVERYTHING HERE ───────────────────────
+  Grok does more thinking than the user does reading.
+
+  The follow-up finding is the clearest case. A five-tool investigation
+  establishes that K-Trap's last four heroes received long-form support
+  on days 3, 13, 9 and 7, and that Pressure's documentary arrived on
+  day 22. Written out that is a paragraph nobody finishes. Drawn as five
+  bars it is obvious in about a second, and the only prose left is the
+  single line about what to do.
+
+  So every Coach output on this page is asked for as STRUCTURE first —
+  pipe-delimited rows that become bars, figures and a runway — and prose
+  only where structure genuinely fails.
+
+  ── ONE CALL, NOT SIX ─────────────────────────────────────────────────
+  The cockpit needs a direction, the channel's own alpha, the pattern
+  data and a rollout. Those arrive from a single request to the existing
+  /api/coach-service. No new backend, no new tools, no prompt-file
+  change; the question carries the structure.
+
+  Watcher paints first and never waits on the model, so the numbers are
+  readable long before the reasoning lands.
+-->
+
+<style>
+:root{
+  --ink:#0B0B0B; --paper:#FFFFFF; --cream:#F4F1EA;
+  --signal:#FF3B14; --smoke:rgba(11,11,11,.46); --hair:rgba(11,11,11,.12);
+  --dim:rgba(255,255,255,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.display{font-family:'Anton',Impact,sans-serif;font-weight:400;letter-spacing:.005em;
+  line-height:.94;text-transform:uppercase}
+h1,h2,h3{margin:0}
+.wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+.lab{font-size:.6rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--signal)}
+.lab.q{color:var(--smoke)}
+
+/* ── Cockpit shell ────────────────────────────────────────────────── */
+.cockpit{background:var(--ink);color:#fff;padding:1.6rem 0 2.2rem}
+.hd{display:flex;align-items:flex-end;gap:1.6rem;flex-wrap:wrap}
+.hd h1{font-size:clamp(1.7rem,3.4vw,2.6rem)}
+.hd h1 .sig{color:var(--signal)}
+.hd .meta{font-size:.78rem;color:var(--dim);font-weight:500;padding-bottom:.35rem}
+.hd .live{margin-left:auto;font-size:.6rem;font-weight:800;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--signal);padding-bottom:.4rem}
+.hd .live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--signal);margin-right:.45rem;vertical-align:middle}
+
+/* Live channel state */
+.state{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
+  gap:1px;background:rgba(255,255,255,.13);margin-top:1.4rem}
+.st{background:var(--ink);padding:.9rem 0 1.1rem}
+.st .n{font-family:'Anton',sans-serif;font-size:clamp(1.5rem,2.9vw,2.4rem);line-height:.92}
+.st .n.sig{color:var(--signal)}
+.st .c{font-size:.54rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--dim);margin-top:.4rem}
+
+/* ── Cockpit body ─────────────────────────────────────────────────── */
+.body{background:var(--cream);padding:2.2rem 0 2.6rem}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:2.6rem}
+@media(max-width:940px){.grid{grid-template-columns:1fr;gap:1.8rem}}
+
+/* Read + direction */
+.read h2{font-size:clamp(1.25rem,2.3vw,1.85rem);max-width:20ch;margin-top:.6rem}
+.dir{margin-top:1.2rem;background:var(--ink);color:#fff;padding:1.1rem 1.3rem;border-radius:3px}
+.dir .lab{color:var(--signal)}
+.dir p{margin:.4rem 0 0;font-size:1.02rem;line-height:1.42;font-weight:600;max-width:46ch}
+
+/* Channel alpha */
+.alpha{display:grid;gap:0}
+.al{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:baseline;
+  padding:.75rem 0;border-bottom:1px solid var(--hair)}
+.al:first-of-type{border-top:1px solid var(--hair)}
+.al .t{font-size:.88rem;font-weight:600;line-height:1.25}
+.al .t small{display:block;font-weight:400;color:var(--smoke);font-size:.76rem;margin-top:.1rem}
+.al .v{font-family:'Anton',sans-serif;font-size:1.55rem;color:var(--signal);white-space:nowrap}
+
+/* ── The pattern chart — the visual insight ───────────────────────── */
+.pattern{margin-top:2.4rem}
+.bars{margin-top:1rem}
+.bar{display:grid;grid-template-columns:190px 1fr auto;gap:1rem;align-items:center;
+  padding:.5rem 0}
+.bar .h{font-size:.8rem;font-weight:650;text-align:right;line-height:1.2}
+.bar .track{height:14px;background:rgba(11,11,11,.07);position:relative;border-radius:2px}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:2px}
+.bar.now .fill{background:var(--signal)}
+.bar .d{font-family:'Anton',sans-serif;font-size:1.1rem;white-space:nowrap;min-width:76px}
+.bar.now .d{color:var(--signal)}
+.bandnote{font-size:.72rem;color:var(--smoke);margin-top:.5rem;padding-left:200px}
+@media(max-width:760px){
+  .bar{grid-template-columns:1fr;gap:.25rem}.bar .h{text-align:left}.bandnote{padding-left:0}
+}
+
+/* ── Runway ───────────────────────────────────────────────────────── */
+.runway{margin-top:2.4rem}
+.rw{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  background:var(--hair);margin-top:1rem;border:1px solid var(--hair)}
+.rwc{background:var(--cream);padding:1.1rem 1.1rem 1.3rem}
+.rwc.today{background:#fff}
+.rwc .w{font-family:'Anton',sans-serif;font-size:1.15rem}
+.rwc .w.sig{color:var(--signal)}
+.rwc .e{font-size:.85rem;font-weight:650;margin-top:.35rem;line-height:1.3}
+.rwc ul{list-style:none;margin:.6rem 0 0;padding:0}
+.rwc li{font-size:.78rem;color:#2c2c2c;padding:.16rem 0 .16rem .8rem;position:relative;line-height:1.35}
+.rwc li::before{content:'';position:absolute;left:0;top:.62em;width:4px;height:4px;
+  border-radius:50%;background:var(--signal)}
+.rwc .none{font-size:.78rem;color:var(--smoke);margin-top:.5rem;line-height:1.4}
+.rwc .none a{color:var(--signal);font-weight:600}
+
+/* ── Coach live + report ──────────────────────────────────────────── */
+.bottom{display:grid;grid-template-columns:1.35fr 1fr;gap:2.6rem;margin-top:2.4rem;
+  padding-top:1.8rem;border-top:1px solid var(--hair)}
+@media(max-width:940px){.bottom{grid-template-columns:1fr}}
+.cl{display:grid;gap:.7rem}
+.clr{display:grid;grid-template-columns:96px 1fr;gap:1rem;align-items:baseline}
+.clr .k{font-size:.58rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke)}
+.clr .v{font-size:.9rem;line-height:1.45}
+.askbar{margin-top:1rem;display:flex;gap:.5rem;max-width:420px}
+.askbar input{flex:1;font:inherit;font-size:.83rem;padding:.5rem .75rem;
+  border:1px solid var(--hair);border-radius:4px;background:#fff}
+.askbar button{font:inherit;font-size:.72rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:.5rem 1rem;border:0;border-radius:4px;
+  background:var(--ink);color:#fff;cursor:pointer}
+.report{background:#fff;border:1px solid var(--hair);padding:1.4rem}
+.report h3{font-size:1rem;font-weight:700}
+.report p{font-size:.84rem;color:var(--smoke);margin:.4rem 0 1rem;line-height:1.45}
+.report a{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:.6rem 1.2rem;border:2px solid var(--ink);
+  text-decoration:none;color:var(--ink)}
+.report a:hover{background:var(--ink);color:#fff}
+
+/* ── Transition into the deep dive ────────────────────────────────── */
+.seam{background:var(--ink);color:#fff;padding:2.2rem 0;text-align:center}
+.seam .t{font-size:.6rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.seam h2{font-size:clamp(1.4rem,3vw,2.2rem);margin-top:.6rem}
+.seam p{font-size:.85rem;color:var(--dim);margin:.7rem auto 0;max-width:46ch}
+.dive{width:100%;height:100vh;border:0;display:block}
+
+.skel{color:var(--smoke);font-size:.85rem}
+.skel.on-dark{color:var(--dim)}
+
+/* ── Panel ────────────────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;background:rgba(11,11,11,.42);opacity:0;pointer-events:none;
+  transition:.2s;z-index:60}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;height:100%;width:min(620px,96vw);background:#fff;z-index:70;
+  transform:translateX(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-18px 0 50px rgba(0,0,0,.16)}
+.panel.on{transform:translateX(0)}
+.ph{padding:1.5rem 1.8rem 1.1rem;border-bottom:1px solid var(--hair);display:flex;gap:1rem;align-items:flex-start}
+.ph h2{font-size:1.05rem;font-weight:700;line-height:1.3}
+.px{margin-left:auto;background:none;border:0;font-size:1.5rem;line-height:1;cursor:pointer;color:var(--smoke)}
+.pb{flex:1;overflow-y:auto;padding:1.5rem 1.8rem 2.4rem}
+.blk{margin-bottom:1.8rem}
+.blk .h{font-size:.6rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.6rem}
+.f{display:grid;grid-template-columns:1fr auto;gap:.6rem 1rem;align-items:baseline;
+  padding:.5rem 0;border-bottom:1px solid var(--hair);font-size:.9rem}
+.f .s{font-size:.56rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.f.inf .s{color:var(--signal)}
+.unk{font-size:.9rem;line-height:1.55;background:var(--cream);padding:.85rem 1rem;border-radius:4px}
+.prose{font-size:.9rem;line-height:1.65;white-space:pre-wrap}
+.pf{border-top:1px solid var(--hair);padding:1rem 1.8rem;display:flex;gap:.5rem}
+.pf input{flex:1;font:inherit;font-size:.85rem;padding:.5rem .75rem;border:1px solid var(--hair);border-radius:4px}
+.pf button{font:inherit;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.5rem 1rem;border:0;border-radius:4px;background:var(--ink);color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- ════════════ COCKPIT ════════════ -->
+<div class="cockpit">
+  <div class="wrap">
+    <div class="hd">
+      <h1 class="display">K-Trap <span class="sig">× YouTube</span></h1>
+      <div class="meta" id="meta"></div>
+      <div class="live">Live</div>
+    </div>
+    <div class="state" id="state"></div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="wrap">
+
+    <div class="grid">
+      <div class="read" id="read">
+        <div class="lab">Campaign read</div>
+        <p class="skel">Reading the campaign…</p>
+      </div>
+
+      <div>
+        <div class="lab q">Channel alpha · what works here</div>
+        <div class="alpha" id="alpha"><p class="skel">…</p></div>
+      </div>
+    </div>
+
+    <div class="pattern" id="patternWrap" hidden>
+      <div class="lab q">Long-form support after each hero</div>
+      <div class="bars" id="bars"></div>
+      <div class="bandnote" id="bandnote"></div>
+    </div>
+
+    <div class="runway">
+      <div class="lab q">Campaign runway</div>
+      <div class="rw" id="runway"></div>
+    </div>
+
+    <div class="bottom">
+      <div>
+        <div class="lab q">Coach live</div>
+        <div class="cl" id="coachlive"><p class="skel">…</p></div>
+        <form class="askbar" id="askForm">
+          <input id="askInput" placeholder="Ask Coach…">
+          <button type="submit">Ask</button>
+        </form>
+      </div>
+      <div class="report">
+        <h3>Full campaign report</h3>
+        <p>The living deep dive — channel architecture, historical campaigns and
+           the full evidence behind everything above. For labels, managers and
+           YouTube partner conversations.</p>
+        <a href="/ktrap" target="_blank" rel="noopener">Open full report</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SEAM ════════════ -->
+<div class="seam">
+  <div class="wrap">
+    <div class="t">Below the cockpit</div>
+    <h2 class="display">The K-Trap deep dive</h2>
+    <p>The strategic understanding of this channel. Unchanged, and always here
+       when someone needs the whole argument rather than today's position.</p>
+  </div>
+</div>
+
+<iframe class="dive" src="/ktrap" title="K-Trap deep dive" loading="lazy"></iframe>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true">
+  <div class="ph"><h2 id="ptitle">Evidence</h2><button class="px" id="px">×</button></div>
+  <div class="pb" id="pb"></div>
+  <div class="pf"><form id="pform" style="display:flex;gap:.5rem;width:100%">
+    <input id="pinput" placeholder="Ask a follow-up"><button type="submit">Ask</button>
+  </form></div>
+</aside>
+
+<script>
+const API  = 'https://youtube-campaign-coach.vercel.app';
+const SLUG = 'k-trap';
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const compact = n => n==null?'—':Math.abs(n)>=1e6?(n/1e6).toFixed(1)+'M':Math.abs(n)>=1e3?Math.round(n/1e3)+'K':String(n);
+const $ = id => document.getElementById(id);
+const get = async p => { try{ return await (await fetch(API+p,{cache:'no-store'})).json(); }
+  catch(e){ return {error:'UNREACHABLE',detail:e.message}; } };
+
+const S = { live:null, coach:null, horizon:null, brief:null, sessionId:null };
+
+/* ═══════════════════════════════════════════════════════════════════
+   ONE REQUEST FOR EVERYTHING THE COCKPIT NEEDS
+   ───────────────────────────────────────────────────────────────────
+   Structure first. Each block is asked for in a shape that becomes a
+   chart, a figure or a runway column — the model does the analysis and
+   the interface makes the answer obvious, rather than handing over a
+   paragraph and calling it intelligence.
+   ═══════════════════════════════════════════════════════════════════ */
+const BRIEF = `Return ONLY the blocks below, in this order, with no other text.
+
+###HEADLINE
+One line under 70 characters. How this campaign is doing, in the voice of a deck
+cover a marketing team would want to read. Not a status label, not a warning.
+
+###DIRECTION
+One sentence. The single most useful thing the team should do next. Specific to
+this artist, naming a real asset or window.
+
+###PATTERN
+For each of this artist's last four OMV heroes AND the current hero, one line:
+HeroName | daysUntilFirstLongFormFollowUp | assetType
+Oldest first, current hero LAST. Middle value a whole number, or "none" if no
+long-form follow-up has landed yet. Keep HeroName under 22 characters.
+
+###BAND
+One short clause naming the follow-up window this artist has typically used.
+
+###ALPHA
+Two or three things that demonstrably work for THIS channel — not general
+YouTube advice. One per line:
+Label | Value | short clause
+Value must be a number, ratio or day range short enough for large type.
+
+###ROLLOUT
+Up to three recommended YouTube actions for the period ahead, one per line:
+When | Action | why in six words or fewer
+"When" is a short phrase like "Now", "Next hero", "+7-14d".
+
+###LIVE
+Exactly three lines:
+Today | one sentence on whether anything is required today
+Watching | what the Coach is tracking
+Next decision | the decision that is actually pending
+
+Be specific and name real assets. Avoid "failed", "missed", "poor", "risk".`;
+
+const blocks = t => {
+  const o = {};
+  for (const p of String(t||'').split(/###\s*/).filter(Boolean)){
+    const i = p.indexOf('\n'); if (i<0) continue;
+    o[p.slice(0,i).trim().toUpperCase()] = p.slice(i+1).trim();
+  }
+  return o;
+};
+const rows = (b,n) => String(b||'').split('\n')
+  .map(l=>l.replace(/^[-•*\s]+/,'').split('|').map(x=>x.trim()))
+  .filter(p=>p.length>=n && p[0]);
+
+/* ── Watcher: live channel state ──────────────────────────────────── */
+function renderState(){
+  const st = S.live?.state||{}, cam = S.live?.campaign||{};
+  const v7 = S.live?.views7?.delta, s7 = S.live?.subs7?.delta;
+  $('meta').textContent = [S.live?.artist?.campaign, `Day ${cam.daysSinceStart ?? '—'}`,
+    S.live?.artist?.phase && `${S.live.artist.phase} phase`].filter(Boolean).join(' · ');
+  const items = [
+    [compact(st.subscriberCount),'Subscribers',0],
+    [(v7>0?'+':'')+compact(v7),'Views · 7d',1],
+    [(s7>0?'+':'')+compact(s7),'Subs · 7d',0],
+    [st.uploadsLast14Days ?? '—','Uploads · 14d',0],
+    [st.shortsLast14Days ?? '—','Shorts · 14d',0],
+    [st.videosLast14Days ?? '—','Long-form · 14d',0],
+    [st.daysSinceLastUpload ?? '—','Days since upload',0],
+  ];
+  $('state').innerHTML = items.map(([n,c,sig])=>
+    `<div class="st"><div class="n${sig?' sig':''}">${esc(n)}</div><div class="c">${esc(c)}</div></div>`).join('');
+}
+
+/* ── Coach: read + one direction ──────────────────────────────────── */
+function renderRead(){
+  const b = S.brief||{}, c = S.coach||{};
+  const head = (b.HEADLINE||'').split('\n')[0].trim() || c.headline || '';
+  const dir  = (b.DIRECTION||'').split('\n')[0].trim() || c.recommendation || '';
+  if (!head && !dir){ $('read').innerHTML = `<div class="lab">Campaign read</div>
+    <p class="skel">The read is unavailable. The numbers above are unaffected.</p>`; return; }
+  $('read').innerHTML = `
+    <div class="lab">Campaign read</div>
+    <h2 class="display">${esc(head)}</h2>
+    ${dir?`<div class="dir"><div class="lab">Do this next</div><p>${esc(dir)}</p></div>`:''}`;
+}
+
+/* ── Channel alpha ────────────────────────────────────────────────── */
+function renderAlpha(){
+  const r = rows(S.brief?.ALPHA,2).slice(0,3);
+  if (!r.length){ $('alpha').innerHTML = `<p class="skel">Building the channel profile…</p>`; return; }
+  $('alpha').innerHTML = r.map(([label,value,note])=>`
+    <div class="al"><div class="t">${esc(label)}${note?`<small>${esc(note)}</small>`:''}</div>
+      <div class="v">${esc(value)}</div></div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE PATTERN CHART
+   ───────────────────────────────────────────────────────────────────
+   The five-tool investigation, drawn. Bars are scaled to the longest
+   gap so the current hero's position is visible rather than argued.
+   "none" is a legitimate value and renders as a full-width open bar —
+   an absent follow-up is a real state, not missing data.
+   ═══════════════════════════════════════════════════════════════════ */
+function renderPattern(){
+  const r = rows(S.brief?.PATTERN,2).slice(0,6);
+  if (r.length < 2) return;
+  const vals = r.map(([,d])=>/^\d+$/.test(d)?parseInt(d,10):null);
+  const max = Math.max(...vals.filter(v=>v!=null), 14);
+  $('patternWrap').hidden = false;
+  $('bars').innerHTML = r.map(([hero,d,type],i)=>{
+    const n = vals[i];
+    const pct = n==null ? 100 : Math.max(4, Math.round((n/max)*100));
+    const last = i === r.length-1;
+    return `<div class="bar${last?' now':''}">
+      <div class="h">${esc(hero)}</div>
+      <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="d">${n==null?'none yet':`Day ${n}`}${type?` · ${esc(type)}`:''}</div>
+    </div>`;
+  }).join('');
+  const band = (S.brief?.BAND||'').split('\n')[0].trim();
+  $('bandnote').textContent = band || '';
+}
+
+/* ── Runway: plan events + recommended YouTube layer ──────────────── */
+function renderRunway(){
+  const h = S.horizon||{};
+  const ev = (h.events||[]).filter(e=>e.eventDate && new Date(e.eventDate)>=Date.now()-864e5)
+    .sort((a,b)=>a.eventDate.localeCompare(b.eventDate)).slice(0,3);
+  const roll = rows(S.brief?.ROLLOUT,2).slice(0,3);
+
+  const cells = [`<div class="rwc today"><div class="w sig">Today</div>
+    <div class="e">${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long'})}</div>
+    ${roll.filter(x=>/^now$/i.test(x[0])).map(x=>`<ul><li>${esc(x[1])}</li></ul>`).join('')||''}</div>`];
+
+  for (const e of ev){
+    const d = Math.round((new Date(e.eventDate)-Date.now())/864e5);
+    cells.push(`<div class="rwc">
+      <div class="w">${new Date(e.eventDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase()}</div>
+      <div class="e">${esc(e.title)}</div>
+      <ul><li>In ${d} day${d===1?'':'s'}</li></ul></div>`);
+  }
+
+  /* No confirmed dates: the runway becomes the ask, and the Coach's
+     recommendations still render — they are about sequence, not dates. */
+  if (!ev.length){
+    cells.push(`<div class="rwc"><div class="w">Next moment</div>
+      <div class="e">Not yet confirmed</div>
+      <div class="none"><a href="${API}/coach-bot/horizon?slug=${SLUG}">Add the next release date</a>
+      and the runway builds around it.</div></div>`);
+  }
+  for (const [when,action,why] of roll.filter(x=>!/^now$/i.test(x[0]))){
+    cells.push(`<div class="rwc"><div class="w">${esc(when)}</div>
+      <div class="e">${esc(action)}</div>${why?`<ul><li>${esc(why)}</li></ul>`:''}</div>`);
+  }
+  $('runway').innerHTML = cells.join('');
+}
+
+/* ── Coach live ───────────────────────────────────────────────────── */
+function renderLive(){
+  const r = rows(S.brief?.LIVE,2).slice(0,3);
+  if (!r.length){
+    const c = S.coach||{};
+    $('coachlive').innerHTML = `
+      <div class="clr"><div class="k">Today</div><div class="v">${esc(c.recommendation||'—')}</div></div>
+      ${c.nextCheck?`<div class="clr"><div class="k">Next check</div><div class="v">${esc(c.nextCheck)}</div></div>`:''}`;
+    return;
+  }
+  $('coachlive').innerHTML = r.map(([k,v])=>
+    `<div class="clr"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join('');
+}
+
+/* ── Evidence panel ───────────────────────────────────────────────── */
+const SRC={WATCHER:'measured',PUBLIC_YOUTUBE:'YouTube',EXTERNAL:'external',COACH_INFERENCE:'inferred'};
+function openP(t){ $('ptitle').textContent=t; $('panel').classList.add('on'); $('scrim').classList.add('on'); }
+function closeP(){ $('panel').classList.remove('on'); $('scrim').classList.remove('on'); }
+$('px').onclick=closeP; $('scrim').onclick=closeP;
+
+async function ask(q,type,title){
+  openP(title||'Evidence');
+  $('pb').innerHTML=`<p class="skel">Looking into it…</p>`;
+  const c=new AbortController(); const t=setTimeout(()=>c.abort(),90000);
+  try{
+    const r=await fetch(API+'/api/coach-service',{method:'POST',
+      headers:{'content-type':'application/json'},signal:c.signal,
+      body:JSON.stringify({artistId:SLUG,question:q,investigationType:type||'CUSTOM',sessionId:S.sessionId})});
+    const j=await r.json();
+    if(j.sessionId) S.sessionId=j.sessionId;
+    if (j.error){ $('pb').innerHTML=`<p class="skel">${esc(j.detail||j.error)}</p>`; return; }
+    const ev=(j.evidence||[]).filter(e=>e.claim);
+    const known=ev.filter(e=>e.sourceType!=='COACH_INFERENCE'), inf=ev.filter(e=>e.sourceType==='COACH_INFERENCE');
+    const facts=l=>l.map(e=>`<div class="f${e.sourceType==='COACH_INFERENCE'?' inf':''}">
+      <span>${esc(e.claim)}</span><span class="s">${esc(SRC[e.sourceType]||e.sourceType)}</span></div>`).join('');
+    $('pb').innerHTML=`
+      ${known.length?`<div class="blk"><div class="h">What we know</div>${facts(known)}</div>`:''}
+      ${inf.length?`<div class="blk"><div class="h">What the Coach concludes</div>${facts(inf)}</div>`:''}
+      ${j.missingContext?`<div class="blk"><div class="h">What we don't know</div><div class="unk">${esc(j.missingContext)}</div></div>`:''}
+      ${j.answer?`<div class="blk"><details><summary class="h" style="cursor:pointer">Full analysis</summary>
+        <div class="prose" style="margin-top:.8rem">${esc(j.answer)}</div></details></div>`:''}`;
+  }catch(e){ $('pb').innerHTML=`<p class="skel">Could not reach the Coach (${esc(e.message)}).</p>`; }
+  finally{ clearTimeout(t); }
+}
+
+/* The pattern chart is clickable — the one place someone will want the
+   working, because it is the one place a claim is being made visually. */
+$('bars').addEventListener('click', () => ask(
+  'Show the evidence for the long-form follow-up timing across recent heroes, with the specific dates, and say what it does and does not establish about performance.',
+  'COMPARE_PREVIOUS_CAMPAIGN', 'Follow-up timing across heroes'));
+
+$('askForm').onsubmit = e => { e.preventDefault();
+  const v=$('askInput').value.trim(); if(!v) return; $('askInput').value=''; ask(v,'CUSTOM',v); };
+$('pform').onsubmit = e => { e.preventDefault();
+  const v=$('pinput').value.trim(); if(!v) return; $('pinput').value=''; ask(v,'CUSTOM',v); };
+
+/* ═══════════════════════════════════════════════════════════════════ */
+(async function(){
+  const [live,horizon] = await Promise.all([
+    get(`/api/artist-live?slug=${SLUG}`), get(`/api/campaign-horizon?slug=${SLUG}`),
+  ]);
+  S.live=live;
+  S.horizon = horizon?.horizon ? {...horizon.horizon, events:horizon.events} : (horizon||{});
+  renderState(); renderRunway();
+
+  S.coach = await get(`/api/coach-service?slug=${SLUG}`);
+  renderRead(); renderLive();
+
+  try{
+    const r = await fetch(API+'/api/coach-service',{method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({artistId:SLUG,question:BRIEF,investigationType:'COMPARE_PREVIOUS_CAMPAIGN'})});
+    const j = await r.json();
+    if (j.sessionId) S.sessionId = j.sessionId;
+    S.brief = blocks(j.answer);
+  }catch(e){ S.brief = null; }
+
+  renderRead(); renderAlpha(); renderPattern(); renderRunway(); renderLive();
+})();
+</script>
+</body>
+</html>

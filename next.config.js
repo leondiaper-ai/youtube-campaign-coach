@@ -19,6 +19,9 @@ const nextConfig = {
       // The living deep dive: the decks' visual language, kept current by
       // Watcher and Grok. Sits alongside /ws and /amyl-live for comparison.
       { source: '/deck', destination: '/deck/index.html' },
+      // The synthesis: live cockpit above, the existing K-Trap deep dive
+      // below (embedded verbatim from /ktrap, not rebuilt).
+      { source: '/ktrap-live', destination: '/ktrap-live/index.html' },
     ];
   },
 };
