@@ -6,23 +6,42 @@
  * swapped out.
  *
  * ── ON GROK SPECIFICALLY ──────────────────────────────────────────────
- * Checked at build time: there is no Grok/xAI connector in the MCP registry
- * available to this environment, and no xAI credential in the project. So
- * "Grok Bot drives our app" is not something that can be wired today without
- * assuming an integration that has not been shown to exist.
+ * There are two independent directions of travel, and confusing them wastes
+ * a lot of time:
  *
- * What IS portable, and what this file implements, is the brief's own
- * fallback: a provider-agnostic adapter. xAI is supported first-class and
- * becomes the default the moment XAI_API_KEY is set — no code change. If
- * Grok Bot later gains the ability to call external tools, it can drive
- * POST /api/researcher/tools directly and this adapter is simply bypassed.
- * Either way the data and the accumulated findings stay in our system.
+ *   1. Grok calls US. grok.com adds our /api/mcp endpoint as a custom
+ *      connector. Works today. Requires a human logged into grok.com.
+ *
+ *   2. WE call Grok. This file. Requires XAI_API_KEY, an api.x.ai
+ *      credential billed separately from any grok.com subscription.
+ *
+ * Only (2) lets our own product surface the Coach to users who have no Grok
+ * account, which is why the Coach service depends on this adapter and not on
+ * the MCP endpoint. xAI is first in the resolution order and becomes the
+ * default the moment XAI_API_KEY is set — no code change. Until then
+ * resolveProvider() returns null and every caller must degrade honestly
+ * rather than invent an answer.
  *
  * xAI and OpenAI share the /v1/chat/completions wire format, so they share
  * one code path. Anthropic's Messages API differs enough to need its own.
  */
 
 import { callTool, TOOL_SPECS, type ToolCtx } from './tools';
+
+/**
+ * ── TOOL REGISTRY INDIRECTION ─────────────────────────────────────────
+ * The run loop used to close over the Researcher's own tools. The Campaign
+ * Coach needs the same provider loop over a DIFFERENT (larger) tool set, and
+ * copying this file would have meant two Grok integrations drifting apart —
+ * exactly what the brief rules out. So the loop now takes a registry, and the
+ * Researcher's registry is merely the default.
+ */
+export interface ToolRegistry {
+  specs: readonly { name: string; description: string; args: Record<string, string> }[];
+  call: (name: string, args: Record<string, any>, ctx: ToolCtx) => Promise<unknown>;
+}
+
+export const RESEARCH_REGISTRY: ToolRegistry = { specs: TOOL_SPECS, call: callTool };
 
 export type Provider = 'xai' | 'anthropic' | 'openai';
 
@@ -62,8 +81,8 @@ export function resolveProvider(): ProviderConfig | null {
 
 /* ── Tool schema translation ────────────────────────────────────────── */
 
-function openAiTools() {
-  return TOOL_SPECS.map(t => ({
+function openAiTools(specs: ToolRegistry['specs']) {
+  return specs.map(t => ({
     type: 'function' as const,
     function: {
       name: t.name,
@@ -78,8 +97,8 @@ function openAiTools() {
   }));
 }
 
-function anthropicTools() {
-  return TOOL_SPECS.map(t => ({
+function anthropicTools(specs: ToolRegistry['specs']) {
+  return specs.map(t => ({
     name: t.name,
     description: t.description,
     input_schema: {
@@ -121,12 +140,13 @@ export async function runResearch(
   userMessage: string,
   ctx: ToolCtx,
   cfg: ProviderConfig,
+  registry: ToolRegistry = RESEARCH_REGISTRY,
 ): Promise<RunResult> {
   const toolCalls: RunResult['toolCalls'] = [];
   const exec = async (name: string, args: Record<string, any>) => {
     const t0 = Date.now();
     try {
-      const out = await callTool(name, args ?? {}, ctx);
+      const out = await registry.call(name, args ?? {}, ctx);
       toolCalls.push({ tool: name, ms: Date.now() - t0, ok: true });
       return out;
     } catch (e) {
@@ -136,8 +156,8 @@ export async function runResearch(
   };
 
   const text = cfg.provider === 'anthropic'
-    ? await runAnthropic(system, userMessage, cfg, exec)
-    : await runOpenAiCompatible(system, userMessage, cfg, exec);
+    ? await runAnthropic(system, userMessage, cfg, exec, registry)
+    : await runOpenAiCompatible(system, userMessage, cfg, exec, registry);
 
   return { text, toolCalls, provider: cfg.provider, model: cfg.model };
 }
@@ -145,7 +165,7 @@ export async function runResearch(
 type Exec = (name: string, args: Record<string, any>) => Promise<unknown>;
 
 async function runOpenAiCompatible(
-  system: string, user: string, cfg: ProviderConfig, exec: Exec,
+  system: string, user: string, cfg: ProviderConfig, exec: Exec, registry: ToolRegistry,
 ): Promise<string> {
   const messages: any[] = [
     { role: 'system', content: system },
@@ -155,7 +175,7 @@ async function runOpenAiCompatible(
     const r = await fetch(`${cfg.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.apiKey}` },
-      body: JSON.stringify({ model: cfg.model, messages, tools: openAiTools(), tool_choice: 'auto' }),
+      body: JSON.stringify({ model: cfg.model, messages, tools: openAiTools(registry.specs), tool_choice: 'auto' }),
     });
     if (!r.ok) throw new Error(`${cfg.provider} ${r.status}: ${(await r.text()).slice(0, 400)}`);
     const j = await r.json();
@@ -177,7 +197,7 @@ async function runOpenAiCompatible(
 }
 
 async function runAnthropic(
-  system: string, user: string, cfg: ProviderConfig, exec: Exec,
+  system: string, user: string, cfg: ProviderConfig, exec: Exec, registry: ToolRegistry,
 ): Promise<string> {
   const messages: any[] = [{ role: 'user', content: user }];
   for (let turn = 0; turn < MAX_TURNS; turn++) {
@@ -188,7 +208,7 @@ async function runAnthropic(
         'x-api-key': cfg.apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({ model: cfg.model, max_tokens: 4096, system, messages, tools: anthropicTools() }),
+      body: JSON.stringify({ model: cfg.model, max_tokens: 4096, system, messages, tools: anthropicTools(registry.specs) }),
     });
     if (!r.ok) throw new Error(`anthropic ${r.status}: ${(await r.text()).slice(0, 400)}`);
     const j = await r.json();

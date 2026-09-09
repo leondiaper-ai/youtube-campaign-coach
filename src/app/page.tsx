@@ -98,6 +98,14 @@ export default function HomePage() {
             desc="Channel-aware campaign planning with live guidance."
             highlight
           />
+          {/* Additive: the Campaign Coach attention layer. Deliberately its
+              own route rather than a change to Watcher or /coach, so it can
+              be evaluated — or removed — without touching either. */}
+          <ToolCard
+            href="/coach-home"
+            title="Campaign Coach"
+            desc="What needs attention today, interpreted from Watcher data."
+          />
           <ToolCard
             href="/campaigns"
             title="Active Campaigns"
