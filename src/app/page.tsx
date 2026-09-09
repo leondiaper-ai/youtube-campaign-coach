@@ -120,6 +120,12 @@ export default function HomePage() {
             desc="Top performing channels this week — what the data says is working."
             highlight
           />
+          <ToolCard
+            href="/researcher"
+            title="The Researcher"
+            desc="Ask why something is happening. Reconstructs release architecture across the roster and records what it finds."
+            highlight
+          />
         </div>
 
         <div
