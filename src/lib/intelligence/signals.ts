@@ -35,6 +35,7 @@ import { readAllLiveSnaps, type CachedSnap } from '../kvCache';
 import { readHistories, deltaOver, type ChannelSnapshot } from '../snapshots';
 import { getRecentSnapshots, type WeeklyChannelSnapshot } from '../weeklySnapshotStore';
 import { getHorizon } from '../coach-bot/horizon';
+import { classifyUploadFormat } from '../formatClassifier';
 import type { Candidate, Signal, SignalType } from './types';
 
 /* ── Thresholds. One place. ──────────────────────────────────────────── */
@@ -80,6 +81,8 @@ export const T = {
   /** Strong-asset rule: all four must hold, or the ratio is meaningless. */
   assetRatio: 3.0,
   assetMinLongform: 6,
+  /** Same-format peers required before 'unusual' means anything. */
+  assetMinPeers: 3,
   assetMinMedianViews: 2_000,
   assetMinViews: 10_000,
   assetMaxAgeDays: 45,
@@ -284,15 +287,33 @@ function strongAsset(snap: CachedSnap | undefined): Signal | null {
     .slice(0, 10);
   if (recent.length < T.assetMinLongform) return null;
 
-  const views = recent.map(v => v.viewCount ?? 0).filter(n => n > 0).sort((a, b) => a - b);
-  if (views.length < T.assetMinLongform) return null;
-  const median = views[Math.floor(views.length / 2)];
-  /* A near-zero median turns any real asset into a spectacular ratio. */
-  if (median < T.assetMinMedianViews) return null;
+  /* ── The comparison has to be like-for-like ───────────────────────
+     Against an undifferentiated long-form median, this fired on David
+     Guetta (a festival set at 21.6× the median) and Tomorrowland (an
+     aftermovie at 23.7×). Both are arithmetically true and neither is a
+     finding: they say that music videos and festival sets outperform
+     vlogs, which is a fact about formats, not about the artist.
 
+     So the top asset is now compared against the median of ITS OWN
+     format. `classifyUploadFormat` works off the RecentUpload we already
+     hold, so this costs nothing extra — no catalogue call. */
   const top = recent.reduce((a, b) => ((a.viewCount ?? 0) >= (b.viewCount ?? 0) ? a : b));
   const topViews = top.viewCount ?? 0;
   if (topViews < T.assetMinViews) return null;
+
+  const topFormat = classifyUploadFormat(top);
+  const peers = recent
+    .filter(v => v.id !== top.id && classifyUploadFormat(v) === topFormat)
+    .map(v => v.viewCount ?? 0)
+    .filter(n => n > 0)
+    .sort((a, b) => a - b);
+
+  /* Too few same-format peers is not a weak signal, it is no signal.
+     A first-of-its-kind asset has nothing to be unusual against. */
+  if (peers.length < T.assetMinPeers) return null;
+
+  const median = peers[Math.floor(peers.length / 2)];
+  if (median < T.assetMinMedianViews) return null;
 
   const ratio = topViews / median;
   if (ratio < T.assetRatio) return null;
@@ -303,7 +324,7 @@ function strongAsset(snap: CachedSnap | undefined): Signal | null {
 
   return {
     type: 'STRONG_ASSET',
-    reason: `"${top.title}" at ${fmt(topViews)} views is ${ratio.toFixed(1)}× the median of the last ${recent.length} long-form uploads (median ${fmt(median)}), ${ageDays} days old`,
+    reason: `"${top.title}" at ${fmt(topViews)} views is ${ratio.toFixed(1)}× this artist's median ${topFormat} (${fmt(median)} across ${peers.length} comparable uploads), ${ageDays} days old`,
     strength: scale(ratio, T.assetRatio, 15),
     sourceRef: `video:${top.id}`,
     historyDays: 0,

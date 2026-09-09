@@ -71,7 +71,13 @@ export function rank(c: Candidate): number {
     b.strategicImportance * 0.4 +
     b.campaignRelevance * 0.25 +
     b.novelty * 0.35;
-  return b.signalStrength * (0.4 + 0.6 * context);
+  /* The floor is 0.25, not 0.4, because at 0.4 the top of the ranked list
+     was Tomorrowland, David Guetta and aespa — observed market channels
+     with big signals and no strategic claim on anyone's morning. The brief
+     is explicit that a small signal on a live priority campaign should
+     outrank a large one on a channel nobody is working, and that only
+     holds if context can move the score by more than half. */
+  return b.signalStrength * (0.25 + 0.75 * context);
 }
 
 export async function runMorningIntelligence(
