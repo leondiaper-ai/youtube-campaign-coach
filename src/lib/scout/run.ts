@@ -45,6 +45,8 @@ export interface ScoutOptions {
   budgetMs?: number;
   /** Skip the model entirely — funnel only. For tuning without paying. */
   discoverOnly?: boolean;
+  /** Re-assess channels already in the Scout universe, refreshing profiles. */
+  reobserve?: boolean;
 }
 
 /** Bounded parallelism — Promise.all over 50 channels would hammer the API. */
@@ -75,6 +77,7 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
     investigationLimit = 3,
     budgetMs = 40_000,
     discoverOnly = false,
+    reobserve = false,
   } = opts;
 
   const runId = newId('scout');
@@ -155,7 +158,7 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
 
     const survivors: ChannelSummary[] = [];
     for (const s of summaries) {
-      const rej = triage(s, { rosterIds, alreadyScouted });
+      const rej = triage(s, { rosterIds, alreadyScouted, reobserve });
       if (rej) result.rejected.push(rej);
       else survivors.push(s);
     }

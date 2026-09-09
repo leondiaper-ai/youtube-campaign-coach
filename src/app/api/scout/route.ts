@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
     investigationLimit: Number(body.investigationLimit ?? 3),
     budgetMs: Number(body.budgetMs ?? 40_000),
     discoverOnly: body.discoverOnly === true,
+    reobserve: body.reobserve === true,
   });
 
   return NextResponse.json({ run, summary: summarise(run) });

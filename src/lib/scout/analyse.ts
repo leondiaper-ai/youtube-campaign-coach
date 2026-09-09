@@ -186,16 +186,17 @@ export function renderProfile(p: ChannelProfile, title: string): string {
     }
   }
 
-  if (p.timeline.length) {
+  const timeline = p.timeline ?? [];
+  if (timeline.length) {
     /* The dated sequence, newest first. Capped at 60 rows: enough to cover
        a campaign and its run-up, short enough to leave the model room to
        reason rather than to recite. */
     lines.push('', 'UPLOAD SEQUENCE (newest first — date, format, views, title):');
-    for (const t of p.timeline.slice(0, 60)) {
+    for (const t of timeline.slice(0, 60)) {
       lines.push(`  ${t.date}  ${t.format.padEnd(11)} ${fmt(t.views).padStart(7)}  ${t.title}`);
     }
-    if (p.timeline.length > 60) {
-      lines.push(`  … ${p.timeline.length - 60} older uploads not shown.`);
+    if (timeline.length > 60) {
+      lines.push(`  … ${timeline.length - 60} older uploads not shown.`);
     }
   }
 

@@ -69,7 +69,7 @@ const NOT_ARTIST = new RegExp(
 
 export function triage(
   c: ChannelSummary,
-  ctx: { rosterIds: Set<string>; alreadyScouted: Set<string> },
+  ctx: { rosterIds: Set<string>; alreadyScouted: Set<string>; reobserve?: boolean },
 ): Rejection | null {
   const rej = (reason: RejectionReason, detail: string): Rejection => ({
     channelId: c.channelId, channelTitle: c.title, reason, detail,
@@ -78,7 +78,10 @@ export function triage(
   if (ctx.rosterIds.has(c.channelId)) {
     return rej('ALREADY_IN_ROSTER', 'This channel is already on the Watcher roster.');
   }
-  if (ctx.alreadyScouted.has(c.channelId)) {
+  /* Skipping known channels is right for a discovery sweep and wrong for
+     an observation pass — the universe only becomes valuable by being
+     looked at again. */
+  if (!ctx.reobserve && ctx.alreadyScouted.has(c.channelId)) {
     return rej('ALREADY_IN_SCOUT', 'Already in the Scout universe from an earlier run.');
   }
   if (!c.uploadsPlaylistId) {
