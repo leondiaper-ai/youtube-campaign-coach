@@ -34,6 +34,23 @@ import type { Artist } from '../artists';
 
 /* ── Fetch ───────────────────────────────────────────────────────────── */
 
+/**
+ * Strips unpaired surrogates from a string.
+ *
+ * Precious Pepala's catalogue contains a title with a lone surrogate — half
+ * of an emoji or a truncated character somewhere upstream. It survives
+ * everything we do to it and then kills the request at the provider:
+ * "unexpected end of hex escape". Every read for that artist failed on it.
+ *
+ * The pairs are what matter, so a lone half carries no information and can
+ * be dropped rather than escaped. Applied at the fetch boundary so nothing
+ * downstream has to think about it.
+ */
+function stripLoneSurrogates(s: string): string {
+  return (s ?? '').replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, '')
+                  .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
+}
+
 interface RawVideo {
   id: string; title: string; publishedAt: string | null; durationSec: number;
   views: number; likes: number; comments: number;
@@ -56,7 +73,7 @@ export async function fetchArtistCatalogue(
     .filter(v => !!v.publishedAt)
     .map(v => ({
       id: v.id,
-      title: v.title,
+      title: stripLoneSurrogates(v.title),
       description: '',
       publishedAt: v.publishedAt as string,
       durationSec: v.durationSec,
