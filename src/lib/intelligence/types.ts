@@ -267,6 +267,15 @@ export interface MorningRun {
   suppressed: SuppressedFinding[];
   /** Every candidate the scan produced, investigated or not. For the audit. */
   candidates: Candidate[];
+  /**
+   * Selected candidates that have not been investigated yet.
+   *
+   * A morning run does not fit in one serverless request — the platform cap
+   * is 60s and a single tool-using investigation can take 45. So a run is
+   * resumable: each call investigates what it can and leaves the rest here.
+   * Empty means the run is finished.
+   */
+  pending: Candidate[];
   metrics: RunMetrics;
   notes: string[];
 }

@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { runMorningIntelligence } from '@/lib/intelligence/run';
+import { runMorningIntelligence, resumeMorningIntelligence } from '@/lib/intelligence/run';
 
 export const dynamic = 'force-dynamic';
 /* Vercel Hobby ceiling. The run's own budgetMs sits below this so it
@@ -22,6 +22,17 @@ export async function POST(req: NextRequest) {
   const baseUrl = new URL(req.url).origin;
   let body: any = {};
   try { body = await req.json(); } catch { /* body is optional */ }
+
+  /* A run does not fit in one 60s request. `resume` continues an existing
+     one; the caller loops until `run.pending` is empty. */
+  const resumeId = body.resume ?? req.nextUrl.searchParams.get('resume');
+  if (resumeId) {
+    const run = await resumeMorningIntelligence(String(resumeId), { baseUrl }, {
+      budgetMs: Number(body.budgetMs ?? 40_000),
+    });
+    if (!run) return NextResponse.json({ error: 'UNKNOWN_RUN' }, { status: 404 });
+    return NextResponse.json({ run });
+  }
 
   const scanOnly = body.scanOnly === true || req.nextUrl.searchParams.get('scanOnly') === '1';
 

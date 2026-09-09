@@ -138,16 +138,36 @@ export default function IntelligencePanel({ initialRun }: { initialRun: MorningR
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * A run spans several requests: the platform caps a function at 60s and
+   * one investigation can take 45. So this starts the run, then resumes it
+   * until nothing is pending, rendering each partial result as it arrives.
+   * The reader sees findings appear rather than a spinner that might be a
+   * timeout.
+   */
   const doRun = useCallback(async () => {
     setRunning(true); setError(null);
     try {
-      const r = await fetch('/api/intelligence/run', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const j = await r.json();
-      if (j.run) setRun(j.run); else setError(j.error ?? 'Run failed.');
+      const post = async (body: object) => {
+        const r = await fetch('/api/intelligence/run', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error(`Run failed (${r.status})`);
+        return r.json();
+      };
+
+      let j = await post({});
+      if (!j.run) { setError(j.error ?? 'Run failed.'); return; }
+      setRun(j.run);
+
+      /* Bounded, so a bug in `pending` cannot loop forever. */
+      for (let i = 0; i < 10 && j.run.pending?.length; i++) {
+        j = await post({ resume: j.run.runId });
+        if (!j.run) break;
+        setRun(j.run);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Run failed.');
     } finally {
