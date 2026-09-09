@@ -14,11 +14,40 @@ import { prepareCampaignRead } from '@/lib/assistant/read';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readOverview } from '@/lib/coach-service/store';
+import { readCampaignRead, reviewCampaignRead, readHistory } from '@/lib/assistant/readStore';
+import {
+  listKnowledge, propose, review, recordFeedback, listFeedback,
+  type KnowledgeKind, type ItemStatus, type FeedbackKind,
+} from '@/lib/knowledge/inbox';
+import { BOUNDARY_RULES } from '@/lib/knowledge/evidence';
+import { runBoundaryChecks } from '@/lib/knowledge/__tests__/evidence.test';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const view = req.nextUrl.searchParams.get('view');
+
+  if (view === 'knowledge') {
+    return NextResponse.json({
+      items: await listKnowledge(),
+      feedback: await listFeedback(50),
+      boundaryRules: BOUNDARY_RULES,
+    });
+  }
+  /* The boundary suite runs on demand rather than in CI, because this repo
+     has no test runner. Executable is better than aspirational. */
+  if (view === 'boundary-checks') {
+    return NextResponse.json(runBoundaryChecks());
+  }
+  if (view === 'read') {
+    const slug = req.nextUrl.searchParams.get('slug') ?? '';
+    return NextResponse.json({
+      read: await readCampaignRead(slug),
+      history: await readHistory(slug),
+    });
+  }
+
   return NextResponse.json(await buildAssistantHome());
 }
 
@@ -52,6 +81,78 @@ export async function POST(req: NextRequest) {
       comparison: r.evidence?.comparison ?? null,
       tokens: r.tokens, latencyMs: r.latencyMs,
     });
+  }
+
+  /* Batch: prepare reads for pinned campaigns that do not have one.
+     Sequential and time-boxed — each read is a catalogue pull plus a model
+     call at roughly 12s, and the platform kills the request at 60. The
+     caller loops until `remaining` is zero. */
+  if (body.action === 'refresh-all') {
+    const t0 = Date.now();
+    const budgetMs = Number(body.budgetMs ?? 45_000);
+    const artists = mergeArtistLists(ARTISTS, await listCustomArtists());
+    const { listPinned } = await import('@/lib/campaignStore');
+    const pinned = await listPinned();
+    const bySlug = new Map(artists.map(a => [a.slug, a]));
+
+    const done: { slug: string; status: string; headline: string }[] = [];
+    const failed: { slug: string; detail: string }[] = [];
+    let remaining = 0;
+
+    for (const p of pinned) {
+      const artist = bySlug.get(p.slug);
+      if (!artist) continue;
+      if (!body.force && await readCampaignRead(p.slug)) continue;
+      if (Date.now() - t0 + 14_000 > budgetMs) { remaining++; continue; }
+
+      const r = await prepareCampaignRead(artist, baseUrl);
+      if (r.ok && r.record) {
+        done.push({ slug: p.slug, status: r.record.status, headline: r.record.read });
+      } else {
+        failed.push({ slug: p.slug, detail: r.detail ?? 'unknown' });
+      }
+    }
+    return NextResponse.json({ done, failed, remaining, ms: Date.now() - t0 });
+  }
+
+  if (body.action === 'review-read') {
+    const r = await reviewCampaignRead(String(body.slug), body.status, body.note);
+    return r ? NextResponse.json({ read: r }) : NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
+  }
+
+  if (body.action === 'feedback') {
+    /* A factual correction and a preference judgement are different things
+       and are stored apart — see knowledge/inbox.ts. */
+    return NextResponse.json({
+      feedback: await recordFeedback({
+        targetId: String(body.targetId ?? ''),
+        targetType: body.targetType,
+        subjectId: body.subjectId ?? null,
+        kind: body.kind as FeedbackKind,
+        correction: body.correction,
+        note: body.note,
+      }),
+    });
+  }
+
+  if (body.action === 'propose-knowledge') {
+    return NextResponse.json({
+      item: await propose({
+        kind: body.kind as KnowledgeKind,
+        statement: String(body.statement ?? ''),
+        subjectId: body.subjectId ?? null,
+        subjectName: body.subjectName ?? null,
+        evidence: Array.isArray(body.evidence) ? body.evidence : [],
+        confidence: body.confidence ?? 'LOW',
+        origin: body.origin ?? 'HUMAN',
+        sourceRef: String(body.sourceRef ?? 'manual'),
+      }),
+    });
+  }
+
+  if (body.action === 'review-knowledge') {
+    const item = await review(String(body.id), body.status as ItemStatus, body.note);
+    return item ? NextResponse.json({ item }) : NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
   }
 
   return NextResponse.json({ error: 'unknown action' }, { status: 400 });
