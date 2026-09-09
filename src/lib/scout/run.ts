@@ -30,6 +30,7 @@ import {
   rosterChannelIds, listScoutChannelIds, listScoutChannels, recordObservation, setScoutStatus,
 } from './channelStore';
 import { newId } from '../knowledge/store';
+import { saveRunSummary } from './runStore';
 import { ensureSeeded } from '../knowledge/principles';
 import { costOf, type Finding, type CaseStudy } from '../knowledge/types';
 import type { MissionResult, QualifiedChannel, Rejection, ScoutRun } from './types';
@@ -286,7 +287,7 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
     notes.push('No material findings. Every channel investigated was doing something a strategist would already recognise.');
   }
 
-  return {
+  const run: ScoutRun = {
     runId,
     startedAt,
     finishedAt: new Date().toISOString(),
@@ -294,6 +295,12 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
     cost: costOf(totalTokens, modelCalls, meter.spent, Date.now() - t0),
     notes,
   };
+
+  /* A summary only — the full run carries every rejection and every
+     qualified channel's profile, which is what you want while tuning and
+     far too much to keep for forty runs. */
+  await saveRunSummary(run);
+  return run;
 }
 
 /** Flattened view for reporting. */
