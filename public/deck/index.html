@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campaign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  THE LIVING DEEP DIVE
+  ══════════════════════════════════════════════════════════════════════
+
+  The question this answers: what would our best YouTube deep-dive deck
+  look like if it updated itself every day and had Grok as its strategist?
+
+  So the visual language is the decks' own — Anton display, Inter body,
+  the single #FF3B14 signal — not a SaaS dashboard. Big chunky numbers,
+  an executive read, what's working, the opportunity, two or three moves.
+
+  ── ONE THING TO KNOW ABOUT WHERE THE CONTENT COMES FROM ──────────────
+  The Coach overview returns headline / interpretation / recommendation.
+  It does NOT return "three things that are working" or "the opportunity"
+  as separate fields — that is a different output shape from the one the
+  service produces today.
+
+  Rather than invent those client-side (which would be me writing the
+  strategy and attributing it to Grok), the page makes ONE additional
+  call to the existing /api/coach-service asking for exactly that
+  structure. Same tools, same reasoning, same evidence discipline — only
+  the question is new. If that call fails or comes back unparseable, the
+  page falls back to the overview fields rather than showing a skeleton.
+
+  ── TONE ──────────────────────────────────────────────────────────────
+  The brief for that call asks for constructive framing: an opportunity
+  rather than a failure, a pattern worth repeating rather than a window
+  missed. It explicitly does NOT ask for optimism — turning a weak
+  campaign into a good one would destroy the thing that makes this
+  useful. Truthful, framed forwards.
+-->
+
+<style>
+:root{
+  --ink:#0B0B0B;
+  --paper:#FFFFFF;
+  --cream:#F4F1EA;
+  --signal:#FF3B14;
+  --smoke:rgba(11,11,11,.46);
+  --hair:rgba(11,11,11,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.display{font-family:'Anton',Impact,sans-serif;font-weight:400;letter-spacing:.005em;
+  line-height:.94;text-transform:uppercase}
+.wrap{max-width:1120px;margin:0 auto;padding:0 40px}
+h1,h2,h3{margin:0}
+.label{font-size:.66rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--signal)}
+
+/* ── Masthead ─────────────────────────────────────────────────────── */
+.top{background:var(--ink);color:#fff;padding:3rem 0 0}
+.top .label{opacity:.9}
+.top h1{font-size:clamp(2.4rem,6vw,4.4rem);margin-top:.7rem}
+.top h1 .sig{color:var(--signal)}
+.sub{margin-top:.8rem;font-size:.95rem;color:rgba(255,255,255,.62);font-weight:500}
+.pick{margin-top:1.5rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.pick a{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.3rem .7rem;border-radius:100px;text-decoration:none;
+  border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.66)}
+.pick a.on{background:#fff;color:var(--ink);border-color:#fff}
+
+/* ── Big chunky data ──────────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:rgba(255,255,255,.14);margin-top:2.6rem}
+.stat{background:var(--ink);padding:1.5rem 0 2.2rem}
+.stat .num{font-family:'Anton',sans-serif;font-size:clamp(2.4rem,5.4vw,4.2rem);
+  line-height:.9;color:#fff}
+.stat .num.sig{color:var(--signal)}
+.stat .cap{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-top:.7rem}
+
+/* ── Sections ─────────────────────────────────────────────────────── */
+section{padding:4.2rem 0}
+section.cream{background:var(--cream)}
+.rule{height:1px;background:var(--hair)}
+
+/* ── Campaign read ────────────────────────────────────────────────── */
+.read h2{font-size:clamp(1.9rem,4.2vw,3.1rem);max-width:19ch;margin-top:1.4rem}
+.read .body{font-size:1.12rem;line-height:1.62;max-width:60ch;margin-top:1.5rem;color:#1c1c1c}
+.read .body p{margin:0 0 .9rem}
+.move{margin-top:2.2rem;border-left:4px solid var(--signal);padding-left:1.6rem}
+.move .label{color:var(--smoke)}
+.move p{font-size:1.18rem;line-height:1.5;font-weight:600;margin:.5rem 0 0;max-width:52ch}
+
+/* ── What's working ───────────────────────────────────────────────── */
+.works{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:2.4rem;margin-top:2rem}
+.work .n{font-family:'Anton',sans-serif;font-size:1.6rem;color:var(--signal);line-height:1}
+.work h3{font-size:.72rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;margin-top:.7rem}
+.work p{font-size:1rem;line-height:1.55;margin:.5rem 0 0;color:#232323}
+
+/* ── Opportunity ──────────────────────────────────────────────────── */
+.opp{display:grid;grid-template-columns:1.1fr 1fr;gap:3.4rem;align-items:start;margin-top:2rem}
+@media(max-width:820px){.opp{grid-template-columns:1fr;gap:2rem}}
+.opp h2{font-size:clamp(1.6rem,3.4vw,2.5rem);max-width:16ch}
+.opp p{font-size:1.05rem;line-height:1.6;margin:1.2rem 0 0;max-width:52ch}
+.ladder{border-top:1px solid var(--hair)}
+.rung{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding:.85rem 0;border-bottom:1px solid var(--hair)}
+.rung .t{font-size:.95rem;font-weight:600}
+.rung .v{font-family:'Anton',sans-serif;font-size:1.5rem}
+.rung.hot .v{color:var(--signal)}
+
+/* ── Moves ────────────────────────────────────────────────────────── */
+.moves{counter-reset:m;margin-top:2rem;display:grid;gap:1.6rem}
+.mv{display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start;
+  padding-bottom:1.6rem;border-bottom:1px solid var(--hair)}
+.mv:last-child{border-bottom:0}
+.mv::before{counter-increment:m;content:counter(m);font-family:'Anton',sans-serif;
+  font-size:2rem;line-height:1;color:var(--signal)}
+.mv h3{font-size:1.1rem;font-weight:700;letter-spacing:-.01em}
+.mv p{font-size:1rem;line-height:1.55;margin:.35rem 0 0;color:#2a2a2a;max-width:56ch}
+
+/* ── Next up ──────────────────────────────────────────────────────── */
+.up{display:grid;gap:0;margin-top:1.6rem}
+.upr{display:grid;grid-template-columns:130px 1fr;gap:1.5rem;align-items:baseline;
+  padding:1.1rem 0;border-bottom:1px solid var(--hair)}
+.upr .d{font-family:'Anton',sans-serif;font-size:1.5rem;line-height:1}
+.upr .t{font-size:1.05rem;font-weight:600}
+.upr .a{font-size:.8rem;color:var(--smoke);margin-top:.15rem}
+.upnone{font-size:1.05rem;line-height:1.6;max-width:48ch;margin-top:1rem}
+.upnone a{color:var(--signal);font-weight:600}
+.coachnote{margin-top:1.6rem;border-left:4px solid var(--signal);padding-left:1.5rem}
+.coachnote p{font-size:1.02rem;line-height:1.55;margin:.4rem 0 0;max-width:54ch}
+
+/* ── Explore / ask ────────────────────────────────────────────────── */
+.foot{padding:3rem 0 5rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}
+.explore{font:inherit;font-family:'Inter',sans-serif;font-size:.76rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;padding:.85rem 1.9rem;border-radius:100px;
+  border:2px solid var(--ink);background:transparent;cursor:pointer;transition:.15s}
+.explore:hover{background:var(--ink);color:#fff}
+.askline{font-size:.8rem;color:var(--smoke)}
+.askline input{font:inherit;font-size:.82rem;border:0;border-bottom:1px solid var(--hair);
+  background:transparent;padding:.3rem 0;width:230px;outline:none}
+.askline input:focus{border-color:var(--ink)}
+.load{color:var(--smoke)}
+
+/* ── Evidence panel ───────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;background:rgba(11,11,11,.4);opacity:0;pointer-events:none;
+  transition:.2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;height:100%;width:min(640px,96vw);background:#fff;z-index:50;
+  transform:translateX(102%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-18px 0 50px rgba(0,0,0,.15)}
+.panel.on{transform:translateX(0)}
+.ph{padding:1.7rem 2rem 1.2rem;border-bottom:1px solid var(--hair);display:flex;gap:1rem;align-items:flex-start}
+.ph h2{font-size:1.15rem;font-weight:700;line-height:1.3;letter-spacing:-.015em}
+.px{margin-left:auto;background:none;border:0;font-size:1.6rem;line-height:1;cursor:pointer;color:var(--smoke)}
+.pb{flex:1;overflow-y:auto;padding:1.7rem 2rem 2.6rem}
+.blk{margin-bottom:2rem}
+.blk .h{font-size:.62rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.7rem}
+.f{display:grid;grid-template-columns:1fr auto;gap:.6rem 1rem;align-items:baseline;
+  padding:.55rem 0;border-bottom:1px solid var(--hair);font-size:.95rem}
+.f .s{font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--smoke);white-space:nowrap}
+.f.inf .s{color:var(--signal)}
+.unk{font-size:.95rem;line-height:1.6;background:var(--cream);padding:.9rem 1.1rem;border-radius:6px}
+.prose{font-size:.95rem;line-height:1.68;white-space:pre-wrap}
+.pf{border-top:1px solid var(--hair);padding:1.1rem 2rem;display:flex;gap:.6rem}
+.pf input{flex:1;font:inherit;font-size:.85rem;padding:.55rem .8rem;border:1px solid var(--hair);border-radius:6px}
+.pf button{font:inherit;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:.55rem 1.1rem;border:0;border-radius:6px;background:var(--ink);color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="label">Virgin Music Group × YouTube</div>
+    <h1 class="display" id="artist">—</h1>
+    <div class="sub" id="sub"></div>
+    <div class="pick" id="pick"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap read" id="read"><p class="load">Reading the campaign…</p></div>
+</section>
+
+<div class="rule"></div>
+
+<section class="cream" id="worksWrap" hidden>
+  <div class="wrap">
+    <div class="label">What's working</div>
+    <div class="works" id="works"></div>
+  </div>
+</section>
+
+<section id="oppWrap" hidden>
+  <div class="wrap">
+    <div class="label">The opportunity</div>
+    <div class="opp">
+      <div id="oppText"></div>
+      <div class="ladder" id="oppLadder"></div>
+    </div>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section id="movesWrap" hidden>
+  <div class="wrap">
+    <div class="label">Best next moves</div>
+    <div class="moves" id="moves"></div>
+  </div>
+</section>
+
+<section class="cream">
+  <div class="wrap">
+    <div class="label">Next up</div>
+    <div id="up"></div>
+  </div>
+</section>
+
+<div class="wrap foot">
+  <button class="explore" id="exploreBtn">Explore the evidence</button>
+  <span class="askline">or ask about this channel
+    <input id="askInput" placeholder="…" aria-label="Ask about this channel"></span>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true">
+  <div class="ph"><h2 id="ptitle">Evidence</h2><button class="px" id="px">×</button></div>
+  <div class="pb" id="pb"></div>
+  <div class="pf"><form id="pform" style="display:flex;gap:.6rem;width:100%">
+    <input id="pinput" placeholder="Ask about this"><button type="submit">Ask</button>
+  </form></div>
+</aside>
+
+<script>
+const API = 'https://youtube-campaign-coach.vercel.app';
+const ARTISTS = [
+  { slug:'k-trap', name:'K-Trap' },
+  { slug:'amylandthesniffers6771', name:'Amyl and The Sniffers' },
+  { slug:'freakslug', name:'freak slug' },
+  { slug:'ezra-collective', name:'Ezra Collective' },
+];
+const SLUG = new URLSearchParams(location.search).get('slug') || ARTISTS[0].slug;
+const ME = ARTISTS.find(a=>a.slug===SLUG) || {slug:SLUG,name:SLUG};
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const compact = n => n==null?'—':Math.abs(n)>=1e6?(n/1e6).toFixed(1)+'M':Math.abs(n)>=1e3?Math.round(n/1e3)+'K':String(n);
+const $ = id => document.getElementById(id);
+const get = async p => { try { return await (await fetch(API+p,{cache:'no-store'})).json(); }
+  catch(e){ return {error:'UNREACHABLE',detail:e.message}; } };
+
+const S = { live:null, coach:null, horizon:null, brief:null, sessionId:null };
+
+/* ═══════════════════════════════════════════════════════════════════
+   BIG CHUNKY DATA — the deck's opening move.
+   Six numbers, Anton, on black. Scannable in about two seconds.
+   ═══════════════════════════════════════════════════════════════════ */
+function renderStats(){
+  const st = S.live?.state||{}, cam = S.live?.campaign||{};
+  const v7 = S.live?.views7?.delta, s7 = S.live?.subs7?.delta;
+  const items = [
+    [compact(st.subscriberCount), 'Subscribers', false],
+    [(v7>0?'+':'')+compact(v7), 'Views · 7 days', v7>0],
+    [(s7>0?'+':'')+compact(s7), 'Subscribers · 7 days', s7>0],
+    [st.uploadsLast14Days ?? '—', 'Uploads · 14 days', false],
+    [`${st.shortsLast14Days ?? 0} / ${st.videosLast14Days ?? 0}`, 'Short / long-form', false],
+    [cam.daysSinceStart ?? '—', 'Campaign day', false],
+  ];
+  $('stats').innerHTML = items.map(([n,c,sig])=>
+    `<div class="stat"><div class="num${sig?' sig':''}">${esc(n)}</div><div class="cap">${esc(c)}</div></div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE STRATEGIST BRIEF
+   ───────────────────────────────────────────────────────────────────
+   One extra call to the existing Coach service. No new backend, no new
+   tools, no prompt-file change — the question itself carries the
+   structure and the tone, and the service's own evidence rules still
+   apply underneath.
+
+   Fixed headers rather than nested JSON: the answer already comes back
+   inside a JSON envelope, and asking for JSON within JSON is markedly
+   less reliable than asking for four headings.
+   ═══════════════════════════════════════════════════════════════════ */
+const BRIEF_Q = `Write the strategic summary for this campaign, in the voice of a very good YouTube strategist working alongside the marketing team.
+
+Use these exact headings and nothing else:
+
+###READ
+Two short paragraphs. The first says how the campaign is actually doing. The second names the single most useful thing to understand right now.
+
+###WORKING
+Up to three items, one per line, formatted "Label — one sentence". Only include what the evidence genuinely supports. Two is better than three padded out. Zero is acceptable if nothing stands out.
+
+###OPPORTUNITY
+A short title line, then two or three sentences. Frame this as something to build on rather than something that went wrong — a pattern worth repeating, a sequence worth tightening. Do not manufacture a positive: if the honest read is that the campaign is struggling, say so plainly and point forward.
+
+###MOVES
+Two or three strategic moves, one per line, formatted "Label — one sentence". High level, not a task list.
+
+Rules: be specific to this artist and name real assets and numbers. Do not grade the team. Do not use the words "failed", "missed" or "poor". Keep every line short enough to read on a slide.`;
+
+function splitBrief(text){
+  const out = {};
+  const parts = String(text||'').split(/###\s*/).filter(Boolean);
+  for (const p of parts){
+    const nl = p.indexOf('\n');
+    if (nl < 0) continue;
+    out[p.slice(0,nl).trim().toUpperCase()] = p.slice(nl+1).trim();
+  }
+  return out;
+}
+const pairs = block => String(block||'').split('\n').map(l=>l.replace(/^[-•*\d.\s]+/,'').trim())
+  .filter(Boolean).map(l=>{
+    const m = l.split(/\s+[—–-]\s+/);
+    return m.length>1 ? { k:m[0].replace(/[*_]/g,'').trim(), v:m.slice(1).join(' — ').trim() }
+                      : { k:null, v:l.replace(/[*_]/g,'') };
+  });
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════════ */
+function renderRead(){
+  const c = S.coach||{}, b = S.brief||{};
+  if (!c.headline && !b.READ){
+    $('read').innerHTML = `<div class="label">Campaign read</div>
+      <h2 class="display">The read is unavailable right now</h2>
+      <div class="body"><p>The numbers above are unaffected — they come straight from the public YouTube API.</p></div>`;
+    return;
+  }
+  const paras = (b.READ||c.interpretation||'').split(/\n{2,}|\n/).filter(Boolean).slice(0,2);
+  const move = (b.MOVES ? pairs(b.MOVES)[0]?.v : null) || c.recommendation;
+  $('read').innerHTML = `
+    <div class="label">Campaign read</div>
+    <h2 class="display">${esc(c.headline||'')}</h2>
+    <div class="body">${paras.map(p=>`<p>${esc(p)}</p>`).join('')}</div>
+    ${move?`<div class="move"><div class="label">Best next move</div><p>${esc(move)}</p></div>`:''}`;
+}
+
+function renderWorking(){
+  const items = pairs(S.brief?.WORKING).slice(0,3);
+  if (!items.length) return;
+  $('worksWrap').hidden = false;
+  $('works').innerHTML = items.map((it,i)=>`
+    <div class="work">
+      <div class="n">0${i+1}</div>
+      <h3>${esc(it.k||'Working')}</h3>
+      <p>${esc(it.v)}</p>
+    </div>`).join('');
+}
+
+function renderOpportunity(){
+  const o = S.brief?.OPPORTUNITY;
+  if (!o) return;
+  const lines = o.split('\n').filter(Boolean);
+  const title = lines[0].replace(/[*_#]/g,'').trim();
+  const body = lines.slice(1).join(' ').trim();
+  $('oppWrap').hidden = false;
+  $('oppText').innerHTML = `<h2 class="display">${esc(title)}</h2>${body?`<p>${esc(body)}</p>`:''}`;
+
+  /* The ladder is measured, not written: whatever numeric evidence the
+     Coach cited, shown as figures rather than buried in a sentence. */
+  const ev = (S.coach?.evidence||[]).filter(e=>e.sourceType==='WATCHER');
+  const rungs = ev.map(e=>{
+    const m = e.claim.match(/^(.{3,58}?)[:,]?\s*((?:[+-]?[\d.,]+\s*(?:days?|x|%)?)|(?:Day\s*\d+))\b(.*)$/i);
+    return m ? { t:m[1].trim(), v:m[2].trim() } : null;
+  }).filter(Boolean).slice(0,4);
+  $('oppLadder').innerHTML = rungs.length
+    ? rungs.map((r,i)=>`<div class="rung${i===rungs.length-1?' hot':''}">
+        <span class="t">${esc(r.t)}</span><span class="v">${esc(r.v)}</span></div>`).join('')
+    : '';
+}
+
+function renderMoves(){
+  const items = pairs(S.brief?.MOVES).slice(0,3);
+  if (!items.length) return;
+  $('movesWrap').hidden = false;
+  $('moves').innerHTML = items.map(it=>`
+    <div class="mv"><div><h3>${esc(it.k||'Move')}</h3><p>${esc(it.v)}</p></div></div>`).join('');
+}
+
+function renderNext(){
+  const h = S.horizon||{}, c = S.coach||{};
+  const ev = (h.events||[]).filter(e=>e.eventDate && new Date(e.eventDate)>=Date.now()-864e5)
+    .sort((a,b)=>a.eventDate.localeCompare(b.eventDate)).slice(0,3);
+  if (!ev.length){
+    $('up').innerHTML = `<h2 class="display" style="font-size:clamp(1.4rem,3vw,2.1rem);max-width:16ch">
+      Next release not yet confirmed</h2>
+      <p class="upnone"><a href="${API}/coach-bot/horizon?slug=${SLUG}">Add the next campaign moment</a>
+      and the Coach will build the recommended sequence around it.</p>`;
+    return;
+  }
+  $('up').innerHTML = `<div class="up">${ev.map(e=>{
+    const d = Math.round((new Date(e.eventDate)-Date.now())/864e5);
+    return `<div class="upr">
+      <div><div class="d">${new Date(e.eventDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase()}</div></div>
+      <div><div class="t">${esc(e.title)}</div><div class="a">${d<=0?'Today':`In ${d} day${d===1?'':'s'}`}</div></div>
+    </div>`;}).join('')}</div>
+    ${c.timing?`<div class="coachnote"><div class="label" style="color:var(--smoke)">Coach read</div>
+      <p>${esc(c.timing)}</p></div>`:''}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EVIDENCE PANEL — the engine room, one click away
+   ═══════════════════════════════════════════════════════════════════ */
+const SRC = { WATCHER:'measured', PUBLIC_YOUTUBE:'YouTube', EXTERNAL:'external', COACH_INFERENCE:'inferred' };
+function openP(t){ $('ptitle').textContent=t; $('panel').classList.add('on'); $('scrim').classList.add('on'); }
+function closeP(){ $('panel').classList.remove('on'); $('scrim').classList.remove('on'); }
+$('px').onclick=closeP; $('scrim').onclick=closeP;
+
+function renderAnswer(j){
+  const ev=(j.evidence||[]).filter(e=>e.claim);
+  const known=ev.filter(e=>e.sourceType!=='COACH_INFERENCE'), inf=ev.filter(e=>e.sourceType==='COACH_INFERENCE');
+  const facts=l=>l.map(e=>`<div class="f${e.sourceType==='COACH_INFERENCE'?' inf':''}">
+    <span>${esc(e.claim)}</span><span class="s">${esc(SRC[e.sourceType]||e.sourceType)}</span></div>`).join('');
+  return `
+    ${known.length?`<div class="blk"><div class="h">What we know</div>${facts(known)}</div>`:''}
+    ${inf.length?`<div class="blk"><div class="h">What the Coach concludes</div>${facts(inf)}</div>`:''}
+    ${j.missingContext?`<div class="blk"><div class="h">What we don't know</div><div class="unk">${esc(j.missingContext)}</div></div>`:''}
+    ${j.answer?`<div class="blk"><details><summary class="h" style="cursor:pointer">Full analysis</summary>
+      <div class="prose" style="margin-top:.8rem">${esc(j.answer)}</div></details></div>`:''}`;
+}
+
+async function ask(question,type,title){
+  openP(title||'Evidence');
+  $('pb').innerHTML=`<p class="load">Looking into it…</p>`;
+  const c=new AbortController(); const t=setTimeout(()=>c.abort(),90000);
+  try{
+    const r=await fetch(API+'/api/coach-service',{method:'POST',
+      headers:{'content-type':'application/json'},signal:c.signal,
+      body:JSON.stringify({artistId:SLUG,question,investigationType:type||'CUSTOM',sessionId:S.sessionId})});
+    const j=await r.json();
+    if(j.sessionId) S.sessionId=j.sessionId;
+    $('pb').innerHTML = j.error?`<p class="load">${esc(j.detail||j.error)}</p>`:renderAnswer(j);
+  }catch(e){ $('pb').innerHTML=`<p class="load">Could not reach the Coach (${esc(e.message)}).</p>`; }
+  finally{ clearTimeout(t); }
+}
+
+$('exploreBtn').onclick = () => ask(
+  `Show the evidence behind this read: "${S.coach?.headline||''}". Give the specific pattern with dates and figures, and say plainly what the data cannot establish.`,
+  'WHY', S.coach?.headline || 'The evidence');
+
+$('askInput').addEventListener('keydown', e => {
+  if (e.key!=='Enter') return;
+  const v=e.target.value.trim(); if(!v) return;
+  e.target.value=''; ask(v,'CUSTOM',v);
+});
+$('pform').onsubmit = e => {
+  e.preventDefault();
+  const v=$('pinput').value.trim(); if(!v) return;
+  $('pinput').value=''; ask(v,'CUSTOM',v);
+};
+
+/* ═══════════════════════════════════════════════════════════════════ */
+(async function(){
+  document.title = `${ME.name} · YouTube`;
+  $('artist').innerHTML = `${esc(ME.name)} <span class="sig">× YouTube</span>`;
+  $('pick').innerHTML = ARTISTS.map(a=>
+    `<a href="?slug=${a.slug}" class="${a.slug===SLUG?'on':''}">${esc(a.name.split(' ')[0])}</a>`).join('');
+
+  const [live,horizon] = await Promise.all([
+    get(`/api/artist-live?slug=${SLUG}`),
+    get(`/api/campaign-horizon?slug=${SLUG}`),
+  ]);
+  S.live=live;
+  S.horizon = horizon?.horizon ? {...horizon.horizon, events:horizon.events} : (horizon||{});
+  $('sub').textContent = [live?.artist?.campaign, live?.artist?.phase && `${live.artist.phase} phase`]
+    .filter(Boolean).join(' · ');
+  renderStats(); renderNext();
+
+  /* Overview first — it is cached and lands fast, so the read appears
+     while the fuller strategist brief is still being written. */
+  S.coach = await get(`/api/coach-service?slug=${SLUG}`);
+  renderRead(); renderNext();
+
+  try{
+    const r = await fetch(API+'/api/coach-service',{method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({artistId:SLUG,question:BRIEF_Q,investigationType:'CUSTOM'})});
+    const j = await r.json();
+    if (j.sessionId) S.sessionId = j.sessionId;
+    S.brief = splitBrief(j.answer);
+  }catch(e){ S.brief = null; }
+
+  renderRead(); renderWorking(); renderOpportunity(); renderMoves();
+})();
+</script>
+</body>
+</html>

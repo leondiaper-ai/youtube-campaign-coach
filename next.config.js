@@ -16,6 +16,9 @@ const nextConfig = {
       // Subtraction pass on the workspace. Kept alongside /amyl-live
       // rather than replacing it, so the two can be compared directly.
       { source: '/ws', destination: '/ws/index.html' },
+      // The living deep dive: the decks' visual language, kept current by
+      // Watcher and Grok. Sits alongside /ws and /amyl-live for comparison.
+      { source: '/deck', destination: '/deck/index.html' },
     ];
   },
 };
