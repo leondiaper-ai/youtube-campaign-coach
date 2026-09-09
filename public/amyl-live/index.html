@@ -365,20 +365,23 @@ function renderHeader(){
     a.slug===SLUG ? `<span class="sw on">${esc(a.name)}</span>`
                   : `<a class="sw" href="?slug=${a.slug}">${esc(a.name)}</a>`).join('');
   /* Fall back to the channel's newest thumbnail when we hold no still. */
-  const t = HERO_THUMB || (S.live?.state?.latestVideos||[])[0]?.thumbnail
-    || (S.live?.state?.latestVideos||[])[0]?.id && `https://i.ytimg.com/vi/${S.live.state.latestVideos[0].id}/maxresdefault.jpg`;
+  const first = (S.live?.state?.latestVideos||[])[0];
+  const t = HERO_THUMB || first?.thumbnail
+    || (first?.videoId ? `https://i.ytimg.com/vi/${first.videoId}/maxresdefault.jpg` : null);
   if (t) $('bleed').style.backgroundImage = `url('${t}')`;
   const st = S.live?.state || {};
   const c  = S.coach || {};
   const h  = S.horizon || {};
 
-  const heroTitle = (st.latestVideos||[]).find(v => /official music video|official video/i.test(v.title||''))?.title;
+  /* artist-live returns deltas as {delta,pct} objects and uploads as
+     {videoId, views, kind} — not the flat shapes assumed on first pass. */
+  const heroTitle = (st.latestVideos||[]).find(v =>
+    /official music video|official video/i.test(v.title||'') || v.kind === 'video')?.title;
   const next = h.nextMajorMoment;
 
   const facts = [
     ['Phase', S.live?.artist?.phase || '—'],
-    ['Campaign day', S.live?.campaign?.day ?? (S.live?.artist?.campaignStartDate
-        ? Math.max(1, Math.round((Date.now()-new Date(S.live.artist.campaignStartDate))/864e5)) : '—')],
+    ['Campaign day', S.live?.campaign?.daysSinceStart ?? '—'],
     ['Current hero', heroTitle ? heroTitle.replace(/\s*[-–—]\s*Official.*$/i,'') : '—'],
     ['Next known moment', next ? `${next.title} · ${next.daysAway}d` : 'Not recorded'],
     ['Channel', c.status ? c.status.replace(/_/g,' ') : '—'],
@@ -386,14 +389,14 @@ function renderHeader(){
   $('facts').innerHTML = facts.map(([k,v]) =>
     `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
 
-  const d7  = S.live?.views7, s7 = S.live?.subs7;
+  const d7 = S.live?.views7?.delta, s7 = S.live?.subs7?.delta, s30 = S.live?.subs30?.delta;
   const m = [
-    ['7d views',   d7!=null ? (d7>0?'+':'')+num(d7) : '—', 'change in total channel views', d7>0],
-    ['7d subs',    s7!=null ? (s7>0?'+':'')+num(s7) : '—', 'change in subscribers', s7>0],
-    ['Subscribers',num(st.subscriberCount), 'total'],
-    ['Uploads 14d',num(st.uploadsLast14Days), 'all formats'],
-    ['Shorts 14d', num(st.shortsLast14Days), 'of those uploads'],
-    ['Long-form 14d', num(st.videosLast14Days), 'of those uploads'],
+    ['Views · 7d',  d7!=null ? (d7>0?'+':'')+num(d7) : '—', 'across the whole channel', d7>0],
+    ['Subs · 7d',   s7!=null ? (s7>0?'+':'')+num(s7) : '—', s30!=null?`${s30>0?'+':''}${num(s30)} over 30d`:'', s7>0],
+    ['Subscribers', num(st.subscriberCount), 'total'],
+    ['Uploads · 14d', num(st.uploadsLast14Days), 'all formats'],
+    ['Shorts · 14d',  num(st.shortsLast14Days), 'of those uploads'],
+    ['Long-form · 14d', num(st.videosLast14Days), 'of those uploads'],
   ];
   $('metrics').innerHTML = m.map(([k,v,d,up]) =>
     `<div class="metric"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>
@@ -537,9 +540,9 @@ function renderPlan(){
 function renderNext(){
   const h = S.horizon || {}, c = S.coach || {};
   const rows = [];
-  rows.push({ when:'Today', what:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long'}),
-    note:`Campaign day ${$('facts').textContent.match(/day/i)?'':''}`.trim() || null, hot:true,
-    cnote: c.timing || null });
+  const day = S.live?.campaign?.daysSinceStart;
+  rows.push({ when:'Today', what:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),
+    note: day!=null ? `Campaign day ${day}` : null, hot:true, cnote: c.timing || null });
 
   const ev = (h.events||[]).filter(e=>e.eventDate).sort((a,b)=>a.eventDate.localeCompare(b.eventDate));
   for (const e of ev.slice(0,6)){
@@ -575,9 +578,11 @@ function renderPerf(){
   const st = S.live?.state || {};
   const vids = (st.latestVideos||[]).slice(0,5);
   const rows = [];
-  if (S.live?.views7 != null) rows.push(['Channel views, 7 days', (S.live.views7>0?'+':'')+num(S.live.views7)]);
-  if (S.live?.views30 != null) rows.push(['Channel views, 30 days', (S.live.views30>0?'+':'')+num(S.live.views30)]);
-  if (S.live?.subs7 != null) rows.push(['Subscribers, 7 days', (S.live.subs7>0?'+':'')+num(S.live.subs7)]);
+  const cv = S.live?.campaign?.views;
+  if (S.live?.views7?.delta != null) rows.push(['Channel views · 7 days', (S.live.views7.delta>0?'+':'')+num(S.live.views7.delta)]);
+  if (cv?.delta != null) rows.push([`Channel views · since campaign start`, (cv.delta>0?'+':'')+num(cv.delta)]);
+  if (S.live?.subs30?.delta != null) rows.push(['Subscribers · 30 days', (S.live.subs30.delta>0?'+':'')+num(S.live.subs30.delta)]);
+  if (S.live?.campaign?.contentCount != null) rows.push(['Assets this campaign', `${S.live.campaign.contentCount} (${S.live.campaign.shortsCount||0} short, ${S.live.campaign.videosCount||0} long)`]);
   if (st.daysSinceLastUpload != null) rows.push(['Days since last upload', st.daysSinceLastUpload]);
   if (S.live?.historyDays) rows.push(['Days of history held', S.live.historyDays]);
 
@@ -588,8 +593,8 @@ function renderPerf(){
     ${vids.length?`<div style="margin-top:1.2rem">
       <div class="k" style="font-size:.58rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--faint)">Most recent uploads</div>
       <div class="learn" style="margin-top:.5rem">
-        ${vids.map(v=>`<div class="lrow"><div class="kind OBSERVED">${esc((v.publishedAt||'').slice(0,10))}</div>
-          <p>${esc(v.title)}${v.viewCount!=null?` · ${num(v.viewCount)} views`:''}</p></div>`).join('')}
+        ${vids.map(v=>`<div class="lrow"><div class="kind OBSERVED">${esc((v.publishedAt||'').slice(0,10))} · ${esc(v.kind||'')}</div>
+          <p>${esc(v.title)}${v.views!=null?` · ${num(v.views)} lifetime views`:''}</p></div>`).join('')}
       </div></div>`:''}
     <p style="font-size:.8rem;color:var(--mute);margin-top:1rem;max-width:66ch">
       View counts are lifetime totals, so they cannot be compared across assets of different ages.
@@ -733,7 +738,9 @@ $('dform').onsubmit = e => {
   S.memory = memory;
   renderHeader(); renderPlan(); renderNext(); renderPerf(); renderStrategy(); renderLearnings();
 
-  S.coach = await get(`/api/coach-service?slug=${SLUG}`);
+  /* refresh=1: the overview cache outlives prompt fixes, and a workspace
+     showing a stale reading is worse than one that waits ten seconds. */
+  S.coach = await get(`/api/coach-service?slug=${SLUG}&refresh=1`);
   renderHeader(); renderRead(); renderAttention(); renderNext();
 
   $('foot').textContent =
