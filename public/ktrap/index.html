@@ -354,6 +354,13 @@ const A = {
   /* Symmetric album-anchored windows. Both 159 days. */
   smile:{ label:'SMILE?', album:'2 Jun 2024', window:'2 Jan – 9 Jun 2024',
     uploads:50, views:12000714, longform:21, shorts:26,
+    /* windowDays is the 159 the whole deck is built on — the matched
+       campaign length used for every SMILE? vs TRAPO 2 comparison.
+       It lives here rather than being typed into a slide so the two
+       can never drift apart. 2 Jan → 9 Jun 2024 spans 159 days.
+       (Checked: date(2024,6,9) - date(2024,1,2) = 159. TRAPO 2's
+       22 Mar → 28 Aug 2026 is the same 159, which is the point.) */
+    windowDays:159,
     activeWeeks:13, totalWeeks:23, longestGap:34, destDays:6, medianDestGap:14,
     premieres:3, heroMedian:1976779 },
 
@@ -552,7 +559,13 @@ const slides = () => [
      1. the wider Virgin learning        (.lens)
      2. K-Trap already had big moments   (headline, first line)
      3. the concrete gaps around them    (.bignums)
-     4. what TRAPO 2 therefore became    (.sub, and slide 03)
+     4. what TRAPO 2 therefore became    (the statement, and slide 03)
+
+   THE STATEMENT IS THE POINT OF THE SLIDE, so it is not set in .sub
+   grey any more. It used to be the smallest text on the page, which
+   left the room to assemble the argument from a headline, a lens and
+   three numbers. It now says the thing outright: the hits existed, the
+   follow-up didn't, TRAPO 2 was the attempt to fix it.
    Read the headline and the lens together: the headline says the
    opportunity was BUILDING AROUND the moments, which is the strategic
    response, not merely the problem. An earlier version said "the space
@@ -583,11 +596,12 @@ const slides = () => [
         <div class="bn-l">weeks active</div></div>
       <div><div class="bn-n">${A.smile.longestGap} days</div>
         <div class="bn-l">longest quiet period</div></div>
-      <div><div class="bn-n">${A.smile.destDays} days</div>
-        <div class="bn-l">with a long-form destination</div></div>
+      <div><div class="bn-n">${A.smile.destDays} / ${A.smile.windowDays}</div>
+        <div class="bn-l">days with a long-form follow-up</div></div>
     </div>
-    <p class="sub reveal">SMILE? delivered K-Trap's biggest YouTube moments to date. TRAPO 2 was
-      our chance to build a more connected campaign around them.</p>
+    <p class="sub statement reveal" style="color:var(--ink);max-width:52ch">SMILE? had the hits —
+      we just didn't consistently follow them up.
+      <strong style="color:var(--signal)">TRAPO 2 was about fixing that.</strong></p>
     <div class="srcbar reveal"><span class="src">SMILE? campaign window · ${A.smile.window} ·
       album ${A.smile.album}</span></div>
   </div>
