@@ -657,7 +657,14 @@ const A = {
     { d:'22 Jan', y:'2027', t:'The album',           s:'Focus track · music video', hot:true },
     { d:'25 Jan', y:'2027', t:'Deluxe',              s:'Extended release', hot:false },
   ],
-  daysToFirst:28,
+  /* NO COUNTDOWN FIELD HERE, DELIBERATELY. This used to be
+     daysToFirst:28, hand-set and rendered as "starts in 28 days" on the
+     cover and again on slide 04. It was wrong the day after it was
+     written and there is no live recompute — a stale countdown on the
+     first slide undermines every real figure behind it. The campaign is
+     anchored to fixed dates instead (2 Oct → 22 Jan), which stay true.
+     If a live count is ever genuinely wanted it has to be computed at
+     render time from a release date, not typed in. */
 
   morningLight:{ id:'WZ9ALGG11CA', views:22733144 },
   shorts:['j33Z_Kxf0Bk','9c-CcUvL2ww','1O54biUuX4Q','AyFkjFJe-28'],
@@ -679,8 +686,8 @@ const slides = () => [
   <div class="inner">
     <div class="label reveal">Palaye Royale × YouTube</div>
     <h1 class="display big reveal" style="max-width:16ch">The album campaign<br>
-      <span style="color:var(--signal)">starts in ${A.daysToFirst} days.</span></h1>
-    <p class="sub reveal">Four music videos between 2 October and 22 January.
+      <span style="color:var(--signal)">starts on 2 October.</span></h1>
+    <p class="sub reveal">Four music videos through to 22 January.
       Here is where they can take you.</p>
     <div class="srcbar reveal"><span class="src">Public YouTube data · 2 September 2026</span></div>
   </div>
@@ -776,7 +783,7 @@ const slides = () => [
           hasn't had is somewhere for that attention to land afterwards.</p>
       </div>
     </div>
-    <p class="sub reveal">There are ${A.daysToFirst} days until Lost In Translation. The opportunity
+    <p class="sub reveal">Lost In Translation is the first of four. The opportunity
       isn't more activity. <strong style="color:var(--paper)">It's more to watch.</strong></p>
   </div>
 </section>`,
