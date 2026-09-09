@@ -52,7 +52,17 @@ export interface ArtistCheck {
   selfReference: number | null;
 }
 
-/** Names that are structurally not one artist, whatever else they are. */
+/**
+ * Names that are structurally not one artist, whatever else they are.
+ *
+ * Tested against the channel NAME only. The first live test applied it to
+ * descriptions too and rejected Madonna, Spotify and Aditya Music Tamil on
+ * that basis — an artist's description routinely says "subscribe for news"
+ * or links a playlist, and neither makes the channel a playlist channel.
+ * A name containing "karaoke" is decisive; a description mentioning it is
+ * not, and the difference is the whole distinction between a fact about
+ * the channel and a word that happened to appear near it.
+ */
 const HARD_NON_ARTIST = new RegExp(
   [
     'topic$', 'karaoke', 'reaction', 'react\\b', 'nightcore',
@@ -124,10 +134,10 @@ export function checkArtistChannel(
 ): ArtistCheck {
   const desc = (c.description ?? '').slice(0, 400);
 
-  if (HARD_NON_ARTIST.test(c.title) || HARD_NON_ARTIST.test(desc)) {
+  if (HARD_NON_ARTIST.test(c.title)) {
     return {
       verdict: 'NON_ARTIST', selfReference: null,
-      reason: `Name or description matches a structurally non-artist pattern: "${c.title}".`,
+      reason: `Channel name matches a structurally non-artist pattern: "${c.title}".`,
     };
   }
 
