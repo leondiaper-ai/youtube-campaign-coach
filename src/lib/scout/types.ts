@@ -126,6 +126,18 @@ export interface ChannelProfile {
 
   /** Median views of long-form uploads. The only honest scale reference. */
   medianLongformViews: number | null;
+
+  /**
+   * Every analysed upload as date + format + views, newest first.
+   *
+   * Added after the first live run, where twelve investigations returned
+   * NOTHING_MATERIAL and the reasons converged on the same complaint:
+   * "format counts show variety but no dates tying formats to a release",
+   * "no per-release clustering". The model was right. Aggregate counts
+   * describe a channel's diet; only a dated sequence describes its
+   * architecture, and architecture is what every active mission asks about.
+   */
+  timeline: { date: string; format: string; views: number; title: string }[];
 }
 
 /* ══ Scout universe ══════════════════════════════════════════════════ */

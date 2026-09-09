@@ -133,6 +133,15 @@ export function buildProfile(channelId: string, videos: DiscoveredVideo[]): Chan
     heroes: heroes.slice(0, 8),
     postHero,
     medianLongformViews: median(longform.map(c => c.v.views).filter(n => n > 0)),
+    timeline: classified
+      .slice()
+      .reverse()
+      .map(c => ({
+        date: c.v.publishedAt.slice(0, 10),
+        format: c.format,
+        views: c.v.views,
+        title: c.v.title.slice(0, 70),
+      })),
   };
 }
 
@@ -174,6 +183,19 @@ export function renderProfile(p: ChannelProfile, title: string): string {
       }
     } else {
       lines.push('  Nothing was published in the 60 days after the hero.');
+    }
+  }
+
+  if (p.timeline.length) {
+    /* The dated sequence, newest first. Capped at 60 rows: enough to cover
+       a campaign and its run-up, short enough to leave the model room to
+       reason rather than to recite. */
+    lines.push('', 'UPLOAD SEQUENCE (newest first — date, format, views, title):');
+    for (const t of p.timeline.slice(0, 60)) {
+      lines.push(`  ${t.date}  ${t.format.padEnd(11)} ${fmt(t.views).padStart(7)}  ${t.title}`);
+    }
+    if (p.timeline.length > 60) {
+      lines.push(`  … ${p.timeline.length - 60} older uploads not shown.`);
     }
   }
 
