@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { runScout, summarise } from '@/lib/scout/run';
+import { runScout, investigateStored, summarise } from '@/lib/scout/run';
 import { listScoutChannels, estimateObservationQuota } from '@/lib/scout/channelStore';
 import { listCaseStudies, listRecentFindings } from '@/lib/knowledge/store';
 import { readSpend, SCOUT_DAILY_BUDGET } from '@/lib/youtube/discovery';
@@ -50,6 +50,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   let body: any = {};
   try { body = await req.json(); } catch { /* optional */ }
+
+  /* Discovery and investigation do not fit in one 60s request, so they are
+     separate calls over the persisted Scout universe. */
+  if (body.action === 'investigate') {
+    const out = await investigateStored(body.mission as MissionId, {
+      limit: Number(body.limit ?? 2),
+      budgetMs: Number(body.budgetMs ?? 50_000),
+    });
+    return NextResponse.json(out);
+  }
 
   const run = await runScout({
     missions: Array.isArray(body.missions) ? (body.missions as MissionId[]) : undefined,

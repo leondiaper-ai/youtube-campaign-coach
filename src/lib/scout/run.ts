@@ -27,7 +27,7 @@ import { triage, testMission, Q } from './qualify';
 import { buildProfile } from './analyse';
 import { investigateChannel } from './investigate';
 import {
-  rosterChannelIds, listScoutChannelIds, recordObservation, setScoutStatus,
+  rosterChannelIds, listScoutChannelIds, listScoutChannels, recordObservation, setScoutStatus,
 } from './channelStore';
 import { newId } from '../knowledge/store';
 import { ensureSeeded } from '../knowledge/principles';
@@ -45,6 +45,24 @@ export interface ScoutOptions {
   budgetMs?: number;
   /** Skip the model entirely — funnel only. For tuning without paying. */
   discoverOnly?: boolean;
+}
+
+/** Bounded parallelism — Promise.all over 50 channels would hammer the API. */
+async function mapWithConcurrency<T, R>(
+  items: T[], limit: number, fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, async () => {
+      while (true) {
+        const i = next++;
+        if (i >= items.length) return;
+        out[i] = await fn(items[i]);
+      }
+    }),
+  );
+  return out;
 }
 
 /** One investigation is 15–45s; the platform kills the request at 60. */
@@ -155,16 +173,24 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
 
     /* ── 3. OBSERVE + QUALIFY, tier 2 — ~4 units each ────────────── */
 
-    for (const s of toAssess) {
-      if (!s.uploadsPlaylistId) continue;
-      let videos;
+    /* Catalogue pulls are independent, so they run three at a time. Done
+       sequentially this stage alone took most of a 60s request; the limit
+       is deliberately low because each pull is several round trips to
+       YouTube and the quota ledger is a Redis read-modify-write. */
+    const assessed = await mapWithConcurrency(toAssess, 3, async s => {
+      if (!s.uploadsPlaylistId) return null;
       try {
-        videos = await fetchRecentUploads(s.uploadsPlaylistId, meter, Q.uploadWindow);
+        const videos = await fetchRecentUploads(s.uploadsPlaylistId, meter, Q.uploadWindow);
+        return videos.length ? { s, videos } : null;
       } catch (e) {
-        if (e instanceof QuotaExceeded) { notes.push(`Quota reached assessing ${missionId}.`); break; }
+        if (e instanceof QuotaExceeded) return null;
         throw e;
       }
-      if (!videos.length) continue;
+    });
+
+    for (const row of assessed) {
+      if (!row) continue;
+      const { s, videos } = row;
 
       const profile = buildProfile(s.channelId, videos);
       const verdict = testMission(missionId, profile, s.title);
@@ -287,3 +313,60 @@ export function summarise(run: ScoutRun): {
 }
 
 export type { Finding, CaseStudy };
+
+/**
+ * INVESTIGATE WHAT WAS ALREADY FOUND
+ *
+ * Discovery and investigation do not fit in one 60s request: a single
+ * mission's discovery takes about 20s and one investigation takes 15–45.
+ * They do not need to. A qualified channel is persisted to the Scout
+ * universe with its profile at the moment it qualifies, so investigation
+ * can be a separate call over stored candidates — which is also what makes
+ * it possible to re-investigate a channel months later against fresh
+ * observations.
+ */
+export async function investigateStored(
+  missionId: MissionId, opts: { limit?: number; budgetMs?: number } = {},
+): Promise<{ findings: Finding[]; caseStudies: CaseStudy[]; nothing: { channelId: string; title: string; why: string }[]; modelCalls: number; tokens: number; latencyMs: number }> {
+  const { limit = 2, budgetMs = 50_000 } = opts;
+  const t0 = Date.now();
+  const mission = getMission(missionId);
+  const findings: Finding[] = [];
+  const caseStudies: CaseStudy[] = [];
+  const nothing: { channelId: string; title: string; why: string }[] = [];
+  let modelCalls = 0, tokens = 0;
+  if (!mission) return { findings, caseStudies, nothing, modelCalls, tokens, latencyMs: 0 };
+
+  const universe = await listScoutChannels(500);
+  const candidates = universe
+    .filter(c => c.missionIds.includes(missionId) && c.latestProfile && c.status === 'WATCHING')
+    .slice(0, limit);
+
+  for (const c of candidates) {
+    if (Date.now() - t0 + ASSUMED_INVESTIGATION_MS > budgetMs) break;
+    const qc: QualifiedChannel = {
+      channelId: c.channelId, title: c.title, handle: c.handle, country: c.country,
+      subs: null, totalViews: null, videoCount: null,
+      missionId, discoverySource: c.discoverySource,
+      missionEvidence: c.whyWatching, score: 0,
+      profile: c.latestProfile!,
+    };
+    const out = await investigateChannel(qc, mission, `stored_${Date.now().toString(36)}`);
+    if (out.kind === 'FINDING') {
+      modelCalls++; tokens += out.tokens;
+      findings.push(out.finding);
+      if (out.caseStudy) caseStudies.push(out.caseStudy);
+      await setScoutStatus(c.channelId, out.caseStudy?.status === 'STRONG_EXAMPLE' ? 'BEST_IN_CLASS' : 'INTERESTING');
+    } else if (out.kind === 'NOTHING') {
+      modelCalls++; tokens += out.tokens;
+      nothing.push({ channelId: out.channelId, title: out.title, why: out.why });
+      await setScoutStatus(c.channelId, 'CANDIDATE');
+    } else {
+      if (out.suppressed.tokens > 0) { modelCalls++; tokens += out.suppressed.tokens; }
+      nothing.push({ channelId: out.suppressed.subjectId, title: out.suppressed.subjectName, why: `${out.suppressed.reason}: ${out.suppressed.detail}` });
+      await setScoutStatus(c.channelId, 'CANDIDATE');
+    }
+  }
+
+  return { findings, caseStudies, nothing, modelCalls, tokens, latencyMs: Date.now() - t0 };
+}
