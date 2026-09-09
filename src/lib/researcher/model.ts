@@ -193,7 +193,17 @@ async function runOpenAiCompatible(
     const r = await fetch(`${cfg.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.apiKey}` },
-      body: JSON.stringify({ model: cfg.model, messages, tools: openAiTools(registry.specs), tool_choice: 'auto' }),
+      /* A registry may legitimately be empty — Scout computes its evidence
+         up front and gives the model nothing to call. Sending an empty
+         tools array with tool_choice:'auto' is rejected outright by xAI
+         ("a tool_choice was set but no tools were specified"), so both
+         fields are omitted rather than sent empty. */
+      body: JSON.stringify({
+        model: cfg.model, messages,
+        ...(registry.specs.length
+          ? { tools: openAiTools(registry.specs), tool_choice: 'auto' }
+          : {}),
+      }),
     });
     if (!r.ok) throw new Error(`${cfg.provider} ${r.status}: ${(await r.text()).slice(0, 400)}`);
     const j = await r.json();
@@ -233,7 +243,10 @@ async function runAnthropic(
         'x-api-key': cfg.apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify({ model: cfg.model, max_tokens: 4096, system, messages, tools: anthropicTools(registry.specs) }),
+      body: JSON.stringify({
+        model: cfg.model, max_tokens: 4096, system, messages,
+        ...(registry.specs.length ? { tools: anthropicTools(registry.specs) } : {}),
+      }),
     });
     if (!r.ok) throw new Error(`anthropic ${r.status}: ${(await r.text()).slice(0, 400)}`);
     const j = await r.json();
