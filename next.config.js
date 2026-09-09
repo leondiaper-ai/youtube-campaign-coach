@@ -13,6 +13,9 @@ const nextConfig = {
       // Living Deep Dive experiment. A DUPLICATE of the Amyl deck — /amyl
       // is already shared with management and must stay byte-identical.
       { source: '/amyl-live', destination: '/amyl-live/index.html' },
+      // Subtraction pass on the workspace. Kept alongside /amyl-live
+      // rather than replacing it, so the two can be compared directly.
+      { source: '/ws', destination: '/ws/index.html' },
     ];
   },
 };

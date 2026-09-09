@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Campaign</title>
+
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  THE SIMPLIFIED WORKSPACE — subtraction pass
+  ══════════════════════════════════════════════════════════════════════
+
+  Same intelligence as /amyl-live. Roughly a fifth of the interface.
+
+  /amyl-live is left in place so the two can be compared.
+
+  ── WHAT WAS REMOVED, AND WHY ─────────────────────────────────────────
+  The previous page had nine sections, sixteen buttons and a visible
+  model byline. Every one of those buttons asked the user to decide how
+  Grok should investigate — which is precisely the work the product is
+  supposed to be doing for them. A page that offers five ways to think
+  about a campaign has not reduced cognitive load, it has relocated it.
+
+  So: four ideas, and one action.
+
+    NOW    what is happening        (measured)
+    READ   what it means            (interpreted)
+    DO     whether to act           (interpreted)
+    NEXT   what is coming           (planned)
+
+  ── EMPHASIS IS COMPUTED, NOT FIXED ───────────────────────────────────
+  Sections are not equally weighted and some do not render at all. If
+  nothing needs doing, DO is one quiet line rather than a card. If there
+  is no forward plan, NEXT shrinks to a single sentence instead of an
+  empty timeline. The page shape follows the campaign.
+
+  ── NO MODEL PLUMBING ─────────────────────────────────────────────────
+  No provider name, no turn count, no tool names in the default view.
+  They remain available behind the evidence panel, where someone
+  checking the work would actually want them.
+-->
+
+<style>
+:root{
+  --ink:#0f0f0f;
+  --paper:#fbfaf8;
+  --line:rgba(0,0,0,.09);
+  --mute:rgba(0,0,0,.50);
+  --faint:rgba(0,0,0,.30);
+  --accent:#b3261e;
+  --ok:#1d7a4c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);color:var(--ink);
+  font:400 17px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 32px}
+h1,h2,h3{margin:0;letter-spacing:-.022em}
+
+/* ── Masthead ─────────────────────────────────────────────────────── */
+.mast{padding:3rem 0 0}
+.who{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+.who h1{font-size:1.55rem;font-weight:780}
+.who .camp{font-size:.86rem;color:var(--mute);font-weight:550}
+.pick{margin-left:auto;font-size:.72rem;color:var(--faint)}
+.pick a{color:var(--faint);text-decoration:none;margin-left:.55rem}
+.pick a:hover{color:var(--ink)}
+.pick a.on{color:var(--ink);font-weight:700}
+
+/* ── NOW ──────────────────────────────────────────────────────────── */
+.now{display:flex;flex-wrap:wrap;gap:0 2.6rem;margin-top:1.6rem;padding-bottom:1.8rem;
+  border-bottom:1px solid var(--line)}
+.n{padding:.2rem 0}
+.n .v{font-size:1.28rem;font-weight:720;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.n .k{font-size:.66rem;color:var(--mute);margin-top:.05rem}
+
+/* ── READ ─────────────────────────────────────────────────────────── */
+.read{padding:2.6rem 0 0}
+.read .lede{font-size:clamp(1.4rem,3vw,1.85rem);font-weight:700;line-height:1.26;letter-spacing:-.026em}
+.read .support{font-size:1.02rem;line-height:1.6;color:#333;margin-top:.9rem}
+.read .conseq{font-size:1.02rem;line-height:1.6;margin-top:.9rem}
+.read .conseq b{font-weight:700}
+
+/* ── The single action ────────────────────────────────────────────── */
+.go{margin-top:1.7rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.explore{
+  font:inherit;font-size:.82rem;font-weight:650;letter-spacing:.01em;
+  padding:.6rem 1.3rem;border-radius:999px;border:1px solid var(--ink);
+  background:transparent;color:var(--ink);cursor:pointer;transition:.15s;
+}
+.explore:hover{background:var(--ink);color:#fff}
+.quiet{font-size:.8rem;color:var(--faint)}
+.quiet a{color:var(--faint)}
+
+/* ── NEXT ─────────────────────────────────────────────────────────── */
+.next{margin-top:2.6rem;padding-top:1.8rem;border-top:1px solid var(--line)}
+.next .lbl{font-size:.64rem;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--faint)}
+.next .row{display:flex;align-items:baseline;gap:.9rem;margin-top:.5rem;flex-wrap:wrap}
+.next .d{font-size:1.05rem;font-weight:700;white-space:nowrap}
+.next .t{font-size:1.02rem}
+.next .away{font-size:.78rem;color:var(--mute)}
+.next .none{font-size:.95rem;color:var(--mute);margin-top:.4rem;line-height:1.55}
+.next .none a{color:var(--ink)}
+
+/* ── Progressive disclosure ───────────────────────────────────────── */
+.more{margin:2.6rem 0 4rem;border-top:1px solid var(--line);padding-top:1.4rem}
+.more summary{cursor:pointer;font-size:.74rem;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);list-style:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary:hover{color:var(--ink)}
+.more[open] summary{margin-bottom:1.3rem}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1.4rem;font-size:.92rem}
+.dl dt{color:var(--mute);white-space:nowrap}
+.dl dd{margin:0}
+.ask{margin-top:1.6rem;display:flex;gap:.5rem;max-width:460px}
+.ask input{flex:1;font:inherit;font-size:.85rem;padding:.5rem .75rem;border:1px solid var(--line);border-radius:8px;background:#fff}
+.ask button{font:inherit;font-size:.8rem;font-weight:650;padding:.5rem .95rem;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer}
+
+/* ── Evidence panel ───────────────────────────────────────────────── */
+.scrim{position:fixed;inset:0;background:rgba(15,15,15,.34);opacity:0;pointer-events:none;transition:.2s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{
+  position:fixed;top:0;right:0;height:100%;width:min(620px,96vw);background:#fff;z-index:50;
+  transform:translateX(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;box-shadow:-16px 0 44px rgba(0,0,0,.13);
+}
+.panel.on{transform:translateX(0)}
+.phead{padding:1.5rem 1.8rem 1.1rem;border-bottom:1px solid var(--line);display:flex;gap:1rem;align-items:flex-start}
+.phead h2{font-size:1.12rem;font-weight:720;line-height:1.3}
+.pclose{margin-left:auto;background:none;border:0;font-size:1.5rem;line-height:1;cursor:pointer;color:var(--mute)}
+.pbody{flex:1;overflow-y:auto;padding:1.5rem 1.8rem 2.4rem}
+.blk{margin-bottom:1.9rem}
+.blk .h{font-size:.64rem;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--faint);margin-bottom:.6rem}
+.fact{display:grid;grid-template-columns:1fr auto;gap:.6rem 1rem;align-items:baseline;
+  padding:.5rem 0;border-bottom:1px solid var(--line);font-size:.92rem}
+.fact .src{font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);white-space:nowrap}
+.fact.inf .src{color:#6b3fa0}
+.unknown{font-size:.94rem;line-height:1.6;color:#333;background:rgba(0,0,0,.035);
+  padding:.85rem 1rem;border-radius:8px}
+.prose{font-size:.94rem;line-height:1.68;white-space:pre-wrap;color:#222}
+.pfoot{border-top:1px solid var(--line);padding:1rem 1.8rem;display:flex;gap:.5rem}
+.pfoot input{flex:1;font:inherit;font-size:.85rem;padding:.5rem .75rem;border:1px solid var(--line);border-radius:8px}
+.pfoot button{font:inherit;font-size:.8rem;font-weight:650;padding:.5rem 1rem;border:0;border-radius:8px;background:var(--ink);color:#fff;cursor:pointer}
+.tiny{font-size:.68rem;color:var(--faint);margin-top:1.4rem}
+.load{color:var(--mute);font-size:.92rem}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="mast">
+    <div class="who">
+      <h1 id="artist">—</h1>
+      <span class="camp" id="camp"></span>
+      <span class="pick" id="pick"></span>
+    </div>
+    <div class="now" id="now"></div>
+  </div>
+
+  <div class="read" id="read"><p class="load">Reading the campaign…</p></div>
+
+  <div class="next" id="next"></div>
+
+  <details class="more">
+    <summary>Detail</summary>
+    <dl class="dl" id="detail"></dl>
+    <form class="ask" id="askForm">
+      <input id="askInput" placeholder="Ask about this channel">
+      <button type="submit">Ask</button>
+    </form>
+  </details>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true">
+  <div class="phead">
+    <h2 id="ptitle">Evidence</h2>
+    <button class="pclose" id="pclose" aria-label="Close">×</button>
+  </div>
+  <div class="pbody" id="pbody"></div>
+  <div class="pfoot">
+    <form id="pform" style="display:flex;gap:.5rem;width:100%">
+      <input id="pinput" placeholder="Ask about this">
+      <button type="submit">Ask</button>
+    </form>
+  </div>
+</aside>
+
+<script>
+const API = 'https://youtube-campaign-coach.vercel.app';
+
+/* Default is K-Trap: the campaign with the richest history and no forward
+   plan, which is the harder of the two states to make feel calm. */
+const ARTISTS = [
+  { slug:'k-trap', name:'K-Trap' },
+  { slug:'amylandthesniffers6771', name:'Amyl and The Sniffers' },
+  { slug:'freakslug', name:'freak slug' },
+  { slug:'ezra-collective', name:'Ezra Collective' },
+];
+const SLUG = new URLSearchParams(location.search).get('slug') || ARTISTS[0].slug;
+const ME = ARTISTS.find(a=>a.slug===SLUG) || {slug:SLUG,name:SLUG};
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = n => n==null ? '—' : Number(n).toLocaleString('en-GB');
+const compact = n => n==null ? '—' : Math.abs(n)>=1e6 ? (n/1e6).toFixed(1)+'M'
+  : Math.abs(n)>=1e3 ? Math.round(n/1e3)+'k' : String(n);
+const $ = id => document.getElementById(id);
+
+async function get(p){
+  try { return await (await fetch(API+p,{cache:'no-store'})).json(); }
+  catch(e){ return {error:'UNREACHABLE',detail:e.message}; }
+}
+
+const S = { live:null, coach:null, horizon:null, sessionId:null };
+
+/* ═══════════════════════════════════════════════════════════════════
+   NOW — four numbers. Not six, not twelve.
+   Chosen because they answer "is the channel moving, and is the team
+   shipping": everything else is a click away.
+   ═══════════════════════════════════════════════════════════════════ */
+function renderNow(){
+  const st = S.live?.state || {};
+  const v7 = S.live?.views7?.delta, s7 = S.live?.subs7?.delta;
+  const items = [
+    [ (v7>0?'+':'')+compact(v7), 'views this week' ],
+    [ (s7>0?'+':'')+compact(s7), 'subscribers' ],
+    [ num(st.uploadsLast14Days), 'uploads in 14 days' ],
+    [ st.daysSinceLastUpload!=null ? st.daysSinceLastUpload : '—', 'days since the last one' ],
+  ];
+  $('now').innerHTML = items.map(([v,k])=>
+    `<div class="n"><div class="v">${esc(v)}</div><div class="k">${esc(k)}</div></div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   READ + DO — collapsed into one statement.
+   ───────────────────────────────────────────────────────────────────
+   The previous page gave these separate headings, which forced the
+   recommendation to restate the finding. Here the consequence is the
+   last line of the same thought, and "nothing to do" is one quiet
+   sentence rather than a card announcing its own emptiness.
+   ═══════════════════════════════════════════════════════════════════ */
+function renderRead(){
+  const c = S.coach;
+  if (!c || c.error){
+    $('read').innerHTML = `<div class="lede">The read is unavailable right now.</div>
+      <p class="support">The numbers above are unaffected — they come from the public YouTube API.</p>`;
+    return;
+  }
+  const nothingToDo = /^no (intervention|action)/i.test(c.recommendation||'');
+  $('read').innerHTML = `
+    <div class="lede">${esc(c.headline)}</div>
+    ${c.interpretation ? `<p class="support">${esc(c.interpretation)}</p>` : ''}
+    <p class="conseq">${ nothingToDo
+        ? `<b>Nothing to do today.</b>${c.nextCheck?` Worth another look ${esc(c.nextCheck)}.`:''}`
+        : `<b>${esc(c.recommendation)}</b>${c.timing?` ${esc(c.timing)}`:''}` }</p>
+    <div class="go">
+      <button class="explore" id="exploreBtn">Explore this</button>
+      <span class="quiet">${nothingToDo?'':'Recorded when you act on it.'}</span>
+    </div>`;
+  $('exploreBtn').onclick = () => explore();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NEXT — one line when there is a plan, one sentence when there isn't.
+   An empty timeline is worse than no timeline: it implies the campaign
+   has nothing coming, when in fact nobody has told us.
+   ═══════════════════════════════════════════════════════════════════ */
+function renderNext(){
+  const h = S.horizon || {};
+  const ev = (h.events||[]).filter(e=>e.eventDate && new Date(e.eventDate) >= Date.now()-864e5)
+    .sort((a,b)=>a.eventDate.localeCompare(b.eventDate)).slice(0,3);
+
+  if (!ev.length){
+    $('next').innerHTML = `<div class="lbl">Next</div>
+      <p class="none">Nothing is scheduled that this system can see.
+      <a href="${API}/coach-bot/horizon?slug=${SLUG}">Add the next two dates</a> and the Coach can start giving timing advice.</p>`;
+    return;
+  }
+  $('next').innerHTML = `<div class="lbl">Next</div>` + ev.map(e=>{
+    const d = Math.round((new Date(e.eventDate)-Date.now())/864e5);
+    return `<div class="row">
+      <span class="d">${new Date(e.eventDate).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+      <span class="t">${esc(e.title)}</span>
+      <span class="away">${d<=0?'today':`in ${d} day${d===1?'':'s'}`}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DETAIL — everything the old page showed as sections, as a definition
+   list behind one disclosure. Nothing here needed its own heading.
+   ═══════════════════════════════════════════════════════════════════ */
+function renderDetail(){
+  const st = S.live?.state || {}, c = S.coach || {}, cam = S.live?.campaign || {};
+  const rows = [
+    ['Campaign day', cam.daysSinceStart ?? '—'],
+    ['Phase', S.live?.artist?.phase ?? '—'],
+    ['Subscribers', num(st.subscriberCount)],
+    ['Views since campaign start', cam.views?.delta!=null ? (cam.views.delta>0?'+':'')+num(cam.views.delta) : '—'],
+    ['Assets this campaign', cam.contentCount!=null ? `${cam.contentCount} (${cam.shortsCount||0} short, ${cam.videosCount||0} long)` : '—'],
+    ['Shorts / long-form, 14d', `${num(st.shortsLast14Days)} / ${num(st.videosLast14Days)}`],
+    ['History held', S.live?.historyDays ? `${S.live.historyDays} days` : '—'],
+  ];
+  if (c.missingContext) rows.push(['Not visible to the Coach', c.missingContext]);
+  $('detail').innerHTML = rows.map(([k,v])=>
+    `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE EVIDENCE PANEL
+   ───────────────────────────────────────────────────────────────────
+   Not a chat transcript. The Coach already returns structured evidence
+   and a stated blind spot; those become "what we know" and "what we
+   don't", which is the shape of the finding rather than a wall of
+   prose. The full written analysis is available but collapsed — most
+   of the time the four facts are the answer.
+   ═══════════════════════════════════════════════════════════════════ */
+function openPanel(title){
+  $('ptitle').textContent = title;
+  $('panel').classList.add('on'); $('scrim').classList.add('on');
+  $('panel').setAttribute('aria-hidden','false');
+}
+function closePanel(){
+  $('panel').classList.remove('on'); $('scrim').classList.remove('on');
+  $('panel').setAttribute('aria-hidden','true');
+}
+$('pclose').onclick = closePanel; $('scrim').onclick = closePanel;
+
+const SRC_LABEL = { WATCHER:'measured', PUBLIC_YOUTUBE:'YouTube', EXTERNAL:'external', COACH_INFERENCE:'inferred' };
+
+function renderAnswer(j){
+  const ev = (j.evidence||[]).filter(e=>e.claim);
+  const known = ev.filter(e=>e.sourceType!=='COACH_INFERENCE');
+  const inferred = ev.filter(e=>e.sourceType==='COACH_INFERENCE');
+
+  const facts = list => list.map(e=>
+    `<div class="fact${e.sourceType==='COACH_INFERENCE'?' inf':''}">
+       <span>${esc(e.claim)}</span><span class="src">${esc(SRC_LABEL[e.sourceType]||e.sourceType)}</span>
+     </div>`).join('');
+
+  return `
+    ${known.length?`<div class="blk"><div class="h">What we know</div>${facts(known)}</div>`:''}
+    ${inferred.length?`<div class="blk"><div class="h">What the Coach concludes from it</div>${facts(inferred)}</div>`:''}
+    ${j.missingContext?`<div class="blk"><div class="h">What we don't know</div>
+      <div class="unknown">${esc(j.missingContext)}</div></div>`:''}
+    ${j.answer?`<div class="blk"><details><summary class="h" style="cursor:pointer;list-style:none">Full analysis</summary>
+      <div class="prose" style="margin-top:.8rem">${esc(j.answer)}</div></details></div>`:''}
+    <p class="tiny">${esc([j.confidence?j.confidence.toLowerCase()+' confidence':null,
+      (j.toolsUsed||[]).length?`${j.toolsUsed.length} data sources`:null].filter(Boolean).join(' · '))}</p>`;
+}
+
+async function ask(question, type, title){
+  openPanel(title || 'Evidence');
+  $('pbody').innerHTML = `<p class="load">Looking into it…</p>`;
+  const c = new AbortController(); const t = setTimeout(()=>c.abort(), 90000);
+  try{
+    const r = await fetch(API+'/api/coach-service',{
+      method:'POST',headers:{'content-type':'application/json'},signal:c.signal,
+      body:JSON.stringify({artistId:SLUG,question,investigationType:type||'CUSTOM',sessionId:S.sessionId}),
+    });
+    const j = await r.json();
+    if (j.sessionId) S.sessionId = j.sessionId;
+    $('pbody').innerHTML = j.error
+      ? `<p class="load">${esc(j.detail||j.error)}</p>`
+      : renderAnswer(j);
+  }catch(e){
+    $('pbody').innerHTML = `<p class="load">Could not reach the Coach (${esc(e.message)}).</p>`;
+  }finally{ clearTimeout(t); }
+}
+
+/* The single Explore action. Grok has already decided what matters, so
+   this asks about THAT rather than offering the user a menu of angles. */
+function explore(){
+  const c = S.coach || {};
+  ask(`Explain the evidence behind this reading: "${c.headline}". Show the specific pattern, and be explicit about what the data cannot establish.`,
+      'WHY', c.headline || 'Evidence');
+}
+
+$('askForm').onsubmit = e => {
+  e.preventDefault();
+  const v = $('askInput').value.trim(); if(!v) return;
+  $('askInput').value=''; ask(v,'CUSTOM',v);
+};
+$('pform').onsubmit = e => {
+  e.preventDefault();
+  const v = $('pinput').value.trim(); if(!v) return;
+  $('pinput').value=''; ask(v,'CUSTOM',v);
+};
+
+/* ═══════════════════════════════════════════════════════════════════ */
+(async function(){
+  document.title = `${ME.name} · Campaign`;
+  $('artist').textContent = ME.name;
+  $('pick').innerHTML = ARTISTS.map(a =>
+    `<a href="?slug=${a.slug}" class="${a.slug===SLUG?'on':''}">${esc(a.name.split(' ')[0])}</a>`).join('');
+
+  const [live, horizon] = await Promise.all([
+    get(`/api/artist-live?slug=${SLUG}`),
+    get(`/api/campaign-horizon?slug=${SLUG}`),
+  ]);
+  S.live = live;
+  S.horizon = horizon?.horizon ? {...horizon.horizon, events:horizon.events} : (horizon||{});
+  $('camp').textContent = live?.artist?.campaign || '';
+  renderNow(); renderNext(); renderDetail();
+
+  S.coach = await get(`/api/coach-service?slug=${SLUG}`);
+  renderRead(); renderDetail();
+})();
+</script>
+</body>
+</html>
