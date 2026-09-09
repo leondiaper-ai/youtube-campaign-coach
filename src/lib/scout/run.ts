@@ -232,6 +232,7 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
         missionId,
         discoverySource: qc.discoverySource,
         whyWatching: verdict.evidence,
+        score: verdict.score,
         profile,
         status: 'WATCHING',
       });
@@ -338,8 +339,13 @@ export async function investigateStored(
   if (!mission) return { findings, caseStudies, nothing, modelCalls, tokens, latencyMs: 0 };
 
   const universe = await listScoutChannels(500);
+  /* Strongest first. Statuses INTERESTING and above have already been
+     investigated; CANDIDATE is included because a transport failure must
+     not bury a channel permanently — `isRepeat` stops genuine duplicates. */
   const candidates = universe
-    .filter(c => c.missionIds.includes(missionId) && c.latestProfile && c.status === 'WATCHING')
+    .filter(c => c.missionIds.includes(missionId) && c.latestProfile
+      && (c.status === 'WATCHING' || c.status === 'CANDIDATE'))
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
     .slice(0, limit);
 
   for (const c of candidates) {
@@ -348,7 +354,7 @@ export async function investigateStored(
       channelId: c.channelId, title: c.title, handle: c.handle, country: c.country,
       subs: null, totalViews: null, videoCount: null,
       missionId, discoverySource: c.discoverySource,
-      missionEvidence: c.whyWatching, score: 0,
+      missionEvidence: c.whyWatching, score: c.score ?? 0,
       profile: c.latestProfile!,
     };
     const out = await investigateChannel(qc, mission, `stored_${Date.now().toString(36)}`);
@@ -360,11 +366,16 @@ export async function investigateStored(
     } else if (out.kind === 'NOTHING') {
       modelCalls++; tokens += out.tokens;
       nothing.push({ channelId: out.channelId, title: out.title, why: out.why });
+      /* A considered "nothing here" is an answer — the channel stays in the
+         universe and keeps accumulating observations, but drops out of the
+         investigation queue. */
       await setScoutStatus(c.channelId, 'CANDIDATE');
     } else {
       if (out.suppressed.tokens > 0) { modelCalls++; tokens += out.suppressed.tokens; }
       nothing.push({ channelId: out.suppressed.subjectId, title: out.suppressed.subjectName, why: `${out.suppressed.reason}: ${out.suppressed.detail}` });
-      await setScoutStatus(c.channelId, 'CANDIDATE');
+      /* Deliberately no status change. A suppression may be a transport
+         failure, and demoting on those is how the first live run lost its
+         two strongest candidates. */
     }
   }
 

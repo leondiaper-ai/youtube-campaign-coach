@@ -122,6 +122,7 @@ export async function recordObservation(args: {
   missionId: MissionId;
   discoverySource: string;
   whyWatching: string;
+  score?: number;
   profile: ChannelProfile | null;
   status?: ScoutStatus;
 }): Promise<ScoutChannel> {
@@ -137,6 +138,7 @@ export async function recordObservation(args: {
     discoverySource: existing?.discoverySource ?? args.discoverySource,
     missionIds: Array.from(new Set([...(existing?.missionIds ?? []), args.missionId])),
     whyWatching: args.whyWatching || existing?.whyWatching || '',
+    score: args.score ?? existing?.score ?? 0,
     /* A status set by a human or by an investigation outranks the
        qualifier's default — never demote an INTERESTING channel back to
        CANDIDATE because a later run happened to re-qualify it. */

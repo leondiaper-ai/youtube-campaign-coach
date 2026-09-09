@@ -154,6 +154,13 @@ export interface ScoutChannel {
 
   /** Why we are keeping an eye on this one. Written by the qualifier. */
   whyWatching: string;
+  /**
+   * The qualifier's deterministic score, kept so a later investigation pass
+   * can work the queue strongest-first. Without it the queue runs in
+   * insertion order, which on the first live run meant the two weakest
+   * candidates were investigated and the two strongest never were.
+   */
+  score: number;
 
   status: ScoutStatus;
   lastObservedAt: string | null;
