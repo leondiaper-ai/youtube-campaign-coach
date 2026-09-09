@@ -95,13 +95,62 @@ function extractJson(text: string): any | null {
 const str = (v: unknown, fallback = ''): string =>
   typeof v === 'string' && v.trim() ? v.trim() : fallback;
 
-function normaliseActions(raw: unknown): SuggestedAction[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.slice(0, 6).map((a: any, i: number) => ({
+/**
+ * Labels that leak how the system is built rather than what the user gets.
+ * Validation produced a live button reading "Review localStorage campaign
+ * plan for Amyl" — accurate internally, meaningless and slightly alarming to
+ * a label marketer. Dropped rather than rewritten: a leaked label is usually
+ * a leaked idea, and salvaging the wording would keep the wrong suggestion.
+ */
+const LEAKY = /localstorage|redis|upstash|api key|endpoint|\bslug\b|json|schema|tool call|mcp|env var|database|cache/i;
+
+/**
+ * The four investigations that are always available, because they depend
+ * only on data every campaign has. Used when the model returns none — which
+ * it did on the K-Trap summary in validation, silently removing the entire
+ * follow-up affordance from the page.
+ */
+const FALLBACK_ACTIONS: SuggestedAction[] = [
+  { id: 'f_why',     label: 'Why does the Coach think this?',   investigationType: 'WHY' },
+  { id: 'f_latest',  label: 'Analyse the latest release',       investigationType: 'ANALYSE_LATEST_VIDEO' },
+  { id: 'f_prev',    label: 'Compare with the previous campaign', investigationType: 'COMPARE_PREVIOUS_CAMPAIGN' },
+  { id: 'f_next',    label: 'What should we do next?',          investigationType: 'WHAT_NEXT' },
+];
+
+function normaliseActions(raw: unknown, opts: { fallback?: boolean } = {}): SuggestedAction[] {
+  const list = Array.isArray(raw) ? raw : [];
+  const cleaned = list.slice(0, 6).map((a: any, i: number) => ({
     id: str(a?.id, `act_${i}`),
-    label: str(a?.label, 'Investigate'),
+    label: str(a?.label),
     investigationType: (str(a?.investigationType, 'CUSTOM') as InvestigationType),
-  }));
+  })).filter(a => {
+    if (!a.label) return false;
+    if (LEAKY.test(a.label)) return false;
+    /* An unknown investigationType would route to CUSTOM and re-ask the
+       label as a question, which is usually fine — but not when the label
+       is an instruction to a human rather than a question. */
+    return true;
+  });
+
+  if (cleaned.length) return cleaned;
+  return opts.fallback ? FALLBACK_ACTIONS : [];
+}
+
+const RANK: Record<string, number> = { LOW: 0, MEDIUM: 1, HIGH: 2 };
+
+/**
+ * Forward context caps confidence. In validation the K-Trap summary returned
+ * HIGH while its own text said the horizon was UNKNOWN and any timing call
+ * would be blind — two claims that cannot both be true. The model is not
+ * reliably able to discount itself, so the ceiling is applied here from the
+ * deterministic horizon rather than asked for in the prompt.
+ */
+function clampConfidence(raw: string, horizonConfidence: string): CoachOverview['confidence'] {
+  const ceiling = horizonConfidence === 'HIGH' ? 'HIGH'
+    : horizonConfidence === 'MEDIUM' ? 'MEDIUM'
+    : 'MEDIUM'; // LOW or UNKNOWN forward plan can still support a solid read of the PAST
+  const v = RANK[raw] === undefined ? 'LOW' : raw;
+  return (RANK[v] > RANK[ceiling] ? ceiling : v) as CoachOverview['confidence'];
 }
 
 function normaliseEvidence(raw: unknown) {
@@ -194,6 +243,14 @@ export async function getCoachOverview(
       };
     }
 
+    /* Read the horizon deterministically rather than trusting the model to
+       report what it saw. This is the value that caps confidence. */
+    let horizonConfidence = 'UNKNOWN';
+    try {
+      const h: any = await callCoachTool('get_campaign_horizon', { slug: artist.slug }, { baseUrl: ctx.baseUrl });
+      horizonConfidence = h?.horizonConfidence ?? 'UNKNOWN';
+    } catch { /* horizon unavailable → stays UNKNOWN, which is the safe read */ }
+
     const out: CoachOverview = {
       artistId: artist.slug,
       artistName: artist.name,
@@ -208,12 +265,16 @@ export async function getCoachOverview(
       timing: str(j.timing),
       evidenceSummary: str(j.evidenceSummary),
       evidence: normaliseEvidence(j.evidence),
-      confidence: (str(j.confidence, 'LOW') as CoachOverview['confidence']),
+      confidence: clampConfidence(str(j.confidence, 'LOW'), horizonConfidence),
       missingContext: str(j.missingContext, 'Not stated by the model — treat this reading as less complete than it appears.'),
       nextCheck: str(j.nextCheck),
-      suggestedActions: normaliseActions(j.suggestedActions),
+      /* fallback: the summary is the one place an empty action list removes
+         the entire follow-up affordance from the page. */
+      suggestedActions: normaliseActions(j.suggestedActions, { fallback: true }),
       producedBy: `${run.provider}/${run.model}`,
       toolsUsed: Array.from(new Set(run.toolCalls.filter(t => t.ok).map(t => t.tool))),
+      usage: run.usage,
+      horizonConfidence,
     };
 
     await writeOverview(out);
@@ -287,6 +348,13 @@ Return ONE JSON object and nothing else.
 
 Where causality is not established, write "appears", "suggests", "consistent with",
 or "one possible explanation" — never "caused", "drove" or "because of".
+
+DO NOT open the answer with a STATUS verdict (ON_TRACK / WATCH / etc). The
+campaign status is set once, by the Coach overview. An investigation that
+declares its own status produces two different verdicts on the same campaign
+minutes apart — which happened in testing and destroys trust in both. Answer
+the question asked; if your analysis genuinely contradicts the current status,
+say so explicitly in a sentence and explain why, rather than quietly relabelling.
 `;
 
 export async function runCoachInvestigation(args: {
@@ -360,6 +428,7 @@ async function runInvestigation(args: {
         suggestedActions: normaliseActions(j.suggestedActions),
         producedBy: `${run.provider}/${run.model}`,
         toolsUsed: Array.from(new Set(run.toolCalls.filter(t => t.ok).map(t => t.tool))),
+        usage: run.usage,
       },
     };
   } catch (e) {

@@ -19,7 +19,17 @@ import {
 import { INVESTIGATION_TYPES, type InvestigationType } from '@/lib/coach-service/types';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+/**
+ * 60s is the Vercel Hobby ceiling for a serverless function, not a choice.
+ *
+ * That matters: the peer-comparison investigation measured 46s in validation,
+ * which leaves ~14s of headroom before the platform kills it. Any campaign
+ * with a larger peer set than Amyl's will exceed it. The client timeout is
+ * generous (90s) so a slow-but-successful run still renders, but a genuinely
+ * long investigation will fail at the platform layer regardless of what we
+ * set here. Raising this needs a Pro plan, not a code change.
+ */
+export const maxDuration = 60;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',

@@ -16,6 +16,13 @@
  * surface actually renders — this is not a place to accumulate metadata.
  */
 
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  turns: number;
+}
+
 /* ── Status ─────────────────────────────────────────────────────────── */
 
 /**
@@ -135,6 +142,10 @@ export interface CoachOverview {
   /** Provenance of the run itself, for debugging and for the UI footer. */
   producedBy: string;
   toolsUsed: string[];
+  /** Token cost of this run, summed across every model turn. */
+  usage?: TokenUsage;
+  /** The deterministic forward-plan quality this reading was capped by. */
+  horizonConfidence?: string;
   /** True when served from cache rather than freshly reasoned. */
   cached?: boolean;
 }
@@ -153,6 +164,7 @@ export interface CoachAnswer {
   suggestedActions: SuggestedAction[];
   producedBy: string;
   toolsUsed: string[];
+  usage?: TokenUsage;
 }
 
 /* ── Access scope ───────────────────────────────────────────────────── */

@@ -120,11 +120,26 @@ function guessType(desc: string): string {
 
 /* ── Run loop ───────────────────────────────────────────────────────── */
 
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  /** Number of model round-trips. A tool-calling run bills once per turn. */
+  turns: number;
+}
+
 export interface RunResult {
   text: string;
   toolCalls: { tool: string; ms: number; ok: boolean }[];
   provider: string;
   model: string;
+  /**
+   * Summed across every turn, not just the last one. A tool-calling run
+   * re-sends the whole transcript each turn, so the final response's own
+   * usage block understates the real cost by a wide margin — which is
+   * exactly the mistake that makes a cost baseline useless.
+   */
+  usage: TokenUsage;
 }
 
 const MAX_TURNS = 12;
@@ -155,17 +170,20 @@ export async function runResearch(
     }
   };
 
-  const text = cfg.provider === 'anthropic'
-    ? await runAnthropic(system, userMessage, cfg, exec, registry)
-    : await runOpenAiCompatible(system, userMessage, cfg, exec, registry);
+  const usage: TokenUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0, turns: 0 };
 
-  return { text, toolCalls, provider: cfg.provider, model: cfg.model };
+  const text = cfg.provider === 'anthropic'
+    ? await runAnthropic(system, userMessage, cfg, exec, registry, usage)
+    : await runOpenAiCompatible(system, userMessage, cfg, exec, registry, usage);
+
+  return { text, toolCalls, provider: cfg.provider, model: cfg.model, usage };
 }
 
 type Exec = (name: string, args: Record<string, any>) => Promise<unknown>;
 
 async function runOpenAiCompatible(
   system: string, user: string, cfg: ProviderConfig, exec: Exec, registry: ToolRegistry,
+  usage: TokenUsage,
 ): Promise<string> {
   const messages: any[] = [
     { role: 'system', content: system },
@@ -179,6 +197,12 @@ async function runOpenAiCompatible(
     });
     if (!r.ok) throw new Error(`${cfg.provider} ${r.status}: ${(await r.text()).slice(0, 400)}`);
     const j = await r.json();
+    if (j.usage) {
+      usage.promptTokens     += j.usage.prompt_tokens ?? 0;
+      usage.completionTokens += j.usage.completion_tokens ?? 0;
+      usage.totalTokens      += j.usage.total_tokens ?? 0;
+    }
+    usage.turns += 1;
     const msg = j.choices?.[0]?.message;
     if (!msg) throw new Error(`${cfg.provider} returned no message`);
     messages.push(msg);
@@ -198,6 +222,7 @@ async function runOpenAiCompatible(
 
 async function runAnthropic(
   system: string, user: string, cfg: ProviderConfig, exec: Exec, registry: ToolRegistry,
+  usage: TokenUsage,
 ): Promise<string> {
   const messages: any[] = [{ role: 'user', content: user }];
   for (let turn = 0; turn < MAX_TURNS; turn++) {
@@ -212,6 +237,12 @@ async function runAnthropic(
     });
     if (!r.ok) throw new Error(`anthropic ${r.status}: ${(await r.text()).slice(0, 400)}`);
     const j = await r.json();
+    if (j.usage) {
+      usage.promptTokens     += j.usage.input_tokens ?? 0;
+      usage.completionTokens += j.usage.output_tokens ?? 0;
+      usage.totalTokens      += (j.usage.input_tokens ?? 0) + (j.usage.output_tokens ?? 0);
+    }
+    usage.turns += 1;
     messages.push({ role: 'assistant', content: j.content });
 
     const uses = (j.content ?? []).filter((b: any) => b.type === 'tool_use');

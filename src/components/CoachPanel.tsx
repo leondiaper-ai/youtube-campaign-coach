@@ -36,6 +36,8 @@ export interface Overview {
   evidence: Evidence[]; confidence: string; missingContext: string;
   nextCheck: string; suggestedActions: Action[];
   producedBy: string; toolsUsed: string[]; cached?: boolean;
+  horizonConfidence?: string;
+  usage?: { promptTokens: number; completionTokens: number; totalTokens: number; turns: number };
 }
 
 const STATUS_STYLE: Record<Status, string> = {
@@ -257,6 +259,23 @@ export function CoachPanel({ o, onRefresh }: { o: Overview; onRefresh?: () => vo
         )}
       </div>
 
+      {/* The forward plan is the single biggest determinant of how useful this
+          reading is, and validation showed the Coach asking for release dates
+          in six of eight outputs. So when the horizon is weak, the fix is one
+          click away rather than buried in a settings page. */}
+      {(o.horizonConfidence === 'UNKNOWN' || o.horizonConfidence === 'LOW') && (
+        <div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3">
+          <p className="text-xs text-amber-900">
+            <b>No usable forward plan.</b> The Coach can read history and performance,
+            but will not give timing advice without the next release dates.
+          </p>
+          <a href={`/coach-bot/horizon?slug=${encodeURIComponent(o.artistId)}`}
+            className="mt-2 inline-block rounded bg-amber-900 px-3 py-1.5 text-xs font-semibold text-white">
+            Add the next two dates
+          </a>
+        </div>
+      )}
+
       <EvidenceBlock items={o.evidence} summary={o.evidenceSummary} />
       <Investigations artistId={o.artistId} actions={o.suggestedActions} />
 
@@ -264,6 +283,7 @@ export function CoachPanel({ o, onRefresh }: { o: Overview; onRefresh?: () => vo
         {o.producedBy} · {new Date(o.generatedAt).toLocaleString('en-GB')}
         {o.cached ? ' · cached' : ''}
         {o.toolsUsed.length ? ` · ${o.toolsUsed.length} Watcher tools` : ''}
+        {o.usage ? ` · ${o.usage.totalTokens.toLocaleString()} tokens over ${o.usage.turns} turns` : ''}
       </p>
     </section>
   );

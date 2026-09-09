@@ -1204,10 +1204,13 @@ const COACH = { overview:null, failed:null };
 const cEsc = v => esc(v == null ? '' : v);
 
 async function coachFetch(path, opts){
-  /* 25s: an investigation runs several Watcher tool calls plus a
-     multi-turn model loop, which is slower than a normal API read. */
+  /* 90s. Measured in validation: peer comparison took 46s because it fetches
+     and reconstructs several full catalogues before the model reasons over
+     them. At 25s that button failed in the browser while succeeding on the
+     server — the worst kind of failure, because it looks like the analysis
+     is broken rather than slow. */
   const ctrl = new AbortController();
-  const t = setTimeout(()=>ctrl.abort(), 25000);
+  const t = setTimeout(()=>ctrl.abort(), 90000);
   try{
     const r = await fetch(path, Object.assign({signal:ctrl.signal, cache:'no-store'}, opts||{}));
     return await r.json();

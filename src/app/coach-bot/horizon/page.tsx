@@ -47,6 +47,14 @@ export default function HorizonEditor() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
+  /* Deep-link support: the Coach panel links here with ?slug= when a campaign
+     has no usable forward plan, so the fix is one click rather than a hunt
+     through a picker of 177 artists. */
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('slug');
+    if (q) setSlug(q);
+  }, []);
+
   useEffect(() => {
     fetch('/api/researcher/tools', {
       method: 'POST', headers: { 'content-type': 'application/json' },

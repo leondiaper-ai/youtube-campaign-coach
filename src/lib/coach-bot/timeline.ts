@@ -84,6 +84,16 @@ export interface CampaignTimeline {
    * acting on it is correct.
    */
   inFollowUpWindow: boolean;
+  /**
+   * The bare boolean above is ambiguous and was misread in testing: a model
+   * saw `inFollowUpWindow: false` on day 6 and reported the window as
+   * "closed" when it had not yet opened. That is a materially different
+   * situation — one says wait, the other says you missed it — so the state
+   * is now named rather than inferred.
+   */
+  followUpWindow: 'NOT_YET_OPEN' | 'OPEN' | 'CLOSED' | 'NO_HERO';
+  /** Days until the window opens. Null unless followUpWindow is NOT_YET_OPEN. */
+  daysUntilFollowUpWindow: number | null;
   /** Long-form already published since the current hero. */
   longFormSinceHero: number;
 
@@ -241,6 +251,14 @@ export function buildTimeline(
   const inFollowUpWindow =
     daysSinceCurrentHero !== null && daysSinceCurrentHero >= 7 && daysSinceCurrentHero <= 14;
 
+  const followUpWindow: CampaignTimeline['followUpWindow'] =
+    daysSinceCurrentHero === null ? 'NO_HERO'
+    : daysSinceCurrentHero < 7 ? 'NOT_YET_OPEN'
+    : daysSinceCurrentHero <= 14 ? 'OPEN'
+    : 'CLOSED';
+  const daysUntilFollowUpWindow =
+    followUpWindow === 'NOT_YET_OPEN' ? 7 - (daysSinceCurrentHero as number) : null;
+
   const planned = events.filter(e => e.status === 'planned' && e.daysFromNow >= 0)
     .sort((a, b) => a.daysFromNow - b.daysFromNow);
   const nextPlannedEvent = planned[0] ?? null;
@@ -273,6 +291,8 @@ export function buildTimeline(
     currentHero,
     daysSinceCurrentHero,
     inFollowUpWindow,
+    followUpWindow,
+    daysUntilFollowUpWindow,
     longFormSinceHero,
     horizonKnown,
     horizonSource: horizonBits.length ? horizonBits.join(' + ') : 'none',
