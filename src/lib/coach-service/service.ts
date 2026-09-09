@@ -28,16 +28,52 @@ import { ARTISTS, mergeArtistLists, type Artist } from '../artists';
 import { listCustomArtists } from '../artistStore';
 import { readOverview, writeOverview } from './store';
 import {
+  buildSessionContext, cacheKey, emptySession, isReusable,
+  loadSession, newSessionId, saveSession,
+  type CoachSession, type EstablishedItem,
+} from './session';
+import { buildMemoryContext, listMemory } from './memory';
+import {
   INTERNAL_GLOBAL_SCOPE, scopeAllows,
   type CoachAnswer, type CoachOverview, type CoachScope,
   type InvestigationType, type SuggestedAction,
 } from './types';
 
-/* The Coach registry: the full 20-tool surface Grok already uses over MCP. */
+/* The Coach registry: the full tool surface Grok already uses over MCP. */
 const COACH_REGISTRY: ToolRegistry = {
   specs: ALL_SPECS,
   call: (name, args, ctx) => callCoachTool(name, args, ctx),
 };
+
+/**
+ * The same registry, but reading and writing a session's tool cache.
+ *
+ * Only tools on the reusable list are served from cache — historical and
+ * architectural data whose answer cannot change between two questions in the
+ * same sitting. Live state is always re-fetched, because a conversation that
+ * lasts an hour must not answer "what's happening now" from a snapshot taken
+ * at the start of it.
+ *
+ * `reused` is threaded back out so the response can report what was saved,
+ * which is the only honest way to claim an efficiency win.
+ */
+function sessionRegistry(session: CoachSession, reused: string[]): ToolRegistry {
+  return {
+    specs: ALL_SPECS,
+    call: async (name, args, ctx) => {
+      const k = cacheKey(name, args ?? {});
+      if (isReusable(name) && session.toolCache[k]) {
+        reused.push(name);
+        return session.toolCache[k].result;
+      }
+      const out = await callCoachTool(name, args, ctx);
+      if (isReusable(name)) {
+        session.toolCache[k] = { at: new Date().toISOString(), result: out };
+      }
+      return out;
+    },
+  };
+}
 
 export interface ServiceCtx { baseUrl: string; scope?: CoachScope }
 
@@ -301,9 +337,13 @@ export async function askCoach(args: {
   campaignId?: string | null;
   question: string;
   contextScope?: 'CAMPAIGN' | 'ARTIST' | 'ROSTER';
+  sessionId?: string | null;
 }, ctx: ServiceCtx): Promise<CoachResult<CoachAnswer>> {
   return runInvestigation(
-    { artistId: args.artistId, investigationType: 'CUSTOM', question: args.question, contextScope: args.contextScope },
+    {
+      artistId: args.artistId, investigationType: 'CUSTOM', question: args.question,
+      contextScope: args.contextScope, sessionId: args.sessionId,
+    },
     ctx,
   );
 }
@@ -369,8 +409,16 @@ put those in their own fields, or the buttons the user clicks will be empty.
   "evidence": [{ "sourceType": "WATCHER|PUBLIC_YOUTUBE|EXTERNAL|COACH_INFERENCE", "claim": "...", "sourceRef": "..." }],
   "confidence": "LOW | MEDIUM | HIGH",
   "missingContext": "what you could not see. Never blank",
-  "suggestedActions": [{ "id": "a1", "label": "specific to this artist and this finding", "investigationType": "WHY|ANALYSE_LATEST_VIDEO|AUDIENCE_REACTION|COMPARE_PREVIOUS_CAMPAIGN|COMPARE_RELEVANT_ARTISTS|WHAT_NEXT|WHAT_TO_TEST|CUSTOM" }]
+  "suggestedActions": [{ "id": "a1", "label": "specific to this artist and this finding", "investigationType": "WHY|ANALYSE_LATEST_VIDEO|AUDIENCE_REACTION|COMPARE_PREVIOUS_CAMPAIGN|COMPARE_RELEVANT_ARTISTS|WHAT_NEXT|WHAT_TO_TEST|CUSTOM" }],
+  "established": [{ "kind": "FINDING|INTERPRETATION|HYPOTHESIS|OPEN_QUESTION", "text": "one sentence", "sourceRef": "tool or asset" }],
+  "entities": ["names of videos, campaigns or formats this answer was about"]
 }
+
+"established" and "entities" are how the conversation remembers. Add ONLY what
+this turn newly settled — two or three items at most, and nothing that was
+already established above. Keep a HYPOTHESIS labelled as a hypothesis; if a
+later turn tests it, restate it with its new kind rather than silently
+upgrading it.
 
 Where causality is not established, write "appears", "suggests", "consistent with",
 or "one possible explanation" — never "caused", "drove" or "because of".
@@ -387,6 +435,7 @@ export async function runCoachInvestigation(args: {
   campaignId?: string | null;
   investigationType: InvestigationType;
   question?: string;
+  sessionId?: string | null;
 }, ctx: ServiceCtx): Promise<CoachResult<CoachAnswer>> {
   return runInvestigation(args, ctx);
 }
@@ -397,11 +446,23 @@ async function runInvestigation(args: {
   investigationType: InvestigationType;
   question?: string;
   contextScope?: string;
+  sessionId?: string | null;
 }, ctx: ServiceCtx): Promise<CoachResult<CoachAnswer>> {
   const scope = ctx.scope ?? INTERNAL_GLOBAL_SCOPE;
   const r = await resolveArtist(args.artistId, scope);
   if (r.error) return { ok: false, reason: r.error, detail: `${args.artistId}: ${r.error}` };
   const artist = r.artist;
+
+  /* Load or open the session. A caller that passes no id gets a fresh one
+     back, so the first question in a conversation needs no ceremony. */
+  let session = args.sessionId ? await loadSession(args.sessionId) : null;
+  if (session && session.artistId !== artist.slug) {
+    /* Switching artist mid-session would carry one campaign's findings into
+       another's answer. Start clean rather than silently cross-contaminate. */
+    session = null;
+  }
+  const isNewSession = !session;
+  session = session ?? emptySession(args.sessionId || newSessionId(), artist.slug, artist.campaign ?? null);
 
   const cfg = resolveProvider();
   if (!cfg) {
@@ -417,23 +478,58 @@ async function runInvestigation(args: {
   /* The artist is always injected server-side. A surface never has to make
      the user restate who they are looking at, and a caller cannot silently
      retarget the question at a different artist by wording alone. */
+  /* Campaign memory is loaded only at the start of a session. Re-sending it
+     every turn would cost tokens to repeat something the model has already
+     been told and has in its recent-turn context. */
+  const memoryBlock = isNewSession
+    ? buildMemoryContext(await listMemory(artist.slug).catch(() => []))
+    : '';
+  const sessionBlock = buildSessionContext(session);
+
   const question = [
     `ARTIST: ${artist.name} (slug: ${artist.slug})`,
     artist.campaign ? `CAMPAIGN: ${artist.campaign}` : null,
     '',
+    memoryBlock || null,
+    sessionBlock || null,
+    sessionBlock ? '═══ THE NEW QUESTION ═══\n' : null,
     base,
     args.question ? `\nThe user asked: ${args.question}` : null,
   ].filter(Boolean).join('\n');
 
+  const reused: string[] = [];
   try {
     const run = await runResearch(
       COACH_SYSTEM_PROMPT + ANSWER_FORMAT,
       question,
       { baseUrl: ctx.baseUrl },
       cfg,
-      COACH_REGISTRY,
+      sessionRegistry(session, reused),
     );
     const j = extractJson(run.text) ?? {};
+
+    const answerText = str(j.answer, run.text || 'No answer returned.');
+
+    /* Record the turn BEFORE returning, so a follow-up fired immediately from
+       a suggested button already sees this exchange. */
+    const turnNo = session.turns.length + 1;
+    session.turns.push({ role: 'user', text: args.question ?? base, at: new Date().toISOString() });
+    session.turns.push({
+      role: 'coach', text: answerText, at: new Date().toISOString(),
+      tools: Array.from(new Set(run.toolCalls.filter(t => t.ok).map(t => t.tool))),
+    });
+    if (Array.isArray(j.established)) {
+      for (const e of j.established.slice(0, 4)) {
+        const kind = str(e?.kind, 'INTERPRETATION') as EstablishedItem['kind'];
+        const text = str(e?.text);
+        if (text) session.established.push({ kind, text, sourceRef: str(e?.sourceRef) || null, turn: turnNo });
+      }
+    }
+    if (Array.isArray(j.entities)) {
+      for (const e of j.entities.slice(0, 6)) { const v = str(e); if (v) session.entitiesDiscussed.push(v); }
+    }
+    session.evidenceRefs.push(...normaliseEvidence(j.evidence));
+    await saveSession(session).catch(() => { /* answer stands even if memory fails */ });
 
     return {
       ok: true,
@@ -446,7 +542,7 @@ async function runInvestigation(args: {
         /* If JSON parsing failed we still have the model's prose, and prose
            is a perfectly good answer here — unlike the overview, nothing
            downstream depends on the fields. */
-        answer: str(j.answer, run.text || 'No answer returned.'),
+        answer: answerText,
         evidence: normaliseEvidence(j.evidence),
         confidence: (str(j.confidence, 'LOW') as CoachAnswer['confidence']),
         missingContext: str(j.missingContext, 'Not stated by the model.'),
@@ -456,6 +552,9 @@ async function runInvestigation(args: {
         producedBy: `${run.provider}/${run.model}`,
         toolsUsed: Array.from(new Set(run.toolCalls.filter(t => t.ok).map(t => t.tool))),
         usage: run.usage,
+        sessionId: session.sessionId,
+        turn: turnNo,
+        reusedEvidence: Array.from(new Set(reused)),
       },
     };
   } catch (e) {

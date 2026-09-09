@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
   let body: any;
   try { body = await req.json(); } catch { return json({ error: 'BAD_JSON' }, 400); }
 
-  const { artistId, campaignId, question, investigationType } = body ?? {};
+  const { artistId, campaignId, question, investigationType, sessionId } = body ?? {};
   if (!artistId) return json({ error: 'artistId is required' }, 400);
 
   /* An unrecognised investigationType falls back to CUSTOM rather than
@@ -76,9 +76,11 @@ export async function POST(req: NextRequest) {
     ? investigationType
     : 'CUSTOM';
 
+  /* sessionId is optional. Omit it to start a conversation; pass the one
+     returned by the previous answer to continue it. */
   const r = (type === 'CUSTOM' && question)
-    ? await askCoach({ artistId, campaignId, question }, { baseUrl })
-    : await runCoachInvestigation({ artistId, campaignId, investigationType: type, question }, { baseUrl });
+    ? await askCoach({ artistId, campaignId, question, sessionId }, { baseUrl })
+    : await runCoachInvestigation({ artistId, campaignId, investigationType: type, question, sessionId }, { baseUrl });
 
   if (!r.ok) return json({ error: r.reason, detail: r.detail }, r.reason === 'NOT_CONFIGURED' ? 503 : 400);
   return json(r.data);

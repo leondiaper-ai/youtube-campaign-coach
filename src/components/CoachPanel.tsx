@@ -115,63 +115,121 @@ function EvidenceBlock({ items, summary }: { items: Evidence[]; summary: string 
 /* ── Follow-ups ─────────────────────────────────────────────────────── */
 
 /**
- * The pattern Grok's own UI does well: the next question is offered rather
- * than typed. Answers open inline and stack, so the artist context is never
- * restated and the reasoning stays next to the reading that prompted it.
+ * The conversation.
+ *
+ * ── WHY THIS IS A THREAD AND NOT A LIST OF ANSWERS ────────────────────
+ * The previous version fired each investigation independently, so every
+ * answer restated the artist, re-derived the same history, and could not
+ * refer to what had just been said. This keeps one sessionId across the whole
+ * exchange: the buttons and the free-form box are the same conversation, and
+ * the server carries what has been established.
+ *
+ * Suggested actions are replaced by the ones the latest answer returned, so
+ * the offered questions follow the thread rather than looping back to the
+ * opening four.
  */
-function Investigations({ artistId, actions }: { artistId: string; actions: Action[] }) {
-  type Slot = { key: string; label: string; body: string; loading: boolean; meta?: string };
-  const [open, setOpen] = useState<Slot[]>([]);
+function Investigations({
+  artistId, actions,
+}: { artistId: string; actions: Action[] }) {
+  type Slot = {
+    key: string; question: string; body: string; loading: boolean;
+    meta?: string; reused?: string[];
+  };
+  const [thread, setThread] = useState<Slot[]>([]);
+  const [offered, setOffered] = useState<Action[]>(actions);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
 
-  /* Keyed rather than indexed. Investigations take many seconds, so two
-     clicks in flight at once is normal, and writing results back by array
-     index would let a slow answer land in a fast one's slot. */
-  const run = useCallback(async (a: Action) => {
-    const key = `${a.id}_${Date.now()}`;
-    setOpen(o => [...o, { key, label: a.label, body: '', loading: true }]);
+  const ask = useCallback(async (question: string, investigationType = 'CUSTOM') => {
+    const key = `t_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    setThread(t => [...t, { key, question, body: '', loading: true }]);
     const settle = (patch: Partial<Slot>) =>
-      setOpen(o => o.map(x => x.key === key ? { ...x, ...patch, loading: false } : x));
+      setThread(t => t.map(x => x.key === key ? { ...x, ...patch, loading: false } : x));
     try {
       const r = await fetch('/api/coach-service', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ artistId, investigationType: a.investigationType, question: a.label }),
+        body: JSON.stringify({ artistId, investigationType, question, sessionId }),
       });
       const j = await r.json();
+      /* Adopt the session on the first answer; every later turn reuses it. */
+      if (j.sessionId) setSessionId(j.sessionId);
+      if (Array.isArray(j.suggestedActions) && j.suggestedActions.length) {
+        setOffered(j.suggestedActions);
+      }
       settle({
         body: j.answer ?? `${j.error ?? 'Failed'} — ${j.detail ?? ''}`,
-        meta: j.producedBy ? `${j.producedBy} · ${(j.toolsUsed ?? []).join(', ')}` : undefined,
+        reused: j.reusedEvidence ?? [],
+        meta: j.producedBy
+          ? `${j.producedBy}${j.turn ? ` · turn ${j.turn}` : ''} · ${(j.toolsUsed ?? []).join(', ')}`
+          : undefined,
       });
     } catch (e) {
       settle({ body: String(e) });
     }
-  }, [artistId]);
+  }, [artistId, sessionId]);
 
-  if (!actions.length) return null;
+  const submit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    const q = draft.trim();
+    if (!q) return;
+    setDraft('');
+    ask(q);
+  }, [draft, ask]);
 
   return (
     <div className="mt-4">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
-        Suggested investigations
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {actions.map(a => (
-          <button key={a.id} onClick={() => run(a)}
-            className="rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white">
-            → {a.label}
-          </button>
-        ))}
+      <div className="flex items-center gap-2">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+          {thread.length ? 'Conversation' : 'Suggested investigations'}
+        </div>
+        {sessionId && (
+          <span className="text-[10px] text-neutral-400">context carried across follow-ups</span>
+        )}
       </div>
 
-      {open.map(o => (
-        <div key={o.key} className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-          <div className="text-xs font-bold text-neutral-900">{o.label}</div>
-          {o.loading
-            ? <p className="mt-1 text-xs text-neutral-500">Reasoning over Watcher data…</p>
-            : <p className="mt-1 whitespace-pre-wrap text-xs leading-relaxed text-neutral-700">{o.body}</p>}
-          {o.meta && <p className="mt-2 text-[10px] text-neutral-400">{o.meta}</p>}
+      {thread.map(o => (
+        <div key={o.key} className="mt-3">
+          <div className="rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white">
+            {o.question}
+          </div>
+          <div className="mt-1 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+            {o.loading
+              ? <p className="text-xs text-neutral-500">Reasoning over Watcher data…</p>
+              : <p className="whitespace-pre-wrap text-xs leading-relaxed text-neutral-700">{o.body}</p>}
+            {o.meta && <p className="mt-2 text-[10px] text-neutral-400">{o.meta}</p>}
+            {!!o.reused?.length && (
+              <p className="mt-1 text-[10px] text-emerald-700">
+                Reused evidence already gathered: {Array.from(new Set(o.reused)).join(', ')}
+              </p>
+            )}
+          </div>
         </div>
       ))}
+
+      {!!offered.length && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {offered.map(a => (
+            <button key={a.id} onClick={() => ask(a.label, a.investigationType)}
+              className="rounded-full border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-800 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white">
+              → {a.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <form onSubmit={submit} className="mt-3 flex gap-2">
+        <input value={draft} onChange={e => setDraft(e.target.value)}
+          placeholder={thread.length ? 'Ask a follow-up…' : 'Ask the Coach anything about this campaign…'}
+          className="flex-1 rounded border border-neutral-300 px-3 py-2 text-xs" />
+        <button type="submit" disabled={!draft.trim()}
+          className="rounded bg-neutral-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-30">
+          Ask
+        </button>
+      </form>
+      <p className="mt-1 text-[10px] text-neutral-400">
+        No need to repeat the artist, the release or what was just said.
+      </p>
     </div>
   );
 }

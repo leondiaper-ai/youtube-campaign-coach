@@ -165,6 +165,12 @@ export interface CoachAnswer {
   producedBy: string;
   toolsUsed: string[];
   usage?: TokenUsage;
+  /** The conversation this answer belongs to. Pass it back to continue. */
+  sessionId?: string;
+  /** 1-based position in that conversation. */
+  turn?: number;
+  /** Tools served from session cache rather than re-run. */
+  reusedEvidence?: string[];
 }
 
 /* ── Access scope ───────────────────────────────────────────────────── */

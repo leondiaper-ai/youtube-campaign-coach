@@ -23,6 +23,10 @@ import { readRecon, writeRecon } from '../researcher/store';
 import { buildTimeline } from './timeline';
 import { getHorizon } from './horizon';
 import {
+  listMemory, recordMemory, MEMORY_KINDS,
+  type MemoryKind,
+} from '../coach-service/memory';
+import {
   listRecommendations, recordCoachFeedback, saveRecommendation,
   type CoachRecommendation,
 } from './store';
@@ -94,6 +98,23 @@ export const COACH_SPECS = [
     },
   },
   {
+    name: 'get_campaign_memory',
+    description:
+      'What this campaign has already established across previous conversations: findings, interpretations, open hypotheses, recommendations and the decisions the team actually took. Call this when asked what was decided, agreed, learned or tested. This is separate from get_coach_history, which is the formal recommendation queue.',
+    args: { slug: 'string' },
+  },
+  {
+    name: 'remember_for_campaign',
+    description:
+      'Promote ONE thing into durable campaign memory. Use sparingly — only for a meaningful finding, an interpretation worth carrying, an untested hypothesis, a recommendation, or a piece of campaign context the system could not otherwise know. Do NOT record conversational chatter, restatements of Watcher metrics, or anything the user did not treat as a conclusion. You may not record a DECISION; only a human can decide.',
+    args: {
+      slug: 'string',
+      kind: 'FINDING|INTERPRETATION|HYPOTHESIS|RECOMMENDATION|CONTEXT',
+      text: 'string, one sentence',
+      sourceRef: 'string, optional — tool name, video id or date range',
+    },
+  },
+  {
     name: 'record_coach_feedback',
     description:
       'Records the human verdict on a recommendation. reason is required for modify and reject — the reasoning is the valuable part.',
@@ -152,6 +173,52 @@ export async function callCoachTool(
         n: out.length,
         campaigns: out,
         guidance: 'This is the CANDIDATE set, not a to-do list. Most of these will need no intervention. Filter to the few where something has actually changed, and say plainly that the rest are fine.',
+      };
+    }
+
+    case 'get_campaign_memory': {
+      const a = find(args.slug);
+      if (!a) return { error: `unknown artist ${args.slug}` };
+      const items = await listMemory(a.slug);
+      return {
+        artistSlug: a.slug,
+        n: items.length,
+        items: items.map(i => ({
+          id: i.id, kind: i.kind, text: i.text, status: i.status,
+          humanDecision: i.humanDecision, decisionNote: i.decisionNote,
+          outcome: i.outcome, sourceRef: i.sourceRef, createdAt: i.createdAt,
+        })),
+        guidance: items.length
+          ? 'Anything marked HYPOTHESIS is untested. Anything with a humanDecision was settled by a person and should be respected unless new evidence contradicts it.'
+          : 'Nothing has been recorded for this campaign yet.',
+      };
+    }
+
+    case 'remember_for_campaign': {
+      const a = find(args.slug);
+      if (!a) return { error: `unknown artist ${args.slug}` };
+      const kind = String(args.kind ?? '').toUpperCase() as MemoryKind;
+      /* DECISION and OUTCOME are deliberately unreachable from the model: a
+         decision is a human act, and an outcome is a measurement. Letting the
+         Coach write either would make the record unable to distinguish what
+         the team chose from what the model suggested. */
+      if (!MEMORY_KINDS.includes(kind) || kind === 'DECISION' || kind === 'OUTCOME') {
+        return { error: `kind must be one of FINDING, INTERPRETATION, HYPOTHESIS, RECOMMENDATION, CONTEXT (got ${args.kind})` };
+      }
+      if (!String(args.text ?? '').trim()) return { error: 'text is required' };
+      const item = await recordMemory({
+        artistId: a.slug,
+        campaignId: a.campaign ?? null,
+        kind,
+        text: String(args.text),
+        sourceRef: args.sourceRef ? String(args.sourceRef) : null,
+        createdBy: 'coach',
+      });
+      return {
+        recorded: true, id: item.id, kind: item.kind, status: item.status,
+        note: kind === 'RECOMMENDATION'
+          ? 'Recorded and added to the human review queue. It is a proposal until someone accepts it.'
+          : 'Recorded in campaign memory.',
       };
     }
 
