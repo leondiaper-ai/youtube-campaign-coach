@@ -356,8 +356,16 @@ const ANSWER_FORMAT = COACH_INVESTIGATION_STANCE + COACH_SUGGESTION_RULES + `
 
 Return ONE JSON object and nothing else.
 
+CRITICAL — WHERE THINGS GO. The output shapes above (HEADLINE, WHAT I FOUND,
+WHY IT MATTERS, PATTERN, and so on) are markdown headings INSIDE the "answer"
+string. "evidence", "confidence", "missingContext" and "suggestedActions" are
+separate JSON keys and must NEVER appear as headings inside "answer".
+
+Do not end the answer with a "suggestedActions" or "missingContext" section —
+put those in their own fields, or the buttons the user clicks will be empty.
+
 {
-  "answer": "your analysis in markdown, shaped to the question as described above. Lead with the finding",
+  "answer": "your analysis in markdown, shaped to the question as described above. Lead with the finding. Your closing 'what I'd check next' section may describe the follow-ups in prose, but you must ALSO return them structurally in suggestedActions below",
   "evidence": [{ "sourceType": "WATCHER|PUBLIC_YOUTUBE|EXTERNAL|COACH_INFERENCE", "claim": "...", "sourceRef": "..." }],
   "confidence": "LOW | MEDIUM | HIGH",
   "missingContext": "what you could not see. Never blank",
@@ -442,7 +450,9 @@ async function runInvestigation(args: {
         evidence: normaliseEvidence(j.evidence),
         confidence: (str(j.confidence, 'LOW') as CoachAnswer['confidence']),
         missingContext: str(j.missingContext, 'Not stated by the model.'),
-        suggestedActions: normaliseActions(j.suggestedActions),
+        /* fallback here too: this phase proved the model will sometimes
+           narrate its follow-ups in prose and leave the field empty. */
+        suggestedActions: normaliseActions(j.suggestedActions, { fallback: true }),
         producedBy: `${run.provider}/${run.model}`,
         toolsUsed: Array.from(new Set(run.toolCalls.filter(t => t.ok).map(t => t.tool))),
         usage: run.usage,
