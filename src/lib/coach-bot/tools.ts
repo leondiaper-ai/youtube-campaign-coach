@@ -21,6 +21,7 @@ import { callTool as callResearchTool, TOOL_SPECS as RESEARCH_SPECS } from '../r
 import { fetchCatalogue, reconstruct } from '../researcher/catalogue';
 import { readRecon, writeRecon } from '../researcher/store';
 import { buildTimeline } from './timeline';
+import { getHorizon } from './horizon';
 import {
   listRecommendations, recordCoachFeedback, saveRecommendation,
   type CoachRecommendation,
@@ -55,6 +56,12 @@ export const COACH_SPECS = [
     name: 'get_campaign_timeline',
     description:
       'THE CORE COACH TOOL. Living timeline for one artist: past assets with publish dates and formats, the current hero, days since it, follow-up window position, hero-to-hero gaps, known upcoming planned events, and explicit data notes. Read horizonKnown before recommending any new content.',
+    args: { slug: 'string' },
+  },
+  {
+    name: 'get_campaign_horizon',
+    description:
+      'WHAT IS PLANNED NEXT. Server-side forward campaign context: next major moment and days away, events in the next 7 / 7-14 / 30 day windows, planned long-form assets, and undated plans. Returns horizonConfidence (HIGH/MEDIUM/LOW/UNKNOWN) plus horizonReason. YOU MUST CALL THIS BEFORE ANY TIMING-SENSITIVE RECOMMENDATION. If confidence is LOW or UNKNOWN, do not give unqualified publishing timing.',
     args: { slug: 'string' },
   },
   {
@@ -125,9 +132,7 @@ export async function callCoachTool(
         const day = a.campaignStartDate
           ? Math.max(1, Math.floor((Date.now() - new Date(a.campaignStartDate).getTime()) / 86_400_000))
           : null;
-        const nextDays = a.nextMomentDate
-          ? Math.round((new Date(a.nextMomentDate).getTime() - Date.now()) / 86_400_000)
-          : null;
+        const h = await getHorizon(a.slug);
         out.push({
           slug: a.slug, name: a.name,
           campaign: a.campaign ?? null, campaignDay: day, phase: a.phase ?? null,
@@ -136,9 +141,11 @@ export async function callCoachTool(
           daysSinceLastUpload: snap?.lastUploadAt
             ? Math.round((Date.now() - new Date(snap.lastUploadAt).getTime()) / 86_400_000) : null,
           uploads30d: snap?.uploads30d ?? null,
-          nextPlanned: a.nextMomentLabel ?? null,
-          daysToNextPlanned: nextDays,
-          horizonKnown: nextDays !== null && nextDays >= 0,
+          nextPlanned: h.nextMajorMoment?.title ?? null,
+          nextPlannedType: h.nextMajorMoment?.type ?? null,
+          daysToNextPlanned: h.nextMajorMoment?.daysAway ?? null,
+          horizonKnown: h.horizonKnown,
+          horizonConfidence: h.horizonConfidence,
         });
       }
       return {
@@ -148,13 +155,41 @@ export async function callCoachTool(
       };
     }
 
+    case 'get_campaign_horizon': {
+      const a = find(args.slug);
+      if (!a) return { error: `unknown artist ${args.slug}` };
+      const h = await getHorizon(a.slug);
+      return {
+        ...h,
+        artistName: a.name,
+        campaignName: a.campaign ?? null,
+        guidance: h.horizonKnown
+          ? 'Forward plan is usable. Reason against these dates before recommending any new asset — check whether a major moment is close enough that new content would compete with it.'
+          : 'Forward plan is NOT usable. Do not give an unqualified publishing-timing recommendation. Say what is missing and ask for the release schedule.',
+      };
+    }
+
     case 'get_campaign_timeline': {
       const a = find(args.slug);
       if (!a) return { error: `unknown artist ${args.slug}` };
       const recon = await reconFor(ctx.baseUrl, a);
       const tl = buildTimeline(a, recon);
+      /* The persisted horizon is authoritative for FORWARD context and
+         overrides the weak artist-record fallback baked into buildTimeline. */
+      const h = await getHorizon(a.slug);
       return {
         ...tl,
+        horizonKnown: h.horizonKnown,
+        horizonConfidence: h.horizonConfidence,
+        horizonReason: h.horizonReason,
+        horizonSource: h.totalUpcoming ? 'campaign_horizon' : 'none',
+        nextMajorMoment: h.nextMajorMoment,
+        next7Days: h.next7Days,
+        days7to14: h.days7to14,
+        longFormPlannedIn7to14: h.longFormPlannedIn7to14,
+        plannedLongFormNext30: h.plannedLongFormNext30,
+        undatedPlans: h.undated,
+        horizonWarnings: h.warnings,
         /* Trimmed: the model gets the shape, not 300 rows. */
         events: tl.events.slice(-40),
         eventsTruncated: Math.max(0, tl.events.length - 40),
