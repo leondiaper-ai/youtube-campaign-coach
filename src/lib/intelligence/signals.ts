@@ -39,6 +39,22 @@ import type { Candidate, Signal, SignalType } from './types';
 
 /* ── Thresholds. One place. ──────────────────────────────────────────── */
 
+/**
+ * These were calibrated against a real full-roster scan, not chosen in the
+ * abstract. The first pass fired on 117 of 177 channels, which is not a
+ * triage layer — it is the roster with extra steps. What the data showed:
+ *
+ *   cadence   26 of 63 hits were swings of fewer than 6 uploads
+ *   quiet     15 of 44 hits were 31–43 days, which is an ordinary gap
+ *             between campaigns for a music channel
+ *   asset     ratios ran from 2.4× to 342×; the 342× was a channel whose
+ *             recent long-form median was near zero, so the ratio measured
+ *             the emptiness of the baseline rather than the strength of the
+ *             asset
+ *
+ * So every threshold below now requires BOTH a relative and an absolute
+ * move. A ratio on its own is a measure of how small the denominator was.
+ */
 export const T = {
   /** Week-over-week view-delta ratio that counts as acceleration. */
   viewAccelRatio: 2.0,
@@ -52,12 +68,21 @@ export const T = {
   subsSurgeAbs: 100,
   /** Net subscriber loss over 7d. Any loss is worth noticing. */
   subsDeclineAbs: -25,
-  /** Upload count change over 30d that counts as a cadence shift. */
-  cadenceDelta: 3,
-  /** Days of silence before "went quiet" fires. */
-  quietDays: 30,
-  /** …but only for artists who were previously active. */
-  quietPriorUploads: 2,
+  /** Upload-count change over 30d. Both conditions must hold. */
+  cadenceDelta: 6,
+  cadenceRatio: 2.0,
+  /** A cadence signal on a near-silent baseline needs real volume now. */
+  cadenceMinActive: 8,
+  /** Days of silence before "went quiet" fires. A month is an ordinary gap. */
+  quietDays: 60,
+  /** …and only where the channel previously sustained real activity. */
+  quietPriorUploads: 4,
+  /** Strong-asset rule: all four must hold, or the ratio is meaningless. */
+  assetRatio: 3.0,
+  assetMinLongform: 6,
+  assetMinMedianViews: 2_000,
+  assetMinViews: 10_000,
+  assetMaxAgeDays: 45,
   /** A release this many days out is worth preparing for. */
   releaseHorizonDays: 21,
   /** Minimum stored history before ratio signals are trusted at all. */
@@ -165,9 +190,14 @@ function subscriberMovement(history: ChannelSnapshot[]): Signal | null {
  */
 function classificationChange(weekly: WeeklyChannelSnapshot[]): Signal | null {
   if (weekly.length < 2) return null;
-  const [now, prev] = weekly; // newest first
+  const [now, prev, before] = weekly; // newest first
   if (!now.currentClassification || !prev.currentClassification) return null;
   if (now.currentClassification === prev.currentClassification) return null;
+
+  /* A → B → A is a channel sitting on a threshold, not a channel changing
+     behaviour. Reporting a flap as a state change would train the reader
+     to ignore the signal, which costs more than missing it. */
+  if (before?.currentClassification === now.currentClassification) return null;
 
   const worse = ['GROWING', 'WEAK_CONVERSION', 'UNDERFED', 'COLD'];
   const direction =
@@ -197,10 +227,20 @@ function cadenceChange(history: ChannelSnapshot[]): Signal | null {
   const diff = last.uploads30d - then.uploads30d;
   if (Math.abs(diff) < T.cadenceDelta) return null;
 
+  /* A ratio alone would fire on 1 → 4. An absolute alone would fire on
+     19 → 28, which for a channel publishing weekly is a normal fortnight.
+     Requiring both leaves genuine changes of behaviour. */
+  const hi = Math.max(last.uploads30d, then.uploads30d);
+  const lo = Math.min(last.uploads30d, then.uploads30d);
+  if (lo > 0 && hi / lo < T.cadenceRatio) return null;
+  /* A zero on one side is as often a thin snapshot as a real stop, so the
+     active side has to carry real volume before we believe it. */
+  if (lo === 0 && hi < T.cadenceMinActive) return null;
+
   return {
     type: 'CADENCE_CHANGE',
     reason: `Upload cadence ${diff > 0 ? 'up' : 'down'} — ${then.uploads30d} uploads/30d on ${then.ts}, ${last.uploads30d} now`,
-    strength: scale(Math.abs(diff), T.cadenceDelta, 12),
+    strength: scale(Math.abs(diff), T.cadenceDelta, 20),
     sourceRef: `snap:uploads30d:${then.ts}..${last.ts}`,
     historyDays: history.length,
   };
@@ -220,40 +260,51 @@ function wentQuiet(snap: CachedSnap | undefined, history: ChannelSnapshot[]): Si
   return {
     type: 'WENT_QUIET',
     reason: `No upload for ${days} days, on a channel that previously sustained ${T.quietPriorUploads}+ uploads/30d`,
-    strength: scale(days, T.quietDays, 120),
+    strength: scale(days, T.quietDays, 180),
     sourceRef: `lastUploadAt:${lastUpload}`,
     historyDays: history.length,
   };
 }
 
 /**
- * Reuses the existing outperformance rule from `opportunities.ts` — a top
- * asset at 2× the median of recent longform — rather than inventing a
- * second definition of "unusually strong".
+ * Descended from the outperformance rule in `opportunities.ts` — a top asset
+ * against the median of recent long-form — but with the guards that rule
+ * never needed and this one does.
+ *
+ * On the first full-roster scan this fired at 342× for a channel whose
+ * recent long-form median was a few hundred views. The ratio was arithmetically
+ * correct and completely uninformative: it measured how empty the baseline
+ * was, not how strong the asset was. So the baseline now has to be a real
+ * baseline (enough uploads, a non-trivial median) and the asset has to be
+ * large in absolute terms as well as relative ones.
  */
 function strongAsset(snap: CachedSnap | undefined): Signal | null {
   const recent = (snap?.recentUploads ?? [])
     .filter(v => v.live !== 'upcoming' && (v.durationSec ?? 0) > 60)
     .slice(0, 10);
-  if (recent.length < 4) return null;
+  if (recent.length < T.assetMinLongform) return null;
 
   const views = recent.map(v => v.viewCount ?? 0).filter(n => n > 0).sort((a, b) => a - b);
-  if (views.length < 4) return null;
+  if (views.length < T.assetMinLongform) return null;
   const median = views[Math.floor(views.length / 2)];
-  if (median <= 0) return null;
+  /* A near-zero median turns any real asset into a spectacular ratio. */
+  if (median < T.assetMinMedianViews) return null;
 
   const top = recent.reduce((a, b) => ((a.viewCount ?? 0) >= (b.viewCount ?? 0) ? a : b));
-  const ratio = (top.viewCount ?? 0) / median;
-  if (ratio < 2) return null;
+  const topViews = top.viewCount ?? 0;
+  if (topViews < T.assetMinViews) return null;
+
+  const ratio = topViews / median;
+  if (ratio < T.assetRatio) return null;
 
   /* Only worth a strategist's time while it is still recent enough to act on. */
   const ageDays = Math.floor((Date.now() - new Date(top.publishedAt).getTime()) / 86400_000);
-  if (ageDays > 45) return null;
+  if (ageDays > T.assetMaxAgeDays) return null;
 
   return {
     type: 'STRONG_ASSET',
-    reason: `"${top.title}" at ${fmt(top.viewCount ?? 0)} views is ${ratio.toFixed(1)}× the median of the last ${recent.length} long-form uploads, ${ageDays} days old`,
-    strength: scale(ratio, 2, 8),
+    reason: `"${top.title}" at ${fmt(topViews)} views is ${ratio.toFixed(1)}× the median of the last ${recent.length} long-form uploads (median ${fmt(median)}), ${ageDays} days old`,
+    strength: scale(ratio, T.assetRatio, 15),
     sourceRef: `video:${top.id}`,
     historyDays: 0,
   };

@@ -46,23 +46,32 @@ const USD_PER_PROMPT_TOKEN = 3 / 1_000_000;
 const USD_PER_COMPLETION_TOKEN = 15 / 1_000_000;
 
 /**
- * signal strength × strategic importance × campaign relevance × novelty,
- * as the brief specifies — but as a weighted sum rather than a product.
+ * signal strength × strategic importance × campaign relevance × novelty.
  *
- * A product would zero the whole score whenever any one input is zero, and
- * novelty legitimately hits zero for a repeat. We want a repeat to be
- * heavily penalised, not erased, because a repeat with an enormous new
- * signal is still worth a look. The weights below make novelty the largest
- * single term, which is the behaviour the brief asks for.
+ * ── WHY A GATE AND NOT A WEIGHTED SUM ────────────────────────────────
+ * The first version was a plain weighted sum, and on the real roster it
+ * produced a median priority of 0.72 against a floor of 0.35 — every
+ * candidate cleared it. The reason is that importance and relevance have
+ * high floors for any managed artist, so a weak signal on a Virgin artist
+ * scored as well as a strong one. The floor was not filtering; it was
+ * decorating.
+ *
+ * So signal strength is now a multiplicative gate: a weak signal cannot be
+ * promoted by who the artist is. Context still matters — it swings the
+ * score by up to 60% — but it can no longer manufacture a reason to look.
+ *
+ * A pure product was the other option and is wrong for novelty, which
+ * legitimately reaches zero on a repeat; that would erase a repeat carrying
+ * an enormous new signal rather than merely penalising it. Hence the
+ * blended context term with its own floor.
  */
 export function rank(c: Candidate): number {
   const b = c.priorityBreakdown;
-  return (
-    b.signalStrength * 0.3 +
-    b.strategicImportance * 0.2 +
-    b.campaignRelevance * 0.15 +
-    b.novelty * 0.35
-  );
+  const context =
+    b.strategicImportance * 0.4 +
+    b.campaignRelevance * 0.25 +
+    b.novelty * 0.35;
+  return b.signalStrength * (0.4 + 0.6 * context);
 }
 
 export async function runMorningIntelligence(
