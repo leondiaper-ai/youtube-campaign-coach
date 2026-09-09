@@ -161,8 +161,17 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
     const survivors: ChannelSummary[] = [];
     for (const s of summaries) {
       const rej = triage(s, { rosterIds, alreadyScouted, reobserve });
-      if (rej) result.rejected.push(rej);
-      else survivors.push(s);
+      if (rej) {
+        result.rejected.push(rej);
+        /* Triage rejects on upload volume before any catalogue pull, which
+           is where T-Series and Sony Music India are caught. The assess
+           loop never sees them, so the demotion has to happen here too —
+           otherwise a channel is rejected on every run and stays WATCHING
+           on every run. */
+        if (alreadyScouted.has(s.channelId) && rej.reason !== 'ALREADY_IN_SCOUT') {
+          await setScoutStatus(s.channelId, 'REJECTED');
+        }
+      } else survivors.push(s);
     }
 
     /* Order the expensive tier by subscriber scale as a rough proxy for
@@ -226,6 +235,13 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
           reason: verdict.reason ?? 'MISSION_TEST_FAILED',
           detail: verdict.detail ?? '',
         });
+        /* A channel that qualified under an older, looser test and fails
+           the current one should stop being presented as worth watching.
+           It drops to CANDIDATE rather than REJECTED — the channel may be
+           fine, it is this mission's test it no longer meets. */
+        if (alreadyScouted.has(s.channelId)) {
+          await setScoutStatus(s.channelId, 'CANDIDATE');
+        }
         continue;
       }
 
