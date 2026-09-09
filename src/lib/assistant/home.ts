@@ -27,6 +27,8 @@ import { listCaseStudies, listRecentFindings } from '../knowledge/store';
 import { listScoutChannels } from '../scout/channelStore';
 import { listRunSummaries, scoutActivity } from '../scout/runStore';
 import { MISSIONS, ACTIVE_MISSIONS } from '../scout/missions';
+import { listKnowledge, listFeedback, type KnowledgeItem, type Feedback } from '../knowledge/inbox';
+import { readCampaignRead } from './readStore';
 import type { Finding, CaseStudy } from '../knowledge/types';
 import type { ScoutChannel } from '../scout/types';
 
@@ -50,6 +52,14 @@ export interface CampaignRow {
     next: string;
     generatedAt: string;
     ageHours: number;
+    /** When the underlying catalogue was read — not the same as generatedAt. */
+    evidenceAsOf: string | null;
+    whatChanged: string | null;
+    confidenceCappedBecause: string | null;
+    humanReviewStatus: string;
+    limitations: string[];
+    observed: { claim: string; sourceRef: string }[];
+    derived: { claim: string; sourceRef: string; limitation?: string }[];
   } | null;
   /** Deterministic, from the roster. Not a model opinion. */
   campaignDay: number | null;
@@ -80,9 +90,13 @@ async function campaignRows(): Promise<{ rows: CampaignRow[]; overviews: Record<
   const overviews: Record<string, CoachOverview> = {};
   const rows: CampaignRow[] = [];
 
-  const reads = await Promise.all(scope.map(async a => ({ a, o: await readOverview(a.slug) })));
+  const reads = await Promise.all(scope.map(async a => ({
+    a,
+    o: await readOverview(a.slug),
+    rec: await readCampaignRead(a.slug),
+  })));
 
-  for (const { a, o } of reads) {
+  for (const { a, o, rec } of reads) {
     if (o) overviews[a.slug] = o;
     const age = o ? ageHours(o.generatedAt) : null;
     rows.push({
@@ -97,6 +111,13 @@ async function campaignRows(): Promise<{ rows: CampaignRow[]; overviews: Record<
         next: o.recommendation,
         generatedAt: o.generatedAt,
         ageHours: age!,
+        evidenceAsOf: rec?.evidenceAsOf ?? null,
+        whatChanged: rec?.whatChanged ?? null,
+        confidenceCappedBecause: rec?.confidenceCappedBecause ?? null,
+        humanReviewStatus: rec?.humanReviewStatus ?? 'UNREVIEWED',
+        limitations: rec?.limitations ?? [],
+        observed: (rec?.observedEvidence ?? []).map(e => ({ claim: e.claim, sourceRef: e.sourceRef })),
+        derived: (rec?.derivedEvidence ?? []).map(e => ({ claim: e.claim, sourceRef: e.sourceRef, limitation: e.limitation })),
       } : null,
       campaignDay: campaignDay(a),
     });
@@ -270,10 +291,21 @@ export interface AssistantHome {
   /** Missions that exist but are not running, with the reason. */
   inactiveMissions: { id: string; question: string; rationale: string }[];
   lastScoutRun: string | null;
+  /** What the system currently believes, and how firmly. */
+  knowledge: {
+    items: KnowledgeItem[];
+    counts: Record<string, number>;
+    corrections: Feedback[];
+  };
 }
 
 export async function buildAssistantHome(): Promise<AssistantHome> {
-  const [{ rows, overviews }, scout] = await Promise.all([campaignRows(), scoutSection()]);
+  const [{ rows, overviews }, scout, kn, fb] = await Promise.all([
+    campaignRows(), scoutSection(), listKnowledge(), listFeedback(50),
+  ]);
+
+  const counts: Record<string, number> = {};
+  for (const i of kn) counts[i.status] = (counts[i.status] ?? 0) + 1;
 
   return {
     generatedAt: new Date().toISOString(),
@@ -285,5 +317,13 @@ export async function buildAssistantHome(): Promise<AssistantHome> {
       id: m.id, question: m.question, rationale: m.rationale,
     })),
     lastScoutRun: scout.activity.lastRunAt,
+    knowledge: {
+      /* Rejected and superseded items are kept in the store but not
+         surfaced by default — the view answers "what does the system
+         believe", and a rejected claim is not a belief. */
+      items: kn.filter(i => i.status !== 'REJECTED' && i.status !== 'SUPERSEDED'),
+      counts,
+      corrections: fb.filter(f => f.kind === 'INCORRECT'),
+    },
   };
 }

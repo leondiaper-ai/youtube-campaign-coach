@@ -55,7 +55,12 @@ function Section({ title, subtitle, children }: {
 
 /* ── The report ──────────────────────────────────────────────────────── */
 
-function Report({ o, onClose }: { o: CoachOverview; onClose: () => void }) {
+function Report({ o, row, onClose, onFeedback }: {
+  o: CoachOverview;
+  row?: CampaignRow;
+  onClose: () => void;
+  onFeedback?: (slug: string, kind: 'USEFUL' | 'NOT_USEFUL' | 'INCORRECT') => void;
+}) {
   const [format, setFormat] = useState<ShareFormat | null>(null);
   const [text, setText] = useState('');
   const [copied, setCopied] = useState(false);
@@ -102,6 +107,67 @@ function Report({ o, onClose }: { o: CoachOverview; onClose: () => void }) {
       <div className="mt-4 text-[10px] font-black uppercase tracking-[0.18em] text-ink/40">Next</div>
       <p className="mt-1 text-[13px] leading-relaxed">{o.recommendation}</p>
       {o.timing && <p className="mt-1 text-[12px] text-ink/55">{o.timing}</p>}
+
+      {row && row.read && (row.read.observed.length > 0 || row.read.derived.length > 0) && (
+        <div className="mt-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-ink/40">
+            Evidence
+          </div>
+          {row.read.observed.map((e, i) => (
+            <p key={`o${i}`} className="mt-1 text-[12px] flex gap-2">
+              <span className="text-[8px] font-bold uppercase tracking-[0.1em] shrink-0 mt-1" style={{ color: '#1B7F4B' }}>
+                Observed
+              </span>
+              <span className="text-ink/75">{e.claim}</span>
+            </p>
+          ))}
+          {row.read.derived.map((e, i) => (
+            <p key={`d${i}`} className="mt-1 text-[12px] flex gap-2">
+              <span className="text-[8px] font-bold uppercase tracking-[0.1em] shrink-0 mt-1 text-ink/45">
+                Computed
+              </span>
+              <span className="text-ink/75">
+                {e.claim}
+                {e.limitation && <span className="text-ink/40"> — {e.limitation}</span>}
+              </span>
+            </p>
+          ))}
+          {row.read.limitations.length > 0 && (
+            <details className="mt-2">
+              <summary className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/35 cursor-pointer">
+                What this read could not see
+              </summary>
+              <ul className="mt-1 space-y-1">
+                {row.read.limitations.map((l, i) => (
+                  <li key={i} className="text-[11px] text-ink/55">{l}</li>
+                ))}
+              </ul>
+            </details>
+          )}
+          {row.read.confidenceCappedBecause && (
+            <p className="mt-2 text-[11px] text-ink/45">{row.read.confidenceCappedBecause}</p>
+          )}
+          <div className="mt-2 flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/35">
+              Was this right?
+            </span>
+            {(['USEFUL', 'NOT_USEFUL', 'INCORRECT'] as const).map(k => (
+              <button
+                key={k}
+                onClick={() => onFeedback?.(o.artistId, k)}
+                className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/45 hover:text-ink"
+              >
+                {k === 'USEFUL' ? 'Useful' : k === 'NOT_USEFUL' ? 'Not useful' : 'Incorrect'}
+              </button>
+            ))}
+            {row.read.humanReviewStatus !== 'UNREVIEWED' && (
+              <span className="text-[10px] uppercase tracking-[0.14em]" style={{ color: SIGNAL }}>
+                marked {row.read.humanReviewStatus.replace('_', ' ').toLowerCase()}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {(o.evidence.length > 0 || o.missingContext) && (
         <>
@@ -163,10 +229,11 @@ function Report({ o, onClose }: { o: CoachOverview; onClose: () => void }) {
 
 /* ── Campaign row ────────────────────────────────────────────────────── */
 
-function Campaign({ row, overview, onRefresh, busy }: {
+function Campaign({ row, overview, onRefresh, onFeedback, busy }: {
   row: CampaignRow;
   overview: CoachOverview | undefined;
   onRefresh: (slug: string) => void;
+  onFeedback: (slug: string, kind: 'USEFUL' | 'NOT_USEFUL' | 'INCORRECT') => void;
   busy: string | null;
 }) {
   const [open, setOpen] = useState(false);
@@ -228,7 +295,7 @@ function Campaign({ row, overview, onRefresh, busy }: {
         </button>
       </div>
 
-      {open && overview && <Report o={overview} onClose={() => setOpen(false)} />}
+      {open && overview && <Report o={overview} row={row} onClose={() => setOpen(false)} onFeedback={onFeedback} />}
     </div>
   );
 }
@@ -281,6 +348,135 @@ function EvidenceTimeline({ timeline }: {
   );
 }
 
+
+/* ── Knowledge ───────────────────────────────────────────────────────── */
+
+const CLASS_TONE: Record<string, string> = {
+  OBSERVED: '#1B7F4B',
+  HUMAN: '#1B7F4B',
+  DERIVED: '#5A5A5A',
+  LEARNED: '#8A6B12',
+  INFERRED: '#8A2A12',
+};
+
+/**
+ * What the system currently believes, and how firmly.
+ *
+ * Grouped by kind rather than by status, because the question a strategist
+ * asks is "what do we think about Live" rather than "what is CANDIDATE".
+ * The class badge is the important pixel on the page: it is the difference
+ * between something we measured and something a model said.
+ */
+function Knowledge({ knowledge, onReview }: {
+  knowledge: HomeData['knowledge'];
+  onReview: (id: string, status: string) => void;
+}) {
+  const byKind = new Map<string, typeof knowledge.items>();
+  for (const i of knowledge.items) {
+    byKind.set(i.kind, [...(byKind.get(i.kind) ?? []), i]);
+  }
+
+  if (!knowledge.items.length && !knowledge.corrections.length) {
+    return (
+      <p className="text-[13px] text-ink/45">
+        The system holds no retained beliefs yet. Campaign Reads and Scout findings can be
+        proposed into knowledge when they are worth carrying forward — ordinary reads are
+        not, and do not need to be.
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      {Array.from(byKind.entries()).map(([kind, items]) => (
+        <div key={kind} className="mt-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-ink/40">
+            {kind.replace(/_/g, ' ')}
+          </div>
+          {items.map(i => (
+            <div key={i.id} className="mt-2 pt-2 border-t" style={{ borderColor: LINE }}>
+              <p className="text-[13px] leading-snug font-bold">{i.statement}</p>
+              <div className="mt-1 flex items-center gap-3 flex-wrap">
+                <span
+                  className="text-[9px] font-bold uppercase tracking-[0.14em]"
+                  style={{ color: CLASS_TONE[i.evidenceClass] ?? '#5A5A5A' }}
+                >
+                  {i.evidenceClass}
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40">
+                  {i.status} · {i.confidence} confidence
+                </span>
+                {i.subjectName && (
+                  <span className="text-[10px] text-ink/45">{i.subjectName}</span>
+                )}
+                <span className="text-[10px] text-ink/30">
+                  {i.origin.replace(/_/g, ' ').toLowerCase()} · {new Date(i.lastUpdatedAt).toLocaleDateString('en-GB')}
+                </span>
+                {i.status === 'CANDIDATE' && (
+                  <>
+                    <button
+                      onClick={() => onReview(i.id, 'RETAINED')}
+                      className="text-[10px] font-bold uppercase tracking-[0.14em]"
+                      style={{ color: SIGNAL }}
+                    >
+                      Retain
+                    </button>
+                    <button
+                      onClick={() => onReview(i.id, 'WATCHING')}
+                      className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/45 hover:text-ink"
+                    >
+                      Watch
+                    </button>
+                    <button
+                      onClick={() => onReview(i.id, 'REJECTED')}
+                      className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/30 hover:text-ink"
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+              </div>
+              {i.evidence.length > 0 && (
+                <details className="mt-1">
+                  <summary className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/30 cursor-pointer">
+                    Evidence basis
+                  </summary>
+                  <ul className="mt-1 space-y-0.5">
+                    {i.evidence.map((e, n) => (
+                      <li key={n} className="text-[11px] text-ink/60">
+                        <span className="font-bold">{e.evidenceClass}</span> — {e.claim}
+                        <span className="text-ink/30"> ({e.sourceRef})</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+
+      {knowledge.corrections.length > 0 && (
+        <div className="mt-6">
+          <div className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: SIGNAL }}>
+            Corrections you have recorded
+          </div>
+          <p className="mt-0.5 text-[11px] text-ink/45">
+            These override anything the system infers, and are shown to future reads for the
+            same artist.
+          </p>
+          {knowledge.corrections.map(c => (
+            <p key={c.id} className="mt-1.5 text-[12px] text-ink/70">
+              <span className="font-bold">{c.subjectId ?? 'general'}: </span>
+              {c.correction ?? c.note}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── The page ────────────────────────────────────────────────────────── */
 
 export default function AssistantHomeView({ initial }: { initial: HomeData }) {
@@ -310,6 +506,53 @@ export default function AssistantHomeView({ initial }: { initial: HomeData }) {
     } finally { setBusy(null); }
   }, [reload]);
 
+  const feedback = useCallback(async (
+    slug: string, kind: 'USEFUL' | 'NOT_USEFUL' | 'INCORRECT',
+  ) => {
+    /* A correction needs to say what is actually true, or it is only a
+       complaint and a later run cannot respect it. */
+    const correction = kind === 'INCORRECT'
+      ? window.prompt('What is actually true? This is stored and shown to future reads for this artist.') ?? ''
+      : undefined;
+    if (kind === 'INCORRECT' && !correction) return;
+
+    await fetch('/api/assistant', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        action: 'feedback', targetId: slug, targetType: 'CAMPAIGN_READ',
+        subjectId: slug, kind, correction,
+      }),
+    });
+    await fetch('/api/assistant', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        action: 'review-read', slug,
+        status: kind === 'USEFUL' ? 'USEFUL' : kind === 'NOT_USEFUL' ? 'NOT_USEFUL' : 'INCORRECT',
+        note: correction,
+      }),
+    });
+    await reload();
+  }, [reload]);
+
+  const generateAll = useCallback(async () => {
+    setBusy('*'); setNote(null);
+    try {
+      /* Each read is a catalogue pull plus a model call; the platform caps
+         a request at 60s. Loop until nothing is left. */
+      for (let i = 0; i < 12; i++) {
+        const r = await fetch('/api/assistant', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ action: 'refresh-all' }),
+        });
+        const j = await r.json();
+        await reload();
+        if (!j.remaining) break;
+      }
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : 'Batch failed.');
+    } finally { setBusy(null); }
+  }, [reload]);
+
   const runScout = useCallback(async () => {
     setScouting(true); setNote(null);
     try {
@@ -336,6 +579,14 @@ export default function AssistantHomeView({ initial }: { initial: HomeData }) {
       });
       await reload();
     } finally { setScouting(false); }
+  }, [reload]);
+
+  const reviewKnowledge = useCallback(async (id: string, status: string) => {
+    await fetch('/api/assistant', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'review-knowledge', id, status }),
+    });
+    await reload();
   }, [reload]);
 
   const s = data.scout;
@@ -420,6 +671,16 @@ export default function AssistantHomeView({ initial }: { initial: HomeData }) {
 
       {/* ── MY CAMPAIGNS ──────────────────────────────────────────── */}
       <Section title="My campaigns" subtitle="Prepared reads for the campaigns you have pinned">
+        {data.campaigns.some(c => c.reportStatus === 'NOT_GENERATED') && (
+          <button
+            onClick={generateAll}
+            disabled={busy === '*'}
+            className="mb-2 px-3 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-[0.14em] text-white disabled:opacity-50"
+            style={{ background: SIGNAL }}
+          >
+            {busy === '*' ? 'Preparing…' : `Prepare ${data.campaigns.filter(c => c.reportStatus === 'NOT_GENERATED').length} missing reads`}
+          </button>
+        )}
         {data.campaigns.length === 0 ? (
           <p className="text-[13px] text-ink/45">
             No campaigns pinned. Pin one from <Link href="/campaigns" className="underline">Active Campaigns</Link> and
@@ -430,7 +691,7 @@ export default function AssistantHomeView({ initial }: { initial: HomeData }) {
             <Campaign
               key={row.slug} row={row}
               overview={data.overviews[row.slug]}
-              onRefresh={refresh} busy={busy}
+              onRefresh={refresh} onFeedback={feedback} busy={busy}
             />
           ))
         )}
@@ -523,6 +784,11 @@ export default function AssistantHomeView({ initial }: { initial: HomeData }) {
             </ul>
           </details>
         )}
+      </Section>
+
+      {/* ── KNOWLEDGE ───────────────────────────────────────────── */}
+      <Section title="Knowledge" subtitle="What the system currently believes, and on what basis">
+        <Knowledge knowledge={data.knowledge} onReview={reviewKnowledge} />
       </Section>
     </div>
   );
