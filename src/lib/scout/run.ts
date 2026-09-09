@@ -206,6 +206,13 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
           channelId: s.channelId, channelTitle: s.title,
           reason: 'NOT_AN_ARTIST_CHANNEL', detail: artist.reason,
         });
+        /* Rejecting a channel we have already saved is not enough — the
+           record stays WATCHING and keeps appearing on the Assistant page.
+           This is how the five label channels survived their own rejection
+           in the first re-observation pass. */
+        if (alreadyScouted.has(s.channelId)) {
+          await setScoutStatus(s.channelId, 'REJECTED');
+        }
         continue;
       }
 
