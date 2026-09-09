@@ -322,9 +322,106 @@ export function buildHorizon(
   };
 }
 
+/**
+ * Reads the campaign plans that already exist server-side in planStore and
+ * projects them as horizon events.
+ *
+ * ── WHY THIS EXISTS ───────────────────────────────────────────────────
+ * The horizon layer originally synced only from a plan held in the browser's
+ * localStorage, which meant it was empty for every artist unless someone
+ * opened the planner and pressed a button. Meanwhile eleven campaigns already
+ * had real, dated, human-entered plans sitting in KV — the partner briefing
+ * has been rendering them for months.
+ *
+ * So this is not a new source of truth. It is the existing one, finally read.
+ * Nothing here invents a date: an artist with no saved plan still returns
+ * UNKNOWN, which is the honest answer and the one the Coach is built to
+ * handle.
+ */
+async function projectSavedPlan(slug: string, now: number): Promise<{ events: CampaignEvent[]; updatedAt: string | null }> {
+  try {
+    const { listPlans, loadPlan } = await import('../planStore');
+    const { ARTISTS, mergeArtistLists } = await import('../artists');
+    const { listCustomArtists } = await import('../artistStore');
+    const index = await listPlans();
+    if (!index.length) return { events: [], updatedAt: null };
+
+    /* Plan slugs look like "ezra-collective-ezra-collective-campaign" and the
+       index carries a display name, not an artist slug. This mirrors the
+       matching the partner briefing already uses — deliberately the same
+       rules, so the two surfaces can never disagree about whose plan is
+       whose, which would be a very confusing bug to chase. */
+    const roster = mergeArtistLists(ARTISTS, await listCustomArtists());
+    const artist = roster.find(a => a.slug === slug);
+    const norm = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const slugNorm = norm(slug);
+    const nameNorm = artist ? norm(artist.name) : '';
+
+    const mine = index.filter(p => {
+      const planNorm = norm(p.slug);
+      const planArtistNorm = norm(p.artist ?? '');
+      if (planNorm === slugNorm) return true;
+      if (nameNorm && planArtistNorm === nameNorm) return true;
+      if (planNorm.startsWith(slugNorm) && slugNorm.length >= 4) return true;
+      if (nameNorm.length >= 4 && planNorm.startsWith(nameNorm)) return true;
+      return false;
+    });
+    if (!mine.length) return { events: [], updatedAt: null };
+
+    const out: CampaignEvent[] = [];
+    let newest: string | null = null;
+
+    for (const entry of mine) {
+      const saved = await loadPlan(entry.slug);
+      if (!saved?.plan?.events) continue;
+      if (!newest || saved.updatedAt > newest) newest = saved.updatedAt;
+
+      for (const ev of saved.plan.events) {
+        /* Past events are history, not horizon. The Coach reads history from
+           the catalogue, which is immutable and more reliable than a plan. */
+        if (!ev.dateISO || new Date(ev.dateISO).getTime() < now - 86_400_000) continue;
+        out.push({
+          eventId: `plan_${entry.slug}_${ev.dateISO}_${ev.title.slice(0, 24)}`,
+          artistId: slug,
+          campaignId: saved.campaignName ?? null,
+          eventDate: ev.dateISO,
+          eventType: normaliseEventType(ev.kind ?? ev.title),
+          title: ev.title,
+          assetType: ev.kind ?? null,
+          /* Anchor and major moments are treated as CONFIRMED because a human
+             typed a specific date against them in the planner. Everything else
+             stays TENTATIVE, which caps horizon confidence at MEDIUM. */
+          status: (ev.scale === 'anchor' || ev.scale === 'major') ? 'CONFIRMED' : 'TENTATIVE',
+          note: ev.scale ? `${ev.scale} moment` : null,
+          source: 'coach_plan',
+          createdAt: saved.createdAt,
+          updatedAt: saved.updatedAt,
+        } as CampaignEvent);
+      }
+    }
+    return { events: out, updatedAt: newest };
+  } catch {
+    /* A planStore failure must not blank the horizon — manual events still
+       stand, and UNKNOWN is safe. */
+    return { events: [], updatedAt: null };
+  }
+}
+
 export async function getHorizon(slug: string, now = Date.now()): Promise<CampaignHorizon> {
-  const [events, meta] = await Promise.all([listEvents(slug), getMeta(slug)]);
-  return buildHorizon(slug, events, meta, now);
+  const [manual, meta, fromPlan] = await Promise.all([
+    listEvents(slug), getMeta(slug), projectSavedPlan(slug, now),
+  ]);
+
+  /* Manual entries win on collision: a human correcting the Coach editor is
+     more current than a plan that may not have been touched in weeks. */
+  const seen = new Set(manual.map(e => `${e.eventDate}|${e.title}`));
+  const merged = [...manual, ...fromPlan.events.filter(e => !seen.has(`${e.eventDate}|${e.title}`))];
+
+  const effectiveMeta = meta ?? (fromPlan.updatedAt
+    ? ({ lastSyncedAt: fromPlan.updatedAt, source: 'coach_plan' } as any)
+    : meta);
+
+  return buildHorizon(slug, merged, effectiveMeta, now);
 }
 
 /* ── Helpers ────────────────────────────────────────────────────────── */
