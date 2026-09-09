@@ -12,8 +12,6 @@ import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normal
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
 import AddArtistButton from '@/components/AddArtistButton';
-import IntelligencePanel from '@/components/IntelligencePanel';
-import { latestRun } from '@/lib/intelligence/store';
 
 export const revalidate = 600;
 
@@ -30,8 +28,6 @@ export default async function ControlPage() {
   const custom = await listCustomArtists();
   const allArtists = mergeArtistLists(ARTISTS, custom);
   const syncMeta = await readSyncMeta();
-  /* Last stored run only. Rendering the Watcher must never spend a token. */
-  const intelRun = await latestRun();
   const pinned = await listPinned();
   const pinnedSlugs = pinned.map((p) => p.slug);
 
@@ -228,9 +224,6 @@ export default async function ControlPage() {
             <AddArtistButton />
           </div>
         </div>
-
-        {/* Intelligence layer — reads the last stored run, never triggers a model on load */}
-        <IntelligencePanel initialRun={intelRun} />
 
         {/* Client-side board with toggle */}
         <ChannelHealthBoard rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />

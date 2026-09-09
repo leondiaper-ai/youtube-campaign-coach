@@ -30,7 +30,7 @@ async function kv(): Promise<Redis | null> {
   return new Redis({ url, token });
 }
 
-const K = 'intel:principles';
+const K = 'knowledge:principles';
 
 /**
  * Seven seeds. Small on purpose — the brief says start conservatively, and
@@ -176,30 +176,4 @@ export async function ensureSeeded(): Promise<number> {
   if (Array.isArray(raw) && raw.length) return raw.length;
   await store.set(K, SEED_PRINCIPLES);
   return SEED_PRINCIPLES.length;
-}
-
-/**
- * Which principles are worth asking about given what the scan saw. Keeps
- * the investigation prompt short — one or two relevant questions beats
- * seven irrelevant ones.
- */
-export function principlesForSignal(
-  all: BestPracticePrinciple[], signalType: string,
-): BestPracticePrinciple[] {
-  const map: Record<string, string[]> = {
-    STRONG_ASSET: ['p_strength_not_exploited', 'p_secondary_formats'],
-    VIEW_ACCELERATION: ['p_followup_window', 'p_secondary_formats'],
-    VIEW_DECELERATION: ['p_gaps_are_decisions', 'p_cadence_over_volume'],
-    CADENCE_CHANGE: ['p_cadence_over_volume', 'p_gaps_are_decisions'],
-    WENT_QUIET: ['p_gaps_are_decisions', 'p_catalogue_is_an_asset'],
-    RELEASE_APPROACHING: ['p_followup_window', 'p_secondary_formats'],
-    FOLLOW_UP_WINDOW_OPEN: ['p_followup_window'],
-    SUBSCRIBER_SURGE: ['p_strength_not_exploited'],
-    SUBSCRIBER_DECLINE: ['p_cadence_over_volume'],
-    CLASSIFICATION_CHANGE: ['p_cadence_over_volume', 'p_gaps_are_decisions'],
-    CATALOGUE_MOVEMENT: ['p_catalogue_is_an_asset'],
-    HERO_RELEASED: ['p_followup_window'],
-  };
-  const ids = map[signalType] ?? [];
-  return all.filter(p => ids.includes(p.id));
 }
