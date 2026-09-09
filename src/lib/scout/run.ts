@@ -24,6 +24,7 @@ import {
 } from '../youtube/discovery';
 import { ACTIVE_MISSIONS, getMission, type MissionId } from './missions';
 import { triage, testMission, Q } from './qualify';
+import { checkArtistChannel } from './artistCheck';
 import { buildProfile } from './analyse';
 import { investigateChannel } from './investigate';
 import {
@@ -196,6 +197,18 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
       if (!row) continue;
       const { s, videos } = row;
 
+      /* Now that we hold real titles, settle whether this is an artist at
+         all. Triage could only reject the obvious cases; this is where the
+         label aggregators that reached the Watching list get caught. */
+      const artist = checkArtistChannel(s, videos.map(v => v.title));
+      if (artist.verdict === 'NON_ARTIST') {
+        result.rejected.push({
+          channelId: s.channelId, channelTitle: s.title,
+          reason: 'NOT_AN_ARTIST_CHANNEL', detail: artist.reason,
+        });
+        continue;
+      }
+
       const profile = buildProfile(s.channelId, videos);
       const verdict = testMission(missionId, profile, s.title);
 
@@ -238,7 +251,12 @@ export async function runScout(opts: ScoutOptions = {}): Promise<ScoutRun> {
         whyWatching: verdict.evidence,
         score: verdict.score,
         profile,
-        status: 'WATCHING',
+        /* AMBIGUOUS stays a CANDIDATE. It remains in the universe and keeps
+           accumulating observations, but it is not presented as something
+           worth watching until a human or better evidence resolves it —
+           which is precisely the step whose absence put five label channels
+           on the Assistant page. */
+        status: artist.verdict === 'ARTIST' ? 'WATCHING' : 'CANDIDATE',
       });
       alreadyScouted.add(s.channelId);
     }

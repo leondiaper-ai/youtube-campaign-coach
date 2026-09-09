@@ -118,6 +118,42 @@ export function buildProfile(channelId: string, videos: DiscoveredVideo[]): Chan
     };
   }
 
+  /* Release windows: what surrounds each hero. −7 to +21 days, because a
+     trailer or teaser before the hero is part of the same architecture and
+     a follow-up three weeks later is still plausibly the same campaign. */
+  const releaseWindows = heroes.slice(0, 6).map(h => {
+    const t = new Date(h.publishedAt).getTime();
+    const inWindow = classified
+      .filter(c => {
+        if (c.v.id === h.id) return false;
+        const d = (new Date(c.v.publishedAt).getTime() - t) / DAY;
+        return d >= -7 && d <= 21;
+      })
+      .map(c => ({
+        id: c.v.id,
+        title: c.v.title,
+        format: c.format,
+        daysFromHero: Math.round((new Date(c.v.publishedAt).getTime() - t) / DAY),
+        views: c.v.views,
+      }))
+      .sort((a, b) => a.daysFromHero - b.daysFromHero);
+
+    /* Shorts are counted but excluded from the format-variety test: a
+       channel posting twelve Shorts around a release is doing one thing
+       twelve times, not deploying twelve formats. */
+    const support = inWindow.filter(a => a.format !== 'short');
+    return {
+      heroId: h.id,
+      heroTitle: h.title,
+      heroDate: h.publishedAt,
+      heroViews: h.views,
+      supportFormats: Array.from(new Set(support.map(a => a.format))),
+      supportCount: support.length,
+      shortsInWindow: inWindow.length - support.length,
+      assets: inWindow,
+    };
+  });
+
   return {
     channelId,
     uploadsAnalysed: vids.length,
@@ -133,6 +169,7 @@ export function buildProfile(channelId: string, videos: DiscoveredVideo[]): Chan
     heroes: heroes.slice(0, 8),
     postHero,
     medianLongformViews: median(longform.map(c => c.v.views).filter(n => n > 0)),
+    releaseWindows,
     timeline: classified
       .slice()
       .reverse()

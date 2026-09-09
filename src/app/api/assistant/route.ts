@@ -10,7 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildAssistantHome } from '@/lib/assistant/home';
 import { renderShare, type ShareFormat } from '@/lib/assistant/share';
-import { getCoachOverview } from '@/lib/coach-service/service';
+import { prepareCampaignRead } from '@/lib/assistant/read';
+import { ARTISTS, mergeArtistLists } from '@/lib/artists';
+import { listCustomArtists } from '@/lib/artistStore';
 import { readOverview } from '@/lib/coach-service/store';
 
 export const dynamic = 'force-dynamic';
@@ -36,14 +38,20 @@ export async function POST(req: NextRequest) {
   if (body.action === 'refresh') {
     const slug = String(body.slug ?? '');
     if (!slug) return NextResponse.json({ error: 'slug required' }, { status: 400 });
-    const r = await getCoachOverview(slug, { baseUrl }, { refresh: true });
-    if (!r.ok) {
-      return NextResponse.json(
-        { error: r.reason, detail: r.detail },
-        { status: r.reason === 'NOT_CONFIGURED' ? 503 : 400 },
-      );
-    }
-    return NextResponse.json({ overview: r.data });
+
+    const artist = mergeArtistLists(ARTISTS, await listCustomArtists()).find(a => a.slug === slug);
+    if (!artist) return NextResponse.json({ error: 'UNKNOWN_ARTIST' }, { status: 404 });
+
+    /* Asset-level read: reconstructs the catalogue, compares this release
+       with the artist's own previous one, then interprets. */
+    const r = await prepareCampaignRead(artist, baseUrl);
+    if (!r.ok) return NextResponse.json({ error: 'READ_FAILED', detail: r.detail }, { status: 400 });
+    return NextResponse.json({
+      overview: r.overview,
+      releaseWindows: r.evidence?.profile.releaseWindows ?? [],
+      comparison: r.evidence?.comparison ?? null,
+      tokens: r.tokens, latencyMs: r.latencyMs,
+    });
   }
 
   return NextResponse.json({ error: 'unknown action' }, { status: 400 });

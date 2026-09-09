@@ -24,6 +24,7 @@
 import type { ChannelSummary } from '../youtube/discovery';
 import type { ChannelProfile, Rejection, RejectionReason } from './types';
 import type { MissionId } from './missions';
+import { checkArtistChannel, type ArtistVerdict } from './artistCheck';
 
 export const Q = {
   /** Below this a channel has too little behaviour to read. */
@@ -37,35 +38,15 @@ export const Q = {
 
   /* Mission tests. */
   postHeroMinFollowUps: 2,
-  multiFormatMinDistinct: 4,
-  multiFormatMinLongform: 8,
+  /** Distinct NON-SHORT formats around a single hero. */
+  multiFormatMinAroundHero: 3,
+  /** Heroes that must show that clustering, so it is architecture not luck. */
+  multiFormatMinHeroes: 2,
   liveMinCount: 3,
   liveMinShare: 0.08,
 } as const;
 
 /* ── Tier 1: triage from channels.list alone ─────────────────────────── */
-
-/**
- * "Is this an artist channel?" has no API field, so this is a heuristic
- * over title and description, and it is written to reject the things that
- * dominate a music search — compilations, reaction channels, karaoke,
- * topic auto-channels and label aggregators.
- *
- * It will occasionally reject a real artist. That is the right direction
- * to be wrong in: a missed artist costs nothing, while a karaoke channel
- * reaching the model costs a 15k-token investigation and produces a
- * finding about karaoke.
- */
-const NOT_ARTIST = new RegExp(
-  [
-    'topic$', 'vevo\\s*compilation', 'karaoke', 'lyrics?\\s*(channel|world|hub)',
-    'reaction', 'react\\b', 'playlist', 'compilation', 'mix\\s*(tape)?\\s*(channel|hub)',
-    '\\bradio\\b', '\\bnews\\b', 'podcast', 'tutorial', 'cover(s)?\\s*channel',
-    'best\\s*of\\s*\\d{4}', 'top\\s*\\d+\\s*songs', 'nightcore', 'slowed\\s*\\+?\\s*reverb',
-    '\\b(records|recordings|music group|entertainment)\\b',
-  ].join('|'),
-  'i',
-);
 
 export function triage(
   c: ChannelSummary,
@@ -87,8 +68,11 @@ export function triage(
   if (!c.uploadsPlaylistId) {
     return rej('NO_UPLOADS_PLAYLIST', 'No uploads playlist — nothing to analyse.');
   }
-  if (NOT_ARTIST.test(c.title) || NOT_ARTIST.test(c.description.slice(0, 300))) {
-    return rej('NOT_AN_ARTIST_CHANNEL', `Title or description matches a non-artist pattern: "${c.title}"`);
+  /* Triage has no upload titles yet, so this can only reject the clear
+     cases. Ambiguity is resolved later, against real titles. */
+  const artist = checkArtistChannel(c);
+  if (artist.verdict === 'NON_ARTIST') {
+    return rej('NOT_AN_ARTIST_CHANNEL', artist.reason);
   }
   if ((c.videoCount ?? 0) < Q.minVideoCount) {
     return rej('TOO_FEW_UPLOADS', `${c.videoCount ?? 0} uploads, below the ${Q.minVideoCount} needed to read behaviour.`);
@@ -158,26 +142,45 @@ export function testMission(
   }
 
   if (missionId === 'MULTI_FORMAT') {
-    if (p.longformCount < Q.multiFormatMinLongform) {
+    /* The question is whether formats are deployed AROUND A RELEASE, not
+       whether the channel posts a variety of things. The first version
+       asked the second question and consequently qualified label
+       aggregators, whose whole business is posting a variety of things. */
+    const windows = (p.releaseWindows ?? []).filter(
+      w => w.supportFormats.length >= Q.multiFormatMinAroundHero,
+    );
+
+    if (!(p.releaseWindows ?? []).length) {
       return {
         passed: false, evidence: '', score: 0,
         reason: 'NO_RELEVANT_FORMATS',
-        detail: `${p.longformCount} long-form uploads, below the ${Q.multiFormatMinLongform} needed to read a format system.`,
+        detail: 'No hero release in the analysed window to cluster formats around.',
       };
     }
-    if (p.distinctFormats < Q.multiFormatMinDistinct) {
+    if (windows.length < Q.multiFormatMinHeroes) {
+      const best = (p.releaseWindows ?? [])
+        .reduce((a, b) => (a && a.supportFormats.length >= b.supportFormats.length ? a : b));
       return {
         passed: false, evidence: '', score: 0,
         reason: 'MISSION_TEST_FAILED',
-        detail: `${p.distinctFormats} distinct formats, below ${Q.multiFormatMinDistinct}.`,
+        detail:
+          `${windows.length} of ${(p.releaseWindows ?? []).length} releases had ` +
+          `${Q.multiFormatMinAroundHero}+ distinct support formats within −7/+21 days ` +
+          `(best: "${best.heroTitle}" with ${best.supportFormats.length}). ` +
+          `Needs ${Q.multiFormatMinHeroes} to read as repeated architecture.`,
       };
     }
-    const mix = Object.entries(p.formatCounts)
-      .sort((a, b) => b[1] - a[1]).map(([f, n]) => `${f} ${n}`).join(', ');
+
+    const detail = windows.slice(0, 3).map(w =>
+      `"${w.heroTitle}" (${w.heroDate.slice(0, 10)}): ${w.supportFormats.join(', ')}`,
+    ).join('; ');
+
     return {
       passed: true,
-      evidence: `${p.distinctFormats} distinct formats across ${p.uploadsAnalysed} uploads — ${mix}.`,
-      score: scale(p.distinctFormats, 3, 8),
+      evidence:
+        `${windows.length} releases with ${Q.multiFormatMinAroundHero}+ distinct support formats ` +
+        `inside a −7/+21 day window — ${detail}.`,
+      score: scale(windows.length, 1, 5),
     };
   }
 

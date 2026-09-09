@@ -128,6 +128,29 @@ export interface ChannelProfile {
   medianLongformViews: number | null;
 
   /**
+   * Each hero and what was published around it, within a release window.
+   *
+   * This exists because the first MULTI_FORMAT test — four distinct formats
+   * across a hundred uploads — was measuring channel size, not strategy. A
+   * label aggregator posting fifty assets a week clears it trivially and
+   * means nothing by it. What we actually care about is several formats
+   * deployed AROUND THE SAME RELEASE, which is a claim about clustering and
+   * can only be made per hero.
+   */
+  releaseWindows: {
+    heroId: string;
+    heroTitle: string;
+    heroDate: string;
+    heroViews: number;
+    /** Non-Shorts formats published from 7 days before to 21 days after. */
+    supportFormats: string[];
+    supportCount: number;
+    shortsInWindow: number;
+    /** The assets themselves, for the evidence view. */
+    assets: { id: string; title: string; format: string; daysFromHero: number; views: number }[];
+  }[];
+
+  /**
    * Every analysed upload as date + format + views, newest first.
    *
    * Added after the first live run, where twelve investigations returned
