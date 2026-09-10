@@ -28,7 +28,7 @@ import { listScoutChannels } from '../scout/channelStore';
 import { listRunSummaries, scoutActivity } from '../scout/runStore';
 import { MISSIONS, ACTIVE_MISSIONS } from '../scout/missions';
 import { listKnowledge, listFeedback, type KnowledgeItem, type Feedback } from '../knowledge/inbox';
-import { readCampaignRead } from './readStore';
+import { readCampaignRead, toOverview } from './readStore';
 import type { Finding, CaseStudy } from '../knowledge/types';
 import type { ScoutChannel } from '../scout/types';
 
@@ -96,9 +96,15 @@ async function campaignRows(): Promise<{ rows: CampaignRow[]; overviews: Record<
     rec: await readCampaignRead(a.slug),
   })));
 
-  for (const { a, o, rec } of reads) {
+  for (const { a, o: cached, rec } of reads) {
+    /* The durable record is the source of truth, not the CoachOverview
+       cache. That cache expires; the record does not. Keying the page off
+       the cache made every prepared read vanish overnight — which is
+       precisely the failure that made reads persistent objects in the
+       first place, reproduced one layer up. */
+    const o = rec ? toOverview(rec) : cached;
     if (o) overviews[a.slug] = o;
-    const age = o ? ageHours(o.generatedAt) : null;
+    const age = rec ? ageHours(rec.generatedAt) : o ? ageHours(o.generatedAt) : null;
     rows.push({
       slug: a.slug,
       name: a.name,
