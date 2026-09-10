@@ -57,7 +57,28 @@ export interface ProviderConfig {
  * intended reasoning colleague. It falls through to whatever is configured
  * so the system is never blocked on one vendor.
  */
+/**
+ * MODEL KILL SWITCH
+ *
+ * Every model path in this codebase — Coach, Scout, Campaign Reads, the
+ * Researcher, the MCP endpoint — resolves its provider here. Returning null
+ * disables all of them at once, and every caller already handles a null
+ * provider gracefully because "no key configured" was always a real state.
+ *
+ * Off by default. Spending money is opt-in, not opt-out: the failure mode of
+ * the reverse is a background job or a link prefetch quietly billing an
+ * account nobody is watching.
+ *
+ * To re-enable, set MODEL_ENABLED=1 in the Vercel environment. Removing the
+ * XAI_API_KEY would also work but loses the key; this does not.
+ */
+export function modelEnabled(): boolean {
+  return process.env.MODEL_ENABLED === '1';
+}
+
 export function resolveProvider(): ProviderConfig | null {
+  if (!modelEnabled()) return null;
+
   const xai = process.env.XAI_API_KEY;
   if (xai) return {
     provider: 'xai', apiKey: xai,
