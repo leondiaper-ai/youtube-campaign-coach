@@ -247,6 +247,15 @@ export default async function CampaignProgressPage(
           <p style={{ color: C.smoke, fontSize: '.9rem' }}>No uploads observed since implementation.</p>
         )}
 
+        {/* Coverage gaps are shown, not swallowed. "The join failed" and
+            "nothing was published" look identical otherwise, and only one
+            of them is a fact about the campaign. */}
+        {(tracked[0]?.observedSince?.coverage?.length ?? 0) > 0 && (
+          <ul style={{ margin: '.9rem 0 0', paddingLeft: '1.1rem', fontSize: '.78rem', color: C.amber }}>
+            {tracked[0]!.observedSince!.coverage.map((c, i) => <li key={i}>{c}</li>)}
+          </ul>
+        )}
+
         {tracked[0]?.observedSince?.channelMovement?.length ? (
           <p style={{ fontSize: '.87rem', marginTop: '1rem' }}>
             <span style={{ fontSize: '.75rem', color: C.smoke, letterSpacing: '.06em' }}>DERIVED · </span>

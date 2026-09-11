@@ -255,5 +255,28 @@ export function runProgressChecks(): CheckResult {
       'no snapshot must not silently produce a clean bill of health');
   });
 
+  /* ── The join must not lose human-attached evidence ────────────────── */
+
+  test('attached uploads carry a parseable title and date in the note', () => {
+    /* The read model recovers the title and date from the note so that a
+       cold or reshaped snapshot cannot make a person's evidence vanish.
+       That only works if the note keeps the shape. */
+    for (const p of SEEDED_PROGRESS['chvrches']) {
+      for (const e of p.evidenceRefs.filter(r => r.kind === 'upload')) {
+        assert.ok(/"[^"]+"/.test(e.note ?? ''), `${e.ref}: no quoted title in the note`);
+        assert.ok(/\d{1,2} \w{3} \d{4}/.test(e.note ?? ''), `${e.ref}: no parseable date in the note`);
+        assert.equal(e.attachedBy, 'HUMAN');
+      }
+    }
+  });
+
+  test('every attached upload ref looks like a YouTube video id', () => {
+    for (const p of SEEDED_PROGRESS['chvrches']) {
+      for (const e of p.evidenceRefs.filter(r => r.kind === 'upload')) {
+        assert.match(e.ref, /^[A-Za-z0-9_-]{11}$/, `${e.ref} is not a video id`);
+      }
+    }
+  });
+
   return { passed, failed, failures };
 }

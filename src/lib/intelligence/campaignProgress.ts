@@ -146,30 +146,70 @@ function parseSince(statedAt: string): Date | null {
   return Number.isFinite(d.getTime()) ? d : null;
 }
 
+/**
+ * Uploads a human explicitly attached to the progress record.
+ *
+ * These come first and are never dropped, because a person naming a video
+ * as the evidence for their implementation is a stronger statement than
+ * anything a cache can offer — and it must not disappear because a snapshot
+ * happens to be cold. The snapshot then ENRICHES them with the current view
+ * count where it can.
+ */
+function attachedUploads(progress: RecommendationProgress | undefined): ObservedSince['uploads'] {
+  if (!progress) return [];
+  return progress.evidenceRefs
+    .filter(e => e.kind === 'upload')
+    .map(e => {
+      /* The note carries the title and date a person wrote. Parsed rather
+         than re-fetched: the point of a human-attached ref is that it does
+         not depend on a live call. */
+      const title = /"([^"]+)"/.exec(e.note ?? '')?.[1] ?? e.ref;
+      const date = /(\d{1,2} \w{3} \d{4})/.exec(e.note ?? '')?.[1] ?? '';
+      const iso = date ? new Date(date).toISOString() : '';
+      return {
+        videoId: e.ref, title, publishedAt: iso,
+        kind: /short/i.test(e.note ?? '') ? 'short' : 'unknown',
+        views: 0,
+      };
+    });
+}
+
 async function observedSince(
   slug: string, handle: string | null, since: Date,
+  progress?: RecommendationProgress,
 ): Promise<ObservedSince> {
   const coverage: string[] = [];
-  const uploads: ObservedSince['uploads'] = [];
+  const uploads: ObservedSince['uploads'] = [...attachedUploads(progress)];
   const events: ObservedSince['events'] = [];
   const channelMovement: ObservedSince['channelMovement'] = [];
 
   const snap = handle ? await readLiveSnapByHandle(handle).catch(() => null) : null;
   if (!snap) {
-    coverage.push('No cached channel snapshot — no uploads or movement could be joined.');
+    coverage.push('No cached channel snapshot — channel movement could not be derived, and the uploads '
+      + 'listed are the ones a person attached rather than a full scan of the window.');
   } else {
-    const latest: any[] = (snap as any).latestVideos ?? [];
+    /* LiveSnap calls this `recentUploads`. The /api/artist-live route
+       reshapes it to `latestVideos`, and reading the reshaped name against
+       the stored object is exactly how this silently returned nothing the
+       first time — both are accepted now. */
+    const latest: any[] = (snap as any).recentUploads ?? (snap as any).latestVideos ?? [];
     if (!latest.length) {
-      coverage.push('Snapshot holds no recent-video list, so uploads since implementation could not be listed.');
+      coverage.push('Snapshot holds no recent-upload list, so the window could not be scanned. Absence here '
+        + 'means the join failed, NOT that nothing was published.');
     }
+    const seen = new Set(uploads.map(u => u.videoId));
     for (const v of latest) {
+      const id = v.id ?? v.videoId;
       const at = new Date(v.publishedAt ?? 0);
-      if (Number.isFinite(at.getTime()) && at >= since) {
-        uploads.push({
-          videoId: v.videoId, title: v.title, publishedAt: v.publishedAt,
-          kind: v.kind ?? 'unknown', views: v.views ?? 0,
-        });
-      }
+      if (!Number.isFinite(at.getTime()) || at < since) continue;
+      const enriched = {
+        videoId: id, title: v.title, publishedAt: v.publishedAt,
+        kind: v.kind ?? ((v.durationSec ?? 0) > 0 && (v.durationSec ?? 0) <= 180 ? 'short' : 'long'),
+        views: v.viewCount ?? v.views ?? 0,
+      };
+      const existing = uploads.findIndex(u => u.videoId === id);
+      if (existing >= 0) uploads[existing] = enriched;
+      else if (!seen.has(id)) uploads.push(enriched);
     }
     uploads.sort((a, b) => a.publishedAt.localeCompare(b.publishedAt));
 
@@ -328,7 +368,7 @@ export async function getCampaignProgress(input: string): Promise<CampaignProgre
   for (const rec of recs) {
     const p = byId.get(rec.id);
     const since = p ? parseSince(p.statedAt) : null;
-    const obs = since ? await observedSince(who.slug, who.artist?.channelHandle ?? null, since) : null;
+    const obs = since ? await observedSince(who.slug, who.artist?.channelHandle ?? null, since, p) : null;
     const result = resultGate(p, obs);
     const state: ProgressState = p?.state ?? 'NOT_STARTED';
 
