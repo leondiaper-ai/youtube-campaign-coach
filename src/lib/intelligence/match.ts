@@ -67,7 +67,12 @@ export interface MatchResult {
   matches: MatchExplanation[];
   /** Needs with no example in the library at all. The research backlog. */
   unmatchedNeeds: { tag: NeedTag; from: string }[];
-  libraryStats: { total: number; tagged: number; scored: number; verified: number; boardEligible: number };
+  /**
+   * Parked leads that touch this artist's needs. NOT candidates — nobody
+   * has assessed them. Listed so a dig can pick one up, never so a page can.
+   */
+  watchlistLeads: { id: string; subject: string; sharedTags: NeedTag[]; whatToCheck: string }[];
+  libraryStats: { total: number; watchlist: number; tagged: number; scored: number; verified: number; boardEligible: number };
   /** Always populated. The caller must not present matches as conclusions. */
   guidance: string;
 }
@@ -100,8 +105,17 @@ export async function getRelevantResearch(
   const library = await readLibrary();
 
   /* A rejected example stays in the store as a record of a judgement made.
-     It must never come back out of the matcher. */
-  const usable = library.filter(c => c.status !== 'REJECTED');
+     It must never come back out of the matcher.
+
+     Watchlist items are excluded for a different reason: they are leads
+     nobody has assessed, and returning one alongside real candidates
+     invites it to be read as one. It is board-blocked either way, but
+     "appears in the match list" and "is a proof example" are close enough
+     in a list that the distinction gets lost. They come back separately,
+     as `watchlistLeads`, which is also how getResearchOpportunities treats
+     them — the two were disagreeing, and this is the side that is right. */
+  const usable = library.filter(c => c.status !== 'REJECTED' && c.status !== 'WATCHLIST');
+  const watchlist = library.filter(c => c.status === 'WATCHLIST');
 
   const matched: MatchExplanation[] = [];
   const tagsProven = new Set<NeedTag>();
@@ -165,6 +179,7 @@ export async function getRelevantResearch(
 
   const stats = {
     total: library.length,
+    watchlist: watchlist.length,
     tagged: usable.filter(c => (c.usefulFor ?? []).length > 0).length,
     scored: usable.filter(c => c.scores).length,
     verified: usable.filter(c => verificationOf(c) === 'VERIFIED').length,
@@ -179,6 +194,16 @@ export async function getRelevantResearch(
     derivedCoverage: needsDetail.derivedCoverage,
     matches: opts.limit ? matched.slice(0, opts.limit) : matched,
     unmatchedNeeds,
+    watchlistLeads: watchlist
+      .map(c => {
+        const { valid } = partitionTags(c.usefulFor ?? []);
+        return {
+          id: c.id, subject: c.subject,
+          sharedTags: valid.filter(t => needByTag.has(t)),
+          whatToCheck: c.possibleLearning,
+        };
+      })
+      .filter(w => w.sharedTags.length > 0),
     libraryStats: stats,
     guidance: buildGuidance(needsDetail, matched.length, stats, unmatchedNeeds.length),
   };

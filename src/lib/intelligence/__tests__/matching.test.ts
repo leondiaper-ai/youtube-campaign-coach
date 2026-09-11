@@ -293,6 +293,20 @@ export function runMatchingChecks(): CheckResult {
     assert.equal(rosterSlugFor('chv'), null, 'a prefix must not resolve — near matches are how the wrong artist gets analysed');
   });
 
+  test('a watchlist seed is never presented as a proof candidate', () => {
+    /* It is board-blocked either way. The point is that appearing in a
+       match list alongside real candidates is enough for the distinction
+       to get lost by whoever reads it. */
+    const wl = SEEDED_RESEARCH.filter(r => r.status === 'WATCHLIST');
+    assert.ok(wl.length > 0, 'the fixture assumes at least one watchlist seed');
+    for (const r of wl) {
+      assert.equal(boardStatus(r).eligible, false);
+      assert.ok(boardStatus(r).blockers.some(b => /watchlist/i.test(b)));
+      assert.ok(/not been verified|not assessed/i.test(r.whyNotObvious + r.limitations),
+        `${r.subject} does not say it is unassessed`);
+    }
+  });
+
   test('name resolution is tolerant of punctuation but not of a different artist', () => {
     assert.equal(normaliseName('CHVRCHES'), 'chvrches');
     assert.equal(normaliseName('The Snuts'), 'snuts');
