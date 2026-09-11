@@ -32,11 +32,11 @@
  * scored the example; the matcher does not compute quality.
  */
 
-import { listCaseStudies } from '../knowledge/store';
 import type { CaseStudy } from '../knowledge/types';
 import { getArtistNeeds, type ArtistNeedsDetail } from './needs';
+import { readLibrary, boardStatus, verificationOf, needsVerificationOf } from './research';
 import {
-  boardEligible, boardBlockers, partitionTags,
+  partitionTags,
   type MatchExplanation, type NeedTag, type ResearchScores,
 } from './types';
 
@@ -67,7 +67,7 @@ export interface MatchResult {
   matches: MatchExplanation[];
   /** Needs with no example in the library at all. The research backlog. */
   unmatchedNeeds: { tag: NeedTag; from: string }[];
-  libraryStats: { total: number; tagged: number; scored: number; boardEligible: number };
+  libraryStats: { total: number; tagged: number; scored: number; verified: number; boardEligible: number };
   /** Always populated. The caller must not present matches as conclusions. */
   guidance: string;
 }
@@ -97,7 +97,7 @@ export async function getRelevantResearch(
   const needByTag = new Map<NeedTag, { from: string; basis: string }>();
   for (const n of needs) if (!needByTag.has(n.tag)) needByTag.set(n.tag, { from: n.from, basis: n.basis });
 
-  const library = await listCaseStudies().catch(() => [] as CaseStudy[]);
+  const library = await readLibrary();
 
   /* A rejected example stays in the store as a record of a judgement made.
      It must never come back out of the matcher. */
@@ -117,8 +117,11 @@ export async function getRelevantResearch(
     if (opts.maxAgeDays != null && age != null && age > opts.maxAgeDays) continue;
 
     const s = scoresOf(c);
-    const eligible = boardEligible(s);
-    if (opts.boardOnly && !eligible) continue;
+    /* Board status is a property of the whole record, not of the scores —
+       it also asks whether anyone has verified the behaviour and whether
+       there is a link to follow. See research.ts. */
+    const board = boardStatus(c);
+    if (opts.boardOnly && !board.eligible) continue;
 
     matched.push({
       caseStudyId: c.id,
@@ -130,11 +133,16 @@ export async function getRelevantResearch(
         return `${t} — ${needsDetail.artistName}: ${need.from}. ${c.subject}: ${c.behaviourObserved}`;
       }),
       scores: s,
-      boardEligible: eligible,
-      boardBlockers: eligible ? [] : boardBlockers(s),
+      scoredBy: c.scoredBy ?? null,
+      boardEligible: board.eligible,
+      boardBlockers: board.blockers,
       freshnessDays: age,
       sourceUrls: c.sourceUrls ?? [],
       limitations: c.limitations,
+      verification: verificationOf(c),
+      needsVerification: needsVerificationOf(c),
+      thumbnailVideoId: c.thumbnailVideoId ?? null,
+      archetype: c.archetype ?? null,
     });
   }
 
@@ -155,12 +163,12 @@ export async function getRelevantResearch(
     .filter(([t]) => !tagsProven.has(t))
     .map(([tag, v]) => ({ tag, from: v.from }));
 
-  const scored = usable.filter(c => c.scores).length;
   const stats = {
     total: library.length,
     tagged: usable.filter(c => (c.usefulFor ?? []).length > 0).length,
-    scored,
-    boardEligible: usable.filter(c => boardEligible(scoresOf(c))).length,
+    scored: usable.filter(c => c.scores).length,
+    verified: usable.filter(c => verificationOf(c) === 'VERIFIED').length,
+    boardEligible: usable.filter(c => boardStatus(c).eligible).length,
   };
 
   return {
@@ -201,4 +209,129 @@ function buildGuidance(
   if (unmatched) parts.push(`${unmatched} need(s) have no proof example at all — these are the research gaps worth going and filling.`);
   parts.push('These are CANDIDATES. The shared tag says the situation is comparable; it does not say the tactic will transfer. Judgement about whether it suits this artist has not been made here.');
   return parts.join(' ');
+}
+
+/* ══ The inverse question ════════════════════════════════════════════ */
+
+/**
+ * "What are we still missing for this artist?"
+ *
+ * The matcher answers what we have. This answers what we do not, and it is
+ * the more useful of the two for directing research. A researcher told to
+ * "find interesting YouTube behaviour" produces interesting YouTube
+ * behaviour; a researcher told "CHVRCHES have an empty 7-14 day window and
+ * we hold no external proof of anyone solving one well" produces something
+ * that can be used.
+ *
+ * Three tiers, because "missing" is not one thing:
+ *   NO_PROOF       nothing in the library addresses this need at all
+ *   UNVERIFIED     something claims to, but nobody has checked it
+ *   NOT_SHOWABLE   verified proof exists but cannot go in front of a team
+ *
+ * The third is the one that would otherwise hide. A need with a strong but
+ * unshowable example looks solved in every count and is not, if the output
+ * is a page someone has to present.
+ */
+export type GapKind = 'NO_PROOF' | 'UNVERIFIED' | 'NOT_SHOWABLE';
+
+export interface ResearchGap {
+  tag: NeedTag;
+  kind: GapKind;
+  /** The artist's need, in the Deep Dive's words. */
+  need: string;
+  basis: string;
+  /** What exists today, if anything. */
+  existing: { id: string; subject: string; verification: string; blockers: string[] }[];
+  /** A concrete instruction, not "research this". */
+  whatToLookFor: string;
+}
+
+export interface ResearchOpportunities {
+  artistSlug: string;
+  artistName: string;
+  deepDiveMissing: boolean;
+  gaps: ResearchGap[];
+  /** Needs that already have verified, showable proof. Nothing to do. */
+  covered: { tag: NeedTag; subject: string }[];
+  watchlist: { id: string; subject: string; whatToCheck: string }[];
+  guidance: string;
+}
+
+export async function getResearchOpportunities(artistInput: string): Promise<ResearchOpportunities> {
+  const needsDetail = await getArtistNeeds(artistInput);
+  const library = (await readLibrary()).filter(c => c.status !== 'REJECTED');
+
+  const byTag = new Map<NeedTag, CaseStudy[]>();
+  for (const c of library) {
+    if (c.status === 'WATCHLIST') continue;
+    const { valid } = partitionTags(c.usefulFor ?? []);
+    for (const t of valid) byTag.set(t, [...(byTag.get(t) ?? []), c]);
+  }
+
+  const gaps: ResearchGap[] = [];
+  const covered: { tag: NeedTag; subject: string }[] = [];
+  const seen = new Set<NeedTag>();
+
+  for (const n of needsDetail.needs) {
+    if (seen.has(n.tag)) continue;
+    seen.add(n.tag);
+
+    const candidates = byTag.get(n.tag) ?? [];
+    const showable = candidates.find(c => boardStatus(c).eligible);
+    if (showable) { covered.push({ tag: n.tag, subject: showable.subject }); continue; }
+
+    const kind: GapKind = !candidates.length
+      ? 'NO_PROOF'
+      : candidates.some(c => verificationOf(c) !== 'VERIFIED') ? 'UNVERIFIED' : 'NOT_SHOWABLE';
+
+    gaps.push({
+      tag: n.tag,
+      kind,
+      need: n.from,
+      basis: n.basis,
+      existing: candidates.map(c => ({
+        id: c.id, subject: c.subject, verification: verificationOf(c),
+        blockers: boardStatus(c).blockers,
+      })),
+      whatToLookFor: instructionFor(kind, n.tag, candidates.map(c => c.subject)),
+    });
+  }
+
+  const watchlist = library
+    .filter(c => c.status === 'WATCHLIST')
+    .map(c => ({ id: c.id, subject: c.subject, whatToCheck: c.possibleLearning }));
+
+  /* NO_PROOF first: a need with nothing at all is a bigger hole than one
+     with an unverified claim against it. */
+  const order: Record<GapKind, number> = { NO_PROOF: 0, UNVERIFIED: 1, NOT_SHOWABLE: 2 };
+  gaps.sort((a, b) => order[a.kind] - order[b.kind]);
+
+  return {
+    artistSlug: needsDetail.artistSlug,
+    artistName: needsDetail.artistName,
+    deepDiveMissing: needsDetail.deepDiveMissing,
+    gaps,
+    covered,
+    watchlist,
+    guidance:
+      `${gaps.length} of ${seen.size} needs lack showable external proof; ${covered.length} are covered. `
+      + 'Work the NO_PROOF list first — those are situations where we have nothing at all. '
+      + 'UNVERIFIED items do not need new discovery, they need somebody to go and check a claim we already hold, '
+      + 'which is cheaper and often finishes the job.',
+  };
+}
+
+function instructionFor(kind: GapKind, tag: NeedTag, subjects: string[]): string {
+  if (kind === 'UNVERIFIED') {
+    return `Do not search for a new example first. Verify ${subjects.join(', ')} against the channel — `
+      + 'pull the uploads, confirm the dates and the order, and record source links. If it holds up, this need is closed.';
+  }
+  if (kind === 'NOT_SHOWABLE') {
+    return `Proof exists (${subjects.join(', ')}) but cannot be shown to a team. Look for a second example of the `
+      + `same "${tag}" mechanic from an artist with more cultural weight or a stronger visual identity. `
+      + 'The mechanic is already established; what is missing is a presentable proof of it.';
+  }
+  return `Nothing in the library addresses "${tag}". Find an artist who has visibly and recently solved this `
+    + 'situation on their own channel, with an upload sequence you can point at. Culturally credible and '
+    + 'visually distinctive, or it will only ever be a library entry.';
 }

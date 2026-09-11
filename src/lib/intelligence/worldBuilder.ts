@@ -26,7 +26,7 @@
  * two-score rule exists to prevent.
  */
 
-import { getRelevantResearch } from './match';
+import { getRelevantResearch, getResearchOpportunities } from './match';
 import { deepDiveFor, resolveArtist } from './needs';
 import { readHumanContext } from './humanContext';
 import { getHorizon } from '../coach-bot/horizon';
@@ -58,7 +58,13 @@ export interface WorldBuilderPayload {
   researchShortlist: {
     subject: string;
     mechanic: string | null;
+    archetype: string | null;
     thumbnailVideoId: string | null;
+    /** The three judgements, surfaced so the page can order by them. */
+    mechanicScore: number | null;
+    culturalScore: number | null;
+    visualScore: number | null;
+    verification: string;
     evidence: string;
     freshnessDays: number | null;
     whyRelevant: string[];
@@ -68,6 +74,20 @@ export interface WorldBuilderPayload {
 
   /** A question about this artist, not an instruction. See the header. */
   possibleApplication: string[];
+
+  /**
+   * What the page CANNOT say yet. Carried in the payload rather than left
+   * for someone to notice, because a page built from five strong references
+   * looks complete whether or not the artist's biggest gap is among them.
+   */
+  openOpportunities: {
+    /** Needs with no showable external proof, and what to go and find. */
+    unmatchedNeeds: { tag: string; kind: string; need: string; whatToLookFor: string }[];
+    /** Leads parked but not assessed. Not for the page; for the next dig. */
+    watchlist: { id: string; subject: string; whatToCheck: string }[];
+    /** Shortlist entries resting on scores a model proposed, not a person. */
+    modelScoredCount: number;
+  };
 
   /** Everything the page must not overstate. Travels with the payload. */
   limitations: string[];
@@ -117,6 +137,7 @@ export async function buildWorld(
   ];
 
   const shortlist = research.matches.map(toShortlistItem);
+  const opportunities = await getResearchOpportunities(who.slug).catch(() => null);
 
   const warnings: string[] = [];
   if (!dive) warnings.push(`No Deep Dive exists for ${who.name}. There is no thesis, no stated gaps and no constraints — do not invent them to fill the page.`);
@@ -163,6 +184,13 @@ export async function buildWorld(
       openQuestions: dive?.openQuestions ?? [],
     },
     researchShortlist: shortlist,
+    openOpportunities: {
+      unmatchedNeeds: (opportunities?.gaps ?? []).map(g => ({
+        tag: g.tag, kind: g.kind, need: g.need, whatToLookFor: g.whatToLookFor,
+      })),
+      watchlist: opportunities?.watchlist ?? [],
+      modelScoredCount: research.matches.filter(m => /model/i.test(m.scoredBy ?? '')).length,
+    },
     possibleApplication: applicationPrompts(who.name, research.matches, dive?.channelGaps?.length ?? 0),
     limitations: [
       ...(dive?.limitations ?? []),
@@ -179,7 +207,12 @@ function toShortlistItem(m: MatchExplanation): WorldBuilderPayload['researchShor
   return {
     subject: m.subject,
     mechanic: m.mechanic,
-    thumbnailVideoId: null, // filled by the tool layer, which has the record
+    archetype: m.archetype,
+    thumbnailVideoId: m.thumbnailVideoId,
+    culturalScore: m.scores?.culturalRelevance ?? null,
+    visualScore: m.scores?.visualBoardValue ?? null,
+    mechanicScore: m.scores?.mechanicValue ?? null,
+    verification: m.verification,
     evidence: m.why[0] ?? '',
     freshnessDays: m.freshnessDays,
     whyRelevant: m.why,

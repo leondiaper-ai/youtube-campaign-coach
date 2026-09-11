@@ -15,6 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { callIntelTool, INTEL_SPECS, INTEL_TOOL_NAMES } from '@/lib/intelligence/tools';
+import { RESEARCH_WORKFLOW } from '@/lib/intelligence/researchWorkflow';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -22,11 +23,20 @@ export const maxDuration = 60;
 const WRITE_TOOLS = new Set([
   'add_research_candidate', 'add_research_observation',
   'update_research_example', 'add_watchlist_item', 'propose_campaign_application',
+  'verify_research_example', 'supersede_research_example',
 ]);
 
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams;
   const tool = p.get('tool');
+
+  /* The loop as the model receives it, readable without a token so it can
+     be checked against what Grok is actually being told. */
+  if (p.get('view') === 'workflow') {
+    return new NextResponse(RESEARCH_WORKFLOW, {
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  }
 
   if (!tool) {
     return NextResponse.json({

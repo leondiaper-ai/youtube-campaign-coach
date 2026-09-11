@@ -31,6 +31,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ALL_SPECS, callCoachTool } from '@/lib/coach-bot/tools';
 import { COACH_SYSTEM_PROMPT } from '@/lib/coach-bot/prompt';
+import { RESEARCH_WORKFLOW } from '@/lib/intelligence/researchWorkflow';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -165,7 +166,10 @@ async function handle(msg: any, req: NextRequest): Promise<object | null> {
           /* Surfaced to clients that display it, so the operating rules
              travel with the connection rather than living only in a bot
              configuration someone has to remember to paste. */
-          instructions: COACH_SYSTEM_PROMPT,
+          /* Both operating documents travel with the connection. The
+             research loop is not optional context — a model that has the
+             write tools but not the loop will save things nobody trusts. */
+          instructions: `${COACH_SYSTEM_PROMPT}\n\n${RESEARCH_WORKFLOW}`,
         },
       };
 

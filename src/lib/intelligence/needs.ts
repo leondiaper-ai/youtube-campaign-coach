@@ -30,6 +30,7 @@ import { readRecon } from '../researcher/store';
 import { getDeepDive } from './deepDiveStore';
 import { DEEP_DIVE_BY_NAME, SEEDED_DEEP_DIVES, normaliseName } from './deepDives';
 import { listHumanContext } from './humanContext';
+import { DECK_TO_ROSTER, deckSlugFor } from './identity';
 import type { ArtistNeeds, NeedTag, DeepDiveContext } from './types';
 
 export interface ResolvedArtist {
@@ -39,7 +40,7 @@ export interface ResolvedArtist {
   artist: Artist | null;
   /** The DECK slug, which is frequently different. Null when no deck exists. */
   deepDiveSlug: string | null;
-  resolvedBy: 'slug' | 'name_match' | 'deep_dive_bridge' | 'deep_dive_only' | 'unresolved';
+  resolvedBy: 'alias' | 'slug' | 'name_match' | 'deep_dive_bridge' | 'deep_dive_only' | 'unresolved';
   /** True when a Deep Dive exists but no roster artist could be found. */
   rosterMissing: boolean;
 }
@@ -63,10 +64,13 @@ async function roster(): Promise<Artist[]> {
  * artist with a full analysis reported as having none, which is exactly the
  * silent absence the fallback existed to prevent, one layer further in.
  *
- * So the join now runs both ways and, critically, bridges on the ARTIST
- * NAME rather than on either slug. Whichever side resolves first supplies a
- * name, and the name finds the other side. Names are the only identifier
- * the two vocabularies actually share.
+ * The fix was a two-way join bridging on the artist NAME. That worked, but
+ * a fuzzy join right 95% of the time is worse than an explicit one, because
+ * the other 5% is silent and looks like missing data. So identity.ts now
+ * holds the mapping explicitly and is consulted FIRST; the name bridge
+ * stays as a fallback so a deck added tomorrow still resolves, and
+ * `resolvedBy` reports which path fired — an artist resolving by name is a
+ * prompt to add an alias, not a quiet piece of luck.
  */
 export async function resolveArtist(input: string): Promise<ResolvedArtist> {
   const list = await roster();
@@ -74,6 +78,29 @@ export async function resolveArtist(input: string): Promise<ResolvedArtist> {
 
   const findRoster = (n: string) =>
     list.find(a => normaliseName(a.name) === n || normaliseName(a.slug) === n);
+
+  /* ── Path 1: the explicit alias table ────────────────────────────────
+     Checked first, because an answer from a written-down mapping is one
+     somebody decided, and an answer from a name match is one that happened
+     to work. When the table knows this artist, nothing else gets a vote. */
+  const deck = deckSlugFor(input);
+  if (deck) {
+    const rosterSlug = DECK_TO_ROSTER[deck];
+    const artist = list.find(a => a.slug === rosterSlug) ?? null;
+    const { dive } = await getDeepDive(deck);
+    if (artist || dive) {
+      return {
+        slug: artist?.slug ?? deck,
+        name: artist?.name ?? dive?.artistName ?? deck,
+        artist,
+        deepDiveSlug: dive ? deck : null,
+        resolvedBy: 'alias',
+        /* A table entry pointing at a roster slug that no longer exists is
+           a broken alias, and saying so beats pretending. */
+        rosterMissing: !artist,
+      };
+    }
+  }
 
   const direct = list.find(a => a.slug === input);
   if (direct) {

@@ -63,6 +63,7 @@ export const NEED_TAGS = [
   'premiere_behaviour',        // Premieres / pre-parties
   'named_series',              // a repeatable, named, returnable format
   'long_form_event',           // a single long piece treated as an event
+  'performance_as_hero',       // the live take IS the release, not support for it
   'release_sequencing',        // order and spacing of assets around a release
   'album_campaign',            // a full album cycle rather than a single
   'first_week_density',        // what lands in the days either side of release
@@ -79,12 +80,78 @@ export function isNeedTag(s: string): s is NeedTag {
   return (NEED_TAGS as readonly string[]).includes(s);
 }
 
-/** Silently dropping an unknown tag hides a typo. Keep them, flag them. */
-export function partitionTags(raw: string[]): { valid: NeedTag[]; unknown: string[] } {
+/**
+ * ── ALIASES ───────────────────────────────────────────────────────────
+ * The vocabulary stays closed; the door is not.
+ *
+ * A model reaching for "premiere_programming" or "longform_event" means the
+ * same situation as `premiere_behaviour` and `long_form_event`, and
+ * rejecting those is pedantry that produces a silently unmatchable record.
+ * Accepting them as free text is the drift the closed set exists to stop.
+ * So there is exactly one canonical form and a table of known ways of
+ * saying it, and everything resolves to canon before it is stored.
+ *
+ * An alias is a SYNONYM, never a near-miss. `album_world` maps to
+ * `album_campaign` because both mean "a full album cycle"; it does not map
+ * to `named_series` because those are different situations that happen to
+ * co-occur. If a proposed alias would change what is matched rather than
+ * just how it is spelled, it belongs in NEED_TAGS as its own entry — which
+ * is why `performance_as_hero` was added rather than aliased to
+ * `archive_live`. Having unused footage and making the live take the
+ * release itself are not the same problem.
+ */
+export const TAG_ALIASES: Record<string, NeedTag> = {
+  premiere_programming: 'premiere_behaviour',
+  premieres: 'premiere_behaviour',
+  performance_series: 'named_series',
+  session_series: 'named_series',
+  process_content: 'bts_process',
+  behind_the_scenes: 'bts_process',
+  longform_event: 'long_form_event',
+  album_world: 'album_campaign',
+  live_archive: 'archive_live',
+  follow_up: 'follow_up_7_14',
+  followup_7_14: 'follow_up_7_14',
+  reactivation: 'channel_reactivation',
+  catalogue: 'catalogue_activation',
+  shorts: 'shorts_programme',
+  community: 'community_activation',
+  touring: 'live_dates_tie_in',
+};
+
+/** Case and separator differences are spelling, not meaning. */
+function canonicaliseKey(s: string): string {
+  return s.trim().toLowerCase().replace(/[\s-]+/g, '_');
+}
+
+/** Returns the canonical tag for any accepted spelling, or null. */
+export function canonicaliseTag(raw: string): NeedTag | null {
+  const k = canonicaliseKey(raw);
+  if (isNeedTag(k)) return k;
+  return TAG_ALIASES[k] ?? null;
+}
+
+/**
+ * Silently dropping an unknown tag hides a typo, so unknowns are returned
+ * rather than swallowed. `aliased` is reported separately so a caller can
+ * see that it wrote one thing and we stored another — an invisible rewrite
+ * is its own kind of drift.
+ */
+export function partitionTags(raw: string[]): {
+  valid: NeedTag[];
+  unknown: string[];
+  aliased: { from: string; to: NeedTag }[];
+} {
   const valid: NeedTag[] = [];
   const unknown: string[] = [];
-  for (const t of raw) (isNeedTag(t) ? valid : unknown).push(t as NeedTag & string);
-  return { valid, unknown };
+  const aliased: { from: string; to: NeedTag }[] = [];
+  for (const t of raw) {
+    const canon = canonicaliseTag(t);
+    if (!canon) { unknown.push(t); continue; }
+    if (canon !== t) aliased.push({ from: t, to: canon });
+    if (!valid.includes(canon)) valid.push(canon);
+  }
+  return { valid, unknown, aliased };
 }
 
 /* ══ Deep Dive ═══════════════════════════════════════════════════════ */
@@ -309,9 +376,17 @@ export interface MatchExplanation {
   /** One line per shared tag: the artist's need, then the example's proof. */
   why: string[];
   scores: ResearchScores | null;
+  /** Who judged it. "model (proposed…)" is a materially weaker basis. */
+  scoredBy: string | null;
   boardEligible: boolean;
   boardBlockers: string[];
   freshnessDays: number | null;
   sourceUrls: string[];
   limitations: string;
+  /** UNVERIFIED / PARTIAL / VERIFIED / DISPUTED. See research.ts. */
+  verification: string;
+  /** Specific questions still outstanding. Empty once verified. */
+  needsVerification: string[];
+  thumbnailVideoId: string | null;
+  archetype: string | null;
 }

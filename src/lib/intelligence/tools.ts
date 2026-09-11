@@ -6,12 +6,14 @@
  * registries so the MCP server picks it up without special-casing.
  *
  * ── THE PERMISSION LINE ───────────────────────────────────────────────
- * Read is broad. Write is five specific research actions and nothing else:
+ * Read is broad. Write is seven specific research actions and nothing else:
  *
- *   add_research_candidate      a new external example
- *   add_research_observation    more evidence on an existing one
- *   update_research_example     tags, mechanic, proposed scores
- *   add_watchlist_item          park something to look at later
+ *   add_research_candidate       a new external example
+ *   add_research_observation     more evidence on an existing one
+ *   update_research_example      tags, mechanic, proposed scores
+ *   verify_research_example      record the outcome of actually checking it
+ *   supersede_research_example   replace a weaker proof of the same mechanic
+ *   add_watchlist_item           park something to look at later
  *   propose_campaign_application connect an example to one of our artists
  *
  * There is no tool here that edits a Deep Dive, writes human context,
@@ -20,24 +22,40 @@
  * on this surface rather than for the prompt to ask nicely.
  *
  * ── SCORES ARE PROPOSED, NEVER SET ────────────────────────────────────
- * A model may propose the three research scores and its proposal is stored
- * with `scoredBy` recording that a model produced it. `boardEligible` is
- * computed from whatever scores are present, so an unratified proposal can
- * reach the board — which is a deliberate trade: the alternative is a
- * library that stays unscored forever. `scoredBy` makes it visible, and the
- * world builder reports how many of its shortlist were model-scored.
+ * A model may propose the three research scores and the proposal is stored
+ * with `scoredBy` recording that a model produced it. Scores alone no
+ * longer reach the board: `boardStatus` in research.ts also requires that
+ * somebody has VERIFIED the behaviour and that a source link exists. So a
+ * model can score its own find generously and the worst outcome is a
+ * library entry, not a slide. The world builder reports how many of its
+ * shortlist rest on model-proposed scores.
+ *
+ * ── VERIFICATION IS A WRITE, PROMOTION IS NOT ─────────────────────────
+ * `verify_research_example` lets a model record what it found when it went
+ * and looked, and VERIFIED demands a URL and an evidence item before it
+ * will accept the label. That is a claim about work done, which a model can
+ * legitimately make. What it still cannot do is decide that something
+ * belongs in front of a team — that falls out of the gate, and the gate is
+ * code.
  */
 
-import { listCaseStudies, saveCaseStudy, searchCaseStudies } from '../knowledge/store';
+import { saveCaseStudy, searchCaseStudies } from '../knowledge/store';
+import { ARTISTS, mergeArtistLists } from '../artists';
+import { listCustomArtists } from '../artistStore';
+import { checkAliases } from './identity';
+import {
+  readLibrary, boardStatus, verificationOf, needsVerificationOf, seedById, isSeed,
+  type ResearchVerification,
+} from './research';
 import type { CaseStudy } from '../knowledge/types';
 import { listDeepDives } from './deepDiveStore';
 import { deepDiveFor, getArtistNeeds, resolveArtist } from './needs';
 import { readHumanContext } from './humanContext';
 import { getResourceContext, listResourceContexts } from './resourceContexts';
-import { getRelevantResearch } from './match';
+import { getRelevantResearch, getResearchOpportunities } from './match';
 import { buildWorld } from './worldBuilder';
 import {
-  NEED_TAGS, partitionTags, boardEligible, boardBlockers,
+  NEED_TAGS, TAG_ALIASES, partitionTags,
   type NeedTag,
 } from './types';
 
@@ -98,6 +116,18 @@ export const INTEL_SPECS = [
     description:
       'Free-text search across saved external examples. Call before adding a candidate so the same mechanic is not recorded three times under three artist names.',
     args: { query: 'string' },
+  },
+  {
+    name: 'get_research_opportunities',
+    description:
+      'THE QUESTION THAT DIRECTS DIGGING. Which of this artist\'s strategic needs have NO showable external proof, split three ways: NO_PROOF (nothing in the library at all), UNVERIFIED (something claims to but nobody has checked it) and NOT_SHOWABLE (verified proof exists but cannot go in front of a team). Each gap comes with a concrete instruction. Work NO_PROOF first; UNVERIFIED usually needs a check rather than a new search, which is cheaper and often closes the need outright.',
+    args: { artist: 'string — roster slug or artist name' },
+  },
+  {
+    name: 'check_artist_aliases',
+    description:
+      'Health check on the deck-slug to roster-slug mapping. Returns each Deep Dive, the roster artist it points at, and whether that artist still exists. Run after any roster change: a broken alias shows up as an artist with a full Deep Dive reporting no needs, which reads exactly like missing data.',
+    args: {},
   },
   {
     name: 'get_world_builder_payload',
@@ -162,6 +192,29 @@ export const INTEL_SPECS = [
     args: { subject: 'string', channelId: 'string, optional', whyInteresting: 'string', whatToCheck: 'string', sourceUrls: 'string[]', producedBy: 'string' },
   },
   {
+    name: 'verify_research_example',
+    description:
+      'Records the outcome of actually checking an example against the channel. Set verification to VERIFIED only when you have retrieved the uploads and can state the sequence and dates; PARTIAL when some of it is confirmed; DISPUTED when it did not hold up. VERIFIED requires at least one source URL and one evidence item — an unsourced verification is just a stronger assertion. Verifying a seeded example is how it becomes usable; until then it can be matched but never shown.',
+    args: {
+      id: 'string',
+      verification: 'UNVERIFIED|PARTIAL|VERIFIED|DISPUTED',
+      behaviourObserved: 'string, optional — what they actually published, sequenced',
+      sequence: 'string[], optional — the architecture in order',
+      sourceUrls: 'string[], optional',
+      observedAt: 'string, optional — when the behaviour happened, yyyy-mm-dd',
+      thumbnailVideoId: 'string, optional',
+      evidence: 'object, optional — {items:[{claim, sourceRef, observedAt}]}',
+      stillOutstanding: 'string[], optional — what remains unchecked',
+      verifiedBy: 'string',
+    },
+  },
+  {
+    name: 'supersede_research_example',
+    description:
+      'Replaces a weaker proof of a mechanic with a better one, instead of leaving two cards claiming the same thing. The old example is marked REJECTED with the reason and the id of what replaced it — it stays in the library as a record of a judgement made, and stops appearing in matches. Use this when a stronger or more current example of the SAME mechanic appears; do not use it to delete something you simply disagree with.',
+    args: { oldId: 'string', newId: 'string', reason: 'string', decidedBy: 'string' },
+  },
+  {
     name: 'propose_campaign_application',
     description:
       'Proposes that a specific research example applies to one of our artists, with the reasoning. This is a PROPOSAL: it is recorded against the example and surfaced for a human, and it does not change any campaign. Conservative by design — say what would have to be true for it to work, not that it will.',
@@ -193,7 +246,7 @@ function newId(prefix: string): string {
 }
 
 async function byId(id: string): Promise<CaseStudy | null> {
-  const all = await listCaseStudies();
+  const all = await readLibrary();
   return all.find(c => c.id === id) ?? null;
 }
 
@@ -206,6 +259,7 @@ function scoreOf(v: unknown, current: number | undefined): number | undefined {
 
 function publicView(c: CaseStudy) {
   const s = c.scores ?? null;
+  const board = boardStatus(c);
   return {
     id: c.id, subject: c.subject, title: c.title, mechanic: c.mechanic ?? null,
     archetype: c.archetype ?? null, usefulFor: c.usefulFor ?? [],
@@ -214,7 +268,9 @@ function publicView(c: CaseStudy) {
     whyInteresting: c.whyInteresting, whyNotObvious: c.whyNotObvious,
     possibleLearning: c.possibleLearning, limitations: c.limitations,
     scores: s, scoredBy: c.scoredBy ?? null,
-    boardEligible: boardEligible(s), boardBlockers: boardEligible(s) ? [] : boardBlockers(s),
+    boardEligible: board.eligible, boardBlockers: board.blockers,
+    verification: verificationOf(c), needsVerification: needsVerificationOf(c),
+    seeded: isSeed(c.id),
     country: c.country ?? null, observedAt: c.observedAt ?? null,
     discoveredAt: c.discoveredAt, sourceUrls: c.sourceUrls ?? [],
     thumbnailVideoId: c.thumbnailVideoId ?? null,
@@ -301,6 +357,23 @@ export async function callIntelTool(
       return { n: hits.length, examples: hits.map(publicView) };
     }
 
+    case 'get_research_opportunities':
+      return getResearchOpportunities(String(args.artist ?? ''));
+
+    case 'check_artist_aliases': {
+      const list = await mergeArtistLists(ARTISTS, await listCustomArtists());
+      const checks = checkAliases(list.map(a => ({ slug: a.slug, name: a.name })));
+      const broken = checks.filter(c => c.problem);
+      return {
+        rosterSize: list.length,
+        checks,
+        broken: broken.length,
+        note: broken.length
+          ? 'One or more aliases point at a roster slug that no longer exists. Fix DECK_TO_ROSTER in identity.ts.'
+          : 'Every Deep Dive maps to exactly one live roster artist.',
+      };
+    }
+
     case 'get_world_builder_payload':
       return buildWorld(String(args.artist ?? ''), {
         maxAgeDays: args.maxAgeDays == null ? null : Number(args.maxAgeDays),
@@ -319,12 +392,13 @@ export async function callIntelTool(
         return { error: 'sourceUrls is required. An external example with no link cannot be checked by anyone, which makes it an assertion rather than research.' };
       }
 
-      const { valid, unknown } = partitionTags(Array.isArray(args.usefulFor) ? args.usefulFor : []);
+      const { valid, unknown, aliased } = partitionTags(Array.isArray(args.usefulFor) ? args.usefulFor : []);
       if (!valid.length) {
         return {
           error: 'usefulFor must contain at least one recognised need tag, otherwise this example can never be matched to an artist and will sit in the library unreachable.',
           unknownTagsSupplied: unknown,
           validTags: NEED_TAGS,
+          acceptedAliases: TAG_ALIASES,
         };
       }
 
@@ -361,7 +435,7 @@ export async function callIntelTool(
       await saveCaseStudy(c);
       return {
         stored: true, id: c.id, status: c.status,
-        unknownTagsIgnored: unknown,
+        unknownTagsIgnored: unknown, tagsAliased: aliased,
         note: 'Saved as CANDIDATE and unscored, so it will not reach a team-facing page. Call update_research_example to propose scores.',
       };
     }
@@ -384,9 +458,10 @@ export async function callIntelTool(
       if (!c) return { error: `unknown research example ${args.id}` };
 
       let unknown: string[] = [];
+      let aliased: { from: string; to: NeedTag }[] = [];
       if (Array.isArray(args.usefulFor)) {
         const p = partitionTags(args.usefulFor);
-        unknown = p.unknown;
+        unknown = p.unknown; aliased = p.aliased;
         if (p.valid.length) c.usefulFor = p.valid as NeedTag[];
       }
       if (args.mechanic != null) c.mechanic = String(args.mechanic);
@@ -405,12 +480,13 @@ export async function callIntelTool(
       c.lastReviewedAt = new Date().toISOString();
       await saveCaseStudy(c);
 
-      const eligible = boardEligible(c.scores ?? null);
+      const board = boardStatus(c);
       return {
-        stored: true, id: c.id, unknownTagsIgnored: unknown,
+        stored: true, id: c.id, unknownTagsIgnored: unknown, tagsAliased: aliased,
         scores: c.scores ?? null, scoredBy: c.scoredBy ?? null,
-        boardEligible: eligible,
-        boardBlockers: eligible ? [] : boardBlockers(c.scores ?? null),
+        verification: verificationOf(c),
+        boardEligible: board.eligible,
+        boardBlockers: board.blockers,
         note: 'Scores you supply are recorded as PROPOSED. A low cultural or visual score with a high mechanic score is a correct outcome, not a failure — it keeps the idea and leaves the proof artist off the page.',
       };
     }
@@ -444,6 +520,83 @@ export async function callIntelTool(
       };
       await saveCaseStudy(c);
       return { stored: true, id: c.id, status: 'WATCHLIST' };
+    }
+
+    case 'verify_research_example': {
+      const c = await byId(String(args.id ?? ''));
+      if (!c) return { error: `unknown research example ${args.id}` };
+      const v = String(args.verification ?? '') as ResearchVerification;
+      if (!['UNVERIFIED', 'PARTIAL', 'VERIFIED', 'DISPUTED'].includes(v)) {
+        return { error: 'verification must be one of UNVERIFIED, PARTIAL, VERIFIED, DISPUTED' };
+      }
+      if (!String(args.verifiedBy ?? '').trim()) {
+        return { error: 'verifiedBy is required — an unattributed verification cannot be questioned later' };
+      }
+
+      const urls = Array.isArray(args.sourceUrls) ? args.sourceUrls.filter(Boolean) : (c.sourceUrls ?? []);
+      const newEvidence = (Array.isArray(args.evidence?.items) ? args.evidence.items : [])
+        .map((e: any) => evidenceItem(String(e.claim ?? ''), String(e.sourceRef ?? ''), e.observedAt));
+
+      if (v === 'VERIFIED' && (!urls.length || !(c.evidence.length + newEvidence.length))) {
+        return {
+          error: 'VERIFIED requires at least one source URL and at least one evidence item. Without both this is '
+            + 'an assertion with a stronger label on it, which is worse than an honest UNVERIFIED.',
+        };
+      }
+
+      const rec = c as CaseStudy & Record<string, unknown>;
+      rec.verification = v;
+      rec.verifiedBy = String(args.verifiedBy);
+      rec.verifiedAt = new Date().toISOString();
+      rec.needsVerification = Array.isArray(args.stillOutstanding) ? args.stillOutstanding : [];
+      if (args.behaviourObserved) c.behaviourObserved = String(args.behaviourObserved);
+      if (Array.isArray(args.sequence)) c.sequence = args.sequence.map(String);
+      if (urls.length) c.sourceUrls = urls;
+      if (args.observedAt) c.observedAt = String(args.observedAt);
+      if (args.thumbnailVideoId) c.thumbnailVideoId = String(args.thumbnailVideoId);
+      if (newEvidence.length) c.evidence = [...c.evidence, ...newEvidence];
+      if (v === 'DISPUTED') c.status = 'REJECTED';
+      else if (v === 'VERIFIED' && c.status === 'CANDIDATE') c.status = 'STRONG_EXAMPLE';
+      c.lastReviewedAt = new Date().toISOString();
+
+      await saveCaseStudy(c);
+      const board = boardStatus(c);
+      const wasSeed = isSeed(c.id);
+      return {
+        stored: true, id: c.id, verification: v, status: c.status,
+        boardEligible: board.eligible, boardBlockers: board.blockers,
+        replacedSeed: wasSeed,
+        note: wasSeed
+          ? 'This overwrites the seeded record. The hard-coded version is no longer used for this id.'
+          : null,
+      };
+    }
+
+    case 'supersede_research_example': {
+      const oldOne = await byId(String(args.oldId ?? ''));
+      const newOne = await byId(String(args.newId ?? ''));
+      if (!oldOne) return { error: `unknown example ${args.oldId}` };
+      if (!newOne) return { error: `unknown replacement ${args.newId}` };
+      if (oldOne.id === newOne.id) return { error: 'an example cannot supersede itself' };
+      if (!String(args.reason ?? '').trim()) {
+        return { error: 'reason is required — the reasoning is the part worth keeping' };
+      }
+
+      /* The old record is not deleted. A library that forgets what it
+         rejected repeats the rejection, and the reason is often the most
+         useful sentence in the file. */
+      oldOne.status = 'REJECTED';
+      oldOne.limitations =
+        `SUPERSEDED by ${newOne.id} (${newOne.subject}) on ${new Date().toISOString().slice(0, 10)}: `
+        + `${String(args.reason)} — decided by ${String(args.decidedBy ?? 'unknown')}. `
+        + `Original limitations: ${oldOne.limitations}`;
+      oldOne.lastReviewedAt = new Date().toISOString();
+      await saveCaseStudy(oldOne);
+
+      return {
+        stored: true, supersededId: oldOne.id, replacementId: newOne.id,
+        note: 'The superseded example is kept as REJECTED and will not appear in matches. Nothing was deleted.',
+      };
     }
 
     case 'propose_campaign_application': {
