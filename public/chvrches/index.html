@@ -516,9 +516,14 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 @media(max-width:900px){ .ideagrid{grid-template-columns:1fr} }
 
-/* The cover carries more objects than any other slide, so it opens
-   tighter and is allowed to size to its content rather than to 100vh. */
-.slide.cover{padding:4.2rem 0 2.4rem;min-height:auto}
+/* The cover opens tighter than the other slides because it carries more
+   objects. It keeps the deck's full-viewport height though: once the
+   creative row shrank to a single band the slide collapsed to its content
+   and the white Deep Dive slide came up into the first screen, which read
+   as the page having ended. The campaign home owns the first screen and
+   the original strategy begins below it — which is the relationship
+   between the two. */
+.slide.cover{padding:4.2rem 0 2.4rem}
 
 
 </style>
