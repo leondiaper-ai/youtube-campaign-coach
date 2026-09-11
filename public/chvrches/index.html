@@ -493,6 +493,20 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea:hover{transform:translateY(-3px);border-color:var(--signal)}
 .idea-img{position:absolute;inset:0;background:var(--coal)}
 .idea-img img{width:100%;height:100%;object-fit:cover;display:block}
+/* ── THE BLACK BARS ──────────────────────────────────────────────────
+   Measured, not guessed. The trailer was shot 4:3 and YouTube pillarboxes
+   it into a 1280x720 storyboard still: sampling the columns of all four
+   frames gives 160px of pure black on each side, every time, so the real
+   picture is the middle 960px — exactly 75%.
+
+   Scaling the image to 4/3 of the frame and pulling it left by half the
+   overflow puts those bars outside the card. object-fit:cover then does
+   the vertical crop as before, which is why this is a widening rather
+   than a zoom: nothing of the picture is lost sideways.
+
+   This is a per-asset measurement, so it lives with the frame that was
+   measured rather than being applied to every image on the page. */
+.debar img{width:133.34%;height:100%;max-width:none;margin-left:-16.67%}
 .idea-img::after{content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(8,7,13,.1) 18%,rgba(8,7,13,.88) 62%,rgba(8,7,13,.97) 100%)}
 /* A support card's caption fills more of its frame than the feature's does,
@@ -516,11 +530,11 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea-r span{display:inline-block;min-width:2.1rem;font-size:.53rem;font-weight:700;
   letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);vertical-align:1px}
 
-.idea.feature{aspect-ratio:16/6.4}
+.idea.feature{aspect-ratio:16/5.9}
 .idea.feature .idea-ev{font-size:clamp(1rem,1.85vw,1.4rem)}
 .idea.feature .idea-h{font-size:clamp(1.25rem,2.5vw,1.95rem)}
 .idea.feature .idea-r{font-size:.82rem;max-width:52ch}
-.idea.sub{aspect-ratio:16/10.4}
+.idea.sub{aspect-ratio:16/9.8}
 .idea.sub .idea-ev{font-size:.82rem}
 .idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
 .idea.sub .idea-src{font-size:.64rem}
@@ -602,7 +616,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    pictures allowed to stay as cold as they were shot. The identity strip
    keeps its magenta, because that belongs to the product and not to the
    era. */
-.era{--era-key:#EDE7DA;--era-2:#8E8877;background:#050507}
+.era{--era-key:#EDE7DA;--era-2:#8E8877;background:#050507;padding:4.4rem 0 2.6rem}
 .era .idea-ev{color:var(--era-key)}
 .era .idea-r{color:#B9B3A6}
 .era .idea{border-color:rgba(237,231,218,.16)}
@@ -620,6 +634,14 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 /* The identity strip keeps its magenta — it carries its colour inline and
    belongs to the product rather than to this album, which is the whole
    reason it is the one fixed thing on every campaign page. */
+
+/* A vertical asset behind a landscape slide is not a background, it is a
+   wall: cover-cropping the Short's 1080x1920 frame filled the viewport with
+   one four-foot rose and the headline disappeared into it. Held at its own
+   aspect, pushed off the text column and dropped to a fifth of its weight,
+   the same frame becomes what it should have been — the album's mark, in
+   the room, behind the words. */
+.era .bleed.emblem img{object-fit:contain;object-position:76% 50%;opacity:.2}
 
 /* Grain. The assets are grainy; a perfectly clean surface under them reads
    as a different object. Two hairline gradients, no image request. */
@@ -1652,6 +1674,13 @@ function thumbGuard(img, id){
    THE LIMITATION, STATED: this is all there is. Eight landscape-safe
    frames plus one true-vertical. There is no route to more imagery from
    the public objects, and none of it is retouched, restaged or generated. */
+/* Assets whose storyboard stills carry pillarbox, and how much of the
+   frame is real picture. Measured by sampling the columns of every
+   published still, not inferred from the asset's aspect — see the .debar
+   rule in the CSS for what the number does. An asset missing from here is
+   rendered untouched, which is the safe direction to be wrong in. */
+const BARS = { KCm7pn_lza8: 0.75 };
+
 function campaignFrames(d){
   const heroes = (d.assets && d.assets.heroes) || [];
   const land = heroes.filter(h => h.aspect !== 'portrait');
@@ -1659,15 +1688,17 @@ function campaignFrames(d){
   const out = [];
   /* 1,3,2 then the thumbnail: the storyboard stills are moments from the
      film and the thumbnail is the packshot, so the film leads. */
-  for (const h of land) for (const n of [1,3,2,0]) out.push(ytFrame(h.videoId, n));
-  for (const h of port) out.push(`https://i.ytimg.com/vi/${h.videoId}/oar2.jpg`);
+  for (const h of land) for (const n of [1,3,2,0])
+    out.push({ src: ytFrame(h.videoId, n), id: h.videoId, debar: BARS[h.videoId] === 0.75 });
+  for (const h of port)
+    out.push({ src: `https://i.ytimg.com/vi/${h.videoId}/oar2.jpg`, id: h.videoId, debar: false, tall: true });
   return out;
 }
 
 /* Deal from the pool, wrapping if the campaign has fewer frames than the
    page has slots. Wrapping repeats a picture; it never borrows one. */
 function frameAt(pool, i, fallbackId){
-  return pool.length ? pool[i % pool.length] : ytThumb(fallbackId);
+  return pool.length ? pool[i % pool.length] : { src: ytThumb(fallbackId), id: fallbackId, debar: false, tall: false };
 }
 
 /* ── THE SOURCE LINK ──────────────────────────────────────────────────
@@ -1691,12 +1722,12 @@ function pickFeature(ideas, items){
   return ideas.find(i => i.title === nextTitle) || ideas[0];
 }
 
-function ideaFigure(it, cls, src){
+function ideaFigure(it, cls, f){
   const p = it.pitch;
   const dd = p.deepDive;
   return `<div class="idea ${cls}">
-    <div class="idea-img">
-      <img src="${src}" alt="" loading="lazy"
+    <div class="idea-img${f.debar ? ' debar' : ''}">
+      <img src="${f.src}" alt="" loading="lazy"
            onload="thumbGuard(this,'${p.imageId}')" onerror="${ytFallback(p.imageId)}">
     </div>
     <div class="idea-cap">
@@ -1752,7 +1783,7 @@ function buildIdeas(d){
   const q = ro && ro.currentQuestion;
 
   return `<section class="slide era" data-t="Our playbook">
-  <div class="bleed strong"><img src="${worldA}" alt=""
+  <div class="bleed strong${worldA.debar ? ' debar' : ''}${worldA.tall ? ' emblem' : ''}"><img src="${worldA.src}" alt=""
     onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
   <div class="inner">
     ${campaignIdentity(d, true)}
@@ -1780,7 +1811,7 @@ function buildIdeas(d){
 </section>
 
 <section class="slide era" data-t="Inspiration">
-  <div class="bleed strong"><img src="${worldB}" alt=""
+  <div class="bleed strong${worldB.debar ? ' debar' : ''}${worldB.tall ? ' emblem' : ''}"><img src="${worldB.src}" alt=""
     onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
   <div class="inner">
     <div class="label" style="color:var(--cyan)">Inspiration</div>
