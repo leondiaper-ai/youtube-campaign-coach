@@ -308,76 +308,55 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .livestate{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
 .livesince{font-size:.6rem;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
 
-/* ── THE CAMPAIGN TIMELINE ──────────────────────────────────────────
-   One band, not six panels. It carries the real creative on the left,
-   the Coach's dates on the right, and the pivot between them.
+/* The campaign creative. Deliberately large: these are the campaign's
+   first assets, not rows in a table.
 
-   The published moments are actual YouTube thumbnails at their observed
-   aspect. A Short shown in a 16:9 frame is not a cropping problem —
-   YouTube bakes grey pillarbox into the 1280x720 thumbnail it serves,
-   so the bars are pixels and no object-fit can remove them. A 9:16 frame
-   scales the source until its height fills, cropping exactly the bars
-   away. Future moments cannot have an image, so they get the only other
-   thing this deck uses at that weight: display type.
+   Each keeps its own shape. A Short shown in a 16:9 frame is not a
+   cropping problem — YouTube bakes grey pillarbox into the 1280x720
+   thumbnail it serves, so the bars are pixels and no object-fit can
+   remove them. A 9:16 frame with cover scales the source until its
+   height fills, cropping exactly the bars away.
 
-   Every body is the same height, so the hairline runs dead straight
-   through the whole campaign. That line is the composition. */
-.tl{display:flex;align-items:flex-end;gap:0;margin-top:2.2rem}
-.tl-i{flex:1 1 0;min-width:0;padding-right:1.4rem}
-.tl-i.k-now{flex:0 0 auto;padding-right:1.4rem}
-.tl-body{height:clamp(160px,19vw,214px);display:flex;align-items:flex-end}
+   The label under each is its EDITORIAL role, not its API format. "Now,
+   we can start." is a trailer that happens to be 41 seconds long, and
+   calling it a Short on a page a label reads would be describing the
+   file rather than the campaign. */
+.heroassets{display:flex;flex-wrap:wrap;gap:1.2rem;margin-top:1.6rem;align-items:flex-start}
+.ha{display:block;text-decoration:none;color:inherit;position:relative;border-radius:12px;
+  overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s;
+  flex:0 0 auto;width:clamp(168px,17.5vw,238px)}
+.ha.wide{width:clamp(300px,36vw,476px)}
+.ha:hover{transform:translateY(-3px);border-color:var(--signal)}
+.ha-img{position:relative;aspect-ratio:9/16;background:var(--coal)}
+.ha.wide .ha-img{aspect-ratio:16/9}
+.ha-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ha-img::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 45%,rgba(8,7,13,.92) 100%)}
+.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.8rem .9rem;z-index:2}
+.ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;
+  line-height:1.12;letter-spacing:-.01em}
+.ha.wide .ha-t{font-size:clamp(1.05rem,1.7vw,1.45rem)}
+.ha-m{font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);margin-top:.4rem}
+.ha-m b{color:var(--signal);font-weight:700}
 
-.tl-img{height:100%;border-radius:10px;overflow:hidden;border:1px solid var(--hair);
-  display:block;text-decoration:none;transition:transform .2s,border-color .2s}
-.tl-img:hover{transform:translateY(-3px);border-color:var(--signal)}
-.tl-img img{width:100%;height:100%;display:block;object-fit:cover}
-.tl-i.portrait .tl-img{aspect-ratio:9/16}
-.tl-i.landscape .tl-img{aspect-ratio:16/9}
+/* ── NEXT ───────────────────────────────────────────────────────────
+   Campaign time as three lines of type, not a component. The deck knows
+   the whole schedule; it says the three dates that explain where we are.
+   The first is the one that matters, so it is the only one at full
+   weight — the rest guide the eye without competing for it. */
+.next{margin-top:1.8rem;padding-top:1.2rem;border-top:1px solid var(--hair);max-width:60ch}
+.nx{display:flex;gap:1.2rem;align-items:baseline;padding:.32rem 0}
+.nx-d{flex:0 0 11.5rem;font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:.98rem;letter-spacing:-.01em;color:var(--signal)}
+.nx-t{font-size:.82rem;color:var(--smoke);line-height:1.45}
+.nx.dim .nx-d{color:var(--bone);font-size:.88rem;opacity:.72}
+.nx.rec .nx-d{color:var(--cyan);font-size:.88rem;opacity:.85}
+.nx.rec .nx-t em{font-style:normal;color:var(--cyan);opacity:.9}
 
-/* A future moment: the date at display weight, the stage above it. */
-.tl-blk{height:100%;width:100%;border-radius:10px;border:1px solid var(--hair);
-  padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
-  background:linear-gradient(160deg,rgba(255,45,120,.09),transparent 62%)}
-.tl-i.p-tentative .tl-blk,.tl-i.p-recommended .tl-blk{border-style:dashed}
-.tl-i.p-recommended .tl-blk{background:linear-gradient(160deg,rgba(56,224,214,.10),transparent 62%)}
-.tl-stage{font-size:.53rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
-  color:var(--signal);line-height:1.3}
-.tl-i.p-recommended .tl-stage{color:var(--cyan)}
-.tl-big{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:.86;
-  letter-spacing:-.03em;font-size:clamp(2.1rem,4.4vw,3.5rem)}
-.tl-big span{display:block;font-size:.3em;letter-spacing:.16em;font-weight:700;
-  color:var(--smoke);margin-top:.5rem}
-
-/* The pivot. The only vertical in the band. */
-.tl-now{height:100%;width:2px;background:linear-gradient(180deg,transparent,var(--signal) 22%,var(--signal));
-  position:relative;margin-left:.8rem}
-.tl-now::after{content:'';position:absolute;left:50%;top:0;transform:translate(-50%,-50%);
-  width:9px;height:9px;border-radius:50%;background:var(--signal);
-  animation:pulse 2.4s ease-in-out infinite}
-@media (prefers-reduced-motion:reduce){.tl-now::after{animation:none}}
-
-.tl-rule{height:1px;background:var(--hair);margin-top:1.1rem;position:relative}
-.tl-i.k-past .tl-rule,.tl-i.k-now .tl-rule{background:var(--signal);opacity:.55}
-.tl-foot{padding-top:.75rem}
-.tl-d{font-size:.56rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--smoke)}
-.tl-i.k-past .tl-d,.tl-i.k-now .tl-d{color:var(--signal)}
-.tl-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.96rem;
-  line-height:1.14;letter-spacing:-.01em;margin-top:.35rem}
-.tl-sub{font-size:.72rem;color:var(--smoke);line-height:1.4;margin-top:.2rem}
-.tl-m{font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);
-  margin-top:.45rem;opacity:.8}
-.tl-i.p-recommended .tl-m{color:var(--cyan);opacity:1}
-
-.tl-note{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);
-  margin-top:1.1rem;opacity:.75}
-
-@media(max-width:900px){
-  .tl{flex-wrap:wrap;gap:1.2rem 0}
-  .tl-i{flex:1 1 44%}
-  .tl-i.k-now{flex:1 1 100%}
-  .tl-now{width:100%;height:2px;margin:0;
-    background:linear-gradient(90deg,var(--signal),transparent)}
+@media(max-width:720px){
+  .ha{width:calc(50% - .6rem)}
+  .nx{flex-direction:column;gap:.15rem;padding:.5rem 0}
+  .nx-d{flex:none}
 }
 
 /* Metrics as typography, not KPI cards. Same .num/.cap scale the rest of
@@ -1211,70 +1190,57 @@ const compact = n => {
   return `${s}${a}`;
 };
 
-/* ── THE TIMELINE ─────────────────────────────────────────────────────
-   Published moments carry the real asset. Future moments carry the date
-   at the same visual weight, because the alternative is a calendar card
-   and this deck does not have calendar cards in it.
-
-   Shape follows the OBSERVED aspect, not the label — a vertical asset a
-   human has renamed TRAILER is still vertical, and framing it 16:9 would
-   put YouTube's baked-in pillarbox straight back into the picture.    */
-
-/* "22 SEP" → big "22", small "SEP". "+7-14 DAYS" → "+7-14", "DAYS". */
-function splitDate(label){
-  const m = /^(\d+)\s+([A-Z]+)$/.exec(label);
-  if (m) return [m[1], m[2]];
-  const w = /^(\S+)\s+(.+)$/.exec(label);
-  return w ? [w[1], w[2]] : [label, ''];
+/* ── THE CAMPAIGN CREATIVE ────────────────────────────────────────────
+   Shape follows the OBSERVED aspect; the LABEL follows editorial role.
+   A vertical asset a human has renamed TRAILER is still vertical, and
+   framing it 16:9 would put YouTube's baked-in pillarbox straight back
+   into the picture — but it is still a trailer, and the page says so. */
+function heroAsset(a){
+  const wide = (a.aspect ? a.aspect === 'landscape' : a.kind !== 'short') ? ' wide' : '';
+  return `<a class="ha${wide}" href="${a.url}" target="_blank" rel="noopener">
+    <div class="ha-img">
+      <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
+           onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
+    </div>
+    <div class="ha-cap">
+      <div class="ha-t">${esc(a.title)}</div>
+      <div class="ha-m">${a.dateLabel} · ${a.formatLabel}${
+        a.views != null ? ` · <b>${nf(a.views)}</b> views` : ''}</div>
+    </div>
+  </a>`;
 }
 
-function timelineMoment(m){
-  const prov = 'p-' + m.provenance.toLowerCase();
-  const kind = 'k-' + m.kind.toLowerCase();
+/* ── NEXT ─────────────────────────────────────────────────────────────
+   Three lines of campaign time. The Coach holds the whole schedule —
+   five dated releases through to January — and this surfaces only the
+   dates that explain where the campaign is: the next moment, the window
+   our own strategy asks for after it, and the album it all lands on.
 
-  if (m.kind === 'NOW') {
-    return `<div class="tl-i k-now">
-      <div class="tl-body"><div class="tl-now"></div></div>
-      <div class="tl-rule"></div>
-      <div class="tl-foot"><div class="tl-d">Today</div>
-        <div class="tl-t" style="color:var(--signal)">You are<br>here</div></div>
-    </div>`;
-  }
+   The recommended window is drawn in cyan and says so. A recommendation
+   set in the same type as a confirmed date is how a page ends up telling
+   a label the artist team agreed to something they have never seen.   */
+function buildNext(tl){
+  if(!tl || !tl.moments) return '';
+  const by = k => tl.moments.find(m => m.kind === k);
+  const rows = [];
 
-  if (m.asset) {
-    const a = m.asset;
-    return `<div class="tl-i ${kind} ${prov} ${a.aspect}">
-      <div class="tl-body">
-        <a class="tl-img" href="${a.url}" target="_blank" rel="noopener">
-          <img src="${a.thumb}" alt="${esc(m.title)}" loading="lazy"
-               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
-        </a>
-      </div>
-      <div class="tl-rule"></div>
-      <div class="tl-foot">
-        <div class="tl-d">${esc(m.dateLabel)}</div>
-        <div class="tl-t">${esc(m.title)}</div>
-        <div class="tl-m">${esc(a.formatLabel)}${
-          a.views != null ? ' · ' + nf(a.views) + ' views' : ''}</div>
-      </div>
-    </div>`;
-  }
+  const next = by('NEXT');
+  if(next) rows.push(['', `${next.dateLabel} · ${next.title.toUpperCase()}`,
+    esc(next.detail || next.stage || '')]);
 
-  const [big, small] = splitDate(m.dateLabel);
-  return `<div class="tl-i ${kind} ${prov}">
-    <div class="tl-body">
-      <div class="tl-blk">
-        <div class="tl-stage">${esc(m.stage || '')}</div>
-        <div class="tl-big">${esc(big)}<span>${esc(small)}</span></div>
-      </div>
-    </div>
-    <div class="tl-rule"></div>
-    <div class="tl-foot">
-      <div class="tl-d">${m.daysAway != null ? 'In ' + m.daysAway + ' days' : 'After the hero'}</div>
-      <div class="tl-t">${esc(m.title)}</div>
-      ${m.detail ? `<div class="tl-sub">${esc(m.detail)}</div>` : ''}
-      <div class="tl-m">${m.provenance}</div>
-    </div>
+  const win = by('WINDOW');
+  if(win) rows.push(['rec', win.dateLabel,
+    `${esc(win.stage || win.title)} · <em>${win.provenance.toLowerCase()}</em>`]);
+
+  const anchor = by('ANCHOR');
+  if(anchor) rows.push(['dim', `${anchor.dateLabel} · ALBUM`,
+    esc(anchor.title) + (tl.betweenNote ? ` · ${esc(tl.betweenNote)}` : '')]);
+
+  if(!rows.length) return '';
+  return `<div class="next stagger">
+    <div class="label" style="margin-bottom:.6rem">Next</div>
+    ${rows.map(([c,d,t])=>`<div class="nx ${c}">
+      <div class="nx-d">${esc(d)}</div><div class="nx-t">${t}</div></div>`).join('')}
   </div>`;
 }
 
@@ -1293,8 +1259,10 @@ function buildLiveCover(d){
   const stats = [
     m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views'] : null,
     m.subsDelta  != null ? [compact(m.subsDelta),  'subscribers'] : null,
-    woke ? [`${m.baselineDormantDays}d → active`, 'channel'] : null,
-    m.newUploads ? [String(m.newUploads), `new upload${m.newUploads === 1 ? '' : 's'}`] : null,
+    woke ? [`${m.baselineDormantDays} days → active`, 'channel'] : null,
+    /* No "2 new uploads" stat. Both of them are on the page directly above
+       this line, at 238px, with their view counts on them. Counting them
+       again is the report habit this page is trying not to have. */
   ].filter(Boolean);
 
   /* Background is the newest campaign asset where one exists, so the
@@ -1316,10 +1284,8 @@ function buildLiveCover(d){
     <h1 class="display reveal" style="font-size:clamp(2.3rem,7vw,5.4rem);line-height:.96;margin-top:.7rem">
       CHVRCHES<br><span style="color:var(--signal)">× YouTube</span></h1>
 
-    ${d.read ? `<div class="readline reveal">
-      <div class="rh">${esc(d.read.headline)}</div>
-      <div class="rl">${esc(d.read.line)}</div>
-    </div>` : ''}
+    ${heroes.length ? `<div class="label" style="margin-top:1.8rem">Now</div>
+    <div class="heroassets stagger">${heroes.map(heroAsset).join('')}</div>` : ''}
 
     ${stats.length ? `<div class="livestats stagger">
       ${stats.map(([n,c])=>`<div class="ls"><div class="n">${n}</div><div class="c">${c}</div></div>`).join('')}
@@ -1327,10 +1293,12 @@ function buildLiveCover(d){
     <div class="livesince" style="margin-top:.7rem">Since the Deep Dive${
       m.daysSinceBaseline ? ` · ${m.daysSinceBaseline} days` : ''}</div>` : ''}
 
-    ${(tl && tl.moments && tl.moments.length) ? `<div class="tl stagger">
-      ${tl.moments.map(timelineMoment).join('')}
-    </div>
-    ${tl.betweenNote ? `<div class="tl-note">${esc(tl.betweenNote)}</div>` : ''}` : ''}
+    ${d.read ? `<div class="readline reveal">
+      <div class="rh">${esc(d.read.headline)}</div>
+      <div class="rl">${esc(d.read.line)}</div>
+    </div>` : ''}
+
+    ${buildNext(tl)}
 
     ${(d.coverage && d.coverage.length) ? `<div class="cov">${
       d.coverage.map(esc).join(' · ')}</div>` : ''}

@@ -355,8 +355,11 @@ function buildRead(
 
   return {
     headline: woke ? 'The channel is awake.' : 'The campaign is live.',
+    /* Forward, not hedged into meaninglessness. A confirmed date exists for
+       the next moment, so "moving towards" is a statement about the plan
+       rather than a claim about cause. */
     line: next
-      ? `Now we're watching whether that carries into ${next.label.toLowerCase()}.`
+      ? `Now we're moving towards ${next.label.toLowerCase()}.`
       : 'Now we\'re watching what follows it.',
   };
 }
