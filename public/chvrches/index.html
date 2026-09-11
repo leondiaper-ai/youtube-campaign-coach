@@ -467,56 +467,71 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
 
 /* ── IDEAS ──────────────────────────────────────────────────────────
-   Two slides that behave like the rest of the deck: image first, six
-   words, one line. The composition is deliberately unequal — a feature
-   and three supports — because four identical cards is what a product
-   does, not what a deck does. */
-.ideagrid{display:grid;grid-template-columns:1.45fr 1fr;gap:.9rem;margin-top:1rem;align-items:start}
+   Two slides that behave like the rest of the deck: image first, then a
+   figure, a headline and two short lines. The composition is deliberately
+   unequal — a feature and three supports — because four identical cards
+   is what a product does, not what a deck does.
+
+   The figure is the point. It is what turns "give every hero a second
+   destination" into "0 of 4 heroes had one last time", and it is why
+   these read as strategy rather than suggestion. */
+.ideagrid{display:grid;grid-template-columns:1.28fr 1fr;gap:.9rem;margin-top:1rem;align-items:start}
 .ideacol{display:grid;gap:.9rem}
 
 .idea{display:block;position:relative;border-radius:12px;overflow:hidden;text-decoration:none;
   color:inherit;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
 .idea:hover{transform:translateY(-3px);border-color:var(--signal)}
 .idea-img{position:relative;background:var(--coal)}
+.idea-img img{width:100%;height:100%;object-fit:cover;display:block}
+.idea-img::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,7,13,.1) 18%,rgba(8,7,13,.88) 62%,rgba(8,7,13,.97) 100%)}
 /* No usable thumbnail: the card keeps its shape and the type carries it,
    rather than showing YouTube's grey placeholder. */
 .idea.noimg .idea-img{background:linear-gradient(150deg,rgba(255,45,120,.22),var(--coal) 70%)}
 .idea.noimg .idea-img img{display:none}
-.idea-img img{width:100%;height:100%;object-fit:cover;display:block}
-.idea-img::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(8,7,13,.12) 28%,rgba(8,7,13,.94) 100%)}
-.idea-cap{position:absolute;left:0;right:0;bottom:0;padding:1rem 1.1rem;z-index:2}
-.idea-h{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;line-height:1.05}
-.idea-l{color:#C6C1D4;line-height:1.4;margin-top:.35rem}
 
-/* The feature carries the slide. Everything about it is bigger, not just
-   its box — otherwise it is a large card rather than a lead. */
-.idea.feature .idea-img{aspect-ratio:16/9.4}
-.idea.feature .idea-h{font-size:clamp(1.4rem,2.9vw,2.25rem)}
-.idea.feature .idea-l{font-size:clamp(.8rem,1.25vw,.95rem);max-width:34ch}
-.idea.sub .idea-img{aspect-ratio:16/6.4}
-.idea.sub .idea-h{font-size:clamp(.95rem,1.55vw,1.18rem)}
-.idea.sub .idea-l{font-size:.73rem;max-width:40ch}
+.idea-cap{position:absolute;left:0;right:0;bottom:0;padding:.9rem 1rem;z-index:2}
+.idea-ev{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--signal);
+  letter-spacing:.02em;line-height:1}
+.idea-h{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
+  line-height:1.05;margin-top:.35rem}
+.idea-body{margin-top:.55rem;display:grid;gap:.3rem}
+.idea-r{font-size:.74rem;line-height:1.42;color:#C6C1D4}
+.idea-r span{display:inline-block;min-width:2.1rem;font-size:.53rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);vertical-align:1px}
 
-/* Partner asks are a line, not a pillar. */
-.partners{margin-top:1.1rem;padding-top:.85rem;border-top:1px solid var(--hair)}
+.idea.feature .idea-img{aspect-ratio:16/10.6}
+.idea.feature .idea-ev{font-size:clamp(1rem,1.85vw,1.4rem)}
+.idea.feature .idea-h{font-size:clamp(1.25rem,2.5vw,1.95rem)}
+.idea.feature .idea-r{font-size:.82rem;max-width:44ch}
+.idea.sub .idea-img{aspect-ratio:16/7.6}
+.idea.sub .idea-ev{font-size:.82rem}
+.idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
+
+/* Partner asks are a line on the inspiration slide, not a pillar. */
+.partners{margin-top:1.3rem;padding-top:.9rem;border-top:1px solid var(--hair)}
 .pcrow{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.55rem}
 .pc{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.82rem;
   padding:.32rem .85rem;border:1px solid var(--hair);border-radius:999px;color:var(--bone)}
 
-/* References. Same grammar as the ideas — picture, name, six words. */
-.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(208px,1fr));gap:1.1rem;margin-top:1.4rem}
+/* References. Picture, artist, mechanic, one line of what it means here. */
+.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:1.1rem;margin-top:1.2rem}
 .ref{display:block;text-decoration:none;color:inherit}
 .ref-img{aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--coal);
   border:1px solid var(--hair)}
 .ref-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ref.noimg .ref-img{background:linear-gradient(150deg,rgba(56,224,214,.2),var(--coal) 70%)}
+.ref.noimg .ref-img img{display:none}
 .ref-a{font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--cyan);margin-top:.7rem}
-.ref-i{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.02rem;
-  line-height:1.15;margin-top:.3rem}
+  color:var(--cyan);margin-top:.65rem}
+.ref-i{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;
+  line-height:1.15;margin-top:.25rem}
+.ref-app{font-size:.72rem;line-height:1.4;color:#ADA7BC;margin-top:.4rem}
+.ref-app span{display:block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--smoke);margin-bottom:.15rem}
 
 .refq{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--cyan);
-  font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.2rem 0 1.3rem}
+  font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.1rem 0 1.1rem}
 
 @media(max-width:900px){ .ideagrid{grid-template-columns:1fr} }
 
