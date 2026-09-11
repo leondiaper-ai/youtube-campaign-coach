@@ -368,10 +368,67 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 .cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
 
-/* IDEAS tab shell. */
+/* ── IDEAS ──────────────────────────────────────────────────────────
+   The rollout. Same type scale and the same two accent colours as the
+   rest of the deck — cyan is the question, magenta is the campaign. */
 .ideasnote{border:1px dashed var(--hair);border-radius:11px;padding:1.6rem 1.4rem;margin-top:1.6rem}
 .ideasq{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.1rem,2.2vw,1.6rem);
   line-height:1.2;color:var(--cyan)}
+
+.roll{margin-top:2.2rem;border-top:1px solid var(--hair)}
+.ri{display:grid;grid-template-columns:3.2rem 1fr;gap:0 1.4rem;padding:1.9rem 0;
+  border-bottom:1px solid var(--hair)}
+.ri-n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;
+  color:var(--smoke);font-variant-numeric:tabular-nums;padding-top:.15rem}
+.ri.live .ri-n{color:var(--signal)}
+.ri-h{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap}
+.ri-t{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
+  font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.08}
+.ri-s{font-size:.55rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  padding:.2rem .5rem;border:1px solid var(--hair);border-radius:4px;color:var(--smoke)}
+.ri-s.live{color:var(--signal);border-color:var(--signal)}
+.ri-s.next{color:var(--cyan);border-color:var(--cyan)}
+.ri-s.poss{color:var(--smoke);border-style:dashed}
+.ri-o{font-size:.92rem;color:var(--bone);margin-top:.55rem;max-width:60ch;line-height:1.55}
+
+/* Four labelled blocks. A definition list, not cards — cards would make
+   six of these look like a dashboard. */
+.ri-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:1.1rem 1.8rem;margin-top:1.25rem}
+.ri-b .k{font-size:.53rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.35rem}
+.ri-b .v{font-size:.81rem;line-height:1.6;color:#B9B4C8}
+.ri-b.acc .k{color:var(--signal)}
+.ri-b.acc .v{color:var(--paper)}
+.ri-b .v em{font-style:normal;color:var(--cyan)}
+
+/* Research sits behind a disclosure so the card stays readable and the
+   provenance stays one click away rather than gone. */
+.ri-e{margin-top:1.1rem}
+.ri-e summary{cursor:pointer;list-style:none;font-size:.57rem;font-weight:700;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--smoke);display:inline-flex;align-items:center;gap:.45rem;
+  padding:.32rem .7rem;border:1px solid var(--hair);border-radius:5px}
+.ri-e summary::-webkit-details-marker{display:none}
+.ri-e summary:hover{color:var(--paper);border-color:var(--smoke)}
+.ri-e[open] summary{color:var(--cyan);border-color:var(--cyan)}
+.ri-e .body{margin-top:.9rem;padding-left:1rem;border-left:2px solid var(--hair)}
+.ri-e .q{font-size:.78rem;color:var(--cyan);line-height:1.55;margin-bottom:.7rem}
+.ri-ex{margin-bottom:.9rem}
+.ri-ex .a{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.92rem}
+.ri-ex .b{font-size:.76rem;color:#B9B4C8;line-height:1.55;margin-top:.2rem}
+.ri-ex .m{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.3rem}
+.ri-ex .m a{color:var(--cyan)}
+.ri-none{font-size:.76rem;color:var(--smoke);line-height:1.6;max-width:58ch}
+
+.ri-up{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.6rem}
+.ri-up a{display:block;width:74px;border-radius:4px;overflow:hidden;border:1px solid var(--hair)}
+.ri-up img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;opacity:.75}
+.ri-up a:hover img{opacity:1}
+
+@media(max-width:720px){
+  .ri{grid-template-columns:1fr;gap:.5rem}
+  .ri-n{padding-top:0}
+}
 
 /* The cover carries more objects than any other slide, so it opens
    tighter and is allowed to size to its content rather than to 100vh. */
@@ -1133,9 +1190,12 @@ const compact = n => {
 };
 
 function heroAsset(a){
-  /* Anything that is not a Short gets the landscape frame, so the first
-     official video will physically dominate the row the day it lands. */
-  const wide = a.kind !== 'short' ? ' wide' : '';
+  /* Shape follows the OBSERVED aspect, not the label. A vertical asset a
+     human has renamed TRAILER is still vertical; framing it 16:9 would put
+     YouTube's baked-in pillarbox straight back into the picture. Anything
+     landscape gets the wide frame, so the first official video will
+     physically dominate the row the day it lands. */
+  const wide = (a.aspect ? a.aspect === 'landscape' : a.kind !== 'short') ? ' wide' : '';
   return `<a class="ha${wide}" href="${a.url}" target="_blank" rel="noopener">
     <div class="ha-img">
       <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
@@ -1244,32 +1304,126 @@ function buildBaselineMarker(d){
 }
 
 /* ── IDEAS ────────────────────────────────────────────────────────────
-   The shell only. Verified external research populates this once the
-   research verification run has happened; until then it states what it
-   is waiting for rather than showing unverified claims about other
-   artists as though they were established.                          */
+   The rollout, rendered from the same payload the cover was built from.
+   There is no second fetch and no second copy of campaign state: the
+   spine above and the list below are two views of d.rollout.
+
+   Three things this renderer will not do. It will not show an external
+   example that has not been verified — unverified candidates are counted
+   instead, because "none verified yet" and "nobody does this" are
+   different answers. It will not present a possibility in the same
+   clothes as a commitment. And it will not leave a blank where evidence
+   is missing; every absence says which kind of absence it is.        */
+
+const RI_STATUS = {
+  LIVE:       ['live', 'Live'],
+  COMPLETE:   ['',     'Complete'],
+  PLANNED:    ['next', 'Planned'],
+  RECOMMENDED:['next', 'Recommended'],
+  EXPLORING:  ['',     'Exploring'],
+};
+
+function rolloutExample(x){
+  const src = x.source
+    ? `<a href="${x.source}" target="_blank" rel="noopener">source</a>`
+    : 'no source link';
+  return `<div class="ri-ex">
+    <div class="a">${esc(x.artist)}</div>
+    <div class="b">${esc(x.observedBehaviour)}</div>
+    <div class="b" style="color:var(--smoke)">${esc(x.whyItMattersHere)}</div>
+    <div class="m">${x.date ? esc(x.date)+' · ' : ''}${x.verification} · ${src}</div>
+  </div>`;
+}
+
+function rolloutItem(it){
+  const [cls, word] = RI_STATUS[it.status] || ['', it.status];
+  const ev = it.campaignEvidence || {};
+  const rs = it.grokResearch || {};
+  const ex = rs.examples || [];
+
+  /* What has actually happened, in the order a person would ask it:
+     did somebody say so, and did anything get published. */
+  const evidence = ev.stated
+    ? `${esc(ev.stated.note)} <em>— ${esc(ev.stated.by)}, ${esc(ev.stated.at)}</em>`
+    : `<span style="color:var(--smoke)">${esc(ev.absence || 'Nothing recorded.')}</span>`;
+
+  const uploads = (ev.uploads || []).length
+    ? `<div class="ri-up">${ev.uploads.map(u=>`<a href="https://www.youtube.com/watch?v=${u.videoId}"
+         target="_blank" rel="noopener" title="${esc(u.title)}">
+         <img src="https://i.ytimg.com/vi/${u.videoId}/hqdefault.jpg" alt="${esc(u.title)}" loading="lazy"></a>`).join('')}</div>`
+    : '';
+
+  /* The headline line of research: a verified example if we have one,
+     an honest count if we do not. Never a gap. */
+  const signal = ex.length
+    ? `${ex.length} verified example${ex.length===1?'':'s'} — ${esc(ex[0].artist)}${ex.length>1?' and others':''}.`
+    : `<span style="color:var(--smoke)">${esc(rs.note || 'No research attached.')}</span>`;
+
+  return `<div class="ri ${it.status==='LIVE'?'live':''}">
+    <div class="ri-n">${String(it.ordinal).padStart(2,'0')}</div>
+    <div>
+      <div class="ri-h">
+        <div class="ri-t">${esc(it.title)}</div>
+        <span class="ri-s ${cls}">${esc(word)}</span>
+        ${it.commitment === 'POSSIBILITY'
+          ? '<span class="ri-s poss">Possibility</span>' : ''}
+      </div>
+      <div class="ri-o">${esc(it.objective)}</div>
+
+      <div class="ri-g">
+        <div class="ri-b"><div class="k">Timing</div><div class="v">${esc(it.timing)}</div></div>
+        <div class="ri-b"><div class="k">Why now</div><div class="v">${esc(it.rationale)}</div></div>
+        <div class="ri-b"><div class="k">Where it stands</div><div class="v">${evidence}${uploads}</div></div>
+        <div class="ri-b"><div class="k">Grok signal</div><div class="v">${signal}</div></div>
+      </div>
+
+      <div class="ri-b acc" style="margin-top:1.15rem">
+        <div class="k">What we'd do</div><div class="v">${esc(it.recommendation)}</div>
+      </div>
+
+      <details class="ri-e">
+        <summary>Evidence &amp; research</summary>
+        <div class="body">
+          <div class="q">Research question — ${esc(rs.question || '')}</div>
+          ${ex.length ? ex.map(rolloutExample).join('')
+            : `<div class="ri-none">${esc(rs.note || '')}</div>`}
+          <div class="ri-none" style="margin-top:.8rem">
+            ${it.origin === 'DEEP_DIVE'
+              ? `From the Deep Dive, ${esc(it.attribution.statedAt)}.`
+              : `Raised by ${esc(it.attribution.statedBy)}, ${esc(it.attribution.statedAt)}. Not a commitment.`}
+            ${ev.nextWatch ? ' Watching for: ' + esc(ev.nextWatch) : ''}
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>`;
+}
+
 function buildIdeas(d){
-  const open = (d && d.stages || []).find(s=>s.status==='NEXT');
-  const q = open
-    ? `How are interesting artists handling ${open.label.toLowerCase()}?`
-    : 'How are interesting artists waking channels before a campaign?';
-  return `<section class="slide" data-t="Ideas">
+  const ro = (d && d.rollout) || null;
+  const items = (ro && ro.items) || [];
+  const q = ro && ro.currentQuestion;
+
+  const head = `<section class="slide" data-t="Ideas">
   <div class="inner">
     <div class="label">Ideas</div>
     <h2 class="display big" style="max-width:20ch">What could this<br>
       <span style="color:var(--cyan)">look like?</span></h2>
-    <p class="sub">External YouTube behaviour worth stealing, matched to where this campaign
-      actually is — not a list of best practice.</p>
-    <div class="ideasnote">
+    <p class="sub">The rollout from here, with what we already know about this campaign and
+      what other artists have actually been observed doing — not a list of best practice.</p>
+    ${q ? `<div class="ideasnote">
       <div class="label" style="color:var(--cyan)">The current question</div>
-      <div class="ideasq">${esc(q)}</div>
-      <p class="sub" style="margin-top:1.1rem">Nothing is shown here yet. Four external examples are in
-        the research library awaiting verification, and an example is only presented once somebody has
-        confirmed the behaviour against the channel and recorded a source. An unverified claim about
-        another artist's campaign is not inspiration, it is a rumour with a thumbnail.</p>
-    </div>
+      <div class="ideasq">${esc(q.question)}</div>
+      <p class="sub" style="margin-top:.9rem">Because <b>${esc(q.becauseOf)}</b> is the next thing this
+        campaign has to get right. It changes when the campaign does.</p>
+    </div>` : ''}
+    ${items.length ? `<div class="roll">${items.map(rolloutItem).join('')}</div>`
+      : `<div class="ideasnote"><p class="sub">No rollout has been written for this campaign yet.</p></div>`}
+    ${(ro && ro.limitations || []).length
+      ? `<div class="cov" style="margin-top:2rem">${ro.limitations.map(esc).join(' · ')}</div>` : ''}
   </div>
 </section>`;
+  return head;
 }
 
 /* ── Tabs ─────────────────────────────────────────────────────────── */

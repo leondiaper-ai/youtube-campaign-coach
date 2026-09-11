@@ -26,6 +26,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getCampaignProgress } from '@/lib/intelligence/campaignProgress';
+import { buildRollout } from '@/lib/intelligence/rollout';
+import { readLibrary } from '@/lib/intelligence/research';
+import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
@@ -59,6 +62,15 @@ interface CoverAsset {
   dateLabel: string;
   kind: string;
   formatLabel: string;
+  /**
+   * How the deck should frame it. Observed from duration, NOT from kind —
+   * a vertical campaign trailer is still vertical, and a human relabelling
+   * it must not silently reshape it into a 16:9 frame with pillarbox baked
+   * back into the pixels.
+   */
+  aspect: 'portrait' | 'landscape';
+  /** Set when a person overrode the observed format. Provenance, not decoration. */
+  labelledBy: string | null;
   views: number | null;
   thumb: string;
   url: string;
@@ -99,7 +111,7 @@ function formatOf(v: any): { kind: string; label: string } {
  * preceded it should move into support without anyone editing anything.
  */
 const FORMAT_WEIGHT: Record<string, number> = {
-  omv: 100, live: 80, lyric: 60, visualiser: 55, long: 40, short: 20, unknown: 10,
+  omv: 100, live: 80, trailer: 70, lyric: 60, visualiser: 55, long: 40, short: 20, unknown: 10,
 };
 
 function rankAssets(assets: CoverAsset[]): CoverAsset[] {
@@ -164,7 +176,11 @@ export async function GET(req: NextRequest) {
     for (const v of raw) {
       const at = new Date(v.publishedAt ?? 0);
       if (!since || !Number.isFinite(at.getTime()) || at <= since) continue;
-      const f = formatOf(v);
+      const observed = formatOf(v);
+      /* A person who knows what the asset is beats a duration check. The
+         shape stays observed; only the name changes. */
+      const human = overrideFor(v.id);
+      const f = human ? { kind: human.kind, label: human.label } : observed;
       postBaseline.push({
         videoId: v.id,
         title: v.title,
@@ -172,6 +188,8 @@ export async function GET(req: NextRequest) {
         dateLabel: dateLabel(v.publishedAt),
         kind: f.kind,
         formatLabel: f.label,
+        aspect: observed.kind === 'short' ? 'portrait' : 'landscape',
+        labelledBy: human ? human.statedBy : null,
         views: v.viewCount ?? null,
         thumb: `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`,
         url: `https://www.youtube.com/watch?v=${v.id}`,
@@ -213,32 +231,30 @@ export async function GET(req: NextRequest) {
       ? Number((/(\d[\d,]*)\s+days/.exec(dormancyClaim.claim)?.[1] ?? '').replace(/,/g, '')) || null
       : null;
 
-    /* ── The campaign stages ───────────────────────────────────────────
-       These ARE the Deep Dive's campaign architecture, in its own order
-       and its own words — not a generic funnel. A stage is IN MOTION only
-       where a human said so. */
-    const architecture = progress.recommendations
-      .filter(r => r.recommendation.source === 'campaign_architecture');
+    /* ── The rollout, and the spine that reads off it ──────────────────
+       The cover's four stages and the Ideas tab's rollout used to be two
+       derivations of the same campaign. They are now one: buildRollout
+       joins the Deep Dive architecture to human progress and to verified
+       research, and the spine is that plan rendered in four words each.
+       A stage is IN MOTION only where a human said so, unchanged — the
+       rule now lives in one place instead of two. */
+    const library = await readLibrary().catch(() => []);
+    const rollout = buildRollout(progress, library);
 
-    const inMotionIds = new Set(inMotion.map(r => r.recommendation.id));
-    let seenNext = false;
-    const stages = architecture.slice(0, 4).map(r => {
-      let status: 'IN MOTION' | 'NEXT' | 'AHEAD';
-      if (inMotionIds.has(r.recommendation.id)) {
-        status = 'IN MOTION';
-      } else if (!seenNext) {
-        status = 'NEXT'; seenNext = true;
-      } else {
-        status = 'AHEAD';
-      }
-      return {
-        id: r.recommendation.id,
-        /* Short label for the deck, long point kept for the tooltip. */
-        label: stageLabel(r.recommendation.point),
-        point: r.recommendation.point,
-        status,
-      };
-    });
+    if (!rollout.items.length) {
+      coverage.push('No rollout plan exists for this artist, so the strategy spine is unavailable rather than empty.');
+    }
+
+    const stages = rollout.items
+      .filter(it => it.spine && it.spineStatus)
+      .slice(0, 4)
+      .map(it => ({
+        id: it.recommendationId ?? it.id,
+        label: it.title,
+        /* Long point kept for the tooltip, as before. */
+        point: it.objective,
+        status: it.spineStatus as string,
+      }));
 
     /* ── One read ──────────────────────────────────────────────────────
        Assembled from observed facts and an explicitly hedged forward
@@ -272,6 +288,10 @@ export async function GET(req: NextRequest) {
       },
       assets: { heroes, supporting },
       stages,
+      /* The same plan the stages were cut from, in full, for the Ideas
+         tab. One fetch, one state — the tab cannot show a campaign the
+         cover disagrees with because there is only one of them. */
+      rollout,
       read,
       /* UNKNOWN is never NONE. The deck renders these quietly but they
          must exist, because a failed join and a quiet channel look
@@ -288,20 +308,6 @@ export async function GET(req: NextRequest) {
       { status: 200, headers: CORS },
     );
   }
-}
-
-/** "Pre-campaign: reopen the channel with…" → "Wake the channel". */
-function stageLabel(point: string): string {
-  const p = point.toLowerCase();
-  if (/reopen|pre-campaign/.test(p)) return 'Wake the channel';
-  if (/official music video|single:/.test(p)) return 'First hero';
-  if (/7-14|second destination/.test(p)) return 'Second destination';
-  if (/release day/.test(p)) return 'Give every song a home';
-  if (/after release|back what moves/.test(p)) return 'Back what moves';
-  if (/always on|station/.test(p)) return 'Build the world';
-  /* No match: use the deck's own words, truncated at the first clause,
-     rather than inventing a label. */
-  return point.split(/[:.—]/)[0].trim();
 }
 
 function firstSentence(s: string): string {

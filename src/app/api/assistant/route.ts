@@ -23,6 +23,7 @@ import { BOUNDARY_RULES } from '@/lib/knowledge/evidence';
 import { runBoundaryChecks } from '@/lib/knowledge/__tests__/evidence.test';
 import { runMatchingChecks } from '@/lib/intelligence/__tests__/matching.test';
 import { runProgressChecks } from '@/lib/intelligence/__tests__/progress.test';
+import { runRolloutChecks } from '@/lib/intelligence/__tests__/rollout.test';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -53,6 +54,12 @@ export async function GET(req: NextRequest) {
      implemented. */
   if (view === 'progress-checks') {
     return NextResponse.json(runProgressChecks());
+  }
+  /* The rollout suite. These guard the Ideas tab's two temptations: showing
+     an unverified example as evidence, and letting the research question sit
+     on a stage the campaign has already passed. */
+  if (view === 'rollout-checks') {
+    return NextResponse.json(runRolloutChecks());
   }
   if (view === 'read') {
     const slug = req.nextUrl.searchParams.get('slug') ?? '';
