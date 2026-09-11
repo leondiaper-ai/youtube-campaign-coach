@@ -96,7 +96,11 @@ export interface Suppressed {
 /* ══ Case studies ════════════════════════════════════════════════════ */
 
 export type CaseStudyStatus =
-  | 'CANDIDATE' | 'INVESTIGATING' | 'STRONG_EXAMPLE' | 'VALIDATED_CASE_STUDY' | 'REJECTED';
+  | 'CANDIDATE' | 'INVESTIGATING' | 'STRONG_EXAMPLE' | 'VALIDATED_CASE_STUDY' | 'REJECTED'
+  /** In the library, deliberately not shown to a team. See ResearchScores. */
+  | 'WATCHLIST'
+  /** Passed both the mechanic bar and the showable bar. */
+  | 'BOARD_ELIGIBLE';
 
 /**
  * `whyNotObvious` and `limitations` are required fields rather than optional
@@ -137,6 +141,40 @@ export interface CaseStudy {
   discoveredAt: string;
   lastReviewedAt: string;
   sourceFindingId?: string | null;
+
+  /* ── Research-library fields ────────────────────────────────────────
+   * Added rather than forked into a second store. Every one is optional,
+   * so records written before this existed stay valid and simply come back
+   * unscored — which is the honest answer for them. A parallel
+   * ResearchExample table would have meant two places to look for the same
+   * thing and two sets of status transitions to keep in step.
+   *
+   * The vocabulary for these lives in intelligence/types.ts; they are typed
+   * loosely here so the knowledge layer keeps its independence from the
+   * matching layer, exactly as the header of this file insists.
+   */
+
+  /** The mechanic in a few words: "archive live as a Premiere run". */
+  mechanic?: string | null;
+  /** A reusable shape the mechanic belongs to: "named series", "process as event". */
+  archetype?: string | null;
+  /** NeedTag values. What campaign situations this is proof for. */
+  usefulFor?: string[];
+  /** ISO-3166 alpha-2 where known. Unknown stays unknown. */
+  country?: string | null;
+  /** When the BEHAVIOUR happened, as distinct from when we found it. */
+  observedAt?: string | null;
+  sourceUrls?: string[];
+  /** A video id to pull a thumbnail from. We store the id, never the image. */
+  thumbnailVideoId?: string | null;
+  /** See ResearchScores. Absent means nobody has judged it yet. */
+  scores?: {
+    mechanicValue: number;
+    culturalRelevance: number;
+    visualBoardValue: number;
+  } | null;
+  /** Who scored it. A model may propose scores; only a human ratifies them. */
+  scoredBy?: string | null;
 }
 
 /* ══ Principles ══════════════════════════════════════════════════════ */

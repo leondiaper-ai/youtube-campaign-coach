@@ -18,6 +18,7 @@ import { readLiveSnapByHandle } from '../kvCache';
 import { readHistory, deltaOver } from '../snapshots';
 import { listPinned, type PinnedCampaign } from '../campaignStore';
 import { callTool as callResearchTool, TOOL_SPECS as RESEARCH_SPECS } from '../researcher/tools';
+import { callIntelTool, INTEL_SPECS, INTEL_TOOL_NAMES } from '../intelligence/tools';
 import { fetchCatalogue, reconstruct } from '../researcher/catalogue';
 import { readRecon, writeRecon } from '../researcher/store';
 import { buildTimeline } from './timeline';
@@ -129,6 +130,7 @@ export const COACH_SPECS = [
 export const ALL_SPECS = [
   ...COACH_SPECS.map(s => ({ name: s.name, description: s.description, args: s.args as Record<string, string> })),
   ...RESEARCH_SPECS,
+  ...INTEL_SPECS.map(s => ({ name: s.name, description: s.description, args: s.args as Record<string, string> })),
 ];
 
 /* ── Dispatcher ─────────────────────────────────────────────────────── */
@@ -376,7 +378,11 @@ export async function callCoachTool(
     }
 
     default:
-      /* Anything not a coach tool is a research tool. */
+      /* Three registries, one dispatcher. Intelligence tools are matched by
+         name against their own set rather than by falling through, because
+         the research registry's default branch returns an "unknown tool"
+         object — a silent wrong answer for any intelligence call. */
+      if (INTEL_TOOL_NAMES.has(name)) return callIntelTool(name, args, ctx);
       return callResearchTool(name, args, ctx);
   }
 }

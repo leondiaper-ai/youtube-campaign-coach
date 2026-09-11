@@ -21,6 +21,7 @@ import {
 } from '@/lib/knowledge/inbox';
 import { BOUNDARY_RULES } from '@/lib/knowledge/evidence';
 import { runBoundaryChecks } from '@/lib/knowledge/__tests__/evidence.test';
+import { runMatchingChecks } from '@/lib/intelligence/__tests__/matching.test';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -39,6 +40,12 @@ export async function GET(req: NextRequest) {
      has no test runner. Executable is better than aspirational. */
   if (view === 'boundary-checks') {
     return NextResponse.json(runBoundaryChecks());
+  }
+  /* The matching suite, same arrangement. It also validates every seeded
+     Deep Dive, so a transcription with an invented tag or a missing basis
+     fails here rather than showing up as a silently unmatchable artist. */
+  if (view === 'matching-checks') {
+    return NextResponse.json(runMatchingChecks());
   }
   if (view === 'read') {
     const slug = req.nextUrl.searchParams.get('slug') ?? '';
