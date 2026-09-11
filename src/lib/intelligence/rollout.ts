@@ -212,8 +212,31 @@ export interface PlanItem {
     why: string;
     /** What we would actually do. One line. */
     doThis: string;
-    /** A real asset on this artist's channel. Never stock, never generated. */
+    /**
+     * FALLBACK ONLY.
+     *
+     * The Ideas slides draw their pictures from the assets THIS campaign has
+     * actually published — see `campaignFrames()` in the deck. A campaign with
+     * two uploads of its own should not be illustrated with a video from the
+     * last album, because the page is meant to feel like the era it is
+     * describing. This id is used only when the campaign has published
+     * nothing yet and the alternative is an empty frame.
+     */
     imageId: string;
+    /**
+     * Where this argument was made, and the figure that makes it.
+     *
+     * An idea card used to link to a video on the channel. That was wrong
+     * twice over: the link answered a question nobody asked ("what does this
+     * picture come from?") and it could rot — CHVRCHES: Live at House of Vans
+     * still returns a thumbnail and a title, but the video itself is not
+     * playable, so the card offered a dead end dressed as a citation.
+     *
+     * The link now goes where the reasoning is: the Channel Deep Dive slide
+     * that argued for this, identified by its `data-t` so it survives slides
+     * being reordered. `figure` is the sentence that slide proves.
+     */
+    deepDive?: { slide: string; figure: string };
     /**
      * Which frame of that asset. YouTube publishes three auto-generated
      * storyboard stills per video at maxres1/2/3.jpg alongside the
@@ -230,7 +253,18 @@ export interface PlanItem {
    * NOT pitches, because a platform opportunity nobody has agreed to must
    * not read like a campaign plan.
    */
-  opportunity?: { name: string; line: string };
+  opportunity?: {
+    name: string;
+    line: string;
+    /**
+     * A real, public thing somebody can open to see what is meant. Named by a
+     * person and checked by hand, NOT produced by the research pipeline — so
+     * it is deliberately a single link with a single observed figure, and it
+     * never appears on the Inspiration slide, which stays reserved for
+     * examples that have been through verification.
+     */
+    example?: { label: string; url: string; observed: string; checkedAt: string };
+  };
 }
 
 /**
@@ -282,6 +316,7 @@ const CHVRCHES_PLAN: PlanItem[] = [
       why: 'The pre-party into Premiere ritual already worked here, on every Screen Violence single.',
       doThis: 'Bring it back for Roses, and give people somewhere to go the moment it ends.',
       imageId: '0XoMu7Bz7YE',
+      deepDive: { slide: 'The ritual', figure: 'A live stream 12-20 minutes ahead of every premiere' },
     },
   },
   {
@@ -308,6 +343,10 @@ const CHVRCHES_PLAN: PlanItem[] = [
       why: 'Nothing meaningful landed in the 7-14 day window after any Screen Violence single.',
       doThis: 'Lyric, live or performance while the attention from the hero is still up.',
       imageId: 'du4kNAyjVCg',
+      deepDive: {
+        slide: 'Lyric videos',
+        figure: '11 lyric videos take 2.04M typical views against 937K for music videos',
+      },
     },
   },
   {
@@ -353,6 +392,7 @@ const CHVRCHES_PLAN: PlanItem[] = [
       why: 'Live is already part of this channel\'s language, with a 104K median.',
       doThis: 'Decide before January that the run is being captured. Could it become a named series?',
       imageId: 'fGiqCmZvkJ8',
+      deepDive: { slide: 'Hero moment', figure: '15 live uploads, 5 full sets, 101 minutes at House of Vans' },
     },
   },
   {
@@ -425,6 +465,12 @@ const CHVRCHES_PLAN: PlanItem[] = [
     opportunity: {
       name: 'CHVRCHES Station',
       line: 'An always-on destination connecting the new album, catalogue and live world.',
+      example: {
+        label: 'Metallica',
+        url: 'https://music.youtube.com/channel/UCbulh9WdLtEXiooRcYK7SWw',
+        observed: '58M monthly listeners on one artist destination',
+        checkedAt: '2026-09-11',
+      },
     },
   },
 ];

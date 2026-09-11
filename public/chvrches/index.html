@@ -555,6 +555,71 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .refq{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--cyan);
   font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.1rem 0 1.1rem}
 
+/* ── THE SOURCE LINE ─────────────────────────────────────────────────
+   An idea card used to link to a video on the channel, which was a
+   citation for the picture rather than for the argument — and one of them
+   (House of Vans) still serves a thumbnail while refusing to play, so the
+   card offered a dead end that looked like evidence.
+
+   The card now opens the Channel Deep Dive slide that made the case, and
+   shows the figure that slide proves. Same gesture, real destination. */
+.idea-src{display:flex;gap:.5rem;align-items:baseline;width:100%;text-align:left;
+  margin-top:.6rem;padding-top:.55rem;border-top:1px solid rgba(237,231,218,.16);
+  background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;
+  font:inherit;font-size:.7rem;line-height:1.4;color:#B6B0A2;padding-left:0;padding-right:0}
+.idea-src b{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:.5rem;
+  color:var(--era-key);white-space:nowrap;flex:0 0 auto;padding-top:.18rem}
+.idea-src:hover{color:var(--era-key)}
+.idea-src:hover b{text-decoration:underline}
+.idea.feature .idea-src{font-size:.76rem;max-width:56ch}
+
+/* The one external thing on this page. Named by a person, checked by hand,
+   and kept to a single line so it reads as "here is what we mean" rather
+   than as research we have run. */
+.opp-x{display:inline-block;margin-top:.4rem;font-size:.68rem;letter-spacing:.01em;
+  color:var(--era-key);text-decoration:none;border-bottom:1px solid rgba(237,231,218,.3);
+  padding-bottom:1px}
+.opp-x:hover{border-bottom-color:var(--era-key)}
+.opp-x i{font-style:normal;color:#8E8877}
+
+/* ── THE ALBUM ERA ───────────────────────────────────────────────────
+   The two campaign uploads are black, silver and grain, with a white
+   heraldic rose. The Ideas slides now take their pictures only from those
+   two assets, so a magenta-and-cyan chrome sat on top of that world
+   looked like the last campaign's UI wrapped around the new one's images.
+
+   This is a palette shift, not a redesign: the same composition, the same
+   type, the same hierarchy — bone white where the accent was, and the
+   pictures allowed to stay as cold as they were shot. The identity strip
+   keeps its magenta, because that belongs to the product and not to the
+   era. */
+.era{--era-key:#EDE7DA;--era-2:#8E8877;background:#050507}
+.era .idea-ev{color:var(--era-key)}
+.era .idea-r{color:#B9B3A6}
+.era .idea{border-color:rgba(237,231,218,.16)}
+.era .idea:hover{border-color:rgba(237,231,218,.55)}
+.era .idea-img img{filter:grayscale(.28) contrast(1.06) brightness(.96)}
+.era .idea.noimg .idea-img{background:linear-gradient(150deg,rgba(237,231,218,.14),#0B0B0D 70%)}
+.era .opps-h{color:var(--era-key);opacity:.75}
+.era .opp{border-left-color:rgba(237,231,218,.35)}
+.era .opp-l{color:#ADA79A}
+.era .refq{color:var(--era-key)}
+.era .ref-a{color:var(--era-key)}
+.era .ref-app{color:#ADA79A}
+.era h2.display span{color:var(--era-key)!important}
+.era .label{color:var(--era-key)!important;opacity:.7}
+/* The identity strip keeps its magenta — it carries its colour inline and
+   belongs to the product rather than to this album, which is the whole
+   reason it is the one fixed thing on every campaign page. */
+
+/* Grain. The assets are grainy; a perfectly clean surface under them reads
+   as a different object. Two hairline gradients, no image request. */
+.era .inner{position:relative;z-index:3}
+.era::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.5;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px),
+    radial-gradient(120% 80% at 50% 0%,transparent 40%,rgba(0,0,0,.55) 100%)}
+
 @media(max-width:900px){ .ideacol{grid-template-columns:1fr} }
 
 /* The cover opens tighter than the other slides because it carries more
@@ -1553,6 +1618,63 @@ function thumbGuard(img, id){
   img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
+/* ── THE CAMPAIGN'S OWN PICTURES ──────────────────────────────────────
+   Every image on these two slides now comes from the assets THIS campaign
+   has published. Nothing from the last album, and nothing invented.
+
+   Why it changed: the cards were illustrated with Screen Violence videos —
+   real, on-channel, correctly credited, and three years out of date. A
+   page describing the next album that looks like the last one is arguing
+   against itself.
+
+   What is actually available, checked rather than assumed. YouTube
+   publishes maxres1/2/3.jpg beside maxresdefault.jpg — three storyboard
+   stills per upload, all public, all distinct (verified by byte size and
+   by eye on both assets). So two uploads give eight frames.
+
+   The catch is shape. A LANDSCAPE upload's stills are true 16:9 frames. A
+   PORTRAIT upload's stills are the same 1280x720 file with the vertical
+   strip pillarboxed into the middle and a blurred smear either side, so
+   they are unusable at card size. For those, oardefault/oar2.jpg sometimes
+   carries the original aspect — on the 10 Sep Short it is a real
+   1080x1920 — and where it does not, the asset simply contributes no
+   frames rather than a bad one.
+
+   THE LIMITATION, STATED: this is all there is. Eight landscape-safe
+   frames plus one true-vertical. There is no route to more imagery from
+   the public objects, and none of it is retouched, restaged or generated. */
+function campaignFrames(d){
+  const heroes = (d.assets && d.assets.heroes) || [];
+  const land = heroes.filter(h => h.aspect !== 'portrait');
+  const port = heroes.filter(h => h.aspect === 'portrait');
+  const out = [];
+  /* 1,3,2 then the thumbnail: the storyboard stills are moments from the
+     film and the thumbnail is the packshot, so the film leads. */
+  for (const h of land) for (const n of [1,3,2,0]) out.push(ytFrame(h.videoId, n));
+  for (const h of port) out.push(`https://i.ytimg.com/vi/${h.videoId}/oar2.jpg`);
+  return out;
+}
+
+/* Deal from the pool, wrapping if the campaign has fewer frames than the
+   page has slots. Wrapping repeats a picture; it never borrows one. */
+function frameAt(pool, i, fallbackId){
+  return pool.length ? pool[i % pool.length] : ytThumb(fallbackId);
+}
+
+/* ── THE SOURCE LINK ──────────────────────────────────────────────────
+   Each card opens the Channel Deep Dive slide that argued for it. Slides
+   are found by their `data-t`, not their index, so reordering the deck
+   cannot silently point a card at the wrong argument — a missing slide
+   leaves the reader where they are rather than scrolling somewhere
+   arbitrary. */
+function goDeep(slide){
+  const el = Array.prototype.slice.call(document.querySelectorAll('#deck .slide'))
+    .filter(function(x){ return x.getAttribute('data-t') === slide; })[0];
+  if (!el) return;
+  switchTab('campaign');
+  setTimeout(function(){ el.scrollIntoView({behavior:'smooth', block:'start'}); }, 30);
+}
+
 /* The feature is whichever idea the campaign is walking into. It follows
    the spine rather than a flag, so it moves on its own. */
 function pickFeature(ideas, items){
@@ -1560,10 +1682,10 @@ function pickFeature(ideas, items){
   return ideas.find(i => i.title === nextTitle) || ideas[0];
 }
 
-function ideaFigure(it, cls){
+function ideaFigure(it, cls, src){
   const p = it.pitch;
-  const src = ytFrame(p.imageId, p.frame);
-  return `<a class="idea ${cls}" href="${yt(p.imageId)}" target="_blank" rel="noopener">
+  const dd = p.deepDive;
+  return `<div class="idea ${cls}">
     <div class="idea-img">
       <img src="${src}" alt="" loading="lazy"
            onload="thumbGuard(this,'${p.imageId}')" onerror="${ytFallback(p.imageId)}">
@@ -1575,8 +1697,11 @@ function ideaFigure(it, cls){
         <div class="idea-r"><span>Why</span>${esc(p.why)}</div>
         <div class="idea-r"><span>Do</span>${esc(p.doThis)}</div>
       </div>
+      ${dd ? `<button class="idea-src" onclick="goDeep('${esc(dd.slide)}')">
+        <b>Deep Dive &rsaquo;</b><span>${esc(dd.figure)}</span>
+      </button>` : ''}
     </div>
-  </a>`;
+  </div>`;
 }
 
 function buildIdeas(d){
@@ -1592,9 +1717,17 @@ function buildIdeas(d){
   const feature = ideas.length ? pickFeature(ideas, items) : null;
   const rest = ideas.filter(i => i !== feature);
 
-  /* The slide sits in the new campaign's world, on a frame from the newest
-     asset rather than on the same picture a card is already showing. */
-  const worldId = heroes.length ? heroes[0].videoId : A.heroImages.station;
+  /* One pool, dealt in order, so no two objects on the page share a frame
+     until the pool runs out. Feature first, then the supports, then the
+     two backgrounds. */
+  const pool = campaignFrames(d);
+  const fallbackId = heroes.length ? heroes[0].videoId : A.heroImages.station;
+  let slot = 0;
+  const nextFrame = () => frameAt(pool, slot++, fallbackId);
+  const featureSrc = feature ? nextFrame() : null;
+  const restSrc = rest.map(() => nextFrame());
+  const worldA = nextFrame();
+  const worldB = nextFrame();
 
   const seen = {};
   const refs = [];
@@ -1609,9 +1742,9 @@ function buildIdeas(d){
     n + ((i.grokResearch && i.grokResearch.awaitingVerification) || 0), 0);
   const q = ro && ro.currentQuestion;
 
-  return `<section class="slide" data-t="Our playbook">
-  <div class="bleed strong"><img src="${ytFrame(worldId, 2)}" alt=""
-    onerror="this.onerror=null;this.src='${ytThumb(worldId)}'"></div>
+  return `<section class="slide era" data-t="Our playbook">
+  <div class="bleed strong"><img src="${worldA}" alt=""
+    onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
   <div class="inner">
     ${campaignIdentity(d, true)}
     <div class="label" style="margin-top:1.1rem">Our playbook</div>
@@ -1620,8 +1753,8 @@ function buildIdeas(d){
       <span style="color:var(--signal)">become?</span></h2>
 
     ${feature ? `<div class="ideagrid stagger">
-      ${ideaFigure(feature,'feature')}
-      <div class="ideacol">${rest.map(i=>ideaFigure(i,'sub')).join('')}</div>
+      ${ideaFigure(feature,'feature',featureSrc)}
+      <div class="ideacol">${rest.map((i,n)=>ideaFigure(i,'sub',restSrc[n])).join('')}</div>
     </div>` : ''}
 
     ${opps.length ? `<div class="opps stagger">
@@ -1629,14 +1762,17 @@ function buildIdeas(d){
       <div class="opps-row">${opps.map(o=>`<div class="opp">
         <div class="opp-n">${esc(o.opportunity.name)}</div>
         <div class="opp-l">${esc(o.opportunity.line)}</div>
+        ${o.opportunity.example ? `<a class="opp-x" href="${o.opportunity.example.url}"
+          target="_blank" rel="noopener">${esc(o.opportunity.example.label)}
+          <i>&middot; ${esc(o.opportunity.example.observed)}</i> &nearr;</a>` : ''}
       </div>`).join('')}</div>
     </div>` : ''}
   </div>
 </section>
 
-<section class="slide" data-t="Inspiration">
-  <div class="bleed strong"><img src="${ytFrame(worldId, 3)}" alt=""
-    onerror="this.onerror=null;this.src='${ytThumb(worldId)}'"></div>
+<section class="slide era" data-t="Inspiration">
+  <div class="bleed strong"><img src="${worldB}" alt=""
+    onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
   <div class="inner">
     <div class="label" style="color:var(--cyan)">Inspiration</div>
     ${refs.length ? `
