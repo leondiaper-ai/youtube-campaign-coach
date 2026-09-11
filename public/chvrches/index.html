@@ -1459,13 +1459,11 @@ function fmtDate(iso){
 /* A divider, so the original analysis is visibly a different thing from
    the live state rather than the second half of it. */
 function buildBaselineMarker(d){
-  return `<section class="slide light" data-t="Original Deep Dive" style="min-height:52vh">
+  return `<section class="slide light" data-t="Channel Deep Dive" style="min-height:52vh">
   <div class="inner">
     <div class="label">The strategy underneath</div>
-    <h2 class="display big" style="max-width:18ch">Original Deep Dive</h2>
-    <p class="sub">Strategy captured ${d.deepDive && d.deepDive.capturedAt ? fmtDate(d.deepDive.capturedAt) : ''}.
-      Nothing below has been rewritten. It is the record of what we saw and what we recommended
-      at that date, and the campaign above is measured against it.</p>
+    <h2 class="display big" style="max-width:18ch">Channel Deep Dive</h2>
+    <p class="sub">Strategy captured ${d.deepDive && d.deepDive.capturedAt ? fmtDate(d.deepDive.capturedAt) : ''}.</p>
   </div>
 </section>`;
 }
