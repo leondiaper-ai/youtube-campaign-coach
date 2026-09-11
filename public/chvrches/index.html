@@ -390,7 +390,13 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    numbers that wrap are three numbers you read twice. Slightly smaller and
    slightly closer, which costs nothing — they are already the loudest
    thing in the column. */
-.covergrid .livestats{gap:1.35rem}
+/* Three columns, not a wrapping row. The campaign-views caption is the
+   longest string in the group and under flex it simply widened its own
+   cell until the third figure fell to a second line — which read as two
+   figures and an afterthought. A grid holds the row whatever the captions
+   say, and lets them wrap inside their own column where they belong. */
+.covergrid .livestats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1.1rem;align-items:start}
 .covergrid .ls .n{font-size:clamp(1.05rem,1.75vw,1.5rem)}
 
 /* The portrait card is now the narrow one in the pair, so its caption needs
