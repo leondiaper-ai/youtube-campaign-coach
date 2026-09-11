@@ -310,18 +310,29 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 /* The hero assets. Deliberately large: these are the campaign's first
    creative, not rows in a table. */
-.heroassets{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-top:1.6rem}
+/* Assets sit in a row and keep their own shape. A Short shown in a 16:9
+   frame is not a cropping problem — YouTube bakes grey pillarbox into the
+   1280x720 thumbnail it serves, so the bars are pixels and no object-fit
+   can remove them. A 9:16 frame with cover scales the source until its
+   height fills, which crops exactly the bars away and leaves the portrait
+   strip full-bleed. It also tells the reader what format this is without
+   a label doing the work. */
+.heroassets{display:flex;flex-wrap:wrap;gap:1.1rem;margin-top:1.4rem;align-items:flex-start}
 .ha{display:block;text-decoration:none;color:inherit;position:relative;border-radius:12px;
-  overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
+  overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s;
+  flex:0 0 auto;width:clamp(150px,15vw,196px)}
+.ha.wide{width:clamp(280px,32vw,420px)}
 .ha:hover{transform:translateY(-3px);border-color:var(--signal)}
-.ha-img{position:relative;aspect-ratio:16/9;background:var(--coal)}
+.ha-img{position:relative;aspect-ratio:9/16;background:var(--coal)}
+.ha.wide .ha-img{aspect-ratio:16/9}
 .ha-img img{width:100%;height:100%;object-fit:cover;display:block}
 .ha-img::after{content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,transparent 45%,rgba(8,7,13,.92) 100%)}
-.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.9rem 1rem;z-index:2}
-.ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1rem,1.7vw,1.4rem);
-  line-height:1.1;letter-spacing:-.01em}
-.ha-m{font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke);margin-top:.4rem}
+.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.7rem .8rem;z-index:2}
+.ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.92rem;
+  line-height:1.12;letter-spacing:-.01em}
+.ha.wide .ha-t{font-size:clamp(1.05rem,1.7vw,1.45rem)}
+.ha-m{font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.35rem}
 .ha-m b{color:var(--signal);font-weight:700}
 
 .supp{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin-top:.9rem}
@@ -333,15 +344,15 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 /* Metrics as typography, not KPI cards. Same .num/.cap scale the rest of
    the deck uses for its statistics. */
-.livestats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.4rem;margin-top:1.9rem;
-  padding-top:1.4rem;border-top:1px solid var(--hair)}
-.ls .n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.5rem,2.8vw,2.3rem);
+.livestats{display:flex;flex-wrap:wrap;gap:2.2rem;margin-top:1.5rem;
+  padding-top:1.1rem;border-top:1px solid var(--hair)}
+.ls .n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.3rem,2.3vw,1.95rem);
   line-height:1;color:var(--signal)}
 .ls .c{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
 
 /* The strategy spine. Four stages from the Deep Dive's own architecture. */
-.spine{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin-top:1.7rem}
-.sp{flex:1 1 150px;padding:.85rem 1rem;border-left:2px solid var(--hair);min-width:140px}
+.spine{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin-top:1.3rem}
+.sp{flex:1 1 140px;padding:.7rem .9rem;border-left:2px solid var(--hair);min-width:130px}
 .sp.on{border-left-color:var(--signal)}
 .sp.next{border-left-color:var(--cyan)}
 .sp-l{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;line-height:1.15}
@@ -350,7 +361,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .sp.on .sp-s{color:var(--signal)}
 .sp.next .sp-s{color:var(--cyan)}
 
-.readline{margin-top:1.9rem;padding-left:1rem;border-left:2px solid var(--signal)}
+.readline{margin-top:1.4rem;padding-left:1rem;border-left:2px solid var(--signal)}
 .readline .rh{font-family:'Space Grotesk',sans-serif;font-weight:700;
   font-size:clamp(1.1rem,2.2vw,1.75rem);line-height:1.12;letter-spacing:-.01em}
 .readline .rl{font-size:.82rem;color:var(--smoke);margin-top:.5rem;max-width:52ch;line-height:1.6}
@@ -362,8 +373,12 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .ideasq{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.1rem,2.2vw,1.6rem);
   line-height:1.2;color:var(--cyan)}
 
+/* The cover carries more objects than any other slide, so it opens
+   tighter and is allowed to size to its content rather than to 100vh. */
+.slide.cover{padding:4.6rem 0 2.6rem;min-height:auto}
+
 @media(max-width:720px){
-  .heroassets{grid-template-columns:1fr}
+  .ha{width:calc(50% - .6rem)}
   .spine{flex-direction:column}
   .sp{border-left-width:2px}
 }
@@ -1118,7 +1133,10 @@ const compact = n => {
 };
 
 function heroAsset(a){
-  return `<a class="ha" href="${a.url}" target="_blank" rel="noopener">
+  /* Anything that is not a Short gets the landscape frame, so the first
+     official video will physically dominate the row the day it lands. */
+  const wide = a.kind !== 'short' ? ' wide' : '';
+  return `<a class="ha${wide}" href="${a.url}" target="_blank" rel="noopener">
     <div class="ha-img">
       <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
@@ -1156,7 +1174,7 @@ function buildLiveCover(d){
      cache rather than leaving a black rectangle. */
   const bgId = heroes.length ? heroes[0].videoId : A.heroImages.open;
 
-  return `<section class="slide" data-t="Campaign live">
+  return `<section class="slide cover" data-t="Campaign live">
   ${bleedImg(bgId,'strong')}
   <div class="inner">
     <div class="livehead">

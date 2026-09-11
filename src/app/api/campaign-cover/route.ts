@@ -106,6 +106,13 @@ function rankAssets(assets: CoverAsset[]): CoverAsset[] {
   return [...assets].sort((a, b) => {
     const w = (FORMAT_WEIGHT[b.kind] ?? 0) - (FORMAT_WEIGHT[a.kind] ?? 0);
     if (w !== 0) return w;
+    /* Same format: the one people actually watched leads. Two Shorts a day
+       apart are the same moment, and ordering them by recency put a 2,721-
+       view teaser ahead of the 25,832-view opener — technically newest,
+       editorially wrong. Views are a poor proxy for importance across
+       formats, which is why they only break a tie within one. */
+    const v = (b.views ?? 0) - (a.views ?? 0);
+    if (v !== 0) return v;
     return b.publishedAt.localeCompare(a.publishedAt);
   });
 }
