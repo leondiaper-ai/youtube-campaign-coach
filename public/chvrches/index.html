@@ -321,18 +321,32 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    we can start." is a trailer that happens to be 41 seconds long, and
    calling it a Short on a page a label reads would be describing the
    file rather than the campaign. */
+/* One height for the row, and each card takes the width its own shape
+   asks for. A landscape card and a portrait card that share a baseline
+   and a top edge read as a considered pair; two cards of different
+   heights read as a layout that got away from someone. */
 .heroassets{display:flex;flex-wrap:wrap;gap:1.2rem;margin-top:1.6rem;align-items:flex-start}
 .ha{display:block;text-decoration:none;color:inherit;position:relative;border-radius:12px;
   overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s;
-  flex:0 0 auto;width:clamp(168px,17.5vw,238px)}
-.ha.wide{width:clamp(300px,36vw,476px)}
+  flex:0 0 auto}
 .ha:hover{transform:translateY(-3px);border-color:var(--signal)}
-.ha-img{position:relative;aspect-ratio:9/16;background:var(--coal)}
+.ha-img{position:relative;overflow:hidden;height:clamp(168px,23vw,244px);
+  aspect-ratio:9/16;background:var(--coal)}
 .ha.wide .ha-img{aspect-ratio:16/9}
 .ha-img img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* A vertical source in a landscape frame.
+   YouTube serves a Short's thumbnail as 1280x720 with grey pillarbox baked
+   into the pixels, so the bars are image content — changing the frame's
+   aspect ratio only changes which part of the bars you see. The picture
+   itself is a 405px strip down the middle, 32% of the width.
+   Scaling 3.16x makes that strip fill the frame, which is a real landscape
+   still taken out of the trailer rather than a letterbox. Anything above
+   3.16 only crops tighter, so the fallback thumbnail sizes are safe too. */
+.ha.wide.src-portrait .ha-img img{transform:scale(3.16);transform-origin:center}
 .ha-img::after{content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,transparent 45%,rgba(8,7,13,.92) 100%)}
-.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.8rem .9rem;z-index:2}
+.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.75rem .85rem;z-index:2}
 .ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;
   line-height:1.12;letter-spacing:-.01em}
 .ha.wide .ha-t{font-size:clamp(1.05rem,1.7vw,1.45rem)}
@@ -1232,7 +1246,10 @@ const compact = n => {
    into the picture — but it is still a trailer, and the page says so. */
 function heroAsset(a){
   const wide = (a.aspect ? a.aspect === 'landscape' : a.kind !== 'short') ? ' wide' : '';
-  return `<a class="ha${wide}" href="${a.url}" target="_blank" rel="noopener">
+  /* The frame and the pixels can disagree — a trailer shot vertically and
+     shown landscape. When they do, the crop rule has to know. */
+  const src  = a.sourceAspect === 'portrait' ? ' src-portrait' : '';
+  return `<a class="ha${wide}${src}" href="${a.url}" target="_blank" rel="noopener">
     <div class="ha-img">
       <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">

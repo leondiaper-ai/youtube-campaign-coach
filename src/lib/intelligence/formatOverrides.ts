@@ -21,6 +21,17 @@
 export interface FormatOverride {
   kind: string;
   label: string;
+  /**
+   * How the deck should FRAME it, when that differs from how it was shot.
+   *
+   * A vertical trailer shown in a vertical frame reads as a Short whatever
+   * the caption says, because shape communicates format faster than type
+   * does. Setting this to 'landscape' asks the deck to take a landscape
+   * crop out of the vertical source rather than letterbox it — see the
+   * `src-portrait` rule in the deck's CSS for why that is not the same as
+   * just changing the aspect ratio.
+   */
+  frame?: 'landscape' | 'portrait';
   statedBy: string;
   statedAt: string;
   note: string;
@@ -31,9 +42,11 @@ export const HUMAN_FORMAT_OVERRIDES: Record<string, FormatOverride> = {
   KCm7pn_lza8: {
     kind: 'trailer',
     label: 'TRAILER',
+    frame: 'landscape',
     statedBy: 'Leon',
     statedAt: '2026-09-11',
-    note: 'Campaign trailer, not a Short. Vertical and under 62s, so the API cannot tell the difference.',
+    note: 'Campaign trailer, not a Short. Vertical and under 62s, so the API cannot tell the difference — '
+      + 'and shown in a vertical frame it reads as a Short however it is labelled.',
   },
 };
 

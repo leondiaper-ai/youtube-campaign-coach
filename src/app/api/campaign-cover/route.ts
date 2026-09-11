@@ -71,6 +71,14 @@ interface CoverAsset {
    * back into the pixels.
    */
   aspect: 'portrait' | 'landscape';
+  /**
+   * The shape of the PIXELS, as opposed to the shape of the frame. When a
+   * portrait source is framed landscape the deck cannot simply letterbox it:
+   * YouTube bakes grey pillarbox into the 1280x720 thumbnail, so those bars
+   * are image content and no aspect-ratio change removes them. The deck
+   * needs to know to crop into the strip instead.
+   */
+  sourceAspect: 'portrait' | 'landscape';
   /** Set when a person overrode the observed format. Provenance, not decoration. */
   labelledBy: string | null;
   views: number | null;
@@ -193,7 +201,8 @@ export async function GET(req: NextRequest) {
         dateLabel: dateLabel(v.publishedAt),
         kind: f.kind,
         formatLabel: f.label,
-        aspect: observed.kind === 'short' ? 'portrait' : 'landscape',
+        aspect: human?.frame ?? (observed.kind === 'short' ? 'portrait' : 'landscape'),
+        sourceAspect: observed.kind === 'short' ? 'portrait' : 'landscape',
         labelledBy: human ? human.statedBy : null,
         views: v.viewCount ?? null,
         thumb: `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`,
