@@ -314,3 +314,33 @@ export function verificationOf(c: CaseStudy): ResearchVerification {
 export function needsVerificationOf(c: CaseStudy): string[] {
   return (c as Partial<SeededResearch>).needsVerification ?? [];
 }
+
+/* ══ The human gate ══════════════════════════════════════════════════ */
+
+export type PromotionStatus = 'PROMOTED' | 'REJECTED' | 'AWAITING';
+
+/** PROMOTED / REJECTED as a person recorded it; AWAITING when nobody has. */
+export function promotionOf(c: CaseStudy): PromotionStatus {
+  return c.promotion?.status ?? 'AWAITING';
+}
+
+/**
+ * Client-facing = the board gate AND a person's promotion. The board gate
+ * is what a model can satisfy on its own (find, verify, score); the
+ * promotion is the one thing it cannot. An example that clears the gate but
+ * has not been promoted is a CANDIDATE FOR REVIEW — worth showing to Leon,
+ * never to a client.
+ */
+export function clientFacing(c: CaseStudy): { eligible: boolean; blockers: string[] } {
+  const board = boardStatus(c);
+  const blockers = [...board.blockers];
+  const p = promotionOf(c);
+  if (p === 'REJECTED') blockers.push(`Rejected by ${c.promotion?.by ?? 'a person'} on review.`);
+  else if (p === 'AWAITING') blockers.push('Not yet promoted by a person. Verified research is reviewed before it is shown.');
+  return { eligible: blockers.length === 0, blockers };
+}
+
+/** Cleared the board gate, awaiting a human decision. The review queue. */
+export function awaitingPromotion(c: CaseStudy): boolean {
+  return boardStatus(c).eligible && promotionOf(c) === 'AWAITING';
+}

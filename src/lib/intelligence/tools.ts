@@ -15,9 +15,12 @@
  *   supersede_research_example   replace a weaker proof of the same mechanic
  *   add_watchlist_item           park something to look at later
  *   propose_campaign_application connect an example to one of our artists
+ *   record_research_run          the log of a run, including a run that did nothing
  *
  * There is no tool here that edits a Deep Dive, writes human context,
- * promotes an example to the board, or mutates a campaign. Those are human
+ * PROMOTES an example to a client-facing page, or mutates a campaign.
+ * Promotion lives on /api/research-review behind a separate token the
+ * model never holds. Those are human
  * acts, and the way to keep them human is for the capability not to exist
  * on this surface rather than for the prompt to ask nicely.
  *
@@ -45,6 +48,7 @@ import { listCustomArtists } from '../artistStore';
 import { checkAliases } from './identity';
 import {
   readLibrary, boardStatus, verificationOf, needsVerificationOf, seedById, isSeed,
+  promotionOf, clientFacing,
   type ResearchVerification,
 } from './research';
 import type { CaseStudy } from '../knowledge/types';
@@ -59,6 +63,9 @@ import { getCampaignProgress } from './campaignProgress';
 import { listProgress, setProgress, PROGRESS_STATES, ProvenanceError } from './progressStore';
 import { readLiveSnapByHandle } from '../kvCache';
 import { buildWorld } from './worldBuilder';
+import { buildRollout } from './rollout';
+import { listResearchRuns, lastResearchRun, validateRun, saveResearchRun } from './researchRuns';
+import { lookupExternalChannel, getExternalChannelUploads, newMeter, QuotaExceeded } from './externalLookup';
 import {
   NEED_TAGS, TAG_ALIASES, partitionTags,
   type NeedTag,
@@ -151,6 +158,30 @@ export const INTEL_SPECS = [
     description:
       'Everything needed to build a one-page inspiration world for an artist, in one call: thesis, strongest evidence, strengths, gaps, constraints, known plans, open questions, a 3-6 example shortlist that clears the team-facing bar, and application prompts. Read `warnings` first — it says when the payload is too thin to build from.',
     args: { artist: 'string — roster slug or artist name', maxAgeDays: 'number, optional', limit: 'number, optional' },
+  },
+  {
+    name: 'get_rollout',
+    description:
+      'THE CAMPAIGN\'S CURRENT QUESTION. The rollout for one artist: every plan item with its status (EXPLORING/RECOMMENDED/PLANNED/LIVE/COMPLETE — the last three only from a human record), its need tags, the research question it puts to you, the examples already promoted against it, how many verified examples are awaiting a person\'s review, proposed applications, and lastResearchedAt. `currentQuestion` is the one to research: it belongs to the first item not yet LIVE or COMPLETE and moves by itself when a person records progress. `lastRun` is the previous research run — compare `lastRun.stateSeen` with `stateNow` and stop with a NO_CHANGE run if nothing has moved and the last run is recent. Tag any candidate with the item\'s needTags and it attaches to that item automatically.',
+    args: { artist: 'string — roster slug or artist name' },
+  },
+  {
+    name: 'list_research_runs',
+    description:
+      'Previous research runs for an artist, newest first: what was researched, what was considered and rejected and why, what evidence was added, which gaps remained. Read before digging so a run does not repeat the last one\'s rejections.',
+    args: { artist: 'string — roster slug or artist name', limit: 'number, optional — default 10' },
+  },
+  {
+    name: 'lookup_external_channel',
+    description:
+      'Find a channel OUTSIDE our roster by name, using the YouTube Data API. Returns candidates with subscriber counts, uploadsPlaylistId, and the video that surfaced each one — the top result is often a label, topic or fan channel, so confirm you have the artist channel before treating anything on it as evidence. Costs about 100 YouTube quota units per query, drawn from a shared daily budget — look up channels you intend to verify, not channels you are curious about.',
+    args: { query: 'string — artist or channel name' },
+  },
+  {
+    name: 'get_external_channel_uploads',
+    description:
+      'Recent uploads for an external channel, from the YouTube Data API: publish dates, durations, current lifetime views, and the liveStreamingDetails fields (wasLive, scheduledStart, actualStart) that are the only public evidence a video was a Premiere or a stream. This — not a screenshot of a channel page — is what a VERIFIED claim about a publishing sequence should rest on. Needs the uploadsPlaylistId from lookup_external_channel. About 4 quota units per 100 uploads.',
+    args: { uploadsPlaylistId: 'string', limit: 'number, optional — default 100, max 200' },
   },
 
   /* ── WRITE ─────────────────────────────────────────────────────────── */
@@ -253,6 +284,23 @@ export const INTEL_SPECS = [
       'Proposes that a specific research example applies to one of our artists, with the reasoning. This is a PROPOSAL: it is recorded against the example and surfaced for a human, and it does not change any campaign. Conservative by design — say what would have to be true for it to work, not that it will.',
     args: { id: 'string', artist: 'string', application: 'string', whatWouldHaveToBeTrue: 'string', producedBy: 'string' },
   },
+  {
+    name: 'record_research_run',
+    description:
+      'Records that a research run happened — ALWAYS the last call of a run, including a run that decided to do nothing. outcome NO_CHANGE with a reason (what was compared, why it was not worth digging) is a good and common record. outcome RESEARCHED must list every example considered, including the ones REJECTED and why — the rejections are what stop the next run repeating them. evidenceAdded lists the library ids you saved, verified or scored. remainingGaps says which needs still have no proof. Changes nothing else: no example, no progress, no plan.',
+    args: {
+      artist: 'string',
+      outcome: 'NO_CHANGE|RESEARCHED',
+      reason: 'string — for NO_CHANGE what was compared and why nothing was done; for RESEARCHED one line on what was done',
+      question: 'string — the current question when this run happened',
+      rolloutItemId: 'string, optional — the rollout item id from get_rollout',
+      stateSeen: 'object, optional — {campaignState, currentQuestion, spine:[]} as get_rollout returned them',
+      considered: 'object[], optional — [{subject, decision: SAVED|VERIFIED|WATCHLISTED|REJECTED|DUPLICATE, why, exampleId, sourceUrl}]',
+      evidenceAdded: 'string[], optional — library ids touched',
+      remainingGaps: 'string[], optional — need tags or plain gaps still without proof',
+      producedBy: 'string',
+    },
+  },
 ] as const;
 
 export type IntelToolName = (typeof INTEL_SPECS)[number]['name'];
@@ -303,6 +351,8 @@ function publicView(c: CaseStudy) {
     scores: s, scoredBy: c.scoredBy ?? null,
     boardEligible: board.eligible, boardBlockers: board.blockers,
     verification: verificationOf(c), needsVerification: needsVerificationOf(c),
+    promotion: promotionOf(c), clientFacing: clientFacing(c).eligible,
+    proposals: c.proposals ?? [],
     seeded: isSeed(c.id),
     country: c.country ?? null, observedAt: c.observedAt ?? null,
     discoveredAt: c.discoveredAt, sourceUrls: c.sourceUrls ?? [],
@@ -441,6 +491,83 @@ export async function callIntelTool(
         maxAgeDays: args.maxAgeDays == null ? null : Number(args.maxAgeDays),
         limit: args.limit == null ? undefined : Number(args.limit),
       });
+
+    case 'get_rollout': {
+      const who = await resolveArtist(String(args.artist ?? ''));
+      const [progress, library, runs] = await Promise.all([
+        getCampaignProgress(who.slug),
+        readLibrary().catch(() => []),
+        listResearchRuns(who.slug, 5),
+      ]);
+      const rollout = buildRollout(progress, library, runs);
+      const live = progress.recommendations.some(
+        r => r.statusProvenance === 'HUMAN' && ['IMPLEMENTED', 'OBSERVING', 'RESULT', 'LEARNED'].includes(r.status),
+      );
+      const stateNow = {
+        campaignState: live ? 'CAMPAIGN_LIVE' : 'NOT_CONFIRMED_LIVE',
+        currentQuestion: rollout.currentQuestion?.question ?? null,
+        spine: rollout.items.filter(i => i.spine).map(i => `${i.title}:${i.spineStatus}`),
+      };
+      const lastRun = runs[0] ?? null;
+      const daysSinceLastRun = lastRun
+        ? Math.round((Date.now() - new Date(lastRun.ranAt).getTime()) / 86_400_000) : null;
+      const moved = lastRun
+        ? JSON.stringify(lastRun.stateSeen) !== JSON.stringify(stateNow) : true;
+      return {
+        artistSlug: who.slug, artistName: who.name,
+        currentQuestion: rollout.currentQuestion,
+        stateNow,
+        lastRun,
+        daysSinceLastRun,
+        /* A plain flag the routine can act on without re-deriving it. */
+        stateChangedSinceLastRun: moved,
+        items: rollout.items.map(it => ({
+          id: it.id, ordinal: it.ordinal, title: it.title, status: it.status, commitment: it.commitment,
+          origin: it.origin, spine: it.spine, spineStatus: it.spineStatus, needTags: it.needTags,
+          recommendationId: it.recommendationId,
+          /* The human-authored recommendation. Read-only on this surface. */
+          recommendation: it.recommendation,
+          campaignEvidence: it.campaignEvidence,
+          research: it.grokResearch,
+        })),
+        limitations: rollout.limitations,
+        note: 'Examples listed under research.examples are promoted and client-facing. research.awaitingPromotion counts '
+          + 'verified examples a person has not reviewed yet — do not re-research those needs, and do not try to promote '
+          + 'them; there is no tool for that here. Tag candidates with an item\'s needTags to attach them to it.',
+      };
+    }
+
+    case 'list_research_runs': {
+      const who = await resolveArtist(String(args.artist ?? ''));
+      const runs = await listResearchRuns(who.slug, args.limit == null ? 10 : Number(args.limit));
+      return { artistSlug: who.slug, n: runs.length, runs, note: runs.length ? null : 'No research run has been recorded for this artist.' };
+    }
+
+    case 'lookup_external_channel': {
+      const q = String(args.query ?? '').trim();
+      if (!q) return { error: 'query is required' };
+      const meter = newMeter();
+      try {
+        const out = await lookupExternalChannel(q, meter);
+        return { ...out, quotaUnits: meter.spent };
+      } catch (e) {
+        if (e instanceof QuotaExceeded) return { error: `YouTube quota exhausted for today: ${e.message}. Stop looking up channels; record the run and try again tomorrow.` };
+        throw e;
+      }
+    }
+
+    case 'get_external_channel_uploads': {
+      const pl = String(args.uploadsPlaylistId ?? '').trim();
+      if (!pl) return { error: 'uploadsPlaylistId is required — take it from lookup_external_channel' };
+      const meter = newMeter();
+      try {
+        const out = await getExternalChannelUploads(pl, meter, args.limit == null ? 100 : Number(args.limit));
+        return { ...out, quotaUnits: meter.spent };
+      } catch (e) {
+        if (e instanceof QuotaExceeded) return { error: `YouTube quota exhausted for today: ${e.message}. Record the run and try again tomorrow.` };
+        throw e;
+      }
+    }
 
     /* ── WRITE ───────────────────────────────────────────────────────── */
 
@@ -648,6 +775,8 @@ export async function callIntelTool(
       return {
         stored: true, id: c.id, verification: v, status: c.status,
         boardEligible: board.eligible, boardBlockers: board.blockers,
+        clientFacing: false,
+        promotion: 'AWAITING — a person reviews verified, scored examples before they appear on any client-facing page. There is no tool here to promote it.',
         replacedSeed: wasSeed,
         note: wasSeed
           ? 'This overwrites the seeded record. The hard-coded version is no longer used for this id.'
@@ -698,6 +827,15 @@ export async function callIntelTool(
         claim: `PROPOSED APPLICATION to ${who.name}: ${String(args.application ?? '')} — conditional on: ${String(args.whatWouldHaveToBeTrue)}`,
         sourceRef: `proposal:${String(args.producedBy ?? 'unknown')}`,
       }];
+      /* Structured as well, so the rollout can show it beside the human
+         recommendation without parsing prose back out of an evidence line. */
+      c.proposals = [...(c.proposals ?? []), {
+        artistSlug: who.slug,
+        application: String(args.application ?? ''),
+        whatWouldHaveToBeTrue: String(args.whatWouldHaveToBeTrue),
+        proposedBy: String(args.producedBy ?? 'unknown'),
+        at: now,
+      }];
       c.lastReviewedAt = now;
       await saveCaseStudy(c);
       return {
@@ -707,9 +845,36 @@ export async function callIntelTool(
       };
     }
 
+    case 'record_research_run': {
+      const who = await resolveArtist(String(args.artist ?? ''));
+      const v = validateRun({
+        artistSlug: who.slug,
+        outcome: args.outcome, reason: args.reason, question: args.question,
+        rolloutItemId: args.rolloutItemId, stateSeen: args.stateSeen, considered: args.considered,
+        evidenceAdded: args.evidenceAdded, remainingGaps: args.remainingGaps, producedBy: args.producedBy,
+      });
+      if (!v.ok) return { error: v.error };
+      const { stored } = await saveResearchRun(v.run);
+      return {
+        stored, id: v.run.id, ranAt: v.run.ranAt, outcome: v.run.outcome,
+        note: stored ? 'Run recorded. Nothing else changed.' : 'No store configured — run not persisted.',
+      };
+    }
+
     default:
       return { error: `unknown tool ${name}`, available: INTEL_SPECS.map(s => s.name) };
   }
 }
 
 export const INTEL_TOOL_NAMES = new Set<string>(INTEL_SPECS.map(s => s.name));
+
+/**
+ * Every tool that mutates anything. The HTTP surface refuses these over GET
+ * and the boundary suite checks the list against the dispatcher, so a write
+ * tool cannot be added without being named here.
+ */
+export const INTEL_WRITE_TOOLS = new Set<string>([
+  'add_research_candidate', 'add_research_observation', 'update_research_example',
+  'add_watchlist_item', 'record_recommendation_progress', 'verify_research_example',
+  'supersede_research_example', 'propose_campaign_application', 'record_research_run',
+]);

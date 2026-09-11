@@ -14,17 +14,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { callIntelTool, INTEL_SPECS, INTEL_TOOL_NAMES } from '@/lib/intelligence/tools';
+import { callIntelTool, INTEL_SPECS, INTEL_TOOL_NAMES, INTEL_WRITE_TOOLS } from '@/lib/intelligence/tools';
 import { RESEARCH_WORKFLOW } from '@/lib/intelligence/researchWorkflow';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const WRITE_TOOLS = new Set([
-  'add_research_candidate', 'add_research_observation',
-  'update_research_example', 'add_watchlist_item', 'propose_campaign_application',
-  'verify_research_example', 'supersede_research_example',
-]);
+/* One list, owned by the registry, so a new write tool cannot be added
+   without also being refused over GET. */
+const WRITE_TOOLS = INTEL_WRITE_TOOLS;
 
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams;

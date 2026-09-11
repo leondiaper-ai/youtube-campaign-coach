@@ -175,6 +175,32 @@ export interface CaseStudy {
   } | null;
   /** Who scored it. A model may propose scores; only a human ratifies them. */
   scoredBy?: string | null;
+
+  /**
+   * THE HUMAN GATE. A model may find, verify and score an example, and the
+   * board gate (scores + VERIFIED + source) says it is READY for a person to
+   * look at. It reaches a client-facing surface only once a named person has
+   * PROMOTED it here. There is no tool on the model surface that writes this.
+   */
+  promotion?: {
+    status: 'PROMOTED' | 'REJECTED';
+    by: string;
+    at: string;
+    note: string | null;
+  } | null;
+
+  /**
+   * Proposed applications to one of our artists, as a model recorded them.
+   * Structured so a rollout can show them next to — never instead of — the
+   * human-authored recommendation. A proposal changes no campaign.
+   */
+  proposals?: {
+    artistSlug: string;
+    application: string;
+    whatWouldHaveToBeTrue: string;
+    proposedBy: string;
+    at: string;
+  }[];
 }
 
 /* ══ Principles ══════════════════════════════════════════════════════ */

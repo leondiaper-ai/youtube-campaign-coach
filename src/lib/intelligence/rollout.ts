@@ -44,9 +44,10 @@
 
 import type { CaseStudy } from '../knowledge/types';
 import { canonicaliseTag, type NeedTag } from './types';
-import { boardStatus, verificationOf, type ResearchVerification } from './research';
+import { boardStatus, clientFacing, promotionOf, verificationOf, type ResearchVerification } from './research';
 import { mintRecommendationId } from './recommendationId';
 import type { CampaignProgressReport, RecommendationProgressView } from './campaignProgress';
+import { lastResearchedByItem, type ResearchRun } from './researchRuns';
 
 /* ══ The model ═══════════════════════════════════════════════════════ */
 
@@ -67,6 +68,8 @@ export type RolloutStatus = 'EXPLORING' | 'RECOMMENDED' | 'PLANNED' | 'LIVE' | '
 export type Commitment = 'POSSIBILITY' | 'COMMITTED';
 
 export interface RolloutExample {
+  /** Library id, so a reader can find the record behind the card. */
+  id: string;
   artist: string;
   observedBehaviour: string;
   source: string | null;
@@ -74,15 +77,39 @@ export interface RolloutExample {
   date: string | null;
   whyItMattersHere: string;
   verification: ResearchVerification;
+  /** Who promoted it and when. Always a person. */
+  promotedBy: string;
+  promotedAt: string;
+}
+
+/** A model's proposed application of an example to THIS campaign. */
+export interface RolloutProposal {
+  exampleId: string;
+  artist: string;
+  application: string;
+  whatWouldHaveToBeTrue: string;
+  proposedBy: string;
+  at: string;
+  /** Whether the example it rests on has itself been promoted. */
+  examplePromoted: boolean;
 }
 
 export interface RolloutResearch {
   /** The question this item puts to Grok. Specific to the item, not the artist. */
   question: string;
-  /** Verified examples only. Empty is a normal and honest answer. */
+  /** Verified AND promoted examples only. Empty is a normal and honest answer. */
   examples: RolloutExample[];
-  /** Held but not yet checked. Counted so that empty never reads as "none exist". */
+  /** Held but not yet verified / scored. Counted so that empty never reads as "none exist". */
   awaitingVerification: number;
+  /** Verified and scored, waiting for a person to promote or reject. The review queue. */
+  awaitingPromotion: number;
+  /**
+   * Proposed applications from Grok. Shown NEXT TO the human-authored
+   * recommendation, never in its place, and labelled as proposals.
+   */
+  proposals: RolloutProposal[];
+  /** When a research run last addressed this item's question. Null = never. */
+  lastResearchedAt: string | null;
   /** Present when there is something to say about why nothing is shown. */
   note: string | null;
 }
@@ -361,7 +388,9 @@ function tagSet(tags: (string | null | undefined)[]): Set<string> {
  * because "no verified examples yet" and "we have not looked" are different
  * answers and the tab has to be able to tell them apart.
  */
-function attachResearch(item: PlanItem, library: CaseStudy[]): RolloutResearch {
+function attachResearch(
+  item: PlanItem, library: CaseStudy[], artistSlug: string, itemId: string, researched: Map<string, string>,
+): RolloutResearch {
   const want = tagSet(item.needTags);
   const matched = library.filter(c => {
     const has = tagSet(c.usefulFor ?? []);
@@ -370,12 +399,30 @@ function attachResearch(item: PlanItem, library: CaseStudy[]): RolloutResearch {
   });
 
   const examples: RolloutExample[] = [];
+  const proposals: RolloutProposal[] = [];
   let awaiting = 0;
+  let awaitingPromotion = 0;
 
   for (const c of matched) {
+    /* Proposals travel with the example whatever its state, labelled with
+       whether the example itself has been promoted. They are proposals to
+       Leon, not to the client. */
+    for (const p of c.proposals ?? []) {
+      if (p.artistSlug !== artistSlug) continue;
+      proposals.push({
+        exampleId: c.id, artist: c.subject, application: p.application,
+        whatWouldHaveToBeTrue: p.whatWouldHaveToBeTrue, proposedBy: p.proposedBy, at: p.at,
+        examplePromoted: promotionOf(c) === 'PROMOTED',
+      });
+    }
+
+    /* Two gates, counted separately, because "nobody has checked this" and
+       "Leon has not looked at this yet" call for different next actions. */
     if (!boardStatus(c).eligible) { awaiting++; continue; }
+    if (!clientFacing(c).eligible) { if (promotionOf(c) === 'AWAITING') awaitingPromotion++; continue; }
     const overlap = Array.from(tagSet(c.usefulFor ?? [])).filter(t => want.has(t));
     examples.push({
+      id: c.id,
       artist: c.subject,
       observedBehaviour: c.behaviourObserved,
       source: (c.sourceUrls ?? [])[0] ?? null,
@@ -385,19 +432,32 @@ function attachResearch(item: PlanItem, library: CaseStudy[]): RolloutResearch {
          which of THIS item's needs the example speaks to. */
       whyItMattersHere: `${c.possibleLearning} Relevant here because it addresses ${overlap.join(', ')}.`,
       verification: verificationOf(c),
+      promotedBy: c.promotion!.by,
+      promotedAt: c.promotion!.at,
     });
   }
 
+  const lastResearchedAt = researched.get(itemId) ?? researched.get(`q:${item.question}`) ?? null;
+
   let note: string | null = null;
   if (!examples.length) {
-    note = awaiting
-      ? `${awaiting} candidate${awaiting === 1 ? '' : 's'} in the library address this, and none has been `
-        + 'verified against the channel yet. An unverified claim about another artist is not evidence.'
-      : 'Nothing in the research library addresses this yet. That is an absence of research, not a '
+    if (awaitingPromotion) {
+      note = `${awaitingPromotion} verified example${awaitingPromotion === 1 ? '' : 's'} awaiting review. `
+        + 'Nothing is shown here until a person has promoted it.';
+    } else if (awaiting) {
+      note = `${awaiting} candidate${awaiting === 1 ? '' : 's'} in the library address this, and none has been `
+        + 'verified against the channel yet. An unverified claim about another artist is not evidence.';
+    } else {
+      note = 'Nothing in the research library addresses this yet. That is an absence of research, not a '
         + 'finding that nobody does it.';
+    }
+    if (lastResearchedAt) note += ` Last researched ${lastResearchedAt.slice(0, 10)}.`;
   }
 
-  return { question: item.question, examples, awaitingVerification: awaiting, note };
+  return {
+    question: item.question, examples, awaitingVerification: awaiting, awaitingPromotion,
+    proposals, lastResearchedAt, note,
+  };
 }
 
 /* ══ Build ═══════════════════════════════════════════════════════════ */
@@ -405,9 +465,11 @@ function attachResearch(item: PlanItem, library: CaseStudy[]): RolloutResearch {
 export function buildRollout(
   report: CampaignProgressReport,
   library: CaseStudy[],
+  runs: ResearchRun[] = [],
 ): Rollout {
   const plan = ROLLOUT_PLANS[report.artistSlug] ?? [];
   const limitations: string[] = [];
+  const researched = lastResearchedByItem(runs);
 
   if (!plan.length) {
     return {
@@ -479,7 +541,7 @@ export function buildRollout(
       needTags: p.needTags,
       recommendation: p.recommendation,
       campaignEvidence: evidence,
-      grokResearch: attachResearch(p, library),
+      grokResearch: attachResearch(p, library, report.artistSlug, `ro_${report.artistSlug}_${p.key}`, researched),
       lastUpdated: view?.implementation?.statedAt ?? report.deepDive?.capturedAt ?? '',
     };
   });
@@ -513,6 +575,11 @@ export function buildRollout(
   limitations.push(
     'This rollout is a plan, not a schedule. Only items marked as stated by a person have been '
     + 'confirmed by anyone; everything else is a recommendation or a possibility.',
+  );
+  limitations.push(
+    'External examples shown as evidence have been verified and then promoted by a named person. '
+    + 'Model-verified research that nobody has reviewed is counted, not shown. Proposed applications '
+    + 'are a model\'s suggestions and change nothing until a person acts on them.',
   );
   if (items.some(it => it.commitment === 'POSSIBILITY')) {
     limitations.push(

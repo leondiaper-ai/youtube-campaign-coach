@@ -29,6 +29,7 @@ import { getCampaignProgress } from '@/lib/intelligence/campaignProgress';
 import { buildRollout } from '@/lib/intelligence/rollout';
 import { buildCampaignTimeline } from '@/lib/intelligence/campaignTimeline';
 import { readLibrary } from '@/lib/intelligence/research';
+import { listResearchRuns } from '@/lib/intelligence/researchRuns';
 import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
@@ -243,7 +244,9 @@ export async function GET(req: NextRequest) {
        A stage is IN MOTION only where a human said so, unchanged — the
        rule now lives in one place instead of two. */
     const library = await readLibrary().catch(() => []);
-    const rollout = buildRollout(progress, library);
+    /* The run log gives each item its lastResearchedAt; nothing else. */
+    const runs = await listResearchRuns(who.slug, 10).catch(() => []);
+    const rollout = buildRollout(progress, library, runs);
 
     if (!rollout.items.length) {
       coverage.push('No rollout plan exists for this artist, so the strategy spine is unavailable rather than empty.');

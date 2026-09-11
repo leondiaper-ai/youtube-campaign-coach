@@ -20,6 +20,8 @@ import { listRecommendations, mintRecommendationId } from '../recommendationId';
 import { canonicaliseTag } from '../types';
 import type { CampaignProgressReport, RecommendationProgressView } from '../campaignProgress';
 import type { CaseStudy } from '../../knowledge/types';
+import { validateRun, type ResearchRun } from '../researchRuns';
+import { INTEL_SPECS, INTEL_WRITE_TOOLS } from '../tools';
 
 export interface CheckResult { passed: number; failed: number; failures: string[] }
 
@@ -204,23 +206,146 @@ export function runRolloutChecks(): CheckResult {
     }
   });
 
-  test('a verified example with a source appears, and carries its provenance', () => {
-    const verified: CaseStudy = {
-      ...(seeds.find(s => s.subject === 'Wet Leg') as CaseStudy),
-      verification: 'VERIFIED',
-      sourceUrls: ['https://www.youtube.com/watch?v=example'],
-      evidence: [{ sourceType: 'PUBLIC_YOUTUBE', claim: 'x', sourceRef: 'y' }],
-      observedAt: '2025-06',
-    } as CaseStudy;
-    const ro = buildRollout(fakeReport(), [verified]);
+  /* A record a model could have produced on its own: verified, sourced,
+     scored — everything except a person's decision. */
+  const verifiedWetLeg = (): CaseStudy => ({
+    ...(seeds.find(s => s.subject === 'Wet Leg') as CaseStudy),
+    verification: 'VERIFIED',
+    verifiedBy: 'grok',
+    sourceUrls: ['https://www.youtube.com/watch?v=example'],
+    evidence: [{ sourceType: 'PUBLIC_YOUTUBE', claim: 'x', sourceRef: 'y' }],
+    observedAt: '2025-06',
+    scores: { mechanicValue: 3, culturalRelevance: 3, visualBoardValue: 2 },
+    scoredBy: 'grok (proposed)',
+  } as CaseStudy);
+
+  /* ── The human gate ────────────────────────────────────────────────── */
+
+  test('a model-verified, model-scored example is NOT client-facing until a person promotes it', () => {
+    const v = verifiedWetLeg();
+    assert.ok(boardStatus(v).eligible, 'the fixture should clear the board gate — that is the point of the test');
+    const ro = buildRollout(fakeReport(), [v]);
+    for (const it of ro.items) {
+      assert.equal(it.grokResearch.examples.length, 0,
+        `${it.title} showed a model-verified example that nobody promoted — the gate is open`);
+    }
+    const counted = ro.items.filter(i => i.grokResearch.awaitingPromotion > 0);
+    assert.ok(counted.length > 0, 'the example must be COUNTED as awaiting promotion, not silently dropped');
+    for (const it of counted) {
+      assert.match(it.grokResearch.note!, /awaiting review|promoted/i,
+        'the empty block must say a person has not reviewed it, not that nothing exists');
+    }
+    assert.ok(ro.limitations.some(l => /promoted by a named person/.test(l)),
+      'the page must state that shown examples were promoted by a person');
+  });
+
+  test('a promoted example appears, and carries who promoted it', () => {
+    const v = verifiedWetLeg();
+    v.promotion = { status: 'PROMOTED', by: 'Leon', at: '2026-09-12T09:00:00.000Z', note: null };
+    const ro = buildRollout(fakeReport(), [v]);
     const found = ro.items.filter(i => i.grokResearch.examples.length);
-    assert.ok(found.length > 0, 'a verified, sourced, scored example should reach the page');
+    assert.ok(found.length > 0, 'a promoted example should reach the page');
     const ex = found[0].grokResearch.examples[0];
-    for (const k of ['artist', 'observedBehaviour', 'whyItMattersHere'] as const) {
+    for (const k of ['id', 'artist', 'observedBehaviour', 'whyItMattersHere', 'promotedBy', 'promotedAt'] as const) {
       assert.ok(ex[k] && String(ex[k]).length > 0, `example is missing ${k}`);
     }
     assert.equal(ex.verification, 'VERIFIED');
+    assert.equal(ex.promotedBy, 'Leon');
     assert.ok(ex.source, 'an example on the page must be followable');
+    assert.equal(found[0].grokResearch.awaitingPromotion, 0);
+  });
+
+  test('a rejected example is neither shown nor counted as waiting', () => {
+    const v = verifiedWetLeg();
+    v.promotion = { status: 'REJECTED', by: 'Leon', at: '2026-09-12T09:00:00.000Z', note: 'weak proof' };
+    const ro = buildRollout(fakeReport(), [v]);
+    for (const it of ro.items) {
+      assert.equal(it.grokResearch.examples.length, 0, `${it.title} showed a rejected example`);
+      assert.equal(it.grokResearch.awaitingPromotion, 0, `${it.title} counted a rejected example as awaiting review`);
+    }
+  });
+
+  test('promotion cannot rescue an example that never cleared the board gate', () => {
+    /* A person promoting an unverified seed by mistake must still not put
+       it on the page — the two gates are AND, not OR. */
+    const unverified = { ...(seeds[0] as CaseStudy), promotion: { status: 'PROMOTED', by: 'Leon', at: '2026-09-12', note: null } } as CaseStudy;
+    assert.ok(!boardStatus(unverified).eligible);
+    const ro = buildRollout(fakeReport(), [unverified]);
+    for (const it of ro.items) assert.equal(it.grokResearch.examples.length, 0, `${it.title} showed an unverified example because it was promoted`);
+  });
+
+  /* ── Proposals sit beside the recommendation, never in its place ──── */
+
+  test('a proposed application is surfaced as a proposal and the human recommendation is untouched', () => {
+    const v = verifiedWetLeg();
+    v.proposals = [{ artistSlug: 'chvrches', application: 'Run the archive as a Premiere series', whatWouldHaveToBeTrue: 'the January footage is captured', proposedBy: 'grok', at: '2026-09-12T09:00:00.000Z' }];
+    const before = buildRollout(fakeReport(), []);
+    const ro = buildRollout(fakeReport(), [v]);
+    const withProposal = ro.items.filter(i => i.grokResearch.proposals.length);
+    assert.ok(withProposal.length > 0, 'the proposal should attach to the items the example matches');
+    for (const it of ro.items) {
+      const orig = before.items.find(o => o.id === it.id)!;
+      assert.equal(it.recommendation, orig.recommendation, `${it.title}: the human "What we'd do" text changed because of a proposal`);
+    }
+    const p = withProposal[0].grokResearch.proposals[0];
+    assert.equal(p.examplePromoted, false, 'a proposal must say whether its example has been promoted');
+    assert.equal(p.proposedBy, 'grok');
+    /* A proposal for another artist never leaks onto this campaign. */
+    v.proposals = [{ ...v.proposals[0], artistSlug: 'idlesband' }];
+    const other = buildRollout(fakeReport(), [v]);
+    assert.ok(other.items.every(i => i.grokResearch.proposals.length === 0), 'a proposal for another artist appeared on CHVRCHES');
+  });
+
+  /* ── Research runs ─────────────────────────────────────────────────── */
+
+  test('lastResearchedAt comes from the run log, per item, and is null when nobody has looked', () => {
+    const none = buildRollout(fakeReport(), []);
+    assert.ok(none.items.every(i => i.grokResearch.lastResearchedAt === null));
+    const heroId = none.items.find(i => i.title === 'First hero')!.id;
+    const runs: ResearchRun[] = [
+      { id: 'r1', artistSlug: 'chvrches', ranAt: '2026-09-12T08:00:00.000Z', outcome: 'NO_CHANGE', reason: 'state unchanged since last run, 2 days old', question: 'How are interesting artists handling first hero?', rolloutItemId: heroId, stateSeen: { campaignState: null, currentQuestion: null, spine: [] }, considered: [], evidenceAdded: [], remainingGaps: [], producedBy: 'grok' },
+      { id: 'r0', artistSlug: 'chvrches', ranAt: '2026-09-10T08:00:00.000Z', outcome: 'RESEARCHED', reason: 'first pass', question: 'How are interesting artists handling first hero?', rolloutItemId: null, stateSeen: { campaignState: null, currentQuestion: null, spine: [] }, considered: [{ subject: 'X', decision: 'REJECTED', why: 'press coverage only, no uploads', exampleId: null, sourceUrl: null }], evidenceAdded: [], remainingGaps: ['premiere_behaviour'], producedBy: 'grok' },
+    ];
+    const ro = buildRollout(fakeReport(), [], runs);
+    const hero = ro.items.find(i => i.title === 'First hero')!;
+    assert.equal(hero.grokResearch.lastResearchedAt, '2026-09-12T08:00:00.000Z', 'newest run for the item wins');
+    assert.match(hero.grokResearch.note!, /Last researched 2026-09-12/);
+    const wake = ro.items.find(i => i.title === 'Wake the channel')!;
+    assert.equal(wake.grokResearch.lastResearchedAt, null, 'a run against first hero must not mark another item as researched');
+  });
+
+  test('record_research_run refuses vague and inconsistent records', () => {
+    const base = { artistSlug: 'chvrches', question: 'q', producedBy: 'grok' };
+    assert.equal(validateRun({ ...base, outcome: 'MAYBE', reason: 'long enough reason here' }).ok, false, 'unknown outcome accepted');
+    assert.equal(validateRun({ ...base, outcome: 'NO_CHANGE', reason: 'no change' }).ok, false, '"no change" is not a reason');
+    assert.equal(validateRun({ ...base, outcome: 'RESEARCHED', reason: 'looked at three channels' }).ok, false, 'a RESEARCHED run with nothing considered');
+    assert.equal(validateRun({ ...base, outcome: 'RESEARCHED', reason: 'looked at three channels', considered: [{ subject: 'X', decision: 'REJECTED', why: 'weak' }] }).ok, false, 'a rejection without a real reason');
+    const ok = validateRun({ ...base, outcome: 'RESEARCHED', reason: 'looked at three channels', considered: [{ subject: 'X', decision: 'REJECTED', why: 'only press coverage, no uploads to point at' }], remainingGaps: ['hero_continuity'] }, '2026-09-12T08:00:00.000Z');
+    assert.ok(ok.ok);
+    if (ok.ok) {
+      assert.equal(ok.run.ranAt, '2026-09-12T08:00:00.000Z', 'ranAt is the server clock, not model-supplied');
+      assert.equal(ok.run.considered[0].decision, 'REJECTED');
+    }
+    const quiet = validateRun({ ...base, outcome: 'NO_CHANGE', reason: 'spine and question identical to run r1, 2 days ago' });
+    assert.ok(quiet.ok, 'a well-reasoned NO_CHANGE run is a valid record');
+  });
+
+  /* ── The model surface ─────────────────────────────────────────────── */
+
+  test('every write tool is refused over GET, and promotion is not a tool at all', () => {
+    const names = new Set<string>(INTEL_SPECS.map(s => s.name));
+    for (const w of Array.from(INTEL_WRITE_TOOLS)) assert.ok(names.has(w), `${w} is listed as a write tool but is not a tool`);
+    for (const must of ['record_recommendation_progress', 'record_research_run', 'verify_research_example', 'propose_campaign_application']) {
+      assert.ok(INTEL_WRITE_TOOLS.has(must), `${must} mutates state and must be refused over GET`);
+    }
+    for (const n of Array.from(names)) {
+      assert.ok(!/promot/i.test(n), `${n} — a promotion tool exists on the model surface; the human gate is not a gate`);
+    }
+    const spec = INTEL_SPECS.find(s => s.name === 'get_rollout')!;
+    assert.ok(spec, 'get_rollout must be on the surface so the routine can read the current question');
+    for (const n of ['lookup_external_channel', 'get_external_channel_uploads', 'list_research_runs', 'record_research_run']) {
+      assert.ok(names.has(n), `${n} missing from the model surface`);
+    }
   });
 
   test('nothing in the example text claims the tactic worked', () => {
