@@ -1473,42 +1473,46 @@ function buildBaselineMarker(d){
 }
 
 /* ── IDEAS ────────────────────────────────────────────────────────────
-   Two slides, read from the same payload the cover was built from.
+   Two slides. The playbook, and what we are looking at.
 
-   The rollout knows eight items, their state, their evidence, their
-   provenance and every research signal attached to them. This renderer
-   shows four pictures and a strip. That is not information thrown away —
-   it is the selection rule doing its job, and the rule is simple enough
-   to state: an item earns a picture when a person wrote it a pitch, and
-   a pitch only gets written for something you would want to talk about
-   in a room.
+   The rollout knows eight items with their state, evidence, provenance and
+   research signals. These slides show four ideas and a reference wall.
+   That is the selection rule working, not information thrown away: an item
+   earns a picture when a person wrote it a pitch, and a pitch only gets
+   written for something you would want to talk about in a room.
 
-   Everything else stays in the payload for Watcher, Grok and anyone
-   inspecting evidence. The model reads more than the person does, which
-   is the correct way round.
+   Each idea carries one figure from the Deep Dive, one line of why, one
+   line of what we would do. The figure is what makes it a strategy rather
+   than a suggestion — "give every hero a second destination" is an
+   opinion; "0 of 4 heroes had one last time" is an argument.
 
-   The one thing this will not do is show an external reference that has
-   not been verified. An unverified claim about another artist's campaign
-   is not inspiration, it is a rumour with a thumbnail.                */
+   Nothing about verification, provenance, recommendation ids or model
+   confidence appears here. All of it decides what appears.             */
 
 const ytThumb = id => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
 
-/* YouTube answers a missing thumbnail with a 120x90 grey placeholder and a
-   200, not a 404 — so `onerror` never fires and a dead video id renders as
-   a broken-looking card rather than failing. Anything that small is the
-   placeholder: try the smaller size, and if that is a placeholder too,
-   drop the image and let the type carry the card. */
+/* YouTube publishes three auto-generated stills per video alongside the
+   thumbnail — maxres1/2/3.jpg, real frames from roughly 25/50/75% through.
+   Checked against both new CHVRCHES assets: four distinct 1280x720 images
+   per video, different bytes, all public. It is how one campaign asset
+   supplies a visual world instead of the same picture four times. */
+const ytFrame = (id, n) =>
+  n ? `https://i.ytimg.com/vi/${id}/maxres${n}.jpg` : ytThumb(id);
+
+/* A missing thumbnail comes back as a 120x90 grey placeholder with a 200,
+   not a 404, so onerror never fires. Anything that small is the
+   placeholder: try the smaller size, then give up and let type carry it. */
 const ytFallback = id =>
   `this.onerror=null;this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'`;
 function thumbGuard(img, id){
   if (img.naturalWidth > 121) return;
-  if (img.dataset.tried) { img.closest('.idea, .ref').classList.add('noimg'); return; }
+  if (img.dataset.tried) { const c = img.closest('.idea, .ref'); if (c) c.classList.add('noimg'); return; }
   img.dataset.tried = '1';
   img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
-/* The feature is whichever idea the campaign is actually walking into.
-   It follows the spine rather than a flag, so it moves on its own. */
+/* The feature is whichever idea the campaign is walking into. It follows
+   the spine rather than a flag, so it moves on its own. */
 function pickFeature(ideas, items){
   const nextTitle = (items.find(i => i.spineStatus === 'NEXT') || {}).title;
   return ideas.find(i => i.title === nextTitle) || ideas[0];
@@ -1516,14 +1520,19 @@ function pickFeature(ideas, items){
 
 function ideaFigure(it, cls){
   const p = it.pitch;
+  const src = ytFrame(p.imageId, p.frame);
   return `<a class="idea ${cls}" href="${yt(p.imageId)}" target="_blank" rel="noopener">
     <div class="idea-img">
-      <img src="${ytThumb(p.imageId)}" alt="" loading="lazy"
+      <img src="${src}" alt="" loading="lazy"
            onload="thumbGuard(this,'${p.imageId}')" onerror="${ytFallback(p.imageId)}">
     </div>
     <div class="idea-cap">
+      <div class="idea-ev">${esc(p.evidence)}</div>
       <div class="idea-h">${esc(p.headline)}</div>
-      <div class="idea-l">${esc(p.line)}</div>
+      <div class="idea-body">
+        <div class="idea-r"><span>Why</span>${esc(p.why)}</div>
+        <div class="idea-r"><span>Do</span>${esc(p.doThis)}</div>
+      </div>
     </div>
   </a>`;
 }
@@ -1531,17 +1540,17 @@ function ideaFigure(it, cls){
 function buildIdeas(d){
   const ro = (d && d.rollout) || null;
   const items = (ro && ro.items) || [];
+  const heroes = (d.assets && d.assets.heroes) || [];
 
-  /* Ideas: anything with a pitch that is still ahead of us.
-     Partner conversations: possibilities nobody wrote a pitch for. */
   const ideas = items.filter(i => i.pitch && i.status !== 'COMPLETE').slice(0, 4);
   const partners = items.filter(i => !i.pitch && i.commitment === 'POSSIBILITY');
-
   const feature = ideas.length ? pickFeature(ideas, items) : null;
   const rest = ideas.filter(i => i !== feature);
 
-  /* Every verified, promoted example across the whole rollout, deduped.
-     Empty is the normal answer today, and the slide says so once. */
+  /* The slide sits in the new campaign's world, on a frame from the newest
+     asset rather than on the same picture a card is already showing. */
+  const worldId = heroes.length ? heroes[0].videoId : A.heroImages.station;
+
   const seen = {};
   const refs = [];
   for (const it of items) {
@@ -1555,49 +1564,55 @@ function buildIdeas(d){
     n + ((i.grokResearch && i.grokResearch.awaitingVerification) || 0), 0);
   const q = ro && ro.currentQuestion;
 
-  return `<section class="slide" data-t="Campaign ideas">
-  ${bleedImg(feature ? feature.pitch.imageId : A.heroImages.station,'strong')}
+  return `<section class="slide" data-t="Our playbook">
+  <div class="bleed strong"><img src="${ytFrame(worldId, 2)}" alt=""
+    onerror="this.onerror=null;this.src='${ytThumb(worldId)}'"></div>
   <div class="inner">
     ${campaignIdentity(d, true)}
-    <div class="label" style="margin-top:1.2rem">Ideas</div>
-    <h2 class="display" style="max-width:20ch;margin:.1rem 0 0;
-      font-size:clamp(1.6rem,3.6vw,2.7rem);line-height:1.02">What could this
+    <div class="label" style="margin-top:1.1rem">Our playbook</div>
+    <h2 class="display" style="max-width:22ch;margin:.1rem 0 0;
+      font-size:clamp(1.5rem,3.3vw,2.5rem);line-height:1.02">What could this
       <span style="color:var(--signal)">become?</span></h2>
 
     ${feature ? `<div class="ideagrid stagger">
       ${ideaFigure(feature,'feature')}
       <div class="ideacol">${rest.map(i=>ideaFigure(i,'sub')).join('')}</div>
     </div>` : ''}
+  </div>
+</section>
+
+<section class="slide" data-t="Inspiration">
+  <div class="bleed strong"><img src="${ytFrame(worldId, 3)}" alt=""
+    onerror="this.onerror=null;this.src='${ytThumb(worldId)}'"></div>
+  <div class="inner">
+    <div class="label" style="color:var(--cyan)">Inspiration</div>
+    ${refs.length ? `
+      <h2 class="display" style="max-width:20ch;margin:.1rem 0 0;
+        font-size:clamp(1.5rem,3.3vw,2.5rem);line-height:1.02">Things we'd like to
+        <span style="color:var(--cyan)">steal.</span></h2>
+      <div class="refs stagger">
+        ${refs.slice(0,4).map(x=>`<a class="ref"${
+          x.source ? ` href="${x.source}" target="_blank" rel="noopener"` : ''}>
+          <div class="ref-img">${x.relevantRef ? `<img src="${ytThumb(x.relevantRef)}" alt=""
+             loading="lazy" onload="thumbGuard(this,'${x.relevantRef}')"
+             onerror="${ytFallback(x.relevantRef)}">` : ''}</div>
+          <div class="ref-a">${esc(x.artist)}</div>
+          <div class="ref-i">${esc(x.observedBehaviour)}</div>
+          <div class="ref-app"><span>CHVRCHES</span>${esc(x.whyItMattersHere)}</div>
+        </a>`).join('')}
+      </div>`
+    : `
+      <h2 class="display" style="max-width:16ch;margin:.1rem 0 0;
+        font-size:clamp(1.5rem,3.3vw,2.5rem);line-height:1.02">Nothing
+        <span style="color:var(--cyan)">verified yet.</span></h2>
+      ${q ? `<div class="refq">${esc(q.question)}</div>` : ''}
+      <p class="sub" style="max-width:44ch">${waiting} candidate${waiting === 1 ? '' : 's'} in the library.
+        None reaches this page until somebody has checked it against the channel.</p>`}
 
     ${partners.length ? `<div class="partners">
       <div class="label" style="color:var(--cyan)">Partner conversations</div>
       <div class="pcrow">${partners.map(p=>`<span class="pc">${esc(p.title)}</span>`).join('')}</div>
     </div>` : ''}
-  </div>
-</section>
-
-<section class="slide" data-t="References">
-  ${bleedImg(A.heroImages.live,'strong')}
-  <div class="inner">
-    <div class="label" style="color:var(--cyan)">Elsewhere</div>
-    ${refs.length ? `
-      <h2 class="display big" style="max-width:14ch">Worth<br>
-        <span style="color:var(--cyan)">stealing.</span></h2>
-      <div class="refs stagger">
-        ${refs.slice(0,4).map(x=>`<a class="ref"${
-          x.source ? ` href="${x.source}" target="_blank" rel="noopener"` : ''}>
-          <div class="ref-img">${x.relevantRef ? `<img src="${ytThumb(x.relevantRef)}" alt=""
-             loading="lazy" onerror="${ytFallback(x.relevantRef)}">` : ''}</div>
-          <div class="ref-a">${esc(x.artist)}</div>
-          <div class="ref-i">${esc(x.observedBehaviour)}</div>
-        </a>`).join('')}
-      </div>`
-    : `
-      <h2 class="display big" style="max-width:14ch">Nothing<br>
-        <span style="color:var(--cyan)">verified yet.</span></h2>
-      ${q ? `<div class="refq">${esc(q.question)}</div>` : ''}
-      <p class="sub" style="max-width:42ch">${waiting} candidate${waiting === 1 ? '' : 's'} in the library.
-        None reaches this page until somebody has checked it against the channel.</p>`}
   </div>
 </section>`;
 }

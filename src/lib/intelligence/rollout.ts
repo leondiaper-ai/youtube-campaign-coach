@@ -197,10 +197,29 @@ export interface PlanItem {
   pitch?: {
     /** Six words at most. The thing itself, not a description of it. */
     headline: string;
-    /** One sentence. Never two. */
-    line: string;
+    /**
+     * One figure from the Deep Dive, set as a typographic detail rather
+     * than a sentence. This is what makes an idea credible in a room: it
+     * is the difference between "give every hero a second destination"
+     * and "0 of 4 heroes had one last time".
+     *
+     * Must be traceable to the Deep Dive. Never a rounded impression.
+     */
+    evidence: string;
+    /** Why this fits THIS artist. One line. */
+    why: string;
+    /** What we would actually do. One line. */
+    doThis: string;
     /** A real asset on this artist's channel. Never stock, never generated. */
     imageId: string;
+    /**
+     * Which frame of that asset. YouTube publishes three auto-generated
+     * storyboard stills per video at maxres1/2/3.jpg alongside the
+     * thumbnail — real frames from roughly 25/50/75% through. Using them
+     * lets one campaign asset supply four distinct images instead of the
+     * same thumbnail four times. Omit for the thumbnail.
+     */
+    frame?: 1 | 2 | 3;
   };
 }
 
@@ -249,8 +268,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     deepDivePoint: 'Single: official music video with the pre-party Premiere they already run.',
     pitch: {
       headline: 'Make the first hero an event',
-      line: 'Pre-party, Premiere, and somewhere to go when it ends.',
-      /* The Screen Violence pre-party stream. This already happened here. */
+      evidence: '4 / 4 singles had a pre-party',
+      why: 'The pre-party into Premiere ritual already worked here, on every Screen Violence single.',
+      doThis: 'Bring it back for Roses, and give people somewhere to go the moment it ends.',
       imageId: '0XoMu7Bz7YE',
     },
   },
@@ -274,12 +294,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
       '+7-14 days: a second destination — lyric video, live, or a performance while attention is still up.',
     pitch: {
       headline: 'Give every hero a second destination',
-      line: 'Lyric, live or performance inside the next 7-14 days.',
-      /* Good Girls — a real, checked asset on the channel. The deck's own
-         "extend the moment" illustration pointed at a video that no longer
-         resolves, and YouTube answers a dead id with a 120x90 grey frame
-         rather than a 404, so it rendered as a broken card instead of
-         failing loudly. Every id here has been fetched. */
+      evidence: '0 / 4 heroes had a follow-up',
+      why: 'Nothing meaningful landed in the 7-14 day window after any Screen Violence single.',
+      doThis: 'Lyric, live or performance while the attention from the hero is still up.',
       imageId: 'du4kNAyjVCg',
     },
   },
@@ -322,7 +339,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
     pitch: {
       headline: 'CHVRCHES in Churches',
-      line: 'Could January become a live series people come back for?',
+      evidence: '15 live uploads · 5 full sets',
+      why: 'Live is already part of this channel\'s language, with a 104K median.',
+      doThis: 'Decide before January that the run is being captured. Could it become a named series?',
       imageId: 'fGiqCmZvkJ8',
     },
   },
@@ -383,7 +402,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
     pitch: {
       headline: 'Build a CHVRCHES destination',
-      line: 'New record, catalogue and live archive programmed as one world.',
+      evidence: '340 days quiet · ~74K views a day',
+      why: 'The catalogue earns at that rate with nothing published at all.',
+      doThis: 'Programme the new record, the catalogue and the live archive as one world.',
       imageId: 'e1YqueG2gtQ',
     },
   },
