@@ -384,6 +384,21 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    caption grey, which survives on a flat panel and disappears on a photo. */
 .covergrid .readline .rl{color:#C6C1D4}
 .covergrid .nx-t{color:#ADA7BC}
+
+/* A landscape card is wider than the portrait one it replaced, so the left
+   column grew and the figures lost the room to sit on one line. Three
+   numbers that wrap are three numbers you read twice. Slightly smaller and
+   slightly closer, which costs nothing — they are already the loudest
+   thing in the column. */
+.covergrid .livestats{gap:1.7rem}
+.covergrid .ls .n{font-size:clamp(1.15rem,1.9vw,1.62rem)}
+
+/* The portrait card is now the narrow one in the pair, so its caption needs
+   its own scale. At the shared size the title and the date both wrapped,
+   which is four lines of type in a 137px frame. */
+.ha:not(.wide) .ha-t{font-size:.84rem;line-height:1.15}
+.ha:not(.wide) .ha-m{font-size:.5rem;letter-spacing:.08em;margin-top:.3rem}
+.ha:not(.wide) .ha-cap{padding:.6rem .65rem}
 .covergrid .livestats{margin-top:0;padding-top:0;border-top:0}
 .covergrid .readline{margin-top:1.6rem}
 @media(max-width:900px){.covergrid{grid-template-columns:1fr;gap:1.8rem}}
