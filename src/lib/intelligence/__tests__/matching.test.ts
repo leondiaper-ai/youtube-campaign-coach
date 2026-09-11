@@ -36,6 +36,7 @@ import {
 import { SEEDED_DEEP_DIVES, DEEP_DIVE_BY_NAME, normaliseName } from '../deepDives';
 import { SEEDED_RESEARCH, boardStatus, verificationOf } from '../research';
 import { DECK_TO_ROSTER, deckSlugFor, rosterSlugFor, checkAliases } from '../identity';
+import { VERIFICATION_RUN, ALLOWED_READS, ALLOWED_WRITES } from '../verificationRun';
 
 export interface CheckResult {
   passed: number;
@@ -305,6 +306,47 @@ export function runMatchingChecks(): CheckResult {
       assert.ok(/not been verified|not assessed/i.test(r.whyNotObvious + r.limitations),
         `${r.subject} does not say it is unassessed`);
     }
+  });
+
+  /* ── The bounded run ───────────────────────────────────────────────── */
+
+  test('the verification run cannot create a new research record', () => {
+    /* The single most important limit. A run scoped to "verify these four"
+       that can also write a fifth has no scope at all. */
+    assert.ok(!ALLOWED_WRITES.has('add_research_candidate'));
+    assert.ok(!ALLOWED_WRITES.has('add_watchlist_item'));
+    assert.ok(!ALLOWED_WRITES.has('propose_campaign_application'));
+    assert.ok(!ALLOWED_WRITES.has('supersede_research_example'));
+    assert.deepEqual(
+      Array.from(ALLOWED_WRITES).sort(),
+      ['update_research_example', 'verify_research_example'],
+    );
+  });
+
+  test('the verification run has no discovery capability', () => {
+    for (const t of Array.from(ALLOWED_READS)) {
+      assert.ok(!/^discover|^scout|^search_music/.test(t), `${t} looks like discovery`);
+    }
+    assert.ok(ALLOWED_READS.has('lookup_external_channel'),
+      'verification is impossible without an external lookup — it would fail closed on all four');
+    assert.ok(ALLOWED_READS.has('get_external_channel_uploads'));
+  });
+
+  test('the run is scoped to exactly the four seeded examples', () => {
+    assert.equal(VERIFICATION_RUN.exampleIds.length, VERIFICATION_RUN.maxExamples);
+    for (const id of VERIFICATION_RUN.exampleIds) {
+      const found = SEEDED_RESEARCH.find(r => r.id === id);
+      assert.ok(found, `${id} is not a seeded example`);
+      assert.notEqual(found!.status, 'WATCHLIST', `${id} is a watchlist item and should not be in a verification pass`);
+    }
+    assert.equal(VERIFICATION_RUN.artist, 'chvrches');
+  });
+
+  test('the quota ceilings are consistent with each other', () => {
+    assert.ok(
+      VERIFICATION_RUN.maxQuotaUnitsTotal >= VERIFICATION_RUN.maxQuotaUnitsPerExample * VERIFICATION_RUN.maxExamples,
+      'the total ceiling is below what four examples are each allowed, so the run would halt part-way by construction',
+    );
   });
 
   test('name resolution is tolerant of punctuation but not of a different artist', () => {
