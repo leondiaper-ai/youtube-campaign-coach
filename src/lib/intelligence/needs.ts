@@ -28,17 +28,19 @@ import { listCustomArtists } from '../artistStore';
 import { readLiveSnapByHandle } from '../kvCache';
 import { readRecon } from '../researcher/store';
 import { getDeepDive } from './deepDiveStore';
-import { DEEP_DIVE_BY_NAME, normaliseName } from './deepDives';
+import { DEEP_DIVE_BY_NAME, SEEDED_DEEP_DIVES, normaliseName } from './deepDives';
 import { listHumanContext } from './humanContext';
 import type { ArtistNeeds, NeedTag, DeepDiveContext } from './types';
 
 export interface ResolvedArtist {
+  /** The ROSTER slug where one exists, so channel data resolves. */
   slug: string;
   name: string;
   artist: Artist | null;
-  /** How we got here. `name_match` means the slug did not resolve directly. */
-  resolvedBy: 'slug' | 'name_match' | 'deep_dive_only' | 'unresolved';
-  /** True when the slug exists in a Deep Dive but not on the live roster. */
+  /** The DECK slug, which is frequently different. Null when no deck exists. */
+  deepDiveSlug: string | null;
+  resolvedBy: 'slug' | 'name_match' | 'deep_dive_bridge' | 'deep_dive_only' | 'unresolved';
+  /** True when a Deep Dive exists but no roster artist could be found. */
   rosterMissing: boolean;
 }
 
@@ -47,35 +49,89 @@ async function roster(): Promise<Artist[]> {
 }
 
 /**
- * Slug first, then name. The Deep Dive slugs come from hand-built decks and
- * the roster comes from Redis; the two were never reconciled, and silently
- * returning nothing for `kingsofleon` because the roster calls them
- * `kings-of-leon` is the kind of failure that looks like an empty database.
+ * ── THE TWO-WAY JOIN ──────────────────────────────────────────────────
+ * Deck slugs and roster slugs are different vocabularies and always were.
+ * The roster slugs are derived from channel handles — `idlesband`,
+ * `palayeroyale`, `amylandthesniffers6771` — while the decks use the short
+ * name a person would type. Neither is wrong; they were built at different
+ * times for different readers.
+ *
+ * The first version of this resolved one direction only: input → roster,
+ * then Deep Dive by the RESOLVED slug. That silently broke IDLES. "idles"
+ * name-matched to `idlesband`, then the Deep Dive lookup asked for
+ * `idlesband`, found nothing, and returned deepDiveMissing: true — an
+ * artist with a full analysis reported as having none, which is exactly the
+ * silent absence the fallback existed to prevent, one layer further in.
+ *
+ * So the join now runs both ways and, critically, bridges on the ARTIST
+ * NAME rather than on either slug. Whichever side resolves first supplies a
+ * name, and the name finds the other side. Names are the only identifier
+ * the two vocabularies actually share.
  */
 export async function resolveArtist(input: string): Promise<ResolvedArtist> {
   const list = await roster();
-  const direct = list.find(a => a.slug === input);
-  if (direct) return { slug: direct.slug, name: direct.name, artist: direct, resolvedBy: 'slug', rosterMissing: false };
-
   const norm = normaliseName(input);
-  const byName = list.find(a => normaliseName(a.name) === norm || normaliseName(a.slug) === norm);
-  if (byName) return { slug: byName.slug, name: byName.name, artist: byName, resolvedBy: 'name_match', rosterMissing: false };
 
-  /* Not on the roster. If a Deep Dive knows this artist we still have real
-     analysis to serve — we just have no live channel data to go with it. */
+  const findRoster = (n: string) =>
+    list.find(a => normaliseName(a.name) === n || normaliseName(a.slug) === n);
+
+  const direct = list.find(a => a.slug === input);
+  if (direct) {
+    return {
+      slug: direct.slug, name: direct.name, artist: direct,
+      /* Bridge outward: the roster name may name a deck. */
+      deepDiveSlug: DEEP_DIVE_BY_NAME[normaliseName(direct.name)] ?? (SEEDED_DEEP_DIVES[input] ? input : null),
+      resolvedBy: 'slug', rosterMissing: false,
+    };
+  }
+
+  const byName = findRoster(norm);
+  if (byName) {
+    return {
+      slug: byName.slug, name: byName.name, artist: byName,
+      deepDiveSlug: DEEP_DIVE_BY_NAME[normaliseName(byName.name)] ?? (SEEDED_DEEP_DIVES[norm] ? norm : null),
+      resolvedBy: 'name_match', rosterMissing: false,
+    };
+  }
+
+  /* Nothing on the roster matched the input. Try the decks, and if one
+     knows this artist use ITS name to go back and find the roster entry —
+     "amyl" finds the deck, the deck says "Amyl and The Sniffers", and that
+     name finds `amylandthesniffers6771`. */
   const diveSlug = DEEP_DIVE_BY_NAME[norm] ?? input;
   const { dive } = await getDeepDive(diveSlug);
-  if (dive) return { slug: dive.artistSlug, name: dive.artistName, artist: null, resolvedBy: 'deep_dive_only', rosterMissing: true };
+  if (dive) {
+    const bridged = findRoster(normaliseName(dive.artistName));
+    if (bridged) {
+      return {
+        slug: bridged.slug, name: bridged.name, artist: bridged,
+        deepDiveSlug: dive.artistSlug, resolvedBy: 'deep_dive_bridge', rosterMissing: false,
+      };
+    }
+    return {
+      slug: dive.artistSlug, name: dive.artistName, artist: null,
+      deepDiveSlug: dive.artistSlug, resolvedBy: 'deep_dive_only', rosterMissing: true,
+    };
+  }
 
-  return { slug: input, name: input, artist: null, resolvedBy: 'unresolved', rosterMissing: true };
+  return { slug: input, name: input, artist: null, deepDiveSlug: null, resolvedBy: 'unresolved', rosterMissing: true };
 }
 
-/** The Deep Dive for an artist, tolerating a slug that only the deck uses. */
+/**
+ * The Deep Dive for an artist, tolerating a slug that only the deck uses,
+ * a slug that only the roster uses, or the artist's name. Always goes
+ * through `resolveArtist` for the harder cases rather than reimplementing
+ * half of it, so there is one join and not two that can disagree.
+ */
 export async function deepDiveFor(input: string): Promise<{ dive: DeepDiveContext | null; source: string | null }> {
   const direct = await getDeepDive(input);
   if (direct.dive) return direct;
   const byName = DEEP_DIVE_BY_NAME[normaliseName(input)];
   if (byName) return getDeepDive(byName);
+  /* Last resort: the input may be a roster slug like `idlesband`, whose
+     NAME names a deck. */
+  const who = await resolveArtist(input);
+  if (who.deepDiveSlug) return getDeepDive(who.deepDiveSlug);
   return { dive: null, source: null };
 }
 
@@ -152,7 +208,11 @@ export interface ArtistNeedsDetail extends ArtistNeeds {
 
 export async function getArtistNeeds(input: string): Promise<ArtistNeedsDetail> {
   const who = await resolveArtist(input);
-  const { dive } = await deepDiveFor(who.slug);
+  /* Use the deck slug the join already found. Re-resolving from the roster
+     slug is what broke IDLES the first time. */
+  const { dive } = who.deepDiveSlug
+    ? await getDeepDive(who.deepDiveSlug)
+    : { dive: null };
 
   const needs: ArtistNeedsDetail['needs'] = [];
   const seen = new Map<NeedTag, number>();
