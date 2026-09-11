@@ -488,6 +488,12 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea-img img{width:100%;height:100%;object-fit:cover;display:block}
 .idea-img::after{content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(8,7,13,.1) 18%,rgba(8,7,13,.88) 62%,rgba(8,7,13,.97) 100%)}
+/* A support card's caption fills more of its frame than the feature's does,
+   so the evidence line lands where the feature's gradient is still light.
+   On a bright frame the magenta washed out — which is the one line on the
+   card that has to be legible. Its own ramp, starting sooner. */
+.idea.sub .idea-img::after{
+  background:linear-gradient(180deg,rgba(8,7,13,.18) 8%,rgba(8,7,13,.9) 44%,rgba(8,7,13,.98) 100%)}
 /* No usable thumbnail: the card keeps its shape and the type carries it,
    rather than showing YouTube's grey placeholder. */
 .idea.noimg .idea-img{background:linear-gradient(150deg,rgba(255,45,120,.22),var(--coal) 70%)}
