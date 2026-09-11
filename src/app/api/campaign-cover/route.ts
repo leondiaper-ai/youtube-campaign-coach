@@ -27,6 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCampaignProgress } from '@/lib/intelligence/campaignProgress';
 import { buildRollout } from '@/lib/intelligence/rollout';
+import { buildCampaignTimeline } from '@/lib/intelligence/campaignTimeline';
 import { readLibrary } from '@/lib/intelligence/research';
 import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
@@ -80,7 +81,10 @@ interface CoverAsset {
 function dateLabel(iso: string): string {
   const d = new Date(iso);
   if (!Number.isFinite(d.getTime())) return '';
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+  /* ICU renders September as "Sept" in en-GB, which is the only four-letter
+     month and wrecks the rhythm of a date row. Three letters, always. */
+  const mon = d.toLocaleDateString('en-GB', { month: 'short' }).slice(0, 3).toUpperCase();
+  return `${d.getUTCDate()} ${mon}`;
 }
 
 /**
@@ -256,6 +260,22 @@ export async function GET(req: NextRequest) {
         status: it.spineStatus as string,
       }));
 
+    /* ── The campaign timeline ────────────────────────────────────────
+       Where the campaign is, in five moments. The Coach plan is the
+       source of dates; the rollout supplies the strategic names; the
+       assets above supply the past. Nothing here is a second store —
+       every field is read from something that already existed. */
+    const timeline = await buildCampaignTimeline(
+      who.slug,
+      ranked.map(a => ({
+        videoId: a.videoId, title: a.title, publishedAt: a.publishedAt,
+        dateLabel: a.dateLabel, formatLabel: a.formatLabel, aspect: a.aspect,
+        thumb: a.thumb, url: a.url, views: a.views,
+      })),
+      rollout,
+    ).catch(() => null);
+    if (timeline) coverage.push(...timeline.coverage);
+
     /* ── One read ──────────────────────────────────────────────────────
        Assembled from observed facts and an explicitly hedged forward
        clause. No causal claim: the channel woke and the campaign started,
@@ -288,6 +308,7 @@ export async function GET(req: NextRequest) {
       },
       assets: { heroes, supporting },
       stages,
+      timeline,
       /* The same plan the stages were cut from, in full, for the Ideas
          tab. One fetch, one state — the tab cannot show a campaign the
          cover disagrees with because there is only one of them. */

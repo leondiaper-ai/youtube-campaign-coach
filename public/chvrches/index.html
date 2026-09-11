@@ -308,39 +308,77 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .livestate{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
 .livesince{font-size:.6rem;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
 
-/* The hero assets. Deliberately large: these are the campaign's first
-   creative, not rows in a table. */
-/* Assets sit in a row and keep their own shape. A Short shown in a 16:9
-   frame is not a cropping problem — YouTube bakes grey pillarbox into the
-   1280x720 thumbnail it serves, so the bars are pixels and no object-fit
-   can remove them. A 9:16 frame with cover scales the source until its
-   height fills, which crops exactly the bars away and leaves the portrait
-   strip full-bleed. It also tells the reader what format this is without
-   a label doing the work. */
-.heroassets{display:flex;flex-wrap:wrap;gap:1.1rem;margin-top:1.4rem;align-items:flex-start}
-.ha{display:block;text-decoration:none;color:inherit;position:relative;border-radius:12px;
-  overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s;
-  flex:0 0 auto;width:clamp(150px,15vw,196px)}
-.ha.wide{width:clamp(280px,32vw,420px)}
-.ha:hover{transform:translateY(-3px);border-color:var(--signal)}
-.ha-img{position:relative;aspect-ratio:9/16;background:var(--coal)}
-.ha.wide .ha-img{aspect-ratio:16/9}
-.ha-img img{width:100%;height:100%;object-fit:cover;display:block}
-.ha-img::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,transparent 45%,rgba(8,7,13,.92) 100%)}
-.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.7rem .8rem;z-index:2}
-.ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.92rem;
-  line-height:1.12;letter-spacing:-.01em}
-.ha.wide .ha-t{font-size:clamp(1.05rem,1.7vw,1.45rem)}
-.ha-m{font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.35rem}
-.ha-m b{color:var(--signal);font-weight:700}
+/* ── THE CAMPAIGN TIMELINE ──────────────────────────────────────────
+   One band, not six panels. It carries the real creative on the left,
+   the Coach's dates on the right, and the pivot between them.
 
-.supp{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin-top:.9rem}
-.supp a{display:block;position:relative;border-radius:6px;overflow:hidden;text-decoration:none}
-.supp img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;opacity:.72;transition:opacity .2s}
-.supp a:hover img{opacity:1}
-.supp .sl{position:absolute;left:.4rem;bottom:.3rem;font-size:.5rem;font-weight:700;color:#fff;
-  text-shadow:0 1px 5px rgba(0,0,0,.95)}
+   The published moments are actual YouTube thumbnails at their observed
+   aspect. A Short shown in a 16:9 frame is not a cropping problem —
+   YouTube bakes grey pillarbox into the 1280x720 thumbnail it serves,
+   so the bars are pixels and no object-fit can remove them. A 9:16 frame
+   scales the source until its height fills, cropping exactly the bars
+   away. Future moments cannot have an image, so they get the only other
+   thing this deck uses at that weight: display type.
+
+   Every body is the same height, so the hairline runs dead straight
+   through the whole campaign. That line is the composition. */
+.tl{display:flex;align-items:flex-end;gap:0;margin-top:2.2rem}
+.tl-i{flex:1 1 0;min-width:0;padding-right:1.4rem}
+.tl-i.k-now{flex:0 0 auto;padding-right:1.4rem}
+.tl-body{height:clamp(160px,19vw,214px);display:flex;align-items:flex-end}
+
+.tl-img{height:100%;border-radius:10px;overflow:hidden;border:1px solid var(--hair);
+  display:block;text-decoration:none;transition:transform .2s,border-color .2s}
+.tl-img:hover{transform:translateY(-3px);border-color:var(--signal)}
+.tl-img img{width:100%;height:100%;display:block;object-fit:cover}
+.tl-i.portrait .tl-img{aspect-ratio:9/16}
+.tl-i.landscape .tl-img{aspect-ratio:16/9}
+
+/* A future moment: the date at display weight, the stage above it. */
+.tl-blk{height:100%;width:100%;border-radius:10px;border:1px solid var(--hair);
+  padding:1rem;display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(160deg,rgba(255,45,120,.09),transparent 62%)}
+.tl-i.p-tentative .tl-blk,.tl-i.p-recommended .tl-blk{border-style:dashed}
+.tl-i.p-recommended .tl-blk{background:linear-gradient(160deg,rgba(56,224,214,.10),transparent 62%)}
+.tl-stage{font-size:.53rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--signal);line-height:1.3}
+.tl-i.p-recommended .tl-stage{color:var(--cyan)}
+.tl-big{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:.86;
+  letter-spacing:-.03em;font-size:clamp(2.1rem,4.4vw,3.5rem)}
+.tl-big span{display:block;font-size:.3em;letter-spacing:.16em;font-weight:700;
+  color:var(--smoke);margin-top:.5rem}
+
+/* The pivot. The only vertical in the band. */
+.tl-now{height:100%;width:2px;background:linear-gradient(180deg,transparent,var(--signal) 22%,var(--signal));
+  position:relative;margin-left:.8rem}
+.tl-now::after{content:'';position:absolute;left:50%;top:0;transform:translate(-50%,-50%);
+  width:9px;height:9px;border-radius:50%;background:var(--signal);
+  animation:pulse 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.tl-now::after{animation:none}}
+
+.tl-rule{height:1px;background:var(--hair);margin-top:1.1rem;position:relative}
+.tl-i.k-past .tl-rule,.tl-i.k-now .tl-rule{background:var(--signal);opacity:.55}
+.tl-foot{padding-top:.75rem}
+.tl-d{font-size:.56rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--smoke)}
+.tl-i.k-past .tl-d,.tl-i.k-now .tl-d{color:var(--signal)}
+.tl-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.96rem;
+  line-height:1.14;letter-spacing:-.01em;margin-top:.35rem}
+.tl-sub{font-size:.72rem;color:var(--smoke);line-height:1.4;margin-top:.2rem}
+.tl-m{font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);
+  margin-top:.45rem;opacity:.8}
+.tl-i.p-recommended .tl-m{color:var(--cyan);opacity:1}
+
+.tl-note{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);
+  margin-top:1.1rem;opacity:.75}
+
+@media(max-width:900px){
+  .tl{flex-wrap:wrap;gap:1.2rem 0}
+  .tl-i{flex:1 1 44%}
+  .tl-i.k-now{flex:1 1 100%}
+  .tl-now{width:100%;height:2px;margin:0;
+    background:linear-gradient(90deg,var(--signal),transparent)}
+}
 
 /* Metrics as typography, not KPI cards. Same .num/.cap scale the rest of
    the deck uses for its statistics. */
@@ -349,17 +387,6 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .ls .n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.3rem,2.3vw,1.95rem);
   line-height:1;color:var(--signal)}
 .ls .c{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
-
-/* The strategy spine. Four stages from the Deep Dive's own architecture. */
-.spine{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin-top:1.3rem}
-.sp{flex:1 1 140px;padding:.7rem .9rem;border-left:2px solid var(--hair);min-width:130px}
-.sp.on{border-left-color:var(--signal)}
-.sp.next{border-left-color:var(--cyan)}
-.sp-l{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;line-height:1.15}
-.sp-s{font-size:.55rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--smoke);margin-top:.45rem}
-.sp.on .sp-s{color:var(--signal)}
-.sp.next .sp-s{color:var(--cyan)}
 
 .readline{margin-top:1.4rem;padding-left:1rem;border-left:2px solid var(--signal)}
 .readline .rh{font-family:'Space Grotesk',sans-serif;font-weight:700;
@@ -434,11 +461,6 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    tighter and is allowed to size to its content rather than to 100vh. */
 .slide.cover{padding:4.6rem 0 2.6rem;min-height:auto}
 
-@media(max-width:720px){
-  .ha{width:calc(50% - .6rem)}
-  .spine{flex-direction:column}
-  .sp{border-left-width:2px}
-}
 
 </style>
 </head>
@@ -1189,31 +1211,78 @@ const compact = n => {
   return `${s}${a}`;
 };
 
-function heroAsset(a){
-  /* Shape follows the OBSERVED aspect, not the label. A vertical asset a
-     human has renamed TRAILER is still vertical; framing it 16:9 would put
-     YouTube's baked-in pillarbox straight back into the picture. Anything
-     landscape gets the wide frame, so the first official video will
-     physically dominate the row the day it lands. */
-  const wide = (a.aspect ? a.aspect === 'landscape' : a.kind !== 'short') ? ' wide' : '';
-  return `<a class="ha${wide}" href="${a.url}" target="_blank" rel="noopener">
-    <div class="ha-img">
-      <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
-           onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
+/* ── THE TIMELINE ─────────────────────────────────────────────────────
+   Published moments carry the real asset. Future moments carry the date
+   at the same visual weight, because the alternative is a calendar card
+   and this deck does not have calendar cards in it.
+
+   Shape follows the OBSERVED aspect, not the label — a vertical asset a
+   human has renamed TRAILER is still vertical, and framing it 16:9 would
+   put YouTube's baked-in pillarbox straight back into the picture.    */
+
+/* "22 SEP" → big "22", small "SEP". "+7-14 DAYS" → "+7-14", "DAYS". */
+function splitDate(label){
+  const m = /^(\d+)\s+([A-Z]+)$/.exec(label);
+  if (m) return [m[1], m[2]];
+  const w = /^(\S+)\s+(.+)$/.exec(label);
+  return w ? [w[1], w[2]] : [label, ''];
+}
+
+function timelineMoment(m){
+  const prov = 'p-' + m.provenance.toLowerCase();
+  const kind = 'k-' + m.kind.toLowerCase();
+
+  if (m.kind === 'NOW') {
+    return `<div class="tl-i k-now">
+      <div class="tl-body"><div class="tl-now"></div></div>
+      <div class="tl-rule"></div>
+      <div class="tl-foot"><div class="tl-d">Today</div>
+        <div class="tl-t" style="color:var(--signal)">You are<br>here</div></div>
+    </div>`;
+  }
+
+  if (m.asset) {
+    const a = m.asset;
+    return `<div class="tl-i ${kind} ${prov} ${a.aspect}">
+      <div class="tl-body">
+        <a class="tl-img" href="${a.url}" target="_blank" rel="noopener">
+          <img src="${a.thumb}" alt="${esc(m.title)}" loading="lazy"
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
+        </a>
+      </div>
+      <div class="tl-rule"></div>
+      <div class="tl-foot">
+        <div class="tl-d">${esc(m.dateLabel)}</div>
+        <div class="tl-t">${esc(m.title)}</div>
+        <div class="tl-m">${esc(a.formatLabel)}${
+          a.views != null ? ' · ' + nf(a.views) + ' views' : ''}</div>
+      </div>
+    </div>`;
+  }
+
+  const [big, small] = splitDate(m.dateLabel);
+  return `<div class="tl-i ${kind} ${prov}">
+    <div class="tl-body">
+      <div class="tl-blk">
+        <div class="tl-stage">${esc(m.stage || '')}</div>
+        <div class="tl-big">${esc(big)}<span>${esc(small)}</span></div>
+      </div>
     </div>
-    <div class="ha-cap">
-      <div class="ha-t">${esc(a.title)}</div>
-      <div class="ha-m">${a.dateLabel} · ${a.formatLabel}${
-        a.views != null ? ` · <b>${nf(a.views)}</b> views` : ''}</div>
+    <div class="tl-rule"></div>
+    <div class="tl-foot">
+      <div class="tl-d">${m.daysAway != null ? 'In ' + m.daysAway + ' days' : 'After the hero'}</div>
+      <div class="tl-t">${esc(m.title)}</div>
+      ${m.detail ? `<div class="tl-sub">${esc(m.detail)}</div>` : ''}
+      <div class="tl-m">${m.provenance}</div>
     </div>
-  </a>`;
+  </div>`;
 }
 
 function buildLiveCover(d){
   const live = d.state === 'CAMPAIGN_LIVE';
   const m = d.metrics || {};
   const heroes = (d.assets && d.assets.heroes) || [];
-  const supp = (d.assets && d.assets.supporting) || [];
+  const tl = d.timeline || null;
 
   /* The dormancy figure is the deck's own headline turned into a
      before/after. It is the single most legible proof that something
@@ -1252,31 +1321,16 @@ function buildLiveCover(d){
       <div class="rl">${esc(d.read.line)}</div>
     </div>` : ''}
 
-    ${heroes.length ? `<div class="heroassets stagger">
-      ${heroes.map(heroAsset).join('')}
-    </div>` : ''}
-
-    ${supp.length ? `<div class="supp stagger">
-      ${supp.map(a=>`<a href="${a.url}" target="_blank" rel="noopener">
-        <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
-             onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
-        <span class="sl">${a.dateLabel}</span></a>`).join('')}
-    </div>` : ''}
-
     ${stats.length ? `<div class="livestats stagger">
       ${stats.map(([n,c])=>`<div class="ls"><div class="n">${n}</div><div class="c">${c}</div></div>`).join('')}
     </div>
     <div class="livesince" style="margin-top:.7rem">Since the Deep Dive${
       m.daysSinceBaseline ? ` · ${m.daysSinceBaseline} days` : ''}</div>` : ''}
 
-    ${(d.stages && d.stages.length) ? `<div class="spine stagger">
-      ${d.stages.map(s=>`<div class="sp ${s.status==='IN MOTION'?'on':s.status==='NEXT'?'next':''}"
-        title="${esc(s.point)}">
-        <div class="sp-l">${esc(s.label)}</div>
-        <div class="sp-s">${s.status}</div>
-      </div>`).join('')}
+    ${(tl && tl.moments && tl.moments.length) ? `<div class="tl stagger">
+      ${tl.moments.map(timelineMoment).join('')}
     </div>
-    <div class="livesince" style="margin-top:.7rem">From the Deep Dive strategy</div>` : ''}
+    ${tl.betweenNote ? `<div class="tl-note">${esc(tl.betweenNote)}</div>` : ''}` : ''}
 
     ${(d.coverage && d.coverage.length) ? `<div class="cov">${
       d.coverage.map(esc).join(' · ')}</div>` : ''}

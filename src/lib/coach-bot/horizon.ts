@@ -407,6 +407,27 @@ async function projectSavedPlan(slug: string, now: number): Promise<{ events: Ca
   }
 }
 
+/**
+ * Every upcoming event this system knows about, merged the same way
+ * `getHorizon` merges them — manual first, plan projection filling in.
+ *
+ * `getHorizon` windows aggressively (7 / 7-14 / 30 days) because the Coach
+ * reasons about what is imminent. A campaign timeline needs to see the album
+ * five months out, which is beyond every one of those windows. Rather than
+ * add a fourth window or let a second caller reimplement the merge — which is
+ * how two surfaces end up disagreeing about whose plan is whose — this
+ * exposes the merged list and lets the caller choose.
+ */
+export async function listMergedEvents(slug: string, now = Date.now()): Promise<CampaignEvent[]> {
+  const [manual, fromPlan] = await Promise.all([
+    listEvents(slug), projectSavedPlan(slug, now),
+  ]);
+  const seen = new Set(manual.map(e => `${e.eventDate}|${e.title}`));
+  return [...manual, ...fromPlan.events.filter(e => !seen.has(`${e.eventDate}|${e.title}`))]
+    .filter(e => e.status !== 'CANCELLED')
+    .sort(sortByDate);
+}
+
 export async function getHorizon(slug: string, now = Date.now()): Promise<CampaignHorizon> {
   const [manual, meta, fromPlan] = await Promise.all([
     listEvents(slug), getMeta(slug), projectSavedPlan(slug, now),
