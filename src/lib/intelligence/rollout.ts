@@ -145,6 +145,8 @@ export interface RolloutItem {
   spineStatus: 'IN MOTION' | 'NEXT' | 'AHEAD' | 'COMPLETE' | null;
   needTags: NeedTag[];
   recommendation: string;
+  /** Present only on ideas that earn a picture. See PlanItem.pitch. */
+  pitch: PlanItem['pitch'] | null;
   campaignEvidence: RolloutEvidence;
   grokResearch: RolloutResearch;
   lastUpdated: string;
@@ -178,6 +180,28 @@ export interface PlanItem {
   human?: { statedBy: string; statedAt: string; precision: 'day' | 'month' };
   /** Seed status for items with no Deep Dive anchor to derive one from. */
   seedStatus?: RolloutStatus;
+  /**
+   * How this idea presents when it is shown to people rather than read by
+   * a model.
+   *
+   * Selection is intelligence — which ideas are live, which have evidence,
+   * which are still possibilities. Phrasing and imagery are editorial, and
+   * they belong next to the item rather than inside a renderer, so that the
+   * words a team reads and the record a model reads can never drift apart.
+   *
+   * An item WITHOUT a pitch is not missing anything. It means this is not a
+   * creative idea you would put a picture against: either campaign
+   * mechanics that belong on the Campaign tab, or a partner conversation
+   * that belongs in a line rather than a frame.
+   */
+  pitch?: {
+    /** Six words at most. The thing itself, not a description of it. */
+    headline: string;
+    /** One sentence. Never two. */
+    line: string;
+    /** A real asset on this artist's channel. Never stock, never generated. */
+    imageId: string;
+  };
 }
 
 /**
@@ -223,6 +247,12 @@ const CHVRCHES_PLAN: PlanItem[] = [
     spine: true,
     commitment: 'COMMITTED',
     deepDivePoint: 'Single: official music video with the pre-party Premiere they already run.',
+    pitch: {
+      headline: 'Make the first hero an event',
+      line: 'Pre-party, Premiere, and somewhere to go when it ends.',
+      /* The Screen Violence pre-party stream. This already happened here. */
+      imageId: '0XoMu7Bz7YE',
+    },
   },
   {
     key: 'second_destination',
@@ -242,6 +272,12 @@ const CHVRCHES_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint:
       '+7-14 days: a second destination — lyric video, live, or a performance while attention is still up.',
+    pitch: {
+      headline: 'Give every hero a second destination',
+      line: 'Lyric, live or performance inside the next 7-14 days.',
+      /* The deck's own "extend the moment" image. */
+      imageId: 'fB4gjiMVKFI',
+    },
   },
   {
     key: 'every_song_home',
@@ -280,6 +316,11 @@ const CHVRCHES_PLAN: PlanItem[] = [
     commitment: 'POSSIBILITY',
     seedStatus: 'EXPLORING',
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
+    pitch: {
+      headline: 'CHVRCHES in Churches',
+      line: 'Could January become a live series people come back for?',
+      imageId: 'fGiqCmZvkJ8',
+    },
   },
   {
     key: 'top_fans',
@@ -336,6 +377,11 @@ const CHVRCHES_PLAN: PlanItem[] = [
     deepDivePoint:
       'Always on: a CHVRCHES Station holding catalogue, live and the new record, between campaigns as well as during.',
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
+    pitch: {
+      headline: 'Build a CHVRCHES destination',
+      line: 'New record, catalogue and live archive programmed as one world.',
+      imageId: 'e1YqueG2gtQ',
+    },
   },
 ];
 
@@ -539,6 +585,7 @@ export function buildRollout(
       spine: p.spine,
       spineStatus: null,     // assigned below, across the whole spine
       needTags: p.needTags,
+      pitch: p.pitch ?? null,
       recommendation: p.recommendation,
       campaignEvidence: evidence,
       grokResearch: attachResearch(p, library, report.artistSlug, `ro_${report.artistSlug}_${p.key}`, researched),

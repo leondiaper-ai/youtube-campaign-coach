@@ -454,66 +454,54 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
 
 /* ── IDEAS ──────────────────────────────────────────────────────────
-   The rollout. Same type scale and the same two accent colours as the
-   rest of the deck — cyan is the question, magenta is the campaign. */
-.ideasnote{border:1px dashed var(--hair);border-radius:11px;padding:1.6rem 1.4rem;margin-top:1.6rem}
-.ideasq{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.1rem,2.2vw,1.6rem);
-  line-height:1.2;color:var(--cyan)}
+   Two slides that behave like the rest of the deck: image first, six
+   words, one line. The composition is deliberately unequal — a feature
+   and three supports — because four identical cards is what a product
+   does, not what a deck does. */
+.ideagrid{display:grid;grid-template-columns:1.45fr 1fr;gap:1.1rem;margin-top:1.3rem;align-items:start}
+.ideacol{display:grid;gap:1.1rem}
 
-.roll{margin-top:2.2rem;border-top:1px solid var(--hair)}
-.ri{display:grid;grid-template-columns:3.2rem 1fr;gap:0 1.4rem;padding:1.9rem 0;
-  border-bottom:1px solid var(--hair)}
-.ri-n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;
-  color:var(--smoke);font-variant-numeric:tabular-nums;padding-top:.15rem}
-.ri.live .ri-n{color:var(--signal)}
-.ri-h{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap}
-.ri-t{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
-  font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.08}
-.ri-s{font-size:.55rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  padding:.2rem .5rem;border:1px solid var(--hair);border-radius:4px;color:var(--smoke)}
-.ri-s.live{color:var(--signal);border-color:var(--signal)}
-.ri-s.next{color:var(--cyan);border-color:var(--cyan)}
-.ri-s.poss{color:var(--smoke);border-style:dashed}
-.ri-o{font-size:.92rem;color:var(--bone);margin-top:.55rem;max-width:60ch;line-height:1.55}
+.idea{display:block;position:relative;border-radius:12px;overflow:hidden;text-decoration:none;
+  color:inherit;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
+.idea:hover{transform:translateY(-3px);border-color:var(--signal)}
+.idea-img{position:relative;background:var(--coal)}
+.idea-img img{width:100%;height:100%;object-fit:cover;display:block}
+.idea-img::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,7,13,.12) 28%,rgba(8,7,13,.94) 100%)}
+.idea-cap{position:absolute;left:0;right:0;bottom:0;padding:1rem 1.1rem;z-index:2}
+.idea-h{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;line-height:1.05}
+.idea-l{color:#C6C1D4;line-height:1.4;margin-top:.35rem}
 
-/* Four labelled blocks. A definition list, not cards — cards would make
-   six of these look like a dashboard. */
-.ri-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-  gap:1.1rem 1.8rem;margin-top:1.25rem}
-.ri-b .k{font-size:.53rem;font-weight:700;letter-spacing:.17em;text-transform:uppercase;
-  color:var(--smoke);margin-bottom:.35rem}
-.ri-b .v{font-size:.81rem;line-height:1.6;color:#B9B4C8}
-.ri-b.acc .k{color:var(--signal)}
-.ri-b.acc .v{color:var(--paper)}
-.ri-b .v em{font-style:normal;color:var(--cyan)}
+/* The feature carries the slide. Everything about it is bigger, not just
+   its box — otherwise it is a large card rather than a lead. */
+.idea.feature .idea-img{aspect-ratio:16/10}
+.idea.feature .idea-h{font-size:clamp(1.4rem,2.9vw,2.25rem)}
+.idea.feature .idea-l{font-size:clamp(.8rem,1.25vw,.95rem);max-width:34ch}
+.idea.sub .idea-img{aspect-ratio:16/7}
+.idea.sub .idea-h{font-size:clamp(.95rem,1.55vw,1.18rem)}
+.idea.sub .idea-l{font-size:.73rem;max-width:40ch}
 
-/* Research sits behind a disclosure so the card stays readable and the
-   provenance stays one click away rather than gone. */
-.ri-e{margin-top:1.1rem}
-.ri-e summary{cursor:pointer;list-style:none;font-size:.57rem;font-weight:700;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--smoke);display:inline-flex;align-items:center;gap:.45rem;
-  padding:.32rem .7rem;border:1px solid var(--hair);border-radius:5px}
-.ri-e summary::-webkit-details-marker{display:none}
-.ri-e summary:hover{color:var(--paper);border-color:var(--smoke)}
-.ri-e[open] summary{color:var(--cyan);border-color:var(--cyan)}
-.ri-e .body{margin-top:.9rem;padding-left:1rem;border-left:2px solid var(--hair)}
-.ri-e .q{font-size:.78rem;color:var(--cyan);line-height:1.55;margin-bottom:.7rem}
-.ri-ex{margin-bottom:.9rem}
-.ri-ex .a{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.92rem}
-.ri-ex .b{font-size:.76rem;color:#B9B4C8;line-height:1.55;margin-top:.2rem}
-.ri-ex .m{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.3rem}
-.ri-ex .m a{color:var(--cyan)}
-.ri-none{font-size:.76rem;color:var(--smoke);line-height:1.6;max-width:58ch}
+/* Partner asks are a line, not a pillar. */
+.partners{margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--hair)}
+.pcrow{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.55rem}
+.pc{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.82rem;
+  padding:.32rem .85rem;border:1px solid var(--hair);border-radius:999px;color:var(--bone)}
 
-.ri-up{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.6rem}
-.ri-up a{display:block;width:74px;border-radius:4px;overflow:hidden;border:1px solid var(--hair)}
-.ri-up img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;opacity:.75}
-.ri-up a:hover img{opacity:1}
+/* References. Same grammar as the ideas — picture, name, six words. */
+.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(208px,1fr));gap:1.1rem;margin-top:1.4rem}
+.ref{display:block;text-decoration:none;color:inherit}
+.ref-img{aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--coal);
+  border:1px solid var(--hair)}
+.ref-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ref-a{font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--cyan);margin-top:.7rem}
+.ref-i{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.02rem;
+  line-height:1.15;margin-top:.3rem}
 
-@media(max-width:720px){
-  .ri{grid-template-columns:1fr;gap:.5rem}
-  .ri-n{padding-top:0}
-}
+.refq{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--cyan);
+  font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.2rem 0 1.3rem}
+
+@media(max-width:900px){ .ideagrid{grid-template-columns:1fr} }
 
 /* The cover carries more objects than any other slide, so it opens
    tighter and is allowed to size to its content rather than to 100vh. */
@@ -1432,126 +1420,118 @@ function buildBaselineMarker(d){
 }
 
 /* ── IDEAS ────────────────────────────────────────────────────────────
-   The rollout, rendered from the same payload the cover was built from.
-   There is no second fetch and no second copy of campaign state: the
-   spine above and the list below are two views of d.rollout.
+   Two slides, read from the same payload the cover was built from.
 
-   Three things this renderer will not do. It will not show an external
-   example that has not been verified — unverified candidates are counted
-   instead, because "none verified yet" and "nobody does this" are
-   different answers. It will not present a possibility in the same
-   clothes as a commitment. And it will not leave a blank where evidence
-   is missing; every absence says which kind of absence it is.        */
+   The rollout knows eight items, their state, their evidence, their
+   provenance and every research signal attached to them. This renderer
+   shows four pictures and a strip. That is not information thrown away —
+   it is the selection rule doing its job, and the rule is simple enough
+   to state: an item earns a picture when a person wrote it a pitch, and
+   a pitch only gets written for something you would want to talk about
+   in a room.
 
-const RI_STATUS = {
-  LIVE:       ['live', 'Live'],
-  COMPLETE:   ['',     'Complete'],
-  PLANNED:    ['next', 'Planned'],
-  RECOMMENDED:['next', 'Recommended'],
-  EXPLORING:  ['',     'Exploring'],
-};
+   Everything else stays in the payload for Watcher, Grok and anyone
+   inspecting evidence. The model reads more than the person does, which
+   is the correct way round.
 
-function rolloutExample(x){
-  const src = x.source
-    ? `<a href="${x.source}" target="_blank" rel="noopener">source</a>`
-    : 'no source link';
-  return `<div class="ri-ex">
-    <div class="a">${esc(x.artist)}</div>
-    <div class="b">${esc(x.observedBehaviour)}</div>
-    <div class="b" style="color:var(--smoke)">${esc(x.whyItMattersHere)}</div>
-    <div class="m">${x.date ? esc(x.date)+' · ' : ''}${x.verification} · ${src}</div>
-  </div>`;
+   The one thing this will not do is show an external reference that has
+   not been verified. An unverified claim about another artist's campaign
+   is not inspiration, it is a rumour with a thumbnail.                */
+
+const ytThumb = id => `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+const ytFallback = id =>
+  `this.onerror=null;this.src='https://i.ytimg.com/vi/${id}/hqdefault.jpg'`;
+
+/* The feature is whichever idea the campaign is actually walking into.
+   It follows the spine rather than a flag, so it moves on its own. */
+function pickFeature(ideas, items){
+  const nextTitle = (items.find(i => i.spineStatus === 'NEXT') || {}).title;
+  return ideas.find(i => i.title === nextTitle) || ideas[0];
 }
 
-function rolloutItem(it){
-  const [cls, word] = RI_STATUS[it.status] || ['', it.status];
-  const ev = it.campaignEvidence || {};
-  const rs = it.grokResearch || {};
-  const ex = rs.examples || [];
-
-  /* What has actually happened, in the order a person would ask it:
-     did somebody say so, and did anything get published. */
-  const evidence = ev.stated
-    ? `${esc(ev.stated.note)} <em>— ${esc(ev.stated.by)}, ${esc(ev.stated.at)}</em>`
-    : `<span style="color:var(--smoke)">${esc(ev.absence || 'Nothing recorded.')}</span>`;
-
-  const uploads = (ev.uploads || []).length
-    ? `<div class="ri-up">${ev.uploads.map(u=>`<a href="https://www.youtube.com/watch?v=${u.videoId}"
-         target="_blank" rel="noopener" title="${esc(u.title)}">
-         <img src="https://i.ytimg.com/vi/${u.videoId}/hqdefault.jpg" alt="${esc(u.title)}" loading="lazy"></a>`).join('')}</div>`
-    : '';
-
-  /* The headline line of research: a verified example if we have one,
-     an honest count if we do not. Never a gap. */
-  const signal = ex.length
-    ? `${ex.length} verified example${ex.length===1?'':'s'} — ${esc(ex[0].artist)}${ex.length>1?' and others':''}.`
-    : `<span style="color:var(--smoke)">${esc(rs.note || 'No research attached.')}</span>`;
-
-  return `<div class="ri ${it.status==='LIVE'?'live':''}">
-    <div class="ri-n">${String(it.ordinal).padStart(2,'0')}</div>
-    <div>
-      <div class="ri-h">
-        <div class="ri-t">${esc(it.title)}</div>
-        <span class="ri-s ${cls}">${esc(word)}</span>
-        ${it.commitment === 'POSSIBILITY'
-          ? '<span class="ri-s poss">Possibility</span>' : ''}
-      </div>
-      <div class="ri-o">${esc(it.objective)}</div>
-
-      <div class="ri-g">
-        <div class="ri-b"><div class="k">Timing</div><div class="v">${esc(it.timing)}</div></div>
-        <div class="ri-b"><div class="k">Why now</div><div class="v">${esc(it.rationale)}</div></div>
-        <div class="ri-b"><div class="k">Where it stands</div><div class="v">${evidence}${uploads}</div></div>
-        <div class="ri-b"><div class="k">Grok signal</div><div class="v">${signal}</div></div>
-      </div>
-
-      <div class="ri-b acc" style="margin-top:1.15rem">
-        <div class="k">What we'd do</div><div class="v">${esc(it.recommendation)}</div>
-      </div>
-
-      <details class="ri-e">
-        <summary>Evidence &amp; research</summary>
-        <div class="body">
-          <div class="q">Research question — ${esc(rs.question || '')}</div>
-          ${ex.length ? ex.map(rolloutExample).join('')
-            : `<div class="ri-none">${esc(rs.note || '')}</div>`}
-          <div class="ri-none" style="margin-top:.8rem">
-            ${it.origin === 'DEEP_DIVE'
-              ? `From the Deep Dive, ${esc(it.attribution.statedAt)}.`
-              : `Raised by ${esc(it.attribution.statedBy)}, ${esc(it.attribution.statedAt)}. Not a commitment.`}
-            ${ev.nextWatch ? ' Watching for: ' + esc(ev.nextWatch) : ''}
-          </div>
-        </div>
-      </details>
+function ideaFigure(it, cls){
+  const p = it.pitch;
+  return `<a class="idea ${cls}" href="${yt(p.imageId)}" target="_blank" rel="noopener">
+    <div class="idea-img">
+      <img src="${ytThumb(p.imageId)}" alt="" loading="lazy" onerror="${ytFallback(p.imageId)}">
     </div>
-  </div>`;
+    <div class="idea-cap">
+      <div class="idea-h">${esc(p.headline)}</div>
+      <div class="idea-l">${esc(p.line)}</div>
+    </div>
+  </a>`;
 }
 
 function buildIdeas(d){
   const ro = (d && d.rollout) || null;
   const items = (ro && ro.items) || [];
+
+  /* Ideas: anything with a pitch that is still ahead of us.
+     Partner conversations: possibilities nobody wrote a pitch for. */
+  const ideas = items.filter(i => i.pitch && i.status !== 'COMPLETE').slice(0, 4);
+  const partners = items.filter(i => !i.pitch && i.commitment === 'POSSIBILITY');
+
+  const feature = ideas.length ? pickFeature(ideas, items) : null;
+  const rest = ideas.filter(i => i !== feature);
+
+  /* Every verified, promoted example across the whole rollout, deduped.
+     Empty is the normal answer today, and the slide says so once. */
+  const seen = {};
+  const refs = [];
+  for (const it of items) {
+    for (const x of (it.grokResearch && it.grokResearch.examples) || []) {
+      if (seen[x.id]) continue;
+      seen[x.id] = 1;
+      refs.push(x);
+    }
+  }
+  const waiting = items.reduce((n, i) =>
+    n + ((i.grokResearch && i.grokResearch.awaitingVerification) || 0), 0);
   const q = ro && ro.currentQuestion;
 
-  const head = `<section class="slide" data-t="Ideas">
+  return `<section class="slide" data-t="Campaign ideas">
+  ${bleedImg(feature ? feature.pitch.imageId : A.heroImages.station,'strong')}
   <div class="inner">
     <div class="label">Ideas</div>
-    <h2 class="display big" style="max-width:20ch">What could this<br>
-      <span style="color:var(--cyan)">look like?</span></h2>
-    <p class="sub">The rollout from here, with what we already know about this campaign and
-      what other artists have actually been observed doing — not a list of best practice.</p>
-    ${q ? `<div class="ideasnote">
-      <div class="label" style="color:var(--cyan)">The current question</div>
-      <div class="ideasq">${esc(q.question)}</div>
-      <p class="sub" style="margin-top:.9rem">Because <b>${esc(q.becauseOf)}</b> is the next thing this
-        campaign has to get right. It changes when the campaign does.</p>
+    <h2 class="display big" style="max-width:16ch;margin-bottom:.2rem">What could this<br>
+      <span style="color:var(--signal)">become?</span></h2>
+
+    ${feature ? `<div class="ideagrid stagger">
+      ${ideaFigure(feature,'feature')}
+      <div class="ideacol">${rest.map(i=>ideaFigure(i,'sub')).join('')}</div>
     </div>` : ''}
-    ${items.length ? `<div class="roll">${items.map(rolloutItem).join('')}</div>`
-      : `<div class="ideasnote"><p class="sub">No rollout has been written for this campaign yet.</p></div>`}
-    ${(ro && ro.limitations || []).length
-      ? `<div class="cov" style="margin-top:2rem">${ro.limitations.map(esc).join(' · ')}</div>` : ''}
+
+    ${partners.length ? `<div class="partners">
+      <div class="label" style="color:var(--cyan)">Partner conversations</div>
+      <div class="pcrow">${partners.map(p=>`<span class="pc">${esc(p.title)}</span>`).join('')}</div>
+    </div>` : ''}
+  </div>
+</section>
+
+<section class="slide" data-t="References">
+  ${bleedImg(A.heroImages.live,'strong')}
+  <div class="inner">
+    <div class="label" style="color:var(--cyan)">Elsewhere</div>
+    ${refs.length ? `
+      <h2 class="display big" style="max-width:14ch">Worth<br>
+        <span style="color:var(--cyan)">stealing.</span></h2>
+      <div class="refs stagger">
+        ${refs.slice(0,4).map(x=>`<a class="ref"${
+          x.source ? ` href="${x.source}" target="_blank" rel="noopener"` : ''}>
+          <div class="ref-img">${x.relevantRef ? `<img src="${ytThumb(x.relevantRef)}" alt=""
+             loading="lazy" onerror="${ytFallback(x.relevantRef)}">` : ''}</div>
+          <div class="ref-a">${esc(x.artist)}</div>
+          <div class="ref-i">${esc(x.observedBehaviour)}</div>
+        </a>`).join('')}
+      </div>`
+    : `
+      <h2 class="display big" style="max-width:14ch">Nothing<br>
+        <span style="color:var(--cyan)">verified yet.</span></h2>
+      ${q ? `<div class="refq">${esc(q.question)}</div>` : ''}
+      <p class="sub" style="max-width:42ch">${waiting} candidate${waiting === 1 ? '' : 's'} in the library.
+        None reaches this page until somebody has checked it against the channel.</p>`}
   </div>
 </section>`;
-  return head;
 }
 
 /* ── Tabs ─────────────────────────────────────────────────────────── */
