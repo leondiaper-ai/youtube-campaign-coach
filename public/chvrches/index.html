@@ -317,6 +317,9 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
   line-height:.92;margin-top:.15rem;text-transform:uppercase}
 .ident-k{font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
   color:var(--smoke);margin-top:.7rem}
+.ident-line{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
+  font-size:clamp(.95rem,1.9vw,1.35rem);color:var(--bone)}
+.ident-line b{color:var(--paper);text-transform:uppercase;letter-spacing:-.02em}
 
 .livestate{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
 .livesince{font-size:.6rem;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
@@ -475,8 +478,8 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    The figure is the point. It is what turns "give every hero a second
    destination" into "0 of 4 heroes had one last time", and it is why
    these read as strategy rather than suggestion. */
-.ideagrid{display:grid;grid-template-columns:1.28fr 1fr;gap:.9rem;margin-top:1rem;align-items:start}
-.ideacol{display:grid;gap:.9rem}
+.ideagrid{display:grid;gap:.9rem;margin-top:.9rem}
+.ideacol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem}
 
 .idea{display:block;position:relative;border-radius:12px;overflow:hidden;text-decoration:none;
   color:inherit;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
@@ -500,11 +503,11 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea-r span{display:inline-block;min-width:2.1rem;font-size:.53rem;font-weight:700;
   letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);vertical-align:1px}
 
-.idea.feature .idea-img{aspect-ratio:16/10.6}
+.idea.feature .idea-img{aspect-ratio:16/6}
 .idea.feature .idea-ev{font-size:clamp(1rem,1.85vw,1.4rem)}
 .idea.feature .idea-h{font-size:clamp(1.25rem,2.5vw,1.95rem)}
-.idea.feature .idea-r{font-size:.82rem;max-width:44ch}
-.idea.sub .idea-img{aspect-ratio:16/7.6}
+.idea.feature .idea-r{font-size:.82rem;max-width:52ch}
+.idea.sub .idea-img{aspect-ratio:16/9.6}
 .idea.sub .idea-ev{font-size:.82rem}
 .idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
 
@@ -533,7 +536,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .refq{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--cyan);
   font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.1rem 0 1.1rem}
 
-@media(max-width:900px){ .ideagrid{grid-template-columns:1fr} }
+@media(max-width:900px){ .ideacol{grid-template-columns:1fr} }
 
 /* The cover opens tighter than the other slides because it carries more
    objects. It keeps the deck's full-viewport height though: once the
@@ -1370,17 +1373,22 @@ function buildNext(tl){
 function campaignIdentity(d, small){
   const c = d && d.campaign;
   const artist = (d && d.artist && d.artist.name) || 'CHVRCHES';
-  const size = small
-    ? 'clamp(1.05rem,2.4vw,1.75rem)'
-    : 'clamp(1.25rem,3.1vw,2.3rem)';
-  const albumSize = small
-    ? 'clamp(1.9rem,5vw,3.4rem)'
-    : 'clamp(2.6rem,7.6vw,5.6rem)';
+
+  /* On the Ideas slides the identity is a signature, not a title page —
+     those slides have to carry four ideas with their evidence, and three
+     stacked lines of masthead was eating the room the content needed.
+     Same words, one line. */
+  if (small) {
+    return `<div class="ident-line reveal">${esc(artist)}
+      <span style="color:var(--signal)">× YouTube</span>${
+        c && c.name ? ` &nbsp;·&nbsp; <b>${esc(c.name)}</b>` : ''}</div>`;
+  }
 
   return `<div class="ident reveal">
-    <div class="ident-a" style="font-size:${size}">${esc(artist)}
+    <div class="ident-a" style="font-size:clamp(1.25rem,3.1vw,2.3rem)">${esc(artist)}
       <span style="color:var(--signal)">× YouTube</span></div>
-    ${c && c.name ? `<div class="ident-c" style="font-size:${albumSize}">${esc(c.name)}</div>` : ''}
+    ${c && c.name ? `<div class="ident-c"
+      style="font-size:clamp(2.6rem,7.6vw,5.6rem)">${esc(c.name)}</div>` : ''}
     <div class="ident-k">The YouTube campaign</div>
   </div>`;
 }
