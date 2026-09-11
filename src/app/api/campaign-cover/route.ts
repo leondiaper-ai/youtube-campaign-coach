@@ -87,6 +87,21 @@ interface CoverAsset {
   role: AssetRole;
 }
 
+/** The real period a delta covers, read off the snapshots it used. */
+type MetricWindow = { days: number; from: string; to: string } | null;
+
+function windowOf(d: { baseline: { ts: string }; last: { ts: string } } | null | undefined): MetricWindow {
+  if (!d) return null;
+  const from = new Date(d.baseline.ts).getTime();
+  const to = new Date(d.last.ts).getTime();
+  if (!Number.isFinite(from) || !Number.isFinite(to)) return null;
+  return {
+    days: Math.max(1, Math.round((to - from) / 86_400_000)),
+    from: d.baseline.ts.slice(0, 10),
+    to: d.last.ts.slice(0, 10),
+  };
+}
+
 function dateLabel(iso: string): string {
   const d = new Date(iso);
   if (!Number.isFinite(d.getTime())) return '';
@@ -227,12 +242,45 @@ export async function GET(req: NextRequest) {
 
     let viewsDelta: number | null = null;
     let subsDelta: number | null = null;
+    let viewsWindow: MetricWindow = null;
+    let subsWindow: MetricWindow = null;
+
     if (channelId && daysSinceBaseline) {
       const hist = await readHistory(channelId).catch(() => []);
       if (hist.length < 7) coverage.push(`Only ${hist.length} snapshot(s) in the series — movement figures are weak.`);
-      viewsDelta = deltaOver(hist, daysSinceBaseline, 'views')?.delta ?? null;
-      subsDelta = deltaOver(hist, daysSinceBaseline, 'subs')?.delta ?? null;
+
+      /* ── The window a figure ACTUALLY covers ────────────────────────
+         `deltaOver` asks for a number of days, then picks the newest
+         snapshot at or before that cutoff. When the series has a gap —
+         and this one does — the snapshot it lands on can be far older
+         than the days requested, so the figure covers a longer period
+         than the label would suggest.
+
+         Asking for 7 days and asking for 17 both returned +3,049,570
+         here, which is the tell: there is no snapshot between those two
+         cutoffs. Labelling that "17 days" would be a guess dressed as a
+         measurement, so the window is read back off the snapshots the
+         delta was actually computed from. */
+      const v = deltaOver(hist, daysSinceBaseline, 'views');
+      const sub = deltaOver(hist, daysSinceBaseline, 'subs');
+      viewsDelta = v ? v.delta : null;
+      subsDelta = sub ? sub.delta : null;
+      viewsWindow = windowOf(v);
+      subsWindow = windowOf(sub);
+
+      if (viewsWindow && daysSinceBaseline && viewsWindow.days > daysSinceBaseline + 2) {
+        coverage.push(
+          `Channel movement covers ${viewsWindow.days} days, not the ${daysSinceBaseline} since the Deep Dive — `
+          + 'the snapshot series has no reading in between.',
+        );
+      }
     }
+
+    /* When the silence actually broke — the FIRST asset after the Deep
+       Dive, not the most recent one. "340 days quiet until two days ago"
+       is about the moment it stopped being quiet. */
+    const firstNewUploadAt = postBaseline.length
+      ? postBaseline.map(a => a.publishedAt).sort()[0] : null;
 
     const lastUploadAt = (snap as any)?.lastUploadAt ?? null;
     const daysSinceUpload = lastUploadAt
@@ -292,7 +340,7 @@ export async function GET(req: NextRequest) {
        Assembled from observed facts and an explicitly hedged forward
        clause. No causal claim: the channel woke and the campaign started,
        and those are two statements sitting next to each other. */
-    const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays, daysSinceUpload, stages);
+    const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays, daysSinceUpload, stages, firstNewUploadAt);
 
     return NextResponse.json({
       state,
@@ -314,6 +362,9 @@ export async function GET(req: NextRequest) {
       },
       metrics: {
         viewsDelta, subsDelta,
+        /* What each figure actually covers. The deck prints this rather
+           than assuming both share the Deep Dive's window. */
+        viewsWindow, subsWindow,
         newUploads: postBaseline.length,
         baselineDormantDays,
         daysSinceBaseline,
@@ -348,17 +399,39 @@ function firstSentence(s: string): string {
   return (m ? m[1] : s).trim();
 }
 
+/** "today" / "yesterday" / "two days ago" / "6 days ago" / "on 9 September". */
+function agoPhrase(iso: string, now = Date.now()): string {
+  const d = Math.max(0, Math.round((now - new Date(iso).getTime()) / 86_400_000));
+  if (d === 0) return 'today';
+  if (d === 1) return 'yesterday';
+  if (d === 2) return 'two days ago';
+  if (d <= 13) return `${d} days ago`;
+  /* Past a fortnight "N days ago" stops being a thing anyone can picture,
+     so it becomes the date and stops ageing. */
+  return 'on ' + new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+}
+
 function buildRead(
   state: string, assetCount: number, dormantDays: number | null,
   daysSinceUpload: number | null, stages: { label: string; status: string }[],
-): { headline: string; line: string } | null {
+  firstNewUploadAt: string | null,
+): { kicker: string | null; headline: string; line: string } | null {
   if (state === 'BASELINE') return null;
+
+  /* The dormancy figure was a statistic sitting beside two others, which
+     made 340 days of silence look like a metric rather than the thing that
+     just changed. As a line of commentary above the read it does the job
+     it was always doing: it is the before, and the headline is the after. */
+  const kicker = dormantDays != null && firstNewUploadAt
+    ? `${dormantDays} days quiet until ${agoPhrase(firstNewUploadAt)}`
+    : null;
 
   const next = stages.find(s => s.status === 'NEXT');
   const woke = dormantDays != null && daysSinceUpload != null && daysSinceUpload < dormantDays;
 
   if (state === 'NEW_ACTIVITY') {
     return {
+      kicker,
       headline: 'New activity on the channel.',
       line: `${assetCount} upload${assetCount === 1 ? '' : 's'} since the analysis. Nobody has confirmed `
         + 'whether this is the campaign starting, so the deck is not claiming that it is.',
@@ -366,6 +439,7 @@ function buildRead(
   }
 
   return {
+    kicker,
     headline: woke ? 'The channel is awake.' : 'The campaign is live.',
     /* Forward, not hedged into meaninglessness. A confirmed date exists for
        the next moment, so "moving towards" is a statement about the plan

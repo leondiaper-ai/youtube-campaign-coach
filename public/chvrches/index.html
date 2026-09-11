@@ -431,7 +431,16 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
   line-height:1;color:var(--signal)}
 .ls .c{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
 
+/* The period a figure covers, under its own label. Quiet, but never absent
+   — an unlabelled delta invites the reader to assume the window they were
+   already thinking about. */
+.ls .w{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);
+  margin-top:.2rem;opacity:.8}
+
 .readline{margin-top:1.4rem;padding-left:1rem;border-left:2px solid var(--signal)}
+/* The before, sitting immediately above the after. */
+.readline .rk{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:.5rem}
 .readline .rh{font-family:'Space Grotesk',sans-serif;font-weight:700;
   font-size:clamp(1.1rem,2.2vw,1.75rem);line-height:1.12;letter-spacing:-.01em}
 .readline .rl{font-size:.82rem;color:var(--smoke);margin-top:.5rem;max-width:52ch;line-height:1.6}
@@ -1317,19 +1326,22 @@ function buildLiveCover(d){
   const heroes = (d.assets && d.assets.heroes) || [];
   const tl = d.timeline || null;
 
-  /* The dormancy figure is the deck's own headline turned into a
-     before/after. It is the single most legible proof that something
-     changed, which is why it gets a stat position of its own. */
-  const woke = m.baselineDormantDays != null && d.channel && d.channel.daysSinceUpload != null
-    && d.channel.daysSinceUpload < m.baselineDormantDays;
+  /* Two figures, each stating the period it covers, on itself.
+     A delta with no window is not a measurement — and these two windows
+     are NOT the same length, because subscriber readings in the snapshot
+     series are coarser than view readings. One line underneath saying
+     "since the Deep Dive" was quietly wrong about at least one of them.
 
+     The dormancy figure has left this row. 340 days of silence is the
+     thing that just changed, not a metric, so it now reads as commentary
+     directly above the headline it explains. And no "2 new uploads" stat:
+     both uploads are on the page to the left with their view counts on
+     them, and counting them again is the report habit this page is
+     trying not to have. */
+  const win = w => w ? `last ${w.days} day${w.days === 1 ? '' : 's'}` : 'period unknown';
   const stats = [
-    m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views'] : null,
-    m.subsDelta  != null ? [compact(m.subsDelta),  'subscribers'] : null,
-    woke ? [`${m.baselineDormantDays} days → active`, 'channel'] : null,
-    /* No "2 new uploads" stat. Both of them are on the page directly above
-       this line, at 238px, with their view counts on them. Counting them
-       again is the report habit this page is trying not to have. */
+    m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views', win(m.viewsWindow)] : null,
+    m.subsDelta  != null ? [compact(m.subsDelta),  'subscribers',   win(m.subsWindow)] : null,
   ].filter(Boolean);
 
   /* Background is the newest campaign asset where one exists, so the
@@ -1360,12 +1372,12 @@ function buildLiveCover(d){
 
       <div>
         ${stats.length ? `<div class="livestats stagger">
-          ${stats.map(([n,c])=>`<div class="ls"><div class="n">${n}</div><div class="c">${c}</div></div>`).join('')}
-        </div>
-        <div class="livesince" style="margin-top:.7rem">Since the Deep Dive${
-          m.daysSinceBaseline ? ` · ${m.daysSinceBaseline} days` : ''}</div>` : ''}
+          ${stats.map(([n,c,w])=>`<div class="ls"><div class="n">${n}</div>
+            <div class="c">${c}</div><div class="w">${esc(w)}</div></div>`).join('')}
+        </div>` : ''}
 
         ${d.read ? `<div class="readline reveal">
+          ${d.read.kicker ? `<div class="rk">${esc(d.read.kicker)}</div>` : ''}
           <div class="rh">${esc(d.read.headline)}</div>
           <div class="rl">${esc(d.read.line)}</div>
         </div>` : ''}
