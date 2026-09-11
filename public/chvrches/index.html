@@ -305,6 +305,19 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 @media (prefers-reduced-motion:reduce){.livedot{animation:none}}
 
 .livehead{display:flex;align-items:baseline;gap:.9rem;flex-wrap:wrap}
+
+/* The campaign's permanent identity. Three lines, three jobs, one of them
+   a headline — the album is what the page is the home of, so it carries
+   the weight; the artist identifier and the explanation sit either side of
+   it at a size that reads without competing. */
+.ident{margin-top:.8rem}
+.ident-a{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
+  line-height:1.05;color:var(--paper)}
+.ident-c{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.035em;
+  line-height:.92;margin-top:.15rem;text-transform:uppercase}
+.ident-k{font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.7rem}
+
 .livestate{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
 .livesince{font-size:.6rem;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
 
@@ -1308,9 +1321,43 @@ function buildNext(tl){
 
   if(!rows.length) return '';
   return `<div class="next stagger">
-    <div class="label" style="margin-bottom:.6rem">Next</div>
+    <div class="label" style="margin-bottom:.6rem">What's next</div>
     ${rows.map(([c,d,t])=>`<div class="nx ${c}">
       <div class="nx-d">${esc(d)}</div><div class="nx-t">${t}</div></div>`).join('')}
+  </div>`;
+}
+
+/* ── THE CAMPAIGN'S PERMANENT IDENTITY ────────────────────────────────
+   Three lines that do three different jobs, and only one of them is a
+   headline.
+
+     CHVRCHES × YOUTUBE   who and where. The deck's existing identifier.
+     ALL THE KING'S MEN   the campaign this page is the home of.
+     THE YOUTUBE CAMPAIGN what this environment is, for someone opening
+                          the URL cold who has never heard of Watcher.
+
+   The album name comes from the Coach plan, so it is the campaign the
+   team is actually running rather than a string typed into a deck. When
+   there is no album in the plan the middle line simply is not there and
+   the page carries the artist identifier alone — which is correct, not a
+   degraded state.
+
+   This stays put as the campaign moves. Everything below it changes. */
+function campaignIdentity(d, small){
+  const c = d && d.campaign;
+  const artist = (d && d.artist && d.artist.name) || 'CHVRCHES';
+  const size = small
+    ? 'clamp(1.05rem,2.4vw,1.75rem)'
+    : 'clamp(1.25rem,3.1vw,2.3rem)';
+  const albumSize = small
+    ? 'clamp(1.9rem,5vw,3.4rem)'
+    : 'clamp(2.6rem,7.6vw,5.6rem)';
+
+  return `<div class="ident reveal">
+    <div class="ident-a" style="font-size:${size}">${esc(artist)}
+      <span style="color:var(--signal)">× YouTube</span></div>
+    ${c && c.name ? `<div class="ident-c" style="font-size:${albumSize}">${esc(c.name)}</div>` : ''}
+    <div class="ident-k">The YouTube campaign</div>
   </div>`;
 }
 
@@ -1363,13 +1410,12 @@ function buildLiveCover(d){
   <div class="inner">
     <div class="livehead">
       <div class="livestate"><span class="livedot"></span>${
-        live ? 'The campaign is live' : 'New activity observed'}</div>
+        live ? 'Live campaign update' : 'New activity observed'} · ${fmtDate(d.generatedAt)}</div>
       ${d.deepDive && d.deepDive.capturedAt
         ? `<div class="livesince">Deep Dive captured ${fmtDate(d.deepDive.capturedAt)}</div>` : ''}
     </div>
 
-    <h1 class="display reveal" style="font-size:clamp(2.3rem,7vw,5.4rem);line-height:.96;margin-top:.7rem">
-      CHVRCHES<br><span style="color:var(--signal)">× YouTube</span></h1>
+    ${campaignIdentity(d)}
 
     <div class="covergrid">
       <div>
@@ -1492,7 +1538,8 @@ function buildIdeas(d){
   return `<section class="slide" data-t="Campaign ideas">
   ${bleedImg(feature ? feature.pitch.imageId : A.heroImages.station,'strong')}
   <div class="inner">
-    <div class="label">Ideas</div>
+    ${campaignIdentity(d, true)}
+    <div class="label" style="margin-top:1.4rem">Ideas</div>
     <h2 class="display big" style="max-width:16ch;margin-bottom:.2rem">What could this<br>
       <span style="color:var(--signal)">become?</span></h2>
 

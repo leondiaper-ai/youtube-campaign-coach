@@ -366,6 +366,25 @@ export async function GET(req: NextRequest) {
     ).catch(() => null);
     if (timeline) coverage.push(...timeline.coverage);
 
+    /* ── The campaign's name ──────────────────────────────────────────
+       A page called "CHVRCHES × YouTube" is an analytics view of an
+       artist. A page called "All The King's Men" is the home of a
+       campaign, and that is what someone from the label is opening.
+
+       The name is read from the album release in the Coach plan rather
+       than typed here, so it is the campaign the team is actually
+       running and it arrives for every artist without a code change.
+       No album in the plan means no campaign name, and the deck falls
+       back to the artist identifier alone rather than inventing one. */
+    const albumMoment = timeline?.moments.find(m => m.kind === 'ANCHOR') ?? null;
+    const campaign = albumMoment
+      ? { name: albumMoment.title, releaseDate: albumMoment.date, source: 'coach_plan' as const }
+      : null;
+
+    if (!campaign) {
+      coverage.push('No album is named in the campaign plan, so this page carries the artist name rather than the campaign name.');
+    }
+
     /* ── One read ──────────────────────────────────────────────────────
        Assembled from observed facts and an explicitly hedged forward
        clause. No causal claim: the channel woke and the campaign started,
@@ -375,6 +394,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       state,
       artist: { slug: who.slug, name: who.name, handle: who.artist?.channelHandle ?? null },
+      campaign,
       deepDive: {
         capturedAt,
         title: dive.title,
