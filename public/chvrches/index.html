@@ -350,6 +350,26 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    one viewport, and the composition is balanced rather than bottom-heavy. */
 .covergrid{display:grid;grid-template-columns:auto minmax(300px,1fr);
   gap:0 3.2rem;align-items:start;margin-top:1.2rem}
+
+/* The deck's standard scrim runs dark on the left and lets the photograph
+   come almost fully forward on the right, because on every other slide the
+   type is on the left. This cover now sets type on BOTH sides, so the same
+   gradient left the read and the dates floating on a busy crowd shot at
+   near-zero contrast.
+
+   This one keeps a lit band through the middle — the creative reads better
+   against a ground that is actually there — and closes down again on the
+   right where the type sits. */
+.slide.cover .bleed.strong::after{background:
+  linear-gradient(90deg,rgba(8,7,13,.93) 0%,rgba(8,7,13,.6) 26%,
+    rgba(8,7,13,.55) 46%,rgba(8,7,13,.84) 68%,rgba(8,7,13,.92) 100%),
+  linear-gradient(180deg,rgba(8,7,13,.72) 0%,transparent 30%,
+    transparent 64%,rgba(8,7,13,.72) 100%)}
+
+/* Same reason: the one sentence that says what happens next was set in the
+   caption grey, which survives on a flat panel and disappears on a photo. */
+.covergrid .readline .rl{color:#C6C1D4}
+.covergrid .nx-t{color:#ADA7BC}
 .covergrid .livestats{margin-top:0;padding-top:0;border-top:0}
 .covergrid .readline{margin-top:1.6rem}
 @media(max-width:900px){.covergrid{grid-template-columns:1fr;gap:1.8rem}}
