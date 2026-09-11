@@ -465,10 +465,15 @@ const CHVRCHES_PLAN: PlanItem[] = [
     opportunity: {
       name: 'CHVRCHES Station',
       line: 'An always-on destination connecting the new album, catalogue and live world.',
+      /* Metallica TV: a continuous live stream on the band's own channel
+         playing videos, live cuts and full concerts across every era. It
+         has been running without a break since 6 Mar 2026 — which is the
+         figure worth carrying, because it is the one that describes the
+         format. Named by Leon, opened and read on 11 Sep 2026. */
       example: {
-        label: 'Metallica',
-        url: 'https://music.youtube.com/channel/UCbulh9WdLtEXiooRcYK7SWw',
-        observed: '58M monthly listeners on one artist destination',
+        label: 'Metallica TV',
+        url: 'https://www.youtube.com/watch?v=1fz60gNnSdU',
+        observed: 'catalogue, live cuts and full concerts, streaming without a break since March',
         checkedAt: '2026-09-11',
       },
     },
