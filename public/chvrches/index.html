@@ -481,10 +481,17 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .ideagrid{display:grid;gap:.9rem;margin-top:.9rem}
 .ideacol{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.9rem}
 
-.idea{display:block;position:relative;border-radius:12px;overflow:hidden;text-decoration:none;
-  color:inherit;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
+/* The picture is the card's background, not a block above the caption.
+   It was the other way round, with the caption absolutely positioned over
+   a fixed-ratio image — which is fine until the caption grows. Adding the
+   Deep Dive line would have pushed the evidence straight out of the top of
+   the frame with overflow:hidden quietly eating it. Now the ratio sets the
+   card's ambition and the content sets its floor. */
+.idea{position:relative;border-radius:12px;overflow:hidden;color:inherit;
+  border:1px solid var(--hair);transition:transform .2s,border-color .2s;
+  display:flex;flex-direction:column;justify-content:flex-end}
 .idea:hover{transform:translateY(-3px);border-color:var(--signal)}
-.idea-img{position:relative;background:var(--coal)}
+.idea-img{position:absolute;inset:0;background:var(--coal)}
 .idea-img img{width:100%;height:100%;object-fit:cover;display:block}
 .idea-img::after{content:'';position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(8,7,13,.1) 18%,rgba(8,7,13,.88) 62%,rgba(8,7,13,.97) 100%)}
@@ -499,7 +506,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea.noimg .idea-img{background:linear-gradient(150deg,rgba(255,45,120,.22),var(--coal) 70%)}
 .idea.noimg .idea-img img{display:none}
 
-.idea-cap{position:absolute;left:0;right:0;bottom:0;padding:.9rem 1rem;z-index:2}
+.idea-cap{position:relative;padding:.9rem 1rem;z-index:2}
 .idea-ev{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--signal);
   letter-spacing:.02em;line-height:1}
 .idea-h{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
@@ -509,13 +516,15 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea-r span{display:inline-block;min-width:2.1rem;font-size:.53rem;font-weight:700;
   letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);vertical-align:1px}
 
-.idea.feature .idea-img{aspect-ratio:16/6}
+.idea.feature{aspect-ratio:16/6.4}
 .idea.feature .idea-ev{font-size:clamp(1rem,1.85vw,1.4rem)}
 .idea.feature .idea-h{font-size:clamp(1.25rem,2.5vw,1.95rem)}
 .idea.feature .idea-r{font-size:.82rem;max-width:52ch}
-.idea.sub .idea-img{aspect-ratio:16/9.6}
+.idea.sub{aspect-ratio:16/10.4}
 .idea.sub .idea-ev{font-size:.82rem}
 .idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
+.idea.sub .idea-src{font-size:.64rem}
+.idea.sub .idea-src b{font-size:.46rem}
 
 /* ── YOUTUBE OPPORTUNITIES ───────────────────────────────────────────
    The three things we would like to explore with YouTube, under the four
