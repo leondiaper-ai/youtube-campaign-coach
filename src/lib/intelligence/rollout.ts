@@ -147,6 +147,8 @@ export interface RolloutItem {
   recommendation: string;
   /** Present only on ideas that earn a picture. See PlanItem.pitch. */
   pitch: PlanItem['pitch'] | null;
+  /** Present only on platform conversations. See PlanItem.opportunity. */
+  opportunity: PlanItem['opportunity'] | null;
   campaignEvidence: RolloutEvidence;
   grokResearch: RolloutResearch;
   lastUpdated: string;
@@ -221,6 +223,14 @@ export interface PlanItem {
      */
     frame?: 1 | 2 | 3;
   };
+  /**
+   * A conversation to have with YouTube rather than something we can do on
+   * our own. These are named and described, because "Top Fans" on its own
+   * means nothing to anyone outside the room — but they are deliberately
+   * NOT pitches, because a platform opportunity nobody has agreed to must
+   * not read like a campaign plan.
+   */
+  opportunity?: { name: string; line: string };
 }
 
 /**
@@ -363,6 +373,10 @@ const CHVRCHES_PLAN: PlanItem[] = [
     commitment: 'POSSIBILITY',
     seedStatus: 'EXPLORING',
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
+    opportunity: {
+      name: 'Top Fans 1%',
+      line: 'Activating and rewarding the campaign\'s most engaged fans.',
+    },
   },
   {
     key: 'youtube_nights',
@@ -380,6 +394,10 @@ const CHVRCHES_PLAN: PlanItem[] = [
     commitment: 'POSSIBILITY',
     seedStatus: 'EXPLORING',
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
+    opportunity: {
+      name: 'YouTube Nights',
+      line: 'CHVRCHES for the intimate-room, big-artist live format.',
+    },
   },
   {
     key: 'station',
@@ -400,12 +418,13 @@ const CHVRCHES_PLAN: PlanItem[] = [
     deepDivePoint:
       'Always on: a CHVRCHES Station holding catalogue, live and the new record, between campaigns as well as during.',
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
-    pitch: {
-      headline: 'Build a CHVRCHES destination',
-      evidence: '340 days quiet · ~74K views a day',
-      why: 'The catalogue earns at that rate with nothing published at all.',
-      doThis: 'Programme the new record, the catalogue and the live archive as one world.',
-      imageId: 'e1YqueG2gtQ',
+    /* Not a pitch. A Station is something YouTube builds with an artist,
+       not something a label ships on its own, so it belongs with the other
+       platform conversations rather than beside four things we can go and
+       do. It was appearing in both places, which is one idea twice. */
+    opportunity: {
+      name: 'CHVRCHES Station',
+      line: 'An always-on destination connecting the new album, catalogue and live world.',
     },
   },
 ];
@@ -611,6 +630,7 @@ export function buildRollout(
       spineStatus: null,     // assigned below, across the whole spine
       needTags: p.needTags,
       pitch: p.pitch ?? null,
+      opportunity: p.opportunity ?? null,
       recommendation: p.recommendation,
       campaignEvidence: evidence,
       grokResearch: attachResearch(p, library, report.artistSlug, `ro_${report.artistSlug}_${p.key}`, researched),

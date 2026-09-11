@@ -479,7 +479,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    destination" into "0 of 4 heroes had one last time", and it is why
    these read as strategy rather than suggestion. */
 .ideagrid{display:grid;gap:.9rem;margin-top:.9rem}
-.ideacol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem}
+.ideacol{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.9rem}
 
 .idea{display:block;position:relative;border-radius:12px;overflow:hidden;text-decoration:none;
   color:inherit;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
@@ -517,11 +517,24 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .idea.sub .idea-ev{font-size:.82rem}
 .idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
 
-/* Partner asks are a line on the inspiration slide, not a pillar. */
-.partners{margin-top:1.3rem;padding-top:.9rem;border-top:1px solid var(--hair)}
-.pcrow{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.55rem}
-.pc{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.82rem;
-  padding:.32rem .85rem;border:1px solid var(--hair);border-radius:999px;color:var(--bone)}
+/* ── YOUTUBE OPPORTUNITIES ───────────────────────────────────────────
+   The three things we would like to explore with YouTube, under the four
+   things we are recommending for the campaign.
+
+   They get real weight — a named row with a line each, not pill buttons —
+   because when this page is open in front of YouTube these are the asks.
+   But they stay under the playbook and carry no picture, because the
+   hierarchy has to hold: the playbook is what we are recommending, these
+   are conversations nobody has agreed to yet. */
+.opps{margin-top:1.2rem;padding-top:.95rem;border-top:1px solid var(--hair)}
+.opps-h{font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--cyan)}
+.opps-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem;margin-top:.7rem}
+.opp{border-left:2px solid rgba(56,224,214,.45);padding-left:.85rem}
+.opp-n{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
+  font-size:clamp(.98rem,1.6vw,1.22rem);color:var(--paper)}
+.opp-l{font-size:.76rem;line-height:1.45;color:#ADA7BC;margin-top:.25rem}
+@media(max-width:900px){ .opps-row{grid-template-columns:1fr;gap:.9rem} }
 
 /* References. Picture, artist, mechanic, one line of what it means here. */
 .refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:1.1rem;margin-top:1.2rem}
@@ -1572,7 +1585,10 @@ function buildIdeas(d){
   const heroes = (d.assets && d.assets.heroes) || [];
 
   const ideas = items.filter(i => i.pitch && i.status !== 'COMPLETE').slice(0, 4);
-  const partners = items.filter(i => !i.pitch && i.commitment === 'POSSIBILITY');
+  /* Platform conversations. Named and described, and sitting under the
+     playbook rather than beside it — these are things to explore with
+     YouTube, not things this campaign has decided to do. */
+  const opps = items.filter(i => i.opportunity);
   const feature = ideas.length ? pickFeature(ideas, items) : null;
   const rest = ideas.filter(i => i !== feature);
 
@@ -1607,6 +1623,14 @@ function buildIdeas(d){
       ${ideaFigure(feature,'feature')}
       <div class="ideacol">${rest.map(i=>ideaFigure(i,'sub')).join('')}</div>
     </div>` : ''}
+
+    ${opps.length ? `<div class="opps stagger">
+      <div class="opps-h">YouTube opportunities</div>
+      <div class="opps-row">${opps.map(o=>`<div class="opp">
+        <div class="opp-n">${esc(o.opportunity.name)}</div>
+        <div class="opp-l">${esc(o.opportunity.line)}</div>
+      </div>`).join('')}</div>
+    </div>` : ''}
   </div>
 </section>
 
@@ -1638,10 +1662,6 @@ function buildIdeas(d){
       <p class="sub" style="max-width:44ch">${waiting} candidate${waiting === 1 ? '' : 's'} in the library.
         None reaches this page until somebody has checked it against the channel.</p>`}
 
-    ${partners.length ? `<div class="partners">
-      <div class="label" style="color:var(--cyan)">Partner conversations</div>
-      <div class="pcrow">${partners.map(p=>`<span class="pc">${esc(p.title)}</span>`).join('')}</div>
-    </div>` : ''}
   </div>
 </section>`;
 }
