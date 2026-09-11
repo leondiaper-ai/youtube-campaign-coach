@@ -339,12 +339,27 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .ha-m{font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);margin-top:.4rem}
 .ha-m b{color:var(--signal);font-weight:700}
 
+/* The cover splits. The campaign creative is tall — two 9:16 frames at
+   238px are 423px high — and stacking the figures, the read and the dates
+   underneath pushed the most important sentence on the page below the
+   fold. It also left the right half of a full-bleed photograph carrying
+   nothing at all.
+
+   So the creative holds the left and everything that interprets it holds
+   the right, on the same baseline. The whole campaign state now lands in
+   one viewport, and the composition is balanced rather than bottom-heavy. */
+.covergrid{display:grid;grid-template-columns:auto minmax(300px,1fr);
+  gap:0 3.2rem;align-items:start;margin-top:1.2rem}
+.covergrid .livestats{margin-top:0;padding-top:0;border-top:0}
+.covergrid .readline{margin-top:1.6rem}
+@media(max-width:900px){.covergrid{grid-template-columns:1fr;gap:1.8rem}}
+
 /* ── NEXT ───────────────────────────────────────────────────────────
    Campaign time as three lines of type, not a component. The deck knows
    the whole schedule; it says the three dates that explain where we are.
    The first is the one that matters, so it is the only one at full
    weight — the rest guide the eye without competing for it. */
-.next{margin-top:1.8rem;padding-top:1.2rem;border-top:1px solid var(--hair);max-width:60ch}
+.next{margin-top:1.7rem;padding-top:1.2rem;border-top:1px solid var(--hair);max-width:60ch}
 .nx{display:flex;gap:1.2rem;align-items:baseline;padding:.32rem 0}
 .nx-d{flex:0 0 11.5rem;font-family:'Space Grotesk',sans-serif;font-weight:700;
   font-size:.98rem;letter-spacing:-.01em;color:var(--signal)}
@@ -438,7 +453,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 /* The cover carries more objects than any other slide, so it opens
    tighter and is allowed to size to its content rather than to 100vh. */
-.slide.cover{padding:4.6rem 0 2.6rem;min-height:auto}
+.slide.cover{padding:4.2rem 0 2.4rem;min-height:auto}
 
 
 </style>
@@ -1284,21 +1299,28 @@ function buildLiveCover(d){
     <h1 class="display reveal" style="font-size:clamp(2.3rem,7vw,5.4rem);line-height:.96;margin-top:.7rem">
       CHVRCHES<br><span style="color:var(--signal)">× YouTube</span></h1>
 
-    ${heroes.length ? `<div class="label" style="margin-top:1.8rem">Now</div>
-    <div class="heroassets stagger">${heroes.map(heroAsset).join('')}</div>` : ''}
+    <div class="covergrid">
+      <div>
+        ${heroes.length ? `<div class="label">Now</div>
+        <div class="heroassets stagger" style="margin-top:.9rem">${
+          heroes.map(heroAsset).join('')}</div>` : ''}
+      </div>
 
-    ${stats.length ? `<div class="livestats stagger">
-      ${stats.map(([n,c])=>`<div class="ls"><div class="n">${n}</div><div class="c">${c}</div></div>`).join('')}
+      <div>
+        ${stats.length ? `<div class="livestats stagger">
+          ${stats.map(([n,c])=>`<div class="ls"><div class="n">${n}</div><div class="c">${c}</div></div>`).join('')}
+        </div>
+        <div class="livesince" style="margin-top:.7rem">Since the Deep Dive${
+          m.daysSinceBaseline ? ` · ${m.daysSinceBaseline} days` : ''}</div>` : ''}
+
+        ${d.read ? `<div class="readline reveal">
+          <div class="rh">${esc(d.read.headline)}</div>
+          <div class="rl">${esc(d.read.line)}</div>
+        </div>` : ''}
+
+        ${buildNext(tl)}
+      </div>
     </div>
-    <div class="livesince" style="margin-top:.7rem">Since the Deep Dive${
-      m.daysSinceBaseline ? ` · ${m.daysSinceBaseline} days` : ''}</div>` : ''}
-
-    ${d.read ? `<div class="readline reveal">
-      <div class="rh">${esc(d.read.headline)}</div>
-      <div class="rl">${esc(d.read.line)}</div>
-    </div>` : ''}
-
-    ${buildNext(tl)}
 
     ${(d.coverage && d.coverage.length) ? `<div class="cov">${
       d.coverage.map(esc).join(' · ')}</div>` : ''}
