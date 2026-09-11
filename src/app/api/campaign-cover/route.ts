@@ -282,6 +282,36 @@ export async function GET(req: NextRequest) {
     const firstNewUploadAt = postBaseline.length
       ? postBaseline.map(a => a.publishedAt).sort()[0] : null;
 
+    /* ── What the campaign itself has earned ──────────────────────────
+       The lifetime view total on the assets published since the Deep Dive.
+       For assets a day or two old, lifetime IS campaign-period — there is
+       no earlier life for the number to include. That stops being true as
+       they age, which is why the label says "on the new assets" rather
+       than "this period", and why the share below is guarded.
+
+       This is the figure that keeps the page honest. +3.05M channel views
+       sitting under THE CAMPAIGN IS LIVE reads as campaign performance,
+       and almost none of it is: the channel was dormant for all but two
+       days of that window and earns roughly 74,000 a day doing nothing.
+       Putting the campaign's own number beside it, at the same size, is
+       the difference between a page that informs and a page that flatters. */
+    const campaignViews = postBaseline.reduce(
+      (n, a) => n + (a.views ?? 0), 0) || null;
+
+    /* Only a fraction if every asset was published inside the window the
+       channel figure covers — otherwise it is two different periods
+       divided by each other, which is not a percentage of anything. */
+    const windowStart = viewsWindow ? new Date(viewsWindow.from).getTime() : null;
+    const allInsideWindow = windowStart != null && postBaseline.every(
+      a => new Date(a.publishedAt).getTime() >= windowStart);
+
+    const campaignShare = campaignViews && viewsDelta && viewsDelta > 0 && allInsideWindow
+      ? campaignViews / viewsDelta : null;
+
+    if (campaignViews && !allInsideWindow) {
+      coverage.push('Asset totals and channel movement cover different periods, so no share is shown.');
+    }
+
     const lastUploadAt = (snap as any)?.lastUploadAt ?? null;
     const daysSinceUpload = lastUploadAt
       ? Math.round((Date.now() - new Date(lastUploadAt).getTime()) / 86_400_000) : null;
@@ -365,6 +395,11 @@ export async function GET(req: NextRequest) {
         /* What each figure actually covers. The deck prints this rather
            than assuming both share the Deep Dive's window. */
         viewsWindow, subsWindow,
+        /* The campaign's own number, and how much of the channel's
+           movement it accounts for. */
+        campaignViews,
+        campaignAssets: postBaseline.length,
+        campaignShare,
         newUploads: postBaseline.length,
         baselineDormantDays,
         daysSinceBaseline,

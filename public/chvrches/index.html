@@ -390,8 +390,8 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
    numbers that wrap are three numbers you read twice. Slightly smaller and
    slightly closer, which costs nothing — they are already the loudest
    thing in the column. */
-.covergrid .livestats{gap:1.7rem}
-.covergrid .ls .n{font-size:clamp(1.15rem,1.9vw,1.62rem)}
+.covergrid .livestats{gap:1.35rem}
+.covergrid .ls .n{font-size:clamp(1.05rem,1.75vw,1.5rem)}
 
 /* The portrait card is now the narrow one in the pair, so its caption needs
    its own scale. At the shared size the title and the date both wrapped,
@@ -1339,7 +1339,21 @@ function buildLiveCover(d){
      them, and counting them again is the report habit this page is
      trying not to have. */
   const win = w => w ? `last ${w.days} day${w.days === 1 ? '' : 's'}` : 'period unknown';
+
+  /* The campaign's own number leads. Channel views are the catalogue —
+     they were arriving before any of this started and would have arrived
+     anyway — so putting them first made the page read as if the campaign
+     had produced 3 million views. The share says plainly how much of the
+     movement the new work actually accounts for. */
+  const share = m.campaignShare != null
+    ? (m.campaignShare < 0.01 ? 'under 1% of channel views' : `${Math.round(m.campaignShare * 100)}% of channel views`)
+    : null;
+
   const stats = [
+    m.campaignViews != null
+      ? [nf(m.campaignViews), 'campaign views',
+         `${m.campaignAssets} new asset${m.campaignAssets === 1 ? '' : 's'}${share ? ' · ' + share : ''}`]
+      : null,
     m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views', win(m.viewsWindow)] : null,
     m.subsDelta  != null ? [compact(m.subsDelta),  'subscribers',   win(m.subsWindow)] : null,
   ].filter(Boolean);
