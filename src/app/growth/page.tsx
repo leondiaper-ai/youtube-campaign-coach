@@ -202,12 +202,6 @@ export default async function ControlPage() {
                 Coach
               </Link>
               <Link
-                href="/campaign-progress"
-                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-              >
-                Campaign Progress
-              </Link>
-              <Link
                 href="/resources"
                 className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
               >

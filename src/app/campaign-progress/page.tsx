@@ -6,9 +6,15 @@
  * that is the useful part: it shows at a glance which strategies are being
  * tracked and which are sitting in a deck nobody has reported back on.
  *
- * The nav points here rather than at one hardcoded artist, because a link
- * that only ever opens CHVRCHES teaches people the feature is about
- * CHVRCHES.
+ * ── NOT A PRODUCT SURFACE ─────────────────────────────────────────────
+ * This route is retained as an internal inspection view and is
+ * deliberately NOT in the Watcher navigation. The campaign progress
+ * intelligence is real and valuable, but people experience it through the
+ * artist Deep Dive deck — which is the thing they already open, already
+ * like, and already show to YouTube. Asking them to learn a second surface
+ * to read the same intelligence was the wrong architecture.
+ *
+ * The deck reads this data via /api/campaign-cover.
  */
 
 import Link from 'next/link';

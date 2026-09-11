@@ -282,6 +282,92 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
   .wall{grid-template-columns:repeat(2,1fr)}
   .bigthumbs{grid-template-columns:1fr}
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVE CAMPAIGN COVER
+   Added when Watcher confirms the campaign has started. Every value
+   below comes from the variables already declared at the top of this
+   file — this is the same deck, opening in a different state, not a
+   second design system bolted on.
+   ═══════════════════════════════════════════════════════════════════ */
+.tabs{display:flex;gap:.35rem;margin-right:.6rem}
+.tab{font:inherit;font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  padding:.42rem .8rem;border-radius:6px;border:1px solid transparent;background:transparent;
+  color:var(--smoke);cursor:pointer}
+.tab.on{color:var(--signal);border-color:var(--signal)}
+.tab:hover{color:var(--paper)}
+
+/* The one piece of motion in the deck. A campaign that is live should
+   look live, and a single slow pulse says it without a banner. */
+.livedot{width:7px;height:7px;border-radius:50%;background:var(--signal);display:inline-block;
+  margin-right:.5rem;vertical-align:middle;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
+@media (prefers-reduced-motion:reduce){.livedot{animation:none}}
+
+.livehead{display:flex;align-items:baseline;gap:.9rem;flex-wrap:wrap}
+.livestate{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
+.livesince{font-size:.6rem;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
+
+/* The hero assets. Deliberately large: these are the campaign's first
+   creative, not rows in a table. */
+.heroassets{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem;margin-top:1.6rem}
+.ha{display:block;text-decoration:none;color:inherit;position:relative;border-radius:12px;
+  overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s}
+.ha:hover{transform:translateY(-3px);border-color:var(--signal)}
+.ha-img{position:relative;aspect-ratio:16/9;background:var(--coal)}
+.ha-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ha-img::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 45%,rgba(8,7,13,.92) 100%)}
+.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.9rem 1rem;z-index:2}
+.ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1rem,1.7vw,1.4rem);
+  line-height:1.1;letter-spacing:-.01em}
+.ha-m{font-size:.6rem;letter-spacing:.13em;text-transform:uppercase;color:var(--smoke);margin-top:.4rem}
+.ha-m b{color:var(--signal);font-weight:700}
+
+.supp{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.5rem;margin-top:.9rem}
+.supp a{display:block;position:relative;border-radius:6px;overflow:hidden;text-decoration:none}
+.supp img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;opacity:.72;transition:opacity .2s}
+.supp a:hover img{opacity:1}
+.supp .sl{position:absolute;left:.4rem;bottom:.3rem;font-size:.5rem;font-weight:700;color:#fff;
+  text-shadow:0 1px 5px rgba(0,0,0,.95)}
+
+/* Metrics as typography, not KPI cards. Same .num/.cap scale the rest of
+   the deck uses for its statistics. */
+.livestats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1.4rem;margin-top:1.9rem;
+  padding-top:1.4rem;border-top:1px solid var(--hair)}
+.ls .n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.5rem,2.8vw,2.3rem);
+  line-height:1;color:var(--signal)}
+.ls .c{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
+
+/* The strategy spine. Four stages from the Deep Dive's own architecture. */
+.spine{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin-top:1.7rem}
+.sp{flex:1 1 150px;padding:.85rem 1rem;border-left:2px solid var(--hair);min-width:140px}
+.sp.on{border-left-color:var(--signal)}
+.sp.next{border-left-color:var(--cyan)}
+.sp-l{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;line-height:1.15}
+.sp-s{font-size:.55rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.45rem}
+.sp.on .sp-s{color:var(--signal)}
+.sp.next .sp-s{color:var(--cyan)}
+
+.readline{margin-top:1.9rem;padding-left:1rem;border-left:2px solid var(--signal)}
+.readline .rh{font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:clamp(1.1rem,2.2vw,1.75rem);line-height:1.12;letter-spacing:-.01em}
+.readline .rl{font-size:.82rem;color:var(--smoke);margin-top:.5rem;max-width:52ch;line-height:1.6}
+
+.cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
+
+/* IDEAS tab shell. */
+.ideasnote{border:1px dashed var(--hair);border-radius:11px;padding:1.6rem 1.4rem;margin-top:1.6rem}
+.ideasq{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.1rem,2.2vw,1.6rem);
+  line-height:1.2;color:var(--cyan)}
+
+@media(max-width:720px){
+  .heroassets{grid-template-columns:1fr}
+  .spine{flex-direction:column}
+  .sp{border-left-width:2px}
+}
+
 </style>
 </head>
 <body>
@@ -290,6 +376,10 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 <div class="chrome">
   <div class="chrome-l">CHVRCHES × YouTube — the next album</div>
   <div class="chrome-r">
+    <div class="tabs" style="display:none">
+      <button class="tab on" data-tab="campaign" onclick="switchTab('campaign')">Campaign</button>
+      <button class="tab" data-tab="ideas" onclick="switchTab('ideas')">Ideas</button>
+    </div>
     <button class="btn" onclick="togglePresent()">Present</button>
     <button class="btn" onclick="openSheet('appendix')">Analysis</button>
   </div>
@@ -298,6 +388,7 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 <div class="phint">← → navigate · esc exit</div>
 
 <div class="deck" id="deck"></div>
+<div class="deck" id="ideas" style="display:none"></div>
 <div class="sheet" id="sheet-appendix"><div class="sheet-in" id="appendixBody"></div></div>
 
 <script>
@@ -991,6 +1082,221 @@ document.getElementById('appendixBody').innerHTML = `
 
 `;
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE LIVE CAMPAIGN COVER
+
+   Watcher knows this artist has a strategic baseline and when it was
+   captured. Everything after that date is new. This block asks the
+   campaign-cover endpoint what has happened since, and if the campaign
+   has started it puts a new first slide in front of the deck.
+
+   ── WHY IT RENDERS AFTER THE DECK, NOT BEFORE ──────────────────────
+   The deck must never depend on a network call to exist. It renders
+   completely and synchronously first; the cover is prepended when and
+   if the data arrives. A slow API, an outage or a stale deploy all
+   produce the deck exactly as it has always been, which is the correct
+   degradation for a document people present from.
+
+   ── THE ONE CLAIM IT WILL NOT MAKE ─────────────────────────────────
+   The endpoint distinguishes CAMPAIGN_LIVE from NEW_ACTIVITY, and so
+   does the copy here. Uploads appearing is observation. A campaign
+   having started is something a person confirmed.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const COVER_API = 'https://youtube-campaign-coach.vercel.app/api/campaign-cover';
+let LIVE = null;
+
+const nf = n => n == null ? '—' : n.toLocaleString('en-GB');
+/* Big numbers want a shape, not nine digits: +3.05M reads instantly. */
+const compact = n => {
+  if (n == null) return '—';
+  const a = Math.abs(n), s = n < 0 ? '-' : '+';
+  if (a >= 1e6) return `${s}${(a/1e6).toFixed(2)}M`;
+  if (a >= 1e3) return `${s}${Math.round(a/1e3)}K`;
+  return `${s}${a}`;
+};
+
+function heroAsset(a){
+  return `<a class="ha" href="${a.url}" target="_blank" rel="noopener">
+    <div class="ha-img">
+      <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
+           onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
+    </div>
+    <div class="ha-cap">
+      <div class="ha-t">${esc(a.title)}</div>
+      <div class="ha-m">${a.dateLabel} · ${a.formatLabel}${
+        a.views != null ? ` · <b>${nf(a.views)}</b> views` : ''}</div>
+    </div>
+  </a>`;
+}
+
+function buildLiveCover(d){
+  const live = d.state === 'CAMPAIGN_LIVE';
+  const m = d.metrics || {};
+  const heroes = (d.assets && d.assets.heroes) || [];
+  const supp = (d.assets && d.assets.supporting) || [];
+
+  /* The dormancy figure is the deck's own headline turned into a
+     before/after. It is the single most legible proof that something
+     changed, which is why it gets a stat position of its own. */
+  const woke = m.baselineDormantDays != null && d.channel && d.channel.daysSinceUpload != null
+    && d.channel.daysSinceUpload < m.baselineDormantDays;
+
+  const stats = [
+    m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views'] : null,
+    m.subsDelta  != null ? [compact(m.subsDelta),  'subscribers'] : null,
+    woke ? [`${m.baselineDormantDays}d → active`, 'channel'] : null,
+    m.newUploads ? [String(m.newUploads), `new upload${m.newUploads === 1 ? '' : 's'}`] : null,
+  ].filter(Boolean);
+
+  /* Background is the newest campaign asset where one exists, so the
+     cover image changes as the campaign does. Falls back to the deck's
+     own opening image, which keeps the composition intact on a cold
+     cache rather than leaving a black rectangle. */
+  const bgId = heroes.length ? heroes[0].videoId : A.heroImages.open;
+
+  return `<section class="slide" data-t="Campaign live">
+  ${bleedImg(bgId,'strong')}
+  <div class="inner">
+    <div class="livehead">
+      <div class="livestate"><span class="livedot"></span>${
+        live ? 'The campaign is live' : 'New activity observed'}</div>
+      ${d.deepDive && d.deepDive.capturedAt
+        ? `<div class="livesince">Deep Dive captured ${fmtDate(d.deepDive.capturedAt)}</div>` : ''}
+    </div>
+
+    <h1 class="display reveal" style="font-size:clamp(2.3rem,7vw,5.4rem);line-height:.96;margin-top:.7rem">
+      CHVRCHES<br><span style="color:var(--signal)">× YouTube</span></h1>
+
+    ${d.read ? `<div class="readline reveal">
+      <div class="rh">${esc(d.read.headline)}</div>
+      <div class="rl">${esc(d.read.line)}</div>
+    </div>` : ''}
+
+    ${heroes.length ? `<div class="heroassets stagger">
+      ${heroes.map(heroAsset).join('')}
+    </div>` : ''}
+
+    ${supp.length ? `<div class="supp stagger">
+      ${supp.map(a=>`<a href="${a.url}" target="_blank" rel="noopener">
+        <img src="${a.thumb}" alt="${esc(a.title)}" loading="lazy"
+             onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
+        <span class="sl">${a.dateLabel}</span></a>`).join('')}
+    </div>` : ''}
+
+    ${stats.length ? `<div class="livestats stagger">
+      ${stats.map(([n,c])=>`<div class="ls"><div class="n">${n}</div><div class="c">${c}</div></div>`).join('')}
+    </div>
+    <div class="livesince" style="margin-top:.7rem">Since the Deep Dive${
+      m.daysSinceBaseline ? ` · ${m.daysSinceBaseline} days` : ''}</div>` : ''}
+
+    ${(d.stages && d.stages.length) ? `<div class="spine stagger">
+      ${d.stages.map(s=>`<div class="sp ${s.status==='IN MOTION'?'on':s.status==='NEXT'?'next':''}"
+        title="${esc(s.point)}">
+        <div class="sp-l">${esc(s.label)}</div>
+        <div class="sp-s">${s.status}</div>
+      </div>`).join('')}
+    </div>
+    <div class="livesince" style="margin-top:.7rem">From the Deep Dive strategy</div>` : ''}
+
+    ${(d.coverage && d.coverage.length) ? `<div class="cov">${
+      d.coverage.map(esc).join(' · ')}</div>` : ''}
+  </div>
+</section>`;
+}
+
+function fmtDate(iso){
+  const dt = new Date(/^\d{4}-\d{2}$/.test(iso) ? iso+'-01' : iso);
+  return isNaN(dt) ? iso : dt.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+}
+
+/* A divider, so the original analysis is visibly a different thing from
+   the live state rather than the second half of it. */
+function buildBaselineMarker(d){
+  return `<section class="slide light" data-t="Original Deep Dive" style="min-height:52vh">
+  <div class="inner">
+    <div class="label">The strategy underneath</div>
+    <h2 class="display big" style="max-width:18ch">Original Deep Dive</h2>
+    <p class="sub">Strategy captured ${d.deepDive && d.deepDive.capturedAt ? fmtDate(d.deepDive.capturedAt) : ''}.
+      Nothing below has been rewritten. It is the record of what we saw and what we recommended
+      at that date, and the campaign above is measured against it.</p>
+  </div>
+</section>`;
+}
+
+/* ── IDEAS ────────────────────────────────────────────────────────────
+   The shell only. Verified external research populates this once the
+   research verification run has happened; until then it states what it
+   is waiting for rather than showing unverified claims about other
+   artists as though they were established.                          */
+function buildIdeas(d){
+  const open = (d && d.stages || []).find(s=>s.status==='NEXT');
+  const q = open
+    ? `How are interesting artists handling ${open.label.toLowerCase()}?`
+    : 'How are interesting artists waking channels before a campaign?';
+  return `<section class="slide" data-t="Ideas">
+  <div class="inner">
+    <div class="label">Ideas</div>
+    <h2 class="display big" style="max-width:20ch">What could this<br>
+      <span style="color:var(--cyan)">look like?</span></h2>
+    <p class="sub">External YouTube behaviour worth stealing, matched to where this campaign
+      actually is — not a list of best practice.</p>
+    <div class="ideasnote">
+      <div class="label" style="color:var(--cyan)">The current question</div>
+      <div class="ideasq">${esc(q)}</div>
+      <p class="sub" style="margin-top:1.1rem">Nothing is shown here yet. Four external examples are in
+        the research library awaiting verification, and an example is only presented once somebody has
+        confirmed the behaviour against the channel and recorded a source. An unverified claim about
+        another artist's campaign is not inspiration, it is a rumour with a thumbnail.</p>
+    </div>
+  </div>
+</section>`;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+function switchTab(name){
+  const deck = document.getElementById('deck');
+  const ideas = document.getElementById('ideas');
+  const isIdeas = name === 'ideas';
+  deck.style.display  = isIdeas ? 'none' : '';
+  ideas.style.display = isIdeas ? '' : 'none';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.tab === name));
+  SLIDE_CACHE = null;
+  window.scrollTo(0,0);
+  observeAll();
+  updateProgress();
+}
+
+/* ── Fetch and mount ──────────────────────────────────────────────── */
+async function loadLiveCampaign(){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), 8000);
+  const r = await fetch(`${COVER_API}?slug=${A.meta.slug}`, {cache:'no-store', signal:ctrl.signal});
+  clearTimeout(t);
+  if(!r.ok) throw new Error('status '+r.status);
+  const d = await r.json();
+  LIVE = d;
+
+  /* BASELINE, NO_DEEP_DIVE and UNAVAILABLE all leave the deck exactly as
+     it was. Only real post-baseline activity changes the opening. */
+  if(d.state !== 'CAMPAIGN_LIVE' && d.state !== 'NEW_ACTIVITY') return;
+
+  const deck = document.getElementById('deck');
+  deck.insertAdjacentHTML('afterbegin', buildLiveCover(d) + buildBaselineMarker(d));
+
+  const ideas = document.getElementById('ideas');
+  if(ideas) ideas.innerHTML = buildIdeas(d);
+
+  document.querySelector('.tabs').style.display = 'flex';
+
+  /* The deck grew at the top, so re-measure and return the reader to it. */
+  SLIDE_CACHE = null;
+  window.scrollTo(0,0);
+  observeAll();
+  updateProgress();
+}
+
 /* ── Live refresh ──────────────────────────────────────────────── */
 async function refreshLive(){
   try{
@@ -1025,6 +1331,10 @@ observeAll();
 updateProgress();
 try{ renderStats(); }catch(e){ console.warn('[deck] stats unavailable', e); }
 try{ refreshLive(); }catch(e){ console.warn('[deck] live refresh unavailable', e); }
+/* The live campaign cover. Guarded and awaited nowhere — the deck is
+   already on screen by this point, and a failure here must leave it
+   exactly as it has always been. */
+loadLiveCampaign().catch(e=>console.warn('[deck] live campaign cover unavailable —', e.message));
 </script>
 </body>
 </html>
