@@ -31,6 +31,7 @@ import { getDeepDive } from './deepDiveStore';
 import { DEEP_DIVE_BY_NAME, SEEDED_DEEP_DIVES, normaliseName } from './deepDives';
 import { listHumanContext } from './humanContext';
 import { DECK_TO_ROSTER, deckSlugFor } from './identity';
+import { buildFreshnessReport, type FreshnessReport } from './freshness';
 import type { ArtistNeeds, NeedTag, DeepDiveContext } from './types';
 
 export interface ResolvedArtist {
@@ -231,6 +232,12 @@ export interface ArtistNeedsDetail extends ArtistNeeds {
   rosterMissing: boolean;
   /** Plain statements about what could NOT be derived. Never hidden. */
   derivedCoverage: string[];
+  /**
+   * Whether the Deep Dive's dated figures still match what Watcher sees.
+   * CHANGED does NOT retire a need — a need stays open until evidence shows
+   * it was met, and a campaign starting is not evidence that it worked.
+   */
+  deepDiveFreshness: FreshnessReport | null;
 }
 
 export async function getArtistNeeds(input: string): Promise<ArtistNeedsDetail> {
@@ -284,5 +291,14 @@ export async function getArtistNeeds(input: string): Promise<ArtistNeedsDetail> 
     resolvedBy: who.resolvedBy,
     rosterMissing: who.rosterMissing,
     derivedCoverage: coverage,
+    deepDiveFreshness: dive
+      ? buildFreshnessReport(dive, {
+          lastUploadAt: (snap as any)?.lastUploadAt ?? null,
+          subs: (snap as any)?.subs ?? null,
+          views: (snap as any)?.views ?? null,
+          uploads30d: (snap as any)?.uploads30d ?? null,
+          checkedAt: (snap as any)?.cachedAt ?? null,
+        })
+      : null,
   };
 }

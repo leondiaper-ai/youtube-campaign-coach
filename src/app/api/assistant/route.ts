@@ -22,6 +22,7 @@ import {
 import { BOUNDARY_RULES } from '@/lib/knowledge/evidence';
 import { runBoundaryChecks } from '@/lib/knowledge/__tests__/evidence.test';
 import { runMatchingChecks } from '@/lib/intelligence/__tests__/matching.test';
+import { runProgressChecks } from '@/lib/intelligence/__tests__/progress.test';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -46,6 +47,12 @@ export async function GET(req: NextRequest) {
      fails here rather than showing up as a silently unmatchable artist. */
   if (view === 'matching-checks') {
     return NextResponse.json(runMatchingChecks());
+  }
+  /* The progress suite. These guard the one claim this layer could make
+     wrongly and flatteringly: that an upload proves a recommendation was
+     implemented. */
+  if (view === 'progress-checks') {
+    return NextResponse.json(runProgressChecks());
   }
   if (view === 'read') {
     const slug = req.nextUrl.searchParams.get('slug') ?? '';

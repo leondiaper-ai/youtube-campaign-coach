@@ -53,6 +53,11 @@ import { deepDiveFor, getArtistNeeds, resolveArtist } from './needs';
 import { readHumanContext } from './humanContext';
 import { getResourceContext, listResourceContexts } from './resourceContexts';
 import { getRelevantResearch, getResearchOpportunities } from './match';
+import { buildFreshnessReport } from './freshness';
+import { listRecommendations } from './recommendationId';
+import { getCampaignProgress } from './campaignProgress';
+import { listProgress, setProgress, PROGRESS_STATES, ProvenanceError } from './progressStore';
+import { readLiveSnapByHandle } from '../kvCache';
 import { buildWorld } from './worldBuilder';
 import {
   NEED_TAGS, TAG_ALIASES, partitionTags,
@@ -124,6 +129,18 @@ export const INTEL_SPECS = [
     args: { artist: 'string — roster slug or artist name' },
   },
   {
+    name: 'get_campaign_progress',
+    description:
+      'THE LIVING CAMPAIGN RECORD. Every actionable Deep Dive recommendation with its human-confirmed lifecycle state, what the team actually did and when, what Watcher has observed since, whether a result is yet arguable, and any retained learning. The Deep Dive itself is never rewritten — progress is measured against it. Read `freshness` to see which of the deck\'s dated figures have since moved.',
+    args: { artist: 'string — roster slug or artist name' },
+  },
+  {
+    name: 'list_recommendation_progress',
+    description:
+      'The raw progress records for an artist: state, who stated it, when, the note, attached evidence and the full transition history. Use get_campaign_progress instead unless you specifically need the unjoined record.',
+    args: { artist: 'string — roster slug or artist name' },
+  },
+  {
     name: 'check_artist_aliases',
     description:
       'Health check on the deck-slug to roster-slug mapping. Returns each Deep Dive, the roster artist it points at, and whether that artist still exists. Run after any roster change: a broken alias shows up as an artist with a full Deep Dive reporting no needs, which reads exactly like missing data.',
@@ -190,6 +207,22 @@ export const INTEL_SPECS = [
     description:
       'Parks a channel or behaviour worth revisiting without claiming it is a case study yet. Use this instead of lowering the bar on add_research_candidate.',
     args: { subject: 'string', channelId: 'string, optional', whyInteresting: 'string', whatToCheck: 'string', sourceUrls: 'string[]', producedBy: 'string' },
+  },
+  {
+    name: 'record_recommendation_progress',
+    description:
+      'Records that a recommendation has moved state. IMPLEMENTED, RESULT and LEARNED are HUMAN-ONLY and will be refused for any other provenance — Watcher can see that uploads appeared, it cannot see that they appeared because of a recommendation, and intent is not in the public API. To record a relevant upload without claiming implementation, set provenance DERIVED and a state of PLANNED or leave the state unchanged; evidence accumulates either way. statedAt may be a month (yyyy-mm) when the exact day is genuinely unknown — preserve the uncertainty rather than inventing a date.',
+    args: {
+      artist: 'string',
+      recommendationId: 'string — from get_campaign_progress or get_deep_dive_context',
+      state: `One of: ${PROGRESS_STATES.join(', ')}`,
+      statedBy: 'string — a named person for human-only states',
+      statedAt: 'string — yyyy-mm-dd or yyyy-mm',
+      note: 'string — what was actually done',
+      provenance: 'HUMAN|DERIVED|INFERRED',
+      evidenceRefs: 'object[], optional — [{kind, ref, note, attachedBy}]',
+      supersedesId: 'string, optional — when a reworded recommendation broke the id link',
+    },
   },
   {
     name: 'verify_research_example',
@@ -308,12 +341,27 @@ export async function callIntelTool(
           note: 'No Deep Dive exists for this artist. Do not generate one from metrics and present it as our view — say plainly that no analysis exists and work from Watcher data, labelled as such.',
         };
       }
+      const snap = who.artist?.channelHandle
+        ? await readLiveSnapByHandle(who.artist.channelHandle).catch(() => null)
+        : null;
       return {
         found: true,
         source,
         rosterMissing: who.rosterMissing,
         evidenceClass: 'HUMAN',
         note: 'This is analysis a person wrote, not measurement. Quote it as our view. Figures inside it were captured on dataCapturedAt and may have moved.',
+        /* Minted at read time. The deck is never edited to add them. */
+        recommendations: listRecommendations(dive),
+        /* CURRENT / CHANGED / STALE / UNKNOWN per time-sensitive claim.
+           CHANGED means the analysis was true then and the campaign has
+           moved — never that the Deep Dive is wrong. */
+        freshness: buildFreshnessReport(dive, {
+          lastUploadAt: (snap as any)?.lastUploadAt ?? null,
+          subs: (snap as any)?.subs ?? null,
+          views: (snap as any)?.views ?? null,
+          uploads30d: (snap as any)?.uploads30d ?? null,
+          checkedAt: (snap as any)?.cachedAt ?? null,
+        }),
         deepDive: dive,
       };
     }
@@ -359,6 +407,20 @@ export async function callIntelTool(
 
     case 'get_research_opportunities':
       return getResearchOpportunities(String(args.artist ?? ''));
+
+    case 'get_campaign_progress':
+      return getCampaignProgress(String(args.artist ?? ''));
+
+    case 'list_recommendation_progress': {
+      const who = await resolveArtist(String(args.artist ?? ''));
+      const items = await listProgress(who.slug);
+      return {
+        artistSlug: who.slug, artistName: who.name, n: items.length, items,
+        note: items.length
+          ? 'IMPLEMENTED, RESULT and LEARNED were asserted by a named human. Uploads attached as evidence support an implementation; they never establish one.'
+          : 'No progress has been recorded. That means nobody has told us what was done, NOT that nothing was done.',
+      };
+    }
 
     case 'check_artist_aliases': {
       const list = await mergeArtistLists(ARTISTS, await listCustomArtists());
@@ -520,6 +582,27 @@ export async function callIntelTool(
       };
       await saveCaseStudy(c);
       return { stored: true, id: c.id, status: 'WATCHLIST' };
+    }
+
+    case 'record_recommendation_progress': {
+      const who = await resolveArtist(String(args.artist ?? ''));
+      try {
+        const rec = await setProgress({
+          artistSlug: who.slug,
+          recommendationId: String(args.recommendationId ?? ''),
+          state: args.state,
+          statedBy: String(args.statedBy ?? ''),
+          statedAt: String(args.statedAt ?? ''),
+          note: String(args.note ?? ''),
+          provenance: args.provenance,
+          evidenceRefs: Array.isArray(args.evidenceRefs) ? args.evidenceRefs : [],
+          supersedesId: args.supersedesId ?? null,
+        });
+        return { stored: true, recommendationId: rec.recommendationId, state: rec.state, statedBy: rec.statedBy };
+      } catch (e) {
+        if (e instanceof ProvenanceError) return { error: e.message, refused: true };
+        throw e;
+      }
     }
 
     case 'verify_research_example': {

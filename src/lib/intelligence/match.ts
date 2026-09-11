@@ -275,6 +275,13 @@ export interface ResearchOpportunities {
   artistSlug: string;
   artistName: string;
   deepDiveMissing: boolean;
+  /**
+   * Whether the Deep Dive figures behind these needs still hold. A need is
+   * NOT retired because a campaign started — implementation beginning is
+   * not evidence the need was met — but a researcher should know the
+   * situation has moved before going looking.
+   */
+  deepDiveFreshness: { overall: string; warnings: string[] } | null;
   gaps: ResearchGap[];
   /** Needs that already have verified, showable proof. Nothing to do. */
   covered: { tag: NeedTag; subject: string }[];
@@ -335,6 +342,9 @@ export async function getResearchOpportunities(artistInput: string): Promise<Res
     artistSlug: needsDetail.artistSlug,
     artistName: needsDetail.artistName,
     deepDiveMissing: needsDetail.deepDiveMissing,
+    deepDiveFreshness: needsDetail.deepDiveFreshness
+      ? { overall: needsDetail.deepDiveFreshness.overall, warnings: needsDetail.deepDiveFreshness.warnings }
+      : null,
     gaps,
     covered,
     watchlist,

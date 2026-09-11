@@ -27,6 +27,8 @@
  */
 
 import { getRelevantResearch, getResearchOpportunities } from './match';
+import { buildFreshnessReport, type FreshnessReport } from './freshness';
+import { listProgress } from './progressStore';
 import { deepDiveFor, resolveArtist } from './needs';
 import { readHumanContext } from './humanContext';
 import { getHorizon } from '../coach-bot/horizon';
@@ -53,6 +55,20 @@ export interface WorldBuilderPayload {
     /** Dated, from the campaign horizon. Separate from deck-stated plans. */
     knownPlans: { source: 'horizon' | 'deep_dive' | 'human_context'; text: string; freshness?: string }[];
     openQuestions: string[];
+    /**
+     * Whether the deck's dated figures still hold. The thesis above is NOT
+     * rewritten — it is what we concluded on its capture date, and that
+     * provenance is the point. This says which parts have moved since.
+     */
+    freshness: FreshnessReport | null;
+    /**
+     * What the team has actually done against this Deep Dive, human-stated.
+     * A page built on a thesis of dormancy while the campaign has started
+     * would be wrong in its first line, so this travels with the payload.
+     */
+    progress: {
+      recommendationId: string; state: string; statedBy: string; statedAt: string; note: string;
+    }[];
   };
 
   researchShortlist: {
@@ -114,6 +130,14 @@ export async function buildWorld(
 
   const human = await readHumanContext(who.slug).catch(() => []);
   const horizon = who.artist ? await getHorizon(who.slug).catch(() => null) : null;
+  const progress = await listProgress(who.slug).catch(() => []);
+  const freshness = dive ? buildFreshnessReport(dive, {
+    lastUploadAt: (snap as any)?.lastUploadAt ?? null,
+    subs: (snap as any)?.subs ?? null,
+    views: (snap as any)?.views ?? null,
+    uploads30d: (snap as any)?.uploads30d ?? null,
+    checkedAt: (snap as any)?.cachedAt ?? null,
+  }) : null;
 
   const knownPlans: WorldBuilderPayload['artistIntelligence']['knownPlans'] = [];
   if (horizon?.nextMajorMoment) {
@@ -140,6 +164,15 @@ export async function buildWorld(
   const opportunities = await getResearchOpportunities(who.slug).catch(() => null);
 
   const warnings: string[] = [];
+  /* First, because a stale thesis is a worse problem than a thin shortlist
+     and a reader stops at the first warning. */
+  for (const w of freshness?.warnings ?? []) warnings.push(`DEEP DIVE MOVED: ${w}`);
+  if (progress.length) {
+    warnings.push(
+      `${progress.length} recommendation(s) have human-confirmed progress. The Deep Dive thesis describes the `
+      + 'situation at its capture date, not today. Do not present it as the current state.',
+    );
+  }
   if (!dive) warnings.push(`No Deep Dive exists for ${who.name}. There is no thesis, no stated gaps and no constraints — do not invent them to fill the page.`);
   if (who.rosterMissing) warnings.push(`${who.name} did not resolve against the live roster, so no channel figures are included.`);
   if (!snap) warnings.push('No cached channel snapshot. Any figure on the page must come from the Deep Dive and be labelled with its capture date.');
@@ -182,6 +215,11 @@ export async function buildWorld(
       constraints,
       knownPlans,
       openQuestions: dive?.openQuestions ?? [],
+      freshness,
+      progress: progress.map(p => ({
+        recommendationId: p.recommendationId, state: p.state,
+        statedBy: p.statedBy, statedAt: p.statedAt, note: p.note,
+      })),
     },
     researchShortlist: shortlist,
     openOpportunities: {
