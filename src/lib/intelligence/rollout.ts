@@ -275,8 +275,12 @@ const CHVRCHES_PLAN: PlanItem[] = [
     pitch: {
       headline: 'Give every hero a second destination',
       line: 'Lyric, live or performance inside the next 7-14 days.',
-      /* The deck's own "extend the moment" image. */
-      imageId: 'fB4gjiMVKFI',
+      /* Good Girls — a real, checked asset on the channel. The deck's own
+         "extend the moment" illustration pointed at a video that no longer
+         resolves, and YouTube answers a dead id with a 120x90 grey frame
+         rather than a 404, so it rendered as a broken card instead of
+         failing loudly. Every id here has been fetched. */
+      imageId: 'du4kNAyjVCg',
     },
   },
   {
