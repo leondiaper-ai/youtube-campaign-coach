@@ -310,10 +310,23 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    /* ── TWO ORDERS, BECAUSE THE TIERS ANSWER DIFFERENT QUESTIONS ─────
+       The heroes are SELECTED — format weight first, then views inside a
+       format — because the question they answer is "what is this campaign
+       about", and the answer is not whichever Short went up this morning.
+
+       The strip is SEQUENCED. It is the campaign as it actually happened,
+       and a run of Shorts ordered by view count is not a run of anything:
+       it loses the countdown, the build, the gap before the hero. Newest
+       first, matching the Latest tab on the channel itself — which is the
+       order anybody checking this against YouTube will be looking at. */
     const ranked = rankAssets(postBaseline);
     ranked.forEach((a, i) => { a.role = i < MAX_HERO_ASSETS ? 'hero' : 'supporting'; });
     const heroes = ranked.filter(a => a.role === 'hero');
-    const supporting = ranked.filter(a => a.role === 'supporting').slice(0, MAX_SUPPORTING);
+    const supporting = ranked
+      .filter(a => a.role === 'supporting')
+      .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))
+      .slice(0, MAX_SUPPORTING);
 
     const state = inMotion.length > 0
       ? 'CAMPAIGN_LIVE'
