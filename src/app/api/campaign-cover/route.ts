@@ -34,7 +34,7 @@ import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
-import { resolveCampaignStart, campaignMetrics } from '@/lib/intelligence/campaignWindow';
+import { resolveCampaignStart, campaignMetrics, followUpAnchorFor } from '@/lib/intelligence/campaignWindow';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -432,9 +432,39 @@ export async function GET(req: NextRequest) {
 
        Nothing here is a claim about intent. It is the newest long-form the
        channel has published since the Deep Dive, which is a fact. */
-    const publishedHero = [...postBaseline]
-      .filter(a => a.kind !== 'short')
-      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0] ?? null;
+    /* The FOLLOW-UP ANCHOR, not "the newest thing that is not a Short".
+
+       That old test asked the editorial label, and a human override had
+       relabelled a 61-second CHVRCHES teaser as a trailer — so `kind !==
+       'short'` passed, a teaser became the hero, and the page drew a
+       dated follow-up window for a campaign in which nothing had landed.
+
+       Qualification is now observed duration plus a title that is not
+       announcing something else, and a human label can only veto. See
+       campaignWindow.ts. Null is a normal state: a campaign in trailer
+       and Shorts activation has no hero to follow. */
+    const anchorRaw = campaignStart
+      ? followUpAnchorFor(
+          raw.map(v => ({
+            videoId: v.id,
+            title: v.title,
+            publishedAt: v.publishedAt,
+            durationSec: v.durationSec ?? null,
+            statedKind: overrideFor(v.id)?.kind ?? null,
+          })),
+          campaignStart,
+        )
+      : null;
+    const publishedHero = anchorRaw
+      ? postBaseline.find(a => a.videoId === anchorRaw.videoId) ?? null
+      : null;
+
+    if (campaignStart && !publishedHero) {
+      coverage.push(
+        'No qualifying long-form asset has been published since the campaign started, so no follow-up '
+        + 'window is shown. A follow-up belongs to a hero, and nothing has landed for it to follow.',
+      );
+    }
 
     const heroCtx = publishedHero
       ? { title: cleanAssetTitle(publishedHero.title, who.name), publishedAt: publishedHero.publishedAt }

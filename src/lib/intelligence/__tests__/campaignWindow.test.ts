@@ -15,7 +15,8 @@
 import assert from 'node:assert';
 import {
   resolveCampaignStart, campaignMetrics, eraOnset, campaignPerformanceFor,
-  toCampaignUploads, type CampaignUpload,
+  toCampaignUploads, followUpAnchorFor, qualifiesAsAnchor,
+  type CampaignUpload, type AnchorCandidate,
 } from '../campaignWindow';
 
 export interface CheckResult { passed: number; failed: number; failures: string[] }
@@ -228,6 +229,124 @@ export function runCampaignWindowChecks(): CheckResult {
     const u = toCampaignUploads(mixed);
     assert.deepEqual(u.map(x => x.kind), ['short', 'video', 'video'],
       '62s is a Short, 63s is not, and a missing duration is not guessed into one');
+  });
+
+  /* ── THE FOLLOW-UP ANCHOR ───────────────────────────────────────────
+     A follow-up window belongs to an ASSET, not to a campaign. CHVRCHES
+     drew "16 SEP - 23 SEP · FOLLOW-UP WINDOW" off a 61-second teaser
+     because the old test was `kind !== 'short'` and a human override had
+     relabelled that Short as a trailer. An editorial note promoted a
+     teaser into a hero. */
+
+  const anchorStart = { at: '2026-09-09T00:00:00Z', rule: 'ERA_ONSET' as const, because: '' };
+  const cand = (d: string, sec: number | null, title: string, statedKind?: string): AnchorCandidate =>
+    ({ videoId: d, title, publishedAt: `${d}T15:00:00Z`, durationSec: sec, statedKind: statedKind ?? null });
+
+  test('a Shorts-only campaign has no follow-up window', () => {
+    const anchor = followUpAnchorFor([
+      cand('2026-09-13', 16, 'Oh, what to do…?'),
+      cand('2026-09-10', 6, 'On your marks.'),
+    ], anchorStart);
+    assert.equal(anchor, null, 'Shorts are not destinations, so nothing follows them');
+  });
+
+  test('a trailer does not open a window, however it has been labelled', () => {
+    /* The exact CHVRCHES object: 61 seconds, human-labelled "trailer". */
+    const anchor = followUpAnchorFor([
+      cand('2026-09-13', 16, 'Oh, what to do…?'),
+      cand('2026-09-09', 61, 'Now, we can start.', 'trailer'),
+    ], anchorStart);
+    assert.equal(anchor, null, 'a 61-second teaser is not a hero');
+  });
+
+  test('a human label can veto an anchor but never create one', () => {
+    /* Long enough to qualify, but somebody who knows it is a trailer
+       knows something the duration does not say. */
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', 180, 'Behind the scenes', 'trailer')), false);
+    /* And the reverse must not work: a label cannot promote a Short. */
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', 45, 'A film', 'omv')), false,
+      'a 45-second object is not long-form because a label says so');
+  });
+
+  test('an unknown or zero duration never qualifies', () => {
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', null, 'Roses')), false);
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', 0, 'Roses')), false,
+      'a missing duration is the specific hole the trailer came through');
+  });
+
+  test('an announcement or countdown does not qualify on length alone', () => {
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', 200, 'Roses — official trailer')), false);
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', 200, "10 days 'til…")), false);
+    assert.equal(qualifiesAsAnchor(cand('2026-09-20', 200, 'Tour announcement')), false);
+  });
+
+  test('an Official Music Video opens the window', () => {
+    const a = followUpAnchorFor([
+      cand('2026-09-24', 20, 'clip'),
+      cand('2026-09-22', 214, 'CHVRCHES - Roses (Official Video)'),
+    ], anchorStart);
+    assert.ok(a, 'an OMV is a destination');
+    assert.equal(a!.publishedAt.slice(0, 10), '2026-09-22');
+  });
+
+  test('a long-form performance opens the window too', () => {
+    const a = followUpAnchorFor([
+      cand('2026-10-02', 1840, 'CHVRCHES – Live at Ancienne Belgique'),
+    ], anchorStart);
+    assert.ok(a, 'a full performance is a destination even without "official video" in the title');
+  });
+
+  test('Kings of Leon keeps its My Whole World window', () => {
+    const start = { at: '2026-08-12T15:00:00Z', rule: 'ERA_ONSET' as const, because: '' };
+    const a = followUpAnchorFor([
+      cand('2026-09-10', 261, 'Kings Of Leon - My Whole World'),
+      cand('2026-09-09', 25, 'Kick off your shoes'),
+      cand('2026-09-07', 32, "3 days 'til…"),
+    ], start);
+    assert.ok(a, 'My Whole World is a qualifying long-form asset');
+    assert.equal(a!.publishedAt.slice(0, 10), '2026-09-10');
+    assert.equal(a!.title, 'Kings Of Leon - My Whole World');
+  });
+
+  test('the anchor is the newest qualifying asset, not the first', () => {
+    const start = { at: '2026-08-01T00:00:00Z', rule: 'ERA_ONSET' as const, because: '' };
+    const a = followUpAnchorFor([
+      cand('2026-08-05', 200, 'First single'),
+      cand('2026-09-10', 261, 'Second single'),
+    ], start);
+    assert.equal(a!.title, 'Second single');
+  });
+
+  test('an asset published before the campaign started is not its anchor', () => {
+    const a = followUpAnchorFor([
+      cand('2026-07-01', 240, 'Last era, official video'),
+    ], anchorStart);
+    assert.equal(a, null);
+  });
+
+  test('campaign measurement is unaffected by having no anchor', () => {
+    /* The separation Leon asked for, asserted. CHVRCHES has a campaign
+       start, an age, assets and views, and no follow-up window — those
+       are two independent questions and the page must answer both. */
+    const chv = [
+      { publishedAt: '2026-09-13T15:00:00Z', viewCount: 4297, durationSec: 16 },
+      { publishedAt: '2026-09-10T15:00:00Z', viewCount: 11019, durationSec: 6 },
+      { publishedAt: '2026-09-09T15:00:00Z', viewCount: 36772, durationSec: 61 },
+      { publishedAt: '2025-09-20T15:00:00Z', viewCount: 15803, durationSec: 16 },
+      { publishedAt: '2025-07-01T15:00:00Z', viewCount: 30972, durationSec: 10 },
+    ];
+    const m = campaignPerformanceFor({ uploads: chv, now: NOW })!;
+    assert.equal(m.start.rule, 'ERA_ONSET');
+    assert.equal(m.start.at.slice(0, 10), '2026-09-09');
+    assert.equal(m.day, 5);
+    assert.equal(m.assets, 3);
+    assert.equal(m.views, 52_088);
+
+    const anchor = followUpAnchorFor(
+      chv.map(u => ({ title: '', publishedAt: u.publishedAt, durationSec: u.durationSec })),
+      m.start,
+    );
+    assert.equal(anchor, null, 'measurement and follow-up are independent');
   });
 
   return { passed, failed, failures };

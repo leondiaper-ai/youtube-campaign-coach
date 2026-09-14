@@ -277,3 +277,79 @@ export function campaignPerformanceFor(opts: {
   if (!start) return null;
   return campaignMetrics(uploads, start, opts.now ?? Date.now());
 }
+
+/* ══ THE FOLLOW-UP ANCHOR ═════════════════════════════════════════════
+   ── WHY THIS IS SEPARATE FROM THE CAMPAIGN START ──────────────────────
+   A follow-up window belongs to an ASSET, not to a campaign.
+
+   The Deep Dive's recommendation is "put a second destination inside the
+   7-14 days after the hero". That sentence has a hero in it. A campaign
+   that has published a trailer and two Shorts has no hero, so it has no
+   window — there is nothing for a follow-up to follow.
+
+   CHVRCHES proved it: campaign start resolved correctly to 9 Sep, and the
+   page then drew "16 SEP - 23 SEP · FOLLOW-UP WINDOW" off the back of a
+   61-second teaser. The campaign had started; nothing had landed.
+
+   ── WHY THE TEST IS ON THE OBJECT, NOT THE LABEL ──────────────────────
+   The old test was `kind !== 'short'`, and a human format override had
+   relabelled that 61-second Short as a trailer — so an editorial note
+   promoted a teaser into a hero. A person's label may VETO an anchor
+   (somebody who knows it is a trailer knows something the duration does
+   not say) but it may never create one. Qualification is observed:
+   duration first, and a title that is not announcing something else.
+*/
+
+/** Below this, it is a teaser or a Short however it has been labelled. */
+const MIN_ANCHOR_SEC = 90;
+
+/** Titles that announce a destination rather than being one. */
+const NOT_A_DESTINATION =
+  /\b(trailer|teaser|snippet|preview|announce\w*|out\s+now\s+snippet|coming\s+soon|countdown)\b|\d+\s*days?\s*['’]?\s*til|\bpre[- ]?save\b/i;
+
+/** Human kinds that disqualify outright. A label can veto, never promote. */
+const VETO_KINDS = new Set(['short', 'trailer', 'teaser', 'announcement', 'clip']);
+
+export interface AnchorCandidate {
+  videoId?: string;
+  title: string;
+  publishedAt: string;
+  /** OBSERVED duration. Never the editorial label. */
+  durationSec?: number | null;
+  /** A human's format label, where one exists. Veto only. */
+  statedKind?: string | null;
+}
+
+/**
+ * Does this asset earn a follow-up window?
+ *
+ * Deliberately conservative. A campaign with no window says "nothing has
+ * landed yet", which is true and useful. A campaign with a window drawn
+ * off a teaser tells a label there is a deadline that does not exist.
+ */
+export function qualifiesAsAnchor(a: AnchorCandidate): boolean {
+  const dur = a.durationSec ?? 0;
+  /* An unknown duration is not a long-form asset. This is the specific
+     hole the CHVRCHES trailer came through: absent or zero must fail. */
+  if (!(dur >= MIN_ANCHOR_SEC)) return false;
+  if (a.statedKind && VETO_KINDS.has(a.statedKind.toLowerCase())) return false;
+  if (NOT_A_DESTINATION.test(a.title ?? '')) return false;
+  return true;
+}
+
+/**
+ * The most recent qualifying long-form asset published since the campaign
+ * started, or null. Null is a normal state for a campaign in activation.
+ */
+export function followUpAnchorFor(
+  candidates: AnchorCandidate[],
+  start: CampaignStart,
+): AnchorCandidate | null {
+  const from = ts(start.at);
+  return [...(candidates ?? [])]
+    .filter(a => {
+      const at = ts(a.publishedAt);
+      return Number.isFinite(at) && at >= from && qualifiesAsAnchor(a);
+    })
+    .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))[0] ?? null;
+}
