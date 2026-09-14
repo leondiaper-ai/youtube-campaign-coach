@@ -599,12 +599,24 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
   color:var(--era-key);opacity:.85}
 .rf-m{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
   line-height:1.06;margin-top:.2rem}
-/* The shape of the thing. Small, wide-tracked, monospace-ish — it should
-   read as a diagram rather than as a sentence. */
-.rf-s{font-size:.58rem;letter-spacing:.11em;text-transform:uppercase;color:#9A9486;
-  margin-top:.45rem;line-height:1.6}
+/* What they did. This was a tracked-out arrow diagram, which looked
+   considered and said almost nothing — three cards rendered that way all
+   reduced to "make the release bigger". It is a sentence now, because the
+   sentence is where the mechanic actually lives. */
+.rf-s{font-size:.72rem;line-height:1.5;color:#B9B3A6;margin-top:.45rem}
+.rf-s span{display:block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:#8E8877;margin-bottom:.2rem}
+/* Evidence, where it is not already inside the sentence above. Often
+   absent — a dated timestamp in the line beats a label under it. */
 .rf-p{font-size:.63rem;letter-spacing:.02em;color:#B9B3A6;margin-top:.5rem;
   padding-left:.6rem;border-left:1px solid rgba(237,231,218,.3)}
+/* The sequence an application implies, when it has one. */
+.rf-c{font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;color:#8E8877;
+  margin-top:.45rem;line-height:1.7}
+/* A horizon marks a reference that is not about the moment the question is
+   about, so a January idea cannot be mistaken for an eight-day one. */
+.rf-a i{display:block;font-style:normal;font-size:.5rem;letter-spacing:.22em;
+  color:#8E8877;margin-bottom:.3rem}
 .rf-x{font-size:.74rem;line-height:1.45;color:#CFC9BB;margin-top:.6rem;
   padding-top:.55rem;border-top:1px solid rgba(237,231,218,.14)}
 .rf-x span{display:inline-block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
@@ -1809,11 +1821,12 @@ function refCard(r, cls){
            onload="thumbGuard(this,'${r.imageId}')" onerror="${ytFallback(r.imageId)}">
     </div>
     <div class="rf-b">
-      <div class="rf-a">${esc(r.artist)}</div>
+      <div class="rf-a">${r.horizon ? `<i>${esc(r.horizon)}</i>` : ''}${esc(r.artist)}</div>
       <div class="rf-m">${esc(r.mechanic)}</div>
-      <div class="rf-s">${esc(r.shape)}</div>
-      <div class="rf-p">${esc(r.proof)}</div>
+      <div class="rf-s"><span>What they did</span>${esc(r.did)}</div>
+      ${r.proof ? `<div class="rf-p">${esc(r.proof)}</div>` : ''}
       <div class="rf-x"><span>CHVRCHES &rarr;</span>${esc(r.application)}</div>
+      ${r.chain ? `<div class="rf-c">${esc(r.chain)}</div>` : ''}
     </div>
   </a>`;
 }

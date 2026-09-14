@@ -144,12 +144,38 @@ export interface RolloutEvidence {
  */
 export interface PlanReference {
   artist: string;
-  /** Four or five words. The idea, not a description of it. */
+  /**
+   * Set when the reference is not about the moment the question is about —
+   * "Looking ahead · January". Without it, a good idea for a run in four
+   * months sits next to two ideas for a single in eight days and all three
+   * read as the same urgency.
+   */
+  horizon?: string;
+  /**
+   * THE INSTRUCTION.
+   *
+   * The test this field has to pass: could somebody walk into the meeting
+   * and do this? "One night can last a year" is an observation about
+   * another band. "Shoot once. Programme for months." is a thing to do.
+   *
+   * The failure mode is specific and worth naming, because three cards
+   * drifted into it once already: every reference on this board is about
+   * a release, so every headline wants to become a variation of "make the
+   * release bigger". If two cards can be summarised the same way, neither
+   * is specific enough yet, and what the research has found is something
+   * interesting rather than a strategy.
+   */
   mechanic: string;
-  /** The shape of the thing, as an arrow sequence. */
-  shape: string;
-  /** One short line of observed proof. Never a view count. */
-  proof: string;
+  /** WHAT THEY DID. The mechanic as it actually happened, in one sentence. */
+  did: string;
+  /** The sequence the application implies, where it has one. */
+  chain?: string;
+  /**
+   * One short line of observed proof, where the evidence is not already
+   * inside `did`. Never a view count. Often absent, because a dated
+   * timestamp in the sentence is better evidence than a line underneath it.
+   */
+  proof?: string;
   /** What CHVRCHES would do with it. One line. */
   application: string;
   /** A real video on that artist's channel. Never stock, never generated. */
@@ -398,10 +424,11 @@ const CHVRCHES_PLAN: PlanItem[] = [
     references: [
       {
         artist: 'Fontaines D.C.',
-        mechanic: 'The countdown is the campaign',
-        shape: 'Tease → state the time → premiere → keep serving it',
+        mechanic: 'Turn release time into content',
+        did: 'Trailer → announce the exact time → Premiere → keep resurfacing the single in Shorts.',
         proof: 'Premiere timestamps verified',
-        application: 'The trailer is out. Now give Roses an hour, then keep bringing it back.',
+        application: 'Announce when Roses lands, not just that it\u2019s coming. Create the appointment '
+          + 'on-channel, then keep resurfacing Roses after release.',
         imageId: 'KHocVRUlvkk',
         url: 'https://www.youtube.com/watch?v=KHocVRUlvkk',
         weight: 'lead',
@@ -419,10 +446,13 @@ const CHVRCHES_PLAN: PlanItem[] = [
       },
       {
         artist: 'Magdalena Bay',
-        mechanic: "The premiere doesn't end",
-        shape: 'Video → two-minute gap → band live',
-        proof: 'Image ended 16:03:49 · live scheduled 16:05',
-        application: 'The pre-party gets people there. Put the band on the other side too.',
+        mechanic: 'Premiere → band live',
+        /* The proof line is gone because the evidence IS the sentence. Two
+           timestamps ninety seconds apart say more than a label claiming
+           they were checked. */
+        did: 'Image ended 16:03:49. Their post-Premiere livestream was scheduled for 16:05.',
+        application: 'We already bring fans together before a Premiere. What if the band is waiting '
+          + 'for them when Roses ends?',
         imageId: 'DfcWOPpmw14',
         url: 'https://www.youtube.com/watch?v=DfcWOPpmw14',
         weight: 'support',
@@ -436,11 +466,14 @@ const CHVRCHES_PLAN: PlanItem[] = [
       },
       {
         artist: 'The Cure',
-        mechanic: 'One night can last a year',
-        shape: 'Appointment → capture → programme',
-        proof: 'One release-night performance → 14 months of observed programming',
-        application:
-          'Capture January properly. CHVRCHES in Churches could feed the channel long after the night itself.',
+        /* Marked, because this one is not about Roses. It is the right idea
+           for a run four months away, and putting it on the same footing as
+           two ideas for a single in eight days would misprice all three. */
+        horizon: 'Looking ahead · January',
+        mechanic: 'Shoot once. Programme for months.',
+        did: 'One release-night performance generated observable YouTube programming across 14 months.',
+        chain: 'Full performance → song cuts → Shorts → future campaign / catalogue',
+        application: 'Capture CHVRCHES in Churches as a content bank, not one upload.',
         imageId: 'QA1lIQWU-EI',
         url: 'https://www.youtube.com/watch?v=QA1lIQWU-EI',
         weight: 'support',
@@ -524,10 +557,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     references: [
       {
         artist: 'Turnstile',
-        mechanic: 'The record, handed to twenty-five other artists',
-        shape: 'One album → 25 reinterpretations → one hour',
-        proof: '25 videos, all timestamped inside 34 seconds',
-        application: 'Every track on the record has somewhere to be watched on the day.',
+        mechanic: 'Give every track its own object on the day',
+        did: '25 versions of the album by 25 other artists, all published inside 34 seconds.',
+        application: 'Every track on the record has somewhere to be watched on release day.',
         imageId: '_gT_7kYdwhA',
         url: 'https://www.youtube.com/watch?v=_gT_7kYdwhA',
         weight: 'lead',

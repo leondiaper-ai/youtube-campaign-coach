@@ -473,9 +473,50 @@ export function runRolloutChecks(): CheckResult {
         assert.match(o.id, /^[A-Za-z0-9_-]{11}$/, `${r.artist} cites something that is not a video id`);
       }
       assert.ok(r.imageId && r.url.includes(r.imageId), `${r.artist} image and link disagree`);
-      /* No view count may be the proof. A big number is not a mechanism. */
-      assert.ok(!/\b\d[\d.,]*\s*(m|k|bn)?\s*views\b/i.test(r.proof),
+      /* No view count may be the evidence. A big number is not a mechanism. */
+      assert.ok(!/\b\d[\d.,]*\s*(m|k|bn)?\s*views\b/i.test(`${r.proof ?? ''} ${r.did}`),
         `${r.artist} is proving a mechanic with an audience size`);
+    }
+  });
+
+  /* ── Could somebody walk in and do this? ────────────────────────────
+     The failure mode here is real, and this board fell into it once. Every
+     reference is about a release, so every headline drifts towards "make
+     the release bigger" and three distinct mechanics arrive on the page
+     sounding like one idea repeated. A card that cannot be told apart from
+     the card beside it is something the research found interesting, not a
+     strategy somebody can act on. */
+  test('each reference is an instruction, and a different one', () => {
+    const ro = buildRollout(fakeReport(), [], [], { release: ROSES });
+    const refs = ro.items.flatMap(i => i.references);
+
+    for (const r of refs) {
+      assert.ok(!/\bevent\b/i.test(r.mechanic),
+        `"${r.mechanic}" is the generic headline every card on this board drifts towards`);
+      assert.ok(r.mechanic.length <= 46, `"${r.mechanic}" is a sentence, not an instruction`);
+      assert.ok(r.did.length > r.mechanic.length,
+        `${r.artist} asserts a mechanic without saying what was actually done`);
+      /* An application that would read identically for any artist has not
+         been applied to anything. */
+      assert.match(r.application, /CHVRCHES|Roses|record|album|release/i,
+        `${r.artist}'s application does not land on this campaign`);
+    }
+
+    /* Distinctness, measured rather than asserted: no two mechanics on one
+       board may share a content word. */
+    const stop = new Set(['the', 'a', 'an', 'into', 'for', 'its', 'own', 'on', 'day', 'and', 'to', '→']);
+    const words = (t: string) => new Set(
+      t.toLowerCase().replace(/[^a-z ]/g, ' ').split(/\s+/).filter(w => w && !stop.has(w)));
+    for (const it of ro.items) {
+      for (let i = 0; i < it.references.length; i++) {
+        for (let j = i + 1; j < it.references.length; j++) {
+          const a = words(it.references[i].mechanic);
+          const b = words(it.references[j].mechanic);
+          const shared = Array.from(a).filter(w => b.has(w));
+          assert.equal(shared.length, 0,
+            `${it.references[i].artist} and ${it.references[j].artist} are one idea twice (${shared.join(', ')})`);
+        }
+      }
     }
   });
 
@@ -484,8 +525,8 @@ export function runRolloutChecks(): CheckResult {
     const cure = ro.items.flatMap(i => i.references).find(r => r.artist === 'The Cure')!;
     assert.ok(cure.caveat && /not a public upload/i.test(cure.caveat),
       'the one claim that rests on the band\u2019s own posts must say so in the record');
-    assert.ok(!/api-verified/i.test(cure.proof),
-      'the slide line must not claim verification the record withholds');
+    assert.ok(!/api-verified/i.test(`${cure.proof ?? ''} ${cure.did}`),
+      'the visible copy must not claim verification the record withholds');
   });
 
   /* ── Generalisation ────────────────────────────────────────────────── */
