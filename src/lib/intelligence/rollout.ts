@@ -297,6 +297,33 @@ export interface PlanItem {
    * that belongs in a line rather than a frame.
    */
   pitch?: {
+    /* ── WHAT THE CARD SHOWS ───────────────────────────────────────
+       Three fields, in this order, and nothing else reaches the page:
+
+         move    the instruction, in the largest type on the slide
+         apply   one short sentence saying what to actually do
+         proof   one number, set small
+
+       Everything below them — headline, evidence, why, doThis, deepDive —
+       stays in the record and renders nowhere. It was all true and all
+       useful, and four cards carrying a headline, a WHY paragraph, a DO
+       paragraph and an evidence line took longer to read than the strategy
+       took to explain out loud. The analysis can stay sophisticated; the
+       recommendation has to be obvious. */
+
+    /** THE MOVE. Plain-English instruction. "Follow the hero", not
+        "maintain momentum" — a reader should know what to do from the
+        headline alone, without the sentence underneath it. */
+    move: string;
+    /** One short sentence. What we would actually do. */
+    apply: string;
+    /** One number, set small. Never a paragraph, never a view count as
+        an argument for itself. */
+    proof: string;
+    /** A date or window, when the move has one. Only where it is real —
+        a badge on every card makes none of them urgent. */
+    when?: string;
+
     /** Six words at most. The thing itself, not a description of it. */
     headline: string;
     /**
@@ -357,6 +384,8 @@ export interface PlanItem {
   references?: PlanReference[];
   opportunity?: {
     name: string;
+    /** The ask in four words, where it reads better than the name alone. */
+    move?: string;
     line: string;
     /**
      * A real, public thing somebody can open to see what is meant. Named by a
@@ -500,6 +529,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint: 'Single: official music video with the pre-party Premiere they already run.',
     pitch: {
+      move: 'Make Roses an event',
+      apply: 'Bring back the Premiere ritual.',
+      proof: '4 / 4 singles had a pre-party',
       headline: 'Make the first hero an event',
       evidence: '4 / 4 singles had a pre-party',
       why: 'The pre-party into Premiere ritual already worked here, on every Screen Violence single.',
@@ -527,6 +559,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     deepDivePoint:
       '+7-14 days: a second destination — lyric video, live, or a performance while attention is still up.',
     pitch: {
+      move: 'Give every hero a second stop',
+      apply: 'Lyric, live or performance within 7-14 days.',
+      proof: '0 / 4 heroes had a follow-up',
       headline: 'Give every hero a second destination',
       evidence: '0 / 4 heroes had a follow-up',
       why: 'Nothing meaningful landed in the 7-14 day window after any Screen Violence single.',
@@ -582,6 +617,19 @@ const CHVRCHES_PLAN: PlanItem[] = [
     spine: true,
     commitment: 'COMMITTED',
     deepDivePoint: 'Release day: give every song a home, as Screen Violence did with seven assets on the day.',
+    /* This one has always been in the spine and never had a card, so the
+       playbook showed three moves and called itself four. */
+    pitch: {
+      move: 'Give every song a home',
+      apply: 'Build a coherent album-wide lyric and visual system.',
+      proof: '7 assets on album day · 6.94M views',
+      headline: 'Give every song a home',
+      evidence: '7 assets on album day',
+      why: 'Screen Violence put seven assets out on one day and took 6.94M views.',
+      doThis: 'Every track has somewhere to be watched, even if that is a lyric video.',
+      imageId: 'e1YqueG2gtQ',
+      deepDive: { slide: 'Screen Violence', figure: '6.94M views on 27 Aug 2021, across seven assets' },
+    },
   },
 
   /* ── Possibilities. Raised in conversation, not committed to. ────── */
@@ -604,6 +652,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
     seedStatus: 'EXPLORING',
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
     pitch: {
+      move: 'Make CHVRCHES in Churches a format',
+      apply: "Turn January's capture into a repeatable live idea.",
+      proof: '15 live uploads · 5 full sets',
       headline: 'CHVRCHES in Churches',
       evidence: '15 live uploads · 5 full sets',
       why: 'Live is already part of this channel\'s language, with a 104K median.',
@@ -632,7 +683,7 @@ const CHVRCHES_PLAN: PlanItem[] = [
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
     opportunity: {
       name: 'Top Fans 1%',
-      line: 'Activating and rewarding the campaign\'s most engaged fans.',
+      line: 'Activate the core audience.',
     },
   },
   {
@@ -653,7 +704,7 @@ const CHVRCHES_PLAN: PlanItem[] = [
     human: { statedBy: 'Leon', statedAt: '2026-09', precision: 'month' },
     opportunity: {
       name: 'YouTube Nights',
-      line: 'CHVRCHES for the intimate-room, big-artist live format.',
+      line: 'Big artist · intimate room.',
     },
   },
   {
@@ -681,7 +732,7 @@ const CHVRCHES_PLAN: PlanItem[] = [
        do. It was appearing in both places, which is one idea twice. */
     opportunity: {
       name: 'CHVRCHES Station',
-      line: 'An always-on destination connecting the new album, catalogue and live world.',
+      line: 'New era · catalogue · live.',
       /* Metallica TV: a continuous live stream on the band's own channel
          playing videos, live cuts and full concerts across every era. It
          has been running without a break since 6 Mar 2026 — which is the
@@ -743,6 +794,10 @@ const KOL_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint: 'Put a second meaningful destination inside 7-14 days, while attention is still elevated.',
     pitch: {
+      move: 'Follow the hero',
+      when: '17-24 Sep',
+      apply: 'Put one meaningful long-form destination after My Whole World.',
+      proof: '6 / 11 heroes had a follow-up last campaign',
       headline: "Don't leave the hero alone",
       evidence: '6 / 11 heroes had a follow-up last time',
       why: 'My Whole World is carrying the campaign almost by itself, and the window after it is empty.',
@@ -821,6 +876,9 @@ const KOL_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint: 'Keep Premieres, and keep them selective.',
     pitch: {
+      move: 'Make single 2 an appointment',
+      apply: 'Give the next priority single a stated time and a Premiere.',
+      proof: '7 / 11 videos premiered last campaign',
       headline: 'Make single two an appointment',
       evidence: '7 / 11 videos premiered last campaign',
       why: 'My Whole World was published, not premiered, though Premieres are established behaviour here.',
@@ -847,6 +905,9 @@ const KOL_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint: 'Give release week a centre of gravity instead of publishing everything at once.',
     pitch: {
+      move: 'Give album day one hero',
+      apply: 'Choose one unmistakable destination for 6 November.',
+      proof: '1.66M hero · 961K across nine lyric videos',
       headline: 'Give album day one centre of gravity',
       evidence: '1.66m for the video · 961k for nine lyric videos',
       why: 'Ten long-form assets landed on one day last time and the day had no centre.',
@@ -874,6 +935,9 @@ const KOL_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint: 'Give every Short a destination.',
     pitch: {
+      move: 'Give every Short somewhere to go',
+      apply: 'Point each Short at the hero, the follow-up or the next release.',
+      proof: '16 Shorts built to My Whole World',
       headline: 'Every Short needs somewhere to go',
       evidence: '16 Shorts built to My Whole World',
       why: 'Shorts are already doing the campaign\u2019s build work, and they already end on themselves.',
@@ -902,8 +966,9 @@ const KOL_PLAN: PlanItem[] = [
     seedStatus: 'RECOMMENDED',
     deepDivePoint: 'Build Kings of Leon TV as an always-on home for catalogue and new music together.',
     opportunity: {
-      name: 'Kings of Leon Station',
-      line: 'Programme twenty years of Kings of Leon alongside the new record, in one persistent place.',
+      name: 'KOL Station',
+      move: '20 years, programmed',
+      line: 'Catalogue · new record · live · archive.',
       example: {
         label: 'Metallica TV',
         url: 'https://www.youtube.com/watch?v=1fz60gNnSdU',
@@ -929,7 +994,8 @@ const KOL_PLAN: PlanItem[] = [
     human: { statedBy: 'Leon', statedAt: '2026-09-14', precision: 'day' },
     opportunity: {
       name: 'YouTube Nights',
-      line: 'Twenty years of catalogue, a tour already running, and a room small enough to matter.',
+      move: 'Big band. Small room.',
+      line: 'Explore KOL for an intimate live moment.',
     },
   },
   {
@@ -948,8 +1014,9 @@ const KOL_PLAN: PlanItem[] = [
     seedStatus: 'EXPLORING',
     human: { statedBy: 'Leon', statedAt: '2026-09-14', precision: 'day' },
     opportunity: {
-      name: 'Premiere / Afterparty',
-      line: 'A bigger appointment around a priority single, and something waiting when it ends.',
+      name: 'Premiere + Afterparty',
+      move: 'Make the next single an event',
+      line: 'Premiere, then somewhere to go when it ends.',
     },
   },
 ];

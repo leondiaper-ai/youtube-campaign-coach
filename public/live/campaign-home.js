@@ -400,24 +400,19 @@ function pickFeature(ideas, items){
   return ideas.find(i => i.title === nextTitle) || ideas[0];
 }
 
-function ideaFigure(it, cls, f){
+function ideaFigure(it, cls, f, n){
   const p = it.pitch;
-  const dd = p.deepDive;
   return `<div class="idea ${cls}">
     <div class="idea-img${f.debar ? ' debar' : ''}">
       <img src="${f.src}" alt="" loading="lazy"
            onload="thumbGuard(this,'${p.imageId}')" onerror="${ytFallback(p.imageId)}">
     </div>
     <div class="idea-cap">
-      <div class="idea-ev">${esc(p.evidence)}</div>
-      <div class="idea-h">${esc(p.headline)}</div>
-      <div class="idea-body">
-        <div class="idea-r"><span>Why</span>${esc(p.why)}</div>
-        <div class="idea-r"><span>Do</span>${esc(p.doThis)}</div>
-      </div>
-      ${dd ? `<button class="idea-src" onclick="goDeep('${esc(dd.slide)}')">
-        <b>Deep Dive &rsaquo;</b><span>${esc(dd.figure)}</span>
-      </button>` : ''}
+      <div class="idea-no">${n}</div>
+      <div class="idea-move">${esc(p.move || p.headline)}</div>
+      ${p.when ? `<div class="idea-when">${esc(p.when)}</div>` : ''}
+      <div class="idea-apply">${esc(p.apply || p.doThis)}</div>
+      <div class="idea-proof">${esc(p.proof || p.evidence)}</div>
     </div>
   </div>`;
 }
@@ -518,18 +513,19 @@ function buildIdeas(d){
     ${campaignIdentity(d, true)}
     <div class="label" style="margin-top:1.1rem">Our playbook</div>
     <h2 class="display" style="max-width:22ch;margin:.1rem 0 0;
-      font-size:clamp(1.5rem,3.3vw,2.5rem);line-height:1.02">What could this
-      <span style="color:var(--signal)">become?</span></h2>
+      font-size:clamp(1.25rem,2.4vw,1.75rem);line-height:1.02">${
+        ideas.length} move${ideas.length === 1 ? '' : 's'} for this campaign</h2>
 
     ${feature ? `<div class="ideagrid stagger">
-      ${ideaFigure(feature,'feature',featureSrc)}
-      <div class="ideacol">${rest.map((i,n)=>ideaFigure(i,'sub',restSrc[n])).join('')}</div>
+      ${ideaFigure(feature,'feature',featureSrc,'01')}
+      <div class="ideacol">${rest.map((i,n)=>ideaFigure(i,'sub',restSrc[n],String(n+2).padStart(2,'0'))).join('')}</div>
     </div>` : ''}
 
     ${opps.length ? `<div class="opps stagger">
-      <div class="opps-h">YouTube opportunities</div>
+      <div class="opps-h">With YouTube</div>
       <div class="opps-row">${opps.map(o=>`<div class="opp">
         <div class="opp-n">${esc(o.opportunity.name)}</div>
+        ${o.opportunity.move ? `<div class="opp-m">${esc(o.opportunity.move)}</div>` : ''}
         <div class="opp-l">${esc(o.opportunity.line)}</div>
         ${o.opportunity.example ? `<a class="opp-x" href="${o.opportunity.example.url}"
           target="_blank" rel="noopener">${esc(o.opportunity.example.label)}

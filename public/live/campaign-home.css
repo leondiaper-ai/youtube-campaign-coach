@@ -257,25 +257,37 @@
 .idea.noimg .idea-img{background:linear-gradient(150deg,rgba(255,45,120,.22),var(--coal) 70%)}
 .idea.noimg .idea-img img{display:none}
 
-.idea-cap{position:relative;padding:.9rem 1rem;z-index:2}
-.idea-ev{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--signal);
-  letter-spacing:.02em;line-height:1}
-.idea-h{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
-  line-height:1.05;margin-top:.35rem}
-.idea-body{margin-top:.55rem;display:grid;gap:.3rem}
-.idea-r{font-size:.74rem;line-height:1.42;color:#C6C1D4}
-.idea-r span{display:inline-block;min-width:2.1rem;font-size:.53rem;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);vertical-align:1px}
+/* ── THE CARD ────────────────────────────────────────────────────────
+   Three things and a number: the move, what we would do, one fact.
+
+   It used to carry a headline, a WHY paragraph, a DO paragraph and an
+   evidence line — all of them true, all of them competing. Four of those
+   side by side took longer to read than the strategy took to say out loud,
+   which is the wrong way round for a page whose job is to make four
+   recommendations obvious at a glance.
+
+   Everything removed is still in the data and renders nowhere. */
+.idea-cap{position:relative;padding:1rem 1.15rem 1.1rem;z-index:2}
+.idea-no{font-family:'Space Grotesk','Oswald',sans-serif;font-weight:700;
+  font-size:.72rem;letter-spacing:.16em;color:var(--signal);opacity:.9;margin-bottom:.28rem}
+/* The instruction, and by a distance the largest thing on the slide. */
+.idea-move{font-family:'Space Grotesk','Oswald',sans-serif;font-weight:700;
+  letter-spacing:-.02em;line-height:1.02;text-transform:uppercase}
+/* Only where the move has a real date. A badge on every card makes none
+   of them urgent. */
+.idea-when{display:inline-block;margin-top:.5rem;font-size:.55rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--signal);
+  border:1px solid var(--signal);border-radius:20px;padding:.2rem .6rem}
+.idea-apply{font-size:.82rem;line-height:1.45;color:#CFC9D8;margin-top:.6rem;max-width:46ch}
+/* The evidence, deliberately quiet. It is there to be believed, not read. */
+.idea-proof{font-size:.57rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.7rem}
 
 .idea.feature{aspect-ratio:16/5.9}
-.idea.feature .idea-ev{font-size:clamp(1rem,1.85vw,1.4rem)}
-.idea.feature .idea-h{font-size:clamp(1.25rem,2.5vw,1.95rem)}
-.idea.feature .idea-r{font-size:.82rem;max-width:52ch}
+.idea.feature .idea-move{font-size:clamp(1.75rem,3.7vw,3rem)}
+.idea.feature .idea-apply{font-size:.95rem;max-width:52ch}
 .idea.sub{aspect-ratio:16/9.8}
-.idea.sub .idea-ev{font-size:.82rem}
-.idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
-.idea.sub .idea-src{font-size:.64rem}
-.idea.sub .idea-src b{font-size:.46rem}
+.idea.sub .idea-move{font-size:clamp(1.05rem,1.8vw,1.38rem)}
 
 /* ── YOUTUBE OPPORTUNITIES ───────────────────────────────────────────
    The three things we would like to explore with YouTube, under the four
@@ -291,9 +303,12 @@
   color:var(--signal-2)}
 .opps-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem;margin-top:.7rem}
 .opp{border-left:2px solid rgba(56,224,214,.45);padding-left:.85rem}
-.opp-n{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
-  font-size:clamp(.98rem,1.6vw,1.22rem);color:var(--paper)}
-.opp-l{font-size:.76rem;line-height:1.45;color:#ADA7BC;margin-top:.25rem}
+.opp-n{font-size:.57rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--smoke)}
+.opp-m{font-family:'Space Grotesk','Oswald',sans-serif;font-weight:700;letter-spacing:-.01em;
+  font-size:clamp(1rem,1.7vw,1.3rem);color:var(--paper);text-transform:uppercase;
+  line-height:1.05;margin-top:.22rem}
+.opp-l{font-size:.74rem;line-height:1.45;color:#ADA7BC;margin-top:.35rem}
 @media(max-width:900px){ .opps-row{grid-template-columns:1fr;gap:.9rem} }
 
 /* References. Picture, artist, mechanic, one line of what it means here. */
@@ -383,23 +398,6 @@
   .rf.sup .rf-img{aspect-ratio:16/9}
 }
 
-/* ── THE SOURCE LINE ─────────────────────────────────────────────────
-   An idea card used to link to a video on the channel, which was a
-   citation for the picture rather than for the argument — and one of them
-   (House of Vans) still serves a thumbnail while refusing to play, so the
-   card offered a dead end that looked like evidence.
-
-   The card now opens the Channel Deep Dive slide that made the case, and
-   shows the figure that slide proves. Same gesture, real destination. */
-.idea-src{display:flex;gap:.5rem;align-items:baseline;width:100%;text-align:left;
-  margin-top:.6rem;padding-top:.55rem;border-top:1px solid rgba(237,231,218,.16);
-  background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;
-  font:inherit;font-size:.7rem;line-height:1.4;color:#B6B0A2;padding-left:0;padding-right:0}
-.idea-src b{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:.5rem;
-  color:var(--era-key);white-space:nowrap;flex:0 0 auto;padding-top:.18rem}
-.idea-src:hover{color:var(--era-key)}
-.idea-src:hover b{text-decoration:underline}
-.idea.feature .idea-src{font-size:.76rem;max-width:56ch}
 
 /* The one external thing on this page. Named by a person, checked by hand,
    and kept to a single line so it reads as "here is what we mean" rather
@@ -422,8 +420,8 @@
    keeps its magenta, because that belongs to the product and not to the
    era. */
 .era{--era-key:#EDE7DA;--era-2:#8E8877;background:#050507;padding:4.4rem 0 2.6rem}
-.era .idea-ev{color:var(--era-key)}
-.era .idea-r{color:#B9B3A6}
+.era .idea-move{color:var(--era-key)}
+.era .idea-apply{color:#B9B3A6}
 .era .idea{border-color:rgba(237,231,218,.16)}
 .era .idea:hover{border-color:rgba(237,231,218,.55)}
 .era .idea-img img{filter:grayscale(.28) contrast(1.06) brightness(.96)}
