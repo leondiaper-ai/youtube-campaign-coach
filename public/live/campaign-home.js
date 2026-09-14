@@ -443,6 +443,22 @@ function refCard(r, cls){
   </a>`;
 }
 
+/* ── INSPIRATION, OFF ────────────────────────────────────────────────
+   The reference board does not ship. Leon's call and the right one: three
+   good references and a real strategic question are not yet a slide that
+   earns its place beside the playbook, and a half-convincing one is worse
+   than none in front of a label.
+
+   OFF, not deleted. Everything underneath it stays — the verified
+   references and the objects they cite, the caveats, the question that
+   derives itself from campaign state, the rule that nothing unverified
+   reaches a page. That work is good and it is the expensive part; what is
+   not good enough yet is the presentation of it. Deleting the renderer
+   would mean rebuilding it later to rediscover the same thing.
+
+   So it is one boolean, and it is one boolean back. */
+const SHOW_INSPIRATION = false;
+
 function buildIdeas(d){
   const ro = (d && d.rollout) || null;
   const items = (ro && ro.items) || [];
@@ -523,6 +539,7 @@ function buildIdeas(d){
   </div>
 </section>
 
+${SHOW_INSPIRATION ? `
 <section class="slide ${CFG.eraClass || ''}" data-t="Inspiration">
   <div class="bleed strong${worldB.debar ? ' debar' : ''}${worldB.tall ? ' emblem' : ''}"><img src="${worldB.src}" alt=""
     onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
@@ -559,7 +576,8 @@ function buildIdeas(d){
         None reaches this page until somebody has checked it against the channel.</p>`}
 
   </div>
-</section>`;
+</section>` : ''}
+`;
 }
 
 /* ── Tabs ─────────────────────────────────────────────────────────── */

@@ -1841,6 +1841,19 @@ function refCard(r, cls){
   </a>`;
 }
 
+/* ── INSPIRATION, OFF ────────────────────────────────────────────────
+   Held back across every living deck, not just this one. Three verified
+   references and a question that derives itself from campaign state are
+   real work, and the slide they sit on is not yet good enough to put in
+   front of a label — a half-convincing reference board is worse than no
+   reference board.
+
+   OFF, not deleted. The references, the objects they cite, the caveats,
+   the verification rules and the question all stay exactly where they are.
+   What is switched off is the presentation, because that is the part that
+   is not ready. */
+const SHOW_INSPIRATION = false;
+
 function buildIdeas(d){
   const ro = (d && d.rollout) || null;
   const items = (ro && ro.items) || [];
@@ -1921,6 +1934,7 @@ function buildIdeas(d){
   </div>
 </section>
 
+${SHOW_INSPIRATION ? `
 <section class="slide era" data-t="Inspiration">
   <div class="bleed strong${worldB.debar ? ' debar' : ''}${worldB.tall ? ' emblem' : ''}"><img src="${worldB.src}" alt=""
     onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
@@ -1957,7 +1971,8 @@ function buildIdeas(d){
         None reaches this page until somebody has checked it against the channel.</p>`}
 
   </div>
-</section>`;
+</section>` : ''}
+`;
 }
 
 /* ── Tabs ─────────────────────────────────────────────────────────── */

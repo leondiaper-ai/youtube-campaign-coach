@@ -80,14 +80,19 @@ const payload = {
   coverage: [], generatedAt: new Date().toISOString(),
 };
 
-const mk = () => ({ classList:{add(){},remove(){},toggle(){},contains(){return false}}, style:{},
-  innerHTML:'', outerHTML:'', dataset:{}, children:[], remove(){}, appendChild(){},
+/* The Ideas surface keeps what was written into it, so the check can count
+   what actually rendered rather than trusting that it did. */
+const ideasHTML = { value: '' };
+const mk = (id) => ({ classList:{add(){},remove(){},toggle(){},contains(){return false}}, style:{},
+  get innerHTML(){ return id === 'ideas' ? ideasHTML.value : ''; },
+  set innerHTML(v){ if (id === 'ideas') ideasHTML.value = v; },
+  outerHTML:'', dataset:{}, children:[], remove(){}, appendChild(){},
   insertAdjacentHTML(_p,h){ this.innerHTML += h; }, getAttribute(){return null},
   querySelector(){return mk()}, querySelectorAll(){return []}, scrollIntoView(){},
   getBoundingClientRect(){return {top:0,height:0}} });
 global.window = { LIVE_DECK: { slug:'kingsofleon', api:'https://x/api/campaign-cover', fallbackImage:'RF0HhrwIwp0',
   host:{ observeAll(){}, resetSlides(){}, updateProgress(){} } }, scrollTo(){} };
-global.document = { getElementById(){ return mk(); }, querySelector(){ return mk(); },
+global.document = { getElementById(id){ return mk(id); }, querySelector(){ return mk(); },
   querySelectorAll(){ return []; }, createElement(){ return mk(); }, body: mk() };
 global.fetch = async () => ({ ok:true, json: async () => payload });
 global.AbortController = class { constructor(){ this.signal = {}; } abort(){} };
@@ -98,6 +103,16 @@ console.warn = (...a) => { failed = a.join(' '); origWarn(...a); };
 
 eval(fs.readFileSync('public/live/campaign-home.js','utf8'));
 setTimeout(() => {
-  console.log(failed ? 'RUNTIME FAIL: ' + failed : 'RENDER OK — cover, playbook and board all built');
-  process.exit(failed ? 1 : 0);
+  const slides = (ideasHTML.value.match(/<section class="slide/g) || []).length;
+  const board = /class="rf /.test(ideasHTML.value);
+  if (failed) { console.log('RUNTIME FAIL: ' + failed); process.exit(1); }
+  /* Inspiration is switched off deliberately. Asserting the count keeps the
+     flag honest: if somebody flips it back on, this says so rather than a
+     label quietly seeing a slide nobody approved. */
+  if (slides !== 1 || board) {
+    console.log(`UNEXPECTED: ${slides} Ideas slide(s), board=${board}. Inspiration should be gated off.`);
+    process.exit(1);
+  }
+  console.log('RENDER OK — cover and playbook built, Inspiration correctly absent');
+  process.exit(0);
 }, 300);
