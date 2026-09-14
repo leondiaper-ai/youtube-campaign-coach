@@ -320,13 +320,31 @@ export async function GET(req: NextRequest) {
        it loses the countdown, the build, the gap before the hero. Newest
        first, matching the Latest tab on the channel itself — which is the
        order anybody checking this against YouTube will be looking at. */
+    /* ── THE TWO HEROES ANSWER TWO QUESTIONS ──────────────────────────
+       WHAT IS THIS CAMPAIGN ABOUT, and WHAT JUST HAPPENED. The block is
+       headed NOW, so the second card has to be the newest thing — and it
+       was the highest-viewed thing instead, which put a 26 Aug Short on
+       the Kings of Leon page while sixteen more recent ones sat in the
+       strip, and CHVRCHES' 10 Sep Short ahead of its 13 Sep one.
+
+       Views are a reasonable tiebreak for "which of these matters most".
+       They are the wrong answer entirely to "what is the latest". */
     const ranked = rankAssets(postBaseline);
-    ranked.forEach((a, i) => { a.role = i < MAX_HERO_ASSETS ? 'hero' : 'supporting'; });
-    const heroes = ranked.filter(a => a.role === 'hero');
-    const supporting = ranked
-      .filter(a => a.role === 'supporting')
+    const lead = ranked[0] ?? null;
+    const latest = [...postBaseline]
+      .filter(a => a.videoId !== lead?.videoId)
+      .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))[0] ?? null;
+
+    const heroIds = new Set([lead?.videoId, latest?.videoId].filter(Boolean));
+    const heroes = [lead, latest].filter(Boolean) as CoverAsset[];
+    heroes.forEach(a => { a.role = 'hero'; });
+
+    /* The strip is everything else, in campaign order. */
+    const supporting = postBaseline
+      .filter(a => !heroIds.has(a.videoId))
       .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))
       .slice(0, MAX_SUPPORTING);
+    supporting.forEach(a => { a.role = 'supporting'; });
 
     const state = inMotion.length > 0
       ? 'CAMPAIGN_LIVE'
