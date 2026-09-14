@@ -630,6 +630,28 @@ export function runRolloutChecks(): CheckResult {
     }
   });
 
+  test('the spine says what to do, not that something should become a moment', () => {
+    /* "Make single two an appointment" shipped, and it is marketing-speak
+       for a thing nobody can act on. The banned shapes are abstractions
+       standing in for an action — an appointment, a moment, a thing —
+       because they read as strategy and contain none. A move may still
+       say "Make X an event" where the sentence underneath names the
+       mechanic that makes it one. */
+    const VAGUE = /\b(an appointment|a moment|a thing|a talking point|a destination point)\b/i;
+    for (const [slug, plan] of Object.entries(ROLLOUT_PLANS)) {
+      for (const p of plan) {
+        if (!p.spine) continue;
+        for (const [field, text] of [
+          ['title', p.title], ['objective', p.objective],
+          ['move', p.pitch?.move ?? ''], ['nextAction', p.nextAction ?? ''],
+        ] as const) {
+          assert.ok(!VAGUE.test(text),
+            `${slug}/${p.key}: ${field} reaches for an abstraction — "${text}"`);
+        }
+      }
+    }
+  });
+
   /* ── Generalisation ────────────────────────────────────────────────── */
 
   test('an artist with no plan gets an explicit absence, not an empty page', () => {

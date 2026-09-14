@@ -908,8 +908,12 @@ const KOL_PLAN: PlanItem[] = [
   {
     key: 'premiere_next',
     nextAction: 'give the next priority single a stated time and a Premiere',
-    title: 'Make single two an appointment',
-    objective: 'Turn the next priority single into a moment rather than an upload.',
+    /* Plain English, and specific to the opportunity that exists. "Make
+       single two an appointment" is marketing-speak for a thing nobody can
+       act on; the ACL headline show is a real date in the Coach plan and
+       naming it is the difference between a slogan and a brief. */
+    title: 'Use the ACL headline show to amplify Single 2',
+    objective: 'Give the next priority single a stated time, a Premiere, and the ACL show behind it.',
     timing: 'The next priority single',
     rationale:
       'Seven of eleven music videos in the last campaign ran as confirmed Premieres. My Whole World did not '
@@ -923,7 +927,7 @@ const KOL_PLAN: PlanItem[] = [
     commitment: 'COMMITTED',
     deepDivePoint: 'Keep Premieres, and keep them selective.',
     pitch: {
-      move: 'Make single 2 an appointment',
+      move: 'Use the ACL show to amplify Single 2',
       apply: 'Give the next priority single a stated time and a Premiere.',
       proof: '7 / 11 videos premiered last campaign',
       headline: 'Make single two an appointment',
@@ -1068,7 +1072,7 @@ const KOL_PLAN: PlanItem[] = [
     human: { statedBy: 'Leon', statedAt: '2026-09-14', precision: 'day' },
     opportunity: {
       name: 'Premiere + Afterparty',
-      move: 'Make the next single an event',
+      move: 'Premiere the next single, then keep the room',
       line: 'Premiere, then somewhere to go when it ends.',
     },
   },
