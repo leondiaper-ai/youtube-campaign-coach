@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'Antony Szmierek',
+        blurb:
+          'Post-album deep dive \u2014 what the campaign taught us about what people respond to in Antony\u2019s world, and how to keep Decoding Birdsong moving after release.',
+        href: '/antonyszmierek',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'VENUS GRRRLS',
         blurb:
           'Channel, creative and campaign deep dive with one release left — what their world is, what their audience responds to, and how to keep YouTube working after Carmilla lands on 13 October.',

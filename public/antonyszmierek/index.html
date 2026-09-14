@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Antony Szmierek × YouTube — Keep it moving</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   ANTONY SZMIEREK × YOUTUBE — post-album deep dive
+
+   ── WHERE THE DESIGN COMES FROM ───────────────────────────────────
+   Not from the Amyl / KoL / CHVRCHES / VENUS GRRRLS template. The
+   backbone is shared — fixed chrome, data-t slides, reveal observers,
+   an Analysis sheet, keyboard present mode — but everything visible
+   is lifted off Antony's own campaign.
+
+   The four post-album lyric videos share one designed identity: a
+   heron against a pale sky, track title in red serif capitals. Those
+   two colours were sampled off the actual artwork rather than chosen:
+     red   #D22B2A  (consistent across all four thumbnails)
+     sky   #DDE3E6  (the pale behind the bird)
+   So this deck is a LIGHT deck in a pale sky, with red serif capitals
+   for every headline. Instrument Serif is the closest free match to
+   the album's title face.
+
+   The second device is his, not ours. Antony posts Shorts whose whole
+   title is an aphorism in capitals — "THE HORRORS PERSIST", "YOUR
+   PERSONALITY HAS BEEN BROKEN APART AND SOLD BACK TO YOU IN A SERIES
+   OF SHORT FORM CLIPS". That is the pull-quote treatment here (.card).
+
+   ── ON THE EVIDENCE ───────────────────────────────────────────────
+   Complete public catalogue — all 66 uploads — pulled from the
+   YouTube Data API on 14 Sep 2026, plus 535 public comments across 21
+   videos, plus the Watcher and the Campaign Coach. No YouTube Studio
+   data anywhere: nothing here claims traffic sources, watch time or
+   retention.
+
+   Two disciplines the deck holds to and says so:
+   1. The 66 uploads sum to 702,642 views; the API's channel viewCount
+      is 1,130,576. The 427,934 gap is unexplained by the current
+      public catalogue, so NOTHING is expressed as a share of lifetime
+      views. Shares are against the 66-upload total and say so.
+   2. The four lyric videos are 24, 17, 11 and 4 days old. The deck
+      does not rank them. Age-mismatched comparison is the easiest way
+      to be confidently wrong here.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --sky:#E4E8EA;       /* the pale behind the heron, warmed a shade for a page */
+  --paper:#F2F3F2;
+  --ink:#121820;
+  --deep:#0E1621;      /* the dark end of the lyric-video artwork */
+  --red:#D22B2A;       /* sampled off all four lyric thumbnails */
+  --slate:#5E6A74;
+  --line:rgba(18,24,32,.14);
+  --lineD:rgba(228,232,234,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--sky);color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* The album's own title treatment: serif, capitals, letterspaced, red. */
+.display{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;
+  letter-spacing:.012em;line-height:1.02;font-weight:400;color:var(--red)}
+.display.big{font-size:clamp(2.2rem,5.6vw,4.6rem)}
+.display.mid{font-size:clamp(1.5rem,3.1vw,2.5rem)}
+.display.ink{color:var(--ink)}
+
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(228,232,234,.94);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;z-index:900}
+.chrome-l{display:flex;align-items:center;gap:.85rem;font-size:.6rem;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--slate)}
+.chrome-r{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{font-family:inherit;font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  padding:.5rem .85rem;border-radius:3px;border:1px solid var(--line);background:transparent;
+  color:var(--ink);cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(18,24,32,.07)}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+body.present .chrome{display:none}
+body.present,body.sheet-open{overflow:hidden}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.deck{padding-top:56px}
+.slide{min-height:100vh;display:flex;align-items:center;position:relative;
+  padding:5rem 1.6rem;border-bottom:1px solid var(--line);overflow:hidden}
+.slide .inner{max-width:1160px;margin:0 auto;width:100%;position:relative;z-index:2}
+.slide.paper{background:var(--paper)}
+.slide.dark{background:var(--deep);color:var(--sky);border-bottom-color:var(--lineD)}
+.slide.dark .sub,.slide.dark .beat-k{color:#93A0AA}
+.slide.dark .display.ink{color:var(--sky)}
+body.present .slide{display:none;height:100vh;padding:3rem 4vw}
+body.present .slide.active{display:flex}
+
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bleed img{width:100%;height:100%;object-fit:cover;opacity:.5}
+.bleed::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(92deg,var(--sky) 4%,rgba(228,232,234,.86) 46%,rgba(228,232,234,.5))}
+.bleed.dk::after{background:linear-gradient(92deg,var(--deep) 4%,rgba(14,22,33,.86) 46%,rgba(14,22,33,.5))}
+
+.label{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--slate);margin-bottom:1rem}
+.sub{font-size:clamp(.9rem,1.15vw,1.02rem);line-height:1.62;color:var(--slate);max-width:64ch;margin-top:1rem}
+.statement{font-size:clamp(1rem,1.65vw,1.3rem);line-height:1.46;max-width:58ch;font-weight:400}
+
+/* The bottom line. One sentence, the action, on every argument slide. */
+.bl{margin-top:1.9rem;padding-left:1.05rem;border-left:3px solid var(--red);max-width:62ch}
+.bl-k{font-size:.53rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--red);margin-bottom:.4rem}
+.bl-v{font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.4;font-weight:500}
+
+/* Antony's own device: an aphorism, in capitals, as the whole thing. */
+.card{border:1px solid var(--line);background:var(--paper);padding:1.4rem 1.5rem;border-radius:3px;
+  max-width:60ch;margin-top:1.5rem}
+.slide.dark .card{border-color:var(--lineD);background:rgba(228,232,234,.05)}
+.card-v{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;line-height:1.16;
+  font-size:clamp(.98rem,1.6vw,1.3rem);letter-spacing:.01em}
+.card-k{font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--slate);margin-top:.7rem}
+
+/* ── Stats ──────────────────────────────────────────────────────── */
+.stat-row{display:flex;gap:clamp(1.2rem,3.4vw,3rem);flex-wrap:wrap;margin-top:2rem}
+.stat .num{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(1.7rem,4.2vw,3.2rem);
+  line-height:1;color:var(--ink)}
+.stat .num.red{color:var(--red)}
+.stat .cap{font-size:.56rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--slate);margin-top:.45rem}
+.stat .sub2{font-size:.63rem;color:var(--slate);opacity:.8;margin-top:.2rem}
+.slide.dark .stat .num{color:var(--sky)}
+
+/* ── Contact sheet ──────────────────────────────────────────────── */
+.sheetgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:1.5rem;
+  border:1px solid var(--lineD);padding:4px;border-radius:3px;background:rgba(228,232,234,.04)}
+.sheetgrid a{display:block;overflow:hidden;border-radius:1px;background:#0b1119;aspect-ratio:16/9}
+.sheetgrid img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(.1) contrast(1.04);transition:filter .25s,transform .25s}
+.sheetgrid a:hover img{filter:none;transform:scale(1.05)}
+@media(max-width:1000px){.sheetgrid{grid-template-columns:repeat(4,1fr)}}
+
+/* His actual words, off the actual titles. */
+.words{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.3rem;max-width:76ch}
+.word{font-size:.71rem;font-weight:500;padding:.34rem .68rem;border:1px solid var(--lineD);
+  border-radius:2px;color:#B9C3CB}
+.word.hot{border-color:var(--red);color:#EC6D6C}
+.word.caps{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:.78rem;
+  letter-spacing:.02em;color:var(--sky)}
+
+/* ── Evidence: real uploads, real titles ────────────────────────── */
+.ev{display:grid;gap:.7rem;margin-top:1.4rem}
+.ev.e2{grid-template-columns:repeat(2,1fr);max-width:600px}
+.ev.e3{grid-template-columns:repeat(3,1fr);max-width:860px}
+.ev.e4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.ev.e3,.ev.e4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:440px){.ev.e2,.ev.e3,.ev.e4{grid-template-columns:1fr}}
+.ev a{display:block;text-decoration:none;color:inherit}
+.ev img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:2px;
+  background:#0b1119;border:1px solid var(--line);transition:border-color .25s,filter .25s;
+  filter:grayscale(.08) contrast(1.03)}
+.ev a:hover img{filter:none;border-color:var(--red)}
+.slide.dark .ev img{border-color:var(--lineD)}
+.ev-k{font-size:.5rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--red);margin-top:.5rem}
+.ev-t{font-size:.66rem;line-height:1.4;color:var(--slate);margin-top:.18rem}
+.slide.dark .ev-t{color:#93A0AA}
+.ev-n{font-family:'Instrument Serif',Georgia,serif;font-size:.95rem;margin-top:.2rem}
+
+/* ── Worlds: one idea, everything it became ─────────────────────── */
+.wr{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.6rem}
+@media(max-width:900px){.wr{grid-template-columns:1fr}}
+.wc{border:1px solid var(--line);border-radius:3px;padding:1rem;background:var(--paper);
+  display:flex;flex-direction:column}
+.wc img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:2px;margin-bottom:.7rem;background:#0b1119}
+.wc-n{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.05rem;
+  color:var(--red);line-height:1.1}
+.wc-s{font-size:.66rem;line-height:1.5;color:var(--slate);margin-top:.42rem;flex:1}
+.wc-f{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
+  margin-top:.7rem;padding-top:.55rem;border-top:1px solid var(--line);font-weight:700}
+
+/* ── Comments ───────────────────────────────────────────────────── */
+.cmt{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;margin-top:1.5rem;max-width:960px}
+@media(max-width:820px){.cmt{grid-template-columns:1fr}}
+.cm{border:1px solid var(--lineD);border-radius:3px;padding:.95rem 1.05rem;background:rgba(228,232,234,.05)}
+.cm-k{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:.9rem;
+  color:var(--red);margin-bottom:.45rem}
+.cm-q{font-size:.79rem;line-height:1.5;color:var(--sky)}
+.cm-a{font-size:.57rem;letter-spacing:.09em;text-transform:uppercase;color:#7D8A95;margin-top:.5rem}
+
+/* ── Bars ───────────────────────────────────────────────────────── */
+.bars{margin-top:1.6rem;max-width:660px}
+.bar-r{display:grid;grid-template-columns:9.5rem 1fr 3.6rem;gap:.9rem;align-items:center;margin-bottom:.55rem}
+.bar-l{font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.bar-l small{display:block;color:var(--slate);font-weight:400;font-size:.59rem;
+  letter-spacing:0;text-transform:none;margin-top:.1rem}
+.bar-t{height:11px;background:rgba(18,24,32,.1);border-radius:2px;overflow:hidden}
+.slide.dark .bar-t{background:rgba(228,232,234,.12)}
+.bar-f{height:100%;background:var(--red);width:0;transition:width 1s cubic-bezier(.2,.8,.3,1)}
+.bar-f.low{background:var(--slate)}
+.bar-v{font-family:'Instrument Serif',Georgia,serif;font-size:.95rem;text-align:right}
+@media(max-width:640px){.bar-r{grid-template-columns:1fr;gap:.2rem}.bar-v{text-align:left}}
+
+/* ── Formats / actions ──────────────────────────────────────────── */
+.fm{display:grid;grid-template-columns:repeat(2,1fr);gap:.85rem;margin-top:1.5rem}
+@media(max-width:820px){.fm{grid-template-columns:1fr}}
+.fc{border:1px solid var(--line);border-radius:3px;padding:1.05rem 1.15rem;background:var(--paper)}
+.slide.dark .fc{border-color:var(--lineD);background:rgba(228,232,234,.05)}
+.fc-n{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.15rem;color:var(--red)}
+.fc-d{font-size:.72rem;line-height:1.55;margin-top:.4rem}
+.fc-l{font-size:.63rem;line-height:1.5;color:var(--slate);margin-top:.5rem;
+  padding-top:.5rem;border-top:1px solid var(--line)}
+.slide.dark .fc-l{border-top-color:var(--lineD);color:#93A0AA}
+.fc-l b{color:var(--ink);font-weight:700}
+.slide.dark .fc-l b{color:var(--sky)}
+
+.acts{margin-top:1.7rem;display:flex;flex-direction:column;gap:.7rem}
+.act{display:grid;grid-template-columns:2.6rem 1fr;gap:1.05rem;align-items:start;
+  border:1px solid var(--line);border-radius:3px;padding:1rem 1.1rem;background:var(--paper)}
+.slide.dark .act{border-color:var(--lineD);background:rgba(228,232,234,.05)}
+.act-n{font-family:'Instrument Serif',Georgia,serif;font-size:1.8rem;color:var(--red);line-height:.85}
+.act-t{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.1rem;line-height:1.12}
+.act-d{font-size:.74rem;color:var(--slate);margin-top:.35rem;line-height:1.55}
+.slide.dark .act-d{color:#93A0AA}
+@media(max-width:640px){.act{grid-template-columns:1fr;gap:.3rem}}
+
+/* The loop on slide 9 — plain words, no arrows-as-jargon. */
+.loop{display:flex;flex-wrap:wrap;align-items:stretch;gap:.5rem;margin-top:1.5rem}
+.lp{flex:1 1 150px;border:1px solid var(--line);border-radius:3px;padding:.85rem .9rem;background:var(--paper)}
+.lp-n{font-size:.5rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--red)}
+.lp-t{font-size:.8rem;font-weight:700;margin-top:.3rem;line-height:1.25}
+.lp-d{font-size:.63rem;color:var(--slate);margin-top:.28rem;line-height:1.45}
+
+.prov{margin-top:1.3rem;font-size:.62rem;line-height:1.56;color:var(--slate);
+  border-left:2px solid var(--slate);padding-left:.8rem;max-width:62ch}
+.prov b{color:var(--ink);font-weight:700;letter-spacing:.08em;font-size:.55rem;text-transform:uppercase}
+.slide.dark .prov b{color:var(--sky)}
+
+/* ── Appendix ───────────────────────────────────────────────────── */
+.sheet{position:fixed;inset:0;background:var(--paper);color:var(--ink);z-index:1200;
+  display:none;overflow-y:auto;padding:4rem 1.6rem}
+.sheet.open{display:block}
+.sheet-in{max-width:940px;margin:0 auto}
+.sheet h2{font-family:'Instrument Serif',Georgia,serif;font-size:2rem;text-transform:uppercase;
+  margin-bottom:.4rem;color:var(--red)}
+.sheet h3{font-family:'Instrument Serif',Georgia,serif;font-size:1.05rem;text-transform:uppercase;
+  margin:1.6rem 0 .5rem}
+.sheet p{font-size:.83rem;line-height:1.65;margin-bottom:.7rem;color:#39424C}
+.sheet table{width:100%;border-collapse:collapse;margin:.5rem 0 1rem;font-size:.75rem}
+.sheet th{text-align:left;font-size:.57rem;letter-spacing:.11em;text-transform:uppercase;
+  padding:.45rem .55rem;border-bottom:2px solid var(--ink);color:#39424C}
+.sheet td{padding:.42rem .55rem;border-bottom:1px solid var(--line)}
+.sheet th.n,.sheet td.n{text-align:right;font-variant-numeric:tabular-nums}
+.sheet-x{position:fixed;top:1.1rem;right:1.4rem;z-index:1300}
+
+.pbar{position:fixed;bottom:0;left:0;height:2px;background:var(--red);width:0;z-index:950;transition:width .2s}
+.phint{position:fixed;bottom:.9rem;left:50%;transform:translateX(-50%);font-size:.55rem;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--slate);display:none;z-index:950}
+body.present .phint{display:block}
+
+/* ── Motion ─────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.stagger.visible>*{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}
+  .bar-f{transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="chrome-l">
+    <span style="color:var(--red)">ANTONY SZMIEREK × YOUTUBE</span>
+    <span>Post-album deep dive · September 2026</span>
+  </div>
+  <div class="chrome-r">
+    <button class="btn" onclick="openSheet('appendix')">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
+<section class="slide dark" data-t="Cover">
+  <div class="bleed dk"><img src="https://i.ytimg.com/vi/bbasdP-u4WA/maxresdefault.jpg" alt=""
+    onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg'"></div>
+  <div class="inner">
+    <div class="label reveal">Antony Szmierek × YouTube · September 2026</div>
+    <h1 class="display big reveal">The album is out.<br>Keep it moving.</h1>
+    <p class="statement reveal" style="margin-top:1.3rem;color:var(--sky)">
+      <i>Decoding Birdsong</i> landed 21 August. The label is already keeping it active on
+      YouTube. Here's what the campaign has taught us — and what to build around it next.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ 2 · WHERE WE ARE ═══════════════════════════════════════════ -->
+<section class="slide paper" data-t="Where we are">
+  <div class="inner">
+    <div class="label reveal">Where we are now</div>
+    <h2 class="display mid reveal" style="max-width:24ch">The channel is bigger than the campaign</h2>
+
+    <div class="stat-row stagger">
+      <div class="stat"><div class="num red">5,320</div><div class="cap">Subscribers</div>
+        <div class="sub2">at 14 Sep</div></div>
+      <div class="stat"><div class="num">+255.6K</div><div class="cap">Views across the channel</div>
+        <div class="sub2">in the last 144 days</div></div>
+      <div class="stat"><div class="num">+1,230</div><div class="cap">Subscribers gained</div>
+        <div class="sub2">in the same period</div></div>
+      <div class="stat"><div class="num">4</div><div class="cap">Lyric videos live</div>
+        <div class="sub2">since 21 August</div></div>
+      <div class="stat"><div class="num">5</div><div class="cap">More scheduled</div>
+        <div class="sub2">to 18 October</div></div>
+    </div>
+
+    <p class="sub reveal">
+      Everything published inside that 144-day window — 16 uploads, including Chalk, Seminal,
+      Flight Simulator and all four lyric videos — has <b style="color:var(--ink)">68,050 views
+      between them in total</b>. So most of the +255.6K is the back catalogue still working:
+      a pyramid video from 2024, Rafters, Yoga Teacher.
+    </p>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">The audience is already there, and most of it found him before this
+        album. The job is bringing them to it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · INSIDE ANTONY'S WORLD ══════════════════════════════════ -->
+<section class="slide dark" data-t="Inside his world">
+  <div class="inner">
+    <div class="label reveal">Inside Antony's world</div>
+    <h2 class="display big reveal" style="max-width:19ch">A pyramid in Stockport,<br>and a heron who can fight</h2>
+
+    <div class="sheetgrid stagger">
+      <a href="https://youtu.be/XP8fS9WuGqU" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg" alt="The Great Pyramid Of Stockport" loading="lazy"></a>
+      <a href="https://youtu.be/L8lAWBK0v9E" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/L8lAWBK0v9E/hqdefault.jpg" alt="The Heron" loading="lazy"></a>
+      <a href="https://youtu.be/TkTRa6a2zQI" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg" alt="Chalk" loading="lazy"></a>
+      <a href="https://youtu.be/bPq-zhiC3aw" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/bPq-zhiC3aw/hqdefault.jpg" alt="Flight Simulator" loading="lazy"></a>
+      <a href="https://youtu.be/NSbdyFT2x1Y" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/NSbdyFT2x1Y/hqdefault.jpg" alt="Rafters" loading="lazy"></a>
+      <a href="https://youtu.be/iEPHboSL5rc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/iEPHboSL5rc/hqdefault.jpg" alt="Yoga Teacher" loading="lazy"></a>
+      <a href="https://youtu.be/NuFT4ls68BA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/NuFT4ls68BA/hqdefault.jpg" alt="Angie's Wedding" loading="lazy"></a>
+      <a href="https://youtu.be/y875VU7Sac0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/y875VU7Sac0/hqdefault.jpg" alt="Seminal" loading="lazy"></a>
+      <a href="https://youtu.be/bbasdP-u4WA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg" alt="Magnolia lyric video" loading="lazy"></a>
+      <a href="https://youtu.be/VExP3_NwpeM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/VExP3_NwpeM/hqdefault.jpg" alt="Bookie's Favourite lyric video" loading="lazy"></a>
+      <a href="https://youtu.be/we_8ev9RhPE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="The Same Heron Again lyric video" loading="lazy"></a>
+      <a href="https://youtu.be/UevSqYI_oVk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/UevSqYI_oVk/hqdefault.jpg" alt="You're Not Supposed To Do This Forever lyric video" loading="lazy"></a>
+      <a href="https://youtu.be/yvRJjTzQ4hM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/yvRJjTzQ4hM/hqdefault.jpg" alt="The Words to Auld Lang Syne" loading="lazy"></a>
+      <a href="https://youtu.be/sZ0LC_H88pU" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/sZ0LC_H88pU/hqdefault.jpg" alt="Rock and a Calm Place" loading="lazy"></a>
+      <a href="https://youtu.be/Vta35XGavjo" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Vta35XGavjo/hqdefault.jpg" alt="ever thought about getting to know yourself?" loading="lazy"></a>
+      <a href="https://youtube.com/shorts/AfzUlbrkTQc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/AfzUlbrkTQc/hqdefault.jpg" alt="Stockport pyramid Short" loading="lazy"></a>
+    </div>
+
+    <div class="words stagger">
+      <span class="word caps">THE HORRORS PERSIST</span>
+      <span class="word caps">THE HERON WAITS PATIENTLY</span>
+      <span class="word hot">the eighth wonder of the world is in stockport x</span>
+      <span class="word">i'm a downward-facing class traitor</span>
+      <span class="word">today we attempt to land Flight Simulator</span>
+      <span class="word">bruce bogtrotter core</span>
+      <span class="word hot">the man up the pole is 62 years old</span>
+      <span class="word">Tony's first billboard 🤝</span>
+      <span class="word">the poem that became Rafters</span>
+      <span class="word">makes you think</span>
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.4rem;color:var(--sky)">
+      Spoken word over dance music, about very specific British things — a shopping-centre
+      pyramid, a snooker table, a heron on a canal. The headlines are his, in capitals; the
+      captions are his too, in lower case, taking the mickey out of himself.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ 4 · THE BEST IDEAS BECOME WORLDS ═══════════════════════════ -->
+<section class="slide paper" data-t="Ideas become worlds">
+  <div class="inner">
+    <div class="label reveal">What actually works</div>
+    <h2 class="display mid reveal" style="max-width:26ch">His best ideas don't promote a song. They build a place people can go.</h2>
+
+    <div class="wr stagger">
+      <div class="wc">
+        <img src="https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg" alt="" loading="lazy">
+        <div class="wc-n">Stockport</div>
+        <div class="wc-s">A shopping-centre pyramid off the M60 became a song, a video, four
+          Shorts and a running joke. One commenter: <i>"Used to live in Cairo, now live in
+          Stockport. This song speaks to me."</i></div>
+        <div class="wc-f">5 videos · 159,892 views</div>
+      </div>
+      <div class="wc">
+        <img src="https://i.ytimg.com/vi/L8lAWBK0v9E/hqdefault.jpg" alt="" loading="lazy">
+        <div class="wc-n">The Heron</div>
+        <div class="wc-s">A song became a character. The actor who played him commented
+          <i>"Thanks for letting me be THE Heron"</i> — 225 likes, the most-liked comment we
+          found anywhere on the channel — and the audience kept the bit going underneath.</div>
+        <div class="wc-f">7 videos · 45,069 views</div>
+      </div>
+      <div class="wc">
+        <img src="https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg" alt="" loading="lazy">
+        <div class="wc-n">Chalk</div>
+        <div class="wc-s">Snooker as the whole frame. One of the top comments is a viewer doing
+          snooker commentary: <i>"For those of you watching in black and white, the pink is
+          next to the green."</i></div>
+        <div class="wc-f">2 videos · 28,118 views</div>
+      </div>
+    </div>
+
+    <p class="sub reveal">
+      Eight of the biggest ideas on the channel turned into more than one upload. Together they
+      account for <b style="color:var(--ink)">65% of all views across the 66 videos</b>
+      currently public.
+    </p>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">The more specific the idea, the more there is for people to step into.</div>
+    </div>
+
+    <div class="prov reveal">
+      <b>Signal, not proof</b><br>
+      We can't show the extra videos caused the views. A song the label already expects to
+      perform is also the song that gets more made for it. These ideas are also of very
+      different ages — Stockport's video is from October 2024, Chalk's from May 2026 — so size
+      here reflects time on the channel as much as reach. What we can say is that the ideas big
+      enough to carry several videos are the ideas that carried the channel.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THEY JOIN IN ═══════════════════════════════════════════ -->
+<section class="slide dark" data-t="They join in">
+  <div class="inner">
+    <div class="label reveal">What the comments say</div>
+    <h2 class="display big reveal" style="max-width:17ch">People don't just watch.<br>They join in.</h2>
+
+    <div class="cmt stagger">
+      <div class="cm">
+        <div class="cm-k">The words</div>
+        <div class="cm-q">"'I'm a downward facing class traitor' 😂😂❤"</div>
+        <div class="cm-a">On Yoga Teacher · 28 likes · people quote the lines back</div>
+      </div>
+      <div class="cm">
+        <div class="cm-k">The joke</div>
+        <div class="cm-q">"Remember everyone, never leave the bookies with a smile on your face."</div>
+        <div class="cm-a">On Bookie's Favourite · they write in his register</div>
+      </div>
+      <div class="cm">
+        <div class="cm-k">The person</div>
+        <div class="cm-q">"Saw Antony a week ago today at AYL? in a church in Reading… what a warm and generous guy"</div>
+        <div class="cm-a">People who've seen him live describe the man, not the setlist</div>
+      </div>
+      <div class="cm">
+        <div class="cm-k">The discovery story</div>
+        <div class="cm-q">"I was recommended this video by Sophie from Buckles in Chippenham!"</div>
+        <div class="cm-a">44 likes · people volunteer exactly how they found him</div>
+      </div>
+    </div>
+
+    <p class="sub reveal" style="margin-top:1.3rem">
+      Read across <b style="color:var(--sky)">535 public comments on 21 of his 66 videos</b>. Telling
+      people where they found him is the theme that comes up most often in this sample —
+      6 Music, the Euros coverage, a stranger on a Manchester tram.
+    </p>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">Antony's videos pull the most out of people when there is something to
+        repeat, finish or answer back to.</div>
+    </div>
+
+    <div class="prov reveal">
+      <b>What this is and isn't</b><br>
+      535 comments is what people chose to write, not a survey of the audience. It tells us
+      what the people who comment care about. It cannot tell us what share of viewers came
+      from anywhere — YouTube's public data doesn't carry traffic sources.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · THE SUSTAIN ENGINE ═════════════════════════════════════ -->
+<section class="slide paper" data-t="Sustain engine">
+  <div class="inner">
+    <div class="label reveal">What the label is already doing</div>
+    <h2 class="display mid reveal" style="max-width:26ch">A track a week, already booked to 18 October</h2>
+
+    <p class="statement reveal" style="margin-top:1rem">
+      Since release day, a track from the album has been given its own video almost every week.
+      Four are live. Five more are booked.
+    </p>
+
+    <div class="prov reveal" style="margin-top:1.1rem">
+      <b>Read the ages, not the view counts</b><br>
+      These went up 24, 17, 11 and 4 days ago. A four-day-old video and a three-week-old one
+      cannot be compared on views, so this is the order they were published in, not a ranking.
+    </div>
+
+    <div class="ev e4 stagger">
+      <a href="https://youtu.be/bbasdP-u4WA" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">21 Aug · 24 days live</div>
+        <div class="ev-t">The First Five Minutes Of Magnolia</div>
+        <div class="ev-n">2,966 views</div></a>
+      <a href="https://youtu.be/VExP3_NwpeM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/VExP3_NwpeM/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">28 Aug · 17 days live</div>
+        <div class="ev-t">Bookie's Favourite (feat. Ellur)</div>
+        <div class="ev-n">1,685 views</div></a>
+      <a href="https://youtu.be/we_8ev9RhPE" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">3 Sep · 11 days live</div>
+        <div class="ev-t">The Same Heron Again</div>
+        <div class="ev-n">719 views</div></a>
+      <a href="https://youtu.be/UevSqYI_oVk" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/UevSqYI_oVk/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">10 Sep · 4 days live</div>
+        <div class="ev-t">You're Not Supposed To Do This Forever</div>
+        <div class="ev-n">505 views</div></a>
+    </div>
+
+    <p class="sub reveal">
+      One thing we <i>can</i> compare fairly, because it barely moves with age:
+      <b style="color:var(--ink)">all four are liked more often than the typical video on this
+      channel</b> — 2.76%, 3.09%, 2.64% and 4.16% against a long-form median of 2.10%. The
+      people finding them are responding.
+    </p>
+    <p class="sub reveal" style="margin-top:.6rem">
+      Still to come: <b style="color:var(--ink)">Aussie Goldhunters</b> (17 Sep),
+      <b style="color:var(--ink)">Godzilla Hotel</b>, <b style="color:var(--ink)">Dave's Angling
+      Superstore</b>, <b style="color:var(--ink)">Commune</b> and the title track.
+    </p>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">Too early to say which of these is working. Not too early to build
+        around them.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · DON'T JUST ANNOUNCE ════════════════════════════════════ -->
+<section class="slide dark" data-t="Not just announcements">
+  <div class="inner">
+    <div class="label reveal">What his Shorts have done</div>
+    <h2 class="display mid reveal" style="max-width:25ch">The opportunity isn't more Shorts. It's more Antony in them.</h2>
+
+    <div class="bars reveal">
+      <div class="bar-r">
+        <div class="bar-l">Live<small>on stage, the crowd, a festival · 6 Shorts</small></div>
+        <div class="bar-t"><div class="bar-f" data-w="100"></div></div><div class="bar-v">1,261</div></div>
+      <div class="bar-r">
+        <div class="bar-l">Personality<small>his jokes, him being him · 10 Shorts</small></div>
+        <div class="bar-t"><div class="bar-f" data-w="69"></div></div><div class="bar-v">865</div></div>
+      <div class="bar-r">
+        <div class="bar-l">Words<small>lyrics and poems as the whole thing · 9 Shorts</small></div>
+        <div class="bar-t"><div class="bar-f" data-w="56"></div></div><div class="bar-v">712</div></div>
+      <div class="bar-r">
+        <div class="bar-l">Announcements<small>out now, tickets, pre-order · 11 Shorts</small></div>
+        <div class="bar-t"><div class="bar-f low" data-w="39"></div></div><div class="bar-v">495</div></div>
+    </div>
+    <div class="sub reveal" style="margin-top:.6rem;font-size:.66rem">
+      Median views per Short. Four of the five groups he makes, sorted by hand; a fifth group
+      of 4 is too small to put a bar against.
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.3rem;color:var(--sky)">
+      Straight announcements are the biggest group he has made — 11 of 40 — and the one with
+      the fewest views. He has already moved on: <b>of his 14 Shorts in 2026, one is an
+      announcement</b>. Everything that shows the man, the room or the writing has done better.
+    </p>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">The instinct is already right. The job is keeping it up while the
+        album rolls out.</div>
+    </div>
+
+    <div class="prov reveal">
+      <b>Signal, not law</b><br>
+      Four groups of 6, 9, 10 and 11, spread across 2023–2026 as the channel grew, sorted by
+      hand — and a few could sit in two groups. Treat the direction as real and the numbers as
+      rough.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · WHAT AN ANTONY SHORT IS ════════════════════════════════ -->
+<section class="slide paper" data-t="An Antony Short">
+  <div class="inner">
+    <div class="label reveal">Four he already makes</div>
+    <h2 class="display mid reveal" style="max-width:24ch">What an Antony Short actually looks like</h2>
+
+    <div class="fm stagger">
+      <div class="fc">
+        <div class="fc-n">The thought</div>
+        <div class="fc-d">One line, held on screen, in capitals. No music video, no "out now" —
+          just the sentence, doing what a good sentence does.</div>
+        <div class="fc-l"><b>He already does this:</b> "YOUR PERSONALITY HAS BEEN BROKEN APART
+          AND SOLD BACK TO YOU IN A SERIES OF SHORT FORM CLIPS" · "THE HORRORS PERSIST".
+          <b>Leads to:</b> the track the line comes from.</div>
+      </div>
+      <div class="fc">
+        <div class="fc-n">The story</div>
+        <div class="fc-d">He already writes these — the Flight Simulator description is one,
+          typed out at length with no prompting. Say it to camera instead of burying it under
+          the video.</div>
+        <div class="fc-l"><b>He already does this:</b> "the poem that became Rafters", and the
+          Craig Cash description: <i>"here he is performing words i wrote (!!)"</i>.
+          <b>Points at:</b> the lyric video that week.</div>
+      </div>
+      <div class="fc">
+        <div class="fc-n">The place</div>
+        <div class="fc-d">An ordinary British spot, filmed plainly, with one strange observation
+          over the top. Not "make more Stockport videos" — make more looking-at-things videos.</div>
+        <div class="fc-l"><b>He already does this:</b> "the eighth wonder of the world is in
+          stockport x" · "Stockport or Giza?" — and the Stockport Short is the most-watched
+          Short on the channel. <b>Points at:</b> any song with a place in it, and three of the
+          five remaining titles are places.</div>
+      </div>
+      <div class="fc">
+        <div class="fc-n">The live moment</div>
+        <div class="fc-d">The spoken passages, specifically — the bit where he stops singing and
+          talks, and the room goes with him. That is what people who have seen him write about.
+          A phone from the side of the stage is fine.</div>
+        <div class="fc-l"><b>He already does this:</b> "Your never be alone again my love" ·
+          "everyone can face a crisis" · "rafters live at glastonbury". Live is the strongest
+          Shorts group of the five we sorted. <b>Points at:</b> the album, and whatever's
+          next live.</div>
+      </div>
+    </div>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">Four formats, all of them already in his catalogue. None needs a
+        production budget.</div>
+    </div>
+
+    <div class="prov reveal">
+      <b>Signal, not law</b><br>
+      The performance behind these is four hand-sorted groups of 6, 9, 10 and 11 Shorts, spread
+      across 2023–2026. Treat the direction as real and the numbers as rough.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · KEEP IT MOVING ═════════════════════════════════════════ -->
+<section class="slide dark" data-t="Keep it moving">
+  <div class="inner">
+    <div class="label reveal">The next six to eight weeks</div>
+    <h2 class="display mid reveal" style="max-width:24ch">Keep Decoding Birdsong moving</h2>
+
+    <p class="statement reveal" style="margin-top:.9rem;color:var(--sky)">
+      Five lyric videos are already booked. Rather than add a separate plan, hang something
+      small off each one — so every album track arrives with something to draw people in, not
+      just a page to sit on.
+    </p>
+
+    <div class="loop stagger">
+      <div class="lp"><div class="lp-n">Already booked</div>
+        <div class="lp-t">The lyric video</div>
+        <div class="lp-d">One album track a week gets its own home on the channel.</div></div>
+      <div class="lp"><div class="lp-n">Add</div>
+        <div class="lp-t">One Antony Short</div>
+        <div class="lp-d">The thought, the story, the place or the live moment — whichever the
+          song gives you.</div></div>
+      <div class="lp"><div class="lp-n">Connect</div>
+        <div class="lp-t">Point it at the song</div>
+        <div class="lp-d">The Short ends on the track, and the track sits in one album playlist
+          — if one doesn't exist already.</div></div>
+      <div class="lp"><div class="lp-n">Then</div>
+        <div class="lp-t">What's next</div>
+        <div class="lp-d">Whoever finishes one video gets offered another. Worth checking what
+          the end screens currently do.</div></div>
+    </div>
+
+    <p class="sub reveal" style="margin-top:1.4rem">
+      The remaining titles do half the work already: <b style="color:var(--sky)">Godzilla
+      Hotel</b>, <b style="color:var(--sky)">Dave's Angling Superstore</b> and
+      <b style="color:var(--sky)">Commune</b> are all places, and <b style="color:var(--sky)">Aussie
+      Goldhunters</b> is a telly reference — the same move as Craig Cash, whose video drew more
+      comments per viewer than anything else on the channel.
+    </p>
+
+    <div class="card reveal">
+      <div class="card-v">39,965 people watched The Heron.<br>719 have watched The Same Heron Again.</div>
+      <div class="card-k">The album track is a callback to the video — and nothing on the
+        channel takes you from one to the other. Different ages, so not a fair comparison of
+        performance. It is a fair description of a missing link.</div>
+    </div>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">The plan already asks for three Shorts a release. One that genuinely
+        suits the song beats three filled slots.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · THREE THINGS ══════════════════════════════════════════ -->
+<section class="slide paper" data-t="Three things">
+  <div class="inner">
+    <div class="label reveal">Three things next</div>
+    <h2 class="display big reveal" style="max-width:16ch">Finish it, fill it, open it up</h2>
+
+    <div class="acts stagger" style="max-width:880px">
+      <div class="act"><div class="act-n">1</div><div>
+        <div class="act-t">Nothing to change here</div>
+        <div class="act-d">The lyric rollout works as a system and is already booked to
+          18 October. Finish it, and judge the four that are live once they have all been up
+          the same number of days.</div></div></div>
+      <div class="act"><div class="act-n">2</div><div>
+        <div class="act-t">Put more Antony around it</div>
+        <div class="act-d">His stories, his observations, his live moments and his own lines
+          instead of another "out now" — the direction his 2026 Shorts already took, now applied
+          to the album.</div></div></div>
+      <div class="act"><div class="act-n">3</div><div>
+        <div class="act-t">When an idea catches, build it out</div>
+        <div class="act-d">Stockport, the Heron and the snooker frame all grew past one video.
+          When the next one lands like that, give people more ways in rather than moving on.</div></div></div>
+    </div>
+
+    <div class="bl reveal" style="margin-top:1.6rem">
+      <div class="bl-k">In one line</div>
+      <div class="bl-v">The album gets a home on YouTube every week. What it needs now is a
+        way in.</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ═══ APPENDIX ══════════════════════════════════════════════════ -->
+<div class="sheet" id="sheet-appendix">
+  <button class="btn sheet-x" onclick="closeSheets()">Close</button>
+  <div class="sheet-in">
+    <h2>Analysis appendix</h2>
+    <p>Everything in this deck comes from public data pulled on <b>14 September 2026</b>: the
+    complete YouTube catalogue of the Antony Szmierek channel (<code>UC-VwXR6M4HD4Wo1UpTBi4SA</code>,
+    66 uploads, retrieved 16:12 UTC), 535 public comments across 21 videos (retrieved 16:38 UTC),
+    the Watcher channel record and the Campaign Coach timeline. <b>No YouTube Studio data is used
+    anywhere</b> — nothing here claims traffic sources, watch time, retention or impressions.</p>
+
+    <h3>The one number we can't reconcile</h3>
+    <p>The 66 currently public uploads sum to <b>702,642 views</b>. The API reports the channel's
+    lifetime <code>viewCount</code> as <b>1,130,576</b>. The <b>427,934</b> difference is most
+    likely views on uploads since made private, unlisted or removed, but the public API cannot
+    confirm that. <b>Because of this, no figure in this deck is expressed as a share of lifetime
+    views.</b> Where a share is given it is against the 702,642 total of current public uploads,
+    and says so.</p>
+
+    <h3>Ideas that became more than one upload</h3>
+    <p>Assigned by hand, by idea rather than by format — the hero video plus every Short or
+    follow-up that belongs to the same idea. <b>These are the eight biggest, not all of them.</b>
+    At least eleven ideas span more than one upload; adding The Words to Auld Lang Syne (2
+    uploads, 68,055), How Did You Get Here? (3, 38,395) and "ever thought about getting to know
+    yourself?" (2, 3,471) takes the total to 11 ideas, 40 uploads and 80.7% of the 66-upload
+    total. The deck uses the conservative eight.</p>
+    <table>
+      <tr><th>Idea</th><th class="n">Uploads</th><th class="n">Total views</th><th class="n">Share of the 66</th></tr>
+      <tr><td>Stockport / the pyramid</td><td class="n">5</td><td class="n">159,892</td><td class="n">22.8%</td></tr>
+      <tr><td>Rafters</td><td class="n">6</td><td class="n">102,328</td><td class="n">14.6%</td></tr>
+      <tr><td>Yoga Teacher</td><td class="n">3</td><td class="n">55,758</td><td class="n">7.9%</td></tr>
+      <tr><td>The Heron</td><td class="n">7</td><td class="n">45,069</td><td class="n">6.4%</td></tr>
+      <tr><td>Angie's Wedding</td><td class="n">5</td><td class="n">36,437</td><td class="n">5.2%</td></tr>
+      <tr><td>Chalk / snooker</td><td class="n">2</td><td class="n">28,118</td><td class="n">4.0%</td></tr>
+      <tr><td>Seminal</td><td class="n">2</td><td class="n">15,526</td><td class="n">2.2%</td></tr>
+      <tr><td>Flight Simulator / Craig Cash</td><td class="n">3</td><td class="n">13,634</td><td class="n">1.9%</td></tr>
+      <tr><td><b>All eight</b></td><td class="n"><b>33</b></td><td class="n"><b>456,762</b></td><td class="n"><b>65.0%</b></td></tr>
+    </table>
+    <p><b>Observed:</b> the share. <b>Interpretation:</b> that specificity is what makes an idea
+    big enough to carry several videos. <b>Not established:</b> direction of causation. Across all
+    eleven multi-upload ideas the long-form hero has a median 36,760 views against 6,806 for the
+    11 long-form uploads that genuinely got nothing else — but a song the label already expects
+    to perform is also the song that gets more made for it, and neither set is age-matched
+    (both span 2021–2026). The deck says the causation caveat on the slide.</p>
+
+    <h3>The four post-album lyric videos</h3>
+    <table>
+      <tr><th>Track</th><th>Published</th><th class="n">Days live</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Comments</th></tr>
+      <tr><td>The First Five Minutes Of Magnolia (feat. Pretty Girl)</td><td>21 Aug</td><td class="n">24</td><td class="n">2,966</td><td class="n">82</td><td class="n">6</td></tr>
+      <tr><td>Bookie's Favourite (feat. Ellur)</td><td>28 Aug</td><td class="n">17</td><td class="n">1,685</td><td class="n">52</td><td class="n">4</td></tr>
+      <tr><td>The Same Heron Again</td><td>3 Sep</td><td class="n">11</td><td class="n">719</td><td class="n">19</td><td class="n">5</td></tr>
+      <tr><td>You're Not Supposed To Do This Forever</td><td>10 Sep</td><td class="n">4</td><td class="n">505</td><td class="n">21</td><td class="n">4</td></tr>
+    </table>
+    <p>Total 5,875 views across four uploads, which matches the Watcher's "campaign views 5.8K
+    across 4 assets". <b>The deck does not rank these and no reader should.</b> Views per day
+    looks tempting — it puts the newest upload top — but it is a lifetime average, and every
+    video's first days run hotter than its later ones, so a four-day-old upload is flattered
+    against a three-week-old one. A like rate on 505 views is four days of one audience. The
+    honest read needs a second pull once all four have had a comparable run.</p>
+
+    <h3>Shorts, sorted by what they are</h3>
+    <p>All 40 Shorts on the channel, assigned by hand from titles and hashtags. Typical =
+    median.</p>
+    <table>
+      <tr><th>Group</th><th class="n">Shorts</th><th class="n">Typical views</th><th>Strongest</th></tr>
+      <tr><td>Live</td><td class="n">6</td><td class="n">1,261</td><td>"Your never be alone again my love"</td></tr>
+      <tr><td>Place</td><td class="n">4</td><td class="n">870.5</td><td>"The Great Pyramid of Stockport shines bright"</td></tr>
+      <tr><td>Personality</td><td class="n">10</td><td class="n">865</td><td>"flight simulator, starring Craig Cash"</td></tr>
+      <tr><td>Words</td><td class="n">9</td><td class="n">712</td><td>"a poem for England, as seen on Newsnight"</td></tr>
+      <tr><td>Announcements</td><td class="n">11</td><td class="n">495</td><td>"szmierek live '25!! tickets on sale now bebeh!!"</td></tr>
+    </table>
+    <p>Slide 7 shows four of these five; Place (n=4) is folded into the commentary rather than
+    charted, because four items is too few to put a bar against. <b>Caveats that matter:</b> the
+    groups span 2023–2026, over which the channel grew substantially, and that is not controlled
+    for. Several Shorts could sit in two groups — the Craig Cash one is personality but also
+    promotes a single; the Glastonbury one is live but also an announcement. The direction is
+    consistent enough to act on; the numbers are not precise.</p>
+
+    <h3>Where the recent growth actually came from</h3>
+    <p>The Watcher reports <b>+255,600 views</b> across the channel over the 144 days it has
+    been tracking, a window opening 23 April 2026. Sixteen uploads were published inside that
+    window — Chalk, Seminal, Flight Simulator, all four lyric videos and nine Shorts — and their
+    combined <i>lifetime</i> view total is <b>68,050</b>. That is a hard ceiling: at most 27% of
+    the growth can have come from work published in the period, and at least 73% is the back
+    catalogue still being watched.</p>
+    <p><b>Observed:</b> both figures. <b>Interpretation:</b> that the older videos are doing the
+    work. It is a ceiling rather than an attribution — some of those 68,050 views also happened
+    outside the window, which only makes the ceiling lower. This is why slide 2 says the channel
+    is bigger than the campaign rather than crediting the campaign with the growth.</p>
+
+    <h3>Shorts by year — the mix has already changed</h3>
+    <table>
+      <tr><th>Year</th><th class="n">Shorts</th><th class="n">Announcements</th><th class="n">Median views</th></tr>
+      <tr><td>2023</td><td class="n">3</td><td class="n">2</td><td class="n">631</td></tr>
+      <tr><td>2024</td><td class="n">14</td><td class="n">2</td><td class="n">699</td></tr>
+      <tr><td>2025</td><td class="n">9</td><td class="n">6</td><td class="n">678</td></tr>
+      <tr><td>2026</td><td class="n">14</td><td class="n">1</td><td class="n">809</td></tr>
+    </table>
+    <p>Ten of the eleven announcement Shorts are from 2023–2025. The single 2026 one is the
+    tour announcement in May. The 2026 mix — 6 Words, 4 Live, 3 Personality, 1 Announcement — is
+    already close to what slides 7 and 8 recommend, which is why slide 7 frames it as keeping an
+    instinct up rather than correcting a habit. The aggregate across four years hides this;
+    worth remembering whenever a four-year total is used for anything.</p>
+
+    <h3>Like rate, and why slide 6 uses it</h3>
+    <p>Like rate moves far less with age than view count does, so it is the one measure on which
+    four videos of 24, 17, 11 and 4 days can be fairly set beside the rest of the channel. The
+    long-form median across all 26 long-form uploads is <b>2.10%</b>. The four post-album lyric
+    videos are 2.76%, 3.09%, 2.64% and 4.16% — all four above it. This is not a ranking of the
+    four against each other, which would not be sound.</p>
+
+    <h3>Comments: how they were gathered</h3>
+    <p>535 public top-level comments across 21 videos, via the API's <code>commentThreads</code>,
+    ordered by YouTube's own relevance — what a visitor actually sees — with up to 40 per video.
+    Replies are not included. One exception: Flight Simulator returned nothing under relevance
+    and was re-pulled newest-first, giving 60; it is the only video sampled differently, and no
+    claim in this deck rests on it alone.</p>
+    <p>Themes were found by keyword match and then read by hand. Of the 535: discovery stories
+    40, live 35, lyrics and words 26, comparisons to other artists 24, quoted phrases 19, place
+    18, the album 15, emotional impact 14, "should be bigger" 9, repeat listening 4.
+    <b>This is what people chose to write, not a survey.</b> It says what the people who comment
+    care about. It cannot say what share of the audience came from anywhere, and the deck does
+    not claim it does.</p>
+
+    <h3>What the campaign has released and what is booked</h3>
+    <p>From the Campaign Coach. Eight moments completed 11 Mar – 11 Sep 2026, each with a hero
+    asset confirmed live: The Heron (Mar), Chalk (May), Seminal (Jun/Jul), Flight Simulator
+    (Aug), then the four lyric videos. Five more lyric videos are scheduled: Aussie Goldhunters
+    17 Sep, Godzilla Hotel 21–27 Sep, Dave's Angling Superstore 28 Sep – 4 Oct, Commune 5–11 Oct,
+    Decoding Birdsong 12–18 Oct. The plan's own target is roughly 40–60 Shorts across the
+    campaign with three around each release. <b>This deck deliberately recommends fewer</b> —
+    one per lyric video, chosen to fit the song — on the grounds that a Short nobody wanted to
+    make is the kind that ends up saying "out now".</p>
+
+    <h3>Premiere and live classification</h3>
+    <p>Seven uploads carry <code>liveStreamingDetails</code>. These are not all the same thing:
+    Flight Simulator (2026) and Rock and a Calm Place (2023) read as premieres of studio videos,
+    while "Working Classic (LIVE @ VIBE)" (2022) and "Giving Up For Beginners (Live at Lock 91)"
+    (2021) are recordings of live performances. The public API does not distinguish them, so the
+    deck makes no claim about premiere strategy.</p>
+
+    <h3>What this deck does not know</h3>
+    <p>Traffic sources, watch time, retention, impressions, click-through, whether anything was
+    promoted, and whether any video has captions. The Watcher reports 17 of 17 videos scanned
+    without captions — worth <b>confirming in YouTube Studio</b> rather than acting on from
+    here. Playlist structure and end screens are likewise not visible from this endpoint: where
+    the deck suggests an album playlist or a link between videos, check first whether one
+    already exists.</p>
+    <p>A UK/IE tour exists — a Short from 8 May 2026 announces it — but no tour dates appear in
+    any source available here, so the deck makes no claim about upcoming live activity.</p>
+  </div>
+</div>
+
+<div class="pbar" id="pbar"></div>
+<div class="phint">← → navigate · esc exit</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   Same behaviour as the rest of the deck set — reveal and stagger
+   observers, an appendix sheet, keyboard present mode — so anyone who
+   has presented one of these can present this one. The visual
+   language is the only thing that differs, and it differs on purpose.
+
+   No live data layer: every figure is written into the HTML and dated
+   14 Sep 2026.
+   ═══════════════════════════════════════════════════════════════════ */
+function observeAll(){
+  var ro = new IntersectionObserver(function(es,o){ es.forEach(function(e){
+    if(e.isIntersecting){ e.target.classList.add('visible'); o.unobserve(e.target); }
+  }); }, { threshold:.12, rootMargin:'0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal').forEach(function(el){ ro.observe(el); });
+
+  var so = new IntersectionObserver(function(es,o){ es.forEach(function(e){
+    if(!e.isIntersecting) return;
+    var kids = e.target.children;
+    for(var i=0;i<kids.length;i++){
+      (function(k,i){ setTimeout(function(){ k.style.opacity=1; k.style.transform='none'; }, i*70); })(kids[i], i);
+    }
+    e.target.classList.add('visible');
+    o.unobserve(e.target);
+  }); }, { threshold:.1, rootMargin:'0px 0px -6% 0px' });
+  document.querySelectorAll('.stagger').forEach(function(el){ so.observe(el); });
+
+  var bo = new IntersectionObserver(function(es,o){ es.forEach(function(e){
+    if(!e.isIntersecting) return;
+    e.target.querySelectorAll('.bar-f').forEach(function(f,i){
+      setTimeout(function(){ f.style.width = f.getAttribute('data-w') + '%'; }, 120 + i*110);
+    });
+    o.unobserve(e.target);
+  }); }, { threshold:.3 });
+  document.querySelectorAll('.bars').forEach(function(el){ bo.observe(el); });
+}
+
+function openSheet(id){
+  var el = document.getElementById('sheet-' + id);
+  if(!el) return;
+  el.classList.add('open');
+  document.body.classList.add('sheet-open');
+}
+function closeSheets(){
+  document.querySelectorAll('.sheet').forEach(function(s){ s.classList.remove('open'); });
+  document.body.classList.remove('sheet-open');
+}
+
+var cur = 0;
+function allSlides(){ return Array.prototype.slice.call(document.querySelectorAll('.slide')); }
+function startPresent(){
+  document.body.classList.add('present');
+  cur = 0; showSlide(0);
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  allSlides().forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('pbar').style.width = '0';
+}
+function showSlide(i){
+  var s = allSlides();
+  if(i < 0 || i >= s.length) return;
+  cur = i;
+  s.forEach(function(el,n){ el.classList.toggle('active', n === i); });
+  /* Reveal everything on the active slide immediately — in present mode
+     there is no scrolling, so the scroll observers would never fire. */
+  s[i].querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
+  s[i].querySelectorAll('.stagger').forEach(function(el){
+    el.classList.add('visible');
+    for(var k=0;k<el.children.length;k++){
+      el.children[k].style.opacity = 1;
+      el.children[k].style.transform = 'none';
+    }
+  });
+  s[i].querySelectorAll('.bar-f').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
+  document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
+}
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){ closeSheets(); if(document.body.classList.contains('present')) exitPresent(); return; }
+  if(!document.body.classList.contains('present')) return;
+  if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); showSlide(cur + 1); }
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); showSlide(cur - 1); }
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+  observeAll();
+  /* Anything already on screen at load should not wait for a scroll. */
+  document.querySelectorAll('.slide')[0].querySelectorAll('.reveal').forEach(function(el){
+    el.classList.add('visible');
+  });
+});
+</script>
+</body>
+</html>
