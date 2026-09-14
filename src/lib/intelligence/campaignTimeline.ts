@@ -249,7 +249,24 @@ export async function buildCampaignTimeline(
     ?? upcoming.find(e => isMajor(e.eventType))
     ?? upcoming[0];
   const nextSplit = splitTitle(next.title);
-  const heroStage = rollout.items.find(i => i.spineStatus === 'NEXT')?.title ?? null;
+  /* The strategic name for a RELEASE, which is what this row is.
+
+     This used to take whichever spine item held the status NEXT, which is a
+     different question — for a campaign whose hero has already landed, the
+     NEXT item is the follow-up window, and the row for 2 OCT came out labelled
+     "Don't leave the hero alone". That is a sentence about My Whole World
+     sitting above a single eight weeks away.
+
+     So it asks for an item about a release: still open, and tagged as one.
+     The follow-up item is excluded outright — it has its own WINDOW row, and
+     no stage name should appear on the timeline twice. */
+  const OPEN = ['NEXT', 'AHEAD'];
+  const openSpine = rollout.items.filter(i =>
+    i.spineStatus && OPEN.includes(i.spineStatus) && !i.needTags.includes('follow_up_7_14'));
+  const heroStage = (
+    openSpine.find(i => i.needTags.includes('premiere_behaviour') || i.needTags.includes('long_form_event'))
+    ?? openSpine[0]
+  )?.title ?? null;
 
   moments.push({
     kind: 'NEXT',

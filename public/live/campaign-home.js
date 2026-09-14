@@ -124,20 +124,39 @@ function heroAsset(a){
    a label the artist team agreed to something they have never seen.   */
 function buildNext(tl){
   if(!tl || !tl.moments) return '';
-  const by = k => tl.moments.find(m => m.kind === k);
   const rows = [];
 
-  const next = by('NEXT');
-  if(next) rows.push(['', `${next.dateLabel} · ${next.title.toUpperCase()}`,
-    esc(next.detail || next.stage || '')]);
+  /* Server order, not a fixed NEXT / WINDOW / ANCHOR sequence.
 
-  const win = by('WINDOW');
-  if(win) rows.push(['rec', win.dateLabel,
-    `${esc(win.stage || win.title)} · <em>${win.provenance.toLowerCase()}</em>`]);
+     This used to pick the three rows out by kind, which quietly imposed a
+     derivation order on a list headed "What's next": for a campaign four
+     days past its hero, that printed 2 OCT above the 17-24 SEP window. The
+     API now sorts its forward moments chronologically, and this renders
+     them in the order it was given. */
+  const FORWARD = { NEXT:1, WINDOW:1, ANCHOR:1 };
+  for(const m of tl.moments){
+    if(!FORWARD[m.kind]) continue;
 
-  const anchor = by('ANCHOR');
-  if(anchor) rows.push(['dim', `${anchor.dateLabel} · ALBUM`,
-    esc(anchor.title) + (tl.betweenNote ? ` · ${esc(tl.betweenNote)}` : '')]);
+    /* Anything not confirmed says so, in the same small italic on every
+       row. A recommendation and a tentative date are different claims from
+       a booking, and they are only honest if they are labelled. */
+    const soft = m.provenance === 'RECOMMENDED' || m.provenance === 'TENTATIVE'
+      ? ` · <em>${esc(m.provenance.toLowerCase())}</em>` : '';
+
+    if(m.kind === 'WINDOW'){
+      /* Date and window name on one line, the formats it is asking for on
+         the next. A reader should not have to open Ideas to see what could
+         go in the fortnight. */
+      rows.push(['rec', `${m.dateLabel} · ${(m.stage || 'Follow-up window').toUpperCase()}`,
+        esc(m.title) + soft]);
+    } else if(m.kind === 'ANCHOR'){
+      rows.push(['dim', `${m.dateLabel} · ALBUM`,
+        esc(m.title) + (tl.betweenNote ? ` · ${esc(tl.betweenNote)}` : '') + soft]);
+    } else {
+      rows.push(['', `${m.dateLabel} · ${m.title.toUpperCase()}`,
+        esc(m.detail || m.stage || '') + soft]);
+    }
+  }
 
   if(!rows.length) return '';
   return `<div class="next stagger">
@@ -221,7 +240,11 @@ function buildLiveCover(d){
          `${m.campaignAssets} new asset${m.campaignAssets === 1 ? '' : 's'}${share ? ' · ' + share : ''}`]
       : null,
     m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views', win(m.viewsWindow)] : null,
-    m.subsDelta  != null ? [compact(m.subsDelta),  'subscribers',   win(m.subsWindow)] : null,
+    /* A flat subscriber reading is not a finding, and "+0 SUBSCRIBERS" set
+       in the same type as the other two figures reads as a campaign that
+       failed rather than as a counter that has not moved. Zero is dropped;
+       a real movement in either direction is kept. */
+    m.subsDelta  ? [compact(m.subsDelta),  'subscribers',   win(m.subsWindow)] : null,
   ].filter(Boolean);
 
   /* Background is the newest campaign asset where one exists, so the
