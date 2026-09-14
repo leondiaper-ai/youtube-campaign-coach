@@ -395,6 +395,99 @@ export function runRolloutChecks(): CheckResult {
     assert.notEqual(ro.currentQuestion?.becauseOf, 'First hero');
   });
 
+  /* ── The question speaks the campaign's language ──────────────────── */
+
+  const ROSES = { title: 'Roses', date: '2026-09-22' };
+
+  test('a confirmed release becomes the noun in the question', () => {
+    const ro = buildRollout(fakeReport({
+      [ID(WAKE)]: { status: 'LEARNED', provenance: 'HUMAN', statedBy: 'Leon' },
+    }), [], [], { release: ROSES });
+    assert.equal(ro.currentQuestion!.question, 'How do we make Roses feel like an event?');
+    assert.equal(ro.currentQuestion!.release?.source, 'coach_plan',
+      'the release name must be attributed to the plan, not to the question string');
+  });
+
+  test('no release resolves to wording that names none, never to a placeholder', () => {
+    const ro = buildRollout(fakeReport({
+      [ID(WAKE)]: { status: 'LEARNED', provenance: 'HUMAN', statedBy: 'Leon' },
+    }), []);
+    const q = ro.currentQuestion!.question;
+    assert.equal(q, 'How do we make the first hero feel like an event?');
+    assert.ok(!/[{}]/.test(q), 'an unfilled placeholder reached the question');
+    assert.ok(!/unknown|undefined|null|tbc|tba/i.test(q),
+      'a missing release must not be spoken aloud as a release');
+    assert.equal(ro.currentQuestion!.release, null);
+    assert.ok(ro.limitations.some(l => /No confirmed release could be resolved/i.test(l)),
+      'an unresolved release must be stated, not silently absorbed');
+  });
+
+  test('the question changes with the campaign, not with an edit', () => {
+    const before = buildRollout(fakeReport({
+      [ID(WAKE)]: { status: 'LEARNED', provenance: 'HUMAN', statedBy: 'Leon' },
+    }), [], [], { release: ROSES });
+    const after = buildRollout(fakeReport({
+      [ID(WAKE)]: { status: 'LEARNED', provenance: 'HUMAN', statedBy: 'Leon' },
+      [ID(HERO)]: { status: 'RESULT', provenance: 'HUMAN', statedBy: 'Leon' },
+    }), [], [], { release: ROSES });
+
+    assert.equal(before.currentQuestion!.question, 'How do we make Roses feel like an event?');
+    assert.equal(after.currentQuestion!.question, 'How do we keep the moment moving?');
+    assert.equal(after.currentQuestion!.becauseOf, 'Second destination');
+    /* The release is still confirmed and still named in the record. It is
+       simply not in this question, because this question is not about it. */
+    assert.equal(after.currentQuestion!.release?.title, 'Roses');
+  });
+
+  /* ── References answer a question, not an artist ───────────────────── */
+
+  test('references are attached to the question they answer', () => {
+    const ro = buildRollout(fakeReport({
+      [ID(WAKE)]: { status: 'LEARNED', provenance: 'HUMAN', statedBy: 'Leon' },
+    }), [], [], { release: ROSES });
+
+    const hero = ro.items.find(i => i.title === 'First hero')!;
+    const artists = hero.references.map(r => r.artist);
+    assert.deepEqual(artists, ['Fontaines D.C.', 'Magdalena Bay', 'The Cure']);
+    assert.equal(hero.references.filter(r => r.weight === 'lead').length, 1,
+      'exactly one reference leads, or the board has no argument');
+
+    /* The discipline that makes the board credible: the best thing the
+       research found is NOT on the current question, because it answers a
+       different one. */
+    assert.ok(!artists.includes('Turnstile'), 'Turnstile is album-day architecture, not first hero');
+    const albumDay = ro.items.find(i => i.title === 'Give every song a home')!;
+    assert.ok(albumDay.references.some(r => r.artist === 'Turnstile'),
+      'Turnstile must be kept, against the question it does answer');
+  });
+
+  test('every reference names a checker, a date and the objects checked', () => {
+    const ro = buildRollout(fakeReport(), [], [], { release: ROSES });
+    const refs = ro.items.flatMap(i => i.references);
+    assert.ok(refs.length >= 4);
+    for (const r of refs) {
+      assert.ok(r.verifiedBy && /^\d{4}-\d{2}-\d{2}$/.test(r.verifiedAt),
+        `${r.artist} has no traceable verification`);
+      assert.ok(r.objects.length >= 1, `${r.artist} cites no object`);
+      for (const o of r.objects) {
+        assert.match(o.id, /^[A-Za-z0-9_-]{11}$/, `${r.artist} cites something that is not a video id`);
+      }
+      assert.ok(r.imageId && r.url.includes(r.imageId), `${r.artist} image and link disagree`);
+      /* No view count may be the proof. A big number is not a mechanism. */
+      assert.ok(!/\b\d[\d.,]*\s*(m|k|bn)?\s*views\b/i.test(r.proof),
+        `${r.artist} is proving a mechanic with an audience size`);
+    }
+  });
+
+  test('what could not be verified is recorded as such', () => {
+    const ro = buildRollout(fakeReport(), [], [], { release: ROSES });
+    const cure = ro.items.flatMap(i => i.references).find(r => r.artist === 'The Cure')!;
+    assert.ok(cure.caveat && /not a public upload/i.test(cure.caveat),
+      'the one claim that rests on the band\u2019s own posts must say so in the record');
+    assert.ok(!/api-verified/i.test(cure.proof),
+      'the slide line must not claim verification the record withholds');
+  });
+
   /* ── Generalisation ────────────────────────────────────────────────── */
 
   test('an artist with no plan gets an explicit absence, not an empty page', () => {

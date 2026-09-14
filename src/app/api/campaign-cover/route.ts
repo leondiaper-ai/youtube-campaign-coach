@@ -27,7 +27,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCampaignProgress } from '@/lib/intelligence/campaignProgress';
 import { buildRollout } from '@/lib/intelligence/rollout';
-import { buildCampaignTimeline } from '@/lib/intelligence/campaignTimeline';
+import { buildCampaignTimeline, nextConfirmedRelease } from '@/lib/intelligence/campaignTimeline';
 import { readLibrary } from '@/lib/intelligence/research';
 import { listResearchRuns } from '@/lib/intelligence/researchRuns';
 import { overrideFor } from '@/lib/intelligence/formatOverrides';
@@ -333,7 +333,13 @@ export async function GET(req: NextRequest) {
     const library = await readLibrary().catch(() => []);
     /* The run log gives each item its lastResearchedAt; nothing else. */
     const runs = await listResearchRuns(who.slug, 10).catch(() => []);
-    const rollout = buildRollout(progress, library, runs);
+    /* The release the campaign is walking into, from the Coach plan, so the
+       strategy question can be phrased as the campaign's own problem rather
+       than as a third-person research query. Confirmed and major only, and
+       null rather than a guess — the rollout falls back to wording that
+       names no release at all. */
+    const release = await nextConfirmedRelease(who.slug).catch(() => null);
+    const rollout = buildRollout(progress, library, runs, { release });
 
     if (!rollout.items.length) {
       coverage.push('No rollout plan exists for this artist, so the strategy spine is unavailable rather than empty.');
@@ -429,8 +435,21 @@ export async function GET(req: NextRequest) {
       timeline,
       /* The same plan the stages were cut from, in full, for the Ideas
          tab. One fetch, one state — the tab cannot show a campaign the
-         cover disagrees with because there is only one of them. */
-      rollout,
+         cover disagrees with because there is only one of them.
+
+         References are trimmed on the way out. `objects` and `caveat` are
+         the record — the ids somebody opened, and the things the API could
+         not confirm — and the record is stronger than the page. Sending it
+         to the browser would put methodology one devtools panel away from
+         a slide that is deliberately about three ideas, and would tempt a
+         future change into rendering it. The record stays here. */
+      rollout: {
+        ...rollout,
+        items: rollout.items.map(it => ({
+          ...it,
+          references: it.references.map(({ objects, caveat, ...visible }) => visible),
+        })),
+      },
       read,
       /* UNKNOWN is never NONE. The deck renders these quietly but they
          must exist, because a failed join and a quiet channel look

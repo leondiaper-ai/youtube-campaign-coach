@@ -116,6 +116,49 @@ function provenanceOf(e: CampaignEvent): MomentProvenance {
   return e.status === 'CONFIRMED' ? 'CONFIRMED' : 'TENTATIVE';
 }
 
+/**
+ * THE NEXT CONFIRMED RELEASE — the campaign's own vocabulary
+ *
+ * The strategy questions on the Ideas tab used to be written in the third
+ * person about an abstraction: "How are interesting artists handling first
+ * hero?" Nobody in a room says "first hero". They say Roses.
+ *
+ * This returns the name of the thing the campaign is walking into, so the
+ * question can be phrased as the campaign's own problem. Three rules, and
+ * they are the whole point:
+ *
+ *   CONFIRMED ONLY  a tentative date is somebody thinking out loud. Putting
+ *                   its title into a headline turns it into a plan.
+ *   MAJOR ONLY      the release everything else competes with, not the next
+ *                   diary entry.
+ *   NEVER INVENTED  no plan, no confirmed release, or an unusable title
+ *                   returns null, and the caller falls back to language that
+ *                   names no release at all. There is no path here by which
+ *                   an unknown becomes a title.
+ */
+export async function nextConfirmedRelease(
+  slug: string,
+  now = Date.now(),
+): Promise<{ title: string; date: string | null } | null> {
+  const events = await listMergedEvents(slug, now).catch(() => [] as CampaignEvent[]);
+  const candidate = events
+    .filter(e =>
+      e.status === 'CONFIRMED'
+      && isMajor(e.eventType)
+      && e.eventDate
+      && new Date(e.eventDate + 'T00:00:00Z').getTime() >= now - DAY)
+    .sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? ''))[0];
+
+  if (!candidate) return null;
+
+  const { title } = splitTitle(candidate.title);
+  /* A working note rather than a name — "TBC", "single 2", an empty string.
+     Better to say "the first hero" than to put that in a headline. */
+  if (!title || title.length > 40 || /^(tba|tbc|tbd|untitled|unknown)$/i.test(title)) return null;
+
+  return { title, date: candidate.eventDate ?? null };
+}
+
 export interface TimelineAsset {
   videoId: string;
   title: string;

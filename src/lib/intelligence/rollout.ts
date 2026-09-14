@@ -125,6 +125,50 @@ export interface RolloutEvidence {
   absence: string | null;
 }
 
+/**
+ * A REFERENCE — something a person brought into the room
+ *
+ * Distinct from `RolloutResearch.examples`, and the distinction matters.
+ * An example comes out of the research library: a model found it, a
+ * verification run scored it, a named person promoted it. A reference is
+ * the other route — somebody went and looked, checked the objects by hand,
+ * and put it on the board. Both are held to the same standard of evidence;
+ * only the path differs, and merging them would lose the ability to say
+ * which is which.
+ *
+ * `objects` and `caveat` exist so the record can be stronger than the
+ * slide. The slide shows one line of proof. The record keeps the ids that
+ * were opened and, where something could NOT be verified directly, says so
+ * — which is how a reference stays honest after the person who checked it
+ * has forgotten the detail.
+ */
+export interface PlanReference {
+  artist: string;
+  /** Four or five words. The idea, not a description of it. */
+  mechanic: string;
+  /** The shape of the thing, as an arrow sequence. */
+  shape: string;
+  /** One short line of observed proof. Never a view count. */
+  proof: string;
+  /** What CHVRCHES would do with it. One line. */
+  application: string;
+  /** A real video on that artist's channel. Never stock, never generated. */
+  imageId: string;
+  url: string;
+  /** The lead reference is the one that answers the current question most directly. */
+  weight: 'lead' | 'support';
+  verifiedBy: string;
+  verifiedAt: string;
+  /**
+   * Anything the API could NOT confirm. Kept in the record, never rendered,
+   * so that a claim which rests partly on a band's own posts rather than on
+   * a verifiable object can never quietly become "API-verified".
+   */
+  caveat?: string;
+  /** The objects actually opened. For the record, not for the page. */
+  objects: { id: string; note: string }[];
+}
+
 export interface RolloutItem {
   id: string;
   ordinal: number;
@@ -149,6 +193,8 @@ export interface RolloutItem {
   pitch: PlanItem['pitch'] | null;
   /** Present only on platform conversations. See PlanItem.opportunity. */
   opportunity: PlanItem['opportunity'] | null;
+  /** Hand-checked references attached to this item's question. */
+  references: PlanReference[];
   campaignEvidence: RolloutEvidence;
   grokResearch: RolloutResearch;
   lastUpdated: string;
@@ -157,8 +203,21 @@ export interface RolloutItem {
 export interface Rollout {
   artistSlug: string;
   items: RolloutItem[];
-  /** The question the campaign is currently asking. Derived from state. */
-  currentQuestion: { question: string; becauseOf: string } | null;
+  /**
+   * The question the campaign is currently asking, in the first person.
+   *
+   * Three different kinds of fact meet here and the shape keeps them apart:
+   * the question is DERIVED from rollout state, the release name inside it
+   * comes from the Coach plan where a person confirmed a date, and the
+   * examples that answer it are verified research. `release` is null when
+   * no confirmed release could be resolved — in which case the question is
+   * the fallback wording, which names no release at all.
+   */
+  currentQuestion: {
+    question: string;
+    becauseOf: string;
+    release: { title: string; date: string | null; source: 'coach_plan' } | null;
+  } | null;
   /** Honest notes about what this plan does not cover. Never empty. */
   limitations: string[];
 }
@@ -172,7 +231,20 @@ export interface PlanItem {
   timing: string;
   rationale: string;
   recommendation: string;
+  /**
+   * The question with no release in it. This is the FALLBACK, and it must
+   * always read as a complete sentence on its own — when the Coach plan
+   * holds no confirmed release, this is what a reader sees, and "How do we
+   * make UNKNOWN feel like an event?" is worse than saying nothing.
+   */
   question: string;
+  /**
+   * The same question with `{release}` in it, used only when a confirmed
+   * release resolves. The placeholder is filled from the Coach plan, never
+   * from this file — the release title is a human's commitment and does not
+   * belong hardcoded in a rollout, still less in the frontend.
+   */
+  questionTemplate?: string;
   needTags: NeedTag[];
   spine: boolean;
   commitment: Commitment;
@@ -253,6 +325,8 @@ export interface PlanItem {
    * NOT pitches, because a platform opportunity nobody has agreed to must
    * not read like a campaign plan.
    */
+  /** Hand-checked references that answer THIS item's question. */
+  references?: PlanReference[];
   opportunity?: {
     name: string;
     line: string;
@@ -305,8 +379,88 @@ const CHVRCHES_PLAN: PlanItem[] = [
     recommendation:
       'Run the hero exactly as before — a live pre-party stream opening 12-20 minutes ahead of a video '
       + 'premiering on the hour. The change worth making is not the hero, it is what follows it.',
-    question: 'How are interesting artists handling first hero?',
+    question: 'How do we make the first hero feel like an event?',
+    questionTemplate: 'How do we make {release} feel like an event?',
     needTags: ['premiere_behaviour', 'community_activation'],
+    /* ── THE BOARD ───────────────────────────────────────────────────
+       Three references, checked against the YouTube Data API on 13 Sep
+       2026 — publishedAt for ordering, and scheduledStart / actualStart
+       for the Premiere and live claims. Those two fields are the reason
+       these are evidence rather than press: when both are present, a
+       broadcast demonstrably aired at that timestamp. No view count was
+       used to infer that anything worked.
+
+       They are in this order on purpose. Anticipation, then the event,
+       then what the event leaves behind — which is the same shape as
+       this campaign's own assets: a trailer already out, a premiere
+       ritual that already works, and a January run nobody has decided
+       whether to film. */
+    references: [
+      {
+        artist: 'Fontaines D.C.',
+        mechanic: 'The countdown is the campaign',
+        shape: 'Tease → state the time → premiere → keep serving it',
+        proof: 'Premiere timestamps verified',
+        application: 'The trailer is out. Now give Roses an hour, then keep bringing it back.',
+        imageId: 'KHocVRUlvkk',
+        url: 'https://www.youtube.com/watch?v=KHocVRUlvkk',
+        weight: 'lead',
+        verifiedBy: 'Claude',
+        verifiedAt: '2026-09-13',
+        objects: [
+          { id: '_zJ0J08drtQ', note: '12 Apr 2024 — "Pig." 30s Short, no song named' },
+          { id: 'qCPCE0sjUTU', note: '15 Apr 2024 — "Romance" 91s album trailer' },
+          { id: 'KHocVRUlvkk', note: '17 Apr 2024 — Starburster, scheduledStart 17:30:00, actualStart 17:30:06' },
+          { id: 'Q3FkinT9yC8', note: '18 Apr 2024 — Short pointing back at the video the next morning' },
+          { id: 'xIPVzwkrvTo', note: '22 Apr 2024 — one of four later Shorts all titled "Starburster."' },
+          { id: '6KIDl6wVWFQ', note: '17 Aug 2026 — "Tomorrow. Our new single Marianne is out at 9AM."' },
+          { id: 'lWNxWy012Ro', note: '18 Aug 2026 — Marianne, scheduledStart 16:00:00, actualStart 16:00:06' },
+        ],
+      },
+      {
+        artist: 'Magdalena Bay',
+        mechanic: "The premiere doesn't end",
+        shape: 'Video → two-minute gap → band live',
+        proof: 'Image ended 16:03:49 · live scheduled 16:05',
+        application: 'The pre-party gets people there. Put the band on the other side too.',
+        imageId: 'DfcWOPpmw14',
+        url: 'https://www.youtube.com/watch?v=DfcWOPpmw14',
+        weight: 'support',
+        verifiedBy: 'Claude',
+        verifiedAt: '2026-09-13',
+        objects: [
+          { id: 'DfcWOPpmw14', note: '10 Jul 2024 — Image, actualStart 16:00:08, 221s, so it ended 16:03:49' },
+          { id: 'CwJJIamlrdE', note: '10 Jul 2024 — "Image (Post-premiere Livestream)", scheduledStart 16:05:00, live 10m' },
+          { id: 'tuwBXXm1wfk', note: '26 Aug 2024 — "That\u2019s My Floor (YouTube Afterparty)", live' },
+        ],
+      },
+      {
+        artist: 'The Cure',
+        mechanic: 'One night can last a year',
+        shape: 'Appointment → capture → programme',
+        proof: 'One release-night performance → 14 months of observed programming',
+        application:
+          'Capture January properly. CHVRCHES in Churches could feed the channel long after the night itself.',
+        imageId: 'QA1lIQWU-EI',
+        url: 'https://www.youtube.com/watch?v=QA1lIQWU-EI',
+        weight: 'support',
+        verifiedBy: 'Claude',
+        verifiedAt: '2026-09-13',
+        caveat:
+          'The free global stream itself is not a public upload on the band\u2019s channel. The appointment is '
+          + 'evidenced by their own Shorts announcing the time and then linking to the show, NOT by an archived '
+          + 'stream object. What is directly API-verified is the fourteen months of programming that came out of '
+          + 'that night. Do not describe the stream as API-verified.',
+        objects: [
+          { id: 'mC138bDHh2k', note: '1 Nov 2024 13:48 — Short announcing a free global live stream at 8pm GMT, same day as release' },
+          { id: 'JltWsbj3uO8', note: '6 Nov 2024 — Short linking to the full show' },
+          { id: 'pLAR6zVoAPc', note: '18 Dec 2024 — first Troxy song published as its own video' },
+          { id: 'dqG3EqAz4OA', note: '27 Nov 2025 — Troxy songs still being published, a year on' },
+          { id: 'CLg3qdD0Hew', note: '20 Nov 2025 — cinema trailer for the same night' },
+          { id: '5k69qXrK7X8', note: '8 Jan 2026 — Troxy song, fourteen months after the show' },
+        ],
+      },
+    ],
     spine: true,
     commitment: 'COMMITTED',
     deepDivePoint: 'Single: official music video with the pre-party Premiere they already run.',
@@ -331,7 +485,7 @@ const CHVRCHES_PLAN: PlanItem[] = [
       'A lyric video, live take or performance in the second week. Lyric videos are already part of '
       + 'this channel’s language — 11 of them, 2.04M median against a 937K median for music videos — '
       + 'so the format needs no introduction.',
-    question: 'How are strong campaigns extending attention after first hero?',
+    question: 'How do we keep the moment moving?',
     needTags: ['follow_up_7_14', 'hero_continuity', 'lyric_video'],
     spine: true,
     commitment: 'COMMITTED',
@@ -360,8 +514,37 @@ const CHVRCHES_PLAN: PlanItem[] = [
     recommendation:
       'Every track on the record should have somewhere to be watched on release day, even where that is '
       + 'a lyric video or a static visualiser rather than a shoot.',
-    question: 'How are artists giving every song on an album a home on release day?',
+    question: 'How do we give every song a home on release day?',
     needTags: ['first_week_density', 'album_campaign'],
+    /* Held, not shown. This answers album-day architecture, not "how do we
+       make the first hero an event", and surfacing it against the current
+       question would be the research system flattering itself with the
+       best thing it found rather than the right thing. It waits here until
+       the rollout reaches the question it answers. */
+    references: [
+      {
+        artist: 'Turnstile',
+        mechanic: 'The record, handed to twenty-five other artists',
+        shape: 'One album → 25 reinterpretations → one hour',
+        proof: '25 videos, all timestamped inside 34 seconds',
+        application: 'Every track on the record has somewhere to be watched on the day.',
+        imageId: '_gT_7kYdwhA',
+        url: 'https://www.youtube.com/watch?v=_gT_7kYdwhA',
+        weight: 'lead',
+        verifiedBy: 'Claude',
+        verifiedAt: '2026-09-13',
+        objects: [
+          { id: '_gT_7kYdwhA', note: '28 Aug 2026 04:00:05 — "SEEIN\u2019 STARS: ELTON JOHN VERSION"' },
+          { id: 'wrFUhB5ygCY', note: '28 Aug 2026 04:00:29 — "LOOK OUT FOR ME: FOUR TET VERSION"' },
+          { id: 'anDRVcLb9P4', note: '28 Aug 2026 04:00:22 — "LIGHT DESIGN: BLOOD ORANGE VERSION"' },
+          { id: 'cI0Ysc-HdoM', note: '28 Aug 2026 04:00:23 — "CEILING: HAYLEY WILLIAMS VERSION"' },
+          { id: 'F84YtZ7jPos', note: '28 Aug 2026 04:00:26 — "BIRDS: DYING FETUS VERSION"' },
+          { id: 'cvIMI5Qrhbk', note: '28 Aug 2026 04:00:17 — "DULL: A. G. COOK VERSION"' },
+          { id: '2QVSU-hDGGQ', note: '28 Aug 2026 04:00:21 — "LIGHT DESIGN: OKLOU VERSION"' },
+          { id: 'RM-Eu-VNgfU', note: 'Earlier in the same campaign — official film trailer' },
+        ],
+      },
+    ],
     spine: true,
     commitment: 'COMMITTED',
     deepDivePoint: 'Release day: give every song a home, as Screen Violence did with seven assets on the day.',
@@ -531,6 +714,7 @@ function tagSet(tags: (string | null | undefined)[]): Set<string> {
  */
 function attachResearch(
   item: PlanItem, library: CaseStudy[], artistSlug: string, itemId: string, researched: Map<string, string>,
+  question: string,
 ): RolloutResearch {
   const want = tagSet(item.needTags);
   const matched = library.filter(c => {
@@ -596,17 +780,47 @@ function attachResearch(
   }
 
   return {
-    question: item.question, examples, awaitingVerification: awaiting, awaitingPromotion,
+    question, examples, awaitingVerification: awaiting, awaitingPromotion,
     proposals, lastResearchedAt, note,
   };
 }
 
 /* ══ Build ═══════════════════════════════════════════════════════════ */
 
+/**
+ * What the rollout knows about the world outside itself.
+ *
+ * One field, deliberately. The release is the only thing the plan needs
+ * from the Coach in order to speak in the campaign's own words, and taking
+ * it as an argument rather than reading it here keeps this module free of
+ * the plan store — which is what lets the tests build a rollout from a
+ * report and nothing else.
+ */
+export interface RolloutContext {
+  /** The next confirmed release from the Coach plan. Null is normal. */
+  release?: { title: string; date: string | null } | null;
+}
+
+/**
+ * The question, in the campaign's own words.
+ *
+ * An item carries two forms: `question`, which names no release and is
+ * always a complete sentence, and `questionTemplate`, which has {release}
+ * in it. The template is used ONLY when a confirmed release resolved. This
+ * is the whole safeguard — there is no substitution of a placeholder for a
+ * missing value, so "How do we make UNKNOWN feel like an event?" cannot be
+ * produced by any path through this function.
+ */
+function questionFor(p: PlanItem, release: RolloutContext['release']): string {
+  if (!p.questionTemplate || !release?.title) return p.question;
+  return p.questionTemplate.replace('{release}', release.title);
+}
+
 export function buildRollout(
   report: CampaignProgressReport,
   library: CaseStudy[],
   runs: ResearchRun[] = [],
+  ctx: RolloutContext = {},
 ): Rollout {
   const plan = ROLLOUT_PLANS[report.artistSlug] ?? [];
   const limitations: string[] = [];
@@ -684,7 +898,11 @@ export function buildRollout(
       opportunity: p.opportunity ?? null,
       recommendation: p.recommendation,
       campaignEvidence: evidence,
-      grokResearch: attachResearch(p, library, report.artistSlug, `ro_${report.artistSlug}_${p.key}`, researched),
+      references: p.references ?? [],
+      grokResearch: attachResearch(
+        p, library, report.artistSlug, `ro_${report.artistSlug}_${p.key}`, researched,
+        questionFor(p, ctx.release),
+      ),
       lastUpdated: view?.implementation?.statedAt ?? report.deepDive?.capturedAt ?? '',
     };
   });
@@ -712,9 +930,23 @@ export function buildRollout(
     ?? null;
 
   const currentQuestion = open
-    ? { question: open.grokResearch.question, becauseOf: open.title }
+    ? {
+      question: open.grokResearch.question,
+      becauseOf: open.title,
+      /* Named here rather than inside the question string, so a reader of
+         the data can always tell where the noun came from. */
+      release: ctx.release?.title
+        ? { title: ctx.release.title, date: ctx.release.date ?? null, source: 'coach_plan' as const }
+        : null,
+    }
     : null;
 
+  if (!ctx.release?.title) {
+    limitations.push(
+      'No confirmed release could be resolved from the campaign plan, so the strategic question is phrased '
+      + 'without naming one. The release is not unknown to the label; it is unknown to this system.',
+    );
+  }
   limitations.push(
     'This rollout is a plan, not a schedule. Only items marked as stated by a person have been '
     + 'confirmed by anyone; everything else is a recommendation or a possibility.',

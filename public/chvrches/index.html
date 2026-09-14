@@ -578,6 +578,62 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 .refq{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--cyan);
   font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.1rem 0 1.1rem}
 
+/* ── THE BOARD ───────────────────────────────────────────────────────
+   Three references against one question, and the composition carries the
+   argument rather than a set of labels: the lead fills the left because it
+   answers the question most directly, and the two supports run down the
+   right in the order the campaign will meet them — anticipation, then the
+   event, then what the event leaves behind.
+
+   Deliberately NOT the playbook's composition, even though it is the same
+   language. Two slides with an identical feature-plus-two grid read as one
+   template used twice. */
+.rfgrid{display:grid;grid-template-columns:1.12fr 1fr;gap:1rem;margin-top:1rem;align-items:stretch}
+.rfcol{display:grid;grid-template-rows:1fr 1fr;gap:1rem;min-height:0}
+
+.rf{position:relative;display:block;border-radius:12px;overflow:hidden;text-decoration:none;
+  color:inherit;border:1px solid rgba(237,231,218,.16);background:#0A0A0C;
+  transition:transform .2s,border-color .2s}
+.rf:hover{transform:translateY(-3px);border-color:rgba(237,231,218,.55)}
+.rf-img{position:relative;background:var(--coal);overflow:hidden}
+.rf-img img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(.3) contrast(1.06) brightness(.94)}
+.rf.noimg .rf-img{background:linear-gradient(150deg,rgba(237,231,218,.14),#0B0B0D 70%)}
+.rf.noimg .rf-img img{display:none}
+
+.rf-a{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--era-key);opacity:.85}
+.rf-m{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
+  line-height:1.06;margin-top:.2rem}
+/* The shape of the thing. Small, wide-tracked, monospace-ish — it should
+   read as a diagram rather than as a sentence. */
+.rf-s{font-size:.58rem;letter-spacing:.11em;text-transform:uppercase;color:#9A9486;
+  margin-top:.45rem;line-height:1.6}
+.rf-p{font-size:.63rem;letter-spacing:.02em;color:#B9B3A6;margin-top:.5rem;
+  padding-left:.6rem;border-left:1px solid rgba(237,231,218,.3)}
+.rf-x{font-size:.74rem;line-height:1.45;color:#CFC9BB;margin-top:.6rem;
+  padding-top:.55rem;border-top:1px solid rgba(237,231,218,.14)}
+.rf-x span{display:inline-block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--era-key);margin-right:.45rem;vertical-align:1px}
+
+/* Lead: picture over copy, and the only one big enough to be looked at. */
+.rf.lead{display:flex;flex-direction:column}
+.rf.lead .rf-img{flex:1 1 auto;min-height:0}
+.rf.lead .rf-b{padding:.95rem 1.1rem 1.05rem}
+.rf.lead .rf-m{font-size:clamp(1.15rem,2.1vw,1.6rem)}
+.rf.lead .rf-x{font-size:.8rem}
+
+/* Supports: picture beside copy, so two fit the column without shrinking
+   the type to the point where nobody reads them. */
+.rf.sup{display:grid;grid-template-columns:37% 1fr;min-height:0}
+.rf.sup .rf-b{padding:.85rem .95rem}
+.rf.sup .rf-m{font-size:clamp(.95rem,1.45vw,1.1rem)}
+@media(max-width:900px){
+  .rfgrid{grid-template-columns:1fr}
+  .rf.sup{grid-template-columns:1fr}
+  .rf.sup .rf-img{aspect-ratio:16/9}
+}
+
 /* ── THE SOURCE LINE ─────────────────────────────────────────────────
    An idea card used to link to a video on the channel, which was a
    citation for the picture rather than for the argument — and one of them
@@ -1744,6 +1800,26 @@ function ideaFigure(it, cls, f){
   </div>`;
 }
 
+/* One reference. The mechanic is the headline, the proof is one line, and
+   the application is the only sentence — because the point of a reference
+   board is that somebody in the room says "oh, like that", not that they
+   read a case study standing up. */
+function refCard(r, cls){
+  return `<a class="rf ${cls}" href="${r.url}" target="_blank" rel="noopener">
+    <div class="rf-img">
+      <img src="${ytThumb(r.imageId)}" alt="" loading="lazy"
+           onload="thumbGuard(this,'${r.imageId}')" onerror="${ytFallback(r.imageId)}">
+    </div>
+    <div class="rf-b">
+      <div class="rf-a">${esc(r.artist)}</div>
+      <div class="rf-m">${esc(r.mechanic)}</div>
+      <div class="rf-s">${esc(r.shape)}</div>
+      <div class="rf-p">${esc(r.proof)}</div>
+      <div class="rf-x"><span>CHVRCHES &rarr;</span>${esc(r.application)}</div>
+    </div>
+  </a>`;
+}
+
 function buildIdeas(d){
   const ro = (d && d.rollout) || null;
   const items = (ro && ro.items) || [];
@@ -1782,6 +1858,18 @@ function buildIdeas(d){
     n + ((i.grokResearch && i.grokResearch.awaitingVerification) || 0), 0);
   const q = ro && ro.currentQuestion;
 
+  /* ── The board, for the question that is actually open ──────────────
+     References belong to a rollout item, not to the artist, so what shows
+     here is whatever answers the CURRENT question. The moment somebody
+     records that first hero is live, the question becomes the next item's
+     and this board empties until that question has been researched — which
+     is the honest behaviour, and the reason the empty state below is kept
+     rather than deleted. */
+  const owner = q ? items.find(i => i.title === q.becauseOf) : null;
+  const board = (owner && owner.references) || [];
+  const lead = board.find(r => r.weight === 'lead') || board[0] || null;
+  const support = board.filter(r => r !== lead).slice(0, 2);
+
   return `<section class="slide era" data-t="Our playbook">
   <div class="bleed strong${worldA.debar ? ' debar' : ''}${worldA.tall ? ' emblem' : ''}"><img src="${worldA.src}" alt=""
     onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
@@ -1815,10 +1903,17 @@ function buildIdeas(d){
     onerror="this.onerror=null;this.src='${ytThumb(fallbackId)}'"></div>
   <div class="inner">
     <div class="label" style="color:var(--cyan)">Inspiration</div>
-    ${refs.length ? `
+    ${lead ? `
+      <h2 class="display" style="max-width:19ch;margin:.1rem 0 0;
+        font-size:clamp(1.4rem,3vw,2.3rem);line-height:1.04">${esc(q.question)}</h2>
+      <div class="rfgrid stagger">
+        ${refCard(lead, 'lead')}
+        <div class="rfcol">${support.map(r => refCard(r, 'sup')).join('')}</div>
+      </div>`
+    : refs.length ? `
       <h2 class="display" style="max-width:20ch;margin:.1rem 0 0;
-        font-size:clamp(1.5rem,3.3vw,2.5rem);line-height:1.02">Things we'd like to
-        <span style="color:var(--cyan)">steal.</span></h2>
+        font-size:clamp(1.5rem,3.3vw,2.5rem);line-height:1.02">${
+          q ? esc(q.question) : 'Things we\'d like to steal.'}</h2>
       <div class="refs stagger">
         ${refs.slice(0,4).map(x=>`<a class="ref"${
           x.source ? ` href="${x.source}" target="_blank" rel="noopener"` : ''}>
