@@ -164,6 +164,40 @@ body.present .slide.active{display:flex}
 .tviews{font-family:'Archivo Black',sans-serif;font-size:.95rem;color:var(--signal);margin-top:.28rem}
 .tsub{font-size:.58rem;color:var(--smoke);margin-top:.12rem}
 
+/* ── EVIDENCE STRIP ─────────────────────────────────────────────────
+   The band's own uploads, used as proof rather than decoration. Every
+   caption is the REAL title exactly as VENUS GRRRLS typed it — emoji,
+   hashtags, double question marks and all. That is the personality; it
+   does not need paraphrasing and it should not be tidied up. */
+.ev{display:grid;gap:.7rem;margin-top:1.5rem}
+.ev.e2{grid-template-columns:repeat(2,1fr);max-width:620px}
+.ev.e3{grid-template-columns:repeat(3,1fr);max-width:840px}
+.ev.e4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.ev.e3,.ev.e4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.ev.e2,.ev.e3,.ev.e4{grid-template-columns:1fr}}
+.ev a{display:block;text-decoration:none;color:inherit}
+.ev img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:5px;
+  background:#15141c;border:1px solid var(--hair);filter:grayscale(.12) contrast(1.05);
+  transition:filter .25s,border-color .25s}
+.ev a:hover img{filter:none;border-color:var(--signal)}
+.slide.light .ev img{border-color:var(--bone)}
+.ev-k{font-size:.5rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--signal);margin-top:.5rem}
+.ev-t{font-size:.66rem;line-height:1.4;color:var(--bone);margin-top:.2rem}
+.slide.light .ev-t{color:#4A4452}
+.ev-n{font-family:'Archivo Black',sans-serif;font-size:.78rem;margin-top:.28rem}
+
+/* A thumbnail inside a pillar card. */
+.pil-t{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:5px;display:block;
+  margin-bottom:.6rem;background:#15141c;filter:grayscale(.12) contrast(1.05)}
+
+/* Their own words, quoted at size. */
+.tq{margin-top:1.5rem;padding-left:1.05rem;border-left:3px solid var(--ember);max-width:56ch}
+.tq-v{font-size:clamp(.95rem,1.35vw,1.12rem);line-height:1.42;font-weight:600;color:var(--paper)}
+.slide.light .tq-v{color:var(--ink)}
+.tq-k{font-size:.52rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ember);margin-top:.45rem}
+
 /* ── Pillars ────────────────────────────────────────────────────── */
 .pil{display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem;margin-top:1.7rem}
 @media(max-width:1000px){.pil{grid-template-columns:repeat(2,1fr)}}
@@ -315,6 +349,24 @@ body.present .phint{opacity:.5}
       put a record out: all three singles were premiered as events.
     </p>
 
+    <div class="ev e3 stagger">
+      <a href="https://youtu.be/Hki1MiJPOB8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Hki1MiJPOB8/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">22 Jan · premiered</div>
+        <div class="ev-t">3x3 (Official Video)</div>
+        <div class="ev-n">3,893 views</div></a>
+      <a href="https://youtu.be/nQ3G4n3kKAk" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/nQ3G4n3kKAk/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">24 Apr · premiered</div>
+        <div class="ev-t">Eve (Official Music Video)</div>
+        <div class="ev-n">74,619 views</div></a>
+      <a href="https://youtu.be/nXSzpkATwFc" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/nXSzpkATwFc/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">18 Aug · premiered</div>
+        <div class="ev-t">Mother Knows (Visualiser)</div>
+        <div class="ev-n">10,430 views</div></a>
+    </div>
+
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
       <div class="bl-v">The campaign has created attention. The final month is about connecting it.</div>
@@ -378,6 +430,11 @@ body.present .phint{opacity:.5}
         Eighteen Crows, Ivy Tree.</div></div>
     </div>
 
+    <div class="tq reveal">
+      <div class="tq-v">"Welcome to the Coven. Sign up for updates, early access, exclusive art, + more"</div>
+      <div class="tq-k">The first line of their own video descriptions</div>
+    </div>
+
     <div class="bl reveal">
       <div class="bl-k">Why it matters</div>
       <div class="bl-v">This world already exists and it belongs to them. Using it costs nothing.</div>
@@ -413,6 +470,24 @@ body.present .phint{opacity:.5}
       any other kind of Short, at 6.9%.
     </p>
 
+    <div class="ev e3 stagger">
+      <a href="https://youtube.com/shorts/Q5OS4sQGYWI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Q5OS4sQGYWI/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Band personality</div>
+        <div class="ev-t">"drummer vs singer final boss 💀"</div>
+        <div class="ev-n">1,490 views</div></a>
+      <a href="https://youtube.com/shorts/x-pn3zCr2xM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/x-pn3zCr2xM/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">The world</div>
+        <div class="ev-t">"ZOINKS it’s the witches"</div>
+        <div class="ev-n">3,083 views</div></a>
+      <a href="https://youtube.com/shorts/hsGIb_1q1PM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/hsGIb_1q1PM/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Release announcement</div>
+        <div class="ev-t">"News tomorrow 🫀🫀🫀"</div>
+        <div class="ev-n">420 views</div></a>
+    </div>
+
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
       <div class="bl-v">Don't just announce Carmilla. Introduce it through the VENUS GRRRLS world.</div>
@@ -433,6 +508,7 @@ body.present .phint{opacity:.5}
 
     <div class="pil stagger">
       <div class="pil-c key">
+        <img class="pil-t" src="https://i.ytimg.com/vi/x-pn3zCr2xM/hqdefault.jpg" alt="" loading="lazy">
         <div class="pil-n">01</div>
         <div class="pil-w">Cultural references</div>
         <div class="pil-e">The Hex Girls give new viewers a way in — "ZOINKS it's the witches"</div>
@@ -440,6 +516,7 @@ body.present .phint{opacity:.5}
         <div class="pil-l">of all Short views, from a third of the Shorts</div>
       </div>
       <div class="pil-c key">
+        <img class="pil-t" src="https://i.ytimg.com/vi/nXSzpkATwFc/hqdefault.jpg" alt="" loading="lazy" style="order:-2">
         <div class="pil-w" style="margin-top:0">Visualisers</div>
         <div class="pil-n" style="order:-1">02</div>
         <div class="pil-e">A still or simple-motion video with the track over it. Mother Knows shows the cheaper format still performs</div>
@@ -447,6 +524,7 @@ body.present .phint{opacity:.5}
         <div class="pil-l">the views of the 3x3 music video — from 27 days online against 235</div>
       </div>
       <div class="pil-c">
+        <img class="pil-t" src="https://i.ytimg.com/vi/Hki1MiJPOB8/hqdefault.jpg" alt="" loading="lazy">
         <div class="pil-n">03</div>
         <div class="pil-w">Premieres</div>
         <div class="pil-e">A scheduled launch with a live countdown, so fans arrive together. Every 2026 single has had one</div>
@@ -454,6 +532,7 @@ body.present .phint{opacity:.5}
         <div class="pil-l">2026 releases premiered</div>
       </div>
       <div class="pil-c">
+        <img class="pil-t" src="https://i.ytimg.com/vi/90hj3kQQmwg/hqdefault.jpg" alt="" loading="lazy">
         <div class="pil-n">04</div>
         <div class="pil-w">The Coven</div>
         <div class="pil-e">They already have a fan identity. Nothing on the channel lets anyone join it</div>
@@ -562,6 +641,19 @@ body.present .phint{opacity:.5}
       </div>
     </div>
 
+    <div class="ev e2 stagger">
+      <a href="https://youtube.com/shorts/au8ODgsgsJU" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/au8ODgsgsJU/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Already made</div>
+        <div class="ev-t">"maybe gothic literature inspired lyrics will make Halloween come early?? 🪦🖤"</div>
+        <div class="ev-n">1,218 views</div></a>
+      <a href="https://youtube.com/shorts/uM2ReZPseXw" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/uM2ReZPseXw/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Already made</div>
+        <div class="ev-t">"can you guess who it was?? 🪦 #gothicliterature"</div>
+        <div class="ev-n">1,269 views</div></a>
+    </div>
+
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
       <div class="bl-v">None of this needs a shoot. All of it is this month.</div>
@@ -592,6 +684,19 @@ body.present .phint{opacity:.5}
         <div class="act-t">Community post on drop day, in the band's voice</div>
         <div class="act-d">2,970 subscribers who already chose to follow. This is the one place
           a direct announcement belongs.</div></div></div>
+    </div>
+
+    <div class="ev e2 stagger" style="max-width:620px">
+      <a href="https://youtu.be/nXSzpkATwFc" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/nXSzpkATwFc/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">The format to repeat</div>
+        <div class="ev-t">Mother Knows (Visualiser) — premiered 18 Aug</div>
+        <div class="ev-n">10,430 views</div></a>
+      <a href="https://youtu.be/nQ3G4n3kKAk" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/nQ3G4n3kKAk/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">The audience to reach</div>
+        <div class="ev-t">Eve (Official Music Video) — the channel’s biggest</div>
+        <div class="ev-n">74,619 views</div></a>
     </div>
   </div>
 </section>
@@ -633,6 +738,24 @@ body.present .phint{opacity:.5}
           <li><b>Why</b><span>Nothing on this channel has a name fans can look out for. That is what brings people back</span></li>
         </ul>
       </div>
+    </div>
+
+    <div class="ev e3 stagger">
+      <a href="https://youtube.com/shorts/BKxK-uU2dC8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/BKxK-uU2dC8/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Posted in July</div>
+        <div class="ev-t">"Our top summerween movies 🎃 #summerween #horrormovies"</div>
+        <div class="ev-n">342 views</div></a>
+      <a href="https://youtube.com/shorts/XSWcF5Qgoxg" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/XSWcF5Qgoxg/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Posted in September</div>
+        <div class="ev-t">"Witchcraft opinions #witchtober #seasonofthewitch"</div>
+        <div class="ev-n">1,361 views</div></a>
+      <a href="https://youtube.com/shorts/ok2cHjhoABQ" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/ok2cHjhoABQ/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ev-k">Posted in March</div>
+        <div class="ev-t">"the hex girls invented music in 1999"</div>
+        <div class="ev-n">1,732 views</div></a>
     </div>
 
     <div class="bl reveal">
