@@ -71,6 +71,8 @@
  * surface is wrong, however reasonable its arithmetic looks.
  */
 
+import { overrideFor } from './formatOverrides';
+
 /** The minimum silence that separates one era of a channel from the next. */
 const ERA_GAP_DAYS = 10;
 
@@ -221,24 +223,49 @@ export function campaignMetrics(
 
 /** The minimum a caller must hold. `RecentUpload` satisfies it structurally. */
 export interface RawUpload {
+  /** Optional, but without it a human format label cannot be found. */
+  id?: string;
   publishedAt: string;
   viewCount?: number | null;
   durationSec?: number | null;
 }
 
+/** Duration alone cannot separate a vertical trailer from a Short. */
+const SHORT_MAX_SEC = 62;
+
 /**
- * The Shorts rule, written once.
+ * ASSET TYPE — Short or long-form. One rule, and a person can correct it.
  *
  * It was `durationSec <= 62` in four files and `kind === 'short'` in a
  * fifth, which is the kind of divergence nobody notices until two pages
  * disagree about how many Shorts a campaign has published.
+ *
+ * Duration is the fallback, not the authority. CHVRCHES published a 61
+ * second VERTICAL campaign trailer, and there is no property on the
+ * YouTube API that distinguishes that from a Short — Leon said so in the
+ * format override he recorded on 11 September, in those words. The label
+ * existed; this function was not reading it, so the page counted three
+ * Shorts for a campaign that had published two.
+ *
+ * A stated kind therefore decides the type outright. That is the reverse
+ * of the rule for follow-up anchors, where a label may veto but never
+ * promote — and the asymmetry is deliberate. Saying what something IS is
+ * a classification a person is better at than a duration check. Saying
+ * something DESERVES a seven-day deadline is a claim about strategy, and
+ * that one has to survive the object itself.
  */
 export function toCampaignUploads(raw: RawUpload[]): CampaignUpload[] {
-  return (raw ?? []).map(u => ({
-    publishedAt: u.publishedAt,
-    views: u.viewCount ?? null,
-    kind: (u.durationSec ?? 0) > 0 && (u.durationSec ?? 0) <= 62 ? 'short' : 'video',
-  }));
+  return (raw ?? []).map(u => {
+    const stated = u.id ? overrideFor(u.id)?.kind ?? null : null;
+    const dur = u.durationSec ?? 0;
+    return {
+      publishedAt: u.publishedAt,
+      views: u.viewCount ?? null,
+      kind: stated
+        ? (stated.toLowerCase() === 'short' ? 'short' : 'video')
+        : (dur > 0 && dur <= SHORT_MAX_SEC ? 'short' : 'video'),
+    };
+  });
 }
 
 /**

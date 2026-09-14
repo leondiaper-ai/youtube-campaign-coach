@@ -349,5 +349,90 @@ export function runCampaignWindowChecks(): CheckResult {
     assert.equal(anchor, null, 'measurement and follow-up are independent');
   });
 
+  /* ── ASSET TYPE vs FOLLOW-UP ELIGIBILITY ────────────────────────────
+     Two questions that share a subject and must not share an answer.
+
+       ASSET TYPE           is this a Short or long-form?
+       FOLLOW-UP ELIGIBLE   does a seven-day deadline hang off it?
+
+     A trailer is long-form and is not a hero. Counting it as a Short
+     undercounts the campaign's long-form output; treating it as a hero
+     invents a deadline. CHVRCHES did both, in that order.
+
+     The real CHVRCHES objects, with the real video id, so the human
+     format override recorded on 11 Sep 2026 is genuinely exercised. */
+
+  const CHV_TRAILER_ID = 'KCm7pn_lza8';
+  const CHV = [
+    { id: 'x1', publishedAt: '2026-09-13T15:00:00Z', viewCount: 4297, durationSec: 16 },
+    { id: 'x2', publishedAt: '2026-09-10T15:00:00Z', viewCount: 11019, durationSec: 6 },
+    { id: CHV_TRAILER_ID, publishedAt: '2026-09-09T15:00:00Z', viewCount: 36772, durationSec: 61 },
+    { id: 'x4', publishedAt: '2025-09-20T15:00:00Z', viewCount: 15803, durationSec: 16 },
+    { id: 'x5', publishedAt: '2025-07-01T15:00:00Z', viewCount: 30972, durationSec: 10 },
+  ];
+
+  test('a trailer a person has labelled is classified long-form, not a Short', () => {
+    /* 61 seconds and vertical. No property on the YouTube API separates
+       that from a Short, which is exactly what Leon wrote in the override
+       note. The label existed; the classifier was not reading it. */
+    const [, , trailer] = toCampaignUploads(CHV);
+    assert.equal(trailer.kind, 'video',
+      'the human format override decides asset type, and it says this is not a Short');
+  });
+
+  test('Shorts are still classified as Shorts', () => {
+    const u = toCampaignUploads(CHV);
+    assert.equal(u[0].kind, 'short');
+    assert.equal(u[1].kind, 'short');
+  });
+
+  test('the same trailer is NOT eligible as a follow-up anchor', () => {
+    /* The asymmetry, asserted. A label decides what something IS. It does
+       not decide that something deserves a deadline — that has to survive
+       the object, and a 61-second teaser does not. */
+    assert.equal(qualifiesAsAnchor({
+      videoId: CHV_TRAILER_ID, title: 'Now, we can start.',
+      publishedAt: '2026-09-09T15:00:00Z', durationSec: 61, statedKind: 'trailer',
+    }), false);
+  });
+
+  test('CHVRCHES resolves to 2 Shorts and 1 long-form, 3 assets, no window', () => {
+    const m = campaignPerformanceFor({ uploads: CHV, now: NOW })!;
+    assert.equal(m.start.rule, 'ERA_ONSET');
+    assert.equal(m.start.at.slice(0, 10), '2026-09-09');
+    assert.equal(m.day, 5);
+    assert.equal(m.assets, 3, 'the total must not move');
+    assert.equal(m.shorts, 2);
+    assert.equal(m.longForm, 1);
+    assert.equal(m.views, 52_088);
+
+    const anchor = followUpAnchorFor(
+      CHV.map(u => ({
+        videoId: u.id, title: '', publishedAt: u.publishedAt,
+        durationSec: u.durationSec, statedKind: u.id === CHV_TRAILER_ID ? 'trailer' : null,
+      })),
+      m.start,
+    );
+    assert.equal(anchor, null, 'long-form is not the same claim as hero');
+  });
+
+  test('relabelling changes the composition and never the total', () => {
+    const plain = toCampaignUploads(CHV.map(u => ({ ...u, id: `plain_${u.id}` })));
+    const labelled = toCampaignUploads(CHV);
+    assert.equal(plain.length, labelled.length);
+    /* All five fixtures are under 62s, so with no label every one of them
+       reads as a Short. The label moves exactly one. */
+    assert.equal(plain.filter(u => u.kind === 'short').length, 5,
+      'without the override, duration alone calls the 61s trailer a Short');
+    assert.equal(labelled.filter(u => u.kind === 'short').length, 4);
+  });
+
+  test('Kings of Leon composition is unchanged by the label rule', () => {
+    const m = campaignPerformanceFor({ uploads: RAW, now: NOW })!;
+    assert.equal(m.assets, 17);
+    assert.equal(m.shorts, 16);
+    assert.equal(m.longForm, 1);
+  });
+
   return { passed, failed, failures };
 }

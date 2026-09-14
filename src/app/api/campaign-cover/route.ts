@@ -34,7 +34,9 @@ import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
-import { resolveCampaignStart, campaignMetrics, followUpAnchorFor } from '@/lib/intelligence/campaignWindow';
+import {
+  resolveCampaignStart, campaignMetrics, followUpAnchorFor, toCampaignUploads,
+} from '@/lib/intelligence/campaignWindow';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -254,12 +256,13 @@ export async function GET(req: NextRequest) {
        analysis ran) to 12 Aug — the first "29 days 'til…" Short, counting
        to My Whole World on 10 Sep. The channel stated the date; nothing
        was reading it. */
+    /* `toCampaignUploads` is the one place asset type is decided, and it
+       reads the human format override itself. Mapping to `kind` here with
+       formatOf() bypassed that, which is how a 61-second vertical trailer
+       a person had already labelled "not a Short" was counted as one. */
+    const campaignUploads = toCampaignUploads(raw);
     const campaignStart = resolveCampaignStart({
-      uploads: raw.map(v => ({
-        publishedAt: v.publishedAt,
-        views: v.viewCount ?? null,
-        kind: formatOf(v).kind,
-      })),
+      uploads: campaignUploads,
       baselineAt: capturedAt ?? null,
     });
     if (campaignStart) coverage.push(campaignStart.because);
@@ -367,14 +370,7 @@ export async function GET(req: NextRequest) {
        album yet. The campaign's own number is ~1.08M, and it is the one
        a label can defend in a room. */
     const campaignPerf = campaignStart
-      ? campaignMetrics(
-          raw.map(v => ({
-            publishedAt: v.publishedAt,
-            views: v.viewCount ?? null,
-            kind: formatOf(v).kind,
-          })),
-          campaignStart,
-        )
+      ? campaignMetrics(campaignUploads, campaignStart)
       : null;
 
     const campaignViews = campaignPerf?.views ?? null;
