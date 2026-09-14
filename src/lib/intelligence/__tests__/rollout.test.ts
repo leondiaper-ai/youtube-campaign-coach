@@ -529,6 +529,62 @@ export function runRolloutChecks(): CheckResult {
       'the visible copy must not claim verification the record withholds');
   });
 
+  /* ── Every plan, not just the first one ────────────────────────────
+     These rules were written while there was one artist in the system, and
+     a rule that only runs against the artist it was written for is a
+     comment. They run over every plan now, so the third artist inherits
+     the standard instead of rediscovering it. */
+  test('every artist plan holds the board rules', () => {
+    for (const [slug, plan] of Object.entries(ROLLOUT_PLANS)) {
+      const refs = plan.flatMap(p => p.references ?? []);
+      for (const r of refs) {
+        assert.ok(!/\bevent\b/i.test(r.mechanic), `${slug}: "${r.mechanic}" is the generic headline`);
+        assert.ok(r.mechanic.length <= 46, `${slug}: "${r.mechanic}" is a sentence, not an instruction`);
+        assert.ok(r.did.length > r.mechanic.length, `${slug}: ${r.artist} claims a mechanic without saying what was done`);
+        assert.ok(r.objects.length >= 1 && r.objects.every(o => /^[A-Za-z0-9_-]{11}$/.test(o.id)),
+          `${slug}: ${r.artist} cites something that is not a video id`);
+        assert.ok(!/\b\d[\d.,]*\s*(m|k|bn)?\s*views\b/i.test(`${r.proof ?? ''} ${r.did}`),
+          `${slug}: ${r.artist} proves a mechanic with an audience size`);
+      }
+      /* One lead per board, and no two mechanics sharing a content word. */
+      const stop = new Set(['the', 'a', 'an', 'into', 'for', 'its', 'own', 'on', 'day', 'and', 'to', 'then', 'about', 'five', 'one']);
+      const words = (t: string) => new Set(
+        t.toLowerCase().replace(/[^a-z ]/g, ' ').split(/\s+/).filter(w => w && !stop.has(w)));
+      for (const p of plan) {
+        const board = p.references ?? [];
+        if (board.length > 1) {
+          assert.equal(board.filter(r => r.weight === 'lead').length, 1,
+            `${slug}/${p.key}: a board needs exactly one lead`);
+        }
+        for (let i = 0; i < board.length; i++) {
+          for (let j = i + 1; j < board.length; j++) {
+            const shared = Array.from(words(board[i].mechanic)).filter(w => words(board[j].mechanic).has(w));
+            assert.equal(shared.length, 0,
+              `${slug}/${p.key}: ${board[i].artist} and ${board[j].artist} are one idea twice (${shared.join(', ')})`);
+          }
+        }
+      }
+      /* A template that can never resolve is a fallback nobody notices. */
+      for (const p of plan) {
+        if (!p.questionTemplate) continue;
+        assert.match(p.questionTemplate, /\{(release|hero)\}/,
+          `${slug}/${p.key}: template asks for a token nothing supplies`);
+        assert.ok(!/[{}]/.test(p.question), `${slug}/${p.key}: the fallback question carries a placeholder`);
+      }
+    }
+  });
+
+  test('Kings of Leon asks about the hero that landed, not the release ahead', () => {
+    const plan = ROLLOUT_PLANS['kingsofleon'];
+    const first = plan.find(p => p.spine)!;
+    assert.equal(first.key, 'follow_up', 'the first open spine item must be the one with a deadline');
+    assert.equal(first.questionTemplate, 'What should land after {hero}?');
+    /* The distinction that matters: this campaign's question is about an
+       observed upload, not about a confirmed future date. */
+    assert.ok(!/\{release\}/.test(first.questionTemplate!),
+      'a campaign past its hero must not phrase its question around the next release');
+  });
+
   /* ── Generalisation ────────────────────────────────────────────────── */
 
   test('an artist with no plan gets an explicit absence, not an empty page', () => {

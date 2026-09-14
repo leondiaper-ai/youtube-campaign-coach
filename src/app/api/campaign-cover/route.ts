@@ -102,6 +102,49 @@ function windowOf(d: { baseline: { ts: string }; last: { ts: string } } | null |
   };
 }
 
+/**
+ * "Kings Of Leon - My Whole World" -> "My Whole World".
+ *
+ * YouTube titles carry the artist because YouTube search needs them to. A
+ * sentence on a deck about that artist does not, and "What should land
+ * after Kings Of Leon - My Whole World?" is a sentence nobody says.
+ * Conservative: it only strips a leading artist name it recognises, and
+ * leaves anything it does not understand exactly as published.
+ */
+function cleanAssetTitle(title: string, artistName: string): string {
+  const t = (title ?? '').trim();
+  const a = (artistName ?? '').trim();
+  if (!a) return t;
+  const esc = a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = new RegExp(`^${esc}\\s*[-\u2013\u2014:]\\s*(.+)$`, 'i').exec(t);
+  const out = m ? m[1].trim() : t;
+  /* "(Official Video)" and friends are packaging, not the name. */
+  return out.replace(/\s*\((official|lyric|visuali[sz]er)[^)]*\)\s*$/i, '').trim() || t;
+}
+
+/**
+ * The Deep Dive's 7-14 day follow-up window, as dates rather than as a
+ * phrase. Anchored to the hero's publication so it does not drift with the
+ * reader's clock, and it reports whether it is still open — a window that
+ * has closed is a different conversation from one that has not opened.
+ */
+function windowAfter(publishedAt: string) {
+  const t = new Date(publishedAt).getTime();
+  if (!Number.isFinite(t)) return null;
+  const from = new Date(t + 7 * 86_400_000);
+  const to = new Date(t + 14 * 86_400_000);
+  const now = Date.now();
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+    fromLabel: dateLabel(from.toISOString()),
+    toLabel: dateLabel(to.toISOString()),
+    state: now < from.getTime() ? 'AHEAD' : now <= to.getTime() ? 'OPEN' : 'CLOSED',
+    daysUntilOpens: Math.ceil((from.getTime() - now) / 86_400_000),
+    daysUntilCloses: Math.ceil((to.getTime() - now) / 86_400_000),
+  };
+}
+
 function dateLabel(iso: string): string {
   const d = new Date(iso);
   if (!Number.isFinite(d.getTime())) return '';
@@ -339,7 +382,33 @@ export async function GET(req: NextRequest) {
        null rather than a guess — the rollout falls back to wording that
        names no release at all. */
     const release = await nextConfirmedRelease(who.slug).catch(() => null);
-    const rollout = buildRollout(progress, library, runs, { release });
+
+    /* ── The hero that already landed, and the window it opened ────────
+       A campaign walking towards its first hero and a campaign four days
+       past one are at opposite ends of the same model, and the difference
+       is entirely in the tense. This resolves the most recent MAJOR
+       published asset — long-form, not a Short, because a Short is not a
+       destination — so the strategy question can be about the thing that
+       happened rather than the thing that is coming.
+
+       Nothing here is a claim about intent. It is the newest long-form the
+       channel has published since the Deep Dive, which is a fact. */
+    const publishedHero = [...postBaseline]
+      .filter(a => a.kind !== 'short')
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0] ?? null;
+
+    const heroCtx = publishedHero
+      ? { title: cleanAssetTitle(publishedHero.title, who.name), publishedAt: publishedHero.publishedAt }
+      : null;
+
+    /* The Deep Dive's follow-up window, dated from the hero rather than
+       from today, so it is the same seven days whenever the page is read.
+       Null when no hero has landed — for that campaign the window is a
+       recommendation against a future date and the timeline already
+       carries it. */
+    const followUpWindow = publishedHero ? windowAfter(publishedHero.publishedAt) : null;
+
+    const rollout = buildRollout(progress, library, runs, { release, hero: heroCtx });
 
     if (!rollout.items.length) {
       coverage.push('No rollout plan exists for this artist, so the strategy spine is unavailable rather than empty.');
@@ -369,6 +438,8 @@ export async function GET(req: NextRequest) {
         thumb: a.thumb, url: a.url, views: a.views,
       })),
       rollout,
+      Date.now(),
+      followUpWindow,
     ).catch(() => null);
     if (timeline) coverage.push(...timeline.coverage);
 
@@ -431,6 +502,8 @@ export async function GET(req: NextRequest) {
         daysSinceBaseline,
       },
       assets: { heroes, supporting },
+      /* Derived, not stored: the 7-14 days after the published hero. */
+      followUpWindow,
       stages,
       timeline,
       /* The same plan the stages were cut from, in full, for the Ideas

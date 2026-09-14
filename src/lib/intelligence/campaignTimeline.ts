@@ -171,11 +171,18 @@ export interface TimelineAsset {
   views: number | null;
 }
 
+/** The dated 7-14 day window after a hero that has already been published. */
+export interface FollowUpWindow {
+  from: string; to: string; fromLabel: string; toLabel: string;
+  state: string; daysUntilOpens: number; daysUntilCloses: number;
+}
+
 export async function buildCampaignTimeline(
   slug: string,
   assets: TimelineAsset[],
   rollout: Rollout,
   now = Date.now(),
+  followUp: FollowUpWindow | null = null,
 ): Promise<CampaignTimeline> {
   const coverage: string[] = [];
   const moments: TimelineMoment[] = [];
@@ -267,6 +274,24 @@ export async function buildCampaignTimeline(
       dateLabel: label(planned.eventDate!), date: planned.eventDate,
       daysAway: daysTo(planned.eventDate!),
       stage: 'Second destination', title: s.title, detail: s.detail, asset: null,
+    });
+  } else if (secondDestination && !['LIVE', 'COMPLETE'].includes(secondDestination.status) && followUp) {
+    /* The hero has already landed, so the window has real dates. "+7-14
+       DAYS" is the right label for a campaign still walking towards its
+       hero and the wrong one for a campaign four days past it — at that
+       point the window is a fortnight in the diary with a start and an
+       end, and saying so is the difference between a principle and a
+       deadline. */
+    moments.push({
+      kind: 'WINDOW', provenance: 'RECOMMENDED',
+      dateLabel: `${followUp.fromLabel} \u2013 ${followUp.toLabel}`,
+      date: followUp.from, daysAway: followUp.daysUntilOpens,
+      stage: 'Second destination',
+      title: secondDestination.title,
+      detail: followUp.state === 'OPEN' ? 'Open now'
+        : followUp.state === 'AHEAD' ? `Opens in ${followUp.daysUntilOpens} days`
+        : 'Window closed',
+      asset: null,
     });
   } else if (secondDestination && !['LIVE', 'COMPLETE'].includes(secondDestination.status)) {
     moments.push({

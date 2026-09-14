@@ -1,0 +1,501 @@
+/* ═══════════════════════════════════════════════════════════════════
+   THE LIVE CAMPAIGN HOME — shared stylesheet
+   ═══════════════════════════════════════════════════════════════════
+
+   Lifted verbatim out of the CHVRCHES deck, which is where every one of
+   these rules was argued for, and made shareable by touching nothing
+   except its location.
+
+   It is deliberately free of colour values. Every accent reads a CSS
+   variable the host deck already defines — --signal, --paper, --ink,
+   --hair, --smoke, --coal — so the same layout arrives in CHVRCHES
+   magenta on one page and Kings of Leon's aged gold on another without a
+   line of per-artist styling. That is the whole reason the second artist
+   was cheap: the composition is the product, the palette is the deck.
+
+   The exception is the .era block, which IS a palette — CHVRCHES' album
+   world, scoped to the Ideas slides and applied only when a deck asks for
+   it by name in its config. A deck that does not opt in never sees it, and
+   Kings of Leon does not: its Ideas slides come out in the deck's own
+   aged gold because that is what the variables resolve to.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIVE CAMPAIGN COVER
+   Added when Watcher confirms the campaign has started. Every value
+   below comes from the variables already declared at the top of this
+   file — this is the same deck, opening in a different state, not a
+   second design system bolted on.
+   ═══════════════════════════════════════════════════════════════════ */
+.tabs{display:flex;gap:.35rem;margin-right:.6rem}
+.tab{font:inherit;font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  padding:.42rem .8rem;border-radius:6px;border:1px solid transparent;background:transparent;
+  color:var(--smoke);cursor:pointer}
+.tab.on{color:var(--signal);border-color:var(--signal)}
+.tab:hover{color:var(--paper)}
+
+/* The one piece of motion in the deck. A campaign that is live should
+   look live, and a single slow pulse says it without a banner. */
+.livedot{width:7px;height:7px;border-radius:50%;background:var(--signal);display:inline-block;
+  margin-right:.5rem;vertical-align:middle;animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.82)}}
+@media (prefers-reduced-motion:reduce){.livedot{animation:none}}
+
+.livehead{display:flex;align-items:baseline;gap:.9rem;flex-wrap:wrap}
+
+/* The campaign's permanent identity. Three lines, three jobs, one of them
+   a headline — the album is what the page is the home of, so it carries
+   the weight; the artist identifier and the explanation sit either side of
+   it at a size that reads without competing. */
+.ident{margin-top:.8rem}
+.ident-a{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
+  line-height:1.05;color:var(--paper)}
+.ident-c{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.035em;
+  line-height:.92;margin-top:.15rem;text-transform:uppercase}
+.ident-k{font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.7rem}
+.ident-line{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
+  font-size:clamp(.95rem,1.9vw,1.35rem);color:var(--bone)}
+.ident-line b{color:var(--paper);text-transform:uppercase;letter-spacing:-.02em}
+
+.livestate{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
+.livesince{font-size:.6rem;color:var(--smoke);letter-spacing:.06em;text-transform:uppercase}
+
+/* The campaign creative. Deliberately large: these are the campaign's
+   first assets, not rows in a table.
+
+   Each keeps its own shape. A Short shown in a 16:9 frame is not a
+   cropping problem — YouTube bakes grey pillarbox into the 1280x720
+   thumbnail it serves, so the bars are pixels and no object-fit can
+   remove them. A 9:16 frame with cover scales the source until its
+   height fills, cropping exactly the bars away.
+
+   The label under each is its EDITORIAL role, not its API format. "Now,
+   we can start." is a trailer that happens to be 41 seconds long, and
+   calling it a Short on a page a label reads would be describing the
+   file rather than the campaign. */
+/* One height for the row, and each card takes the width its own shape
+   asks for. A landscape card and a portrait card that share a baseline
+   and a top edge read as a considered pair; two cards of different
+   heights read as a layout that got away from someone. */
+.heroassets{display:flex;flex-wrap:wrap;gap:1.2rem;margin-top:1.6rem;align-items:flex-start}
+.ha{display:block;text-decoration:none;color:inherit;position:relative;border-radius:12px;
+  overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s;
+  flex:0 0 auto}
+.ha:hover{transform:translateY(-3px);border-color:var(--signal)}
+.ha-img{position:relative;overflow:hidden;height:clamp(168px,23vw,244px);
+  aspect-ratio:9/16;background:var(--coal)}
+.ha.wide .ha-img{aspect-ratio:16/9}
+.ha-img img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* A vertical source in a landscape frame.
+   YouTube serves a Short's thumbnail as 1280x720 with grey pillarbox baked
+   into the pixels, so the bars are image content — changing the frame's
+   aspect ratio only changes which part of the bars you see. The picture
+   itself is a 405px strip down the middle, 32% of the width.
+   Scaling 3.16x makes that strip fill the frame, which is a real landscape
+   still taken out of the trailer rather than a letterbox. Anything above
+   3.16 only crops tighter, so the fallback thumbnail sizes are safe too. */
+.ha.wide.src-portrait .ha-img img{transform:scale(3.16);transform-origin:center}
+.ha-img::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 45%,rgba(8,7,13,.92) 100%)}
+.ha-cap{position:absolute;left:0;right:0;bottom:0;padding:.75rem .85rem;z-index:2}
+.ha-t{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;
+  line-height:1.12;letter-spacing:-.01em}
+.ha.wide .ha-t{font-size:clamp(1.05rem,1.7vw,1.45rem)}
+.ha-m{font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);margin-top:.4rem}
+.ha-m b{color:var(--signal);font-weight:700}
+
+/* The cover splits. The campaign creative is tall — two 9:16 frames at
+   238px are 423px high — and stacking the figures, the read and the dates
+   underneath pushed the most important sentence on the page below the
+   fold. It also left the right half of a full-bleed photograph carrying
+   nothing at all.
+
+   So the creative holds the left and everything that interprets it holds
+   the right, on the same baseline. The whole campaign state now lands in
+   one viewport, and the composition is balanced rather than bottom-heavy. */
+.covergrid{display:grid;grid-template-columns:auto minmax(300px,1fr);
+  gap:0 3.2rem;align-items:start;margin-top:1.2rem}
+
+/* The deck's standard scrim runs dark on the left and lets the photograph
+   come almost fully forward on the right, because on every other slide the
+   type is on the left. This cover now sets type on BOTH sides, so the same
+   gradient left the read and the dates floating on a busy crowd shot at
+   near-zero contrast.
+
+   This one keeps a lit band through the middle — the creative reads better
+   against a ground that is actually there — and closes down again on the
+   right where the type sits. */
+.slide.cover .bleed.strong::after{background:
+  linear-gradient(90deg,rgba(8,7,13,.93) 0%,rgba(8,7,13,.6) 26%,
+    rgba(8,7,13,.55) 46%,rgba(8,7,13,.84) 68%,rgba(8,7,13,.92) 100%),
+  linear-gradient(180deg,rgba(8,7,13,.72) 0%,transparent 30%,
+    transparent 64%,rgba(8,7,13,.72) 100%)}
+
+/* Same reason: the one sentence that says what happens next was set in the
+   caption grey, which survives on a flat panel and disappears on a photo. */
+.covergrid .readline .rl{color:#C6C1D4}
+.covergrid .nx-t{color:#ADA7BC}
+
+/* A landscape card is wider than the portrait one it replaced, so the left
+   column grew and the figures lost the room to sit on one line. Three
+   numbers that wrap are three numbers you read twice. Slightly smaller and
+   slightly closer, which costs nothing — they are already the loudest
+   thing in the column. */
+/* Three columns, not a wrapping row. The campaign-views caption is the
+   longest string in the group and under flex it simply widened its own
+   cell until the third figure fell to a second line — which read as two
+   figures and an afterthought. A grid holds the row whatever the captions
+   say, and lets them wrap inside their own column where they belong. */
+.covergrid .livestats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1.1rem;align-items:start}
+.covergrid .ls .n{font-size:clamp(1.05rem,1.75vw,1.5rem)}
+
+/* The portrait card is now the narrow one in the pair, so its caption needs
+   its own scale. At the shared size the title and the date both wrapped,
+   which is four lines of type in a 137px frame. */
+.ha:not(.wide) .ha-t{font-size:.84rem;line-height:1.15}
+.ha:not(.wide) .ha-m{font-size:.5rem;letter-spacing:.08em;margin-top:.3rem}
+.ha:not(.wide) .ha-cap{padding:.6rem .65rem}
+.covergrid .livestats{margin-top:0;padding-top:0;border-top:0}
+.covergrid .readline{margin-top:1.6rem}
+@media(max-width:900px){.covergrid{grid-template-columns:1fr;gap:1.8rem}}
+
+/* ── NEXT ───────────────────────────────────────────────────────────
+   Campaign time as three lines of type, not a component. The deck knows
+   the whole schedule; it says the three dates that explain where we are.
+   The first is the one that matters, so it is the only one at full
+   weight — the rest guide the eye without competing for it. */
+.next{margin-top:1.7rem;padding-top:1.2rem;border-top:1px solid var(--hair);max-width:60ch}
+.nx{display:flex;gap:1.2rem;align-items:baseline;padding:.32rem 0}
+.nx-d{flex:0 0 11.5rem;font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:.98rem;letter-spacing:-.01em;color:var(--signal)}
+.nx-t{font-size:.82rem;color:var(--smoke);line-height:1.45}
+.nx.dim .nx-d{color:var(--bone);font-size:.88rem;opacity:.72}
+.nx.rec .nx-d{color:var(--signal-2);font-size:.88rem;opacity:.85}
+.nx.rec .nx-t em{font-style:normal;color:var(--signal-2);opacity:.9}
+
+@media(max-width:720px){
+  .ha{width:calc(50% - .6rem)}
+  .nx{flex-direction:column;gap:.15rem;padding:.5rem 0}
+  .nx-d{flex:none}
+}
+
+/* Metrics as typography, not KPI cards. Same .num/.cap scale the rest of
+   the deck uses for its statistics. */
+.livestats{display:flex;flex-wrap:wrap;gap:2.2rem;margin-top:1.5rem;
+  padding-top:1.1rem;border-top:1px solid var(--hair)}
+.ls .n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.3rem,2.3vw,1.95rem);
+  line-height:1;color:var(--signal)}
+.ls .c{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
+
+/* The period a figure covers, under its own label. Quiet, but never absent
+   — an unlabelled delta invites the reader to assume the window they were
+   already thinking about. */
+.ls .w{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);
+  margin-top:.2rem;opacity:.8}
+
+.readline{margin-top:1.4rem;padding-left:1rem;border-left:2px solid var(--signal)}
+/* The before, sitting immediately above the after. */
+.readline .rk{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:.5rem}
+.readline .rh{font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:clamp(1.1rem,2.2vw,1.75rem);line-height:1.12;letter-spacing:-.01em}
+.readline .rl{font-size:.82rem;color:var(--smoke);margin-top:.5rem;max-width:52ch;line-height:1.6}
+
+.cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
+
+/* ── IDEAS ──────────────────────────────────────────────────────────
+   Two slides that behave like the rest of the deck: image first, then a
+   figure, a headline and two short lines. The composition is deliberately
+   unequal — a feature and three supports — because four identical cards
+   is what a product does, not what a deck does.
+
+   The figure is the point. It is what turns "give every hero a second
+   destination" into "0 of 4 heroes had one last time", and it is why
+   these read as strategy rather than suggestion. */
+.ideagrid{display:grid;gap:.9rem;margin-top:.9rem}
+.ideacol{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.9rem}
+
+/* The picture is the card's background, not a block above the caption.
+   It was the other way round, with the caption absolutely positioned over
+   a fixed-ratio image — which is fine until the caption grows. Adding the
+   Deep Dive line would have pushed the evidence straight out of the top of
+   the frame with overflow:hidden quietly eating it. Now the ratio sets the
+   card's ambition and the content sets its floor. */
+.idea{position:relative;border-radius:12px;overflow:hidden;color:inherit;
+  border:1px solid var(--hair);transition:transform .2s,border-color .2s;
+  display:flex;flex-direction:column;justify-content:flex-end}
+.idea:hover{transform:translateY(-3px);border-color:var(--signal)}
+.idea-img{position:absolute;inset:0;background:var(--coal)}
+.idea-img img{width:100%;height:100%;object-fit:cover;display:block}
+/* ── THE BLACK BARS ──────────────────────────────────────────────────
+   Measured, not guessed. The trailer was shot 4:3 and YouTube pillarboxes
+   it into a 1280x720 storyboard still: sampling the columns of all four
+   frames gives 160px of pure black on each side, every time, so the real
+   picture is the middle 960px — exactly 75%.
+
+   Scaling the image to 4/3 of the frame and pulling it left by half the
+   overflow puts those bars outside the card. object-fit:cover then does
+   the vertical crop as before, which is why this is a widening rather
+   than a zoom: nothing of the picture is lost sideways.
+
+   This is a per-asset measurement, so it lives with the frame that was
+   measured rather than being applied to every image on the page. */
+.debar img{width:133.34%;height:100%;max-width:none;margin-left:-16.67%}
+.idea-img::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,7,13,.1) 18%,rgba(8,7,13,.88) 62%,rgba(8,7,13,.97) 100%)}
+/* A support card's caption fills more of its frame than the feature's does,
+   so the evidence line lands where the feature's gradient is still light.
+   On a bright frame the magenta washed out — which is the one line on the
+   card that has to be legible. Its own ramp, starting sooner. */
+.idea.sub .idea-img::after{
+  background:linear-gradient(180deg,rgba(8,7,13,.18) 8%,rgba(8,7,13,.9) 44%,rgba(8,7,13,.98) 100%)}
+/* No usable thumbnail: the card keeps its shape and the type carries it,
+   rather than showing YouTube's grey placeholder. */
+.idea.noimg .idea-img{background:linear-gradient(150deg,rgba(255,45,120,.22),var(--coal) 70%)}
+.idea.noimg .idea-img img{display:none}
+
+.idea-cap{position:relative;padding:.9rem 1rem;z-index:2}
+.idea-ev{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--signal);
+  letter-spacing:.02em;line-height:1}
+.idea-h{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
+  line-height:1.05;margin-top:.35rem}
+.idea-body{margin-top:.55rem;display:grid;gap:.3rem}
+.idea-r{font-size:.74rem;line-height:1.42;color:#C6C1D4}
+.idea-r span{display:inline-block;min-width:2.1rem;font-size:.53rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--smoke);vertical-align:1px}
+
+.idea.feature{aspect-ratio:16/5.9}
+.idea.feature .idea-ev{font-size:clamp(1rem,1.85vw,1.4rem)}
+.idea.feature .idea-h{font-size:clamp(1.25rem,2.5vw,1.95rem)}
+.idea.feature .idea-r{font-size:.82rem;max-width:52ch}
+.idea.sub{aspect-ratio:16/9.8}
+.idea.sub .idea-ev{font-size:.82rem}
+.idea.sub .idea-h{font-size:clamp(.95rem,1.5vw,1.12rem)}
+.idea.sub .idea-src{font-size:.64rem}
+.idea.sub .idea-src b{font-size:.46rem}
+
+/* ── YOUTUBE OPPORTUNITIES ───────────────────────────────────────────
+   The three things we would like to explore with YouTube, under the four
+   things we are recommending for the campaign.
+
+   They get real weight — a named row with a line each, not pill buttons —
+   because when this page is open in front of YouTube these are the asks.
+   But they stay under the playbook and carry no picture, because the
+   hierarchy has to hold: the playbook is what we are recommending, these
+   are conversations nobody has agreed to yet. */
+.opps{margin-top:1.2rem;padding-top:.95rem;border-top:1px solid var(--hair)}
+.opps-h{font-size:.62rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--signal-2)}
+.opps-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem;margin-top:.7rem}
+.opp{border-left:2px solid rgba(56,224,214,.45);padding-left:.85rem}
+.opp-n{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.01em;
+  font-size:clamp(.98rem,1.6vw,1.22rem);color:var(--paper)}
+.opp-l{font-size:.76rem;line-height:1.45;color:#ADA7BC;margin-top:.25rem}
+@media(max-width:900px){ .opps-row{grid-template-columns:1fr;gap:.9rem} }
+
+/* References. Picture, artist, mechanic, one line of what it means here. */
+.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(214px,1fr));gap:1.1rem;margin-top:1.2rem}
+.ref{display:block;text-decoration:none;color:inherit}
+.ref-img{aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:var(--coal);
+  border:1px solid var(--hair)}
+.ref-img img{width:100%;height:100%;object-fit:cover;display:block}
+.ref.noimg .ref-img{background:linear-gradient(150deg,rgba(56,224,214,.2),var(--coal) 70%)}
+.ref.noimg .ref-img img{display:none}
+.ref-a{font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--signal-2);margin-top:.65rem}
+.ref-i{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;
+  line-height:1.15;margin-top:.25rem}
+.ref-app{font-size:.72rem;line-height:1.4;color:#ADA7BC;margin-top:.4rem}
+.ref-app span{display:block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--smoke);margin-bottom:.15rem}
+
+.refq{font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--signal-2);
+  font-size:clamp(1.05rem,2.1vw,1.55rem);line-height:1.25;max-width:24ch;margin:1.1rem 0 1.1rem}
+
+/* ── THE BOARD ───────────────────────────────────────────────────────
+   Three references against one question, and the composition carries the
+   argument rather than a set of labels: the lead fills the left because it
+   answers the question most directly, and the two supports run down the
+   right in the order the campaign will meet them — anticipation, then the
+   event, then what the event leaves behind.
+
+   Deliberately NOT the playbook's composition, even though it is the same
+   language. Two slides with an identical feature-plus-two grid read as one
+   template used twice. */
+.rfgrid{display:grid;grid-template-columns:1.12fr 1fr;gap:1rem;margin-top:1rem;align-items:stretch}
+.rfcol{display:grid;grid-template-rows:1fr 1fr;gap:1rem;min-height:0}
+
+.rf{position:relative;display:block;border-radius:12px;overflow:hidden;text-decoration:none;
+  color:inherit;border:1px solid rgba(237,231,218,.16);background:#0A0A0C;
+  transition:transform .2s,border-color .2s}
+.rf:hover{transform:translateY(-3px);border-color:rgba(237,231,218,.55)}
+.rf-img{position:relative;background:var(--coal);overflow:hidden}
+.rf-img img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(.3) contrast(1.06) brightness(.94)}
+.rf.noimg .rf-img{background:linear-gradient(150deg,rgba(237,231,218,.14),#0B0B0D 70%)}
+.rf.noimg .rf-img img{display:none}
+
+.rf-a{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--era-key);opacity:.85}
+.rf-m{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.015em;
+  line-height:1.06;margin-top:.2rem}
+/* What they did. This was a tracked-out arrow diagram, which looked
+   considered and said almost nothing — three cards rendered that way all
+   reduced to "make the release bigger". It is a sentence now, because the
+   sentence is where the mechanic actually lives. */
+.rf-s{font-size:.72rem;line-height:1.5;color:#B9B3A6;margin-top:.45rem}
+.rf-s span{display:block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:#8E8877;margin-bottom:.2rem}
+/* Evidence, where it is not already inside the sentence above. Often
+   absent — a dated timestamp in the line beats a label under it. */
+.rf-p{font-size:.63rem;letter-spacing:.02em;color:#B9B3A6;margin-top:.5rem;
+  padding-left:.6rem;border-left:1px solid rgba(237,231,218,.3)}
+/* The sequence an application implies, when it has one. */
+.rf-c{font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;color:#8E8877;
+  margin-top:.45rem;line-height:1.7}
+/* A horizon marks a reference that is not about the moment the question is
+   about, so a January idea cannot be mistaken for an eight-day one. */
+.rf-a i{display:block;font-style:normal;font-size:.5rem;letter-spacing:.22em;
+  color:#8E8877;margin-bottom:.3rem}
+.rf-x{font-size:.74rem;line-height:1.45;color:#CFC9BB;margin-top:.6rem;
+  padding-top:.55rem;border-top:1px solid rgba(237,231,218,.14)}
+.rf-x span{display:inline-block;font-size:.5rem;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--era-key);margin-right:.45rem;vertical-align:1px}
+
+/* Lead: picture over copy, and the only one big enough to be looked at. */
+.rf.lead{display:flex;flex-direction:column}
+.rf.lead .rf-img{flex:1 1 auto;min-height:0}
+.rf.lead .rf-b{padding:.95rem 1.1rem 1.05rem}
+.rf.lead .rf-m{font-size:clamp(1.15rem,2.1vw,1.6rem)}
+.rf.lead .rf-x{font-size:.8rem}
+
+/* Supports: picture beside copy, so two fit the column without shrinking
+   the type to the point where nobody reads them. */
+.rf.sup{display:grid;grid-template-columns:37% 1fr;min-height:0}
+.rf.sup .rf-b{padding:.85rem .95rem}
+.rf.sup .rf-m{font-size:clamp(.95rem,1.45vw,1.1rem)}
+@media(max-width:900px){
+  .rfgrid{grid-template-columns:1fr}
+  .rf.sup{grid-template-columns:1fr}
+  .rf.sup .rf-img{aspect-ratio:16/9}
+}
+
+/* ── THE SOURCE LINE ─────────────────────────────────────────────────
+   An idea card used to link to a video on the channel, which was a
+   citation for the picture rather than for the argument — and one of them
+   (House of Vans) still serves a thumbnail while refusing to play, so the
+   card offered a dead end that looked like evidence.
+
+   The card now opens the Channel Deep Dive slide that made the case, and
+   shows the figure that slide proves. Same gesture, real destination. */
+.idea-src{display:flex;gap:.5rem;align-items:baseline;width:100%;text-align:left;
+  margin-top:.6rem;padding-top:.55rem;border-top:1px solid rgba(237,231,218,.16);
+  background:none;border-left:0;border-right:0;border-bottom:0;cursor:pointer;
+  font:inherit;font-size:.7rem;line-height:1.4;color:#B6B0A2;padding-left:0;padding-right:0}
+.idea-src b{font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:.5rem;
+  color:var(--era-key);white-space:nowrap;flex:0 0 auto;padding-top:.18rem}
+.idea-src:hover{color:var(--era-key)}
+.idea-src:hover b{text-decoration:underline}
+.idea.feature .idea-src{font-size:.76rem;max-width:56ch}
+
+/* The one external thing on this page. Named by a person, checked by hand,
+   and kept to a single line so it reads as "here is what we mean" rather
+   than as research we have run. */
+.opp-x{display:inline-block;margin-top:.4rem;font-size:.68rem;letter-spacing:.01em;
+  color:var(--era-key);text-decoration:none;border-bottom:1px solid rgba(237,231,218,.3);
+  padding-bottom:1px}
+.opp-x:hover{border-bottom-color:var(--era-key)}
+.opp-x i{font-style:normal;color:#8E8877}
+
+/* ── THE ALBUM ERA ───────────────────────────────────────────────────
+   The two campaign uploads are black, silver and grain, with a white
+   heraldic rose. The Ideas slides now take their pictures only from those
+   two assets, so a magenta-and-cyan chrome sat on top of that world
+   looked like the last campaign's UI wrapped around the new one's images.
+
+   This is a palette shift, not a redesign: the same composition, the same
+   type, the same hierarchy — bone white where the accent was, and the
+   pictures allowed to stay as cold as they were shot. The identity strip
+   keeps its magenta, because that belongs to the product and not to the
+   era. */
+.era{--era-key:#EDE7DA;--era-2:#8E8877;background:#050507;padding:4.4rem 0 2.6rem}
+.era .idea-ev{color:var(--era-key)}
+.era .idea-r{color:#B9B3A6}
+.era .idea{border-color:rgba(237,231,218,.16)}
+.era .idea:hover{border-color:rgba(237,231,218,.55)}
+.era .idea-img img{filter:grayscale(.28) contrast(1.06) brightness(.96)}
+.era .idea.noimg .idea-img{background:linear-gradient(150deg,rgba(237,231,218,.14),#0B0B0D 70%)}
+.era .opps-h{color:var(--era-key);opacity:.75}
+.era .opp{border-left-color:rgba(237,231,218,.35)}
+.era .opp-l{color:#ADA79A}
+.era .refq{color:var(--era-key)}
+.era .ref-a{color:var(--era-key)}
+.era .ref-app{color:#ADA79A}
+.era h2.display span{color:var(--era-key)!important}
+.era .label{color:var(--era-key)!important;opacity:.7}
+/* The identity strip keeps its magenta — it carries its colour inline and
+   belongs to the product rather than to this album, which is the whole
+   reason it is the one fixed thing on every campaign page. */
+
+/* A vertical asset behind a landscape slide is not a background, it is a
+   wall: cover-cropping the Short's 1080x1920 frame filled the viewport with
+   one four-foot rose and the headline disappeared into it. Held at its own
+   aspect, pushed off the text column and dropped to a fifth of its weight,
+   the same frame becomes what it should have been — the album's mark, in
+   the room, behind the words. */
+.era .bleed.emblem img{object-fit:contain;object-position:76% 50%;opacity:.2}
+
+/* Grain. The assets are grainy; a perfectly clean surface under them reads
+   as a different object. Two hairline gradients, no image request. */
+.era .inner{position:relative;z-index:3}
+.era::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.5;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px),
+    radial-gradient(120% 80% at 50% 0%,transparent 40%,rgba(0,0,0,.55) 100%)}
+
+@media(max-width:900px){ .ideacol{grid-template-columns:1fr} }
+
+/* The cover opens tighter than the other slides because it carries more
+   objects. It keeps the deck's full-viewport height though: once the
+   creative row shrank to a single band the slide collapsed to its content
+   and the white Deep Dive slide came up into the first screen, which read
+   as the page having ended. The campaign home owns the first screen and
+   the original strategy begins below it — which is the relationship
+   between the two. */
+.slide.cover{padding:4.2rem 0 2.4rem}
+
+/* ── THE FIRST SCREEN ────────────────────────────────────────────────
+   The campaign home is built from a live fetch, so for the second or two
+   that fetch takes, the deck's own captured cover was the first thing on
+   screen — and then the page jumped as the live cover was inserted above
+   it. Whoever opened the link watched the wrong page and then watched it
+   move.
+
+   The deck is held invisible until either the live cover has mounted or a
+   short budget expires, whichever comes first. It is `visibility`, not
+   `display`: the layout is already computed underneath, so the reveal is
+   instant and the slide measurements the progress bar depends on are
+   correct before anyone sees anything.
+
+   The budget is the point. A page that waits indefinitely for an API is a
+   page an API outage can take down, and this deck's first rule is that the
+   live layer must never be able to do that. Past the budget the captured
+   deck appears exactly as it always did and the live cover arrives when it
+   arrives — the old behaviour, kept as the floor rather than the norm. */
+/* An empty first screen, the height of a slide, standing where the campaign
+   home will be. Not a spinner and not a skeleton — it claims nothing, it
+   just holds the space so the cover arrives INTO the page rather than on
+   top of it.
+
+   It replaced a timed hold that blanked the deck for 2.6s while the fetch
+   ran. Measured on a cold function the fetch takes about 3.4s, so the
+   budget expired first and the jump it was meant to prevent happened
+   anyway — with a blank screen added in front of it. The slot has no
+   budget to get wrong: the rest of the deck is visible and scrollable
+   underneath from the first paint, and if the fetch never returns the slot
+   is simply removed. */
+.coverslot{min-height:100vh}
+

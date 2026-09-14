@@ -227,6 +227,73 @@ export const SEEDED_PROGRESS: Record<string, RecommendationProgress[]> = {
       updatedAt: '2026-09-11T00:00:00.000Z',
     },
   ],
+
+  /**
+   * KINGS OF LEON, and a deliberately narrow record.
+   *
+   * Leon's confirmation was two sentences: the current campaign is live,
+   * and 'My Whole World', released 10 September 2026, is part of it. He
+   * added that nothing else should be inferred from it, so this is ONE
+   * record against ONE recommendation, and the 2025 material — 'We're Onto
+   * Something' and the November EP — is not claimed either way. Its
+   * relationship to this era is UNKNOWN, which is a different thing from
+   * excluded.
+   *
+   * The state is OBSERVING rather than RESULT because the hero is four days
+   * old. Four days is not a measurement.
+   *
+   * The note carries one observation that is NOT part of the human claim
+   * and is labelled as such: the upload has no scheduled or actual start
+   * time, so it was not premiered, where 7 of 11 music videos in the last
+   * campaign were. That belongs in the record precisely because it
+   * complicates the good news — a progress record that only holds the
+   * flattering half of what happened is a press release.
+   */
+  kingsofleon: [
+    {
+      /* Campaign architecture Phase 2: "Hero single: create the front door
+         — a major long-form asset, premiered, with Shorts pointing toward
+         it and Community supporting it." Recorded against this one alone.
+         The content-direction sentence that also asks for a Premiere
+         (dd_kingsofleon_1ds8ira) is NOT recorded, because half of it
+         demonstrably did not happen and marking it in flight would say the
+         opposite. */
+      recommendationId: 'dd_kingsofleon_14ghofv',
+      artistSlug: 'kingsofleon',
+      state: 'OBSERVING',
+      statedBy: 'Leon',
+      statedAt: '2026-09-14',
+      statedAtPrecision: 'day',
+      note:
+        "Leon has confirmed that Kings of Leon's current campaign is live, and that 'My Whole World', "
+        + 'released 10 September 2026, is part of the current campaign. That confirmation covers the '
+        + 'campaign and that asset, and nothing else is inferred from it — no other dates, assets or '
+        + 'era boundaries. '
+        + 'Observed alongside the claim, and not part of it: the upload carries no scheduled or actual '
+        + 'start time, so this hero was not premiered, where 7 of 11 music videos in the last campaign '
+        + 'were. Sixteen Shorts ran in the 29 days before it, including a countdown ladder, so the Shorts '
+        + 'half of this recommendation is visible on the channel. No follow-up long-form has been '
+        + 'published in the four days since, and the Coach plan holds nothing in the 7-14 day window.',
+      evidenceRefs: [
+        {
+          kind: 'upload', ref: 'Bb7YN5wQztk', attachedBy: 'HUMAN',
+          note: "'My Whole World' — 4m21s long-form, published 10 Sep 2026. The channel's first music "
+            + 'long-form in 307 days. No liveStreamingDetails, so not a Premiere.',
+        },
+      ],
+      supersedesId: null,
+      history: [
+        {
+          to: 'OBSERVING', at: '2026-09-14', statedBy: 'Leon',
+          note: 'Campaign confirmed live and the hero confirmed as part of it. Recorded straight to '
+            + 'OBSERVING rather than through IMPLEMENTED because the asset was already published when '
+            + 'the confirmation was given — there is no earlier date to claim.',
+        },
+      ],
+      createdAt: '2026-09-14T00:00:00.000Z',
+      updatedAt: '2026-09-14T00:00:00.000Z',
+    },
+  ],
 };
 
 /* ══ Read ════════════════════════════════════════════════════════════ */

@@ -243,6 +243,8 @@ export interface Rollout {
     question: string;
     becauseOf: string;
     release: { title: string; date: string | null; source: 'coach_plan' } | null;
+    /** The published asset the question is about, when it is about one. */
+    hero: { title: string; publishedAt: string; source: 'observed' } | null;
   } | null;
   /** Honest notes about what this plan does not cover. Never empty. */
   limitations: string[];
@@ -695,8 +697,266 @@ const CHVRCHES_PLAN: PlanItem[] = [
   },
 ];
 
+/**
+ * KINGS OF LEON, and a campaign at a different point in the same model.
+ *
+ * CHVRCHES is dormant, awake, walking towards a first hero. Kings of Leon
+ * ran a 29-day public build, landed the hero on 10 September, and has
+ * published nothing since. Same four-stage architecture, opposite problem:
+ * one campaign is trying to create a moment, the other is trying not to
+ * waste one.
+ *
+ * The order below is the order the campaign meets these, and the first one
+ * has a deadline rather than a preference. That matters for the spine —
+ * whichever item is first and open owns the strategy question, and for this
+ * artist the honest question is not "how do we make this big" but "what
+ * lands next, and it needs to be soon".
+ *
+ * ── ON THE ONE NUMBER THAT ISN'T HERE ─────────────────────────────────
+ * The Deep Dive's largest observation is that the catalogue dwarfs the
+ * campaign — 92.8% of the channel's movement in the last three weeks was
+ * not this record. That is the biggest thing about this artist and it is
+ * deliberately NOT one of the four cards, because public data cannot show
+ * whether catalogue viewers currently reach new releases. The deck's own
+ * words: "a routing opportunity, not a measured gap." It belongs in the
+ * Station conversation with YouTube, where it is an ask rather than a
+ * finding, and that is where it is.
+ */
+const KOL_PLAN: PlanItem[] = [
+  {
+    key: 'follow_up',
+    title: "Don't leave the hero alone",
+    objective: 'A second meaningful destination while attention from the hero is still elevated.',
+    timing: '7-14 days after the hero',
+    rationale:
+      'My Whole World is carrying almost all of the campaign\u2019s viewing on its own, and the plan holds '
+      + 'nothing in the window that follows it. The last campaign managed a follow-up on 6 of 11 heroes, so '
+      + 'this is a thing this team already does — when it is decided in time.',
+    recommendation:
+      'Put one meaningful long-form destination inside the 7-14 day window. It does not need to be new '
+      + 'music: a performance, a film, or the same song presented another way all qualify, and all of them '
+      + 'are cheaper than the hero was.',
+    question: 'What should land after the hero?',
+    questionTemplate: 'What should land after {hero}?',
+    needTags: ['follow_up_7_14', 'hero_continuity'],
+    spine: true,
+    commitment: 'COMMITTED',
+    deepDivePoint: 'Put a second meaningful destination inside 7-14 days, while attention is still elevated.',
+    pitch: {
+      headline: "Don't leave the hero alone",
+      evidence: '6 / 11 heroes had a follow-up last time',
+      why: 'My Whole World is carrying the campaign almost by itself, and the window after it is empty.',
+      doThis: 'Put one meaningful long-form destination inside the 7-14 days after the hero.',
+      imageId: 'Bb7YN5wQztk',
+      deepDive: { slide: 'Follow-through', figure: 'Gaps to the next long-form ran 19, 5, 4, 8, 5, 8, 7, 28, 21, 27 and 15 days' },
+    },
+    /* ── THE BOARD ─────────────────────────────────────────────────────
+       Two references, both checked against the YouTube Data API on 14 Sep
+       2026 using publishedAt, durationSec and the premiere fields. They
+       answer the same question two different ways: extend the song, or
+       change the object. Neither is a view-count argument. */
+    references: [
+      {
+        artist: 'Lola Young',
+        mechanic: 'One song. Five settings.',
+        did:
+          'From Down Here was filmed five times in five places and released a week apart \u2014 From The Water '
+          + '(22 May), a Living Room (29 May), The Pool (5 Jun), Mirror (12 Jun), The Wooden Room (23 Jun).',
+        proof: 'Five long-form objects, one song, roughly weekly',
+        application: 'My Whole World can carry the window on its own. A second version is not a repost.',
+        imageId: 'uF5HUfho2NU',
+        url: 'https://www.youtube.com/watch?v=uF5HUfho2NU',
+        weight: 'lead',
+        verifiedBy: 'Claude',
+        verifiedAt: '2026-09-14',
+        objects: [
+          { id: '-u9TRlZADmg', note: '22 May 2026 14:00:01 \u2014 "From The Water", 241s' },
+          { id: 'uF5HUfho2NU', note: '29 May 2026 14:00:04 \u2014 "From a Living Room", 242s. Seven days after the first.' },
+          { id: 'YFhpMpONGUY', note: '5 Jun 2026 15:00:20 \u2014 "From The Pool", 240s' },
+          { id: 'N46TwoQjvAw', note: '12 Jun 2026 15:00:14 \u2014 "Mirror", 242s' },
+          { id: 'bL_cOefk_J0', note: '23 Jun 2026 16:00:37 \u2014 "From The Wooden Room", 246s' },
+        ],
+      },
+      {
+        artist: 'Odeal',
+        mechanic: 'The record, then the film about it',
+        did:
+          'Nine days after the record landed, a 15-minute tour documentary was premiered on the same channel '
+          + '\u2014 a different kind of object entirely, not another song.',
+        proof: 'Premiere timestamps verified on both',
+        application:
+          'Kings of Leon are on tour now. A film about the shows is a destination the band does not have to '
+          + 'stop and make.',
+        imageId: '9OzdjyBHVAo',
+        url: 'https://www.youtube.com/watch?v=9OzdjyBHVAo',
+        weight: 'support',
+        verifiedBy: 'Claude',
+        verifiedAt: '2026-09-14',
+        caveat:
+          'Scout logged this as a repeated 4-10 day pattern with HIGH confidence. Checking the objects, it is '
+          + 'ONE sequence, not a pattern, and the card says so. Also worth holding against it: the 31 Jul drop '
+          + 'was seven visualisers premiered at the same instant, which is the shape this playbook argues '
+          + 'against for album day. The follow-up is the reference here; the drop is not.',
+        objects: [
+          { id: '-yMOMqgwTbQ', note: '31 Jul 2026 04:00:06 \u2014 one of seven visualisers, all premiered at the same second' },
+          { id: '9OzdjyBHVAo', note: '9 Aug 2026 \u2014 "Summer Walker Tour Documentary", 936s, scheduled 18:05:06, live 18:07:51' },
+        ],
+      },
+    ],
+  },
+  {
+    key: 'premiere_next',
+    title: 'Make single two an appointment',
+    objective: 'Turn the next priority single into a moment rather than an upload.',
+    timing: 'The next priority single',
+    rationale:
+      'Seven of eleven music videos in the last campaign ran as confirmed Premieres. My Whole World did not '
+      + '\u2014 it carries no scheduled or actual start time. The habit exists; it was not used this time.',
+    recommendation:
+      'Premiere the next priority single, with the Shorts pointing at a stated time rather than at a date. '
+      + 'Keep it selective \u2014 premiering everything is how a Premiere stops meaning anything.',
+    question: 'How do we turn the next single into an appointment?',
+    needTags: ['premiere_behaviour', 'shorts_programme'],
+    spine: true,
+    commitment: 'COMMITTED',
+    deepDivePoint: 'Keep Premieres, and keep them selective.',
+    pitch: {
+      headline: 'Make single two an appointment',
+      evidence: '7 / 11 videos premiered last campaign',
+      why: 'My Whole World was published, not premiered, though Premieres are established behaviour here.',
+      doThis: 'Give the next priority single a stated time, and point the Shorts at the time.',
+      imageId: 'Bb7YN5wQztk',
+      frame: 2,
+      deepDive: { slide: 'Premieres', figure: 'Counted only where the API returns both a scheduled and an actual start' },
+    },
+  },
+  {
+    key: 'album_day',
+    title: 'Give album day one centre of gravity',
+    objective: 'One unmistakable destination on release day, with everything else orbiting it.',
+    timing: 'Album release day',
+    rationale:
+      'Last time ten long-form assets went out on one day. The album-day music video took 1.66m; the nine '
+      + 'lyric videos beside it took 961k between them, at a 105k median.',
+    recommendation:
+      'Decide now which single object is the album-day destination, and programme the rest of the week '
+      + 'around it rather than publishing everything at once.',
+    question: 'What is the one thing album day is built around?',
+    needTags: ['first_week_density', 'album_campaign', 'long_form_event'],
+    spine: true,
+    commitment: 'COMMITTED',
+    deepDivePoint: 'Give release week a centre of gravity instead of publishing everything at once.',
+    pitch: {
+      headline: 'Give album day one centre of gravity',
+      evidence: '1.66m for the video · 961k for nine lyric videos',
+      why: 'Ten long-form assets landed on one day last time and the day had no centre.',
+      doThis: 'Pick the one album-day destination now, and let the rest of the week orbit it.',
+      imageId: 'Bb7YN5wQztk',
+      frame: 3,
+      deepDive: { slide: 'Release week', figure: '22 uploads and 3.3m views in release week, nine lyric videos on the day itself' },
+    },
+  },
+  {
+    key: 'shorts_route',
+    title: 'Every Short needs somewhere to go',
+    objective: 'Shorts that start a journey and then finish it somewhere.',
+    timing: 'Continuous',
+    rationale:
+      'Sixteen Shorts ran in the 29 days before the hero, including a countdown ladder. The build worked. '
+      + 'Last campaign 106 Shorts returned 11.7% of campaign views and ended there.',
+    recommendation:
+      'Point Shorts at the hero, the follow-up and the next destination deliberately, rather than letting '
+      + 'them end on themselves. Public data cannot show whether viewers travel; that is the reason to make '
+      + 'the route explicit rather than to assume it.',
+    question: 'Where is each Short sending people?',
+    needTags: ['shorts_programme', 'hero_continuity'],
+    spine: true,
+    commitment: 'COMMITTED',
+    deepDivePoint: 'Give every Short a destination.',
+    pitch: {
+      headline: 'Every Short needs somewhere to go',
+      evidence: '16 Shorts built to My Whole World',
+      why: 'Shorts are already doing the campaign\u2019s build work, and they already end on themselves.',
+      doThis: 'Route Shorts at the hero, the follow-up and the next destination, deliberately.',
+      imageId: 'Pem_5ooqU2E',
+      deepDive: { slide: 'Shorts', figure: '106 Shorts were 80% of campaign uploads and 11.7% of campaign views' },
+    },
+  },
+
+  /* ── Platform conversations. Named, and not plans. ────────────────── */
+  {
+    key: 'station',
+    title: 'Kings of Leon Station',
+    objective: 'One persistent place where the catalogue, the live material and the new record sit together.',
+    timing: 'Across and between campaigns',
+    rationale:
+      'The channel moved 13.5m views in three weeks and the campaign accounted for 7.2% of it. The scale of '
+      + 'the catalogue relative to the campaign is the condition a Station is for.',
+    recommendation:
+      'Open the conversation with YouTube. Stations are an emerging product and eligibility needs confirming '
+      + '\u2014 nothing here assumes access.',
+    question: 'How are heritage artists programming a catalogue alongside a new record?',
+    needTags: ['named_series', 'catalogue_activation'],
+    spine: false,
+    commitment: 'POSSIBILITY',
+    seedStatus: 'RECOMMENDED',
+    deepDivePoint: 'Build Kings of Leon TV as an always-on home for catalogue and new music together.',
+    opportunity: {
+      name: 'Kings of Leon Station',
+      line: 'Programme twenty years of Kings of Leon alongside the new record, in one persistent place.',
+      example: {
+        label: 'Metallica TV',
+        url: 'https://www.youtube.com/watch?v=1fz60gNnSdU',
+        observed: 'catalogue, live cuts and full concerts, streaming without a break since March',
+        checkedAt: '2026-09-11',
+      },
+    },
+  },
+  {
+    key: 'youtube_nights',
+    title: 'YouTube Nights',
+    objective: 'Explore the band for the intimate-room, major-artist live proposition.',
+    timing: 'Unscheduled',
+    rationale:
+      'A band with twenty years of catalogue and a tour already running is the shape of artist the format is '
+      + 'built around. Whether that is a fit is a judgement for the people who programme it.',
+    recommendation: 'Raise it as a partner ask. Nothing here has been checked against what the programme offers.',
+    question: 'How are heritage artists using platform-programmed live moments?',
+    needTags: ['performance_as_hero', 'community_activation'],
+    spine: false,
+    commitment: 'POSSIBILITY',
+    seedStatus: 'EXPLORING',
+    human: { statedBy: 'Leon', statedAt: '2026-09-14', precision: 'day' },
+    opportunity: {
+      name: 'YouTube Nights',
+      line: 'Twenty years of catalogue, a tour already running, and a room small enough to matter.',
+    },
+  },
+  {
+    key: 'premiere_afterparty',
+    title: 'Premiere / Afterparty',
+    objective: 'A larger platform-native appointment around a future priority single.',
+    timing: 'A future priority single',
+    rationale:
+      'Premieres are established behaviour on this channel and the last one was not used. A bigger version of '
+      + 'a habit the team already has is a cheaper ask than a new one.',
+    recommendation: 'Explore what YouTube can put behind a Premiere, and what happens on the other side of it.',
+    question: 'What does YouTube put behind a Premiere for an artist at this scale?',
+    needTags: ['premiere_behaviour', 'community_activation'],
+    spine: false,
+    commitment: 'POSSIBILITY',
+    seedStatus: 'EXPLORING',
+    human: { statedBy: 'Leon', statedAt: '2026-09-14', precision: 'day' },
+    opportunity: {
+      name: 'Premiere / Afterparty',
+      line: 'A bigger appointment around a priority single, and something waiting when it ends.',
+    },
+  },
+];
+
 export const ROLLOUT_PLANS: Record<string, PlanItem[]> = {
   chvrches: CHVRCHES_PLAN,
+  kingsofleon: KOL_PLAN,
 };
 
 /* ══ Deriving status from what is actually recorded ══════════════════ */
@@ -831,6 +1091,19 @@ function attachResearch(
 export interface RolloutContext {
   /** The next confirmed release from the Coach plan. Null is normal. */
   release?: { title: string; date: string | null } | null;
+  /**
+   * The most recent major asset this campaign has actually PUBLISHED.
+   *
+   * Two artists at different points in the same model need different nouns.
+   * A campaign walking towards its first hero asks about the thing coming
+   * ("How do we make Roses feel like an event?") and takes {release} from
+   * the plan. A campaign whose hero has already landed asks about the thing
+   * that landed ("What should land after My Whole World?") and takes {hero}
+   * from the channel. One is a commitment, the other is an observation, and
+   * collapsing them would put a confirmed future date inside a sentence
+   * about the past.
+   */
+  hero?: { title: string; publishedAt: string } | null;
 }
 
 /**
@@ -843,9 +1116,18 @@ export interface RolloutContext {
  * missing value, so "How do we make UNKNOWN feel like an event?" cannot be
  * produced by any path through this function.
  */
-function questionFor(p: PlanItem, release: RolloutContext['release']): string {
-  if (!p.questionTemplate || !release?.title) return p.question;
-  return p.questionTemplate.replace('{release}', release.title);
+function questionFor(p: PlanItem, ctx: RolloutContext): string {
+  if (!p.questionTemplate) return p.question;
+  const values: Record<string, string | undefined> = {
+    release: ctx.release?.title,
+    hero: ctx.hero?.title,
+  };
+  /* Every token the template asks for must resolve. A half-filled question
+     is worse than the fallback, because it reads as a system that knows
+     something it does not. */
+  const wanted = Array.from(p.questionTemplate.matchAll(/\{(\w+)\}/g)).map(m => m[1]);
+  if (!wanted.length || wanted.some(k => !values[k])) return p.question;
+  return wanted.reduce((q, k) => q.replace(`{${k}}`, values[k]!), p.questionTemplate);
 }
 
 export function buildRollout(
@@ -933,7 +1215,7 @@ export function buildRollout(
       references: p.references ?? [],
       grokResearch: attachResearch(
         p, library, report.artistSlug, `ro_${report.artistSlug}_${p.key}`, researched,
-        questionFor(p, ctx.release),
+        questionFor(p, ctx),
       ),
       lastUpdated: view?.implementation?.statedAt ?? report.deepDive?.capturedAt ?? '',
     };
@@ -969,6 +1251,9 @@ export function buildRollout(
          the data can always tell where the noun came from. */
       release: ctx.release?.title
         ? { title: ctx.release.title, date: ctx.release.date ?? null, source: 'coach_plan' as const }
+        : null,
+      hero: ctx.hero?.title
+        ? { title: ctx.hero.title, publishedAt: ctx.hero.publishedAt, source: 'observed' as const }
         : null,
     }
     : null;

@@ -25,6 +25,10 @@
   --smoke:#8A8580;
   --hair:rgba(239,234,227,.14);
   --mint:#7FA88C;
+  /* The shared live-campaign layer names its secondary accent --signal-2.
+     Here that is the mint, so the campaign home and the reference board
+     come out in this deck's colours rather than in another artist's. */
+  --signal-2:#7FA88C;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -530,6 +534,9 @@ body.sheet-open .deck{display:none}
 .sheet .note{background:rgba(11,11,12,.05);border-left:3px solid var(--ember);
   padding:.9rem 1.1rem;font-size:.82rem;line-height:1.6;margin:1rem 0;color:#3D3931}
 </style>
+<!-- The live campaign home, playbook and reference board. Shared with every
+     other living deck; coloured entirely by the variables above. -->
+<link rel="stylesheet" href="/live/campaign-home.css">
 </head>
 <body>
 
@@ -539,7 +546,10 @@ body.sheet-open .deck{display:none}
     <span>September 2026</span>
   </div>
   <div class="chrome-r">
-    <button class="btn primary" onclick="startPresent()">Present</button>
+    <div class="tabs" style="display:none">
+      <button class="tab on" data-tab="campaign" onclick="switchTab('campaign')">Campaign</button>
+      <button class="tab" data-tab="ideas" onclick="switchTab('ideas')">Ideas</button>
+    </div>
     <button class="btn" onclick="openSheet('appendix')">Analysis</button>
     <button class="btn icon" onclick="refreshLive()" id="refreshBtn"
             title="Refresh YouTube data" aria-label="Refresh YouTube data">
@@ -556,6 +566,7 @@ body.sheet-open .deck{display:none}
 <div class="phint">← → navigate · esc exit</div>
 
 <div class="deck" id="deck"></div>
+<div class="deck" id="ideas" style="display:none"></div>
 <div class="sheet" id="sheet-appendix"><div class="sheet-in" id="appendixBody"></div></div>
 
 <script>
@@ -1670,5 +1681,32 @@ observeAll();
 try{ renderStats(); }catch(e){ console.warn('[deck] stats unavailable', e); }
 try{ refreshLive(); }catch(e){ console.warn('[deck] live refresh unavailable', e); }
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     THE LIVING LAYER
+     Everything above is the Deep Dive as captured on 24 August 2026 and
+     it does not change. Everything below is today, and it is the same
+     file CHVRCHES runs — the artist-specific part is the rollout plan and
+     the Deep Dive on the server, not the page.
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+window.LIVE_DECK = {
+  slug: 'kingsofleon',
+  api: 'https://youtube-campaign-coach.vercel.app/api/campaign-cover',
+  /* Used only if the campaign has published nothing of its own. Sex on
+     Fire, because if this channel has one image it is that one. */
+  fallbackImage: 'RF0HhrwIwp0',
+  host: {
+    observeAll: () => { try { observeAll(); } catch (e) {} },
+    resetSlides: () => {},
+    /* This deck's progress bar is driven by presentation mode rather than
+       by scroll position, so there is nothing to recompute when the slide
+       count changes. Stated as a no-op rather than left out, so the next
+       deck can see which of the three hooks it actually needs. */
+    updateProgress: () => {},
+  },
+};
+</script>
+<script src="/live/campaign-home.js"></script>
 </body>
 </html>
