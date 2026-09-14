@@ -129,7 +129,7 @@ body.present .slide.active{display:flex}
 .bleed.dk::after{background:linear-gradient(88deg,rgba(18,17,15,.94) 4%,rgba(18,17,15,.72) 46%,rgba(18,17,15,.24))}
 .slide.green .bleed.dk::after{background:linear-gradient(88deg,rgba(10,63,27,.95) 4%,rgba(10,63,27,.8) 50%,rgba(10,63,27,.5))}
 /* The cover earns a full-height picture with the type sitting in it. */
-.bleed.hero img{object-position:52% 34%}
+.bleed.hero img{object-position:46% 26%}
 .bleed.hero::after{background:linear-gradient(180deg,rgba(18,17,15,.55) 0%,rgba(18,17,15,.2) 34%,rgba(18,17,15,.9) 88%)}
 
 .label{font-size:.6rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
@@ -413,6 +413,12 @@ body.present .slide.active{display:flex}
 .th-d{font-size:.78rem;line-height:1.46;color:var(--grey);margin-top:.6rem;max-width:30ch}
 .slide.dark .th-d{color:#9A958B}
 
+/* Emphasis inside body copy. Inline colours could not follow a slide onto a
+   dark ground — a near-black bold on the baize measured 1.56:1 — so this is a
+   class that flips instead. */
+.hi{color:var(--ink);font-weight:700}
+.slide.dark .hi,.slide.green .hi{color:var(--news)}
+
 /* One line of provenance, not a paragraph. Detail lives in Analysis. */
 .note{font-family:'Courier Prime',monospace;font-size:.62rem;letter-spacing:0;color:var(--grey);
   margin-top:1.1rem;opacity:.9;max-width:64ch}
@@ -471,8 +477,8 @@ body.present .phint{display:block}
 
 <!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
 <section class="slide dark" data-t="Cover" style="align-items:flex-end;padding-bottom:3.6rem">
-  <div class="bleed dk hero"><img src="https://i.ytimg.com/vi/XP8fS9WuGqU/maxresdefault.jpg" alt=""
-    onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg'"></div>
+  <div class="bleed dk hero"><img src="https://i.ytimg.com/vi/TkTRa6a2zQI/maxresdefault.jpg" alt=""
+    onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg'"></div>
   <div class="inner">
     <div class="label reveal">Antony Szmierek × YouTube · September 2026</div>
     <h1 class="display big reveal">The album is out.<br>Keep it moving.</h1>
@@ -481,7 +487,7 @@ body.present .phint{display:block}
       YouTube. Here's what to build around it.
     </p>
     <div class="note reveal" style="margin-top:1.5rem;color:#8C877E">
-      Above — the top of the Great Pyramid of Stockport. 153,698 views.
+      Above — Chalk, from the album. 26,718 views since 5 May.
     </div>
   </div>
 </section>
@@ -687,7 +693,7 @@ body.present .phint{display:block}
 
     <p class="sub reveal" style="margin-top:1.5rem">
       He has done this eight times. Those eight ideas hold
-      <b style="color:var(--ink)">65% of everything the channel has been watched for</b>.
+      <b class="hi">65% of everything the channel has been watched for</b>.
     </p>
 
     <div class="bl reveal">
@@ -917,8 +923,8 @@ body.present .phint{display:block}
 
 <!-- ═══ 9 · THREE THINGS NEXT ══════════════════════════════════════ -->
 <section class="slide green" data-t="Three things next">
-  <div class="bleed dk"><img src="https://i.ytimg.com/vi/TkTRa6a2zQI/maxresdefault.jpg" alt="" style="opacity:.16"
-    onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg'"></div>
+  <div class="bleed dk"><img src="https://i.ytimg.com/vi/y875VU7Sac0/maxresdefault.jpg" alt="" style="opacity:.16"
+    onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/y875VU7Sac0/hqdefault.jpg'"></div>
   <div class="inner">
     <div class="label reveal">Three things next</div>
 
