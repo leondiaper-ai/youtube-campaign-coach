@@ -53,9 +53,20 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
 }
 
-/** How many assets the cover may show before it becomes a feed. */
+/**
+ * How many assets the cover may show before it becomes a feed.
+ *
+ * Two tiers, because they do different jobs. The heroes are the campaign's
+ * argument and are set large. The rest are the campaign's WORLD — sixteen
+ * countdown Shorts are not sixteen things to read, they are the texture of
+ * a channel posting every other day, and that only comes across if you can
+ * see them. They render as a strip of stills with no captions.
+ *
+ * Fourteen is where a strip stops reading as a body of work and starts
+ * reading as a scroll. Past that the count carries it: "+3 more".
+ */
 const MAX_HERO_ASSETS = 2;
-const MAX_SUPPORTING = 4;
+const MAX_SUPPORTING = 14;
 
 type AssetRole = 'hero' | 'supporting';
 
@@ -579,7 +590,12 @@ export async function GET(req: NextRequest) {
         baselineDormantDays,
         daysSinceBaseline,
       },
-      assets: { heroes, supporting },
+      assets: {
+        heroes, supporting,
+        /* Everything published since the campaign started, so the strip can
+           say what it is not showing rather than silently truncating. */
+        total: postBaseline.length,
+      },
       /* Derived, not stored: the 7-14 days after the published hero. */
       followUpWindow,
       stages,

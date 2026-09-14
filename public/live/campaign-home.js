@@ -205,6 +205,30 @@ function campaignIdentity(d, small){
   </div>`;
 }
 
+/* ── THE CAMPAIGN'S WORLD ─────────────────────────────────────────────
+   The two heroes are the argument. These are the evidence that a channel
+   is being run — sixteen countdown Shorts in thirty-three days is not
+   sixteen things to read, it is a shape, and the shape only arrives if
+   you can see them all at once.
+
+   So: stills, no captions, no view counts. Every caption added here made
+   it a second asset list competing with the one above it. The date lives
+   in the tooltip for anyone who wants it, and the strip itself says the
+   thing that matters — this campaign has been working. */
+function assetStrip(rest, total, shownAbove){
+  if(!rest || !rest.length) return '';
+  const hidden = Math.max(0, (total || 0) - shownAbove - rest.length);
+  return `<div class="strip stagger">
+    ${rest.map(a => `<a class="sti${a.sourceAspect === 'portrait' ? ' sti-p' : ''}"
+      href="${a.url}" target="_blank" rel="noopener"
+      title="${esc(a.dateLabel)} · ${esc(a.formatLabel)} · ${esc(a.title)}">
+      <img src="${a.thumb}" alt="" loading="lazy"
+           onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${a.videoId}/hqdefault.jpg'">
+    </a>`).join('')}
+    ${hidden ? `<span class="sti sti-more">+${hidden}</span>` : ''}
+  </div>`;
+}
+
 function buildLiveCover(d){
   const live = d.state === 'CAMPAIGN_LIVE';
   const m = d.metrics || {};
@@ -290,7 +314,9 @@ function buildLiveCover(d){
       <div>
         ${heroes.length ? `<div class="label">Now</div>
         <div class="heroassets stagger" style="margin-top:.9rem">${
-          heroes.map(heroAsset).join('')}</div>` : ''}
+          heroes.map(heroAsset).join('')}</div>
+        ${assetStrip((d.assets && d.assets.supporting) || [],
+                     (d.assets && d.assets.total) || 0, heroes.length)}` : ''}
       </div>
 
       <div>

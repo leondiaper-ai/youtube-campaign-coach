@@ -497,3 +497,29 @@
    is simply removed. */
 .coverslot{min-height:100vh}
 
+/* ── THE CAMPAIGN STRIP ───────────────────────────────────────────────
+   Stills of everything else the campaign has published, under the two
+   heroes. Small enough that sixteen of them read as a body of work
+   rather than a list, and deliberately captionless: the moment these
+   carried dates and view counts they became a second asset table
+   arguing with the first one.
+
+   Height is fixed and width follows the frame, so a strip of Shorts and
+   the occasional landscape asset still sits on one baseline. */
+.strip{display:flex;flex-wrap:wrap;gap:.42rem;margin-top:.85rem;max-width:640px}
+.sti{display:block;height:62px;width:110px;border-radius:6px;overflow:hidden;
+  border:1px solid var(--hair);background:var(--coal);flex:0 0 auto;
+  opacity:.72;transition:opacity .18s,transform .18s,border-color .18s}
+.sti img{width:100%;height:100%;object-fit:cover;display:block}
+.sti:hover{opacity:1;transform:translateY(-2px);border-color:var(--signal)}
+
+/* A Short's thumbnail is 16:9 with grey pillarbox baked into the pixels,
+   so the picture is a narrow strip down the middle. Same correction as
+   the hero cards, at the scale this frame needs. */
+.sti-p img{transform:scale(3.16);transform-origin:center}
+
+/* What the strip is not showing, in the strip's own shape. */
+.sti-more{display:flex;align-items:center;justify-content:center;
+  font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--smoke);
+  opacity:1;border-style:dashed}
+@media (max-width:900px){.strip{max-width:none}}
