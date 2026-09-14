@@ -1854,8 +1854,6 @@ function buildIdeas(d){
       refs.push(x);
     }
   }
-  const waiting = items.reduce((n, i) =>
-    n + ((i.grokResearch && i.grokResearch.awaitingVerification) || 0), 0);
   const q = ro && ro.currentQuestion;
 
   /* ── The board, for the question that is actually open ──────────────
@@ -1867,6 +1865,10 @@ function buildIdeas(d){
      rather than deleted. */
   const owner = q ? items.find(i => i.title === q.becauseOf) : null;
   const board = (owner && owner.references) || [];
+  /* The count under the empty state belongs to THIS question. Summing the
+     whole rollout put twenty candidates under a headline about one of them,
+     which flatters the library by counting work aimed at other questions. */
+  const waiting = (owner && owner.grokResearch && owner.grokResearch.awaitingVerification) || 0;
   const lead = board.find(r => r.weight === 'lead') || board[0] || null;
   const support = board.filter(r => r !== lead).slice(0, 2);
 
