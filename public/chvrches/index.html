@@ -742,10 +742,19 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
    live layer must never be able to do that. Past the budget the captured
    deck appears exactly as it always did and the live cover arrives when it
    arrives — the old behaviour, kept as the floor rather than the norm. */
-body.booting .deck{visibility:hidden}
-/* The top bar stays. It is fixed, it says the same thing before and after,
-   and leaving it up means the hold reads as a page loading rather than as
-   a page that failed to. */
+/* An empty first screen, the height of a slide, standing where the campaign
+   home will be. Not a spinner and not a skeleton — it claims nothing, it
+   just holds the space so the cover arrives INTO the page rather than on
+   top of it.
+
+   It replaced a timed hold that blanked the deck for 2.6s while the fetch
+   ran. Measured on a cold function the fetch takes about 3.4s, so the
+   budget expired first and the jump it was meant to prevent happened
+   anyway — with a blank screen added in front of it. The slot has no
+   budget to get wrong: the rest of the deck is visible and scrollable
+   underneath from the first paint, and if the fetch never returns the slot
+   is simply removed. */
+.coverslot{min-height:100vh}
 
 
 </style>
@@ -1308,11 +1317,12 @@ function slides(){ return [
 /* ═══════════════════════════════════════════════════════════════════
    RENDER
    ═══════════════════════════════════════════════════════════════════ */
-/* Held from the first line, so there is no frame in which the captured
-   cover is the page. Removed by the boot budget or by the live cover
-   mounting — see the bottom of this file. */
-document.body.classList.add('booting');
-document.getElementById('deck').innerHTML = slides().join('');
+/* The campaign home's space, reserved before anything else renders, so the
+   captured cover is never the first screen. Deliberately not a .slide: the
+   progress counter and the scroll observers should not see a section that
+   is about to stop existing. */
+document.getElementById('deck').innerHTML =
+  '<div class="coverslot" id="coverslot"></div>' + slides().join('');
 
 let SLIDE_CACHE = null;
 function allSlides(){
@@ -1978,8 +1988,12 @@ async function loadLiveCampaign(){
      it was. Only real post-baseline activity changes the opening. */
   if(d.state !== 'CAMPAIGN_LIVE' && d.state !== 'NEW_ACTIVITY') return;
 
-  const deck = document.getElementById('deck');
-  deck.insertAdjacentHTML('afterbegin', buildLiveCover(d) + buildBaselineMarker(d));
+  /* Into the reserved slot, replacing it, so the page does not grow at the
+     top and nothing the reader is looking at moves. */
+  const slot = document.getElementById('coverslot');
+  const html = buildLiveCover(d) + buildBaselineMarker(d);
+  if (slot) slot.outerHTML = html;
+  else document.getElementById('deck').insertAdjacentHTML('afterbegin', html);
 
   const ideas = document.getElementById('ideas');
   if(ideas) ideas.innerHTML = buildIdeas(d);
@@ -2037,13 +2051,20 @@ try{ refreshLive(); }catch(e){ console.warn('[deck] live refresh unavailable', e
    fires whatever the fetch is doing — slow API, cold function, no network
    — and reveals the deck as it has always been. Nothing about this path
    can leave the page blank for longer than the budget. */
-const BOOT_BUDGET = 2600;
-const reveal = () => document.body.classList.remove('booting');
-const bootTimer = setTimeout(reveal, BOOT_BUDGET);
-
 loadLiveCampaign()
   .catch(e => console.warn('[deck] live campaign cover unavailable —', e.message))
-  .finally(() => { clearTimeout(bootTimer); reveal(); });
+  .finally(() => {
+    /* Whatever happened — mounted, wrong state, failed, timed out — the
+       reserved space must not outlive the attempt. On the success path the
+       slot was already replaced and there is nothing here to remove. */
+    const slot = document.getElementById('coverslot');
+    if (slot) {
+      slot.remove();
+      SLIDE_CACHE = null;
+      observeAll();
+      updateProgress();
+    }
+  });
 </script>
 </body>
 </html>
