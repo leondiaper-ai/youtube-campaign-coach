@@ -14,7 +14,8 @@
 
 import assert from 'node:assert';
 import {
-  resolveCampaignStart, campaignMetrics, eraOnset, type CampaignUpload,
+  resolveCampaignStart, campaignMetrics, eraOnset, campaignPerformanceFor,
+  toCampaignUploads, type CampaignUpload,
 } from '../campaignWindow';
 
 export interface CheckResult { passed: number; failed: number; failures: string[] }
@@ -40,6 +41,13 @@ const KOL: CampaignUpload[] = [
   up('2026-07-29', 'short', 13502), up('2026-07-24', 'short', 39214),
   up('2026-07-09', 'video', 11380), up('2026-07-05', 'video', 13910),
 ];
+
+/* The same channel, in the raw shape every surface actually holds. */
+const RAW = KOL.map(u => ({
+  publishedAt: u.publishedAt,
+  viewCount: u.views ?? 0,
+  durationSec: u.kind === 'short' ? 30 : 240,
+}));
 
 export function runCampaignWindowChecks(): CheckResult {
   let passed = 0; let failed = 0;
@@ -134,6 +142,92 @@ export function runCampaignWindowChecks(): CheckResult {
     assert.equal(m.assets, 3);
     assert.equal(m.longForm, 0);
     assert.equal(m.views, 52_088);
+  });
+
+  /* ── CROSS-SURFACE AGREEMENT ───────────────────────────────────────
+     The migration's actual promise. Campaign Home, /campaigns and
+     /team-watcher each used to compute this themselves, and on 14 Sep
+     2026 they disagreed by an order of magnitude for the same artist on
+     the same afternoon. These checks fail if that can happen again. */
+
+  test('every surface computing campaign performance gets the same answer', () => {
+    /* Each surface reaches campaignWindow.ts with a different notion of a
+       fallback date — /campaigns passes the pin date, the deck passes the
+       Deep Dive capture — and the resolver must still land on the same
+       observed onset, because the channel's behaviour is the same channel's
+       behaviour whoever is asking. */
+    const home = campaignPerformanceFor({ uploads: RAW, baselineAt: '2026-08-24', now: NOW });
+    const campaigns = campaignPerformanceFor({ uploads: RAW, baselineAt: '2026-08-18', now: NOW });
+    const teamBoard = campaignPerformanceFor({ uploads: RAW, now: NOW });
+
+    for (const [name, m] of [['home', home], ['campaigns', campaigns], ['team', teamBoard]] as const) {
+      assert.ok(m, `${name} resolved nothing`);
+      assert.equal(m!.start.at, home!.start.at, `${name} disagrees about the campaign start`);
+      assert.equal(m!.views, home!.views, `${name} disagrees about campaign views`);
+      assert.equal(m!.assets, home!.assets, `${name} disagrees about the asset count`);
+      assert.equal(m!.day, home!.day, `${name} disagrees about the campaign day`);
+    }
+  });
+
+  test('campaign views cannot silently fall back to a channel delta', () => {
+    /* The regression in one assertion. On 14 Sep the channel delta was
+       ~19M and the campaign's assets had earned ~1.08M. Anything that
+       reintroduces the channel figure under this name lands far outside
+       this bound and fails here rather than on a slide. */
+    const m = campaignPerformanceFor({ uploads: RAW, baselineAt: '2026-08-18', now: NOW })!;
+    const CHANNEL_DELTA_ON_THE_DAY = 19_043_112;
+    assert.ok(m.views! < CHANNEL_DELTA_ON_THE_DAY / 10,
+      `campaign views (${m.views}) are within an order of magnitude of the channel delta — `
+      + 'something has started summing the channel again');
+    /* And it must be the sum of the assets, exactly. */
+    const byHand = RAW
+      .filter(u => u.publishedAt >= m.start.at)
+      .reduce((n, u) => n + (u.viewCount ?? 0), 0);
+    assert.equal(m.views, byHand, 'campaign views are not the sum of the campaign assets');
+  });
+
+  test('a Shorts-only campaign still reports views, and never a channel figure', () => {
+    /* CHVRCHES: three Shorts, no hero. The surfaces that showed a channel
+       delta here were reporting millions for a campaign that had earned
+       52 thousand. */
+    const chv = [
+      { publishedAt: '2026-09-13T15:00:00Z', viewCount: 4297, durationSec: 30 },
+      { publishedAt: '2026-09-10T15:00:00Z', viewCount: 11019, durationSec: 30 },
+      { publishedAt: '2026-09-09T15:00:00Z', viewCount: 36772, durationSec: 30 },
+      { publishedAt: '2025-09-20T15:00:00Z', viewCount: 15803, durationSec: 30 },
+      { publishedAt: '2025-07-01T15:00:00Z', viewCount: 30972, durationSec: 30 },
+    ];
+    const m = campaignPerformanceFor({ uploads: chv, now: NOW })!;
+    assert.equal(m.views, 52_088);
+    assert.equal(m.assets, 3);
+    assert.equal(m.longForm, 0);
+    assert.equal(m.day, 5);
+  });
+
+  test('a stated date reaches the resolver from the surfaces that hold one', () => {
+    /* Team Watcher stores a human campaign start and, before the
+       migration, never passed it: HUMAN_STATED was unreachable in
+       production. This is the check that it is wired. */
+    const m = campaignPerformanceFor({
+      uploads: RAW, statedAt: '2026-07-25T00:00:00Z', statedBy: 'Team Watcher', now: NOW,
+    })!;
+    assert.equal(m.start.rule, 'HUMAN_STATED');
+    assert.equal(m.start.at, '2026-07-25T00:00:00Z');
+    assert.ok(m.assets > 17, 'a stated earlier start must widen the campaign, not be ignored');
+  });
+
+  test('the Shorts rule is defined once', () => {
+    /* Four files tested durationSec <= 62 and a fifth tested kind, which
+       is how two pages come to disagree about how many Shorts a campaign
+       has published. */
+    const mixed = [
+      { publishedAt: '2026-09-10T15:00:00Z', viewCount: 1, durationSec: 62 },
+      { publishedAt: '2026-09-09T15:00:00Z', viewCount: 1, durationSec: 63 },
+      { publishedAt: '2026-09-08T15:00:00Z', viewCount: 1, durationSec: 0 },
+    ];
+    const u = toCampaignUploads(mixed);
+    assert.deepEqual(u.map(x => x.kind), ['short', 'video', 'video'],
+      '62s is a Short, 63s is not, and a missing duration is not guessed into one');
   });
 
   return { passed, failed, failures };

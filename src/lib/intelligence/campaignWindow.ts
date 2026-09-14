@@ -59,6 +59,18 @@
  * Fire to a campaign that has not released the album yet.
  */
 
+/**
+ * ── THE ONE FUNCTION EVERY SURFACE CALLS ──────────────────────────────
+ * `campaignPerformanceFor()` at the bottom of this file. Six surfaces used
+ * to compute this themselves — the same four lines copy-pasted, with two
+ * different Shorts rules, five different Day-N formulas (two off by one,
+ * two able to render "Day 0") and two weekly-bucket implementations that
+ * had already drifted apart. They are now one call.
+ *
+ * If a surface needs campaign performance and is not calling this, that
+ * surface is wrong, however reasonable its arithmetic looks.
+ */
+
 /** The minimum silence that separates one era of a channel from the next. */
 const ERA_GAP_DAYS = 10;
 
@@ -203,4 +215,65 @@ export function campaignMetrics(
     longForm: mine.length - shorts,
     views: mine.length ? views : null,
   };
+}
+
+/* ══ THE ENTRY POINT ══════════════════════════════════════════════════ */
+
+/** The minimum a caller must hold. `RecentUpload` satisfies it structurally. */
+export interface RawUpload {
+  publishedAt: string;
+  viewCount?: number | null;
+  durationSec?: number | null;
+}
+
+/**
+ * The Shorts rule, written once.
+ *
+ * It was `durationSec <= 62` in four files and `kind === 'short'` in a
+ * fifth, which is the kind of divergence nobody notices until two pages
+ * disagree about how many Shorts a campaign has published.
+ */
+export function toCampaignUploads(raw: RawUpload[]): CampaignUpload[] {
+  return (raw ?? []).map(u => ({
+    publishedAt: u.publishedAt,
+    views: u.viewCount ?? null,
+    kind: (u.durationSec ?? 0) > 0 && (u.durationSec ?? 0) <= 62 ? 'short' : 'video',
+  }));
+}
+
+/**
+ * CAMPAIGN PERFORMANCE, FOR ANY SURFACE.
+ *
+ * Give it the channel's recent uploads and, where one exists, the date a
+ * person stated. It returns the start (with the rule that decided it) and
+ * the figures, or null when no start can be resolved — which is the honest
+ * answer for a channel nobody has pinned and that has published
+ * continuously for a year.
+ *
+ * `statedAt` is how a human date reaches the resolver. Team Watcher stores
+ * one against every campaign and it was, until this migration, unreachable
+ * from any caller: the HUMAN_STATED branch existed and nothing used it.
+ *
+ * Deliberately NOT here: any channel-level figure. `channelDeltaSince()` in
+ * lib/snapshots.ts is a whole-channel measurement and remains useful for
+ * exactly that — it must never be reachable through a function with the
+ * word "campaign performance" on it.
+ */
+export function campaignPerformanceFor(opts: {
+  uploads: RawUpload[];
+  statedAt?: string | null;
+  statedBy?: string | null;
+  baselineAt?: string | null;
+  now?: number;
+}): CampaignMetrics | null {
+  const uploads = toCampaignUploads(opts.uploads);
+  const start = resolveCampaignStart({
+    uploads,
+    statedAt: opts.statedAt,
+    statedBy: opts.statedBy,
+    baselineAt: opts.baselineAt,
+    now: opts.now,
+  });
+  if (!start) return null;
+  return campaignMetrics(uploads, start, opts.now ?? Date.now());
 }

@@ -290,7 +290,22 @@ export async function writeTopEverCache(channelId: string, videoIds: string[]) {
  * Uses the oldest snapshot on or after the start date as the baseline.
  * Falls back to the oldest snapshot we have if none exist before the start date.
  */
-export function campaignDelta(
+/**
+ * WHOLE-CHANNEL movement between two snapshots. Named for what it measures.
+ *
+ * It was called `campaignDelta`, and six surfaces rendered its result under
+ * labels like "Campaign views" — which for a channel whose catalogue earns
+ * 700,000 views a day put ~19M of back catalogue on a page about a campaign
+ * that had published 17 assets earning 1.08M between them.
+ *
+ * The measurement was never wrong; the name invited the wrong sentence. It
+ * remains genuinely useful on analysis surfaces: knowing the channel around
+ * a campaign is moving is worth knowing. It is simply not attribution, and
+ * nothing derived from it may carry a campaign label.
+ *
+ * For campaign attribution see lib/intelligence/campaignWindow.ts.
+ */
+export function channelDeltaSince(
   history: ChannelSnapshot[],
   campaignStartDate: string,
   field: 'subs' | 'views',
@@ -332,3 +347,10 @@ export function seriesForField(
     .filter((h) => new Date(h.ts).getTime() >= cutoff && h[field] != null)
     .map((h) => ({ x: new Date(h.ts).getTime(), y: h[field]! }));
 }
+
+/**
+ * @deprecated Use `channelDeltaSince`. Kept only so an unmigrated caller
+ * fails loudly in review rather than silently shipping a campaign label
+ * over a channel figure.
+ */
+export const campaignDelta = channelDeltaSince;

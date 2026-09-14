@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
-import { readHistory, campaignDelta } from '@/lib/snapshots';
+import { readHistory, channelDeltaSince } from '@/lib/snapshots';
+import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
 import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 
 /**
@@ -71,22 +72,28 @@ export async function GET(req: NextRequest) {
 
   // 3b. Campaign-period deltas (if campaignStartDate is set)
   const campaignSubs = campaignStart
-    ? campaignDelta(history, campaignStart, 'subs')
+    ? channelDeltaSince(history, campaignStart, 'subs')
     : null;
   const campaignViews = campaignStart
-    ? campaignDelta(history, campaignStart, 'views')
+    ? channelDeltaSince(history, campaignStart, 'views')
     : null;
 
-  // 3c. Campaign content stats — sum views from uploads since campaign start
-  const campaignUploads = campaignStart
-    ? (snap.recentUploads ?? []).filter(
-        (u) => new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
-      )
-    : [];
-  const campaignContentViews = campaignUploads.reduce((sum, u) => sum + u.viewCount, 0);
-  const campaignContentCount = campaignUploads.length;
-  const campaignShortsCount = campaignUploads.filter((u) => u.durationSec <= 62).length;
-  const campaignVideosCount = campaignContentCount - campaignShortsCount;
+  /* 3c. Campaign performance, from campaignWindow.ts.
+
+     This response is CORS-open and read by standalone HTML decks, so the
+     shape below is a contract with things outside this repo. `campaign.views`
+     used to be the whole-channel delta under a key called `campaign`, which
+     is the worst place in the product for that mistake to live: a deck can
+     print it without ever seeing the label. Channel movement now sits under
+     `channelDelta`, named for what it is. */
+  const perf = campaignPerformanceFor({
+    uploads: snap.recentUploads ?? [],
+    baselineAt: campaignStart,
+  });
+  const campaignContentViews = perf?.views ?? null;
+  const campaignContentCount = perf?.assets ?? 0;
+  const campaignShortsCount = perf?.shorts ?? 0;
+  const campaignVideosCount = perf?.longForm ?? 0;
 
   // 4. Derive counts from recentUploads (7d, 14d breakdowns)
   const now = Date.now();
@@ -192,19 +199,25 @@ export async function GET(req: NextRequest) {
     views7,
     historyDays: nc.historyDepthDays,
     // Campaign-period tracking
-    campaign: campaignStart
+    campaign: perf
       ? {
-          startDate: campaignStart,
+          /* The resolved start, and the rule that decided it — so a deck can
+             tell an observed campaign start from a fallback. */
+          startDate: perf.start.at,
+          startRule: perf.start.rule,
           name: artist.campaign ?? null,
-          subs: campaignSubs,
-          views: campaignViews,
+          /* Campaign attribution: assets published since the start. */
+          views: campaignContentViews,
+          assets: campaignContentCount,
           contentViews: campaignContentViews,
           contentCount: campaignContentCount,
           shortsCount: campaignShortsCount,
           videosCount: campaignVideosCount,
-          daysSinceStart: Math.floor(
-            (Date.now() - new Date(campaignStart).getTime()) / 86400000
-          ),
+          daysSinceStart: perf.day,
+          /* Whole-channel movement, kept but named. Deprecated keys `subs`
+             and the old channel-delta `views` are gone deliberately: a
+             silently wrong number is worse than a missing one. */
+          channelDelta: { views: campaignViews, subs: campaignSubs },
         }
       : null,
   }, { headers: CORS });

@@ -5,7 +5,8 @@ import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { listCustomArtists } from '@/lib/artistStore';
 import { isPinned } from '@/lib/campaignStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
-import { readHistory, campaignDelta } from '@/lib/snapshots';
+import { readHistory, channelDeltaSince } from '@/lib/snapshots';
+import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
 import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import { decideWatcher } from '@/lib/watcherDecision';
 import {
@@ -97,19 +98,19 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
 
   // Campaign-period tracking
   const campaignStart = artist.campaignStartDate ?? null;
-  const campSubs = campaignStart ? campaignDelta(history, campaignStart, 'subs') : null;
-  const campViews = campaignStart ? campaignDelta(history, campaignStart, 'views') : null;
-  const campaignUploads = campaignStart
-    ? (live?.recentUploads ?? []).filter(
-        (u) => new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
-      )
-    : [];
-  const campaignContentViews = campaignUploads.reduce((sum, u) => sum + u.viewCount, 0);
-  const campaignContentCount = campaignUploads.length;
-  const campaignShortsCount = campaignUploads.filter((u) => u.durationSec <= 62).length;
-  const campaignDaysSinceStart = campaignStart
-    ? Math.floor((Date.now() - new Date(campaignStart).getTime()) / 86400000)
-    : null;
+  const campSubs = campaignStart ? channelDeltaSince(history, campaignStart, 'subs') : null;
+  const campViews = campaignStart ? channelDeltaSince(history, campaignStart, 'views') : null;
+  /* One definition, from campaignWindow.ts. The local version summed
+     viewCount on its own filter and computed a Day N with no Math.max(1),
+     so this page could render "Day 0". */
+  const perf = campaignPerformanceFor({
+    uploads: live?.recentUploads ?? [],
+    baselineAt: campaignStart,
+  });
+  const campaignContentViews = perf?.views ?? null;
+  const campaignContentCount = perf?.assets ?? 0;
+  const campaignShortsCount = perf?.shorts ?? 0;
+  const campaignDaysSinceStart = perf?.day ?? null;
 
   // ── Launch Module data — daily view deltas for chart + momentum ─────────
   const viewSeries = nc.sparklineViews30d;
@@ -371,14 +372,14 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
           // Source-aware labels
           const viewsLabel = ba.source === 'live_7d' ? 'Views (7d)'
             : ba.source === 'recent_snapshot' ? 'Views (recent)'
-            : ba.source === 'campaign_period' ? 'Campaign views'
+            : ba.source === 'campaign_period' ? 'Channel views'
             : ba.source === 'last_confirmed' ? ba.label
             : ba.source === 'recent_uploads' ? 'Content activity'
             : 'Views (7d)';
 
           const subsLabel = ba.source === 'live_7d' ? 'Subs (7d)'
             : ba.source === 'recent_snapshot' ? 'Subs (recent)'
-            : ba.source === 'campaign_period' ? 'Campaign subs'
+            : ba.source === 'campaign_period' ? 'Channel subs'
             : ba.source === 'last_confirmed' ? 'Subs (last confirmed)'
             : 'Subs (7d)';
 
@@ -459,12 +460,12 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
             </div>
             <div className="grid grid-cols-4 gap-3">
               <MetricTile
-                label="Content views"
-                value={fmtNum(campaignContentViews)}
-                sub={`${campaignContentCount} uploads since ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
+                label="Campaign views"
+                value={campaignContentViews != null ? fmtNum(campaignContentViews) : '—'}
+                sub={`${campaignContentCount} asset${campaignContentCount === 1 ? '' : 's'} since the campaign started`}
               />
               <MetricTile
-                label="Channel views"
+                label="Channel view delta"
                 value={campViews ? fmtDelta(campViews.delta) : '—'}
                 sub={campViews ? `${campViews.daysCovered}d tracked` : `tracking from ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
                 color={campViews ? (campViews.delta > 0 ? '#0C6A3F' : campViews.delta < 0 ? '#8A1F0C' : undefined) : undefined}

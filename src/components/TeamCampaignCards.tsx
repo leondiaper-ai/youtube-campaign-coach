@@ -47,6 +47,11 @@ export type TeamCardData = {
   campaignSignalLabel: string;
   spk: number | null;
   campaignDay: number | null;
+  /* The campaign's own figures. */
+  campaignViews: number | null;
+  campaignAssets: number | null;
+  /* Whole-channel movement since the campaign started. Never a campaign
+     label — this is the catalogue as well. */
   campaignViewsDelta: number | null;
   campaignSubsDelta: number | null;
   confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
@@ -324,17 +329,26 @@ function TeamDecisionCard({ card }: { card: TeamCardData }) {
             <span className="text-[11px] text-ink/40">{card.campaign}</span>
           </div>
           <div className="flex items-center gap-4">
+            {/* The campaign's own two numbers. "views (total)" over a
+                channel delta, inside a Day-N block, was the card reading
+                as campaign performance when it was the back catalogue. */}
             <div>
-              <span className="text-[16px] font-black tabular-nums" style={{ color: deltaColor(card.campaignViewsDelta) }}>
-                {card.campaignViewsDelta != null ? `${card.campaignViewsDelta >= 0 ? '+' : ''}${fmtNum(card.campaignViewsDelta)}` : '—'}
+              <span className="text-[16px] font-black tabular-nums" style={{ color: '#0C6A3F' }}>
+                {card.campaignViews != null ? fmtNum(card.campaignViews) : '—'}
               </span>
-              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views (total)</span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">campaign views</span>
             </div>
             <div>
-              <span className="text-[16px] font-black tabular-nums" style={{ color: deltaColor(card.campaignSubsDelta) }}>
-                {card.campaignSubsDelta != null ? `${card.campaignSubsDelta >= 0 ? '+' : ''}${fmtNum(card.campaignSubsDelta)}` : '—'}
+              <span className="text-[16px] font-black tabular-nums">
+                {card.campaignAssets != null ? fmtNum(card.campaignAssets) : '—'}
               </span>
-              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">subs (total)</span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">assets</span>
+            </div>
+            <div>
+              <span className="text-[13px] font-bold tabular-nums text-ink/50">
+                {card.campaignViewsDelta != null ? `${card.campaignViewsDelta >= 0 ? '+' : ''}${fmtNum(card.campaignViewsDelta)}` : '—'}
+              </span>
+              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">channel view delta</span>
             </div>
           </div>
         </div>

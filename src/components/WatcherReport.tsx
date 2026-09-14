@@ -51,7 +51,7 @@ export type ReportProps = {
   };
   // Campaign-period data
   campaign: string | null;
-  campaignContentViews: number;
+  campaignContentViews: number | null;
   campaignContentCount: number;
   campaignShortsCount: number;
   campaignDaysSinceStart: number | null;
@@ -368,7 +368,7 @@ function buildFullReport(p: ReportProps): string {
     lines.push(`CAMPAIGN PERIOD (Day ${p.campaignDaysSinceStart})`);
     const campParts: string[] = [];
     campParts.push(`Content: ${p.campaignContentCount} uploads (${p.campaignShortsCount} Shorts, ${p.campaignContentCount - p.campaignShortsCount} long-form)`);
-    campParts.push(`Content views: ${fmtNum(p.campaignContentViews)}`);
+    campParts.push(`Campaign views: ${p.campaignContentViews != null ? fmtNum(p.campaignContentViews) : '—'}`);
     if (p.campaignViewsDelta != null) campParts.push(`Channel views: ${fmtDelta(p.campaignViewsDelta)}`);
     if (p.campaignSubsDelta != null) campParts.push(`Subs gained: ${fmtDelta(p.campaignSubsDelta)}`);
     lines.push(campParts.join(' · '));

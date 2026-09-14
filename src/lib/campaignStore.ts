@@ -117,7 +117,8 @@ export type CampaignWeeklySnapshot = {
   uploads30d: number;
   shorts30d: number;
   // Campaign-window cumulative metrics (null = no confirmed data)
-  campaignContentViews: number;
+  /** Null when the campaign has published nothing yet — not zero. */
+  campaignContentViews: number | null;
   campaignChannelViews: number | null;
   campaignSubsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };

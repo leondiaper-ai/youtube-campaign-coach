@@ -36,7 +36,7 @@ type ImpactData = {
 type CampaignWindowData = {
   campaignName: string;
   campaignDay: number;
-  contentViews: number;
+  contentViews: number | null;
   channelViewsDelta: number | null;
   subsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };
@@ -47,8 +47,13 @@ type CampaignTrendData = {
   previousWeekViews: number | null;
   bestWeekViews: number | null;
   bestWeekNumber: number;
-  totalCampaignViews: number | null;
-  totalCampaignSubs: number | null;
+  /* CHANNEL scope. Named so after these were rendered as "Campaign views:
+     19,043,112" for a campaign whose own assets had earned 1.08M. */
+  totalChannelViews: number | null;
+  totalChannelSubs: number | null;
+  /* The campaign's own figures, from campaignWindow.ts. */
+  campaignViews: number | null;
+  campaignAssets: number | null;
 };
 
 type WeeklyProgressEntry = {
@@ -263,7 +268,7 @@ function classifyCard(card: CardData): BoardSection {
 function momentumLine(ct: CampaignTrendData): string {
   const curr = ct.currentWeekViews != null ? fmtNum(ct.currentWeekViews) : '—';
   const prev = ct.previousWeekViews != null && ct.previousWeekViews > 0 ? fmtNum(ct.previousWeekViews) : null;
-  const total = ct.totalCampaignViews != null ? fmtNum(ct.totalCampaignViews) : '—';
+  const total = ct.campaignViews != null ? fmtNum(ct.campaignViews) : '—';
   const arrow = (ct.currentWeekViews != null && ct.previousWeekViews != null)
     ? (ct.currentWeekViews > ct.previousWeekViews ? '↑' :
        ct.currentWeekViews < ct.previousWeekViews ? '↓' : '→')
@@ -311,8 +316,12 @@ function generateSnapshot(card: CardData): string {
 
   if (hasCampaign && cw && ct) {
     lines.push('', '3. CAMPAIGN SO FAR');
-    lines.push(`Campaign views: ${ct.totalCampaignViews != null ? fmtNum(ct.totalCampaignViews) : '—'}`);
-    lines.push(`Campaign subs: ${ct.totalCampaignSubs != null ? `${ct.totalCampaignSubs >= 0 ? '+' : ''}${fmtNum(ct.totalCampaignSubs)}` : '—'}`);
+    /* The campaign's own assets first, and the channel around them
+       second, explicitly labelled. These two lines used to be one line
+       that said "Campaign views" over a whole-channel delta. */
+    lines.push(`Campaign views (assets published since campaign start): ${ct.campaignViews != null ? fmtNum(ct.campaignViews) : '—'}`);
+    lines.push(`Channel view delta (whole channel, catalogue included): ${ct.totalChannelViews != null ? fmtNum(ct.totalChannelViews) : '—'}`);
+    lines.push(`Channel subs delta: ${ct.totalChannelSubs != null ? `${ct.totalChannelSubs >= 0 ? '+' : ''}${fmtNum(ct.totalChannelSubs)}` : '—'}`);
     lines.push(`Content: ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
     lines.push(`Momentum: ${momentumLine(ct)}`);
   }
@@ -342,7 +351,10 @@ function generateSnapshot(card: CardData): string {
   lines.push(read.watch);
 
   if (card.impact && card.impact.daysSinceTakeover >= 2) {
-    lines.push('', `SINCE TAKEOVER (${card.impact.daysSinceTakeover} days)`);
+    /* "Takeover" is accurate here — this is measured from the moment we
+       started watching, not from when the campaign began — but the figures
+       under it are whole-channel, so the heading says both. */
+    lines.push('', `CHANNEL TOTALS SINCE TAKEOVER (${card.impact.daysSinceTakeover} days — whole channel, not campaign attribution)`);
     lines.push(`${card.impact.subsDelta != null ? `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs` : '— subs'}`);
     lines.push(`${card.impact.viewsDelta != null ? `${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views` : '— views'}`);
   }
@@ -379,7 +391,9 @@ function generateSlackUpdate(card: CardData): string {
 
   // Campaign totals
   if (cw && ct) {
-    lines.push(`• Day ${cw.campaignDay} — ${ct.totalCampaignViews != null ? fmtNum(ct.totalCampaignViews) + ' views' : '—'}${ct.totalCampaignSubs != null ? ` · ${ct.totalCampaignSubs >= 0 ? '+' : ''}${fmtNum(ct.totalCampaignSubs)} subs` : ''} since campaign start`);
+    /* Slack-pasteable, so this one has to be right on its own: it gets
+       read without the page around it. */
+    lines.push(`• Day ${cw.campaignDay} — ${ct.campaignViews != null ? fmtNum(ct.campaignViews) + ' campaign views' : '—'}${ct.campaignAssets != null ? ` across ${ct.campaignAssets} asset${ct.campaignAssets === 1 ? '' : 's'}` : ''}`);
     lines.push(`• ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
   } else {
     lines.push(`• ${card.uploads30d} uploads in 30 days · ${card.cadenceLine}`);
@@ -1178,7 +1192,7 @@ function DecisionCard({
           {/* Impact */}
           {card.impact && card.impact.daysSinceTakeover >= 2 && (
             <div className="mt-2 pt-2 text-[10px] text-ink/35" style={{ borderTop: `1px solid rgba(14,14,14,0.06)` }}>
-              <span className="font-bold uppercase tracking-[0.08em]">Since takeover ({card.impact.daysSinceTakeover}d):</span>{' '}
+              <span className="font-bold uppercase tracking-[0.08em]">Channel since takeover ({card.impact.daysSinceTakeover}d):</span>{' '}
               <span className="tabular-nums" style={{ color: card.impact.subsDelta != null ? (card.impact.subsDelta > 0 ? '#0C6A3F' : '#8A1F0C') : 'rgba(14,14,14,0.25)' }}>
                 {card.impact.subsDelta != null ? `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs` : '— subs'}
               </span>

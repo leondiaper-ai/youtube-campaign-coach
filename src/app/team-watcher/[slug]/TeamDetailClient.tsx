@@ -28,7 +28,7 @@ export type WeeklyProgressEntry = {
 export type CampaignTrackingData = {
   campaignName: string;
   campaignDay: number;
-  contentViews: number;
+  contentViews: number | null;
   channelViewsDelta: number | null;
   subsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };
@@ -59,7 +59,7 @@ export type SnapshotData = {
   campaignDay: number | null;
   campaignViewsDelta: number | null;
   campaignSubsDelta: number | null;
-  campaignContentViews: number;
+  campaignContentViews: number | null;
   campaignContentCount: number;
   campaignShortsCount: number;
 };
@@ -107,10 +107,12 @@ function generateTeamSnapshot(d: SnapshotData, notes: Note[]): string {
   // 3. Campaign (if active)
   if (d.campaignName && d.campaignDay) {
     lines.push('', '3. CAMPAIGN SO FAR');
-    lines.push(`Campaign views: ${d.campaignViewsDelta != null ? fmtDelta(d.campaignViewsDelta) : '—'}`);
-    lines.push(`Campaign subs: ${d.campaignSubsDelta != null ? fmtDelta(d.campaignSubsDelta) : '—'}`);
-    lines.push(`Content: ${d.campaignContentCount} uploads (${d.campaignShortsCount} Shorts · ${d.campaignContentCount - d.campaignShortsCount} videos)`);
-    lines.push(`Content views: ${fmtNum(d.campaignContentViews)}`);
+    /* Campaign first, channel second and labelled. "Campaign views" over
+       a whole-channel delta is how a heritage act's back catalogue ends up
+       pasted into Slack as campaign performance. */
+    lines.push(`Campaign views: ${d.campaignContentViews != null ? fmtNum(d.campaignContentViews) : '—'} across ${d.campaignContentCount} asset${d.campaignContentCount === 1 ? '' : 's'} (${d.campaignShortsCount} Shorts · ${d.campaignContentCount - d.campaignShortsCount} long-form)`);
+    lines.push(`Channel view delta (whole channel, catalogue included): ${d.campaignViewsDelta != null ? fmtDelta(d.campaignViewsDelta) : '—'}`);
+    lines.push(`Channel subs delta: ${d.campaignSubsDelta != null ? fmtDelta(d.campaignSubsDelta) : '—'}`);
   }
 
   // Action
@@ -343,10 +345,12 @@ export default function TeamDetailClient({
 
           {/* Campaign metrics row */}
           <div className="grid grid-cols-4 gap-3 mb-3">
-            <MiniTile label="Channel views" value={ct.channelViewsDelta != null ? fmtDelta(ct.channelViewsDelta) : '—'} color={ct.channelViewsDelta != null && ct.channelViewsDelta > 0 ? '#0C6A3F' : undefined} />
-            <MiniTile label="Subs gained" value={ct.subsGained != null ? fmtDelta(ct.subsGained) : '—'} color={ct.subsGained != null && ct.subsGained > 0 ? '#0C6A3F' : undefined} />
-            <MiniTile label="Content views" value={fmtNum(ct.contentViews)} />
-            <MiniTile label="Uploads" value={`${ct.contentMix.uploads}`} sub={`${ct.contentMix.shorts} Shorts · ${ct.contentMix.videos} videos`} />
+            {/* Campaign figures lead; the channel around them follows, on
+                a label that cannot be mistaken for attribution. */}
+            <MiniTile label="Campaign views" value={ct.contentViews != null ? fmtNum(ct.contentViews) : '—'} sub="assets since campaign start" />
+            <MiniTile label="Campaign assets" value={`${ct.contentMix.uploads}`} sub={`${ct.contentMix.shorts} Shorts · ${ct.contentMix.videos} long-form`} />
+            <MiniTile label="Channel view delta" value={ct.channelViewsDelta != null ? fmtDelta(ct.channelViewsDelta) : '—'} sub="whole channel" color={ct.channelViewsDelta != null && ct.channelViewsDelta > 0 ? '#0C6A3F' : undefined} />
+            <MiniTile label="Channel subs delta" value={ct.subsGained != null ? fmtDelta(ct.subsGained) : '—'} sub="whole channel" color={ct.subsGained != null && ct.subsGained > 0 ? '#0C6A3F' : undefined} />
           </div>
 
           {/* Momentum */}

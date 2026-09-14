@@ -4,7 +4,8 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readLiveSnap, readSyncMeta, readChannelMapping } from '@/lib/kvCache';
-import { readHistory, campaignDelta } from '@/lib/snapshots';
+import { readHistory, channelDeltaSince } from '@/lib/snapshots';
+import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
 import {
   normalizeChannelData, rawDelta, computeWoW, toGrowthInput,
 } from '@/lib/youtube/normalizeChannelData';
@@ -128,6 +129,8 @@ export default async function TeamWatcherPage() {
     campaignSignalLabel: string;
     spk: number | null;
     campaignDay: number | null;
+    campaignViews: number | null;
+    campaignAssets: number | null;
     campaignViewsDelta: number | null;
     campaignSubsDelta: number | null;
     confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
@@ -172,11 +175,22 @@ export default async function TeamWatcherPage() {
       let campaignDay: number | null = null;
       let campaignViewsDelta: number | null = null;
       let campaignSubsDelta: number | null = null;
+      /* This list held `snap` all along and never read `recentUploads`,
+         so every card showed a whole-channel delta under a Day-N header.
+         The uploads were one property away. */
+      const perf = campaignPerformanceFor({
+        uploads: (snap?.recentUploads ?? []) as { publishedAt: string; viewCount?: number | null; durationSec?: number | null }[],
+        statedAt: campaignStart || null,
+        statedBy: 'Team Watcher',
+      });
+      let campaignViews: number | null = null;
+      let campaignAssets: number | null = null;
       if (campaignStart) {
-        const startTs = new Date(campaignStart).getTime();
-        campaignDay = Math.max(1, Math.floor((Date.now() - startTs) / 86400000));
-        const cv = campaignDelta(history, campaignStart, 'views');
-        const cs = campaignDelta(history, campaignStart, 'subs');
+        campaignDay = perf?.day ?? null;
+        campaignViews = perf?.views ?? null;
+        campaignAssets = perf?.assets ?? null;
+        const cv = channelDeltaSince(history, campaignStart, 'views');
+        const cs = channelDeltaSince(history, campaignStart, 'subs');
         campaignViewsDelta = cv?.delta ?? null;
         campaignSubsDelta = cs?.delta ?? null;
       }
@@ -211,6 +225,8 @@ export default async function TeamWatcherPage() {
         campaignSignalLabel: campSig.label,
         spk,
         campaignDay,
+        campaignViews,
+        campaignAssets,
         campaignViewsDelta,
         campaignSubsDelta,
         confidence: nc.confidence,

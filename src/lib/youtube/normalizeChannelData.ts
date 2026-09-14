@@ -14,7 +14,7 @@
 import type { LiveSnap, Artist } from '../artists';
 import { daysSince } from '../artists';
 import type { ChannelSnapshot } from '../snapshots';
-import { deltaOver, campaignDelta, seriesForField, detectViewFreshness, detectSubsFreshness } from '../snapshots';
+import { deltaOver, channelDeltaSince, seriesForField, detectViewFreshness, detectSubsFreshness } from '../snapshots';
 import type { ViewFreshness } from '../snapshots';
 import type { CachedSnap } from '../kvCache';
 
@@ -292,9 +292,15 @@ export function deriveBestAvailableMovement(
       source: 'campaign_period',
       freshness: 'delayed',
       confidence: nc.campaign.viewsDelta.confidence === 'HIGH' ? 'high' : 'medium',
-      label: 'Campaign period',
-      sublabel: `since ${startLabel} · day ${campDay}`,
-      explanation: `Campaign active: ${nc.campaign.viewsDelta.delta >= 0 ? '+' : ''}${nc.campaign.viewsDelta.delta.toLocaleString()} views since launch. Weekly totals updating.`,
+      /* CHANNEL, not campaign. This delta is the whole channel's totals
+         moving, catalogue included, and it was labelled "Campaign period"
+         over a figure that for a heritage act is almost entirely back
+         catalogue. Campaign attribution lives in campaignWindow.ts and is
+         computed from the assets themselves; this is the channel around
+         it, which is a useful thing to know and a different thing to say. */
+      label: 'Channel views',
+      sublabel: `whole channel · since ${startLabel} · day ${campDay}`,
+      explanation: `${nc.campaign.viewsDelta.delta >= 0 ? '+' : ''}${nc.campaign.viewsDelta.delta.toLocaleString()} views across the whole channel since the campaign started, catalogue included. Not campaign attribution.`,
       shouldUseInScore: false, // campaign totals are cumulative, not weekly
       shouldUseInTopMovers: false,
       shouldUseInReport: true,
@@ -1085,7 +1091,7 @@ export function getReportingMovementSummary(
         viewsLine: ba.viewsValue != null ? `${fmtV(ba.viewsValue)} views ${ba.sublabel}` : 'Campaign views tracking',
         subsLine: ba.subsValue != null ? `${fmtV(ba.subsValue)} subscribers ${ba.sublabel}` : 'Campaign subs tracking',
         confidenceNote: 'Campaign active. Weekly totals updating — using campaign-period context.',
-        recommendedWording: `Campaign active, ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' views since launch' : 'tracking views'}. Weekly totals updating.`,
+        recommendedWording: `Campaign active, ${ba.viewsValue != null ? fmtV(ba.viewsValue) + ' channel views since the campaign started (whole channel, not campaign attribution)' : 'tracking views'}.`,
       };
 
     case 'recent_uploads':
@@ -1294,11 +1300,17 @@ function computeCampaignMetrics(
   history: ChannelSnapshot[],
   ctx: CampaignContext,
 ): CampaignMetrics {
+  /* Day 1 on the day the campaign started, matching campaignWindow.ts.
+     Five formulas for this existed; two were a day low and two could
+     render "Day 0". */
   const startTs = new Date(ctx.campaignStartDate).getTime();
-  const campaignDay = Math.max(1, Math.floor((Date.now() - startTs) / 86400000));
+  const campaignDay = Math.max(1, Math.floor((Date.now() - startTs) / 86400000) + 1);
 
-  const viewsRaw = campaignDelta(history, ctx.campaignStartDate, 'views');
-  const subsRaw = campaignDelta(history, ctx.campaignStartDate, 'subs');
+  /* Whole-channel movement. Everything this function returns is channel
+     scope; nothing here is campaign attribution, and the labels above say
+     so. See campaignWindow.ts for the campaign's own figures. */
+  const viewsRaw = channelDeltaSince(history, ctx.campaignStartDate, 'views');
+  const subsRaw = channelDeltaSince(history, ctx.campaignStartDate, 'subs');
 
   return {
     campaignDay,

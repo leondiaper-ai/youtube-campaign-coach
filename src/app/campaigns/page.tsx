@@ -7,7 +7,8 @@ import {
   type PinnedCampaign, type CampaignNote, type CampaignWeeklySnapshot,
 } from '@/lib/campaignStore';
 import { readLiveSnapByHandle, readSyncMeta } from '@/lib/kvCache';
-import { readHistory, campaignDelta, type ChannelSnapshot } from '@/lib/snapshots';
+import { readHistory, channelDeltaSince, type ChannelSnapshot } from '@/lib/snapshots';
+import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
 import {
   generateYouTubeGrowthRead, getCampaignSignal, getChannelHealth,
   getYouTubeGrowthState, type GrowthInput,
@@ -49,7 +50,7 @@ export type ImpactData = {
 export type CampaignWindowData = {
   campaignName: string;
   campaignDay: number;
-  contentViews: number;
+  contentViews: number | null;
   channelViewsDelta: number | null;
   subsGained: number | null;
   contentMix: { uploads: number; shorts: number; videos: number };
@@ -61,8 +62,13 @@ export type CampaignTrendData = {
   previousWeekViews: number | null;
   bestWeekViews: number | null;
   bestWeekNumber: number;
-  totalCampaignViews: number | null;
-  totalCampaignSubs: number | null;
+  /* CHANNEL scope. Named so after these were rendered as "Campaign views:
+     19,043,112" for a campaign whose own assets had earned 1.08M. */
+  totalChannelViews: number | null;
+  totalChannelSubs: number | null;
+  /* The campaign's own figures, from campaignWindow.ts. */
+  campaignViews: number | null;
+  campaignAssets: number | null;
 };
 
 // ── Weekly progress entry (for display) ─────────────────────────────────
@@ -343,29 +349,40 @@ async function loadCard(
 
   if (campaignStart) {
     const startTs = new Date(campaignStart).getTime();
-    const campaignDay = Math.max(1, Math.floor((Date.now() - startTs) / 86400000));
 
-    // Content uploaded since campaign start
-    const campaignUploads = (snap.recentUploads ?? []).filter(
-      (u) => new Date(u.publishedAt).getTime() >= startTs,
-    );
-    const contentViews = campaignUploads.reduce((sum, u) => sum + u.viewCount, 0);
-    const shortsCount = campaignUploads.filter((u) => u.durationSec <= 62).length;
+    /* ── CAMPAIGN PERFORMANCE — one definition, one function ───────────
+       This block used to filter uploads, sum viewCount, count Shorts on
+       its own duration rule and compute its own Day N. So did four other
+       surfaces, and they had drifted: two Shorts rules, five Day-N
+       formulas. campaignWindow.ts owns all of it now.
 
-    // Channel-level deltas since campaign
-    const campViewsDelta = campaignDelta(history, campaignStart, 'views');
-    const campSubsDelta = campaignDelta(history, campaignStart, 'subs');
+       `campaignStart` above is the pin date, which is not when the
+       campaign began — it is the day somebody added the artist here. It
+       is passed as `baselineAt`, the last resort, so the resolver prefers
+       the channel's own observable era onset. For Kings of Leon that is
+       12 Aug rather than 18 Aug: four more assets, and the difference
+       between this page and the Campaign Home disappears. */
+    const perf = campaignPerformanceFor({
+      uploads: snap.recentUploads ?? [],
+      baselineAt: campaignStart,
+    });
+    const campaignDay = perf?.day ?? Math.max(1, Math.floor((Date.now() - startTs) / 86400000) + 1);
+
+    /* Whole-channel movement. Kept, because knowing the channel is up
+       13.5M is worth knowing — but never again under a campaign label. */
+    const campViewsDelta = channelDeltaSince(history, campaignStart, 'views');
+    const campSubsDelta = channelDeltaSince(history, campaignStart, 'subs');
 
     campaignWindow = {
       campaignName: artist.campaign ?? 'Tracking',
       campaignDay,
-      contentViews,
+      contentViews: perf?.views ?? null,
       channelViewsDelta: campViewsDelta?.delta ?? null,
       subsGained: campSubsDelta?.delta ?? null,
       contentMix: {
-        uploads: campaignUploads.length,
-        shorts: shortsCount,
-        videos: campaignUploads.length - shortsCount,
+        uploads: perf?.assets ?? 0,
+        shorts: perf?.shorts ?? 0,
+        videos: perf?.longForm ?? 0,
       },
     };
 
@@ -403,8 +420,13 @@ async function loadCard(
         previousWeekViews: previousWeek.views7d,
         bestWeekViews: bestWeek.views7d,
         bestWeekNumber: bestWeek.week,
-        totalCampaignViews: campViewsDelta?.delta ?? null,
-        totalCampaignSubs: campSubsDelta?.delta ?? null,
+        /* Named for what they are. These were `totalCampaignViews` and
+           printed as "Campaign views: 19,043,112" for a channel whose
+           campaign assets had earned 1.08M. */
+        totalChannelViews: campViewsDelta?.delta ?? null,
+        totalChannelSubs: campSubsDelta?.delta ?? null,
+        campaignViews: perf?.views ?? null,
+        campaignAssets: perf?.assets ?? null,
       };
     }
 
@@ -422,13 +444,13 @@ async function loadCard(
         subs7d: rawDelta(nc.subs7d) ?? null,
         uploads30d: snap.uploads30d ?? 0,
         shorts30d: snap.shorts30d ?? 0,
-        campaignContentViews: contentViews,
+        campaignContentViews: perf?.views ?? null,
         campaignChannelViews: campViewsDelta?.delta ?? null,
         campaignSubsGained: campSubsDelta?.delta ?? null,
         contentMix: {
-          uploads: campaignUploads.length,
-          shorts: shortsCount,
-          videos: campaignUploads.length - shortsCount,
+          uploads: perf?.assets ?? 0,
+          shorts: perf?.shorts ?? 0,
+          videos: perf?.longForm ?? 0,
         },
         channelHealth: chHealth,
         campaignSignal: campSig.label,

@@ -6,7 +6,8 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readLiveSnap } from '@/lib/kvCache';
-import { readHistory, campaignDelta } from '@/lib/snapshots';
+import { readHistory, channelDeltaSince } from '@/lib/snapshots';
+import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
 import {
   normalizeChannelData, rawDelta, computeWoW,
 } from '@/lib/youtube/normalizeChannelData';
@@ -119,11 +120,23 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
   let campaignDay: number | null = null;
   let campaignViewsDelta: number | null = null;
   let campaignSubsDelta: number | null = null;
+  /* ── CAMPAIGN PERFORMANCE ───────────────────────────────────────────
+     `entry.campaignStartDate` is a Team Watcher field a PERSON fills in on
+     the Start Campaign form, which makes it the one genuinely human
+     campaign start in the product — and until now it never reached the
+     resolver, so the HUMAN_STATED branch was unreachable in production.
+     It is passed as `statedAt` and beats the observation, which is right:
+     somebody who ran the campaign knows when it started. */
+  const perf = campaignPerformanceFor({
+    uploads: (snap?.recentUploads ?? []) as { publishedAt: string; viewCount?: number | null; durationSec?: number | null }[],
+    statedAt: campaignStart || null,
+    statedBy: 'Team Watcher',
+  });
   if (campaignStart) {
-    const startTs = new Date(campaignStart).getTime();
-    campaignDay = Math.max(1, Math.floor((Date.now() - startTs) / 86400000));
-    const cv = campaignDelta(history, campaignStart, 'views');
-    const cs = campaignDelta(history, campaignStart, 'subs');
+    campaignDay = perf?.day ?? null;
+    /* Whole-channel movement, kept under a channel label. */
+    const cv = channelDeltaSince(history, campaignStart, 'views');
+    const cs = channelDeltaSince(history, campaignStart, 'subs');
     campaignViewsDelta = cv?.delta ?? null;
     campaignSubsDelta = cs?.delta ?? null;
   }
@@ -151,9 +164,10 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
         (u: { publishedAt: string }) => new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
       )
     : [];
-  const campaignContentViews = campaignUploads.reduce((sum: number, u: { viewCount: number }) => sum + u.viewCount, 0);
-  const campaignContentCount = campaignUploads.length;
-  const campaignShortsCount = campaignUploads.filter((u: { durationSec: number }) => u.durationSec <= 62).length;
+  /* From campaignWindow.ts, not from a fourth copy of the same reduce. */
+  const campaignContentViews = perf?.views ?? null;
+  const campaignContentCount = perf?.assets ?? 0;
+  const campaignShortsCount = perf?.shorts ?? 0;
 
   // ── Campaign tracking data (weekly progress, trend, structure) ────────
   let campaignTracking: CampaignTrackingData | undefined;
@@ -232,7 +246,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
       contentMix: {
         uploads: campaignContentCount,
         shorts: campaignShortsCount,
-        videos: campaignContentCount - campaignShortsCount,
+        videos: perf?.longForm ?? 0,
       },
       currentWeekViews,
       previousWeekViews,
@@ -320,13 +334,13 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
         {/* Performance snapshot — 4-tile grid */}
         <div className="mt-6 grid grid-cols-4 gap-3">
           <MetricTile
-            label={ba.source === 'live_7d' ? 'Views (7d)' : ba.source === 'campaign_period' ? 'Campaign views' : 'Views (7d)'}
+            label={ba.source === 'live_7d' ? 'Views (7d)' : ba.source === 'campaign_period' ? 'Channel views' : 'Views (7d)'}
             value={ba.viewsValue != null ? fmtDelta(ba.viewsValue) : '—'}
             color={ba.viewsValue != null ? deltaColor(ba.viewsValue) : undefined}
             sub={ba.sublabel}
           />
           <MetricTile
-            label={ba.source === 'live_7d' ? 'Subs (7d)' : ba.source === 'campaign_period' ? 'Campaign subs' : 'Subs (7d)'}
+            label={ba.source === 'live_7d' ? 'Subs (7d)' : ba.source === 'campaign_period' ? 'Channel subs' : 'Subs (7d)'}
             value={ba.subsValue != null ? fmtDelta(ba.subsValue) : (nc.subs != null ? fmtNum(nc.subs) : '—')}
             color={ba.subsValue != null ? deltaColor(ba.subsValue) : undefined}
             sub={ba.subsValue != null ? ba.sublabel : 'total'}
