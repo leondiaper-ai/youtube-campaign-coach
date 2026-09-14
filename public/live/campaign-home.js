@@ -49,6 +49,12 @@ const fmt = n => n == null ? '—'
   : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M'
   : n >= 1e3 ? Math.round(n / 1e3) + 'K' : String(n);
 const yt = id => `https://www.youtube.com/watch?v=${id}`;
+/* The deck's full-bleed background image. Defined here rather than borrowed
+   from the host, because borrowing it is how this module shipped depending
+   on a helper that happened to exist in one deck and not the other. */
+const bleedImg = (id, cls = '') =>
+  `<div class="bleed${cls ? ' ' + cls : ''}"><img src="${ytThumb(id)}" alt=""`
+  + ` onerror="${ytFallback(id)}"></div>`;
 
 /* ═══════════════════════════════════════════════════════════════════
    THE LIVE CAMPAIGN COVER
