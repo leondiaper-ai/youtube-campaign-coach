@@ -434,5 +434,23 @@ export function runCampaignWindowChecks(): CheckResult {
     assert.equal(m.longForm, 1);
   });
 
+  test('no anchor means no window at all, dated or undated', () => {
+    /* The first fix gated the DATED window on an anchor and left an
+       undated "+7-14 DAYS" row firing off the plan alone — so CHVRCHES
+       still drew a window, just without dates on it. A window with no
+       anchor is exactly the thing we decided not to draw, so that branch
+       is gone. This asserts the condition the timeline now depends on. */
+    const m = campaignPerformanceFor({ uploads: CHV, now: NOW })!;
+    const anchor = followUpAnchorFor(
+      CHV.map(u => ({
+        videoId: u.id, title: '', publishedAt: u.publishedAt,
+        durationSec: u.durationSec, statedKind: u.id === CHV_TRAILER_ID ? 'trailer' : null,
+      })),
+      m.start,
+    );
+    assert.equal(anchor, null,
+      'the timeline draws a window if and only if this is non-null');
+  });
+
   return { passed, failed, failures };
 }

@@ -332,21 +332,17 @@ export async function buildCampaignTimeline(
         : 'Window closed',
       asset: null,
     });
-  } else if (secondDestination && !['LIVE', 'COMPLETE'].includes(secondDestination.status)) {
-    moments.push({
-      kind: 'WINDOW', provenance: 'RECOMMENDED',
-      dateLabel: '+7-14 DAYS', date: null, daysAway: null,
-      stage: 'Follow-up window',
-      /* The formats the Deep Dive named, in the Deep Dive's order. Not a
-         list of everything YouTube supports — and this artist's list, read
-         off this artist's plan. */
-      title: secondDestination.windowFormats ?? 'Lyric · Live · Performance',
-      /* The reason this is on the page at all, in six words. 0 of 4 Screen
-         Violence heroes had anything land in this window. */
-      detail: 'Nothing landed here last campaign',
-      asset: null,
-    });
   }
+  /* There is no third branch, and its absence is the point.
+
+     A "+7-14 DAYS" row used to render whenever the plan held a follow-up
+     item that was not yet live — which is to say, whenever the strategy
+     existed, rather than when there was anything to follow. CHVRCHES drew
+     one for a campaign whose only long-form asset is a 61-second trailer.
+
+     The window belongs to the anchor. No qualifying long-form asset means
+     no window, and the page leads to the next release instead, which is
+     what the campaign is actually walking towards. */
 
   /* ── ANCHOR — the album ───────────────────────────────────────────── */
   const album = upcoming.find(e => e.eventType === 'ALBUM_RELEASE');
