@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VENUS GRRRLS × YouTube — Welcome to the Coven</title>
+<title>VENUS GRRRLS × YouTube — One release left</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -83,6 +83,8 @@ body.present .slide.active{display:flex}
 .bleed img{width:100%;height:100%;object-fit:cover;opacity:.28}
 .bleed::after{content:'';position:absolute;inset:0;
   background:linear-gradient(90deg,var(--ink) 6%,rgba(8,7,10,.78) 55%,rgba(8,7,10,.44))}
+/* The cover is the artist and one question — a softer scrim on that slide only. */
+#cover-bleed::after{background:linear-gradient(90deg,var(--ink) 2%,rgba(8,7,10,.70) 48%,rgba(8,7,10,.30))}
 
 .label{font-size:.62rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
   color:var(--signal);margin-bottom:1rem}
@@ -305,22 +307,15 @@ body.present .phint{opacity:.5}
 
 <!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
 <section class="slide" data-t="Cover">
-  <div class="bleed"><img src="https://i.ytimg.com/vi/nQ3G4n3kKAk/maxresdefault.jpg" alt=""
+  <div class="bleed" id="cover-bleed"><img src="https://i.ytimg.com/vi/nQ3G4n3kKAk/maxresdefault.jpg" alt="" style="opacity:.46"
     onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/nQ3G4n3kKAk/hqdefault.jpg'"></div>
   <div class="inner">
-    <div class="label reveal">Channel · creative · campaign · 14 September 2026</div>
-    <h1 class="display big reveal">Welcome<br>to the Coven</h1>
-    <p class="statement reveal" style="margin-top:1.2rem">
-      That is not our line. It is how VENUS GRRRLS open their own video descriptions.
-      The band has already named its fanbase. Almost nothing else on the channel uses it.
-    </p>
-    <div class="bl reveal">
-      <div class="bl-k">The opportunity</div>
-      <div class="bl-v">Turn The Coven into something fans can actually join — and come back to.</div>
-    </div>
-    <p class="sub reveal">
-      One release left: <b style="color:var(--paper)">Carmilla, 13 October</b>.
-      This deck asks how we use that moment, and the weeks afterwards.
+    <div class="label reveal">VENUS GRRRLS × YouTube · September 2026</div>
+    <h1 class="display big reveal">One release left.<br>What do we<br>do next?</h1>
+    <p class="statement reveal" style="margin-top:1.4rem">
+      With <b style="color:var(--signal)">Carmilla arriving 13 October</b>, we look at what the
+      campaign has taught us, what we can still improve, and how YouTube can keep working
+      after release.
     </p>
   </div>
 </section>
@@ -375,10 +370,14 @@ body.present .phint{opacity:.5}
 </section>
 
 <!-- ═══ 3 · INSIDE THE WORLD ═══════════════════════════════════════ -->
-<section class="slide" data-t="Channel Deep Dive" id="world">
+<section class="slide" data-t="Welcome to the Coven" id="world">
   <div class="inner">
     <div class="label reveal">Inside the VENUS GRRRLS world</div>
-    <h2 class="display mid reveal" style="max-width:26ch">Leeds goth-grunge with a Scooby-Doo sense of humour</h2>
+    <h2 class="display big reveal" style="max-width:15ch">Welcome<br>to the Coven</h2>
+    <p class="statement reveal" style="margin-top:1.2rem;max-width:64ch">
+      That is not our line. It is how VENUS GRRRLS open their own video descriptions. This band
+      has already named its fanbase — and built a world for it.
+    </p>
 
     <div class="sheetgrid stagger">
       <a href="https://youtu.be/nQ3G4n3kKAk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/nQ3G4n3kKAk/hqdefault.jpg" alt="Eve" loading="lazy"></a>
@@ -415,9 +414,9 @@ body.present .phint{opacity:.5}
     </div>
 
     <p class="statement reveal" style="margin-top:1.4rem">
-      This is not a generic alt-rock channel. VENUS GRRRLS have built a recognisable world
-      out of goth culture, horror, gothic literature and their own sense of humour — including
-      the Hex Girls, the fictional goth band from Scooby-Doo. And they build it themselves.
+      Leeds goth-grunge with a Scooby-Doo sense of humour. Not a generic alt-rock channel — a
+      recognisable world built from goth culture, horror, gothic literature and their own jokes,
+      including the Hex Girls, the fictional goth band from Scooby-Doo. And they build it themselves.
     </p>
 
     <div class="beat reveal">
@@ -436,8 +435,9 @@ body.present .phint{opacity:.5}
     </div>
 
     <div class="bl reveal">
-      <div class="bl-k">Why it matters</div>
-      <div class="bl-v">This world already exists and it belongs to them. Using it costs nothing.</div>
+      <div class="bl-k">The opportunity</div>
+      <div class="bl-v">This world already exists and it belongs to them. Turn The Coven into
+        something fans can actually join — and come back to.</div>
     </div>
   </div>
 </section>
