@@ -297,7 +297,6 @@ body.present .phint{opacity:.5}
     <span>Deep dive · September 2026</span>
   </div>
   <div class="chrome-r">
-    <button class="btn" onclick="goChannel()">The world</button>
     <button class="btn" onclick="openSheet('appendix')">Analysis</button>
     <button class="btn primary" onclick="startPresent()">Present</button>
   </div>
@@ -370,7 +369,7 @@ body.present .phint{opacity:.5}
 </section>
 
 <!-- ═══ 3 · INSIDE THE WORLD ═══════════════════════════════════════ -->
-<section class="slide" data-t="Welcome to the Coven" id="world">
+<section class="slide" data-t="Welcome to the Coven">
   <div class="inner">
     <div class="label reveal">Inside the VENUS GRRRLS world</div>
     <h2 class="display big reveal" style="max-width:15ch">Welcome<br>to the Coven</h2>
@@ -931,11 +930,6 @@ function closeSheets(){
   document.body.classList.remove('sheet-open');
 }
 
-/* The channel-world slide, reachable from the chrome like the other decks. */
-function goChannel(){
-  var el = document.getElementById('world');
-  if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
-}
 
 var cur = 0;
 function allSlides(){ return Array.prototype.slice.call(document.querySelectorAll('.slide')); }
