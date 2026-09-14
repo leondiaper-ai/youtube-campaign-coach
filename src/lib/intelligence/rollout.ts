@@ -213,6 +213,10 @@ export interface RolloutItem {
   spine: boolean;
   /** The cover's own vocabulary, derived — never stored twice. */
   spineStatus: 'IN MOTION' | 'NEXT' | 'AHEAD' | 'COMPLETE' | null;
+  /** Resolved instruction for the cover's read line. Null when unstated. */
+  nextAction: string | null;
+  /** Resolved formats for the follow-up window row. Null when unstated. */
+  windowFormats: string | null;
   needTags: NeedTag[];
   recommendation: string;
   /** Present only on ideas that earn a picture. See PlanItem.pitch. */
@@ -272,6 +276,34 @@ export interface PlanItem {
    * from this file — the release title is a human's commitment and does not
    * belong hardcoded in a rollout, still less in the frontend.
    */
+  /**
+   * THE NEXT ACTION. What somebody would actually do on Monday.
+   *
+   * The cover's read line used to print the item's TITLE \u2014 "Next: Don't
+   * leave the hero alone." A title is the name of an argument; it tells a
+   * reader what the idea is called, not what to do about it. This field is
+   * the clause that follows "Next:", and it is deliberately the smallest
+   * unit of work the item asks for rather than a summary of the item.
+   *
+   * `nextActionTemplate` may name {hero} or {release} and is used only when
+   * every token resolves, exactly as `questionTemplate` is. Without a
+   * template \u2014 or with one that cannot be filled \u2014 `nextAction` is used
+   * as written, so it must read as a complete instruction on its own.
+   *
+   * No terminal full stop: the renderer supplies it.
+   */
+  nextAction?: string;
+  nextActionTemplate?: string;
+  /**
+   * The formats THIS artist's follow-up window is asking for. Only meaningful
+   * on the item tagged `follow_up_7_14`.
+   *
+   * The timeline printed "Lyric \u00b7 Live \u00b7 Performance" for every artist,
+   * because one artist's Deep Dive named those three. Each plan now states
+   * its own, so the window row is this artist's recommendation rather than
+   * the first artist's recommendation.
+   */
+  windowFormats?: string;
   questionTemplate?: string;
   needTags: NeedTag[];
   spine: boolean;
@@ -409,6 +441,7 @@ export interface PlanItem {
 const CHVRCHES_PLAN: PlanItem[] = [
   {
     key: 'wake',
+    nextAction: 'reopen the channel with catalogue, archive live and playlists',
     title: 'Wake the channel',
     objective: 'Bring a dormant channel back into publishing before anything is announced.',
     timing: 'Before announcement — under way now',
@@ -427,6 +460,8 @@ const CHVRCHES_PLAN: PlanItem[] = [
   },
   {
     key: 'first_hero',
+    nextAction: 'give the next single a stated time and a Premiere',
+    nextActionTemplate: 'give {release} a stated time and a Premiere',
     title: 'First hero',
     objective: 'The first major single moment of album five.',
     timing: 'Release day of the first single',
@@ -542,6 +577,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
   },
   {
     key: 'second_destination',
+    nextAction: 'put a second destination inside the 7-14 days after the hero',
+    nextActionTemplate: 'give {hero} a second destination',
+    windowFormats: 'Lyric \u00b7 Live \u00b7 Performance',
     title: 'Second destination',
     objective: 'A meaningful follow-up asset while attention from the hero is still up.',
     timing: '+7-14 days after the hero',
@@ -575,6 +613,11 @@ const CHVRCHES_PLAN: PlanItem[] = [
   },
   {
     key: 'every_song_home',
+    /* No template: `ctx.release` is the NEXT confirmed release, which for a
+       campaign mid-rollout is a single, not the album. Substituting it here
+       produced "give every song on Roses a home on release day" — a
+       resolved token that reads as knowledge and is simply wrong. */
+    nextAction: 'give every song on the album a home on release day',
     title: 'Give every song a home',
     objective: 'Release day as a single large moment rather than one upload.',
     timing: 'Album release day',
@@ -776,6 +819,9 @@ const CHVRCHES_PLAN: PlanItem[] = [
 const KOL_PLAN: PlanItem[] = [
   {
     key: 'follow_up',
+    nextAction: 'put one long-form destination inside the follow-up window',
+    nextActionTemplate: 'give {hero} a second destination',
+    windowFormats: 'Lyric \u00b7 Visualiser \u00b7 Live/performance',
     title: "Don't leave the hero alone",
     objective: 'A second meaningful destination while attention from the hero is still elevated.',
     timing: '7-14 days after the hero',
@@ -861,6 +907,7 @@ const KOL_PLAN: PlanItem[] = [
   },
   {
     key: 'premiere_next',
+    nextAction: 'give the next priority single a stated time and a Premiere',
     title: 'Make single two an appointment',
     objective: 'Turn the next priority single into a moment rather than an upload.',
     timing: 'The next priority single',
@@ -890,6 +937,11 @@ const KOL_PLAN: PlanItem[] = [
   },
   {
     key: 'album_day',
+    /* No template: `ctx.release` is the NEXT confirmed release, which for a
+       campaign mid-rollout is a single, not the album. Substituting it here
+       produced "give every song on Roses a home on release day" — a
+       resolved token that reads as knowledge and is simply wrong. */
+    nextAction: 'choose one unmistakable destination for album day',
     title: 'Give album day one centre of gravity',
     objective: 'One unmistakable destination on release day, with everything else orbiting it.',
     timing: 'Album release day',
@@ -919,6 +971,7 @@ const KOL_PLAN: PlanItem[] = [
   },
   {
     key: 'shorts_route',
+    nextAction: 'point every Short at the hero, the follow-up or the next release',
     title: 'Every Short needs somewhere to go',
     objective: 'Shorts that start a journey and then finish it somewhere.',
     timing: 'Continuous',
@@ -1184,17 +1237,33 @@ export interface RolloutContext {
  * produced by any path through this function.
  */
 function questionFor(p: PlanItem, ctx: RolloutContext): string {
-  if (!p.questionTemplate) return p.question;
+  return fillOrFallback(p.questionTemplate, p.question, ctx);
+}
+
+/**
+ * Substitute {release} / {hero} into a template, or return the fallback.
+ *
+ * Every token the template asks for must resolve. A half-filled sentence is
+ * worse than the fallback, because it reads as a system that knows something
+ * it does not \u2014 "Next: give UNKNOWN a second destination." is precisely
+ * the failure this exists to make unreachable.
+ *
+ * The same rule now governs the current question and the next action, so it
+ * lives in one function rather than being written twice and drifting once.
+ */
+function fillOrFallback(
+  template: string | undefined,
+  fallback: string,
+  ctx: RolloutContext,
+): string {
+  if (!template) return fallback;
   const values: Record<string, string | undefined> = {
     release: ctx.release?.title,
     hero: ctx.hero?.title,
   };
-  /* Every token the template asks for must resolve. A half-filled question
-     is worse than the fallback, because it reads as a system that knows
-     something it does not. */
-  const wanted = Array.from(p.questionTemplate.matchAll(/\{(\w+)\}/g)).map(m => m[1]);
-  if (!wanted.length || wanted.some(k => !values[k])) return p.question;
-  return wanted.reduce((q, k) => q.replace(`{${k}}`, values[k]!), p.questionTemplate);
+  const wanted = Array.from(template.matchAll(/\{(\w+)\}/g)).map(m => m[1]);
+  if (!wanted.length || wanted.some(k => !values[k])) return fallback;
+  return wanted.reduce((q, k) => q.replace(`{${k}}`, values[k]!), template);
 }
 
 export function buildRollout(
@@ -1279,6 +1348,8 @@ export function buildRollout(
       spine: p.spine,
       spineStatus: null,     // assigned below, across the whole spine
       needTags: p.needTags,
+      nextAction: p.nextAction ? fillOrFallback(p.nextActionTemplate, p.nextAction, ctx) : null,
+      windowFormats: p.windowFormats ?? null,
       pitch: p.pitch ?? null,
       opportunity: p.opportunity ?? null,
       recommendation: p.recommendation,

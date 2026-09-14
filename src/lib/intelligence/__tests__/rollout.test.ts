@@ -585,6 +585,51 @@ export function runRolloutChecks(): CheckResult {
       'a campaign past its hero must not phrase its question around the next release');
   });
 
+  /* ── The next action is an instruction, on every plan ──────────────── */
+
+  test('every spine item states what to do, not just what it is called', () => {
+    for (const [slug, plan] of Object.entries(ROLLOUT_PLANS)) {
+      for (const p of plan) {
+        if (!p.spine) continue;
+        assert.ok(p.nextAction,
+          `${slug}/${p.key}: a spine item with no nextAction would put its title after "Next:", `
+          + 'which names the argument instead of the work');
+        /* The renderer supplies the full stop and the word before it. A
+           stored sentence would print "Next: Give … ." */
+        assert.ok(!/[.]$/.test(p.nextAction!), `${slug}/${p.key}: nextAction carries its own full stop`);
+        assert.ok(/^[a-z]/.test(p.nextAction!), `${slug}/${p.key}: nextAction must read as a clause, not a heading`);
+        assert.ok(!/[{}]/.test(p.nextAction!), `${slug}/${p.key}: the fallback action carries an unresolved placeholder`);
+        if (p.nextActionTemplate) {
+          assert.match(p.nextActionTemplate, /\{(release|hero)\}/,
+            `${slug}/${p.key}: action template asks for a token nothing supplies`);
+        }
+      }
+    }
+  });
+
+  test('an unresolvable action template falls back rather than printing a placeholder', () => {
+    /* No release, no hero in context: every {hero} template must give way to
+       its fallback. This is the check that keeps "give UNKNOWN a second
+       destination" off the page. */
+    const ro = buildRollout(fakeReport(), []);
+    for (const it of ro.items) {
+      if (!it.nextAction) continue;
+      assert.ok(!/[{}]/.test(it.nextAction), `${it.title}: resolved action still holds a placeholder`);
+      assert.ok(!/UNKNOWN/.test(it.nextAction), `${it.title}: resolved action names an unknown`);
+    }
+  });
+
+  test('the follow-up window names formats rather than repeating the strategy', () => {
+    for (const [slug, plan] of Object.entries(ROLLOUT_PLANS)) {
+      const w = plan.find(p => p.spine && p.needTags.includes('follow_up_7_14'));
+      if (!w) continue;
+      assert.ok(w.windowFormats,
+        `${slug}: the follow-up item must state its own formats, or every artist inherits the first artist's`);
+      assert.ok(w.windowFormats!.includes('·'),
+        `${slug}: windowFormats is a list of formats, not a sentence`);
+    }
+  });
+
   /* ── Generalisation ────────────────────────────────────────────────── */
 
   test('an artist with no plan gets an explicit absence, not an empty page', () => {

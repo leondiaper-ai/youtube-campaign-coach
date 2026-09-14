@@ -301,8 +301,15 @@ export async function buildCampaignTimeline(
       kind: 'WINDOW', provenance: 'RECOMMENDED',
       dateLabel: `${followUp.fromLabel} \u2013 ${followUp.toLabel}`,
       date: followUp.from, daysAway: followUp.daysUntilOpens,
-      stage: 'Second destination',
-      title: secondDestination.title,
+      /* "Second destination / Don't leave the hero alone" named the strategy
+         twice and the work never. A reader looking at a dated fortnight wants
+         to know what could go in it, so the row now carries the window as the
+         stage and the formats as the line — the same three words the Deep
+         Dive named, read off the plan rather than typed here. Its provenance
+         stays RECOMMENDED, which is what keeps it visually distinct from a
+         confirmed asset: this is an option, not a booking. */
+      stage: 'Follow-up window',
+      title: secondDestination.windowFormats ?? secondDestination.title,
       detail: followUp.state === 'OPEN' ? 'Open now'
         : followUp.state === 'AHEAD' ? `Opens in ${followUp.daysUntilOpens} days`
         : 'Window closed',
@@ -312,10 +319,11 @@ export async function buildCampaignTimeline(
     moments.push({
       kind: 'WINDOW', provenance: 'RECOMMENDED',
       dateLabel: '+7-14 DAYS', date: null, daysAway: null,
-      stage: secondDestination.title,
+      stage: 'Follow-up window',
       /* The formats the Deep Dive named, in the Deep Dive's order. Not a
-         list of everything YouTube supports. */
-      title: 'Lyric · Live · Performance',
+         list of everything YouTube supports — and this artist's list, read
+         off this artist's plan. */
+      title: secondDestination.windowFormats ?? 'Lyric · Live · Performance',
       /* The reason this is on the page at all, in six words. 0 of 4 Screen
          Violence heroes had anything land in this window. */
       detail: 'Nothing landed here last campaign',
@@ -336,6 +344,23 @@ export async function buildCampaignTimeline(
     });
   } else {
     coverage.push('No album date is held in the campaign plan.');
+  }
+
+  /* ── Forward moments in the order they will happen ─────────────────
+     The three forward rows were pushed in the order the logic derived them
+     — NEXT, then the window opened by the hero, then the album — which put
+     2 OCT above 17-24 SEP on a page headed WHAT'S NEXT. A reader scanning a
+     timeline reads it as a timeline, so the nearest dated thing has to be
+     first. Undated rows (the "+7-14 DAYS" window) keep their derived
+     position rather than being sorted against dates they do not have. */
+  const forwardFrom = moments.findIndex(m => m.kind === 'NEXT' || m.kind === 'WINDOW' || m.kind === 'ANCHOR');
+  if (forwardFrom >= 0) {
+    const head = moments.slice(0, forwardFrom);
+    const tail = moments.slice(forwardFrom);
+    const dated = tail.filter(m => m.date).sort((a, b) => a.date!.localeCompare(b.date!));
+    const undated = tail.filter(m => !m.date);
+    moments.length = 0;
+    moments.push(...head, ...dated, ...undated);
   }
 
   /* ── What we left out, stated ─────────────────────────────────────── */

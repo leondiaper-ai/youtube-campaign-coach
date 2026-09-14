@@ -423,6 +423,9 @@ export async function GET(req: NextRequest) {
         /* Long point kept for the tooltip, as before. */
         point: it.objective,
         status: it.spineStatus as string,
+        /* What to do, as opposed to what it is called. The read line prints
+           this; the label stays the name of the stage. */
+        action: it.nextAction,
       }));
 
     /* ── The campaign timeline ────────────────────────────────────────
@@ -560,7 +563,8 @@ function agoPhrase(iso: string, now = Date.now()): string {
 
 function buildRead(
   state: string, assetCount: number, dormantDays: number | null,
-  daysSinceUpload: number | null, stages: { label: string; status: string }[],
+  daysSinceUpload: number | null,
+  stages: { label: string; status: string; action?: string | null }[],
   firstNewUploadAt: string | null,
 ): { kicker: string | null; headline: string; line: string } | null {
   if (state === 'BASELINE') return null;
@@ -588,11 +592,20 @@ function buildRead(
   return {
     kicker,
     headline: woke ? 'The channel is awake.' : 'The campaign is live.',
-    /* Forward, not hedged into meaninglessness. A confirmed date exists for
-       the next moment, so "moving towards" is a statement about the plan
-       rather than a claim about cause. */
+    /* Forward, and concrete.
+
+       This line used to print the stage's TITLE — "Next: Don't leave the hero
+       alone." That is the name of an argument, and a reader who has not read
+       the argument learns nothing from it except that somebody is worried.
+       The plan now carries an instruction alongside the title, resolved
+       against the hero or release where it names one, and that instruction is
+       what belongs after the word "Next".
+
+       The title remains the fallback, lowercased as before so it reads as a
+       clause rather than a heading. An item with no stated action is a gap in
+       the plan, not a reason to print nothing. */
     line: next
-      ? `Next: ${next.label}.`
+      ? `Next: ${next.action ?? next.label.charAt(0).toLowerCase() + next.label.slice(1)}.`
       : 'Now we\'re watching what follows it.',
   };
 }
