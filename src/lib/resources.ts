@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'VENUS GRRRLS',
+        blurb:
+          'Channel, creative and campaign deep dive with one release left — what their world is, what their audience responds to, and how to keep YouTube working after Carmilla lands on 13 October.',
+        href: '/venusgrrrls',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'IDLES — TANGK',
         blurb:
           'What the TANGK campaign did on YouTube, and what to try next — including the live format that never appeared.',
