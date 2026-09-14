@@ -712,6 +712,29 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
    between the two. */
 .slide.cover{padding:4.2rem 0 2.4rem}
 
+/* ── THE FIRST SCREEN ────────────────────────────────────────────────
+   The campaign home is built from a live fetch, so for the second or two
+   that fetch takes, the deck's own captured cover was the first thing on
+   screen — and then the page jumped as the live cover was inserted above
+   it. Whoever opened the link watched the wrong page and then watched it
+   move.
+
+   The deck is held invisible until either the live cover has mounted or a
+   short budget expires, whichever comes first. It is `visibility`, not
+   `display`: the layout is already computed underneath, so the reveal is
+   instant and the slide measurements the progress bar depends on are
+   correct before anyone sees anything.
+
+   The budget is the point. A page that waits indefinitely for an API is a
+   page an API outage can take down, and this deck's first rule is that the
+   live layer must never be able to do that. Past the budget the captured
+   deck appears exactly as it always did and the live cover arrives when it
+   arrives — the old behaviour, kept as the floor rather than the norm. */
+body.booting .deck{visibility:hidden}
+/* The top bar stays. It is fixed, it says the same thing before and after,
+   and leaving it up means the hold reads as a page loading rather than as
+   a page that failed to. */
+
 
 </style>
 </head>
@@ -1273,6 +1296,10 @@ function slides(){ return [
 /* ═══════════════════════════════════════════════════════════════════
    RENDER
    ═══════════════════════════════════════════════════════════════════ */
+/* Held from the first line, so there is no frame in which the captured
+   cover is the page. Removed by the boot budget or by the live cover
+   mounting — see the bottom of this file. */
+document.body.classList.add('booting');
 document.getElementById('deck').innerHTML = slides().join('');
 
 let SLIDE_CACHE = null;
@@ -1987,10 +2014,23 @@ observeAll();
 updateProgress();
 try{ renderStats(); }catch(e){ console.warn('[deck] stats unavailable', e); }
 try{ refreshLive(); }catch(e){ console.warn('[deck] live refresh unavailable', e); }
-/* The live campaign cover. Guarded and awaited nowhere — the deck is
-   already on screen by this point, and a failure here must leave it
-   exactly as it has always been. */
-loadLiveCampaign().catch(e=>console.warn('[deck] live campaign cover unavailable —', e.message));
+/* ── The live campaign cover, and the first screen ──────────────────
+   Guarded, and its failure still cannot change the deck. What it can now
+   do is decide what the reader sees first: the deck is hidden while this
+   runs, so the campaign home is the opening screen rather than something
+   that arrives on top of one.
+
+   BOOT_BUDGET is deliberately short and deliberately unconditional. It
+   fires whatever the fetch is doing — slow API, cold function, no network
+   — and reveals the deck as it has always been. Nothing about this path
+   can leave the page blank for longer than the budget. */
+const BOOT_BUDGET = 2600;
+const reveal = () => document.body.classList.remove('booting');
+const bootTimer = setTimeout(reveal, BOOT_BUDGET);
+
+loadLiveCampaign()
+  .catch(e => console.warn('[deck] live campaign cover unavailable —', e.message))
+  .finally(() => { clearTimeout(bootTimer); reveal(); });
 </script>
 </body>
 </html>
