@@ -419,6 +419,21 @@ body.present .slide.active{display:flex}
 .hi{color:var(--ink);font-weight:700}
 .slide.dark .hi,.slide.green .hi{color:var(--news)}
 
+/* Every muted text colour, lifted for the two dark grounds in one place.
+   --grey reads at 2.17:1 on the baize, which is unreadable; measuring the
+   whole page rather than fixing one tag at a time found six more of these
+   after the first. Anything muted gets listed here or it will happen again. */
+.slide.dark .wo-s,.slide.green .wo-s,
+.slide.dark .th-d,.slide.green .th-d,
+.slide.dark .ytv-m,.slide.green .ytv-m,
+.slide.dark .sc-t,.slide.green .sc-t,
+.slide.dark .sc-c,.slide.green .sc-c,
+.slide.dark .ft-e,.slide.green .ft-e,
+.slide.dark .ytc-m,.slide.green .ytc-m,
+.slide.dark .rc-t,.slide.green .rc-t{color:#B7B2A6}
+.slide.green .sub,.slide.green .label,.slide.green .note{color:#A9C6AE}
+.slide.dark .note{color:#A5A096}
+
 /* One line of provenance, not a paragraph. Detail lives in Analysis. */
 .note{font-family:'Courier Prime',monospace;font-size:.62rem;letter-spacing:0;color:var(--grey);
   margin-top:1.1rem;opacity:.9;max-width:64ch}
