@@ -38,14 +38,28 @@
    data anywhere: nothing here claims traffic sources, watch time or
    retention.
 
-   Two disciplines the deck holds to and says so:
+   Two disciplines the deck holds to:
    1. The 66 uploads sum to 702,642 views; the API's channel viewCount
       is 1,130,576. The 427,934 gap is unexplained by the current
       public catalogue, so NOTHING is expressed as a share of lifetime
-      views. Shares are against the 66-upload total and say so.
+      views. Shares are against the 66-upload total.
    2. The four lyric videos are 24, 17, 11 and 4 days old. The deck
       does not rank them. Age-mismatched comparison is the easiest way
       to be confidently wrong here.
+
+   ── WHERE THE QUALIFICATIONS LIVE ─────────────────────────────────
+   On the slides: a one-line source note, at most. Everything else —
+   sample sizes, classification method, the age problem, the view-count
+   gap, what the public API cannot see — is in Analysis. A presentation
+   that makes the room read the peer review does not get believed more;
+   it just gets read less. The appendix is complete so the slides don't
+   have to be.
+
+   The channel is shown, not described. Real Videos-surface rows, real
+   vertical Shorts thumbnails (oardefault.jpg, which YouTube serves at
+   the Short's true 9:16), real comments in something close to YouTube's
+   own comment layout. Someone should finish this deck feeling they have
+   visited the channel.
    ═══════════════════════════════════════════════════════════════════ */
 :root{
   --sky:#E4E8EA;       /* the pale behind the heron, warmed a shade for a page */
@@ -237,6 +251,129 @@ body.present .slide.active{display:flex}
 .prov b{color:var(--ink);font-weight:700;letter-spacing:.08em;font-size:.55rem;text-transform:uppercase}
 .slide.dark .prov b{color:var(--sky)}
 
+
+/* ── YOUTUBE SURFACES ───────────────────────────────────────────────
+   The deck kept describing the channel instead of showing it. These
+   three components exist to put the actual channel on the slides: the
+   Videos grid, the Shorts rail and the comment thread. Real thumbnails,
+   real titles, real view counts, real comments — nothing mocked up. */
+
+/* Videos surface. Thumbnail, two-line title, metadata line. */
+.ytrow{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem 1.1rem;margin-top:1.5rem}
+@media(max-width:900px){.ytrow{grid-template-columns:repeat(2,1fr)}}
+.ytrow.r2{grid-template-columns:repeat(2,1fr);max-width:620px}
+.ytv{display:block;text-decoration:none;color:inherit}
+.ytv img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:7px;display:block;
+  background:#0b1119;transition:transform .25s}
+.ytv:hover img{transform:scale(1.02)}
+.ytv-t{font-size:.76rem;font-weight:700;line-height:1.3;margin-top:.5rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ytv-m{font-size:.66rem;color:var(--slate);margin-top:.2rem}
+.slide.dark .ytv-m{color:#93A0AA}
+
+/* Shorts rail. oardefault.jpg is the Short's own 9:16 frame. */
+.srail{display:flex;gap:.7rem;margin-top:1.4rem;overflow:hidden}
+.sh{flex:1 1 0;min-width:0;position:relative;border-radius:7px;overflow:hidden;
+  background:#0b1119;text-decoration:none;color:inherit;display:block}
+.sh img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;transition:transform .3s}
+.sh:hover img{transform:scale(1.04)}
+.sh-o{position:absolute;left:0;right:0;bottom:0;padding:.55rem .6rem .5rem;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff}
+.sh-t{font-size:.63rem;font-weight:700;line-height:1.25;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sh-v{font-size:.58rem;opacity:.82;margin-top:.22rem}
+@media(max-width:820px){.srail .sh:nth-child(n+5){display:none}}
+@media(max-width:560px){.srail .sh:nth-child(n+4){display:none}}
+
+/* Comments, laid out roughly the way YouTube lays them out. */
+.ythread{display:grid;grid-template-columns:repeat(2,1fr);gap:1.4rem 2rem;margin-top:1.5rem}
+@media(max-width:860px){.ythread{grid-template-columns:1fr}}
+.ytc{display:grid;grid-template-columns:2.1rem 1fr;gap:.75rem;align-items:start}
+.ytc-a{width:2.1rem;height:2.1rem;border-radius:50%;background:var(--red);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
+.ytc-k{font-size:.53rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--red)}
+.ytc-q{font-size:.86rem;line-height:1.48;margin-top:.24rem}
+.ytc-m{font-size:.62rem;color:var(--slate);margin-top:.4rem;display:flex;gap:.5rem;align-items:center}
+.slide.dark .ytc-m{color:#93A0AA}
+
+/* One idea, everything it became. Number first. */
+.worlds{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:1.6rem}
+@media(max-width:860px){.worlds{grid-template-columns:1fr}}
+.wo-n{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.3rem;
+  color:var(--red);line-height:1}
+.wo-b{font-family:'Instrument Serif',Georgia,serif;font-size:clamp(1.9rem,3.6vw,2.9rem);
+  line-height:1;margin-top:.45rem}
+.wo-c{font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--slate);margin-top:.35rem}
+.wo-s{font-size:.72rem;line-height:1.5;color:var(--slate);margin-top:.6rem}
+.slide.dark .wo-s{color:#93A0AA}
+.wo-g{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:.8rem}
+.wo-g img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:3px;background:#0b1119}
+
+/* The rollout, as a run of weeks rather than a ranking. */
+.roll{display:grid;grid-template-columns:repeat(9,1fr);gap:.45rem;margin-top:1.5rem}
+@media(max-width:900px){.roll{grid-template-columns:repeat(3,1fr)}}
+.rc{border-radius:5px;overflow:hidden;border:1px solid var(--line);background:var(--paper);
+  display:flex;flex-direction:column}
+.slide.dark .rc{border-color:var(--lineD);background:rgba(228,232,234,.05)}
+.rc.soon{border-style:dashed;opacity:.72}
+.rc img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b1119}
+.rc-b{padding:.5rem .55rem .6rem}
+.rc-d{font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+.rc-t{font-size:.63rem;line-height:1.28;margin-top:.22rem;font-weight:500}
+.rc-ph{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+  background:rgba(18,24,32,.05);font-family:'Instrument Serif',Georgia,serif;
+  font-size:1.5rem;color:var(--slate)}
+.slide.dark .rc-ph{background:rgba(228,232,234,.05)}
+
+/* Shorts by what they are: the thumbnail is the argument, the bar is the footnote. */
+.scols{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.5rem}
+@media(max-width:820px){.scols{grid-template-columns:repeat(2,1fr)}}
+.sc-n{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.05rem;
+  color:var(--red);margin-bottom:.5rem}
+.sc-n.dim{color:var(--slate)}
+.sc img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:6px;display:block;background:#0b1119}
+.sc-v{font-family:'Instrument Serif',Georgia,serif;font-size:1.55rem;margin-top:.55rem;line-height:1}
+.sc-c{font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--slate);margin-top:.2rem}
+.sc-t{font-size:.63rem;line-height:1.4;color:var(--slate);margin-top:.4rem}
+.slide.dark .sc-t,.slide.dark .sc-c{color:#93A0AA}
+.sc-m{height:4px;background:var(--red);border-radius:2px;margin-top:.5rem;width:0;
+  transition:width .9s cubic-bezier(.2,.8,.3,1)}
+.sc-m.dim{background:var(--slate)}
+
+/* Formats to brief, each with the one he already made. */
+.fmt{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.4rem}
+@media(max-width:820px){.fmt{grid-template-columns:repeat(2,1fr)}}
+.ft img{width:100%;aspect-ratio:9/16;object-fit:cover;border-radius:6px;display:block;background:#0b1119}
+.ft-n{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.05rem;
+  color:var(--red);margin-bottom:.45rem}
+.ft-d{font-size:.71rem;line-height:1.45;margin-top:.5rem}
+.ft-e{font-size:.62rem;line-height:1.4;color:var(--slate);margin-top:.35rem;font-style:italic}
+.slide.dark .ft-e{color:#93A0AA}
+
+/* The chain, in five plain words. */
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;margin-top:1.6rem}
+.ch{border:1px solid var(--line);border-radius:4px;padding:.6rem .9rem;font-size:.75rem;font-weight:700;
+  background:var(--paper)}
+.slide.dark .ch{border-color:var(--lineD);background:rgba(228,232,234,.06)}
+.ch.hot{border-color:var(--red);color:var(--red)}
+.ch-a{font-family:'Instrument Serif',Georgia,serif;color:var(--red);font-size:1.2rem;line-height:1}
+
+/* Three things, numbered, nothing else. */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;margin-top:2rem}
+@media(max-width:820px){.three{grid-template-columns:1fr;gap:1.1rem}}
+.th-n{font-family:'Instrument Serif',Georgia,serif;font-size:3rem;color:var(--red);line-height:.8}
+.th-t{font-family:'Instrument Serif',Georgia,serif;text-transform:uppercase;font-size:1.25rem;
+  line-height:1.08;margin-top:.7rem}
+.th-d{font-size:.76rem;line-height:1.5;color:var(--slate);margin-top:.5rem}
+.slide.dark .th-d{color:#93A0AA}
+
+/* One line of provenance, not a paragraph. Detail lives in Analysis. */
+.note{font-size:.58rem;letter-spacing:.06em;color:var(--slate);margin-top:1rem;opacity:.85}
+.slide.dark .note{color:#7D8A95}
+.note b{color:var(--red);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.55rem}
+
 /* ── Appendix ───────────────────────────────────────────────────── */
 .sheet{position:fixed;inset:0;background:var(--paper);color:var(--ink);z-index:1200;
   display:none;overflow-y:auto;padding:4rem 1.6rem}
@@ -294,88 +431,134 @@ body.present .phint{display:block}
     <h1 class="display big reveal">The album is out.<br>Keep it moving.</h1>
     <p class="statement reveal" style="margin-top:1.3rem;color:var(--sky)">
       <i>Decoding Birdsong</i> landed 21 August. The label is already keeping it active on
-      YouTube. Here's what the campaign has taught us — and what to build around it next.
+      YouTube. Here's what to build around it.
     </p>
   </div>
 </section>
 
-<!-- ═══ 2 · WHERE WE ARE ═══════════════════════════════════════════ -->
-<section class="slide paper" data-t="Where we are">
+<!-- ═══ 2 · IT ALREADY HAS A HOME ══════════════════════════════════ -->
+<section class="slide paper" data-t="It has a home">
   <div class="inner">
-    <div class="label reveal">Where we are now</div>
-    <h2 class="display mid reveal" style="max-width:24ch">The channel is bigger than the campaign</h2>
+    <div class="label reveal">Where we are</div>
+    <h2 class="display mid reveal" style="max-width:26ch">The album already has a home on YouTube</h2>
 
-    <div class="stat-row stagger">
-      <div class="stat"><div class="num red">5,320</div><div class="cap">Subscribers</div>
-        <div class="sub2">at 14 Sep</div></div>
-      <div class="stat"><div class="num">+255.6K</div><div class="cap">Views across the channel</div>
-        <div class="sub2">in the last 144 days</div></div>
-      <div class="stat"><div class="num">+1,230</div><div class="cap">Subscribers gained</div>
-        <div class="sub2">in the same period</div></div>
-      <div class="stat"><div class="num">4</div><div class="cap">Lyric videos live</div>
-        <div class="sub2">since 21 August</div></div>
-      <div class="stat"><div class="num">5</div><div class="cap">More scheduled</div>
-        <div class="sub2">to 18 October</div></div>
+    <div class="ytrow stagger">
+      <a class="ytv" href="https://youtu.be/bbasdP-u4WA" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">The First Five Minutes Of Magnolia (feat. Pretty Girl)</div>
+        <div class="ytv-m">2,966 views · 21 Aug</div></a>
+      <a class="ytv" href="https://youtu.be/VExP3_NwpeM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/VExP3_NwpeM/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">Bookie's Favourite (feat. Ellur)</div>
+        <div class="ytv-m">1,685 views · 28 Aug</div></a>
+      <a class="ytv" href="https://youtu.be/we_8ev9RhPE" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">The Same Heron Again</div>
+        <div class="ytv-m">719 views · 3 Sep</div></a>
+      <a class="ytv" href="https://youtu.be/UevSqYI_oVk" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/UevSqYI_oVk/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">You're Not Supposed To Do This Forever</div>
+        <div class="ytv-m">505 views · 10 Sep</div></a>
     </div>
 
-    <p class="sub reveal">
-      Everything published inside that 144-day window — 16 uploads, including Chalk, Seminal,
-      Flight Simulator and all four lyric videos — has <b style="color:var(--ink)">68,050 views
-      between them in total</b>. So most of the +255.6K is the back catalogue still working:
-      a pyramid video from 2024, Rafters, Yoga Teacher.
-    </p>
+    <div class="stat-row stagger" style="margin-top:2.2rem">
+      <div class="stat"><div class="num red">4</div><div class="cap">Lyric videos live</div>
+        <div class="sub2">one a week since release</div></div>
+      <div class="stat"><div class="num red">5</div><div class="cap">More booked</div>
+        <div class="sub2">through to 18 October</div></div>
+      <div class="stat"><div class="num">5,320</div><div class="cap">Subscribers</div></div>
+      <div class="stat"><div class="num">+255.6K</div><div class="cap">Views · last 144 days</div></div>
+      <div class="stat"><div class="num">+1,230</div><div class="cap">Subs · same period</div></div>
+    </div>
 
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
-      <div class="bl-v">The audience is already there, and most of it found him before this
-        album. The job is bringing them to it.</div>
+      <div class="bl-v">The foundation is there. Now give people more reasons to enter it.</div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 3 · INSIDE ANTONY'S WORLD ══════════════════════════════════ -->
-<section class="slide dark" data-t="Inside his world">
+<!-- ═══ 3 · THIS IS ANTONY ON YOUTUBE ══════════════════════════════ -->
+<section class="slide dark" data-t="This is Antony">
   <div class="inner">
-    <div class="label reveal">Inside Antony's world</div>
-    <h2 class="display big reveal" style="max-width:19ch">A pyramid in Stockport,<br>and a heron who can fight</h2>
+    <div class="label reveal">His channel</div>
+    <h2 class="display big reveal" style="max-width:17ch">This is Antony on YouTube</h2>
 
-    <div class="sheetgrid stagger">
-      <a href="https://youtu.be/XP8fS9WuGqU" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg" alt="The Great Pyramid Of Stockport" loading="lazy"></a>
-      <a href="https://youtu.be/L8lAWBK0v9E" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/L8lAWBK0v9E/hqdefault.jpg" alt="The Heron" loading="lazy"></a>
-      <a href="https://youtu.be/TkTRa6a2zQI" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg" alt="Chalk" loading="lazy"></a>
-      <a href="https://youtu.be/bPq-zhiC3aw" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/bPq-zhiC3aw/hqdefault.jpg" alt="Flight Simulator" loading="lazy"></a>
-      <a href="https://youtu.be/NSbdyFT2x1Y" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/NSbdyFT2x1Y/hqdefault.jpg" alt="Rafters" loading="lazy"></a>
-      <a href="https://youtu.be/iEPHboSL5rc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/iEPHboSL5rc/hqdefault.jpg" alt="Yoga Teacher" loading="lazy"></a>
-      <a href="https://youtu.be/NuFT4ls68BA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/NuFT4ls68BA/hqdefault.jpg" alt="Angie's Wedding" loading="lazy"></a>
-      <a href="https://youtu.be/y875VU7Sac0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/y875VU7Sac0/hqdefault.jpg" alt="Seminal" loading="lazy"></a>
-      <a href="https://youtu.be/bbasdP-u4WA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg" alt="Magnolia lyric video" loading="lazy"></a>
-      <a href="https://youtu.be/VExP3_NwpeM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/VExP3_NwpeM/hqdefault.jpg" alt="Bookie's Favourite lyric video" loading="lazy"></a>
-      <a href="https://youtu.be/we_8ev9RhPE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="The Same Heron Again lyric video" loading="lazy"></a>
-      <a href="https://youtu.be/UevSqYI_oVk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/UevSqYI_oVk/hqdefault.jpg" alt="You're Not Supposed To Do This Forever lyric video" loading="lazy"></a>
-      <a href="https://youtu.be/yvRJjTzQ4hM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/yvRJjTzQ4hM/hqdefault.jpg" alt="The Words to Auld Lang Syne" loading="lazy"></a>
-      <a href="https://youtu.be/sZ0LC_H88pU" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/sZ0LC_H88pU/hqdefault.jpg" alt="Rock and a Calm Place" loading="lazy"></a>
-      <a href="https://youtu.be/Vta35XGavjo" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Vta35XGavjo/hqdefault.jpg" alt="ever thought about getting to know yourself?" loading="lazy"></a>
-      <a href="https://youtube.com/shorts/AfzUlbrkTQc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/AfzUlbrkTQc/hqdefault.jpg" alt="Stockport pyramid Short" loading="lazy"></a>
+    <div class="ytrow stagger" style="margin-top:1.3rem">
+      <a class="ytv" href="https://youtu.be/XP8fS9WuGqU" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">The Great Pyramid Of Stockport</div>
+        <div class="ytv-m">153,698 views · Oct 2024</div></a>
+      <a class="ytv" href="https://youtu.be/NSbdyFT2x1Y" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/NSbdyFT2x1Y/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">Rafters</div>
+        <div class="ytv-m">99,007 views · Jul 2024</div></a>
+      <a class="ytv" href="https://youtu.be/iEPHboSL5rc" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/iEPHboSL5rc/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">Yoga Teacher</div>
+        <div class="ytv-m">53,957 views · Nov 2024</div></a>
+      <a class="ytv" href="https://youtu.be/L8lAWBK0v9E" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/L8lAWBK0v9E/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">The Heron</div>
+        <div class="ytv-m">39,965 views · Mar 2026</div></a>
+      <a class="ytv" href="https://youtu.be/TkTRa6a2zQI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">Chalk</div>
+        <div class="ytv-m">26,718 views · May 2026</div></a>
+      <a class="ytv" href="https://youtu.be/y875VU7Sac0" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/y875VU7Sac0/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">Seminal</div>
+        <div class="ytv-m">14,473 views · Jun 2026</div></a>
+      <a class="ytv" href="https://youtu.be/bPq-zhiC3aw" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/bPq-zhiC3aw/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">Flight Simulator (feat. Imogen and the Knife)</div>
+        <div class="ytv-m">11,706 views · Aug 2026</div></a>
+      <a class="ytv" href="https://youtu.be/Vta35XGavjo" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Vta35XGavjo/hqdefault.jpg" alt="" loading="lazy">
+        <div class="ytv-t">ever thought about getting to know yourself?</div>
+        <div class="ytv-m">2,429 views · Dec 2025</div></a>
     </div>
 
-    <div class="words stagger">
-      <span class="word caps">THE HORRORS PERSIST</span>
-      <span class="word caps">THE HERON WAITS PATIENTLY</span>
-      <span class="word hot">the eighth wonder of the world is in stockport x</span>
-      <span class="word">i'm a downward-facing class traitor</span>
-      <span class="word">today we attempt to land Flight Simulator</span>
-      <span class="word">bruce bogtrotter core</span>
-      <span class="word hot">the man up the pole is 62 years old</span>
-      <span class="word">Tony's first billboard 🤝</span>
-      <span class="word">the poem that became Rafters</span>
-      <span class="word">makes you think</span>
+    <div class="srail stagger">
+      <a class="sh" href="https://youtube.com/shorts/AfzUlbrkTQc" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/AfzUlbrkTQc/oardefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/AfzUlbrkTQc/hqdefault.jpg'">
+        <div class="sh-o"><div class="sh-t">The Great Pyramid of Stockport shines bright</div>
+          <div class="sh-v">3,924 views</div></div></a>
+      <a class="sh" href="https://youtube.com/shorts/_NSxb01m3iI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/_NSxb01m3iI/oardefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/_NSxb01m3iI/hqdefault.jpg'">
+        <div class="sh-o"><div class="sh-t">a poem for England, as seen on Newsnight</div>
+          <div class="sh-v">2,469 views</div></div></a>
+      <a class="sh" href="https://youtube.com/shorts/Bns4zGjlpKA" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Bns4zGjlpKA/oardefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Bns4zGjlpKA/hqdefault.jpg'">
+        <div class="sh-o"><div class="sh-t">flight simulator, starring Craig Cash 🛋️</div>
+          <div class="sh-v">1,570 views</div></div></a>
+      <a class="sh" href="https://youtube.com/shorts/3NmrnehrF-Y" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/3NmrnehrF-Y/oardefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/3NmrnehrF-Y/hqdefault.jpg'">
+        <div class="sh-o"><div class="sh-t">what if you had to play snooker but you suddenly had massive hands?</div>
+          <div class="sh-v">1,400 views</div></div></a>
+      <a class="sh" href="https://youtube.com/shorts/DloCLWptg7c" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/DloCLWptg7c/oardefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/DloCLWptg7c/hqdefault.jpg'">
+        <div class="sh-o"><div class="sh-t">i'm a downward-facing class traitor 🧘🏻‍♂️</div>
+          <div class="sh-v">1,017 views</div></div></a>
+      <a class="sh" href="https://youtube.com/shorts/74K4TNyZBjI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/74K4TNyZBjI/oardefault.jpg" alt="" loading="lazy"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/74K4TNyZBjI/hqdefault.jpg'">
+        <div class="sh-o"><div class="sh-t">THE HORRORS PERSIST</div>
+          <div class="sh-v">730 views</div></div></a>
     </div>
 
-    <p class="statement reveal" style="margin-top:1.4rem;color:var(--sky)">
-      Spoken word over dance music, about very specific British things — a shopping-centre
-      pyramid, a snooker table, a heron on a canal. The headlines are his, in capitals; the
-      captions are his too, in lower case, taking the mickey out of himself.
+    <p class="statement reveal" style="margin-top:1.5rem;color:var(--sky)">
+      A shopping-centre pyramid. A heron on a canal. A snooker table. Craig Cash. A poem that
+      became Rafters. A bloke taking the mickey out of himself.
     </p>
+    <div class="card reveal" style="margin-top:1.1rem">
+      <div class="card-v">Spoken word + dance music<br>+ very specific British things</div>
+    </div>
   </div>
 </section>
 
@@ -383,352 +566,301 @@ body.present .phint{display:block}
 <section class="slide paper" data-t="Ideas become worlds">
   <div class="inner">
     <div class="label reveal">What actually works</div>
-    <h2 class="display mid reveal" style="max-width:26ch">His best ideas don't promote a song. They build a place people can go.</h2>
+    <h2 class="display mid reveal" style="max-width:20ch">The best ideas become worlds</h2>
 
-    <div class="wr stagger">
-      <div class="wc">
-        <img src="https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg" alt="" loading="lazy">
-        <div class="wc-n">Stockport</div>
-        <div class="wc-s">A shopping-centre pyramid off the M60 became a song, a video, four
-          Shorts and a running joke. One commenter: <i>"Used to live in Cairo, now live in
-          Stockport. This song speaks to me."</i></div>
-        <div class="wc-f">5 videos · 159,892 views</div>
+    <div class="worlds stagger">
+      <div>
+        <div class="wo-n">Stockport</div>
+        <div class="wo-b">159.9K</div>
+        <div class="wo-c">views · 5 videos</div>
+        <div class="wo-g">
+          <img src="https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://i.ytimg.com/vi/AfzUlbrkTQc/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://i.ytimg.com/vi/26dzA9jmOEo/hqdefault.jpg" alt="" loading="lazy">
+        </div>
+        <div class="wo-s">A pyramid off the M60 became a song, a video, four Shorts and a
+          running joke.</div>
       </div>
-      <div class="wc">
-        <img src="https://i.ytimg.com/vi/L8lAWBK0v9E/hqdefault.jpg" alt="" loading="lazy">
-        <div class="wc-n">The Heron</div>
-        <div class="wc-s">A song became a character. The actor who played him commented
-          <i>"Thanks for letting me be THE Heron"</i> — 225 likes, the most-liked comment we
-          found anywhere on the channel — and the audience kept the bit going underneath.</div>
-        <div class="wc-f">7 videos · 45,069 views</div>
+      <div>
+        <div class="wo-n">The Heron</div>
+        <div class="wo-b">45.1K</div>
+        <div class="wo-c">views · 7 videos</div>
+        <div class="wo-g">
+          <img src="https://i.ytimg.com/vi/L8lAWBK0v9E/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://i.ytimg.com/vi/4s_t7hnEi0Q/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="" loading="lazy">
+        </div>
+        <div class="wo-s">A song became a character. The bloke who played him turned up in the
+          comments and got 225 likes.</div>
       </div>
-      <div class="wc">
-        <img src="https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg" alt="" loading="lazy">
-        <div class="wc-n">Chalk</div>
-        <div class="wc-s">Snooker as the whole frame. One of the top comments is a viewer doing
-          snooker commentary: <i>"For those of you watching in black and white, the pink is
-          next to the green."</i></div>
-        <div class="wc-f">2 videos · 28,118 views</div>
+      <div>
+        <div class="wo-n">Chalk</div>
+        <div class="wo-b">28.1K</div>
+        <div class="wo-c">views · 2 videos</div>
+        <div class="wo-g">
+          <img src="https://i.ytimg.com/vi/TkTRa6a2zQI/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://i.ytimg.com/vi/3NmrnehrF-Y/hqdefault.jpg" alt="" loading="lazy">
+          <img src="https://i.ytimg.com/vi/G0SYbDMJbJ4/hqdefault.jpg" alt="" loading="lazy">
+        </div>
+        <div class="wo-s">Snooker as the whole frame — and the audience carried on doing the
+          commentary underneath.</div>
       </div>
     </div>
 
-    <p class="sub reveal">
-      Eight of the biggest ideas on the channel turned into more than one upload. Together they
-      account for <b style="color:var(--ink)">65% of all views across the 66 videos</b>
-      currently public.
+    <p class="sub reveal" style="margin-top:1.5rem">
+      Eight of his biggest ideas turned into more than one video. Together they are
+      <b style="color:var(--ink)">65% of everything the channel has been watched for</b>.
     </p>
 
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
-      <div class="bl-v">The more specific the idea, the more there is for people to step into.</div>
+      <div class="bl-v">When an idea catches, don't move on. Build around it.</div>
     </div>
 
-    <div class="prov reveal">
-      <b>Signal, not proof</b><br>
-      We can't show the extra videos caused the views. A song the label already expects to
-      perform is also the song that gets more made for it. These ideas are also of very
-      different ages — Stockport's video is from October 2024, Chalk's from May 2026 — so size
-      here reflects time on the channel as much as reach. What we can say is that the ideas big
-      enough to carry several videos are the ideas that carried the channel.
-    </div>
+    <div class="note reveal"><b>Source</b> · 66 public uploads, grouped by idea. Ideas of
+      different ages. Full working in Analysis.</div>
   </div>
 </section>
 
-<!-- ═══ 5 · THEY JOIN IN ═══════════════════════════════════════════ -->
-<section class="slide dark" data-t="They join in">
+<!-- ═══ 5 · PEOPLE JOIN IN ═════════════════════════════════════════ -->
+<section class="slide dark" data-t="People join in">
   <div class="inner">
-    <div class="label reveal">What the comments say</div>
-    <h2 class="display big reveal" style="max-width:17ch">People don't just watch.<br>They join in.</h2>
+    <div class="label reveal">His comments section</div>
+    <h2 class="display big reveal" style="max-width:14ch">People join in</h2>
 
-    <div class="cmt stagger">
-      <div class="cm">
-        <div class="cm-k">The words</div>
-        <div class="cm-q">"'I'm a downward facing class traitor' 😂😂❤"</div>
-        <div class="cm-a">On Yoga Teacher · 28 likes · people quote the lines back</div>
+    <div class="ythread stagger">
+      <div class="ytc">
+        <div class="ytc-a">“</div>
+        <div>
+          <div class="ytc-k">They quote him</div>
+          <div class="ytc-q">"'I'm a downward facing class traitor' 😂😂❤"</div>
+          <div class="ytc-m">👍 28 · on Yoga Teacher</div>
+        </div>
       </div>
-      <div class="cm">
-        <div class="cm-k">The joke</div>
-        <div class="cm-q">"Remember everyone, never leave the bookies with a smile on your face."</div>
-        <div class="cm-a">On Bookie's Favourite · they write in his register</div>
+      <div class="ytc">
+        <div class="ytc-a">☺</div>
+        <div>
+          <div class="ytc-k">They continue the joke</div>
+          <div class="ytc-q">"Remember everyone, never leave the bookies with a smile on your face."</div>
+          <div class="ytc-m">👍 3 · on Bookie's Favourite</div>
+        </div>
       </div>
-      <div class="cm">
-        <div class="cm-k">The person</div>
-        <div class="cm-q">"Saw Antony a week ago today at AYL? in a church in Reading… what a warm and generous guy"</div>
-        <div class="cm-a">People who've seen him live describe the man, not the setlist</div>
+      <div class="ytc">
+        <div class="ytc-a">♥</div>
+        <div>
+          <div class="ytc-k">They talk about meeting him</div>
+          <div class="ytc-q">"Saw Antony a week ago today at AYL? in a church in Reading… what a warm and generous guy"</div>
+          <div class="ytc-m">👍 12 · on How Did You Get Here?</div>
+        </div>
       </div>
-      <div class="cm">
-        <div class="cm-k">The discovery story</div>
-        <div class="cm-q">"I was recommended this video by Sophie from Buckles in Chippenham!"</div>
-        <div class="cm-a">44 likes · people volunteer exactly how they found him</div>
+      <div class="ytc">
+        <div class="ytc-a">→</div>
+        <div>
+          <div class="ytc-k">They say where they found him</div>
+          <div class="ytc-q">"I was recommended this video by Sophie from Buckles in Chippenham!"</div>
+          <div class="ytc-m">👍 44 · on The Heron</div>
+        </div>
       </div>
     </div>
-
-    <p class="sub reveal" style="margin-top:1.3rem">
-      Read across <b style="color:var(--sky)">535 public comments on 21 of his 66 videos</b>. Telling
-      people where they found him is the theme that comes up most often in this sample —
-      6 Music, the Euros coverage, a stranger on a Manchester tram.
-    </p>
 
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
-      <div class="bl-v">Antony's videos pull the most out of people when there is something to
-        repeat, finish or answer back to.</div>
+      <div class="bl-v">Give people something to repeat, finish or answer back to.</div>
     </div>
 
-    <div class="prov reveal">
-      <b>What this is and isn't</b><br>
-      535 comments is what people chose to write, not a survey of the audience. It tells us
-      what the people who comment care about. It cannot tell us what share of viewers came
-      from anywhere — YouTube's public data doesn't carry traffic sources.
-    </div>
+    <div class="note reveal"><b>Source</b> · 535 comments read across 21 videos. What people
+      chose to write, not a survey. Method in Analysis.</div>
   </div>
 </section>
 
-<!-- ═══ 6 · THE SUSTAIN ENGINE ═════════════════════════════════════ -->
-<section class="slide paper" data-t="Sustain engine">
+<!-- ═══ 6 · THE SUSTAIN PLAN IS WORKING ════════════════════════════ -->
+<section class="slide paper" data-t="Sustain plan">
   <div class="inner">
     <div class="label reveal">What the label is already doing</div>
-    <h2 class="display mid reveal" style="max-width:26ch">A track a week, already booked to 18 October</h2>
+    <h2 class="display mid reveal" style="max-width:22ch">The sustain plan is working</h2>
 
-    <p class="statement reveal" style="margin-top:1rem">
-      Since release day, a track from the album has been given its own video almost every week.
-      Four are live. Five more are booked.
+    <p class="statement reveal" style="margin-top:.9rem">
+      A track a week. A new album destination every time.
     </p>
 
-    <div class="prov reveal" style="margin-top:1.1rem">
-      <b>Read the ages, not the view counts</b><br>
-      These went up 24, 17, 11 and 4 days ago. A four-day-old video and a three-week-old one
-      cannot be compared on views, so this is the order they were published in, not a ranking.
-    </div>
-
-    <div class="ev e4 stagger">
-      <a href="https://youtu.be/bbasdP-u4WA" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg" alt="" loading="lazy">
-        <div class="ev-k">21 Aug · 24 days live</div>
-        <div class="ev-t">The First Five Minutes Of Magnolia</div>
-        <div class="ev-n">2,966 views</div></a>
-      <a href="https://youtu.be/VExP3_NwpeM" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/VExP3_NwpeM/hqdefault.jpg" alt="" loading="lazy">
-        <div class="ev-k">28 Aug · 17 days live</div>
-        <div class="ev-t">Bookie's Favourite (feat. Ellur)</div>
-        <div class="ev-n">1,685 views</div></a>
-      <a href="https://youtu.be/we_8ev9RhPE" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="" loading="lazy">
-        <div class="ev-k">3 Sep · 11 days live</div>
-        <div class="ev-t">The Same Heron Again</div>
-        <div class="ev-n">719 views</div></a>
-      <a href="https://youtu.be/UevSqYI_oVk" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/UevSqYI_oVk/hqdefault.jpg" alt="" loading="lazy">
-        <div class="ev-k">10 Sep · 4 days live</div>
-        <div class="ev-t">You're Not Supposed To Do This Forever</div>
-        <div class="ev-n">505 views</div></a>
-    </div>
-
-    <p class="sub reveal">
-      One thing we <i>can</i> compare fairly, because it barely moves with age:
-      <b style="color:var(--ink)">all four are liked more often than the typical video on this
-      channel</b> — 2.76%, 3.09%, 2.64% and 4.16% against a long-form median of 2.10%. The
-      people finding them are responding.
-    </p>
-    <p class="sub reveal" style="margin-top:.6rem">
-      Still to come: <b style="color:var(--ink)">Aussie Goldhunters</b> (17 Sep),
-      <b style="color:var(--ink)">Godzilla Hotel</b>, <b style="color:var(--ink)">Dave's Angling
-      Superstore</b>, <b style="color:var(--ink)">Commune</b> and the title track.
-    </p>
-
-    <div class="bl reveal">
-      <div class="bl-k">The bottom line</div>
-      <div class="bl-v">Too early to say which of these is working. Not too early to build
-        around them.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ 7 · DON'T JUST ANNOUNCE ════════════════════════════════════ -->
-<section class="slide dark" data-t="Not just announcements">
-  <div class="inner">
-    <div class="label reveal">What his Shorts have done</div>
-    <h2 class="display mid reveal" style="max-width:25ch">The opportunity isn't more Shorts. It's more Antony in them.</h2>
-
-    <div class="bars reveal">
-      <div class="bar-r">
-        <div class="bar-l">Live<small>on stage, the crowd, a festival · 6 Shorts</small></div>
-        <div class="bar-t"><div class="bar-f" data-w="100"></div></div><div class="bar-v">1,261</div></div>
-      <div class="bar-r">
-        <div class="bar-l">Personality<small>his jokes, him being him · 10 Shorts</small></div>
-        <div class="bar-t"><div class="bar-f" data-w="69"></div></div><div class="bar-v">865</div></div>
-      <div class="bar-r">
-        <div class="bar-l">Words<small>lyrics and poems as the whole thing · 9 Shorts</small></div>
-        <div class="bar-t"><div class="bar-f" data-w="56"></div></div><div class="bar-v">712</div></div>
-      <div class="bar-r">
-        <div class="bar-l">Announcements<small>out now, tickets, pre-order · 11 Shorts</small></div>
-        <div class="bar-t"><div class="bar-f low" data-w="39"></div></div><div class="bar-v">495</div></div>
-    </div>
-    <div class="sub reveal" style="margin-top:.6rem;font-size:.66rem">
-      Median views per Short. Four of the five groups he makes, sorted by hand; a fifth group
-      of 4 is too small to put a bar against.
-    </div>
-
-    <p class="statement reveal" style="margin-top:1.3rem;color:var(--sky)">
-      Straight announcements are the biggest group he has made — 11 of 40 — and the one with
-      the fewest views. He has already moved on: <b>of his 14 Shorts in 2026, one is an
-      announcement</b>. Everything that shows the man, the room or the writing has done better.
-    </p>
-
-    <div class="bl reveal">
-      <div class="bl-k">The bottom line</div>
-      <div class="bl-v">The instinct is already right. The job is keeping it up while the
-        album rolls out.</div>
-    </div>
-
-    <div class="prov reveal">
-      <b>Signal, not law</b><br>
-      Four groups of 6, 9, 10 and 11, spread across 2023–2026 as the channel grew, sorted by
-      hand — and a few could sit in two groups. Treat the direction as real and the numbers as
-      rough.
-    </div>
-  </div>
-</section>
-
-<!-- ═══ 8 · WHAT AN ANTONY SHORT IS ════════════════════════════════ -->
-<section class="slide paper" data-t="An Antony Short">
-  <div class="inner">
-    <div class="label reveal">Four he already makes</div>
-    <h2 class="display mid reveal" style="max-width:24ch">What an Antony Short actually looks like</h2>
-
-    <div class="fm stagger">
-      <div class="fc">
-        <div class="fc-n">The thought</div>
-        <div class="fc-d">One line, held on screen, in capitals. No music video, no "out now" —
-          just the sentence, doing what a good sentence does.</div>
-        <div class="fc-l"><b>He already does this:</b> "YOUR PERSONALITY HAS BEEN BROKEN APART
-          AND SOLD BACK TO YOU IN A SERIES OF SHORT FORM CLIPS" · "THE HORRORS PERSIST".
-          <b>Points at:</b> the track the line comes from.</div>
-      </div>
-      <div class="fc">
-        <div class="fc-n">The story</div>
-        <div class="fc-d">He already writes these — the Flight Simulator description is one,
-          typed out at length with no prompting. Say it to camera instead of burying it under
-          the video.</div>
-        <div class="fc-l"><b>He already does this:</b> "the poem that became Rafters", and the
-          Craig Cash description: <i>"here he is performing words i wrote (!!)"</i>.
-          <b>Points at:</b> the lyric video that week.</div>
-      </div>
-      <div class="fc">
-        <div class="fc-n">The place</div>
-        <div class="fc-d">An ordinary British spot, filmed plainly, with one strange observation
-          over the top. Not "make more Stockport videos" — make more looking-at-things videos.</div>
-        <div class="fc-l"><b>He already does this:</b> "the eighth wonder of the world is in
-          stockport x" · "Stockport or Giza?" — and the Stockport Short is the most-watched
-          Short on the channel. <b>Points at:</b> any song with a place in it, and three of the
-          five remaining titles are places.</div>
-      </div>
-      <div class="fc">
-        <div class="fc-n">The live moment</div>
-        <div class="fc-d">The spoken passages, specifically — the bit where he stops singing and
-          talks, and the room goes with him. That is what people who have seen him write about.
-          A phone from the side of the stage is fine.</div>
-        <div class="fc-l"><b>He already does this:</b> "Your never be alone again my love" ·
-          "everyone can face a crisis" · "rafters live at glastonbury". Live is the strongest
-          Shorts group of the five we sorted. <b>Points at:</b> the album, and whatever's
-          next live.</div>
-      </div>
-    </div>
-
-    <div class="bl reveal">
-      <div class="bl-k">The bottom line</div>
-      <div class="bl-v">Four formats, all of them already in his catalogue. None needs a
-        production budget.</div>
-    </div>
-
-    <div class="prov reveal">
-      <b>Signal, not law</b><br>
-      The performance behind these is four hand-sorted groups of 6, 9, 10 and 11 Shorts, spread
-      across 2023–2026. Treat the direction as real and the numbers as rough.
-    </div>
-  </div>
-</section>
-
-<!-- ═══ 9 · KEEP IT MOVING ═════════════════════════════════════════ -->
-<section class="slide dark" data-t="Keep it moving">
-  <div class="inner">
-    <div class="label reveal">The next six to eight weeks</div>
-    <h2 class="display mid reveal" style="max-width:24ch">Keep Decoding Birdsong moving</h2>
-
-    <p class="statement reveal" style="margin-top:.9rem;color:var(--sky)">
-      Five lyric videos are already booked. Rather than add a separate plan, hang something
-      small off each one — so every album track arrives with something to draw people in, not
-      just a page to sit on.
-    </p>
-
-    <div class="loop stagger">
-      <div class="lp"><div class="lp-n">Already booked</div>
-        <div class="lp-t">The lyric video</div>
-        <div class="lp-d">One album track a week gets its own home on the channel.</div></div>
-      <div class="lp"><div class="lp-n">Add</div>
-        <div class="lp-t">One Antony Short</div>
-        <div class="lp-d">The thought, the story, the place or the live moment — whichever the
-          song gives you.</div></div>
-      <div class="lp"><div class="lp-n">Connect</div>
-        <div class="lp-t">Point it at the song</div>
-        <div class="lp-d">The Short ends on the track, and the track sits in one album playlist
-          — if one doesn't exist already.</div></div>
-      <div class="lp"><div class="lp-n">Then</div>
-        <div class="lp-t">What's next</div>
-        <div class="lp-d">Whoever finishes one video gets offered another. Worth checking what
-          the end screens currently do.</div></div>
+    <div class="roll stagger">
+      <div class="rc"><img src="https://i.ytimg.com/vi/bbasdP-u4WA/hqdefault.jpg" alt="" loading="lazy">
+        <div class="rc-b"><div class="rc-d">21 Aug · live</div><div class="rc-t">Magnolia</div></div></div>
+      <div class="rc"><img src="https://i.ytimg.com/vi/VExP3_NwpeM/hqdefault.jpg" alt="" loading="lazy">
+        <div class="rc-b"><div class="rc-d">28 Aug · live</div><div class="rc-t">Bookie's Favourite</div></div></div>
+      <div class="rc"><img src="https://i.ytimg.com/vi/we_8ev9RhPE/hqdefault.jpg" alt="" loading="lazy">
+        <div class="rc-b"><div class="rc-d">3 Sep · live</div><div class="rc-t">The Same Heron Again</div></div></div>
+      <div class="rc"><img src="https://i.ytimg.com/vi/UevSqYI_oVk/hqdefault.jpg" alt="" loading="lazy">
+        <div class="rc-b"><div class="rc-d">10 Sep · live</div><div class="rc-t">You're Not Supposed To Do This Forever</div></div></div>
+      <div class="rc soon"><div class="rc-ph">17</div>
+        <div class="rc-b"><div class="rc-d">17 Sep</div><div class="rc-t">Aussie Goldhunters</div></div></div>
+      <div class="rc soon"><div class="rc-ph">21</div>
+        <div class="rc-b"><div class="rc-d">21–27 Sep</div><div class="rc-t">Godzilla Hotel</div></div></div>
+      <div class="rc soon"><div class="rc-ph">28</div>
+        <div class="rc-b"><div class="rc-d">28 Sep</div><div class="rc-t">Dave's Angling Superstore</div></div></div>
+      <div class="rc soon"><div class="rc-ph">5</div>
+        <div class="rc-b"><div class="rc-d">5–11 Oct</div><div class="rc-t">Commune</div></div></div>
+      <div class="rc soon"><div class="rc-ph">12</div>
+        <div class="rc-b"><div class="rc-d">12–18 Oct</div><div class="rc-t">Decoding Birdsong</div></div></div>
     </div>
 
     <p class="sub reveal" style="margin-top:1.4rem">
-      The remaining titles do half the work already: <b style="color:var(--sky)">Godzilla
-      Hotel</b>, <b style="color:var(--sky)">Dave's Angling Superstore</b> and
-      <b style="color:var(--sky)">Commune</b> are all places, and <b style="color:var(--sky)">Aussie
-      Goldhunters</b> is a telly reference — the same move as Craig Cash, whose video drew more
-      comments per viewer than anything else on the channel.
+      All four live ones are liked more often than the typical video on this channel. That is
+      the fair comparison at this stage — the four are 24, 17, 11 and 4 days old.
     </p>
-
-    <div class="card reveal">
-      <div class="card-v">39,965 people watched The Heron.<br>719 have watched The Same Heron Again.</div>
-      <div class="card-k">The album track is a callback to the video — and nothing on the
-        channel takes you from one to the other. Different ages, so not a fair comparison of
-        performance. It is a fair description of a missing link.</div>
-    </div>
 
     <div class="bl reveal">
       <div class="bl-k">The bottom line</div>
-      <div class="bl-v">The plan already asks for three Shorts a release. One that genuinely
-        suits the song beats three filled slots.</div>
+      <div class="bl-v">Too early to pick a winner. Not too early to build around them.</div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 10 · THREE THINGS ══════════════════════════════════════════ -->
-<section class="slide paper" data-t="Three things">
+<!-- ═══ 7 · MORE ANTONY IN THE SHORTS ══════════════════════════════ -->
+<section class="slide dark" data-t="More Antony in the Shorts">
   <div class="inner">
-    <div class="label reveal">Three things next</div>
-    <h2 class="display big reveal" style="max-width:16ch">Finish it, fill it, open it up</h2>
+    <div class="label reveal">His Shorts, by what they are</div>
+    <h2 class="display mid reveal" style="max-width:24ch">The opportunity isn't more Shorts. It's more Antony in them.</h2>
 
-    <div class="acts stagger" style="max-width:880px">
-      <div class="act"><div class="act-n">1</div><div>
-        <div class="act-t">Nothing to change here</div>
-        <div class="act-d">The lyric rollout works as a system and is already booked to
-          18 October. Finish it, and judge the four that are live once they have all been up
-          the same number of days.</div></div></div>
-      <div class="act"><div class="act-n">2</div><div>
-        <div class="act-t">Put more Antony around it</div>
-        <div class="act-d">His stories, his observations, his live moments and his own lines
-          instead of another "out now" — the direction his 2026 Shorts already took, now applied
-          to the album.</div></div></div>
-      <div class="act"><div class="act-n">3</div><div>
-        <div class="act-t">When an idea catches, build it out</div>
-        <div class="act-d">Stockport, the Heron and the snooker frame all grew past one video.
-          When the next one lands like that, give people more ways in rather than moving on.</div></div></div>
+    <div class="scols stagger">
+      <div class="sc">
+        <div class="sc-n">Live</div>
+        <a href="https://youtube.com/shorts/q3MWzlSJ1VU" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/q3MWzlSJ1VU/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/q3MWzlSJ1VU/hqdefault.jpg'"></a>
+        <div class="sc-v">1,261</div><div class="sc-c">typical views · 6 Shorts</div>
+        <div class="sc-m" data-w="100"></div>
+        <div class="sc-t">"Your never be alone again my love"</div>
+      </div>
+      <div class="sc">
+        <div class="sc-n">Personality</div>
+        <a href="https://youtube.com/shorts/Bns4zGjlpKA" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/Bns4zGjlpKA/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Bns4zGjlpKA/hqdefault.jpg'"></a>
+        <div class="sc-v">865</div><div class="sc-c">typical views · 10 Shorts</div>
+        <div class="sc-m" data-w="69"></div>
+        <div class="sc-t">"flight simulator, starring Craig Cash 🛋️"</div>
+      </div>
+      <div class="sc">
+        <div class="sc-n">Words</div>
+        <a href="https://youtube.com/shorts/_NSxb01m3iI" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/_NSxb01m3iI/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/_NSxb01m3iI/hqdefault.jpg'"></a>
+        <div class="sc-v">712</div><div class="sc-c">typical views · 9 Shorts</div>
+        <div class="sc-m" data-w="56"></div>
+        <div class="sc-t">"a poem for England, as seen on Newsnight"</div>
+      </div>
+      <div class="sc">
+        <div class="sc-n dim">Announcements</div>
+        <a href="https://youtube.com/shorts/TNbmUTWRFJY" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/TNbmUTWRFJY/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/TNbmUTWRFJY/hqdefault.jpg'"></a>
+        <div class="sc-v">495</div><div class="sc-c">typical views · 11 Shorts</div>
+        <div class="sc-m dim" data-w="39"></div>
+        <div class="sc-t">"szmierek live '25!! tickets on sale now bebeh!!"</div>
+      </div>
     </div>
 
-    <div class="bl reveal" style="margin-top:1.6rem">
+    <p class="statement reveal" style="margin-top:1.5rem;color:var(--sky)">
+      The man, the room and the writing have travelled further than "out now" — and he has
+      already worked that out. Of his 14 Shorts in 2026, one is an announcement.
+    </p>
+
+    <div class="note reveal"><b>Signal, not law</b> · 40 Shorts reviewed, sorted by hand.
+      Directional. Caveats in Analysis.</div>
+  </div>
+</section>
+
+<!-- ═══ 8 · WHAT TO MAKE NEXT ══════════════════════════════════════ -->
+<section class="slide paper" data-t="What to make next">
+  <div class="inner">
+    <div class="label reveal">Four he already makes</div>
+    <h2 class="display mid reveal" style="max-width:20ch">What to make next</h2>
+
+    <div class="fmt stagger">
+      <div class="ft">
+        <div class="ft-n">The thought</div>
+        <a href="https://youtube.com/shorts/74K4TNyZBjI" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/74K4TNyZBjI/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/74K4TNyZBjI/hqdefault.jpg'"></a>
+        <div class="ft-d">One Antony line, held on screen.</div>
+        <div class="ft-e">"THE HORRORS PERSIST"</div>
+      </div>
+      <div class="ft">
+        <div class="ft-n">The story</div>
+        <a href="https://youtube.com/shorts/kZt69t3OsEQ" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/kZt69t3OsEQ/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/kZt69t3OsEQ/hqdefault.jpg'"></a>
+        <div class="ft-d">Where the lyric actually came from.</div>
+        <div class="ft-e">"the poem that became Rafters"</div>
+      </div>
+      <div class="ft">
+        <div class="ft-n">The place</div>
+        <a href="https://youtube.com/shorts/AfzUlbrkTQc" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/AfzUlbrkTQc/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/AfzUlbrkTQc/hqdefault.jpg'"></a>
+        <div class="ft-d">An ordinary place through his eyes.</div>
+        <div class="ft-e">"the eighth wonder of the world is in stockport x"</div>
+      </div>
+      <div class="ft">
+        <div class="ft-n">The live moment</div>
+        <a href="https://youtube.com/shorts/611mkjfzHtQ" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/611mkjfzHtQ/oardefault.jpg" alt="" loading="lazy"
+            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/611mkjfzHtQ/hqdefault.jpg'"></a>
+        <div class="ft-d">A spoken passage and the room going with him.</div>
+        <div class="ft-e">"everyone can face a crisis"</div>
+      </div>
+    </div>
+
+    <div class="chain reveal">
+      <span class="ch hot">Lyric video</span>
+      <span class="ch-a">→</span>
+      <span class="ch">One Short</span>
+      <span class="ch-a">→</span>
+      <span class="ch">Ends on the song</span>
+      <span class="ch-a">→</span>
+      <span class="ch">Album playlist</span>
+      <span class="ch-a">→</span>
+      <span class="ch hot">The next one</span>
+    </div>
+
+    <div class="bl reveal">
+      <div class="bl-k">The bottom line</div>
+      <div class="bl-v">One Short per lyric video, picked to suit the song. None of these needs
+        a production budget.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · THREE THINGS NEXT ══════════════════════════════════════ -->
+<section class="slide dark" data-t="Three things next">
+  <div class="bleed dk"><img src="https://i.ytimg.com/vi/XP8fS9WuGqU/maxresdefault.jpg" alt="" style="opacity:.2"
+    onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/XP8fS9WuGqU/hqdefault.jpg'"></div>
+  <div class="inner">
+    <div class="label reveal">Three things next</div>
+
+    <div class="three stagger">
+      <div>
+        <div class="th-n">1</div>
+        <div class="th-t">Finish it</div>
+        <div class="th-d">Keep the lyric-video rollout going. It is already booked to
+          18 October.</div>
+      </div>
+      <div>
+        <div class="th-n">2</div>
+        <div class="th-t">Put more<br>Antony around it</div>
+        <div class="th-d">His stories, observations, words, places and live moments.</div>
+      </div>
+      <div>
+        <div class="th-n">3</div>
+        <div class="th-t">When an idea<br>catches, build it out</div>
+        <div class="th-d">Stockport, the Heron and Chalk show what that looks like.</div>
+      </div>
+    </div>
+
+    <div class="bl reveal" style="margin-top:2.4rem">
       <div class="bl-k">In one line</div>
-      <div class="bl-v">The album gets a home on YouTube every week. What it needs now is a
-        way in.</div>
+      <div class="bl-v">The album has a home. Now keep giving people ways in.</div>
     </div>
   </div>
 </section>
@@ -926,6 +1058,17 @@ function observeAll(){
     o.unobserve(e.target);
   }); }, { threshold:.3 });
   document.querySelectorAll('.bars').forEach(function(el){ bo.observe(el); });
+
+  /* Slide 7's measure bars sit under the thumbnails rather than in a .bars
+     block — the picture is the argument there and the bar is the footnote. */
+  var mo = new IntersectionObserver(function(es,o){ es.forEach(function(e){
+    if(!e.isIntersecting) return;
+    e.target.querySelectorAll('.sc-m').forEach(function(f,i){
+      setTimeout(function(){ f.style.width = f.getAttribute('data-w') + '%'; }, 200 + i*110);
+    });
+    o.unobserve(e.target);
+  }); }, { threshold:.25 });
+  document.querySelectorAll('.scols').forEach(function(el){ mo.observe(el); });
 }
 
 function openSheet(id){
@@ -965,7 +1108,7 @@ function showSlide(i){
       el.children[k].style.transform = 'none';
     }
   });
-  s[i].querySelectorAll('.bar-f').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
+  s[i].querySelectorAll('.bar-f,.sc-m').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
   document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
 }
 
