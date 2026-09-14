@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VENUS GRRRLS × YouTube — The Last Act</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   VENUS GRRRLS × YOUTUBE — the final phase of the 2026 campaign
+
+   Not the Kings of Leon deck (warm black, aged gold, heritage) and not
+   Amyl (punk red, Anton). This is goth/grunge: cold black, blood red,
+   a violet second accent lifted from Violet State of Mind, and Archivo
+   Black — blunt and poster-like rather than elegant.
+
+   EVERY FIGURE ON THESE SLIDES IS COUNTED from the public YouTube API
+   via /api/artist-live?slug=venusgrrrls on 14 September 2026, and from
+   the Coach plan at /coach/venus-grrrls-venus-grrrls-campaign. Two
+   claims are inferred rather than counted and both say so on the slide:
+   the cause of Eve's engagement gap, and the absence of any live upload
+   (read from titles, since the API carries no format field). The
+   channel is 32 uploads total, so this is the complete catalogue rather
+   than a sample. Where something is inferred rather than counted it is
+   labelled INTERPRETATION on the slide itself.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#08070A;
+  --coal:#101016;
+  --paper:#EDE9F0;
+  --bone:#D5CEDA;
+  --signal:#D81E41;      /* blood red — the band's own 🫀 */
+  --ember:#8A5AA8;       /* violet, secondary */
+  --smoke:#8A8391;
+  --hair:rgba(237,233,240,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.display{font-family:'Archivo Black',sans-serif;letter-spacing:-.02em;line-height:.95;
+  text-transform:uppercase}
+.display.big{font-size:clamp(2.1rem,5.6vw,4.6rem)}
+.display.mid{font-size:clamp(1.5rem,3.1vw,2.5rem)}
+
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;height:58px;background:rgba(8,7,10,.93);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--hair);display:flex;align-items:center;
+  justify-content:space-between;padding:0 1.6rem;z-index:900;
+  transform:translateZ(0);backface-visibility:hidden}
+.chrome-l{display:flex;align-items:center;gap:.9rem;font-size:.6rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.chrome-r{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{font-family:inherit;font-size:.58rem;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;padding:.5rem .85rem;border-radius:4px;border:1px solid var(--hair);
+  background:transparent;color:var(--paper);cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(237,233,240,.09)}
+body.present .chrome{display:none}
+body.present{overflow:hidden}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.deck{padding-top:58px}
+.slide{min-height:100vh;display:flex;align-items:center;position:relative;
+  padding:5rem 1.6rem;border-bottom:1px solid rgba(237,233,240,.07);overflow:hidden}
+.slide .inner{max-width:1180px;margin:0 auto;width:100%;position:relative;z-index:2}
+.slide.light{background:var(--paper);color:var(--ink)}
+.slide.light .display{color:var(--ink)}
+.slide.coal{background:var(--coal)}
+body.present .slide{display:none;min-height:100vh;height:100vh;padding:3.5rem 4vw}
+body.present .slide.on{display:flex}
+
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bleed img{width:100%;height:100%;object-fit:cover;opacity:.26}
+.bleed::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--ink) 6%,rgba(8,7,10,.76) 55%,rgba(8,7,10,.42))}
+
+.label{font-size:.62rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:1.1rem}
+.label.v{color:var(--ember)}
+.sub{font-size:clamp(.95rem,1.25vw,1.1rem);line-height:1.62;color:var(--smoke);
+  max-width:66ch;margin-top:1.25rem}
+.slide.light .sub{color:#57505F}
+.statement{font-size:clamp(1.05rem,1.8vw,1.42rem);line-height:1.45;font-weight:500;max-width:60ch}
+
+/* THE THREE-BEAT: a number, what it means, what we do. Every content
+   slide uses it, because a deck that varies its argument shape makes a
+   reader re-learn how to read it on every page. */
+.beat{margin-top:2rem;display:flex;flex-direction:column;gap:.9rem;max-width:62ch}
+.beat-r{display:grid;grid-template-columns:5.6rem 1fr;gap:1.1rem;align-items:baseline}
+.beat-k{font-size:.55rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--smoke);padding-top:.28rem}
+.beat-v{font-size:clamp(.88rem,1.15vw,1rem);line-height:1.55}
+.beat-r.do .beat-k{color:var(--signal)}
+.beat-r.do .beat-v{font-weight:600}
+@media(max-width:700px){.beat-r{grid-template-columns:1fr;gap:.2rem}}
+
+/* ── Stats ──────────────────────────────────────────────────────── */
+.stat-row{display:flex;gap:clamp(1.3rem,4vw,3.4rem);flex-wrap:wrap;margin-top:2.2rem}
+.stat .num{font-family:'Archivo Black',sans-serif;font-size:clamp(1.7rem,4.4vw,3.4rem);
+  line-height:1;color:var(--paper)}
+.slide.light .stat .num{color:var(--ink)}
+.stat .num.sig{color:var(--signal)}
+.stat .cap{font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.5rem}
+.stat .sub2{font-size:.64rem;color:var(--smoke);opacity:.72;margin-top:.28rem}
+
+/* ── The hero number ────────────────────────────────────────────── */
+.huge{font-family:'Archivo Black',sans-serif;font-size:clamp(3.4rem,13vw,10rem);
+  line-height:.86;color:var(--signal);letter-spacing:-.03em}
+.huge.v{color:var(--ember)}
+.huge-cap{font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.9rem}
+
+/* ── Thumbnails ─────────────────────────────────────────────────── */
+.thumb-grid{display:grid;gap:.9rem;margin-top:2rem}
+.thumb-grid.g2{grid-template-columns:repeat(2,1fr)}
+.thumb-grid.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.thumb-grid.g4{grid-template-columns:repeat(2,1fr)}}
+.tcard{display:block;text-decoration:none;color:inherit;border-radius:6px;overflow:hidden;
+  background:rgba(237,233,240,.05);border:1px solid var(--hair);transition:transform .3s ease}
+.tcard:hover{transform:translateY(-4px);border-color:var(--signal)}
+.tcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#1a1a22}
+.tmeta{padding:.65rem .75rem}
+.ttitle{font-size:.72rem;font-weight:600;line-height:1.3}
+.tviews{font-family:'Archivo Black',sans-serif;font-size:1rem;color:var(--signal);margin-top:.3rem}
+.tviews.dim{color:var(--smoke)}
+.tsub{font-size:.6rem;color:var(--smoke);margin-top:.15rem}
+
+/* ── Comparison pair ────────────────────────────────────────────── */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.8rem;max-width:760px}
+.vs-col{border:1px solid var(--hair);border-radius:10px;padding:1.1rem;
+  background:rgba(237,233,240,.03)}
+.vs-col.win{border-color:var(--signal)}
+.vs-yr{font-size:.56rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.5rem}
+.vs-col.win .vs-yr{color:var(--signal)}
+.vs-n{font-family:'Archivo Black',sans-serif;font-size:clamp(1.6rem,3.4vw,2.5rem);
+  line-height:.95;color:var(--paper)}
+.vs-col.win .vs-n{color:var(--signal)}
+.vs-lab{font-size:.65rem;color:var(--smoke);margin-top:.4rem;line-height:1.45}
+.vs-list{list-style:none;margin-top:.7rem}
+.vs-list li{font-size:.7rem;line-height:1.45;padding:.32rem 0;border-top:1px solid var(--hair);
+  display:flex;justify-content:space-between;gap:.6rem}
+.vs-list li span:last-child{color:var(--smoke);white-space:nowrap}
+@media(max-width:760px){.vs{grid-template-columns:1fr}}
+
+/* ── Phase columns ──────────────────────────────────────────────── */
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-top:1.8rem}
+@media(max-width:900px){.ph{grid-template-columns:1fr}}
+.ph-c{border:1px solid var(--hair);border-radius:10px;padding:1.05rem;
+  background:rgba(237,233,240,.03)}
+.ph-c.key{border-color:var(--signal)}
+.ph-n{font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--signal)}
+.ph-w{font-family:'Archivo Black',sans-serif;font-size:1.15rem;margin:.35rem 0 .5rem;
+  text-transform:uppercase}
+.ph-l{list-style:none}
+.ph-l li{font-size:.72rem;line-height:1.5;padding:.4rem 0;border-top:1px solid var(--hair);
+  display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem}
+.ph-l li b{color:var(--signal);font-size:.58rem;font-weight:700;letter-spacing:.06em;
+  padding-top:.15rem}
+
+/* ── Numbered actions ───────────────────────────────────────────── */
+.acts{margin-top:2rem;display:flex;flex-direction:column;gap:.8rem}
+.act{display:grid;grid-template-columns:3rem 1fr;gap:1.2rem;align-items:start;
+  border:1px solid var(--hair);border-radius:10px;padding:1.15rem 1.2rem;
+  background:rgba(237,233,240,.03)}
+.act-n{font-family:'Archivo Black',sans-serif;font-size:1.9rem;color:var(--signal);line-height:.9}
+.act-t{font-size:.98rem;font-weight:700;line-height:1.35}
+.act-d{font-size:.76rem;color:var(--smoke);margin-top:.42rem;line-height:1.55}
+@media(max-width:640px){.act{grid-template-columns:1fr;gap:.4rem}}
+
+/* ── Gap bars ───────────────────────────────────────────────────── */
+.gaps{margin-top:1.9rem;max-width:680px}
+.gap-r{display:grid;grid-template-columns:7.2rem 1fr 3.4rem;gap:.9rem;align-items:center;
+  margin-bottom:.55rem}
+.gap-l{font-size:.66rem;color:var(--smoke)}
+.gap-t{height:10px;background:rgba(237,233,240,.09);border-radius:99px;overflow:hidden}
+.gap-f{height:100%;background:var(--ember);border-radius:99px;width:0;
+  transition:width 1s cubic-bezier(.2,.8,.3,1)}
+.gap-f.worst{background:var(--signal)}
+.gap-v{font-family:'Archivo Black',sans-serif;font-size:.92rem;text-align:right}
+
+/* ── Provenance note ────────────────────────────────────────────── */
+.prov{margin-top:1.6rem;font-size:.63rem;line-height:1.6;color:var(--smoke);
+  border-left:2px solid var(--ember);padding-left:.85rem;max-width:58ch}
+.prov b{color:var(--ember);font-weight:700;letter-spacing:.08em;font-size:.58rem;
+  text-transform:uppercase}
+
+.phint{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);font-size:.58rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);opacity:0;
+  transition:opacity .3s;z-index:950;pointer-events:none}
+body.present .phint{opacity:.55}
+.pnum{position:fixed;bottom:1rem;right:1.4rem;font-size:.58rem;letter-spacing:.14em;
+  color:var(--smoke);opacity:0;transition:opacity .3s;z-index:950}
+body.present .pnum{opacity:.55}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="chrome-l">
+    <span style="color:var(--signal)">VENUS GRRRLS × YOUTUBE</span>
+    <span>The last act · September 2026</span>
+  </div>
+  <div class="chrome-r">
+    <button class="btn" onclick="present()">Present</button>
+  </div>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
+<section class="slide" data-t="Cover">
+  <div class="bleed"><img src="https://i.ytimg.com/vi/nXSzpkATwFc/maxresdefault.jpg" alt=""
+       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/nXSzpkATwFc/hqdefault.jpg'"></div>
+  <div class="inner">
+    <div class="label reveal">YouTube deep dive · 14 September 2026</div>
+    <h1 class="display big reveal">The last act</h1>
+    <p class="statement reveal" style="margin-top:1.4rem">
+      VENUS GRRRLS have already run most of a campaign on YouTube. Three singles, sixteen
+      uploads, and more than a third of everything the channel has ever earned.
+    </p>
+    <p class="sub reveal">
+      One release left — <b style="color:var(--paper)">Carmilla, 13 October</b> — and then an EP with no
+      YouTube date on it yet. This deck is about connecting what already exists, not starting
+      something new.
+    </p>
+    <div class="prov reveal">
+      <b>Sources</b><br>
+      Every figure is counted from the public YouTube API on 14 Sep 2026 and the Coach plan.
+      The channel has 32 uploads in total, so this is the whole catalogue rather than a sample.
+      Nothing here uses YouTube Studio data.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · WHERE WE ARE NOW ═══════════════════════════════════════ -->
+<section class="slide coal" data-t="Where we are">
+  <div class="inner">
+    <div class="label reveal">Where we are now</div>
+    <h2 class="display mid reveal" style="max-width:20ch">This campaign is already the biggest thing the channel has done</h2>
+
+    <div class="stat-row reveal">
+      <div class="stat"><div class="num sig">106,487</div><div class="cap">Campaign views</div>
+        <div class="sub2">16 assets since 22 Jan</div></div>
+      <div class="stat"><div class="num">37.6%</div><div class="cap">Of lifetime views</div>
+        <div class="sub2">283,484 all time</div></div>
+      <div class="stat"><div class="num">2,970</div><div class="cap">Subscribers</div>
+        <div class="sub2">+10 last 7 days</div></div>
+      <div class="stat"><div class="num">13 / 3</div><div class="cap">Shorts / long-form</div>
+        <div class="sub2">long-form = 83% of campaign views</div></div>
+      <div class="stat"><div class="num" style="color:var(--ember)">14</div><div class="cap">Days quiet</div>
+        <div class="sub2">29 to Carmilla</div></div>
+    </div>
+
+    <div class="beat reveal">
+      <div class="beat-r"><div class="beat-k">Means</div><div class="beat-v">
+        The record is not arriving at a cold channel. Three singles have already done the work of
+        building an audience here — the question is whether the last one inherits it.</div></div>
+      <div class="beat-r do"><div class="beat-k">So</div><div class="beat-v">
+        Treat 13 October as the moment that connects the campaign, not the moment that starts one.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · WHAT'S WORKING ═════════════════════════════════════════ -->
+<section class="slide" data-t="What's working">
+  <div class="inner">
+    <div class="label reveal">What's working</div>
+    <h2 class="display mid reveal" style="max-width:22ch">The cheap format beat the expensive one</h2>
+
+    <div class="vs reveal">
+      <div class="vs-col win">
+        <div class="vs-yr">Mother Knows · visualiser · 18 Aug</div>
+        <div class="vs-n">10,403</div>
+        <div class="vs-lab">views in 27 days</div>
+        <ul class="vs-list">
+          <li><span>Like rate</span><span>3.81%</span></li>
+          <li><span>Comments</span><span>55</span></li>
+          <li><span>Days live</span><span>27</span></li>
+        </ul>
+      </div>
+      <div class="vs-col">
+        <div class="vs-yr">3x3 · official video · 22 Jan</div>
+        <div class="vs-n">3,887</div>
+        <div class="vs-lab">views in 8 months</div>
+        <ul class="vs-list">
+          <li><span>Like rate</span><span>5.61%</span></li>
+          <li><span>Comments</span><span>14</span></li>
+          <li><span>Days live</span><span>235</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="beat reveal">
+      <div class="beat-r"><div class="beat-k">Means</div><div class="beat-v">
+        A visualiser did 2.7× the views of a full music video in an eighth of the time, and pulled
+        four times the comments. 3x3 has the better like rate — the content isn't the problem —
+        but almost nobody saw it. Format and timing carried Mother Knows, not budget.</div></div>
+      <div class="beat-r do"><div class="beat-k">So</div><div class="beat-v">
+        Carmilla gets a visualiser live on release day. Do not hold the moment waiting for a
+        music video.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · THE NUMBER THAT ISN'T WHAT IT LOOKS LIKE ═══════════════ -->
+<section class="slide light" data-t="Eve">
+  <div class="inner">
+    <div class="label v reveal">What we've learned · 1</div>
+    <h2 class="display mid reveal" style="max-width:24ch">The biggest number on the channel is the weakest signal on it</h2>
+
+    <div style="display:flex;gap:clamp(1.5rem,5vw,4rem);flex-wrap:wrap;align-items:flex-end;margin-top:1.8rem" class="reveal">
+      <div>
+        <div class="huge">0.61%</div>
+        <div class="huge-cap">Eve · like rate</div>
+      </div>
+      <div>
+        <div class="huge v" style="font-size:clamp(2rem,6vw,4.4rem)">3.46%</div>
+        <div class="huge-cap">Median official video, excluding Eve</div>
+      </div>
+    </div>
+
+    <div class="beat reveal">
+      <div class="beat-r"><div class="beat-k">Observed</div><div class="beat-v">
+        Eve has 74,595 views — 26% of everything the channel has ever earned, 2.7× the next
+        best video. It is also the <b>lowest-engaging upload on the channel</b>, running 5.7×
+        below the median official video, with <b>fewer comments than Mother Knows</b> —
+        36 against 55 — on 7.2× the views.</div></div>
+      <div class="beat-r"><div class="beat-k">Means</div><div class="beat-v">
+        Whatever drove those views, that audience did not behave like this band's audience.
+        It was reach without a relationship.</div></div>
+      <div class="beat-r do"><div class="beat-k">So</div><div class="beat-v">
+        Judge Carmilla on like rate and comments, not the view counter — and don't build the
+        release plan around repeating what Eve looked like.</div></div>
+    </div>
+
+    <div class="prov reveal">
+      <b>Interpretation, not observation</b><br>
+      The engagement gap is counted. The cause is not — a promoted or suggested-traffic spike is
+      the most likely explanation for that shape, but the API cannot confirm it. The strategic
+      conclusion is the same either way.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE GAPS ═══════════════════════════════════════════════ -->
+<section class="slide" data-t="The gaps">
+  <div class="inner">
+    <div class="label reveal">What we've learned · 2</div>
+    <h2 class="display mid reveal" style="max-width:22ch">The silence costs more than the content</h2>
+
+    <div class="gaps reveal">
+      <div class="gap-r"><div class="gap-l">After 3x3</div>
+        <div class="gap-t"><div class="gap-f" data-w="47"></div></div><div class="gap-v">36d</div></div>
+      <div class="gap-r"><div class="gap-l">Before Eve</div>
+        <div class="gap-t"><div class="gap-f" data-w="69"></div></div><div class="gap-v">53d</div></div>
+      <div class="gap-r"><div class="gap-l"><b style="color:var(--signal)">After Eve</b></div>
+        <div class="gap-t"><div class="gap-f worst" data-w="100"></div></div><div class="gap-v">77d</div></div>
+      <div class="gap-r"><div class="gap-l">Before Mother Knows</div>
+        <div class="gap-t"><div class="gap-f" data-w="29"></div></div><div class="gap-v">22d</div></div>
+      <div class="gap-r"><div class="gap-l">Right now</div>
+        <div class="gap-t"><div class="gap-f" data-w="18"></div></div><div class="gap-v">14d</div></div>
+    </div>
+
+    <div class="beat reveal">
+      <div class="beat-r"><div class="beat-k">Observed</div><div class="beat-v">
+        The channel went quiet for 77 days immediately after its single biggest view moment.
+        The two longest gaps of the year sit either side of Eve — 53 days walking into it,
+        77 days walking away.</div></div>
+      <div class="beat-r"><div class="beat-k">Means</div><div class="beat-v">
+        The campaign keeps arriving and then leaving. Attention is being generated and then
+        handed back — and that is the cheapest thing on this list to fix, because it needs
+        no new creative.</div></div>
+      <div class="beat-r do"><div class="beat-k">So</div><div class="beat-v">
+        One or two Shorts a week between now and 13 October, cut from footage that already
+        exists. Nothing has to be made.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · THE OPPORTUNITY ════════════════════════════════════════ -->
+<section class="slide coal" data-t="The opportunity">
+  <div class="inner">
+    <div class="label reveal">The opportunity</div>
+    <h2 class="display mid reveal" style="max-width:24ch">Somewhere fans spend time, not somewhere videos land</h2>
+
+    <div class="thumb-grid g4 reveal">
+      <a class="tcard" href="https://youtube.com/shorts/x-pn3zCr2xM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/x-pn3zCr2xM/hqdefault.jpg" alt="">
+        <div class="tmeta"><div class="ttitle">ZOINKS it's the witches</div>
+          <div class="tviews">3,083</div><div class="tsub">27 Feb · best Short</div></div></a>
+      <a class="tcard" href="https://youtube.com/shorts/EV5Ol-u5eUw" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/EV5Ol-u5eUw/hqdefault.jpg" alt="">
+        <div class="tmeta"><div class="ttitle">do you think it worked??</div>
+          <div class="tviews">1,756</div><div class="tsub">26 Jul</div></div></a>
+      <a class="tcard" href="https://youtube.com/shorts/Q5OS4sQGYWI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Q5OS4sQGYWI/hqdefault.jpg" alt="">
+        <div class="tmeta"><div class="ttitle">drummer vs singer final boss</div>
+          <div class="tviews">1,490</div><div class="tsub">26 Jul</div></div></a>
+      <a class="tcard" href="https://youtube.com/shorts/il0PTX1p80A" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/il0PTX1p80A/hqdefault.jpg" alt="">
+        <div class="tmeta"><div class="ttitle">Goth Chappell Roan it is</div>
+          <div class="tviews">1,212</div><div class="tsub">30 Aug · last upload</div></div></a>
+    </div>
+
+    <div class="beat reveal">
+      <div class="beat-r"><div class="beat-k">Observed</div><div class="beat-v">
+        The Shorts that reach furthest are the personality ones — Hex Girls, witchcraft,
+        gothic literature, band in-jokes — rather than the announcement ones. The best is
+        <i>ZOINKS it's the witches</i> at 3,083; the weakest is a release announcement at 420.
+        Across all 18 they engage at a <b>2.78% median like rate</b>, the same band as the
+        official videos. And the channel converts viewers to subscribers at
+        <b>1.05% lifetime</b> — and 0.61% over the last seven days, in a week with nothing
+        uploaded in it at all.</div></div>
+      <div class="beat-r"><div class="beat-k">Means</div><div class="beat-v">
+        This channel does not have a conversion problem. It has an attendance problem. The
+        voice is already working — there just isn't enough of it, and nothing on the channel
+        currently gathers it into one place.</div></div>
+      <div class="beat-r do"><div class="beat-k">So</div><div class="beat-v">
+        Keep the coven voice and give it somewhere to point: a pinned playlist, an end screen,
+        a next video. That is the difference between a feed and a channel.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · NOW → RELEASE ══════════════════════════════════════════ -->
+<section class="slide" data-t="Now → release">
+  <div class="inner">
+    <div class="label reveal">Phase one · 15 Sep → 12 Oct</div>
+    <h2 class="display mid reveal" style="max-width:20ch">Re-open the channel. Make nothing new.</h2>
+
+    <div class="ph reveal">
+      <div class="ph-c key">
+        <div class="ph-n">This week</div>
+        <div class="ph-w">Break the silence</div>
+        <ul class="ph-l">
+          <li><b>Shorts</b><span>Two, cut from Eve and Mother Knows footage that already exists</span></li>
+          <li><b>EP</b><span>Announce <i>To Die As Lovers May</i> — the moment planned for August that never ran</span></li>
+        </ul>
+      </div>
+      <div class="ph-c">
+        <div class="ph-n">Late September</div>
+        <div class="ph-w">Build the room</div>
+        <ul class="ph-l">
+          <li><b>Playlist</b><span>One EP playlist: 3x3, Eve, Mother Knows — so Carmilla has somewhere to land</span></li>
+          <li><b>Captions</b><span>All 14 long-form videos are missing them. Start with the five carrying the views</span></li>
+        </ul>
+      </div>
+      <div class="ph-c">
+        <div class="ph-n">Early October</div>
+        <div class="ph-w">Point at it</div>
+        <ul class="ph-l">
+          <li><b>Cadence</b><span>1–2 personality Shorts a week, each ending on the playlist</span></li>
+          <li><b>Community</b><span>One post: EP tracklist or artwork reveal</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="sub reveal">
+      Nothing on this slide requires a shoot, a budget or a new idea. It requires the channel to
+      stop being empty for the four weeks before the record.
+    </p>
+  </div>
+</section>
+
+<!-- ═══ 8 · RELEASE WEEK ═══════════════════════════════════════════ -->
+<section class="slide light" data-t="Release week">
+  <div class="inner">
+    <div class="label reveal">Phase two · 12–18 October</div>
+    <h2 class="display mid reveal" style="max-width:20ch">Five things, in this order</h2>
+
+    <div class="acts reveal" style="max-width:900px">
+      <div class="act"><div class="act-n">1</div><div>
+        <div class="act-t">Carmilla visualiser, live on 13 October</div>
+        <div class="act-d">The format Mother Knows already proved on this channel. Release day, not release week.</div></div></div>
+      <div class="act"><div class="act-n">2</div><div>
+        <div class="act-t">Three Shorts: 11 Oct tease · 13 Oct drop · 16 Oct follow-up</div>
+        <div class="act-d">The Coach plan already specifies this shape. Personality-led, in the band's own voice — the register that works here.</div></div></div>
+      <div class="act"><div class="act-n">3</div><div>
+        <div class="act-t">End screens and pinned comments on Eve and Mother Knows</div>
+        <div class="act-d">85,000 views already sit on those two videos. It is the largest audience the band can reach on release day and it costs nothing.</div></div></div>
+      <div class="act"><div class="act-n">4</div><div>
+        <div class="act-t">Carmilla into the EP playlist, and the playlist onto the homepage</div>
+        <div class="act-d">One destination for four singles, so a new viewer has a second thing to watch.</div></div></div>
+      <div class="act"><div class="act-n">5</div><div>
+        <div class="act-t">Community post on drop day</div>
+        <div class="act-d">2,970 subscribers who have already opted in. The cheapest reach in the campaign.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · AFTER RELEASE ══════════════════════════════════════════ -->
+<section class="slide coal" data-t="After release">
+  <div class="inner">
+    <div class="label reveal">Phase three · +1 to +6 weeks</div>
+    <h2 class="display mid reveal" style="max-width:24ch">This is the part that decides whether it was a campaign or a release</h2>
+
+    <div class="ph reveal">
+      <div class="ph-c key">
+        <div class="ph-n">+1 to +2 weeks</div>
+        <div class="ph-w">Extend the song</div>
+        <ul class="ph-l">
+          <li><b>Lyric</b><span>Carmilla lyric video, +7–10 days. Already in the Coach plan</span></li>
+          <li><b>Why</b><span>The 77-day silence after Eve is the pattern this breaks</span></li>
+        </ul>
+      </div>
+      <div class="ph-c key">
+        <div class="ph-n">+2 to +3 weeks</div>
+        <div class="ph-w">One live session</div>
+        <ul class="ph-l">
+          <li><b>Shoot</b><span>Acoustic or live, two or three EP tracks, one day</span></li>
+          <li><b>Why</b><span>No live or performance upload appears anywhere in the 32-video catalogue</span></li>
+        </ul>
+      </div>
+      <div class="ph-c">
+        <div class="ph-n">+4 to +6 weeks</div>
+        <div class="ph-w">Cut it down</div>
+        <ul class="ph-l">
+          <li><b>Shorts</b><span>Four, from the live session and BTS</span></li>
+          <li><b>Story</b><span>Story behind Carmilla — Mother Knows drew 55 comments on 10K views, the channel's second-highest rate</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="beat reveal">
+      <div class="beat-r"><div class="beat-k">Means</div><div class="beat-v">
+        One day of filming produces the lyric video's audience, a live piece, four Shorts and a
+        story video — six weeks of channel activity from a single shoot, landing exactly where
+        the last two campaigns went quiet.</div></div>
+      <div class="beat-r do"><div class="beat-k">So</div><div class="beat-v">
+        Book the session now, for the week after release. It is the only decision on this deck
+        with a lead time.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · THREE THINGS ══════════════════════════════════════════ -->
+<section class="slide" data-t="Three things">
+  <div class="bleed"><img src="https://i.ytimg.com/vi/nQ3G4n3kKAk/maxresdefault.jpg" alt=""
+       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/nQ3G4n3kKAk/hqdefault.jpg'"></div>
+  <div class="inner">
+    <div class="label reveal">Three things to do next</div>
+    <h2 class="display big reveal" style="max-width:16ch">Connect it</h2>
+
+    <div class="acts reveal" style="max-width:860px;margin-top:2.2rem">
+      <div class="act"><div class="act-n">1</div><div>
+        <div class="act-t">Re-open the channel this week</div>
+        <div class="act-d">Two Shorts from existing footage, the EP announce that never ran, and one playlist.
+          Fourteen days of silence with twenty-nine to go is the only problem here that is free to solve.</div></div></div>
+      <div class="act"><div class="act-n">2</div><div>
+        <div class="act-t">Give Carmilla a visualiser and three Shorts on 13 October</div>
+        <div class="act-d">Repeat what Mother Knows proved — 10,403 views and a 3.81% like rate in 27 days —
+          rather than what Eve looked like. And point Eve's 74,595 views at it with an end screen.</div></div></div>
+      <div class="act"><div class="act-n">3</div><div>
+        <div class="act-t">Book one live session for the week after release</div>
+        <div class="act-d">No live or performance video appears anywhere in the 32-video catalogue, and it is the
+          format that turns a release into six weeks. Booked now, it lands while Carmilla is still moving.</div></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="phint">← → navigate · esc exit</div>
+<div class="pnum" id="pnum"></div>
+
+<script>
+/* Reveal on scroll, present mode, slide counter. Deliberately small —
+   this deck has no live data layer, because VENUS GRRRLS has no Deep
+   Dive baseline in Watcher yet. Every number here is a counted figure
+   from 14 Sep 2026 and is written into the HTML rather than fetched. */
+(function(){
+  'use strict';
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var idx = 0;
+
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('in');
+      /* Bars animate only once their slide is actually on screen, so the
+         motion reads as a response to arriving rather than something that
+         already happened above the fold. */
+      Array.prototype.forEach.call(e.target.parentNode.querySelectorAll('.gap-f'), function(f){
+        if(f.dataset.w) f.style.width = f.dataset.w + '%';
+      });
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.15 });
+  Array.prototype.forEach.call(document.querySelectorAll('.reveal'), function(el){ io.observe(el); });
+
+  function show(n){
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s,i){ s.classList.toggle('on', i === idx); });
+    document.getElementById('pnum').textContent = (idx+1) + ' / ' + slides.length;
+    Array.prototype.forEach.call(slides[idx].querySelectorAll('.reveal'), function(el){ el.classList.add('in'); });
+    Array.prototype.forEach.call(slides[idx].querySelectorAll('.gap-f'), function(f){
+      if(f.dataset.w) f.style.width = f.dataset.w + '%';
+    });
+  }
+  window.present = function(){ document.body.classList.add('present'); show(0); };
+  function exit(){ document.body.classList.remove('present'); slides.forEach(function(s){ s.classList.remove('on'); }); }
+
+  document.addEventListener('keydown', function(e){
+    if(!document.body.classList.contains('present')) return;
+    if(e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(idx+1); }
+    if(e.key === 'ArrowLeft') { e.preventDefault(); show(idx-1); }
+    if(e.key === 'Escape') exit();
+  });
+})();
+</script>
+</body>
+</html>
