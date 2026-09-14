@@ -1203,7 +1203,11 @@ export function buildRollout(
       origin: p.deepDivePoint ? 'DEEP_DIVE' : 'HUMAN',
       attribution: p.human
         ? { statedBy: p.human.statedBy, statedAt: p.human.statedAt, precision: p.human.precision }
-        : { statedBy: 'CHVRCHES Deep Dive', statedAt: report.deepDive?.capturedAt ?? '', precision: 'day' },
+        /* The artist's own Deep Dive, named from the report rather than typed.
+           It said CHVRCHES on a Kings of Leon page until a second artist
+           existed to notice \u2014 which is the whole argument for building the
+           second one. */
+        : { statedBy: `${report.artistName} Deep Dive`, statedAt: report.deepDive?.capturedAt ?? '', precision: 'day' },
       recommendationId: recId,
       spine: p.spine,
       spineStatus: null,     // assigned below, across the whole spine

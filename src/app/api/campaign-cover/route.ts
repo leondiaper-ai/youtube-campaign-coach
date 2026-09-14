@@ -592,7 +592,7 @@ function buildRead(
        the next moment, so "moving towards" is a statement about the plan
        rather than a claim about cause. */
     line: next
-      ? `Now we're moving towards ${next.label.toLowerCase()}.`
+      ? `Next: ${next.label}.`
       : 'Now we\'re watching what follows it.',
   };
 }

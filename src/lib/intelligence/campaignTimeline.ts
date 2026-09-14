@@ -236,7 +236,18 @@ export async function buildCampaignTimeline(
     Math.round((new Date(iso + 'T00:00:00Z').getTime() - now) / DAY);
 
   /* ── NEXT — the nearest thing that makes other content compete ───── */
-  const next = upcoming.find(e => isMajor(e.eventType)) ?? upcoming[0];
+  /* The nearest thing that makes other content compete — but NOT the album
+     when something sits between here and it. The album is the ANCHOR and
+     already has its own row; letting it be NEXT as well printed the same
+     date twice and hid the release actually coming first. A tentative
+     single eight weeks out is more useful to a reader than the album they
+     can already see at the end of the line. */
+  const album0 = upcoming.find(e => e.eventType === 'ALBUM_RELEASE');
+  const beforeAlbum = upcoming.filter(e => e.eventId !== album0?.eventId);
+  const next = beforeAlbum.find(e => isMajor(e.eventType) || isLongForm(e.eventType))
+    ?? beforeAlbum[0]
+    ?? upcoming.find(e => isMajor(e.eventType))
+    ?? upcoming[0];
   const nextSplit = splitTitle(next.title);
   const heroStage = rollout.items.find(i => i.spineStatus === 'NEXT')?.title ?? null;
 
@@ -265,7 +276,11 @@ export async function buildCampaignTimeline(
     && new Date(e.eventDate + 'T00:00:00Z').getTime() >= winStart
     && new Date(e.eventDate + 'T00:00:00Z').getTime() <= winEnd);
 
-  const secondDestination = rollout.items.find(i => i.title === 'Second destination');
+  /* By need tag, not by title. Matching on the words "Second destination"
+     worked for exactly one artist and silently returned nothing for the
+     next one, so the window it is meant to draw simply did not appear. The
+     tag is the contract; the title is editorial. */
+  const secondDestination = rollout.items.find(i => i.spine && i.needTags.includes('follow_up_7_14'));
 
   if (planned) {
     const s = splitTitle(planned.title);
@@ -273,7 +288,7 @@ export async function buildCampaignTimeline(
       kind: 'WINDOW', provenance: provenanceOf(planned),
       dateLabel: label(planned.eventDate!), date: planned.eventDate,
       daysAway: daysTo(planned.eventDate!),
-      stage: 'Second destination', title: s.title, detail: s.detail, asset: null,
+      stage: secondDestination?.title ?? 'Second destination', title: s.title, detail: s.detail, asset: null,
     });
   } else if (secondDestination && !['LIVE', 'COMPLETE'].includes(secondDestination.status) && followUp) {
     /* The hero has already landed, so the window has real dates. "+7-14
@@ -297,7 +312,7 @@ export async function buildCampaignTimeline(
     moments.push({
       kind: 'WINDOW', provenance: 'RECOMMENDED',
       dateLabel: '+7-14 DAYS', date: null, daysAway: null,
-      stage: 'Second destination',
+      stage: secondDestination.title,
       /* The formats the Deep Dive named, in the Deep Dive's order. Not a
          list of everything YouTube supports. */
       title: 'Lyric · Live · Performance',
