@@ -74,6 +74,29 @@ export async function writeLiveSnap(channelId: string, snap: LiveSnap) {
   if (!store) return;
   const cached: CachedSnap = { ...snap, cachedAt: new Date().toISOString() };
   await store.set(`live:${channelId}`, cached);
+
+  /* ── Keep the per-video reading instead of overwriting it ──────────
+     Every refresh already fetches viewCount and likeCount for recent
+     uploads and then throws them away on the next one. A view total at day
+     7 cannot be recovered later — the API only ever returns a lifetime
+     counter — so the only way to ever say "1.4x the previous hero's pace
+     at day 7" is to have written it down on day 7.
+
+     Costs no extra quota: this is the data already in hand. Awaited but
+     never allowed to throw, because a snapshot is a side effect of a read
+     whose job is something else. */
+  try {
+    const { recordVideoObservations } = await import('./videoSnapshots');
+    await recordVideoObservations(
+      (snap.recentUploads ?? []).map(u => ({
+        id: u.id,
+        publishedAt: u.publishedAt,
+        viewCount: u.viewCount,
+        likeCount: u.likeCount,
+        commentCount: (u as { commentCount?: number }).commentCount ?? null,
+      })),
+    );
+  } catch { /* never fail a cache write over a history write */ }
 }
 
 export async function readLiveSnap(channelId: string): Promise<CachedSnap | null> {
