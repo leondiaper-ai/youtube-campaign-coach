@@ -309,8 +309,15 @@ function buildLiveCover(d){
       </div>
     </div>
 
-    ${(d.coverage && d.coverage.length) ? `<div class="cov">${
-      d.coverage.map(esc).join(' · ')}</div>` : ''}
+    ${/* The coverage list stays in the payload and off the page.
+
+          It is the record of how each figure was derived — which rule
+          picked the campaign start, why there is no follow-up window —
+          and it earns its place in the API response, where anybody
+          auditing a number can read it. Printed under the cover it
+          became two paragraphs of methodology below a page whose whole
+          argument is that a campaign should be legible in five seconds.
+          Reasoning belongs in the record; the page states the finding. */''}
   </div>
 </section>`;
 }
