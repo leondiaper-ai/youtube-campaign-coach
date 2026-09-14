@@ -478,6 +478,30 @@ function goDeep(slide){
   setTimeout(function(){ el.scrollIntoView({behavior:'smooth', block:'start'}); }, 30);
 }
 
+/* ── THE CHANNEL DEEP DIVE BUTTON ─────────────────────────────────────
+   The research is already in the deck — the scale, the era, the last
+   album, the story — sitting behind the live campaign that now opens it.
+   Before this there was no way to reach it except scrolling past the
+   campaign, which is fine the first time and tedious every time after.
+
+   It aims at the divider the live layer already inserts, by its data-t.
+   If the API failed there is no divider, so it falls back to the first
+   slide after the cover, which is where the captured deck begins anyway.
+   A button that does nothing is worse than a button that does the
+   approximately right thing. */
+function goChannel(){
+  const marker = Array.prototype.slice.call(document.querySelectorAll('#deck .slide'))
+    .filter(function(x){ return x.getAttribute('data-t') === 'Channel Deep Dive'; })[0];
+  if (marker) return goDeep('Channel Deep Dive');
+
+  switchTab('campaign');
+  const slides = document.querySelectorAll('#deck .slide');
+  const target = slides[1] || slides[0];
+  if (target) setTimeout(function(){
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 30);
+}
+
 /* The feature is whichever idea the campaign is walking into. It follows
    the spine rather than a flag, so it moves on its own. */
 function pickFeature(ideas, items){
@@ -720,6 +744,7 @@ if (deckEl) deckEl.insertAdjacentHTML('afterbegin', '<div class="coverslot" id="
 
 window.switchTab = switchTab;
 window.goDeep = goDeep;
+window.goChannel = goChannel;
 window.thumbGuard = thumbGuard;
 
 loadLiveCampaign()
