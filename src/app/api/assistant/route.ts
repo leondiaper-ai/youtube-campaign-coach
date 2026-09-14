@@ -24,6 +24,7 @@ import { runBoundaryChecks } from '@/lib/knowledge/__tests__/evidence.test';
 import { runMatchingChecks } from '@/lib/intelligence/__tests__/matching.test';
 import { runProgressChecks } from '@/lib/intelligence/__tests__/progress.test';
 import { runRolloutChecks } from '@/lib/intelligence/__tests__/rollout.test';
+import { runCampaignWindowChecks } from '@/lib/intelligence/__tests__/campaignWindow.test';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -60,6 +61,12 @@ export async function GET(req: NextRequest) {
      on a stage the campaign has already passed. */
   if (view === 'rollout-checks') {
     return NextResponse.json(runRolloutChecks());
+  }
+  /* The campaign-window suite. These guard the two halves of one mistake:
+     a channel view delta presented as CAMPAIGN VIEWS, and a pin date or an
+     analysis date presented as the campaign start. */
+  if (view === 'campaign-window-checks') {
+    return NextResponse.json(runCampaignWindowChecks());
   }
   if (view === 'read') {
     const slug = req.nextUrl.searchParams.get('slug') ?? '';

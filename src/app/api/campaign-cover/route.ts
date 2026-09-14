@@ -34,6 +34,7 @@ import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory, deltaOver } from '@/lib/snapshots';
+import { resolveCampaignStart, campaignMetrics } from '@/lib/intelligence/campaignWindow';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -243,10 +244,36 @@ export async function GET(req: NextRequest) {
       coverage.push('Snapshot holds no recent-upload list. Absence of assets here means the read failed, not that nothing was published.');
     }
 
+    /* ── When this campaign started ────────────────────────────────
+       Not when we pinned the artist, and not when the Deep Dive was
+       captured. See campaignWindow.ts: a stated date if one exists,
+       otherwise the first upload of the most recent sustained run, and
+       the Deep Dive capture only as a last resort that says so.
+
+       For Kings of Leon this moves the boundary from 24 Aug (the day the
+       analysis ran) to 12 Aug — the first "29 days 'til…" Short, counting
+       to My Whole World on 10 Sep. The channel stated the date; nothing
+       was reading it. */
+    const campaignStart = resolveCampaignStart({
+      uploads: raw.map(v => ({
+        publishedAt: v.publishedAt,
+        views: v.viewCount ?? null,
+        kind: formatOf(v).kind,
+      })),
+      baselineAt: capturedAt ?? null,
+    });
+    if (campaignStart) coverage.push(campaignStart.because);
+    else coverage.push('No campaign start could be resolved, so campaign figures are unavailable rather than zero.');
+
+    const startAt = campaignStart ? new Date(campaignStart.at) : null;
+
     const postBaseline: CoverAsset[] = [];
     for (const v of raw) {
       const at = new Date(v.publishedAt ?? 0);
-      if (!since || !Number.isFinite(at.getTime()) || at <= since) continue;
+      /* Inclusive. The upload that opens an era IS the campaign's first
+         asset, and excluding it by a strict `>` was half of the reason
+         one surface counted 13 assets and this one counted 10. */
+      if (!startAt || !Number.isFinite(at.getTime()) || at < startAt) continue;
       const observed = formatOf(v);
       /* A person who knows what the asset is beats a duration check. The
          shape stays observed; only the name changes. */
@@ -280,8 +307,8 @@ export async function GET(req: NextRequest) {
 
     /* ── Movement since the baseline ───────────────────────────────── */
     const channelId = (snap as any)?.channelId;
-    const daysSinceBaseline = since
-      ? Math.max(1, Math.round((Date.now() - since.getTime()) / 86_400_000)) : null;
+    const daysSinceBaseline = startAt
+      ? Math.max(1, Math.round((Date.now() - startAt.getTime()) / 86_400_000)) : null;
 
     let viewsDelta: number | null = null;
     let subsDelta: number | null = null;
@@ -313,7 +340,7 @@ export async function GET(req: NextRequest) {
 
       if (viewsWindow && daysSinceBaseline && viewsWindow.days > daysSinceBaseline + 2) {
         coverage.push(
-          `Channel movement covers ${viewsWindow.days} days, not the ${daysSinceBaseline} since the Deep Dive — `
+          `Channel movement covers ${viewsWindow.days} days, not the ${daysSinceBaseline} since the campaign started — `
           + 'the snapshot series has no reading in between.',
         );
       }
@@ -326,24 +353,36 @@ export async function GET(req: NextRequest) {
       ? postBaseline.map(a => a.publishedAt).sort()[0] : null;
 
     /* ── What the campaign itself has earned ──────────────────────────
-       The lifetime view total on the assets published since the Deep Dive.
-       For assets a day or two old, lifetime IS campaign-period — there is
-       no earlier life for the number to include. That stops being true as
-       they age, which is why the label says "on the new assets" rather
-       than "this period", and why the share below is guarded.
+       The sum of views on every asset published since the campaign
+       started. Exact, not approximate: a video published after the start
+       has accumulated all of its views during the campaign, so its
+       lifetime counter IS its campaign total, and stays so.
 
-       This is the figure that keeps the page honest. +3.05M channel views
-       sitting under THE CAMPAIGN IS LIVE reads as campaign performance,
-       and almost none of it is: the channel was dormant for all but two
-       days of that window and earns roughly 74,000 a day doing nothing.
-       Putting the campaign's own number beside it, at the same size, is
-       the difference between a page that informs and a page that flatters. */
-    const campaignViews = postBaseline.reduce(
-      (n, a) => n + (a.views ?? 0), 0) || null;
+       This is the figure that keeps the page honest, and the reason the
+       channel delta below no longer appears on the cover. Kings of Leon
+       earns roughly 700,000 views a day from a catalogue in which one
+       2008 single holds 36.6% of 2.46 billion lifetime views. Over 27
+       days that is ~19M, and a page that prints it under CAMPAIGN VIEWS
+       is attributing Sex on Fire to a campaign that has not released the
+       album yet. The campaign's own number is ~1.08M, and it is the one
+       a label can defend in a room. */
+    const campaignPerf = campaignStart
+      ? campaignMetrics(
+          raw.map(v => ({
+            publishedAt: v.publishedAt,
+            views: v.viewCount ?? null,
+            kind: formatOf(v).kind,
+          })),
+          campaignStart,
+        )
+      : null;
 
-    /* Only a fraction if every asset was published inside the window the
-       channel figure covers — otherwise it is two different periods
-       divided by each other, which is not a percentage of anything. */
+    const campaignViews = campaignPerf?.views ?? null;
+
+    /* Kept in the payload because the Ideas tab and the analysis surfaces
+       still want channel context, and removed from the cover's stats. Two
+       large view figures side by side meant the bigger one won, and the
+       bigger one was the catalogue. */
     const windowStart = viewsWindow ? new Date(viewsWindow.from).getTime() : null;
     const allInsideWindow = windowStart != null && postBaseline.every(
       a => new Date(a.publishedAt).getTime() >= windowStart);
@@ -498,7 +537,17 @@ export async function GET(req: NextRequest) {
         /* The campaign's own number, and how much of the channel's
            movement it accounts for. */
         campaignViews,
-        campaignAssets: postBaseline.length,
+        campaignAssets: campaignPerf?.assets ?? null,
+        campaignShorts: campaignPerf?.shorts ?? null,
+        campaignLongForm: campaignPerf?.longForm ?? null,
+        /* Day 1 is the day the first asset landed. Set small on the page:
+           it is the thing that makes the other two figures mean something,
+           not a figure in its own right. */
+        campaignDay: campaignPerf?.day ?? null,
+        /* Which rule decided the boundary, so a reader can tell an
+           observed campaign start from a fallback to the analysis date. */
+        campaignStart: campaignStart
+          ? { at: campaignStart.at, rule: campaignStart.rule } : null,
         campaignShare,
         newUploads: postBaseline.length,
         baselineDormantDays,

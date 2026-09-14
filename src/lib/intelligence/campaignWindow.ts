@@ -1,0 +1,206 @@
+/**
+ * WHEN THE CAMPAIGN STARTED, AND WHAT IT HAS EARNED SINCE
+ *
+ * ── THE PROBLEM THIS SOLVES ───────────────────────────────────────────
+ * Watcher held four different answers to "when did this campaign start",
+ * and three surfaces each picked a different one:
+ *
+ *   artist.campaignStartDate   the day somebody pinned the artist in
+ *                              Watcher. Written automatically as `today`.
+ *   campaignStore baseline     captured seconds later in the same handler,
+ *                              and rendered as "SINCE TAKEOVER (N days)".
+ *   deepDive.dataCapturedAt    the day the analysis was run. A constant in
+ *                              a module.
+ *   progress.statedAt          when a person recorded an implementation.
+ *
+ * None of those is when the campaign started. Two are when WE arrived and
+ * one is when we looked. On Kings of Leon the first gave 13 assets and the
+ * third gave 10, for the same campaign, on the same afternoon — and the
+ * difference was not a bug in either, it was two dates both being called
+ * "campaign start".
+ *
+ * "Since takeover" and "since the campaign began" are different questions
+ * and this module answers only the second. The first belongs to the
+ * campaign store and keeps its own name.
+ *
+ * ── WHAT A CAMPAIGN START IS ──────────────────────────────────────────
+ * The moment the channel's behaviour changed. Artists do not drift into a
+ * campaign; they go from sporadic to sustained, usually with a countdown.
+ * That transition is visible in publishedAt alone, and needs no Studio
+ * data, no human record and no API call this app is not already making.
+ *
+ * Kings of Leon: uploads on 5 Jul, 9 Jul, 24 Jul, 29 Jul — and then a
+ * fourteen-day silence, and then 12 Aug "29 days 'til…", 13 Aug, 14 Aug,
+ * 17 Aug "24 days 'til…", and near-daily from there to My Whole World on
+ * 10 Sep. 12 August + 29 days = 10 September. The channel told us when the
+ * campaign started; nobody was reading it.
+ *
+ * Resolution order, and the rule that fired is always reported:
+ *
+ *   HUMAN_STATED   somebody said so. Beats every observation.
+ *   ERA_ONSET      the first upload of the most recent sustained run.
+ *   BASELINE       the Deep Dive capture date. A last resort, and honest
+ *                  about being one: it is when we started looking.
+ *
+ * ── WHAT CAMPAIGN VIEWS MEANS ─────────────────────────────────────────
+ * The sum of views on assets the channel published on or after that date.
+ *
+ * This is exact rather than approximate, which is worth stating because
+ * the codebase previously hedged about it. A video published after the
+ * campaign started has accumulated every one of its views during the
+ * campaign — its lifetime counter IS its campaign total, by definition,
+ * and stays so forever. The approximation only appears if you include
+ * assets that existed beforehand, which this never does.
+ *
+ * What it is NOT, and must never quietly become, is a channel-level view
+ * delta. Kings of Leon earns roughly 700,000 views a day from a catalogue
+ * where one 2008 single holds 36.6% of 2.46 billion lifetime views. Over
+ * 27 days that is ~19M, and labelling it CAMPAIGN VIEWS attributes Sex on
+ * Fire to a campaign that has not released the album yet.
+ */
+
+/** The minimum silence that separates one era of a channel from the next. */
+const ERA_GAP_DAYS = 10;
+
+/** A run shorter than this is a stray upload, not the start of a campaign. */
+const MIN_ERA_UPLOADS = 3;
+
+/** How far back to look for an onset. Beyond this it is a different year. */
+const MAX_LOOKBACK_DAYS = 400;
+
+export type CampaignStartRule = 'HUMAN_STATED' | 'ERA_ONSET' | 'BASELINE';
+
+export interface CampaignStart {
+  /** ISO instant. Compared with `>=`, so an asset on the day counts. */
+  at: string;
+  rule: CampaignStartRule;
+  /** One line, for the coverage list. Always populated. */
+  because: string;
+}
+
+export interface CampaignUpload {
+  publishedAt: string;
+  /** Lifetime views. For a post-start asset this is its campaign total. */
+  views?: number | null;
+  kind?: 'short' | 'video' | string | null;
+}
+
+export interface CampaignMetrics {
+  start: CampaignStart;
+  /** Day 1 is the day of the first asset, not the day after it. */
+  day: number;
+  assets: number;
+  shorts: number;
+  longForm: number;
+  /** Null, never 0, when there are no assets — a campaign that has not
+      published is not a campaign that earned nothing. */
+  views: number | null;
+}
+
+const DAY = 86_400_000;
+const ts = (iso: string) => new Date(iso).getTime();
+
+/**
+ * The first upload of the most recent sustained run.
+ *
+ * Walks newest to oldest and stops at the FIRST silence long enough to
+ * count, not the longest one. The longest gap in a channel's year is
+ * usually somewhere in the middle of last winter; the most recent one is
+ * the edge of the current era, which is the question being asked.
+ */
+export function eraOnset(uploads: CampaignUpload[], now = Date.now()): string | null {
+  const dates = uploads
+    .map(u => u.publishedAt)
+    .filter(d => d && Number.isFinite(ts(d)))
+    .filter(d => now - ts(d) <= MAX_LOOKBACK_DAYS * DAY)
+    .sort()
+    .reverse();
+  if (dates.length < MIN_ERA_UPLOADS) return null;
+
+  for (let i = 0; i < dates.length - 1; i++) {
+    const gap = (ts(dates[i]) - ts(dates[i + 1])) / DAY;
+    if (gap < ERA_GAP_DAYS) continue;
+    /* dates[i] opens the run. Everything from index 0 to i belongs to it. */
+    return i + 1 >= MIN_ERA_UPLOADS ? dates[i] : null;
+  }
+  /* No qualifying silence: the channel has been publishing continuously,
+     so there is no observable onset to point at. Say so rather than
+     returning the oldest upload we happen to hold. */
+  return null;
+}
+
+export function resolveCampaignStart(opts: {
+  uploads: CampaignUpload[];
+  /** A date a person stated. Beats every observation. */
+  statedAt?: string | null;
+  statedBy?: string | null;
+  /** The Deep Dive capture date. Last resort only. */
+  baselineAt?: string | null;
+  now?: number;
+}): CampaignStart | null {
+  const now = opts.now ?? Date.now();
+
+  if (opts.statedAt && Number.isFinite(ts(opts.statedAt))) {
+    return {
+      at: opts.statedAt,
+      rule: 'HUMAN_STATED',
+      because: `Campaign start stated by ${opts.statedBy ?? 'a person'}.`,
+    };
+  }
+
+  const onset = eraOnset(opts.uploads, now);
+  if (onset) {
+    return {
+      at: onset,
+      rule: 'ERA_ONSET',
+      because:
+        `Campaign start observed from the channel: the first upload after ${ERA_GAP_DAYS}+ days of silence, `
+        + 'followed by a sustained run. Nobody has stated a date, so this is derived from publishedAt.',
+    };
+  }
+
+  if (opts.baselineAt && Number.isFinite(ts(opts.baselineAt))) {
+    return {
+      at: opts.baselineAt,
+      rule: 'BASELINE',
+      because:
+        'No stated campaign start and no observable change in publishing behaviour, so figures run from the '
+        + 'Deep Dive capture date — which is when we started looking, not when the campaign began.',
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Everything the campaign has published, and what it has earned.
+ *
+ * Inclusive of the start instant: the upload that opens an era IS the
+ * first asset of the campaign, and excluding it by a strict `>` was one
+ * half of the 13-versus-10 disagreement.
+ */
+export function campaignMetrics(
+  uploads: CampaignUpload[],
+  start: CampaignStart,
+  now = Date.now(),
+): CampaignMetrics {
+  const from = ts(start.at);
+  const mine = uploads.filter(u => {
+    const at = ts(u.publishedAt);
+    return Number.isFinite(at) && at >= from;
+  });
+
+  const shorts = mine.filter(u => u.kind === 'short').length;
+  const views = mine.reduce((n, u) => n + (u.views ?? 0), 0);
+
+  return {
+    start,
+    /* Day 1 on the day the first asset landed. A campaign is not on day 0
+       the afternoon it starts, and it is not on day 2 either. */
+    day: Math.max(1, Math.floor((now - from) / DAY) + 1),
+    assets: mine.length,
+    shorts,
+    longForm: mine.length - shorts,
+    views: mine.length ? views : null,
+  };
+}

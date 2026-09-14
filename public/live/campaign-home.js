@@ -225,26 +225,47 @@ function buildLiveCover(d){
      trying not to have. */
   const win = w => w ? `last ${w.days} day${w.days === 1 ? '' : 's'}` : 'period unknown';
 
-  /* The campaign's own number leads. Channel views are the catalogue —
-     they were arriving before any of this started and would have arrived
-     anyway — so putting them first made the page read as if the campaign
-     had produced 3 million views. The share says plainly how much of the
-     movement the new work actually accounts for. */
-  const share = m.campaignShare != null
-    ? (m.campaignShare < 0.01 ? 'under 1% of channel views' : `${Math.round(m.campaignShare * 100)}% of channel views`)
-    : null;
+  /* ── THREE QUESTIONS, IN ORDER ─────────────────────────────────────
+     How big is it?      campaign views
+     How active is it?   campaign assets, and the day it is on
+     Is it still moving? last 7 days — not here yet, and not faked
+
+     Everything on this row is campaign-only. The channel view delta has
+     left it: Kings of Leon earns roughly 700,000 views a day from a
+     catalogue where one 2008 single holds 36.6% of 2.46 billion lifetime
+     views, so +13.5M sat beside 974K and won, and the number that won was
+     not the campaign's. It stays in the payload for the analysis
+     surfaces; it is no longer the first thing a label reads.
+
+     LAST 7 DAYS is deliberately absent rather than approximated. Answering
+     it honestly needs per-video history, which began collecting on 14 Sep,
+     so the slot fills itself about a week later. Until then the page says
+     two true things instead of three things one of which is a guess. */
+  const startedLabel = m.campaignStart && m.campaignStart.at
+    ? `since ${shortDate(m.campaignStart.at)}` : 'since the campaign started';
+
+  /* Day and mix ride together under the asset count, set small. The age is
+     what makes the two figures above it mean anything — 1.08M on day 33 is
+     a different campaign from 1.08M on day 3 — but it is context, not a
+     third headline. */
+  const mix = [
+    m.campaignDay ? `day ${m.campaignDay}` : null,
+    m.campaignShorts ? `${m.campaignShorts} short${m.campaignShorts === 1 ? '' : 's'}` : null,
+    m.campaignLongForm ? `${m.campaignLongForm} long-form` : null,
+  ].filter(Boolean).join(' · ');
 
   const stats = [
     m.campaignViews != null
-      ? [nf(m.campaignViews), 'campaign views',
-         `${m.campaignAssets} new asset${m.campaignAssets === 1 ? '' : 's'}${share ? ' · ' + share : ''}`]
+      ? [nf(m.campaignViews), 'campaign views', startedLabel]
       : null,
-    m.viewsDelta != null ? [compact(m.viewsDelta), 'channel views', win(m.viewsWindow)] : null,
-    /* A flat subscriber reading is not a finding, and "+0 SUBSCRIBERS" set
-       in the same type as the other two figures reads as a campaign that
-       failed rather than as a counter that has not moved. Zero is dropped;
-       a real movement in either direction is kept. */
-    m.subsDelta  ? [compact(m.subsDelta),  'subscribers',   win(m.subsWindow)] : null,
+    m.campaignAssets
+      ? [String(m.campaignAssets), `campaign asset${m.campaignAssets === 1 ? '' : 's'}`, mix]
+      : null,
+    /* Real movement only. "+0 SUBSCRIBERS" in the same type as the figures
+       beside it reads as a campaign that failed rather than as a counter
+       that has not moved, and YouTube rounds subscribers to three
+       significant figures, so a genuine gain can land on zero. */
+    m.subsDelta ? [compact(m.subsDelta), 'subscribers', win(m.subsWindow)] : null,
   ].filter(Boolean);
 
   /* Background is the newest campaign asset where one exists, so the
@@ -292,6 +313,14 @@ function buildLiveCover(d){
       d.coverage.map(esc).join(' · ')}</div>` : ''}
   </div>
 </section>`;
+}
+
+/* "12 AUG". The campaign's first day, small, under the figure it explains. */
+function shortDate(iso){
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const mon = d.toLocaleDateString('en-GB',{month:'short'}).slice(0,3).toUpperCase();
+  return `${d.getUTCDate()} ${mon}`;
 }
 
 function fmtDate(iso){
