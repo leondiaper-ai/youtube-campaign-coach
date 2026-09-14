@@ -68,7 +68,6 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
 .reveal.visible{opacity:1;transform:none}
 .stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
 .stagger>*.visible{opacity:1;transform:none}
-body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 
 .cols{display:grid;gap:1.1rem;margin-top:1.8rem}
 .card{border:1px solid var(--hair);border-radius:11px;padding:1.15rem 1.1rem;
@@ -244,7 +243,6 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   border-bottom:1px solid var(--hair);
   transform:translateZ(0);will-change:transform;backface-visibility:hidden}
-body.present .chrome{display:none}
 .chrome-l{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
 .chrome-r{display:flex;gap:.5rem}
 .btn{font:inherit;font-size:.66rem;font-weight:600;padding:.45rem .9rem;border-radius:6px;
@@ -254,10 +252,6 @@ body.present .chrome{display:none}
   transform:scaleX(0);transform-origin:0 50%;will-change:transform}
 .pcount{position:fixed;bottom:1.2rem;right:1.6rem;z-index:50;font-size:.62rem;color:var(--smoke);
   font-family:'Space Grotesk',sans-serif}
-.phint{position:fixed;bottom:1.2rem;left:1.6rem;z-index:50;font-size:.58rem;color:var(--smoke);display:none}
-body.present .phint{display:block}
-body.present .slide{scroll-snap-align:start}
-body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
 
 .sheet{position:fixed;inset:0;z-index:80;background:var(--paper);color:var(--ink);
   overflow-y:auto;display:none;padding:3rem 2rem}
@@ -731,12 +725,10 @@ body.present .deck{scroll-snap-type:y mandatory;height:100vh;overflow-y:scroll}
       <button class="tab on" data-tab="campaign" onclick="switchTab('campaign')">Campaign</button>
       <button class="tab" data-tab="ideas" onclick="switchTab('ideas')">Ideas</button>
     </div>
-    <button class="btn" onclick="togglePresent()">Present</button>
     <button class="btn" onclick="openSheet('appendix')">Analysis</button>
   </div>
 </div>
 <div class="pcount" id="pcount"></div>
-<div class="phint">← → navigate · esc exit</div>
 
 <div class="deck" id="deck"></div>
 <div class="deck" id="ideas" style="display:none"></div>
@@ -1336,27 +1328,6 @@ function updateProgress(){
 }
 window.addEventListener('scroll', updateProgress, {passive:true});
 window.addEventListener('resize', ()=>{ SLIDE_CACHE = null; updateProgress(); }, {passive:true});
-
-/* ── Presentation mode ─────────────────────────────────────────── */
-function togglePresent(){
-  document.body.classList.toggle('present');
-  document.querySelectorAll('.reveal,.stagger>*').forEach(e=>e.classList.add('visible'));
-  updateProgress();
-}
-document.addEventListener('keydown', e=>{
-  if(e.key === 'Escape') document.body.classList.remove('present');
-  if(!document.body.classList.contains('present')) return;
-  const S = allSlides();
-  const i = S.findIndex(s=>s.getBoundingClientRect().top > window.innerHeight*0.5);
-  if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){
-    e.preventDefault(); (S[i] || S[S.length-1]).scrollIntoView({behavior:'smooth'});
-  }
-  if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
-    e.preventDefault();
-    const cur = i<0 ? S.length-1 : i-1;
-    (S[Math.max(0,cur-1)] || S[0]).scrollIntoView({behavior:'smooth'});
-  }
-});
 
 /* ── Sheets ────────────────────────────────────────────────────── */
 function openSheet(id){ document.getElementById('sheet-'+id).classList.add('open'); }
