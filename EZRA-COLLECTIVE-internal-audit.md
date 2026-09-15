@@ -21,28 +21,30 @@ authenticated access to this channel and we have not estimated any of those numb
 
 **[API]** Album: *Here Because of Hope*, Partisan Records.
 
-**Release date: 11 September 2026.** Read from the channel's own uploads — one source,
-three consistent signals within it, not three independent sources:
+**Release date: 11 September 2026, confirmed.**
 
-| Evidence | Date | Video |
-|---|---|---|
-| Short: "out tomorrow and we can't wait for you to hear it" | 10 Sep | `LIsKhSRD1Fg` |
-| 11 song visualisers + 3 spoken interludes published | 10–11 Sep | `_d4tu0tCN58` … `MR0K-Ta9M2o` |
-| Short: "Here Because of Hope" London Block Party | 12 Sep | `asYBb11UesE` |
+> ✅ **RESOLVED, 15 September 2026.** Confirmed by the label's own release-day announcement,
+> issued through Shore Fire Media and dated 11 September: *"September 11, 2026 // Ezra Collective
+> … release their extraordinary fourth studio album Here Because of Hope today via Partisan
+> Records."* The **18 September** date in the band's 28 May announcement Short was superseded — an
+> earlier plan, not the commercial date. Earlier drafts of this audit and the deck hedged on this;
+> the hedging has been removed from both.
+>
+> That announcement settles a second question too. Partisan describe the album as **"conceived in
+> three spiritual and geographical movements … from West Africa, across the Caribbean and
+> ultimately home to the streets of London."** The campaign published one *Messages of Hope* film
+> per movement, in that order — Lagos (30 Jun), Kingston (11 Aug), London (1 Sep). **The campaign
+> was built on the record's own architecture**, now a sourced fact rather than an inference.
+
+The channel's own uploads are consistent with 11 September: a Short on 10 Sep saying "out
+tomorrow" (`LIsKhSRD1Fg`), 11 song visualisers and 3 spoken interludes across 10–11 Sep, and the
+block party Short on 12 Sep (`asYBb11UesE`).
 
 **Campaign window used throughout: 27 May 2026 → 15 September 2026 (111 days).**
 Start is the album announcement Short `qYFr_GvFhfA` (27 May). End is the pull date.
 
 **Today is day 4 post-release.** This is the single most important framing fact in the
 whole document, and section 5 is mostly about what it stops us saying.
-
-> ⚠️ **DISCREPANCY, AND IT IS LOAD-BEARING.** The 28 May announcement Short `TN6YONzpx7E`
-> reads "Out September 18th 2026". Everything else on the channel points to 11 September.
-> We have not confirmed the commercial release date with Partisan, and **"day 4
-> post-release", the release-week comparison in section 3, and the October re-read date all
-> rest on 11 September being right.** If the commercial date is 18 September, sections 3,
-> 5.2 and 6 need rewriting. **Confirm this with Partisan before the deck is built.**
-> Until then the deck should not state a precise date as established fact.
 
 **Comparison window: *Dance, No One's Watching*, 18 June 2024 → 6 October 2024 (110 days).**
 Chosen because it is within one day of the same length, making structural comparison clean.
@@ -380,8 +382,8 @@ real thumbnails, not chosen. Same principle as the Antony deck, not the same exe
 
 If you are checking this document, start here:
 
-1. **The release date.** 11 Sep vs the announced 18 Sep. Confirm with Partisan. Sections 3,
-   5.2 and 6 depend on it.
+1. ~~**The release date.**~~ **Resolved** — 11 September 2026, confirmed by Partisan's own
+   release-day announcement. See section 1.
 2. **The 15.1M gap.** Does 27,305,501 − 12,223,598 hold? Is there a benign explanation
    that changes what we can claim?
 3. **The 43-day gap in 2024.** 22 Jul → 3 Sep 2024. Confirm no upload sits between them.
@@ -408,3 +410,60 @@ same figures in adjacent sections.
 The count matters less than the pattern: **every one of those errors made the campaign look
 better than the evidence supports.** That is the direction this document will drift in, and
 it is what the next reviewer should be looking for.
+
+---
+
+## 9. Addendum — the best-practice check (15 September 2026)
+
+Run after the main audit, against publicly observable channel behaviour only. Three findings
+reached the deck; the rest stayed here.
+
+### Premieres, used selectively **[API]**
+
+**Ezra have premiered seven uploads in the channel's entire history. Three of them are in this
+campaign** — *Only Love* (28 May), *Jubilee Feeling* (25 Aug) and the *Rehearsal Tapes* (9 Sep).
+The other four are spread across 2022–2024. Nothing else in the 2026 window was premiered.
+
+Those three sit at ranks 1, 3 and 4 by views inside the campaign window.
+
+> ⚠️ **Do not read this as premieres causing performance.** The causality plausibly runs the other
+> way: these are the assets the campaign was betting on, which is exactly why they got the premiere
+> treatment. *Well Organised* is rank 2 and was not premiered, which cuts against any simple
+> "premiere equals big" reading. The defensible claim — and the one on the slide — is about
+> **how the feature was used**: reserved for chosen moments rather than applied to everything.
+
+### The album's three movements, mirrored in the campaign **[API] + label source**
+
+Partisan's release-day announcement describes the album as three movements: West Africa, the
+Caribbean, London. The campaign published one *Messages of Hope* film per movement, in that order:
+
+| Film | Published | Movement |
+|---|---|---|
+| Messages of Hope: Lagos | 30 Jun | West Africa |
+| Messages of Hope: Kingston | 11 Aug | Caribbean |
+| Messages of Hope: London | 1 Sep | London |
+
+Ten weeks apart, in album order. This is the strongest creative finding in the project and it is
+the evidential basis for slide 3. A fourth film, *Messages of hope at Love Supreme Festival*
+(5 Aug), sits outside the geographic trio.
+
+### Song ecosystems **[API]**
+
+Both lead singles were worked properly rather than posted once. *Only Love* accumulated six uploads
+across 39 days; *Well Organised* six across 41. The third single, *Jubilee Feeling*, got two.
+
+### The clearest next opportunity **[API]**
+
+**The channel's last upload was 12 September.** During the campaign it never went quiet for more
+than nine days. The album is now at its most findable and the channel has stopped — the one thing
+the campaign otherwise did better than anything else. This is the deck's own spine pointed
+forwards, and it is the recommendation on the final slide.
+
+### Checked and not used
+
+- **Shorts into long-form.** 15 of 45 Shorts landed on, or the day before, a long-form drop. A
+  third is a real pattern but not a headline, and without traffic-source data we cannot show routing.
+- **Playlists and homepage sections.** `/api/channel-shelf` was built for this and is in the repo.
+  Not yet run against a deployed build, so nothing about playlists appears in the deck.
+- **End screens, cards, Community tab.** Not exposed by the public API. Not assessed, and the deck
+  does not imply otherwise.

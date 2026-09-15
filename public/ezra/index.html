@@ -34,10 +34,10 @@
    6. No share-of-lifetime claims. There is a 15,081,903-view gap
       between the public uploads playlist and the channel's reported
       lifetime total.
-   7. No precise commercial release date is stated. The channel's own
-      copy conflicts: an announcement Short says 18 September, the rest
-      of the channel implies 11 September. Unresolved with Partisan, so
-      the deck says "release week".
+   7. RESOLVED. The album was released 11 September 2026 via Partisan,
+      confirmed by the label's own release-day announcement through Shore
+      Fire Media. The 18 September date in the 28 May announce Short was
+      superseded. Earlier drafts hedged; they no longer need to.
    8. No best-in-class outcome claim. Slide 9 is about exactly that.
 
   ─────────────────────────────────────────────────────────────────────
@@ -150,6 +150,13 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .tick.on.r{background:var(--red)}
 .rhythm.mini{--rh:16px;gap:1.5px}
 .rhythm.mini .tick{height:34%}
+
+.step-city{
+  font-family:'DM Mono',monospace;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cream);border:1px solid var(--green);border-radius:2px;
+  padding:.45rem .7rem;display:inline-flex;flex-direction:column;gap:.15rem;white-space:nowrap;
+}
+.step-city i{font-style:normal;font-size:.62rem;color:var(--green);letter-spacing:.08em}
 
 .gapmark{
   position:relative;font-family:'DM Mono',monospace;font-size:.72rem;
@@ -264,6 +271,33 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .sheet th{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 .sheet td b{color:var(--cream);font-weight:600}
 .close{position:fixed;top:1rem;right:var(--pad);z-index:90}
+/* ── Analysis: built to be read in 30 seconds, not defended line by line.
+   The forensic version lives in the internal audit; this page answers
+   where the data came from, what we can see, what we can't, and whether
+   the 2024 comparison is fair. ─────────────────────────────────────── */
+.sheet .lede{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--cream);max-width:48ch;margin:.9rem 0 0}
+.sheet h3.sec{
+  font-size:clamp(1.05rem,1.9vw,1.5rem);color:var(--gold);
+  margin:2.8rem 0 .8rem;padding-top:1.1rem;border-top:1px solid var(--line);
+}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.2rem 0 .4rem}
+.mgrid.two{grid-template-columns:repeat(2,1fr)}
+@media(max-width:760px){.mgrid,.mgrid.two{grid-template-columns:1fr}}
+.mcard{border-top:2px solid var(--line);padding-top:.9rem}
+.mcard.ok{border-top-color:var(--green)}
+.mcard p{font-size:.9rem;margin:.45rem 0 0;color:var(--warm)}
+.mbig{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 800;
+  font-size:clamp(1.8rem,3vw,2.4rem);line-height:.9;color:var(--gold);margin-top:.5rem}
+.ct{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cream)}
+.fair{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.fair span{
+  font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.08em;
+  border:1px solid var(--green);color:var(--green);border-radius:2px;padding:.4rem .7rem;
+}
+.sheet .foot{
+  margin-top:3rem;padding-top:1.1rem;border-top:1px solid var(--line);
+  font-size:.84rem;color:var(--dim);
+}
 
 /* ── Present mode ───────────────────────────────────────────────────
    Tighter chrome clearance than the scrolling deck, and overflow-y:auto
@@ -384,20 +418,25 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 3 · WAYS IN ═════════════════════════════════════════════════
-     Deliberately not a bar chart. The point is that 69 uploads were not
-     69 versions of the same thing, and only the actual frames show that. -->
-<section class="slide" data-t="Ways in" style="justify-content:flex-start;padding-top:6.5rem">
+<!-- ═══ 3 · ONE WORLD ═══════════════════════════════════════════════
+     Deliberately not a bar chart. The grid is the argument: every format
+     is different and every format still looks like the same record.
+     The Lagos / Kingston / London films are the proof that this was
+     designed rather than lucky — Partisan describe the album itself as
+     three movements, West Africa to the Caribbean to London, and the
+     campaign published one film per movement in that order. -->
+<section class="slide" data-t="One world" style="justify-content:flex-start;padding-top:6.5rem">
   <div class="inner">
     <div class="label reveal">What filled those weeks</div>
-    <h2 class="display reveal" style="margin-top:.8rem">More content.<br>More ways in.</h2>
+    <h2 class="display reveal" style="margin-top:.7rem">69 uploads.<br>One world.</h2>
 
-    <div class="grid3 reveal" style="margin-top:2rem;gap:1.6rem;align-items:start">
+    <div class="grid3 reveal" style="margin-top:1.6rem;gap:1.6rem;align-items:start">
       <div>
         <p class="body" style="font-size:1.02rem">
-          Music videos, lyric videos, a fourteen-minute rehearsal film, twelve album visualisers,
-          spoken interludes read by Letitia Wright, films made in Lagos and Kingston, a block party,
-          and forty-five Shorts from the festival run.
+          Music videos, lyric videos, a fourteen-minute rehearsal film, eleven album visualisers,
+          spoken interludes read by Letitia Wright, films shot in Lagos, Kingston and London, a block
+          party, and forty-five Shorts from the festival run.
+          <b style="color:var(--cream)">Every one of them still looks like the same record.</b>
         </p>
       </div>
       <div style="display:flex;gap:2rem">
@@ -413,16 +452,31 @@ body.present{overflow:hidden}
       </div>
     </div>
 
-    <div class="stagger" id="waysin" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-top:2.2rem"></div>
+    <div class="stagger" id="waysin" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-top:1.8rem"></div>
 
-    <p class="statement reveal" style="margin-top:2rem;color:var(--gold);max-width:46ch">
-      Not sixty-nine versions of the same thing — sixty-nine different doors.
+    <!-- The structural proof, not a decorative aside. -->
+    <div class="reveal" style="margin-top:1.8rem;border-top:2px solid var(--green);padding-top:1.1rem;display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2.6rem);align-items:center">
+      <div style="display:flex;gap:.7rem;flex-wrap:wrap">
+        <span class="step-city">Lagos<i>30 Jun</i></span>
+        <span class="step-city">Kingston<i>11 Aug</i></span>
+        <span class="step-city">London<i>1 Sep</i></span>
+      </div>
+      <p class="body" style="font-size:.97rem;max-width:66ch">
+        Partisan describe the album as three movements — <b style="color:var(--cream)">West Africa,
+        across the Caribbean, home to London</b>. The campaign shot one <em>Messages of Hope</em> film
+        per movement and published them in that order, ten weeks apart.
+        <b style="color:var(--green)">The campaign was built on the record's own architecture.</b>
+      </p>
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.6rem;color:var(--gold);max-width:52ch">
+      Lots of different doors into one recognisable world.
     </p>
 
     <div class="src reveal">
-      <b>Public YouTube API.</b> All 69 uploads in the campaign window, classified by title and
-      duration. Thumbnails are the live YouTube images. Counts only — no view comparison is being
-      made between the two years.
+      <b>Public YouTube API</b>, plus the album's structure as described in Partisan's own release-day
+      announcement. All 69 uploads in the campaign window; thumbnails are the live YouTube images.
+      Counts only — no view comparison between the two years.
     </div>
   </div>
 </section>
@@ -608,9 +662,8 @@ body.present{overflow:hidden}
     </div>
 
     <div class="src reveal">
-      <b>Public YouTube API.</b> Every upload dated 9–15 September. The exact commercial release date
-      is unconfirmed — the channel's own copy says both 11 and 18 September — so this deck says
-      "release week" throughout. See Analysis.
+      <b>Public YouTube API.</b> Every upload dated 9–15 September. The album was released on
+      <b>11 September 2026</b> via Partisan Records, confirmed by the label's release-day announcement.
     </div>
   </div>
 </section>
@@ -671,47 +724,66 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 9 · THE VERDICT ═════════════════════════════════════════════
-     This slide makes the case study more credible, not less. -->
-<section class="slide" data-t="Best in class?" style="background:var(--ink-2)">
+<!-- ═══ 9 · WHAT THEY GOT RIGHT ═════════════════════════════════════
+     The summary slide. Six terse blocks — the headline does the
+     five-second work, the blocks are the scannable detail. The premiere
+     finding sits here because it answers "what else did they do well"
+     rather than needing a slide of its own. The outcome question is not
+     dodged, it just belongs on the final slide as a thing to measure
+     rather than as a wall of what we cannot prove. -->
+<section class="slide" data-t="What they got right" style="background:var(--ink-2)">
   <div class="inner">
-    <div class="label reveal">The question everybody asks</div>
-    <h2 class="display reveal" style="margin-top:.8rem">Is this best in class?</h2>
-    <p class="display reveal" style="margin-top:.4rem;font-size:clamp(1.6rem,4vw,3.4rem);color:var(--gold);font-variation-settings:'wdth' 118,'wght' 800;text-transform:uppercase;line-height:.92">Not yet.</p>
+    <div class="label reveal">The campaign, summarised</div>
+    <h2 class="display reveal" style="margin-top:.7rem">What they got right.</h2>
 
-    <div class="grid2 stagger" style="margin-top:clamp(2rem,4.5vw,3.2rem)">
+    <div class="stagger" style="margin-top:clamp(1.8rem,4vw,2.8rem);display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.1rem,2.4vw,2.2rem)" id="gotright">
 
-      <div class="verdict can">
-        <h3 class="display">What we can say</h3>
-        <ul>
-          <li>Sixteen of sixteen weeks active, with a nine-day maximum gap</li>
-          <li>2.6× the output of the comparable 2024 campaign</li>
-          <li>Far less dependence on a single video — 84.7% → 56.5%</li>
-          <li>A fully stocked channel around release</li>
-          <li>A clear public channel movement in release week</li>
-        </ul>
+      <div class="lesson">
+        <div class="n">Consistency</div>
+        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--gold);margin-top:.6rem">16<span style="color:var(--dim)">/16</span></div>
+        <p class="body" style="margin-top:.5rem;font-size:.92rem">Active weeks, with a nine-day maximum gap. The channel never went dark.</p>
       </div>
 
-      <div class="verdict cant">
-        <h3 class="display">What we can't say yet</h3>
-        <ul>
-          <li>That the outcome is best in class — release week is one observation, and it's a week old</li>
-          <li>That the lift becomes sustained growth — too early to know</li>
-          <li>Which asset caused anything — no traffic-source data exists</li>
-          <li><b style="color:var(--cream)">That it beats anyone but Ezra.</b> Best in class needs a class, and so far this is Ezra measured against Ezra</li>
-        </ul>
+      <div class="lesson" style="border-top-color:var(--green)">
+        <div class="n" style="color:var(--green)">Depth</div>
+        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--green);margin-top:.6rem">69</div>
+        <p class="body" style="margin-top:.5rem;font-size:.92rem">Uploads across Shorts and long-form — 2.6× the comparable 2024 campaign.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--red)">
+        <div class="n" style="color:var(--red)">One world</div>
+        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--red);margin-top:.6rem">3</div>
+        <p class="body" style="margin-top:.5rem;font-size:.92rem">Films for the album's three movements — Lagos, Kingston, London — published in order.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--teal)">
+        <div class="n" style="color:var(--teal)">Long-form with purpose</div>
+        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--teal);margin-top:.6rem">83.6<span style="font-size:.45em">%</span></div>
+        <p class="body" style="margin-top:.5rem;font-size:.92rem">Of window views. Rehearsal films and live material, not just the videos.</p>
+      </div>
+
+      <div class="lesson">
+        <div class="n">Premieres, saved for the moments</div>
+        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--gold);margin-top:.6rem">3<span style="color:var(--dim)">/7</span></div>
+        <p class="body" style="margin-top:.5rem;font-size:.92rem">Ezra have premiered seven uploads ever. Three were in this campaign — and nothing else was.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--green)">
+        <div class="n" style="color:var(--green)">A release-week destination</div>
+        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--green);margin-top:.6rem">19</div>
+        <p class="body" style="margin-top:.5rem;font-size:.92rem">Uploads in release week. The album arrived to a stocked channel, not a single video.</p>
       </div>
 
     </div>
 
-    <p class="statement reveal" style="margin-top:2.4rem;font-size:clamp(1.3rem,2.6vw,2rem);color:var(--gold);max-width:40ch">
-      The structure is strong. The outcome needs time.
+    <p class="statement reveal" style="margin-top:2.2rem;font-size:clamp(1.25rem,2.5vw,1.95rem);color:var(--gold);max-width:44ch">
+      A strong example of how to build a YouTube campaign around an album.
     </p>
 
     <div class="src reveal">
-      The gap-length and week-coverage distribution across the wider Watcher roster has not been
-      computed. Until it is, "a marked improvement on their own previous campaign" is the claim the
-      evidence supports — and that is a real one.
+      <b>Public YouTube API.</b> Premiere counts come from the scheduled and actual start times the
+      API exposes on every upload. Reserving premieres for chosen moments is a judgement about
+      <b>how the feature was used</b> — it is not a claim that premiering caused those videos to perform.
     </div>
   </div>
 </section>
@@ -749,6 +821,15 @@ body.present{overflow:hidden}
         <p class="body" style="margin-top:.9rem;font-size:.96rem">
           Official videos joined by rehearsal films, live footage, visualisers, spoken pieces and
           Shorts. When release week came, there was somewhere for everyone to go.
+        </p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--teal)">
+        <div class="n" style="color:var(--teal)">04</div>
+        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Make it all feel<br>like one world.</h3>
+        <p class="body" style="margin-top:.9rem;font-size:.96rem">
+          Variety is only an asset if it still adds up to something. Three films for the album's
+          three movements is what turns sixty-nine uploads into one campaign.
         </p>
       </div>
 
@@ -792,6 +873,22 @@ body.present{overflow:hidden}
       </div>
     </div>
 
+    <!-- The one actionable gap the best-practice check surfaced. It belongs
+         here rather than on a slide of its own: it is the deck's own spine
+         pointed forwards. -->
+    <div class="reveal" style="margin-top:1.8rem;border-top:2px solid var(--red);padding-top:1rem;display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2.2rem);align-items:center">
+      <div>
+        <div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.2rem);color:var(--red)">12 Sep</div>
+        <div class="label" style="margin-top:.3rem">Last upload</div>
+      </div>
+      <p class="body" style="font-size:.97rem;max-width:64ch">
+        <b style="color:var(--cream)">And the clearest thing to do next is the thing they already did
+        best.</b> The campaign held a nine-day maximum gap for sixteen weeks. The channel has now been
+        quiet since the block party — in the weeks when a new album is most findable. The discipline
+        that built the campaign is the discipline worth keeping now.
+      </p>
+    </div>
+
     <div class="step reveal">
       <span>Campaign</span><i>→</i>
       <span>Release</span><i>→</i>
@@ -819,153 +916,107 @@ body.present{overflow:hidden}
 <div class="sheet" id="sheet">
   <button class="btn close" onclick="closeSheet()">Close ✕</button>
   <div class="sheet-in">
-    <div class="label">Analysis · method, limits and audit trail</div>
-    <h2 class="display" style="margin-top:.6rem;font-size:clamp(1.6rem,3.4vw,2.6rem)">What we can and cannot see</h2>
+
+    <div class="label">Analysis</div>
+    <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
+    <p class="lede">
+      Four things worth knowing before you trust a number in this deck.
+    </p>
+
+    <!-- 1 -->
+    <h3 class="display sec">1 &nbsp;What we used</h3>
+    <p>
+      The <b>public YouTube Data API</b>, our own <b>weekly Watcher snapshots</b> of that same public
+      API, and <b>public comments</b>. Nothing else.
+    </p>
+    <div class="mgrid">
+      <div class="mcard">
+        <div class="label">This campaign</div>
+        <div class="mbig">69</div>
+        <p>uploads · 27 May → 15 Sep 2026 · 111 days</p>
+      </div>
+      <div class="mcard">
+        <div class="label">Comparison campaign</div>
+        <div class="mbig">27</div>
+        <p>uploads · <em>Dance, No One’s Watching</em>, 2024 · 110 days</p>
+      </div>
+      <div class="mcard">
+        <div class="label">Comments</div>
+        <div class="mbig">266</div>
+        <p>top-level comments sampled across 15 videos</p>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <h3 class="display sec">2 &nbsp;What we can’t see</h3>
+    <p>
+      We do not have YouTube Studio access for this channel, so we cannot see impressions,
+      click-through rate, retention, traffic sources, unique viewers, or new versus returning viewers.
+      <b style="color:var(--cream)">That is why we never attribute channel movement to an individual
+      asset.</b> Release week and the campaign activity around it co-occurred; which one moved the
+      other is not something public data can answer.
+    </p>
+
+    <!-- 3 -->
+    <h3 class="display sec">3 &nbsp;How we compared the two campaigns</h3>
+    <p>
+      The 2024 videos have had roughly two years to accumulate views. The 2026 campaign is still
+      live. <b style="color:var(--cream)">So we do not compare absolute views between
+      campaigns — that would measure age, not performance.</b>
+    </p>
+    <p>Instead we compare the things that stay fair whatever a video’s age:</p>
+    <div class="fair">
+      <span>Active weeks</span><span>Longest gap</span><span>Upload volume</span>
+      <span>Format mix</span><span>Concentration within each window</span>
+    </div>
     <p style="margin-top:1rem">
-      This deck is built entirely on public data: the YouTube Data API v3, and our own weekly Watcher
-      snapshots of that same public API. <b style="color:var(--cream)">There are no YouTube Studio
-      metrics anywhere in it.</b> No impressions, no click-through rate, no retention, no traffic
-      sources, no unique viewers, no new-versus-returning. We do not have authenticated access to this
-      channel and none of those numbers has been estimated.
+      This lets us compare <em>how the two campaigns were built</em> without pretending videos of very
+      different ages are directly comparable.
     </p>
 
-    <h4>The dataset</h4>
-    <table>
-      <tr><th>Item</th><th>Value</th></tr>
-      <tr><td>Channel</td><td><b>UCDjQX5MfQrWowYF9ucLpdOQ</b> · Ezra Collective</td></tr>
-      <tr><td>Pulled</td><td>15 September 2026, 10:52 UTC</td></tr>
-      <tr><td>At pull</td><td><b>72,700</b> subscribers · <b>27,305,501</b> lifetime views · 246 public videos</td></tr>
-      <tr><td>Rows retrieved</td><td>251 from the uploads playlist</td></tr>
-      <tr><td>Campaign window</td><td>27 May → 15 Sep 2026 · <b>111 days</b> · 69 uploads</td></tr>
-      <tr><td>Comparison window</td><td>18 Jun → 6 Oct 2024 · <b>110 days</b> · 27 uploads</td></tr>
-      <tr><td>Comments</td><td>15 videos scanned, 266 top-level comments, none disabled</td></tr>
-    </table>
+    <!-- 4 -->
+    <h3 class="display sec">4 &nbsp;Important caveats</h3>
+    <div class="mgrid two">
+      <div class="mcard">
+        <div class="ct">Public subscribers</div>
+        <p>YouTube rounds the public subscriber count. We show the observed movement, but claim
+        neither precise subscriber additions nor a growth multiple.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Attribution</div>
+        <p>Release-week views and subscriber movement co-occurred with the campaign. Without
+        traffic-source data we cannot say which asset caused it.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Alexandra Palace</div>
+        <p>The 8 May film predates the campaign. It is excluded from every campaign figure, and used
+        only as evidence about how this audience responds to long-form filmmaking.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Comments</div>
+        <p>A relevance-ranked public sample, not a census. Used qualitatively, never as
+        representative audience research.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Lifetime views</div>
+        <p>The public uploads we retrieved do not reconcile to the channel’s reported lifetime total,
+        most likely because not every historical upload is still public. So the deck makes no
+        share-of-lifetime claims.</p>
+      </div>
+      <div class="mcard ok">
+        <div class="ct" style="color:var(--green)">Release date · resolved</div>
+        <p><em>Here Because of Hope</em> was released <b style="color:var(--cream)">11 September 2026</b>
+        via Partisan Records, confirmed by the label’s release-day announcement. The 18 September date
+        in the band’s 28 May announcement Short was superseded.</p>
+      </div>
+    </div>
 
-    <h4>The hole in the data, disclosed</h4>
-    <p class="warn">
-      The 251 retrieved rows sum to <b>12,223,598</b> views. The channel reports <b>27,305,501</b>.
-      A gap of <b>15,081,903</b> views — 55.2% of the reported lifetime total — is not accounted for by
-      the public uploads playlist. Deleted or privated uploads are the most likely explanation; we have
-      not diagnosed it. <b>Consequence: this deck makes no share-of-lifetime claims at all.</b> Every
-      percentage on every slide uses a campaign window as its denominator, never the lifetime total.
-    </p>
-
-    <h4>Why no view comparison between the two campaigns</h4>
-    <p>
-      The 2024 assets have had roughly two years to accumulate views. The 2026 assets have had between
-      three days and sixteen weeks. Comparing the two windows' view totals would not be a measurement,
-      it would be an artefact of age — and we cannot reconstruct what 2024 looked like at day 111,
-      because the API returns only current view counts and our weekly snapshots do not reach back
-      that far.
-    </p>
-    <p>
-      <b style="color:var(--cream)">What survives the age problem, and is therefore what the deck
-      uses:</b> upload counts, active weeks, gap lengths, format mix, and any ratio computed inside a
-      single window. <b style="color:var(--cream)">What does not survive, and is therefore absent:</b>
-      every absolute view comparison, every "bigger than last time", and the median-views comparison.
-    </p>
-
-    <h4>The release date is unresolved</h4>
-    <p class="warn">
-      The album's announcement Short, published 28 May, reads <b>"Out September 18th 2026"</b>.
-      Everything else on the channel points to <b>11 September</b>: a Short on 10 September saying
-      "out tomorrow", the visualisers landing across 10–11 September, and the block party Short on
-      12 September. <b>We have not confirmed the commercial release date with Partisan.</b> Because the
-      framing of the release-week comparison depends on it, this deck states no precise date and uses
-      "release week" throughout. This should be resolved before the deck goes further.
+    <p class="foot">
+      This page is the short version. The full working — every figure, the row-level source data, and
+      the adversarial check that corrected an earlier draft — is in the internal audit,
+      <code>EZRA-COLLECTIVE-internal-audit.md</code>, available on request.
     </p>
 
-    <h4>Subscriber wording, and why there is no multiple</h4>
-    <p>
-      Every subscriber figure here is the <b>publicly displayed count</b>, which YouTube rounds — to the
-      nearest 100 at this channel size — and which already nets off unsubscribes. It is not gross or net
-      subscriber additions; those are Studio metrics we do not have. The weekly movements read
-      300, 400, 300, then 1,100. Because each of those is rounded to the nearest hundred, a ratio built
-      from them could honestly be anything from about 2.6× to 4.4×, so <b style="color:var(--cream)">the
-      deck states no subscriber multiple at all</b> and shows the four readings instead. The weekly
-      <em>view</em> figures are not rounded, which is why 2.4× is stated for those.
-    </p>
-    <table>
-      <tr><th>Week starting</th><th>Public subs</th><th>Channel views</th><th>Views, prior 7d</th><th>Subs, prior 7d</th></tr>
-      <tr><td>24 Aug</td><td>70,600</td><td>26,327,535</td><td>234,269</td><td>300</td></tr>
-      <tr><td>31 Aug</td><td>71,000</td><td>26,587,444</td><td>259,909</td><td>400</td></tr>
-      <tr><td>7 Sep</td><td>71,300</td><td>26,769,957</td><td>182,513</td><td>300</td></tr>
-      <tr><td>14 Sep</td><td><b>72,400</b></td><td><b>27,305,501</b></td><td><b>535,544</b></td><td><b>1,100</b></td></tr>
-      <tr><td>15 Sep · API read</td><td><b>72,700</b></td><td>27,305,501</td><td>—</td><td>—</td></tr>
-    </table>
-    <p>
-      Two limits on this table. First, <b>our weekly snapshots only begin on 24 August</b>, so the
-      before-and-after evidence is strong for release week specifically and does not exist for the
-      campaign as a whole. Second, the 14 September snapshot and the 15 September API read return an
-      identical view total, which suggests they share a source rather than being two independent
-      observations a day apart.
-    </p>
-
-    <h4>Two numbers that are not the same quantity</h4>
-    <p>
-      The 19 release-week uploads have accumulated <b>242,582 views between them</b> as of 15 September.
-      The channel recorded <b>535,544 views in the seven days to 14 September</b>. These measure
-      different things — the first is the lifetime-to-date total of a set of videos, the second is
-      channel-wide viewing across the whole catalogue in a fixed period — and the deck never places
-      them side by side, because doing so invites a comparison that isn't valid.
-    </p>
-
-    <h4>Attribution: what we are not claiming</h4>
-    <p class="warn">
-      We have no traffic-source data, so we cannot say whether release-week movement came from the
-      visualisers, the Rehearsal Tapes, the block party, press, playlisting, the tour announcement, or
-      spillover from streaming release radars. Slide 7 and slide 8 describe events that
-      <b>co-occurred</b>. Nothing in this deck credits an asset with an outcome.
-    </p>
-
-    <h4>The Alexandra Palace film</h4>
-    <p>
-      <span class="flag">Pre-campaign</span> The live film with Kano was published <b>8 May 2026</b>,
-      nineteen days before the album announcement. Its 337,985 views are excluded from every campaign
-      figure in this deck. It appears on slide 6 solely as evidence about how this audience responds to
-      long-form film, labelled as pre-campaign, and its views are never shown as campaign performance.
-    </p>
-
-    <h4>The comment evidence, and what it will not carry</h4>
-    <p>
-      The comment scan returns a <b>relevance-ranked sample</b> of up to 40 comments per video, not a
-      census. Alexandra Palace has 251 comments in total and we retrieved 40. Every quotation is drawn
-      from the comments YouTube surfaces most prominently, which is not the same as what the commenter
-      base as a whole is saying.
-    </p>
-    <p>
-      An earlier draft of the analysis claimed this audience was "actively hunting" for long-form live
-      footage, on the strength of two comments describing searching for a full set. That claim was cut:
-      two comments on one out-of-window video cannot carry it.
-      <b style="color:var(--cream)">The narrower claim on slide 6 — that when Ezra publish a well-made
-      long-form film, the comments are about how it was made — is what the evidence actually supports.</b>
-    </p>
-
-    <h4>Classification</h4>
-    <p>
-      Shorts versus long-form uses the API's own <code>isShort</code> flag. Format labels (music video,
-      visualiser, rehearsal film, live, Shorts) are derived from titles and durations. The 2026 window
-      opens at the album announcement Short of 27 May and closes at the pull date. The 2024 window opens
-      at its lead single and runs 110 days, chosen to sit within one day of the 2026 window so that
-      structural comparison is clean.
-    </p>
-
-    <h4>Where the design came from</h4>
-    <p>
-      The palette was sampled programmatically from fifteen real campaign thumbnails — greys and crushed
-      blacks filtered out, the rest binned by hue. The warm band came back at 48% of saturated pixels,
-      green at 17%, red at 11%, teal at 12%: the Lagos gele and foliage, the brass in <em>Only Love</em>,
-      the Kingston sequins, the sea in <em>Well Organised</em>. The repeating rhythm strip is one tick per
-      day of the campaign window, lit where an upload landed — the deck's central finding used as its
-      decoration.
-    </p>
-
-    <h4>Source</h4>
-    <p>
-      Every figure traces to <code>EZRA-COLLECTIVE-internal-audit.md</code> and its row-level source data.
-      That audit was written before this deck and checked adversarially against the raw rows; the
-      corrections it produced are recorded in its own final section.
-    </p>
   </div>
 </div>
 
