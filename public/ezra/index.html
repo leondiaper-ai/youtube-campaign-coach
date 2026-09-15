@@ -176,9 +176,9 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 /* One line of provenance per slide. The full audit trail is in Analysis —
    the point of this deck is the insight, not the apparatus. */
 .src{
-  font-family:'DM Mono',monospace;font-size:.68rem;line-height:1.5;
-  color:var(--dim);border-left:2px solid var(--line);padding-left:.8rem;
-  max-width:62ch;margin-top:2rem;
+  font-family:'DM Mono',monospace;font-size:.64rem;line-height:1.45;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;
+  max-width:74ch;margin-top:1.4rem;
 }
 .src b{color:var(--warm);font-weight:400}
 
@@ -350,6 +350,13 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 /* Small print: present so the method can be checked, sized so it never
    competes with the findings it supports. */
 .notes{margin-top:3.2rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.mn{margin-top:.9rem;display:grid;grid-template-columns:auto 1fr;gap:.5rem 1.4rem;align-items:baseline}
+@media(max-width:700px){.mn{grid-template-columns:1fr;gap:.1rem .5rem}.mn dt{margin-top:.7rem}}
+.mn dt{
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--warm);white-space:nowrap;
+}
+.mn dd{margin:0;font-size:.78rem;line-height:1.55;color:var(--dim);max-width:70ch}
 .notes p{font-size:.78rem;line-height:1.65;color:var(--dim);max-width:88ch;margin:.6rem 0 0}
 .notes code{font-size:.76rem;color:var(--warm)}
 .sheet h3.sec{
@@ -489,9 +496,7 @@ body.present{overflow:hidden}
     </p>
 
     <div class="src reveal">
-      <b>Same artist. Same label. Near-identical campaign shape.</b> Both windows open on the album
-      announcement and run to just after release — 101 days announcement-to-album in 2024, 107 in 2026.
-      Counts and gaps are compared, not views.
+      Source: public YouTube API. Comparable announcement-led campaign windows.
     </div>
   </div>
 </section>
@@ -537,6 +542,7 @@ body.present{overflow:hidden}
     <p class="statement reveal" style="margin-top:1.3rem;color:var(--gold);max-width:54ch">
       More content. More ways in. One recognisable world.
     </p>
+    <div class="src reveal" style="margin-top:.8rem">Source: public YouTube API · 27 May–15 Sep 2026.</div>
   </div>
 </section>
 
@@ -590,9 +596,7 @@ body.present{overflow:hidden}
     </p>
 
     <div class="src reveal">
-      <b>Public YouTube API.</b> Each percentage is a share of its own window, so both years have aged
-      together and the ratio is fair. This shows <b>less concentration</b> — it does not show more total
-      viewing, and the two windows' view totals are deliberately not compared.
+      Source: public YouTube API.
     </div>
   </div>
 </section>
@@ -630,9 +634,7 @@ body.present{overflow:hidden}
       </p>
 
       <div class="src reveal">
-        <b>Public YouTube API.</b> Both figures are shares of the same 2026 window, so they are
-        comparable to each other. Judge the Shorts on the rhythm strip two slides back, not on this
-        percentage.
+        Source: public YouTube API.
       </div>
     </div>
   </div>
@@ -683,9 +685,8 @@ body.present{overflow:hidden}
 
       <div class="src reveal" style="margin-top:1.4rem;font-size:.62rem;opacity:.78;max-width:70ch">
         <span class="flag" style="font-size:.55rem;padding:.18rem .4rem">Pre-campaign</span>
-        The Alexandra Palace film is from 8 May, before the campaign window; its views are excluded
-        from every campaign figure here. Comments are a relevance-ranked public sample. Audience
-        response and performance are shown side by side, not as cause and effect.
+        Alexandra Palace — excluded from campaign-performance figures.
+        Source: public YouTube API + public comment sample.
       </div>
     </div>
   </div>
@@ -767,8 +768,7 @@ body.present{overflow:hidden}
     </div>
 
     <div class="src reveal" style="margin-top:1.2rem">
-      <b>Public YouTube API.</b> Every upload dated 9–12 September, in publication order.
-      <em>Here Because of Hope</em> was released 11 September 2026 via Partisan Records.
+      Source: public YouTube API · album released 11 Sep 2026.
     </div>
   </div>
 </section>
@@ -821,10 +821,7 @@ body.present{overflow:hidden}
     </p>
 
     <div class="src reveal">
-      <b>Watcher weekly snapshots of the public API</b>, plus a direct API read on 15 September.
-      <b style="color:var(--red)">We cannot say what caused this.</b> Attribution needs traffic-source
-      data, which requires authenticated YouTube Analytics. The visualisers, the Rehearsal Tapes and
-      the block party all co-occurred with this movement. None of them is credited with it.
+      Source: Watcher + public YouTube API. Public subscriber counts are rounded by YouTube.
     </div>
   </div>
 </section>
@@ -894,8 +891,7 @@ body.present{overflow:hidden}
     </p>
 
     <div class="src reveal" style="margin-top:1.2rem">
-      Every figure here appears earlier in the deck. Premiere use is verified from the start times the
-      public API exposes — three of the seven premieres in the channel&rsquo;s history are in this campaign.
+      Source: public YouTube API. Every figure appears earlier in this deck.
     </div>
   </div>
 </section>
@@ -948,8 +944,7 @@ body.present{overflow:hidden}
     </div>
 
     <div class="src reveal" style="margin-top:1.4rem">
-      Each lesson comes from a figure on an earlier slide. Nothing here is general YouTube best
-      practice imported from elsewhere.
+      Each lesson comes from a figure earlier in this deck.
     </div>
   </div>
 </section>
@@ -1014,8 +1009,727 @@ body.present{overflow:hidden}
     </p>
 
     <div class="src reveal">
-      Ezra Collective × YouTube · Virgin Music Group / Partisan Records · data pulled 15 September 2026.
-      Full method, limitations and audit trail under <b>Analysis</b>.
+      Ezra Collective × YouTube · Virgin Music Group / Partisan Records · data pulled 15 September 2026 · method under Analysis.
+    </div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ═══ ANALYSIS ════════════════════════════════════════════════════
+     Everything the slides deliberately don't carry. The presentation
+     and the audit trail are separated, not one hidden inside the other. -->
+<div class="sheet" id="sheet">
+  <button class="btn close" onclick="closeSheet()">Close ✕</button>
+  <div class="sheet-in">
+
+    <div class="label">Analysis</div>
+    <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
+
+    <!-- ── The three sources ─────────────────────────────────────── -->
+    <h3 class="display sec">Sources</h3>
+    <div class="mgrid">
+      <div class="mcard">
+        <div class="ct">Public YouTube Data API</div>
+        <p>Every upload on the channel, with its publication date, duration, format, view and
+        engagement counts.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Weekly Watcher snapshots</div>
+        <p>Our own cron, recording the channel’s public figures once a week. This is what makes
+        before-and-after measurable.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Public comments</div>
+        <p>Read as audience research — what people say about the work, in their own words.</p>
+      </div>
+    </div>
+
+    <!-- ── What was studied ──────────────────────────────────────── -->
+    <h3 class="display sec">The study</h3>
+
+    <div class="album">
+      <div>
+        <div class="ct" style="color:var(--gold)">Here Because of Hope</div>
+        <p style="margin-top:.3rem">Released <b style="color:var(--cream)">11 September 2026</b> · Partisan Records</p>
+      </div>
+      <div class="label">Channel data pulled 15 September 2026</div>
+    </div>
+
+    <div class="mgrid">
+      <div class="mcard">
+        <div class="label">2026 campaign</div>
+        <div class="mbig">69</div>
+        <p>uploads across <b style="color:var(--cream)">111 days</b><br>27 May → 15 Sep 2026</p>
+      </div>
+      <div class="mcard">
+        <div class="label">2024 comparison</div>
+        <div class="mbig" style="color:var(--warm)">27</div>
+        <p>uploads across <b style="color:var(--cream)">110 days</b><br><em>Dance, No One’s Watching</em></p>
+      </div>
+      <div class="mcard">
+        <div class="label">Comments</div>
+        <div class="mbig" style="color:var(--green)">266</div>
+        <p>sampled across <b style="color:var(--cream)">15 videos</b></p>
+      </div>
+    </div>
+
+    <!-- ── The one methodological choice that shapes everything ──── -->
+    <h3 class="display sec">A fair comparison</h3>
+    <p class="big-p">
+      The 2024 videos have had longer to accumulate views, so campaign-to-campaign performance is
+      compared using <b style="color:var(--cream)">structural measures rather than absolute views</b>.
+    </p>
+    <div class="fair">
+      <span>Active weeks</span><span>Longest gap</span><span>Upload volume</span>
+      <span>Format mix</span><span>Attention concentration</span>
+    </div>
+    <p style="margin-top:1.1rem">
+      These hold their meaning whatever a video’s age. Release-week channel movement is measured
+      separately, using Watcher’s weekly snapshots.
+    </p>
+
+    <!-- ── Small print. Present for transparency, not for emphasis. ─ -->
+    <div class="notes">
+      <div class="label">Methodology notes</div>
+
+      <dl class="mn">
+        <dt>Data sources</dt>
+        <dd>Public YouTube Data API, our weekly Watcher snapshots of that API, and public comments.
+        No YouTube Studio metrics were used.</dd>
+
+        <dt>Comparison method</dt>
+        <dd>Comparable announcement-led campaign windows — 101 days announcement-to-album in 2024,
+        107 in 2026. Structural measures are used where asset age prevents a fair absolute-view
+        comparison, so campaign view totals are not compared.</dd>
+
+        <dt>Public subscribers</dt>
+        <dd>Displayed counts are rounded by YouTube, so movement is shown as observed readings
+        rather than as a precise figure or a growth multiple.</dd>
+
+        <dt>Attribution</dt>
+        <dd>Public data shows co-occurrence, not asset-level causation. Release-week channel
+        movement is not credited to any individual upload.</dd>
+
+        <dt>Comments</dt>
+        <dd>Used qualitatively, from a public relevance-ranked sample rather than a census.</dd>
+
+        <dt>Pre-campaign material</dt>
+        <dd>The Alexandra Palace film predates the campaign window and is kept separate from all
+        campaign-performance figures.</dd>
+
+        <dt>Catalogue reconciliation</dt>
+        <dd>Retrieved public uploads do not fully reconcile with the channel’s reported lifetime view
+        total, so no share-of-lifetime claims are made.</dd>
+      </dl>
+
+      <p style="margin-top:1.1rem">
+        Release date per Partisan’s release-day announcement, 11 September 2026. Row-level data and
+        the full audit trail are in the internal audit,
+        <code>EZRA-COLLECTIVE-internal-audit.md</code>.
+      </p>
+    </div>
+
+<div class="chrome">
+  <div class="chrome-l">
+    <span style="color:var(--gold)">EZRA COLLECTIVE × YOUTUBE</span>
+    <span>Here Because of Hope · post-album case study · September 2026</span>
+  </div>
+  <div class="chrome-r" style="display:flex;gap:.5rem">
+    <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════
+     No metric on the cover. The question is the cover. -->
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3.4rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/3ziixar3gqI/maxresdefault.jpg" alt="Only Love — brass band in ceremonial dress"
+      style="object-position:50% 34%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/3ziixar3gqI/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--gold)">Ezra Collective × YouTube · Partisan Records · Virgin Music Group</div>
+    <h1 class="display reveal" style="margin-top:1.1rem">Here because<br>of hope</h1>
+    <p class="statement reveal" style="margin-top:1.6rem;font-size:clamp(1.15rem,2vw,1.75rem);max-width:30ch">
+      The album is out.<br><span style="color:var(--gold)">What did the campaign build?</span>
+    </p>
+    <div class="reveal" style="margin-top:2.6rem;max-width:760px">
+      <div class="rhythm mini" id="cover-rhythm"></div>
+      <div class="label" style="margin-top:.6rem">Every upload day of the campaign window · 27 May → 15 September 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE SPINE ═══════════════════════════════════════════════
+     The strongest finding in the audit, and the only one strong enough
+     to carry a deck. Structural, age-independent, unarguable. -->
+<section class="slide" data-t="Rhythm">
+  <div class="inner">
+    <div class="label reveal">The finding</div>
+    <!-- No forced break: at desk widths this wraps to two lines on its own,
+         and the hard break was pushing the slide past the viewport. -->
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:17ch;font-size:clamp(1.9rem,4.4vw,3.8rem)">The channel stopped going quiet.</h2>
+
+    <div style="margin-top:clamp(1.4rem,3vw,2.2rem)" class="stagger">
+
+      <div class="era" style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div class="era-y">Dance, No One&rsquo;s Watching &middot; 2024 campaign</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.7rem;flex-wrap:wrap">
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--warm)">7<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--red)">43</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--warm)">9</div><div class="label" style="margin-top:.35rem">Upload days</div></div>
+            </div>
+          </div>
+          <div class="label" style="text-align:right">27 uploads</div>
+        </div>
+        <div class="rhythm" id="r24" style="--rh:25px"></div>
+        <div class="gapmark" style="margin-top:.6rem">Six weeks silent, mid-campaign</div>
+      </div>
+
+      <div class="era now">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div class="era-y" style="color:var(--gold)">Here Because of Hope &middot; 2026 campaign</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.7rem;flex-wrap:wrap">
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--gold)">16<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--gold)">9</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--gold)">44</div><div class="label" style="margin-top:.35rem">Upload days</div></div>
+            </div>
+          </div>
+          <div class="label" style="text-align:right;color:var(--gold)">69 uploads</div>
+        </div>
+        <div class="rhythm" id="r26" style="--rh:25px"></div>
+        <div class="label" style="margin-top:.6rem;color:var(--gold)">Never dark for more than nine days</div>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.4rem;color:var(--gold);max-width:44ch">
+      The biggest change wasn&rsquo;t one breakout video. It was consistency.
+    </p>
+
+    <div class="src reveal">
+      Source: public YouTube API. Comparable announcement-led campaign windows — 101 days
+      announcement-to-album in 2024, 107 in 2026.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · ONE WORLD ═══════════════════════════════════════════════
+     The contact sheet IS the slide. Twenty-four real frames from the
+     campaign: different formats, different people, different cities,
+     different jobs — and one unmistakable palette running through all of
+     them. Explaining that in copy would be weaker than showing it, so the
+     type stays out of the way and the grid does the arguing.
+
+     The Lagos / Kingston / London films are the proof it was designed
+     rather than lucky: Partisan describe the album as three movements,
+     West Africa to the Caribbean to London, and the campaign shot one
+     film per movement and published them in that order. -->
+<section class="slide" data-t="One world" style="padding:0;justify-content:stretch">
+  <div class="sheet-grid" id="contact"></div>
+  <div class="sheet-wash"></div>
+  <div class="inner sheet-type">
+    <div class="label reveal" style="color:var(--gold)">What filled those weeks</div>
+    <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(2rem,5.4vw,4.6rem)">69 uploads.<br>One world.</h2>
+    <div class="grid2 reveal" style="margin-top:1.4rem;align-items:end;gap:clamp(1.2rem,3vw,3rem)">
+      <p class="body" style="font-size:1rem;max-width:46ch">
+        Music videos, visualisers, spoken interludes, a fourteen-minute rehearsal film, festival
+        Shorts, a block party. Different formats, different cities, different jobs —
+        <b style="color:var(--cream)">and every one of them still looks like the same record.</b>
+      </p>
+      <div style="display:flex;gap:1.6rem;flex-wrap:wrap;align-items:flex-end">
+        <div><div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.3rem);color:var(--gold)">45</div><div class="label" style="margin-top:.25rem">Shorts</div></div>
+        <div><div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.3rem);color:var(--cream)">24</div><div class="label" style="margin-top:.25rem">Long-form</div></div>
+        <div style="border-left:2px solid var(--green);padding-left:.9rem">
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <span class="step-city">Lagos<i>30 Jun</i></span>
+            <span class="step-city">Kingston<i>11 Aug</i></span>
+            <span class="step-city">London<i>1 Sep</i></span>
+          </div>
+          <div class="label" style="margin-top:.45rem;color:var(--warm);max-width:40ch;letter-spacing:.05em">
+            One film for each of the album’s three movements, in order
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="statement reveal" style="margin-top:1.3rem;color:var(--gold);max-width:54ch">
+      More content. More ways in. One recognisable world.
+    </p>
+    <div class="src reveal" style="margin-top:.8rem">Source: public YouTube API · 27 May–15 Sep 2026.</div>
+  </div>
+</section>
+
+<!-- ═══ 4 · CONCENTRATION ═══════════════════════════════════════════
+     Percentages only. Raw view counts here would be the exact
+     un-age-matched comparison the audit forbids. -->
+<section class="slide" data-t="Concentration">
+  <div class="inner">
+    <div class="label reveal">Where the attention went</div>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:20ch">It stopped depending<br>on one video.</h2>
+    <p class="label reveal" style="margin-top:1.2rem;color:var(--warm);letter-spacing:.1em">
+      Share of campaign-window views taken by the top three uploads
+    </p>
+
+    <div class="grid2 stagger" style="margin-top:2.2rem">
+
+      <div class="era">
+        <div class="era-y">2024</div>
+        <div class="big-num" style="font-size:clamp(3.4rem,8vw,6rem);color:var(--warm);margin-top:.5rem">84.7<span style="font-size:.42em">%</span></div>
+        <div style="margin-top:1.4rem;display:flex;height:70px;gap:3px;align-items:flex-end">
+          <div style="flex:62.8;background:var(--red-dp);height:100%;border-radius:2px"></div>
+          <div style="flex:19.1;background:rgba(224,56,61,.42);height:100%;border-radius:2px"></div>
+          <div style="flex:2.8;background:rgba(224,56,61,.24);height:100%;border-radius:2px"></div>
+          <div style="flex:15.3;background:rgba(246,240,228,.10);height:100%;border-radius:2px"></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">
+          One video — <em>God Gave Me Feet For Dancing</em> — took <b style="color:var(--cream)">62.8%</b> of the
+          whole window on its own. The other twenty-six uploads shared what was left.
+        </p>
+      </div>
+
+      <div class="era now">
+        <div class="era-y">2026</div>
+        <div class="big-num" style="font-size:clamp(3.4rem,8vw,6rem);color:var(--gold);margin-top:.5rem">56.5<span style="font-size:.42em">%</span></div>
+        <div style="margin-top:1.4rem;display:flex;height:70px;gap:3px;align-items:flex-end">
+          <div style="flex:27.4;background:var(--gold);height:100%;border-radius:2px"></div>
+          <div style="flex:15.5;background:var(--green);height:100%;border-radius:2px"></div>
+          <div style="flex:13.6;background:var(--teal);height:100%;border-radius:2px"></div>
+          <div style="flex:43.5;background:rgba(246,240,228,.10);height:100%;border-radius:2px"></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">
+          The leader took <b style="color:var(--cream)">27.4%</b>. And the top three aren't three of the same
+          thing: a music video, a second music video, and a fourteen-minute rehearsal film.
+        </p>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.2rem;color:var(--gold)">
+      The campaign built more than one doorway.
+    </p>
+
+    <div class="src reveal">
+      Source: public YouTube API.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE TWO JOBS ════════════════════════════════════════════
+     The interesting distinction, not "long-form good, Shorts bad". -->
+<section class="slide" data-t="Two jobs" style="padding:0">
+  <div style="display:grid;grid-template-columns:1.05fr 1fr;min-height:100vh;width:100%" class="split5">
+    <div class="bleed" style="position:relative;inset:auto">
+      <img src="https://i.ytimg.com/vi/lsTsx7FPpQ0/maxresdefault.jpg" alt="Rehearsal Tapes — the band in the rehearsal room"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/lsTsx7FPpQ0/hqdefault.jpg'">
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;padding:6rem var(--pad) 4rem">
+      <div class="label reveal">The two jobs</div>
+      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.8rem,3.6vw,3.2rem)">Long-form did<br>the heavy lifting.</h2>
+
+      <div class="stagger" style="margin-top:2.4rem">
+        <div style="border-top:2px solid var(--gold);padding-top:1rem;margin-bottom:1.8rem">
+          <div class="big-num" style="font-size:clamp(2.6rem,5vw,4.2rem);color:var(--gold)">83.6<span style="font-size:.4em">%</span></div>
+          <div class="label" style="margin-top:.4rem;color:var(--warm)">of window views — from 24 long-form uploads</div>
+        </div>
+        <div style="border-top:2px solid var(--line);padding-top:1rem">
+          <div class="big-num" style="font-size:clamp(2.6rem,5vw,4.2rem);color:var(--warm)">16.4<span style="font-size:.4em">%</span></div>
+          <div class="label" style="margin-top:.4rem;color:var(--warm)">of window views — from 45 Shorts</div>
+        </div>
+      </div>
+
+      <p class="statement reveal" style="margin-top:2.2rem;max-width:32ch">
+        That isn't Shorts failing. It's two different jobs.
+      </p>
+      <p class="body reveal" style="margin-top:1rem">
+        The Shorts are what made sixteen consecutive active weeks possible — the festival thank-yous,
+        the tour announcements, what hope means to Femi. <b style="color:var(--cream)">Shorts kept the channel
+        present. Long-form gave people somewhere to go.</b>
+      </p>
+
+      <div class="src reveal">
+        Source: public YouTube API.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · CRAFT ═══════════════════════════════════════════════════
+     The narrowed, defensible version. The audit killed the stronger
+     "audiences were hunting for this" claim — two comments on one
+     out-of-window video could not carry it. -->
+<section class="slide" data-t="Craft">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/Jih5_ZRlQqc/maxresdefault.jpg" alt="Live at Alexandra Palace"
+      style="object-position:62% 40%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Jih5_ZRlQqc/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div style="max-width:720px">
+      <div class="label reveal">What people actually talk about</div>
+      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.8rem,4vw,3.4rem)">The audience<br>notices the craft.</h2>
+
+      <div class="stagger" style="margin-top:2.2rem;display:flex;flex-direction:column;gap:1.6rem">
+        <div class="quote">
+          “Putting people with cameras at different positions in the crowd and around the stage is a
+          brilliant way to capture the feeling of a live gig.”
+          <cite>402 likes · the most-liked comment in the whole scan · Live at Alexandra Palace</cite>
+        </div>
+        <div class="quote" style="border-left-color:var(--green)">
+          “mad props to the steadicam operator and the focus puller!”
+          <cite>14 likes · Rehearsal Tapes</cite>
+        </div>
+      </div>
+
+      <div class="reveal" style="margin-top:2rem;display:flex;gap:2.4rem;flex-wrap:wrap;align-items:flex-end">
+        <div>
+          <div class="big-num" style="font-size:clamp(1.8rem,3.2vw,2.6rem);color:var(--gold)">121.5K</div>
+          <div class="label" style="margin-top:.35rem">Rehearsal Tapes · 14:32<br>3rd-largest campaign asset</div>
+        </div>
+        <div style="max-width:30ch">
+          <p class="body" style="font-size:.95rem">
+            A fourteen-minute rehearsal film, not a song, sitting third in the campaign window.
+          </p>
+        </div>
+      </div>
+
+      <p class="statement reveal" style="margin-top:1.8rem;color:var(--gold);max-width:38ch">
+        Long-form works here when it feels worth watching.
+      </p>
+
+      <div class="src reveal" style="margin-top:1.4rem;font-size:.62rem;opacity:.78;max-width:70ch">
+        <span class="flag" style="font-size:.55rem;padding:.18rem .4rem">Pre-campaign</span>
+        Alexandra Palace is a pre-campaign audience signal, excluded from campaign-performance
+        figures. Source: public YouTube API + public comment sample.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · RELEASE WEEK ══════════════════════════════════════════
+     This slide owns SEQUENCING. Slide 3 owns format variety and visual
+     coherence, so there is deliberately no thumbnail grid here — a second
+     contact sheet would say the same thing twice and neither would land.
+
+     The visual language is a rail, because the argument is chronological:
+     four beats running left to right, with the number of uploads on each
+     day drawn as tick marks so the surge on the 10th reads as a wall
+     against the singles either side. The ticks are the deck's rhythm motif
+     at day scale, which ties it to slide 2 without repeating slide 3.
+
+     The last beat hands into "And the channel moved" — the closing line is
+     written to be answered by the next headline. -->
+<section class="slide" data-t="Release week">
+  <div class="inner">
+    <div class="label reveal">Release week</div>
+    <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">Release week<br>became an event.</h2>
+
+    <div class="rail stagger" style="margin-top:clamp(1.6rem,3.6vw,2.6rem)">
+
+      <div class="stop">
+        <div class="stop-d">Tue 9 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="2"></div>
+        <h3 class="stop-h">The warm-up</h3>
+        <p>The <b>Rehearsal Tapes</b> premiere. Fourteen minutes, not a single — and it becomes the
+        campaign&rsquo;s third-biggest upload.</p>
+      </div>
+
+      <div class="stop surge">
+        <div class="stop-d">Thu 10 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="14"></div>
+        <h3 class="stop-h">The build</h3>
+        <p><b>Fourteen uploads in one day.</b> Nine visualisers, the three Letitia Wright interludes,
+        and a Short saying <em>out tomorrow</em>.</p>
+      </div>
+
+      <div class="stop album">
+        <div class="stop-d">Fri 11 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="2"></div>
+        <h3 class="stop-h">Album out</h3>
+        <p>The last two visualisers land on the day itself — <b>All I Need</b> and <b>Most High</b>.
+        By the end of it, <b>every track on the album</b> has a video.</p>
+      </div>
+
+      <div class="stop">
+        <div class="stop-d">Sat 12 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="1"></div>
+        <h3 class="stop-h">The party</h3>
+        <p>The <b>London block party</b>, posted the day after release. The record goes back to the
+        room it was made for.</p>
+      </div>
+
+    </div>
+
+    <div class="reveal" style="margin-top:1.6rem;display:flex;gap:clamp(1.4rem,4vw,3.4rem);align-items:flex-end;flex-wrap:wrap">
+      <div>
+        <div class="big-num" style="font-size:clamp(2rem,4vw,3.2rem);color:var(--gold)">19</div>
+        <div class="label" style="margin-top:.3rem">uploads across four days</div>
+      </div>
+      <div>
+        <!-- 11 visualisers + the 3 tracks that already had music videos = the
+             whole 14-track album. Verified track by track against the
+             tracklist in Partisan's release-day announcement. -->
+        <div class="big-num" style="font-size:clamp(2rem,4vw,3.2rem);color:var(--cream)">14<span style="color:var(--dim)">/14</span></div>
+        <div class="label" style="margin-top:.3rem">album tracks with a video<br>on the channel</div>
+      </div>
+      <p class="statement" style="margin-bottom:.2rem;color:var(--gold);max-width:30ch">
+        The album didn&rsquo;t arrive as one video. It arrived as a week.
+      </p>
+    </div>
+
+    <div class="src reveal" style="margin-top:1.2rem">
+      Source: public YouTube API · album released 11 Sep 2026.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · THE CHANNEL MOVED ═══════════════════════════════════════
+     Two huge numbers. The view multiple is safe (unrounded inputs);
+     the subscriber figure carries no multiple, by rule. -->
+<section class="slide" data-t="The channel moved">
+  <div class="inner">
+    <div class="label reveal">What the first week did</div>
+    <h2 class="display reveal" style="margin-top:.8rem">And the channel moved.</h2>
+
+    <div class="grid2" style="margin-top:clamp(2rem,4.5vw,3.4rem);align-items:start">
+
+      <div class="reveal">
+        <div class="label" style="color:var(--warm)">Channel views, per week</div>
+        <div style="display:flex;align-items:flex-end;gap:1.6rem;margin-top:1.2rem;flex-wrap:wrap">
+          <div>
+            <div class="big-num" style="font-size:clamp(2rem,3.6vw,2.8rem);color:var(--dim)">225.6K</div>
+            <div class="label" style="margin-top:.35rem">average of the<br>three weeks before</div>
+          </div>
+          <div style="color:var(--dim);font-size:1.4rem;padding-bottom:1.2rem">→</div>
+          <div>
+            <div class="big-num" style="font-size:clamp(3rem,6.4vw,5rem);color:var(--gold)">535.5K</div>
+            <div class="label" style="margin-top:.35rem;color:var(--gold)">release week</div>
+          </div>
+        </div>
+        <div style="margin-top:1.4rem;display:flex;align-items:center;gap:.8rem">
+          <div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.2rem);color:var(--green)">2.4×</div>
+          <div class="label" style="color:var(--warm);max-width:26ch;letter-spacing:.06em">
+            These view counts aren't rounded, so the multiple is safe to state.
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="label" style="color:var(--warm)">Public subscriber count</div>
+        <div id="subladder" style="margin-top:1.2rem"></div>
+        <p class="body" style="margin-top:1.2rem;font-size:.95rem">
+          <b style="color:var(--cream)">The public subscriber count rose.</b> That is the honest sentence.
+          YouTube rounds this figure to the nearest hundred and it already nets off unsubscribes, so
+          it is not a count of new subscribers and we don't put a multiple on it.
+        </p>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.4rem;color:var(--gold);max-width:52ch">
+      Release week produced a clear, visible movement on the channel.
+    </p>
+
+    <div class="src reveal">
+      Source: Watcher + public YouTube API. Public subscriber counts are rounded by YouTube.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · WHAT WORKED ════════════════════════════════════════════
+     Six behaviours, each one already evidenced earlier in the deck, each
+     with its number attached so the claim and its proof travel together.
+
+     Premieres are listed because they were VERIFIED, not because they are
+     YouTube best practice: the API exposes scheduled and actual start
+     times, and three of the channel's seven all-time premieres are in this
+     campaign. Community posts, end screens, cards, Top Fans and Stations
+     are not listed, because the public API does not expose them and we did
+     not check them. This documents what Ezra did, not a generic checklist.
+
+     The landing line deliberately avoids "this is what a full YouTube
+     campaign looks like" — that would imply a universal benchmark we have
+     not established. "Built for the whole channel" is a claim about THIS
+     campaign, and it is one the evidence supports. -->
+<section class="slide" data-t="What worked" style="background:var(--ink-2)">
+  <div class="inner">
+    <div class="label reveal">The campaign, summarised</div>
+    <h2 class="display reveal" style="margin-top:.6rem">What worked.</h2>
+
+    <div class="stagger worked" style="margin-top:clamp(1.5rem,3.4vw,2.4rem)">
+
+      <div class="lesson">
+        <div class="n">01</div>
+        <h3 class="wk">The channel stayed active.</h3>
+        <p><b>16 of 16 weeks</b>, never dark more than nine days.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--green)">
+        <div class="n" style="color:var(--green)">02</div>
+        <h3 class="wk">Attention spread across more assets.</h3>
+        <p>Top-three share fell from <b>84.7%</b> to <b>56.5%</b>.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--teal)">
+        <div class="n" style="color:var(--teal)">03</div>
+        <h3 class="wk">Long-form gave the campaign depth.</h3>
+        <p><b>83.6%</b> of window views, from rehearsal films and live as well as videos.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--red)">
+        <div class="n" style="color:var(--red)">04</div>
+        <h3 class="wk">Shorts kept the channel present.</h3>
+        <p><b>45 Shorts</b> are what made sixteen unbroken weeks possible.</p>
+      </div>
+
+      <div class="lesson">
+        <div class="n">05</div>
+        <h3 class="wk">Release week felt like an event.</h3>
+        <p><b>19 uploads</b> in a week, and premieres saved for the three moments that mattered.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--green)">
+        <div class="n" style="color:var(--green)">06</div>
+        <h3 class="wk">Everything lived in one creative world.</h3>
+        <p>One film for each of the album&rsquo;s <b>three movements</b>, published in order.</p>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.8rem;font-size:clamp(1.25rem,2.6vw,2rem);color:var(--gold);max-width:42ch">
+      The campaign was built for the whole channel.
+    </p>
+
+    <div class="src reveal" style="margin-top:1.2rem">
+      Source: public YouTube API. Every figure appears earlier in this deck.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · THE TRANSFERABLE PART ══════════════════════════════════
+     Only lessons this campaign actually supports. Three, not four. -->
+<section class="slide" data-t="What it teaches">
+  <div class="inner">
+    <div class="label reveal">Beyond Ezra</div>
+    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">What this campaign teaches us.</h2>
+
+    <div class="stagger lessons4" style="margin-top:clamp(1.6rem,3.6vw,2.6rem)">
+
+      <div class="lesson">
+        <div class="n">01</div>
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Don&rsquo;t go quiet.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          Consistency gave the campaign a continuous presence. A 43-day silence last time became a
+          9-day maximum gap this time — a decision, not a budget.
+        </p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--green)">
+        <div class="n" style="color:var(--green)">02</div>
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Don&rsquo;t bet everything on one video.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          When 63% of a campaign sits on a single upload, the campaign <em>is</em> that upload. Build
+          multiple ways in instead.
+        </p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--red)">
+        <div class="n" style="color:var(--red)">03</div>
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Give Shorts and long-form different jobs.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          Shorts keep the channel present and catch the moments. Long-form gives people somewhere
+          deeper to go. Judge each on its own job.
+        </p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--teal)">
+        <div class="n" style="color:var(--teal)">04</div>
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Build a world, not a content calendar.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          Different formats can still feel like one campaign. Three films for the album&rsquo;s three
+          movements is what turns sixty-nine uploads into one thing.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="src reveal" style="margin-top:1.4rem">
+      Each lesson comes from a figure earlier in this deck.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · THE METHOD, DEMONSTRATED ═══════════════════════════════
+     Not an apology. The most transferable idea in the deck. -->
+<section class="slide" data-t="October">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/asYBb11UesE/maxresdefault.jpg" alt="Here Because of Hope — London block party"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/asYBb11UesE/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal">Next read</div>
+    <h2 class="display reveal" style="margin-top:.8rem">Read it again<br>in October.</h2>
+
+    <div class="grid2 reveal" style="margin-top:1.5rem;align-items:start">
+      <div>
+        <div class="label" style="color:var(--gold)">What we can measure today</div>
+        <ul style="margin-top:.9rem;list-style:none">
+          <li style="padding:.4rem 0;color:var(--cream);border-bottom:1px solid var(--line)">How the campaign was built</li>
+          <li style="padding:.4rem 0;color:var(--cream)">How release week responded</li>
+        </ul>
+      </div>
+      <div>
+        <div class="label" style="color:var(--teal)">What only October can tell us</div>
+        <ul style="margin-top:.9rem;list-style:none">
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Did the view lift hold, or decay?</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Did the public subscriber count keep moving?</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Which release-week assets kept growing?</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Did the back catalogue benefit?</li>
+          <li style="padding:.4rem 0;color:var(--warm)">Did the channel stay active?</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- The one actionable gap the best-practice check surfaced. It belongs
+         here rather than on a slide of its own: it is the deck's own spine
+         pointed forwards. -->
+    <div class="reveal" style="margin-top:1.2rem;border-top:2px solid var(--red);padding-top:.85rem;display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2.2rem);align-items:center">
+      <div>
+        <div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.2rem);color:var(--red)">12 Sep</div>
+        <div class="label" style="margin-top:.3rem">Last upload</div>
+      </div>
+      <p class="body" style="font-size:.97rem;max-width:64ch">
+        <b style="color:var(--cream)">And the clearest thing to do next is the thing they already did
+        best.</b> The campaign held a nine-day maximum gap for sixteen weeks. The channel has now been
+        quiet since the block party — in the weeks when a new album is most findable. The discipline
+        that built the campaign is the discipline worth keeping now.
+      </p>
+    </div>
+
+    <div class="step reveal" style="margin-top:1rem">
+      <span>Campaign</span><i>→</i>
+      <span>Release</span><i>→</i>
+      <span class="now">First read · today</span><i>→</i>
+      <span class="next">30-day read</span><i>→</i>
+      <span class="next">What lasted</span>
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.6rem;font-size:clamp(1.25rem,2.5vw,1.95rem);color:var(--gold);max-width:36ch">
+      The campaign was built well. Now let's see what it leaves behind.
+    </p>
+
+    <div class="src reveal">
+      Ezra Collective × YouTube · Virgin Music Group / Partisan Records · data pulled 15 September 2026 · method under Analysis.
     </div>
   </div>
 </section>
