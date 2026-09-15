@@ -265,8 +265,15 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .sheet td b{color:var(--cream);font-weight:600}
 .close{position:fixed;top:1rem;right:var(--pad);z-index:90}
 
-/* ── Present mode ───────────────────────────────────────────────────*/
-body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0}
+/* ── Present mode ───────────────────────────────────────────────────
+   Tighter chrome clearance than the scrolling deck, and overflow-y:auto
+   as a safety net: a slide that outgrows the viewport on an unusual
+   screen should scroll rather than have its headline cut off by the
+   chrome bar, which is what happened to slide 2 at 1440×900. */
+body.present .deck .slide{
+  display:none;height:100vh;min-height:100vh;border-bottom:0;
+  padding-top:4.4rem;padding-bottom:2.4rem;overflow-y:auto;
+}
 body.present .deck .slide.active{display:flex}
 body.present{overflow:hidden}
 
@@ -327,22 +334,24 @@ body.present{overflow:hidden}
 <section class="slide" data-t="Rhythm">
   <div class="inner">
     <div class="label reveal">The finding</div>
-    <h2 class="display reveal" style="margin-top:.8rem;max-width:18ch">The channel<br>stopped going quiet.</h2>
+    <!-- No forced break: at desk widths this wraps to two lines on its own,
+         and the hard break was pushing the slide past the viewport. -->
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:17ch;font-size:clamp(1.9rem,4.4vw,3.8rem)">The channel stopped going quiet.</h2>
 
-    <div style="margin-top:clamp(2.2rem,5vw,3.6rem)" class="stagger">
+    <div style="margin-top:clamp(1.4rem,3vw,2.2rem)" class="stagger">
 
-      <div class="era" style="margin-bottom:2.6rem">
+      <div class="era" style="margin-bottom:1.7rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
           <div>
             <div class="era-y">2024 · Dance, No One's Watching · 110 days</div>
             <div style="display:flex;gap:2.4rem;margin-top:.7rem">
-              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--warm)">7<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
-              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--red)">43</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(2rem,3.5vw,2.9rem);color:var(--warm)">7<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(2rem,3.5vw,2.9rem);color:var(--red)">43</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
             </div>
           </div>
           <div class="label" style="text-align:right">27 uploads</div>
         </div>
-        <div class="rhythm" id="r24" style="--rh:44px"></div>
+        <div class="rhythm" id="r24" style="--rh:34px"></div>
         <div class="gapmark" style="margin-top:.7rem">↑ 22 July → 3 September · nothing published for six weeks</div>
       </div>
 
@@ -351,19 +360,19 @@ body.present{overflow:hidden}
           <div>
             <div class="era-y">2026 · Here Because of Hope · 111 days</div>
             <div style="display:flex;gap:2.4rem;margin-top:.7rem">
-              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">16<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
-              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">9</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(2rem,3.5vw,2.9rem);color:var(--gold)">16<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(2rem,3.5vw,2.9rem);color:var(--gold)">9</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
             </div>
           </div>
           <div class="label" style="text-align:right;color:var(--gold)">69 uploads</div>
         </div>
-        <div class="rhythm" id="r26" style="--rh:44px"></div>
+        <div class="rhythm" id="r26" style="--rh:34px"></div>
         <div class="label" style="margin-top:.7rem;color:var(--warm)">44 separate upload days. The channel was never dark for more than nine.</div>
       </div>
 
     </div>
 
-    <p class="statement reveal" style="margin-top:2.4rem;color:var(--gold)">
+    <p class="statement reveal" style="margin-top:1.6rem;color:var(--gold)">
       This campaign didn't rely on the occasional hero upload. It kept the channel alive.
     </p>
 
@@ -527,9 +536,9 @@ body.present{overflow:hidden}
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Jih5_ZRlQqc/hqdefault.jpg'">
   </div>
   <div class="inner">
-    <div style="max-width:660px">
+    <div style="max-width:720px">
       <div class="label reveal">What people actually talk about</div>
-      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.7rem,3.8vw,3.2rem)">When the film is good,<br>people notice the film.</h2>
+      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.6rem,3.3vw,2.8rem)">When the film is good, people notice the film.</h2>
 
       <div class="stagger" style="margin-top:2.2rem;display:flex;flex-direction:column;gap:1.6rem">
         <div class="quote">
