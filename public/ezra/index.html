@@ -1152,23 +1152,6 @@ function rhythm(el, days, cls){
   el.innerHTML = html;
 }
 
-/* Slide 3 — the actual campaign surfaces. Deliberately a mix of formats
-   rather than a run of visualisers, so the variety is visible at a glance. */
-var WAYS = [
-  ['3ziixar3gqI','Only Love','Music video'],
-  ['MLV8w3k2U9o','Well Organised','Music video'],
-  ['lsTsx7FPpQ0','Rehearsal Tapes','14:32 film'],
-  ['n6pSgYKSCs8','Jubilee Feeling','Music video'],
-  ['ivlTNyDy488','Messages of Hope: Lagos','Short film'],
-  ['i0UFpV7xd8I','Messages of Hope: Kingston','Short film'],
-  ['4IqthGzU_-Q','Messages of Hope: London','Short film'],
-  ['MR0K-Ta9M2o','Most High','Visualiser'],
-  ['_d4tu0tCN58','Blow Your Trumpet','Visualiser'],
-  ['wF0bJb8liUA','Well Organised','Lyric video'],
-  ['asYBb11UesE','London block party','Short'],
-  ['VPlRXt0aVc8','fEZtival season','Short']
-];
-
 /* Slide 7 — release week, in publication order. */
 /* Slide 3 — the contact sheet. Chosen to span the campaign's whole
    range: three music videos, the rehearsal film, visualisers, the three
@@ -1180,38 +1163,6 @@ var CONTACT = [
   'MR0K-Ta9M2o','_d4tu0tCN58','hNVwJ4FiYmg','TlJTXw9u3uM','6JGO7rWm7ls','k8l4p7phsr8','vnb9HIzjKqw','CMSnoFHp4p4',
   'tKEc8jyz54k','e4MjLCRwelI','asYBb11UesE','VPlRXt0aVc8','wF0bJb8liUA','UD_jk88ATcc','NFhpdYWa1sE','qev0o2DywMw'
 ];
-
-var STOCKED = [
-  ['lsTsx7FPpQ0','Rehearsal Tapes'],
-  ['tKEc8jyz54k','Letitia Wright · Pt 1'],
-  ['_d4tu0tCN58','Blow Your Trumpet'],
-  ['hNVwJ4FiYmg','Sweet Echo'],
-  ['2n3D7qaGB54','Don’t Worry'],
-  ['CMSnoFHp4p4','Someday'],
-  ['e4MjLCRwelI','Letitia Wright · Pt 2'],
-  ['TlJTXw9u3uM','Birdie Sings'],
-  ['f2_cyQA3384','The Last Stand'],
-  ['6JGO7rWm7ls','El Corazón'],
-  ['H-ThsRcn980','Bunny on the Rise'],
-  ['IEoiIMF7Cys','Letitia Wright · Pt 3'],
-  ['k8l4p7phsr8','Black Flag'],
-  ['vnb9HIzjKqw','All I Need'],
-  ['MR0K-Ta9M2o','Most High'],
-  ['asYBb11UesE','London block party']
-];
-
-/* bare = a filmstrip: no caption overlay, so the row reads as one
-   continuous band of the campaign's colour rather than twelve cards. */
-function thumbs(el, rows, showKind, bare){
-  if(!el) return;
-  el.innerHTML = rows.map(function(r){
-    return '<a class="thumb" title="' + r[1] + (r[2] ? ' \u00b7 ' + r[2] : '') + '"' +
-      ' href="https://www.youtube.com/watch?v=' + r[0] + '" target="_blank" rel="noopener">' +
-      '<img loading="lazy" src="https://i.ytimg.com/vi/' + r[0] + '/mqdefault.jpg" alt="' + r[1] + '">' +
-      (bare ? '' : '<div class="thumb-c">' + r[1] + (showKind && r[2] ? '<br><span style="color:var(--gold)">' + r[2] + '</span>' : '') + '</div>') +
-    '</a>';
-  }).join('');
-}
 
 /* Slide 8 — the four public readings as a ladder. No multiple, by rule:
    each input is rounded to the nearest 100. */
@@ -1319,7 +1270,6 @@ document.addEventListener('DOMContentLoaded', function(){
     return '<a href="https://www.youtube.com/watch?v=' + id + '" target="_blank" rel="noopener">' +
       '<img loading="lazy" src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" alt=""></a>';
   }).join('');
-  thumbs(document.getElementById('stocked'), STOCKED, false);
   document.querySelectorAll('.ticks').forEach(function(t){
     t.innerHTML = new Array(+t.getAttribute('data-n') || 0).fill('<i></i>').join('');
   });
