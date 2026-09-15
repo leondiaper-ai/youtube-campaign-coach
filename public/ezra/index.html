@@ -194,6 +194,38 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.v{aspect-ratio:9/16}
 .strip .thumb{border-radius:2px}
+/* ── The release-week rail ─────────────────────────────────────────
+   Four beats left to right on a single line. Each station draws one tick
+   per upload that day, so 10 September reads as a wall next to the twos
+   and ones either side — the shape of the week, not a bar chart of it. */
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.9rem,2.2vw,2rem);position:relative}
+.rail::before{
+  content:'';position:absolute;left:0;right:0;top:calc(1.05rem + 5px);height:1px;
+  background:linear-gradient(to right,var(--line),var(--line) 62%,var(--gold) 62%,var(--gold) 88%,var(--line) 88%);
+}
+.stop{position:relative;padding-right:.4rem}
+.stop-d{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.stop.album .stop-d{color:var(--gold)}
+.node{width:11px;height:11px;border-radius:50%;background:var(--ink);border:2px solid var(--line);margin:.35rem 0 0}
+.stop.surge .node{border-color:var(--cream)}
+.stop.album .node{border-color:var(--gold);background:var(--gold);box-shadow:0 0 0 4px rgba(214,142,34,.18)}
+.ticks{display:flex;gap:2px;align-items:flex-end;height:30px;margin:.9rem 0 .8rem}
+.ticks i{width:4px;background:var(--warm);border-radius:1px;height:52%;display:block}
+.stop.surge .ticks i{background:var(--cream);height:100%}
+.stop.album .ticks i{background:var(--gold);height:78%}
+.stop-h{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 720;
+  font-size:clamp(1rem,1.6vw,1.3rem);text-transform:uppercase;color:var(--cream);
+  line-height:1.1;margin-bottom:.45rem;
+}
+.stop.album .stop-h{color:var(--gold)}
+.stop p{font-size:.87rem;line-height:1.45;color:var(--warm)}
+.stop p b{color:var(--cream);font-weight:600}
+@media(max-width:860px){
+  .rail{grid-template-columns:1fr 1fr;row-gap:1.6rem}
+  .rail::before{display:none}
+}
+
 /* ── The contact sheet ──────────────────────────────────────────────
    A full-bleed grid of real campaign frames sitting behind the type.
    The wash is a gradient rather than a flat scrim so the top of the
@@ -660,37 +692,84 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 7 · RELEASE WEEK ════════════════════════════════════════════
-     The visualiser grid is the slide. Show the surface filling up. -->
-<section class="slide" data-t="Fully stocked" style="justify-content:flex-start;padding-top:6.5rem">
+<!-- ═══ 7 · RELEASE WEEK ══════════════════════════════════════════
+     This slide owns SEQUENCING. Slide 3 owns format variety and visual
+     coherence, so there is deliberately no thumbnail grid here — a second
+     contact sheet would say the same thing twice and neither would land.
+
+     The visual language is a rail, because the argument is chronological:
+     four beats running left to right, with the number of uploads on each
+     day drawn as tick marks so the surge on the 10th reads as a wall
+     against the singles either side. The ticks are the deck's rhythm motif
+     at day scale, which ties it to slide 2 without repeating slide 3.
+
+     The last beat hands into "And the channel moved" — the closing line is
+     written to be answered by the next headline. -->
+<section class="slide" data-t="Release week">
   <div class="inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap">
+    <div class="label reveal">Release week</div>
+    <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">Release week<br>became an event.</h2>
+
+    <div class="rail stagger" style="margin-top:clamp(1.6rem,3.6vw,2.6rem)">
+
+      <div class="stop">
+        <div class="stop-d">Tue 9 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="2"></div>
+        <h3 class="stop-h">The warm-up</h3>
+        <p>The <b>Rehearsal Tapes</b> premiere. Fourteen minutes, not a single — and it becomes the
+        campaign&rsquo;s third-biggest upload.</p>
+      </div>
+
+      <div class="stop surge">
+        <div class="stop-d">Thu 10 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="14"></div>
+        <h3 class="stop-h">The build</h3>
+        <p><b>Fourteen uploads in one day.</b> Nine visualisers, the three Letitia Wright interludes,
+        and a Short saying <em>out tomorrow</em>.</p>
+      </div>
+
+      <div class="stop album">
+        <div class="stop-d">Fri 11 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="2"></div>
+        <h3 class="stop-h">Album out</h3>
+        <p>The last two visualisers land on the day itself — <b>All I Need</b> and <b>Most High</b>.
+        By the end of it, <b>every track on the album</b> has a video.</p>
+      </div>
+
+      <div class="stop">
+        <div class="stop-d">Sat 12 Sep</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="1"></div>
+        <h3 class="stop-h">The party</h3>
+        <p>The <b>London block party</b>, posted the day after release. The record goes back to the
+        room it was made for.</p>
+      </div>
+
+    </div>
+
+    <div class="reveal" style="margin-top:1.6rem;display:flex;gap:clamp(1.4rem,4vw,3.4rem);align-items:flex-end;flex-wrap:wrap">
       <div>
-        <div class="label reveal">Release week</div>
-        <h2 class="display reveal" style="margin-top:.8rem">Fully stocked.</h2>
+        <div class="big-num" style="font-size:clamp(2rem,4vw,3.2rem);color:var(--gold)">19</div>
+        <div class="label" style="margin-top:.3rem">uploads across four days</div>
       </div>
-      <div class="reveal" style="text-align:right">
-        <div class="big-num" style="font-size:clamp(2.6rem,5.5vw,4.4rem);color:var(--gold)">19</div>
-        <div class="label" style="margin-top:.35rem">uploads in the week of 9 September<br>12 long-form · 7 Shorts</div>
+      <div>
+        <!-- 11 visualisers + the 3 tracks that already had music videos = the
+             whole 14-track album. Verified track by track against the
+             tracklist in Partisan's release-day announcement. -->
+        <div class="big-num" style="font-size:clamp(2rem,4vw,3.2rem);color:var(--cream)">14<span style="color:var(--dim)">/14</span></div>
+        <div class="label" style="margin-top:.3rem">album tracks with a video<br>on the channel</div>
       </div>
-    </div>
-
-    <div class="stagger" id="stocked" style="display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:2rem"></div>
-
-    <div class="grid2 reveal" style="margin-top:2rem;align-items:start">
-      <p class="statement" style="color:var(--gold)">
-        The album didn't arrive as one video.<br>It arrived as a whole channel.
-      </p>
-      <p class="body">
-        Eleven song visualisers across forty-eight hours, three spoken interludes read by Letitia
-        Wright, the full Rehearsal Tapes, the London block party. Everybody who came looking in
-        release week found the whole record waiting.
+      <p class="statement" style="margin-bottom:.2rem;color:var(--gold);max-width:30ch">
+        The album didn&rsquo;t arrive as one video. It arrived as a week.
       </p>
     </div>
 
-    <div class="src reveal">
-      <b>Public YouTube API.</b> Every upload dated 9–15 September. The album was released on
-      <b>11 September 2026</b> via Partisan Records, confirmed by the label's release-day announcement.
+    <div class="src reveal" style="margin-top:1.2rem">
+      <b>Public YouTube API.</b> Every upload dated 9–12 September, in publication order.
+      <em>Here Because of Hope</em> was released 11 September 2026 via Partisan Records.
     </div>
   </div>
 </section>
@@ -1226,6 +1305,9 @@ document.addEventListener('DOMContentLoaded', function(){
       '<img loading="lazy" src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" alt=""></a>';
   }).join('');
   thumbs(document.getElementById('stocked'), STOCKED, false);
+  document.querySelectorAll('.ticks').forEach(function(t){
+    t.innerHTML = new Array(+t.getAttribute('data-n') || 0).fill('<i></i>').join('');
+  });
   ladder();
   observeAll();
   /* The first slide is already on screen; it shouldn't wait for a scroll. */
