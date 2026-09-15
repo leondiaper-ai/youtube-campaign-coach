@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'Ezra Collective',
+        blurb:
+          'Post-album case study on Here Because of Hope — what the campaign built, what release week did, and why it is too early to call the outcome. Written to be shareable with Partisan and YouTube.',
+        href: '/ezra',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'Antony Szmierek',
         blurb:
           'Post-album deep dive \u2014 what the campaign taught us about what people respond to in Antony\u2019s world, and how to keep Decoding Birdsong moving after release.',

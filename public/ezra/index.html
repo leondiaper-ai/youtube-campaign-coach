@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ezra Collective × YouTube — Here Because of Hope</title>
+
+<!--
+  EZRA COLLECTIVE × YOUTUBE — post-album case study
+  Virgin Music Group / Partisan Records · September 2026
+
+  ─────────────────────────────────────────────────────────────────────
+  WHERE THE NUMBERS COME FROM
+  Every figure on these slides traces to EZRA-COLLECTIVE-internal-audit.md
+  and its source rows in /tmp/ez/cat.js. Public YouTube Data API v3 plus
+  our own weekly Watcher snapshots of that same public API. There are no
+  YouTube Studio metrics anywhere in this deck: no impressions, no CTR,
+  no retention, no traffic sources, no unique viewers.
+
+  ─────────────────────────────────────────────────────────────────────
+  EIGHT RULES THIS FILE OBEYS (from the audit's evidence section)
+   1. No absolute view comparison between the 2026 and 2024 windows.
+      The assets are not age-matched. Only counts and within-window
+      ratios cross the two campaigns.
+   2. Public subscriber-count movement is never called "subscriber
+      additions". It is a rounded, net-of-unsubscribes public display.
+   3. No multiple is put on the subscriber figure. Inputs are rounded to
+      the nearest 100, so a ratio would be false precision.
+   4. Release-week channel movement is never attributed to any asset.
+      We have no traffic-source data. Co-occurrence only.
+   5. Alexandra Palace is PRE-CAMPAIGN (8 May, 19 days before the
+      announcement) and is labelled as such everywhere it appears. Its
+      views never enter a campaign total.
+   6. No share-of-lifetime claims. There is a 15,081,903-view gap
+      between the public uploads playlist and the channel's reported
+      lifetime total.
+   7. No precise commercial release date is stated. The channel's own
+      copy conflicts: an announcement Short says 18 September, the rest
+      of the channel implies 11 September. Unresolved with Partisan, so
+      the deck says "release week".
+   8. No best-in-class outcome claim. Slide 9 is about exactly that.
+
+  ─────────────────────────────────────────────────────────────────────
+  THE DESIGN SYSTEM CAME OUT OF THE CHANNEL, NOT OFF A SHELF
+  The palette below was sampled programmatically from fifteen real
+  campaign thumbnails — canvas getImageData, greys and crushed blacks
+  filtered out, then binned by hue. What came back was the warm band
+  (48% of saturated pixels), green (17%), red (11%), teal (12%). Those
+  are the Lagos gele and foliage, the brass headdresses in Only Love,
+  the Kingston sequins, the sea in Well Organised. Ezra caption their
+  own Shorts with 💚💛❤️ and 🖤❤️💛; the pixels agree with them.
+
+  The motif is RHYTHM. The deck's central finding is that the channel
+  stopped going quiet, which is a claim about rhythm, so the repeating
+  mark throughout is a strip of day-ticks — one per day of the campaign
+  window, lit where an upload landed. It is the argument and the
+  decoration at the same time.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Axes verified against the CSS2 endpoint before use: Archivo really is
+     wdth 62..125 / wght 100..900. Guessing an axis range that does not exist
+     makes Google serve a static fallback and the whole deck silently loses
+     its typography. -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:wght@400..700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* Sampled from the campaign's own frames — see the note above. */
+  --gold:#D68E22;      /* brass, the Kingston sequins, low sun */
+  --gold-lt:#F0B44A;
+  --red:#E0383D;       /* the gele, the Only Love headdresses */
+  --red-dp:#8C2A25;
+  --green:#3FAB51;     /* Lagos foliage */
+  --green-dp:#1D5426;
+  --teal:#4E9AAA;      /* the sea in Well Organised */
+
+  --ink:#0B0907;       /* deep warm black — the campaign shoots dark */
+  --ink-2:#14100C;
+  --ink-3:#1E1813;
+  --cream:#F6F0E4;
+  --warm:#C3B3A0;      /* muted body copy on dark, measured at 7.4:1 */
+  --dim:#8A7C6C;       /* labels only, never body text */
+  --line:rgba(246,240,228,.14);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--cream);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Type scale ─────────────────────────────────────────────────────
+   Archivo at wide widths reads like gig-poster and sound-system
+   signage, which is the register this campaign actually lives in. */
+.display{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 118,'wght' 800;
+  text-transform:uppercase;line-height:.92;letter-spacing:-.005em;
+}
+h1.display{font-size:clamp(2.6rem,7.4vw,6.6rem)}
+h2.display{font-size:clamp(2rem,5.2vw,4.5rem)}
+h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 110,'wght' 750}
+
+.label{
+  font-family:'DM Mono',monospace;font-size:.68rem;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.4;color:var(--cream);max-width:34ch}
+.body{color:var(--warm);max-width:60ch}
+.big-num{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 800;
+  line-height:.86;letter-spacing:-.02em;
+}
+
+/* ── Slides ─────────────────────────────────────────────────────────
+   A scrolling deck by default; Present mode swaps to one-at-a-time. */
+.deck{width:100%}
+.slide{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:5.5rem var(--pad) 4rem;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+/* Scrims are separate elements rather than a filter on the image, so the
+   image keeps its own contrast and only the type side is darkened. */
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,9,7,.96) 4%,rgba(11,9,7,.72) 38%,rgba(11,9,7,.18) 78%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(11,9,7,.95) 30%,rgba(11,9,7,.62) 58%,rgba(11,9,7,.12) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(11,9,7,.78)}
+
+/* ── THE MOTIF: the rhythm strip ────────────────────────────────────
+   One tick per day of the campaign window. Lit = an upload landed.
+   This is the deck's whole argument rendered as a repeating mark. */
+.rhythm{display:flex;gap:2px;align-items:flex-end;width:100%;height:var(--rh,54px)}
+.tick{flex:1 1 0;min-width:1px;border-radius:1px;background:rgba(246,240,228,.10);height:26%}
+.tick.on{height:100%;background:var(--gold)}
+.tick.on.g{background:var(--green)}
+.tick.on.r{background:var(--red)}
+.rhythm.mini{--rh:16px;gap:1.5px}
+.rhythm.mini .tick{height:34%}
+
+.gapmark{
+  position:relative;font-family:'DM Mono',monospace;font-size:.72rem;
+  letter-spacing:.1em;color:var(--red);text-transform:uppercase;
+}
+
+/* ── Components ─────────────────────────────────────────────────────*/
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,2.5vw,2.4rem)}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.era{border-top:2px solid var(--line);padding-top:1.1rem}
+.era.now{border-top-color:var(--gold)}
+.era-y{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.18em;color:var(--dim)}
+.era.now .era-y{color:var(--gold)}
+
+/* One line of provenance per slide. The full audit trail is in Analysis —
+   the point of this deck is the insight, not the apparatus. */
+.src{
+  font-family:'DM Mono',monospace;font-size:.68rem;line-height:1.5;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.8rem;
+  max-width:62ch;margin-top:2rem;
+}
+.src b{color:var(--warm);font-weight:400}
+
+.flag{
+  display:inline-block;font-family:'DM Mono',monospace;font-size:.6rem;
+  letter-spacing:.14em;text-transform:uppercase;padding:.25rem .5rem;
+  border:1px solid var(--red);color:var(--red);border-radius:2px;
+  vertical-align:middle;
+}
+.flag.n{border-color:var(--line);color:var(--dim)}
+
+.thumb{position:relative;display:block;border-radius:3px;overflow:hidden;background:var(--ink-3);aspect-ratio:16/9}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.v{aspect-ratio:9/16}
+.thumb-c{
+  position:absolute;left:0;right:0;bottom:0;padding:.5rem .55rem .45rem;
+  background:linear-gradient(to top,rgba(11,9,7,.94),rgba(11,9,7,0));
+  font-family:'DM Mono',monospace;font-size:.6rem;line-height:1.3;color:var(--cream);
+}
+
+.quote{
+  border-left:3px solid var(--gold);padding:.1rem 0 .1rem 1.1rem;
+  font-size:clamp(1rem,1.35vw,1.2rem);line-height:1.42;color:var(--cream);
+}
+.quote cite{display:block;margin-top:.5rem;font-style:normal;
+  font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;color:var(--dim)}
+
+.verdict{border-top:2px solid;padding-top:1.2rem}
+.verdict.can{border-color:var(--green)}
+.verdict.cant{border-color:var(--red)}
+.verdict h3{margin-bottom:1rem}
+.verdict.can h3{color:var(--green)}
+.verdict.cant h3{color:var(--red)}
+.verdict li{list-style:none;padding:.5rem 0 .5rem 1.3rem;position:relative;color:var(--warm);border-bottom:1px solid var(--line)}
+.verdict li:last-child{border-bottom:0}
+.verdict li::before{content:'';position:absolute;left:0;top:1.12rem;width:6px;height:6px;border-radius:50%}
+.verdict.can li::before{background:var(--green)}
+.verdict.cant li::before{background:var(--red)}
+
+.lesson{border-top:2px solid var(--gold);padding-top:1.2rem}
+.lesson .n{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--gold);letter-spacing:.18em}
+
+.step{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;margin-top:1.4rem}
+.step span{
+  font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.5rem .8rem;border:1px solid var(--line);border-radius:2px;color:var(--warm);
+}
+.step span.now{border-color:var(--gold);color:var(--gold)}
+.step span.next{border-color:var(--teal);color:var(--teal)}
+.step i{color:var(--dim);font-style:normal}
+
+/* ── Chrome ─────────────────────────────────────────────────────────*/
+.chrome{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.7rem var(--pad);background:rgba(11,9,7,.9);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+}
+.chrome-l{display:flex;gap:1.1rem;align-items:baseline;color:var(--dim);min-width:0}
+.chrome-l span:first-child{white-space:nowrap}
+@media(max-width:760px){.chrome-l span:nth-child(2){display:none}}
+.btn{
+  font:inherit;text-transform:uppercase;letter-spacing:.13em;cursor:pointer;
+  background:transparent;color:var(--warm);border:1px solid var(--line);
+  padding:.45rem .8rem;border-radius:2px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.primary{border-color:var(--gold);color:var(--ink);background:var(--gold);font-weight:500}
+.btn.primary:hover{background:var(--gold-lt);border-color:var(--gold-lt);color:var(--ink)}
+#pbar{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0;z-index:70;transition:width .3s ease}
+
+/* ── Analysis sheet — where every caveat actually lives ─────────────*/
+.sheet{
+  position:fixed;inset:0;z-index:80;background:rgba(6,5,4,.97);
+  overflow-y:auto;padding:5rem var(--pad) 6rem;display:none;
+}
+.sheet.open{display:block}
+.sheet-in{max-width:880px;margin:0 auto}
+.sheet h2{margin-bottom:.4rem}
+.sheet h4{
+  font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin:2.4rem 0 .7rem;
+}
+.sheet p,.sheet li{color:var(--warm);margin-bottom:.7rem;max-width:74ch}
+.sheet li{margin-left:1.1rem}
+.sheet .warn{border-left:3px solid var(--red);padding-left:1rem;color:var(--cream)}
+.sheet table{border-collapse:collapse;width:100%;margin:.8rem 0 1.4rem;font-size:.82rem}
+.sheet th,.sheet td{text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--line);color:var(--warm)}
+.sheet th{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.sheet td b{color:var(--cream);font-weight:600}
+.close{position:fixed;top:1rem;right:var(--pad);z-index:90}
+
+/* ── Present mode ───────────────────────────────────────────────────*/
+body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0}
+body.present .deck .slide.active{display:flex}
+body.present{overflow:hidden}
+
+/* ── Motion ─────────────────────────────────────────────────────────*/
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger.visible>*{opacity:1;transform:none}
+.tick{transition:height .5s cubic-bezier(.2,.7,.3,1),background .4s ease}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}
+  .tick{transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="pbar"></div>
+
+<div class="chrome">
+  <div class="chrome-l">
+    <span style="color:var(--gold)">EZRA COLLECTIVE × YOUTUBE</span>
+    <span>Here Because of Hope · post-album case study · September 2026</span>
+  </div>
+  <div class="chrome-r" style="display:flex;gap:.5rem">
+    <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════
+     No metric on the cover. The question is the cover. -->
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3.4rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/3ziixar3gqI/maxresdefault.jpg" alt="Only Love — brass band in ceremonial dress"
+      style="object-position:50% 34%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/3ziixar3gqI/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--gold)">Ezra Collective × YouTube · Partisan Records · Virgin Music Group</div>
+    <h1 class="display reveal" style="margin-top:1.1rem">Here because<br>of hope</h1>
+    <p class="statement reveal" style="margin-top:1.6rem;font-size:clamp(1.15rem,2vw,1.75rem);max-width:30ch">
+      The album is out.<br><span style="color:var(--gold)">What did the campaign build?</span>
+    </p>
+    <div class="reveal" style="margin-top:2.6rem;max-width:760px">
+      <div class="rhythm mini" id="cover-rhythm"></div>
+      <div class="label" style="margin-top:.6rem">Every upload day of the campaign window · 27 May → 15 September 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE SPINE ═══════════════════════════════════════════════
+     The strongest finding in the audit, and the only one strong enough
+     to carry a deck. Structural, age-independent, unarguable. -->
+<section class="slide" data-t="Rhythm">
+  <div class="inner">
+    <div class="label reveal">The finding</div>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:18ch">The channel<br>stopped going quiet.</h2>
+
+    <div style="margin-top:clamp(2.2rem,5vw,3.6rem)" class="stagger">
+
+      <div class="era" style="margin-bottom:2.6rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div class="era-y">2024 · Dance, No One's Watching · 110 days</div>
+            <div style="display:flex;gap:2.4rem;margin-top:.7rem">
+              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--warm)">7<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--red)">43</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+            </div>
+          </div>
+          <div class="label" style="text-align:right">27 uploads</div>
+        </div>
+        <div class="rhythm" id="r24" style="--rh:44px"></div>
+        <div class="gapmark" style="margin-top:.7rem">↑ 22 July → 3 September · nothing published for six weeks</div>
+      </div>
+
+      <div class="era now">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div class="era-y">2026 · Here Because of Hope · 111 days</div>
+            <div style="display:flex;gap:2.4rem;margin-top:.7rem">
+              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">16<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">9</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+            </div>
+          </div>
+          <div class="label" style="text-align:right;color:var(--gold)">69 uploads</div>
+        </div>
+        <div class="rhythm" id="r26" style="--rh:44px"></div>
+        <div class="label" style="margin-top:.7rem;color:var(--warm)">44 separate upload days. The channel was never dark for more than nine.</div>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.4rem;color:var(--gold)">
+      This campaign didn't rely on the occasional hero upload. It kept the channel alive.
+    </p>
+
+    <div class="src reveal">
+      <b>Public YouTube API.</b> Upload counts, active weeks and gap lengths don't change as videos
+      age, so these two windows are directly comparable. View totals are not — and are not shown.
+      Windows matched to within one day: 111 vs 110.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · WAYS IN ═════════════════════════════════════════════════
+     Deliberately not a bar chart. The point is that 69 uploads were not
+     69 versions of the same thing, and only the actual frames show that. -->
+<section class="slide" data-t="Ways in" style="justify-content:flex-start;padding-top:6.5rem">
+  <div class="inner">
+    <div class="label reveal">What filled those weeks</div>
+    <h2 class="display reveal" style="margin-top:.8rem">More content.<br>More ways in.</h2>
+
+    <div class="grid3 reveal" style="margin-top:2rem;gap:1.6rem;align-items:start">
+      <div>
+        <p class="body" style="font-size:1.02rem">
+          Music videos, lyric videos, a fourteen-minute rehearsal film, twelve album visualisers,
+          spoken interludes read by Letitia Wright, films made in Lagos and Kingston, a block party,
+          and forty-five Shorts from the festival run.
+        </p>
+      </div>
+      <div style="display:flex;gap:2rem">
+        <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem);color:var(--gold)">45</div><div class="label" style="margin-top:.3rem">Shorts</div></div>
+        <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem);color:var(--cream)">24</div><div class="label" style="margin-top:.3rem">Long-form</div></div>
+      </div>
+      <div class="era" style="border-top-color:var(--line)">
+        <div class="label">The comparable 2024 window</div>
+        <div style="display:flex;gap:2rem;margin-top:.7rem">
+          <div><div class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--dim)">9</div><div class="label" style="margin-top:.3rem">Shorts</div></div>
+          <div><div class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--dim)">18</div><div class="label" style="margin-top:.3rem">Long-form</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stagger" id="waysin" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-top:2.2rem"></div>
+
+    <p class="statement reveal" style="margin-top:2rem;color:var(--gold);max-width:46ch">
+      Not sixty-nine versions of the same thing — sixty-nine different doors.
+    </p>
+
+    <div class="src reveal">
+      <b>Public YouTube API.</b> All 69 uploads in the campaign window, classified by title and
+      duration. Thumbnails are the live YouTube images. Counts only — no view comparison is being
+      made between the two years.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · CONCENTRATION ═══════════════════════════════════════════
+     Percentages only. Raw view counts here would be the exact
+     un-age-matched comparison the audit forbids. -->
+<section class="slide" data-t="Concentration">
+  <div class="inner">
+    <div class="label reveal">Where the attention went</div>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:20ch">It stopped depending<br>on one video.</h2>
+    <p class="label reveal" style="margin-top:1.2rem;color:var(--warm);letter-spacing:.1em">
+      Share of campaign-window views taken by the top three uploads
+    </p>
+
+    <div class="grid2 stagger" style="margin-top:2.2rem">
+
+      <div class="era">
+        <div class="era-y">2024</div>
+        <div class="big-num" style="font-size:clamp(3.4rem,8vw,6rem);color:var(--warm);margin-top:.5rem">84.7<span style="font-size:.42em">%</span></div>
+        <div style="margin-top:1.4rem;display:flex;height:70px;gap:3px;align-items:flex-end">
+          <div style="flex:62.8;background:var(--red-dp);height:100%;border-radius:2px"></div>
+          <div style="flex:19.1;background:rgba(224,56,61,.42);height:100%;border-radius:2px"></div>
+          <div style="flex:2.8;background:rgba(224,56,61,.24);height:100%;border-radius:2px"></div>
+          <div style="flex:15.3;background:rgba(246,240,228,.10);height:100%;border-radius:2px"></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">
+          One video — <em>God Gave Me Feet For Dancing</em> — took <b style="color:var(--cream)">62.8%</b> of the
+          whole window on its own. The other twenty-six uploads shared what was left.
+        </p>
+      </div>
+
+      <div class="era now">
+        <div class="era-y">2026</div>
+        <div class="big-num" style="font-size:clamp(3.4rem,8vw,6rem);color:var(--gold);margin-top:.5rem">56.5<span style="font-size:.42em">%</span></div>
+        <div style="margin-top:1.4rem;display:flex;height:70px;gap:3px;align-items:flex-end">
+          <div style="flex:27.4;background:var(--gold);height:100%;border-radius:2px"></div>
+          <div style="flex:15.5;background:var(--green);height:100%;border-radius:2px"></div>
+          <div style="flex:13.6;background:var(--teal);height:100%;border-radius:2px"></div>
+          <div style="flex:43.5;background:rgba(246,240,228,.10);height:100%;border-radius:2px"></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">
+          The leader took <b style="color:var(--cream)">27.4%</b>. And the top three aren't three of the same
+          thing: a music video, a second music video, and a fourteen-minute rehearsal film.
+        </p>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.2rem;color:var(--gold)">
+      The campaign built more than one doorway.
+    </p>
+
+    <div class="src reveal">
+      <b>Public YouTube API.</b> Each percentage is a share of its own window, so both years have aged
+      together and the ratio is fair. This shows <b>less concentration</b> — it does not show more total
+      viewing, and the two windows' view totals are deliberately not compared.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE TWO JOBS ════════════════════════════════════════════
+     The interesting distinction, not "long-form good, Shorts bad". -->
+<section class="slide" data-t="Two jobs" style="padding:0">
+  <div style="display:grid;grid-template-columns:1.05fr 1fr;min-height:100vh;width:100%" class="split5">
+    <div class="bleed" style="position:relative;inset:auto">
+      <img src="https://i.ytimg.com/vi/lsTsx7FPpQ0/maxresdefault.jpg" alt="Rehearsal Tapes — the band in the rehearsal room"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/lsTsx7FPpQ0/hqdefault.jpg'">
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;padding:6rem var(--pad) 4rem">
+      <div class="label reveal">The two jobs</div>
+      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.8rem,3.6vw,3.2rem)">Long-form did<br>the heavy lifting.</h2>
+
+      <div class="stagger" style="margin-top:2.4rem">
+        <div style="border-top:2px solid var(--gold);padding-top:1rem;margin-bottom:1.8rem">
+          <div class="big-num" style="font-size:clamp(2.6rem,5vw,4.2rem);color:var(--gold)">83.6<span style="font-size:.4em">%</span></div>
+          <div class="label" style="margin-top:.4rem;color:var(--warm)">of window views — from 24 long-form uploads</div>
+        </div>
+        <div style="border-top:2px solid var(--line);padding-top:1rem">
+          <div class="big-num" style="font-size:clamp(2.6rem,5vw,4.2rem);color:var(--warm)">16.4<span style="font-size:.4em">%</span></div>
+          <div class="label" style="margin-top:.4rem;color:var(--warm)">of window views — from 45 Shorts</div>
+        </div>
+      </div>
+
+      <p class="statement reveal" style="margin-top:2.2rem;max-width:32ch">
+        That isn't Shorts failing. It's two different jobs.
+      </p>
+      <p class="body reveal" style="margin-top:1rem">
+        The Shorts are what made sixteen consecutive active weeks possible — the festival thank-yous,
+        the tour announcements, what hope means to Femi. <b style="color:var(--cream)">Shorts kept the channel
+        present. Long-form gave people somewhere to go.</b>
+      </p>
+
+      <div class="src reveal">
+        <b>Public YouTube API.</b> Both figures are shares of the same 2026 window, so they are
+        comparable to each other. Judge the Shorts on the rhythm strip two slides back, not on this
+        percentage.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · CRAFT ═══════════════════════════════════════════════════
+     The narrowed, defensible version. The audit killed the stronger
+     "audiences were hunting for this" claim — two comments on one
+     out-of-window video could not carry it. -->
+<section class="slide" data-t="Craft">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/Jih5_ZRlQqc/maxresdefault.jpg" alt="Live at Alexandra Palace"
+      style="object-position:62% 40%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Jih5_ZRlQqc/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div style="max-width:660px">
+      <div class="label reveal">What people actually talk about</div>
+      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.7rem,3.8vw,3.2rem)">When the film is good,<br>people notice the film.</h2>
+
+      <div class="stagger" style="margin-top:2.2rem;display:flex;flex-direction:column;gap:1.6rem">
+        <div class="quote">
+          “Putting people with cameras at different positions in the crowd and around the stage is a
+          brilliant way to capture the feeling of a live gig.”
+          <cite>402 likes · the most-liked comment in the whole scan · Live at Alexandra Palace</cite>
+        </div>
+        <div class="quote" style="border-left-color:var(--green)">
+          “mad props to the steadicam operator and the focus puller!”
+          <cite>14 likes · Rehearsal Tapes</cite>
+        </div>
+      </div>
+
+      <div class="reveal" style="margin-top:2rem;display:flex;gap:2.4rem;flex-wrap:wrap;align-items:flex-end">
+        <div>
+          <div class="big-num" style="font-size:clamp(1.8rem,3.2vw,2.6rem);color:var(--gold)">121.5K</div>
+          <div class="label" style="margin-top:.35rem">Rehearsal Tapes · 14:32<br>3rd-largest campaign asset</div>
+        </div>
+        <div style="max-width:30ch">
+          <p class="body" style="font-size:.95rem">
+            A fourteen-minute rehearsal film, not a song, sitting third in the campaign window.
+          </p>
+        </div>
+      </div>
+
+      <p class="statement reveal" style="margin-top:2rem;color:var(--gold);max-width:40ch">
+        The craft is not the packaging. For this audience it's part of the work.
+      </p>
+
+      <div class="src reveal">
+        <span class="flag">Pre-campaign</span>
+        <b style="margin-left:.5rem">The Alexandra Palace film is from 8 May</b> — nineteen days before the album
+        announcement. It is evidence about the audience, not about this campaign, and its views are
+        excluded from every campaign figure in this deck. Comments are a relevance-ranked sample from
+        the public API, not a census.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · RELEASE WEEK ════════════════════════════════════════════
+     The visualiser grid is the slide. Show the surface filling up. -->
+<section class="slide" data-t="Fully stocked" style="justify-content:flex-start;padding-top:6.5rem">
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap">
+      <div>
+        <div class="label reveal">Release week</div>
+        <h2 class="display reveal" style="margin-top:.8rem">Fully stocked.</h2>
+      </div>
+      <div class="reveal" style="text-align:right">
+        <div class="big-num" style="font-size:clamp(2.6rem,5.5vw,4.4rem);color:var(--gold)">19</div>
+        <div class="label" style="margin-top:.35rem">uploads in the week of 9 September<br>12 long-form · 7 Shorts</div>
+      </div>
+    </div>
+
+    <div class="stagger" id="stocked" style="display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-top:2rem"></div>
+
+    <div class="grid2 reveal" style="margin-top:2rem;align-items:start">
+      <p class="statement" style="color:var(--gold)">
+        The album didn't arrive as one video.<br>It arrived as a whole channel.
+      </p>
+      <p class="body">
+        Eleven song visualisers across forty-eight hours, three spoken interludes read by Letitia
+        Wright, the full Rehearsal Tapes, the London block party. Everybody who came looking in
+        release week found the whole record waiting.
+      </p>
+    </div>
+
+    <div class="src reveal">
+      <b>Public YouTube API.</b> Every upload dated 9–15 September. The exact commercial release date
+      is unconfirmed — the channel's own copy says both 11 and 18 September — so this deck says
+      "release week" throughout. See Analysis.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · THE CHANNEL MOVED ═══════════════════════════════════════
+     Two huge numbers. The view multiple is safe (unrounded inputs);
+     the subscriber figure carries no multiple, by rule. -->
+<section class="slide" data-t="The channel moved">
+  <div class="inner">
+    <div class="label reveal">What the first week did</div>
+    <h2 class="display reveal" style="margin-top:.8rem">And the channel moved.</h2>
+
+    <div class="grid2" style="margin-top:clamp(2rem,4.5vw,3.4rem);align-items:start">
+
+      <div class="reveal">
+        <div class="label" style="color:var(--warm)">Channel views, per week</div>
+        <div style="display:flex;align-items:flex-end;gap:1.6rem;margin-top:1.2rem;flex-wrap:wrap">
+          <div>
+            <div class="big-num" style="font-size:clamp(2rem,3.6vw,2.8rem);color:var(--dim)">225.6K</div>
+            <div class="label" style="margin-top:.35rem">average of the<br>three weeks before</div>
+          </div>
+          <div style="color:var(--dim);font-size:1.4rem;padding-bottom:1.2rem">→</div>
+          <div>
+            <div class="big-num" style="font-size:clamp(3rem,6.4vw,5rem);color:var(--gold)">535.5K</div>
+            <div class="label" style="margin-top:.35rem;color:var(--gold)">release week</div>
+          </div>
+        </div>
+        <div style="margin-top:1.4rem;display:flex;align-items:center;gap:.8rem">
+          <div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.2rem);color:var(--green)">2.4×</div>
+          <div class="label" style="color:var(--warm);max-width:26ch;letter-spacing:.06em">
+            These view counts aren't rounded, so the multiple is safe to state.
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <div class="label" style="color:var(--warm)">Public subscriber count</div>
+        <div id="subladder" style="margin-top:1.2rem"></div>
+        <p class="body" style="margin-top:1.2rem;font-size:.95rem">
+          <b style="color:var(--cream)">The public subscriber count rose.</b> That is the honest sentence.
+          YouTube rounds this figure to the nearest hundred and it already nets off unsubscribes, so
+          it is not a count of new subscribers and we don't put a multiple on it.
+        </p>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.4rem;color:var(--gold);max-width:52ch">
+      Release week produced a clear, visible movement on the channel.
+    </p>
+
+    <div class="src reveal">
+      <b>Watcher weekly snapshots of the public API</b>, plus a direct API read on 15 September.
+      <b style="color:var(--red)">We cannot say what caused this.</b> Attribution needs traffic-source
+      data, which requires authenticated YouTube Analytics. The visualisers, the Rehearsal Tapes and
+      the block party all co-occurred with this movement. None of them is credited with it.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · THE VERDICT ═════════════════════════════════════════════
+     This slide makes the case study more credible, not less. -->
+<section class="slide" data-t="Best in class?" style="background:var(--ink-2)">
+  <div class="inner">
+    <div class="label reveal">The question everybody asks</div>
+    <h2 class="display reveal" style="margin-top:.8rem">Is this best in class?</h2>
+    <p class="display reveal" style="margin-top:.4rem;font-size:clamp(1.6rem,4vw,3.4rem);color:var(--gold);font-variation-settings:'wdth' 118,'wght' 800;text-transform:uppercase;line-height:.92">Not yet.</p>
+
+    <div class="grid2 stagger" style="margin-top:clamp(2rem,4.5vw,3.2rem)">
+
+      <div class="verdict can">
+        <h3 class="display">What we can say</h3>
+        <ul>
+          <li>Sixteen of sixteen weeks active, with a nine-day maximum gap</li>
+          <li>2.6× the output of the comparable 2024 campaign</li>
+          <li>Far less dependence on a single video — 84.7% → 56.5%</li>
+          <li>A fully stocked channel around release</li>
+          <li>A clear public channel movement in release week</li>
+        </ul>
+      </div>
+
+      <div class="verdict cant">
+        <h3 class="display">What we can't say yet</h3>
+        <ul>
+          <li>That the outcome is best in class — release week is one observation, and it's a week old</li>
+          <li>That the lift becomes sustained growth — too early to know</li>
+          <li>Which asset caused anything — no traffic-source data exists</li>
+          <li><b style="color:var(--cream)">That it beats anyone but Ezra.</b> Best in class needs a class, and so far this is Ezra measured against Ezra</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.4rem;font-size:clamp(1.3rem,2.6vw,2rem);color:var(--gold);max-width:40ch">
+      The structure is strong. The outcome needs time.
+    </p>
+
+    <div class="src reveal">
+      The gap-length and week-coverage distribution across the wider Watcher roster has not been
+      computed. Until it is, "a marked improvement on their own previous campaign" is the claim the
+      evidence supports — and that is a real one.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · THE TRANSFERABLE PART ══════════════════════════════════
+     Only lessons this campaign actually supports. Three, not four. -->
+<section class="slide" data-t="What it teaches">
+  <div class="inner">
+    <div class="label reveal">Beyond Ezra</div>
+    <h2 class="display reveal" style="margin-top:.8rem">What this campaign teaches us.</h2>
+
+    <div class="grid3 stagger" style="margin-top:clamp(2.2rem,5vw,3.6rem)">
+
+      <div class="lesson">
+        <div class="n">01</div>
+        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Don't go quiet.</h3>
+        <p class="body" style="margin-top:.9rem;font-size:.96rem">
+          A 43-day silence in the last campaign became a 9-day maximum gap in this one. Continuous
+          presence is a decision, and it is one you can make without a bigger budget.
+        </p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--green)">
+        <div class="n" style="color:var(--green)">02</div>
+        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Don't bet it all<br>on one video.</h3>
+        <p class="body" style="margin-top:.9rem;font-size:.96rem">
+          When 63% of a campaign sits on a single upload, the campaign is that upload. Spreading
+          attention across more assets and more formats is what changed here.
+        </p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--red)">
+        <div class="n" style="color:var(--red)">03</div>
+        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Build depth<br>around the music.</h3>
+        <p class="body" style="margin-top:.9rem;font-size:.96rem">
+          Official videos joined by rehearsal films, live footage, visualisers, spoken pieces and
+          Shorts. When release week came, there was somewhere for everyone to go.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="src reveal">
+      Each lesson is drawn from a figure on an earlier slide in this deck. Nothing here is general
+      YouTube best practice imported from elsewhere.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · THE METHOD, DEMONSTRATED ═══════════════════════════════
+     Not an apology. The most transferable idea in the deck. -->
+<section class="slide" data-t="October">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/asYBb11UesE/maxresdefault.jpg" alt="Here Because of Hope — London block party"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/asYBb11UesE/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal">Next read</div>
+    <h2 class="display reveal" style="margin-top:.8rem">Read it again<br>in October.</h2>
+
+    <div class="grid2 reveal" style="margin-top:2.2rem;align-items:start">
+      <div>
+        <div class="label" style="color:var(--gold)">What we can measure today</div>
+        <ul style="margin-top:.9rem;list-style:none">
+          <li style="padding:.4rem 0;color:var(--cream);border-bottom:1px solid var(--line)">How the campaign was built</li>
+          <li style="padding:.4rem 0;color:var(--cream)">How release week responded</li>
+        </ul>
+      </div>
+      <div>
+        <div class="label" style="color:var(--teal)">What only October can tell us</div>
+        <ul style="margin-top:.9rem;list-style:none">
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Did the view lift hold, or decay?</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Did the public subscriber count keep moving?</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Which release-week assets kept growing?</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Did the back catalogue benefit?</li>
+          <li style="padding:.4rem 0;color:var(--warm)">Did the channel stay active?</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step reveal">
+      <span>Campaign</span><i>→</i>
+      <span>Release</span><i>→</i>
+      <span class="now">First read · today</span><i>→</i>
+      <span class="next">30-day read</span><i>→</i>
+      <span class="next">What lasted</span>
+    </div>
+
+    <p class="statement reveal" style="margin-top:2.6rem;font-size:clamp(1.3rem,2.8vw,2.2rem);color:var(--gold);max-width:36ch">
+      The campaign was built well. Now let's see what it leaves behind.
+    </p>
+
+    <div class="src reveal">
+      Ezra Collective × YouTube · Virgin Music Group / Partisan Records · data pulled 15 September 2026.
+      Full method, limitations and audit trail under <b>Analysis</b>.
+    </div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ═══ ANALYSIS ════════════════════════════════════════════════════
+     Everything the slides deliberately don't carry. The presentation
+     and the audit trail are separated, not one hidden inside the other. -->
+<div class="sheet" id="sheet">
+  <button class="btn close" onclick="closeSheet()">Close ✕</button>
+  <div class="sheet-in">
+    <div class="label">Analysis · method, limits and audit trail</div>
+    <h2 class="display" style="margin-top:.6rem;font-size:clamp(1.6rem,3.4vw,2.6rem)">What we can and cannot see</h2>
+    <p style="margin-top:1rem">
+      This deck is built entirely on public data: the YouTube Data API v3, and our own weekly Watcher
+      snapshots of that same public API. <b style="color:var(--cream)">There are no YouTube Studio
+      metrics anywhere in it.</b> No impressions, no click-through rate, no retention, no traffic
+      sources, no unique viewers, no new-versus-returning. We do not have authenticated access to this
+      channel and none of those numbers has been estimated.
+    </p>
+
+    <h4>The dataset</h4>
+    <table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Channel</td><td><b>UCDjQX5MfQrWowYF9ucLpdOQ</b> · Ezra Collective</td></tr>
+      <tr><td>Pulled</td><td>15 September 2026, 10:52 UTC</td></tr>
+      <tr><td>At pull</td><td><b>72,700</b> subscribers · <b>27,305,501</b> lifetime views · 246 public videos</td></tr>
+      <tr><td>Rows retrieved</td><td>251 from the uploads playlist</td></tr>
+      <tr><td>Campaign window</td><td>27 May → 15 Sep 2026 · <b>111 days</b> · 69 uploads</td></tr>
+      <tr><td>Comparison window</td><td>18 Jun → 6 Oct 2024 · <b>110 days</b> · 27 uploads</td></tr>
+      <tr><td>Comments</td><td>15 videos scanned, 266 top-level comments, none disabled</td></tr>
+    </table>
+
+    <h4>The hole in the data, disclosed</h4>
+    <p class="warn">
+      The 251 retrieved rows sum to <b>12,223,598</b> views. The channel reports <b>27,305,501</b>.
+      A gap of <b>15,081,903</b> views — 55.2% of the reported lifetime total — is not accounted for by
+      the public uploads playlist. Deleted or privated uploads are the most likely explanation; we have
+      not diagnosed it. <b>Consequence: this deck makes no share-of-lifetime claims at all.</b> Every
+      percentage on every slide uses a campaign window as its denominator, never the lifetime total.
+    </p>
+
+    <h4>Why no view comparison between the two campaigns</h4>
+    <p>
+      The 2024 assets have had roughly two years to accumulate views. The 2026 assets have had between
+      three days and sixteen weeks. Comparing the two windows' view totals would not be a measurement,
+      it would be an artefact of age — and we cannot reconstruct what 2024 looked like at day 111,
+      because the API returns only current view counts and our weekly snapshots do not reach back
+      that far.
+    </p>
+    <p>
+      <b style="color:var(--cream)">What survives the age problem, and is therefore what the deck
+      uses:</b> upload counts, active weeks, gap lengths, format mix, and any ratio computed inside a
+      single window. <b style="color:var(--cream)">What does not survive, and is therefore absent:</b>
+      every absolute view comparison, every "bigger than last time", and the median-views comparison.
+    </p>
+
+    <h4>The release date is unresolved</h4>
+    <p class="warn">
+      The album's announcement Short, published 28 May, reads <b>"Out September 18th 2026"</b>.
+      Everything else on the channel points to <b>11 September</b>: a Short on 10 September saying
+      "out tomorrow", the visualisers landing across 10–11 September, and the block party Short on
+      12 September. <b>We have not confirmed the commercial release date with Partisan.</b> Because the
+      framing of the release-week comparison depends on it, this deck states no precise date and uses
+      "release week" throughout. This should be resolved before the deck goes further.
+    </p>
+
+    <h4>Subscriber wording, and why there is no multiple</h4>
+    <p>
+      Every subscriber figure here is the <b>publicly displayed count</b>, which YouTube rounds — to the
+      nearest 100 at this channel size — and which already nets off unsubscribes. It is not gross or net
+      subscriber additions; those are Studio metrics we do not have. The weekly movements read
+      300, 400, 300, then 1,100. Because each of those is rounded to the nearest hundred, a ratio built
+      from them could honestly be anything from about 2.6× to 4.4×, so <b style="color:var(--cream)">the
+      deck states no subscriber multiple at all</b> and shows the four readings instead. The weekly
+      <em>view</em> figures are not rounded, which is why 2.4× is stated for those.
+    </p>
+    <table>
+      <tr><th>Week starting</th><th>Public subs</th><th>Channel views</th><th>Views, prior 7d</th><th>Subs, prior 7d</th></tr>
+      <tr><td>24 Aug</td><td>70,600</td><td>26,327,535</td><td>234,269</td><td>300</td></tr>
+      <tr><td>31 Aug</td><td>71,000</td><td>26,587,444</td><td>259,909</td><td>400</td></tr>
+      <tr><td>7 Sep</td><td>71,300</td><td>26,769,957</td><td>182,513</td><td>300</td></tr>
+      <tr><td>14 Sep</td><td><b>72,400</b></td><td><b>27,305,501</b></td><td><b>535,544</b></td><td><b>1,100</b></td></tr>
+      <tr><td>15 Sep · API read</td><td><b>72,700</b></td><td>27,305,501</td><td>—</td><td>—</td></tr>
+    </table>
+    <p>
+      Two limits on this table. First, <b>our weekly snapshots only begin on 24 August</b>, so the
+      before-and-after evidence is strong for release week specifically and does not exist for the
+      campaign as a whole. Second, the 14 September snapshot and the 15 September API read return an
+      identical view total, which suggests they share a source rather than being two independent
+      observations a day apart.
+    </p>
+
+    <h4>Two numbers that are not the same quantity</h4>
+    <p>
+      The 19 release-week uploads have accumulated <b>242,582 views between them</b> as of 15 September.
+      The channel recorded <b>535,544 views in the seven days to 14 September</b>. These measure
+      different things — the first is the lifetime-to-date total of a set of videos, the second is
+      channel-wide viewing across the whole catalogue in a fixed period — and the deck never places
+      them side by side, because doing so invites a comparison that isn't valid.
+    </p>
+
+    <h4>Attribution: what we are not claiming</h4>
+    <p class="warn">
+      We have no traffic-source data, so we cannot say whether release-week movement came from the
+      visualisers, the Rehearsal Tapes, the block party, press, playlisting, the tour announcement, or
+      spillover from streaming release radars. Slide 7 and slide 8 describe events that
+      <b>co-occurred</b>. Nothing in this deck credits an asset with an outcome.
+    </p>
+
+    <h4>The Alexandra Palace film</h4>
+    <p>
+      <span class="flag">Pre-campaign</span> The live film with Kano was published <b>8 May 2026</b>,
+      nineteen days before the album announcement. Its 337,985 views are excluded from every campaign
+      figure in this deck. It appears on slide 6 solely as evidence about how this audience responds to
+      long-form film, labelled as pre-campaign, and its views are never shown as campaign performance.
+    </p>
+
+    <h4>The comment evidence, and what it will not carry</h4>
+    <p>
+      The comment scan returns a <b>relevance-ranked sample</b> of up to 40 comments per video, not a
+      census. Alexandra Palace has 251 comments in total and we retrieved 40. Every quotation is drawn
+      from the comments YouTube surfaces most prominently, which is not the same as what the commenter
+      base as a whole is saying.
+    </p>
+    <p>
+      An earlier draft of the analysis claimed this audience was "actively hunting" for long-form live
+      footage, on the strength of two comments describing searching for a full set. That claim was cut:
+      two comments on one out-of-window video cannot carry it.
+      <b style="color:var(--cream)">The narrower claim on slide 6 — that when Ezra publish a well-made
+      long-form film, the comments are about how it was made — is what the evidence actually supports.</b>
+    </p>
+
+    <h4>Classification</h4>
+    <p>
+      Shorts versus long-form uses the API's own <code>isShort</code> flag. Format labels (music video,
+      visualiser, rehearsal film, live, Shorts) are derived from titles and durations. The 2026 window
+      opens at the album announcement Short of 27 May and closes at the pull date. The 2024 window opens
+      at its lead single and runs 110 days, chosen to sit within one day of the 2026 window so that
+      structural comparison is clean.
+    </p>
+
+    <h4>Where the design came from</h4>
+    <p>
+      The palette was sampled programmatically from fifteen real campaign thumbnails — greys and crushed
+      blacks filtered out, the rest binned by hue. The warm band came back at 48% of saturated pixels,
+      green at 17%, red at 11%, teal at 12%: the Lagos gele and foliage, the brass in <em>Only Love</em>,
+      the Kingston sequins, the sea in <em>Well Organised</em>. The repeating rhythm strip is one tick per
+      day of the campaign window, lit where an upload landed — the deck's central finding used as its
+      decoration.
+    </p>
+
+    <h4>Source</h4>
+    <p>
+      Every figure traces to <code>EZRA-COLLECTIVE-internal-audit.md</code> and its row-level source data.
+      That audit was written before this deck and checked adversarially against the raw rows; the
+      corrections it produced are recorded in its own final section.
+    </p>
+  </div>
+</div>
+
+<script>
+/* ── The rhythm data ──────────────────────────────────────────────────
+   Day offsets from the start of each window on which at least one upload
+   was published. Computed from the source rows, not hand-entered:
+   2026 window opens 27 May 2026, 2024 window opens 18 Jun 2024. */
+var DAYS26 = [0,1,2,3,7,16,22,24,30,31,33,34,35,36,37,38,40,41,42,44,47,48,49,
+              56,57,58,61,62,64,70,72,76,79,81,83,86,90,92,97,103,105,106,107,108];
+var DAYS24 = [0,24,34,77,78,84,100,101,110];
+var SPAN = 111;
+
+function rhythm(el, days, cls){
+  if(!el) return;
+  var on = {}; days.forEach(function(d){ on[d] = 1; });
+  var html = '';
+  for(var d = 0; d < SPAN; d++){
+    html += '<div class="tick' + (on[d] ? ' on ' + (cls || '') : '') + '"></div>';
+  }
+  el.innerHTML = html;
+}
+
+/* Slide 3 — the actual campaign surfaces. Deliberately a mix of formats
+   rather than a run of visualisers, so the variety is visible at a glance. */
+var WAYS = [
+  ['3ziixar3gqI','Only Love','Music video'],
+  ['MLV8w3k2U9o','Well Organised','Music video'],
+  ['lsTsx7FPpQ0','Rehearsal Tapes','14:32 film'],
+  ['n6pSgYKSCs8','Jubilee Feeling','Music video'],
+  ['ivlTNyDy488','Messages of Hope: Lagos','Short film'],
+  ['i0UFpV7xd8I','Messages of Hope: Kingston','Short film'],
+  ['4IqthGzU_-Q','Messages of Hope: London','Short film'],
+  ['MR0K-Ta9M2o','Most High','Visualiser'],
+  ['_d4tu0tCN58','Blow Your Trumpet','Visualiser'],
+  ['wF0bJb8liUA','Well Organised','Lyric video'],
+  ['asYBb11UesE','London block party','Short'],
+  ['VPlRXt0aVc8','fEZtival season','Short']
+];
+
+/* Slide 7 — release week, in publication order. */
+var STOCKED = [
+  ['lsTsx7FPpQ0','Rehearsal Tapes'],
+  ['tKEc8jyz54k','Letitia Wright · Pt 1'],
+  ['_d4tu0tCN58','Blow Your Trumpet'],
+  ['hNVwJ4FiYmg','Sweet Echo'],
+  ['2n3D7qaGB54','Don’t Worry'],
+  ['CMSnoFHp4p4','Someday'],
+  ['e4MjLCRwelI','Letitia Wright · Pt 2'],
+  ['TlJTXw9u3uM','Birdie Sings'],
+  ['f2_cyQA3384','The Last Stand'],
+  ['6JGO7rWm7ls','El Corazón'],
+  ['H-ThsRcn980','Bunny on the Rise'],
+  ['IEoiIMF7Cys','Letitia Wright · Pt 3'],
+  ['k8l4p7phsr8','Black Flag'],
+  ['vnb9HIzjKqw','All I Need'],
+  ['MR0K-Ta9M2o','Most High'],
+  ['asYBb11UesE','London block party']
+];
+
+function thumbs(el, rows, showKind){
+  if(!el) return;
+  el.innerHTML = rows.map(function(r){
+    return '<a class="thumb" href="https://www.youtube.com/watch?v=' + r[0] + '" target="_blank" rel="noopener">' +
+      '<img loading="lazy" src="https://i.ytimg.com/vi/' + r[0] + '/mqdefault.jpg" alt="' + r[1] + '">' +
+      '<div class="thumb-c">' + r[1] + (showKind && r[2] ? '<br><span style="color:var(--gold)">' + r[2] + '</span>' : '') + '</div>' +
+    '</a>';
+  }).join('');
+}
+
+/* Slide 8 — the four public readings as a ladder. No multiple, by rule:
+   each input is rounded to the nearest 100. */
+var SUBS = [['24 Aug','70.6K',70600],['31 Aug','71.0K',71000],['7 Sep','71.3K',71300],
+            ['14 Sep','72.4K',72400],['15 Sep · API','72.7K',72700]];
+function ladder(){
+  var el = document.getElementById('subladder');
+  if(!el) return;
+  var lo = 70300, hi = 72900;
+  el.innerHTML = SUBS.map(function(s, i){
+    var w = ((s[2] - lo) / (hi - lo)) * 100;
+    var last = i === SUBS.length - 1;
+    return '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.5rem">' +
+      '<div class="label" style="width:6.5rem;flex:none;text-align:right">' + s[0] + '</div>' +
+      '<div style="flex:1;height:14px;background:rgba(246,240,228,.07);border-radius:2px;overflow:hidden">' +
+        '<div class="sub-f" data-w="' + w.toFixed(1) + '" style="height:100%;width:0;border-radius:2px;background:' +
+        (last ? 'var(--gold)' : 'rgba(246,240,228,.32)') + ';transition:width .8s cubic-bezier(.2,.7,.3,1)"></div>' +
+      '</div>' +
+      '<div style="width:4.2rem;flex:none;font-family:\'DM Mono\',monospace;font-size:.78rem;color:' +
+        (last ? 'var(--gold)' : 'var(--warm)') + '">' + s[1] + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ── Reveal on scroll ─────────────────────────────────────────────── */
+var io = null;
+/* The rhythm ticks carry their height in CSS via .on, so they need no JS.
+   Only the subscriber ladder animates from a zero width. */
+function fill(slide){
+  slide.querySelectorAll('.sub-f').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
+}
+function observeAll(){
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('.reveal,.stagger').forEach(function(e){ e.classList.add('visible'); });
+    document.querySelectorAll('.slide').forEach(fill);
+    return;
+  }
+  io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      en.target.classList.add('visible');
+      if(en.target.classList.contains('stagger')){
+        for(var i = 0; i < en.target.children.length; i++){
+          en.target.children[i].style.transitionDelay = (i * 45) + 'ms';
+        }
+      }
+      var sl = en.target.closest('.slide');
+      if(sl) fill(sl);
+      io.unobserve(en.target);
+    });
+  }, { threshold: .18, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal,.stagger').forEach(function(e){ io.observe(e); });
+}
+
+/* ── Present mode ─────────────────────────────────────────────────── */
+var cur = 0;
+function startPresent(){
+  document.body.classList.add('present');
+  showSlide(0);
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  document.getElementById('pbar').style.width = '0';
+}
+function showSlide(i){
+  var s = document.querySelectorAll('.deck .slide');
+  if(i < 0) i = 0;
+  if(i > s.length - 1) i = s.length - 1;
+  cur = i;
+  s.forEach(function(el, n){ el.classList.toggle('active', n === i); });
+  /* In present mode nothing scrolls, so the observers would never fire. */
+  s[i].querySelectorAll('.reveal,.stagger').forEach(function(el){
+    el.classList.add('visible');
+    if(el.classList.contains('stagger')){
+      for(var k = 0; k < el.children.length; k++){
+        el.children[k].style.opacity = 1;
+        el.children[k].style.transform = 'none';
+      }
+    }
+  });
+  fill(s[i]);
+  document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
+}
+
+function openSheet(){ document.getElementById('sheet').classList.add('open'); }
+function closeSheet(){ document.getElementById('sheet').classList.remove('open'); }
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    closeSheet();
+    if(document.body.classList.contains('present')) exitPresent();
+    return;
+  }
+  if(!document.body.classList.contains('present')) return;
+  if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); showSlide(cur + 1); }
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); showSlide(cur - 1); }
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+  rhythm(document.getElementById('cover-rhythm'), DAYS26, '');
+  rhythm(document.getElementById('r26'), DAYS26, '');
+  rhythm(document.getElementById('r24'), DAYS24, 'r');
+  thumbs(document.getElementById('waysin'), WAYS, true);
+  thumbs(document.getElementById('stocked'), STOCKED, false);
+  ladder();
+  observeAll();
+  /* The first slide is already on screen; it shouldn't wait for a scroll. */
+  document.querySelectorAll('.deck .slide')[0].querySelectorAll('.reveal').forEach(function(el){
+    el.classList.add('visible');
+  });
+});
+</script>
+
+<style>
+/* Slide 5 splits into a stack on narrow screens; the image keeps a fixed
+   height there so it stays a picture rather than a sliver. */
+@media(max-width:860px){
+  .split5{grid-template-columns:1fr!important}
+  .split5 > .bleed{height:44vh}
+  #waysin{grid-template-columns:repeat(3,1fr)!important}
+  #stocked{grid-template-columns:repeat(4,1fr)!important}
+}
+@media(max-width:560px){
+  #waysin{grid-template-columns:repeat(2,1fr)!important}
+  #stocked{grid-template-columns:repeat(3,1fr)!important}
+}
+</style>
+</body>
+</html>
