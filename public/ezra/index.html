@@ -194,6 +194,26 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.v{aspect-ratio:9/16}
 .strip .thumb{border-radius:2px}
+/* ── The contact sheet ──────────────────────────────────────────────
+   A full-bleed grid of real campaign frames sitting behind the type.
+   The wash is a gradient rather than a flat scrim so the top of the
+   sheet stays legible as imagery while the lower half carries copy. */
+.sheet-grid{
+  position:absolute;inset:0;z-index:0;display:grid;
+  grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;gap:3px;padding:3px;
+}
+.sheet-grid a{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
+.sheet-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.sheet-wash{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,rgba(11,9,7,.985) 34%,rgba(11,9,7,.92) 50%,rgba(11,9,7,.55) 74%,rgba(11,9,7,.28) 100%);
+}
+.sheet-type{
+  position:relative;z-index:3;margin-top:auto;
+  padding:0 var(--pad) clamp(1.8rem,4vw,3.2rem);
+}
+@media(max-width:860px){.sheet-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:560px){.sheet-grid{grid-template-columns:repeat(3,1fr)}}
 .thumb-c{
   position:absolute;left:0;right:0;bottom:0;padding:.5rem .55rem .45rem;
   background:linear-gradient(to top,rgba(11,9,7,.94),rgba(11,9,7,0));
@@ -220,6 +240,19 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .verdict.cant li::before{background:var(--red)}
 
 .lesson{border-top:2px solid var(--gold);padding-top:1.2rem}
+.lessons4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2.2vw,2rem)}
+@media(max-width:980px){.lessons4{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.lessons4{grid-template-columns:1fr}}
+.worked{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2rem)}
+@media(max-width:860px){.worked{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.worked{grid-template-columns:1fr}}
+.wk{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 720;
+  font-size:clamp(.95rem,1.45vw,1.15rem);line-height:1.12;text-transform:uppercase;
+  color:var(--cream);margin:.55rem 0 .45rem;letter-spacing:-.003em;
+}
+.worked p{font-size:.88rem;color:var(--warm);line-height:1.45}
+.worked p b{color:var(--cream);font-weight:600}
 .lesson .n{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--gold);letter-spacing:.18em}
 
 .step{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;margin-top:1.4rem}
@@ -388,108 +421,90 @@ body.present{overflow:hidden}
       <div class="era" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
           <div>
-            <div class="era-y">2024 · Dance, No One's Watching · 110 days</div>
-            <div style="display:flex;gap:2.4rem;margin-top:.7rem">
+            <div class="era-y">Dance, No One&rsquo;s Watching &middot; 2024 campaign</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.7rem;flex-wrap:wrap">
               <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--warm)">7<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
               <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--red)">43</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--warm)">9</div><div class="label" style="margin-top:.35rem">Upload days</div></div>
             </div>
           </div>
           <div class="label" style="text-align:right">27 uploads</div>
         </div>
         <div class="rhythm" id="r24" style="--rh:25px"></div>
-        <div class="gapmark" style="margin-top:.7rem">↑ 22 July → 3 September · nothing published for six weeks</div>
+        <div class="gapmark" style="margin-top:.6rem">Six weeks silent, mid-campaign</div>
       </div>
 
       <div class="era now">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
           <div>
-            <div class="era-y">2026 · Here Because of Hope · 111 days</div>
-            <div style="display:flex;gap:2.4rem;margin-top:.7rem">
+            <div class="era-y" style="color:var(--gold)">Here Because of Hope &middot; 2026 campaign</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.7rem;flex-wrap:wrap">
               <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--gold)">16<span style="color:var(--dim)">/16</span></div><div class="label" style="margin-top:.35rem">Active weeks</div></div>
               <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--gold)">9</div><div class="label" style="margin-top:.35rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.9rem,3.1vw,2.6rem);color:var(--gold)">44</div><div class="label" style="margin-top:.35rem">Upload days</div></div>
             </div>
           </div>
           <div class="label" style="text-align:right;color:var(--gold)">69 uploads</div>
         </div>
         <div class="rhythm" id="r26" style="--rh:25px"></div>
-        <div class="label" style="margin-top:.7rem;color:var(--warm)">44 separate upload days. The channel was never dark for more than nine.</div>
+        <div class="label" style="margin-top:.6rem;color:var(--gold)">Never dark for more than nine days</div>
       </div>
 
     </div>
 
-    <p class="statement reveal" style="margin-top:1.6rem;color:var(--gold)">
-      This campaign didn't rely on the occasional hero upload. It kept the channel alive.
+    <p class="statement reveal" style="margin-top:1.4rem;color:var(--gold);max-width:44ch">
+      The biggest change wasn&rsquo;t one breakout video. It was consistency.
     </p>
 
     <div class="src reveal">
-      <b>Public YouTube API.</b> Upload counts, active weeks and gap lengths don't change as videos
-      age, so these two windows are directly comparable. View totals are not — and are not shown.
-      Windows matched to within one day: 111 vs 110.
+      <b>Same artist. Same label. Near-identical campaign shape.</b> Both windows open on the album
+      announcement and run to just after release — 101 days announcement-to-album in 2024, 107 in 2026.
+      Counts and gaps are compared, not views.
     </div>
   </div>
 </section>
 
 <!-- ═══ 3 · ONE WORLD ═══════════════════════════════════════════════
-     Deliberately not a bar chart. The grid is the argument: every format
-     is different and every format still looks like the same record.
-     The Lagos / Kingston / London films are the proof that this was
-     designed rather than lucky — Partisan describe the album itself as
-     three movements, West Africa to the Caribbean to London, and the
-     campaign published one film per movement in that order. -->
-<section class="slide" data-t="One world" style="justify-content:flex-start;padding-top:6.5rem">
-  <div class="inner">
-    <div class="label reveal">What filled those weeks</div>
-    <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">69 uploads.<br>One world.</h2>
+     The contact sheet IS the slide. Twenty-four real frames from the
+     campaign: different formats, different people, different cities,
+     different jobs — and one unmistakable palette running through all of
+     them. Explaining that in copy would be weaker than showing it, so the
+     type stays out of the way and the grid does the arguing.
 
-    <div class="grid3 reveal" style="margin-top:1.2rem;gap:1.4rem;align-items:start">
-      <div>
-        <p class="body" style="font-size:.98rem">
-          Music videos, lyric videos, a fourteen-minute rehearsal film, eleven visualisers, spoken
-          interludes read by Letitia Wright, films shot in Lagos, Kingston and London, a block party,
-          and forty-five Shorts from the festival run.
-          <b style="color:var(--cream)">Every one still looks like the same record.</b>
-        </p>
-      </div>
-      <div style="display:flex;gap:2rem">
-        <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem);color:var(--gold)">45</div><div class="label" style="margin-top:.3rem">Shorts</div></div>
-        <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem);color:var(--cream)">24</div><div class="label" style="margin-top:.3rem">Long-form</div></div>
-      </div>
-      <div class="era" style="border-top-color:var(--line)">
-        <div class="label">The comparable 2024 window</div>
-        <div style="display:flex;gap:2rem;margin-top:.7rem">
-          <div><div class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--dim)">9</div><div class="label" style="margin-top:.3rem">Shorts</div></div>
-          <div><div class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--dim)">18</div><div class="label" style="margin-top:.3rem">Long-form</div></div>
+     The Lagos / Kingston / London films are the proof it was designed
+     rather than lucky: Partisan describe the album as three movements,
+     West Africa to the Caribbean to London, and the campaign shot one
+     film per movement and published them in that order. -->
+<section class="slide" data-t="One world" style="padding:0;justify-content:stretch">
+  <div class="sheet-grid" id="contact"></div>
+  <div class="sheet-wash"></div>
+  <div class="inner sheet-type">
+    <div class="label reveal" style="color:var(--gold)">What filled those weeks</div>
+    <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(2rem,5.4vw,4.6rem)">69 uploads.<br>One world.</h2>
+    <div class="grid2 reveal" style="margin-top:1.4rem;align-items:end;gap:clamp(1.2rem,3vw,3rem)">
+      <p class="body" style="font-size:1rem;max-width:46ch">
+        Music videos, visualisers, spoken interludes, a fourteen-minute rehearsal film, festival
+        Shorts, a block party. Different formats, different cities, different jobs —
+        <b style="color:var(--cream)">and every one of them still looks like the same record.</b>
+      </p>
+      <div style="display:flex;gap:1.6rem;flex-wrap:wrap;align-items:flex-end">
+        <div><div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.3rem);color:var(--gold)">45</div><div class="label" style="margin-top:.25rem">Shorts</div></div>
+        <div><div class="big-num" style="font-size:clamp(1.6rem,2.8vw,2.3rem);color:var(--cream)">24</div><div class="label" style="margin-top:.25rem">Long-form</div></div>
+        <div style="border-left:2px solid var(--green);padding-left:.9rem">
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <span class="step-city">Lagos<i>30 Jun</i></span>
+            <span class="step-city">Kingston<i>11 Aug</i></span>
+            <span class="step-city">London<i>1 Sep</i></span>
+          </div>
+          <div class="label" style="margin-top:.45rem;color:var(--warm);max-width:40ch;letter-spacing:.05em">
+            One film for each of the album’s three movements, in order
+          </div>
         </div>
       </div>
     </div>
-
-    <div class="stagger" id="waysin" class="strip" style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:1.1rem"></div>
-
-    <!-- The structural proof, not a decorative aside. -->
-    <div class="reveal" style="margin-top:1.2rem;border-top:2px solid var(--green);padding-top:.9rem;display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2.6rem);align-items:center">
-      <div style="display:flex;gap:.7rem;flex-wrap:wrap">
-        <span class="step-city">Lagos<i>30 Jun</i></span>
-        <span class="step-city">Kingston<i>11 Aug</i></span>
-        <span class="step-city">London<i>1 Sep</i></span>
-      </div>
-      <p class="body" style="font-size:.97rem;max-width:66ch">
-        Partisan describe the album as three movements — <b style="color:var(--cream)">West Africa,
-        across the Caribbean, home to London</b>. The campaign shot one <em>Messages of Hope</em> film
-        per movement and published them in that order, ten weeks apart. Its playlist was created on
-        announcement day and grew to 25 videos as the campaign ran.
-        <b style="color:var(--green)">The campaign was built on the record's own architecture.</b>
-      </p>
-    </div>
-
-    <p class="statement reveal" style="margin-top:1.2rem;color:var(--gold);max-width:52ch">
-      Lots of different doors into one recognisable world.
+    <p class="statement reveal" style="margin-top:1.3rem;color:var(--gold);max-width:54ch">
+      More content. More ways in. One recognisable world.
     </p>
-
-    <div class="src reveal" style="margin-top:1.1rem">
-      <b>Public YouTube API</b>, plus the album's structure as described in Partisan's own release-day
-      announcement. All 69 uploads in the campaign window; thumbnails are the live YouTube images.
-      Counts only — no view comparison between the two years.
-    </div>
   </div>
 </section>
 
@@ -736,66 +751,73 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 9 · WHAT THEY GOT RIGHT ═════════════════════════════════════
-     The summary slide. Six terse blocks — the headline does the
-     five-second work, the blocks are the scannable detail. The premiere
-     finding sits here because it answers "what else did they do well"
-     rather than needing a slide of its own. The outcome question is not
-     dodged, it just belongs on the final slide as a thing to measure
-     rather than as a wall of what we cannot prove. -->
-<section class="slide" data-t="What they got right" style="background:var(--ink-2)">
+<!-- ═══ 9 · WHAT WORKED ════════════════════════════════════════════
+     Six behaviours, each one already evidenced earlier in the deck, each
+     with its number attached so the claim and its proof travel together.
+
+     Premieres are listed because they were VERIFIED, not because they are
+     YouTube best practice: the API exposes scheduled and actual start
+     times, and three of the channel's seven all-time premieres are in this
+     campaign. Community posts, end screens, cards, Top Fans and Stations
+     are not listed, because the public API does not expose them and we did
+     not check them. This documents what Ezra did, not a generic checklist.
+
+     The landing line deliberately avoids "this is what a full YouTube
+     campaign looks like" — that would imply a universal benchmark we have
+     not established. "Built for the whole channel" is a claim about THIS
+     campaign, and it is one the evidence supports. -->
+<section class="slide" data-t="What worked" style="background:var(--ink-2)">
   <div class="inner">
     <div class="label reveal">The campaign, summarised</div>
-    <h2 class="display reveal" style="margin-top:.7rem">What they got right.</h2>
+    <h2 class="display reveal" style="margin-top:.6rem">What worked.</h2>
 
-    <div class="stagger" style="margin-top:clamp(1.8rem,4vw,2.8rem);display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.1rem,2.4vw,2.2rem)" id="gotright">
+    <div class="stagger worked" style="margin-top:clamp(1.5rem,3.4vw,2.4rem)">
 
       <div class="lesson">
-        <div class="n">Consistency</div>
-        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--gold);margin-top:.6rem">16<span style="color:var(--dim)">/16</span></div>
-        <p class="body" style="margin-top:.5rem;font-size:.92rem">Active weeks, with a nine-day maximum gap. The channel never went dark.</p>
+        <div class="n">01</div>
+        <h3 class="wk">The channel stayed active.</h3>
+        <p><b>16 of 16 weeks</b>, never dark more than nine days.</p>
       </div>
 
       <div class="lesson" style="border-top-color:var(--green)">
-        <div class="n" style="color:var(--green)">Depth</div>
-        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--green);margin-top:.6rem">69</div>
-        <p class="body" style="margin-top:.5rem;font-size:.92rem">Uploads across Shorts and long-form — 2.6× the comparable 2024 campaign.</p>
-      </div>
-
-      <div class="lesson" style="border-top-color:var(--red)">
-        <div class="n" style="color:var(--red)">One world</div>
-        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--red);margin-top:.6rem">3</div>
-        <p class="body" style="margin-top:.5rem;font-size:.92rem">Films for the album's three movements — Lagos, Kingston, London — published in order.</p>
+        <div class="n" style="color:var(--green)">02</div>
+        <h3 class="wk">Attention spread across more assets.</h3>
+        <p>Top-three share fell from <b>84.7%</b> to <b>56.5%</b>.</p>
       </div>
 
       <div class="lesson" style="border-top-color:var(--teal)">
-        <div class="n" style="color:var(--teal)">Long-form with purpose</div>
-        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--teal);margin-top:.6rem">83.6<span style="font-size:.45em">%</span></div>
-        <p class="body" style="margin-top:.5rem;font-size:.92rem">Of window views. Rehearsal films and live material, not just the videos.</p>
+        <div class="n" style="color:var(--teal)">03</div>
+        <h3 class="wk">Long-form gave the campaign depth.</h3>
+        <p><b>83.6%</b> of window views, from rehearsal films and live as well as videos.</p>
+      </div>
+
+      <div class="lesson" style="border-top-color:var(--red)">
+        <div class="n" style="color:var(--red)">04</div>
+        <h3 class="wk">Shorts kept the channel present.</h3>
+        <p><b>45 Shorts</b> are what made sixteen unbroken weeks possible.</p>
       </div>
 
       <div class="lesson">
-        <div class="n">Premieres, saved for the moments</div>
-        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--gold);margin-top:.6rem">3<span style="color:var(--dim)">/7</span></div>
-        <p class="body" style="margin-top:.5rem;font-size:.92rem">Ezra have premiered seven uploads ever. Three were in this campaign — and nothing else was.</p>
+        <div class="n">05</div>
+        <h3 class="wk">Release week felt like an event.</h3>
+        <p><b>19 uploads</b> in a week, and premieres saved for the three moments that mattered.</p>
       </div>
 
       <div class="lesson" style="border-top-color:var(--green)">
-        <div class="n" style="color:var(--green)">A release-week destination</div>
-        <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.4rem);color:var(--green);margin-top:.6rem">19</div>
-        <p class="body" style="margin-top:.5rem;font-size:.92rem">Uploads in release week. The album arrived to a stocked channel, not a single video.</p>
+        <div class="n" style="color:var(--green)">06</div>
+        <h3 class="wk">Everything lived in one creative world.</h3>
+        <p>One film for each of the album&rsquo;s <b>three movements</b>, published in order.</p>
       </div>
 
     </div>
 
-    <p class="statement reveal" style="margin-top:2.2rem;font-size:clamp(1.25rem,2.5vw,1.95rem);color:var(--gold);max-width:44ch">
-      A strong example of how to build a YouTube campaign around an album.
+    <p class="statement reveal" style="margin-top:1.8rem;font-size:clamp(1.25rem,2.6vw,2rem);color:var(--gold);max-width:42ch">
+      The campaign was built for the whole channel.
     </p>
 
-    <div class="src reveal">
-      <b>Public YouTube API.</b> Premiere counts come from the scheduled and actual start times the
-      API exposes on every upload. Reserving premieres for chosen moments is a judgement about
-      <b>how the feature was used</b> — it is not a claim that premiering caused those videos to perform.
+    <div class="src reveal" style="margin-top:1.2rem">
+      Every figure here appears earlier in the deck. Premiere use is verified from the start times the
+      public API exposes — three of the seven premieres in the channel&rsquo;s history are in this campaign.
     </div>
   </div>
 </section>
@@ -805,51 +827,51 @@ body.present{overflow:hidden}
 <section class="slide" data-t="What it teaches">
   <div class="inner">
     <div class="label reveal">Beyond Ezra</div>
-    <h2 class="display reveal" style="margin-top:.8rem">What this campaign teaches us.</h2>
+    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">What this campaign teaches us.</h2>
 
-    <div class="grid3 stagger" style="margin-top:clamp(2.2rem,5vw,3.6rem)">
+    <div class="stagger lessons4" style="margin-top:clamp(1.6rem,3.6vw,2.6rem)">
 
       <div class="lesson">
         <div class="n">01</div>
-        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Don't go quiet.</h3>
-        <p class="body" style="margin-top:.9rem;font-size:.96rem">
-          A 43-day silence in the last campaign became a 9-day maximum gap in this one. Continuous
-          presence is a decision, and it is one you can make without a bigger budget.
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Don&rsquo;t go quiet.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          Consistency gave the campaign a continuous presence. A 43-day silence last time became a
+          9-day maximum gap this time — a decision, not a budget.
         </p>
       </div>
 
       <div class="lesson" style="border-top-color:var(--green)">
         <div class="n" style="color:var(--green)">02</div>
-        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Don't bet it all<br>on one video.</h3>
-        <p class="body" style="margin-top:.9rem;font-size:.96rem">
-          When 63% of a campaign sits on a single upload, the campaign is that upload. Spreading
-          attention across more assets and more formats is what changed here.
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Don&rsquo;t bet everything on one video.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          When 63% of a campaign sits on a single upload, the campaign <em>is</em> that upload. Build
+          multiple ways in instead.
         </p>
       </div>
 
       <div class="lesson" style="border-top-color:var(--red)">
         <div class="n" style="color:var(--red)">03</div>
-        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Build depth<br>around the music.</h3>
-        <p class="body" style="margin-top:.9rem;font-size:.96rem">
-          Official videos joined by rehearsal films, live footage, visualisers, spoken pieces and
-          Shorts. When release week came, there was somewhere for everyone to go.
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Give Shorts and long-form different jobs.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          Shorts keep the channel present and catch the moments. Long-form gives people somewhere
+          deeper to go. Judge each on its own job.
         </p>
       </div>
 
       <div class="lesson" style="border-top-color:var(--teal)">
         <div class="n" style="color:var(--teal)">04</div>
-        <h3 class="display" style="margin-top:.8rem;color:var(--cream)">Make it all feel<br>like one world.</h3>
-        <p class="body" style="margin-top:.9rem;font-size:.96rem">
-          Variety is only an asset if it still adds up to something. Three films for the album's
-          three movements is what turns sixty-nine uploads into one campaign.
+        <h3 class="display" style="margin-top:.7rem;color:var(--cream);font-size:clamp(1.15rem,2vw,1.7rem)">Build a world, not a content calendar.</h3>
+        <p class="body" style="margin-top:.7rem;font-size:.93rem">
+          Different formats can still feel like one campaign. Three films for the album&rsquo;s three
+          movements is what turns sixty-nine uploads into one thing.
         </p>
       </div>
 
     </div>
 
-    <div class="src reveal">
-      Each lesson is drawn from a figure on an earlier slide in this deck. Nothing here is general
-      YouTube best practice imported from elsewhere.
+    <div class="src reveal" style="margin-top:1.4rem">
+      Each lesson comes from a figure on an earlier slide. Nothing here is general YouTube best
+      practice imported from elsewhere.
     </div>
   </div>
 </section>
@@ -1054,6 +1076,17 @@ var WAYS = [
 ];
 
 /* Slide 7 — release week, in publication order. */
+/* Slide 3 — the contact sheet. Chosen to span the campaign's whole
+   range: three music videos, the rehearsal film, visualisers, the three
+   city films, spoken interludes, festival Shorts, the block party. The
+   point of the selection is breadth; the point of the grid is that
+   breadth still reads as one campaign. */
+var CONTACT = [
+  '3ziixar3gqI','MLV8w3k2U9o','n6pSgYKSCs8','lsTsx7FPpQ0','ivlTNyDy488','i0UFpV7xd8I','4IqthGzU_-Q','qYFr_GvFhfA',
+  'MR0K-Ta9M2o','_d4tu0tCN58','hNVwJ4FiYmg','TlJTXw9u3uM','6JGO7rWm7ls','k8l4p7phsr8','vnb9HIzjKqw','CMSnoFHp4p4',
+  'tKEc8jyz54k','e4MjLCRwelI','asYBb11UesE','VPlRXt0aVc8','wF0bJb8liUA','UD_jk88ATcc','NFhpdYWa1sE','qev0o2DywMw'
+];
+
 var STOCKED = [
   ['lsTsx7FPpQ0','Rehearsal Tapes'],
   ['tKEc8jyz54k','Letitia Wright · Pt 1'],
@@ -1187,7 +1220,11 @@ document.addEventListener('DOMContentLoaded', function(){
   rhythm(document.getElementById('cover-rhythm'), DAYS26, '');
   rhythm(document.getElementById('r26'), DAYS26, '');
   rhythm(document.getElementById('r24'), DAYS24, 'r');
-  thumbs(document.getElementById('waysin'), WAYS, false, true);
+  var cg = document.getElementById('contact');
+  if(cg) cg.innerHTML = CONTACT.map(function(id){
+    return '<a href="https://www.youtube.com/watch?v=' + id + '" target="_blank" rel="noopener">' +
+      '<img loading="lazy" src="https://i.ytimg.com/vi/' + id + '/mqdefault.jpg" alt=""></a>';
+  }).join('');
   thumbs(document.getElementById('stocked'), STOCKED, false);
   ladder();
   observeAll();
