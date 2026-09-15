@@ -467,3 +467,23 @@ forwards, and it is the recommendation on the final slide.
   Not yet run against a deployed build, so nothing about playlists appears in the deck.
 - **End screens, cards, Community tab.** Not exposed by the public API. Not assessed, and the deck
   does not imply otherwise.
+
+### Playlists and channel organisation **[API]** — added 15 Sep, after `/api/channel-shelf` deployed
+
+**11 public playlists.** The campaign's own playlist, *Here Because of Hope*, was **created on
+28 May 2026 — the day the album was announced** — and holds 25 videos. It was built as the
+campaign's container on day one, not assembled after release.
+
+The channel keeps **one playlist per record** (*Here Because of Hope*, *Dance, No One's Watching*,
+*Where I'm Meant To Be*, *You Can't Steal My Joy*, *Chapter 7*, *Juan Pablo: The Philosopher*),
+plus *Ezra Collective - Live videos* (27), a *Shorts* playlist (60), and two mood playlists —
+*Dance with Ezra Collective* (20) and *Chill with Ezra Collective* (19) — which route a new
+arrival into the back catalogue rather than leaving them on the newest upload.
+
+The channel homepage carries **three pinned single-playlist sections**. The API reports the
+remaining section types as undefined, which is a limit of the endpoint rather than an absence of
+sections, so no claim is made about the full homepage arrangement.
+
+One line of this reached slide 3, because the album playlist existing on announcement day is part
+of the same finding as the three city films: the campaign had a shape before it had assets. The
+rest stays here.
