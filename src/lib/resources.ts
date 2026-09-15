@@ -46,7 +46,7 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         title: 'Ezra Collective',
         blurb:
-          'Post-album case study on Here Because of Hope — what the campaign built, what release week did, and why it is too early to call the outcome. Written to be shareable with Partisan and YouTube.',
+          'Post-album case study on Here Because of Hope — the campaign that stopped the channel going quiet, what worked and why, and what we measure again in October. Built to be shareable with Partisan and YouTube.',
         href: '/ezra',
         kind: 'Deck',
         updated: 'September 2026',
