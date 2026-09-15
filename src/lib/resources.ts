@@ -44,6 +44,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'D-Block Europe',
+        blurb:
+          'Channel deep dive for the management conversation — the release-day playbook they already run, the Worldwide Wave window that is still open, and the catalogue sitting on other people’s channels. Public API data only, with the method under Analysis.',
+        href: '/dblock',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'Ezra Collective',
         blurb:
           'Post-album case study on Here Because of Hope — the campaign that stopped the channel going quiet, what worked and why, and what we measure again in October. Public API data only, with the method under Analysis.',

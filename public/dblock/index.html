@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D-Block Europe — YouTube channel deep dive</title>
+
+<!--
+  D-BLOCK EUROPE × YOUTUBE — channel deep dive
+  Virgin Music Group · September 2026
+
+  ──────────────────────────────────────────────────────────────────────
+  SINGLE SOURCE OF TRUTH
+  Every figure on these slides traces to D-BLOCK-EUROPE-internal-audit.md
+  (V2) and its source rows in /tmp/dbe/cat.json — the public YouTube Data
+  API, public channel/playlist surfaces, a public comment sample, and
+  verified YouTube product documentation.
+
+  There are NO YouTube Studio metrics anywhere in this deck: no
+  impressions, no CTR, no retention, no traffic sources, no unique
+  viewers, no subscriber-gain-per-video.
+
+  ──────────────────────────────────────────────────────────────────────
+  TEN RULES THIS FILE OBEYS — every one of these is a claim the V2 audit
+  rejected after adversarial review found it overstated the opportunity.
+
+   1. NO peer multiple, no "2.02x", no "highest in cohort", no "wins by a
+      wider margin than anyone comparable". On a like-for-like catalogue
+      basis DBE lead the cohort by 0.9% — a tie. Peer comparison does not
+      appear in PRESENT at all.
+   2. NO "best release-day playbook in UK rap". No peer's release-day
+      behaviour was ever measured. Superlative deleted.
+   3. NO "every project since 2019". Four of seven got a full track
+      layer; three got none. Slide 4 shows only what was measured.
+   4. NO claim that DBE should already have 1M subs, or that their views
+      imply 1.33M. That was computed on a confounded basis and is false.
+      1M is framed as ambition, never as correction.
+   5. NO view forecast for Worldwide Wave. The audit says the stronger
+      argument is ownership and destination, not speculative views.
+   6. The ~176m GRM figure and the 266m collaboration figure are
+      described as WHERE ATTENTION SITS. Never as recoverable views,
+      never in the same breath as an incremental-view argument.
+   7. NO 4.3x Shorts engagement multiple, and no direct comparison of
+      Shorts views to long-form views. The units differ and YouTube
+      redefined Shorts views in March 2025.
+   8. NO "DBE's Shorts should be more creative". Their four best Shorts
+      ARE announcement cards. The ask is frequency, not format.
+   9. Premieres and Collaborations are shown as ALREADY IN USE. Neither
+      is presented as a new recommendation.
+  10. Stations is a question for YouTube, never a plan. Invite-only,
+      no published eligibility, no application route.
+
+  Also excluded from PRESENT by instruction, and parked on the questions
+  slide or the analysis page: the lifetime/public-catalogue gap,
+  views-per-subscriber methodology, subscriber rounding, comment
+  sampling method, and all API limitations.
+
+  ──────────────────────────────────────────────────────────────────────
+  DESIGN SYSTEM — sampled, not assumed.
+  Palette derived by canvas-sampling 16 real DBE thumbnails (top videos
+  plus the full Worldwide Wave run), binning by hue after dropping greys,
+  crushed blacks and blow-outs. Result: median luminance 0.348, 32% of
+  pixels below 0.2 — genuinely dark imagery. Dominant hues were teal 180
+  (15.2%), deep blue 210 (14.4%), gold/bronze 30 (13.1%), steel 195
+  (13.1%), then violet 270 (9.0%). That is the palette below: cold night,
+  gold as the warm accent, violet as the flash.
+
+  MOTIF: the track layer. A run of bars, one per track, filled where an
+  artist-channel asset exists and hollow where it doesn't. It is the
+  argument and the ornament at once, and it is generated from the data
+  in DECK below so the bar counts can never drift from the numbers.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#06080B;
+  --night:#0C121C;
+  --panel:#111A27;
+  --steel:#294A7F;
+  --teal:#39737C;
+  --teal-lt:#5FA8B3;
+  --gold:#C99A45;
+  --gold-lt:#E3B55E;
+  --violet:#7A3CA3;
+  --bone:#F4F2EE;
+  --dim:#7F8A99;
+  --hair:rgba(244,242,238,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--bone);
+  font-family:'Archivo',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.deck{scroll-snap-type:y mandatory;overflow-y:auto;height:100vh}
+section{
+  scroll-snap-align:start;min-height:100vh;position:relative;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(28px,5vw,84px);overflow:hidden;
+}
+/* ---------- type ---------- */
+.kicker{
+  font-size:clamp(10px,.82vw,13px);letter-spacing:.34em;text-transform:uppercase;
+  color:var(--gold);font-weight:600;margin-bottom:clamp(18px,2.4vw,34px);
+}
+h1,h2{
+  font-stretch:64%;font-weight:800;line-height:.88;letter-spacing:-.015em;
+  text-transform:uppercase;
+}
+h1{font-size:clamp(46px,9.4vw,158px)}
+h2{font-size:clamp(30px,5.2vw,82px);max-width:20ch}
+.sub{
+  font-size:clamp(15px,1.5vw,25px);color:var(--dim);font-weight:400;
+  max-width:52ch;margin-top:clamp(16px,2vw,28px);line-height:1.42;
+}
+.bottom{
+  margin-top:clamp(22px,3vw,44px);font-size:clamp(14px,1.34vw,22px);
+  font-weight:600;color:var(--bone);max-width:46ch;line-height:1.36;
+  border-left:3px solid var(--gold);padding-left:clamp(14px,1.4vw,22px);
+}
+.src{
+  position:absolute;left:clamp(28px,5vw,84px);bottom:clamp(18px,2.4vw,34px);
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#5A6472;
+}
+.num{
+  font-stretch:62%;font-weight:800;line-height:.82;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+/* ---------- cover ---------- */
+#cover{justify-content:space-between;background:
+  radial-gradient(120% 90% at 78% 12%, rgba(41,74,127,.42) 0%, transparent 58%),
+  radial-gradient(90% 70% at 8% 96%, rgba(57,115,124,.34) 0%, transparent 60%),
+  var(--ink);}
+.cover-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.cover-mid h1{font-size:clamp(54px,13.4vw,232px);font-stretch:62%;font-weight:900}
+.cover-thesis{
+  font-stretch:70%;font-weight:700;text-transform:uppercase;line-height:1.02;
+  /* 30ch, not 22 — at 22ch the first sentence broke after "win on", leaving
+     "YouTube." stranded on its own line. Each sentence now holds one line. */
+  font-size:clamp(19px,2.9vw,46px);max-width:30ch;margin-top:clamp(20px,2.6vw,38px);
+}
+.cover-thesis em{font-style:normal;color:var(--gold)}
+.cover-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5A6472}
+/* ---------- scale ---------- */
+.scale{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:clamp(16px,2.4vw,40px);margin-top:clamp(24px,3.4vw,52px)}
+.stat .v{font-size:clamp(40px,6.4vw,104px);color:var(--bone)}
+.stat .v.g{color:var(--gold)}
+.stat .l{font-size:clamp(10px,.78vw,12px);letter-spacing:.2em;text-transform:uppercase;
+  color:var(--dim);margin-top:12px;line-height:1.5;font-weight:500}
+/* ---------- frames ---------- */
+.frames{display:grid;gap:clamp(8px,.9vw,14px);margin-top:clamp(20px,2.6vw,38px)}
+.frames.c5{grid-template-columns:repeat(5,1fr)}
+.frames.c4{grid-template-columns:repeat(4,1fr)}
+.fr{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--night);
+  border:1px solid var(--hair)}
+.fr img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.06)}
+.fr .cap{position:absolute;left:0;right:0;bottom:0;padding:9px 10px;
+  background:linear-gradient(transparent,rgba(6,8,11,.94) 62%);
+  font-size:clamp(9px,.72vw,12px);letter-spacing:.06em;font-weight:700;text-transform:uppercase}
+.fr .cap b{color:var(--gold-lt);display:block;font-size:clamp(11px,.92vw,15px);font-stretch:70%}
+/* ---------- track-layer motif ---------- */
+/* align-items:start, not end — the notes wrap to different line counts, and
+   with end-alignment that pushed whole columns out of line with each other.
+   Tops align; everything above .lnote is fixed height, so the bar runs and
+   the three big counts stay on the same baselines. */
+.layers{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,56px);
+  margin-top:clamp(22px,3vw,46px);align-items:start}
+.layer .lname{font-stretch:66%;font-weight:800;text-transform:uppercase;
+  font-size:clamp(15px,1.7vw,28px);line-height:1}
+.layer .ldate{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:8px}
+.bars{display:flex;gap:clamp(2px,.28vw,5px);align-items:flex-end;
+  height:clamp(88px,12vw,190px);margin:clamp(14px,1.8vw,26px) 0}
+.bars i{flex:1;height:100%;border-radius:1px;display:block}
+.bars i.on{background:var(--gold)}
+.bars i.on.t{background:var(--teal-lt)}
+.bars i.off{background:transparent;border:1px solid rgba(244,242,238,.24)}
+.layer .lcount{font-stretch:62%;font-weight:800;font-size:clamp(28px,4.2vw,66px);line-height:.9;
+  font-variant-numeric:tabular-nums}
+.layer .lcount.good{color:var(--gold)}
+.layer .lcount.open{color:var(--bone)}
+.layer .lnote{font-size:clamp(11px,.86vw,14px);color:var(--dim);margin-top:10px;line-height:1.45;max-width:26ch}
+/* ---------- generic grid / lists ---------- */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3.4vw,64px);
+  margin-top:clamp(20px,2.6vw,40px);align-items:start}
+.card{border:1px solid var(--hair);background:var(--night);padding:clamp(16px,1.9vw,30px)}
+.card h3{font-stretch:68%;font-weight:800;text-transform:uppercase;
+  font-size:clamp(13px,1.16vw,19px);letter-spacing:.04em;color:var(--gold);margin-bottom:14px}
+.card.t h3{color:var(--teal-lt)}
+ul.clean{list-style:none}
+ul.clean li{font-size:clamp(12px,1.06vw,17px);line-height:1.5;padding:9px 0;
+  border-bottom:1px solid rgba(244,242,238,.07);font-weight:500}
+ul.clean li:last-child{border-bottom:0}
+ul.clean li small{display:block;color:var(--dim);font-weight:400;font-size:.84em;margin-top:3px;line-height:1.4}
+/* ---------- partners ---------- */
+.partners{display:flex;flex-wrap:wrap;gap:clamp(6px,.7vw,11px);margin-top:clamp(16px,2vw,30px);max-width:62ch}
+.partners span{border:1px solid var(--hair);padding:7px 13px;font-size:clamp(10px,.86vw,14px);
+  font-weight:600;letter-spacing:.03em;color:#C6CEDA}
+.partners span.big{border-color:var(--gold);color:var(--gold)}
+/* ---------- then/now ---------- */
+.thennow{display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(14px,2vw,34px);
+  align-items:center;margin-top:clamp(20px,2.6vw,38px)}
+.tn{border:1px solid var(--hair);padding:clamp(14px,1.7vw,26px);background:var(--night)}
+.tn .t{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.tn .b{font-stretch:68%;font-weight:800;text-transform:uppercase;font-size:clamp(14px,1.5vw,24px);line-height:1.1}
+.tn.now{border-color:var(--gold)}
+.tn.now .b{color:var(--gold)}
+.arrow{font-size:clamp(20px,2.4vw,38px);color:var(--dim)}
+/* ---------- questions ---------- */
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+  gap:clamp(12px,1.5vw,24px);margin-top:clamp(20px,2.6vw,40px)}
+.q{border-left:3px solid var(--teal-lt);padding:4px 0 4px clamp(13px,1.3vw,20px);
+  font-size:clamp(13px,1.2vw,20px);font-weight:600;line-height:1.32}
+/* ---------- million ---------- */
+#million{align-items:center;text-align:center;background:
+  radial-gradient(90% 70% at 50% 42%, rgba(201,154,69,.2) 0%, transparent 62%), var(--ink)}
+.mrun{display:flex;align-items:center;justify-content:center;gap:clamp(14px,2.6vw,50px);
+  margin:clamp(14px,2vw,30px) 0}
+.mrun .a{font-size:clamp(42px,8vw,140px);color:var(--dim)}
+.mrun .b{font-size:clamp(42px,8vw,140px);color:var(--gold)}
+.mrun .d{font-size:clamp(26px,3.6vw,62px);color:var(--dim)}
+#million .sub{margin-left:auto;margin-right:auto;text-align:center}
+#million .bottom{border-left:0;border-top:3px solid var(--gold);padding:18px 0 0;
+  margin-left:auto;margin-right:auto;text-align:center;max-width:54ch}
+/* ---------- analysis ---------- */
+#analysis{min-height:auto;background:var(--night);scroll-snap-align:start;
+  padding:clamp(40px,6vw,96px) clamp(28px,5vw,84px)}
+#analysis h2{font-size:clamp(24px,3.2vw,46px);margin-bottom:10px}
+.an{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:clamp(18px,2.4vw,44px);margin-top:clamp(22px,3vw,44px)}
+.an h4{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.an p,.an li{font-size:clamp(12px,1vw,15px);line-height:1.6;color:#B4BDC9}
+.an ul{list-style:none}
+.an ul li{padding:7px 0;border-bottom:1px solid rgba(244,242,238,.07)}
+.an ul li:last-child{border-bottom:0}
+/* #keep carries the most list items of any slide (8 + 6) and was measuring
+   945px against a 900px viewport, pushing its source line below the snap
+   point. Tighten the rows rather than cutting evidence. */
+#keep ul.clean li{padding:6px 0}
+#keep .bottom{margin-top:clamp(16px,2vw,28px)}
+
+/* ---------- nav ---------- */
+.dots{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:50;
+  display:flex;flex-direction:column;gap:9px}
+.dots a{width:7px;height:7px;border-radius:50%;background:rgba(244,242,238,.26);display:block;
+  transition:background .2s,transform .2s}
+.dots a:hover,.dots a.on{background:var(--gold);transform:scale(1.5)}
+@media(max-width:860px){
+  .two,.thennow{grid-template-columns:1fr}
+  .layers{grid-template-columns:1fr;gap:26px}
+  .bars{height:62px}
+  .frames.c5{grid-template-columns:repeat(2,1fr)}
+  .frames.c4{grid-template-columns:repeat(2,1fr)}
+  .arrow{display:none}
+  .dots{display:none}
+  .src{position:static;margin-top:26px}
+  section{min-height:auto;padding-top:56px;padding-bottom:56px}
+  /* space-between stops doing anything once min-height is auto, so the cover's
+     three blocks collapse onto each other at phone width. Give them real gaps. */
+  #cover{gap:38px}
+  .cover-top{gap:10px}
+  .cover-mid{margin:8px 0}
+}
+</style>
+</head>
+<body>
+
+<nav class="dots" id="dots"></nav>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════════ 1 · COVER ═══════════════ -->
+<section id="cover">
+  <div class="cover-top">
+    <div class="kicker" style="margin:0">Virgin Music Group · YouTube channel deep dive · September 2026</div>
+    <div class="kicker" style="margin:0;color:#5A6472">@DBlockEuropeTV</div>
+  </div>
+
+  <div class="cover-mid">
+    <h1>D-Block<br>Europe</h1>
+    <div class="cover-thesis">They already win on YouTube.<br><em>Now build the whole channel around it.</em></div>
+  </div>
+
+  <div class="cover-foot">
+    <div>659K subscribers · 969.6M lifetime views · 197 videos</div>
+    <div>Public YouTube data · 15 Sep 2026</div>
+  </div>
+</section>
+
+<!-- ═══════════════ 2 · SCALE ═══════════════ -->
+<section id="scale">
+  <div class="kicker">The starting point</div>
+  <h2>This is already a huge YouTube channel.</h2>
+
+  <div class="scale">
+    <div class="stat"><div class="v num">659K</div><div class="l">Subscribers</div></div>
+    <div class="stat"><div class="v num">969.6M</div><div class="l">Lifetime channel views</div></div>
+    <div class="stat"><div class="v num">61</div><div class="l">Videos over 1M</div></div>
+    <div class="stat"><div class="v num">13</div><div class="l">Videos over 10M</div></div>
+    <div class="stat"><div class="v num g">106M</div><div class="l">Overseas ft. Central Cee</div></div>
+  </div>
+
+  <div class="bottom">The question isn't whether DBE work on YouTube. They clearly do.</div>
+  <div class="src">Source: public YouTube API · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 3 · THE ENGINE ═══════════════ -->
+<section id="engine">
+  <div class="kicker">What actually drives it</div>
+  <h2>The music videos do the heavy lifting.</h2>
+  <div class="sub"><strong style="color:var(--bone)">41 music videos carry 67.6%</strong> of everything the public catalogue has earned. Big song, big video, big audience. It is a simple engine and it works.</div>
+
+  <div class="frames c5" id="engineFrames"></div>
+
+  <div class="bottom">This is the foundation. Nothing that follows asks DBE to change it.</div>
+  <div class="src">Source: public YouTube API · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 4 · THE PLAYBOOK ═══════════════ -->
+<section id="playbook">
+  <div class="kicker">The most important slide in this deck</div>
+  <h2>They already know how to build a whole record on YouTube.</h2>
+
+  <div class="layers" id="layerRow"></div>
+
+  <div class="bottom">The capability is already there. It just hasn't been used on the current record yet.</div>
+  <div class="src">Source: public YouTube API + channel shelves · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 5 · WORLDWIDE WAVE ═══════════════ -->
+<section id="ww">
+  <div class="kicker">Worldwide Wave · with French Montana · released 11 September 2026</div>
+  <h2>16 tracks still need a home.</h2>
+
+  <div class="bars" id="wwBars" style="height:clamp(56px,8vw,120px);max-width:940px"></div>
+
+  <div class="two" style="margin-top:clamp(14px,2vw,28px)">
+    <div>
+      <ul class="clean">
+        <li><strong>3 of 19 tracks</strong> have an artist-channel asset<small>All three are the pre-release official music videos</small></li>
+        <li><strong>16 tracks</strong> are currently distributor-fed Topic art tracks<small>They exist on YouTube, but not on the artist's own channel</small></li>
+        <li><strong>No Worldwide Wave playlist</strong><small>Every other project on the channel has one</small></li>
+        <li><strong>No Worldwide Wave homepage section</strong><small>The channel front page is otherwise organised by project</small></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>The window is still open</h3>
+      <p style="font-size:clamp(13px,1.2vw,19px);line-height:1.45;font-weight:600">The tour opens <strong style="color:var(--gold)">22 October</strong> — Birmingham, Manchester, The O2, then Europe.</p>
+      <p style="font-size:clamp(12px,1.04vw,16px);line-height:1.5;color:var(--dim);margin-top:14px">Finish the track layer. Build the project destination. Both are things this team has already done twice, at full coverage, on the day of release.</p>
+    </div>
+  </div>
+
+  <div class="src">Source: public YouTube API + channel shelves + release metadata · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 6 · CATALOGUE ═══════════════ -->
+<section id="catalogue">
+  <div class="kicker">The catalogue is bigger than the channel</div>
+  <h2>DBE's history lives all over YouTube.</h2>
+  <div class="sub">The pre-label era was published to platform channels — principally GRM Daily. Those videos are still live, still dated, still being watched. They just have no path back to DBE's own channel.</div>
+
+  <div class="scale" style="margin-top:clamp(20px,2.6vw,36px);grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+    <div class="stat"><div class="v num g" style="font-size:clamp(38px,5.6vw,92px)">~176M</div><div class="l">Views across seven verified historic videos hosted elsewhere — a partial count</div></div>
+  </div>
+
+  <div class="partners" style="margin-top:clamp(14px,1.8vw,26px)">
+    <span>Kitchen Kings</span><span>Nassty</span><span>Large Amounts</span><span>The Shard</span>
+    <span>Gucci Mane</span><span>Home</span><span>Mazzaleen</span>
+  </div>
+
+  <div class="bottom">The views stay where they are. The relationship doesn't have to.</div>
+  <div class="src">Source: public YouTube surfaces · 15 Sep 2026 · seven videos of a larger cross-hosted set</div>
+</section>
+
+<!-- ═══════════════ 7 · COLLABORATIONS ═══════════════ -->
+<section id="collabs">
+  <div class="kicker">The collaboration network</div>
+  <h2>A decade of features. One video is 40% of it.</h2>
+
+  <div class="scale" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+    <div class="stat"><div class="v num" style="font-size:clamp(34px,5vw,80px)">54</div><div class="l">Long-form videos with a featured artist</div></div>
+    <div class="stat"><div class="v num" style="font-size:clamp(34px,5vw,80px)">~31</div><div class="l">Collaborating artists</div></div>
+    <div class="stat"><div class="v num g" style="font-size:clamp(34px,5vw,80px)">266M</div><div class="l">Views on those videos — of which Overseas alone is 106M. One huge video plus a long tail.</div></div>
+  </div>
+
+  <div class="partners">
+    <span class="big">Central Cee</span><span>Raye</span><span>AJ Tracey</span><span>Clavish</span><span>Noizy</span>
+    <span>Dave</span><span>Aitch</span><span>Headie One</span><span>K-Trap</span><span>Skepta</span>
+    <span>French Montana</span><span>Popcaan</span><span>Lil Baby</span><span>Offset</span><span>M Huncho</span>
+    <span>Nafe Smallz</span><span>Chip</span><span>Morad</span>
+  </div>
+
+  <div class="thennow">
+    <div class="tn"><div class="t">The back catalogue</div><div class="b">Featured artist named in the title</div></div>
+    <div class="arrow">→</div>
+    <div class="tn now"><div class="t">The current campaign</div><div class="b">YouTube Collaboration credit — RICO, RIPS &amp; FR33</div></div>
+  </div>
+
+  <div class="bottom">The team has already started using Collaborations. The back catalogue is the conversation.</div>
+  <div class="src">Source: public YouTube API + watch-page observation · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 8 · SHORTS ═══════════════ -->
+<section id="shorts">
+  <div class="kicker">The one layer that isn't constant</div>
+  <h2>Long-form is relentless. Shorts aren't.</h2>
+
+  <div class="two" style="align-items:center">
+    <div>
+      <div style="display:flex;align-items:flex-end;gap:clamp(20px,3vw,54px)">
+        <div class="stat"><div class="v num" style="font-size:clamp(56px,10vw,170px)">40</div><div class="l">Long-form uploads<br>last 12 months</div></div>
+        <div class="stat"><div class="v num g" style="font-size:clamp(56px,10vw,170px)">5</div><div class="l">Shorts<br>last 12 months</div></div>
+      </div>
+    </div>
+    <div class="card t">
+      <h3>And the interesting part</h3>
+      <p style="font-size:clamp(12px,1.08vw,17px);line-height:1.55;color:#C6CEDA">DBE's four best-performing Shorts are all straightforward release announcements. The evidence doesn't say the Shorts need to be cleverer — it says there should simply be more of them.</p>
+      <p style="font-size:clamp(12px,1.08vw,17px);line-height:1.55;color:#C6CEDA;margin-top:14px">There is a tour, a new record, 41 music videos and 66 visualisers of existing footage to cut from.</p>
+    </div>
+  </div>
+
+  <div class="bottom">This doesn't need more shoots. It needs more use of what already exists.</div>
+  <div class="src">Source: public YouTube API · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 9 · ACTIONS ═══════════════ -->
+<section id="actions">
+  <div class="kicker">Low-friction opportunity</div>
+  <h2>A lot of this doesn't need the artist.</h2>
+
+  <div class="two">
+    <div class="card">
+      <h3>Now · channel side</h3>
+      <ul class="clean">
+        <li>Build the Worldwide Wave playlist</li>
+        <li>Pin a Worldwide Wave homepage section</li>
+        <li>Complete and extend the track-asset layer</li>
+        <li>Set up the Concerts tab for the October tour</li>
+        <li>More Shorts, cut from existing assets</li>
+        <li>Curate the Fan Shorts shelf</li>
+        <li>Use Posts — there's an audience question about the catalogue waiting for an answer</li>
+      </ul>
+    </div>
+    <div class="card t">
+      <h3>With YouTube &amp; partners</h3>
+      <ul class="clean">
+        <li>Confirm whether Collaboration credits can be added to already-published videos<small>Needs checking in Studio before anyone commits to it</small></li>
+        <li>Test collaborator credits across the catalogue</li>
+        <li>Explore connecting the GRM Daily classics<small>GRM Daily would need to initiate this — it isn't DBE's switch to flip</small></li>
+        <li>Ask whether DBE could be a Stations candidate</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="src">Source: public YouTube API + channel shelves + YouTube product documentation · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 10 · KEEP THE ENGINE ═══════════════ -->
+<section id="keep">
+  <div class="kicker">What this is, and what it isn't</div>
+  <h2>This isn't a rebuild. Keep the engine, build around it.</h2>
+
+  <div class="two">
+    <div class="card">
+      <h3>Already working</h3>
+      <ul class="clean">
+        <li>Music videos win, consistently</li>
+        <li>High publishing volume — 44 uploads last year</li>
+        <li>Project playlist architecture</li>
+        <li>Full release-day track layers when used</li>
+        <li>Premieres already embedded — including Overseas</li>
+        <li>Collaborations now in use</li>
+        <li>Official Artist Channel fully configured</li>
+        <li>Catalogue that keeps earning years later</li>
+      </ul>
+    </div>
+    <div class="card t">
+      <h3>Where more value sits</h3>
+      <ul class="clean">
+        <li>Consistency — run the playbook every time</li>
+        <li>A destination for the current project</li>
+        <li>Connecting the wider catalogue back</li>
+        <li>Collaborator credits across the back catalogue</li>
+        <li>Shorts frequency</li>
+        <li>Fan and tour surfaces</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bottom">We're not trying to change what makes DBE work. We're trying to capture more value around it.</div>
+  <div class="src">Source: public YouTube API + channel shelves + YouTube product documentation · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 11 · QUESTIONS ═══════════════ -->
+<section id="questions">
+  <div class="kicker">For the room</div>
+  <h2>What can we unlock together?</h2>
+  <div class="sub">Public data gets us this far. These are the questions where YouTube can tell us something we can't see.</div>
+
+  <div class="qs">
+    <div class="q">Can Collaboration credits be extended into the back catalogue?</div>
+    <div class="q">Could the GRM-hosted classics surface on DBE's Official Artist Channel?</div>
+    <div class="q">Could DBE be a Stations candidate?</div>
+    <div class="q">What does Studio show about subscriber growth by video?</div>
+    <div class="q">What explains the gap between lifetime channel views and the current public catalogue?</div>
+    <div class="q">What's the split between new and returning viewers?</div>
+    <div class="q">What is actually driving subscriptions?</div>
+  </div>
+
+  <div class="src">Source: questions arising from public-data analysis · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ 12 · 1M ═══════════════ -->
+<section id="million">
+  <div class="kicker">The shared destination</div>
+  <h1 style="font-size:clamp(34px,5.6vw,92px);max-width:none">The next number is 1M.</h1>
+
+  <div class="mrun">
+    <div class="a num">659K</div>
+    <div class="d">→</div>
+    <div class="b num">1M</div>
+  </div>
+
+  <div class="sub">DBE already turn their catalogue into subscribers at a rate that stands up against the strongest comparable UK rap channels. A million isn't a correction. It's an ambition worth building towards together.</div>
+
+  <div class="bottom">The views are already huge. The playbook already exists. Now make every release, every collaboration and every part of the catalogue work for the channel.</div>
+  <div class="src">Source: public YouTube API · 15 Sep 2026</div>
+</section>
+
+<!-- ═══════════════ ANALYSIS ═══════════════ -->
+<section id="analysis">
+  <div class="kicker">Analysis</div>
+  <h2>How this was measured</h2>
+  <p style="font-size:clamp(13px,1.1vw,17px);color:#B4BDC9;max-width:66ch;line-height:1.6;margin-top:10px">
+    Every figure in this deck comes from public sources, pulled on 15 September 2026. The full evidence trail, including what we tested and rejected, sits in the internal audit.
+  </p>
+
+  <div class="an">
+    <div>
+      <h4>Sources</h4>
+      <ul>
+        <li>Public YouTube Data API — full catalogue, all 197 public videos, not sampled</li>
+        <li>Public channel and playlist surfaces</li>
+        <li>Watcher weekly snapshots of the same public API</li>
+        <li>Public comment sample — qualitative</li>
+        <li>Verified YouTube product documentation</li>
+      </ul>
+    </div>
+    <div>
+      <h4>What public data can't tell us</h4>
+      <ul>
+        <li>No YouTube Studio metrics are used anywhere: no impressions, click-through rate, retention, traffic sources or unique viewers</li>
+        <li>Views are plays, not people — no per-viewer claim is made</li>
+        <li>Subscriber counts are rounded by YouTube to three significant figures</li>
+        <li>Shorts and long-form views are not equivalent units and are never compared directly</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Things to confirm before acting</h4>
+      <ul>
+        <li>Whether Collaboration credits can be applied to already-published videos — documented for the upload flow only</li>
+        <li>GRM-hosted videos would need GRM Daily to initiate any collaboration</li>
+        <li>Stations is invite-only with no published eligibility or application route — it is a question, not a plan</li>
+        <li>A meaningful share of lifetime channel views isn't attributable to any currently-public video; Studio should resolve it</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#5A6472;margin-top:clamp(28px,3.4vw,52px)">
+    Virgin Music Group · D-Block Europe channel deep dive · September 2026 · full evidence trail in the internal audit
+  </p>
+</section>
+
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────────────────
+   DECK DATA — single source for anything the slides count.
+   Bar counts are GENERATED from these numbers, so a bar run can never
+   disagree with the figure printed beside it. Every value traces to
+   D-BLOCK-EUROPE-internal-audit.md V2.
+   ────────────────────────────────────────────────────────────────── */
+const DECK = {
+  /* Release-day track-asset layers. ONLY the three projects whose layers
+     were actually measured. The audit is explicit that three other
+     post-2019 projects received no layer at all — so this slide shows
+     "here is the capability", never "here is what they always do". */
+  layers: [
+    { name:'Rolling Stone', date:'12 Jan 2024',  tracks:15, assets:15,
+      note:'Every track, on release day.' },
+    { name:'PTSD 2',        date:'14 Nov 2025',  tracks:29, assets:29,
+      note:'Twenty-nine tracks, all of them, same day.' },
+    { name:'Worldwide Wave',date:'11 Sep 2026',  tracks:19, assets:3, open:true,
+      note:'Three pre-release music videos. Sixteen tracks still to come home.' }
+  ],
+  /* Top music videos — real frames from the channel. */
+  engine: [
+    { id:'I4Ra4z2Arqg', t:'Overseas',        v:'106M' },
+    { id:'VRc0PH7pHGs', t:'Elegant & Gang',  v:'22.7M' },
+    { id:'kFlfgHvgetY', t:'Make You Smile',  v:'19.3M' },
+    { id:'Ry1m40ScWks', t:'Pakistan',        v:'18.6M' },
+    { id:'bnc7hO8UGXU', t:'Eagle',           v:'14.2M' }
+  ]
+};
+
+/* ---- slide 3 : real thumbnail frames ---- */
+document.getElementById('engineFrames').innerHTML = DECK.engine.map(f => `
+  <div class="fr">
+    <img src="https://i.ytimg.com/vi/${f.id}/maxresdefault.jpg"
+         onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${f.id}/hqdefault.jpg'"
+         alt="${f.t}" loading="lazy">
+    <div class="cap"><b>${f.v}</b>${f.t}</div>
+  </div>`).join('');
+
+/* ---- the track-layer motif ---- */
+function barRun(tracks, assets, teal){
+  let h = '';
+  for (let i = 0; i < tracks; i++){
+    h += i < assets ? `<i class="on${teal ? ' t' : ''}"></i>` : '<i class="off"></i>';
+  }
+  return h;
+}
+
+/* ---- slide 4 : three layers side by side ---- */
+document.getElementById('layerRow').innerHTML = DECK.layers.map(l => `
+  <div class="layer">
+    <div class="lname">${l.name}</div>
+    <div class="ldate">${l.date}</div>
+    <div class="bars">${barRun(l.tracks, l.assets)}</div>
+    <div class="lcount ${l.open ? 'open' : 'good'}">${l.assets}<span style="color:var(--dim)">/${l.tracks}</span></div>
+    <div class="lnote">${l.note}</div>
+  </div>`).join('');
+
+/* ---- slide 5 : Worldwide Wave, full width ---- */
+const ww = DECK.layers.find(l => l.open);
+document.getElementById('wwBars').innerHTML = barRun(ww.tracks, ww.assets);
+
+/* ---- nav dots ---- */
+const secs = [...document.querySelectorAll('.deck > section')];
+document.getElementById('dots').innerHTML =
+  secs.map(s => `<a href="#${s.id}" data-t="${s.id}"></a>`).join('');
+const dots = [...document.querySelectorAll('.dots a')];
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    dots.forEach(d => d.classList.toggle('on', d.dataset.t === e.target.id));
+  });
+}, { threshold: .5 });
+secs.forEach(s => spy.observe(s));
+
+/* ---- self-check: bar runs must match printed figures ---- */
+(function(){
+  const errs = [];
+  DECK.layers.forEach((l, i) => {
+    const el = document.querySelectorAll('#layerRow .bars')[i];
+    if (!el) { errs.push(l.name + ': no bar run'); return; }
+    const on = el.querySelectorAll('i.on').length, all = el.querySelectorAll('i').length;
+    if (on !== l.assets || all !== l.tracks) errs.push(`${l.name}: drew ${on}/${all}, expected ${l.assets}/${l.tracks}`);
+  });
+  const w = document.getElementById('wwBars');
+  if (w.querySelectorAll('i.on').length !== ww.assets || w.querySelectorAll('i').length !== ww.tracks){
+    errs.push('Worldwide Wave hero run mismatch');
+  }
+  if (errs.length) console.error('DECK INTEGRITY:', errs); else console.log('DECK INTEGRITY: bar runs match figures');
+})();
+</script>
+</body>
+</html>
