@@ -275,7 +275,17 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
    The forensic version lives in the internal audit; this page answers
    where the data came from, what we can see, what we can't, and whether
    the 2024 comparison is fair. ─────────────────────────────────────── */
-.sheet .lede{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--cream);max-width:48ch;margin:.9rem 0 0}
+.sheet .big-p{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--warm);max-width:60ch;margin:.2rem 0 0;line-height:1.5}
+.album{
+  display:flex;justify-content:space-between;align-items:center;gap:1.5rem;flex-wrap:wrap;
+  border-left:3px solid var(--gold);padding:.1rem 0 .1rem 1rem;margin:.4rem 0 1.4rem;
+}
+.album p{margin:0}
+/* Small print: present so the method can be checked, sized so it never
+   competes with the findings it supports. */
+.notes{margin-top:3.2rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.notes p{font-size:.78rem;line-height:1.65;color:var(--dim);max-width:88ch;margin:.6rem 0 0}
+.notes code{font-size:.76rem;color:var(--warm)}
 .sheet h3.sec{
   font-size:clamp(1.05rem,1.9vw,1.5rem);color:var(--gold);
   margin:2.8rem 0 .8rem;padding-top:1.1rem;border-top:1px solid var(--line);
@@ -920,103 +930,87 @@ body.present{overflow:hidden}
 
     <div class="label">Analysis</div>
     <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
-    <p class="lede">
-      Four things worth knowing before you trust a number in this deck.
-    </p>
 
-    <!-- 1 -->
-    <h3 class="display sec">1 &nbsp;What we used</h3>
-    <p>
-      The <b>public YouTube Data API</b>, our own <b>weekly Watcher snapshots</b> of that same public
-      API, and <b>public comments</b>. Nothing else.
-    </p>
+    <!-- ── The three sources ─────────────────────────────────────── -->
+    <h3 class="display sec">Sources</h3>
     <div class="mgrid">
       <div class="mcard">
-        <div class="label">This campaign</div>
-        <div class="mbig">69</div>
-        <p>uploads · 27 May → 15 Sep 2026 · 111 days</p>
+        <div class="ct">Public YouTube Data API</div>
+        <p>Every upload on the channel, with its publication date, duration, format, view and
+        engagement counts.</p>
       </div>
       <div class="mcard">
-        <div class="label">Comparison campaign</div>
-        <div class="mbig">27</div>
-        <p>uploads · <em>Dance, No One’s Watching</em>, 2024 · 110 days</p>
+        <div class="ct">Weekly Watcher snapshots</div>
+        <p>Our own cron, recording the channel’s public figures once a week. This is what makes
+        before-and-after measurable.</p>
+      </div>
+      <div class="mcard">
+        <div class="ct">Public comments</div>
+        <p>Read as audience research — what people say about the work, in their own words.</p>
+      </div>
+    </div>
+
+    <!-- ── What was studied ──────────────────────────────────────── -->
+    <h3 class="display sec">The study</h3>
+
+    <div class="album">
+      <div>
+        <div class="ct" style="color:var(--gold)">Here Because of Hope</div>
+        <p style="margin-top:.3rem">Released <b style="color:var(--cream)">11 September 2026</b> · Partisan Records</p>
+      </div>
+      <div class="label">Channel data pulled 15 September 2026</div>
+    </div>
+
+    <div class="mgrid">
+      <div class="mcard">
+        <div class="label">2026 campaign</div>
+        <div class="mbig">69</div>
+        <p>uploads across <b style="color:var(--cream)">111 days</b><br>27 May → 15 Sep 2026</p>
+      </div>
+      <div class="mcard">
+        <div class="label">2024 comparison</div>
+        <div class="mbig" style="color:var(--warm)">27</div>
+        <p>uploads across <b style="color:var(--cream)">110 days</b><br><em>Dance, No One’s Watching</em></p>
       </div>
       <div class="mcard">
         <div class="label">Comments</div>
-        <div class="mbig">266</div>
-        <p>top-level comments sampled across 15 videos</p>
+        <div class="mbig" style="color:var(--green)">266</div>
+        <p>sampled across <b style="color:var(--cream)">15 videos</b></p>
       </div>
     </div>
 
-    <!-- 2 -->
-    <h3 class="display sec">2 &nbsp;What we can’t see</h3>
-    <p>
-      We do not have YouTube Studio access for this channel, so we cannot see impressions,
-      click-through rate, retention, traffic sources, unique viewers, or new versus returning viewers.
-      <b style="color:var(--cream)">That is why we never attribute channel movement to an individual
-      asset.</b> Release week and the campaign activity around it co-occurred; which one moved the
-      other is not something public data can answer.
+    <!-- ── The one methodological choice that shapes everything ──── -->
+    <h3 class="display sec">A fair comparison</h3>
+    <p class="big-p">
+      The 2024 videos have had longer to accumulate views, so campaign-to-campaign performance is
+      compared using <b style="color:var(--cream)">structural measures rather than absolute views</b>.
     </p>
-
-    <!-- 3 -->
-    <h3 class="display sec">3 &nbsp;How we compared the two campaigns</h3>
-    <p>
-      The 2024 videos have had roughly two years to accumulate views. The 2026 campaign is still
-      live. <b style="color:var(--cream)">So we do not compare absolute views between
-      campaigns — that would measure age, not performance.</b>
-    </p>
-    <p>Instead we compare the things that stay fair whatever a video’s age:</p>
     <div class="fair">
       <span>Active weeks</span><span>Longest gap</span><span>Upload volume</span>
-      <span>Format mix</span><span>Concentration within each window</span>
+      <span>Format mix</span><span>Attention concentration</span>
     </div>
-    <p style="margin-top:1rem">
-      This lets us compare <em>how the two campaigns were built</em> without pretending videos of very
-      different ages are directly comparable.
+    <p style="margin-top:1.1rem">
+      These hold their meaning whatever a video’s age. Release-week channel movement is measured
+      separately, using Watcher’s weekly snapshots.
     </p>
 
-    <!-- 4 -->
-    <h3 class="display sec">4 &nbsp;Important caveats</h3>
-    <div class="mgrid two">
-      <div class="mcard">
-        <div class="ct">Public subscribers</div>
-        <p>YouTube rounds the public subscriber count. We show the observed movement, but claim
-        neither precise subscriber additions nor a growth multiple.</p>
-      </div>
-      <div class="mcard">
-        <div class="ct">Attribution</div>
-        <p>Release-week views and subscriber movement co-occurred with the campaign. Without
-        traffic-source data we cannot say which asset caused it.</p>
-      </div>
-      <div class="mcard">
-        <div class="ct">Alexandra Palace</div>
-        <p>The 8 May film predates the campaign. It is excluded from every campaign figure, and used
-        only as evidence about how this audience responds to long-form filmmaking.</p>
-      </div>
-      <div class="mcard">
-        <div class="ct">Comments</div>
-        <p>A relevance-ranked public sample, not a census. Used qualitatively, never as
-        representative audience research.</p>
-      </div>
-      <div class="mcard">
-        <div class="ct">Lifetime views</div>
-        <p>The public uploads we retrieved do not reconcile to the channel’s reported lifetime total,
-        most likely because not every historical upload is still public. So the deck makes no
-        share-of-lifetime claims.</p>
-      </div>
-      <div class="mcard ok">
-        <div class="ct" style="color:var(--green)">Release date · resolved</div>
-        <p><em>Here Because of Hope</em> was released <b style="color:var(--cream)">11 September 2026</b>
-        via Partisan Records, confirmed by the label’s release-day announcement. The 18 September date
-        in the band’s 28 May announcement Short was superseded.</p>
-      </div>
+    <!-- ── Small print. Present for transparency, not for emphasis. ─ -->
+    <div class="notes">
+      <div class="label">Methodology notes</div>
+      <p>
+        Public API analysis only; no YouTube Studio metrics were used. Public subscriber counts are
+        rounded by YouTube. Campaign activity and channel movement are treated as co-occurring rather
+        than causally attributed to individual assets. Comments are used qualitatively from a
+        relevance-ranked public sample. The Alexandra Palace film predates the campaign window and is
+        excluded from campaign performance figures. No share-of-lifetime claims are made, because
+        historical public uploads do not fully reconcile with the channel’s reported lifetime view
+        total. Release date per Partisan’s release-day announcement, 11 September 2026.
+      </p>
+      <p style="margin-top:.6rem">
+        Row-level data, the full reconciliation and the complete audit trail are in the internal
+        audit, <code>EZRA-COLLECTIVE-internal-audit.md</code>.
+      </p>
     </div>
-
-    <p class="foot">
-      This page is the short version. The full working — every figure, the row-level source data, and
-      the adversarial check that corrected an earlier draft — is in the internal audit,
-      <code>EZRA-COLLECTIVE-internal-audit.md</code>, available on request.
-    </p>
 
   </div>
 </div>
