@@ -46,10 +46,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         title: 'Ezra Collective',
         blurb:
-          'Post-album case study on Here Because of Hope — the campaign that stopped the channel going quiet, what worked and why, and what we measure again in October. Built to be shareable with Partisan and YouTube.',
+          'Post-album case study on Here Because of Hope — the campaign that stopped the channel going quiet, what worked and why, and what we measure again in October. Public API data only, with the method under Analysis.',
         href: '/ezra',
         kind: 'Deck',
         updated: 'September 2026',
+        /* Going to YouTube and Partisan. The badge this sets reads "Public
+           link", which is the accurate warning: /ezra has no login, so once
+           the URL is sent it is readable by anyone who has it. */
+        external: true,
       },
       {
         title: 'Antony Szmierek',
