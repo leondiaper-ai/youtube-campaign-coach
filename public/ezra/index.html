@@ -193,6 +193,7 @@ h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 1
 .thumb{position:relative;display:block;border-radius:3px;overflow:hidden;background:var(--ink-3);aspect-ratio:16/9}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb.v{aspect-ratio:9/16}
+.strip .thumb{border-radius:2px}
 .thumb-c{
   position:absolute;left:0;right:0;bottom:0;padding:.5rem .55rem .45rem;
   background:linear-gradient(to top,rgba(11,9,7,.94),rgba(11,9,7,0));
@@ -384,7 +385,7 @@ body.present{overflow:hidden}
 
     <div style="margin-top:clamp(1.4rem,3vw,2.2rem)" class="stagger">
 
-      <div class="era" style="margin-bottom:1.2rem">
+      <div class="era" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
           <div>
             <div class="era-y">2024 · Dance, No One's Watching · 110 days</div>
@@ -395,7 +396,7 @@ body.present{overflow:hidden}
           </div>
           <div class="label" style="text-align:right">27 uploads</div>
         </div>
-        <div class="rhythm" id="r24" style="--rh:28px"></div>
+        <div class="rhythm" id="r24" style="--rh:25px"></div>
         <div class="gapmark" style="margin-top:.7rem">↑ 22 July → 3 September · nothing published for six weeks</div>
       </div>
 
@@ -410,7 +411,7 @@ body.present{overflow:hidden}
           </div>
           <div class="label" style="text-align:right;color:var(--gold)">69 uploads</div>
         </div>
-        <div class="rhythm" id="r26" style="--rh:28px"></div>
+        <div class="rhythm" id="r26" style="--rh:25px"></div>
         <div class="label" style="margin-top:.7rem;color:var(--warm)">44 separate upload days. The channel was never dark for more than nine.</div>
       </div>
 
@@ -462,7 +463,7 @@ body.present{overflow:hidden}
       </div>
     </div>
 
-    <div class="stagger" id="waysin" style="display:grid;grid-template-columns:repeat(6,1fr);gap:.5rem;margin-top:1.3rem"></div>
+    <div class="stagger" id="waysin" class="strip" style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:1.1rem"></div>
 
     <!-- The structural proof, not a decorative aside. -->
     <div class="reveal" style="margin-top:1.2rem;border-top:2px solid var(--green);padding-top:.9rem;display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2.6rem);align-items:center">
@@ -484,7 +485,7 @@ body.present{overflow:hidden}
       Lots of different doors into one recognisable world.
     </p>
 
-    <div class="src reveal">
+    <div class="src reveal" style="margin-top:1.1rem">
       <b>Public YouTube API</b>, plus the album's structure as described in Partisan's own release-day
       announcement. All 69 uploads in the campaign window; thumbnails are the live YouTube images.
       Counts only — no view comparison between the two years.
@@ -1072,12 +1073,15 @@ var STOCKED = [
   ['asYBb11UesE','London block party']
 ];
 
-function thumbs(el, rows, showKind){
+/* bare = a filmstrip: no caption overlay, so the row reads as one
+   continuous band of the campaign's colour rather than twelve cards. */
+function thumbs(el, rows, showKind, bare){
   if(!el) return;
   el.innerHTML = rows.map(function(r){
-    return '<a class="thumb" href="https://www.youtube.com/watch?v=' + r[0] + '" target="_blank" rel="noopener">' +
+    return '<a class="thumb" title="' + r[1] + (r[2] ? ' \u00b7 ' + r[2] : '') + '"' +
+      ' href="https://www.youtube.com/watch?v=' + r[0] + '" target="_blank" rel="noopener">' +
       '<img loading="lazy" src="https://i.ytimg.com/vi/' + r[0] + '/mqdefault.jpg" alt="' + r[1] + '">' +
-      '<div class="thumb-c">' + r[1] + (showKind && r[2] ? '<br><span style="color:var(--gold)">' + r[2] + '</span>' : '') + '</div>' +
+      (bare ? '' : '<div class="thumb-c">' + r[1] + (showKind && r[2] ? '<br><span style="color:var(--gold)">' + r[2] + '</span>' : '') + '</div>') +
     '</a>';
   }).join('');
 }
@@ -1183,7 +1187,7 @@ document.addEventListener('DOMContentLoaded', function(){
   rhythm(document.getElementById('cover-rhythm'), DAYS26, '');
   rhythm(document.getElementById('r26'), DAYS26, '');
   rhythm(document.getElementById('r24'), DAYS24, 'r');
-  thumbs(document.getElementById('waysin'), WAYS, true);
+  thumbs(document.getElementById('waysin'), WAYS, false, true);
   thumbs(document.getElementById('stocked'), STOCKED, false);
   ladder();
   observeAll();
@@ -1200,11 +1204,11 @@ document.addEventListener('DOMContentLoaded', function(){
 @media(max-width:860px){
   .split5{grid-template-columns:1fr!important}
   .split5 > .bleed{height:44vh}
-  #waysin{grid-template-columns:repeat(3,1fr)!important}
+  #waysin{grid-template-columns:repeat(6,1fr)!important}
   #stocked{grid-template-columns:repeat(4,1fr)!important}
 }
 @media(max-width:560px){
-  #waysin{grid-template-columns:repeat(2,1fr)!important}
+  #waysin{grid-template-columns:repeat(4,1fr)!important}
   #stocked{grid-template-columns:repeat(3,1fr)!important}
 }
 </style>
