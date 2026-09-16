@@ -101,8 +101,20 @@ export type FanResponse = {
   };
   withheldReason: string | null;    // why the page shows nothing
   computedAt: string;
+  rulesVersion: number;             // see RULES_VERSION — cached reads from an
+                                    // older rule set are recomputed, not served
   quotaUnitsUsed: number;
 };
+
+/* Bump on ANY change to the lexicons, gates, tiers or copy.
+   The read is cached for 12 hours, so without this a rule change is
+   invisible on a live page for half a day — and worse, a stale object
+   looks exactly like a freshly computed one. That nearly sent a wrong
+   answer upstream: after the polarity denominator was fixed, both live
+   campaigns still returned the OLD counts and I read it as the fix not
+   working. The cache cannot know the rules moved unless the rules say so,
+   so correctness here is structural, not a thing to remember. */
+export const RULES_VERSION = 3;
 
 export type RawComment = { text: string; likes: number; replies: number; at: string; videoId: string };
 
@@ -374,6 +386,7 @@ export function buildFanResponse(
       samplingNote: 'relevance-ranked, capped at 100 per video — not a census',
     },
     confidence: 'low', withheldReason: null, computedAt: now.toISOString(),
+    rulesVersion: RULES_VERSION,
     quotaUnitsUsed: assets.length,
     gates: { volume: false, concentration: false, spread: false, freshness: false, positive: false },
     ...extra,

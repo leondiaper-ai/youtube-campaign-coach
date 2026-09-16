@@ -594,10 +594,15 @@ export async function GET(req: NextRequest) {
     if (state === 'CAMPAIGN_LIVE' || state === 'NEW_ACTIVITY') {
       try {
         const { readFanResponse, writeFanResponse } = await import('@/lib/kvCache');
-        const cached = await readFanResponse<{ computedAt?: string }>(who.slug);
+        const { RULES_VERSION } = await import('@/lib/intelligence/fanResponse');
+        const cached = await readFanResponse<{ computedAt?: string; rulesVersion?: number }>(who.slug);
         const ageMs = cached?.computedAt ? Date.now() - new Date(cached.computedAt).getTime() : Infinity;
+        /* A cached read computed under older rules is stale regardless of
+           its age — serving it would silently show a classification the
+           current code would not produce. */
+        const currentRules = cached?.rulesVersion === RULES_VERSION;
 
-        if (cached && ageMs < 12 * 60 * 60 * 1000) {
+        if (cached && currentRules && ageMs < 12 * 60 * 60 * 1000) {
           fanResponse = cached;
         } else {
           const { assetsToScan, fetchCommentsForAssets, buildFanResponse } =
