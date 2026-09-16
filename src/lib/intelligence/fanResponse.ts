@@ -337,8 +337,8 @@ const GATE = {
   MIN_THEME_RATIO: 2,         // ... and this many times the runner-up
   MIN_ASSETS: 2,              // spread, so one viral post cannot carry it
   MAX_AGE_DAYS: 14,           // freshness of the newest sampled asset
-  MIN_POSITIVE_SHARE: 0.70,   // positive share of polarity-classified comments
-  MAX_NEGATIVE_SHARE: 0.10,   // hard ceiling — above this we never display
+  MIN_POSITIVE_SHARE: 0.85,   // positive share of POLARISED comments (pos+neg), not of all retrieved
+  MAX_NEGATIVE_SHARE: 0.10,   // hard ceiling on the same polarised base — above this we never display
 };
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -392,13 +392,33 @@ export function buildFanResponse(
     else if (p === 'negative') negative++;
     else neutral++;
   }
-  const polarityTotal = positive + negative + neutral;
-  const posShare = polarityTotal ? positive / polarityTotal : 0;
-  const negShare = polarityTotal ? negative / polarityTotal : 0;
+  /* DENOMINATOR. 'neutral' here does not mean "felt neutrally about it".
+     It means "this rule set found no polarity token" — which covers a
+     comment in Portuguese, a lone 🍒, "out now", and a genuinely lukewarm
+     reaction, all identically. Dividing by every retrieved comment
+     therefore scores my own vocabulary gaps as evidence against the
+     artist. The first live run made that concrete: Kings of Leon returned
+     134 positive against 2 negative and still failed the gate, because 60
+     unrecognised comments dragged the share to 68%.
+
+     So the share is taken over comments that actually expressed a
+     polarity, which is what this was always documented to do. Two things
+     stop that from being a quiet loosening:
+       - the threshold rises to 0.85, because the denominator is stricter;
+       - negatives use the SAME denominator, so a handful of criticisms
+         cannot be diluted by a large unreadable tail;
+       - and an absolute floor (below) means a near-silent audience with
+         three positives and no negatives can never reach 100% and show. */
+  const polarised = positive + negative;
+  const posShare = polarised ? positive / polarised : 0;
+  const negShare = polarised ? negative / polarised : 0;
+
+  /* Guards against a tiny polarised base speaking for a large sample. */
+  const positiveFloor = positive >= 25 && positive / comments.length >= 0.25;
 
   const tone: FanTone =
     negShare > 0.25 ? 'negative'
-    : posShare >= 0.85 ? 'overwhelmingly_positive'
+    : posShare >= 0.95 ? 'overwhelmingly_positive'
     : posShare >= GATE.MIN_POSITIVE_SHARE ? 'mostly_positive'
     : 'mixed';
 
@@ -431,16 +451,26 @@ export function buildFanResponse(
     concentration: !!top && themeShare >= GATE.MIN_THEME_SHARE && themeRatio >= GATE.MIN_THEME_RATIO,
     spread:        assetsSampled.filter(a => a.retrieved > 0).length >= GATE.MIN_ASSETS,
     freshness:     ageDays <= GATE.MAX_AGE_DAYS,
-    positive:      posShare >= GATE.MIN_POSITIVE_SHARE && negShare <= GATE.MAX_NEGATIVE_SHARE,
+    positive:      posShare >= GATE.MIN_POSITIVE_SHARE
+                   && negShare <= GATE.MAX_NEGATIVE_SHARE
+                   && positiveFloor,
   };
 
-  /* ── candidate quotes: on-theme, safe, and actually quotable ── */
-  const candidateQuotes: FanQuote[] = positives
+  /* ── candidate quotes ──
+     On-theme first when a theme is clear, but NEVER restricted to it.
+     Quote selection must not be able to decide whether Fan Response
+     appears, so this list is allowed to be empty and is allowed to be
+     off-theme; the display decision upstream does not consult it. */
+  const safePositives: FanQuote[] = positives
     .filter(c => isSafeToFeature(c.text))
     .map(c => ({ text: c.text.trim(), likes: c.likes, videoId: c.videoId, theme: themeOf(c.text) }))
-    .filter(q => top && q.theme === top.theme)
-    .sort((a, b) => b.likes - a.likes)
-    .slice(0, 5);
+    .sort((a, b) => b.likes - a.likes);
+
+  const candidateQuotes: FanQuote[] = (
+    top ? [...safePositives.filter(q => q.theme === top.theme),
+           ...safePositives.filter(q => q.theme !== top.theme)]
+        : safePositives
+  ).slice(0, 5);
 
   const evidence = {
     assetsSampled,
@@ -450,22 +480,44 @@ export function buildFanResponse(
     samplingNote: 'relevance-ranked, capped at 100 per video — not a census',
   };
 
-  const allPassed = Object.values(gates).every(Boolean);
+  /* ── TWO SEPARATE QUESTIONS ──
+     "Can we say the vibe is positive?" and "Can we say what fans are
+     positive about?" are different questions with different evidence
+     requirements, and conflating them was the design error here. The
+     first is answered by polarity across a decent sample; the second
+     needs one theme to actually dominate. Only the FIRST decides whether
+     the block appears. The second decides how specific the copy gets.
+
+     So `concentration` stays in `gates` — Watcher and the Coach still
+     want to know whether the theme was legible — but it is deliberately
+     NOT part of `canDisplay`. A campaign whose fans are loudly excited
+     about three different things is still a campaign whose fans are
+     loudly excited, and the page should be able to say so. */
+  const canDisplay = gates.volume && gates.spread && gates.freshness && gates.positive;
 
   const confidence: 'high' | 'medium' | 'low' =
-    !allPassed ? 'low'
-    : comments.length >= 120 && themeShare >= 0.45 ? 'high'
+    !canDisplay ? 'low'
+    : comments.length >= 120 && gates.concentration ? 'high'
     : 'medium';
 
   /* ── withhold ──
-     Order matters only for the message; any single failure withholds. */
-  if (!allPassed) {
+     Any single failure withholds; the order here only decides which
+     message is reported. It runs cheapest-evidence-first — volume,
+     spread, freshness — before anything that characterises the AUDIENCE.
+     That ordering is not cosmetic: nothing reads this on the page, but
+     the Coach and Watcher do, and a thin sample that was reported as
+     "response is mixed" would tell them the audience was lukewarm when
+     the truth is we barely looked. Describe the sample before you
+     describe the people in it. */
+  if (!canDisplay) {
     const why =
-      !gates.positive      ? (tone === 'negative' ? 'response is not predominantly positive' : 'response is mixed')
-      : !gates.volume      ? `only ${comments.length} comments retrieved (need ${GATE.MIN_RETRIEVED})`
-      : !gates.concentration ? 'no single positive theme is dominant enough'
-      : !gates.spread      ? 'comments came from too few assets'
-      : 'newest sampled asset is stale';
+      !gates.volume      ? `only ${comments.length} comments retrieved (need ${GATE.MIN_RETRIEVED})`
+      : !gates.spread    ? 'comments came from too few assets'
+      : !gates.freshness ? 'newest sampled asset is stale'
+      : tone === 'negative' ? 'response is not predominantly positive'
+      : positive < 25 || positive / comments.length < 0.25
+        ? 'too few comments expressed a clear positive reaction'
+        : 'response is mixed';
     return base({
       tone, themes, evidence, gates, confidence,
       dominantTheme: top?.theme ?? null,
@@ -475,27 +527,78 @@ export function buildFanResponse(
     });
   }
 
-  /* ── display ── */
-  const theme = top!.theme;
-  const copy = THEME_COPY[theme as FanTheme];
+  /* ══ display — three tiers of specificity ══
+     The block is already going to appear. All that is left is deciding
+     how much we are entitled to claim about WHY fans are excited. Each
+     tier says exactly as much as the evidence supports and no more. */
+
+  const theme = gates.concentration ? top!.theme : null;
+  const copy = theme ? THEME_COPY[theme] : null;
+
+  /* TIER 3 — a fan's own words. Strongest when it happens, but strictly
+     optional: it never decides whether the block appears, only how the
+     headline reads. A pull-quote has to work typographically as well as
+     evidentially, so a well-liked 49-character sentence stays in the
+     object and out of the headline slot. */
   const quote = candidateQuotes[0] ?? null;
 
-  /* The quote replaces the headline when one qualifies — a fan's own words
-     outperform ours. Otherwise the themed headline carries it alone, which
-     is the whole point of "quote optional, useful read mandatory". */
-  const headline = quote ? `“${quote.text}”` : copy.headline;
+  /* Short and well-liked is not enough. "can't wait for this" is both, and
+     putting it in the headline slot says nothing a reader could not have
+     guessed. What makes a quote worth elevating is that the AUDIENCE
+     elevated it — a comment sitting far above its neighbours is the crowd
+     agreeing on how they feel, which is the thing being reported. A
+     comment merely at the top of a flat pile is one person talking.
+     When nothing stands out, the broad or themed copy is the honest
+     output and the quote stays in the object. */
+  const likeMedian = (() => {
+    const xs = safePositives.map(q => q.likes).sort((a, b) => a - b);
+    return xs.length ? xs[Math.floor(xs.length / 2)] : 0;
+  })();
+  const quotable =
+    quote && quote.text.length <= 28 && quote.likes >= 10
+      && quote.likes >= Math.max(3 * likeMedian, 10)
+      ? quote : null;
+
+  /* TIER 2 — a clear theme, named. When the winning theme is the song and
+     the asset that carried it is titled in the standard "Artist - Title"
+     form, the track can be named outright; a title that does not match
+     that shape is left alone rather than guessed at. */
+  const songTitle = (() => {
+    if (theme !== 'song') return null;
+    const byTheme = new Map<string, number>();
+    for (const c of positives) if (themeOf(c.text) === 'song')
+      byTheme.set(c.videoId, (byTheme.get(c.videoId) ?? 0) + 1);
+    const leadId = Array.from(byTheme.entries()).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const raw = assets.find(a => a.videoId === leadId)?.title ?? '';
+    const m = raw.match(/^[^-–—]{2,40}\s[-–—]\s([^-–—(\[|]{2,40})$/);
+    return m ? m[1].trim() : null;
+  })();
+
+  /* TIER 1 — positivity is clear, the reason is not. Say that, plainly,
+     rather than picking whichever theme happened to edge ahead. Claiming
+     a driver we cannot evidence is the same failure as claiming a
+     sentiment we cannot evidence, just harder to spot. */
+  const BROAD = {
+    headline: 'STRONG FAN RESPONSE',
+    line: 'Plenty of excitement around the campaign so far.',
+  };
+
+  const headline = quotable ? `“${quotable.text}”` : (copy?.headline ?? BROAD.headline);
+  const line =
+    songTitle ? `Fans are responding strongly to ${songTitle}.`
+    : copy?.line ?? BROAD.line;
 
   /* Comment count shown is the PUBLIC count on the asset the quote came
      from — exact and checkable — not the size of our sample, and not a
      campaign total, which would be a different number wearing the same
      label. */
-  const quoteAsset = quote ? assets.find(a => a.videoId === quote.videoId) : null;
+  const quoteAsset = quotable ? assets.find(a => a.videoId === quotable.videoId) : null;
   const commentCount = quoteAsset?.comments ?? null;
 
   return base({
     display: true,
-    headline, line: copy.line, commentCount,
-    quote, tone, dominantTheme: theme, themes,
+    headline, line, commentCount,
+    quote: quotable, tone, dominantTheme: top?.theme ?? null, themes,
     recurringPhrases: recurringPhrases(comments),
     candidateQuotes, evidence, gates, confidence,
     withheldReason: null,

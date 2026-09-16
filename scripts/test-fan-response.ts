@@ -43,7 +43,17 @@ console.log('\nDISPLAY GATES');
 { // 1 — genuine positive
   const fr = buildFanResponse(rows(80, POS, 'a').concat(rows(20, POS, 'b')), assets(['a','b']), NOW);
   check('1 POSITIVE displays', fr.display === true, JSON.stringify(fr.withheldReason));
-  check('1 POSITIVE quote is safe', !!fr.quote && isSafeToFeature(fr.quote.text));
+  // A quote is optional by design, so this asserts the conditional, not its presence.
+  check('1 POSITIVE quote, if any, is safe', !fr.quote || isSafeToFeature(fr.quote.text));
+  check('1 POSITIVE has a headline either way', !!fr.headline);
+}
+{ // 1b — a comment the audience pushed far above the rest DOES lead
+  const base = rows(60, POS, 'a').concat(rows(59, POS, 'b'));
+  base.forEach(c => { c.likes = 2; });
+  const fr = buildFanResponse(
+    base.concat([{ text: 'WE SO BACK', likes: 184, replies: 0, at: FRESH, videoId: 'b' }]),
+    assets(['a','b']), NOW);
+  check('1b standout quote becomes the headline', fr.headline === '“WE SO BACK”', String(fr.headline));
 }
 { // 2 — THE CRITICAL ONE: negative fixture must render nothing
   const fr = buildFanResponse(rows(100, NEG, 'a').concat(rows(20, NEG, 'b')), assets(['a','b']), NOW);
@@ -72,6 +82,43 @@ console.log('\nDISPLAY GATES');
 { // 6 — one loud video is not an audience
   const fr = buildFanResponse(rows(120, POS, 'a'), assets(['a']), NOW);
   check('6 ONE ASSET withholds', fr.display === false, String(fr.withheldReason));
+}
+
+/* The positive share is taken over POLARISED comments, which is a more
+   permissive denominator than "all retrieved". These two cases exist to
+   prove that change did not quietly become a way to display anything. */
+const MUTE = ['🍒', 'out now', 'obrigado', '2026', 'link?', 'ok', '...', 'who else here'];
+{ // 7 — a handful of positives inside a large unreadable sample: 100% of
+  //     polarised, and still must not display.
+  const fr = buildFanResponse(
+    rows(6, POS, 'a').concat(rows(114, MUTE, 'b')), assets(['a','b']), NOW);
+  check('7 SPARSE withholds despite 100% of polarised being positive', fr.display === false);
+  check('7 SPARSE blames the sample, not the audience',
+    /too few comments expressed/.test(fr.withheldReason ?? ''), String(fr.withheldReason));
+}
+{ // 8 — negatives must not be dilutable by an unreadable tail.
+  const fr = buildFanResponse(
+    rows(40, POS, 'a').concat(rows(20, NEG, 'a'), rows(80, MUTE, 'b')), assets(['a','b']), NOW);
+  check('8 DILUTED negatives still withhold', fr.display === false, String(fr.withheldReason));
+}
+
+/* Positivity decides WHETHER the block shows. Theme clarity decides only
+   HOW SPECIFIC the copy is. These must not be re-entangled. */
+console.log('\nCOPY TIERS');
+{ // 9 — split themes: displays, but must not claim a driver
+  const SPLIT = ["can't wait for this", 'so excited', 'welcome back boys', 'missed you so much',
+                 'what a tune', 'this song is perfect', 'please tour uk', 'the video looks amazing'];
+  const fr = buildFanResponse(rows(70, SPLIT, 'a').concat(rows(50, SPLIT, 'b')), assets(['a','b']), NOW);
+  check('9 SPLIT displays anyway', fr.display === true, String(fr.withheldReason));
+  check('9 SPLIT uses broad copy', fr.headline === 'STRONG FAN RESPONSE', String(fr.headline));
+  check('9 SPLIT does not name a driver', /excitement around the campaign/.test(fr.line ?? ''));
+  check('9 SPLIT still records the theme spread internally', fr.themes.length > 1);
+}
+{ // 10 — a long well-liked comment stays out of the headline slot
+  const LONG = ['what an absolutely beautiful song that I will never stop playing'];
+  const fr = buildFanResponse(rows(60, LONG, 'a').concat(rows(60, LONG, 'b')), assets(['a','b']), NOW);
+  check('10 displays', fr.display === true, String(fr.withheldReason));
+  check('10 long comment is not used as a headline', !(fr.headline ?? '').includes('never stop'));
 }
 
 console.log('\nSAFETY FILTER (all drawn from comments real scans returned)');
