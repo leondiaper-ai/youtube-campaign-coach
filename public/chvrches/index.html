@@ -479,6 +479,16 @@ body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans
 .ls .w{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);
   margin-top:.2rem;opacity:.8}
 
+/* Fan Response sits below the strategy read and is deliberately quieter
+   than it: a hairline rather than the signal border, smaller type. The
+   read is our analysis and carries weight; this is audience colour. */
+.fanresp{margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--hair,rgba(255,255,255,.12));max-width:52ch}
+.fanresp .fr-k{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.45rem}
+.fanresp .fr-h{font-family:'Space Grotesk',sans-serif;font-weight:600;
+  font-size:clamp(.92rem,1.5vw,1.15rem);line-height:1.2;letter-spacing:-.005em;color:var(--signal)}
+.fanresp .fr-l{font-size:.74rem;color:var(--smoke);margin-top:.35rem;line-height:1.55}
+
 .readline{margin-top:1.4rem;padding-left:1rem;border-left:2px solid var(--signal)}
 /* The before, sitting immediately above the after. */
 .readline .rk{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
@@ -1545,6 +1555,27 @@ function heroAsset(a){
    The recommended window is drawn in cyan and says so. A recommendation
    set in the same type as a confirmed date is how a page ends up telling
    a label the artist team agreed to something they have never seen.   */
+/* FAN RESPONSE — the audience talking back, or nothing at all.
+
+   Identical to the shared implementation in /live/campaign-home.js. It is
+   duplicated because this page predates that file and carries its own
+   renderer; the two must be changed together. The guard below is the only
+   thing standing between a withheld read and a client-facing page, so it
+   checks the payload rather than trusting it: no display flag, no copy,
+   no block. Campaign Home never prints a mixed or negative state — that
+   is omission, not reinterpretation, and the true classification stays in
+   the payload for Watcher and the Coach to read. */
+function buildFanResponse(fr){
+  if (!fr || !fr.display || !fr.headline || !fr.line) return '';
+  const count = typeof fr.commentCount === 'number' && fr.commentCount > 0
+    ? ` · ${fr.commentCount.toLocaleString()} comments` : '';
+  return `<div class="fanresp reveal">
+    <div class="fr-k">Fan response${count}</div>
+    <div class="fr-h">${esc(fr.headline)}</div>
+    <div class="fr-l">${esc(fr.line)}</div>
+  </div>`;
+}
+
 function buildNext(tl){
   if(!tl || !tl.moments) return '';
   const rows = [];
@@ -1753,6 +1784,8 @@ function buildLiveCover(d){
           <div class="rh">${esc(d.read.headline)}</div>
           <div class="rl">${esc(d.read.line)}</div>
         </div>` : ''}
+
+        ${buildFanResponse(d.fanResponse)}
 
         ${buildNext(tl)}
       </div>
