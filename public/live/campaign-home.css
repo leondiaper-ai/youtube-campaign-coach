@@ -204,6 +204,19 @@
   font-size:clamp(1.1rem,2.2vw,1.75rem);line-height:1.12;letter-spacing:-.01em}
 .readline .rl{font-size:.82rem;color:var(--smoke);margin-top:.5rem;max-width:52ch;line-height:1.6}
 
+/* ── FAN RESPONSE ────────────────────────────────────────────────────
+   Deliberately quieter than .readline directly above it: no accent rule,
+   a hairline instead of a signal-coloured border, and a headline a size
+   down. The campaign read is the argument; this is the audience noise
+   underneath it, and if it ever competes for attention it is wrong.
+   Three lines, no chart, no percentage, about two seconds to read. */
+.fanresp{margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--hair);max-width:52ch}
+.fanresp .fr-k{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--smoke);margin-bottom:.45rem}
+.fanresp .fr-h{font-family:'Space Grotesk',sans-serif;font-weight:600;
+  font-size:clamp(.92rem,1.5vw,1.15rem);line-height:1.2;letter-spacing:-.005em;color:var(--signal-2,var(--signal))}
+.fanresp .fr-l{font-size:.74rem;color:var(--smoke);margin-top:.35rem;line-height:1.55}
+
 .cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
 
 /* ── IDEAS ──────────────────────────────────────────────────────────

@@ -229,6 +229,32 @@ function assetStrip(rest, total, shownAbove){
   </div>`;
 }
 
+/* ── FAN RESPONSE ─────────────────────────────────────────────────────
+   Three lines under the campaign read: a label, the fans' own words (or a
+   themed headline when no comment safely qualifies), and one short
+   interpretation. Subordinate to the read above it by design — this is a
+   pulse of audience colour, not a second argument.
+
+   It renders ONLY when the server says display:true. Every judgement about
+   whether the evidence is strong enough, positive enough, fresh enough and
+   safe enough has already happened server-side; this function's entire
+   contract is "print it or print nothing".
+
+   There is deliberately no negative, neutral, warning or empty state. When
+   the evidence does not support an encouraging read the block is absent —
+   omission, not reinterpretation. The real classification stays in the
+   payload for Watcher and the Coach. */
+function buildFanResponse(fr){
+  if (!fr || !fr.display || !fr.headline || !fr.line) return '';
+  const count = typeof fr.commentCount === 'number' && fr.commentCount > 0
+    ? ` · ${fr.commentCount.toLocaleString()} comments` : '';
+  return `<div class="fanresp reveal">
+    <div class="fr-k">Fan response${count}</div>
+    <div class="fr-h">${esc(fr.headline)}</div>
+    <div class="fr-l">${esc(fr.line)}</div>
+  </div>`;
+}
+
 function buildLiveCover(d){
   const live = d.state === 'CAMPAIGN_LIVE';
   const m = d.metrics || {};
@@ -330,6 +356,8 @@ function buildLiveCover(d){
           <div class="rh">${esc(d.read.headline)}</div>
           <div class="rl">${esc(d.read.line)}</div>
         </div>` : ''}
+
+        ${buildFanResponse(d.fanResponse)}
 
         ${buildNext(tl)}
       </div>

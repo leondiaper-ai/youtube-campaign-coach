@@ -206,6 +206,30 @@ export async function readSyncMeta(): Promise<SyncMeta | null> {
   return (await store.get('sync:meta')) as SyncMeta | null;
 }
 
+// ── Fan Response ──────────────────────────────────────────────────────────
+
+/**
+ * One derived read per artist, overwritten each run. A few KB.
+ *
+ * Deliberately NOT a comment archive. We keep the conclusion, the theme
+ * counts and the handful of quotes actually under consideration — enough
+ * to defend anything the page shows — and discard the rest after
+ * classification. Retaining tens of thousands of identifiable strangers'
+ * comments indefinitely would be a storage problem and a data-minimisation
+ * one, and we only ever needed the finding.
+ */
+export async function writeFanResponse(slug: string, fr: unknown) {
+  const store = await kv();
+  if (!store) return;
+  await store.set(`fanresponse:${slug}`, fr);
+}
+
+export async function readFanResponse<T = unknown>(slug: string): Promise<T | null> {
+  const store = await kv();
+  if (!store) return null;
+  return (await store.get(`fanresponse:${slug}`)) as T | null;
+}
+
 // ── Cooldown check for manual refresh ─────────────────────────────────────
 
 const REFRESH_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes

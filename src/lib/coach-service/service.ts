@@ -370,7 +370,13 @@ Do not stop at the headline ratio. A number against baseline is where this start
 Compare only against this artist's own same-age baseline — never another artist's lifetime totals, and never divide views by age.`,
 
   AUDIENCE_REACTION: n =>
-    `Assess the audience response to ${n}'s recent releases using the public engagement signals available: comment and like counts relative to this artist's own recent norm. State plainly that you cannot see comment TEXT, sentiment, retention, or who is watching — those are not in the public Data API. Do not speculate about sentiment as though you had read it.`,
+    `Assess the audience response to ${n}'s recent releases using the public engagement signals available: comment and like counts relative to this artist's own recent norm.
+
+WHAT YOU MAY SAY ABOUT COMMENT CONTENT. Where a Fan Response read exists for this artist, comment TEXT has been sampled and classified, and you may use it: the dominant theme fans are responding to, the broad tone, recurring fan phrases, and representative quotes. Attribute it to what fans are saying, and treat the theme as the finding — "fans are responding to the return rather than to the music yet" is the useful read; "sentiment is positive" is not.
+
+HOW TO HANDLE ITS LIMITS. The sample is relevance-ranked and capped at 100 comments per video, which over-weights popular comments, and carries no author identity, so repeat posters cannot be detected. Therefore: never state a percentage, never describe the sample as representative of the whole fanbase, and always give the raw count with its denominator if you give a number at all. Where no Fan Response read exists, say plainly that comment text has not been sampled for this artist rather than speculating.
+
+STILL UNAVAILABLE IN ALL CASES: retention, traffic sources, unique viewers, demographics, and anything else that lives only in YouTube Studio. Do not speculate about those as though you had read them.`,
 
   COMPARE_PREVIOUS_CAMPAIGN: n =>
     `Compare ${n}'s current campaign with their own previous campaigns using reconstruct_catalogue, get_release_moments and run_gap_study. Do NOT answer from general knowledge of the artist.

@@ -578,8 +578,52 @@ export async function GET(req: NextRequest) {
        and those are two statements sitting next to each other. */
     const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays, daysSinceUpload, stages, firstNewUploadAt);
 
+    /* ── Fan response ──────────────────────────────────────────────────
+       What the audience is positively responding to, in about eight words,
+       or nothing at all. Rides this refresh rather than becoming its own
+       system: the campaign asset list assembled above is exactly the input
+       it needs.
+
+       Scoped hard for quota: live campaigns only, newest four assets, and
+       a 12-hour cache. That is ~4 units per live campaign per half-day
+       against the ~1,110 the roster sync already spends.
+
+       Never allowed to throw. A fan-response failure must not take down a
+       campaign page whose real job is the campaign. */
+    let fanResponse: unknown = null;
+    if (state === 'CAMPAIGN_LIVE' || state === 'NEW_ACTIVITY') {
+      try {
+        const { readFanResponse, writeFanResponse } = await import('@/lib/kvCache');
+        const cached = await readFanResponse<{ computedAt?: string }>(who.slug);
+        const ageMs = cached?.computedAt ? Date.now() - new Date(cached.computedAt).getTime() : Infinity;
+
+        if (cached && ageMs < 12 * 60 * 60 * 1000) {
+          fanResponse = cached;
+        } else {
+          const { assetsToScan, fetchCommentsForAssets, buildFanResponse } =
+            await import('@/lib/intelligence/fanResponse');
+          const campaignAssets = [...heroes, ...supporting]
+            .map(a => ({ videoId: a.videoId, title: a.title, publishedAt: a.publishedAt, comments: null as number | null }));
+          const scan = assetsToScan(campaignAssets, 4);
+          if (scan.length) {
+            /* Public comment totals for the scanned assets, so the page can
+               print an exact, checkable number rather than our sample size. */
+            for (const a of scan) {
+              const v = (snap as any)?.recentUploads?.find((u: any) => u.id === a.videoId);
+              a.comments = typeof v?.commentCount === 'number' ? v.commentCount : null;
+            }
+            const { comments } = await fetchCommentsForAssets(scan.map(a => a.videoId));
+            const fr = buildFanResponse(comments, scan);
+            await writeFanResponse(who.slug, fr);
+            fanResponse = fr;
+          }
+        }
+      } catch { /* the campaign page does not fail over audience colour */ }
+    }
+
     return NextResponse.json({
       state,
+      fanResponse,
       artist: { slug: who.slug, name: who.name, handle: who.artist?.channelHandle ?? null },
       campaign,
       deepDive: {
