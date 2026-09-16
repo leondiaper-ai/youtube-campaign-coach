@@ -134,7 +134,7 @@ export type FanResponse = {
    campaigns still returned the OLD counts and I read it as the fix not
    working. The cache cannot know the rules moved unless the rules say so,
    so correctness here is structural, not a thing to remember. */
-export const RULES_VERSION = 4;
+export const RULES_VERSION = 5;
 
 export type RawComment = { text: string; likes: number; replies: number; at: string; videoId: string };
 
@@ -518,11 +518,21 @@ export function buildFanResponse(
   for (const c of positives)
     for (const g of Array.from(new Set(NG(c.text)))) corpus.set(g, (corpus.get(g) ?? 0) + 1);
 
+  /* Echo is the strength of a comment's MOST-shared phrase, not the
+     fraction of its phrases that are shared. The difference is not
+     academic: measured as a fraction, "WE SO BACK" scored 0.33 — it only
+     contains three n-grams, so the arithmetic punished it for being
+     short, and the live CHVRCHES page duly chose a 23-like variant over
+     the 184-like comment that coined the phrase. A rule that penalises
+     brevity is precisely backwards for something being used as a
+     pull-quote. What matters is whether the thing this fan said is a
+     thing many fans said, and one strong shared phrase settles that. */
+  const ECHO_FLOOR = Math.max(3, positives.length * 0.05);
   const echoOf = (text: string) => {
     const grams = Array.from(new Set(NG(text)));
     if (!grams.length) return 0;
-    const shared = grams.filter(g => (corpus.get(g) ?? 0) >= 2).length;
-    return Math.min(1, shared / Math.max(3, grams.length * 0.5));
+    const best = Math.max(0, ...grams.map(g => corpus.get(g) ?? 0));
+    return Math.min(1, best / ECHO_FLOOR);
   };
 
   const maxLikes = Math.max(1, ...positives.map(c => c.likes));
