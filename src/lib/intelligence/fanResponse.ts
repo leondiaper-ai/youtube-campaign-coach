@@ -4,14 +4,21 @@
  * ─────────────────────────────────────────────────────────────────────────
  * WHAT THIS IS FOR
  *
- * Campaign Home already says what the campaign DID. This says what the
- * audience is saying back — in about eight words, or not at all.
+ * Campaign Home already says what the campaign DID. This shows one thing a
+ * fan actually said back — or nothing.
  *
- * The question it answers is deliberately not "is sentiment positive". That
- * is a number nobody acts on. It answers "what are fans responding TO",
- * because the theme is the part a manager can use: a return landing is a
- * different campaign from a song connecting, and both are different from
- * an audience that has come for the visual.
+ * It used to print a conclusion in our own voice ("STRONG FAN RESPONSE",
+ * "THE SONG IS CONNECTING"). That was the wrong product. A reader does not
+ * need to be told the response is positive; they need to see it. "WE SO
+ * BACK" with 184 public likes under it is the same finding, delivered as
+ * evidence rather than assertion, in a tenth of the space.
+ *
+ * So the classification work below has been demoted, deliberately. It no
+ * longer produces copy. Its entire job is now to QUALIFY and to SELECT:
+ * to confirm the overall response really is positive before anything is
+ * shown, to keep unsafe comments off a client-facing page, and to choose
+ * which real comment best represents the rest. All the boring machinery
+ * still runs; none of its prose reaches the reader.
  *
  * ─────────────────────────────────────────────────────────────────────────
  * THE ONE RULE THAT SHAPES EVERYTHING
@@ -67,16 +74,29 @@ export type FanTheme =
 export type FanTone =
   | 'overwhelmingly_positive' | 'mostly_positive' | 'mixed' | 'negative';
 
-export type FanQuote = { text: string; likes: number; videoId: string; theme: FanTheme | null };
+export type FanQuote = {
+  text: string;
+  likes: number;
+  videoId: string;
+  theme: FanTheme | null;
+  /** Observed format of the asset it came from ("trailer", "official video").
+      Taken from the same formatLabel the campaign cards use, lower-cased —
+      never a description of the asset invented here. */
+  source: string | null;
+  /** Why this comment won, kept so a selection can be defended in a room. */
+  why: { engagement: number; echo: number; themeShare: number; recency: number; score: number };
+};
 
 export type FanResponse = {
-  /* ── the only four fields Campaign Home reads ── */
+  /* ── what Campaign Home renders: a real comment, or nothing ──
+     There is deliberately no headline and no summary line. The page used
+     to print "STRONG FAN RESPONSE / Plenty of excitement around the
+     campaign so far", which is us telling the reader a conclusion in our
+     own voice. A fan saying "WE SO BACK" with 184 likes behind it is the
+     evidence for that conclusion, and it is shorter, truer and better
+     reading. If no real comment qualifies, the page shows nothing —
+     generic copy is not an acceptable substitute for evidence. */
   display: boolean;
-  headline: string | null;          // "WE SO BACK"  or  "THE RETURN IS LANDING"
-  line: string | null;              // one sentence, <= 14 words
-  commentCount: number | null;      // public count on the asset the quote came from
-
-  /* ── everything below is stored and never rendered ── */
   quote: FanQuote | null;
   tone: FanTone;
   dominantTheme: FanTheme | null;
@@ -114,7 +134,7 @@ export type FanResponse = {
    campaigns still returned the OLD counts and I read it as the fix not
    working. The cache cannot know the rules moved unless the rules say so,
    so correctness here is structural, not a thing to remember. */
-export const RULES_VERSION = 3;
+export const RULES_VERSION = 4;
 
 export type RawComment = { text: string; likes: number; replies: number; at: string; videoId: string };
 
@@ -376,8 +396,7 @@ export function buildFanResponse(
   }));
 
   const base = (extra: Partial<FanResponse>): FanResponse => ({
-    display: false, headline: null, line: null, commentCount: null,
-    quote: null, tone: 'mixed', dominantTheme: null, themes: [],
+    display: false, quote: null, tone: 'mixed', dominantTheme: null, themes: [],
     recurringPhrases: [], candidateQuotes: [],
     evidence: {
       assetsSampled,
@@ -469,21 +488,81 @@ export function buildFanResponse(
                    && positiveFloor,
   };
 
-  /* ── candidate quotes ──
-     On-theme first when a theme is clear, but NEVER restricted to it.
-     Quote selection must not be able to decide whether Fan Response
-     appears, so this list is allowed to be empty and is allowed to be
-     off-theme; the display decision upstream does not consult it. */
-  const safePositives: FanQuote[] = positives
-    .filter(c => isSafeToFeature(c.text))
-    .map(c => ({ text: c.text.trim(), likes: c.likes, videoId: c.videoId, theme: themeOf(c.text) }))
-    .sort((a, b) => b.likes - a.likes);
+  /* ══ SELECTION — which real comment, if any, earns the page ══
 
-  const candidateQuotes: FanQuote[] = (
-    top ? [...safePositives.filter(q => q.theme === top.theme),
-           ...safePositives.filter(q => q.theme !== top.theme)]
-        : safePositives
-  ).slice(0, 5);
+     The brief here is precise: do not simply take the highest-liked
+     comment if it is an outlier, but do prefer it when it also represents
+     the wider response, because that is stronger evidence. Those two
+     instructions are only in tension if "popular" is the sole input, so
+     popularity is scored alongside how much of the rest of the audience
+     said the same thing.
+
+     ECHO is what does the real work. A comment that reuses language many
+     other fans independently reached for is representative by definition —
+     no theme model required. It is also what separates "WE SO BACK" (184
+     likes AND the phrase five other people used) from a single funny
+     comment that happened to collect likes. */
+
+  const NG = (t: string) => {
+    const w = t.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+    const out: string[] = [];
+    for (let n = 2; n <= 3; n++)
+      for (let i = 0; i + n <= w.length; i++) out.push(w.slice(i, i + n).join(' '));
+    return out;
+  };
+
+  /* How many DIFFERENT positive comments used each phrase. Counted per
+     comment, not per occurrence, so one person repeating themselves does
+     not manufacture consensus. */
+  const corpus = new Map<string, number>();
+  for (const c of positives)
+    for (const g of Array.from(new Set(NG(c.text)))) corpus.set(g, (corpus.get(g) ?? 0) + 1);
+
+  const echoOf = (text: string) => {
+    const grams = Array.from(new Set(NG(text)));
+    if (!grams.length) return 0;
+    const shared = grams.filter(g => (corpus.get(g) ?? 0) >= 2).length;
+    return Math.min(1, shared / Math.max(3, grams.length * 0.5));
+  };
+
+  const maxLikes = Math.max(1, ...positives.map(c => c.likes));
+  const newestAt = Math.max(...comments.map(c => new Date(c.at).getTime() || 0));
+
+  const score = (c: RawComment) => {
+    const theme = themeOf(c.text);
+    const engagement = Math.log1p(c.likes) / Math.log1p(maxLikes);
+    const echo = echoOf(c.text);
+    const themeShare = theme && classified ? (counts.get(theme) ?? 0) / classified : 0;
+    const ageDays = (newestAt - (new Date(c.at).getTime() || newestAt)) / 86_400_000;
+    const recency = Math.max(0, 1 - ageDays / 30);
+    return {
+      engagement, echo, themeShare, recency,
+      score: 0.45 * engagement + 0.30 * echo + 0.15 * themeShare + 0.10 * recency,
+    };
+  };
+
+  const toQuote = (c: RawComment): FanQuote => ({
+    text: c.text.trim(), likes: c.likes, videoId: c.videoId, theme: themeOf(c.text),
+    source: (assets.find(a => a.videoId === c.videoId) as { formatLabel?: string } | undefined)
+      ?.formatLabel?.toLowerCase() ?? null,
+    why: score(c),
+  });
+
+  /* Eligibility. Every condition here is a reason a comment could embarrass
+     the label if printed, not a reason it is uninteresting. */
+  const eligible = positives.filter(c => {
+    if (!isSafeToFeature(c.text)) return false;
+    if (c.text.trim().length > 48) return false;   // a pull-quote, not a paragraph
+    if (c.likes < 10) return false;                // the public has to have agreed
+    const w = score(c);
+    /* Must be representative by SOME route: shared language, or a theme a
+       real share of the positive response is also talking about. A comment
+       that is merely popular and singular is exactly the outlier case. */
+    return w.echo > 0 || w.themeShare >= 0.15;
+  });
+
+  const ranked = eligible.map(toQuote).sort((a, b) => b.why.score - a.why.score);
+  const candidateQuotes = ranked.slice(0, 5);
 
   const evidence = {
     assetsSampled,
@@ -540,78 +619,28 @@ export function buildFanResponse(
     });
   }
 
-  /* ══ display — three tiers of specificity ══
-     The block is already going to appear. All that is left is deciding
-     how much we are entitled to claim about WHY fans are excited. Each
-     tier says exactly as much as the evidence supports and no more. */
+  /* ══ display — a real comment, or nothing ══
 
-  const theme = gates.concentration ? top!.theme : null;
-  const copy = theme ? THEME_COPY[theme] : null;
-
-  /* TIER 3 — a fan's own words. Strongest when it happens, but strictly
-     optional: it never decides whether the block appears, only how the
-     headline reads. A pull-quote has to work typographically as well as
-     evidentially, so a well-liked 49-character sentence stays in the
-     object and out of the headline slot. */
-  const quote = candidateQuotes[0] ?? null;
-
-  /* Short and well-liked is not enough. "can't wait for this" is both, and
-     putting it in the headline slot says nothing a reader could not have
-     guessed. What makes a quote worth elevating is that the AUDIENCE
-     elevated it — a comment sitting far above its neighbours is the crowd
-     agreeing on how they feel, which is the thing being reported. A
-     comment merely at the top of a flat pile is one person talking.
-     When nothing stands out, the broad or themed copy is the honest
-     output and the quote stays in the object. */
-  const likeMedian = (() => {
-    const xs = safePositives.map(q => q.likes).sort((a, b) => a - b);
-    return xs.length ? xs[Math.floor(xs.length / 2)] : 0;
-  })();
-  const quotable =
-    quote && quote.text.length <= 28 && quote.likes >= 10
-      && quote.likes >= Math.max(3 * likeMedian, 10)
-      ? quote : null;
-
-  /* TIER 2 — a clear theme, named. When the winning theme is the song and
-     the asset that carried it is titled in the standard "Artist - Title"
-     form, the track can be named outright; a title that does not match
-     that shape is left alone rather than guessed at. */
-  const songTitle = (() => {
-    if (theme !== 'song') return null;
-    const byTheme = new Map<string, number>();
-    for (const c of positives) if (themeOf(c.text) === 'song')
-      byTheme.set(c.videoId, (byTheme.get(c.videoId) ?? 0) + 1);
-    const leadId = Array.from(byTheme.entries()).sort((a, b) => b[1] - a[1])[0]?.[0];
-    const raw = assets.find(a => a.videoId === leadId)?.title ?? '';
-    const m = raw.match(/^[^-–—]{2,40}\s[-–—]\s([^-–—(\[|]{2,40})$/);
-    return m ? m[1].trim() : null;
-  })();
-
-  /* TIER 1 — positivity is clear, the reason is not. Say that, plainly,
-     rather than picking whichever theme happened to edge ahead. Claiming
-     a driver we cannot evidence is the same failure as claiming a
-     sentiment we cannot evidence, just harder to spot. */
-  const BROAD = {
-    headline: 'STRONG FAN RESPONSE',
-    line: 'Plenty of excitement around the campaign so far.',
-  };
-
-  const headline = quotable ? `“${quotable.text}”` : (copy?.headline ?? BROAD.headline);
-  const line =
-    songTitle ? `Fans are responding strongly to ${songTitle}.`
-    : copy?.line ?? BROAD.line;
-
-  /* Comment count shown is the PUBLIC count on the asset the quote came
-     from — exact and checkable — not the size of our sample, and not a
-     campaign total, which would be a different number wearing the same
-     label. */
-  const quoteAsset = quotable ? assets.find(a => a.videoId === quotable.videoId) : null;
-  const commentCount = quoteAsset?.comments ?? null;
+     There is no fallback copy and there must never be one. If the audience
+     is plainly positive but no single comment is safe AND representative
+     AND short enough to read as a pull-quote, the correct output is an
+     empty space. Campaign Home does not need this badly enough to invent
+     something, and a generated line dressed as fan voice would be worse
+     than silence — it would look like evidence while being our own words. */
+  const quote = ranked[0] ?? null;
+  if (!quote) {
+    return base({
+      tone, themes, evidence, gates, confidence,
+      dominantTheme: top?.theme ?? null,
+      recurringPhrases: recurringPhrases(comments),
+      candidateQuotes,
+      withheldReason: 'response is positive but no single comment is safe and representative enough to feature',
+    });
+  }
 
   return base({
     display: true,
-    headline, line, commentCount,
-    quote: quotable, tone, dominantTheme: top?.theme ?? null, themes,
+    quote, tone, dominantTheme: top?.theme ?? null, themes,
     recurringPhrases: recurringPhrases(comments),
     candidateQuotes, evidence, gates, confidence,
     withheldReason: null,
@@ -619,7 +648,7 @@ export function buildFanResponse(
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   FETCH — top-level comments for a set of campaign assets.
+      FETCH — top-level comments for a set of campaign assets.
    1 quota unit per video. Failure of one video never fails the set.
    ══════════════════════════════════════════════════════════════════════ */
 

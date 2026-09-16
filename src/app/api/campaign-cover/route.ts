@@ -608,7 +608,13 @@ export async function GET(req: NextRequest) {
           const { assetsToScan, fetchCommentsForAssets, buildFanResponse } =
             await import('@/lib/intelligence/fanResponse');
           const campaignAssets = [...heroes, ...supporting]
-            .map(a => ({ videoId: a.videoId, title: a.title, publishedAt: a.publishedAt, comments: null as number | null }));
+            /* formatLabel rides along so the quote can say where it came
+               from ("trailer", "official video") using the SAME label the
+               campaign cards show — including any human override. Without
+               it the module would have to guess from the title, which is
+               how a page ends up describing an asset that does not exist. */
+            .map(a => ({ videoId: a.videoId, title: a.title, publishedAt: a.publishedAt,
+                         formatLabel: a.formatLabel, comments: null as number | null }));
           const scan = assetsToScan(campaignAssets, 4);
           if (scan.length) {
             /* Public comment totals for the scanned assets, so the page can

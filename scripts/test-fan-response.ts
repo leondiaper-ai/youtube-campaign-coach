@@ -43,9 +43,8 @@ console.log('\nDISPLAY GATES');
 { // 1 — genuine positive
   const fr = buildFanResponse(rows(80, POS, 'a').concat(rows(20, POS, 'b')), assets(['a','b']), NOW);
   check('1 POSITIVE displays', fr.display === true, JSON.stringify(fr.withheldReason));
-  // A quote is optional by design, so this asserts the conditional, not its presence.
-  check('1 POSITIVE quote, if any, is safe', !fr.quote || isSafeToFeature(fr.quote.text));
-  check('1 POSITIVE has a headline either way', !!fr.headline);
+  check('1 POSITIVE displays only WITH a real quote', !!fr.quote);
+  check('1 POSITIVE quote is safe', !!fr.quote && isSafeToFeature(fr.quote.text));
 }
 { // 1b — a comment the audience pushed far above the rest DOES lead
   const base = rows(60, POS, 'a').concat(rows(59, POS, 'b'));
@@ -53,13 +52,11 @@ console.log('\nDISPLAY GATES');
   const fr = buildFanResponse(
     base.concat([{ text: 'WE SO BACK', likes: 184, replies: 0, at: FRESH, videoId: 'b' }]),
     assets(['a','b']), NOW);
-  check('1b standout quote becomes the headline', fr.headline === '“WE SO BACK”', String(fr.headline));
+  check('1b standout, echoed quote is selected', fr.quote?.text === 'WE SO BACK', String(fr.quote?.text));
 }
 { // 2 — THE CRITICAL ONE: negative fixture must render nothing
   const fr = buildFanResponse(rows(100, NEG, 'a').concat(rows(20, NEG, 'b')), assets(['a','b']), NOW);
   check('2 NEGATIVE withholds', fr.display === false);
-  check('2 NEGATIVE emits no headline', fr.headline === null);
-  check('2 NEGATIVE emits no line', fr.line === null);
   check('2 NEGATIVE emits no quote', fr.quote === null);
   check('2 NEGATIVE keeps the true classification internally', fr.tone === 'negative');
 }
@@ -67,7 +64,7 @@ console.log('\nDISPLAY GATES');
   const fr = buildFanResponse(
     rows(60, POS, 'a').concat(rows(60, NEG, 'b')), assets(['a','b']), NOW);
   check('3 MIXED withholds', fr.display === false, String(fr.tone));
-  check('3 MIXED emits no headline', fr.headline === null);
+  check('3 MIXED emits no quote', fr.quote === null);
 }
 { // 4 — too little evidence
   const fr = buildFanResponse(rows(4, POS, 'a').concat(rows(4, POS, 'b')), assets(['a','b']), NOW);
@@ -102,23 +99,44 @@ const MUTE = ['🍒', 'out now', 'obrigado', '2026', 'link?', 'ok', '...', 'who 
   check('8 DILUTED negatives still withhold', fr.display === false, String(fr.withheldReason));
 }
 
-/* Positivity decides WHETHER the block shows. Theme clarity decides only
-   HOW SPECIFIC the copy is. These must not be re-entangled. */
-console.log('\nCOPY TIERS');
-{ // 9 — split themes: displays, but must not claim a driver
+/* SELECTION. The page shows a fan's own words or nothing — there is no
+   generated fallback line, so these prove both halves of that. */
+console.log('\nSELECTION');
+{ // 9 — no dominant theme is no longer a reason to stay silent
   const SPLIT = ["can't wait for this", 'so excited', 'welcome back boys', 'missed you so much',
                  'what a tune', 'this song is perfect', 'please tour uk', 'the video looks amazing'];
   const fr = buildFanResponse(rows(70, SPLIT, 'a').concat(rows(50, SPLIT, 'b')), assets(['a','b']), NOW);
-  check('9 SPLIT displays anyway', fr.display === true, String(fr.withheldReason));
-  check('9 SPLIT uses broad copy', fr.headline === 'STRONG FAN RESPONSE', String(fr.headline));
-  check('9 SPLIT does not name a driver', /excitement around the campaign/.test(fr.line ?? ''));
+  check('9 SPLIT displays on a real comment, not a theme', fr.display === true, String(fr.withheldReason));
+  check('9 SPLIT quote is one of the real comments', !!fr.quote && SPLIT.includes(fr.quote.text));
   check('9 SPLIT still records the theme spread internally', fr.themes.length > 1);
 }
-{ // 10 — a long well-liked comment stays out of the headline slot
+{ // 10 — popular but unquotable: no fallback copy may appear
   const LONG = ['what an absolutely beautiful song that I will never stop playing'];
   const fr = buildFanResponse(rows(60, LONG, 'a').concat(rows(60, LONG, 'b')), assets(['a','b']), NOW);
-  check('10 displays', fr.display === true, String(fr.withheldReason));
-  check('10 long comment is not used as a headline', !(fr.headline ?? '').includes('never stop'));
+  check('10 over-long comment never reaches the page', fr.display === false);
+  check('10 says why', /no single comment is safe and representative/.test(fr.withheldReason ?? ''));
+}
+
+{ /* 11 — THE OUTLIER RULE. A joke that collected likes is popular but
+       speaks for nobody. A quieter comment using the language 60 other
+       fans reached for speaks for all of them. Likes alone must not win. */
+  const ECHOED = ['this song is perfect', 'this song is everything', 'this song is a classic'];
+  const base = rows(120, ECHOED, 'a').map((c, i) => ({ ...c, videoId: i % 2 ? 'a' : 'b', likes: 25 }));
+  const fr = buildFanResponse(
+    base.concat([{ text: 'my cat left the room', likes: 400, replies: 0, at: FRESH, videoId: 'a' }]),
+    assets(['a','b']), NOW);
+  check('11 popular outlier does not win', fr.quote?.text !== 'my cat left the room', String(fr.quote?.text));
+  check('11 the echoed comment wins instead',
+    !!fr.quote && ECHOED.includes(fr.quote.text), String(fr.quote?.text));
+}
+{ /* 12 — but when the most-liked comment IS representative, prefer it.
+       Leon's rule: that combination is the strongest evidence there is. */
+  const ECHOED = ['this song is perfect', 'this song is everything'];
+  const base = rows(120, ECHOED, 'a').map((c, i) => ({ ...c, videoId: i % 2 ? 'a' : 'b', likes: 20 }));
+  const fr = buildFanResponse(
+    base.concat([{ text: 'this song is perfect', likes: 900, replies: 0, at: FRESH, videoId: 'a' }]),
+    assets(['a','b']), NOW);
+  check('12 top-liked AND representative is preferred', fr.quote?.likes === 900, String(fr.quote?.likes));
 }
 
 console.log('\nSAFETY FILTER (all drawn from comments real scans returned)');

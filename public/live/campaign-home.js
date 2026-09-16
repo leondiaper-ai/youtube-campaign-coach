@@ -245,14 +245,16 @@ function assetStrip(rest, total, shownAbove){
    omission, not reinterpretation. The real classification stays in the
    payload for Watcher and the Coach. */
 function buildFanResponse(fr){
-  if (!fr || !fr.display || !fr.headline || !fr.line) return '';
-  const count = typeof fr.commentCount === 'number' && fr.commentCount > 0
-    ? ` · ${fr.commentCount.toLocaleString()} comments` : '';
-  return `<div class="fanresp reveal">
-    <div class="fr-k">Fan response${count}</div>
-    <div class="fr-h">${esc(fr.headline)}</div>
-    <div class="fr-l">${esc(fr.line)}</div>
-  </div>`;
+  if (!fr || !fr.display || !fr.quote || !fr.quote.text) return '';
+  const q = fr.quote;
+  const likes = typeof q.likes === 'number' && q.likes > 0
+    ? `<span class="fv-l">&#9825; ${q.likes.toLocaleString()}</span>` : '';
+  const src = q.source ? `<span class="fv-s">${esc(String(q.source).toLowerCase())}</span>` : '';
+  const meta = [likes, src].filter(Boolean).join('<span class="fv-d">&middot;</span>');
+  return `<figure class="fanvoice reveal">
+    <blockquote class="fv-q">&ldquo;${esc(q.text)}&rdquo;</blockquote>
+    ${meta ? `<figcaption class="fv-m">${meta}</figcaption>` : ''}
+  </figure>`;
 }
 
 function buildLiveCover(d){
@@ -346,6 +348,13 @@ function buildLiveCover(d){
       </div>
 
       <div>
+        ${/* Fan Voice sits ABOVE the information stack, not inside it.
+             The required reading order — campaign state, strategic read,
+             what's next — has to stay unbroken, so a piece of atmosphere
+             is not allowed to interrupt it. Here it reads as a margin
+             note against the numbers rather than a claim among them. */''}
+        ${buildFanResponse(d.fanResponse)}
+
         ${stats.length ? `<div class="livestats stagger">
           ${stats.map(([n,c,w])=>`<div class="ls"><div class="n">${n}</div>
             <div class="c">${c}</div><div class="w">${esc(w)}</div></div>`).join('')}
@@ -356,8 +365,6 @@ function buildLiveCover(d){
           <div class="rh">${esc(d.read.headline)}</div>
           <div class="rl">${esc(d.read.line)}</div>
         </div>` : ''}
-
-        ${buildFanResponse(d.fanResponse)}
 
         ${buildNext(tl)}
       </div>

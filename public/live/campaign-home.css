@@ -210,12 +210,18 @@
    down. The campaign read is the argument; this is the audience noise
    underneath it, and if it ever competes for attention it is wrong.
    Three lines, no chart, no percentage, about two seconds to read. */
-.fanresp{margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--hair);max-width:52ch}
-.fanresp .fr-k{font-size:.56rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--smoke);margin-bottom:.45rem}
-.fanresp .fr-h{font-family:'Space Grotesk',sans-serif;font-weight:600;
-  font-size:clamp(.92rem,1.5vw,1.15rem);line-height:1.2;letter-spacing:-.005em;color:var(--signal-2,var(--signal))}
-.fanresp .fr-l{font-size:.74rem;color:var(--smoke);margin-top:.35rem;line-height:1.55}
+/* FAN VOICE — an editorial annotation, not a module.
+   No heading, no card, no border box. The quotation marks and the italic
+   are the only signals it needs; a reader knows a pull-quote on sight.
+   It is allowed to be small because it is atmosphere, and it must never
+   compete with the strategic read or push WHAT'S NEXT down the page. */
+.fanvoice{margin:0 0 1.2rem;padding:0;max-width:34ch}
+.fanvoice .fv-q{margin:0;padding:0;border:0;font-style:italic;
+  font-size:clamp(.88rem,1.25vw,1.02rem);line-height:1.35;color:var(--bone,#F5F3EF);opacity:.92}
+.fanvoice .fv-m{margin-top:.3rem;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smoke);opacity:.8;display:flex;align-items:center;gap:.4rem}
+.fanvoice .fv-l{color:var(--signal)}
+.fanvoice .fv-d{opacity:.45}
 
 .cov{margin-top:1.4rem;font-size:.56rem;color:var(--smoke);line-height:1.5;opacity:.75}
 
