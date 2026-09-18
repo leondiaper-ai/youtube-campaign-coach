@@ -1,30 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  readLiveSnapByHandle, writeFoundryBaseline, readFoundryBaseline, repairEmptyFoundryBaseline,
-} from '@/lib/kvCache';
+import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
 import type { LiveSnap } from '@/lib/artists';
 import {
-  FOUNDRY_COHORTS, FOUNDRY_UNRESOLVED, FOUNDRY_SPELLING_NOTES,
-  FOUNDRY_SIGNALS, FOUNDRY_VMG_OVERLAP, membersOf, activityOf,
-  type FoundryBaseline, type FoundryCohortId, type FoundryRow,
+  FOUNDRY_COHORTS, FOUNDRY_UNRESOLVED, membersOf, type FoundryCohortId,
 } from '@/lib/intelligence/foundryCohort';
 
 /**
  * GET /api/foundry?cohort=foundry-2026-fall
  *
- * The Foundry cohort, assembled at request time from Watcher's own cached
- * channel data. This route stores no channel metrics of its own — it reads
- * the same live snaps the Watcher pages read, so a Foundry number and a
- * Watcher number for the same channel cannot drift apart.
+ * The Foundry cohort with whatever Watcher currently knows about each
+ * channel. Read-only: no writes, no stored metrics, no baselines. Watcher
+ * accumulates history from the day a channel was added, and that is the
+ * only history this feature needs.
  *
- * It has one side effect, and only one: the first time it sees a channel
- * it freezes a baseline (see writeFoundryBaseline, which refuses to
- * overwrite). That is what makes "since tracking" measurable later.
+ * Channel figures come through normalizeChannelData — the same function
+ * the Watcher and artist pages use — so a Foundry number and a Watcher
+ * number for the same channel are the same number by construction.
  */
 
-export const revalidate = 600;
+export const dynamic = 'force-dynamic';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -38,11 +34,6 @@ export async function OPTIONS() {
 
 const n = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
-function daysBetween(a: string, b: string): number {
-  const ms = new Date(b).getTime() - new Date(a).getTime();
-  return Number.isFinite(ms) ? Math.max(0, Math.round(ms / 86_400_000)) : 0;
-}
-
 export async function GET(req: NextRequest) {
   const cohortId = (req.nextUrl.searchParams.get('cohort') ?? 'foundry-2026-fall') as FoundryCohortId;
   const cohort = FOUNDRY_COHORTS[cohortId];
@@ -50,144 +41,42 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: `Unknown cohort: ${cohortId}` }, { status: 404, headers: CORS });
   }
 
-  const members = membersOf(cohortId);
-  const now = new Date().toISOString();
-
-  /* TEMPORARY DIAGNOSTIC — ?debug=1 returns what the KV read actually
-     produced for the first few members. Added because two rounds of
-     inferring the snap shape from downstream responses produced two
-     wrong answers; looking at the object directly is faster and settles
-     it. Remove once the cohort reads clean. */
-  if (req.nextUrl.searchParams.get('debug') === '1') {
-    const probe = await Promise.all(members.slice(0, 3).map(async mem => {
-      const snap = await readLiveSnapByHandle(mem.handle ?? mem.name) as Record<string, unknown> | null;
-      const history = await readHistory(mem.channelId);
-      const nc = snap ? normalizeChannelData(snap as LiveSnap, history, null) : null;
-      return {
-        handle: mem.handle,
-        snapIsNull: snap === null,
-        snapKeys: snap ? Object.keys(snap).slice(0, 25) : null,
-        snapSubs: snap ? (snap as Record<string, unknown>).subs ?? null : null,
-        historyLen: history.length,
-        ncSubs: nc ? nc.subs : null,
-        ncViews: nc ? nc.views : null,
-        ncCadence: nc ? nc.cadence : null,
-      };
-    }));
-    return NextResponse.json({ probe }, { headers: CORS });
-  }
-
-  const rows: FoundryRow[] = await Promise.all(members.map(async member => {
-    let current: FoundryRow['current'] = null;
-    let baseline = await readFoundryBaseline<FoundryBaseline>(member.channelId);
+  const rows = await Promise.all(membersOf(cohortId).map(async member => {
+    let channel = null;
 
     try {
-      const snap = await readLiveSnapByHandle(member.handle ?? member.name) as LiveSnap | null;
+      const snap = await readLiveSnapByHandle(member.handle) as LiveSnap | null;
       if (snap && !snap.error) {
-        const history = member.channelId ? await readHistory(member.channelId) : [];
-
-        /* Read through normalizeChannelData — the SAME function the Watcher
-           and artist-live pages use — rather than reaching into the raw KV
-           snap. The first version of this route did reach in, using field
-           names lifted from an API response that had already been through
-           this normalizer (subscriberCount, videoCount, uploadsLast14Days).
-           None of those exist on the raw snap, so every metric silently
-           came back null. Going through the normalizer makes a Foundry
-           number and a Watcher number the same number by construction,
-           which was the stated principle all along. */
+        const history = await readHistory(member.channelId);
         const nc = normalizeChannelData(snap, history, null);
-        const cad = nc.cadence;
 
-        const lastUploadAt = snap.lastUploadAt ?? null;
-        const daysSinceUpload = n(cad?.lastUploadDaysAgo);
-        const uploads30 = n(cad?.uploads30d);
-
-        current = {
+        channel = {
           subscribers: n(nc.subs),
           totalViews: n(nc.views),
-          lastUploadAt,
-          daysSinceUpload,
-          uploads30d: uploads30,
-          shorts30d: n(cad?.shorts30d),
-          longform30d: n(cad?.videos30d),
-          views7: nc.views7d ? n(nc.views7d.delta) : null,
-          views30: nc.views30d ? n(nc.views30d.delta) : null,
-          subs30: nc.subs30d ? n(nc.subs30d.delta) : null,
-          historyDepthDays: n(nc.historyDepthDays),
-          activity: activityOf(daysSinceUpload, uploads30),
+          lastUploadAt: snap.lastUploadAt ?? null,
+          daysSinceUpload: n(nc.cadence?.lastUploadDaysAgo),
+          /* How many daily snapshots Watcher holds. Zero or one means
+             there is no trend to read yet, and the page can say so
+             rather than implying a flat line. */
+          historyDays: n(nc.historyDepthDays),
         };
-
-        const snapshotOf = () => ({
-          channelId: member.channelId,
-          capturedAt: now,
-          subscribers: current!.subscribers,
-          totalViews: current!.totalViews,
-          lastUploadAt: current!.lastUploadAt,
-          uploads30d: current!.uploads30d,
-          shorts30d: current!.shorts30d,
-          longform30d: current!.longform30d,
-          watcherHistoryDays: current!.historyDepthDays,
-        });
-
-        if (!baseline) {
-          const fresh = snapshotOf();
-          const stored = await writeFoundryBaseline(member.channelId, fresh);
-          baseline = stored ? fresh : await readFoundryBaseline<FoundryBaseline>(member.channelId);
-        } else if (baseline.subscribers == null && baseline.totalViews == null) {
-          /* An anchor written from the null-metric bug. Not a real
-             baseline — replace it once, now that we can read properly. */
-          const fresh = snapshotOf();
-          const repaired = await repairEmptyFoundryBaseline(member.channelId, fresh);
-          if (repaired) baseline = fresh;
-        }
       }
     } catch {
-      /* One unreachable channel must not empty the cohort. The row comes
-         back with current:null and the page omits its metrics. */
+      /* One unreachable channel must not empty the cohort. */
     }
 
-    /* "Since tracking" only exists once time has actually passed. On day
-       zero every delta is 0, and a column of zeroes reads as "flat"
-       rather than "we only just started" — so it stays null and the UI
-       shows the tracking-started date instead. */
-    let sinceTracking: FoundryRow['sinceTracking'] = null;
-    if (baseline && current) {
-      const days = daysBetween(baseline.capturedAt, now);
-      if (days >= 1) {
-        sinceTracking = {
-          days,
-          subscribers: current.subscribers != null && baseline.subscribers != null
-            ? current.subscribers - baseline.subscribers : null,
-          totalViews: current.totalViews != null && baseline.totalViews != null
-            ? current.totalViews - baseline.totalViews : null,
-        };
-      }
-    }
-
-    return { member, current, baseline, sinceTracking };
+    return { ...member, channel };
   }));
-
-  const withData = rows.filter(r => r.current);
-  const baselined = rows.filter(r => r.baseline).length;
 
   return NextResponse.json({
     cohort,
-    /* Counts are stated separately and never merged. "16 artists" would
-       be wrong; "13 tracked, 3 not yet in Watcher" is what is true. */
     counts: {
-      tracked: members.length,
-      withLiveData: withData.length,
-      baselineCaptured: baselined,
+      tracked: rows.length,
+      withData: rows.filter(r => r.channel).length,
       unresolved: FOUNDRY_UNRESOLVED.length,
-      namedInBrief: members.length + FOUNDRY_UNRESOLVED.length,
     },
     rows,
     unresolved: FOUNDRY_UNRESOLVED,
-    spellingNotes: FOUNDRY_SPELLING_NOTES,
-    vmgOverlap: FOUNDRY_VMG_OVERLAP,
-    /* Empty until findings are earned. The page renders the empty state
-       rather than inventing cohort patterns from one snapshot. */
-    signals: FOUNDRY_SIGNALS,
-    generatedAt: now,
+    generatedAt: new Date().toISOString(),
   }, { headers: CORS });
 }

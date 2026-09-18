@@ -599,17 +599,16 @@ footer{padding-block:clamp(2.4rem,5vw,4rem);border-top:1px solid var(--line)}
     <!-- Deliberately small. The homepage says this intelligence stream
          now exists and sends you to it; the cohort itself lives on
          /foundry and does not belong on a front page. -->
-    <div class="fdy-stats reveal">
-      <div><div class="n" id="fdyTracked">—</div><div class="k label">Artists tracked</div></div>
+    <div class="fdy-stats reveal" style="grid-template-columns:repeat(2,1fr)">
+      <div><div class="n" id="fdyTracked">—</div><div class="k label">Artists currently tracked</div></div>
       <div><div class="n plain" id="fdyCohort">—</div><div class="k label">Cohort</div></div>
-      <div><div class="n plain" id="fdyBaselines">—</div><div class="k label">Baselines captured</div></div>
-      <div><div class="n plain" id="fdyStarted">—</div><div class="k label">Tracking started</div></div>
     </div>
 
     <div class="pending-note reveal">
       <span class="label" style="color:var(--c-fdy)">Status</span>
       <p class="body" style="margin:.45rem 0 0" id="fdyStatus">
-        Connecting to Watcher…
+        Following YouTube's developing artist cohort and surfacing interesting channel
+        strategies, formats and campaigns.
       </p>
       <a class="more" href="/foundry" style="margin-top:1rem;display:inline-flex;gap:.45rem;
          font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.16em;
@@ -760,34 +759,20 @@ function observe(nodes) {
   nodes.forEach((n, i) => { n.style.transitionDelay = `${Math.min(i * 55, 330)}ms`; io.observe(n); });
 }
 
-/* Foundry — the homepage carries the fact that the cohort exists and how
-   far tracking has got, nothing more. No artist names, no rankings: this
-   is a signpost to /foundry, and a front page that listed thirteen
-   developing artists would bury everything around it. */
+/* Foundry — a signpost, not a summary. The homepage says this stream
+   exists and how many artists are in it; the cohort itself lives on
+   /foundry. No artist names here: thirteen developing artists on a front
+   page would bury everything around them. */
 async function loadFoundry() {
-  const status = document.getElementById('fdyStatus');
   try {
     const r = await fetch('/api/foundry?cohort=foundry-2026-fall');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-
     document.getElementById('fdyTracked').textContent = d.counts.tracked;
     document.getElementById('fdyCohort').textContent =
-      `${String(d.cohort.season).toUpperCase()} ${d.cohort.year}`;
-    document.getElementById('fdyBaselines').textContent =
-      `${d.counts.baselineCaptured}/${d.counts.tracked}`;
-    document.getElementById('fdyStarted').textContent = d.cohort.trackingStarted
-      ? new Date(d.cohort.trackingStarted).toLocaleDateString('en-GB', { month:'short', year:'numeric' }).toUpperCase()
-      : '—';
-
-    const gap = d.counts.unresolved
-      ? ` ${d.counts.namedInBrief} were named for the cohort; the remaining ${d.counts.unresolved} are not yet resolved to a channel.`
-      : '';
-    status.textContent =
-      `YouTube's ${d.cohort.season} ${d.cohort.year} Foundry cohort is now inside Watcher — ` +
-      `following channel growth, cadence, formats and campaign behaviour.${gap}`;
+      `${String(d.cohort.drop).toUpperCase()} ${d.cohort.year}`;
   } catch {
-    status.textContent = 'Cohort data unavailable right now.';
+    document.getElementById('fdyStatus').textContent = 'Cohort data unavailable right now.';
   }
 }
 

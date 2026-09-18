@@ -1,58 +1,39 @@
 /**
- * FOUNDRY COHORT — YouTube Music Foundry artists, tracked longitudinally.
+ * FOUNDRY COHORT — YouTube Music Foundry artists, kept together.
  *
- * ─────────────────────────────────────────────────────────────────────────
- * WHERE THE DATA LIVES
+ * The point of this file is small and deliberately stays small: it records
+ * WHICH channels belong to which Foundry cohort, and carries a slot for a
+ * hand-written editorial note about any of them.
  *
- * Watcher stays the source of truth for every channel and video number.
- * This module owns exactly two things Watcher has no opinion about:
+ * It stores no metrics. Watcher already holds subscribers, views, uploads
+ * and cadence for these channels, and builds history from the day each was
+ * added. Duplicating any of that here would create a second number that
+ * eventually disagrees with the first.
  *
- *   1. MEMBERSHIP — which channels are in which Foundry cohort.
- *   2. BASELINE   — what each channel looked like on the day we started
- *                   watching, frozen so it can never drift.
+ * An earlier version of this file carried an immutable baseline system,
+ * signal structures and follow-through models. That was over-built for the
+ * job, and it is gone.
  *
- * Everything else — subscribers, views, cadence, formats, latest upload —
- * is read live from Watcher at request time. There is deliberately no
- * second copy of it here. A duplicated metric is a metric that will
- * eventually disagree with itself, and then nobody trusts either number.
+ * ── ON IDENTIFIERS ────────────────────────────────────────────────────
+ * Keyed on channel ID. Names and handles change; channel IDs do not. This
+ * is not theoretical — the original cohort list named sixteen artists, of
+ * which three matched no channel and one was spelled differently from the
+ * channel it referred to.
  *
- * ─────────────────────────────────────────────────────────────────────────
- * WHY CHANNEL ID IS THE JOIN KEY
- *
- * Artist names and handles change; channel IDs do not. The roster below
- * is keyed on the UC id, with slug and display name carried alongside for
- * convenience only. If an artist renames, the row keeps working and the
- * display name is the thing that updates.
- *
- * This matters more than it sounds. The brief listed the cohort by name;
- * three of those names did not resolve to anything in Watcher, and one
- * resolved under a different spelling. Names are not identifiers.
- *
- * ─────────────────────────────────────────────────────────────────────────
- * WHAT THIS MODULE WILL NOT DO
- *
- * It will not compute "Foundry impact". We observe public channel
- * behaviour for artists who happen to be in a development programme; we
- * have no visibility of what the programme does, and growth in a tracked
- * window has many causes. The only claim this module supports is
- * SINCE TRACKING — a measured change over a stated period — and the
- * naming throughout reflects that on purpose.
+ * ── ON LANGUAGE ───────────────────────────────────────────────────────
+ * We observe public channel behaviour for artists who happen to be in a
+ * development programme. We have no visibility of that programme or its
+ * selection, so nothing here computes "Foundry impact" and nothing implies
+ * we know why a channel did what it did.
  */
 
-/* ══════════════════════════════════════════════════════════════════════
-   COHORT DEFINITION
-   ══════════════════════════════════════════════════════════════════════ */
-
-export type FoundryCohortId = 'foundry-2026-fall' | 'foundry-2026-summer';
+export type FoundryCohortId = 'foundry-2026-fall';
 
 export type FoundryCohort = {
   id: FoundryCohortId;
-  label: string;        // human-readable, for display
+  label: string;
   year: number;
-  season: 'Spring' | 'Summer' | 'Fall' | 'Winter';
-  /** When WE started watching. Not when the artist joined Foundry — we
-      have no reliable visibility of that date and must not imply we do. */
-  trackingStarted: string;   // yyyy-mm-dd
+  drop: string;
 };
 
 export const FOUNDRY_COHORTS: Record<FoundryCohortId, FoundryCohort> = {
@@ -60,58 +41,52 @@ export const FOUNDRY_COHORTS: Record<FoundryCohortId, FoundryCohort> = {
     id: 'foundry-2026-fall',
     label: 'YouTube Foundry 2026 — Fall',
     year: 2026,
-    season: 'Fall',
-    trackingStarted: '2026-09-18',
+    drop: 'Fall',
   },
-  'foundry-2026-summer': {
-    id: 'foundry-2026-summer',
-    label: 'YouTube Foundry 2026 — Summer',
-    year: 2026,
-    season: 'Summer',
-    trackingStarted: '',
-  },
-};
-
-export type FoundryCaseStudyStatus = 'watching' | 'candidate' | 'in_progress' | 'published';
-
-export type FoundryMember = {
-  channelId: string;          // UC… — the primary key, everywhere
-  slug: string;               // Watcher slug, for /api/artist-live
-  name: string;               // display name as Watcher holds it
-  handle: string | null;
-  cohort: FoundryCohortId;
-
-  /* Left null until verified from a source we can point at. The brief was
-     explicit that country and genre must not appear as headline facts
-     before that, so they are null rather than guessed, and the UI omits
-     any field that is null rather than printing a dash. */
-  country: string | null;
-  lane: string | null;
-
-  /** Editorial, manually curated. Never algorithmic — see the note on
-      comparables at the bottom of this file. */
-  comparableVmgArtists: { slug: string; name: string; why: string }[];
-
-  /** True when this Foundry artist is also a VMG artist. Confirmed for
-      underscores. Worth showing rather than normalising away: it means one
-      channel sits in both the cohort and our own roster, which makes it
-      the single most directly comparable reference we have. */
-  vmgManaged: boolean;
-
-  caseStudyStatus: FoundryCaseStudyStatus;
-  /** Editorial note for CHANNELS TO WATCH. Empty until a real behaviour
-      is worth pointing at; an empty string renders nothing. */
-  editorialNote: string;
 };
 
 /**
- * THE FALL 2026 ROSTER.
+ * The editorial layer — the actually valuable part.
  *
- * Every channel id below was read back from Watcher rather than typed in,
- * so each one is known to resolve. The brief named sixteen artists; these
- * are the thirteen that exist in Watcher today. The three unresolved names
- * are recorded in FOUNDRY_UNRESOLVED rather than silently dropped, because
- * a cohort that quietly shrinks is worse than one that says what's missing.
+ * Written by hand when someone notices something, never generated. Three
+ * kinds, matching the three things worth saying about a channel we're
+ * watching. An artist with no note simply has none, and the page shows
+ * nothing rather than padding.
+ */
+export type FoundryNoteKind = 'watching' | 'case-study' | 'reference';
+
+export type FoundryNote = {
+  kind: FoundryNoteKind;
+  note: string;
+  /** For 'reference' notes: the VMG artist this might be useful to. */
+  forVmgArtist?: string;
+};
+
+export type FoundryMember = {
+  channelId: string;
+  slug: string;          // Watcher slug
+  name: string;
+  handle: string;
+  cohort: FoundryCohortId;
+  /** In the Foundry cohort AND on the VMG roster. True for underscores. */
+  vmgManaged: boolean;
+  note?: FoundryNote;
+};
+
+/* Declared BEFORE the roster that reads it.
+   The previous version declared this below FOUNDRY_MEMBERS, which calls it
+   while initialising — a temporal dead zone error that threw on module
+   load. TypeScript does not catch it, so it type-checked clean and then
+   failed every production build for four commits. Order matters here. */
+const VMG_MANAGED = new Set<string>(['underscores']);
+
+/** Hand-written notes, keyed by slug. Empty until something is genuinely
+    worth saying — see FoundryNote above. */
+const NOTES: Record<string, FoundryNote> = {};
+
+/**
+ * THE FALL 2026 ROSTER.
+ * Every channel ID was read back from Watcher rather than typed in.
  */
 export const FOUNDRY_MEMBERS: FoundryMember[] = [
   m('UC3XZCxTQ55JkT35W27Jtbyg', 'aiobahn',       'Aiobahn',        '@aiobahn'),
@@ -133,184 +108,14 @@ function m(channelId: string, slug: string, name: string, handle: string): Found
   return {
     channelId, slug, name, handle,
     cohort: 'foundry-2026-fall',
-    country: null, lane: null,
-    comparableVmgArtists: [],
     vmgManaged: VMG_MANAGED.has(slug),
-    caseStudyStatus: 'watching',
-    editorialNote: '',
+    note: NOTES[slug],
   };
 }
 
-/** Foundry artists who are also VMG artists. Confirmed by Leon, 18 Sep. */
-const VMG_MANAGED = new Set(['underscores']);
-
-/**
- * Named in the brief, not found in Watcher. Surfaced by the API so the
- * gap is visible rather than being mistaken for a cohort of thirteen.
- * Each needs a channel adding to Watcher before it can join the roster.
- */
-export const FOUNDRY_UNRESOLVED = [
-  { name: 'Takase Toya',    note: 'no matching channel in Watcher' },
-  { name: 'This Is Lorelei', note: 'no matching channel in Watcher' },
-  { name: 'Yapi',           note: 'no matching channel in Watcher' },
-];
-
-/** The brief spelled this "KEVIS Y MAYYKI"; Watcher holds "KEVIS Y MAYKYY".
-    Recorded so the discrepancy is resolved deliberately rather than by
-    whoever edits the roster next. */
-/** underscores appears in both the Foundry cohort and the VMG roster.
-    Not a data error — confirmed — and the most useful single comparison
-    point in the cohort, since we can see the campaign from both sides. */
-export const FOUNDRY_VMG_OVERLAP = ['underscores'];
-
-export const FOUNDRY_SPELLING_NOTES = [
-  { watcher: 'KEVIS Y MAYKYY', brief: 'KEVIS Y MAYYKI', channelId: 'UCXd_WcWuCEqJ9B0UJAWGXlQ' },
-];
+/** Named for this cohort but not yet resolved to a channel in Watcher.
+    Kept visible so the count difference is explained rather than noticed. */
+export const FOUNDRY_UNRESOLVED = ['Takase Toya', 'This Is Lorelei', 'Yapi'];
 
 export const membersOf = (cohort: FoundryCohortId) =>
   FOUNDRY_MEMBERS.filter(a => a.cohort === cohort);
-
-export const memberByChannelId = (id: string) =>
-  FOUNDRY_MEMBERS.find(a => a.channelId === id) ?? null;
-
-/* ══════════════════════════════════════════════════════════════════════
-   BASELINE — the anchor for "since tracking"
-   ══════════════════════════════════════════════════════════════════════ */
-
-export type FoundryBaseline = {
-  channelId: string;
-  capturedAt: string;          // ISO — the moment this was frozen
-  subscribers: number | null;
-  totalViews: number | null;
-  lastUploadAt: string | null;
-  /* 30-day windows, because that is the window Watcher's cadence layer
-     actually computes. An earlier draft of this file asked for 7- and
-     14-day counts that no upstream source produced, and every one of
-     them came back null. Mirror the source; do not invent a window. */
-  uploads30d: number | null;
-  shorts30d: number | null;
-  longform30d: number | null;
-  /** What Watcher knew at capture time. A baseline taken on day one of
-      tracking has no history behind it, and a reader deserves to know
-      that before drawing a trend through it. */
-  watcherHistoryDays: number | null;
-};
-
-/** Shape of a live row: baseline + current + the delta between them. */
-export type FoundryRow = {
-  member: FoundryMember;
-  current: {
-    subscribers: number | null;
-    totalViews: number | null;
-    lastUploadAt: string | null;
-    daysSinceUpload: number | null;
-    uploads30d: number | null;
-    shorts30d: number | null;
-    longform30d: number | null;
-    views7: number | null;
-    views30: number | null;
-    subs30: number | null;
-    /** How many daily snapshots sit behind the deltas above. A 30-day
-        figure computed from two days of history is not a 30-day figure,
-        and the UI needs to be able to tell. */
-    historyDepthDays: number | null;
-    activity: FoundryActivity;
-  } | null;
-  baseline: FoundryBaseline | null;
-  /** Null until there is genuinely a gap between baseline and now. On the
-      first day of tracking every delta is zero, and showing a row of
-      zeroes invites someone to read it as "no growth" rather than
-      "no elapsed time". */
-  sinceTracking: {
-    days: number;
-    subscribers: number | null;
-    totalViews: number | null;
-  } | null;
-};
-
-export type FoundryActivity = 'ACTIVE' | 'STEADY' | 'SLOW' | 'DORMANT';
-
-/**
- * Activity from observable cadence only. The thresholds are deliberately
- * coarse — this is a reading aid for a cohort table, not a judgement of
- * an artist, and a four-way split is about as much as fourteen days of
- * upload counts can honestly support.
- */
-export function activityOf(daysSinceUpload: number | null, uploads30: number | null): FoundryActivity {
-  const d = daysSinceUpload ?? 9999;
-  const u = uploads30 ?? 0;
-  if (d <= 7 && u >= 4) return 'ACTIVE';
-  if (d <= 14) return 'STEADY';
-  if (d <= 45) return 'SLOW';
-  return 'DORMANT';
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   SIGNALS — cohort-level findings, empty until earned
-   ══════════════════════════════════════════════════════════════════════ */
-
-export type FoundrySignal = {
-  id: string;
-  /** e.g. "11 / 16" — always a count over a stated denominator, never a
-      percentage. The sample is small enough that a percentage would imply
-      precision the cohort size cannot carry. */
-  figure: string;
-  headline: string;
-  detail: string;
-  /** Every signal must name the window it was measured over and the date
-      it was computed, or it is not publishable. */
-  measuredOver: string;
-  computedAt: string;
-  method: string;
-};
-
-/**
- * Deliberately empty.
- *
- * The brief gave examples of the KIND of finding wanted here — Shorts
- * within 72 hours of long-form, a second long-form inside 14 days — and
- * was explicit that they are not current findings. Tracking began today.
- * Nothing in a single snapshot can support a cohort claim, so this array
- * stays empty and the page says so, rather than shipping a plausible
- * number that nobody measured.
- */
-export const FOUNDRY_SIGNALS: FoundrySignal[] = [];
-
-/* ══════════════════════════════════════════════════════════════════════
-   FOLLOW-THROUGH — the 7–14 day window, structured now, computed later
-   ══════════════════════════════════════════════════════════════════════ */
-
-export type FollowThroughEvent = {
-  channelId: string;
-  anchorVideoId: string;
-  anchorPublishedAt: string;
-  anchorFormat: string;
-  /** Did another meaningful asset land 7–14 days after the anchor?
-      Null until the window has fully elapsed — an open window is not a
-      failure, and scoring it as one would bias the cohort read downward
-      exactly the way our own 22/23 finding must not be biased upward. */
-  followedUp: boolean | null;
-  followUpVideoId: string | null;
-  followUpPublishedAt: string | null;
-  windowClosesAt: string;
-};
-
-export const FOUNDRY_FOLLOW_THROUGH: FollowThroughEvent[] = [];
-
-/* ══════════════════════════════════════════════════════════════════════
-   COMPARABLES
-
-   Manually curated, always. The temptation is to compute similarity from
-   subscriber count and upload cadence and call it a lane — but a lane is
-   a scene, an audience and a way of making things, none of which are in
-   the numbers we hold. An algorithm here would produce confident pairings
-   that a label team would quite reasonably act on.
-
-   The framing is also load-bearing: a comparable is "a useful reference
-   for this team", never "this artist should be in Foundry". We have no
-   visibility of YouTube's selection and must never imply otherwise.
-   ══════════════════════════════════════════════════════════════════════ */
-
-export function comparablesFor(channelId: string) {
-  return memberByChannelId(channelId)?.comparableVmgArtists ?? [];
-}

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Foundry Watch — VMG YouTube Intelligence</title>
-<meta name="description" content="Following YouTube's emerging artist cohort to understand how developing artists are building their channels.">
+<meta name="description" content="Following artists selected for YouTube Music Foundry to see how their channels develop.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
@@ -12,27 +12,20 @@
 /* ══════════════════════════════════════════════════════════════════════
    FOUNDRY WATCH
 
-   Inherits the Intelligence Hub system exactly — same type stack, same
-   ink, same gutter — and takes the violet that the Hub already assigns
-   to Foundry as its accent. The reason it reads as a distinct project
-   rather than a Hub page is the accent and the cohort table, not a
-   second design language.
+   Inherits the Intelligence Hub system — same type stack, same ink, same
+   gutter — with the violet the Hub already assigns to Foundry.
 
-   It is a cohort study, not an admin screen. So: no zebra-striped rows,
-   no sortable-column chrome, no status chips in boxes. The artist name
-   is the largest thing in a row, the numbers sit under it as labelled
-   figures, and a channel with missing data shows fewer figures rather
-   than a row of em-dashes.
+   Deliberately a short page. It answers "who is in the cohort and what are
+   their channels doing right now", and stops. Watcher holds the data and
+   builds the history; this is the reading surface.
    ══════════════════════════════════════════════════════════════════════ */
 
 :root{
-  --ink:#08080A; --ink-2:#0E0E13; --ink-3:#15151C;
+  --ink:#08080A; --ink-2:#0E0E13;
   --paper:#F4F2ED; --bone:#C6C2B9; --dim:#7A766E;
-  --line:rgba(244,242,237,.11); --hair:rgba(244,242,237,.07);
+  --line:rgba(244,242,237,.11);
   --signal:#FFE24A;
-  --fdy:#A98BFF;            /* the Foundry identity, carried from the Hub */
-  --fdy-dp:#6E52C4;
-  --active:#5FD3B6;
+  --fdy:#A98BFF;
   --pad:clamp(1.4rem,5vw,5rem);
 }
 *{box-sizing:border-box}
@@ -44,16 +37,13 @@ a{color:inherit;text-decoration:none}
 .display{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 800;
   text-transform:uppercase;line-height:.9;letter-spacing:-.012em;color:var(--paper);margin:0}
 h1.display{font-size:clamp(2.4rem,6.6vw,5.6rem)}
-h2.display{font-size:clamp(1.7rem,3.8vw,3rem)}
-h3.display{font-size:clamp(1.05rem,1.8vw,1.5rem);font-variation-settings:'wdth' 104,'wght' 750}
+h3.display{font-size:clamp(1.05rem,1.7vw,1.4rem);font-variation-settings:'wdth' 104,'wght' 750}
 .label{font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.17em;
   text-transform:uppercase;color:var(--dim)}
 .body{color:var(--bone);max-width:58ch}
-.figure{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 850;
-  line-height:.82;letter-spacing:-.03em;color:var(--paper);font-size:clamp(2.6rem,7vw,6rem)}
 .wrap{padding-inline:var(--pad);max-width:1680px;margin:0 auto}
-section{padding-block:clamp(3rem,6vw,6rem)}
-.eyebrow{display:flex;align-items:baseline;gap:.9rem;margin-bottom:clamp(1.3rem,3vw,2.4rem)}
+section{padding-block:clamp(2.6rem,5vw,4.6rem)}
+.eyebrow{display:flex;align-items:baseline;gap:.9rem;margin-bottom:clamp(1.2rem,2.6vw,2rem)}
 .eyebrow .bar{flex:1;height:1px;background:var(--line)}
 
 .mast{position:sticky;top:0;z-index:60;background:rgba(8,8,10,.86);
@@ -66,89 +56,56 @@ section{padding-block:clamp(3rem,6vw,6rem)}
   text-transform:uppercase;color:var(--fdy);margin-left:auto}
 
 /* ── hero ── */
-.hero{padding-top:clamp(2.4rem,5vw,4rem);padding-bottom:clamp(1.6rem,3vw,2.4rem)}
+.hero{padding-top:clamp(2.4rem,5vw,4rem);padding-bottom:clamp(1.4rem,2.6vw,2rem)}
 .hero .label{color:var(--fdy)}
 .hero .lede{margin-top:1.2rem;max-width:56ch;font-size:clamp(1rem,1.3vw,1.14rem)}
-.cohort-figs{display:flex;flex-wrap:wrap;gap:clamp(2rem,6vw,5rem);margin-top:clamp(2rem,4vw,3rem);
-  padding-top:clamp(1.4rem,3vw,2rem);border-top:1px solid var(--line)}
-.cohort-figs .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 840;
-  font-size:clamp(2.4rem,5vw,4rem);line-height:.85;color:var(--fdy)}
-.cohort-figs .n.plain{color:var(--paper)}
-.cohort-figs .k{margin-top:.5rem;max-width:18ch}
-.stamp{margin-top:1.6rem}
+.count{display:flex;align-items:baseline;gap:1rem;margin-top:clamp(1.8rem,3.4vw,2.6rem);
+  padding-top:clamp(1.2rem,2.4vw,1.8rem);border-top:1px solid var(--line)}
+.count .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 840;
+  font-size:clamp(2.2rem,4.4vw,3.4rem);line-height:.85;color:var(--fdy)}
+.gap-note{margin-top:1.2rem;padding-left:1rem;border-left:2px solid var(--fdy);max-width:56ch}
 
-/* A stated gap, not a hidden one. */
-.gap-note{margin-top:1.4rem;padding-left:1rem;border-left:2px solid var(--fdy);max-width:56ch}
-
-/* ── what we're watching ── */
-.watching{background:var(--ink-2);border-block:1px solid var(--line)}
-.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.4rem,3vw,2.6rem);
-  margin-top:clamp(1.6rem,3vw,2.4rem)}
-@media(max-width:900px){.wgrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.wgrid{grid-template-columns:1fr}}
-.wgrid > div{padding-top:1rem;border-top:1px solid var(--line)}
-.wgrid h4{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 102,'wght' 720;
-  text-transform:uppercase;font-size:.95rem;color:var(--paper);margin:.5rem 0 .4rem}
-.wgrid p{margin:0;font-size:.9rem;max-width:30ch}
-.wgrid .ix{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--fdy);letter-spacing:.1em}
-
-/* ── channels to watch ── */
-.ctw{border-left:2px solid var(--fdy);padding-left:clamp(1rem,2vw,1.5rem);max-width:62ch}
-
-/* ── cohort ── */
-.controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin-bottom:clamp(1.2rem,2.4vw,1.8rem)}
-.controls .grp{display:flex;gap:.4rem;flex-wrap:wrap}
-.chip{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--dim);background:none;border:1px solid var(--line);padding:.42rem .7rem;cursor:pointer;
-  transition:color .25s,border-color .25s}
-.chip:hover{color:var(--paper)}
-.chip.on{color:var(--ink);background:var(--fdy);border-color:var(--fdy);font-weight:500}
-.controls .sep{flex:1}
-
+/* ── cohort ──
+   One row per artist. The name leads; the figures sit under it as small
+   labelled numbers. A channel with nothing to show yet renders fewer
+   figures rather than a line of em-dashes. */
 .cohort{border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:minmax(0,2.1fr) repeat(4,minmax(0,1fr)) auto;
+.row{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr)) auto;
   gap:clamp(.8rem,2vw,1.8rem);align-items:center;
-  padding:clamp(1rem,2vw,1.4rem) 0;border-bottom:1px solid var(--line);
+  padding:clamp(.95rem,1.9vw,1.3rem) 0;border-bottom:1px solid var(--line);
   border-left:2px solid transparent;transition:border-left-color .3s,padding-left .35s}
 .row:hover{border-left-color:var(--fdy);padding-left:.7rem}
 .row .who h3{margin:0}
-.row .who .meta{margin-top:.3rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.row .who .meta{margin-top:.28rem;display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}
 .row .m .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 106,'wght' 780;
-  font-size:clamp(.98rem,1.5vw,1.25rem);line-height:1;color:var(--paper)}
-.row .m .k{margin-top:.3rem}
-.row .go{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--dim);white-space:nowrap}
+  font-size:clamp(.95rem,1.4vw,1.2rem);line-height:1;color:var(--paper)}
+.row .m .k{margin-top:.28rem}
+.row .go{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);white-space:nowrap}
 .row:hover .go{color:var(--fdy)}
-.act{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase}
-.act.ACTIVE{color:var(--active)}
-.act.STEADY{color:var(--bone)}
-.act.SLOW{color:var(--dim)}
-.act.DORMANT{color:var(--dim);opacity:.7}
 .label.vmg{color:var(--signal)}
-@media(max-width:1040px){
+@media(max-width:1000px){
   .row{grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr)) auto}
   .row .m.hide-md{display:none}
 }
 @media(max-width:680px){
-  .row{grid-template-columns:1fr 1fr;gap:.8rem}
-  .row .who{grid-column:1/-1}
-  .row .go{grid-column:1/-1}
-  .row .m.hide-sm{display:none}
+  .row{grid-template-columns:1fr 1fr;gap:.7rem}
+  .row .who,.row .go{grid-column:1/-1}
 }
 
-/* ── signals ── */
-.signals{background:var(--ink-2);border-block:1px solid var(--line)}
-.empty{border-left:2px solid var(--fdy);padding-left:clamp(1rem,2vw,1.5rem);max-width:60ch}
-.eg{margin-top:clamp(1.6rem,3vw,2.4rem);padding-top:1.4rem;border-top:1px solid var(--line)}
-.eg-list{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.4vw,2rem);margin-top:1rem}
-@media(max-width:800px){.eg-list{grid-template-columns:1fr}}
-.eg-list > div{opacity:.42}
-.eg-list .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 800;
-  font-size:clamp(1.5rem,2.6vw,2rem);color:var(--dim);line-height:1}
-.eg-list p{margin:.5rem 0 0;font-size:.86rem;max-width:30ch}
+/* ── editorial ── */
+.editorial{background:var(--ink-2);border-block:1px solid var(--line)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
+  gap:clamp(1.2rem,2.6vw,2.2rem);margin-top:clamp(1.2rem,2.4vw,1.8rem)}
+.note{padding-left:1rem;border-left:2px solid var(--fdy)}
+.note .k{color:var(--fdy)}
+.note h4{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 750;
+  text-transform:uppercase;font-size:1rem;color:var(--paper);margin:.45rem 0 .4rem}
+.note p{margin:0;font-size:.92rem;max-width:34ch}
+.empty{padding-left:1rem;border-left:2px solid var(--fdy);max-width:60ch}
 
-footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .65s cubic-bezier(.2,.7,.2,1),transform .65s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 </style>
@@ -166,91 +123,29 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
   <div class="label reveal">YouTube Foundry 2026</div>
   <h1 class="display reveal" style="margin-top:.6rem">Foundry Watch</h1>
   <p class="lede reveal">
-    Following YouTube's emerging artist cohort to understand how developing artists are
-    building their channels, using formats and sustaining campaigns.
+    Following artists selected for YouTube Music Foundry to see how their channels develop,
+    what formats they're using and what we can learn for our own campaigns.
   </p>
-
-  <div class="cohort-figs reveal">
-    <div>
-      <div class="n" id="figTracked">—</div>
-      <div class="k label">Artists currently tracked</div>
-    </div>
-    <div>
-      <div class="n plain" id="figCohort">FALL 2026</div>
-      <div class="k label">Cohort</div>
-    </div>
+  <div class="count reveal">
+    <span class="n" id="figCount">—</span>
+    <span class="label" id="figLabel">artists currently tracked</span>
   </div>
-
-  <div class="stamp label reveal" id="stamp">Loading cohort…</div>
   <div id="gapNote"></div>
 </section>
 
-<!-- ═══ WHAT WE'RE WATCHING ═══ -->
-<section class="watching">
-  <div class="wrap">
-    <div class="eyebrow reveal"><span class="label" style="color:var(--fdy)">What we're watching</span><span class="bar"></span></div>
-    <p class="body reveal" style="font-size:clamp(1rem,1.5vw,1.25rem);color:var(--paper);max-width:46ch">
-      YouTube has selected these artists for its Foundry development programme. We follow their
-      public channel behaviour to understand what changes over time.
-    </p>
-    <div class="wgrid">
-      <div class="reveal"><span class="ix">01</span><h4>Cadence</h4><p>How often are artists publishing, and does the rhythm hold between releases?</p></div>
-      <div class="reveal"><span class="ix">02</span><h4>Format</h4><p>How Shorts, official videos, live, performance and lyric formats get used.</p></div>
-      <div class="reveal"><span class="ix">03</span><h4>Follow-through</h4><p>What happens in the 7–14 days after a release — the window we already know is thin.</p></div>
-      <div class="reveal"><span class="ix">04</span><h4>Catalogue</h4><p>Whether older assets are activated alongside new campaign content.</p></div>
-      <div class="reveal"><span class="ix">05</span><h4>Growth</h4><p>How channel views and subscribers move across the tracking window.</p></div>
-      <div class="reveal"><span class="ix">06</span><h4>Experimentation</h4><p>New YouTube formats or publishing behaviours appearing in the cohort.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ CHANNELS TO WATCH ═══ -->
-<section class="wrap">
-  <div class="eyebrow reveal"><span class="label" style="color:var(--fdy)">Channels to watch</span><span class="bar"></span></div>
-  <div class="ctw reveal">
-    <p class="body" style="font-size:clamp(1rem,1.5vw,1.2rem);color:var(--paper);margin:0">
-      Tracking has just begun. Standout behaviours will appear here as the cohort develops.
-    </p>
-    <p class="body" style="margin-top:.8rem;font-size:.92rem">
-      This section is curated by hand. It will feature an artist when something specific is
-      worth pointing at — not because a number moved fastest in a given week.
-    </p>
-  </div>
-</section>
-
-<!-- ═══ THE COHORT ═══ -->
 <section class="wrap">
   <div class="eyebrow reveal">
     <span class="label" style="color:var(--fdy)">The cohort</span><span class="bar"></span>
-    <span class="label" id="shown"></span>
+    <span class="label" id="cohortLabel"></span>
   </div>
-
-  <div class="controls reveal">
-    <div class="grp" id="filters">
-      <button class="chip on" data-f="all">All</button>
-      <button class="chip" data-f="active">Active</button>
-      <button class="chip" data-f="shorts">Using Shorts</button>
-      <button class="chip" data-f="longform">Using long-form</button>
-      <button class="chip" data-f="vmg">Also VMG</button>
-    </div>
-    <span class="sep"></span>
-    <div class="grp" id="sorts">
-      <button class="chip on" data-s="activity">Most active</button>
-      <button class="chip" data-s="subs">Subscribers</button>
-      <button class="chip" data-s="recent">Recently uploaded</button>
-      <button class="chip" data-s="name">A–Z</button>
-    </div>
-  </div>
-
   <div class="cohort" id="cohort"><div class="label" style="padding:2rem 0">Loading cohort…</div></div>
 </section>
 
-<!-- ═══ FOUNDRY SIGNALS ═══ -->
-<section class="signals">
+<!-- The editorial layer: hand-written, or absent. -->
+<section class="editorial">
   <div class="wrap">
-    <div class="eyebrow reveal"><span class="label" style="color:var(--fdy)">Foundry signals</span><span class="bar"></span></div>
-    <h2 class="display reveal" style="max-width:18ch">Patterns emerging across the cohort</h2>
-    <div id="signalBody" style="margin-top:clamp(1.4rem,3vw,2rem)"></div>
+    <div class="eyebrow reveal"><span class="label" style="color:var(--fdy)">Worth watching</span><span class="bar"></span></div>
+    <div id="notes"></div>
   </div>
 </section>
 
@@ -258,28 +153,19 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:1.2rem;justify-content:space-between">
     <div>
       <a class="brand" href="/intelligence">VMG <b>YouTube Intelligence</b></a>
-      <p class="label" style="margin-top:.5rem">Foundry Watch · external observation cohort</p>
+      <p class="label" style="margin-top:.5rem">Foundry Watch</p>
     </div>
-    <p class="label" style="max-width:40ch;text-align:right">
-      Public YouTube data only. We observe channel behaviour; we have no visibility of
-      YouTube's programme or its selection.
+    <p class="label" style="max-width:42ch;text-align:right">
+      Public YouTube data via Watcher. We observe channel behaviour; we have no visibility
+      of YouTube's programme or its selection.
     </p>
   </div>
 </footer>
 
 <script>
-/* ══════════════════════════════════════════════════════════════════════
-   Everything below renders from /api/foundry. There is no artist data in
-   this file — not a name, not a number. If the endpoint fails the page
-   says so rather than falling back to anything written by hand.
-   ══════════════════════════════════════════════════════════════════════ */
-
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* Compact where it helps a column scan, exact where the number is the
-   point. Subscriber and view counts read better abbreviated; upload
-   counts are small enough to print in full. */
 const compact = n => {
   if (typeof n !== 'number' || !Number.isFinite(n)) return null;
   if (n >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,'') + 'B';
@@ -288,10 +174,8 @@ const compact = n => {
   return String(n);
 };
 
-const ago = iso => {
-  if (!iso) return null;
-  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (!Number.isFinite(d)) return null;
+const ago = d => {
+  if (typeof d !== 'number' || !Number.isFinite(d)) return null;
   if (d <= 0) return 'today';
   if (d === 1) return 'yesterday';
   if (d < 30) return d + ' days ago';
@@ -299,115 +183,58 @@ const ago = iso => {
   return Math.round(d/365) + ' years ago';
 };
 
-let STATE = { rows: [], filter: 'all', sort: 'activity' };
-
-/* A metric cell renders only when the metric exists. The brief was
-   explicit: omit rather than print meaningless dashes. A row with three
-   figures and a row with five should both look deliberate. */
-const cell = (value, label, cls = '') =>
+/* A figure renders only when it exists — never a dash standing in for a
+   number we don't have. */
+const cell = (value, label, cls='') =>
   value == null ? `<div class="m ${cls}"></div>`
                 : `<div class="m ${cls}"><div class="n">${esc(value)}</div><div class="k label">${esc(label)}</div></div>`;
 
-function rowHtml(r) {
-  const c = r.current;
-  const m = r.member;
-  const chUrl = `https://www.youtube.com/channel/${encodeURIComponent(m.channelId)}`;
-  const latest = c ? ago(c.lastUploadAt) : null;
+const NOTE_LABEL = { 'watching':'Worth watching', 'case-study':'Potential case study', 'reference':'Useful reference' };
 
-  return `<a class="row reveal" href="${esc(chUrl)}" target="_blank" rel="noopener">
+function rowHtml(r) {
+  const c = r.channel;
+  return `<a class="row reveal" href="https://www.youtube.com/channel/${esc(r.channelId)}" target="_blank" rel="noopener">
     <div class="who">
-      <h3 class="display">${esc(m.name)}</h3>
+      <h3 class="display">${esc(r.name)}</h3>
       <div class="meta">
-        ${c ? `<span class="act ${esc(c.activity)}">${esc(c.activity)}</span>` : ''}
-        ${m.country ? `<span class="label">${esc(m.country)}</span>` : ''}
-        ${m.handle ? `<span class="label">${esc(m.handle)}</span>` : ''}
-        ${m.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
+        <span class="label">${esc(r.handle)}</span>
+        ${r.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
       </div>
     </div>
     ${cell(c && compact(c.subscribers), 'Subscribers')}
-    ${cell(c && compact(c.views30 ?? c.views7), c && c.views30 != null ? '30d views' : '7d views', 'hide-sm')}
-    ${cell(c && latest, 'Latest upload', 'hide-md')}
-    ${cell(c && c.uploads30d != null ? String(c.uploads30d) : null, 'Uploads · 30d', 'hide-md')}
+    ${cell(c && compact(c.totalViews), 'Total views', 'hide-md')}
+    ${cell(c && ago(c.daysSinceUpload), 'Latest upload')}
     <span class="go">View channel →</span>
   </a>`;
 }
 
-function applyView() {
-  const f = STATE.filter, s = STATE.sort;
-  let rows = STATE.rows.slice();
-
-  rows = rows.filter(r => {
-    const c = r.current;
-    if (f === 'active')   return c && (c.activity === 'ACTIVE' || c.activity === 'STEADY');
-    if (f === 'shorts')   return c && (c.shorts30d ?? 0) > 0;
-    if (f === 'longform') return c && (c.longform30d ?? 0) > 0;
-    if (f === 'vmg')      return r.member.vmgManaged;
-    return true;
-  });
-
-  const rank = { ACTIVE: 0, STEADY: 1, SLOW: 2, DORMANT: 3 };
-  rows.sort((a, b) => {
-    const A = a.current, B = b.current;
-    if (s === 'subs')   return (B?.subscribers ?? -1) - (A?.subscribers ?? -1);
-    if (s === 'recent') return (A?.daysSinceUpload ?? 9e9) - (B?.daysSinceUpload ?? 9e9);
-    if (s === 'name')   return a.member.name.localeCompare(b.member.name, 'en', { sensitivity: 'base' });
-    const d = (rank[A?.activity] ?? 9) - (rank[B?.activity] ?? 9);
-    return d !== 0 ? d : (B?.subscribers ?? 0) - (A?.subscribers ?? 0);
-  });
-
-  document.getElementById('cohort').innerHTML =
-    rows.length ? rows.map(rowHtml).join('')
-                : `<div class="label" style="padding:2rem 0">No artists match that filter.</div>`;
-  document.getElementById('shown').textContent =
-    rows.length === STATE.rows.length ? `${rows.length} artists` : `${rows.length} of ${STATE.rows.length}`;
-  observe(document.querySelectorAll('#cohort .reveal'));
-}
-
-function wireChips(id, key) {
-  document.getElementById(id).addEventListener('click', e => {
-    const b = e.target.closest('.chip'); if (!b) return;
-    document.querySelectorAll(`#${id} .chip`).forEach(x => x.classList.remove('on'));
-    b.classList.add('on');
-    STATE[key] = b.dataset.f || b.dataset.s;
-    applyView();
-  });
-}
-
-function signalsHtml(signals) {
-  if (signals && signals.length) {
-    return signals.map(s => `<div class="reveal" style="margin-bottom:1.6rem">
-      <div class="figure" style="font-size:clamp(2rem,4vw,3.2rem)">${esc(s.figure)}</div>
-      <h3 class="display" style="margin-top:.5rem">${esc(s.headline)}</h3>
-      <p class="body" style="margin-top:.5rem">${esc(s.detail)}</p>
-      <p class="label" style="margin-top:.6rem">${esc(s.measuredOver)} · computed ${esc(s.computedAt)}</p>
-    </div>`).join('');
-  }
-  /* The honest empty state. The examples below are shown at low contrast
-     and explicitly labelled as the SHAPE of a future finding, so nobody
-     can screenshot one and read it as a result. */
-  return `<div class="empty reveal">
+function notesHtml(rows) {
+  const withNotes = rows.filter(r => r.note && r.note.note);
+  if (!withNotes.length) {
+    return `<div class="empty reveal">
       <p class="body" style="font-size:clamp(1rem,1.4vw,1.15rem);color:var(--paper);margin:0">
-        No cohort findings yet. Tracking began this month, and a pattern across sixteen
-        channels needs campaign events to have actually happened before it means anything.
+        Nothing flagged yet.
       </p>
-      <p class="body" style="margin-top:.8rem;font-size:.92rem">
-        Findings appear here only once measured, with the window and method stated alongside.
+      <p class="body" style="margin-top:.7rem;font-size:.92rem">
+        This section is written by hand. When a channel in the cohort does something worth
+        pointing at — a format, a release sequence, a useful reference for a VMG artist in a
+        similar lane — it appears here.
       </p>
-    </div>
-    <div class="eg reveal">
-      <span class="label">The kind of finding this section will carry — illustrative only, not measured</span>
-      <div class="eg-list">
-        <div><div class="n">— / —</div><p>used Shorts within 72 hours of a long-form upload.</p></div>
-        <div><div class="n">— / —</div><p>published another long-form asset within 14 days.</p></div>
-        <div><div class="n">— / —</div><p>used performance-led content inside a campaign window.</p></div>
-      </div>
     </div>`;
+  }
+  return `<div class="notes">${withNotes.map(r => `
+    <div class="note reveal">
+      <span class="k label">${esc(NOTE_LABEL[r.note.kind] || 'Worth watching')}</span>
+      <h4>${esc(r.name)}</h4>
+      <p>${esc(r.note.note)}</p>
+      ${r.note.forVmgArtist ? `<p class="label" style="margin-top:.55rem">For ${esc(r.note.forVmgArtist)}</p>` : ''}
+    </div>`).join('')}</div>`;
 }
 
 const io = new IntersectionObserver(es => {
   es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-}, { rootMargin: '0px 0px -6% 0px', threshold: .06 });
-function observe(nodes){ nodes.forEach((n,i)=>{ n.style.transitionDelay = `${Math.min(i*40,300)}ms`; io.observe(n); }); }
+}, { rootMargin:'0px 0px -6% 0px', threshold:.06 });
+function observe(nodes){ nodes.forEach((n,i)=>{ n.style.transitionDelay = `${Math.min(i*40,280)}ms`; io.observe(n); }); }
 
 async function load() {
   try {
@@ -415,45 +242,32 @@ async function load() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
 
-    STATE.rows = d.rows || [];
-    document.getElementById('figTracked').textContent = d.counts.tracked;
-    document.getElementById('figCohort').textContent =
-      `${String(d.cohort.season).toUpperCase()} ${d.cohort.year}`;
+    document.getElementById('figCount').textContent = d.counts.tracked;
+    document.getElementById('figLabel').textContent =
+      d.counts.tracked === 1 ? 'artist currently tracked' : 'artists currently tracked';
+    document.getElementById('cohortLabel').textContent = d.cohort.label;
 
-    const started = d.cohort.trackingStarted
-      ? new Date(d.cohort.trackingStarted).toLocaleDateString('en-GB', { month:'long', year:'numeric' })
-      : null;
-    document.getElementById('stamp').textContent =
-      [started ? `Tracking started ${started}` : null,
-       `${d.counts.baselineCaptured} of ${d.counts.tracked} baselines captured`].filter(Boolean).join(' · ');
-
-    /* The count named in the brief and the count actually in Watcher are
-       different numbers. Saying so here is cheaper than someone finding
-       out by counting the rows. */
     if (d.unresolved && d.unresolved.length) {
       document.getElementById('gapNote').innerHTML = `<div class="gap-note reveal">
-        <span class="label" style="color:var(--fdy)">Cohort status</span>
-        <p class="body" style="margin:.45rem 0 0;font-size:.95rem">
-          ${d.counts.namedInBrief} artists named for this cohort; ${d.counts.tracked} are in Watcher and
-          tracked here. Not yet resolved to a channel:
-          ${d.unresolved.map(u => esc(u.name)).join(', ')}.
+        <p class="body" style="margin:0;font-size:.93rem">
+          ${d.counts.tracked + d.counts.unresolved} artists named for this cohort.
+          Not yet resolved to a channel in Watcher: ${d.unresolved.map(esc).join(', ')}.
         </p></div>`;
     }
 
-    document.getElementById('signalBody').innerHTML = signalsHtml(d.signals);
-    applyView();
+    document.getElementById('cohort').innerHTML =
+      d.rows.map(rowHtml).join('') ||
+      `<div class="label" style="padding:2rem 0">No artists in this cohort.</div>`;
+    document.getElementById('notes').innerHTML = notesHtml(d.rows);
     observe(document.querySelectorAll('.reveal'));
-  } catch (e) {
+  } catch {
     document.getElementById('cohort').innerHTML =
       `<div class="label" style="padding:2rem 0">Cohort data unavailable right now.</div>`;
-    document.getElementById('stamp').textContent = 'Cohort data unavailable';
-    document.getElementById('signalBody').innerHTML = signalsHtml([]);
+    document.getElementById('notes').innerHTML = notesHtml([]);
     observe(document.querySelectorAll('.reveal'));
   }
 }
 
-wireChips('filters', 'filter');
-wireChips('sorts', 'sort');
 observe(document.querySelectorAll('.reveal'));
 load();
 </script>
