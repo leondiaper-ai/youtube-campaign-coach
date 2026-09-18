@@ -78,6 +78,20 @@ export type FoundryNote = {
   forVmgArtist?: string;
 };
 
+/**
+ * Where an artist is from, as stated in the Foundry cohort information.
+ *
+ * An array, not a single value, because some artists have a dual identity
+ * that a single country would misrepresent — RaiNao is Puerto Rican, which
+ * is also the United States, and flattening that either way loses something
+ * real. Order matters: the first entry leads.
+ *
+ * `code` is ISO 3166-1 alpha-2, which is all the flag needs: a flag emoji is
+ * just the two letters as regional indicators, so nothing has to store an
+ * image or a per-country mapping.
+ */
+export type FoundryCountry = { code: string; name: string };
+
 export type FoundryMember = {
   channelId: string;
   slug: string;          // Watcher slug
@@ -86,6 +100,10 @@ export type FoundryMember = {
   cohort: FoundryCohortId;
   /** In the Foundry cohort AND on the VMG roster. True for underscores. */
   vmgManaged: boolean;
+  /** From the cohort information. Absent where we have not established it —
+      absent, never guessed, and the page shows nothing rather than a flag
+      that might be wrong. */
+  countries?: FoundryCountry[];
   note?: FoundryNote;
 };
 
@@ -103,6 +121,30 @@ const S: FoundryCohortId = 'foundry-2026-summer';
 /** Hand-written notes, keyed by slug. Empty until something is genuinely
     worth saying — see FoundryNote above. */
 const NOTES: Record<string, FoundryNote> = {};
+
+/* ── COUNTRY, WHERE WE HAVE IT ────────────────────────────────────────
+   Supplied with the first 2026 cohort information. The Fall intake has no
+   country data in this project and none is inferred here: YouTube does not
+   expose a channel's country anywhere we read, and guessing from a channel
+   title or the language of a video title would produce something that looks
+   verified and is not. Those artists carry no country and the page shows
+   none, which is the behaviour to fix by supplying the data — not by
+   loosening the rule. */
+const COUNTRIES: Record<string, FoundryCountry[]> = {
+  rainao:         [{ code: 'PR', name: 'Puerto Rico' }, { code: 'US', name: 'USA' }],
+  silicagel:      [{ code: 'KR', name: 'South Korea' }],
+  soffiemusic:    [{ code: 'DE', name: 'Germany' }],
+  theparadoxband: [{ code: 'US', name: 'USA' }],
+  tks2g:          [{ code: 'FR', name: 'France' }],
+  wasiaproject:   [{ code: 'GB', name: 'UK' }],
+  wavetoearth:    [{ code: 'KR', name: 'South Korea' }],
+  zippyfala:      [{ code: 'PL', name: 'Poland' }],
+};
+
+/** Tracked artists with no country established yet — for review, so the gap
+    is visible rather than silently empty on the page. */
+export const FOUNDRY_COUNTRY_UNKNOWN = () =>
+  FOUNDRY_MEMBERS.filter(a => !a.countries?.length).map(a => a.name);
 
 /**
  * THE FALL 2026 ROSTER.
@@ -158,6 +200,7 @@ function m(
   return {
     channelId, slug, name, handle, cohort,
     vmgManaged: VMG_MANAGED.has(slug),
+    countries: COUNTRIES[slug],
     note: NOTES[slug],
   };
 }

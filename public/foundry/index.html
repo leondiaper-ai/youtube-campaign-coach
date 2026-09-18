@@ -179,6 +179,10 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
   text-transform:uppercase;color:var(--dim);white-space:nowrap}
 .row:hover .go{color:var(--fdy)}
 .label.vmg{color:var(--signal)}
+/* Country sits in the existing meta line beside the handle — a marker, not
+   a column. The flag carries at the label's own size; letter-spacing is
+   dropped so the two regional indicators stay joined as one glyph pair. */
+.label.country{color:var(--bone);letter-spacing:.06em}
 /* The intake an artist came from — Summer or Fall — is carried in the data
    and returned by the API, but deliberately not shown. On the page this is
    one cohort of developing artists; which month YouTube picked them is
@@ -403,6 +407,24 @@ const byActivity = (a, b) => {
   return d(a) - d(b) || (b.channel?.subscribers ?? 0) - (a.channel?.subscribers ?? 0);
 };
 
+/* A flag emoji is the country's two letters as regional indicator symbols —
+   so nothing here stores images or a country table, and an unknown country
+   simply produces nothing. */
+const flagOf = code => (typeof code === 'string' && /^[A-Za-z]{2}$/.test(code))
+  ? String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65))
+  : '';
+
+/* "🇵🇷🇺🇸 Puerto Rico / USA" — every flag, then the names, so a dual
+   identity reads as one thing rather than two competing labels. Empty
+   string when we have no country, which renders nothing at all. */
+function countryLine(r) {
+  const cs = (r && r.countries) || [];
+  if (!cs.length) return '';
+  const flags = cs.map(c => flagOf(c.code)).join('');
+  const names = cs.map(c => c.name).join(' / ');
+  return `${flags} ${names}`.trim();
+}
+
 const NOTE_LABEL = { 'watching':'Worth watching', 'case-study':'Potential case study', 'reference':'Useful reference' };
 
 function rowHtml(r) {
@@ -414,6 +436,7 @@ function rowHtml(r) {
         <h3 class="display">${esc(r.name)}</h3>
         <div class="meta">
           <span class="label">${esc(r.handle)}</span>
+          ${countryLine(r) ? `<span class="label country">${esc(countryLine(r))}</span>` : ''}
           ${r.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
         </div>
         ${c && c.latest && c.latest.title
@@ -465,7 +488,8 @@ function featHtml(r) {
     <div class="body-in">
       ${c.avatar ? `<span class="av" style="background-image:url('${esc(c.avatar)}')"></span>` : ''}
       <h3 class="display">${esc(r.name)}</h3>
-      <div class="hand label">${esc(r.handle)}${r.vmgManaged ? ' · Also VMG' : ''}</div>
+      <div class="hand label">${esc(r.handle)}${
+        countryLine(r) ? ' · ' + esc(countryLine(r)) : ''}${r.vmgManaged ? ' · Also VMG' : ''}</div>
       <div class="nums">
         ${cell(compact(c.subscribers), 'Subscribers')}
         ${cell(compact(c.totalViews), 'Total views')}

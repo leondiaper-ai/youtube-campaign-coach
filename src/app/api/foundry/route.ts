@@ -5,8 +5,8 @@ import { normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
 import { computeMultiformat } from '@/lib/contentStructure';
 import type { LiveSnap } from '@/lib/artists';
 import {
-  FOUNDRY_COHORTS, FOUNDRY_COHORT_IDS, FOUNDRY_UNRESOLVED, membersOf,
-  type FoundryCohortId,
+  FOUNDRY_COHORTS, FOUNDRY_COHORT_IDS, FOUNDRY_COUNTRY_UNKNOWN,
+  FOUNDRY_UNRESOLVED, membersOf, type FoundryCohortId,
 } from '@/lib/intelligence/foundryCohort';
 
 /**
@@ -145,6 +145,9 @@ export async function GET(req: NextRequest) {
     },
     rows,
     unresolved: FOUNDRY_UNRESOLVED,
+    /* Tracked artists with no country established. Surfaced so the gap is
+       reviewable rather than invisible. */
+    countryUnknown: FOUNDRY_COUNTRY_UNKNOWN(),
     generatedAt: new Date().toISOString(),
   }, { headers: CORS });
 }
