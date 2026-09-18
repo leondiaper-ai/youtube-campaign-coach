@@ -109,6 +109,34 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
   font-size:clamp(3.2rem,7vw,5.6rem);line-height:.8;color:var(--fdy)}
 .gap-note{margin-top:1.2rem;padding-left:1rem;border-left:2px solid var(--fdy);max-width:56ch}
 
+/* ── featured channels ─────────────────────────────────────────────────
+   Three cards above the list, for the channels publishing right now.
+
+   ON THE CRITERION. Watcher holds one day of history for this cohort, so
+   there is no trend to rank on and nothing here claims to identify the
+   "best" channel. The one thing the data supports is recency: who has
+   published most recently. That is stated on the page rather than implied,
+   and the section disappears entirely if nobody has uploaded this week.
+
+   Every channel stays in the full list below. A card is emphasis, not a
+   filter — nobody should have to wonder where an artist went. */
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
+  gap:clamp(.9rem,1.8vw,1.4rem)}
+.fcard{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;background:var(--ink-2);transition:border-color .3s,transform .3s}
+.fcard:hover{border-color:rgba(244,242,237,.28);transform:translateY(-2px)}
+.fcard .field{height:88px;display:flex;align-items:flex-end;padding:.8rem 1rem}
+.fcard .field .when{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--paper);opacity:.92}
+.fcard .body-in{padding:1rem 1.1rem 1.2rem;display:flex;flex-direction:column;flex:1}
+.fcard h3{margin:0;font-size:clamp(1.1rem,1.7vw,1.4rem)}
+.fcard .hand{margin-top:.3rem}
+.fcard .nums{display:flex;gap:1.6rem;margin-top:auto;padding-top:1.1rem;border-top:1px solid var(--line)}
+.fcard .nums .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 800;
+  font-size:1.15rem;line-height:1;color:var(--paper)}
+.fcard .nums .k{margin-top:.28rem}
+.feat-note{margin-top:1rem;font-size:.84rem;color:var(--dim);max-width:62ch}
+
 /* ── cohort ──
    One row per artist. The name leads; the figures sit under it as small
    labelled numbers. A channel with nothing to show yet renders fewer
@@ -205,6 +233,17 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
     <span class="label" id="figLabel">artists currently tracked</span>
   </div>
   <div id="gapNote"></div>
+</section>
+
+<!-- Featured: channels publishing right now. Rendered only when at least
+     one channel in the cohort has uploaded within seven days. -->
+<section class="wrap" id="featured" style="display:none;padding-bottom:0">
+  <div class="eyebrow reveal">
+    <span class="label" style="color:var(--fdy)">Publishing now</span><span class="bar"></span>
+    <span class="label" id="featCount"></span>
+  </div>
+  <div class="feat" id="featGrid"></div>
+  <p class="feat-note reveal" id="featNote"></p>
 </section>
 
 <section class="wrap">
@@ -308,6 +347,37 @@ function rowHtml(r) {
   </a>`;
 }
 
+/* Recency only — see the note on .feat in the stylesheet. */
+const FEATURE_WINDOW_DAYS = 7;
+const FEATURE_MAX = 3;
+
+function featuredOf(rows) {
+  return rows
+    .filter(r => r.channel && typeof r.channel.daysSinceUpload === 'number'
+                 && r.channel.daysSinceUpload <= FEATURE_WINDOW_DAYS)
+    .sort((a, b) => a.channel.daysSinceUpload - b.channel.daysSinceUpload
+                 || (b.channel.subscribers ?? 0) - (a.channel.subscribers ?? 0))
+    .slice(0, FEATURE_MAX);
+}
+
+function featHtml(r) {
+  const c = r.channel;
+  return `<a class="fcard reveal" href="https://www.youtube.com/channel/${esc(r.channelId)}"
+             target="_blank" rel="noopener">
+    <div class="field" style="background:${chipColour(r.channelId)}">
+      <span class="when">Uploaded ${esc(ago(c.daysSinceUpload))}</span>
+    </div>
+    <div class="body-in">
+      <h3 class="display">${esc(r.name)}</h3>
+      <div class="hand label">${esc(r.handle)}${r.vmgManaged ? ' · Also VMG' : ''}</div>
+      <div class="nums">
+        ${cell(compact(c.subscribers), 'Subscribers')}
+        ${cell(compact(c.totalViews), 'Total views')}
+      </div>
+    </div>
+  </a>`;
+}
+
 function notesHtml(rows) {
   const withNotes = rows.filter(r => r.note && r.note.note);
   if (!withNotes.length) {
@@ -353,6 +423,20 @@ async function load() {
           ${d.counts.tracked + d.counts.unresolved} artists named for this cohort.
           Not yet resolved to a channel in Watcher: ${d.unresolved.map(esc).join(', ')}.
         </p></div>`;
+    }
+
+    /* Featured first, then the complete list — the list keeps every
+       channel, including the three above it. */
+    const feat = featuredOf(d.rows);
+    if (feat.length) {
+      document.getElementById('featured').style.display = '';
+      document.getElementById('featGrid').innerHTML = feat.map(featHtml).join('');
+      document.getElementById('featCount').textContent =
+        `${feat.length} of ${d.counts.tracked} uploaded in the last ${FEATURE_WINDOW_DAYS} days`;
+      document.getElementById('featNote').textContent =
+        'Ordered by how recently each channel uploaded. Watcher has been following this ' +
+        'cohort for one day, so there is no trend to read yet — this is who is publishing, ' +
+        'not who is performing best.';
     }
 
     document.getElementById('cohort').innerHTML =
