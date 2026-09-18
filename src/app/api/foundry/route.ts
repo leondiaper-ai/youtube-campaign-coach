@@ -6,7 +6,7 @@ import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
 import type { LiveSnap } from '@/lib/artists';
 import {
-  FOUNDRY_COHORTS, FOUNDRY_MEMBERS, FOUNDRY_UNRESOLVED, FOUNDRY_SPELLING_NOTES,
+  FOUNDRY_COHORTS, FOUNDRY_UNRESOLVED, FOUNDRY_SPELLING_NOTES,
   FOUNDRY_SIGNALS, FOUNDRY_VMG_OVERLAP, membersOf, activityOf,
   type FoundryBaseline, type FoundryCohortId, type FoundryRow,
 } from '@/lib/intelligence/foundryCohort';
