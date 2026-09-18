@@ -27,23 +27,39 @@
  * we know why a channel did what it did.
  */
 
-export type FoundryCohortId = 'foundry-2026-fall';
+/* Two intakes so far, and they stay separate in the data even though the
+   page reads them together. A cohort is when YouTube selected an artist;
+   collapsing that into one bucket would make it impossible to ever ask
+   whether the two intakes behave differently. */
+export type FoundryCohortId = 'foundry-2026-summer' | 'foundry-2026-fall';
 
 export type FoundryCohort = {
   id: FoundryCohortId;
   label: string;
+  /** Short form, for a per-row marker where the full label is too long. */
+  short: string;
   year: number;
   drop: string;
 };
 
 export const FOUNDRY_COHORTS: Record<FoundryCohortId, FoundryCohort> = {
+  'foundry-2026-summer': {
+    id: 'foundry-2026-summer',
+    label: 'YouTube Foundry 2026 — first cohort',
+    short: 'Summer',
+    year: 2026,
+    drop: 'Summer',
+  },
   'foundry-2026-fall': {
     id: 'foundry-2026-fall',
     label: 'YouTube Foundry 2026 — Fall',
+    short: 'Fall',
     year: 2026,
     drop: 'Fall',
   },
 };
+
+export const FOUNDRY_COHORT_IDS = Object.keys(FOUNDRY_COHORTS) as FoundryCohortId[];
 
 /**
  * The editorial layer — the actually valuable part.
@@ -80,6 +96,10 @@ export type FoundryMember = {
    failed every production build for four commits. Order matters here. */
 const VMG_MANAGED = new Set<string>(['underscores']);
 
+/* Shorthand for the roster below, declared before it is read — see the note
+   above on declaration order. */
+const S: FoundryCohortId = 'foundry-2026-summer';
+
 /** Hand-written notes, keyed by slug. Empty until something is genuinely
     worth saying — see FoundryNote above. */
 const NOTES: Record<string, FoundryNote> = {};
@@ -103,35 +123,51 @@ export const FOUNDRY_MEMBERS: FoundryMember[] = [
   m('UC7Dr19bFdqkkfREMITgY9Vg', 'underscores',   'underscores',    '@underscores'),
   m('UCakRh4eU8scBO-SzfEKFm9w', 'zeinamates',    'Zeina',          '@zeinamates'),
 
-  /* Added 18 September, completing the named cohort. Every channel ID and
-     handle below was read off the channel itself and then confirmed against
-     what Watcher stored when the artist was added — not typed from the
-     brief. Two arrived as handles and six as channel IDs; all eight resolved
-     to a channel whose title matches the artist. */
-  m('UC-eDoMjP2VBrXtNOkNgxQiQ', 'rainao',         'RaiNao',         '@rainao'),
+
+  /* ── THE FIRST 2026 COHORT (Summer) ──────────────────────────────────
+     Selected before the Fall intake and added here on 18 September. Every
+     channel ID and handle was read off the channel itself and then checked
+     against what Watcher stored on add — not typed from the brief. Six
+     arrived as channel IDs and two as handles; all eight resolved to a
+     channel whose own title matches the artist. */
+  m('UC-eDoMjP2VBrXtNOkNgxQiQ', 'rainao',         'RaiNao',         '@rainao',         S),
   /* Watcher holds the channel's own title, which carries the Korean name. */
-  m('UCXteMTpHAvyDP05G0QULuZA', 'silicagel',      'Silica Gel 실리카겔', '@silicagel'),
-  m('UCshXgyGxsBzR8mVk7IC1K_Q', 'soffiemusic',    'SOFFIE',         '@soffiemusic'),
-  m('UCAgPDQ0haCpdUm7FGQoYStw', 'theparadoxband', 'The Paradox',    '@theparadoxband'),
-  m('UCiRWTc0sdBm-G37iVA4idEg', 'tks2g',          'TKS 2G',         '@tks2g'),
-  m('UCgIjUYl5i3LDBRFPHkiLULA', 'wasiaproject',   'Wasia Project',  '@wasiaproject'),
-  m('UCBJNpcJaUcVyw4LlqGRMpcQ', 'wavetoearth',    'wave to earth',  '@wavetoearth'),
+  m('UCXteMTpHAvyDP05G0QULuZA', 'silicagel',      'Silica Gel 실리카겔', '@silicagel',   S),
+  m('UCshXgyGxsBzR8mVk7IC1K_Q', 'soffiemusic',    'SOFFIE',         '@soffiemusic',    S),
+  m('UCAgPDQ0haCpdUm7FGQoYStw', 'theparadoxband', 'The Paradox',    '@theparadoxband', S),
+  m('UCiRWTc0sdBm-G37iVA4idEg', 'tks2g',          'TKS 2G',         '@tks2g',          S),
+  m('UCgIjUYl5i3LDBRFPHkiLULA', 'wasiaproject',   'Wasia Project',  '@wasiaproject',   S),
+  m('UCBJNpcJaUcVyw4LlqGRMpcQ', 'wavetoearth',    'wave to earth',  '@wavetoearth',    S),
   /* The handle is @zippyfala, not @zippyogar. */
-  m('UCpw7wrI_lazxjBTkkZVQ0Dg', 'zippyfala',      'Zippy Ogar',     '@zippyfala'),
+  m('UCpw7wrI_lazxjBTkkZVQ0Dg', 'zippyfala',      'Zippy Ogar',     '@zippyfala',      S),
+
+  /* The last three, resolved 18 September from handles. They were named in
+     the Fall list from the start and sat unresolved because nobody had a
+     handle for them — which is precisely why this file is keyed on channel
+     ID and not on names. Watcher holds Takase Toya's channel under its own
+     bilingual title. */
+  m('UC9eX-yFQNy_puCqa-QIKD0Q', 'takasetoya',    '高瀬統也 - Takase Toya', '@takasetoya'),
+  m('UClS8Nj7Ia_MuQ_Go52DR9QA', 'thisislorelei', 'This Is Lorelei',      '@thisislorelei'),
+  m('UCu_CZvWjKZx1G2w6uWRRJEA', 'yapimks',       'Yapi',                 '@yapimks'),
 ];
 
-function m(channelId: string, slug: string, name: string, handle: string): FoundryMember {
+function m(
+  channelId: string, slug: string, name: string, handle: string,
+  cohort: FoundryCohortId = 'foundry-2026-fall',
+): FoundryMember {
   return {
-    channelId, slug, name, handle,
-    cohort: 'foundry-2026-fall',
+    channelId, slug, name, handle, cohort,
     vmgManaged: VMG_MANAGED.has(slug),
     note: NOTES[slug],
   };
 }
 
-/** Named for this cohort but not yet resolved to a channel in Watcher.
-    Kept visible so the count difference is explained rather than noticed. */
-export const FOUNDRY_UNRESOLVED = ['Takase Toya', 'This Is Lorelei', 'Yapi'];
+/** Named for a cohort but not yet resolved to a channel in Watcher. Empty
+    as of 18 September — every named artist now has a channel. Kept as a
+    concept because the next intake will arrive as names before handles, and
+    the page explains a count gap rather than letting someone notice it. */
+export const FOUNDRY_UNRESOLVED: string[] = [];
 
-export const membersOf = (cohort: FoundryCohortId) =>
-  FOUNDRY_MEMBERS.filter(a => a.cohort === cohort);
+/** One cohort, or every tracked Foundry artist when asked for 'all'. */
+export const membersOf = (cohort: FoundryCohortId | 'all') =>
+  cohort === 'all' ? FOUNDRY_MEMBERS : FOUNDRY_MEMBERS.filter(a => a.cohort === cohort);

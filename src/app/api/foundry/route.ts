@@ -5,7 +5,8 @@ import { normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
 import { computeMultiformat } from '@/lib/contentStructure';
 import type { LiveSnap } from '@/lib/artists';
 import {
-  FOUNDRY_COHORTS, FOUNDRY_UNRESOLVED, membersOf, type FoundryCohortId,
+  FOUNDRY_COHORTS, FOUNDRY_COHORT_IDS, FOUNDRY_UNRESOLVED, membersOf,
+  type FoundryCohortId,
 } from '@/lib/intelligence/foundryCohort';
 
 /**
@@ -36,11 +37,18 @@ export async function OPTIONS() {
 const n = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 export async function GET(req: NextRequest) {
-  const cohortId = (req.nextUrl.searchParams.get('cohort') ?? 'foundry-2026-fall') as FoundryCohortId;
-  const cohort = FOUNDRY_COHORTS[cohortId];
-  if (!cohort) {
-    return NextResponse.json({ error: `Unknown cohort: ${cohortId}` }, { status: 404, headers: CORS });
+  /* ?cohort=all returns every tracked Foundry artist across intakes, which
+     is what the page asks for — one list, with each row still carrying the
+     cohort it belongs to. A named cohort still returns just that cohort, so
+     the two intakes remain separable by anything that wants them apart. */
+  const requested = req.nextUrl.searchParams.get('cohort') ?? 'all';
+  const cohortId = requested as FoundryCohortId | 'all';
+  if (cohortId !== 'all' && !FOUNDRY_COHORTS[cohortId]) {
+    return NextResponse.json({ error: `Unknown cohort: ${requested}` }, { status: 404, headers: CORS });
   }
+  const cohort = cohortId === 'all'
+    ? { id: 'all', label: 'YouTube Foundry 2026', short: 'All', year: 2026, drop: 'All intakes' }
+    : FOUNDRY_COHORTS[cohortId];
 
   const rows = await Promise.all(membersOf(cohortId).map(async member => {
     let channel = null;
@@ -112,11 +120,24 @@ export async function GET(req: NextRequest) {
       /* One unreachable channel must not empty the cohort. */
     }
 
-    return { ...member, channel };
+    /* The cohort travels with the row so the page can mark it without a
+       second lookup. */
+    return { ...member, cohortLabel: FOUNDRY_COHORTS[member.cohort].label,
+             cohortShort: FOUNDRY_COHORTS[member.cohort].short, channel };
   }));
+
+  /* Per-intake counts, so nothing downstream has to count rows itself or
+     hard-code a total that goes stale the next time an artist is added. */
+  const byCohort = FOUNDRY_COHORT_IDS.map(id => ({
+    id,
+    label: FOUNDRY_COHORTS[id].label,
+    short: FOUNDRY_COHORTS[id].short,
+    tracked: rows.filter(r => r.cohort === id).length,
+  })).filter(c => c.tracked > 0);
 
   return NextResponse.json({
     cohort,
+    cohorts: byCohort,
     counts: {
       tracked: rows.length,
       withData: rows.filter(r => r.channel).length,

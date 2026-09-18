@@ -179,6 +179,10 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
   text-transform:uppercase;color:var(--dim);white-space:nowrap}
 .row:hover .go{color:var(--fdy)}
 .label.vmg{color:var(--signal)}
+/* The intake an artist came from — Summer or Fall — is carried in the data
+   and returned by the API, but deliberately not shown. On the page this is
+   one cohort of developing artists; which month YouTube picked them is
+   provenance, not something a reader needs while scanning the list. */
 /* The newest upload, under the name. This is the line that makes someone
    click: a title and a view count says what is happening on the channel in
    a way that "406K subscribers" never does. */
@@ -302,8 +306,8 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
       <span>What are</span><span>they doing</span><span>that we</span><span>aren't?</span>
     </h2>
     <p class="sub reveal">
-      Thirteen developing channels, watched for cadence, format and the shape of a
-      release — the same things we look at across our own campaigns.
+      <span id="bandCount">Developing channels</span>, watched for cadence, format and the
+      shape of a release — the same things we look at across our own campaigns.
     </p>
   </div>
 </section>
@@ -501,11 +505,19 @@ function observe(nodes){ nodes.forEach((n,i)=>{ n.style.transitionDelay = `${Mat
 
 async function load() {
   try {
-    const r = await fetch('/api/foundry?cohort=foundry-2026-fall');
+    /* Every intake in one list. Each row still carries its own cohort, so
+       Summer and Fall stay distinguishable on the page and in the data. */
+    const r = await fetch('/api/foundry?cohort=all');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
 
     document.getElementById('figCount').textContent = d.counts.tracked;
+    /* The band used to say "Thirteen developing channels" in prose, which
+       was true for about four days. */
+    const band = document.getElementById('bandCount');
+    if (band) {
+      band.textContent = `${d.counts.tracked} developing channel${d.counts.tracked === 1 ? '' : 's'}`;
+    }
     document.getElementById('figLabel').textContent =
       d.counts.tracked === 1 ? 'artist currently tracked' : 'artists currently tracked';
     document.getElementById('cohortLabel').textContent = d.cohort.label;
