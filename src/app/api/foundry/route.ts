@@ -50,11 +50,28 @@ export async function GET(req: NextRequest) {
         const history = await readHistory(member.channelId);
         const nc = normalizeChannelData(snap, history, null);
 
+        /* The newest upload, for the card image. Sorted here rather than
+           trusting the array order — recentUploads is assembled by the sync
+           and nothing guarantees it stays newest-first. The thumbnail URL is
+           derived from the video id, which is the documented i.ytimg.com
+           pattern and needs no extra API call. */
+        const newest = (snap.recentUploads ?? [])
+          .filter(u => u && u.id && u.publishedAt)
+          .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0] ?? null;
+
         channel = {
           subscribers: n(nc.subs),
           totalViews: n(nc.views),
           lastUploadAt: snap.lastUploadAt ?? null,
           daysSinceUpload: n(nc.cadence?.lastUploadDaysAgo),
+          /* Channel avatar, straight from the snap. */
+          avatar: snap.thumbnail ?? null,
+          latest: newest ? {
+            videoId: newest.id,
+            title: newest.title ?? null,
+            publishedAt: newest.publishedAt,
+            thumb: `https://i.ytimg.com/vi/${newest.id}/hqdefault.jpg`,
+          } : null,
           /* How many daily snapshots Watcher holds. Zero or one means
              there is no trend to read yet, and the page can say so
              rather than implying a flat line. */
