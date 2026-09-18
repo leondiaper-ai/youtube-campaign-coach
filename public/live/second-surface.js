@@ -135,7 +135,13 @@ function momentFromPost(m, sourceName) {
     date: when.toISOString().slice(0, 10),
     dateLabel: shortDate(when.toISOString()),
     title: q ? q[1] : 'Single',
-    detail: `Single · date stated by ${sourceName}`,
+    /* Just "New single." The provenance was written for the moment this
+       date first appeared and nobody had confirmed it — worth saying
+       then, clutter now. The evidence has not gone anywhere: the post it
+       was read from is on the page above, with Sumerian Records named in
+       its own metadata line, so a reader who wants the source can see it
+       without the timeline explaining itself. */
+    detail: 'New single',
     stage: null,
     asset: null,
   };
