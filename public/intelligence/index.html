@@ -7,7 +7,7 @@
 <meta name="description" content="Active YouTube campaigns and the intelligence we've gathered for each Virgin Music Group artist.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wdth,wght@62..125,100..900&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════════════════════
    VMG YOUTUBE INTELLIGENCE
@@ -25,8 +25,11 @@
    of work attached to an artist, which is what they always were — the
    loop explains itself when someone uses it, and needs no diagram.
 
-   Design system unchanged: same tokens, same type stack, same campaign
-   cards. This is an architecture change, not a redesign.
+   The display face is Anton and the corners are rounded, both lifted
+   from the Amyl deck — large type reads as a statement rather than as
+   enlarged body text, and soft edges make the page read as a product
+   rather than a printed layout. Tokens, colour and structure are
+   otherwise unchanged.
    ══════════════════════════════════════════════════════════════════════ */
 
 :root{
@@ -59,10 +62,22 @@ body{margin:0;background:var(--ink);color:var(--bone);
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 
-.display{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 800;
-  text-transform:uppercase;line-height:.9;letter-spacing:-.012em;color:var(--paper);margin:0}
-h2.display{font-size:clamp(1.6rem,3.4vw,2.6rem)}
-h3.display{font-size:clamp(1.1rem,1.9vw,1.6rem);font-variation-settings:'wdth' 104,'wght' 750}
+/* ── display type ──────────────────────────────────────────────────────
+   Anton, taken from the Amyl deck. A single-weight condensed face, so
+   there is no weight to choose and nothing to tune — it is heavy and
+   narrow by construction, which is what makes large type read as a
+   statement rather than as a bigger version of the body text.
+
+   It sets tighter than Archivo at the same size, so everything here is
+   set larger than the values it replaced. line-height under 1 is safe
+   because Anton has short descenders and no ascender clash in caps.
+
+   Archivo stays loaded: the masthead brand still uses it, and /foundry
+   is built on its variable width axis. */
+.display{font-family:'Anton',Impact,sans-serif;font-weight:400;
+  text-transform:uppercase;line-height:.92;letter-spacing:.004em;color:var(--paper);margin:0}
+h2.display{font-size:clamp(1.9rem,4vw,3.1rem)}
+h3.display{font-size:clamp(1.25rem,2.1vw,1.8rem)}
 .label{font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.17em;
   text-transform:uppercase;color:var(--dim)}
 .body{color:var(--bone);max-width:56ch}
@@ -92,7 +107,11 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 
 /* ── campaigns ── */
 .live-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(1.2rem,2.6vw,2.2rem)}
+/* Rounded to match the Amyl deck — 14px on the large cards, 12px on the
+   smaller ones, pills on anything tag-sized. Hard corners read as a print
+   layout; these read as a product, which is what this is. */
 .camp{position:relative;overflow:hidden;background:var(--ink-3);border:1px solid var(--line);
+  border-radius:14px;
   display:flex;flex-direction:column;min-height:430px;transition:border-color .35s}
 .camp:hover{border-color:rgba(244,242,237,.26)}
 .camp .art{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.5;
@@ -113,8 +132,8 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 .camp .said .hl{font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.3;color:var(--paper);max-width:28ch}
 .camp .said .nx{margin-top:.5rem;font-size:.88rem;color:var(--bone);max-width:40ch}
 .camp .nums{display:flex;gap:clamp(1.2rem,3vw,2.4rem);margin-top:1.3rem;padding-top:1.1rem;border-top:1px solid var(--line)}
-.camp .nums .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 800;
-  font-size:clamp(1.3rem,2.1vw,1.75rem);line-height:1;color:var(--paper)}
+.camp .nums .n{font-family:'Anton',Impact,sans-serif;font-weight:400;
+  font-size:clamp(1.5rem,2.4vw,2rem);line-height:1;color:var(--paper)}
 .camp .nums .k{margin-top:.3rem}
 .camp .go{margin-top:1.2rem;display:inline-flex;align-items:center;gap:.5rem;
   font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--signal)}
@@ -139,7 +158,7 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 .arow:hover .go{color:var(--paper)}
 .tags{display:flex;gap:.4rem;flex-wrap:wrap}
 .tag{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;
-  padding:.3rem .5rem;border:1px solid currentColor;white-space:nowrap}
+  padding:.32rem .68rem;border:1px solid currentColor;border-radius:100px;white-space:nowrap}
 .tag.live{color:var(--c-live)}
 .tag.deep{color:var(--c-deep)}
 .tag.case{color:var(--c-case)}
@@ -163,32 +182,32 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
    that say more about history depth than about the campaign. */
 .spot .lede{max-width:60ch;margin:0 0 clamp(1.2rem,2.4vw,1.8rem);color:var(--bone)}
 .spot-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1px;
-  background:var(--line);border:1px solid var(--line)}
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .sp-lead{background:var(--ink-3);padding:clamp(1.3rem,2.6vw,2rem);display:flex;flex-direction:column}
 .sp-rest{background:var(--ink-2);display:flex;flex-direction:column}
 .sp-head{display:flex;align-items:center;gap:.9rem}
 .sp-av{width:52px;height:52px;border-radius:50%;background:var(--ink);background-size:cover;
   background-position:center;flex:0 0 auto;border:1px solid var(--line)}
 .sp-rest .sp-av{width:34px;height:34px}
-.sp-grade{margin-left:auto;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
-  font-size:clamp(1.8rem,3vw,2.4rem);line-height:.8;color:var(--c-spot)}
+.sp-grade{margin-left:auto;font-family:'Anton',Impact,sans-serif;font-weight:400;
+  font-size:clamp(1.9rem,3.2vw,2.6rem);line-height:.8;color:var(--c-spot)}
 .sp-lead .why{margin:1.1rem 0 0;font-size:clamp(1rem,1.4vw,1.14rem);line-height:1.34;color:var(--paper);max-width:32ch}
 .sp-lead .cad{margin-top:.55rem;font-size:.9rem;color:var(--bone)}
 .sp-fmts{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1.1rem}
 .sp-fmt{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
-  padding:.26rem .45rem;border:1px solid var(--line);color:var(--dim)}
+  padding:.28rem .62rem;border:1px solid var(--line);border-radius:100px;color:var(--dim)}
 .sp-nums{display:flex;gap:clamp(1.2rem,3vw,2.2rem);margin-top:auto;padding-top:1.3rem;border-top:1px solid var(--line)}
-.sp-nums .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 800;
-  font-size:clamp(1.2rem,2vw,1.6rem);line-height:1;color:var(--paper)}
+.sp-nums .n{font-family:'Anton',Impact,sans-serif;font-weight:400;
+  font-size:clamp(1.4rem,2.3vw,1.9rem);line-height:1;color:var(--paper)}
 .sp-nums .k{margin-top:.3rem}
 .sp-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.85rem;align-items:center;
   padding:clamp(.8rem,1.6vw,1.05rem) clamp(1rem,2vw,1.5rem);border-bottom:1px solid var(--line)}
 .sp-row:last-child{border-bottom:none}
-.sp-row .nm{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 750;
-  text-transform:uppercase;font-size:.95rem;color:var(--paper);line-height:1.1}
+.sp-row .nm{font-family:'Anton',Impact,sans-serif;font-weight:400;
+  text-transform:uppercase;font-size:1.05rem;letter-spacing:.004em;color:var(--paper);line-height:1.1}
 .sp-row .sub{margin-top:.2rem;font-size:.82rem;color:var(--dim)}
-.sp-row .gr{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
-  font-size:1.3rem;line-height:1;color:var(--c-spot)}
+.sp-row .gr{font-family:'Anton',Impact,sans-serif;font-weight:400;
+  font-size:1.45rem;line-height:1;color:var(--c-spot)}
 /* Each channel links to its own YouTube channel — the lead card and every
    row are whole link targets, so the hover state is the affordance. */
 .sp-lead,.sp-row{transition:background .3s}
@@ -204,7 +223,7 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 /* ── the two non-artist destinations ── */
 .beyond{background:var(--ink-2);border-block:1px solid var(--line)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1px;
-  background:var(--line);border:1px solid var(--line)}
+  background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .bcard{background:var(--ink-2);padding:clamp(1.4rem,2.8vw,2.2rem);display:flex;flex-direction:column;
   min-height:210px;transition:background .3s}
 .bcard:hover{background:var(--ink-3)}
@@ -212,8 +231,8 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 .bcard.res .k{color:var(--signal)}
 .bcard h3{margin:.6rem 0 .5rem}
 .bcard p{margin:0;font-size:.93rem;color:var(--bone);max-width:38ch}
-.bcard .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
-  font-size:clamp(2rem,3.4vw,2.8rem);line-height:.85;color:var(--c-fdy);margin-bottom:.2rem}
+.bcard .n{font-family:'Anton',Impact,sans-serif;font-weight:400;
+  font-size:clamp(2.2rem,3.8vw,3.1rem);line-height:.85;color:var(--c-fdy);margin-bottom:.2rem}
 .bcard .go{margin-top:auto;padding-top:1.2rem;font-family:'DM Mono',monospace;font-size:.62rem;
   letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:inline-flex;gap:.45rem}
 .bcard .go::after{content:'→';transition:transform .3s}
