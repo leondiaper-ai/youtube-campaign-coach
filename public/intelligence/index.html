@@ -189,8 +189,10 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 .sp-av{width:52px;height:52px;border-radius:50%;background:var(--ink);background-size:cover;
   background-position:center;flex:0 0 auto;border:1px solid var(--line)}
 .sp-rest .sp-av{width:34px;height:34px}
-.sp-grade{margin-left:auto;font-family:'Anton',Impact,sans-serif;font-weight:400;
-  font-size:clamp(1.9rem,3.2vw,2.6rem);line-height:.8;color:var(--c-spot)}
+/* The API also returns a letter grade per channel. It is not shown: the
+   weighting is not yet defensible — an all-Shorts channel currently grades
+   above one publishing across five formats — and a letter is read as a
+   verdict. The cadence line says what the channel did; that stands up. */
 .sp-lead .why{margin:1.1rem 0 0;font-size:clamp(1rem,1.4vw,1.14rem);line-height:1.34;color:var(--paper);max-width:32ch}
 .sp-lead .cad{margin-top:.55rem;font-size:.9rem;color:var(--bone)}
 .sp-fmts{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1.1rem}
@@ -200,14 +202,12 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 .sp-nums .n{font-family:'Anton',Impact,sans-serif;font-weight:400;
   font-size:clamp(1.4rem,2.3vw,1.9rem);line-height:1;color:var(--paper)}
 .sp-nums .k{margin-top:.3rem}
-.sp-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.85rem;align-items:center;
+.sp-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.85rem;align-items:center;
   padding:clamp(.8rem,1.6vw,1.05rem) clamp(1rem,2vw,1.5rem);border-bottom:1px solid var(--line)}
 .sp-row:last-child{border-bottom:none}
 .sp-row .nm{font-family:'Anton',Impact,sans-serif;font-weight:400;
   text-transform:uppercase;font-size:1.05rem;letter-spacing:.004em;color:var(--paper);line-height:1.1}
 .sp-row .sub{margin-top:.2rem;font-size:.82rem;color:var(--dim)}
-.sp-row .gr{font-family:'Anton',Impact,sans-serif;font-weight:400;
-  font-size:1.45rem;line-height:1;color:var(--c-spot)}
 /* Each channel links to its own YouTube channel — the lead card and every
    row are whole link targets, so the hover state is the affordance. */
 .sp-lead,.sp-row{transition:background .3s}
@@ -553,7 +553,6 @@ function spotLead(c) {
         <h3 class="display">${esc(c.name)}</h3>
         <div class="label" style="margin-top:.3rem;color:var(--c-spot)">${esc(c.ecosystemSignal || c.classification || '')}</div>
       </div>
-      <div class="sp-grade">${esc(c.grade || '')}</div>
     </div>
     <p class="why">${esc(c.scoreLabel || '')}</p>
     <div class="cad">${esc(cadenceLine(c))}</div>
@@ -575,7 +574,6 @@ function spotRow(c) {
       <div class="nm">${esc(c.name)}</div>
       <div class="sub">${esc(cadenceLine(c))}</div>
     </div>
-    <div class="gr">${esc(c.grade || '')}</div>
   </${href ? 'a' : 'div'}>`;
 }
 
