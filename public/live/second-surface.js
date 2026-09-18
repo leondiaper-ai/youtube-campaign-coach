@@ -53,6 +53,24 @@ const SURFACES = {
 
 const API = 'https://youtube-campaign-coach.vercel.app/api/label-watch';
 
+/* How many supporting stills the gallery shows beside the hero. */
+const MAX_GALLERY = 9;
+
+/* Small counts read better as words in a sentence than as digits. */
+const WORD = ['no','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'];
+const count = n => WORD[n] || String(n);
+
+/* "2 October". Full month, because this one appears inside a sentence
+   rather than in a metadata line, and "2 OCT" mid-prose reads as a
+   field rather than as a date. UTC throughout, like every other date
+   here. */
+const longDate = iso => {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return `${d.getUTCDate()} ${d.toLocaleDateString('en-GB',
+    { month: 'long', timeZone: 'UTC' })}`;
+};
+
 const shortDate = iso => {
   const d = new Date(iso);
   if (isNaN(d)) return '';
@@ -168,6 +186,29 @@ async function merge(d) {
   const imported = (w.matched || []).map(m => labelAsset(m, sourceName));
   if (!imported.length && !own.length) return d;
 
+  /* What the server's campaignViews already covers. Anything with one of
+     these ids is not new money, however many times it arrives. */
+  const ownIds = new Set(own.map(x => x.videoId));
+
+  /* ── ONE VIDEO, ONE PLACE ──────────────────────────────────────────
+     Deduplicated on YouTube video id, which is the only identifier that
+     cannot drift: a title can be edited, a thumbnail can be replaced,
+     and the same upload reaches this function from two lists (the
+     cover's heroes and its supporting set overlap, and a label match can
+     restate an asset the artist channel already published). Two cards
+     for one video reads as two pieces of campaign activity, which
+     inflates what the page appears to show.
+
+     Genuinely separate uploads from the two channels are NOT duplicates
+     and both stay — they have different ids, and each names its own
+     source in its metadata. */
+  const seen = new Set();
+  const unique = xs => xs.filter(x => {
+    if (!x || !x.videoId || seen.has(x.videoId)) return false;
+    seen.add(x.videoId);
+    return true;
+  });
+
   /* Newest first BY DAY, and within a day the asset that travelled
      furthest leads. Palaye's two assets went out on 15 September seven
      minutes apart, and to-the-minute sorting handed the lead slot to
@@ -178,19 +219,36 @@ async function merge(d) {
     const t2 = Date.parse(x.publishedAt || x.date || 0);
     return isNaN(t2) ? 0 : Math.floor(t2 / 864e5);
   };
-  const all = own.concat(imported)
+  const all = unique(own.concat(imported))
     .sort((x, y) => day(y) - day(x) || (y.views || 0) - (x.views || 0));
 
   /* ONE hero, as everywhere else. The lead asset is the campaign's
      picture; the rest are the evidence it has been working. */
   a.heroes = all.slice(0, 1).map(x => Object.assign(x, { role: 'hero' }));
-  a.supporting = all.slice(1).map(x => Object.assign(x, { role: 'supporting' }));
+
+  /* The gallery is a SELECTION, not an inventory. A campaign that ends
+     up posting every other day would otherwise turn this strip into a
+     scroll of near-identical Shorts, and the argument it is making —
+     this channel is being run — stops landing somewhere around the
+     twelfth thumbnail. The strip already prints "+N" for what it is not
+     showing, from `total`, so nothing is hidden: the count stays whole
+     while the picture stays readable.
+
+     Totals are unaffected. Campaign views and campaign assets are
+     computed from `all` below, every verified asset included. */
+  a.supporting = all.slice(1, 1 + MAX_GALLERY)
+    .map(x => Object.assign(x, { role: 'supporting' }));
   a.total = all.length;
 
   if (!imported.length) return d;
 
   const m = d.metrics || (d.metrics = {});
-  const addViews = imported.reduce((t2, x) => t2 + (x.views || 0), 0);
+  /* Summed off the DEDUPED list, not off the raw matches. Summing the
+     matches counted a video twice when the same upload arrived from both
+     channels' lists — 52,676 views from two cards showing one video. */
+  const addViews = all
+    .filter(x => !ownIds.has(x.videoId))
+    .reduce((t2, x) => t2 + (x.views || 0), 0);
   if (typeof m.campaignViews === 'number') m.campaignViews += addViews;
   else if (addViews) m.campaignViews = addViews;
   m.campaignAssets = all.length;
@@ -198,18 +256,9 @@ async function merge(d) {
   m.campaignLongForm = all.length - m.campaignShorts;
   m.newUploads = all.length;
 
-  /* The server counted the artist channel's uploads and said so in
-     prose. It did not know about the second surface, so the count in
-     that sentence is corrected here — the number only, leaving the
-     server's wording and its careful refusal to call this a confirmed
-     campaign start exactly as written. */
-  if (d.read && typeof d.read.line === 'string') {
-    d.read.line = d.read.line.replace(/^\d+ uploads?\b/,
-      `${all.length} upload${all.length === 1 ? '' : 's'}`);
-  }
-
   /* A date the label has published, if it published one. */
   const tl = d.timeline;
+  let stated = null;
   if (tl && Array.isArray(tl.moments)) {
     const known = new Set(tl.moments.map(x => x.date));
     for (const post of (w.matched || [])) {
@@ -217,9 +266,38 @@ async function merge(d) {
       if (!mo || known.has(mo.date)) continue;
       known.add(mo.date);
       tl.moments.push(mo);
+      if (!stated) stated = mo;
     }
     /* Forward moments render in the order given, so re-sort. */
     tl.moments.sort((x, y) => Date.parse(x.date || 0) - Date.parse(y.date || 0));
+  }
+
+  /* ── THE CAMPAIGN READ ─────────────────────────────────────────────
+     The server writes this line knowing only the artist channel, and it
+     writes it defensively — "nobody has confirmed whether this is the
+     campaign starting" — which is the right posture when all you can see
+     is uploads appearing on one channel with nothing dated ahead of
+     them. Once the label's own post supplies a release date, that is no
+     longer the situation: there IS something to lead into, and hedging
+     against it reads as a system that has not noticed.
+
+     Still assembled from observation rather than typed: the count, the
+     formats, the single's name and its date all come from the merged
+     payload, so the sentence moves as the campaign does and disappears
+     rather than going stale if the evidence for it does. */
+  if (d.read && stated) {
+    const shorts = all.filter(x => x.aspect === 'portrait' || x.kind === 'short').length;
+    const what = shorts === all.length
+      ? `Short${all.length === 1 ? '' : 's'}`
+      : `asset${all.length === 1 ? '' : 's'}`;
+    d.read.line = `${count(all.length)} new ${what} have appeared ahead of `
+      + `${stated.title} on ${longDate(stated.date)}. `
+      + `We're tracking activity from here.`;
+  } else if (d.read && typeof d.read.line === 'string') {
+    /* No published date to lead into, so the server's careful wording
+       stands; only the upload count it could not know is corrected. */
+    d.read.line = d.read.line.replace(/^\d+ uploads?\b/,
+      `${all.length} upload${all.length === 1 ? '' : 's'}`);
   }
 
   /* One line, for wherever the assets are shown. */
