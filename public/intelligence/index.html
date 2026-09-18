@@ -189,7 +189,7 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
       <a href="#campaigns">Campaigns</a>
       <a href="#artists">Artists</a>
       <a href="/foundry">Foundry</a>
-      <a href="/resources">Resources</a>
+      <a href="https://youtube-insights-pi.vercel.app/preview.html" target="_blank" rel="noopener">Analysis</a>
     </nav>
   </div>
 </header>
@@ -239,12 +239,18 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
            use formats and sustain campaigns.</p>
         <span class="go">Explore Foundry</span>
       </a>
-      <a class="bcard res reveal" href="/resources">
-        <span class="k label">Resources</span>
-        <h3 class="display" style="margin-top:.9rem">Decks, market analysis<br>and methodology</h3>
-        <p>The wider library — YouTube research, benchmarks and the working
-           documents behind the analysis.</p>
-        <span class="go">Open resources</span>
+      <!-- Points at the Observatory, which is the market analysis every
+           artist page is measured against — 138 channels, 3,554 videos.
+           It lives on its own deployment, so this leaves the Hub. The
+           previous target, /resources, was a folder of documents with no
+           index page behind it. -->
+      <a class="bcard res reveal" href="https://youtube-insights-pi.vercel.app/preview.html"
+         target="_blank" rel="noopener">
+        <span class="k label">The analysis</span>
+        <h3 class="display" style="margin-top:.9rem">How successful YouTube<br>campaigns are built</h3>
+        <p>The market study everything here is measured against — 138 channels and
+           3,554 videos on release planning, sequencing and the follow-up window.</p>
+        <span class="go">Open the analysis ↗</span>
       </a>
     </div>
   </div>
@@ -254,7 +260,7 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
   <div class="wrap foot">
     <div>
       <div class="brand">VMG <b>YouTube Intelligence</b></div>
-      <p class="label" style="margin-top:.6rem">Campaigns · Artists · Foundry · Resources</p>
+      <p class="label" style="margin-top:.6rem">Campaigns · Artists · Foundry · Analysis</p>
     </div>
     <p class="label" id="footStamp">Public YouTube data</p>
   </div>
