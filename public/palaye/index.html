@@ -149,6 +149,37 @@
 .lc-asset .ti{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.02rem;margin-top:.3rem;
   line-height:1.2}
 .lc-asset .st{font-family:'Inter',sans-serif;font-size:.8rem;color:rgba(242,239,234,.6);margin-top:.35rem}
+/* ── THE BAND'S OWN WORLD ─────────────────────────────────────────
+   A strip of the artist channel's most recent uploads, straight from
+   their thumbnails. The deck's whole argument is that this channel is a
+   world rather than a feed, and a live cover that showed only figures
+   would be arguing the opposite. Shorts keep their 9:16 so the strip
+   looks like the channel does. */
+.lc-world{margin-top:1.6rem}
+.lc-world .k{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(242,239,234,.5);margin-bottom:.7rem}
+.lc-strip{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.4rem;
+  scrollbar-width:thin;scroll-snap-type:x proximity}
+.lc-strip::-webkit-scrollbar{height:4px}
+.lc-strip::-webkit-scrollbar-thumb{background:rgba(242,239,234,.2);border-radius:4px}
+.lc-strip a{flex:0 0 auto;width:82px;border-radius:7px;overflow:hidden;position:relative;
+  scroll-snap-align:start;border:1px solid rgba(242,239,234,.12)}
+.lc-strip a.wide{width:146px}
+.lc-strip img{width:100%;height:100%;object-fit:cover;aspect-ratio:9/16;display:block;
+  transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+.lc-strip a.wide img{aspect-ratio:16/9}
+.lc-strip a:hover img{transform:scale(1.06)}
+.lc-strip .tag{position:absolute;left:0;bottom:0;right:0;padding:.3rem .35rem;
+  font-family:'Inter',sans-serif;font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--paper);background:linear-gradient(180deg,transparent,rgba(8,7,10,.9))}
+
+/* Their own words, at the size the band would set them. */
+.lc-say{margin-top:1.5rem;border-left:2px solid var(--signal);padding-left:1rem;max-width:44ch}
+.lc-say q{font-family:'Oswald',sans-serif;font-weight:500;quotes:none;
+  font-size:clamp(1.05rem,1.9vw,1.4rem);line-height:1.22;display:block}
+.lc-say .who{font-family:'Inter',sans-serif;font-size:.72rem;letter-spacing:.12em;
+  text-transform:uppercase;color:rgba(242,239,234,.45);margin-top:.45rem}
+
 .lc-jump{margin-top:1.8rem;display:inline-flex;gap:.5rem;font-family:'Inter',sans-serif;
   font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,239,234,.55);
   border-bottom:1px solid rgba(242,239,234,.2);padding-bottom:.25rem;cursor:pointer}
@@ -1196,7 +1227,21 @@ function liveAsset(a){
   </a>`;
 }
 
-function liveCover(cover, label){
+/* The label's announcement post carries the release date in its own
+   title — "out Oct. 2nd!". That is a published statement, so the timeline
+   uses it and says where it came from, rather than repeating the
+   second-hand "about two weeks". If no such post exists the briefed
+   estimate stands. */
+function statedRelease(label){
+  const posts = (label && label.matchedAllTime) || [];
+  for (const p of posts) {
+    const m = (p.title || '').match(/out\s+([A-Z][a-z]+\.?\s+\d{1,2}(?:st|nd|rd|th)?)/);
+    if (m) return { text: m[1].replace(/\./,''), source: label.labelTitle || 'the label channel' };
+  }
+  return null;
+}
+
+function liveCover(cover, label, world){
   const m = cover.metrics || {};
   const heroes = (cover.assets && cover.assets.heroes) || [];
   const newest = heroes[0] || null;
@@ -1272,6 +1317,11 @@ function liveCover(cover, label){
         <div>
           ${newest ? liveAsset({...newest, source:'Palaye Royale'}) : ''}
 
+          ${newest && newest.title ? `<div class="lc-say">
+            <q>${newest.title}</q>
+            <div class="who">Palaye Royale · their words, on their channel</div>
+          </div>` : ''}
+
           <div class="lc-tl">
             ${heroes.slice().reverse().map(a => `<div class="lc-ev done">
               <div class="when">${a.dateLabel || dayMon(a.publishedAt)}</div>
@@ -1284,17 +1334,29 @@ function liveCover(cover, label){
                 <div class="what">${a.formatLabel || 'Upload'}</div>
                 <div class="src">Sumerian Records · ${nfmt(a.views) || '—'} views</div>
               </div>`).join('')}
-            <div class="lc-ev pending">
-              <div class="when">${LIVE.briefed.single}</div>
+            ${(() => { const rel = statedRelease(label); return `<div class="lc-ev pending">
+              <div class="when">${rel ? rel.text : LIVE.briefed.single}</div>
               <div class="what">First single</div>
-              <div class="src">${LIVE.briefed.singleNote}</div>
-            </div>
+              <div class="src">${rel
+                ? `Stated on ${rel.source}'s own post`
+                : LIVE.briefed.singleNote}</div>
+            </div>`; })()}
             <div class="lc-ev pending">
               <div class="when">Not yet published</div>
               <div class="what">Official video</div>
               <div class="src">Channel: to be confirmed</div>
             </div>
           </div>
+
+          ${world && world.recent && world.recent.length ? `<div class="lc-world">
+            <div class="k">The channel right now · ${world.recent.length} most recent uploads</div>
+            <div class="lc-strip">${world.recent.map(u => `
+              <a class="${u.isShort ? '' : 'wide'}" href="https://www.youtube.com/watch?v=${u.videoId}"
+                 target="_blank" rel="noopener" title="${(u.title||'').replace(/"/g,'&quot;')}">
+                <img src="${u.thumb}" alt="" loading="lazy">
+                <span class="tag">${u.isShort ? 'Short' : (u.formatLabel || 'Upload')}</span>
+              </a>`).join('')}</div>
+          </div>` : ''}
 
           <div class="lc-jump" onclick="document.querySelectorAll('.slide')[1].scrollIntoView({behavior:'smooth'})">
             Read the Deep Dive ↓
@@ -1319,8 +1381,15 @@ async function loadLive(){
         + (since ? `&since=${since}` : ''))).json();
     } catch { /* the label surface is additive; its absence must not remove the cover */ }
 
+    /* The artist channel's own recent uploads — same KV read, no filter,
+       because on their own channel everything is theirs. */
+    let world = null;
+    try {
+      world = await (await fetch('/api/label-watch?mode=recent&label=%40palayeroyale')).json();
+    } catch { /* the strip is texture; the cover stands without it */ }
+
     const deck = document.getElementById('deck');
-    deck.insertAdjacentHTML('afterbegin', liveCover(cover, label));
+    deck.insertAdjacentHTML('afterbegin', liveCover(cover, label, world));
     deck.querySelectorAll('.lc .reveal,.lc .stagger').forEach(el => io.observe(el));
   } catch { /* a failed live read leaves the deck exactly as it was */ }
 }

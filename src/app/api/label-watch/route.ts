@@ -124,6 +124,12 @@ function assess(u: RecentUpload, artist: string): Matched | null {
 }
 
 export async function GET(req: NextRequest) {
+  /* mode=recent returns a channel's newest uploads with no artist filter
+     at all — used for the artist's OWN channel, where every upload is
+     theirs by definition and filtering would be nonsense. It is the same
+     KV read, so it costs nothing extra, and it keeps the page from
+     needing a second endpoint to show a band its own work. */
+  const mode = req.nextUrl.searchParams.get('mode');
   const label = req.nextUrl.searchParams.get('label') ?? '@sumerianrecords';
   const artist = req.nextUrl.searchParams.get('artist') ?? 'Palaye Royale';
   const since = req.nextUrl.searchParams.get('since');
@@ -146,6 +152,31 @@ export async function GET(req: NextRequest) {
   const pool = new Map<string, RecentUpload>();
   for (const u of [...(snap.recentUploads ?? []), ...(snap.topEverVideos ?? [])]) {
     if (u?.id && !pool.has(u.id)) pool.set(u.id, u);
+  }
+
+  if (mode === 'recent') {
+    const recent = Array.from(pool.values())
+      .filter(u => u?.id && u.publishedAt)
+      .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+      .slice(0, 12)
+      .map(u => ({
+        videoId: u.id,
+        title: u.title ?? '',
+        publishedAt: u.publishedAt,
+        views: n(u.viewCount),
+        likes: n(u.likeCount),
+        durationSec: n(u.durationSec),
+        formatLabel: classifyUploadFormat(u),
+        isShort: (u.durationSec ?? 0) > 0 && (u.durationSec ?? 0) <= 62,
+        thumb: `https://i.ytimg.com/vi/${u.id}/hqdefault.jpg`,
+      }));
+    return NextResponse.json({
+      label, mode: 'recent', available: true,
+      channelTitle: snap.title ?? null,
+      avatar: snap.thumbnail ?? null,
+      recent,
+      generatedAt: new Date().toISOString(),
+    }, { headers: CORS });
   }
 
   const assessed = Array.from(pool.values())
