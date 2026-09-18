@@ -231,13 +231,13 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
 <section class="beyond">
   <div class="wrap">
     <div class="bgrid">
-      <a class="bcard reveal" href="/foundry">
+      <a class="bcard reveal" href="/foundry" target="_blank" rel="noopener">
         <span class="k label">Foundry watch</span>
         <div class="n" id="fdyCount">—</div>
         <h3 class="display">Developing artists</h3>
         <p>YouTube's Fall 2026 Foundry cohort, followed for how they build channels,
            use formats and sustain campaigns.</p>
-        <span class="go">Explore Foundry</span>
+        <span class="go">Explore Foundry ↗</span>
       </a>
       <!-- Points at the Observatory, which is the market analysis every
            artist page is measured against — 138 channels, 3,554 videos.
@@ -315,7 +315,14 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
 const num = n => typeof n === 'number' ? n.toLocaleString('en-GB') : '—';
 
 /* Live campaigns first, then everything else in roster order — so the
-   artists someone is most likely to be looking for sit at the top. */
+   artists someone is most likely to be looking for sit at the top.
+
+   Every destination on this page opens in a new tab. The artist and
+   campaign pages are self-contained documents with no route back here,
+   so following one in place strands the reader. Keeping the Hub open
+   also matches how it actually gets used — scanning the list, opening
+   two or three artists, comparing them. The ↗ on each row says so
+   before the click rather than after. */
 function renderArtists() {
   const sorted = [...ARTISTS].sort((a, b) =>
     (b.work.includes('live') ? 1 : 0) - (a.work.includes('live') ? 1 : 0));
@@ -328,13 +335,13 @@ function renderArtists() {
        current one. */
     const work = a.work.includes('live') ? ['live'] : a.work;
     return `
-    <a class="arow reveal" href="${esc(a.href)}">
+    <a class="arow reveal" href="${esc(a.href)}" target="_blank" rel="noopener">
       <h3 class="display">${esc(a.name)}</h3>
       <div class="tags">
         ${work.map(w => `<span class="tag ${w}">${esc(TAG[w])}</span>`).join('')}
       </div>
       <div class="note">${esc(a.note)}</div>
-      <span class="go">Open →</span>
+      <span class="go">Open ↗</span>
     </a>`;
   }).join('');
 
@@ -355,7 +362,7 @@ function campCard(d) {
   const nextStage = (d.stages || []).find(s => s.status === 'NEXT')
                  || (d.stages || []).find(s => s.status === 'IN MOTION');
 
-  return `<a class="camp reveal" href="/${esc(d.pageSlug)}">
+  return `<a class="camp reveal" href="/${esc(d.pageSlug)}" target="_blank" rel="noopener">
     ${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ''}
     <div class="veil"></div>
     <div class="inner">
@@ -372,7 +379,7 @@ function campCard(d) {
           ${typeof m.baselineDormantDays === 'number'
             ? `<div><div class="n">${num(m.baselineDormantDays)}</div><div class="k label">Days quiet before</div></div>` : ''}
         </div>
-        <span class="go">View live campaign</span>
+        <span class="go">View live campaign ↗</span>
       </div>
     </div>
   </a>`;
