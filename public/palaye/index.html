@@ -735,18 +735,39 @@ const thumb = (id,q='hqdefault') => `https://i.ytimg.com/vi/${id}/${q}.jpg`;
    Nothing here is generated, retouched or licensed from anywhere. Six
    video ids the deck already cites, and the stills YouTube publishes
    next to them. */
-const FRAME_IDS = ['nzM134EhSFQ','f5Nc4kiBaIs','CrUM4tVpmRc','0WzprXZGoLs','qePhiiz7dtc','4AnmemzByVY'];
+/* ── THE FRAMES, CHOSEN BY MEASUREMENT ─────────────────────────────
+   Not every still is usable. These are music videos shot dark, and
+   several of the twenty-four frames are effectively black — behind a
+   vignette at 34% opacity they contribute nothing, which is what left
+   two of these slides looking as flat as they did before the images
+   arrived.
 
-/* Grouped by POSITION-IN-VIDEO rather than by video, so consecutive
-   slides are six different films rather than four looks at one — and so
-   the packshots (n:0) sit at the back of the pack where ten slides never
-   reach them. That matters beyond variety: the deck's first slide
-   already uses one packshot by hand, and dealing them here put the same
-   picture on two slides. */
-const FRAMES = [1, 3, 2, 0].flatMap(n => FRAME_IDS.map(id => ({ id, n })));
+   So every frame was loaded into a canvas and its mean luminance
+   measured (Rec. 709), rather than picked by eye from a filename. The
+   spread runs 13 to 151 on a 0-255 scale. The eight below all sit
+   between 54 and 135: dark enough that white type wins without help,
+   bright enough to be a photograph rather than a suggestion.
 
-/* Dealt in order, so no two slides share a frame, and the film leads:
-   1, 3, 2 are moments from inside the video and 0 is the packshot. */
+   Mr. Doctor Man contributes nothing here despite being the biggest
+   video of the six — its three storyboard frames measure 14, 36 and 31.
+   Its packshot is bright enough and is already on the cover.
+
+   Five different videos across eight slides, so consecutive slides are
+   different films. Re-measure if the video set ever changes; the
+   numbers in the comments are the record of what was checked. */
+const FRAMES = [
+  { id: '0WzprXZGoLs', n: 3 },  /* Punching Bag        L 135 */
+  { id: 'qePhiiz7dtc', n: 2 },  /* No Love In LA       L 109 */
+  { id: 'CrUM4tVpmRc', n: 2 },  /* Broken              L  74 */
+  { id: '4AnmemzByVY', n: 2 },  /* Dying In A Hot Tub  L  54 */
+  { id: '0WzprXZGoLs', n: 2 },  /* Punching Bag        L  63 */
+  { id: 'qePhiiz7dtc', n: 1 },  /* No Love In LA       L 101 */
+  { id: 'CrUM4tVpmRc', n: 1 },  /* Broken              L  69 */
+  { id: 'f5Nc4kiBaIs', n: 0 },  /* Lonely              L  73 */
+];
+
+/* Dealt in order. Slides 1 and 10 carry their own images already, so
+   the deal starts at the second slide that needs one. */
 const bleed = (i, cls = '') => {
   const f = FRAMES[i % FRAMES.length];
   const src = f.n ? `https://i.ytimg.com/vi/${f.id}/maxres${f.n}.jpg` : thumb(f.id, 'maxresdefault');
@@ -776,7 +797,7 @@ const slides = () => [
    Opens on the true size of the audience, which the previous version
    badly understated by counting only the artist channel.            */
 `<section class="slide coal" data-t="The scale">
-  ${bleed(1)}
+  ${bleed(0)}
   <div class="inner">
     <div class="label reveal">Where you're starting from</div>
     <h2 class="display big reveal" style="max-width:15ch">201 million views.<br>
@@ -800,7 +821,7 @@ const slides = () => [
    The reveal. Framed as distribution, never as loss. Sumerian is the
    biggest number on the slide and is presented as an asset.        */
 `<section class="slide" data-t="Three destinations">
-  ${bleed(2)}
+  ${bleed(1)}
   <div class="inner">
     <div class="label reveal">The picture</div>
     <h2 class="display big reveal" style="max-width:18ch">One artist.<br>
@@ -843,7 +864,7 @@ const slides = () => [
    Tone stays constructive — this is effort being redirected, not
    effort being criticised.                                          */
 `<section class="slide coal" data-t="The destination">
-  ${bleed(3)}
+  ${bleed(2)}
   <div class="inner">
     <div class="label reveal">The diagnosis</div>
     <h2 class="display big reveal" style="max-width:19ch">The channel isn't quiet.<br>
@@ -902,7 +923,7 @@ const slides = () => [
    collaboration adds, and this is campaign architecture, not a
    promise.                                                          */
 `<section class="slide" data-t="The model">
-  ${bleed(4)}
+  ${bleed(3)}
   <div class="inner">
     <div class="label reveal">What we'd do</div>
     <h2 class="display big reveal" style="max-width:16ch">Keep the reach.<br>
@@ -947,7 +968,7 @@ const slides = () => [
    of replacing it. Metallica TV is a platform reference only; we never
    reproduce their branding, and the Stations beta caveat is on-slide. */
 `<section class="slide coal" data-t="Royal Television">
-  ${bleed(5)}
+  ${bleed(4)}
   <div class="inner">
     <div class="label reveal">The part most bands don't have</div>
     <h2 class="display big reveal" style="max-width:22ch">You already built<br>
@@ -1014,7 +1035,7 @@ const slides = () => [
    The closing line hands off deliberately: "Another way in." here,
    "Multiple ways in." on the next slide.                            */
 `<section class="slide coal" data-t="World building">
-  ${bleed(6)}
+  ${bleed(5)}
   <div class="inner">
     <div class="label reveal">A contemporary reference</div>
     <h2 class="display big reveal" style="max-width:21ch">Don't just make another asset.<br>
@@ -1063,7 +1084,7 @@ const slides = () => [
    as response-led. They are not "opportunities" to be delivered — the
    evidence says they are the weakest default commitments here.     */
 `<section class="slide" data-t="Every video needs a next">
-  ${bleed(7)}
+  ${bleed(6)}
   <div class="inner">
     <div class="label reveal">One world. Multiple ways in.</div>
     <h2 class="display big reveal" style="max-width:20ch">Three formats.<br>
@@ -1102,7 +1123,7 @@ const slides = () => [
    The supplied dates, with Royal Television recurring in the gaps.
    Kept light — a shape to agree, not a content calendar.          */
 `<section class="slide coal" data-t="Four moments">
-  ${bleed(8)}
+  ${bleed(7)}
   <div class="inner">
     <div class="label reveal">The campaign</div>
     <h2 class="display big reveal" style="max-width:20ch">Four moments.<br>
