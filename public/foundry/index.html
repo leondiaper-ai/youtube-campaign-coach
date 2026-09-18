@@ -158,7 +158,7 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
    labelled numbers. A channel with nothing to show yet renders fewer
    figures rather than a line of em-dashes. */
 .cohort{border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr)) auto;
+.row{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(0,1fr)) auto;
   gap:clamp(.8rem,2vw,1.8rem);align-items:center;
   padding:clamp(.95rem,1.9vw,1.3rem) 0;border-bottom:1px solid var(--line);
   border-left:2px solid transparent;transition:border-left-color .3s,padding-left .35s}
@@ -172,6 +172,23 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
   text-transform:uppercase;color:var(--dim);white-space:nowrap}
 .row:hover .go{color:var(--fdy)}
 .label.vmg{color:var(--signal)}
+/* The newest upload, under the name. This is the line that makes someone
+   click: a title and a view count says what is happening on the channel in
+   a way that "406K subscribers" never does. */
+.row .latest{margin-top:.34rem;font-size:.84rem;color:var(--bone);
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.row .latest b{font-weight:400;color:var(--paper)}
+
+/* Format range as six dots — filled for the formats published in the last
+   90 days, hollow for the rest. The Watcher shows the same shape, so the
+   two surfaces read the same way. */
+.dots{display:flex;gap:.24rem;margin-top:.34rem}
+.dot{width:7px;height:7px;border-radius:50%;border:1px solid var(--dim)}
+.dot.on{background:var(--fdy);border-color:var(--fdy)}
+@media(max-width:1200px){
+  .row{grid-template-columns:minmax(0,1.8fr) repeat(3,minmax(0,1fr)) auto}
+  .row .m.hide-lg{display:none}
+}
 @media(max-width:1000px){
   .row{grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr)) auto}
   .row .m.hide-md{display:none}
@@ -265,6 +282,7 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
 <section class="wrap">
   <div class="eyebrow reveal">
     <span class="label" style="color:var(--fdy)">The cohort</span><span class="bar"></span>
+    <span class="label">Most recently active first</span>
     <span class="label" id="cohortLabel"></span>
   </div>
   <div class="cohort" id="cohort"><div class="label" style="padding:2rem 0">Loading cohort…</div></div>
@@ -341,6 +359,25 @@ function chipColour(channelId) {
   return `var(${MUTED[h % MUTED.length]})`;
 }
 
+/* "15 long · 4 short", or whichever half exists, or nothing. */
+function splitLine(c) {
+  const parts = [];
+  if (c.videos30d) parts.push(`${c.videos30d} long`);
+  if (c.shorts30d) parts.push(`${c.shorts30d} short`);
+  return parts.join(' · ');
+}
+
+const dots = (on, of) => Array.from({ length: of },
+  (_, i) => `<span class="dot${i < on ? ' on' : ''}"></span>`).join('');
+
+/* Most recently active first, dormant channels last. A channel with no
+   upload date sorts to the end rather than to the top. */
+const byActivity = (a, b) => {
+  const d = x => (x.channel && typeof x.channel.daysSinceUpload === 'number')
+    ? x.channel.daysSinceUpload : Number.POSITIVE_INFINITY;
+  return d(a) - d(b) || (b.channel?.subscribers ?? 0) - (a.channel?.subscribers ?? 0);
+};
+
 const NOTE_LABEL = { 'watching':'Worth watching', 'case-study':'Potential case study', 'reference':'Useful reference' };
 
 function rowHtml(r) {
@@ -354,10 +391,23 @@ function rowHtml(r) {
           <span class="label">${esc(r.handle)}</span>
           ${r.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
         </div>
+        ${c && c.latest && c.latest.title
+          ? `<div class="latest"><b>${esc(c.latest.title)}</b>${
+               c.latest.views != null ? ` · ${esc(compact(c.latest.views))} views` : ''}</div>`
+          : ''}
       </div>
     </div>
+    ${c && typeof c.uploads30d === 'number' ? `<div class="m">
+        <div class="n">${c.uploads30d}</div>
+        <div class="k label">Uploads (30d)</div>
+        ${splitLine(c) ? `<div class="k label">${esc(splitLine(c))}</div>` : ''}
+      </div>` : '<div class="m"></div>'}
+    ${c && c.formats ? `<div class="m hide-lg">
+        <div class="n">${c.formats.count}/${c.formats.of}</div>
+        <div class="k label">Formats</div>
+        <div class="dots">${dots(c.formats.count, c.formats.of)}</div>
+      </div>` : '<div class="m hide-lg"></div>'}
     ${cell(c && compact(c.subscribers), 'Subscribers')}
-    ${cell(c && compact(c.totalViews), 'Total views', 'hide-md')}
     ${cell(c && ago(c.daysSinceUpload), 'Latest upload')}
     <span class="go">View channel →</span>
   </a>`;
@@ -460,7 +510,7 @@ async function load() {
     }
 
     document.getElementById('cohort').innerHTML =
-      d.rows.map(rowHtml).join('') ||
+      [...d.rows].sort(byActivity).map(rowHtml).join('') ||
       `<div class="label" style="padding:2rem 0">No artists in this cohort.</div>`;
     document.getElementById('notes').innerHTML = notesHtml(d.rows);
     observe(document.querySelectorAll('.reveal'));

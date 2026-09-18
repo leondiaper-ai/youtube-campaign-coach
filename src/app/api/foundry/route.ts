@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
+import { computeMultiformat } from '@/lib/contentStructure';
 import type { LiveSnap } from '@/lib/artists';
 import {
   FOUNDRY_COHORTS, FOUNDRY_UNRESOLVED, membersOf, type FoundryCohortId,
@@ -59,9 +60,30 @@ export async function GET(req: NextRequest) {
           .filter(u => u && u.id && u.publishedAt)
           .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))[0] ?? null;
 
+        /* Format range, from the same function the Watcher and the weekly
+           spotlight use. Reads the last 90 days of uploads, so unlike a
+           trend it needs no accumulated history — which is the whole reason
+           it can appear here on day one. */
+        const mf = computeMultiformat(snap.recentUploads ?? []);
+        const formatNames = [
+          mf.hasOfficialVideo && 'Official Video',
+          mf.hasLyricVideo && 'Lyric Video',
+          mf.hasVisualizer && 'Visualiser',
+          mf.hasBTS && 'BTS',
+          mf.hasLiveSession && 'Live session',
+          mf.hasShorts && 'Shorts',
+        ].filter(Boolean) as string[];
+
         channel = {
           subscribers: n(nc.subs),
           totalViews: n(nc.views),
+          /* Cadence — how much, and of what. Straight from the snap's own
+             30-day counts, so it says what the channel did rather than what
+             it is trending towards. */
+          uploads30d: n(nc.cadence?.uploads30d),
+          shorts30d: n(nc.cadence?.shorts30d),
+          videos30d: n(nc.cadence?.videos30d),
+          formats: { count: mf.formatCount, of: 6, names: formatNames },
           lastUploadAt: snap.lastUploadAt ?? null,
           daysSinceUpload: n(nc.cadence?.lastUploadDaysAgo),
           /* Channel avatar, straight from the snap. */
@@ -70,6 +92,7 @@ export async function GET(req: NextRequest) {
             videoId: newest.id,
             title: newest.title ?? null,
             publishedAt: newest.publishedAt,
+            views: n(newest.viewCount),
             thumb: `https://i.ytimg.com/vi/${newest.id}/hqdefault.jpg`,
           } : null,
           /* How many daily snapshots Watcher holds. Zero or one means
