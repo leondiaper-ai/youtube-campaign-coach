@@ -53,6 +53,30 @@ export async function GET(req: NextRequest) {
   const members = membersOf(cohortId);
   const now = new Date().toISOString();
 
+  /* TEMPORARY DIAGNOSTIC — ?debug=1 returns what the KV read actually
+     produced for the first few members. Added because two rounds of
+     inferring the snap shape from downstream responses produced two
+     wrong answers; looking at the object directly is faster and settles
+     it. Remove once the cohort reads clean. */
+  if (req.nextUrl.searchParams.get('debug') === '1') {
+    const probe = await Promise.all(members.slice(0, 3).map(async mem => {
+      const snap = await readLiveSnapByHandle(mem.handle ?? mem.name) as Record<string, unknown> | null;
+      const history = await readHistory(mem.channelId);
+      const nc = snap ? normalizeChannelData(snap as LiveSnap, history, null) : null;
+      return {
+        handle: mem.handle,
+        snapIsNull: snap === null,
+        snapKeys: snap ? Object.keys(snap).slice(0, 25) : null,
+        snapSubs: snap ? (snap as Record<string, unknown>).subs ?? null : null,
+        historyLen: history.length,
+        ncSubs: nc ? nc.subs : null,
+        ncViews: nc ? nc.views : null,
+        ncCadence: nc ? nc.cadence : null,
+      };
+    }));
+    return NextResponse.json({ probe }, { headers: CORS });
+  }
+
   const rows: FoundryRow[] = await Promise.all(members.map(async member => {
     let current: FoundryRow['current'] = null;
     let baseline = await readFoundryBaseline<FoundryBaseline>(member.channelId);
