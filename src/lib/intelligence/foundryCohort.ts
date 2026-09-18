@@ -145,6 +145,20 @@ const COUNTRIES: Record<string, FoundryCountry[]> = {
   wasiaproject:   [{ code: 'GB', name: 'UK' }],
   wavetoearth:    [{ code: 'KR', name: 'South Korea' }],
   zippyfala:      [{ code: 'PL', name: 'Poland' }],
+  amandamagalhaes:   [{ code: 'BR', name: 'Brazil' }],
+  iamciza:           [{ code: 'ZA', name: 'South Africa' }],
+  daminibhatla:      [{ code: 'IN', name: 'India' }],
+  francothesir:      [{ code: 'BR', name: 'Brazil' }],
+  garvitpriyansh:    [{ code: 'IN', name: 'India' }],
+  hamiltonctg:       [{ code: 'CO', name: 'Colombia' }],
+  hanroro6055:       [{ code: 'KR', name: 'South Korea' }],
+  juliawolfnyc:      [{ code: 'US', name: 'USA' }],
+  kelelaofficial:    [{ code: 'US', name: 'USA' }],
+  mcluanna:          [{ code: 'BR', name: 'Brazil' }],
+  mustbemeek:        [{ code: 'GB', name: 'UK' }],
+  momoboydmusic7296: [{ code: 'US', name: 'USA' }],
+  n4t4nya:           [{ code: 'GB', name: 'UK' }],
+  weareoutstation:   [{ code: 'IN', name: 'India' }],
 
   /* Fall 2026 */
   aiobahn:        [{ code: 'JP', name: 'Japan' }],
@@ -208,6 +222,32 @@ export const FOUNDRY_MEMBERS: FoundryMember[] = [
   /* The handle is @zippyfala, not @zippyogar. */
   m('UCpw7wrI_lazxjBTkkZVQ0Dg', 'zippyfala',      'Zippy Ogar',     '@zippyfala',      S),
 
+  /* ── The rest of the first 2026 cohort ───────────────────────────────
+     Added 18 September. These arrived as names only, so each was resolved by
+     search and then opened before it was trusted — a name is not an
+     identifier, and several of these are words before they are artists.
+     Three were confirmed by what the channel actually publishes rather than
+     by its title alone: HAMILTON CTG describes itself as the official
+     Hamilton channel and features Ryan Castro; Amanda Magalhães' own bio
+     places her in Brazilian music; Natanya and MEEK are artist channels
+     publishing official videos under those exact names.
+
+     Two are deliberately absent — see FOUNDRY_NEEDS_HANDLE below. */
+  m('UCrQ6yz1cWXPHqZdC-c_-a6w', 'amandamagalhaes', 'Amanda Magalhães', '@amandamagalhaes', S),
+  m('UC73PP9j19LxoWc-tml8NE3A', 'iamciza',         'CIZA',             '@iamciza',         S),
+  m('UC7n0h20zOhCc2E2kLN9WJ4w', 'daminibhatla',    'Damini Bhatla',    '@daminibhatla',    S),
+  m('UCy9PEH_oOYSusHmi5yGvAQg', 'francothesir',    'Franco, The Sir!', '@francothesir',    S),
+  m('UCGC7az4IFm1nITBjqm3vv1g', 'garvitpriyansh',  'Garvit - Priyansh','@garvitpriyansh',  S),
+  m('UCUmXhDO53cPrsm7Ep8Kiv3Q', 'hamiltonctg',     'HAMILTON CTG',     '@hamiltonctg',     S),
+  m('UCrDa_5OU-rhvXqWlPx5hgKQ', 'hanroro6055',     '한로로 HANRORO',     '@hanroro6055',     S),
+  m('UCO5E5lH8cR9v2ya0BpdoAwA', 'juliawolfnyc',    'JULIA WOLF',       '@juliawolfnyc',    S),
+  m('UCI2aWCbAUZDzZZ5a5GDtRew', 'kelelaofficial',  'Kelela',           '@kelelaofficial',  S),
+  m('UCByhdSOQn-WYVmvWaaFyB2g', 'mcluanna',        'MC LUANNA',        '@mcluanna',        S),
+  m('UCF5FUiJFoRPdnfcjbHvTkAQ', 'mustbemeek',      'MEEK',             '@mustbemeek',      S),
+  m('UC3p9yNSjfmIGGRe9JAdtwtg', 'momoboydmusic7296','MomoBoydMusic',   '@momoboydmusic7296', S),
+  m('UCKxHLGYw0x0c2hgRr1rJ79A', 'n4t4nya',         'Natanya',          '@n4t4nya',         S),
+  m('UCRiaNJzUFL63WPC8Ues0j4g', 'weareoutstation', 'OutStation',       '@weareoutstation', S),
+
   /* The last three, resolved 18 September from handles. They were named in
      the Fall list from the start and sat unresolved because nobody had a
      handle for them — which is precisely why this file is keyed on channel
@@ -235,6 +275,24 @@ function m(
     concept because the next intake will arrive as names before handles, and
     the page explains a count gap rather than letting someone notice it. */
 export const FOUNDRY_UNRESOLVED: string[] = [];
+
+/**
+ * Named in the cohort but NOT tracked, because a search does not settle
+ * which channel is theirs and a wrong channel is worse than a missing one.
+ * Each needs a handle or a channel ID from someone who knows.
+ *
+ *   Antara and Ankita Nandy — the sisters have two separate channels,
+ *     ANTARA NANDY and ANKITA NANDY, and the cohort names them as a pair.
+ *     Which one the entry refers to, or whether a joint channel exists, is
+ *     not something search answers.
+ *   Draganov — no channel matching a Moroccan artist appears in the
+ *     results; the top hits are unrelated channels with similar names, and
+ *     the auto-generated "Draganov - Topic" gives no channel of their own.
+ */
+export const FOUNDRY_NEEDS_HANDLE = [
+  'Antara and Ankita Nandy',
+  'Draganov',
+];
 
 /** One cohort, or every tracked Foundry artist when asked for 'all'. */
 export const membersOf = (cohort: FoundryCohortId | 'all') =>

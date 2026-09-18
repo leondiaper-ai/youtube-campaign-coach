@@ -6,7 +6,7 @@ import { computeMultiformat } from '@/lib/contentStructure';
 import type { LiveSnap } from '@/lib/artists';
 import {
   FOUNDRY_COHORTS, FOUNDRY_COHORT_IDS, FOUNDRY_COUNTRY_UNKNOWN,
-  FOUNDRY_UNRESOLVED, membersOf, type FoundryCohortId,
+  FOUNDRY_NEEDS_HANDLE, FOUNDRY_UNRESOLVED, membersOf, type FoundryCohortId,
 } from '@/lib/intelligence/foundryCohort';
 
 /**
@@ -148,6 +148,9 @@ export async function GET(req: NextRequest) {
     /* Tracked artists with no country established. Surfaced so the gap is
        reviewable rather than invisible. */
     countryUnknown: FOUNDRY_COUNTRY_UNKNOWN(),
+    /* Named in the cohort but not tracked — search could not settle which
+       channel is theirs. */
+    needsHandle: FOUNDRY_NEEDS_HANDLE,
     generatedAt: new Date().toISOString(),
   }, { headers: CORS });
 }

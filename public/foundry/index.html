@@ -546,11 +546,16 @@ async function load() {
       d.counts.tracked === 1 ? 'artist currently tracked' : 'artists currently tracked';
     document.getElementById('cohortLabel').textContent = d.cohort.label;
 
-    if (d.unresolved && d.unresolved.length) {
+    /* The gap between named and tracked, in the two ways it happens: an
+       artist whose channel we have not resolved, and one whose name does
+       not identify a channel without someone telling us which. */
+    const gaps = [...(d.unresolved ?? []), ...(d.needsHandle ?? [])];
+    if (gaps.length) {
       document.getElementById('gapNote').innerHTML = `<div class="gap-note reveal">
         <p class="body" style="margin:0;font-size:.93rem">
-          ${d.counts.tracked + d.counts.unresolved} artists named for this cohort.
-          Not yet resolved to a channel in Watcher: ${d.unresolved.map(esc).join(', ')}.
+          ${d.counts.tracked + gaps.length} artists named across the 2026 cohorts.
+          Not tracked yet, because a search does not settle which channel is theirs:
+          ${gaps.map(esc).join(', ')}.
         </p></div>`;
     }
 
