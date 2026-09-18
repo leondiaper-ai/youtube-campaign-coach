@@ -387,15 +387,28 @@ async function mergeSecondSurface(d){
   const imported = (w.matched || []).map(m => labelAsset(m, sourceName));
   if (!imported.length && !own.length) return;
 
-  const all = own.concat(imported).sort((x, y) => {
-    const dx = Date.parse(x.publishedAt || x.date || 0);
-    const dy = Date.parse(y.publishedAt || y.date || 0);
-    return (isNaN(dy) ? 0 : dy) - (isNaN(dx) ? 0 : dx);
-  });
+  /* Newest first, by DAY rather than by timestamp, and within a day the
+     asset that has travelled furthest leads.
 
-  const HEROES = 2;
-  a.heroes = all.slice(0, HEROES);
-  a.supporting = all.slice(HEROES);
+     Both of Palaye's current assets went out on 15 September seven
+     minutes apart, and to-the-minute sorting handed the hero slot to
+     whichever of the two happened to publish second. A campaign's lead
+     asset is not decided by seven minutes; on the day they share, the
+     one the audience actually went to is the better answer, and it is a
+     figure rather than an opinion. */
+  const day = x => {
+    const t = Date.parse(x.publishedAt || x.date || 0);
+    return isNaN(t) ? 0 : Math.floor(t / 864e5);
+  };
+  const all = own.concat(imported)
+    .sort((x, y) => day(y) - day(x) || (y.views || 0) - (x.views || 0));
+
+  /* ONE hero, as everywhere else in this layer. The lead asset is the
+     campaign's picture and the rest are the evidence it has been
+     working — a second full-size card competing with the first is how
+     the page stopped looking like the other two. */
+  a.heroes = all.slice(0, 1);
+  a.supporting = all.slice(1);
   a.total = all.length;
 
   if (imported.length) {
