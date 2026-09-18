@@ -155,6 +155,9 @@ const COUNTRIES: Record<string, FoundryCountry[]> = {
   juliawolfnyc:      [{ code: 'US', name: 'USA' }],
   kelelaofficial:    [{ code: 'US', name: 'USA' }],
   mcluanna:          [{ code: 'BR', name: 'Brazil' }],
+  /* Read off the channel's own country field, not inferred from the
+     music or from a collaborator's nationality. */
+  mrdraganov:        [{ code: 'MA', name: 'Morocco' }],
   mustbemeek:        [{ code: 'GB', name: 'UK' }],
   momoboydmusic7296: [{ code: 'US', name: 'USA' }],
   n4t4nya:           [{ code: 'GB', name: 'UK' }],
@@ -248,6 +251,14 @@ export const FOUNDRY_MEMBERS: FoundryMember[] = [
   m('UCKxHLGYw0x0c2hgRr1rJ79A', 'n4t4nya',         'Natanya',          '@n4t4nya',         S),
   m('UCRiaNJzUFL63WPC8Ues0j4g', 'weareoutstation', 'OutStation',       '@weareoutstation', S),
 
+  /* Resolved 18 September. The earlier note said no channel matching a
+     Moroccan artist appeared in search, and that was simply wrong — the
+     search terms were too narrow. @MrDraganov is unambiguous: 1.23m
+     subscribers, 79 videos, every upload titled "Draganov — ...", and the
+     channel's own metadata sets its country to Morocco, which is where
+     the earlier note expected to find him. */
+  m('UCK82U3ep55nGX3bRMT5lECQ', 'mrdraganov',      'Draganov',         '@MrDraganov',      S),
+
   /* The last three, resolved 18 September from handles. They were named in
      the Fall list from the start and sat unresolved because nobody had a
      handle for them — which is precisely why this file is keyed on channel
@@ -281,17 +292,23 @@ export const FOUNDRY_UNRESOLVED: string[] = [];
  * which channel is theirs and a wrong channel is worse than a missing one.
  * Each needs a handle or a channel ID from someone who knows.
  *
- *   Antara and Ankita Nandy — the sisters have two separate channels,
- *     ANTARA NANDY and ANKITA NANDY, and the cohort names them as a pair.
- *     Which one the entry refers to, or whether a joint channel exists, is
- *     not something search answers.
- *   Draganov — no channel matching a Moroccan artist appears in the
- *     results; the top hits are unrelated channels with similar names, and
- *     the auto-generated "Draganov - Topic" gives no channel of their own.
+ *   Antara and Ankita Nandy — the cohort names a PAIR, and there are three
+ *     candidate channels, none of which is obviously the answer:
+ *       @antaranandy   1.18m subs, India, 476 videos. Antara's own channel
+ *                      by its description, but it carries the duo's
+ *                      official releases ("Ft. Nandy Sisters | Antara,
+ *                      Ankita") and is the top result for "Nandy Sisters".
+ *       @ankitanandy   Ankita's own channel, UCQDHhbQN0Qu3uOq5bH82J4Q.
+ *       @nandysisters  Titled "Antara Nandy & Ankita Nandy" — the exact
+ *                      pair — but 705 subscribers and no country set. A
+ *                      name that matches perfectly on a channel with no
+ *                      audience is a trap, not an answer.
+ *     Tracking @antaranandy would put one sister's channel under a
+ *     two-artist entry and quietly overstate what we are watching. That is
+ *     a call for someone who knows which channel the Foundry entry meant.
  */
 export const FOUNDRY_NEEDS_HANDLE = [
   'Antara and Ankita Nandy',
-  'Draganov',
 ];
 
 /** One cohort, or every tracked Foundry artist when asked for 'all'. */
