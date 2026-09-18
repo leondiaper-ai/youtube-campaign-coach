@@ -68,124 +68,6 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 
-/* ═══════════════════════════════════════════════════════════════════
-   LIVE CAMPAIGN COVER
-
-   Prepended to the deck when the campaign is running, in the pattern
-   established on the CHVRCHES and Kings of Leon pages: the deck stays
-   the analysis, and the live state sits in front of it.
-
-   TWO SURFACES. Palaye's campaign may run across the artist channel and
-   the Sumerian Records channel — that is the Deep Dive's own finding,
-   and the one thing this cover has to make visible from day one. So the
-   figures are never pooled into a single number without also being
-   shown apart. Sumerian's own channel performance never appears here;
-   only uploads that carry Palaye Royale's name in the title.
-   ═══════════════════════════════════════════════════════════════════ */
-.lc{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(2.2rem,5vw,4.5rem) clamp(1.2rem,5vw,5rem);overflow:hidden}
-.lc-bleed{position:absolute;inset:0;z-index:0}
-.lc-bleed img{width:100%;height:100%;object-fit:cover;opacity:.42}
-.lc-bleed::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,var(--ink) 6%,rgba(8,7,10,.86) 46%,rgba(8,7,10,.55))}
-.lc-in{position:relative;z-index:2;max-width:1500px;margin:0 auto;width:100%}
-.lc-state{display:inline-flex;align-items:center;gap:.55rem;font-family:'Oswald',sans-serif;
-  font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
-.lc-state::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--signal);
-  animation:lcbeat 2.2s ease-in-out infinite}
-@keyframes lcbeat{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.75)}}
-.lc-since{font-family:'Inter',sans-serif;font-size:.78rem;color:rgba(242,239,234,.5);margin-left:.9rem}
-.lc h1{font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;line-height:.92;
-  font-size:clamp(2.4rem,6.4vw,5.4rem);margin:1rem 0 0;letter-spacing:-.01em}
-.lc h1 em{font-style:normal;color:var(--signal)}
-.lc-sub{font-family:'Inter',sans-serif;margin-top:.7rem;max-width:56ch;
-  font-size:clamp(.95rem,1.3vw,1.1rem);color:rgba(242,239,234,.76)}
-.lc-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
-  gap:clamp(1.4rem,3vw,3rem);margin-top:clamp(1.6rem,3.4vw,2.6rem);align-items:start}
-@media(max-width:940px){.lc-grid{grid-template-columns:1fr}}
-
-/* Numbers. Campaign only — never the channel's lifetime totals. */
-.lc-stats{display:flex;flex-wrap:wrap;gap:clamp(1.4rem,3.4vw,2.8rem)}
-.lc-stats .n{font-family:'Oswald',sans-serif;font-weight:700;line-height:1;
-  font-size:clamp(1.8rem,3.6vw,2.9rem)}
-.lc-stats .c{font-family:'Inter',sans-serif;font-size:.74rem;letter-spacing:.14em;
-  text-transform:uppercase;color:rgba(242,239,234,.58);margin-top:.35rem}
-.lc-stats .w{font-family:'Inter',sans-serif;font-size:.72rem;color:rgba(242,239,234,.38);margin-top:.2rem}
-
-/* The two surfaces, side by side and never added together silently. */
-.lc-surf{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(242,239,234,.12);
-  border:1px solid rgba(242,239,234,.12);border-radius:12px;overflow:hidden;margin-top:1.6rem}
-@media(max-width:620px){.lc-surf{grid-template-columns:1fr}}
-.lc-s{background:rgba(8,7,10,.72);padding:1rem 1.1rem}
-.lc-s .k{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-  color:rgba(242,239,234,.5)}
-.lc-s .t{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
-  font-size:1.05rem;margin-top:.3rem}
-.lc-s .v{font-family:'Inter',sans-serif;font-size:.86rem;color:rgba(242,239,234,.72);margin-top:.45rem}
-.lc-s .flag{font-family:'Inter',sans-serif;font-size:.76rem;color:var(--signal);margin-top:.45rem}
-
-/* Chronological, and honest about what has not happened yet. */
-.lc-tl{margin-top:1.6rem;border-left:2px solid rgba(242,239,234,.16);padding-left:1.1rem;
-  display:flex;flex-direction:column;gap:1rem}
-.lc-ev{position:relative}
-.lc-ev::before{content:'';position:absolute;left:-1.52rem;top:.42rem;width:9px;height:9px;
-  border-radius:50%;background:rgba(242,239,234,.22)}
-.lc-ev.done::before{background:var(--signal)}
-.lc-ev .when{font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.14em;
-  text-transform:uppercase;color:rgba(242,239,234,.5)}
-.lc-ev .what{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;
-  font-size:1.02rem;margin-top:.15rem}
-.lc-ev .src{font-family:'Inter',sans-serif;font-size:.78rem;color:rgba(242,239,234,.62);margin-top:.2rem}
-.lc-ev.pending .what{color:rgba(242,239,234,.66)}
-
-/* The newest campaign asset, as itself rather than as a row in a table. */
-.lc-asset{display:flex;gap:1rem;align-items:flex-start;border:1px solid rgba(242,239,234,.14);
-  border-radius:12px;overflow:hidden;background:rgba(8,7,10,.66)}
-.lc-asset img{width:132px;height:auto;aspect-ratio:9/16;object-fit:cover;flex:0 0 auto}
-.lc-asset.wide img{width:180px;aspect-ratio:16/9}
-.lc-asset .meta{padding:.9rem 1rem .9rem 0}
-.lc-asset .fm{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--signal)}
-.lc-asset .ti{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.02rem;margin-top:.3rem;
-  line-height:1.2}
-.lc-asset .st{font-family:'Inter',sans-serif;font-size:.8rem;color:rgba(242,239,234,.6);margin-top:.35rem}
-/* ── THE BAND'S OWN WORLD ─────────────────────────────────────────
-   A strip of the artist channel's most recent uploads, straight from
-   their thumbnails. The deck's whole argument is that this channel is a
-   world rather than a feed, and a live cover that showed only figures
-   would be arguing the opposite. Shorts keep their 9:16 so the strip
-   looks like the channel does. */
-.lc-world{margin-top:1.6rem}
-.lc-world .k{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.16em;
-  text-transform:uppercase;color:rgba(242,239,234,.5);margin-bottom:.7rem}
-.lc-strip{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.4rem;
-  scrollbar-width:thin;scroll-snap-type:x proximity}
-.lc-strip::-webkit-scrollbar{height:4px}
-.lc-strip::-webkit-scrollbar-thumb{background:rgba(242,239,234,.2);border-radius:4px}
-.lc-strip a{flex:0 0 auto;width:82px;border-radius:7px;overflow:hidden;position:relative;
-  scroll-snap-align:start;border:1px solid rgba(242,239,234,.12)}
-.lc-strip a.wide{width:146px}
-.lc-strip img{width:100%;height:100%;object-fit:cover;aspect-ratio:9/16;display:block;
-  transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.lc-strip a.wide img{aspect-ratio:16/9}
-.lc-strip a:hover img{transform:scale(1.06)}
-.lc-strip .tag{position:absolute;left:0;bottom:0;right:0;padding:.3rem .35rem;
-  font-family:'Inter',sans-serif;font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--paper);background:linear-gradient(180deg,transparent,rgba(8,7,10,.9))}
-
-/* Their own words, at the size the band would set them. */
-.lc-say{margin-top:1.5rem;border-left:2px solid var(--signal);padding-left:1rem;max-width:44ch}
-.lc-say q{font-family:'Oswald',sans-serif;font-weight:500;quotes:none;
-  font-size:clamp(1.05rem,1.9vw,1.4rem);line-height:1.22;display:block}
-.lc-say .who{font-family:'Inter',sans-serif;font-size:.72rem;letter-spacing:.12em;
-  text-transform:uppercase;color:rgba(242,239,234,.45);margin-top:.45rem}
-
-.lc-jump{margin-top:1.8rem;display:inline-flex;gap:.5rem;font-family:'Inter',sans-serif;
-  font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(242,239,234,.55);
-  border-bottom:1px solid rgba(242,239,234,.2);padding-bottom:.25rem;cursor:pointer}
-.lc-note{margin-top:1.1rem;font-family:'Inter',sans-serif;font-size:.76rem;
-  color:rgba(242,239,234,.42);max-width:62ch}
-
 :root{
   --ink:#08070A;           /* near-black ground */
   --coal:#0F0D13;
@@ -195,6 +77,14 @@
   --signal:#C4162E;        /* oxblood — the band's own register */
   --gold:#C9A227;          /* used once, on the owned-asset slide */
   --hair:rgba(242,239,234,.10);
+  /* Read by the shared live-campaign layer. --signal-2 marks anything
+     recommended rather than confirmed, and it has to be legible as a
+     DIFFERENT claim from the oxblood above it, not a second shade of it.
+     --era-key belongs to the playbook slides, which this deck does not
+     currently show; it resolves to the band's own red so that if it ever
+     does, it arrives in Palaye's colour and not CHVRCHES'. */
+  --signal-2:#8C8FA8;
+  --era-key:#C4162E;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -210,6 +100,7 @@ body{background:var(--ink);color:var(--paper);
 .chrome{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;
   align-items:center;justify-content:space-between;padding:.85rem 1.6rem;
   background:rgba(8,7,10,.82);border-bottom:1px solid var(--hair)}
+.chrome-b{display:flex;gap:.5rem;align-items:center}
 .chrome-t{font-size:.6rem;font-weight:700;letter-spacing:.19em;text-transform:uppercase;color:var(--smoke)}
 .btn{font:inherit;font-size:.62rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
   padding:.5rem .9rem;border-radius:99px;border:1px solid var(--hair);
@@ -542,12 +433,20 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition
   font-size:clamp(1rem,2vw,1.35rem);line-height:1.05}
 .dec-a{font-size:.66rem;color:var(--smoke);line-height:1.65;margin-top:.3rem;max-width:62ch}
 </style>
+<!-- The live campaign home. The same file CHVRCHES and Kings of Leon run,
+     carrying no colour of its own — every accent below resolves against
+     the variables declared above, so this arrives in Palaye's oxblood
+     without a line of per-artist styling. -->
+<link rel="stylesheet" href="/live/campaign-home.css">
 </head>
 <body>
 <div id="pbar"></div><div id="pcount"></div>
 <div class="chrome">
   <span class="chrome-t">Palaye Royale × YouTube · Album campaign</span>
-  <button class="btn on" id="presentBtn" onclick="startPresent()">Present</button>
+  <span class="chrome-b">
+    <button class="btn" onclick="goChannel()">Channel deep dive</button>
+    <button class="btn on" id="presentBtn" onclick="startPresent()">Present</button>
+  </span>
 </div>
 <div class="deck" id="deck"></div>
 <script>
@@ -1177,229 +1076,19 @@ const slides = () => [
    ═══════════════════════════════════════════════════════════════════ */
 document.getElementById('deck').innerHTML = slides().join('');
 
-/* ═══════════════════════════════════════════════════════════════════
-   LIVE CAMPAIGN — prepended to the deck once the campaign is running
-
-   Reads two endpoints and keeps them apart:
-
-     /api/campaign-cover?slug=palayeroyale   the artist channel
-     /api/label-watch?label=@sumerianrecords the label channel, Palaye
-                                             uploads only
-
-   Nothing here is written by hand. If the artist channel shows no new
-   activity the cover does not render at all and the deck opens on the
-   analysis, exactly as it did before — a live campaign header over a
-   campaign that has not started would be the worst outcome available.
-   ═══════════════════════════════════════════════════════════════════ */
-const LIVE = {
-  slug: 'palayeroyale',
-  label: '@sumerianrecords',
-  artistName: 'Palaye Royale',
-  /* What we have been told, held separately from what we have observed.
-     The single is briefed as roughly two weeks out and no date has been
-     published, so the timeline says that rather than inventing one. */
-  briefed: { single: 'Expected in about two weeks', singleNote: 'No date published yet' },
-};
-
-const nfmt = n => typeof n === 'number' && isFinite(n) ? n.toLocaleString('en-GB') : null;
-const dayMon = iso => {
-  const d = new Date(iso);
-  if (isNaN(d)) return '';
-  return `${d.getUTCDate()} ${d.toLocaleDateString('en-GB',{month:'short'}).toUpperCase()}`;
-};
-const longDate = iso => {
-  const d = new Date(iso);
-  return isNaN(d) ? '' : d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-};
-
-function liveAsset(a){
-  if(!a) return '';
-  const isShort = /short/i.test(a.formatLabel || '');
-  return `<a class="lc-asset ${isShort ? '' : 'wide'}" href="https://www.youtube.com/watch?v=${a.videoId}"
-             target="_blank" rel="noopener">
-    <img src="${thumb(a.videoId, isShort ? 'hqdefault' : 'maxresdefault')}" alt="" loading="lazy">
-    <div class="meta">
-      <div class="fm">${a.formatLabel || 'Upload'} · ${a.source || 'Palaye Royale'}</div>
-      <div class="ti">${a.title || ''}</div>
-      <div class="st">${a.dateLabel || dayMon(a.publishedAt)}${
-        a.views != null ? ` · ${nfmt(a.views)} views` : ''}</div>
-    </div>
-  </a>`;
-}
-
-/* The label's announcement post carries the release date in its own
-   title — "out Oct. 2nd!". That is a published statement, so the timeline
-   uses it and says where it came from, rather than repeating the
-   second-hand "about two weeks". If no such post exists the briefed
-   estimate stands. */
-function statedRelease(label){
-  const posts = (label && label.matchedAllTime) || [];
-  for (const p of posts) {
-    const m = (p.title || '').match(/out\s+([A-Z][a-z]+\.?\s+\d{1,2}(?:st|nd|rd|th)?)/);
-    if (m) return { text: m[1].replace(/\./,''), source: label.labelTitle || 'the label channel' };
-  }
-  return null;
-}
-
-function liveCover(cover, label, world){
-  const m = cover.metrics || {};
-  const heroes = (cover.assets && cover.assets.heroes) || [];
-  const newest = heroes[0] || null;
-
-  /* Campaign totals, stated per surface. The combined figure is only
-     shown when the label surface actually has campaign assets — until
-     then a "total" would just be the artist number wearing a bigger
-     hat. */
-  const artistViews = m.campaignViews;
-  const labelViews = label && label.totals ? label.totals.matchedViews : null;
-  const labelCount = label && label.totals ? label.totals.matched : 0;
-  const combined = (artistViews != null && labelViews != null && labelCount > 0)
-    ? artistViews + labelViews : null;
-
-  const stats = [
-    combined != null
-      ? [nfmt(combined), 'Total campaign views', 'Artist + label, both surfaces']
-      : (artistViews != null ? [nfmt(artistViews), 'Campaign views', 'Artist channel'] : null),
-    m.campaignAssets ? [String(m.campaignAssets + labelCount), 'Campaign uploads',
-      labelCount ? `${m.campaignAssets} artist · ${labelCount} label` : 'Artist channel'] : null,
-    m.campaignDay != null ? [String(m.campaignDay), 'Days tracked',
-      m.campaignStart && m.campaignStart.at ? `since ${dayMon(m.campaignStart.at)}` : ''] : null,
-  ].filter(Boolean);
-
-  const ch = cover.channel || {};
-
-  return `<section class="slide lc cover" data-t="Live campaign">
-    ${newest ? `<div class="lc-bleed"><img src="${thumb(newest.videoId,'maxresdefault')}" alt=""></div>` : ''}
-    <div class="lc-in">
-      <div>
-        <span class="lc-state">Live campaign · ${longDate(cover.generatedAt)}</span>
-        <span class="lc-since">Deep Dive captured 2 September 2026</span>
-      </div>
-
-      <h1>Palaye Royale <em>×</em> YouTube<br><em>Live campaign</em></h1>
-      <p class="lc-sub">The campaign has started. Tracking both YouTube surfaces from day one —
-        the artist channel, and Palaye uploads on the label channel.</p>
-
-      <div class="lc-grid">
-        <div>
-          ${stats.length ? `<div class="lc-stats">${stats.map(([n,c,w])=>
-            `<div><div class="n">${n}</div><div class="c">${c}</div>${
-              w ? `<div class="w">${w}</div>` : ''}</div>`).join('')}</div>` : ''}
-
-          <div class="lc-surf">
-            <div class="lc-s">
-              <div class="k">Artist channel</div>
-              <div class="t">Palaye Royale</div>
-              <div class="v">${nfmt(ch.subs) || '—'} subscribers · ${
-                m.campaignAssets || 0} campaign upload${m.campaignAssets === 1 ? '' : 's'}${
-                ch.daysSinceUpload != null ? ` · last upload ${ch.daysSinceUpload}d ago` : ''}</div>
-            </div>
-            <div class="lc-s">
-              <div class="k">Label channel</div>
-              <div class="t">${(label && label.labelTitle) || 'Sumerian Records'}</div>
-              <div class="v">${label && label.available
-                ? (labelCount
-                    ? `${labelCount} Palaye upload${labelCount === 1 ? '' : 's'} in this campaign`
-                    : 'No Palaye upload in this campaign yet')
-                : 'Not readable right now'}${
-                label && label.totals && label.totals.matchedAllTime
-                  ? ` · ${label.totals.matchedAllTime} tracked all-time` : ''}</div>
-              ${label && label.totals && label.totals.flagged
-                ? `<div class="flag">${label.totals.flagged} upload${
-                    label.totals.flagged === 1 ? '' : 's'} flagged for review — not counted</div>` : ''}
-            </div>
-          </div>
-
-          <p class="lc-note">Label figures count only uploads carrying Palaye Royale's name.
-            Sumerian's own channel performance is never included.</p>
-        </div>
-
-        <div>
-          ${newest ? liveAsset({...newest, source:'Palaye Royale'}) : ''}
-
-          ${newest && newest.title ? `<div class="lc-say">
-            <q>${newest.title}</q>
-            <div class="who">Palaye Royale · their words, on their channel</div>
-          </div>` : ''}
-
-          <div class="lc-tl">
-            ${heroes.slice().reverse().map(a => `<div class="lc-ev done">
-              <div class="when">${a.dateLabel || dayMon(a.publishedAt)}</div>
-              <div class="what">${a.formatLabel || 'Upload'}</div>
-              <div class="src">Palaye Royale · ${nfmt(a.views) || '—'} views</div>
-            </div>`).join('')}
-            ${(label && label.matched ? label.matched : []).slice().reverse().map(a =>
-              `<div class="lc-ev done">
-                <div class="when">${dayMon(a.publishedAt)}</div>
-                <div class="what">${a.formatLabel || 'Upload'}</div>
-                <div class="src">Sumerian Records · ${nfmt(a.views) || '—'} views</div>
-              </div>`).join('')}
-            ${(() => { const rel = statedRelease(label); return `<div class="lc-ev pending">
-              <div class="when">${rel ? rel.text : LIVE.briefed.single}</div>
-              <div class="what">First single</div>
-              <div class="src">${rel
-                ? `Stated on ${rel.source}'s own post`
-                : LIVE.briefed.singleNote}</div>
-            </div>`; })()}
-            <div class="lc-ev pending">
-              <div class="when">Not yet published</div>
-              <div class="what">Official video</div>
-              <div class="src">Channel: to be confirmed</div>
-            </div>
-          </div>
-
-          ${world && world.recent && world.recent.length ? `<div class="lc-world">
-            <div class="k">The channel right now · ${world.recent.length} most recent uploads</div>
-            <div class="lc-strip">${world.recent.map(u => `
-              <a class="${u.isShort ? '' : 'wide'}" href="https://www.youtube.com/watch?v=${u.videoId}"
-                 target="_blank" rel="noopener" title="${(u.title||'').replace(/"/g,'&quot;')}">
-                <img src="${u.thumb}" alt="" loading="lazy">
-                <span class="tag">${u.isShort ? 'Short' : (u.formatLabel || 'Upload')}</span>
-              </a>`).join('')}</div>
-          </div>` : ''}
-
-          <div class="lc-jump" onclick="document.querySelectorAll('.slide')[1].scrollIntoView({behavior:'smooth'})">
-            Read the Deep Dive ↓
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>`;
-}
-
-async function loadLive(){
-  try {
-    const cover = await (await fetch(`/api/campaign-cover?slug=${LIVE.slug}`)).json();
-    /* Nothing observed yet means no live cover. The deck is still true. */
-    if (!cover || (cover.state !== 'CAMPAIGN_LIVE' && cover.state !== 'NEW_ACTIVITY')) return;
-
-    const since = cover.metrics && cover.metrics.campaignStart && cover.metrics.campaignStart.at;
-    let label = null;
-    try {
-      label = await (await fetch(`/api/label-watch?label=${encodeURIComponent(LIVE.label)}`
-        + `&artist=${encodeURIComponent(LIVE.artistName)}`
-        + (since ? `&since=${since}` : ''))).json();
-    } catch { /* the label surface is additive; its absence must not remove the cover */ }
-
-    /* The artist channel's own recent uploads — same KV read, no filter,
-       because on their own channel everything is theirs. */
-    let world = null;
-    try {
-      world = await (await fetch('/api/label-watch?mode=recent&label=%40palayeroyale')).json();
-    } catch { /* the strip is texture; the cover stands without it */ }
-
-    const deck = document.getElementById('deck');
-    deck.insertAdjacentHTML('afterbegin', liveCover(cover, label, world));
-    deck.querySelectorAll('.lc .reveal,.lc .stagger').forEach(el => io.observe(el));
-  } catch { /* a failed live read leaves the deck exactly as it was */ }
-}
-loadLive();
 
 
 const io = new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting) e.target.classList.add('in');
 }),{threshold:.14});
-document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+/* Named and re-runnable, because the live campaign layer inserts slides
+   after this has already run. Everything revealed starts at opacity 0, so
+   an un-observed element is an invisible one — observing is not a polish
+   step here, it is what makes the content exist. */
+function observeAll(){
+  document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+}
+observeAll();
 
 /* ── Presentation mode ─────────────────────────────────────────── */
 let cur = 0;
@@ -1461,5 +1150,42 @@ document.addEventListener('fullscreenchange', ()=>{
   if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent();
 });
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     THE LIVING LAYER
+     Everything above is the Deep Dive as captured on 2 September 2026 and
+     it does not change. Everything below is today — and it is the same
+     file CHVRCHES and Kings of Leon run, because a live campaign page is
+     a product rather than three artist pages that resemble each other.
+
+     What is different about Palaye is one config key. This campaign
+     publishes across two channels, so `alsoWatch` names the second one
+     and the shared layer merges the uploads it can confidently tie to
+     the artist into the campaign's own totals. Sumerian's channel
+     performance is never brought across and never appears; each asset
+     simply says where it went out.
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+window.LIVE_DECK = {
+  slug: 'palayeroyale',
+  api: 'https://youtube-campaign-coach.vercel.app/api/campaign-cover',
+  /* Only reached if the campaign has published nothing of its own —
+     Royal Television, because if this channel has one image that is not
+     a release, it is that one. */
+  fallbackImage: 'dsvFakRJbRg',
+  alsoWatch: {
+    label: '@sumerianrecords',
+    artist: 'Palaye Royale',
+    sourceName: 'Sumerian Records',
+    api: 'https://youtube-campaign-coach.vercel.app/api/label-watch',
+  },
+  host: {
+    observeAll: () => { try { observeAll(); } catch (e) {} },
+    resetSlides: () => {},
+    updateProgress: () => {},
+  },
+};
+</script>
+<script src="/live/campaign-home.js"></script>
 </body>
 </html>

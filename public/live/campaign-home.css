@@ -167,6 +167,12 @@
    the whole schedule; it says the three dates that explain where we are.
    The first is the one that matters, so it is the only one at full
    weight — the rest guide the eye without competing for it. */
+/* Where a campaign publishes. One sentence, set below the assets and
+   well under the weight of everything above it — the fact matters, the
+   arrangement does not deserve a panel. */
+.assetnote{font-size:.68rem;line-height:1.5;color:var(--smoke);opacity:.75;
+  max-width:52ch;margin:1.1rem 0 0}
+
 .next{margin-top:1.7rem;padding-top:1.2rem;border-top:1px solid var(--hair);max-width:60ch}
 .nx{display:flex;gap:1.2rem;align-items:baseline;padding:.32rem 0}
 .nx-d{flex:0 0 11.5rem;font-family:'Space Grotesk',sans-serif;font-weight:700;
