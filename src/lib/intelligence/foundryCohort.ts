@@ -122,16 +122,22 @@ const S: FoundryCohortId = 'foundry-2026-summer';
     worth saying — see FoundryNote above. */
 const NOTES: Record<string, FoundryNote> = {};
 
-/* ── COUNTRY, WHERE WE HAVE IT ────────────────────────────────────────
-   Supplied with the first 2026 cohort information. The Fall intake has no
-   country data in this project and none is inferred here: YouTube does not
-   expose a channel's country anywhere we read, and guessing from a channel
-   title or the language of a video title would produce something that looks
-   verified and is not. Those artists carry no country and the page shows
-   none, which is the behaviour to fix by supplying the data — not by
-   loosening the rule. */
+/* ── COUNTRY ──────────────────────────────────────────────────────────
+   Every tracked artist, from the Foundry cohort information. Written down
+   rather than inferred: YouTube does not expose a channel's country
+   anywhere we read, and deriving one from a channel title or the language
+   of a video title would produce something that looks verified and is not.
+
+   RaiNao was briefly carried as Puerto Rico / USA on an earlier reading of
+   the cohort information; the full list gives Puerto Rico alone, so that is
+   what it says. Zeina is Lebanon and Egypt, which is why this is an array —
+   flattening it would drop half of a real identity.
+
+   An artist missing here renders no flag at all rather than a placeholder,
+   and FOUNDRY_COUNTRY_UNKNOWN below reports the gap. */
 const COUNTRIES: Record<string, FoundryCountry[]> = {
-  rainao:         [{ code: 'PR', name: 'Puerto Rico' }, { code: 'US', name: 'USA' }],
+  /* First 2026 cohort */
+  rainao:         [{ code: 'PR', name: 'Puerto Rico' }],
   silicagel:      [{ code: 'KR', name: 'South Korea' }],
   soffiemusic:    [{ code: 'DE', name: 'Germany' }],
   theparadoxband: [{ code: 'US', name: 'USA' }],
@@ -139,6 +145,25 @@ const COUNTRIES: Record<string, FoundryCountry[]> = {
   wasiaproject:   [{ code: 'GB', name: 'UK' }],
   wavetoearth:    [{ code: 'KR', name: 'South Korea' }],
   zippyfala:      [{ code: 'PL', name: 'Poland' }],
+
+  /* Fall 2026 */
+  aiobahn:        [{ code: 'JP', name: 'Japan' }],
+  asfarshamsi:    [{ code: 'FR', name: 'France' }],
+  baranskok:      [{ code: 'DE', name: 'Germany' }],
+  flvckka:        [{ code: 'MX', name: 'Mexico' }],
+  gabrieljacoby:  [{ code: 'US', name: 'USA' }],
+  harhaofficial:  [{ code: 'JP', name: 'Japan' }],
+  jonnymahoro:    [{ code: 'DE', name: 'Germany' }],
+  josejr:         [{ code: 'BR', name: 'Brazil' }],
+  kevisymaykyy:   [{ code: 'MX', name: 'Mexico' }],
+  mariasss:       [{ code: 'BR', name: 'Brazil' }],
+  maxmcnown:      [{ code: 'US', name: 'USA' }],
+  takasetoya:     [{ code: 'JP', name: 'Japan' }],
+  thisislorelei:  [{ code: 'US', name: 'USA' }],
+  underscores:    [{ code: 'US', name: 'USA' }],
+  yapimks:        [{ code: 'ES', name: 'Spain' }],
+  /* The one dual identity in the cohort, and the reason this is an array. */
+  zeinamates:     [{ code: 'LB', name: 'Lebanon' }, { code: 'EG', name: 'Egypt' }],
 };
 
 /** Tracked artists with no country established yet — for review, so the gap
