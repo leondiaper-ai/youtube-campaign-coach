@@ -360,6 +360,7 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
   </div>
 </footer>
 
+<script src="/live/second-surface.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════
    ARTIST DIRECTORY
@@ -387,10 +388,11 @@ const ARTISTS = [
     note:'TANGK — four videos did most of the work' },
   { name:'Amyl and The Sniffers', href:'/amyl',           work:['deep'],
     note:'What happens between the uploads' },
-  { name:'D-Block Europe',        href:'/dblock',         work:['deep'],
-    note:'A catalogue at scale, published with one gear' },
-  { name:'Palaye Royale',         href:'/palaye',         work:['deep'],
-    note:'Album campaign starts 2 October' },
+  /* D-Block Europe is off the Hub while the deep dive gets more work.
+     The page at /dblock is untouched and still reachable by URL — this
+     is a decision about what is ready to be shown, not a deletion. */
+  { name:'Palaye Royale',         href:'/palaye',         work:['live','deep'],
+    note:"'Lost In Translation' — first single 2 October" },
   { name:'VENUS GRRRLS',          href:'/venusgrrrls',    work:['deep'],
     note:'One release left — what do we do next?' },
   { name:'Antony Szmierek',       href:'/antonyszmierek', work:['deep'],
@@ -444,14 +446,31 @@ function renderArtists() {
 }
 
 /* ── live campaigns, from the campaign-cover API ── */
-const LIVE_SLUGS = ['chvrches', 'kings-of-leon'];
+const LIVE_SLUGS = ['chvrches', 'kings-of-leon', 'palayeroyale'];
+
+/* Where the API slug and the page path differ. */
+const PAGE_SLUG = { 'kings-of-leon': 'kol', palayeroyale: 'palaye' };
+
+/* Not every live campaign has a name in the plan yet. Palaye's album is
+   held in its timeline as a CONFIRMED moment rather than as a campaign
+   record, so the card reads it from there instead of printing nothing —
+   or worse, printing something nobody entered. */
+function campaignTitle(d) {
+  if (d.campaign && d.campaign.name) return d.campaign.name;
+  /* The FURTHEST-OUT confirmed moment, because a campaign is named for
+     what it lands on. Taking the first would title Palaye's card with
+     the 2 October single rather than the album it is leading to. */
+  const ms = ((d.timeline && d.timeline.moments) || [])
+    .filter(x => x.provenance === 'CONFIRMED' && (x.kind === 'ANCHOR' || x.kind === 'NEXT') && x.title);
+  return ms.length ? ms[ms.length - 1].title : '';
+}
 
 function campCard(d) {
   const m = d.metrics || {};
   const a = (d.assets && d.assets.heroes || [])[0];
   const art = a && a.thumb ? a.thumb : '';
   const name = (d.artist && d.artist.name) || d.slug;
-  const title = (d.campaign && d.campaign.name) || '';
+  const title = campaignTitle(d);
   const read = d.read || {};
   const nextStage = (d.stages || []).find(s => s.status === 'NEXT')
                  || (d.stages || []).find(s => s.status === 'IN MOTION');
@@ -460,7 +479,13 @@ function campCard(d) {
     ${art ? `<div class="art" style="background-image:url('${esc(art)}')"></div>` : ''}
     <div class="veil"></div>
     <div class="inner">
-      <span class="pulse">Live · Day ${esc(m.campaignDay ?? '—')}</span>
+      ${/* The state, not a blanket "Live". The API distinguishes a
+             confirmed campaign from uploads appearing, and so does the
+             read underneath — a card that says LIVE above a line saying
+             nobody has confirmed the campaign has started is arguing with
+             itself. */''}
+      <span class="pulse">${d.state === 'CAMPAIGN_LIVE' ? 'Live' : 'New activity'
+        } · Day ${esc(m.campaignDay ?? '—')}</span>
       <div class="who">${esc(name)}</div>
       <h3 class="display what">${esc(title)}</h3>
       <div class="said">
@@ -487,9 +512,15 @@ async function loadLive() {
       if (!r.ok) return null;
       const j = await r.json();
       if (j.state !== 'CAMPAIGN_LIVE' && j.state !== 'NEW_ACTIVITY') return null;
-      /* The API slug and the page path differ for Kings of Leon. */
-      j.pageSlug = slug === 'kings-of-leon' ? 'kol' : slug;
+      j.pageSlug = PAGE_SLUG[slug] || slug;
       j.slug = slug;
+      /* A campaign published across two channels is merged here exactly
+         as it is on the deck, by the same shared module — so the figure
+         on this card and the figure one click away are the same figure.
+         Artists with no second surface pass through untouched. */
+      if (window.CampaignSecondSurface) {
+        try { await window.CampaignSecondSurface.merge(j); } catch {}
+      }
       return j;
     } catch { return null; }
   }));
