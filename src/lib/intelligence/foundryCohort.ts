@@ -158,6 +158,7 @@ const COUNTRIES: Record<string, FoundryCountry[]> = {
   /* Read off the channel's own country field, not inferred from the
      music or from a collaborator's nationality. */
   mrdraganov:        [{ code: 'MA', name: 'Morocco' }],
+  antaranandy:       [{ code: 'IN', name: 'India' }],
   mustbemeek:        [{ code: 'GB', name: 'UK' }],
   momoboydmusic7296: [{ code: 'US', name: 'USA' }],
   n4t4nya:           [{ code: 'GB', name: 'UK' }],
@@ -259,6 +260,18 @@ export const FOUNDRY_MEMBERS: FoundryMember[] = [
      the earlier note expected to find him. */
   m('UCK82U3ep55nGX3bRMT5lECQ', 'mrdraganov',      'Draganov',         '@MrDraganov',      S),
 
+  /* Resolved 18 September, by Leon, because search could not.
+     The cohort names a PAIR and three channels answer to it: @antaranandy
+     (1.18m, India, 476 videos), @ankitanandy, and @nandysisters — which
+     carries the exact pair name and 705 subscribers. The perfect name
+     match is the dormant one.
+     @antaranandy is the channel the duo's work actually lives on: its own
+     description is Antara's, but the official releases on it are credited
+     "Ft. Nandy Sisters | Antara, Ankita", and it is the top result for a
+     Nandy Sisters search. Recorded under the cohort's two-artist name, so
+     the roster matches the Foundry list one-to-one. */
+  m('UClV0DLc88i0hgeRWOOjSJfw', 'antaranandy', 'Antara and Ankita Nandy', '@antaranandy', S),
+
   /* The last three, resolved 18 September from handles. They were named in
      the Fall list from the start and sat unresolved because nobody had a
      handle for them — which is precisely why this file is keyed on channel
@@ -292,24 +305,19 @@ export const FOUNDRY_UNRESOLVED: string[] = [];
  * which channel is theirs and a wrong channel is worse than a missing one.
  * Each needs a handle or a channel ID from someone who knows.
  *
- *   Antara and Ankita Nandy — the cohort names a PAIR, and there are three
- *     candidate channels, none of which is obviously the answer:
- *       @antaranandy   1.18m subs, India, 476 videos. Antara's own channel
- *                      by its description, but it carries the duo's
- *                      official releases ("Ft. Nandy Sisters | Antara,
- *                      Ankita") and is the top result for "Nandy Sisters".
- *       @ankitanandy   Ankita's own channel, UCQDHhbQN0Qu3uOq5bH82J4Q.
- *       @nandysisters  Titled "Antara Nandy & Ankita Nandy" — the exact
- *                      pair — but 705 subscribers and no country set. A
- *                      name that matches perfectly on a channel with no
- *                      audience is a trap, not an answer.
- *     Tracking @antaranandy would put one sister's channel under a
- *     two-artist entry and quietly overstate what we are watching. That is
- *     a call for someone who knows which channel the Foundry entry meant.
+ * EMPTY as of 18 September — every named artist is tracked, so the page
+ * shows one number rather than two. Kept as a concept because the next
+ * intake will arrive as names before handles, and a page that can explain
+ * a gap is better than one where somebody notices it.
+ *
+ * The last entry to leave was "Antara and Ankita Nandy", and it is worth
+ * recording why it sat here: the cohort names a pair, and three channels
+ * answered to it — @antaranandy (1.18m, India), @ankitanandy, and
+ * @nandysisters, which carries the exact pair name and 705 subscribers.
+ * The perfect name match was the dormant one. Search could not settle it;
+ * Leon did.
  */
-export const FOUNDRY_NEEDS_HANDLE = [
-  'Antara and Ankita Nandy',
-];
+export const FOUNDRY_NEEDS_HANDLE: string[] = [];
 
 /** One cohort, or every tracked Foundry artist when asked for 'all'. */
 export const membersOf = (cohort: FoundryCohortId | 'all') =>
