@@ -785,10 +785,30 @@ const slides = () => [
   <div class="bleed"><img src="${thumb(A.sumerianMV[0].id,'maxresdefault')}" alt=""></div>
   <div class="inner">
     <div class="label reveal">Palaye Royale × YouTube</div>
-    <h1 class="display big reveal" style="max-width:16ch">The album campaign<br>
-      <span style="color:var(--signal)">starts on 2 October.</span></h1>
-    <p class="sub reveal">Four music videos through to 22 January.
-      Here is where they can take you.</p>
+    ${/* ── THE OPENING CLAIM ──────────────────────────────────────
+         Not the release date. A date is a fact the band already knows,
+         and opening on it makes the deck a calendar.
+
+         This is the analysis instead, and specifically the finding that
+         surprised us: 136 uploads in 24 months, active in 17 of them,
+         which is a HIGHER upload rate than most of the bands we looked
+         at. Whatever this channel's problem is, it was never effort.
+         The deck spends the next ten slides on where that effort could
+         land, so the cover states the premise and slide 4 proves it.
+
+         Set from the same numbers as the diagnosis slide rather than
+         typed, so the two can never drift apart. */''}
+    <h1 class="display big reveal" style="max-width:15ch">The effort is<br>already going in.<br>
+      <span style="color:var(--signal)">It needs somewhere to land.</span></h1>
+    ${/* activeMonths is stored as "17 / 24" for the diagnosis slide, where
+         it reads as a ratio in a stat block. In a sentence it has to be a
+         number, so the numerator is taken rather than a second copy of the
+         figure being written down here. */''}
+    <p class="sub reveal">${A.activity.uploads24} uploads in 24 months, active in
+      ${String(A.activity.activeMonths).split('/')[0].trim()} of them — a higher rate
+      than most bands we looked at.
+      Four music videos from 2 October through to 22 January is the chance to give
+      all of it a destination.</p>
     <div class="srcbar reveal"><span class="src">Public YouTube data · 2 September 2026</span></div>
   </div>
 </section>`,
