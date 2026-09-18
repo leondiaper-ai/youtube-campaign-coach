@@ -539,6 +539,26 @@
    so anything it leaves unscoped wins by position alone.
    The filmstrip only ever renders inside the live cover, so scoping costs
    nothing and stops this layer from reaching into the deck behind it. */
+/* ── A CAMPAIGN WHOSE LEAD ASSET IS VERTICAL ──────────────────────────
+   The hero slot is sized by HEIGHT, which is right when the lead asset
+   is 16:9: CHVRCHES' trailer fills its column at about 430px wide. A
+   9:16 Short given the same height comes out 139px wide, so a campaign
+   whose only asset so far is a Short drew a thumbnail where CHVRCHES
+   draws a hero — and left two thirds of its own column empty, which is
+   what reads as the page hugging the left with dead space to the right.
+
+   So when there is exactly ONE hero and it is vertical, the card is
+   sized by width instead and the height follows 9:16 from it. Two
+   heroes, or a landscape one, are untouched: :only-child excludes
+   CHVRCHES' pair, :not(.wide) excludes Kings of Leon's trailer. */
+.slide.cover .heroassets .ha:only-child:not(.wide){width:clamp(190px,15vw,240px)}
+.slide.cover .heroassets .ha:only-child:not(.wide) .ha-img{height:clamp(338px,26.7vw,427px)}
+.slide.cover .heroassets .ha:only-child:not(.wide) .ha-t{font-size:1rem;line-height:1.2}
+
+/* The note sets the left column's width, so it should not be wider than
+   the assets it explains. */
+.slide.cover .assetnote{max-width:34ch}
+
 .slide.cover .strip{display:flex;flex-wrap:wrap;gap:.42rem;margin-top:.85rem;max-width:640px}
 .sti{display:block;height:62px;width:110px;border-radius:6px;overflow:hidden;
   border:1px solid var(--hair);background:var(--coal);flex:0 0 auto;
