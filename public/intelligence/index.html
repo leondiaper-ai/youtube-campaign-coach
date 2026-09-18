@@ -46,6 +46,7 @@
   --c-deep:#FFE24A;    /* DEEP DIVE     — our analysis */
   --c-case:#E8E3D6;    /* POST CAMPAIGN CASE STUDY — finished, outcome measured */
   --c-fdy:#A98BFF;     /* FOUNDRY       — the external cohort */
+  --c-spot:#5FD9A6;    /* SPOTLIGHT     — this week across the roster */
 
   --pad:clamp(1.4rem,5vw,5rem);
 }
@@ -149,6 +150,51 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
   .arow .go{display:none}
 }
 
+/* ── channel spotlight ─────────────────────────────────────────────────
+   The weekly roster-wide read, rendered here rather than linked to. It
+   answers a different question from the rest of the page: not "what do we
+   know about this artist" but "who executed well this week", across all
+   115 managed channels — including artists with no page of their own.
+
+   One lead channel, four alongside it. The figures shown are the durable
+   ones — total subscribers, upload cadence, format range. Week-on-week
+   percentages are deliberately left to the full spotlight page: a channel
+   Watcher has only recently started following produces enormous swings
+   that say more about history depth than about the campaign. */
+.spot .lede{max-width:60ch;margin:0 0 clamp(1.2rem,2.4vw,1.8rem);color:var(--bone)}
+.spot-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line)}
+.sp-lead{background:var(--ink-3);padding:clamp(1.3rem,2.6vw,2rem);display:flex;flex-direction:column}
+.sp-rest{background:var(--ink-2);display:flex;flex-direction:column}
+.sp-head{display:flex;align-items:center;gap:.9rem}
+.sp-av{width:52px;height:52px;border-radius:50%;background:var(--ink);background-size:cover;
+  background-position:center;flex:0 0 auto;border:1px solid var(--line)}
+.sp-rest .sp-av{width:34px;height:34px}
+.sp-grade{margin-left:auto;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
+  font-size:clamp(1.8rem,3vw,2.4rem);line-height:.8;color:var(--c-spot)}
+.sp-lead .why{margin:1.1rem 0 0;font-size:clamp(1rem,1.4vw,1.14rem);line-height:1.34;color:var(--paper);max-width:32ch}
+.sp-lead .cad{margin-top:.55rem;font-size:.9rem;color:var(--bone)}
+.sp-fmts{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:1.1rem}
+.sp-fmt{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:.26rem .45rem;border:1px solid var(--line);color:var(--dim)}
+.sp-nums{display:flex;gap:clamp(1.2rem,3vw,2.2rem);margin-top:auto;padding-top:1.3rem;border-top:1px solid var(--line)}
+.sp-nums .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 800;
+  font-size:clamp(1.2rem,2vw,1.6rem);line-height:1;color:var(--paper)}
+.sp-nums .k{margin-top:.3rem}
+.sp-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.85rem;align-items:center;
+  padding:clamp(.8rem,1.6vw,1.05rem) clamp(1rem,2vw,1.5rem);border-bottom:1px solid var(--line)}
+.sp-row:last-child{border-bottom:none}
+.sp-row .nm{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 750;
+  text-transform:uppercase;font-size:.95rem;color:var(--paper);line-height:1.1}
+.sp-row .sub{margin-top:.2rem;font-size:.82rem;color:var(--dim)}
+.sp-row .gr{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
+  font-size:1.3rem;line-height:1;color:var(--c-spot)}
+.spot .more{display:inline-flex;gap:.5rem;margin-top:clamp(1.1rem,2.2vw,1.6rem);
+  font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c-spot)}
+.spot .note{margin-top:.9rem;font-size:.82rem;color:var(--dim);max-width:60ch}
+.sp-skel{padding:clamp(1.3rem,2.6vw,2rem);color:var(--dim);background:var(--ink-3)}
+@media(max-width:900px){.spot-grid{grid-template-columns:1fr}}
+
 /* ── the two non-artist destinations ── */
 .beyond{background:var(--ink-2);border-block:1px solid var(--line)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:1px;
@@ -222,6 +268,29 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
     <span class="label" id="artistCount"></span>
   </div>
   <div class="artists" id="artistList"></div>
+</section>
+
+<!-- ═══ CHANNEL SPOTLIGHT ═══
+     Sits after the artist directory because it is a different cut of the
+     same roster: not our written work on an artist, but how every managed
+     channel executed this week. Rendered live; removed entirely if the
+     API is unavailable, rather than showing an empty frame. -->
+<section id="spotlight" class="spot wrap">
+  <div class="eyebrow reveal">
+    <span class="label" style="color:var(--c-spot)">Channel spotlight</span><span class="bar"></span>
+    <span class="label" id="spotWeek">This week</span>
+  </div>
+  <p class="lede reveal">
+    The best-executed channels across the VMG roster this week — scored on upload cadence,
+    format range and how efficiently views convert to subscribers. Not on audience size.
+  </p>
+  <div class="spot-grid reveal" id="spotGrid">
+    <div class="sp-skel">Loading this week's spotlight…</div>
+  </div>
+  <a class="more reveal" href="/weekly-pulse/channel-spotlight" target="_blank" rel="noopener">
+    Open the full spotlight ↗
+  </a>
+  <p class="note reveal" id="spotNote"></p>
 </section>
 
 <!-- ═══ FOUNDRY + RESOURCES ═══
@@ -409,6 +478,83 @@ async function loadLive() {
   observe(grid.querySelectorAll('.reveal'));
 }
 
+/* ── channel spotlight ──────────────────────────────────────────────
+   Reads /api/channel-spotlight, the same endpoint the full spotlight
+   page uses, so the two never disagree. Shown fields are chosen for
+   durability: totals and cadence hold up whatever depth of history
+   Watcher has for a channel, where a week-on-week percentage does not.
+   If the endpoint fails or returns nothing, the section is removed —
+   an empty spotlight is worse than no spotlight. */
+const compact = n => {
+  if (typeof n !== 'number' || !isFinite(n)) return '—';
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, '') + 'K';
+  return String(n);
+};
+
+/* "19 uploads — 15 longform, 4 Shorts", skipping whichever half is zero. */
+function cadenceLine(c) {
+  const parts = [];
+  if (c.longform30d) parts.push(`${c.longform30d} longform`);
+  if (c.shorts30d) parts.push(`${c.shorts30d} Shorts`);
+  const split = parts.length ? ` — ${parts.join(', ')}` : '';
+  return `${c.uploads30d} upload${c.uploads30d === 1 ? '' : 's'} in 30 days${split}`;
+}
+
+const avatar = url => url ? ` style="background-image:url('${esc(url)}')"` : '';
+
+function spotLead(c) {
+  const fmts = (c.contentFormats || []).slice(0, 5);
+  return `<div class="sp-lead">
+    <div class="sp-head">
+      <div class="sp-av"${avatar(c.thumbnail)}></div>
+      <div>
+        <h3 class="display">${esc(c.name)}</h3>
+        <div class="label" style="margin-top:.3rem;color:var(--c-spot)">${esc(c.ecosystemSignal || c.classification || '')}</div>
+      </div>
+      <div class="sp-grade">${esc(c.grade || '')}</div>
+    </div>
+    <p class="why">${esc(c.scoreLabel || '')}</p>
+    <div class="cad">${esc(cadenceLine(c))}</div>
+    ${fmts.length ? `<div class="sp-fmts">${fmts.map(f => `<span class="sp-fmt">${esc(f)}</span>`).join('')}</div>` : ''}
+    <div class="sp-nums">
+      <div><div class="n">${compact(c.subs)}</div><div class="k label">Subscribers</div></div>
+      <div><div class="n">${compact(c.views7d)}</div><div class="k label">Views this week</div></div>
+      <div><div class="n">${c.uploads30d}</div><div class="k label">Uploads (30d)</div></div>
+    </div>
+  </div>`;
+}
+
+const spotRow = c => `<div class="sp-row">
+  <div class="sp-av"${avatar(c.thumbnail)}></div>
+  <div>
+    <div class="nm">${esc(c.name)}</div>
+    <div class="sub">${esc(cadenceLine(c))}</div>
+  </div>
+  <div class="gr">${esc(c.grade || '')}</div>
+</div>`;
+
+async function loadSpotlight() {
+  const section = document.getElementById('spotlight');
+  try {
+    const r = await fetch('/api/channel-spotlight');
+    if (!r.ok) throw new Error(String(r.status));
+    const d = await r.json();
+    const ch = (d.channels || []).filter(c => c && c.name);
+    if (!ch.length) throw new Error('empty');
+
+    if (d.weekRange) document.getElementById('spotWeek').textContent = d.weekRange;
+    document.getElementById('spotGrid').innerHTML =
+      spotLead(ch[0]) + `<div class="sp-rest">${ch.slice(1).map(spotRow).join('')}</div>`;
+    if (d.totalManaged) {
+      document.getElementById('spotNote').textContent =
+        `${ch.length} of ${d.totalManaged} Virgin-managed channels. Scored on execution, not popularity.`;
+    }
+  } catch {
+    section.remove();
+  }
+}
+
 /* ── Foundry count only — the cohort itself lives on /foundry ── */
 async function loadFoundry() {
   try {
@@ -427,6 +573,7 @@ function observe(nodes){ nodes.forEach((n,i)=>{ n.style.transitionDelay = `${Mat
 renderArtists();
 observe(document.querySelectorAll('.reveal'));
 loadLive();
+loadSpotlight();
 loadFoundry();
 
 document.getElementById('footStamp').textContent =
