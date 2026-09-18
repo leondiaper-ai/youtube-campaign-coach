@@ -249,3 +249,32 @@ export async function canRefresh(): Promise<{ allowed: boolean; nextAllowedAt: s
   const nextAllowed = new Date(new Date(meta.lastSyncAt).getTime() + REFRESH_COOLDOWN_MS).toISOString();
   return { allowed: false, nextAllowedAt: nextAllowed, lastSyncAt: meta.lastSyncAt };
 }
+
+/**
+ * FOUNDRY BASELINE — write-once, by design.
+ *
+ * This is the anchor every "since tracking" figure is measured against,
+ * so the one thing it must never do is move. `writeFoundryBaseline` will
+ * not overwrite an existing record: if a later scan produced different
+ * numbers, that is the change we are trying to observe, not a correction
+ * to the starting point. Re-baselining would silently erase the history
+ * it exists to preserve.
+ *
+ * Keyed on channel id rather than slug, so a rename or a re-slug in
+ * Watcher cannot orphan a baseline.
+ */
+export async function writeFoundryBaseline(channelId: string, baseline: unknown): Promise<boolean> {
+  const store = await kv();
+  if (!store) return false;
+  const key = `foundry:baseline:${channelId}`;
+  const existing = await store.get(key);
+  if (existing) return false;          // already anchored — leave it alone
+  await store.set(key, baseline);
+  return true;
+}
+
+export async function readFoundryBaseline<T = unknown>(channelId: string): Promise<T | null> {
+  const store = await kv();
+  if (!store) return null;
+  return ((await store.get(`foundry:baseline:${channelId}`)) as T | null) ?? null;
+}
