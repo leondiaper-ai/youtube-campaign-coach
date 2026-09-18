@@ -93,6 +93,13 @@ export async function GET(req: NextRequest) {
             title: newest.title ?? null,
             publishedAt: newest.publishedAt,
             views: n(newest.viewCount),
+            /* Engagement on the newest upload. Counts rather than comment
+               text: the Fan Voice safety and sentiment layer reads English
+               only, and most of this cohort publishes in Portuguese,
+               Japanese, Turkish and Spanish. A count says an audience is
+               responding without us claiming to know what they said. */
+            likes: n(newest.likeCount),
+            comments: n(newest.commentCount),
             thumb: `https://i.ytimg.com/vi/${newest.id}/hqdefault.jpg`,
           } : null,
           /* How many daily snapshots Watcher holds. Zero or one means

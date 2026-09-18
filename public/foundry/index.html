@@ -156,6 +156,8 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
 .fcard .nums .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 800;
   font-size:1.15rem;line-height:1;color:var(--paper)}
 .fcard .nums .k{margin-top:.28rem}
+.fcard .react{margin-top:.7rem;font-family:'DM Mono',monospace;font-size:.6rem;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
 .feat-note{margin-top:1rem;font-size:.84rem;color:var(--dim);max-width:62ch}
 
 /* ── cohort ──
@@ -372,6 +374,20 @@ function splitLine(c) {
   return parts.join(' · ');
 }
 
+/* Engagement on the newest upload, as counts. Deliberately not comment
+   text: the qualification layer that decides whether a comment is safe and
+   representative reads English only, and most of this cohort does not
+   publish in English. "1.2K comments" is true in every language; a comment
+   we cannot read is not something to put on a page. */
+function engagement(c) {
+  const l = c.latest;
+  if (!l) return '';
+  const parts = [];
+  if (typeof l.likes === 'number' && l.likes > 0) parts.push(`${compact(l.likes)} likes`);
+  if (typeof l.comments === 'number' && l.comments > 0) parts.push(`${compact(l.comments)} comments`);
+  return parts.join(' · ');
+}
+
 const dots = (on, of) => Array.from({ length: of },
   (_, i) => `<span class="dot${i < on ? ' on' : ''}"></span>`).join('');
 
@@ -398,7 +414,8 @@ function rowHtml(r) {
         </div>
         ${c && c.latest && c.latest.title
           ? `<div class="latest"><b>${esc(c.latest.title)}</b>${
-               c.latest.views != null ? ` · ${esc(compact(c.latest.views))} views` : ''}</div>`
+               c.latest.views != null ? ` · ${esc(compact(c.latest.views))} views` : ''}${
+               engagement(c) ? ` · ${esc(engagement(c))}` : ''}</div>`
           : ''}
       </div>
     </div>
@@ -449,6 +466,7 @@ function featHtml(r) {
         ${cell(compact(c.subscribers), 'Subscribers')}
         ${cell(compact(c.totalViews), 'Total views')}
       </div>
+      ${engagement(c) ? `<div class="react">${esc(engagement(c))}</div>` : ''}
     </div>
   </a>`;
 }
