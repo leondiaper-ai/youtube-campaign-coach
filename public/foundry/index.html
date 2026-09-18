@@ -87,6 +87,18 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
 .mast .here{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.16em;
   text-transform:uppercase;color:var(--fdy);margin-left:auto}
 
+/* Navigation identical to the Hub's — same type, size, tracking and hover.
+   The only difference is the current page, which is violet and underlined
+   rather than clickable: you should be able to see where you are without
+   reading the URL. */
+.mast nav{display:flex;gap:1.5rem;margin-left:auto;flex-wrap:wrap}
+.mast nav a{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--dim);padding-block:.3rem;border-bottom:1px solid transparent}
+.mast nav a:hover{color:var(--paper);border-bottom-color:var(--signal)}
+.mast nav a.current{color:var(--fdy);border-bottom-color:var(--fdy);cursor:default}
+.mast nav a.current:hover{color:var(--fdy);border-bottom-color:var(--fdy)}
+@media(max-width:700px){.mast nav{gap:1rem}.mast nav a{font-size:.6rem}}
+
 /* ── hero ── */
 .hero{padding-top:clamp(2.4rem,5vw,4rem);padding-bottom:clamp(1.4rem,2.6vw,2rem)}
 .hero .label{color:var(--fdy)}
@@ -165,7 +177,17 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
 <header class="mast">
   <div class="mast-in">
     <a class="brand" href="/intelligence">VMG <b>YouTube Intelligence</b></a>
-    <span class="here">Foundry Watch</span>
+    <!-- The same four destinations as the Hub, in the same order, so this
+         page reads as part of the product rather than somewhere you landed.
+         Campaigns and Artists are sections of the Hub, so they carry the
+         anchor with them and arrive in the right place. Foundry is marked
+         current rather than linked to itself. -->
+    <nav>
+      <a href="/intelligence#campaigns">Campaigns</a>
+      <a href="/intelligence#artists">Artists</a>
+      <a class="current" aria-current="page">Foundry</a>
+      <a href="https://youtube-insights-pi.vercel.app/preview.html" target="_blank" rel="noopener">Analysis</a>
+    </nav>
   </div>
 </header>
 
@@ -218,7 +240,7 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
   <div class="wrap" style="display:flex;flex-wrap:wrap;gap:1.2rem;justify-content:space-between">
     <div>
       <a class="brand" href="/intelligence">VMG <b>YouTube Intelligence</b></a>
-      <p class="label" style="margin-top:.5rem">Foundry Watch</p>
+      <p class="label" style="margin-top:.5rem">Campaigns · Artists · Foundry · Analysis</p>
     </div>
     <p class="label" style="max-width:42ch;text-align:right">
       Public YouTube data via Watcher. We observe channel behaviour; we have no visibility
