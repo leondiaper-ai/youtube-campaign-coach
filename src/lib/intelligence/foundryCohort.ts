@@ -102,6 +102,22 @@ export const FOUNDRY_MEMBERS: FoundryMember[] = [
   m('UCrutg3fZvLPjQCKZjLeA8Ng', 'maxmcnown',     'Max McNown',     '@maxmcnown'),
   m('UC7Dr19bFdqkkfREMITgY9Vg', 'underscores',   'underscores',    '@underscores'),
   m('UCakRh4eU8scBO-SzfEKFm9w', 'zeinamates',    'Zeina',          '@zeinamates'),
+
+  /* Added 18 September, completing the named cohort. Every channel ID and
+     handle below was read off the channel itself and then confirmed against
+     what Watcher stored when the artist was added — not typed from the
+     brief. Two arrived as handles and six as channel IDs; all eight resolved
+     to a channel whose title matches the artist. */
+  m('UC-eDoMjP2VBrXtNOkNgxQiQ', 'rainao',         'RaiNao',         '@rainao'),
+  /* Watcher holds the channel's own title, which carries the Korean name. */
+  m('UCXteMTpHAvyDP05G0QULuZA', 'silicagel',      'Silica Gel 실리카겔', '@silicagel'),
+  m('UCshXgyGxsBzR8mVk7IC1K_Q', 'soffiemusic',    'SOFFIE',         '@soffiemusic'),
+  m('UCAgPDQ0haCpdUm7FGQoYStw', 'theparadoxband', 'The Paradox',    '@theparadoxband'),
+  m('UCiRWTc0sdBm-G37iVA4idEg', 'tks2g',          'TKS 2G',         '@tks2g'),
+  m('UCgIjUYl5i3LDBRFPHkiLULA', 'wasiaproject',   'Wasia Project',  '@wasiaproject'),
+  m('UCBJNpcJaUcVyw4LlqGRMpcQ', 'wavetoearth',    'wave to earth',  '@wavetoearth'),
+  /* The handle is @zippyfala, not @zippyogar. */
+  m('UCpw7wrI_lazxjBTkkZVQ0Dg', 'zippyfala',      'Zippy Ogar',     '@zippyfala'),
 ];
 
 function m(channelId: string, slug: string, name: string, handle: string): FoundryMember {
