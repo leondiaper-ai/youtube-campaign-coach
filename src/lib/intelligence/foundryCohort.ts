@@ -92,6 +92,12 @@ export type FoundryMember = {
       comparables at the bottom of this file. */
   comparableVmgArtists: { slug: string; name: string; why: string }[];
 
+  /** True when this Foundry artist is also a VMG artist. Confirmed for
+      underscores. Worth showing rather than normalising away: it means one
+      channel sits in both the cohort and our own roster, which makes it
+      the single most directly comparable reference we have. */
+  vmgManaged: boolean;
+
   caseStudyStatus: FoundryCaseStudyStatus;
   /** Editorial note for CHANNELS TO WATCH. Empty until a real behaviour
       is worth pointing at; an empty string renders nothing. */
@@ -129,10 +135,14 @@ function m(channelId: string, slug: string, name: string, handle: string): Found
     cohort: 'foundry-2026-fall',
     country: null, lane: null,
     comparableVmgArtists: [],
+    vmgManaged: VMG_MANAGED.has(slug),
     caseStudyStatus: 'watching',
     editorialNote: '',
   };
 }
+
+/** Foundry artists who are also VMG artists. Confirmed by Leon, 18 Sep. */
+const VMG_MANAGED = new Set(['underscores']);
 
 /**
  * Named in the brief, not found in Watcher. Surfaced by the API so the
@@ -148,6 +158,11 @@ export const FOUNDRY_UNRESOLVED = [
 /** The brief spelled this "KEVIS Y MAYYKI"; Watcher holds "KEVIS Y MAYKYY".
     Recorded so the discrepancy is resolved deliberately rather than by
     whoever edits the roster next. */
+/** underscores appears in both the Foundry cohort and the VMG roster.
+    Not a data error — confirmed — and the most useful single comparison
+    point in the cohort, since we can see the campaign from both sides. */
+export const FOUNDRY_VMG_OVERLAP = ['underscores'];
+
 export const FOUNDRY_SPELLING_NOTES = [
   { watcher: 'KEVIS Y MAYKYY', brief: 'KEVIS Y MAYYKI', channelId: 'UCXd_WcWuCEqJ9B0UJAWGXlQ' },
 ];
@@ -167,12 +182,14 @@ export type FoundryBaseline = {
   capturedAt: string;          // ISO — the moment this was frozen
   subscribers: number | null;
   totalViews: number | null;
-  videoCount: number | null;
   lastUploadAt: string | null;
-  uploadsLast7Days: number | null;
-  uploadsLast14Days: number | null;
-  shortsLast14Days: number | null;
-  longformLast14Days: number | null;
+  /* 30-day windows, because that is the window Watcher's cadence layer
+     actually computes. An earlier draft of this file asked for 7- and
+     14-day counts that no upstream source produced, and every one of
+     them came back null. Mirror the source; do not invent a window. */
+  uploads30d: number | null;
+  shorts30d: number | null;
+  longform30d: number | null;
   /** What Watcher knew at capture time. A baseline taken on day one of
       tracking has no history behind it, and a reader deserves to know
       that before drawing a trend through it. */
@@ -185,16 +202,18 @@ export type FoundryRow = {
   current: {
     subscribers: number | null;
     totalViews: number | null;
-    videoCount: number | null;
     lastUploadAt: string | null;
     daysSinceUpload: number | null;
-    uploadsLast7Days: number | null;
-    uploadsLast14Days: number | null;
-    shortsLast14Days: number | null;
-    longformLast14Days: number | null;
+    uploads30d: number | null;
+    shorts30d: number | null;
+    longform30d: number | null;
     views7: number | null;
     views30: number | null;
     subs30: number | null;
+    /** How many daily snapshots sit behind the deltas above. A 30-day
+        figure computed from two days of history is not a 30-day figure,
+        and the UI needs to be able to tell. */
+    historyDepthDays: number | null;
     activity: FoundryActivity;
   } | null;
   baseline: FoundryBaseline | null;
@@ -206,7 +225,6 @@ export type FoundryRow = {
     days: number;
     subscribers: number | null;
     totalViews: number | null;
-    uploads: number | null;
   } | null;
 };
 
@@ -218,10 +236,10 @@ export type FoundryActivity = 'ACTIVE' | 'STEADY' | 'SLOW' | 'DORMANT';
  * an artist, and a four-way split is about as much as fourteen days of
  * upload counts can honestly support.
  */
-export function activityOf(daysSinceUpload: number | null, uploads14: number | null): FoundryActivity {
+export function activityOf(daysSinceUpload: number | null, uploads30: number | null): FoundryActivity {
   const d = daysSinceUpload ?? 9999;
-  const u = uploads14 ?? 0;
-  if (d <= 7 && u >= 3) return 'ACTIVE';
+  const u = uploads30 ?? 0;
+  if (d <= 7 && u >= 4) return 'ACTIVE';
   if (d <= 14) return 'STEADY';
   if (d <= 45) return 'SLOW';
   return 'DORMANT';

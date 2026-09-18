@@ -124,6 +124,7 @@ section{padding-block:clamp(3rem,6vw,6rem)}
 .act.STEADY{color:var(--bone)}
 .act.SLOW{color:var(--dim)}
 .act.DORMANT{color:var(--dim);opacity:.7}
+.label.vmg{color:var(--signal)}
 @media(max-width:1040px){
   .row{grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr)) auto}
   .row .m.hide-md{display:none}
@@ -230,6 +231,7 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
       <button class="chip" data-f="active">Active</button>
       <button class="chip" data-f="shorts">Using Shorts</button>
       <button class="chip" data-f="longform">Using long-form</button>
+      <button class="chip" data-f="vmg">Also VMG</button>
     </div>
     <span class="sep"></span>
     <div class="grp" id="sorts">
@@ -319,12 +321,13 @@ function rowHtml(r) {
         ${c ? `<span class="act ${esc(c.activity)}">${esc(c.activity)}</span>` : ''}
         ${m.country ? `<span class="label">${esc(m.country)}</span>` : ''}
         ${m.handle ? `<span class="label">${esc(m.handle)}</span>` : ''}
+        ${m.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
       </div>
     </div>
     ${cell(c && compact(c.subscribers), 'Subscribers')}
     ${cell(c && compact(c.views30 ?? c.views7), c && c.views30 != null ? '30d views' : '7d views', 'hide-sm')}
     ${cell(c && latest, 'Latest upload', 'hide-md')}
-    ${cell(c && c.uploadsLast14Days != null ? String(c.uploadsLast14Days) : null, 'Uploads · 14d', 'hide-md')}
+    ${cell(c && c.uploads30d != null ? String(c.uploads30d) : null, 'Uploads · 30d', 'hide-md')}
     <span class="go">View channel →</span>
   </a>`;
 }
@@ -336,8 +339,9 @@ function applyView() {
   rows = rows.filter(r => {
     const c = r.current;
     if (f === 'active')   return c && (c.activity === 'ACTIVE' || c.activity === 'STEADY');
-    if (f === 'shorts')   return c && (c.shortsLast14Days ?? 0) > 0;
-    if (f === 'longform') return c && (c.longformLast14Days ?? 0) > 0;
+    if (f === 'shorts')   return c && (c.shorts30d ?? 0) > 0;
+    if (f === 'longform') return c && (c.longform30d ?? 0) > 0;
+    if (f === 'vmg')      return r.member.vmgManaged;
     return true;
   });
 

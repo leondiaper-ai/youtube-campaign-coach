@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readLiveSnapByHandle, writeFoundryBaseline, readFoundryBaseline } from '@/lib/kvCache';
-import { readHistory, channelDeltaSince } from '@/lib/snapshots';
+import {
+  readLiveSnapByHandle, writeFoundryBaseline, readFoundryBaseline, repairEmptyFoundryBaseline,
+} from '@/lib/kvCache';
+import { readHistory } from '@/lib/snapshots';
+import { normalizeChannelData } from '@/lib/youtube/normalizeChannelData';
+import type { LiveSnap } from '@/lib/artists';
 import {
   FOUNDRY_COHORTS, FOUNDRY_MEMBERS, FOUNDRY_UNRESOLVED, FOUNDRY_SPELLING_NOTES,
-  FOUNDRY_SIGNALS, membersOf, activityOf,
+  FOUNDRY_SIGNALS, FOUNDRY_VMG_OVERLAP, membersOf, activityOf,
   type FoundryBaseline, type FoundryCohortId, type FoundryRow,
 } from '@/lib/intelligence/foundryCohort';
 
@@ -54,60 +58,63 @@ export async function GET(req: NextRequest) {
     let baseline = await readFoundryBaseline<FoundryBaseline>(member.channelId);
 
     try {
-      const snap = await readLiveSnapByHandle(member.handle ?? member.name) as Record<string, unknown> | null;
+      const snap = await readLiveSnapByHandle(member.handle ?? member.name) as LiveSnap | null;
       if (snap && !snap.error) {
         const history = member.channelId ? await readHistory(member.channelId) : [];
 
-        /* Deltas come from Watcher's own history, not from our baseline.
-           Two different questions: "what has this channel done lately"
-           (Watcher) and "what has changed since we started watching"
-           (baseline). Conflating them would make a channel we added
-           today look like it had no recent activity. */
-        const since = (days: number) =>
-          new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
-        const v7  = history.length ? channelDeltaSince(history, since(7), 'views') : null;
-        const v30 = history.length ? channelDeltaSince(history, since(30), 'views') : null;
-        const s30 = history.length ? channelDeltaSince(history, since(30), 'subs') : null;
+        /* Read through normalizeChannelData — the SAME function the Watcher
+           and artist-live pages use — rather than reaching into the raw KV
+           snap. The first version of this route did reach in, using field
+           names lifted from an API response that had already been through
+           this normalizer (subscriberCount, videoCount, uploadsLast14Days).
+           None of those exist on the raw snap, so every metric silently
+           came back null. Going through the normalizer makes a Foundry
+           number and a Watcher number the same number by construction,
+           which was the stated principle all along. */
+        const nc = normalizeChannelData(snap, history, null);
+        const cad = nc.cadence;
 
-        const lastUploadAt = (snap.lastUploadDate as string) ?? null;
-        const daysSinceUpload = n(snap.daysSinceLastUpload);
-        const uploads14 = n(snap.uploadsLast14Days);
+        const lastUploadAt = snap.lastUploadAt ?? null;
+        const daysSinceUpload = n(cad?.lastUploadDaysAgo);
+        const uploads30 = n(cad?.uploads30d);
 
         current = {
-          subscribers: n(snap.subscriberCount),
-          totalViews: n(snap.viewCount),
-          videoCount: n(snap.videoCount),
+          subscribers: n(nc.subs),
+          totalViews: n(nc.views),
           lastUploadAt,
           daysSinceUpload,
-          uploadsLast7Days: n(snap.uploadsLast7Days),
-          uploadsLast14Days: uploads14,
-          shortsLast14Days: n(snap.shortsLast14Days),
-          longformLast14Days: n(snap.videosLast14Days),
-          views7: v7 ? n(v7.delta) : null,
-          views30: v30 ? n(v30.delta) : null,
-          subs30: s30 ? n(s30.delta) : null,
-          activity: activityOf(daysSinceUpload, uploads14),
+          uploads30d: uploads30,
+          shorts30d: n(cad?.shorts30d),
+          longform30d: n(cad?.videos30d),
+          views7: nc.views7d ? n(nc.views7d.delta) : null,
+          views30: nc.views30d ? n(nc.views30d.delta) : null,
+          subs30: nc.subs30d ? n(nc.subs30d.delta) : null,
+          historyDepthDays: n(nc.historyDepthDays),
+          activity: activityOf(daysSinceUpload, uploads30),
         };
 
-        /* Freeze the baseline the first time we successfully see this
-           channel. Only ever on a good read — anchoring a cohort to a
-           failed fetch would poison every future comparison. */
+        const snapshotOf = () => ({
+          channelId: member.channelId,
+          capturedAt: now,
+          subscribers: current!.subscribers,
+          totalViews: current!.totalViews,
+          lastUploadAt: current!.lastUploadAt,
+          uploads30d: current!.uploads30d,
+          shorts30d: current!.shorts30d,
+          longform30d: current!.longform30d,
+          watcherHistoryDays: current!.historyDepthDays,
+        });
+
         if (!baseline) {
-          const fresh: FoundryBaseline = {
-            channelId: member.channelId,
-            capturedAt: now,
-            subscribers: current.subscribers,
-            totalViews: current.totalViews,
-            videoCount: current.videoCount,
-            lastUploadAt: current.lastUploadAt,
-            uploadsLast7Days: current.uploadsLast7Days,
-            uploadsLast14Days: current.uploadsLast14Days,
-            shortsLast14Days: current.shortsLast14Days,
-            longformLast14Days: current.longformLast14Days,
-            watcherHistoryDays: history.length || null,
-          };
+          const fresh = snapshotOf();
           const stored = await writeFoundryBaseline(member.channelId, fresh);
           baseline = stored ? fresh : await readFoundryBaseline<FoundryBaseline>(member.channelId);
+        } else if (baseline.subscribers == null && baseline.totalViews == null) {
+          /* An anchor written from the null-metric bug. Not a real
+             baseline — replace it once, now that we can read properly. */
+          const fresh = snapshotOf();
+          const repaired = await repairEmptyFoundryBaseline(member.channelId, fresh);
+          if (repaired) baseline = fresh;
         }
       }
     } catch {
@@ -129,8 +136,6 @@ export async function GET(req: NextRequest) {
             ? current.subscribers - baseline.subscribers : null,
           totalViews: current.totalViews != null && baseline.totalViews != null
             ? current.totalViews - baseline.totalViews : null,
-          uploads: current.videoCount != null && baseline.videoCount != null
-            ? current.videoCount - baseline.videoCount : null,
         };
       }
     }
@@ -155,6 +160,7 @@ export async function GET(req: NextRequest) {
     rows,
     unresolved: FOUNDRY_UNRESOLVED,
     spellingNotes: FOUNDRY_SPELLING_NOTES,
+    vmgOverlap: FOUNDRY_VMG_OVERLAP,
     /* Empty until findings are earned. The page renders the empty state
        rather than inventing cohort patterns from one snapshot. */
     signals: FOUNDRY_SIGNALS,

@@ -278,3 +278,34 @@ export async function readFoundryBaseline<T = unknown>(channelId: string): Promi
   if (!store) return null;
   return ((await store.get(`foundry:baseline:${channelId}`)) as T | null) ?? null;
 }
+
+/**
+ * Replace a baseline that never actually captured anything.
+ *
+ * The write-once rule above protects a real anchor from drifting. It does
+ * not protect a record that was written from a failed read — and the
+ * first live run of the Foundry route did exactly that, freezing thirteen
+ * baselines whose every metric was null because the field names were
+ * wrong. Those are not anchors; they are a bug wearing an anchor's shape,
+ * and leaving them in place would have silently broken every future
+ * "since tracking" figure.
+ *
+ * So this overwrites ONLY when the stored record carries no subscriber or
+ * view figure at all. A baseline with real numbers is never touched, which
+ * keeps the write-once guarantee where it matters.
+ */
+export async function repairEmptyFoundryBaseline(
+  channelId: string,
+  baseline: { subscribers: number | null; totalViews: number | null },
+): Promise<boolean> {
+  const store = await kv();
+  if (!store) return false;
+  const key = `foundry:baseline:${channelId}`;
+  const existing = (await store.get(key)) as { subscribers?: number | null; totalViews?: number | null } | null;
+  if (!existing) return false;                                  // nothing to repair
+  const empty = existing.subscribers == null && existing.totalViews == null;
+  if (!empty) return false;                                     // a real anchor — leave it
+  if (baseline.subscribers == null && baseline.totalViews == null) return false; // no better data
+  await store.set(key, baseline);
+  return true;
+}
