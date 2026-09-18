@@ -189,9 +189,15 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
 .sp-row .sub{margin-top:.2rem;font-size:.82rem;color:var(--dim)}
 .sp-row .gr{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
   font-size:1.3rem;line-height:1;color:var(--c-spot)}
-.spot .more{display:inline-flex;gap:.5rem;margin-top:clamp(1.1rem,2.2vw,1.6rem);
-  font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c-spot)}
-.spot .note{margin-top:.9rem;font-size:.82rem;color:var(--dim);max-width:60ch}
+/* Each channel links to its own YouTube channel — the lead card and every
+   row are whole link targets, so the hover state is the affordance. */
+.sp-lead,.sp-row{transition:background .3s}
+.sp-lead:hover{background:#191922}
+.sp-row:hover{background:var(--ink-3)}
+.sp-go{margin-top:1.1rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim)}
+.sp-lead:hover .sp-go{color:var(--c-spot)}
+.spot .note{margin-top:clamp(1rem,2vw,1.4rem);font-size:.82rem;color:var(--dim);max-width:60ch}
 .sp-skel{padding:clamp(1.3rem,2.6vw,2rem);color:var(--dim);background:var(--ink-3)}
 @media(max-width:900px){.spot-grid{grid-template-columns:1fr}}
 
@@ -287,9 +293,6 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
   <div class="spot-grid reveal" id="spotGrid">
     <div class="sp-skel">Loading this week's spotlight…</div>
   </div>
-  <a class="more reveal" href="/weekly-pulse/channel-spotlight" target="_blank" rel="noopener">
-    Open the full spotlight ↗
-  </a>
   <p class="note reveal" id="spotNote"></p>
 </section>
 
@@ -503,9 +506,25 @@ function cadenceLine(c) {
 
 const avatar = url => url ? ` style="background-image:url('${esc(url)}')"` : '';
 
+/* The channel itself is the destination. Watcher's handle is the only
+   identifier we hold for these channels that resolves to a YouTube URL,
+   and three of the five are not VMG artists with a page here — so the
+   spotlight points at the work rather than at another of our own screens.
+   A channel with no handle stays unlinked rather than guessing a URL. */
+const ytHref = c => {
+  /* Sanitised rather than URL-encoded: encodeURIComponent turns the leading
+     @ into %40, which YouTube only resolves via a redirect. Handles are a
+     restricted character set, so anything outside it means the value isn't
+     a handle and we don't link at all. */
+  const raw = String(c.channelHandle || '').trim().replace(/^@/, '');
+  return /^[A-Za-z0-9._-]{3,30}$/.test(raw) ? `https://www.youtube.com/@${raw}` : null;
+};
+const openTab = href => href ? ` href="${esc(href)}" target="_blank" rel="noopener"` : '';
+
 function spotLead(c) {
   const fmts = (c.contentFormats || []).slice(0, 5);
-  return `<div class="sp-lead">
+  const href = ytHref(c);
+  return `<${href ? 'a' : 'div'} class="sp-lead"${openTab(href)}>
     <div class="sp-head">
       <div class="sp-av"${avatar(c.thumbnail)}></div>
       <div>
@@ -522,17 +541,21 @@ function spotLead(c) {
       <div><div class="n">${compact(c.views7d)}</div><div class="k label">Views this week</div></div>
       <div><div class="n">${c.uploads30d}</div><div class="k label">Uploads (30d)</div></div>
     </div>
-  </div>`;
+    ${href ? `<span class="sp-go">${esc(c.channelHandle)} on YouTube ↗</span>` : ''}
+  </${href ? 'a' : 'div'}>`;
 }
 
-const spotRow = c => `<div class="sp-row">
-  <div class="sp-av"${avatar(c.thumbnail)}></div>
-  <div>
-    <div class="nm">${esc(c.name)}</div>
-    <div class="sub">${esc(cadenceLine(c))}</div>
-  </div>
-  <div class="gr">${esc(c.grade || '')}</div>
-</div>`;
+function spotRow(c) {
+  const href = ytHref(c);
+  return `<${href ? 'a' : 'div'} class="sp-row"${openTab(href)}>
+    <div class="sp-av"${avatar(c.thumbnail)}></div>
+    <div>
+      <div class="nm">${esc(c.name)}</div>
+      <div class="sub">${esc(cadenceLine(c))}</div>
+    </div>
+    <div class="gr">${esc(c.grade || '')}</div>
+  </${href ? 'a' : 'div'}>`;
+}
 
 async function loadSpotlight() {
   const section = document.getElementById('spotlight');
