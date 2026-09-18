@@ -61,6 +61,10 @@ export interface VideoSeries {
 /** Six months. Long enough for a 30-day curve plus the next campaign. */
 const MAX_OBSERVATIONS = 180;
 
+/** Per-call ceiling on videos, so one huge channel cannot build a request
+    big enough to hit Upstash's payload limit. */
+const MAX_VIDEOS_PER_WRITE = 60;
+
 const K = (videoId: string) => `vsnap:${videoId}`;
 
 async function kv(): Promise<Redis | null> {
@@ -87,34 +91,69 @@ export async function recordVideoObservations(
   const store = await kv();
   if (!store) return { recorded: 0 };
 
-  const ts = today();
-  let recorded = 0;
+  /* ── WHY THIS IS BATCHED ───────────────────────────────────────────
+     The first version read and wrote one video at a time:
 
-  for (const v of videos) {
-    if (!v?.id || typeof v.viewCount !== 'number') continue;
-    try {
-      const existing = (await store.get<VideoSeries>(K(v.id))) ?? {
+         for (const v of videos) { await get(v.id); await set(v.id, …) }
+
+     That is two sequential network round-trips per video, inside a
+     function that runs once per artist. At ~40 videos a channel it made
+     each artist ~80 round-trips, and measured on production it took a
+     single-artist refresh from 1.15s to between 9 and 19 seconds.
+
+     The daily cron walks the whole roster inside one 300s invocation.
+     At 213 artists that arithmetic stopped working: the run was killed
+     partway through, and because sync meta is written at the very end,
+     Watcher's "last sync" froze at 14 September while the job failed
+     silently every morning after. Adding an artist broke the same way —
+     that route does the same write with a shorter timeout.
+
+     One mget and one pipeline instead: two round-trips per artist
+     regardless of how many videos it has. */
+  const eligible = videos
+    .filter(v => v?.id && typeof v.viewCount === 'number')
+    /* A ceiling, so one pathological channel cannot produce a request
+       large enough to fail on Upstash's payload limit. Newest first —
+       an old video's curve is already recorded. */
+    .slice(0, MAX_VIDEOS_PER_WRITE);
+
+  if (!eligible.length) return { recorded: 0 };
+
+  const ts = today();
+
+  try {
+    const keys = eligible.map(v => K(v.id));
+    const existing = await store.mget<(VideoSeries | null)[]>(...keys);
+
+    const pipe = store.pipeline();
+    eligible.forEach((v, i) => {
+      const prior = existing?.[i] ?? null;
+      const series: VideoSeries = prior ?? {
         videoId: v.id, publishedAt: v.publishedAt ?? null, observations: [],
       };
       /* publishedAt can arrive late; fill it in but never overwrite. */
-      if (!existing.publishedAt && v.publishedAt) existing.publishedAt = v.publishedAt;
+      if (!series.publishedAt && v.publishedAt) series.publishedAt = v.publishedAt;
 
       const obs: VideoObservation = {
         ts,
-        views: v.viewCount,
+        views: v.viewCount as number,
         likes: typeof v.likeCount === 'number' ? v.likeCount : null,
         comments: typeof v.commentCount === 'number' ? v.commentCount : null,
       };
-      const rest = existing.observations.filter(o => o.ts !== ts);
-      existing.observations = [...rest, obs]
+      /* Idempotent by day: a second reading on the same date replaces it. */
+      series.observations = [...series.observations.filter(o => o.ts !== ts), obs]
         .sort((a, b) => a.ts.localeCompare(b.ts))
         .slice(-MAX_OBSERVATIONS);
 
-      await store.set(K(v.id), existing);
-      recorded++;
-    } catch { /* a lost observation is not worth a failed request */ }
+      pipe.set(K(v.id), series);
+    });
+
+    await pipe.exec();
+    return { recorded: eligible.length };
+  } catch {
+    /* A lost observation is not worth a failed request. */
+    return { recorded: 0 };
   }
-  return { recorded };
 }
 
 export async function readVideoSeries(videoId: string): Promise<VideoSeries | null> {

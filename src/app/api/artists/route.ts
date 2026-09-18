@@ -12,6 +12,13 @@ export async function GET() {
   return NextResponse.json({ artists: list });
 }
 
+/* Adding an artist resolves the channel against YouTube and then writes the
+   first snapshot — several seconds of real work on a large catalogue. With no
+   ceiling declared this route took Vercel's default, and once the per-video
+   snapshot write landed the request began dying before the artist was saved:
+   the dialog just failed. */
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   if (!process.env.YOUTUBE_API_KEY) {
     return NextResponse.json({ error: 'YOUTUBE_API_KEY not set' }, { status: 503 });
