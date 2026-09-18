@@ -44,7 +44,7 @@
      appear so the tag is readable at a glance rather than needing a key. */
   --c-live:#FF4A33;    /* LIVE CAMPAIGN — running now */
   --c-deep:#FFE24A;    /* DEEP DIVE     — our analysis */
-  --c-case:#E8E3D6;    /* CASE STUDY    — measured outcome */
+  --c-case:#E8E3D6;    /* POST CAMPAIGN CASE STUDY — finished, outcome measured */
   --c-fdy:#A98BFF;     /* FOUNDRY       — the external cohort */
 
   --pad:clamp(1.4rem,5vw,5rem);
@@ -283,7 +283,7 @@ const ARTISTS = [
     note:'9 upload days became 44' },
   { name:'K-Trap',                href:'/ktrap',          work:['case'],
     note:'TRAPO 2 — the campaign stopped disappearing between releases' },
-  { name:'IDLES',                 href:'/idles',          work:['case'],
+  { name:'IDLES',                 href:'/idles',          work:['deep'],
     note:'TANGK — four videos did most of the work' },
   { name:'Amyl and The Sniffers', href:'/amyl',           work:['deep'],
     note:'What happens between the uploads' },
@@ -297,7 +297,12 @@ const ARTISTS = [
     note:'The album is out. Keep it moving.' },
 ];
 
-const TAG = { live:'Live campaign', deep:'Deep dive', case:'Case study' };
+/* Tag wording is deliberately explicit about WHEN the work was done.
+   "Case study" alone read as though the campaign might still be running;
+   these are written after a campaign has finished and the outcome is
+   measurable. "Live campaign" means running right now — it is only ever
+   applied from the API's CAMPAIGN_LIVE state, never typed by hand. */
+const TAG = { live:'Live campaign', deep:'Deep dive', case:'Post campaign case study' };
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
@@ -309,15 +314,23 @@ function renderArtists() {
   const sorted = [...ARTISTS].sort((a, b) =>
     (b.work.includes('live') ? 1 : 0) - (a.work.includes('live') ? 1 : 0));
 
-  document.getElementById('artistList').innerHTML = sorted.map(a => `
+  document.getElementById('artistList').innerHTML = sorted.map(a => {
+    /* A live campaign is the only label a live artist carries. The deep
+       dive and the case study still exist and still sit on the artist's
+       page — but on this list, what matters is that it is running now.
+       Two tags on one row read as two parallel states rather than one
+       current one. */
+    const work = a.work.includes('live') ? ['live'] : a.work;
+    return `
     <a class="arow reveal" href="${esc(a.href)}">
       <h3 class="display">${esc(a.name)}</h3>
       <div class="tags">
-        ${a.work.map(w => `<span class="tag ${w}">${esc(TAG[w])}</span>`).join('')}
+        ${work.map(w => `<span class="tag ${w}">${esc(TAG[w])}</span>`).join('')}
       </div>
       <div class="note">${esc(a.note)}</div>
       <span class="go">Open →</span>
-    </a>`).join('');
+    </a>`;
+  }).join('');
 
   document.getElementById('artistCount').textContent = `${ARTISTS.length} artists`;
   observe(document.querySelectorAll('#artistList .reveal'));
