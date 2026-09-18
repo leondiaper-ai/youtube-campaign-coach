@@ -26,8 +26,40 @@
   --line:rgba(244,242,237,.11);
   --signal:#FFE24A;
   --fdy:#A98BFF;
+
+  /* ── MUTED FIELD PALETTE ──────────────────────────────────────────
+     Six desaturated tones, used as flat colour fields behind chunky
+     type. Deliberately ours rather than lifted from the reference —
+     that palette belongs to another publisher's identity. These are
+     dulled well below the Hub's signal yellow and Foundry violet, so a
+     colour field reads as texture and the accents still mean something.
+     Each is dark enough to carry --paper text at comfortable contrast. */
+  --m-olive:#6E7042;
+  --m-clay:#8F5140;
+  --m-slate:#43586B;
+  --m-moss:#4A6550;
+  --m-plum:#5E4668;
+  --m-sand:#8A7550;
+
   --pad:clamp(1.4rem,5vw,5rem);
 }
+
+/* ── CONDENSED DISPLAY ────────────────────────────────────────────────
+   Archivo's variable width axis runs 62–125. The Hub sets it wide (108)
+   for its editorial voice; this page borrows the opposite end — narrow
+   and very heavy — for statement type only. Tall, tight, packed. Used
+   sparingly: the hero, the count, and one band. Everywhere else keeps
+   the Hub's normal display so the two pages still read as a family. */
+.chunk{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
+  text-transform:uppercase;line-height:.84;letter-spacing:-.005em;
+  color:var(--paper);margin:0;
+}
+
+/* Stacked lines divided by hairlines — the device that makes a block of
+   display type read as a set of statements rather than a paragraph. */
+.ruled{border-top:1px solid currentColor}
+.ruled > span{display:block;border-bottom:1px solid currentColor;padding-block:.06em .1em}
 *{box-sizing:border-box}
 body{margin:0;background:var(--ink);color:var(--bone);
   font-family:'Instrument Sans',system-ui,sans-serif;font-size:clamp(15px,1.02vw,17px);
@@ -61,8 +93,8 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
 .hero .lede{margin-top:1.2rem;max-width:56ch;font-size:clamp(1rem,1.3vw,1.14rem)}
 .count{display:flex;align-items:baseline;gap:1rem;margin-top:clamp(1.8rem,3.4vw,2.6rem);
   padding-top:clamp(1.2rem,2.4vw,1.8rem);border-top:1px solid var(--line)}
-.count .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 840;
-  font-size:clamp(2.2rem,4.4vw,3.4rem);line-height:.85;color:var(--fdy)}
+.count .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 74,'wght' 900;
+  font-size:clamp(3.2rem,7vw,5.6rem);line-height:.8;color:var(--fdy)}
 .gap-note{margin-top:1.2rem;padding-left:1rem;border-left:2px solid var(--fdy);max-width:56ch}
 
 /* ── cohort ──
@@ -93,6 +125,24 @@ section{padding-block:clamp(2.6rem,5vw,4.6rem)}
   .row .who,.row .go{grid-column:1/-1}
 }
 
+/* ── statement band ──────────────────────────────────────────────────
+   One full-bleed muted field with condensed type on it. Editorial
+   punctuation between the cohort and the notes — it gives the page a
+   change of pace and carries the research question in the artists' own
+   scale rather than in a paragraph nobody reads. */
+.band{background:var(--m-olive);color:var(--paper)}
+.band .chunk{color:var(--paper);font-size:clamp(2rem,6.2vw,5rem)}
+.band .ruled{border-color:rgba(244,242,237,.32)}
+.band .ruled > span{border-color:rgba(244,242,237,.32)}
+.band .sub{margin-top:clamp(1.2rem,2.4vw,1.8rem);max-width:52ch;color:rgba(244,242,237,.86)}
+
+/* A muted chip per artist. Deterministic from the channel ID, so an
+   artist keeps the same colour on every visit and the eye can learn the
+   list. Decoration that does a small job rather than none. */
+.chip-c{width:10px;height:38px;flex:0 0 auto;border-radius:1px}
+.row .who{display:flex;align-items:center;gap:.85rem}
+.row .who .txt{min-width:0}
+
 /* ── editorial ── */
 .editorial{background:var(--ink-2);border-block:1px solid var(--line)}
 .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
@@ -121,7 +171,9 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
 
 <section class="hero wrap">
   <div class="label reveal">YouTube Foundry 2026</div>
-  <h1 class="display reveal" style="margin-top:.6rem">Foundry Watch</h1>
+  <h1 class="chunk ruled reveal" style="margin-top:.9rem;font-size:clamp(3rem,11vw,9rem);color:var(--paper)">
+    <span>Foundry</span><span>Watch</span>
+  </h1>
   <p class="lede reveal">
     Following artists selected for YouTube Music Foundry to see how their channels develop,
     what formats they're using and what we can learn for our own campaigns.
@@ -139,6 +191,19 @@ footer{padding-block:clamp(2rem,4vw,3rem);border-top:1px solid var(--line)}
     <span class="label" id="cohortLabel"></span>
   </div>
   <div class="cohort" id="cohort"><div class="label" style="padding:2rem 0">Loading cohort…</div></div>
+</section>
+
+<!-- Statement band: the research question, at scale, on a muted field. -->
+<section class="band">
+  <div class="wrap">
+    <h2 class="chunk ruled reveal">
+      <span>What are</span><span>they doing</span><span>that we</span><span>aren't?</span>
+    </h2>
+    <p class="sub reveal">
+      Thirteen developing channels, watched for cadence, format and the shape of a
+      release — the same things we look at across our own campaigns.
+    </p>
+  </div>
 </section>
 
 <!-- The editorial layer: hand-written, or absent. -->
@@ -189,16 +254,29 @@ const cell = (value, label, cls='') =>
   value == null ? `<div class="m ${cls}"></div>`
                 : `<div class="m ${cls}"><div class="n">${esc(value)}</div><div class="k label">${esc(label)}</div></div>`;
 
+/* Stable per-artist colour: hash the channel ID into the muted palette.
+   Same artist, same colour, every load — which is what makes it useful
+   rather than confetti. */
+const MUTED = ['--m-olive','--m-clay','--m-slate','--m-moss','--m-plum','--m-sand'];
+function chipColour(channelId) {
+  let h = 0;
+  for (let i = 0; i < channelId.length; i++) h = (h * 31 + channelId.charCodeAt(i)) >>> 0;
+  return `var(${MUTED[h % MUTED.length]})`;
+}
+
 const NOTE_LABEL = { 'watching':'Worth watching', 'case-study':'Potential case study', 'reference':'Useful reference' };
 
 function rowHtml(r) {
   const c = r.channel;
   return `<a class="row reveal" href="https://www.youtube.com/channel/${esc(r.channelId)}" target="_blank" rel="noopener">
     <div class="who">
-      <h3 class="display">${esc(r.name)}</h3>
-      <div class="meta">
-        <span class="label">${esc(r.handle)}</span>
-        ${r.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
+      <span class="chip-c" style="background:${chipColour(r.channelId)}"></span>
+      <div class="txt">
+        <h3 class="display">${esc(r.name)}</h3>
+        <div class="meta">
+          <span class="label">${esc(r.handle)}</span>
+          ${r.vmgManaged ? `<span class="label vmg">Also VMG</span>` : ''}
+        </div>
       </div>
     </div>
     ${cell(c && compact(c.subscribers), 'Subscribers')}
