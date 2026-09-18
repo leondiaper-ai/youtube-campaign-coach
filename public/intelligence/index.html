@@ -329,7 +329,7 @@ footer{padding-block:clamp(2.2rem,4vw,3.4rem);border-top:1px solid var(--line)}
         <span class="k label">Foundry watch</span>
         <div class="n" id="fdyCount">—</div>
         <h3 class="display">Developing artists</h3>
-        <p>YouTube's Fall 2026 Foundry cohort, followed for how they build channels,
+        <p>YouTube's 2026 Foundry cohorts, followed for how they build channels,
            use formats and sustain campaigns.</p>
         <span class="go">Explore Foundry ↗</span>
       </a>
@@ -598,10 +598,15 @@ async function loadSpotlight() {
   }
 }
 
-/* ── Foundry count only — the cohort itself lives on /foundry ── */
+/* ── Foundry count only — the cohort itself lives on /foundry ──────
+   ?cohort=all, which is what /foundry itself asks for. This card used to
+   request the Fall intake alone and so read 16 while the page it links to
+   read 38 — two true numbers for the same thing, one click apart, which
+   is indistinguishable from a broken one. The count is fetched rather
+   than written down precisely so that adding an artist updates both. */
 async function loadFoundry() {
   try {
-    const r = await fetch('/api/foundry?cohort=foundry-2026-fall');
+    const r = await fetch('/api/foundry?cohort=all');
     if (!r.ok) return;
     const d = await r.json();
     document.getElementById('fdyCount').textContent = d.counts.tracked;
