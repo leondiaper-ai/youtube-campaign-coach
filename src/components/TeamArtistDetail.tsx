@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince,
@@ -28,6 +27,7 @@ import {
 } from '@/lib/youtubeGrowthOS';
 import Sparkline from '@/components/Sparkline';
 import TeamDetailClient, { type SnapshotData, type CampaignTrackingData, type WeeklyProgressEntry } from '@/app/team-watcher/[slug]/TeamDetailClient';
+import TeamArtistActions from '@/components/TeamArtistActions';
 import { checkContentStructure } from '@/lib/contentStructure';
 
 export const dynamic = 'force-dynamic';
@@ -273,15 +273,16 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[880px] mx-auto px-6 py-10">
-        {/* Breadcrumb */}
-        <div className="flex items-center justify-between mb-8">
-          <Link
-            href={backHref}
-            className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
-          >
-            &larr; Team Campaign Board
-          </Link>
-        </div>
+        {/* Breadcrumb + pin / behaviour, in the Watcher's own corner */}
+        <TeamArtistActions
+          slug={slug}
+          artistName={entry.displayName}
+          channelId={entry.channelId}
+          team={team}
+          backHref={backHref}
+          backLabel="Team Campaign Board"
+          initiallyPinned={!!entry.pinnedAt}
+        />
 
         {/* Header */}
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45 mb-1">
