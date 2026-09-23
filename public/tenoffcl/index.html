@@ -366,11 +366,17 @@ body.sheet-open .chrome{display:none}
   grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;gap:3px;padding:3px;
 }
 .sheet-grid a{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
+/* Non-major tiles are held back so the five ringed ones carry. At equal
+   treatment the ring was invisible at slide scale and the copy beside
+   it — "the five ringed in lilac" — was simply untrue. */
 .sheet-grid img{width:100%;height:100%;object-fit:cover;display:block;
-  filter:saturate(.85);transition:filter .4s ease,transform .5s ease}
-.sheet-grid a:hover img{filter:saturate(1.1);transform:scale(1.04)}
+  filter:saturate(.62) brightness(.78);transition:filter .4s ease,transform .5s ease}
+.sheet-grid a:hover img{filter:saturate(1) brightness(1);transform:scale(1.04)}
+.sheet-grid a.major img{filter:saturate(1) brightness(1)}
+.sheet-grid a.major{z-index:2}
 .sheet-grid a.major::after{
-  content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 2px var(--lilac);
+  content:'';position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 3px var(--lilac), 0 0 18px rgba(183,159,212,.45);
 }
 .sheet-name{
   position:absolute;left:0;right:0;bottom:0;padding:.45rem .4rem .35rem;
