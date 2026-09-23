@@ -83,9 +83,29 @@
   overflow:hidden;border:1px solid var(--hair);transition:transform .2s,border-color .2s;
   flex:0 0 auto}
 .ha:hover{transform:translateY(-3px);border-color:var(--signal)}
-.ha-img{position:relative;overflow:hidden;height:clamp(168px,23vw,244px);
-  aspect-ratio:9/16;background:var(--coal)}
-.ha.wide .ha-img{aspect-ratio:16/9}
+/* ── WIDTH IS THE DEFINITE DIMENSION, NOT HEIGHT ──────────────────
+   This frame used to set `height` + `aspect-ratio` and let the browser
+   derive the width. Chrome derives it. Safari resolves the width from
+   the containing block first and then applies the ratio to compute the
+   HEIGHT, which at 9/16 produced a card hundreds of pixels tall — and
+   the stretched left column, the squeezed right column and the thumbnail
+   strip pushed down the page all followed from that one ambiguity.
+
+   Stating the width and letting aspect-ratio derive the height is
+   unambiguous in every engine, so this is a standards fix rather than a
+   Safari workaround.
+
+   The widths are the old heights multiplied by their own ratio, so
+   Chrome is unchanged: 244 x 9/16 = 137.25, 244 x 16/9 = 433.778.
+   Verified by measuring the live page before and after — every box
+   identical to the pixel.
+
+   The width sits on .ha-img and not on .ha because box-sizing is
+   border-box here: putting it on the card would have had the card's 1px
+   borders eat into the picture and shifted every frame by 2px. */
+.ha-img{position:relative;overflow:hidden;width:clamp(94.5px,12.9375vw,137.25px);
+  height:auto;aspect-ratio:9/16;background:var(--coal)}
+.ha.wide .ha-img{width:clamp(298.667px,40.8889vw,433.778px);aspect-ratio:16/9}
 .ha-img img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* A vertical source in a landscape frame.
@@ -117,6 +137,11 @@
    one viewport, and the composition is balanced rather than bottom-heavy. */
 .covergrid{display:grid;grid-template-columns:auto minmax(300px,1fr);
   gap:0 3.2rem;align-items:start;margin-top:1.2rem}
+/* A grid item's automatic minimum size is its content, not zero, so one
+   long unbroken string can force its column past its track and squeeze
+   the other. Both columns opt out — belt and braces alongside the fix
+   above, and the standard guard for exactly this symptom. */
+.covergrid > *{min-width:0}
 
 /* The deck's standard scrim runs dark on the left and lets the photograph
    come almost fully forward on the right, because on every other slide the
@@ -551,8 +576,8 @@
    sized by width instead and the height follows 9:16 from it. Two
    heroes, or a landscape one, are untouched: :only-child excludes
    CHVRCHES' pair, :not(.wide) excludes Kings of Leon's trailer. */
-.slide.cover .heroassets .ha:only-child:not(.wide){width:clamp(190px,15vw,240px)}
-.slide.cover .heroassets .ha:only-child:not(.wide) .ha-img{height:clamp(338px,26.7vw,427px)}
+.slide.cover .heroassets .ha:only-child:not(.wide) .ha-img{
+  width:clamp(190px,15vw,240px);height:auto}
 .slide.cover .heroassets .ha:only-child:not(.wide) .ha-t{font-size:1rem;line-height:1.2}
 
 /* The note sets the left column's width, so it should not be wider than
