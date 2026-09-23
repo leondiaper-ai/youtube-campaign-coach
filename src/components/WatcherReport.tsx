@@ -458,49 +458,36 @@ export function ReportActions({ props, showBehaviour, onBehaviour }: {
   );
 }
 
-/** Full-size buttons for the detail page header */
+/* ── ONE BUTTON ─────────────────────────────────────────────────────
+   This was three: Slack Update, Email Update, Email Report. They
+   produced the same findings in three wrappers, so the choice on offer
+   was really "which greeting do you want" — and the answer, every
+   time, was whichever one you were about to paste into.
+
+   What it copies is the full report: performance, campaign period, key
+   insights, recommendation. No "Hi all", no channel-specific
+   formatting, so it pastes into Slack, an email or a doc unchanged.
+
+   One button on the artist page, which both the Watcher and the
+   regional team boards render, so it is one button everywhere. */
 export function ReportButtonBar({ props }: { props: ReportProps }) {
   const { copied, copy } = useCopyUpdate(props);
+  const done = copied === 'report';
 
   return (
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => copy('slack')}
-        className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
-        style={{
-          background: copied === 'slack' ? '#E6F8EE' : SOFT,
-          color: copied === 'slack' ? '#0C6A3F' : INK,
-          border: `1px solid ${copied === 'slack' ? MINT : MUTED}`,
-        }}
-      >
-        {copied === 'slack' ? <CheckIcon /> : <SlackIcon />}
-        {copied === 'slack' ? 'Copied' : 'Slack Update'}
-      </button>
-      <button
-        onClick={() => copy('email')}
-        className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
-        style={{
-          background: copied === 'email' ? '#E6F8EE' : SOFT,
-          color: copied === 'email' ? '#0C6A3F' : INK,
-          border: `1px solid ${copied === 'email' ? MINT : MUTED}`,
-        }}
-      >
-        {copied === 'email' ? <CheckIcon /> : <EmailIcon />}
-        {copied === 'email' ? 'Copied' : 'Email Update'}
-      </button>
-      <button
-        onClick={() => copy('report')}
-        className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
-        style={{
-          background: copied === 'report' ? '#E6F8EE' : 'transparent',
-          color: copied === 'report' ? '#0C6A3F' : 'rgba(14,14,14,0.45)',
-          border: `1px solid ${copied === 'report' ? MINT : MUTED}`,
-        }}
-      >
-        {copied === 'report' ? <CheckIcon /> : <EmailIcon />}
-        {copied === 'report' ? 'Copied' : 'Email Report'}
-      </button>
-    </div>
+    <button
+      onClick={() => copy('report')}
+      className="px-4 py-2 rounded-lg text-[11px] font-bold uppercase tracking-[0.12em] inline-flex items-center gap-2 transition-colors cursor-pointer"
+      style={{
+        background: done ? '#E6F8EE' : SOFT,
+        color: done ? '#0C6A3F' : INK,
+        border: `1px solid ${done ? MINT : MUTED}`,
+      }}
+      title="Copy a channel report to paste into Slack, an email or a doc"
+    >
+      {done ? <CheckIcon /> : <EmailIcon />}
+      {done ? 'Copied' : 'Quick Channel Report'}
+    </button>
   );
 }
 
