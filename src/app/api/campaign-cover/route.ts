@@ -195,8 +195,26 @@ function formatOf(v: any): { kind: string; label: string } {
  * first official video lands it should take the page, and the Shorts that
  * preceded it should move into support without anyone editing anything.
  */
+/* ── WHY A TRAILER SITS LOW ────────────────────────────────────────
+   It was at 70, above lyric and visualiser, and that put CHVRCHES' 9 Sep
+   teaser ("Now, we can start.", 47,520 views) in the lead slot while the
+   Roses Official Lyric Video — the release it was teasing, 100,820 views,
+   the biggest asset in the campaign — sat in the supporting strip.
+
+   A trailer is promotional lead-in. Its entire job is to point at
+   something that has not happened yet, so the moment that something
+   lands, the trailer is the second-most interesting object on the page by
+   definition. Ranking it above the release inverts the very rule this
+   table was written for: "when the first official video lands it should
+   take the page, and the Shorts that preceded it should move into support
+   without anyone editing anything." A teaser is a Short with a budget.
+
+   It stays above `short` because a trailer is still a made thing rather
+   than a post, and the gap to `long` is deliberate: an untitled 5-minute
+   upload is more likely to be the campaign's subject than a 30-second
+   tease of it. */
 const FORMAT_WEIGHT: Record<string, number> = {
-  omv: 100, live: 80, trailer: 70, lyric: 60, visualiser: 55, long: 40, short: 20, unknown: 10,
+  omv: 100, live: 80, lyric: 70, visualiser: 65, long: 50, trailer: 30, short: 20, unknown: 10,
 };
 
 function rankAssets(assets: CoverAsset[]): CoverAsset[] {
