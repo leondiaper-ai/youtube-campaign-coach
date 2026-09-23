@@ -29,9 +29,12 @@
    the artist page links here, the same way our own artist page links
    to /campaigns?behaviour=<slug>.
 
-   Only the behaviour tab unmounts when you leave it. The chart is the
-   heavy part of this page, and there is no reason to hold it — or the
-   request behind it — for a reader who never opened the tab.
+   The behaviour tab is a tab you click and a page you land on: the
+   board's header, tab bar and centred column all step aside, because
+   this is the same view our own campaigns board gives a channel and it
+   should look the same here. It also means the chart, which is the
+   heavy part of this page, is never mounted for a reader who does not
+   open it.
    ═══════════════════════════════════════════════════════════════════ */
 
 import {
@@ -51,7 +54,6 @@ const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
 const PAPER = '#FAF7F2';
 const INK = '#0E0E0E';
 const SOFT = '#F6F1E7';
-const MUTED = '#E9E2D3';
 
 /** One pinned artist, as the behaviour rail needs them. */
 export type BehaviourRailArtist = {
@@ -144,6 +146,133 @@ export default function TeamBoardShell({
      what is in there. */
   const current = rail.find(a => a.slug === behaviourSlug) ?? rail[0] ?? null;
 
+  /* ─── CHANNEL BEHAVIOUR ─────────────────────────────────────────────
+     Reached by a tab, but it is a page. The board's header, tab bar and
+     centred column all step aside, because this is the same view our
+     own campaigns board gives a channel and it should be the same view
+     here — the logo strip, the dark rail of pinned artists, the chart
+     with the window to itself. Nothing above it, nothing beside it.
+
+     "← Board" is how you come back, which is also what the arrow at the
+     top of the rail does and what the chart's own "← Summary" does.
+     Three ways out of one room, all going to the same place. */
+  if (tab === 'behaviour' && current) {
+    return (
+      <div style={{
+        display: 'flex', flexDirection: 'column', minHeight: '100vh',
+        background: PAPER, color: INK,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '12px 20px', background: PAPER }}>
+          <button
+            onClick={() => leaveBehaviour('priority')}
+            className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
+            style={{ background: 'none', border: 'none', cursor: 'pointer',
+                     padding: 0, marginRight: 8 }}
+          >
+            &larr; Board
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 24 }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
+        </div>
+
+        <div style={{ display: 'flex', flex: 1 }}>
+          <div style={{
+            width: 72, minWidth: 72, background: '#1A1A1A', display: 'flex',
+            flexDirection: 'column', alignItems: 'center', paddingTop: 16,
+            paddingBottom: 16, gap: 6, overflowY: 'auto', position: 'sticky',
+            top: 0, height: 'calc(100vh - 52px)',
+            borderRight: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            <button
+              onClick={() => leaveBehaviour('priority')}
+              title="Back to board"
+              style={{
+                width: 42, height: 42, borderRadius: '50%', border: 'none',
+                background: 'rgba(255,255,255,0.06)', color: 'rgba(250,247,242,0.7)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: 18, marginBottom: 10, flexShrink: 0,
+              }}
+            >
+              &#x2190;
+            </button>
+
+            {rail.map((a) => {
+              const isActive = a.slug === current.slug;
+              const initials = a.name.split(/\s+/).map(w => w[0]).join('')
+                .substring(0, 2).toUpperCase();
+              return (
+                <button
+                  key={a.slug}
+                  onClick={() => open(a.slug)}
+                  title={a.name}
+                  style={{
+                    width: 42, height: 42, borderRadius: '50%',
+                    border: isActive ? '2.5px solid #FAF7F2' : '2.5px solid transparent',
+                    background: a.thumbnail ? 'transparent'
+                      : (isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'),
+                    color: isActive ? '#FAF7F2' : 'rgba(250,247,242,0.5)',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', fontSize: 11, fontWeight: 700,
+                    position: 'relative', flexShrink: 0, padding: 0,
+                    overflow: 'hidden', opacity: isActive ? 1 : 0.7,
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {a.thumbnail ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={a.thumbnail} alt={a.name}
+                         style={{ width: '100%', height: '100%', objectFit: 'cover',
+                                  borderRadius: '50%' }} />
+                  ) : initials}
+                  <span style={{
+                    position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                    borderRadius: '50%', background: STATUS_DOT[a.status] ?? '#8A847A',
+                    border: '2px solid #1A1A1A',
+                  }} />
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <CampaignBehaviour
+              key={current.slug}
+              slug={current.slug}
+              artistName={current.name}
+              onClose={() => leaveBehaviour('priority')}
+              noBreakout
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* Behaviour with nothing pinned: say so on the board rather than
+     opening an empty room. */
+  if (tab === 'behaviour' && !current) {
+    return (
+      <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
+        <div className="max-w-[1080px] mx-auto px-6 py-10 text-center">
+          <p className="text-[13px] text-ink/45 max-w-[420px] mx-auto mb-4 mt-16">
+            Behaviour follows the pins. Pin an artist and their upload
+            timeline, formats and follow-up window appear here.
+          </p>
+          <button
+            onClick={() => leaveBehaviour('all')}
+            className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
+            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            &larr; Board
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   /* ─── THE BOARD ─────────────────────────────────────────────────── */
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
@@ -178,92 +307,6 @@ export default function TeamBoardShell({
         {priorityCount > 0 ? priorityTab : emptyPriority}
       </div>
 
-      {/* ── CHANNEL BEHAVIOUR ──────────────────────────────────────
-          Not kept mounted like the other two: the chart is the heavy
-          part of this page and there is no reason to hold it, or the
-          request behind it, for a reader who never opens the tab. */}
-      {tab === 'behaviour' && (
-        current ? (
-          /* ── FULL BLEED ────────────────────────────────────────────
-             The board is a centred 1080px column, which is right for a
-             table and wrong for this: a 58-day timeline squeezed into
-             it loses the gaps between uploads, which is most of what
-             the chart is for. So it escapes the column and takes the
-             window, the same width our own campaigns board gives it.
-
-             The rail shows even when one artist is pinned. It is the
-             left edge of this view, not a switcher that appears once
-             there is something to switch to — and a team with one
-             pinned artist is a team about to have two. */
-          <div style={{
-            width: '100vw', marginLeft: 'calc(-50vw + 50%)',
-            display: 'flex', minHeight: '78vh', background: PAPER,
-            borderTop: `1px solid ${MUTED}`,
-          }}>
-            <div style={{
-              width: 72, minWidth: 72, background: '#1A1A1A', display: 'flex',
-              flexDirection: 'column', alignItems: 'center', gap: 6,
-              paddingTop: 18, paddingBottom: 18, overflowY: 'auto',
-              position: 'sticky', top: 0, alignSelf: 'flex-start',
-              maxHeight: '100vh',
-              borderRight: '1px solid rgba(255,255,255,0.06)',
-            }}>
-              {rail.map((a) => {
-                const isActive = a.slug === current.slug;
-                const initials = a.name.split(/\s+/).map(w => w[0]).join('')
-                  .substring(0, 2).toUpperCase();
-                return (
-                  <button
-                    key={a.slug}
-                    onClick={() => open(a.slug)}
-                    title={a.name}
-                    style={{
-                      width: 42, height: 42, borderRadius: '50%',
-                      border: isActive ? '2.5px solid #FAF7F2' : '2.5px solid transparent',
-                      background: a.thumbnail ? 'transparent'
-                        : (isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'),
-                      color: isActive ? '#FAF7F2' : 'rgba(250,247,242,0.5)',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', fontSize: 11, fontWeight: 700,
-                      position: 'relative', flexShrink: 0, padding: 0,
-                      overflow: 'hidden', opacity: isActive ? 1 : 0.7,
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    {a.thumbnail ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={a.thumbnail} alt={a.name}
-                           style={{ width: '100%', height: '100%', objectFit: 'cover',
-                                    borderRadius: '50%' }} />
-                    ) : initials}
-                    <span style={{
-                      position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                      borderRadius: '50%', background: STATUS_DOT[a.status] ?? '#8A847A',
-                      border: '2px solid #1A1A1A',
-                    }} />
-                  </button>
-                );
-              })}
-            </div>
-
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <CampaignBehaviour
-                key={current.slug}
-                slug={current.slug}
-                artistName={current.name}
-                noBreakout
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <p className="text-[13px] text-ink/45 max-w-[420px] mx-auto">
-              Behaviour follows the pins. Pin an artist and their upload
-              timeline, formats and follow-up window appear here.
-            </p>
-          </div>
-        )
-      )}
     </OpenBehaviourContext.Provider>
     </div>
     </main>

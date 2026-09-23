@@ -1982,7 +1982,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
   const [showFormats, setShowFormats] = useState(false);
   const [hoveredShortGroup, setHoveredShortGroup] = useState<ShortGroupData | null>(null);
   const [shortGroupSvgRect, setShortGroupSvgRect] = useState<DOMRect | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(700);
 
   // Handle short group hover
@@ -2011,18 +2011,37 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
       .finally(() => setLoading(false));
   }, [slug, periodDays]);
 
-  // Responsive width — re-run when loading changes since containerRef
-  // points to different DOM elements during loading vs loaded states
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
+  /* ── MEASURING THE CONTAINER ────────────────────────────────────────
+     This used to be an effect keyed on `loading`, because the loading,
+     error and loaded branches each return a different root element and
+     the observer has to follow. That works only if `loading` actually
+     changes after the first effect run — when the payload is already
+     cached it may not, and the observer is then left watching a node
+     React has thrown away. The chart sits at its 700px default forever,
+     however wide the page is. That is exactly what happened on the team
+     boards, where the response is warm.
+
+     A callback ref cannot miss: React calls it with every node this
+     component mounts, so the observer is always on the live one. It
+     also measures immediately, so the first paint is right rather than
+     right one frame later. */
+  const roRef = useRef<ResizeObserver | null>(null);
+  const attachContainer = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    roRef.current?.disconnect();
+    roRef.current = null;
+    if (!node) return;
+    setChartWidth(Math.max(400, node.getBoundingClientRect().width));
+    const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setChartWidth(Math.max(400, entry.contentRect.width));
       }
     });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [loading]);
+    ro.observe(node);
+    roRef.current = ro;
+  }, []);
+
+  useEffect(() => () => roRef.current?.disconnect(), []);
 
   // Fetch upload observation when selected
   useEffect(() => {
@@ -2137,7 +2156,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
   if (loading) {
     return (
       <div
-        ref={containerRef}
+        ref={attachContainer}
         style={{
           background: PAPER,
           padding: '40px 20px',
@@ -2155,7 +2174,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
   if (error || !data) {
     return (
       <div
-        ref={containerRef}
+        ref={attachContainer}
         style={{
           background: PAPER,
           padding: '24px 20px',
@@ -2201,7 +2220,7 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
 
   return (
     <div
-      ref={containerRef}
+      ref={attachContainer}
       style={{
         background: PAPER,
         borderRadius: 0,
