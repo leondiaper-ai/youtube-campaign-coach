@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Angus &amp; Julia Stone × YouTube — Karaoke Bar</title>
+
+<!--
+  ANGUS & JULIA STONE × YOUTUBE — post-album campaign review
+  Virgin Music Group · September 2026
+
+  ─────────────────────────────────────────────────────────────────────
+  WHERE THE NUMBERS COME FROM
+  Every figure traces to a single pull of the channel's complete public
+  uploads playlist — 341 videos, 2009-03-05 to 2026-09-14 — via
+  /api/full-catalogue, which is YouTube Data API v3. Nothing here comes
+  from YouTube Studio: no impressions, no CTR, no retention, no traffic
+  sources, no unique viewers. Channel totals are the public figures the
+  Watcher snapshots daily.
+
+  ─────────────────────────────────────────────────────────────────────
+  SIX RULES THIS FILE OBEYS
+   1. No campaign-total view comparison between 2026 and 2024. The 2024
+      assets have had two extra years to accumulate. The two campaigns
+      are compared on STRUCTURE — active weeks, longest gap, upload
+      days, volume, format mix, concentration — which holds its meaning
+      whatever an asset's age.
+   2. Where an individual asset's views are shown across eras, its AGE
+      IS SHOWN BESIDE IT, every time, without exception.
+   3. Release-week channel movement is not attributed to any single
+      upload. We have no traffic-source data. Co-occurrence only.
+   4. The public subscriber count is rounded by YouTube to the nearest
+      thousand, so it is quoted as an observed reading and never turned
+      into a growth multiple.
+   5. The album is Karaoke Bar, out Friday 4 September 2026 — stated by
+      the band in their own Short of 30 August, not inferred.
+   6. Formats are classified from title text. The rule is written into
+      the Method section so anyone can re-run it and get these numbers.
+
+  ─────────────────────────────────────────────────────────────────────
+  THE PALETTE CAME OUT OF THE CAMPAIGN'S OWN FRAMES
+  Six 2026 campaign thumbnails were sampled programmatically — canvas
+  getImageData at 160×90, greys and crushed blacks filtered out, the
+  remainder binned by hue. 61% of the saturated pixels landed in the
+  0–30° band and 31% in 30–60°: earth, amber, sunlight, old film. That
+  is the Château d'Hérouville VHS, the Tasmanian light, Byron Bay, the
+  Sugarcane Mountain room. Almost no cool colour at all — 2% blue.
+  The deck is warm because the campaign is.
+
+  THE MOTIF IS THE WEEK STRIP. The central finding is about rhythm —
+  the channel was present in 18 of the campaign's 20 weeks, against 15
+  of 26 last time — so the repeating mark is one tick per campaign
+  week, lit where an upload landed. It is the argument and the
+  decoration at the same time.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:wght@400..700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* Sampled from the campaign's own frames — see the note above. */
+  --amber:#E0A356;     /* the Tasmanian light, the low sun */
+  --amber-lt:#F2C185;
+  --clay:#B5663F;      /* 61% of the campaign's saturated pixels */
+  --clay-dp:#633D2A;
+  --sand:#C9A87C;      /* the second band, 31% */
+  --rust:#A33A2E;      /* the Château reds */
+  --night:#3C4A63;     /* the 2% — used only where something must recede */
+  --sea:#4E8578;
+
+  --ink:#120D0A;       /* warm near-black; these frames are never neutral */
+  --ink-2:#1A130E;
+  --ink-3:#241A14;
+  --cream:#F4EADC;
+  --warm:#C2B09A;      /* body copy on dark */
+  --dim:#8A7660;       /* labels only, never body text */
+  --line:rgba(244,234,220,.14);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--cream);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Type ───────────────────────────────────────────────────────────
+   Archivo at narrower widths than a gig poster: this is a folk record
+   made in old rooms, not a sound-system campaign. */
+.display{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 104,'wght' 760;
+  text-transform:uppercase;line-height:.94;letter-spacing:-.005em;
+}
+h1.display{font-size:clamp(2.5rem,7vw,6.2rem)}
+h2.display{font-size:clamp(1.95rem,5vw,4.3rem)}
+h3.display{font-size:clamp(1.25rem,2.3vw,2rem);font-variation-settings:'wdth' 100,'wght' 720}
+
+.label{
+  font-family:'DM Mono',monospace;font-size:.68rem;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.4;color:var(--cream);max-width:34ch}
+.body{color:var(--warm);max-width:60ch}
+.big-p{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.5;color:var(--warm);max-width:62ch}
+.big-num{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 780;
+  line-height:.86;letter-spacing:-.02em;
+}
+
+/* ── Slides ─────────────────────────────────────────────────────────*/
+.deck{width:100%}
+.slide{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:5.5rem var(--pad) 4rem;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(18,13,10,.96) 4%,rgba(18,13,10,.74) 38%,rgba(18,13,10,.20) 78%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(18,13,10,.95) 30%,rgba(18,13,10,.64) 58%,rgba(18,13,10,.14) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(18,13,10,.80)}
+
+/* ── THE MOTIF: the week strip ──────────────────────────────────────
+   One tick per campaign week. Lit = the channel published that week.
+   18 lit of 20 in 2026; 15 of 26 in 2024. The finding, drawn. */
+.weeks{display:flex;gap:3px;align-items:flex-end;width:100%;height:var(--wh,52px)}
+.wk{flex:1 1 0;min-width:2px;border-radius:1px;background:rgba(244,234,220,.09);height:24%}
+.wk.on{height:100%;background:var(--amber)}
+.wk.on.big{background:var(--clay)}
+.wk.dead{background:rgba(163,58,46,.30);height:24%}
+.weeks.mini{--wh:16px;gap:2px}
+.weeks.mini .wk{height:32%}
+
+/* ── Components ─────────────────────────────────────────────────────*/
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,2.5vw,2.4rem)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2vw,1.8rem)}
+@media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+.era{border-top:2px solid var(--line);padding-top:1.1rem}
+.era.now{border-top-color:var(--amber)}
+.era-y{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.18em;color:var(--dim)}
+.era.now .era-y{color:var(--amber)}
+
+.stat{display:flex;flex-direction:column;gap:.35rem}
+.stat .big-num{font-size:clamp(1.9rem,3.1vw,2.7rem)}
+
+.src{
+  font-family:'DM Mono',monospace;font-size:.64rem;line-height:1.45;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;
+  max-width:76ch;margin-top:1.4rem;
+}
+.src b{color:var(--warm);font-weight:400}
+
+/* Age is never optional next to a cross-era view figure. */
+.age{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim);border:1px solid var(--line);
+  border-radius:2px;padding:.2rem .45rem;white-space:nowrap}
+
+.thumb{position:relative;display:block;border-radius:3px;overflow:hidden;background:var(--ink-3);aspect-ratio:16/9}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.thumb:hover img{transform:scale(1.03)}
+.thumb .cap{position:absolute;left:0;right:0;bottom:0;padding:.7rem .8rem;
+  background:linear-gradient(to top,rgba(18,13,10,.94),rgba(18,13,10,0));
+  font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.08em;color:var(--cream)}
+
+.card{border:1px solid var(--line);border-radius:3px;padding:clamp(1.1rem,2vw,1.6rem);background:rgba(244,234,220,.02)}
+.card.lit{border-color:var(--amber)}
+
+table.cmp{width:100%;border-collapse:collapse;font-size:clamp(.82rem,1.15vw,1rem)}
+table.cmp th,table.cmp td{text-align:left;padding:.85rem .6rem;border-bottom:1px solid var(--line);vertical-align:baseline}
+table.cmp th{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);font-weight:400}
+table.cmp td.n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 720;
+  font-size:1.15em;white-space:nowrap}
+table.cmp td.now{color:var(--amber)}
+table.cmp td.then{color:var(--warm)}
+table.cmp tr:last-child td{border-bottom:none}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(12px);transition:opacity .6s ease,transform .6s ease}
+.stagger.in>*{opacity:1;transform:none}
+.stagger.in>*:nth-child(2){transition-delay:.08s}
+.stagger.in>*:nth-child(3){transition-delay:.16s}
+.stagger.in>*:nth-child(4){transition-delay:.24s}
+.stagger.in>*:nth-child(5){transition-delay:.32s}
+.stagger.in>*:nth-child(6){transition-delay:.40s}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+
+/* ── Method section ─────────────────────────────────────────────────*/
+.method{background:var(--ink-2);padding:clamp(3rem,7vw,6rem) var(--pad)}
+h3.sec{color:var(--sand);margin:2.2rem 0 .8rem;font-size:clamp(1.05rem,1.8vw,1.4rem)}
+.fair{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.fair span{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;border:1px solid var(--sand);color:var(--sand);
+  border-radius:2px;padding:.35rem .6rem}
+dl.mn{margin-top:1rem}
+dl.mn dt{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cream);margin-top:1.1rem}
+dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
+.notes{margin-top:2.4rem;border-top:1px solid var(--line);padding-top:1.4rem}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════
+     No metric on the cover. The question is the cover. -->
+<section class="slide" style="justify-content:flex-end;padding-bottom:3.4rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/QAFqzxnFZyE/maxresdefault.jpg" alt="Karaoke Bar — official music video"
+      style="object-position:50% 40%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/QAFqzxnFZyE/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--amber)">Angus &amp; Julia Stone × YouTube · Virgin Music Group</div>
+    <h1 class="display reveal" style="margin-top:1.1rem">Karaoke Bar</h1>
+    <p class="statement reveal" style="margin-top:1.6rem;font-size:clamp(1.15rem,2vw,1.75rem);max-width:30ch">
+      The album is out.<br><span style="color:var(--amber)">What did the campaign build?</span>
+    </p>
+    <div class="reveal" style="margin-top:2.6rem;max-width:760px">
+      <div class="weeks mini" id="cover-weeks"></div>
+      <div class="label" style="margin-top:.6rem">Every week of the campaign · 29 April → 14 September 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE FINDING ═════════════════════════════════════════════
+     Structural, age-independent, and the only claim strong enough to
+     carry the whole review. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">The finding</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:18ch">This time, the channel stayed in the room.</h2>
+
+    <div style="margin-top:clamp(1.4rem,3vw,2.2rem)" class="stagger">
+
+      <div class="era" style="margin-bottom:1.4rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div class="era-y">Cape Forestier · 2024 campaign</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.7rem;flex-wrap:wrap">
+              <div class="stat"><div class="big-num" style="color:var(--warm)">15<span style="color:var(--dim)">/26</span></div><div class="label">Active weeks</div></div>
+              <div class="stat"><div class="big-num" style="color:var(--rust)">69</div><div class="label">Days, longest gap</div></div>
+              <div class="stat"><div class="big-num" style="color:var(--warm)">30</div><div class="label">Upload days</div></div>
+            </div>
+          </div>
+          <div class="label" style="text-align:right">36 uploads</div>
+        </div>
+        <div class="weeks" id="w24"></div>
+      </div>
+
+      <div class="era now">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:1rem">
+          <div>
+            <div class="era-y">Karaoke Bar · 2026 campaign</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.7rem;flex-wrap:wrap">
+              <div class="stat"><div class="big-num" style="color:var(--amber)">18<span style="color:var(--dim)">/20</span></div><div class="label">Active weeks</div></div>
+              <div class="stat"><div class="big-num" style="color:var(--amber)">16</div><div class="label">Days, longest gap</div></div>
+              <div class="stat"><div class="big-num" style="color:var(--amber)">53</div><div class="label">Upload days</div></div>
+            </div>
+          </div>
+          <div class="label" style="text-align:right;color:var(--amber)">88 uploads</div>
+        </div>
+        <div class="weeks" id="w26"></div>
+      </div>
+
+    </div>
+
+    <p class="big-p reveal" style="margin-top:2rem">
+      Last album, the channel published in 58% of the campaign's weeks and then went
+      <b style="color:var(--rust)">69 days</b> without an upload — a silence that began seventeen days
+      after release. This time it published in <b style="color:var(--amber)">90%</b> of them, and the
+      longest quiet stretch was sixteen days.
+    </p>
+    <div class="src">
+      <b>Source</b> · Complete public uploads playlist, 341 videos. Campaign weeks counted from the
+      first campaign asset to the most recent upload. A week is "active" if at least one video was
+      published in it.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · THE OPENER ══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/Z54gaFbwm1E/maxresdefault.jpg" alt="Big Jet Plane live in Sydney"
+      style="object-position:60% 45%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Z54gaFbwm1E/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div style="max-width:48ch">
+      <div class="label reveal">29 April · the campaign opens</div>
+      <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.8rem,4vw,3.4rem)">It opened with a<br>sixteen-year-old song.</h2>
+      <p class="big-p reveal" style="margin-top:1.3rem">
+        Not a new single. <b style="color:var(--cream)">Big Jet Plane</b>, live in Sydney with Dua Lipa —
+        a 2010 track, handed to a new audience a week before the first album asset appeared.
+      </p>
+      <div class="grid3 stagger" style="margin-top:1.8rem;max-width:620px">
+        <div class="stat"><div class="big-num" style="color:var(--amber)">106.8K</div><div class="label">The long-form</div></div>
+        <div class="stat"><div class="big-num" style="color:var(--amber)">3</div><div class="label">Best Shorts of the year</div></div>
+        <div class="stat"><div class="big-num" style="color:var(--amber)">74.7K</div><div class="label">Across those three</div></div>
+      </div>
+      <p class="big-p reveal" style="margin-top:1.5rem">
+        Those three Shorts — 34.1K, 23.3K and 17.3K — are still the channel's three biggest of 2026.
+        Nothing released since has beaten them. The campaign's widest moment was a catalogue moment.
+      </p>
+    </div>
+    <div class="src">
+      <b>Assets</b> · Big Jet Plane (Live in Sydney) 29 Apr, 106,819 views <span class="age">147 days old</span>
+      · three companion Shorts 28–30 Apr.
+      <b>Note</b> · Views are lifetime-to-date at 23 September 2026.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · THE ENGINE ══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">Where the reach came from</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:20ch">Two videos carried the campaign.</h2>
+
+    <div class="grid2" style="margin-top:2rem">
+      <div class="stagger">
+        <a class="thumb" href="https://www.youtube.com/watch?v=QAFqzxnFZyE" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/QAFqzxnFZyE/hqdefault.jpg" alt="Karaoke Bar official music video">
+          <div class="cap">Karaoke Bar · Official Music Video · 11 June</div>
+        </a>
+        <div style="display:flex;align-items:baseline;gap:.8rem;margin-top:1rem;flex-wrap:wrap">
+          <div class="big-num" style="font-size:clamp(2.2rem,4vw,3.4rem);color:var(--amber)">1.10M</div>
+          <span class="age">104 days old</span>
+        </div>
+        <p class="body" style="margin-top:.7rem">
+          Directed by Julia Stone. The campaign's single biggest asset, and the channel's first upload
+          of any kind to pass a million views since November 2018.
+        </p>
+      </div>
+      <div class="stagger">
+        <a class="thumb" href="https://www.youtube.com/watch?v=qZ0G4Gb9fz8" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/qZ0G4Gb9fz8/hqdefault.jpg" alt="Celestial Bodies official video">
+          <div class="cap">Celestial Bodies · Official Video · 19 August</div>
+        </a>
+        <div style="display:flex;align-items:baseline;gap:.8rem;margin-top:1rem;flex-wrap:wrap">
+          <div class="big-num" style="font-size:clamp(2.2rem,4vw,3.4rem);color:var(--amber)">517.5K</div>
+          <span class="age">35 days old</span>
+        </div>
+        <p class="body" style="margin-top:.7rem">
+          Shot at Château d'Hérouville. Half a million inside five weeks, on a song that arrived two
+          weeks before the album.
+        </p>
+      </div>
+    </div>
+
+    <p class="big-p reveal" style="margin-top:2rem">
+      Between them, <b style="color:var(--cream)">1.62M</b> of the campaign's long-form views — from two
+      uploads out of twenty-seven. Official videos are what this channel converts attention into;
+      everything else in the campaign was built around them.
+    </p>
+    <div class="src">
+      <b>Comparison, age-stated</b> · The 2024 campaign's biggest asset, Down To The Sea, has
+      947,385 views <span class="age">866 days old</span>. Karaoke Bar has more, at 104 days.
+      Absolute campaign totals are not compared — see Method.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE ROOMS ═══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">The pattern underneath</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:22ch">Every single got a room to be played in.</h2>
+    <p class="big-p reveal" style="margin-top:1.2rem">
+      Seven live and acoustic performances, each in a named place — Tasmania, Byron Bay, Sugarcane
+      Mountain Studios, Château d'Hérouville, Sydney. Not one of them is a lyric card or a static
+      audio upload. They are the most reliable format the channel has.
+    </p>
+
+    <div class="grid4 stagger" style="margin-top:1.8rem">
+      <a class="thumb" href="https://www.youtube.com/watch?v=_4RraK-j770" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/_4RraK-j770/hqdefault.jpg" alt="Celestial Bodies at Sugarcane Mountain Studios">
+        <div class="cap">Sugarcane Mountain · 63.8K</div>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=8-Xjerd4D14" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/8-Xjerd4D14/hqdefault.jpg" alt="Karaoke Bar acoustic in Byron Bay">
+        <div class="cap">Byron Bay · 55.2K</div>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=uXIgbSKHces" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/uXIgbSKHces/hqdefault.jpg" alt="The Cherry Farm live in Tasmania">
+        <div class="cap">Tasmania · 46.9K</div>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=Z54gaFbwm1E" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Z54gaFbwm1E/hqdefault.jpg" alt="Big Jet Plane live in Sydney">
+        <div class="cap">Sydney · 106.8K</div>
+      </a>
+    </div>
+
+    <div class="grid2" style="margin-top:2rem;align-items:center">
+      <div>
+        <div class="label">Median views, campaign-era long-form by format</div>
+        <table class="cmp" style="margin-top:.8rem">
+          <tr><td>Official video</td><td class="n now" style="text-align:right">517.5K</td></tr>
+          <tr><td>Live / acoustic, in a place</td><td class="n now" style="text-align:right">39.8K</td></tr>
+          <tr><td>Lyric video</td><td class="n then" style="text-align:right">16.3K</td></tr>
+          <tr><td>Instrumental karaoke</td><td class="n" style="text-align:right;color:var(--dim)">1.1K</td></tr>
+        </table>
+      </div>
+      <p class="big-p">
+        A performance in a real room out-reaches a lyric video by more than two to one, and the
+        karaoke versions by thirty-six. The band already know this — they made seven of them. It is
+        the single most repeatable thing in the campaign.
+      </p>
+    </div>
+    <div class="src">
+      <b>Method</b> · Medians across long-form uploads published since 1 January 2024, classified from
+      title text. Karaoke and instrumental versions serve catalogue completeness rather than reach,
+      and are shown here only to place the performance figure in scale.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · RELEASE WEEK ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">30 August → 10 September</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:20ch">Release week was announced, not assumed.</h2>
+    <p class="big-p reveal" style="margin-top:1.2rem">
+      The band told their audience the date themselves, in their own voice, five days out —
+      <i style="color:var(--cream)">"Our new album, Karaoke Bar, is out this Friday September 4th X"</i> —
+      then kept showing up either side of it.
+    </p>
+
+    <div class="grid4 stagger" style="margin-top:2rem">
+      <div class="card">
+        <div class="label" style="color:var(--amber)">30 Aug · five days out</div>
+        <h3 class="display" style="margin-top:.6rem;color:var(--cream);font-size:clamp(1.05rem,1.8vw,1.5rem)">The date, said out loud</h3>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">Three Shorts in one day, one of them naming the release date. 9.9K between them.</p>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--amber)">1 Sep · the reminder</div>
+        <h3 class="display" style="margin-top:.6rem;color:var(--cream);font-size:clamp(1.05rem,1.8vw,1.5rem)">Another one from the record</h3>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">6.0K — the strongest Short of release week, and a song rather than a graphic.</p>
+      </div>
+      <div class="card lit">
+        <div class="label" style="color:var(--amber)">3–4 Sep · album out</div>
+        <h3 class="display" style="margin-top:.6rem;color:var(--cream);font-size:clamp(1.05rem,1.8vw,1.5rem)">Eight uploads in a day</h3>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">A thank-you Short and the full set of instrumental versions — the record made complete on the channel in one move.</p>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--amber)">10 Sep · six days after</div>
+        <h3 class="display" style="margin-top:.6rem;color:var(--cream);font-size:clamp(1.05rem,1.8vw,1.5rem)">The Cherry Farm, in Tasmania</h3>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">46.9K. The best-performing asset of release week arrived <b style="color:var(--cream)">after</b> the album.</p>
+      </div>
+    </div>
+
+    <p class="big-p reveal" style="margin-top:2rem">
+      That last beat is the one worth keeping. In 2024 the channel's post-release move was silence.
+      In 2026 it was a performance film, and it out-reached everything else in the week.
+    </p>
+    <div class="src">
+      <b>Release date</b> · Stated by the band in their Short of 30 August 2026.
+      <b>Attribution</b> · Channel movement in release week is not credited to any individual upload —
+      we have no traffic-source data.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · THE COMPARISON ══════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">Campaign against campaign</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:22ch">Stronger on everything that is a choice.</h2>
+    <p class="big-p reveal" style="margin-top:1.2rem">
+      These are structural measures — how often, how many, in what shape. They mean the same thing
+      whatever age an asset happens to be, which is why they are the ones being compared.
+    </p>
+
+    <div style="margin-top:1.8rem;overflow-x:auto">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th style="width:38%"></th>
+            <th>Cape Forestier · 2024</th>
+            <th style="color:var(--amber)">Karaoke Bar · 2026</th>
+            <th style="width:26%">Read</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Weeks the channel published</td>
+            <td class="n then">15 / 26 &nbsp;<span class="label">58%</span></td>
+            <td class="n now">18 / 20 &nbsp;<span class="label" style="color:var(--amber)">90%</span></td>
+            <td class="label">Far more present</td>
+          </tr>
+          <tr>
+            <td>Longest silence</td>
+            <td class="n" style="color:var(--rust)">69 days</td>
+            <td class="n now">16 days</td>
+            <td class="label">The big one</td>
+          </tr>
+          <tr>
+            <td>Days with an upload</td>
+            <td class="n then">30</td>
+            <td class="n now">53</td>
+            <td class="label">Nearly double</td>
+          </tr>
+          <tr>
+            <td>Uploads</td>
+            <td class="n then">36</td>
+            <td class="n now">88</td>
+            <td class="label">2.4×</td>
+          </tr>
+          <tr>
+            <td>Long-form pieces</td>
+            <td class="n then">9</td>
+            <td class="n now">27</td>
+            <td class="label">3×</td>
+          </tr>
+          <tr>
+            <td>Live / acoustic performances</td>
+            <td class="n then">4</td>
+            <td class="n now">7</td>
+            <td class="label">More rooms</td>
+          </tr>
+          <tr>
+            <td>Shorts share of uploads</td>
+            <td class="n then">75%</td>
+            <td class="n now">69%</td>
+            <td class="label">Better balanced</td>
+          </tr>
+          <tr>
+            <td>Top asset's share of campaign views</td>
+            <td class="n then">35%</td>
+            <td class="n" style="color:var(--sand)">42%</td>
+            <td class="label">Still one-video-led</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2" style="margin-top:2rem">
+      <p class="big-p">
+        Seven of eight measures moved the right way. The campaign is more present, more varied and
+        more consistent than the one before it, and it built a bigger lead asset while doing so.
+      </p>
+      <p class="big-p">
+        The one to watch is the last row. Attention is slightly <b style="color:var(--cream)">more</b>
+        concentrated on a single video than last time, not less. The depth is there in the catalogue —
+        it just has not started pulling its weight yet.
+      </p>
+    </div>
+    <div class="src">
+      <b>Windows</b> · 2024: 9 Feb → 4 Aug, album 10 May. 2026: 29 Apr → 14 Sep, album 4 Sep.
+      <b>Rule</b> · No campaign view totals are compared — the 2024 assets have had two more years to
+      accumulate. Shares within a window are comparable; absolute totals across windows are not.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · WHAT HAPPENED LAST TIME ════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal" style="color:var(--rust)">The part worth not repeating</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:20ch">Last album, the channel went quiet for a year.</h2>
+
+    <div class="grid2" style="margin-top:1.8rem;align-items:center">
+      <div>
+        <div class="label">Uploads per month after Cape Forestier</div>
+        <div class="weeks" id="after24" style="--wh:80px;margin-top:1rem"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:.5rem">
+          <span class="label">June 2024</span><span class="label">December 2025</span>
+        </div>
+      </div>
+      <div class="stagger">
+        <div class="stat" style="margin-bottom:1.4rem">
+          <div class="big-num" style="font-size:clamp(2.6rem,5vw,4rem);color:var(--rust)">10</div>
+          <div class="label">Uploads in the whole of 2025</div>
+        </div>
+        <p class="big-p">
+          Eight of those ten were Shorts. The channel published two long-form videos in twelve months,
+          and neither reached 2,000 views. A campaign that had been running at ten uploads a month in
+          April 2024 was down to one every six weeks by the following spring.
+        </p>
+      </div>
+    </div>
+
+    <p class="big-p reveal" style="margin-top:1.8rem">
+      That is the risk this campaign has earned the right to avoid. The audience it has just gathered
+      is larger than the one Cape Forestier gathered, and it is currently being met with the most
+      consistent publishing the channel has ever done. The question is only whether that survives
+      October.
+    </p>
+    <div class="src">
+      <b>Source</b> · Uploads playlist, 11 May 2024 → 31 December 2025. Long-form in 2025: two videos,
+      1,800 views each.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9 · WHAT TO KEEP DOING ═════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">Post-album</div>
+    <h2 class="display reveal" style="margin-top:.7rem">Five things to keep doing.</h2>
+    <p class="big-p reveal" style="margin-top:1rem">
+      Each of these is already in the campaign and already working on this channel. None of them
+      requires a new idea — only that they continue past release week.
+    </p>
+
+    <div class="grid2" style="margin-top:2rem">
+      <div class="stagger">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="label" style="color:var(--amber)">01 · The strongest evidence on the page</div>
+          <h3 class="display" style="margin-top:.5rem;color:var(--cream);font-size:clamp(1.1rem,1.9vw,1.6rem)">Keep filming songs in places.</h3>
+          <p class="body" style="margin-top:.6rem">
+            A performance in a named room is this channel's most reliable format after the official
+            video — a 39.8K median against 16.3K for a lyric video. Four album songs have been filmed
+            in a room so far. Every one that has not is a room still available.
+          </p>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="label" style="color:var(--amber)">02 · The gap that opened last time</div>
+          <h3 class="display" style="margin-top:.5rem;color:var(--cream);font-size:clamp(1.1rem,1.9vw,1.6rem)">Don't let a fortnight pass.</h3>
+          <p class="body" style="margin-top:.6rem">
+            The campaign's longest silence so far is sixteen days. Holding roughly that — something
+            every two weeks, whatever size — is the difference between this album's second act and
+            the last one's.
+          </p>
+        </div>
+        <div class="card">
+          <div class="label" style="color:var(--amber)">03 · Already proven this year</div>
+          <h3 class="display" style="margin-top:.5rem;color:var(--cream);font-size:clamp(1.1rem,1.9vw,1.6rem)">Put the catalogue back to work.</h3>
+          <p class="body" style="margin-top:.6rem">
+            The campaign's widest moment was Big Jet Plane with a guest — a 2010 song. Chateau, Grizzly
+            Bear and A Heartbreak are the channel's biggest videos and are untouched by this campaign.
+            A new live version of an old song is a new asset for a new audience.
+          </p>
+        </div>
+      </div>
+      <div class="stagger">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="label" style="color:var(--amber)">04 · The concentration problem</div>
+          <h3 class="display" style="margin-top:.5rem;color:var(--cream);font-size:clamp(1.1rem,1.9vw,1.6rem)">Give a third song a real video.</h3>
+          <p class="body" style="margin-top:.6rem">
+            Two official videos carry 42% and 20% of campaign views. Every album since has one or two
+            songs that grow late — Monroe and The Cherry Farm both have performance films and audiences
+            already. A third proper video is the most direct way to widen the base.
+          </p>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="label" style="color:var(--amber)">05 · Where the Shorts actually landed</div>
+          <h3 class="display" style="margin-top:.5rem;color:var(--cream);font-size:clamp(1.1rem,1.9vw,1.6rem)">Keep Shorts personal, not promotional.</h3>
+          <p class="body" style="margin-top:.6rem">
+            Shorts near a release did no better than Shorts anywhere else — 3,885 against 3,641. The
+            ones that travelled were the collaboration, the wrong chord, the fifteen seconds off duty.
+            The channel's Shorts median has risen from 2.6K to 3.9K by being about the two of them.
+          </p>
+        </div>
+        <div class="card" style="border-color:var(--sand)">
+          <div class="label" style="color:var(--sand)">And one to simply continue</div>
+          <h3 class="display" style="margin-top:.5rem;color:var(--cream);font-size:clamp(1.1rem,1.9vw,1.6rem)">Say the next date out loud.</h3>
+          <p class="body" style="margin-top:.6rem">
+            The release date was announced by the band, to camera, five days out. Tour dates, a film,
+            a deluxe — whatever comes next, that is the move that already works here.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="src">
+      <b>Every figure above</b> is from the campaign's own uploads, not from a benchmark. The
+      comparisons are the channel against itself.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · CLOSE ═════════════════════════════════════════════════ -->
+<section class="slide" style="justify-content:flex-end;padding-bottom:4rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/qZ0G4Gb9fz8/maxresdefault.jpg" alt="Celestial Bodies at Château d'Hérouville"
+      style="object-position:50% 38%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/qZ0G4Gb9fz8/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--amber)">Nineteen days after release</div>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:18ch">The campaign did its job.<br>Now don't stop.</h2>
+    <p class="statement reveal" style="margin-top:1.4rem;max-width:44ch">
+      297,000 subscribers. 168.7M lifetime views. A million-view video for the first time since 2018 —
+      and a channel that, for five months, has behaved like somebody lives there.
+    </p>
+    <div class="src" style="margin-top:2rem">
+      <b>Channel readings</b> · 23 September 2026, from the public API. Subscriber counts are rounded
+      by YouTube and are quoted as observed readings, not as growth.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ METHOD ═════════════════════════════════════════════════════ -->
+<section class="method">
+  <div class="inner">
+    <div class="label">Analysis</div>
+    <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
+
+    <h3 class="display sec">Sources</h3>
+    <p class="big-p">
+      One pull of the channel's complete public uploads playlist — 341 videos, 5 March 2009 to
+      14 September 2026 — through YouTube Data API v3, plus the daily public channel readings the
+      Watcher stores. No YouTube Studio metrics are used anywhere: no impressions, no click-through,
+      no retention, no traffic sources, no unique viewers.
+    </p>
+
+    <h3 class="display sec">A fair comparison</h3>
+    <p class="big-p">
+      The 2024 videos have had two more years to accumulate views, so the two campaigns are compared
+      using <b style="color:var(--cream)">structural measures rather than absolute views</b>.
+    </p>
+    <div class="fair">
+      <span>Active weeks</span><span>Longest gap</span><span>Upload days</span>
+      <span>Upload volume</span><span>Format mix</span><span>Attention concentration</span>
+    </div>
+    <p style="margin-top:1.1rem;color:var(--warm)">
+      These hold their meaning whatever a video's age. Where a single asset's views appear next to an
+      asset from the other era, its age in days is printed beside it.
+    </p>
+
+    <div class="notes">
+      <div class="label">Methodology notes</div>
+      <dl class="mn">
+        <dt>Campaign windows</dt>
+        <dd>2024: 9 February (The Wedding Song) → 4 August, album 10 May. 2026: 29 April (Big Jet Plane
+        live with Dua Lipa) → 14 September, album 4 September. The 2026 window opens on the Dua Lipa
+        performance because it is the campaign's first asset, a week before the first album single.</dd>
+
+        <dt>Format classification</dt>
+        <dd>From title text. "Official Music Video" / "Official Video" → official video; "Lyric Video"
+        → lyric; "Instrumental Karaoke" → karaoke; live, acoustic, session or a named venue →
+        live/acoustic; anything under 62 seconds → Short. The rule is stated so the figures can be
+        re-derived.</dd>
+
+        <dt>Medians, not averages</dt>
+        <dd>Format comparisons use medians. One official video at 1.1M would otherwise drag every
+        average it touched.</dd>
+
+        <dt>Public subscribers</dt>
+        <dd>Displayed subscriber counts are rounded by YouTube, so movement is given as observed
+        readings rather than as a precise figure or a growth multiple.</dd>
+
+        <dt>Attribution</dt>
+        <dd>Public data shows co-occurrence, not asset-level causation. Release-week channel movement
+        is not credited to any individual upload.</dd>
+
+        <dt>Karaoke and instrumental versions</dt>
+        <dd>These are counted as campaign uploads because they are, but they are catalogue-completeness
+        assets rather than reach assets, and are described that way. Their inclusion is what moves the
+        campaign's median long-form figure, which is why medians by format are shown instead.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   THE WEEK STRIP
+   One tick per campaign week, lit where the channel published. The
+   arrays below are the real weekly upload counts, derived from the
+   uploads playlist — not a decorative approximation. Anyone can count
+   them back against the campaign windows in the Method section.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* 2024 · 9 Feb → 4 Aug, 26 weeks. Uploads per week. */
+var W24 = [3,0,1,3,2,4,0,3,6,2,2,1,2,2,3,1,0,0,0,0,0,0,0,0,0,1];
+
+/* 2026 · 29 Apr → 14 Sep, 20 weeks. Uploads per week. */
+var W26 = [6,7,3,9,2,1,1,3,5,2,0,0,5,5,10,7,5,6,8,3];
+
+function paint(el, weeks){
+  if(!el) return;
+  el.innerHTML = '';
+  var max = Math.max.apply(null, weeks) || 1;
+  weeks.forEach(function(n){
+    var d = document.createElement('div');
+    d.className = 'wk' + (n > 0 ? ' on' : ' dead');
+    if(n > 0){
+      /* Height carries volume as well as presence, so a release week
+         reads as a wall rather than as one more lit tick. */
+      d.style.height = (38 + (n / max) * 62) + '%';
+      if(n >= max * 0.75) d.className += ' big';
+    }
+    d.title = n === 0 ? 'No uploads' : n + (n === 1 ? ' upload' : ' uploads');
+    el.appendChild(d);
+  });
+}
+
+paint(document.getElementById('cover-weeks'), W26);
+paint(document.getElementById('w24'), W24);
+paint(document.getElementById('w26'), W26);
+
+/* Uploads per month after the last album — June 2024 to December 2025,
+   the nineteen months following Cape Forestier's release month. The
+   shape of a channel going quiet. */
+var AFTER = [0,0,4,2,1,3,6,1,3,1,1,3,0,1,0,0,0,0,0];
+paint(document.getElementById('after24'), AFTER);
+
+/* ── Reveal on scroll ─────────────────────────────────────────────── */
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+document.querySelectorAll('.reveal,.stagger').forEach(function(el){ io.observe(el); });
+</script>
+
+</body>
+</html>
