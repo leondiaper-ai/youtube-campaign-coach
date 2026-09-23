@@ -129,7 +129,12 @@ body{
   font-variation-settings:'wdth' 108,'wght' 800;
   text-transform:uppercase;line-height:.92;letter-spacing:-.012em;
 }
-h1.display{font-size:clamp(2.5rem,7.4vw,6.6rem)}
+/* 5.8rem, not 6.6. The cover's longest line is "A SOLO CHANNEL BUILT"
+   and at 6.6rem it needed 1302px inside a 1296px column, so it wrapped
+   and orphaned BUILT — measured in the browser at 1440, where 6.2rem
+   still breaks and 6.0rem just holds. 5.8 keeps a little headroom for
+   font-loading variance. */
+h1.display{font-size:clamp(2.5rem,7.4vw,5.8rem)}
 h2.display{font-size:clamp(1.95rem,5.2vw,4.5rem)}
 h3.display{font-size:clamp(1.25rem,2.3vw,2rem);font-variation-settings:'wdth' 104,'wght' 740}
 
