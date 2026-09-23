@@ -5,6 +5,8 @@ import {
   type Artist, type ChannelState,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
+import { listAllTeamEntries } from '@/lib/teamWatcherStore';
+import { TEAMS, TEAM_SLUGS } from '@/lib/teams';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { listPinned } from '@/lib/campaignStore';
 import { readHistory } from '@/lib/snapshots';
@@ -26,6 +28,20 @@ const SOFT = '#F6F1E7';
 
 export default async function ControlPage() {
   const custom = await listCustomArtists();
+
+  /* ── WHO ELSE IS WATCHING ───────────────────────────────────────────
+     Artists a regional team adds already arrive here: everything added
+     through any board lands in the same `artists:custom` pool, and this
+     page reads that pool. What was missing was WHOSE they are — an
+     unfamiliar name in the roster with no explanation is a puzzle rather
+     than information.
+
+     So each row picks up the tag of the team that added it. Read-only,
+     and keyed on channel id so a rename on their side cannot break it. */
+  const teamEntries = await listAllTeamEntries(TEAM_SLUGS);
+  const teamTagByChannel = new Map(
+    teamEntries.map(e => [e.channelId, TEAMS[e.team]?.regionTag ?? e.regionTag]),
+  );
   const allArtists = mergeArtistLists(ARTISTS, custom);
   const syncMeta = await readSyncMeta();
   const pinned = await listPinned();
@@ -71,6 +87,7 @@ export default async function ControlPage() {
         slug: a.slug,
         name: a.name,
         isVirgin: isVirginOwned(a),
+        teamTag: snap?.channelId ? teamTagByChannel.get(snap.channelId) : undefined,
         subs: nc.subs,
         subs7Delta: subs7Val,
         views7Delta: views7Val,

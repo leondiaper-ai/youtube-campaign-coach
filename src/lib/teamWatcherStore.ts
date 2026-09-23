@@ -8,7 +8,21 @@
 // Each entry also carries an artistSlug for routing/display.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ENTRIES_KEY = 'team-watcher:entries';
+/* ── ONE BOARD PER TEAM ───────────────────────────────────────────────
+   This was a single global key holding the Nordics board. Australia
+   joining made that a bug waiting to happen: a second team would have
+   written its campaign names and pins straight over the first team's.
+
+   Keys are now scoped per team. The Nordics board keeps the ORIGINAL
+   unscoped key, because it already has live data in it and a rename here
+   would silently empty a board somebody is using. New teams get a scoped
+   key. The mapping is one function so nothing else has to know. */
+const LEGACY_KEY = 'team-watcher:entries';
+const DEFAULT_TEAM = 'nordics';
+
+function entriesKey(team: string = DEFAULT_TEAM): string {
+  return team === DEFAULT_TEAM ? LEGACY_KEY : `team-watcher:${team}:entries`;
+}
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -76,16 +90,16 @@ async function kv() {
 
 // ── CRUD ─────────────────────────────────────────────────────────────────────
 
-export async function listEntries(): Promise<TeamWatcherEntry[]> {
+export async function listEntries(team: string = DEFAULT_TEAM): Promise<TeamWatcherEntry[]> {
   const store = await kv();
   if (!store) return [];
-  return ((await store.get(ENTRIES_KEY)) as TeamWatcherEntry[] | null) ?? [];
+  return ((await store.get(entriesKey(team))) as TeamWatcherEntry[] | null) ?? [];
 }
 
-async function writeEntries(entries: TeamWatcherEntry[]): Promise<void> {
+async function writeEntries(entries: TeamWatcherEntry[], team: string = DEFAULT_TEAM): Promise<void> {
   const store = await kv();
   if (!store) return;
-  await store.set(ENTRIES_KEY, entries);
+  await store.set(entriesKey(team), entries);
 }
 
 /**
@@ -94,8 +108,9 @@ async function writeEntries(entries: TeamWatcherEntry[]): Promise<void> {
  */
 export async function upsertEntry(
   entry: Omit<TeamWatcherEntry, 'createdAt' | 'updatedAt'>,
+  team: string = DEFAULT_TEAM,
 ): Promise<TeamWatcherEntry[]> {
-  const entries = await listEntries();
+  const entries = await listEntries(team);
   const now = new Date().toISOString();
   const idx = entries.findIndex((e) => e.channelId === entry.channelId);
 
@@ -115,7 +130,7 @@ export async function upsertEntry(
     });
   }
 
-  await writeEntries(entries);
+  await writeEntries(entries, team);
   return entries;
 }
 
@@ -128,8 +143,9 @@ export async function patchEntry(
     TeamWatcherEntry,
     'campaignName' | 'campaignStartDate' | 'campaignState' | 'regionTag' | 'pinnedAt' | 'displayName'
   >>,
+  team: string = DEFAULT_TEAM,
 ): Promise<TeamWatcherEntry[]> {
-  const entries = await listEntries();
+  const entries = await listEntries(team);
   const idx = entries.findIndex((e) => e.channelId === channelId);
   if (idx < 0) return entries; // not found — no-op
 
@@ -138,7 +154,7 @@ export async function patchEntry(
     ...patch,
     updatedAt: new Date().toISOString(),
   };
-  await writeEntries(entries);
+  await writeEntries(entries, team);
   return entries;
 }
 
@@ -148,8 +164,9 @@ export async function patchEntry(
 export async function addEntryNote(
   channelId: string,
   text: string,
+  team: string = DEFAULT_TEAM,
 ): Promise<TeamWatcherEntry[]> {
-  const entries = await listEntries();
+  const entries = await listEntries(team);
   const idx = entries.findIndex((e) => e.channelId === channelId);
   if (idx < 0) return entries;
 
@@ -160,7 +177,7 @@ export async function addEntryNote(
   };
   entries[idx].teamNotes = [note, ...entries[idx].teamNotes].slice(0, 30);
   entries[idx].updatedAt = new Date().toISOString();
-  await writeEntries(entries);
+  await writeEntries(entries, team);
   return entries;
 }
 
@@ -170,23 +187,49 @@ export async function addEntryNote(
 export async function deleteEntryNote(
   channelId: string,
   noteId: string,
+  team: string = DEFAULT_TEAM,
 ): Promise<TeamWatcherEntry[]> {
-  const entries = await listEntries();
+  const entries = await listEntries(team);
   const idx = entries.findIndex((e) => e.channelId === channelId);
   if (idx < 0) return entries;
 
   entries[idx].teamNotes = entries[idx].teamNotes.filter((n) => n.id !== noteId);
   entries[idx].updatedAt = new Date().toISOString();
-  await writeEntries(entries);
+  await writeEntries(entries, team);
   return entries;
 }
 
 /**
  * Remove an entry entirely by channelId.
  */
-export async function removeEntry(channelId: string): Promise<TeamWatcherEntry[]> {
-  const entries = await listEntries();
+export async function removeEntry(
+  channelId: string,
+  team: string = DEFAULT_TEAM,
+): Promise<TeamWatcherEntry[]> {
+  const entries = await listEntries(team);
   const next = entries.filter((e) => e.channelId !== channelId);
-  await writeEntries(next);
+  await writeEntries(next, team);
   return next;
+}
+
+/**
+ * Every team's entries at once, each tagged with the team it came from.
+ * Used by the main Watcher to show what the regional boards are tracking
+ * without anybody having to open them.
+ */
+export async function listAllTeamEntries(
+  teamSlugs: string[],
+): Promise<Array<TeamWatcherEntry & { team: string }>> {
+  const lists = await Promise.all(
+    teamSlugs.map(async t => (await listEntries(t)).map(e => ({ ...e, team: t }))),
+  );
+  /* Deduped on channelId: two teams can legitimately watch the same
+     channel, and the main Watcher should show it once. First team wins,
+     which is stable because the slug order is stable. */
+  const seen = new Set<string>();
+  return lists.flat().filter(e => {
+    if (seen.has(e.channelId)) return false;
+    seen.add(e.channelId);
+    return true;
+  });
 }

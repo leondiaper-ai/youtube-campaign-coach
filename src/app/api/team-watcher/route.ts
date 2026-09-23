@@ -1,3 +1,4 @@
+import { getTeam } from '@/lib/teams';
 import { NextRequest, NextResponse } from 'next/server';
 import {
   listEntries,
@@ -47,8 +48,24 @@ function enrichSnap(snap: LiveSnap | null): EnrichedEntry['youtube'] {
 
 // ── GET: list all entries with cached YouTube data ───────────────────────────
 
-export async function GET() {
-  const entries = await listEntries();
+/* Which board. Absent means the Nordics board, which is what every
+   existing caller means and what the store's default resolves to, so
+   nothing that already works has to change. An unknown slug is rejected
+   rather than silently written to a new key — a typo should not quietly
+   create a board nobody can find. */
+function teamOf(req: NextRequest): string | null {
+  const t = req.nextUrl.searchParams.get('team');
+  if (!t) return 'nordics';
+  return getTeam(t)?.slug ?? null;
+}
+
+const BAD_TEAM = () =>
+  NextResponse.json({ error: 'Unknown team' }, { status: 404 });
+
+export async function GET(req: NextRequest) {
+  const team = teamOf(req);
+  if (!team) return BAD_TEAM();
+  const entries = await listEntries(team);
 
   // Enrich each entry with cached YouTube data (no API calls)
   const enriched: EnrichedEntry[] = await Promise.all(
@@ -93,6 +110,9 @@ export async function POST(req: NextRequest) {
       ? (campaignState as CampaignState)
       : 'Monitoring';
 
+  const team = teamOf(req);
+  if (!team) return BAD_TEAM();
+
   const entries = await upsertEntry({
     channelId,
     artistSlug,
@@ -103,7 +123,7 @@ export async function POST(req: NextRequest) {
     regionTag: regionTag ?? '',
     teamNotes: [],
     pinnedAt: null,
-  });
+  }, team);
 
   return NextResponse.json({ entries });
 }
@@ -116,6 +136,9 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
+  const team = teamOf(req);
+  if (!team) return BAD_TEAM();
+
   const { channelId, action } = body as Record<string, string | undefined>;
   if (!channelId) {
     return NextResponse.json({ error: 'channelId is required' }, { status: 400 });
@@ -126,11 +149,11 @@ export async function PATCH(req: NextRequest) {
     case 'pin': {
       const entries = await patchEntry(channelId, {
         pinnedAt: new Date().toISOString(),
-      });
+      }, team);
       return NextResponse.json({ entries });
     }
     case 'unpin': {
-      const entries = await patchEntry(channelId, { pinnedAt: null });
+      const entries = await patchEntry(channelId, { pinnedAt: null }, team);
       return NextResponse.json({ entries });
     }
     case 'addNote': {
@@ -138,7 +161,7 @@ export async function PATCH(req: NextRequest) {
       if (!text) {
         return NextResponse.json({ error: 'text is required for addNote' }, { status: 400 });
       }
-      const entries = await addEntryNote(channelId, text);
+      const entries = await addEntryNote(channelId, text, team);
       return NextResponse.json({ entries });
     }
     case 'deleteNote': {
@@ -146,7 +169,7 @@ export async function PATCH(req: NextRequest) {
       if (!noteId) {
         return NextResponse.json({ error: 'noteId is required for deleteNote' }, { status: 400 });
       }
-      const entries = await deleteEntryNote(channelId, noteId);
+      const entries = await deleteEntryNote(channelId, noteId, team);
       return NextResponse.json({ entries });
     }
     default: {
@@ -162,7 +185,7 @@ export async function PATCH(req: NextRequest) {
       ) {
         patch.campaignState = body.campaignState;
       }
-      const entries = await patchEntry(channelId, patch);
+      const entries = await patchEntry(channelId, patch, team);
       return NextResponse.json({ entries });
     }
   }
@@ -171,10 +194,12 @@ export async function PATCH(req: NextRequest) {
 // ── DELETE: remove an entry ──────────────────────────────────────────────────
 
 export async function DELETE(req: NextRequest) {
+  const team = teamOf(req);
+  if (!team) return BAD_TEAM();
   const channelId = req.nextUrl.searchParams.get('channelId');
   if (!channelId) {
     return NextResponse.json({ error: 'channelId query param required' }, { status: 400 });
   }
-  const entries = await removeEntry(channelId);
+  const entries = await removeEntry(channelId, team);
   return NextResponse.json({ entries });
 }

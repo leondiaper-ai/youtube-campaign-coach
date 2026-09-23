@@ -10,6 +10,8 @@ import Sparkline from './Sparkline';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type RowData = {
+  /** Region tag of the team that added this artist, if a team did. */
+  teamTag?: string;
   slug: string;
   name: string;
   isVirgin: boolean;
@@ -509,6 +511,10 @@ export type MarketFormatStats = {
 export default function ChannelHealthBoard({
   rows,
   linkPrefix = '/watcher',
+  /* Appended to every row link. Regional boards live behind a key in the
+     query string, and a link that drops it sends the reader to a page
+     that tells them they are not allowed in. */
+  linkSuffix = '',
   topVideos,
   marketFormatStats,
   singleTab = false,
@@ -517,6 +523,7 @@ export default function ChannelHealthBoard({
 }: {
   rows: RowData[];
   linkPrefix?: string;
+  linkSuffix?: string;
   topVideos?: TopVideo[];
   marketFormatStats?: MarketFormatStats;
   /** Hide the managed/market toggle and show only the managed view */
@@ -817,7 +824,7 @@ export default function ChannelHealthBoard({
                 <div key={c.slug} className="flex items-center gap-3 text-[12px]">
                   <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{i + 1}.</span>
                   <Link
-                    href={`${linkPrefix}/${c.slug}`}
+                    href={`${linkPrefix}/${c.slug}${linkSuffix}`}
                     className="font-bold hover:underline min-w-0 truncate"
                     style={{ color: INK, textDecoration: 'none' }}
                   >
@@ -979,12 +986,24 @@ export default function ChannelHealthBoard({
                 <div className="min-w-0 relative">
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`${linkPrefix}/${r.slug}`}
+                      href={`${linkPrefix}/${r.slug}${linkSuffix}`}
                       className="font-black text-[14px] truncate hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {r.name}
                     </Link>
+                    {/* Added by a regional board rather than by us. Shown so
+                        the main Watcher answers "who is watching this?"
+                        without anybody opening the other board. */}
+                    {r.teamTag && (
+                      <span
+                        className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded"
+                        style={{ background: '#EEF2FF', color: '#3730A3' }}
+                        title={`Tracked by the ${r.teamTag} team`}
+                      >
+                        {r.teamTag}
+                      </span>
+                    )}
                     {r.dataStatus && r.dataStatus !== 'FRESH' && (
                       <span
                         className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded"

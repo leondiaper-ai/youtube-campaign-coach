@@ -9,7 +9,13 @@ const SOFT = '#F6F1E7';
 const BONE = '#EBE7DF';
 const SMOKE = '#8A847A';
 
-export default function AddArtistModal() {
+/* Which board this modal writes to. Absent means the Nordics board, which
+   is what every existing call site means. The region is pre-filled so a
+   team's artists arrive tagged without anybody typing it — that tag is how
+   the main Watcher shows who is tracking what. */
+export type AddArtistProps = { team?: string; regionTag?: string };
+
+export default function AddArtistModal({ team, regionTag }: AddArtistProps = {}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [channelInput, setChannelInput] = useState('');
@@ -55,7 +61,7 @@ export default function AddArtistModal() {
       }
 
       // Add to team watcher with defaults
-      const twRes = await fetch('/api/team-watcher', {
+      const twRes = await fetch(`/api/team-watcher${team ? `?team=${encodeURIComponent(team)}` : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -65,7 +71,7 @@ export default function AddArtistModal() {
           campaignName: '',
           campaignStartDate: '',
           campaignState: 'Monitoring',
-          regionTag: '',
+          regionTag: regionTag ?? '',
         }),
       });
 
@@ -183,7 +189,7 @@ export default function AddArtistModal() {
 }
 
 /** Inline version for empty states — renders as a larger button */
-export function AddArtistModalInline() {
+export function AddArtistModalInline({ team, regionTag }: AddArtistProps = {}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [channelInput, setChannelInput] = useState('');
@@ -227,7 +233,7 @@ export function AddArtistModalInline() {
         return;
       }
 
-      const twRes = await fetch('/api/team-watcher', {
+      const twRes = await fetch(`/api/team-watcher${team ? `?team=${encodeURIComponent(team)}` : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -237,7 +243,7 @@ export function AddArtistModalInline() {
           campaignName: '',
           campaignStartDate: '',
           campaignState: 'Monitoring',
-          regionTag: '',
+          regionTag: regionTag ?? '',
         }),
       });
 
