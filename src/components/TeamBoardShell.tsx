@@ -184,53 +184,67 @@ export default function TeamBoardShell({
           request behind it, for a reader who never opens the tab. */}
       {tab === 'behaviour' && (
         current ? (
-          <div className="flex rounded-2xl overflow-hidden"
-               style={{ border: `1px solid ${MUTED}`, background: '#FFFFFF' }}>
-            {/* The other pinned artists, one click away. */}
-            {rail.length > 1 && (
-              <div style={{
-                width: 64, minWidth: 64, background: '#1A1A1A', display: 'flex',
-                flexDirection: 'column', alignItems: 'center', gap: 6,
-                paddingTop: 14, paddingBottom: 14,
-              }}>
-                {rail.map((a) => {
-                  const isActive = a.slug === current.slug;
-                  const initials = a.name.split(/\s+/).map(w => w[0]).join('')
-                    .substring(0, 2).toUpperCase();
-                  return (
-                    <button
-                      key={a.slug}
-                      onClick={() => open(a.slug)}
-                      title={a.name}
-                      style={{
-                        width: 40, height: 40, borderRadius: '50%',
-                        border: isActive ? '2.5px solid #FAF7F2' : '2.5px solid transparent',
-                        background: a.thumbnail ? 'transparent'
-                          : (isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'),
-                        color: isActive ? '#FAF7F2' : 'rgba(250,247,242,0.5)',
-                        cursor: 'pointer', display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', fontSize: 10, fontWeight: 700,
-                        position: 'relative', flexShrink: 0, padding: 0,
-                        overflow: 'hidden', opacity: isActive ? 1 : 0.7,
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {a.thumbnail ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={a.thumbnail} alt={a.name}
-                             style={{ width: '100%', height: '100%', objectFit: 'cover',
-                                      borderRadius: '50%' }} />
-                      ) : initials}
-                      <span style={{
-                        position: 'absolute', bottom: 0, right: 0, width: 9, height: 9,
-                        borderRadius: '50%', background: STATUS_DOT[a.status] ?? '#8A847A',
-                        border: '2px solid #1A1A1A',
-                      }} />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+          /* ── FULL BLEED ────────────────────────────────────────────
+             The board is a centred 1080px column, which is right for a
+             table and wrong for this: a 58-day timeline squeezed into
+             it loses the gaps between uploads, which is most of what
+             the chart is for. So it escapes the column and takes the
+             window, the same width our own campaigns board gives it.
+
+             The rail shows even when one artist is pinned. It is the
+             left edge of this view, not a switcher that appears once
+             there is something to switch to — and a team with one
+             pinned artist is a team about to have two. */
+          <div style={{
+            width: '100vw', marginLeft: 'calc(-50vw + 50%)',
+            display: 'flex', minHeight: '78vh', background: PAPER,
+            borderTop: `1px solid ${MUTED}`,
+          }}>
+            <div style={{
+              width: 72, minWidth: 72, background: '#1A1A1A', display: 'flex',
+              flexDirection: 'column', alignItems: 'center', gap: 6,
+              paddingTop: 18, paddingBottom: 18, overflowY: 'auto',
+              position: 'sticky', top: 0, alignSelf: 'flex-start',
+              maxHeight: '100vh',
+              borderRight: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              {rail.map((a) => {
+                const isActive = a.slug === current.slug;
+                const initials = a.name.split(/\s+/).map(w => w[0]).join('')
+                  .substring(0, 2).toUpperCase();
+                return (
+                  <button
+                    key={a.slug}
+                    onClick={() => open(a.slug)}
+                    title={a.name}
+                    style={{
+                      width: 42, height: 42, borderRadius: '50%',
+                      border: isActive ? '2.5px solid #FAF7F2' : '2.5px solid transparent',
+                      background: a.thumbnail ? 'transparent'
+                        : (isActive ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)'),
+                      color: isActive ? '#FAF7F2' : 'rgba(250,247,242,0.5)',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', fontSize: 11, fontWeight: 700,
+                      position: 'relative', flexShrink: 0, padding: 0,
+                      overflow: 'hidden', opacity: isActive ? 1 : 0.7,
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {a.thumbnail ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={a.thumbnail} alt={a.name}
+                           style={{ width: '100%', height: '100%', objectFit: 'cover',
+                                    borderRadius: '50%' }} />
+                    ) : initials}
+                    <span style={{
+                      position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                      borderRadius: '50%', background: STATUS_DOT[a.status] ?? '#8A847A',
+                      border: '2px solid #1A1A1A',
+                    }} />
+                  </button>
+                );
+              })}
+            </div>
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <CampaignBehaviour
