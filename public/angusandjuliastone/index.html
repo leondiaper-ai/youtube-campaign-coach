@@ -349,11 +349,15 @@ table.cmp tr:last-child td{border-bottom:none}
   .mosaic .tile.tall{grid-row:span 1;aspect-ratio:16/9}
 }
 
-/* ── THE ANALYSIS TAB ───────────────────────────────────────────────
-   Method is not the story, but it has to be one click away or the
-   page is unfalsifiable. It sits behind a fixed control rather than
-   at the foot, so the deck ends on the recommendation and the working
-   is still there for anyone who wants it. */
+/* ── THE ANALYSIS SHEET ─────────────────────────────────────────────
+   Same idea as the Amyl appendix: the deck is dark and photographic,
+   the analysis behind it is a light document with tables in it. The
+   switch in ground is the point — you are not in the deck any more,
+   you are in the working.
+
+   Everything the deck asserts is here in a table, with the sentence
+   that reads it underneath. A reviewer should be able to disagree
+   with any row without leaving the page. */
 .an-btn{
   position:fixed;top:clamp(.9rem,2vw,1.5rem);right:clamp(.9rem,2vw,1.5rem);z-index:60;
   font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
@@ -362,20 +366,58 @@ table.cmp tr:last-child td{border-bottom:none}
   -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);transition:all .18s ease;
 }
 .an-btn:hover{border-color:var(--amber);color:var(--amber)}
-.an-panel{
-  position:fixed;inset:0;z-index:70;background:var(--ink-2);
-  overflow-y:auto;padding:clamp(3.4rem,7vw,5.5rem) var(--pad) clamp(3rem,6vw,5rem);
-  opacity:0;pointer-events:none;transition:opacity .25s ease;
-}
-.an-panel.open{opacity:1;pointer-events:auto}
-.an-close{
-  position:fixed;top:clamp(.9rem,2vw,1.5rem);right:clamp(.9rem,2vw,1.5rem);z-index:80;
-  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--amber);background:rgba(18,13,10,.9);border:1px solid var(--amber);
-  border-radius:3px;padding:.55rem .85rem;cursor:pointer;display:none;
-}
-.an-panel.open ~ .an-close{display:block}
-body.locked{overflow:hidden}
+
+.an-panel{display:none;position:absolute;inset:0 0 auto 0;z-index:70;
+  background:var(--cream);color:var(--ink);min-height:100vh;
+  padding:clamp(2.6rem,6vw,4.5rem) clamp(1.1rem,5vw,4rem) clamp(3rem,6vw,5rem)}
+.an-panel.open{display:block}
+/* The deck is hidden outright rather than covered: scrolling to the top
+   of an overlay that sits on a 12,000px document lands you on slide 1. */
+body.sheet-open .deck{display:none}
+body.sheet-open .an-btn{display:none}
+
+.an-in{max-width:1000px;margin:0 auto}
+.an-back{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);background:transparent;
+  border:1px solid rgba(18,13,10,.22);border-radius:3px;padding:.5rem .8rem;
+  cursor:pointer;margin-bottom:2rem;transition:all .16s ease}
+.an-back:hover{border-color:var(--clay);color:var(--clay)}
+
+.an-panel h2{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 780;
+  text-transform:uppercase;font-size:clamp(1.9rem,4vw,2.6rem);line-height:.98;margin-bottom:.45rem}
+.an-panel .an-sub{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(18,13,10,.45)}
+.an-panel h3{font-family:'DM Mono',monospace;font-size:.68rem;font-weight:500;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--clay);margin:2.6rem 0 .85rem}
+.an-panel p{font-size:.9rem;line-height:1.55;color:rgba(18,13,10,.72);
+  margin-bottom:.7rem;max-width:72ch}
+.an-panel p strong{color:var(--ink);font-weight:600}
+.an-panel dl{margin-top:.4rem}
+.an-panel dt{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink);margin-top:1.1rem}
+.an-panel dd{font-size:.88rem;line-height:1.5;color:rgba(18,13,10,.72);max-width:72ch;margin-top:.25rem}
+
+.an-panel table{width:100%;border-collapse:collapse;margin:.9rem 0 1.4rem;font-size:.8rem}
+.an-panel th{text-align:left;font-family:'DM Mono',monospace;font-size:.58rem;font-weight:500;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(18,13,10,.45);
+  border-bottom:2px solid var(--ink);padding:.55rem .5rem}
+.an-panel td{padding:.55rem .5rem;border-bottom:1px solid rgba(18,13,10,.12);
+  color:rgba(18,13,10,.75);vertical-align:baseline}
+.an-panel td.n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 700;
+  font-size:.98rem;color:var(--ink);white-space:nowrap}
+.an-panel td.up{color:#1F6B44}
+.an-panel td.dn{color:var(--rust)}
+.an-panel td.miss{color:var(--rust)}
+.an-panel tr.lead td{background:rgba(224,163,86,.13)}
+
+.an-note{background:rgba(18,13,10,.05);border-left:3px solid var(--clay);
+  padding:.95rem 1.15rem;margin:1.1rem 0;font-size:.85rem;line-height:1.55;
+  color:rgba(18,13,10,.78);max-width:74ch}
+.an-note b{color:var(--ink)}
+.fair{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0 1.2rem}
+.fair span{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.1em;
+  text-transform:uppercase;border:1px solid var(--clay);color:var(--clay);
+  border-radius:2px;padding:.32rem .55rem}
 
 /* ── THE SUPPORT GAP ────────────────────────────────────────────────
    One row per catalogue song. The bar is lifetime views; the chips say
@@ -1010,80 +1052,211 @@ dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
 
 
 </div>
-<!-- ═══ ANALYSIS — behind the tab, not in the scroll ══════════════ -->
+<!-- ═══ ANALYSIS APPENDIX ═══════════════════════════════════════════
+     A light document behind a dark deck, the way the Amyl appendix
+     works. Every figure the review asserts appears here as a table
+     with the sentence that reads it underneath, so a reader can
+     disagree with any single row without leaving the page. -->
 <button class="an-btn" id="an-open">Analysis</button>
-<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis and method">
-  <div class="inner" style="max-width:900px">
 
-    <div class="label">Analysis</div>
-    <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
+<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis appendix">
+ <div class="an-in">
+  <button class="an-back" id="an-close">&larr; Back to the review</button>
 
-    <h3 class="display sec">Sources</h3>
-    <p class="big-p">
-      One pull of the channel's complete public uploads playlist — 341 videos, 5 March 2009 to
-      14 September 2026 — through YouTube Data API v3, plus the daily public channel readings the
-      Watcher stores. No YouTube Studio metrics are used anywhere: no impressions, no click-through,
-      no retention, no traffic sources, no unique viewers.
-    </p>
+  <h2>Analysis appendix</h2>
+  <div class="an-sub">The full analytical layer behind the review &middot; Angus &amp; Julia Stone &middot; 23 September 2026</div>
 
-    <h3 class="display sec">What this page does and does not claim</h3>
-    <p class="big-p">
-      It does <b style="color:var(--cream)">not</b> claim that Karaoke Bar has performed better than
-      Cape Forestier. Public lifetime view data cannot establish that — the older campaign has had
-      roughly two additional years to accumulate views, and there is no way to age-match it.
-    </p>
-    <p class="big-p" style="margin-top:1rem">
-      What it claims is narrower and firmer: the 2026 campaign was
-      <b style="color:var(--cream)">run differently</b> — more consistently, across more formats, with
-      substantially stronger continuity around the release. Every figure in the scorecard is a count
-      or a ratio, unaffected by how long a video has been live.
-    </p>
-    <div class="fair">
-      <span>Active weeks</span><span>Longest gap</span><span>Upload days</span>
-      <span>Upload volume</span><span>Format mix</span><span>Attention concentration</span>
-    </div>
-    <p style="margin-top:1.1rem;color:var(--warm)">
-      These hold their meaning whatever a video's age. Where a single asset's views appear next to an
-      asset from the other era, its age in days is printed beside it. Format medians are drawn from
-      small samples — sixteen performance films against five lyric videos — and are described on the
-      page as directional rather than definitive.
-    </p>
-
-    <div class="notes">
-      <div class="label">Methodology notes</div>
-      <dl class="mn">
-        <dt>Campaign windows</dt>
-        <dd>2024: 9 February (The Wedding Song) → 4 August, album 10 May. 2026: 29 April (Big Jet Plane
-        live with Dua Lipa) → 14 September, album 4 September. The 2026 window opens on the Dua Lipa
-        performance because it is the campaign's first asset, a week before the first album single.</dd>
-
-        <dt>Format classification</dt>
-        <dd>From title text. "Official Music Video" / "Official Video" → official video; "Lyric Video"
-        → lyric; "Instrumental Karaoke" → karaoke; live, acoustic, session or a named venue →
-        live/acoustic; anything under 62 seconds → Short. The rule is stated so the figures can be
-        re-derived.</dd>
-
-        <dt>Medians, not averages</dt>
-        <dd>Format comparisons use medians. One official video at 1.1M would otherwise drag every
-        average it touched.</dd>
-
-        <dt>Public subscribers</dt>
-        <dd>Displayed subscriber counts are rounded by YouTube, so movement is given as observed
-        readings rather than as a precise figure or a growth multiple.</dd>
-
-        <dt>Attribution</dt>
-        <dd>Public data shows co-occurrence, not asset-level causation. Release-week channel movement
-        is not credited to any individual upload.</dd>
-
-        <dt>Karaoke and instrumental versions</dt>
-        <dd>These are counted as campaign uploads because they are, but they are catalogue-completeness
-        assets rather than reach assets, and are described that way. Their inclusion is what moves the
-        campaign's median long-form figure, which is why medians by format are shown instead.</dd>
-      </dl>
-    </div>
+  <h3>Channel readings</h3>
+  <table>
+    <tr><th>Metric</th><th>Value</th></tr>
+    <tr><td>Subscribers</td><td class="n">297,000</td></tr>
+    <tr><td>Lifetime channel views</td><td class="n">168,677,271</td></tr>
+    <tr><td>Videos in the public uploads playlist</td><td class="n">341</td></tr>
+    <tr><td>Catalogue span</td><td class="n">5 Mar 2009 &rarr; 14 Sep 2026</td></tr>
+    <tr><td>Distinct songs identified</td><td class="n">93</td></tr>
+    <tr><td>Videos the channel reports</td><td class="n">100</td></tr>
+  </table>
+  <div class="an-note">
+    <b>A discrepancy worth stating.</b> The channel reports 100 videos; the public uploads playlist
+    returns 341. Every figure here is computed from the 341. Because the denominator is not
+    trustworthy, <b>no share-of-catalogue or share-of-lifetime claim is made anywhere</b> in the
+    review.
   </div>
+
+  <h3>Campaign structure — the scorecard, in full</h3>
+  <table>
+    <tr><th>Measure</th><th>Cape Forestier 2024</th><th>Karaoke Bar 2026</th><th>Reading</th></tr>
+    <tr><td>Window</td><td class="n">9 Feb &rarr; 4 Aug</td><td class="n">29 Apr &rarr; 14 Sep</td><td>177 days vs 138</td></tr>
+    <tr><td>Album release</td><td class="n">10 May 2024</td><td class="n">4 Sep 2026</td><td>Inferred vs stated</td></tr>
+    <tr class="lead"><td>Weeks the channel published</td><td class="n">15 / 26</td><td class="n up">18 / 20</td><td>58% &rarr; 90%</td></tr>
+    <tr class="lead"><td>Longest silence</td><td class="n dn">69 days</td><td class="n up">16 days</td><td>Began 17 days post-album in 2024</td></tr>
+    <tr><td>Days with an upload</td><td class="n">30</td><td class="n up">53</td><td>1.8&times;</td></tr>
+    <tr><td>Uploads</td><td class="n">36</td><td class="n up">88</td><td>2.4&times;</td></tr>
+    <tr><td>Long-form pieces</td><td class="n">9</td><td class="n up">27</td><td>3&times;</td></tr>
+    <tr><td>Shorts</td><td class="n">27</td><td class="n">61</td><td>75% &rarr; 69% of uploads</td></tr>
+    <tr><td>Live / acoustic performances</td><td class="n">4</td><td class="n up">7</td><td>External vs self-produced</td></tr>
+    <tr><td>Top asset's share of campaign views</td><td class="n">35%</td><td class="n dn">42%</td><td>The one that moved the other way</td></tr>
+  </table>
+  <p>Seven of eight measures moved in the direction the team would want. The eighth —
+  concentration — went the other way, and the review gives it a slide of its own rather than a
+  footnote. <strong>All ten rows are counts or within-window ratios</strong>, so none of them is
+  affected by how long a video has been live.</p>
+
+  <h3>What this page does and does not claim</h3>
+  <p>It does <strong>not</strong> claim Karaoke Bar performed better than Cape Forestier. Public
+  lifetime view data cannot establish that: the older campaign has had roughly two additional years
+  to accumulate views and there is no way to age-match it.</p>
+  <p>It claims the 2026 campaign was <strong>run differently</strong> — more consistently, across
+  more formats, with substantially stronger continuity around the release. The comparison rests on
+  these measures only:</p>
+  <div class="fair">
+    <span>Active weeks</span><span>Longest gap</span><span>Upload days</span>
+    <span>Upload volume</span><span>Format mix</span><span>Attention concentration</span>
+  </div>
+  <p>Where a single asset's views appear beside one from the other era, its age in days is printed
+  next to it on the page, every time.</p>
+
+  <h3>The campaign's 88 uploads, by layer</h3>
+  <table>
+    <tr><th>Layer</th><th>Uploads</th><th>Share</th><th>Example</th></tr>
+    <tr class="lead"><td>Official videos</td><td class="n">2</td><td class="n">2.3%</td><td>Karaoke Bar &middot; Celestial Bodies</td></tr>
+    <tr><td>Performance films</td><td class="n">7</td><td class="n">8.0%</td><td>Tasmania, Byron Bay, Sugarcane Mountain, Sydney</td></tr>
+    <tr><td>Lyric videos</td><td class="n">5</td><td class="n">5.7%</td><td>One per single</td></tr>
+    <tr><td>Alternate versions</td><td class="n">1</td><td class="n">1.1%</td><td>Karaoke Bar, piano</td></tr>
+    <tr><td>Shorts &amp; personality</td><td class="n">61</td><td class="n">69.3%</td><td>Backstage, rehearsals, off duty</td></tr>
+    <tr><td>Karaoke &amp; utility</td><td class="n">10</td><td class="n">11.4%</td><td>Instrumental versions, release day</td></tr>
+    <tr><td>Channel moments</td><td class="n">2</td><td class="n">2.3%</td><td>Longer clips outside the release rhythm</td></tr>
+  </table>
+  <p>Two official videos carry <strong>1,617,164 views</strong> — roughly 72% of the campaign's
+  2,255,297 long-form views — from 2.3% of the uploads. Shorts are the inverse: 69% of everything
+  published, and the format with the lowest median. That is not an argument against Shorts, which
+  are cheap and do a different job; it does mean upload volume there is a weak lever on reach
+  compared with one more performance film.</p>
+
+  <h3>Format performance — median views, uploads since 2024</h3>
+  <table>
+    <tr><th>Format</th><th>n</th><th>Median views</th><th>vs a lyric video</th></tr>
+    <tr class="lead"><td>Official video</td><td class="n">7</td><td class="n">517,538</td><td class="n">31.8&times;</td></tr>
+    <tr><td>Live / acoustic in a named place</td><td class="n">16</td><td class="n">39,800</td><td class="n">2.4&times;</td></tr>
+    <tr><td>Lyric video</td><td class="n">5</td><td class="n">16,258</td><td class="n">1.0&times;</td></tr>
+    <tr><td>Shorts</td><td class="n">125</td><td class="n">3,293</td><td class="n">0.2&times;</td></tr>
+    <tr><td>Instrumental karaoke</td><td class="n">10</td><td class="n">1,094</td><td class="n">0.07&times;</td></tr>
+  </table>
+  <div class="an-note">
+    <b>Small samples.</b> Seven official videos and five lyric videos. The review describes the
+    performance-film finding as <b>directional rather than definitive</b> and should be read that
+    way here too. Medians, not means — one video at 1.1M would distort any average it touched.
+  </div>
+
+  <h3>Shorts — release-adjacent against everything else</h3>
+  <table>
+    <tr><th>Group</th><th>n</th><th>Median views</th></tr>
+    <tr><td>Within &plusmn;7 days of an official video</td><td class="n">11</td><td class="n">3,885</td></tr>
+    <tr><td>Every other campaign Short</td><td class="n">63</td><td class="n">3,641</td></tr>
+    <tr class="lead"><td>Best three Shorts of 2026 — all Dua Lipa, 28–30 April</td><td class="n">3</td><td class="n">34,144 &middot; 23,328 &middot; 17,325</td></tr>
+  </table>
+  <p>A 6.7% difference on eleven items against sixty-three is <strong>noise, and is read as
+  one</strong>. The recommendation that follows is not "post more Shorts" but that the ones which
+  travelled were about the two of them, not about the release calendar. The channel's Shorts median
+  rose from 2,572 in the 2024 window to 3,885 in the 2026 one.</p>
+
+  <h3>The catalogue support gap</h3>
+  <p>Song identity is derived from the title — strip the artist prefix, strip every bracketed
+  segment, strip trailing descriptors. 341 videos resolve to 93 songs; 66 were first uploaded before
+  2024 and count as catalogue.</p>
+  <table>
+    <tr><th>Song</th><th>First upload</th><th>Lifetime</th><th>Views/day</th><th>Video</th><th>Live</th><th>Lyric</th><th>Karaoke</th></tr>
+    <tr class="lead"><td>Chateau</td><td>Aug 2017</td><td class="n">45.4M</td><td class="n">13,679</td><td>Yes</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Grizzly Bear</td><td>Jul 2014</td><td class="n">13.0M</td><td class="n">2,918</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>A Heartbreak</td><td>Jul 2014</td><td class="n">10.2M</td><td class="n">2,294</td><td>Yes</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Big Jet Plane</td><td>Nov 2011</td><td class="n">10.2M</td><td class="n">1,881</td><td>Yes</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>From The Stalls</td><td>May 2015</td><td class="n">6.8M</td><td class="n">1,641</td><td class="miss">&mdash;</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Nothing Else</td><td>Sep 2017</td><td class="n">5.7M</td><td class="n">1,734</td><td>Yes</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Heart Beats Slow</td><td>May 2014</td><td class="n">4.4M</td><td class="n">981</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Cellar Door</td><td>Sep 2017</td><td class="n">4.2M</td><td class="n">1,284</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Snow</td><td>Jun 2017</td><td class="n">3.7M</td><td class="n">1,104</td><td>Yes</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Oakwood</td><td>Sep 2017</td><td class="n">2.6M</td><td class="n">783</td><td class="miss">&mdash;</td><td>Yes</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Baudelaire</td><td>Sep 2017</td><td class="n">1.97M</td><td class="n">597</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Who Do You Think You Are</td><td>Sep 2017</td><td class="n">1.52M</td><td class="n">462</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Youngblood</td><td>Nov 2018</td><td class="n">1.50M</td><td class="n">521</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>My House Your House</td><td>Sep 2017</td><td class="n">1.07M</td><td class="n">326</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+    <tr><td>Sleep Alone</td><td>Sep 2017</td><td class="n">0.78M</td><td class="n">237</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td><td class="miss">&mdash;</td></tr>
+  </table>
+  <p><strong>21 catalogue songs carrying 115.3M views have no lyric video.</strong> Nine exist as an
+  audio upload and nothing else — 8.0M between them. <strong>No catalogue song has an instrumental
+  karaoke version</strong>, while all ten new-album songs got one on release day.</p>
+  <div class="an-note">
+    <b>The objection to raise first.</b> This measures assets on <b>this channel</b>. A catalogue
+    song may well have a lyric video on a label channel, a topic channel or as a DSP canvas. The
+    claim is about the artist channel's own shelf, and the review is worded that way. Views/day is
+    lifetime views divided by days since upload — a ranking device for enduring demand, not a
+    current rate and not a forecast.
+  </div>
+
+  <h3>What happened after the last album</h3>
+  <table>
+    <tr><th>Period</th><th>Uploads</th><th>Of which Shorts</th><th>Long-form</th></tr>
+    <tr><td>Jun–Jul 2024 (immediately post-album)</td><td class="n dn">0</td><td class="n">0</td><td class="n">0</td></tr>
+    <tr><td>Aug–Dec 2024</td><td class="n">16</td><td class="n">&mdash;</td><td class="n">&mdash;</td></tr>
+    <tr class="lead"><td>All of 2025</td><td class="n dn">10</td><td class="n">8</td><td class="n">2, at 1,800 views each</td></tr>
+  </table>
+  <p>A channel running at ten uploads a month in April 2024 was down to one every six weeks a year
+  later. This is the least arguable evidence in the review — it is a count of uploads, entirely
+  unaffected by view accumulation.</p>
+
+  <h3>Method</h3>
+  <dl>
+    <dt>Sources</dt>
+    <dd>One pull of the complete public uploads playlist through YouTube Data API v3, plus the daily
+    public channel readings the Watcher stores. No YouTube Studio metrics are used anywhere: no
+    impressions, no click-through, no retention, no traffic sources, no unique viewers.</dd>
+
+    <dt>Format classification</dt>
+    <dd>From title text, first match wins, in this order: <em>Instrumental Karaoke / Karaoke Video /
+    Karaoke Version</em> &rarr; karaoke; <em>(Official Music Video) / (Official Video) / Official
+    Video for</em> &rarr; official video; <em>Lyric Video</em> &rarr; lyric; live, acoustic, session,
+    studio, perform or a named venue &rarr; live/acoustic; <em>(Audio)</em> &rarr; audio; otherwise a
+    bare title is the song's primary video. Anything 62 seconds or under is a Short, classified
+    before all of the above. The ordering matters: <em>Karaoke Bar (Official Music Video)</em>
+    matches the official-video rule, not the karaoke one.</dd>
+
+    <dt>Campaign windows</dt>
+    <dd>2024: 9 February (The Wedding Song) to 4 August, album 10 May. 2026: 29 April (Big Jet Plane
+    live with Dua Lipa) to 14 September, album 4 September. The 2026 window opens on the Dua Lipa
+    performance because it is the campaign's first asset, a week before the first album single —
+    a deliberate choice, and a contestable one. Opening instead at 6 May gives 17 of 19 active weeks
+    rather than 18 of 20.</dd>
+
+    <dt>Album dates</dt>
+    <dd>4 September 2026 is stated by the band in their own Short of 30 August. 10 May 2024 is
+    <em>inferred</em> from the release-day upload pattern and is lower-confidence; the structural
+    comparison does not depend on it.</dd>
+
+    <dt>"Long-form" is a duration threshold</dt>
+    <dd>Over 62 seconds. Two items in the 2026 window clear it but are plainly social clips rather
+    than pieces of content — a 66-second and a 139-second clip. Both are counted in the 27.
+    Excluding everything under 150 seconds gives 25; excluding the karaoke set as well gives 17.
+    The review says 27 and this note says why.</dd>
+
+    <dt>Public subscribers</dt>
+    <dd>Displayed counts are rounded by YouTube, so movement is given as observed readings rather
+    than as a precise figure or a growth multiple. Our daily snapshots do not reach back to the 2024
+    campaign, so no campaign-to-campaign subscriber comparison is possible and none is made.</dd>
+
+    <dt>Attribution</dt>
+    <dd>Public data shows co-occurrence, not asset-level causation. Release-week channel movement is
+    not credited to any individual upload.</dd>
+
+    <dt>Full audit pack</dt>
+    <dd>Every claim on the review appears as a numbered row with its derivation, alongside both
+    campaign windows as raw data — 36 and 88 uploads with date, type, views, duration and title — in
+    <em>audits/ANGUS-AND-JULIA-STONE-audit.md</em>, which is written to be handed to an independent
+    reviewer.</dd>
+  </dl>
+
+  <button class="an-back" id="an-close-2" style="margin-top:2.4rem;margin-bottom:0">&larr; Back to the review</button>
+ </div>
 </div>
-<button class="an-close" id="an-close">Close</button>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
@@ -1132,15 +1305,22 @@ paint(document.getElementById('after24'), AFTER);
 /* ── The Analysis panel ───────────────────────────────────────────── */
 function wireAnalysis(){
   var btn=document.getElementById('an-open'),
-      panel=document.getElementById('an-panel'),
-      close=document.getElementById('an-close');
+      panel=document.getElementById('an-panel');
   if(!btn||!panel) return;
-  function open(){panel.classList.add('open');document.body.classList.add('locked');
-    btn.style.display='none';panel.scrollTop=0;close.focus();}
-  function shut(){panel.classList.remove('open');document.body.classList.remove('locked');
-    btn.style.display='';btn.focus();}
+  function open(){
+    panel.classList.add('open');
+    document.body.classList.add('sheet-open');
+    window.scrollTo(0,0);
+  }
+  function shut(){
+    panel.classList.remove('open');
+    document.body.classList.remove('sheet-open');
+    btn.focus();
+  }
   btn.addEventListener('click',open);
-  close.addEventListener('click',shut);
+  ['an-close','an-close-2'].forEach(function(id){
+    var b=document.getElementById(id); if(b) b.addEventListener('click',shut);
+  });
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'&&panel.classList.contains('open')) shut();});
 }
