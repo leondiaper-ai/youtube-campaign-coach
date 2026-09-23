@@ -286,15 +286,31 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         {/* Channel Health table */}
         {hasEntries && (
           <>
-            <ChannelHealthBoard rows={rows} linkPrefix={linkPrefix} linkSuffix={linkSuffix} singleTab removable />
+            <ChannelHealthBoard
+              rows={rows}
+              linkPrefix={linkPrefix}
+              linkSuffix={linkSuffix}
+              singleTab
+              removable
+              team={team.slug}
+              pinnedChannelIds={pinnedEntries.map((e) => e.channelId)}
+            />
 
             {/* Active Campaigns section (pinned entries) */}
+            {campaignCards.length === 0 && (
+              <p className="text-[11px] text-ink/35 mt-6">
+                Pin an artist with the 📍 beside their name to make them a
+                priority — pinned artists get a campaign card with their full
+                upload behaviour.
+              </p>
+            )}
             {campaignCards.length > 0 && (
               <div className="mt-10">
                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-4">
                   Active Campaigns
                 </div>
-                <TeamCampaignCards cards={campaignCards} />
+                <TeamCampaignCards cards={campaignCards} team={team.slug}
+                                   linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
               </div>
             )}
           </>

@@ -519,6 +519,13 @@ export default function ChannelHealthBoard({
   marketFormatStats,
   singleTab = false,
   removable = false,
+  /* Which board's entries these rows belong to. Without it, a write from
+     the Australia board lands on the Nordics board — the API defaults to
+     nordics when no team is given, which is right for the old callers and
+     silently wrong for a new one. */
+  team,
+  /** Channel ids currently pinned, so the toggle can show its state. */
+  pinnedChannelIds,
   pinnedSlugs = [],
 }: {
   rows: RowData[];
@@ -530,6 +537,8 @@ export default function ChannelHealthBoard({
   singleTab?: boolean;
   /** Show ✕ remove button on each row (team watcher mode) */
   removable?: boolean;
+  team?: string;
+  pinnedChannelIds?: string[];
   /** Only show Behaviour button for artists with pinned campaigns */
   pinnedSlugs?: string[];
 }) {
@@ -545,7 +554,10 @@ export default function ChannelHealthBoard({
     if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
     setRemovingId(channelId);
     try {
-      const res = await fetch(`/api/team-watcher?channelId=${encodeURIComponent(channelId)}`, { method: 'DELETE' });
+      const res = await fetch(
+        `/api/team-watcher?channelId=${encodeURIComponent(channelId)}`
+        + (team ? `&team=${encodeURIComponent(team)}` : ''),
+        { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to remove');
       router.refresh();
     } catch {
@@ -553,7 +565,34 @@ export default function ChannelHealthBoard({
     } finally {
       setRemovingId(null);
     }
-  }, [router]);
+  }, [router, team]);
+
+  /* ── PINNING ────────────────────────────────────────────────────────
+     A pin is the team saying "this one is a priority" — and that is what
+     promotes a channel into Active Campaigns, where the full behaviour
+     view lives. The data model has carried `pinnedAt` since the board
+     was built and the API has always accepted pin/unpin; what was
+     missing was any way to pin in the first place, so the section could
+     only ever empty itself. */
+  const pinnedSet = new Set(pinnedChannelIds ?? []);
+  const [pinningId, setPinningId] = useState<string | null>(null);
+
+  const handlePin = useCallback(async (channelId: string, pinned: boolean) => {
+    setPinningId(channelId);
+    try {
+      const res = await fetch(`/api/team-watcher${team ? `?team=${encodeURIComponent(team)}` : ''}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channelId, action: pinned ? 'unpin' : 'pin' }),
+      });
+      if (!res.ok) throw new Error('failed');
+      router.refresh();
+    } catch {
+      alert('Could not change the pin. Please try again.');
+    } finally {
+      setPinningId(null);
+    }
+  }, [router, team]);
 
   const managedRows = rows.filter((r) => r.isVirgin);
   const marketRows = rows.filter((r) => !r.isVirgin);
@@ -1021,6 +1060,21 @@ export default function ChannelHealthBoard({
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
                   </div>
                   <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
+                  {pinnedChannelIds && r.channelId && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handlePin(r.channelId!, pinnedSet.has(r.channelId!)); }}
+                      disabled={pinningId === r.channelId}
+                      className={`absolute ${removable ? '-right-7' : '-right-1'} top-0 w-5 h-5 flex items-center justify-center rounded-full text-[11px] transition-all ${
+                        pinnedSet.has(r.channelId) ? '' : 'opacity-0 group-hover/row:opacity-100 hover:!opacity-100 focus:!opacity-100'
+                      }`}
+                      style={{ background: 'transparent' }}
+                      title={pinnedSet.has(r.channelId)
+                        ? `Unpin ${r.name} from Active Campaigns`
+                        : `Pin ${r.name} to Active Campaigns`}
+                    >
+                      {pinningId === r.channelId ? '…' : pinnedSet.has(r.channelId) ? '📌' : '📍'}
+                    </button>
+                  )}
                   {removable && r.channelId && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}

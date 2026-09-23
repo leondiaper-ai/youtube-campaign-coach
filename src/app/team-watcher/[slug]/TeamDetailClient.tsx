@@ -130,6 +130,10 @@ function generateTeamSnapshot(d: SnapshotData, notes: Note[]): string {
 }
 
 export default function TeamDetailClient({
+  /* Which board this artist's notes and campaign fields belong to. The
+     API defaults to nordics when it is absent, so without this every
+     edit made from the Australia board would be written to Nordics. */
+  team,
   channelId,
   initialNotes,
   campaignState: initialState,
@@ -139,6 +143,7 @@ export default function TeamDetailClient({
   hasCampaign,
   initialCampaignName,
 }: {
+  team?: string;
   channelId: string;
   initialNotes: Note[];
   campaignState: string;
@@ -149,6 +154,7 @@ export default function TeamDetailClient({
   initialCampaignName: string;
 }) {
   const router = useRouter();
+  const twApi = `/api/team-watcher${team ? `?team=${encodeURIComponent(team)}` : ''}`;
   const [notes, setNotes] = useState<Note[]>(initialNotes);
   const [noteInput, setNoteInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -168,7 +174,7 @@ export default function TeamDetailClient({
     if (!noteInput.trim()) return;
     setSaving(true);
     try {
-      await fetch('/api/team-watcher', {
+      await fetch(twApi, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -189,7 +195,7 @@ export default function TeamDetailClient({
 
   async function handleStateChange(newState: string) {
     setCampaignState(newState);
-    await fetch('/api/team-watcher', {
+    await fetch(twApi, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -212,7 +218,7 @@ export default function TeamDetailClient({
     if (!newCampaignName.trim() || !newCampaignDate) return;
     setStartingSaving(true);
     try {
-      await fetch('/api/team-watcher', {
+      await fetch(twApi, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -231,7 +237,7 @@ export default function TeamDetailClient({
   }
 
   async function handleEndCampaign() {
-    await fetch('/api/team-watcher', {
+    await fetch(twApi, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

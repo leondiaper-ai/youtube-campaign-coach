@@ -1,7 +1,21 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
+
+/* Loaded on demand. The behaviour view is a large chart component and
+   most cards are never expanded — importing it eagerly would put it in
+   the bundle of a board whose whole point is to be quick to open. */
+const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
+  ssr: false,
+  loading: () => (
+    <div className="mt-4 rounded-lg px-4 py-6 text-[11px] text-ink/35 text-center"
+         style={{ background: '#F6F1E7' }}>
+      Loading channel behaviour…
+    </div>
+  ),
+});
 import { fmtNum, STATUS_COLOR, type ChannelState } from '@/lib/artists';
 import {
   CAMPAIGN_STATE_STYLE,
@@ -99,20 +113,34 @@ const SPARK_COLOR: Record<ChannelState, { stroke: string; fill: string }> = {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export default function TeamCampaignCards({ cards }: { cards: TeamCardData[] }) {
+/* `team` decides WHICH board these writes land on. The API defaults to
+   nordics when it is absent, which is correct for the original caller and
+   silently wrong for every other one — a note typed on the Australia board
+   would have been saved to the Nordics board. */
+export default function TeamCampaignCards({ cards, team, linkPrefix = '/team-watcher', linkSuffix = '' }: {
+  cards: TeamCardData[];
+  team?: string;
+  linkPrefix?: string;
+  linkSuffix?: string;
+}) {
   return (
     <div className="space-y-4">
       {cards.map((card) => (
-        <TeamDecisionCard key={card.channelId} card={card} />
+        <TeamDecisionCard key={card.channelId} card={card} team={team}
+                          linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
       ))}
     </div>
   );
 }
 
-function TeamDecisionCard({ card }: { card: TeamCardData }) {
+function TeamDecisionCard({ card, team, linkPrefix, linkSuffix }: {
+  card: TeamCardData; team?: string; linkPrefix: string; linkSuffix: string;
+}) {
   const [noteInput, setNoteInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [notes, setNotes] = useState(card.teamNotes);
+  const [showBehaviour, setShowBehaviour] = useState(false);
+  const api = `/api/team-watcher${team ? `?team=${encodeURIComponent(team)}` : ''}`;
 
   const st = STATUS_STYLE[card.boardStatus];
   const sp = SPARK_COLOR[card.boardStatus];
@@ -125,7 +153,7 @@ function TeamDecisionCard({ card }: { card: TeamCardData }) {
     if (!noteInput.trim()) return;
     setSaving(true);
     try {
-      await fetch('/api/team-watcher', {
+      await fetch(api, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -145,7 +173,7 @@ function TeamDecisionCard({ card }: { card: TeamCardData }) {
   }
 
   async function handleUnpin() {
-    await fetch('/api/team-watcher', {
+    await fetch(api, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ channelId: card.channelId, action: 'unpin' }),
@@ -158,6 +186,25 @@ function TeamDecisionCard({ card }: { card: TeamCardData }) {
       className="rounded-2xl p-5 relative group"
       style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}
     >
+      {/* ── WHY PINNING EARNS THIS ──────────────────────────────────
+          A pin says "this one matters", and the thing you want for an
+          artist that matters is what their channel has actually been
+          doing — the upload timeline, the formats, the follow-up window.
+          That view already existed for our own campaigns; a pinned team
+          artist now gets the same one, in place, rather than the team
+          being told to ask somebody. */}
+      <button
+        onClick={() => setShowBehaviour(v => !v)}
+        className="absolute top-3 right-11 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-[0.1em] transition-all"
+        style={{
+          color: showBehaviour ? '#0E0E0E' : 'rgba(14,14,14,0.45)',
+          background: showBehaviour ? 'rgba(14,14,14,0.07)' : 'transparent',
+        }}
+        title={`${showBehaviour ? 'Hide' : 'Show'} channel behaviour for ${card.name}`}
+      >
+        {showBehaviour ? 'Hide behaviour' : 'Behaviour'}
+      </button>
+
       {/* Unpin — hover only */}
       <button
         onClick={handleUnpin}
@@ -171,7 +218,7 @@ function TeamDecisionCard({ card }: { card: TeamCardData }) {
       <div className="mb-3">
         <div className="flex items-center gap-2.5 mb-1 flex-wrap">
           <Link
-            href={`/team-watcher/${card.slug}`}
+            href={`${linkPrefix}/${card.slug}${linkSuffix}`}
             className="font-black text-[20px] leading-tight hover:underline"
             style={{ color: INK, textDecoration: 'none' }}
           >
@@ -400,6 +447,18 @@ function TeamDecisionCard({ card }: { card: TeamCardData }) {
       {!card.campaign && (
         <div className="mt-3 rounded-lg px-4 py-3 text-[11px] text-ink/35" style={{ background: SOFT }}>
           No campaign timeline yet — ask Leon to set up a campaign timeline.
+        </div>
+      )}
+
+      {/* What this channel has actually been doing. */}
+      {showBehaviour && (
+        <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${MUTED}` }}>
+          <CampaignBehaviour
+            slug={card.slug}
+            artistName={card.name}
+            onClose={() => setShowBehaviour(false)}
+            noBreakout
+          />
         </div>
       )}
     </div>

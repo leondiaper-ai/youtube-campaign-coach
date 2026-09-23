@@ -450,6 +450,7 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
 
         {/* Team notes + snapshot + campaign — client component for interactivity */}
         <TeamDetailClient
+          team={team}
           channelId={entry.channelId}
           initialNotes={entry.teamNotes}
           campaignState={entry.campaignState}
