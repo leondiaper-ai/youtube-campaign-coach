@@ -169,7 +169,10 @@ em.hl{font-style:normal;color:var(--lilac)}
 .scrim-l::after{content:'';position:absolute;inset:0;
   background:linear-gradient(to right,rgba(7,12,24,.975) 36%,rgba(7,12,24,.86) 54%,
     rgba(7,12,24,.5) 74%,rgba(7,12,24,.16) 100%)}
-.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(7,12,24,.82)}
+/* .88, not .82. Both frames behind this scrim carry burned-in artwork —
+   a camcorder timecode on one, hand-lettered titles on the other — and
+   at the gentler ramp they competed with the type sitting over them. */
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(7,12,24,.88)}
 
 /* ── THE MOTIF: the four-tier mark ──────────────────────────────────
    Discovery, scale, depth, longevity. Three built, one empty. It sits
@@ -197,7 +200,12 @@ em.hl{font-style:normal;color:var(--lilac)}
 
 .thumb{position:relative;display:block;border-radius:3px;overflow:hidden;
   background:var(--ink-3);aspect-ratio:16/9}
+/* A 9:16 tile in a four-column grid at desktop width is about 530px
+   tall, which pushed the caption and everything under it off the fold.
+   The row is capped so the Shorts read as Shorts without taking the
+   slide over. */
 .thumb.v{aspect-ratio:9/16}
+.vgrid{max-width:660px}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
 .thumb:hover img{transform:scale(1.03)}
 .thumb .cap{position:absolute;left:0;right:0;bottom:0;padding:.7rem .8rem;
@@ -263,10 +271,12 @@ table.cmp tr:last-child td{border-bottom:none}
 .wkcol .lf{background:var(--lilac);border-radius:1px 1px 0 0;min-height:2px}
 .wkcol .sh{background:var(--navy-lt);border-radius:0 0 1px 1px;min-height:2px}
 .wkcol.push .sh{background:var(--lilac);opacity:.55}
-.wkcol.quiet .lf,.wkcol.quiet .sh{background:rgba(234,239,245,.15)}
+/* Only weeks 2–5 are the trough. Week one is the launch burst and was
+   briefly greyed with them, which drew the opposite of the argument. */
+.wkcol.quiet .lf,.wkcol.quiet .sh{background:rgba(234,239,245,.26)}
 .wkcol .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 760;
   font-size:clamp(.72rem,1.3vw,1.05rem);text-align:center;margin-bottom:.4rem;color:var(--cream)}
-.wkcol.quiet .n{color:var(--dim)}
+.wkcol.quiet .n{color:var(--cool)}
 .wk-axis{display:grid;grid-template-columns:repeat(9,1fr);gap:clamp(4px,.9vw,12px);margin-top:.6rem}
 .wk-axis span{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.06em;
   text-align:center;color:var(--dim)}
@@ -288,10 +298,16 @@ table.cmp tr:last-child td{border-bottom:none}
 .arch-row:last-child{border-bottom:none}
 .arch-name{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 760;
   text-transform:uppercase;font-size:clamp(.86rem,1.4vw,1.14rem);letter-spacing:.01em}
-.arch-bar{display:flex;align-items:center;gap:.9rem}
-.arch-fill{height:clamp(16px,2.2vw,26px);border-radius:2px;background:var(--navy-lt);flex-shrink:0}
+/* The bar is a TRACK with a fill inside it, not a flex item sized by
+   percentage. Sized the flex way, a 100%-wide fill is 100% of the row
+   rather than of its own column, so it ran under the count and the
+   examples beside it. The track owns the width; the fill is a % of the
+   track. */
+.arch-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.9rem;align-items:center}
+.arch-track{height:clamp(16px,2.2vw,26px);position:relative}
+.arch-fill{height:100%;border-radius:2px;background:var(--navy-lt)}
 .arch-fill.hi{background:var(--lilac)}
-.arch-fill.empty{background:transparent;border:1px dashed rgba(224,67,26,.6);flex:1 1 auto}
+.arch-fill.empty{background:transparent;border:1px dashed rgba(224,67,26,.6);width:100%}
 .arch-n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 780;
   font-size:clamp(1rem,1.7vw,1.4rem);color:var(--cream);white-space:nowrap}
 .arch-row.gap .arch-name,.arch-row.gap .arch-n{color:var(--ember)}
@@ -312,7 +328,7 @@ table.cmp tr:last-child td{border-bottom:none}
   gap:clamp(.9rem,2.2vw,2.2rem);align-items:start;padding:clamp(1rem,2vw,1.5rem) 0}
 .jrail{width:12px;display:flex;flex-direction:column;align-items:center;align-self:stretch}
 .jdot{width:11px;height:11px;border-radius:50%;background:var(--lilac);flex-shrink:0;margin-top:.35rem}
-.jline{width:1px;flex:1;background:var(--lilac);opacity:.5;margin-top:.3rem}
+.jline{width:1px;flex:1;background:var(--lilac);opacity:.75;margin-top:.3rem}
 .jrow.open .jdot{background:transparent;border:1px solid var(--ember)}
 .jrow.open .jline{background:transparent;border-left:1px dashed rgba(224,67,26,.55);width:0}
 .jrow:last-child .jline{display:none}
@@ -429,7 +445,7 @@ table.cmp tr:last-child td{border-bottom:none}
   </div>
   <div class="inner reveal">
     <div class="label">TEN · @tenoffcl · Channel deep dive · Virgin Music Group</div>
-    <h1 class="display" style="margin:1.4rem 0 1.6rem;max-width:18ch">
+    <h1 class="display" style="margin:1.4rem 0 1.6rem;max-width:26ch">
       57 days.<br>59 uploads.<br>A solo channel built<br>at campaign speed.
     </h1>
     <p class="big-p" style="max-width:56ch">
@@ -514,7 +530,7 @@ table.cmp tr:last-child td{border-bottom:none}
     </p>
 
     <div class="weeks reveal">
-      <div class="wkcol quiet"><div class="n">12</div><div class="lf" style="height:7%"></div><div class="sh" style="height:58%"></div></div>
+      <div class="wkcol"><div class="n">12</div><div class="lf" style="height:7%"></div><div class="sh" style="height:58%"></div></div>
       <div class="wkcol quiet"><div class="n">0</div><div class="sh" style="height:1%"></div></div>
       <div class="wkcol quiet"><div class="n">1</div><div class="lf" style="height:6%"></div></div>
       <div class="wkcol quiet"><div class="n">3</div><div class="lf" style="height:11%"></div><div class="sh" style="height:6%"></div></div>
@@ -576,22 +592,22 @@ table.cmp tr:last-child td{border-bottom:none}
     <div class="arch reveal stagger">
       <div class="arch-row">
         <div class="arch-name">Discovery</div>
-        <div class="arch-bar"><div class="arch-fill hi" style="width:100%"></div><div class="arch-n">47</div></div>
+        <div class="arch-bar"><div class="arch-track"><div class="arch-fill hi" style="width:100%"></div></div><div class="arch-n">47</div></div>
         <div class="arch-eg">Shorts, teasers, collaborations<br>8 tag another artist</div>
       </div>
       <div class="arch-row">
         <div class="arch-name">Scale</div>
-        <div class="arch-bar"><div class="arch-fill hi" style="width:10.6%"></div><div class="arch-n">5</div></div>
+        <div class="arch-bar"><div class="arch-track"><div class="arch-fill hi" style="width:10.6%"></div></div><div class="arch-n">5</div></div>
         <div class="arch-eg">3 official MVs<br>2 dance practices</div>
       </div>
       <div class="arch-row">
         <div class="arch-name">Depth</div>
-        <div class="arch-bar"><div class="arch-fill" style="width:14.9%"></div><div class="arch-n">7</div></div>
+        <div class="arch-bar"><div class="arch-track"><div class="arch-fill" style="width:14.9%"></div></div><div class="arch-n">7</div></div>
         <div class="arch-eg">6 behind-the-scenes &amp; recap<br>1 fanchant guide</div>
       </div>
       <div class="arch-row gap">
         <div class="arch-name">Longevity</div>
-        <div class="arch-bar"><div class="arch-fill empty"></div><div class="arch-n">0</div></div>
+        <div class="arch-bar"><div class="arch-track"><div class="arch-fill empty"></div></div><div class="arch-n">0</div></div>
         <div class="arch-eg">Lyric · visualiser · official audio<br>live performance</div>
       </div>
     </div>
@@ -725,7 +741,7 @@ table.cmp tr:last-child td{border-bottom:none}
       Median views · approximately 1.9× · every Short above 40K is a collaboration
     </div>
 
-    <div class="grid4 reveal stagger" style="margin-top:clamp(1.6rem,3vw,2.6rem)">
+    <div class="grid4 vgrid reveal stagger" style="margin-top:clamp(1.6rem,3vw,2.6rem)">
       <a class="thumb v" href="https://www.youtube.com/watch?v=dIBL1FTUhF8" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/dIBL1FTUhF8/oardefault.jpg" alt="" loading="lazy">
         <span class="cap"><b>58.9K</b>andTEAM · NICHOLAS</span></a>
@@ -831,7 +847,7 @@ table.cmp tr:last-child td{border-bottom:none}
   <div class="inner">
     <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
     <div class="label reveal">Scale · reading the release data</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:27ch">
       OUTWEST is an outlier.<br>The rest of the catalogue<br>is the planning tool.
     </h2>
     <p class="big-p reveal">
@@ -908,8 +924,11 @@ table.cmp tr:last-child td{border-bottom:none}
       <a class="thumb" href="https://www.youtube.com/watch?v=58H62-MyYro" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/58H62-MyYro/maxresdefault.jpg" alt="" loading="lazy">
         <span class="cap"><b>24.1K</b>Concert Behind the Scenes · 19 Aug</span></a>
+      <!-- Solid ground, not a tint. This card sits over the brightest
+           part of the concert frame and the ember label was unreadable
+           against a crowd shot at full resolution. -->
       <div class="card" style="display:flex;flex-direction:column;justify-content:center;
-           border-color:rgba(224,67,26,.5);background:rgba(224,67,26,.05)">
+           border-color:rgba(224,67,26,.5);background:#0C1424">
         <div class="label" style="color:var(--ember)">Not on the channel</div>
         <div class="big-num" style="font-size:clamp(2.2rem,4vw,3.2rem);color:var(--ember);margin-top:.6rem">0</div>
         <div class="body" style="margin-top:.6rem;font-size:.9rem">
