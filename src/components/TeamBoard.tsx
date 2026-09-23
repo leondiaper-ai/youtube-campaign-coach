@@ -17,6 +17,7 @@ import { checkContentStructure, computeMultiformat } from '@/lib/contentStructur
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
+import TeamBoardShell from '@/components/TeamBoardShell';
 import AddArtistModal, { AddArtistModalInline } from '@/components/AddArtistModal';
 
 import type { Team } from '@/lib/teams';
@@ -119,6 +120,8 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
     campaignState: string;
     regionTag: string;
     pinnedAt: string | null;
+    /* For the behaviour rail's avatar. */
+    thumbnail?: string;
     subs7Delta: number | null;
     views7Delta: number | null;
     uploads30d: number;
@@ -215,6 +218,7 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         campaignState: entry.campaignState,
         regionTag: entry.regionTag,
         pinnedAt: entry.pinnedAt,
+        thumbnail: snap?.thumbnail ?? undefined,
         subs7Delta: subs7Val,
         views7Delta: views7Val,
         uploads30d: nc.cadence.uploads30d,
@@ -245,34 +249,35 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
 
   const hasEntries = entries.length > 0;
 
-  return (
-    <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-      <div className="max-w-[1080px] mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-6 mb-6">
-          <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
-              YouTube Campaign System
-            </div>
-            <h1 className="font-black text-[28px] leading-tight mt-1">
-              {team.name}
-            </h1>
-            <p className="text-[11px] text-ink/35 mt-1">
-              {team.blurb}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <AddArtistModal team={team.slug} regionTag={team.regionTag} />
-            {syncMeta && (
-              <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
-                Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-              </span>
-            )}
-          </div>
+  const header = (
+    <div className="flex items-start justify-between gap-6 mb-6">
+      <div>
+        <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
+          YouTube Campaign System
         </div>
+        <h1 className="font-black text-[28px] leading-tight mt-1">
+          {team.name}
+        </h1>
+        <p className="text-[11px] text-ink/35 mt-1">
+          {team.blurb}
+        </p>
+      </div>
+      <div className="flex items-center gap-4">
+        <AddArtistModal team={team.slug} regionTag={team.regionTag} />
+        {syncMeta && (
+          <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
+            Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 
-        {/* Empty state */}
-        {!hasEntries && (
+  if (!hasEntries) {
+    return (
+      <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
+        <div className="max-w-[1080px] mx-auto px-6 py-10">
+          {header}
           <div className="text-center py-20">
             <h2 className="text-[24px] font-black mb-2">No artists yet</h2>
             <p className="text-[13px] text-ink/45 mb-6 max-w-[380px] mx-auto">
@@ -281,41 +286,52 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
             </p>
             <AddArtistModalInline team={team.slug} regionTag={team.regionTag} />
           </div>
-        )}
+        </div>
+      </main>
+    );
+  }
 
-        {/* Channel Health table */}
-        {hasEntries && (
-          <>
-            <ChannelHealthBoard
-              rows={rows}
-              linkPrefix={linkPrefix}
-              linkSuffix={linkSuffix}
-              singleTab
-              removable
-              team={team.slug}
-              pinnedChannelIds={pinnedEntries.map((e) => e.channelId)}
-            />
-
-            {/* Active Campaigns section (pinned entries) */}
-            {campaignCards.length === 0 && (
-              <p className="text-[11px] text-ink/35 mt-6">
-                Pin an artist with the 📍 beside their name to make them a
-                priority — pinned artists get a campaign card with their full
-                upload behaviour.
-              </p>
-            )}
-            {campaignCards.length > 0 && (
-              <div className="mt-10">
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40 mb-4">
-                  Active Campaigns
-                </div>
-                <TeamCampaignCards cards={campaignCards} team={team.slug}
-                                   linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </main>
+  /* ── TWO TABS, AND THE BEHAVIOUR VIEW BEHIND THEM ──────────────────
+     The shell owns the page from here down, including the header —
+     opening a channel's behaviour replaces the whole board, the way it
+     does on ours, rather than hanging a full-width chart underneath a
+     board the reader has stopped looking at. */
+  return (
+    <TeamBoardShell
+      header={header}
+      allCount={rows.length}
+      priorityCount={campaignCards.length}
+      backHref={`${linkPrefix}${linkSuffix}`}
+      rail={campaignCards.map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        thumbnail: c.thumbnail,
+        status: c.boardStatus,
+      }))}
+      allTab={
+        <ChannelHealthBoard
+          rows={rows}
+          linkPrefix={linkPrefix}
+          linkSuffix={linkSuffix}
+          singleTab
+          removable
+          team={team.slug}
+          pinnedChannelIds={pinnedEntries.map((e) => e.channelId)}
+        />
+      }
+      priorityTab={
+        <TeamCampaignCards cards={campaignCards} team={team.slug}
+                           linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+      }
+      emptyPriority={
+        <div className="text-center py-16">
+          <p className="text-[13px] text-ink/45 max-w-[400px] mx-auto">
+            Nothing pinned yet. Pin an artist with the 📍 beside their name on
+            the All Artists tab, and they appear here with a campaign card and
+            their full channel behaviour.
+          </p>
+        </div>
+      }
+    />
   );
 }

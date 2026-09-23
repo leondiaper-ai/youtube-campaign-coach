@@ -27,6 +27,7 @@ import {
   type CampaignSignal,
 } from '@/lib/youtubeGrowthOS';
 import Sparkline from './Sparkline';
+import { useOpenBehaviour } from './TeamBoardShell';
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK = '#0E0E0E';
@@ -140,6 +141,9 @@ function TeamDecisionCard({ card, team, linkPrefix, linkSuffix }: {
   const [saving, setSaving] = useState(false);
   const [notes, setNotes] = useState(card.teamNotes);
   const [showBehaviour, setShowBehaviour] = useState(false);
+  /* Null if these cards are ever rendered outside the board shell, in
+     which case the old in-card panel is still there to fall back on. */
+  const openBehaviour = useOpenBehaviour();
   const api = `/api/team-watcher${team ? `?team=${encodeURIComponent(team)}` : ''}`;
 
   const st = STATUS_STYLE[card.boardStatus];
@@ -190,17 +194,19 @@ function TeamDecisionCard({ card, team, linkPrefix, linkSuffix }: {
           A pin says "this one matters", and the thing you want for an
           artist that matters is what their channel has actually been
           doing — the upload timeline, the formats, the follow-up window.
-          That view already existed for our own campaigns; a pinned team
-          artist now gets the same one, in place, rather than the team
-          being told to ask somebody. */}
+
+          It opens as its own view rather than expanding in here. A
+          full-width chart folded into a card column, above a note box,
+          was readable but cramped; the Watcher gives it the page and a
+          rail of the other campaigns, and so does this now. */}
       <button
-        onClick={() => setShowBehaviour(v => !v)}
+        onClick={() => (openBehaviour ? openBehaviour(card.slug) : setShowBehaviour(v => !v))}
         className="absolute top-3 right-11 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-[0.1em] transition-all"
         style={{
           color: showBehaviour ? '#0E0E0E' : 'rgba(14,14,14,0.45)',
           background: showBehaviour ? 'rgba(14,14,14,0.07)' : 'transparent',
         }}
-        title={`${showBehaviour ? 'Hide' : 'Show'} channel behaviour for ${card.name}`}
+        title={`Channel behaviour for ${card.name}`}
       >
         {showBehaviour ? 'Hide behaviour' : 'Behaviour'}
       </button>

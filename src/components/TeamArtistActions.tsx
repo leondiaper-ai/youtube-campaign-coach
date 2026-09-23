@@ -4,14 +4,12 @@
    Our own artist page has carried a Pin and a Behaviour button in its
    top-right corner for months. A regional board's artist page had
    neither, so a team could pin from the board's row but not from the
-   page they were actually reading, and the behaviour view they had been
-   given was only reachable by going back.
+   page they were actually reading.
 
-   Same position, same two controls, same order. The one difference is
-   where Behaviour lands: ours navigates to /campaigns, which is our
-   pinned-campaign page and not theirs, so here the view opens in place
-   underneath. Nothing about a team's board is reachable from a page
-   belonging to another one.
+   Same position, same two controls, same order, and now the same
+   destination shape: ours links to /campaigns?behaviour=<slug>, this
+   one links to the team's OWN board with the same parameter. A team
+   never lands on a board that is not theirs.
 
    Behaviour appears only once the artist is pinned — the same gate as
    the Watcher, and the same reason: a pin is how somebody says this one
@@ -20,21 +18,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
-
-/* On demand. Most visits to a detail page never open it, and it is a
-   large chart component. */
-const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
-  ssr: false,
-  loading: () => (
-    <div className="mb-8 rounded-lg px-4 py-6 text-[11px] text-ink/35 text-center"
-         style={{ background: '#F6F1E7' }}>
-      Loading channel behaviour…
-    </div>
-  ),
-});
-
-const MUTED = '#E9E2D3';
 
 export default function TeamArtistActions({
   slug, artistName, channelId, team, backHref, backLabel, initiallyPinned,
@@ -49,7 +32,12 @@ export default function TeamArtistActions({
 }) {
   const [pinned, setPinned] = useState(initiallyPinned);
   const [busy, setBusy] = useState(false);
-  const [showBehaviour, setShowBehaviour] = useState(false);
+
+  /* The board's own behaviour view, carrying the key it was reached
+     with. `backHref` already holds ?k= on a gated route and nothing on
+     the legacy one, so the separator is decided rather than assumed. */
+  const behaviourHref =
+    `${backHref}${backHref.includes('?') ? '&' : '?'}behaviour=${encodeURIComponent(slug)}`;
 
   /* The team always travels with the write. Without it the API falls
      back to Nordics and Australia's pin lands on somebody else's
@@ -65,67 +53,46 @@ export default function TeamArtistActions({
         body: JSON.stringify({ channelId, action: pinned ? 'unpin' : 'pin' }),
       });
       if (!res.ok) return;
-      const nowPinned = !pinned;
-      setPinned(nowPinned);
-      /* Unpinning takes the Behaviour button away, so it should not
-         leave the panel it opened behind it. */
-      if (!nowPinned) setShowBehaviour(false);
+      setPinned(!pinned);
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <>
-      <div className="flex items-center justify-between mb-8">
-        <Link
-          href={backHref}
-          className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
-        >
-          &larr; {backLabel}
-        </Link>
+    <div className="flex items-center justify-between mb-8">
+      <Link
+        href={backHref}
+        className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
+      >
+        &larr; {backLabel}
+      </Link>
 
-        <div className="flex items-center gap-3">
-          {pinned && (
-            <button
-              onClick={() => setShowBehaviour(v => !v)}
-              className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
-              style={
-                showBehaviour
-                  ? { background: 'rgba(44,37,255,0.10)', color: '#2C25FF' }
-                  : { background: '#2C25FF', color: '#fff' }
-              }
-              title={`${showBehaviour ? 'Hide' : 'Show'} channel behaviour for ${artistName}`}
-            >
-              {showBehaviour ? 'Hide behaviour' : 'Behaviour'}
-            </button>
-          )}
-
-          <button
-            onClick={togglePin}
-            disabled={busy}
-            className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all disabled:opacity-40"
-            style={{
-              background: pinned ? '#F0E6FF' : '#F6F1E7',
-              color: pinned ? '#5B21B6' : '#0E0E0E80',
-            }}
-            title={pinned ? 'Remove from Active Campaigns' : 'Pin to Active Campaigns'}
+      <div className="flex items-center gap-3">
+        {pinned && (
+          <Link
+            href={behaviourHref}
+            className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] no-underline transition-colors"
+            style={{ background: '#2C25FF', color: '#fff' }}
+            title={`Channel behaviour for ${artistName}`}
           >
-            {busy ? '…' : pinned ? '★ Pinned' : '☆ Pin'}
-          </button>
-        </div>
-      </div>
+            Behaviour
+          </Link>
+        )}
 
-      {showBehaviour && (
-        <div className="mb-8 pb-6" style={{ borderBottom: `1px solid ${MUTED}` }}>
-          <CampaignBehaviour
-            slug={slug}
-            artistName={artistName}
-            onClose={() => setShowBehaviour(false)}
-            noBreakout
-          />
-        </div>
-      )}
-    </>
+        <button
+          onClick={togglePin}
+          disabled={busy}
+          className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md transition-all disabled:opacity-40"
+          style={{
+            background: pinned ? '#F0E6FF' : '#F6F1E7',
+            color: pinned ? '#5B21B6' : '#0E0E0E80',
+          }}
+          title={pinned ? 'Remove from Active Campaigns' : 'Pin to Active Campaigns'}
+        >
+          {busy ? '…' : pinned ? '★ Pinned' : '☆ Pin'}
+        </button>
+      </div>
+    </div>
   );
 }
