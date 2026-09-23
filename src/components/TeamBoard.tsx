@@ -18,6 +18,9 @@ import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
 import TeamBoardShell from '@/components/TeamBoardShell';
+import type { CardData } from '@/components/CampaignDecisionCard';
+import type { TeamCardData } from '@/components/TeamCampaignCards';
+import { computeWeeklyWindows } from '@/lib/campaignWeeks';
 import AddArtistModal, { AddArtistModalInline } from '@/components/AddArtistModal';
 
 import type { Team } from '@/lib/teams';
@@ -112,41 +115,15 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
   // ── Build rich CardData for pinned entries (Active Campaigns) ─────────
   const pinnedEntries = entries.filter((e) => e.pinnedAt != null);
 
-  type TeamCardData = {
-    slug: string;
-    name: string;
-    channelId: string;
-    campaign: string;
-    campaignState: string;
-    regionTag: string;
-    pinnedAt: string | null;
-    /* For the behaviour rail's avatar. */
-    thumbnail?: string;
-    subs7Delta: number | null;
-    views7Delta: number | null;
-    uploads30d: number;
-    shorts30d: number;
-    boardStatus: ChannelState;
-    diagnosis: string;
-    actions: string[];
-    cadenceStr: string;
-    sparkline: { x: number; y: number }[];
-    subs: number | null;
-    views: number | null;
-    lastUploadDaysAgo: number | null;
-    channelHealth: string;
-    campaignSignal: string;
-    campaignSignalLabel: string;
-    spk: number | null;
-    campaignDay: number | null;
-    campaignViews: number | null;
-    campaignAssets: number | null;
-    campaignViewsDelta: number | null;
-    campaignSubsDelta: number | null;
-    confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
-    movementConfidence?: 'high' | 'medium' | 'limited' | 'stale';
-    teamNotes: { id: string; text: string; createdAt: string }[];
-  };
+  /* ── THE SAME CARD, THE SAME FIELDS ──────────────────────────────
+     A team's pinned artist used to get a card built here with a
+     narrower shape than the one the campaigns board draws. It now
+     builds CardData — the real one — so the team reads the same
+     figures, in the same order, with the same growth read.
+
+     Two fields stay empty by honest default: `impact` needs a takeover
+     date nobody has entered for a regional artist, and `priority` is
+     ours. Everything else is computed from the same sources. */
 
   const campaignCards: TeamCardData[] = await Promise.all(
     pinnedEntries.map(async (entry) => {
@@ -210,15 +187,69 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         ? (subs7Val / views7Val) * 1000
         : null;
 
+      /* ── WEEKLY PROGRESS AND TREND ──────────────────────────────
+         Same windows the campaigns board uses, from the same helper,
+         so a team's week 3 is our week 3. Absent when there is no
+         stated campaign start, because without one there is nothing to
+         count weeks from. */
+      const weeklyWindows = campaignStart
+        ? computeWeeklyWindows(history, campaignStart)
+        : [];
+
+      const weeklyProgress = weeklyWindows.map((w) => ({
+        week: w.week,
+        views7d: w.views7d,
+        subs7d: w.subs7d,
+        channelHealth: chHealth,
+        campaignSignal: campSig.label,
+        status: w.status,
+      }));
+
+      let campaignWindow = null as CardData['campaignWindow'];
+      let campaignTrend = null as CardData['campaignTrend'];
+
+      if (campaignStart && campaignDay) {
+        campaignWindow = {
+          campaignName: entry.campaignName || 'Tracking',
+          campaignDay,
+          contentViews: perf?.views ?? null,
+          channelViewsDelta: campaignViewsDelta,
+          subsGained: campaignSubsDelta,
+          contentMix: {
+            uploads: perf?.assets ?? 0,
+            shorts: perf?.shorts ?? 0,
+            videos: perf?.longForm ?? 0,
+          },
+        };
+
+        if (weeklyWindows.length >= 1) {
+          const currentWeek = weeklyWindows[weeklyWindows.length - 1];
+          const previousWeek = weeklyWindows.length >= 2
+            ? weeklyWindows[weeklyWindows.length - 2]
+            : { views7d: null, subs7d: null, week: 0 };
+          const bestWeek = weeklyWindows.reduce((best, w) =>
+            (w.views7d ?? 0) > (best.views7d ?? 0) ? w : best, weeklyWindows[0]);
+
+          campaignTrend = {
+            currentWeekViews: currentWeek.views7d,
+            previousWeekViews: previousWeek.views7d,
+            bestWeekViews: bestWeek.views7d,
+            bestWeekNumber: bestWeek.week,
+            totalChannelViews: campaignViewsDelta,
+            totalChannelSubs: campaignSubsDelta,
+            campaignViews: perf?.views ?? null,
+            campaignAssets: perf?.assets ?? null,
+          };
+        }
+      }
+
       return {
         slug: entry.artistSlug,
         name: entry.displayName,
-        channelId: entry.channelId,
-        campaign: entry.campaignName,
-        campaignState: entry.campaignState,
-        regionTag: entry.regionTag,
-        pinnedAt: entry.pinnedAt,
-        thumbnail: snap?.thumbnail ?? undefined,
+        campaign: entry.campaignName || undefined,
+        /* Non-null by the filter above; the type wants a string. */
+        pinnedAt: entry.pinnedAt ?? new Date().toISOString(),
+        priority: 'normal' as const,
         subs7Delta: subs7Val,
         views7Delta: views7Val,
         uploads30d: nc.cadence.uploads30d,
@@ -226,23 +257,39 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         boardStatus: currentStatus,
         diagnosis: derived?.reason ?? 'Awaiting data',
         actions: [derived?.nextAction ?? 'Ship something this week'],
-        cadenceStr: nc.cadence.cadenceLine,
+        cadenceLine: nc.cadence.cadenceLine,
         sparkline: nc.sparklineSubs30d,
         subs: nc.subs,
         views: nc.views,
         lastUploadDaysAgo: nc.cadence.lastUploadDaysAgo,
+        /* The team's own notes, in the shape the card reads. */
+        notes: entry.teamNotes.map((n) => ({
+          id: n.id, text: n.text, createdAt: n.createdAt,
+        })),
+        /* Needs a takeover date nobody enters for a regional artist. */
+        impact: null,
+        campaignWindow,
+        campaignTrend,
+        weeklyProgress,
         channelHealth: chHealth,
         campaignSignal: campSig.signal,
         campaignSignalLabel: campSig.label,
-        spk,
-        campaignDay,
-        campaignViews,
-        campaignAssets,
-        campaignViewsDelta,
-        campaignSubsDelta,
+        thumbnail: snap?.thumbnail ?? undefined,
+        structureWarning: snap?.recentUploads
+          ? checkContentStructure(snap.recentUploads)
+          : null,
         confidence: nc.confidence,
+        healthNote: nc.healthNote,
+        dataStatus: nc.dataStatus,
+        dataStatusNote: nc.dataStatusNote,
+        viewDataFreshness: nc.viewDataFreshness,
         movementConfidence: nc.movementConfidence,
-        teamNotes: entry.teamNotes,
+        movementFreshness: nc.movementFreshness,
+        lastKnownGoodViews7d: nc.lastKnownGood.views7d,
+        lastKnownGoodSubs7d: nc.lastKnownGood.subs7d,
+        lastKnownGoodDaysAgo: nc.lastKnownGood.daysAgo,
+        /* Carried for the board's own use, not the card's. */
+        channelId: entry.channelId,
       };
     }),
   );
@@ -319,8 +366,7 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         />
       }
       priorityTab={
-        <TeamCampaignCards cards={campaignCards} team={team.slug}
-                           linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+        <TeamCampaignCards cards={campaignCards} team={team.slug} />
       }
       emptyPriority={
         <div className="text-center py-16">
