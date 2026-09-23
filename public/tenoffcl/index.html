@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TEN × YouTube — the first 57 days</title>
+
+<!--
+  TEN (@tenoffcl) × YOUTUBE — channel deep dive
+  Virgin Music Group · September 2026
+
+  ─────────────────────────────────────────────────────────────────────
+  WHERE THE NUMBERS COME FROM
+  One pull of the channel's complete public uploads playlist — 59 of 59
+  videos, 2026-07-28 to 2026-09-22, retrieved 23 September 2026 via
+  /api/full-catalogue, which is YouTube Data API v3. Nothing here comes
+  from YouTube Studio: no impressions, no CTR, no retention, no traffic
+  sources, no unique viewers.
+
+  ─────────────────────────────────────────────────────────────────────
+  SIX RULES THIS FILE OBEYS
+   1. NO SHARE-OF-LIFETIME CLAIMS, ANYWHERE. The channel's lifetime view
+      counter and the sum of its public uploads do not reconcile, and we
+      cannot explain the difference from outside. So every proportion on
+      this page is a share of the PUBLIC UPLOADS CATALOGUE and is
+      labelled as such. The discrepancy is noted once, in the analysis
+      sheet, and is never used as a finding. It is a limit on what we
+      may say, not a story.
+   2. NO CLAIM, STATED OR IMPLIED, ABOUT HOW ANY VIEW WAS ACQUIRED. The
+      OUTWEST MV's engagement shape is unusual and the internal audit
+      pack discusses what it is and isn't consistent with. Nothing in
+      that discussion can be separated without traffic-source data we
+      do not have, and an unprovable reading of a partner's campaign
+      has no place on a page they will read — including in this
+      comment, which ships with the file. Slide 8 treats OUTWEST as an
+      outlier and moves to what the rest of the catalogue can tell us.
+   3. NO CEILING LANGUAGE. Three assets cluster between 98K
+      and 145K. That is a cluster, and a useful planning reference. It
+      is not a ceiling, because we have no traffic-source data and
+      cannot say what any of those numbers were made of.
+   4. THE MISSING FORMATS ARE STATED AS ABSENT, NOT AS LOST VALUE. The
+      catalogue proves there is no lyric video, visualiser, official
+      audio or live performance. What those formats would do for this
+      channel is our recommendation, labelled as one — not a fact
+      dressed as one.
+   5. THE TONE IS ADDITIVE. This team publishes at a rate almost nobody
+      matches and has already built a working discovery mechanic. The
+      page says so, in the copy, before it says anything else. The
+      finding is that a well-built system is three-quarters complete.
+   6. Formats are classified from title text. The rule is written into
+      the analysis sheet so anyone can re-run it. On a title set that is
+      partly Thai and Korean, keyword matching is a real limitation and
+      it is declared there rather than buried.
+
+  ─────────────────────────────────────────────────────────────────────
+  THE PALETTE CAME OUT OF THE CHANNEL'S OWN FRAMES
+  Six key thumbnails were sampled programmatically — canvas getImageData
+  at 160×90, greys and crushed blacks filtered, the remainder binned by
+  hue. The channel is overwhelmingly midnight blue and cool steel:
+  #102840, #202840, #607080 dominate five of the six. The exceptions are
+  the OUTWEST MV's mauve key light (#A78FBF) and the Fanchant Guide's
+  burnt ember (#BF3000). So: midnight ground, lilac accent, ember used
+  exactly twice. Cool, not warm — this is not the Angus & Julia Stone
+  deck with new numbers in it.
+
+  THE MOTIF IS THE FOUR-TIER MARK — ▮▮▮▯. Discovery, scale, depth,
+  longevity: three layers built, one empty. It repeats in the section
+  rules and it is the whole argument, drawn. The decoration and the
+  thesis are the same object.
+
+  ─────────────────────────────────────────────────────────────────────
+  THE SPINE OF THE PAGE
+  TEN's team has already built most of the machine. Our job is to show
+  them the missing parts.
+
+      What have they built?     slides 2, 3
+      What job is each part doing?   slides 4, 5, 6, 7
+      What is missing?          slides 8, 9, 10
+      What should they do?      slides 11, 12
+
+  Working lives behind the ANALYSIS control, fixed top right, so the
+  deck ends on the recommendation. Full detail: audits/TENOFFCL-audit.md
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:wght@400..700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/shared/analysis-sheet.css">
+
+<style>
+:root{
+  /* Sampled from the channel's own frames — see the note above. */
+  --navy:#102840;      /* the dominant bin across five of six thumbnails */
+  --navy-lt:#1C3B5C;
+  --steel:#6B7E90;     /* the IRL MV's cool grey */
+  --lilac:#B79FD4;     /* the OUTWEST key light, lifted for dark-ground legibility */
+  --lilac-lt:#D6C8EA;
+  --ember:#E0431A;     /* the Fanchant Guide. Used twice on this page, deliberately. */
+  --rust:#C4553A;
+
+  --ink:#070C18;       /* cool near-black; nothing on this channel is warm */
+  --ink-2:#0C1424;
+  --ink-3:#131E31;
+  --cream:#EAEFF5;
+  --cool:#9DAEC0;      /* body copy on dark */
+  --dim:#5E7186;       /* labels only, never body text */
+  --line:rgba(234,239,245,.13);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+  --an-accent:var(--lilac);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--cream);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Type ───────────────────────────────────────────────────────────
+   Archivo wider and heavier than the folk decks. K-pop rollout type is
+   confident and a bit graphic; this should feel closer to a tour poster
+   than to a sleeve note. */
+.display{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 108,'wght' 800;
+  text-transform:uppercase;line-height:.92;letter-spacing:-.012em;
+}
+h1.display{font-size:clamp(2.5rem,7.4vw,6.6rem)}
+h2.display{font-size:clamp(1.95rem,5.2vw,4.5rem)}
+h3.display{font-size:clamp(1.25rem,2.3vw,2rem);font-variation-settings:'wdth' 104,'wght' 740}
+
+.label{
+  font-family:'DM Mono',monospace;font-size:.68rem;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.label.lit{color:var(--lilac)}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.4;color:var(--cream);max-width:36ch}
+.body{color:var(--cool);max-width:60ch}
+.big-p{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.5;color:var(--cool);max-width:64ch}
+.big-num{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 800;
+  line-height:.86;letter-spacing:-.02em;
+}
+em.hl{font-style:normal;color:var(--lilac)}
+
+/* ── Slides ─────────────────────────────────────────────────────────*/
+.deck{width:100%}
+.slide{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:5.5rem var(--pad) 4rem;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+
+.slide:has(.bleed) .display,
+.slide:has(.bleed) .statement,
+.slide:has(.bleed) .hero-num{text-shadow:0 2px 26px rgba(7,12,24,.8)}
+
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(7,12,24,.985) 6%,rgba(7,12,24,.93) 34%,
+    rgba(7,12,24,.72) 60%,rgba(7,12,24,.34) 84%,rgba(7,12,24,.16) 100%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(7,12,24,.975) 36%,rgba(7,12,24,.86) 54%,
+    rgba(7,12,24,.5) 74%,rgba(7,12,24,.16) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(7,12,24,.82)}
+
+/* ── THE MOTIF: the four-tier mark ──────────────────────────────────
+   Discovery, scale, depth, longevity. Three built, one empty. It sits
+   above every section heading, so by slide four the reader already
+   knows the shape of the argument without having been told it. */
+.tier-mark{display:flex;gap:4px;align-items:flex-end;height:14px;margin-bottom:1rem}
+.tier-mark i{width:16px;border-radius:1px;background:var(--lilac);height:100%}
+.tier-mark i.off{background:transparent;border:1px solid rgba(183,159,212,.42);height:100%}
+
+/* ── Components ─────────────────────────────────────────────────────*/
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,2.5vw,2.4rem)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2vw,1.8rem)}
+@media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+.stat{display:flex;flex-direction:column;gap:.35rem}
+.stat .big-num{font-size:clamp(1.9rem,3.1vw,2.7rem)}
+
+.src{
+  font-family:'DM Mono',monospace;font-size:.64rem;line-height:1.45;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;
+  max-width:78ch;margin-top:1.4rem;
+}
+.src b{color:var(--cool);font-weight:400}
+
+.thumb{position:relative;display:block;border-radius:3px;overflow:hidden;
+  background:var(--ink-3);aspect-ratio:16/9}
+.thumb.v{aspect-ratio:9/16}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.thumb:hover img{transform:scale(1.03)}
+.thumb .cap{position:absolute;left:0;right:0;bottom:0;padding:.7rem .8rem;
+  background:linear-gradient(to top,rgba(7,12,24,.95),rgba(7,12,24,0));
+  font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.06em;color:var(--cream)}
+.thumb .cap b{display:block;font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 100,'wght' 760;font-size:1.25em;letter-spacing:0;color:var(--lilac)}
+
+.card{border:1px solid var(--line);border-radius:3px;
+  padding:clamp(1.1rem,2vw,1.6rem);background:rgba(234,239,245,.02)}
+.card.lit{border-color:var(--lilac)}
+
+table.cmp{width:100%;border-collapse:collapse;font-size:clamp(.82rem,1.15vw,1rem)}
+table.cmp th,table.cmp td{text-align:left;padding:.85rem .6rem;
+  border-bottom:1px solid var(--line);vertical-align:baseline}
+table.cmp th{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);font-weight:400}
+table.cmp td.n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 740;
+  font-size:1.15em;white-space:nowrap}
+table.cmp td.lit{color:var(--lilac)}
+table.cmp tr:last-child td{border-bottom:none}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(12px);transition:opacity .6s ease,transform .6s ease}
+.stagger.in>*{opacity:1;transform:none}
+.stagger.in>*:nth-child(2){transition-delay:.07s}
+.stagger.in>*:nth-child(3){transition-delay:.14s}
+.stagger.in>*:nth-child(4){transition-delay:.21s}
+.stagger.in>*:nth-child(5){transition-delay:.28s}
+.stagger.in>*:nth-child(6){transition-delay:.35s}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+
+/* ── THE SCALE BOARD ────────────────────────────────────────────────
+   Six readings, no commentary inside them. The job of this block is to
+   settle the question of whether this channel is active before the page
+   asks for anything. */
+.board{display:grid;grid-template-columns:repeat(6,1fr);gap:0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin-top:clamp(1.6rem,3vw,2.6rem)}
+.board div{padding:clamp(1.1rem,2.2vw,1.9rem) clamp(.5rem,1.4vw,1.1rem);
+  border-right:1px solid var(--line)}
+.board div:last-child{border-right:none}
+.board .big-num{font-size:clamp(1.5rem,3.2vw,2.9rem);color:var(--cream)}
+.board .big-num.lit{color:var(--lilac)}
+.board .label{margin-top:.5rem;font-size:.6rem;line-height:1.4}
+@media(max-width:900px){
+  .board{grid-template-columns:repeat(3,1fr)}
+  .board div{border-bottom:1px solid var(--line)}
+  .board div:nth-child(3n){border-right:none}
+}
+
+/* ── THE WEEK COLUMNS ───────────────────────────────────────────────
+   Nine weeks, stacked: long-form on top of Shorts. Drawn rather than
+   tabled because the finding IS the silhouette — a spike with a trough
+   in front of it and a taper behind. */
+.weeks{display:grid;grid-template-columns:repeat(9,1fr);gap:clamp(4px,.9vw,12px);
+  align-items:end;height:clamp(180px,26vh,280px);margin-top:clamp(1.4rem,3vw,2.4rem)}
+.wkcol{display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:2px;position:relative}
+.wkcol .lf{background:var(--lilac);border-radius:1px 1px 0 0;min-height:2px}
+.wkcol .sh{background:var(--navy-lt);border-radius:0 0 1px 1px;min-height:2px}
+.wkcol.push .sh{background:var(--lilac);opacity:.55}
+.wkcol.quiet .lf,.wkcol.quiet .sh{background:rgba(234,239,245,.15)}
+.wkcol .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 760;
+  font-size:clamp(.72rem,1.3vw,1.05rem);text-align:center;margin-bottom:.4rem;color:var(--cream)}
+.wkcol.quiet .n{color:var(--dim)}
+.wk-axis{display:grid;grid-template-columns:repeat(9,1fr);gap:clamp(4px,.9vw,12px);margin-top:.6rem}
+.wk-axis span{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.06em;
+  text-align:center;color:var(--dim)}
+.wk-brace{display:grid;grid-template-columns:repeat(9,1fr);gap:clamp(4px,.9vw,12px);margin-top:.9rem}
+.wk-brace b{grid-column:span var(--sp,1);font-family:'DM Mono',monospace;font-size:.6rem;
+  font-weight:400;letter-spacing:.1em;text-transform:uppercase;text-align:center;
+  border-top:1px solid var(--line);padding-top:.5rem;color:var(--dim)}
+.wk-brace b.lit{border-top-color:var(--lilac);color:var(--lilac)}
+
+/* ── THE ARCHITECTURE ───────────────────────────────────────────────
+   Four layers as a stack. Width carries how much has been built. The
+   fourth row is drawn as an empty outline rather than a zero, because
+   a zero reads as a score and an outline reads as a space. */
+.arch{display:flex;flex-direction:column;gap:clamp(.55rem,1.2vw,.9rem);
+  margin-top:clamp(1.5rem,3vw,2.4rem)}
+.arch-row{display:grid;grid-template-columns:minmax(120px,.7fr) minmax(0,2.4fr) minmax(130px,1fr);
+  gap:clamp(.9rem,2vw,2rem);align-items:center;
+  padding:clamp(.7rem,1.3vw,1rem) 0;border-bottom:1px solid var(--line)}
+.arch-row:last-child{border-bottom:none}
+.arch-name{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 760;
+  text-transform:uppercase;font-size:clamp(.86rem,1.4vw,1.14rem);letter-spacing:.01em}
+.arch-bar{display:flex;align-items:center;gap:.9rem}
+.arch-fill{height:clamp(16px,2.2vw,26px);border-radius:2px;background:var(--navy-lt);flex-shrink:0}
+.arch-fill.hi{background:var(--lilac)}
+.arch-fill.empty{background:transparent;border:1px dashed rgba(224,67,26,.6);flex:1 1 auto}
+.arch-n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 780;
+  font-size:clamp(1rem,1.7vw,1.4rem);color:var(--cream);white-space:nowrap}
+.arch-row.gap .arch-name,.arch-row.gap .arch-n{color:var(--ember)}
+.arch-eg{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.05em;
+  color:var(--dim);line-height:1.45}
+@media(max-width:780px){
+  .arch-row{grid-template-columns:1fr;gap:.5rem}
+  .arch-bar{order:3}
+}
+
+/* ── THE JOURNEY ────────────────────────────────────────────────────
+   The signature visual. Four stages, the first three carrying real
+   assets and real numbers, the fourth drawn open. The arrow down the
+   left is continuous through three stages and dashed into the fourth:
+   the path exists, it just does not arrive anywhere yet. */
+.journey{display:flex;flex-direction:column;margin-top:clamp(1.6rem,3vw,2.6rem)}
+.jrow{display:grid;grid-template-columns:auto minmax(150px,1fr) minmax(0,2fr) minmax(120px,.9fr);
+  gap:clamp(.9rem,2.2vw,2.2rem);align-items:start;padding:clamp(1rem,2vw,1.5rem) 0}
+.jrail{width:12px;display:flex;flex-direction:column;align-items:center;align-self:stretch}
+.jdot{width:11px;height:11px;border-radius:50%;background:var(--lilac);flex-shrink:0;margin-top:.35rem}
+.jline{width:1px;flex:1;background:var(--lilac);opacity:.5;margin-top:.3rem}
+.jrow.open .jdot{background:transparent;border:1px solid var(--ember)}
+.jrow.open .jline{background:transparent;border-left:1px dashed rgba(224,67,26,.55);width:0}
+.jrow:last-child .jline{display:none}
+.jstage{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 106,'wght' 800;
+  text-transform:uppercase;font-size:clamp(1.05rem,2.1vw,1.7rem);line-height:1;color:var(--lilac)}
+.jrow.open .jstage{color:var(--ember)}
+.jformat{font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--dim);margin-top:.45rem}
+.jbody{color:var(--cool);font-size:clamp(.88rem,1.2vw,1rem);line-height:1.5;max-width:52ch}
+.jev{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.06em;
+  color:var(--cream);line-height:1.6}
+.jev b{color:var(--lilac);font-weight:400}
+.jrow.open .jev{color:var(--dim)}
+@media(max-width:820px){
+  .jrow{grid-template-columns:auto 1fr;gap:1rem}
+  .jbody,.jev{grid-column:2}
+}
+
+/* ── THE COLLAB BARS ────────────────────────────────────────────────*/
+.vs{display:flex;flex-direction:column;gap:clamp(.9rem,2vw,1.5rem);
+  margin-top:clamp(1.4rem,3vw,2.2rem)}
+.vs-row{display:grid;grid-template-columns:minmax(130px,.75fr) 1fr auto;
+  gap:clamp(.8rem,2vw,1.6rem);align-items:center}
+.vs-k{font-family:'DM Mono',monospace;font-size:clamp(.62rem,.9vw,.72rem);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--dim);line-height:1.4}
+.vs-row.hi .vs-k{color:var(--lilac)}
+.vs-bar{height:clamp(24px,3.4vw,40px);border-radius:2px;background:rgba(234,239,245,.14)}
+.vs-row.hi .vs-bar{background:var(--lilac)}
+.vs-v{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 780;
+  font-size:clamp(1.05rem,2vw,1.6rem);color:var(--cream);white-space:nowrap}
+.vs-row.hi .vs-v{color:var(--lilac)}
+
+/* ── THE INVERSE (BTS) ──────────────────────────────────────────────
+   Two series that run in opposite directions, drawn as paired bars so
+   the crossing is visible without a chart library. */
+.inv{display:flex;flex-direction:column;gap:clamp(.8rem,1.6vw,1.2rem);
+  margin-top:clamp(1.4rem,3vw,2.2rem)}
+.inv-row{display:grid;grid-template-columns:minmax(150px,1.1fr) 1fr 1fr;
+  gap:clamp(.8rem,2vw,1.8rem);align-items:center;
+  padding-bottom:clamp(.7rem,1.3vw,1rem);border-bottom:1px solid var(--line)}
+.inv-row:last-child{border-bottom:none}
+.inv-k{font-family:'DM Mono',monospace;font-size:clamp(.62rem,.9vw,.73rem);
+  letter-spacing:.09em;text-transform:uppercase;color:var(--cool);line-height:1.45}
+.inv-cell{display:flex;align-items:center;gap:.7rem}
+.inv-b{height:clamp(14px,1.9vw,22px);border-radius:2px}
+.inv-b.views{background:rgba(234,239,245,.2)}
+.inv-b.eng{background:var(--lilac)}
+.inv-v{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 740;
+  font-size:clamp(.82rem,1.3vw,1.06rem);white-space:nowrap;color:var(--cream)}
+.inv-head{display:grid;grid-template-columns:minmax(150px,1.1fr) 1fr 1fr;
+  gap:clamp(.8rem,2vw,1.8rem);margin-top:clamp(1.4rem,3vw,2.2rem)}
+.inv-head span{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--dim)}
+@media(max-width:780px){
+  .inv-row,.inv-head{grid-template-columns:1fr}
+  .inv-head span:first-child{display:none}
+}
+
+/* ── THE CLUSTER ────────────────────────────────────────────────────
+   A number line, log-ish by hand, with three assets sitting together
+   and one a long way off it. Drawn so the outlier is obviously an
+   outlier and nothing has to be asserted about why. */
+.cluster{position:relative;margin-top:clamp(2.4rem,5vw,4rem);
+  height:clamp(150px,20vh,210px);border-bottom:1px solid var(--line)}
+.cpt{position:absolute;bottom:0;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.cpt i{width:1px;background:var(--line);display:block}
+.cpt .dot{width:13px;height:13px;border-radius:50%;background:var(--lilac);flex-shrink:0}
+.cpt.out .dot{background:var(--ember);width:17px;height:17px}
+.cpt .v{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 780;
+  font-size:clamp(.85rem,1.5vw,1.2rem);color:var(--cream);white-space:nowrap}
+.cpt.out .v{color:var(--ember)}
+.cpt .t{font-family:'DM Mono',monospace;font-size:.57rem;letter-spacing:.06em;
+  color:var(--dim);white-space:nowrap;text-align:center;line-height:1.35}
+.cband{position:absolute;bottom:0;height:100%;
+  background:rgba(183,159,212,.08);border-left:1px dashed rgba(183,159,212,.35);
+  border-right:1px dashed rgba(183,159,212,.35)}
+@media(max-width:780px){.cpt .t{display:none}}
+
+/* ── THE ACTION LIST ────────────────────────────────────────────────*/
+.act{display:grid;grid-template-columns:auto 1fr;gap:clamp(.9rem,2vw,1.6rem);
+  padding:clamp(1rem,1.8vw,1.4rem) 0;border-bottom:1px solid var(--line);align-items:baseline}
+.act:last-child{border-bottom:none}
+.act-n{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.14em;color:var(--lilac)}
+.act h3{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 780;
+  text-transform:uppercase;font-size:clamp(1.05rem,2vw,1.6rem);line-height:1.02;color:var(--cream)}
+.act p{color:var(--cool);margin-top:.5rem;max-width:64ch;font-size:clamp(.92rem,1.2vw,1.05rem)}
+
+/* ── Small parts ────────────────────────────────────────────────────*/
+.hero-num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 96,'wght' 830;
+  font-size:clamp(4rem,14vw,12rem);line-height:.82;letter-spacing:-.03em;color:var(--lilac)}
+.rule{height:1px;background:var(--line);margin:clamp(1.6rem,3vw,2.6rem) 0}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.1rem}
+.chips span{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.09em;
+  text-transform:uppercase;border:1px solid var(--line);border-radius:2px;
+  padding:.34rem .58rem;color:var(--cool)}
+.chips span.gap{border-color:rgba(224,67,26,.55);color:var(--ember)}
+.note{border-left:3px solid var(--lilac);padding:.9rem 1.15rem;
+  background:rgba(183,159,212,.06);margin-top:1.4rem;max-width:74ch;
+  font-size:clamp(.86rem,1.15vw,.97rem);line-height:1.55;color:var(--cool)}
+.note b{color:var(--cream);font-weight:600}
+.foot{padding:clamp(2.5rem,6vw,4.5rem) var(--pad);text-align:center}
+.foot .label{line-height:1.9}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+<!-- ════════ 1 · COVER ════════════════════════════════════════════ -->
+<section class="slide" style="justify-content:flex-end">
+  <div class="bleed scrim-b scrim-l">
+    <img src="https://i.ytimg.com/vi/08ZJvWQ1pVM/maxres2.jpg" alt="">
+  </div>
+  <div class="inner reveal">
+    <div class="label">TEN · @tenoffcl · Channel deep dive · Virgin Music Group</div>
+    <h1 class="display" style="margin:1.4rem 0 1.6rem;max-width:18ch">
+      57 days.<br>59 uploads.<br>A solo channel built<br>at campaign speed.
+    </h1>
+    <p class="big-p" style="max-width:56ch">
+      TEN's channel is eleven weeks old. In that time it has published more than
+      most established artist channels manage in a year — and it has done it with
+      a structure, not just a volume. This is a read of how that channel actually
+      works, and where there is room to make it work harder.
+    </p>
+  </div>
+</section>
+
+
+<!-- ════════ 2 · THE SCALE BOARD ═══════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Where the channel stands</div>
+    <h2 class="display reveal" style="margin:.9rem 0 0;max-width:20ch">
+      This is not a channel<br>short of activity.
+    </h2>
+
+    <div class="board reveal stagger">
+      <div><div class="big-num lit">115K</div><div class="label">Subscribers</div></div>
+      <div><div class="big-num">59</div><div class="label">Public uploads</div></div>
+      <div><div class="big-num">47</div><div class="label">Shorts</div></div>
+      <div><div class="big-num">12</div><div class="label">Long-form</div></div>
+      <div><div class="big-num">30</div><div class="label">Publishing days</div></div>
+      <div><div class="big-num">57</div><div class="label">Day active span</div></div>
+    </div>
+
+    <div class="grid2" style="margin-top:clamp(1.8rem,3.5vw,3rem)">
+      <div class="reveal">
+        <p class="big-p">
+          The channel was created on <em class="hl">7 July 2026</em> and published its
+          first upload on <em class="hl">28 July</em>. Everything above was built in
+          the eight weeks that followed — roughly <em class="hl">one upload a day</em>,
+          across three songs, a concert and a brand shoot.
+        </p>
+        <p class="big-p" style="margin-top:1.1rem">
+          Most of what follows is about structure rather than volume, because volume
+          is the part this team has already solved.
+        </p>
+      </div>
+      <div class="reveal">
+        <div class="card">
+          <div class="label">Three songs worked in 57 days</div>
+          <table class="cmp" style="margin-top:.8rem">
+            <tr><td>If You Don't Mean It</td><td class="n">1</td><td class="label" style="text-align:right">30 Jul</td></tr>
+            <tr><td>OUTWEST</td><td class="n lit">30</td><td class="label" style="text-align:right">4 Sep</td></tr>
+            <tr><td>IRL</td><td class="n">11</td><td class="label" style="text-align:right">14 Sep</td></tr>
+          </table>
+          <div class="label" style="margin-top:.7rem;font-size:.58rem">
+            Supporting assets built around each release
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="src reveal">
+      <b>Source.</b> All 59 public uploads retrieved from the channel's uploads
+      playlist via YouTube Data API v3, 23 September 2026. No YouTube Studio data
+      is used anywhere on this page — no impressions, CTR, retention or traffic
+      sources. Subscriber counts are rounded by YouTube to the nearest thousand.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 3 · CADENCE ═══════════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-f"><img src="https://i.ytimg.com/vi/Q5mk7prdWRE/maxres1.jpg" alt=""></div>
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Publishing rhythm · weeks 1–9</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      The push isn't<br>the problem.
+    </h2>
+    <p class="big-p reveal">
+      Weeks six and seven are as well-run as release weeks get: <em class="hl">32 uploads
+      in 14 days</em>, with long-form and Shorts interleaved rather than batched. That
+      is a genuinely high standard and it is worth saying so plainly.
+    </p>
+
+    <div class="weeks reveal">
+      <div class="wkcol quiet"><div class="n">12</div><div class="lf" style="height:7%"></div><div class="sh" style="height:58%"></div></div>
+      <div class="wkcol quiet"><div class="n">0</div><div class="sh" style="height:1%"></div></div>
+      <div class="wkcol quiet"><div class="n">1</div><div class="lf" style="height:6%"></div></div>
+      <div class="wkcol quiet"><div class="n">3</div><div class="lf" style="height:11%"></div><div class="sh" style="height:6%"></div></div>
+      <div class="wkcol quiet"><div class="n">3</div><div class="sh" style="height:17%"></div></div>
+      <div class="wkcol push"><div class="n">14</div><div class="lf" style="height:17%"></div><div class="sh" style="height:61%"></div></div>
+      <div class="wkcol push"><div class="n">18</div><div class="lf" style="height:17%"></div><div class="sh" style="height:83%"></div></div>
+      <div class="wkcol"><div class="n">7</div><div class="lf" style="height:6%"></div><div class="sh" style="height:33%"></div></div>
+      <div class="wkcol"><div class="n">1</div><div class="lf" style="height:6%"></div></div>
+    </div>
+    <div class="wk-axis reveal">
+      <span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span>
+      <span>W6</span><span>W7</span><span>W8</span><span>W9</span>
+    </div>
+    <div class="wk-brace reveal">
+      <b style="--sp:1">Launch</b>
+      <b style="--sp:4">7 uploads · 4 weeks</b>
+      <b class="lit" style="--sp:2">32 uploads · 14 days</b>
+      <b style="--sp:2">8 uploads · 9 days</b>
+    </div>
+
+    <div class="grid2" style="margin-top:clamp(1.6rem,3vw,2.4rem)">
+      <p class="body reveal">
+        <em class="hl">The space between pushes is where the opportunity is.</em>
+        Weeks two to five carried seven uploads across 28 days. The nine days after
+        the peak carried eight. A channel that can produce 32 assets in a fortnight
+        clearly has the capability; what it doesn't yet have is a reason to publish
+        when there is no single to support.
+      </p>
+      <p class="body reveal">
+        The cost of a quiet month is that the subscribers gained during a spike
+        arrive at a channel with nothing new to meet them. Two light uploads a week
+        through a trough would cost very little against what weeks six and seven
+        already prove this team can do.
+      </p>
+    </div>
+
+    <div class="src reveal">
+      <b>Read.</b> Bars are uploads per week from first upload, 28 Jul – 22 Sep 2026.
+      Lilac is long-form, deep blue is Shorts. Week 9 is a single day. Uploads landed
+      on <b>30 of 57 days</b>; the longest gap was <b>9 days</b> (2–11 Aug).
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 4 · THE ARCHITECTURE ══════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Content architecture · all 59 uploads classified</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
+      The campaign layer<br>is built. The evergreen<br>layer isn't.
+    </h2>
+    <p class="big-p reveal">
+      Every upload on the channel falls into one of four layers. Three of them are
+      well stocked. The fourth has nothing in it at all.
+    </p>
+
+    <div class="arch reveal stagger">
+      <div class="arch-row">
+        <div class="arch-name">Discovery</div>
+        <div class="arch-bar"><div class="arch-fill hi" style="width:100%"></div><div class="arch-n">47</div></div>
+        <div class="arch-eg">Shorts, teasers, collaborations<br>8 tag another artist</div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-name">Scale</div>
+        <div class="arch-bar"><div class="arch-fill hi" style="width:10.6%"></div><div class="arch-n">5</div></div>
+        <div class="arch-eg">3 official MVs<br>2 dance practices</div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-name">Depth</div>
+        <div class="arch-bar"><div class="arch-fill" style="width:14.9%"></div><div class="arch-n">7</div></div>
+        <div class="arch-eg">6 behind-the-scenes &amp; recap<br>1 fanchant guide</div>
+      </div>
+      <div class="arch-row gap">
+        <div class="arch-name">Longevity</div>
+        <div class="arch-bar"><div class="arch-fill empty"></div><div class="arch-n">0</div></div>
+        <div class="arch-eg">Lyric · visualiser · official audio<br>live performance</div>
+      </div>
+    </div>
+
+    <div class="chips reveal">
+      <span>3 official MV</span><span>2 dance practice</span><span>3 MV teaser</span>
+      <span>1 fanchant guide</span><span>6 BTS / recap / sketch</span><span>47 Shorts</span>
+      <span class="gap">0 lyric video</span><span class="gap">0 visualiser</span>
+      <span class="gap">0 official audio</span><span class="gap">0 live performance</span>
+    </div>
+
+    <div class="note reveal">
+      <b>What this does and doesn't say.</b> The catalogue establishes that these four
+      formats are absent — that is a fact about the channel. What they would do for it
+      is our recommendation, not a finding. We have no traffic-source data for this
+      channel and are not claiming a guaranteed return from any format.
+    </div>
+
+    <div class="src reveal">
+      <b>Method.</b> Formats classified from title text across all 59 uploads. On a
+      title set that is partly Thai and Korean, keyword matching will miss things —
+      the absence of the four formats above should be confirmed by eye before the
+      claim travels. Full rule in the analysis sheet.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 5 · THE JOURNEY (signature visual) ════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">What each format is actually for</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:20ch">
+      One channel.<br>Different jobs.
+    </h2>
+    <p class="big-p reveal">
+      The most useful thing in this catalogue isn't which video won. It's that the
+      channel's formats are already doing <em class="hl">four different jobs</em>, and
+      judging them all on views would get three of them wrong.
+    </p>
+
+    <div class="journey reveal stagger">
+      <div class="jrow">
+        <div class="jrail"><div class="jdot"></div><div class="jline"></div></div>
+        <div>
+          <div class="jstage">Discovery</div>
+          <div class="jformat">Collaboration Shorts</div>
+        </div>
+        <p class="jbody">
+          The only assets on the channel that reliably reach people who didn't arrive
+          for TEN. Borrowed attention from another fandom, pointed here.
+        </p>
+        <div class="jev"><b>26.0K</b> median<br>vs 13.6K for other Shorts</div>
+      </div>
+
+      <div class="jrow">
+        <div class="jrail"><div class="jdot"></div><div class="jline"></div></div>
+        <div>
+          <div class="jstage">Scale</div>
+          <div class="jformat">Official MV · dance practice</div>
+        </div>
+        <p class="jbody">
+          The tentpoles. Dance practice is doing more work here than it usually gets
+          credit for — OUTWEST's matched the IRL music video almost exactly.
+        </p>
+        <div class="jev"><b>144.5K</b> OUTWEST dance<br>143.7K IRL MV</div>
+      </div>
+
+      <div class="jrow">
+        <div class="jrail"><div class="jdot"></div><div class="jline"></div></div>
+        <div>
+          <div class="jstage">Depth</div>
+          <div class="jformat">Behind the scenes · recording</div>
+        </div>
+        <p class="jbody">
+          The smallest audiences on the channel and by a distance the most engaged.
+          These are retention assets, and they are working.
+        </p>
+        <div class="jev"><b>25.8</b> comments / 1K<br>vs 10.5 other long-form</div>
+      </div>
+
+      <div class="jrow open">
+        <div class="jrail"><div class="jdot"></div></div>
+        <div>
+          <div class="jstage">Longevity</div>
+          <div class="jformat">Lyric · visualiser · live</div>
+        </div>
+        <p class="jbody">
+          Nothing on this channel is built to be found after its campaign ends. Every
+          asset here is a campaign asset.
+        </p>
+        <div class="jev">No assets</div>
+      </div>
+    </div>
+
+    <p class="big-p reveal" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+      Three stages of a working audience journey, already built. The fourth is where
+      a channel stops being a campaign and starts being a catalogue.
+    </p>
+  </div>
+</section>
+
+
+<!-- ════════ 6 · THE COLLAB ENGINE ═════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Discovery · 47 Shorts analysed</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      Their best discovery<br>mechanic is already<br>working.
+    </h2>
+    <p class="big-p reveal">
+      Eight of the channel's 47 Shorts tag another artist. Those eight are not a
+      slight improvement on the rest — they are <em class="hl">the top of the chart</em>.
+    </p>
+
+    <div class="vs reveal stagger">
+      <div class="vs-row hi">
+        <div class="vs-k">Collab Shorts<br>n = 8</div>
+        <div class="vs-bar" style="width:100%"></div>
+        <div class="vs-v">26.0K</div>
+      </div>
+      <div class="vs-row">
+        <div class="vs-k">All other Shorts<br>n = 39</div>
+        <div class="vs-bar" style="width:52.3%"></div>
+        <div class="vs-v">13.6K</div>
+      </div>
+    </div>
+    <div class="label reveal" style="margin-top:.9rem">
+      Median views · approximately 1.9× · every Short above 40K is a collaboration
+    </div>
+
+    <div class="grid4 reveal stagger" style="margin-top:clamp(1.6rem,3vw,2.6rem)">
+      <a class="thumb v" href="https://www.youtube.com/watch?v=dIBL1FTUhF8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/dIBL1FTUhF8/oardefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>58.9K</b>andTEAM · NICHOLAS</span></a>
+      <a class="thumb v" href="https://www.youtube.com/watch?v=N4VIucqdr7w" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/N4VIucqdr7w/oardefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>45.9K</b>WayV · KUN</span></a>
+      <a class="thumb v" href="https://www.youtube.com/watch?v=2JJbg-Nd4vA" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/2JJbg-Nd4vA/oardefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>31.2K</b>SEVENTEEN · DINO</span></a>
+      <a class="thumb v" href="https://www.youtube.com/watch?v=-GyEDbAyO9I" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/-GyEDbAyO9I/oardefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>25.8K</b>Stray Kids · MINHO</span></a>
+      </div>
+    <div class="label reveal" style="margin-top:.8rem;font-size:.58rem">
+      Also: A2O MAY 26.1K · XINLONG / ALPHA DRIVE ONE 26.0K · HARU 24.2K · KWON EUNBI 22.2K
+    </div>
+
+    <div class="note reveal">
+      <b>The recommendation isn't "do collaborations".</b> It's that the team has already
+      built a repeatable fandom-bridging mechanic and is currently running it at
+      <b>8 of 47 Shorts</b>. Making it a planned part of release architecture — rather
+      than something that happens when a schedule allows — is the single clearest
+      way to extend what already works.
+    </div>
+
+    <div class="src reveal">
+      <b>Read.</b> Medians, not means, because one 58.9K Short would drag an average.
+      A Short is counted as a collaboration where its title carries a hashtag naming
+      another artist. Every one of the eight sits inside the channel's top twelve
+      Shorts; the lowest (22.2K) still clears the 16.9K all-Shorts median.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 7 · BTS DEPTH ═════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Depth · long-form engagement structure</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      The people who go<br>deep, really go deep.
+    </h2>
+    <p class="big-p reveal">
+      The least-watched long-form videos on this channel are the most engaged, and
+      the relationship is close to perfectly inverse. That is not a problem to fix.
+      It's a signal about who those videos are for.
+    </p>
+
+    <div class="inv-head reveal"><span></span><span>Views</span><span>Comments per 1,000 views</span></div>
+    <div class="inv reveal stagger">
+      <div class="inv-row">
+        <div class="inv-k">IRL Recording BTS<br>15 min</div>
+        <div class="inv-cell"><div class="inv-b views" style="width:7%"></div><div class="inv-v">10.4K</div></div>
+        <div class="inv-cell"><div class="inv-b eng" style="width:100%"></div><div class="inv-v">25.8</div></div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-k">OUTWEST MV BTS<br>27 min</div>
+        <div class="inv-cell"><div class="inv-b views" style="width:15%"></div><div class="inv-v">21.2K</div></div>
+        <div class="inv-cell"><div class="inv-b eng" style="width:66%"></div><div class="inv-v">17.0</div></div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-k">IRL MV BTS<br>12 min</div>
+        <div class="inv-cell"><div class="inv-b views" style="width:10%"></div><div class="inv-v">14.8K</div></div>
+        <div class="inv-cell"><div class="inv-b eng" style="width:59%"></div><div class="inv-v">15.2</div></div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-k">IRL — Official MV<br>4 min</div>
+        <div class="inv-cell"><div class="inv-b views" style="width:100%"></div><div class="inv-v">143.7K</div></div>
+        <div class="inv-cell"><div class="inv-b eng" style="width:40%"></div><div class="inv-v">10.4</div></div>
+      </div>
+      <div class="inv-row">
+        <div class="inv-k">OUTWEST Dance Practice<br>3 min</div>
+        <div class="inv-cell"><div class="inv-b views" style="width:100%"></div><div class="inv-v">144.5K</div></div>
+        <div class="inv-cell"><div class="inv-b eng" style="width:19%"></div><div class="inv-v">5.0</div></div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:clamp(1.6rem,3vw,2.4rem)">
+      <p class="body reveal">
+        <em class="hl">A 15-minute recording session drawing 25.8 comments per thousand
+        views is a strong number by any standard.</em> It is the sound of a core
+        audience that wants more time with the artist, not less.
+      </p>
+      <p class="body reveal">
+        The risk with content like this is that it gets judged on absolute views and
+        quietly shortened or dropped. The data here argues the opposite: keep it long,
+        keep it frequent, and measure it on the audience it is actually serving.
+      </p>
+    </div>
+
+    <div class="src reveal">
+      <b>Read.</b> Comments per 1,000 views, from public like and comment counts.
+      Bars within each column are scaled to that column's largest value, so views and
+      engagement are not being compared to each other — only within themselves.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 8 · THE OUTLIER ═══════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Scale · reading the release data</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
+      OUTWEST is an outlier.<br>The rest of the catalogue<br>is the planning tool.
+    </h2>
+    <p class="big-p reveal">
+      The OUTWEST music video sits at 5.69M views. Nothing else on the channel is
+      within forty times of it. An outlier that large is not a number you can plan
+      the next release against.
+    </p>
+
+    <div class="cluster reveal">
+      <div class="cband" style="left:8%;width:26%"></div>
+      <div class="cpt" style="left:12%">
+        <div class="v">97.8K</div><i style="height:30px"></i><div class="dot"></div>
+        <div class="t">IRL<br>Dance Practice</div></div>
+      <div class="cpt" style="left:26%">
+        <div class="v">143.7K</div><i style="height:56px"></i><div class="dot"></div>
+        <div class="t">IRL<br>Official MV</div></div>
+      <div class="cpt" style="left:32%">
+        <div class="v">144.5K</div><i style="height:82px"></i><div class="dot"></div>
+        <div class="t">OUTWEST<br>Dance Practice</div></div>
+      <div class="cpt out" style="left:88%">
+        <div class="v">5.69M</div><i style="height:108px"></i><div class="dot"></div>
+        <div class="t">OUTWEST<br>Official MV</div></div>
+    </div>
+
+    <div class="grid2" style="margin-top:clamp(1.8rem,3.5vw,2.8rem)">
+      <p class="body reveal">
+        <em class="hl">Three well-supported assets cluster between 98K and 145K.</em>
+        Two different songs, two different formats, three separate release moments —
+        and they land in the same band. That agreement across independent assets is
+        what makes the cluster useful.
+      </p>
+      <p class="body reveal">
+        Planning the next single against that band, and treating anything above it as
+        upside, is a more honest basis for a forecast than assuming every music video
+        reproduces 5.69M. It also makes the dance practice look like what it is: a
+        tentpole in its own right, not a support asset.
+      </p>
+    </div>
+
+    <div class="note reveal">
+      <b>What we are not saying.</b> We have no traffic-source data for this channel, so
+      we can't say what any of these numbers are made of, and this cluster is not a
+      ceiling — it is three observations that happen to agree. Nor are we offering an
+      explanation for the OUTWEST figure. It is an outlier; the useful analysis is in
+      everything around it.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 9 · THE LIVE OPPORTUNITY ══════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-b scrim-l"><img src="https://i.ytimg.com/vi/C0L897LQNiU/maxres3.jpg" alt=""></div>
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Longevity · TEN:CORE0110</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      The concert was<br>documented. The<br>performance wasn't.
+    </h2>
+    <p class="big-p reveal">
+      TEN's 10th anniversary concert produced a <em class="hl">2-minute recap</em> and a
+      <em class="hl">15-minute behind-the-scenes</em>. Between them they've drawn 44.4K
+      views — the channel's strongest long-form pair outside the singles campaign.
+    </p>
+    <p class="big-p reveal" style="margin-top:1rem">
+      What the channel does not have is a single song performed. Not one live
+      performance video exists across all 59 uploads.
+    </p>
+
+    <div class="grid3 reveal stagger" style="margin-top:clamp(1.6rem,3vw,2.6rem)">
+      <a class="thumb" href="https://www.youtube.com/watch?v=C0L897LQNiU" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/C0L897LQNiU/maxresdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>20.3K</b>Concert Recap · 11 Aug</span></a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=58H62-MyYro" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/58H62-MyYro/maxresdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>24.1K</b>Concert Behind the Scenes · 19 Aug</span></a>
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center;
+           border-color:rgba(224,67,26,.5);background:rgba(224,67,26,.05)">
+        <div class="label" style="color:var(--ember)">Not on the channel</div>
+        <div class="big-num" style="font-size:clamp(2.2rem,4vw,3.2rem);color:var(--ember);margin-top:.6rem">0</div>
+        <div class="body" style="margin-top:.6rem;font-size:.9rem">
+          Individual song performances from a concert the team already filmed.
+        </div>
+      </div>
+    </div>
+
+    <div class="note reveal">
+      <b>Why this one is different.</b> Most content recommendations ask for a new shoot.
+      This one doesn't. The team appears to have already captured the raw material —
+      two finished edits came out of it. If usable performance footage exists,
+      individual song videos would open the channel's empty fourth layer without
+      commissioning anything new.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 10 · ONE SONG NEVER GOT THE SYSTEM ════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
+    <div class="label reveal">Support architecture · three singles compared</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      One song never<br>got the system.
+    </h2>
+
+    <div class="grid2" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+      <div class="reveal">
+        <table class="cmp">
+          <tr><th>Single</th><th>Supporting assets</th><th style="text-align:right">MV views</th></tr>
+          <tr><td>OUTWEST</td><td class="n lit">30</td><td class="n" style="text-align:right">5.69M</td></tr>
+          <tr><td>IRL</td><td class="n lit">11</td><td class="n" style="text-align:right">143.7K</td></tr>
+          <tr><td>If You Don't Mean It</td><td class="n" style="color:var(--ember)">1</td>
+              <td class="n" style="text-align:right;color:var(--ember)">9.5K</td></tr>
+        </table>
+        <div class="chips" style="margin-top:1.2rem">
+          <span class="gap">No dance practice</span>
+          <span class="gap">No teaser</span>
+          <span class="gap">No behind the scenes</span>
+          <span class="gap">No tags</span>
+          <span class="gap">No description</span>
+        </div>
+        <div class="label" style="margin-top:.7rem;font-size:.58rem">
+          If You Don't Mean It — the channel's debut single, 30 July
+        </div>
+      </div>
+      <div class="reveal">
+        <a class="thumb" href="https://www.youtube.com/watch?v=69n3jB_Cp8A" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/69n3jB_Cp8A/maxresdefault.jpg" alt="" loading="lazy">
+          <span class="cap"><b>9,463</b>The channel's lowest-viewed long-form upload</span></a>
+        <p class="body" style="margin-top:1.2rem">
+          It is also the only music video on the channel with no tags and no
+          description — the two things that cost nothing to fix.
+        </p>
+      </div>
+    </div>
+
+    <div class="note reveal">
+      <b>We can't claim cause here.</b> A debut single on a three-day-old channel was
+      always going to start from a standing position, and missing metadata is not
+      proof of anything on its own. What the catalogue does show is a pattern worth
+      noticing: <b>the channel's least-supported song is also its least-viewed
+      release</b>, and its two best-supported ones are its two biggest.
+    </div>
+
+    <div class="rule reveal"></div>
+
+    <div class="grid3 reveal stagger">
+      <div>
+        <div class="label lit">Metadata — what's strong</div>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">
+          <em class="hl">10 of 12</em> long-form uploads carry proper tags and
+          descriptions, multilingual across English, Korean and Chinese. The IRL
+          assets are deliberately cross-tagged with <em class="hl">OUTWEST</em> —
+          that is traffic architecture, and it's a good instinct.
+        </p>
+      </div>
+      <div>
+        <div class="label">Metadata — what's light</div>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">
+          42 of 47 Shorts carry no description and 40 of 47 carry no tags. All
+          discovery information lives in the on-screen hashtags. That's a defensible
+          Shorts approach — it just means the Shorts library contributes nothing to
+          search.
+        </p>
+      </div>
+      <div>
+        <div class="label" style="color:var(--ember)">Free fixes</div>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">
+          Tags and a description on the If You Don't Mean It MV. And the like count
+          on the OUTWEST MV is currently hidden — the only video of 59 where it is.
+          On the channel's biggest asset, that's a lot of visible social proof
+          switched off, and it may simply be a setting nobody has revisited.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 11 · THE BIG IDEA ═════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-f"><img src="https://i.ytimg.com/vi/yi_S9bPQACg/maxres2.jpg" alt=""></div>
+  <div class="inner" style="text-align:center">
+    <div class="label reveal">The finding</div>
+    <h2 class="display reveal" style="margin:1.1rem auto 1.4rem;max-width:20ch">
+      Don't add more content.<br>Complete the system.
+    </h2>
+    <p class="big-p reveal" style="margin:0 auto;max-width:60ch">
+      TEN's team already has campaign intensity, short-form fluency, a working
+      collaboration mechanic and long-form content that its core audience engages
+      with harder than almost anything else on the channel. Four of the hardest
+      things to build, built in eleven weeks.
+    </p>
+    <p class="big-p reveal" style="margin:1.2rem auto 0;max-width:60ch">
+      What's missing isn't volume. It's <em class="hl">continuity between pushes</em> and
+      an <em class="hl">evergreen layer</em> that outlives the campaign that made it.
+    </p>
+    <div class="tier-mark reveal" style="justify-content:center;margin:clamp(2rem,4vw,3rem) auto 0;
+         height:26px;gap:8px">
+      <i style="width:34px"></i><i style="width:34px"></i><i style="width:34px"></i>
+      <i class="off" style="width:34px"></i>
+    </div>
+    <div class="label reveal" style="margin-top:.9rem">
+      Discovery · Scale · Depth · Longevity
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 12 · WHAT NEXT ════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">Where we'd start</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.6rem;max-width:18ch">
+      What next.
+    </h2>
+
+    <div class="reveal stagger">
+      <div class="act">
+        <div class="act-n">01</div>
+        <div>
+          <h3>Systematise the collab Shorts</h3>
+          <p>
+            The discovery mechanic already works — 1.9× the median of every other
+            Short, and the entire top of the chart. Build it into release plans as a
+            planned beat rather than an opportunistic one. It's currently 8 of 47.
+          </p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-n">02</div>
+        <div>
+          <h3>Build the evergreen layer</h3>
+          <p>
+            Test lyric or visualiser assets around the priority songs. Right now every
+            asset on this channel expires with its campaign; nothing is built to be
+            found six months later.
+          </p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-n">03</div>
+        <div>
+          <h3>Turn TEN:CORE0110 into performance content</h3>
+          <p>
+            If usable footage exists from the anniversary concert, individual song
+            performances would open the missing layer without a new shoot. The raw
+            material appears to already be there.
+          </p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-n">04</div>
+        <div>
+          <h3>Protect the quiet weeks</h3>
+          <p>
+            The team clearly knows how to run a release push. A lighter standing
+            cadence between pushes stops the channel resetting to zero each time and
+            gives new subscribers somewhere to land.
+          </p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-n">05</div>
+        <div>
+          <h3>Keep the BTS long</h3>
+          <p>
+            Don't judge long-form fan content on absolute views. At 25.8 comments per
+            thousand it is serving the core audience better than anything else on the
+            channel. Measure it on that.
+          </p>
+        </div>
+      </div>
+      <div class="act">
+        <div class="act-n">06</div>
+        <div>
+          <h3>Fix the free things</h3>
+          <p>
+            Tags and a description on the If You Don't Mean It MV, and a look at why
+            the like count is hidden on the OUTWEST music video — the only one of 59
+            where it is.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /.deck -->
+
+
+<!-- ════════ THE ANALYSIS SHEET ════════════════════════════════════
+     Markup sits ABOVE the script that binds it. The first version of
+     this pattern shipped a button that rendered perfectly and did
+     nothing, because getElementById ran before the panel existed. -->
+<button class="an-btn" id="an-open">Analysis</button>
+<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis appendix">
+  <div class="an-in">
+    <button class="an-back" id="an-close">← Back to the review</button>
+    <h2>Analysis appendix</h2>
+    <div class="an-sub">
+      TEN · @tenoffcl · 59 of 59 public uploads · retrieved 23 September 2026
+    </div>
+
+    <h3>What this is built from</h3>
+    <p>
+      One pull of the channel's complete public uploads playlist via YouTube Data
+      API v3 — <strong>59 videos retrieved of 59 reported</strong>, 28 July to
+      22 September 2026, retrieval uncapped. Views, likes, comments, durations,
+      tags and descriptions are the public values returned by that API.
+    </p>
+    <p>
+      <strong>No YouTube Studio data is used anywhere on this page.</strong> No
+      impressions, no click-through rate, no retention curves, no traffic sources,
+      no unique viewers, no demographics. Every "why" on the deck is inference from
+      views, likes and comments, and should be read as inference.
+    </p>
+
+    <div class="an-note">
+      <b>Scope note.</b> All analysis on this page is based on the channel's
+      <b>complete currently public catalogue</b> — the 59 uploads listed below.
+      The channel's lifetime view counter and the sum of those 59 uploads do not
+      reconcile, and we cannot account for the difference from public data. Rather
+      than guess at it, this page makes <b>no share-of-lifetime claims at all</b>:
+      every proportion quoted is a share of the public uploads catalogue. Anyone
+      extending these figures to the channel's lifetime counter is making a claim
+      this data does not support.
+    </div>
+
+    <h3>The catalogue</h3>
+    <table>
+      <tr><th>Measure</th><th>Value</th></tr>
+      <tr><td>Channel created</td><td class="n">7 Jul 2026</td></tr>
+      <tr><td>First upload</td><td class="n">28 Jul 2026</td></tr>
+      <tr><td>Most recent upload</td><td class="n">22 Sep 2026</td></tr>
+      <tr><td>Active publishing span</td><td class="n">57 days</td></tr>
+      <tr><td>Days an upload landed</td><td class="n">30 of 57</td></tr>
+      <tr><td>Longest gap</td><td class="n">9 days</td></tr>
+      <tr><td>Public uploads</td><td class="n">59</td></tr>
+      <tr class="lead"><td>— long-form</td><td class="n">12</td></tr>
+      <tr class="lead"><td>— Shorts</td><td class="n">47</td></tr>
+      <tr><td>Subscribers (rounded by YouTube)</td><td class="n">115,000</td></tr>
+    </table>
+    <p>
+      Roughly one upload per day across the span, on a channel eleven weeks old.
+      The 30-of-57 figure is the one worth holding: the channel published on just
+      over half of the days it has existed as a publishing channel.
+    </p>
+
+    <h3>Uploads by week</h3>
+    <table>
+      <tr><th>Week</th><th>Dates</th><th>Long-form</th><th>Shorts</th><th>Total</th></tr>
+      <tr><td>1</td><td>28 Jul – 3 Aug</td><td class="n">1</td><td class="n">11</td><td class="n">12</td></tr>
+      <tr><td>2</td><td>4 – 10 Aug</td><td class="n">0</td><td class="n">0</td><td class="n dn">0</td></tr>
+      <tr><td>3</td><td>11 – 17 Aug</td><td class="n">1</td><td class="n">0</td><td class="n dn">1</td></tr>
+      <tr><td>4</td><td>18 – 24 Aug</td><td class="n">2</td><td class="n">1</td><td class="n dn">3</td></tr>
+      <tr><td>5</td><td>25 – 31 Aug</td><td class="n">0</td><td class="n">3</td><td class="n dn">3</td></tr>
+      <tr class="lead"><td>6</td><td>1 – 7 Sep</td><td class="n">3</td><td class="n">11</td><td class="n">14</td></tr>
+      <tr class="lead"><td>7</td><td>8 – 14 Sep</td><td class="n">3</td><td class="n">15</td><td class="n">18</td></tr>
+      <tr><td>8</td><td>15 – 21 Sep</td><td class="n">1</td><td class="n">6</td><td class="n">7</td></tr>
+      <tr><td>9</td><td>22 Sep (1 day)</td><td class="n">1</td><td class="n">0</td><td class="n">1</td></tr>
+    </table>
+    <p>
+      Weeks 6–7 carry <strong>32 uploads in 14 days</strong>. Weeks 2–5 carry
+      <strong>7 across 28 days</strong>. The nine days from 15 September carry
+      <strong>8</strong>. The deck's cadence argument is this table, drawn.
+    </p>
+
+    <h3>Every long-form upload</h3>
+    <table>
+      <tr><th>Date</th><th>Title</th><th>Length</th><th>Views</th><th>Likes/1k</th><th>Comments/1k</th></tr>
+      <tr><td>30 Jul</td><td>If You Don't Mean It — MV</td><td>2m</td><td class="n">9,463</td><td class="n">194.7</td><td class="n">20.40</td></tr>
+      <tr><td>11 Aug</td><td>TEN:CORE0110 Concert Recap</td><td>2m</td><td class="n">20,301</td><td class="n">157.8</td><td class="n">28.13</td></tr>
+      <tr><td>19 Aug</td><td>TEN:CORE0110 Concert BTS</td><td>15m</td><td class="n">24,145</td><td class="n">138.7</td><td class="n">22.78</td></tr>
+      <tr><td>20 Aug</td><td>JisuLife Shooting Sketch</td><td>2m</td><td class="n">4,339</td><td class="n">298.5</td><td class="n">24.66</td></tr>
+      <tr><td>4 Sep</td><td>OUTWEST Fanchant Guide</td><td>4m</td><td class="n">34,668</td><td class="n">92.4</td><td class="n">13.50</td></tr>
+      <tr class="lead"><td>4 Sep</td><td>OUTWEST — Official MV</td><td>4m</td><td class="n">5,691,353</td><td class="n">hidden</td><td class="n dn">0.92</td></tr>
+      <tr><td>6 Sep</td><td>OUTWEST Dance Practice</td><td>3m</td><td class="n">144,489</td><td class="n">65.5</td><td class="n">4.95</td></tr>
+      <tr><td>8 Sep</td><td>IRL Dance Practice</td><td>3m</td><td class="n">97,751</td><td class="n">74.7</td><td class="n">5.97</td></tr>
+      <tr><td>12 Sep</td><td>OUTWEST MV Behind the Scenes</td><td>27m</td><td class="n">21,183</td><td class="n">115.5</td><td class="n">17.04</td></tr>
+      <tr class="lead"><td>14 Sep</td><td>IRL — Official MV</td><td>4m</td><td class="n">143,719</td><td class="n">81.8</td><td class="n">10.43</td></tr>
+      <tr><td>17 Sep</td><td>IRL MV Behind the Scenes</td><td>12m</td><td class="n">14,757</td><td class="n">125.3</td><td class="n">15.18</td></tr>
+      <tr><td>22 Sep</td><td>IRL Recording Behind the Scenes</td><td>15m</td><td class="n">10,354</td><td class="n up">151.2</td><td class="n up">25.76</td></tr>
+    </table>
+    <p>
+      All twelve, so nothing is selected. Read down the last column: engagement
+      rises almost perfectly as views fall. Excluding OUTWEST, long-form averages
+      <strong>10.5 comments and 90.0 likes per 1,000 views</strong>.
+    </p>
+
+    <div class="an-note">
+      <b>The OUTWEST row, stated plainly.</b> Its comment rate of 0.92 per 1,000 is
+      roughly <b>eleven times below</b> every other long-form video on the channel,
+      and its like count is the only one of 59 that is hidden — verified on the
+      watch page, not inferred from a null value in the API. We do not have the
+      traffic-source data that would explain the difference, so this page does not
+      offer an explanation, and no claim about how those views were acquired appears
+      anywhere on the deck. It is treated as an outlier and set aside.
+    </div>
+
+    <h3>Shorts: the collaboration effect</h3>
+    <table>
+      <tr><th>Group</th><th>n</th><th>Median views</th><th>Total views</th></tr>
+      <tr class="lead"><td>Shorts tagging another artist</td><td class="n">8</td><td class="n">26,016</td><td class="n">260K</td></tr>
+      <tr><td>All other Shorts</td><td class="n">39</td><td class="n">13,613</td><td class="n">597K</td></tr>
+      <tr><td>All Shorts</td><td class="n">47</td><td class="n">16,941</td><td class="n">857K</td></tr>
+    </table>
+    <p>
+      A ratio of <strong>1.91×</strong> on medians. Medians rather than means,
+      because a single 58,943-view Short would move an average on a sample of 47.
+      All eight collaborations sit inside the channel's top twelve Shorts, and the
+      weakest (22,215) still clears the all-Shorts median.
+    </p>
+    <table>
+      <tr><th>Collaborator</th><th>Views</th></tr>
+      <tr><td>andTEAM · NICHOLAS</td><td class="n">58,943</td></tr>
+      <tr><td>WayV · KUN</td><td class="n">45,870</td></tr>
+      <tr><td>SEVENTEEN · DINO</td><td class="n">31,205</td></tr>
+      <tr><td>A2O MAY</td><td class="n">26,066</td></tr>
+      <tr><td>ALPHA DRIVE ONE · XINLONG</td><td class="n">25,965</td></tr>
+      <tr><td>Stray Kids · MINHO</td><td class="n">25,757</td></tr>
+      <tr><td>HARU</td><td class="n">24,182</td></tr>
+      <tr><td>KWON EUNBI</td><td class="n">22,215</td></tr>
+    </table>
+
+    <div class="an-note">
+      <b>The objection to raise here.</b> Collaboration Shorts were made for the
+      OUTWEST campaign, when the channel was at its most visible. Some of the gap
+      may be timing rather than the mechanic. The counter is that non-collab Shorts
+      published in the same fortnight sit at the lower median — but with n=8, this
+      is a strong indication rather than a proof, and it should be described that way.
+    </div>
+
+    <h3>Format classification</h3>
+    <table>
+      <tr><th>Format</th><th>Count</th><th>Layer</th></tr>
+      <tr><td>Shorts (incl. 3 MV teasers, 8 collaborations)</td><td class="n">47</td><td>Discovery</td></tr>
+      <tr><td>Official Music Video</td><td class="n">3</td><td>Scale</td></tr>
+      <tr><td>Dance Practice</td><td class="n">2</td><td>Scale</td></tr>
+      <tr><td>Behind the Scenes / recap / sketch</td><td class="n">6</td><td>Depth</td></tr>
+      <tr><td>Fanchant Guide</td><td class="n">1</td><td>Depth</td></tr>
+      <tr><td>Lyric video</td><td class="n miss">0</td><td>Longevity</td></tr>
+      <tr><td>Visualiser</td><td class="n miss">0</td><td>Longevity</td></tr>
+      <tr><td>Official audio</td><td class="n miss">0</td><td>Longevity</td></tr>
+      <tr><td>Live performance</td><td class="n miss">0</td><td>Longevity</td></tr>
+    </table>
+    <p>
+      Classification is by keyword match against title text: a video is a lyric
+      video if its title contains "lyric", a visualiser if it contains "visualiser"
+      or "visualizer", and so on. The rule is stated so it can be re-run.
+    </p>
+
+    <div class="an-note">
+      <b>The limitation of that rule.</b> This channel's titles are partly Thai and
+      Korean and heavy with emoji and hashtags. English keyword matching will miss a
+      correctly-made asset with a non-English title. The claim "zero lyric videos,
+      zero visualisers, zero live performance" should be <b>confirmed by eye</b>
+      against the channel's video list before it travels any further than this page.
+    </div>
+
+    <h3>Support assets by song</h3>
+    <table>
+      <tr><th>Asset</th><th>OUTWEST</th><th>IRL</th><th>If You Don't Mean It</th></tr>
+      <tr><td>Official MV</td><td class="n">5,691,353</td><td class="n">143,719</td><td class="n">9,463</td></tr>
+      <tr><td>MV Teaser</td><td class="n">2</td><td class="n">1</td><td class="n miss">—</td></tr>
+      <tr><td>Dance Practice</td><td class="n">144,489</td><td class="n">97,751</td><td class="n miss">—</td></tr>
+      <tr><td>Fanchant Guide</td><td class="n">34,668</td><td class="n miss">—</td><td class="n miss">—</td></tr>
+      <tr><td>MV Behind the Scenes</td><td class="n">21,183</td><td class="n">14,757</td><td class="n miss">—</td></tr>
+      <tr><td>Recording Behind the Scenes</td><td class="n miss">—</td><td class="n">10,354</td><td class="n miss">—</td></tr>
+      <tr><td>Promo Shorts</td><td class="n">30</td><td class="n">7</td><td class="n">4</td></tr>
+      <tr><td>Lyric / visualiser / live</td><td class="n miss">—</td><td class="n miss">—</td><td class="n miss">—</td></tr>
+    </table>
+    <p>
+      The pattern the deck points at: the two songs given an ecosystem are the two
+      biggest, and the one given a single upload is the smallest. <strong>This is a
+      correlation on a sample of three, not a demonstrated cause.</strong> A debut
+      single on a three-day-old channel starts from a standing position regardless
+      of how it is supported.
+    </p>
+
+    <h3>Metadata</h3>
+    <table>
+      <tr><th>Check</th><th>Result</th></tr>
+      <tr><td>Long-form with tags</td><td class="n up">10 of 12</td></tr>
+      <tr><td>Long-form with a description</td><td class="n up">10 of 12</td></tr>
+      <tr><td>Long-form missing both</td><td class="n miss">If You Don't Mean It MV · JisuLife Sketch</td></tr>
+      <tr><td>Shorts with tags</td><td class="n dn">7 of 47</td></tr>
+      <tr><td>Shorts with a description ≥ 20 characters</td><td class="n dn">5 of 47</td></tr>
+      <tr><td>Videos with a visible like count</td><td class="n">58 of 59</td></tr>
+    </table>
+    <p>
+      Long-form tagging is genuinely good where it exists — multilingual, song-specific,
+      and cross-tagged so the IRL assets carry <strong>OUTWEST</strong> as a tag. That
+      is deliberate traffic architecture and it is worth saying so.
+    </p>
+
+    <h3>What this page does not claim</h3>
+    <p>
+      That any video's share of the channel's lifetime audience is knowable from this
+      data. That the missing formats would produce a specific return. That the 98K–145K
+      cluster is a ceiling, or that we know what any of those views were made of. That
+      missing metadata caused a low view count. That the OUTWEST figure has any
+      particular explanation. And that any of the above would survive contact with
+      Studio data — several of these readings would sharpen or reverse with retention
+      and traffic-source figures we do not have.
+    </p>
+
+    <h3>Where the full working lives</h3>
+    <p>
+      The complete audit — including every figure's provenance, the unresolved
+      lifetime-view discrepancy in full, and the objections a reviewer should raise
+      first — is in the accompanying pack,
+      <strong>audits/TENOFFCL-audit.md</strong>.
+    </p>
+
+    <button class="an-back">← Back to the review</button>
+  </div>
+</div>
+
+<div class="foot">
+  <div class="label">
+    TEN · @tenoffcl · Channel deep dive · Virgin Music Group · September 2026<br>
+    All figures from the public YouTube Data API, retrieved 23 September 2026.
+    No YouTube Studio metrics are used or implied.
+  </div>
+</div>
+
+<script src="/shared/analysis-sheet.js"></script>
+<script>
+/* Reveal on scroll. Same observer for both .reveal and .stagger — a
+   stagger is just a reveal whose children carry the delay. */
+(function () {
+  var els = document.querySelectorAll('.reveal,.stagger');
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(function (e) { e.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  els.forEach(function (e) { io.observe(e); });
+})();
+</script>
+</body>
+</html>
