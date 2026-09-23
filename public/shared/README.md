@@ -76,8 +76,17 @@ evidence.
 3. **The claim boundary in words.** What the page does *not* claim is
    usually the most useful paragraph in the document.
 4. **The objection a reviewer would raise first — raised by us.**
-5. **The classification rule**, written out, so the numbers can be
-   re-derived by someone who does not have our code.
+5. **A pointer to the audit pack**, where the raw rows, the
+   classification rule and the judgement calls live.
+
+### What does *not* belong in a sheet
+
+The full methodology. We tried it on Angus & Julia Stone and it read as
+a wall — eight dense definitions about duration thresholds and window
+boundaries, in the document people open to check a number. Sources and
+the claim boundary in plain sentences; everything else goes in the
+audit pack, which exists precisely so the sheet does not have to carry
+it.
 
 ### Two things learned the hard way
 
