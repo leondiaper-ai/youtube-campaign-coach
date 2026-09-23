@@ -594,7 +594,8 @@ export async function GET(req: NextRequest) {
        Assembled from observed facts and an explicitly hedged forward
        clause. No causal claim: the channel woke and the campaign started,
        and those are two statements sitting next to each other. */
-    const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays, daysSinceUpload, stages, firstNewUploadAt);
+    const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays,
+      daysSinceUpload, stages, firstNewUploadAt, [...heroes, ...supporting]);
 
     /* ── Fan response ──────────────────────────────────────────────────
        What the audience is positively responding to, in about eight words,
@@ -761,6 +762,7 @@ function buildRead(
   daysSinceUpload: number | null,
   stages: { label: string; status: string; action?: string | null }[],
   firstNewUploadAt: string | null,
+  campaignAssets: CoverAsset[] = [],
 ): { kicker: string | null; headline: string; line: string } | null {
   if (state === 'BASELINE') return null;
 
@@ -768,8 +770,13 @@ function buildRead(
      made 340 days of silence look like a metric rather than the thing that
      just changed. As a line of commentary above the read it does the job
      it was always doing: it is the before, and the headline is the after. */
+  /* agoPhrase returns either a bare phrase ("yesterday", "6 days ago") or
+     a dated one that already carries its preposition ("on 9 September"),
+     and "until" in front of the second produced "340 days quiet until on
+     9 September". The preposition belongs to whichever form needs it. */
+  const woken = firstNewUploadAt ? agoPhrase(firstNewUploadAt) : '';
   const kicker = dormantDays != null && firstNewUploadAt
-    ? `${dormantDays} days quiet until ${agoPhrase(firstNewUploadAt)}`
+    ? `${dormantDays} days quiet until ${woken.replace(/^on /, '')}`
     : null;
 
   const next = stages.find(s => s.status === 'NEXT');
@@ -784,9 +791,29 @@ function buildRead(
     };
   }
 
+  /* ── THE HEADLINE HAS TO AGE ───────────────────────────────────────
+     "The channel is awake." was the right sentence on day one and stayed
+     on the page through day fourteen, by which point CHVRCHES had put out
+     a single and a lyric video with 100,820 views on it. A live campaign
+     page whose headline is stuck on the first thing that happened is a
+     screenshot, not a live page.
+
+     So the read follows the campaign's own evidence. Waking up is the
+     story only until something is RELEASED: an official video, a lyric
+     video, a visualiser, a premiere. Shorts and trailers are the build —
+     they point at a release rather than being one — which is the same
+     distinction the hero ranking makes, and it is made from the observed
+     formats rather than from anybody updating a string. */
+  const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live']);
+  const released = campaignAssets.filter(a => RELEASE_KINDS.has(a.kind));
+
+  const headline = released.length
+    ? 'The single is out.'
+    : woke ? 'The channel is awake.' : 'The campaign is live.';
+
   return {
     kicker,
-    headline: woke ? 'The channel is awake.' : 'The campaign is live.',
+    headline,
     /* Forward, and concrete.
 
        This line used to print the stage's TITLE — "Next: Don't leave the hero
