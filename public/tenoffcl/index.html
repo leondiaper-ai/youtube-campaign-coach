@@ -1387,19 +1387,43 @@ table.cmp tr:last-child td{border-bottom:none}
 <script src="/shared/analysis-sheet.js"></script>
 <script>
 /* Reveal on scroll. Same observer for both .reveal and .stagger — a
-   stagger is just a reveal whose children carry the delay. */
+   stagger is just a reveal whose children carry the delay.
+
+   Anything already inside the viewport is shown outright rather than
+   waiting to be observed; the observer handles everything below the
+   fold. A real browser fires the observer's first callback on load
+   anyway, so this changes nothing for a reader — it is insurance
+   against the cases where that callback is throttled or never comes:
+   a backgrounded tab, a prerender, print.
+
+   It was added for the wrong reason. The cover kept screenshotting
+   blank during QA and that was called a layout bug; it was not. The
+   pane running these checks reports document.hidden === true, and a
+   hidden document does not get the initial IntersectionObserver
+   callback. The page was fine the whole time. The guard is worth
+   keeping on its own merits, but the lesson is the diagnosis: check
+   document.visibilityState before believing anything a headless
+   screenshot says about reveal state. */
 (function () {
   var els = document.querySelectorAll('.reveal,.stagger');
+  function show(e) { e.classList.add('in'); }
+
   if (!('IntersectionObserver' in window)) {
-    els.forEach(function (e) { e.classList.add('in'); });
+    els.forEach(show);
     return;
   }
+
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (en) {
-      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      if (en.isIntersecting) { show(en.target); io.unobserve(en.target); }
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-  els.forEach(function (e) { io.observe(e); });
+
+  els.forEach(function (e) {
+    var r = e.getBoundingClientRect();
+    if (r.top < window.innerHeight && r.bottom > 0) { show(e); return; }
+    io.observe(e);
+  });
 })();
 </script>
 </body>
