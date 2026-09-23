@@ -256,47 +256,79 @@ is building on something consistent across four separate assets.
 
 ---
 
-## 6. The collab-Short engine — their best original mechanic
+## 6. Guesting — already a habit; the variable is who
 
-47 Shorts, **857,000** views, **median 16,940**, range 4,562 – 58,939.
+> **⚠️ This section was wrong in the first issue of this pack and has been
+> rewritten.** It previously reported *8 collaborations of 47, at a 1.9× median
+> advantage, the clearest underexploited asset on the channel.* Every part of
+> that was an artefact of a bad classifier. What it should have said is below;
+> the failure is documented in §6.1 rather than quietly removed.
 
-**8 Shorts** carry a hashtag naming another artist. They are not a small
-difference from the rest:
+47 Shorts, **857,000** views, **median 16,941**, range 4,592 – 58,987.
 
-| | Count | Median views | Total |
+**21 of 47 Shorts name a guest.** Guesting is not an underused tactic here — it
+is a standing habit, running since the first week of the channel. But it does
+not pay the same every time:
+
+| Group | n | Median views | Range |
 |---|---|---|---|
-| **Shorts tagging another artist** | **8** | **26,066** | 260K |
-| All other Shorts | 39 | 13,613 | 597K |
+| **Major K-pop idol guest** | **5** | **31,230** | 22,238 – 58,987 |
+| Other named guest | 8 | 19,451 | 5,318 – 26,076 |
+| No guest named | 26 | 16,189 | 4,592 – 32,705 |
+| **Thai launch guest** | 8 | **11,403** | 6,482 – 17,146 |
+| All Shorts | 47 | 16,941 | 4,592 – 58,987 |
 
-**Median 26,066 against 13,613 — a 1.9× difference.**
+The four groups are mutually exclusive and sum to 47.
 
-The top of the Shorts chart is almost entirely this mechanic:
+**The five major-guest Shorts, all of them:**
 
-| Views | Short |
+| Views | Guest |
 |---|---|
-| 58,939 | Leave your Mark on #OUTWEST — **andTEAM NICHOLAS** |
-| 45,866 | Heading for #OUTWEST with **#KUN** (WayV) |
-| 32,653 | "When Louis is talking about his perfect crush…" |
-| 31,975 | OUTWEST MV Teaser #2 |
-| 31,205 | "I think I LIKE IT!!!" — **DINO (SEVENTEEN)** |
-| 28,592 | 𝑯𝑶𝑾 𝑾𝑬 𝑫𝑶 𝑰𝑻 |
-| 26,066 | "Love got me ooh…" — **A2O MAY** |
-| 25,965 | "Keep it BORN DIRE" — **XINLONG (ALPHA DRIVE ONE)** |
-| 25,757 | "Making it hot all the way #OUTWEST" — **MINHO (Stray Kids)** |
-| 24,182 | "Dancing our way from X to Z!!!" — **HARU** |
-| 22,212 | "Feels like DEJAVU?!" — **KWON EUNBI** |
+| 58,987 | **andTEAM · NICHOLAS** |
+| 45,910 | **WayV · KUN** |
+| 31,230 | **SEVENTEEN · DINO** |
+| 25,757 | **Stray Kids · MINHO** |
+| 22,238 | **KWON EUNBI** |
 
-**Observed.** Every Short above 40K is a collaboration, and **all eight** of the
-channel's collab Shorts sit inside the top twelve. The lowest-performing collab
-Short (22,212) still beat the Shorts median (16,940).
+**Observed.** Four of the channel's top five Shorts carry a major-idol guest.
+Meanwhile the eight Thai launch guests — NuNew, JAYLERR, PP Krit, Butterbear,
+PiXXiE, URBOYTJ, LUNAR, SIN Singular — sit **below** the channel's own solo
+median.
 
-**Interpretation.** This is a genuine, working audience-acquisition mechanic and
-the team clearly knows it — it is being used deliberately and repeatedly. It
-borrows another fandom's attention and points it at TEN. It is also the only
-thing on this channel that reliably brings in people who did not arrive for TEN.
+**Observed.** The strongest Short carrying no guest at all is
+**"😺When Louis is talking about his perfect crush to Leon…" at 32,705** — a bit
+about TEN's two cats, which outperforms every collaboration except andTEAM and
+WayV.
 
-**And it is being run at 8 of 47 Shorts — 17%.** That is the clearest
-underexploited asset on the channel.
+**Interpretation.** Collaboration is not the finding; it is the baseline. The
+finding is that the *scale of the guest's own fandom* is what moves the number,
+and that the channel's own personality content competes with it.
+
+**The objection to raise first.** All five major-guest Shorts ran inside the
+OUTWEST push, when the channel was at its most visible; the eight Thai guests
+ran in week one, when it was days old. **Guest scale and campaign timing are
+confounded and cannot be separated from this data.** n=5 is a strong indication,
+not a measurement.
+
+### 6.1 How the original figure came to be wrong
+
+Recorded because the method matters more than the number.
+
+1. The first classifier was **a hand-written list of K-pop names I had spotted
+   by eye** while reading the titles. It found 8 collaborations because it was
+   only ever looking for 8 kinds of name. It missed the entire Thai launch
+   block, which is 8 more.
+2. The second attempt matched those names as **loose substrings**, at which
+   point `Est` matched inside `OUTWEST` and swept nearly every campaign Short
+   into the "collaboration" bucket, producing 39 of 47.
+3. The classifier now extracts only **`#hashtag` and `@handle` tokens** and
+   matches them whole. Every one of the 47 assignments was printed and read
+   before the figures above were written.
+
+This is precisely the failure mode §10 warns about for format classification —
+keyword matching against a multilingual title set — and it happened to the
+collaboration analysis first. Any figure in this pack derived from title text
+should be treated as carrying this risk until it has been eyeballed.
 
 ---
 
@@ -329,7 +361,7 @@ are doing that job extremely well.** 25.76 comments per 1,000 views on a
 
 The error would be to judge them on views and cut them. The opportunity is that
 the channel currently has a well-served superfan tier and an under-served
-discovery tier, and only one mechanic (collab Shorts) bridging the two.
+discovery tier, with guest Shorts the main mechanic bridging the two.
 
 ---
 
@@ -372,10 +404,13 @@ The channel has nothing that earns views after a campaign ends. Lyric videos for
 OUTWEST and IRL are low-cost and would give the channel its first assets with a
 multi-year tail.
 
-**2. Scale the collab-Short mechanic from 17% to a deliberate cadence.**
-It is the only proven audience-acquisition tool on this channel — 1.9× the median
-of everything else, and it owns the entire top of the Shorts chart. It is
-currently being used opportunistically. It should be planned.
+**2. Choose guests for reach, not only for goodwill.**
+Guesting is already habitual — 21 of 47 Shorts — so the recommendation is not to
+do more of it. It is that the five major-idol guests run at a 31,230 median and
+hold four of the top five slots, while the eight Thai launch guests landed below
+the channel's own solo median. Same mechanic, very different outcomes. Worth
+booking deliberately. (See §6 for why this figure is an indication rather than a
+measurement.)
 
 **3. Publish a live performance asset from TEN:CORE0110.**
 The footage exists — it produced a recap and a 15-minute BTS. A performance video
@@ -465,9 +500,13 @@ Every number in this document, with its origin.
 | Long-form excl. OUTWEST, comments/1k | 10.5 | derived |
 | Long-form excl. OUTWEST, likes/1k | 90.0 | derived |
 | Shorts likes/1k · comments/1k | 139.8 · 5.71 | derived |
-| Shorts median views | 16,940 | derived |
-| Collab Shorts | 8, median 26,066 | derived |
-| Non-collab Shorts | 39, median 13,613 | derived |
+| Shorts median views | 16,941 | derived |
+| Shorts naming a guest | 21 of 47 | derived (#tag / @handle) |
+| — major K-pop idol guest | 5, median 31,230 | derived |
+| — other named guest | 8, median 19,451 | derived |
+| — Thai launch guest | 8, median 11,403 | derived |
+| Shorts with no guest named | 26, median 16,189 | derived |
+| Best Short with no guest (the cats) | 32,705 | retrieved |
 | Lyric / visualiser / audio / live count | 0 / 0 / 0 / 0 | derived (title keyword) |
 | Long-form missing tags | 2 of 12 | derived |
 | Shorts missing description | 42 of 47 | derived |

@@ -323,6 +323,26 @@ table.cmp tr:last-child td{border-bottom:none}
   .arch-bar{order:3}
 }
 
+/* ── THE THREE WORLDS ───────────────────────────────────────────────
+   Each release gets a column, a real frame and one line in the
+   channel's own voice. The quote is the point: it carries more of the
+   artist than any amount of description would. */
+.worlds{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,2.6vw,2.6rem);
+  margin-top:clamp(1.6rem,3vw,2.6rem)}
+@media(max-width:860px){.worlds{grid-template-columns:1fr}}
+.world .thumb{margin-bottom:1rem}
+.world-when{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim)}
+.world-name{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 800;
+  text-transform:uppercase;font-size:clamp(1.15rem,2.1vw,1.7rem);line-height:1;
+  margin-top:.45rem;color:var(--cream)}
+.world-sub{font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.06em;
+  color:var(--lilac);margin-top:.4rem}
+.world-body{color:var(--cool);font-size:clamp(.86rem,1.15vw,.97rem);
+  line-height:1.5;margin-top:.7rem}
+.world-quote{font-size:clamp(.95rem,1.4vw,1.15rem);line-height:1.35;color:var(--cream);
+  border-left:2px solid var(--lilac);padding-left:.8rem;margin-top:.9rem}
+
 /* ── THE JOURNEY ────────────────────────────────────────────────────
    The signature visual. Four stages, the first three carrying real
    assets and real numbers, the fourth drawn open. The arrow down the
@@ -519,6 +539,76 @@ table.cmp tr:last-child td{border-bottom:none}
 </section>
 
 
+<!-- ════════ 2b · THREE WORLDS ═════════════════════════════════════
+     Added late, because the first cut of this deck was charts on navy
+     and you could read all twelve slides without learning anything
+     about the artist. The material was sitting in the titles the whole
+     time: a Thai-language debut worked with Thai artists, a desert
+     record about heat and water, and a record literally called In Real
+     Life whose Shorts are TEN meeting people in real life. The copy
+     below quotes the channel's own words rather than describing them. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">Three songs · three worlds · 57 days</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
+      Three worlds,<br>back to back.
+    </h2>
+    <p class="big-p reveal">
+      This is not one campaign repeated three times. Each release has its own
+      language, its own palette and its own cast — and the channel switches between
+      them cleanly.
+    </p>
+
+    <div class="worlds reveal stagger">
+      <div class="world">
+        <a class="thumb" href="https://www.youtube.com/watch?v=69n3jB_Cp8A" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/69n3jB_Cp8A/maxresdefault.jpg" alt="" loading="lazy"></a>
+        <div class="world-when">30 July · Bangkok</div>
+        <h3 class="world-name">If You Don't&nbsp;Mean&nbsp;It</h3>
+        <div class="world-sub">ถ้าไม่คิด อย่าทำให้คิด</div>
+        <p class="world-body">
+          A Thai-language debut, worked almost entirely with Thai artists — NuNew,
+          JAYLERR, PP&nbsp;Krit, PiXXiE, Butterbear. Flowers, crushes, soft focus.
+        </p>
+        <div class="world-quote">“Send this to your crush”</div>
+      </div>
+
+      <div class="world">
+        <a class="thumb" href="https://www.youtube.com/watch?v=08ZJvWQ1pVM" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/08ZJvWQ1pVM/maxres2.jpg" alt="" loading="lazy"></a>
+        <div class="world-when">4 September · the desert</div>
+        <h3 class="world-name">OUTWEST</h3>
+        <div class="world-sub">heat · water · teal neon</div>
+        <p class="world-body">
+          The tentpole. Thirty supporting assets, two MV teasers, a fanchant guide,
+          and a guest list that reads like a festival bill.
+        </p>
+        <div class="world-quote">“💦 We found the water!”</div>
+      </div>
+
+      <div class="world">
+        <a class="thumb" href="https://www.youtube.com/watch?v=yi_S9bPQACg" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/yi_S9bPQACg/maxresdefault.jpg" alt="" loading="lazy"></a>
+        <div class="world-when">14 September · Busan</div>
+        <h3 class="world-name">IRL</h3>
+        <div class="world-sub">in real life · handwriting</div>
+        <p class="world-body">
+          Scrawled type over photographs, a setlog, a baseball game. The Shorts take
+          the title literally — TEN meeting people, in real life.
+        </p>
+        <div class="world-quote">“Met #Est In Real Life!”</div>
+      </div>
+    </div>
+
+    <div class="src reveal">
+      <b>Read.</b> Quotations are Short titles exactly as published. The Thai title is
+      the artist's own. Worlds are described from the assets themselves, not from any
+      campaign brief — we have not seen one.
+    </div>
+  </div>
+</section>
+
+
 <!-- ════════ 3 · CADENCE ═══════════════════════════════════════════ -->
 <section class="slide">
   <div class="bleed scrim-f"><img src="https://i.ytimg.com/vi/Q5mk7prdWRE/maxres1.jpg" alt=""></div>
@@ -598,7 +688,7 @@ table.cmp tr:last-child td{border-bottom:none}
       <div class="arch-row">
         <div class="arch-name">Discovery</div>
         <div class="arch-bar"><div class="arch-track"><div class="arch-fill hi" style="width:100%"></div></div><div class="arch-n">47</div></div>
-        <div class="arch-eg">Shorts, teasers, collaborations<br>8 tag another artist</div>
+        <div class="arch-eg">Shorts, teasers, collaborations<br>21 bring in a guest</div>
       </div>
       <div class="arch-row">
         <div class="arch-name">Scale</div>
@@ -663,10 +753,10 @@ table.cmp tr:last-child td{border-bottom:none}
           <div class="jformat">Collaboration Shorts</div>
         </div>
         <p class="jbody">
-          The only assets on the channel that reliably reach people who didn't arrive
-          for TEN. Borrowed attention from another fandom, pointed here.
+          The assets that reach people who didn't arrive for TEN. 21 of 47 Shorts
+          bring in a guest — and the bigger the guest's own fandom, the further it goes.
         </p>
-        <div class="jev"><b>26.0K</b> median<br>vs 13.6K for other Shorts</div>
+        <div class="jev"><b>31.2K</b> median with a<br>major idol guest · 16.2K solo</div>
       </div>
 
       <div class="jrow">
@@ -721,62 +811,83 @@ table.cmp tr:last-child td{border-bottom:none}
 <section class="slide">
   <div class="inner">
     <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
-    <div class="label reveal">Discovery · 47 Shorts analysed</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
-      Their best discovery<br>mechanic is already<br>working.
+    <div class="label reveal">Discovery · every one of the 47 Shorts classified</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:20ch">
+      They already<br>collaborate. The<br>partner is the variable.
     </h2>
     <p class="big-p reveal">
-      Eight of the channel's 47 Shorts tag another artist. Those eight are not a
-      slight improvement on the rest — they are <em class="hl">the top of the chart</em>.
+      <em class="hl">21 of the channel's 47 Shorts bring in another artist.</em> Guesting
+      is not an experiment here — it's a habit, running since the first week. But it
+      doesn't pay the same every time, and the difference is large enough to plan around.
     </p>
 
     <div class="vs reveal stagger">
       <div class="vs-row hi">
-        <div class="vs-k">Collab Shorts<br>n = 8</div>
+        <div class="vs-k">Major K-pop idols<br>n = 5</div>
         <div class="vs-bar" style="width:100%"></div>
-        <div class="vs-v">26.0K</div>
+        <div class="vs-v">31.2K</div>
       </div>
       <div class="vs-row">
-        <div class="vs-k">All other Shorts<br>n = 39</div>
-        <div class="vs-bar" style="width:52.3%"></div>
-        <div class="vs-v">13.6K</div>
+        <div class="vs-k">Other guests<br>n = 8</div>
+        <div class="vs-bar" style="width:62.3%"></div>
+        <div class="vs-v">19.5K</div>
+      </div>
+      <div class="vs-row">
+        <div class="vs-k">No guest named<br>n = 26</div>
+        <div class="vs-bar" style="width:51.8%"></div>
+        <div class="vs-v">16.2K</div>
+      </div>
+      <div class="vs-row">
+        <div class="vs-k">Thai launch guests<br>n = 8</div>
+        <div class="vs-bar" style="width:36.5%"></div>
+        <div class="vs-v">11.4K</div>
       </div>
     </div>
     <div class="label reveal" style="margin-top:.9rem">
-      Median views · approximately 1.9× · every Short above 40K is a collaboration
+      Median views by guest type · all 47 Shorts, none excluded
     </div>
 
     <div class="grid4 vgrid reveal stagger" style="margin-top:clamp(1.6rem,3vw,2.6rem)">
       <a class="thumb v" href="https://www.youtube.com/watch?v=dIBL1FTUhF8" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/dIBL1FTUhF8/oardefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>58.9K</b>andTEAM · NICHOLAS</span></a>
+        <span class="cap"><b>59.0K</b>andTEAM · NICHOLAS</span></a>
       <a class="thumb v" href="https://www.youtube.com/watch?v=N4VIucqdr7w" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/N4VIucqdr7w/oardefault.jpg" alt="" loading="lazy">
         <span class="cap"><b>45.9K</b>WayV · KUN</span></a>
+      <a class="thumb v" href="https://www.youtube.com/watch?v=H8M3QrFZPf4" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/H8M3QrFZPf4/oardefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>32.7K</b>Louis &amp; Leon · the cats</span></a>
       <a class="thumb v" href="https://www.youtube.com/watch?v=2JJbg-Nd4vA" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/2JJbg-Nd4vA/oardefault.jpg" alt="" loading="lazy">
         <span class="cap"><b>31.2K</b>SEVENTEEN · DINO</span></a>
-      <a class="thumb v" href="https://www.youtube.com/watch?v=-GyEDbAyO9I" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/-GyEDbAyO9I/oardefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>25.8K</b>Stray Kids · MINHO</span></a>
       </div>
     <div class="label reveal" style="margin-top:.8rem;font-size:.58rem">
-      Also: A2O MAY 26.1K · XINLONG / ALPHA DRIVE ONE 26.0K · HARU 24.2K · KWON EUNBI 22.2K
+      Third from left is not a collaboration. It's TEN's cats — the channel's
+      best-performing Short with no guest in it at all.
     </div>
 
     <div class="note reveal">
-      <b>The recommendation isn't "do collaborations".</b> It's that the team has already
-      built a repeatable fandom-bridging mechanic and is currently running it at
-      <b>8 of 47 Shorts</b>. Making it a planned part of release architecture — rather
-      than something that happens when a schedule allows — is the single clearest
-      way to extend what already works.
+      <b>Two things worth taking from this.</b> The guests who move the number are the
+      ones with their own stadium-scale fandom — <b>andTEAM, WayV, SEVENTEEN, Stray
+      Kids, KWON EUNBI</b> — and those five hold four of the channel's top five Shorts.
+      The Thai launch guests, by contrast, landed <b>below</b> the channel's own solo
+      median. Guesting works; guesting at scale works considerably harder.
+      <br><br>
+      And the strongest Short carrying no guest at all is <b>a bit about TEN's two
+      cats arguing about a crush</b>. On a channel this disciplined, that is not a
+      fluke worth ignoring.
     </div>
 
     <div class="src reveal">
-      <b>Read.</b> Medians, not means, because one 58.9K Short would drag an average.
-      A Short is counted as a collaboration where its title carries a hashtag naming
-      another artist. Every one of the eight sits inside the channel's top twelve
-      Shorts; the lowest (22.2K) still clears the 16.9K all-Shorts median.
+      <b>Read, and its limits.</b> A Short counts as a collaboration only where a
+      <b>#hashtag or @handle names another act</b> — matched on the tag, not as loose
+      text, after an earlier pass let "Est" match inside "OUTWEST" and swept in half
+      the campaign. Medians, not means, on a sample this small.
+      <br><br>
+      <b>The major-guest group is five Shorts, all published inside the OUTWEST push</b>,
+      when the channel was at its most visible. Partner scale and campaign timing
+      cannot be separated here. Treat the gap as a strong indication, not a
+      measurement.
     </div>
   </div>
 </section>
@@ -1078,11 +1189,13 @@ table.cmp tr:last-child td{border-bottom:none}
       <div class="act">
         <div class="act-n">01</div>
         <div>
-          <h3>Systematise the collab Shorts</h3>
+          <h3>Book guests for reach, not just for goodwill</h3>
           <p>
-            The discovery mechanic already works — 1.9× the median of every other
-            Short, and the entire top of the chart. Build it into release plans as a
-            planned beat rather than an opportunistic one. It's currently 8 of 47.
+            Guesting is already a habit — 21 of 47 Shorts. What varies is who: the five
+            major-idol collabs run at a 31.2K median and hold four of the top five
+            slots, while the Thai launch guests landed below the channel's own solo
+            median. Same mechanic, very different outcomes, and worth choosing on
+            purpose.
           </p>
         </div>
       </div>
@@ -1257,43 +1370,63 @@ table.cmp tr:last-child td{border-bottom:none}
       anywhere on the deck. It is treated as an outlier and set aside.
     </div>
 
-    <h3>Shorts: the collaboration effect</h3>
+    <h3>Shorts: who the guest is</h3>
     <table>
-      <tr><th>Group</th><th>n</th><th>Median views</th><th>Total views</th></tr>
-      <tr class="lead"><td>Shorts tagging another artist</td><td class="n">8</td><td class="n">26,016</td><td class="n">260K</td></tr>
-      <tr><td>All other Shorts</td><td class="n">39</td><td class="n">13,613</td><td class="n">597K</td></tr>
-      <tr><td>All Shorts</td><td class="n">47</td><td class="n">16,941</td><td class="n">857K</td></tr>
+      <tr><th>Group</th><th>n</th><th>Median views</th><th>Range</th></tr>
+      <tr class="lead"><td>Major K-pop idol guest</td><td class="n">5</td><td class="n">31,230</td><td class="n">22,238 – 58,987</td></tr>
+      <tr><td>Other named guest</td><td class="n">8</td><td class="n">19,451</td><td class="n">5,318 – 26,076</td></tr>
+      <tr><td>No guest named</td><td class="n">26</td><td class="n">16,189</td><td class="n">4,592 – 32,705</td></tr>
+      <tr><td>Thai launch guest</td><td class="n dn">8</td><td class="n dn">11,403</td><td class="n">6,482 – 17,146</td></tr>
+      <tr><td>All Shorts</td><td class="n">47</td><td class="n">16,941</td><td class="n">4,592 – 58,987</td></tr>
     </table>
     <p>
-      A ratio of <strong>1.91×</strong> on medians. Medians rather than means,
-      because a single 58,943-view Short would move an average on a sample of 47.
-      All eight collaborations sit inside the channel's top twelve Shorts, and the
-      weakest (22,215) still clears the all-Shorts median.
+      <strong>21 of 47 Shorts name a guest</strong>; 26 do not. The four groups are
+      mutually exclusive and sum to 47, so nothing is hidden. Medians rather than
+      means, on samples this small.
+    </p>
+    <p>
+      The shape worth noticing is that collaboration is <strong>not</strong>
+      automatically better: the eight Thai launch guests sit below the channel's own
+      solo median. What separates the top group is the guest's own audience size, not
+      the act of guesting.
     </p>
     <table>
-      <tr><th>Collaborator</th><th>Views</th></tr>
-      <tr><td>andTEAM · NICHOLAS</td><td class="n">58,943</td></tr>
-      <tr><td>WayV · KUN</td><td class="n">45,870</td></tr>
-      <tr><td>SEVENTEEN · DINO</td><td class="n">31,205</td></tr>
-      <tr><td>A2O MAY</td><td class="n">26,066</td></tr>
-      <tr><td>ALPHA DRIVE ONE · XINLONG</td><td class="n">25,965</td></tr>
+      <tr><th>Major-guest Shorts — all five</th><th>Views</th></tr>
+      <tr><td>andTEAM · NICHOLAS</td><td class="n">58,987</td></tr>
+      <tr><td>WayV · KUN</td><td class="n">45,910</td></tr>
+      <tr><td>SEVENTEEN · DINO</td><td class="n">31,230</td></tr>
       <tr><td>Stray Kids · MINHO</td><td class="n">25,757</td></tr>
-      <tr><td>HARU</td><td class="n">24,182</td></tr>
-      <tr><td>KWON EUNBI</td><td class="n">22,215</td></tr>
+      <tr><td>KWON EUNBI</td><td class="n">22,238</td></tr>
     </table>
 
     <div class="an-note">
-      <b>The objection to raise here.</b> Collaboration Shorts were made for the
-      OUTWEST campaign, when the channel was at its most visible. Some of the gap
-      may be timing rather than the mechanic. The counter is that non-collab Shorts
-      published in the same fortnight sit at the lower median — but with n=8, this
-      is a strong indication rather than a proof, and it should be described that way.
+      <b>A correction, recorded rather than quietly fixed.</b> An earlier version of
+      this page reported <b>8 collaborations of 47, at a 1.9× median advantage</b>.
+      That was wrong. The classifier was a hand-written list of K-pop names spotted by
+      eye, so it missed the entire Thai launch block — NuNew, JAYLERR, PP&nbsp;Krit,
+      Butterbear, PiXXiE, URBOYTJ, LUNAR, SIN&nbsp;Singular — every one of them a
+      collaboration. A second attempt over-corrected by matching loose text, at which
+      point <b>"Est" matched inside "OUTWEST"</b> and swept in half the campaign.
+      <br><br>
+      The classifier now reads only <b>#hashtags and @handles</b>, matched whole, and
+      every one of the 47 assignments was printed and read before these numbers were
+      written. This is the same failure the format section warns about, and it
+      happened here first.
+    </div>
+
+    <div class="an-note">
+      <b>The objection to raise on the figures above.</b> All five major-guest Shorts
+      were published inside the OUTWEST push, when the channel was at its most
+      visible; the eight Thai guests ran in week one, when it was days old. Guest
+      scale and campaign timing are <b>confounded and cannot be separated</b> with
+      this data. The gap is large and consistent, but n=5 is a strong indication,
+      not a measurement, and should be described that way wherever it travels.
     </div>
 
     <h3>Format classification</h3>
     <table>
       <tr><th>Format</th><th>Count</th><th>Layer</th></tr>
-      <tr><td>Shorts (incl. 3 MV teasers, 8 collaborations)</td><td class="n">47</td><td>Discovery</td></tr>
+      <tr><td>Shorts (incl. 3 MV teasers, 21 with a guest)</td><td class="n">47</td><td>Discovery</td></tr>
       <tr><td>Official Music Video</td><td class="n">3</td><td>Scale</td></tr>
       <tr><td>Dance Practice</td><td class="n">2</td><td>Scale</td></tr>
       <tr><td>Behind the Scenes / recap / sketch</td><td class="n">6</td><td>Depth</td></tr>
