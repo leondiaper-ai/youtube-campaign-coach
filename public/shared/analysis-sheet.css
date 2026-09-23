@@ -1,0 +1,183 @@
+/* ═══════════════════════════════════════════════════════════════════
+   THE ANALYSIS SHEET — the house pattern for every deep dive
+   ═══════════════════════════════════════════════════════════════════
+
+   Every campaign deep dive we make is a dark, photographic deck. Every
+   one of them also has a body of working behind it, and that working
+   kept ending up either at the foot of the scroll (where the deck then
+   ends on apparatus rather than on the recommendation) or nowhere at
+   all (where the page becomes unfalsifiable).
+
+   This is the answer, first built for Amyl and now standard: a LIGHT
+   DOCUMENT behind a fixed ANALYSIS control, top right. The change in
+   ground does the work — you are not in the deck any more, you are in
+   the evidence. Tables, with the sentence that reads each one
+   underneath, and the caveats called out rather than buried.
+
+   ── HOW TO USE IT ──────────────────────────────────────────────────
+   1. Link this file after the deck's own <style>:
+
+        <link rel="stylesheet" href="/shared/analysis-sheet.css">
+
+   2. Add the control, the sheet, and one class on the deck wrapper:
+
+        <div class="deck"> … the slides … </div>
+
+        <button class="an-btn" id="an-open">Analysis</button>
+        <div class="an-panel" id="an-panel" role="dialog" aria-modal="true"
+             aria-label="Analysis appendix">
+          <div class="an-in">
+            <button class="an-back" id="an-close">← Back to the review</button>
+            <h2>Analysis appendix</h2>
+            <div class="an-sub">…one line of provenance…</div>
+            <h3>Section</h3>
+            <table>…</table>
+            <p>The sentence that reads the table.</p>
+            <div class="an-note"><b>A caveat.</b> …</div>
+            <dl><dt>Method heading</dt><dd>…</dd></dl>
+          </div>
+        </div>
+
+   3. Include analysis-sheet.js, or copy its dozen lines.
+
+   ── PALETTE ────────────────────────────────────────────────────────
+   Every colour below reads a custom property with a fallback, so a
+   deck that already defines --ink, --cream and an accent gets its own
+   palette for free, and a deck that defines none still renders.
+
+   Decks name their accent differently — Ezra has --gold, Amyl has
+   --signal, Angus & Julia Stone has --clay. Set --an-accent once in
+   the deck's :root to whichever it is:
+
+        :root{ --an-accent: var(--gold); }
+
+   ── WHAT BELONGS IN A SHEET ────────────────────────────────────────
+   Every figure the deck asserts, as a row someone can disagree with.
+   Sample sizes inside the table, not in a footnote. The claim boundary
+   stated in words — what the page does NOT claim is usually the most
+   useful paragraph in the document. And the objection a reviewer
+   should raise first, raised by us.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root{
+  --an-paper: var(--cream, #F4EADC);
+  --an-ink:   var(--ink,   #120D0A);
+  --an-accent:var(--clay,  #B5663F);
+}
+
+/* ── The control ────────────────────────────────────────────────────*/
+.an-btn{
+  position:fixed;top:clamp(.9rem,2vw,1.5rem);right:clamp(.9rem,2vw,1.5rem);z-index:60;
+  font-family:'DM Mono',ui-monospace,monospace;font-size:.66rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--an-paper);
+  background:color-mix(in srgb, var(--an-ink) 72%, transparent);
+  border:1px solid color-mix(in srgb, var(--an-paper) 16%, transparent);
+  border-radius:3px;padding:.55rem .85rem;cursor:pointer;
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+  transition:border-color .18s ease,color .18s ease;
+}
+.an-btn:hover{border-color:var(--an-accent);color:var(--an-accent)}
+
+/* ── The sheet ──────────────────────────────────────────────────────
+   Hidden by default and shown with .open. The DECK is hidden outright
+   when it opens rather than being covered: an overlay sitting on a
+   12,000px document scrolls to slide one when the reader tries to
+   reach the top of the thing they actually asked for. */
+.an-panel{
+  display:none;position:absolute;inset:0 0 auto 0;z-index:70;
+  background:var(--an-paper);color:var(--an-ink);min-height:100vh;
+  padding:clamp(2.6rem,6vw,4.5rem) clamp(1.1rem,5vw,4rem) clamp(3rem,6vw,5rem);
+}
+.an-panel.open{display:block}
+body.sheet-open .deck{display:none}
+body.sheet-open .an-btn{display:none}
+.an-in{max-width:1000px;margin:0 auto}
+
+.an-back{
+  font-family:'DM Mono',ui-monospace,monospace;font-size:.66rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--an-ink);background:transparent;
+  border:1px solid color-mix(in srgb, var(--an-ink) 22%, transparent);
+  border-radius:3px;padding:.5rem .8rem;cursor:pointer;margin-bottom:2rem;
+  transition:border-color .16s ease,color .16s ease;
+}
+.an-back:hover{border-color:var(--an-accent);color:var(--an-accent)}
+
+/* ── Type ───────────────────────────────────────────────────────────*/
+.an-panel h2{
+  font-family:'Archivo','Anton',sans-serif;font-variation-settings:'wdth' 104,'wght' 780;
+  font-weight:800;text-transform:uppercase;
+  font-size:clamp(1.9rem,4vw,2.6rem);line-height:.98;margin-bottom:.45rem;
+}
+.an-panel .an-sub{
+  font-family:'DM Mono',ui-monospace,monospace;font-size:.7rem;letter-spacing:.14em;
+  text-transform:uppercase;color:color-mix(in srgb, var(--an-ink) 45%, transparent);
+}
+.an-panel h3{
+  font-family:'DM Mono',ui-monospace,monospace;font-size:.68rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--an-accent);
+  margin:2.6rem 0 .85rem;
+}
+.an-panel p{
+  font-size:.9rem;line-height:1.55;margin-bottom:.7rem;max-width:72ch;
+  color:color-mix(in srgb, var(--an-ink) 72%, transparent);
+}
+.an-panel p strong{color:var(--an-ink);font-weight:600}
+.an-panel ul{margin:0 0 1rem 1.1rem}
+.an-panel li{font-size:.88rem;line-height:1.5;margin-bottom:.4rem;
+  color:color-mix(in srgb, var(--an-ink) 72%, transparent)}
+
+.an-panel dl{margin-top:.4rem}
+.an-panel dt{
+  font-family:'DM Mono',ui-monospace,monospace;font-size:.66rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--an-ink);margin-top:1.1rem;
+}
+.an-panel dd{font-size:.88rem;line-height:1.5;max-width:72ch;margin-top:.25rem;
+  color:color-mix(in srgb, var(--an-ink) 72%, transparent)}
+
+/* ── Tables ─────────────────────────────────────────────────────────
+   td.n is the figure cell: display face, full weight, never wrapped.
+   .up / .dn / .miss carry direction where direction is the point. */
+.an-panel table{width:100%;border-collapse:collapse;margin:.9rem 0 1.4rem;font-size:.8rem}
+.an-panel th{
+  text-align:left;font-family:'DM Mono',ui-monospace,monospace;font-size:.58rem;
+  font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:color-mix(in srgb, var(--an-ink) 45%, transparent);
+  border-bottom:2px solid var(--an-ink);padding:.55rem .5rem;
+}
+.an-panel td{
+  padding:.55rem .5rem;vertical-align:baseline;
+  border-bottom:1px solid color-mix(in srgb, var(--an-ink) 12%, transparent);
+  color:color-mix(in srgb, var(--an-ink) 75%, transparent);
+}
+.an-panel td.n{
+  font-family:'Archivo','Anton',sans-serif;font-variation-settings:'wdth' 100,'wght' 700;
+  font-weight:700;font-size:.98rem;color:var(--an-ink);white-space:nowrap;
+}
+.an-panel td.up{color:#1F6B44}
+.an-panel td.dn,.an-panel td.miss{color:var(--rust,#A33A2E)}
+.an-panel tr.lead td{background:color-mix(in srgb, var(--an-accent) 13%, transparent)}
+
+/* ── Called-out caveats ─────────────────────────────────────────────
+   The objection a reviewer should raise first belongs here, raised by
+   us, not three paragraphs into a methodology note. */
+.an-note{
+  background:color-mix(in srgb, var(--an-ink) 5%, transparent);
+  border-left:3px solid var(--an-accent);
+  padding:.95rem 1.15rem;margin:1.1rem 0;font-size:.85rem;line-height:1.55;
+  max-width:74ch;color:color-mix(in srgb, var(--an-ink) 78%, transparent);
+}
+.an-note b{color:var(--an-ink)}
+
+/* The measures a cross-era comparison is allowed to rest on. */
+.an-fair{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0 1.2rem}
+.an-fair span{
+  font-family:'DM Mono',ui-monospace,monospace;font-size:.66rem;letter-spacing:.1em;
+  text-transform:uppercase;border:1px solid var(--an-accent);color:var(--an-accent);
+  border-radius:2px;padding:.32rem .55rem;
+}
+
+@media print{
+  .an-btn,.an-back{display:none}
+  .an-panel{display:block;position:static;min-height:0}
+  body.sheet-open .deck{display:none}
+}
