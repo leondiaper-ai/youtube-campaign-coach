@@ -301,7 +301,6 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
       header={header}
       allCount={rows.length}
       priorityCount={campaignCards.length}
-      backHref={`${linkPrefix}${linkSuffix}`}
       rail={campaignCards.map((c) => ({
         slug: c.slug,
         name: c.name,
@@ -325,11 +324,7 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
       }
       emptyPriority={
         <div className="text-center py-16">
-          <p className="text-[13px] text-ink/45 max-w-[400px] mx-auto">
-            Nothing pinned yet. Pin an artist with the 📍 beside their name on
-            the All Artists tab, and they appear here with a campaign card and
-            their full channel behaviour.
-          </p>
+          <p className="text-[13px] text-ink/45">Nothing pinned yet.</p>
         </div>
       }
     />

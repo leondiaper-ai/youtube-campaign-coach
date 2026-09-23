@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import {
-  ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince,
-  STATUS_COLOR, type ChannelState,
+  ARTISTS, mergeArtistLists, deriveFromLive, type ChannelState,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readLiveSnap } from '@/lib/kvCache';
@@ -16,19 +15,11 @@ import {
 } from '@/lib/youtubeGrowthOS';
 import { toGrowthInput } from '@/lib/youtube/normalizeChannelData';
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
-import {
-  CAMPAIGN_STATE_STYLE,
-  CAMPAIGN_STATES,
-  type CampaignState,
-} from '@/lib/teamWatcherStore';
-import {
-  CAMPAIGN_SIGNAL_STYLE,
-  type CampaignSignal,
-} from '@/lib/youtubeGrowthOS';
-import Sparkline from '@/components/Sparkline';
+import { CAMPAIGN_STATE_STYLE, type CampaignState } from '@/lib/teamWatcherStore';
+import { checkContentStructure } from '@/lib/contentStructure';
 import TeamDetailClient, { type SnapshotData, type CampaignTrackingData, type WeeklyProgressEntry } from '@/app/team-watcher/[slug]/TeamDetailClient';
 import TeamArtistActions from '@/components/TeamArtistActions';
-import { checkContentStructure } from '@/lib/contentStructure';
+import WatcherArtistView from '@/components/WatcherArtistView';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,12 +33,6 @@ export async function buildMetadata(slug: string, teamSlug = 'nordics') {
   };
 }
 
-// ── Design tokens ────────────────────────────────────────────────────────────
-const INK = '#0E0E0E';
-const PAPER = '#FAF7F2';
-const SOFT = '#F6F1E7';
-const MUTED = '#E9E2D3';
-
 const STATE_LABEL: Record<ChannelState, string> = {
   HEALTHY:           'Healthy',
   'WEAK CONVERSION': 'Weak Conversion',
@@ -55,17 +40,6 @@ const STATE_LABEL: Record<ChannelState, string> = {
   'AT RISK':         'At Risk',
   COLD:              'Cold',
 };
-
-function fmtDelta(n: number): string {
-  return (n >= 0 ? '+' : '') + fmtNum(n);
-}
-
-function deltaColor(v: number | null): string {
-  if (v == null) return 'rgba(14,14,14,0.25)';
-  if (v > 0) return '#0C6A3F';
-  if (v < 0) return '#8A1F0C';
-  return 'rgba(14,14,14,0.4)';
-}
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -102,7 +76,6 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
     views7Delta: views7Val,
   }) : null;
   const channelState: ChannelState = derived?.status ?? 'COLD';
-  const sc = STATUS_COLOR[channelState];
 
   // Match existing artist for phase/type
   const custom = await listCustomArtists();
@@ -158,9 +131,6 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
   const viewsWoW = computeWoW(nc.views7d, views14Raw);
 
   const lastUpDays = nc.cadence.lastUploadDaysAgo;
-
-  // Best available movement data
-  const ba = nc.bestAvailable;
 
   // Campaign content stats (if campaign is active)
   const campaignUploads = campaignStart
@@ -270,10 +240,19 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
 
   const stateStyle = CAMPAIGN_STATE_STYLE[entry.campaignState as CampaignState] ?? CAMPAIGN_STATE_STYLE.Monitoring;
 
+  /* ── ONE ARTIST PAGE, NOT TWO ──────────────────────────────────────
+     This used to be its own layout: a thinner set of tiles built
+     separately from the Watcher's. Two pages analysing the same channel
+     drift, and the one nobody reads daily drifts furthest — so a team
+     now reads exactly what we read. What differs is the chrome around
+     it (their pin, their way back, no Coach) and their own notes and
+     campaign fields, which hang underneath. */
   return (
-    <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-      <div className="max-w-[880px] mx-auto px-6 py-10">
-        {/* Breadcrumb + pin / behaviour, in the Watcher's own corner */}
+    <WatcherArtistView
+      slug={slug}
+      coachBadge={false}
+      signature="Channel activity · public YouTube data · updated daily"
+      chrome={
         <TeamArtistActions
           slug={slug}
           artistName={entry.displayName}
@@ -283,242 +262,45 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
           backLabel="Team Campaign Board"
           initiallyPinned={!!entry.pinnedAt}
         />
-
-        {/* Header */}
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45 mb-1">
-          YouTube Campaign System
-        </div>
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <h1 className="font-black text-3xl">{entry.displayName}</h1>
-          {/* Campaign state pill */}
-          <span
-            className="px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-[0.08em]"
-            style={{ background: stateStyle.bg, color: stateStyle.fg }}
-          >
-            {entry.campaignState}
-          </span>
-          {entry.regionTag && (
-            <span
-              className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-[0.08em]"
-              style={{ background: SOFT, color: 'rgba(14,14,14,0.4)' }}
-            >
-              {entry.regionTag}
-            </span>
-          )}
-        </div>
-
-        {/* Dual health labels */}
-        <div className="flex items-center gap-3 mt-3">
-          <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.14em]"
-            style={{ background: sc.bg, color: sc.fg }}
-          >
-            <span className="w-2 h-2 rounded-full" style={{ background: sc.dot }} />
-            {STATE_LABEL[channelState]}
-          </span>
-          {campSig.signal !== 'NO_CAMPAIGN' && (
-            <span
-              className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-[0.08em]"
-              style={{
-                background: CAMPAIGN_SIGNAL_STYLE[campSig.signal as CampaignSignal]?.bg ?? SOFT,
-                color: CAMPAIGN_SIGNAL_STYLE[campSig.signal as CampaignSignal]?.fg ?? INK,
-              }}
-            >
-              {campSig.label}
-            </span>
-          )}
-        </div>
-
-        {/* Diagnosis */}
-        {derived?.reason && (
-          <div className="mt-4 text-[14px] font-semibold text-ink/70 leading-snug max-w-[60ch]">
-            {derived.reason}
-          </div>
-        )}
-
-        {/* Performance snapshot — 4-tile grid */}
-        <div className="mt-6 grid grid-cols-4 gap-3">
-          <MetricTile
-            label={ba.source === 'live_7d' ? 'Views (7d)' : ba.source === 'campaign_period' ? 'Channel views' : 'Views (7d)'}
-            value={ba.viewsValue != null ? fmtDelta(ba.viewsValue) : '—'}
-            color={ba.viewsValue != null ? deltaColor(ba.viewsValue) : undefined}
-            sub={ba.sublabel}
-          />
-          <MetricTile
-            label={ba.source === 'live_7d' ? 'Subs (7d)' : ba.source === 'campaign_period' ? 'Channel subs' : 'Subs (7d)'}
-            value={ba.subsValue != null ? fmtDelta(ba.subsValue) : (nc.subs != null ? fmtNum(nc.subs) : '—')}
-            color={ba.subsValue != null ? deltaColor(ba.subsValue) : undefined}
-            sub={ba.subsValue != null ? ba.sublabel : 'total'}
-          />
-          <MetricTile
-            label="Uploads (30d)"
-            value={nc.cadence.uploads30d != null ? String(nc.cadence.uploads30d) : '—'}
-            sub={nc.cadence.shorts30d > 0 ? `${nc.cadence.shorts30d} Shorts` : null}
-          />
-          <MetricTile
-            label="Last upload"
-            value={lastUpDays != null ? (lastUpDays === 0 ? 'Today' : `${lastUpDays}d ago`) : '—'}
-            color={lastUpDays != null ? (lastUpDays <= 3 ? '#0C6A3F' : lastUpDays >= 14 ? '#8A1F0C' : undefined) : undefined}
-            sub={null}
+      }
+      footer={
+        <div className="mt-10">
+          <TeamDetailClient
+            team={team}
+            channelId={entry.channelId}
+            initialNotes={entry.teamNotes}
+            campaignState={entry.campaignState}
+            regionTag={entry.regionTag}
+            hasCampaign={!!campaignStart && !!entry.campaignName}
+            initialCampaignName={entry.campaignName}
+            campaignTracking={campaignTracking}
+            snapshotData={{
+              artistName: entry.displayName,
+              channelState: STATE_LABEL[channelState],
+              campaignState: entry.campaignState,
+              diagnosis: derived?.reason ?? 'No data yet',
+              nextAction: derived?.nextAction ?? null,
+              cadenceLine: nc.cadence.cadenceLine,
+              subs: nc.subs,
+              views7d: views7Val,
+              subs7d: subs7Val,
+              uploads30d: nc.cadence.uploads30d,
+              shorts30d: nc.cadence.shorts30d,
+              lastUpDays: lastUpDays ?? null,
+              spk,
+              viewsWoW: viewsWoW?.value ?? null,
+              subsWoW: subsWoW?.value ?? null,
+              campaignName: entry.campaignName,
+              campaignDay,
+              campaignViewsDelta,
+              campaignSubsDelta,
+              campaignContentViews,
+              campaignContentCount,
+              campaignShortsCount,
+            }}
           />
         </div>
-
-        {/* Movement source indicator */}
-        {ba.source !== 'live_7d' && ba.source !== 'none' && ba.explanation && (
-          <div className="mt-2 text-[10px] italic text-ink/35">{ba.explanation}</div>
-        )}
-
-        {/* Conversion + Sparkline row */}
-        <div className="mt-6 flex items-end gap-6 flex-wrap">
-          <div>
-            <div
-              className="text-[24px] font-black leading-none tabular-nums"
-              style={{ color: spk != null ? (spk >= 2 ? '#0C6A3F' : spk >= 1 ? '#7A5A00' : '#8A1F0C') : 'rgba(14,14,14,0.25)' }}
-            >
-              {spk != null ? spk.toFixed(1) : '—'}
-            </div>
-            <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold" style={{
-              color: spk != null ? (spk >= 2 ? '#0C6A3F' : spk >= 1 ? '#7A5A00' : '#8A1F0C') : 'rgba(14,14,14,0.25)',
-            }}>
-              subs/1K views{spk != null ? ` · ${spk >= 2 ? 'strong' : spk >= 1 ? 'healthy' : 'weak'}` : ''}
-            </div>
-          </div>
-
-          {viewsWoW?.value != null && (
-            <div>
-              <div
-                className="text-[18px] font-black leading-none tabular-nums"
-                style={{ color: deltaColor(viewsWoW.value) }}
-              >
-                {viewsWoW.value >= 0 ? '+' : ''}{viewsWoW.value.toFixed(0)}%
-              </div>
-              <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold text-ink/35">
-                views WoW
-              </div>
-            </div>
-          )}
-
-          {subsWoW?.value != null && (
-            <div>
-              <div
-                className="text-[18px] font-black leading-none tabular-nums"
-                style={{ color: deltaColor(subsWoW.value) }}
-              >
-                {subsWoW.value >= 0 ? '+' : ''}{subsWoW.value.toFixed(0)}%
-              </div>
-              <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold text-ink/35">
-                subs WoW
-              </div>
-            </div>
-          )}
-
-          <div className="ml-auto rounded-lg px-3 py-2" style={{ background: sparkColor.fill }}>
-            <Sparkline
-              data={nc.sparklineSubs30d}
-              width={160}
-              height={48}
-              stroke={sparkColor.stroke}
-              fill={sparkColor.fill}
-            />
-            <div className="text-[9px] text-right mt-0.5 uppercase tracking-wider font-bold" style={{ color: sparkColor.stroke }}>
-              30d subs trend
-            </div>
-          </div>
-        </div>
-
-        {/* Actions from derived */}
-        {derived?.nextAction && (
-          <div className="mt-8 rounded-lg p-4" style={{ background: SOFT }}>
-            <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-2">
-              Recommended action
-            </div>
-            <div className="text-[13px] font-medium leading-snug flex gap-2">
-              <span className="text-ink/40 shrink-0">&rarr;</span>
-              <span>{derived.nextAction}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Content cadence */}
-        <div className="mt-6 rounded-lg p-4 border" style={{ borderColor: MUTED, background: PAPER }}>
-          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
-            Content cadence
-          </div>
-          <div className="text-[13px] text-ink/60 leading-snug">
-            {nc.cadence.cadenceLine}
-          </div>
-        </div>
-
-        {/* Team notes + snapshot + campaign — client component for interactivity */}
-        <TeamDetailClient
-          team={team}
-          channelId={entry.channelId}
-          initialNotes={entry.teamNotes}
-          campaignState={entry.campaignState}
-          regionTag={entry.regionTag}
-          hasCampaign={!!campaignStart && !!entry.campaignName}
-          initialCampaignName={entry.campaignName}
-          campaignTracking={campaignTracking}
-          snapshotData={{
-            artistName: entry.displayName,
-            channelState: STATE_LABEL[channelState],
-            campaignState: entry.campaignState,
-            diagnosis: derived?.reason ?? 'No data yet',
-            nextAction: derived?.nextAction ?? null,
-            cadenceLine: nc.cadence.cadenceLine,
-            subs: nc.subs,
-            views7d: views7Val,
-            subs7d: subs7Val,
-            uploads30d: nc.cadence.uploads30d,
-            shorts30d: nc.cadence.shorts30d,
-            lastUpDays: lastUpDays ?? null,
-            spk,
-            viewsWoW: viewsWoW?.value ?? null,
-            subsWoW: subsWoW?.value ?? null,
-            campaignName: entry.campaignName,
-            campaignDay,
-            campaignViewsDelta,
-            campaignSubsDelta,
-            campaignContentViews,
-            campaignContentCount,
-            campaignShortsCount,
-          }}
-        />
-      </div>
-    </main>
-  );
-}
-
-// ── MetricTile ──────────────────────────────────────────────────────────────
-
-function MetricTile({
-  label,
-  value,
-  sub,
-  color,
-}: {
-  label: string;
-  value: string;
-  sub: string | null;
-  color?: string;
-}) {
-  return (
-    <div
-      className="rounded-lg px-4 py-3"
-      style={{ background: SOFT }}
-    >
-      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-1">
-        {label}
-      </div>
-      <div
-        className="text-[20px] font-black leading-none tabular-nums"
-        style={{ color: color ?? INK }}
-      >
-        {value}
-      </div>
-      {sub && (
-        <div className="text-[10px] text-ink/35 mt-1">{sub}</div>
-      )}
-    </div>
+      }
+    />
   );
 }
