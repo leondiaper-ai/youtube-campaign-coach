@@ -323,6 +323,82 @@ table.cmp tr:last-child td{border-bottom:none}
   .arch-bar{order:3}
 }
 
+/* ── CHROME ─────────────────────────────────────────────────────────
+   Borrowed from the Ezra deck. A twelve-slide scroll with no fixed
+   furniture reads as a very long web page; a thin bar carrying the
+   artist and the section names makes it read as a document you are
+   moving through. The Analysis control is pulled up into it so there
+   is one piece of chrome rather than two. */
+.chrome{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.72rem var(--pad);
+  background:color-mix(in srgb, var(--ink) 90%, transparent);
+  border-bottom:1px solid var(--line);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.chrome-id{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--cream);white-space:nowrap}
+.chrome-id i{font-style:normal;color:var(--dim)}
+.chrome-nav{display:flex;gap:clamp(.7rem,1.6vw,1.5rem);align-items:center;
+  margin-left:auto;margin-right:clamp(5.2rem,7vw,7rem)}
+.chrome-nav a{
+  font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);text-decoration:none;
+  transition:color .16s ease;white-space:nowrap;
+}
+.chrome-nav a:hover{color:var(--lilac)}
+@media(max-width:900px){.chrome-nav{display:none}}
+/* The shared sheet fixes this top-right on its own; re-seat it inside
+   the bar so the two don't stack. */
+.an-btn{top:.55rem;padding:.42rem .7rem}
+.slide{scroll-margin-top:48px}
+body.sheet-open .chrome{display:none}
+
+/* ── THE CONTACT SHEET ──────────────────────────────────────────────
+   Ezra's move, and the right one for this channel: 21 of TEN's 47
+   Shorts have somebody else in them, so the guest list IS the texture.
+   Full-bleed grid of the actual frames, gradient wash rather than a
+   flat scrim so the top stays photographic while the bottom carries
+   type. Seven across by three down is exactly 21 — no filler tiles. */
+.sheet-grid{
+  position:absolute;inset:0;z-index:0;display:grid;
+  grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;gap:3px;padding:3px;
+}
+.sheet-grid a{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
+.sheet-grid img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.85);transition:filter .4s ease,transform .5s ease}
+.sheet-grid a:hover img{filter:saturate(1.1);transform:scale(1.04)}
+.sheet-grid a.major::after{
+  content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 2px var(--lilac);
+}
+.sheet-name{
+  position:absolute;left:0;right:0;bottom:0;padding:.45rem .4rem .35rem;
+  background:linear-gradient(to top,rgba(7,12,24,.95),rgba(7,12,24,0));
+  font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cream);line-height:1.2;
+}
+.sheet-wash{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,rgba(7,12,24,.99) 30%,rgba(7,12,24,.94) 46%,
+    rgba(7,12,24,.6) 70%,rgba(7,12,24,.25) 100%);
+}
+.sheet-type{position:relative;z-index:3;margin-top:auto;width:100%;max-width:1400px;
+  margin-left:auto;margin-right:auto}
+@media(max-width:900px){.sheet-grid{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:560px){.sheet-grid{grid-template-columns:repeat(4,1fr)}
+  .sheet-name{display:none}}
+
+/* ── PULL QUOTE ─────────────────────────────────────────────────────
+   The channel's own words, attributed like a source — because on this
+   deck they are one. */
+.quote{border-left:3px solid var(--lilac);padding:.15rem 0 .15rem 1.15rem;
+  font-size:clamp(1.05rem,1.6vw,1.45rem);line-height:1.38;color:var(--cream);
+  max-width:40ch}
+.quote cite{display:block;margin-top:.6rem;font-style:normal;
+  font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim)}
+
 /* ── THE THREE WORLDS ───────────────────────────────────────────────
    Each release gets a column, a real frame and one line in the
    channel's own voice. The quote is the point: it carries more of the
@@ -461,6 +537,18 @@ table.cmp tr:last-child td{border-bottom:none}
 </head>
 <body>
 
+<div class="chrome">
+  <div class="chrome-id">TEN <i>· @tenoffcl</i></div>
+  <nav class="chrome-nav">
+    <a href="#worlds">Worlds</a>
+    <a href="#rhythm">Rhythm</a>
+    <a href="#system">System</a>
+    <a href="#guests">Guests</a>
+    <a href="#depth">Depth</a>
+    <a href="#next">What next</a>
+  </nav>
+</div>
+
 <div class="deck">
 
 <!-- ════════ 1 · COVER ════════════════════════════════════════════ -->
@@ -547,7 +635,7 @@ table.cmp tr:last-child td{border-bottom:none}
      record about heat and water, and a record literally called In Real
      Life whose Shorts are TEN meeting people in real life. The copy
      below quotes the channel's own words rather than describing them. -->
-<section class="slide">
+<section class="slide" id="worlds">
   <div class="inner">
     <div class="label reveal">Three songs · three worlds · 57 days</div>
     <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
@@ -610,7 +698,7 @@ table.cmp tr:last-child td{border-bottom:none}
 
 
 <!-- ════════ 3 · CADENCE ═══════════════════════════════════════════ -->
-<section class="slide">
+<section class="slide" id="rhythm">
   <div class="bleed scrim-f"><img src="https://i.ytimg.com/vi/Q5mk7prdWRE/maxres1.jpg" alt=""></div>
   <div class="inner">
     <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
@@ -672,7 +760,7 @@ table.cmp tr:last-child td{border-bottom:none}
 
 
 <!-- ════════ 4 · THE ARCHITECTURE ══════════════════════════════════ -->
-<section class="slide">
+<section class="slide" id="system">
   <div class="inner">
     <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
     <div class="label reveal">Content architecture · all 59 uploads classified</div>
@@ -807,6 +895,52 @@ table.cmp tr:last-child td{border-bottom:none}
 </section>
 
 
+<!-- ════════ 5b · THE CONTACT SHEET ════════════════════════════════
+     Every Short with somebody else in it, as one picture. Seven across
+     by three down is exactly 21, so no tile is filler and the grid is
+     the count. The lilac inset ring marks the five major-idol guests —
+     the argument on the next slide, visible here before it is made.
+     Ezra's device; this channel earns it more, because the guest list
+     is the texture rather than a decoration on top of one. -->
+<section class="slide" id="guests" style="justify-content:flex-end;padding-left:0;padding-right:0">
+  <div class="sheet-grid">
+    <a class="major" href="https://www.youtube.com/watch?v=dIBL1FTUhF8" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/dIBL1FTUhF8/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">andTEAM<br>59.0K</span></a>
+    <a class="major" href="https://www.youtube.com/watch?v=N4VIucqdr7w" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/N4VIucqdr7w/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">WayV · KUN<br>45.9K</span></a>
+    <a class="major" href="https://www.youtube.com/watch?v=2JJbg-Nd4vA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/2JJbg-Nd4vA/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">SEVENTEEN<br>31.2K</span></a>
+    <a href="https://www.youtube.com/watch?v=3fYw2bF2yH0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/3fYw2bF2yH0/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">A2O MAY<br>26.1K</span></a>
+    <a href="https://www.youtube.com/watch?v=_SynwmW_y3M" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/_SynwmW_y3M/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">XINLONG<br>26.0K</span></a>
+    <a class="major" href="https://www.youtube.com/watch?v=-GyEDbAyO9I" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/-GyEDbAyO9I/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">Stray Kids<br>25.8K</span></a>
+    <a href="https://www.youtube.com/watch?v=yBDyq8X_EzI" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/yBDyq8X_EzI/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">HARU<br>24.2K</span></a>
+    <a class="major" href="https://www.youtube.com/watch?v=2wAKGKd7Z6k" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/2wAKGKd7Z6k/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">KWON EUNBI<br>22.2K</span></a>
+    <a href="https://www.youtube.com/watch?v=qNH0tBjynZQ" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/qNH0tBjynZQ/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">SAKI<br>20.9K</span></a>
+    <a href="https://www.youtube.com/watch?v=-oemGwRr4Vg" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/-oemGwRr4Vg/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">YSY<br>18.0K</span></a>
+    <a href="https://www.youtube.com/watch?v=lv-h7u1UvAA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/lv-h7u1UvAA/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">JAYLERR<br>17.1K</span></a>
+    <a href="https://www.youtube.com/watch?v=uvWMTY8Sj1g" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/uvWMTY8Sj1g/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">PP KRIT<br>14.9K</span></a>
+    <a href="https://www.youtube.com/watch?v=ZCBK1Y_pfaw" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/ZCBK1Y_pfaw/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">SEOHYEON<br>13.6K</span></a>
+    <a href="https://www.youtube.com/watch?v=gqpiCWaQtlc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/gqpiCWaQtlc/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">NuNew<br>13.0K</span></a>
+    <a href="https://www.youtube.com/watch?v=QHHlyw-1-lM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/QHHlyw-1-lM/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">PiXXiE<br>12.6K</span></a>
+    <a href="https://www.youtube.com/watch?v=168ebFD21vY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/168ebFD21vY/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">Est<br>11.3K</span></a>
+    <a href="https://www.youtube.com/watch?v=Yl78GkmF9Uo" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Yl78GkmF9Uo/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">LUNAR<br>10.2K</span></a>
+    <a href="https://www.youtube.com/watch?v=oFHnNo5Nz5A" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/oFHnNo5Nz5A/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">Butterbear<br>9.9K</span></a>
+    <a href="https://www.youtube.com/watch?v=zkcq_KE2CeM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/zkcq_KE2CeM/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">URBOYTJ<br>7.7K</span></a>
+    <a href="https://www.youtube.com/watch?v=8G-9VMMQV5U" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/8G-9VMMQV5U/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">SIN Singular<br>6.5K</span></a>
+    <a href="https://www.youtube.com/watch?v=YwPi-oGRJbc" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/YwPi-oGRJbc/oardefault.jpg" alt="" loading="lazy"><span class="sheet-name">TUNEXX<br>5.3K</span></a>
+  </div>
+  <div class="sheet-wash"></div>
+  <div class="sheet-type" style="padding:0 var(--pad)">
+    <div class="label reveal">Every Short with a guest in it · 21 of 47</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      The room is full<br>of other people.
+    </h2>
+    <p class="big-p reveal" style="max-width:58ch">
+      Bangkok to Seoul, rookies to stadium acts, a Thai cartoon bear. Nearly half
+      of everything TEN posts short-form has somebody else standing in the frame —
+      and the five ringed in lilac are the ones that travelled furthest.
+    </p>
+  </div>
+</section>
+
+
 <!-- ════════ 6 · THE COLLAB ENGINE ═════════════════════════════════ -->
 <section class="slide">
   <div class="inner">
@@ -894,7 +1028,10 @@ table.cmp tr:last-child td{border-bottom:none}
 
 
 <!-- ════════ 7 · BTS DEPTH ═════════════════════════════════════════ -->
-<section class="slide">
+<section class="slide" id="depth">
+  <!-- The recording booth, because the argument on this slide is about
+       intimacy and the frame carries it faster than the bars do. -->
+  <div class="bleed scrim-l"><img src="https://i.ytimg.com/vi/ov78Zu8-dH4/maxresdefault.jpg" alt="" loading="lazy"></div>
   <div class="inner">
     <div class="tier-mark reveal"><i></i><i></i><i></i><i class="off"></i></div>
     <div class="label reveal">Depth · long-form engagement structure</div>
@@ -947,6 +1084,11 @@ table.cmp tr:last-child td{border-bottom:none}
         quietly shortened or dropped. The data here argues the opposite: keep it long,
         keep it frequent, and measure it on the audience it is actually serving.
       </p>
+    </div>
+
+    <div class="quote reveal" style="margin-top:clamp(1.6rem,3vw,2.4rem)">
+      “Kitty TEN's workday in Korea 🐾”
+      <cite>Short, 13 September — 12,496 views. The channel is happy to be small on purpose.</cite>
     </div>
 
     <div class="src reveal">
@@ -1178,7 +1320,7 @@ table.cmp tr:last-child td{border-bottom:none}
 
 
 <!-- ════════ 12 · WHAT NEXT ════════════════════════════════════════ -->
-<section class="slide">
+<section class="slide" id="next">
   <div class="inner">
     <div class="label reveal">Where we'd start</div>
     <h2 class="display reveal" style="margin:.9rem 0 1.6rem;max-width:18ch">
