@@ -88,6 +88,30 @@ the claim boundary in plain sentences; everything else goes in the
 audit pack, which exists precisely so the sheet does not have to carry
 it.
 
+### What does *not* belong on a slide
+
+The mirror of the rule above, and the one that keeps getting broken.
+**Caveats, classification rules and claim boundaries belong in the sheet,
+not on the deck.** They are the reason the sheet exists.
+
+This has now been cut twice by the same reader, in the same words —
+"lets cut all this, its confusing" on Angus & Julia Stone, and again on
+TEN. The TEN deck had reached *seven* apparatus boxes across twelve
+slides: "What this does and doesn't say", "What we are not saying",
+"Read, and its limits", a "Method" note about keyword matching. Each was
+defensible on its own and the accumulation was fatal — a reader looking
+for the finding had to wade through a paragraph of what the finding
+wasn't.
+
+The test: **if a box explains how we know, or what we are not claiming,
+it goes in the sheet.** If it states what we found, it stays. A deck
+should carry one provenance line total, and it should fit on two lines.
+
+Caveats that genuinely change how a number should be read — a confound,
+an n of 5 — are not exempt. They go in the sheet as an `.an-note`, where
+someone checking the figure will actually meet them, rather than on the
+slide where they read as throat-clearing.
+
 ### Two things learned the hard way
 
 - **The deck is hidden, not covered.** `body.sheet-open .deck{display:none}`.
