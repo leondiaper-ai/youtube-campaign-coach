@@ -59,19 +59,20 @@
   campaign channel. Every section answers one of three questions and
   nothing else:
 
-      What changed?                  slides 2, 3
+      What changed?                      slides 2, 3
       What did the audience respond to?  slides 4, 5, 6, 7, 8
-      What should the team do next?   slides 9, 10
+      What should the team do next?      slides 9, 10, 11
 
   The page does NOT claim the campaign performed better. It claims it
   was RUN differently. That distinction is the difference between a
   finding we can defend and one we cannot, and it is why the scorecard
   is five counts rather than a view total.
 
-  Methodology is deliberately downstream of the argument — available in
-  the notes at the foot of the page, and in full in the audit pack at
-  audits/ANGUS-AND-JULIA-STONE-audit.md. The front of the page is for
-  the insight.
+  Methodology is deliberately downstream of the argument. It lives
+  behind the ANALYSIS control, fixed top right, rather than at the foot
+  of the scroll — so the deck ends on the recommendation and the
+  working is still one click away. Full detail is in the audit pack at
+  audits/ANGUS-AND-JULIA-STONE-audit.md.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -293,6 +294,80 @@ table.cmp tr:last-child td{border-bottom:none}
   text-transform:uppercase;font-size:clamp(1.05rem,2vw,1.6rem);line-height:1.02;color:var(--cream)}
 .act p{color:var(--warm);margin-top:.5rem;max-width:62ch;font-size:clamp(.92rem,1.2vw,1.05rem)}
 
+
+/* ── THE WORLD MOSAIC ───────────────────────────────────────────────
+   Seven real frames from the campaign, one per layer, so the argument
+   that it became a content world is made by the pictures rather than
+   asserted over a bar chart. The tiles carry their own labels. */
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.4rem,.9vw,.7rem)}
+.mosaic .tile{position:relative;display:block;overflow:hidden;border-radius:3px;
+  background:var(--ink-3);aspect-ratio:16/9}
+.mosaic .tile.wide{grid-column:span 2}
+.mosaic .tile.tall{aspect-ratio:9/16;grid-row:span 2}
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.92);transition:transform .55s ease,filter .35s ease}
+.mosaic .tile:hover img{transform:scale(1.04);filter:saturate(1.05)}
+.mosaic .tl{position:absolute;left:0;right:0;bottom:0;padding:.55rem .6rem;
+  background:linear-gradient(to top,rgba(18,13,10,.93),rgba(18,13,10,0));
+  font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--cream);line-height:1.35}
+.mosaic .tl b{display:block;color:var(--amber);font-weight:400;font-size:.94em}
+@media(max-width:860px){
+  .mosaic{grid-template-columns:repeat(2,1fr)}
+  .mosaic .tile.tall{grid-row:span 1;aspect-ratio:16/9}
+}
+
+/* ── THE ANALYSIS TAB ───────────────────────────────────────────────
+   Method is not the story, but it has to be one click away or the
+   page is unfalsifiable. It sits behind a fixed control rather than
+   at the foot, so the deck ends on the recommendation and the working
+   is still there for anyone who wants it. */
+.an-btn{
+  position:fixed;top:clamp(.9rem,2vw,1.5rem);right:clamp(.9rem,2vw,1.5rem);z-index:60;
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cream);background:rgba(18,13,10,.72);border:1px solid var(--line);
+  border-radius:3px;padding:.55rem .85rem;cursor:pointer;
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);transition:all .18s ease;
+}
+.an-btn:hover{border-color:var(--amber);color:var(--amber)}
+.an-panel{
+  position:fixed;inset:0;z-index:70;background:var(--ink-2);
+  overflow-y:auto;padding:clamp(3.4rem,7vw,5.5rem) var(--pad) clamp(3rem,6vw,5rem);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.an-panel.open{opacity:1;pointer-events:auto}
+.an-close{
+  position:fixed;top:clamp(.9rem,2vw,1.5rem);right:clamp(.9rem,2vw,1.5rem);z-index:80;
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--amber);background:rgba(18,13,10,.9);border:1px solid var(--amber);
+  border-radius:3px;padding:.55rem .85rem;cursor:pointer;display:none;
+}
+.an-panel.open ~ .an-close{display:block}
+body.locked{overflow:hidden}
+
+/* ── THE SUPPORT GAP ────────────────────────────────────────────────
+   One row per catalogue song. The bar is lifetime views; the chips say
+   which supporting assets exist. Absence is the point, so the missing
+   ones are drawn as outlines rather than left off. */
+.gap-row{display:grid;grid-template-columns:minmax(140px,1.1fr) 1fr auto;
+  gap:clamp(.7rem,1.6vw,1.4rem);align-items:center;
+  padding:clamp(.55rem,1vw,.8rem) 0;border-bottom:1px solid var(--line)}
+.gap-row:last-child{border-bottom:none}
+.gap-song{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 700;
+  font-size:clamp(.88rem,1.3vw,1.08rem)}
+.gap-song i{font-style:normal;color:var(--dim);font-family:'DM Mono',monospace;
+  font-size:.62rem;letter-spacing:.1em;display:block;margin-top:.15rem}
+.gap-bar{height:clamp(9px,1.3vw,13px);border-radius:2px;background:var(--clay);min-width:3px}
+.gap-chips{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end}
+.chip{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.09em;text-transform:uppercase;
+  padding:.22rem .4rem;border-radius:2px;white-space:nowrap}
+.chip.has{background:rgba(224,163,86,.16);color:var(--amber);border:1px solid rgba(224,163,86,.4)}
+.chip.no{background:transparent;color:rgba(194,176,154,.35);border:1px dashed rgba(194,176,154,.28)}
+@media(max-width:700px){
+  .gap-row{grid-template-columns:1fr;gap:.4rem}
+  .gap-chips{justify-content:flex-start}
+}
+
 /* ── Method section ─────────────────────────────────────────────────*/
 .method{background:var(--ink-2);padding:clamp(3rem,7vw,6rem) var(--pad)}
 h3.sec{color:var(--sand);margin:2.2rem 0 .8rem;font-size:clamp(1.05rem,1.8vw,1.4rem)}
@@ -396,55 +471,84 @@ dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
   <div class="inner">
     <div class="label reveal">What changed</div>
     <h2 class="display reveal" style="margin-top:.7rem;max-width:20ch">It didn't just get busier. It got a world.</h2>
-    <p class="big-p reveal" style="margin-top:1.1rem">
+    <p class="big-p reveal" style="margin-top:1.1rem;max-width:74ch">
       Cape Forestier was four official videos, three borrowed radio sessions and a tail of promo
       Shorts. Karaoke Bar is seven distinct layers, each doing a different job — and the album's
       songs move between them.
     </p>
 
-      <div style="margin-top:1.8rem" class="stagger">
-        <div class="layer">
-          <div class="layer-name">Official videos <span style="color:var(--dim);font-size:.72em">2</span></div>
-          <div class="layer-bar"><div class="layer-fill hi" style="width:3.3%"></div>
-            <div class="layer-eg">Karaoke Bar &middot; Celestial Bodies &mdash; the tentpoles</div></div>
+    <div class="mosaic stagger" style="margin-top:1.6rem">
+      <a class="tile wide" href="https://www.youtube.com/watch?v=QAFqzxnFZyE" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/QAFqzxnFZyE/hqdefault.jpg" alt="Karaoke Bar official music video" loading="lazy">
+        <div class="tl"><b>Official video</b>Karaoke Bar &middot; 1.10M</div>
+      </a>
+      <a class="tile" href="https://www.youtube.com/watch?v=uXIgbSKHces" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/uXIgbSKHces/hqdefault.jpg" alt="The Cherry Farm live in Tasmania" loading="lazy">
+        <div class="tl"><b>Location</b>Tasmania &middot; 46.9K</div>
+      </a>
+      <a class="tile" href="https://www.youtube.com/watch?v=_4RraK-j770" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/_4RraK-j770/hqdefault.jpg" alt="Celestial Bodies at Sugarcane Mountain Studios" loading="lazy">
+        <div class="tl"><b>Studio film</b>Sugarcane Mountain &middot; 63.8K</div>
+      </a>
+
+      <a class="tile" href="https://www.youtube.com/watch?v=8-Xjerd4D14" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/8-Xjerd4D14/hqdefault.jpg" alt="Karaoke Bar acoustic in Byron Bay" loading="lazy">
+        <div class="tl"><b>Location</b>Byron Bay &middot; 55.2K</div>
+      </a>
+      <a class="tile" href="https://www.youtube.com/watch?v=v5jGyEqOHnI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/v5jGyEqOHnI/hqdefault.jpg" alt="Karaoke Bar piano version" loading="lazy">
+        <div class="tl"><b>Alternate version</b>Piano &middot; 29.6K</div>
+      </a>
+      <a class="tile wide" href="https://www.youtube.com/watch?v=qZ0G4Gb9fz8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/qZ0G4Gb9fz8/hqdefault.jpg" alt="Celestial Bodies official video" loading="lazy">
+        <div class="tl"><b>Official video</b>Celestial Bodies &middot; 518K</div>
+      </a>
+
+      <a class="tile" href="https://www.youtube.com/watch?v=fwAMVh-9s4Q" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/fwAMVh-9s4Q/hqdefault.jpg" alt="Monroe official lyric video" loading="lazy">
+        <div class="tl"><b>Lyric video</b>Monroe &middot; 61.7K</div>
+      </a>
+      <a class="tile" href="https://www.youtube.com/watch?v=rhXiTIO7r4A" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/rhXiTIO7r4A/hqdefault.jpg" alt="Monroe acoustic performance" loading="lazy">
+        <div class="tl"><b>Acoustic</b>Monroe &middot; 33.0K</div>
+      </a>
+      <a class="tile" href="https://www.youtube.com/watch?v=ieTCK9VOQ2E" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/ieTCK9VOQ2E/hqdefault.jpg" alt="Short from the Dua Lipa collaboration" loading="lazy">
+        <div class="tl"><b>Shorts</b>Best of 2026 &middot; 34.1K</div>
+      </a>
+      <a class="tile" href="https://www.youtube.com/watch?v=DqsUowRqXVQ" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/DqsUowRqXVQ/hqdefault.jpg" alt="Mexico City instrumental karaoke video" loading="lazy">
+        <div class="tl"><b>Karaoke &amp; utility</b>Mexico City &middot; 8.1K</div>
+      </a>
+    </div>
+
+    <div class="grid2" style="margin-top:1.6rem;align-items:start">
+      <p class="big-p">
+        Seven layers, 88 uploads. Shorts are 61 of them and official videos are 2 —
+        <b style="color:var(--cream)">no single format was carrying the album on its own.</b>
+      </p>
+      <div>
+        <div class="label" style="margin-bottom:.5rem">Share of the 88 campaign uploads</div>
+        <div style="display:flex;gap:2px;height:14px;border-radius:2px;overflow:hidden">
+          <div style="width:2.3%;background:var(--amber)" title="Official videos — 2"></div>
+          <div style="width:8.0%;background:var(--clay)" title="Performance films — 7"></div>
+          <div style="width:5.7%;background:var(--sand)" title="Lyric videos — 5"></div>
+          <div style="width:1.1%;background:var(--sea)" title="Alternate versions — 1"></div>
+          <div style="width:69.3%;background:rgba(244,234,220,.22)" title="Shorts — 61"></div>
+          <div style="width:11.4%;background:rgba(244,234,220,.11)" title="Karaoke &amp; utility — 10"></div>
+          <div style="width:2.3%;background:rgba(244,234,220,.07)" title="Channel moments — 2"></div>
         </div>
-        <div class="layer">
-          <div class="layer-name">Performance films <span style="color:var(--dim);font-size:.72em">7</span></div>
-          <div class="layer-bar"><div class="layer-fill" style="width:11.5%"></div>
-            <div class="layer-eg">Tasmania &middot; Byron Bay &middot; Sugarcane Mountain Studios &middot; Sydney</div></div>
-        </div>
-        <div class="layer">
-          <div class="layer-name">Lyric videos <span style="color:var(--dim);font-size:.72em">5</span></div>
-          <div class="layer-bar"><div class="layer-fill" style="width:8.2%"></div>
-            <div class="layer-eg">One per single, ahead of each release</div></div>
-        </div>
-        <div class="layer">
-          <div class="layer-name">Alternate versions <span style="color:var(--dim);font-size:.72em">1</span></div>
-          <div class="layer-bar"><div class="layer-fill" style="width:1.6%"></div>
-            <div class="layer-eg">Karaoke Bar, piano</div></div>
-        </div>
-        <div class="layer">
-          <div class="layer-name">Shorts &amp; personality <span style="color:var(--dim);font-size:.72em">61</span></div>
-          <div class="layer-bar"><div class="layer-fill" style="width:100%"></div>
-            <div class="layer-eg">Backstage, rehearsals, the two of them</div></div>
-        </div>
-        <div class="layer">
-          <div class="layer-name">Karaoke &amp; utility <span style="color:var(--dim);font-size:.72em">10</span></div>
-          <div class="layer-bar"><div class="layer-fill lo" style="width:16.4%"></div>
-            <div class="layer-eg">Instrumental versions &mdash; catalogue completeness, not reach</div></div>
-        </div>
-        <div class="layer">
-          <div class="layer-name">Channel moments <span style="color:var(--dim);font-size:.72em">2</span></div>
-          <div class="layer-bar"><div class="layer-fill lo" style="width:3.3%"></div>
-            <div class="layer-eg">Longer clips that sit outside the release rhythm</div></div>
+        <div class="label" style="margin-top:.55rem;line-height:1.7">
+          <span style="color:var(--amber)">&#9632;</span> Official 2 &nbsp;
+          <span style="color:var(--clay)">&#9632;</span> Performance 7 &nbsp;
+          <span style="color:var(--sand)">&#9632;</span> Lyric 5 &nbsp;
+          <span style="color:var(--sea)">&#9632;</span> Alternate 1 &nbsp;
+          <span style="color:rgba(244,234,220,.5)">&#9632;</span> Shorts 61 &nbsp;
+          <span style="color:rgba(244,234,220,.3)">&#9632;</span> Karaoke 10 &nbsp;
+          <span style="color:rgba(244,234,220,.2)">&#9632;</span> Moments 2
         </div>
       </div>
-
-    <p class="big-p reveal" style="margin-top:1.8rem">
-      Counts are of the 88 campaign uploads; bars are scaled to the largest. Shorts dominate by
-      volume, as they should — the point is the middle of that list.
-      <b style="color:var(--cream)">No single format was carrying the album on its own.</b>
-    </p>
+    </div>
   </div>
 </section>
 
@@ -620,6 +724,111 @@ dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
   </div>
 </section>
 
+<!-- ═══ 8b · THE CATALOGUE SUPPORT GAP ══════════════════════════════
+     The audit that came out of the Big Jet Plane finding: if catalogue
+     is the way in, which catalogue songs are standing there with no
+     supporting assets at all? -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What the team should do next</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:24ch">Every new single got a lyric video. The catalogue never has.</h2>
+
+    <div class="grid3 stagger" style="margin-top:1.6rem;max-width:920px">
+      <div class="stat"><div class="big-num" style="color:var(--amber)">21</div>
+        <div class="label">Catalogue songs with no lyric video</div></div>
+      <div class="stat"><div class="big-num" style="color:var(--amber)">115M</div>
+        <div class="label">Views those songs hold</div></div>
+      <div class="stat"><div class="big-num" style="color:var(--sand)">9</div>
+        <div class="label">Are audio uploads with no visual at all</div></div>
+    </div>
+
+    <p class="big-p reveal" style="margin-top:1.6rem;max-width:76ch">
+      The campaign built a supporting kit for each new song — lyric video, acoustic take, location
+      film, instrumental version. The practice clearly works and the team is good at it. It has
+      simply never been pointed at the songs where the audience already is.
+    </p>
+
+    <div style="margin-top:1.6rem" class="stagger">
+      <div class="gap-row" style="border-bottom:1px solid var(--amber);padding-bottom:.5rem">
+        <div class="label">Song &middot; first upload</div>
+        <div class="label">Lifetime views</div>
+        <div class="label" style="text-align:right">Supporting assets on the channel</div>
+      </div>
+
+      <div class="gap-row">
+        <div class="gap-song">Chateau <i>Aug 2017 &middot; 13,679 views a day, still</i></div>
+        <div><div class="gap-bar" style="width:100%"></div><div class="label" style="margin-top:.3rem">45.4M</div></div>
+        <div class="gap-chips"><span class="chip has">Video</span><span class="chip has">Live</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Grizzly Bear <i>Jul 2014</i></div>
+        <div><div class="gap-bar" style="width:29%"></div><div class="label" style="margin-top:.3rem">13.0M</div></div>
+        <div class="gap-chips"><span class="chip has">Video</span><span class="chip no">No live</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">A Heartbreak <i>Jul 2014</i></div>
+        <div><div class="gap-bar" style="width:23%"></div><div class="label" style="margin-top:.3rem">10.2M</div></div>
+        <div class="gap-chips"><span class="chip has">Video</span><span class="chip has">Live</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Big Jet Plane <i>Nov 2011 &middot; reactivated this campaign</i></div>
+        <div><div class="gap-bar" style="width:23%"></div><div class="label" style="margin-top:.3rem">10.2M</div></div>
+        <div class="gap-chips"><span class="chip has">Video</span><span class="chip has">Live</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">From The Stalls <i>May 2015</i></div>
+        <div><div class="gap-bar" style="width:15%"></div><div class="label" style="margin-top:.3rem">6.8M</div></div>
+        <div class="gap-chips"><span class="chip has">Live</span><span class="chip no">No studio video</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Heart Beats Slow <i>May 2014</i></div>
+        <div><div class="gap-bar" style="width:10%"></div><div class="label" style="margin-top:.3rem">4.4M</div></div>
+        <div class="gap-chips"><span class="chip has">Video</span><span class="chip no">No live</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Cellar Door <i>Sep 2017</i></div>
+        <div><div class="gap-bar" style="width:9%"></div><div class="label" style="margin-top:.3rem">4.2M</div></div>
+        <div class="gap-chips"><span class="chip has">Video</span><span class="chip no">No live</span><span class="chip no">No lyric</span><span class="chip no">No karaoke</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Baudelaire <i>Sep 2017 &middot; audio upload only</i></div>
+        <div><div class="gap-bar" style="width:4.3%"></div><div class="label" style="margin-top:.3rem">1.97M</div></div>
+        <div class="gap-chips"><span class="chip has">Audio</span><span class="chip no">No video</span><span class="chip no">No live</span><span class="chip no">No lyric</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Who Do You Think You Are <i>Sep 2017 &middot; audio upload only</i></div>
+        <div><div class="gap-bar" style="width:3.4%"></div><div class="label" style="margin-top:.3rem">1.52M</div></div>
+        <div class="gap-chips"><span class="chip has">Audio</span><span class="chip no">No video</span><span class="chip no">No live</span><span class="chip no">No lyric</span></div>
+      </div>
+      <div class="gap-row">
+        <div class="gap-song">Youngblood <i>Nov 2018 &middot; audio upload only</i></div>
+        <div><div class="gap-bar" style="width:3.3%"></div><div class="label" style="margin-top:.3rem">1.50M</div></div>
+        <div class="gap-chips"><span class="chip has">Audio</span><span class="chip no">No video</span><span class="chip no">No live</span><span class="chip no">No lyric</span></div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:1.8rem">
+      <p class="big-p">
+        Nine songs exist on the channel as an audio upload and nothing else — 8.0M views between
+        them, no picture attached to any of it. Baudelaire alone still takes 597 views a day, nine
+        years on, from a static audio file.
+      </p>
+      <p class="big-p">
+        And the album is called <i style="color:var(--cream)">Karaoke Bar</i>. Ten instrumental
+        versions were made for the new songs on release day.
+        <b style="color:var(--amber)">Not one exists for a catalogue song</b> — including the ones
+        an audience of this size would actually want to sing.
+      </p>
+    </div>
+    <div class="src">
+      93 distinct songs identified across the 341-video catalogue by stripping format suffixes from
+      titles. "Catalogue" is anything first uploaded before 2024. Lifetime views, so the ranking is
+      unaffected by asset age. A song counts as having a lyric video only if one exists on this
+      channel.
+    </div>
+  </div>
+</section>
+
 <!-- ═══ 9 · THE REAL TEST ═══════════════════════════════════════════ -->
 <section class="slide">
   <div class="inner">
@@ -696,8 +905,9 @@ dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
         <div>
           <h3>Put the catalogue back to work</h3>
           <p>Big Jet Plane opened this campaign and still holds its widest moment. Look for the next
-          one: guests, new arrangements, live versions, a cultural opening. Chateau, Grizzly Bear
-          and A Heartbreak are the channel's biggest videos and this campaign hasn't touched them.</p>
+          one: guests, new arrangements, live versions, a cultural opening. And start with the
+          support gap — 21 catalogue songs holding 115M views have no lyric video, and nine exist
+          as an audio file and nothing else.</p>
         </div>
       </div>
       <div class="act">
@@ -733,9 +943,84 @@ dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
   </div>
 </section>
 
-<!-- ═══ METHOD ═════════════════════════════════════════════════════ -->
-<section class="method">
-  <div class="inner">
+
+
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   THE WEEK STRIP
+   One tick per campaign week, lit where the channel published. The
+   arrays below are the real weekly upload counts, derived from the
+   uploads playlist — not a decorative approximation. Anyone can count
+   them back against the campaign windows in the Method section.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* 2024 · 9 Feb → 4 Aug, 26 weeks. Uploads per week. */
+var W24 = [3,0,1,3,2,4,0,3,6,2,2,1,2,2,3,1,0,0,0,0,0,0,0,0,0,1];
+
+/* 2026 · 29 Apr → 14 Sep, 20 weeks. Uploads per week. */
+var W26 = [6,7,3,9,2,1,1,3,5,2,0,0,5,5,10,7,5,6,8,3];
+
+function paint(el, weeks){
+  if(!el) return;
+  el.innerHTML = '';
+  var max = Math.max.apply(null, weeks) || 1;
+  weeks.forEach(function(n){
+    var d = document.createElement('div');
+    d.className = 'wk' + (n > 0 ? ' on' : ' dead');
+    if(n > 0){
+      /* Height carries volume as well as presence, so a release week
+         reads as a wall rather than as one more lit tick. */
+      d.style.height = (38 + (n / max) * 62) + '%';
+      if(n >= max * 0.75) d.className += ' big';
+    }
+    d.title = n === 0 ? 'No uploads' : n + (n === 1 ? ' upload' : ' uploads');
+    el.appendChild(d);
+  });
+}
+
+paint(document.getElementById('cover-weeks'), W26);
+paint(document.getElementById('w24'), W24);
+paint(document.getElementById('w26'), W26);
+
+/* Uploads per month after the last album — June 2024 to December 2025,
+   the nineteen months following Cape Forestier's release month. The
+   shape of a channel going quiet. */
+var AFTER = [0,0,4,2,1,3,6,1,3,1,1,3,0,1,0,0,0,0,0];
+paint(document.getElementById('after24'), AFTER);
+
+
+/* ── The Analysis panel ───────────────────────────────────────────── */
+(function(){
+  var btn=document.getElementById('an-open'),
+      panel=document.getElementById('an-panel'),
+      close=document.getElementById('an-close');
+  if(!btn||!panel) return;
+  function open(){panel.classList.add('open');document.body.classList.add('locked');
+    btn.style.display='none';panel.scrollTop=0;close.focus();}
+  function shut(){panel.classList.remove('open');document.body.classList.remove('locked');
+    btn.style.display='';btn.focus();}
+  btn.addEventListener('click',open);
+  close.addEventListener('click',shut);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&panel.classList.contains('open')) shut();});
+})();
+
+/* ── Reveal on scroll ─────────────────────────────────────────────── */
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+
+document.querySelectorAll('.reveal,.stagger').forEach(function(el){ io.observe(el); });
+</script>
+
+<!-- ═══ ANALYSIS — behind the tab, not in the scroll ══════════════ -->
+<button class="an-btn" id="an-open">Analysis</button>
+<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis and method">
+  <div class="inner" style="max-width:900px">
+
     <div class="label">Analysis</div>
     <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
 
@@ -803,61 +1088,7 @@ dl.mn dd{color:var(--warm);font-size:.9rem;max-width:74ch;margin-top:.3rem}
       </dl>
     </div>
   </div>
-</section>
-
 </div>
-<script>
-/* ═══════════════════════════════════════════════════════════════════
-   THE WEEK STRIP
-   One tick per campaign week, lit where the channel published. The
-   arrays below are the real weekly upload counts, derived from the
-   uploads playlist — not a decorative approximation. Anyone can count
-   them back against the campaign windows in the Method section.
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* 2024 · 9 Feb → 4 Aug, 26 weeks. Uploads per week. */
-var W24 = [3,0,1,3,2,4,0,3,6,2,2,1,2,2,3,1,0,0,0,0,0,0,0,0,0,1];
-
-/* 2026 · 29 Apr → 14 Sep, 20 weeks. Uploads per week. */
-var W26 = [6,7,3,9,2,1,1,3,5,2,0,0,5,5,10,7,5,6,8,3];
-
-function paint(el, weeks){
-  if(!el) return;
-  el.innerHTML = '';
-  var max = Math.max.apply(null, weeks) || 1;
-  weeks.forEach(function(n){
-    var d = document.createElement('div');
-    d.className = 'wk' + (n > 0 ? ' on' : ' dead');
-    if(n > 0){
-      /* Height carries volume as well as presence, so a release week
-         reads as a wall rather than as one more lit tick. */
-      d.style.height = (38 + (n / max) * 62) + '%';
-      if(n >= max * 0.75) d.className += ' big';
-    }
-    d.title = n === 0 ? 'No uploads' : n + (n === 1 ? ' upload' : ' uploads');
-    el.appendChild(d);
-  });
-}
-
-paint(document.getElementById('cover-weeks'), W26);
-paint(document.getElementById('w24'), W24);
-paint(document.getElementById('w26'), W26);
-
-/* Uploads per month after the last album — June 2024 to December 2025,
-   the nineteen months following Cape Forestier's release month. The
-   shape of a channel going quiet. */
-var AFTER = [0,0,4,2,1,3,6,1,3,1,1,3,0,1,0,0,0,0,0];
-paint(document.getElementById('after24'), AFTER);
-
-/* ── Reveal on scroll ─────────────────────────────────────────────── */
-var io = new IntersectionObserver(function(entries){
-  entries.forEach(function(e){
-    if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-
-document.querySelectorAll('.reveal,.stagger').forEach(function(el){ io.observe(el); });
-</script>
-
+<button class="an-close" id="an-close">Close</button>
 </body>
 </html>

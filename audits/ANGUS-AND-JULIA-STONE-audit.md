@@ -457,5 +457,78 @@ rule 2, not rule 1, despite containing the word "Karaoke". Verified by hand.
 
 ---
 
-*Audit pack generated 23 September 2026. Page: `/angusandjuliastone`.
+## 9 · Addendum — the catalogue support gap
+
+Added after the first review. The Big Jet Plane finding raised an obvious
+follow-up: if catalogue is a way into the current era, which catalogue songs are
+sitting there with no supporting assets?
+
+### Method
+
+Song identity is derived from the title: strip the artist prefix, strip every
+bracketed segment, strip trailing descriptors. 341 videos resolve to **93
+distinct songs**. Shorts and anything under 90 seconds are excluded. "Catalogue"
+means first uploaded before 2024-01-01 — 66 songs.
+
+For each song, the formats present on the channel are recorded: official video,
+bare-title video, audio upload, live/acoustic, lyric video, instrumental karaoke.
+
+**This measures what exists on THIS channel.** A song may well have a lyric video
+elsewhere — on a label channel, on a DSP canvas, on a topic channel. The claim is
+about the artist channel's own shelf, and is worded that way on the page.
+
+### Findings
+
+| Figure | Value |
+|---|---|
+| Catalogue songs with no lyric video, ≥300K views | **21** |
+| Lifetime views those songs hold | **115.3M** |
+| Catalogue songs existing as an audio upload and nothing else | **9** |
+| Lifetime views those nine hold | **8.0M** |
+| Catalogue songs with an instrumental karaoke version | **0** |
+| New-album songs with an instrumental karaoke version | **10** |
+
+### The ranked gap, as published
+
+| Song | First upload | Lifetime | Views/day | Has | Missing |
+|---|---|---|---|---|---|
+| Chateau | Aug 2017 | 45.4M | 13,679 | video, live | lyric, karaoke |
+| Grizzly Bear | Jul 2014 | 13.0M | 2,918 | video | live, lyric, karaoke |
+| A Heartbreak | Jul 2014 | 10.2M | 2,294 | video, live | lyric, karaoke |
+| Big Jet Plane | Nov 2011 | 10.2M | 1,881 | video, live | lyric, karaoke |
+| From The Stalls | May 2015 | 6.8M | 1,641 | live | studio video, lyric, karaoke |
+| Nothing Else | Sep 2017 | 5.7M | 1,734 | video, live, audio | lyric, karaoke |
+| Heart Beats Slow | May 2014 | 4.4M | 981 | video | live, lyric, karaoke |
+| Cellar Door | Sep 2017 | 4.2M | 1,284 | video | live, lyric, karaoke |
+| Snow | Jun 2017 | 3.7M | 1,104 | video, live, audio | lyric, karaoke |
+| Oakwood | Sep 2017 | 2.6M | 783 | audio, live | video, lyric, karaoke |
+| Baudelaire | Sep 2017 | 1.97M | 597 | audio | everything else |
+| Who Do You Think You Are | Sep 2017 | 1.52M | 462 | audio | everything else |
+| Youngblood | Nov 2018 | 1.50M | 521 | audio | everything else |
+| My House Your House | Sep 2017 | 1.07M | 326 | audio | everything else |
+| Sleep Alone | Sep 2017 | 0.78M | 237 | audio | everything else |
+
+Views/day is lifetime views ÷ days since first upload. It is a rough proxy for
+enduring demand, not a current rate — a song that was huge in 2017 and is flat
+now would still read high. It is used to rank candidates, not to forecast.
+
+### Where a reviewer should push
+
+1. **The song-name stripper.** 93 songs from 341 titles is a derived number. A
+   mis-split would create a phantom song or merge two real ones. The 2026
+   campaign songs were checked by hand; the 2009–2018 catalogue was not
+   exhaustively checked.
+2. **Off-channel assets.** The strongest objection. If Chateau has a lyric video
+   on a label channel, the "gap" is a gap in this channel's shelf rather than in
+   the world. The page says "on the channel"; decide whether that is clear
+   enough.
+3. **Does a lyric video actually earn its place on a nine-year-old song?** The
+   page asserts the practice works — every 2026 single got one — but the lyric
+   median (16.3K, n=5) is drawn entirely from new releases. There is no evidence
+   here of what a lyric video does for a catalogue song, and the page should not
+   be read as providing any.
+
+---
+
+*Audit pack generated 23 September 2026, addendum same day. Page: `/angusandjuliastone`.
 Data: YouTube Data API v3 only.*
