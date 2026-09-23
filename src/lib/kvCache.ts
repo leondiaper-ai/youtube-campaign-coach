@@ -194,6 +194,48 @@ export async function readAllLiveSnaps(handles: string[]): Promise<Map<string, C
 
 // ── Sync metadata ─────────────────────────────────────────────────────────
 
+/* ── WHERE A SYNC GOT TO ──────────────────────────────────────────────
+   The roster outgrew one cron invocation. 224 artists at roughly 1.2s
+   each is about 4.5 minutes against a 5-minute platform ceiling, and on
+   14 September it crossed that line: the run was killed part-way, never
+   reached writeSyncMeta, and the Watcher sat frozen on the previous day's
+   numbers with nothing on the page admitting it. Everyone after the
+   cut-off silently kept yesterday's figures.
+
+   So a pass is now resumable. This is where it remembers how far it got:
+   one pass per London day, a cursor into the ordered fetch list, and the
+   running totals so the meta at the end describes the whole pass rather
+   than the last slice of it.
+
+   `dayKey` is what makes a pass a pass. A new day means start again from
+   zero however far yesterday got — stale progress from a failed day
+   should never stop today's run before it starts. */
+export type SyncProgress = {
+  /** London calendar day this pass belongs to, yyyy-mm-dd. */
+  dayKey: string;
+  /** Next index into the ordered fetch list. Equals its length when done. */
+  cursor: number;
+  /** How long that list was, so a caller can report N of M. */
+  total: number;
+  startedAt: string;
+  successCount: number;
+  failCount: number;
+  quotaUnits: number;
+  errors: string[];
+};
+
+export async function readSyncProgress(): Promise<SyncProgress | null> {
+  const store = await kv();
+  if (!store) return null;
+  return ((await store.get('sync:progress')) as SyncProgress | null) ?? null;
+}
+
+export async function writeSyncProgress(p: SyncProgress) {
+  const store = await kv();
+  if (!store) return;
+  await store.set('sync:progress', p);
+}
+
 export async function writeSyncMeta(meta: SyncMeta) {
   const store = await kv();
   if (!store) return;

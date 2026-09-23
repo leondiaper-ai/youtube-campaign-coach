@@ -2,14 +2,32 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ARTISTS, mergeArtistLists, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { fetchChannelSnapLite } from '@/lib/youtube';
-import { writeLiveSnap, writeChannelMapping, writeSyncMeta, readSyncMeta, readLiveSnap, readAllLiveSnaps, type SyncMeta } from '@/lib/kvCache';
+import { writeLiveSnap, writeChannelMapping, writeSyncMeta, readSyncMeta, readLiveSnap, readAllLiveSnaps, readSyncProgress, writeSyncProgress, type SyncMeta, type SyncProgress } from '@/lib/kvCache';
 import { captureWeeklySnapshots } from '@/lib/weeklySnapshotCapture';
 import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
 import { classifySnapshotPriority, shouldFetchInRun, applyQuotaGuardrails, type SnapshotPriority } from '@/lib/snapshotScheduler';
 import { deriveFromLive } from '@/lib/artists';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; // Allow up to 120s for all artists
+export const maxDuration = 300;
+
+/* ── WHY THIS RUN STOPS EARLY ────────────────────────────────────────
+   The platform kills the function at 300s. A run that is killed never
+   reaches writeSyncMeta, so the Watcher keeps yesterday's numbers and
+   says nothing about it — which is exactly what happened on 14
+   September, and the reason nobody noticed for four days.
+
+   So the loop now watches the clock and stops itself with time to
+   spare. 225s of fetching leaves 75s for the meta write, the weekly
+   capture and the pulse refresh that follow it. Stopping deliberately
+   writes a cursor and honest meta; being killed writes nothing.
+
+   The budget is the fix. More cron entries are throughput. */
+const FETCH_BUDGET_MS = 225_000;
+
+/** London day, which is how a "pass" is defined. */
+const londonDay = (d: Date = new Date()) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(d);
 
 /**
  * Cron endpoint — Vercel calls this via vercel.json crons config.
@@ -37,7 +55,29 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const _londonHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', hour12: false }).format(new Date())); if (process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`) { if (_londonHour < 6) { return NextResponse.json({ skipped: true, reason: 'before 06:00 UK' }); } const _prevMeta = await readSyncMeta(); const _todayLondon = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()); const _prevLondonDay = _prevMeta && _prevMeta.lastSyncAt ? new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date(_prevMeta.lastSyncAt)) : null; if (_prevLondonDay === _todayLondon) { return NextResponse.json({ skipped: true, reason: 'already synced today (UK)' }); } } const startTime = Date.now();
+  const _londonHour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', hour12: false }).format(new Date())); /* ── HAS TODAY'S PASS FINISHED? ──────────────────────────────────
+     This used to skip if sync meta was stamped today, which was right
+     when a run either finished or died. Now that a pass can legitimately
+     stop half way and resume, "we wrote meta today" no longer means
+     "today is done" — and keeping the old test would have made the
+     chunking useless: the first chunk would stamp the day and every
+     later chunk would decline to run.
+
+     The question is now whether the CURSOR has reached the end. */
+  if (process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`) {
+    if (_londonHour < 6) {
+      return NextResponse.json({ skipped: true, reason: 'before 06:00 UK' });
+    }
+    const prior = await readSyncProgress();
+    if (prior && prior.dayKey === londonDay() && prior.cursor >= prior.total && prior.total > 0) {
+      return NextResponse.json({
+        skipped: true,
+        reason: 'today\'s pass already complete (UK)',
+        pass: { dayKey: prior.dayKey, done: prior.cursor, total: prior.total },
+      });
+    }
+  }
+  const startTime = Date.now();
   const errors: string[] = [];
   let successCount = 0;
   let failCount = 0;
@@ -119,9 +159,44 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  for (const slug of toFetch) {
+  /* ── RESUME WHERE THE LAST RUN STOPPED ────────────────────────────
+     `toFetch` is rebuilt from scratch every run and its order has to be
+     stable for a cursor into it to mean anything, so it is sorted before
+     the cursor is applied. Priority already decided WHO is in the list;
+     this only fixes the order they are walked in. */
+  toFetch.sort();
+
+  const prior = await readSyncProgress();
+  const today = londonDay();
+  const resuming = !!prior && prior.dayKey === today && prior.cursor > 0 && prior.cursor < toFetch.length;
+  const startIndex = resuming ? prior!.cursor : 0;
+
+  /* Totals carry across the chunks of one pass, so the meta at the end
+     describes the day rather than the last slice of it. */
+  if (resuming) {
+    successCount = prior!.successCount;
+    failCount = prior!.failCount;
+    quotaUnits = prior!.quotaUnits;
+    errors.push(...prior!.errors);
+  }
+
+  let cursor = startIndex;
+  let ranOutOfTime = false;
+
+  for (let i = startIndex; i < toFetch.length; i++) {
+    const slug = toFetch[i];
+    cursor = i;
+
+    /* Checked BEFORE the fetch, not after: a run that starts an artist
+       at 224s and is killed at 300s has lost that artist's slot and
+       written nothing. */
+    if (Date.now() - startTime > FETCH_BUDGET_MS) {
+      ranOutOfTime = true;
+      break;
+    }
+
     const entry = eligibleMap.get(slug);
-    if (!entry) continue;
+    if (!entry) { cursor = i + 1; continue; }
     const { handle } = entry;
 
     try {
@@ -134,6 +209,7 @@ export async function GET(req: NextRequest) {
       if (!snap) {
         dailyResults[slug] = 'no key';
         failCount++;
+        cursor = i + 1;
         continue;
       }
       if (snap.error) {
@@ -141,13 +217,19 @@ export async function GET(req: NextRequest) {
         failCount++;
         if (errors.length < 10) errors.push(`${slug}: ${snap.error}`);
         // If quota exceeded, stop fetching more artists
+        cursor = i + 1;
         if (snap.error === 'quota_exceeded') {
           console.warn('[Cron] Quota exceeded — stopping further fetches');
-          const remaining = toFetch.slice(toFetch.indexOf(slug) + 1);
+          const remaining = toFetch.slice(i + 1);
           for (const r of remaining) {
             dailyResults[r] = 'skipped (quota exhausted mid-run)';
             failCount++;
           }
+          /* Quota is a day-level wall, not a time-level one. Resuming in
+             ten minutes would only spend the next key's units on the same
+             refusal, so the pass is marked finished and tomorrow starts
+             clean. */
+          cursor = toFetch.length;
           break;
         }
         continue;
@@ -164,13 +246,35 @@ export async function GET(req: NextRequest) {
       dailyResults[slug] = `ok [${entry.schedule.priority}] (${snap.subs} subs, ${snap.uploads30d} uploads/30d)`;
       successCount++;
       quotaUnits += 6;
+      cursor = i + 1;
     } catch (e: any) {
       dailyResults[slug] = `throw: ${e?.message ?? e}`;
       failCount++;
       if (errors.length < 10) errors.push(`${slug}: ${e?.message ?? e}`);
-      // Never fail the whole run because one artist fails
+      /* Never fail the whole run because one artist fails — and never
+         let a failing artist trap the cursor either, or every future run
+         would break its teeth on the same channel. */
+      cursor = i + 1;
     }
   }
+
+  /* ── 6b. RECORD HOW FAR THIS PASS GOT ──────────────────────────────
+     Written before the meta, and written on EVERY outcome including the
+     one where we stopped early. The pass is complete when the cursor
+     reaches the end of the list; until then the next cron invocation
+     picks it up from here. */
+  const complete = cursor >= toFetch.length;
+  const progress: SyncProgress = {
+    dayKey: today,
+    cursor: complete ? toFetch.length : cursor,
+    total: toFetch.length,
+    startedAt: resuming && prior ? prior.startedAt : new Date(startTime).toISOString(),
+    successCount,
+    failCount,
+    quotaUnits,
+    errors: errors.slice(0, 10),
+  };
+  await writeSyncProgress(progress);
 
   // ── 7. Write sync metadata ─────────────────────────────────────────────
   const durationMs = Date.now() - startTime;
@@ -187,9 +291,15 @@ export async function GET(req: NextRequest) {
   const priorityBreakdown: Record<SnapshotPriority, number> = { HIGH: 0, MEDIUM: 0, LOW: 0 };
   for (const s of allSchedules) priorityBreakdown[s.schedule.priority]++;
 
+  /* A pass still in progress is 'partial', which is the honest word for
+     it and the one the Watcher already knows how to show. The failure
+     mode this whole change exists to prevent is the page claiming a
+     fresh full sync when half the roster has yesterday's numbers. */
   const syncMeta: SyncMeta = {
     lastSyncAt: new Date().toISOString(),
-    status: failCount === 0 ? 'success' : successCount > 0 ? 'partial' : 'failed',
+    status: !complete
+      ? 'partial'
+      : failCount === 0 ? 'success' : successCount > 0 ? 'partial' : 'failed',
     artistsTotal: withHandles.length,
     artistsSuccess: successCount,
     artistsFailed: failCount,
@@ -205,7 +315,7 @@ export async function GET(req: NextRequest) {
 
   // ── 8. Weekly snapshot capture (reads from KV, not API) ────────────────
   let weeklyResult;
-  if (runSlot === 'morning') {
+  if (runSlot === 'morning' && complete) {
     try {
       weeklyResult = await captureWeeklySnapshots();
     } catch (e: any) {
@@ -216,6 +326,14 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     at: new Date().toISOString(),
+    pass: {
+      dayKey: today,
+      complete,
+      done: progress.cursor,
+      total: toFetch.length,
+      resumedFrom: resuming ? startIndex : 0,
+      stoppedOnClock: ranOutOfTime,
+    },
     runSlot,
     dayOfWeek,
     priorityBreakdown,
