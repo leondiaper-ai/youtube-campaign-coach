@@ -158,6 +158,15 @@ export default function UKLandscape() {
     return <div className="text-[11px] uppercase tracking-[0.18em] text-ink/30">Loading…</div>;
   }
 
+  /* The page is as current as its most recently refreshed source.
+     Derived, never hardcoded — and it moves on its own as any one of
+     the three lands. */
+  const latestUpdate =
+    [data.freshness.watcherUpdated, data.freshness.chartmetricUpdated, data.freshness.consumptionThrough]
+      .filter(Boolean)
+      .sort()
+      .pop() ?? null;
+
   const rows: Row[] = tab === 'consumption' ? data.consumption : tab === 'crossover' ? crossRows : data.biggestUk;
   const shown = showAll ? rows : rows.slice(0, 20);
 
@@ -187,33 +196,22 @@ export default function UKLandscape() {
         YouTube audience.
       </div>
 
-      {/* ── the three datasets ─────────────────────────────────────
-          Named separately, each with its OWN period. They do not
-          cover the same window and the page must not imply they do:
-          consumption is a date RANGE, the other two are readings
-          taken on a day. */}
-      <div className="flex flex-wrap gap-x-10 gap-y-3 mb-7 pb-5" style={{ borderBottom: `1px solid ${MUTED}` }}>
-        {[
-          {
-            name: 'VMG UK Consumption',
-            detail: range(data.freshness.consumptionFrom, data.freshness.consumptionThrough),
-          },
-          {
-            name: 'Watcher Channel Data',
-            detail: `Updated ${dayYear(data.freshness.watcherUpdated)}`,
-          },
-          {
-            name: 'Chartmetric UK Audience',
-            detail: `Monthly views · Updated ${dayYear(data.freshness.chartmetricUpdated)}`,
-          },
-        ].map((s) => (
-          <div key={s.name}>
-            <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/55">
-              {s.name}
-            </div>
-            <div className="text-[11px] text-ink/40 mt-0.5 tabular-nums">{s.detail}</div>
-          </div>
-        ))}
+      {/* ── one freshness line ─────────────────────────────────────
+          "How recent is this?" answered once, by the most recent of
+          the three sources.
+
+          The consumption range stays on the line because dropping it
+          would be misleading rather than merely terser: the headline
+          figure is a six-month total, and a bare "Updated 25 Sep"
+          invites reading it as a recent-week number. Per-source
+          detail now lives in the Sources note at the foot. */}
+      <div className="mb-7 pb-5" style={{ borderBottom: `1px solid ${MUTED}` }}>
+        <span className="text-[11px] font-black uppercase tracking-[0.14em] text-ink/55">
+          Updated {dayYear(latestUpdate)}
+        </span>
+        <span className="text-[11px] text-ink/40 tabular-nums">
+          {'  ·  '}Consumption data {range(data.freshness.consumptionFrom, data.freshness.consumptionThrough)}
+        </span>
       </div>
 
       {/* ── tabs ───────────────────────────────────────────────── */}
@@ -467,20 +465,24 @@ export default function UKLandscape() {
           <div className="mb-1.5">
             <dt className="inline font-bold text-ink/55">VMG UK Consumption</dt>
             <dd className="inline">
-              {' '}— internal Virgin UK YouTube consumption reporting. Ranked exactly as
-              reported: collaborations are kept whole and nothing is merged. Figures are
-              tracks, not individual videos.
+              {' '}— internal Virgin UK YouTube consumption reporting, covering{' '}
+              {range(data.freshness.consumptionFrom, data.freshness.consumptionThrough)}. Ranked
+              exactly as reported: collaborations are kept whole and nothing is merged. Figures
+              are tracks, not individual videos.
             </dd>
           </div>
           <div className="mb-1.5">
             <dt className="inline font-bold text-ink/55">Chartmetric UK Audience</dt>
-            <dd className="inline"> — artist-level UK YouTube audience data, as monthly views.</dd>
+            <dd className="inline">
+              {' '}— artist-level UK YouTube audience data, as monthly views. Read{' '}
+              {dayYear(data.freshness.chartmetricUpdated)}.
+            </dd>
           </div>
           <div>
             <dt className="inline font-bold text-ink/55">Watcher</dt>
             <dd className="inline">
               {' '}— channel-level YouTube data such as subscribers and lifetime views. These
-              are global figures, not UK.
+              are global figures, not UK. Updated {dayYear(data.freshness.watcherUpdated)}.
             </dd>
           </div>
         </dl>
