@@ -21,6 +21,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 import { cmFetch } from './client';
+import { cmOverrideFor } from './overrides';
 
 const KEY = (channelId: string) => `cm:artist:${channelId}`;
 
@@ -29,10 +30,13 @@ export type CmArtistMapping = {
   cmArtistId: number | null;
   /** Chartmetric's name for this artist — a human check on the match. */
   cmArtistName: string | null;
-  resolvedBy: 'youtube-channel-id';
+  resolvedBy: 'youtube-channel-id' | 'manual-override';
   resolvedAt: string;
   /** True when Chartmetric simply has no artist for this channel. */
   notFound?: boolean;
+  /** Set only on overrides, so the provenance travels with the row. */
+  overrideVerifiedBy?: string;
+  overrideVerifiedOn?: string;
 };
 
 async function kv() {
@@ -72,6 +76,25 @@ export async function resolveCmArtist(
   opts: { refresh?: boolean } = {},
 ): Promise<CmArtistMapping | null> {
   if (!channelId || !/^UC[A-Za-z0-9_-]{10,}$/.test(channelId)) return null;
+
+  /* A human-verified override beats both the cache and the endpoint.
+     It sits ahead of the cache deliberately: the cached value is the
+     null that the override exists to correct, so consulting the cache
+     first would keep serving the miss. cmArtistName is left null so
+     the next territory fetch fills it from Chartmetric — the name is
+     the check on the id, and inventing it here would destroy that. */
+  const override = cmOverrideFor(channelId);
+  if (override) {
+    return {
+      channelId,
+      cmArtistId: override.cmArtistId,
+      cmArtistName: null,
+      resolvedBy: 'manual-override',
+      resolvedAt: new Date().toISOString(),
+      overrideVerifiedBy: override.verifiedBy,
+      overrideVerifiedOn: override.verifiedOn,
+    };
+  }
 
   const store = await kv();
   if (store && !opts.refresh) {
