@@ -306,7 +306,7 @@ export const BASELINE_PERIOD: ConsumptionPeriod = {
       "rank": 14,
       "consumption": 853555,
       "isCollab": false,
-      "watcherSlug": null,
+      "watcherSlug": "bad-omens",
       "tracks": [
         {
           "track": "Just Pretend",
@@ -1765,7 +1765,7 @@ export const BASELINE_PERIOD: ConsumptionPeriod = {
       "rank": 110,
       "consumption": 34033,
       "isCollab": false,
-      "watcherSlug": null,
+      "watcherSlug": "k-trap",
       "tracks": [
         {
           "track": "SHOOTERS BE",

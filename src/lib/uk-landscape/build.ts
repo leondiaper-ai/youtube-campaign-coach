@@ -130,7 +130,7 @@ export async function buildLandscape(): Promise<Landscape> {
     const handle = ch?.handle ?? null;
     const cid = ch?.channelId ?? null;
     return {
-      classification: classification[slug] ?? null,
+      classification: classification[slug] ?? 'CHECK',
       channelId: cid,
       youtubeHandle: handle,
       youtubeChannelUrl: handle
@@ -180,7 +180,11 @@ export async function buildLandscape(): Promise<Landscape> {
 
   const biggestUk: LandscapeRow[] = [];
   for (const a of artists) {
-    if (classification[a.slug] !== 'INCLUDE') continue;
+    /* Unknown slugs default to CHECK, never to nothing. An artist that
+       nobody has classified is a backstage question, not an invisible
+       row — which is exactly how Tom Odell, K-Trap and Bad Omens went
+       missing from the first build. */
+    if ((classification[a.slug] ?? 'CHECK') !== 'INCLUDE') continue;
     const s = uk.get(a.slug);
     if (!usable(s)) continue;
     const c = consBySlug.get(a.slug);

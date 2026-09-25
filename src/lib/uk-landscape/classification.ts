@@ -15,6 +15,14 @@
    This is a SEED. The live map lives in KV and is edited through
    setClassification(), so moving an artist between buckets never
    requires a code change.
+
+   SEED-ROSTER ARTISTS. tom-odell, k-trap and bad-omens live in the
+   hardcoded ARTISTS array rather than the KV custom store. The first
+   universe build read the custom store alone and lost all three —
+   Bad Omens silently, despite 853,555 UK consumption at rank 14. They
+   are listed explicitly here, and build.ts now defaults an unknown
+   slug to CHECK rather than to nothing, so a future omission surfaces
+   backstage instead of vanishing.
    ═══════════════════════════════════════════════════════════════════ */
 
 export const CLASSIFICATION_SEED: { include: string[]; check: string[]; exclude: string[] } = {
@@ -24,6 +32,7 @@ export const CLASSIFICATION_SEED: { include: string[]; check: string[]; exclude:
     "antonyszmierek",
     "arkaylaband",
     "ascomullionz",
+    "bad-omens",
     "beabadoobee",
     "bethmccarthy",
     "bigbemz1",
@@ -55,6 +64,7 @@ export const CLASSIFICATION_SEED: { include: string[]; check: string[]; exclude:
     "jjerome87",
     "jofromschool",
     "jutesmusic",
+    "k-trap",
     "kingsofleon",
     "kislashki",
     "konnykon1",
@@ -94,6 +104,7 @@ export const CLASSIFICATION_SEED: { include: string[]; check: string[]; exclude:
     "theitchmusic",
     "thesnuts",
     "thisisblocparty",
+    "tom-odell",
     "tomasmithmusic",
     "tovelomusic",
     "underworldlivetv",
