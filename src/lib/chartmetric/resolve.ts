@@ -21,22 +21,37 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 import { cmFetch } from './client';
-import { cmOverrideFor } from './overrides';
 
 const KEY = (channelId: string) => `cm:artist:${channelId}`;
+
+/**
+ * A SUCCESSFUL mapping is cached forever — a channel's Chartmetric
+ * artist does not change.
+ *
+ * A MISS is cached for 24 hours only. This matters more than it looks.
+ * A negative cached forever is indistinguishable from a fact, and it
+ * silently outlives whatever caused it: a transient 404, a bad
+ * response shape, an artist Chartmetric had not indexed yet. K-Trap
+ * sat in exactly that state — /get-ids returns his artist id perfectly
+ * well, but one early miss had been written as permanent, so every
+ * later run read the stored null and never asked again. The artist
+ * looked absent from Chartmetric when he was not.
+ *
+ * Twenty-four hours is a deliberate compromise: long enough that a
+ * genuinely unknown channel costs one lookup a day rather than one per
+ * request, short enough that a wrong negative heals itself.
+ */
+const MISS_TTL_SECONDS = 24 * 60 * 60;
 
 export type CmArtistMapping = {
   channelId: string;
   cmArtistId: number | null;
   /** Chartmetric's name for this artist — a human check on the match. */
   cmArtistName: string | null;
-  resolvedBy: 'youtube-channel-id' | 'manual-override';
+  resolvedBy: 'youtube-channel-id';
   resolvedAt: string;
   /** True when Chartmetric simply has no artist for this channel. */
   notFound?: boolean;
-  /** Set only on overrides, so the provenance travels with the row. */
-  overrideVerifiedBy?: string;
-  overrideVerifiedOn?: string;
 };
 
 async function kv() {
@@ -77,25 +92,6 @@ export async function resolveCmArtist(
 ): Promise<CmArtistMapping | null> {
   if (!channelId || !/^UC[A-Za-z0-9_-]{10,}$/.test(channelId)) return null;
 
-  /* A human-verified override beats both the cache and the endpoint.
-     It sits ahead of the cache deliberately: the cached value is the
-     null that the override exists to correct, so consulting the cache
-     first would keep serving the miss. cmArtistName is left null so
-     the next territory fetch fills it from Chartmetric — the name is
-     the check on the id, and inventing it here would destroy that. */
-  const override = cmOverrideFor(channelId);
-  if (override) {
-    return {
-      channelId,
-      cmArtistId: override.cmArtistId,
-      cmArtistName: null,
-      resolvedBy: 'manual-override',
-      resolvedAt: new Date().toISOString(),
-      overrideVerifiedBy: override.verifiedBy,
-      overrideVerifiedOn: override.verifiedOn,
-    };
-  }
-
   const store = await kv();
   if (store && !opts.refresh) {
     const hit = (await store.get(KEY(channelId))) as CmArtistMapping | null;
@@ -117,7 +113,8 @@ export async function resolveCmArtist(
         resolvedAt: new Date().toISOString(),
         notFound: true,
       };
-      if (store) await store.set(KEY(channelId), miss);
+      // A miss expires. See MISS_TTL_SECONDS.
+      if (store) await store.set(KEY(channelId), miss, { ex: MISS_TTL_SECONDS });
       return miss;
     }
     return null;
@@ -139,6 +136,10 @@ export async function resolveCmArtist(
     ...(cmArtistId ? {} : { notFound: true }),
   };
 
-  if (store) await store.set(KEY(channelId), mapping);
+  /* A real id is permanent; a null is a question we should ask again. */
+  if (store) {
+    if (mapping.cmArtistId) await store.set(KEY(channelId), mapping);
+    else await store.set(KEY(channelId), mapping, { ex: MISS_TTL_SECONDS });
+  }
   return mapping;
 }
