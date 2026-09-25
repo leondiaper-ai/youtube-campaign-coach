@@ -88,6 +88,37 @@ export default function UKLandscape() {
     return r;
   }, [data, sortCross]);
 
+  /* Headline figures. Each tab gets the two or three numbers someone
+     would say out loud when presenting it — deliberately per-tab, and
+     deliberately never combined across tabs into a single score. */
+  const headline = useMemo((): { value: string; label: string; note?: string }[] => {
+    if (!data) return [];
+    const sum = (rs: Row[], k: 'consumption' | 'ukMonthlyViews') =>
+      rs.reduce((t, r) => t + (r[k] ?? 0), 0);
+
+    if (tab === 'consumption') {
+      const matched = data.consumption.filter((r) => r.youtubeChannelUrl).length;
+      return [
+        { value: fmt(sum(data.consumption, 'consumption')), label: 'Total UK consumption', note: data.period.label },
+        { value: String(data.consumption.length), label: 'Reported artists' },
+        { value: `${matched}/${data.consumption.length}`, label: 'Matched to a channel' },
+      ];
+    }
+    if (tab === 'crossover') {
+      return [
+        { value: String(data.crossover.length), label: 'Artists in both' },
+        { value: fmt(sum(data.crossover, 'consumption')), label: 'Their UK consumption' },
+        { value: fmt(sum(data.crossover, 'ukMonthlyViews')), label: 'Their UK monthly views' },
+      ];
+    }
+    const ukFirst = data.biggestUk.filter((r) => r.ukTerritoryRank === 1).length;
+    return [
+      { value: String(data.biggestUk.length), label: 'Artists with UK audience data' },
+      { value: fmt(sum(data.biggestUk, 'ukMonthlyViews')), label: 'Combined UK monthly views' },
+      { value: String(ukFirst), label: 'Where UK is their #1 territory' },
+    ];
+  }, [data, tab]);
+
   if (err) {
     return (
       <div className="text-[13px] text-ink/50">
@@ -117,7 +148,6 @@ export default function UKLandscape() {
         </h1>
         <a
           href="/api/uk-landscape/export"
-          data-x={tab}
           className="px-4 py-2 rounded text-[10px] font-black uppercase tracking-[0.12em] no-underline shrink-0"
           style={{ background: INK, color: PAPER }}
         >
@@ -125,7 +155,7 @@ export default function UKLandscape() {
         </a>
       </div>
       <div className="text-[13px] text-ink/50 mb-4 max-w-[62ch]">
-        A live view of Virgin&apos;s UK YouTube consumption, audience and biggest artists.
+        Virgin&apos;s UK YouTube consumption and audience landscape.
       </div>
 
       <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-[10px] uppercase tracking-[0.14em] text-ink/35">
@@ -160,6 +190,19 @@ export default function UKLandscape() {
         {tab === 'biggest' && 'Who are our biggest Virgin artists on YouTube in the UK? Wider UK audience, whether or not they appear in our internal reporting.'}
       </div>
 
+      {/* ── headline figures ───────────────────────────────────── */}
+      <div className="flex flex-wrap gap-x-10 gap-y-5 mb-7 pb-6" style={{ borderBottom: `1px solid ${MUTED}` }}>
+        {headline.map((h) => (
+          <div key={h.label}>
+            <div className="font-black tabular-nums leading-none" style={{ fontSize: 'clamp(1.6rem,3.2vw,2.5rem)' }}>
+              {h.value}
+            </div>
+            <div className="text-[10px] uppercase tracking-[0.14em] text-ink/40 mt-1.5">{h.label}</div>
+            {h.note && <div className="text-[10px] text-ink/25 mt-0.5">{h.note}</div>}
+          </div>
+        ))}
+      </div>
+
       {tab === 'crossover' && (
         <div className="flex items-center gap-2 mb-4 text-[10px] uppercase tracking-[0.12em] text-ink/35">
           <span>Rank by</span>
@@ -186,21 +229,34 @@ export default function UKLandscape() {
           const rank = tab === 'consumption' ? r.consumptionRank ?? i + 1 : i + 1;
           const key = (r.slug ?? r.artist) + i;
           const isOpen = open === key;
+          /* Rank hierarchy: the top three carry the room, four to ten
+             stay legible, the tail recedes. A flat list reads as a
+             spreadsheet and nobody looks at the top of it. */
+          const lead = rank <= 3;
+          const rankColor = lead ? INK : rank <= 10 ? 'rgba(14,14,14,0.55)' : 'rgba(14,14,14,0.26)';
           return (
             <div key={key} className="rounded-lg" style={{ background: PAPER, border: `1px solid ${MUTED}` }}>
               <div
-                className={`flex items-center gap-4 sm:gap-6 px-4 sm:px-5 py-4 ${tab === 'consumption' && r.tracks.length ? 'cursor-pointer' : ''}`}
+                className={`flex items-center gap-4 sm:gap-6 px-4 sm:px-5 ${lead ? 'py-5' : 'py-4'} ${tab === 'consumption' && r.tracks.length ? 'cursor-pointer' : ''}`}
                 onClick={() => tab === 'consumption' && r.tracks.length && setOpen(isOpen ? null : key)}
               >
                 <div
                   className="font-black tabular-nums shrink-0 text-right"
-                  style={{ fontSize: 'clamp(1.1rem,2.2vw,1.9rem)', width: 56, color: rank <= 3 ? INK : 'rgba(14,14,14,0.28)' }}
+                  style={{
+                    fontSize: lead ? 'clamp(1.5rem,3vw,2.6rem)' : 'clamp(1.05rem,2vw,1.7rem)',
+                    width: 56,
+                    color: rankColor,
+                    lineHeight: 1,
+                  }}
                 >
                   {rank}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="font-black leading-tight truncate" style={{ fontSize: 'clamp(0.95rem,1.5vw,1.2rem)' }}>
+                  <div
+                    className="font-black leading-tight truncate"
+                    style={{ fontSize: lead ? 'clamp(1.1rem,1.9vw,1.5rem)' : 'clamp(0.95rem,1.5vw,1.2rem)' }}
+                  >
                     {r.artist}
                     {r.isCollab && (
                       <span className="ml-2 text-[9px] uppercase tracking-[0.14em] text-ink/30 align-middle">collab</span>
