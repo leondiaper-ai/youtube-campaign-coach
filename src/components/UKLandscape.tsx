@@ -31,6 +31,7 @@ type Row = {
   artist: string;
   youtubeHandle: string | null;
   youtubeChannelUrl: string | null;
+  activeCampaign: boolean;
   consumption: number | null;
   consumptionRank: number | null;
   isCollab: boolean;
@@ -312,12 +313,23 @@ export default function UKLandscape() {
 
                 <div className="min-w-0 flex-1">
                   <div
-                    className="font-black leading-tight truncate"
+                    className="font-black leading-tight flex items-center gap-2 min-w-0"
                     style={{ fontSize: lead ? 'clamp(1.1rem,1.9vw,1.5rem)' : 'clamp(0.95rem,1.5vw,1.2rem)' }}
                   >
-                    {r.artist}
+                    <span className="truncate">{r.artist}</span>
+                    {/* Pinned in the Watcher's Active Campaigns workspace —
+                        a person put them there, so this reads as "someone
+                        is working this now". It never affects rank. */}
+                    {r.activeCampaign && (
+                      <span
+                        className="shrink-0 px-1.5 py-[3px] rounded text-[8.5px] font-black uppercase tracking-[0.12em] whitespace-nowrap"
+                        style={{ background: GREEN, color: '#fff' }}
+                      >
+                        Active campaign
+                      </span>
+                    )}
                     {r.isCollab && (
-                      <span className="ml-2 text-[9px] uppercase tracking-[0.14em] text-ink/30 align-middle">collab</span>
+                      <span className="shrink-0 text-[9px] uppercase tracking-[0.14em] text-ink/30">collab</span>
                     )}
                   </div>
                   {/* Channel identity sits here rather than as its own column:

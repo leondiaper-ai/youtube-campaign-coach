@@ -30,6 +30,7 @@
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { readLiveSnapByHandle, readSyncMeta } from '@/lib/kvCache';
+import { listPinned } from '@/lib/campaignStore';
 import { readLatestPeriod, readClassification } from './store';
 import type { Landscape, LandscapeRow, ConsumptionPeriod } from './types';
 
@@ -77,12 +78,16 @@ const usable = (s: UkSnap | undefined): boolean =>
   !!s && !s.error && !!s.uk && s.uk.inReturnedTerritories && (s.uk.monthlyViews ?? 0) >= 1000;
 
 export async function buildLandscape(): Promise<Landscape> {
-  const [period, classification, custom, syncMeta] = await Promise.all([
+  const [period, classification, custom, syncMeta, pinned] = await Promise.all([
     readLatestPeriod(),
     readClassification(),
     listCustomArtists(),
     readSyncMeta().catch(() => null),
+    /* Never let a pin lookup take the page down — the tag is a nicety,
+       the rankings are the product. */
+    listPinned().catch(() => []),
   ]);
+  const pinnedSlugs = new Set(pinned.map((p) => p.slug));
 
   const artists = mergeArtistLists(ARTISTS, custom);
 
@@ -117,7 +122,7 @@ export async function buildLandscape(): Promise<Landscape> {
 
   const row = (opts: Partial<LandscapeRow> & { artist: string }): LandscapeRow => ({
     slug: null, classification: null, channelId: null, youtubeHandle: null,
-    youtubeChannelUrl: null, consumption: null, consumptionRank: null,
+    youtubeChannelUrl: null, activeCampaign: false, consumption: null, consumptionRank: null,
     isCollab: false, tracks: [], subscribers: null, lifetimeViews: null,
     ukMonthlyViews: null, ukTerritoryRank: null, ukReadingDate: null, ...opts,
   });
@@ -131,6 +136,7 @@ export async function buildLandscape(): Promise<Landscape> {
     const cid = ch?.channelId ?? null;
     return {
       classification: classification[slug] ?? 'CHECK',
+      activeCampaign: pinnedSlugs.has(slug),
       channelId: cid,
       youtubeHandle: handle,
       youtubeChannelUrl: handle

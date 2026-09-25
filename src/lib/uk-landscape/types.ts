@@ -70,6 +70,12 @@ export type LandscapeRow = {
   /** Canonical URL: /@handle if we have one, else /channel/UC…. */
   youtubeChannelUrl: string | null;
 
+  /* True when the artist is pinned in the Watcher's Active Campaigns
+     workspace. A HUMAN pinned them, so this says "someone is working
+     this right now" — it is not derived from upload activity and is
+     never used to rank. Presentation only. */
+  activeCampaign: boolean;
+
   // A — consumption
   consumption: number | null;
   consumptionRank: number | null;
