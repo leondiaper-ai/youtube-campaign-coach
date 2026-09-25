@@ -124,7 +124,10 @@ export default function UKLandscape() {
     if (tab === 'consumption') {
       const matched = data.consumption.filter((r) => r.youtubeChannelUrl).length;
       return [
-        { value: fmt(sum(data.consumption, 'consumption')), label: 'Total UK consumption', note: data.period.label },
+        /* No date note here. The dataset strip above states the period
+           once, and the tab intro repeats it in words — a third copy
+           under the headline figure is noise, not clarity. */
+        { value: fmt(sum(data.consumption, 'consumption')), label: 'Total UK consumption' },
         { value: String(data.consumption.length), label: 'Reported artists' },
         { value: `${matched}/${data.consumption.length}`, label: 'Matched to a channel' },
       ];
