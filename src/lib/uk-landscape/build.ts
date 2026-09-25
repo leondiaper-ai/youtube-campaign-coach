@@ -93,14 +93,22 @@ export async function buildLandscape(): Promise<Landscape> {
       snap: a.channelHandle ? await readLiveSnapByHandle(a.channelHandle) : null,
     })),
   );
-  const channelBySlug = new Map<string, { name: string; subs: number | null; views: number | null; channelId: string | null }>();
+  const channelBySlug = new Map<string, {
+    name: string; subs: number | null; views: number | null;
+    channelId: string | null; handle: string | null;
+  }>();
   const channelIdBySlug = new Map<string, string>();
   for (const { a, snap } of snaps) {
+    /* Watcher stores channelHandle as either '@handle' or a raw UC id.
+       Only the former is a handle; the latter is an id wearing the
+       wrong field. */
+    const raw = (a.channelHandle ?? '').trim();
     channelBySlug.set(a.slug, {
       name: a.name,
       subs: snap?.subs ?? null,
       views: snap?.views ?? null,
       channelId: snap?.channelId ?? null,
+      handle: raw.startsWith('@') ? raw : null,
     });
     if (snap?.channelId) channelIdBySlug.set(a.slug, snap.channelId);
   }
@@ -108,7 +116,8 @@ export async function buildLandscape(): Promise<Landscape> {
   const uk = await readUkSnaps(channelIdBySlug);
 
   const row = (opts: Partial<LandscapeRow> & { artist: string }): LandscapeRow => ({
-    slug: null, classification: null, consumption: null, consumptionRank: null,
+    slug: null, classification: null, channelId: null, youtubeHandle: null,
+    youtubeChannelUrl: null, consumption: null, consumptionRank: null,
     isCollab: false, tracks: [], subscribers: null, lifetimeViews: null,
     ukMonthlyViews: null, ukTerritoryRank: null, ukReadingDate: null, ...opts,
   });
@@ -118,8 +127,17 @@ export async function buildLandscape(): Promise<Landscape> {
     const ch = channelBySlug.get(slug);
     const s = uk.get(slug);
     const ok = usable(s);
+    const handle = ch?.handle ?? null;
+    const cid = ch?.channelId ?? null;
     return {
       classification: classification[slug] ?? null,
+      channelId: cid,
+      youtubeHandle: handle,
+      youtubeChannelUrl: handle
+        ? `https://www.youtube.com/${handle}`
+        : cid
+          ? `https://www.youtube.com/channel/${cid}`
+          : null,
       subscribers: ch?.subs ?? null,
       lifetimeViews: ch?.views ?? null,
       ukMonthlyViews: ok ? s!.uk!.monthlyViews : null,

@@ -29,6 +29,8 @@ type Track = { track: string; isrc: string | null; consumption: number };
 type Row = {
   slug: string | null;
   artist: string;
+  youtubeHandle: string | null;
+  youtubeChannelUrl: string | null;
   consumption: number | null;
   consumptionRank: number | null;
   isCollab: boolean;
@@ -114,11 +116,12 @@ export default function UKLandscape() {
           UK YouTube Landscape
         </h1>
         <a
-          href={`/api/uk-landscape/export?view=${tab}`}
+          href="/api/uk-landscape/export"
+          data-x={tab}
           className="px-4 py-2 rounded text-[10px] font-black uppercase tracking-[0.12em] no-underline shrink-0"
           style={{ background: INK, color: PAPER }}
         >
-          Download data
+          Download UK YouTube Data
         </a>
       </div>
       <div className="text-[13px] text-ink/50 mb-4 max-w-[62ch]">
@@ -203,11 +206,33 @@ export default function UKLandscape() {
                       <span className="ml-2 text-[9px] uppercase tracking-[0.14em] text-ink/30 align-middle">collab</span>
                     )}
                   </div>
+                  {/* Channel identity sits here rather than as its own column:
+                      a raw URL on every row would drown the ranking. Blank
+                      where Watcher has no confirmed match — never guessed. */}
+                  {r.youtubeChannelUrl && (
+                    <a
+                      href={r.youtubeChannelUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1.5 mt-1 text-[11px] no-underline hover:underline"
+                      style={{ color: 'rgba(14,14,14,0.45)' }}
+                    >
+                      <svg width="13" height="10" viewBox="0 0 24 17" aria-hidden="true">
+                        <path d="M23.5 2.7A3 3 0 0 0 21.4.6C19.6 0 12 0 12 0s-7.6 0-9.4.6A3 3 0 0 0 .5 2.7C0 4.5 0 8.5 0 8.5s0 4 .5 5.8a3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.8.5-5.8.5-5.8s0-4-.5-5.8Z" fill="#FF0000"/>
+                        <path d="M9.6 12.3 15.8 8.5 9.6 4.7v7.6Z" fill="#FAF7F2"/>
+                      </svg>
+                      {r.youtubeHandle ?? 'View channel'}
+                    </a>
+                  )}
                   {tab === 'consumption' && r.tracks.length > 0 && (
                     <div className="text-[11px] text-ink/40 mt-0.5 truncate">
                       {r.tracks[0].track}
                       {r.tracks.length > 1 && ` · +${r.tracks.length - 1} more`}
                     </div>
+                  )}
+                  {tab === 'consumption' && !r.youtubeChannelUrl && (
+                    <div className="text-[10px] text-ink/25 mt-1">No matched channel</div>
                   )}
                   {tab === 'biggest' && r.ukTerritoryRank != null && (
                     <div className="text-[11px] text-ink/40 mt-0.5">

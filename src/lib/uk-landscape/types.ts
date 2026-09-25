@@ -60,6 +60,16 @@ export type LandscapeRow = {
   artist: string;
   classification: Classification | null;
 
+  /* Channel identity, from the Watcher mapping only. Never constructed
+     from an artist name — a guessed handle is a wrong link. A
+     consumption string with no confirmed Watcher match keeps both
+     fields null and stays in the ranking. */
+  channelId: string | null;
+  /** '@handle' where Watcher holds one. Null when it only has a UC id. */
+  youtubeHandle: string | null;
+  /** Canonical URL: /@handle if we have one, else /channel/UC…. */
+  youtubeChannelUrl: string | null;
+
   // A — consumption
   consumption: number | null;
   consumptionRank: number | null;
