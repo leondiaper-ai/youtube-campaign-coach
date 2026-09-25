@@ -87,6 +87,8 @@ export type LandscapeRow = {
 };
 
 export type Freshness = {
+  /** First date covered by the current consumption period. */
+  consumptionFrom: string | null;
   consumptionThrough: string | null;
   watcherUpdated: string | null;
   chartmetricUpdated: string | null;

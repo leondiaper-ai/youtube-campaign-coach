@@ -203,6 +203,9 @@ export async function buildLandscape(): Promise<Landscape> {
 
   return {
     freshness: {
+      /* The page states each source's own period. They do not align,
+         and pretending they do would be the lie worth avoiding here. */
+      consumptionFrom: period.dateFrom,
       consumptionThrough: period.dateTo,
       watcherUpdated: syncMeta?.lastSyncAt ? String(syncMeta.lastSyncAt).slice(0, 10) : null,
       chartmetricUpdated: readings.length ? readings[readings.length - 1] : null,

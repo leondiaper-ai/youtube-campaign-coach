@@ -42,7 +42,12 @@ type Row = {
   ukReadingDate: string | null;
 };
 type Data = {
-  freshness: { consumptionThrough: string | null; watcherUpdated: string | null; chartmetricUpdated: string | null };
+  freshness: {
+    consumptionFrom: string | null;
+    consumptionThrough: string | null;
+    watcherUpdated: string | null;
+    chartmetricUpdated: string | null;
+  };
   period: { id: string; label: string };
   consumption: Row[];
   crossover: Row[];
@@ -57,6 +62,26 @@ const fmt = (n: number | null | undefined): string => {
 };
 const day = (d: string | null) =>
   d ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+
+/* Every date on this page is derived from the data it describes.
+   Nothing here is hardcoded: when next week's consumption lands, the
+   range moves on its own. */
+const dayYear = (d: string | null) =>
+  d
+    ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '—';
+
+/** "23 Mar – 20 Sep 2026" — the year is stated once, at the end. */
+const range = (from: string | null, to: string | null) =>
+  from && to ? `${day(from)} – ${dayYear(to)}` : from || to ? dayYear(from ?? to) : '—';
+
+/** "23 Mar – 20 Sep" — for running text, where the year is noise. */
+const shortRange = (from: string | null, to: string | null) =>
+  from && to ? `${day(from)} – ${day(to)}` : '—';
 
 type Tab = 'consumption' | 'crossover' | 'biggest';
 
@@ -154,14 +179,38 @@ export default function UKLandscape() {
           Download UK YouTube Data
         </a>
       </div>
-      <div className="text-[13px] text-ink/50 mb-4 max-w-[62ch]">
-        Virgin&apos;s UK YouTube consumption and audience landscape.
+      <div className="text-[15px] text-ink/70 mb-6 max-w-[62ch] leading-snug">
+        Virgin&apos;s UK YouTube performance across our consumption data and the wider UK
+        YouTube audience.
       </div>
 
-      <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-[10px] uppercase tracking-[0.14em] text-ink/35">
-        <span>VMG Consumption · {day(data.freshness.consumptionThrough)}</span>
-        <span>Watcher · {day(data.freshness.watcherUpdated)}</span>
-        <span>Chartmetric UK · {day(data.freshness.chartmetricUpdated)}</span>
+      {/* ── the three datasets ─────────────────────────────────────
+          Named separately, each with its OWN period. They do not
+          cover the same window and the page must not imply they do:
+          consumption is a date RANGE, the other two are readings
+          taken on a day. */}
+      <div className="flex flex-wrap gap-x-10 gap-y-3 mb-7 pb-5" style={{ borderBottom: `1px solid ${MUTED}` }}>
+        {[
+          {
+            name: 'VMG UK Consumption',
+            detail: range(data.freshness.consumptionFrom, data.freshness.consumptionThrough),
+          },
+          {
+            name: 'Watcher Channel Data',
+            detail: `Updated ${dayYear(data.freshness.watcherUpdated)}`,
+          },
+          {
+            name: 'Chartmetric UK Audience',
+            detail: `Monthly views · Updated ${dayYear(data.freshness.chartmetricUpdated)}`,
+          },
+        ].map((s) => (
+          <div key={s.name}>
+            <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/55">
+              {s.name}
+            </div>
+            <div className="text-[11px] text-ink/40 mt-0.5 tabular-nums">{s.detail}</div>
+          </div>
+        ))}
       </div>
 
       {/* ── tabs ───────────────────────────────────────────────── */}
@@ -184,10 +233,18 @@ export default function UKLandscape() {
       </div>
 
       {/* ── question ───────────────────────────────────────────── */}
-      <div className="text-[12px] text-ink/45 mb-5 max-w-[70ch] leading-snug">
-        {tab === 'consumption' && 'What is driving Virgin’s UK YouTube consumption? Ranked exactly as VMG reports it — collaborations are kept whole, nothing is merged. Figures are tracks, not individual videos.'}
-        {tab === 'crossover' && 'Where does our own UK consumption overlap with the wider UK YouTube market? Only artists with real consumption and a usable UK audience figure.'}
-        {tab === 'biggest' && 'Who are our biggest Virgin artists on YouTube in the UK? Wider UK audience, whether or not they appear in our internal reporting.'}
+      {/* One line each. The methodology that used to live here — the
+          collaboration rule, tracks vs videos — moved to the source
+          note at the foot of the page. */}
+      <div className="text-[13px] text-ink/55 mb-5 max-w-[70ch] leading-snug">
+        {tab === 'consumption' &&
+          `Artists and tracks ranked by VMG UK YouTube consumption, ${shortRange(
+            data.freshness.consumptionFrom,
+            data.freshness.consumptionThrough,
+          )}.`}
+        {tab === 'crossover' &&
+          'Where VMG UK consumption overlaps with the wider UK YouTube audience.'}
+        {tab === 'biggest' && 'Virgin artists ranked by current UK YouTube monthly views.'}
       </div>
 
       {/* ── headline figures ───────────────────────────────────── */}
@@ -398,9 +455,32 @@ export default function UKLandscape() {
         </button>
       )}
 
-      <div className="mt-8 text-[10px] text-ink/30 leading-snug max-w-[78ch]">
-        UK Consumption uses VMG internal YouTube consumption reporting. UK YouTube Audience uses Chartmetric
-        artist-level YouTube territory data. Subscribers and lifetime views are global channel figures, not UK.
+      {/* The top of the page says what this is. The bottom says where
+          it comes from, and carries the methodology detail that would
+          otherwise clutter the tab intros. */}
+      <div className="mt-10 pt-5 max-w-[80ch]" style={{ borderTop: `1px solid ${MUTED}` }}>
+        <div className="text-[9px] uppercase tracking-[0.16em] text-ink/30 mb-2.5">Sources</div>
+        <dl className="text-[11px] text-ink/40 leading-relaxed">
+          <div className="mb-1.5">
+            <dt className="inline font-bold text-ink/55">VMG UK Consumption</dt>
+            <dd className="inline">
+              {' '}— internal Virgin UK YouTube consumption reporting. Ranked exactly as
+              reported: collaborations are kept whole and nothing is merged. Figures are
+              tracks, not individual videos.
+            </dd>
+          </div>
+          <div className="mb-1.5">
+            <dt className="inline font-bold text-ink/55">Chartmetric UK Audience</dt>
+            <dd className="inline"> — artist-level UK YouTube audience data, as monthly views.</dd>
+          </div>
+          <div>
+            <dt className="inline font-bold text-ink/55">Watcher</dt>
+            <dd className="inline">
+              {' '}— channel-level YouTube data such as subscribers and lifetime views. These
+              are global figures, not UK.
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
   );
