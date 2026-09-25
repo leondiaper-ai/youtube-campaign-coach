@@ -468,37 +468,11 @@ export default function UKLandscape() {
         </button>
       )}
 
-      {/* The top of the page says what this is. The bottom says where
-          it comes from, and carries the methodology detail that would
-          otherwise clutter the tab intros. */}
-      <div className="mt-10 pt-5 max-w-[80ch]" style={{ borderTop: `1px solid ${MUTED}` }}>
-        <div className="text-[9px] uppercase tracking-[0.16em] text-ink/30 mb-2.5">Sources</div>
-        <dl className="text-[11px] text-ink/40 leading-relaxed">
-          <div className="mb-1.5">
-            <dt className="inline font-bold text-ink/55">VMG UK Consumption</dt>
-            <dd className="inline">
-              {' '}— internal Virgin UK YouTube consumption reporting, covering{' '}
-              {range(data.freshness.consumptionFrom, data.freshness.consumptionThrough)}. Ranked
-              exactly as reported: collaborations are kept whole and nothing is merged. Figures
-              are tracks, not individual videos.
-            </dd>
-          </div>
-          <div className="mb-1.5">
-            <dt className="inline font-bold text-ink/55">Chartmetric UK Audience</dt>
-            <dd className="inline">
-              {' '}— artist-level UK YouTube audience data, as monthly views. Read{' '}
-              {dayYear(data.freshness.chartmetricUpdated)}.
-            </dd>
-          </div>
-          <div>
-            <dt className="inline font-bold text-ink/55">Watcher</dt>
-            <dd className="inline">
-              {' '}— channel-level YouTube data such as subscribers and lifetime views. These
-              are global figures, not UK. Updated {dayYear(data.freshness.watcherUpdated)}.
-            </dd>
-          </div>
-        </dl>
-      </div>
+      {/* No sources note. The page explains itself at the top, and the
+          global-not-UK caveat travels with the figures themselves —
+          every subscriber and lifetime column is labelled "· global"
+          at the point of reading, which is where it actually protects
+          against a misread. */}
     </div>
   );
 }
