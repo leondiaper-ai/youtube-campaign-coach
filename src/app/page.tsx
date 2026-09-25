@@ -107,6 +107,11 @@ export default function HomePage() {
             desc="What needs attention today, interpreted from Watcher data."
           />
           <ToolCard
+            href="/uk-landscape"
+            title="UK YouTube Landscape"
+            desc="Virgin's UK consumption, UK audience and biggest UK artists — three rankings, never one score."
+          />
+          <ToolCard
             href="/campaigns"
             title="Active Campaigns"
             desc="Campaign status board with decision signals."

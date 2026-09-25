@@ -1,0 +1,326 @@
+'use client';
+
+/* ═══════════════════════════════════════════════════════════════════
+   UK YOUTUBE LANDSCAPE
+
+   The approved spreadsheet, alive. Three rankings, one question each,
+   never averaged into a score — the fact that they disagree is the
+   product, and a combined number would destroy it.
+
+   Designed for a meeting screen: big rank, big artist, one or two hero
+   figures, everything else quiet. Deliberately not a rendered
+   spreadsheet — the top ten should be readable from across a room,
+   with the full list a click away.
+
+   Channel figures (subscribers, lifetime views) are GLOBAL and are
+   labelled that way wherever they appear. Chartmetric UK is
+   territory-specific. They are never divided by one another.
+   ═══════════════════════════════════════════════════════════════════ */
+
+import { useEffect, useMemo, useState } from 'react';
+
+const INK = '#0E0E0E';
+const PAPER = '#FAF7F2';
+const MUTED = '#E9E2D3';
+const BLUE = '#2C6BFF';
+const GREEN = '#0C6A3F';
+
+type Track = { track: string; isrc: string | null; consumption: number };
+type Row = {
+  slug: string | null;
+  artist: string;
+  consumption: number | null;
+  consumptionRank: number | null;
+  isCollab: boolean;
+  tracks: Track[];
+  subscribers: number | null;
+  lifetimeViews: number | null;
+  ukMonthlyViews: number | null;
+  ukTerritoryRank: number | null;
+  ukReadingDate: string | null;
+};
+type Data = {
+  freshness: { consumptionThrough: string | null; watcherUpdated: string | null; chartmetricUpdated: string | null };
+  period: { id: string; label: string };
+  consumption: Row[];
+  crossover: Row[];
+  biggestUk: Row[];
+};
+
+const fmt = (n: number | null | undefined): string => {
+  if (n == null) return '—';
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 2) + 'M';
+  if (n >= 1_000) return Math.round(n / 1_000) + 'K';
+  return String(n);
+};
+const day = (d: string | null) =>
+  d ? new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—';
+
+type Tab = 'consumption' | 'crossover' | 'biggest';
+
+export default function UKLandscape() {
+  const [data, setData] = useState<Data | null>(null);
+  const [err, setErr] = useState(false);
+  const [tab, setTab] = useState<Tab>('consumption');
+  const [showAll, setShowAll] = useState(false);
+  const [open, setOpen] = useState<string | null>(null);
+  const [sortCross, setSortCross] = useState<'uk' | 'consumption'>('uk');
+
+  useEffect(() => {
+    fetch('/api/uk-landscape')
+      .then((r) => r.json())
+      .then((j) => (j?.consumption ? setData(j) : setErr(true)))
+      .catch(() => setErr(true));
+  }, []);
+
+  useEffect(() => {
+    setShowAll(false);
+    setOpen(null);
+  }, [tab]);
+
+  const crossRows = useMemo(() => {
+    if (!data) return [];
+    const r = data.crossover.slice();
+    if (sortCross === 'consumption') r.sort((a, b) => (b.consumption ?? 0) - (a.consumption ?? 0));
+    else r.sort((a, b) => (b.ukMonthlyViews ?? 0) - (a.ukMonthlyViews ?? 0));
+    return r;
+  }, [data, sortCross]);
+
+  if (err) {
+    return (
+      <div className="text-[13px] text-ink/50">
+        UK Landscape data is not available right now.
+      </div>
+    );
+  }
+  if (!data) {
+    return <div className="text-[11px] uppercase tracking-[0.18em] text-ink/30">Loading…</div>;
+  }
+
+  const rows: Row[] = tab === 'consumption' ? data.consumption : tab === 'crossover' ? crossRows : data.biggestUk;
+  const shown = showAll ? rows : rows.slice(0, 20);
+
+  const TABS: { id: Tab; label: string; count: number }[] = [
+    { id: 'consumption', label: 'UK Consumption', count: data.consumption.length },
+    { id: 'crossover', label: 'Crossover', count: data.crossover.length },
+    { id: 'biggest', label: 'Biggest UK Artists', count: data.biggestUk.length },
+  ];
+
+  return (
+    <div style={{ color: INK }}>
+      {/* ── header ─────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-1">
+        <h1 className="font-black tracking-tight" style={{ fontSize: 'clamp(1.7rem,3.4vw,2.6rem)', lineHeight: 1.02 }}>
+          UK YouTube Landscape
+        </h1>
+        <a
+          href={`/api/uk-landscape/export?view=${tab}`}
+          className="px-4 py-2 rounded text-[10px] font-black uppercase tracking-[0.12em] no-underline shrink-0"
+          style={{ background: INK, color: PAPER }}
+        >
+          Download data
+        </a>
+      </div>
+      <div className="text-[13px] text-ink/50 mb-4 max-w-[62ch]">
+        A live view of Virgin&apos;s UK YouTube consumption, audience and biggest artists.
+      </div>
+
+      <div className="flex flex-wrap gap-x-6 gap-y-1 mb-6 text-[10px] uppercase tracking-[0.14em] text-ink/35">
+        <span>VMG Consumption · {day(data.freshness.consumptionThrough)}</span>
+        <span>Watcher · {day(data.freshness.watcherUpdated)}</span>
+        <span>Chartmetric UK · {day(data.freshness.chartmetricUpdated)}</span>
+      </div>
+
+      {/* ── tabs ───────────────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-2 mb-7">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className="px-4 py-2 rounded text-[11px] font-black uppercase tracking-[0.1em] transition-colors"
+            style={
+              tab === t.id
+                ? { background: INK, color: PAPER }
+                : { background: PAPER, color: 'rgba(14,14,14,0.55)', border: `1px solid ${MUTED}` }
+            }
+          >
+            {t.label}
+            <span className="ml-2 opacity-50 tabular-nums">{t.count}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* ── question ───────────────────────────────────────────── */}
+      <div className="text-[12px] text-ink/45 mb-5 max-w-[70ch] leading-snug">
+        {tab === 'consumption' && 'What is driving Virgin’s UK YouTube consumption? Ranked exactly as VMG reports it — collaborations are kept whole, nothing is merged. Figures are tracks, not individual videos.'}
+        {tab === 'crossover' && 'Where does our own UK consumption overlap with the wider UK YouTube market? Only artists with real consumption and a usable UK audience figure.'}
+        {tab === 'biggest' && 'Who are our biggest Virgin artists on YouTube in the UK? Wider UK audience, whether or not they appear in our internal reporting.'}
+      </div>
+
+      {tab === 'crossover' && (
+        <div className="flex items-center gap-2 mb-4 text-[10px] uppercase tracking-[0.12em] text-ink/35">
+          <span>Rank by</span>
+          {(['uk', 'consumption'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setSortCross(s)}
+              className="px-2.5 py-1 rounded font-bold"
+              style={
+                sortCross === s
+                  ? { background: BLUE, color: '#fff' }
+                  : { background: PAPER, border: `1px solid ${MUTED}`, color: 'rgba(14,14,14,0.5)' }
+              }
+            >
+              {s === 'uk' ? 'UK YouTube' : 'VMG Consumption'}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── rows ───────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-2">
+        {shown.map((r, i) => {
+          const rank = tab === 'consumption' ? r.consumptionRank ?? i + 1 : i + 1;
+          const key = (r.slug ?? r.artist) + i;
+          const isOpen = open === key;
+          return (
+            <div key={key} className="rounded-lg" style={{ background: PAPER, border: `1px solid ${MUTED}` }}>
+              <div
+                className={`flex items-center gap-4 sm:gap-6 px-4 sm:px-5 py-4 ${tab === 'consumption' && r.tracks.length ? 'cursor-pointer' : ''}`}
+                onClick={() => tab === 'consumption' && r.tracks.length && setOpen(isOpen ? null : key)}
+              >
+                <div
+                  className="font-black tabular-nums shrink-0 text-right"
+                  style={{ fontSize: 'clamp(1.1rem,2.2vw,1.9rem)', width: 56, color: rank <= 3 ? INK : 'rgba(14,14,14,0.28)' }}
+                >
+                  {rank}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="font-black leading-tight truncate" style={{ fontSize: 'clamp(0.95rem,1.5vw,1.2rem)' }}>
+                    {r.artist}
+                    {r.isCollab && (
+                      <span className="ml-2 text-[9px] uppercase tracking-[0.14em] text-ink/30 align-middle">collab</span>
+                    )}
+                  </div>
+                  {tab === 'consumption' && r.tracks.length > 0 && (
+                    <div className="text-[11px] text-ink/40 mt-0.5 truncate">
+                      {r.tracks[0].track}
+                      {r.tracks.length > 1 && ` · +${r.tracks.length - 1} more`}
+                    </div>
+                  )}
+                  {tab === 'biggest' && r.ukTerritoryRank != null && (
+                    <div className="text-[11px] text-ink/40 mt-0.5">
+                      UK is their #{r.ukTerritoryRank} YouTube territory
+                    </div>
+                  )}
+                </div>
+
+                {/* hero metrics */}
+                {tab === 'consumption' && (
+                  <div className="text-right shrink-0">
+                    <div className="font-black tabular-nums leading-none" style={{ fontSize: 'clamp(1.1rem,2vw,1.6rem)' }}>
+                      {fmt(r.consumption)}
+                    </div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-ink/35 mt-1">UK consumption</div>
+                  </div>
+                )}
+
+                {tab === 'crossover' && (
+                  <div className="flex items-center gap-5 sm:gap-8 shrink-0">
+                    <div className="text-right">
+                      <div className="font-black tabular-nums leading-none" style={{ fontSize: 'clamp(0.95rem,1.7vw,1.35rem)' }}>
+                        {fmt(r.consumption)}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-[0.12em] text-ink/35 mt-1">VMG consumption</div>
+                    </div>
+                    <div className="text-right">
+                      <div
+                        className="font-black tabular-nums leading-none"
+                        style={{ fontSize: 'clamp(0.95rem,1.7vw,1.35rem)', color: BLUE }}
+                      >
+                        {fmt(r.ukMonthlyViews)}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-[0.12em] text-ink/35 mt-1">UK YouTube monthly</div>
+                    </div>
+                    <div className="hidden sm:block text-right w-[78px]">
+                      <div className="font-black tabular-nums leading-none text-[15px]" style={{ color: GREEN }}>
+                        #{r.ukTerritoryRank ?? '—'}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-[0.12em] text-ink/35 mt-1">UK territory</div>
+                    </div>
+                  </div>
+                )}
+
+                {tab === 'biggest' && (
+                  <div className="flex items-center gap-5 sm:gap-8 shrink-0">
+                    <div className="text-right">
+                      <div
+                        className="font-black tabular-nums leading-none"
+                        style={{ fontSize: 'clamp(1.05rem,1.9vw,1.55rem)', color: BLUE }}
+                      >
+                        {fmt(r.ukMonthlyViews)}
+                      </div>
+                      <div className="text-[9px] uppercase tracking-[0.12em] text-ink/35 mt-1">UK YouTube monthly</div>
+                    </div>
+                    <div className="hidden md:block text-right w-[80px]">
+                      <div className="font-bold tabular-nums leading-none text-[13px] text-ink/60">{fmt(r.subscribers)}</div>
+                      <div className="text-[9px] uppercase tracking-[0.12em] text-ink/30 mt-1">Subs · global</div>
+                    </div>
+                    <div className="hidden lg:block text-right w-[92px]">
+                      <div className="font-bold tabular-nums leading-none text-[13px] text-ink/60">{fmt(r.lifetimeViews)}</div>
+                      <div className="text-[9px] uppercase tracking-[0.12em] text-ink/30 mt-1">Lifetime · global</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* expanded tracks */}
+              {tab === 'consumption' && isOpen && r.tracks.length > 0 && (
+                <div className="px-4 sm:px-5 pb-4" style={{ borderTop: `1px solid ${MUTED}` }}>
+                  <div className="text-[9px] uppercase tracking-[0.14em] text-ink/30 pt-3 pb-2">
+                    Biggest consuming tracks
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {r.tracks.map((t, j) => (
+                      <div key={t.isrc ?? j} className="flex items-center gap-3">
+                        <div className="text-[12px] text-ink/60 flex-1 min-w-0 truncate">{t.track}</div>
+                        <div className="h-[8px] flex-1 max-w-[220px] hidden sm:block" style={{ background: MUTED }}>
+                          <div
+                            className="h-full"
+                            style={{
+                              width: `${Math.max((t.consumption / (r.tracks[0].consumption || 1)) * 100, 2)}%`,
+                              background: BLUE,
+                            }}
+                          />
+                        </div>
+                        <div className="text-[12px] font-black tabular-nums text-ink/80 w-[62px] text-right">
+                          {fmt(t.consumption)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {rows.length > 20 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="mt-4 px-4 py-2 rounded text-[10px] font-black uppercase tracking-[0.12em]"
+          style={{ background: PAPER, border: `1px solid ${MUTED}`, color: 'rgba(14,14,14,0.55)' }}
+        >
+          {showAll ? 'Show top 20' : `Show all ${rows.length}`}
+        </button>
+      )}
+
+      <div className="mt-8 text-[10px] text-ink/30 leading-snug max-w-[78ch]">
+        UK Consumption uses VMG internal YouTube consumption reporting. UK YouTube Audience uses Chartmetric
+        artist-level YouTube territory data. Subscribers and lifetime views are global channel figures, not UK.
+      </div>
+    </div>
+  );
+}
