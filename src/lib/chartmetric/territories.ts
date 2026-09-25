@@ -59,15 +59,30 @@
    Ezra city checked, a ten-day window, which is not the "previous
    trend point" (16 Sep) anyone would assume.
 
-   THE LABELLING RULE
+   THE LABELLING RULE — AND A CORRECTION
 
-   This is YouTube-for-Artists territory data for the ARTIST ENTITY.
-   It is not the owned channel the Watcher tracks, and it must never
-   be presented as if it were. Ezra's 26 countries total 1.42m monthly
-   views against a channel with 28.6m lifetime views — different
-   things, different scopes, and a reader who conflates them will draw
-   a false conclusion. Hence `scope` on the result, and the source line
-   the module is required to render.
+   The first version of this comment claimed the territory figures
+   describe a wider artist entity than the owned channel, on the
+   grounds that 1.42m territory views sat against a channel with
+   28.6m views. That comparison was wrong, and wrong in the exact way
+   this codebase has been burned before: it put a MONTHLY number next
+   to a LIFETIME number and drew a conclusion from the gap.
+
+   Checking Chartmetric's own artist page for 324003 settles it. They
+   publish, for Ezra: YouTube subscribers 74.1k, total views 28.4m —
+   both matching the Watcher's own snapshot of @ezracollective to the
+   rounding — and monthly video views 1.9m. The 26 returned
+   territories sum to 1.42m, which is 75% of that 1.9m. A top-26 slice
+   of the same population, in other words, not a different population.
+
+   So what can be said honestly: these are Chartmetric's YouTube
+   monthly video views split by territory, and they are a DIFFERENT
+   MEASUREMENT from the lifetime channel totals shown above them on
+   the page — monthly not lifetime, vendor-modelled not YouTube API.
+   What cannot be said: that they cover a different set of videos.
+   Every row carries the same Google Knowledge Graph MID in
+   target_id, which is entity-shaped, but entity-shaped is not proof
+   of a wider population when the totals reconcile this cleanly.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { cmFetch } from './client';
@@ -101,7 +116,9 @@ export type Territories = {
   ok: true;
   artist: { slug: string; name: string; channelId: string };
   chartmetric: { artistId: number; artistName: string | null };
-  scope: 'youtube-for-artists-entity';
+  scope: 'chartmetric-youtube-monthly-views';
+  /** Median growth across comparable territories — the pack, to beat. */
+  medianChangePct: number | null;
   /** Date of the reading, derived from the trend where possible. */
   reportingDate: string | null;
   /** Date of the comparison reading, when it could be pinned down. */
@@ -261,11 +278,28 @@ export async function fetchTerritories(
 
   const countries = normalizeRows(rawCountries, listedTotal);
 
+  /* The pack. Ezra's territories nearly all roughly doubled in this
+     window, so "+119%" means nothing on its own — the question a
+     campaign person actually has is which markets beat the artist's
+     own overall lift. That needs a baseline, and the median of the
+     comparable territories is it. */
+  const growths = countries
+    .map((c) => c.changePct)
+    .filter((p): p is number => p != null)
+    .sort((a, b) => a - b);
+  const medianChangePct =
+    growths.length === 0
+      ? null
+      : growths.length % 2
+        ? growths[(growths.length - 1) / 2]
+        : (growths[growths.length / 2 - 1] + growths[growths.length / 2]) / 2;
+
   return {
     ok: true,
     artist: { slug: artist.slug, name: artist.name, channelId },
     chartmetric: { artistId: mapping.cmArtistId, artistName: mapping.cmArtistName },
-    scope: 'youtube-for-artists-entity',
+    scope: 'chartmetric-youtube-monthly-views',
+    medianChangePct,
     reportingDate,
     previousDate,
     windowDays: daysBetween(reportingDate, previousDate),
