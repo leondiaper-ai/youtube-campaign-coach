@@ -310,3 +310,76 @@ export async function fetchTerritories(
     fetchedAt: new Date().toISOString(),
   };
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE UK ROW
+
+   One territory, pulled out of the normalized result for the UK
+   Landscape work. Three measures, deliberately separate:
+
+     UK SCALE       monthlyViews for GB.
+     UK IMPORTANCE  rank first, share second. Rank is the primary
+                    measure because "the UK is their #2 market" is a
+                    fact about the artist; share depends on how many
+                    territories Chartmetric chose to return. Ezra's 26
+                    countries summed to 75% of Chartmetric's own stated
+                    monthly total, so the denominator is not the world
+                    and the field name says so.
+     UK MOMENTUM    UK's change against the artist's median territory
+                    change — the Ezra method. On Ezra the UK did +101%
+                    against a +102% median, i.e. it moved with his
+                    overall lift and is not a UK story. A raw
+                    percentage would have read as a breakout.
+
+   Absence is recorded, not zeroed. An artist whose returned
+   territories do not include GB gets `inReturnedTerritories: false`,
+   which is a finding — particularly on a short list.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export type UkRow = {
+  inReturnedTerritories: boolean;
+  monthlyViews: number | null;
+  previousViews: number | null;
+  changeViews: number | null;
+  changePct: number | null;
+  /** PRIMARY importance measure: UK's position among this artist's territories. */
+  territoryRank: number | null;
+  /** SECONDARY. Share of RETURNED territories, never of world views. */
+  shareOfReturned: number | null;
+  isEstimate: boolean | null;
+  /** changePct − medianChangePct, in percentage points. */
+  vsMedianPp: number | null;
+};
+
+export function ukRow(t: Territories): UkRow {
+  const idx = t.countries.findIndex((c) => c.code2 === 'GB');
+  if (idx === -1) {
+    return {
+      inReturnedTerritories: false,
+      monthlyViews: null,
+      previousViews: null,
+      changeViews: null,
+      changePct: null,
+      territoryRank: null,
+      shareOfReturned: null,
+      isEstimate: null,
+      vsMedianPp: null,
+    };
+  }
+  const gb = t.countries[idx];
+  return {
+    inReturnedTerritories: true,
+    monthlyViews: gb.monthlyViews,
+    previousViews: gb.previousViews,
+    changeViews: gb.changeViews,
+    changePct: gb.changePct,
+    // countries are sorted by monthlyViews desc, so index is the rank.
+    territoryRank: idx + 1,
+    shareOfReturned: gb.shareOfListed,
+    isEstimate: gb.isEstimate,
+    vsMedianPp:
+      gb.changePct != null && t.medianChangePct != null
+        ? gb.changePct - t.medianChangePct
+        : null,
+  };
+}
