@@ -299,7 +299,12 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
         </div>
       )}
 
-      <div className="mt-2 text-[10px] text-ink/25 leading-snug">
+      {/* Rendered at /45, not the /25 the other footnotes use. On the live
+          page at /25 it was effectively invisible — and this is the one
+          line whose whole job is to stop someone reading these monthly
+          figures as the lifetime channel totals higher up. A caveat
+          nobody can see is not a caveat. */}
+      <div className="mt-3 pt-2 text-[10px] text-ink/45 leading-snug" style={{ borderTop: `1px solid ${MUTED}` }}>
         Chartmetric YouTube&#8209;for&#8209;Artists, monthly video views by territory — a different
         measurement from the lifetime channel totals above, not a different set of videos.
       </div>
