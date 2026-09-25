@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { isPinned } from '@/lib/campaignStore';
 import PinCampaignButton from '@/components/PinCampaignButton';
 import WatcherArtistView from '@/components/WatcherArtistView';
+import YouTubeTerritories from '@/components/YouTubeTerritories';
 
 /* Our own artist page. The analysis lives in WatcherArtistView, which
    the regional boards render too; what belongs to us alone is this
@@ -18,6 +19,10 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     <WatcherArtistView
       slug={slug}
       signature="Watcher watches · Coach plans · You decide"
+      /* Chartmetric hangs off the existing footer slot, so
+         WatcherArtistView needs no change at all. It fetches after
+         paint and renders nothing when there is nothing to say. */
+      footer={<YouTubeTerritories slug={slug} />}
       chrome={
         <div className="flex items-center justify-between mb-8">
           <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
