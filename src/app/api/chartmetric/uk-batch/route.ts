@@ -190,7 +190,11 @@ export async function GET(req: NextRequest) {
     const history = await readHistory(channelId);
     const v7 = deltaOver(history, 7, 'views');
 
-    const t = await fetchTerritories({ slug: artist.slug, name: artist.name }, channelId);
+    const t = await fetchTerritories(
+      { slug: artist.slug, name: artist.name },
+      channelId,
+      { refresh },
+    );
     fetched++;
 
     const title = snap?.title ?? null;

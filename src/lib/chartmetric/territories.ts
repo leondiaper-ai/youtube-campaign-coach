@@ -244,10 +244,17 @@ function normalizeRows(raw: RawRow[], listedTotal: number): TerritoryRow[] {
 export async function fetchTerritories(
   artist: { slug: string; name: string },
   channelId: string,
+  /* refresh re-asks Chartmetric for the ARTIST MAPPING too, not just
+     the territories. Without this a caller asking for fresh data got
+     fresh territories on top of a stale resolution — and if that
+     resolution was a cached null, the refresh could never recover it.
+     That is precisely how K-Trap stayed invisible through repeated
+     forced retries. A refresh now means the whole chain. */
+  opts: { refresh?: boolean } = {},
 ): Promise<TerritoriesResult> {
   let mapping: CmArtistMapping | null;
   try {
-    mapping = await resolveCmArtist(channelId);
+    mapping = await resolveCmArtist(channelId, { refresh: opts.refresh });
   } catch {
     return { ok: false, reason: 'resolve-failed' };
   }
