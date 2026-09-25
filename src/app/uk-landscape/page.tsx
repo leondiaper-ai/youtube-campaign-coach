@@ -1,25 +1,23 @@
-import Link from 'next/link';
 import UKLandscape from '@/components/UKLandscape';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'UK YouTube Landscape — YouTube Campaign System',
-  description: "Virgin's UK YouTube consumption, audience and biggest artists.",
+  title: 'UK YouTube Landscape — Virgin Music Group',
+  description:
+    "Virgin's UK YouTube performance across our consumption data and the wider UK YouTube audience.",
 };
 
+/**
+ * This page is sent to people outside Virgin, including YouTube, so it
+ * stands on its own: no link back into the internal Watcher, and no
+ * internal strapline. Everything a first-time viewer needs is in the
+ * page itself.
+ */
 export default function UKLandscapePage() {
   return (
-    <main className="min-h-screen px-5 sm:px-8 py-8 max-w-[1500px] mx-auto">
-      <div className="mb-8">
-        <Link href="/" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline">
-          ← Home
-        </Link>
-      </div>
+    <main className="min-h-screen px-5 sm:px-8 py-10 max-w-[1500px] mx-auto">
       <UKLandscape />
-      <div className="mt-12 text-[10px] uppercase tracking-[0.18em] text-ink/25">
-        Watcher watches · Coach plans · You decide
-      </div>
     </main>
   );
 }
