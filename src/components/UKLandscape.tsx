@@ -179,18 +179,17 @@ export default function UKLandscape() {
 
   return (
     <div style={{ color: INK }}>
-      {/* ── header ─────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-1">
+      {/* ── header ─────────────────────────────────────────────────
+          No download button. This page goes to people outside Virgin,
+          and that button handed anyone holding the link the full
+          145-artist consumption export — our own reporting, including
+          track-level detail. The export ROUTE is untouched and still
+          works for us directly; only the public doorway to it is
+          closed. */}
+      <div className="mb-1">
         <h1 className="font-black tracking-tight" style={{ fontSize: 'clamp(1.7rem,3.4vw,2.6rem)', lineHeight: 1.02 }}>
           UK YouTube Landscape
         </h1>
-        <a
-          href="/api/uk-landscape/export"
-          className="px-4 py-2 rounded text-[10px] font-black uppercase tracking-[0.12em] no-underline shrink-0"
-          style={{ background: INK, color: PAPER }}
-        >
-          Download UK YouTube Data
-        </a>
       </div>
       <div className="text-[15px] text-ink/70 mb-6 max-w-[62ch] leading-snug">
         Virgin&apos;s UK YouTube performance across our consumption data and the wider UK
