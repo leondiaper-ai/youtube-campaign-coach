@@ -127,8 +127,15 @@ export default function FormatSplitPanel({ slug }: { slug: string }) {
   const s = a.windows!.all;
   const channelTotal = a.channelTotalViews ?? null;
   const counted = s.longformViews + s.shortsViews;
-  const unaccounted =
-    channelTotal != null ? Math.max(0, channelTotal - counted) : null;
+  /* rawGap can be NEGATIVE: the channel's lifetime total and the
+     per-video counts are read at different moments in the sync, so on
+     a small catalogue the videos can briefly sum higher than the
+     channel figure. Observed on VENUS GRRRLS at −1,995 (0.7%).
+     Clamping alone would leave an unexplained mismatch on a panel
+     claiming full coverage, so the overshoot is named instead. */
+  const rawGap = channelTotal != null ? channelTotal - counted : null;
+  const unaccounted = rawGap != null ? Math.max(0, rawGap) : null;
+  const overshoot = rawGap != null && rawGap < 0 ? -rawGap : null;
   const complete = s.coverage.confidence === 'complete';
 
   return (
@@ -179,6 +186,12 @@ export default function FormatSplitPanel({ slug }: { slug: string }) {
         {!complete && (
           <>
             {' '}The two format totals do not add up to overall channel views, and are not meant to.
+          </>
+        )}
+        {overshoot != null && (
+          <>
+            {' '}The videos sum {fmt(overshoot)} above the channel total — the two figures are
+            read at different points in the sync, so they can differ slightly.
           </>
         )}
       </div>
