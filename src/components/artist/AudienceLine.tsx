@@ -80,13 +80,16 @@ export default function AudienceLine({ slug }: { slug: string }) {
 
   const quote = read?.display ? read.quote : null;
 
-  if (!quote) {
-    return (
-      <div className="text-[12px] text-ink/35 mt-5 pl-5" style={{ borderLeft: `2px solid ${RULE}` }}>
-        Not enough comment signal on the latest uploads to read a response yet.
-      </div>
-    );
-  }
+  /* Withheld reads render nothing at all.
+     This previously printed "Not enough comment signal … yet", on the
+     reasoning that a blank space would be misread as "nothing to report".
+     In practice most of the roster is withheld most of the time, so that
+     line was a permanent apology occupying the most valuable space on the
+     page — directly under the artist name, above the next action. An
+     absent line costs a reader nothing; a line explaining its own absence
+     on every artist costs them attention on every visit. The reason is
+     still available: it is `withheldReason` on the cached read. */
+  if (!quote) return null;
 
   const theme = quote.theme ?? read?.dominantTheme ?? null;
   const themeWord = theme ? THEME_WORD[theme] ?? null : null;

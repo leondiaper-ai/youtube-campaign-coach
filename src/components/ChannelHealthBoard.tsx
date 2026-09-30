@@ -1297,8 +1297,9 @@ function ViewSplitLine({ split }: { split: NonNullable<RowData['formatSplit']> }
   const sample = !recent && split.confidence === 'sample';
 
   const tooltip = recent
-    ? `Views gained in the last ${split.windowDays} days\n` +
-      `${pcTight(split.longformShare)}% long-form · ${pcTight(split.shortsShare)}% Shorts\n` +
+    ? `${fmtNum(split.longformViews + split.shortsViews)} views gained in the last ${split.windowDays} days\n` +
+      `${fmtNum(split.longformViews)} long-form (${pcTight(split.longformShare)}%) · ` +
+      `${fmtNum(split.shortsViews)} Shorts (${pcTight(split.shortsShare)}%)\n` +
       `From daily readings, counted only on videos present in both readings.`
     : `LIFETIME split — not recent viewing.\n` +
       `${pcTight(split.longformShare)}% long-form · ${pcTight(split.shortsShare)}% Shorts\n` +
@@ -1316,14 +1317,29 @@ function ViewSplitLine({ split }: { split: NonNullable<RowData['formatSplit']> }
         <div style={{ width: `${split.longformShare * 100}%`, background: SPLIT_LF, opacity: recent ? 1 : 0.5 }} />
         <div style={{ width: `${split.shortsShare * 100}%`, background: SPLIT_SH, opacity: recent ? 1 : 0.5 }} />
       </div>
+      {/* On a recent basis the views GAINED lead, because that is the
+          thing the row is actually reporting — the percentages explain
+          where it came from. On a lifetime basis there is no such number
+          to show: the totals describe years of catalogue, not a period,
+          and putting one here would be read as this week's. */}
+      {recent && (
+        <span className="text-[8px] font-bold tabular-nums whitespace-nowrap" style={{ color: '#0C6A3F' }}>
+          +{fmtNum(split.longformViews + split.shortsViews)}
+        </span>
+      )}
       <span className="text-[8px] tabular-nums whitespace-nowrap" style={{ color: 'rgba(14,14,14,0.5)' }}>
         {pcTight(split.longformShare)}/{pcTight(split.shortsShare)}
       </span>
+      {/* The coverage percentage has moved to the tooltip. At 7px next to
+          four other figures it read as a channel statistic rather than as
+          a caveat about our own inventory, which is the opposite of its
+          job. The basis word stays: without it a lifetime split and a
+          7-day one are indistinguishable at this size. */}
       <span
         className="text-[7px] font-bold uppercase tracking-[0.06em] whitespace-nowrap"
         style={{ color: recent ? '#0C6A3F' : sample ? '#9A5B00' : 'rgba(14,14,14,0.3)' }}
       >
-        {recent ? '7d' : sample ? `life ${pcCoverage(split.viewsCovered)}` : 'life'}
+        {recent ? '7d' : 'life'}
       </span>
     </div>
   );
