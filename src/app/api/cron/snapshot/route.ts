@@ -7,6 +7,7 @@ import { captureWeeklySnapshots } from '@/lib/weeklySnapshotCapture';
 import { safeMergeSnap } from '@/lib/youtube/normalizeChannelData';
 import { classifySnapshotPriority, shouldFetchInRun, applyQuotaGuardrails, type SnapshotPriority } from '@/lib/snapshotScheduler';
 import { deriveFromLive } from '@/lib/artists';
+import { recordFormatReading } from '@/lib/formatHistory';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -241,6 +242,19 @@ export async function GET(req: NextRequest) {
         const merged = safeMergeSnap(existing, snap);
         await writeLiveSnap(snap.channelId, merged);
         await writeChannelMapping(handle, snap.channelId);
+
+        /* Daily format reading. Uses the MERGED uploads so a partial
+           API response cannot wipe the baseline the next delta is
+           measured against. Wrapped because a failure here must not
+           cost us the channel snapshot — the split is an addition,
+           the snapshot is the product. */
+        try {
+          if (merged.recentUploads?.length) {
+            await recordFormatReading(snap.channelId, merged.recentUploads);
+          }
+        } catch (e) {
+          console.warn('[cron] format reading failed for', slug, e);
+        }
       }
 
       dailyResults[slug] = `ok [${entry.schedule.priority}] (${snap.subs} subs, ${snap.uploads30d} uploads/30d)`;

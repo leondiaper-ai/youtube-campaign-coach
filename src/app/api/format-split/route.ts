@@ -27,6 +27,7 @@ import {
   isChannelRepresentative,
 } from '@/lib/formatSplit';
 import { getTeam } from '@/lib/territories/markets';
+import { readFormatDays, computeTrends } from '@/lib/formatHistory';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,11 +65,17 @@ async function forArtist(a: { slug: string; name: string; channelHandle?: string
     channelLifetimeViews: snap.views ?? null,
   });
 
+  /* Trends come from stored daily deltas, never from lifetime totals.
+     Empty until the cron has run on enough consecutive days. */
+  const days = snap.channelId ? await readFormatDays(snap.channelId) : [];
+
   return {
     slug: a.slug,
     name: a.name,
     handle: a.channelHandle ?? null,
     available: true,
+    trends: computeTrends(days),
+    trackingDays: days.filter((d) => d.comparable).length,
     /** Channel lifetime total. Reported, never split. */
     channelTotalViews: snap.views ?? null,
     coverage: set.all.coverage,
