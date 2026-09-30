@@ -100,15 +100,6 @@ export default function ArtistActionBar({
 
       <button
         type="button"
-        onClick={() => copy('report')}
-        className={chip}
-        style={{ border: `1px solid ${RULE}`, color: INK, background: 'transparent' }}
-      >
-        {copied === 'report' ? '✓ Copied' : 'Copy report'}
-      </button>
-
-      <button
-        type="button"
         onClick={togglePin}
         disabled={busy}
         aria-pressed={pinned}
@@ -142,6 +133,22 @@ export default function ArtistActionBar({
           )}
         </Link>
       )}
+
+      {/* Pushed to the right edge, away from the navigation.
+          Everything to the left of this takes you somewhere or changes
+          what the roster tracks; this one takes the page away with you.
+          Grouping it with the links implied it was another destination.
+          `ml-auto` only bites while the row fits on one line — once it
+          wraps on a narrow screen the button simply starts the next row,
+          which is the right outcome. */}
+      <button
+        type="button"
+        onClick={() => copy('report')}
+        className={chip + ' ml-auto'}
+        style={{ border: `1px solid ${RULE}`, color: INK, background: 'transparent' }}
+      >
+        {copied === 'report' ? '✓ Copied' : 'Channel report'}
+      </button>
     </div>
   );
 }
