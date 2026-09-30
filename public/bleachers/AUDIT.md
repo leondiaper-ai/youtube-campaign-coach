@@ -1,7 +1,7 @@
 # Bleachers × YouTube deep dive — audit pack
 
 **Artefact:** `https://youtube-campaign-coach.vercel.app/bleachers`
-**Version:** v3 — 30 September 2026
+**Version:** v4 — 30 September 2026
 **Audience for the deck:** the artist and their management.
 
 ---
@@ -11,6 +11,7 @@
 | Version | What it got wrong | Fixed in |
 |---|---|---|
 | v1 | Said 15 music videos / 60.2M — missed "Tiny Moves (Official)" (4.43M) because the title omits the word "Video", and the stated count didn't match its own sum. Said only two songs got the full support package while its own table showed three. Took 54% against the 189M lifetime counter on the cover. Claimed "all 230 uploads classified" while showing 174. | v2 |
+| v3 | Never mentioned that *everyone for ten minutes* was released 22 May 2026 — **inside the 154-day longevity window it was measuring** — or that the Stone Pony film is the album release show, played free the day after the record came out. Rested the December case entirely on chart data while the tracker was already showing the video climbing. Rendered on cream paper, which is the opposite of the band's own imagery. | **v4** |
 | v2 | Headlined "the live take beat the music video" from a single comparison. Presented lifetime live-video medians against Shorts medians as though it were a controlled experiment. Implied the Stone Pony show being public meant rights were settled. Presented the four lyric videos' average as a clean per-upload return, ignoring that they are old and attached to the biggest songs. Chart bars rendered as hairlines. | **v3** |
 
 ---
@@ -83,6 +84,46 @@ Every one inspected for title, duration and date. Durations run 182–307s, all 
 **Tiny Moves specifically:** 4:07, published 17 Jan 2024 as a premiere, choreography by Margaret Qualley, with a separate "Tiny Moves (Live at Red Rocks)" also on the channel. It is the official music video. v1 missed it; v3 counts it.
 
 **The one judgement call:** the 17 include the Verdine White *remix* video. The deck says "17 music videos" in the census and "sixteen songs have an official music video" on the support slide. Both are accurate. Excluding the remix would make it 16 / 64,627,646 and move nothing material.
+
+---
+
+## 2b. The measured seasonal ramp — new in v4
+
+The tracker holds per-video daily history for seven uploads on this channel. In the seven days to 30 September 2026:
+
+| Upload | Added | Lifetime | Age |
+|---|---|---|---|
+| **Merry Christmas, Please Don't Call (MV)** | **+400,000** | 7.06M | 672d |
+| you and forever | +11,000 | 2.2M | 230d |
+| MCPDC with Annie DiRusso (Stone Pony) | +4,000 | 25K | 47d |
+| Live From The Stone Pony | +3,800 | 227K | 117d |
+| "jack breaks down mcpdc" (Short) | +1,800 | 46K | 314d |
+
+**The ratio that matters.** 7,060,665 views over 672 days is a lifetime average of **10,507/day**. 400,000 over 7 days is **57,143/day** — **5.4×** its own norm, in September.
+
+**Stated limitation, on the slide.** This ranks the seven uploads with per-video history, not all 230. So "the fastest-moving video on the channel" is **not** established — older catalogue videos have no per-video series. What *is* solid is the video against its own history, which is the comparison the deck makes.
+
+This supersedes nothing in §3; it adds present-tense evidence to a case that previously rested only on the UK chart record. The deck still states that we have no observation of either past Christmas period.
+
+---
+
+## 2c. The album era — new in v4
+
+*everyone for ten minutes* was released **22 May 2026**, inside the 27 April – 28 September longevity window. Its singles went up before the window opened: you and forever (11 Feb), the van (13 Apr), Dirty Wedding Dress (17 Apr).
+
+So the 97.3% figure counts those three singles as "older material". The deck now says this explicitly and reframes the finding as the stronger version: **an album landed mid-window and the overwhelming majority of viewing still went to things already published.**
+
+The Stone Pony film is the album release show — free, the day after release, 900 people, in Jack's own words on the video. That is now the opening of the Stone Pony slide.
+
+Five album eras, from the descriptions: Strange Desire (2014), Gone Now (2017), Take The Sadness Out Of Saturday Night (2021), Bleachers (2024), everyone for ten minutes (2026).
+
+---
+
+## 2d. Design provenance — new in v4
+
+Twelve maxresdefault frames were sampled for average colour. Eleven fall between #1a0f10 and #8a704b — warm, dark, sepia. One breaks the pattern: the Christmas video at **#97a4aa**, cold blue-grey. The deck is therefore warm near-black throughout and turns cold once, on the December slide, because that is what the band's own artwork does.
+
+All imagery is maxresdefault frames from their videos with hqdefault fallbacks. All quoted text is Jack Antonoff's, verbatim from video descriptions on this channel. Nothing is stock and nothing is invented.
 
 ---
 
