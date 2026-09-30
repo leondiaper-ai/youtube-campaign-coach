@@ -252,6 +252,33 @@ h2.display{font-size:clamp(1.9rem,4.8vw,3.7rem)}
 .gaprow.subject .a span.on{border-color:var(--ice);color:var(--ice)}
 .gaprow.subject .a span.late{border-style:dashed}
 
+/* ── THE RUNWAY ──────────────────────────────────────────────────────
+   The deck kept saying "before November" without showing how little
+   November is away. Drawn, the argument makes itself: the ramp is
+   already running, the chart weeks start in ten, and two of the four
+   assets do not exist yet. */
+.runway{margin-top:1rem;padding:1.05rem 1.2rem 1.15rem;
+  border:1px solid var(--ice);border-radius:4px;background:rgba(159,178,188,.07)}
+.rwline{position:relative;height:2px;background:rgba(159,178,188,.3);
+  margin:2.1rem .4rem 0}
+.rwline::before{content:'';position:absolute;left:0;top:0;height:2px;width:6%;
+  background:var(--ice)}
+.rwmarks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:-2.1rem}
+.rwm{position:relative;padding-top:1.7rem}
+.rwm::before{content:'';position:absolute;top:calc(2.1rem - 4px);left:0;
+  width:9px;height:9px;border-radius:50%;background:var(--night);
+  border:2px solid rgba(159,178,188,.5)}
+.rwm.now::before{background:var(--ice);border-color:var(--ice)}
+.rwm .w{font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint)}
+.rwm.now .w{color:var(--ice)}
+.rwm .d{font-family:var(--disp);font-weight:700;font-size:.95rem;margin-top:.3rem;
+  line-height:1.2}
+.rwm.now .d{color:var(--ice)}
+.rwm .n{font-size:.76rem;line-height:1.4;color:var(--smoke);margin-top:.3rem}
+@media(max-width:780px){.rwmarks{grid-template-columns:repeat(2,1fr);row-gap:18px}
+  .rwline{display:none}.rwmarks{margin-top:.6rem}.rwm{padding-top:0}.rwm::before{display:none}}
+
 /* ── SEASON COMPARISON ───────────────────────────────────────────── */
 .season{margin-top:.9rem;display:flex;flex-direction:column;gap:14px}
 .srow{display:grid;grid-template-columns:clamp(92px,12vw,140px) 1fr;
@@ -334,10 +361,14 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 
 <!-- ════════ 1 · COVER ════════════════════════════════════════════ -->
 <section class="slide">
+  <!-- The Stone Pony frame is the best picture on the channel, but it
+       belongs to the Stone Pony slide. Using it twice made the cover and
+       slide 5b read as the same page. This is 'you and forever' — the
+       current era's biggest video, and the right words to open on. -->
   <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/468J7e1clU4/maxresdefault.jpg" alt="Bleachers live at the Stone Pony"
-      style="object-position:64% 42%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/468J7e1clU4/hqdefault.jpg'">
+    <img src="https://i.ytimg.com/vi/I6ox7VKVzqU/maxresdefault.jpg" alt="Bleachers — you and forever"
+      style="object-position:72% 42%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/I6ox7VKVzqU/hqdefault.jpg'">
   </div>
   <div class="inner">
     <div class="label">Bleachers · @bleachers · Channel deep dive · Virgin Music Group</div>
@@ -632,8 +663,12 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
   <div class="inner">
     <div class="label cold">Seasonal asset · Merry Christmas, Please Don't Call</div>
     <h2 class="display" style="margin:.8rem 0 .9rem;max-width:22ch">
-      It's already<br>climbing. It's<br>September.
+      It's already<br>climbing. And<br>it's September.
     </h2>
+    <p class="big-p" style="margin-bottom:.4rem">
+      Ten weeks to the first chart week. <em>This is the planning window, and it is
+      open now.</em>
+    </p>
 
     <div class="said" style="border-left-color:var(--ice)">
       <p>
@@ -733,6 +768,41 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
     <div class="fine" style="margin-top:.8rem">
       Chart performance, not YouTube viewing · peak improved from 77 to 65 in the
       second season · source: Official Charts Company
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="label cold">The runway · from today</div>
+    <div class="runway">
+      <div class="rwline"></div>
+      <div class="rwmarks">
+        <div class="rwm now">
+          <div class="w">Now</div>
+          <div class="d">30 September</div>
+          <div class="n">Already at 5.4&times; its daily average. Two of the four assets
+            don't exist.</div>
+        </div>
+        <div class="rwm">
+          <div class="w">In 6 weeks</div>
+          <div class="d">11 November</div>
+          <div class="n">Where the 2024 campaign started — the first Short went up on
+            this date.</div>
+        </div>
+        <div class="rwm">
+          <div class="w">In 10 weeks</div>
+          <div class="d">11 December</div>
+          <div class="n">The first chart week last season. It peaked at #65 here.</div>
+        </div>
+        <div class="rwm">
+          <div class="w">In 12 weeks</div>
+          <div class="d">25 December</div>
+          <div class="n">The song's day. By then the work is either done or it isn't.</div>
+        </div>
+      </div>
+    </div>
+    <div class="fine" style="margin-top:.7rem">
+      A lyric video and an official audio are studio jobs measured in weeks, not months
+      — but they are not same-week jobs, and the ramp has already begun
     </div>
 
     <div class="note cold">
