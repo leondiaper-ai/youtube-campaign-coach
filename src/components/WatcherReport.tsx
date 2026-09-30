@@ -396,14 +396,18 @@ function buildFullReport(p: ReportProps): string {
 
 type CopyState = 'idle' | 'slack' | 'email' | 'report';
 
-function useCopyUpdate(props: ReportProps) {
+export function useCopyUpdate(props: ReportProps) {
   const [copied, setCopied] = useState<CopyState>('idle');
 
   const copy = useCallback((type: 'slack' | 'email' | 'report') => {
     let text: string;
     if (type === 'slack') text = buildSlackUpdate(props);
     else if (type === 'email') text = buildEmailUpdate(props);
-    else text = buildEmailUpdate(props);
+    /* 'report' used to fall through to buildEmailUpdate, which left
+       buildFullReport dead code and meant the "Channel report" button
+       silently copied the shorter email text — without the PERFORMANCE
+       and CAMPAIGN PERIOD sections the button's own label promises. */
+    else text = buildFullReport(props);
 
     navigator.clipboard.writeText(text).then(() => {
       setCopied(type);

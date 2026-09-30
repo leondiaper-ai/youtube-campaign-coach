@@ -163,6 +163,36 @@ export async function readVideoSeries(videoId: string): Promise<VideoSeries | nu
 }
 
 /**
+ * Several series in one round trip.
+ *
+ * Ranking a grid needs every candidate's series at once, and doing that as
+ * N sequential gets puts N network round trips in a page render. MGET makes
+ * it one. Missing keys come back as nulls in position, so the caller can
+ * tell "no series" from "empty series" — the difference between a video we
+ * have never observed and one observed once.
+ */
+export async function readVideoSeriesMany(
+  videoIds: string[],
+): Promise<Map<string, VideoSeries>> {
+  const out = new Map<string, VideoSeries>();
+  if (!videoIds.length) return out;
+
+  const store = await kv();
+  if (!store) return out;
+
+  try {
+    const rows = await store.mget<(VideoSeries | null)[]>(...videoIds.map(K));
+    videoIds.forEach((id, i) => {
+      const s = rows?.[i];
+      if (s?.observations?.length) out.set(id, s);
+    });
+  } catch {
+    /* Ranking degrades to lifetime views rather than failing the page. */
+  }
+  return out;
+}
+
+/**
  * What this video had done at N days old, if anybody was watching then.
  *
  * `tolerance` exists because observations are daily and a campaign does not

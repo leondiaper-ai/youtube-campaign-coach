@@ -34,7 +34,7 @@ const fmt = (n: number): string => {
 };
 const pct = (x: number) => (x <= 0 ? '0%' : x < 0.01 ? '<1%' : `${Math.round(x * 100)}%`);
 
-export default function EzraMarkets({ slug }: { slug: string }) {
+export default function ArtistMarkets({ slug }: { slug: string }) {
   const [t, setT] = useState<Payload | null>(null);
   const [open, setOpen] = useState(false);
 

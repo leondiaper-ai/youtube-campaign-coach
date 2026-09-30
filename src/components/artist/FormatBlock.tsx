@@ -6,7 +6,7 @@
    The whole design question on this block is what occupies the big type
    when there is no recent figure yet. The lifetime split is always
    computable and looks authoritative, which is exactly why it must not
-   take that position: a number describing every view Ezra's catalogue
+   take that position: a number describing every view the catalogue
    has ever earned, set in 42px under a heading about the last 7 days,
    would be read as this week's behaviour. It is not.
 
@@ -21,7 +21,7 @@ const LF = '#2C6BFF';
 const SH = '#C77A16';
 const RULE = '#E9E2D3';
 
-export type EzraSplit = {
+export type FormatSplit = {
   basis: 'recent' | 'lifetime';
   windowDays: number | null;
   longformShare: number;
@@ -48,11 +48,11 @@ const cov = (x: number | null) => {
   return `${Math.round(x * 100)}%`;
 };
 
-export default function EzraFormatBlock({
+export default function FormatBlock({
   split,
   lifetimeCounts,
 }: {
-  split: EzraSplit | null;
+  split: FormatSplit | null;
   lifetimeCounts: { longform: number; shorts: number } | null;
 }) {
   const [open, setOpen] = useState(false);

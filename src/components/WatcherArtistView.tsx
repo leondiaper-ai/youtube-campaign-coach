@@ -18,6 +18,10 @@ import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/compon
 import MissedReachSection from '@/components/MissedReachSection';
 import { ReportButtonBar } from '@/components/WatcherReport';
 import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
+import ArtistOverview from '@/components/artist/ArtistOverview';
+import ArtistActionBar from '@/components/artist/ArtistActionBar';
+import { deepDiveFor } from '@/lib/deepDiveLink';
+import { isPinned } from '@/lib/campaignStore';
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
@@ -74,11 +78,18 @@ const DECISION_TO_STATE: Record<string, ChannelState> = {
    ═══════════════════════════════════════════════════════════════════ */
 
 export default async function WatcherArtistView({
-  slug, chrome, coachBadge = true, metrics = null, footer = null, signature,
+  slug, chrome = null, coachBadge = true, metrics = null, footer = null, signature,
 }: {
   slug: string;
-  /** Breadcrumb and top-right controls. Whose page this is. */
-  chrome: ReactNode;
+  /**
+   * Breadcrumb and top-right controls. Whose page this is.
+   *
+   * Omit it and the page renders its own ArtistActionBar, which is what
+   * /watcher/[slug] does. A team board passes its own, because its pin
+   * writes to that board's store rather than ours and its "back" goes
+   * somewhere else.
+   */
+  chrome?: ReactNode;
   /** Coach is ours; a regional board does not see it. */
   coachBadge?: boolean;
   /** Rendered directly beneath the headline cards. Shared by every
@@ -276,182 +287,111 @@ export default async function WatcherArtistView({
   const isColdMode = channelState === 'COLD' || (channelState === 'AT RISK' && uploads30d === 0 && !nearMoment);
   const isLiveCampaign = !isColdMode;
 
+  /* The recommendation the overview shows is Watcher's own — the same
+     call the page has always made, hoisted above the return so the
+     overview can lead with it instead of it appearing halfway down. */
+  const moves = whatToDoNow(decision, live?.recentUploads ?? [], scanVideoGaps(live?.recentUploads ?? []), {
+    isColdMode,
+    daysToNextMoment,
+    momentLabel: artist.nextMomentLabel ?? null,
+    uploads30d,
+    lastUpDays,
+    subs7delta: subs7?.delta ?? null,
+    views7delta: views7?.delta ?? null,
+  });
+
+  /* Only needed when this view supplies its own action bar. A team board
+     passes chrome, owns its own pin, and must not read ours. */
+  const ownActions = !chrome;
+  const campaignPinned = ownActions ? await isPinned(slug) : false;
+  const deepDive = ownActions ? deepDiveFor(artist.name) : null;
+
   return (
     <main className="bg-paper min-h-screen" style={{ color: INK }}>
-      <div className="max-w-[880px] mx-auto px-6 py-10">
-        {chrome}
+      {/* Wider than the old 880px column: the overview runs a five-across
+          metric row and two four-across thumbnail grids, which a narrow
+          column turns into a stack of tiny tiles. */}
+      <div className="max-w-[1180px] mx-auto px-5 sm:px-8 py-8 sm:py-12">
+        {/* ─── ACTIONS ────────────────────────────────────────────────
+            Ours, unless the caller supplied its own (team boards do). */}
+        {chrome ?? (
+          <ArtistActionBar
+            slug={slug}
+            initiallyPinned={campaignPinned}
+            deepDive={deepDive}
+            reportProps={{
+              artistName: artist.name,
+              channelState,
+              stateReason: derived?.reason ?? decision.headline,
+              riskLine: null,
+              primaryMove: moves.primary,
+              secondaryMove: moves.secondary,
+              missedReach: [],
+              stats: {
+                subs: live?.subs ?? null,
+                views7d: rawDelta(nc.views7d),
+                subs7d: rawDelta(nc.subs7d),
+                uploads30d,
+                lastUpDays,
+                shorts30d: live?.shorts30d ?? 0,
+              },
+              campaign: artist.campaign ?? null,
+              campaignContentViews,
+              campaignContentCount,
+              campaignShortsCount,
+              campaignDaysSinceStart,
+              campaignSubsDelta: campSubs?.delta ?? null,
+              campaignViewsDelta: campViews?.delta ?? null,
+              recentUploads: (live?.recentUploads ?? []).filter(
+                (u) => (Date.now() - new Date(u.publishedAt).getTime()) / 86400000 <= 14
+              ).map((u) => ({
+                title: u.title,
+                views: u.viewCount,
+                kind: (u.durationSec <= 62 ? 'Short' : 'Video') as 'Short' | 'Video',
+                daysAgo: Math.floor((Date.now() - new Date(u.publishedAt).getTime()) / 86400000),
+              })),
+              conv7,
+            }}
+          />
+        )}
 
-        {/* ─── HEADER ─────────────────────────────────────────────────────── */}
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
-          <YouTubeMark />
-          <span>Watcher</span>
-          {coachBadge && <CoachCampaignBadge slug={slug} fallback={artist.campaign} />}
-        </div>
-        <div className="flex items-center justify-between mt-1">
-          <div className="flex items-center gap-2">
-            <h1 className="font-black text-3xl">{artist.name}</h1>
-            {nc.confidence === 'LOW' && (
-              <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={nc.healthNote}>
-                Building history
-              </span>
-            )}
-            {nc.confidence === 'MEDIUM' && (
-              <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#FFF5D6', color: '#7A5A00' }} title={nc.healthNote}>
-                Partial history
-              </span>
-            )}
+        {/* Coach is ours; a regional board does not see it. It sits above
+            the overview rather than inside it, because the overview is
+            shared and knows nothing about Coach. */}
+        {coachBadge && (
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45 mb-6">
+            <YouTubeMark />
+            <span>Watcher</span>
+            <CoachCampaignBadge slug={slug} fallback={artist.campaign} />
           </div>
-          <ReportButtonBar props={{
-            artistName: artist.name,
-            channelState,
-            stateReason: derived?.reason ?? decision.headline,
-            riskLine: null,
-            primaryMove: { label: '', action: '' },
-            secondaryMove: null,
-            missedReach: [],
-            stats: {
-              subs: live?.subs ?? null,
-              views7d: rawDelta(nc.views7d),
-              subs7d: rawDelta(nc.subs7d),
-              uploads30d,
-              lastUpDays,
-              shorts30d: live?.shorts30d ?? 0,
-            },
-            campaign: artist.campaign ?? null,
-            campaignContentViews,
-            campaignContentCount,
-            campaignShortsCount,
-            campaignDaysSinceStart,
-            campaignSubsDelta: campSubs?.delta ?? null,
-            campaignViewsDelta: campViews?.delta ?? null,
-            recentUploads: (live?.recentUploads ?? []).filter(
-              (u) => (Date.now() - new Date(u.publishedAt).getTime()) / 86400000 <= 14
-            ).map((u) => ({
-              title: u.title,
-              views: u.viewCount,
-              kind: (u.durationSec <= 62 ? 'Short' : 'Video') as 'Short' | 'Video',
-              daysAgo: Math.floor((Date.now() - new Date(u.publishedAt).getTime()) / 86400000),
-            })),
-            conv7,
-          }} />
-        </div>
+        )}
 
-        {/* ─── STATE + HEADLINE + CONSEQUENCE ─────────────────────────── */}
-        <div className="mt-5 flex items-start gap-3">
-          <span
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-[0.14em] shrink-0 mt-0.5"
-            style={{ background: sc.bg, color: sc.fg }}
-          >
-            <span className="w-2 h-2 rounded-full" style={{ background: sc.dot }} />
-            {STATE_LABEL[channelState]}
-          </span>
-          <div>
-            <div className="text-[18px] font-black leading-snug">
-              {decision.headline}
-            </div>
-            {(decision.type === 'FIX' || decision.type === 'CORRECT') && (
-              <div className="mt-2 text-[12px] text-ink/50 leading-snug max-w-[60ch]">
-                <span className="font-bold text-ink/60">If nothing changes:</span> {decision.ifIgnored}
-              </div>
-            )}
+        {/* ─── THE OVERVIEW — identical on every artist page ──────────── */}
+        <ArtistOverview
+          slug={slug}
+          artist={artist}
+          snap={live}
+          nc={nc}
+          derived={derived}
+          status={channelState}
+          uploads={live?.recentUploads ?? []}
+          subs7={rawDelta(nc.subs7d)}
+          views7={rawDelta(nc.views7d)}
+          moves={moves}
+          pinned={campaignPinned}
+        />
+
+        {/* The decision headline and its consequence. The overview carries
+            the state and the action; this is the reasoning behind them,
+            and it only earns space when something is actually wrong. */}
+        {(decision.type === 'FIX' || decision.type === 'CORRECT') && decision.ifIgnored && (
+          <div className="mt-10 pt-6 text-[12px] text-ink/55 leading-snug max-w-[70ch]"
+               style={{ borderTop: `1px solid ${MUTED}` }}>
+            <span className="font-bold text-ink/70">If nothing changes:</span> {decision.ifIgnored}
           </div>
-        </div>
+        )}
 
-        {/* ─── PERFORMANCE SNAPSHOT — primary data surface ────────────── */}
-        {(() => {
-          // Best Available Movement: use ranked signal selection instead of simple LKG fallback
-          const ba = nc.bestAvailable;
-          const isLive = ba.source === 'live_7d';
-          const isMuted = !isLive && ba.source !== 'recent_snapshot';
-
-          // Choose what to display based on best available source
-          const viewsDisplay = ba.viewsValue != null
-            ? {
-                value: fmtDelta(ba.viewsValue),
-                sub: ba.sublabel,
-                color: ba.viewsValue > 0
-                  ? (isMuted ? 'rgba(12,106,63,0.45)' : '#0C6A3F')
-                  : ba.viewsValue < 0
-                    ? (isMuted ? 'rgba(138,31,12,0.45)' : '#8A1F0C')
-                    : undefined,
-              }
-            : null;
-
-          const subsDisplay = ba.subsValue != null
-            ? {
-                value: (ba.subsValue >= 0 ? '+' : '') + ba.subsValue.toLocaleString(),
-                sub: ba.sublabel,
-                color: ba.subsValue > 0
-                  ? (isMuted ? 'rgba(12,106,63,0.45)' : '#0C6A3F')
-                  : ba.subsValue < 0
-                    ? (isMuted ? 'rgba(138,31,12,0.45)' : '#8A1F0C')
-                    : undefined,
-              }
-            : null;
-
-          // Source-aware labels
-          const viewsLabel = ba.source === 'live_7d' ? 'Views (7d)'
-            : ba.source === 'recent_snapshot' ? 'Views (recent)'
-            : ba.source === 'campaign_period' ? 'Channel views'
-            : ba.source === 'last_confirmed' ? ba.label
-            : ba.source === 'recent_uploads' ? 'Content activity'
-            : 'Views (7d)';
-
-          const subsLabel = ba.source === 'live_7d' ? 'Subs (7d)'
-            : ba.source === 'recent_snapshot' ? 'Subs (recent)'
-            : ba.source === 'campaign_period' ? 'Channel subs'
-            : ba.source === 'last_confirmed' ? 'Subs (last confirmed)'
-            : 'Subs (7d)';
-
-          return (
-            <>
-              <div className="mt-6 grid grid-cols-4 gap-3">
-                <MetricTile
-                  label={viewsLabel}
-                  value={viewsDisplay ? viewsDisplay.value : (ba.source === 'recent_uploads' ? ba.sublabel : '—')}
-                  sub={viewsDisplay ? viewsDisplay.sub : null}
-                  color={viewsDisplay?.color}
-                />
-                <MetricTile
-                  label={subsLabel}
-                  value={subsDisplay ? subsDisplay.value : '—'}
-                  sub={subsDisplay ? subsDisplay.sub : null}
-                  color={subsDisplay?.color}
-                />
-                <MetricTile
-                  label="Uploads (30d)"
-                  value={live?.uploads30d != null ? String(live.uploads30d) : '—'}
-                  sub={live?.shorts30d != null ? `${live.shorts30d} Shorts` : null}
-                />
-                <MetricTile
-                  label="Last upload"
-                  value={lastUpDays != null ? (lastUpDays === 0 ? 'Today' : `${lastUpDays}d ago`) : '—'}
-                  sub={null}
-                  color={lastUpDays != null ? (lastUpDays <= 3 ? '#0C6A3F' : lastUpDays >= 14 ? '#8A1F0C' : undefined) : undefined}
-                />
-              </div>
-
-              {/* ─── MOVEMENT SOURCE INDICATOR ───────────────────────── */}
-              {ba.source !== 'live_7d' && ba.source !== 'none' && (
-                <div className="mt-2 text-[10px] italic text-ink/35">
-                  {ba.explanation}
-                </div>
-              )}
-              {ba.source === 'none' && (
-                <div className="mt-2 text-[10px] italic text-ink/30">
-                  {nc.movementConfidence === 'limited'
-                    ? 'Recently added — movement data building'
-                    : 'Totals updating — movement data will refresh shortly'}
-                </div>
-              )}
-            </>
-          );
-        })()}
-
-        {/* ─── METRICS SLOT ────────────────────────────────────────
-            Directly under the headline cards, where the reader
-            already is. Renders nothing when the caller passes
-            nothing, so boards that do not want it are unchanged. */}
+        {/* ─── METRICS SLOT — for callers that supply their own ──────── */}
         {metrics}
 
         {/* ─── ACTIVITY SIGNAL FALLBACK (when no better signal exists) ──────── */}
@@ -552,52 +492,10 @@ export default async function WatcherArtistView({
         )}
 
 
-        {/* ─── WHAT TO DO NOW — max 2 directions ────────────────────────── */}
-        {(() => {
-          const videoGaps = scanVideoGaps(live?.recentUploads ?? []);
-          const moves = whatToDoNow(decision, live?.recentUploads ?? [], videoGaps, {
-            isColdMode,
-            daysToNextMoment,
-            momentLabel: artist.nextMomentLabel ?? null,
-            uploads30d,
-            lastUpDays,
-            subs7delta: subs7?.delta ?? null,
-            views7delta: views7?.delta ?? null,
-          });
-          return (
-            <section className="mt-10">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ background: isLiveCampaign ? '#F08A3C' : '#2C6BFF' }} />
-                <h2 className="font-black text-lg">What to do now</h2>
-              </div>
-              <div className="space-y-3">
-                <div
-                  className="rounded-xl border-l-4 border p-5"
-                  style={{ borderColor: MUTED, borderLeftColor: isLiveCampaign ? '#F08A3C' : '#2C6BFF', background: PAPER }}
-                >
-                  <div className="text-[11px] font-black uppercase tracking-[0.14em] text-ink/40 mb-1">Primary move</div>
-                  <div className="text-[15px] font-black leading-snug">{moves.primary.label}</div>
-                  <div className="text-[13px] text-ink/65 mt-1.5 leading-snug max-w-[60ch]">
-                    {moves.primary.action}
-                  </div>
-                </div>
-                {moves.secondary && (
-                  <div
-                    className="rounded-xl border p-5"
-                    style={{ borderColor: MUTED, background: PAPER }}
-                  >
-                    <div className="text-[11px] font-black uppercase tracking-[0.14em] text-ink/40 mb-1">Secondary move</div>
-                    <div className="text-[14px] font-bold leading-snug">{moves.secondary.label}</div>
-                    <div className="text-[12px] text-ink/50 mt-1.5 leading-snug max-w-[60ch]">
-                      {moves.secondary.action}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-          );
-        })()}
-
+        {/* The primary and secondary moves used to render here, halfway
+            down the page. They now lead the overview at the top, which is
+            where a reader looking for "what do I do" actually looks — so
+            this section is gone rather than duplicated. */}
 
         {/* ─── 4. MISSED REACH — full catalogue, tiered, expandable ────── */}
         {allMissedOpps.length > 0 && (() => {
