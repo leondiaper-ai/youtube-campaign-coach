@@ -58,14 +58,13 @@ const EXTRA_DECKS: Record<string, DeepDiveLink> = {
   },
 };
 
-/**
- * "Living" workspace variants — a deck that reads live data rather than a
- * frozen snapshot. Where one exists it is the better destination, so it wins.
+/*
+ * There are also "-live" pages on disk (/amyl-live, /ktrap-live). These
+ * used to be preferred here on the reasoning that a live page beats a
+ * frozen one — which was wrong. They are working surfaces, not the deep
+ * dive: the deep dive is the deck that was written and reviewed, and it
+ * is what "Deep dive" has to open. They are deliberately NOT mapped.
  */
-const LIVE_VARIANTS: Record<string, string> = {
-  amylandthesniffers: '/amyl-live',
-  ktrap: '/ktrap-live',
-};
 
 /** name → link, built once at module load from the artist-decks group. */
 const BY_NAME: Record<string, DeepDiveLink> = (() => {
@@ -86,10 +85,6 @@ const BY_NAME: Record<string, DeepDiveLink> = (() => {
   }
 
   for (const [key, link] of Object.entries(EXTRA_DECKS)) out[key] = link;
-
-  for (const [key, href] of Object.entries(LIVE_VARIANTS)) {
-    if (out[key]) out[key] = { ...out[key], href };
-  }
 
   return out;
 })();
