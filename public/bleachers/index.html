@@ -98,10 +98,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opa
   border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:.6rem;
   letter-spacing:.14em;text-transform:uppercase}
 .nav .who{color:var(--faint)}
-.nav .links{display:flex;gap:clamp(10px,1.8vw,24px)}
-.nav .links a{text-decoration:none;color:var(--faint)}
-.nav .links a:hover{color:var(--bone)}
-@media(max-width:1000px){.nav .links{display:none}}
+/* One destination, not eight. The section links were a table of contents
+   for a deck you scroll anyway — they took the full width of the bar to
+   tell you what you were about to read. The only thing a reader actually
+   needs from here is the working behind the numbers. */
+.nav a.analysis{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
+  padding:.4rem .75rem;border-radius:3px;transition:color .2s,border-color .2s;white-space:nowrap}
+.nav a.analysis:hover{color:var(--bone);border-color:var(--bone)}
 
 /* ── SLIDE ───────────────────────────────────────────────────────── */
 .slide{position:relative;min-height:100vh;display:flex;flex-direction:column;
@@ -350,16 +353,7 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 
 <nav class="nav">
   <div class="who">Bleachers · @bleachers</div>
-  <div class="links">
-    <a href="#catalogue">Catalogue</a>
-    <a href="#earns">What earns</a>
-    <a href="#longevity">Longevity</a>
-    <a href="#live">Live</a>
-    <a href="#december">December</a>
-    <a href="#support">Support</a>
-    <a href="#shorts">Shorts</a>
-    <a href="#next">What next</a>
-  </div>
+  <a class="analysis" href="/bleachers/analysis">The analysis →</a>
 </nav>
 
 

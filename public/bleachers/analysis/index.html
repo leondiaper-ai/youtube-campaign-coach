@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bleachers × YouTube — the analysis</title>
+<meta name="description" content="The working behind the Bleachers channel deep dive: sources, method, every figure, and what the data cannot show.">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     BLEACHERS × YOUTUBE — THE ANALYSIS
+     The working behind /bleachers. Same palette and type as the deck,
+     document layout rather than slides.
+
+     This page exists because the deck makes claims about somebody's
+     livelihood and they should be checkable without asking us. Every
+     figure on the deck appears here with the object it came from, and
+     the limitations are set out at the same size as the findings rather
+     than smaller.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --night:#14100E; --bone:#F2EBDF; --smoke:rgba(242,235,223,.62);
+  --faint:rgba(242,235,223,.44); --rule:rgba(242,235,223,.15);
+  --brick:#D2694E; --gold:#D9A441; --ice:#9FB2BC;
+  --pad:clamp(20px,5vw,72px);
+  --disp:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
+  -webkit-font-smoothing:antialiased}
+a{color:inherit}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.5;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px)}
+
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;padding:12px var(--pad);
+  background:rgba(20,16,14,.86);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:.6rem;
+  letter-spacing:.14em;text-transform:uppercase}
+.nav .who{color:var(--faint)}
+.nav a.back{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
+  padding:.4rem .75rem;border-radius:3px;transition:color .2s,border-color .2s;white-space:nowrap}
+.nav a.back:hover{color:var(--bone);border-color:var(--bone)}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(96px,14vh,140px) var(--pad) clamp(60px,10vh,110px)}
+
+.eyebrow{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(2.2rem,5.5vw,3.6rem);
+  line-height:.98;letter-spacing:-.035em;margin:1rem 0 1.1rem}
+h2{font-family:var(--disp);font-weight:700;font-size:clamp(1.3rem,2.6vw,1.9rem);
+  line-height:1.15;letter-spacing:-.025em;margin:3.2rem 0 .9rem;
+  padding-top:1.6rem;border-top:1px solid var(--rule)}
+h3{font-family:var(--disp);font-weight:700;font-size:1.02rem;margin:1.9rem 0 .55rem;
+  letter-spacing:-.01em}
+p{font-size:.95rem;line-height:1.68;color:var(--smoke);margin:0 0 1rem;max-width:74ch}
+p.lede{font-size:clamp(1rem,1.5vw,1.16rem);line-height:1.6;max-width:66ch}
+p b, li b{color:var(--bone)}
+ul,ol{color:var(--smoke);font-size:.95rem;line-height:1.68;max-width:74ch;
+  padding-left:1.15rem;margin:0 0 1rem}
+li{margin-bottom:.4rem}
+code{font-family:var(--mono);font-size:.82em;color:var(--gold);
+  background:rgba(217,164,65,.09);padding:.12em .36em;border-radius:2px}
+
+table{width:100%;border-collapse:collapse;font-size:.87rem;margin:1rem 0 1.4rem}
+th{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);text-align:left;font-weight:500;padding:0 .8rem .6rem 0;vertical-align:bottom}
+td{padding:.52rem .8rem .52rem 0;border-top:1px solid var(--rule);
+  vertical-align:top;color:var(--smoke)}
+td:last-child,th:last-child{padding-right:0}
+td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabular-nums;
+  color:var(--bone);text-align:right;white-space:nowrap}
+th.n{text-align:right}
+tr.total td{border-top:1px solid rgba(242,235,223,.4);color:var(--bone);font-weight:600}
+tr.lit td{background:rgba(159,178,188,.09)}
+tr.lit td:first-child{color:var(--bone)}
+
+.callout{margin:1.4rem 0;padding:1rem 1.2rem;background:rgba(242,235,223,.045);
+  border-left:3px solid var(--brick);border-radius:0 4px 4px 0;
+  font-size:.92rem;line-height:1.62;color:var(--smoke);max-width:78ch}
+.callout.cold{border-left-color:var(--ice)}
+.callout.warn{border-left-color:var(--gold)}
+.callout b{color:var(--bone)}
+.callout p:last-child{margin-bottom:0}
+
+.kv{display:grid;grid-template-columns:1fr;gap:12px;margin:1.2rem 0 1.6rem}
+@media(min-width:720px){.kv{grid-template-columns:repeat(3,1fr)}}
+.kv > div{padding:.95rem 1.1rem;border:1px solid var(--rule);border-radius:4px}
+.kv .n{font-family:var(--disp);font-weight:700;font-size:1.6rem;letter-spacing:-.03em;line-height:1}
+.kv .k{font-family:var(--mono);font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);margin-top:.5rem;line-height:1.5}
+
+.foot{margin-top:3.4rem;padding-top:1.6rem;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);line-height:1.9}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="who">Bleachers · The analysis</div>
+  <a class="back" href="/bleachers">← The deck</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="eyebrow">Bleachers · @bleachers · Channel deep dive · Virgin Music Group</div>
+  <h1>The working.</h1>
+  <p class="lede">
+    Every figure on the deck, the object it came from, and the things this data
+    cannot show. The deck makes claims about a body of work that belongs to
+    somebody — they should be checkable without having to ask us.
+  </p>
+
+
+  <h2>Where the numbers come from</h2>
+
+  <table>
+    <tr><th>Source</th><th>What it gives</th><th>Window</th></tr>
+    <tr>
+      <td>YouTube Data API v3</td>
+      <td>230 uploads — views, likes, comments, duration, publish date, title, description</td>
+      <td>Read 30 Sep 2026</td>
+    </tr>
+    <tr>
+      <td>Our own daily channel snapshots</td>
+      <td>Channel view and subscriber totals, and per-video daily history for seven uploads</td>
+      <td><b>From 20 Apr 2026 only</b></td>
+    </tr>
+    <tr>
+      <td>UK Official Charts Company</td>
+      <td>Public chart record for Merry Christmas, Please Don't Call</td>
+      <td>Dec 2024 – Feb 2026</td>
+    </tr>
+  </table>
+
+  <p>
+    <b>No YouTube Studio access.</b> That means no watch time, no retention, no traffic
+    sources and no audience demographics. Nothing on the deck is a claim about how long
+    anyone watched or where they came from, because nothing here could support one.
+  </p>
+
+  <h3>Two numbers that are not the same number</h3>
+  <div class="kv">
+    <div><div class="n">111.0M</div><div class="k">The catalogue · 230 uploads summed</div></div>
+    <div><div class="n" style="color:var(--faint)">+78.0M</div><div class="k">Unaccounted</div></div>
+    <div><div class="n" style="color:var(--faint)">189.0M</div><div class="k">Channel lifetime counter</div></div>
+  </div>
+  <p>
+    The uploads sum to <b>111,033,880</b>. The channel counter reads <b>188,997,142</b>.
+    The 77,963,262 difference — 41.3% — cannot be accounted for from public data; it may
+    sit in removed or private videos, or in counting differences at YouTube's end.
+    <b>Every percentage on the deck is a share of the 111.0M, and nothing is ever divided
+    by the lifetime figure.</b>
+  </p>
+  <div class="callout warn">
+    <p>
+      <b>The limitation this creates.</b> If the missing 78M is not spread evenly across
+      formats, the format shares below would shift — and there is no way to test that from
+      outside. The shares are exact statements about the catalogue we can open. They are
+      estimates about the channel.
+    </p>
+  </div>
+  <p style="font-family:var(--mono);font-size:.63rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)">
+    Public counters move through the day. Read at 15:20 UTC the catalogue summed to
+    111,033,880; earlier the same day, 111,031,833. Figures on the deck are rounded for
+    that reason.
+  </p>
+
+
+  <h2>The format census</h2>
+  <p>
+    Every one of the 230 uploads lands in exactly one category, assigned from title,
+    duration and the API's Shorts flag. Both columns reconcile to the catalogue total —
+    which is the control, because a miscount would break the sum.
+  </p>
+
+  <table>
+    <tr><th>Category</th><th class="n">Uploads</th><th class="n">Views</th><th class="n">Share</th></tr>
+    <tr><td>Music video</td><td class="n">17</td><td class="n">64,643,354</td><td class="n">58.2%</td></tr>
+    <tr><td>Official audio</td><td class="n">16</td><td class="n">27,856,744</td><td class="n">25.1%</td></tr>
+    <tr><td>Live</td><td class="n">45</td><td class="n">8,635,469</td><td class="n">7.8%</td></tr>
+    <tr><td>Lyric video</td><td class="n">4</td><td class="n">4,885,844</td><td class="n">4.4%</td></tr>
+    <tr><td>Album tracks &amp; remixes</td><td class="n">30</td><td class="n">2,606,419</td><td class="n">2.3%</td></tr>
+    <tr><td>Docs &amp; behind the scenes</td><td class="n">24</td><td class="n">1,343,066</td><td class="n">1.2%</td></tr>
+    <tr><td>Shorts</td><td class="n">94</td><td class="n">1,062,984</td><td class="n">1.0%</td></tr>
+    <tr class="total"><td>Total</td><td class="n">230</td><td class="n">111,033,880</td><td class="n">100%</td></tr>
+  </table>
+
+  <h3>All seventeen music videos, checked individually</h3>
+  <p>
+    Classification by title is the single biggest lever in this analysis, so every music
+    video was inspected for title, duration and date. Durations run 182–307 seconds, all
+    consistent with music videos.
+  </p>
+
+  <table>
+    <tr><th>Video</th><th>Published</th><th class="n">Views</th><th class="n">Length</th></tr>
+    <tr><td>I Wanna Get Better</td><td>27 Mar 2014</td><td class="n">15,686,722</td><td class="n">293s</td></tr>
+    <tr><td>Rollercoaster</td><td>29 Oct 2014</td><td class="n">11,805,014</td><td class="n">211s</td></tr>
+    <tr class="lit"><td>Merry Christmas, Please Don't Call</td><td>26 Nov 2024</td><td class="n">7,060,665</td><td class="n">200s</td></tr>
+    <tr><td>Don't Take The Money</td><td>02 May 2017</td><td class="n">5,012,123</td><td class="n">307s</td></tr>
+    <tr><td>Tiny Moves</td><td>17 Jan 2024</td><td class="n">4,425,809</td><td class="n">247s</td></tr>
+    <tr><td>Modern Girl</td><td>20 Sep 2023</td><td class="n">4,247,766</td><td class="n">247s</td></tr>
+    <tr><td>Chinatown</td><td>16 Nov 2020</td><td class="n">3,612,679</td><td class="n">282s</td></tr>
+    <tr><td>Stop Making This Hurt</td><td>18 May 2021</td><td class="n">2,764,651</td><td class="n">225s</td></tr>
+    <tr><td>I Miss Those Days</td><td>25 May 2017</td><td class="n">2,677,300</td><td class="n">219s</td></tr>
+    <tr><td>you and forever</td><td>11 Feb 2026</td><td class="n">2,198,689</td><td class="n">236s</td></tr>
+    <tr><td>Alfie's Song</td><td>19 Mar 2018</td><td class="n">1,465,433</td><td class="n">206s</td></tr>
+    <tr><td>the van</td><td>13 Apr 2026</td><td class="n">1,384,172</td><td class="n">199s</td></tr>
+    <tr><td>Alma Mater</td><td>07 Dec 2023</td><td class="n">1,342,754</td><td class="n">231s</td></tr>
+    <tr><td>Like a River Runs</td><td>11 Aug 2015</td><td class="n">437,346</td><td class="n">200s</td></tr>
+    <tr><td>How Dare You Want More</td><td>28 Jan 2022</td><td class="n">304,157</td><td class="n">275s</td></tr>
+    <tr><td>Dirty Wedding Dress</td><td>17 Apr 2026</td><td class="n">202,366</td><td class="n">291s</td></tr>
+    <tr><td>How Dare You Want More — Verdine White remix</td><td>14 Jun 2022</td><td class="n">15,708</td><td class="n">182s</td></tr>
+  </table>
+
+  <p>
+    <b>One judgement call.</b> The seventeen include the Verdine White <em>remix</em> video,
+    which is an official music video for a remix rather than a distinct song. That is why
+    the deck says "17 music videos" in the census and "sixteen songs have an official music
+    video" on the support slide. Both are accurate. Excluding it would make the census
+    16 / 64,627,646 and change nothing material.
+  </p>
+
+
+  <h2>Catalogue longevity</h2>
+
+  <table>
+    <tr><td>Channel views, 27 April 2026</td><td class="n">165,112,313</td></tr>
+    <tr><td>Channel views, 28 September 2026</td><td class="n">188,997,142</td></tr>
+    <tr class="total"><td>Gain over 154 days</td><td class="n">+23,884,829</td></tr>
+    <tr><td>Uploads published inside the window</td><td class="n">5</td></tr>
+    <tr><td>Views held by those five</td><td class="n">650,634</td></tr>
+    <tr class="total"><td>Share held by everything published in the window</td><td class="n">2.7%</td></tr>
+  </table>
+
+  <p>
+    The five: Dirty Wedding Dress live at Electric Lady (388,227), the Stone Pony film
+    (227,059), the Annie DiRusso Christmas duet (25,020), the Stone Pony teaser (5,647)
+    and a Zane Lowe clip (4,681).
+  </p>
+
+  <div class="callout">
+    <p>
+      <b>Two qualifications that matter more than the headline.</b>
+    </p>
+    <p>
+      First, this does not mean the 23.88M would have arrived with nothing happening.
+      <em>everyone for ten minutes</em> was released on <b>22 May 2026 — inside this
+      window</b>. A release, a tour announcement and a press cycle all pull people toward
+      older videos, and that halo is real but invisible from outside. We can see where
+      views landed, not what sent them there.
+    </p>
+    <p>
+      Second, the album's own singles — you and forever (11 Feb), the van (13 Apr), Dirty
+      Wedding Dress (17 Apr) — went up before the window opened, so they sit on the
+      "older material" side of the line.
+    </p>
+    <p>
+      What survives both: <b>an album landed in the middle of this window and the
+      overwhelming majority of viewing still went to things already published.</b> That is
+      a claim about where viewing lands, not about what would have happened otherwise.
+    </p>
+  </div>
+
+
+  <h2>The seasonal asset</h2>
+
+  <h3>What we have measured</h3>
+  <p>
+    The tracker holds per-video daily history for seven uploads on this channel. In the
+    seven days to 30 September 2026:
+  </p>
+
+  <table>
+    <tr><th>Upload</th><th class="n">Added, 7 days</th><th class="n">Lifetime</th><th class="n">Age</th></tr>
+    <tr class="lit"><td>Merry Christmas, Please Don't Call</td><td class="n">+400,000</td><td class="n">7.06M</td><td class="n">672d</td></tr>
+    <tr><td>you and forever</td><td class="n">+11,000</td><td class="n">2.2M</td><td class="n">230d</td></tr>
+    <tr><td>MCPDC with Annie DiRusso · Stone Pony</td><td class="n">+4,000</td><td class="n">25K</td><td class="n">47d</td></tr>
+    <tr><td>Live From The Stone Pony</td><td class="n">+3,800</td><td class="n">227K</td><td class="n">117d</td></tr>
+    <tr><td>"jack breaks down mcpdc" · Short</td><td class="n">+1,800</td><td class="n">46K</td><td class="n">314d</td></tr>
+  </table>
+
+  <p>
+    7,060,665 views across 672 days is a lifetime average of <b>10,507 a day</b>. 400,000
+    across seven days is <b>57,143 a day</b> — <b>5.4× its own norm</b>, in September.
+  </p>
+
+  <div class="callout cold">
+    <p>
+      <b>What this ranks, and what it does not.</b> These are the seven uploads we hold
+      per-video history for, not all 230. So "the fastest-moving video on the channel" is
+      <b>not established</b> — the older catalogue has no per-video series to compare.
+      What is solid is the video measured against its own history, which is the comparison
+      the deck makes.
+    </p>
+  </div>
+
+  <h3>What we have not measured</h3>
+  <div class="callout cold">
+    <p>
+      Our daily readings begin <b>20 April 2026</b>. We have <b>no observation of either
+      previous Christmas period</b> and the deck does not estimate one. The claim that
+      demand returns every year rests entirely on the UK chart record, which is
+      independent of YouTube — and the chart graphic on the deck is labelled as chart
+      position for exactly that reason.
+    </p>
+  </div>
+
+  <h3>The chart record</h3>
+  <table>
+    <tr><th>Season</th><th class="n">Weeks</th><th>Run</th><th class="n">Peak</th></tr>
+    <tr><td>One — Dec 2024 / Jan 2025</td><td class="n">1</td><td>02 Jan (77)</td><td class="n">77</td></tr>
+    <tr class="lit"><td>Two — Dec 2025 / Jan 2026</td><td class="n">4</td><td>11 Dec (65) · 18 Dec (66) · 25 Dec (78) · 01 Jan (68)</td><td class="n">65</td></tr>
+  </table>
+  <p>
+    Also two four-week runs on the Official Independent Singles Chart, peaking 10 and 12;
+    Physical Singles peak 24; Vinyl Singles peak 18; Irish Singles 47.
+  </p>
+
+  <h3>What the channel published each season</h3>
+  <p>
+    Season one: the official music video and five Shorts. Season two — the bigger chart
+    year — <b>two Shorts and no video asset</b>. A December 2025 network television
+    performance was not published to the channel; the catalogue shows no upload at all
+    between 31 October 2025 and 3 February 2026. The one new Christmas asset since is the
+    Annie DiRusso live version, published <b>14 August 2026</b>.
+  </p>
+
+
+  <h2>Live performance</h2>
+  <p>
+    Twelve songs have both an official video and a live version. <b>The official video
+    leads in ten of them.</b> The two exceptions:
+  </p>
+  <table>
+    <tr><th>Song</th><th class="n">Live</th><th class="n">Official video</th></tr>
+    <tr><td>How Dare You Want More</td><td class="n">601,311</td><td class="n">304,157</td></tr>
+    <tr><td>Dirty Wedding Dress</td><td class="n">388,227</td><td class="n">202,366</td></tr>
+  </table>
+  <p>
+    These are also the two lowest-viewed official music videos in the catalogue. The deck's
+    claim is therefore narrow: live is a second opening for a song whose video didn't land.
+    It is explicitly <b>not</b> a ranking of formats.
+  </p>
+  <p>
+    <b>Stone Pony:</b> 91 minutes, 227,059 views, published 5 June 2026, never split into
+    songs. <b>Red Rocks precedent,</b> 8 July 2024: three songs from one night published
+    individually — 171,061 + 143,285 + 68,986 = <b>383,332</b>. The channel holds
+    <b>28 single-song live videos</b> in total.
+  </p>
+  <div class="callout warn">
+    <p>
+      <b>Two things the Stone Pony recommendation does not assume.</b> That individual
+      uploads would purely add viewing — they may redistribute it from the full-show
+      upload, and that is stated on the deck. And that the footage is cleared: a concert
+      film being public establishes nothing about permission to cut it up.
+    </p>
+  </div>
+
+
+  <h2>Song support</h2>
+  <p>
+    Songs with an official video <b>and</b> a lyric video <b>and</b> an official audio
+    <b>and</b> a live version: <b>three</b> — I Wanna Get Better (30.67M), Rollercoaster
+    (18.92M), Alfie's Song (3.72M). The most recent was 2018.
+  </p>
+  <p>
+    Every total in the deck's support table counts those same four asset types and nothing
+    else, which is why a song's figure there is lower than its all-upload total. The
+    "you and forever" official video alone is 2,198,689 of its 2,750,183.
+  </p>
+  <p>
+    Four lyric videos exist: I Wanna Get Better (3,714,016), Alfie's Song (563,167),
+    Shadow (480,248), Rollercoaster (128,413). Shadow has a lyric video, an audio and a
+    live version but no official music video, which is why it is not in the support table.
+  </p>
+  <div class="callout warn">
+    <p>
+      <b>The confound, stated plainly.</b> The three songs with the full package include
+      the two oldest and two biggest on the channel. Assets follow hits at least as readily
+      as hits follow assets. <b>Nothing here shows the build made those songs big</b> — and
+      the same caution applies to the lyric videos, whose totals are not evidence that a
+      new one would perform. That is why the recommendation is a controlled test rather
+      than an assertion.
+    </p>
+  </div>
+
+
+  <h2>Shorts</h2>
+  <p>
+    94 Shorts, median <b>6,083 views</b>. Two above 50,000 — 152,565 (billed as the only
+    live performance of Modern Girl that exists) and 144,905 (Margaret Qualley's
+    choreography). The third best is 46,996. Neither top performer is a concert excerpt.
+  </p>
+  <p>
+    For context only: the six Shorts cut from the 2023 Radio City performance run 1,841 to
+    6,083. Those were published in a different year under different distribution
+    conditions, so this is <b>not a controlled comparison</b>, and two successes out of
+    ninety-four is thin. The deck frames it as a creative hypothesis — test distinctiveness
+    as the variable — not a formula.
+  </p>
+
+
+  <h2>What this deck does not claim</h2>
+  <ol>
+    <li>That the 23.88M would have arrived with no activity at all.</li>
+    <li>Any measured YouTube seasonality — we have no observation of either past Christmas.</li>
+    <li>That live outperforms official video. Across twelve songs, the video leads in ten.</li>
+    <li>That building assets caused the older songs' size.</li>
+    <li>That a public concert film may be cut up without clearance.</li>
+    <li>Any watch time, retention, traffic source or demographic figure.</li>
+    <li>Any percentage taken against the 189M lifetime counter.</li>
+  </ol>
+
+
+  <h2>Each recommendation, and how strong the evidence is</h2>
+  <table>
+    <tr><th>#</th><th>Action</th><th>Rests on</th><th>Strength</th></tr>
+    <tr>
+      <td class="n">01</td>
+      <td>Give the Christmas song the assets it has never had</td>
+      <td>+400K in seven days at 5.4× its own average; two assets against four; one chart week became four</td>
+      <td><b>Strong on demand</b>, none on past YouTube seasons</td>
+    </tr>
+    <tr>
+      <td class="n">02</td>
+      <td>Test individual song edits from the Stone Pony concert</td>
+      <td>Red Rocks precedent — 383,332 from one night; 28 single-song live videos</td>
+      <td><b>Moderate</b> — one same-channel precedent; redistribution risk stated</td>
+    </tr>
+    <tr>
+      <td class="n">03</td>
+      <td>Test a complete support package on one upcoming song</td>
+      <td>Three full packages, none since 2018</td>
+      <td><b>Suggestive only</b> — confounded by age; framed as a test</td>
+    </tr>
+    <tr>
+      <td class="n">04</td>
+      <td>Build Shorts around distinctive moments, not clips</td>
+      <td>152,565 and 144,905 against a 6,083 median</td>
+      <td><b>Weak</b> — two data points, called a hypothesis</td>
+    </tr>
+  </table>
+
+
+  <h2>Open questions we cannot answer from here</h2>
+  <ol>
+    <li>
+      <b>Redistribution.</b> If the Stone Pony set is split into songs, do those add
+      viewing or draw it from the full-show upload? Only running it would tell you.
+    </li>
+    <li>
+      <b>Cross-platform inference.</b> Recommendation 01 assumes December chart demand is
+      reachable on YouTube. That is an inference across platforms — reasonable, but not
+      proven by anything here.
+    </li>
+    <li>
+      <b>The halo.</b> The 97.3% is unadjustable for the lift an album release gives older
+      videos, because that lift is invisible from outside.
+    </li>
+    <li>
+      <b>Season-two output.</b> We state two Shorts, which is what reached the channel.
+      Promotion may have run elsewhere — television, playlists, DSPs — and we cannot see it.
+    </li>
+    <li>
+      <b>Classification.</b> Formats are assigned from titles. A mislabelled upload is
+      counted as what it says it is.
+    </li>
+  </ol>
+
+  <div class="foot">
+    Bleachers · @bleachers · channel deep dive · Virgin Music Group<br>
+    230 uploads read 30 September 2026 · public YouTube API data, our own daily channel
+    snapshots from 20 April 2026, and the UK Official Charts public record ·
+    every share stated against the 111.0M catalogue, never the 189.0M lifetime counter<br>
+    <a href="/bleachers" style="color:var(--ice);text-decoration:none">← Back to the deck</a>
+  </div>
+
+</div>
+</body>
+</html>
