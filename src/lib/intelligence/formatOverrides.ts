@@ -38,6 +38,29 @@ export interface FormatOverride {
 }
 
 export const HUMAN_FORMAT_OVERRIDES: Record<string, FormatOverride> = {
+  /* Kings of Leon — "My Whole World", 10 Sep 2026. The official music
+     video, titled without "(Official Video)" or any other marker, so the
+     classifier read 4m21s of landscape footage as generic long-form.
+
+     That one missing word had consequences well past a wrong label. With
+     no music video recognised in the campaign, the VISUALISER released
+     fifteen days later became the highest-ranked release and therefore
+     the hero — so the cover asked for a second destination for the
+     visualiser, which is itself the second destination. The page was
+     recommending work that had already been done, and would have kept
+     recommending it.
+
+     Confirmed by eye: 4m21s, director and production company in the
+     description, 4.45M views. */
+  Bb7YN5wQztk: {
+    kind: 'omv',
+    label: 'OFFICIAL VIDEO',
+    statedBy: 'Leon',
+    statedAt: '2026-09-30',
+    note: 'Official music video for My Whole World. The title carries no format marker, '
+      + 'so duration and aspect alone cannot separate it from any other long-form upload.',
+  },
+
   /* "Now, we can start." — 9 Sep 2026. Reads as a Short on duration alone. */
   KCm7pn_lza8: {
     kind: 'trailer',
