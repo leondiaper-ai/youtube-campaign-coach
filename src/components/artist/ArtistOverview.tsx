@@ -31,14 +31,11 @@ import {
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDays } from '@/lib/formatHistory';
 import { classifyUploadFormat } from '@/lib/formatClassifier';
-import { rankByMomentum } from '@/lib/videoMomentum';
+import type { RankedGrid } from '@/lib/videoMomentum';
 import FormatBlock from './FormatBlock';
 import ArtistMarkets from './ArtistMarkets';
 import AudienceLine from './AudienceLine';
 import { Eyebrow, Metric, VideoGrid, INK, RULE, GAIN, LOSS } from './primitives';
-
-/** The window both grids and the momentum ranking describe. */
-const RECENT_WINDOW_DAYS = 7;
 
 export interface ArtistOverviewProps {
   slug: string;
@@ -61,28 +58,30 @@ export interface ArtistOverviewProps {
     primary: { label: string; action: string };
     secondary: { label: string; action: string } | null;
   };
+  /** Kept in the contract for callers and future use, not rendered here —
+   *  the action bar owns showing the pin state. */
   pinned: boolean;
+  /**
+   * Ranked grids, computed by the caller.
+   *
+   * They are NOT computed here because the same ranking decides which video
+   * the "next action" names. Computing it in two places is how a page ends
+   * up recommending one video while the grid beneath it shows another
+   * leading — which is exactly the bug this arrangement removes.
+   */
+  topLongform: RankedGrid;
+  topShorts: RankedGrid;
 }
 
 export default async function ArtistOverview({
-  slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves, pinned,
+  slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves, pinned: _pinned,
+  topLongform, topShorts,
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
   const split = resolveRowFormatSplit(uploads, days, snap?.views ?? null);
 
   const shorts = uploads.filter(u => classifyUploadFormat(u) === 'short');
   const longform = uploads.filter(u => classifyUploadFormat(u) !== 'short');
-
-  const toCandidate = (u: RecentUpload) => ({
-    id: u.id, title: u.title, views: u.viewCount, publishedAt: u.publishedAt,
-  });
-
-  /* Both grids ranked in parallel — each is one MGET, and doing them in
-     sequence would put two avoidable round trips in the render. */
-  const [topLongform, topShorts] = await Promise.all([
-    rankByMomentum(longform.map(toCandidate), { windowDays: RECENT_WINDOW_DAYS, limit: 4 }),
-    rankByMomentum(shorts.map(toCandidate), { windowDays: RECENT_WINDOW_DAYS, limit: 4 }),
-  ]);
 
   const lastUpDays = snap?.lastUploadAt ? daysSince(snap.lastUploadAt) : null;
 
@@ -95,17 +94,10 @@ export default async function ArtistOverview({
     <>
       {/* ═══ 1. WHO, AND IS IT HEALTHY ═══════════════════════════ */}
       <header>
-        <div className="flex flex-wrap items-center gap-3">
-          <Eyebrow>Virgin Music Group · YouTube Watcher</Eyebrow>
-          {pinned && (
-            <span
-              className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em]"
-              style={{ background: '#2C25FF', color: '#fff' }}
-            >
-              Tracked project
-            </span>
-          )}
-        </div>
+        {/* No "Tracked project" badge and no second Watcher mark here: the
+            action bar directly above already carries both, and on the live
+            page they read as a stutter rather than as emphasis. */}
+        <Eyebrow>Virgin Music Group</Eyebrow>
         <h1
           className="font-black tracking-[-0.045em] leading-[0.9] mt-4"
           style={{ fontSize: 'clamp(2.8rem,8vw,6rem)' }}

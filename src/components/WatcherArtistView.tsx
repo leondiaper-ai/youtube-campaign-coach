@@ -19,6 +19,8 @@ import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
 import ArtistOverview from '@/components/artist/ArtistOverview';
 import ArtistActionBar from '@/components/artist/ArtistActionBar';
 import { deepDiveFor } from '@/lib/deepDiveLink';
+import { rankByMomentum } from '@/lib/videoMomentum';
+import { classifyUploadFormat } from '@/lib/formatClassifier';
 import { isPinned } from '@/lib/campaignStore';
 
 const INK = '#0E0E0E';
@@ -277,6 +279,35 @@ export default async function WatcherArtistView({
   const isColdMode = channelState === 'COLD' || (channelState === 'AT RISK' && uploads30d === 0 && !nearMoment);
   const isLiveCampaign = !isColdMode;
 
+  /* Rank the grids BEFORE deciding what to recommend, so the advice and
+     the grid are the same answer. The window is 7 days in both. */
+  const RECENT_WINDOW_DAYS = 7;
+  const allUploads = live?.recentUploads ?? [];
+  const toCandidate = (u: RecentUpload) => ({
+    id: u.id, title: u.title, views: u.viewCount, publishedAt: u.publishedAt,
+  });
+  const [topLongform, topShorts] = await Promise.all([
+    rankByMomentum(
+      allUploads.filter(u => classifyUploadFormat(u) !== 'short').map(toCandidate),
+      { windowDays: RECENT_WINDOW_DAYS, limit: 4 },
+    ),
+    rankByMomentum(
+      allUploads.filter(u => classifyUploadFormat(u) === 'short').map(toCandidate),
+      { windowDays: RECENT_WINDOW_DAYS, limit: 4 },
+    ),
+  ]);
+
+  /* The single biggest mover across both formats, when we hold the history
+     to know it. Null leaves whatToDoNow on its old lifetime-based rule. */
+  const topMover = (() => {
+    const best = [...topLongform.items, ...topShorts.items]
+      .filter(v => v.recentGain != null)
+      .sort((a, b) => (b.recentGain ?? 0) - (a.recentGain ?? 0))[0];
+    return best
+      ? { title: best.title, recentGain: best.recentGain!, windowDays: RECENT_WINDOW_DAYS }
+      : null;
+  })();
+
   /* The recommendation the overview shows is Watcher's own — the same
      call the page has always made, hoisted above the return so the
      overview can lead with it instead of it appearing halfway down. */
@@ -288,6 +319,7 @@ export default async function WatcherArtistView({
     lastUpDays,
     subs7delta: subs7?.delta ?? null,
     views7delta: views7?.delta ?? null,
+    topMover,
   });
 
   /* Only needed when this view supplies its own action bar. A team board
@@ -351,7 +383,7 @@ export default async function WatcherArtistView({
         {coachBadge && (
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45 mb-6">
             <YouTubeMark />
-            <span>Watcher</span>
+            <span>YouTube Watcher</span>
             <CoachCampaignBadge slug={slug} fallback={artist.campaign} />
           </div>
         )}
@@ -369,6 +401,8 @@ export default async function WatcherArtistView({
           views7={rawDelta(nc.views7d)}
           moves={moves}
           pinned={campaignPinned}
+          topLongform={topLongform}
+          topShorts={topShorts}
         />
 
         {/* The decision headline and its consequence. The overview carries
@@ -668,6 +702,16 @@ export type WhatToDoCtx = {
   lastUpDays: number | null;
   subs7delta: number | null;
   views7delta: number | null;
+  /**
+   * The video actually gaining the most views right now, from the per-video
+   * daily series. Optional because most channels have no usable history yet.
+   *
+   * Without this the "top performer" was whichever upload from the last 14
+   * days had the highest LIFETIME count — which on a channel that uploads
+   * often is simply the newest reasonably-sized video, and produced advice
+   * naming a video at 5.1K while the grid beside it showed one gaining 32K.
+   */
+  topMover?: { title: string; recentGain: number; windowDays: number } | null;
 };
 
 export type MoveDirection = {
@@ -792,22 +836,28 @@ export function whatToDoNow(
   }
 
   // ── ACCELERATE ─────────────────────────────────────────────────────────
-  if (decision.type === 'ACCELERATE' && upload.topRecent) {
+  if (decision.type === 'ACCELERATE' && (ctx.topMover || upload.topRecent)) {
+    const m = ctx.topMover;
     return {
       primary: {
         label: 'Don\'t change what\'s working',
-        action: `"${truncate(upload.topRecent.title, 30)}" is at ${fmtNum(upload.topRecent.viewCount)} views and climbing. Keep feeding this track with Shorts — let it compound.`,
+        action: m
+          ? `"${truncate(m.title, 30)}" added ${fmtNum(m.recentGain)} views in the last ${m.windowDays} days — the most on the channel. Keep feeding this track with Shorts and let it compound.`
+          : `"${truncate(upload.topRecent!.title, 30)}" is at ${fmtNum(upload.topRecent!.viewCount)} views and climbing. Keep feeding this track with Shorts — let it compound.`,
       },
       secondary: null,
     };
   }
 
   // ── TOP RECENT EXISTS ─────────────────────────────────────────────────
-  if (upload.topRecent) {
+  if (ctx.topMover || upload.topRecent) {
+    const m = ctx.topMover;
     return {
       primary: {
         label: 'Extend your top performer',
-        action: `"${truncate(upload.topRecent.title, 30)}" is leading at ${fmtNum(upload.topRecent.viewCount)} views. Cut a Short from it this week.`,
+        action: m
+          ? `"${truncate(m.title, 30)}" added ${fmtNum(m.recentGain)} views in the last ${m.windowDays} days — more than anything else on the channel. Cut a Short from it this week.`
+          : `"${truncate(upload.topRecent!.title, 30)}" is leading at ${fmtNum(upload.topRecent!.viewCount)} views in our cached inventory. Cut a Short from it this week.`,
       },
       secondary: upload.hasCollabs ? {
         label: 'Activate the collab network',
