@@ -20,7 +20,6 @@ import { checkContentStructure } from '@/lib/contentStructure';
 import TeamDetailClient, { type SnapshotData, type CampaignTrackingData, type WeeklyProgressEntry } from '@/app/team-watcher/[slug]/TeamDetailClient';
 import TeamArtistActions from '@/components/TeamArtistActions';
 import WatcherArtistView from '@/components/WatcherArtistView';
-import FormatSplitPanel from '@/components/FormatSplitPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -257,18 +256,19 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
          the same slot. UK, Australia and the Nordics get the format
          split and their top markets without a regional variant —
          which is the whole point of one Watcher. */
-      metrics={<FormatSplitPanel slug={slug} />}
-      chrome={
-        <TeamArtistActions
-          slug={slug}
-          artistName={entry.displayName}
-          channelId={entry.channelId}
-          team={team}
-          backHref={backHref}
-          backLabel="Team Campaign Board"
-          initiallyPinned={!!entry.pinnedAt}
-        />
-      }
+      /* No `chrome`: the view renders the same ArtistActionBar our own
+         page does, pointed at this board. A team gets Behaviour, the
+         channel report and the deep dive link that the hand-built bar
+         never had — and the format split and markets now come from the
+         shared overview, so FormatSplitPanel is no longer passed here
+         and no longer renders twice. */
+      actionContext={{
+        backHref,
+        backLabel: `← ${'Team Campaign Board'}`,
+        behaviourHref: `${backHref}${backHref.includes('?') ? '&' : '?'}behaviour=${encodeURIComponent(slug)}`,
+        pin: { mode: 'team', team, channelId: entry.channelId },
+      }}
+      initiallyPinned={!!entry.pinnedAt}
       footer={
         <div className="mt-10">
           <TeamDetailClient

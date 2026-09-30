@@ -273,6 +273,26 @@ export type RowFormatSplit = {
    * Lets a surface explain the fallback instead of just showing it.
    */
   collecting: { comparable: number; required: number; total: number } | null;
+  /**
+   * The lifetime split, ALWAYS, whatever `basis` says.
+   *
+   * The fields above change meaning with `basis` — they are the recent
+   * figures on a recent basis and the lifetime ones otherwise. That made
+   * a surface wanting to show both at once impossible to write correctly,
+   * and it had already produced a latent bug: the "Lifetime detail" panel
+   * read the top-level shares, so the day a channel earned a recent split
+   * it would have printed recent numbers under the word "Lifetime".
+   *
+   * Anything labelling itself lifetime reads from here instead.
+   */
+  lifetime: {
+    longformShare: number;
+    shortsShare: number;
+    longformViews: number;
+    shortsViews: number;
+    viewsCovered: number | null;
+    confidence: SplitCoverage['confidence'];
+  } | null;
 };
 
 export function resolveRowFormatSplit(
@@ -295,6 +315,19 @@ export function resolveRowFormatSplit(
   const longformViews = inWindow.reduce((t, d) => t + d.longformDelta, 0);
   const recentTotal = shortsViews + longformViews;
 
+  /* Computed unconditionally now, because `lifetime` is part of every
+     result. It is a pure pass over the cached uploads, so a recent-basis
+     channel pays nothing meaningful for carrying it. */
+  const life = computeFormatSplit(uploads, { channelLifetimeViews, now });
+  const lifetime = life.totalViews === 0 ? null : {
+    longformShare: life.longformShare,
+    shortsShare: life.shortsShare,
+    longformViews: life.longformViews,
+    shortsViews: life.shortsViews,
+    viewsCovered: life.coverage.viewsCovered,
+    confidence: life.coverage.confidence,
+  };
+
   if (inWindow.length >= required && recentTotal > 0) {
     return {
       basis: 'recent',
@@ -306,10 +339,10 @@ export function resolveRowFormatSplit(
       viewsCovered: null,
       confidence: 'complete',
       collecting: null,
+      lifetime,
     };
   }
 
-  const life = computeFormatSplit(uploads, { channelLifetimeViews, now });
   if (life.totalViews === 0) return null;
 
   return {
@@ -326,5 +359,6 @@ export function resolveRowFormatSplit(
       required,
       total: days.length,
     },
+    lifetime,
   };
 }

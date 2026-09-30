@@ -37,6 +37,27 @@ import ArtistMarkets from './ArtistMarkets';
 import AudienceLine from './AudienceLine';
 import { Eyebrow, Metric, VideoGrid, INK, RULE, GAIN, LOSS } from './primitives';
 
+/* Same two colours the format block uses, so a reader moving down the
+   page maps blue to long-form and amber to Shorts without relearning. */
+const LF_BLUE = '#2C6BFF';
+const SH_AMBER = '#C77A16';
+
+/** A share, keeping one decimal where rounding would erase the number. */
+function sharePct(x: number): string {
+  if (x <= 0) return '0%';
+  if (x < 0.01) return '<1%';
+  if (x < 0.1) return `${(x * 100).toFixed(1)}%`;
+  return `${Math.round(x * 100)}%`;
+}
+
+function coveragePct(x: number | null): string {
+  if (x == null) return '—';
+  if (x <= 0) return '0%';
+  if (x < 0.01) return '<1%';
+  if (x < 0.1) return `${(x * 100).toFixed(1)}%`;
+  return `${Math.round(x * 100)}%`;
+}
+
 export interface ArtistOverviewProps {
   slug: string;
   artist: Artist;
@@ -166,6 +187,44 @@ export default async function ArtistOverview({
             period={lastUpDays != null ? `30 days · last ${lastUpDays}d ago` : 'Last 30 days'}
           />
         </div>
+        {/* ─── LIFETIME SPLIT ──────────────────────────────────────
+            Sits with the headline numbers because it answers the same
+            question they do — what has this channel earned, all time —
+            and the row above already establishes that register with
+            "Channel views · Lifetime total".
+
+            It reads from split.lifetime rather than the top-level shares,
+            which are the RECENT figures once a channel has a recent
+            basis. Kept visually subordinate (half-strength bar, small
+            type) so it cannot be mistaken for this week's behaviour, and
+            the coverage caveat sits in amber directly beneath the
+            percentages rather than a tooltip away: a split measured over
+            part of the catalogue is not a fact about the channel. */}
+        {split?.lifetime && (
+          <div className="mt-8 max-w-[340px]">
+            <Eyebrow>Lifetime split</Eyebrow>
+            <div
+              className="flex h-[8px] w-full overflow-hidden rounded-sm mt-2.5"
+              style={{ background: RULE }}
+            >
+              <div style={{ width: `${split.lifetime.longformShare * 100}%`, background: LF_BLUE, opacity: 0.55 }} />
+              <div style={{ width: `${split.lifetime.shortsShare * 100}%`, background: SH_AMBER, opacity: 0.75 }} />
+            </div>
+            <div className="text-[13px] text-ink/70 mt-2 tabular-nums">
+              {sharePct(split.lifetime.longformShare)} long-form ·{' '}
+              {sharePct(split.lifetime.shortsShare)} Shorts
+            </div>
+            <div
+              className="text-[12px] mt-0.5"
+              style={{ color: split.lifetime.confidence === 'complete' ? 'rgba(14,14,14,0.4)' : '#9A5B00' }}
+            >
+              {split.lifetime.confidence === 'complete'
+                ? 'Covers essentially the whole channel.'
+                : `Of ${coveragePct(split.lifetime.viewsCovered)} of views we hold — not the channel`}
+            </div>
+          </div>
+        )}
+
         {/* These two fields often carry the same word ("stale · stale"),
             which read as a stutter rather than as information. Print the
             second only when it adds something. */}

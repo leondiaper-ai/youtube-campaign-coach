@@ -28,17 +28,45 @@ import { INK, PAPER, RULE } from './primitives';
 
 const PIN_ON = '#2C25FF';
 
+/**
+ * Where "back" goes, where Behaviour goes, and which store the pin writes
+ * to. Omit it and the bar behaves as our own Watcher page.
+ *
+ * A regional board differs in exactly these three ways and in no others,
+ * so they are passed rather than branched on — which is what stops the
+ * team's bar drifting into a second, thinner design the way it had before.
+ */
+export interface ActionBarContext {
+  backHref: string;
+  backLabel: string;
+  behaviourHref: string;
+  /** Team boards pin to their own board, never to our campaign store. */
+  pin:
+    | { mode: 'watcher' }
+    | { mode: 'team'; team: string; channelId: string };
+}
+
+const WATCHER_CONTEXT = (slug: string): ActionBarContext => ({
+  backHref: '/growth',
+  backLabel: '← Dashboard',
+  behaviourHref: `/campaigns?behaviour=${encodeURIComponent(slug)}`,
+  pin: { mode: 'watcher' },
+});
+
 export default function ArtistActionBar({
   slug,
   initiallyPinned,
   deepDive,
   reportProps,
+  context,
 }: {
   slug: string;
   initiallyPinned: boolean;
   deepDive: DeepDiveLink | null;
   reportProps: ReportProps;
+  context?: ActionBarContext;
 }) {
+  const ctx = context ?? WATCHER_CONTEXT(slug);
   const [pinned, setPinned] = useState(initiallyPinned);
   const [busy, setBusy] = useState(false);
   const { copied, copy } = useCopyUpdate(reportProps);
@@ -52,15 +80,30 @@ export default function ArtistActionBar({
     const next = !pinned;
     setPinned(next);
     try {
-      const res = next
-        ? await fetch('/api/active-campaigns', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug }),
-          })
-        : await fetch(`/api/active-campaigns?slug=${encodeURIComponent(slug)}`, {
-            method: 'DELETE',
-          });
+      let res: Response;
+      if (ctx.pin.mode === 'team') {
+        /* The team always travels with the write. Without it the API
+           falls back to a default board and the pin lands on somebody
+           else's — a bug this codebase has already had once. */
+        res = await fetch(`/api/team-watcher?team=${encodeURIComponent(ctx.pin.team)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            channelId: ctx.pin.channelId,
+            action: next ? 'pin' : 'unpin',
+          }),
+        });
+      } else {
+        res = next
+          ? await fetch('/api/active-campaigns', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ slug }),
+            })
+          : await fetch(`/api/active-campaigns?slug=${encodeURIComponent(slug)}`, {
+              method: 'DELETE',
+            });
+      }
       if (!res.ok) setPinned(!next);
     } catch {
       setPinned(!next);
@@ -79,11 +122,11 @@ export default function ArtistActionBar({
       style={{ borderBottom: `1px solid ${RULE}` }}
     >
       <Link
-        href="/growth"
+        href={ctx.backHref}
         className={chip + ' text-ink/50 hover:text-ink'}
         style={{ border: `1px solid ${RULE}` }}
       >
-        ← Dashboard
+        {ctx.backLabel}
       </Link>
 
       {/* The behaviour timeline is the single most-used destination from
@@ -91,7 +134,7 @@ export default function ArtistActionBar({
           It used to appear only for pinned artists, which hid the most
           useful view precisely when you were deciding whether to pin. */}
       <Link
-        href={`/campaigns?behaviour=${encodeURIComponent(slug)}`}
+        href={ctx.behaviourHref}
         className={chip}
         style={{ background: INK, color: PAPER }}
       >

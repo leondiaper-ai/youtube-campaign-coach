@@ -17,7 +17,7 @@ import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/compon
 import MissedReachSection from '@/components/MissedReachSection';
 import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
 import ArtistOverview from '@/components/artist/ArtistOverview';
-import ArtistActionBar from '@/components/artist/ArtistActionBar';
+import ArtistActionBar, { type ActionBarContext } from '@/components/artist/ArtistActionBar';
 import { deepDiveFor } from '@/lib/deepDiveLink';
 import { rankByMomentum } from '@/lib/videoMomentum';
 import { classifyUploadFormat } from '@/lib/formatClassifier';
@@ -71,6 +71,7 @@ const DECISION_TO_STATE: Record<string, ChannelState> = {
 
 export default async function WatcherArtistView({
   slug, chrome = null, coachBadge = true, metrics = null, footer = null, signature,
+  actionContext, initiallyPinned,
 }: {
   slug: string;
   /**
@@ -82,6 +83,21 @@ export default async function WatcherArtistView({
    * somewhere else.
    */
   chrome?: ReactNode;
+  /**
+   * Where the action bar's links go and which store its pin writes to.
+   * A regional board passes its own; omitted, the bar behaves as ours.
+   *
+   * This exists so team pages get the SAME bar — behaviour, report, pin,
+   * deep dive — rather than a thinner hand-built one that drifts. The
+   * three things that genuinely differ are passed; nothing else branches.
+   */
+  actionContext?: ActionBarContext;
+  /**
+   * Pin state from the caller's own store. Required alongside a team
+   * actionContext: our campaign store knows nothing about a team board's
+   * pins, and reading ours there would show the wrong star.
+   */
+  initiallyPinned?: boolean;
   /** Coach is ours; a regional board does not see it. */
   coachBadge?: boolean;
   /** Rendered directly beneath the headline cards. Shared by every
@@ -325,7 +341,10 @@ export default async function WatcherArtistView({
   /* Only needed when this view supplies its own action bar. A team board
      passes chrome, owns its own pin, and must not read ours. */
   const ownActions = !chrome;
-  const campaignPinned = ownActions ? await isPinned(slug) : false;
+  /* Only read OUR pin store when the pin actually writes there. A team
+     board supplies its own state, because ours would be the wrong star. */
+  const campaignPinned = initiallyPinned
+    ?? (ownActions && !actionContext ? await isPinned(slug) : false);
   const deepDive = ownActions ? deepDiveFor(artist.name) : null;
 
   return (
@@ -341,6 +360,7 @@ export default async function WatcherArtistView({
             slug={slug}
             initiallyPinned={campaignPinned}
             deepDive={deepDive}
+            context={actionContext}
             reportProps={{
               artistName: artist.name,
               channelState,

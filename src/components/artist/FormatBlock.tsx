@@ -31,6 +31,13 @@ export type FormatSplit = {
   viewsCovered: number | null;
   confidence: 'complete' | 'partial' | 'sample';
   collecting: { comparable: number; required: number; total: number } | null;
+  /** True lifetime figures, present whatever `basis` says. */
+  lifetime?: {
+    longformShare: number; shortsShare: number;
+    longformViews: number; shortsViews: number;
+    viewsCovered: number | null;
+    confidence: 'complete' | 'partial' | 'sample';
+  } | null;
 };
 
 const fmt = (n: number): string => {
@@ -122,13 +129,18 @@ export default function FormatBlock({
 
       {open && (
         <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${RULE}` }}>
+          {/* split.lifetime, not the top-level shares: those are the
+              RECENT figures on a recent basis, so reading them here
+              would print this week's numbers under the word Lifetime. */}
           <div className="flex h-[5px] w-full max-w-[300px] overflow-hidden rounded-sm" style={{ background: RULE }}>
-            <div style={{ width: `${split.longformShare * 100}%`, background: LF, opacity: 0.5 }} />
-            <div style={{ width: `${split.shortsShare * 100}%`, background: SH, opacity: 0.5 }} />
+            <div style={{ width: `${(split.lifetime?.longformShare ?? split.longformShare) * 100}%`, background: LF, opacity: 0.5 }} />
+            <div style={{ width: `${(split.lifetime?.shortsShare ?? split.shortsShare) * 100}%`, background: SH, opacity: 0.5 }} />
           </div>
           <div className="text-[13px] mt-2 tabular-nums text-ink/70">
-            Lifetime: {pct(split.longformShare)} long-form ({fmt(split.longformViews)}) ·{' '}
-            {pct(split.shortsShare)} Shorts ({fmt(split.shortsViews)})
+            Lifetime: {pct(split.lifetime?.longformShare ?? split.longformShare)} long-form
+            ({fmt(split.lifetime?.longformViews ?? split.longformViews)}) ·{' '}
+            {pct(split.lifetime?.shortsShare ?? split.shortsShare)} Shorts
+            ({fmt(split.lifetime?.shortsViews ?? split.shortsViews)})
           </div>
           <div
             className="text-[11px] mt-1"
