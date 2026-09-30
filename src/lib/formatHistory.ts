@@ -80,9 +80,26 @@ async function kv() {
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
 /**
- * Record one reading. Safe to call more than once a day — a repeat run
- * replaces that day's row rather than double-counting, because the
- * delta is always measured against the stored baseline.
+ * Record one reading — AT MOST ONE PER CALENDAR DAY per channel.
+ *
+ * The once-a-day rule is not a convenience, it is what makes a row mean
+ * a day. Our cron is not one nightly job: it is eight runs between 05:00
+ * and 07:30 UTC, chunked so 245 artists fit inside the function timeout.
+ * An earlier version of this function rewrote the current day's row on
+ * every run, so after the last run a "daily" row held the delta since the
+ * run 30 minutes before it — and a 7-day trend summed seven half-hours
+ * while calling itself a week. The numbers would have looked plausible
+ * and been wrong by a factor of about fifty.
+ *
+ * So the first run of a day that touches a channel records it and moves
+ * the baseline; later runs that day return the existing row untouched.
+ * Each stored row is then a delta against the previous DAY's reading,
+ * which is what a daily figure has to be.
+ *
+ * A consequence worth knowing: the day boundary is the moment of the
+ * first run that sees a channel, not midnight. The window is ~24h either
+ * way, so a sum over several days is sound; a single day is "the 24 hours
+ * ending at that reading".
  */
 export async function recordFormatReading(
   channelId: string,
@@ -92,6 +109,11 @@ export async function recordFormatReading(
   if (!store || !channelId || uploads.length === 0) return null;
 
   const ts = todayKey();
+
+  const existingDays =
+    ((await store.get(DAY_KEY(channelId))) as FormatDay[] | null) ?? [];
+  const alreadyToday = existingDays.find((d) => d.ts === ts);
+  if (alreadyToday) return alreadyToday;
   const current: LastSeen['videos'] = {};
   let shortsTotal = 0, longformTotal = 0;
 
@@ -140,8 +162,7 @@ export async function recordFormatReading(
     comparable: !!prev?.videos,
   };
 
-  const days = ((await store.get(DAY_KEY(channelId))) as FormatDay[] | null) ?? [];
-  const next = [...days.filter((d) => d.ts !== ts), row]
+  const next = [...existingDays.filter((d) => d.ts !== ts), row]
     .sort((a, b) => a.ts.localeCompare(b.ts))
     .slice(-MAX_DAYS);
 

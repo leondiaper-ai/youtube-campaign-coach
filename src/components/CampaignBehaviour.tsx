@@ -1971,6 +1971,242 @@ async function exportToPNG(
 
 // ── Main component ───────────────────────────────────────────────────────
 
+/* ═══════════════════════════════════════════════════════════════════════
+   VIEWING vs PUBLISHING
+
+   The gap this fills: the timeline above shows what was PUBLISHED and how
+   views moved, and the format cards below show how each format performs.
+   Neither answers the question a campaign manager actually asks — "we are
+   putting out mostly Shorts; is that where the viewing is?" That needs the
+   publishing mix and the viewing mix on one line, at the same window.
+
+   Ordering follows the rest of Watcher: recent viewing first, lifetime as
+   context. The rule that matters most is the one about substitution. The
+   lifetime split is always computable; the recent split needs six
+   comparable daily readings. Showing lifetime in the recent slot while
+   waiting would put years of catalogue where the reader expects a week,
+   so the recent slot instead states how many comparable days exist.
+
+   Publishing counts come from `uploads`, already fetched for the chart.
+   Viewing comes from /api/format-split, which reads cached data. Neither
+   costs a YouTube request.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+type FormatSplitPayload = {
+  artist: {
+    available: boolean;
+    channelTotalViews?: number | null;
+    coverageLabel?: string;
+    windows?: {
+      all: {
+        longformViews: number; shortsViews: number;
+        longformShare: number; shortsShare: number;
+        longformCount: number; shortsCount: number;
+        coverage: { viewsCovered: number | null; confidence: 'complete' | 'partial' | 'sample' };
+      };
+    };
+    trends?: Record<'d7' | 'd30' | 'd90', {
+      windowDays: number;
+      shortsViews: number | null; longformViews: number | null;
+      daysAvailable: number; daysRequired: number; ready: boolean;
+    }>;
+    readings?: { total: number; comparable: number; first: string | null; last: string | null };
+  };
+};
+
+const LF_COLOR = ELECTRIC;
+const SH_COLOR = FORMAT_COLORS.short;
+
+function splitPct(x: number): string {
+  if (x <= 0) return '0%';
+  if (x < 0.01) return '<1%';
+  return `${Math.round(x * 100)}%`;
+}
+function coveragePct(x: number | null): string {
+  if (x == null) return '—';
+  if (x <= 0) return '0%';
+  if (x < 0.01) return '<1%';
+  if (x < 0.1) return `${(x * 100).toFixed(1)}%`;
+  return `${Math.round(x * 100)}%`;
+}
+function compact(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return String(n);
+}
+
+function SplitBar({
+  longShare,
+  shortShare,
+  width,
+  height,
+  dim,
+}: { longShare: number; shortShare: number; width: number; height: number; dim?: boolean }) {
+  return (
+    <div style={{ display: 'flex', width, height, borderRadius: 2, overflow: 'hidden', background: BONE }}>
+      <div style={{ width: `${longShare * 100}%`, background: LF_COLOR, opacity: dim ? 0.45 : 1 }} />
+      <div style={{ width: `${shortShare * 100}%`, background: SH_COLOR, opacity: dim ? 0.45 : 1 }} />
+    </div>
+  );
+}
+
+function ViewingVsPublishing({
+  payload,
+  uploads,
+  viewWindow,
+  onWindow,
+}: {
+  payload: FormatSplitPayload | null;
+  uploads: ClassifiedUpload[];
+  viewWindow: 7 | 30 | 90;
+  onWindow: (w: 7 | 30 | 90) => void;
+}) {
+  const a = payload?.artist;
+  if (!a?.available) return null;
+
+  const trend = a.trends?.[`d${viewWindow}` as 'd7' | 'd30' | 'd90'];
+  const readings = a.readings;
+  const life = a.windows?.all;
+
+  const viewLf = trend?.longformViews ?? 0;
+  const viewSh = trend?.shortsViews ?? 0;
+  const viewTotal = viewLf + viewSh;
+  const viewReady = !!trend?.ready && viewTotal > 0;
+
+  /* Publishing is counted over the SAME window as viewing, so the two
+     columns are comparable. The existing 30-day upload summary above is
+     untouched — this is a second, window-matched count, not a
+     replacement for it. */
+  const cutoff = Date.now() - viewWindow * 86_400_000;
+  const inWindow = uploads.filter((u) => new Date(u.publishedAt).getTime() >= cutoff);
+  const pubSh = inWindow.filter((u) => u.format === 'short').length;
+  const pubLf = inWindow.length - pubSh;
+  const pubTotal = inWindow.length;
+
+  const label = (t: string) => (
+    <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: SMOKE, marginBottom: 5 }}>
+      {t}
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop: 14, padding: '0 16px' }}>
+      {/* heading + window switch */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: SMOKE }}>
+          Where the viewing is coming from
+        </div>
+        <div style={{ display: 'flex', gap: 3 }}>
+          {([7, 30, 90] as const).map((w) => {
+            const t = a.trends?.[`d${w}` as 'd7' | 'd30' | 'd90'];
+            const on = viewWindow === w;
+            const avail = !!t?.ready;
+            return (
+              <button
+                key={w}
+                onClick={() => onWindow(w)}
+                title={avail ? `${w}-day viewing window` : `${w}d needs ${t?.daysRequired ?? '—'} comparable daily readings — ${t?.daysAvailable ?? 0} so far`}
+                style={{
+                  fontSize: 9, fontWeight: 700, letterSpacing: '0.06em',
+                  padding: '2px 6px', borderRadius: 3, cursor: 'pointer',
+                  border: `1px solid ${on ? INK : GHOST}`,
+                  background: on ? INK : 'transparent',
+                  color: on ? PAPER : avail ? SMOKE : GHOST,
+                }}
+              >
+                {w}D
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        {/* ── VIEWING (primary) ────────────────────────────── */}
+        <div style={{ minWidth: 210 }}>
+          {label(`Viewing · last ${viewWindow} days`)}
+          {viewReady ? (
+            <>
+              <SplitBar longShare={viewLf / viewTotal} shortShare={viewSh / viewTotal} width={200} height={8} />
+              <div style={{ fontSize: 12, marginTop: 5, color: INK }}>
+                <strong style={{ color: LF_COLOR }}>{splitPct(viewLf / viewTotal)}</strong>
+                <span style={{ color: SMOKE }}> long-form </span>
+                <strong>{compact(viewLf)}</strong>
+                <span style={{ color: GHOST }}> · </span>
+                <strong style={{ color: SH_COLOR }}>{splitPct(viewSh / viewTotal)}</strong>
+                <span style={{ color: SMOKE }}> Shorts </span>
+                <strong>{compact(viewSh)}</strong>
+              </div>
+              <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>
+                View gains on videos we hold, matched across consecutive daily readings.
+              </div>
+            </>
+          ) : trend?.ready ? (
+            <div style={{ fontSize: 11, color: SMOKE, marginTop: 2 }}>
+              No measurable view gain across our inventory in this window.
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: SIGNAL, marginTop: 2, maxWidth: 230 }}>
+              {readings && readings.total === 0
+                ? 'Collecting not started — no daily readings stored yet.'
+                : `Collecting — ${trend?.daysAvailable ?? 0} of ${trend?.daysRequired ?? '—'} comparable days.`}
+              <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>
+                Lifetime figures are shown below and are not a substitute.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── PUBLISHING (same window) ─────────────────────── */}
+        <div style={{ minWidth: 190 }}>
+          {label(`Publishing · same ${viewWindow} days`)}
+          {pubTotal > 0 ? (
+            <>
+              <SplitBar longShare={pubLf / pubTotal} shortShare={pubSh / pubTotal} width={170} height={8} />
+              <div style={{ fontSize: 12, marginTop: 5, color: INK }}>
+                <strong style={{ color: LF_COLOR }}>{splitPct(pubLf / pubTotal)}</strong>
+                <span style={{ color: SMOKE }}> long-form </span>
+                <strong>{pubLf}</strong>
+                <span style={{ color: GHOST }}> · </span>
+                <strong style={{ color: SH_COLOR }}>{splitPct(pubSh / pubTotal)}</strong>
+                <span style={{ color: SMOKE }}> Shorts </span>
+                <strong>{pubSh}</strong>
+              </div>
+              <div style={{ fontSize: 9, color: SMOKE, marginTop: 2 }}>
+                {pubTotal} upload{pubTotal === 1 ? '' : 's'} in this window.
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 11, color: SMOKE, marginTop: 2 }}>
+              Nothing published in the last {viewWindow} days.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── LIFETIME (secondary context) ───────────────────── */}
+      {life && life.longformViews + life.shortsViews > 0 && (
+        <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${BONE}`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <SplitBar longShare={life.longformShare} shortShare={life.shortsShare} width={110} height={4} dim />
+          <div style={{ fontSize: 10, color: SMOKE }}>
+            <strong style={{ color: INK }}>Lifetime</strong> {splitPct(life.longformShare)} long-form ·{' '}
+            {splitPct(life.shortsShare)} Shorts
+          </div>
+          <div
+            style={{ fontSize: 9, color: life.coverage.confidence === 'complete' ? SMOKE : SIGNAL }}
+            title={a.coverageLabel}
+          >
+            {life.coverage.confidence === 'complete'
+              ? 'whole channel'
+              : `across ${coveragePct(life.coverage.viewsCovered)} of channel views we hold — not the channel`}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CampaignBehaviour({ slug, artistName, onClose, noBreakout }: Props) {
   const [data, setData] = useState<BehaviourData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1984,6 +2220,12 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
   const [shortGroupSvgRect, setShortGroupSvgRect] = useState<DOMRect | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(700);
+
+  /* Viewing-vs-publishing comparison. /api/format-split reads cached
+     Watcher data only, so this costs no YouTube quota and is safe to
+     fetch alongside the behaviour payload rather than after it. */
+  const [formatPayload, setFormatPayload] = useState<FormatSplitPayload | null>(null);
+  const [viewWindow, setViewWindow] = useState<7 | 30 | 90>(7);
 
   // Handle short group hover
   const handleShortGroupHover = useCallback(
@@ -2010,6 +2252,19 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [slug, periodDays]);
+
+  /* Split data is per-channel, not per-period, so it is keyed on slug
+     alone — changing the chart's window must not refetch it. */
+  useEffect(() => {
+    let live = true;
+    fetch(`/api/format-split?slug=${encodeURIComponent(slug)}`)
+      .then((r) => r.json())
+      .then((j) => live && setFormatPayload(j))
+      .catch(() => live && setFormatPayload(null));
+    return () => {
+      live = false;
+    };
+  }, [slug]);
 
   /* ── MEASURING THE CONTAINER ────────────────────────────────────────
      This used to be an effect keyed on `loading`, because the loading,
@@ -2484,6 +2739,14 @@ export default function CampaignBehaviour({ slug, artistName, onClose, noBreakou
           </span>
         )}
       </div>
+
+      {/* ═══ VIEWING vs PUBLISHING ═══ */}
+      <ViewingVsPublishing
+        payload={formatPayload}
+        uploads={uploads}
+        viewWindow={viewWindow}
+        onWindow={setViewWindow}
+      />
 
       {/* ═══ WHAT WE'RE LEARNING ═══ */}
       {learningData && (
