@@ -191,6 +191,19 @@ h2.display{font-size:clamp(1.9rem,4.8vw,3.7rem)}
   font-variant-numeric:tabular-nums;min-width:100px;text-align:right}
 .bar .bv span{font-family:var(--mono);font-weight:400;font-size:.62rem;color:var(--faint)}
 
+/* ── HERO PAIR ───────────────────────────────────────────────────────
+   For the two or three slides whose whole argument is one or two
+   numbers. The panelled .twonum treatment gave equal weight to the
+   figure and the explanation around it; here the figure is the slide
+   and everything else is a caption. */
+.hero2{display:grid;grid-template-columns:1fr;gap:clamp(20px,4vw,64px);
+  margin:clamp(1.6rem,3.4vw,2.8rem) 0 1.1rem}
+@media(min-width:700px){.hero2{grid-template-columns:auto auto;justify-content:start}}
+.hero2 .hn{font-family:var(--disp);font-weight:700;
+  font-size:clamp(3.2rem,8vw,6.2rem);line-height:.86;letter-spacing:-.045em}
+.hero2 .hk{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-top:.85rem;line-height:1.7}
+
 /* ── PANELS ──────────────────────────────────────────────────────── */
 .twonum{display:grid;grid-template-columns:1fr;gap:14px;margin-top:clamp(1.3rem,2.6vw,2rem)}
 @media(min-width:760px){.twonum{grid-template-columns:1fr 1fr}}
@@ -344,6 +357,21 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 .act .why{display:block;margin-top:.45rem;font-family:var(--mono);font-size:.57rem;
   letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
 .act .why b{color:var(--bone);font-weight:500}
+/* One evidence point per action, set as a figure rather than a citation.
+   The old .why lines repeated which slide each rested on, which is a
+   thing a reader who just scrolled past it does not need told. */
+.act .ev{display:block;margin-top:.5rem;font-family:var(--disp);font-weight:700;
+  font-size:.92rem;letter-spacing:-.01em;color:var(--bone);font-variant-numeric:tabular-nums}
+.act.now .ev{color:var(--ice)}
+.act .urgent{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ice);margin-bottom:.4rem}
+/* The first action has a date attached and momentum behind it. The other
+   three are experiments. Making them look equally urgent would be a
+   design decision that misrepresents the analysis. */
+.act.now{background:rgba(159,178,188,.08);border-top-color:var(--ice);
+  padding-left:1.1rem;padding-right:1.1rem;margin-left:-1.1rem;margin-right:-1.1rem;
+  border-radius:0 0 4px 4px}
+.act.now h3{font-size:1.2rem}
 
 .foot{padding:clamp(40px,7vh,72px) 0;text-align:center}
 .foot .label{margin-bottom:.6rem}
@@ -511,47 +539,29 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
   </div>
   <div class="inner">
     <div class="label">Catalogue longevity · 27 April – 28 September 2026 · our own daily snapshots</div>
-    <h2 class="display" style="margin:.8rem 0 .9rem;max-width:20ch">
-      An album came out<br>in this window. The<br>catalogue still won.
+    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:20ch">
+      97% of viewing came<br>from existing videos.
     </h2>
-    <p class="big-p">
-      <em>everyone for ten minutes</em> was released on 22 May 2026, inside the 154 days
-      measured here. The channel added <em>23.88 million views</em> across that period.
-      Everything published during it holds <em>651,000</em> of them.
+    <p class="big-p" style="max-width:48ch">
+      Even with a new album released during the period.
     </p>
 
-    <div class="twonum">
+    <div class="hero2">
       <div>
-        <div class="hd">+23.88M</div>
-        <div class="cap">Views added · 154 days · ~155,000 a day</div>
-        <div class="ex">
-          165,112,313 on 27 April to 188,997,142 on 28 September. Twenty-three weekly
-          readings taken by us, on this channel.
-        </div>
+        <div class="hn">+23.88M</div>
+        <div class="hk">Channel views added<br>154 days · ~155,000 a day</div>
       </div>
       <div>
-        <div class="hd" style="color:var(--brick)">2.7%</div>
-        <div class="cap">Held by everything published in the window</div>
-        <div class="ex">
-          Five uploads: the Electric Lady performance, the Stone Pony film and its
-          teaser, a Zane Lowe clip and the Annie DiRusso duet.
-        </div>
+        <div class="hn" style="color:var(--brick)">2.7%</div>
+        <div class="hk">Held by the five videos<br>published in that window</div>
       </div>
     </div>
 
-    <div class="note">
-      <b>Two honest qualifications, then the point.</b> First, this does not mean the
-      23.88M would have arrived with nothing happening — an album release, a tour
-      announcement and a press cycle all pull people toward older videos, and that
-      halo is real but invisible from outside. Second, the album's own singles —
-      <em>you and forever</em>, <em>the van</em>, <em>Dirty Wedding Dress</em> — went up
-      between February and mid-April, so they sit on the older side of the line.
-      <br><br>
-      What survives both is the shape: <b>an album landed in the middle of this window
-      and the overwhelming majority of viewing still went to things already published.</b>
-      A channel at 155,000 views a day rewards being organised, resurfaced and pointed
-      at the right moments. The four opportunities that follow are all versions of that,
-      and none of them requires shooting anything new.
+    <div class="fine" style="margin-top:.4rem;max-width:74ch">
+      <em>everyone for ten minutes</em> was released 22 May 2026, inside this window ·
+      the 2.7% compares those uploads' lifetime views against the channel's growth over
+      the period, so it is a measure of where viewing landed rather than exact
+      attribution — the album campaign is likely to have lifted catalogue viewing too
     </div>
   </div>
 </section>
@@ -660,57 +670,39 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
   </div>
   <div class="inner">
     <div class="label cold">Seasonal asset · Merry Christmas, Please Don't Call</div>
-    <h2 class="display" style="margin:.8rem 0 .9rem;max-width:22ch">
-      It's already<br>climbing. And<br>it's September.
+    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:20ch">
+      Christmas demand is<br>already building.
     </h2>
-    <p class="big-p" style="margin-bottom:.4rem">
-      Ten weeks to the first chart week. <em>This is the planning window, and it is
-      open now.</em>
+    <p class="big-p" style="max-width:50ch">
+      Ten weeks to the first chart week. <em>The planning window is open now.</em>
     </p>
 
-    <div class="said" style="border-left-color:var(--ice)">
-      <p>
-        &ldquo;it's finally happened. finally here in full after popping its head out
-        here and there for years. from tac talent shows to acoustic moments it's been
-        wanting to come alive&rdquo;
-      </p>
-      <span class="attr">Jack Antonoff, on releasing it — November 2024</span>
-    </div>
-
-    <div class="ramp">
-      <div class="rampnow">
-        <div class="hd">+400,000</div>
-        <div class="sub">Views added in the seven days to 30 September</div>
-        <div class="ex">
-          Against a lifetime average of <b>10,500 a day</b> across its 672 days, the
-          Christmas video is currently running at roughly <b>57,000 a day —
-          5.4&times; its own norm</b>, two months before the season it belongs to.
-          Measured on this channel, from our own daily readings.
-        </div>
+    <div class="hero2" style="margin-bottom:.8rem">
+      <div>
+        <div class="hn" style="color:var(--ice)">+400K</div>
+        <div class="hk">Views added<br>last seven days</div>
       </div>
-      <div class="movers">
-        <div class="fine" style="margin-bottom:.4rem">Moving now · last 7 days</div>
-        <div class="mv top"><div class="t">Merry Christmas, Please Don't Call</div><div class="g">+400K</div></div>
-        <div class="mv"><div class="t">you and forever</div><div class="g">+11K</div></div>
-        <div class="mv"><div class="t">MCPDC with Annie DiRusso · Stone Pony</div><div class="g">+4.0K</div></div>
-        <div class="mv"><div class="t">Live From The Stone Pony</div><div class="g">+3.8K</div></div>
-        <div class="mv"><div class="t">&ldquo;jack breaks down mcpdc&rdquo; · Short</div><div class="g">+1.8K</div></div>
+      <div>
+        <div class="hn" style="color:var(--ice)">5.4&times;</div>
+        <div class="hk">Its own lifetime<br>daily average</div>
+      </div>
+      <div>
+        <div class="hn" style="color:var(--ice)">1 &rarr; 4</div>
+        <div class="hk">UK chart weeks, season one<br>to season two · higher peak</div>
       </div>
     </div>
-    <div class="fine" style="margin-top:.8rem">
-      The tracker holds per-video daily history for seven uploads on this channel, so
-      this ranks those seven — not all 230 · the 5.4&times; comparison is the video
-      against its own history, which is the solid part
+    <div class="fine" style="max-width:76ch">
+      10,507 a day across its 672 days against roughly 57,000 a day now · measured on
+      this channel from our own daily readings, which cover seven uploads and not all
+      230, so the solid comparison is the video against its own history
     </div>
 
     <div class="rule"></div>
 
     <div class="label cold">And it is doing it on almost nothing</div>
-    <p class="big-p" style="margin-top:.7rem">
-      This is the <em>third-biggest music video this channel has ever released</em> —
-      behind only I Wanna Get Better and Rollercoaster, both from 2014. Those two songs
-      have a lyric video, an official audio and live material. This one has a video, and
-      a live take that arrived <em>twenty months after the song</em>, in August.
+    <p class="big-p" style="margin-top:.7rem;max-width:56ch">
+      The <em>third-biggest music video this channel has released</em>. The two above it
+      have a lyric video, an official audio and live material.
     </p>
 
     <div class="gap">
@@ -736,9 +728,10 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
         <div class="v">7.06M</div>
       </div>
     </div>
-    <div class="fine" style="margin-top:.7rem">
+    <div class="fine" style="margin-top:.7rem;max-width:76ch">
       Music videos only, so the comparison is like for like · across both chart seasons
-      the song had one long-form asset on this channel: the video itself
+      the song had one long-form asset on this channel: the video itself · the live take
+      arrived twenty months after the song, in August, four months out of season
     </div>
 
   </div>
@@ -926,19 +919,18 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 <section class="slide" id="shorts">
   <div class="inner">
     <div class="label">Shorts · 94 uploads</div>
-    <h2 class="display" style="margin:.8rem 0 .9rem;max-width:23ch">
-      Two Shorts worked.<br>Neither was a<br>concert clip.
+    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:22ch">
+      The biggest Shorts<br>offered something<br>different.
     </h2>
-    <p class="big-p">
-      Ninety-four Shorts have a median of <em>6,083 views</em>. Two have cleared 50,000
-      and the next best is 46,996. What those two share is not the format — it is that
-      <em>you could not see either of them anywhere else.</em>
+    <p class="big-p" style="max-width:52ch">
+      The only live performance of a song that exists. A piece of choreography by the
+      person in the music video. <em>Neither is an excerpt of a show.</em>
     </p>
 
-    <div class="vgrid" style="margin-top:clamp(1.2rem,2.4vw,1.9rem);max-width:660px">
+    <div class="vgrid" style="margin-top:clamp(1.2rem,2.4vw,1.8rem);max-width:640px">
       <a class="thumb" href="https://www.youtube.com/watch?v=7XyRT_prqjY" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/7XyRT_prqjY/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>152,565</b>&ldquo;the only live performance of &lsquo;modern girl&rsquo; that exists&rdquo;</span>
+        <span class="cap"><b>152,565</b>Modern Girl — the only live performance that exists</span>
       </a>
       <a class="thumb" href="https://www.youtube.com/watch?v=au7cm7Od7b8" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/au7cm7Od7b8/hqdefault.jpg" alt="" loading="lazy">
@@ -946,18 +938,23 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
       </a>
     </div>
 
-    <div class="note">
-      <b>A hypothesis worth testing, not a formula.</b> One is billed as the only live
-      performance of a song that exists. The other is a piece of choreography by the
-      person in the music video. Neither is an excerpt of a show — and for context, the
-      six Shorts cut from the 2023 Radio City performance sit between 1,841 and 6,083
-      views.
-      <br><br>
-      Two successes out of ninety-four is thin, and those six clips were published in a
-      different year under different conditions, so this is not a controlled comparison.
-      It is a reason to <b>test distinctiveness as the variable</b> — the thing nobody
-      can see elsewhere — rather than to make more performance clips and expect a
-      different result.
+    <div class="hero2" style="margin:clamp(1.3rem,2.6vw,2rem) 0 .7rem">
+      <div>
+        <div class="hn" style="font-size:clamp(2.4rem,5.4vw,4rem)">6,083</div>
+        <div class="hk">Median across<br>94 Shorts</div>
+      </div>
+      <div>
+        <div class="hn" style="font-size:clamp(2.4rem,5.4vw,4rem);color:var(--faint)">2</div>
+        <div class="hk">Have ever cleared 50,000<br>next best is 46,996</div>
+      </div>
+    </div>
+
+    <div class="fine" style="max-width:78ch">
+      Two successes out of ninety-four is a creative hypothesis, not a proven cause ·
+      test distinctiveness as the variable — the thing nobody can see elsewhere · for
+      context only, the six Shorts cut from the 2023 Radio City show sit between 1,841
+      and 6,083 views, published in a different year under different conditions, so that
+      is not a controlled comparison
     </div>
   </div>
 </section>
@@ -972,76 +969,45 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
   </div>
   <div class="inner">
     <div class="label">Where we would start</div>
-    <h2 class="display" style="margin:.8rem 0 1.1rem;max-width:21ch">
-      Four things.<br>Nothing new to shoot.
+    <h2 class="display" style="margin:.8rem 0 1.1rem;max-width:22ch">
+      Four opportunities.<br>Start with what exists.
     </h2>
 
     <div>
-      <div class="act">
+      <div class="act now">
         <div class="num cold">01</div>
         <div>
-          <h3>Give the Christmas song the assets it has never had — now, not in November</h3>
-          <p>
-            It is the channel's third-biggest music video, it charts every December, it
-            grew between its first season and its second, and it is currently running at
-            5.4&times; its own daily average — all on one video. It has no lyric video
-            and no official audio, and the two songs above it have both. That is the
-            clearest unbuilt ecosystem in the catalogue, attached to the one song with a
-            guaranteed annual moment.
-          </p>
-          <p style="margin-top:.5rem">
-            Before November: add the missing assets, move the Annie DiRusso live version
-            into season, link everything to everything, and chase the December 2025
-            television performance that never reached the channel. The season has
-            already started — the ramp is measurable now.
-          </p>
-          <span class="why">Evidence · <b>December slide — +400K in seven days, two assets against four, one chart week became four</b></span>
+          <div class="urgent">Do now · deadline is real</div>
+          <h3>Activate Christmas</h3>
+          <p>Build the seasonal campaign from assets that already exist.</p>
+          <span class="ev">+400K views this week · 5.4&times; its own average</span>
         </div>
       </div>
 
       <div class="act">
         <div class="num">02</div>
         <div>
-          <h3>Test individual song edits from the Stone Pony concert</h3>
-          <p>
-            Ninety-one minutes sit public as a single upload at 227,059 views — the
-            album release show, played free the day after the record came out, to 900
-            people. Red Rocks is the precedent on this channel: three songs from one
-            night, published separately, 383K views between them. Start with a handful
-            and watch whether they add viewing or move it around. Subject to footage and
-            to rights clearance, which the show being public does not by itself establish.
-          </p>
-          <span class="why">Evidence · <b>Live slides — Red Rocks, and 28 single-song live videos</b></span>
+          <h3>Unlock the Stone Pony concert</h3>
+          <p>Test individual song uploads — subject to footage and rights.</p>
+          <span class="ev">227K views for the full film</span>
         </div>
       </div>
 
       <div class="act">
         <div class="num">03</div>
         <div>
-          <h3>Test a complete support package on one upcoming song</h3>
-          <p>
-            Video, lyric video, official audio and a live version on a single release,
-            measured against the video-only releases either side of it. The three songs
-            that ever got this are the channel's strongest — but they are also its
-            oldest, so that proves nothing on its own. One controlled release is what
-            would turn the question into an answer, in either direction.
-          </p>
-          <span class="why">Evidence · <b>Support slide — three full packages, none since 2018</b></span>
+          <h3>Bring back the full song package</h3>
+          <p>Test video, lyric, audio and live together on one upcoming release.</p>
+          <span class="ev">No complete package since 2018</span>
         </div>
       </div>
 
       <div class="act">
         <div class="num">04</div>
         <div>
-          <h3>Build Shorts around distinctive moments, not clips</h3>
-          <p>
-            The two Shorts that cleared 50,000 were a performance billed as the only one
-            of its kind and a piece of choreography — not excerpts. Test that variable
-            deliberately: a handful built on something unavailable elsewhere, measured
-            against the 6,083 median. A creative experiment with a clear read-out, not a
-            format to scale.
-          </p>
-          <span class="why">Evidence · <b>Shorts slide — 152,565 and 144,905 against a 6,083 median</b></span>
+          <h3>Make Shorts worth watching</h3>
+          <p>Test distinctive moments rather than routine concert excerpts.</p>
+          <span class="ev">153K and 145K against a 6,083 median</span>
         </div>
       </div>
     </div>
