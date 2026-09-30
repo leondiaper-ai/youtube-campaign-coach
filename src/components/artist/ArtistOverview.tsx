@@ -74,7 +74,7 @@ export interface ArtistOverviewProps {
 }
 
 export default async function ArtistOverview({
-  slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves, pinned: _pinned,
+  slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves: _moves, pinned: _pinned,
   topLongform, topShorts,
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
@@ -118,27 +118,21 @@ export default async function ArtistOverview({
         <AudienceLine slug={slug} />
       </header>
 
-      {/* ═══ 3. WHAT TO DO — kept near the top ══════════════════ */}
-      <section className="mt-9 pl-5" style={{ borderLeft: `3px solid ${statusTheme.dot}` }}>
-        <Eyebrow>Next action</Eyebrow>
-        <div className="text-[19px] sm:text-[23px] font-black leading-snug tracking-[-0.015em] mt-2 max-w-[30ch]">
-          {moves.primary.label}
-        </div>
-        <div className="text-[13px] text-ink/60 mt-2 leading-relaxed max-w-[68ch]">
-          {moves.primary.action}
-        </div>
-        {moves.secondary && (
-          <div className="mt-5 pt-4" style={{ borderTop: `1px solid ${RULE}` }}>
-            <Eyebrow>Then</Eyebrow>
-            <div className="text-[14px] font-bold leading-snug mt-1.5 max-w-[40ch]">
-              {moves.secondary.label}
-            </div>
-            <div className="text-[12px] text-ink/55 mt-1 leading-relaxed max-w-[68ch]">
-              {moves.secondary.action}
-            </div>
-          </div>
-        )}
-      </section>
+      {/* ═══ NEXT ACTION — removed for now ══════════════════════
+          The "Next action" / "Then" block used to sit here, printing
+          whatToDoNow's primary and secondary moves.
+
+          It is the rendering that has gone, not the engine: `moves` is
+          still computed in WatcherArtistView and still passed in below,
+          and it still feeds the channel report. Restoring the section is
+          re-adding this markup, not rebuilding anything.
+
+          Worth knowing before it comes back: the moves come from a rule
+          cascade, so the phrasing is fixed and repeats across the roster
+          — "Activate the collab network" reads the same on every artist
+          that has a feature. The figures inside it are real (the top
+          mover is now the same video the grid ranks first), but the
+          sentences around them are templates. ══════════════════════ */}
 
       {/* ═══ MOMENTUM ═══════════════════════════════════════════ */}
       <section className="mt-12 pt-8" style={{ borderTop: `1px solid ${RULE}` }}>
