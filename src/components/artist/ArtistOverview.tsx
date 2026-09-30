@@ -50,13 +50,6 @@ function sharePct(x: number): string {
   return `${Math.round(x * 100)}%`;
 }
 
-function coveragePct(x: number | null): string {
-  if (x == null) return '—';
-  if (x <= 0) return '0%';
-  if (x < 0.01) return '<1%';
-  if (x < 0.1) return `${(x * 100).toFixed(1)}%`;
-  return `${Math.round(x * 100)}%`;
-}
 
 export interface ArtistOverviewProps {
   slug: string;
@@ -214,14 +207,13 @@ export default async function ArtistOverview({
               {sharePct(split.lifetime.longformShare)} long-form ·{' '}
               {sharePct(split.lifetime.shortsShare)} Shorts
             </div>
-            <div
-              className="text-[12px] mt-0.5"
-              style={{ color: split.lifetime.confidence === 'complete' ? 'rgba(14,14,14,0.4)' : '#9A5B00' }}
-            >
-              {split.lifetime.confidence === 'complete'
-                ? 'Covers essentially the whole channel.'
-                : `Of ${coveragePct(split.lifetime.viewsCovered)} of views we hold — not the channel`}
-            </div>
+            {/* The coverage caveat ("Of 62% of views we hold — not the
+                channel") used to print here. It is still true and still
+                matters, but on a headline row it read as a disclaimer
+                attached to every artist rather than as information. It
+                remains one click away under Lifetime detail in the format
+                block, where a reader who cares about the denominator is
+                already looking. */}
           </div>
         )}
 
