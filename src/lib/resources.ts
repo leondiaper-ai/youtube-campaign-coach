@@ -120,6 +120,16 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         updated: 'August 2026',
       },
       {
+        title: 'Bleachers',
+        blurb:
+          'Channel deep dive for the artist and their management \u2014 what twelve years of catalogue actually earns, '
+          + 'where the support around each song thinned out, and the 2026 live take that outperformed its own music video. '
+          + 'Public API data only, with the coverage stated on the page.',
+        href: '/bleachers',
+        kind: 'Deck',
+        updated: 'September 2026',
+      },
+      {
         title: 'Amyl and the Sniffers',
         blurb:
           'Channel analysis built for the signing conversation — format mix, cadence and catalogue coverage.',

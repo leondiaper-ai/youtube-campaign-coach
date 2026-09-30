@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bleachers × YouTube — a channel read</title>
+<meta name="description" content="Bleachers on YouTube: what the catalogue earns, where the support architecture stopped, and what the live material is already proving.">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     BLEACHERS × YOUTUBE — CHANNEL DEEP DIVE
+
+     Written for the artist and their management, which sets the rules
+     this page is built to: every number is checkable, every gap is
+     framed as something available rather than something missed, and
+     nothing is asserted that the public data cannot carry.
+
+     ── WHAT THE DATA IS ───────────────────────────────────────────────
+     230 uploads read from the channel's own uploads playlist on 30
+     September 2026 via the YouTube Data API. Public objects only: view,
+     like and comment counts, durations, publish dates, titles, tags and
+     descriptions. No Studio access, so no watch time, no retention, no
+     traffic sources and no demographics. Anything those would be needed
+     to prove is not claimed here.
+
+     ── THE COVERAGE FIGURE THAT MATTERS ───────────────────────────────
+     Those 230 uploads sum to 111.0M views. The channel's lifetime
+     counter reads 189.0M. We cannot account for the 78M difference from
+     public data — it may sit in videos since removed, or in counting
+     differences on YouTube's side. So every share on this page is
+     stated against the 111.0M we can see and check, never against the
+     channel total. A percentage of a number you cannot inspect is not
+     evidence.
+
+     ── DESIGN ─────────────────────────────────────────────────────────
+     Warm paper and ink rather than the dark decks, because this channel's
+     own imagery is sunlit Jersey film stock and a black page fights it.
+     Thumbnails come from i.ytimg.com, which is deterministic per video
+     id and costs no API request.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#F7F3EC; --ink:#17171A; --smoke:rgba(23,23,26,.58);
+  --rule:#E3DACB; --wash:#EFE8DC;
+  --signal:#C8553D;      /* Jersey brick — the accent, used sparingly */
+  --gold:#C08A2E;        /* saxophone */
+  --blue:#2F4D7A;        /* long-form */
+  --pad:clamp(20px,5vw,72px);
+  --disp:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit}
+
+/* ── NAV ─────────────────────────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;padding:12px var(--pad);
+  background:rgba(247,243,236,.88);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:.6rem;
+  letter-spacing:.14em;text-transform:uppercase}
+.nav .who{color:var(--smoke)}
+.nav .links{display:flex;gap:clamp(10px,2vw,26px)}
+.nav .links a{text-decoration:none;color:var(--smoke)}
+.nav .links a:hover{color:var(--ink)}
+@media(max-width:700px){.nav .links{display:none}}
+
+/* ── SLIDE ───────────────────────────────────────────────────────── */
+.slide{position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;padding:clamp(72px,10vh,120px) 0 clamp(48px,8vh,88px);
+  border-bottom:1px solid var(--rule)}
+.inner{width:100%;max-width:1220px;margin:0 auto;padding:0 var(--pad)}
+
+.label{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--smoke)}
+.label.lit{color:var(--signal)}
+h1.display,h2.display{font-family:var(--disp);font-weight:700;line-height:.95;
+  letter-spacing:-.035em;margin:0}
+h1.display{font-size:clamp(2.6rem,7.5vw,6rem)}
+h2.display{font-size:clamp(2rem,5.2vw,4.1rem)}
+.big-p{font-size:clamp(1rem,1.5vw,1.22rem);line-height:1.6;color:var(--smoke);
+  max-width:64ch;margin:0}
+.big-p em{font-style:normal;color:var(--ink);font-weight:600}
+.body{font-size:.95rem;line-height:1.65;color:var(--smoke);margin:0}
+.body em{font-style:normal;color:var(--ink);font-weight:600}
+.rule{height:1px;background:var(--rule);margin:clamp(1.6rem,3vw,2.6rem) 0}
+
+/* ── REVEAL ──────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* ── BOARD ───────────────────────────────────────────────────────── */
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:clamp(14px,2.4vw,30px);margin-top:clamp(1.6rem,3vw,2.6rem)}
+.board .n{font-family:var(--disp);font-weight:700;font-size:clamp(1.8rem,3.6vw,3rem);
+  line-height:1;letter-spacing:-.03em}
+.board .n.lit{color:var(--signal)}
+.board .k{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--smoke);margin-top:.6rem}
+
+/* ── BARS ────────────────────────────────────────────────────────── */
+.bars{margin-top:clamp(1.4rem,3vw,2.2rem);display:flex;flex-direction:column;gap:12px}
+.bar{display:grid;grid-template-columns:clamp(96px,14vw,168px) 1fr auto;
+  align-items:center;gap:clamp(10px,1.6vw,20px)}
+.bar .bk{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--smoke);line-height:1.4}
+.bar .bt{height:9px;background:var(--wash);border-radius:2px;overflow:hidden}
+.bar .bf{height:100%;width:0;background:var(--blue);border-radius:2px;
+  transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.bar.hi .bf{background:var(--signal)}
+.bar.mid .bf{background:var(--gold)}
+.bar .bv{font-family:var(--disp);font-weight:700;font-size:.92rem;
+  font-variant-numeric:tabular-nums;min-width:74px;text-align:right}
+
+/* ── GRIDS ───────────────────────────────────────────────────────── */
+.grid2{display:grid;grid-template-columns:1fr;gap:clamp(1.4rem,3vw,2.6rem)}
+.grid3{display:grid;grid-template-columns:1fr;gap:clamp(1.2rem,2.4vw,2.2rem)}
+@media(min-width:860px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}}
+
+/* ── THUMBS ──────────────────────────────────────────────────────── */
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.8vw,20px)}
+@media(min-width:860px){.vgrid.four{grid-template-columns:repeat(4,1fr)}}
+.thumb{display:block;text-decoration:none;position:relative}
+.thumb img{aspect-ratio:16/9;object-fit:cover;border-radius:5px;background:var(--wash);
+  transition:transform .4s ease}
+.thumb:hover img{transform:scale(1.02)}
+.thumb .cap{display:block;margin-top:.55rem;font-size:.76rem;line-height:1.4;color:var(--smoke)}
+.thumb .cap b{display:block;font-family:var(--disp);font-weight:700;font-size:1.02rem;
+  color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ── VERSUS (the two-asset comparison) ───────────────────────────── */
+.vs2{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.4vw,26px);align-items:start}
+@media(min-width:760px){.vs2{grid-template-columns:1fr auto 1fr}}
+.vs2 .mid{display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--smoke);padding:clamp(8px,4vw,60px) 0}
+
+/* ── TABLE ───────────────────────────────────────────────────────── */
+table.cmp{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:1.2rem}
+table.cmp th{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--smoke);text-align:left;font-weight:500;
+  padding:0 0 .7rem}
+table.cmp td{padding:.62rem 0;border-top:1px solid var(--rule);vertical-align:top}
+table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabular-nums}
+table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
+.tick{color:var(--gold);font-weight:700}
+.dash{color:rgba(23,23,26,.24)}
+
+/* ── NOTE ────────────────────────────────────────────────────────── */
+.note{margin-top:clamp(1.4rem,3vw,2.2rem);padding:1.1rem 1.3rem;background:var(--wash);
+  border-left:3px solid var(--signal);border-radius:0 4px 4px 0;
+  font-size:.95rem;line-height:1.65;color:var(--smoke);max-width:78ch}
+.note b{color:var(--ink)}
+
+/* ── CHIPS ───────────────────────────────────────────────────────── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.1rem}
+.chips span{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:.4rem .7rem;border:1px solid var(--rule);
+  border-radius:3px;color:var(--smoke)}
+.chips span.open{border-color:var(--gold);color:var(--gold)}
+
+/* ── ACTIONS ─────────────────────────────────────────────────────── */
+.act{display:grid;grid-template-columns:auto 1fr;gap:clamp(14px,2.4vw,26px);
+  padding:1.3rem 0;border-top:1px solid var(--rule)}
+.act .num{font-family:var(--disp);font-weight:700;font-size:1.5rem;color:var(--signal);
+  line-height:1;font-variant-numeric:tabular-nums}
+.act h3{font-family:var(--disp);font-weight:700;font-size:1.12rem;margin:0 0 .5rem;
+  letter-spacing:-.01em;line-height:1.25}
+.act p{margin:0;font-size:.92rem;line-height:1.62;color:var(--smoke);max-width:72ch}
+
+/* ── FOOT ────────────────────────────────────────────────────────── */
+.foot{padding:clamp(40px,7vh,72px) 0;text-align:center}
+.foot .label{margin-bottom:.6rem}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="who">Bleachers · @bleachers</div>
+  <div class="links">
+    <a href="#scale">Scale</a>
+    <a href="#earns">What earns</a>
+    <a href="#support">Support</a>
+    <a href="#live">Live</a>
+    <a href="#shorts">Shorts</a>
+    <a href="#next">What next</a>
+  </div>
+</nav>
+
+
+<!-- ════════ 1 · COVER ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner reveal">
+    <div class="label">Bleachers · @bleachers · Channel deep dive · Virgin Music Group</div>
+    <h1 class="display" style="margin:1.4rem 0 1.5rem;max-width:20ch">
+      Twelve years.<br>Two songs got<br>the full build.
+    </h1>
+    <p class="big-p">
+      The channel has 261,000 subscribers and 189 million lifetime views. Fifteen
+      music videos carry more than half of everything it has earned. This is a read
+      of what the catalogue actually does, where the support around it thinned out,
+      and what the live material has quietly started proving.
+    </p>
+    <div class="chips">
+      <span>230 uploads read</span><span>Public API data only</span><span>30 September 2026</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 2 · SCALE ════════════════════════════════════════════ -->
+<section class="slide" id="scale">
+  <div class="inner">
+    <div class="label reveal">Where the channel stands</div>
+    <h2 class="display reveal" style="margin:.9rem 0 0;max-width:20ch">
+      A catalogue with real<br>weight behind it.
+    </h2>
+
+    <div class="board reveal">
+      <div><div class="n lit">261K</div><div class="k">Subscribers</div></div>
+      <div><div class="n">189M</div><div class="k">Lifetime views</div></div>
+      <div><div class="n">230</div><div class="k">Uploads read</div></div>
+      <div><div class="n">15</div><div class="k">Music videos</div></div>
+      <div><div class="n">43</div><div class="k">Live assets</div></div>
+      <div><div class="n">2014</div><div class="k">Channel opened</div></div>
+    </div>
+
+    <div class="grid2" style="margin-top:clamp(1.8rem,3.5vw,3rem)">
+      <p class="body reveal">
+        <em>Fifteen music videos have earned 60.2M views between them</em> — 54% of
+        everything we can measure on this channel. That is a catalogue doing its job:
+        a small number of properly made things carrying the weight, rather than volume
+        spread thin.
+      </p>
+      <p class="body reveal">
+        The publishing has been anything but steady, and that is worth seeing plainly.
+        2024 was the busiest year on record at 57 uploads. 2025 carried ten. 2026 has
+        already put out fifteen, including a 91-minute concert film. The channel moves
+        in bursts around the work.
+      </p>
+    </div>
+
+    <div class="note reveal">
+      <b>One number to hold on to.</b> The 230 uploads we can read sum to 111.0M views
+      against a lifetime counter of 189.0M. We cannot account for the difference from
+      public data, so every share on this page is calculated against the 111.0M we can
+      actually inspect — not against the channel total. Where a figure looks smaller
+      than you expect, that is usually why.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 3 · WHAT EARNS ═══════════════════════════════════════ -->
+<section class="slide" id="earns">
+  <div class="inner">
+    <div class="label reveal">Format economics · all 230 uploads classified</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      Four formats.<br>Very different jobs.
+    </h2>
+    <p class="big-p reveal">
+      Sorted by what each format has actually earned, the channel's shape is
+      unusually clear — and unusually top-heavy.
+    </p>
+
+    <div class="bars reveal">
+      <div class="bar hi">
+        <div class="bk">Music video<br>15 uploads</div>
+        <div class="bt"><div class="bf" data-w="100"></div></div>
+        <div class="bv">60.2M</div>
+      </div>
+      <div class="bar mid">
+        <div class="bk">Official audio<br>17 uploads</div>
+        <div class="bt"><div class="bf" data-w="46.3"></div></div>
+        <div class="bv">27.9M</div>
+      </div>
+      <div class="bar">
+        <div class="bk">Live<br>43 uploads</div>
+        <div class="bt"><div class="bf" data-w="19.8"></div></div>
+        <div class="bv">11.9M</div>
+      </div>
+      <div class="bar">
+        <div class="bk">Lyric video<br>4 uploads</div>
+        <div class="bt"><div class="bf" data-w="8.1"></div></div>
+        <div class="bv">4.9M</div>
+      </div>
+      <div class="bar">
+        <div class="bk">Shorts<br>95 uploads</div>
+        <div class="bt"><div class="bf" data-w="1.8"></div></div>
+        <div class="bv">1.1M</div>
+      </div>
+    </div>
+    <div class="label reveal" style="margin-top:.9rem;font-size:.56rem">
+      Views across the 111.0M we can read · formats assigned from title and duration,
+      so a mislabelled upload is classified as what it says it is
+    </div>
+
+    <div class="note reveal">
+      <b>The ratio worth noticing.</b> Ninety-five Shorts have earned 1.1M between
+      them. Four lyric videos have earned 4.9M. The channel is putting most of its
+      publishing effort into the format returning least, and almost none into one of
+      the formats returning most per upload.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 4 · THE SUPPORT ARCHITECTURE ═════════════════════════ -->
+<section class="slide" id="support">
+  <div class="inner">
+    <div class="label reveal">Support architecture · every song with a music video</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
+      The two biggest songs<br>are the two that got<br>everything.
+    </h2>
+    <p class="big-p reveal">
+      Fifteen songs on this channel have a music video. Only two of them were also
+      given a lyric video, an official audio and live material.
+    </p>
+
+    <table class="cmp reveal">
+      <tr>
+        <th>Song</th><th>Video</th><th>Lyric</th><th>Audio</th><th>Live</th>
+        <th style="text-align:right">Views · video, lyric, audio &amp; live</th>
+      </tr>
+      <tr>
+        <td>I Wanna Get Better <span style="color:rgba(23,23,26,.4)">· 2014</span></td>
+        <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">30.67M</td>
+      </tr>
+      <tr>
+        <td>Rollercoaster <span style="color:rgba(23,23,26,.4)">· 2014</span></td>
+        <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">18.92M</td>
+      </tr>
+      <tr>
+        <td>Alfie's Song <span style="color:rgba(23,23,26,.4)">· 2018</span></td>
+        <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">3.72M</td>
+      </tr>
+      <tr>
+        <td>Merry Christmas, Please Don't Call <span style="color:rgba(23,23,26,.4)">· 2024</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td>
+        <td class="n" style="text-align:right">7.06M</td>
+      </tr>
+      <tr>
+        <td>Chinatown <span style="color:rgba(23,23,26,.4)">· 2020</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">6.02M</td>
+      </tr>
+      <tr>
+        <td>Don't Take The Money <span style="color:rgba(23,23,26,.4)">· 2017</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">5.17M</td>
+      </tr>
+      <tr>
+        <td>Modern Girl <span style="color:rgba(23,23,26,.4)">· 2023</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td>
+        <td class="n" style="text-align:right">4.25M</td>
+      </tr>
+      <tr>
+        <td>you and forever <span style="color:rgba(23,23,26,.4)">· 2026</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">2.25M</td>
+      </tr>
+    </table>
+    <div class="label reveal" style="margin-top:.8rem;font-size:.56rem">
+      Eight of the fifteen shown · the remaining seven follow the same pattern as the
+      lower rows
+    </div>
+
+    <div class="note reveal">
+      <b>Read this carefully, because it cuts both ways.</b> The two songs with the
+      full set are also the two oldest and the two biggest, and a hit attracts assets
+      as much as assets build a hit. Age and scale are tangled up in this, and nothing
+      here proves the build caused the size.
+      <br><br>
+      What it does show cleanly is that <b>the channel used to build song ecosystems
+      and now mostly doesn't</b>. Alfie's Song in 2018 was the last release to get a
+      lyric video and an official audio. Every song since has had a video and, at
+      best, one live performance — which is a decision worth making on purpose rather
+      than by default.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 5 · LIVE ═════════════════════════════════════════════ -->
+<section class="slide" id="live">
+  <div class="inner">
+    <div class="label reveal">Live · 43 assets, 11% of measurable views</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      In 2026 the live take<br>beat the music video.
+    </h2>
+    <p class="big-p reveal">
+      Dirty Wedding Dress got an official music video in April. Nineteen days later
+      the Electric Lady performance went up. <em>The live version has nearly twice the
+      views of the video it was supporting.</em>
+    </p>
+
+    <div class="vs2 reveal" style="margin-top:clamp(1.6rem,3vw,2.4rem)">
+      <a class="thumb" href="https://www.youtube.com/watch?v=uEWr6mENsPA" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/uEWr6mENsPA/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>202,366</b>Official Music Video · 17 April 2026</span>
+      </a>
+      <div class="mid">19 days later</div>
+      <a class="thumb" href="https://www.youtube.com/watch?v=vPyhRkfMGak" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/vPyhRkfMGak/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>388,206</b>Live From Electric Lady · 6 May 2026</span>
+      </a>
+    </div>
+
+    <div class="rule reveal"></div>
+
+    <div class="label reveal">The live layer is not a side project</div>
+    <div class="vgrid four reveal" style="margin-top:1rem">
+      <a class="thumb" href="https://www.youtube.com/watch?v=kmpyfDF_pes" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/kmpyfDF_pes/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>4.43M</b>Tiny Moves · 2024</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=4POQtHyD2Yg" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/4POQtHyD2Yg/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>2.41M</b>Chinatown · on the roof, 2020</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=468J7e1clU4" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/468J7e1clU4/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>227,036</b>Stone Pony · 91 minutes, 2026</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=o1NGF6G4diM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/o1NGF6G4diM/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>501,993</b>Jack at Electric Lady · 2026</span>
+      </a>
+    </div>
+
+    <div class="note reveal">
+      <b>The Stone Pony show is 91 minutes sitting as one upload.</b> It has done
+      227,036 views as a full set, which is a good number for a feature-length
+      concert film — and it is also a room full of individual song performances that
+      have never been published as individual song performances.
+      <br><br>
+      Cutting that set into per-song videos is the clearest opportunity on this
+      channel: the footage exists, the rights are presumably settled since the full
+      show is already public, and the format it would create is the one the Dirty
+      Wedding Dress comparison suggests this audience turns up for.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 6 · SHORTS ═══════════════════════════════════════════ -->
+<section class="slide" id="shorts">
+  <div class="inner">
+    <div class="label reveal">Shorts · 95 uploads classified</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
+      The two Shorts that<br>worked were both<br>performances.
+    </h2>
+    <p class="big-p reveal">
+      Ninety-five Shorts have a median of <em>6,054 views</em>. Two have cleared
+      50,000. Both of those are performance footage rather than announcement or
+      studio-diary material.
+    </p>
+
+    <div class="vgrid reveal" style="margin-top:clamp(1.4rem,3vw,2.2rem);max-width:720px">
+      <a class="thumb" href="https://www.youtube.com/watch?v=7XyRT_prqjY" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/7XyRT_prqjY/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>152,562</b>"the only live performance of 'modern girl' that exists"</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=au7cm7Od7b8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/au7cm7Od7b8/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>144,901</b>Tiny Moves choreography</span>
+      </a>
+    </div>
+
+    <div class="note reveal">
+      <b>This is a steer, not a verdict.</b> Two Shorts out of ninety-five is a thin
+      basis for a rule, and the honest reading is that it points the same direction as
+      the live finding rather than proving anything on its own.
+      <br><br>
+      But the pattern is consistent: when this channel shows the band playing, people
+      watch. When it announces that something is coming, they mostly don't — the
+      release-announcement Shorts around <em>you and forever</em> ran between 8,756
+      and 46,996 views against a music video that did 2.2M.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 7 · WHAT NEXT ════════════════════════════════════════ -->
+<section class="slide" id="next">
+  <div class="inner">
+    <div class="label reveal">Where we would start</div>
+    <h2 class="display reveal" style="margin:.9rem 0 1.4rem;max-width:20ch">
+      Three things,<br>in order.
+    </h2>
+
+    <div class="reveal">
+      <div class="label lit" style="margin-bottom:.4rem">Do first — the footage already exists</div>
+      <div class="act">
+        <div class="num">01</div>
+        <div>
+          <h3>Cut the Stone Pony set into song videos</h3>
+          <p>
+            Ninety-one minutes are already public as one upload at 227,036 views.
+            Published as individual songs, that same footage becomes the format the
+            channel's own numbers favour — the Electric Lady take of Dirty Wedding
+            Dress outperformed its music video by 1.9×, and the best-performing Short
+            on the channel is a live performance clip. Nothing new needs shooting.
+          </p>
+        </div>
+      </div>
+
+      <div class="label lit" style="margin:1.8rem 0 .4rem">Then — a cheap test on the next single</div>
+      <div class="act">
+        <div class="num">02</div>
+        <div>
+          <h3>Give one upcoming song the full build</h3>
+          <p>
+            Video, lyric video, official audio and a live take, on one release, and
+            watch what the package does against the video-only releases that came
+            before it. The two songs that ever got this treatment are the channel's
+            two biggest — that is suggestive rather than proven, and one controlled
+            release is what would turn it into something you can trust.
+          </p>
+        </div>
+      </div>
+
+      <div class="act">
+        <div class="num">03</div>
+        <div>
+          <h3>Point the Shorts at the performances</h3>
+          <p>
+            The two Shorts that cleared 50,000 views were both performance footage;
+            the announcement Shorts sit near the 6,054 median. A Shorts layer cut from
+            live material, pointing back at the full performances, costs nothing extra
+            once the Stone Pony set is broken up.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note reveal">
+      <b>What this read cannot see.</b> Everything here comes from public data — views,
+      likes, comments, durations and dates. Without Studio access there is no watch
+      time, no retention, no traffic source and no audience breakdown, so nothing above
+      is a claim about how long anybody watched or where they came from. The
+      recommendations are framed as tests for that reason.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ FOOT ═════════════════════════════════════════════════ -->
+<section class="slide" style="min-height:auto;border-bottom:none">
+  <div class="foot inner reveal">
+    <div class="label">Virgin Music Group × YouTube</div>
+    <div style="font-family:var(--disp);font-weight:700;font-size:clamp(1.1rem,2vw,1.5rem);
+         letter-spacing:-.02em">Bleachers · channel deep dive</div>
+    <div class="label" style="margin-top:.8rem">
+      230 uploads read 30 September 2026 · public YouTube API data only ·
+      shares stated against the 111.0M views we can inspect
+    </div>
+  </div>
+</section>
+
+<script>
+/* Reveal on scroll, and fill the bars only once their slide is in view —
+   a bar that has already animated before you reach it reads as a static
+   graphic and loses the comparison it is making. */
+(function(){
+  var ro = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      ro.unobserve(e.target);
+    });
+  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
+
+  var bo = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.querySelectorAll('.bf').forEach(function(b,i){
+        setTimeout(function(){ b.style.width = b.dataset.w + '%'; }, 140 + i*110);
+      });
+      bo.unobserve(e.target);
+    });
+  },{threshold:.25});
+  document.querySelectorAll('.bars').forEach(function(el){bo.observe(el);});
+})();
+</script>
+</body>
+</html>
