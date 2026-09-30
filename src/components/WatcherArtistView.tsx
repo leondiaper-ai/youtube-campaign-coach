@@ -747,8 +747,8 @@ function YouTubeMark() {
 // 3. CAMPAIGN-AWARE ACTIONS — specific, time-bound, tied to real data
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type VideoGap = { title: string; gaps: string[]; views: number };
-function scanVideoGaps(uploads: RecentUpload[]): VideoGap[] {
+export type VideoGap = { title: string; gaps: string[]; views: number };
+export function scanVideoGaps(uploads: RecentUpload[]): VideoGap[] {
   const now = Date.now();
   const longform = uploads.filter(
     (u) => u.durationSec > 62 && u.live === 'none' &&
@@ -772,7 +772,7 @@ function scanVideoGaps(uploads: RecentUpload[]): VideoGap[] {
 // WHAT TO DO NOW — max 2 directions, sharp and specific
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type WhatToDoCtx = {
+export type WhatToDoCtx = {
   isColdMode: boolean;
   daysToNextMoment: number | null;
   momentLabel: string | null;
@@ -782,17 +782,17 @@ type WhatToDoCtx = {
   views7delta: number | null;
 };
 
-type MoveDirection = {
+export type MoveDirection = {
   label: string;    // short framing: "Push connection, not more volume"
   action: string;   // specific action tied to real data
 };
 
-type WhatToDo = {
+export type WhatToDo = {
   primary: MoveDirection;
   secondary: MoveDirection | null;
 };
 
-function whatToDoNow(
+export function whatToDoNow(
   decision: { type: string; headline: string; signals: string[] },
   uploads: RecentUpload[],
   videoGaps: VideoGap[],
