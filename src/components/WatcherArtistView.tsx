@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
@@ -16,7 +15,6 @@ import {
 import { CoachCampaignBadge } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
 import MissedReachSection from '@/components/MissedReachSection';
-import { ReportButtonBar } from '@/components/WatcherReport';
 import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
 import ArtistOverview from '@/components/artist/ArtistOverview';
 import ArtistActionBar from '@/components/artist/ArtistActionBar';
@@ -31,14 +29,6 @@ const MUTED = '#E9E2D3';
 // ── Use the SAME 4-state system as the overview page ────────────────────────
 // The watcher expands on the state with detail — it never contradicts it.
 import { STATUS_COLOR, type ChannelState } from '@/lib/artists';
-
-const STATE_LABEL: Record<ChannelState, string> = {
-  HEALTHY:           'Healthy',
-  'WEAK CONVERSION': 'Weak Conversion',
-  BUILDING:          'Building',
-  'AT RISK':         'At Risk',
-  COLD:              'Cold',
-};
 
 // Fallback: when derived is null, map decision.type → ChannelState
 const DECISION_TO_STATE: Record<string, ChannelState> = {
