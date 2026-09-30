@@ -76,6 +76,18 @@ async function forArtist(a: { slug: string; name: string; channelHandle?: string
     available: true,
     trends: computeTrends(days),
     trackingDays: days.filter((d) => d.comparable).length,
+    /* Provenance of the daily history, so a caller can tell the
+       difference between "the cron has never recorded anything here"
+       and "it has recorded once, and the first reading is a baseline
+       that by design yields no trend". Both show zero comparable days,
+       and they mean opposite things — one is a fault, the other is the
+       first day working correctly. */
+    readings: {
+      total: days.length,
+      comparable: days.filter((d) => d.comparable).length,
+      first: days[0]?.ts ?? null,
+      last: days[days.length - 1]?.ts ?? null,
+    },
     /** Channel lifetime total. Reported, never split. */
     channelTotalViews: snap.views ?? null,
     coverage: set.all.coverage,

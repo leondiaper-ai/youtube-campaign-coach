@@ -215,9 +215,22 @@ export function coverageLabel(c: SplitCoverage): string {
     bits.push(`${c.videosCounted} videos`);
   }
   if (c.viewsCovered != null) {
-    bits.push(`${Math.round(c.viewsCovered * 100)}% of lifetime views`);
+    bits.push(`${sharePct(c.viewsCovered)} of lifetime views`);
   }
   return `Based on ${bits.join(' · ')}`;
+}
+
+/**
+ * A share as a percentage that never rounds a real quantity to nothing.
+ * League of Legends coverage is 0.4%; printing "0%" reads as "we hold
+ * none of it", which is a different and false claim. Only an exact zero
+ * prints as 0%.
+ */
+export function sharePct(x: number): string {
+  if (x <= 0) return '0%';
+  if (x < 0.01) return '<1%';
+  if (x < 0.1) return `${(x * 100).toFixed(1)}%`;
+  return `${Math.round(x * 100)}%`;
 }
 
 /**
