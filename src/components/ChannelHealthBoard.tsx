@@ -1165,7 +1165,14 @@ export default function ChannelHealthBoard({
                     {/* Strategy tags */}
                     <div className="flex flex-wrap items-center gap-1.5">
                       <ProfileTag label="Cadence" value={profile.cadence} />
-                      <ProfileTag label="Format" value={profile.formatMix} />
+                      {/* "Upload mix", not "Format". computeProfile derives this
+                          from shorts30d / uploads30d — it counts what was
+                          PUBLISHED. Labelled "Format" next to a viewing split it
+                          reads as a statement about where views come from, which
+                          is a different metric that can point the other way: a
+                          Shorts-heavy publisher can still earn most of its
+                          viewing on long-form. */}
+                      <ProfileTag label="Upload mix" value={profile.formatMix} />
                       <ProfileTag label="Conversion" value={profile.conversion} />
                       <ProfileTag label="Momentum" value={profile.momentum} />
                     </div>
@@ -1177,30 +1184,33 @@ export default function ChannelHealthBoard({
                     </div>
                   </div>
 
-                  {/* ── View split, spelled out ──────────────────────────
-                      The column shows this in four characters. Here there
-                      is room to say which measure it is and what it rests
-                      on — including, while daily readings accumulate, how
-                      far off a real recent figure is. */}
+                  {/* ── VIEWING MIX — recent only ────────────────────────
+                      This strip answers "where is viewing coming from NOW".
+                      Lifetime totals and the coverage caveat used to sit
+                      here and have been removed: they are a different
+                      question, they were the longest thing in the strip,
+                      and a lifetime figure this close to the upload-mix
+                      badge invited averaging two unrelated measures into
+                      one impression. Lifetime now appears only in the
+                      expanded format analysis on the artist page and in
+                      Channel Behaviour, where there is room to qualify it.
+
+                      So there are exactly two states here: a real recent
+                      split, or a short line saying how far off one is. */}
                   {r.formatSplit && (
                     <div className="mt-3 pt-2 text-[10px] leading-relaxed text-ink/45" style={{ borderTop: '1px solid #EFE9DC' }}>
                       {r.formatSplit.basis === 'recent' ? (
                         <>
-                          <b className="text-ink/60">Views gained, last {r.formatSplit.windowDays} days:</b>{' '}
-                          {fmtNum(r.formatSplit.longformViews)} long-form · {fmtNum(r.formatSplit.shortsViews)} Shorts.
-                          {' '}From daily readings of videos we hold, counted only where the same video appears
-                          in consecutive readings.
+                          <b className="text-ink/60">Viewing mix, last {r.formatSplit.windowDays} days:</b>{' '}
+                          {fmtNum(r.formatSplit.longformViews)} long-form · {fmtNum(r.formatSplit.shortsViews)} Shorts
+                          {' '}— view gains on videos we hold, matched across consecutive daily readings.
                         </>
                       ) : (
                         <>
-                          <b className="text-ink/60">Lifetime split shown — not recent viewing.</b>{' '}
-                          {fmtNum(r.formatSplit.longformViews)} long-form · {fmtNum(r.formatSplit.shortsViews)} Shorts,
-                          across {pcCoverage(r.formatSplit.viewsCovered)} of channel lifetime views that we hold.
-                          {r.formatSplit.collecting && (
-                            r.formatSplit.collecting.total === 0
-                              ? ' No daily readings stored yet, so no recent figure is available.'
-                              : ` A recent 7-day figure needs ${r.formatSplit.collecting.required} comparable daily readings — ${r.formatSplit.collecting.comparable} so far, from ${r.formatSplit.collecting.total} stored.`
-                          )}
+                          <b className="text-ink/60">Viewing mix:</b>{' '}
+                          {r.formatSplit.collecting && r.formatSplit.collecting.total === 0
+                            ? 'not collecting yet — no daily readings stored for this channel.'
+                            : `collecting — ${r.formatSplit.collecting?.comparable ?? 0} of ${r.formatSplit.collecting?.required ?? 6} comparable daily readings.`}
                         </>
                       )}
                     </div>
