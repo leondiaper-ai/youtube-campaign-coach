@@ -171,9 +171,21 @@ h2.display{font-size:clamp(1.9rem,5vw,3.9rem)}
 .run.two{border-color:var(--pine);background:rgba(63,107,74,.055)}
 .run .yr{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
   text-transform:uppercase;color:var(--smoke)}
-.wks{display:flex;align-items:flex-end;gap:9px;margin-top:1rem;height:96px}
-.wk{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}
-.wk .col{width:100%;background:var(--wash);border-radius:2px 2px 0 0;min-height:3px}
+/* align-items must be `stretch`, not `flex-end`. With flex-end each .wk
+   collapses to its own content height, so the columns' percentage heights
+   resolve against ~20px and every bar renders as a hairline. The bars must
+   measure against the full 116px track. */
+.wks{display:flex;align-items:stretch;gap:9px;margin-top:1rem;height:116px}
+/* The labels are lifted out of the flow into the padding, so a column's
+   height percentage resolves against the bar track alone (116 − 34 = 82px)
+   rather than against the track minus whatever the text happened to wrap to.
+   That keeps 100% meaning "tallest bar" instead of "bar plus overflow". */
+.wk{flex:1;position:relative;padding-bottom:34px;box-sizing:border-box;
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.wk .col{width:100%;background:var(--wash);border-radius:2px 2px 0 0;min-height:3px;
+  flex:0 0 auto}
+.wk .pos{position:absolute;bottom:15px;left:0;right:0;text-align:center}
+.wk .dt{position:absolute;bottom:1px;left:0;right:0;text-align:center}
 .run.two .wk .col{background:var(--pine);opacity:.75}
 .run.one .wk .col{background:rgba(23,23,26,.22)}
 .wk .pos{font-family:var(--disp);font-weight:700;font-size:.8rem;
