@@ -539,19 +539,65 @@ export async function GET(req: NextRequest) {
       coverage.push('No rollout plan exists for this artist, so the strategy spine is unavailable rather than empty.');
     }
 
+    /* ── A FOLLOW-UP THAT EXISTS COUNTS AS DONE ───────────────────────
+       The follow-through item is opened by the artist's HISTORY — "none
+       of the last eight release moments had a long-form asset in the 7-14
+       day window" — which is the right basis for raising it and the wrong
+       basis for keeping it open. It stayed open while THIS campaign put a
+       lyric video out five days after its music video, so the cover asked
+       for a second destination that was already on the channel, and would
+       have gone on asking until the history changed.
+
+       A recommendation the team has acted on has to stop being the next
+       thing to do. So: if a release-weight asset follows this campaign's
+       hero, the item is complete for this campaign, whatever the history
+       says. The history is still true — it is why the item exists at all
+       — but it is not evidence about the release in front of us.
+
+       Deliberately not time-boxed to the 7-14 day window. The window is a
+       recommendation about when a follow-up lands best; a follow-up on day
+       fifteen is late, not absent, and telling somebody to make a thing
+       they have already made is the worse error. */
+    const FOLLOW_UP_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live', 'premiere']);
+    const leadHero = heroes.find(h => FOLLOW_UP_KINDS.has(h.kind)) ?? null;
+    const heroFollowUp = leadHero
+      ? postBaseline.find(a =>
+          a.videoId !== leadHero.videoId
+          && FOLLOW_UP_KINDS.has(a.kind)
+          && a.publishedAt > leadHero.publishedAt)
+      : null;
+    if (leadHero && heroFollowUp) {
+      coverage.push(
+        `Follow-through is met for this campaign: ${heroFollowUp.formatLabel.toLowerCase()} `
+        + `"${heroFollowUp.title}" followed the hero on ${heroFollowUp.dateLabel}.`,
+      );
+    }
+
     const stages = rollout.items
       .filter(it => it.spine && it.spineStatus)
       .slice(0, 4)
-      .map(it => ({
-        id: it.recommendationId ?? it.id,
-        label: it.title,
-        /* Long point kept for the tooltip, as before. */
-        point: it.objective,
-        status: it.spineStatus as string,
-        /* What to do, as opposed to what it is called. The read line prints
-           this; the label stays the name of the stage. */
-        action: it.nextAction,
-      }));
+      .map(it => {
+        const isFollowUp = (it.needTags ?? []).includes('follow_up_7_14' as never);
+        const met = isFollowUp && !!heroFollowUp;
+        return {
+          id: it.recommendationId ?? it.id,
+          label: it.title,
+          /* Long point kept for the tooltip, as before. */
+          point: it.objective,
+          status: met ? 'COMPLETE' : (it.spineStatus as string),
+          /* What to do, as opposed to what it is called. The read line prints
+             this; the label stays the name of the stage. */
+          action: it.nextAction,
+        };
+      });
+
+    /* NEXT is positional, so completing an item mid-spine leaves the list
+       with no NEXT at all and the read line falls back to its generic
+       sentence. Re-point it at the first item still outstanding. */
+    if (heroFollowUp && !stages.some(st => st.status === 'NEXT')) {
+      const upcoming = stages.find(st => st.status !== 'COMPLETE');
+      if (upcoming) upcoming.status = 'NEXT';
+    }
 
     /* ── The campaign timeline ────────────────────────────────────────
        Where the campaign is, in five moments. The Coach plan is the
