@@ -4,38 +4,50 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bleachers × YouTube — a channel read</title>
-<meta name="description" content="Bleachers on YouTube: what the catalogue earns, where the support architecture stopped, and what the live material is already proving.">
+<meta name="description" content="Bleachers on YouTube: what the catalogue earns without being touched, the seasonal asset that returns every December, and the performance footage already sitting on the shelf.">
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     BLEACHERS × YOUTUBE — CHANNEL DEEP DIVE
+     BLEACHERS × YOUTUBE — CHANNEL DEEP DIVE  ·  v2, 30 September 2026
 
-     Written for the artist and their management, which sets the rules
-     this page is built to: every number is checkable, every gap is
-     framed as something available rather than something missed, and
-     nothing is asserted that the public data cannot carry.
+     Written for the artist and their management, which sets the rules:
+     every number is checkable, every gap is framed as something
+     available rather than something missed, and nothing is asserted
+     that the public data cannot carry.
 
      ── WHAT THE DATA IS ───────────────────────────────────────────────
      230 uploads read from the channel's own uploads playlist on 30
-     September 2026 via the YouTube Data API. Public objects only: view,
-     like and comment counts, durations, publish dates, titles, tags and
-     descriptions. No Studio access, so no watch time, no retention, no
-     traffic sources and no demographics. Anything those would be needed
-     to prove is not claimed here.
+     September 2026 via the YouTube Data API, plus 23 weeks of our own
+     daily channel snapshots (from 20 April 2026), plus the UK Official
+     Charts public record. Public objects only. No Studio access, so no
+     watch time, retention, traffic sources or demographics — and
+     nothing here is claimed that would need them.
 
-     ── THE COVERAGE FIGURE THAT MATTERS ───────────────────────────────
-     Those 230 uploads sum to 111.0M views. The channel's lifetime
-     counter reads 189.0M. We cannot account for the 78M difference from
-     public data — it may sit in videos since removed, or in counting
-     differences on YouTube's side. So every share on this page is
-     stated against the 111.0M we can see and check, never against the
-     channel total. A percentage of a number you cannot inspect is not
+     ── THE TWO NUMBERS, KEPT APART ────────────────────────────────────
+     The 230 uploads sum to 111.0M views. The channel's lifetime counter
+     reads 189.0M. The 78.0M difference cannot be accounted for from
+     public data. So this page uses two words and never mixes them:
+
+       "the catalogue"  = 111.0M, the 230 uploads we can open and check
+       "lifetime"       = 189.0M, the channel counter
+
+     Every share is a share OF THE CATALOGUE. Where the lifetime figure
+     appears it is labelled as such and no percentage is taken against
+     it, because a percentage of a number you cannot inspect is not
      evidence.
 
+     ── WHAT CHANGED IN v2 (and why it matters for trust) ──────────────
+     The first version of this deck said 15 music videos. It missed
+     "Tiny Moves (Official)" — titled without the word "Video" — and
+     miscounted the rest. The census is now rule-based and exhaustive:
+     every one of the 230 uploads lands in exactly one bucket and the
+     buckets sum to 111,031,833. It also said only two songs got the
+     full asset build; the answer is three. Both are corrected here.
+
      ── DESIGN ─────────────────────────────────────────────────────────
-     Warm paper and ink rather than the dark decks, because this channel's
+     Warm paper and ink rather than a dark deck, because this channel's
      own imagery is sunlit Jersey film stock and a black page fights it.
-     Thumbnails come from i.ytimg.com, which is deterministic per video
-     id and costs no API request.
+     Thumbnails come from i.ytimg.com, deterministic per video id, no
+     API request.
      ═══════════════════════════════════════════════════════════════════ -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +61,7 @@
   --signal:#C8553D;      /* Jersey brick — the accent, used sparingly */
   --gold:#C08A2E;        /* saxophone */
   --blue:#2F4D7A;        /* long-form */
+  --pine:#3F6B4A;        /* the December green, only on the seasonal slide */
   --pad:clamp(20px,5vw,72px);
   --disp:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
 }
@@ -69,11 +82,11 @@ a{color:inherit}
 .nav .links{display:flex;gap:clamp(10px,2vw,26px)}
 .nav .links a{text-decoration:none;color:var(--smoke)}
 .nav .links a:hover{color:var(--ink)}
-@media(max-width:700px){.nav .links{display:none}}
+@media(max-width:820px){.nav .links{display:none}}
 
 /* ── SLIDE ───────────────────────────────────────────────────────── */
 .slide{position:relative;min-height:100vh;display:flex;flex-direction:column;
-  justify-content:center;padding:clamp(72px,10vh,120px) 0 clamp(48px,8vh,88px);
+  justify-content:center;padding:clamp(72px,10vh,116px) 0 clamp(48px,8vh,84px);
   border-bottom:1px solid var(--rule)}
 .inner{width:100%;max-width:1220px;margin:0 auto;padding:0 var(--pad)}
 
@@ -83,13 +96,15 @@ a{color:inherit}
 h1.display,h2.display{font-family:var(--disp);font-weight:700;line-height:.95;
   letter-spacing:-.035em;margin:0}
 h1.display{font-size:clamp(2.6rem,7.5vw,6rem)}
-h2.display{font-size:clamp(2rem,5.2vw,4.1rem)}
-.big-p{font-size:clamp(1rem,1.5vw,1.22rem);line-height:1.6;color:var(--smoke);
+h2.display{font-size:clamp(1.9rem,5vw,3.9rem)}
+.big-p{font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.6;color:var(--smoke);
   max-width:64ch;margin:0}
 .big-p em{font-style:normal;color:var(--ink);font-weight:600}
-.body{font-size:.95rem;line-height:1.65;color:var(--smoke);margin:0}
+.body{font-size:.94rem;line-height:1.62;color:var(--smoke);margin:0}
 .body em{font-style:normal;color:var(--ink);font-weight:600}
-.rule{height:1px;background:var(--rule);margin:clamp(1.6rem,3vw,2.6rem) 0}
+.rule{height:1px;background:var(--rule);margin:clamp(1.4rem,2.6vw,2.2rem) 0}
+.fine{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--smoke);line-height:1.7}
 
 /* ── REVEAL ──────────────────────────────────────────────────────── */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
@@ -97,83 +112,120 @@ h2.display{font-size:clamp(2rem,5.2vw,4.1rem)}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 
 /* ── BOARD ───────────────────────────────────────────────────────── */
-.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
-  gap:clamp(14px,2.4vw,30px);margin-top:clamp(1.6rem,3vw,2.6rem)}
-.board .n{font-family:var(--disp);font-weight:700;font-size:clamp(1.8rem,3.6vw,3rem);
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));
+  gap:clamp(14px,2.4vw,30px);margin-top:clamp(1.5rem,2.8vw,2.4rem)}
+.board .n{font-family:var(--disp);font-weight:700;font-size:clamp(1.7rem,3.4vw,2.9rem);
   line-height:1;letter-spacing:-.03em}
 .board .n.lit{color:var(--signal)}
 .board .k{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--smoke);margin-top:.6rem}
+  text-transform:uppercase;color:var(--smoke);margin-top:.6rem;line-height:1.5}
 
 /* ── BARS ────────────────────────────────────────────────────────── */
-.bars{margin-top:clamp(1.4rem,3vw,2.2rem);display:flex;flex-direction:column;gap:12px}
-.bar{display:grid;grid-template-columns:clamp(96px,14vw,168px) 1fr auto;
+.bars{margin-top:clamp(1.3rem,2.6vw,2rem);display:flex;flex-direction:column;gap:11px}
+.bar{display:grid;grid-template-columns:clamp(104px,15vw,190px) 1fr auto;
   align-items:center;gap:clamp(10px,1.6vw,20px)}
-.bar .bk{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;
+.bar .bk{font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;
   text-transform:uppercase;color:var(--smoke);line-height:1.4}
 .bar .bt{height:9px;background:var(--wash);border-radius:2px;overflow:hidden}
 .bar .bf{height:100%;width:0;background:var(--blue);border-radius:2px;
   transition:width 1s cubic-bezier(.2,.8,.2,1)}
 .bar.hi .bf{background:var(--signal)}
 .bar.mid .bf{background:var(--gold)}
-.bar .bv{font-family:var(--disp);font-weight:700;font-size:.92rem;
-  font-variant-numeric:tabular-nums;min-width:74px;text-align:right}
+.bar .bv{font-family:var(--disp);font-weight:700;font-size:.9rem;
+  font-variant-numeric:tabular-nums;min-width:96px;text-align:right}
+.bar .bv span{font-family:var(--mono);font-weight:400;font-size:.6rem;color:var(--smoke)}
 
-/* ── GRIDS ───────────────────────────────────────────────────────── */
+/* ── SPLIT / GRIDS ───────────────────────────────────────────────── */
 .grid2{display:grid;grid-template-columns:1fr;gap:clamp(1.4rem,3vw,2.6rem)}
 .grid3{display:grid;grid-template-columns:1fr;gap:clamp(1.2rem,2.4vw,2.2rem)}
-@media(min-width:860px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:880px){.grid2{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:repeat(3,1fr)}}
+
+/* ── THE TWO NUMBERS ─────────────────────────────────────────────── */
+.twonum{display:grid;grid-template-columns:1fr;gap:14px;margin-top:clamp(1.4rem,3vw,2.2rem)}
+@media(min-width:760px){.twonum{grid-template-columns:1fr 1fr}}
+.twonum > div{padding:1.1rem 1.25rem;border:1px solid var(--rule);border-radius:4px}
+.twonum .hd{font-family:var(--disp);font-weight:700;font-size:clamp(1.6rem,3.2vw,2.5rem);
+  letter-spacing:-.03em;line-height:1}
+.twonum .cap{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--smoke);margin-top:.5rem}
+.twonum .ex{font-size:.86rem;line-height:1.55;color:var(--smoke);margin-top:.7rem}
+.twonum .solid{background:var(--wash);border-color:transparent}
 
 /* ── THUMBS ──────────────────────────────────────────────────────── */
 .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.8vw,20px)}
-@media(min-width:860px){.vgrid.four{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:880px){.vgrid.four{grid-template-columns:repeat(4,1fr)}
+  .vgrid.three{grid-template-columns:repeat(3,1fr)}}
 .thumb{display:block;text-decoration:none;position:relative}
 .thumb img{aspect-ratio:16/9;object-fit:cover;border-radius:5px;background:var(--wash);
   transition:transform .4s ease}
 .thumb:hover img{transform:scale(1.02)}
-.thumb .cap{display:block;margin-top:.55rem;font-size:.76rem;line-height:1.4;color:var(--smoke)}
-.thumb .cap b{display:block;font-family:var(--disp);font-weight:700;font-size:1.02rem;
+.thumb .cap{display:block;margin-top:.55rem;font-size:.75rem;line-height:1.42;color:var(--smoke)}
+.thumb .cap b{display:block;font-family:var(--disp);font-weight:700;font-size:1rem;
   color:var(--ink);font-variant-numeric:tabular-nums}
 
-/* ── VERSUS (the two-asset comparison) ───────────────────────────── */
-.vs2{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.4vw,26px);align-items:start}
-@media(min-width:760px){.vs2{grid-template-columns:1fr auto 1fr}}
-.vs2 .mid{display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--smoke);padding:clamp(8px,4vw,60px) 0}
+/* ── CHART RUN (the December slide) ──────────────────────────────── */
+.runs{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.4vw,24px);
+  margin-top:clamp(1.4rem,3vw,2.2rem)}
+@media(min-width:760px){.runs{grid-template-columns:1fr 1fr}}
+.run{padding:1.1rem 1.25rem;border:1px solid var(--rule);border-radius:4px}
+.run.two{border-color:var(--pine);background:rgba(63,107,74,.055)}
+.run .yr{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--smoke)}
+.wks{display:flex;align-items:flex-end;gap:9px;margin-top:1rem;height:96px}
+.wk{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}
+.wk .col{width:100%;background:var(--wash);border-radius:2px 2px 0 0;min-height:3px}
+.run.two .wk .col{background:var(--pine);opacity:.75}
+.run.one .wk .col{background:rgba(23,23,26,.22)}
+.wk .pos{font-family:var(--disp);font-weight:700;font-size:.8rem;
+  font-variant-numeric:tabular-nums}
+.wk .dt{font-family:var(--mono);font-size:.5rem;color:var(--smoke);letter-spacing:.04em}
+.run .sum{margin-top:.9rem;font-size:.85rem;line-height:1.5;color:var(--smoke)}
+.run .sum b{color:var(--ink)}
+
+/* ── TIMELINE (the December calendar) ────────────────────────────── */
+.cal{display:flex;flex-wrap:wrap;gap:7px;margin-top:1rem}
+.cal span{font-family:var(--mono);font-size:.58rem;letter-spacing:.06em;
+  padding:.42rem .66rem;border:1px solid var(--rule);border-radius:3px;color:var(--smoke)}
+.cal span.on{border-color:var(--pine);color:var(--pine);background:rgba(63,107,74,.06)}
+.cal span.off{border-style:dashed;opacity:.65}
 
 /* ── TABLE ───────────────────────────────────────────────────────── */
-table.cmp{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:1.2rem}
-table.cmp th{font-family:var(--mono);font-size:.56rem;letter-spacing:.14em;
+table.cmp{width:100%;border-collapse:collapse;font-size:.87rem;margin-top:1.1rem}
+table.cmp th{font-family:var(--mono);font-size:.55rem;letter-spacing:.13em;
   text-transform:uppercase;color:var(--smoke);text-align:left;font-weight:500;
-  padding:0 0 .7rem}
-table.cmp td{padding:.62rem 0;border-top:1px solid var(--rule);vertical-align:top}
+  padding:0 0 .7rem;vertical-align:bottom}
+table.cmp td{padding:.6rem 0;border-top:1px solid var(--rule);vertical-align:top}
+table.cmp tr.full td{background:rgba(192,138,46,.07)}
 table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabular-nums}
-table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
 .tick{color:var(--gold);font-weight:700}
-.dash{color:rgba(23,23,26,.24)}
+.dash{color:rgba(23,23,26,.22)}
+.yr{color:rgba(23,23,26,.4)}
 
 /* ── NOTE ────────────────────────────────────────────────────────── */
-.note{margin-top:clamp(1.4rem,3vw,2.2rem);padding:1.1rem 1.3rem;background:var(--wash);
+.note{margin-top:clamp(1.3rem,2.6vw,2rem);padding:1.05rem 1.25rem;background:var(--wash);
   border-left:3px solid var(--signal);border-radius:0 4px 4px 0;
-  font-size:.95rem;line-height:1.65;color:var(--smoke);max-width:78ch}
+  font-size:.92rem;line-height:1.62;color:var(--smoke);max-width:80ch}
+.note.calm{border-left-color:var(--pine)}
 .note b{color:var(--ink)}
 
 /* ── CHIPS ───────────────────────────────────────────────────────── */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.1rem}
-.chips span{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;
+.chips span{font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;
   text-transform:uppercase;padding:.4rem .7rem;border:1px solid var(--rule);
   border-radius:3px;color:var(--smoke)}
-.chips span.open{border-color:var(--gold);color:var(--gold)}
 
 /* ── ACTIONS ─────────────────────────────────────────────────────── */
-.act{display:grid;grid-template-columns:auto 1fr;gap:clamp(14px,2.4vw,26px);
-  padding:1.3rem 0;border-top:1px solid var(--rule)}
-.act .num{font-family:var(--disp);font-weight:700;font-size:1.5rem;color:var(--signal);
-  line-height:1;font-variant-numeric:tabular-nums}
-.act h3{font-family:var(--disp);font-weight:700;font-size:1.12rem;margin:0 0 .5rem;
-  letter-spacing:-.01em;line-height:1.25}
-.act p{margin:0;font-size:.92rem;line-height:1.62;color:var(--smoke);max-width:72ch}
+.act{display:grid;grid-template-columns:auto 1fr;gap:clamp(13px,2.2vw,24px);
+  padding:1.15rem 0;border-top:1px solid var(--rule)}
+.act .num{font-family:var(--disp);font-weight:700;font-size:1.4rem;color:var(--signal);
+  line-height:1.1;font-variant-numeric:tabular-nums}
+.act .num.pine{color:var(--pine)}
+.act h3{font-family:var(--disp);font-weight:700;font-size:1.08rem;margin:0 0 .45rem;
+  letter-spacing:-.01em;line-height:1.28}
+.act p{margin:0;font-size:.9rem;line-height:1.6;color:var(--smoke);max-width:76ch}
+.act .why{display:block;margin-top:.5rem;font-family:var(--mono);font-size:.55rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.act .why b{color:var(--ink);font-weight:500}
 
 /* ── FOOT ────────────────────────────────────────────────────────── */
 .foot{padding:clamp(40px,7vh,72px) 0;text-align:center}
@@ -185,11 +237,12 @@ table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
 <nav class="nav">
   <div class="who">Bleachers · @bleachers</div>
   <div class="links">
-    <a href="#scale">Scale</a>
+    <a href="#scale">Catalogue</a>
     <a href="#earns">What earns</a>
+    <a href="#longevity">Longevity</a>
+    <a href="#december">December</a>
     <a href="#support">Support</a>
-    <a href="#live">Live</a>
-    <a href="#shorts">Shorts</a>
+    <a href="#live">Performance</a>
     <a href="#next">What next</a>
   </div>
 </nav>
@@ -199,60 +252,69 @@ table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
 <section class="slide">
   <div class="inner reveal">
     <div class="label">Bleachers · @bleachers · Channel deep dive · Virgin Music Group</div>
-    <h1 class="display" style="margin:1.4rem 0 1.5rem;max-width:20ch">
-      Twelve years.<br>Two songs got<br>the full build.
+    <h1 class="display" style="margin:1.3rem 0 1.4rem;max-width:19ch">
+      The catalogue is<br>doing the work.<br>Quietly.
     </h1>
     <p class="big-p">
-      The channel has 261,000 subscribers and 189 million lifetime views. Fifteen
-      music videos carry more than half of everything it has earned. This is a read
-      of what the catalogue actually does, where the support around it thinned out,
-      and what the live material has quietly started proving.
+      Over the last five months this channel earned <em>23.9 million views while
+      publishing almost nothing</em>. It has a Christmas song that comes back up the
+      UK chart every December. It has a ninety-one minute concert film sitting whole
+      on the shelf. This is a read of what the existing work is already worth, and
+      where a small amount of effort would go furthest.
     </p>
     <div class="chips">
-      <span>230 uploads read</span><span>Public API data only</span><span>30 September 2026</span>
+      <span>230 uploads read</span><span>Public API + UK Official Charts</span><span>30 September 2026</span>
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 2 · SCALE ════════════════════════════════════════════ -->
+<!-- ════════ 2 · THE CATALOGUE ════════════════════════════════════ -->
 <section class="slide" id="scale">
   <div class="inner">
     <div class="label reveal">Where the channel stands</div>
-    <h2 class="display reveal" style="margin:.9rem 0 0;max-width:20ch">
-      A catalogue with real<br>weight behind it.
+    <h2 class="display reveal" style="margin:.85rem 0 0;max-width:20ch">
+      Twelve years of<br>real catalogue.
     </h2>
 
     <div class="board reveal">
       <div><div class="n lit">261K</div><div class="k">Subscribers</div></div>
-      <div><div class="n">189M</div><div class="k">Lifetime views</div></div>
       <div><div class="n">230</div><div class="k">Uploads read</div></div>
-      <div><div class="n">15</div><div class="k">Music videos</div></div>
-      <div><div class="n">43</div><div class="k">Live assets</div></div>
+      <div><div class="n">17</div><div class="k">Music videos</div></div>
+      <div><div class="n">45</div><div class="k">Live assets</div></div>
+      <div><div class="n">94</div><div class="k">Shorts</div></div>
       <div><div class="n">2014</div><div class="k">Channel opened</div></div>
     </div>
 
-    <div class="grid2" style="margin-top:clamp(1.8rem,3.5vw,3rem)">
-      <p class="body reveal">
-        <em>Fifteen music videos have earned 60.2M views between them</em> — 54% of
-        everything we can measure on this channel. That is a catalogue doing its job:
-        a small number of properly made things carrying the weight, rather than volume
-        spread thin.
-      </p>
-      <p class="body reveal">
-        The publishing has been anything but steady, and that is worth seeing plainly.
-        2024 was the busiest year on record at 57 uploads. 2025 carried ten. 2026 has
-        already put out fifteen, including a 91-minute concert film. The channel moves
-        in bursts around the work.
-      </p>
+    <!-- The coverage caveat, promoted from a footnote to its own object.
+         It was buried before and the cover slide contradicted it. -->
+    <div class="twonum reveal">
+      <div class="solid">
+        <div class="hd">111.0M</div>
+        <div class="cap">The catalogue · what we can open and check</div>
+        <div class="ex">
+          The 230 uploads on this channel, summed. Every percentage on this page is a
+          share of this number, and each one can be traced to individual videos.
+        </div>
+      </div>
+      <div>
+        <div class="hd" style="color:var(--smoke)">+78.0M</div>
+        <div class="cap">Unaccounted · lifetime counter reads 189.0M</div>
+        <div class="ex">
+          The channel's lifetime counter is 78.0M higher than the uploads sum to. From
+          public data we cannot say where that sits — removed or private videos, or
+          counting differences on YouTube's side. <b style="color:var(--ink)">No share
+          on this page is taken against it.</b>
+        </div>
+      </div>
     </div>
 
     <div class="note reveal">
-      <b>One number to hold on to.</b> The 230 uploads we can read sum to 111.0M views
-      against a lifetime counter of 189.0M. We cannot account for the difference from
-      public data, so every share on this page is calculated against the 111.0M we can
-      actually inspect — not against the channel total. Where a figure looks smaller
-      than you expect, that is usually why.
+      <b>Why we are strict about this.</b> If the missing 78.0M is not spread evenly
+      across formats, it would shift the percentages that follow — and we have no way
+      to test that from outside. So the honest position is to measure only what can be
+      inspected, say so every time, and let you judge the rest. Everything below is a
+      statement about the 230 uploads, not about the channel counter.
     </div>
   </div>
 </section>
@@ -261,295 +323,445 @@ table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
 <!-- ════════ 3 · WHAT EARNS ═══════════════════════════════════════ -->
 <section class="slide" id="earns">
   <div class="inner">
-    <div class="label reveal">Format economics · all 230 uploads classified</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
-      Four formats.<br>Very different jobs.
+    <div class="label reveal">Format economics · every one of the 230 uploads, in exactly one bucket</div>
+    <h2 class="display reveal" style="margin:.85rem 0 1rem;max-width:23ch">
+      Two formats carry<br>eight views in ten.
     </h2>
     <p class="big-p reveal">
-      Sorted by what each format has actually earned, the channel's shape is
-      unusually clear — and unusually top-heavy.
+      Music videos and official audio are 33 uploads out of 230 — <em>14% of the
+      output, 83% of the catalogue's views.</em>
     </p>
 
     <div class="bars reveal">
       <div class="bar hi">
-        <div class="bk">Music video<br>15 uploads</div>
+        <div class="bk">Music video<br>17 uploads</div>
         <div class="bt"><div class="bf" data-w="100"></div></div>
-        <div class="bv">60.2M</div>
+        <div class="bv">64.6M <span>58%</span></div>
       </div>
       <div class="bar mid">
-        <div class="bk">Official audio<br>17 uploads</div>
-        <div class="bt"><div class="bf" data-w="46.3"></div></div>
-        <div class="bv">27.9M</div>
+        <div class="bk">Official audio<br>16 uploads</div>
+        <div class="bt"><div class="bf" data-w="43.2"></div></div>
+        <div class="bv">27.9M <span>25%</span></div>
       </div>
       <div class="bar">
-        <div class="bk">Live<br>43 uploads</div>
-        <div class="bt"><div class="bf" data-w="19.8"></div></div>
-        <div class="bv">11.9M</div>
+        <div class="bk">Live<br>45 uploads</div>
+        <div class="bt"><div class="bf" data-w="13.3"></div></div>
+        <div class="bv">8.6M <span>8%</span></div>
       </div>
       <div class="bar">
         <div class="bk">Lyric video<br>4 uploads</div>
-        <div class="bt"><div class="bf" data-w="8.1"></div></div>
-        <div class="bv">4.9M</div>
+        <div class="bt"><div class="bf" data-w="7.6"></div></div>
+        <div class="bv">4.9M <span>4%</span></div>
       </div>
       <div class="bar">
-        <div class="bk">Shorts<br>95 uploads</div>
-        <div class="bt"><div class="bf" data-w="1.8"></div></div>
-        <div class="bv">1.1M</div>
+        <div class="bk">Album tracks &amp; remixes<br>31 uploads</div>
+        <div class="bt"><div class="bf" data-w="4.0"></div></div>
+        <div class="bv">2.6M <span>2%</span></div>
+      </div>
+      <div class="bar">
+        <div class="bk">Docs &amp; behind the scenes<br>23 uploads</div>
+        <div class="bt"><div class="bf" data-w="2.1"></div></div>
+        <div class="bv">1.3M <span>1%</span></div>
+      </div>
+      <div class="bar">
+        <div class="bk">Shorts<br>94 uploads</div>
+        <div class="bt"><div class="bf" data-w="1.7"></div></div>
+        <div class="bv">1.1M <span>1%</span></div>
       </div>
     </div>
-    <div class="label reveal" style="margin-top:.9rem;font-size:.56rem">
-      Views across the 111.0M we can read · formats assigned from title and duration,
-      so a mislabelled upload is classified as what it says it is
+    <div class="fine reveal" style="margin-top:.9rem">
+      230 uploads · 111,031,833 views · buckets are exhaustive and sum exactly ·
+      bars drawn against the largest bucket, not against the total
     </div>
 
     <div class="note reveal">
-      <b>The ratio worth noticing.</b> Ninety-five Shorts have earned 1.1M between
-      them. Four lyric videos have earned 4.9M. The channel is putting most of its
-      publishing effort into the format returning least, and almost none into one of
-      the formats returning most per upload.
+      <b>The two numbers to sit with.</b> Four lyric videos have earned 4.9M between
+      them — an average of 1.2M each, the highest per-upload return of any format on
+      the channel. Ninety-four Shorts have earned 1.1M between them. That is not an
+      argument against Shorts; it is an argument about which Shorts, and we come back
+      to it.
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 4 · THE SUPPORT ARCHITECTURE ═════════════════════════ -->
-<section class="slide" id="support">
+<!-- ════════ 4 · CATALOGUE LONGEVITY ══════════════════════════════ -->
+<section class="slide" id="longevity">
   <div class="inner">
-    <div class="label reveal">Support architecture · every song with a music video</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:24ch">
-      The two biggest songs<br>are the two that got<br>everything.
+    <div class="label reveal">Catalogue longevity · 27 April – 28 September 2026, from our own daily snapshots</div>
+    <h2 class="display reveal" style="margin:.85rem 0 1rem;max-width:21ch">
+      97% of the last five<br>months came from<br>work already made.
     </h2>
     <p class="big-p reveal">
-      Fifteen songs on this channel have a music video. Only two of them were also
-      given a lyric video, an official audio and live material.
+      In 154 days the channel added <em>23.9 million views</em>. Five things were
+      published in that window and they account for <em>650,611 of them</em>. Everything
+      else — 23.2 million views — went to the back catalogue.
+    </p>
+
+    <div class="twonum reveal">
+      <div class="solid">
+        <div class="hd">+23.9M</div>
+        <div class="cap">Views added · 154 days · ~155,000 a day</div>
+        <div class="ex">
+          165,112,313 on 27 April → 188,997,142 on 28 September. Twenty-three weekly
+          readings, taken by us, on this channel.
+        </div>
+      </div>
+      <div class="solid">
+        <div class="hd" style="color:var(--signal)">2.7%</div>
+        <div class="cap">Share from anything published in the window</div>
+        <div class="ex">
+          Five uploads: the Electric Lady performance, the Stone Pony film and its
+          teaser, a Zane Lowe clip and the Annie DiRusso duet. 650,611 views between them.
+        </div>
+      </div>
+    </div>
+
+    <div class="note reveal">
+      <b>This is the single most useful fact in the deck.</b> A channel earning 155,000
+      views a day untouched is not a promotional channel that goes quiet between
+      releases — it is a catalogue business that happens to also run campaigns. It means
+      the highest-leverage work available is not making more things. It is making the
+      things that already exist easier to find, better connected, and present at the
+      moments when people are already looking for them.
+      <br><br>
+      The next three slides are the three clearest cases of exactly that.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 5 · DECEMBER ═════════════════════════════════════════ -->
+<section class="slide" id="december">
+  <div class="inner">
+    <div class="label reveal" style="color:var(--pine)">Seasonal asset · Merry Christmas, Please Don't Call</div>
+    <h2 class="display reveal" style="margin:.85rem 0 1rem;max-width:23ch">
+      It charted higher in<br>its second December<br>than its first.
+    </h2>
+    <p class="big-p reveal">
+      The music video is <em>7.06M views</em> — the biggest music video this
+      channel has released since 2014, ahead of Modern Girl, Tiny Moves and
+      Don&rsquo;t Take The Money. And the song does something almost nothing
+      else in the catalogue does: <em>it comes back on its own, every year.</em>
+    </p>
+
+    <div class="runs reveal">
+      <div class="run one">
+        <div class="yr">UK Official Singles Chart · year one</div>
+        <div class="wks">
+          <div class="wk"><div class="col" style="height:40%"></div><div class="pos">77</div><div class="dt">02 Jan 25</div></div>
+          <div class="wk" style="opacity:.25"><div class="col" style="height:3px"></div><div class="pos">—</div><div class="dt"></div></div>
+          <div class="wk" style="opacity:.25"><div class="col" style="height:3px"></div><div class="pos">—</div><div class="dt"></div></div>
+          <div class="wk" style="opacity:.25"><div class="col" style="height:3px"></div><div class="pos">—</div><div class="dt"></div></div>
+        </div>
+        <div class="sum"><b>One week on chart.</b> Peak 77.</div>
+      </div>
+      <div class="run two">
+        <div class="yr">UK Official Singles Chart · year two</div>
+        <div class="wks">
+          <div class="wk"><div class="col" style="height:100%"></div><div class="pos">65</div><div class="dt">11 Dec 25</div></div>
+          <div class="wk"><div class="col" style="height:95%"></div><div class="pos">66</div><div class="dt">18 Dec 25</div></div>
+          <div class="wk"><div class="col" style="height:35%"></div><div class="pos">78</div><div class="dt">25 Dec 25</div></div>
+          <div class="wk"><div class="col" style="height:85%"></div><div class="pos">68</div><div class="dt">01 Jan 26</div></div>
+        </div>
+        <div class="sum"><b>Four weeks on chart.</b> Peak 65 — twelve places higher, a year after release.</div>
+      </div>
+    </div>
+    <div class="fine reveal" style="margin-top:.9rem">
+      Source: UK Official Charts Company, public chart record · column height shows chart
+      position inverted, so taller is higher · the song also ran two separate four-week
+      spells on the Official Independent Singles Chart, peaking at 10 in January 2025 and
+      12 in December 2025
+    </div>
+
+    <div class="rule reveal"></div>
+
+    <div class="grid2">
+      <div class="reveal">
+        <div class="label">What the channel did about it</div>
+        <div class="cal">
+          <span class="on">Nov 2024 · video + 5 Shorts</span>
+          <span class="off">Nov–Dec 2025 · 2 Shorts</span>
+          <span class="off">Dec 2025 · TV performance, not uploaded</span>
+          <span class="off">Aug 2026 · live version published</span>
+        </div>
+        <p class="body" style="margin-top:1rem">
+          Year one got a full launch. In year two — the bigger chart year — the channel
+          posted two Shorts and no video asset. The band played the song on US network
+          television in December 2025; that performance is not on the channel. And the
+          one new Christmas asset made since, a live version with Annie DiRusso from the
+          Stone Pony show, went up on <em>14 August</em>.
+        </p>
+      </div>
+      <div class="reveal">
+        <a class="thumb" href="https://www.youtube.com/watch?v=aBpYk9vuneE" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/aBpYk9vuneE/hqdefault.jpg" alt="" loading="lazy">
+          <span class="cap"><b>7,059,176</b>Merry Christmas, Please Don't Call (Official Music Video) · 26 November 2024</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="note calm reveal">
+      <b>What we can and cannot show.</b> The chart record proves the demand returns
+      and grew. It does not prove the YouTube views spike in December — our own daily
+      snapshots on this channel only begin on 20 April 2026, so <b>we have no
+      observation of either Christmas period and are not going to estimate one.</b>
+      The recommendation that follows is therefore a plan to test against a known
+      seasonal demand curve, not a claim about YouTube performance we have measured.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 6 · SUPPORT ══════════════════════════════════════════ -->
+<section class="slide" id="support">
+  <div class="inner">
+    <div class="label reveal">Song support · every song with a music video</div>
+    <h2 class="display reveal" style="margin:.85rem 0 1rem;max-width:24ch">
+      Three songs got the<br>full build. The last<br>one was 2018.
+    </h2>
+    <p class="big-p reveal">
+      Sixteen songs on this channel have an official music video. Three of them also
+      have a lyric video, an official audio and a live version.
     </p>
 
     <table class="cmp reveal">
       <tr>
         <th>Song</th><th>Video</th><th>Lyric</th><th>Audio</th><th>Live</th>
-        <th style="text-align:right">Views · video, lyric, audio &amp; live</th>
+        <th style="text-align:right">Views across those four asset types</th>
       </tr>
-      <tr>
-        <td>I Wanna Get Better <span style="color:rgba(23,23,26,.4)">· 2014</span></td>
+      <tr class="full">
+        <td>I Wanna Get Better <span class="yr">· 2014</span></td>
         <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
         <td class="n" style="text-align:right">30.67M</td>
       </tr>
-      <tr>
-        <td>Rollercoaster <span style="color:rgba(23,23,26,.4)">· 2014</span></td>
+      <tr class="full">
+        <td>Rollercoaster <span class="yr">· 2014</span></td>
         <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
         <td class="n" style="text-align:right">18.92M</td>
       </tr>
-      <tr>
-        <td>Alfie's Song <span style="color:rgba(23,23,26,.4)">· 2018</span></td>
+      <tr class="full">
+        <td>Alfie's Song <span class="yr">· 2018</span></td>
         <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
         <td class="n" style="text-align:right">3.72M</td>
       </tr>
       <tr>
-        <td>Merry Christmas, Please Don't Call <span style="color:rgba(23,23,26,.4)">· 2024</span></td>
-        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td>
-        <td class="n" style="text-align:right">7.06M</td>
-      </tr>
-      <tr>
-        <td>Chinatown <span style="color:rgba(23,23,26,.4)">· 2020</span></td>
+        <td>Merry Christmas, Please Don't Call <span class="yr">· 2024</span></td>
         <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
-        <td class="n" style="text-align:right">6.02M</td>
+        <td class="n" style="text-align:right">7.08M</td>
       </tr>
       <tr>
-        <td>Don't Take The Money <span style="color:rgba(23,23,26,.4)">· 2017</span></td>
+        <td>Chinatown <span class="yr">· 2020</span></td>
         <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
-        <td class="n" style="text-align:right">5.17M</td>
+        <td class="n" style="text-align:right">6.11M</td>
       </tr>
       <tr>
-        <td>Modern Girl <span style="color:rgba(23,23,26,.4)">· 2023</span></td>
+        <td>Don't Take The Money <span class="yr">· 2017</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">5.50M</td>
+      </tr>
+      <tr>
+        <td>Tiny Moves <span class="yr">· 2024</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
+        <td class="n" style="text-align:right">4.49M</td>
+      </tr>
+      <tr>
+        <td>Modern Girl <span class="yr">· 2023</span></td>
         <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td>
         <td class="n" style="text-align:right">4.25M</td>
       </tr>
       <tr>
-        <td>you and forever <span style="color:rgba(23,23,26,.4)">· 2026</span></td>
+        <td>you and forever <span class="yr">· 2026</span></td>
         <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
-        <td class="n" style="text-align:right">2.25M</td>
+        <td class="n" style="text-align:right">2.75M</td>
+      </tr>
+      <tr>
+        <td>the van <span class="yr">· 2026</span></td>
+        <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td>
+        <td class="n" style="text-align:right">1.38M</td>
       </tr>
     </table>
-    <div class="label reveal" style="margin-top:.8rem;font-size:.56rem">
-      Eight of the fifteen shown · the remaining seven follow the same pattern as the
-      lower rows
+    <div class="fine reveal" style="margin-top:.8rem">
+      Ten of sixteen shown, by views · totals cover only the four asset types in the
+      columns, so they are lower than a song's all-upload total · the "you and forever"
+      official video alone is 2.20M of its 2.75M
     </div>
 
     <div class="note reveal">
-      <b>Read this carefully, because it cuts both ways.</b> The two songs with the
-      full set are also the two oldest and the two biggest, and a hit attracts assets
-      as much as assets build a hit. Age and scale are tangled up in this, and nothing
-      here proves the build caused the size.
+      <b>Read this carefully, because it cuts both ways.</b> The three songs with the
+      full set include the two oldest and two biggest on the channel, and a hit attracts
+      assets as much as assets build a hit. Age and scale are tangled up in this, and
+      <b>nothing here shows that the build caused the size.</b>
       <br><br>
-      What it does show cleanly is that <b>the channel used to build song ecosystems
-      and now mostly doesn't</b>. Alfie's Song in 2018 was the last release to get a
-      lyric video and an official audio. Every song since has had a video and, at
-      best, one live performance — which is a decision worth making on purpose rather
-      than by default.
+      What it does show cleanly is a change in habit. Between 2014 and 2018 this channel
+      built song ecosystems; since then, releases have had a video and, at best, one live
+      version. Lyric videos are the clearest gap: four exist, they average 1.2M views
+      each, and none has been made in eight years. That is worth choosing on purpose
+      rather than by default.
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 5 · LIVE ═════════════════════════════════════════════ -->
+<!-- ════════ 7 · PERFORMANCE ══════════════════════════════════════ -->
 <section class="slide" id="live">
   <div class="inner">
-    <div class="label reveal">Live · 43 assets, 11% of measurable views</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
-      In 2026 the live take<br>beat the music video.
-    </h2>
+    <div class="label reveal">Performance footage · what length it should be</div>
+    <h2 class="display reveal" style="margin:.85rem 0 1rem;max-width:25ch">
+      The channel already<br>ran this experiment.<br>Full length won.</h2>
     <p class="big-p reveal">
-      Dirty Wedding Dress got an official music video in April. Nineteen days later
-      the Electric Lady performance went up. <em>The live version has nearly twice the
-      views of the video it was supporting.</em>
+      Twenty-eight single-song live videos have a <em>median of 95,800 views</em>. In
+      2023 the same kind of material was cut into six Shorts from the Radio City show.
+      Those have a <em>median of 2,739</em>.
     </p>
 
-    <div class="vs2 reveal" style="margin-top:clamp(1.6rem,3vw,2.4rem)">
-      <a class="thumb" href="https://www.youtube.com/watch?v=uEWr6mENsPA" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/uEWr6mENsPA/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>202,366</b>Official Music Video · 17 April 2026</span>
-      </a>
-      <div class="mid">19 days later</div>
-      <a class="thumb" href="https://www.youtube.com/watch?v=vPyhRkfMGak" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/vPyhRkfMGak/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>388,206</b>Live From Electric Lady · 6 May 2026</span>
-      </a>
+    <div class="bars reveal" style="max-width:840px">
+      <div class="bar hi">
+        <div class="bk">Single-song live videos<br>28 uploads · median</div>
+        <div class="bt"><div class="bf" data-w="100"></div></div>
+        <div class="bv">95,800</div>
+      </div>
+      <div class="bar">
+        <div class="bk">Radio City live Shorts<br>6 uploads · median</div>
+        <div class="bt"><div class="bf" data-w="2.9"></div></div>
+        <div class="bv">2,739</div>
+      </div>
+    </div>
+    <div class="fine reveal" style="margin-top:.9rem">
+      Medians, not averages, because both sets contain outliers · the six Radio City
+      Shorts ran 1,841 to 6,083 views, August–September 2023
     </div>
 
     <div class="rule reveal"></div>
 
-    <div class="label reveal">The live layer is not a side project</div>
+    <div class="label reveal">What that means for the show sitting whole on the shelf</div>
     <div class="vgrid four reveal" style="margin-top:1rem">
-      <a class="thumb" href="https://www.youtube.com/watch?v=kmpyfDF_pes" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/kmpyfDF_pes/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>4.43M</b>Tiny Moves · 2024</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=4POQtHyD2Yg" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/4POQtHyD2Yg/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>2.41M</b>Chinatown · on the roof, 2020</span>
-      </a>
       <a class="thumb" href="https://www.youtube.com/watch?v=468J7e1clU4" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/468J7e1clU4/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>227,036</b>Stone Pony · 91 minutes, 2026</span>
+        <span class="cap"><b>227,050</b>Stone Pony · 91 minutes, one upload, June 2026</span>
       </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=o1NGF6G4diM" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/o1NGF6G4diM/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>501,993</b>Jack at Electric Lady · 2026</span>
+      <a class="thumb" href="https://www.youtube.com/watch?v=LvwZVMk2v6o" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/LvwZVMk2v6o/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>171,061</b>I Wanna Get Better · Red Rocks, 2024</span>
       </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=YE68EpoHT3k" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/YE68EpoHT3k/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>143,289</b>Rollercoaster · Red Rocks, 2024</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=-b9D3TVmssI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/-b9D3TVmssI/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>68,986</b>Tiny Moves · Red Rocks, 2024</span>
+      </a>
+    </div>
+    <div class="fine reveal" style="margin-top:.9rem">
+      Red Rocks, July 2024 — three songs from one show, published individually,
+      383,336 views between them. The Stone Pony show has never been cut up.
     </div>
 
     <div class="note reveal">
-      <b>The Stone Pony show is 91 minutes sitting as one upload.</b> It has done
-      227,036 views as a full set, which is a good number for a feature-length
-      concert film — and it is also a room full of individual song performances that
-      have never been published as individual song performances.
+      <b>And one thing the live material does that the videos sometimes can't.</b>
+      Twelve songs have both an official video and a live version. In ten, the video
+      leads comfortably — live is a supporting asset, not a substitute, and this deck
+      will not pretend otherwise. But in two it doesn't:
+      <b>How Dare You Want More</b> (live 601,311 vs video 304,157) and
+      <b>Dirty Wedding Dress</b> (live 388,213 vs video 202,366).
       <br><br>
-      Cutting that set into per-song videos is the clearest opportunity on this
-      channel: the footage exists, the rights are presumably settled since the full
-      show is already public, and the format it would create is the one the Dirty
-      Wedding Dress comparison suggests this audience turns up for.
+      Those two are precisely the two lowest-performing official videos in the
+      catalogue. On the evidence here, live footage is not a way to beat a good video —
+      it is a <b>second chance at a song whose video didn't land</b>, and it worked both
+      times it was available.
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 6 · SHORTS ═══════════════════════════════════════════ -->
-<section class="slide" id="shorts">
-  <div class="inner">
-    <div class="label reveal">Shorts · 95 uploads classified</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.1rem;max-width:22ch">
-      The two Shorts that<br>worked were both<br>performances.
-    </h2>
-    <p class="big-p reveal">
-      Ninety-five Shorts have a median of <em>6,054 views</em>. Two have cleared
-      50,000. Both of those are performance footage rather than announcement or
-      studio-diary material.
-    </p>
-
-    <div class="vgrid reveal" style="margin-top:clamp(1.4rem,3vw,2.2rem);max-width:720px">
-      <a class="thumb" href="https://www.youtube.com/watch?v=7XyRT_prqjY" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/7XyRT_prqjY/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>152,562</b>"the only live performance of 'modern girl' that exists"</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=au7cm7Od7b8" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/au7cm7Od7b8/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>144,901</b>Tiny Moves choreography</span>
-      </a>
-    </div>
-
-    <div class="note reveal">
-      <b>This is a steer, not a verdict.</b> Two Shorts out of ninety-five is a thin
-      basis for a rule, and the honest reading is that it points the same direction as
-      the live finding rather than proving anything on its own.
-      <br><br>
-      But the pattern is consistent: when this channel shows the band playing, people
-      watch. When it announces that something is coming, they mostly don't — the
-      release-announcement Shorts around <em>you and forever</em> ran between 8,756
-      and 46,996 views against a music video that did 2.2M.
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 7 · WHAT NEXT ════════════════════════════════════════ -->
+<!-- ════════ 8 · WHAT NEXT ════════════════════════════════════════ -->
 <section class="slide" id="next">
   <div class="inner">
     <div class="label reveal">Where we would start</div>
-    <h2 class="display reveal" style="margin:.9rem 0 1.4rem;max-width:20ch">
-      Three things,<br>in order.
+    <h2 class="display reveal" style="margin:.85rem 0 1.2rem;max-width:22ch">
+      Four things.<br>Nothing new to shoot.
     </h2>
 
     <div class="reveal">
-      <div class="label lit" style="margin-bottom:.4rem">Do first — the footage already exists</div>
+      <div class="label lit" style="margin-bottom:.35rem">Do first — the footage already exists</div>
       <div class="act">
         <div class="num">01</div>
         <div>
-          <h3>Cut the Stone Pony set into song videos</h3>
+          <h3>Cut the Stone Pony set into single-song videos</h3>
           <p>
-            Ninety-one minutes are already public as one upload at 227,036 views.
-            Published as individual songs, that same footage becomes the format the
-            channel's own numbers favour — the Electric Lady take of Dirty Wedding
-            Dress outperformed its music video by 1.9×, and the best-performing Short
-            on the channel is a live performance clip. Nothing new needs shooting.
+            Ninety-one minutes are public as one upload at 227,050 views. Published as
+            individual songs, that becomes the format with a 95,800-view median on this
+            channel — and the Red Rocks precedent shows three songs from one show
+            returning 383,336 between them. Subject to footage and rights, which we'd
+            expect to be settled given the full show is already up. Keep the full show
+            published alongside them — Red Rocks suggests the two serve different
+            viewers, but that is the one part of this worth watching rather than
+            assuming.
           </p>
+          <span class="why">Finding · <b>Performance footage: full length won, 95,800 vs 2,739</b></span>
         </div>
       </div>
 
-      <div class="label lit" style="margin:1.8rem 0 .4rem">Then — a cheap test on the next single</div>
+      <div class="label lit" style="margin:1.5rem 0 .35rem;color:var(--pine)">Then — book it before November</div>
       <div class="act">
-        <div class="num">02</div>
+        <div class="num pine">02</div>
         <div>
-          <h3>Give one upcoming song the full build</h3>
+          <h3>Put a December plan around the Christmas song</h3>
           <p>
-            Video, lyric video, official audio and a live take, on one release, and
-            watch what the package does against the video-only releases that came
-            before it. The two songs that ever got this treatment are the channel's
-            two biggest — that is suggestive rather than proven, and one controlled
-            release is what would turn it into something you can trust.
+            Demand returns every year and grew between year one and year two on the UK
+            chart. The assets to work with already exist: the 7.06M video, the Annie
+            DiRusso live version currently published in August, and a network TV
+            performance that never made it to the channel. Resurface the video, move the
+            live version into season, link the two to each other, and treat late November
+            as a fixed date in the calendar rather than a reaction.
           </p>
+          <span class="why">Finding · <b>December: peak 65 in year two against 77 in year one</b></span>
         </div>
       </div>
 
+      <div class="label lit" style="margin:1.5rem 0 .35rem">Then — one controlled test</div>
       <div class="act">
         <div class="num">03</div>
         <div>
-          <h3>Point the Shorts at the performances</h3>
+          <h3>Give one upcoming song the full build</h3>
           <p>
-            The two Shorts that cleared 50,000 views were both performance footage;
-            the announcement Shorts sit near the 6,054 median. A Shorts layer cut from
-            live material, pointing back at the full performances, costs nothing extra
-            once the Stone Pony set is broken up.
+            Video, lyric video, official audio and a live version on a single release,
+            measured against the video-only releases either side of it. Lyric videos are
+            the specific gap — four exist, they average 1.2M views each, and the last was
+            2018. The three songs that got the full set are the channel's strongest, but
+            they are also its oldest, so this is the test that would tell you whether the
+            build matters or the songs did.
           </p>
+          <span class="why">Finding · <b>Song support: three full builds, last one 2018</b></span>
+        </div>
+      </div>
+
+      <div class="act">
+        <div class="num">04</div>
+        <div>
+          <h3>Point Shorts at exclusive moments, not concert clips</h3>
+          <p>
+            Ninety-four Shorts have a median of 6,083 views and only two have cleared
+            50,000 — a Fallon performance billed as the only live version of Modern Girl
+            that exists, and Margaret Qualley's Tiny Moves choreography. Neither is a
+            concert clip; both are something you could not see anywhere else. The six
+            straight live clips from Radio City sit at a 2,739 median. Test the
+            exclusivity angle, and stop treating Shorts as offcuts.
+          </p>
+          <span class="why">Finding · <b>Shorts: 152,562 and 144,905 vs a 6,083 median</b></span>
         </div>
       </div>
     </div>
 
     <div class="note reveal">
       <b>What this read cannot see.</b> Everything here comes from public data — views,
-      likes, comments, durations and dates. Without Studio access there is no watch
-      time, no retention, no traffic source and no audience breakdown, so nothing above
-      is a claim about how long anybody watched or where they came from. The
-      recommendations are framed as tests for that reason.
+      likes, comments, durations, dates, and the UK chart record. Without Studio access
+      there is no watch time, no retention, no traffic source and no audience breakdown,
+      so nothing above is a claim about how long anyone watched or where they came from.
+      Our own daily readings on this channel begin on 20 April 2026, which is why the
+      December case is built on chart data and not on view curves. The four
+      recommendations are framed as things to test for exactly that reason.
     </div>
   </div>
 </section>
@@ -561,9 +773,10 @@ table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
     <div class="label">Virgin Music Group × YouTube</div>
     <div style="font-family:var(--disp);font-weight:700;font-size:clamp(1.1rem,2vw,1.5rem);
          letter-spacing:-.02em">Bleachers · channel deep dive</div>
-    <div class="label" style="margin-top:.8rem">
-      230 uploads read 30 September 2026 · public YouTube API data only ·
-      shares stated against the 111.0M views we can inspect
+    <div class="label" style="margin-top:.8rem;line-height:1.8">
+      230 uploads read 30 September 2026 · public YouTube API data, our own daily
+      channel snapshots from 20 April 2026, and the UK Official Charts public record ·
+      every share stated against the 111.0M catalogue, never the 189.0M lifetime counter
     </div>
   </div>
 </section>
@@ -579,18 +792,18 @@ table.cmp td.miss{color:var(--smoke);font-family:var(--mono);font-size:.74rem}
       e.target.classList.add('visible');
       ro.unobserve(e.target);
     });
-  },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  },{threshold:.08,rootMargin:'0px 0px -40px 0px'});
   document.querySelectorAll('.reveal').forEach(function(el){ro.observe(el);});
 
   var bo = new IntersectionObserver(function(es){
     es.forEach(function(e){
       if(!e.isIntersecting) return;
       e.target.querySelectorAll('.bf').forEach(function(b,i){
-        setTimeout(function(){ b.style.width = b.dataset.w + '%'; }, 140 + i*110);
+        setTimeout(function(){ b.style.width = b.dataset.w + '%'; }, 140 + i*100);
       });
       bo.unobserve(e.target);
     });
-  },{threshold:.25});
+  },{threshold:.2});
   document.querySelectorAll('.bars').forEach(function(el){bo.observe(el);});
 })();
 </script>
