@@ -239,3 +239,92 @@ export function sharePct(x: number): string {
  */
 export const isChannelRepresentative = (c: SplitCoverage): boolean =>
   c.confidence === 'complete' || c.confidence === 'partial';
+
+/* ═══════════════════════════════════════════════════════════════════
+   ONE PLACE THAT DECIDES RECENT-vs-LIFETIME
+
+   Watcher now shows this split on the artist strip, the dashboard's
+   Formats column and Channel Behaviour. If each surface made its own
+   choice about when recent data is good enough, they would eventually
+   disagree — and a reader seeing 13% Shorts on one screen and 31% on
+   the next has no way to tell which is wrong. So the decision is made
+   here, once, and `basis` travels with the numbers.
+
+   The rule: recent wins whenever there are enough comparable daily
+   readings AND they recorded some viewing. Otherwise the lifetime
+   split is returned WITH its basis marked as lifetime, so no caller
+   can accidentally print it under a "recent" heading.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export type RowFormatSplit = {
+  /** Which measure these numbers are. Callers must label accordingly. */
+  basis: 'recent' | 'lifetime';
+  /** 7 for recent; null for lifetime (which is not a window). */
+  windowDays: number | null;
+  longformShare: number;
+  shortsShare: number;
+  longformViews: number;
+  shortsViews: number;
+  /** Lifetime basis only: how much of the channel the split saw. */
+  viewsCovered: number | null;
+  confidence: SplitCoverage['confidence'];
+  /**
+   * Set only when we fell back to lifetime because recent is not ready.
+   * Lets a surface explain the fallback instead of just showing it.
+   */
+  collecting: { comparable: number; required: number; total: number } | null;
+};
+
+export function resolveRowFormatSplit(
+  uploads: RecentUpload[],
+  days: { comparable: boolean; ts: string; shortsDelta: number; longformDelta: number }[],
+  channelLifetimeViews: number | null,
+  opts: { windowDays?: number; now?: number } = {},
+): RowFormatSplit | null {
+  if (uploads.length === 0) return null;
+
+  const windowDays = opts.windowDays ?? 7;
+  const now = opts.now ?? Date.now();
+  const cutoff = now - windowDays * 86_400_000;
+
+  const inWindow = days.filter(
+    (d) => d.comparable && new Date(d.ts + 'T00:00:00Z').getTime() >= cutoff,
+  );
+  const required = Math.max(2, Math.ceil(windowDays * 0.8));
+  const shortsViews = inWindow.reduce((t, d) => t + d.shortsDelta, 0);
+  const longformViews = inWindow.reduce((t, d) => t + d.longformDelta, 0);
+  const recentTotal = shortsViews + longformViews;
+
+  if (inWindow.length >= required && recentTotal > 0) {
+    return {
+      basis: 'recent',
+      windowDays,
+      longformShare: longformViews / recentTotal,
+      shortsShare: shortsViews / recentTotal,
+      longformViews,
+      shortsViews,
+      viewsCovered: null,
+      confidence: 'complete',
+      collecting: null,
+    };
+  }
+
+  const life = computeFormatSplit(uploads, { channelLifetimeViews, now });
+  if (life.totalViews === 0) return null;
+
+  return {
+    basis: 'lifetime',
+    windowDays: null,
+    longformShare: life.longformShare,
+    shortsShare: life.shortsShare,
+    longformViews: life.longformViews,
+    shortsViews: life.shortsViews,
+    viewsCovered: life.coverage.viewsCovered,
+    confidence: life.coverage.confidence,
+    collecting: {
+      comparable: inWindow.length,
+      required,
+      total: days.length,
+    },
+  };
+}

@@ -13,6 +13,8 @@ import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
+import { resolveRowFormatSplit } from '@/lib/formatSplit';
+import { readFormatDaysBatch } from '@/lib/formatHistory';
 import AddArtistButton from '@/components/AddArtistButton';
 
 export const revalidate = 600;
@@ -52,6 +54,18 @@ export default async function ControlPage() {
     .map((a) => a.channelHandle)
     .filter(Boolean) as string[];
   const snapMap = await readAllLiveSnaps(handles);
+
+  /* ── FORMAT SPLIT, SERVER-SIDE, NO NEW API CALLS ────────────────────
+     Everything the split needs is already on this page: recentUploads
+     and lifetime views come from the snaps read above. The only extra
+     fetch is the stored daily history, batched into one Redis mget so
+     the Formats column costs a single round trip for the whole roster
+     rather than one per artist. */
+  const formatDaysByChannel = await readFormatDaysBatch(
+    allArtists
+      .map((a) => (a.channelHandle ? snapMap.get(a.channelHandle)?.channelId : null))
+      .filter(Boolean) as string[],
+  );
 
   const rows: RowData[] = await Promise.all(
     allArtists.map(async (a) => {
@@ -113,6 +127,16 @@ export default async function ControlPage() {
         bestAvailableSource: nc.bestAvailable.source,
         bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
         multiformat: snap?.recentUploads ? computeMultiformat(snap.recentUploads) : undefined,
+        /* Recent-vs-lifetime decided by the shared resolver, so this
+           column can never disagree with the artist strip. */
+        formatSplit:
+          snap?.recentUploads && snap.channelId
+            ? resolveRowFormatSplit(
+                snap.recentUploads,
+                formatDaysByChannel.get(snap.channelId) ?? [],
+                snap.views ?? null,
+              ) ?? undefined
+            : undefined,
       };
     })
   );

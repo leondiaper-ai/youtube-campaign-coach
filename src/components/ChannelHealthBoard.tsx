@@ -65,6 +65,24 @@ export type RowData = {
     formatCount: number;
     score: 'Strong' | 'Good' | 'Partial' | 'Weak' | 'None';
   };
+  /**
+   * Shorts vs long-form VIEW split, computed server-side in growth/page.tsx
+   * from already-cached data. `basis` says which measure it is: 'recent'
+   * is viewing gained in the last 7 days from daily readings, 'lifetime'
+   * is the totals our inventoried videos have accumulated since upload.
+   * The two are not interchangeable and the cell labels them differently.
+   */
+  formatSplit?: {
+    basis: 'recent' | 'lifetime';
+    windowDays: number | null;
+    longformShare: number;
+    shortsShare: number;
+    longformViews: number;
+    shortsViews: number;
+    viewsCovered: number | null;
+    confidence: 'complete' | 'partial' | 'sample';
+    collecting: { comparable: number; required: number; total: number } | null;
+  };
 };
 
 type ViewMode = 'managed' | 'market';
@@ -1105,7 +1123,7 @@ export default function ChannelHealthBoard({
                     {STATE_LABEL[r.status]}
                   </span>
                 </div>
-                <MultiformatCell multiformat={r.multiformat} />
+                <MultiformatCell multiformat={r.multiformat} formatSplit={r.formatSplit} />
                 <div className="text-right text-[13px] font-bold tabular-nums">{subsTotal}</div>
                 <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
                   {fmtSubs7Label}
@@ -1158,6 +1176,35 @@ export default function ChannelHealthBoard({
                       <span className="text-ink/60">{fix}</span>
                     </div>
                   </div>
+
+                  {/* ── View split, spelled out ──────────────────────────
+                      The column shows this in four characters. Here there
+                      is room to say which measure it is and what it rests
+                      on — including, while daily readings accumulate, how
+                      far off a real recent figure is. */}
+                  {r.formatSplit && (
+                    <div className="mt-3 pt-2 text-[10px] leading-relaxed text-ink/45" style={{ borderTop: '1px solid #EFE9DC' }}>
+                      {r.formatSplit.basis === 'recent' ? (
+                        <>
+                          <b className="text-ink/60">Views gained, last {r.formatSplit.windowDays} days:</b>{' '}
+                          {fmtNum(r.formatSplit.longformViews)} long-form · {fmtNum(r.formatSplit.shortsViews)} Shorts.
+                          {' '}From daily readings of videos we hold, counted only where the same video appears
+                          in consecutive readings.
+                        </>
+                      ) : (
+                        <>
+                          <b className="text-ink/60">Lifetime split shown — not recent viewing.</b>{' '}
+                          {fmtNum(r.formatSplit.longformViews)} long-form · {fmtNum(r.formatSplit.shortsViews)} Shorts,
+                          across {pcCoverage(r.formatSplit.viewsCovered)} of channel lifetime views that we hold.
+                          {r.formatSplit.collecting && (
+                            r.formatSplit.collecting.total === 0
+                              ? ' No daily readings stored yet, so no recent figure is available.'
+                              : ` A recent 7-day figure needs ${r.formatSplit.collecting.required} comparable daily readings — ${r.formatSplit.collecting.comparable} so far, from ${r.formatSplit.collecting.total} stored.`
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1207,9 +1254,85 @@ const MF_SCORE_STYLE: Record<string, { bg: string; fg: string }> = {
   None:    { bg: '#F3F0EA', fg: 'rgba(14,14,14,0.35)' },
 };
 
-function MultiformatCell({ multiformat }: { multiformat?: RowData['multiformat'] }) {
+/* ── The view split, inside the Formats column ─────────────────────────
+   The column already answers "which formats is this channel making?".
+   This adds "and which ones are actually being watched?" beneath it —
+   the same question one level deeper, so it belongs in the same cell
+   rather than in a column of its own.
+
+   Two things must survive being this small. First, the basis: a 7-day
+   figure and a lifetime figure look identical once they are two numbers
+   in a row, so the badge naming the basis is not decoration and is
+   never omitted. Second, coverage: on a lifetime split that describes a
+   fraction of the catalogue, the percentage sits next to the basis,
+   amber, where it cannot be read as a channel fact. */
+const SPLIT_LF = '#2C6BFF';
+const SPLIT_SH = '#C77A16';
+
+function pcTight(x: number): string {
+  if (x <= 0) return '0';
+  if (x < 0.01) return '<1';
+  return String(Math.round(x * 100));
+}
+function pcCoverage(x: number | null): string {
+  if (x == null) return '—';
+  if (x <= 0) return '0%';
+  if (x < 0.01) return '<1%';
+  if (x < 0.1) return `${(x * 100).toFixed(1)}%`;
+  return `${Math.round(x * 100)}%`;
+}
+
+function ViewSplitLine({ split }: { split: NonNullable<RowData['formatSplit']> }) {
+  const recent = split.basis === 'recent';
+  const sample = !recent && split.confidence === 'sample';
+
+  const tooltip = recent
+    ? `Views gained in the last ${split.windowDays} days\n` +
+      `${pcTight(split.longformShare)}% long-form · ${pcTight(split.shortsShare)}% Shorts\n` +
+      `From daily readings, counted only on videos present in both readings.`
+    : `LIFETIME split — not recent viewing.\n` +
+      `${pcTight(split.longformShare)}% long-form · ${pcTight(split.shortsShare)}% Shorts\n` +
+      `Across ${pcCoverage(split.viewsCovered)} of channel lifetime views that we hold.\n` +
+      (split.collecting
+        ? `Recent 7-day figure needs ${split.collecting.required} comparable daily readings; ${split.collecting.comparable} so far.`
+        : '');
+
+  return (
+    <div className="flex items-center gap-1.5 mt-1" title={tooltip}>
+      <div
+        className="flex h-[3px] w-[34px] overflow-hidden rounded-sm shrink-0"
+        style={{ background: '#E9E2D3' }}
+      >
+        <div style={{ width: `${split.longformShare * 100}%`, background: SPLIT_LF, opacity: recent ? 1 : 0.5 }} />
+        <div style={{ width: `${split.shortsShare * 100}%`, background: SPLIT_SH, opacity: recent ? 1 : 0.5 }} />
+      </div>
+      <span className="text-[8px] tabular-nums whitespace-nowrap" style={{ color: 'rgba(14,14,14,0.5)' }}>
+        {pcTight(split.longformShare)}/{pcTight(split.shortsShare)}
+      </span>
+      <span
+        className="text-[7px] font-bold uppercase tracking-[0.06em] whitespace-nowrap"
+        style={{ color: recent ? '#0C6A3F' : sample ? '#9A5B00' : 'rgba(14,14,14,0.3)' }}
+      >
+        {recent ? '7d' : sample ? `life ${pcCoverage(split.viewsCovered)}` : 'life'}
+      </span>
+    </div>
+  );
+}
+
+function MultiformatCell({
+  multiformat,
+  formatSplit,
+}: {
+  multiformat?: RowData['multiformat'];
+  formatSplit?: RowData['formatSplit'];
+}) {
   if (!multiformat) {
-    return <div className="text-[9px] text-ink/20">—</div>;
+    return (
+      <div>
+        <div className="text-[9px] text-ink/20">—</div>
+        {formatSplit && <ViewSplitLine split={formatSplit} />}
+      </div>
+    );
   }
 
   const st = MF_SCORE_STYLE[multiformat.score] ?? MF_SCORE_STYLE.None;
@@ -1220,22 +1343,28 @@ function MultiformatCell({ multiformat }: { multiformat?: RowData['multiformat']
   const tooltip = `${multiformat.score} multiformat (${multiformat.formatCount}/6)\n${tooltipParts.join('\n')}`;
 
   return (
-    <div className="flex items-center gap-1.5" title={tooltip}>
-      <span
-        className="text-[8px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded whitespace-nowrap"
-        style={{ background: st.bg, color: st.fg }}
-      >
-        {multiformat.formatCount}/6
-      </span>
-      <div className="flex gap-0.5">
-        {activeFormats.map((f) => (
-          <span
-            key={f.key}
-            className="w-1.5 h-1.5 rounded-full"
-            style={{ background: f.color }}
-          />
-        ))}
+    <div>
+      {/* Publishing mix — unchanged: the score chip and the coloured
+          per-format dots stay exactly as they were. */}
+      <div className="flex items-center gap-1.5" title={tooltip}>
+        <span
+          className="text-[8px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded whitespace-nowrap"
+          style={{ background: st.bg, color: st.fg }}
+        >
+          {multiformat.formatCount}/6
+        </span>
+        <div className="flex gap-0.5">
+          {activeFormats.map((f) => (
+            <span
+              key={f.key}
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: f.color }}
+            />
+          ))}
+        </div>
       </div>
+      {/* Viewing mix — what those formats actually earn. */}
+      {formatSplit && <ViewSplitLine split={formatSplit} />}
     </div>
   );
 }

@@ -157,6 +157,41 @@ export async function readFormatDays(channelId: string): Promise<FormatDay[]> {
   return ((await store.get(DAY_KEY(channelId))) as FormatDay[] | null) ?? [];
 }
 
+/**
+ * Daily history for many channels in one round trip.
+ *
+ * The dashboard needs this for every row. Looping readFormatDays over a
+ * 245-artist roster is 245 sequential Redis calls on a page that already
+ * reads a snapshot and a history per artist, which is how a board stops
+ * rendering inside the function timeout. mget fetches them together.
+ *
+ * Channels with no stored history come back as an empty array, so a
+ * caller can treat "absent" and "empty" identically.
+ */
+export async function readFormatDaysBatch(
+  channelIds: string[],
+): Promise<Map<string, FormatDay[]>> {
+  const out = new Map<string, FormatDay[]>();
+  const ids = Array.from(new Set(channelIds.filter(Boolean)));
+  if (ids.length === 0) return out;
+
+  const store = await kv();
+  if (!store) {
+    for (const id of ids) out.set(id, []);
+    return out;
+  }
+
+  try {
+    const vals = (await store.mget(...ids.map(DAY_KEY))) as (FormatDay[] | null)[];
+    ids.forEach((id, i) => out.set(id, vals?.[i] ?? []));
+  } catch {
+    /* A failed history read must not take the board down with it — the
+       lifetime split still renders without any of this. */
+    for (const id of ids) out.set(id, []);
+  }
+  return out;
+}
+
 export type FormatTrend = {
   windowDays: number;
   /** Null until enough comparable days exist. */
