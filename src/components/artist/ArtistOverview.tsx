@@ -217,21 +217,18 @@ export default async function ArtistOverview({
           </div>
         )}
 
-        {/* These two fields often carry the same word ("stale · stale"),
-            which read as a stutter rather than as information. Print the
-            second only when it adds something. */}
-        {(() => {
-          const conf = nc.movementConfidence ? String(nc.movementConfidence).toLowerCase() : null;
-          const fresh = nc.movementFreshness ? String(nc.movementFreshness).toLowerCase() : null;
-          if (!conf && !fresh) return null;
-          const detail = fresh && fresh !== conf ? ` · ${fresh}` : '';
-          return (
-            <div className="text-[10px] text-ink/35 mt-5">
-              7-day movement figures are {conf ?? fresh}{detail} — from the last successful sync,
-              not a live read.
-            </div>
-          );
-        })()}
+        {/* The movement-provenance line ("7-day movement figures are
+            stale — from the last successful sync, not a live read") used
+            to sit here. Removed: it printed on essentially every artist,
+            so it stopped reading as a caveat about these numbers and
+            started reading as boilerplate under the headline row.
+
+            The underlying fields are untouched — nc.movementConfidence
+            and nc.movementFreshness — so a surface that needs to flag a
+            genuinely old sync can still do it. If that matters, the
+            honest version is conditional: say something only when the
+            reading is old enough to change a decision, rather than on
+            every render. */}
       </section>
 
       {/* ═══ 4+5. FORMAT + MARKETS, side by side ════════════════ */}
