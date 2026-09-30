@@ -127,6 +127,53 @@ export async function GET(req: NextRequest) {
     `/api/artist/${mapping.cmArtistId}/market-coverage-views/youtube`,
   );
 
+  /* ── 4. BOUNDED PROBES ──────────────────────────────────────────────
+     ?probe=<key> runs one extra Chartmetric call from the allowlist
+     below, against the artist this roster slug already resolved to.
+
+     Deliberately an allowlist of fixed templates rather than a `path`
+     parameter. This route has no token gate — the header explains why —
+     and a free-text path would turn a bounded diagnostic into an open
+     proxy for our Chartmetric credentials, which is a different and
+     much worse object. The artist id is never taken from the caller;
+     it comes from the roster mapping.
+
+     Probe responses are NOT written to the shared cache key, so a probe
+     cannot poison the cached market-coverage payload. */
+  const PROBES: Record<string, (id: number) => string> = {
+    'spotify-stat':   (id) => `/api/artist/${id}/stat/spotify`,
+    'youtube-stat':   (id) => `/api/artist/${id}/stat/youtube`,
+    'cm-stat':        (id) => `/api/artist/${id}/stat/cm`,
+    'tracks':         (id) => `/api/artist/${id}/tracks?limit=100`,
+    'albums':         (id) => `/api/artist/${id}/albums?limit=50`,
+    'charts-spotify': (id) => `/api/artist/${id}/charts/spotify?limit=50`,
+    'playlists':      (id) => `/api/artist/${id}/playlists/spotify/current?limit=50`,
+  };
+
+  const probe = (new URL(req.url).searchParams.get('probe') ?? '').trim();
+  if (probe) {
+    const build = PROBES[probe];
+    if (!build) {
+      return NextResponse.json(
+        { error: 'unknown probe', allowed: Object.keys(PROBES) },
+        { status: 400 },
+      );
+    }
+    const path = build(mapping.cmArtistId);
+    return NextResponse.json(
+      {
+        probe,
+        path,
+        cmArtistId: mapping.cmArtistId,
+        cmArtistName: mapping.cmArtistName,
+        ambiguous: mapping.ambiguous ?? null,
+        raw: await cmFetch<unknown>(path),
+        capturedAt: new Date().toISOString(),
+      },
+      { status: 200 },
+    );
+  }
+
   out.client = clientState();
   out.capturedAt = new Date().toISOString();
 

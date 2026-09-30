@@ -80,6 +80,14 @@ export type CmArtistMapping = {
   resolvedAt: string;
   /** True when Chartmetric simply has no artist for this channel. */
   notFound?: boolean;
+  /**
+   * Present only when /get-ids returned more than one distinct artist
+   * for this channel, ordered by how many rows each owns. The winner is
+   * the first entry. Recorded so a contested match is visible rather
+   * than silent — the Bleachers mapping was wrong for exactly as long
+   * as nobody could see that a choice had been made.
+   */
+  ambiguous?: { cmArtistId: number; name: string | null; rows: number }[];
 };
 
 async function kv() {
@@ -165,9 +173,46 @@ export async function resolveCmArtist(
   const raw = res.data?.obj;
   const rows: GetIdsRow[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
 
-  // Prefer the row whose youtube_channel_id is the one we asked about.
-  const exact = rows.find((r) => r.youtube_channel_id === channelId) ?? rows[0] ?? null;
-  const cmArtistId = exact ? toInt(exact.cm_artist ?? exact.chartmetric_id) : null;
+  /* ── PICKING THE ARTIST WHEN THE CHANNEL RESOLVES TO SEVERAL ────────
+     This used to be `rows.find(r => r.youtube_channel_id === channelId)
+     ?? rows[0]`, which looks like a precision filter and is not one.
+     Every row returned by /get-ids already carries the channel we asked
+     about — that is the query — so the find always matched row zero and
+     the code was "take the first result and hoping", the exact thing
+     the header comment on this file warns against.
+
+     It bit on Bleachers. The channel returns 84 rows: one for an
+     Australian indie-folk act called "BLEACHER" (cm 10799742), and 83
+     for the actual band (cm 4835). Row zero was the Australian one, so
+     every Chartmetric figure we held for Bleachers belonged to someone
+     else — which is why their territory call kept coming back with
+     artistTotalViews: 0 and no countries.
+
+     Chartmetric returns one row per release, so the artist who owns
+     most of the channel's releases is the artist. Counting is therefore
+     not a heuristic, it is the structure of the response. A single
+     stray row cannot outvote a discography.
+
+     `ambiguous` is recorded when more than one distinct artist comes
+     back, so a human can see that a choice was made rather than
+     discovering it the way we discovered this one. */
+  const tally = new Map<number, { n: number; name: string | null }>();
+  for (const r of rows) {
+    const id = toInt(r.cm_artist ?? r.chartmetric_id);
+    if (!id) continue;
+    const seen = tally.get(id);
+    if (seen) seen.n += 1;
+    else tally.set(id, { n: 1, name: r.artist_name ?? null });
+  }
+  /* Array.from rather than spread: this project's tsconfig target does
+     not allow iterating a Map without downlevelIteration. */
+  const ranked = Array.from(tally.entries()).sort((a, b) => b[1].n - a[1].n);
+  const winner = ranked[0] ?? null;
+  const cmArtistId = winner ? winner[0] : null;
+  const exact = winner ? { artist_name: winner[1].name } : null;
+  const ambiguous = ranked.length > 1
+    ? ranked.map(([id, v]) => ({ cmArtistId: id, name: v.name, rows: v.n }))
+    : undefined;
 
   const mapping: CmArtistMapping = {
     channelId,
@@ -175,6 +220,7 @@ export async function resolveCmArtist(
     cmArtistName: exact?.artist_name ?? null,
     resolvedBy: 'youtube-channel-id',
     resolvedAt: new Date().toISOString(),
+    ...(ambiguous ? { ambiguous } : {}),
     ...(cmArtistId ? {} : { notFound: true }),
   };
 
