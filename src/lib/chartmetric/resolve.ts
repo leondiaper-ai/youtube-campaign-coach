@@ -50,6 +50,16 @@ const MANUAL_CM_ARTISTS: Record<string, { id: number; name: string }> = {
   /* TEN (@tenoffcl). /get-ids returns nothing for this channel; the
      profile is real and confirmed at app.chartmetric.com/artist/558680. */
   UC1a1QawKLefYNAjpT0ELNrQ: { id: 558680, name: 'TEN' },
+
+  /* Bleachers (@bleachers). A different failure from TEN's: /get-ids
+     returns plenty for this channel, but 84 rows across two artists —
+     one row for an Australian indie folk act called "BLEACHER"
+     (cm 10799742) and 83 for the band. The row-count rule below now
+     picks 4835 on its own, so this entry is not load-bearing; it is
+     here because a human opened the profile and confirmed it
+     (app.chartmetric.com/artist/4835), and a confirmed id should not
+     depend on a tie-break continuing to behave. */
+  UCjd8rtustMHutt_vrVhsUyg: { id: 4835, name: 'Bleachers' },
 };
 
 /**
