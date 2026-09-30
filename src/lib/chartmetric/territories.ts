@@ -343,7 +343,10 @@ export async function fetchTerritories(
    which is a finding — particularly on a short list.
    ═══════════════════════════════════════════════════════════════════ */
 
-export type UkRow = {
+export type MarketRow = {
+  /** ISO alpha-2 this row describes. Present so a row is never
+   *  ambiguous once several markets sit in the same table. */
+  marketCode: string;
   inReturnedTerritories: boolean;
   monthlyViews: number | null;
   previousViews: number | null;
@@ -358,10 +361,26 @@ export type UkRow = {
   vsMedianPp: number | null;
 };
 
-export function ukRow(t: Territories): UkRow {
-  const idx = t.countries.findIndex((c) => c.code2 === 'GB');
+/** Kept as an alias so existing UK callers compile unchanged. */
+export type UkRow = MarketRow;
+
+/**
+ * The general form. UK was never special — it was just the first
+ * market we needed, and the extractor was written around 'GB'. Every
+ * market runs the same arithmetic against the same normalized
+ * payload, so Australia and the Nordics need configuration, not code.
+ *
+ * `code` is an ISO alpha-2 matching Chartmetric's code2.
+ */
+export function marketRow(t: Territories, code: string): MarketRow {
+  const want = code.toUpperCase();
+  const idx = t.countries.findIndex((c) => c.code2 === want);
   if (idx === -1) {
+    /* Absence is a finding, not a zero. An artist whose returned
+       territories exclude Sweden has no Swedish audience worth
+       Chartmetric reporting — which is information. */
     return {
+      marketCode: want,
       inReturnedTerritories: false,
       monthlyViews: null,
       previousViews: null,
@@ -373,20 +392,37 @@ export function ukRow(t: Territories): UkRow {
       vsMedianPp: null,
     };
   }
-  const gb = t.countries[idx];
+  const c = t.countries[idx];
   return {
+    marketCode: want,
     inReturnedTerritories: true,
-    monthlyViews: gb.monthlyViews,
-    previousViews: gb.previousViews,
-    changeViews: gb.changeViews,
-    changePct: gb.changePct,
+    monthlyViews: c.monthlyViews,
+    previousViews: c.previousViews,
+    changeViews: c.changeViews,
+    changePct: c.changePct,
     // countries are sorted by monthlyViews desc, so index is the rank.
     territoryRank: idx + 1,
-    shareOfReturned: gb.shareOfListed,
-    isEstimate: gb.isEstimate,
+    shareOfReturned: c.shareOfListed,
+    isEstimate: c.isEstimate,
     vsMedianPp:
-      gb.changePct != null && t.medianChangePct != null
-        ? gb.changePct - t.medianChangePct
+      c.changePct != null && t.medianChangePct != null
+        ? c.changePct - t.medianChangePct
         : null,
   };
+}
+
+/** Several markets in one pass, for a team that reports on a group. */
+export function marketRows(t: Territories, codes: string[]): Record<string, MarketRow> {
+  const out: Record<string, MarketRow> = {};
+  for (const code of codes) out[code.toUpperCase()] = marketRow(t, code);
+  return out;
+}
+
+/**
+ * UK extractor, preserved verbatim in behaviour so the existing UK
+ * dashboard and export cannot regress. It is now a thin call into the
+ * general function.
+ */
+export function ukRow(t: Territories): UkRow {
+  return marketRow(t, 'GB');
 }
