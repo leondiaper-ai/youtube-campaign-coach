@@ -89,6 +89,16 @@ export async function GET(req: NextRequest) {
   const withHandles = allArtists.filter((a) => a.channelHandle);
 
   // ── 2. Determine run slot ──────────────────────────────────────────────
+  /* Format-reading outcomes, reported in the response.
+     These writes were failing silently: the only signal was a console.warn
+     with no counter and no field in the JSON, so a format pipeline that
+     never wrote anything looked exactly like one that worked. The daily
+     split needs 6 comparable days out of 7 — at most one missed day, ever —
+     so "did today's run actually store a row" has to be answerable from
+     the run's own output rather than by reading Redis by hand. */
+  const fmt = { rows: 0, comparable: 0, skippedNoUploads: 0, failed: 0 };
+  const fmtFailures: string[] = [];
+
   const now = new Date();
   const utcHour = now.getUTCHours();
   const dayOfWeek = now.getUTCDay();
@@ -250,9 +260,25 @@ export async function GET(req: NextRequest) {
            the snapshot is the product. */
         try {
           if (merged.recentUploads?.length) {
-            await recordFormatReading(snap.channelId, merged.recentUploads);
+            const row = await recordFormatReading(snap.channelId, merged.recentUploads);
+            /* A returned row means today is covered, whether this run wrote
+               it or the once-per-day guard handed back an existing one —
+               the two are indistinguishable from here and the distinction
+               does not matter. What matters is `comparable`, which is true
+               only when a previous baseline existed to diff against. That
+               is the number to watch: rows climbs on day one, comparable
+               stays at zero, and both should climb together from day two. */
+            if (!row) fmt.failed++;
+            else {
+              fmt.rows++;
+              if (row.comparable) fmt.comparable++;
+            }
+          } else {
+            fmt.skippedNoUploads++;
           }
         } catch (e) {
+          fmt.failed++;
+          if (fmtFailures.length < 10) fmtFailures.push(slug);
           console.warn('[cron] format reading failed for', slug, e);
         }
       }
@@ -354,6 +380,7 @@ export async function GET(req: NextRequest) {
     fetched: toFetch.length,
     skipped: skipped.length,
     estimatedQuota: quotaUnits,
+    formatReadings: { ...fmt, failedSlugs: fmtFailures },
     daily: dailyResults,
     weekly: weeklyResult ?? 'evening run — skipped',
     sync: syncMeta,
