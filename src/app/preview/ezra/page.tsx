@@ -273,11 +273,21 @@ export default async function EzraPreviewPage() {
               period={lastUpDays != null ? `30 days · last ${lastUpDays}d ago` : 'Last 30 days'}
             />
           </div>
-          {nc.movementConfidence && nc.movementFreshness && (
-            <div className="text-[10px] text-ink/35 mt-5">
-              Movement confidence {String(nc.movementConfidence).toLowerCase()} · {nc.movementFreshness}
-            </div>
-          )}
+          {/* These two fields often carry the same word ("stale · stale"),
+              which read as a stutter rather than as information. Print the
+              second only when it adds something. */}
+          {(() => {
+            const conf = nc.movementConfidence ? String(nc.movementConfidence).toLowerCase() : null;
+            const fresh = nc.movementFreshness ? String(nc.movementFreshness).toLowerCase() : null;
+            if (!conf && !fresh) return null;
+            const detail = fresh && fresh !== conf ? ` · ${fresh}` : '';
+            return (
+              <div className="text-[10px] text-ink/35 mt-5">
+                7-day movement figures are {conf ?? fresh}{detail} — from the last successful sync,
+                not a live read.
+              </div>
+            );
+          })()}
         </section>
 
         {/* ═══ 4. FORMAT + MARKETS, side by side ══════════════════ */}
