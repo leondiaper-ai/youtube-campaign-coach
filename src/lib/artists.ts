@@ -394,7 +394,19 @@ export function fmtNum(n: number) {
   // (e.g. "-31856183" instead of "-32M").
   const sign = n < 0 ? '-' : '';
   const v = Math.abs(n);
-  if (v >= 1_000_000) return sign + (v / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1) + 'M';
-  if (v >= 1_000) return sign + (v / 1_000).toFixed(v >= 10_000 ? 0 : 1) + 'K';
+  /* Without the billions branch a channel past a billion views printed as
+     "2176M", which reads as a typo and has to be counted on fingers. Plenty
+     of the roster is over 1B, so this is the normal case for the biggest
+     artists, not an edge one.
+
+     The thresholds are set just BELOW each power rather than at it, because
+     rounding happens after the branch is chosen: 999,999,999 passes the
+     "under a billion" test, then rounds up inside the millions branch and
+     prints "1000M". Same one magnitude down, where 999,500 prints "1000K".
+     Choosing the unit on the value as it will be ROUNDED, not as it is,
+     removes both. */
+  if (v >= 999_500_000) return sign + (v / 1_000_000_000).toFixed(v >= 10_000_000_000 ? 0 : 2) + 'B';
+  if (v >= 999_500) return sign + (v / 1_000_000).toFixed(v >= 10_000_000 ? 0 : 1) + 'M';
+  if (v >= 999.5) return sign + (v / 1_000).toFixed(v >= 10_000 ? 0 : 1) + 'K';
   return String(n);
 }
