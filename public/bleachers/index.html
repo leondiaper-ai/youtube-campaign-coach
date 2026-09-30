@@ -229,6 +229,29 @@ h2.display{font-size:clamp(1.9rem,4.8vw,3.7rem)}
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .mv.top .g{color:var(--ice)}
 
+/* ── THE ASSET GAP ───────────────────────────────────────────────────
+   Leon's read, and the right one: the interesting thing about this song
+   is not only that it climbs, it is that it climbs on almost nothing.
+   Set against the two videos above it, which have everything. */
+.gap{margin-top:.9rem;border-top:1px solid var(--rule)}
+.gaprow{display:grid;grid-template-columns:1fr auto auto;gap:clamp(10px,2vw,22px);
+  align-items:center;padding:.72rem 0;border-bottom:1px solid var(--rule)}
+.gaprow .s{font-size:.88rem;line-height:1.3}
+.gaprow .s small{display:block;font-family:var(--mono);font-size:.55rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:.25rem}
+.gaprow .v{font-family:var(--disp);font-weight:700;font-size:.95rem;
+  font-variant-numeric:tabular-nums;min-width:66px;text-align:right}
+.gaprow .a{display:flex;gap:5px;min-width:186px;justify-content:flex-end}
+.gaprow .a span{font-family:var(--mono);font-size:.52rem;letter-spacing:.08em;
+  text-transform:uppercase;padding:.28rem .44rem;border-radius:2px;
+  border:1px solid var(--rule);color:var(--faint);white-space:nowrap}
+.gaprow .a span.on{border-color:var(--gold);color:var(--gold)}
+.gaprow.subject{background:rgba(159,178,188,.09)}
+.gaprow.subject .s{color:var(--bone);font-weight:600}
+.gaprow.subject .v{color:var(--ice)}
+.gaprow.subject .a span.on{border-color:var(--ice);color:var(--ice)}
+.gaprow.subject .a span.late{border-style:dashed}
+
 /* ── SEASON COMPARISON ───────────────────────────────────────────── */
 .season{margin-top:.9rem;display:flex;flex-direction:column;gap:14px}
 .srow{display:grid;grid-template-columns:clamp(92px,12vw,140px) 1fr;
@@ -649,6 +672,44 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 
     <div class="rule"></div>
 
+    <div class="label cold">And it is doing it on almost nothing</div>
+    <p class="big-p" style="margin-top:.7rem">
+      This is the <em>third-biggest music video this channel has ever released</em> —
+      behind only I Wanna Get Better and Rollercoaster, both from 2014. Those two songs
+      have a lyric video, an official audio and live material. This one has a video, and
+      a live take that arrived <em>twenty months after the song</em>, in August.
+    </p>
+
+    <div class="gap">
+      <div class="gaprow">
+        <div class="s">I Wanna Get Better <small>2014</small></div>
+        <div class="a">
+          <span class="on">Video</span><span class="on">Lyric</span><span class="on">Audio</span><span class="on">Live</span>
+        </div>
+        <div class="v">15.69M</div>
+      </div>
+      <div class="gaprow">
+        <div class="s">Rollercoaster <small>2014</small></div>
+        <div class="a">
+          <span class="on">Video</span><span class="on">Lyric</span><span class="on">Audio</span><span class="on">Live</span>
+        </div>
+        <div class="v">11.81M</div>
+      </div>
+      <div class="gaprow subject">
+        <div class="s">Merry Christmas, Please Don't Call <small>2024 · charts every December</small></div>
+        <div class="a">
+          <span class="on">Video</span><span>Lyric</span><span>Audio</span><span class="on late">Live · Aug 26</span>
+        </div>
+        <div class="v">7.06M</div>
+      </div>
+    </div>
+    <div class="fine" style="margin-top:.7rem">
+      Music videos only, so the comparison is like for like · across both chart seasons
+      the song had one long-form asset on this channel: the video itself
+    </div>
+
+    <div class="rule"></div>
+
     <div class="label cold">And it does this every year — UK Official Singles Chart position</div>
     <div class="season">
       <div class="srow one">
@@ -718,10 +779,13 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
         <td class="tick">●</td><td class="tick">●</td><td class="tick">●</td><td class="tick">●</td>
         <td class="n" style="text-align:right">3.72M</td>
       </tr>
-      <tr>
-        <td>Merry Christmas, Please Don't Call <span class="yr">· 2024</span></td>
+      <tr style="background:rgba(159,178,188,.09)">
+        <td style="color:var(--bone);font-weight:600">Merry Christmas, Please Don't Call
+          <span class="yr">· 2024</span>
+          <span style="color:var(--ice);font-family:var(--mono);font-size:.55rem;
+            letter-spacing:.1em;text-transform:uppercase;margin-left:.4rem">← the gap</span></td>
         <td class="tick">●</td><td class="dash">—</td><td class="dash">—</td><td class="tick">●</td>
-        <td class="n" style="text-align:right">7.09M</td>
+        <td class="n" style="text-align:right;color:var(--ice)">7.09M</td>
       </tr>
       <tr>
         <td>Chinatown <span class="yr">· 2020</span></td>
@@ -832,17 +896,22 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
       <div class="act">
         <div class="num cold">01</div>
         <div>
-          <h3>Move on the Christmas song now, not in November</h3>
+          <h3>Give the Christmas song the assets it has never had — now, not in November</h3>
           <p>
-            It is already running at 5.4&times; its own daily average and the season is
-            two months away. The material exists: the 7.06M video, the Annie DiRusso
-            live version currently sitting in August, and a television performance that
-            never reached the channel. Resurface the video, move the live version into
-            season, link the assets to each other, and treat late November as a fixed
-            date rather than a reaction. Demand grew between season one and season two
-            on the UK chart without the channel doing much at all.
+            It is the channel's third-biggest music video, it charts every December, it
+            grew between its first season and its second, and it is currently running at
+            5.4&times; its own daily average — all on one video. It has no lyric video
+            and no official audio, and the two songs above it have both. That is the
+            clearest unbuilt ecosystem in the catalogue, attached to the one song with a
+            guaranteed annual moment.
           </p>
-          <span class="why">Evidence · <b>December slide — +400K in seven days, and one chart week became four</b></span>
+          <p style="margin-top:.5rem">
+            Before November: add the missing assets, move the Annie DiRusso live version
+            into season, link everything to everything, and chase the December 2025
+            television performance that never reached the channel. The season has
+            already started — the ramp is measurable now.
+          </p>
+          <span class="why">Evidence · <b>December slide — +400K in seven days, two assets against four, one chart week became four</b></span>
         </div>
       </div>
 
