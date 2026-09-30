@@ -24,6 +24,34 @@ import { cmFetch } from './client';
 
 const KEY = (channelId: string) => `cm:artist:${channelId}`;
 
+/* ═══════════════════════════════════════════════════════════════════
+   MANUAL MAPPINGS
+
+   Chartmetric's /get-ids resolves a YouTube channel to an artist, and
+   for most of the roster that is enough. It is not exhaustive: an
+   artist can exist in Chartmetric while that lookup returns nothing
+   for their channel, usually because the channel is not linked on
+   their Chartmetric profile. The artist is then invisible to us for
+   no reason a reader could ever guess.
+
+   These are the ones a human has confirmed by opening the Chartmetric
+   profile and reading the id out of the URL
+   (app.chartmetric.com/artist/<id>). They take priority over the
+   lookup and over any cached miss, so a wrong negative cannot outlive
+   the correction — which is the failure mode this file already has a
+   long comment about.
+
+   Adding one is deliberate: confirm the profile is the right artist
+   first, because a bad id here is worse than no id. It fails loudly in
+   one direction only — the artist name comes back from Chartmetric on
+   the territories call, so a mismatch is visible rather than silent.
+   ═══════════════════════════════════════════════════════════════════ */
+const MANUAL_CM_ARTISTS: Record<string, { id: number; name: string }> = {
+  /* TEN (@tenoffcl). /get-ids returns nothing for this channel; the
+     profile is real and confirmed at app.chartmetric.com/artist/558680. */
+  UC1a1QawKLefYNAjpT0ELNrQ: { id: 558680, name: 'TEN' },
+};
+
 /**
  * A SUCCESSFUL mapping is cached forever — a channel's Chartmetric
  * artist does not change.
@@ -48,7 +76,7 @@ export type CmArtistMapping = {
   cmArtistId: number | null;
   /** Chartmetric's name for this artist — a human check on the match. */
   cmArtistName: string | null;
-  resolvedBy: 'youtube-channel-id';
+  resolvedBy: 'youtube-channel-id' | 'manual';
   resolvedAt: string;
   /** True when Chartmetric simply has no artist for this channel. */
   notFound?: boolean;
@@ -91,6 +119,20 @@ export async function resolveCmArtist(
   opts: { refresh?: boolean } = {},
 ): Promise<CmArtistMapping | null> {
   if (!channelId || !/^UC[A-Za-z0-9_-]{10,}$/.test(channelId)) return null;
+
+  /* Checked before the cache as well as before the lookup: the point of
+     a manual mapping is to override a stored miss, and a miss is exactly
+     what sent us looking for the id by hand. */
+  const manual = MANUAL_CM_ARTISTS[channelId];
+  if (manual) {
+    return {
+      channelId,
+      cmArtistId: manual.id,
+      cmArtistName: manual.name,
+      resolvedBy: 'manual',
+      resolvedAt: new Date().toISOString(),
+    };
+  }
 
   const store = await kv();
   if (store && !opts.refresh) {
