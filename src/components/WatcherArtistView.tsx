@@ -61,6 +61,10 @@ const DECISION_TO_STATE: Record<string, ChannelState> = {
                 belongs to this reader (ours writes to campaignStore,
                 a team's writes to their own board)
      coachBadge Coach is ours. A team board does not show it.
+     metrics    an extra strip directly under the headline cards —
+                where a reader is already looking. Format and audience
+                live here rather than at the foot, because scrolling
+                past the analysis to reach them was the whole problem.
      footer     a team's notes and campaign fields hang below the
                 analysis; ours has nothing there.
      signature  the line at the bottom.
@@ -70,13 +74,16 @@ const DECISION_TO_STATE: Record<string, ChannelState> = {
    ═══════════════════════════════════════════════════════════════════ */
 
 export default async function WatcherArtistView({
-  slug, chrome, coachBadge = true, footer = null, signature,
+  slug, chrome, coachBadge = true, metrics = null, footer = null, signature,
 }: {
   slug: string;
   /** Breadcrumb and top-right controls. Whose page this is. */
   chrome: ReactNode;
   /** Coach is ours; a regional board does not see it. */
   coachBadge?: boolean;
+  /** Rendered directly beneath the headline cards. Shared by every
+   *  board, so one component serves artist pages and team views. */
+  metrics?: ReactNode;
   /** Rendered under the analysis — a team's notes and campaign fields. */
   footer?: ReactNode;
   signature: string;
@@ -440,6 +447,12 @@ export default async function WatcherArtistView({
             </>
           );
         })()}
+
+        {/* ─── METRICS SLOT ────────────────────────────────────────
+            Directly under the headline cards, where the reader
+            already is. Renders nothing when the caller passes
+            nothing, so boards that do not want it are unchanged. */}
+        {metrics}
 
         {/* ─── ACTIVITY SIGNAL FALLBACK (when no better signal exists) ──────── */}
         {nc.bestAvailable.source === 'none' && nc.cadence.uploads30d > 0 && (

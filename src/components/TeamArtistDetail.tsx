@@ -20,6 +20,7 @@ import { checkContentStructure } from '@/lib/contentStructure';
 import TeamDetailClient, { type SnapshotData, type CampaignTrackingData, type WeeklyProgressEntry } from '@/app/team-watcher/[slug]/TeamDetailClient';
 import TeamArtistActions from '@/components/TeamArtistActions';
 import WatcherArtistView from '@/components/WatcherArtistView';
+import FormatSplitPanel from '@/components/FormatSplitPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -252,6 +253,11 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
       slug={slug}
       coachBadge={false}
       signature="Channel activity · public YouTube data · updated daily"
+      /* Same strip as the main Watcher, from the same component and
+         the same slot. UK, Australia and the Nordics get the format
+         split and their top markets without a regional variant —
+         which is the whole point of one Watcher. */
+      metrics={<FormatSplitPanel slug={slug} />}
       chrome={
         <TeamArtistActions
           slug={slug}

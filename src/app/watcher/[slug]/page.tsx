@@ -19,12 +19,11 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     <WatcherArtistView
       slug={slug}
       signature="Watcher watches · Coach plans · You decide"
-      /* One compact strip, not two stacked modules. FormatSplitPanel
-         carries the format split AND the top-three markets inline, and
-         reveals the full country/city breakdown on demand — so
-         YouTubeTerritories is rendered from inside it rather than
-         adding a second full-width block to the foot of the page. */
-      footer={<FormatSplitPanel slug={slug} />}
+      /* Under the headline cards, not at the foot. One strip carries
+         the format split AND the top-three markets, and reveals the
+         full country/city breakdown on demand — so there is no second
+         block anywhere on the page. */
+      metrics={<FormatSplitPanel slug={slug} />}
       chrome={
         <div className="flex items-center justify-between mb-8">
           <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
