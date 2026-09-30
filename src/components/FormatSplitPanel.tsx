@@ -1,73 +1,65 @@
 'use client';
 
 /* ═══════════════════════════════════════════════════════════════════
-   SHORTS vs LONG-FORM — one panel, used everywhere.
+   FORMAT & AUDIENCE — one compact strip, not two panels.
 
-   The honesty problem this component exists to solve: the two format
-   totals are sums over the videos we hold, while overall channel views
-   is YouTube's own lifetime number. Those are different populations.
-   Putting them in a row of three without saying so invites the reader
-   to subtract, and on a large catalogue they would be subtracting
-   numbers that do not belong together.
+   This replaces the oversized standalone panel. It was correct and
+   badly placed: a bordered box at the foot of the page that made
+   people scroll to reach it, in a layout whose own idiom is small
+   label/value cards under a dotted section heading.
 
-   So the panel always shows the gap. When coverage is incomplete an
-   "unaccounted" figure appears with the same weight as the other
-   numbers, and the split bar is labelled as a share of the videos we
-   hold rather than of the channel. Only when coverage is complete does
-   the panel say the split describes the channel.
+   So it now borrows that idiom exactly, and folds the territory
+   summary in beside the format split. Two bolted-on modules become
+   one line of the page.
 
-   Loading, permission and missing-data states are distinct. Nothing
-   renders as zero because data is absent.
+   WHAT STAYS AT A GLANCE
+     the format share, the coverage caveat, the top three markets.
+   WHAT MOVES BEHIND "DETAIL"
+     the unaccounted figure, the sync-overshoot note, the counts, the
+     per-window trends.
+
+   The safeguards are unchanged, only relocated. Incomplete coverage is
+   still stated in the always-visible line, because that is the one
+   caveat a reader must not be able to miss — a Shorts share read as a
+   channel fact when it describes 0.3% of a catalogue is the specific
+   error this component exists to prevent.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from 'react';
+import YouTubeTerritories from './YouTubeTerritories';
 
-const INK = '#0E0E0E';
-const PAPER = '#FAF7F2';
+const BLUE = '#2C6BFF';
+const AMBER = '#C77A16';
 const MUTED = '#E9E2D3';
-const BLUE = '#2C6BFF';   // long-form
-const AMBER = '#C77A16';  // Shorts
-const GREY = '#B9B0A0';   // unaccounted
 
 type Split = {
-  totalViews: number;
-  longformViews: number;
-  shortsViews: number;
-  longformShare: number;
-  shortsShare: number;
-  longformCount: number;
-  shortsCount: number;
+  longformViews: number; shortsViews: number;
+  longformShare: number; shortsShare: number;
+  longformCount: number; shortsCount: number;
   coverage: {
     videosCounted: number;
-    channelVideoCount: number | null;
     channelLifetimeViews: number | null;
     viewsCovered: number | null;
     confidence: 'complete' | 'partial' | 'sample';
   };
 };
-
 type Trend = {
-  windowDays: number;
-  shortsViews: number | null;
-  longformViews: number | null;
-  shortsShare: number | null;
-  daysAvailable: number;
-  daysRequired: number;
-  ready: boolean;
+  windowDays: number; shortsViews: number | null; longformViews: number | null;
+  daysAvailable: number; daysRequired: number; ready: boolean;
 };
-
-type Payload = {
+type FormatPayload = {
   artist: {
-    name: string;
-    available: boolean;
-    reason?: string;
+    available: boolean; reason?: string;
     channelTotalViews?: number | null;
     coverageLabel?: string;
-    channelRepresentative?: boolean;
     windows?: { all: Split };
     trends?: { d7: Trend; d30: Trend; d90: Trend };
   };
 };
+type TerrRow = { rank: number; name: string; code2: string | null; monthlyViews: number; shareOfListed: number; isEstimate: boolean };
+type TerrPayload =
+  | { ok: true; reportingDate: string | null; countries: TerrRow[]; estimatedCount: number }
+  | { ok: false; reason: string };
 
 const fmt = (n: number | null | undefined): string => {
   if (n == null) return '—';
@@ -76,209 +68,146 @@ const fmt = (n: number | null | undefined): string => {
   if (n >= 1_000) return Math.round(n / 1_000) + 'K';
   return String(n);
 };
-const pct = (x: number | null | undefined) =>
-  x == null ? '—' : `${Math.round(x * 100)}%`;
+const pc = (x: number | null | undefined) => (x == null ? '—' : `${Math.round(x * 100)}%`);
 
 export default function FormatSplitPanel({ slug }: { slug: string }) {
-  const [data, setData] = useState<Payload | null>(null);
-  const [err, setErr] = useState(false);
+  const [f, setF] = useState<FormatPayload | null>(null);
+  const [t, setT] = useState<TerrPayload | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let live = true;
     fetch(`/api/format-split?slug=${encodeURIComponent(slug)}`)
-      .then((r) => r.json())
-      .then((j) => live && (j?.artist ? setData(j) : setErr(true)))
-      .catch(() => live && setErr(true));
+      .then((r) => r.json()).then((j) => live && setF(j)).catch(() => live && setF(null));
+    fetch(`/api/chartmetric/territories/${encodeURIComponent(slug)}`)
+      .then((r) => r.json()).then((j) => live && setT(j))
+      .catch(() => live && setT({ ok: false, reason: 'network' }));
     return () => { live = false; };
   }, [slug]);
 
-  if (err) {
-    return (
-      <Shell>
-        <div className="text-[12px] text-ink/45">Format split unavailable right now.</div>
-      </Shell>
-    );
-  }
-  if (!data) {
-    return (
-      <Shell>
-        <div className="text-[11px] uppercase tracking-[0.16em] text-ink/30">Loading…</div>
-      </Shell>
-    );
-  }
+  const a = f?.artist;
+  const s = a?.available ? a.windows?.all : undefined;
+  const terr = t && t.ok ? t : null;
+  const top3 = terr?.countries?.slice(0, 3) ?? [];
 
-  const a = data.artist;
+  /* Nothing to say yet — stay silent rather than occupy space with a
+     skeleton. The rest of the page is the product. */
+  if (!f && !t) return null;
 
-  if (!a.available) {
-    /* Explicitly NOT zeros. "No inventory" and "0 Shorts views" look
-       identical as numbers and mean opposite things. */
-    return (
-      <Shell>
-        <Head />
-        <div className="text-[12px] text-ink/50 mt-2">
-          {a.reason === 'no-video-inventory'
-            ? 'No videos cached for this channel yet, so the split cannot be calculated. This is a data gap, not a zero.'
-            : 'No channel data cached yet. The split appears after the next sync.'}
-        </div>
-      </Shell>
-    );
-  }
-
-  const s = a.windows!.all;
-  const channelTotal = a.channelTotalViews ?? null;
-  const counted = s.longformViews + s.shortsViews;
-  /* rawGap can be NEGATIVE: the channel's lifetime total and the
-     per-video counts are read at different moments in the sync, so on
-     a small catalogue the videos can briefly sum higher than the
-     channel figure. Observed on VENUS GRRRLS at −1,995 (0.7%).
-     Clamping alone would leave an unexplained mismatch on a panel
-     claiming full coverage, so the overshoot is named instead. */
-  const rawGap = channelTotal != null ? channelTotal - counted : null;
-  const unaccounted = rawGap != null ? Math.max(0, rawGap) : null;
+  const complete = s?.coverage.confidence === 'complete';
+  const counted = s ? s.longformViews + s.shortsViews : 0;
+  const rawGap = s && a?.channelTotalViews != null ? a.channelTotalViews - counted : null;
+  const unaccounted = rawGap != null && rawGap > 0 ? rawGap : null;
   const overshoot = rawGap != null && rawGap < 0 ? -rawGap : null;
-  const complete = s.coverage.confidence === 'complete';
 
   return (
-    <Shell>
-      <Head />
-
-      {/* ── the three headline numbers ─────────────────────────── */}
-      <div className="flex flex-wrap gap-x-10 gap-y-4 mt-3">
-        <Metric label="Overall channel views" value={fmt(channelTotal)} note="YouTube lifetime total" />
-        <Metric label="Long-form views" value={fmt(s.longformViews)} colour={BLUE}
-          note={`${pct(s.longformShare)} of counted · ${s.longformCount} videos`} />
-        <Metric label="Shorts views" value={fmt(s.shortsViews)} colour={AMBER}
-          note={`${pct(s.shortsShare)} of counted · ${s.shortsCount} videos`} />
-        {!complete && unaccounted != null && unaccounted > 0 && (
-          <Metric
-            label="Not yet counted"
-            value={fmt(unaccounted)}
-            colour={GREY}
-            note="Views on videos outside our inventory"
-          />
-        )}
+    <div className="mt-2">
+      <div className="text-[10px] uppercase tracking-[0.16em] text-ink/35 mb-3 flex items-center gap-2">
+        <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: '#0E0E0E' }} />
+        Format &amp; audience
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="ml-auto text-[9px] uppercase tracking-[0.14em] text-ink/35 hover:text-ink/70"
+        >
+          {open ? 'Hide detail' : 'Detail'}
+        </button>
       </div>
 
-      {/* ── the bar ────────────────────────────────────────────── */}
-      <div className="mt-5">
-        <div className="flex h-[10px] w-full overflow-hidden rounded" style={{ background: MUTED }}>
-          <div style={{ width: `${s.longformShare * 100}%`, background: BLUE }} title="Long-form" />
-          <div style={{ width: `${s.shortsShare * 100}%`, background: AMBER }} title="Shorts" />
-        </div>
-        <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2 text-[10px] uppercase tracking-[0.12em] text-ink/40">
-          <Key colour={BLUE} label={`Long-form ${pct(s.longformShare)}`} />
-          <Key colour={AMBER} label={`Shorts ${pct(s.shortsShare)}`} />
-          <span className="text-ink/30 normal-case tracking-normal text-[11px]">
-            {complete
-              ? 'Share of this channel’s views'
-              : 'Share of the videos we hold — not of the channel total'}
-          </span>
-        </div>
-      </div>
-
-      {/* ── coverage, stated plainly ───────────────────────────── */}
-      <div className="mt-4 text-[11px] leading-relaxed" style={{ color: 'rgba(14,14,14,0.45)' }}>
-        <span className="font-bold" style={{ color: complete ? INK : 'rgba(14,14,14,0.6)' }}>
-          {complete ? 'Full coverage' : `Partial coverage — ${pct(s.coverage.viewsCovered)} of lifetime views`}
-        </span>
-        {' · '}
-        {a.coverageLabel}
-        {!complete && (
-          <>
-            {' '}The two format totals do not add up to overall channel views, and are not meant to.
-          </>
-        )}
-        {overshoot != null && (
-          <>
-            {' '}The videos sum {fmt(overshoot)} above the channel total — the two figures are
-            read at different points in the sync, so they can differ slightly.
-          </>
-        )}
-      </div>
-
-      {a.trends && <Trends t={a.trends} />}
-    </Shell>
-  );
-}
-
-/* ── trends ──────────────────────────────────────────────────── */
-
-function Trends({ t }: { t: { d7: Trend; d30: Trend; d90: Trend } }) {
-  const rows = [t.d7, t.d30, t.d90];
-  const anyReady = rows.some((r) => r.ready);
-
-  return (
-    <div className="mt-5 pt-4" style={{ borderTop: `1px solid ${MUTED}` }}>
-      <div className="text-[9px] uppercase tracking-[0.16em] text-ink/30 mb-2">
-        Views gained by format
-      </div>
-      {!anyReady ? (
-        /* Daily tracking started recently. Saying so is more useful
-           than a number built from too few days. */
-        <div className="text-[11px] text-ink/45">
-          Collecting daily readings — {rows[0].daysAvailable} day
-          {rows[0].daysAvailable === 1 ? '' : 's'} so far. The 7-day figure appears at{' '}
-          {rows[0].daysRequired} days.
-        </div>
-      ) : (
-        <div className="flex flex-wrap gap-x-8 gap-y-2">
-          {rows.map((r) => (
-            <div key={r.windowDays} className="text-[11px]">
-              <div className="text-[9px] uppercase tracking-[0.12em] text-ink/35 mb-0.5">
-                Last {r.windowDays} days
-              </div>
-              {r.ready ? (
-                <div className="tabular-nums">
-                  <span style={{ color: BLUE }} className="font-bold">{fmt(r.longformViews)}</span>
-                  <span className="text-ink/30"> long-form · </span>
-                  <span style={{ color: AMBER }} className="font-bold">{fmt(r.shortsViews)}</span>
-                  <span className="text-ink/30"> Shorts</span>
-                </div>
-              ) : (
-                <div className="text-ink/35">
-                  {r.daysAvailable}/{r.daysRequired} days collected
-                </div>
-              )}
+      <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
+        {/* ── format split ─────────────────────────────────── */}
+        {s ? (
+          <div className="min-w-[210px]">
+            <div className="flex h-[7px] w-[190px] overflow-hidden rounded-sm" style={{ background: MUTED }}>
+              <div style={{ width: `${s.longformShare * 100}%`, background: BLUE }} />
+              <div style={{ width: `${s.shortsShare * 100}%`, background: AMBER }} />
             </div>
-          ))}
+            <div className="text-[12px] mt-1.5 tabular-nums">
+              <span style={{ color: BLUE }} className="font-black">{pc(s.longformShare)}</span>
+              <span className="text-ink/45"> long-form · </span>
+              <span style={{ color: AMBER }} className="font-black">{pc(s.shortsShare)}</span>
+              <span className="text-ink/45"> Shorts</span>
+            </div>
+            {/* The caveat a reader must not miss stays out here. */}
+            <div className="text-[10px] mt-0.5" style={{ color: complete ? 'rgba(14,14,14,0.35)' : '#9A5B00' }}>
+              {complete
+                ? 'Whole channel'
+                : `Of ${pc(s.coverage.viewsCovered)} of views we hold — not the channel`}
+            </div>
+          </div>
+        ) : a && !a.available ? (
+          <div className="text-[11px] text-ink/40 max-w-[240px]">
+            No video inventory cached yet — the split is unavailable, not zero.
+          </div>
+        ) : null}
+
+        {/* ── channel total ────────────────────────────────── */}
+        {a?.channelTotalViews != null && (
+          <div>
+            <div className="text-[15px] font-black tabular-nums leading-none">
+              {fmt(a.channelTotalViews)}
+            </div>
+            <div className="text-[9px] uppercase tracking-[0.12em] text-ink/40 mt-1">
+              Channel views · lifetime
+            </div>
+          </div>
+        )}
+
+        {/* ── top markets ──────────────────────────────────── */}
+        {top3.length > 0 && (
+          <div>
+            <div className="text-[12px] tabular-nums">
+              {top3.map((c, i) => (
+                <span key={c.code2 ?? c.name}>
+                  {i > 0 && <span className="text-ink/25"> · </span>}
+                  <span className="font-black">{c.code2 ?? c.name}</span>
+                  <span className="text-ink/45"> {fmt(c.monthlyViews)}</span>
+                </span>
+              ))}
+            </div>
+            <div className="text-[9px] uppercase tracking-[0.12em] text-ink/40 mt-1">
+              Top markets · monthly
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── detail ───────────────────────────────────────────── */}
+      {open && (
+        <div className="mt-4 pt-3 text-[11px] leading-relaxed" style={{ borderTop: `1px solid ${MUTED}`, color: 'rgba(14,14,14,0.5)' }}>
+          {s && (
+            <p className="mb-1.5">
+              <b className="text-ink/70">Format.</b> {fmt(s.longformViews)} long-form views across{' '}
+              {s.longformCount} videos, {fmt(s.shortsViews)} Shorts views across {s.shortsCount}.{' '}
+              {a?.coverageLabel}.
+              {unaccounted != null && <> A further {fmt(unaccounted)} lifetime views sit on videos outside our inventory and are not in this split.</>}
+              {overshoot != null && <> The videos sum {fmt(overshoot)} above the channel total — the two are read at different points in the sync, so they can differ slightly.</>}
+            </p>
+          )}
+          {a?.trends && (
+            <p className="mb-1.5">
+              <b className="text-ink/70">Trends.</b>{' '}
+              {a.trends.d7.ready
+                ? [a.trends.d7, a.trends.d30, a.trends.d90].filter((r) => r.ready).map((r) =>
+                    `${r.windowDays}d: ${fmt(r.longformViews)} long-form / ${fmt(r.shortsViews)} Shorts`).join(' · ')
+                : `Collecting daily readings — ${a.trends.d7.daysAvailable} of ${a.trends.d7.daysRequired} days needed for a 7-day figure.`}
+            </p>
+          )}
+          {terr && (
+            <p className="mb-3">
+              <b className="text-ink/70">Audience.</b> Chartmetric monthly YouTube views by country
+              {terr.reportingDate ? `, read ${terr.reportingDate}` : ''} — a different measure from
+              the lifetime channel total above.
+              {terr.estimatedCount > 0 && ` ${terr.estimatedCount} of these markets are modelled estimates.`}
+              {terr.countries.length > 3 && ` ${terr.countries.length} markets returned in total.`}
+            </p>
+          )}
+
+          {/* The full country and city breakdown, unchanged — it just
+              lives behind the expansion now instead of occupying the
+              foot of every page. */}
+          {terr && <YouTubeTerritories slug={slug} />}
         </div>
       )}
     </div>
   );
 }
-
-/* ── chrome ──────────────────────────────────────────────────── */
-
-const Shell = ({ children }: { children: React.ReactNode }) => (
-  <div className="rounded-lg p-5" style={{ background: PAPER, border: `1px solid ${MUTED}`, color: INK }}>
-    {children}
-  </div>
-);
-
-const Head = () => (
-  <div className="text-[10px] uppercase tracking-[0.16em] text-ink/40">
-    Shorts vs long-form
-  </div>
-);
-
-function Metric({ label, value, note, colour }: {
-  label: string; value: string; note?: string; colour?: string;
-}) {
-  return (
-    <div>
-      <div className="font-black tabular-nums leading-none"
-        style={{ fontSize: 'clamp(1.3rem,2.4vw,1.9rem)', color: colour ?? INK }}>
-        {value}
-      </div>
-      <div className="text-[10px] uppercase tracking-[0.12em] text-ink/45 mt-1.5">{label}</div>
-      {note && <div className="text-[10px] text-ink/30 mt-0.5">{note}</div>}
-    </div>
-  );
-}
-
-const Key = ({ colour, label }: { colour: string; label: string }) => (
-  <span className="inline-flex items-center gap-1.5">
-    <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: colour }} />
-    {label}
-  </span>
-);

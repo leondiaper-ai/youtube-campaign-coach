@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { isPinned } from '@/lib/campaignStore';
 import PinCampaignButton from '@/components/PinCampaignButton';
 import WatcherArtistView from '@/components/WatcherArtistView';
-import YouTubeTerritories from '@/components/YouTubeTerritories';
 import FormatSplitPanel from '@/components/FormatSplitPanel';
 
 /* Our own artist page. The analysis lives in WatcherArtistView, which
@@ -20,19 +19,12 @@ export default async function WatcherPage({ params }: { params: Promise<{ slug: 
     <WatcherArtistView
       slug={slug}
       signature="Watcher watches · Coach plans · You decide"
-      /* Chartmetric hangs off the existing footer slot, so
-         WatcherArtistView needs no change at all. It fetches after
-         paint and renders nothing when there is nothing to say. */
-      footer={
-        <div className="flex flex-col gap-6">
-          {/* Format split sits above territories: "what are people
-              watching" reads before "where are they". Both hang off
-              the existing footer slot, so WatcherArtistView still
-              needs no change. */}
-          <FormatSplitPanel slug={slug} />
-          <YouTubeTerritories slug={slug} />
-        </div>
-      }
+      /* One compact strip, not two stacked modules. FormatSplitPanel
+         carries the format split AND the top-three markets inline, and
+         reveals the full country/city breakdown on demand — so
+         YouTubeTerritories is rendered from inside it rather than
+         adding a second full-width block to the foot of the page. */
+      footer={<FormatSplitPanel slug={slug} />}
       chrome={
         <div className="flex items-center justify-between mb-8">
           <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink">
