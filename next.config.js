@@ -10,6 +10,9 @@ const nextConfig = {
       { source: '/ktrap', destination: '/ktrap/index.html' },
       { source: '/palaye', destination: '/palaye/index.html' },
       { source: '/idles', destination: '/idles/index.html' },
+      // Tove Lo — ESTRUS post-album review. Reads its figures live from
+      // /api/full-catalogue rather than freezing a pull into the file.
+      { source: '/tovelo', destination: '/tovelo/index.html' },
       // Living Deep Dive experiment. A DUPLICATE of the Amyl deck — /amyl
       // is already shared with management and must stay byte-identical.
       { source: '/amyl-live', destination: '/amyl-live/index.html' },

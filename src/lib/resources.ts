@@ -120,6 +120,16 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         updated: 'August 2026',
       },
       {
+        title: 'Tove Lo — ESTRUS',
+        blurb:
+          'Post-album review read against the team’s own May YouTube plan — which planned assets reached the channel, '
+          + 'how the gaps between singles were used, which album-day upload the audience picked first, and the European tour as the next content layer. '
+          + 'Figures are computed live from the uploads playlist and Watcher history when the page opens.',
+        href: '/tovelo',
+        kind: 'Deck',
+        updated: 'October 2026',
+      },
+      {
         title: 'Bleachers',
         blurb:
           'Channel deep dive for the artist and their management \u2014 what twelve years of catalogue actually earns, '

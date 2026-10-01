@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tove Lo × YouTube — ESTRUS</title>
+
+<!--
+  TOVE LO × YOUTUBE — post-album campaign review, ESTRUS
+  Virgin Music Group · October 2026
+
+  ─────────────────────────────────────────────────────────────────────
+  WHY THIS DECK READS ITS NUMBERS AT VIEW TIME
+  Every other deep dive freezes one pull of the uploads playlist into
+  the HTML. This one could not: it was built in a session with no
+  YouTube key and no network route to the app, so there was no pull to
+  freeze. Rather than invent figures, the deck asks the app's own
+  authorised endpoints when it opens:
+
+    /api/full-catalogue?handle=@tovelomusic   YouTube Data API v3, the
+                                              complete public uploads
+                                              playlist (CORS-open)
+    /api/debug/snapshots?handle=@tovelomusic  the Watcher's own daily
+                                              channel readings
+    /api/chartmetric/territories/tovelomusic  Chartmetric YouTube
+                                              territories, if mapped
+
+  Same origin first, then the production app — the pattern /ktrap-live
+  and /deck already use. Anything that does not load is SAID, on the
+  page and in the sheet; nothing is back-filled from a guess.
+
+  What is written into the HTML is only what was verified without the
+  API: the team's own YouTube plan (Drive, 20 May 2026), release dates
+  from the label's release sheets and press, the YouTube Premiere
+  notifications of 13 May and 18 Sep, the tour routing, and the
+  Watcher's dated daily digests — quoted as dated readings, never as a
+  series.
+
+  ─────────────────────────────────────────────────────────────────────
+  RULES THIS FILE OBEYS (inherited from /angusandjuliastone)
+   1. No campaign-total view comparison against Dirt Femme (2022). The
+      eras are compared on STRUCTURE only — weeks active, longest
+      silence, upload days, volume, format mix, concentration.
+   2. Any single asset's views carry its AGE beside them.
+   3. Nothing is attributed to an upload. No traffic-source data.
+   4. No daily momentum from lifetime totals. A rate appears only
+      between two real Watcher readings, and only if both exist.
+   5. Formats come from title text and duration; the rule is in the
+      sheet so anyone can re-run it.
+
+  ─────────────────────────────────────────────────────────────────────
+  THE PALETTE IS CHOSEN, NOT SAMPLED
+  The Angus deck sampled its campaign frames. These frames could not
+  be fetched at build time, so this palette is a deliberate choice —
+  heat, skin, ember; ESTRUS is a record about being in heat — and
+  should be re-sampled from the campaign's thumbnails on the next
+  revision. Dirt Femme, where it appears, is drawn in the receding
+  cool so the current era always reads first.
+
+  THE MOTIF IS THE PLAN. The team wrote its YouTube plan down in May.
+  That is unusual and it is what makes this review possible: the
+  question on every slide is the plan's own question.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:wght@400..700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/shared/analysis-sheet.css">
+
+<style>
+:root{
+  --heat:#E2583E;      /* the accent — the current era, the lit week */
+  --heat-lt:#F08A6E;
+  --flesh:#E9A68C;
+  --blush:#C97B84;
+  --ember:#9E2B25;     /* gaps, silences, what is missing */
+  --cool:#6F7FA0;      /* Dirt Femme, 2022 — always receding */
+
+  --ink:#120B0C;
+  --ink-2:#1A1011;
+  --ink-3:#251719;
+  --bone:#F3E9E4;
+  --warm:#C9B3AC;      /* body copy on dark */
+  --dim:#8C7470;       /* labels only */
+  --line:rgba(243,233,228,.14);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+  --an-accent:var(--heat);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--bone);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+.display{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 104,'wght' 760;
+  text-transform:uppercase;line-height:.94;letter-spacing:-.005em}
+h1.display{font-size:clamp(2.5rem,7vw,6.2rem)}
+h2.display{font-size:clamp(1.95rem,5vw,4.3rem)}
+.label{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.4;color:var(--bone);max-width:34ch}
+.big-p{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.5;color:var(--warm);max-width:62ch}
+.big-p b{color:var(--bone)}
+.big-num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 780;line-height:.86;letter-spacing:-.02em}
+
+/* Live values. Until the data arrives they show a quiet placeholder,
+   never a number; if it never arrives they say so. */
+.lv{transition:opacity .4s ease}
+.lv.wait{opacity:.35}
+.lv.na{color:var(--dim)!important}
+
+.deck{width:100%}
+.slide{position:relative;min-height:100vh;width:100%;display:flex;flex-direction:column;
+  justify-content:center;padding:5.5rem var(--pad) 4rem;overflow:hidden;border-bottom:1px solid var(--line)}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+.slide:has(.bleed) .display,.slide:has(.bleed) .statement{text-shadow:0 2px 26px rgba(18,11,12,.75)}
+.bleed{position:absolute;inset:0;z-index:0;
+  background:radial-gradient(ellipse at 70% 30%,rgba(226,88,62,.32),rgba(18,11,12,0) 60%),
+             radial-gradient(ellipse at 20% 80%,rgba(158,43,37,.35),rgba(18,11,12,0) 55%),var(--ink)}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 1s ease}
+.bleed img.ok{opacity:1}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(18,11,12,.985) 6%,rgba(18,11,12,.93) 34%,
+    rgba(18,11,12,.72) 60%,rgba(18,11,12,.34) 84%,rgba(18,11,12,.16) 100%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(18,11,12,.975) 36%,rgba(18,11,12,.86) 52%,
+    rgba(18,11,12,.52) 72%,rgba(18,11,12,.18) 100%)}
+
+
+/* ── THE WEEK STRIP (from /angusandjuliastone) ─────────────────────*/
+.weeks{display:flex;gap:3px;align-items:flex-end;width:100%;height:var(--wh,52px)}
+.wk{flex:1 1 0;min-width:2px;border-radius:1px;background:rgba(243,233,228,.09);height:24%;position:relative}
+.wk.on{height:100%;background:var(--heat)}
+.wk.on.big{background:var(--flesh)}
+.wk.dead{background:rgba(158,43,37,.38);height:24%}
+.wk.mark::after{content:'';position:absolute;left:50%;top:-9px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--bone)}
+.weeks.then .wk.on{background:var(--cool)}
+.weeks.then .wk.on.big{background:#97A5C2}
+.weeks.mini{--wh:16px;gap:2px}
+.weeks.mini .wk{height:32%}
+.wk-axis{display:flex;justify-content:space-between;margin-top:.45rem}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,2.5vw,2.4rem)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2vw,1.8rem)}
+@media(max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+.era{border-top:2px solid var(--line);padding-top:1.1rem}
+.era.now{border-top-color:var(--heat)}
+.era-y{font-family:'DM Mono',monospace;font-size:.8rem;letter-spacing:.18em;color:var(--dim)}
+.era.now .era-y{color:var(--heat)}
+.stat{display:flex;flex-direction:column;gap:.35rem}
+.stat .big-num{font-size:clamp(1.9rem,3.1vw,2.7rem)}
+
+.src{font-family:'DM Mono',monospace;font-size:.64rem;line-height:1.45;color:var(--dim);
+  border-left:2px solid var(--line);padding-left:.7rem;max-width:76ch;margin-top:1.4rem}
+.src b{color:var(--warm);font-weight:400}
+.age{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);border:1px solid var(--line);border-radius:2px;padding:.15rem .4rem;white-space:nowrap}
+
+/* ── Scorecard ──────────────────────────────────────────────────────*/
+.score{display:flex;flex-direction:column;gap:clamp(.7rem,1.4vw,1.15rem);margin-top:clamp(1.4rem,3vw,2.4rem)}
+.score-row{display:grid;grid-template-columns:minmax(150px,1.25fr) 1fr auto 1fr;align-items:center;
+  gap:clamp(.8rem,2vw,2rem);padding-bottom:clamp(.7rem,1.4vw,1.15rem);border-bottom:1px solid var(--line)}
+.score-row:last-child{border-bottom:none}
+.score-k{font-family:'DM Mono',monospace;font-size:clamp(.66rem,.9vw,.76rem);letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+.score-then{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 700;
+  font-size:clamp(1.3rem,2.6vw,2.2rem);color:rgba(151,165,194,.6);text-align:right;line-height:1}
+.score-arrow{color:var(--dim)}
+.score-now{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 800;
+  font-size:clamp(1.7rem,3.6vw,3.1rem);color:var(--heat);line-height:1}
+@media(max-width:700px){
+  .score-row{grid-template-columns:1fr auto 1fr;grid-template-areas:'k k k' 'then arrow now'}
+  .score-k{grid-area:k;margin-bottom:.3rem}
+}
+
+/* ── The plan (phase strip) ─────────────────────────────────────────*/
+.phases{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(.4rem,1vw,.8rem);margin-top:1.8rem}
+.ph{border:1px solid var(--line);border-radius:3px;padding:clamp(.9rem,1.6vw,1.2rem);background:rgba(243,233,228,.02);display:flex;flex-direction:column}
+.ph.key{border-color:var(--heat);background:rgba(226,88,62,.06)}
+.ph-d{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--heat)}
+.ph h3{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 102,'wght' 760;text-transform:uppercase;
+  font-size:clamp(.95rem,1.5vw,1.2rem);line-height:1.02;margin-top:.45rem}
+.ph ul{list-style:none;margin-top:.7rem}
+.ph li{color:var(--warm);font-size:clamp(.8rem,1vw,.9rem);line-height:1.4;padding:.2rem 0;border-top:1px solid var(--line)}
+@media(max-width:960px){.phases{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.phases{grid-template-columns:1fr}}
+
+/* ── Plan vs delivery / song support (chips from /angusandjuliastone) */
+.gap-row{display:grid;grid-template-columns:minmax(150px,1.2fr) minmax(90px,.8fr) auto;
+  gap:clamp(.7rem,1.6vw,1.4rem);align-items:center;padding:clamp(.5rem,.9vw,.7rem) 0;border-bottom:1px solid var(--line)}
+.gap-row:last-child{border-bottom:none}
+.gap-song{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 700;font-size:clamp(.86rem,1.25vw,1.04rem)}
+.gap-song i{font-style:normal;color:var(--dim);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;display:block;margin-top:.15rem}
+.gap-bar{height:clamp(9px,1.3vw,13px);border-radius:2px;background:var(--heat);min-width:3px}
+.gap-chips{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end}
+.chip{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.09em;text-transform:uppercase;padding:.22rem .4rem;border-radius:2px;white-space:nowrap}
+.chip.has{background:rgba(226,88,62,.16);color:var(--heat-lt);border:1px solid rgba(226,88,62,.45)}
+.chip.no{background:transparent;color:rgba(201,179,172,.4);border:1px dashed rgba(201,179,172,.3)}
+.chip.extra{background:rgba(233,166,140,.12);color:var(--flesh);border:1px solid rgba(233,166,140,.4)}
+.phase-h{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--heat);
+  margin-top:1.3rem;padding-bottom:.35rem;border-bottom:1px solid var(--heat)}
+@media(max-width:700px){.gap-row{grid-template-columns:1fr;gap:.35rem}.gap-chips{justify-content:flex-start}}
+
+/* ── Album-day mosaic (from /angusandjuliastone) ────────────────────*/
+.mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.4rem,.9vw,.7rem)}
+.mosaic .tile{position:relative;display:block;overflow:hidden;border-radius:3px;background:var(--ink-3);aspect-ratio:16/9}
+.mosaic .tile.wide{grid-column:span 2;grid-row:span 2}
+.mosaic img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.92);transition:transform .55s ease}
+.mosaic .tile:hover img{transform:scale(1.04)}
+.mosaic .tl{position:absolute;left:0;right:0;bottom:0;padding:.55rem .6rem;
+  background:linear-gradient(to top,rgba(18,11,12,.93),rgba(18,11,12,0));
+  font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.09em;text-transform:uppercase;color:var(--bone);line-height:1.35}
+.mosaic .tl b{display:block;color:var(--heat-lt);font-weight:400}
+@media(max-width:860px){.mosaic{grid-template-columns:repeat(2,1fr)}.mosaic .tile.wide{grid-row:span 1}}
+
+/* Ranked bars — one per album-day upload, equal age so a fair race. */
+.rank{display:flex;flex-direction:column;gap:.45rem;margin-top:1rem}
+.rk{display:grid;grid-template-columns:minmax(120px,1.1fr) 2fr auto;gap:.8rem;align-items:center}
+.rk-n{font-size:.88rem;color:var(--bone);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-b{height:12px;border-radius:0 4px 4px 0;background:var(--heat);min-width:3px}
+.rk-b.lo{background:rgba(243,233,228,.22)}
+.rk-v{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 720;font-size:.95rem;white-space:nowrap}
+
+.hero-num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 96,'wght' 820;
+  font-size:clamp(4rem,14vw,12rem);line-height:.82;letter-spacing:-.03em;color:var(--heat)}
+
+.act{display:grid;grid-template-columns:auto 1fr;gap:clamp(.9rem,2vw,1.6rem);padding:clamp(1rem,1.8vw,1.4rem) 0;border-bottom:1px solid var(--line);align-items:baseline}
+.act:last-child{border-bottom:none}
+.act-n{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.14em;color:var(--heat)}
+.act h3{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 102,'wght' 760;text-transform:uppercase;
+  font-size:clamp(1.05rem,2vw,1.6rem);line-height:1.02}
+.act p{color:var(--warm);margin-top:.5rem;max-width:66ch;font-size:clamp(.92rem,1.2vw,1.05rem)}
+.act p b{color:var(--bone)}
+
+/* Tour routing — the next content source, drawn as dates. */
+.tour{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.5rem;margin-top:1.2rem}
+.td{border:1px solid var(--line);border-radius:3px;padding:.6rem .7rem}
+.td.past{opacity:.45}
+.td.hl{border-color:var(--heat)}
+.td-d{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--heat)}
+.td-c{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 100,'wght' 720;text-transform:uppercase;font-size:.95rem;margin-top:.2rem}
+.td-v{font-size:.78rem;color:var(--dim)}
+
+/* Watcher trend — a single series, so no legend box; the title names it. */
+.trend{position:relative;margin-top:1.2rem}
+.trend svg{width:100%;height:auto;display:block;overflow:visible}
+.trend .tip{position:absolute;pointer-events:none;background:var(--ink-3);border:1px solid var(--line);
+  border-radius:3px;padding:.4rem .55rem;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--bone);
+  white-space:nowrap;transform:translate(-50%,-115%);opacity:0;transition:opacity .15s}
+
+.card{border:1px solid var(--line);border-radius:3px;padding:clamp(1rem,1.8vw,1.4rem);background:rgba(243,233,228,.02)}
+.status{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.2rem}
+.st{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:2px;padding:.25rem .5rem;color:var(--dim)}
+.st.ok{border-color:rgba(226,88,62,.5);color:var(--heat-lt)}
+.st.bad{border-style:dashed}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+/* The sheet's live tables need the same quiet placeholder. */
+.an-panel td.lv.wait{opacity:.4}
+</style>
+</head>
+<body>
+
+
+<div class="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
+<section class="slide" style="justify-content:flex-end;padding-bottom:3.4rem">
+  <div class="bleed scrim-b"><img id="cover-img" alt=""></div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--heat)">Tove Lo · ESTRUS · post-album review</div>
+    <h1 class="display reveal" style="margin-top:1.1rem;max-width:16ch">The team wrote the plan down. Here is what the channel did with it.</h1>
+    <p class="statement reveal" style="margin-top:1.6rem;max-width:44ch">
+      Three singles, a Stromae collaboration, an album released mid-tour on 18 September.
+      <span style="color:var(--heat)">This review reads the campaign against its own YouTube plan.</span>
+    </p>
+    <div class="reveal" style="margin-top:2.4rem;max-width:760px">
+      <div class="weeks mini" id="cover-weeks"></div>
+      <div class="label" style="margin-top:.6rem">Every week of the campaign · <span class="lv wait" id="cover-span">1 May → reading…</span></div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE PLAN ════════════════════════════════════════════════
+     Verified from the team's own document, not from the channel. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What the campaign set out to do</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:20ch">A kit for every single, and no dark weeks between them.</h2>
+    <p class="big-p reveal" style="margin-top:1.1rem;max-width:74ch">
+      The ESTRUS YouTube plan, written on 20 May, gave every single the same supporting kit —
+      video, behind-the-scenes, lyric video, visualiser, Shorts cut-downs — and named the weeks in
+      between as work too: a <b>bridge</b> through July and August, then an <b>album ramp</b> at
+      three to five Shorts a week.
+    </p>
+    <div class="phases reveal">
+      <div class="ph"><div class="ph-d">13 May</div><h3>I'm your girl right?</h3>
+        <ul><li>Official video (Nogari)</li><li>Behind the scenes</li><li>Lyric video · w/o 25 May</li><li>Visualiser · w/o 1 Jun</li></ul></div>
+      <div class="ph"><div class="ph-d">12 June</div><h3>des fleurs × Stromae</h3>
+        <ul><li>Lyric video</li><li>English + French lyric versions</li><li>Visualiser · w/o 22 Jun</li><li>Interview content</li></ul></div>
+      <div class="ph key"><div class="ph-d">July – August</div><h3>The bridge</h3>
+        <ul><li>DNH: lyric + visualiser 7–10 days on</li><li>Story-behind-the-song / BTS</li><li>2–4 Shorts a week</li><li>Personality, as on IG &amp; TikTok</li></ul></div>
+      <div class="ph key"><div class="ph-d">Late Aug – 17 Sep</div><h3>Album ramp</h3>
+        <ul><li>Album trailer</li><li>Snippet medley</li><li>Visual-world teasers</li><li>3–5 Shorts a week</li></ul></div>
+      <div class="ph"><div class="ph-d">18 September</div><h3>ESTRUS</h3>
+        <ul><li>Long-form visualiser film, premiered</li><li>Die For My Art lyric video</li><li>Song-by-song clips</li><li>Community post</li></ul></div>
+    </div>
+    <div class="src">Source: <b>Tove ESTRUS YouTube Plan</b> (Google Doc, last edited 20 May 2026). Release dates: label release sheets and press — see the sheet.</div>
+  </div>
+</section>
+
+<!-- ═══ 3 · PLAN VS DELIVERY ════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What changed between the plan and the channel</div>
+    <h2 class="display reveal lv wait" id="pvd-h" style="margin-top:.7rem;max-width:22ch">Reading the channel against the plan…</h2>
+    <p class="big-p reveal lv wait" id="pvd-p" style="margin-top:1rem;max-width:76ch">Every planned asset, checked against the complete public uploads playlist.</p>
+    <div id="pvd" style="margin-top:1.2rem"></div>
+    <div class="src">Matched on title and date against every public upload on @tovelomusic. A planned asset titled unconventionally, or published on another channel, would read as missing — every campaign upload is listed in the sheet so a miss can be checked.</div>
+  </div>
+</section>
+
+<!-- ═══ 4 · RHYTHM ══════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What changed since the last album</div>
+    <h2 class="display reveal lv wait" id="rhythm-h" style="margin-top:.7rem;max-width:20ch">How often the channel showed up…</h2>
+
+    <div class="score" id="score"></div>
+
+    <div class="grid2" style="margin-top:2.2rem;align-items:start">
+      <div class="era">
+        <div class="era-y">Dirt Femme · 2022</div>
+        <div class="weeks then" id="w22" style="margin-top:1rem"></div>
+        <p class="big-p lv wait" id="w22-p" style="margin-top:.9rem;font-size:.92rem"></p>
+      </div>
+      <div class="era now">
+        <div class="era-y">ESTRUS · 2026</div>
+        <div class="weeks" id="w26" style="margin-top:1rem"></div>
+        <p class="big-p lv wait" id="w26-p" style="margin-top:.9rem;font-size:.92rem"></p>
+      </div>
+    </div>
+    <div class="src">Each window runs from the lead single to the same number of days after the album. Counts and gaps only — no view totals across eras. Dots mark the singles and the album.</div>
+  </div>
+</section>
+
+<!-- ═══ 5 · ALBUM DAY ═══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What the audience responded to</div>
+    <h2 class="display reveal lv wait" id="ad-h" style="margin-top:.7rem;max-width:22ch">Album day…</h2>
+    <p class="big-p reveal lv wait" id="ad-p" style="margin-top:1rem;max-width:76ch"></p>
+    <div class="grid2" style="margin-top:1.6rem;align-items:start">
+      <div class="mosaic" id="ad-mosaic"></div>
+      <div>
+        <div class="label">Views to date · every song upload published 17–19 September · same age, so a fair race</div>
+        <div class="rank" id="ad-rank"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · THE ANCHOR ══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-l"><img id="anchor-img" alt=""></div>
+  <div class="inner">
+    <div style="max-width:56ch">
+      <div class="label reveal">What the audience responded to</div>
+      <div class="hero-num reveal lv wait" id="anchor-num">—</div>
+      <h2 class="display reveal lv wait" id="anchor-h" style="margin-top:1rem;font-size:clamp(1.5rem,3.2vw,2.6rem);max-width:24ch">The campaign's long-form anchor…</h2>
+      <p class="big-p reveal lv wait" id="anchor-p" style="margin-top:1.2rem"></p>
+      <div class="src lv wait" id="anchor-src"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · SONG SUPPORT ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">Where the next phase comes from</div>
+    <h2 class="display reveal lv wait" id="sup-h" style="margin-top:.7rem;max-width:24ch">Which songs got a world, and which got one upload…</h2>
+    <p class="big-p reveal lv wait" id="sup-p" style="margin-top:1rem;max-width:76ch"></p>
+    <div style="margin-top:1.4rem">
+      <div class="gap-row" style="border-bottom:1px solid var(--heat);padding-bottom:.5rem">
+        <div class="label">Song · first upload</div><div class="label">Views to date, all its uploads</div>
+        <div class="label" style="text-align:right">Supporting assets on the channel</div>
+      </div>
+      <div id="sup"></div>
+    </div>
+    <div class="src">Songs identified by stripping the artist prefix, featured artists and bracketed descriptors from titles. Shorts are excluded — their titles rarely name a song.</div>
+  </div>
+</section>
+
+<!-- ═══ 8 · SHORTS ══════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What changed between the plan and the channel</div>
+    <h2 class="display reveal lv wait" id="sh-h" style="margin-top:.7rem;max-width:22ch">Shorts, phase by phase…</h2>
+    <div class="score" id="sh-score"></div>
+    <p class="big-p reveal lv wait" id="sh-p" style="margin-top:1.6rem;max-width:76ch"></p>
+  </div>
+</section>
+
+<!-- ═══ 9 · WHAT THE WATCHER SAW ════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">The channel, read daily</div>
+    <h2 class="display reveal lv wait" id="wt-h" style="margin-top:.7rem;max-width:22ch">What the Watcher recorded…</h2>
+    <p class="big-p reveal lv wait" id="wt-p" style="margin-top:1rem;max-width:76ch"></p>
+    <div class="trend" id="wt-trend"></div>
+    <div class="grid3" style="margin-top:1.6rem" id="wt-digest">
+      <div class="card" style="border-top:2px solid var(--line);padding-top:.9rem">
+        <div class="label">15 Sep · Watcher digest</div>
+        <p class="big-p" style="font-size:.95rem;margin-top:.4rem">"ESTRUS album release in 3 days; channel currently <b>cold (no uploads in 30d)</b>."</p></div>
+      <div class="card" style="border-top:2px solid var(--line);padding-top:.9rem">
+        <div class="label">18 Sep · Watcher digest</div>
+        <p class="big-p" style="font-size:.95rem;margin-top:.4rem">"Multiple official visualisers uploaded this morning… <b>3.88M subs; +10k subs / +42M views over 30 days</b>."</p></div>
+      <div class="card" style="border-top:2px solid var(--line);padding-top:.9rem">
+        <div class="label">18 Sep · YouTube</div>
+        <p class="big-p" style="font-size:.95rem;margin-top:.4rem">Premiere notification, 18:01 UTC: <b>"Tove Lo – ESTRUS"</b>. The plan's long-form film, delivered on the day.</p></div>
+    </div>
+    <div class="src">Digests are the automated daily review built on Watcher data, quoted as dated readings. The 18 Sep note also says "steady short-form cadence in the run-up", which contradicts 15 Sep — the uploads playlist settles it on slide 4.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · LAST TIME ══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal" style="color:var(--ember)">What happens next</div>
+    <h2 class="display reveal lv wait" id="lt-h" style="margin-top:.7rem;max-width:20ch">What happened after the last album…</h2>
+    <div class="grid2" style="margin-top:1.8rem;align-items:center">
+      <div>
+        <div class="label">Uploads per month after Dirt Femme · Oct 2022 → Sep 2023</div>
+        <div class="weeks then" id="after22" style="--wh:86px;margin-top:1rem"></div>
+        <div class="wk-axis"><span class="label">Oct 2022</span><span class="label">Sep 2023</span></div>
+      </div>
+      <p class="big-p lv wait" id="lt-p"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · THE TOUR IS THE NEXT LAYER ═════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What the team should do next</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:22ch">The next content is already booked.</h2>
+    <p class="big-p reveal" style="margin-top:1rem;max-width:76ch">
+      ESTRUS came out three days into a North American tour. The UK and European leg runs
+      <b>5–19 November</b> — Brixton, the Olympia in Paris, and a home show at Avicii Arena in
+      Stockholm to close. Nine rooms with names, in the weeks a post-album channel usually goes quiet.
+    </p>
+    <div class="tour" id="tour"></div>
+    <div id="cm" style="margin-top:1.6rem"></div>
+  </div>
+</section>
+
+<!-- ═══ 12 · WHAT NEXT ══════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label reveal">What the team should do next</div>
+    <h2 class="display reveal" style="margin-top:.7rem">What next.</h2>
+    <div style="margin-top:1.8rem">
+      <div class="act"><div class="act-n">01</div><div>
+        <h3>Film the European tour, room by room</h3>
+        <p>Live performance in a named place is the format the plan never listed. Brixton, the
+        Olympia and Stockholm are the obvious three; one song filmed properly per room is a new door
+        into the record every week of November.</p></div></div>
+      <div class="act"><div class="act-n">02</div><div>
+        <h3>Give the audience's pick its own video</h3>
+        <p class="lv wait" id="next-pick">The album-day visualisers went up together, so their views are a fair vote.
+        The leader is the strongest case for the next proper video.</p></div></div>
+      <div class="act"><div class="act-n">03</div><div>
+        <h3>Finish the kit the plan already wrote</h3>
+        <p class="lv wait" id="next-kit">The plan's own unfilled items are the cheapest backlog on this page — no new
+        idea needed, only the uploads.</p></div></div>
+      <div class="act"><div class="act-n">04</div><div>
+        <h3>No silence longer than a fortnight</h3>
+        <p class="lv wait" id="next-gap">Hold every gap under fourteen days through the tour and into the new year.</p></div></div>
+      <div class="act"><div class="act-n">05</div><div>
+        <h3>Shorts with Tove in them</h3>
+        <p>The plan said it in May: "personality-driven content on Shorts the same way we are on IG /
+        TikTok." Tour days make that easy — backstage, soundcheck, the city — and none of it needs a
+        release to hang on.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 13 · CLOSE ══════════════════════════════════════════════════ -->
+<section class="slide" style="justify-content:flex-end;padding-bottom:4rem">
+  <div class="bleed scrim-b"><img id="close-img" alt=""></div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--heat)">ESTRUS · <span class="lv wait" id="close-days">—</span> days after release</div>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:20ch">The album is out. The tour is the second act.</h2>
+    <p class="statement reveal" style="margin-top:1.4rem;max-width:46ch">
+      The plan built a kit for every single. The next phase is the one it didn't write down:
+      what the channel does when there is nothing left to release.
+    </p>
+    <div class="src lv wait" id="close-src" style="margin-top:2rem">Reading the channel…</div>
+  </div>
+</section>
+
+</div>
+
+<!-- ═══ ANALYSIS APPENDIX ═══════════════════════════════════════════ -->
+<button class="an-btn" id="an-open">Analysis</button>
+
+<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis appendix">
+ <div class="an-in">
+  <button class="an-back">&larr; Back to the review</button>
+  <h2>Analysis appendix</h2>
+  <div class="an-sub lv wait" id="an-sub">Tove Lo &middot; ESTRUS &middot; reading the channel…</div>
+
+  <h3>Where every number comes from</h3>
+  <table id="an-sources">
+    <tr><th>Source</th><th>What it gives</th><th>Status on this load</th></tr>
+  </table>
+  <div class="an-note">
+    <b>This page computes its figures when it opens.</b> It was written in a session with no
+    YouTube key and no route to the app, so instead of freezing one pull into the HTML, it reads
+    the app's own authorised endpoints at view time. The upside is that nothing on it was typed by
+    hand. The cost is that figures move slightly between visits — view counters tick — and the
+    read time above is the one that applies.
+  </div>
+
+  <h3>Channel readings</h3>
+  <table id="an-channel"><tr><th>Metric</th><th>Value</th></tr></table>
+
+  <h3>Campaign structure — the scorecard, in full</h3>
+  <table id="an-score"><tr><th>Measure</th><th>Dirt Femme 2022</th><th>ESTRUS 2026</th></tr></table>
+  <p>Windows run from the lead single (No One Dies From Love, 4 May 2022; I'm your girl right?, 13 May
+  2026) to the same number of days after each album (14 Oct 2022; 18 Sep 2026). <strong>Every row is a
+  count or a within-window ratio</strong>, so none is affected by how long a video has been live.</p>
+
+  <h3>Plan against delivery — every item</h3>
+  <table id="an-plan"><tr><th>Planned</th><th>Match rule</th><th>Found</th></tr></table>
+
+  <h3>Shorts against the plan's cadence</h3>
+  <table id="an-shorts"><tr><th>Phase</th><th>Window</th><th>Shorts</th><th>Per week</th><th>Plan</th></tr></table>
+
+  <h3>The campaign's uploads, by format</h3>
+  <table id="an-fmt"><tr><th>Format</th><th>Uploads</th><th>Median views</th></tr></table>
+  <div class="an-note"><b>Medians, not means,</b> and views are lifetime-to-date at the read time — a
+  May upload has had four months more than a September one. Format medians mix ages, so read them as
+  directional.</div>
+
+  <h3>Watcher history</h3>
+  <table id="an-watch"><tr><th>Measure</th><th>Value</th></tr></table>
+  <div class="an-note"><b>No daily momentum is derived from lifetime totals.</b> A change in channel
+  views appears here only between two real Watcher readings. Readings of zero, and readings lower than
+  the one before, are dropped — the Watcher has a recorded history of stale-API zeros on this channel
+  (see <code>api/debug/repair-snapshots</code>).</div>
+
+  <h3>Chartmetric — YouTube territories</h3>
+  <table id="an-cm"><tr><th>Country</th><th>Monthly views</th><th>Share of listed</th><th>Estimate?</th></tr></table>
+
+  <h3>Every campaign upload</h3>
+  <table id="an-all"><tr><th>Date</th><th>Format</th><th>Title</th><th>Views</th><th>Age</th></tr></table>
+
+  <h3>Verified without the API</h3>
+  <table>
+    <tr><th>Fact</th><th>Source</th></tr>
+    <tr><td>ESTRUS released 18 Sep 2026, Pretty Swede Records / Virgin Music Group</td><td>UK Hit List release sheet; press</td></tr>
+    <tr><td>I'm your girl right? official video premiered 13 May 2026, dir. Nogari</td><td>YouTube Premiere notification; LBB, Promonews</td></tr>
+    <tr><td>des fleurs × Stromae released 12 Jun 2026; video dir. Melchior Leroux</td><td>UK Hit List; mxdwn (30 Jun)</td></tr>
+    <tr><td>DNH released 29–30 Jul 2026 with a visualiser</td><td>Press — sources disagree by a day; the upload date on the channel governs</td></tr>
+    <tr><td>"Tove Lo – ESTRUS" Premiere, 18 Sep 2026, 18:01 UTC</td><td>YouTube Premiere notification</td></tr>
+    <tr><td>Tour: N. America from 15 Sep; UK &amp; Europe 5–19 Nov</td><td>Consequence, Stereoboard</td></tr>
+    <tr><td>Album charted #13 Sweden, #32 UK</td><td>Public chart reporting via search — not checked against OCC or Sverigetopplistan directly</td></tr>
+  </table>
+
+  <h3>What this page does and does not claim</h3>
+  <p>It does <strong>not</strong> claim ESTRUS performed better or worse than Dirt Femme — lifetime
+  view data cannot establish that across a four-year age gap. It does not attribute any channel
+  movement to any upload. It has no YouTube Studio data: no impressions, click-through, retention,
+  traffic sources or unique viewers.</p>
+  <p>It claims how the campaign was <strong>run</strong> — against its own written plan and against
+  the structure of the last album campaign — and which of the album's songs the audience reached for
+  first, which is the one fair race in the data because the album-day uploads share a birthday.</p>
+  <div class="an-fair"><span>Plan items found</span><span>Active weeks</span><span>Longest silence</span>
+    <span>Upload days</span><span>Format mix</span><span>Same-age ranking</span></div>
+
+  <h3>Method</h3>
+  <dl>
+    <dt>Shorts</dt><dd>The catalogue endpoint's flag: 62 seconds or under. YouTube now allows Shorts up
+    to three minutes, so a longer vertical upload counts as long-form here — the same rule as the Angus &amp;
+    Julia Stone review, kept for comparability.</dd>
+    <dt>Formats</dt><dd>From title text, first match wins: Short → film or live stream (15 min+) →
+    visualiser → lyric → official video → behind the scenes → live &amp; performance → trailer &amp;
+    teaser → audio → other.</dd>
+    <dt>Campaign window</dt><dd>1 May 2026 (the Watcher's recorded campaign start) to the read time.
+    The scorecard uses lead-single windows instead so the two eras line up.</dd>
+    <dt>Dates</dt><dd>UTC publish dates from the API. A Premiere's publish date can differ from its
+    air time by a day.</dd>
+  </dl>
+  <div class="an-note"><b>The objection to raise first.</b> This measures the artist channel. A lyric
+  video or visualiser on a Topic channel, a Vevo channel or a DSP canvas does not appear, so "missing"
+  means missing <b>from @tovelomusic</b>.</div>
+  <div class="an-note"><b>The full working is a separate document</b> — sources, the Watcher digest
+  readings quoted in full, every definition, and the judgement calls ranked by how much each could
+  change the conclusion: <code>audits/TOVE-LO-audit.md</code>.</div>
+  <button class="an-back" style="margin-top:2.4rem;margin-bottom:0">&larr; Back to the review</button>
+ </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DATA — read from the app's own authorised endpoints at view time.
+   Same origin first (production or a preview with its env vars), then
+   the production app. Nothing below is a hard-coded channel figure.
+   ═══════════════════════════════════════════════════════════════════ */
+var HANDLE = '@tovelomusic', SLUG = 'tovelomusic';
+var PROD = 'https://youtube-campaign-coach.vercel.app';
+var BASES = location.protocol.indexOf('http') === 0 && location.origin !== PROD ? [location.origin, PROD] : [PROD];
+
+var D = {                                   // dates the page is built around
+  start:'2026-05-01', lead:'2026-05-13', fleurs:'2026-06-12', dnh:'2026-07-29', album:'2026-09-18',
+  bridgeEnd:'2026-08-20', rampEnd:'2026-09-17',
+  dfLead:'2022-05-04', dfAlbum:'2022-10-14'
+};
+var MARKS26 = [D.lead, D.fleurs, D.dnh, D.album];
+var MARKS22 = ['2022-05-04', '2022-07-27', D.dfAlbum];   // No One Dies From Love, 2 Die 4, the album
+
+var TOUR = [
+  ['2026-09-15','Nashville','Pinnacle'],['2026-09-16','Chicago','Salt Shed'],['2026-09-19','Brooklyn','Under The Bridge'],
+  ['2026-09-22','Toronto','Coca-Cola Coliseum'],['2026-09-27','Los Angeles','Greek Theatre'],['2026-10-01','Mexico City',''],
+  ['2026-11-05','Manchester','O2 Victoria Warehouse'],['2026-11-07','London','O2 Academy Brixton',1],
+  ['2026-11-09','Brussels','Forest National'],['2026-11-10','Paris',"L'Olympia",1],['2026-11-12','Amsterdam','AFAS Live'],
+  ['2026-11-14','Berlin','Columbiahalle'],['2026-11-16','Copenhagen','Royal Arena'],['2026-11-17','Oslo','Spektrum'],
+  ['2026-11-19','Stockholm','Avicii Arena',1]
+];
+
+var DAY = 864e5;
+function dt(s){ return new Date(s.length === 10 ? s + 'T00:00:00Z' : s); }
+function ymd(d){ return new Date(d).toISOString().slice(0,10); }
+function days(a,b){ return Math.round((dt(b) - dt(a)) / DAY); }
+function fmtD(s){ return dt(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}); }
+function fmtDY(s){ return dt(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}); }
+function n(x){ return x == null ? '—' : Math.round(x).toLocaleString('en-GB'); }
+function k(x){ if(x == null) return '—'; if(x >= 1e6) return (x/1e6).toFixed(x >= 1e7 ? 1 : 2) + 'M'; if(x >= 1e3) return (x/1e3).toFixed(x >= 1e5 ? 0 : 1) + 'K'; return String(x); }
+function pct(x){ return Math.round(x * 100) + '%'; }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function median(a){ if(!a.length) return null; var s = a.slice().sort(function(x,y){return x-y;}), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2; }
+function $(id){ return document.getElementById(id); }
+function set(id, html){ var el = $(id); if(!el) return; el.innerHTML = html; el.classList.remove('wait'); }
+function na(id, html){ var el = $(id); if(!el) return; el.innerHTML = html; el.classList.remove('wait'); el.classList.add('na'); }
+function thumb(id, q){ return 'https://i.ytimg.com/vi/' + id + '/' + (q || 'hqdefault') + '.jpg'; }
+function yt(id){ return 'https://www.youtube.com/watch?v=' + id; }
+function bleed(imgId, vid){
+  var img = $(imgId); if(!img || !vid) return;
+  img.onload = function(){ img.classList.add('ok'); };
+  img.onerror = function(){ img.onerror = null; img.src = thumb(vid); };
+  img.src = thumb(vid, 'maxresdefault');
+}
+
+function getJSON(path, ms){
+  var i = 0;
+  function next(){
+    if(i >= BASES.length) return Promise.resolve({ ok:false, error:'unreachable' });
+    var base = BASES[i++], ctl = ('AbortController' in window) ? new AbortController() : null;
+    var t = ctl ? setTimeout(function(){ ctl.abort(); }, ms) : null;
+    return fetch(base + path, { cache:'no-store', signal: ctl ? ctl.signal : undefined })
+      .then(function(r){ return r.json().then(function(j){ return { status:r.status, j:j }; }); })
+      .then(function(res){
+        if(t) clearTimeout(t);
+        if(res.status >= 400 || (res.j && res.j.error && !res.j.videos && !res.j.allViewsTimeline)) return next();
+        return { ok:true, j:res.j, base:base };
+      })
+      .catch(function(){ if(t) clearTimeout(t); return next(); });
+  }
+  return next();
+}
+
+/* ═══ CLASSIFICATION ═══════════════════════════════════════════════ */
+function fmtOf(v){
+  var t = v.title || '';
+  if(v.isShort) return 'Short';
+  if(v.durationSec >= 900) return /live|concert|stream|tour/i.test(t) ? 'Live & performance' : 'Long-form film';
+  if(/visuali[sz]er/i.test(t)) return 'Visualiser';
+  if(/lyric/i.test(t)) return 'Lyric video';
+  if(/official (music )?video|music video|\(video\)/i.test(t)) return 'Official video';
+  if(/behind the scenes|\bbts\b|making of/i.test(t)) return 'Behind the scenes';
+  if(/\blive\b|session|performance|acoustic|tiny desk/i.test(t)) return 'Live & performance';
+  if(/trailer|teaser|snippet|medley/i.test(t)) return 'Trailer & teaser';
+  if(/\baudio\b/i.test(t)) return 'Audio';
+  return 'Other long-form';
+}
+function songOf(title){
+  var s = (title || '').replace(/^\s*tove\s*lo\s*[-–—:|]\s*/i, '')
+    .replace(/[\(\[][^\)\]]*[\)\]]/g, '')
+    .replace(/\s+(x|×|ft\.?|feat\.?|with)\s+.*$/i, '')
+    .replace(/\s*[-–—|]\s*(official|lyric|visuali[sz]er|audio|live|music video|video).*$/i, '')
+    .replace(/["“”]/g, '').trim();
+  return s;
+}
+
+/* ═══ STRUCTURE ════════════════════════════════════════════════════ */
+function windowStats(vids, from, to){
+  var inW = vids.filter(function(v){ var d = v.d; return d >= from && d <= to; });
+  var weeks = Math.ceil((days(from, to) + 1) / 7), per = [];
+  for(var w = 0; w < weeks; w++) per.push(0);
+  inW.forEach(function(v){ per[Math.min(weeks - 1, Math.floor(days(from, v.d) / 7))]++; });
+  var udays = Array.from(new Set(inW.map(function(v){ return v.d; }))).sort();
+  var pts = [from].concat(udays).concat([to]), gap = 0, gapFrom = from, gapTo = to;
+  if(!udays.length){ gap = days(from, to); }
+  for(var i = 1; i < pts.length; i++){
+    var g = days(pts[i-1], pts[i]) - (i === 1 || i === pts.length - 1 ? 0 : 1);
+    if(g > gap){ gap = g; gapFrom = pts[i-1]; gapTo = pts[i]; }
+  }
+  var total = inW.reduce(function(a,v){ return a + v.views; }, 0);
+  var top = inW.slice().sort(function(a,b){ return b.views - a.views; })[0];
+  return {
+    vids:inW, weeks:weeks, per:per, active:per.filter(function(x){return x>0;}).length,
+    uploadDays:udays.length, uploads:inW.length,
+    long:inW.filter(function(v){return !v.isShort;}).length, shorts:inW.filter(function(v){return v.isShort;}).length,
+    gap:gap, gapFrom:gapFrom, gapTo:gapTo, topShare: total ? top.views / total : null, top:top
+  };
+}
+
+function paint(el, weeks, marksIdx){
+  if(!el) return;
+  el.innerHTML = '';
+  var max = Math.max.apply(null, weeks.concat([1]));
+  weeks.forEach(function(c, i){
+    var d = document.createElement('div');
+    d.className = 'wk' + (c > 0 ? ' on' : ' dead') + (marksIdx && marksIdx.indexOf(i) >= 0 ? ' mark' : '');
+    if(c > 0){ d.style.height = (38 + (c / max) * 62) + '%'; if(c >= max * .75) d.className += ' big'; }
+    d.title = (c === 0 ? 'No uploads' : c + (c === 1 ? ' upload' : ' uploads'));
+    el.appendChild(d);
+  });
+}
+function markIdx(from, marks){ return marks.map(function(m){ return Math.floor(days(from, m) / 7); }); }
+
+/* ═══ PLAN ITEMS ═══════════════════════════════════════════════════ */
+var IY = /girl right/i, FL = /fleurs/i, DN = /\bdnh\b/i;
+var PLAN = [
+  { ph:"I'm your girl right?", item:'Official video', rule:'"girl right" + official video', f:function(v){ return IY.test(v.title) && /official (music )?video|music video/i.test(v.title) && !/lyric|visuali/i.test(v.title); } },
+  { ph:"I'm your girl right?", item:'Behind the scenes', rule:'"girl right" + BTS / behind / making of', f:function(v){ return IY.test(v.title) && /behind|\bbts\b|making of/i.test(v.title); } },
+  { ph:"I'm your girl right?", item:'Lyric video', rule:'"girl right" + lyric', f:function(v){ return IY.test(v.title) && /lyric/i.test(v.title); } },
+  { ph:"I'm your girl right?", item:'Visualiser', rule:'"girl right" + visualiser', f:function(v){ return IY.test(v.title) && /visuali[sz]er/i.test(v.title); } },
+  { ph:'des fleurs × Stromae', item:'Lyric video', rule:'"fleurs" + lyric', f:function(v){ return FL.test(v.title) && /lyric/i.test(v.title); } },
+  { ph:'des fleurs × Stromae', item:'English lyric version', rule:'"fleurs" + lyric + English', f:function(v){ return FL.test(v.title) && /lyric/i.test(v.title) && /english/i.test(v.title); } },
+  { ph:'des fleurs × Stromae', item:'French lyric version', rule:'"fleurs" + lyric + French / français', f:function(v){ return FL.test(v.title) && /lyric/i.test(v.title) && /french|fran[cç]ais/i.test(v.title); } },
+  { ph:'des fleurs × Stromae', item:'Visualiser', rule:'"fleurs" + visualiser', f:function(v){ return FL.test(v.title) && /visuali[sz]er/i.test(v.title); } },
+  { ph:'des fleurs × Stromae', item:'Official video', rule:'"fleurs" + official video', extra:true, f:function(v){ return FL.test(v.title) && /official (music )?video|music video/i.test(v.title) && !/lyric|visuali/i.test(v.title); } },
+  { ph:'The bridge · DNH', item:'DNH lyric video', rule:'"DNH" + lyric', f:function(v){ return DN.test(v.title) && /lyric/i.test(v.title); } },
+  { ph:'The bridge · DNH', item:'DNH visualiser', rule:'"DNH" + visualiser', f:function(v){ return DN.test(v.title) && /visuali[sz]er/i.test(v.title); } },
+  { ph:'The bridge · DNH', item:'Story behind the song / BTS', rule:'behind / BTS / story, 29 Jul – 17 Sep', f:function(v){ return v.d >= D.dnh && v.d <= D.rampEnd && /behind|\bbts\b|story|making of/i.test(v.title); } },
+  { ph:'Album ramp', item:'Album trailer', rule:'trailer / teaser, 21 Aug – 17 Sep', f:function(v){ return v.d > D.bridgeEnd && v.d <= D.rampEnd && /trailer|teaser/i.test(v.title); } },
+  { ph:'Album ramp', item:'Snippet medley', rule:'snippet / medley, before 18 Sep', f:function(v){ return v.d >= D.start && v.d < D.album && /snippet|medley/i.test(v.title); } },
+  { ph:'ESTRUS · 18 Sep', item:'Long-form visualiser film', rule:'"ESTRUS" in title, 10 min+, from 17 Sep', f:function(v){ return v.d >= D.rampEnd && /estrus/i.test(v.title) && v.durationSec >= 600; } },
+  { ph:'ESTRUS · 18 Sep', item:'Die For My Art lyric video', rule:'"die for my art" + lyric', f:function(v){ return /die for my art/i.test(v.title) && /lyric/i.test(v.title); } },
+  { ph:'ESTRUS · 18 Sep', item:'Song visualisers on album day', rule:'visualiser, 17–19 Sep', f:function(v){ return v.d >= '2026-09-17' && v.d <= '2026-09-19' && /visuali[sz]er/i.test(v.title); } }
+];
+
+/* ═══ RENDER ═══════════════════════════════════════════════════════ */
+var STATUS = [];
+function statusChip(label, ok, detail, what){
+  STATUS.push([label, ok, detail, what]);
+  var el = $('status'); if(!el) return;
+  el.innerHTML = STATUS.map(function(s){ return '<span class="st ' + (s[1] ? 'ok' : 'bad') + '" title="' + esc(s[2]) + '">' + esc(s[0]) + (s[1] ? '' : ' · unavailable') + '</span>'; }).join('');
+  var t = $('an-sources');
+  if(t) t.innerHTML = '<tr><th>Source</th><th>What it gives</th><th>Status on this load</th></tr>' +
+    STATUS.map(function(s){ return '<tr' + (s[1] ? '' : ' class="lead"') + '><td>' + esc(s[0]) + '</td><td>' + esc(s[3] || '') + '</td><td' + (s[1] ? '' : ' class="miss"') + '>' + esc(s[2]) + '</td></tr>'; }).join('');
+}
+
+function renderCatalogue(cat){
+  var READ = ymd(cat.fetchedAt), READ_LABEL = fmtDY(cat.fetchedAt);
+  var all = (cat.videos || []).filter(function(v){ return v.publishedAt; }).map(function(v){
+    v.d = v.publishedAt.slice(0,10); v.fmt = fmtOf(v); v.age = days(v.d, READ); return v;
+  });
+  var camp = all.filter(function(v){ return v.d >= D.start && v.d <= READ; }).sort(function(a,b){ return a.d < b.d ? -1 : 1; });
+  var post = days(D.album, READ);
+
+  /* Channel sheet */
+  var c = cat.channel || {};
+  $('an-channel').innerHTML = '<tr><th>Metric</th><th>Value</th></tr>' +
+    '<tr><td>Subscribers (rounded by YouTube)</td><td class="n">' + n(c.subscribers) + '</td></tr>' +
+    '<tr><td>Lifetime channel views</td><td class="n">' + n(c.lifetimeViews) + '</td></tr>' +
+    '<tr><td>Videos the channel reports</td><td class="n">' + n(c.publicVideoCount) + '</td></tr>' +
+    '<tr><td>Videos in the public uploads playlist</td><td class="n">' + n(all.length) + '</td></tr>' +
+    '<tr><td>Campaign uploads, 1 May → ' + esc(READ_LABEL) + '</td><td class="n">' + n(camp.length) + '</td></tr>' +
+    (cat.capped ? '<tr class="lead"><td>Playlist pull capped — oldest uploads missing</td><td class="miss">capped</td></tr>' : '');
+  set('an-sub', 'Tove Lo &middot; ESTRUS &middot; uploads read ' + esc(new Date(cat.fetchedAt).toUTCString().replace(' GMT',' UTC')));
+
+  /* Cover */
+  var cw = windowStats(all, D.start, READ);
+  paint($('cover-weeks'), cw.per, markIdx(D.start, MARKS26));
+  set('cover-span', '1 May → ' + esc(READ_LABEL) + ' · ' + cw.uploads + ' uploads');
+  set('close-days', String(post));
+
+  /* ── Plan vs delivery ── */
+  var rows = PLAN.map(function(p){
+    var hits = camp.filter(p.f).sort(function(a,b){ return a.d < b.d ? -1 : 1; });
+    return { p:p, hits:hits };
+  });
+  var planned = rows.filter(function(r){ return !r.p.extra; }), found = planned.filter(function(r){ return r.hits.length; });
+  var html = '', ph = '';
+  rows.forEach(function(r){
+    if(r.p.ph !== ph){ ph = r.p.ph; html += '<div class="phase-h">' + esc(ph) + '</div>'; }
+    var h = r.hits[0];
+    html += '<div class="gap-row"><div class="gap-song">' + esc(r.p.item) +
+      '<i>' + (h ? esc(fmtD(h.d)) + (r.hits.length > 1 ? ' · ' + r.hits.length + ' uploads' : '') : 'not on the channel') + '</i></div>' +
+      '<div>' + (h ? '<span class="label" style="color:var(--bone)">' + k(h.views) + '</span> <span class="age">' + h.age + ' days</span>' : '') + '</div>' +
+      '<div class="gap-chips">' + (h ? '<span class="chip ' + (r.p.extra ? 'extra' : 'has') + '">' + (r.p.extra ? 'Beyond the plan' : 'Delivered') + '</span>'
+        : '<span class="chip no">' + (r.p.extra ? 'Not made' : 'Missing') + '</span>') + '</div></div>';
+  });
+  $('pvd').innerHTML = html;
+  var miss = planned.filter(function(r){ return !r.hits.length; });
+  set('pvd-h', found.length + ' of ' + planned.length + ' planned assets are on the channel.');
+  set('pvd-p', miss.length
+    ? 'Delivered: ' + found.map(function(r){ return esc(r.p.item.replace(/^DNH /,'DNH ')) + (r.p.ph.indexOf('girl') >= 0 ? ' (IYGR)' : r.p.ph.indexOf('fleurs') >= 0 ? ' (des fleurs)' : ''); }).slice(0,6).join(', ') + (found.length > 6 ? '…' : '') +
+      '. <b>Not on the channel: ' + miss.map(function(r){ return esc(r.p.item) + (r.p.ph.indexOf('girl') >= 0 ? ' (IYGR)' : r.p.ph.indexOf('fleurs') >= 0 ? ' (des fleurs)' : ''); }).join(', ') + '.</b>'
+    : 'Every planned asset is on the channel. That is rarer than it sounds.');
+  $('an-plan').innerHTML = '<tr><th>Planned</th><th>Match rule</th><th>Found</th></tr>' + rows.map(function(r){
+    return '<tr' + (r.hits.length ? '' : ' class="lead"') + '><td>' + esc(r.p.ph + ' — ' + r.p.item) + (r.p.extra ? ' <em>(not in plan)</em>' : '') + '</td><td>' + esc(r.p.rule) + '</td>' +
+      (r.hits.length ? '<td>' + r.hits.map(function(h){ return esc(fmtD(h.d) + ' · ' + h.title); }).join('<br>') + '</td>' : '<td class="miss">&mdash;</td>') + '</tr>';
+  }).join('');
+  var kitMiss = miss.map(function(r){ return r.p.item + (r.p.ph.indexOf('girl') >= 0 ? ' for I\'m your girl right?' : r.p.ph.indexOf('fleurs') >= 0 ? ' for des fleurs' : ''); });
+  set('next-kit', kitMiss.length
+    ? 'Still unfilled from the May plan: <b>' + esc(kitMiss.join('; ')) + '</b>. The cheapest backlog on this page — no new idea needed, only the uploads.'
+    : 'Every item in the May plan is on the channel. The kit is finished; what remains is the tour.');
+
+  /* ── Rhythm: ESTRUS vs Dirt Femme, lead single → album + same days ── */
+  var e26 = windowStats(all, D.lead, READ);
+  var dfEnd = ymd(dt(D.dfAlbum).getTime() + post * DAY);
+  var e22 = windowStats(all, D.dfLead, dfEnd);
+  paint($('w26'), e26.per, markIdx(D.lead, MARKS26));
+  paint($('w22'), e22.per, markIdx(D.dfLead, MARKS22));
+  var S = [
+    ['Weeks the channel published', pct(e22.active / e22.weeks), pct(e26.active / e26.weeks)],
+    ['Longest silence', e22.gap + ' days', e26.gap + ' days'],
+    ['Days with an upload', e22.uploadDays, e26.uploadDays],
+    ['Uploads', e22.uploads, e26.uploads],
+    ['Long-form pieces', e22.long, e26.long]
+  ];
+  $('score').innerHTML = S.map(function(r){ return '<div class="score-row"><div class="score-k">' + r[0] + '</div><div class="score-then">' + r[1] + '</div><div class="score-arrow">&rarr;</div><div class="score-now">' + r[2] + '</div></div>'; }).join('');
+  var inRamp = e26.gapTo > D.bridgeEnd && e26.gapFrom < D.album;
+  var gapTxt = fmtD(e26.gapFrom) + ' → ' + fmtD(e26.gapTo);
+  set('rhythm-h', e26.gap >= 21 && inRamp
+    ? 'The longest silence of the campaign fell where the plan asked for the most.'
+    : e26.gap > e22.gap ? 'The channel went quiet for longer than it did last time.'
+    : e26.active / e26.weeks >= e22.active / e22.weeks ? 'The channel showed up more often than last time.'
+    : 'The channel published in fewer weeks than last time.');
+  set('w26-p', 'Published in ' + e26.active + ' of ' + e26.weeks + ' weeks. Longest silence: <b>' + e26.gap + ' days</b>, ' + esc(gapTxt) +
+    (inRamp ? ' — the window the plan set aside for the album ramp at three to five Shorts a week.' : '.'));
+  set('w22-p', 'Published in ' + e22.active + ' of ' + e22.weeks + ' weeks. Longest silence: ' + e22.gap + ' days, ' + esc(fmtD(e22.gapFrom) + ' → ' + fmtD(e22.gapTo)) + ' 2022.');
+  set('next-gap', 'The campaign\'s longest silence was <b>' + e26.gap + ' days</b> (' + esc(gapTxt) + '). Hold every gap under fourteen days through the November tour and into the new year — the dates on the next slide do most of the work.');
+  $('an-score').innerHTML = '<tr><th>Measure</th><th>Dirt Femme 2022</th><th>ESTRUS 2026</th></tr>' +
+    '<tr><td>Window</td><td class="n">' + fmtD(D.dfLead) + ' → ' + fmtD(dfEnd) + '</td><td class="n">' + fmtD(D.lead) + ' → ' + fmtD(READ) + '</td></tr>' +
+    '<tr><td>Weeks</td><td class="n">' + e22.weeks + '</td><td class="n">' + e26.weeks + '</td></tr>' +
+    S.map(function(r, i){ return '<tr' + (i < 2 ? ' class="lead"' : '') + '><td>' + r[0] + '</td><td class="n">' + r[1] + '</td><td class="n">' + r[2] + '</td></tr>'; }).join('') +
+    '<tr><td>Shorts</td><td class="n">' + e22.shorts + '</td><td class="n">' + e26.shorts + '</td></tr>' +
+    '<tr><td>Longest silence, dates</td><td>' + esc(fmtD(e22.gapFrom) + ' → ' + fmtD(e22.gapTo)) + '</td><td>' + esc(gapTxt) + '</td></tr>' +
+    '<tr><td>Top asset\'s share of window views</td><td class="n">' + (e22.topShare == null ? '—' : pct(e22.topShare)) + '</td><td class="n">' + (e26.topShare == null ? '—' : pct(e26.topShare)) + '</td></tr>';
+
+  /* ── Album day: equal-age uploads, a fair race ── */
+  var ad = all.filter(function(v){ return v.d >= '2026-09-17' && v.d <= '2026-09-19'; }).sort(function(a,b){ return b.views - a.views; });
+  var adLong = ad.filter(function(v){ return !v.isShort; });
+  var adSongs = adLong.filter(function(v){ return v.fmt !== 'Long-form film'; });
+  if(ad.length){
+    var lead = adSongs[0] || adLong[0] || ad[0], med = median(adSongs.map(function(v){ return v.views; }));
+    var film = ad.filter(function(v){ return v.fmt === 'Long-form film'; })[0];
+    set('ad-h', ad.length + (ad.length === 1 ? ' upload' : ' uploads') + ' around album day. The audience has already picked one.');
+    set('ad-p', '<b>' + esc(songOf(lead.title) || lead.title) + '</b> leads with ' + k(lead.views) + ' views — ' +
+      (med ? (lead.views / med).toFixed(1) + '× the median song upload in the set' : '') + '. Everything here went up within the same three days, so unlike every other comparison on this page, ' +
+      '<b>age is not a factor</b>.' + (film ? ' The long-form ESTRUS film has ' + k(film.views) + '.' : ''));
+    var race = adSongs.length ? adSongs : ad, max = race[0].views || 1;
+    $('ad-rank').innerHTML = race.slice(0, 14).map(function(v, i){
+      return '<div class="rk" title="' + esc(v.title) + '"><div class="rk-n">' + esc(songOf(v.title) || v.title) + ' <span class="label">' + esc(v.fmt) + '</span></div>' +
+        '<div><div class="rk-b' + (i ? ' lo' : '') + '" style="width:' + Math.max(1, v.views / max * 100) + '%"></div></div><div class="rk-v">' + k(v.views) + '</div></div>';
+    }).join('');
+    $('ad-mosaic').innerHTML = adLong.slice(0, 7).map(function(v, i){
+      return '<a class="tile' + (i === 0 ? ' wide' : '') + '" href="' + yt(v.id) + '" target="_blank" rel="noopener"><img src="' + thumb(v.id) + '" alt="' + esc(v.title) + '" loading="lazy">' +
+        '<div class="tl"><b>' + esc(v.fmt) + '</b>' + esc(songOf(v.title) || v.title) + ' &middot; ' + k(v.views) + '</div></a>';
+    }).join('');
+    set('next-pick', 'The album-day uploads share a birthday, so their views are a fair vote — and <b>' + esc(songOf(lead.title) || lead.title) +
+      '</b> is leading at ' + k(lead.views) + ', ' + (med ? (lead.views / med).toFixed(1) + '× the median' : '') + '. A visualiser is a placeholder; the song the audience picked first is the strongest case for the next proper video.');
+    bleed('close-img', (film || lead).id);
+  } else {
+    na('ad-h', 'No uploads on the channel around album day.');
+    na('ad-p', 'The uploads playlist has nothing published 17–19 September. The plan called for a premiered film, a lyric video and song-by-song clips.');
+    na('next-pick', 'No album-day uploads to rank yet.');
+  }
+
+  /* ── Anchor: biggest long-form of the campaign window ── */
+  var cl = camp.filter(function(v){ return !v.isShort; }).sort(function(a,b){ return b.views - a.views; });
+  var clTotal = cl.reduce(function(a,v){ return a + v.views; }, 0);
+  if(cl.length){
+    var an = cl[0], second = cl[1];
+    bleed('anchor-img', an.id); bleed('cover-img', an.id);
+    set('anchor-num', k(an.views));
+    set('anchor-h', esc(songOf(an.title) || an.title) + ' is the campaign\'s long-form anchor.');
+    set('anchor-p', 'It holds <b>' + pct(an.views / clTotal) + '</b> of all long-form views in the campaign window, from one upload of ' + cl.length + '. ' +
+      (second ? 'The next biggest, ' + esc(songOf(second.title) || second.title) + ', has ' + k(second.views) + ' <span class="age">' + second.age + ' days</span>.' : ''));
+    set('anchor-src', esc(an.title) + ' · ' + n(an.views) + ' <span class="age">' + an.age + ' days</span> · published ' + esc(fmtDY(an.d)) + '. Lifetime-to-date; older uploads have had longer.');
+  }
+
+  /* ── Song support ── */
+  var songs = {};
+  camp.filter(function(v){ return !v.isShort; }).forEach(function(v){
+    var nm = songOf(v.title), s = nm.toLowerCase(); if(!s || s.length < 2) return;
+    (songs[s] = songs[s] || { name:nm, vids:[], views:0, first:v.d }).vids.push(v);
+    songs[s].views += v.views; if(v.d < songs[s].first) songs[s].first = v.d;
+  });
+  var list = Object.keys(songs).map(function(s){ return songs[s]; }).filter(function(s){ return !/estrus|trailer|teaser/i.test(s.name); })
+    .sort(function(a,b){ return b.views - a.views; });
+  var KIT = [['Official video','Video'],['Lyric video','Lyric'],['Visualiser','Visualiser'],['Live & performance','Live'],['Behind the scenes','BTS']];
+  var mx = list.length ? list[0].views : 1;
+  $('sup').innerHTML = list.slice(0, 12).map(function(s){
+    var has = {}; s.vids.forEach(function(v){ has[v.fmt] = 1; });
+    return '<div class="gap-row"><div class="gap-song">' + esc(s.name) + '<i>' + esc(fmtD(s.first)) + ' · ' + s.vids.length + (s.vids.length === 1 ? ' upload' : ' uploads') + '</i></div>' +
+      '<div><div class="gap-bar" style="width:' + Math.max(1, s.views / mx * 100) + '%"></div><div class="label" style="margin-top:.3rem">' + k(s.views) + '</div></div>' +
+      '<div class="gap-chips">' + KIT.map(function(kk){ return '<span class="chip ' + (has[kk[0]] ? 'has' : 'no') + '">' + (has[kk[0]] ? '' : 'No ') + kk[1] + '</span>'; }).join('') + '</div></div>';
+  }).join('');
+  var single = list.filter(function(s){ return s.vids.length === 1; }), noLive = list.filter(function(s){ return !s.vids.some(function(v){ return v.fmt === 'Live & performance'; }); });
+  if(list.length){
+    set('sup-h', single.length >= list.length / 2
+      ? single.length + ' of ' + list.length + ' songs have exactly one upload.'
+      : 'The singles got a world. ' + single.length + ' album songs got one upload.');
+    set('sup-p', 'The three singles were given several formats each. ' + (single.length ? '<b>' + single.length + '</b> songs exist on the channel as a single upload, ' : '') +
+      (noLive.length === list.length ? 'and <b>not one song from the campaign has a live performance on the channel</b> — while the record is being played live every week.' : noLive.length + ' have no live performance.'));
+  } else { na('sup-h', 'No long-form campaign uploads to group by song.'); }
+
+  /* ── Shorts against the plan's cadence ── */
+  var PH = [
+    ['Lead single', D.lead, '2026-06-11', null],
+    ['des fleurs', D.fleurs, '2026-07-28', null],
+    ['The bridge', D.dnh, D.bridgeEnd, [2,4]],
+    ['Album ramp', '2026-08-21', D.rampEnd, [3,5]],
+    ['Since the album', D.album, READ, null]
+  ];
+  var shR = PH.map(function(p){
+    var to = p[2] < READ ? p[2] : READ, wk = Math.max(1, (days(p[1], to) + 1) / 7);
+    var c = camp.filter(function(v){ return v.isShort && v.d >= p[1] && v.d <= to; }).length;
+    return { name:p[0], from:p[1], to:to, c:c, pw:c / wk, plan:p[3], wk:wk };
+  });
+  $('sh-score').innerHTML = shR.map(function(r){
+    return '<div class="score-row"><div class="score-k">' + r.name + ' · ' + fmtD(r.from) + '–' + fmtD(r.to) + '</div>' +
+      '<div class="score-then">' + (r.plan ? r.plan[0] + '–' + r.plan[1] + '/wk' : '') + '</div><div class="score-arrow">' + (r.plan ? 'plan &rarr;' : '') + '</div>' +
+      '<div class="score-now">' + r.pw.toFixed(1) + '<span style="font-size:.45em;color:var(--dim)"> /wk · ' + r.c + '</span></div></div>';
+  }).join('');
+  var br = shR[2], rp = shR[3];
+  var shMed = median(camp.filter(function(v){ return v.isShort; }).map(function(v){ return v.views; }));
+  set('sh-h', (br.pw < 2 && rp.pw < 3) ? 'The plan asked for Shorts every week between singles. They mostly didn\'t come.'
+    : (br.pw >= 2 && rp.pw >= 3) ? 'Shorts kept the plan\'s cadence between the singles.'
+    : 'Shorts kept the plan\'s cadence in one gap and not the other.');
+  set('sh-p', 'Bridge: <b>' + br.c + '</b> Shorts in ' + Math.round(br.wk) + ' weeks against a plan of 2–4 a week. Album ramp: <b>' + rp.c + '</b> in ' + Math.round(rp.wk) + ' weeks against 3–5 a week. ' +
+    (shMed != null ? 'Campaign Shorts median: ' + k(shMed) + ' views.' : ''));
+  $('an-shorts').innerHTML = '<tr><th>Phase</th><th>Window</th><th>Shorts</th><th>Per week</th><th>Plan</th></tr>' + shR.map(function(r){
+    var short = r.plan && r.pw < r.plan[0];
+    return '<tr' + (short ? ' class="lead"' : '') + '><td>' + r.name + '</td><td>' + fmtD(r.from) + ' → ' + fmtD(r.to) + '</td><td class="n">' + r.c + '</td><td class="n' + (short ? ' dn' : '') + '">' + r.pw.toFixed(1) + '</td><td>' + (r.plan ? r.plan[0] + '–' + r.plan[1] + '/wk' : '—') + '</td></tr>';
+  }).join('');
+
+  /* ── Formats ── */
+  var F = {};
+  camp.forEach(function(v){ (F[v.fmt] = F[v.fmt] || []).push(v.views); });
+  $('an-fmt').innerHTML = '<tr><th>Format</th><th>Uploads</th><th>Median views</th></tr>' + Object.keys(F).sort(function(a,b){ return F[b].length - F[a].length; }).map(function(f){
+    return '<tr><td>' + esc(f) + '</td><td class="n">' + F[f].length + '</td><td class="n">' + n(median(F[f])) + '</td></tr>';
+  }).join('');
+  $('an-all').innerHTML = '<tr><th>Date</th><th>Format</th><th>Title</th><th>Views</th><th>Age</th></tr>' + camp.map(function(v){
+    return '<tr><td>' + esc(v.d) + '</td><td>' + esc(v.fmt) + '</td><td><a href="' + yt(v.id) + '" target="_blank" rel="noopener">' + esc(v.title) + '</a></td><td class="n">' + n(v.views) + '</td><td>' + v.age + 'd</td></tr>';
+  }).join('');
+
+  /* ── Last time: twelve months after Dirt Femme ── */
+  var months = [];
+  for(var m = 0; m < 12; m++){
+    var a = new Date(Date.UTC(2022, 9 + m, 1)), b = new Date(Date.UTC(2022, 10 + m, 1));
+    months.push(all.filter(function(v){ var t = dt(v.d); return t >= a && t < b; }).length);
+  }
+  paint($('after22'), months);
+  var firstThree = months.slice(0,3).reduce(function(x,y){ return x + y; }, 0), year = months.reduce(function(x,y){ return x + y; }, 0);
+  var zeroM = months.filter(function(x){ return x === 0; }).length;
+  set('lt-h', zeroM >= 3 ? 'Last time, the channel went quiet after the album.' : 'Last time, the channel kept going after the album.');
+  set('lt-p', 'In the twelve months from October 2022 the channel published <b>' + year + '</b> uploads — ' + firstThree + ' in October to December, the record\'s first three months' +
+    (zeroM ? ', and <b>' + zeroM + ' months with none at all</b>' : '') + '. ESTRUS is ' + post + ' days old. ' +
+    'The difference this time is that the next three months already have a tour in them.');
+
+  set('close-src', n(c.subscribers) + ' subscribers · ' + n(c.lifetimeViews) + ' lifetime views · read ' + esc(READ_LABEL) + '. Subscriber counts are rounded by YouTube and quoted as observed readings, not growth.');
+}
+
+function renderCatalogueFailed(){
+  ['pvd-h','rhythm-h','ad-h','anchor-h','sup-h','sh-h','lt-h'].forEach(function(id){ na(id, 'The uploads playlist did not load on this visit.'); });
+  ['pvd-p','w26-p','w22-p','ad-p','anchor-p','sup-p','sh-p','lt-p','anchor-num','anchor-src','cover-span','close-days'].forEach(function(id){ na(id, id === 'anchor-num' ? '—' : ''); });
+  na('close-src', 'The channel could not be read on this visit. Every figure on this page is computed from the live uploads playlist, so none is shown rather than any guessed.');
+  na('an-sub', 'Tove Lo &middot; ESTRUS &middot; uploads playlist unavailable on this load');
+  ['next-pick','next-kit','next-gap'].forEach(function(id){ var el = $(id); if(el) el.classList.remove('wait'); });
+}
+
+/* ── Watcher: real readings only; a rate exists only between two of them ── */
+function renderWatcher(r){
+  var tl = (r.j.allViewsTimeline || []).filter(function(p){ return p && p.views > 0; }).sort(function(a,b){ return a.ts < b.ts ? -1 : 1; });
+  var clean = [];
+  tl.forEach(function(p){ if(!clean.length || p.views >= clean[clean.length - 1].views) clean.push(p); });
+  var dropped = tl.length - clean.length;
+  var tbl = '<tr><th>Measure</th><th>Value</th></tr>' +
+    '<tr><td>Readings returned</td><td class="n">' + n(r.j.totalSnapshots) + '</td></tr>' +
+    '<tr><td>Usable readings (zeros and regressions dropped)</td><td class="n">' + n(clean.length) + '</td></tr>' +
+    (clean.length ? '<tr><td>Span</td><td class="n">' + fmtDY(clean[0].ts) + ' → ' + fmtDY(clean[clean.length-1].ts) + '</td></tr>' : '');
+  if(clean.length < 2){
+    $('an-watch').innerHTML = tbl;
+    na('wt-h', 'The Watcher holds too few readings to draw a line.');
+    na('wt-p', 'Below are the dated readings the daily digest recorded around the album. They are observations on a day, not a series.');
+    return false;
+  }
+  /* Real deltas between real readings: the fortnight either side of the album. */
+  function at(day, tol){ var t = dt(day).getTime(), best = null;
+    clean.forEach(function(p){ var d = Math.abs(dt(p.ts).getTime() - t); if(d <= tol * DAY && (!best || d < best.d)) best = { p:p, d:d }; }); return best && best.p; }
+  var a0 = at(ymd(dt(D.album).getTime() - 14 * DAY), 2), a1 = at(D.album, 1), a2 = at(ymd(dt(D.album).getTime() + 13 * DAY), 2);
+  var before = a0 && a1 ? { v:a1.views - a0.views, d:days(a0.ts.slice(0,10), a1.ts.slice(0,10)) } : null;
+  var after = a1 && a2 ? { v:a2.views - a1.views, d:days(a1.ts.slice(0,10), a2.ts.slice(0,10)) } : null;
+  tbl += '<tr class="lead"><td>Channel views gained, fortnight before album (between two readings)</td><td class="n">' + (before && before.d > 0 ? n(before.v) + ' over ' + before.d + ' days' : 'no readings at both ends') + '</td></tr>' +
+         '<tr class="lead"><td>Channel views gained, since album (between two readings)</td><td class="n">' + (after && after.d > 0 ? n(after.v) + ' over ' + after.d + ' days' : 'no readings at both ends') + '</td></tr>' +
+         (dropped ? '<tr><td>Readings dropped as stale</td><td class="n">' + dropped + '</td></tr>' : '');
+  $('an-watch').innerHTML = tbl;
+
+  /* The line: lifetime channel views, one series, crosshair tooltip. */
+  var W = 1000, H = 260, P = { l:8, r:8, t:16, b:26 };
+  var t0 = dt(clean[0].ts).getTime(), t1 = dt(clean[clean.length-1].ts).getTime(), v0 = clean[0].views, v1 = clean[clean.length-1].views;
+  var X = function(t){ return P.l + (t - t0) / Math.max(1, t1 - t0) * (W - P.l - P.r); };
+  var Y = function(v){ return H - P.b - (v - v0) / Math.max(1, v1 - v0) * (H - P.t - P.b); };
+  var path = clean.map(function(p, i){ return (i ? 'L' : 'M') + X(dt(p.ts).getTime()).toFixed(1) + ' ' + Y(p.views).toFixed(1); }).join(' ');
+  var marks = MARKS26.filter(function(m){ var t = dt(m).getTime(); return t >= t0 && t <= t1; }).map(function(m){
+    var x = X(dt(m).getTime()).toFixed(1);
+    return '<line x1="' + x + '" x2="' + x + '" y1="' + P.t + '" y2="' + (H - P.b) + '" stroke="rgba(243,233,228,.22)" stroke-dasharray="3 4"/>' +
+      '<text x="' + x + '" y="' + (H - 8) + '" fill="#8C7470" font-family="DM Mono, monospace" font-size="11" text-anchor="middle">' + fmtD(m) + '</text>';
+  }).join('');
+  $('wt-trend').innerHTML = '<div class="label">Lifetime channel views, as the Watcher read them · ' + clean.length + ' readings</div>' +
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Lifetime channel views by Watcher reading">' + marks +
+    '<text x="' + P.l + '" y="' + (P.t - 4) + '" fill="#8C7470" font-family="DM Mono, monospace" font-size="11">' + k(v1) + '</text>' +
+    '<text x="' + P.l + '" y="' + (H - P.b - 6) + '" fill="#8C7470" font-family="DM Mono, monospace" font-size="11">' + k(v0) + '</text>' +
+    '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + (H - P.b) + '" y2="' + (H - P.b) + '" stroke="rgba(243,233,228,.14)"/>' +
+    '<path d="' + path + '" fill="none" stroke="#E2583E" stroke-width="2" stroke-linejoin="round"/>' +
+    '<line id="wt-x" y1="' + P.t + '" y2="' + (H - P.b) + '" stroke="rgba(243,233,228,.5)" opacity="0"/>' +
+    '<circle id="wt-dot" r="5" fill="#E2583E" stroke="#120B0C" stroke-width="2" opacity="0"/>' +
+    '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="transparent" id="wt-hit"/></svg><div class="tip" id="wt-tip"></div>';
+  var svg = $('wt-trend').querySelector('svg'), tip = $('wt-tip');
+  $('wt-hit').addEventListener('mousemove', function(e){
+    var r0 = svg.getBoundingClientRect(), x = (e.clientX - r0.left) / r0.width * W, best = clean[0];
+    clean.forEach(function(p){ if(Math.abs(X(dt(p.ts).getTime()) - x) < Math.abs(X(dt(best.ts).getTime()) - x)) best = p; });
+    var px = X(dt(best.ts).getTime()), py = Y(best.views);
+    $('wt-x').setAttribute('x1', px); $('wt-x').setAttribute('x2', px); $('wt-x').setAttribute('opacity', 1);
+    $('wt-dot').setAttribute('cx', px); $('wt-dot').setAttribute('cy', py); $('wt-dot').setAttribute('opacity', 1);
+    tip.style.left = (px / W * 100) + '%'; tip.style.top = (py / H * r0.height) + 'px'; tip.style.opacity = 1;
+    tip.textContent = fmtDY(best.ts) + ' · ' + n(best.views) + ' views';
+  });
+  $('wt-hit').addEventListener('mouseleave', function(){ tip.style.opacity = 0; $('wt-x').setAttribute('opacity', 0); $('wt-dot').setAttribute('opacity', 0); });
+
+  set('wt-h', 'The Watcher has been reading this channel since ' + fmtDY(clean[0].ts) + '.');
+  set('wt-p', clean.length + ' usable daily readings of the channel\'s public totals. ' +
+    (before && after && before.d > 0 && after.d > 0
+      ? 'Between readings, the channel gained <b>' + k(before.v) + '</b> views in the ' + before.d + ' days before the album and <b>' + k(after.v) + '</b> in the ' + after.d + ' days after — channel-wide, not attributable to any one upload.'
+      : 'Readings either side of the album are not both present, so no before-and-after is drawn.'));
+  return true;
+}
+
+function renderChartmetric(r){
+  var j = r.j;
+  if(!j || !j.ok || !(j.countries || []).length) return false;
+  var top = j.countries.slice(0, 10);
+  $('an-cm').innerHTML = '<tr><th>Country</th><th>Monthly views</th><th>Share of listed</th><th>Estimate?</th></tr>' + top.map(function(c){
+    return '<tr><td>' + esc(c.name) + '</td><td class="n">' + n(c.monthlyViews) + '</td><td class="n">' + pct(c.shareOfListed) + '</td><td>' + (c.isEstimate ? 'Modelled' : 'Measured') + '</td></tr>';
+  }).join('') + '<tr><td colspan="4">Reporting date ' + esc(j.reportingDate || '—') + ' · shares are of the territories Chartmetric returned, not of the channel.</td></tr>';
+  var TOURC = /united kingdom|belgium|france|netherlands|germany|denmark|norway|sweden|united states|canada|mexico/i;
+  var onTour = top.filter(function(c){ return TOURC.test(c.name); });
+  $('cm').innerHTML = '<div class="label">Where the YouTube audience is · Chartmetric, ' + esc(j.reportingDate || 'latest') + '</div>' +
+    '<div class="rank" style="max-width:720px">' + top.slice(0, 6).map(function(c, i){
+      return '<div class="rk"><div class="rk-n">' + esc(c.name) + (TOURC.test(c.name) ? ' <span class="label" style="color:var(--heat)">tour</span>' : '') + '</div>' +
+        '<div><div class="rk-b' + (i ? ' lo' : '') + '" style="width:' + Math.max(1, c.monthlyViews / top[0].monthlyViews * 100) + '%"></div></div><div class="rk-v">' + k(c.monthlyViews) + '</div></div>';
+    }).join('') + '</div><p class="big-p" style="margin-top:1rem;font-size:.95rem">' + onTour.length + ' of the top ' + top.length + ' YouTube territories are on the tour routing.</p>';
+  return true;
+}
+
+function renderTour(today){
+  $('tour').innerHTML = TOUR.map(function(t){
+    return '<div class="td' + (t[0] < today ? ' past' : '') + (t[3] ? ' hl' : '') + '"><div class="td-d">' + fmtD(t[0]) + '</div><div class="td-c">' + esc(t[1]) + '</div><div class="td-v">' + esc(t[2]) + '</div></div>';
+  }).join('');
+}
+
+/* ═══ BOOT ══════════════════════════════════════════════════════════ */
+renderTour(ymd(Date.now()));
+
+getJSON('/api/full-catalogue?handle=' + encodeURIComponent(HANDLE) + '&slim=1', 120000).then(function(r){
+  if(r.ok && r.j && r.j.videos){
+    statusChip('Uploads playlist', true, 'Loaded ' + r.j.videos.length + ' videos from ' + r.base.replace(/^https?:\/\//,''), 'YouTube Data API v3 via /api/full-catalogue — every public upload');
+    try { renderCatalogue(r.j); } catch(e){ console.error(e); renderCatalogueFailed(); }
+  } else {
+    statusChip('Uploads playlist', false, 'Could not reach /api/full-catalogue', 'YouTube Data API v3 via /api/full-catalogue');
+    renderCatalogueFailed();
+  }
+});
+getJSON('/api/debug/snapshots?handle=' + encodeURIComponent(HANDLE), 30000).then(function(r){
+  var ok = r.ok && r.j && Array.isArray(r.j.allViewsTimeline) && renderWatcher(r);
+  statusChip('Watcher history', !!ok, ok ? r.j.totalSnapshots + ' readings' : (r.ok ? 'Too few readings' : 'Not readable from this origin'), 'Daily public channel readings — /api/debug/snapshots');
+  if(!ok){ na('wt-h', 'What the Watcher recorded around the album.'); var p = $('wt-p'); if(p && p.classList.contains('wait')) na('wt-p', 'The Watcher\'s daily history could not be read on this visit, so no trend is drawn. These are the dated readings its digest recorded.'); $('an-watch').innerHTML += '<tr><td>Status</td><td class="miss">unavailable on this load</td></tr>'; }
+});
+getJSON('/api/chartmetric/territories/' + SLUG, 30000).then(function(r){
+  var ok = r.ok && renderChartmetric(r);
+  statusChip('Chartmetric territories', !!ok, ok ? 'Reporting date ' + (r.j.reportingDate || '—') : (r.ok && r.j && r.j.reason ? 'Not available: ' + r.j.reason : 'Not readable from this origin'), 'Chartmetric YouTube monthly views by country');
+  if(!ok) $('an-cm').innerHTML += '<tr><td colspan="4" class="miss">Not available on this load</td></tr>';
+});
+
+/* Reveal on scroll */
+var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); },
+  { threshold:.12, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
+</script>
+<script src="/shared/analysis-sheet.js"></script>
+</body>
+</html>
