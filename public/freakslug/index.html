@@ -120,6 +120,8 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   margin:clamp(1.3rem,2.9vw,2.2rem) 0 .9rem}
 @media(min-width:700px){.hero2{flex-direction:row;flex-wrap:wrap;align-items:flex-start}}
 .hero2 > div{flex:0 0 auto;min-width:0}
+/* Tabular figures so the digits don't jitter while a number counts up. */
+.hn,.sn,.bv,.shift .sv{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .hero2 .hn{font-family:var(--disp);font-weight:800;white-space:nowrap;
   font-size:clamp(2.4rem,5.5vw,4.2rem);line-height:.92;letter-spacing:-.03em}
 .hero2 .hn.cold{color:var(--cobalt)}
@@ -746,12 +748,29 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     return Math.round(v).toLocaleString();
   }
 
+  /* Reserve each figure's finished width BEFORE counting.
+     A counting figure changes width every frame — "0" to "727" is 98px,
+     "0.0K" to "78.7K" is 70px — and in a flex row that reflows the whole
+     line on every tick, which is what made the slides judder on open and
+     occasionally wrap mid-count. Measuring the final text first and
+     pinning min-width holds the layout completely still; tabular figures
+     stop the digits jittering within that width. */
+  function lockWidths(group){
+    group.querySelectorAll('[data-n],[data-pct]').forEach(function(v){
+      var w = v.getBoundingClientRect().width;
+      if (!w) return;
+      if (getComputedStyle(v).display.indexOf('inline') === 0) v.style.display = 'inline-block';
+      v.style.minWidth = Math.ceil(w) + 'px';
+    });
+  }
+
   function paint(group){
     group.classList.add('go');
     group.querySelectorAll('.bf').forEach(function(f){
       f.style.width = f.getAttribute('data-w') + '%';
     });
     if (reduced) return;                         // leave the final text alone
+    lockWidths(group);
     group.querySelectorAll('[data-n],[data-pct]').forEach(function(v, i){
       var end = parseFloat(v.getAttribute('data-n') || v.getAttribute('data-pct'));
       if (isNaN(end)) return;
@@ -767,6 +786,18 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
       setTimeout(function(){ requestAnimationFrame(step); }, delay);
     });
   }
+
+  /* A pinned min-width is correct only for the width it was measured at,
+     so drop the locks on resize and let the figures re-measure. */
+  var resizeT;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function(){
+      document.querySelectorAll('[data-n],[data-pct]').forEach(function(v){
+        v.style.minWidth = '';
+      });
+    }, 120);
+  });
 
   var groups = document.querySelectorAll('.bars, .count');
   if (!('IntersectionObserver' in window)) {
