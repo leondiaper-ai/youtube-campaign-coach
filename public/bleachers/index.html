@@ -311,8 +311,18 @@ h2.display{font-size:clamp(1.9rem,4.8vw,3.7rem)}
 .rwline::before{content:'';position:absolute;left:0;top:0;height:2px;width:6%;
   background:var(--ice)}
 .rwmarks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:-2.1rem}
-.rwm{position:relative;padding-top:1.7rem}
-.rwm::before{content:'';position:absolute;top:calc(2.1rem - 4px);left:0;
+/* ── THE RULE HAS TO PASS ABOVE THE LABELS, NOT THROUGH THEM ───────
+   The marks are pulled up by 2.1rem so they sit on the timeline, which
+   put the rule at ~31px inside each marker while the week label began
+   at 27px — so the line struck straight through "6 WEEKS", and the dot,
+   also at left:0, sat on top of "NOW".
+
+   The content now starts below both. The dot is centred on the rule by
+   transform rather than by a hand-tuned offset, so it stays centred if
+   the dot size or the rule weight ever changes. */
+.rwm{position:relative;padding-top:2.9rem}
+.rwm::before{content:'';position:absolute;top:calc(2.1rem - 1px);left:0;
+  transform:translateY(-50%);
   width:9px;height:9px;border-radius:50%;background:var(--night);
   border:2px solid rgba(159,178,188,.5)}
 .rwm.now::before{background:var(--ice);border-color:var(--ice)}
