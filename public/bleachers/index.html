@@ -215,6 +215,12 @@ h2.display{font-size:clamp(1.9rem,4.8vw,3.7rem)}
   text-transform:uppercase;color:var(--faint);margin-top:.5rem}
 .twonum .ex{font-size:.86rem;line-height:1.55;color:var(--smoke);margin-top:.65rem}
 .twonum .ex b{color:var(--bone)}
+/* A caveat, not a section. Unboxed, it reads as a footnote with two
+   figures in it rather than as a second argument on the page. */
+.twonum.plain > div{padding:0;border:0;border-top:1px solid var(--rule);
+  border-radius:0;background:none;padding-top:.9rem}
+.twonum.plain .ex{margin-top:.4rem}
+@media(min-width:760px){.twonum.plain{gap:clamp(24px,5vw,72px)}}
 
 /* ── THUMBS ──────────────────────────────────────────────────────── */
 .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.7vw,20px)}
@@ -416,7 +422,44 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 </section>
 
 
-<!-- ════════ 2 · THE CATALOGUE ════════════════════════════════════ -->
+<!-- ════════ 2 · LONGEVITY — THE FINDING ═════════════════════════ -->
+<section class="slide" id="longevity">
+  <div class="bleed scrim-b" style="opacity:.6">
+    <img src="https://i.ytimg.com/vi/z28Pgx8yCm0/maxresdefault.jpg" alt="the van"
+      style="object-position:50% 38%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/z28Pgx8yCm0/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label">Catalogue longevity · 27 April – 28 September 2026 · our own daily snapshots</div>
+    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:20ch">
+      97% of viewing came<br>from existing videos.
+    </h2>
+    <p class="big-p" style="max-width:48ch">
+      Even with a new album released during the period.
+    </p>
+
+    <div class="hero2">
+      <div>
+        <div class="hn">+23.88M</div>
+        <div class="hk">Channel views added<br>154 days · ~155,000 a day</div>
+      </div>
+      <div>
+        <div class="hn" style="color:var(--brick)">2.7%</div>
+        <div class="hk">Held by the five videos<br>published in that window</div>
+      </div>
+    </div>
+
+    <div class="fine" style="margin-top:.4rem;max-width:74ch">
+      <em>everyone for ten minutes</em> was released 22 May 2026, inside this window ·
+      the 2.7% compares those uploads' lifetime views against the channel's growth over
+      the period, so it is a measure of where viewing landed rather than exact
+      attribution — the album campaign is likely to have lifted catalogue viewing too
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 3 · THE CATALOGUE ════════════════════════════════════ -->
 <section class="slide" id="catalogue">
   <div class="bleed scrim-l">
     <img src="https://i.ytimg.com/vi/4POQtHyD2Yg/maxresdefault.jpg" alt="Bleachers on the roof at Electric Lady"
@@ -445,35 +488,33 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
       <div><div class="n">94</div><div class="k">Shorts</div></div>
     </div>
 
-    <div class="twonum">
+    <!-- Two bordered panels carrying four lines of prose each made the
+         difference between the two numbers look like the subject of the
+         page. It is a caveat, and it only has to survive one reading: use
+         111M, not 189M. The full account of why they differ belongs in the
+         analysis page, where someone who wants it will go looking. -->
+    <div class="twonum plain">
       <div>
-        <div class="hd">111.0M</div>
-        <div class="cap">The catalogue · what we can open and check</div>
-        <div class="ex">
-          The 230 uploads on this channel, summed. Every percentage in this deck is a
-          share of this number, and each traces back to individual videos.
-        </div>
+        <div class="hd">111M</div>
+        <div class="cap">Measurable catalogue</div>
+        <div class="ex">230 public uploads we can inspect individually.</div>
       </div>
       <div>
-        <div class="hd" style="color:var(--faint)">+78.0M</div>
-        <div class="cap">Unaccounted · lifetime counter reads 189.0M</div>
-        <div class="ex">
-          The channel counter sits 78.0M above what the uploads sum to — removed or
-          private videos, or counting differences at YouTube's end.
-          <b>Nothing here is divided by it.</b>
-        </div>
+        <div class="hd" style="color:var(--faint)">189M</div>
+        <div class="cap">Lifetime channel counter</div>
+        <div class="ex">78M sits outside the currently measurable catalogue.</div>
       </div>
     </div>
 
     <div class="fine" style="margin-top:.9rem">
-      Exact catalogue total at the time of reading: 111,033,880 views across 230
-      uploads · public counters move through the day, so figures are rounded
+      All format analysis in this deck uses the 111M measurable catalogue ·
+      111,033,880 views across 230 uploads at the time of reading
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 3 · WHAT EARNS ═══════════════════════════════════════ -->
+<!-- ════════ 4 · WHAT EARNS ═══════════════════════════════════════ -->
 <section class="slide" id="earns">
   <div class="inner">
     <div class="label">Format economics · every upload in exactly one category</div>
@@ -525,43 +566,6 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
     <div class="fine" style="margin-top:.9rem">
       Seven categories · 230 uploads · both columns reconcile exactly to the
       catalogue total · bars drawn against the largest category, not the total
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 4 · LONGEVITY ════════════════════════════════════════ -->
-<section class="slide" id="longevity">
-  <div class="bleed scrim-b" style="opacity:.6">
-    <img src="https://i.ytimg.com/vi/z28Pgx8yCm0/maxresdefault.jpg" alt="the van"
-      style="object-position:50% 38%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/z28Pgx8yCm0/hqdefault.jpg'">
-  </div>
-  <div class="inner">
-    <div class="label">Catalogue longevity · 27 April – 28 September 2026 · our own daily snapshots</div>
-    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:20ch">
-      97% of viewing came<br>from existing videos.
-    </h2>
-    <p class="big-p" style="max-width:48ch">
-      Even with a new album released during the period.
-    </p>
-
-    <div class="hero2">
-      <div>
-        <div class="hn">+23.88M</div>
-        <div class="hk">Channel views added<br>154 days · ~155,000 a day</div>
-      </div>
-      <div>
-        <div class="hn" style="color:var(--brick)">2.7%</div>
-        <div class="hk">Held by the five videos<br>published in that window</div>
-      </div>
-    </div>
-
-    <div class="fine" style="margin-top:.4rem;max-width:74ch">
-      <em>everyone for ten minutes</em> was released 22 May 2026, inside this window ·
-      the 2.7% compares those uploads' lifetime views against the channel's growth over
-      the period, so it is a measure of where viewing landed rather than exact
-      attribution — the album campaign is likely to have lifted catalogue viewing too
     </div>
   </div>
 </section>
