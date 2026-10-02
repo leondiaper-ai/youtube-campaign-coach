@@ -132,9 +132,9 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
       {
         title: 'Freak Slug',
         blurb:
-          'Amulet read two weeks after release, measured against the I Blow Out Big Candles campaign on a '
-          + 'matched clock — what changed, what is carrying the views, and the post-cycle plan built on the '
-          + 'October tour. Public API data only, with the catalogue coverage stated on the page.',
+          'Post-album campaign read, two weeks after Amulet. The channel became four times more active than '
+          + 'it was for the debut — what that bought, where the viewing actually went, and a 30–60 day '
+          + 'operating plan for the window that is still open. Public API data only.',
         href: '/freakslug',
         kind: 'Deck',
         updated: 'October 2026',
