@@ -134,7 +134,8 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         blurb:
           'Post-album campaign read, two weeks after Amulet. The channel became four times more active than '
           + 'it was for the debut — what that bought, where the viewing actually went, and a 30–60 day '
-          + 'operating plan for the window that is still open. Public API data only.',
+          + 'operating plan for the window that is still open. Includes the territory split and what '
+          + 'the audience is asking for in the comments.',
         href: '/freakslug',
         kind: 'Deck',
         updated: 'October 2026',
