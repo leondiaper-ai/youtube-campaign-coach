@@ -206,6 +206,84 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
   letter-spacing:.09em;line-height:2.1;text-transform:uppercase;color:var(--faint);
   max-width:1180px;margin:0 auto}
 .foot a{color:var(--rose);text-decoration:none}
+
+/* ── OPERATING MODEL · the song cycle ─────────────────────────────── */
+.cyc{display:grid;grid-template-columns:1fr;gap:10px;margin:clamp(1.3rem,2.6vw,2rem) 0 .8rem}
+@media(min-width:900px){.cyc{grid-template-columns:repeat(4,1fr);gap:0}}
+.cy{position:relative;padding:1rem 1.1rem 1.1rem;border:1px solid var(--rule);border-radius:3px;
+  background:rgba(244,239,236,.03)}
+@media(min-width:900px){
+  .cy{border-radius:0;border-right:0}
+  .cy:first-child{border-radius:3px 0 0 3px}
+  .cy:last-child{border-right:1px solid var(--rule);border-radius:0 3px 3px 0}
+  .cy::after{content:'';position:absolute;right:-6px;top:50%;transform:translateY(-50%) rotate(45deg);
+    width:10px;height:10px;border-top:1px solid var(--rule);border-right:1px solid var(--rule);
+    background:var(--night);z-index:2}
+  .cy:last-child::after{display:none}
+}
+.cy.hero{background:rgba(200,33,58,.09);border-color:rgba(200,33,58,.45)}
+.cy .cw{font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--faint)}
+.cy.hero .cw{color:var(--blood)}
+.cy .ch{margin:.45rem 0 .5rem;font-weight:600;font-size:1rem;letter-spacing:-.01em}
+.cy ul{margin:0;padding-left:1rem;list-style:none}
+.cy li{position:relative;font-size:.78rem;line-height:1.55;color:var(--smoke);margin-bottom:.25rem}
+.cy li::before{content:'';position:absolute;left:-.8rem;top:.55em;width:3px;height:3px;
+  border-radius:50%;background:var(--faint)}
+
+/* ── ACT ARCHITECTURE ─────────────────────────────────────────────── */
+.acts{display:grid;grid-template-columns:1fr;gap:12px;margin:clamp(1.3rem,2.6vw,2rem) 0 .8rem}
+@media(min-width:900px){.acts{grid-template-columns:repeat(4,1fr)}}
+.ac{padding:1rem 1.05rem 1.1rem;border:1px solid var(--rule);border-radius:3px;
+  background:rgba(244,239,236,.025)}
+.ac.live{border-color:rgba(200,33,58,.5);background:rgba(200,33,58,.08)}
+.ac.album{border-color:rgba(231,159,180,.5);background:rgba(231,159,180,.07)}
+.ac .an{font-family:var(--disp);font-size:1.5rem;letter-spacing:-.02em;line-height:1}
+.ac.live .an{color:var(--blood)} .ac.album .an{color:var(--rose)}
+.ac .aw{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);margin-top:.45rem}
+.ac .layers{margin-top:.8rem;padding-top:.7rem;border-top:1px solid var(--rule)}
+.ac .ly{display:flex;gap:.5rem;font-size:.75rem;line-height:1.5;color:var(--smoke);margin-bottom:.3rem}
+.ac .ly b{font-family:var(--mono);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);min-width:5.4em;padding-top:.15em}
+
+/* ── SURFACES (world building) ────────────────────────────────────── */
+.surf{display:grid;grid-template-columns:1fr;gap:1px;margin:clamp(1.3rem,2.6vw,2rem) 0 .6rem;
+  background:var(--rule);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+@media(min-width:760px){.surf{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1040px){.surf{grid-template-columns:repeat(5,1fr)}}
+.sf{background:var(--night);padding:1rem 1.05rem 1.1rem}
+.sf .sw{font-family:var(--mono);font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--blood)}
+.sf .st{margin-top:.5rem;font-size:.82rem;line-height:1.55;color:var(--smoke)}
+
+/* ── PRECEDENTS ───────────────────────────────────────────────────── */
+.prec{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.2vw,26px);
+  margin:clamp(1.3rem,2.6vw,2rem) 0 .6rem}
+@media(min-width:880px){.prec{grid-template-columns:repeat(4,1fr)}}
+.pr{padding-top:.9rem;border-top:2px solid var(--rule)}
+.pr.beth{border-top-color:var(--rose)}
+.pr .pa{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint)}
+.pr.beth .pa{color:var(--rose)}
+.pr .pb{font-family:var(--disp);font-size:1.2rem;margin:.4rem 0 .45rem;letter-spacing:-.01em}
+.pr .pf{font-size:.78rem;line-height:1.55;color:var(--smoke)}
+.pr .pl{margin-top:.6rem;font-size:.78rem;line-height:1.55;color:var(--bone)}
+
+/* ── ACT I PLAN ───────────────────────────────────────────────────── */
+.plan{margin:clamp(1.2rem,2.4vw,1.8rem) 0 .5rem;border:1px solid var(--rule);border-radius:3px;
+  overflow:hidden}
+.pw{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule)}
+@media(min-width:900px){.pw{grid-template-columns:auto 1fr}}
+.pr2{display:contents}
+.pd{background:var(--night);padding:.75rem 1rem;font-family:var(--mono);font-size:.62rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--bone);white-space:nowrap;
+  min-width:9.5em;display:flex;align-items:center}
+.pc{background:var(--night);padding:.75rem 1rem;font-size:.84rem;line-height:1.55;color:var(--smoke)}
+.pc b{color:var(--bone)}
+.pd.hero{background:rgba(200,33,58,.1);color:var(--blood)}
+.pc.hero{background:rgba(200,33,58,.05)}
+.pd.gap{color:var(--faint)}
 </style>
 </head>
 <body>
@@ -219,403 +297,477 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
 <!-- ════════ 1 · COVER ════════════════════════════════════════════ -->
 <section class="slide">
   <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/maxresdefault.jpg"
-      alt="She Gets The Flowers — Beth holding a handwritten card"
-      style="object-position:68% 42%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg'">
-  </div>
-  <div class="inner">
-    <div class="label">Beth McCarthy · @BethMcCarthy · Channel deep dive · Virgin Music Group</div>
-    <h1 class="display" style="margin:1rem 0 0;max-width:15ch">
-      The songs that<br>built this channel<br>were answers.
-    </h1>
-    <p class="big-p" style="max-width:56ch">
-      Four songs written back at somebody else hold <b>53%</b> of everything this channel
-      has ever earned. <em>She Gets The Flowers</em> — which began as a reply to a stranger's
-      video and became a song because of how many people replied to that — holds another
-      <b>30%</b>. This is a read of what that mechanic is, and whether a three-act album
-      can put it back to work.
-    </p>
-    <div class="pills">
-      <span class="pill">26 uploads read</span>
-      <span class="pill">Public YouTube API</span>
-      <span class="pill">2 October 2026</span>
-      <span class="pill">Act I, week four</span>
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 2 · WHAT BUILT IT ════════════════════════════════════ -->
-<section class="slide" id="built">
-  <div class="inner">
-    <div class="label">Where 12.07M views actually sit</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:20ch">
-      Five uploads.<br>Eighty-three per cent.
-    </h2>
-    <p class="big-p" style="max-width:52ch">
-      Not a catalogue. A handful of moments, all from one fourteen-month window.
-    </p>
-
-    <div class="bars">
-      <div class="bar hot">
-        <div class="bl">Four response songs</div>
-        <div class="bt"><div class="bf" style="width:53.4%"></div></div>
-        <div class="bv">6,442,953 · 53.4%</div>
-      </div>
-      <div class="bar rose">
-        <div class="bl">She Gets The Flowers ×3</div>
-        <div class="bt"><div class="bf" style="width:29.5%"></div></div>
-        <div class="bv">3,566,677 · 29.5%</div>
-      </div>
-      <div class="bar">
-        <div class="bl">Everything else — 19 uploads</div>
-        <div class="bt"><div class="bf" style="width:17.1%"></div></div>
-        <div class="bv">2,061,592 · 17.1%</div>
-      </div>
-    </div>
-
-    <div class="vgrid four" style="margin-top:clamp(1.2rem,2.4vw,1.8rem)">
-      <a class="thumb" href="https://www.youtube.com/watch?v=XjQqSkGratQ" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/XjQqSkGratQ/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>3.04M</b>(Self) Love Story · Taylor Swift response</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=dUUCZvKxzSQ" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>2.90M</b>She Gets The Flowers · video</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=3_OSlP6Vdks" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/3_OSlP6Vdks/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>2.43M</b>July · Noah Cyrus response</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=8IFDmo3BrL4" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/8IFDmo3BrL4/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>797K</b>Omg Did She Call Him Baby? · a rewrite</span>
-      </a>
-    </div>
-    <div class="fine" style="margin-top:.9rem;max-width:84ch">
-      Response = a song written from the other side of somebody else's record · the fourth,
-      Omg Did She Call Him Baby?, is described on the channel as a rewrite of Will Joseph
-      Cook's Be Around Me · 2021 alone holds 81.9% of all channel views from seven uploads
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 3 · THE LOOP ═════════════════════════════════════════ -->
-<section class="slide" id="loop">
-  <div class="bleed scrim-b" style="opacity:.5">
-    <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/maxresdefault.jpg" alt="She Gets The Flowers"
-      style="object-position:50% 40%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg'">
-  </div>
-  <div class="inner">
-    <div class="label rose">She Gets The Flowers · the mechanic, in Beth's own words</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:21ch">
-      The audience wrote<br>themselves into it.
-    </h2>
-
-    <div class="loop">
-      <div class="lp">
-        <div class="ls">01 · Someone else</div>
-        <div class="lt">"The original concept for this song was inspired by a video of
-          Hannah Klein."</div>
-      </div>
-      <div class="lp">
-        <div class="ls">02 · Beth replies</div>
-        <div class="lt">"Having experienced those emotions myself, I posted my initial
-          idea onto TikTok."</div>
-      </div>
-      <div class="lp">
-        <div class="ls">03 · They reply</div>
-        <div class="lt">"I honestly couldn't believe the amount of people who commented
-          saying…"</div>
-      </div>
-      <div class="lp">
-        <div class="ls">04 · It becomes the video</div>
-        <div class="lt">Real submitted stories, held up to camera on handwritten cards.</div>
-      </div>
-    </div>
-    <div class="fine" style="margin-bottom:.4rem">
-      Quoted from the video's own YouTube description · the thumbnail above is the mechanic
-    </div>
-
-    <div class="rule"></div>
-
-    <div class="vs">
-      <div class="vsside">
-        <div class="label rose">What that song became</div>
-        <div class="vgrid three" style="margin-top:.7rem">
-          <a class="thumb" href="https://www.youtube.com/watch?v=dUUCZvKxzSQ" target="_blank" rel="noopener">
-            <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg" alt="" loading="lazy">
-            <span class="cap"><b>2.90M</b>Video</span>
-          </a>
-          <a class="thumb" href="https://www.youtube.com/watch?v=aOlB65sYW6s" target="_blank" rel="noopener">
-            <img src="https://i.ytimg.com/vi/aOlB65sYW6s/hqdefault.jpg" alt="" loading="lazy">
-            <span class="cap"><b>537K</b>Lyric</span>
-          </a>
-          <a class="thumb" href="https://www.youtube.com/watch?v=f2tCFPBQKYs" target="_blank" rel="noopener">
-            <img src="https://i.ytimg.com/vi/f2tCFPBQKYs/hqdefault.jpg" alt="" loading="lazy">
-            <span class="cap"><b>134K</b>Acoustic</span>
-          </a>
-        </div>
-        <div class="vsnum"><b>3.57M</b> across three assets</div>
-      </div>
-      <div class="vsside">
-        <div class="label">What every other song got</div>
-        <p class="big-p" style="margin-top:.7rem;max-width:34ch;font-size:1rem">
-          She Gets The Flowers is the <b>only song on the channel with three assets</b>.
-          Three songs have two. Fifteen have one.
-        </p>
-        <div class="vsnum"><b>1 of 19</b> songs was built out rather than moved on from</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 4 · WHAT THE CHANNEL BECAME ══════════════════════════ -->
-<section class="slide" id="became">
-  <div class="inner">
-    <div class="label">The channel today · all 26 uploads</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
-      It stopped being a<br>place and became<br>a release shelf.
-    </h2>
-    <p class="big-p" style="max-width:54ch">
-      Twenty-three of twenty-six uploads are a song asset. There is no layer for
-      anything else.
-    </p>
-
-    <div class="hero2">
-      <div>
-        <div class="hn">23<span style="color:var(--faint);font-size:.44em"> / 26</span></div>
-        <div class="hk">Uploads that are a video,<br>lyric, visualiser or audio</div>
-      </div>
-      <div>
-        <div class="hn" style="color:var(--blood)">1</div>
-        <div class="hk">Shorts, ever<br>2,672 views</div>
-      </div>
-      <div>
-        <div class="hn" style="color:var(--blood)">0</div>
-        <div class="hk">Standalone live<br>song destinations</div>
-      </div>
-      <div>
-        <div class="hn" style="color:var(--blood)">0</div>
-        <div class="hk">Personality, community,<br>BTS or fan uploads</div>
-      </div>
-    </div>
-
-    <div class="rule"></div>
-
-    <div class="note hot">
-      <b>Reading &amp; Leeds, 28–29 August.</b> The Pretty Villain premiere, the character
-      reveal, the crowd. Nothing from that weekend exists on this channel. The first upload
-      after it is the music video on 4 September, and the second is a sixteen-second Short
-      on the 7th. Those are the only two uploads since June.
-    </div>
-    <div class="fine" style="margin-top:.9rem;max-width:84ch">
-      The two live items on the channel are a 2016 session and a 25-minute full show from
-      December 2025 (6,651 views) · no individual song has ever been published as a live
-      destination · we have not checked whether festival footage is cleared, and it should
-      not be assumed
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 5 · THE AUDIENCE DIDN'T LEAVE ════════════════════════ -->
-<section class="slide" id="deepened">
-  <div class="inner">
-    <div class="label">Reach against response · likes and comments per 1,000 views</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:21ch">
-      Fewer people.<br>Who care far more.
-    </h2>
-    <p class="big-p" style="max-width:54ch">
-      The easy read is that the channel faded after 2021. The engagement says something
-      else: the people arriving now respond <b>four times harder</b> than the people the
-      viral videos brought.
-    </p>
-
-    <div class="bars" style="margin-top:clamp(1.5rem,3vw,2.3rem)">
-      <div class="bar">
-        <div class="bl">2020–21 · the viral era</div>
-        <div class="bt"><div class="bf" style="width:18.4%"></div></div>
-        <div class="bv">0.80 comments / 1,000</div>
-      </div>
-      <div class="bar">
-        <div class="bl">2022–24</div>
-        <div class="bt"><div class="bf" style="width:17.1%"></div></div>
-        <div class="bv">0.74 comments / 1,000</div>
-      </div>
-      <div class="bar hot">
-        <div class="bl">2025–26 · now</div>
-        <div class="bt"><div class="bf" style="width:33.9%"></div></div>
-        <div class="bv">1.47 comments / 1,000</div>
-      </div>
-      <div class="bar hot">
-        <div class="bl">Pretty Villain</div>
-        <div class="bt"><div class="bf" style="width:100%"></div></div>
-        <div class="bv">4.34 comments / 1,000</div>
-      </div>
-    </div>
-
-    <div class="note">
-      <b>Pretty Villain has the highest comment rate of any upload in the channel's
-      history</b> — 49 comments on 11,302 views — and the fourth-highest like rate of
-      twenty-six. On the measure that does not need an age adjustment, this is the
-      strongest-received thing Beth has ever put up.
-    </div>
-    <!-- Honest about the one thing that weakens this slide. A new upload
-         gathers likes and comments in its first weeks and then gathers views
-         for years, so its engagement RATE is structurally flattered against
-         a five-year-old video. The era comparison is still worth making, but
-         it cannot be stated as if it were clean. -->
-    <div class="fine" style="margin-top:.9rem;max-width:84ch">
-      Rates are per 1,000 views, which travels better across uploads of different sizes than
-      raw totals · but a new upload collects its likes early and its views for years, so
-      recent uploads are flattered on this measure — the gap is real, its size is not exact ·
-      channel median 33.6 likes per 1,000
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 6 · PRETTY VILLAIN ═══════════════════════════════════ -->
-<section class="slide" id="villain">
-  <div class="bleed scrim-l" style="opacity:.75">
-    <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/maxresdefault.jpg" alt="Pretty Villain"
-      style="object-position:62% 46%"
+    <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/maxresdefault.jpg"
+      alt="Pretty Villain" style="object-position:64% 46%"
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/7BhwzSyJK-4/hqdefault.jpg'">
   </div>
   <div class="inner">
-    <div class="label hot">Act I · week four</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:20ch">
-      The world exists.<br>You can't walk<br>into it.
+    <div class="label">Beth McCarthy · @BethMcCarthy · YouTube deep dive · Virgin Music Group</div>
+    <h1 class="display" style="margin:1rem 0 0;max-width:14ch">
+      The album has<br>three acts.<br>YouTube should too.
+    </h1>
+    <p class="big-p" style="max-width:54ch">
+      Beth already has the songs, the character, the visual world and the campaign
+      structure. The opportunity is to make YouTube <b>the home of that world</b> rather
+      than the place each music video lands.
+    </p>
+    <div class="pills">
+      <span class="pill">Act I · week four</span>
+      <span class="pill">Four singles to 13 Nov</span>
+      <span class="pill">Album Q2 2027</span>
+      <span class="pill">Read 2 October 2026</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 2 · STATE OF THE CHANNEL ═════════════════════════════ -->
+<section class="slide" id="state">
+  <div class="inner">
+    <div class="label">The channel today · all 26 public uploads</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:21ch">
+      Strong audience.<br>Thin architecture.
     </h2>
-    <p class="big-p" style="max-width:52ch">
-      Pretty Villain is a character, a cinematic universe and a new chapter. On YouTube it
-      is <b>one video and one sixteen-second Short</b>.
+    <p class="big-p" style="max-width:54ch">
+      Nearly a hundred thousand people have subscribed to a channel that is, almost
+      entirely, a place where finished songs are filed.
     </p>
 
     <div class="hero2">
       <div>
-        <div class="hn" style="color:var(--blood)">2</div>
-        <div class="hk">Uploads in the new era<br>4 Sep and 7 Sep</div>
+        <div class="hn">96.3K</div>
+        <div class="hk">Subscribers</div>
       </div>
       <div>
-        <div class="hn">4.34</div>
-        <div class="hk">Comments per 1,000 —<br>#1 of 26 ever</div>
+        <div class="hn">12.1M</div>
+        <div class="hk">Catalogue views<br>across 26 uploads</div>
       </div>
       <div>
-        <div class="hn">0</div>
-        <div class="hk">Festival, behind-the-scenes,<br>character or live assets</div>
+        <div class="hn" style="color:var(--blood)">23<span style="color:var(--faint);font-size:.46em"> / 26</span></div>
+        <div class="hk">Uploads that are<br>a song asset</div>
       </div>
-    </div>
-
-    <div class="note hot">
-      <b>This is not a launch problem.</b> The video is being received better than anything
-      Beth has released. The gap is that somebody who watches it and wants more of that
-      world has nowhere on YouTube to go — and the next single lands today.
-    </div>
-  </div>
-</section>
-
-
-<!-- ════════ 7 · THE CHANNEL HAS TRIED CHAPTERS ═══════════════════ -->
-<section class="slide" id="chapters">
-  <div class="inner">
-    <div class="label">Before recommending a three-act structure</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
-      This channel has<br>announced a series<br>twice. And finished<br>neither.
-    </h2>
-
-    <div class="vs" style="margin-top:clamp(1.5rem,3vw,2.2rem)">
-      <div class="vsside">
-        <div class="label">2016 · Left Behind</div>
-        <p class="big-p" style="margin-top:.6rem;max-width:36ch;font-size:1rem">
-          "The first of 5 live sessions that will be uploaded every Friday over the next
-          5 weeks."
-        </p>
-        <div class="vsnum"><b>1 of 5</b> was ever published</div>
+      <div>
+        <div class="hn" style="color:var(--blood)">1</div>
+        <div class="hk">Short on the channel<br>verified on the Shorts tab</div>
       </div>
-      <div class="vsside">
-        <div class="label">2023 · a five-part series</div>
-        <p class="big-p" style="margin-top:.6rem;max-width:36ch;font-size:1rem">
-          <em>What Do You Call It?</em> is "episode 1". <em>She's Pretty</em> is
-          "episode 2" — of "a five part series where we see Beth navigate a night out".
-        </p>
-        <div class="vsnum"><b>2 of 5</b> were ever published</div>
+      <div>
+        <div class="hn" style="color:var(--blood)">0</div>
+        <div class="hk">Live song destinations,<br>BTS, story or community</div>
       </div>
-    </div>
-    <div class="fine" style="margin-top:.9rem;max-width:84ch">
-      Both quoted from the uploads' own descriptions · episodes 3, 4 and 5 do not exist;
-      the next music video, fourteen months later, is not part of the series
     </div>
 
     <div class="note">
-      <b>The useful reading is not "they fail at series".</b> Episode 2 is a 292,741-view
-      music video and the lyric video before it did 265,963 — the series was working. What
-      the channel has never had is a structure small enough to finish. Three acts is a
-      better bet than five episodes only if each act's commitment is sized to what two
-      people can actually deliver between four singles in ten weeks.
+      <b>This is not a quiet channel — it is an unbuilt one.</b> The audience is already
+      here. What is missing is everything that would give that audience a reason to stay
+      between releases, and a way to find their way around the era once it has one.
+    </div>
+    <div class="fine" style="margin-top:.9rem;max-width:84ch">
+      26 of 26 uploads returned by the API, not capped · the Shorts tab was checked directly
+      on 2 October and shows one Short · the two live uploads are a 2016 session and a
+      25-minute full show; no individual song has ever been published as its own live
+      destination
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 8 · FOUR SINGLES IN TEN WEEKS ════════════════════════ -->
+<!-- ════════ 3 · WHAT THE HISTORY TELLS US ════════════════════════ -->
+<section class="slide" id="history">
+  <div class="bleed scrim-b" style="opacity:.42">
+    <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/maxresdefault.jpg" alt="She Gets The Flowers"
+      style="object-position:50% 38%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label rose">What the history actually shows</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
+      Beth broke through<br>when the audience<br>was part of the idea.
+    </h2>
+
+    <div class="hero2" style="margin-bottom:.5rem">
+      <div>
+        <div class="hn" style="color:var(--rose)">82.9%</div>
+        <div class="hk">Of all catalogue viewing sits in<br>response material and one song</div>
+      </div>
+      <div>
+        <div class="hn">3</div>
+        <div class="hk">Assets for She Gets The Flowers —<br>the only song on the channel with three</div>
+      </div>
+    </div>
+
+    <p class="big-p" style="max-width:58ch">
+      <em>She Gets The Flowers</em> began as a reply to a stranger's video, was posted as an
+      idea, and became a song because of how many people answered. It is the one song that
+      was built out rather than moved on from — video, lyric, acoustic.
+    </p>
+
+    <div class="note hot">
+      <b>Don't recreate 2021. Recover the principle.</b> All of that material clusters
+      inside one fourteen-month window, so the format and the moment cannot be separated —
+      this is a historical concentration, not a formula to re-run. What travels is the
+      behaviour underneath it: <b>response, identification, conversation, participation.</b>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 4 · THE CADENCE PROBLEM ══════════════════════════════ -->
 <section class="slide" id="cadence">
   <div class="inner">
     <div class="label hot">Act I · the published plan</div>
-    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:23ch">
-      Four singles in ten<br>weeks. Three weeks<br>each to matter.
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:24ch">
+      Four singles. Ten weeks.<br>YouTube can't reset<br>every three.
     </h2>
-    <p class="big-p" style="max-width:54ch">
-      On a channel whose one proven habit is <b>moving on</b>, this cadence is the risk and
-      the opportunity in the same calendar.
-    </p>
 
     <div class="tl">
       <div class="tline"></div>
-      <div class="tmarks">
+      <div class="tmarks" style="grid-template-columns:repeat(2,1fr)">
         <div class="tm done">
-          <div class="tw">Done · nothing published</div>
-          <div class="td">28 Aug</div>
-          <div class="tn">Reading &amp; Leeds. The reveal.</div>
+          <div class="tw">Nothing published</div>
+          <div class="td">28–29 Aug</div>
+          <div class="tn">Reading &amp; Leeds — the reveal</div>
         </div>
         <div class="tm now">
-          <div class="tw">Live · 28 days old</div>
+          <div class="tw">28 days ago</div>
           <div class="td">4 Sep</div>
-          <div class="tn">Pretty Villain. Best-received upload ever.</div>
+          <div class="tn">Pretty Villain · video + one Short</div>
         </div>
         <div class="tm">
           <div class="tw">Today</div>
           <div class="td">2 Oct</div>
-          <div class="tn">Love After Love Of Your Life. Not yet on the channel at 10:20.</div>
+          <div class="tn">Love After Love Of Your Life</div>
         </div>
         <div class="tm">
-          <div class="tw">In 3 weeks</div>
+          <div class="tw">+21 days</div>
           <div class="td">23 Oct</div>
-          <div class="tn">Say Less.</div>
+          <div class="tn">Say Less</div>
         </div>
         <div class="tm">
-          <div class="tw">In 6 weeks</div>
+          <div class="tw">+21 days</div>
           <div class="td">13 Nov</div>
-          <div class="tn">Your Next Forever. Residency on the 19th.</div>
+          <div class="tn">Your Next Forever</div>
+        </div>
+        <div class="tm">
+          <div class="tw">+6 days</div>
+          <div class="td">19 Nov</div>
+          <div class="tn">London residency</div>
         </div>
       </div>
     </div>
 
-    <div class="fine" style="margin-top:.8rem;max-width:84ch">
-      Dates from the campaign plan, not from YouTube · the gaps are 28, 21 and 21 days ·
-      the question is not whether to upload more, it is what occupies three weeks between
-      heroes on a channel that currently publishes nothing between them
+    <div class="note hot">
+      <b>Three weeks is not long enough for a song to finish arriving.</b> At this cadence
+      each release has to keep developing <em>after</em> release day while the next one
+      starts — which means the gaps between singles are the campaign, not the pause
+      between campaigns.
+    </div>
+    <div class="fine" style="margin-top:.9rem;max-width:84ch">
+      Gaps of 28, 21 and 21 days · 4 Sep to 13 Nov is 70 days · dates from the campaign
+      plan, not from YouTube · the first two rows are what is observable on the channel today
     </div>
   </div>
 </section>
 
 
-<!-- ════════ 9 · WHAT NEXT ════════════════════════════════════════ -->
+<!-- ════════ 5 · THE OPERATING MODEL ══════════════════════════════ -->
+<section class="slide" id="model">
+  <div class="inner">
+    <div class="label">Our recommended operating model · how we would run each priority song</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
+      Release day is the<br>start of the song's<br>campaign.
+    </h2>
+
+    <div class="cyc">
+      <div class="cy hero">
+        <div class="cw">Release day</div>
+        <div class="ch">Hero destination</div>
+        <ul>
+          <li>Primary video</li>
+          <li>Premiere where the moment earns it</li>
+          <li>Beth in the chat and comments</li>
+          <li>Pinned comment, Act playlist</li>
+          <li>Community post</li>
+        </ul>
+      </div>
+      <div class="cy">
+        <div class="cw">Days 1–7</div>
+        <div class="ch">Discovery</div>
+        <ul>
+          <li>Shorts from the world, not the trailer</li>
+          <li>Character and story moments</li>
+          <li>Direct to camera</li>
+          <li>The lines people recognise</li>
+          <li>Reply to what comes back</li>
+        </ul>
+      </div>
+      <div class="cy">
+        <div class="cw">Days 7–14</div>
+        <div class="ch">Second destination</div>
+        <ul>
+          <li>One of: lyric, visualiser,</li>
+          <li>performance, acoustic, live,</li>
+          <li>alternate version</li>
+          <li>Chosen per song</li>
+          <li>Linked back to the hero</li>
+        </ul>
+      </div>
+      <div class="cy">
+        <div class="cw">Days 14–21</div>
+        <div class="ch">Deepen, then hand over</div>
+        <ul>
+          <li>Story behind the song</li>
+          <li>Character or world piece</li>
+          <li>Audience response</li>
+          <li>Bridge into the next single</li>
+          <li><b style="color:var(--bone)">Don't reset — the song stays in the Act</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="fine" style="max-width:88ch">
+      This is our recommended campaign framework, shaped by the gaps on Beth's channel and
+      by what we have observed across other campaigns · it is not derived from Beth's own
+      data, and the 7–14 day window is a planning convention we use, not a number this
+      channel proves · not every song needs every format
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 6 · THE THREE ACTS ═══════════════════════════════════ -->
+<section class="slide" id="acts">
+  <div class="inner">
+    <div class="label">The architecture</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:23ch">
+      Don't build twelve<br>releases. Build one<br>world in three chapters.
+    </h2>
+
+    <div class="acts">
+      <div class="ac live">
+        <div class="an">Act I</div>
+        <div class="aw">Now → Nov 2026 · running</div>
+        <div class="layers">
+          <div class="ly"><b>Hero</b><span>Pretty Villain · Love After Love · Say Less · Your Next Forever</span></div>
+          <div class="ly"><b>Support</b><span>One second destination per priority song</span></div>
+          <div class="ly"><b>Story</b><span>Who Pretty Villain is</span></div>
+          <div class="ly"><b>Discovery</b><span>Shorts from the character</span></div>
+          <div class="ly"><b>Audience</b><span>The first participation mechanic</span></div>
+          <div class="ly"><b>Live</b><span>Residency, if the moment earns it</span></div>
+        </div>
+      </div>
+      <div class="ac">
+        <div class="an">Act II</div>
+        <div class="aw">Q1 2027</div>
+        <div class="layers">
+          <div class="ly"><b>Opens</b><span>A transition piece that closes Act I</span></div>
+          <div class="ly"><b>Carries</b><span>Same visual language, new chapter</span></div>
+          <div class="ly"><b>Adds</b><span>What the audience sent back in Act I</span></div>
+        </div>
+      </div>
+      <div class="ac">
+        <div class="an">Act III</div>
+        <div class="aw">Into the album</div>
+        <div class="layers">
+          <div class="ly"><b>Resolves</b><span>The character arc lands</span></div>
+          <div class="ly"><b>Collects</b><span>Acts I and II still navigable</span></div>
+        </div>
+      </div>
+      <div class="ac album">
+        <div class="an">Album</div>
+        <div class="aw">Q2 2027</div>
+        <div class="layers">
+          <div class="ly"><b>Result</b><span>Someone arriving at the album can go back to September 2026 and follow the whole thing</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>Each Act needs four things:</b> a recognisable look, its own destination on the
+      channel, a clear opening, and a moment that closes it and hands over. Everything else
+      is content. These four are what turn uploads into chapters.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 7 · WORLD BUILDING ═══════════════════════════════════ -->
+<section class="slide" id="world">
+  <div class="bleed scrim-l" style="opacity:.6">
+    <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/maxresdefault.jpg" alt="Pretty Villain"
+      style="object-position:70% 44%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/7BhwzSyJK-4/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label hot">The creative is already there</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:21ch">
+      Pretty Villain has<br>a world. Use the gaps<br>to build it.
+    </h2>
+    <p class="big-p" style="max-width:52ch">
+      The channel bio already says <em>"don't i make a pretty villain?"</em> — the character
+      is live. Each surface can show a different part of it.
+    </p>
+
+    <div class="surf">
+      <div class="sf">
+        <div class="sw">The video</div>
+        <div class="st">The finished, cinematic version of the world.</div>
+      </div>
+      <div class="sf">
+        <div class="sw">Shorts</div>
+        <div class="st">Her POV. Transformations, attitude, the situations, the lines, the humour.</div>
+      </div>
+      <div class="sf">
+        <div class="sw">Long-form</div>
+        <div class="st">Performance, making-of, how the character was built.</div>
+      </div>
+      <div class="sf">
+        <div class="sw">Community</div>
+        <div class="st">Prompts, questions, choices the audience makes for her.</div>
+      </div>
+      <div class="sf">
+        <div class="sw">Live</div>
+        <div class="st">The character walking into the real world.</div>
+      </div>
+    </div>
+
+    <div class="note hot">
+      <b>The test for every asset: does it reveal something, or just announce the song
+      again?</b> A Short cut from the video announces. A Short of who she is between the
+      videos reveals.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 8 · PUT THE AUDIENCE IN ══════════════════════════════ -->
+<section class="slide" id="audience">
+  <div class="inner">
+    <div class="label rose">The bridge from history to strategy</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:23ch">
+      The audience shouldn't<br>just watch the story.<br>They can enter it.
+    </h2>
+    <p class="big-p" style="max-width:56ch">
+      Beth's songs are unusually identifiable — people hear their own situation in them.
+      That is what the breakout was made of, and it is the one ingredient the campaign
+      already has and isn't using on YouTube.
+    </p>
+
+    <div class="loop" style="grid-template-columns:1fr">
+      <div class="lp" style="border-radius:3px;border-right:1px solid var(--rule)">
+        <div class="ls">Things worth testing — not a prescription</div>
+        <div class="lt" style="margin-top:.7rem">
+          Who was the villain in your story? · confessions and situations sent in ·
+          questions Beth answers on camera · a comment turned into a Short ·
+          the audience choosing what the character does next ·
+          submitted stories worked into the creative, the way the Flowers video was ·
+          fan moments from the residency, where they are genuinely meaningful
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>The principle, not the format.</b> We are not recommending more response songs —
+      that was a moment, not a method. We are recommending mechanisms that let people
+      recognise themselves inside the campaign, which is what made the moment work.
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 9 · PRECEDENTS ═══════════════════════════════════════ -->
+<section class="slide" id="precedent">
+  <div class="inner">
+    <div class="label">Campaign behaviours worth borrowing · not aesthetics, not audiences</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
+      What we've seen<br>work elsewhere.
+    </h2>
+
+    <div class="prec">
+      <div class="pr">
+        <div class="pa">Tove Lo</div>
+        <div class="pb">Density</div>
+        <div class="pf">Around the ESTRUS release period we observed roughly 12 uploads in 30 days.</div>
+        <div class="pl">A release can be <b>surrounded</b> by activity rather than represented by one asset.</div>
+      </div>
+      <div class="pr">
+        <div class="pa">CHVRCHES</div>
+        <div class="pb">Follow-through</div>
+        <div class="pf">The Roses analysis found the opening for a meaningful second asset inside the 7–14 day window.</div>
+        <div class="pl">Release day is the <b>start</b> of the song's campaign, not the end.</div>
+      </div>
+      <div class="pr">
+        <div class="pa">Angus &amp; Julia Stone</div>
+        <div class="pb">Depth</div>
+        <div class="pf">Karaoke Bar: active in ~90% of weeks against ~58% before; 88 uploads and 27 long-form against 36 and 9.</div>
+        <div class="pl">The channel itself becomes <b>part of the campaign</b>.</div>
+      </div>
+      <div class="pr beth">
+        <div class="pa">Beth</div>
+        <div class="pb">Participation</div>
+        <div class="pf">Her own history adds the ingredient none of the others had.</div>
+        <div class="pl">Give the audience something to <b>take part in</b>.</div>
+      </div>
+    </div>
+
+    <div class="fine" style="margin-top:1rem;max-width:88ch">
+      Drawn from our own previous deep dives on those channels, not from Beth's data ·
+      different artists, different audiences, different scales · offered as observed campaign
+      behaviour, not as a benchmark Beth should be measured against
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 10 · ACT I FROM HERE ═════════════════════════════════ -->
+<section class="slide" id="acti">
+  <div class="inner">
+    <div class="label hot">From today</div>
+    <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
+      Act I, week by week.
+    </h2>
+
+    <div class="plan">
+      <div class="pw">
+        <div class="pd hero">2 Oct</div>
+        <div class="pc hero"><b>Love After Love Of Your Life.</b> Hero destination. Premiere if the
+          moment earns it, Beth in the chat, pinned comment, Act I playlist, Community post.</div>
+
+        <div class="pd gap">3–9 Oct</div>
+        <div class="pc">Discovery and story. Shorts from the character and the strongest moments
+          in the video. Reply to the comments — Pretty Villain's are the best the channel has had.</div>
+
+        <div class="pd gap">9–16 Oct</div>
+        <div class="pc"><b>Second destination.</b> One support asset, chosen from what exists or
+          can be made quickly — lyric, performance, visualiser or alternate. Link it back to the hero.</div>
+
+        <div class="pd gap">16–22 Oct</div>
+        <div class="pc">Bridge. Story, world or participation, carrying Love After Love into Say Less
+          so the handover looks deliberate.</div>
+
+        <div class="pd hero">23 Oct</div>
+        <div class="pc hero"><b>Say Less.</b> Same architecture, formats adapted to the song.</div>
+
+        <div class="pd hero">13 Nov</div>
+        <div class="pc hero"><b>Your Next Forever.</b> The Halloween stunt belongs in the YouTube
+          world, not only on ephemeral social — it is the most in-character moment of the Act.</div>
+
+        <div class="pd">19 Nov</div>
+        <div class="pc">London residency. Decide which moments deserve to become durable assets.
+          Individual songs, not a full-set upload. <b>Rights not assumed.</b></div>
+
+        <div class="pd gap">Dec → Q1</div>
+        <div class="pc">Close Act I and open Act II. One piece that makes the chapter change visible.</div>
+      </div>
+    </div>
+    <div class="fine" style="margin-top:.8rem;max-width:84ch">
+      The shaded rows are hero moments · everything between them is the campaign, not
+      empty space
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════ 11 · RECOMMENDATIONS ═════════════════════════════════ -->
 <section class="slide" id="next">
   <div class="bleed scrim-f" style="opacity:.5">
     <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/maxresdefault.jpg" alt="Pretty Villain"
@@ -623,62 +775,60 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/7BhwzSyJK-4/hqdefault.jpg'">
   </div>
   <div class="inner">
-    <div class="label">Where we would start</div>
-    <h2 class="display" style="margin:.8rem 0 1rem;max-width:22ch">
-      Four moves.<br>Act I is already running.
+    <div class="label">What we recommend</div>
+    <h2 class="display" style="margin:.8rem 0 1rem;max-width:20ch">
+      Four things,<br>starting this week.
     </h2>
 
     <div>
       <div class="act now">
         <div class="num hot">01</div>
         <div>
-          <div class="urgent">Do now · the next single is today</div>
-          <h3>Give Act I a door</h3>
-          <p>One place on the channel where Pretty Villain, Love After Love and what
-            follows sit together as a chapter rather than four separate uploads — and
-            a reason for each video to point at the next.</p>
-          <span class="ev">2 uploads in the new era · 4.34 comments per 1,000 and nowhere to send them</span>
+          <div class="urgent">Starts with today's single</div>
+          <h3>Build beyond release day</h3>
+          <p>Every priority song gets a planned window: hero, discovery, a second
+            destination inside two weeks, then story. Not every song needs every format.</p>
+          <span class="ev">Currently: one video and one Short for the whole new era</span>
         </div>
       </div>
 
       <div class="act">
         <div class="num">02</div>
         <div>
-          <h3>Put the audience back in the work</h3>
-          <p>The one mechanic this channel can prove is Beth answering someone, and people
-            answering back. Build one asset per act out of what the audience sends —
-            the way the Flowers video was built.</p>
-          <span class="ev">Response songs and Flowers hold 82.9% of all channel views</span>
+          <h3>Make the three acts navigable</h3>
+          <p>Act destinations, consistent visual language, and a moment that closes each
+            chapter. By the album, the channel should hold the whole story.</p>
+          <span class="ev">The album already has the structure — YouTube doesn't show it</span>
         </div>
       </div>
 
       <div class="act">
         <div class="num">03</div>
         <div>
-          <h3>Capture the live moments as songs</h3>
-          <p>Reading &amp; Leeds left no trace. The residency on 19 November is the next
-            chance. Individual song performances, not a full-set upload — subject to rights.</p>
-          <span class="ev">0 standalone live song destinations · the one full show did 6,651</span>
+          <h3>Use Shorts for story, not excerpts</h3>
+          <p>Beth, the character, the songs, the audience. A platform opportunity rather
+            than a proven format here — which is the reason to test it properly.</p>
+          <span class="ev">One Short on the channel, verified on the Shorts tab</span>
         </div>
       </div>
 
       <div class="act">
         <div class="num">04</div>
         <div>
-          <h3>Finish something small</h3>
-          <p>Commit to a run short enough to complete. Three acts, one recurring piece each
-            — not five episodes.</p>
-          <span class="ev">Two announced series, 1 of 5 and 2 of 5 delivered</span>
+          <h3>Put people inside the campaign</h3>
+          <p>Build mechanisms for the audience to contribute and be answered — without
+            trying to re-run 2021.</p>
+          <span class="ev">Participation is what the breakout was made of</span>
         </div>
       </div>
     </div>
 
     <div class="note">
-      <b>What this read cannot see.</b> Everything here is public data — views, likes,
-      comments, durations, dates and the uploads' own descriptions. No Studio access, so no
-      watch time, retention, traffic source or audience data, and nothing above is a claim
-      about who is watching. Campaign dates and the Spotify and social figures in the brief
-      are context we were given, not things we verified.
+      <b>What this read is built on.</b> Public YouTube data only — 26 uploads, views, likes,
+      comments, dates and the uploads' own descriptions, plus the Shorts tab checked by hand.
+      No Studio access, so no watch time, retention or audience data, and nothing here is a
+      claim about who is watching. Campaign dates and the Spotify and social figures come
+      from the brief and were not independently verified.
     </div>
   </div>
 </section>
@@ -687,10 +837,10 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
 <!-- ════════ FOOT ═════════════════════════════════════════════════ -->
 <section class="slide" style="min-height:auto;border-bottom:none">
   <div class="foot">
-    Beth McCarthy · @BethMcCarthy · channel deep dive · Virgin Music Group<br>
-    26 uploads — the entire public catalogue — read 2 October 2026 via the YouTube Data
-    API v3 · uploads sum to 12,071,222 against a lifetime counter of 12,069,430, so every
-    share here is a share of the whole channel<br>
+    Beth McCarthy · @BethMcCarthy · YouTube deep dive · Virgin Music Group<br>
+    26 uploads — the entire public catalogue — read 2 October 2026 · uploads sum to
+    12,071,222 against a lifetime counter of 12,069,430, so every share is a share of the
+    whole channel<br>
     <a href="/beth/analysis">The numbers →</a>
   </div>
 </section>

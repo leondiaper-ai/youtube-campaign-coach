@@ -1,7 +1,7 @@
 # Beth McCarthy — YouTube channel deep dive
 ## Audit pack for independent review
 
-**Version 1 · 2 October 2026**
+**Version 2 · 2 October 2026**
 Deck: `/beth` · Evidence page: `/beth/analysis`
 
 ---
@@ -50,13 +50,18 @@ lag — the counter updates less often than per-video counts.
 **Consequence:** unlike most channels, there is no unaccounted gap. Every
 percentage in this analysis is a share of the *entire* channel.
 
-**Is 26 really everything?** This is worth challenging. 26 uploads for a
-channel with 96.3K subscribers and a 2.9M video is unusually few. Checks done:
-the API returned 26 of a stated 26 and was not capped; the uploads-playlist
-count also returned 26. I did **not** separately crawl the channel's Shorts
-tab. If Beth has Shorts that do not appear in the uploads playlist, the
-"1 Short ever" finding would be wrong. **Please flag this as the single
-biggest data risk.**
+**Is 26 really everything?** Worth challenging — 26 uploads for a channel with
+96.3K subscribers and a 2.9M video is unusually few. Checks done: the API
+returned 26 of a stated 26 and was not capped, and the uploads-playlist count
+also returned 26.
+
+**RESOLVED (2 Oct).** The public Shorts tab at `youtube.com/@BethMcCarthy/shorts`
+was loaded and read directly. It contains **exactly one Short** — "wrote an
+anthem for the baddies", 2.6K views — matching the API. The channel header on
+that page independently reports "26 videos" and "96.3K subscribers".
+
+This closes what was the largest data risk in version 1 of this pack. The
+"one Short" claim is now verified rather than inferred.
 
 ### Full catalogue (all 26, as pulled)
 
@@ -320,7 +325,7 @@ of the four and I am not certain it belongs.
    mechanic? (§2)
 2. Does the age confound invalidate the "audience deepened" slide? (§5)
 3. Should row 23 be counted as a response? (§2)
-4. Is the "0 Shorts except one" claim safe without crawling the Shorts tab? (§1)
+4. ~~Is the "one Short" claim safe?~~ **Resolved — Shorts tab verified directly (§1).**
 5. Does recommendation 03 survive without a precedent? (§9)
 6. Is there anything in the 26-row table in §1 that contradicts the deck and
    is not addressed anywhere?
