@@ -7,7 +7,7 @@
 <meta name="description" content="Bleachers on YouTube: twelve years, five records, a catalogue earning 155,000 views a day — and a Christmas song that started climbing again in September.">
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     BLEACHERS × YOUTUBE — CHANNEL DEEP DIVE  ·  v4, 30 September 2026
+     BLEACHERS × YOUTUBE — CHANNEL DEEP DIVE  ·  v5, 2 October 2026 · data read 30 September 2026
 
      For the artist and their management.
 
@@ -785,28 +785,52 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
       <div class="rwmarks">
         <div class="rwm now">
           <div class="w">Now</div>
-          <div class="d">30 September</div>
+          <div class="d" data-today>2 October</div>
           <div class="n">Already at 5.4&times; its daily average. Two of the four assets
             don't exist.</div>
         </div>
         <div class="rwm">
-          <div class="w">In 6 weeks</div>
+          <div class="w" data-weeks="2026-11-11">In 6 weeks</div>
           <div class="d">11 November</div>
           <div class="n">Where the 2024 campaign started — the first Short went up on
             this date.</div>
         </div>
         <div class="rwm">
-          <div class="w">In 10 weeks</div>
+          <div class="w" data-weeks="2026-12-11">In 10 weeks</div>
           <div class="d">11 December</div>
           <div class="n">The first chart week last season. It peaked at #65 here.</div>
         </div>
         <div class="rwm">
-          <div class="w">In 12 weeks</div>
+          <div class="w" data-weeks="2026-12-25">In 12 weeks</div>
           <div class="d">25 December</div>
           <div class="n">The song's day. By then the work is either done or it isn't.</div>
         </div>
       </div>
     </div>
+    <!-- The runway is the one thing on this page that is relative to the day it
+         is read, so it is the one thing that can quietly go stale. The markers
+         carry correct static values as a fallback; this rewrites them from the
+         clock so a deck opened in three weeks still says something true. The
+         fixed dates never move — only "Now" and the week offsets do. -->
+    <script>
+    (function(){
+      var MONTHS=['January','February','March','April','May','June','July',
+                  'August','September','October','November','December'];
+      var now=new Date(), today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+      var el=document.querySelector('[data-today]');
+      if(el) el.textContent=today.getDate()+' '+MONTHS[today.getMonth()];
+      document.querySelectorAll('[data-weeks]').forEach(function(n){
+        var p=n.getAttribute('data-weeks').split('-');
+        var t=new Date(+p[0],+p[1]-1,+p[2]);
+        var days=Math.round((t-today)/86400000);
+        if(days<0){ n.textContent='Passed'; return; }
+        if(days===0){ n.textContent='Today'; return; }
+        if(days<7){ n.textContent='In '+days+(days===1?' day':' days'); return; }
+        var w=Math.round(days/7);
+        n.textContent='In '+w+(w===1?' week':' weeks');
+      });
+    })();
+    </script>
     <div class="fine" style="margin-top:.7rem">
       A lyric video and an official audio are studio jobs measured in weeks, not months
       — but they are not same-week jobs, and the ramp has already begun
