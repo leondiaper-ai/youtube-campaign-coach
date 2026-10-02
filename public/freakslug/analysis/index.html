@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Freak Slug — where the numbers came from</title>
+<meta name="description" content="Sources, method and working for the Freak Slug album-era read, 2 October 2026">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0A0B12; --ink:#141726; --bone:#F2EBE4; --smoke:#A9A3AE;
+  --faint:#6A6472; --rule:rgba(242,235,228,.13);
+  --cobalt:#2E8ACB; --wine:#A82F4C;
+  --disp:'Syne',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --pad:clamp(22px,5vw,78px);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;line-height:1.62}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(56px,10vh,110px) var(--pad) clamp(60px,12vh,130px)}
+a{color:var(--cobalt)}
+.back{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--faint);text-decoration:none;display:inline-block;margin-bottom:2.4rem}
+.back:hover{color:var(--bone)}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(2rem,4.6vw,3.2rem);
+  letter-spacing:-.03em;line-height:1.02;margin:0 0 1rem}
+h2{font-family:var(--disp);font-weight:800;font-size:clamp(1.15rem,2.3vw,1.6rem);
+  letter-spacing:-.02em;margin:3.1rem 0 .7rem}
+h3{font-family:var(--mono);font-weight:500;font-size:.63rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--faint);margin:2rem 0 .6rem}
+p{margin:0 0 1rem;color:var(--smoke);font-size:.96rem}
+p b,li b{color:var(--bone);font-weight:600}
+.lede{font-size:1.08rem;color:var(--bone)}
+ul{margin:0 0 1rem;padding-left:1.1rem;color:var(--smoke);font-size:.96rem}
+li{margin-bottom:.4rem}
+.rule{height:1px;background:var(--rule);margin:2.6rem 0}
+.qual{font-size:.84rem;line-height:1.6;color:var(--faint);margin:.9rem 0 1.2rem;
+  padding-left:.9rem;border-left:1px solid var(--rule)}
+table{width:100%;border-collapse:collapse;margin:.9rem 0 1.4rem;font-size:.82rem}
+th{font-family:var(--mono);font-size:.57rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);text-align:left;font-weight:500;padding:.5rem .6rem .5rem 0;
+  border-bottom:1px solid var(--rule);vertical-align:bottom}
+td{padding:.52rem .6rem .52rem 0;border-bottom:1px solid var(--rule);color:var(--smoke);
+  vertical-align:top}
+td.n{font-family:var(--mono);font-size:.78rem;white-space:nowrap;color:var(--bone)}
+tr.hi td{background:rgba(168,47,76,.08)}
+.flag{font-family:var(--mono);font-size:.57rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--wine)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="/freakslug">← Back to the read</a>
+
+<h1>Where the numbers came from.</h1>
+
+<p class="lede">
+Every figure on the deck comes from one pull of the YouTube Data API v3 against
+<b>@freakslug</b> (UCPPyyg5x0Txuic9N869_I_Q) on <b>2 October 2026</b>, plus the Watcher's
+own channel snapshot series. Nothing is modelled, estimated or taken from a third party.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>The one limit worth reading first</h2>
+
+<p>
+The API returned <b>181 of 181</b> public uploads and was not capped. Those 181 uploads
+sum to <b>1,368,348 views</b>. The channel's lifetime view counter reads <b>5,826,056</b>.
+</p>
+
+<p>
+That is a gap of roughly 4.46 million views, or <b>76.5% of the channel's history</b>,
+sitting in uploads that are no longer public. It is not an error in the pull — it is
+what a pruned channel looks like from the outside.
+</p>
+
+<p class="qual">
+Consequence: every share quoted on the deck — "78.8% of views are long-form", "26% of
+all Shorts views" — is a share of the <b>1,368,348 that can be seen and counted today</b>,
+not of the channel's whole history. Comparisons <em>between</em> currently-public assets are
+unaffected, because they are all measured on the same basis.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>The matched campaign window</h2>
+
+<p>
+Comparing two album campaigns by calendar date would compare a 2024 campaign against a
+2026 one and call the difference strategy. Instead both are measured on the same
+<b>campaign clock</b>: 71 days before release day to 14 days after. The window closes at
++14 because that is how old Amulet is on the day of reading, so neither era is given
+more campaign time than the other.
+</p>
+
+<table>
+<thead><tr><th>Measure</th><th>I Blow Out Big Candles<br>8 Nov 2024</th><th>Amulet<br>18 Sep 2026</th></tr></thead>
+<tbody>
+<tr><td>Uploads in window</td><td class="n">10</td><td class="n">46</td></tr>
+<tr><td>Long-form videos</td><td class="n">2</td><td class="n">7</td></tr>
+<tr><td>Shorts</td><td class="n">8</td><td class="n">39</td></tr>
+<tr><td>Longest gap between uploads</td><td class="n">27 days</td><td class="n">19 days</td></tr>
+<tr><td>Videos published after release day</td><td class="n">0</td><td class="n">2</td></tr>
+<tr class="hi"><td>Long-form views in window</td><td class="n">155,622</td><td class="n">147,080</td></tr>
+<tr><td>Shorts views in window</td><td class="n">11,107</td><td class="n">41,059</td></tr>
+<tr><td>Oldest asset in window, at reading</td><td class="n">~2 years</td><td class="n">12 weeks</td></tr>
+</tbody>
+</table>
+
+<p class="qual">
+<span class="flag">What this does not control for</span><br>
+Views keep accruing, so the debut window's 155,622 reflects up to two years of
+accumulation and Amulet's 147,080 reflects at most twelve weeks. This makes the
+comparison <b>conservative in the debut's favour</b> — the Amulet figure can only rise
+against a near-static one. It does <em>not</em> support any claim about which era will
+finish larger, only that the newer one has already come within 5.5% while being a
+fraction of the age.
+</p>
+
+<h3>The seven Amulet-window videos</h3>
+<table>
+<thead><tr><th>Day</th><th>Asset</th><th>Views</th></tr></thead>
+<tbody>
+<tr><td class="n">D−71</td><td>Girl, Intentions — music video</td><td class="n">53,815</td></tr>
+<tr><td class="n">D−58</td><td>Girl, Intentions (BTS)</td><td class="n">727</td></tr>
+<tr><td class="n">D−46</td><td>Chattin with Molly from Earworm</td><td class="n">288</td></tr>
+<tr><td class="n">D−42</td><td>If I Could — music video</td><td class="n">26,126</td></tr>
+<tr><td class="n">D−2</td><td>Wishing Bone — music video</td><td class="n">56,854</td></tr>
+<tr><td class="n">D+0</td><td>Amulet — album visualiser</td><td class="n">5,584</td></tr>
+<tr><td class="n">D+13</td><td>Serpent — music video</td><td class="n">3,686</td></tr>
+<tr class="hi"><td class="n">—</td><td><b>Total</b></td><td class="n"><b>147,080</b></td></tr>
+</tbody>
+</table>
+
+<h3>The two debut-window videos</h3>
+<table>
+<thead><tr><th>Day</th><th>Asset</th><th>Views</th></tr></thead>
+<tbody>
+<tr><td class="n">D−56</td><td>Spells — music video</td><td class="n">83,937</td></tr>
+<tr><td class="n">D+0</td><td>Piece of Cake — music video</td><td class="n">71,685</td></tr>
+<tr class="hi"><td class="n">—</td><td><b>Total</b></td><td class="n"><b>155,622</b></td></tr>
+</tbody>
+</table>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>"Eight posts carried it"</h2>
+
+<p>
+The Amulet window earned <b>188,139 views</b> across all 46 uploads. The seven long-form
+videos account for 147,080 of that, and one Short — <em>GIRL, INTENTIONS. OUT NOW</em> —
+accounts for a further 12,041.
+</p>
+
+<p>
+<b>159,121 ÷ 188,139 = 84.6%</b>, rounded on the deck to 85%. The remaining 38 Shorts
+share 29,018 views between them.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>The Shorts arithmetic</h2>
+
+<table>
+<thead><tr><th>Window</th><th>Shorts</th><th>Views</th><th>Mean</th><th>Median</th><th>Likes / 1,000</th></tr></thead>
+<tbody>
+<tr><td>Debut, D−71 to D+14</td><td class="n">8</td><td class="n">11,107</td><td class="n">1,388</td><td class="n">1,060</td><td class="n">34.2</td></tr>
+<tr><td>Amulet, all</td><td class="n">39</td><td class="n">41,059</td><td class="n">1,053</td><td class="n">764</td><td class="n">54.5</td></tr>
+<tr class="hi"><td>Amulet, excluding the one outlier</td><td class="n">38</td><td class="n">29,018</td><td class="n">764</td><td class="n">764</td><td class="n">25.5</td></tr>
+</tbody>
+</table>
+
+<p class="qual">
+The middle row is the misleading one, and it is why the deck quotes the bottom row.
+Taken whole, the Amulet window's Shorts look <em>more</em> engaging than the debut's —
+54.5 likes per thousand against 34.2. But a single post holds 29% of the views and 67%
+of the likes. Remove it and engagement is <b>down</b>, not up: 25.5 against 34.2. The
+honest reading is that one announcement Short carried the layer and the other 38 did
+not move.
+</p>
+
+<h3>All-time Shorts distribution · 163 Shorts</h3>
+<table>
+<thead><tr><th>Threshold</th><th>Shorts above it</th></tr></thead>
+<tbody>
+<tr><td>50,000 views</td><td class="n">1</td></tr>
+<tr><td>10,000 views</td><td class="n">2</td></tr>
+<tr><td>3,000 views</td><td class="n">7</td></tr>
+<tr><td>Median Short</td><td class="n">1,231</td></tr>
+</tbody>
+</table>
+
+<h3>The five biggest Shorts, and what each one is</h3>
+<table>
+<thead><tr><th>Date</th><th>Short</th><th>Views</th><th>Type</th></tr></thead>
+<tbody>
+<tr class="hi"><td class="n">13 Apr 2026</td><td>Coachella that was amazing!</td><td class="n">75,826</td><td>Festival moment</td></tr>
+<tr><td class="n">9 Jul 2026</td><td>GIRL, INTENTIONS. OUT NOW</td><td class="n">12,041</td><td>Release announcement</td></tr>
+<tr><td class="n">13 May 2026</td><td>killer live in LA xx</td><td class="n">4,709</td><td>Live clip</td></tr>
+<tr><td class="n">23 Apr 2025</td><td>@audiotree !</td><td class="n">4,206</td><td>Session promo</td></tr>
+<tr><td class="n">23 Apr 2025</td><td>My @audiotree session is out today!</td><td class="n">3,714</td><td>Session promo</td></tr>
+</tbody>
+</table>
+
+<p>
+The Coachella Short alone is <b>26.1%</b> of all 290,585 Shorts views on the channel
+(75,826 ÷ 290,585). That is the basis for making the tour the post-cycle spine.
+</p>
+
+<p class="qual">
+<span class="flag">What this is not</span><br>
+Five posts is a small sample and the categories above are my reading of each video, not
+a label YouTube supplies. The pattern is consistent and it points the same way as the
+long-form evidence, but it is a <b>direction to test</b>, not a measured effect size. It
+does not establish that a moment Short will reliably outperform — only that every Short
+this channel has had break out so far has been one.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>The silences</h2>
+
+<table>
+<thead><tr><th>Period</th><th>What happened</th><th>Length</th></tr></thead>
+<tbody>
+<tr><td class="n">8 Nov 2024 →<br>6 Feb 2025</td><td>Album out; no new song video until Liquorice</td><td class="n">90 days</td></tr>
+<tr class="hi"><td class="n">7 Nov 2025 →<br>9 Jul 2026</td><td>EP out; no new song video until Girl, Intentions</td><td class="n">244 days</td></tr>
+<tr><td class="n">Dec 2025 →<br>Mar 2026</td><td>Total uploads of any kind across four months</td><td class="n">1</td></tr>
+<tr><td class="n">Apr 2026</td><td>Coachella; uploads in that single month</td><td class="n">17</td></tr>
+</tbody>
+</table>
+
+<p class="qual">
+One long-form upload does sit inside the 244-day stretch — <em>ily new york can't wait to
+come back</em> (17 May 2026, 66 seconds, 2,025 views). It is a tour note rather than a
+song release, which is why the deck describes the gap as having no <b>song video</b>
+rather than no video at all.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>Channel view velocity</h2>
+
+<p>
+Weekly totals from the Watcher snapshot series, which begins 29 June 2026 — fourteen
+weeks of record.
+</p>
+
+<table>
+<thead><tr><th>Week commencing</th><th>Views gained</th><th>What was happening</th></tr></thead>
+<tbody>
+<tr><td class="n">13 Jul 2026</td><td class="n">60,102</td><td>Girl, Intentions — lead single week</td></tr>
+<tr><td class="n">14 Sep 2026</td><td class="n">29,157</td><td>Wishing Bone, then the album on the 18th</td></tr>
+<tr><td class="n">21 Sep 2026</td><td class="n">48,078</td><td>Album week +1</td></tr>
+<tr class="hi"><td class="n">28 Sep 2026</td><td class="n">78,674</td><td>Album week +2 — highest week in the record</td></tr>
+</tbody>
+</table>
+
+<p class="qual">
+Snapshots are taken on an irregular cadence, so single-day gains are lumpy — several
+days read zero and the following day carries the whole interval. Weekly totals are the
+safe granularity and are the only ones quoted. The 28 September week is also still
+<b>partial</b> at the time of reading, which makes it a floor rather than a final figure.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>Production credits</h2>
+
+<p>
+Taken verbatim from each video's own public description.
+</p>
+
+<table>
+<thead><tr><th>Video</th><th>Credit</th><th>Views</th></tr></thead>
+<tbody>
+<tr><td>Girl, Intentions</td><td>Director: St Clair Bryant · director rep · producer</td><td class="n">53,815</td></tr>
+<tr><td>If I Could</td><td>Director: St Clair Bryant</td><td class="n">26,126</td></tr>
+<tr><td>Serpent</td><td>Director: St Clair Bryant · producer · production company</td><td class="n">3,686</td></tr>
+<tr class="hi"><td>Wishing Bone</td><td>"Directed and Edited by Freak Slug, with footage shot by…"</td><td class="n">56,854</td></tr>
+<tr><td>Amulet (visualiser)</td><td>"Directed and Edited by Freak Slug, with footage shot by…"</td><td class="n">5,584</td></tr>
+</tbody>
+</table>
+
+<p class="qual">
+Wishing Bone released two days before the album, which is the highest-attention slot in
+the campaign, and Serpent is one day old at the time of reading. Neither comparison
+supports a claim that self-directed videos outperform commissioned ones. What the table
+does support is narrower and still useful: the self-directed tier produced the
+campaign's largest video, so it can carry a lead asset rather than only filler.
+</p>
+
+<!-- ─────────────────────────────────────────────────────────────── -->
+<h2>Catalogue shape</h2>
+
+<table>
+<thead><tr><th>Measure</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Public uploads retrieved</td><td class="n">181 of 181, not capped</td></tr>
+<tr><td>Shorts</td><td class="n">163 — 90.1%</td></tr>
+<tr><td>Long-form</td><td class="n">18 — 9.9%</td></tr>
+<tr><td>Views in long-form</td><td class="n">1,077,763 — 78.8%</td></tr>
+<tr><td>Views in Shorts</td><td class="n">290,585 — 21.2%</td></tr>
+<tr class="hi"><td>Freak Slug - FRIDAY (Nov 2020)</td><td class="n">614,437 — 57.0% of long-form views</td></tr>
+<tr><td>Subscribers</td><td class="n">24,300</td></tr>
+</tbody>
+</table>
+
+<div class="rule"></div>
+
+<h2>Three things this read cannot answer</h2>
+
+<ul>
+<li><b>Where the 4.46 million missing views went.</b> The removed uploads cannot be
+inspected from outside, so the channel's real long-term shape — including whether FRIDAY
+was always the outlier it looks like — is unknowable from public data.</li>
+<li><b>Whether the Amulet window will finish ahead.</b> Twelve weeks against two years is
+not a settled comparison. The claim is that it has closed to within 5.5%, not that it wins.</li>
+<li><b>What any of this did to streaming.</b> Nothing here touches DSP performance, and
+YouTube view totals are not a proxy for it.</li>
+</ul>
+
+<div class="rule"></div>
+
+<p class="qual">
+Read 2 October 2026. YouTube Data API v3 · @freakslug · UCPPyyg5x0Txuic9N869_I_Q.
+Channel velocity from the Watcher snapshot series, 29 June – 2 October 2026.
+<a href="/freakslug">← Back to the read</a>
+</p>
+
+</div>
+</body>
+</html>

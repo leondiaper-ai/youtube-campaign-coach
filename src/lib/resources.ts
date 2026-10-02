@@ -130,6 +130,16 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         updated: 'September 2026',
       },
       {
+        title: 'Freak Slug',
+        blurb:
+          'Amulet read two weeks after release, measured against the I Blow Out Big Candles campaign on a '
+          + 'matched clock — what changed, what is carrying the views, and the post-cycle plan built on the '
+          + 'October tour. Public API data only, with the catalogue coverage stated on the page.',
+        href: '/freakslug',
+        kind: 'Deck',
+        updated: 'October 2026',
+      },
+      {
         title: 'Amyl and the Sniffers',
         blurb:
           'Channel analysis built for the signing conversation — format mix, cadence and catalogue coverage.',

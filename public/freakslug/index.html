@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Freak Slug × YouTube — Amulet, two weeks in</title>
+<meta name="description" content="Freak Slug channel deep dive · Amulet vs I Blow Out Big Candles · 181 uploads read 2 October 2026">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     FREAK SLUG × YOUTUBE — ALBUM-ERA DEEP DIVE  ·  v1, 2 October 2026
+
+     Every figure comes from one pull of the YouTube Data API v3 against
+     @freakslug (UCPPyyg5x0Txuic9N869_I_Q) on 2 October 2026. The API
+     returned 181 of 181 public uploads and was not capped.
+
+     ONE IMPORTANT LIMIT, STATED UP FRONT. Those 181 uploads sum to
+     1,368,348 views against a lifetime channel counter of 5,826,056.
+     Only 23.5% of the channel's lifetime views sit in content that is
+     public today; the rest is in uploads that have since been removed
+     or hidden. Every share and every total on this deck is a share of
+     the 1,368,348 that can actually be seen and counted. Nothing here
+     claims to describe the channel's whole history.
+
+     Channel-level view velocity comes from the Watcher snapshot series,
+     which starts 29 June 2026 — 14 weeks. Snapshots are irregular, so
+     daily gains are lumpy and only weekly totals are quoted.
+
+     The working is at /freakslug/analysis.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── PALETTE ──────────────────────────────────────────────────────
+   Sampled from the Amulet videos themselves. The blue-black and the
+   cobalt are Serpent — a field at dusk lit by fire. The wine red is
+   the wall in Wishing Bone. The blush is the same video's skin tone
+   against it. Nothing here was invented; the hex values came off the
+   frames. */
+:root{
+  --night:#0A0B12; --ink:#141726; --bone:#F2EBE4; --smoke:#A9A3AE;
+  --faint:#6A6472; --rule:rgba(242,235,228,.13);
+  --cobalt:#2E8ACB;  /* Serpent, dusk sky */
+  --wine:#A82F4C;    /* Wishing Bone, the red wall */
+  --blush:#F0C8CE;
+  --disp:'Syne',sans-serif;
+  --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --pad:clamp(22px,5vw,78px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* Fine grain. The videos are handheld and grainy; a flat page would
+   read as a dashboard rather than as this artist's world. */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.02;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
+
+/* ── NAV ──────────────────────────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;padding:14px var(--pad);
+  background:linear-gradient(180deg,rgba(10,11,18,.96),rgba(10,11,18,0));
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase}
+.nav .who{color:var(--faint)}
+.nav a.analysis{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
+  padding:7px 13px;border-radius:2px;transition:.2s}
+.nav a.analysis:hover{color:var(--bone);border-color:var(--bone)}
+
+/* ── SLIDE ────────────────────────────────────────────────────────── */
+.slide{position:relative;min-height:100vh;display:flex;align-items:center;
+  border-bottom:1px solid var(--rule);overflow:hidden}
+.inner{position:relative;z-index:3;width:100%;max-width:1180px;margin:0 auto;
+  padding:clamp(76px,11vh,130px) var(--pad) clamp(52px,8vh,96px)}
+
+.bleed{position:absolute;inset:0;z-index:1}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+.bleed::after{content:'';position:absolute;inset:0}
+.scrim-l::after{background:linear-gradient(90deg,rgba(10,11,18,.97) 0%,rgba(10,11,18,.9) 44%,rgba(10,11,18,.45) 100%)}
+.scrim-b::after{background:linear-gradient(180deg,rgba(10,11,18,.5) 0%,rgba(10,11,18,.92) 62%,var(--night) 100%)}
+.scrim-f::after{background:rgba(10,11,18,.84)}
+
+/* ── TYPE ─────────────────────────────────────────────────────────── */
+.label{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.label.hot{color:var(--wine)}
+.label.cold{color:var(--cobalt)}
+h1.display,h2.display{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;
+  line-height:1.0;margin:0}
+h1.display{font-size:clamp(2.5rem,5.9vw,4.9rem)}
+h2.display{font-size:clamp(1.95rem,4.3vw,3.4rem)}
+.big-p{font-size:clamp(1.02rem,1.9vw,1.38rem);line-height:1.52;color:var(--smoke);
+  margin:.95rem 0 0;font-weight:400}
+.big-p b{color:var(--bone);font-weight:600}
+.big-p em{font-style:italic;color:var(--blush)}
+.fine{font-family:var(--mono);font-size:.63rem;line-height:1.95;letter-spacing:.055em;
+  text-transform:uppercase;color:var(--faint)}
+.rule{height:1px;background:var(--rule);margin:clamp(1.3rem,3vw,2.3rem) 0}
+.qual{font-size:.84rem;line-height:1.6;color:var(--faint);margin:1rem 0 0;
+  padding-left:.9rem;border-left:1px solid var(--rule)}
+
+/* ── BIG NUMBERS ──────────────────────────────────────────────────── */
+.hero2{display:grid;grid-template-columns:1fr;gap:clamp(20px,4vw,58px);
+  margin:clamp(1.4rem,3vw,2.4rem) 0 1rem}
+@media(min-width:700px){.hero2{grid-template-columns:repeat(auto-fit,minmax(140px,auto));justify-content:start}}
+.hero2 .hn{font-family:var(--disp);font-weight:800;
+  font-size:clamp(2.5rem,5.8vw,4.4rem);line-height:.92;letter-spacing:-.03em}
+.hero2 .hn.cold{color:var(--cobalt)}
+.hero2 .hn.hot{color:var(--wine)}
+.hero2 .hk{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-top:.8rem;line-height:1.75}
+
+/* ── THUMBS ───────────────────────────────────────────────────────── */
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(11px,1.6vw,18px)}
+.vgrid.three{grid-template-columns:repeat(3,1fr)}
+@media(min-width:880px){.vgrid.four{grid-template-columns:repeat(4,1fr)}}
+.thumb{position:relative;display:block;text-decoration:none;color:inherit;
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--ink)}
+.thumb img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  filter:saturate(.95) contrast(1.04)}
+.thumb .cap{display:block;padding:.55rem .65rem .65rem;font-family:var(--mono);
+  font-size:.58rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+  line-height:1.6}
+.thumb .cap b{color:var(--bone);font-weight:500}
+.thumb:hover{border-color:var(--bone)}
+.thumb.hot{border-color:var(--wine);box-shadow:0 0 0 1px var(--wine)}
+
+/* ── TWO-COLUMN COMPARISON ────────────────────────────────────────── */
+.vs{display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--rule);
+  border-radius:3px;overflow:hidden;margin:clamp(1.2rem,2.6vw,2rem) 0 0}
+@media(min-width:760px){.vs{grid-template-columns:1fr 1fr}}
+.vs .col{padding:clamp(1rem,2.1vw,1.6rem)}
+@media(min-width:760px){.vs .col:first-child{border-right:1px solid var(--rule)}}
+@media(max-width:759px){.vs .col:first-child{border-bottom:1px solid var(--rule)}}
+.vs .col.now{background:rgba(168,47,76,.07)}
+.vs .ct{font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:.15rem}
+.vs .cn{font-family:var(--disp);font-weight:800;font-size:clamp(1.05rem,2vw,1.35rem);
+  letter-spacing:-.02em;line-height:1.15}
+.vs .cd{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-top:.3rem}
+.vs .row{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding:.62rem 0;border-top:1px solid var(--rule);font-size:.86rem}
+.vs .row:first-of-type{margin-top:.95rem}
+.vs .row .k{color:var(--faint);font-family:var(--mono);font-size:.59rem;
+  letter-spacing:.1em;text-transform:uppercase;flex:1}
+.vs .row .v{font-family:var(--disp);font-weight:700;font-size:1.12rem;letter-spacing:-.02em;
+  white-space:nowrap}
+.vs .col.now .row .v{color:var(--blush)}
+
+/* ── SPINE / TIMELINE ─────────────────────────────────────────────── */
+.spine{margin:clamp(1.3rem,2.8vw,2.1rem) 0 0;border-top:1px solid var(--rule)}
+.sp{display:grid;grid-template-columns:62px 1fr;gap:clamp(.8rem,2vw,1.6rem);
+  padding:.78rem 0;border-bottom:1px solid var(--rule);align-items:baseline}
+@media(min-width:760px){.sp{grid-template-columns:78px 1fr 120px}}
+.sp .d{font-family:var(--mono);font-size:.6rem;letter-spacing:.09em;color:var(--faint);
+  text-transform:uppercase}
+.sp .t{font-size:.95rem;line-height:1.45}
+.sp .t small{display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--faint);margin-top:.22rem}
+.sp .n{font-family:var(--disp);font-weight:700;font-size:1.02rem;letter-spacing:-.02em;
+  text-align:left;color:var(--smoke)}
+@media(min-width:760px){.sp .n{text-align:right}}
+.sp.key{background:rgba(46,138,203,.07)}
+.sp.key .t{color:var(--bone)}
+.sp.key .n{color:var(--cobalt)}
+.sp.dead .t,.sp.dead .n{color:var(--faint)}
+
+/* ── NUMBERED LIST (recommendations) ──────────────────────────────── */
+.recs{margin:clamp(1.2rem,2.6vw,2rem) 0 0;border-top:1px solid var(--rule)}
+.rec{display:grid;grid-template-columns:44px 1fr;gap:clamp(.9rem,2.2vw,1.8rem);
+  padding:clamp(.85rem,1.9vw,1.25rem) 0;border-bottom:1px solid var(--rule)}
+.rec .num{font-family:var(--disp);font-weight:800;font-size:1.35rem;color:var(--faint);
+  letter-spacing:-.03em;line-height:1.1}
+.rec.first{background:rgba(168,47,76,.08);border-left:2px solid var(--wine);
+  padding-left:clamp(.7rem,1.6vw,1.1rem)}
+.rec.first .num{color:var(--wine)}
+.rec h3{font-family:var(--body);font-weight:600;font-size:clamp(1rem,1.9vw,1.24rem);
+  margin:0 0 .35rem;line-height:1.28}
+.rec p{margin:0;font-size:.92rem;line-height:1.56;color:var(--smoke)}
+.rec .ev{display:block;margin-top:.5rem;font-family:var(--mono);font-size:.58rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.rec .tag{display:block;font-family:var(--mono);font-size:.57rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--wine);margin-bottom:.3rem}
+
+/* ── BAR (shorts distribution) ────────────────────────────────────── */
+.bars{margin:clamp(1.2rem,2.6vw,1.9rem) 0 0}
+.bar{display:grid;grid-template-columns:118px 1fr 76px;gap:.9rem;align-items:center;
+  padding:.46rem 0}
+.bar .bl{font-family:var(--mono);font-size:.58rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--faint)}
+.bar .bt{height:9px;background:rgba(242,235,228,.08);border-radius:1px;overflow:hidden}
+.bar .bf{height:100%;background:var(--smoke)}
+.bar.hot .bf{background:var(--wine)}
+.bar .bv{font-family:var(--mono);font-size:.62rem;color:var(--smoke);text-align:right}
+
+/* ── FOOTER ───────────────────────────────────────────────────────── */
+.foot{padding:clamp(3rem,7vh,5.5rem) var(--pad);max-width:1180px;margin:0 auto}
+.foot a{color:var(--smoke)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="who">Freak Slug · @freakslug</span>
+  <a class="analysis" href="/freakslug/analysis">The numbers ↓</a>
+</nav>
+
+<!-- ══ 01 · COVER ══════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/RQVbqeolfNg/maxres2.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/RQVbqeolfNg/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label hot">Amulet · album read · 2 October 2026</div>
+    <h1 class="display" style="margin-top:1.1rem">Five times the output.<br>Eight posts carried it.</h1>
+    <p class="big-p" style="max-width:36em">
+      Amulet is two weeks old. Against the same stretch of the <b>I Blow Out Big
+      Candles</b> campaign, this one published <b>46 uploads instead of 10</b> — and
+      <b>eight of them</b> account for <b>85%</b> of everything the window earned.
+      That is the finding, and it decides what happens next.
+    </p>
+    <div class="rule"></div>
+    <div class="fine">
+      181 public uploads · 24,300 subscribers<br>
+      Matched campaign window: 71 days before release to 14 days after<br>
+      YouTube Data API v3, read 2 October 2026
+    </div>
+  </div>
+</section>
+
+<!-- ══ 02 · THE COMPARISON ════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label">Two albums, measured the same way</div>
+    <h2 class="display" style="margin-top:.9rem">The campaign didn't get<br>louder. It got built.</h2>
+    <p class="big-p" style="max-width:40em">
+      Both windows run from 71 days before release day to 14 days after, so the
+      comparison is campaign-for-campaign rather than calendar-for-calendar.
+      The debut had a lead single and an album-day video. Amulet has a release
+      architecture.
+    </p>
+
+    <div class="vs">
+      <div class="col">
+        <div class="ct">Album one</div>
+        <div class="cn">I Blow Out Big Candles</div>
+        <div class="cd">8 November 2024 · Future Classic</div>
+        <div class="row"><span class="k">Uploads in window</span><span class="v">10</span></div>
+        <div class="row"><span class="k">Long-form videos</span><span class="v">2</span></div>
+        <div class="row"><span class="k">Shorts</span><span class="v">8</span></div>
+        <div class="row"><span class="k">Longest silence</span><span class="v">27 days</span></div>
+        <div class="row"><span class="k">Videos after release day</span><span class="v">0</span></div>
+      </div>
+      <div class="col now">
+        <div class="ct">Album two</div>
+        <div class="cn">Amulet</div>
+        <div class="cd">18 September 2026 · Future Classic</div>
+        <div class="row"><span class="k">Uploads in window</span><span class="v">46</span></div>
+        <div class="row"><span class="k">Long-form videos</span><span class="v">7</span></div>
+        <div class="row"><span class="k">Shorts</span><span class="v">39</span></div>
+        <div class="row"><span class="k">Longest silence</span><span class="v">19 days</span></div>
+        <div class="row"><span class="k">Videos after release day</span><span class="v">2</span></div>
+      </div>
+    </div>
+
+    <p class="qual">
+      The debut campaign put out <em>Spells</em> on day −56 and <em>Piece of Cake</em> on
+      release day, and nothing else of length in between — 56 days carried by seven
+      Shorts. Amulet runs three single videos, a behind-the-scenes film, an interview,
+      an album visualiser and a post-release song video.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 03 · IT IS LANDING ═════════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres2.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label cold">What the numbers say so far</div>
+    <h2 class="display" style="margin-top:.9rem">Two weeks in, it has nearly<br>matched two years.</h2>
+
+    <div class="hero2">
+      <div><div class="hn cold">147,080</div><div class="hk">Amulet window<br>long-form views<br>Oldest asset: 12 weeks</div></div>
+      <div><div class="hn">155,622</div><div class="hk">Debut window<br>long-form views<br>Oldest asset: 2 years</div></div>
+      <div><div class="hn cold">94.5%</div><div class="hk">Of the debut<br>window's total,<br>already</div></div>
+    </div>
+
+    <p class="big-p" style="max-width:40em">
+      The debut's two videos have had up to two years to accumulate. Amulet's seven
+      have had, at most, twelve weeks. The gap between them is <b>8,542 views</b>, and
+      it is closing weekly — which makes this a conservative read, not a flattering one.
+    </p>
+
+    <div class="rule"></div>
+    <div class="label">Channel view velocity · weekly totals</div>
+    <div class="bars">
+      <div class="bar"><span class="bl">w/c 13 Jul · lead single</span><span class="bt"><span class="bf" style="width:76%"></span></span><span class="bv">60,102</span></div>
+      <div class="bar"><span class="bl">w/c 14 Sep · album week</span><span class="bt"><span class="bf" style="width:37%"></span></span><span class="bv">29,157</span></div>
+      <div class="bar"><span class="bl">w/c 21 Sep · +1</span><span class="bt"><span class="bf" style="width:61%"></span></span><span class="bv">48,078</span></div>
+      <div class="bar hot"><span class="bl">w/c 28 Sep · +2</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">78,674</span></div>
+    </div>
+    <p class="qual">
+      Week two after release is the <b>biggest week in the entire 14-week snapshot
+      record</b>, and it is bigger than lead-single week. The channel is accelerating
+      after the album, not decaying — which is the opposite of the usual shape, and
+      the single best argument for keeping the foot down.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 04 · THE ENGINE ════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label">Where the views actually are</div>
+    <h2 class="display" style="margin-top:.9rem">One upload in ten is a video.<br>They hold four views in five.</h2>
+
+    <div class="hero2">
+      <div><div class="hn">9.9%</div><div class="hk">Of uploads are<br>long-form</div></div>
+      <div><div class="hn cold">78.8%</div><div class="hk">Of measured views<br>come from them</div></div>
+      <div><div class="hn">18</div><div class="hk">Long-form videos<br>on the channel</div></div>
+      <div><div class="hn">163</div><div class="hk">Shorts</div></div>
+    </div>
+
+    <p class="big-p" style="max-width:40em">
+      Eighteen videos carry <b>1,077,763</b> of the <b>1,368,348</b> views that can be
+      counted on this channel. Every single asset in the top twelve is a song video,
+      with one exception — and that exception is a festival.
+    </p>
+
+    <div class="vgrid four" style="margin-top:clamp(1.2rem,2.6vw,1.9rem);max-width:900px">
+      <a class="thumb" href="https://www.youtube.com/watch?v=yCsrt0nNliM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/yCsrt0nNliM/hqdefault.jpg" alt=""><span class="cap"><b>Spells</b><br>Sep 2024 · 83,937</span></a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=MNNMKKW5KmI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/MNNMKKW5KmI/hqdefault.jpg" alt=""><span class="cap"><b>Piece of Cake</b><br>Nov 2024 · 71,685</span></a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=vB0DoqKpkWw" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg" alt=""><span class="cap"><b>Wishing Bone</b><br>Sep 2026 · 56,854</span></a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=u9FguM9aAM8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/u9FguM9aAM8/hqdefault.jpg" alt=""><span class="cap"><b>Girl, Intentions</b><br>Jul 2026 · 53,815</span></a>
+    </div>
+
+    <p class="qual">
+      <b>Freak Slug - FRIDAY</b> (2020) still sits above all of them at 614,437 views —
+      a six-year-old upload that out-earns the entire Amulet campaign so far. It is
+      the channel's largest front door and nothing currently points through it.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 05 · THE SHORTS READ ═══════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/Bfqx-QYBLbE/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/Bfqx-QYBLbE/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label hot">163 Shorts · the uncomfortable part</div>
+    <h2 class="display" style="margin-top:.9rem">Thirty-nine Shorts this campaign.<br>One of them did the work.</h2>
+
+    <div class="vs">
+      <div class="col">
+        <div class="ct">Debut window</div>
+        <div class="cn">8 Shorts</div>
+        <div class="row"><span class="k">Average views</span><span class="v">1,388</span></div>
+        <div class="row"><span class="k">Likes per 1,000</span><span class="v">34.2</span></div>
+      </div>
+      <div class="col now">
+        <div class="ct">Amulet window · the 38 others</div>
+        <div class="cn">38 Shorts</div>
+        <div class="row"><span class="k">Average views</span><span class="v">764</span></div>
+        <div class="row"><span class="k">Likes per 1,000</span><span class="v">25.5</span></div>
+      </div>
+    </div>
+
+    <p class="big-p" style="max-width:40em">
+      Shorts volume went up nearly five times. Reach per Short went down by
+      <b>45%</b>. One post — <em>GIRL, INTENTIONS. OUT NOW</em> — took <b>29%</b> of the
+      window's Shorts views and <b>67%</b> of its likes on its own. Strip it out and the
+      remaining 38 averaged 764 views each.
+    </p>
+
+    <div class="rule"></div>
+    <div class="label">The two Shorts that ever broke out</div>
+    <div class="vgrid" style="max-width:620px;margin-top:.9rem">
+      <a class="thumb hot" href="https://www.youtube.com/watch?v=Bfqx-QYBLbE" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Bfqx-QYBLbE/hqdefault.jpg" alt=""><span class="cap"><b>Coachella, Apr 2026</b><br>75,826 views · 4,427 likes<br>26% of every Short view ever</span></a>
+      <a class="thumb hot" href="https://www.youtube.com/watch?v=dRarsKu5Ens" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/dRarsKu5Ens/hqdefault.jpg" alt=""><span class="cap"><b>Girl, Intentions out now</b><br>12,041 views · 1,498 likes<br>Jul 2026</span></a>
+    </div>
+
+    <p class="qual">
+      Of 163 Shorts, two have passed 10,000 views and seven have passed 3,000. The
+      five biggest are all the same thing: a festival, a release announcement, a live
+      clip and two session posts. Not one of them is a lip-sync to the record.
+      <b>The test before publishing: does this document a moment, or restate a song?</b>
+    </p>
+  </div>
+</section>
+
+<!-- ══ 06 · DOUBLE DOWN — SONG ECOSYSTEMS ════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label cold">Double down · one</div>
+    <h2 class="display" style="margin-top:.9rem">The song that got three assets<br>is the song that travelled.</h2>
+
+    <p class="big-p" style="max-width:40em">
+      <b>Girl, Intentions</b> is the only song in either album cycle to get more than
+      two pieces of video: the music video, a release Short, and a behind-the-scenes
+      film. Together they have done <b>66,583 views</b> — more than any other single song
+      in the campaign — and the Short is the second-biggest the channel has ever had.
+    </p>
+
+    <div class="vgrid three" style="margin-top:clamp(1.1rem,2.4vw,1.7rem);max-width:760px">
+      <a class="thumb" href="https://www.youtube.com/watch?v=u9FguM9aAM8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/u9FguM9aAM8/hqdefault.jpg" alt=""><span class="cap"><b>Music video</b><br>9 Jul · 53,815</span></a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=dRarsKu5Ens" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/dRarsKu5Ens/hqdefault.jpg" alt=""><span class="cap"><b>Release Short</b><br>9 Jul · 12,041</span></a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=xd8E-yAbPfY" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/xd8E-yAbPfY/hqdefault.jpg" alt=""><span class="cap"><b>Behind the scenes</b><br>22 Jul · 727</span></a>
+    </div>
+
+    <p class="qual">
+      The BTS film itself is small at 727 views, and that is worth being honest about —
+      it is not a reach asset. What it does is keep the song on the channel for a
+      third week without needing a new song. The pattern to repeat is the <em>shape</em>,
+      not that specific video.
+    </p>
+
+    <div class="rule"></div>
+    <div class="label">And the thing this campaign did that the last one never did</div>
+    <div class="spine">
+      <div class="sp dead"><span class="d">2024</span><span class="t">Album out, then nothing of length for <b>90 days</b><small>Next song video: Liquorice, 6 February 2025</small></span><span class="n">D+90</span></div>
+      <div class="sp key"><span class="d">2026</span><span class="t"><b>Serpent</b> — a song video thirteen days after the album<small>The record is still releasing itself</small></span><span class="n">D+13</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 07 · DOUBLE DOWN — THE WORLD ══════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/-Qb8EXtKyfA/maxres1.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/-Qb8EXtKyfA/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label cold">Double down · two</div>
+    <h2 class="display" style="margin-top:.9rem">The campaign has a cheap tier.<br>It made the biggest video.</h2>
+    <p class="big-p" style="max-width:38em">
+      The credits in the descriptions show two production tiers. <b>Girl, Intentions</b>,
+      <b>If I Could</b> and <b>Serpent</b> are directed by St Clair Bryant with a producer and
+      a production company. <b>Wishing Bone</b> and the album visualiser read
+      <em>"Directed and Edited by Freak Slug, with footage shot by"</em> three friends.
+      Wishing Bone is the biggest video of the campaign at <b>56,854</b> — at sixteen
+      days old, already above a commissioned single that has had eighty-five.
+    </p>
+    <div class="vgrid four" style="margin-top:clamp(1.1rem,2.4vw,1.7rem);max-width:900px">
+      <div class="thumb"><img src="https://i.ytimg.com/vi/u9FguM9aAM8/maxres1.jpg" onerror="this.src='https://i.ytimg.com/vi/u9FguM9aAM8/hqdefault.jpg'" alt=""><span class="cap">Girl, Intentions<br>Commissioned · 53,815</span></div>
+      <div class="thumb"><img src="https://i.ytimg.com/vi/-Qb8EXtKyfA/maxres2.jpg" onerror="this.src='https://i.ytimg.com/vi/-Qb8EXtKyfA/hqdefault.jpg'" alt=""><span class="cap">If I Could<br>Commissioned · 26,126</span></div>
+      <div class="thumb hot"><img src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres1.jpg" onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt=""><span class="cap"><b>Wishing Bone</b><br>Self-directed · 56,854</span></div>
+      <div class="thumb hot"><img src="https://i.ytimg.com/vi/0ooWGLdkQ6U/maxres1.jpg" onerror="this.src='https://i.ytimg.com/vi/0ooWGLdkQ6U/hqdefault.jpg'" alt=""><span class="cap"><b>Amulet visualiser</b><br>Self-directed · 5,584</span></div>
+    </div>
+    <p class="qual">
+      Wishing Bone landed two days before the album, which is the best slot in the
+      campaign, so placement is doing some of this. But the claim worth taking away is
+      the smaller one: <b>the cheap tier is not the lesser tier</b>. It is made from footage
+      that already exists, it can be turned around in days, and it is the only answer
+      to the silence on the next slide that does not need a budget conversation.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 08 · THE PATTERN TO BREAK ═════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">The thing that has gone wrong twice</div>
+    <h2 class="display" style="margin-top:.9rem">Both cycles ended in silence.<br>Both were restarted by a stage.</h2>
+
+    <div class="spine">
+      <div class="sp dead"><span class="d">Nov 2024</span><span class="t">Album out. No song video for three months.<small>Next: Liquorice, February 2025</small></span><span class="n">90 days</span></div>
+      <div class="sp dead"><span class="d">Nov 2025</span><span class="t">EP out. Then the longest gap on the channel.<small>No song video until Girl, Intentions, July 2026</small></span><span class="n">244 days</span></div>
+      <div class="sp dead"><span class="d">Dec–Mar</span><span class="t">One upload in four months.<small>December 2025 to March 2026</small></span><span class="n">1 upload</span></div>
+      <div class="sp key"><span class="d">Apr 2026</span><span class="t">Coachella. Seventeen uploads in a month, and the biggest Short the channel has ever had.<small>75,826 views — 26% of all Shorts views to date</small></span><span class="n">Restart</span></div>
+    </div>
+
+    <p class="big-p" style="max-width:40em">
+      The post-release lull is not a hypothesis on this channel — it has happened
+      after both bodies of work, and the second time it ran for <b>244 days</b>.
+      It is also the one problem with a proven solution already in the record: when
+      Freak Slug is on a stage, the channel moves.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 09 · THE POST-CYCLE SPINE ═════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/0ooWGLdkQ6U/maxres1.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/0ooWGLdkQ6U/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label cold">What happens after the album cycle</div>
+    <h2 class="display" style="margin-top:.9rem">North America starts 23 October.<br>That is the next six months.</h2>
+
+    <p class="big-p" style="max-width:38em">
+      The tour is not a promotional afterthought here — on the evidence it is the
+      strongest content engine the channel has. One festival appearance generated a
+      quarter of every Short view in the catalogue. A full North American run is
+      forty-odd nights of the same raw material.
+    </p>
+
+    <div class="spine">
+      <div class="sp key"><span class="d">Oct 23 →</span><span class="t">A live performance video per leg, not per tour<small>Precedent: Killer (Live at Union Pool) — 5,861, published eleven months before Coachella</small></span><span class="n">Long-form</span></div>
+      <div class="sp"><span class="d">Weekly</span><span class="t">One <b>moment</b> Short a week, not one a day<small>The five biggest Shorts are all moments. The daily song restatements average 764</small></span><span class="n">Shorts</span></div>
+      <div class="sp"><span class="d">Nov–Dec</span><span class="t">A second Amulet song video from footage already shot<small>Serpent proved the appetite exists at D+13</small></span><span class="n">Long-form</span></div>
+      <div class="sp"><span class="d">Q1 2027</span><span class="t">Something that is not a single, before the gap opens<small>The 244-day silence began the week the last asset landed</small></span><span class="n">Anything</span></div>
+    </div>
+
+    <p class="qual">
+      The point of dating this is the December problem. Last cycle the channel went
+      from seventeen uploads in a month to one in four. The tour covers October and
+      November; the decision that matters is what is already shot and scheduled for
+      the weeks after it ends.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 10 · RECOMMENDATIONS ══════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label">What we recommend</div>
+    <h2 class="display" style="margin-top:.9rem">Four things, starting<br>with the tour.</h2>
+
+    <div class="recs">
+      <div class="rec first">
+        <div class="num">01</div>
+        <div>
+          <span class="tag">Starts 23 October</span>
+          <h3>Make the tour the publishing plan</h3>
+          <p>A live video per leg and one moment Short a week, for as long as the run
+          lasts. Not a highlights reel at the end — the channel's two previous restarts
+          both came from a stage, and this is the longest stage time Freak Slug has had.</p>
+          <span class="ev">Coachella: 75,826 views — 26% of all Shorts views ever</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">02</div>
+        <div>
+          <h3>Give the album's remaining songs their own assets</h3>
+          <p>Serpent at D+13 was the right instinct and it is already the thing that
+          separates this cycle from the last one. Keep going — a song video, a live
+          version, a piece of behind-the-scenes. The record should still be releasing
+          itself in January.</p>
+          <span class="ev">Girl, Intentions got three assets and outperformed every other song</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">03</div>
+        <div>
+          <h3>Cut the Shorts count, raise the Shorts bar</h3>
+          <p>Thirty-nine in the window, thirty-eight of them averaging 764 views. The
+          ones that travel document something that happened. One good moment a week
+          will reach more people than five restatements of the single, and it costs
+          less to make.</p>
+          <span class="ev">2 of 163 Shorts have passed 10,000 views</span>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="num">04</div>
+        <div>
+          <h3>Point something at FRIDAY</h3>
+          <p>A 2020 upload is still the biggest thing on the channel at 614,437 views
+          and nothing currently connects it to Amulet. End screens, a pinned comment,
+          a playlist that runs it into the new record — the cheapest available audience
+          is the one already arriving.</p>
+          <span class="ev">FRIDAY is 57% of all long-form views on the channel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="fine">
+    Freak Slug · YouTube channel read · 2 October 2026<br>
+    Source: YouTube Data API v3, @freakslug (UCPPyyg5x0Txuic9N869_I_Q), 181 of 181 public
+    uploads retrieved. Channel velocity from the Watcher snapshot series, 29 June – 2 October 2026.<br><br>
+    Those 181 uploads sum to 1,368,348 views against a lifetime channel counter of
+    5,826,056. Only the 1,368,348 is measurable, and every share on this deck is a
+    share of that figure. &nbsp;·&nbsp; <a href="/freakslug/analysis">Where the numbers came from →</a>
+  </div>
+</footer>
+
+</body>
+</html>
