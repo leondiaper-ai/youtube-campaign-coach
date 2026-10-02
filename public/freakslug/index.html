@@ -144,10 +144,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .shift .sv{white-space:nowrap}
 .shift .sv{display:flex;align-items:baseline;gap:clamp(.5rem,1.4vw,1rem);
   font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.9}
-.shift .from{font-size:clamp(1.8rem,3.8vw,2.9rem);color:var(--faint)}
-.shift .ar{font-size:clamp(1.3rem,2.6vw,2rem);color:var(--faint);font-family:var(--body);
+.shift .from{font-size:clamp(1.6rem,3.2vw,2.4rem);color:var(--faint)}
+.shift .ar{font-size:clamp(1.1rem,2vw,1.5rem);color:var(--faint);font-family:var(--body);
   font-weight:400}
-.shift .to{font-size:clamp(2.7rem,6.2vw,4.8rem);color:var(--bone)}
+.shift .to{font-size:clamp(2.4rem,5vw,3.9rem);color:var(--bone)}
 .shift.flat .to{color:var(--smoke)}
 .shift.up .to{color:var(--blush)}
 .shift .sk{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
@@ -634,9 +634,8 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 
     <div class="hero2 xl count">
       <div><div class="hn hot" data-pct="50.5">50.5%</div><div class="hk">US + Canada<br>share of views</div></div>
-      <div><div class="hn cold" data-pct="39.8">+39.8%</div><div class="hk">US growth</div></div>
-      <div><div class="hn cold" data-pct="123.7">+123.7%</div><div class="hk">Canada growth</div></div>
-      <div><div class="hn" data-pct="7.7">+7.7%</div><div class="hk">Median market</div></div>
+      <div><div class="hn cold" data-pct="39.8" data-prefix="+">+39.8%</div><div class="hk">US growth</div></div>
+      <div><div class="hn cold" data-pct="123.7" data-prefix="+">+123.7%</div><div class="hk">Canada growth</div></div>
     </div>
 
     <p class="big-p" style="max-width:42em">
@@ -651,9 +650,9 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     </div>
 
     <p class="qual">
-      29 of 312 comments read ask for live dates, naming 16 cities unprompted — most of
-      them North American. Territory split: Chartmetric YouTube monthly views, top 25
-      countries, 19–29 September.
+      Against a median market change of +7.7%. 29 of 312 comments read ask for live dates,
+      naming 16 cities unprompted — most of them North American. Territory split:
+      Chartmetric YouTube monthly views, top 25 countries, 19–29 September.
     </p>
   </div>
 </section>
@@ -789,9 +788,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   /* One formatter so a figure reads the same mid-count as it does at rest:
      data-pct -> 85.6%, data-fmt="k" -> 78.7K, otherwise 60,102. */
   function fmt(v, el){
-    if (el.hasAttribute('data-pct')) return v.toFixed(1) + '%';
-    if (el.getAttribute('data-fmt') === 'k') return (v / 1000).toFixed(1) + 'K';
-    return Math.round(v).toLocaleString();
+    var pre = el.getAttribute('data-prefix') || '';   // keeps a leading "+"
+    if (el.hasAttribute('data-pct')) return pre + v.toFixed(1) + '%';
+    if (el.getAttribute('data-fmt') === 'k') return pre + (v / 1000).toFixed(1) + 'K';
+    return pre + Math.round(v).toLocaleString();
   }
 
   /* Reserve each figure's finished width BEFORE counting.
