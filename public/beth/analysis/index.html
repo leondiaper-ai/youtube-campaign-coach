@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beth McCarthy — where the numbers came from</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0B0A0C; --bone:#F4EFEC; --smoke:#B3A9AE; --faint:#6E646A;
+  --rule:rgba(244,239,236,.14); --blood:#C8213A; --rose:#E79FB4;
+  --disp:'Instrument Serif',Georgia,serif; --body:'Inter',sans-serif;
+  --mono:'JetBrains Mono',monospace; --pad:clamp(22px,5vw,64px);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;line-height:1.6}
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;padding:14px var(--pad);
+  background:linear-gradient(180deg,rgba(11,10,12,.97),rgba(11,10,12,.85));
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase}
+.nav .who{color:var(--faint)}
+.nav a.back{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
+  padding:7px 13px;border-radius:2px}
+.nav a.back:hover{color:var(--bone);border-color:var(--bone)}
+.wrap{max-width:900px;margin:0 auto;padding:clamp(96px,14vh,140px) var(--pad) clamp(60px,10vh,110px)}
+.eyebrow{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+h1{font-family:var(--disp);font-weight:400;font-size:clamp(2.6rem,6vw,4.4rem);
+  line-height:1.02;letter-spacing:-.015em;margin:.6rem 0 0}
+.lede{font-size:1.06rem;color:var(--smoke);max-width:60ch;margin:1rem 0 0}
+h2{font-family:var(--disp);font-weight:400;font-size:clamp(1.5rem,3vw,2.1rem);
+  letter-spacing:-.01em;margin:3rem 0 .9rem;padding-top:1.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1rem;font-weight:600;margin:2rem 0 .7rem;letter-spacing:-.005em}
+p{margin:0 0 1rem;font-size:.93rem;color:var(--smoke)}
+p b{color:var(--bone)}
+em{color:var(--rose);font-style:italic}
+table{width:100%;border-collapse:collapse;margin:1.2rem 0 1rem;font-size:.84rem}
+th{text-align:left;font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);font-weight:400;
+  padding:.5rem .6rem;border-bottom:1px solid var(--rule)}
+td{padding:.5rem .6rem;border-bottom:1px solid rgba(244,239,236,.07);color:var(--smoke)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:.78rem}
+tr.lit td{color:var(--bone);background:rgba(231,159,180,.06)}
+tr.total td{color:var(--bone);font-weight:600;border-bottom:2px solid var(--rule)}
+.qual{font-size:.84rem;line-height:1.6;color:var(--faint);margin:.7rem 0 0;
+  padding-left:.9rem;border-left:1px solid var(--rule)}
+.qual b{color:var(--smoke)}
+.kv{display:grid;grid-template-columns:1fr;gap:12px;margin:1.2rem 0 1.6rem}
+@media(min-width:620px){.kv{grid-template-columns:repeat(3,1fr)}}
+.kv > div{padding:.95rem 1.1rem;border:1px solid var(--rule);border-radius:3px}
+.kv .n{font-family:var(--disp);font-size:1.7rem;letter-spacing:-.02em;line-height:1}
+.kv .k{font-family:var(--mono);font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);margin-top:.5rem;line-height:1.7}
+ol{color:var(--smoke);font-size:.93rem;padding-left:1.2rem}
+ol li{margin-bottom:.8rem}
+ol li b{color:var(--bone)}
+.foot{margin-top:3.4rem;padding-top:1.6rem;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.09em;line-height:2;
+  text-transform:uppercase;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="who">Beth McCarthy · The numbers</div>
+  <a class="back" href="/beth">← The deck</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="eyebrow">Beth McCarthy · @BethMcCarthy · Channel deep dive · Virgin Music Group</div>
+  <h1>Where the numbers came from.</h1>
+  <p class="lede">
+    Every figure in the deck, and the video or chart behind it. Have a look if you want
+    to check something.
+  </p>
+
+
+  <h2>Where the numbers come from</h2>
+
+  <table>
+    <tr><th>Source</th><th>What it gives</th><th>Window</th></tr>
+    <tr>
+      <td>YouTube Data API v3</td>
+      <td>All 26 uploads — views, likes, comments, duration, publish date, title, description</td>
+      <td>Read 2 Oct 2026, 10:18 UTC</td>
+    </tr>
+    <tr>
+      <td>The uploads' own descriptions</td>
+      <td>The She Gets The Flowers origin, the two series announcements, the rewrite credit</td>
+      <td>Same pull</td>
+    </tr>
+    <tr>
+      <td>Campaign brief (given to us)</td>
+      <td>Act dates, release schedule, Spotify and social figures</td>
+      <td>Not independently verified</td>
+    </tr>
+  </table>
+
+  <p class="qual">
+    Public data only. No YouTube Studio access, so nothing here includes watch time,
+    retention, traffic sources or audience demographics — and nothing on the deck is a
+    claim about who is watching.
+  </p>
+
+  <h3>The whole channel is measurable</h3>
+  <div class="kv">
+    <div><div class="n">26</div><div class="k">Public uploads · API returned 26 of 26, not capped</div></div>
+    <div><div class="n">12,071,222</div><div class="k">Uploads summed</div></div>
+    <div><div class="n" style="color:var(--faint)">12,069,430</div><div class="k">Lifetime channel counter</div></div>
+  </div>
+  <p>
+    The uploads sum to roughly <b>1,800 above</b> the lifetime counter, which is ordinary
+    counter lag through the day. Unlike most channels there is no unaccounted gap, so every
+    percentage on the deck is a share of the entire channel rather than of a measurable
+    subset. Channel subscribers at the time of reading: <b>96,300</b>.
+  </p>
+
+
+  <h2>What the 26 uploads are</h2>
+  <p>
+    Categories assigned from the titles, which on this channel are explicit — every song
+    asset names its own format in brackets. Each upload lands in exactly one category and
+    the column reconciles to the channel total.
+  </p>
+
+  <table>
+    <tr><th>Category</th><th class="n">Uploads</th><th class="n">Views</th><th class="n">Share</th></tr>
+    <tr class="lit"><td>Response / rewrite</td><td class="n">4</td><td class="n">6,442,953</td><td class="n">53.4%</td></tr>
+    <tr><td>Official video</td><td class="n">7</td><td class="n">3,783,672</td><td class="n">31.3%</td></tr>
+    <tr><td>Lyric video</td><td class="n">3</td><td class="n">833,280</td><td class="n">6.9%</td></tr>
+    <tr><td>Visualiser</td><td class="n">7</td><td class="n">810,491</td><td class="n">6.7%</td></tr>
+    <tr><td>Acoustic</td><td class="n">1</td><td class="n">133,954</td><td class="n">1.1%</td></tr>
+    <tr><td>Sync / film</td><td class="n">1</td><td class="n">36,756</td><td class="n">0.3%</td></tr>
+    <tr><td>Live</td><td class="n">2</td><td class="n">27,444</td><td class="n">0.2%</td></tr>
+    <tr><td>Shorts</td><td class="n">1</td><td class="n">2,672</td><td class="n">0.0%</td></tr>
+    <tr class="total"><td>Total</td><td class="n">26</td><td class="n">12,071,222</td><td class="n">100%</td></tr>
+  </table>
+
+  <p class="qual">
+    Response counts four uploads: three titled "(… Response)" and <em>Omg Did She Call Him
+    Baby?</em>, which its own description calls "a rewrite of the song 'Be Around Me' by
+    Will Joseph Cook". Counting it as an official video instead would move 797,057 views
+    between the first two rows and make the response share 46.8% rather than 53.4%. The
+    deck's argument does not turn on which way it is counted.
+  </p>
+
+
+  <h2>The top ten</h2>
+  <table>
+    <tr><th>Upload</th><th>Published</th><th class="n">Views</th><th class="n">Likes</th><th class="n">Comments</th></tr>
+    <tr class="lit"><td>(Self) Love Story — Taylor Swift response</td><td>21 Mar 2021</td><td class="n">3,044,922</td><td class="n">98,454</td><td class="n">2,597</td></tr>
+    <tr class="lit"><td>She Gets The Flowers — official video</td><td>15 Apr 2021</td><td class="n">2,895,684</td><td class="n">112,643</td><td class="n">2,506</td></tr>
+    <tr class="lit"><td>July — Noah Cyrus response</td><td>05 Mar 2021</td><td class="n">2,433,511</td><td class="n">76,889</td><td class="n">1,245</td></tr>
+    <tr class="lit"><td>Omg Did She Call Him Baby? — a rewrite</td><td>15 Jan 2021</td><td class="n">797,057</td><td class="n">33,278</td><td class="n">633</td></tr>
+    <tr class="lit"><td>She Gets the Flowers — lyric</td><td>26 Mar 2021</td><td class="n">537,039</td><td class="n">21,621</td><td class="n">687</td></tr>
+    <tr><td>IDK How To Talk To Girls — visualiser</td><td>05 Jan 2024</td><td class="n">338,812</td><td class="n">10,238</td><td class="n">209</td></tr>
+    <tr><td>Good Bi — visualiser</td><td>31 May 2024</td><td class="n">294,309</td><td class="n">9,658</td><td class="n">341</td></tr>
+    <tr><td>She's Pretty — official video</td><td>17 Aug 2023</td><td class="n">292,741</td><td class="n">7,429</td><td class="n">177</td></tr>
+    <tr><td>She's Pretty — lyric</td><td>01 Jun 2023</td><td class="n">265,963</td><td class="n">5,141</td><td class="n">96</td></tr>
+    <tr><td>IDK How To Talk To Girls — official video</td><td>27 Mar 2024</td><td class="n">213,019</td><td class="n">6,383</td><td class="n">198</td></tr>
+  </table>
+  <p>
+    The five highlighted rows are the four response uploads plus the Flowers video —
+    <b>10,009,630 views, 82.9% of the channel</b>, all published between January 2021 and
+    April 2021. 2021 as a whole holds 81.9% of all channel views from seven uploads.
+  </p>
+
+
+  <h2>She Gets The Flowers</h2>
+  <p>
+    The loop on the deck is quoted from the video's own description: the concept came from
+    "a video of Hannah Klein"; Beth posted her idea to TikTok; "I honestly couldn't believe
+    the amount of people who commented saying…"; the finished video is built from submitted
+    stories held to camera.
+  </p>
+  <table>
+    <tr><th>Asset</th><th>Published</th><th class="n">Views</th><th class="n">Likes / 1k</th></tr>
+    <tr><td>Official music video</td><td>15 Apr 2021</td><td class="n">2,895,684</td><td class="n">38.9</td></tr>
+    <tr><td>Lyric video</td><td>26 Mar 2021</td><td class="n">537,039</td><td class="n">40.3</td></tr>
+    <tr><td>Acoustic</td><td>11 Jun 2021</td><td class="n">133,954</td><td class="n">39.6</td></tr>
+    <tr class="total"><td>Three assets</td><td></td><td class="n">3,566,677</td><td class="n">39.1</td></tr>
+  </table>
+  <p>
+    <b>Assets per song across the channel:</b> She Gets The Flowers has three. She's Pretty,
+    IDK How To Talk To Girls and What Do You Call It? have two each. The remaining fifteen
+    songs have one. Nineteen songs in total, plus one full-show upload and one Short.
+  </p>
+
+
+  <h2>Reach against response</h2>
+  <p>
+    Likes and comments per 1,000 views are comparable across uploads of different ages and
+    sizes in a way raw totals are not.
+  </p>
+  <table>
+    <tr><th>Era</th><th class="n">Uploads</th><th class="n">Views</th><th class="n">Likes / 1k</th><th class="n">Comments / 1k</th></tr>
+    <tr><td>2020–21 · the viral era</td><td class="n">8</td><td class="n">10,056,829</td><td class="n">35.2</td><td class="n">0.80</td></tr>
+    <tr><td>2022–24</td><td class="n">9</td><td class="n">1,686,176</td><td class="n">28.3</td><td class="n">0.74</td></tr>
+    <tr class="lit"><td>2025–26 · now</td><td class="n">7</td><td class="n">270,668</td><td class="n">33.3</td><td class="n">1.47</td></tr>
+  </table>
+  <table>
+    <tr><th>2026 uploads</th><th class="n">Views</th><th class="n">Likes / 1k</th><th class="n">Comments / 1k</th></tr>
+    <tr><td>How Am I Supposed To Love Myself? — visualiser</td><td class="n">19,275</td><td class="n">50.5</td><td class="n">3.68</td></tr>
+    <tr><td>Hey Handsome — visualiser</td><td class="n">28,909</td><td class="n">43.4</td><td class="n">2.21</td></tr>
+    <tr class="lit"><td>Pretty Villain — official video</td><td class="n">11,302</td><td class="n">49.3</td><td class="n">4.34</td></tr>
+    <tr><td>wrote an anthem for the baddies — Short</td><td class="n">2,672</td><td class="n">34.8</td><td class="n">1.12</td></tr>
+  </table>
+  <p>
+    Pretty Villain ranks <b>1st of 26 on comment rate</b> and 4th of 26 on like rate. The
+    channel's median is 33.6 likes per 1,000.
+  </p>
+  <p class="qual">
+    Engagement rate measures how the people who arrive respond. It says nothing about how
+    many arrive, and the deck does not use it to argue reach.
+  </p>
+
+
+  <h2>The two announced series</h2>
+  <p>
+    Both quoted from the uploads' own descriptions.
+  </p>
+  <table>
+    <tr><th>Announced</th><th>Stated</th><th class="n">Delivered</th></tr>
+    <tr><td>Left Behind (Live Session), 6 May 2016</td><td>"the first of 5 live sessions that will be uploaded every Friday over the next 5 weeks"</td><td class="n">1 of 5</td></tr>
+    <tr><td>What Do You Call It?, 27 Apr 2023</td><td>"episode 1 … the first of a five part series"</td><td class="n" rowspan="2">2 of 5</td></tr>
+    <tr><td>She's Pretty, 17 Aug 2023</td><td>"episode 2: she's pretty"</td></tr>
+  </table>
+  <p>
+    No episode 3, 4 or 5 exists. The next music video is <em>IDK How To Talk To Girls</em>,
+    fourteen months after episode 2, and is not part of the series. Episode 2 is the
+    channel's eighth-biggest upload at 292,741.
+  </p>
+
+
+  <h2>Live, Shorts and everything that is not a song asset</h2>
+  <table>
+    <tr><th>Upload</th><th>Published</th><th class="n">Length</th><th class="n">Views</th></tr>
+    <tr><td>Left Behind (Live Session)</td><td>06 May 2016</td><td class="n">3m16s</td><td class="n">20,793</td></tr>
+    <tr><td>The Hot &amp; Stupid Tour Live from London</td><td>26 Dec 2025</td><td class="n">25m49s</td><td class="n">6,651</td></tr>
+    <tr><td>wrote an anthem for the baddies (Short)</td><td>07 Sep 2026</td><td class="n">16s</td><td class="n">2,672</td></tr>
+  </table>
+  <p>
+    That is the entire non-song layer: three uploads of twenty-six. <b>No individual song
+    has ever been published as a standalone live destination</b>, and there are no
+    behind-the-scenes, personality, community or fan uploads at all.
+  </p>
+  <p class="qual">
+    We have not checked whether Reading &amp; Leeds or residency footage is cleared for
+    publication, and the deck does not assume it is.
+  </p>
+
+
+  <h2>Act I as it stands today</h2>
+  <table>
+    <tr><th>Date</th><th>Moment</th><th>On the channel</th></tr>
+    <tr><td>28–29 Aug 2026</td><td>Reading &amp; Leeds — Pretty Villain premiere, character reveal</td><td>Nothing</td></tr>
+    <tr class="lit"><td>04 Sep 2026</td><td>Pretty Villain — official music video</td><td>11,302 views at 28 days</td></tr>
+    <tr><td>07 Sep 2026</td><td>"wrote an anthem for the baddies" — Short</td><td>2,672 views</td></tr>
+    <tr><td>02 Oct 2026</td><td>Love After Love Of Your Life</td><td>Not public at 10:20 UTC on the day</td></tr>
+    <tr><td>23 Oct 2026</td><td>Say Less</td><td>—</td></tr>
+    <tr><td>13 Nov 2026</td><td>Your Next Forever</td><td>—</td></tr>
+    <tr><td>19 Nov 2026</td><td>London residency</td><td>—</td></tr>
+  </table>
+  <p>
+    Gaps between the four singles: <b>28, 21 and 21 days</b>. The four span 4 September to
+    13 November — ten weeks exactly. Release dates come from the campaign brief; only the
+    first three rows are observable on YouTube.
+  </p>
+
+
+  <h2>Evidence behind the recommendations</h2>
+  <table>
+    <tr><th>Action</th><th>Evidence</th><th>Read</th></tr>
+    <tr>
+      <td>Give Act I a door</td>
+      <td>2 uploads in the new era · Pretty Villain 1st of 26 on comment rate</td>
+      <td>Strong current signal</td>
+    </tr>
+    <tr>
+      <td>Put the audience back in the work</td>
+      <td>Response uploads + Flowers = 82.9% of all channel views</td>
+      <td>Strong structural signal</td>
+    </tr>
+    <tr>
+      <td>Capture live as songs</td>
+      <td>0 standalone live destinations · the one full show did 6,651</td>
+      <td>Worth testing</td>
+    </tr>
+    <tr>
+      <td>Finish something small</td>
+      <td>Two announced series, 1 of 5 and 2 of 5 delivered</td>
+      <td>Observed pattern, twice</td>
+    </tr>
+  </table>
+  <p class="qual">
+    The response share is a statement about where views landed, not about what caused them.
+    Three of the four response uploads went up within eleven weeks of each other during a
+    single period of attention, so the format and the moment cannot be separated from
+    outside.
+  </p>
+
+
+  <h2>Open questions we cannot answer from here</h2>
+  <ol>
+    <li>
+      <b>Where the social audience goes.</b> The brief cites a 4.3M-view social clip. We
+      can see that no equivalent exists on YouTube, but not whether that audience would
+      follow if one did.
+    </li>
+    <li>
+      <b>Whether the 2021 reach is reachable again.</b> Response songs worked once, inside
+      one window, under distribution conditions we cannot observe or reproduce.
+    </li>
+    <li>
+      <b>Studio behaviour.</b> What retention, traffic sources and audience data reveal
+      that public counts cannot — including whether the high comment rate on recent uploads
+      reflects a smaller, more committed audience or a different traffic mix.
+    </li>
+  </ol>
+
+  <div class="foot">
+    Beth McCarthy · @BethMcCarthy · channel deep dive · Virgin Music Group<br>
+    26 uploads — the entire public catalogue — read 2 October 2026 via the YouTube Data
+    API v3 · uploads sum to 12,071,222 against a lifetime counter of 12,069,430<br>
+    <a href="/beth" style="color:var(--rose);text-decoration:none">← Back to the deck</a>
+  </div>
+
+</div>
+</body>
+</html>
