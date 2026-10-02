@@ -370,6 +370,25 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .ten div.arrow{border:0;padding:0 .8rem;color:var(--faint);font-size:.72rem}
 .ten div.but{color:var(--wine);border-color:var(--wine);background:rgba(168,47,76,.08)}
 
+/* ── SHORTS SHELF — the channel's biggest Shorts, clickable ────────
+   Shorts thumbnails are vertical inside a 16:9 frame, so a portrait box
+   with object-fit:cover crops the letterboxing off. */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,13px);
+  margin:clamp(.9rem,2vw,1.3rem) 0 0}
+@media(min-width:820px){.sgrid{grid-template-columns:repeat(8,1fr)}}
+.sh2{display:block;text-decoration:none;color:inherit;border:1px solid var(--rule);
+  border-radius:3px;overflow:hidden;background:var(--ink);transition:.2s}
+.sh2 .sw{position:relative;aspect-ratio:4/5;overflow:hidden}
+.sh2 img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.1)}
+.sh2 .sc{display:block;padding:.35rem .4rem .45rem;font-family:var(--mono);
+  font-size:.55rem;letter-spacing:.06em;line-height:1.5;color:var(--faint)}
+.sh2 .sc b{display:block;color:var(--bone);font-weight:500;font-size:.62rem}
+.sh2:hover{border-color:var(--bone)}
+.sh2.hot{border-color:var(--wine);box-shadow:0 0 0 1px var(--wine)}
+.sh2.hot .sc b{color:var(--blush)}
+.sh2.cold{border-color:var(--cobalt)}
+.sh2.cold .sc b{color:var(--cobalt)}
+
 /* ── JOBS GRID (slide 05) ─────────────────────────────────────────── */
 .jobs{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule);
   border:1px solid var(--rule);border-radius:3px;overflow:hidden;
@@ -585,6 +604,23 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
       The biggest Shorts were not representative of the wider output. So the question is
       not how many — it is <b>what job each one is doing</b>.
     </p>
+
+
+    <!-- The eight biggest Shorts on the channel, newest views at the top of
+         the list. Clickable so the drop-off is inspectable rather than
+         asserted: the first two are the breakouts, the rest sit between
+         4.7K and 2.8K against a 1.2K median. -->
+    <div class="sgrid">
+      <a class="sh2 hot" href="https://www.youtube.com/watch?v=Bfqx-QYBLbE" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/Bfqx-QYBLbE/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>75.8K</b>Coachella</span></a>
+      <a class="sh2 cold" href="https://www.youtube.com/watch?v=dRarsKu5Ens" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/dRarsKu5Ens/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>12.0K</b>Girl, Intentions</span></a>
+      <a class="sh2" href="https://www.youtube.com/watch?v=y-8TNlgwrmU" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/y-8TNlgwrmU/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>4,709</b>Killer live, LA</span></a>
+      <a class="sh2" href="https://www.youtube.com/watch?v=OXdyXopaT3s" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/OXdyXopaT3s/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>4,206</b>Audiotree</span></a>
+      <a class="sh2" href="https://www.youtube.com/watch?v=VN71_bYGWW4" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/VN71_bYGWW4/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>3,714</b>Audiotree</span></a>
+      <a class="sh2" href="https://www.youtube.com/watch?v=UgexvyP3ZCs" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/UgexvyP3ZCs/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>3,620</b>How I write</span></a>
+      <a class="sh2" href="https://www.youtube.com/watch?v=FKRWjeFxub0" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/FKRWjeFxub0/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>3,014</b>Album Friday</span></a>
+      <a class="sh2" href="https://www.youtube.com/watch?v=tsKrPkIjGfg" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/tsKrPkIjGfg/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>2,825</b>Merch</span></a>
+    </div>
+    <div class="label" style="margin-top:.55rem">The channel’s eight biggest Shorts · click to watch</div>
 
     <div class="jobs">
       <div class="job"><div class="jt">Discovery</div><p>Reach people who don't follow her yet.</p></div>
