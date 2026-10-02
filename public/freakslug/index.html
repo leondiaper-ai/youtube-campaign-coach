@@ -212,10 +212,29 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .bar .bl{font-family:var(--mono);font-size:.58rem;letter-spacing:.09em;
   text-transform:uppercase;color:var(--faint)}
 .bar .bt{height:10px;background:rgba(242,235,228,.07);border-radius:1px;overflow:hidden}
-.bar .bf{height:100%;background:var(--smoke)}
-.bar.hot .bf{background:var(--wine)}
-.bar.cold .bf{background:var(--cobalt)}
-.bar .bv{font-family:var(--mono);font-size:.62rem;color:var(--bone);text-align:right}
+/* Bars fill from zero when the slide comes into view. Over a photographic
+   backdrop a flat grey bar disappears, so each one carries its own colour
+   and the figure is tinted to match. */
+.bar .bf{height:100%;width:0;border-radius:1px;
+  background:linear-gradient(90deg,rgba(169,163,174,.55),var(--smoke));
+  transition:width 1.05s cubic-bezier(.22,.9,.26,1)}
+.bar.cold .bf{background:linear-gradient(90deg,rgba(46,138,203,.45),var(--cobalt))}
+.bar.hot  .bf{background:linear-gradient(90deg,rgba(168,47,76,.5),var(--wine));
+  box-shadow:0 0 18px rgba(168,47,76,.45)}
+.bar .bv{font-family:var(--mono);font-size:.62rem;color:var(--smoke);text-align:right;
+  transition:color .5s ease .35s}
+.bar.cold .bv{color:var(--cobalt)}
+.bar.hot .bv{color:var(--blush);font-size:.72rem}
+/* Each bar is held back a beat behind the one above, so the climb to the
+   biggest week reads as a sequence rather than four bars appearing at once. */
+.bars.go .bar:nth-child(1) .bf{transition-delay:.04s}
+.bars.go .bar:nth-child(2) .bf{transition-delay:.17s}
+.bars.go .bar:nth-child(3) .bf{transition-delay:.30s}
+.bars.go .bar:nth-child(4) .bf{transition-delay:.43s}
+@media(prefers-reduced-motion:reduce){
+  .bar .bf{transition:none}
+  .bar .bv{transition:none}
+}
 
 /* ── THE TENSION STACK (slide 03) ─────────────────────────────────── */
 .ten{display:grid;grid-template-columns:1fr;gap:.5rem;margin:clamp(1.1rem,2.4vw,1.7rem) 0 0;
@@ -354,10 +373,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     <h2 class="display" style="margin-top:.9rem">Four times the surfaces.<br>The same few assets.</h2>
 
     <div class="bars">
-      <div class="bar cold"><span class="bl">Top 3 uploads</span><span class="bt"><span class="bf" style="width:72.7%"></span></span><span class="bv">72.7%</span></div>
-      <div class="bar cold"><span class="bl">Top 6 uploads</span><span class="bt"><span class="bf" style="width:84%"></span></span><span class="bv">84.0%</span></div>
-      <div class="bar hot"><span class="bl">Top 8 uploads</span><span class="bt"><span class="bf" style="width:85.6%"></span></span><span class="bv">85.6%</span></div>
-      <div class="bar"><span class="bl">The other 38</span><span class="bt"><span class="bf" style="width:14.4%"></span></span><span class="bv">14.4%</span></div>
+      <div class="bar cold"><span class="bl">Top 3 uploads</span><span class="bt"><span class="bf" data-w="72.7"></span></span><span class="bv" data-pct="72.7">72.7%</span></div>
+      <div class="bar cold"><span class="bl">Top 6 uploads</span><span class="bt"><span class="bf" data-w="84"></span></span><span class="bv" data-pct="84.0">84.0%</span></div>
+      <div class="bar hot"><span class="bl">Top 8 uploads</span><span class="bt"><span class="bf" data-w="85.6"></span></span><span class="bv" data-pct="85.6">85.6%</span></div>
+      <div class="bar"><span class="bl">The other 38</span><span class="bt"><span class="bf" data-w="14.4"></span></span><span class="bv" data-pct="14.4">14.4%</span></div>
     </div>
     <div class="label" style="margin-top:.7rem">Share of campaign-window views · 46 uploads</div>
 
@@ -525,10 +544,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     <h2 class="display" style="margin-top:.9rem">The biggest week we have<br>observed is happening<br>after release.</h2>
 
     <div class="bars">
-      <div class="bar"><span class="bl">w/c 13 Jul · lead single</span><span class="bt"><span class="bf" style="width:76%"></span></span><span class="bv">60,102</span></div>
-      <div class="bar"><span class="bl">w/c 14 Sep · album week</span><span class="bt"><span class="bf" style="width:37%"></span></span><span class="bv">29,157</span></div>
-      <div class="bar"><span class="bl">w/c 21 Sep · +1</span><span class="bt"><span class="bf" style="width:61%"></span></span><span class="bv">48,078</span></div>
-      <div class="bar hot"><span class="bl">w/c 28 Sep · +2</span><span class="bt"><span class="bf" style="width:100%"></span></span><span class="bv">78,674</span></div>
+      <div class="bar"><span class="bl">w/c 13 Jul · lead single</span><span class="bt"><span class="bf" data-w="76"></span></span><span class="bv" data-n="60102">60,102</span></div>
+      <div class="bar"><span class="bl">w/c 14 Sep · album week</span><span class="bt"><span class="bf" data-w="37"></span></span><span class="bv" data-n="29157">29,157</span></div>
+      <div class="bar cold"><span class="bl">w/c 21 Sep · +1</span><span class="bt"><span class="bf" data-w="61"></span></span><span class="bv" data-n="48078">48,078</span></div>
+      <div class="bar hot"><span class="bl">w/c 28 Sep · +2</span><span class="bt"><span class="bf" data-w="100"></span></span><span class="bv" data-n="78674">78,674</span></div>
     </div>
     <div class="label" style="margin-top:.7rem">Views gained across the channel · weekly totals</div>
 
@@ -682,6 +701,55 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     + '9WkjbOwQycM,IgpAZnOsyyg,RrTQuUcaK5E,scdQVdS3eD4,vB0DoqKpkWw*,JE1Z7Ri33Pw,2FyKA8wr1mw,'
     + '0ooWGLdkQ6U*,yQIn_IoLDmQ,bZmQE3WK1cE,P-RvvVdnq-A,b-DDUGML1zo,ZWc2AdvwG3k,nGOX1n2WYe4,'
     + 'RlTlzIkPbmk,jOIV0lf4erk,RQVbqeolfNg*,RoEOBeSjD78,7vS-fgTuoJE').split(',');
+  /* Bars fill and figures count up the first time each group scrolls into
+     view. Static bars over a photograph read as flat grey lines; the climb
+     to the biggest week is the whole point of that slide, so it should be
+     something you watch rather than something you read. Fires once. */
+  var reduced = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function paint(group){
+    group.classList.add('go');
+    group.querySelectorAll('.bf').forEach(function(f){
+      f.style.width = f.getAttribute('data-w') + '%';
+    });
+    group.querySelectorAll('.bv').forEach(function(v, i){
+      var n   = v.getAttribute('data-n');
+      var pct = v.getAttribute('data-pct');
+      var end = parseFloat(n || pct);
+      if (isNaN(end)) return;
+      if (reduced) return;                       // leave the final text alone
+      var dur = 900, delay = 40 + i * 130, t0 = null;
+      v.textContent = pct ? '0.0%' : '0';
+      function step(ts){
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / dur);
+        var e = 1 - Math.pow(1 - p, 3);           // ease-out cubic
+        var cur = end * e;
+        v.textContent = pct
+          ? cur.toFixed(1) + '%'
+          : Math.round(cur).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+        else v.textContent = pct ? end.toFixed(1) + '%' : end.toLocaleString();
+      }
+      setTimeout(function(){ requestAnimationFrame(step); }, delay);
+    });
+  }
+
+  var groups = document.querySelectorAll('.bars');
+  if (!('IntersectionObserver' in window)) {
+    groups.forEach(paint);                        // no observer: just show them
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        paint(en.target);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.35 });
+    groups.forEach(function(g){ io.observe(g); });
+  }
+
   var el = document.getElementById('sheet');
   if (!el) return;
   IDS.forEach(function(raw){
