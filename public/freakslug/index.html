@@ -123,6 +123,60 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .hero2 .hk{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;
   text-transform:uppercase;color:var(--faint);margin-top:.75rem;line-height:1.75}
 
+/* .hero2.xl — when the numbers ARE the argument and the paragraph is
+   only there to confirm them. */
+.hero2.xl{gap:clamp(24px,5vw,80px);margin:clamp(1.5rem,3.2vw,2.5rem) 0 1rem}
+.hero2.xl .hn{font-size:clamp(3.1rem,7.6vw,6rem);line-height:.86}
+.hero2.xl .hk{font-size:.63rem;margin-top:.9rem}
+
+/* ── SHIFT — before → after, for the two numbers that carry slide 02 ── */
+.shifts{display:grid;grid-template-columns:1fr;gap:clamp(1.3rem,3.4vw,3.4rem);
+  margin:clamp(1.4rem,3vw,2.3rem) 0 0}
+@media(min-width:760px){.shifts{grid-template-columns:repeat(2,auto);justify-content:start}}
+.shift .sv{display:flex;align-items:baseline;gap:clamp(.5rem,1.4vw,1rem);
+  font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.9}
+.shift .from{font-size:clamp(2rem,4.4vw,3.4rem);color:var(--faint)}
+.shift .ar{font-size:clamp(1.3rem,2.6vw,2rem);color:var(--faint);font-family:var(--body);
+  font-weight:400}
+.shift .to{font-size:clamp(3rem,7.2vw,5.6rem);color:var(--bone)}
+.shift.flat .to{color:var(--smoke)}
+.shift.up .to{color:var(--blush)}
+.shift .sk{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin-top:.75rem;line-height:1.7}
+
+/* ── CLIMB — the post-album week progression on slide 08 ─────────── */
+.climb{display:grid;grid-template-columns:1fr;gap:clamp(.9rem,2.2vw,1.6rem);
+  margin:clamp(1.4rem,3vw,2.4rem) 0 0;align-items:end}
+@media(min-width:720px){.climb{grid-template-columns:repeat(3,auto);justify-content:start}}
+.step .sn{font-family:var(--disp);font-weight:800;letter-spacing:-.035em;line-height:.86}
+.step.s1 .sn{font-size:clamp(2.1rem,4.2vw,3.1rem);color:var(--faint)}
+.step.s2 .sn{font-size:clamp(2.7rem,5.6vw,4.2rem);color:var(--cobalt)}
+.step.s3 .sn{font-size:clamp(3.9rem,9.4vw,7.2rem);color:var(--blush);
+  text-shadow:0 0 42px rgba(168,47,76,.5)}
+.step .sl{font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--faint);margin-top:.7rem}
+.step.s3 .sl{color:var(--wine)}
+
+/* ── ACTION CARDS — slide 09 ──────────────────────────────────────── */
+.acts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;
+  margin:clamp(1.2rem,2.6vw,2rem) 0 0}
+@media(min-width:800px){.acts{grid-template-columns:repeat(4,1fr)}}
+.act{background:var(--night);padding:clamp(.9rem,2vw,1.2rem) clamp(.8rem,1.6vw,1rem) 1.1rem}
+.act .aw{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--cobalt);margin-bottom:.55rem}
+.act h4{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;line-height:1.02;
+  font-size:clamp(1.05rem,2vw,1.38rem);margin:0 0 .45rem}
+.act p{margin:0;font-size:.82rem;line-height:1.48;color:var(--smoke)}
+.act.first{background:rgba(168,47,76,.09)}
+.act.first .aw{color:var(--wine)}
+
+/* ── BOTTOM LINE ──────────────────────────────────────────────────── */
+.bottomline{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;line-height:1.0;
+  font-size:clamp(1.3rem,3.1vw,2.3rem);margin:clamp(1.3rem,2.8vw,2rem) 0 0;
+  padding-left:clamp(.8rem,1.6vw,1.1rem);border-left:3px solid var(--wine)}
+.bottomline span{color:var(--blush)}
+
 /* ── THUMBS ───────────────────────────────────────────────────────── */
 .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(11px,1.6vw,18px)}
 .vgrid.three{grid-template-columns:repeat(3,1fr)}
@@ -327,41 +381,39 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     <div class="label">Two albums on the same campaign clock</div>
     <h2 class="display" style="margin-top:.9rem">More activity.<br>Similar long-form viewing so far.</h2>
 
-    <div class="vs">
+    <!-- Two numbers carry this slide. Everything else is secondary and sized
+         to say so. -->
+    <div class="shifts">
+      <div class="shift up">
+        <div class="sv"><span class="from">10</span><span class="ar">→</span><span class="to">46</span></div>
+        <div class="sk">Uploads in the window</div>
+      </div>
+      <div class="shift flat">
+        <div class="sv"><span class="from">155.6K</span><span class="ar">→</span><span class="to">147.1K</span></div>
+        <div class="sk">Long-form views so far</div>
+      </div>
+    </div>
+
+    <div class="vs" style="margin-top:clamp(1.3rem,2.8vw,2rem)">
       <div class="col">
         <img class="eraimg" src="https://i.ytimg.com/vi/MNNMKKW5KmI/maxres1.jpg"
              onerror="this.src='https://i.ytimg.com/vi/MNNMKKW5KmI/hqdefault.jpg'" alt="">
-        <div class="ct">Album one</div>
+        <div class="ct">Album one · 8 Nov 2024</div>
         <div class="cn">I Blow Out Big Candles</div>
-        <div class="cd">8 November 2024</div>
-        <div class="row"><span class="k">Uploads</span><span class="v">10</span></div>
-        <div class="row"><span class="k">Long-form</span><span class="v">2</span></div>
-        <div class="row"><span class="k">Shorts</span><span class="v">8</span></div>
-        <div class="row"><span class="k">Long-form views</span><span class="v">155.6K</span></div>
+        <div class="row"><span class="k">Long-form · Shorts</span><span class="v">2 · 8</span></div>
       </div>
       <div class="col now">
         <img class="eraimg" src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres2.jpg"
              onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt="">
-        <div class="ct">Album two</div>
+        <div class="ct">Album two · 18 Sep 2026</div>
         <div class="cn">Amulet</div>
-        <div class="cd">18 September 2026</div>
-        <div class="row"><span class="k">Uploads</span><span class="v">46</span></div>
-        <div class="row"><span class="k">Long-form</span><span class="v">7</span></div>
-        <div class="row"><span class="k">Shorts</span><span class="v">39</span></div>
-        <div class="row"><span class="k">Long-form views</span><span class="v">147.1K</span></div>
+        <div class="row"><span class="k">Long-form · Shorts</span><span class="v">7 · 39</span></div>
       </div>
     </div>
 
-    <p class="big-p" style="max-width:42em">
-      The debut had a lead single and an album-day video. Amulet has three single videos,
-      a behind-the-scenes film, an interview, a visualiser and a post-release song video.
-      <b>The change is in campaign behaviour, not in the headline view count.</b>
-    </p>
-
     <p class="qual">
-      Current view totals. The two campaigns' assets are very different ages — up to two
-      years against at most twelve weeks — so this is <b>not a like-for-like performance
-      comparison</b> and is not offered as one.
+      Amulet's assets are weeks old; the debut's have had up to two years. Not a
+      like-for-like performance comparison.
     </p>
   </div>
 </section>
@@ -370,33 +422,21 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 <section class="slide">
   <div class="inner">
     <div class="label cold">The central finding</div>
-    <h2 class="display" style="margin-top:.9rem">Four times the surfaces.<br>The same few assets.</h2>
+    <h2 class="display" style="margin-top:.9rem">8 of 46 uploads generated<br>86% of the viewing.</h2>
 
-    <div class="bars">
-      <div class="bar cold"><span class="bl">Top 3 uploads</span><span class="bt"><span class="bf" data-w="72.7"></span></span><span class="bv" data-pct="72.7">72.7%</span></div>
-      <div class="bar cold"><span class="bl">Top 6 uploads</span><span class="bt"><span class="bf" data-w="84"></span></span><span class="bv" data-pct="84.0">84.0%</span></div>
-      <div class="bar hot"><span class="bl">Top 8 uploads</span><span class="bt"><span class="bf" data-w="85.6"></span></span><span class="bv" data-pct="85.6">85.6%</span></div>
-      <div class="bar"><span class="bl">The other 38</span><span class="bt"><span class="bf" data-w="14.4"></span></span><span class="bv" data-pct="14.4">14.4%</span></div>
+    <div class="hero2 xl count">
+      <div><div class="hn" data-n="46">46</div><div class="hk">Uploads</div></div>
+      <div><div class="hn cold" data-n="8">8</div><div class="hk">Drive it</div></div>
+      <div><div class="hn hot" data-pct="85.6">85.6%</div><div class="hk">Of campaign-<br>window views</div></div>
     </div>
-    <div class="label" style="margin-top:.7rem">Share of campaign-window views · 46 uploads</div>
 
-    <!-- The whole campaign as one picture. Lit = the eight that hold 85.6%. -->
+    <!-- The whole campaign as one picture. Lit = the eight. -->
     <div class="sheet" id="sheet"></div>
     <div class="label" style="margin-top:.6rem">Every upload in the window, in order · lit = the eight</div>
 
-    <div class="ten">
-      <div>More activity</div>
-      <div class="arrow">↓</div>
-      <div>More continuity · more surfaces · more chances to be found</div>
-      <div class="arrow">↓</div>
-      <div class="but">But viewing stays concentrated in a handful of assets</div>
-    </div>
-
-    <p class="big-p" style="max-width:40em">
-      This is the useful tension. The campaign footprint got much richer, and that has
-      value the view count does not show. It also means <b>the next layer of support
-      should not be spread evenly</b> — there is already a signal about where attention
-      collects.
+    <p class="big-p" style="max-width:42em">
+      More activity created a richer campaign footprint. <b>Attention still concentrated
+      around a small number of assets.</b>
     </p>
   </div>
 </section>
@@ -404,20 +444,19 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 <!-- ══ 04 · LONG-FORM ════════════════════════════════════════════ -->
 <section class="slide">
   <div class="inner">
-    <div class="label">All 181 videos currently public on the channel</div>
+    <div class="label">Across the current public catalogue</div>
     <h2 class="display" style="margin-top:.9rem">Long-form is still doing<br>the heavy lifting.</h2>
 
-    <div class="hero2">
-      <div><div class="hn">9.9%</div><div class="hk">Of current<br>public uploads</div></div>
-      <div><div class="hn cold">78.8%</div><div class="hk">Of current public<br>catalogue views</div></div>
-      <div><div class="hn">18</div><div class="hk">Long-form videos</div></div>
-      <div><div class="hn">163</div><div class="hk">Shorts</div></div>
+    <div class="hero2 xl count">
+      <div><div class="hn" data-pct="9.9">9.9%</div><div class="hk">Of uploads</div></div>
+      <div><div class="hn cold" data-pct="78.8">78.8%</div><div class="hk">Of views</div></div>
+      <div><div class="hn" data-n="18">18</div><div class="hk">Long-form</div></div>
+      <div><div class="hn" data-n="163">163</div><div class="hk">Shorts</div></div>
     </div>
 
     <p class="big-p" style="max-width:40em">
-      Eighteen videos out of 181 do four-fifths of the viewing. Every asset in the
-      campaign's top three is a song video. This is the clearest directional read in the
-      catalogue, and it should shape where production effort goes next.
+      Put production effort where the viewing is. <b>Every asset in the campaign's top
+      three is a song video.</b>
     </p>
 
     <div class="vgrid three" style="margin-top:clamp(1rem,2.1vw,1.5rem);max-width:620px">
@@ -443,34 +482,33 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
          onerror="this.src='https://i.ytimg.com/vi/Bfqx-QYBLbE/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
-    <div class="label">39 Shorts in the campaign window</div>
-    <h2 class="display" style="margin-top:.9rem">Volume didn't create reach.<br>Distinctive moments did.</h2>
+    <div class="label">39 Shorts in the campaign window · 163 on the channel</div>
+    <h2 class="display" style="margin-top:.9rem">39 Shorts.<br>Two clear breakouts.</h2>
 
-    <div class="hero2">
-      <div><div class="hn hot">75.8K</div><div class="hk">Coachella Short<br>April 2026</div></div>
-      <div><div class="hn cold">12.0K</div><div class="hk">Girl, Intentions<br>release Short</div></div>
-      <div><div class="hn">1.2K</div><div class="hk">Median Short<br>163 of them</div></div>
+    <div class="hero2 xl count">
+      <div><div class="hn hot">75.8K</div><div class="hk">Coachella</div></div>
+      <div><div class="hn cold">12.0K</div><div class="hk">Girl, Intentions</div></div>
+      <div><div class="hn">1.2K</div><div class="hk">Median Short</div></div>
     </div>
 
     <p class="big-p" style="max-width:42em">
-      The question is not whether 39 was too many. It is <b>which job each Short was
-      doing</b> — because the two that broke out were doing a different one from the rest.
+      The biggest Shorts were not representative of the wider output. So the question is
+      not how many — it is <b>what job each one is doing</b>.
     </p>
 
     <div class="jobs">
-      <div class="job"><div class="jt">Discovery</div><p>Reach people who do not already follow her.</p></div>
-      <div class="job"><div class="jt">Moment</div><p>Capture something live or culturally distinctive.</p></div>
-      <div class="job"><div class="jt">Song support</div><p>Keep one priority song moving.</p></div>
-      <div class="job"><div class="jt">Personality</div><p>More Freak Slug between hero uploads.</p></div>
-      <div class="job"><div class="jt">Continuity</div><p>Keep the channel alive between releases.</p></div>
+      <div class="job"><div class="jt">Discovery</div><p>Reach people who don't follow her yet.</p></div>
+      <div class="job"><div class="jt">Moment</div><p>Something live or culturally distinctive.</p></div>
+      <div class="job"><div class="jt">Song support</div><p>Keep a priority song moving.</p></div>
+      <div class="job"><div class="jt">Personality</div><p>More Freak Slug between releases.</p></div>
+      <div class="job"><div class="jt">Continuity</div><p>Keep the channel alive.</p></div>
     </div>
 
+    <div class="bottomline">Give each Short <span>a job</span>.</div>
+
     <p class="qual">
-      And it was not "Coachella footage" that travelled. The channel published
-      <b>nine other Coachella Shorts</b> that April; they did <b>231 to 1,530 views each</b>,
-      at or below the channel median. One specific post did 75,826. Directional, not
-      proven — but it argues against clipping a tour and for deciding in advance what is
-      actually distinctive.
+      Nine other Coachella Shorts that April did 231 to 1,530 views each. It was not the
+      footage that travelled — it was one specific post.
     </p>
   </div>
 </section>
@@ -481,10 +519,14 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     <div class="label cold">One song, three surfaces</div>
     <h2 class="display" style="margin-top:.9rem">Support assets<br>need a job.</h2>
 
+    <div class="hero2 xl count">
+      <div><div class="hn" data-n="53815" data-fmt="k">53.8K</div><div class="hk">Music video</div></div>
+      <div><div class="hn cold" data-n="12041" data-fmt="k">12.0K</div><div class="hk">Release Short</div></div>
+      <div><div class="hn hot" data-n="727">727</div><div class="hk">BTS</div></div>
+    </div>
+
     <p class="big-p" style="max-width:40em">
-      <b>Girl, Intentions</b> is the only song in either cycle to get three pieces of
-      video. Together they have done <b>66,583 views</b> — more than any other song in
-      the campaign. But the three contributed very differently, and that is the lesson.
+      Same song. Three surfaces. <b>Very different contribution.</b>
     </p>
 
     <div class="vgrid three" style="margin-top:clamp(1rem,2.1vw,1.4rem);max-width:600px">
@@ -496,11 +538,9 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
         <img src="https://i.ytimg.com/vi/xd8E-yAbPfY/hqdefault.jpg" alt=""><span class="cap"><b>Behind the scenes</b><br>727 · 1.4% of the song</span></a>
     </div>
 
-    <p class="big-p" style="max-width:40em">
-      The Short added meaningful incremental reach — ten times the median Short. The BTS
-      added 727 views, which is 1.4% of the song's total. <em>Neither is a verdict on the
-      format.</em> The point is that a support asset should be made because it has a job,
-      not because the campaign template says there should be one.
+    <p class="qual">
+      A support asset should exist because it has a job, not because the campaign
+      template says there should be one.
     </p>
   </div>
 </section>
@@ -515,20 +555,22 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
          onerror="this.src='https://i.ytimg.com/vi/yCsrt0nNliM/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
-    <div class="label">What this campaign fixed</div>
-    <h2 class="display" style="margin-top:.9rem">The activity problem<br>has been solved.</h2>
+    <div class="label">Longest gap with no new song video</div>
+    <h2 class="display" style="margin-top:.9rem">Amulet fixed the gaps.</h2>
 
-    <div class="spine">
-      <div class="sp dead"><span class="d">Nov 2024</span><span class="t">Debut album out, then no new song video for three months<small>Next: Liquorice, February 2025</small></span><span class="n">90 days</span></div>
-      <div class="sp dead"><span class="d">Nov 2025</span><span class="t">EP out, then the longest gap on the channel<small>Next song video: Girl, Intentions, July 2026</small></span><span class="n">244 days</span></div>
-      <div class="sp dead"><span class="d">Dec–Mar</span><span class="t">Uploads of any kind across four months<small>December 2025 to March 2026</small></span><span class="n">1 upload</span></div>
-      <div class="sp key"><span class="d">Amulet</span><span class="t">Longest silence across the whole campaign window<small>46 uploads · 6 in the last 7 days</small></span><span class="n">19 days</span></div>
+    <div class="climb count">
+      <div class="step s1"><div class="sn" data-n="90">90</div><div class="sl">Days after<br>the debut album</div></div>
+      <div class="step s1"><div class="sn" data-n="244">244</div><div class="sl">Days after<br>the EP</div></div>
+      <div class="step s3"><div class="sn" data-n="19">19</div><div class="sl">Longest<br>Amulet gap</div></div>
     </div>
 
     <p class="big-p" style="max-width:40em">
-      This is a genuine operational win and it should be read as one. The channel used to
-      go quiet after a body of work, twice, for three months and then eight.
-      <b>The next test is whether the new rhythm survives album week.</b>
+      <b>The next test is whether that rhythm survives album week.</b>
+    </p>
+
+    <p class="qual">
+      Dec 2025 to Mar 2026: one upload of any kind across four months. The Amulet window:
+      46 uploads, six in the last seven days.
     </p>
   </div>
 </section>
@@ -540,26 +582,19 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
          onerror="this.src='https://i.ytimg.com/vi/0ooWGLdkQ6U/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
-    <div class="label cold">Why this is a live decision, not a post-mortem</div>
-    <h2 class="display" style="margin-top:.9rem">The biggest week we have<br>observed is happening<br>after release.</h2>
+    <div class="label cold">Views gained across the channel · weekly</div>
+    <h2 class="display" style="margin-top:.9rem">The channel is accelerating<br>after album week.</h2>
 
-    <div class="bars">
-      <div class="bar"><span class="bl">w/c 13 Jul · lead single</span><span class="bt"><span class="bf" data-w="76"></span></span><span class="bv" data-n="60102">60,102</span></div>
-      <div class="bar"><span class="bl">w/c 14 Sep · album week</span><span class="bt"><span class="bf" data-w="37"></span></span><span class="bv" data-n="29157">29,157</span></div>
-      <div class="bar cold"><span class="bl">w/c 21 Sep · +1</span><span class="bt"><span class="bf" data-w="61"></span></span><span class="bv" data-n="48078">48,078</span></div>
-      <div class="bar hot"><span class="bl">w/c 28 Sep · +2</span><span class="bt"><span class="bf" data-w="100"></span></span><span class="bv" data-n="78674">78,674</span></div>
+    <div class="climb count">
+      <div class="step s1"><div class="sn">+<span data-n="29157" data-fmt="k">29.2K</span></div><div class="sl">Album week<br>14 Sep</div></div>
+      <div class="step s2"><div class="sn">+<span data-n="48078" data-fmt="k">48.1K</span></div><div class="sl">Week +1<br>21 Sep</div></div>
+      <div class="step s3"><div class="sn">+<span data-n="78674" data-fmt="k">78.7K</span>*</div><div class="sl">Week +2<br>28 Sep</div></div>
     </div>
-    <div class="label" style="margin-top:.7rem">Views gained across the channel · weekly totals</div>
 
-    <p class="big-p" style="max-width:38em">
-      The post-album window is <b>open right now</b>. Everything after this slide is about
-      the next sixty days, not about grading the ten weeks that have gone.
-    </p>
+    <div class="bottomline">The post-album window is <span>open now</span>.</div>
 
     <p class="qual">
-      14-week Watcher snapshot history; the current week is incomplete, so 78,674 is a
-      floor rather than a final figure. Snapshot cadence is irregular, so only weekly
-      totals are quoted.
+      *Current week incomplete. 14-week Watcher history; the highest week in it.
     </p>
   </div>
 </section>
@@ -574,55 +609,38 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   </div>
   <div class="inner">
     <div class="label hot">The next 30–60 days</div>
-    <h2 class="display" style="margin-top:.9rem">Don't support the album<br>evenly. Follow the signals.</h2>
+    <h2 class="display" style="margin-top:.9rem">Four moves.</h2>
 
-    <div class="plan">
-      <div class="pl first">
-        <div class="pw">Now</div>
-        <div class="pb">
-          <h4>Name the two or three songs actually showing something</h4>
-          <p>On current public figures, <b>Wishing Bone</b> has gathered 56,854 views in
-          sixteen days — the fastest accumulation of any Amulet asset. <b>Serpent</b> is
-          one day old with the highest like rate of the campaign. <b>If I Could</b> is the
-          quietest of the three singles. That is a starting read, not a ranking.</p>
-        </div>
+    <div class="acts">
+      <div class="act first">
+        <div class="aw">Now</div>
+        <h4>Follow the signal</h4>
+        <p>Identify the two or three songs actually moving. Wishing Bone is the fastest
+        of the Amulet assets; Serpent has the highest like rate.</p>
       </div>
-      <div class="pl">
-        <div class="pw">7–14 days</div>
-        <div class="pb">
-          <h4>Give the strongest song another destination</h4>
-          <p>A live version, a second visual, a performance — something that gives people
-          arriving at Wishing Bone somewhere else to go. Long-form is where the viewing
-          is, so the next meaningful asset should be long-form.</p>
-        </div>
+      <div class="act">
+        <div class="aw">7–14 days</div>
+        <h4>Extend the winner</h4>
+        <p>Give the strongest song another meaningful long-form destination — a live
+        version, a second visual, a performance.</p>
       </div>
-      <div class="pl">
-        <div class="pw">30 days</div>
-        <div class="pb">
-          <h4>Capture distinctive live moments, not generic clips</h4>
-          <p>The North American run starts 23 October. Coachella showed a live moment can
-          create outsized discovery — but it was distinctive, not just footage. Look for
-          crowd interaction, a song visibly taking off live, backstage personality, tour
-          milestones. Decide in advance what is worth capturing.</p>
-        </div>
+      <div class="act">
+        <div class="aw">30 days</div>
+        <h4>Capture the tour</h4>
+        <p>North America from 23 October. Prioritise distinctive live and personality
+        moments over generic clipping.</p>
       </div>
-      <div class="pl">
-        <div class="pw">30–60 days</div>
-        <div class="pb">
-          <h4>Let behaviour choose the next investment</h4>
-          <p>By late November there will be real signal on which Amulet songs people
-          return to. Put the next layer of production behind those, and accept that some
-          album tracks will not get a campaign. That is the point.</p>
-        </div>
+      <div class="act">
+        <div class="aw">30–60 days</div>
+        <h4>Reinvest behind demand</h4>
+        <p>Let audience behaviour decide which album songs get the next production layer.
+        Some will not get one.</p>
       </div>
     </div>
 
-    <p class="qual">
-      Accumulation here is views since publish divided by days since publish — an average
-      across each asset's whole run rather than current velocity, so a one-day-old asset's
-      figure is close to noise. Enough to say which songs got where they are quickly, not
-      enough to forecast.
-    </p>
+    <div class="bottomline" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+      Don't support the album evenly.<br><span>Follow the signals.</span>
+    </div>
   </div>
 </section>
 
@@ -636,7 +654,7 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   </div>
   <div class="inner">
     <div class="label">What we recommend</div>
-    <h2 class="display" style="margin-top:.9rem">Four things.</h2>
+    <h2 class="display" style="margin-top:.9rem">What to remember.</h2>
 
     <div class="recs">
       <div class="rec first">
@@ -708,35 +726,37 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   var reduced = window.matchMedia
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* One formatter so a figure reads the same mid-count as it does at rest:
+     data-pct -> 85.6%, data-fmt="k" -> 78.7K, otherwise 60,102. */
+  function fmt(v, el){
+    if (el.hasAttribute('data-pct')) return v.toFixed(1) + '%';
+    if (el.getAttribute('data-fmt') === 'k') return (v / 1000).toFixed(1) + 'K';
+    return Math.round(v).toLocaleString();
+  }
+
   function paint(group){
     group.classList.add('go');
     group.querySelectorAll('.bf').forEach(function(f){
       f.style.width = f.getAttribute('data-w') + '%';
     });
-    group.querySelectorAll('.bv').forEach(function(v, i){
-      var n   = v.getAttribute('data-n');
-      var pct = v.getAttribute('data-pct');
-      var end = parseFloat(n || pct);
+    if (reduced) return;                         // leave the final text alone
+    group.querySelectorAll('[data-n],[data-pct]').forEach(function(v, i){
+      var end = parseFloat(v.getAttribute('data-n') || v.getAttribute('data-pct'));
       if (isNaN(end)) return;
-      if (reduced) return;                       // leave the final text alone
       var dur = 900, delay = 40 + i * 130, t0 = null;
-      v.textContent = pct ? '0.0%' : '0';
+      v.textContent = fmt(0, v);
       function step(ts){
         if (t0 === null) t0 = ts;
         var p = Math.min(1, (ts - t0) / dur);
         var e = 1 - Math.pow(1 - p, 3);           // ease-out cubic
-        var cur = end * e;
-        v.textContent = pct
-          ? cur.toFixed(1) + '%'
-          : Math.round(cur).toLocaleString();
+        v.textContent = fmt(end * (p < 1 ? e : 1), v);
         if (p < 1) requestAnimationFrame(step);
-        else v.textContent = pct ? end.toFixed(1) + '%' : end.toLocaleString();
       }
       setTimeout(function(){ requestAnimationFrame(step); }, delay);
     });
   }
 
-  var groups = document.querySelectorAll('.bars');
+  var groups = document.querySelectorAll('.bars, .count');
   if (!('IntersectionObserver' in window)) {
     groups.forEach(paint);                        // no observer: just show them
   } else {
