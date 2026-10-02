@@ -225,6 +225,27 @@ h2.display{font-size:clamp(1.9rem,4.8vw,3.7rem)}
 /* ── THUMBS ──────────────────────────────────────────────────────── */
 .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.7vw,20px)}
 @media(min-width:880px){.vgrid.four{grid-template-columns:repeat(4,1fr)}}
+.vgrid.three{grid-template-columns:repeat(3,1fr)}
+
+/* ── TWO SIDES OF AN ARGUMENT ─────────────────────────────────────
+   A row of equal thumbnails makes everything look like one set. When
+   the point IS the difference between two sets — what this show has
+   against what the same channel did with another one — the split has
+   to be in the layout, or the reader has to reconstruct it from a
+   caption. The rule between them carries the comparison. */
+.vs{display:grid;grid-template-columns:1fr;gap:clamp(18px,3vw,38px);
+  margin:clamp(1.3rem,2.6vw,2rem) 0 1rem}
+@media(min-width:860px){
+  .vs{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .vs .vsside + .vsside{padding-left:clamp(18px,3vw,38px);border-left:1px solid var(--rule)}
+}
+.vsnum{margin-top:.75rem;font-size:.82rem;color:var(--smoke);line-height:1.5}
+.vsnum b{font-family:var(--disp);font-weight:700;font-size:1.5rem;letter-spacing:-.02em;
+  color:var(--bone);margin-right:.4rem;font-variant-numeric:tabular-nums}
+
+/* Atmosphere, not argument: half the size, no display face. */
+.said.tight{margin-top:clamp(1rem,2vw,1.4rem)}
+.said.tight p{font-family:var(--body);font-size:.92rem;line-height:1.5;font-style:italic}
 .thumb{display:block;text-decoration:none}
 .thumb img{aspect-ratio:16/9;object-fit:cover;border-radius:4px;
   background:rgba(242,235,223,.06);transition:transform .4s ease,filter .4s ease;
@@ -624,42 +645,78 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
   </div>
   <div class="inner">
     <div class="label lit">The show that has never been opened up</div>
-    <h2 class="display" style="margin:.8rem 0 0;max-width:20ch">
-      Ninety-one minutes.<br>One upload.
+    <!-- "Ninety-one minutes. One upload." stated the situation and left the
+         reader to infer the opportunity. The headline is now the
+         opportunity, and the situation is the line beneath it.
+
+         The number of songs is deliberately not stated. The public API
+         truncates descriptions at 400 characters, so we cannot read the
+         setlist, and a track count estimated from the running time would
+         be a guess printed as a fact. "Multiple" is what the evidence
+         supports. -->
+    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:20ch">
+      One concert.<br>Multiple song assets.
     </h2>
+    <p class="big-p" style="max-width:54ch">
+      The 91-minute Stone Pony film has 227K views. <em>None of its performances
+      have been published individually.</em>
+    </p>
 
-    <div class="said">
-      <p>
-        &ldquo;the day after we released our album, the band and i played a free show at
-        the stone pony for 900 fans. some of you flew across the country to be there,
-        and others locals who have been coming to see us for over a decade. from the
-        second we stepped onto that stage, it was one of my favorite shows ever&rdquo;
-      </p>
-      <span class="attr">Jack Antonoff, in the video description</span>
+    <!-- The two sides used to be four equal thumbnails in a row with the
+         distinction explained in a footnote, so the comparison was
+         something you worked out rather than something you saw. Labelled
+         columns make the argument structural: this is what we have, this
+         is what the same channel already did with a different show. -->
+    <div class="vs">
+      <div class="vsside">
+        <div class="label cold">Stone Pony · what exists</div>
+        <div class="vgrid" style="margin-top:.7rem;grid-template-columns:1fr">
+          <a class="thumb" href="https://www.youtube.com/watch?v=468J7e1clU4" target="_blank" rel="noopener">
+            <img src="https://i.ytimg.com/vi/468J7e1clU4/hqdefault.jpg" alt="" loading="lazy">
+            <span class="cap"><b>227K</b>The full 91-minute concert · June 2026</span>
+          </a>
+        </div>
+        <div class="vsnum"><b>0</b> individual song uploads</div>
+      </div>
+
+      <div class="vsside">
+        <div class="label cold">Red Rocks · the precedent</div>
+        <div class="vgrid three" style="margin-top:.7rem">
+          <a class="thumb" href="https://www.youtube.com/watch?v=LvwZVMk2v6o" target="_blank" rel="noopener">
+            <img src="https://i.ytimg.com/vi/LvwZVMk2v6o/hqdefault.jpg" alt="" loading="lazy">
+            <span class="cap"><b>171K</b>I Wanna Get Better</span>
+          </a>
+          <a class="thumb" href="https://www.youtube.com/watch?v=YE68EpoHT3k" target="_blank" rel="noopener">
+            <img src="https://i.ytimg.com/vi/YE68EpoHT3k/hqdefault.jpg" alt="" loading="lazy">
+            <span class="cap"><b>143K</b>Rollercoaster</span>
+          </a>
+          <a class="thumb" href="https://www.youtube.com/watch?v=-b9D3TVmssI" target="_blank" rel="noopener">
+            <img src="https://i.ytimg.com/vi/-b9D3TVmssI/hqdefault.jpg" alt="" loading="lazy">
+            <span class="cap"><b>69K</b>Tiny Moves</span>
+          </a>
+        </div>
+        <div class="vsnum"><b>383K</b> across three individual performances from one show</div>
+      </div>
     </div>
 
-    <div class="vgrid four" style="margin-top:clamp(1.4rem,2.8vw,2.2rem)">
-      <a class="thumb" href="https://www.youtube.com/watch?v=468J7e1clU4" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/468J7e1clU4/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>227,059</b>The whole show · June 2026</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=LvwZVMk2v6o" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/LvwZVMk2v6o/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>171,061</b>I Wanna Get Better · Red Rocks</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=YE68EpoHT3k" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/YE68EpoHT3k/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>143,285</b>Rollercoaster · Red Rocks</span>
-      </a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=-b9D3TVmssI" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/-b9D3TVmssI/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>68,986</b>Tiny Moves · Red Rocks</span>
-      </a>
+    <div class="rule"></div>
+    <div class="label" style="margin-top:clamp(.8rem,1.8vw,1.2rem)">The opportunity</div>
+    <p class="big-p" style="margin-top:.5rem;max-width:50ch">
+      Test a handful of Stone Pony performances as standalone videos.
+    </p>
+    <!-- Red Rocks is a precedent, not a projection. The slide must not be
+         readable as "this is worth 383K", which is why the qualification
+         names redistribution as a live possibility rather than listing it
+         as a risk at the end. -->
+    <div class="fine" style="margin-top:.6rem;max-width:78ch">
+      Subject to rights · measure whether the edits add viewing or redistribute it from
+      the full concert · Red Rocks was July 2024, and the channel holds 28 single-song
+      live videos in all
     </div>
-    <div class="fine" style="margin-top:.9rem">
-      Red Rocks, July 2024 — three songs from one night, published individually, 383K
-      views between them · the channel holds 28 single-song live videos in all · the
-      Stone Pony set has never been cut up
+
+    <div class="said tight">
+      <p>&ldquo;one of my favorite shows ever&rdquo;</p>
+      <span class="attr">Jack Antonoff on the Stone Pony night, the day after the album came out</span>
     </div>
   </div>
 </section>
@@ -951,42 +1008,48 @@ table.cmp td.n{font-family:var(--disp);font-weight:700;font-variant-numeric:tabu
 <section class="slide" id="shorts">
   <div class="inner">
     <div class="label">Shorts · 94 uploads</div>
-    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:22ch">
-      The biggest Shorts<br>offered something<br>different.
+    <!-- The headline used to be the conclusion ("offered something
+         different") with the evidence underneath, which meant the slide
+         asked for trust before it had earned any. The count is the finding:
+         two out of ninety-four is the whole argument, and it needs no
+         setup. What the two had in common follows it. -->
+    <h2 class="display" style="margin:.8rem 0 .5rem;max-width:20ch">
+      94 Shorts. Only<br>two passed 50K.
     </h2>
-    <p class="big-p" style="max-width:52ch">
-      The only live performance of a song that exists. A piece of choreography by the
-      person in the music video. <em>Neither is an excerpt of a show.</em>
+    <p class="big-p" style="max-width:48ch">
+      Both gave fans something they couldn't get elsewhere.
     </p>
 
     <div class="vgrid" style="margin-top:clamp(1.2rem,2.4vw,1.8rem);max-width:640px">
       <a class="thumb" href="https://www.youtube.com/watch?v=7XyRT_prqjY" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/7XyRT_prqjY/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>152,565</b>Modern Girl — the only live performance that exists</span>
+        <span class="cap"><b>153K</b>Modern Girl · the only live performance</span>
       </a>
       <a class="thumb" href="https://www.youtube.com/watch?v=au7cm7Od7b8" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/au7cm7Od7b8/hqdefault.jpg" alt="" loading="lazy">
-        <span class="cap"><b>144,905</b>Tiny Moves — the choreography, by Margaret Qualley</span>
+        <span class="cap"><b>145K</b>Tiny Moves · Margaret Qualley's choreography</span>
       </a>
     </div>
 
-    <div class="hero2" style="margin:clamp(1.3rem,2.6vw,2rem) 0 .7rem">
+    <div class="hero2" style="margin:clamp(1.3rem,2.6vw,2rem) 0 .9rem">
       <div>
-        <div class="hn" style="font-size:clamp(2.4rem,5.4vw,4rem)">6,083</div>
-        <div class="hk">Median across<br>94 Shorts</div>
-      </div>
-      <div>
-        <div class="hn" style="font-size:clamp(2.4rem,5.4vw,4rem);color:var(--faint)">2</div>
-        <div class="hk">Have ever cleared 50,000<br>next best is 46,996</div>
+        <div class="hn" style="font-size:clamp(2.4rem,5.4vw,4rem);color:var(--faint)">6,083</div>
+        <div class="hk">Median across<br>all 94 Shorts</div>
       </div>
     </div>
 
-    <div class="fine" style="max-width:78ch">
-      Two successes out of ninety-four is a creative hypothesis, not a proven cause ·
-      test distinctiveness as the variable — the thing nobody can see elsewhere · for
-      context only, the six Shorts cut from the 2023 Radio City show sit between 1,841
-      and 6,083 views, published in a different year under different conditions, so that
-      is not a controlled comparison
+    <div class="rule"></div>
+    <div class="label" style="margin-top:clamp(.9rem,2vw,1.3rem)">The test</div>
+    <p class="big-p" style="margin-top:.5rem;max-width:46ch">
+      Build Shorts around unique moments, not routine clips.
+    </p>
+    <!-- The Radio City Shorts, the publication-year confound and the
+         controlled-comparison caveat all moved to the analysis page. They
+         were the most-read thing on a slide whose finding is a count, and
+         a reader who wants them goes looking. What survives here is the one
+         caveat that changes how the recommendation should be taken. -->
+    <div class="fine" style="margin-top:.6rem">
+      Two examples are a signal, not proof
     </div>
   </div>
 </section>
