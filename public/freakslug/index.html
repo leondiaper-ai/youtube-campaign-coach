@@ -374,14 +374,14 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
    Shorts thumbnails are vertical inside a 16:9 frame, so a portrait box
    with object-fit:cover crops the letterboxing off. */
 .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,13px);
-  margin:clamp(.9rem,2vw,1.3rem) 0 0}
+  margin:clamp(.7rem,1.6vw,1rem) 0 0}
 @media(min-width:820px){.sgrid{grid-template-columns:repeat(8,1fr)}}
 .sh2{display:block;text-decoration:none;color:inherit;border:1px solid var(--rule);
   border-radius:3px;overflow:hidden;background:var(--ink);transition:.2s}
-.sh2 .sw{position:relative;aspect-ratio:4/5;overflow:hidden}
+.sh2 .sw{display:block;position:relative;aspect-ratio:1/1;overflow:hidden}
 .sh2 img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.1)}
-.sh2 .sc{display:block;padding:.35rem .4rem .45rem;font-family:var(--mono);
-  font-size:.55rem;letter-spacing:.06em;line-height:1.5;color:var(--faint)}
+.sh2 .sc{display:block;padding:.3rem .35rem .35rem;font-family:var(--mono);
+  font-size:.55rem;letter-spacing:.06em;line-height:1.4;color:var(--faint)}
 .sh2 .sc b{display:block;color:var(--bone);font-weight:500;font-size:.62rem}
 .sh2:hover{border-color:var(--bone)}
 .sh2.hot{border-color:var(--wine);box-shadow:0 0 0 1px var(--wine)}
@@ -394,10 +394,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   border:1px solid var(--rule);border-radius:3px;overflow:hidden;
   margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
 @media(min-width:720px){.jobs{grid-template-columns:repeat(5,1fr)}}
-.job{background:var(--night);padding:.85rem .8rem 1rem}
+.job{background:var(--night);padding:.7rem .75rem .8rem}
 .job .jt{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--cobalt);margin-bottom:.4rem}
-.job p{margin:0;font-size:.8rem;line-height:1.48;color:var(--smoke)}
+.job p{margin:0;font-size:.76rem;line-height:1.42;color:var(--smoke)}
 
 /* ── PLAN (slide 09) ──────────────────────────────────────────────── */
 .plan{margin:clamp(1.1rem,2.4vw,1.8rem) 0 0;border-top:1px solid var(--rule)}
@@ -620,7 +620,6 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
       <a class="sh2" href="https://www.youtube.com/watch?v=FKRWjeFxub0" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/FKRWjeFxub0/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>3,014</b>Album Friday</span></a>
       <a class="sh2" href="https://www.youtube.com/watch?v=tsKrPkIjGfg" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/tsKrPkIjGfg/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>2,825</b>Merch</span></a>
     </div>
-    <div class="label" style="margin-top:.55rem">The channel’s eight biggest Shorts · click to watch</div>
 
     <div class="jobs">
       <div class="job"><div class="jt">Discovery</div><p>Reach people who don't follow her yet.</p></div>
