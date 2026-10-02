@@ -171,19 +171,82 @@ function dateLabel(iso: string): string {
 /**
  * Observable format only. The API can see duration and liveStreamingDetails;
  * it cannot see whether something is a visualiser or a lyric video unless
- * the title says so, and guessing would put a wrong label on a campaign
+ * the asset says so, and guessing would put a wrong label on a campaign
  * asset in front of YouTube.
+ *
+ * ── A PREMIERE IS A DISTRIBUTION CHOICE, NOT A FORMAT ────────────────
+ * `actualStart` alone used to return PREMIERE / LIVE, ahead of every other
+ * check, so every premiered music release on every campaign page was a
+ * live performance. Kings of Leon premiered the Cold Blue Dawn lyric video
+ * at 16:00 on 30 September and this called four and a half minutes of NASA
+ * satellite imagery a live show — then ranked it at live's weight, 80.
+ *
+ * The shared classifier already learned this and will not believe a
+ * premiere was a performance under ten minutes. Same rule, same reason: a
+ * premiered single is two to five minutes long, a live set is not.
+ *
+ * ── AND THE DESCRIPTION IS EVIDENCE ──────────────────────────────────
+ * "unless the title says so" was too strict by one field. That upload is
+ * titled "Kings Of Leon - Cold Blue Dawn", and its first sentence says the
+ * Weather Channel built "a lyric video" out of Landsat imagery. That is the
+ * label, stated by the people who made the thing.
+ *
+ * Only `lyric video` and `visualiser` are read out of a description, and
+ * only when the title offers nothing, because those two phrases name the
+ * upload itself. "Official music video" in a description is usually
+ * pointing at a DIFFERENT upload — "full music video out now on our
+ * channel" is the standard Short caption — so that one stays title-only.
  */
+const PREMIERE_IS_A_PERFORMANCE_SEC = 600;
+
 function formatOf(v: any): { kind: string; label: string } {
   const dur = v.durationSec ?? 0;
   const title = String(v.title ?? '');
-  if (v.wasLive || v.actualStart) return { kind: 'live', label: 'PREMIERE / LIVE' };
+  const desc = String(v.description ?? '');
+
   if (dur > 0 && dur <= 62) return { kind: 'short', label: 'SHORT' };
+
+  /* The title, where it says. Strongest evidence, and it beats the
+     premiere check below: an "(Official Video)" that premiered is still an
+     official video. */
   if (/\blyric\b/i.test(title)) return { kind: 'lyric', label: 'LYRIC VIDEO' };
   if (/\bvisuali[sz]er\b/i.test(title)) return { kind: 'visualiser', label: 'VISUALISER' };
   if (/official (music )?video|\bomv\b/i.test(title)) return { kind: 'omv', label: 'OFFICIAL VIDEO' };
+
+  /* The description, for the two formats that name themselves in it. */
+  if (/\blyric(?:s)?\s+video\b/i.test(desc)) return { kind: 'lyric', label: 'LYRIC VIDEO' };
+  if (/\bvisuali[sz]er\b/i.test(desc)) return { kind: 'visualiser', label: 'VISUALISER' };
+
+  /* Long enough to have been a show rather than a scheduled drop. */
+  if ((v.wasLive || v.actualStart) && dur > PREMIERE_IS_A_PERFORMANCE_SEC) {
+    return { kind: 'live', label: 'PREMIERE / LIVE' };
+  }
+
   if (dur > 62) return { kind: 'long', label: 'LONG FORM' };
   return { kind: 'unknown', label: 'UPLOAD' };
+}
+
+/**
+ * What counts as a RELEASE rather than a build.
+ *
+ * A Short or a trailer points at something. These are the something. The
+ * distinction drives both which asset leads the page and what the read
+ * says is out, so it lives here rather than being declared twice.
+ */
+const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live']);
+
+/** What a release is called in a sentence, as opposed to on a label. */
+const FORMAT_NOUN: Record<string, string> = {
+  omv: 'video',
+  lyric: 'lyric video',
+  visualiser: 'visualiser',
+  live: 'live video',
+};
+
+/** ['a','b','c'] -> "a, b and c". */
+function listPhrase(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
 }
 
 /**
@@ -347,8 +410,32 @@ export async function GET(req: NextRequest) {
 
        Views are a reasonable tiebreak for "which of these matters most".
        They are the wrong answer entirely to "what is the latest". */
+    /* ── THE LEAD IS THE CURRENT RELEASE, NOT THE BIGGEST ONE ────────
+       `rankAssets()[0]` answers "what is the largest thing in this
+       campaign", and on a campaign's second single that is permanently
+       the first single. My Whole World held the NOW slot with 4.47M views
+       while Cold Blue Dawn, out two days and the reason anyone was
+       looking, sat in the supporting strip.
+
+       The block is headed NOW. A page that leads on the previous single
+       until the next one out-watches it is a page that is always one
+       single behind — the same error already corrected for the second
+       hero, where views were the wrong answer to "what is the latest".
+       They are also the wrong answer to "what is this campaign about
+       today".
+
+       Ties inside a day — a lyric video and a visualiser dropping
+       together — fall back to format weight and then views, which is
+       exactly what rankAssets does, so it runs first and the date sort
+       is stable on top of it.
+
+       rankAssets still answers outright for a campaign with no release
+       yet: a run of countdown Shorts has no current release, and the
+       biggest of them is the right thing to lead on. */
     const ranked = rankAssets(postBaseline);
-    const lead = ranked[0] ?? null;
+    const releases = rankAssets(postBaseline.filter(a => RELEASE_KINDS.has(a.kind)))
+      .sort((x, y) => y.publishedAt.slice(0, 10).localeCompare(x.publishedAt.slice(0, 10)));
+    const lead = releases[0] ?? ranked[0] ?? null;
     const latest = [...postBaseline]
       .filter(a => a.videoId !== lead?.videoId)
       .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))[0] ?? null;
@@ -641,7 +728,7 @@ export async function GET(req: NextRequest) {
        clause. No causal claim: the channel woke and the campaign started,
        and those are two statements sitting next to each other. */
     const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays,
-      daysSinceUpload, stages, firstNewUploadAt, [...heroes, ...supporting]);
+      daysSinceUpload, stages, firstNewUploadAt, [...heroes, ...supporting], who.name);
 
     /* ── Fan response ──────────────────────────────────────────────────
        What the audience is positively responding to, in about eight words,
@@ -809,6 +896,7 @@ function buildRead(
   stages: { label: string; status: string; action?: string | null }[],
   firstNewUploadAt: string | null,
   campaignAssets: CoverAsset[] = [],
+  artistName = '',
 ): { kicker: string | null; headline: string; line: string } | null {
   if (state === 'BASELINE') return null;
 
@@ -850,12 +938,49 @@ function buildRead(
      they point at a release rather than being one — which is the same
      distinction the hero ranking makes, and it is made from the observed
      formats rather than from anybody updating a string. */
-  const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live']);
   const released = campaignAssets.filter(a => RELEASE_KINDS.has(a.kind));
 
-  const headline = released.length
-    ? 'The single is out.'
-    : woke ? 'The channel is awake.' : 'The campaign is live.';
+  /* ── AND THE HEADLINE HAS TO NAME WHAT IS OUT ──────────────────────
+     "The single is out." was a constant, so it could not tell one single
+     from the next. It was true on 10 September for My Whole World and was
+     still the sentence on 2 October, by which point the single it referred
+     to was two singles old and Cold Blue Dawn had been out for two days.
+
+     So it is built from the newest release and whatever else went out for
+     the same song: "New track and lyric video out." The song goes on the
+     line below — the headline is the event, the name is the detail. When
+     the next single lands this sentence changes by itself, and so does
+     the list of formats, because both are read off the uploads. */
+  const newest = [...released]
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0] ?? null;
+  const song = newest ? cleanAssetTitle(newest.title, artistName) : null;
+
+  /* Everything released for that song, not just the newest asset: a
+     lyric video and a visualiser for one track are one event. Matched on
+     the cleaned title, which already strips the artist and the
+     "(Visualizer)" packaging, so the two forms land on the same key. */
+  const forSong = song
+    ? released.filter(a => cleanAssetTitle(a.title, artistName).toLowerCase() === song.toLowerCase())
+    : [];
+  const nouns = Array.from(new Set(forSong.map(a => a.kind)))
+    .sort((a, b) => (FORMAT_WEIGHT[b] ?? 0) - (FORMAT_WEIGHT[a] ?? 0))
+    .map(k => FORMAT_NOUN[k])
+    .filter(Boolean);
+
+  const headline = nouns.length
+    /* "New track AND ..." because two things went out: the song, on every
+       platform, and the asset that carries it here. */
+    ? `New track and ${listPhrase(nouns)} out.`
+    : released.length ? 'The single is out.'
+      : woke ? 'The channel is awake.' : 'The campaign is live.';
+
+  /* The song, dated, ahead of the forward instruction. Without it the
+     headline announces a release the reader cannot name. */
+  /* `dateLabel` is "30 SEP" — right on a card, shouting in a sentence. */
+  const subjectDate = newest
+    ? new Date(newest.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })
+    : '';
+  const subject = song && subjectDate ? `“${song}”, ${subjectDate}. ` : '';
 
   return {
     kicker,
@@ -872,8 +997,8 @@ function buildRead(
        The title remains the fallback, lowercased as before so it reads as a
        clause rather than a heading. An item with no stated action is a gap in
        the plan, not a reason to print nothing. */
-    line: next
+    line: subject + (next
       ? `Next: ${next.action ?? next.label.charAt(0).toLowerCase() + next.label.slice(1)}.`
-      : 'Now we\'re watching what follows it.',
+      : 'Now we\'re watching what follows it.'),
   };
 }
