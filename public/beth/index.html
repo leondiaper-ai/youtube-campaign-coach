@@ -25,7 +25,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
 /* ── PALETTE ──────────────────────────────────────────────────────
@@ -39,7 +39,7 @@
   --faint:#6E646A; --rule:rgba(244,239,236,.14);
   --blood:#C8213A;   /* Pretty Villain */
   --rose:#E79FB4;    /* She Gets The Flowers */
-  --disp:'Instrument Serif',Georgia,serif;
+  --disp:'Anton',Impact,sans-serif;
   --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
   --pad:clamp(22px,5vw,78px);
 }
@@ -86,10 +86,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opa
   text-transform:uppercase;color:var(--faint)}
 .label.hot{color:var(--blood)}
 .label.rose{color:var(--rose)}
-h1.display,h2.display{font-family:var(--disp);font-weight:400;letter-spacing:-.015em;
-  line-height:1.02;margin:0}
-h1.display{font-size:clamp(3rem,7.4vw,6.2rem)}
-h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
+/* Anton is condensed, single-weight and has a tall x-height, so it needs
+   tighter leading and a little negative tracking than a serif would. */
+h1.display,h2.display{font-family:var(--disp);font-weight:400;letter-spacing:-.012em;
+  line-height:.94;margin:0}
+h1.display{font-size:clamp(2.9rem,7vw,5.9rem)}
+h2.display{font-size:clamp(2.2rem,5.1vw,4.1rem)}
 .big-p{font-size:clamp(1.02rem,1.9vw,1.4rem);line-height:1.5;color:var(--smoke);
   margin:.9rem 0 0;font-weight:400}
 .big-p b{color:var(--bone);font-weight:600}
@@ -103,7 +105,7 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
   margin:clamp(1.5rem,3.2vw,2.6rem) 0 1rem}
 @media(min-width:700px){.hero2{grid-template-columns:repeat(auto-fit,minmax(150px,auto));justify-content:start}}
 .hero2 .hn{font-family:var(--disp);font-weight:400;
-  font-size:clamp(3rem,7.4vw,5.6rem);line-height:.9;letter-spacing:-.03em}
+  font-size:clamp(2.8rem,6.8vw,5.2rem);line-height:.88;letter-spacing:-.015em}
 .hero2 .hk{font-family:var(--mono);font-size:.6rem;letter-spacing:.13em;
   text-transform:uppercase;color:var(--faint);margin-top:.8rem;line-height:1.75}
 
@@ -261,6 +263,28 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
   color:var(--blood)}
 .sf .st{margin-top:.5rem;font-size:.82rem;line-height:1.55;color:var(--smoke)}
 
+/* ── THE WHOLE CHANNEL, AS A PICTURE ──────────────────────────────
+   26 uploads is small enough to show all of it at once, which is a
+   better argument than any sentence about catalogue size: this is
+   everything, and you can see the shape of it in one look. The three
+   that are not a song asset are ringed. */
+.sheet{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;
+  margin:clamp(1.2rem,2.4vw,1.8rem) 0 .7rem}
+@media(min-width:900px){.sheet{grid-template-columns:repeat(13,1fr)}}
+.sh{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:2px;
+  border:1px solid rgba(244,239,236,.1);background:var(--ink)}
+.sh img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.75) brightness(.72)}
+.sh.other{border-color:var(--blood);box-shadow:0 0 0 1px var(--blood)}
+.sh.other img{filter:saturate(1.1) brightness(1)}
+.sh.big img{filter:saturate(1) brightness(.95)}
+.shkey{display:flex;flex-wrap:wrap;gap:1.1rem;margin-top:.8rem;
+  font-family:var(--mono);font-size:.56rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint)}
+.shkey i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:2px;
+  margin-right:.45rem;vertical-align:-1px;background:rgba(244,239,236,.22)}
+.shkey .k2 i{background:var(--blood)}
+
 /* ── PRECEDENTS ───────────────────────────────────────────────────── */
 .prec{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.2vw,26px);
   margin:clamp(1.3rem,2.6vw,2rem) 0 .6rem}
@@ -371,10 +395,43 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
       </div>
     </div>
 
+    <div class="sheet">
+      <div class="sh big"><img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh big"><img src="https://i.ytimg.com/vi/XjQqSkGratQ/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh big"><img src="https://i.ytimg.com/vi/3_OSlP6Vdks/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/8IFDmo3BrL4/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/aOlB65sYW6s/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/KPFsS-SsmNs/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/Twm54ZCdPhE/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/hsqvoAmOLFI/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/lF09ID0Cm2Q/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/hd3EoD9L7IE/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/7weSg0AYyOc/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/EIfQrMs3kwY/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/f2tCFPBQKYs/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/SOs-o26YeMw/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/zwvdOeoymwI/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/hHaWskErtKg/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/H4zsms2SK54/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/gG6qDpUWqnU/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/T-bWMcIb7ho/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/pXEBwpNyykA/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/1LRnS-10EsY/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/xAiNUiCZm_8/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh"><img src="https://i.ytimg.com/vi/7BhwzSyJK-4/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh other" title="Live session, 2016"><img src="https://i.ytimg.com/vi/LJhDty_zHE0/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh other" title="The one full show"><img src="https://i.ytimg.com/vi/LM9sBCZwKUQ/mqdefault.jpg" alt="" loading="lazy"></div>
+      <div class="sh other" title="The one Short"><img src="https://i.ytimg.com/vi/npcB_KPO63s/mqdefault.jpg" alt="" loading="lazy"></div>
+    </div>
+    <div class="shkey">
+      <span><i></i>Song asset — 23 uploads</span>
+      <span class="k2"><i></i>Everything else — 3 uploads</span>
+    </div>
+
     <div class="note">
-      <b>This is not a quiet channel — it is an unbuilt one.</b> The audience is already
-      here. What is missing is everything that would give that audience a reason to stay
-      between releases, and a way to find their way around the era once it has one.
+      <b>This is not a quiet channel — it is an unbuilt one.</b> That is the whole channel
+      above: every upload since 2016. The audience is already here. What is missing is
+      anything that would hold them between releases.
     </div>
     <div class="fine" style="margin-top:.9rem;max-width:84ch">
       26 of 26 uploads returned by the API, not capped · the Shorts tab was checked directly
@@ -412,9 +469,27 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
 
     <p class="big-p" style="max-width:58ch">
       <em>She Gets The Flowers</em> began as a reply to a stranger's video, was posted as an
-      idea, and became a song because of how many people answered. It is the one song that
-      was built out rather than moved on from — video, lyric, acoustic.
+      idea, and became a song because of how many people answered.
     </p>
+
+    <div class="vgrid four" style="margin-top:clamp(1.1rem,2.2vw,1.7rem)">
+      <a class="thumb" href="https://www.youtube.com/watch?v=dUUCZvKxzSQ" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>2.90M</b>She Gets The Flowers · built from fans' own stories</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=XjQqSkGratQ" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/XjQqSkGratQ/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>3.04M</b>Answering Taylor Swift</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=3_OSlP6Vdks" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/3_OSlP6Vdks/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>2.43M</b>Answering Noah Cyrus</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=8IFDmo3BrL4" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/8IFDmo3BrL4/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>797K</b>Answering Will Joseph Cook</span>
+      </a>
+    </div>
 
     <div class="note hot">
       <b>Don't recreate 2021. Recover the principle.</b> All of that material clusters
@@ -467,6 +542,33 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
           <div class="td">19 Nov</div>
           <div class="tn">London residency</div>
         </div>
+      </div>
+    </div>
+
+    <div class="vgrid four" style="margin-top:clamp(1rem,2vw,1.5rem)">
+      <div class="thumb" style="opacity:.3">
+        <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+          background:repeating-linear-gradient(45deg,rgba(244,239,236,.05) 0 8px,transparent 8px 16px)">
+          <span style="font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
+            text-transform:uppercase;color:var(--faint)">Nothing</span>
+        </div>
+        <span class="cap"><b>—</b>Reading &amp; Leeds</span>
+      </div>
+      <a class="thumb" href="https://www.youtube.com/watch?v=7BhwzSyJK-4" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>11.3K</b>Pretty Villain · 4 Sep</span>
+      </a>
+      <a class="thumb" href="https://www.youtube.com/watch?v=npcB_KPO63s" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/npcB_KPO63s/hqdefault.jpg" alt="" loading="lazy">
+        <span class="cap"><b>2.7K</b>One Short · 7 Sep</span>
+      </a>
+      <div class="thumb" style="opacity:.3">
+        <div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+          background:repeating-linear-gradient(45deg,rgba(200,33,58,.12) 0 8px,transparent 8px 16px)">
+          <span style="font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
+            text-transform:uppercase;color:var(--blood)">Today</span>
+        </div>
+        <span class="cap"><b>—</b>Love After Love · 2 Oct</span>
       </div>
     </div>
 
@@ -551,6 +653,11 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
 
 <!-- ════════ 6 · THE THREE ACTS ═══════════════════════════════════ -->
 <section class="slide" id="acts">
+  <div class="bleed scrim-f" style="opacity:.2">
+    <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/maxres3.jpg" alt=""
+      style="object-position:50% 42%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/7BhwzSyJK-4/hq3.jpg'">
+  </div>
   <div class="inner">
     <div class="label">The architecture</div>
     <h2 class="display" style="margin:.8rem 0 .4rem;max-width:23ch">
@@ -679,6 +786,13 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
 
 <!-- ════════ 8 · PUT THE AUDIENCE IN ══════════════════════════════ -->
 <section class="slide" id="audience">
+  <!-- The Flowers thumbnail is a girl holding a handwritten card that says
+       "I wasn't enough". The participation mechanic, already a picture. -->
+  <div class="bleed scrim-l" style="opacity:.55">
+    <img src="https://i.ytimg.com/vi/dUUCZvKxzSQ/maxresdefault.jpg" alt=""
+      style="object-position:74% 40%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/dUUCZvKxzSQ/hqdefault.jpg'">
+  </div>
   <div class="inner">
     <div class="label rose">The bridge from history to strategy</div>
     <h2 class="display" style="margin:.8rem 0 .4rem;max-width:23ch">
@@ -766,6 +880,11 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
 
 <!-- ════════ 10 · ACT I FROM HERE ═════════════════════════════════ -->
 <section class="slide" id="acti">
+  <div class="bleed scrim-f" style="opacity:.22">
+    <img src="https://i.ytimg.com/vi/7BhwzSyJK-4/maxres2.jpg" alt=""
+      style="object-position:50% 45%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/7BhwzSyJK-4/hq2.jpg'">
+  </div>
   <div class="inner">
     <div class="label hot">From today</div>
     <h2 class="display" style="margin:.8rem 0 .4rem;max-width:22ch">
