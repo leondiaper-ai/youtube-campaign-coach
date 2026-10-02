@@ -81,14 +81,13 @@ tr.total td{border-top:1px solid rgba(242,235,223,.4);color:var(--bone);font-wei
 tr.lit td{background:rgba(159,178,188,.09)}
 tr.lit td:first-child{color:var(--bone)}
 
-.callout{margin:1.4rem 0;padding:1rem 1.2rem;background:rgba(242,235,223,.045);
-  border-left:3px solid var(--brick);border-radius:0 4px 4px 0;
-  font-size:.92rem;line-height:1.62;color:var(--smoke);max-width:78ch}
-.callout.cold{border-left-color:var(--ice)}
-.callout.warn{border-left-color:var(--gold)}
-.callout b{color:var(--bone)}
-.callout p:last-child{margin-bottom:0}
 
+ /* One muted line beside the evidence it qualifies. The boxed callouts
+    made every caveat look like a warning, and a page with nine warnings
+    reads as nervous rather than careful. */
+.qual{font-size:.84rem;line-height:1.6;color:var(--faint);margin:.7rem 0 0;
+  padding-left:.9rem;border-left:1px solid var(--rule)}
+.qual b{color:var(--smoke)}
 .kv{display:grid;grid-template-columns:1fr;gap:12px;margin:1.2rem 0 1.6rem}
 @media(min-width:720px){.kv{grid-template-columns:repeat(3,1fr)}}
 .kv > div{padding:.95rem 1.1rem;border:1px solid var(--rule);border-radius:4px}
@@ -113,9 +112,8 @@ tr.lit td:first-child{color:var(--bone)}
   <div class="eyebrow">Bleachers · @bleachers · Channel deep dive · Virgin Music Group</div>
   <h1>The working.</h1>
   <p class="lede">
-    Every figure on the deck, the object it came from, and the things this data
-    cannot show. The deck makes claims about a body of work that belongs to
-    somebody — they should be checkable without having to ask us.
+    Every figure on the deck and the object it came from, so a number can be
+    challenged without having to ask us.
   </p>
 
 
@@ -140,45 +138,35 @@ tr.lit td:first-child{color:var(--bone)}
     </tr>
   </table>
 
-  <p>
-    <b>No YouTube Studio access.</b> That means no watch time, no retention, no traffic
-    sources and no audience demographics. Nothing on the deck is a claim about how long
-    anyone watched or where they came from, because nothing here could support one.
+  <p class="qual">
+    Public data only. No YouTube Studio access, so nothing here includes watch time,
+    retention, traffic sources or audience demographics.
   </p>
 
-  <h3>Two numbers that are not the same number</h3>
+  <h3>111.0M and 189.0M</h3>
   <div class="kv">
-    <div><div class="n">111.0M</div><div class="k">The catalogue · 230 uploads summed</div></div>
-    <div><div class="n" style="color:var(--faint)">+78.0M</div><div class="k">Unaccounted</div></div>
-    <div><div class="n" style="color:var(--faint)">189.0M</div><div class="k">Channel lifetime counter</div></div>
+    <div><div class="n">111.0M</div><div class="k">Measurable catalogue · 230 uploads summed</div></div>
+    <div><div class="n" style="color:var(--faint)">+78.0M</div><div class="k">Outside the measurable catalogue</div></div>
+    <div><div class="n" style="color:var(--faint)">189.0M</div><div class="k">Lifetime channel counter</div></div>
   </div>
   <p>
-    The uploads sum to <b>111,033,880</b>. The channel counter reads <b>188,997,142</b>.
-    The 77,963,262 difference — 41.3% — cannot be accounted for from public data; it may
-    sit in removed or private videos, or in counting differences at YouTube's end.
-    <b>Every percentage on the deck is a share of the 111.0M, and nothing is ever divided
-    by the lifetime figure.</b>
+    The 230 public uploads sum to <b>111,033,880</b>. The lifetime counter reads
+    <b>188,997,142</b>. All format analysis in this deck uses the measurable 111.0M
+    catalogue.
   </p>
-  <div class="callout warn">
-    <p>
-      <b>The limitation this creates.</b> If the missing 78M is not spread evenly across
-      formats, the format shares below would shift — and there is no way to test that from
-      outside. The shares are exact statements about the catalogue we can open. They are
-      estimates about the channel.
-    </p>
-  </div>
-  <p style="font-family:var(--mono);font-size:.63rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)">
-    Public counters move through the day. Read at 15:20 UTC the catalogue summed to
-    111,033,880; earlier the same day, 111,031,833. Figures on the deck are rounded for
-    that reason.
+  <p class="qual">
+    The difference may sit in removed or private videos, or in counting differences at
+    YouTube's end. Public counters also move through the day — read at 15:20 UTC the
+    catalogue summed to 111,033,880, earlier the same day 111,031,833 — which is why deck
+    figures are rounded.
   </p>
 
 
   <h2>The format census</h2>
   <p>
     Every one of the 230 uploads lands in exactly one category, assigned from title,
-    duration and the API's Shorts flag. Both columns reconcile to the catalogue total —
-    which is the control, because a miscount would break the sum.
+    duration and the API's Shorts flag. Both columns reconcile to the catalogue total,
+    so a miscount would break the sum.
   </p>
 
   <table>
@@ -195,9 +183,8 @@ tr.lit td:first-child{color:var(--bone)}
 
   <h3>All seventeen music videos, checked individually</h3>
   <p>
-    Classification by title is the single biggest lever in this analysis, so every music
-    video was inspected for title, duration and date. Durations run 182–307 seconds, all
-    consistent with music videos.
+    All 17 were checked one by one, because title-based classification is the main
+    judgement call in the census. Durations run 182–307 seconds.
   </p>
 
   <table>
@@ -221,12 +208,9 @@ tr.lit td:first-child{color:var(--bone)}
     <tr><td>How Dare You Want More — Verdine White remix</td><td>14 Jun 2022</td><td class="n">15,708</td><td class="n">182s</td></tr>
   </table>
 
-  <p>
-    <b>One judgement call.</b> The seventeen include the Verdine White <em>remix</em> video,
-    which is an official music video for a remix rather than a distinct song. That is why
-    the deck says "17 music videos" in the census and "sixteen songs have an official music
-    video" on the support slide. Both are accurate. Excluding it would make the census
-    16 / 64,627,646 and change nothing material.
+  <p class="qual">
+    The Verdine White remix is counted as a music video because it is an official video
+    for a remix; excluding it does not materially change the analysis.
   </p>
 
 
@@ -244,39 +228,20 @@ tr.lit td:first-child{color:var(--bone)}
   <p>
     The five: Dirty Wedding Dress live at Electric Lady (388,227), the Stone Pony film
     (227,059), the Annie DiRusso Christmas duet (25,020), the Stone Pony teaser (5,647)
-    and a Zane Lowe clip (4,681).
+    and a Zane Lowe clip (4,681). <em>everyone for ten minutes</em> was released
+    <b>22 May 2026</b>, inside this window.
   </p>
 
-  <div class="callout">
-    <p>
-      <b>Two qualifications that matter more than the headline.</b>
-    </p>
-    <p>
-      First, this does not mean the 23.88M would have arrived with nothing happening.
-      <em>everyone for ten minutes</em> was released on <b>22 May 2026 — inside this
-      window</b>. A release, a tour announcement and a press cycle all pull people toward
-      older videos, and that halo is real but invisible from outside. We can see where
-      views landed, not what sent them there.
-    </p>
-    <p>
-      Second, the album's own singles — you and forever (11 Feb), the van (13 Apr), Dirty
-      Wedding Dress (17 Apr) — went up before the window opened, so they sit on the
-      "older material" side of the line.
-    </p>
-    <p>
-      What survives both: <b>an album landed in the middle of this window and the
-      overwhelming majority of viewing still went to things already published.</b> That is
-      a claim about where viewing lands, not about what would have happened otherwise.
-    </p>
-  </div>
+  <p class="qual">
+    The album campaign may also have lifted older videos, so this is a measure of where
+    viewing landed, not what caused it.
+  </p>
 
 
   <h2>The seasonal asset</h2>
-
-  <h3>What we have measured</h3>
   <p>
-    The tracker holds per-video daily history for seven uploads on this channel. In the
-    seven days to 30 September 2026:
+    We hold per-video daily history for seven uploads on this channel. In the seven days
+    to 30 September 2026:
   </p>
 
   <table>
@@ -290,29 +255,15 @@ tr.lit td:first-child{color:var(--bone)}
 
   <p>
     7,060,665 views across 672 days is a lifetime average of <b>10,507 a day</b>. 400,000
-    across seven days is <b>57,143 a day</b> — <b>5.4× its own norm</b>, in September.
+    across seven days is <b>57,143 a day</b> — <b>5.4&times; its own average</b>, in September.
   </p>
 
-  <div class="callout cold">
-    <p>
-      <b>What this ranks, and what it does not.</b> These are the seven uploads we hold
-      per-video history for, not all 230. So "the fastest-moving video on the channel" is
-      <b>not established</b> — the older catalogue has no per-video series to compare.
-      What is solid is the video measured against its own history, which is the comparison
-      the deck makes.
-    </p>
-  </div>
-
-  <h3>What we have not measured</h3>
-  <div class="callout cold">
-    <p>
-      Our daily readings begin <b>20 April 2026</b>. We have <b>no observation of either
-      previous Christmas period</b> and the deck does not estimate one. The claim that
-      demand returns every year rests entirely on the UK chart record, which is
-      independent of YouTube — and the chart graphic on the deck is labelled as chart
-      position for exactly that reason.
-    </p>
-  </div>
+  <p class="qual">
+    Daily video history begins April 2026, so previous Christmas YouTube seasonality is not
+    measured here; the earlier seasonal evidence is the Official Charts record below. The
+    seven uploads we hold history for are not all 230, so this ranks the video against its
+    own past, not against the catalogue.
+  </p>
 
   <h3>The chart record</h3>
   <table>
@@ -321,8 +272,9 @@ tr.lit td:first-child{color:var(--bone)}
     <tr class="lit"><td>Two — Dec 2025 / Jan 2026</td><td class="n">4</td><td>11 Dec (65) · 18 Dec (66) · 25 Dec (78) · 01 Jan (68)</td><td class="n">65</td></tr>
   </table>
   <p>
-    Also two four-week runs on the Official Independent Singles Chart, peaking 10 and 12;
-    Physical Singles peak 24; Vinyl Singles peak 18; Irish Singles 47.
+    Two completed seasons: it returned in the second, longer and higher. Also two four-week
+    runs on the Official Independent Singles Chart, peaking 10 and 12; Physical Singles peak
+    24; Vinyl Singles peak 18; Irish Singles 47.
   </p>
 
   <h3>What the channel published each season</h3>
@@ -346,107 +298,76 @@ tr.lit td:first-child{color:var(--bone)}
     <tr><td>Dirty Wedding Dress</td><td class="n">388,227</td><td class="n">202,366</td></tr>
   </table>
   <p>
-    These are also the two lowest-viewed official music videos in the catalogue. The deck's
-    claim is therefore narrow: live is a second opening for a song whose video didn't land.
-    It is explicitly <b>not</b> a ranking of formats.
+    Both are also the two lowest-viewed official music videos in the catalogue, so the
+    deck's claim is narrow: live is a second opening for a song whose video didn't land.
   </p>
   <p>
     <b>Stone Pony:</b> 91 minutes, 227,059 views, published 5 June 2026, never split into
-    songs. <b>Red Rocks precedent,</b> 8 July 2024: three songs from one night published
-    individually — 171,061 + 143,285 + 68,986 = <b>383,332</b>. The channel holds
-    <b>28 single-song live videos</b> in total.
+    songs. <b>Red Rocks,</b> 8 July 2024: three songs from one night published individually
+    — 171,061 + 143,285 + 68,986 = <b>383,332</b>. The channel holds <b>28 single-song live
+    videos</b> in total.
   </p>
-  <div class="callout warn">
-    <p>
-      <b>Two things the Stone Pony recommendation does not assume.</b> That individual
-      uploads would purely add viewing — they may redistribute it from the full-show
-      upload, and that is stated on the deck. And that the footage is cleared: a concert
-      film being public establishes nothing about permission to cut it up.
-    </p>
-  </div>
+
+  <p class="qual">
+    Red Rocks is precedent, not a forecast. Stone Pony edits should be treated as a test,
+    and remain subject to rights clearance.
+  </p>
 
 
   <h2>Song support</h2>
   <p>
     Songs with an official video <b>and</b> a lyric video <b>and</b> an official audio
     <b>and</b> a live version: <b>three</b> — I Wanna Get Better (30.67M), Rollercoaster
-    (18.92M), Alfie's Song (3.72M). The most recent was 2018.
+    (18.92M), Alfie's Song (3.72M). The most recent was <b>2018</b>.
   </p>
   <p>
     Every total in the deck's support table counts those same four asset types and nothing
-    else, which is why a song's figure there is lower than its all-upload total. The
-    "you and forever" official video alone is 2,198,689 of its 2,750,183.
+    else, which is why a song's figure there is lower than its all-upload total: the
+    "you and forever" official video alone is 2,198,689 of its 2,750,183. Four lyric videos
+    exist — I Wanna Get Better (3,714,016), Alfie's Song (563,167), Shadow (480,248),
+    Rollercoaster (128,413). Shadow has a lyric video, an audio and a live version but no
+    official music video, which is why it is not in the support table.
   </p>
-  <p>
-    Four lyric videos exist: I Wanna Get Better (3,714,016), Alfie's Song (563,167),
-    Shadow (480,248), Rollercoaster (128,413). Shadow has a lyric video, an audio and a
-    live version but no official music video, which is why it is not in the support table.
+
+  <p class="qual">
+    The older songs are also the channel's biggest, so this does not establish that fuller
+    support caused their performance. The recommendation is therefore a test.
   </p>
-  <div class="callout warn">
-    <p>
-      <b>The confound, stated plainly.</b> The three songs with the full package include
-      the two oldest and two biggest on the channel. Assets follow hits at least as readily
-      as hits follow assets. <b>Nothing here shows the build made those songs big</b> — and
-      the same caution applies to the lyric videos, whose totals are not evidence that a
-      new one would perform. That is why the recommendation is a controlled test rather
-      than an assertion.
-    </p>
-  </div>
 
 
   <h2>Shorts</h2>
   <p>
-    94 Shorts, median <b>6,083 views</b>. Two above 50,000 — 152,565 (billed as the only
-    live performance of Modern Girl that exists) and 144,905 (Margaret Qualley's
-    choreography). The third best is 46,996. Neither top performer is a concert excerpt.
+    94 Shorts · median <b>6,083 views</b>. Two exceeded 50,000: Modern Girl <b>153K</b>
+    (billed as the only live performance of the song that exists) and Tiny Moves
+    <b>145K</b> (Margaret Qualley's choreography). The third best is 46,996.
   </p>
-  <p>
-    For context only: the six Shorts cut from the 2023 Radio City performance run 1,841 to
-    6,083. Those were published in a different year under different distribution
-    conditions, so this is <b>not a controlled comparison</b>, and two successes out of
-    ninety-four is thin. The deck frames it as a creative hypothesis — test distinctiveness
-    as the variable — not a formula.
+  <p class="qual">
+    Useful as a creative signal only: test distinctive moments rather than routine clipping.
   </p>
 
 
-  <h2>What this deck does not claim</h2>
-  <ol>
-    <li>That the 23.88M would have arrived with no activity at all.</li>
-    <li>Any measured YouTube seasonality — we have no observation of either past Christmas.</li>
-    <li>That live outperforms official video. Across twelve songs, the video leads in ten.</li>
-    <li>That building assets caused the older songs' size.</li>
-    <li>That a public concert film may be cut up without clearance.</li>
-    <li>Any watch time, retention, traffic source or demographic figure.</li>
-    <li>Any percentage taken against the 189M lifetime counter.</li>
-  </ol>
-
-
-  <h2>Each recommendation, and how strong the evidence is</h2>
+  <h2>Evidence behind the recommendations</h2>
   <table>
-    <tr><th>#</th><th>Action</th><th>Rests on</th><th>Strength</th></tr>
+    <tr><th>Action</th><th>Evidence</th><th>Read</th></tr>
     <tr>
-      <td class="n">01</td>
-      <td>Give the Christmas song the assets it has never had</td>
-      <td>+400K in seven days at 5.4× its own average; two assets against four; one chart week became four</td>
-      <td><b>Strong on demand</b>, none on past YouTube seasons</td>
+      <td>Christmas now</td>
+      <td>+400K in seven days · stronger second chart season</td>
+      <td>Strong current signal</td>
     </tr>
     <tr>
-      <td class="n">02</td>
-      <td>Test individual song edits from the Stone Pony concert</td>
-      <td>Red Rocks precedent — 383,332 from one night; 28 single-song live videos</td>
-      <td><b>Moderate</b> — one same-channel precedent; redistribution risk stated</td>
+      <td>Stone Pony song edits</td>
+      <td>Red Rocks precedent · 28 existing single-song live videos</td>
+      <td>Worth testing</td>
     </tr>
     <tr>
-      <td class="n">03</td>
-      <td>Test a complete support package on one upcoming song</td>
-      <td>Three full packages, none since 2018</td>
-      <td><b>Suggestive only</b> — confounded by age; framed as a test</td>
+      <td>Full song support</td>
+      <td>Three full packages · none since 2018</td>
+      <td>Worth testing</td>
     </tr>
     <tr>
-      <td class="n">04</td>
-      <td>Build Shorts around distinctive moments, not clips</td>
-      <td>152,565 and 144,905 against a 6,083 median</td>
-      <td><b>Weak</b> — two data points, called a hypothesis</td>
+      <td>Catalogue resurfacing</td>
+      <td>23.88M channel growth · 97.3% landed on existing material</td>
+      <td>Strong structural signal</td>
     </tr>
   </table>
 
@@ -454,25 +375,16 @@ tr.lit td:first-child{color:var(--bone)}
   <h2>Open questions we cannot answer from here</h2>
   <ol>
     <li>
-      <b>Redistribution.</b> If the Stone Pony set is split into songs, do those add
-      viewing or draw it from the full-show upload? Only running it would tell you.
+      <b>Redistribution.</b> Would individual Stone Pony songs add viewing, or redistribute
+      it from the full concert?
     </li>
     <li>
-      <b>Cross-platform inference.</b> Recommendation 01 assumes December chart demand is
-      reachable on YouTube. That is an inference across platforms — reasonable, but not
-      proven by anything here.
+      <b>Seasonality.</b> How does the Christmas video's YouTube curve behave through a
+      complete November–January period?
     </li>
     <li>
-      <b>The halo.</b> The 97.3% is unadjustable for the lift an album release gives older
-      videos, because that lift is invisible from outside.
-    </li>
-    <li>
-      <b>Season-two output.</b> We state two Shorts, which is what reached the channel.
-      Promotion may have run elsewhere — television, playlists, DSPs — and we cannot see it.
-    </li>
-    <li>
-      <b>Classification.</b> Formats are assigned from titles. A mislabelled upload is
-      counted as what it says it is.
+      <b>Studio behaviour.</b> What do retention, traffic sources and audience data reveal
+      that public data cannot?
     </li>
   </ol>
 
