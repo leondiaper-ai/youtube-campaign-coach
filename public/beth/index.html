@@ -50,9 +50,13 @@ body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
 
 /* Film grain. Beth's current world is cinematic; a flat black page
    would read as a dashboard. */
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.035;
-  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 2px),
-             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 2px)}
+/* A 2px grid at 3.5% reads as a visible dot screen on the flat-black
+   slides -- fine over a photograph, a screen door over nothing. Finer
+   and fainter, so it is texture on the image slides and invisible on
+   the rest. */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.018;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
 
 /* ── NAV ──────────────────────────────────────────────────────────── */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
@@ -483,7 +487,7 @@ h2.display{font-size:clamp(2.3rem,5.4vw,4.3rem)}
         <div class="ch">Hero destination</div>
         <ul>
           <li>Primary video</li>
-          <li>Premiere where the moment earns it</li>
+          <li>Premiere if the moment earns it</li>
           <li>Beth in the chat and comments</li>
           <li>Pinned comment, Act playlist</li>
           <li>Community post</li>
