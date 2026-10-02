@@ -370,34 +370,44 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .ten div.arrow{border:0;padding:0 .8rem;color:var(--faint);font-size:.72rem}
 .ten div.but{color:var(--wine);border-color:var(--wine);background:rgba(168,47,76,.08)}
 
-/* ── SHORTS SHELF — the channel's biggest Shorts, clickable ────────
-   Shorts thumbnails are vertical inside a 16:9 frame, so a portrait box
-   with object-fit:cover crops the letterboxing off. */
-.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.2vw,13px);
-  margin:clamp(.7rem,1.6vw,1rem) 0 0}
-@media(min-width:820px){.sgrid{grid-template-columns:repeat(8,1fr)}}
-.sh2{display:block;text-decoration:none;color:inherit;border:1px solid var(--rule);
-  border-radius:3px;overflow:hidden;background:var(--ink);transition:.2s}
-.sh2 .sw{display:block;position:relative;aspect-ratio:1/1;overflow:hidden}
-.sh2 img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.1)}
-.sh2 .sc{display:block;padding:.3rem .35rem .35rem;font-family:var(--mono);
-  font-size:.55rem;letter-spacing:.06em;line-height:1.4;color:var(--faint)}
-.sh2 .sc b{display:block;color:var(--bone);font-weight:500;font-size:.62rem}
-.sh2:hover{border-color:var(--bone)}
-.sh2.hot{border-color:var(--wine);box-shadow:0 0 0 1px var(--wine)}
-.sh2.hot .sc b{color:var(--blush)}
-.sh2.cold{border-color:var(--cobalt)}
-.sh2.cold .sc b{color:var(--cobalt)}
+/* ── TWO BREAKOUT CARDS (slide 05) ────────────────────────────────
+   This slide carries two Shorts and nothing else, so each one gets a
+   real card rather than a thumbnail in a shelf. Shorts thumbnails are
+   vertical inside a 16:9 frame, so object-fit:cover on a tall-ish box
+   crops the letterboxing off. */
+.bigtwo{display:grid;grid-template-columns:1fr;gap:clamp(12px,2vw,22px);
+  margin:clamp(1rem,2.2vw,1.6rem) 0 0}
+@media(min-width:760px){.bigtwo{grid-template-columns:1fr 1fr}}
+.bc{display:flex;align-items:stretch;text-decoration:none;color:inherit;
+  border:1px solid var(--rule);border-radius:4px;overflow:hidden;
+  background:var(--ink);transition:.2s}
+.bc:hover{border-color:var(--bone)}
+.bc .bthumb{flex:0 0 36%;overflow:hidden;min-height:clamp(170px,22vw,232px)}
+.bc .bthumb img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.1)}
+.bc .bbody{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;
+  justify-content:center;padding:clamp(.85rem,1.8vw,1.25rem)}
+.bc .bn{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;line-height:.95;
+  font-size:clamp(2rem,4.2vw,3.1rem);font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1}
+.bc .bt{margin-top:.5rem;font-weight:600;font-size:clamp(.9rem,1.6vw,1.02rem);line-height:1.3}
+.bc .bmeta{font-family:var(--mono);font-size:.55rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-top:.3rem}
+.bc .brole{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;margin-top:.8rem}
+.bc .bq{margin:.35rem 0 0;font-size:.82rem;line-height:1.45;color:var(--smoke)}
+.bc.hot{border-color:var(--wine)}
+.bc.hot .bn{color:var(--wine)} .bc.hot .brole{color:var(--blush)}
+.bc.cold{border-color:var(--cobalt)}
+.bc.cold .bn{color:var(--cobalt)} .bc.cold .brole{color:var(--cobalt)}
 
-/* ── JOBS GRID (slide 05) ─────────────────────────────────────────── */
-.jobs{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule);
-  border:1px solid var(--rule);border-radius:3px;overflow:hidden;
-  margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
-@media(min-width:720px){.jobs{grid-template-columns:repeat(5,1fr)}}
-.job{background:var(--night);padding:.7rem .75rem .8rem}
-.job .jt{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--cobalt);margin-bottom:.4rem}
-.job p{margin:0;font-size:.76rem;line-height:1.42;color:var(--smoke)}
+/* The scale line. Deliberately quiet — it exists to make the two
+   figures above look as far ahead as they actually are. */
+.bench{display:flex;align-items:baseline;gap:clamp(.7rem,1.6vw,1.1rem);
+  margin:clamp(.9rem,2vw,1.35rem) 0 0;padding-top:.8rem;border-top:1px solid var(--rule)}
+.bench .bl{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint)}
+.bench .bnv{font-family:var(--disp);font-weight:800;color:var(--smoke);
+  font-size:clamp(1.15rem,2.1vw,1.55rem);font-variant-numeric:tabular-nums}
 
 /* ── PLAN (slide 09) ──────────────────────────────────────────────── */
 .plan{margin:clamp(1.1rem,2.4vw,1.8rem) 0 0;border-top:1px solid var(--rule)}
@@ -591,59 +601,54 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
          onerror="this.src='https://i.ytimg.com/vi/Bfqx-QYBLbE/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
-    <div class="label">39 Shorts in the campaign window · 163 on the channel</div>
-    <h2 class="display" style="margin-top:.9rem">39 Shorts.<br>One clear breakout.</h2>
+    <div class="label">163 Shorts on the channel · two of them this year</div>
+    <h2 class="display" style="margin-top:.9rem">This cycle produced the<br>channel’s two biggest Shorts.</h2>
 
-    <div class="hero2 xl count" style="margin-top:30px">
-      <div><div class="hn hot">75.8K</div><div class="hk">Coachella<span class="role low">April 2026 · outside the window</span></div></div>
-      <div><div class="hn cold">12.0K</div><div class="hk">Girl, Intentions</div></div>
-      <div><div class="hn">1.2K</div><div class="hk">Median Short</div></div>
-    </div>
-
-    <!-- VERIFIED 2 Oct 2026 against all 163 Shorts. The all-time Shorts ranking
+    <!-- TWO CARDS, ONE BENCHMARK, ONE CONCLUSION. Nothing else belongs on
+         this slide. Verified 2 Oct 2026 against all 163 Shorts: the ranking
          is 75,826 (Coachella, Apr 26) / 12,041 (Girl Intentions, Jul 26) /
-         4,709 (killer live in LA, May 26) / 4,206 (Audiotree, Apr 25). So the
-         two figures above really are #1 and #2 of the channel's entire Shorts
-         history, and nothing from the debut cycle has ever passed 3,620. -->
-    <div class="label" style="margin-top:.45rem;color:var(--blush)">
-      #1 and #2 of all 163 Shorts the channel has ever posted · next biggest is 4.7K
+         4,709 (killer live in LA, May 26) / 4,206 (Audiotree, Apr 25).
+         Nothing from the debut cycle has ever passed 3,620.
+
+         These are two EXAMPLES, not two rules. Nine other Coachella Shorts
+         that same April did 231-1,530 views, and the other release Shorts
+         in the window sat around 1.2K. Do not let the copy drift into
+         "live content works" or "release Shorts work" -- the finding is
+         that two specific posts, doing two different jobs, broke out. -->
+    <div class="bigtwo count">
+      <a class="bc hot" href="https://www.youtube.com/watch?v=Bfqx-QYBLbE" target="_blank" rel="noopener">
+        <span class="bthumb"><img src="https://i.ytimg.com/vi/Bfqx-QYBLbE/hqdefault.jpg" alt="" loading="lazy"></span>
+        <span class="bbody">
+          <span class="bn" data-n="75826" data-fmt="k">75.8K</span>
+          <span class="bt">Coachella</span>
+          <span class="bmeta">April 2026 · outside the campaign window</span>
+          <span class="brole">Live / cultural moment</span>
+          <span class="bq">A distinctive real-world moment.</span>
+        </span>
+      </a>
+      <a class="bc cold" href="https://www.youtube.com/watch?v=dRarsKu5Ens" target="_blank" rel="noopener">
+        <span class="bthumb"><img src="https://i.ytimg.com/vi/dRarsKu5Ens/hqdefault.jpg" alt="" loading="lazy"></span>
+        <span class="bbody">
+          <span class="bn" data-n="12041" data-fmt="k">12.0K</span>
+          <span class="bt">Girl, Intentions</span>
+          <span class="bmeta">July 2026 · release day</span>
+          <span class="brole">Song / release moment</span>
+          <span class="bq">Direct support around a priority song.</span>
+        </span>
+      </a>
     </div>
 
-    <!-- No paragraph here. Measured at 1440x900 the slide runs 968px of 900
-         with one; the all-time label above and the jobs row below already
-         carry the point, so the prose was the thing to lose. -->
-
-
-
-    <!-- The eight biggest Shorts FROM THE AMULET WINDOW ONLY. Every tile
-         here is inside D-71 to D+14. Do not add Shorts from the debut or
-         EP cycles to this shelf -- it is the campaign's own drop-off and
-         mixing eras destroys it. -->
-    <div class="sgrid">
-      <a class="sh2 cold" href="https://www.youtube.com/watch?v=dRarsKu5Ens" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/dRarsKu5Ens/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>12.0K</b>Girl, Intentions</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=Q9rfGOSsthc" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/Q9rfGOSsthc/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,550</b>If I Could out</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=MAn3QjbwHew" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/MAn3QjbwHew/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,404</b>Girl, Intentions</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=9WkjbOwQycM" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/9WkjbOwQycM/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,386</b>GI live</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=eIOc_PzQfUM" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/eIOc_PzQfUM/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,350</b>New new new</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=mH6wQCt3vsI" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/mH6wQCt3vsI/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,292</b>If I Could</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=scdQVdS3eD4" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/scdQVdS3eD4/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,226</b>Amulet Friday</span></a>
-      <a class="sh2 " href="https://www.youtube.com/watch?v=vOhoau_3E18" target="_blank" rel="noopener"><span class="sw"><img src="https://i.ytimg.com/vi/vOhoau_3E18/hqdefault.jpg" alt="" loading="lazy"></span><span class="sc"><b>1,223</b>GI behind the scenes</span></a>
-    </div>
-    <div class="label" style="margin-top:.5rem">The campaign’s eight biggest Shorts · click to watch</div>
-
-    <div class="jobs">
-      <div class="job"><div class="jt">Discovery</div><p>Reach people who don't follow her yet.</p></div>
-      <div class="job"><div class="jt">Moment</div><p>Something live or culturally distinctive.</p></div>
-      <div class="job"><div class="jt">Song support</div><p>Keep a priority song moving.</p></div>
-      <div class="job"><div class="jt">Personality</div><p>More Freak Slug between releases.</p></div>
-      <div class="job"><div class="jt">Continuity</div><p>Keep the channel alive.</p></div>
+    <div class="bench">
+      <span class="bl">Next biggest public Short</span>
+      <span class="bnv">4.7K</span>
     </div>
 
-    <div class="bottomline">Give each Short <span>a job</span>.</div>
+    <div class="bottomline">One captured a moment. <span>One extended a song.</span></div>
 
     <p class="qual">
-      Nine other Coachella Shorts that April did 231 to 1,530 views each. It was not the
-      footage that travelled — it was one specific post.
+      Use Shorts for moments worth sharing, or songs worth extending. Nine other Coachella
+      Shorts that April did 231 to 1,530 views each — it was not the footage that travelled,
+      it was one specific post.
     </p>
   </div>
 </section>
