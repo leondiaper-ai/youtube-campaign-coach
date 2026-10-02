@@ -98,11 +98,21 @@ export async function GET(req: NextRequest) {
   }
 
   /* Cached whole. Chartmetric bills per request, and this route exists to
-     be re-read while we work out what the payload means. */
+     be re-read while we work out what the payload means.
+
+     The cache is skipped entirely when ?probe= is set. It used to sit in
+     front of the probe branch, which meant that once any plain call had
+     warmed the key, EVERY probe for the next twelve hours silently
+     returned the cached base payload instead of running — no error, just
+     the wrong body, which reads as "the probe returned nothing useful"
+     rather than "the probe never ran". The probe path has its own, much
+     smaller cost (one Chartmetric call, no market-coverage pull) and
+     never writes to this key, so letting it past the cache is safe. */
   const store = await kv();
   const cacheKey = `cm:inspect:${channelId}`;
   const fresh = new URL(req.url).searchParams.get('fresh') === '1';
-  if (store && !fresh) {
+  const probing = (new URL(req.url).searchParams.get('probe') ?? '').trim() !== '';
+  if (store && !fresh && !probing) {
     const hit = (await store.get(cacheKey)) as Record<string, unknown> | null;
     if (hit) return NextResponse.json({ ...hit, servedFromCache: true }, { status: 200 });
   }
