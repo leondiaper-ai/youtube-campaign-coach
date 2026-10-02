@@ -135,10 +135,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 @media(min-width:760px){.shifts{grid-template-columns:repeat(2,auto);justify-content:start}}
 .shift .sv{display:flex;align-items:baseline;gap:clamp(.5rem,1.4vw,1rem);
   font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.9}
-.shift .from{font-size:clamp(2rem,4.4vw,3.4rem);color:var(--faint)}
+.shift .from{font-size:clamp(1.8rem,3.8vw,2.9rem);color:var(--faint)}
 .shift .ar{font-size:clamp(1.3rem,2.6vw,2rem);color:var(--faint);font-family:var(--body);
   font-weight:400}
-.shift .to{font-size:clamp(3rem,7.2vw,5.6rem);color:var(--bone)}
+.shift .to{font-size:clamp(2.7rem,6.2vw,4.8rem);color:var(--bone)}
 .shift.flat .to{color:var(--smoke)}
 .shift.up .to{color:var(--blush)}
 .shift .sk{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
@@ -149,9 +149,11 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   margin:clamp(1.4rem,3vw,2.4rem) 0 0;align-items:end}
 @media(min-width:720px){.climb{grid-template-columns:repeat(3,auto);justify-content:start}}
 .step .sn{font-family:var(--disp);font-weight:800;letter-spacing:-.035em;line-height:.86}
-.step.s1 .sn{font-size:clamp(2.1rem,4.2vw,3.1rem);color:var(--faint)}
-.step.s2 .sn{font-size:clamp(2.7rem,5.6vw,4.2rem);color:var(--cobalt)}
-.step.s3 .sn{font-size:clamp(3.9rem,9.4vw,7.2rem);color:var(--blush);
+/* Sized so the three steps fit the 1180px inner on one line — the hero
+   figure was running off the right edge at 1440 before this. */
+.step.s1 .sn{font-size:clamp(1.9rem,3.4vw,2.6rem);color:var(--faint)}
+.step.s2 .sn{font-size:clamp(2.4rem,4.4vw,3.4rem);color:var(--cobalt)}
+.step.s3 .sn{font-size:clamp(3.2rem,6.6vw,5.2rem);color:var(--blush);
   text-shadow:0 0 42px rgba(168,47,76,.5)}
 .step .sl{font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;
   text-transform:uppercase;color:var(--faint);margin-top:.7rem}
