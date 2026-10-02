@@ -113,10 +113,14 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   padding-left:.9rem;border-left:1px solid var(--rule)}
 
 /* ── BIG NUMBERS ──────────────────────────────────────────────────── */
-.hero2{display:grid;grid-template-columns:1fr;gap:clamp(20px,4vw,56px);
+/* Flex, not grid. auto-fit tracks were sized independently of the figure
+   inside them, so once the .xl sizes went in the numbers overlapped each
+   other. Flex items size to their own content and wrap instead. */
+.hero2{display:flex;flex-direction:column;gap:clamp(18px,3.4vw,46px);
   margin:clamp(1.3rem,2.9vw,2.2rem) 0 .9rem}
-@media(min-width:700px){.hero2{grid-template-columns:repeat(auto-fit,minmax(135px,auto));justify-content:start}}
-.hero2 .hn{font-family:var(--disp);font-weight:800;
+@media(min-width:700px){.hero2{flex-direction:row;flex-wrap:wrap;align-items:flex-start}}
+.hero2 > div{flex:0 0 auto;min-width:0}
+.hero2 .hn{font-family:var(--disp);font-weight:800;white-space:nowrap;
   font-size:clamp(2.4rem,5.5vw,4.2rem);line-height:.92;letter-spacing:-.03em}
 .hero2 .hn.cold{color:var(--cobalt)}
 .hero2 .hn.hot{color:var(--wine)}
@@ -125,14 +129,17 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 
 /* .hero2.xl — when the numbers ARE the argument and the paragraph is
    only there to confirm them. */
-.hero2.xl{gap:clamp(24px,5vw,80px);margin:clamp(1.5rem,3.2vw,2.5rem) 0 1rem}
-.hero2.xl .hn{font-size:clamp(3.1rem,7.6vw,6rem);line-height:.86}
+.hero2.xl{gap:clamp(22px,3.8vw,54px);margin:clamp(1.5rem,3.2vw,2.5rem) 0 1rem}
+.hero2.xl .hn{font-size:clamp(2.7rem,5.4vw,4.4rem);line-height:.88}
 .hero2.xl .hk{font-size:.63rem;margin-top:.9rem}
 
 /* ── SHIFT — before → after, for the two numbers that carry slide 02 ── */
-.shifts{display:grid;grid-template-columns:1fr;gap:clamp(1.3rem,3.4vw,3.4rem);
+.shifts{display:flex;flex-direction:column;gap:clamp(1.3rem,3vw,2.6rem);
   margin:clamp(1.4rem,3vw,2.3rem) 0 0}
-@media(min-width:760px){.shifts{grid-template-columns:repeat(2,auto);justify-content:start}}
+@media(min-width:760px){.shifts{flex-direction:row;flex-wrap:wrap;align-items:flex-start;
+  gap:clamp(1.8rem,4vw,3.4rem)}}
+.shifts .shift{flex:0 0 auto}
+.shift .sv{white-space:nowrap}
 .shift .sv{display:flex;align-items:baseline;gap:clamp(.5rem,1.4vw,1rem);
   font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.9}
 .shift .from{font-size:clamp(1.8rem,3.8vw,2.9rem);color:var(--faint)}
@@ -145,9 +152,12 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   text-transform:uppercase;color:var(--faint);margin-top:.75rem;line-height:1.7}
 
 /* ── CLIMB — the post-album week progression on slide 08 ─────────── */
-.climb{display:grid;grid-template-columns:1fr;gap:clamp(.9rem,2.2vw,1.6rem);
-  margin:clamp(1.4rem,3vw,2.4rem) 0 0;align-items:end}
-@media(min-width:720px){.climb{grid-template-columns:repeat(3,auto);justify-content:start}}
+.climb{display:flex;flex-direction:column;gap:clamp(1rem,2.4vw,1.8rem);
+  margin:clamp(1.4rem,3vw,2.4rem) 0 0}
+@media(min-width:720px){.climb{flex-direction:row;flex-wrap:wrap;align-items:flex-end;
+  gap:clamp(1.4rem,3.4vw,3rem)}}
+.climb .step{flex:0 0 auto}
+.step .sn{white-space:nowrap}
 .step .sn{font-family:var(--disp);font-weight:800;letter-spacing:-.035em;line-height:.86}
 /* Sized so the three steps fit the 1180px inner on one line — the hero
    figure was running off the right edge at 1440 before this. */
