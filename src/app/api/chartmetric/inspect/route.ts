@@ -139,11 +139,36 @@ export async function GET(req: NextRequest) {
      it comes from the roster mapping.
 
      Probe responses are NOT written to the shared cache key, so a probe
-     cannot poison the cached market-coverage payload. */
+     cannot poison the cached market-coverage payload.
+
+     ?since=YYYY-MM-DD&until=YYYY-MM-DD narrows the stat probes to a date
+     range. Both are validated against a strict date pattern and passed
+     through verbatim; they cannot introduce a new path. This exists
+     because the stat endpoints return a time series, and a dated window
+     is the only way to ask "what did this platform do either side of a
+     specific day" — which is the whole question in an intervention read.
+     Without it the caller gets the default window and has to trust that
+     it reaches far enough back. */
+  const DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const since = (new URL(req.url).searchParams.get('since') ?? '').trim();
+  const until = (new URL(req.url).searchParams.get('until') ?? '').trim();
+  const range =
+    (DATE.test(since) ? `&since=${since}` : '') + (DATE.test(until) ? `&until=${until}` : '');
+  /* The stat paths carry no query of their own, so the first separator
+     has to be a '?'. Everything after it is already '&'-prefixed. */
+  const q = range ? '?' + range.slice(1) : '';
+
   const PROBES: Record<string, (id: number) => string> = {
-    'spotify-stat':   (id) => `/api/artist/${id}/stat/spotify`,
-    'youtube-stat':   (id) => `/api/artist/${id}/stat/youtube`,
-    'cm-stat':        (id) => `/api/artist/${id}/stat/cm`,
+    'spotify-stat':   (id) => `/api/artist/${id}/stat/spotify${q}`,
+    'youtube-stat':   (id) => `/api/artist/${id}/stat/youtube${q}`,
+    'cm-stat':        (id) => `/api/artist/${id}/stat/cm${q}`,
+    /* The platforms an intervention shows up on fastest. Shazam in
+       particular is the closest thing to a pure "I just heard this and
+       do not know what it is" signal, which is exactly what a televised
+       performance should generate if it is doing anything. */
+    'tiktok-stat':    (id) => `/api/artist/${id}/stat/tiktok${q}`,
+    'shazam-stat':    (id) => `/api/artist/${id}/stat/shazam${q}`,
+    'instagram-stat': (id) => `/api/artist/${id}/stat/instagram${q}`,
     'tracks':         (id) => `/api/artist/${id}/tracks?limit=100`,
     'albums':         (id) => `/api/artist/${id}/albums?limit=50`,
     'charts-spotify': (id) => `/api/artist/${id}/charts/spotify?limit=50`,
