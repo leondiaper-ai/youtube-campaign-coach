@@ -178,7 +178,9 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
    are dimmed. The argument and the artwork are the same object. */
 .sheet{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;
   margin:clamp(1rem,2.2vw,1.5rem) 0 0}
-@media(min-width:900px){.sheet{grid-template-columns:repeat(16,1fr)}}
+/* 23 columns puts all 46 in exactly two rows, which keeps the slide
+   inside the fold at 1440x900. */
+@media(min-width:900px){.sheet{grid-template-columns:repeat(23,1fr);gap:3px}}
 .sh{position:relative;aspect-ratio:1;overflow:hidden;border-radius:2px;
   background:var(--ink);display:block}
 .sh img{width:100%;height:100%;object-fit:cover;display:block;
@@ -187,14 +189,12 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .sh.big{box-shadow:0 0 0 1px var(--wine);z-index:2}
 .sheet:hover .sh img{filter:saturate(1.15) brightness(.86)}
 
-/* ── ERA PAIR (slide 02) ──────────────────────────────────────────── */
-.era{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,16px);
-  margin:clamp(1rem,2.2vw,1.5rem) 0 0}
-.era figure{margin:0}
-.era img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:3px;
-  border:1px solid var(--rule);filter:saturate(1.12) contrast(1.03)}
-.era figcaption{font-family:var(--mono);font-size:.57rem;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--faint);margin-top:.45rem}
+/* ── ERA IMAGE (inside the comparison columns) ────────────────────
+   Sat above the table as its own band at first, which pushed the slide
+   past the fold. Inside each column it costs less height and ties the
+   picture to the campaign it belongs to. */
+.eraimg{width:100%;aspect-ratio:21/9;object-fit:cover;display:block;border-radius:2px;
+  margin-bottom:.8rem;filter:saturate(1.12) contrast(1.03)}
 
 /* ── CONCENTRATION BARS ───────────────────────────────────────────── */
 .bars{margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
@@ -278,7 +278,7 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   </div>
   <div class="inner">
     <div class="label hot">Amulet · post-album read · 2 October 2026</div>
-    <h1 class="display" style="margin-top:1.1rem">The channel got four<br>times more active.<br>What did that buy?</h1>
+    <h1 class="display" style="margin-top:1.1rem">Four times more active.<br>What did that buy?</h1>
     <p class="big-p" style="max-width:35em">
       Amulet ran <b>46 uploads</b> where the debut campaign ran <b>10</b>. That is a real
       change in how this channel operates. This read is about what the change produced,
@@ -299,21 +299,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     <div class="label">Two albums on the same campaign clock</div>
     <h2 class="display" style="margin-top:.9rem">More activity.<br>Similar long-form viewing so far.</h2>
 
-    <div class="era" style="max-width:720px">
-      <figure>
-        <img src="https://i.ytimg.com/vi/MNNMKKW5KmI/maxres1.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/MNNMKKW5KmI/hqdefault.jpg'" alt="">
-        <figcaption>Piece of Cake · 2024 · Blackpool sand</figcaption>
-      </figure>
-      <figure>
-        <img src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres2.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt="">
-        <figcaption>Wishing Bone · 2026 · the red wall</figcaption>
-      </figure>
-    </div>
-
     <div class="vs">
       <div class="col">
+        <img class="eraimg" src="https://i.ytimg.com/vi/MNNMKKW5KmI/maxres1.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/MNNMKKW5KmI/hqdefault.jpg'" alt="">
         <div class="ct">Album one</div>
         <div class="cn">I Blow Out Big Candles</div>
         <div class="cd">8 November 2024</div>
@@ -324,6 +313,8 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
         <div class="row"><span class="k">Longest silence</span><span class="v">27 days</span></div>
       </div>
       <div class="col now">
+        <img class="eraimg" src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres2.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt="">
         <div class="ct">Album two</div>
         <div class="cn">Amulet</div>
         <div class="cd">18 September 2026</div>
@@ -335,15 +326,15 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
       </div>
     </div>
 
-    <p class="big-p" style="max-width:40em">
+    <p class="big-p" style="max-width:42em">
       The debut had a lead single and an album-day video. Amulet has three single videos,
-      a behind-the-scenes film, an interview, an album visualiser and a post-release song
-      video. <b>The change is in campaign behaviour, not in the headline view count.</b>
+      a behind-the-scenes film, an interview, a visualiser and a post-release song video.
+      <b>The change is in campaign behaviour, not in the headline view count.</b>
     </p>
 
     <p class="qual">
-      Current public view totals. The two campaigns' assets are very different ages —
-      up to two years against at most twelve weeks — so this is <b>not a like-for-like
+      Current public view totals. The two campaigns' assets are very different ages — up
+      to two years against at most twelve weeks — so this is <b>not a like-for-like
       performance comparison</b> and is not offered as one.
     </p>
   </div>
