@@ -171,6 +171,15 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   text-transform:uppercase;color:var(--faint);margin-top:.7rem}
 .step.s3 .sl{color:var(--wine)}
 
+/* ── QUOTE STRIP — verbatim audience comments ─────────────────────── */
+.quotes{display:grid;grid-template-columns:1fr;gap:clamp(10px,1.6vw,16px);
+  margin:clamp(1.2rem,2.6vw,1.9rem) 0 0}
+@media(min-width:800px){.quotes{grid-template-columns:repeat(3,1fr)}}
+.q{border-left:2px solid var(--wine);padding:.15rem 0 .2rem .85rem}
+.q p{margin:0;font-size:.88rem;line-height:1.5;color:var(--bone);font-style:italic}
+.q span{display:block;margin-top:.45rem;font-family:var(--mono);font-size:.56rem;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--faint)}
+
 /* ── ACTION CARDS — slide 09 ──────────────────────────────────────── */
 .acts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule);
   border:1px solid var(--rule);border-radius:3px;overflow:hidden;
@@ -613,6 +622,42 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   </div>
 </section>
 
+<!-- ══ 09 · WHERE THE AUDIENCE IS ════════════════════════════════
+     Added after the first review: the tour recommendation was an
+     assertion about content with no audience evidence behind it.
+     Chartmetric's territory split and the public comments both point the
+     same way, so the plan now rests on something. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label cold">Where the audience actually is</div>
+    <h2 class="display" style="margin-top:.9rem">Half the audience is where<br>the tour is going.</h2>
+
+    <div class="hero2 xl count">
+      <div><div class="hn hot" data-pct="50.5">50.5%</div><div class="hk">US + Canada<br>share of views</div></div>
+      <div><div class="hn cold" data-pct="39.8">+39.8%</div><div class="hk">US growth</div></div>
+      <div><div class="hn cold" data-pct="123.7">+123.7%</div><div class="hk">Canada growth</div></div>
+      <div><div class="hn" data-pct="7.7">+7.7%</div><div class="hk">Median market</div></div>
+    </div>
+
+    <p class="big-p" style="max-width:42em">
+      The North American run starts 23 October into the two fastest-growing
+      major markets on the channel. <b>And the audience is already asking for it by name.</b>
+    </p>
+
+    <div class="quotes">
+      <div class="q"><p>&ldquo;I&rsquo;ll be traveling from Cinti to Detroit to see you guys in November!&rdquo;</p><span>If I Could</span></div>
+      <div class="q"><p>&ldquo;i cant wait to see yall in san francisco!! ive been waiting so long&rdquo;</p><span>Wishing Bone</span></div>
+      <div class="q"><p>&ldquo;Just heard this on the radio, had to come and find the video&rdquo;</p><span>Blue Eyes</span></div>
+    </div>
+
+    <p class="qual">
+      29 of 312 comments read ask for live dates, naming 16 cities unprompted — most of
+      them North American. Territory split: Chartmetric YouTube monthly views, top 25
+      countries, 19–29 September.
+    </p>
+  </div>
+</section>
+
 <!-- ══ 09 · WHAT HAPPENS NEXT ════════════════════════════════════ -->
 <section class="slide">
   <!-- Blue Eyes, 2025 — the brightest thing on the channel. The forward
@@ -641,8 +686,8 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
       <div class="act">
         <div class="aw">30 days</div>
         <h4>Capture the tour</h4>
-        <p>North America from 23 October. Prioritise distinctive live and personality
-        moments over generic clipping.</p>
+        <p>North America from 23 October — half the audience, growing fastest.
+        Distinctive live and personality moments, not generic clipping.</p>
       </div>
       <div class="act">
         <div class="aw">30–60 days</div>
@@ -716,7 +761,8 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     Freak Slug · post-album campaign read · 2 October 2026<br>
     Analysis covers all 181 videos currently public on the channel.<br>
     YouTube Data API v3, @freakslug (UCPPyyg5x0Txuic9N869_I_Q). Channel velocity from the
-    Watcher snapshot series, 29 June – 2 October 2026.<br><br>
+    Watcher snapshot series, 29 June – 2 October 2026. Territory split from Chartmetric,
+    19–29 September. Audience quotes are verbatim public YouTube comments.<br><br>
     Method, sources and confounds: <a href="/freakslug/analysis">where the numbers came from →</a>
   </div>
 </footer>
