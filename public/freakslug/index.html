@@ -81,7 +81,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opa
 .bleed::after{content:'';position:absolute;inset:0}
 .scrim-l::after{background:linear-gradient(90deg,rgba(10,11,18,.97) 0%,rgba(10,11,18,.9) 44%,rgba(10,11,18,.45) 100%)}
 .scrim-b::after{background:linear-gradient(180deg,rgba(10,11,18,.5) 0%,rgba(10,11,18,.92) 62%,var(--night) 100%)}
-.scrim-f::after{background:rgba(10,11,18,.86)}
+/* Was .86, which flattened the Coachella stage lights to grey. */
+.scrim-f::after{background:rgba(10,11,18,.74)}
 
 /* ── TYPE ─────────────────────────────────────────────────────────── */
 .label{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;
@@ -118,8 +119,11 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .vgrid.three{grid-template-columns:repeat(3,1fr)}
 .thumb{position:relative;display:block;text-decoration:none;color:inherit;
   border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--ink)}
+/* Saturation lifted. The Amulet videos are cold, but this channel's wider
+   world is a straw hat on Blackpool sand, a yellow slug mask and a red
+   wall — desaturating it was flattening the artist. */
 .thumb img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
-  filter:saturate(.95) contrast(1.04)}
+  filter:saturate(1.1) contrast(1.03)}
 .thumb .cap{display:block;padding:.5rem .6rem .6rem;font-family:var(--mono);
   font-size:.57rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
   line-height:1.6}
@@ -167,6 +171,30 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 .sp.key .t{color:var(--bone)}
 .sp.key .n{color:var(--cobalt)}
 .sp.dead .t,.sp.dead .n{color:var(--faint)}
+
+/* ── CONTACT SHEET ────────────────────────────────────────────────
+   Every upload in the campaign window as one picture. The eight that
+   hold 85.6% of the viewing are the ones at full strength; the rest
+   are dimmed. The argument and the artwork are the same object. */
+.sheet{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;
+  margin:clamp(1rem,2.2vw,1.5rem) 0 0}
+@media(min-width:900px){.sheet{grid-template-columns:repeat(16,1fr)}}
+.sh{position:relative;aspect-ratio:1;overflow:hidden;border-radius:2px;
+  background:var(--ink);display:block}
+.sh img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(1.1) brightness(.5) contrast(1.02);transition:.25s}
+.sh.big img{filter:saturate(1.2) brightness(1) contrast(1.04)}
+.sh.big{box-shadow:0 0 0 1px var(--wine);z-index:2}
+.sheet:hover .sh img{filter:saturate(1.15) brightness(.86)}
+
+/* ── ERA PAIR (slide 02) ──────────────────────────────────────────── */
+.era{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.5vw,16px);
+  margin:clamp(1rem,2.2vw,1.5rem) 0 0}
+.era figure{margin:0}
+.era img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;border-radius:3px;
+  border:1px solid var(--rule);filter:saturate(1.12) contrast(1.03)}
+.era figcaption{font-family:var(--mono);font-size:.57rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);margin-top:.45rem}
 
 /* ── CONCENTRATION BARS ───────────────────────────────────────────── */
 .bars{margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
@@ -240,9 +268,13 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 
 <!-- ══ 01 · COVER ══════════════════════════════════════════════════ -->
 <section class="slide">
+  <!-- Wishing Bone, not Serpent. The red wall and the sunglasses are the
+       campaign's biggest asset and the brightest thing in it; the Serpent
+       night frame was making the whole deck read colder than the artist. -->
   <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/RQVbqeolfNg/maxres2.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/RQVbqeolfNg/hqdefault.jpg'" alt="">
+    <img src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres2.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt=""
+         style="filter:saturate(1.15)">
   </div>
   <div class="inner">
     <div class="label hot">Amulet · post-album read · 2 October 2026</div>
@@ -266,6 +298,19 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   <div class="inner">
     <div class="label">Two albums on the same campaign clock</div>
     <h2 class="display" style="margin-top:.9rem">More activity.<br>Similar long-form viewing so far.</h2>
+
+    <div class="era" style="max-width:720px">
+      <figure>
+        <img src="https://i.ytimg.com/vi/MNNMKKW5KmI/maxres1.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/MNNMKKW5KmI/hqdefault.jpg'" alt="">
+        <figcaption>Piece of Cake · 2024 · Blackpool sand</figcaption>
+      </figure>
+      <figure>
+        <img src="https://i.ytimg.com/vi/vB0DoqKpkWw/maxres2.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/vB0DoqKpkWw/hqdefault.jpg'" alt="">
+        <figcaption>Wishing Bone · 2026 · the red wall</figcaption>
+      </figure>
+    </div>
 
     <div class="vs">
       <div class="col">
@@ -317,6 +362,10 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
       <div class="bar"><span class="bl">The other 38</span><span class="bt"><span class="bf" style="width:14.4%"></span></span><span class="bv">14.4%</span></div>
     </div>
     <div class="label" style="margin-top:.7rem">Share of campaign-window views · 46 uploads</div>
+
+    <!-- The whole campaign as one picture. Lit = the eight that hold 85.6%. -->
+    <div class="sheet" id="sheet"></div>
+    <div class="label" style="margin-top:.6rem">Every upload in the window, in order · lit = the eight</div>
 
     <div class="ten">
       <div>More activity</div>
@@ -446,6 +495,13 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 
 <!-- ══ 07 · THE ACTIVITY PROBLEM ═════════════════════════════════ -->
 <section class="slide">
+  <!-- Spells, 2024 — the slug mask and the SLUG bear. This is the era the
+       channel went quiet in, and it is also the most characterful frame
+       in the catalogue. -->
+  <div class="bleed scrim-l" style="opacity:.6">
+    <img src="https://i.ytimg.com/vi/yCsrt0nNliM/maxres3.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/yCsrt0nNliM/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label">What this campaign fixed</div>
     <h2 class="display" style="margin-top:.9rem">The activity problem<br>has been solved.</h2>
@@ -498,6 +554,12 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 
 <!-- ══ 09 · WHAT HAPPENS NEXT ════════════════════════════════════ -->
 <section class="slide">
+  <!-- Blue Eyes, 2025 — the brightest thing on the channel. The forward
+       slides were reading like a spreadsheet next to the rest. -->
+  <div class="bleed scrim-l" style="opacity:.42">
+    <img src="https://i.ytimg.com/vi/ADHOesAU5lY/maxres1.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/ADHOesAU5lY/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">The next 30–60 days</div>
     <h2 class="display" style="margin-top:.9rem">Don't support the album<br>evenly. Follow the signals.</h2>
@@ -554,6 +616,12 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 
 <!-- ══ 10 · TAKEAWAYS ════════════════════════════════════════════ -->
 <section class="slide">
+  <!-- Piece of Cake, 2024 — the straw hat on the beach. Closing on the
+       artist rather than on a list. -->
+  <div class="bleed scrim-l" style="opacity:.4">
+    <img src="https://i.ytimg.com/vi/MNNMKKW5KmI/maxres2.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/MNNMKKW5KmI/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label">What we recommend</div>
     <h2 class="display" style="margin-top:.9rem">Four things.</h2>
@@ -609,6 +677,37 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
     <a href="/freakslug/analysis">where the numbers came from →</a>
   </div>
 </footer>
+
+<script>
+/* Contact sheet. IDs are the 46 campaign-window uploads in publish order,
+   taken from the same API pull as every figure on this page. A trailing *
+   marks one of the eight that hold 85.6% of the window's views. */
+(function(){
+  var IDS = ('MAn3QjbwHew*,7vc_4YiYdp8,u9FguM9aAM8*,dRarsKu5Ens*,KfTwS4TccZ4,8wBL5un36G0,'
+    + 'l0Q70brKS7U,x7QQ3VZKhJU,J5N20DhFds4,Z3CNl57f0k0,xd8E-yAbPfY,lbpxFYRGiIM,vOhoau_3E18,'
+    + 'jBafC934PdY,mH6wQCt3vsI,eIOc_PzQfUM,-s644gkITw8,R3bT_oh-B7Y,Q9rfGOSsthc*,-Qb8EXtKyfA*,'
+    + '_5mzqajA1xs,OYRfRigYmbA,qp_A691G8JM,IuBcqMknsds,UwVD2JTlNa0,pvW68Jg-Vyg,pu52SKSLTe8,'
+    + '9WkjbOwQycM,IgpAZnOsyyg,RrTQuUcaK5E,scdQVdS3eD4,vB0DoqKpkWw*,JE1Z7Ri33Pw,2FyKA8wr1mw,'
+    + '0ooWGLdkQ6U*,yQIn_IoLDmQ,bZmQE3WK1cE,P-RvvVdnq-A,b-DDUGML1zo,ZWc2AdvwG3k,nGOX1n2WYe4,'
+    + 'RlTlzIkPbmk,jOIV0lf4erk,RQVbqeolfNg*,RoEOBeSjD78,7vS-fgTuoJE').split(',');
+  var el = document.getElementById('sheet');
+  if (!el) return;
+  IDS.forEach(function(raw){
+    var big = raw.slice(-1) === '*';
+    var id  = big ? raw.slice(0, -1) : raw;
+    var a = document.createElement('a');
+    a.className = 'sh' + (big ? ' big' : '');
+    a.href = 'https://www.youtube.com/watch?v=' + id;
+    a.target = '_blank'; a.rel = 'noopener';
+    var img = new Image();
+    img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+    img.alt = '';
+    img.loading = 'lazy';
+    a.appendChild(img);
+    el.appendChild(a);
+  });
+})();
+</script>
 
 </body>
 </html>
