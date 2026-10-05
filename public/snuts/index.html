@@ -226,24 +226,36 @@ h2.w{max-width:28ch}
   margin:clamp(1rem,2.2vh,1.5rem) 0 0;font-weight:700}
 .grouplab.g{color:var(--do)} .grouplab.r{color:var(--stop)}
 
-/* ── 8 · FUNNEL ──────────────────────────────────────────────────── */
-.fn{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2vw,28px);
-  margin-top:clamp(1.1rem,2.6vh,1.8rem)}
-@media(max-width:880px){.fn{grid-template-columns:1fr}}
-.fs{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.95rem 1rem;
-  position:relative}
-.fs .fl{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
-  font-weight:700;margin-bottom:.6rem}
-.fs.a .fl{color:var(--hold)} .fs.b .fl{color:var(--test)} .fs.c .fl{color:var(--do)}
-.fs ul{margin:0;padding:0;list-style:none}
-.fs li{font-size:.88rem;line-height:1.35;padding:.3rem 0;border-top:1px solid var(--rule);
-  display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:var(--ink);
-  font-weight:600}
-.fs li:first-child{border-top:0}
-.fs li s{text-decoration:none;font-family:var(--mono);font-size:.54rem;letter-spacing:.11em;
-  text-transform:uppercase;font-weight:500}
-.fs li s.pri{color:var(--do)} .fs li s.tst{color:var(--test)}
-.fs li s.low{color:var(--faint)} .fs li s.dsc{color:var(--hold)}
+/* ── 8 · DISCOVERY vs CONVERSION, THEN THE ROUTING TABLE ─────────── */
+.dc{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,2.4vw,34px);
+  margin-top:clamp(1rem,2.4vh,1.6rem)}
+@media(max-width:880px){.dc{grid-template-columns:1fr}}
+.dp{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.9rem 1rem}
+.dp .dl{font-family:var(--mono);font-size:.55rem;letter-spacing:.17em;text-transform:uppercase;
+  margin-bottom:.5rem}
+.dp.disc .dl{color:var(--hold)} .dp.conv .dl{color:var(--do)}
+.dp .r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding:.4rem 0;border-top:1px solid var(--rule)}
+.dp .r:first-of-type{border-top:0}
+.dp .r span{font-size:.88rem;color:var(--ink);font-weight:500}
+.dp .r b{font-family:var(--mono);font-size:.78rem;color:var(--ink);white-space:nowrap;font-weight:700}
+.dp .foot{font-size:.8rem;line-height:1.4;color:var(--body);margin:.6rem 0 0;padding-top:.55rem;
+  border-top:1px solid var(--rule)}
+
+.ptbl{width:100%;border-collapse:collapse;margin-top:clamp(.9rem,2vh,1.4rem)}
+.ptbl th{font-family:var(--mono);font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--mute);text-align:left;padding:.4rem .6rem .45rem 0;border-bottom:1.5px solid var(--ink);
+  font-weight:500}
+.ptbl td{padding:.48rem .6rem .48rem 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.ptbl td.sf{font-weight:700;font-size:.9rem;color:var(--ink);white-space:nowrap}
+.ptbl td.pr{font-family:var(--mono);font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:700;white-space:nowrap}
+.ptbl td.pr.p{color:var(--do)} .ptbl td.pr.s{color:var(--test)}
+.ptbl td.pr.t{color:var(--test)} .ptbl td.pr.l{color:var(--faint)}
+.ptbl td.wy{font-family:var(--mono);font-size:.66rem;line-height:1.5;color:var(--body)}
+.ptbl td.ts{font-family:var(--mono);font-size:.66rem;line-height:1.5;color:var(--body)}
+.ptbl tr.dim td{opacity:.6}
+@media(max-width:820px){.ptbl td.ts,.ptbl th.ts{display:none}}
 
 /* ── 9 · RELEASE TIMELINE ────────────────────────────────────────── */
 .rt{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(9px,1.5vw,18px);
@@ -689,36 +701,47 @@ footer a{color:var(--mute)}
 <section class="slide">
   <div class="inner">
     <div class="eyebrow">Routing the album ask</div>
-    <h2 class="w">Attention and conversion are happening in different places.</h2>
+    <h2 class="w">Attention and conversion are happening in different places. Don't confuse them.</h2>
 
-    <div class="fn">
-      <div class="fs a">
-        <div class="fl">1 · Attention</div>
-        <ul>
-          <li>TikTok <s class="dsc">Discovery</s></li>
-          <li>YouTube <s class="dsc">Discovery</s></li>
-          <li>Spotify reach <s class="dsc">Discovery</s></li>
-        </ul>
+    <div class="dc">
+      <div class="dp disc">
+        <div class="dl">Discovery surfaces · where new attention appears</div>
+        <div class="r"><span>Spotify — monthly listeners</span><b>+56.2% · largest</b></div>
+        <div class="r"><span>YouTube long-form — podcast reached non-fans</span><b>Proven</b></div>
+        <div class="r"><span>TikTok — PTS, age-matched</span><b>1.40 vids/day</b></div>
+        <p class="foot">These are where people <i>arrive</i>. It does not follow that they're where people act.</p>
       </div>
-      <div class="fs b">
-        <div class="fl">2 · Interest</div>
-        <ul>
-          <li>YouTube long-form <s class="tst">Engage</s></li>
-          <li>Instagram <s class="tst">Engage</s></li>
-        </ul>
-      </div>
-      <div class="fs c">
-        <div class="fl">3 · Album action</div>
-        <ul>
-          <li>Spotify Countdown <s class="pri">Primary</s></li>
-          <li>YouTube long-form route <s class="pri">Primary</s></li>
-          <li>Instagram ask <s class="tst">Test</s></li>
-          <li>Shorts <s class="low">Low priority</s></li>
-        </ul>
+      <div class="dp conv">
+        <div class="dl">Conversion surfaces · where intent is acted on</div>
+        <div class="r"><span>Spotify — the only follower step-change ever</span><b>3.94×</b></div>
+        <div class="r"><span>YouTube long-form descriptions</span><b>6 of 10</b></div>
+        <div class="r"><span>Instagram — moves on real news only</span><b>Likely</b></div>
+        <p class="foot">Summer Rain converted on Spotify. Nothing has converted anywhere else at scale.</p>
       </div>
     </div>
 
-    <p class="sub" style="max-width:74ch">Where attention appears is not where people act. Summer Rain converted on Spotify; nothing has converted at scale anywhere else. Long-form already carries the route on <b style="color:var(--ink)">80,562 of 101,478</b> post-announcement views — with one large hole in it.</p>
+    <table class="ptbl">
+      <thead><tr>
+        <th>Surface</th><th>Priority</th><th>Why</th><th class="ts">Smallest test if unproven</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="sf">Spotify Countdown Page</td><td class="pr p">Primary</td>
+          <td class="wy">The only place conversion has ever happened — and the only route to the August audience</td>
+          <td class="ts">—</td></tr>
+        <tr><td class="sf">YouTube long-form</td><td class="pr p">Primary</td>
+          <td class="wy">Already carries the route on 80,562 of 101,478 views — with one large hole in it</td>
+          <td class="ts">Fix the podcast, then compare</td></tr>
+        <tr><td class="sf">Instagram</td><td class="pr s">Secondary</td>
+          <td class="wy">Registers campaign moments; likely the existing-fan intent surface</td>
+          <td class="ts">One dedicated post, read link clicks natively</td></tr>
+        <tr><td class="sf">TikTok</td><td class="pr t">Test</td>
+          <td class="wy">Strongest attention of the campaign, zero evidence of album-action conversion</td>
+          <td class="ts">One bio-link push, measure click-through only</td></tr>
+        <tr class="dim"><td class="sf">YouTube Shorts</td><td class="pr l">Low</td>
+          <td class="wy">49,445 views, 39 comments, median 1,088 against 30,200 subs</td>
+          <td class="ts">Add the link anyway — it's free</td></tr>
+      </tbody>
+    </table>
 
     <div class="act stop">
       <div class="lbl">Fix first</div>
