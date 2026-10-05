@@ -581,6 +581,11 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .flow span.on{color:var(--rose)}
 .flow i{color:var(--faint);font-style:normal}
 
+/* On the rollout slide the stage cards carry body copy rather than a
+   dim closing note, so .sp is reset: body colour, normal flow, no rule. */
+.slide.stages .st .sp{color:var(--smoke);font-size:.78rem;line-height:1.5;
+  margin:.55rem 0 0;border-top:0;padding-top:0}
+
 /* The bridge slide carries imagery, a paragraph, a recommendation block
    and a flow strip, which is more than the stock layout fits. Scoped,
    and the numbers come from measuring the live page: at the stock 16:9
@@ -1326,28 +1331,38 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
 </section>
 
-<!-- ══ CADENCE, FOLLOW-THROUGH AND PREMIERES ═════════════════════
-     Three of the good-practice tests on one slide, because they are
-     one finding: the campaign had a deliberate shape, and the shape
-     includes two long silences. Positions on the axis are real dates
-     over the 145-day window, so the 43-day hole is drawn to scale.
+<!-- ══ THE ROLLOUT, AND WHAT IT PRODUCED ════════════════════════
+     Reframed from a description into a bridge. The timeline stays
+     because it shows the publishing behaviour better than any
+     paragraph; what changed is the conclusion drawn from it.
+
+     The 17-day post-album gap is NOT framed as a failure. It is early,
+     the deck's position is that this campaign did the fundamentals
+     well, and the useful reading is that album day produced a dataset
+     rather than an ending. The axis labels were neutralised for the
+     same reason: "17 days, and counting" editorialised a window that
+     is still open.
+
+     The premiere KPI moved off this slide. It is a real finding and it
+     sits on the diagnosis slide, but it does not serve this argument
+     and three unrelated figures in a row diluted the sequence.
 
      NO VELOCITY CLAIM ANYWHERE ON THIS SLIDE. It describes publishing
      behaviour only — what went out and when. The daily collection did
      not run through release week, so nothing here says what any of it
      did after it landed. -->
-<section class="slide">
+<section class="slide stages">
   <div class="inner">
     <div class="label cold">Every upload, 13 May – 5 October · publishing behaviour only</div>
-    <h2 class="display" style="margin-top:.9rem">Twelve weeks hot.<br>Then everything in one day.</h2>
+    <h2 class="display" style="margin-top:.9rem">The campaign built momentum.<br>Album day shouldn't be the <em>finish line</em>.</h2>
 
     <div class="tl">
       <div class="axis"></div>
 
       <div class="gap" style="left:58.6%;width:29.7%"></div>
-      <div class="gl" style="left:73.4%">43 days quiet</div>
+      <div class="gl" style="left:73.4%">43 days between moments</div>
       <div class="gap" style="left:88.3%;width:11.7%"></div>
-      <div class="gl" style="left:94.1%">17 days, and counting</div>
+      <div class="gl" style="left:94.1%">17 days since album day</div>
 
       <div class="pip" style="left:9.0%"></div>
       <div class="pip" style="left:11.0%"></div>
@@ -1369,14 +1384,33 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
       <div class="ml" style="left:88.3%;transform:translateX(-82%)">18 Sep<span class="md">Album · 12 uploads · premiere</span></div>
     </div>
 
-    <div class="hero2 count" style="margin-top:2.6rem">
-      <div><div class="hn" data-n="46">46</div>
-      <div class="hk">Uploads, 13 May – 6 Aug<span class="role">Across 85 days</span></div></div>
-      <div><div class="hn rose" data-n="12">12</div>
-      <div class="hk">Uploads on album day<span class="role">11 visualizers and the album film</span></div></div>
-      <div><div class="hn gold" data-n="3">3</div>
-      <div class="hk">Premieres, all campaign<span class="role">The three hero moments, and nothing else</span></div></div>
+    <div class="steps" style="margin-top:1.6rem">
+      <div class="st">
+        <div class="sc">What worked</div>
+        <div class="sh3">46 uploads · 85 days</div>
+        <p class="sp" >
+          Sustained pre-album activity established the ESTRUS world and kept the channel
+          live right through to release.</p>
+      </div>
+      <div class="st">
+        <div class="sc">Album day</div>
+        <div class="sh3">12 uploads</div>
+        <p class="sp" >
+          Every track got a visual surface — which created a usable read on where demand
+          sits across the record.</p>
+      </div>
+      <div class="st cond">
+        <div class="sc">What now</div>
+        <div class="sh3">Follow the tracks separating</div>
+        <p class="sp" >
+          Use post-album viewing to choose which songs get the next live, lyric, Short or
+          hero treatment. <b style="color:var(--blush)">source of life</b> is the clearest
+          first signal.</p>
+      </div>
     </div>
+
+    <div class="bottomline">Album day wasn't the end of the rollout.
+      <span>It created the data for the next phase.</span></div>
   </div>
 </section>
 
