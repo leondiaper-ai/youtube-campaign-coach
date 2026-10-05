@@ -726,7 +726,11 @@ export async function GET(req: NextRequest) {
       'SINGLE_RELEASE', 'ALBUM_RELEASE', 'EP_RELEASE',
       'OMV', 'LYRIC_VIDEO', 'VISUALISER',
     ]);
-    const planEvents = await listMergedEvents(who.slug).catch(() => []);
+    /* 180 days back, so a campaign that started months ago still reads as
+       started. The `startAt` bound below is what actually scopes this to
+       the current campaign — the look-back only has to be wide enough not
+       to be the binding constraint. */
+    const planEvents = await listMergedEvents(who.slug, Date.now(), 180).catch(() => []);
     const landed = planEvents
       .filter(e =>
         e.eventDate

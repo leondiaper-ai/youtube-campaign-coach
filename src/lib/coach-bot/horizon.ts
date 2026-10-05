@@ -338,7 +338,9 @@ export function buildHorizon(
  * UNKNOWN, which is the honest answer and the one the Coach is built to
  * handle.
  */
-async function projectSavedPlan(slug: string, now: number): Promise<{ events: CampaignEvent[]; updatedAt: string | null }> {
+async function projectSavedPlan(
+  slug: string, now: number, lookBackDays = 1,
+): Promise<{ events: CampaignEvent[]; updatedAt: string | null }> {
   try {
     const { listPlans, loadPlan } = await import('../planStore');
     const { ARTISTS, mergeArtistLists } = await import('../artists');
@@ -378,8 +380,12 @@ async function projectSavedPlan(slug: string, now: number): Promise<{ events: Ca
 
       for (const ev of saved.plan.events) {
         /* Past events are history, not horizon. The Coach reads history from
-           the catalogue, which is immutable and more reliable than a plan. */
-        if (!ev.dateISO || new Date(ev.dateISO).getTime() < now - 86_400_000) continue;
+           the catalogue, which is immutable and more reliable than a plan —
+           except for the one thing the catalogue cannot know, which is that
+           a release was SCHEDULED for a date. `lookBackDays` is how a caller
+           asks for that. */
+        if (!ev.dateISO) continue;
+        if (new Date(ev.dateISO).getTime() < now - lookBackDays * 86_400_000) continue;
         out.push({
           eventId: `plan_${entry.slug}_${ev.dateISO}_${ev.title.slice(0, 24)}`,
           artistId: slug,
@@ -419,9 +425,23 @@ async function projectSavedPlan(slug: string, now: number): Promise<{ events: Ca
  * how two surfaces end up disagreeing about whose plan is whose — this
  * exposes the merged list and lets the caller choose.
  */
-export async function listMergedEvents(slug: string, now = Date.now()): Promise<CampaignEvent[]> {
+/**
+ * @param lookBackDays how far into the past to keep plan moments.
+ *
+ * Defaults to 1, which is the horizon's own rule: a plan is a forward
+ * document and its past is better read from the catalogue, which is
+ * immutable. But "has the campaign started" is a question about the
+ * recent past, and the only record that a single was due on a given
+ * Friday is the plan row saying so. A caller asking that question has to
+ * be able to see last week.
+ */
+export async function listMergedEvents(
+  slug: string,
+  now = Date.now(),
+  lookBackDays = 1,
+): Promise<CampaignEvent[]> {
   const [manual, fromPlan] = await Promise.all([
-    listEvents(slug), projectSavedPlan(slug, now),
+    listEvents(slug), projectSavedPlan(slug, now, lookBackDays),
   ]);
   const seen = new Set(manual.map(e => `${e.eventDate}|${e.title}`));
   return [...manual, ...fromPlan.events.filter(e => !seen.has(`${e.eventDate}|${e.title}`))]
