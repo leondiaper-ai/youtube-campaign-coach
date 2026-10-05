@@ -679,6 +679,20 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   text-transform:uppercase;color:var(--rose);padding:.4rem 0}
 @media(min-width:900px){.lpr{writing-mode:vertical-rl;padding:0 .3rem}}
 
+/* The lead action carries the one piece of evidence the whole plan
+   rests on, so it gets a lit frame and the figures inline. The other
+   four are instructions and read as a list. */
+.ac.lead{background:rgba(217,18,27,.09);border-left:3px solid var(--rose)}
+.ac.lead .an{color:var(--rose)}
+.ac.lead .ah{color:var(--blush)}
+.acf{display:flex;gap:clamp(1rem,2.4vw,1.9rem);margin-top:.5rem;grid-column:2/-1}
+@media(min-width:880px){.acf{grid-column:3/-1}}
+.acf div{white-space:nowrap}
+.acf .afn{font-family:var(--disp);font-weight:700;font-size:clamp(1.05rem,1.9vw,1.4rem);
+  line-height:1;color:var(--blush);font-variant-numeric:tabular-nums}
+.acf .afl{font-family:var(--body);font-weight:600;font-size:.52rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--smoke);margin-top:.25rem}
+
 /* ── MONDAY MORNING ───────────────────────────────────────────────
    Numbered, because it is a list someone works through, and the
    number is the only decoration it gets. */
@@ -989,8 +1003,8 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
       <div class="lp">
         <div class="ln2">02</div>
         <h5>Watch what separates</h5>
-        <p>One has, by 14.3×. Three more are clear of the pack. The other seven have not,
-          yet.</p>
+        <p>One has — <em>source of life</em>, at 59.7% of all album-day visualizer
+          viewing. Three more are clear of the pack. The other seven are not, yet.</p>
       </div>
       <div class="lp">
         <div class="ln2">03</div>
@@ -1512,40 +1526,65 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
 </section>
 
-<!-- ══ MONDAY MORNING ════════════════════════════════════════════
-     Five things a person can do without another meeting. Ordered by
-     how soon they could start, not by how impressive they sound. -->
+<!-- ══ FIVE MOVES ═══════════════════════════════════════════════
+     The executive action plan, and the slide has to stand alone —
+     someone who reads only this page should still get the whole
+     recommendation.
+
+     ORDER CHANGED. The rushes audit used to be 01, which put a means
+     ahead of the objective: auditing footage is how you answer the
+     audience signal, not the thing itself. source of life leads now,
+     because it is the largest actionable finding in the deck, and the
+     audit sits at 02 as the cheapest way to serve it.
+
+     The 14.3x multiple came off. Its denominator — the median of the
+     other ten release-day visualizers — is not on this slide, and a
+     multiple with an invisible denominator is a number a reader has to
+     take on trust. 1.01M and 59.7% carry the same point and are
+     established earlier in the deck. -->
 <section class="slide">
   <div class="inner">
-    <div class="label hot">Five things, in order</div>
-    <h2 class="display" style="margin-top:.9rem">If this were our channel<br>tomorrow morning.</h2>
+    <div class="label hot">The next 30 days</div>
+    <h2 class="display" style="margin-top:.9rem">Five moves from here.</h2>
+    <p class="big-p" style="margin-top:.7rem">
+      Back the winner. Audit what already exists. <b>Keep investment tied to audience demand.</b>
+    </p>
 
     <div class="acts">
-      <div class="ac">
-        <div class="an">01</div><div class="ah">Open the rushes</div>
-        <p class="ap">Audit A Night In ESTRUS. What was performed, what was filmed, what is
-          usable. Everything else on this list is cheaper if the answer is good.</p>
+      <div class="ac lead">
+        <div class="an">01</div><div class="ah">Back source of life</div>
+        <p class="ap">It has separated decisively from the album-day set. Give it the next
+          post-album moment, starting with the lowest-cost credible asset.</p>
+        <div class="acf">
+          <div><div class="afn">1.01M</div><div class="afl">Views</div></div>
+          <div><div class="afn">59.7%</div><div class="afl">Of album-day visualizer viewing</div></div>
+        </div>
       </div>
       <div class="ac">
-        <div class="an">02</div><div class="ah">Scope source of life</div>
-        <p class="ap">Decide what its second asset is this week, not next quarter. It is
-          seventeen days old and 14.3× clear of the set.</p>
+        <div class="an">02</div><div class="ah">Audit A Night In ESTRUS</div>
+        <p class="ap">Before commissioning anything: what was performed, captured, usable,
+          clearable. Then match whatever exists against the tracks showing demand.</p>
       </div>
       <div class="ac">
-        <div class="an">03</div><div class="ah">Cut from what exists</div>
-        <p class="ap">Pull Shorts out of the visualizers, the live footage and the BTS you
-          already own, instead of shooting disconnected ones.</p>
+        <div class="an">03</div><div class="ah">Extend the visual world</div>
+        <p class="ap">Cut from the visualizers, live footage and BTS already made. Keep
+          extending the same ESTRUS world rather than making disconnected content.</p>
       </div>
       <div class="ac">
-        <div class="an">04</div><div class="ah">Give the three a cheap push</div>
-        <p class="ap">F.A.M.T, die for my art and are we on a break are the only others past
-          100,000. Low-cost support, then re-read them.</p>
+        <div class="an">04</div><div class="ah">Test the next three</div>
+        <p class="ap">F.A.M.T, die for my art and are we on a break are the next group
+          separating. Lightweight support only — enough to see if one pulls away.</p>
       </div>
       <div class="ac">
-        <div class="an">05</div><div class="ah">Re-read the set in 30 days</div>
-        <p class="ap">The ranking will move as the album ages. The tier that a song sits in
-          should decide what it gets next — every month, not once.</p>
+        <div class="an">05</div><div class="ah">Read the signal again</div>
+        <p class="ap">Re-rank the album in 30 days. Audience behaviour decides which songs
+          earn the next level of support.</p>
       </div>
+    </div>
+
+    <div class="flow" style="margin-top:1.1rem">
+      <span class="on">Signal</span><i>→</i><span>Support</span><i>→</i>
+      <span>Measure</span><i>→</i><span>Escalate</span>
     </div>
   </div>
 </section>
