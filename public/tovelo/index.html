@@ -85,8 +85,8 @@
 :root{
   --night:#050304; --ink:#0C0607; --bone:#E9DFDC; --smoke:#9B8781;
   --faint:#7A6763; --rule:rgba(233,223,220,.14);
-  --rose:#D9121B; --deep:#8E0A10; --gold:#E4642A; --blush:#FF4438;
-  --acid:#5FE3B4;
+  --rose:#D9121B; --deep:#8E0A10; --gold:#F0A62B; --blush:#FF4438;
+  --acid:#3BF0B0;
   --disp:'Grenze Gotisch','Bodoni Moda',Georgia,serif;
   --serif:'Bodoni Moda',Georgia,serif;
   --body:'Inter Tight',system-ui,sans-serif; --mono:'Inter Tight',system-ui,sans-serif;
@@ -420,16 +420,22 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   text-transform:uppercase;color:var(--bone)}
 .sr .se{font-size:.78rem;line-height:1.45;color:var(--smoke);grid-column:1/-1}
 @media(min-width:860px){.sr .se{grid-column:auto}}
-.sr .sg{font-family:var(--body);font-weight:700;font-size:.6rem;letter-spacing:.18em;
+.sr .sg{font-family:var(--body);font-weight:700;font-size:.68rem;letter-spacing:.2em;
   text-transform:uppercase;text-align:right;white-space:nowrap}
 .sr.strong .sg{color:var(--acid)}
 .sr.mixed  .sg{color:var(--gold)}
 .sr.limited .sg{color:var(--smoke)}
 .sr.open   .sg{color:var(--rose)}
-.sr.strong{border-left:2px solid var(--acid)}
-.sr.mixed{border-left:2px solid var(--gold)}
-.sr.limited{border-left:2px solid var(--rule)}
-.sr.open{border-left:2px solid var(--rose)}
+.sr.strong{border-left:3px solid var(--acid)}
+.sr.mixed{border-left:3px solid var(--gold)}
+.sr.limited{border-left:3px solid var(--rule)}
+.sr.open{border-left:3px solid var(--rose)}
+/* The grain layer is an overlay composite, which pulls saturation out of
+   small text. The grades are the only thing on this slide that has to be
+   told apart by colour, so they get a glow that survives it. */
+.sr.strong .sg{text-shadow:0 0 18px rgba(59,240,176,.5)}
+.sr.mixed  .sg{text-shadow:0 0 18px rgba(240,166,43,.45)}
+.sr.open   .sg{text-shadow:0 0 18px rgba(217,18,27,.6)}
 
 /* ── FOOTER ───────────────────────────────────────────────────────── */
 .foot{padding:clamp(2.4rem,5vw,4rem) var(--pad);max-width:1180px;margin:0 auto}
