@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Snuts — Joy In Short Moments · the working</title>
+<meta name="description" content="Method, every figure, and every stated limit behind the Joy In Short Moments decision read · 5 October 2026">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#F2EEE6; --card:#FAF8F3; --ink:#15130F; --body:#36312A;
+  --mute:#7C7366; --faint:#A79C8C; --rule:rgba(21,19,15,.14);
+  --slate:#4C5F67; --field:#5E6E47; --sun:#D8912A; --rain:#3C5A72; --leak:#A83B26;
+  --disp:'Newsreader',Georgia,serif; --sans:'Inter Tight',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--body);font-family:var(--sans);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+/* Reading intensity: a little tooth, no vignette, nothing that fights text. */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:61;opacity:.035;
+  mix-blend-mode:multiply;background-size:180px 180px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.wrap{max-width:900px;margin:0 auto;padding:clamp(28px,5vw,64px) clamp(20px,5vw,40px) 120px}
+header.top{border-bottom:2px solid var(--ink);padding-bottom:1.2rem;margin-bottom:2.4rem}
+header.top .kicker{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mute)}
+header.top h1{font-family:var(--disp);font-weight:500;font-size:clamp(1.9rem,4.2vw,3rem);
+  line-height:1.06;color:var(--ink);margin:.7rem 0 0;letter-spacing:-.018em}
+header.top p{margin:.8rem 0 0;max-width:68ch;color:var(--body)}
+header.top a{color:var(--rain)}
+
+h2{font-family:var(--disp);font-weight:500;font-size:clamp(1.35rem,2.4vw,1.85rem);
+  color:var(--ink);margin:3.2rem 0 .3rem;letter-spacing:-.012em;line-height:1.14;
+  padding-top:1.1rem;border-top:1px solid var(--rule)}
+h2 span{font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--sun);display:block;margin-bottom:.5rem;font-weight:500}
+h3{font-family:var(--sans);font-weight:600;font-size:.98rem;color:var(--ink);margin:1.9rem 0 .3rem}
+p{margin:.7rem 0;max-width:72ch}
+p.lead{font-size:1.02rem;color:var(--body)}
+ul,ol{max-width:72ch;padding-left:1.25rem}
+li{margin:.34rem 0}
+b,strong{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:.82em;background:rgba(21,19,15,.06);
+  padding:1px 5px;border-radius:2px;color:var(--ink)}
+a{color:var(--rain)}
+
+table{width:100%;border-collapse:collapse;margin:1.1rem 0;background:var(--card);
+  border:1px solid var(--rule);font-size:.86rem}
+th{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mute);text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--rule);
+  font-weight:500;vertical-align:bottom}
+td{padding:.5rem .7rem;border-top:1px solid var(--rule);vertical-align:top}
+td.n{font-family:var(--mono);font-size:.8rem;text-align:right;white-space:nowrap;color:var(--ink)}
+td.s{font-weight:600;color:var(--ink)}
+tr.hi td{background:rgba(216,145,42,.1)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.box{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--slate);
+  padding:.95rem 1.1rem;margin:1.2rem 0;border-radius:0 3px 3px 0}
+.box.warn{border-left-color:var(--leak)}
+.box.ok{border-left-color:var(--field)}
+.box.gap{border-left-color:var(--sun)}
+.box h4{font-family:var(--mono);font-size:.56rem;letter-spacing:.17em;text-transform:uppercase;
+  margin:0 0 .45rem;color:var(--mute);font-weight:500}
+.box.warn h4{color:var(--leak)} .box.ok h4{color:var(--field)} .box.gap h4{color:var(--sun)}
+.box p{margin:.3rem 0;font-size:.88rem;max-width:none}
+.box p:first-of-type{margin-top:0}
+
+.tag{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--rule);border-radius:2px;padding:2px 6px;display:inline-block;
+  color:var(--mute);vertical-align:middle}
+.tag.f{color:var(--field);border-color:rgba(94,110,71,.42)}
+.tag.i{color:var(--sun);border-color:rgba(216,145,42,.45)}
+.tag.r{color:var(--rain);border-color:rgba(60,90,114,.42)}
+.tag.g{color:var(--leak);border-color:rgba(168,59,38,.42)}
+
+.toc{background:var(--card);border:1px solid var(--rule);padding:1rem 1.2rem;margin:2rem 0;
+  border-radius:3px;columns:2;column-gap:2rem}
+@media(max-width:620px){.toc{columns:1}}
+.toc a{display:block;font-size:.82rem;padding:.17rem 0;text-decoration:none;color:var(--body)}
+.toc a:hover{color:var(--ink);text-decoration:underline}
+.toc a i{font-style:normal;font-family:var(--mono);font-size:.68rem;color:var(--faint);
+  margin-right:.5rem}
+
+footer{border-top:1px solid var(--rule);margin-top:3.5rem;padding-top:1.4rem;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);line-height:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker">The working · read 5 October 2026 · 18 days to album day</div>
+  <h1>The Snuts — Joy In Short Moments</h1>
+  <p>Everything behind the <a href="/snuts">decision read</a>: where each number came from, how it was computed, what it is not allowed to mean, and the things we could not see. Nothing in this document is estimated or modelled. Where a figure could not be obtained it is listed in <a href="#gaps">§10, measurement gaps</a>, rather than approximated.</p>
+</header>
+
+<nav class="toc">
+  <a href="#sources"><i>01</i>Sources and provenance</a>
+  <a href="#rules"><i>02</i>Rules this analysis follows</a>
+  <a href="#timeline"><i>03</i>Campaign timeline</a>
+  <a href="#funnel"><i>04</i>The funnel, stage by stage</a>
+  <a href="#hypothesis"><i>05</i>The central hypothesis, tested</a>
+  <a href="#singles"><i>06</i>Comparing the five singles</a>
+  <a href="#youtube"><i>07</i>YouTube in detail</a>
+  <a href="#dsp"><i>08</i>DSP trajectory</a>
+  <a href="#sentiment"><i>09</i>Audience language</a>
+  <a href="#gaps"><i>10</i>Measurement gaps</a>
+  <a href="#notclaimed"><i>11</i>What this analysis does not claim</a>
+  <a href="#decisions"><i>12</i>Decisions, in full</a>
+</nav>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="sources"><span>01</span>Sources and provenance</h2>
+<p>Four pulls, all made on 5 October 2026 between 16:28 and 16:35 UTC.</p>
+
+<div class="scroll"><table>
+<tr><th>Source</th><th>What it gives</th><th>Coverage</th><th>Limit</th></tr>
+<tr>
+  <td class="s">YouTube Data API v3 — full catalogue</td>
+  <td>Every public upload on <code>@thesnuts</code> (<code>UC0aftMT8dWPpF2M_v82N7hw</code>) with title, description, publish date, duration, Shorts flag, lifetime views, likes, comments.</td>
+  <td class="n">310 uploads<br>uncapped</td>
+  <td>Lifetime counters only. One reading. Cannot show a trajectory.</td>
+</tr>
+<tr>
+  <td class="s">Watcher per-video daily series (<code>vsnap</code>)</td>
+  <td>Daily views, likes and comments per video, as recorded.</td>
+  <td class="n">15 Sep – 5 Oct<br>21 days, no gaps</td>
+  <td><b>Starts 15 September 2026.</b> No campaign single before PTS has an early-life series. This is the single biggest constraint on the analysis.</td>
+</tr>
+<tr>
+  <td class="s">Watcher channel snapshot history</td>
+  <td>Channel subscribers and lifetime views, daily.</td>
+  <td class="n">170 readings<br>17 Apr – 5 Oct</td>
+  <td>Channel-level only. Cannot attribute to a video by itself.</td>
+</tr>
+<tr>
+  <td class="s">Chartmetric — artist 349107</td>
+  <td>Daily Spotify followers and monthly listeners; track-level playlist counts, playlist reach, popularity and streams; Instagram and TikTok follower series.</td>
+  <td class="n">1 Jan – 4/5 Oct</td>
+  <td>Some daily values are flagged <code>is_interpolated</code>. Flagged values are never used as a standalone claim; see §02.</td>
+</tr>
+</table></div>
+
+<div class="box">
+  <h4>Channel figures as read</h4>
+  <p>Subscribers <b>30,200</b> · lifetime views <b>18,177,485</b> · public video count <b>308</b> · channel created 21 April 2016 · last upload 2 October 2026.</p>
+  <p>Deltas: 7-day <b>+100 subs / +128,829 views</b> (baseline 28 Sep) · 30-day <b>+200 subs / +277,716 views</b> · 14-day <b>+190,706 views</b>. Week-on-week views <b>+108.2%</b>; week-on-week subscribers <b>0.0%</b>.</p>
+</div>
+
+<div class="box warn">
+  <h4>One reconciliation that does not close</h4>
+  <p>The 310 returned uploads sum to <b>11,722,939</b> lifetime views against a channel counter of <b>18,177,485</b> — a gap of 6,454,546, or 35.5%. That gap is not explained by anything we can see from outside: it may be deleted or privatised videos, or Shorts-feed views counted differently at channel level.</p>
+  <p><b>Consequence:</b> no figure in the deck is expressed as a share of the channel's lifetime views. All share figures are shares of a measured delta over a stated window, where the numerator and denominator come from the same window.</p>
+</div>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="rules"><span>02</span>Rules this analysis follows</h2>
+<ol>
+  <li><b>No age-mismatched comparison.</b> A 10-day-old video is never ranked against a 248-day-old one. Where only lifetime counters exist, the figures are shown side by side with their ages visible and explicitly labelled as not a performance ranking.</li>
+  <li><b>Attribution windows must match.</b> Every share of channel consumption uses the identical start and end dates for the numerator and the denominator — 28 September baseline, 5 October reading.</li>
+  <li><b>Interpolated values are never a claim on their own.</b> Chartmetric interpolates some daily points. Every figure quoted here either falls on an observed reading or is a difference across a span long enough that interpolation within it cannot change the sign or magnitude. TikTok likes before mid-June increment by exactly 917 every week, which is interpolation, and are not used.</li>
+  <li><b>Correlation is labelled.</b> Everything is tagged <span class="tag f">Fact</span>, <span class="tag i">Interpretation</span>, <span class="tag r">Hypothesis</span> or <span class="tag g">Gap</span>. A timing coincidence is never written as a cause.</li>
+  <li><b>Internal context is treated as supplied, not verified.</b> The February Spotify figures, the June placement report, the PTS commercial tracking and the New Music Friday miss come from the brief. They are used as context and are never recomputed or contradicted — but where live data bears on their interpretation, that is stated.</li>
+</ol>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="timeline"><span>03</span>Campaign timeline</h2>
+<p>Reconstructed from the catalogue publish dates, the Chartmetric daily series, and the internal context supplied in the brief. Monthly-listener figures are the value on that date.</p>
+
+<div class="scroll"><table>
+<tr><th>Date</th><th>Moment</th><th>Type</th><th style="text-align:right">Spotify monthly listeners</th></tr>
+<tr><td class="n">19–29 Jan</td><td>11 teaser Shorts, <code>#newmusic</code></td><td>Owned</td><td class="n">509k → 558k</td></tr>
+<tr class="hi"><td class="n">30 Jan</td><td><b>Summer Rain</b> — official video, 183,482 views to date</td><td>Release</td><td class="n">557,879</td></tr>
+<tr><td class="n">31 Jan – 1 Feb</td><td>Follower spike: <b>+582, +581</b> (median day = 41)</td><td>Conversion</td><td class="n">—</td></tr>
+<tr><td class="n">15 Feb</td><td>Summer Rain live at Beecraigs Loch — 3,884</td><td>Owned</td><td class="n">601k</td></tr>
+<tr><td class="n">19 Feb</td><td>First listener plateau — 603,372</td><td>Peak</td><td class="n">603,372</td></tr>
+<tr><td class="n">10 Mar</td><td>Magic Box Dundee session — 4,616</td><td>Owned</td><td class="n">580k</td></tr>
+<tr><td class="n">26 Mar</td><td><b>Motherlands</b> — lyric video, 12,526 to date. Zero Spotify editorial.</td><td>Release</td><td class="n">578,554</td></tr>
+<tr><td class="n">1 May</td><td>Motherlands live, Bathgate Regal — 1,862</td><td>Owned</td><td class="n">609k</td></tr>
+<tr><td class="n">22 May – 3 Jun</td><td>Archive Shorts run — "from the vaults", six cities</td><td>Owned</td><td class="n">621k → 638k</td></tr>
+<tr><td class="n">2 Jun</td><td>Migration Studios BTS long-form — 682 views</td><td>Owned</td><td class="n">638,795</td></tr>
+<tr class="hi"><td class="n">16 Jun</td><td><b>Defibrillator</b> — lyric video, 81,189 to date. Best DSP week of the campaign (NMF UK #44, The Indie List #41, New in Rock #3).</td><td>Release</td><td class="n">649,093</td></tr>
+<tr><td class="n">17 Jun</td><td><b>Album announced</b> — Joy In Short Moments, 23 Oct. Announcement Short: 273 views, <b>empty description</b>.</td><td>Announcement</td><td class="n">649k</td></tr>
+<tr><td class="n">22–27 Jun</td><td>Presale. Follower gains +127, +107, +166 (3.1–4.0× median)</td><td>Conversion</td><td class="n">655k</td></tr>
+<tr><td class="n">1 Jul</td><td>TRNSMT</td><td>Live</td><td class="n">677k</td></tr>
+<tr><td class="n">9–10 Jul</td><td>Kings of Leon support. Follower gains +109, +125</td><td>Live / conversion</td><td class="n">689k</td></tr>
+<tr><td class="n">17–19 Jul</td><td>Paris, Amsterdam</td><td>Live</td><td class="n">700k</td></tr>
+<tr><td class="n">23 Jul</td><td><b>In Motion</b> — lyric video, 4,516 to date</td><td>Release</td><td class="n">703,074</td></tr>
+<tr><td class="n">30 Jul</td><td>In Motion Live in Berlin (Lollapalooza) — 1,894. Premiered.</td><td>Owned / live</td><td class="n">706,969</td></tr>
+<tr><td class="n">late Jul</td><td>Internal: Spotify NMF UK ≈ #95 plus Indie List</td><td>DSP</td><td class="n">—</td></tr>
+<tr class="hi"><td class="n">6–29 Aug</td><td><b>Festival run. No release.</b> Kendal Calling, YNot (Fatboy Slim), Glasgow announce. Six of the ten biggest expansion weeks of 2026 fall here.</td><td>Live</td><td class="n">719k → 791k</td></tr>
+<tr><td class="n">4 Sep</td><td><b>Monthly-listener peak — 802,842</b></td><td>Peak</td><td class="n">802,842</td></tr>
+<tr><td class="n">5–24 Sep</td><td>Decline from peak as the 28-day window sheds August. Trough 26 Sep.</td><td>—</td><td class="n">802k → 753k</td></tr>
+<tr class="hi"><td class="n">25 Sep</td><td><b>PTS</b> — official video. <b>No New Music Friday UK.</b> Amazon Brand New Music ≈ #9, YouTube new-music surface ≈ #28.</td><td>Release</td><td class="n">752,916</td></tr>
+<tr><td class="n">28 Sep</td><td>France24 interview. Louis Tomlinson teaser Short (2,004). Sold-out Barfly show.</td><td>PR / live</td><td class="n">757,916</td></tr>
+<tr><td class="n">29 Sep – 3 Oct</td><td>PTS daily gain climbs 1,698 → 10,250 without a second push</td><td>Inflection</td><td class="n">758k → 772k</td></tr>
+<tr><td class="n">2 Oct</td><td><b>Finding Joy In Short Moments ep.1</b> with Louis Tomlinson, for CALM — 17,913 views, 1,015 likes in 3 days</td><td>Owned</td><td class="n">764,815</td></tr>
+<tr><td class="n">5 Oct</td><td>Read date. PTS at 69,712. Channel +128,829 views / +100 subs on the week.</td><td>—</td><td class="n">780,062</td></tr>
+</table></div>
+
+<h3>Inflection points, ranked</h3>
+<ol>
+  <li><b>Summer Rain, 30 Jan.</b> <span class="tag f">Fact</span> The only moment in nine months that produced both a listener surge (+30,843 over the following week, 18th of 270 weeks) and a follower event (+1,163 over two days, 14.2× median).</li>
+  <li><b>August, no release.</b> <span class="tag f">Fact</span> Six of the ten biggest seven-day listener gains of 2026. Peak 802,842 on 4 September. <span class="tag i">Interpretation</span> the festival run is the most plausible cause; we cannot prove it.</li>
+  <li><b>PTS, 29 Sep – 3 Oct.</b> <span class="tag f">Fact</span> A sustained step change in daily views, 6.0× from day 3 to day 8. <span class="tag i">Interpretation</span> the shape is more consistent with a recommendation surface than with the 28 September press activity, because press bumps spike and decay inside 48 hours and this did not.</li>
+  <li><b>Album presale, 22–27 Jun.</b> <span class="tag f">Fact</span> Three follower days at 2.6–4.0× median — the second-largest conversion cluster of the campaign, produced by a commerce deadline rather than a song.</li>
+</ol>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="funnel"><span>04</span>The funnel, stage by stage</h2>
+
+<div class="scroll"><table>
+<tr><th>Stage</th><th>What we can measure</th><th>Reading</th><th>Verdict</th></tr>
+<tr>
+  <td class="s">Attention</td>
+  <td>Spotify monthly listeners; channel views; playlist reach</td>
+  <td class="n">+56.2% ML<br>+108.2% views WoW<br>1,207,306 PTS reach</td>
+  <td><b style="color:#5E6E47">Strong</b></td>
+</tr>
+<tr>
+  <td class="s">Engagement</td>
+  <td>Like rates; comment volume; per-video daily trajectory</td>
+  <td class="n">podcast 5.67%<br>PTS 0.42%<br>PTS +6.0× d3→d8</td>
+  <td><b style="color:#5E6E47">Strong where tested</b></td>
+</tr>
+<tr>
+  <td class="s">Intent</td>
+  <td>Follower gains; subscriber gains; pre-save route availability</td>
+  <td class="n">+41/day median<br>0 of 44 Shorts<br>carry a pre-save</td>
+  <td><b style="color:#A83B26">This is the leak</b></td>
+</tr>
+<tr>
+  <td class="s">Conversion</td>
+  <td>Spotify streams per track; subscriber conversion rate</td>
+  <td class="n">0.72 subs / 1,000 views<br>Watcher band: WEAK</td>
+  <td><b style="color:#A83B26">Weak</b></td>
+</tr>
+<tr>
+  <td class="s">Retention</td>
+  <td>Catalogue consumption; streams-per-listener (internal)</td>
+  <td class="n">64.3% of 30-day views<br>from the back catalogue</td>
+  <td><b style="color:#5E6E47">Healthy</b></td>
+</tr>
+</table></div>
+
+<div class="box warn">
+  <h4>The leak, located</h4>
+  <p>Attention is strong and growing. Retention is healthy. Engagement, wherever it can be measured, is good. <b>Intent is where the funnel fails, and it fails for a physical reason rather than a creative one: the route does not exist on the format that carries the reach.</b></p>
+</div>
+
+<h3>Intent, in full</h3>
+<p>Every upload from 17 June (album announcement) to 5 October was checked for whether its description contains the album pre-save or pre-order link.</p>
+<div class="scroll"><table>
+<tr><th>Format</th><th style="text-align:right">Uploads</th><th style="text-align:right">Views</th><th style="text-align:right">Carry pre-save</th><th style="text-align:right">Empty description</th></tr>
+<tr><td class="s">Shorts</td><td class="n">44</td><td class="n">49,232</td><td class="n" style="color:#A83B26"><b>0</b></td><td class="n">22</td></tr>
+<tr><td class="s">Long-form</td><td class="n">10</td><td class="n">100,713</td><td class="n">5</td><td class="n">1</td></tr>
+</table></div>
+<p>The two most intent-heavy posts of the campaign both have an entirely empty description field: the album announcement Short (<code>3YNsIZR48hg</code>, 17 Jun) and the presale announcement Short (<code>O8kiJA860FE</code>, 22 Jun, caption "Pre-order the new album for access").</p>
+<p>The long-form assets that do carry it carry the full stack: stream, pre-order, pre-save, UK tour, US tour. The June decision to split the Spotify Countdown Page and Apple Pre-Add calls to action was correct and was correctly implemented — <b>on the format the core audience already finds</b>.</p>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="hypothesis"><span>05</span>The central hypothesis, tested</h2>
+<p class="lead"><i>"The Snuts have a strong established audience, but the Joy In Short Moments campaign may currently be better at activating existing fans than expanding beyond them."</i></p>
+
+<h3>Evidence that supports it</h3>
+<ul>
+  <li><span class="tag f">Fact</span> Every owned follower base is near-flat across nine months: Spotify followers <b>+7.5%</b>, Instagram <b>+4.0%</b>, TikTok followers <b>+2.6%</b>.</li>
+  <li><span class="tag f">Fact</span> YouTube subscribers: <b>+200 in 30 days</b> against 277,716 views. 0.72 per 1,000 — the Watcher's <b>WEAK</b> band, unchanged across both the 7-day and 30-day windows.</li>
+  <li><span class="tag f">Fact</span> Comment language is returning-fan language. Eight variants of "we're so back" on the Summer Rain thread; essentially no discovery language in 158 music comments.</li>
+  <li><span class="tag f">Fact</span> YouTube is the band's smallest owned platform by a wide margin — Spotify followers are 6.4× the subscriber count, Instagram 4.5×, TikTok 3.6×.</li>
+</ul>
+
+<h3>Evidence that contradicts it</h3>
+<ul>
+  <li><span class="tag f">Fact</span> Spotify monthly listeners <b>499,500 → 780,062</b>, +280,562 (+56.2%). An already-activated core cannot produce that; it is already listening.</li>
+  <li><span class="tag f">Fact</span> The followers-to-listeners ratio fell from <b>35.92% to 24.08%</b>. The listening pool outgrew the committed pool by a third.</li>
+  <li><span class="tag f">Fact</span> <b>587,761</b> current monthly listeners are not followers — 75.3% of the listening audience.</li>
+  <li><span class="tag f">Fact</span> PTS sits on Spotify playlists reaching <b>1,207,306</b>, 6.9× the next single in this campaign, with the campaign's highest popularity score (47 vs a 41–43 band).</li>
+  <li><span class="tag f">Fact</span> The podcast episode drew a demonstrably non-Snuts audience: of 60 comments read, the overwhelming majority concern Louis Tomlinson, several in Spanish and Portuguese, referencing his own tour dates.</li>
+</ul>
+
+<div class="box ok">
+  <h4>Verdict</h4>
+  <p><b>The hypothesis is half right, and the wrong half is the half that matters.</b> Expansion is happening and it is large. Capture is not happening at all.</p>
+  <p>The internal reading formed for a sound reason: every surface the team looks at daily — YouTube comments, subscriber counts, social follower numbers — is a surface on which only committed fans act. Reading those surfaces and inferring reach from them produces exactly the conclusion management reached. The reach metrics say something different.</p>
+  <p><b>Strategic consequence.</b> The intervention this implies is not "buy more reach". It is "capture the reach we have" — and those are opposite spends.</p>
+</div>
+
+<h3>Why a high algorithmic share is not proof of discovery</h3>
+<p>The brief is right to flag this, and the live data lets us go one step further than the warning. For an established artist, Release Radar and artist radio surface new music to people who already follow — so algorithmic share conflates core delivery with discovery and cannot separate them.</p>
+<p><b>The followers-to-listeners ratio does separate them.</b> If algorithmic consumption were predominantly core, listeners and followers would move together and the ratio would hold. It fell by a third. That is the cleanest discovery evidence available without Spotify's own segment data. <span class="tag r">Hypothesis</span></p>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="singles"><span>06</span>Comparing the five singles</h2>
+
+<h3>The one genuinely age-matched comparison</h3>
+<p>Monthly-listener gain in the seven days following each release day. Same metric, same window length, measured from each single's own release date, ranked against all 270 rolling seven-day windows of 2026.</p>
+<div class="scroll"><table>
+<tr><th>Single</th><th>Released</th><th style="text-align:right">Listeners on release day</th><th style="text-align:right">At +7 days</th><th style="text-align:right">Gain</th><th style="text-align:right">Rank of 270</th></tr>
+<tr><td class="s">Summer Rain</td><td>30 Jan</td><td class="n">557,879</td><td class="n">588,722</td><td class="n">+30,843</td><td class="n">18th</td></tr>
+<tr><td class="s">Motherlands</td><td>26 Mar</td><td class="n">578,554</td><td class="n">596,385</td><td class="n">+17,831</td><td class="n">43rd</td></tr>
+<tr class="hi"><td class="s">PTS</td><td>25 Sep</td><td class="n">752,916</td><td class="n">764,815</td><td class="n">+11,899</td><td class="n">89th</td></tr>
+<tr><td class="s">Defibrillator</td><td>16 Jun</td><td class="n">649,093</td><td class="n">660,235</td><td class="n">+11,142</td><td class="n">97th</td></tr>
+<tr><td class="s">In Motion</td><td>23 Jul</td><td class="n">703,074</td><td class="n">706,969</td><td class="n">+3,895</td><td class="n">167th</td></tr>
+</table></div>
+<p><span class="tag i">Interpretation</span> PTS is third of five and a 3.1× recovery on In Motion — while fighting a headwind none of the others faced, because the 28-day window was still shedding the August festival peak throughout its first week. Read against the lead single it is down; read against the trajectory of the three singles before it, it is a clear improvement.</p>
+
+<h3>Spotify support and streams</h3>
+<div class="scroll"><table>
+<tr><th>Single</th><th style="text-align:right">Playlist reach</th><th style="text-align:right">Playlists</th><th style="text-align:right">Spotify editorials</th><th style="text-align:right">Popularity</th><th style="text-align:right">Streams to date</th><th style="text-align:right">Age</th></tr>
+<tr class="hi"><td class="s">PTS</td><td class="n">1,207,306</td><td class="n">19</td><td class="n">1</td><td class="n">47</td><td class="n">—</td><td class="n">10d</td></tr>
+<tr><td class="s">In Motion</td><td class="n">174,221</td><td class="n">29</td><td class="n">1</td><td class="n">43</td><td class="n">227,732</td><td class="n">74d</td></tr>
+<tr><td class="s">Summer Rain</td><td class="n">170,016</td><td class="n">172</td><td class="n">1</td><td class="n">41</td><td class="n">564,216</td><td class="n">248d</td></tr>
+<tr><td class="s">Defibrillator</td><td class="n">159,850</td><td class="n">74</td><td class="n">1</td><td class="n">43</td><td class="n">354,767</td><td class="n">111d</td></tr>
+<tr><td class="s">Motherlands</td><td class="n">30,305</td><td class="n">127</td><td class="n">0</td><td class="n">41</td><td class="n">380,814</td><td class="n">193d</td></tr>
+</table></div>
+<div class="box warn">
+  <h4>Three things this table is not allowed to say</h4>
+  <p><b>1.</b> Streams-to-date is <b>not</b> a performance ranking. A 248-day-old track has had 24× the exposure time of a 10-day-old one. The column exists only so the playlist-reach column cannot be mistaken for a demand figure.</p>
+  <p><b>2.</b> Playlist <i>count</i> falling from 172 to 19 is <b>not</b> declining support. Count accumulates with age as a track settles into user playlists. Reach, which is dominated by the largest playlists at the moment of reading, is the age-robust column.</p>
+  <p><b>3.</b> We cannot say <i>which</i> playlists produce PTS's 1.2 million of reach — see §10.</p>
+</div>
+
+<h3>Where each track sits on reach versus conversion</h3>
+<p>The brief asks for this explicitly, using the internal Summer Rain / Brush Me Like A Horse contrast as the two poles. Using the evidence available:</p>
+<div class="scroll"><table>
+<tr><th>Track</th><th>Reach</th><th>Conversion</th><th>Read</th></tr>
+<tr><td class="s">Summer Rain</td><td>High</td><td>High</td><td>The only moment that did both. Internal Feb read: 34.6% save rate, 1.74 SPL. The follower spike is 14.2× median.</td></tr>
+<tr><td class="s">Motherlands</td><td>Low — 30,305 playlist reach, zero Spotify editorial</td><td>Moderate</td><td>Under-exposed, not under-performing. 380,814 streams off the smallest playlist footprint of the five. <b>Reach was the constraint here.</b></td></tr>
+<tr><td class="s">Defibrillator</td><td>High — best editorial week of the campaign</td><td>Flat</td><td>Strong exposure, no follower event (+36 on release day, below median). Closest in shape to the Brush Me Like A Horse pattern described in the brief.</td></tr>
+<tr><td class="s">In Motion</td><td>Moderate</td><td>Lowest</td><td>Weakest release week of the five on every measure. 4,516 YouTube views at 74 days.</td></tr>
+<tr><td class="s">PTS</td><td>Highest of the campaign</td><td>Unresolved at 10 days</td><td>Accelerating on YouTube, top playlist reach on Spotify, no follower event yet (+52 on release day). Too early to call conversion.</td></tr>
+</table></div>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="youtube"><span>07</span>YouTube in detail</h2>
+
+<h3>PTS, the full daily series</h3>
+<div class="scroll"><table>
+<tr><th>Date</th><th style="text-align:right">Day</th><th style="text-align:right">Total views</th><th style="text-align:right">Daily gain</th><th style="text-align:right">Likes</th><th style="text-align:right">Comments</th></tr>
+<tr><td>26 Sep</td><td class="n">1</td><td class="n">7,199</td><td class="n">+7,199</td><td class="n">175</td><td class="n">13</td></tr>
+<tr><td>27 Sep</td><td class="n">2</td><td class="n">9,640</td><td class="n">+2,441</td><td class="n">213</td><td class="n">20</td></tr>
+<tr><td>28 Sep</td><td class="n">3</td><td class="n">11,338</td><td class="n" style="color:#A83B26">+1,698</td><td class="n">228</td><td class="n">22</td></tr>
+<tr><td>29 Sep</td><td class="n">4</td><td class="n">15,250</td><td class="n">+3,912</td><td class="n">240</td><td class="n">23</td></tr>
+<tr><td>30 Sep</td><td class="n">5</td><td class="n">22,064</td><td class="n">+6,814</td><td class="n">256</td><td class="n">24</td></tr>
+<tr><td>1 Oct</td><td class="n">6</td><td class="n">29,885</td><td class="n">+7,821</td><td class="n">265</td><td class="n">29</td></tr>
+<tr><td>2 Oct</td><td class="n">7</td><td class="n">38,453</td><td class="n">+8,568</td><td class="n">277</td><td class="n">29</td></tr>
+<tr class="hi"><td>3 Oct</td><td class="n">8</td><td class="n">48,703</td><td class="n">+10,250</td><td class="n">283</td><td class="n">29</td></tr>
+<tr><td>4 Oct</td><td class="n">9</td><td class="n">58,192</td><td class="n">+9,489</td><td class="n">288</td><td class="n">30</td></tr>
+<tr><td>5 Oct</td><td class="n">10</td><td class="n">65,917</td><td class="n">+7,725</td><td class="n">290</td><td class="n">30</td></tr>
+</table></div>
+<p>The catalogue reading taken at 16:28 UTC on 5 October — later in the day than the 05:47 snapshot — shows <b>69,712</b>.</p>
+<p><span class="tag f">Fact</span> Daily gain rose 6.0× between day 3 and day 8 and has stayed above 7,700 since. <span class="tag i">Interpretation</span> a sustained seven-day step with no second marketing push in the window is more consistent with a recommendation surface qualifying the video than with press activity on 28 September; press bumps spike and decay inside 48 hours. We cannot see traffic sources from outside Studio, so this is interpretation and not fact.</p>
+<p><span class="tag f">Fact</span> Note what the likes column does <i>not</i> do: 175 → 290 while views went 7,199 → 65,917. The additional audience arriving from day 4 onward engages at a far lower rate than the day-1 audience — the signature of an audience that did not come looking for the band.</p>
+
+<h3>Where the channel's consumption goes</h3>
+<p>Attribution across the identical window used for the channel delta: 28 September baseline, 5 October reading. Assets published inside the window contribute their whole lifetime count. The residual is everything not individually tracked.</p>
+<div class="scroll"><table>
+<tr><th>Asset</th><th style="text-align:right">7-day gain</th><th style="text-align:right">Share of 128,829</th></tr>
+<tr><td class="s">PTS official video</td><td class="n">54,579</td><td class="n">42.4%</td></tr>
+<tr><td class="s">Finding Joy In Short Moments ep.1</td><td class="n">16,880</td><td class="n">13.1%</td></tr>
+<tr><td>Louis Tomlinson teaser Short</td><td class="n">2,004</td><td class="n">1.6%</td></tr>
+<tr><td>Shorts published in window (3)</td><td class="n">1,539</td><td class="n">1.2%</td></tr>
+<tr><td>Defibrillator lyric video</td><td class="n">313</td><td class="n">0.2%</td></tr>
+<tr><td>In Motion lyric video</td><td class="n">241</td><td class="n">0.2%</td></tr>
+<tr><td>In Motion stripped back</td><td class="n">166</td><td class="n">0.1%</td></tr>
+<tr><td>In Motion Live in Berlin</td><td class="n">77</td><td class="n">0.1%</td></tr>
+<tr><td>Defibrillator acoustic</td><td class="n">35</td><td class="n">0.0%</td></tr>
+<tr><td class="s">Tracked total</td><td class="n">75,834</td><td class="n">58.9%</td></tr>
+<tr class="hi"><td class="s">Residual — catalogue and older Shorts</td><td class="n">52,995</td><td class="n">41.1%</td></tr>
+</table></div>
+<p>Over 30 days the balance reverses. The 13 uploads published since 5 September total <b>99,163</b> views — all of them published inside the window, so the whole count falls in it — against a channel delta of 277,716. <b>178,553 views (64.3%) came from material published before 5 September.</b></p>
+<div class="box ok">
+  <h4>Answering the question as the brief posed it</h4>
+  <p><i>"If the channel itself is generating materially more consumption than PTS, where is that consumption happening?"</i></p>
+  <p>It was true on day three and it is no longer true. PTS is now <b>42.4% of the channel's entire trailing week</b>. Over a month the channel remains predominantly a back-catalogue engine at 64.3%, which is healthy and is <b>not</b> evidence against the new release. PTS did not fail to penetrate; it was read at day three.</p>
+</div>
+
+<h3>Format and cadence</h3>
+<div class="scroll"><table>
+<tr><th>Year</th><th style="text-align:right">Uploads</th><th style="text-align:right">Of which Shorts</th><th style="text-align:right">Views on that year's uploads</th></tr>
+<tr><td>2020</td><td class="n">20</td><td class="n">1</td><td class="n">2,908,597</td></tr>
+<tr><td>2021</td><td class="n">25</td><td class="n">16</td><td class="n">1,823,228</td></tr>
+<tr><td>2022</td><td class="n">44</td><td class="n">24</td><td class="n">1,470,191</td></tr>
+<tr><td>2023</td><td class="n">43</td><td class="n">32</td><td class="n">1,334,671</td></tr>
+<tr><td>2024</td><td class="n">21</td><td class="n">12</td><td class="n">480,689</td></tr>
+<tr><td>2025</td><td class="n">17</td><td class="n">17</td><td class="n" style="color:#A83B26">39,405</td></tr>
+<tr class="hi"><td>2026</td><td class="n">108</td><td class="n">89</td><td class="n">512,546</td></tr>
+</table></div>
+<p><span class="tag f">Fact</span> 2025 was a dormant year: 17 uploads, every one a Short, 39,405 views between them. 2026 has produced <b>13.0×</b> the consumption of 2025 on 108 uploads. Against the band's own recent history the campaign is a strong recovery. Against 2020 it is 17.6%.</p>
+<p>Current cadence: 12 uploads in 30 days, 8 of them Shorts, average gap 2.5 days — the Watcher classifies this as <b>strong cadence</b>. Cadence is not the problem.</p>
+
+<h3>The Shorts layer</h3>
+<p>44 Shorts since the album announcement, 49,232 views between them. Median <b>1,087</b> views, maximum <b>2,324</b>, against 30,200 subscribers. <span class="tag i">Interpretation</span> a median Short reaching 3.6% of the subscriber base is not meaningfully escaping the subscriber feed, so the Shorts layer is currently neither reaching new people effectively <i>nor</i> routing the people it does reach anywhere.</p>
+
+<h3>Performance assets — the gap</h3>
+<div class="scroll"><table>
+<tr><th>Asset</th><th>Published</th><th style="text-align:right">Views</th><th style="text-align:right">Age</th></tr>
+<tr class="hi"><td class="s">Always (Official Live Music Video)</td><td>2 Oct 2020</td><td class="n">1,024,903</td><td class="n">6 yrs</td></tr>
+<tr><td>Summer Rain — Magic Box Dundee Session</td><td>10 Mar 2026</td><td class="n">4,616</td><td class="n">209d</td></tr>
+<tr><td>Summer Rain — Live at Beecraigs Loch</td><td>15 Feb 2026</td><td class="n">3,884</td><td class="n">232d</td></tr>
+<tr><td>In Motion — Live in Berlin</td><td>30 Jul 2026</td><td class="n">1,894</td><td class="n">67d</td></tr>
+<tr><td>Motherlands — Live from Bathgate Regal</td><td>1 May 2026</td><td class="n">1,862</td><td class="n">157d</td></tr>
+<tr><td>In Motion — stripped back</td><td>11 Aug 2026</td><td class="n">1,781</td><td class="n">55d</td></tr>
+<tr><td>Defibrillator — acoustic version</td><td>2 Jul 2026</td><td class="n">1,458</td><td class="n">95d</td></tr>
+</table></div>
+<p><span class="tag f">Fact</span> The channel's biggest video of all time is a live video, and the only seven-figure asset on the channel. <span class="tag f">Fact</span> Six performance assets published in 2026, all between 1,458 and 4,616 views. <span class="tag f">Fact</span> <b>None of them is from the 2026 festival run</b> — TRNSMT, Kendal Calling, YNot, Lollapalooza Berlin and the Kings of Leon support exist on the channel only as Shorts.</p>
+<p><span class="tag r">Hypothesis</span> The 2026 performance assets are all small-room, acoustic or single-camera pieces. <i>Always</i> is a full live music video. The gap may be production scale rather than format — which, if true, means a festival long-form from the 2026 run is a different proposition from the six assets above, and that is the thing worth testing.</p>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="dsp"><span>08</span>DSP trajectory</h2>
+<p>Combining the internal placement reports with the live Chartmetric reading.</p>
+<div class="scroll"><table>
+<tr><th>Moment</th><th>Spotify</th><th>Other DSPs</th><th>Live reading now</th></tr>
+<tr><td class="s">Defibrillator · 16–19 Jun</td><td>NMF UK #44, NMF Japan #52, The Indie List #41, Rock The World #7 JP</td><td>Apple New in Alternative #6 (61 territories), New in Rock #3; Amazon Fresh Indie #1 + cover; YouTube RELEASED #23</td><td class="n">159,850 reach<br>pop 43</td></tr>
+<tr><td class="s">late Jul (In Motion)</td><td>NMF UK ≈ #95, Indie List</td><td>—</td><td class="n">174,221 reach<br>pop 43</td></tr>
+<tr><td class="s">PTS · 25 Sep</td><td><b style="color:#A83B26">No NMF UK</b></td><td>Amazon Brand New Music ≈ #9; YouTube new-music surface ≈ #28; 2 Apple editorials; 2 Amazon editorials; 1 Deezer editorial (134,748 reach)</td><td class="n"><b>1,207,306 reach</b><br>pop <b>47</b></td></tr>
+</table></div>
+
+<div class="box ok">
+  <h4>Is Spotify support weakening? The evidence says no.</h4>
+  <p><span class="tag f">Fact</span> PTS currently sits on Spotify playlists reaching <b>1,207,306</b> people — 6.9× In Motion, 7.1× Summer Rain, 7.6× Defibrillator, and 39.8× Motherlands.</p>
+  <p><span class="tag f">Fact</span> PTS has the campaign's highest Spotify popularity score, 47, against a 41–43 band for everything before it. That measure is engagement-weighted and recency-weighted: it is Spotify's own read of demand, and it is rising.</p>
+  <p><span class="tag f">Fact</span> The artist currently sits on <b>24 Spotify editorial playlists</b> with 2,295,595 of editorial reach across the catalogue.</p>
+  <p><span class="tag i">Interpretation</span> Missing New Music Friday UK is a real and unusual fact that deserves the manual investigation Commercial has already opened. It is <b>not</b> evidence of withdrawn support, and the deck recommends against escalating it as though it were. The most likely explanation given the reach figure is a different and larger placement, but we cannot confirm that — see §10.</p>
+</div>
+
+<div class="box">
+  <h4>Editorial support and listener demand are different variables</h4>
+  <p>Motherlands received <b>zero</b> Spotify editorial placements and has the smallest playlist footprint of the five singles at 30,305 reach — and has streamed 380,814 times, more than Defibrillator which had the campaign's best editorial week. The relationship between editorial support and demand on this campaign is weak enough that neither can be used to predict the other.</p>
+</div>
+
+<h3>Cross-platform owned audience</h3>
+<div class="scroll"><table>
+<tr><th>Platform</th><th style="text-align:right">1 Jan 2026</th><th style="text-align:right">5 Oct 2026</th><th style="text-align:right">Change</th><th style="text-align:right">× YouTube subs</th></tr>
+<tr class="hi"><td class="s">Spotify monthly listeners</td><td class="n">499,500</td><td class="n">780,062</td><td class="n" style="color:#5E6E47"><b>+56.2%</b></td><td class="n">—</td></tr>
+<tr><td class="s">Spotify followers</td><td class="n">178,883</td><td class="n">192,301</td><td class="n">+7.5%</td><td class="n">6.4×</td></tr>
+<tr><td class="s">Instagram</td><td class="n">131,750</td><td class="n">136,974</td><td class="n">+4.0%</td><td class="n">4.5×</td></tr>
+<tr><td class="s">TikTok followers</td><td class="n">104,748</td><td class="n">107,457</td><td class="n">+2.6%</td><td class="n">3.6×</td></tr>
+<tr><td class="s">YouTube subscribers</td><td class="n">—</td><td class="n">30,200</td><td class="n">+0.67% / 30d</td><td class="n">1.0×</td></tr>
+</table></div>
+<p><span class="tag f">Fact</span> TikTok <i>likes</i> are the one social engagement measure that accelerated: 1,226,585 → 1,332,578 (+8.6%), with the last four days running at roughly 2,500/day against an early-year baseline too interpolated to quote. Instagram followers declined between April and late May before recovering.</p>
+<p><span class="tag i">Interpretation</span> YouTube is structurally the band's smallest owned platform. Expecting it to carry discovery for this campaign is asking the weakest channel to do the hardest job. That does not mean it should be ignored — it means its realistic job before album day is <b>routing</b>, not reach.</p>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="sentiment"><span>09</span>Audience language</h2>
+<p>218 top-level comments across 15 videos, ordered by relevance, read verbatim with HTML stripped. 60 of these are on the podcast episode and are treated separately because the audience is demonstrably different.</p>
+
+<h3>Clusters in the 158 music comments</h3>
+<div class="scroll"><table>
+<tr><th>Cluster</th><th style="text-align:right">Approx. count</th><th>What it sounds like</th></tr>
+<tr class="hi"><td class="s">Live demand</td><td class="n">15+</td><td>"Can't wait to hear this live" (×4 near-identical) · "Día 809 pidiendo… que vuelvan a México" · "Gutted you've no Liverpool show this year" · "Big love from 🇯🇵" · "Come back to Inverness" · Brighton, Stoke, Leeds, the Hydro</td></tr>
+<tr><td class="s">"We're back" / new era</td><td class="n">8</td><td>"The snuts are so back 🌦️" · "we're so back" · "We're back baby!" · "Snuts new era bring it on" — returning-fan language, not discovery language</td></tr>
+<tr><td class="s">Scottish / West Lothian identity</td><td class="n">8</td><td>"One of the best things to come out of West Lothian" · "from Armadale, West Lothian" · "2 weans a baw, jumpers fir goalposts" · heavy Scots dialect and flag use</td></tr>
+<tr><td class="s">Album anticipation</td><td class="n">6</td><td>"GIVE US THE ALBUM AND MY LIFE IS YOURS" · "Cannot wait for this album" · "can't wait for the full project"</td></tr>
+<tr><td class="s">Catalogue comparison</td><td class="n">5</td><td>"no two songs sound the same with the snuts" · "love how their sound has evolved" · "Up there with breeze and Bailie"</td></tr>
+<tr><td class="s">Community casting</td><td class="n">4</td><td>"I'm the ginger boy" (23 likes, top comment on PTS) · "3 of my friends and one of their sisters are in the music video" · "Both of the boys go to my school" · "It was amazing working with you guys"</td></tr>
+<tr><td class="s">Criticism</td><td class="n">2</td><td>"Still not really enjoying the new sound just yet. Missing a bit of kick" · "The Blossoms take 2 decent enough tho"</td></tr>
+<tr><td class="s">Discovery language</td><td class="n" style="color:#A83B26">≈1</td><td>"Hideo Kojima brought me here" is the only unambiguous arrival-from-elsewhere comment in the sample</td></tr>
+</table></div>
+
+<div class="box">
+  <h4>What the language reveals that the behavioural data does not</h4>
+  <p><b>Live demand is the loudest thing the audience is saying, and it is international.</b> Mexico, Japan, Peru, Argentina alongside Liverpool, Inverness, Brighton, Stoke and Leeds. The behavioural data could not have told us this: it shows August expansion but not what people wanted from it.</p>
+  <p><b>Community casting is a reach mechanic that worked and nobody counted.</b> The PTS video cast local people. Those people, their schools and their networks are the top of the comment thread. That is organic distribution built into production, and it is repeatable.</p>
+  <p><b>The music is not the problem.</b> Two negative comments in 158 — 1.3% of the sample.</p>
+  <p class="aside" style="color:var(--mute);font-size:.82rem"><b>Limit:</b> a relevance-ordered sample of 158 is large enough to cluster and too small to quantify as a share of the audience. The counts above are of distinct comments in the sample, not estimates of audience proportion.</p>
+</div>
+
+<h3>The podcast, separately</h3>
+<p>Episode one with Louis Tomlinson, in support of CALM, published 2 October. <b>17,913 views, 1,015 likes, 118 comments in three days</b> — a 5.67% like rate against 0.42% on the PTS video. It is the highest-engagement asset of the campaign by a wide margin.</p>
+<p>Of the 60 comments read, the overwhelming majority are about Louis Tomlinson — his honesty, his voice, his parenting, his tour. Several are in Spanish and Portuguese and reference his own dates in Argentina, Mexico and Peru. A handful mention Jack. Almost none mention the album.</p>
+<div class="box gap">
+  <h4>Read this the right way round</h4>
+  <p>This is <b>measurable proof that the channel can reach a large audience with no prior relationship to The Snuts</b> — exactly the thing management was worried was not happening. It is the strongest discovery evidence on the entire channel.</p>
+  <p>The failure is not the episode. It is that nothing in or around it asked those people for anything. Channel subscribers moved <b>+100</b> in the week it landed.</p>
+</div>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="gaps"><span>10</span>Measurement gaps</h2>
+<p>These are the things we could not see. None has been estimated anywhere in the deck or this document.</p>
+
+<div class="box gap">
+  <h4>Gap 01 — Where the catalogue views come from <span class="tag g">Highest value</span></h4>
+  <p><b>What's missing:</b> 178,553 views in 30 days landed on material published before 5 September. We cannot see which videos, or how anybody got to them.</p>
+  <p><b>Why it matters:</b> if a measurable share of those views comes from Browse or Suggested rather than from subscribers, the channel is doing discovery work nobody is counting — and the right album-week programming looks completely different.</p>
+  <p><b>Who holds it:</b> YouTube Studio → Content, last 30 days, plus the Traffic Sources report. One export.</p>
+</div>
+
+<div class="box gap">
+  <h4>Gap 02 — The pre-save funnel</h4>
+  <p><b>What's missing:</b> exposure → click → Countdown Page → pre-save, split by source. The brief asks for it explicitly and nothing in the public data touches it.</p>
+  <p><b>Why it matters:</b> the June decision to separate the Spotify Countdown and Apple Pre-Add calls to action was a deliberate strategic choice, and we currently cannot say whether it worked. Decision 01 is also unmeasurable without it.</p>
+  <p><b>Who holds it:</b> Spotify for Artists, Apple for Artists, and the <code>lnk.to</code> dashboard.</p>
+</div>
+
+<div class="box gap">
+  <h4>Gap 03 — Which playlists PTS is on</h4>
+  <p><b>What's missing:</b> we can see 1,207,306 of playlist reach and not what produces it. The Chartmetric current-playlists endpoint (<code>/artist/349107/playlists/spotify/current</code>) returns 404 for this artist.</p>
+  <p><b>Why it matters:</b> it is the direct answer to the New Music Friday question. If the reach comes from a larger placement, the NMF miss is a non-event; if it comes from algorithmic surfaces, that is a different and more fragile position.</p>
+  <p><b>Who holds it:</b> Spotify for Artists → playlists.</p>
+</div>
+
+<div class="box gap">
+  <h4>Gap 04 — Early-life data for four of the five singles</h4>
+  <p><b>What's missing:</b> the per-video daily series begins 15 September 2026. Summer Rain, Motherlands, Defibrillator and In Motion have a lifetime counter and nothing else.</p>
+  <p><b>Consequence:</b> <b>no age-matched YouTube comparison between the singles is possible and none has been made.</b> The one age-matched comparison in this analysis is on the Spotify side, where the daily series reaches back to 1 January.</p>
+  <p><b>Fixable going forward:</b> the series now exists. From album day onward this constraint disappears.</p>
+</div>
+
+<div class="box gap">
+  <h4>Gap 05 — Spotify listener segments</h4>
+  <p><b>What's missing:</b> super / moderate / light listener splits, and the algorithmic-versus-editorial-versus-direct source breakdown that the February internal read had.</p>
+  <p><b>Why it matters:</b> Decision 03 is a test on light and moderate listeners and cannot be targeted or measured without it.</p>
+  <p><b>Who holds it:</b> Spotify for Artists → Audience.</p>
+</div>
+
+<div class="box gap">
+  <h4>Gap 06 — The October PR and live moments</h4>
+  <p><b>What's missing:</b> the France24 appearance (28 Sep), the German print and online coverage, and the sold-out Barfly show have no measurable downstream signal we can isolate. They fall inside the PTS acceleration window and cannot be separated from it.</p>
+  <p><b>Consequence:</b> the deck does not attribute any of the PTS acceleration to them, in either direction.</p>
+</div>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="notclaimed"><span>11</span>What this analysis does not claim</h2>
+<ol>
+  <li><b>That the festivals caused the August expansion.</b> The expansion is a fact and the absence of a release in the window is a fact. The causal link is plausible and unproven.</li>
+  <li><b>That press activity on 28 September caused the PTS acceleration.</b> The shape argues against it. We cannot see traffic sources, so the deck says what the shape is consistent with and stops.</li>
+  <li><b>That the comment clusters represent the audience in proportion.</b> 158 relevance-ordered comments is a sample for direction, not a measurement of share.</li>
+  <li><b>That any single "outperformed" any other on YouTube.</b> See Gap 04.</li>
+  <li><b>That Spotify has withdrawn support.</b> The NMF UK miss is real and unexplained. Every age-robust support measure we can read points the other way.</li>
+  <li><b>That the podcast's audience will convert.</b> It has not yet. The recommendation is to give it something to convert <i>to</i>, and then measure.</li>
+  <li><b>Anything about view velocity as a quality signal.</b> Daily gains are reported as what they are — daily gains over a stated window — and never as a ranking of how good a video is.</li>
+</ol>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<h2 id="decisions"><span>12</span>Decisions, in full</h2>
+<p>Ranked by potential impact × evidence strength × ability to execute before 23 October.</p>
+
+<div class="box ok">
+  <h4>Decision 01 — Put a pre-save route on every Short <span class="tag f">Confidence: High</span></h4>
+  <p><b>Observation.</b> The format that carries the campaign's only non-subscriber reach has no route to the album.</p>
+  <p><b>Evidence.</b> 0 of 44 Shorts published since the album announcement carry the pre-save link. 22 have no description at all, including the album announcement and the presale announcement. 49,232 views passed through them.</p>
+  <p><b>Interpretation.</b> This is not a strategy failure — the June decision to split the Spotify and Apple calls to action was right and was implemented correctly on long-form. It is an execution gap on the format that was treated as a social post rather than as a page with a description field.</p>
+  <p><b>Action.</b> Description line, pinned comment and end-card on every new Short. Backfill descriptions on the 44 already published — they continue to accrue views.</p>
+  <p><b>Measurement.</b> Pre-save adds attributed to YouTube in the <code>lnk.to</code> and Spotify for Artists dashboards, against the current baseline. Requires Gap 02 to be closed first.</p>
+  <p><b>Timeframe.</b> Implement this week. Evaluate at 7 days and again on album day.</p>
+  <p><b>Cost.</b> One afternoon. No spend.</p>
+</div>
+
+<div class="box ok">
+  <h4>Decision 02 — Publish one long-form live asset from the 2026 run <span class="tag i">Confidence: Medium</span></h4>
+  <p><b>Observation.</b> The year's largest non-launch audience expansion came from live, and none of it exists on the channel as long-form.</p>
+  <p><b>Evidence.</b> Six of the ten biggest seven-day listener gains of 2026 fall in August, a month with no release (+37,315 at the peak). The channel's biggest video of all time is a live video at 1,024,903. Live demand is the largest and most international cluster in the comments. TRNSMT, Kendal Calling, YNot, Lollapalooza Berlin and the Kings of Leon support exist on the channel only as Shorts.</p>
+  <p><b>Interpretation.</b> This band converts in rooms. The campaign has been publishing small-room acoustic performances (1,458–4,616 views) and has not published the thing the audience is actually asking for.</p>
+  <p><b>Action.</b> One festival performance, long-form, premiered before album day. <b>Audit what footage already exists before commissioning anything</b> — this decision is only cheap if the footage is already shot.</p>
+  <p><b>Measurement.</b> Beats the 1,458–4,616 band that every 2026 performance asset has landed in, measured at day 10. Secondary: channel 7-day views against the current 128,829.</p>
+  <p><b>Timeframe.</b> Publish within 10 days. Evaluate at album day.</p>
+  <p><b>Confidence is Medium, not High,</b> because the causal link between August and the festivals is unproven, and because the 2026 performance assets may be small for production reasons we cannot separate from format reasons.</p>
+</div>
+
+<div class="box ok">
+  <h4>Decision 03 — Paid test on light and moderate listeners, measured on followers <span class="tag i">Confidence: Medium</span></h4>
+  <p><b>Observation.</b> 587,761 people listen to this band every month and have not followed it. Album day converts people who have a standing relationship; these people do not have one.</p>
+  <p><b>Evidence.</b> Followers-to-listeners fell 35.92% → 24.08% across nine months. Monthly listeners grew 7.5× faster than followers. Four of the five singles produced no follower event at all.</p>
+  <p><b>Interpretation.</b> February's objection to targeting super listeners was argued then and is quantified now: the people worth paying to reach are measurably not the ones already following. The working recommendation at the time — prove engagement survives expansion before scaling spend — has now had its first half proved. Expansion happened. What has not been proved is that expansion converts.</p>
+  <p><b>Action.</b> Marquee or equivalent, light and moderate segments only. Creative points at the pre-save, not at the stream.</p>
+  <p><b>Measurement.</b> Follower gain per 1,000 reached, against the 41/day organic baseline. <b>Not</b> streams — streams are the metric that made this look fine for nine months.</p>
+  <p><b>Stop condition.</b> If follower gain per 1,000 reached does not beat organic, stop. Do not scale on a stream number.</p>
+  <p><b>Timeframe.</b> Live before album week. First read at 7 days.</p>
+  <p><b>Blocked by</b> Gap 05 — segment targeting needs Spotify for Artists audience data.</p>
+</div>
+
+<div class="box ok">
+  <h4>Decision 04 — Episode two in album week, with the ask in the first thirty seconds <span class="tag i">Confidence: Medium</span></h4>
+  <p><b>Observation.</b> The campaign's highest-engagement asset brought in a new audience and asked them for nothing.</p>
+  <p><b>Evidence.</b> 5.67% like rate against 0.42% on the single. 17,913 views in three days on a 41-minute video. Comments show a demonstrably non-Snuts audience arriving, several in Spanish and Portuguese. Channel subscribers moved +100 that week.</p>
+  <p><b>Interpretation.</b> The format works, the guest worked, and the conversion architecture around it is missing. This is the same failure as Decision 01, at a larger scale and with a better audience.</p>
+  <p><b>Action.</b> Schedule episode two into album week. Album call to action in the opening thirty seconds and the first line of the description — not buried under the social links.</p>
+  <p><b>Measurement.</b> Like rate holds above 2% <i>and</i> the share of comments mentioning the band or the album rises against the episode-one baseline. Both conditions, not either.</p>
+  <p><b>Timeframe.</b> Album week. Evaluate at 7 days.</p>
+</div>
+
+<h3>Stop / don't start</h3>
+<ol>
+  <li><b>Do not buy broad paid reach.</b> Reach is the working part. Monthly listeners +56.2%, PTS on playlists reaching 1.2 million. More top-of-funnel pours water into the same leaking bucket.</li>
+  <li><b>Do not escalate the New Music Friday UK miss.</b> Worth the quiet investigation Commercial has opened. Not worth a campaign-level reaction: PTS holds the campaign's highest playlist reach and highest popularity score.</li>
+  <li><b>Do not target super listeners with paid.</b> February's logic stands and is now measurable.</li>
+  <li><b>Do not add more Shorts at the current cadence.</b> 44 Shorts, 49,232 views, zero routes to the pre-save. Fix what exists before making more. Cadence is already classified as strong; volume is not the constraint.</li>
+  <li><b>Do not read PTS as a failure.</b> It was assessed at day three. By day ten it is 42.4% of the channel's entire trailing week and still gaining 7,700+ a day.</li>
+</ol>
+
+<h3>The one question</h3>
+<div class="box gap">
+  <p style="font-family:var(--disp);font-size:1.15rem;line-height:1.35;color:var(--ink)">587,761 people listen to this band every month and have not followed it. What is the single owned mechanism putting the album in front of them before 23 October — and who owns it?</p>
+</div>
+
+<footer>
+  The Snuts × Joy In Short Moments · the working · v1, 5 October 2026<br>
+  YouTube Data API v3 (310 uploads) · Watcher vsnap + channel history (170 readings) · Chartmetric artist 349107 · comment scan (218 comments, 15 videos)<br>
+  <a href="/snuts">← back to the decision read</a>
+</footer>
+
+</div>
+</body>
+</html>

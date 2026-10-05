@@ -141,6 +141,17 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         updated: 'October 2026',
       },
       {
+        title: 'The Snuts — Joy In Short Moments',
+        blurb:
+          'Decision read, 18 days out from the album. Tests the internal worry that only the core is reacting '
+          + 'and finds the opposite — reach up 56% while every follower base sits flat. Where the expansion '
+          + 'actually came from, why PTS was read too early, and four decisions that fit before 23 October. '
+          + 'YouTube and Chartmetric, with the measurement gaps listed rather than filled.',
+        href: '/snuts',
+        kind: 'Deck',
+        updated: 'October 2026',
+      },
+      {
         title: 'Amyl and the Sniffers',
         blurb:
           'Channel analysis built for the signing conversation — format mix, cadence and catalogue coverage.',
