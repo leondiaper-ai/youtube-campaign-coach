@@ -45,14 +45,21 @@
      video; the quiet year did not "cause" anything measurable. Both
      are stated as sequence and contrast, not cause.
 
-     THE LOOK. Gothic horror neon, referenced to Mandy (2018) and to
-     the DNH visualizer, which is the clearest statement of the ESTRUS
-     world: a black street, black leather, and one hot magenta doorway.
-     Near-black violet ground, magenta as the single light source,
-     violet in the shadows, and acid green used once or twice the way
-     Mandy uses its one cold colour. Film grain, halation on the type,
-     a hard vignette. The imagery is graded to match so four different
-     shoots read as one night.
+     THE LOOK. Occult horror, referenced to Mandy (2018) and to the
+     campaign's own artwork — the Fcukers remix sleeve is a red sigil
+     on pure black, and that is the whole palette. True black ground,
+     blood red as the only light, a sharp gothic display face carrying
+     a Mandy-style bleed, one cold green used twice the way Mandy uses
+     its single cold colour.
+
+     The backdrops are deliberately NOT the biggest assets. They are
+     the campaign's creepiest frames — the bad one, roomie, and DNH
+     live at A Night In ESTRUS — because this deck is about the world
+     the campaign built, and the des fleurs collage is the one piece of
+     ESTRUS imagery that does not look like the rest of it.
+
+     Film grain over the lot, in overlay rather than normal blend, so
+     the blacks stay black instead of fogging to grey.
 
      SOURCE. One pull of the YouTube Data API v3 against @tovelomusic
      on 5 October 2026. 565 of 565 public uploads, not capped. Those
@@ -61,7 +68,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,800;1,6..96,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@400;600;700;800;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 /* ── PALETTE ──────────────────────────────────────────────────────
@@ -76,11 +83,12 @@
    of a mountain on a flat sea under a crescent moon. Gold is the
    lamplight in the visualizers. There is no cold blue anywhere. */
 :root{
-  --night:#09060D; --ink:#140A16; --bone:#F2E6EC; --smoke:#A98FA0;
-  --faint:#6E5366; --rule:rgba(242,230,236,.14);
-  --rose:#E0197E; --deep:#B3122B; --gold:#8E3BC7; --blush:#FF6FB0;
+  --night:#050304; --ink:#0C0607; --bone:#E9DFDC; --smoke:#9B8781;
+  --faint:#7A6763; --rule:rgba(233,223,220,.14);
+  --rose:#D9121B; --deep:#8E0A10; --gold:#E4642A; --blush:#FF4438;
   --acid:#5FE3B4;
-  --disp:'Bodoni Moda',Georgia,serif;
+  --disp:'Grenze Gotisch','Bodoni Moda',Georgia,serif;
+  --serif:'Bodoni Moda',Georgia,serif;
   --body:'Inter Tight',system-ui,sans-serif; --mono:'Inter Tight',system-ui,sans-serif;
   --pad:clamp(22px,5vw,78px);
 }
@@ -98,26 +106,32 @@ body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
    The grain is an inline SVG turbulence rather than an image file, so
    it costs no request and cannot 404 on a deck opened from a link in
    an email. */
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"),
-    radial-gradient(118% 88% at 50% 44%,transparent 36%,rgba(4,2,7,.82) 100%);
-  background-size:220px 220px,100% 100%;
-  opacity:.9;mix-blend-mode:normal}
+/* Two layers, not one, because they need different blend modes. Mid-grey
+   noise composited normally over a near-black page lifts every black to
+   grey — the whole deck fogs. Overlay leaves black black and only bites
+   in the midtones and highlights, which is where film grain lives anyway.
+   The vignette has to stay a normal composite to actually darken, so it
+   gets its own layer. */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:61;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:220px 220px;
+  opacity:.17;mix-blend-mode:overlay}
+.vig{position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:radial-gradient(116% 86% at 50% 42%,transparent 30%,rgba(2,1,4,.72) 78%,rgba(0,0,0,.94) 100%)}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background:
-    radial-gradient(52% 40% at 78% 8%,rgba(224,25,126,.16),transparent 64%),
-    radial-gradient(60% 46% at 14% 92%,rgba(142,59,199,.14),transparent 66%)}
+    radial-gradient(52% 40% at 78% 8%,rgba(217,18,27,.16),transparent 64%),
+    radial-gradient(60% 46% at 14% 92%,rgba(255,58,42,.14),transparent 66%)}
 
 /* ── NAV ──────────────────────────────────────────────────────────── */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
   justify-content:space-between;padding:14px var(--pad);
-  background:linear-gradient(180deg,rgba(9,6,13,.96),rgba(9,6,13,0));
+  background:linear-gradient(180deg,rgba(5,3,4,.96),rgba(5,3,4,0));
   font-family:var(--body);font-weight:600;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase}
 .nav .who{color:var(--faint)}
 .nav a.analysis{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
   padding:7px 13px;border-radius:2px;transition:.2s}
-.nav a.analysis:hover{color:var(--blush);border-color:rgba(224,25,126,.6)}
+.nav a.analysis:hover{color:var(--blush);border-color:rgba(217,18,27,.6)}
 
 /* ── SLIDE ────────────────────────────────────────────────────────── */
 .slide{position:relative;min-height:100vh;display:flex;align-items:center;
@@ -125,25 +139,29 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 /* A rule inset from the edge, like a plate on a page. Pointer-events
    off so it never eats a click on the cards underneath. */
 .slide::before{content:'';position:absolute;z-index:4;pointer-events:none;
-  inset:clamp(12px,2.2vw,26px);border:1px solid rgba(224,25,126,.16);
-  box-shadow:0 0 42px rgba(224,25,126,.08) inset}
+  inset:clamp(12px,2.2vw,26px);border:1px solid rgba(217,18,27,.16);
+  box-shadow:0 0 42px rgba(217,18,27,.08) inset}
 .inner{position:relative;z-index:3;width:100%;max-width:1180px;margin:0 auto;
   padding:clamp(76px,11vh,130px) var(--pad) clamp(52px,8vh,96px)}
 .bleed{position:absolute;inset:0;z-index:1}
+/* Crushed, not just dimmed. These frames are already mostly black —
+   candles in a dark room, a face on a black field — and the grade's job
+   is to let the black go all the way down so the only thing with any
+   light in it is the one thing the frame is about. */
 .bleed img{width:100%;height:100%;object-fit:cover;display:block;
-  filter:saturate(1.35) contrast(1.22) brightness(.82) hue-rotate(-8deg)}
-/* The grade sits over the photograph rather than in it, so the magenta
+  filter:saturate(1.1) contrast(1.42) brightness(.56)}
+/* The grade sits over the photograph rather than in it, so the red
    reads as light in the room instead of a filter on the lens. */
 .bleed::before{content:'';position:absolute;inset:0;z-index:2;
-  background:linear-gradient(145deg,rgba(224,25,126,.2),transparent 42%,rgba(142,59,199,.24));
+  background:linear-gradient(150deg,rgba(217,18,27,.18),transparent 46%,rgba(142,10,16,.26));
   mix-blend-mode:screen}
 .bleed::after{content:'';position:absolute;inset:0;z-index:3}
 .scrim-l::after{background:
-  linear-gradient(90deg,rgba(9,6,13,.97) 0%,rgba(9,6,13,.93) 46%,rgba(9,6,13,.62) 100%),
-  linear-gradient(0deg,rgba(9,6,13,.6) 0%,transparent 46%)}
-.scrim-b::after{background:linear-gradient(180deg,rgba(9,6,13,.5) 0%,rgba(9,6,13,.92) 62%,var(--night) 100%)}
+  linear-gradient(90deg,rgba(5,3,4,.97) 0%,rgba(5,3,4,.93) 46%,rgba(5,3,4,.62) 100%),
+  linear-gradient(0deg,rgba(5,3,4,.6) 0%,transparent 46%)}
+.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.5) 0%,rgba(5,3,4,.92) 62%,var(--night) 100%)}
 .scrim-f::after{background:
-  linear-gradient(0deg,rgba(9,6,13,.9) 0%,rgba(9,6,13,.74) 55%,rgba(9,6,13,.8) 100%)}
+  linear-gradient(0deg,rgba(5,3,4,.9) 0%,rgba(5,3,4,.74) 55%,rgba(5,3,4,.8) 100%)}
 
 /* ── TYPE ─────────────────────────────────────────────────────────── */
 .label{font-family:var(--body);font-size:.64rem;font-weight:600;letter-spacing:.34em;
@@ -151,20 +169,25 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 .label.hot{color:var(--rose)}
 .label.gold{color:var(--acid)}
 .label.cold{color:var(--gold)}
-h1.display,h2.display{font-family:var(--disp);font-weight:800;letter-spacing:-.008em;
-  line-height:1.02;margin:0;
-  /* Halation. A neon sign photographed on film does not have a crisp
-     edge — it blooms into the emulsion, and the bloom is coloured.
-     Two shadows: a tight magenta one for the edge, a wide violet one
-     for the room. */
-  text-shadow:0 0 1px rgba(224,25,126,.5),0 0 26px rgba(224,25,126,.3),
-              0 0 68px rgba(142,59,199,.28)}
-h1.display{font-size:clamp(2.6rem,6vw,5rem)}
-h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
+/* MANDY TITLE TREATMENT. The reference is a horror title card, not a
+   fashion masthead: a sharp gothic face, bone-white, bleeding red into
+   the black behind it. Three shadows — a tight red edge, a mid bloom,
+   and a wide ember haze — so the letterforms look lit from inside
+   rather than coloured in. */
+h1.display,h2.display{font-family:var(--disp);font-weight:700;letter-spacing:.004em;
+  line-height:.98;margin:0;
+  text-shadow:0 0 2px rgba(217,18,27,.9),0 0 14px rgba(217,18,27,.55),
+              0 0 48px rgba(217,18,27,.4),0 0 96px rgba(255,58,42,.22)}
+h1.display{font-size:clamp(3rem,7.2vw,6.1rem)}
+h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 /* The record is styled — the channel's own Shorts are NYFW and Collina
    Strada — so emphasis is an italic, the way a fashion title page would
    do it, rather than a second colour. */
-.display em{font-style:italic;font-weight:400}
+/* Grenze Gotisch ships no italic, and a synthesised slant on a gothic
+   face looks like a mistake. Emphasis in a horror title card is colour
+   anyway — the word that bleeds. */
+.display em{font-style:normal;color:var(--rose);
+  text-shadow:0 0 3px rgba(217,18,27,.95),0 0 22px rgba(217,18,27,.6),0 0 70px rgba(217,18,27,.4)}
 .big-p{font-size:clamp(1rem,1.8vw,1.32rem);line-height:1.52;color:var(--smoke);
   margin:.9rem 0 0;font-weight:400;max-width:44em}
 .big-p b{color:var(--bone);font-weight:600}
@@ -188,8 +211,8 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 .hn,.sv,.bv,.tn{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .hero2 .hn{font-family:var(--disp);font-weight:800;white-space:nowrap;
   font-size:clamp(2.3rem,4.4vw,3.6rem);line-height:.9;letter-spacing:-.02em;
-  text-shadow:0 0 2px rgba(224,25,126,.55),0 0 30px rgba(224,25,126,.38),
-              0 0 76px rgba(142,59,199,.3)}
+  text-shadow:0 0 2px rgba(217,18,27,.55),0 0 30px rgba(217,18,27,.38),
+              0 0 76px rgba(255,58,42,.3)}
 .hero2 .hn.rose{color:var(--rose)}
 .hero2 .hn.gold{color:var(--gold)}
 .hero2 .hn.dim{color:var(--faint)}
@@ -211,7 +234,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 .sw.a .sv{font-size:clamp(2rem,3.4vw,2.7rem);color:var(--faint)}
 .sw.gap .sv{font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--rose)}
 .sw.b .sv{font-size:clamp(3.2rem,6vw,5rem);color:var(--blush);
-  text-shadow:0 0 46px rgba(224,25,126,.4)}
+  text-shadow:0 0 46px rgba(217,18,27,.4)}
 .sw .sk{font-family:var(--body);font-weight:600;font-size:.61rem;letter-spacing:.22em;max-width:19ch;
   text-transform:uppercase;color:var(--faint);margin-top:.75rem;line-height:1.7}
 .sw.b .sk{color:var(--rose)}
@@ -222,7 +245,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 @media(min-width:800px){.wins{grid-template-columns:repeat(3,1fr)}}
 .win{display:block;text-decoration:none;color:inherit;border:1px solid var(--rule);
   border-radius:4px;overflow:hidden;background:var(--ink);transition:.2s}
-.win:hover{border-color:rgba(224,25,126,.6);box-shadow:0 0 34px rgba(224,25,126,.2)}
+.win:hover{border-color:rgba(217,18,27,.6);box-shadow:0 0 34px rgba(217,18,27,.2)}
 .win .wi{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;
   filter:saturate(1.3) contrast(1.15) brightness(.88)}
 .win .wb{display:block;padding:clamp(.75rem,1.6vw,1rem)}
@@ -240,7 +263,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   align-items:center;margin:clamp(1.4rem,3vw,2.2rem) 0 0}
 @media(min-width:820px){.step2{grid-template-columns:1fr auto 1.35fr}}
 .sa{border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--ink)}
-.sa.big{border-color:rgba(224,25,126,.45);background:rgba(224,25,126,.07)}
+.sa.big{border-color:rgba(217,18,27,.45);background:rgba(217,18,27,.07)}
 .sa img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;filter:saturate(1.3) contrast(1.15) brightness(.88)}
 .sa .sb{padding:clamp(.7rem,1.5vw,1rem)}
 .sa .sl{font-family:var(--body);font-weight:600;font-size:.57rem;letter-spacing:.2em;
@@ -266,12 +289,12 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   align-items:center}
 .trk .tt{font-size:clamp(.74rem,1.3vw,.86rem);color:var(--smoke);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-.trk .bar{height:7px;background:rgba(242,230,236,.08);border-radius:2px;overflow:hidden}
+.trk .bar{height:7px;background:rgba(233,223,220,.08);border-radius:2px;overflow:hidden}
 .trk .bf{height:100%;width:0;background:var(--faint);border-radius:2px;
   transition:width 1.1s cubic-bezier(.22,.9,.25,1)}
 .trk .tn{font-family:var(--body);font-weight:600;font-size:.68rem;color:var(--faint);white-space:nowrap}
 .trk.lead .tt{color:var(--bone);font-weight:600}
-.trk.lead .bf{background:var(--rose);box-shadow:0 0 10px rgba(224,25,126,.9),0 0 30px rgba(224,25,126,.6)}
+.trk.lead .bf{background:var(--rose);box-shadow:0 0 10px rgba(217,18,27,.9),0 0 30px rgba(217,18,27,.6)}
 .trk.lead .tn{color:var(--rose);font-weight:500}
 
 /* ── TWO WORLDS (slide 07) ────────────────────────────────────────── */
@@ -279,7 +302,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   margin:clamp(1.3rem,2.8vw,2rem) 0 0}
 @media(min-width:840px){.worlds{grid-template-columns:1fr 1fr}}
 .wld{border:1px solid var(--rule);border-radius:4px;padding:clamp(1rem,2.2vw,1.5rem)}
-.wld.now{border-color:rgba(224,25,126,.4);background:rgba(224,25,126,.06)}
+.wld.now{border-color:rgba(217,18,27,.4);background:rgba(217,18,27,.06)}
 .wld .we{font-family:var(--body);font-weight:600;font-size:.58rem;letter-spacing:.2em;
   text-transform:uppercase;color:var(--faint)}
 .wld h4{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;
@@ -298,7 +321,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 .lt{display:flex;gap:.85rem;align-items:center;text-decoration:none;color:inherit;
   border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--ink);
   transition:.2s}
-.lt:hover{border-color:rgba(224,25,126,.55);box-shadow:0 0 26px rgba(224,25,126,.18)}
+.lt:hover{border-color:rgba(217,18,27,.55);box-shadow:0 0 26px rgba(217,18,27,.18)}
 .lt img{width:92px;height:58px;object-fit:cover;flex:0 0 auto;filter:saturate(1.3) contrast(1.15) brightness(.88)}
 .lt .lb{display:block;padding:.35rem .7rem .35rem 0;min-width:0}
 .lt .ln{display:block;font-family:var(--disp);font-weight:800;font-size:1.05rem;letter-spacing:-.02em;
@@ -334,8 +357,79 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   font-size:clamp(1.5rem,3vw,2.2rem);margin-top:.55rem}
 .bt.one .bh{color:var(--faint)}
 .bt.two .bh{color:var(--gold)}
-.bt.three .bh{color:var(--blush);text-shadow:0 0 40px rgba(224,25,126,.4)}
+.bt.three .bh{color:var(--blush);text-shadow:0 0 40px rgba(217,18,27,.4)}
 .bt p{margin:.6rem 0 0;font-size:.82rem;line-height:1.5;color:var(--smoke)}
+
+/* ── SONG DEPTH LADDERS ───────────────────────────────────────────
+   Four columns of unequal height, because the finding IS the
+   inequality. One song has six rungs, two have two, nine have one —
+   and that reads in a second as a shape where a table would need
+   reading. The rungs carry the format name, not a number, because
+   the question is what each song was given, not what it earned. */
+.depth{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.8vw,18px);
+  align-items:end;margin:clamp(1.2rem,2.6vw,1.9rem) 0 0}
+@media(min-width:860px){.depth{grid-template-columns:1.25fr 1fr 1fr 1fr}}
+.dc{min-width:0}
+.dc .dt{font-family:var(--body);font-weight:600;font-size:.58rem;letter-spacing:.17em;
+  text-transform:uppercase;color:var(--smoke);margin-bottom:.55rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc .dn{font-family:var(--disp);font-weight:700;line-height:.9;
+  font-size:clamp(1.7rem,3.2vw,2.5rem);color:var(--faint);margin-bottom:.6rem}
+.dc.lead .dn{color:var(--rose);text-shadow:0 0 24px rgba(217,18,27,.45)}
+.rung{display:block;font-family:var(--body);font-weight:600;font-size:.56rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);
+  padding:.46rem .6rem;margin-bottom:3px;border-radius:2px;
+  background:rgba(233,223,220,.05);border-left:2px solid var(--rule)}
+.dc.lead .rung{border-left-color:var(--rose);background:rgba(217,18,27,.1);color:var(--bone)}
+
+/* ── CAMPAIGN TIMELINE ────────────────────────────────────────────
+   One axis, the whole window, positioned by real date. Markers are
+   absolutely placed from a percentage computed in the markup, so the
+   gaps are drawn to scale rather than described — a 43-day hole looks
+   like a 43-day hole. */
+.tl{position:relative;height:clamp(104px,15vw,132px);
+  margin:clamp(1.6rem,3.4vw,2.4rem) 0 0}
+.tl .axis{position:absolute;left:0;right:0;top:50%;height:1px;background:var(--rule)}
+.tl .gap{position:absolute;top:calc(50% - 10px);height:20px;
+  background:repeating-linear-gradient(135deg,rgba(217,18,27,.16) 0 5px,transparent 5px 10px);
+  border-left:1px solid rgba(217,18,27,.4);border-right:1px solid rgba(217,18,27,.4)}
+.tl .gl{position:absolute;top:calc(50% + 16px);transform:translateX(-50%);white-space:nowrap;
+  font-family:var(--body);font-weight:600;font-size:.56rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--rose)}
+.tl .pip{position:absolute;top:calc(50% - 3px);width:6px;height:6px;margin-left:-3px;
+  border-radius:50%;background:var(--faint)}
+.tl .pip.hero{width:11px;height:11px;margin-left:-5.5px;top:calc(50% - 5.5px);
+  background:var(--rose);box-shadow:0 0 16px rgba(217,18,27,.8)}
+.tl .ml{position:absolute;bottom:calc(50% + 14px);transform:translateX(-50%);white-space:nowrap;
+  font-family:var(--body);font-weight:600;font-size:.56rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--bone)}
+.tl .ml .md{display:block;color:var(--faint);font-size:.52rem;margin-top:.2rem}
+
+/* ── GOOD-PRACTICE SCORECARD ──────────────────────────────────────
+   Graded, not ticked. A column of green ticks is a sales document;
+   the grade is the only thing that makes the strong rows mean
+   anything, so STRONG, MIXED, LIMITED and OPEN each get their own
+   colour and the evidence sits on the same line. */
+.score{display:flex;flex-direction:column;gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;
+  margin:clamp(1.2rem,2.6vw,1.8rem) 0 0}
+.sr{display:grid;grid-template-columns:1fr auto;gap:.5rem 1rem;align-items:baseline;
+  background:var(--night);padding:clamp(.6rem,1.3vw,.82rem) clamp(.8rem,1.6vw,1.1rem)}
+@media(min-width:860px){.sr{grid-template-columns:13rem 1fr 7.5rem}}
+.sr .sb{font-family:var(--body);font-weight:700;font-size:.63rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--bone)}
+.sr .se{font-size:.78rem;line-height:1.45;color:var(--smoke);grid-column:1/-1}
+@media(min-width:860px){.sr .se{grid-column:auto}}
+.sr .sg{font-family:var(--body);font-weight:700;font-size:.6rem;letter-spacing:.18em;
+  text-transform:uppercase;text-align:right;white-space:nowrap}
+.sr.strong .sg{color:var(--acid)}
+.sr.mixed  .sg{color:var(--gold)}
+.sr.limited .sg{color:var(--smoke)}
+.sr.open   .sg{color:var(--rose)}
+.sr.strong{border-left:2px solid var(--acid)}
+.sr.mixed{border-left:2px solid var(--gold)}
+.sr.limited{border-left:2px solid var(--rule)}
+.sr.open{border-left:2px solid var(--rose)}
 
 /* ── FOOTER ───────────────────────────────────────────────────────── */
 .foot{padding:clamp(2.4rem,5vw,4rem) var(--pad);max-width:1180px;margin:0 auto}
@@ -343,6 +437,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 </style>
 </head>
 <body>
+<div class="vig" aria-hidden="true"></div>
 
 <nav class="nav">
   <span class="who">Tove Lo · @tovelomusic</span>
@@ -352,8 +447,8 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 <!-- ══ 01 · WHERE ARE WE NOW ═════════════════════════════════════ -->
 <section class="slide">
   <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="">
+    <img src="https://i.ytimg.com/vi/ksfJ-jyZT94/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/ksfJ-jyZT94/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
     <div class="label hot">ESTRUS · Post-album read · 5 October 2026</div>
@@ -391,8 +486,8 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 <!-- ══ 02 · BUILT AROUND VISUALS ═════════════════════════════════ -->
 <section class="slide">
   <div class="bleed scrim-f">
-    <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="">
+    <img src="https://i.ytimg.com/vi/wBf1UUhlpsc/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/wBf1UUhlpsc/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
     <div class="label">The campaign shape</div>
@@ -414,7 +509,61 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   </div>
 </section>
 
-<!-- ══ 03 · LONG-FORM IS THE ENGINE ══════════════════════════════ -->
+<!-- ══ 03 · SONG DEPTH ═══════════════════════════════════════════
+     Tests the early-campaign hypothesis. The original case study found
+     five formats in just over two weeks around the lead single and
+     called it a multi-format rollout. It was. What the full window
+     shows is that it was a LEAD-SINGLE behaviour: one song got six
+     long-form surfaces, two got two, and nine got one each. Stated as
+     structure, with no claim that more surfaces caused more viewing. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">Long-form surfaces per song · 13 May – 5 October</div>
+    <h2 class="display" style="margin-top:.9rem">One song got six ways in.</h2>
+
+    <div class="depth">
+      <div class="dc lead">
+        <div class="dt">I'm your girl right?</div>
+        <div class="dn">6</div>
+        <span class="rung">Official video · premiered</span>
+        <span class="rung">Behind the scenes</span>
+        <span class="rung">Her Cut visualizer</span>
+        <span class="rung">Lyric video</span>
+        <span class="rung">Fcukers remix</span>
+        <span class="rung">Album-day visualizer</span>
+      </div>
+      <div class="dc">
+        <div class="dt">des fleurs x stromae</div>
+        <div class="dn">2</div>
+        <span class="rung">Visualizer</span>
+        <span class="rung">Official video · premiered</span>
+      </div>
+      <div class="dc">
+        <div class="dt">DNH</div>
+        <div class="dn">2</div>
+        <span class="rung">Visualizer</span>
+        <span class="rung">Live performance</span>
+      </div>
+      <div class="dc">
+        <div class="dt">Nine other tracks</div>
+        <div class="dn">1</div>
+        <span class="rung">Album-day visualizer</span>
+      </div>
+    </div>
+
+    <div class="bottomline">Seven formats in the campaign.
+      <span>Three songs saw more than one of them.</span></div>
+
+    <p class="qual">
+      Counting long-form only. The five-format rollout we flagged early in the campaign was
+      real — official video, BTS, alternate-cut visualizer, lyric video and remix, all inside
+      twenty-three days. The full window shows it was how the lead single was handled, not
+      how every song was handled.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 04 · LONG-FORM IS THE ENGINE ══════════════════════════════ -->
 <section class="slide">
   <div class="inner">
     <div class="label cold">Comparable campaign windows · structure, not totals</div>
@@ -496,8 +645,8 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 
     <div class="step2 count">
       <div class="sa">
-        <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="" loading="lazy">
+        <img src="https://i.ytimg.com/vi/wBf1UUhlpsc/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/wBf1UUhlpsc/hqdefault.jpg'" alt="" loading="lazy">
         <div class="sb">
           <div class="sl">Visualizer · 12 June</div>
           <div class="sn2" data-n="899673" data-fmt="k">899.7K</div>
@@ -629,15 +778,79 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   </div>
 </section>
 
-<!-- ══ 08 · THE POST-ALBUM OPPORTUNITY ═══════════════════════════ -->
+<!-- ══ CADENCE, FOLLOW-THROUGH AND PREMIERES ═════════════════════
+     Three of the good-practice tests on one slide, because they are
+     one finding: the campaign had a deliberate shape, and the shape
+     includes two long silences. Positions on the axis are real dates
+     over the 145-day window, so the 43-day hole is drawn to scale.
+
+     NO VELOCITY CLAIM ANYWHERE ON THIS SLIDE. It describes publishing
+     behaviour only — what went out and when. The daily collection did
+     not run through release week, so nothing here says what any of it
+     did after it landed. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label cold">Every upload, 13 May – 5 October · publishing behaviour only</div>
+    <h2 class="display" style="margin-top:.9rem">Twelve weeks hot.<br>Then everything in one day.</h2>
+
+    <div class="tl">
+      <div class="axis"></div>
+
+      <div class="gap" style="left:58.6%;width:29.7%"></div>
+      <div class="gl" style="left:73.4%">43 days quiet</div>
+      <div class="gap" style="left:88.3%;width:11.7%"></div>
+      <div class="gl" style="left:94.1%">17 days, and counting</div>
+
+      <div class="pip" style="left:9.0%"></div>
+      <div class="pip" style="left:11.0%"></div>
+      <div class="pip" style="left:14.5%"></div>
+      <div class="pip" style="left:15.9%"></div>
+      <div class="pip" style="left:20.7%"></div>
+      <div class="pip" style="left:58.6%"></div>
+
+      <div class="pip hero" style="left:0.4%"></div>
+      <div class="ml" style="left:0;transform:none">13 May<span class="md">I'm your girl right? · premiere</span></div>
+
+      <div class="pip hero" style="left:33.1%"></div>
+      <div class="ml" style="left:33.1%">30 Jun<span class="md">des fleurs video · premiere</span></div>
+
+      <div class="pip hero" style="left:53.1%"></div>
+      <div class="ml" style="left:53.1%">29 Jul<span class="md">DNH visualizer</span></div>
+
+      <div class="pip hero" style="left:88.3%"></div>
+      <div class="ml" style="left:88.3%;transform:translateX(-82%)">18 Sep<span class="md">Album · 12 uploads · premiere</span></div>
+    </div>
+
+    <div class="hero2 count" style="margin-top:2.6rem">
+      <div><div class="hn" data-n="46">46</div>
+      <div class="hk">Uploads, 13 May – 6 Aug<span class="role">Across 85 days</span></div></div>
+      <div><div class="hn rose" data-n="12">12</div>
+      <div class="hk">Uploads on album day<span class="role">11 visualizers and the album film</span></div></div>
+      <div><div class="hn gold" data-n="3">3</div>
+      <div class="hk">Premieres, all campaign<span class="role">Both official videos and the album</span></div></div>
+    </div>
+
+    <p class="qual">
+      Premiere use is verifiable here: three uploads carry a scheduled start with the broadcast
+      beginning within eight seconds of it. They are the two official videos and the 33-minute
+      album film — the three hero moments, and nothing else in the campaign. Follow-through was
+      tight where it happened: BTS thirteen days after the lead single, the des fleurs video
+      eighteen days after its visualizer, the DNH live cut eight days after its. Then nothing
+      between 7 August and album day.
+    </p>
+  </div>
+</section>
+
+<!-- ══ THE POST-ALBUM OPPORTUNITY ═══════════════════════════ -->
 <section class="slide">
   <div class="inner">
     <div class="label hot">The next 30–90 days</div>
     <h2 class="display" style="margin-top:.9rem">Follow the audience,<br>not the calendar.</h2>
 
     <p class="big-p">
-      The campaign has already given every track a surface. The question now is not how
-      much more to publish — it is <b>which songs have earned a second asset</b>.
+      The campaign has already given every track a surface, and <b>nothing has gone out
+      since</b>. The question now is not how much more to publish — it is <b>which songs have
+      earned a second asset</b>.
     </p>
 
     <div class="hero2 count" style="margin-top:1.5rem">
@@ -660,11 +873,76 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
   </div>
 </section>
 
-<!-- ══ 09 · THE READ ═════════════════════════════════════════════ -->
+<!-- ══ THE GOOD-PRACTICE READ ════════════════════════════════════
+     Graded against the full upload record, not ticked. Four strong,
+     three qualified, one open. If every row were a tick the slide
+     would be worthless, so the two honest negatives — the silences
+     and the single live asset — stay on the page. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">Tested against the full upload record · 565 uploads, 13 May – 5 October</div>
+    <h2 class="display" style="margin-top:.9rem">ESTRUS got the<br>fundamentals right.</h2>
+
+    <div class="score">
+      <div class="sr strong">
+        <div class="sb">Album depth</div>
+        <div class="se">Eleven tracks given their own surface on album day, plus the album film.</div>
+        <div class="sg">Strong</div>
+      </div>
+      <div class="sr strong">
+        <div class="sb">World-building</div>
+        <div class="se">One naming convention, one visual treatment, one release day, one named event.</div>
+        <div class="sg">Strong</div>
+      </div>
+      <div class="sr strong">
+        <div class="sb">Premieres</div>
+        <div class="se">Used on all three hero moments and on nothing else. A deliberate, consistent choice.</div>
+        <div class="sg">Strong</div>
+      </div>
+      <div class="sr strong">
+        <div class="sb">Long-form weight</div>
+        <div class="se">92.6% of campaign-window views sit with the twenty long-form assets.</div>
+        <div class="sg">Strong</div>
+      </div>
+      <div class="sr mixed">
+        <div class="sb">Multi-format</div>
+        <div class="se">Seven formats in the campaign — but six surfaces went to one song, two each to two more, one each to the rest.</div>
+        <div class="sg">Mixed</div>
+      </div>
+      <div class="sr mixed">
+        <div class="sb">Follow-through</div>
+        <div class="se">Fast on every hero that got a follow-up — 8 to 18 days — and then two long silences.</div>
+        <div class="sg">Mixed</div>
+      </div>
+      <div class="sr mixed">
+        <div class="sb">Shorts support</div>
+        <div class="se">38 Shorts on 27 days, 18 of them days with nothing else. Frequency, but it stopped on 6 August.</div>
+        <div class="sg">Mixed</div>
+      </div>
+      <div class="sr limited">
+        <div class="sb">Live / performance</div>
+        <div class="se">One asset, DNH at A Night In ESTRUS. A good idea used once, not a campaign pillar.</div>
+        <div class="sg">Limited</div>
+      </div>
+      <div class="sr open">
+        <div class="sb">Post-album extension</div>
+        <div class="se">No uploads since album day. Seventeen days is too early to grade — and it is the live question.</div>
+        <div class="sg">Open</div>
+      </div>
+    </div>
+
+    <p class="qual">
+      Graded on publishing behaviour, which is what the record can support. Nothing here is a
+      judgement about how any asset performed.
+    </p>
+  </div>
+</section>
+
+<!-- ══ THE READ ═════════════════════════════════════════════ -->
 <section class="slide">
   <div class="bleed scrim-b">
-    <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="">
+    <img src="https://i.ytimg.com/vi/vlLeLmx6GVI/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/vlLeLmx6GVI/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
     <div class="label">The read</div>
@@ -679,7 +957,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
       <div class="bt two">
         <div class="by">ESTRUS</div>
         <div class="bh">Build the world</div>
-        <p>14 visualizers, 11 on album day, three official videos.</p>
+        <p>14 visualizers, 11 on album day, two official videos and the album film.</p>
       </div>
       <div class="bt three">
         <div class="by">Now</div>
