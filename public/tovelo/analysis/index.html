@@ -21,53 +21,95 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@400;600;700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ── THE WORKING PAGE'S OWN VERSION OF THE DECK'S LOOK ─────────────
+   Same world, different job. The deck is a performance — big type over
+   imagery, heavy grain, a hard vignette. This page is read, closely,
+   for twenty minutes, by someone checking arithmetic. So it takes the
+   palette and the display face and leaves the theatrics behind:
+
+     · the haze and grain are at roughly a third of the deck's strength,
+       because static over a dense table is hostile, not atmospheric
+     · no vignette at all — a reading column must not fall off at the
+       edges
+     · Grenze Gotisch on headings only; body copy, tables and figures
+       stay on Inter Tight and JetBrains Mono, which is what makes a
+       number checkable
+
+   Red is reserved for the two things that carry weight: section
+   eyebrows, and the lead figure in a table. */
 :root{
-  --night:#0C0D12; --ink:#16171F; --bone:#F2EDE6; --smoke:#A7A2A6;
-  --faint:#6C6670; --rule:rgba(242,237,230,.14);
-  --rose:#C4566A; --sky:#8FB4CE; --blush:#E8C2C8; --amber:#C98A3C;
-  --disp:'Syne',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --night:#050304; --ink:#0C0607; --bone:#E9DFDC; --smoke:#9B8781;
+  --faint:#7A6763; --rule:rgba(233,223,220,.13);
+  --rose:#D9121B; --blush:#FF4438; --amber:#F0A62B; --acid:#3BF0B0;
+  --disp:'Grenze Gotisch',Georgia,serif;
+  --body:'Inter Tight',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
-  -webkit-font-smoothing:antialiased;line-height:1.6}
-.wrap{max-width:860px;margin:0 auto;padding:clamp(28px,6vw,72px) clamp(20px,5vw,40px) 96px}
-a{color:var(--sky)}
+  -webkit-font-smoothing:antialiased;line-height:1.62}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:220px 220px;opacity:.11;mix-blend-mode:overlay}
+.haze{position:fixed;inset:0;pointer-events:none;z-index:61;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23h)'/%3E%3C/svg%3E");
+  background-size:300px 300px;opacity:.03;mix-blend-mode:screen}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(60% 34% at 80% 0%,rgba(217,18,27,.12),transparent 64%),
+    radial-gradient(56% 36% at 8% 100%,rgba(142,10,16,.12),transparent 66%)}
+.wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;
+  padding:clamp(28px,6vw,72px) clamp(20px,5vw,40px) 96px}
+a{color:var(--blush)}
 .back{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
   text-decoration:none;color:var(--faint)}
 .back:hover{color:var(--bone)}
-h1{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;line-height:1.02;
-  font-size:clamp(1.9rem,4.4vw,3rem);margin:1.6rem 0 .5rem}
-h2{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;line-height:1.1;
-  font-size:clamp(1.15rem,2.4vw,1.5rem);margin:2.8rem 0 .7rem;
-  padding-top:1.5rem;border-top:1px solid var(--rule)}
-h3{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+h1{font-family:var(--disp);font-weight:700;letter-spacing:.004em;line-height:1.0;
+  font-size:clamp(2.2rem,5.4vw,3.6rem);margin:1.6rem 0 .6rem;
+  text-shadow:0 0 2px rgba(217,18,27,.75),0 0 18px rgba(217,18,27,.4),
+              0 0 60px rgba(217,18,27,.25)}
+h2{font-family:var(--disp);font-weight:700;letter-spacing:.004em;line-height:1.08;
+  font-size:clamp(1.35rem,2.9vw,1.9rem);margin:3rem 0 .7rem;
+  padding-top:1.6rem;border-top:1px solid var(--rule)}
+h3{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--rose);margin:1.9rem 0 .5rem;font-weight:500}
 p{margin:.8rem 0;color:var(--smoke)}
-p b,li b{color:var(--bone);font-weight:600}
+p b,li b,td b{color:var(--bone);font-weight:600}
 .lede{font-size:1.06rem;color:var(--bone)}
 ul{color:var(--smoke);padding-left:1.1rem}
-li{margin:.4rem 0}
+li{margin:.45rem 0}
 table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.84rem}
-th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--rule);
+th,td{text-align:left;padding:.52rem .6rem;border-bottom:1px solid var(--rule);
   vertical-align:top}
-th{font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;
+th{font-family:var(--mono);font-size:.57rem;letter-spacing:.13em;text-transform:uppercase;
   color:var(--faint);font-weight:500}
 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 tr.lead td{color:var(--bone)}
 tr.lead td.n{color:var(--rose);font-weight:600}
-.warn{border-left:3px solid var(--amber);padding:.1rem 0 .1rem 1rem;margin:1.3rem 0}
-.warn h3{color:var(--amber);margin-top:.4rem}
+/* A limitation is the most important thing on this page, so it gets the
+   one colour nothing else uses. */
+.warn{border-left:3px solid var(--amber);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;
+  background:linear-gradient(90deg,rgba(240,166,43,.05),transparent 42%)}
+.warn h3{color:var(--amber);margin-top:.5rem}
 .note{border-left:3px solid var(--rule);padding:.1rem 0 .1rem 1rem;margin:1.2rem 0;
   font-size:.88rem}
 code{font-family:var(--mono);font-size:.84em;color:var(--blush)}
+/* Grades, matching the deck's scorecard exactly so the two pages cannot
+   drift apart on what counts as strong. */
+td.g{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  white-space:nowrap}
+td.g.strong{color:var(--acid)}
+td.g.mixed{color:var(--amber)}
+td.g.limited{color:var(--smoke)}
+td.g.open{color:var(--rose)}
 .foot{font-family:var(--mono);font-size:.6rem;letter-spacing:.07em;line-height:2;
   text-transform:uppercase;color:var(--faint);margin-top:3.5rem;padding-top:1.4rem;
   border-top:1px solid var(--rule)}
 </style>
 </head>
 <body>
+<div class="haze" aria-hidden="true"></div>
 <div class="wrap">
 
 <a class="back" href="/tovelo">← Back to the read</a>
@@ -281,6 +323,104 @@ code{font-family:var(--mono);font-size:.84em;color:var(--blush)}
   </p>
 </div>
 
+<h2>Format depth, song by song</h2>
+<p>
+  Counting <b>long-form only</b>, across the campaign window 13 May – 5 October. A Short is
+  not a surface for a song in this count; it is promotion for one.
+</p>
+<table>
+  <tr><th>Song</th><th>Long-form surfaces</th><th class="n">Count</th></tr>
+  <tr class="lead"><td>I'm your girl right?</td>
+    <td>Official video (premiered) · behind the scenes · Her Cut visualizer · lyric video ·
+        Fcukers remix audio · album-day visualizer</td><td class="n">6</td></tr>
+  <tr><td>des fleurs x stromae</td><td>Visualizer · official video (premiered)</td><td class="n">2</td></tr>
+  <tr><td>DNH</td><td>Visualizer · live performance</td><td class="n">2</td></tr>
+  <tr><td>Nine other album tracks</td><td>Album-day visualizer</td><td class="n">1 each</td></tr>
+</table>
+<p>
+  Seven distinct long-form formats appear in the campaign: official video, visualizer,
+  alternate-cut visualizer, lyric video, behind the scenes, remix audio and live performance,
+  plus the 33-minute album film. <b>Three songs received more than one of them.</b>
+</p>
+<div class="note">
+  <p>
+    This is the test of our own earlier finding. The original case study flagged
+    <b>five formats in just over two weeks</b> around the lead single and read it as a
+    multi-format rollout. That is confirmed — official video 13 May, BTS 26 May, Her Cut
+    visualizer 29 May, lyric video 3 June, remix 5 June, all inside twenty-three days. What
+    the full window adds is that it describes <b>how the lead single was handled</b>, not how
+    the campaign was run. The deck says so rather than repeating the original slide.
+  </p>
+</div>
+
+<h2>Cadence and follow-through</h2>
+<p>
+  58 uploads in the window: <b>38 Shorts, 20 long-form</b>, on 28 distinct days. Shorts
+  appear on 27 of those days, long-form on 10; <b>18 days carry a Short and nothing else</b>.
+  That is what supports "Shorts created frequency" as a description of publishing behaviour.
+  It is not a claim that Shorts sent anyone to the long-form.
+</p>
+<h3>First follow-up after each hero</h3>
+<table>
+  <tr><th>Hero asset</th><th>First long-form follow-up</th><th class="n">Gap</th></tr>
+  <tr><td>I'm your girl right? video · 13 May</td><td>Behind the scenes · 26 May</td><td class="n">13 days</td></tr>
+  <tr><td>des fleurs visualizer · 12 Jun</td><td>des fleurs official video · 30 Jun</td><td class="n">18 days</td></tr>
+  <tr><td>des fleurs official video · 30 Jun</td><td>None for this song, ever</td><td class="n">—</td></tr>
+  <tr><td>DNH visualizer · 29 Jul</td><td>DNH live at A Night In ESTRUS · 6 Aug</td><td class="n">8 days</td></tr>
+  <tr class="lead"><td>ESTRUS album · 18 Sep</td><td>Nothing published since</td><td class="n">17 days</td></tr>
+</table>
+<h3>Every gap of seven days or more</h3>
+<table>
+  <tr><th>From</th><th>To</th><th class="n">Days</th></tr>
+  <tr><td>13 May</td><td>20 May</td><td class="n">7</td></tr>
+  <tr><td>19 Jun</td><td>29 Jun</td><td class="n">10</td></tr>
+  <tr><td>30 Jun</td><td>16 Jul</td><td class="n">16</td></tr>
+  <tr class="lead"><td>6 Aug</td><td>18 Sep</td><td class="n">43</td></tr>
+  <tr class="lead"><td>18 Sep</td><td>5 Oct (read date)</td><td class="n">17, open</td></tr>
+</table>
+<p>
+  So the shape is: <b>46 uploads across 85 days</b> to 6 August, then nothing for six weeks,
+  then <b>12 uploads on album day</b>, then nothing. Both silences are facts about publishing.
+  Neither is a statement about performance, and the deck does not make one.
+</p>
+
+<h2>Premiere use — verifiable, and consistent</h2>
+<p>
+  Premiere status is normally the thing we have to leave out, but it is recoverable here. The
+  API returns <code>scheduledStart</code> and <code>actualStart</code>, and a Premiere shows a
+  scheduled time with the broadcast starting within seconds of it. Three uploads in the whole
+  campaign carry that signature:
+</p>
+<table>
+  <tr><th>Upload</th><th>Scheduled</th><th class="n">Started after</th></tr>
+  <tr><td>I'm your girl right? (Official Video) · 13 May</td><td>17:30 UTC</td><td class="n">6s</td></tr>
+  <tr><td>des fleurs x stromae (Official Video) · 30 Jun</td><td>08:00 UTC</td><td class="n">6s</td></tr>
+  <tr><td>ESTRUS · 18 Sep · 33m 25s album film</td><td>18:00 UTC</td><td class="n">8s</td></tr>
+</table>
+<p>
+  <b>Nothing else in the campaign premiered.</b> Not one of the fourteen visualizers, not the
+  lyric video, not the live cut. Premiere was reserved for the three hero moments, which is a
+  deliberate and consistent choice rather than an occasional one.
+</p>
+
+<h2>The good-practice read, and how each grade was reached</h2>
+<p>
+  Every grade is about <b>publishing behaviour</b> — what went out and when. None of them is a
+  judgement about how an asset performed, because limitation 2 means we cannot make one.
+</p>
+<table>
+  <tr><th>Behaviour</th><th>Evidence</th><th>Grade</th></tr>
+  <tr><td>Album depth</td><td>11 tracks given a surface on album day, plus the album film</td><td class="g strong">Strong</td></tr>
+  <tr><td>World-building</td><td>One naming convention, one visual treatment, one release day, one named event</td><td class="g strong">Strong</td></tr>
+  <tr><td>Premieres</td><td>3 of 3 hero moments; 0 of everything else</td><td class="g strong">Strong</td></tr>
+  <tr><td>Long-form weight</td><td>92.6% of window views on 20 long-form assets</td><td class="g strong">Strong</td></tr>
+  <tr><td>Multi-format</td><td>7 formats, but 6 surfaces to one song and 1 each to nine</td><td class="g mixed">Mixed</td></tr>
+  <tr><td>Follow-through</td><td>8–18 days where it happened; a 43-day and a 17-day silence</td><td class="g mixed">Mixed</td></tr>
+  <tr><td>Shorts support</td><td>38 Shorts on 27 days, 18 of them alone — but stopping 6 Aug</td><td class="g mixed">Mixed</td></tr>
+  <tr><td>Live / performance</td><td>One asset in the entire campaign</td><td class="g limited">Limited</td></tr>
+  <tr><td>Post-album extension</td><td>17 days, no uploads. Too early to grade</td><td class="g open">Open</td></tr>
+</table>
+
 <h2>What this read does not claim</h2>
 <ul>
   <li><b>That ESTRUS is out- or under-performing Dirt Femme.</b> See limitation 1.</li>
@@ -292,6 +432,13 @@ code{font-family:var(--mono);font-size:.84em;color:var(--blush)}
     measured at four years and seventeen days.</li>
   <li><b>Anything about streaming, radio or touring.</b> No DSP data was used; YouTube views
     are not a proxy for consumption elsewhere.</li>
+  <li><b>That Shorts drove viewing to the long-form.</b> Shorts created publishing frequency;
+    whether anyone moved between the two is not visible in public data.</li>
+  <li><b>That the two silences cost anything.</b> 43 days before the album and 17 days after it
+    are facts about what was published. What they did or did not cost is not measurable from
+    outside, and the post-album row is graded open for exactly that reason.</li>
+  <li><b>That more surfaces per song produce more viewing.</b> The format depth table counts
+    what each song was given, not what it earned.</li>
 </ul>
 
 <p class="foot">
