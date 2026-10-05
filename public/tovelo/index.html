@@ -106,18 +106,31 @@ body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
    The grain is an inline SVG turbulence rather than an image file, so
    it costs no request and cannot 404 on a deck opened from a link in
    an email. */
-/* Two layers, not one, because they need different blend modes. Mid-grey
-   noise composited normally over a near-black page lifts every black to
-   grey — the whole deck fogs. Overlay leaves black black and only bites
-   in the midtones and highlights, which is where film grain lives anyway.
-   The vignette has to stay a normal composite to actually darken, so it
-   gets its own layer. */
+/* THREE LAYERS, each with a different blend mode, because each is doing
+   a different job and one layer cannot do all three.
+
+   1. GRAIN (body::after, overlay). Fine, tight noise. Overlay leaves
+      black black and bites in the midtones, which is where film grain
+      lives. This is the texture.
+   2. HAZE (.haze, screen). Coarser, softer noise on a screen blend, so
+      it ADDS light — a thin static fog that lifts the shadows just
+      enough to feel like a degraded transfer rather than a flat black
+      page. This is the part that reads as VHS.
+   3. VIGNETTE (.vig, normal). The only layer that darkens, so it has to
+      be a normal composite.
+
+   The haze is deliberately weak (.085). Static that you notice as an
+   effect is too much static; it should only register as the room not
+   being perfectly clean. */
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:61;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size:220px 220px;
-  opacity:.17;mix-blend-mode:overlay}
+  opacity:.30;mix-blend-mode:overlay}
+.haze{position:fixed;inset:0;pointer-events:none;z-index:62;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='h'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23h)'/%3E%3C/svg%3E");
+  background-size:300px 300px;opacity:.085;mix-blend-mode:screen}
 .vig{position:fixed;inset:0;pointer-events:none;z-index:60;
-  background:radial-gradient(116% 86% at 50% 42%,transparent 30%,rgba(2,1,4,.72) 78%,rgba(0,0,0,.94) 100%)}
+  background:radial-gradient(120% 92% at 50% 44%,transparent 42%,rgba(2,1,4,.52) 82%,rgba(0,0,0,.84) 100%)}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background:
     radial-gradient(52% 40% at 78% 8%,rgba(217,18,27,.16),transparent 64%),
@@ -144,24 +157,46 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 .inner{position:relative;z-index:3;width:100%;max-width:1180px;margin:0 auto;
   padding:clamp(76px,11vh,130px) var(--pad) clamp(52px,8vh,96px)}
 .bleed{position:absolute;inset:0;z-index:1}
-/* Crushed, not just dimmed. These frames are already mostly black —
-   candles in a dark room, a face on a black field — and the grade's job
-   is to let the black go all the way down so the only thing with any
-   light in it is the one thing the frame is about. */
+/* Present, not crushed. These frames are already mostly black — candles
+   in a dark room, a face on a black field — so they do not need much
+   dimming to sit behind type, and taking them to .56 threw away the
+   thing worth looking at. The image should read as a room the slide is
+   standing in. */
 .bleed img{width:100%;height:100%;object-fit:cover;display:block;
-  filter:saturate(1.1) contrast(1.42) brightness(.56)}
+  filter:saturate(1.18) contrast(1.16) brightness(.92)}
 /* The grade sits over the photograph rather than in it, so the red
    reads as light in the room instead of a filter on the lens. */
 .bleed::before{content:'';position:absolute;inset:0;z-index:2;
-  background:linear-gradient(150deg,rgba(217,18,27,.18),transparent 46%,rgba(142,10,16,.26));
+  background:linear-gradient(150deg,rgba(217,18,27,.22),transparent 48%,rgba(142,10,16,.3));
   mix-blend-mode:screen}
 .bleed::after{content:'';position:absolute;inset:0;z-index:3}
+
+/* SCRIM STRENGTH IS SET BY WHAT SITS ON THE SLIDE, NOT BY TASTE.
+   scrim-l and scrim-b carry a headline and a short paragraph, so they
+   can stay open and let the frame through. scrim-f carries the two
+   data-dense slides — a bar chart and a figure row — and a chart cannot
+   compete with a lit face behind it. So scrim-f is much stronger, on
+   both axes, and darkens its own image further. If a future slide moves
+   between these classes, the scrim has to move with it. */
 .scrim-l::after{background:
-  linear-gradient(90deg,rgba(5,3,4,.97) 0%,rgba(5,3,4,.93) 46%,rgba(5,3,4,.62) 100%),
-  linear-gradient(0deg,rgba(5,3,4,.6) 0%,transparent 46%)}
-.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.5) 0%,rgba(5,3,4,.92) 62%,var(--night) 100%)}
+  linear-gradient(90deg,rgba(5,3,4,.9) 0%,rgba(5,3,4,.78) 46%,rgba(5,3,4,.3) 100%),
+  linear-gradient(0deg,rgba(5,3,4,.5) 0%,transparent 46%)}
+.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.34) 0%,rgba(5,3,4,.8) 62%,var(--night) 100%)}
 .scrim-f::after{background:
-  linear-gradient(0deg,rgba(5,3,4,.9) 0%,rgba(5,3,4,.74) 55%,rgba(5,3,4,.8) 100%)}
+  linear-gradient(0deg,rgba(5,3,4,.94) 0%,rgba(5,3,4,.84) 50%,rgba(5,3,4,.9) 100%),
+  linear-gradient(90deg,rgba(5,3,4,.72) 0%,rgba(5,3,4,.3) 62%,rgba(5,3,4,.62) 100%)}
+.slide:has(.scrim-f) .bleed img{filter:saturate(1.18) contrast(1.2) brightness(.74)}
+
+/* With the imagery this far up, small text over it needs its own
+   contrast rather than relying on the scrim. Display type already has
+   halation; this is for everything that does not. */
+.slide:has(.bleed) .big-p,
+.slide:has(.bleed) .qual,
+.slide:has(.bleed) .label,
+.slide:has(.bleed) .hk,
+.slide:has(.bleed) .bt p,
+.slide:has(.bleed) .sw .sv,
+.slide:has(.bleed) .sw .sk{text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 16px rgba(0,0,0,.85)}
 
 /* ── TYPE ─────────────────────────────────────────────────────────── */
 .label{font-family:var(--body);font-size:.64rem;font-weight:600;letter-spacing:.34em;
@@ -231,7 +266,7 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .swing .sw{flex:0 0 auto}
 .sw .sv{font-family:var(--disp);font-weight:800;letter-spacing:-.035em;line-height:.86;
   white-space:nowrap}
-.sw.a .sv{font-size:clamp(2rem,3.4vw,2.7rem);color:var(--faint)}
+.sw.a .sv{font-size:clamp(2rem,3.4vw,2.7rem);color:#9C8781}
 .sw.gap .sv{font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--rose)}
 .sw.b .sv{font-size:clamp(3.2rem,6vw,5rem);color:var(--blush);
   text-shadow:0 0 46px rgba(217,18,27,.4)}
@@ -444,6 +479,7 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 </head>
 <body>
 <div class="vig" aria-hidden="true"></div>
+<div class="haze" aria-hidden="true"></div>
 
 <nav class="nav">
   <span class="who">Tove Lo · @tovelomusic</span>
