@@ -547,16 +547,42 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .lf ul{margin:0;padding-left:1rem;color:var(--smoke);font-size:.79rem;line-height:1.5}
 .lf li{margin:.28rem 0}
 
-/* ── CASCADE ──────────────────────────────────────────────────────
-   One shoot opening into many assets, drawn as a widening stack. The
-   rows get lighter going down because the lower rows are the ones we
-   are recommending rather than the ones that exist. */
+/* ── DECISION TREE ────────────────────────────────────────────────
+   Three states, and the state is the whole point: KNOW (confirmed and
+   verifiable), CHECK (the one action being recommended), COULD (only
+   on the far side of that action).
+
+   The earlier version drew this as a single funnel, which quietly made
+   "other songs performed that night" a stage in a process rather than
+   an open question — an unknown dressed as a fact. States fix that: a
+   row cannot sit in the funnel without declaring which kind of thing
+   it is.
+
+   The CHECK row is deliberately the loudest thing on the slide. It is
+   the only row that is an instruction. */
 .casc{display:flex;flex-direction:column;align-items:center;gap:.3rem;
   margin:clamp(1.1rem,2.4vw,1.6rem) 0 0;text-align:center}
 .cs{width:100%;max-width:38rem;border:1px solid var(--rule);border-radius:3px;
   padding:.58rem .8rem;font-family:var(--body);font-weight:600;font-size:.68rem;
   letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
-.cs.have{border-color:rgba(217,18,27,.55);background:rgba(217,18,27,.12);color:var(--bone)}
+.cs.have{border-color:rgba(217,18,27,.5);background:rgba(217,18,27,.1);color:var(--bone)}
+/* The audit step: brighter, taller, and the only row with a lit edge. */
+.cs.check{border-color:var(--rose);background:rgba(217,18,27,.2);color:var(--bone);
+  padding:.8rem .9rem;font-size:.78rem;letter-spacing:.14em;
+  box-shadow:0 0 34px rgba(217,18,27,.28)}
+.cs.check .cnote{color:var(--blush);font-size:.58rem;line-height:1.75}
+/* Dashed, dimmed and faded, so a row that might not exist cannot be
+   mistaken for one that does. Tested against the live page: at .2 and
+   full opacity these read as confirmed rows at presentation size. */
+.cs.maybe{border-style:dashed;border-color:rgba(233,223,220,.26);color:var(--smoke);opacity:.72}
+.cs.maybe .cnote{color:var(--faint)}
+/* State keys sit outside the row so the row reads as content and the
+   key reads as provenance. */
+.csk{font-family:var(--body);font-weight:700;font-size:.52rem;letter-spacing:.2em;
+  text-transform:uppercase;width:100%;max-width:38rem;text-align:left;margin-bottom:.1rem}
+.csk.k1{color:var(--smoke)}
+.csk.k2{color:var(--rose)}
+.csk.k3{color:var(--faint)}
 .cs .cnote{display:block;font-size:.56rem;letter-spacing:.14em;color:var(--faint);
   margin-top:.25rem}
 .cs.have .cnote{color:var(--blush)}
@@ -631,6 +657,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .slide.trim .bottomline{margin-top:.9rem;font-size:clamp(1.2rem,2.5vw,1.8rem)}
 .slide.trim .qual{margin-top:.7rem;font-size:.76rem}
 .slide.trim .wld p{font-size:.78rem}
+
+/* A quiet sentence, not a footer. .fine is uppercase and letterspaced,
+   which is right for provenance lines and wrong for prose. */
+.aside{font-size:.76rem;line-height:1.5;color:var(--smoke);margin:1rem 0 0;max-width:52em}
 
 /* ── FOOTER ───────────────────────────────────────────────────────── */
 .foot{padding:clamp(2.4rem,5vw,4rem) var(--pad);max-width:1180px;margin:0 auto}
@@ -954,77 +984,93 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      The strongest unexploited opportunity in the campaign, and the one
      that needed the most care to state honestly.
 
-     The earlier version of this slide said "you do not hire a show
-     director to film one song". That was inference dressed as evidence
-     and it has been removed. The slide now asks a question and
-     recommends an audit, which is all the evidence supports.
+     WHAT IS VERIFIED: the credits on the DNH live upload name a show
+     director, creative director, DP, editor/colorist, producer and
+     stylist. That is a staged, professionally crewed production. One
+     performance from it is published.
 
-     WHAT IS VERIFIED: the credits on the DNH live upload name a Show
-     Director, a Creative Director, a DP, an editor/colorist, a producer
-     and a stylist. That is a staged, professionally crewed show. One
-     song from it is on the channel.
+     WHAT IS NOT VERIFIED AND IS NOT CLAIMED ANYWHERE: that other songs
+     were performed, that anything else was filmed, that further footage
+     exists, that it is usable, or that rights permit release. No
+     setlist is public.
 
-     WHAT IS NOT VERIFIED, AND IS NOT CLAIMED ANYWHERE ON THIS SLIDE:
-     which other songs were performed, whether they were filmed, or
-     whether the footage is usable. No setlist is public. The slide
-     therefore recommends an AUDIT, not a release schedule — the ask is
-     for someone at the label to open the rushes, which is a question we
-     cannot answer from outside and they can answer in an afternoon. -->
+     THE ARGUMENT IS ASSET ECONOMICS, NOT LIVE PERFORMANCE. 97.7K is
+     nowhere near enough to show live works, so the figure is supporting
+     context only and is deliberately the smallest number on the slide.
+     The point is unused production value. -->
 <section class="slide">
   <div class="inner">
-    <div class="label hot">A Night In ESTRUS · the cheapest question in this deck</div>
+    <div class="label hot">A Night In ESTRUS · the cheapest move available</div>
     <h2 class="display" style="margin-top:.9rem">Before commissioning more,<br>audit what <em>already exists</em>.</h2>
 
-    <div class="hero2 count">
-      <div><div class="hn rose" data-n="1">1</div>
-      <div class="hk">Songs published from the night<span class="role">DNH, 6 August</span></div></div>
-      <div><div class="hn" data-n="6">6</div>
-      <div class="hk">Crew roles credited<span class="role">Including a show director</span></div></div>
-      <div><div class="hn gold" data-n="97715" data-fmt="k">97.7K</div>
-      <div class="hk">What that one song did<span class="role">In its first 59 days, with no album behind it</span></div></div>
+    <p class="big-p">
+      A live show was staged, crewed and filmed, and one performance was published. The first
+      move is simple: <b>audit what else, if anything, was captured and can be used.</b>
+    </p>
+
+    <div class="hero2 count" style="margin-top:1.4rem">
+      <div><div class="hn rose" data-n="6">6</div>
+      <div class="hk">Production roles credited<span class="role">Show director, creative director, DP, editor, colorist, producer</span></div></div>
+      <div><div class="hn" data-n="1">1</div>
+      <div class="hk">Performances published from it<span class="role">DNH, 6 August — the only one we can verify</span></div></div>
     </div>
 
-    
+    <div class="bottomline">If usable footage exists, the assets are already paid for.
+      <span>If it does not, the question is answered before the next shoot is.</span></div>
 
-    <p class="big-p">
-      A live show was staged, crewed and filmed, and one song from it was published. No setlist
-      for the night is public, so <b>what else was shot?</b> is a question only the label can
-      answer. If more usable performance exists, there are post-album assets already paid for.
-      If it does not, we have spent an afternoon finding out and we move on.
+    <p class="aside" style="margin-top:1.3rem">
+      Context, not evidence — that one performance has done 97.7K in 59 days. Too small a
+      sample to say anything about live as a format, and nothing here does.
     </p>
   </div>
 </section>
 
-<!-- ══ 09 · ONE SHOOT, MANY SURFACES ════════════════════════════
-     Conditional on the previous slide's audit finding something. The
-     top two rows are what exists; everything below is what could, and
-     the slide says so rather than implying a plan. -->
-<section class="slide">
-  <div class="inner">
-    <div class="label cold">If — and only if — the rushes contain more</div>
-    <h2 class="display" style="margin-top:.9rem">One shoot can become<br>an <em>asset bank</em>.</h2>
+<!-- ══ 09 · KNOW, CHECK, COULD ═════════════════════════════════
+     Rebuilt from a funnel into a decision tree, because the funnel
+     made an unknown look like a stage: "other songs performed that
+     night" sat between two confirmed rows as though it were part of a
+     process. It is not — it is the open question.
 
-<div class="casc">
+     Three states now, and every row declares which it is. Nothing
+     below the audit step is claimed to exist.
+
+     Step 4 is what ties these slides to the rest of the deck: the
+     audience signal decides which footage is worth cutting first. That
+     is the difference between this and a generic repurposing
+     recommendation. -->
+<section class="slide dense">
+  <div class="inner">
+    <div class="label cold">What we know · what we check · what we could do</div>
+    <h2 class="display" style="margin-top:.9rem">Check the archive<br>before booking the <em>crew</em>.</h2>
+
+    <div class="casc">
+      <div class="csk k1">What we know</div>
       <div class="cs have">A Night In ESTRUS · staged, crewed, filmed
-        <span class="cnote">Confirmed — show director, DP, editor, colorist, producer, stylist</span></div>
+        <span class="cnote">Confirmed production · six roles credited</span></div>
       <div class="cdn">▼</div>
-      <div class="cs have">DNH · standalone live video
-        <span class="cnote">Published 6 August · 97.7K</span></div>
+      <div class="cs have">DNH · live performance
+        <span class="cnote">Confirmed output · published 6 August</span></div>
+
       <div class="cdn">▼</div>
-      <div class="cs">Other songs performed that night
-        <span class="cnote">Unknown from outside — this is the audit</span></div>
+      <div class="csk k2">What we check</div>
+      <div class="cs check">Audit the existing footage
+        <span class="cnote">What else was captured? · What is usable? · What can be cleared?</span></div>
+
       <div class="cdn">▼</div>
-      <div class="cs">Standalone live videos per track
-        <span class="cnote">The medium-lift option on the previous slide</span></div>
+      <div class="csk k3">What we could do — only if the audit finds something</div>
+      <div class="cs maybe">Prioritise by audience signal
+        <span class="cnote">Cut the tracks already separating first — source of life before anything else</span></div>
       <div class="cdn">▼</div>
-      <div class="cs">Performance Shorts, vocal and lyric moments
-        <span class="cnote">Cut from the same rushes</span></div>
+      <div class="cs maybe">Build the asset bank
+        <span class="cnote">Standalone performances · performance Shorts · vocal and lyric moments · world-building cuts</span></div>
     </div>
 
-    <p class="big-p">
-      The economics are the point. A performance already shot, lit, graded and cleared costs an
-      edit; the same asset commissioned from scratch costs a shoot. <b>Extending the world is
-      cheaper than building another one.</b>
+    <div class="bottomline">Don't commission the next asset
+      <span>until you know what the last shoot already contains.</span></div>
+
+    <p class="aside">
+      If the footage exists, extending the ESTRUS world may need an edit rather than another
+      shoot. Nothing below the audit step is claimed to exist today.
     </p>
   </div>
 </section>
