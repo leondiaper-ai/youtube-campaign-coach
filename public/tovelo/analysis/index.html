@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tove Lo × YouTube — the numbers behind the ESTRUS read</title>
+<meta name="description" content="Method, source data and every figure behind the Tove Lo ESTRUS post-album read">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     THE WORKING PAGE for /tovelo.
+
+     Everything the deck asserts, with its arithmetic, plus the two
+     limitations that shaped what the deck is allowed to say:
+
+       1. ESTRUS and Dirt Femme view totals are not comparable.
+       2. There is no ESTRUS release-week velocity data at all.
+
+     Both are stated here in full rather than softened. The deck obeys
+     them; this page explains them.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0C0D12; --ink:#16171F; --bone:#F2EDE6; --smoke:#A7A2A6;
+  --faint:#6C6670; --rule:rgba(242,237,230,.14);
+  --rose:#C4566A; --sky:#8FB4CE; --blush:#E8C2C8; --amber:#C98A3C;
+  --disp:'Syne',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(28px,6vw,72px) clamp(20px,5vw,40px) 96px}
+a{color:var(--sky)}
+.back{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;color:var(--faint)}
+.back:hover{color:var(--bone)}
+h1{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;line-height:1.02;
+  font-size:clamp(1.9rem,4.4vw,3rem);margin:1.6rem 0 .5rem}
+h2{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;line-height:1.1;
+  font-size:clamp(1.15rem,2.4vw,1.5rem);margin:2.8rem 0 .7rem;
+  padding-top:1.5rem;border-top:1px solid var(--rule)}
+h3{font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--rose);margin:1.9rem 0 .5rem;font-weight:500}
+p{margin:.8rem 0;color:var(--smoke)}
+p b,li b{color:var(--bone);font-weight:600}
+.lede{font-size:1.06rem;color:var(--bone)}
+ul{color:var(--smoke);padding-left:1.1rem}
+li{margin:.4rem 0}
+table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.84rem}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);font-weight:500}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.lead td{color:var(--bone)}
+tr.lead td.n{color:var(--rose);font-weight:600}
+.warn{border-left:3px solid var(--amber);padding:.1rem 0 .1rem 1rem;margin:1.3rem 0}
+.warn h3{color:var(--amber);margin-top:.4rem}
+.note{border-left:3px solid var(--rule);padding:.1rem 0 .1rem 1rem;margin:1.2rem 0;
+  font-size:.88rem}
+code{font-family:var(--mono);font-size:.84em;color:var(--blush)}
+.foot{font-family:var(--mono);font-size:.6rem;letter-spacing:.07em;line-height:2;
+  text-transform:uppercase;color:var(--faint);margin-top:3.5rem;padding-top:1.4rem;
+  border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<a class="back" href="/tovelo">← Back to the read</a>
+
+<h1>The numbers behind the ESTRUS read.</h1>
+<p class="lede">
+  Every figure on <a href="/tovelo">/tovelo</a>, with its arithmetic — and the two
+  limitations that decided what the deck is allowed to claim.
+</p>
+
+<h2>Where the data comes from</h2>
+<table>
+  <tr><th>Channel</th><td><code>@tovelomusic</code></td></tr>
+  <tr><th>Source</th><td>YouTube Data API v3, single pull, 5 October 2026</td></tr>
+  <tr><th>Uploads retrieved</th><td><b>565 of 565 public uploads.</b> <code>capped: false</code></td></tr>
+  <tr><th>Subscribers</th><td>3,880,000 (YouTube's rounded public figure)</td></tr>
+  <tr><th>Lifetime view counter</th><td>3,330,599,183</td></tr>
+  <tr><th>Sum of the 565 uploads</th><td>2,808,559,662 — <b>84.3%</b> of the counter</td></tr>
+</table>
+<p>
+  Every view figure on both pages is a live counter read at that moment and drifts by a
+  few hundred within the hour; they are accurate to the stated read time, not frozen.
+  84.3% coverage is unusually good for this kind of read, so share-of-catalogue statements
+  stand on firmer ground than they often do. The remaining 522,044,141 views sit in content
+  that is no longer public, and nothing here claims to account for it.
+</p>
+
+<h2>The two limitations</h2>
+
+<div class="warn">
+<h3>1 · ESTRUS and Dirt Femme view totals are not comparable</h3>
+<p>
+  A matched campaign clock puts assets published in the same relative window side by side.
+  But Dirt Femme's assets were published in 2022 and have been accumulating for about
+  <b>four years</b>; ESTRUS's have had between <b>seventeen days and five months</b>.
+</p>
+<p>
+  A matched window of <em>publication</em> is not a matched window of <em>accumulation</em>.
+  And it cannot be corrected: the API returns a lifetime counter and nothing else, so there
+  is no way to ask what Dirt Femme had done at day 17 — nobody recorded it in 2022.
+</p>
+<p>
+  So the deck compares <b>structure</b> (cadence, format mix, how each visual world was
+  built) and <b>shares</b>, which age does not distort. No cross-era view total appears
+  anywhere on it.
+</p>
+</div>
+
+<div class="warn">
+<h3>2 · There is no ESTRUS release-week velocity data</h3>
+<p>
+  The Watcher's daily collection for this channel failed during the week that mattered:
+</p>
+<ul>
+  <li>The <b>channel snapshot has been frozen since 22 September</b> at 3,330,599,183 views
+    and 3,880,000 subscribers — thirteen days with no movement recorded.</li>
+  <li>The <b>per-video daily series stops on 17 September</b>, the day before the album.</li>
+  <li>Earlier readings are catch-ups, not daily: 8 September records +33,582,602 in a single
+    reading covering fourteen days.</li>
+</ul>
+<p>
+  Every ESTRUS figure in the deck is therefore a <b>lifetime total as at 5 October</b>, with
+  no visible shape behind it. The deck makes no claim about momentum, velocity, first-week
+  performance or growth rate, because any such claim would have been invented.
+</p>
+</div>
+
+<h2>How the channel has been managed</h2>
+<table>
+  <tr><th>Year</th><th>Uploads</th><th>of which Shorts</th><th>Views on those uploads</th></tr>
+  <tr><td>2020</td><td class="n">38</td><td class="n">2</td><td class="n">113,745,527</td></tr>
+  <tr><td>2021</td><td class="n">1</td><td class="n">0</td><td class="n">469,379</td></tr>
+  <tr><td>2022 · Dirt Femme</td><td class="n">156</td><td class="n">125</td><td class="n">83,908,009</td></tr>
+  <tr><td>2023</td><td class="n">113</td><td class="n">89</td><td class="n">17,274,834</td></tr>
+  <tr><td>2024</td><td class="n">35</td><td class="n">27</td><td class="n">5,515,418</td></tr>
+  <tr class="lead"><td>2025</td><td class="n">1</td><td class="n">1</td><td class="n">11,755</td></tr>
+  <tr><td>2026 · ESTRUS</td><td class="n">81</td><td class="n">60</td><td class="n">11,780,973</td></tr>
+</table>
+<p>
+  The gap: last upload before it <b>21 March 2025</b> (a Short, 11,755 views), first upload
+  after it <b>11 February 2026</b> (a Short, 30,348 views) — <b>327 days</b>.
+</p>
+<div class="note">
+  <p>
+    The deck states this as contrast and nothing more. Whether the quiet year cost the
+    channel audience, reach or algorithmic standing is <b>not measurable from outside</b>,
+    and no claim of that kind is made.
+  </p>
+</div>
+<p>
+  One further caution on this table: <b>2014 holds 71.8%</b> of the whole public catalogue's
+  views. Any lifetime percentage on this channel is really a statement about
+  <em>Habits (Stay High)</em>, which is why no lifetime percentage is used in the analysis.
+</p>
+
+<h2>The structural comparison — the one that is valid</h2>
+<p>
+  Matched campaign clock, <b>D−127 to D+17</b>, where −127 is the day the ESTRUS lead single
+  landed and +17 is the album's age at reading. Dirt Femme's release day is 14 October 2022;
+  ESTRUS's is 18 September 2026, both taken from the videos' own descriptions.
+</p>
+<table>
+  <tr><th></th><th>ESTRUS</th><th>Dirt Femme</th></tr>
+  <tr><td>Uploads in window</td><td class="n">58</td><td class="n">101</td></tr>
+  <tr><td>of which long-form</td><td class="n">20</td><td class="n">15</td></tr>
+  <tr><td>of which Shorts</td><td class="n">38</td><td class="n">86</td></tr>
+  <tr class="lead"><td>Long-form share of window views</td><td class="n">92.6%</td><td class="n">91.7%</td></tr>
+</table>
+<p>
+  <b>This is the only cross-era figure the deck uses</b>, because a share is not distorted by
+  age the way a total is. Two campaigns with opposite Shorts strategies — 86 against 38 —
+  land within a point of each other on where the viewing comes from.
+</p>
+<p>
+  Arithmetic: ESTRUS 10,478,289 long-form of 11,310,407 total = 92.63%. Dirt Femme
+  22,915,899 of 24,984,527 = 91.72%. The totals themselves are stated here for traceability
+  and are <b>deliberately absent from the deck</b> for the reason in limitation 1.
+</p>
+<div class="note">
+  <p>
+    A second window caveat: −127 is ESTRUS's lead single, but Dirt Femme's lead
+    (<em>No One Dies From Love</em>) sits at D−163, <b>outside</b> the window. So the matched
+    window cuts Dirt Femme's own lead asset out. Measured instead from D−163, Dirt Femme has
+    114 uploads and 51,689,818 long-form views. Whichever boundary is chosen, one campaign
+    is disadvantaged; there is no correct answer, only a stated one.
+  </p>
+</div>
+
+<h2>The ESTRUS visual footprint</h2>
+<table>
+  <tr><th>Date</th><th>Asset</th><th>Views</th></tr>
+  <tr><td>13 May</td><td>I'm your girl right? — Official Video</td><td class="n">2,176,989</td></tr>
+  <tr><td>26 May</td><td>I'm your girl right? — Behind The Scenes</td><td class="n">18,807</td></tr>
+  <tr><td>29 May</td><td>I'm your girl right? — Her Cut visualizer</td><td class="n">51,464</td></tr>
+  <tr><td>3 Jun</td><td>I'm your girl right? — Lyric Video</td><td class="n">148,937</td></tr>
+  <tr><td>5 Jun</td><td>I'm your girl right? — Fcukers Remix visualizer</td><td class="n">33,365</td></tr>
+  <tr><td>12 Jun</td><td>des fleurs x stromae — Visualizer</td><td class="n">899,673</td></tr>
+  <tr class="lead"><td>30 Jun</td><td>des fleurs x stromae — Official Video</td><td class="n">4,978,233</td></tr>
+  <tr><td>29 Jul</td><td>DNH — Visualizer</td><td class="n">266,099</td></tr>
+  <tr><td>6 Aug</td><td>DNH live at A Night In ESTRUS</td><td class="n">97,660</td></tr>
+  <tr><td>18 Sep</td><td>ESTRUS (album video)</td><td class="n">136,085</td></tr>
+</table>
+<p>
+  <b>14 visualizers across 2026</b>, totalling 2,911,575. Two official videos. The lead
+  single alone received five separate visual treatments.
+</p>
+
+<h3>The eleven release-day visualizers · 18 September</h3>
+<table>
+  <tr><th>Track</th><th>Views</th><th>Share of the set</th></tr>
+  <tr class="lead"><td>source of life</td><td class="n">1,011,938</td><td class="n">59.7%</td></tr>
+  <tr><td>F.A.M.T</td><td class="n">118,587</td><td class="n">7.0%</td></tr>
+  <tr><td>die for my art with a lonely heart</td><td class="n">111,169</td><td class="n">6.6%</td></tr>
+  <tr><td>are we on a break</td><td class="n">109,601</td><td class="n">6.5%</td></tr>
+  <tr><td>the bad one</td><td class="n">74,280</td><td class="n">4.4%</td></tr>
+  <tr><td>roomie</td><td class="n">74,263</td><td class="n">4.4%</td></tr>
+  <tr><td>I'm the cake</td><td class="n">67,275</td><td class="n">4.0%</td></tr>
+  <tr><td>if I could I would</td><td class="n">42,826</td><td class="n">2.5%</td></tr>
+  <tr><td>idiot</td><td class="n">42,306</td><td class="n">2.5%</td></tr>
+  <tr><td>a lot of feelings, no solutions</td><td class="n">22,806</td><td class="n">1.3%</td></tr>
+  <tr><td>I'm your girl right</td><td class="n">19,275</td><td class="n">1.1%</td></tr>
+</table>
+<p>
+  Eleven release-day visualizers total <b>1,694,325</b>, mean <b>154,030</b>.
+  <em>source of life</em> alone is 1,011,938 — <b>59.7%</b> of the set.
+</p>
+<p>
+  <b>Ten of the eleven are long-form; one is not.</b> <em>a lot of feelings, no solutions</em>
+  was published as a Short. It is counted in the set above because it is part of the same
+  release-day drop, and the shares in the table are of all eleven. Against the ten long-form
+  visualizers alone, <em>source of life</em> is 60.5% of 1,671,519 — the conclusion does not
+  turn on which basis is used, but the basis is stated rather than left to be guessed.
+</p>
+<div class="note">
+  <p>
+    The deck frames this as audience selection, not as ten failures. Seventeen days is not
+    long, every track was given the same surface on the same day, and one has moved. That is
+    a signal about demand, not a verdict on ten pieces of work.
+  </p>
+</div>
+
+<h2>des fleurs — sequence, not cause</h2>
+<p>
+  Visualizer 12 June, <b>899,673</b>. Official video 30 June, <b>4,978,233</b>. Eighteen days
+  apart.
+</p>
+<p>
+  The deck says only that an early visual treatment <b>did not exhaust demand</b> for a
+  larger hero asset. It does not say the visualizer caused the video's performance — nothing
+  in public data can show whether it helped, hurt or did nothing.
+</p>
+
+<h2>Dirt Femme's Scenes</h2>
+<p>
+  Fifteen numbered long-form Scenes released out of sequence between June 2022 and August
+  2023 — fourteen months. Together <b>12,043,420</b> views, mean <b>802,895</b>. There were
+  also twelve <code>Scene N</code> Shorts posted 5–9 October 2022 as an album countdown;
+  those did 5,279–20,320 views each.
+</p>
+<p>The two largest arrived latest:</p>
+<table>
+  <tr><th>Date</th><th>Scene</th><th>Views</th><th>After release</th></tr>
+  <tr><td>31 May 2023</td><td>I like u (Scene 14)</td><td class="n">1,963,743</td><td class="n">7½ months</td></tr>
+  <tr><td>9 Aug 2023</td><td>Elevator Eyes (Scene 15)</td><td class="n">1,658,940</td><td class="n">10 months</td></tr>
+</table>
+<div class="note">
+  <p>
+    These are <b>lifetime totals on assets roughly three years old</b>. They appear in the
+    deck as evidence that the previous campaign kept producing substantial visual assets long
+    after release day — never as a benchmark for an ESTRUS figure.
+  </p>
+</div>
+
+<h2>What this read does not claim</h2>
+<ul>
+  <li><b>That ESTRUS is out- or under-performing Dirt Femme.</b> See limitation 1.</li>
+  <li><b>Anything about release-week momentum.</b> See limitation 2.</li>
+  <li><b>That the quiet year cost anything.</b> One upload in 2025 is a fact; its consequences
+    are not visible from outside.</li>
+  <li><b>That the des fleurs visualizer drove the official video.</b> Sequence only.</li>
+  <li><b>That the Scenes approach beat the visualizer approach, or the reverse.</b> They are
+    measured at four years and seventeen days.</li>
+  <li><b>Anything about streaming, radio or touring.</b> No DSP data was used; YouTube views
+    are not a proxy for consumption elsewhere.</li>
+</ul>
+
+<p class="foot">
+  All 565 videos currently public on the channel · YouTube Data API v3, read 5 October 2026<br>
+  84.3% of the channel's lifetime view counter · Album dates from the videos' own descriptions<br>
+  <a href="/tovelo">← Back to the read</a>
+</p>
+
+</div>
+</body>
+</html>

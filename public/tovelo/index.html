@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tove Lo × YouTube — ESTRUS, the post-album read</title>
+<meta name="description" content="Tove Lo post-album case study · ESTRUS · read 5 October 2026">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     TOVE LO × YOUTUBE — ESTRUS POST-ALBUM READ  ·  v1, 5 Oct 2026
+
+     THE STORY, IN ORDER:
+       silence → a visual rebuild → clear winners → now extend the world
+
+     ── THE RULE THAT SHAPES THIS WHOLE DECK ───────────────────────
+     ESTRUS AND DIRT FEMME VIEW TOTALS ARE NOT COMPARED, ANYWHERE.
+
+     Not because it is impolite, because it is invalid. Dirt Femme's
+     assets have been accumulating views for about four years; ESTRUS's
+     have had between seventeen days and five months. A matched window
+     of PUBLICATION is not a matched window of ACCUMULATION, and the
+     YouTube API returns a lifetime counter and nothing else — so there
+     is no way to ask what Dirt Femme had done at day 17, because
+     nobody recorded it in 2022.
+
+     So the deck compares STRUCTURE: cadence, format mix, how each
+     visual world was built, and SHARES — which are not distorted by
+     age the way totals are. The 2.21x figure from the audit pack does
+     not appear on this page and must not be reintroduced.
+
+     Equally absent: anything about ESTRUS release-week momentum,
+     velocity or first-week growth. The Watcher's daily collection
+     failed during release week — the channel snapshot froze on 22 Sep
+     and the per-video series stops on 17 Sep, the day before the
+     album. Every ESTRUS figure here is a LIFETIME TOTAL AS AT 5 OCT
+     with no visible shape behind it. A momentum claim would be made
+     up.
+
+     Dirt Femme figures appear only as evidence that the previous
+     campaign kept producing substantial visual assets long after
+     release. They are labelled as lifetime totals and are never set
+     against an ESTRUS number.
+
+     NO CAUSAL CLAIMS. The visualizer did not "cause" the des fleurs
+     video; the quiet year did not "cause" anything measurable. Both
+     are stated as sequence and contrast, not cause.
+
+     SOURCE. One pull of the YouTube Data API v3 against @tovelomusic
+     on 5 October 2026. 565 of 565 public uploads, not capped. Those
+     uploads account for 84.3% of the channel's lifetime view counter.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── PALETTE ──────────────────────────────────────────────────────
+   Sampled from the ESTRUS visuals. The dusty rose and pale sky are the
+   des fleurs collage — a rose the size of a mountain on a flat sea
+   under a crescent moon. The cold blue is the uniform row in source of
+   life. Cream is the cloud bank. */
+:root{
+  --night:#0C0D12; --ink:#16171F; --bone:#F2EDE6; --smoke:#A7A2A6;
+  --faint:#6C6670; --rule:rgba(242,237,230,.13);
+  --rose:#C4566A; --deep:#9E3A52; --sky:#8FB4CE; --blush:#E8C2C8;
+  --disp:'Syne',sans-serif;
+  --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --pad:clamp(22px,5vw,78px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--night);color:var(--bone);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.02;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
+
+/* ── NAV ──────────────────────────────────────────────────────────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;padding:14px var(--pad);
+  background:linear-gradient(180deg,rgba(12,13,18,.96),rgba(12,13,18,0));
+  font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase}
+.nav .who{color:var(--faint)}
+.nav a.analysis{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
+  padding:7px 13px;border-radius:2px;transition:.2s}
+.nav a.analysis:hover{color:var(--bone);border-color:var(--bone)}
+
+/* ── SLIDE ────────────────────────────────────────────────────────── */
+.slide{position:relative;min-height:100vh;display:flex;align-items:center;
+  border-bottom:1px solid var(--rule);overflow:hidden}
+.inner{position:relative;z-index:3;width:100%;max-width:1180px;margin:0 auto;
+  padding:clamp(76px,11vh,130px) var(--pad) clamp(52px,8vh,96px)}
+.bleed{position:absolute;inset:0;z-index:1}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+.bleed::after{content:'';position:absolute;inset:0}
+.scrim-l::after{background:linear-gradient(90deg,rgba(12,13,18,.97) 0%,rgba(12,13,18,.9) 44%,rgba(12,13,18,.45) 100%)}
+.scrim-b::after{background:linear-gradient(180deg,rgba(12,13,18,.5) 0%,rgba(12,13,18,.92) 62%,var(--night) 100%)}
+.scrim-f::after{background:rgba(12,13,18,.76)}
+
+/* ── TYPE ─────────────────────────────────────────────────────────── */
+.label{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.label.hot{color:var(--rose)}
+.label.cold{color:var(--sky)}
+h1.display,h2.display{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;
+  line-height:1.0;margin:0}
+h1.display{font-size:clamp(2.4rem,5.5vw,4.6rem)}
+h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
+.big-p{font-size:clamp(1rem,1.8vw,1.32rem);line-height:1.52;color:var(--smoke);
+  margin:.9rem 0 0;font-weight:400;max-width:44em}
+.big-p b{color:var(--bone);font-weight:600}
+.big-p em{font-style:italic;color:var(--blush)}
+.fine{font-family:var(--mono);font-size:.63rem;line-height:1.95;letter-spacing:.055em;
+  text-transform:uppercase;color:var(--faint)}
+.qual{font-size:.82rem;line-height:1.58;color:var(--faint);margin:.9rem 0 0;
+  padding-left:.9rem;border-left:1px solid var(--rule);max-width:56em}
+
+/* ── BIG NUMBERS ──────────────────────────────────────────────────── */
+/* Flex, not grid: auto-fit tracks size independently of the figure
+   inside them, which makes large numbers collide. Flex items size to
+   their own content and wrap instead. */
+.hero2{display:flex;flex-direction:column;gap:clamp(18px,3.4vw,46px);
+  margin:clamp(1.3rem,2.9vw,2.2rem) 0 .9rem}
+@media(min-width:700px){.hero2{flex-direction:row;flex-wrap:wrap;align-items:flex-start}}
+.hero2 > div{flex:0 0 auto;min-width:0}
+.hn,.sv,.bv,.tn{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+.hero2 .hn{font-family:var(--disp);font-weight:800;white-space:nowrap;
+  font-size:clamp(2.3rem,4.4vw,3.6rem);line-height:.9;letter-spacing:-.03em}
+.hero2 .hn.rose{color:var(--rose)}
+.hero2 .hn.sky{color:var(--sky)}
+.hero2 .hn.dim{color:var(--faint)}
+.hero2 .hk{font-family:var(--mono);font-size:.62rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-top:.85rem;line-height:1.75}
+.hk .role{display:block;margin-top:.3rem;color:var(--smoke);letter-spacing:.11em}
+
+/* ── SILENCE → CAMPAIGN (slide 01) ────────────────────────────────
+   Two years at the same weight would read as two facts. One upload and
+   eighty-one are not two facts, they are a before and an after, so the
+   after is set several sizes larger and the arrow carries the gap. */
+.swing{display:flex;flex-direction:column;gap:clamp(1.1rem,2.6vw,1.8rem);
+  margin:clamp(1.4rem,3vw,2.4rem) 0 0}
+@media(min-width:780px){.swing{flex-direction:row;align-items:flex-end;
+  gap:clamp(1.4rem,3.2vw,2.8rem)}}
+.swing .sw{flex:0 0 auto}
+.sw .sv{font-family:var(--disp);font-weight:800;letter-spacing:-.035em;line-height:.86;
+  white-space:nowrap}
+.sw.a .sv{font-size:clamp(2rem,3.4vw,2.7rem);color:var(--faint)}
+.sw.gap .sv{font-size:clamp(1.5rem,2.6vw,2.1rem);color:var(--rose)}
+.sw.b .sv{font-size:clamp(3.2rem,6vw,5rem);color:var(--blush);
+  text-shadow:0 0 46px rgba(196,86,106,.42)}
+.sw .sk{font-family:var(--mono);font-size:.61rem;letter-spacing:.15em;max-width:19ch;
+  text-transform:uppercase;color:var(--faint);margin-top:.75rem;line-height:1.7}
+.sw.b .sk{color:var(--rose)}
+
+/* ── ASSET CARDS — the winners, with their own frames ─────────────── */
+.wins{display:grid;grid-template-columns:1fr;gap:clamp(12px,2vw,20px);
+  margin:clamp(1.3rem,2.8vw,2rem) 0 0}
+@media(min-width:800px){.wins{grid-template-columns:repeat(3,1fr)}}
+.win{display:block;text-decoration:none;color:inherit;border:1px solid var(--rule);
+  border-radius:4px;overflow:hidden;background:var(--ink);transition:.2s}
+.win:hover{border-color:var(--bone)}
+.win .wi{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;
+  filter:saturate(1.08)}
+.win .wb{padding:clamp(.75rem,1.6vw,1rem)}
+.win .wn{font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.95;
+  font-size:clamp(1.7rem,3.2vw,2.5rem);font-variant-numeric:tabular-nums}
+.win.one .wn{color:var(--rose)}
+.win.two .wn{color:var(--blush)}
+.win.three .wn{color:var(--sky)}
+.win .wt{margin-top:.5rem;font-weight:600;font-size:clamp(.88rem,1.5vw,1rem);line-height:1.3}
+.win .wm{font-family:var(--mono);font-size:.56rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-top:.35rem}
+
+/* ── STEP — visualizer then video, one song (slide 05) ────────────── */
+.step2{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.4vw,22px);
+  align-items:center;margin:clamp(1.4rem,3vw,2.2rem) 0 0}
+@media(min-width:820px){.step2{grid-template-columns:1fr auto 1.35fr}}
+.sa{border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--ink)}
+.sa.big{border-color:rgba(196,86,106,.45);background:rgba(196,86,106,.07)}
+.sa img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;filter:saturate(1.08)}
+.sa .sb{padding:clamp(.7rem,1.5vw,1rem)}
+.sa .sl{font-family:var(--mono);font-size:.57rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--faint)}
+.sa .sn2{font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.92;
+  font-size:clamp(1.9rem,3.4vw,2.6rem);margin-top:.4rem;font-variant-numeric:tabular-nums}
+.sa.big .sn2{font-size:clamp(2.6rem,5vw,4rem);color:var(--rose)}
+.sa .sd{font-family:var(--mono);font-size:.56rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-top:.4rem}
+.arrow{display:flex;align-items:center;justify-content:center;font-family:var(--mono);
+  font-size:.66rem;letter-spacing:.2em;color:var(--rose);padding:.3rem 0}
+@media(min-width:820px){.arrow{padding:0 .4rem;font-size:.8rem}}
+
+/* ── THE RELEASE-DAY SET — one bar away from ten ──────────────────── */
+.setgrid{display:flex;flex-direction:column;gap:clamp(7px,1.1vw,10px);
+  margin:clamp(1.2rem,2.6vw,1.8rem) 0 0}
+.trk{display:grid;grid-template-columns:minmax(0,10.5rem) 1fr auto;gap:clamp(.6rem,1.4vw,1rem);
+  align-items:center}
+.trk .tt{font-size:clamp(.74rem,1.3vw,.86rem);color:var(--smoke);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.trk .bar{height:9px;background:rgba(242,237,230,.07);border-radius:2px;overflow:hidden}
+.trk .bf{height:100%;width:0;background:var(--faint);border-radius:2px;
+  transition:width 1.1s cubic-bezier(.22,.9,.25,1)}
+.trk .tn{font-family:var(--mono);font-size:.68rem;color:var(--faint);white-space:nowrap}
+.trk.lead .tt{color:var(--bone);font-weight:600}
+.trk.lead .bf{background:var(--rose);box-shadow:0 0 22px rgba(196,86,106,.55)}
+.trk.lead .tn{color:var(--rose);font-weight:500}
+
+/* ── TWO WORLDS (slide 07) ────────────────────────────────────────── */
+.worlds{display:grid;grid-template-columns:1fr;gap:clamp(14px,2.4vw,22px);
+  margin:clamp(1.3rem,2.8vw,2rem) 0 0}
+@media(min-width:840px){.worlds{grid-template-columns:1fr 1fr}}
+.wld{border:1px solid var(--rule);border-radius:4px;padding:clamp(1rem,2.2vw,1.5rem)}
+.wld.now{border-color:rgba(196,86,106,.4);background:rgba(196,86,106,.06)}
+.wld .we{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+.wld h4{font-family:var(--disp);font-weight:800;letter-spacing:-.02em;
+  font-size:clamp(1.15rem,2.2vw,1.6rem);line-height:1.08;margin:.55rem 0 0}
+.wld.now h4{color:var(--blush)}
+.wld .wq{font-family:var(--disp);font-weight:800;letter-spacing:-.03em;line-height:.92;
+  font-size:clamp(2rem,3.6vw,2.8rem);margin-top:.9rem;font-variant-numeric:tabular-nums}
+.wld .wl{font-family:var(--mono);font-size:.57rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin-top:.4rem;line-height:1.7}
+.wld p{margin:.85rem 0 0;font-size:.86rem;line-height:1.55;color:var(--smoke)}
+
+/* Catalogue proof row — two Dirt Femme Scenes that landed months late. */
+.late{display:grid;grid-template-columns:1fr;gap:clamp(10px,1.8vw,16px);
+  margin:clamp(1.1rem,2.4vw,1.6rem) 0 0}
+@media(min-width:700px){.late{grid-template-columns:1fr 1fr}}
+.lt{display:flex;gap:.85rem;align-items:center;text-decoration:none;color:inherit;
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;background:var(--ink);
+  transition:.2s}
+.lt:hover{border-color:var(--bone)}
+.lt img{width:92px;height:58px;object-fit:cover;flex:0 0 auto;filter:saturate(1.05)}
+.lt .lb{padding:.35rem .7rem .35rem 0;min-width:0}
+.lt .ln{font-family:var(--disp);font-weight:800;font-size:1.05rem;letter-spacing:-.02em;
+  color:var(--sky);font-variant-numeric:tabular-nums}
+.lt .lx{font-family:var(--mono);font-size:.55rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);margin-top:.2rem;line-height:1.5}
+
+/* ── NEXT MOVES ───────────────────────────────────────────────────── */
+.moves{display:grid;grid-template-columns:1fr;gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;
+  margin:clamp(1.2rem,2.6vw,1.9rem) 0 0}
+@media(min-width:820px){.moves{grid-template-columns:repeat(5,1fr)}}
+.mv{background:var(--night);padding:clamp(.85rem,1.8vw,1.1rem) clamp(.75rem,1.5vw,.95rem) 1rem}
+.mv .mk{font-family:var(--mono);font-size:.56rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--rose);margin-bottom:.5rem}
+.mv p{margin:0;font-size:.79rem;line-height:1.45;color:var(--smoke)}
+
+/* ── BOTTOM LINE ──────────────────────────────────────────────────── */
+.bottomline{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;line-height:1.02;
+  font-size:clamp(1.4rem,3vw,2.2rem);margin:clamp(1.3rem,2.8vw,2rem) 0 0;
+  padding-left:clamp(.8rem,1.8vw,1.2rem);border-left:3px solid var(--rose)}
+.bottomline span{color:var(--blush)}
+
+/* ── FINAL THREE-BEAT ─────────────────────────────────────────────── */
+.beats{display:flex;flex-direction:column;gap:clamp(1.2rem,2.6vw,2rem);
+  margin:clamp(1.5rem,3.2vw,2.6rem) 0 0}
+@media(min-width:800px){.beats{flex-direction:row;align-items:flex-start;
+  gap:clamp(1.4rem,3vw,2.6rem)}}
+.bt{flex:1 1 0;min-width:0}
+.bt .by{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.bt .bh{font-family:var(--disp);font-weight:800;letter-spacing:-.025em;line-height:1.0;
+  font-size:clamp(1.5rem,3vw,2.2rem);margin-top:.55rem}
+.bt.one .bh{color:var(--faint)}
+.bt.two .bh{color:var(--sky)}
+.bt.three .bh{color:var(--blush);text-shadow:0 0 40px rgba(196,86,106,.4)}
+.bt p{margin:.6rem 0 0;font-size:.82rem;line-height:1.5;color:var(--smoke)}
+
+/* ── FOOTER ───────────────────────────────────────────────────────── */
+.foot{padding:clamp(2.4rem,5vw,4rem) var(--pad);max-width:1180px;margin:0 auto}
+.foot a{color:var(--sky)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="who">Tove Lo · @tovelomusic</span>
+  <a class="analysis" href="/tovelo/analysis">The numbers ↓</a>
+</nav>
+
+<!-- ══ 01 · WHERE ARE WE NOW ═════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label hot">ESTRUS · Post-album read · 5 October 2026</div>
+    <h1 class="display" style="margin-top:1rem">From near-silence<br>to a full campaign.</h1>
+    <p class="big-p">
+      The channel posted <b>once in the whole of 2025</b>. ESTRUS has put it back
+      into campaign mode — and built the return around <b>substantial visual assets</b>.
+    </p>
+
+    <!-- The swing. 2025 and 2026 at the same type size would read as two
+         facts rather than as a before and an after, so the after is set
+         several sizes larger and the gap sits between them. -->
+    <div class="swing count">
+      <div class="sw a">
+        <div class="sv" data-n="1">1</div>
+        <div class="sk">Upload in all of 2025</div>
+      </div>
+      <div class="sw gap">
+        <div class="sv" data-n="327">327</div>
+        <div class="sk">Days between uploads</div>
+      </div>
+      <div class="sw b">
+        <div class="sv" data-n="81">81</div>
+        <div class="sk">Uploads in 2026 · 60 of them Shorts</div>
+      </div>
+    </div>
+
+    <p class="qual">
+      Contrast only. Nothing here says the quiet year cost the channel anything —
+      that is not measurable from outside, and this read does not claim it.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 02 · BUILT AROUND VISUALS ═════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label">The campaign shape</div>
+    <h2 class="display" style="margin-top:.9rem">The album was given<br>a visual footprint.</h2>
+
+    <div class="hero2 count">
+      <div><div class="hn rose" data-n="14">14</div>
+      <div class="hk">Visualizers across 2026<span class="role">One per album track, plus alternates</span></div></div>
+      <div><div class="hn sky" data-n="11">11</div>
+      <div class="hk">Released on album day<span class="role">18 September</span></div></div>
+      <div><div class="hn" data-n="2">2</div>
+      <div class="hk">Official videos<span class="role">A lead single and a collaboration</span></div></div>
+    </div>
+
+    <p class="big-p">
+      Every track on ESTRUS was given a surface on YouTube on the day the album landed,
+      on top of the three videos that had already gone out. <b>Not more posts — more to watch.</b>
+    </p>
+  </div>
+</section>
+
+<!-- ══ 03 · LONG-FORM IS THE ENGINE ══════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label cold">Comparable campaign windows · structure, not totals</div>
+    <h2 class="display" style="margin-top:.9rem">~92% of campaign views<br>come from long-form.</h2>
+
+    <div class="hero2 xl count">
+      <div><div class="hn rose" data-pct="92.6">92.6%</div>
+      <div class="hk">ESTRUS<span class="role">20 long-form · 38 Shorts</span></div></div>
+      <div><div class="hn sky" data-pct="91.7">91.7%</div>
+      <div class="hk">Dirt Femme<span class="role">15 long-form · 86 Shorts</span></div></div>
+    </div>
+
+    <p class="big-p">
+      Two campaigns with <b>completely different Shorts strategies</b> — 86 against 38 —
+      and the same answer. Substantial visual assets are where the viewing is.
+    </p>
+
+    <div class="bottomline">Shorts create frequency. <span>Long-form creates the viewing.</span></div>
+
+    <!-- A SHARE, not a total. This is the one era figure that age does not
+         distort, which is exactly why it is the slide that carries the
+         cross-campaign comparison and the view totals do not appear. -->
+    <p class="qual">
+      Shares of each campaign's own window, so the four-year age difference between the
+      two eras does not distort them. The view totals themselves are not comparable and
+      are not shown.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 04 · WHAT HAS WORKED ══════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">ESTRUS campaign · biggest assets so far</div>
+    <h2 class="display" style="margin-top:.9rem">The audience is already<br>showing us where demand sits.</h2>
+
+    <div class="wins">
+      <a class="win one" href="https://www.youtube.com/watch?v=2SWSD6QVa7c" target="_blank" rel="noopener">
+        <img class="wi" src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="" loading="lazy">
+        <span class="wb">
+          <span class="wn">4.98M</span>
+          <span class="wt">des fleurs x stromae</span>
+          <span class="wm">Official video · 30 June</span>
+        </span>
+      </a>
+      <a class="win two" href="https://www.youtube.com/watch?v=ERn_e8fiFPs" target="_blank" rel="noopener">
+        <img class="wi" src="https://i.ytimg.com/vi/ERn_e8fiFPs/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/ERn_e8fiFPs/hqdefault.jpg'" alt="" loading="lazy">
+        <span class="wb">
+          <span class="wn">2.18M</span>
+          <span class="wt">I'm your girl right?</span>
+          <span class="wm">Official video · 13 May</span>
+        </span>
+      </a>
+      <a class="win three" href="https://www.youtube.com/watch?v=MpEXgZVithY" target="_blank" rel="noopener">
+        <img class="wi" src="https://i.ytimg.com/vi/MpEXgZVithY/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg'" alt="" loading="lazy">
+        <span class="wb">
+          <span class="wn">1.01M</span>
+          <span class="wt">source of life</span>
+          <span class="wm">Visualizer · 18 September</span>
+        </span>
+      </a>
+    </div>
+
+    <p class="big-p">
+      Two commissioned videos and <b>one visualizer</b> — which is the one worth looking at,
+      because nothing was spent on positioning it ahead of the other ten.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 05 · DES FLEURS — ONE SONG, TWO MOMENTS ═══════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label">des fleurs x stromae · one song, two assets</div>
+    <h2 class="display" style="margin-top:.9rem">A visualizer doesn't have<br>to be the final asset.</h2>
+
+    <div class="step2 count">
+      <div class="sa">
+        <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="" loading="lazy">
+        <div class="sb">
+          <div class="sl">Visualizer · 12 June</div>
+          <div class="sn2" data-n="899673" data-fmt="k">899.7K</div>
+          <div class="sd">First visual treatment</div>
+        </div>
+      </div>
+      <div class="arrow">18 DAYS LATER</div>
+      <div class="sa big">
+        <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="" loading="lazy">
+        <div class="sb">
+          <div class="sl">Official video · 30 June</div>
+          <div class="sn2" data-n="4978233" data-fmt="k">4.98M</div>
+          <div class="sd">The hero asset</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="big-p">
+      The early treatment did not exhaust the song. <b>Giving a track a visualizer does not
+      mean its YouTube opportunity has been used up.</b>
+    </p>
+
+    <!-- Sequence, not cause. We cannot see whether the visualizer helped the
+         video, hurt it, or did nothing; we can only see that a large hero
+         asset still worked after one existed. -->
+    <p class="qual">
+      Two assets in sequence, not a cause and an effect. Nothing here shows the visualizer
+      drove the video — only that a substantial hero still found an audience after it.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 06 · SOURCE OF LIFE ═══════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/MpEXgZVithY/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label hot">Album day · 11 visualizers, 18 September</div>
+    <h2 class="display" style="margin-top:.9rem">11 tracks got a surface.<br>The audience started choosing.</h2>
+
+    <div class="hero2 xl count">
+      <div><div class="hn rose" data-n="1011938" data-fmt="k">1.01M</div>
+      <div class="hk">source of life<span class="role">59.7% of all release-day visualizer views</span></div></div>
+      <div><div class="hn dim" data-n="154030">154,030</div>
+      <div class="hk">Mean of the eleven<span class="role">1,694,325 across the whole set</span></div></div>
+    </div>
+
+    <!-- The whole set, so the separation is seen rather than asserted. The
+         ten are deliberately not framed as failures: they are surfaces,
+         and one of them has moved. -->
+    <div class="setgrid bars">
+      <div class="trk lead"><span class="tt">source of life</span><span class="bar"><span class="bf" data-w="100"></span></span><span class="tn">1,011,938</span></div>
+      <div class="trk"><span class="tt">F.A.M.T</span><span class="bar"><span class="bf" data-w="11.7"></span></span><span class="tn">118,587</span></div>
+      <div class="trk"><span class="tt">die for my art…</span><span class="bar"><span class="bf" data-w="11.0"></span></span><span class="tn">111,169</span></div>
+      <div class="trk"><span class="tt">are we on a break</span><span class="bar"><span class="bf" data-w="10.8"></span></span><span class="tn">109,601</span></div>
+      <div class="trk"><span class="tt">the bad one</span><span class="bar"><span class="bf" data-w="7.3"></span></span><span class="tn">74,280</span></div>
+      <div class="trk"><span class="tt">roomie</span><span class="bar"><span class="bf" data-w="7.3"></span></span><span class="tn">74,263</span></div>
+      <div class="trk"><span class="tt">I'm the cake</span><span class="bar"><span class="bf" data-w="6.6"></span></span><span class="tn">67,275</span></div>
+      <div class="trk"><span class="tt">if I could I would</span><span class="bar"><span class="bf" data-w="4.2"></span></span><span class="tn">42,828</span></div>
+      <div class="trk"><span class="tt">idiot</span><span class="bar"><span class="bf" data-w="4.2"></span></span><span class="tn">42,306</span></div>
+      <div class="trk"><span class="tt">I'm your girl right</span><span class="bar"><span class="bf" data-w="1.9"></span></span><span class="tn">19,275</span></div>
+      <div class="trk"><span class="tt">a lot of feelings…</span><span class="bar"><span class="bf" data-w="2.3"></span></span><span class="tn">22,806</span></div>
+    </div>
+
+    <div class="bottomline">source of life has <span>broken away from the pack</span>.</div>
+
+    <p class="qual">
+      Ten of the eleven were published as long-form; <em>a lot of feelings, no solutions</em>
+      went out as a Short, and is counted in the set. Seventeen days is early — this is
+      where the audience has gone so far, not a verdict on ten pieces of work.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 07 · TWO WAYS TO BUILD A WORLD ════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label">Campaign architecture · Dirt Femme and ESTRUS</div>
+    <h2 class="display" style="margin-top:.9rem">Two ways to build a world.</h2>
+
+    <div class="worlds">
+      <div class="wld">
+        <div class="we">Dirt Femme · 2022–23</div>
+        <h4>The world unfolded over time.</h4>
+        <div class="wq" data-n="15">15</div>
+        <div class="wl">Numbered Scenes, released out of<br>sequence across 14 months</div>
+        <p>Each Scene arrived as its own event, long after release day, and kept the
+          visual world in front of people for more than a year.</p>
+      </div>
+      <div class="wld now">
+        <div class="we">ESTRUS · 2026</div>
+        <h4>The world arrived at once.</h4>
+        <div class="wq" data-n="11">11</div>
+        <div class="wl">Visualizers, all released on<br>album day, 18 September</div>
+        <p>The full album was given a visual surface immediately, so every track was
+          available to be chosen from the first day.</p>
+      </div>
+    </div>
+
+    <p class="big-p">
+      Neither is better. But Dirt Femme kept making <b>substantial visual assets months
+      after release</b> — and the two biggest arrived latest.
+    </p>
+
+    <div class="late">
+      <a class="lt" href="https://www.youtube.com/watch?v=Bysu5e0CT5U" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Bysu5e0CT5U/hqdefault.jpg" alt="" loading="lazy">
+        <span class="lb"><span class="ln">1.96M</span>
+        <span class="lx">I like u · Scene 14 · 7½ months after release</span></span>
+      </a>
+      <a class="lt" href="https://www.youtube.com/watch?v=h5_Jd20TINo" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/h5_Jd20TINo/hqdefault.jpg" alt="" loading="lazy">
+        <span class="lb"><span class="ln">1.66M</span>
+        <span class="lx">Elevator Eyes · Scene 15 · 10 months after release</span></span>
+      </a>
+    </div>
+
+    <!-- These are lifetime totals on four-year-old assets. They are here as
+         evidence that the previous campaign kept going, NOT as a benchmark
+         any ESTRUS figure should be read against. -->
+    <p class="qual">
+      Lifetime totals on assets that have had around three years to accumulate. They are
+      here to show the previous campaign kept building after release day — not as a target
+      for anything in ESTRUS.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 08 · THE POST-ALBUM OPPORTUNITY ═══════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">The next 30–90 days</div>
+    <h2 class="display" style="margin-top:.9rem">Follow the audience,<br>not the calendar.</h2>
+
+    <p class="big-p">
+      The campaign has already given every track a surface. The question now is not how
+      much more to publish — it is <b>which songs have earned a second asset</b>.
+    </p>
+
+    <div class="hero2 count" style="margin-top:1.5rem">
+      <div><div class="hn rose">source of life</div>
+      <div class="hk">The clearest signal on the album<span class="role">1.01M · 59.7% of the release-day set</span></div></div>
+    </div>
+
+    <div class="moves">
+      <div class="mv"><div class="mk">Hero</div><p>An official video or expanded visual — the des fleurs pattern says the surface has not used the song up.</p></div>
+      <div class="mv"><div class="mk">Live</div><p>A performance capture. A Night In ESTRUS already exists as a format on the channel.</p></div>
+      <div class="mv"><div class="mk">Lyric</div><p>A lyric treatment, as I'm your girl right? got — cheap, and it extends a song's shelf.</p></div>
+      <div class="mv"><div class="mk">World</div><p>BTS and world-building around the ESTRUS visual language, which is strong enough to carry it.</p></div>
+      <div class="mv"><div class="mk">Watch</div><p>Keep reading the other ten. Separation is the signal, and it has only had seventeen days.</p></div>
+    </div>
+
+    <p class="qual">
+      Possibilities, not a schedule. The point of the slide is the selection rule, not the
+      list: build the next chapter around whatever the audience separates out.
+    </p>
+  </div>
+</section>
+
+<!-- ══ 09 · THE READ ═════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="">
+  </div>
+  <div class="inner">
+    <div class="label">The read</div>
+    <h2 class="display" style="margin-top:.9rem">ESTRUS put the channel<br>back into campaign mode.</h2>
+
+    <div class="beats">
+      <div class="bt one">
+        <div class="by">2025</div>
+        <div class="bh">Silence</div>
+        <p>One upload in a year.</p>
+      </div>
+      <div class="bt two">
+        <div class="by">ESTRUS</div>
+        <div class="bh">Build the world</div>
+        <p>14 visualizers, 11 on album day, three official videos.</p>
+      </div>
+      <div class="bt three">
+        <div class="by">Now</div>
+        <div class="bh">Follow the audience</div>
+        <p>One track has separated. Build the next chapter around it.</p>
+      </div>
+    </div>
+
+    <p class="big-p" style="margin-top:2rem">
+      The next opportunity is not more volume for its own sake. It is finding where people
+      are already leaning in — and <b>building the next chapter around those songs</b>.
+    </p>
+  </div>
+</section>
+
+<footer class="foot">
+  <p class="fine">
+    All 565 videos currently public on the channel · YouTube Data API v3, read 5 October 2026<br>
+    Those uploads account for 84.3% of the channel's lifetime view counter<br>
+    ESTRUS figures are totals as at 5 October — the daily collection did not run through release week,
+    so no momentum or first-week claim is made anywhere on this page<br>
+    Dirt Femme and ESTRUS view totals are never compared: the assets are roughly four years apart in age<br>
+    <a href="/tovelo/analysis">Method and every figure →</a>
+  </p>
+</footer>
+
+<script>
+(function(){
+  var reduced = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* One formatter so a figure reads the same mid-count as at rest. */
+  function fmt(v, el){
+    var pre = el.getAttribute('data-prefix') || '';
+    if (el.hasAttribute('data-pct')) return pre + v.toFixed(1) + '%';
+    if (el.getAttribute('data-fmt') === 'k') {
+      return v >= 1e6 ? pre + (v / 1e6).toFixed(2) + 'M'
+                      : pre + (v / 1000).toFixed(1) + 'K';
+    }
+    return pre + Math.round(v).toLocaleString();
+  }
+
+  /* Reserve each figure's finished width BEFORE counting. A counting
+     figure changes width every frame, and in a flex row that reflows the
+     whole line on every tick — which is what makes a slide judder on
+     open. Measuring the final text and pinning min-width holds it still. */
+  function lockWidths(group){
+    group.querySelectorAll('[data-n],[data-pct]').forEach(function(v){
+      var w = v.getBoundingClientRect().width;
+      if (!w) return;
+      if (getComputedStyle(v).display.indexOf('inline') === 0) v.style.display = 'inline-block';
+      v.style.minWidth = Math.ceil(w) + 'px';
+    });
+  }
+
+  function paint(group){
+    group.classList.add('go');
+    group.querySelectorAll('.bf').forEach(function(f){
+      f.style.width = f.getAttribute('data-w') + '%';
+    });
+    if (reduced) return;
+    lockWidths(group);
+    group.querySelectorAll('[data-n],[data-pct]').forEach(function(v, i){
+      var end = parseFloat(v.getAttribute('data-n') || v.getAttribute('data-pct'));
+      if (isNaN(end)) return;
+      var dur = 900, delay = 40 + i * 120, t0 = null;
+      v.textContent = fmt(0, v);
+      function step(ts){
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / dur);
+        var e = 1 - Math.pow(1 - p, 3);
+        v.textContent = fmt(end * (p < 1 ? e : 1), v);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      setTimeout(function(){ requestAnimationFrame(step); }, delay);
+    });
+  }
+
+  var resizeT;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeT);
+    resizeT = setTimeout(function(){
+      document.querySelectorAll('[data-n],[data-pct]').forEach(function(v){
+        v.style.minWidth = '';
+      });
+    }, 120);
+  });
+
+  var groups = document.querySelectorAll('.bars, .count');
+  if (!('IntersectionObserver' in window)) {
+    groups.forEach(paint);
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        paint(en.target);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.3 });
+    groups.forEach(function(g){ io.observe(g); });
+  }
+})();
+</script>
+
+</body>
+</html>
