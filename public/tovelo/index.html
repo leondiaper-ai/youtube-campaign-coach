@@ -195,7 +195,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 .scrim-l::after{background:
   linear-gradient(90deg,rgba(5,3,4,.9) 0%,rgba(5,3,4,.78) 46%,rgba(5,3,4,.3) 100%),
   linear-gradient(0deg,rgba(5,3,4,.5) 0%,transparent 46%)}
-.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.34) 0%,rgba(5,3,4,.8) 62%,var(--night) 100%)}
+.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.62) 0%,rgba(5,3,4,.5) 26%,rgba(5,3,4,.86) 64%,var(--night) 100%)}
 .scrim-f::after{background:
   linear-gradient(0deg,rgba(5,3,4,.94) 0%,rgba(5,3,4,.84) 50%,rgba(5,3,4,.9) 100%),
   linear-gradient(90deg,rgba(5,3,4,.72) 0%,rgba(5,3,4,.3) 62%,rgba(5,3,4,.62) 100%)}
@@ -210,7 +210,15 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 .slide:has(.bleed) .hk,
 .slide:has(.bleed) .bt p,
 .slide:has(.bleed) .sw .sv,
-.slide:has(.bleed) .sw .sk{text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 16px rgba(0,0,0,.85)}
+.slide:has(.bleed) .sw .sk,
+.slide:has(.bleed) .ch h4,
+.slide:has(.bleed) .ch p,
+.slide:has(.bleed) .ch .ck,
+.slide:has(.bleed) .lp p,
+.slide:has(.bleed) .ac .ap{text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 16px rgba(0,0,0,.88)}
+/* --faint is a deliberate hush on a flat ground, but over a lit frame it
+   stops being quiet and becomes illegible. */
+.slide:has(.bleed) .label{color:var(--smoke)}
 
 /* ── TYPE ─────────────────────────────────────────────────────────── */
 .label{font-family:var(--body);font-size:.64rem;font-weight:600;letter-spacing:.34em;
