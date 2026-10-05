@@ -433,10 +433,69 @@ export async function GET(req: NextRequest) {
        rankAssets still answers outright for a campaign with no release
        yet: a run of countdown Shorts has no current release, and the
        biggest of them is the right thing to lead on. */
+    /* ── A RELEASE DATE THAT HAS PASSED IS THE CAMPAIGN STARTING ───────
+       NEW_ACTIVITY prints "nobody has confirmed whether this is the
+       campaign starting", and the only thing that cleared it was a human
+       ticking a recommendation in the Coach. That hedge was right while
+       the only evidence was uploads — a run of Shorts genuinely can be a
+       band posting. It is wrong once a release the team themselves
+       scheduled has come and gone: Palaye Royale's first single was dated
+       2 October in the plan, came out on 2 October, and on 5 October the
+       page was still asking whether the campaign had begun.
+
+       So a dated release moment in the plan, now in the past and after
+       the Deep Dive was captured, starts the campaign. That is the team's
+       own stated intention plus the calendar, which is evidence, not an
+       assumption — and it needs nobody to remember to tick anything.
+
+       Read before the heroes are chosen, because which release has landed
+       also decides which asset leads the page.
+
+       Deliberately release moments only. A pre-order or an announcement
+       is the build-up and keeps the hedge. */
+    const RELEASE_MOMENTS = new Set([
+      'SINGLE_RELEASE', 'ALBUM_RELEASE', 'EP_RELEASE',
+      'OMV', 'LYRIC_VIDEO', 'VISUALISER',
+    ]);
+    /* 180 days back, so a campaign that started months ago still reads as
+       started. The `startAt` bound below is what actually scopes this to
+       the current campaign — the look-back only has to be wide enough not
+       to be the binding constraint. */
+    const planEvents = await listMergedEvents(who.slug, Date.now(), 180).catch(() => []);
+    const landed = planEvents
+      .filter(e =>
+        e.eventDate
+        && RELEASE_MOMENTS.has(e.eventType)
+        && new Date(e.eventDate + 'T00:00:00Z').getTime() <= Date.now()
+        && (!startAt || new Date(e.eventDate + 'T00:00:00Z').getTime() >= startAt.getTime()))
+      .sort((a, b) => (b.eventDate ?? '').localeCompare(a.eventDate ?? ''));
+
     const ranked = rankAssets(postBaseline);
     const releases = rankAssets(postBaseline.filter(a => RELEASE_KINDS.has(a.kind)))
       .sort((x, y) => y.publishedAt.slice(0, 10).localeCompare(x.publishedAt.slice(0, 10)));
-    const lead = releases[0] ?? ranked[0] ?? null;
+
+    /* ── WHEN THE SONG IS OUT AND HAS NO VIDEO ────────────────────────
+       rankAssets answers "what is the biggest thing here", which is the
+       right question only when nothing has been released. Once a single
+       is out, the hero is the asset about that single — and if the only
+       assets are Shorts, it is the biggest Short about it, not the most
+       recent unrelated post.
+
+       Palaye Royale is the case: Lost In Translation came out on 2
+       October with no video of any kind on the channel, four Shorts name
+       it, and the page was leading on a wordless clip captioned
+       "October 4, 2026". A campaign page whose hero is not about the
+       thing the campaign just released is showing the wrong picture.
+
+       Matched on the song name appearing in the title, which is how
+       these Shorts are actually captioned ("Lost In Translation out
+       now. x"). No match leaves the existing behaviour untouched. */
+    const landedSong = landed[0] ? splitPlanTitle(landed[0].title).toLowerCase() : null;
+    const aboutRelease = landedSong && landedSong.length >= 4
+      ? rankAssets(postBaseline.filter(a => a.title.toLowerCase().includes(landedSong)))
+      : [];
+
+    const lead = releases[0] ?? aboutRelease[0] ?? ranked[0] ?? null;
     const latest = [...postBaseline]
       .filter(a => a.videoId !== lead?.videoId)
       .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))[0] ?? null;
@@ -704,40 +763,6 @@ export async function GET(req: NextRequest) {
       followUpWindow,
     ).catch(() => null);
     if (timeline) coverage.push(...timeline.coverage);
-
-    /* ── A RELEASE DATE THAT HAS PASSED IS THE CAMPAIGN STARTING ───────
-       NEW_ACTIVITY prints "nobody has confirmed whether this is the
-       campaign starting", and the only thing that cleared it was a human
-       ticking a recommendation in the Coach. That hedge was right while
-       the only evidence was uploads — a run of Shorts genuinely can be a
-       band posting. It is wrong once a release the team themselves
-       scheduled has come and gone: Palaye Royale's first single was dated
-       2 October in the plan, came out on 2 October, and on 5 October the
-       page was still asking whether the campaign had begun.
-
-       So a dated release moment in the plan, now in the past and after
-       the Deep Dive was captured, starts the campaign. That is the team's
-       own stated intention plus the calendar, which is evidence, not an
-       assumption — and it needs nobody to remember to tick anything.
-
-       Deliberately release moments only. A pre-order or an announcement
-       is the build-up and keeps the hedge. */
-    const RELEASE_MOMENTS = new Set([
-      'SINGLE_RELEASE', 'ALBUM_RELEASE', 'EP_RELEASE',
-      'OMV', 'LYRIC_VIDEO', 'VISUALISER',
-    ]);
-    /* 180 days back, so a campaign that started months ago still reads as
-       started. The `startAt` bound below is what actually scopes this to
-       the current campaign — the look-back only has to be wide enough not
-       to be the binding constraint. */
-    const planEvents = await listMergedEvents(who.slug, Date.now(), 180).catch(() => []);
-    const landed = planEvents
-      .filter(e =>
-        e.eventDate
-        && RELEASE_MOMENTS.has(e.eventType)
-        && new Date(e.eventDate + 'T00:00:00Z').getTime() <= Date.now()
-        && (!startAt || new Date(e.eventDate + 'T00:00:00Z').getTime() >= startAt.getTime()))
-      .sort((a, b) => (b.eventDate ?? '').localeCompare(a.eventDate ?? ''));
 
     if (state === 'NEW_ACTIVITY' && landed.length) state = 'CAMPAIGN_LIVE';
 
