@@ -1,272 +1,311 @@
-# Tove Lo — audit pack
+# Tove Lo — ESTRUS deep dive · audit pack v2
 
-**For independent review, BEFORE the deck is built.** Read 5 October 2026.
+**For independent review.** Read 5 October 2026. Covers the deck at
+[`/tovelo`](https://youtube-campaign-coach.vercel.app/tovelo) and the working page at
+[`/tovelo/analysis`](https://youtube-campaign-coach.vercel.app/tovelo/analysis).
 
-You are being asked to **try to break this**. The most useful thing you can do is
-read §3 first, because I think the comparison the brief asks for may not be
-answerable with this data, and I would rather be told that now than after a deck
-exists.
+You are being asked to **try to break this**. The deck has changed shape since v1 of this
+pack: it is no longer mainly a retrospective. It now spends roughly 40% of its slides on what
+happened and 60% on what to do next, and the forward half makes **recommendations with money
+attached**. That raises the stakes on the evidence, so this pack leads with the three places I
+think it is weakest rather than with the findings.
+
+**Read §1 first.** One of the three is an error I made and then caught; I want to know whether
+my fix is sufficient or whether the claim should come out entirely.
 
 ---
 
-## 1. Provenance
+## 1. The three things most likely to be wrong
+
+### ⚠ 1a · I made the exact mistake this project exists to avoid, and I want a second opinion on the fix
+
+The deck's founding rule is that **a lifetime view total cannot be compared across assets of
+different ages** (§3 below — it is why no ESTRUS/Dirt Femme view totals appear anywhere).
+
+I then wrote this on the A Night In ESTRUS slide:
+
+> 97.7K — *more than 7 of the 11 album-day visualizers*
+
+That is the same error. `DNH live at A Night In ESTRUS` was published 6 August and is **59 days
+old**. The album-day visualizers are **17 days old**. Ranking a 59-day lifetime total against
+17-day lifetime totals is a publication-vs-accumulation comparison, and I had explicitly
+forbidden it 400 lines earlier in the same file.
+
+**What I changed it to:** the figure now reads *"97.7K — in its first 59 days, with no album
+behind it"*, with no comparison to the visualizer set, and the slide's qualifier now says
+plainly that the two are not comparable and why.
+
+**What I want from you:** is that enough? The argument I am trying to make is "one live asset
+carried itself outside a release moment, so live is worth more attention than one upload."
+A per-day rate would be the obvious correction — but DNH live runs at ~1,656/day over 59 days
+against *source of life* at ~59,545/day over 17, and I do not trust per-day either, because
+view curves are front-loaded and a 17-day average sits much higher on the curve than a 59-day
+one. **Is there an honest version of this comparison at all, or should the slide simply state
+the figure and stop?** My instinct is the latter.
+
+### ⚠ 1b · The tier cut points are defensible but not unique, and the deck does not admit that
+
+The deck sorts the eleven release-day visualizers into three tiers and attaches a different
+spending instruction to each. Tier 2 is described as *"the only others clearing 100,000"*.
+
+100,000 is a round number I chose. In its favour, it does coincide with a real break — here is
+every gap down the ranking:
+
+| Rank | Track | Views | Drop from the one above |
+|---|---|---|---|
+| 1 | source of life | 1,012,266 | — |
+| 2 | F.A.M.T | 118,745 | **88.3%** |
+| 3 | die for my art with a lonely heart | 111,376 | 6.2% |
+| 4 | are we on a break | 109,813 | 1.4% |
+| 5 | the bad one | 74,460 | **32.2%** |
+| 6 | roomie | 74,378 | 0.1% |
+| 7 | I'm the cake | 67,373 | 9.4% |
+| 8 | if I could I would | 42,891 | **36.3%** |
+| 9 | idiot | 42,441 | 1.0% |
+| 10 | a lot of feelings, no solutions | 22,826 | **46.2%** |
+| 11 | I'm your girl right | 19,298 | 15.5% |
+
+The 1/3/7 split I used falls on the 88.3% and 32.2% breaks. But there are two other breaks of
+similar size further down (36.3% and 46.2%), so a 1/3/3/4 or 1/6/4 split would also be
+arguable. **Have I cut this where the data cuts, or where the round number is?** And should the
+deck show this gap table so the reader can see the cut was a choice?
+
+### ⚠ 1c · "You do not hire a show director to film one song" is rhetoric, not evidence
+
+This is the line carrying the biggest recommendation in the deck. What is **verifiable** is the
+credit block on the DNH live upload:
+
+> Shot by Blair Brown · Editor and Colorist — Chris Martin · Creative Director — Charlie
+> Twaddle · **Show Director — Phil Marfleet** · Producer — JSE Studio · Tove Lo Styling —
+> Annie & Han
+
+What is **not** verifiable, and is not claimed anywhere on the slide: which songs were
+performed, whether they were filmed, whether the footage is usable, or whether rights allow
+release. No setlist for the event is public — I searched, and the only Tove Lo setlists I could
+find are for the September–October ESTRUS tour, which is a different thing and is **not** used
+as evidence anywhere.
+
+The slide therefore recommends an **audit of the rushes**, not a release schedule. But the
+emotional weight of the slide comes from an inference, and I want it challenged:
+
+1. **Is the inference sound?** A show director could plausibly be credited for a single-song
+   staged shoot. How much weight does that credit really carry?
+2. **Is "recommend an audit" a legitimate way to put an unverified idea in a deck**, or is it
+   a way of implying something while keeping deniability? This is the question I am least sure
+   about. It is genuinely the cheapest high-value action on the list if the footage exists —
+   and genuinely worthless if it does not.
+3. The campaign's own Short *"ESTRUS in nyc 🖤"* (31 July) suggests the event was in New York in
+   late July, which fits a 6 August upload. That is the only corroboration I have and it is weak.
+
+---
+
+## 2. Provenance
 
 | | |
 |---|---|
 | Channel | `@tovelomusic` |
 | Source | YouTube Data API v3, single pull, 5 October 2026 |
-| Uploads retrieved | **565 of 565 public uploads.** `capped: false`, `playlistIds: 565` |
-| Fields used | `publishedAt`, `isShort`, `views`, `likes`, `comments`, `title`, `description` |
+| Uploads retrieved | **565 of 565 public uploads.** `capped: false` |
 | Subscribers | 3,880,000 (YouTube's rounded public figure) |
 | Lifetime view counter | 3,330,599,183 |
-| Sum of the 565 uploads | **2,808,555,042** |
-| Coverage | **84.3%** of the lifetime counter; 522,044,141 views sit outside public uploads |
+| Sum of the 565 uploads | 2,808,559,662 — **84.3%** of the counter |
 
-Coverage here is much better than it often is — 84.3% rather than the 20–30% we
-sometimes get — so share-of-catalogue claims are on firmer ground than usual.
+Every view figure is a live counter read at that moment and drifts by a few hundred within the
+hour. Figures in this pack were re-read on 5 October and are a few hundred higher than the ones
+in the deck, which was built earlier the same day. Nothing material moves.
 
-### ⚠ The daily collection failed during the release week
-
-This matters more than the coverage note and I want it stated before any figure.
-
-- The **channel snapshot has been frozen since 22 September** at 3,330,599,183
-  views and 3,880,000 subscribers. Thirteen days of no movement recorded, through
-  the entire post-release period.
-- The **per-video daily series stops on 17 September** — the day *before* the album.
-- Earlier readings are catch-ups, not daily: 8 September records +33,582,602 in one
-  reading covering 14 days.
-
-**So there is no velocity data for the ESTRUS release at all.** No daily curve, no
-first-week shape, no "views per day since release". Every ESTRUS figure in this pack
-is a **lifetime total as at 5 October**, i.e. a number 17 days after release with no
-way to see how it got there.
-
-Anything in the eventual deck that looks like momentum would be invented. I have not
-invented any, and the deck must not either.
+Campaign window throughout: **13 May – 5 October 2026** (lead single to read date), 145 days.
+58 uploads: 38 Shorts, 20 long-form.
 
 ---
 
-## 2. The two albums
+## 3. The two limitations — unchanged, and still binding
 
-Both dates are taken from the artist's own video descriptions, not from memory.
+### 3a · ESTRUS and Dirt Femme view totals are not comparable
 
-- **Dirt Femme** — 14 October 2022
-  (`Tove Lo - Dirt Femme` uploaded 14 Oct 2022; `'Dirt Femme' out now:` appears in
-  descriptions from 21 Jun 2022 as a pre-order link)
-- **ESTRUS** — 18 September 2026
-  (verbatim, *I'm your girl right?* description: *"New album out September 18 /
-  Pre-Save/Pre-Order ESTRUS"*)
+Dirt Femme's assets were published in 2022 and have accumulated for about four years; ESTRUS's
+have had between 17 days and five months. A matched window of *publication* is not a matched
+window of *accumulation*, and it cannot be corrected — the API returns a lifetime counter and
+nothing else, so there is no way to ask what Dirt Femme had done at day 17.
 
-### Upload history by year
+**The 2.21× figure from v1 of this pack does not appear in the deck and must not be
+reintroduced.** The deck compares structure and shares only. The one valid cross-era figure is
+the long-form share of window views: **92.6% ESTRUS, 91.7% Dirt Femme** — a share is not
+distorted by age the way a total is.
 
-| Year | Uploads | of which Shorts | Views (sum of those uploads) |
-|---|---|---|---|
-| 2012 | 1 | 0 | 2,348,348 |
-| 2013 | 3 | 0 | 27,923,718 |
-| 2014 | 15 | 1 | 2,016,206,785 |
-| 2015 | 26 | 1 | 272,755,335 |
-| 2016 | 19 | 3 | 146,809,754 |
-| 2017 | 15 | 1 | 22,175,806 |
-| 2018 | 22 | 2 | 21,448,778 |
-| 2019 | 39 | 4 | 66,180,623 |
-| 2020 | 38 | 2 | 113,745,527 |
-| 2021 | 1 | 0 | 469,379 |
-| 2022 | 156 | 125 | 83,908,009 |
-| 2023 | 113 | 89 | 17,274,834 |
-| 2024 | 35 | 27 | 5,515,418 |
-| **2025** | **1** | **1** | **11,755** |
-| 2026 | 81 | 60 | 11,780,973 |
+Where Dirt Femme appears, it is as evidence that the previous campaign kept producing
+substantial assets long after release, labelled as lifetime totals on three-year-old assets,
+and never set against an ESTRUS number.
 
-2014 holds 71.8% of the whole public catalogue's views. Any lifetime percentage on
-this channel is really a statement about *Habits (Stay High)* and should be read
-that way.
+### 3b · There is no ESTRUS release-week velocity data at all
 
-### The quiet year
+The channel snapshot froze on 22 September; the per-video daily series stops on 17 September,
+the day *before* the album. So every ESTRUS figure is a **lifetime total as at 5 October** with
+no visible shape behind it.
 
-- Last upload before the gap: **21 March 2025**, a Short, 11,755 views
-- First upload after: **11 February 2026**, a Short, 30,348 views
-- **327 days between them**, and one single upload in the whole of 2025
+**Every grade and recommendation in the deck is therefore about publishing behaviour, not
+performance.** Check me on this — if any slide reads as a performance judgement, it is wrong.
 
 ---
 
-## 3. The comparison problem — read this before anything else
+## 4. What the deck now claims, with arithmetic
 
-The brief asks how ESTRUS compares to the last album campaign. I ran a matched
-campaign clock, **D−127 to D+17**, where −127 is the day the ESTRUS lead single
-landed and +17 is the album's age at reading.
+### 4a · Format depth per song (long-form only)
 
-**Matched window, D−127 → D+17**
-
-| | ESTRUS | Dirt Femme |
+| Song | Surfaces | What they were |
 |---|---|---|
-| Uploads in window | 58 | 101 |
-| of which long-form | 20 | 15 |
-| of which Shorts | 38 | 86 |
-| Long-form views | 10,478,289 | 22,915,899 |
-| Shorts views | 832,118 | 2,068,628 |
-| **Total** | **11,310,407** | **24,984,527** |
+| I'm your girl right? | **6** | Official video (premiered) · BTS · Her Cut visualizer · lyric video · Fcukers remix audio · album-day visualizer |
+| des fleurs x stromae | 2 | Visualizer · official video (premiered) |
+| DNH | 2 | Visualizer · live performance |
+| Nine other album tracks | 1 each | Album-day visualizer |
 
-Dirt Femme shows **2.21×** the views of ESTRUS on the same clock.
+Seven distinct long-form formats in the campaign, plus the 33-minute album film. **Three songs
+received more than one of them.**
 
-### Why I do not believe that number means what it appears to mean
+This is the test of our own earlier case study, which found *five formats in just over two
+weeks* around the lead single. **Confirmed** — official video 13 May, BTS 26 May, Her Cut
+visualizer 29 May, lyric 3 June, remix 5 June, all inside 23 days. The full window shows it
+described how the *lead single* was handled, not the campaign. The deck says so rather than
+repeating the original slide.
 
-**A matched window of PUBLICATION is not a matched window of ACCUMULATION.**
+### 4b · Cadence
 
-Both columns count assets published in the same relative window. But Dirt Femme's
-assets were published in 2022 and have been accumulating for **four years**. ESTRUS's
-have had between 17 days and five months. The two columns are measured at wildly
-different ages, so the 2.21× is mostly just elapsed time.
+28 active days. Shorts on 27 of them, long-form on 10; **18 days carry a Short and nothing
+else**. Every gap of seven days or more:
 
-This is the opposite of the situation where a matched clock rescues a comparison.
-For Freak Slug it worked because both eras could be read at the same asset age. Here
-it cannot be, and I think the honest position is that **view totals between these two
-eras are not comparable at all** with public API data, because the API gives a
-lifetime counter and nothing else — there is no way to ask what Dirt Femme's assets
-had done at 17 days old, because nobody recorded it in 2022.
-
-**This is my main question for you.** Options as I see them:
-
-1. Drop cross-era view comparison entirely; compare structure, cadence and format
-   mix, which *are* comparable, and say plainly why totals are not.
-2. Keep the totals but label them as what they are — a four-year-old campaign versus
-   a seventeen-day-old one — and accept the deck is making a weak claim loudly.
-3. Something I have not thought of.
-
-I lean hard towards (1). The brief's own emphasis — the visual world — is a
-structural question, and structure survives this problem intact.
-
-### A second, smaller window problem
-
-−127 is ESTRUS's lead single. **Dirt Femme's lead single, *No One Dies From Love*,
-sits at D−163 — outside the window.** So the matched window cuts Dirt Femme's lead
-asset out of its own campaign.
-
-Measured instead from Dirt Femme's own lead (D−163 → D+17), it has 114 uploads and
-**51,689,818** long-form views — more than double the matched-window figure, because
-that one video and its satellites are enormous. Whichever boundary I choose, one
-campaign is disadvantaged. I do not think there is a correct answer here, only a
-stated one.
-
----
-
-## 4. The visual worlds — this part I am confident in
-
-This is the part of the brief I think is strongly supported, because it is about
-what was made and when, not about comparing view totals.
-
-### Dirt Femme: 15 numbered Scenes, serialised over 14 months
-
-A continuous visual world released as numbered episodes, out of sequence, across
-more than a year.
-
-| Date | Scene | Views |
+| From | To | Days |
 |---|---|---|
-| 2022-06-02 | No One Dies From Love (Scene 1) | 375,307 |
-| 2022-06-21 | True Romance (Scene 4) | 1,058,656 |
-| 2022-07-27 | 2 Die 4 (Scene 3) | 1,983,186 |
-| 2022-10-26 | Suburbia (Scene 2) | 1,626,429 |
-| 2022-10-27 | Grapefruit (Scene 5) | 601,942 |
-| 2022-10-28 | Cute & Cruel (Scene 6) | 249,906 |
-| 2022-10-31 | Call On Me (Scene 7) | 465,989 |
-| 2022-11-01 | Attention Whore (Scene 8) | 583,179 |
-| 2022-11-02 | Pineapple Slice (Scene 9) | 270,417 |
-| 2022-11-03 | I'm To Blame (Scene 10) | 317,219 |
-| 2022-11-04 | Kick In The Head (Scene 11) | 259,356 |
-| 2022-11-07 | How Long (Scene 12) | 130,058 |
-| 2023-02-24 | Borderline (Scene 13) | 499,092 |
-| 2023-05-31 | I like u (Scene 14) | 1,963,739 |
-| 2023-08-09 | Elevator Eyes (Scene 15) | 1,658,940 |
+| 13 May | 20 May | 7 |
+| 19 Jun | 29 Jun | 10 |
+| 30 Jun | 16 Jul | 16 |
+| **6 Aug** | **18 Sep** | **43** |
+| **18 Sep** | **5 Oct** | **17, open** |
 
-**15 long-form Scenes, 12,043,415 views, mean 802,894.**
+Shape: 46 uploads across 85 days to 6 August → six weeks silent → 12 uploads on album day →
+nothing since.
 
-There were also **12 Shorts** titled `Scene N #song #dirtfemme`, posted 5–9 Oct 2022
-as a countdown to the album. They did 5,279–20,320 views each — i.e. the Shorts
-version of the world was a rounding error against the long-form version.
+### 4c · Follow-through
 
-### ESTRUS: the full visualizer set on release day
-
-| | |
-|---|---|
-| Visualizers in 2026 | **14**, totalling 2,911,483 |
-| Released on album day, 18 Sep | **11**, totalling 1,694,305, mean 154,028 |
-| *source of life* alone | 1,011,938 — **59.7%** of all release-day visualizer views |
-
-Plus, ahead of the album:
-- *I'm your girl right?* (Official Video) 13 May — 2,176,961
-- *I'm your girl right?* in four further cuts: BTS (18,807), Her Cut visualizer
-  (51,464), lyric video (148,937), Fcukers remix visualizer (33,364)
-- *des fleurs x stromae* visualizer 12 Jun (899,615), then Official Video 30 Jun
-  (4,977,769)
-- *DNH* visualizer 29 Jul (266,099), *DNH live at A Night In ESTRUS* 6 Aug (97,689)
-
-### What is actually comparable here
-
-| | Dirt Femme | ESTRUS |
+| Hero | First long-form follow-up | Gap |
 |---|---|---|
-| Visual world shape | 15 Scenes, serialised over 14 months | 11 visualizers, one day |
-| Long-form in matched window | 15 | 20 |
-| Shorts in matched window | 86 | 38 |
-| Long-form share of window views | 91.7% | 92.6% |
+| I'm your girl right? video, 13 May | Behind the scenes, 26 May | 13 days |
+| des fleurs visualizer, 12 Jun | des fleurs official video, 30 Jun | 18 days |
+| des fleurs official video, 30 Jun | None for this song, ever | — |
+| DNH visualizer, 29 Jul | DNH live, 6 Aug | 8 days |
+| ESTRUS album, 18 Sep | Nothing published since | 17 days |
 
-Both campaigns earn ~92% of their window views from long-form. **That is the
-strongest like-for-like finding in this pack**, because a share is not distorted by
-age the way a total is.
+### 4d · Premieres — the cleanest finding in the pack
+
+Recoverable from `scheduledStart` / `actualStart`. Three uploads carry the Premiere signature
+(a scheduled time with the broadcast starting within seconds of it):
+
+| Upload | Scheduled | Started after |
+|---|---|---|
+| I'm your girl right? (Official Video), 13 May | 17:30 UTC | 6s |
+| des fleurs x stromae (Official Video), 30 Jun | 08:00 UTC | 6s |
+| ESTRUS, 18 Sep — 33m 25s album film | 18:00 UTC | 8s |
+
+**Nothing else premiered.** Not one of the fourteen visualizers, not the lyric video, not the
+live cut. Premiere was reserved for the three hero moments.
+
+*Is the scheduledStart/actualStart inference safe?* A scheduled live stream that started on
+time would look the same. The 33-minute album film is the one I am least sure about — it could
+be a genuine stream rather than a Premiere. Does that matter to the finding?
+
+### 4e · The release-day set
+
+Combined 1,695,587 across eleven. *source of life* at 1,012,266 is **59.7%** of the set, and
+**14.28× the median of the other ten** (median 70,875.5; on the mean of 68,360 it is 14.81×).
+I used the median as the more conservative of the two.
+
+**Caveat carried on the slide:** *I'm your girl right?* sits bottom of the set at 19,298, but
+that song already has a 2.18M official video. A low visualizer number on a song that has had
+its moment is not a demand signal.
+
+### 4f · Shorts
+
+38 Shorts (65.5% of uploads) carrying **7.4%** of window views; 20 long-form carrying **92.6%**.
+Shorts occupied 18 days on which nothing else went out. The deck's claim is therefore limited
+to publishing frequency, and it explicitly does **not** claim Shorts drove long-form viewing —
+that is not visible in public data and has not been tested.
+
+### 4g · The good-practice grades
+
+| Behaviour | Evidence | Grade |
+|---|---|---|
+| Album depth | 11 tracks surfaced on album day, plus the album film | Strong |
+| World-building | One naming convention, one treatment, one release day, one named event | Strong |
+| Premieres | 3 of 3 hero moments; 0 of everything else | Strong |
+| Long-form weight | 92.6% of window views on 20 assets | Strong |
+| Multi-format | 7 formats, but 6 surfaces to one song and 1 each to nine | Mixed |
+| Follow-through | 8–18 days where it happened; a 43-day and a 17-day silence | Mixed |
+| Shorts support | 38 on 27 days, 18 of them alone — but stopping 6 Aug | Mixed |
+| Live / performance | One asset in the entire campaign | Limited |
+| Post-album extension | 17 days, no uploads. Too early to grade | Open |
 
 ---
 
-## 5. Where I think this is weakest
+## 5. The forward half — where recommendations acquire cost
 
-**(a) The cross-era view comparison is, I believe, invalid.** §3. Everything else in
-this pack is secondary to getting an answer on that.
+This is new since v1 and is the part that spends someone's money. The chain is:
 
-**(b) No release-week data at all.** §1. The collection failed the week it mattered.
-I can say what ESTRUS assets have done in total by 5 October; I cannot say anything
-about shape, pace or first-week performance.
+> surface every track → watch what separates → support the signal cheapest-first → turn the
+> winner into a mini-campaign → repeat
 
-**(c) "Strong visual world" is partly an aesthetic judgement.** What I can evidence
-is the *structure* — counts, dates, formats, concentration. Whether the ESTRUS world
-is better-realised than the Dirt Femme one is not something view counts can settle,
-and the deck should not pretend otherwise.
+Specific recommendations made:
 
-**(d) The release-day visualizer set is highly concentrated.** One of eleven holds
-59.7% of the set's views. I could frame that as "the set gave the album eleven
-doors"; I could equally frame it as "ten of the eleven did under 120,000". Both are
-true and I am not sure which is the more useful read for the team.
+1. **source of life has earned a second asset.** Effort ladder ordered cheapest-first (cut
+   Shorts from the existing visualizer → use footage already shot → commission a hero video),
+   explicitly *not* recommending all three.
+2. **Audit the A Night In ESTRUS rushes.** See §1c.
+3. **Cut Shorts out of existing assets** rather than shooting disconnected ones.
+4. **Give the three Tier 2 tracks a cheap push**, then re-read.
+5. **Re-read the set every 30 days** and let the tier decide the spend.
 
-**(e) 2014 distorts every lifetime figure.** 71.8% of the public catalogue's views
-are from one year. I have kept lifetime percentages out of the analysis for this
-reason, but check that I have been consistent.
+**Questions:**
 
----
-
-## 6. Things I have deliberately not claimed
-
-- That ESTRUS is out- or under-performing Dirt Femme. See §3.
-- Anything about momentum, velocity, or first-week performance. See §1.
-- That the quiet year caused anything. 2025 had one upload; what that did or did not
-  cost is not measurable from outside.
-- Anything about streaming, radio or tour. No DSP data was used.
-- That the Scenes concept "worked better" than the visualizer set. The two are
-  measured at four years and seventeen days respectively.
+1. **Is the des fleurs precedent strong enough to carry recommendation 1?** The deck uses it to
+   argue a visualizer does not exhaust a song (visualizer 12 Jun 899.9K → official video 30 Jun
+   4.98M). It is stated as sequence, not cause. But it is **one instance**, and it is the song
+   with a Stromae feature, which is a confound the deck does not mention. Should it?
+2. **Is recommending re-reads every 30 days safe** when the thing being re-read is a lifetime
+   total? Month-on-month deltas on lifetime counters are fine in principle, but the Watcher's
+   daily collection has already failed once in this campaign. Should the deck say that the
+   monitoring it recommends depends on collection we have not proven reliable?
+3. **Does the deck over-read a single breakout?** 14.28× is enormous. But it is one song, at 17
+   days, with no velocity data. Is "has earned a second moment" too strong, and should it be
+   "is the only candidate currently visible"?
 
 ---
 
-## 7. Questions for the reviewer
+## 6. Things deliberately not claimed
 
-1. **Is §3 right?** Is a matched publication window between a 2022 campaign and a
-   2026 one simply uninterpretable for view totals, or is there a correction I am
-   missing that would make it honest?
-2. If it is uninterpretable, **is a structure-only era comparison still worth
-   putting in front of a label**, or does the deck need to stop claiming to compare
-   eras at all?
-3. **Which window boundary would you choose** — ESTRUS's lead at −127, which cuts
-   out Dirt Femme's lead, or Dirt Femme's at −163, which gives it 36 extra days?
-4. **Is the ~92% long-form share the real headline?** It is the one figure that is
-   genuinely like-for-like, and it says both campaigns are long-form businesses
-   despite one posting 86 Shorts and the other 38.
-5. **How would you frame 5(d)** — eleven doors, or one hit and ten that did not
-   travel?
-6. **Is the quiet year fair to foreground?** The user has asked for it as the setup
-   for the comeback. Is there a reading of 2025 that makes that framing unfair to
-   whoever was running the channel?
-7. **What have I missed in §2's year table** that the analysis does not address?
+- That ESTRUS out- or under-performed Dirt Femme. §3a.
+- Anything about release-week momentum, velocity or first-week performance. §3b.
+- That the quiet year of 2025 cost anything. One upload is a fact; consequences are not visible.
+- That the two silences cost anything. Facts about publishing only.
+- That Shorts drove long-form viewing.
+- That the des fleurs visualizer caused the official video.
+- That footage of any specific song exists from A Night In ESTRUS.
+- That more surfaces per song produce more viewing. The depth table counts what each song was
+  *given*, not what it earned.
+- Anything about streaming, radio or touring. No DSP data was used.
+
+---
+
+## 7. Questions for the reviewer, in priority order
+
+1. **§1a** — is the corrected live figure honest now, or should the comparison be dropped
+   entirely? This is the one I most want a second opinion on.
+2. **§1c** — is "recommend an audit" a legitimate device for an unverified but high-value idea,
+   or is it implication with deniability?
+3. **§1b** — are the tier cuts where the data cuts, or where the round number is? Should the
+   gap table be on the slide?
+4. **§5 Q1** — does the Stromae feature confound the des fleurs precedent enough that the deck
+   should name it?
+5. **§5 Q3** — is "source of life has earned a second moment" too strong at 17 days?
+6. **§4d** — is the Premiere inference safe, particularly for the 33-minute album film?
+7. Does anything in the deck read as a **performance** judgement rather than a publishing one?
+   If so it violates §3b and needs rewriting.
+8. Is the 40/60 retrospective/forward balance right for a label audience, or has the deck now
+   under-explained the campaign in order to get to the recommendations?
