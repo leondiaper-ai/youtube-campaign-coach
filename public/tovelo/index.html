@@ -10,7 +10,21 @@
      TOVE LO × YOUTUBE — ESTRUS POST-ALBUM READ  ·  v1, 5 Oct 2026
 
      THE STORY, IN ORDER:
-       silence → a visual rebuild → clear winners → now extend the world
+       silence → the world gets built → the album drop becomes a test
+       → one song answers → now get more out of what already exists
+
+     THE DECK IS DELIBERATELY 40% RETROSPECTIVE, 60% FORWARD. Six slides
+     establish what happened; the scorecard is the hinge; nine slides are
+     about what to do with it. Any retrospective slide that stopped
+     earning its place has been cut — the standalone long-form-share
+     slide and the three-winner slide both went, because each stated a
+     figure without attaching an instruction to it. Their figures survive
+     on slides that do.
+
+     THE ARGUMENT IS NOT THAT ESTRUS BEAT DIRT FEMME. It is that this
+     artist has always understood visual world-building, that ESTRUS has
+     produced an unusual amount of usable raw material, and that the
+     opportunity now is extraction rather than commissioning.
 
      ── THE RULE THAT SHAPES THIS WHOLE DECK ───────────────────────
      ESTRUS AND DIRT FEMME VIEW TOTALS ARE NOT COMPARED, ANYWHERE.
@@ -472,6 +486,111 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .sr.mixed  .sg{text-shadow:0 0 18px rgba(240,166,43,.45)}
 .sr.open   .sg{text-shadow:0 0 18px rgba(217,18,27,.6)}
 
+/* ── TIER SYSTEM ──────────────────────────────────────────────────
+   A decision table, not a chart. The point of the slide is that the
+   three tiers carry three different instructions, so the instruction
+   is the right-hand column and gets as much weight as the figure. */
+.tiers{display:flex;flex-direction:column;gap:1px;background:var(--rule);
+  border:1px solid var(--rule);border-radius:3px;overflow:hidden;
+  margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
+.tr3{display:grid;grid-template-columns:1fr;gap:.35rem .9rem;background:var(--night);
+  padding:clamp(.7rem,1.5vw,.95rem) clamp(.85rem,1.7vw,1.15rem)}
+@media(min-width:880px){.tr3{grid-template-columns:7.5rem 1fr 1fr;align-items:center}}
+.tr3 .tk{font-family:var(--body);font-weight:700;font-size:.6rem;letter-spacing:.18em;
+  text-transform:uppercase}
+.tr3.t1 .tk{color:var(--rose)}
+.tr3.t2 .tk{color:var(--gold)}
+.tr3.t3 .tk{color:var(--faint)}
+.tr3 .ts{font-size:.86rem;line-height:1.42;color:var(--bone)}
+.tr3 .tsub{display:block;color:var(--smoke);font-size:.77rem;margin-top:.15rem}
+.tr3 .ta{font-family:var(--body);font-weight:600;font-size:.74rem;letter-spacing:.07em;
+  text-transform:uppercase;line-height:1.5;color:var(--smoke)}
+.tr3.t1{border-left:3px solid var(--rose)}
+.tr3.t1 .ta{color:var(--blush)}
+.tr3.t2{border-left:3px solid var(--gold)}
+.tr3.t3{border-left:3px solid var(--rule)}
+
+/* ── EFFORT / VALUE LADDER ────────────────────────────────────────
+   Three columns of rising cost. Ordered left to right so the cheapest
+   option is read first — the argument is that the song has earned
+   something, not that it has earned the most expensive thing. */
+.lift{display:grid;grid-template-columns:1fr;gap:clamp(10px,1.8vw,16px);
+  margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
+@media(min-width:840px){.lift{grid-template-columns:repeat(3,1fr);align-items:start}}
+.lf{border:1px solid var(--rule);border-radius:3px;background:var(--ink);
+  padding:clamp(.85rem,1.8vw,1.15rem)}
+.lf.hero{border-color:rgba(217,18,27,.45);background:rgba(217,18,27,.08)}
+.lf .lk{font-family:var(--body);font-weight:700;font-size:.58rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.lf.hero .lk{color:var(--rose)}
+.lf .lh{font-family:var(--disp);font-weight:700;font-size:clamp(1.1rem,2.1vw,1.5rem);
+  line-height:1.05;margin:.5rem 0 .6rem}
+.lf ul{margin:0;padding-left:1rem;color:var(--smoke);font-size:.79rem;line-height:1.5}
+.lf li{margin:.28rem 0}
+
+/* ── CASCADE ──────────────────────────────────────────────────────
+   One shoot opening into many assets, drawn as a widening stack. The
+   rows get lighter going down because the lower rows are the ones we
+   are recommending rather than the ones that exist. */
+.casc{display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  margin:clamp(1.1rem,2.4vw,1.6rem) 0 0;text-align:center}
+.cs{width:100%;max-width:38rem;border:1px solid var(--rule);border-radius:3px;
+  padding:.58rem .8rem;font-family:var(--body);font-weight:600;font-size:.68rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--smoke)}
+.cs.have{border-color:rgba(217,18,27,.55);background:rgba(217,18,27,.12);color:var(--bone)}
+.cs .cnote{display:block;font-size:.56rem;letter-spacing:.14em;color:var(--faint);
+  margin-top:.25rem}
+.cs.have .cnote{color:var(--blush)}
+.casc .cdn{color:var(--rose);font-size:.62rem;line-height:1}
+
+/* ── THE LOOP ─────────────────────────────────────────────────────── */
+.loop{display:grid;grid-template-columns:1fr;gap:clamp(8px,1.4vw,12px);
+  margin:clamp(1.2rem,2.6vw,1.9rem) 0 0}
+@media(min-width:900px){.loop{grid-template-columns:repeat(4,1fr) auto;align-items:stretch}}
+.lp{border:1px solid var(--rule);border-radius:3px;padding:clamp(.8rem,1.6vw,1.05rem);
+  background:var(--ink)}
+.lp .ln2{font-family:var(--disp);font-weight:700;font-size:1.5rem;line-height:1;
+  color:var(--rose)}
+.lp h5{font-family:var(--body);font-weight:700;font-size:.66rem;letter-spacing:.16em;
+  text-transform:uppercase;margin:.5rem 0 .4rem;color:var(--bone)}
+.lp p{margin:0;font-size:.76rem;line-height:1.45;color:var(--smoke)}
+.lpr{display:flex;align-items:center;justify-content:center;
+  font-family:var(--body);font-weight:700;font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--rose);padding:.4rem 0}
+@media(min-width:900px){.lpr{writing-mode:vertical-rl;padding:0 .3rem}}
+
+/* ── MONDAY MORNING ───────────────────────────────────────────────
+   Numbered, because it is a list someone works through, and the
+   number is the only decoration it gets. */
+.acts{display:flex;flex-direction:column;gap:1px;background:var(--rule);
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  margin:clamp(1.1rem,2.4vw,1.7rem) 0 0}
+.ac{display:grid;grid-template-columns:2.6rem 1fr;gap:.3rem .9rem;background:var(--night);
+  padding:clamp(.72rem,1.5vw,.95rem) .2rem}
+@media(min-width:880px){.ac{grid-template-columns:2.6rem 14rem 1fr;align-items:baseline}}
+.ac .an{font-family:var(--disp);font-weight:700;font-size:1.35rem;line-height:1;
+  color:var(--rose)}
+.ac .ah{font-family:var(--body);font-weight:700;font-size:.68rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--bone)}
+.ac .ap{margin:0;font-size:.82rem;line-height:1.45;color:var(--smoke);
+  grid-column:2/-1}
+@media(min-width:880px){.ac .ap{grid-column:auto}}
+
+/* ── FINAL CHAIN ──────────────────────────────────────────────────── */
+.chain{display:grid;grid-template-columns:1fr;gap:clamp(10px,1.8vw,16px);
+  margin:clamp(1.3rem,2.8vw,2rem) 0 0}
+@media(min-width:860px){.chain{grid-template-columns:repeat(4,1fr)}}
+.ch{border-top:2px solid var(--rule);padding-top:.75rem}
+.ch.done{border-top-color:var(--acid)}
+.ch.now{border-top-color:var(--rose)}
+.ch .ck{font-family:var(--body);font-weight:700;font-size:.58rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint)}
+.ch.done .ck{color:var(--acid)}
+.ch.now .ck{color:var(--rose)}
+.ch h4{font-family:var(--disp);font-weight:700;font-size:clamp(1.15rem,2.2vw,1.6rem);
+  line-height:1.05;margin:.45rem 0 .4rem}
+.ch p{margin:0;font-size:.78rem;line-height:1.45;color:var(--smoke)}
+
 /* ── FOOTER ───────────────────────────────────────────────────────── */
 .foot{padding:clamp(2.4rem,5vw,4rem) var(--pad);max-width:1180px;margin:0 auto}
 .foot a{color:var(--gold)}
@@ -561,7 +680,7 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 <section class="slide">
   <div class="inner">
     <div class="label hot">Long-form surfaces per song · 13 May – 5 October</div>
-    <h2 class="display" style="margin-top:.9rem">One song got six ways in.</h2>
+    <h2 class="display" style="margin-top:.9rem">Not every track needs six assets.<br>The <em>right</em> track might.</h2>
 
     <div class="depth">
       <div class="dc lead">
@@ -593,88 +712,14 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
       </div>
     </div>
 
-    <div class="bottomline">Seven formats in the campaign.
-      <span>Three songs saw more than one of them.</span></div>
+    <div class="bottomline">The question is not how many assets.
+      <span>It is which song earns them.</span></div>
 
     <p class="qual">
       Counting long-form only. The five-format rollout we flagged early in the campaign was
       real — official video, BTS, alternate-cut visualizer, lyric video and remix, all inside
       twenty-three days. The full window shows it was how the lead single was handled, not
       how every song was handled.
-    </p>
-  </div>
-</section>
-
-<!-- ══ 04 · LONG-FORM IS THE ENGINE ══════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label cold">Comparable campaign windows · structure, not totals</div>
-    <h2 class="display" style="margin-top:.9rem">~92% of campaign views<br>come from long-form.</h2>
-
-    <div class="hero2 xl count">
-      <div><div class="hn rose" data-pct="92.6">92.6%</div>
-      <div class="hk">ESTRUS<span class="role">20 long-form · 38 Shorts</span></div></div>
-      <div><div class="hn gold" data-pct="91.7">91.7%</div>
-      <div class="hk">Dirt Femme<span class="role">15 long-form · 86 Shorts</span></div></div>
-    </div>
-
-    <p class="big-p">
-      Two campaigns with <b>completely different Shorts strategies</b> — 86 against 38 —
-      and the same answer. Substantial visual assets are where the viewing is.
-    </p>
-
-    <div class="bottomline">Shorts create frequency. <span>Long-form creates the viewing.</span></div>
-
-    <!-- A SHARE, not a total. This is the one era figure that age does not
-         distort, which is exactly why it is the slide that carries the
-         cross-campaign comparison and the view totals do not appear. -->
-    <p class="qual">
-      Shares of each campaign's own window, so the four-year age difference between the
-      two eras does not distort them. The view totals themselves are not comparable and
-      are not shown.
-    </p>
-  </div>
-</section>
-
-<!-- ══ 04 · WHAT HAS WORKED ══════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label hot">ESTRUS campaign · biggest assets so far</div>
-    <h2 class="display" style="margin-top:.9rem">The audience is already<br>showing us where demand sits.</h2>
-
-    <div class="wins">
-      <a class="win one" href="https://www.youtube.com/watch?v=2SWSD6QVa7c" target="_blank" rel="noopener">
-        <img class="wi" src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="" loading="lazy">
-        <span class="wb">
-          <span class="wn">4.98M</span>
-          <span class="wt">des fleurs x stromae</span>
-          <span class="wm">Official video · 30 June</span>
-        </span>
-      </a>
-      <a class="win two" href="https://www.youtube.com/watch?v=ERn_e8fiFPs" target="_blank" rel="noopener">
-        <img class="wi" src="https://i.ytimg.com/vi/ERn_e8fiFPs/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/ERn_e8fiFPs/hqdefault.jpg'" alt="" loading="lazy">
-        <span class="wb">
-          <span class="wn">2.18M</span>
-          <span class="wt">I'm your girl right?</span>
-          <span class="wm">Official video · 13 May</span>
-        </span>
-      </a>
-      <a class="win three" href="https://www.youtube.com/watch?v=MpEXgZVithY" target="_blank" rel="noopener">
-        <img class="wi" src="https://i.ytimg.com/vi/MpEXgZVithY/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg'" alt="" loading="lazy">
-        <span class="wb">
-          <span class="wn">1.01M</span>
-          <span class="wt">source of life</span>
-          <span class="wm">Visualizer · 18 September</span>
-        </span>
-      </a>
-    </div>
-
-    <p class="big-p">
-      Two commissioned videos and <b>one visualizer</b> — which is the one worth looking at,
-      because nothing was spent on positioning it ahead of the other ten.
     </p>
   </div>
 </section>
@@ -687,8 +732,8 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 
     <div class="step2 count">
       <div class="sa">
-        <img src="https://i.ytimg.com/vi/wBf1UUhlpsc/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/wBf1UUhlpsc/hqdefault.jpg'" alt="" loading="lazy">
+        <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="" loading="lazy">
         <div class="sb">
           <div class="sl">Visualizer · 12 June</div>
           <div class="sn2" data-n="899673" data-fmt="k">899.7K</div>
@@ -730,7 +775,7 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
   <div class="inner">
     <div class="label hot">Album day · 11 visualizers, 18 September</div>
-    <h2 class="display" style="margin-top:.9rem">11 tracks got a surface.<br>The audience started choosing.</h2>
+    <h2 class="display" style="margin-top:.9rem">The album drop built<br>an <em>audience test</em>.</h2>
 
     <div class="hero2 xl count">
       <div><div class="hn rose" data-n="1011938" data-fmt="k">1.01M</div>
@@ -756,66 +801,15 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
       <div class="trk"><span class="tt">a lot of feelings…</span><span class="bar"><span class="bf" data-w="2.3"></span></span><span class="tn">22,806</span></div>
     </div>
 
-    <div class="bottomline">source of life has <span>broken away from the pack</span>.</div>
+    <div class="bottomline">Eleven surfaces. <span>One has already answered.</span></div>
 
     <p class="qual">
-      Ten of the eleven were published as long-form; <em>a lot of feelings, no solutions</em>
-      went out as a Short, and is counted in the set. Seventeen days is early — this is
-      where the audience has gone so far, not a verdict on ten pieces of work.
-    </p>
-  </div>
-</section>
-
-<!-- ══ 07 · TWO WAYS TO BUILD A WORLD ════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label">Campaign architecture · Dirt Femme and ESTRUS</div>
-    <h2 class="display" style="margin-top:.9rem">Two ways to build a world.</h2>
-
-    <div class="worlds">
-      <div class="wld">
-        <div class="we">Dirt Femme · 2022–23</div>
-        <h4>The world unfolded over time.</h4>
-        <div class="wq" data-n="15">15</div>
-        <div class="wl">Numbered Scenes, released out of<br>sequence across 14 months</div>
-        <p>Each Scene arrived as its own event, long after release day, and kept the
-          visual world in front of people for more than a year.</p>
-      </div>
-      <div class="wld now">
-        <div class="we">ESTRUS · 2026</div>
-        <h4>The world arrived at once.</h4>
-        <div class="wq" data-n="11">11</div>
-        <div class="wl">Visualizers, all released on<br>album day, 18 September</div>
-        <p>The full album was given a visual surface immediately, so every track was
-          available to be chosen from the first day.</p>
-      </div>
-    </div>
-
-    <p class="big-p">
-      Neither is better. But Dirt Femme kept making <b>substantial visual assets months
-      after release</b> — and the two biggest arrived latest.
-    </p>
-
-    <div class="late">
-      <a class="lt" href="https://www.youtube.com/watch?v=Bysu5e0CT5U" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/Bysu5e0CT5U/hqdefault.jpg" alt="" loading="lazy">
-        <span class="lb"><span class="ln">1.96M</span>
-        <span class="lx">I like u · Scene 14 · 7½ months after release</span></span>
-      </a>
-      <a class="lt" href="https://www.youtube.com/watch?v=h5_Jd20TINo" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/h5_Jd20TINo/hqdefault.jpg" alt="" loading="lazy">
-        <span class="lb"><span class="ln">1.66M</span>
-        <span class="lx">Elevator Eyes · Scene 15 · 10 months after release</span></span>
-      </a>
-    </div>
-
-    <!-- These are lifetime totals on four-year-old assets. They are here as
-         evidence that the previous campaign kept going, NOT as a benchmark
-         any ESTRUS figure should be read against. -->
-    <p class="qual">
-      Lifetime totals on assets that have had around three years to accumulate. They are
-      here to show the previous campaign kept building after release day — not as a target
-      for anything in ESTRUS.
+      Giving every track a surface on the same day did something more useful than filling the
+      channel: it put eleven songs in front of the same audience, on the same day, with the
+      same support. Differences after that are the audience, not the marketing. Ten of the
+      eleven went out as long-form; <em>a lot of feelings, no solutions</em> went out as a
+      Short and is counted in the set. Seventeen days is early — this is where people have
+      gone so far, not a verdict on ten pieces of work.
     </p>
   </div>
 </section>
@@ -879,38 +873,6 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
       tight where it happened: BTS thirteen days after the lead single, the des fleurs video
       eighteen days after its visualizer, the DNH live cut eight days after its. Then nothing
       between 7 August and album day.
-    </p>
-  </div>
-</section>
-
-<!-- ══ THE POST-ALBUM OPPORTUNITY ═══════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label hot">The next 30–90 days</div>
-    <h2 class="display" style="margin-top:.9rem">Follow the audience,<br>not the calendar.</h2>
-
-    <p class="big-p">
-      The campaign has already given every track a surface, and <b>nothing has gone out
-      since</b>. The question now is not how much more to publish — it is <b>which songs have
-      earned a second asset</b>.
-    </p>
-
-    <div class="hero2 count" style="margin-top:1.5rem">
-      <div><div class="hn rose">source of life</div>
-      <div class="hk">The clearest signal on the album<span class="role">1.01M · 59.7% of the release-day set</span></div></div>
-    </div>
-
-    <div class="moves">
-      <div class="mv"><div class="mk">Hero</div><p>An official video or expanded visual — the des fleurs pattern says the surface has not used the song up.</p></div>
-      <div class="mv"><div class="mk">Live</div><p>A performance capture. A Night In ESTRUS already exists as a format on the channel.</p></div>
-      <div class="mv"><div class="mk">Lyric</div><p>A lyric treatment, as I'm your girl right? got — cheap, and it extends a song's shelf.</p></div>
-      <div class="mv"><div class="mk">World</div><p>BTS and world-building around the ESTRUS visual language, which is strong enough to carry it.</p></div>
-      <div class="mv"><div class="mk">Watch</div><p>Keep reading the other ten. Separation is the signal, and it has only had seventeen days.</p></div>
-    </div>
-
-    <p class="qual">
-      Possibilities, not a schedule. The point of the slide is the selection rule, not the
-      list: build the next chapter around whatever the audience separates out.
     </p>
   </div>
 </section>
@@ -980,7 +942,359 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
 </section>
 
-<!-- ══ THE READ ═════════════════════════════════════════════ -->
+<!-- ══ THE TIER SYSTEM ══════════════════════════════════════════
+     Turns the release-day chart into a decision rule. The tiers are cut
+     on the data: one asset at 14.3x the median of the other ten, three
+     more as the only ones clearing 100,000, and the remaining seven.
+     The right-hand column is the point of the slide — a tier with no
+     instruction attached is just a ranking. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">A decision rule for the other ten · read 5 October</div>
+    <h2 class="display" style="margin-top:.9rem">Let the album<br>tell you where to spend.</h2>
+
+    <div class="tiers">
+      <div class="tr3 t1">
+        <div class="tk">Tier 1 · Breakout</div>
+        <div class="ts"><b>source of life</b> — 1.01M
+          <span class="tsub">14.3× the median of the other ten visualizers</span></div>
+        <div class="ta">Deepen it. This one has earned a second meaningful asset.</div>
+      </div>
+      <div class="tr3 t2">
+        <div class="tk">Tier 2 · Emerging</div>
+        <div class="ts"><b>F.A.M.T · die for my art… · are we on a break</b>
+          <span class="tsub">109K–119K — the only others clearing 100,000</span></div>
+        <div class="ta">Support cheaply. Shorts, a live cut, a lyric treatment. Then watch.</div>
+      </div>
+      <div class="tr3 t3">
+        <div class="tk">Tier 3 · Baseline</div>
+        <div class="ts">The remaining seven
+          <span class="tsub">19K–74K, no separation from the pack yet</span></div>
+        <div class="ta">No further investment needed. Leave them working.</div>
+      </div>
+    </div>
+
+    <p class="big-p">
+      Three tiers, three different instructions — and <b>two of the three cost nothing</b>.
+      The system is what matters more than today's ranking: it will re-sort itself as the
+      album ages, and it tells you what to do either way.
+    </p>
+
+    <p class="qual">
+      One caveat that matters: <em>I'm your girl right?</em> sits bottom of the set at 19,275,
+      but that song already has a 2.18M official video. A low visualizer number on a song that
+      has already had its moment is not a demand signal, and should not be read as one.
+    </p>
+  </div>
+</section>
+
+<!-- ══ SOURCE OF LIFE — THE CASE ═════════════════════════════════
+     The effort ladder is ordered cheapest first on purpose. The
+     argument is that the song has earned SOMETHING, not that it has
+     earned the most expensive thing; putting the hero option first
+     would turn a decision into a pitch. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">The clearest signal on the album</div>
+    <h2 class="display" style="margin-top:.9rem"><em>source of life</em> has<br>earned a second moment.</h2>
+
+    <p class="big-p">
+      It was given exactly what the other ten were given — one visualizer, on one day, with no
+      extra push — and it has done <b>14.3× the median of the rest of the set</b>. The channel
+      has already shown what happens next: <b>des fleurs</b> got a second asset eighteen days
+      after its visualizer, and the song was nowhere near used up.
+    </p>
+
+    <div class="lift">
+      <div class="lf">
+        <div class="lk">Low lift · days, not weeks</div>
+        <div class="lh">Cut what exists.</div>
+        <ul>
+          <li>Shorts from the existing visualizer</li>
+          <li>Lyric-led vertical moments</li>
+          <li>Re-cut ESTRUS footage around the track</li>
+        </ul>
+      </div>
+      <div class="lf">
+        <div class="lk">Medium · existing production</div>
+        <div class="lh">Use footage already shot.</div>
+        <ul>
+          <li>A standalone live performance, if the song was played at A Night In ESTRUS</li>
+          <li>Lyric video, as <em>I'm your girl right?</em> got</li>
+          <li>An alternate visual cut</li>
+        </ul>
+      </div>
+      <div class="lf hero">
+        <div class="lk">Hero · new commission</div>
+        <div class="lh">Make the video.</div>
+        <ul>
+          <li>An official video inside the ESTRUS visual language</li>
+          <li>The des fleurs pattern: visualizer first, hero second</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="qual">
+      Not a recommendation to do all three. The point is that the signal decides how far up
+      this ladder the song goes — and that the first column is cheap enough to start this week
+      while the decision on the third is still being made.
+    </p>
+  </div>
+</section>
+
+<!-- ══ A NIGHT IN ESTRUS — THE ASSET BANK ════════════════════════
+     The strongest unexploited opportunity in the campaign, and the one
+     that needed the most care to state honestly.
+
+     WHAT IS VERIFIED: the credits on the DNH live upload name a Show
+     Director, a Creative Director, a DP, an editor/colorist, a producer
+     and a stylist. That is a staged, professionally crewed show. One
+     song from it is on the channel.
+
+     WHAT IS NOT VERIFIED, AND IS NOT CLAIMED ANYWHERE ON THIS SLIDE:
+     which other songs were performed, whether they were filmed, or
+     whether the footage is usable. No setlist is public. The slide
+     therefore recommends an AUDIT, not a release schedule — the ask is
+     for someone at the label to open the rushes, which is a question we
+     cannot answer from outside and they can answer in an afternoon. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">A Night In ESTRUS · the one thing worth checking first</div>
+    <h2 class="display" style="margin-top:.9rem">A show was staged<br>and filmed. <em>One song</em> came out.</h2>
+
+    <div class="hero2 count">
+      <div><div class="hn rose" data-n="1">1</div>
+      <div class="hk">Songs published from the night<span class="role">DNH, 6 August</span></div></div>
+      <div><div class="hn" data-n="6">6</div>
+      <div class="hk">Crew roles credited<span class="role">Including a show director</span></div></div>
+      <div><div class="hn gold" data-n="97696" data-fmt="k">97.7K</div>
+      <div class="hk">What that one song did<span class="role">More than 7 of the 11 album-day visualizers</span></div></div>
+    </div>
+
+    <div class="casc">
+      <div class="cs have">A Night In ESTRUS · staged, crewed, filmed
+        <span class="cnote">Confirmed — show director, DP, editor, colorist, producer, stylist</span></div>
+      <div class="cdn">▼</div>
+      <div class="cs have">DNH · standalone live video
+        <span class="cnote">Published 6 August · 97.7K</span></div>
+      <div class="cdn">▼</div>
+      <div class="cs">Other songs performed that night
+        <span class="cnote">Unknown from outside — this is the audit</span></div>
+      <div class="cdn">▼</div>
+      <div class="cs">Standalone live videos per track
+        <span class="cnote">The medium-lift option on the previous slide</span></div>
+      <div class="cdn">▼</div>
+      <div class="cs">Performance Shorts, vocal and lyric moments
+        <span class="cnote">Cut from the same rushes</span></div>
+    </div>
+
+    <p class="big-p">
+      A show director was hired. You do not hire a show director to film one song. <b>If that
+      night contains more of the album, the most valuable content in this campaign may already
+      be shot and sitting on a drive.</b>
+    </p>
+
+    <p class="qual">
+      Stated carefully: the crew credits are on the DNH upload and are verifiable. What else
+      was performed, filmed or is usable is not public, and nothing here claims it exists. The
+      recommendation is an audit of the rushes — a question the label can answer in an
+      afternoon and we cannot answer at all. If <em>source of life</em> was played that night,
+      the Tier 1 decision gets a great deal cheaper.
+    </p>
+  </div>
+</section>
+
+<!-- ══ SHORTS AS THE TEST LAYER ══════════════════════════════════
+     Deliberately NOT "post more Shorts". The 92.6% long-form figure
+     from the cut slide lives here now, where it has an instruction
+     attached to it. No claim that Shorts drive long-form viewing —
+     that is not visible in public data and the qual says so. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label cold">The cheapest thing on this list</div>
+    <h2 class="display" style="margin-top:.9rem">Cut Shorts <em>out of</em> the world,<br>not alongside it.</h2>
+
+    <div class="hero2 count">
+      <div><div class="hn rose" data-pct="92.6">92.6%</div>
+      <div class="hk">Of campaign views sit with long-form<span class="role">20 assets of 58</span></div></div>
+      <div><div class="hn" data-n="38">38</div>
+      <div class="hk">Shorts in the campaign<span class="role">On 27 days, 18 of them alone</span></div></div>
+    </div>
+
+    <p class="big-p">
+      The Shorts did their job — they kept the channel present on days nothing else went out.
+      But they were made <b>beside</b> the campaign rather than <b>from</b> it. Every long-form
+      asset on this channel contains a moment that could be a Short, and that version costs an
+      edit rather than a shoot.
+    </p>
+
+    <div class="moves">
+      <div class="mv"><div class="mk">Live</div><p>The strongest thirty seconds of a performance. Already shot, already graded.</p></div>
+      <div class="mv"><div class="mk">Visualizer</div><p>The one image or lyric from each visualizer that carries the song.</p></div>
+      <div class="mv"><div class="mk">BTS</div><p>The story beat — why the song exists, what the room was like.</p></div>
+      <div class="mv"><div class="mk">Signal</div><p>When a track starts separating, point the next three Shorts at it.</p></div>
+      <div class="mv"><div class="mk">Loop</div><p>Shorts as the test; long-form as the investment the test earns.</p></div>
+    </div>
+
+    <p class="qual">
+      No claim that Shorts send people to the long-form — that is not visible in public data
+      and we have not tested it. The argument is cost: a Short cut from an asset that already
+      exists is close to free, and it tells you something about the song either way.
+    </p>
+  </div>
+</section>
+
+<!-- ══ THE PRECEDENT ════════════════════════════════════════════
+     Moved out of the retrospective half on purpose. Next to the
+     campaign description this was a neutral compare-and-contrast and
+     did not earn its place. Next to the recommendations it is the
+     argument that post-album extension is something this artist has
+     already done once — which is a much better reason to ask for it
+     than "best practice". No claim that either architecture won. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">The precedent · Dirt Femme, 2022–23</div>
+    <h2 class="display" style="margin-top:.9rem">She has built a world before —<br>and kept <em>building</em> it.</h2>
+
+    <div class="worlds">
+      <div class="wld">
+        <div class="we">Dirt Femme · 2022–23</div>
+        <h4>The world unfolded over time.</h4>
+        <div class="wq" data-n="15">15</div>
+        <div class="wl">Numbered Scenes, released out of<br>sequence across 14 months</div>
+        <p>Each Scene arrived as its own event, long after release day, and kept the
+          visual world in front of people for more than a year.</p>
+      </div>
+      <div class="wld now">
+        <div class="we">ESTRUS · 2026</div>
+        <h4>The world arrived at once.</h4>
+        <div class="wq" data-n="11">11</div>
+        <div class="wl">Visualizers, all released on<br>album day, 18 September</div>
+        <p>The full album was given a visual surface immediately, so every track was
+          available to be chosen from the first day.</p>
+      </div>
+    </div>
+
+    <p class="big-p">
+      Neither architecture is better, and ESTRUS is not a reinvention. The useful point is
+      that this artist has done the hard part before: Dirt Femme kept making <b>substantial
+      visual assets months after release</b> — and its two biggest arrived latest.
+    </p>
+
+    <div class="late">
+      <a class="lt" href="https://www.youtube.com/watch?v=Bysu5e0CT5U" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Bysu5e0CT5U/hqdefault.jpg" alt="" loading="lazy">
+        <span class="lb"><span class="ln">1.96M</span>
+        <span class="lx">I like u · Scene 14 · 7½ months after release</span></span>
+      </a>
+      <a class="lt" href="https://www.youtube.com/watch?v=h5_Jd20TINo" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/h5_Jd20TINo/hqdefault.jpg" alt="" loading="lazy">
+        <span class="lb"><span class="ln">1.66M</span>
+        <span class="lx">Elevator Eyes · Scene 15 · 10 months after release</span></span>
+      </a>
+    </div>
+
+    <!-- These are lifetime totals on four-year-old assets. They are here as
+         evidence that the previous campaign kept going, NOT as a benchmark
+         any ESTRUS figure should be read against. -->
+    <div class="bottomline">The last campaign kept going for fourteen months.
+      <span>This one has been quiet for seventeen days.</span></div>
+
+    <p class="qual">
+      Lifetime totals on assets with around three years to accumulate. They are here to show
+      the previous campaign kept building after release day — not as a target for anything in
+      ESTRUS, and not a claim that one approach beat the other.
+    </p>
+  </div>
+</section>
+
+<!-- ══ THE LOOP ═════════════════════════════════════════════════
+     The system, not a schedule. This is the slide the deck exists to
+     produce: it works on the next record too. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">The operating model this campaign has already half-built</div>
+    <h2 class="display" style="margin-top:.9rem">Surface everything.<br>Then back what moves.</h2>
+
+    <div class="loop">
+      <div class="lp">
+        <div class="ln2">01</div>
+        <h5>Surface every track</h5>
+        <p>Done on 18 September. Eleven songs, one day, equal support — which is what makes
+          the next step readable.</p>
+      </div>
+      <div class="lp">
+        <div class="ln2">02</div>
+        <h5>Watch what separates</h5>
+        <p>One has, by 14.3×. Three more are clear of the pack. The other seven have not,
+          yet.</p>
+      </div>
+      <div class="lp">
+        <div class="ln2">03</div>
+        <h5>Support the signal</h5>
+        <p>Cheapest first — Shorts, a live cut, a lyric treatment. Cost should follow
+          evidence, not the release calendar.</p>
+      </div>
+      <div class="lp">
+        <div class="ln2">04</div>
+        <h5>Build the winner out</h5>
+        <p>The track that keeps answering gets the <em>I'm your girl right?</em> treatment.
+          One song, several ways in.</p>
+      </div>
+      <div class="lpr">Repeat</div>
+    </div>
+
+    <div class="bottomline">The campaign has done step one.
+      <span>Steps two to four are the next ninety days.</span></div>
+  </div>
+</section>
+
+<!-- ══ MONDAY MORNING ════════════════════════════════════════════
+     Five things a person can do without another meeting. Ordered by
+     how soon they could start, not by how impressive they sound. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">Five things, in order</div>
+    <h2 class="display" style="margin-top:.9rem">If this were our channel<br>tomorrow morning.</h2>
+
+    <div class="acts">
+      <div class="ac">
+        <div class="an">01</div><div class="ah">Open the rushes</div>
+        <p class="ap">Audit A Night In ESTRUS. What was performed, what was filmed, what is
+          usable. Everything else on this list is cheaper if the answer is good.</p>
+      </div>
+      <div class="ac">
+        <div class="an">02</div><div class="ah">Scope source of life</div>
+        <p class="ap">Decide what its second asset is this week, not next quarter. It is
+          seventeen days old and 14.3× clear of the set.</p>
+      </div>
+      <div class="ac">
+        <div class="an">03</div><div class="ah">Cut from what exists</div>
+        <p class="ap">Pull Shorts out of the visualizers, the live footage and the BTS you
+          already own, instead of shooting disconnected ones.</p>
+      </div>
+      <div class="ac">
+        <div class="an">04</div><div class="ah">Give the three a cheap push</div>
+        <p class="ap">F.A.M.T, die for my art and are we on a break are the only others past
+          100,000. Low-cost support, then re-read them.</p>
+      </div>
+      <div class="ac">
+        <div class="an">05</div><div class="ah">Re-read the set in 30 days</div>
+        <p class="ap">The ranking will move as the album ages. The tier that a song sits in
+          should decide what it gets next — every month, not once.</p>
+      </div>
+    </div>
+
+    <p class="qual">
+      Nothing on this list requires a new commission to begin. Four of the five are edits,
+      decisions or audits of material the campaign already owns.
+    </p>
+  </div>
+</section>
+
+<!-- ══ THE READ ══════════════════════════════════════════════════
+     The close has to do one job: stop the room reaching for a new
+     campaign. The chain says the expensive part is finished. -->
 <section class="slide">
   <div class="bleed scrim-b">
     <img src="https://i.ytimg.com/vi/vlLeLmx6GVI/maxresdefault.jpg"
@@ -988,29 +1302,38 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
   <div class="inner">
     <div class="label">The read</div>
-    <h2 class="display" style="margin-top:.9rem">ESTRUS put the channel<br>back into campaign mode.</h2>
+    <h2 class="display" style="margin-top:.9rem">The world is already built.<br>Now get <em>more</em> from it.</h2>
 
-    <div class="beats">
-      <div class="bt one">
-        <div class="by">2025</div>
-        <div class="bh">Silence</div>
-        <p>One upload in a year.</p>
+    <div class="chain">
+      <div class="ch done">
+        <div class="ck">Done</div>
+        <h4>Build the world</h4>
+        <p>14 visualizers, 11 on album day, two premiered videos, a filmed show and an
+          album film. The expensive part is behind them.</p>
       </div>
-      <div class="bt two">
-        <div class="by">ESTRUS</div>
-        <div class="bh">Build the world</div>
-        <p>14 visualizers, 11 on album day, two official videos and the album film.</p>
+      <div class="ch now">
+        <div class="ck">Now</div>
+        <h4>Find the signal</h4>
+        <p><em>source of life</em>, 14.3× the median of its own set, with nothing spent on
+          putting it there.</p>
       </div>
-      <div class="bt three">
-        <div class="by">Now</div>
-        <div class="bh">Follow the audience</div>
-        <p>One track has separated. Build the next chapter around it.</p>
+      <div class="ch">
+        <div class="ck">Next</div>
+        <h4>Deepen the winners</h4>
+        <p>Live, lyric, Shorts, a hero asset — in that order of cost, with the signal
+          deciding how far it goes.</p>
+      </div>
+      <div class="ch">
+        <div class="ck">Keep</div>
+        <h4>Keep the album moving</h4>
+        <p>Re-read the eleven monthly. The next winner is already in there somewhere.</p>
       </div>
     </div>
 
-    <p class="big-p" style="margin-top:2rem">
-      The next opportunity is not more volume for its own sake. It is finding where people
-      are already leaning in — and <b>building the next chapter around those songs</b>.
+    <p class="big-p" style="margin-top:1.8rem">
+      ESTRUS does not need another flood of content. It needs <b>selective investment behind
+      the songs and moments people are already choosing</b> — and most of the raw material for
+      that is already shot.
     </p>
   </div>
 </section>
@@ -1021,6 +1344,8 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
     Those uploads account for 84.3% of the channel's lifetime view counter<br>
     ESTRUS figures are totals as at 5 October — the daily collection did not run through release week,
     so no momentum or first-week claim is made anywhere on this page<br>
+    A Night In ESTRUS: the crew credits are verifiable on the DNH upload. What else was performed or
+    filmed that night is not public, is not claimed here, and is the audit the deck recommends<br>
     Dirt Femme and ESTRUS view totals are never compared: the assets are roughly four years apart in age<br>
     <a href="/tovelo/analysis">Method and every figure →</a>
   </p>
