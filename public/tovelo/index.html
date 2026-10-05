@@ -191,14 +191,19 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
   font-size:.66rem;letter-spacing:.2em;color:var(--rose);padding:.3rem 0}
 @media(min-width:820px){.arrow{padding:0 .4rem;font-size:.8rem}}
 
+/* The set slide is the densest in the deck, so its figure block and
+   conclusion sit tighter than the rest. Scoped, not global. */
+.tight .hero2{margin:clamp(.9rem,2vw,1.2rem) 0 .5rem}
+.tight .bottomline{margin-top:clamp(.8rem,1.8vw,1.1rem)}
+
 /* ── THE RELEASE-DAY SET — one bar away from ten ──────────────────── */
-.setgrid{display:flex;flex-direction:column;gap:clamp(7px,1.1vw,10px);
-  margin:clamp(1.2rem,2.6vw,1.8rem) 0 0}
+.setgrid{display:flex;flex-direction:column;gap:6px;
+  margin:clamp(.8rem,1.8vw,1.1rem) 0 0}
 .trk{display:grid;grid-template-columns:minmax(0,10.5rem) 1fr auto;gap:clamp(.6rem,1.4vw,1rem);
   align-items:center}
 .trk .tt{font-size:clamp(.74rem,1.3vw,.86rem);color:var(--smoke);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-.trk .bar{height:9px;background:rgba(242,237,230,.07);border-radius:2px;overflow:hidden}
+.trk .bar{height:7px;background:rgba(242,237,230,.07);border-radius:2px;overflow:hidden}
 .trk .bf{height:100%;width:0;background:var(--faint);border-radius:2px;
   transition:width 1.1s cubic-bezier(.22,.9,.25,1)}
 .trk .tn{font-family:var(--mono);font-size:.68rem;color:var(--faint);white-space:nowrap}
@@ -464,7 +469,7 @@ h2.display{font-size:clamp(1.9rem,4.1vw,3.2rem)}
 </section>
 
 <!-- ══ 06 · SOURCE OF LIFE ═══════════════════════════════════════ -->
-<section class="slide">
+<section class="slide tight">
   <div class="bleed scrim-f">
     <img src="https://i.ytimg.com/vi/MpEXgZVithY/maxresdefault.jpg"
          onerror="this.src='https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg'" alt="">
