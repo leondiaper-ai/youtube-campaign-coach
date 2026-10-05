@@ -206,11 +206,27 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 .scrim-l::after{background:
   linear-gradient(90deg,rgba(5,3,4,.9) 0%,rgba(5,3,4,.78) 46%,rgba(5,3,4,.3) 100%),
   linear-gradient(0deg,rgba(5,3,4,.5) 0%,transparent 46%)}
-.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.62) 0%,rgba(5,3,4,.5) 26%,rgba(5,3,4,.86) 64%,var(--night) 100%)}
+.scrim-b::after{background:linear-gradient(180deg,rgba(5,3,4,.46) 0%,rgba(5,3,4,.34) 26%,rgba(5,3,4,.72) 64%,var(--night) 100%)}
 .scrim-f::after{background:
-  linear-gradient(0deg,rgba(5,3,4,.94) 0%,rgba(5,3,4,.84) 50%,rgba(5,3,4,.9) 100%),
-  linear-gradient(90deg,rgba(5,3,4,.72) 0%,rgba(5,3,4,.3) 62%,rgba(5,3,4,.62) 100%)}
-.slide:has(.scrim-f) .bleed img{filter:saturate(1.18) contrast(1.2) brightness(.74)}
+  linear-gradient(0deg,rgba(5,3,4,.80) 0%,rgba(5,3,4,.52) 48%,rgba(5,3,4,.70) 100%),
+  linear-gradient(90deg,rgba(5,3,4,.52) 0%,rgba(5,3,4,.14) 58%,rgba(5,3,4,.42) 100%)}
+.slide:has(.scrim-f) .bleed img{filter:saturate(1.2) contrast(1.14) brightness(.92)}
+
+/* ── PANELS, SO THE SCRIM CAN STAY LIGHT ──────────────────────────
+   The scrims above were heavy because three content blocks are built
+   from transparent parts — bar fills, ladder rungs and a timeline axis
+   — and they vanish over a lit frame. Darkening the whole slide to
+   protect them hid the imagery the deck exists to show.
+
+   Backing those three blocks individually instead means the scrim only
+   has to serve type, which it can do at roughly half the weight. The
+   frame reads; the data sits on its own ground. */
+.setgrid{background:rgba(5,3,4,.80);border:1px solid var(--rule);border-radius:3px;
+  padding:.75rem .9rem;backdrop-filter:blur(2px)}
+.depth{background:rgba(5,3,4,.76);border:1px solid var(--rule);border-radius:3px;
+  padding:.85rem .9rem;backdrop-filter:blur(2px)}
+.tl{background:rgba(5,3,4,.76);border:1px solid var(--rule);border-radius:3px;
+  padding:.6rem .9rem;backdrop-filter:blur(2px)}
 
 /* With the imagery this far up, small text over it needs its own
    contrast rather than relying on the scrim. Display type already has
