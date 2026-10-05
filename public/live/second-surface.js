@@ -186,6 +186,13 @@ async function merge(d) {
      Labelling only the imported ones would read as though the label
      uploads were the exception rather than half the campaign. */
   const a = d.assets || (d.assets = { heroes: [], supporting: [], total: 0 });
+
+  /* The server's own choice of lead, before this merge flattens the
+     distinction. It knows things this file cannot: which release in the
+     Coach plan has actually come out, and therefore which asset is about
+     it. See the hero selection in /api/campaign-cover. */
+  const serverLeadId = (a.heroes && a.heroes[0] && a.heroes[0].videoId) || null;
+
   const own = [].concat(a.heroes || [], a.supporting || [])
     .map(x => Object.assign({}, x, { source: x.source || artistName }));
 
@@ -227,6 +234,22 @@ async function merge(d) {
   };
   const all = unique(own.concat(imported))
     .sort((x, y) => day(y) - day(x) || (y.views || 0) - (x.views || 0));
+
+  /* ── THE SERVER'S LEAD WINS ────────────────────────────────────────
+     Newest-first is the right default while nothing has been released:
+     the most recent post is the current state of the channel. It is
+     wrong once a single is out, and this file cannot tell the
+     difference — it has thumbnails and dates, not the campaign plan.
+     The server does, so it had already picked the asset about the
+     release, and this sort was throwing that choice away: Palaye Royale
+     led on a wordless clip captioned "October 4, 2026" three days after
+     Lost In Translation came out.
+
+     So the server's lead is moved to the front when it is still here
+     after the merge, and newest-first decides only when the server
+     offered nothing. The ordering of everything else is untouched. */
+  const leadIdx = serverLeadId ? all.findIndex(x => x.videoId === serverLeadId) : -1;
+  if (leadIdx > 0) all.unshift(all.splice(leadIdx, 1)[0]);
 
   /* ONE hero, as everywhere else. The lead asset is the campaign's
      picture; the rest are the evidence it has been working. */
