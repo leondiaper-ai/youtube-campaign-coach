@@ -385,7 +385,8 @@ async function projectSavedPlan(slug: string, now: number): Promise<{ events: Ca
           artistId: slug,
           campaignId: saved.campaignName ?? null,
           eventDate: ev.dateISO,
-          eventType: normaliseEventType(ev.kind ?? ev.title),
+          /* Both, not one or the other — see normaliseEventType. */
+          eventType: normaliseEventType(ev.kind, ev.title),
           title: ev.title,
           assetType: ev.kind ?? null,
           /* Anchor and major moments are treated as CONFIRMED because a human
@@ -456,8 +457,58 @@ export function newEventId(): string {
  * Anything unrecognised becomes OTHER rather than being guessed at — an
  * event mistyped as SINGLE_RELEASE would wrongly block other content.
  */
-export function normaliseEventType(raw?: string | null): EventType {
-  const s = (raw ?? '').toLowerCase();
+/**
+ * What kind of moment this is, from everything we know about it.
+ *
+ * ── WHY IT TAKES MORE THAN ONE STRING ─────────────────────────────────
+ * This used to be called as `normaliseEventType(ev.kind ?? ev.title)`, so
+ * a planner row whose `kind` was set to anything at all meant the title
+ * was never read. Palaye Royale's plan came out of that with
+ * "Confidant - Single" typed OTHER and "Amsterdamage - LP Release" typed
+ * SINGLE_RELEASE, and both errors were visible on the live page: the
+ * album was not recognised as an album, so the campaign had no anchor and
+ * no name, and because the mislabelled album was the only row flagged
+ * `major`, the timeline picked it as what-comes-next and hid both of the
+ * singles actually coming first. A page headed WHAT'S NEXT was pointing
+ * at January while the single released that week went unmentioned.
+ *
+ * So it reads every label it has been given. `kind` is a dropdown; the
+ * title is what a human typed; neither is reliably the more specific one,
+ * and the ordering of the tests below decides between them.
+ *
+ * ── THE ORDER IS THE LOGIC ────────────────────────────────────────────
+ * A pre-order is an announcement even though its row says "Single", and
+ * an album release is an album even though the planner may have typed it
+ * as a single. Both of those only come out right if the narrower test
+ * runs first, so the sequence here is deliberate rather than incidental.
+ */
+export function normaliseEventType(...labels: (string | null | undefined)[]): EventType {
+  const s = labels.filter(Boolean).join(' ').toLowerCase();
+
+  /* A pre-order is the announcement of a release, not the release. It is
+     checked first because these rows almost always also say "single" or
+     "album", and matching on that would date the campaign's anchor to the
+     day the shop page went up. */
+  if (/pre-?order|pre-?save/.test(s)) return 'ANNOUNCEMENT';
+
+  /* "LP" is what half the plans in here say, and it never matched. The
+     release word is required so that "LP pre-order" and "taken from the
+     album" cannot become the album release itself. */
+  if (/\b(album|lp)\b[^.]{0,20}\b(release|launch|out|drop)\b/.test(s)) return 'ALBUM_RELEASE';
+
+  /* Before the bare /album/ test below, so a single whose row mentions
+     the album it comes from stays a single. */
+  if (/\bsingle\b/.test(s)) return 'SINGLE_RELEASE';
+
+  /* "Roses - taken from the album Hope" is a single that mentions an
+     album, and the bare test below would make it the album release and
+     move the campaign's anchor to the wrong date. Naming the record a
+     track comes from is normal planner phrasing, so it is excluded by
+     the phrase rather than by hoping nobody writes it. */
+  if (/\b(from|off|lifted from|taken from)\s+(the\s+)?(album|lp|ep)\b/.test(s)) {
+    return 'SINGLE_RELEASE';
+  }
+
   if (/album/.test(s)) return 'ALBUM_RELEASE';
   if (/\bep\b/.test(s)) return 'EP_RELEASE';
   if (/single|track|song|focus/.test(s)) return 'SINGLE_RELEASE';

@@ -99,6 +99,13 @@ function monthLabel(iso: string): string {
  * often a second action in one string. The timeline wants the name of the
  * thing; the rest becomes the detail line.
  */
+/** ["a"] → "a"; ["a","b"] → "a, then b". Reads as a sequence, which is
+    what two dated releases in a row are. */
+function listPhrase(items: string[]): string {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(', ')}, then ${items[items.length - 1]}`;
+}
+
 function splitTitle(raw: string): { title: string; detail: string | null } {
   const m = /^(.+?)\s*[-–—]\s*(.+)$/.exec(raw.trim());
   if (!m) return { title: raw.trim(), detail: null };
@@ -382,10 +389,26 @@ export async function buildCampaignTimeline(
     isMajor(e.eventType) && e.eventDate && !shown.has(e.eventDate)
     && (!album || e.eventDate < album.eventDate!));
 
-  const betweenNote = between.length
-    ? `${between.length} further release${between.length === 1 ? '' : 's'} in the plan between `
-      + `${monthLabel(between[0].eventDate!)} and ${monthLabel(between[between.length - 1].eventDate!)}`
-    : null;
+  /* ── NAME THEM WHILE THERE ARE FEW ENOUGH TO NAME ──────────────────
+     This counted: "2 further releases in the plan between October and
+     November". The count exists so that a campaign with eight singles
+     does not turn the timeline into the plan, and that is still the right
+     rule at eight. At two it throws away the only thing the reader wants,
+     which is which songs and when — a team reading their own campaign
+     page should not have to open the Coach to learn that Confidant is
+     next and Allergic To Myself follows it.
+
+     So: name up to two, count beyond that. The threshold is where a line
+     of prose stops being readable, not where the data runs out. */
+  const named = between.slice(0, 2)
+    .map(e => `${splitTitle(e.title).title} (${label(e.eventDate!)})`);
+
+  const betweenNote = !between.length
+    ? null
+    : between.length <= 2
+      ? `Also in the plan before the album: ${listPhrase(named)}`
+      : `${between.length} further releases in the plan between `
+        + `${monthLabel(between[0].eventDate!)} and ${monthLabel(between[between.length - 1].eventDate!)}`;
 
   return { moments, betweenNote, coverage };
 }

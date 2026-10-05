@@ -28,6 +28,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCampaignProgress } from '@/lib/intelligence/campaignProgress';
 import { buildRollout } from '@/lib/intelligence/rollout';
 import { buildCampaignTimeline, nextConfirmedRelease } from '@/lib/intelligence/campaignTimeline';
+import { listMergedEvents } from '@/lib/coach-bot/horizon';
 import { readLibrary } from '@/lib/intelligence/research';
 import { listResearchRuns } from '@/lib/intelligence/researchRuns';
 import { overrideFor } from '@/lib/intelligence/formatOverrides';
@@ -451,7 +452,7 @@ export async function GET(req: NextRequest) {
       .slice(0, MAX_SUPPORTING);
     supporting.forEach(a => { a.role = 'supporting'; });
 
-    const state = inMotion.length > 0
+    let state = inMotion.length > 0
       ? 'CAMPAIGN_LIVE'
       : postBaseline.length > 0 ? 'NEW_ACTIVITY' : 'BASELINE';
 
@@ -704,6 +705,38 @@ export async function GET(req: NextRequest) {
     ).catch(() => null);
     if (timeline) coverage.push(...timeline.coverage);
 
+    /* ── A RELEASE DATE THAT HAS PASSED IS THE CAMPAIGN STARTING ───────
+       NEW_ACTIVITY prints "nobody has confirmed whether this is the
+       campaign starting", and the only thing that cleared it was a human
+       ticking a recommendation in the Coach. That hedge was right while
+       the only evidence was uploads — a run of Shorts genuinely can be a
+       band posting. It is wrong once a release the team themselves
+       scheduled has come and gone: Palaye Royale's first single was dated
+       2 October in the plan, came out on 2 October, and on 5 October the
+       page was still asking whether the campaign had begun.
+
+       So a dated release moment in the plan, now in the past and after
+       the Deep Dive was captured, starts the campaign. That is the team's
+       own stated intention plus the calendar, which is evidence, not an
+       assumption — and it needs nobody to remember to tick anything.
+
+       Deliberately release moments only. A pre-order or an announcement
+       is the build-up and keeps the hedge. */
+    const RELEASE_MOMENTS = new Set([
+      'SINGLE_RELEASE', 'ALBUM_RELEASE', 'EP_RELEASE',
+      'OMV', 'LYRIC_VIDEO', 'VISUALISER',
+    ]);
+    const planEvents = await listMergedEvents(who.slug).catch(() => []);
+    const landed = planEvents
+      .filter(e =>
+        e.eventDate
+        && RELEASE_MOMENTS.has(e.eventType)
+        && new Date(e.eventDate + 'T00:00:00Z').getTime() <= Date.now()
+        && (!startAt || new Date(e.eventDate + 'T00:00:00Z').getTime() >= startAt.getTime()))
+      .sort((a, b) => (b.eventDate ?? '').localeCompare(a.eventDate ?? ''));
+
+    if (state === 'NEW_ACTIVITY' && landed.length) state = 'CAMPAIGN_LIVE';
+
     /* ── The campaign's name ──────────────────────────────────────────
        A page called "CHVRCHES × YouTube" is an analytics view of an
        artist. A page called "All The King's Men" is the home of a
@@ -728,7 +761,8 @@ export async function GET(req: NextRequest) {
        clause. No causal claim: the channel woke and the campaign started,
        and those are two statements sitting next to each other. */
     const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays,
-      daysSinceUpload, stages, firstNewUploadAt, [...heroes, ...supporting], who.name);
+      daysSinceUpload, stages, firstNewUploadAt, [...heroes, ...supporting], who.name,
+      landed[0] ? { title: splitPlanTitle(landed[0].title), date: landed[0].eventDate! } : null);
 
     /* ── Fan response ──────────────────────────────────────────────────
        What the audience is positively responding to, in about eight words,
@@ -873,6 +907,12 @@ export async function GET(req: NextRequest) {
   }
 }
 
+/** "Lost In Translation - Single" → "Lost In Translation". */
+function splitPlanTitle(raw: string): string {
+  const m = /^(.+?)\s*[-–—]\s*(.+)$/.exec(raw.trim());
+  return (m ? m[1] : raw).trim();
+}
+
 function firstSentence(s: string): string {
   const m = /^(.*?[.!?])\s/.exec(s);
   return (m ? m[1] : s).trim();
@@ -897,6 +937,11 @@ function buildRead(
   firstNewUploadAt: string | null,
   campaignAssets: CoverAsset[] = [],
   artistName = '',
+  /* The newest release from the Coach plan whose date has passed. The
+     song can be out on every DSP with no video on the channel yet, which
+     is exactly Palaye Royale's position, so the page has to be able to
+     name a release it cannot see a thumbnail for. */
+  landedRelease: { title: string; date: string } | null = null,
 ): { kicker: string | null; headline: string; line: string } | null {
   if (state === 'BASELINE') return null;
 
@@ -972,7 +1017,11 @@ function buildRead(
        platform, and the asset that carries it here. */
     ? `New track and ${listPhrase(nouns)} out.`
     : released.length ? 'The single is out.'
-      : woke ? 'The channel is awake.' : 'The campaign is live.';
+      /* No release asset on the channel, but a release in the plan has
+         landed. The song is out; YouTube just has not been given it
+         yet, which is a finding rather than a gap in our knowledge. */
+      : landedRelease ? 'The campaign has started.'
+        : woke ? 'The channel is awake.' : 'The campaign is live.';
 
   /* The song, dated, ahead of the forward instruction. Without it the
      headline announces a release the reader cannot name. */
@@ -980,7 +1029,17 @@ function buildRead(
   const subjectDate = newest
     ? new Date(newest.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })
     : '';
-  const subject = song && subjectDate ? `“${song}”, ${subjectDate}. ` : '';
+  let subject = song && subjectDate ? `“${song}”, ${subjectDate}. ` : '';
+
+  /* Nothing on the channel carries the release, so the subject comes from
+     the plan instead — and says plainly that YouTube has not had the
+     asset. "Out on 2 October" with six Shorts on the page and no video
+     is the single most actionable sentence this read can print. */
+  if (!subject && landedRelease) {
+    const d = new Date(landedRelease.date + 'T00:00:00Z')
+      .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+    subject = `“${landedRelease.title}” out ${d}, with no video on the channel yet. `;
+  }
 
   return {
     kicker,

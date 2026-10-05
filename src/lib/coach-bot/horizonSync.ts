@@ -93,7 +93,7 @@ export function projectCoachPlan(slug: string, now = Date.now()): SyncEvent[] | 
       if (!date && !a.dropType && !a.momentRole) continue;
       out.push({
         eventDate: date,
-        eventType: normaliseEventType(a.dropType ?? a.momentRole ?? a.title),
+        eventType: normaliseEventType(a.dropType, a.momentRole, a.title),
         title: a.title,
         assetType: a.dropType ?? a.momentRole ?? null,
         status: 'PLANNED',
