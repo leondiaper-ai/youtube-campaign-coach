@@ -547,6 +547,76 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .lf ul{margin:0;padding-left:1rem;color:var(--smoke);font-size:.79rem;line-height:1.5}
 .lf li{margin:.28rem 0}
 
+/* ── INVESTMENT LADDER ────────────────────────────────────────────
+   Three stages, numbered, cost rising left to right. The number and
+   the cost key do the work a chart would: a sequence you walk, not a
+   menu you choose from. Stage three is the only lit one and it is
+   conditional, so the expensive option reads as a last resort rather
+   than the headline. */
+.steps{display:grid;grid-template-columns:1fr;gap:clamp(10px,1.8vw,16px);
+  margin:clamp(1rem,2.2vw,1.5rem) 0 0;align-items:stretch}
+@media(min-width:880px){.steps{grid-template-columns:repeat(3,1fr)}}
+.st{border:1px solid var(--rule);border-radius:3px;background:var(--ink);
+  padding:clamp(.8rem,1.6vw,1.05rem);display:flex;flex-direction:column}
+.st.cond{border-color:rgba(217,18,27,.4);background:rgba(217,18,27,.07)}
+.st .sn3{font-family:var(--disp);font-weight:700;font-size:1.3rem;line-height:1;color:var(--faint)}
+.st.cond .sn3{color:var(--rose)}
+.st .sh3{font-family:var(--disp);font-weight:700;line-height:1.05;
+  font-size:clamp(1.05rem,2vw,1.4rem);margin:.4rem 0 .3rem}
+.st .sc{font-family:var(--body);font-weight:700;font-size:.54rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:.55rem}
+.st.cond .sc{color:var(--rose)}
+.st ul{margin:0;padding-left:1rem;color:var(--smoke);font-size:.77rem;line-height:1.48}
+.st li{margin:.25rem 0}
+.st .sp{margin:.8rem 0 0;font-size:.73rem;line-height:1.45;color:var(--faint);
+  border-top:1px solid var(--rule);padding-top:.5rem;margin-top:auto}
+
+/* The sequence, stated once, in one line. Used on two slides: the
+   bridge previews it, the ladder details it. */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .65rem;
+  margin:clamp(1rem,2.2vw,1.4rem) 0 0;
+  font-family:var(--body);font-weight:700;font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase}
+.flow span{color:var(--smoke)}
+.flow span.on{color:var(--rose)}
+.flow i{color:var(--faint);font-style:normal}
+
+/* The bridge slide carries imagery, a paragraph, a recommendation block
+   and a flow strip, which is more than the stock layout fits. Scoped,
+   and the numbers come from measuring the live page: at the stock 16:9
+   the slide ran 187px past the fold; 2:1 brings it to exactly the fold
+   with the figures still legible. */
+.slide.bridge .inner{padding-top:clamp(66px,9vh,104px);padding-bottom:clamp(44px,6vh,70px)}
+.slide.bridge h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
+.slide.bridge .step2{margin-top:clamp(.9rem,1.8vw,1.3rem)}
+.slide.bridge .sa img{aspect-ratio:2/1}
+.slide.bridge .sa .sb{padding:.6rem .8rem}
+.slide.bridge .sa .sn2{font-size:clamp(1.5rem,2.6vw,2rem)}
+.slide.bridge .sa.big .sn2{font-size:clamp(2rem,3.6vw,2.9rem)}
+.slide.bridge .big-p{margin-top:.85rem;font-size:clamp(.95rem,1.6vw,1.12rem)}
+.slide.bridge .sowhat{margin-top:.9rem}
+.slide.bridge .flow{margin-top:.8rem}
+
+/* ── THE SO-WHAT BLOCK ────────────────────────────────────────────
+   An observation slide earns its place by ending in an instruction.
+   This is that instruction, given its own frame so it cannot be read
+   as more commentary. */
+.sowhat{border:1px solid rgba(217,18,27,.45);background:rgba(217,18,27,.09);
+  border-radius:3px;padding:clamp(.85rem,1.8vw,1.15rem);
+  margin:clamp(1rem,2.2vw,1.4rem) 0 0;
+  display:grid;grid-template-columns:1fr;gap:.6rem 1.4rem}
+@media(min-width:820px){.sowhat{grid-template-columns:1fr auto;align-items:center}}
+.sowhat .swk{font-family:var(--body);font-weight:700;font-size:.54rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--rose);margin-bottom:.35rem}
+.sowhat .swh{font-family:var(--disp);font-weight:700;line-height:1.04;
+  font-size:clamp(1.3rem,2.6vw,1.95rem)}
+.sowhat .swf{display:flex;gap:clamp(1rem,2.4vw,2rem)}
+.sowhat .swf div{white-space:nowrap}
+.sowhat .swn{font-family:var(--disp);font-weight:700;font-size:clamp(1.2rem,2.2vw,1.6rem);
+  line-height:1;color:var(--blush);font-variant-numeric:tabular-nums}
+.sowhat .swl{font-family:var(--body);font-weight:600;font-size:.53rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--smoke);margin-top:.3rem}
+
 /* ── DECISION TREE ────────────────────────────────────────────────
    Three states, and the state is the whole point: KNOW (confirmed and
    verifiable), CHECK (the one action being recommended), COULD (only
@@ -980,6 +1050,75 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
 </section>
 
+<!-- ══ THE BRIDGE — OBSERVATION INTO ACTION ═════════════════════
+     This slide is the hinge between the data half and the action half,
+     and it only earns that if it ends in an instruction. Hence the
+     so-what block.
+
+     WHAT DES FLEURS DOES AND DOES NOT SHOW. It does not show a team
+     reading a visualizer's performance and deciding to commission a
+     video: des fleurs is a Stromae collaboration, and the eighteen-day
+     gap plausibly reflects coordinating two artists and a production
+     schedule. What it does show is simpler and still useful — an
+     existing visualizer did not prevent the song from later carrying a
+     substantial hero visual. The two can coexist. That is the only
+     claim on this slide, and it is the one source of life needs.
+
+     The three-beat strip previews the ladder two slides later rather
+     than repeating it. -->
+<section class="slide bridge">
+  <div class="inner">
+    <div class="label">des fleurs x stromae · one song, two assets</div>
+    <h2 class="display" style="margin-top:.9rem">A visualizer doesn't have to be<br>the <em>end</em> of the track.</h2>
+
+<div class="step2 count">
+      <div class="sa">
+        <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="" loading="lazy">
+        <div class="sb">
+          <div class="sl">Visualizer · 12 June</div>
+          <div class="sn2" data-n="899673" data-fmt="k">899.7K</div>
+          <div class="sd">First visual treatment</div>
+        </div>
+      </div>
+      <div class="arrow">18 DAYS LATER</div>
+      <div class="sa big">
+        <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
+             onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="" loading="lazy">
+        <div class="sb">
+          <div class="sl">Official video · 30 June</div>
+          <div class="sn2" data-n="4978233" data-fmt="k">4.98M</div>
+          <div class="sd">The hero asset</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="big-p">
+      An existing visualizer <b>doesn't close the door on a bigger visual moment</b> — the two
+      can coexist on one song. Not a method to copy: des fleurs is a Stromae collaboration, and
+      the gap plausibly reflects coordinating two artists rather than a read of audience
+      response.
+    </p>
+
+    <div class="sowhat">
+      <div>
+        <div class="swk">So what?</div>
+        <div class="swh">Test a second moment<br>for <em>source of life</em>.</div>
+      </div>
+      <div class="swf">
+        <div><div class="swn">1.01M</div><div class="swl">Visualizer views</div></div>
+        <div><div class="swn">59.7%</div><div class="swl">Of album-day viewing</div></div>
+      </div>
+    </div>
+
+    <div class="flow">
+      <span class="on">Start cheap</span><i>→</i>
+      <span>See if the signal holds</span><i>→</i>
+      <span>Escalate only if earned</span>
+    </div>
+  </div>
+</section>
+
 <!-- ══ 08 · AUDIT BEFORE YOU COMMISSION ═════════════════════════
      The strongest unexploited opportunity in the campaign, and the one
      that needed the most care to state honestly.
@@ -1150,48 +1289,6 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 
     <div class="bottomline">Don't confuse a signal
       <span>with a spending decision.</span></div>
-  </div>
-</section>
-
-<!-- ══ 05 · DES FLEURS — ONE SONG, TWO MOMENTS ═══════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label">des fleurs x stromae · one song, two assets</div>
-    <h2 class="display" style="margin-top:.9rem">A visualizer doesn't have<br>to be the final asset.</h2>
-
-    <div class="step2 count">
-      <div class="sa">
-        <img src="https://i.ytimg.com/vi/5Zi5mI9kwhA/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/5Zi5mI9kwhA/hqdefault.jpg'" alt="" loading="lazy">
-        <div class="sb">
-          <div class="sl">Visualizer · 12 June</div>
-          <div class="sn2" data-n="899673" data-fmt="k">899.7K</div>
-          <div class="sd">First visual treatment</div>
-        </div>
-      </div>
-      <div class="arrow">18 DAYS LATER</div>
-      <div class="sa big">
-        <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/maxresdefault.jpg"
-             onerror="this.src='https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg'" alt="" loading="lazy">
-        <div class="sb">
-          <div class="sl">Official video · 30 June</div>
-          <div class="sn2" data-n="4978233" data-fmt="k">4.98M</div>
-          <div class="sd">The hero asset</div>
-        </div>
-      </div>
-    </div>
-
-    <p class="big-p">
-      The early treatment did not exhaust the song. <b>Giving a track a visualizer does not
-      mean its YouTube opportunity has been used up.</b>
-    </p>
-
-    <p class="aside">
-      Outcome, not a method. des fleurs is a Stromae collaboration, and the eighteen days
-      between the two assets plausibly reflect coordinating two artists and a production
-      schedule rather than a read of audience response. Nothing here says the visualizer was
-      used as a test, or that the video was a reaction to one.
-    </p>
   </div>
 </section>
 
