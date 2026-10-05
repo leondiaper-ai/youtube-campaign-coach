@@ -39,6 +39,7 @@ type Thread = {
           textDisplay?: string;
           likeCount?: number;
           authorDisplayName?: string;
+          authorChannelId?: { value?: string };
           publishedAt?: string;
         };
       };
@@ -88,11 +89,29 @@ export async function GET(req: NextRequest) {
         .map((it) => {
           const s = it.snippet?.topLevelComment?.snippet;
           if (!s?.textDisplay) return null;
+          /* Links have to be read off the RAW textDisplay. The stripper
+             below removes the <a href> wrapper YouTube puts around every
+             URL, and on a shortened link the visible text is truncated
+             ("thesnuts.lnk.to/joyinshortmome...") — so stripping first and
+             regexing after loses the destination. Read the href, then strip. */
+          const hrefs = Array.from(
+            s.textDisplay.matchAll(/href="([^"]+)"/gi),
+            (m) => m[1],
+          ).filter((h) => /^https?:/i.test(h));
+
           return {
             text: s.textDisplay.replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').trim().slice(0, 500),
             likes: Number(s.likeCount ?? 0),
             replies: Number(it.snippet?.totalReplyCount ?? 0),
             at: (s.publishedAt ?? '').slice(0, 10),
+            /* Who wrote it. Needed to tell an owner comment — the thing a
+               pinned call-to-action actually is — from a fan comment. The
+               API does not expose a pinned flag at all, so ordering by
+               relevance (which floats the pinned comment to position 0) plus
+               owner identity is the closest test available. */
+            author: s.authorDisplayName ?? null,
+            authorChannelId: s.authorChannelId?.value ?? null,
+            links: hrefs,
           };
         })
         .filter(Boolean);
