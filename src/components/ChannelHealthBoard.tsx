@@ -1326,20 +1326,41 @@ function ViewSplitLine({ split }: { split: NonNullable<RowData['formatSplit']> }
           +{fmtNum(split.longformViews + split.shortsViews)}
         </span>
       )}
-      <span className="text-[8px] tabular-nums whitespace-nowrap" style={{ color: 'rgba(14,14,14,0.5)' }}>
+      {/* Amber carries the low-coverage warning that used to ride on the
+          badge's colour. A lifetime split computed from under a fifth of
+          a channel's views is the one figure here that can actively
+          mislead, so losing the badge must not lose the caveat with it —
+          it moves onto the number it is a caveat about. */}
+      <span
+        className="text-[8px] tabular-nums whitespace-nowrap"
+        style={{ color: recent ? 'rgba(14,14,14,0.5)' : sample ? '#9A5B00' : 'rgba(14,14,14,0.38)' }}
+      >
         {pcTight(split.longformShare)}/{pcTight(split.shortsShare)}
       </span>
-      {/* The coverage percentage has moved to the tooltip. At 7px next to
-          four other figures it read as a channel statistic rather than as
-          a caveat about our own inventory, which is the opposite of its
-          job. The basis word stays: without it a lifetime split and a
-          7-day one are indistinguishable at this size. */}
-      <span
-        className="text-[7px] font-bold uppercase tracking-[0.06em] whitespace-nowrap"
-        style={{ color: recent ? '#0C6A3F' : sample ? '#9A5B00' : 'rgba(14,14,14,0.3)' }}
-      >
-        {recent ? '7d' : 'life'}
-      </span>
+      {/* ── LABEL THE EXCEPTION, NOT THE NORM ─────────────────────────
+          The coverage percentage moved to the tooltip a while back; the
+          basis word stayed, on the reasoning that without it a lifetime
+          split and a 7-day one are indistinguishable at this size.
+
+          True, but it labelled the wrong one. Most channels do not yet
+          have two comparable daily readings, so "LIFE" printed on nearly
+          every row of a 121-row table — a word repeated that often stops
+          being read and becomes texture, while the rows that genuinely
+          differ were the ones in the minority.
+
+          So only "7d" is marked. Lifetime is the unlabelled default and
+          stays distinguishable three other ways: a half-opacity bar,
+          lighter percentages, and no green gained-views figure in front
+          of them. The tooltip still opens with "LIFETIME split — not
+          recent viewing" for anyone who needs it spelled out. */}
+      {recent && (
+        <span
+          className="text-[7px] font-bold uppercase tracking-[0.06em] whitespace-nowrap"
+          style={{ color: '#0C6A3F' }}
+        >
+          7d
+        </span>
+      )}
     </div>
   );
 }
