@@ -602,6 +602,49 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
 .slide.bridge .sowhat{margin-top:.9rem}
 .slide.bridge .flow{margin-top:.8rem}
 
+/* ── THE WORLD, AS A WALL ─────────────────────────────────────────
+   The station slide has to SHOW the thing it is arguing for. Twelve
+   frames from the campaign, tiled, is the argument: this much already
+   exists and it already looks like one body of work. hqdefault rather
+   than maxres because twelve maxres frames is several megabytes for
+   tiles rendered 130px wide, and hqdefault exists for every video
+   whereas maxres does not. */
+.wall{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  margin:clamp(.9rem,2vw,1.3rem) 0 0}
+@media(min-width:900px){.wall{grid-template-columns:repeat(6,1fr)}}
+.wt2{position:relative;display:block;overflow:hidden;border-radius:2px;
+  border:1px solid var(--rule);text-decoration:none;aspect-ratio:16/9;
+  background:var(--ink)}
+.wt2 img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(1.15) contrast(1.12) brightness(.82);transition:.25s}
+.wt2:hover img{filter:saturate(1.3) contrast(1.15) brightness(1)}
+.wt2:hover{border-color:rgba(217,18,27,.65)}
+.wtl{position:absolute;left:0;right:0;bottom:0;padding:.3rem .35rem .25rem;
+  font-family:var(--body);font-weight:600;font-size:.45rem;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--bone);line-height:1.25;
+  background:linear-gradient(0deg,rgba(5,3,4,.95),transparent);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* The platform reference and the programming strands, side by side. */
+.stn{display:grid;grid-template-columns:1fr;gap:clamp(12px,2.2vw,22px);
+  margin:clamp(.9rem,2vw,1.3rem) 0 0;align-items:start}
+@media(min-width:860px){.stn{grid-template-columns:15rem 1fr}}
+.stn-ex{display:block;text-decoration:none;border:1px solid var(--rule);
+  border-radius:3px;overflow:hidden;background:var(--ink);transition:.2s}
+.stn-ex:hover{border-color:rgba(217,18,27,.6)}
+.stn-ex img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;
+  filter:saturate(1.1) contrast(1.1) brightness(.88)}
+.stn-ex .se2{padding:.55rem .7rem}
+.stn-ex .st2{font-family:var(--body);font-weight:700;font-size:.72rem;color:var(--bone)}
+.stn-ex .sm2{font-family:var(--body);font-weight:600;font-size:.52rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin-top:.2rem}
+.strands{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+@media(min-width:700px){.strands{grid-template-columns:repeat(4,1fr)}}
+.strand{border:1px solid var(--rule);border-radius:2px;padding:.5rem .55rem;
+  font-family:var(--body);font-weight:600;font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--smoke);text-align:center;
+  background:rgba(217,18,27,.05)}
+
 /* ── THE SO-WHAT BLOCK ────────────────────────────────────────────
    An observation slide earns its place by ending in an instruction.
    This is that instruction, given its own frame so it cannot be read
@@ -963,6 +1006,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      earned a second asset". At 17 days with no velocity data, earned is
      stronger than the evidence supports. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/MpEXgZVithY/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">Album day + 17 · the one thing that has moved</div>
     <h2 class="display" style="margin-top:.9rem">One track has<br><em>separated</em>.</h2>
@@ -989,6 +1036,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      The system, not a schedule. This is the slide the deck exists to
      produce: it works on the next record too. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/gYJej9L7bko/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/gYJej9L7bko/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">The operating model this campaign has already half-built</div>
     <h2 class="display" style="margin-top:.9rem">Surface everything.<br>Then back what moves.</h2>
@@ -1036,6 +1087,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      round number up as a finding. The qualifier now says where the cut
      is solid (an 88% gap at the top) and where it is a choice. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/Vr26Xq1pWI4/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/Vr26Xq1pWI4/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">Decision bands, not categories · read 5 October</div>
     <h2 class="display" style="margin-top:.9rem">Three bands.<br>Three different answers.</h2>
@@ -1157,6 +1212,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      context only and is deliberately the smallest number on the slide.
      The point is unused production value. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/vlLeLmx6GVI/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/vlLeLmx6GVI/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">A Night In ESTRUS · the cheapest move available</div>
     <h2 class="display" style="margin-top:.9rem">Before commissioning more,<br>audit what <em>already exists</em>.</h2>
@@ -1252,6 +1311,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      ladder is a sequence to walk, cheapest first, with the third rung
      conditional on the signal holding. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/MpEXgZVithY/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">source of life · priority is not a budget</div>
     <h2 class="display" style="margin-top:.9rem">It has earned another <em>test</em>.<br>Not necessarily another shoot.</h2>
@@ -1317,6 +1380,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      attached to it. No claim that Shorts drive long-form viewing —
      that is not visible in public data and the qual says so. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/ZW58pm9CFD4/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/ZW58pm9CFD4/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label cold">The cheapest thing on this list</div>
     <h2 class="display" style="margin-top:.9rem">Cut Shorts <em>out of</em> the world,<br>not alongside it.</h2>
@@ -1526,6 +1593,107 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   </div>
 </section>
 
+<!-- ══ THE STATION ══════════════════════════════════════════════
+     The deck's thesis taken to its conclusion, and framed as the
+     post-album continuity play: if the world is already built, the
+     cheapest way to keep the channel live between moments is to keep
+     that world playing. Twelve frames from the campaign are the
+     argument — this much exists, and it already reads as one body of
+     work.
+
+     It sits immediately before the action plan because it is the one
+     recommendation that costs no production at all, which makes it the
+     natural floor under everything on that list.
+
+     PLATFORM REFERENCE ONLY. Metallica TV is cited as an example of
+     the format and was verified live via YouTube's oEmbed endpoint on
+     5 October 2026. No Metallica creative is reproduced and nothing
+     here is a creative template.
+
+     THE CAVEAT IS NOT OPTIONAL. YouTube Stations is an emerging and
+     partly gated product. Availability and eligibility would have to
+     be confirmed with YouTube, and the slide says so rather than
+     presenting access as a given. -->
+<section class="slide">
+  <div class="inner">
+    <div class="label hot">Post-album · keeping the channel live between moments</div>
+    <h2 class="display" style="margin-top:.9rem">What if ESTRUS<br>never stopped <em>playing</em>?</h2>
+
+    <div class="wall">
+      <a class="wt2" href="https://www.youtube.com/watch?v=MpEXgZVithY" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/MpEXgZVithY/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">source of life</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=2SWSD6QVa7c" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/2SWSD6QVa7c/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">des fleurs x stromae</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=ERn_e8fiFPs" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/ERn_e8fiFPs/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">I'm your girl right?</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=vlLeLmx6GVI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/vlLeLmx6GVI/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">DNH live</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=ksfJ-jyZT94" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/ksfJ-jyZT94/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">the bad one</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=wBf1UUhlpsc" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/wBf1UUhlpsc/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">roomie</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=gYJej9L7bko" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/gYJej9L7bko/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">are we on a break</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=Vr26Xq1pWI4" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Vr26Xq1pWI4/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">F.A.M.T</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=4L9vx7m4AgI" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/4L9vx7m4AgI/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">die for my art</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=ZW58pm9CFD4" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/ZW58pm9CFD4/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">I'm the cake</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=ceOecuehj1M" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/ceOecuehj1M/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">ESTRUS · album film</span></a>
+      <a class="wt2" href="https://www.youtube.com/watch?v=rr7fE8HSNWQ" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/rr7fE8HSNWQ/hqdefault.jpg" alt="" loading="lazy">
+        <span class="wtl">DNH</span></a>
+    </div>
+
+    <p class="big-p" style="margin-top:1rem">
+      Everything above already exists. A programmed channel built from it would keep the world
+      in front of people <b>in the weeks when nothing new is going out</b> — and it needs no
+      shoot, no commission and no artist time.
+    </p>
+
+    <div class="stn">
+      <a class="stn-ex" href="https://www.youtube.com/watch?v=1fz60gNnSdU" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/1fz60gNnSdU/hqdefault.jpg" alt="Metallica TV on YouTube">
+        <span class="se2">
+          <span class="st2">Metallica TV</span>
+          <span class="sm2">Live platform example →</span>
+        </span>
+      </a>
+      <div>
+        <div class="label" style="margin-bottom:.5rem">What it would programme — all of it already made</div>
+        <div class="strands">
+          <div class="strand">The ESTRUS visualizers</div>
+          <div class="strand">Official videos</div>
+          <div class="strand">A Night In ESTRUS</div>
+          <div class="strand">The album film</div>
+          <div class="strand">Dirt Femme Scenes</div>
+          <div class="strand">Catalogue &amp; eras</div>
+          <div class="strand">BTS and alternates</div>
+          <div class="strand">Shorts and moments</div>
+        </div>
+        <p class="aside" style="margin-top:.7rem">
+          A platform reference, not a creative template. YouTube Stations is an emerging
+          product — availability and eligibility would need confirming with YouTube, and
+          nothing here assumes access.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══ FIVE MOVES ═══════════════════════════════════════════════
      The executive action plan, and the slide has to stand alone —
      someone who reads only this page should still get the whole
@@ -1543,6 +1711,10 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      take on trust. 1.01M and 59.7% carry the same point and are
      established earlier in the deck. -->
 <section class="slide">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/ksfJ-jyZT94/maxresdefault.jpg"
+         onerror="this.src='https://i.ytimg.com/vi/ksfJ-jyZT94/hqdefault.jpg'" alt="">
+  </div>
   <div class="inner">
     <div class="label hot">The next 30 days</div>
     <h2 class="display" style="margin-top:.9rem">Five moves from here.</h2>
