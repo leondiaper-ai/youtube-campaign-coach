@@ -56,6 +56,26 @@ export async function GET(req: NextRequest) {
    * removes exactly the rows the analysis needs.
    */
   const slim = req.nextUrl.searchParams.get('slim') === '1';
+  /**
+   * HOW MUCH OF THE DESCRIPTION TO RETURN.
+   *
+   * The default was a flat 400 characters, chosen for payload size. That is
+   * fine for reading what a video is, and silently wrong for the question
+   * "does this upload carry a link to X" — which is the question a campaign
+   * audit actually asks. An artist description routinely opens with 150-250
+   * characters of copy, then the streaming link, then pre-order, then
+   * pre-save, then tour links, then the social block. The pre-save link on
+   * this project's campaign uploads sits at roughly character 300-450, so a
+   * 400-character window cuts it off about half the time — and a truncated
+   * description is indistinguishable from a description that never had the
+   * link in it. An audit run against the default would report missing CTAs
+   * that are in fact present.
+   *
+   * So: default stays at 400 to keep the common payload small, and
+   * ?desc=full lifts it to 5000 (YouTube's own description limit) for the
+   * audit case. Anything reporting on CTA presence MUST pass desc=full.
+   */
+  const descCap = req.nextUrl.searchParams.get('desc') === 'full' ? 5000 : 400;
   if (!handle) return NextResponse.json({ error: 'missing handle' }, { status: 400, headers: CORS });
 
   try {
@@ -99,7 +119,7 @@ export async function GET(req: NextRequest) {
         videos.push({
           id: v.id,
           title: v.snippet?.title ?? '',
-          ...(slim ? {} : { description: (v.snippet?.description ?? '').slice(0, 400) }),
+          ...(slim ? {} : { description: (v.snippet?.description ?? '').slice(0, descCap) }),
           publishedAt: v.snippet?.publishedAt ?? null,
           durationSec: dur,
           isShort: dur > 0 && dur <= 62,
