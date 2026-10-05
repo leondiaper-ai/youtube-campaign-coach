@@ -109,9 +109,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
 .bleed img{width:100%;height:100%;object-fit:cover;display:block;
   filter:sepia(.3) saturate(1.08) contrast(1.04)}
 .bleed::after{content:'';position:absolute;inset:0}
-.scrim-l::after{background:linear-gradient(90deg,rgba(23,17,12,.97) 0%,rgba(23,17,12,.9) 44%,rgba(23,17,12,.42) 100%)}
+.scrim-l::after{background:
+  linear-gradient(90deg,rgba(23,17,12,.97) 0%,rgba(23,17,12,.93) 46%,rgba(23,17,12,.62) 100%),
+  linear-gradient(0deg,rgba(23,17,12,.6) 0%,transparent 46%)}
 .scrim-b::after{background:linear-gradient(180deg,rgba(23,17,12,.5) 0%,rgba(23,17,12,.92) 62%,var(--night) 100%)}
-.scrim-f::after{background:rgba(23,17,12,.78)}
+.scrim-f::after{background:
+  linear-gradient(0deg,rgba(23,17,12,.9) 0%,rgba(23,17,12,.74) 55%,rgba(23,17,12,.8) 100%)}
 
 /* ── TYPE ─────────────────────────────────────────────────────────── */
 .label{font-family:var(--body);font-size:.64rem;font-weight:600;letter-spacing:.34em;
@@ -133,8 +136,11 @@ h2.display{font-size:clamp(2rem,4.4vw,3.5rem)}
 .big-p em{font-style:italic;color:var(--blush)}
 .fine{font-family:var(--body);font-weight:600;font-size:.63rem;line-height:1.95;letter-spacing:.055em;
   text-transform:uppercase;color:var(--faint)}
-.qual{font-size:.82rem;line-height:1.58;color:var(--faint);margin:.9rem 0 0;
+.qual{font-size:.82rem;line-height:1.58;color:var(--smoke);margin:.9rem 0 0;
   padding-left:.9rem;border-left:1px solid var(--rule);max-width:56em}
+/* Over a photograph the measure tightens, so no line runs out past the
+   scrim into the bright part of the frame. */
+.slide:has(.bleed) .qual{max-width:46em}
 
 /* ── BIG NUMBERS ──────────────────────────────────────────────────── */
 /* Flex, not grid: auto-fit tracks size independently of the figure
