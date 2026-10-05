@@ -3,22 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Snuts — Joy In Short Moments · campaign deep dive</title>
-<meta name="description" content="Five releases in. What they taught us, what's happening now, and what to do for album week · 5 October 2026">
+<title>The Snuts — Joy In Short Moments · campaign playbook &amp; bets</title>
+<meta name="description" content="What the five releases taught us, and our best bets for the rest of the campaign · 5 October 2026">
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     JOY IN SHORT MOMENTS — CAMPAIGN DEEP DIVE · 5 October 2026
+     JOY IN SHORT MOMENTS — PLAYBOOK & BETS · 5 October 2026
 
-     Scope: the campaign, from Summer Rain (30 Jan) onward. Catalogue
-     appears once, as downstream context on slide 6, and never as a
-     recommendation.
+     Organising question: given everything we know now, what are our best
+     bets for the rest of this campaign?
 
-     Every figure traces to pulls made 5 Oct 2026: YouTube Data API v3
-     full catalogue (310 uploads), Watcher per-video daily series
-     (15 Sep - 5 Oct), Watcher channel history (169 readings), Chartmetric
-     artist 349107, comment scan (218 comments + all 44 campaign Shorts).
+     Scope: the campaign, Summer Rain (30 Jan) onward. Catalogue appears
+     only as downstream evidence, never as a recommendation.
 
-     Full working: /snuts/analysis · findings note: /snuts/FINDINGS.md
+     Confidence is HIGH / MEDIUM / LOW, weighted by hand. No invented
+     probabilities and no invented budgets.
+
+     Sources: YouTube Data API v3 full catalogue (310 uploads) · Watcher
+     per-video daily series (15 Sep - 5 Oct) · Watcher channel history
+     (169 readings, gap-adjusted) · Chartmetric artist 349107 · comment
+     scan (218 comments + all 44 campaign Shorts) · festival dates from
+     setlist.fm · DSP placements and internal Spotify reads from the
+     supplied internal brief.
+
+     Working: /snuts/analysis · findings: /snuts/FINDINGS.md
      ═══════════════════════════════════════════════════════════════════ -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,10 +36,7 @@
 :root{
   --paper:#F4F2ED; --card:#FFFFFF; --ink:#111110; --body:#4A463F;
   --mute:#8A8276; --faint:#B5AD9F; --rule:#DDD8CE;
-  --win:#3E6B4A;      /* works / strong */
-  --warn:#B5651D;     /* mixed */
-  --stop:#A8372A;     /* weak / don't */
-  --blue:#2F5575;     /* neutral data */
+  --win:#3E6B4A; --warn:#B5651D; --stop:#A8372A; --blue:#2F5575;
   --sans:'Inter Tight',system-ui,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,monospace;
   --pad:clamp(24px,5vw,80px);
@@ -43,195 +47,162 @@ body{margin:0;background:var(--paper);color:var(--body);font-family:var(--sans);
   -webkit-font-smoothing:antialiased;overflow-x:hidden}
 
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
-  justify-content:space-between;gap:14px;padding:12px var(--pad);
+  justify-content:space-between;gap:14px;padding:11px var(--pad);
   background:linear-gradient(180deg,rgba(244,242,237,.98),rgba(244,242,237,0));
-  font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase}
+  font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase}
 .nav .who{color:var(--mute)} .nav .who b{color:var(--ink);font-weight:700}
 .nav a{text-decoration:none;color:var(--mute);border:1px solid var(--rule);
-  padding:6px 11px;border-radius:2px;white-space:nowrap}
+  padding:5px 10px;border-radius:2px;white-space:nowrap}
 .nav a:hover{color:var(--ink);border-color:var(--ink)}
 
 .slide{position:relative;min-height:100vh;display:flex;align-items:center;
   border-bottom:1px solid var(--rule)}
-.inner{width:100%;max-width:1180px;margin:0 auto;
-  padding:clamp(70px,10vh,110px) var(--pad) clamp(44px,7vh,76px)}
+.inner{width:100%;max-width:1200px;margin:0 auto;
+  padding:clamp(62px,9vh,100px) var(--pad) clamp(38px,6vh,68px)}
 
-.kicker{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--mute);margin-bottom:.9rem}
+.kicker{font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:.8rem}
 .kicker b{color:var(--stop);font-weight:500}
 
 h1,h2{font-weight:700;line-height:1.03;letter-spacing:-.025em;color:var(--ink);margin:0}
-h1{font-size:clamp(2.1rem,4.6vw,3.9rem)}
-h2{font-size:clamp(1.65rem,3.4vw,2.9rem);max-width:21ch}
-h2.wide{max-width:28ch}
+h1{font-size:clamp(2rem,4.4vw,3.7rem)}
+h2{font-size:clamp(1.5rem,3.1vw,2.6rem);max-width:24ch}
+h2.wide{max-width:32ch}
 
-.interp{font-size:clamp(.95rem,1.25vw,1.08rem);line-height:1.5;max-width:60ch;
-  color:var(--body);margin:1.1rem 0 0}
+.interp{font-size:clamp(.92rem,1.2vw,1.04rem);line-height:1.5;max-width:62ch;margin:1rem 0 0}
 
-/* ── WHAT THIS MEANS ─────────────────────────────────────────────── */
-.means{margin-top:clamp(1.4rem,3vh,2.2rem);border-left:4px solid var(--ink);
-  padding:.75rem 0 .75rem 1.1rem;max-width:72ch}
-.means .ml{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--mute);margin-bottom:.35rem}
-.means p{margin:0;font-size:clamp(.98rem,1.35vw,1.14rem);line-height:1.38;
+.means{margin-top:clamp(1.1rem,2.4vh,1.8rem);border-left:4px solid var(--ink);
+  padding:.65rem 0 .65rem 1rem;max-width:74ch}
+.means .ml{font-family:var(--mono);font-size:.55rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:.3rem}
+.means p{margin:0;font-size:clamp(.94rem,1.3vw,1.08rem);line-height:1.38;
   color:var(--ink);font-weight:600}
-.means.win{border-left-color:var(--win)}
-.means.stop{border-left-color:var(--stop)}
+.means.win{border-left-color:var(--win)} .means.stop{border-left-color:var(--stop)}
 
-/* ── HERO NUMBER ─────────────────────────────────────────────────── */
 .hero{font-weight:800;line-height:.88;letter-spacing:-.04em;color:var(--ink);
-  font-size:clamp(3.6rem,10vw,8.5rem)}
-.hero.win{color:var(--win)} .hero.blue{color:var(--blue)} .hero.stop{color:var(--stop)}
-.herosub{font-family:var(--mono);font-size:.64rem;letter-spacing:.17em;
-  text-transform:uppercase;color:var(--mute);margin-top:.6rem;line-height:1.75}
+  font-size:clamp(3rem,8vw,6.5rem)}
+.hero.win{color:var(--win)} .hero.stop{color:var(--stop)}
+.herosub{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mute);margin-top:.5rem;line-height:1.75}
 
-.stats{display:flex;flex-wrap:wrap;gap:clamp(22px,4vw,56px);margin-top:1.6rem}
-.stats div .v{font-weight:700;font-size:clamp(1.3rem,2.4vw,2rem);color:var(--ink);
+.stats{display:flex;flex-wrap:wrap;gap:clamp(18px,3.4vw,48px);margin-top:1.3rem}
+.stats div .v{font-weight:700;font-size:clamp(1.2rem,2.2vw,1.8rem);color:var(--ink);
   letter-spacing:-.02em;line-height:1}
-.stats div .k{font-family:var(--mono);font-size:.56rem;letter-spacing:.15em;
-  text-transform:uppercase;color:var(--mute);margin-top:.4rem;line-height:1.7}
+.stats div .k{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--mute);margin-top:.35rem;line-height:1.7}
 
-/* ── FIVE RELEASE CARDS ──────────────────────────────────────────── */
-.rel5{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(8px,1vw,14px);
-  margin-top:clamp(1.4rem,3vh,2rem)}
-@media(max-width:880px){.rel5{grid-template-columns:repeat(2,1fr)}}
-.rc{background:var(--card);border:1px solid var(--rule);border-radius:3px;
-  padding:.85rem .8rem;position:relative}
-.rc.star{border:2px solid var(--ink);box-shadow:0 2px 0 var(--ink)}
-.rc .n{font-weight:700;font-size:.92rem;color:var(--ink);line-height:1.12;letter-spacing:-.01em}
-.rc .d{font-family:var(--mono);font-size:.52rem;letter-spacing:.12em;color:var(--faint);
-  text-transform:uppercase;margin-top:.2rem}
-.rc .big{font-weight:800;font-size:clamp(1.3rem,2.2vw,1.85rem);letter-spacing:-.03em;
-  color:var(--ink);margin-top:.7rem;line-height:1}
-.rc.star .big{color:var(--win)}
-.rc .bl{font-family:var(--mono);font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--mute);margin-top:.25rem}
-.rc .row{display:flex;justify-content:space-between;align-items:baseline;
-  border-top:1px solid var(--rule);margin-top:.6rem;padding-top:.42rem;
-  font-family:var(--mono);font-size:.62rem;color:var(--body)}
-.rc .row s{text-decoration:none;color:var(--faint);font-size:.5rem;letter-spacing:.1em;
+/* ── CONFIDENCE PILL ─────────────────────────────────────────────── */
+.cf{font-family:var(--mono);font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;
+  border:1px solid;border-radius:2px;padding:2px 7px;display:inline-block;font-weight:500}
+.cf.h{color:var(--win);border-color:rgba(62,107,74,.45)}
+.cf.m{color:var(--warn);border-color:rgba(181,101,29,.45)}
+.cf.l{color:var(--mute);border-color:var(--rule)}
+
+/* ── BETS BOARD ──────────────────────────────────────────────────── */
+.board{margin-top:clamp(1.1rem,2.4vh,1.7rem);border-top:1px solid var(--rule)}
+.brow{display:grid;grid-template-columns:clamp(112px,13vw,150px) 1fr clamp(74px,8vw,96px) clamp(78px,8vw,100px);
+  gap:clamp(10px,1.6vw,22px);align-items:center;padding:.56rem 0;border-bottom:1px solid var(--rule)}
+@media(max-width:820px){.brow{grid-template-columns:1fr auto;gap:6px}.brow .bwhy{grid-column:1/-1}}
+.brow .bact{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700}
+.brow .bact.do{color:var(--win)} .brow .bact.test{color:var(--warn)}
+.brow .bact.hold{color:var(--blue)} .brow .bact.dont{color:var(--stop)}
+.brow .bwhat{font-weight:600;font-size:.94rem;color:var(--ink);line-height:1.15}
+.brow .bwhy{font-family:var(--mono);font-size:.63rem;color:var(--body);line-height:1.5}
+.brow .bcost{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);text-align:right}
+
+/* ── TWO / THREE COLUMN CARDS ────────────────────────────────────── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.4vw,32px);margin-top:clamp(1.1rem,2.4vh,1.7rem)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,26px);margin-top:clamp(1.1rem,2.4vh,1.7rem)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.6vw,20px);margin-top:clamp(1.1rem,2.4vh,1.7rem)}
+@media(max-width:860px){.g2,.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
+.cd{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.9rem 1rem}
+.cd h4{font-weight:700;font-size:.98rem;color:var(--ink);margin:0 0 .45rem;letter-spacing:-.015em;line-height:1.14}
+.cd .lab{font-family:var(--mono);font-size:.54rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mute);margin-bottom:.3rem}
+.cd p{margin:.45rem 0 0;font-size:.83rem;line-height:1.44}
+.cd ul{margin:.5rem 0 0;padding:0;list-style:none}
+.cd li{font-size:.8rem;line-height:1.42;padding:.26rem 0;border-top:1px solid var(--rule);
+  display:flex;justify-content:space-between;gap:10px}
+.cd li:first-child{border-top:0}
+.cd li b{font-family:var(--mono);font-size:.76rem;color:var(--ink);white-space:nowrap}
+.cd .ft{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;color:var(--faint);
+  margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--rule);line-height:1.6;
   text-transform:uppercase}
 
-/* ── BARS ────────────────────────────────────────────────────────── */
-.bars{margin-top:clamp(1.3rem,3vh,2rem);max-width:880px}
-.bar{display:grid;grid-template-columns:clamp(108px,15vw,170px) 1fr clamp(76px,9vw,104px);
-  gap:14px;align-items:center;padding:.42rem 0}
-.bar .bn{font-weight:600;font-size:.92rem;color:var(--ink)}
-.bar .bt{height:20px;background:#E7E2D8;border-radius:2px;overflow:hidden}
-.bar .bf{height:100%;border-radius:2px;background:var(--blue)}
-.bar .bf.win{background:var(--win)} .bar .bf.mute{background:#BDB5A6}
-.bar .bv{font-family:var(--mono);font-size:.84rem;font-weight:700;color:var(--ink);text-align:right}
+/* ── RULE BLOCK ──────────────────────────────────────────────────── */
+.rule{background:var(--ink);color:#F4F2ED;border-radius:3px;padding:1rem 1.15rem;
+  margin-top:clamp(1rem,2.2vh,1.6rem)}
+.rule .rl{font-family:var(--mono);font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;
+  color:#B5AD9F;margin-bottom:.55rem}
+.rule p{margin:0;font-size:clamp(.96rem,1.3vw,1.1rem);line-height:1.4;font-weight:600;color:#fff}
+.rule .chain{display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin-top:.8rem;
+  font-family:var(--mono);font-size:.62rem;color:#B5AD9F}
+.rule .chain b{color:#fff;font-weight:500}
 
-/* ── TRAJECTORY ──────────────────────────────────────────────────── */
-.traj{margin-top:clamp(1.3rem,3vh,2rem);background:var(--card);border:1px solid var(--rule);
-  border-radius:3px;padding:1.2rem 1.3rem .9rem}
-.traj svg{width:100%;height:auto;display:block}
+/* ── SIGNAL → ACTION ─────────────────────────────────────────────── */
+.sa{margin-top:clamp(1rem,2.2vh,1.6rem);border-top:1px solid var(--rule)}
+.sa .r{display:grid;grid-template-columns:1.15fr 1fr .9fr .9fr;gap:clamp(10px,1.6vw,22px);
+  padding:.52rem 0;border-bottom:1px solid var(--rule);align-items:start}
+@media(max-width:860px){.sa .r{grid-template-columns:1fr 1fr}}
+.sa .r.hd{border-bottom:1px solid var(--ink)}
+.sa .r.hd span{font-family:var(--mono);font-size:.53rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--mute)}
+.sa .r span{font-size:.8rem;line-height:1.4}
+.sa .r span b{color:var(--ink);font-weight:600}
+.sa .r span.m{font-family:var(--mono);font-size:.68rem;color:var(--body)}
 
-/* ── TWO-UP CONTRAST ─────────────────────────────────────────────── */
-.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(16px,3vw,44px);
-  align-items:center;margin-top:clamp(1.4rem,3vh,2.2rem)}
-@media(max-width:820px){.vs{grid-template-columns:1fr;gap:18px}.vs .mid{display:none}}
-.vs .side{background:var(--card);border:1px solid var(--rule);border-radius:3px;
-  padding:clamp(1rem,2.2vw,1.6rem)}
-.vs .side.hot{border:2px solid var(--win)}
-.vs .side .sl{font-family:var(--mono);font-size:.58rem;letter-spacing:.17em;
-  text-transform:uppercase;color:var(--mute);margin-bottom:.6rem}
-.vs .side .sv{font-weight:800;font-size:clamp(1.8rem,3.6vw,3rem);letter-spacing:-.035em;
-  color:var(--ink);line-height:1}
-.vs .side.hot .sv{color:var(--win)}
-.vs .side.cold .sv{color:var(--mute)}
-.vs .side .sn{font-family:var(--mono);font-size:.58rem;letter-spacing:.13em;
-  text-transform:uppercase;color:var(--mute);margin-top:.5rem;line-height:1.7}
-.vs .mid{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--faint);
-  text-transform:uppercase}
+/* ── SUPPORT LISTS ───────────────────────────────────────────────── */
+.sup{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.9rem 1rem}
+.sup.thin{border-left:4px solid var(--warn)} .sup.thick{border-left:4px solid var(--blue)}
+.sup h4{font-weight:700;font-size:1.05rem;color:var(--ink);margin:0;letter-spacing:-.015em}
+.sup .dsp{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mute);margin-top:.65rem}
+.sup .pl{font-family:var(--mono);font-size:.67rem;color:var(--body);line-height:1.6;margin-top:.1rem}
+.sup .none{color:var(--stop);font-weight:700}
+.sup .res{margin-top:.8rem;padding-top:.6rem;border-top:1px solid var(--rule)}
+.sup .res .rv{font-weight:800;font-size:clamp(1.3rem,2.4vw,1.9rem);letter-spacing:-.03em;color:var(--ink)}
+.sup.thin .res .rv{color:var(--warn)}
+.sup .res .rk{font-family:var(--mono);font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--mute);margin-top:.2rem}
 
-/* ── THREE COLUMNS ───────────────────────────────────────────────── */
-.col3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2.2vw,30px);
-  margin-top:clamp(1.3rem,3vh,2rem)}
-@media(max-width:860px){.col3{grid-template-columns:1fr}}
-.cc{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:1.05rem 1.1rem}
-.cc .ct{font-weight:700;font-size:1.02rem;color:var(--ink);letter-spacing:-.015em}
-.cc .cv{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;
-  margin-top:.3rem}
-.cc.a .cv{color:var(--warn)} .cc.b .cv{color:var(--blue)} .cc.c .cv{color:var(--stop)}
-.cc ul{margin:.85rem 0 0;padding:0;list-style:none}
-.cc li{font-family:var(--mono);font-size:.68rem;color:var(--body);padding:.22rem 0;
-  border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:10px}
-.cc li:first-child{border-top:0}
-.cc li s{text-decoration:none;color:var(--faint);font-size:.56rem;letter-spacing:.1em;
-  text-transform:uppercase}
-.cc .ci{font-size:.84rem;line-height:1.42;color:var(--body);margin-top:.85rem;
-  padding-top:.7rem;border-top:1px solid var(--rule)}
-.cc .ci b{color:var(--ink)}
+/* ── TIMELINE / PHASES ───────────────────────────────────────────── */
+.ph{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.6vw,18px);
+  margin-top:clamp(1rem,2.2vh,1.6rem)}
+@media(max-width:900px){.ph{grid-template-columns:repeat(2,1fr)}}
+.pc{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.85rem .9rem;
+  border-top:3px solid var(--rule)}
+.pc.a{border-top-color:var(--mute)} .pc.b{border-top-color:var(--ink)}
+.pc.c{border-top-color:var(--blue)} .pc.d{border-top-color:var(--warn)}
+.pc .pt{font-family:var(--mono);font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--mute);font-weight:700}
+.pc .ph4{font-weight:700;font-size:.9rem;color:var(--ink);margin:.35rem 0 .45rem;line-height:1.16}
+.pc ul{margin:0;padding:0;list-style:none}
+.pc li{font-size:.76rem;line-height:1.4;color:var(--body);padding:.2rem 0 .2rem .75rem;position:relative}
+.pc li::before{content:'';position:absolute;left:0;top:.62em;width:4px;height:4px;
+  border-radius:50%;background:var(--faint)}
+.pc li b{color:var(--ink)}
 
-/* ── CREATIVE SPLIT ──────────────────────────────────────────────── */
-.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,3vw,40px);
-  margin-top:clamp(1.3rem,3vh,2rem)}
-@media(max-width:820px){.split{grid-template-columns:1fr}}
-.sp{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:1rem 1.1rem}
-.sp h4{font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
-  margin:0 0 .8rem;font-weight:500}
-.sp.t h4{color:var(--blue)} .sp.d h4{color:var(--warn)}
-.sp .it{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;
-  padding:.42rem 0;border-top:1px solid var(--rule)}
-.sp .it:first-of-type{border-top:0}
-.sp .it .in{font-size:.85rem;color:var(--ink);font-weight:500;line-height:1.2}
-.sp .it .iv{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--ink);
-  text-align:right;min-width:62px}
-.sp .it .ir{font-family:var(--mono);font-size:.68rem;text-align:right;min-width:48px}
-.sp.t .it .ir{color:var(--faint)} .sp.d .it .ir{color:var(--warn);font-weight:700}
-.sp .cap{font-family:var(--mono);font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--faint);margin-top:.8rem;display:flex;justify-content:space-between}
+/* ── BRANCHES ────────────────────────────────────────────────────── */
+.br{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.6vw,18px);
+  margin-top:clamp(1rem,2.2vh,1.6rem)}
+@media(max-width:900px){.br{grid-template-columns:repeat(2,1fr)}}
+.bc{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.85rem .9rem}
+.bc .bl{font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:700;margin-bottom:.35rem}
+.bc.a .bl{color:var(--win)} .bc.b .bl{color:var(--blue)}
+.bc.c .bl{color:var(--warn)} .bc.d .bl{color:var(--stop)}
+.bc .sig{font-family:var(--mono);font-size:.66rem;color:var(--ink);line-height:1.45;
+  padding-bottom:.5rem;border-bottom:1px solid var(--rule)}
+.bc .act{font-size:.8rem;line-height:1.42;margin-top:.5rem;color:var(--body)}
+.bc .act b{color:var(--ink)}
 
-/* ── THEMES ──────────────────────────────────────────────────────── */
-.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,2vw,24px);
-  margin-top:clamp(1.3rem,3vh,2rem)}
-@media(max-width:900px){.themes{grid-template-columns:repeat(2,1fr)}}
-.th{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.95rem 1rem}
-.th .tn{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--ink);font-weight:700}
-.th q{display:block;font-size:.92rem;line-height:1.32;color:var(--ink);margin:.65rem 0 0;
-  quotes:none;font-weight:500}
-.th q::before,.th q::after{content:''}
-.th .tm{font-family:var(--mono);font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--faint);margin-top:.55rem}
+.foot{font-family:var(--mono);font-size:.53rem;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--faint);margin-top:1.1rem;line-height:1.8;max-width:92ch}
 
-/* ── MATRIX ──────────────────────────────────────────────────────── */
-.mx{margin-top:clamp(1.2rem,2.6vh,1.8rem);background:var(--card);border:1px solid var(--rule);
-  border-radius:3px;padding:1rem}
-.mx svg{width:100%;height:auto;display:block}
-
-/* ── DECISIONS ───────────────────────────────────────────────────── */
-.dec{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,22px);
-  margin-top:clamp(1.1rem,2.4vh,1.7rem)}
-@media(max-width:860px){.dec{grid-template-columns:1fr}}
-.dd{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:.9rem 1rem;
-  border-left:4px solid var(--rule)}
-.dd.hold{border-left-color:var(--blue)} .dd.inv{border-left-color:var(--warn)}
-.dd.mom{border-left-color:var(--win)} .dd.depth{border-left-color:var(--ink)}
-.dd .dt{font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--mute)}
-.dd h4{font-weight:700;font-size:1rem;color:var(--ink);margin:.3rem 0 .4rem;
-  letter-spacing:-.015em;line-height:1.14}
-.dd p{margin:0;font-size:.82rem;line-height:1.42;color:var(--body)}
-.dd .trig{font-family:var(--mono);font-size:.6rem;color:var(--ink);margin-top:.5rem;
-  padding-top:.45rem;border-top:1px solid var(--rule)}
-
-.need{margin-top:clamp(1.1rem,2.4vh,1.6rem);background:var(--ink);color:#F4F2ED;
-  border-radius:3px;padding:1rem 1.15rem}
-.need .nl{font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;
-  color:#B5AD9F;margin-bottom:.65rem}
-.need .ng{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,26px)}
-@media(max-width:820px){.need .ng{grid-template-columns:1fr;gap:10px}}
-.need .ng div b{display:block;font-size:.88rem;color:#fff;font-weight:700;letter-spacing:-.01em}
-.need .ng div span{display:block;font-family:var(--mono);font-size:.62rem;color:#B5AD9F;
-  margin-top:.25rem;line-height:1.5}
-
-.foot{font-family:var(--mono);font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--faint);margin-top:1.3rem;line-height:1.8}
-
-footer{padding:clamp(30px,5vh,52px) var(--pad);font-family:var(--mono);font-size:.56rem;
-  letter-spacing:.13em;text-transform:uppercase;color:var(--faint);line-height:2;
+footer{padding:clamp(28px,5vh,48px) var(--pad);font-family:var(--mono);font-size:.54rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--faint);line-height:2;
   display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
 footer a{color:var(--mute)}
 </style>
@@ -239,417 +210,520 @@ footer a{color:var(--mute)}
 <body>
 
 <nav class="nav">
-  <span class="who"><b>Joy In Short Moments</b> · campaign deep dive · 18 days out</span>
+  <span class="who"><b>Joy In Short Moments</b> · playbook &amp; bets · 18 days out</span>
   <a href="/snuts/analysis">The working →</a>
 </nav>
 
-<!-- ══ 1 · THE CAMPAIGN IN ONE VIEW ══════════════════════════════════ -->
+<!-- ══ 1 · THE QUESTION ══════════════════════════════════════════════ -->
 <section class="slide">
   <div class="inner">
-    <div class="kicker">Summer Rain → PTS · five releases · 30 Jan – 5 Oct 2026</div>
-    <h1>Five releases in — only one has created<br>a true conversion step-change.</h1>
+    <div class="kicker">Summer Rain → PTS · five releases · 249 days of campaign</div>
+    <h1>We've done the diagnosis.<br>The question now is what to <em style="font-style:normal;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px">bet on</em>.</h1>
+    <p class="interp" style="margin-top:1.4rem">Five releases have produced a lot of signal. Most of it doesn't explain the campaign — but a fair amount of it can steer the eighteen days that are left. This deck turns what we've learned into a platform playbook and a set of bets, each with the evidence for it, the evidence against it, and what would change our mind.</p>
 
-    <div class="rel5">
-      <div class="rc star">
-        <div class="n">Summer Rain</div><div class="d">30 Jan</div>
-        <div class="big">3.94×</div><div class="bl">median follower day</div>
-        <div class="row"><span>+1,453</span><s>Followers 9d</s></div>
-        <div class="row"><span>+30,843</span><s>Listeners 7d</s></div>
-      </div>
-      <div class="rc">
-        <div class="n">Motherlands</div><div class="d">26 Mar</div>
-        <div class="big">1.34×</div><div class="bl">median follower day</div>
-        <div class="row"><span>+495</span><s>Followers 9d</s></div>
-        <div class="row"><span>+17,831</span><s>Listeners 7d</s></div>
-      </div>
-      <div class="rc">
-        <div class="n">Defibrillator</div><div class="d">16 Jun</div>
-        <div class="big">1.65×</div><div class="bl">median follower day</div>
-        <div class="row"><span>+609</span><s>Followers 9d</s></div>
-        <div class="row"><span>+11,142</span><s>Listeners 7d</s></div>
-      </div>
-      <div class="rc">
-        <div class="n">In Motion</div><div class="d">23 Jul</div>
-        <div class="big">1.11×</div><div class="bl">median follower day</div>
-        <div class="row"><span>+408</span><s>Followers 9d</s></div>
-        <div class="row"><span>+3,895</span><s>Listeners 7d</s></div>
-      </div>
-      <div class="rc">
-        <div class="n">PTS</div><div class="d">25 Sep · 10 days old</div>
-        <div class="big">1.38×</div><div class="bl">median follower day</div>
-        <div class="row"><span>+511</span><s>Followers 9d</s></div>
-        <div class="row"><span>+11,899</span><s>Listeners 7d</s></div>
-      </div>
+    <div class="stats" style="margin-top:2rem">
+      <div><div class="v">5</div><div class="k">Releases to learn from</div></div>
+      <div><div class="v">11</div><div class="k">Bets on the board</div></div>
+      <div><div class="v">3</div><div class="k">At HIGH confidence</div></div>
+      <div><div class="v">£0</div><div class="k">Invented budgets<br>in this deck</div></div>
     </div>
 
     <div class="means">
-      <div class="ml">The thread through this deck</div>
-      <p>Summer Rain is still the benchmark. PTS is the first release since to show attention building on several platforms at once — but it has not yet reproduced Summer Rain's conversion. Album week is where we try to close that gap.</p>
-    </div>
-    <p class="foot">Identical windows for all five · Spotify followers gained in 9 days from release, against a 41/day median · monthly-listener gain in 7 days from release</p>
-  </div>
-</section>
-
-<!-- ══ 2 · SUMMER RAIN SET THE BAR ═══════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="kicker">The benchmark · 30 January 2026</div>
-    <h2>Summer Rain created the campaign's only major audience step-change.</h2>
-
-    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:clamp(24px,5vw,72px);margin-top:clamp(1.6rem,4vh,2.6rem)">
-      <div>
-        <div class="hero win">3.94×</div>
-        <div class="herosub">normal follower growth<br>across the 9 days from release</div>
-      </div>
-      <div class="stats" style="margin:0 0 .6rem">
-        <div><div class="v">+1,453</div><div class="k">Spotify followers<br>in 9 days</div></div>
-        <div><div class="v">+30,843</div><div class="k">Monthly listeners<br>in 7 days</div></div>
-        <div><div class="v">18th</div><div class="k">Biggest listener week<br>of 270 in 2026</div></div>
-      </div>
-    </div>
-
-    <p class="interp">On release weekend alone it added <b style="color:var(--ink)">+582 and +581</b> followers on consecutive days — 14× an ordinary day. No release since has produced anything like it.</p>
-
-    <div class="means">
-      <div class="ml">What was different — and what we are not claiming</div>
-      <p>It had an official video, a release <i>weekend</i>, and a band returning after a quiet 2025. We cannot prove those caused the result. We can say this is the one release configuration worth understanding, because nothing since has matched its conversion.</p>
+      <div class="ml">How to read the confidence labels</div>
+      <p>HIGH means several independent sources point the same way. MEDIUM means the evidence is real but thin or confounded. LOW means we're acting on a hunch and should say so. No percentages — we don't have enough campaigns yet to earn them.</p>
     </div>
   </div>
 </section>
 
-<!-- ══ 3 · WHAT THE NEXT THREE TAUGHT US ═════════════════════════════ -->
+<!-- ══ 2 · THE BETS BOARD ════════════════════════════════════════════ -->
 <section class="slide">
   <div class="inner">
-    <div class="kicker">March → July · three releases, three different lessons</div>
-    <h2 class="wide">The next three releases each failed in a different way.</h2>
+    <div class="kicker">Everything on one board · detail follows</div>
+    <h2 class="wide">Eleven bets, ranked by confidence.</h2>
 
-    <div class="col3">
-      <div class="cc a">
-        <div class="ct">Motherlands</div>
-        <div class="cv">Demand ran ahead of support</div>
-        <ul>
-          <li><s>Spotify editorials</s><span style="color:var(--stop);font-weight:700">0</span></li>
-          <li><s>Playlist reach</s><span>30,305</span></li>
-          <li><s>Listeners 7d</s><span style="font-weight:700">+17,831</span></li>
-          <li><s>Rank of 270 weeks</s><span>43rd</span></li>
-        </ul>
-        <p class="ci">Second-best listener week of the five — on the <b>weakest Spotify distribution of the campaign</b>, 5.6× less reach than Summer Rain.</p>
+    <div class="board">
+      <div class="brow">
+        <span class="bact do">DO · HIGH</span>
+        <span class="bwhat">Fix the podcast conversion route</span>
+        <span class="bwhy">18,101 views, best engagement of the campaign, zero links in the description</span>
+        <span class="bcost">Minutes</span>
       </div>
-      <div class="cc b">
-        <div class="ct">Defibrillator</div>
-        <div class="cv">Support helped — didn't transform</div>
-        <ul>
-          <li><s>Spotify editorials</s><span>1</span></li>
-          <li><s>Playlist reach</s><span>159,850</span></li>
-          <li><s>Listeners 7d</s><span>+11,142</span></li>
-          <li><s>Followers vs median</s><span style="font-weight:700">1.65×</span></li>
-        </ul>
-        <p class="ci">The campaign's <b>best editorial week</b> — NMF UK #44, Indie List #41, Apple New in Rock #3 — produced a decent result, not a step-change.</p>
+      <div class="brow">
+        <span class="bact hold">HOLD · HIGH</span>
+        <span class="bwhat">Don't spend against PTS</span>
+        <span class="bwhy">Velocity still rising at day 10; lift is video-specific, catalogue flat at +13/day</span>
+        <span class="bcost">Free</span>
       </div>
-      <div class="cc c">
-        <div class="ct">In Motion</div>
-        <div class="cv">Activity without a moment</div>
+      <div class="brow">
+        <span class="bact dont">DON'T · HIGH</span>
+        <span class="bwhat">Add Shorts volume</span>
+        <span class="bwhy">44 Shorts → 49,370 views and 43 comments total; cadence already strong</span>
+        <span class="bcost">Saves time</span>
+      </div>
+      <div class="brow">
+        <span class="bact do">DO · MEDIUM</span>
+        <span class="bwhat">Stack album week into one moment</span>
+        <span class="bwhy">Both multi-platform events of 2026 were stacks; four singles released alone moved nothing</span>
+        <span class="bcost">Scheduling</span>
+      </div>
+      <div class="brow">
+        <span class="bact do">DO · MEDIUM</span>
+        <span class="bwhat">Episode two inside album week</span>
+        <span class="bwhy">8,995 views/day and 5.66% like rate — the only proven reach into non-fans</span>
+        <span class="bcost">Already exists</span>
+      </div>
+      <div class="brow">
+        <span class="bact test">TEST · MEDIUM</span>
+        <span class="bwhat">Spotify paid — light &amp; moderate listeners</span>
+        <span class="bwhy">Followers:listeners fell 35.9% → 24.1%; August proved a large unreachable pool</span>
+        <span class="bcost">Test budget</span>
+      </div>
+      <div class="brow">
+        <span class="bact test">TEST · MEDIUM</span>
+        <span class="bwhat">Ask Commercial why Motherlands outperformed</span>
+        <span class="bwhy">Zero Spotify editorials, +17,831 listeners — 43rd of 270 weeks</span>
+        <span class="bcost">A conversation</span>
+      </div>
+      <div class="brow">
+        <span class="bact test">TEST · MEDIUM</span>
+        <span class="bwhat">Band-personality creative for album week</span>
+        <span class="bwhy">Direct-to-camera 3.97% like rate; community casting is the top PTS comment</span>
+        <span class="bcost">Cheap to make</span>
+      </div>
+      <div class="brow">
+        <span class="bact dont">DON'T · MEDIUM</span>
+        <span class="bwhat">Buy broad reach</span>
+        <span class="bwhy">Reach is the working part — listeners +56.2% while every follower base sat flat</span>
+        <span class="bcost">Saves spend</span>
+      </div>
+      <div class="brow">
+        <span class="bact dont">DON'T · MEDIUM</span>
+        <span class="bwhat">Default to a lyric video for the focus track</span>
+        <span class="bwhy">Lyric assets at 65 and 62 views/day; both official videos are in the campaign's top four</span>
+        <span class="bcost">Production choice</span>
+      </div>
+      <div class="brow">
+        <span class="bact test">TEST · LOW</span>
+        <span class="bwhat">Instagram as the album-intent surface</span>
+        <span class="bwhy">Only moves on real campaign moments (−2/day → +99/day in late June). No native data.</span>
+        <span class="bcost">One post</span>
+      </div>
+    </div>
+    <p class="foot">Cost column is effort, not money. No budget appears anywhere in this deck because we have no paid-performance data to defend one.</p>
+  </div>
+</section>
+
+<!-- ══ 3 · SPOTIFY ═══════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Platform playbook · 01</div>
+    <h2 class="wide">Spotify is where this campaign's reach lives — and where its only real conversion ever happened.</h2>
+
+    <div class="g3">
+      <div class="cd">
+        <div class="lab">Best role · evidence-led</div>
+        <h4>Discovery <i style="font-style:normal;color:var(--faint)">and</i> conversion — but never at the same time</h4>
+        <p>Monthly listeners <b>+56.2%</b> since January. The only follower step-change in nine months was also here — Summer Rain, <b>3.94×</b> a median day. But August added <b>+86,303</b> listeners and barely any followers.</p>
+        <span class="ft">Fact · Chartmetric daily, 1 Jan – 4 Oct</span>
+      </div>
+      <div class="cd">
+        <div class="lab">What a converting track looks like</div>
+        <h4>We have two reference points, and they're miles apart</h4>
         <ul>
-          <li><s>Followers vs median</s><span style="color:var(--stop);font-weight:700">1.11×</span></li>
-          <li><s>Listeners 7d</s><span>+3,895</span></li>
-          <li><s>Rank of 270 weeks</s><span>167th</span></li>
-          <li><s>3 YouTube assets</s><span>124 views/day</span></li>
+          <li><span>Summer Rain save rate</span><b>34.6%</b></li>
+          <li><span>Summer Rain SPL</span><b>1.74</b></li>
+          <li><span>Brush Me Like A Horse save</span><b style="color:var(--stop)">4.9%</b></li>
+          <li><span>Brush Me SPL</span><b style="color:var(--stop)">1.23</b></li>
+          <li><span>Brush Me editorial share</span><b>≈39%</b></li>
         </ul>
-        <p class="ci">A single plus lyric video, stripped cut and live video, released into the festival run with nothing stacked around it. <b>Statistically a normal fortnight.</b></p>
+        <span class="ft">Internal Spotify reads · supplied context</span>
+      </div>
+      <div class="cd">
+        <div class="lab">The lesson in one line</div>
+        <h4>Editorial share is not the signal. Save rate and SPL are.</h4>
+        <p>Brush Me had heavy editorial exposure and the weakest response of anything we've measured. Summer Rain had the strongest save and replay behaviour and is still the campaign benchmark.</p>
+        <span class="ft">Interpretation · two reference points, not a rule yet</span>
       </div>
     </div>
 
-    <div class="means">
-      <div class="ml">What this means</div>
-      <p>Editorial support is not the variable that decides the outcome. Motherlands had almost none and outperformed; Defibrillator had the most and didn't transform; In Motion had a full asset set and moved nothing.</p>
+    <div class="rule">
+      <div class="rl">The Spotify lean-in rule</div>
+      <p>A focus track earns a paid test when its save rate and streams-per-listener sit closer to Summer Rain than to Brush Me — <i>and</i> follower gain is running at least 2× a median day. Editorial placement on its own does not qualify a track for spend.</p>
+      <div class="chain">
+        <span>SIGNAL <b>save + SPL + follower conversion</b></span>
+        <span>AUDIENCE <b>light &amp; moderate listeners</b></span>
+        <span>OBJECTIVE <b>followers and pre-saves</b></span>
+        <span>MEASURE <b>follower gain per 1,000 reached vs 41/day organic</b></span>
+        <span>STOP <b>doesn't beat organic → stop, don't scale</b></span>
+      </div>
+    </div>
+    <p class="foot">Budget · <b style="color:var(--ink)">CONTROLLED TEST — BUDGET REQUIRES PAID PERFORMANCE DATA.</b> February's reasoning against targeting super listeners still holds and is now quantified: followers are 24.1% of monthly listeners, down from 35.9%. Blocked on Spotify for Artists audience segments.</p>
+  </div>
+</section>
+
+<!-- ══ 4 · YOUTUBE ═══════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Platform playbook · 02</div>
+    <h2 class="wide">On YouTube, two asset types have earned priority. Three haven't.</h2>
+
+    <div class="g2">
+      <div class="cd" style="border-left:4px solid var(--win)">
+        <div class="lab">Earned it</div>
+        <ul>
+          <li><span><b>Conversation / collaboration</b> — podcast</span><b>8,995/day · 5.66%</b></li>
+          <li><span><b>Official music video</b> — PTS, Summer Rain</span><b>7,000 &amp; 740/day</b></li>
+        </ul>
+        <p>Both official videos are in the campaign's top four assets by rate. The podcast is the only asset that provably reached people with no prior relationship to the band.</p>
+      </div>
+      <div class="cd" style="border-left:4px solid var(--stop)">
+        <div class="lab">Hasn't earned it</div>
+        <ul>
+          <li><span>Lyric video</span><b>65 &amp; 62/day</b></li>
+          <li><span>Stripped / acoustic / live cut</span><b>29–33/day</b></li>
+          <li><span>Shorts at volume</span><b>median 1,087 lifetime</b></li>
+        </ul>
+        <p>High like rates (2.2–4.4%) on tiny reach. The core loves these. They do not travel, and they have not moved a release.</p>
+      </div>
+    </div>
+
+    <div class="rule">
+      <div class="rl">The day-3 rule · the most reusable thing this campaign taught us</div>
+      <p>Do not judge a release before day 5. Judge the <i>direction</i> of daily gain across days 4–8, not the volume at day 3 — and check whether the rest of the channel moved.</p>
+      <div class="chain">
+        <span>PTS day 3 <b>1,698/day</b></span>
+        <span>→ day 8 <b>10,250/day</b></span>
+        <span>Catalogue across the same window <b>+13 views/day, combined</b></span>
+      </div>
+    </div>
+
+    <p class="interp">If the rest of the channel lifts too, it's a brand or PR effect. If only the one video lifts, it's a recommendation surface doing its job — and paying into it buys views you were getting free.</p>
+
+    <div class="means stop">
+      <div class="ml">Paid trigger for YouTube</div>
+      <p>Leave it alone while daily gain is rising. A video earns amplification only once gain has flattened <i>and</i> engagement has held. Stop if daily gain falls below ~3,000 for three consecutive days — that's the reassess point, not the spend point.</p>
     </div>
   </div>
 </section>
 
-<!-- ══ 4 · PTS CHANGED DIRECTION ═════════════════════════════════════ -->
+<!-- ══ 5 · TIKTOK ════════════════════════════════════════════════════ -->
 <section class="slide">
   <div class="inner">
-    <div class="kicker"><b>We nearly judged this at exactly the wrong moment</b></div>
-    <h2 class="wide">PTS looked soft at day 3 — then YouTube velocity accelerated 6×.</h2>
+    <div class="kicker">Platform playbook · 03</div>
+    <h2 class="wide">TikTok is reacting to PTS harder than to anything else this campaign — and we don't yet know what that converts into.</h2>
 
-    <div class="traj">
-      <svg viewBox="0 0 1000 250" role="img" aria-label="PTS daily view gain rose from 1,698 on day 3 to 10,250 on day 8">
-        <g stroke="#E7E2D8" stroke-width="1">
-          <line x1="40" y1="40" x2="1000" y2="40"/><line x1="40" y1="105" x2="1000" y2="105"/>
-          <line x1="40" y1="170" x2="1000" y2="170"/><line x1="40" y1="212" x2="1000" y2="212"/>
-        </g>
-        <!-- bars: day1..day10, scaled 0-11000 over y=212..30 -->
-        <g>
-          <rect x="60"  y="93"  width="62" height="119" fill="#BDB5A6"/>
-          <rect x="155" y="172" width="62" height="40"  fill="#BDB5A6"/>
-          <rect x="250" y="184" width="62" height="28"  fill="#A8372A"/>
-          <rect x="345" y="147" width="62" height="65"  fill="#BDB5A6"/>
-          <rect x="440" y="99"  width="62" height="113" fill="#2F5575"/>
-          <rect x="535" y="82"  width="62" height="130" fill="#2F5575"/>
-          <rect x="630" y="70"  width="62" height="142" fill="#2F5575"/>
-          <rect x="725" y="42"  width="62" height="170" fill="#3E6B4A"/>
-          <rect x="820" y="55"  width="62" height="157" fill="#3E6B4A"/>
-          <rect x="915" y="84"  width="62" height="128" fill="#3E6B4A"/>
-        </g>
-        <g font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="#111110" text-anchor="middle">
-          <text x="281" y="178" fill="#A8372A">1,698</text>
-          <text x="756" y="36">10,250</text>
-          <text x="946" y="78">7,725</text>
-        </g>
-        <g font-family="JetBrains Mono, monospace" font-size="11" fill="#B5AD9F" text-anchor="middle">
-          <text x="91" y="232">D1</text><text x="186" y="232">D2</text>
-          <text x="281" y="232" fill="#A8372A" font-weight="700">D3</text>
-          <text x="376" y="232">D4</text><text x="471" y="232">D5</text><text x="566" y="232">D6</text>
-          <text x="661" y="232">D7</text><text x="756" y="232">D8</text><text x="851" y="232">D9</text>
-          <text x="946" y="232">D10</text>
-        </g>
-        <text x="281" y="18" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700"
-          fill="#A8372A" text-anchor="middle">INTERNAL READ TAKEN HERE</text>
-        <line x1="281" y1="24" x2="281" y2="180" stroke="#A8372A" stroke-width="1" stroke-dasharray="3 3"/>
-      </svg>
+    <div class="g3">
+      <div class="cd">
+        <div class="lab">Age-matched · videos created per day of life</div>
+        <ul>
+          <li><span><b>PTS</b></span><b style="color:var(--win)">1.40</b></li>
+          <li><span>In Motion</span><b>0.68</b></li>
+          <li><span>Defibrillator</span><b>0.41</b></li>
+          <li><span>Summer Rain</span><b>0.37</b></li>
+          <li><span>Motherlands</span><b>0.22</b></li>
+        </ul>
+        <span class="ft">PTS is 10 days old — early rates are naturally higher. Directional.</span>
+      </div>
+      <div class="cd">
+        <div class="lab">What it's doing</div>
+        <h4>Creative participation. Not conversion.</h4>
+        <p>Likes ran <b>8.1×</b> baseline and followers <b>7.4×</b> in the PTS window. We have no evidence at all that TikTok drives album actions for this artist — nothing in any source connects it to pre-saves.</p>
+        <span class="ft">Fact + stated absence of evidence</span>
+      </div>
+      <div class="cd">
+        <div class="lab">The bet</div>
+        <h4>Double down on PTS as the sound, not on TikTok as a conversion surface</h4>
+        <p>Put the focus-track creative behind the song people are already using. Don't move the primary pre-save ask here on the strength of attention alone.</p>
+        <span class="ft">Bet · TEST · MEDIUM confidence</span>
+      </div>
     </div>
 
-    <div class="stats">
-      <div><div class="v" style="color:var(--win)">6×</div><div class="k">Acceleration from<br>the day-3 trough</div></div>
-      <div><div class="v">42.4%</div><div class="k">Of the channel's entire<br>trailing-week views</div></div>
-      <div><div class="v">+13</div><div class="k">Views/day gained by all four other<br>campaign assets, combined</div></div>
+    <div class="means">
+      <div class="ml">What would raise or lower this bet</div>
+      <p>Raise it if PTS creation rate holds above 1.0/day past day 21 — that would mean it isn't just launch-week novelty. Lower it if it falls below In Motion's 0.68 by then. Both are readable from Chartmetric without new access.</p>
+    </div>
+    <p class="foot">Limit · num_tt_videos counts videos using the sound and cannot be split into UGC versus artist-posted. TikTok follower and like series are 69% and 72% interpolated, so only coarse comparisons are safe.</p>
+  </div>
+</section>
+
+<!-- ══ 6 · INSTAGRAM ═════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Platform playbook · 04</div>
+    <h2 class="wide">Instagram only moves when something real happens. That makes it a news channel, not a discovery one.</h2>
+
+    <div class="g4">
+      <div class="cd"><div class="lab">April · nothing happening</div><div class="hero stop" style="font-size:clamp(1.8rem,3.4vw,2.6rem)">−2</div><div class="herosub">followers/day</div></div>
+      <div class="cd" style="border:2px solid var(--win)"><div class="lab">Late June · announce + TRNSMT + presale</div><div class="hero win" style="font-size:clamp(1.8rem,3.4vw,2.6rem)">+99</div><div class="herosub">followers/day</div></div>
+      <div class="cd"><div class="lab">PTS window</div><div class="hero" style="font-size:clamp(1.8rem,3.4vw,2.6rem)">+51</div><div class="herosub">followers/day</div></div>
+      <div class="cd"><div class="lab">Data quality</div><div class="hero" style="font-size:clamp(1.8rem,3.4vw,2.6rem)">0%</div><div class="herosub">interpolated — the most<br>reliable social series we have</div></div>
+    </div>
+
+    <p class="interp">A 50× swing between a quiet month and a campaign moment, on a clean series. Instagram does not generate attention here — it registers it.</p>
+
+    <div class="means">
+      <div class="ml">Likely — needs native verification</div>
+      <p>Best role is <b>existing-fan communication and album intent</b>, not discovery. Worth one low-cost test in album week: a dedicated pre-save post, measured natively.</p>
+    </div>
+    <p class="foot">What would confirm or reject it · non-follower reach share · profile visits · follows generated · link clicks · story taps forward/back · saves and shares. All are in Instagram Insights and none are in any source available here.</p>
+  </div>
+</section>
+
+<!-- ══ 7 · DSP / COMMERCIAL ══════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">For Commercial · confirmed placements only</div>
+    <h2 class="wide">One release got almost nothing and outperformed one that got almost everything.</h2>
+
+    <div class="g2">
+      <div class="sup thin">
+        <h4>Motherlands · 26 Mar</h4>
+        <div class="dsp">Spotify</div>
+        <div class="pl"><span class="none">0 editorials</span> · playlist reach ≈30,305</div>
+        <div class="dsp">Apple</div>
+        <div class="pl">1 confirmed editorial</div>
+        <div class="dsp">Amazon · YouTube · Deezer</div>
+        <div class="pl" style="color:var(--faint)">No confirmed placements in our sources</div>
+        <div class="res">
+          <div class="rv">+17,831</div>
+          <div class="rk">Monthly listeners · 7 days from release · 43rd of 270 weeks in 2026</div>
+        </div>
+      </div>
+      <div class="sup thick">
+        <h4>Defibrillator · 16 Jun</h4>
+        <div class="dsp">Spotify</div>
+        <div class="pl">NMF UK #44 · NMF Japan #52 · Indie List #41 · Rock The World #7 JP</div>
+        <div class="dsp">Apple</div>
+        <div class="pl">New in Alternative #6 US/UK +59 terrs · New in Rock #3 UK/IE/CA/AU/NZ · ALT CTRL #5 CA/TR</div>
+        <div class="dsp">Amazon</div>
+        <div class="pl">Brand New Music #8 UK · Fresh Alternative #3 · Fresh Indie #1 + COVER UK · Fresh Rock #12 DE · Indie Nation #5 UK · 2026! #37 UK</div>
+        <div class="dsp">YouTube · Deezer</div>
+        <div class="pl">RELEASED #23 · Heavy Stereo #15 · New Alt Indie #5 · Your New Alternative #76 · Brand New UK #68 · Radar Weekly #64 · Hot New Rock #6</div>
+        <div class="res">
+          <div class="rv">+11,142</div>
+          <div class="rk">Monthly listeners · 7 days from release · 97th of 270 weeks</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="means">
+      <div class="ml">The Commercial question — not a conclusion</div>
+      <p>Why did Motherlands generate 60% more listener growth with a fraction of the observable support? This is an investigation to open with Spotify, not proof that editorial doesn't work.</p>
+    </div>
+    <p class="foot">Summer Rain, In Motion and PTS · <b style="color:var(--ink)">SUPPORT DATA INCOMPLETE</b> — we hold partial placements only (PTS: no NMF UK, Amazon Brand New Music ≈#9, YouTube ≈#28, and the campaign's largest playlist reach at 1,207,306). There is no comparable numerical measure of total DSP support across all five releases, so none is shown.</p>
+  </div>
+</section>
+
+<!-- ══ 8 · CREATIVE ══════════════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Creative playbook · which territories earned another bet</div>
+    <h2 class="wide">Four creative territories have evidence behind them. Two don't.</h2>
+
+    <div class="sa">
+      <div class="r hd"><span>Territory</span><span>Signal</span><span>Role · strength</span><span>Bet · next application</span></div>
+      <div class="r">
+        <span><b>Real people in the work</b></span>
+        <span class="m">"I'm the ginger boy" — top comment on PTS, 23 likes. Local cast, their schools and networks in the thread.</span>
+        <span class="m">DISCOVERY<br><span class="cf m">Medium</span></span>
+        <span class="m"><b>DO</b> · cast locally again on the focus-track asset; it builds distribution into production</span>
+      </div>
+      <div class="r">
+        <span><b>Band personality, direct to camera</b></span>
+        <span class="m">3.97% like rate on 67 views/day — engagement 9× the official video's on a fraction of the reach.</span>
+        <span class="m">ENGAGEMENT<br><span class="cf m">Medium</span></span>
+        <span class="m"><b>TEST</b> · put it on a surface with reach — inside the podcast or as the album-week hero, not as a 60-view Short</span>
+      </div>
+      <div class="r">
+        <span><b>Conversation / collaboration</b></span>
+        <span class="m">8,995 views/day, 5.66% like rate, demonstrably non-Snuts audience arriving.</span>
+        <span class="m">DISCOVERY<br><span class="cf h">High</span></span>
+        <span class="m"><b>DO</b> · episode two in album week, album ask in the first 30 seconds</span>
+      </div>
+      <div class="r">
+        <span><b>Scottish / West Lothian identity</b></span>
+        <span class="m">8 comments in heavy Scots dialect around PTS; "best thing to come out of West Lothian".</span>
+        <span class="m">RETENTION<br><span class="cf m">Medium</span></span>
+        <span class="m"><b>TEST</b> · keep it specific and place-named rather than generic — it is what the core quotes back</span>
+      </div>
+      <div class="r" style="opacity:.62">
+        <span><b>Lyric assets</b></span>
+        <span class="m">65 and 62 views/day. Defibrillator's reached 81,194 — on the campaign's biggest editorial week, not on format.</span>
+        <span class="m">—<br><span class="cf l">Low</span></span>
+        <span class="m"><b>DEPRIORITISE</b> · not the default for the focus track</span>
+      </div>
+      <div class="r" style="opacity:.62">
+        <span><b>Stripped / acoustic</b></span>
+        <span class="m">29–33 views/day across three assets. High like rate, no reach, no release moved.</span>
+        <span class="m">—<br><span class="cf l">Low</span></span>
+        <span class="m"><b>HOLD</b> · cheap, keeps the core fed, don't build a moment on it</span>
+      </div>
+    </div>
+    <p class="foot">Measure for every creative bet · does the asset clear the 700 views/day line that separates everything that travels from everything that doesn't on this channel — and does its like rate stay above 1%?</p>
+  </div>
+</section>
+
+<!-- ══ 9 · PRE-SAVE / ALBUM INTENT ═══════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Where to actually ask</div>
+    <h2 class="wide">Attention and conversion are happening in different places. Don't confuse them.</h2>
+
+    <div class="g2">
+      <div class="cd">
+        <div class="lab" style="color:var(--blue)">Discovery surfaces · where new attention appears</div>
+        <ul>
+          <li><span>Spotify — listeners +56.2%</span><b>Largest</b></li>
+          <li><span>YouTube long-form — podcast reached non-fans</span><b>Proven</b></li>
+          <li><span>TikTok — PTS 1.40 videos/day</span><b>Strong</b></li>
+        </ul>
+        <p>These are where people arrive. It does not follow that they're where people act.</p>
+      </div>
+      <div class="cd">
+        <div class="lab" style="color:var(--win)">Conversion surfaces · where intent is acted on</div>
+        <ul>
+          <li><span>Spotify — the only follower step-change ever</span><b>3.94×</b></li>
+          <li><span>YouTube long-form descriptions</span><b>6 of 10 carry it</b></li>
+          <li><span>Instagram — moves on real news only</span><b>Likely</b></li>
+        </ul>
+        <p>Summer Rain converted on Spotify. Nothing has converted anywhere else at scale.</p>
+      </div>
+    </div>
+
+    <div class="sa" style="margin-top:1.2rem">
+      <div class="r hd"><span>Surface</span><span>Priority</span><span>Why</span><span>Smallest test if unproven</span></div>
+      <div class="r"><span><b>Spotify Countdown Page</b></span><span class="m" style="color:var(--win);font-weight:700">PRIMARY</span><span class="m">The only place conversion has ever happened, and the only route to the August audience</span><span class="m">—</span></div>
+      <div class="r"><span><b>YouTube long-form</b></span><span class="m" style="color:var(--win);font-weight:700">PRIMARY</span><span class="m">Already carries the route on 80,562 of 101,478 views — and has one large hole</span><span class="m">Fix the podcast, then compare</span></div>
+      <div class="r"><span><b>Instagram</b></span><span class="m" style="color:var(--warn);font-weight:700">SECONDARY</span><span class="m">Registers campaign moments; likely the existing-fan intent surface</span><span class="m">One dedicated post, read link clicks natively</span></div>
+      <div class="r"><span><b>TikTok</b></span><span class="m" style="color:var(--warn);font-weight:700">TEST</span><span class="m">Strong attention, zero evidence of album-action conversion</span><span class="m">One bio-link push, measure click-through only</span></div>
+      <div class="r" style="opacity:.62"><span><b>YouTube Shorts</b></span><span class="m" style="color:var(--mute);font-weight:700">LOW</span><span class="m">49,370 views, 43 comments, median 1,087 against 30,200 subs</span><span class="m">Add the link anyway — it's free</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 10 · FOCUS TRACK — BEFORE & RELEASE DAY ═══════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The focus-track playbook · built from this campaign only</div>
+    <h2 class="wide">What we should have ready, and when.</h2>
+
+    <div class="ph">
+      <div class="pc a">
+        <div class="pt">Before release</div>
+        <div class="ph4">Build the stack, not the schedule</div>
+        <ul>
+          <li><b>Official video</b> ready — not a lyric video</li>
+          <li>A <b>live or PR moment</b> inside the same 72 hours</li>
+          <li>Podcast ep.2 <b>scheduled into the week</b>, not after it</li>
+          <li>Pre-save route <b>on every asset</b> before anything publishes</li>
+          <li>Local casting booked on the hero asset</li>
+        </ul>
+      </div>
+      <div class="pc b">
+        <div class="pt">Release day</div>
+        <div class="ph4">One moment, everything at once</div>
+        <ul>
+          <li><b>Hero:</b> official video, premiered</li>
+          <li><b>Spotify:</b> Countdown Page is the primary ask</li>
+          <li><b>YouTube:</b> route in the first line of every description</li>
+          <li><b>TikTok:</b> the sound, not the pre-save</li>
+          <li><b>Instagram:</b> the news, with the album link</li>
+          <li><b>Commercial:</b> placements confirmed, not chased</li>
+        </ul>
+      </div>
+      <div class="pc c">
+        <div class="pt">Days 2–4</div>
+        <div class="ph4">Measure. Do not spend.</div>
+        <ul>
+          <li>Save rate and SPL against Summer Rain's 34.6% / 1.74</li>
+          <li>Follower gain against the 41/day median</li>
+          <li>YouTube daily gain — <b>direction, not volume</b></li>
+          <li>Whether the rest of the channel moved</li>
+          <li>TikTok creation rate against PTS's 1.40</li>
+        </ul>
+      </div>
+      <div class="pc d">
+        <div class="pt">Day 5</div>
+        <div class="ph4">The earliest honest decision point</div>
+        <ul>
+          <li>PTS's trough was day 3 at 1,698/day</li>
+          <li>By day 8 it was 10,250/day</li>
+          <li>A day-3 decision would have been wrong</li>
+          <li><b>Branch from here — next slide</b></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="means">
+      <div class="ml">The single biggest change from how we ran the last five</div>
+      <p>Four of the five singles were released on their own, with satellite assets trailing behind them, and four of the five moved nothing. Both times this campaign moved more than one platform, several things landed inside the same few days.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 11 · DAYS 5-7 BRANCHES ════════════════════════════════════════ -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Days 5–7 · four branches, decided by what the signals say</div>
+    <h2 class="wide">Four outcomes. Four different responses.</h2>
+
+    <div class="br">
+      <div class="bc a">
+        <div class="bl">A · Converting</div>
+        <div class="sig">Save rate and SPL near Summer Rain · followers ≥2× median · YouTube gain rising</div>
+        <div class="act"><b>Spend — on capture, not reach.</b> Spotify paid to light and moderate listeners, pointed at the pre-save. Leave YouTube organic alone while it's still climbing. This is the branch we have never actually been in since January.</div>
+      </div>
+      <div class="bc b">
+        <div class="bl">B · Attention, no capture</div>
+        <div class="sig">YouTube and TikTok strong · followers at or near median · saves soft</div>
+        <div class="act"><b>Don't buy more reach.</b> This is the PTS pattern and the August pattern. Fix routes, push the Countdown Page, get episode two out. Spending here pours water into the same bucket.</div>
+      </div>
+      <div class="bc c">
+        <div class="bl">C · Capture, no reach</div>
+        <div class="sig">Strong saves and follower conversion on modest exposure</div>
+        <div class="act"><b>This is the Motherlands shape — and it's the best problem to have.</b> Take it straight to Commercial as a support case, then amplify. Demand is proven; distribution is the constraint.</div>
+      </div>
+      <div class="bc d">
+        <div class="bl">D · Neither</div>
+        <div class="sig">Flat on every measure by day 7 · the In Motion shape</div>
+        <div class="act"><b>Stop, don't rescue.</b> In Motion got a lyric video, a stripped cut and a live video and its three assets do 124 views/day between them. Protect the album moment instead of spending into a flat release.</div>
+      </div>
     </div>
 
     <div class="means stop">
-      <div class="ml">What we do</div>
-      <p>Do not rescue-spend against PTS while organic velocity holds. The lift is confined to this one video — a PR or brand moment would have lifted the catalogue, and it didn't.</p>
+      <div class="ml">The rule that governs all four</div>
+      <p>No branch is chosen before day 5, and no branch is chosen on volume alone. Direction of travel and whether the rest of the channel moved are what separate an organic lift from a moment that's already over.</p>
     </div>
   </div>
 </section>
 
-<!-- ══ 5 · PTS IS THE STRONGEST SOCIAL MOMENT ════════════════════════ -->
+<!-- ══ 12 · WHAT WOULD CHANGE OUR MIND ═══════════════════════════════ -->
 <section class="slide">
   <div class="inner">
-    <div class="kicker">Age-matched · TikTok videos created per day of life</div>
-    <h2 class="wide">On a like-for-like basis, PTS is the campaign's strongest TikTok release.</h2>
+    <div class="kicker">Keeping ourselves honest</div>
+    <h2 class="wide">What would make us raise, cut or kill each bet.</h2>
 
-    <div class="bars">
-      <div class="bar"><div class="bn">PTS</div><div class="bt"><div class="bf win" style="width:100%"></div></div><div class="bv">1.40</div></div>
-      <div class="bar"><div class="bn">In Motion</div><div class="bt"><div class="bf" style="width:48.6%"></div></div><div class="bv">0.68</div></div>
-      <div class="bar"><div class="bn">Defibrillator</div><div class="bt"><div class="bf mute" style="width:29.3%"></div></div><div class="bv">0.41</div></div>
-      <div class="bar"><div class="bn">Summer Rain</div><div class="bt"><div class="bf mute" style="width:26.4%"></div></div><div class="bv">0.37</div></div>
-      <div class="bar"><div class="bn">Motherlands</div><div class="bt"><div class="bf mute" style="width:15.7%"></div></div><div class="bv">0.22</div></div>
-    </div>
-
-    <p class="interp">TikTok likes ran <b style="color:var(--ink)">8.1× baseline</b> across the PTS window, and TikTok followers 7.4×. This is the campaign's loudest social moment to date.</p>
-
-    <div class="means">
-      <div class="ml">Read it directionally, not precisely</div>
-      <p>PTS is 10 days old and creation rates are naturally highest early in a track's life, so this flatters it. The honest statement is that PTS is clearly reacting on TikTok and Motherlands clearly is not.</p>
-    </div>
-    <p class="foot">Correction to an earlier read: comparing PTS's raw video count to a five-year-old catalogue track gave the opposite conclusion. That comparison was not age-matched and has been withdrawn.</p>
-  </div>
-</section>
-
-<!-- ══ 6 · ATTENTION ≠ DISCOVERY ═════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="kicker">The gap between this campaign and the last one</div>
-    <h2 class="wide">PTS is generating song consumption — not yet artist discovery.</h2>
-
-    <div class="vs">
-      <div class="side hot">
-        <div class="sl">PTS itself · 28 Sep → 5 Oct</div>
-        <div class="sv">11.3K → 65.9K</div>
-        <div class="sn">The song is travelling</div>
-      </div>
-      <div class="mid">meanwhile</div>
-      <div class="side cold">
-        <div class="sl">Rest of the channel · same window</div>
-        <div class="sv">7,220 → 7,571</div>
-        <div class="sn">views/day · +4.9% · essentially flat</div>
-      </div>
-    </div>
-
-    <p class="interp">While PTS gained nearly 55,000 views, everything else on the channel carried on at exactly the rate it was already running. Nobody is arriving at PTS and going exploring.</p>
-
-    <div class="means win">
-      <div class="ml">The album opportunity</div>
-      <p>The challenge for 23 October is not more reach for one song. It is whether album week can turn PTS's attention into people who go deeper — into the album, the artist profile, and a durable follow.</p>
-    </div>
-    <p class="foot">Caveat · we cannot see which catalogue videos those views land on, so no lift in aggregate does not rule out movement within it</p>
-  </div>
-</section>
-
-<!-- ══ 7 · THE CREATIVE PROBLEM ══════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="kicker">Every campaign long-form asset · views per day of life</div>
-    <h2 class="wide">The content people love doesn't travel. The content that travels gets shallow engagement.</h2>
-
-    <div class="split">
-      <div class="sp t">
-        <h4>Travels · 700+ views/day</h4>
-        <div class="it"><span class="in">Podcast ep.1</span><span class="iv">8,995</span><span class="ir">5.66%</span></div>
-        <div class="it"><span class="in">PTS official video</span><span class="iv">7,000</span><span class="ir">0.42%</span></div>
-        <div class="it"><span class="in">Summer Rain official</span><span class="iv">740</span><span class="ir">0.45%</span></div>
-        <div class="it"><span class="in">Defibrillator lyric</span><span class="iv">738</span><span class="ir">0.31%</span></div>
-        <div class="cap"><span>Views / day</span><span>Like rate</span></div>
-      </div>
-      <div class="sp d">
-        <h4>Core loves it · under 70 views/day</h4>
-        <div class="it"><span class="in">Band direct-to-camera</span><span class="iv">67</span><span class="ir">3.97%</span></div>
-        <div class="it"><span class="in">Motherlands lyric</span><span class="iv">65</span><span class="ir">2.24%</span></div>
-        <div class="it"><span class="in">In Motion lyric</span><span class="iv">62</span><span class="ir">2.48%</span></div>
-        <div class="it"><span class="in">Stripped & live cuts</span><span class="iv">29–33</span><span class="ir">~3%</span></div>
-        <div class="cap"><span>Views / day</span><span>Like rate</span></div>
-      </div>
-    </div>
-
-    <p class="interp">Reach and engagement run in opposite directions. Everything above 700 views/day has a like rate under 0.5%. Everything below 70 has a like rate 5–10× higher.</p>
-
-    <div class="means">
-      <div class="ml">What this means</div>
-      <p>This is not an argument for more podcasts or fewer lyric videos. It is that the campaign has not yet found content that combines reach <i>and</i> depth — and album week is the moment to try.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 8 · WHAT FANS RESPOND TO ══════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="kicker">218 comments read across campaign assets</div>
-    <h2 class="wide">The strongest response is about identity, connection and the band — not the campaign assets.</h2>
-
-    <div class="themes">
-      <div class="th">
-        <div class="tn">Live</div>
-        <q>"Can't wait to hear this live"</q>
-        <div class="tm">Largest cluster · 15+ · Mexico, Japan, Peru, Liverpool, Inverness</div>
-      </div>
-      <div class="th">
-        <div class="tn">"We're back"</div>
-        <q>"The snuts are so back 🌦️"</q>
-        <div class="tm">8 variants on Summer Rain · returning fans, not discovery</div>
-      </div>
-      <div class="th">
-        <div class="tn">Scottish identity</div>
-        <q>"2 weans a baw, jumpers fir goalposts"</q>
-        <div class="tm">8 comments · heavy Scots dialect around PTS</div>
-      </div>
-      <div class="th">
-        <div class="tn">Real people</div>
-        <q>"I'm the ginger boy"</q>
-        <div class="tm">Top comment on PTS · 23 likes · he's in the video</div>
-      </div>
-    </div>
-
-    <p class="interp">Two negative comments in 158. <b style="color:var(--ink)">The music is not the problem.</b> But almost nobody arrives cold — there is roughly one unambiguous discovery comment in the entire sample.</p>
-
-    <div class="means">
-      <div class="ml">Creative implication</div>
-      <p>The sharpest reactions come from things that are human, specific and culturally rooted rather than generic release assets. Treat that as a direction for album-week content, not as proof of what drives performance.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 9 · SUPPORT vs RESPONSE ═══════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="kicker">For Commercial</div>
-    <h2 class="wide">DSP support and audience response are not telling the same story.</h2>
-
-    <div class="mx">
-      <svg viewBox="0 0 1000 400" role="img" aria-label="Support versus response matrix for the five campaign singles">
-        <line x1="90" y1="340" x2="960" y2="340" stroke="#DDD8CE" stroke-width="1.5"/>
-        <line x1="90" y1="30"  x2="90"  y2="340" stroke="#DDD8CE" stroke-width="1.5"/>
-        <line x1="525" y1="30" x2="525" y2="340" stroke="#E7E2D8" stroke-width="1" stroke-dasharray="4 4"/>
-        <line x1="90" y1="185" x2="960" y2="185" stroke="#E7E2D8" stroke-width="1" stroke-dasharray="4 4"/>
-
-        <g font-family="JetBrains Mono, monospace" font-size="12" fill="#B5AD9F" letter-spacing="1.5">
-          <text x="90" y="368">LOW DSP SUPPORT</text>
-          <text x="960" y="368" text-anchor="end">HIGH DSP SUPPORT</text>
-          <text x="78" y="340" text-anchor="end" transform="rotate(-90 78 340)">LOW RESPONSE</text>
-          <text x="78" y="36"  text-anchor="end" transform="rotate(-90 78 36)">HIGH RESPONSE</text>
-        </g>
-
-        <!-- Motherlands: low support, relatively strong response -->
-        <circle cx="185" cy="135" r="13" fill="#B5651D"/>
-        <text x="208" y="131" font-family="Inter Tight" font-size="19" font-weight="700" fill="#111110">Motherlands</text>
-        <text x="208" y="151" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#B5651D">0 Spotify editorials · +17,831 listeners</text>
-
-        <!-- Summer Rain: moderate support, strongest conversion -->
-        <circle cx="470" cy="62" r="15" fill="#3E6B4A"/>
-        <text x="495" y="58" font-family="Inter Tight" font-size="19" font-weight="700" fill="#111110">Summer Rain</text>
-        <text x="495" y="78" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#3E6B4A">3.94× median followers · the benchmark</text>
-
-        <!-- PTS: high support, strong attention, conversion open -->
-        <circle cx="848" cy="118" r="15" fill="#2F5575"/>
-        <text x="828" y="114" font-family="Inter Tight" font-size="19" font-weight="700" fill="#111110" text-anchor="end">PTS</text>
-        <text x="828" y="134" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#2F5575" text-anchor="end">best support of the campaign · conversion still open</text>
-
-        <!-- Defibrillator: strong support, moderate response -->
-        <circle cx="775" cy="222" r="13" fill="#8A8276"/>
-        <text x="755" y="218" font-family="Inter Tight" font-size="19" font-weight="700" fill="#111110" text-anchor="end">Defibrillator</text>
-        <text x="755" y="238" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#8A8276" text-anchor="end">best editorial week · 1.65× median</text>
-
-        <!-- In Motion: moderate support, low response -->
-        <circle cx="520" cy="295" r="13" fill="#A8372A"/>
-        <text x="545" y="291" font-family="Inter Tight" font-size="19" font-weight="700" fill="#111110">In Motion</text>
-        <text x="545" y="311" font-family="JetBrains Mono, monospace" font-size="11.5" fill="#A8372A">167th of 270 weeks</text>
-      </svg>
+    <div class="sa">
+      <div class="r hd"><span>Bet</span><span>Raise it if</span><span>Cut or kill it if</span><span>Readable from</span></div>
+      <div class="r"><span><b>Hold on PTS</b></span><span class="m">Daily gain stays above 5,000 past day 14</span><span class="m">Below ~3,000 for three consecutive days — then reassess, not spend</span><span class="m">Watcher, already running</span></div>
+      <div class="r"><span><b>Stack album week</b></span><span class="m">Album week moves three or more platforms together</span><span class="m">It moves one, as four of five singles did</span><span class="m">Chartmetric + Watcher</span></div>
+      <div class="r"><span><b>Podcast format</b></span><span class="m">Ep.2 holds above 2% like rate <i>and</i> more comments mention the band</span><span class="m">Engagement holds but comments stay about the guest</span><span class="m">Comment scan, repeatable</span></div>
+      <div class="r"><span><b>Spotify paid test</b></span><span class="m">Follower gain per 1,000 reached beats 41/day organic</span><span class="m">It doesn't — stop, do not scale on a stream number</span><span class="m">Spotify for Artists <b style="color:var(--stop)">(needed)</b></span></div>
+      <div class="r"><span><b>TikTok as the sound</b></span><span class="m">PTS creation rate holds above 1.0/day past day 21</span><span class="m">Falls below In Motion's 0.68 by then</span><span class="m">Chartmetric, no new access</span></div>
+      <div class="r"><span><b>Motherlands case</b></span><span class="m">Spotify can explain the gap, or offers support</span><span class="m">The listener gain turns out to be a timing artefact</span><span class="m">Commercial conversation</span></div>
+      <div class="r"><span><b>Instagram intent</b></span><span class="m">A dedicated post generates measurable link clicks</span><span class="m">Non-follower reach is negligible</span><span class="m">IG Insights <b style="color:var(--stop)">(needed)</b></span></div>
     </div>
 
     <div class="means">
-      <div class="ml">Two questions for Commercial</div>
-      <p>Why did Motherlands outperform its Spotify support — and can PTS's strong support plus building attention be converted into album intent before the 23rd?</p>
-    </div>
-    <p class="foot">Positions are indicative. Playlist reach is a current reading and favours recent releases, so support is not a like-for-like of support at release.</p>
-  </div>
-</section>
-
-<!-- ══ 10 · WHAT WE DO ═══════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="kicker">18 days to album day</div>
-    <h2 class="wide">Four decisions before 23 October.</h2>
-
-    <div class="dec">
-      <div class="dd hold">
-        <div class="dt">01 · Hold</div>
-        <h4>Don't spend against PTS yet</h4>
-        <p>Organic YouTube velocity is still healthy at day 10, and the lift is video-specific. Spending now buys views it is getting free.</p>
-        <div class="trig">Reconsider if daily gain &lt; ~3,000 for three consecutive days</div>
-      </div>
-      <div class="dd inv">
-        <div class="dt">02 · Investigate</div>
-        <h4>Take Motherlands back to Spotify</h4>
-        <p>Weakest distribution of the campaign, second-best listener week. Costs a conversation, not a budget.</p>
-        <div class="trig">Take the counter-evidence in: its YouTube asset is the campaign's weakest</div>
-      </div>
-      <div class="dd mom">
-        <div class="dt">03 · Design</div>
-        <h4>Build album week as one moment, not a schedule</h4>
-        <p>The only times this campaign moved more than one platform, several things landed inside the same few days. Four singles released alone moved almost nothing.</p>
-        <div class="trig">A campaign hypothesis — the evidence is a pattern, not proven causality</div>
-      </div>
-      <div class="dd depth">
-        <div class="dt">04 · Fix, then test</div>
-        <h4>The podcast has no route on it at all</h4>
-        <p>18,101 views, the campaign's best engagement, our one proven reach into non-fans — and <b style="color:var(--stop)">zero links in the description</b>. It is 8× larger than any other asset missing a route.</p>
-        <div class="trig">Fix it this week · then measure follower and subscriber gain per 1,000 reached, not streams</div>
-      </div>
-    </div>
-
-    <div class="need">
-      <div class="nl">What we still need — three missing pieces, not appendix trivia</div>
-      <div class="ng">
-        <div><b>Spotify audience source</b><span>Where did August's +86K listeners come from? Nothing we own saw them.</span></div>
-        <div><b>PTS traffic sources</b><span>What caused the day 4–8 acceleration? One Studio export settles it.</span></div>
-        <div><b>Pre-save / Countdown funnel</b><span>Is attention converting into album intent? Currently unmeasured.</span></div>
-      </div>
+      <div class="ml">Three pieces still missing — all held by people in this room</div>
+      <p><b>Spotify audience source for August</b> — where did +86,303 listeners come from. <b>PTS traffic sources</b> — what caused days 4 to 8. <b>Pre-save funnel by source</b> — whether any of this converts. Without the first, the paid test has no target.</p>
     </div>
   </div>
 </section>
 
 <footer>
-  <span>The Snuts · Joy In Short Moments · campaign deep dive · 5 October 2026</span>
-  <span>YouTube Data API · Watcher · Chartmetric 349107 · 218 comments</span>
+  <span>The Snuts · Joy In Short Moments · playbook &amp; bets · 5 October 2026</span>
+  <span>YouTube Data API · Watcher · Chartmetric 349107 · 218 comments · internal brief</span>
   <span><a href="/snuts/analysis">The working →</a></span>
 </footer>
 
