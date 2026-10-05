@@ -591,6 +591,28 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
   line-height:1.05;margin:.45rem 0 .4rem}
 .ch p{margin:0;font-size:.78rem;line-height:1.45;color:var(--smoke)}
 
+/* ── TWO SCOPED DENSITY CLASSES ───────────────────────────────────
+   Both earned by measurement, not taste. The A Night In ESTRUS slide
+   ran 102px past the fold and the precedent slide 65px, because both
+   gained a block after their layouts were set. Scoped rather than
+   global so the airy slides stay airy.
+
+   NOTE ON HOW THIS WAS MISSED ONCE: comparing a slide's scrollHeight
+   to its own getBoundingClientRect().height never catches this — the
+   slide is min-height:100vh and simply grows. The check that works is
+   slide height against window.innerHeight. */
+.slide.dense .inner{padding-top:clamp(66px,9vh,110px);padding-bottom:clamp(44px,6vh,76px)}
+.slide.dense .hero2{margin:.9rem 0 .5rem;gap:clamp(14px,2.6vw,34px)}
+.slide.dense .casc{margin-top:.8rem;gap:.18rem}
+.slide.dense .cs{padding:.42rem .8rem;font-size:.63rem}
+.slide.dense .cs .cnote{font-size:.52rem;margin-top:.18rem}
+.slide.dense .big-p{margin-top:.8rem}
+.slide.dense .qual{margin-top:.7rem;font-size:.74rem;line-height:1.5}
+.slide.trim .late{margin-top:.8rem}
+.slide.trim .bottomline{margin-top:.9rem;font-size:clamp(1.2rem,2.5vw,1.8rem)}
+.slide.trim .qual{margin-top:.7rem;font-size:.76rem}
+.slide.trim .wld p{font-size:.78rem}
+
 /* ── FOOTER ───────────────────────────────────────────────────────── */
 .foot{padding:clamp(2.4rem,5vw,4rem) var(--pad);max-width:1180px;margin:0 auto}
 .foot a{color:var(--gold)}
@@ -1057,7 +1079,7 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      therefore recommends an AUDIT, not a release schedule — the ask is
      for someone at the label to open the rushes, which is a question we
      cannot answer from outside and they can answer in an afternoon. -->
-<section class="slide">
+<section class="slide dense">
   <div class="inner">
     <div class="label hot">A Night In ESTRUS · the one thing worth checking first</div>
     <h2 class="display" style="margin-top:.9rem">A show was staged<br>and filmed. <em>One song</em> came out.</h2>
@@ -1151,7 +1173,7 @@ h2.display{font-size:clamp(2.3rem,5.2vw,4.2rem)}
      argument that post-album extension is something this artist has
      already done once — which is a much better reason to ask for it
      than "best practice". No claim that either architecture won. -->
-<section class="slide">
+<section class="slide trim">
   <div class="inner">
     <div class="label hot">The precedent · Dirt Femme, 2022–23</div>
     <h2 class="display" style="margin-top:.9rem">She has built a world before —<br>and kept <em>building</em> it.</h2>
