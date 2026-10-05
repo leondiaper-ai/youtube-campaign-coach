@@ -653,31 +653,28 @@ export default function ChannelHealthBoard({
       {/* ─── VIEW TOGGLE + HELPER LINE ──────────────────────────────────── */}
       {!singleTab && (
         <>
-          <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
-            <button
-              onClick={() => { setView('managed'); setExpandedRow(null); setSearch(''); }}
-              className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
-              style={{
-                background: view === 'managed' ? '#FFFFFF' : 'transparent',
-                color: view === 'managed' ? INK : 'rgba(14,14,14,0.4)',
-                boxShadow: view === 'managed' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              Virgin Managed ({managedRows.length})
-            </button>
-            <button
-              onClick={() => { setView('market'); setExpandedRow(null); setSearch(''); }}
-              className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
-              style={{
-                background: view === 'market' ? '#FFFFFF' : 'transparent',
-                color: view === 'market' ? INK : 'rgba(14,14,14,0.4)',
-                boxShadow: view === 'market' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-              }}
-            >
-              Market Watch ({marketRows.length})
-            </button>
+          {/* Flat tabs on a rule, not pills in a tray. Two buttons inside a
+              filled container with their own fill and a drop shadow is three
+              surfaces to say one thing. The underline carries it. */}
+          <div className="flex items-center gap-7 mb-2" style={{ borderBottom: `1px solid ${MUTED}` }}>
+            {([
+              ['managed', `Virgin Managed (${managedRows.length})`],
+              ['market', `Market Watch (${marketRows.length})`],
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); }}
+                className="pb-2.5 -mb-px text-[12px] font-black uppercase tracking-[0.1em] transition-colors"
+                style={{
+                  color: view === key ? INK : 'rgba(14,14,14,0.35)',
+                  borderBottom: `2px solid ${view === key ? INK : 'transparent'}`,
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-          <div className="text-[10px] text-ink/35 mb-5 pl-1">
+          <div className="text-[10px] text-ink/35 mb-6">
             {view === 'managed'
               ? 'Owned / priority channels we can act on'
               : 'External channels used to spot patterns, benchmarks and rollout signals'}
@@ -685,29 +682,35 @@ export default function ChannelHealthBoard({
         </>
       )}
 
-      {/* ─── SUMMARY BAR ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
-        <div className="rounded-xl px-4 py-3" style={{ background: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.bg : SOFT }} title="Strong cadence and positive momentum">
-          <div className="text-[24px] font-black" style={{ color: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.fg : 'rgba(14,14,14,0.25)' }}>{growingCount}</div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: growingCount > 0 ? CLASSIFICATION_STYLE.GROWING.fg : 'rgba(14,14,14,0.25)' }}>Growing</div>
-        </div>
-        <div className="rounded-xl px-4 py-3" style={{ background: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.bg : SOFT }} title="Views growing faster than subscriber conversion">
-          <div className="text-[24px] font-black" style={{ color: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.fg : 'rgba(14,14,14,0.25)' }}>{weakConvCount}</div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: weakConvCount > 0 ? CLASSIFICATION_STYLE.WEAK_CONVERSION.fg : 'rgba(14,14,14,0.25)' }}>Weak Conversion</div>
-        </div>
-        <div className="rounded-xl px-4 py-3" style={{ background: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.bg : SOFT }} title="Low upload activity limiting discovery potential">
-          <div className="text-[24px] font-black" style={{ color: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.fg : 'rgba(14,14,14,0.25)' }}>{underfedCount}</div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: underfedCount > 0 ? CLASSIFICATION_STYLE.UNDERFED.fg : 'rgba(14,14,14,0.25)' }}>Underfed</div>
-        </div>
-        <div className="rounded-xl px-4 py-3" style={{ background: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.bg : SOFT }} title="Long periods of inactivity or declining momentum">
-          <div className="text-[24px] font-black" style={{ color: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.fg : 'rgba(14,14,14,0.25)' }}>{coldCount}</div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: coldCount > 0 ? CLASSIFICATION_STYLE.COLD.fg : 'rgba(14,14,14,0.25)' }}>Cold</div>
-        </div>
+      {/* ─── SUMMARY BAR ──────────────────────────────────────────────────
+          Four pastel blocks were the loudest thing on a page whose job is
+          to be read downwards, and they fought the tables underneath for
+          attention they did not need: the number is the signal, not the
+          rectangle around it. The figure keeps its state colour so Cold
+          still reads as a warning at a glance; everything else is a rule
+          and some air, which is the artist pages' own language. */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-6 mb-7">
+        {([
+          [growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence and positive momentum'],
+          [weakConvCount, 'Weak conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views growing faster than subscriber conversion'],
+          [underfedCount, 'Underfed', CLASSIFICATION_STYLE.UNDERFED.fg, 'Low upload activity limiting discovery potential'],
+          [coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Long periods of inactivity or declining momentum'],
+        ] as const).map(([count, label, fg, hint]) => (
+          <div key={label} style={{ borderTop: `1px solid ${MUTED}` }} className="pt-3" title={hint}>
+            <div
+              className="text-[34px] font-black leading-none tracking-[-0.03em] tabular-nums"
+              style={{ color: count > 0 ? fg : 'rgba(14,14,14,0.2)' }}
+            >
+              {count}
+            </div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink/55 mt-2">{label}</div>
+          </div>
+        ))}
       </div>
 
       {/* ─── Multiformat Strategy Summary ──────────────────────────────── */}
       {mfRows.length > 0 && (
-        <div className="flex items-center gap-4 mb-4 px-1 text-[10px]" style={{ color: 'rgba(14,14,14,0.45)' }}>
+        <div className="flex items-center gap-4 mb-7 text-[10px]" style={{ color: 'rgba(14,14,14,0.45)' }}>
           <span className="font-bold uppercase tracking-[0.12em]" style={{ color: 'rgba(14,14,14,0.3)' }}>Multiformat</span>
           <span title="Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)">
             <span className="font-black" style={{ color: '#0C6A3F' }}>{mfStrong}</span> strong
@@ -723,7 +726,7 @@ export default function ChannelHealthBoard({
 
       {/* ─── MANAGED VIEW: What Changed This Week ──────────────────────── */}
       {view === 'managed' && insights.length > 0 && (
-        <div className="rounded-xl px-5 py-3.5 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
           <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2.5">
             What Changed This Week
           </div>
@@ -747,7 +750,7 @@ export default function ChannelHealthBoard({
         const topLongform = topVideos.filter((v) => !v.isShort).slice(0, 5);
         if (topShorts.length === 0 && topLongform.length === 0) return null;
         return (
-          <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+          <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
             <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
               Top Performing Videos This Week
             </div>
@@ -784,10 +787,10 @@ export default function ChannelHealthBoard({
         topMovers.topViews.length > 0 || topMovers.topSubs.length > 0 ||
         topMovers.biggestDecline.length > 0 || topMovers.cadenceRisk.length > 0
       ) && (
-        <div className="rounded-xl mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
           <button
             onClick={() => setMoversOpen(!moversOpen)}
-            className="w-full flex items-center justify-between px-5 py-3 text-left"
+            className="w-full flex items-center justify-between text-left"
           >
             <span className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35">
               Top Movers
@@ -797,7 +800,7 @@ export default function ChannelHealthBoard({
             </span>
           </button>
           {moversOpen && (
-            <div className="grid grid-cols-2 gap-4 px-5 pb-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 mt-3 lg:grid-cols-4">
               <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} linkPrefix={linkPrefix} />
               <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} linkPrefix={linkPrefix} />
               <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} />
@@ -809,7 +812,7 @@ export default function ChannelHealthBoard({
 
       {/* ─── MARKET VIEW: Market Benchmark Read ────────────────────────── */}
       {view === 'market' && benchmarkRead && (
-        <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
           <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
             Market Benchmark Read
           </div>
@@ -870,7 +873,7 @@ export default function ChannelHealthBoard({
 
       {/* ─── BEST IN CLASS: Consistency Leaders ──────────────────────── */}
       {consistencyLeaders.length > 0 && (
-        <div className="rounded-xl px-5 py-4 mb-4" style={{ background: '#FFFFFF', border: `1px solid ${MUTED}` }}>
+        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
           <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
             Best in Class — Consistency
           </div>
@@ -942,21 +945,17 @@ export default function ChannelHealthBoard({
       </div>
 
       {/* ─── SEARCH ─────────────────────────────────────────────────────── */}
-      <div className="mb-3 relative max-w-xs">
+      <div className="mb-4 relative max-w-xs">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search artists…"
-          className="w-full px-3 py-2 pl-8 pr-7 rounded-lg text-[12px] outline-none transition-colors"
-          style={{
-            background: SOFT,
-            color: INK,
-            border: `1px solid ${MUTED}`,
-          }}
+          className="w-full py-2 pl-6 pr-7 text-[12px] outline-none transition-colors bg-transparent"
+          style={{ color: INK, borderBottom: `1px solid ${MUTED}` }}
         />
         <svg
-          className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none"
           width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(14,14,14,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
           <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
@@ -974,10 +973,10 @@ export default function ChannelHealthBoard({
       </div>
 
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
-      <div className="rounded-xl overflow-hidden border" style={{ borderColor: MUTED }}>
+      <div style={{ borderTop: `1px solid ${MUTED}` }}>
         <div
-          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
-          style={{ borderColor: MUTED, background: SOFT }}
+          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
+          style={{ borderColor: MUTED }}
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
@@ -1034,7 +1033,7 @@ export default function ChannelHealthBoard({
           return (
             <div key={r.slug}>
               <div
-                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
+                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
                   i === filtered.length - 1 && !isExpanded ? '' : 'border-b'
                 }`}
                 style={{ borderColor: MUTED, background: st.rowBg }}
@@ -1142,7 +1141,7 @@ export default function ChannelHealthBoard({
               {/* ── Expanded: Actions + Strategy Profile + Fix This Week ───────── */}
               {isExpanded && (
                 <div
-                  className={`px-5 py-3.5 ${i === filtered.length - 1 ? '' : 'border-b'}`}
+                  className={`py-3.5 ${i === filtered.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
                   {/* Action buttons row */}
@@ -1221,7 +1220,7 @@ export default function ChannelHealthBoard({
           );
         })}
         {search && filtered.length === 0 && (
-          <div className="px-5 py-8 text-center text-[12px]" style={{ color: 'rgba(14,14,14,0.35)' }}>
+          <div className="py-10 text-center text-[12px]" style={{ color: 'rgba(14,14,14,0.35)' }}>
             No artists matching &ldquo;{search}&rdquo;
           </div>
         )}
