@@ -102,15 +102,33 @@
 
 <style>
 :root{
-  --ink:#040507; --night:#0A0E14; --panel:#0E141C; --slate:#0C1118;
+  /* Warm-black ground, not neutral. A true #000 reads as a screen; a brown
+     black reads as a room, and every frame on this channel is warm. */
+  --ink:#060605; --night:#0A0908; --panel:#0F0D0B; --slate:#0C0B0A;
   --gold:#C99A45; --gold-lt:#F0C979; --red:#FF0033; --amber:#E8893C;
-  --bone:#F7F5F1; --dim:#6F7681; --hair:rgba(247,245,241,.10);
+  --cold:#4E8FA8;          /* the counterweight — comparisons, "before", context */
+  /* THREE greys with jobs, not twelve one-off hexes. Tinted warm so copy
+     belongs to the palette instead of sitting on top of it. */
+  --bone:#F7F3EC;          /* statements */
+  --warm:#B4ABA0;          /* body */
+  --dim:#766D62;           /* labels only — never body text */
+  --hair:rgba(247,243,236,.11);
   --mono:'JetBrains Mono',ui-monospace,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--ink);color:var(--bone);font-family:'Archivo',system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* A fine woven texture over every pixel. 2% is almost invisible alone and
+   is the difference between "a web page" and "a printed thing". */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.022;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
+
+/* Every image is graded. Desaturating DBE flattens them — these frames are
+   gold chains, neon, Paris at night, and they should look like it. */
+.bed img,.st img,.ocard .th img,.flyw .src img,.strip img{
+  filter:saturate(1.14) contrast(1.05)}
 .deck{scroll-snap-type:y mandatory;overflow-y:auto;height:100vh}
 section{scroll-snap-align:start;min-height:100vh;position:relative;display:flex;flex-direction:column;
   justify-content:center;padding:clamp(20px,3.4vw,66px);overflow:hidden}
@@ -132,14 +150,69 @@ h2.sm{font-size:clamp(22px,3.4vw,52px);max-width:24ch}
 .z{position:relative;z-index:2}
 .bed{position:absolute;inset:0;z-index:0}
 .bed img{width:100%;height:100%;object-fit:cover}
+/* FIVE scrim geometries, four stops each. Scrims are separate elements
+   rather than a filter on the image, so the picture keeps its own contrast
+   and only the side carrying type gets darkened. Slides set their own
+   opacity inline, so the same class reads at a different depth each time
+   and the deck gets a dimmer rather than a switch. */
 .scrim::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(100deg,rgba(4,5,7,.97) 18%,rgba(4,5,7,.70) 56%,rgba(4,5,7,.30) 100%),
-             linear-gradient(0deg,rgba(4,5,7,.95) 0%,transparent 26%,transparent 74%,rgba(4,5,7,.88) 100%)}
+  background:linear-gradient(100deg,rgba(6,6,5,.97) 18%,rgba(6,6,5,.70) 56%,rgba(6,6,5,.30) 100%),
+             linear-gradient(0deg,rgba(6,6,5,.95) 0%,transparent 26%,transparent 74%,rgba(6,6,5,.88) 100%)}
 .scrim-c::after{content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 50%,rgba(4,5,7,.55) 0%,rgba(4,5,7,.93) 72%)}
-.grain::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.05;
+  background:radial-gradient(ellipse at 50% 50%,rgba(6,6,5,.52) 0%,rgba(6,6,5,.94) 72%)}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(6,6,5,.975) 6%,rgba(6,6,5,.80) 34%,rgba(6,6,5,.26) 76%,rgba(6,6,5,.05) 100%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(6,6,5,.975) 26%,rgba(6,6,5,.88) 48%,rgba(6,6,5,.46) 76%,rgba(6,6,5,.14) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(6,6,5,.80)}
+
+.grain::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.055;
   mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+/* The analytical act is quieter; the closing slide is heaviest. */
+.console.grain::before{opacity:.03}
+#close.grain::before{opacity:.08}
+
+/* ── MOTION ──────────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+.stagger.visible>*{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* The one figure per slide that matters gets lit. */
+.glow{text-shadow:0 0 46px rgba(201,154,69,.45)}
+
+/* ── THE SHIFT ───────────────────────────────────────────────────────────
+   A compound figure: dead "before" on the left, lit "after" on the right,
+   and the arrow drops out of the condensed face entirely so the glyph is
+   visibly not part of either number. The whole deck is a before/after
+   argument, so it deserves a component rather than two separate stats. */
+.shifts{display:flex;flex-wrap:wrap;gap:clamp(18px,3.4vw,58px);margin-top:clamp(12px,1.8vw,26px)}
+.shift .sv{display:flex;align-items:baseline;gap:clamp(7px,1.2vw,15px);
+  font-stretch:60%;font-weight:900;letter-spacing:-.035em;line-height:.88;
+  font-variant-numeric:tabular-nums}
+.shift .from{font-size:clamp(17px,3vw,42px);color:#55504A}
+.shift .ar{font-stretch:100%;font-weight:400;font-size:clamp(13px,1.8vw,26px);color:#55504A}
+.shift .to{font-size:clamp(26px,5vw,74px);color:var(--gold)}
+.shift .sk{font-family:var(--mono);font-size:8.5px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--dim);margin-top:9px;line-height:1.5;max-width:26ch}
+
+/* ── FULL-BLEED BREAKS ───────────────────────────────────────────────────
+   Twenty-two slides at identical padding is its own kind of flatness. Two
+   slides run edge to edge instead. */
+section.bleedout{padding:0}
+section.bleedout>.z{margin-top:auto;padding:clamp(20px,3.4vw,66px)}
+section.splitscreen{padding:0}
+.ss{display:grid;grid-template-columns:1.05fr 1fr;min-height:100vh}
+@media(max-width:860px){.ss{grid-template-columns:1fr}}
+.ss .pic{position:relative;overflow:hidden;min-height:46vh}
+.ss .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  object-position:50% 38%;filter:saturate(1.14) contrast(1.05)}
+.ss .pic::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(6,6,5,.30) 0%,rgba(6,6,5,.10) 55%,rgba(6,6,5,.85) 100%)}
+.ss .txt{display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,3.4vw,66px)}
 
 /* ══ ACT I ══════════════════════════════════════════════════════════ */
 #open{justify-content:flex-end}
@@ -205,6 +278,11 @@ h2.sm{font-size:clamp(22px,3.4vw,52px);max-width:24ch}
 .cell .l{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--dim);margin-top:7px;line-height:1.45}
 .cell.g .v{color:var(--gold)}
+/* A cold counterweight so the audit reads as two kinds of fact rather than
+   gold and leftovers: amber marks what is barely there, cold marks context. */
+.cell.a .v{color:var(--amber)} .cell.c .v{color:var(--cold)}
+.cell.a{background:rgba(232,137,60,.06)}
+.cell.g{background:rgba(201,154,69,.055)}
 .cell.wide{grid-column:span 2}
 .bars{display:flex;align-items:flex-end;gap:2px;height:clamp(54px,7vh,84px);margin-top:9px}
 .bars b{flex:1;background:var(--gold);opacity:.75;border-radius:1px 1px 0 0;min-height:1px}
@@ -246,8 +324,12 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 
 .opp{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:clamp(9px,1.3vw,20px);
   margin-top:clamp(10px,1.4vw,20px)}
-.ocard{border:1px solid var(--hair);border-radius:3px;overflow:hidden;background:rgba(14,20,28,.75);
-  display:flex;flex-direction:column}
+.ocard{border:1px solid var(--hair);border-radius:3px;overflow:hidden;background:rgba(15,13,11,.72);
+  display:flex;flex-direction:column;transition:border-color .3s ease,transform .3s ease}
+.ocard:hover{transform:translateY(-3px)}
+/* The first card is the one to do now. A 9% wash marks it without making it
+   a different size — hierarchy inside a grid, rather than a bigger box. */
+.ocard.first{background:rgba(201,154,69,.09);border-color:rgba(201,154,69,.42)}
 .ocard .th{aspect-ratio:16/9;background:#11161E;position:relative}
 .ocard .th img{width:100%;height:100%;object-fit:cover;display:block}
 .ocard .th .vel{position:absolute;left:0;bottom:0;background:var(--red);color:#fff;font-family:var(--mono);
@@ -274,6 +356,8 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   transition:width 1.1s cubic-bezier(.2,.8,.25,1)}
 .vrow .d{font-family:var(--mono);font-size:clamp(8.5px,.78vw,12px);color:#525A65;
   font-variant-numeric:tabular-nums}
+.vrow.hero{background:rgba(201,154,69,.07);border-radius:2px;
+  padding:clamp(4px,.6vw,9px) clamp(5px,.7vw,10px);margin-left:clamp(-5px,-.7vw,-10px)}
 .vrow.hero .n,.vrow.hero .d{color:var(--gold);font-weight:700}
 .vrow.hero .t{height:clamp(16px,2.1vw,32px)}
 .vrow.hero .f{background:linear-gradient(90deg,var(--gold),var(--gold-lt));
@@ -284,8 +368,14 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
 /* ══ ACT IV · THE WORLD ═════════════════════════════════════════════ */
-.sheet{position:absolute;inset:0;z-index:0;display:grid;gap:2px;opacity:.3}
-.sheet img{width:100%;height:100%;object-fit:cover;display:block}
+/* Brightness carries the argument. On slide 09 the lit tiles are the
+   records that stand alone; the dimmed ones are everything else. The
+   picture and the point are the same object. */
+.sheet{position:absolute;inset:0;z-index:0;display:grid;gap:2px;opacity:.42}
+.sheet img{width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.9) brightness(.3) contrast(1.02);transition:filter .5s ease}
+.sheet img.lit{filter:saturate(1.25) brightness(1) contrast(1.06)}
+.sheet:hover img{filter:saturate(1.1) brightness(.62)}
 .strip{display:grid;gap:3px;margin-top:clamp(10px,1.4vw,20px)}
 .strip img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:2px;display:block}
 
@@ -309,7 +399,17 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 
 .lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(192px,1fr));gap:clamp(9px,1.3vw,20px);
   margin-top:clamp(10px,1.4vw,20px)}
-.lane{border-top:2px solid var(--gold);padding-top:clamp(8px,1.05vw,15px)}
+/* Four lanes, four accents, nothing repeating twice in a row — the rule
+   that stops a grid of cards reading as one grey object. */
+.lane{border-top:2px solid var(--gold);padding-top:clamp(8px,1.05vw,15px);
+  padding-left:clamp(0px,.7vw,12px)}
+.lanes .lane:nth-child(2){border-top-color:var(--amber)}
+.lanes .lane:nth-child(3){border-top-color:var(--cold)}
+.lanes .lane:nth-child(4){border-top-color:#9A7CB0}
+.lanes .lane:nth-child(2) h4{color:var(--amber)}
+.lanes .lane:nth-child(3) h4{color:var(--cold)}
+.lanes .lane:nth-child(4) h4{color:#9A7CB0}
+.lane.first{background:rgba(201,154,69,.07)}
 .lane h4{font-size:clamp(12px,1.35vw,21px);font-weight:900;font-stretch:66%;text-transform:uppercase;
   line-height:1;margin-bottom:8px}
 .lane ul{list-style:none}
@@ -333,7 +433,9 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
 .outs{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:clamp(6px,.85vw,12px)}
 .out{border:1px solid var(--hair);border-radius:2px;padding:clamp(7px,.95vw,13px);
-  background:rgba(14,20,28,.55)}
+  background:rgba(15,13,11,.55);transition:border-color .3s ease,background .3s ease}
+.out:hover{border-color:rgba(201,154,69,.4);background:rgba(201,154,69,.07)}
+.outs .out:nth-child(1){background:rgba(201,154,69,.09);border-color:rgba(201,154,69,.38)}
 .out .f{font-family:var(--mono);font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;
   color:#4F5762}
 .out .t{font-size:clamp(10px,1.05vw,16px);font-weight:800;font-stretch:70%;text-transform:uppercase;
@@ -417,7 +519,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="bed scrim"><img data-vid="I4Ra4z2Arqg" alt=""></div>
   <div class="z">
     <div class="name">D-Block Europe</div>
-    <div class="num big">973,000,000</div>
+    <div class="num big glow">973,000,000</div>
     <div class="num big" style="font-size:clamp(18px,4.2vw,78px);color:var(--gold);margin-top:.12em">YouTube views</div>
     <div class="tiny">The next billion starts here</div>
   </div>
@@ -426,10 +528,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 02 -->
 <section class="grain">
   <div class="act">Act I · The scale</div>
+  <div class="bed scrim-l" style="opacity:.30"><img data-vid="bY4FsK0M5Vw" alt=""></div>
   <div class="z">
     <div class="eyebrow">Virgin Music Group · October 2026</div>
-    <h2 id="wall-h">This is one of Virgin's biggest YouTube businesses.</h2>
-    <div class="wall count">
+    <h2 id="wall-h" class="reveal">This is one of Virgin's biggest YouTube businesses.</h2>
+    <div class="wall count stagger">
       <div class="wrow hi"><div class="num v" data-n="9.23" data-dp="2" data-suffix="M">9.23M</div>
         <div class="l">UK monthly views</div></div>
       <div class="wrow hi"><div class="num v">#1</div>
@@ -444,6 +547,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 03 -->
 <section class="grain">
   <div class="act">Act I · The scale</div>
+  <div class="bed scrim-l" style="opacity:.26"><img data-vid="kFlfgHvgetY" alt=""></div>
   <div class="z">
     <div class="eyebrow">And it's bigger than the subscriber number suggests</div>
     <div class="duo count">
@@ -462,8 +566,8 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         <div class="b">Subscribers</div>
       </div>
     </div>
-    <div class="punch">1.7× the UK viewing.<br><em>26% of the subscribers.</em></div>
-    <div class="kick" style="margin-top:clamp(12px,1.6vw,22px);color:var(--bone)">
+    <div class="punch reveal">1.7× the UK viewing.<br><em>26% of the subscribers.</em></div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.6vw,22px);color:var(--bone)">
       Millions are already watching. The opportunity is to give them more to watch.</div>
     <div class="qual">Current UK monthly YouTube viewing. Subscribers do not cause views.</div>
   </div>
@@ -473,11 +577,12 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 04 -->
 <section class="grain">
   <div class="act">Act I · The scale</div>
+  <div class="bed scrim-f" style="opacity:.20"><img data-vid="VRc0PH7pHGs" alt=""></div>
   <div class="z">
     <div class="eyebrow">198 videos · ten years · one catalogue</div>
-    <h2>This isn't a channel.<br>It's an asset.</h2>
+    <h2 class="reveal">This isn't a channel.<br>It's an asset.</h2>
     <div class="field" id="field"></div>
-    <div class="legend count">
+    <div class="legend count stagger">
       <div><div class="num v" data-n="198">198</div><div class="l">Uploads, 2013 → today</div></div>
       <div class="g"><div class="num v" data-n="61">61</div><div class="l">Over one million</div></div>
       <div class="g"><div class="num v" data-n="13">13</div><div class="l">Over ten million</div></div>
@@ -494,8 +599,8 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="act">Act II · The machine</div>
   <div class="z">
     <div class="eyebrow">Full channel audit · YouTube Data API · 7 Oct 2026</div>
-    <h2 class="sm">We looked at everything.<br>198 public uploads. Ten years of DBE.</h2>
-    <div class="audit count">
+    <h2 class="sm reveal">We looked at everything.<br>198 public uploads. Ten years of DBE.</h2>
+    <div class="audit count stagger">
       <div class="cell g"><div class="num v" data-n="972.5" data-dp="1" data-suffix="M">972.5M</div><div class="l">Lifetime channel views</div></div>
       <div class="cell"><div class="num v" data-n="661" data-suffix="K">661K</div><div class="l">Subscribers</div></div>
       <div class="cell g"><div class="num v" data-n="9.23" data-dp="2" data-suffix="M">9.23M</div><div class="l">UK monthly views</div></div>
@@ -533,12 +638,13 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 06 · WHAT IT'S MADE OF -->
 <section class="console">
   <div class="act">Act II · The machine</div>
+  <div class="bed scrim-f" style="opacity:.17"><img data-vid="Ry1m40ScWks" alt=""></div>
   <div class="z">
     <div class="eyebrow">What ten years of uploads actually consists of</div>
-    <h2 class="sm">Almost all of it is the record itself.</h2>
+    <h2 class="sm reveal">Almost all of it is the record itself.</h2>
     <div class="mixrow" id="mixrow"></div>
     <div class="mixkey" id="mixkey"></div>
-    <div class="lanes" style="margin-top:clamp(14px,2.2vw,32px)">
+    <div class="lanes stagger" style="margin-top:clamp(14px,2.2vw,32px)">
       <div class="lane">
         <h4 style="color:var(--gold)">Built, and built well</h4>
         <ul>
@@ -574,10 +680,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 07 · RELEASE DAY -->
 <section class="console">
   <div class="act">Act II · The machine</div>
+  <div class="bed scrim-f" style="opacity:.22"><img data-vid="x-AavfF5XAk" alt=""></div>
   <div class="z">
     <div class="eyebrow">What DBE already do brilliantly</div>
-    <h2 class="sm">On release day, this channel is a machine.</h2>
-    <div class="lanes count" style="grid-template-columns:repeat(auto-fit,minmax(118px,1fr))">
+    <h2 class="sm reveal">On release day, this channel is a machine.</h2>
+    <div class="lanes count stagger" style="grid-template-columns:repeat(auto-fit,minmax(118px,1fr))">
       <div class="lane"><h4><span class="num" data-n="24">24</span></h4>
         <ul><li>PTSD<br>7 Nov 2019</li></ul></div>
       <div class="lane"><h4><span class="num" data-n="23">23</span></h4>
@@ -587,9 +694,9 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
       <div class="lane"><h4><span class="num" data-n="30">30</span></h4>
         <ul><li>PTSD 2<br>14 Nov 2025</li></ul></div>
     </div>
-    <div class="punch" style="margin-top:clamp(14px,2.2vw,32px)">
+    <div class="punch reveal" style="margin-top:clamp(14px,2.2vw,32px)">
       <em>92</em> same-day assets.<br>Four times over.</div>
-    <div class="kick" style="margin-top:clamp(10px,1.4vw,20px);color:#AEB5BE">
+    <div class="kick reveal" style="margin-top:clamp(10px,1.4vw,20px);color:#AEB5BE">
       Nobody needs to teach DBE how to release a record.</div>
   </div>
   <div class="foot">Uploads published on a single release day · counts only — lifetime totals of projects years apart are not comparable</div>
@@ -598,15 +705,26 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 08 · THE CALENDAR -->
 <section class="console">
   <div class="act">Act II · The machine</div>
+  <div class="bed scrim-l" style="opacity:.30"><img data-vid="nQnnqfkpuwQ" alt=""></div>
   <div class="z">
     <div class="eyebrow">And here is the thing we found</div>
-    <h2 class="sm">All 66 visualisers were posted on four days.</h2>
-    <div class="kick" style="margin-top:clamp(12px,1.8vw,26px);color:var(--bone)">
+    <h2 class="sm reveal">All 66 visualisers were posted on four days.</h2>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.8vw,26px);color:var(--bone)">
       Every one of them lands on an album release day.<br>
       <em>Between campaigns, the channel goes quiet.</em></div>
-    <div class="punch s" style="margin-top:clamp(16px,2.4vw,36px)">
+    <div class="shifts stagger">
+      <div class="shift">
+        <div class="sv"><span class="from">4</span><span class="ar">&rarr;</span><span class="to">52</span></div>
+        <div class="sk">Days a year the channel has something new on it</div>
+      </div>
+      <div class="shift">
+        <div class="sv"><span class="from">0</span><span class="ar">&rarr;</span><span class="to">11</span></div>
+        <div class="sk">Big records with a world built around them</div>
+      </div>
+    </div>
+    <div class="punch s reveal" style="margin-top:clamp(14px,2vw,30px)">
       The machine is real.<br><em>It only runs four days a decade.</em></div>
-    <div class="kick" style="margin-top:clamp(12px,1.7vw,24px);color:#AEB5BE">
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:#AEB5BE">
       That is the single biggest thing we can change — and it needs
       almost nothing from the artist.</div>
   </div>
@@ -616,19 +734,19 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- ═══ ACT III · THE GAPS ═══════════════════════════════════════════ -->
 
 <!-- 09 -->
-<section class="grain">
+<section class="grain bleedout">
   <div class="act">Act III · The gaps</div>
   <div class="sheet" id="sheet9"></div>
   <div class="z">
     <div class="eyebrow">The opportunity, in one number</div>
-    <h2>The hits are huge.<br>Most of them are standing alone.</h2>
-    <div class="legend count" style="border-top:none;padding-top:0;margin-top:clamp(16px,2.4vw,34px)">
-      <div class="g"><div class="num v" style="font-size:clamp(34px,5.6vw,92px)" data-n="248.7" data-dp="1" data-suffix="M">248.7M</div>
+    <h2 class="reveal">The hits are huge.<br>Most of them are standing alone.</h2>
+    <div class="legend count stagger" style="border-top:none;padding-top:0;margin-top:clamp(16px,2.4vw,34px)">
+      <div class="g"><div class="num v glow" style="font-size:clamp(34px,5.6vw,92px)" data-n="248.7" data-dp="1" data-suffix="M">248.7M</div>
         <div class="l">Views on records with no other<br>official asset on the channel</div></div>
       <div><div class="num v" style="font-size:clamp(34px,5.6vw,92px)">11<span style="color:#4D545E">/15</span></div>
         <div class="l">Videos over 8M views that have<br>nothing built around them</div></div>
     </div>
-    <div class="kick" style="margin-top:clamp(14px,2vw,30px);color:var(--bone)">
+    <div class="kick reveal" style="margin-top:clamp(14px,2vw,30px);color:var(--bone)">
       A quarter of a billion views, on records where the official video
       is <em>the only thing that exists</em>.</div>
   </div>
@@ -638,9 +756,10 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 10 · GAP MAP -->
 <section class="grain">
   <div class="act">Act III · The gaps</div>
+  <div class="bed scrim-f" style="opacity:.15"><img data-vid="Y7Zq0_DegQc" alt=""></div>
   <div class="z">
     <div class="eyebrow">The channel gap map</div>
-    <h2 class="sm">Where the whitespace is.</h2>
+    <h2 class="sm reveal">Where the whitespace is.</h2>
     <div class="gapwrap">
       <table class="gap" id="gapmap"></table>
     </div>
@@ -656,10 +775,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 11 · OPPORTUNITY CARDS -->
 <section class="grain">
   <div class="act">Act III · The gaps</div>
+  <div class="bed scrim-f" style="opacity:.18"><img data-vid="bnc7hO8UGXU" alt=""></div>
   <div class="z">
     <div class="eyebrow">Not every asset for every record — the right move per record</div>
-    <h2 class="sm">Four we would start with.</h2>
-    <div class="opp" id="oppcards"></div>
+    <h2 class="sm reveal">Four we would start with.</h2>
+    <div class="opp stagger" id="oppcards"></div>
   </div>
   <div class="foot">Velocity shown only where a daily observation series exists · the big catalogue records have none, so none is claimed</div>
 </section>
@@ -667,10 +787,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 12 · STILL MOVING -->
 <section class="grain">
   <div class="act">Act III · The gaps</div>
+  <div class="bed scrim-l" style="opacity:.34"><img data-vid="mQs4LQloa2c" alt=""></div>
   <div class="z">
     <div class="live"><b></b> Live right now · 7 October 2026</div>
-    <h2 class="sm" style="margin-top:clamp(10px,1.4vw,20px)">The audience is telling us where to spend.</h2>
-    <div class="vel count">
+    <h2 class="sm reveal" style="margin-top:clamp(10px,1.4vw,20px)">The audience is telling us where to spend.</h2>
+    <div class="vel count stagger">
       <div class="vrow hero"><div class="n">SEPA<br>day 76</div>
         <div class="t"><div class="f" data-w="100"></div></div><div class="d" data-n="23393">23,393</div></div>
       <div class="vrow"><div class="n">Rips &amp; Fr33</div>
@@ -682,11 +803,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
       <div class="vrow"><div class="n">Ski Flow<br>day 418</div>
         <div class="t"><div class="f" data-w="23"></div></div><div class="d" data-n="5486">5,486</div></div>
     </div>
-    <div class="kick" style="margin-top:clamp(14px,2vw,28px);color:var(--bone)">
+    <div class="kick reveal" style="margin-top:clamp(14px,2vw,28px);color:var(--bone)">
       SEPA alone is doing <em>~90%</em> of the daily viewing of the four
       Worldwide Wave videos combined.<br>
       And records from last year are still pulling thousands a day.</div>
-    <div class="punch s" style="margin-top:clamp(12px,1.7vw,24px)">
+    <div class="punch s reveal" style="margin-top:clamp(12px,1.7vw,24px)">
       These are the records to <em>build around first</em>.</div>
   </div>
   <div class="foot">Views per day, seven-day average, from daily observations · the series begins mid-September 2026</div>
@@ -695,25 +816,38 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- ═══ ACT IV · THE WORLD ═══════════════════════════════════════════ -->
 
 <!-- 13 -->
-<section class="grain">
+<section class="grain splitscreen">
   <div class="act">Act IV · The world</div>
-  <div class="bed scrim-c"><img data-vid="bY4FsK0M5Vw" alt=""></div>
-  <div class="z" style="text-align:center;align-items:center;display:flex;flex-direction:column">
-    <div class="eyebrow">Act IV</div>
-    <h2 style="max-width:22ch;text-align:center">The music is the centre.<br>It doesn't have to be the whole channel.</h2>
-    <div class="kick" style="margin-top:clamp(14px,2vw,30px);color:#C5CBD3;text-align:center;max-width:46ch">
-      DBE already live a life people would watch.<br>
-      <em>Almost none of it is on YouTube.</em></div>
+  <!-- The one true split screen in the deck. Asymmetric on purpose: 1.05fr
+       against 1fr reads as a deliberate composition where 1fr 1fr reads as
+       a table. The picture runs the full height of the slide, uncropped by
+       any container, which no other slide does. -->
+  <div class="ss">
+    <div class="pic"><img data-vid="bY4FsK0M5Vw" alt=""></div>
+    <div class="txt">
+      <div class="eyebrow">Act IV · The world</div>
+      <h2 class="reveal" style="max-width:17ch">The music is the centre.<br>It doesn't have to be the whole channel.</h2>
+      <div class="kick reveal" style="margin-top:clamp(14px,2vw,30px);color:var(--warm);max-width:38ch">
+        DBE already live a life people would watch.<br>
+        <em>Almost none of it is on YouTube.</em></div>
+      <div class="shifts stagger" style="margin-top:clamp(16px,2.4vw,34px)">
+        <div class="shift">
+          <div class="sv"><span class="from">1</span><span class="ar">&rarr;</span><span class="to">∞</span></div>
+          <div class="sk">Live videos in ten years, against everything a tour could give us</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- 14 · EVIDENCE -->
 <section class="console">
   <div class="act">Act IV · The world</div>
+  <div class="bed scrim-f" style="opacity:.20"><img data-vid="cBpIVKxCMZU" alt=""></div>
   <div class="z">
     <div class="eyebrow">Why this is worth doing — YouTube's own evidence</div>
-    <h2 class="sm">Fans don't just want the song.</h2>
-    <div class="evid count">
+    <h2 class="sm reveal">Fans don't just want the song.</h2>
+    <div class="evid count stagger">
       <div>
         <div class="num v" data-n="4">4</div>
         <div class="t">out of 5 music superfans use YouTube to engage with
@@ -733,7 +867,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         <div class="s">YouTube internal data, Dec 2025 – Mar 2026<br>artists.youtube</div>
       </div>
     </div>
-    <div class="punch" style="margin-top:clamp(16px,2.4vw,34px)">
+    <div class="punch reveal" style="margin-top:clamp(16px,2.4vw,34px)">
       The video gets the view.<br><em>The world builds the fan.</em></div>
     <div class="qual">
       YouTube's own post-release guidance recommends continuing to upload
@@ -748,11 +882,12 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 15 · STATIONS -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
+  <div class="bed scrim-f" style="opacity:.16"><img data-vid="XCQV3fIIako" alt=""></div>
   <div class="z">
     <div class="eyebrow">From an upload feed to a destination</div>
-    <h2 class="sm">Eight stations inside one channel.</h2>
-    <div class="stations" id="stations"></div>
-    <div class="kick" style="margin-top:clamp(12px,1.7vw,24px);color:#AEB5BE">
+    <h2 class="sm reveal">Eight stations inside one channel.</h2>
+    <div class="stations stagger" id="stations"></div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:#AEB5BE">
       Not separate channels — <em>programming lanes</em>. Playlists, series
       naming, thumbnails and shelves, so the channel has places to go.</div>
   </div>
@@ -764,8 +899,8 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="sheet" id="sheet16"></div>
   <div class="z">
     <div class="eyebrow">What else could people watch, because they care about DBE?</div>
-    <h2 class="sm">The formats that already fit them.</h2>
-    <div class="lanes">
+    <h2 class="sm reveal">The formats that already fit them.</h2>
+    <div class="lanes stagger">
       <div class="lane">
         <h4>Behind the music</h4>
         <ul>
@@ -795,7 +930,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         </ul>
       </div>
     </div>
-    <div class="kick" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
       The value here is <em>access</em>, not production. Polished corporate
       BTS is worth less than a real room.</div>
   </div>
@@ -804,15 +939,16 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 17 · FLYWHEEL -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
+  <div class="bed scrim-l" style="opacity:.30"><img data-vid="jOtrxyE1xpc" alt=""></div>
   <div class="z">
     <div class="eyebrow">One day. Worked properly.</div>
-    <h2 class="sm">DBE play a show in Paris.</h2>
+    <h2 class="sm reveal">DBE play a show in Paris.</h2>
     <div class="flyw">
       <div class="src">
         <img data-vid="I4Ra4z2Arqg" alt="">
         <div class="cap">One night · one camera</div>
       </div>
-      <div class="outs">
+      <div class="outs stagger">
         <div class="out"><div class="f">The show</div><div class="t">Live performance</div></div>
         <div class="out"><div class="f">Backstage</div><div class="t">8-minute vlog</div></div>
         <div class="out"><div class="f">Soundcheck</div><div class="t">Performance clip</div></div>
@@ -823,7 +959,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         <div class="out"><div class="f">Everything else</div><div class="t">Future archive</div></div>
       </div>
     </div>
-    <div class="punch" style="margin-top:clamp(14px,2vw,30px)">
+    <div class="punch reveal" style="margin-top:clamp(14px,2vw,30px)">
       One day.<br><em>A month of YouTube.</em></div>
   </div>
 </section>
@@ -833,10 +969,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 18 · RINGS -->
 <section class="grain">
   <div class="act">Act V · The system</div>
+  <div class="bed scrim-l" style="opacity:.28"><img data-vid="d8hlIIWb3s4" alt=""></div>
   <div class="z">
     <div class="eyebrow">How much of this needs the artist?</div>
-    <h2 class="sm">Most of it doesn't.</h2>
-    <div class="rings">
+    <h2 class="sm reveal">Most of it doesn't.</h2>
+    <div class="rings stagger">
       <div class="ring a">
         <h4>No artist time</h4>
         <ul>
@@ -869,9 +1006,10 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 19 · WHO DOES WHAT -->
 <section class="grain">
   <div class="act">Act V · The system</div>
+  <div class="bed scrim-l" style="opacity:.32"><img data-vid="dP6e17UlF8U" alt=""></div>
   <div class="z">
     <div class="eyebrow">Who does what</div>
-    <h2 class="sm">We can do the heavy lifting.</h2>
+    <h2 class="sm reveal">We can do the heavy lifting.</h2>
     <div class="split">
       <div class="col them">
         <h3>D-Block Europe</h3>
@@ -888,7 +1026,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         </ul>
       </div>
     </div>
-    <div class="punch" style="margin-top:clamp(14px,2vw,28px)">
+    <div class="punch reveal" style="margin-top:clamp(14px,2vw,28px)">
       More YouTube.<br><em>Not more work for the artist.</em></div>
   </div>
 </section>
@@ -896,6 +1034,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 20 · THE LOOP -->
 <section class="grain">
   <div class="act">Act V · The system</div>
+  <div class="bed scrim-c" style="opacity:.36"><img data-vid="8QCu_ZJNwZY" alt=""></div>
   <div class="z" style="display:flex;flex-direction:column;align-items:center">
     <div class="eyebrow" style="text-align:center">What Virgin builds around DBE</div>
     <div class="mach">
@@ -909,7 +1048,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
       <div class="st2">Learn</div><div class="ar">↓</div>
       <div class="st2">Next move</div>
     </div>
-    <div class="num hub" style="margin-top:clamp(14px,2vw,28px)">973M → 1BN → BEYOND</div>
+    <div class="num hub glow" style="margin-top:clamp(14px,2vw,28px)">973M → 1BN → BEYOND</div>
   </div>
 </section>
 
@@ -933,7 +1072,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <section id="appx">
   <div class="z">
     <div class="eyebrow">Appendix · method, sources and limits</div>
-    <h2 class="sm" style="font-size:clamp(18px,2.8vw,40px)">What this is built on.</h2>
+    <h2 class="sm reveal" style="font-size:clamp(18px,2.8vw,40px)">What this is built on.</h2>
     <div class="apx">
       <div>
         <h4>Channel data</h4>
@@ -1175,18 +1314,22 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
   }
 
   /* ── 09 + 16 · CONTACT SHEETS ──────────────────────────────────── */
-  function sheet(el, cols, rows, from) {
+  /* `lit` lights a share of the tiles at full brightness and leaves the rest
+     dimmed. On slide 09 that ratio is the argument itself — most of the
+     catalogue sits in the dark with nothing built around it. */
+  function sheet(el, cols, rows, from, lit) {
     if (!el) return;
     el.style.gridTemplateColumns = 'repeat(' + cols + ',1fr)';
     el.style.gridTemplateRows = 'repeat(' + rows + ',1fr)';
     for (let i = 0; i < cols * rows; i++) {
       const img = document.createElement('img');
       thumb(img, ERAS[(from + i) % ERAS.length], false);
+      if (lit && lit.indexOf(i) !== -1) img.className = 'lit';
       el.appendChild(img);
     }
   }
-  sheet(document.getElementById('sheet9'), 8, 3, 0);
-  sheet(document.getElementById('sheet16'), 8, 3, 12);
+  sheet(document.getElementById('sheet9'), 8, 3, 0, [2, 9, 13, 20]);
+  sheet(document.getElementById('sheet16'), 8, 3, 12, [1, 6, 11, 15, 18, 22]);
 
   /* ── 10 · THE GAP MAP ──────────────────────────────────────────── */
   const gm = document.getElementById('gapmap');
@@ -1204,9 +1347,11 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
 
   /* ── 11 · OPPORTUNITY CARDS ────────────────────────────────────── */
   const oc = document.getElementById('oppcards');
-  if (oc) OPPS.forEach(o => {
+  if (oc) OPPS.forEach((o, i) => {
     const d = document.createElement('div');
-    d.className = 'ocard';
+    /* SEPA is first because it is the one still climbing. The tint says so
+       without making the card a different size. */
+    d.className = 'ocard' + (i === 0 ? ' first' : '');
     d.innerHTML = '<div class="th"><img alt="">' + (o.vel ? '<div class="vel">' + o.vel + '</div>' : '') + '</div>'
       + '<div class="bd"><div><div class="nm">' + o.nm + '</div>'
       + '<div class="vv">' + o.views + '</div></div>'
@@ -1282,6 +1427,31 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
       if (!e.isIntersecting) return; paint(e.target); io.unobserve(e.target);
     }), { threshold: 0.25 });
     groups.forEach(g => io.observe(g));
+  }
+
+  /* ── REVEAL ────────────────────────────────────────────────────────────
+     Content lifts in as each slide arrives, and children of a .stagger
+     follow one another rather than all landing at once. The observer root
+     is the .deck element, not the viewport: the deck is the scrolling
+     container, so a viewport-rooted observer fires for everything at load
+     and nothing afterwards. */
+  const deck = document.querySelector('.deck');
+  const items = [...document.querySelectorAll('.reveal, .stagger')];
+  if (reduced || !('IntersectionObserver' in window)) {
+    items.forEach(el => el.classList.add('visible'));
+  } else {
+    const ro = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      if (e.target.classList.contains('stagger')) {
+        [...e.target.children].forEach((c, i) => { c.style.transitionDelay = (i * 55) + 'ms'; });
+      }
+      e.target.classList.add('visible');
+      ro.unobserve(e.target);
+    }), { root: deck, threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    items.forEach(el => ro.observe(el));
+    /* The cover must not wait for a scroll that may never come. */
+    document.querySelectorAll('section:first-of-type .reveal, section:first-of-type .stagger')
+      .forEach(el => el.classList.add('visible'));
   }
 })();
 </script>
