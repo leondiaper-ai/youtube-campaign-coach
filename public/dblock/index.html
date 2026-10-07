@@ -456,6 +456,35 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 .evid .s{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#4F5762;margin-top:8px;
   line-height:1.6}
 
+/* ── THE PROOF ───────────────────────────────────────────────────────────
+   Adz's own channel. The strongest evidence in the deck, because it is not
+   a recommendation — it is a thing DBE already did, and the numbers are
+   theirs. Shown as real thumbnails with real view counts, because a list
+   of figures would be arguable and the actual videos are not. */
+.pstat{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:clamp(10px,1.8vw,30px);
+  margin-top:clamp(12px,1.8vw,26px)}
+.pstat>div{border-top:2px solid var(--hair);padding-top:clamp(8px,1.1vw,15px)}
+.pstat>div.g{border-top-color:var(--gold)}
+.pstat .v{font-size:clamp(22px,3.4vw,54px)}
+.pstat>div.g .v{color:var(--gold)}
+.pstat .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--dim);margin-top:8px;line-height:1.55;max-width:22ch}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:clamp(7px,1vw,13px);
+  margin-top:clamp(12px,1.8vw,26px)}
+.pv{border:1px solid var(--hair);border-radius:3px;overflow:hidden;background:rgba(15,13,11,.7);
+  text-decoration:none;display:block;transition:transform .3s ease,border-color .3s ease}
+.pv:hover{transform:translateY(-3px);border-color:rgba(201,154,69,.45)}
+.pv .th{aspect-ratio:16/9;position:relative;background:#11100E}
+.pv .th img{width:100%;height:100%;object-fit:cover;filter:saturate(1.14) contrast(1.05)}
+.pv .dur{position:absolute;right:5px;bottom:5px;background:rgba(6,6,5,.88);color:var(--bone);
+  font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:2px}
+.pv .bd{padding:clamp(6px,.85vw,11px)}
+.pv .t{font-size:clamp(9.5px,.92vw,13px);font-weight:800;font-stretch:72%;text-transform:uppercase;
+  line-height:1.2;color:var(--bone);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden}
+.pv .v{font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:6px;
+  font-variant-numeric:tabular-nums}
+
 .flyw{display:grid;grid-template-columns:minmax(180px,.9fr) 2.3fr;gap:clamp(14px,2.4vw,44px);
   align-items:center;margin-top:clamp(10px,1.4vw,20px)}
 @media(max-width:860px){.flyw{grid-template-columns:1fr}}
@@ -1015,31 +1044,58 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   </div>
 </section>
 
-<!-- 17 · FLYWHEEL -->
+<!-- 18 · THE PROOF ─ Adz already ran the experiment -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
-  <div class="bed scrim-l" style="opacity:.56"><img data-vid="jOtrxyE1xpc" alt=""></div>
   <div class="z">
-    <div class="eyebrow">One day. Worked properly.</div>
-    <h2 class="sm reveal">DBE play a show in Paris.</h2>
-    <div class="flyw">
-      <div class="src">
-        <img data-vid="I4Ra4z2Arqg" alt="">
-        <div class="cap">One night · one camera</div>
+    <div class="eyebrow">And we don't have to guess whether this works for DBE</div>
+    <h2 class="sm reveal">Adz already did it.<br>It worked. Then it stopped.</h2>
+    <div class="pstat stagger count">
+      <div><div class="num v" data-n="72.1" data-dp="1" data-suffix="K">72.1K</div>
+        <div class="l">Subscribers on his own channel</div></div>
+      <div><div class="num v" data-n="3.92" data-dp="2" data-suffix="M">3.92M</div>
+        <div class="l">Views from 18 uploads</div></div>
+      <div class="g"><div class="num v" data-n="2.7" data-dp="1" data-suffix="M">2.7M</div>
+        <div class="l">From nine long-form vlogs alone</div></div>
+      <div class="g"><div class="num v" data-n="236442">236,442</div>
+        <div class="l">Median views per vlog</div></div>
+    </div>
+    <div class="pgrid stagger" id="adzgrid"></div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      Not music. A 22-minute Ramadan vlog. Hotel reviews. Cars. A day with fans.
+      <em>Twelve to thirty-one minutes long</em> — and people watched.</div>
+  </div>
+  <div class="foot">@dbenumber29skiski · 18 uploads between 11 Feb and 19 May 2024, nothing since · read from the YouTube Data API, 7 Oct 2026</div>
+</section>
+
+<!-- 19 · THE COLLAB TOOL -->
+<section class="grain">
+  <div class="act">Act IV · The world</div>
+  <div class="bed scrim-l" style="opacity:.52"><img data-vid="jOtrxyE1xpc" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">And the two channels don't have to stay separate</div>
+    <h2 class="sm reveal">One upload.<br>Both channels.</h2>
+    <div class="shifts stagger">
+      <div class="shift">
+        <div class="sv"><span class="from">72.1K</span><span class="ar">&rarr;</span><span class="to">733K</span></div>
+        <div class="sk">The audience this content reaches if it sits on both channels</div>
       </div>
-      <div class="outs stagger">
-        <div class="out"><div class="f">The show</div><div class="t">Live performance</div></div>
-        <div class="out"><div class="f">Backstage</div><div class="t">8-minute vlog</div></div>
-        <div class="out"><div class="f">Soundcheck</div><div class="t">Performance clip</div></div>
-        <div class="out"><div class="f">Car · hotel · city</div><div class="t">Lifestyle Shorts</div></div>
-        <div class="out"><div class="f">Post-show</div><div class="t">Reaction</div></div>
-        <div class="out"><div class="f">Songs performed</div><div class="t">Catalogue routing</div></div>
-        <div class="out"><div class="f">Fan moments</div><div class="t">Community posts</div></div>
-        <div class="out"><div class="f">Everything else</div><div class="t">Future archive</div></div>
+      <div class="shift">
+        <div class="sv"><span class="from">870</span><span class="ar">&rarr;</span><span class="to">0</span></div>
+        <div class="sk">Days dormant — a proven format, sitting idle since May 2024</div>
       </div>
     </div>
-    <div class="punch reveal" style="margin-top:clamp(14px,2vw,30px)">
-      One day.<br><em>A month of YouTube.</em></div>
+    <div class="kick reveal" style="margin-top:clamp(13px,1.9vw,26px);color:var(--bone)">
+      YouTube's collaboration feature puts one video on
+      <em>both channels at once</em> — it shows on each channel and counts for both.</div>
+    <div class="punch s reveal" style="margin-top:clamp(11px,1.6vw,22px)">
+      The content works. The audience is there.<br><em>They have never met.</em></div>
+    <div class="qual">
+      YouTube reports channels using Collaborations saw a 25% uplift in first-week views with a
+      similar-sized collaborator and 60% with a slightly smaller one (YouTube for Artists, internal
+      study, Feb 2026, US &amp; UK). DBE's two channels are far apart in size, so those figures are
+      context for the mechanic — not a forecast for this pairing. 733K is the two subscriber counts
+      added together; it is reach available, not an audience guaranteed.</div>
   </div>
 </section>
 
@@ -1262,6 +1318,20 @@ const OPPS = [
 
 /* Stations — programming lanes, each fronted by a real upload so the
    idea is shown in DBE's own imagery rather than described. */
+/* Young Adz's own channel, @dbenumber29skiski. Six long-form vlogs, read
+   from the YouTube Data API on 7 Oct 2026. These are the exact formats the
+   deck recommends — travel, cars, faith, fans, tour — and DBE already made
+   them and already proved they work. Durations are real: the biggest is 22
+   minutes and the longest is 31. */
+const ADZ = [
+  { id:'Oip1BvcnMT8', t:'Ramadan with Young Adz',        v:559720, d:'22m' },
+  { id:'-lcG1h3Dn7U', t:'1 star vs 5 star hotel, London', v:506202, d:'17m' },
+  { id:'v2075-nUrFY', t:'I spent $1M in Lamborghini',     v:371861, d:'12m' },
+  { id:'rcTlpDr1LTk', t:'We sold out the O2 four times',  v:344036, d:'25m' },
+  { id:'ePXC8wTb3ok', t:'A day with my fans',             v:236442, d:'31m' },
+  { id:'SHGCqlqEI7M', t:'The 27th night of Ramadan',      v:217996, d:'12m' },
+];
+
 /* Live Stations on real artist channels. Every title and owning channel here
    was verified through YouTube's own oEmbed API on 7 Oct 2026, so these are
    the real objects and the real owners rather than something half-remembered
@@ -1474,6 +1544,19 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
       + '<div class="nt">' + e.nt + '</div></div>';
     thumb(a.querySelector('img'), e.id, true);
     exr.appendChild(a);
+  });
+
+  /* ── 18 · ADZ'S VLOGS ──────────────────────────────────────────── */
+  const ag = document.getElementById('adzgrid');
+  if (ag) ADZ.forEach(v => {
+    const a = document.createElement('a');
+    a.href = 'https://youtu.be/' + v.id; a.target = '_blank'; a.rel = 'noopener';
+    a.className = 'pv';
+    a.innerHTML = '<div class="th"><img alt=""><div class="dur">' + v.d + '</div></div>'
+      + '<div class="bd"><div class="t">' + v.t + '</div>'
+      + '<div class="v">' + nf(v.v) + ' views</div></div>';
+    thumb(a.querySelector('img'), v.id, true);
+    ag.appendChild(a);
   });
 
   /* ── 17 · DBE'S OWN STATIONS ───────────────────────────────────── */
