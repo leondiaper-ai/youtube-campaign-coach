@@ -40,6 +40,22 @@ export interface ResourceGroup {
 
 export const RESOURCE_GROUPS: ResourceGroup[] = [
   {
+    heading: 'Meetings',
+    note: 'Built to be open on screen during the conversation, not read beforehand.',
+    items: [
+      {
+        title: 'YouTube Monthly Catch-up — October 2026',
+        blurb:
+          'Briefing page for the monthly YouTube catch-up. Seven talking points, the cross-artist patterns '
+          + 'behind them, the campaigns worth raising, where the Watcher is going, and the questions only '
+          + 'YouTube can answer. Every claim labelled OBSERVED, HYPOTHESIS or ASK YOUTUBE.',
+        href: '/catchup/',
+        kind: 'Page',
+        updated: 'October 2026',
+      },
+    ],
+  },
+  {
     heading: 'Artist decks',
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [

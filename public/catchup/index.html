@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YouTube Monthly Catch-up — October 2026</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F2ED; --card:#FFFFFF; --ink:#101010; --body:#45413B;
+  --mute:#847C70; --faint:#B8B0A2; --rule:#DED9CF;
+  --obs:#2F6B42; --hyp:#B5651D; --ask:#2B5676; --flag:#A8372A;
+  --sans:'Inter Tight',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;line-height:1.45}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(18px,4vw,48px)}
+
+/* ── sticky nav ─────────────────────────────────────────────── */
+.nav{position:sticky;top:0;z-index:50;background:rgba(244,242,237,.94);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.nav .wrap{display:flex;align-items:center;gap:clamp(8px,2vw,22px);
+  height:50px;overflow-x:auto;scrollbar-width:none}
+.nav .wrap::-webkit-scrollbar{display:none}
+.nav b{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink);white-space:nowrap;font-weight:700}
+.nav a{font-family:var(--mono);font-size:.58rem;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--mute);text-decoration:none;white-space:nowrap}
+.nav a:hover{color:var(--ink)}
+
+/* ── header ─────────────────────────────────────────────────── */
+header{padding:clamp(34px,6vh,64px) 0 clamp(22px,4vh,38px)}
+.eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:.9rem}
+h1{font-size:clamp(2.2rem,5.6vw,3.9rem);line-height:.98;letter-spacing:-.035em;
+  font-weight:800;margin:0 0 .5rem}
+h1 em{font-style:normal;color:var(--mute)}
+.lede{font-size:clamp(1rem,1.7vw,1.18rem);color:var(--body);max-width:60ch;margin:0}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:clamp(10px,2vw,26px);
+  margin-top:clamp(20px,3vh,30px);padding-top:1rem;border-top:1px solid var(--rule)}
+.legend div{display:flex;align-items:baseline;gap:.5rem;font-size:.82rem;color:var(--body)}
+
+/* ── tag chips ──────────────────────────────────────────────── */
+.t{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;padding:.2rem .42rem;border-radius:2px;white-space:nowrap;display:inline-block}
+.t.obs{color:var(--obs);background:rgba(47,107,66,.11)}
+.t.hyp{color:var(--hyp);background:rgba(181,101,29,.12)}
+.t.ask{color:var(--ask);background:rgba(43,86,118,.11)}
+.t.flag{color:var(--flag);background:rgba(168,55,42,.11)}
+
+/* ── sections ───────────────────────────────────────────────── */
+section{padding:clamp(30px,5vh,56px) 0;border-top:1px solid var(--rule)}
+.shead{display:flex;align-items:baseline;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;margin-bottom:clamp(18px,3vh,30px)}
+h2{font-size:clamp(1.5rem,3.1vw,2.2rem);line-height:1.02;letter-spacing:-.028em;
+  font-weight:800;margin:0}
+.snote{font-family:var(--mono);font-size:.62rem;letter-spacing:.09em;color:var(--mute);
+  max-width:46ch;text-align:right;line-height:1.6}
+@media(max-width:700px){.snote{text-align:left}}
+
+/* ── big talking-point cards ────────────────────────────────── */
+.talk{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));
+  gap:clamp(12px,1.8vw,20px)}
+.tc{background:var(--card);border:1px solid var(--rule);border-radius:4px;
+  padding:clamp(16px,2vw,22px);display:flex;flex-direction:column;
+  border-left:4px solid var(--rule)}
+.tc.o{border-left-color:var(--obs)} .tc.h{border-left-color:var(--hyp)}
+.tc.a{border-left-color:var(--ask)}
+.tc .top{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.7rem;align-items:center}
+.tc .n{font-family:var(--mono);font-size:.58rem;color:var(--faint);font-weight:700;
+  letter-spacing:.1em;margin-right:auto}
+.tc h3{font-size:clamp(1.06rem,1.5vw,1.26rem);line-height:1.18;letter-spacing:-.018em;
+  font-weight:700;margin:0 0 .6rem}
+.tc .fig{font-family:var(--mono);font-size:.78rem;line-height:1.65;color:var(--ink);
+  font-weight:500;padding:.6rem 0;border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);margin-bottom:.7rem}
+.tc .fig b{font-weight:700}
+.tc p{font-size:.92rem;line-height:1.5;color:var(--body);margin:0 0 .7rem}
+.tc .foot{margin-top:auto;padding-top:.5rem;font-family:var(--mono);font-size:.6rem;
+  letter-spacing:.07em;color:var(--mute);display:flex;gap:.8rem;flex-wrap:wrap}
+.tc .foot a{color:var(--ask);text-decoration:none;border-bottom:1px solid rgba(43,86,118,.3)}
+.tc .foot a:hover{border-bottom-color:var(--ask)}
+
+/* ── learning rows ──────────────────────────────────────────── */
+.rows{display:flex;flex-direction:column;gap:0}
+.row{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+  gap:clamp(14px,2.6vw,38px);padding:clamp(15px,2.4vh,22px) 0;
+  border-bottom:1px solid var(--rule);align-items:start}
+.row:first-child{border-top:1px solid var(--rule)}
+@media(max-width:780px){.row{grid-template-columns:1fr;gap:.7rem}}
+.row .l .tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.5rem}
+.row h3{font-size:clamp(1.02rem,1.5vw,1.2rem);line-height:1.2;letter-spacing:-.016em;
+  font-weight:700;margin:0 0 .4rem}
+.row .l p{font-size:.89rem;line-height:1.5;color:var(--body);margin:0;max-width:52ch}
+.row .ev{font-family:var(--mono);font-size:.73rem;line-height:1.72;color:var(--body)}
+.row .ev b{color:var(--ink);font-weight:700}
+.row .ev .src{display:block;margin-top:.5rem;color:var(--faint);font-size:.63rem;
+  letter-spacing:.07em}
+.row .ev .src a{color:var(--ask);text-decoration:none;border-bottom:1px solid rgba(43,86,118,.3)}
+
+/* ── artist cards ───────────────────────────────────────────── */
+.arts{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));
+  gap:clamp(11px,1.6vw,18px)}
+.ac{background:var(--card);border:1px solid var(--rule);border-radius:4px;
+  padding:clamp(14px,1.8vw,19px);display:flex;flex-direction:column}
+.ac .hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  margin-bottom:.55rem}
+.ac .nm{font-size:1.05rem;font-weight:800;letter-spacing:-.018em;line-height:1.1}
+.ac .nm a{text-decoration:none;border-bottom:2px solid var(--rule)}
+.ac .nm a:hover{border-bottom-color:var(--ink)}
+.ac .hero{font-family:var(--mono);font-size:1.22rem;font-weight:700;line-height:1;
+  letter-spacing:-.02em;margin:.25rem 0 .1rem}
+.ac .hsub{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:.6rem}
+.ac p{font-size:.87rem;line-height:1.48;color:var(--body);margin:0 0 .6rem}
+.ac ul{margin:0 0 .6rem;padding:0;list-style:none}
+.ac li{font-family:var(--mono);font-size:.69rem;line-height:1.55;color:var(--body);
+  padding:.26rem 0;border-top:1px solid var(--rule)}
+.ac li b{color:var(--ink)}
+.ac .ft{margin-top:auto;padding-top:.5rem;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:.59rem;letter-spacing:.07em;color:var(--mute);
+  display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+.ac .ft a{color:var(--ask);text-decoration:none;border-bottom:1px solid rgba(43,86,118,.3)}
+
+/* ── building ───────────────────────────────────────────────── */
+.build{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+  gap:clamp(10px,1.5vw,16px);margin-bottom:clamp(20px,3vh,30px)}
+.bc{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:14px 15px}
+.bc .k{font-family:var(--mono);font-size:1.05rem;font-weight:700;letter-spacing:-.02em;
+  line-height:1;margin-bottom:.3rem}
+.bc .ttl{font-size:.9rem;font-weight:700;line-height:1.2;margin-bottom:.3rem}
+.bc p{font-size:.8rem;line-height:1.45;color:var(--body);margin:0}
+.bc .lk{display:block;margin-top:.5rem;font-family:var(--mono);font-size:.58rem;
+  letter-spacing:.09em;color:var(--ask);text-decoration:none}
+
+/* dataset panel */
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:4px;
+  border-left:4px solid var(--ask);padding:clamp(18px,2.4vw,28px)}
+.panel h3{font-size:clamp(1.2rem,2vw,1.55rem);line-height:1.1;letter-spacing:-.022em;
+  font-weight:800;margin:.5rem 0 .6rem;max-width:30ch}
+.panel .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:clamp(14px,2.4vw,32px);margin-top:1.1rem}
+.panel p{font-size:.92rem;line-height:1.52;color:var(--body);margin:0 0 .7rem;max-width:58ch}
+.panel .sub{font-family:var(--mono);font-size:.58rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:.5rem}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chip{font-family:var(--mono);font-size:.62rem;letter-spacing:.05em;padding:.26rem .5rem;
+  border:1px solid var(--rule);border-radius:2px;color:var(--body);background:var(--paper)}
+.chip.on{border-color:var(--obs);color:var(--obs)}
+.chip.off{border-style:dashed;color:var(--faint)}
+.quote{font-size:1rem;line-height:1.45;color:var(--ink);font-weight:600;
+  border-left:3px solid var(--rule);padding-left:.9rem;margin:.2rem 0 .9rem;max-width:48ch}
+.quote.good{border-left-color:var(--obs)}
+.quote.bad{border-left-color:var(--faint);color:var(--mute);font-weight:500}
+
+/* ── questions ──────────────────────────────────────────────── */
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:clamp(11px,1.6vw,18px)}
+.q{background:var(--card);border:1px solid var(--rule);border-radius:4px;
+  border-left:4px solid var(--ask);padding:15px 17px}
+.q .lab{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mute);margin-bottom:.45rem}
+.q h3{font-size:1rem;line-height:1.26;font-weight:700;letter-spacing:-.012em;margin:0 0 .4rem}
+.q p{font-size:.84rem;line-height:1.46;color:var(--body);margin:0}
+
+/* ── footer ─────────────────────────────────────────────────── */
+footer{padding:clamp(28px,4vh,46px) 0 clamp(40px,6vh,70px);border-top:1px solid var(--rule)}
+footer .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:clamp(14px,2.4vw,30px)}
+footer .lab{font-family:var(--mono);font-size:.56rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--mute);margin-bottom:.55rem}
+footer ul{margin:0;padding:0;list-style:none}
+footer li{padding:.2rem 0}
+footer li a{font-size:.85rem;color:var(--body);text-decoration:none;
+  border-bottom:1px solid var(--rule)}
+footer li a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+footer .note{margin-top:clamp(20px,3vh,30px);padding-top:1rem;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:.63rem;line-height:1.75;color:var(--mute);max-width:72ch}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="wrap">
+  <b>Oct 2026</b>
+  <a href="#discuss">Worth discussing</a>
+  <a href="#learning">What we're learning</a>
+  <a href="#campaigns">Campaigns</a>
+  <a href="#building">What we're building</a>
+  <a href="#questions">Questions</a>
+  <a href="#links">Links</a>
+</div></nav>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Virgin Music Group · YouTube monthly catch-up</div>
+  <h1>October 2026.<br><em>What we've learned, built<br>and want to ask.</em></h1>
+  <p class="lede">Everything here comes from the public YouTube Data API and Chartmetric, read across the artist channels we monitor. No Studio access — which is itself one of the conversations.</p>
+
+  <div class="legend">
+    <div><span class="t obs">Observed</span> <span>Directly measured in our data.</span></div>
+    <div><span class="t hyp">Hypothesis</span> <span>We think it's happening. Not proven.</span></div>
+    <div><span class="t ask">Ask YouTube</span> <span>They can validate, explain or correct it.</span></div>
+  </div>
+</header>
+
+<!-- ═══ WORTH DISCUSSING TODAY ═══════════════════════════════ -->
+<section id="discuss">
+  <div class="shead">
+    <h2>Worth discussing today</h2>
+    <div class="snote">Seven things. Each one has a number behind it<br>and a reason YouTube's view would change ours.</div>
+  </div>
+
+  <div class="talk">
+
+    <div class="tc o">
+      <div class="top"><span class="n">01</span><span class="t obs">Observed</span><span class="t ask">Ask YouTube</span></div>
+      <h3>Kings of Leon's new single did in 27 days what the last album's lead single hasn't done in two and a half years.</h3>
+      <div class="fig">
+        My Whole World · 10 Sep · <b>4,521,343</b><br>
+        Mustang · Feb 2024 · <b>1,733,051</b> lifetime<br>
+        Nowhere to Run · May 2024 · <b>1,692,907</b> lifetime<br>
+        Cold Blue Dawn · 30 Sep · <b>740,137</b> in 7 days
+      </div>
+      <p>That's a 2.6× gap against a single that has had 31 months to accumulate. Something has changed, and from outside the channel we cannot see what. This is the single best question we have for the room.</p>
+      <div class="foot"><span>Ask: is this distribution, format, or the song?</span><a href="/kol">Deck</a></div>
+    </div>
+
+    <div class="tc o">
+      <div class="top"><span class="n">02</span><span class="t obs">Observed</span></div>
+      <h3>HEARTSTEEL is the clearest collaboration ecosystem we can see from outside.</h3>
+      <div class="fig">
+        Live My Life · 18 Sep · <b>5,410,334</b> in 19 days<br>
+        Skins trailers, same day · <b>248,264</b> + <b>125,539</b><br>
+        Follow-up Short, +2 days · <b>91,394</b><br>
+        PARANOIA, 2023 · <b>77,150,460</b>
+      </div>
+      <p>Four featured artists, a game publisher's channel, a product launch and a music release moving together. Worth discussing as a model — and as the case where neither party owns both sides of the analytics.</p>
+      <div class="foot"><span>On the League of Legends channel, not an artist channel</span></div>
+    </div>
+
+    <div class="tc h">
+      <div class="top"><span class="n">03</span><span class="t hyp">Hypothesis</span><span class="t ask">Ask YouTube</span></div>
+      <h3>Nobody programmes the fortnight after a release — and we can't prove it matters.</h3>
+      <div class="fig">
+        CHVRCHES, Screen Violence · <b>0 of 4</b> heroes had anything<br>
+        meaningful land in the 7–14 day window<br>
+        Kings of Leon, 2024 · <b>6 of 11</b> did<br>
+        136 campaigns · <b>131 (96.3%)</b> record zero return moments
+      </div>
+      <p>We keep finding the gap and we keep failing to prove it costs anything. The 7–14 day window is <em>our</em> convention, not a YouTube-published figure. We'd rather be corrected than keep repeating it.</p>
+      <div class="foot"><span>See the correction note below</span><a href="#followup">Detail</a></div>
+    </div>
+
+    <div class="tc o">
+      <div class="top"><span class="n">04</span><span class="t obs">Observed</span><span class="t ask">Ask YouTube</span></div>
+      <h3>One Short out of 46 uploads carried a campaign. The other 45 didn't come close.</h3>
+      <div class="fig">
+        Freak Slug · <b>8 of 46</b> uploads = <b>85.6%</b> of window views<br>
+        Best campaign Short · <b>12,041</b> · next best · <b>4,709</b><br>
+        Nine Coachella Shorts, same week · <b>231–1,530</b> each
+      </div>
+      <p>It wasn't the footage that travelled, it was one specific post. We see this shape on nearly every channel: concentration, not distribution. Volume is not the variable we can control.</p>
+      <div class="foot"><a href="/freakslug/">Deck</a><a href="/freakslug/analysis/">Working</a></div>
+    </div>
+
+    <div class="tc o">
+      <div class="top"><span class="n">05</span><span class="t obs">Observed</span><span class="t ask">Ask YouTube</span></div>
+      <h3>A dormant channel earned 74,266 views a day for 79 days with nothing published.</h3>
+      <div class="fig">
+        CHVRCHES · 340 days since last upload<br>
+        79-day window · <b>5,866,985</b> views · <b>74,266</b>/day<br>
+        Annualised · <b>27.1M</b> · subs moved 548,000 → 549,000
+      </div>
+      <p>Demand arrives against silence. We can't see whether any of it reaches a new release when one lands — that needs traffic sources. It's also why the Station / programmed-channel idea keeps coming up.</p>
+      <div class="foot"><span>Stations eligibility is an open question for YouTube</span><a href="/chvrches">Deck</a></div>
+    </div>
+
+    <div class="tc o">
+      <div class="top"><span class="n">06</span><span class="t obs">Observed</span><span class="t hyp">Hypothesis</span></div>
+      <h3>Catalogue is doing more work than any campaign we ran this quarter.</h3>
+      <div class="fig">
+        Bleachers · <b>97.3%</b> of 23.88M over 154 days landed<br>
+        on videos published before the window<br>
+        Christmas track · <b>+400,000</b> in 7 days in September<br>= <b>5.4×</b> its own lifetime daily rate
+      </div>
+      <p>A song charting four weeks last December has two Shorts and no video asset supporting it. Seasonal and catalogue demand is visible, early, and mostly unserved.</p>
+      <div class="foot"><a href="/bleachers/">Deck</a><a href="/bleachers/analysis/">Working</a></div>
+    </div>
+
+    <div class="tc a">
+      <div class="top"><span class="n">07</span><span class="t ask">Ask YouTube</span></div>
+      <h3>We have no Studio access on any of this. Everything above is the outside view.</h3>
+      <div class="fig">
+        No traffic sources · no retention · no impressions or CTR<br>
+        No new-vs-returning · no subscriber attribution<br>
+        No catalogue → new-release overlap
+      </div>
+      <p>Most of our open questions are one Studio field away from being answered. Worth asking what's realistically shareable, at what level, and whether aggregate benchmarks could stand in where artist-level data can't.</p>
+      <div class="foot"><span>The practical ask of the meeting</span></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ WHAT WE'RE LEARNING ═══════════════════════════════════ -->
+<section id="learning">
+  <div class="shead">
+    <h2>What we're learning</h2>
+    <div class="snote">Patterns that repeat across channels.<br>These matter more than any single campaign.</div>
+  </div>
+
+  <div class="rows">
+
+    <div class="row" id="followup">
+      <div class="l">
+        <div class="tags"><span class="t flag">Correction</span><span class="t hyp">Hypothesis</span></div>
+        <h3>The "22 of 23 channels had no follow-up" figure is wrong — and it's worth knowing before someone quotes it.</h3>
+        <p>We went looking for the source. 22 of 23 is real, but it measures <em>Shorts adoption</em> in a curated 23-campaign set, not follow-up. The follow-up gap is a genuine pattern in individual deep dives; it has never been measured across the roster.</p>
+      </div>
+      <div class="ev">
+        <b>22 of 23 (95.7%)</b> = campaigns including at least one Short<br>
+        <b>0 of 4</b> CHVRCHES heroes had a 7–14 day follow-up<br>
+        <b>6 of 11</b> Kings of Leon heroes did, median gap 8 days<br>
+        <b>131 of 136 (96.3%)</b> campaigns record zero return moments<br>
+        <span class="src">The cross-roster test exists in code and has never been run. The 7–14 day boundary is our convention, not YouTube's.</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="l">
+        <div class="tags"><span class="t obs">Observed</span><span class="t ask">Ask YouTube</span></div>
+        <h3>We publish fewer live sessions and fewer lyric videos than the market does.</h3>
+        <p>Channel-level adoption across 138 channels — whether a channel has ever published the format, not how well it performed. The live gap is the largest we've found between our roster and the comparison set.</p>
+      </div>
+      <div class="ev">
+        Live session · Virgin <b>63.4%</b> vs market <b>78.6%</b> — <b>−15.2pts</b><br>
+        Lyric video · Virgin <b>43.9%</b> vs market <b>53.6%</b><br>
+        Visualiser · Virgin <b>51.2%</b> vs market <b>42.9%</b><br>
+        <span class="src">June–July 2026, 82 Virgin + 56 market channels. Title-keyword classification.</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="l">
+        <div class="tags"><span class="t obs">Observed</span></div>
+        <h3>Campaign views concentrate into two or three assets, almost everywhere we look.</h3>
+        <p>Not a Shorts-vs-long-form story — a top-of-the-distribution story. The practical consequence is that spreading support evenly across a release is the wrong default.</p>
+      </div>
+      <div class="ev">
+        Freak Slug · 3 of 46 uploads = <b>72.7%</b> of window views<br>
+        Tove Lo · one track = <b>59.7%</b> of the release-day set, <b>14.3×</b> the median of the other ten<br>
+        Angus &amp; Julia Stone · top asset <b>35% → 42%</b> across two campaigns<br>
+        <span class="src"><a href="/tovelo/">Tove Lo</a> · <a href="/angusandjuliastone/">A&amp;JS</a></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="l">
+        <div class="tags"><span class="t obs">Observed</span><span class="t ask">Ask YouTube</span></div>
+        <h3>Shorts are baseline, not an edge — and we cannot see whether they feed long-form.</h3>
+        <p>Over half of campaigns already use them. Top-quartile campaigns use them more. But we can count Shorts and we can count long-form; we cannot observe one viewer moving between them. We've made that a hard rule internally rather than implying a funnel.</p>
+      </div>
+      <div class="ev">
+        <b>55.1%</b> of 136 campaigns include at least one Short<br>
+        Top quartile <b>82.4%</b> vs bottom quartile <b>34.3%</b><br>
+        CHVRCHES · 38 Shorts = <b>0.4%</b> of visible views<br>
+        The Snuts · 44 Shorts, median <b>1,088</b>, <b>39</b> comments total<br>
+        <span class="src">Developing-tier adoption is 32.3% — the real gap is at the small end.</span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="l">
+        <div class="tags"><span class="t obs">Observed</span><span class="t hyp">Hypothesis</span></div>
+        <h3>Reach and capture have come apart on the campaign we know best.</h3>
+        <p>The Snuts' album lands on 23 October. Reach is expanding fast; every durable follower base is flat. If this shape is common, "grew the audience" and "grew the fanbase" are different claims and we've been using them interchangeably.</p>
+      </div>
+      <div class="ev">
+        Monthly listeners <b>+56.2%</b> since 1 Jan<br>
+        Spotify followers <b>+7.5%</b> · Instagram <b>+4.0%</b> · TikTok <b>+2.6%</b><br>
+        Followers as a share of listeners · <b>35.9% → 24.1%</b><br>
+        <span class="src"><a href="/snuts/">Deck</a> · <a href="/snuts/analysis/">Working page</a></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="l">
+        <div class="tags"><span class="t obs">Observed</span><span class="t ask">Ask YouTube</span></div>
+        <h3>More channels on our roster are declining week-on-week than growing — and we can't tell if that's structural.</h3>
+        <p>One week of full coverage, so treat it as a flag rather than a finding. But it's the question we most want YouTube's view on: is per-video performance falling across the platform as supply rises, and what should a label do about it?</p>
+      </div>
+      <div class="ev">
+        Of 30 channels classified GROWING, only <b>7</b> were positive on views week-on-week<br>
+        Only <b>4 of 30</b> positive on subscribers<br>
+        Decline occurs <em>while</em> cadence is maintained<br>
+        <span class="src">86 managed channels, week 25. Single-week, cross-sectional. Cyclical vs structural is untested.</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ CAMPAIGNS WORTH MENTIONING ════════════════════════════ -->
+<section id="campaigns">
+  <div class="shead">
+    <h2>Campaigns worth mentioning</h2>
+    <div class="snote">Only where there's something interesting to say.<br>Not a status report.</div>
+  </div>
+
+  <div class="arts">
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/kol">Kings of Leon</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">4,521,343</div>
+      <div class="hsub">My Whole World · 27 days</div>
+      <p>New era outperforming the last album cycle by a wide margin, with a second single already at 740,137 in a week.</p>
+      <ul>
+        <li>Cold Blue Dawn · <b>740,137</b> in 7 days</li>
+        <li>Visualiser follow-up · <b>51,907</b></li>
+        <li>Last cycle: 86.6% of channel viewing is 2008–13</li>
+      </ul>
+      <div class="ft"><a href="/kol">Deck</a><span>Deck predates both singles</span></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm">HEARTSTEEL</div><span class="t obs">Observed</span></div>
+      <div class="hero">5,410,334</div>
+      <div class="hsub">Live My Life · 19 days</div>
+      <p>Riot's virtual band with four featured artists. Music release and game product launch programmed as one moment.</p>
+      <ul>
+        <li>Two skins trailers same day · <b>373,803</b> combined</li>
+        <li>Follow-up Short at +2 days · <b>91,394</b></li>
+        <li>2023 precedent, PARANOIA · <b>77,150,460</b></li>
+      </ul>
+      <div class="ft"><span>Not a Virgin campaign — a model worth discussing</span></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/freakslug/">Freak Slug</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">85.6%</div>
+      <div class="hsub">of window views, from 8 of 46 uploads</div>
+      <p>Channel ran four times more active than the debut. Territory data points hard at the North American tour, and the comments agree.</p>
+      <ul>
+        <li>US + Canada · <b>50.5%</b> of views</li>
+        <li>Canada <b>+123.7%</b>, US <b>+39.8%</b> vs market median <b>+7.7%</b></li>
+        <li><b>29 of 312</b> comments ask for live dates, naming 16 cities</li>
+        <li>Visualiser <b>399</b>/day vs BTS <b>10</b>/day</li>
+      </ul>
+      <div class="ft"><a href="/freakslug/">Deck</a><a href="/freakslug/analysis/">Working</a></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/chvrches">CHVRCHES</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">74,266</div>
+      <div class="hsub">views/day while dormant</div>
+      <p>Channel reopened with Roses after 340 days silent. Lyric videos carry the highest median of any format here.</p>
+      <ul>
+        <li>Lyric median <b>2.04M</b> (n=11) vs music video <b>937K</b> (n=44)</li>
+        <li>Not a controlled comparison — different songs, different ages</li>
+        <li>All <b>4</b> Screen Violence singles ran a pre-party livestream</li>
+      </ul>
+      <div class="ft"><a href="/chvrches">Deck</a><span>Album five inferred, not confirmed</span></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/bleachers/">Bleachers</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">5.4×</div>
+      <div class="hsub">Christmas track's September rate</div>
+      <p>Charted four weeks last December, peaking #65 — supported on YouTube by two Shorts and no video asset.</p>
+      <ul>
+        <li>Lifetime <b>7,060,665</b> · <b>+400,000</b> in 7 days</li>
+        <li><b>97.3%</b> of 154-day viewing landed on older videos</li>
+        <li>A 91-minute live film, never split into songs</li>
+      </ul>
+      <div class="ft"><a href="/bleachers/">Deck</a><a href="/bleachers/analysis/">Working</a></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/snuts/">The Snuts</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">+56.2%</div>
+      <div class="hsub">listeners · followers +7.5%</div>
+      <p>Album out 23 October. Reach expanding, capture flat — and the campaign's biggest listening month touched no surface we own.</p>
+      <ul>
+        <li>August · <b>+86,303</b> listeners, every owned surface flat</li>
+        <li>Podcast · <b>18,244</b> views, <b>5.66%</b> like rate, no link in the description</li>
+        <li><b>0 of 44</b> Shorts carry the pre-save route</li>
+      </ul>
+      <div class="ft"><a href="/snuts/">Deck</a><a href="/snuts/analysis/">Working</a></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/tovelo/">Tove Lo</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">14.3×</div>
+      <div class="hsub">one track vs the album-day median</div>
+      <p>ESTRUS surfaced every track at once — 11 visualisers on album day. One separated decisively within 17 days.</p>
+      <ul>
+        <li>source of life · <b>1,011,938</b> = <b>59.7%</b> of the set</li>
+        <li>Long-form carried <b>92.6%</b> of window views on 20 of 58 uploads</li>
+        <li>Previous album ran 86 Shorts and landed within a point of that</li>
+      </ul>
+      <div class="ft"><a href="/tovelo/">Deck</a><a href="/tovelo/analysis/">Working</a></div>
+    </div>
+
+    <div class="ac">
+      <div class="hd"><div class="nm"><a href="/angusandjuliastone/">Angus &amp; Julia Stone</a></div><span class="t obs">Observed</span></div>
+      <div class="hero">21</div>
+      <div class="hsub">catalogue songs with no lyric video</div>
+      <p>Those 21 songs carry 115M views between them. Nine exist as an audio upload and nothing else. Zero visualisers in 341 uploads.</p>
+      <ul>
+        <li>Chateau · <b>45.4M</b> · <b>13,679</b> views/day, no lyric, no visualiser</li>
+        <li>Channel ran 90% of weeks this campaign vs 58% last</li>
+      </ul>
+      <div class="ft"><a href="/angusandjuliastone/">Deck</a></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ WHAT WE'RE BUILDING ═══════════════════════════════════ -->
+<section id="building">
+  <div class="shead">
+    <h2>What we're building</h2>
+    <div class="snote">How the capability is changing, not a changelog.</div>
+  </div>
+
+  <div class="build">
+    <div class="bc">
+      <div class="k">~185</div>
+      <div class="ttl">Artist channels monitored</div>
+      <p>Up from ~140 in June. Snapshotted daily, with priority tiers so active campaigns are read twice a day.</p>
+      <a class="lk" href="/watcher">Open the Watcher →</a>
+    </div>
+    <div class="bc">
+      <div class="k">Daily</div>
+      <div class="ttl">Per-video observations</div>
+      <p>Since mid-September we capture views, likes and comments per video per day. First time we can read a trajectory rather than a lifetime total.</p>
+    </div>
+    <div class="bc">
+      <div class="k">Recent</div>
+      <div class="ttl">Views, not lifetime</div>
+      <p>Artist pages now lead on recent 7-day viewing, with lifetime demoted. A 10-year-old catalogue stops drowning this week's release.</p>
+    </div>
+    <div class="bc">
+      <div class="k">Shorts / LF</div>
+      <div class="ttl">Format split</div>
+      <p>Separated across the roster, with a coverage confidence label. We refuse to extrapolate a channel-level split the API can't give us.</p>
+    </div>
+    <div class="bc">
+      <div class="k">+Chartmetric</div>
+      <div class="ttl">Off-platform evidence</div>
+      <p>Territories, Spotify, TikTok, Shazam and Instagram series. Lets us test whether a YouTube moment shows up anywhere else.</p>
+      <a class="lk" href="/uk-landscape">UK Landscape →</a>
+    </div>
+    <div class="bc">
+      <div class="k">Comments</div>
+      <div class="ttl">Audience research</div>
+      <p>Verbatim comments read at scale. Freak Slug's tour demand came out of this, not out of a metric.</p>
+    </div>
+    <div class="bc">
+      <div class="k">11</div>
+      <div class="ttl">Deep dives since mid-Sept</div>
+      <p>Each one now ships with an audit pack and an adversarial fact-check. Claims get withdrawn before they reach a slide.</p>
+      <a class="lk" href="/resources">All resources →</a>
+    </div>
+    <div class="bc">
+      <div class="k">40</div>
+      <div class="ttl">Foundry channels tracked</div>
+      <p>Both 2026 cohorts, measured with the same pipeline as the rest of the roster so the numbers are comparable by construction.</p>
+      <a class="lk" href="/foundry/">Foundry →</a>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sub">New direction · for discussion, not a result</div>
+    <h3>Turning the Watcher into our own behavioural dataset.</h3>
+    <div class="cols">
+      <div>
+        <p>We monitor enough channels now that the interesting question has changed. It isn't "how is this artist doing" — it's "what do campaigns that look like this one normally do?"</p>
+        <p>To answer that we'd need to tag every channel, then compare campaigns within a bucket rather than across the whole roster.</p>
+        <div class="quote bad">"Artists should post more on YouTube."</div>
+        <div class="quote good">"For UK indie artists this size, campaigns with a second meaningful asset inside two weeks tend to hold viewing longer than campaigns without one."</div>
+        <p style="font-size:.84rem;color:var(--mute)">We are nowhere near the second statement. This is the direction, and we'd rather have it pulled apart now than after we've built it.</p>
+      </div>
+      <div>
+        <div class="sub">Dimensions we'd tag on</div>
+        <div class="chips">
+          <span class="chip on">Artist size</span>
+          <span class="chip on">Upload frequency</span>
+          <span class="chip on">Shorts / long-form mix</span>
+          <span class="chip on">Campaign behaviour</span>
+          <span class="chip off">Genre</span>
+          <span class="chip off">Career stage</span>
+          <span class="chip off">Catalogue vs frontline</span>
+          <span class="chip off">Release type</span>
+          <span class="chip off">Territory</span>
+        </div>
+        <p style="margin-top:.9rem;font-size:.84rem;color:var(--mute)">Solid = we already hold it. Dashed = we don't. Genre currently covers 16% of the roster and sits in the wrong layer; career stage and catalogue-vs-frontline don't exist at all.</p>
+        <div class="sub" style="margin-top:1.2rem">The honest position</div>
+        <p style="font-size:.84rem">Our one segmentation that works today is a four-state health classification — growing, weak conversion, underfed, cold. Everything richer than that is an intention.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ QUESTIONS FOR YOUTUBE ═════════════════════════════════ -->
+<section id="questions">
+  <div class="shead">
+    <h2>Questions for YouTube</h2>
+    <div class="snote">Where YouTube has data, context or product<br>knowledge we don't.</div>
+  </div>
+
+  <div class="qs">
+    <div class="q">
+      <div class="lab">Segmentation</div>
+      <h3>If you were building our artist segmentation, what would you bucket on?</h3>
+      <p>And more usefully — which of our dimensions would you throw out? We'd rather hear that genre is a red herring now than in six months.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Metrics</div>
+      <h3>Which metrics should we stop using because they mislead?</h3>
+      <p>We've already banned a few internally. We'd like to know which ones you see people misread most often.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Shorts</div>
+      <h3>What do you actually see between Shorts and long-form music consumption?</h3>
+      <p>We've made it a rule not to claim a funnel we can't observe. But you can observe it — is there a relationship worth designing around?</p>
+    </div>
+    <div class="q">
+      <div class="lab">Follow-up</div>
+      <h3>Does structured post-release follow-up affect recommendation longevity?</h3>
+      <p>We keep finding the gap. We can't test whether closing it does anything, because reverse causation is wide open — teams add follow-ups to releases that are already working.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Benchmarks</div>
+      <h3>Are there benchmarks you could share by artist size, genre or format?</h3>
+      <p>Even coarse ranges would stop us building our own from 140 channels and calling it a market view.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Supply</div>
+      <h3>Are average views per video falling as consumption grows — and what should a label do about it?</h3>
+      <p>More of our roster is declining week-on-week than growing, while cadence holds. We can't separate cyclical from structural from outside.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Collabs</div>
+      <h3>How should we evaluate a collaboration when we don't own both sides of the analytics?</h3>
+      <p>HEARTSTEEL is the live example. The release sits on a game publisher's channel with four featured artists attached.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Demand vs supply</div>
+      <h3>What signal separates real audience demand from simply publishing more?</h3>
+      <p>This is the one that would change how we advise. Right now we can tell a busy channel from a quiet one, not a wanted release from a loud one.</p>
+    </div>
+    <div class="q">
+      <div class="lab">Products</div>
+      <h3>Stations and CTV — what's real, and who's eligible?</h3>
+      <p>Two artists this quarter had a case for a programmed channel. We stopped short of recommending it because we don't know the eligibility position.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LINKS ═════════════════════════════════════════════════ -->
+<footer id="links">
+  <div class="fg">
+    <div>
+      <div class="lab">This quarter's deep dives</div>
+      <ul>
+        <li><a href="/snuts/">The Snuts — Joy In Short Moments</a></li>
+        <li><a href="/tovelo/">Tove Lo — ESTRUS</a></li>
+        <li><a href="/freakslug/">Freak Slug — Amulet</a></li>
+        <li><a href="/beth/">Beth McCarthy</a></li>
+        <li><a href="/bleachers/">Bleachers</a></li>
+        <li><a href="/angusandjuliastone/">Angus &amp; Julia Stone</a></li>
+        <li><a href="/tenoffcl/">TEN</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="lab">Earlier decks</div>
+      <ul>
+        <li><a href="/kol">Kings of Leon</a></li>
+        <li><a href="/chvrches">CHVRCHES</a></li>
+        <li><a href="/idles">IDLES — TANGK</a></li>
+        <li><a href="/ezra">Ezra Collective</a></li>
+        <li><a href="/ktrap">K-Trap — TRAPO 2</a></li>
+        <li><a href="/palaye">Palaye Royale</a></li>
+        <li><a href="/venusgrrrls/">VENUS GRRRLS</a></li>
+        <li><a href="/antonyszmierek/">Antony Szmierek</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="lab">Tools</div>
+      <ul>
+        <li><a href="/watcher">The Watcher</a></li>
+        <li><a href="/campaigns">Active campaigns</a></li>
+        <li><a href="/uk-landscape">UK YouTube Landscape</a></li>
+        <li><a href="/foundry/">Foundry Watch</a></li>
+        <li><a href="/weekly-pulse">Weekly Pulse</a></li>
+        <li><a href="/intelligence/">VMG YouTube Hub</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="lab">Method</div>
+      <ul>
+        <li><a href="/resources">All resources</a></li>
+        <li><a href="/snuts/DATA-AUDIT.md">Example audit pack</a></li>
+        <li><a href="/system">What the system is</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="note">
+    Public YouTube Data API v3 and Chartmetric only. No YouTube Studio data anywhere in this page — no traffic sources, retention, impressions, CTR, or subscriber attribution.<br>
+    Kings of Leon and HEARTSTEEL figures read live on 7 October 2026. Cross-channel adoption and campaign-registry figures date from June–July 2026 against a smaller roster, and are labelled where used. Single-week roster figures are week 25.<br>
+    Where a finding is a hypothesis it says so. Where we corrected ourselves, the correction is on the page rather than removed.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>

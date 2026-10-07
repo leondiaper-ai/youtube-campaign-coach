@@ -106,6 +106,15 @@ export default function HomePage() {
             title="Campaign Coach"
             desc="What needs attention today, interpreted from Watcher data."
           />
+          {/* Meeting page, not a tool. Lives here because the alternative —
+              finding it again in Resources on the morning of the catch-up —
+              is exactly the failure it exists to prevent. */}
+          <ToolCard
+            href="/catchup/"
+            title="YouTube Monthly Catch-up"
+            desc="October 2026 — what we've learned, built and want to ask. Built to run the meeting from."
+            highlight
+          />
           <ToolCard
             href="/uk-landscape"
             title="UK YouTube Landscape"
