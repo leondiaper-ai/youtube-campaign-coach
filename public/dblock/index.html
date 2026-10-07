@@ -759,9 +759,17 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
     return (dp > 0 ? v.toFixed(dp) : Math.round(v).toLocaleString()) + suf;
   }
 
+  /* The figure in the markup is the real value and the animation only ever
+     counts UP to it. That ordering matters more than the motion does: this
+     is a deck, and a slide that shows a confident "0" because an animation
+     never ran is far worse than one that never animated. So the count-up is
+     skipped outright when motion is reduced or the tab is hidden (browsers
+     pause requestAnimationFrame on hidden tabs, which would strand every
+     figure at zero), and a hard timer snaps each figure to its final value
+     regardless of whether a single frame was ever served. */
   function paint(group) {
     group.querySelectorAll('.f[data-w]').forEach(f => { f.style.width = f.dataset.w + '%'; });
-    if (reduced) return;
+    if (reduced || document.hidden) return;
     group.querySelectorAll('[data-n]').forEach(v => {
       const w = v.getBoundingClientRect().width;
       if (w) v.style.minWidth = Math.ceil(w) + 'px';
@@ -770,15 +778,19 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
       const end = parseFloat(v.getAttribute('data-n'));
       if (isNaN(end)) return;
       const dur = 1050, delay = 60 + i * 95;
-      let t0 = null;
+      let t0 = null, done = false;
+      const land = () => { if (!done) { done = true; v.textContent = fmt(end, v); } };
       v.textContent = fmt(0, v);
       const step = ts => {
+        if (done) return;
         if (t0 === null) t0 = ts;
         const p = Math.min(1, (ts - t0) / dur);
-        v.textContent = fmt(p < 1 ? end * (1 - Math.pow(1 - p, 3)) : end, v);
-        if (p < 1) requestAnimationFrame(step);
+        if (p >= 1) return land();
+        v.textContent = fmt(end * (1 - Math.pow(1 - p, 3)), v);
+        requestAnimationFrame(step);
       };
       setTimeout(() => requestAnimationFrame(step), delay);
+      setTimeout(land, delay + dur + 450);   // the safety net
     });
   }
 
