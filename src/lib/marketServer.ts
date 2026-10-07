@@ -1,15 +1,19 @@
-import { cookies } from 'next/headers';
-import { MARKET_COOKIE, MARKET_PARAM, resolveMarket, type MarketDef } from './market';
+import { MARKET_PARAM, resolveMarket, type MarketDef } from './market';
 
 /**
  * Resolve the market for a server component.
  *
- * Priority: explicit URL param, then the cookie the switcher writes, then UK.
+ * The URL is the only source. There was a cookie, written by a market
+ * dropdown; the dropdown is gone, so the cookie is now unreachable — and a
+ * preference nobody can see or change is worse than none at all. A stale one
+ * would silently pin someone to a market with no way out.
  *
- * The URL deliberately beats the cookie. A Priority Campaigns link sent to
- * someone must show them what the sender saw — if the cookie won, the
- * Australian team sharing their page with a UK colleague would show that
- * colleague the UK page, and neither of them would notice.
+ * URL-only also makes every page honest when shared: a link shows the
+ * recipient exactly what the sender saw, which a cookie would have overridden
+ * without either of them noticing.
+ *
+ * Markets are reached by their own URLs — /weekly-pulse/au/campaign-briefing,
+ * or ?market=au on the shared routes.
  */
 export async function getMarketFromRequest(
   /**
@@ -24,13 +28,5 @@ export async function getMarketFromRequest(
   const resolved = await searchParams;
   const raw = resolved?.[MARKET_PARAM];
   const fromUrl = Array.isArray(raw) ? raw[0] : raw;
-  if (fromUrl) return resolveMarket(fromUrl);
-
-  try {
-    const jar = await cookies();
-    return resolveMarket(jar.get(MARKET_COOKIE)?.value ?? null);
-  } catch {
-    // cookies() throws in a static render. UK is the right fallback.
-    return resolveMarket(null);
-  }
+  return resolveMarket(fromUrl ?? null);
 }

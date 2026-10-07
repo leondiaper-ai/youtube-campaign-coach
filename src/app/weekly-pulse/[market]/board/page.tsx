@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import TeamBoard from '@/components/TeamBoard';
 import PulseNav from '@/components/PulseNav';
-import MarketSwitcher from '@/components/MarketSwitcher';
 import { getMarket, MARKET_IDS } from '@/lib/market';
 import { getTeam } from '@/lib/teams';
 
@@ -39,17 +38,13 @@ export default async function MarketBoardPage({
 
   return (
     <main style={{ background: '#FAF7F2', minHeight: '100vh' }}>
-      <div style={{
-        maxWidth: 1200, margin: '0 auto', padding: '24px 40px 0',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-      }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 40px 0' }}>
         <div style={{
           fontFamily: 'Inter, system-ui, sans-serif', fontSize: 9, fontWeight: 800,
           letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C8C2B8',
         }}>
           {m.orgName} · YouTube
         </div>
-        <MarketSwitcher current={m.id} compact />
       </div>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 40px 0' }}>
         <PulseNav market={m.id} />

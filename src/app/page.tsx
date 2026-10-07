@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import MarketSwitcher from '@/components/MarketSwitcher';
 import { getMarketFromRequest } from '@/lib/marketServer';
 
 export const metadata = {
@@ -34,14 +33,9 @@ export default async function HomePage({
             textTransform: 'uppercase',
             color: MUTED,
             marginBottom: 32,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
           }}
         >
           <span>YouTube Campaign System</span>
-          <MarketSwitcher current={market.id} compact />
         </div>
 
         {/* Hero */}

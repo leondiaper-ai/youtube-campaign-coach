@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, type CSSProperties, type ReactNode } from 'react';
 import PulseNav from './PulseNav';
-import MarketSwitcher from './MarketSwitcher';
 
 // ── Design System ───────────────────────────────────────────────────────────
 
@@ -684,11 +683,10 @@ export default function PartnerBriefing({
   if (readiness && readiness.campaignCount === 0) {
     return (
       <main style={{ background: PAPER, minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 40px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 40px 0' }}>
           <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST }}>
             {mkt?.orgName ?? 'Virgin Music'} · YouTube
           </div>
-          <MarketSwitcher current={mkt?.id ?? market} />
         </div>
         {showPulseNav && (
           <div className="pb-nav-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 40px 0' }}>
@@ -872,7 +870,6 @@ export default function PartnerBriefing({
           >
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
-          <MarketSwitcher current={data.market?.id ?? market} compact />
         </div>
       </div>
 
