@@ -46,12 +46,18 @@ export interface ActionBarContext {
     | { mode: 'team'; team: string; channelId: string };
 }
 
-const WATCHER_CONTEXT = (slug: string): ActionBarContext => ({
-  backHref: '/growth',
-  backLabel: '← Dashboard',
-  behaviourHref: `/campaigns?behaviour=${encodeURIComponent(slug)}`,
-  pin: { mode: 'watcher' },
-});
+/* The default context is what every /watcher/[slug] page gets, so these two
+   links fire for every artist an Australian user opens. Unscoped, they walked
+   straight back into the UK workspace. */
+const WATCHER_CONTEXT = (slug: string, market = 'uk'): ActionBarContext => {
+  const q = market && market !== 'uk' ? `?market=${market}` : '';
+  return {
+    backHref: `/growth${q}`,
+    backLabel: '← Dashboard',
+    behaviourHref: `/campaigns${q}${q ? '&' : '?'}behaviour=${encodeURIComponent(slug)}`,
+    pin: { mode: 'watcher' },
+  };
+};
 
 export default function ArtistActionBar({
   slug,
@@ -59,14 +65,17 @@ export default function ArtistActionBar({
   deepDive,
   reportProps,
   context,
+  market = 'uk',
 }: {
   slug: string;
   initiallyPinned: boolean;
   deepDive: DeepDiveLink | null;
   reportProps: ReportProps;
   context?: ActionBarContext;
+  /** Market this page belongs to, so the default links stay in it. */
+  market?: string;
 }) {
-  const ctx = context ?? WATCHER_CONTEXT(slug);
+  const ctx = context ?? WATCHER_CONTEXT(slug, market);
   const [pinned, setPinned] = useState(initiallyPinned);
   const [busy, setBusy] = useState(false);
   const { copied, copy } = useCopyUpdate(reportProps);

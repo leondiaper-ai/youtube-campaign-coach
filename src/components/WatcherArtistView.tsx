@@ -71,7 +71,7 @@ const DECISION_TO_STATE: Record<string, ChannelState> = {
 
 export default async function WatcherArtistView({
   slug, chrome = null, coachBadge = true, metrics = null, footer = null, signature,
-  actionContext, initiallyPinned,
+  actionContext, initiallyPinned, market = 'uk',
 }: {
   slug: string;
   /**
@@ -91,6 +91,9 @@ export default async function WatcherArtistView({
    * deep dive — rather than a thinner hand-built one that drifts. The
    * three things that genuinely differ are passed; nothing else branches.
    */
+  /** Market this page belongs to. Passed to the action bar so its default
+     Dashboard and Channel-behaviour links stay inside the workspace. */
+  market?: string;
   actionContext?: ActionBarContext;
   /**
    * Pin state from the caller's own store. Required alongside a team
@@ -356,7 +359,7 @@ export default async function WatcherArtistView({
         {/* ─── ACTIONS ────────────────────────────────────────────────
             Ours, unless the caller supplied its own (team boards do). */}
         {chrome ?? (
-          <ArtistActionBar
+          <ArtistActionBar market={market}
             slug={slug}
             initiallyPinned={campaignPinned}
             deepDive={deepDive}

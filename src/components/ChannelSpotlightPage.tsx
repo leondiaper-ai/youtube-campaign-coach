@@ -192,7 +192,7 @@ export default function ChannelSpotlightPage({ market = 'uk' }: { market?: strin
             <div style={{ marginBottom: 8 }} />
 
             {/* Spotlight cards */}
-            <WeeklySpotlight channels={data.channels} linkPrefix="/watcher" />
+            <WeeklySpotlight channels={data.channels} />
 
             {/* spacer before footer */}
             <div style={{ marginTop: 32 }} />

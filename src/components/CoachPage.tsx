@@ -18,6 +18,7 @@ import {
 } from '@/lib/planEngine';
 import { type PlanIndexEntry } from '@/lib/planStore';
 import { getMarket } from '@/lib/market';
+import { getTeam, teamUrl } from '@/lib/teams';
 import CampaignPlanOutput from './CampaignPlanOutput';
 
 // ── Design tokens ────────────────────────────────────────────────────────
@@ -66,6 +67,9 @@ export default function CoachPage({
 
   const [timeline, setTimeline] = useState('');
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
+  /* Appended to every internal link so saving or opening a campaign keeps
+     the planner in its own workspace. */
+  const q = market === 'uk' ? '' : `?market=${market}`;
   const [planLoading, setPlanLoading] = useState(false);
   const [error, setError] = useState('');
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
@@ -457,7 +461,7 @@ export default function CoachPage({
                   Campaign saved — shareable page ready.
                 </span>
                 <Link
-                  href={savedUrl}
+                  href={savedUrl ? `${savedUrl}${q}` : savedUrl}
                   style={{
                     fontSize: 13,
                     fontWeight: 700,
@@ -491,7 +495,7 @@ export default function CoachPage({
               {savedPlans.map((p) => (
                 <Link
                   key={p.slug}
-                  href={`/coach/${p.slug}`}
+                  href={`/coach/${p.slug}${q}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -636,19 +640,24 @@ function deriveMomentum(data: ChannelData): 'rising' | 'flat' | 'falling' {
 // ── Sub-components ───────────────────────────────────────────────────────
 
 /**
- * Every destination carries the market.
+ * Every destination carries the market, and a market with its own board
+ * navigates to THAT board — not to a generic equivalent.
  *
- * Without it, an Australian user clicking "Watcher" or "Active Campaigns"
- * lands silently in the UK workspace — the nav is the one place a market
- * leak is guaranteed to happen, because moving between tools is the normal
- * thing to do. A market that cannot be navigated within is not a workspace.
+ * Two mistakes are corrected here. The first was leaving these links
+ * unscoped, which dropped an Australian user into the UK workspace. The
+ * second was worse: a "Campaign Board" link pointing at a second dashboard
+ * I had built, when Australia already had one at /team/australia with
+ * fourteen artists on it. Two dashboards for one team is not a nav bug, it
+ * is a product mistake — so the duplicate is deleted and this points at the
+ * board the team actually uses, token and all.
  *
- * Markets with their own board get it as a destination too, so the roster
- * is reachable from the planner rather than only from a token link.
+ * Markets without a board (the UK) get neither link, so the UK nav is
+ * exactly what it was.
  */
 function Nav({ market = 'uk' }: { market?: string }) {
   const m = getMarket(market);
   const q = !m || m.id === 'uk' ? '' : `?market=${m.id}`;
+  const team = m?.teamSlug ? getTeam(m.teamSlug) : null;
   const link = 'px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors';
   return (
     <div
@@ -670,10 +679,10 @@ function Nav({ market = 'uk' }: { market?: string }) {
         <Link href={`/campaigns${q}`} className={link} style={{ color: MUTED }}>
           Active Campaigns
         </Link>
-        {m?.teamSlug && (
-          <Link href={`/weekly-pulse/${m.id}/board`} className={link} style={{ color: MUTED }}>
+        {team && (
+          <a href={teamUrl(team)} className={link} style={{ color: MUTED }}>
             Campaign Board
-          </Link>
+          </a>
         )}
         <Link
           href={m && m.id !== 'uk' ? `/weekly-pulse/${m.id}/campaign-briefing` : '/weekly-pulse/campaign-briefing'}

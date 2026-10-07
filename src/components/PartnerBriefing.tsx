@@ -136,8 +136,8 @@ function channelUrl(handle: string | null): string | null {
  *  - to its saved Coach content plan (/coach/[slug]) when one exists → same tab
  *  - otherwise to the artist's YouTube channel → new tab
  */
-function campaignLink(fc: FocusCampaign): { href: string; internal: boolean } {
-  if (fc.coachPlanSlug) return { href: `/coach/${fc.coachPlanSlug}`, internal: true };
+function campaignLink(fc: FocusCampaign, marketQ = ''): { href: string; internal: boolean } {
+  if (fc.coachPlanSlug) return { href: `/coach/${fc.coachPlanSlug}${marketQ}`, internal: true };
   return { href: fc.channelUrl ?? '#', internal: false };
 }
 
@@ -152,14 +152,15 @@ function linkTarget(internal: boolean) {
  * neither destination exists it renders a plain div so nothing else changes.
  */
 function MomentLink({
-  m, style, className, children,
+  m, marketQ, style, className, children,
 }: {
   m: UpcomingMoment;
+  marketQ?: string;
   style?: CSSProperties;
   className?: string;
   children: ReactNode;
 }) {
-  const href = m.coachPlanSlug ? `/coach/${m.coachPlanSlug}` : (m.channelUrl ?? null);
+  const href = m.coachPlanSlug ? `/coach/${m.coachPlanSlug}${marketQ ?? ''}` : (m.channelUrl ?? null);
   if (!href) return <div style={style} className={className}>{children}</div>;
   const internal = !!m.coachPlanSlug;
   return (
@@ -190,10 +191,10 @@ function YtGlyph({ w = 15, h = 11 }: { w?: number; h?: number }) {
  * Visible call-to-action button for a campaign card. Links to the artist's
  * Coach content planner when one exists, otherwise offers the YouTube channel.
  */
-function PlannerCTA({ fc }: { fc: FocusCampaign }) {
+function PlannerCTA({ fc, marketQ }: { fc: FocusCampaign; marketQ?: string }) {
   if (fc.coachPlanSlug) {
     return (
-      <a href={`/coach/${fc.coachPlanSlug}`} className="pb-link" style={{
+      <a href={`/coach/${fc.coachPlanSlug}${marketQ ?? ''}`} className="pb-link" style={{
         display: 'inline-flex', alignItems: 'center', gap: 8,
         padding: '9px 15px', borderRadius: 8, background: INK, color: PAPER,
         fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
@@ -748,6 +749,10 @@ export default function PartnerBriefing({
     );
   }
 
+  /* Carried onto every internal link below. This page is the one shared
+     externally, so a leak here sends a partner into another market's Coach. */
+  const marketQ = (data.market?.id ?? market) === 'uk' ? '' : `?market=${data.market?.id ?? market}`;
+
   const grouped = groupMomentsByWindow(data.upcomingMoments);
   const hasDateMoments = grouped.thisWeek.length > 0 || grouped.nextTwoWeeks.length > 0 || grouped.nextMonth.length > 0;
 
@@ -1031,7 +1036,7 @@ export default function PartnerBriefing({
                 </div>
                 <div className="pb-radar-big-items" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {bigDay[1].map((m, i) => (
-                    <MomentLink key={i} m={m} style={{
+                    <MomentLink key={i} m={m} marketQ={marketQ} style={{
                       display: 'block',
                       background: 'rgba(255,255,255,0.08)', borderRadius: 6,
                       padding: '8px 14px', flex: '1 1 200px',
@@ -1115,7 +1120,7 @@ export default function PartnerBriefing({
                     {/* Moments for this date */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {moments.map((m, mi) => (
-                        <MomentLink key={mi} m={m} style={{
+                        <MomentLink key={mi} m={m} marketQ={marketQ} style={{
                           display: 'flex', alignItems: 'baseline', gap: 8,
                           padding: isTier1(m) ? '6px 10px' : '3px 0',
                           background: isTier1(m) ? 'rgba(45,106,79,0.04)' : 'transparent',
@@ -1191,7 +1196,7 @@ export default function PartnerBriefing({
                     const topVids = fc.recentVideos.slice(0, 3);
                     const status = deriveStatus(fc);
                     const genre = genreFor(fc.channel.name);
-                    const link = campaignLink(fc);
+                    const link = campaignLink(fc, marketQ);
                     return (
                       <div key={fc.channel.slug} className="pb-campaign-card" style={{
                         borderRadius: 12, overflow: 'hidden', background: WHITE,
@@ -1222,7 +1227,7 @@ export default function PartnerBriefing({
 
                           {/* ── Content planner CTA ── */}
                           <div style={{ marginBottom: 16 }}>
-                            <PlannerCTA fc={fc} />
+                            <PlannerCTA fc={fc} marketQ={marketQ} />
                           </div>
 
                           {/* ── NEXT / AFTER dates — front and centre ── */}
@@ -1397,7 +1402,7 @@ export default function PartnerBriefing({
                   {tier2.map(fc => {
                     const status = deriveStatus(fc);
                     const genre = genreFor(fc.channel.name);
-                    const link = campaignLink(fc);
+                    const link = campaignLink(fc, marketQ);
                     return (
                     <a key={fc.channel.slug} href={link.href} {...linkTarget(link.internal)}
                       className="pb-campaign-card pb-link"
@@ -1476,7 +1481,7 @@ export default function PartnerBriefing({
                   {tier3.map(fc => {
                     const status = deriveStatus(fc);
                     const genre = genreFor(fc.channel.name);
-                    const link = campaignLink(fc);
+                    const link = campaignLink(fc, marketQ);
                     return (
                     <a key={fc.channel.slug} href={link.href} {...linkTarget(link.internal)}
                       className="pb-campaign-card pb-link"

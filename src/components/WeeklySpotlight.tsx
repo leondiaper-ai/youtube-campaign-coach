@@ -117,10 +117,8 @@ function channelUrl(handle: string | null): string | null {
 
 export default function WeeklySpotlight({
   channels,
-  linkPrefix = '/watcher',
 }: {
   channels: SpotlightChannel[];
-  linkPrefix?: string;
 }) {
   const [expandedSlug, setExpandedSlug] = useState<string | null>(
     channels.length > 0 ? channels[0].slug : null

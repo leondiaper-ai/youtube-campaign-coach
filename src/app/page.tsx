@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getMarketFromRequest } from '@/lib/marketServer';
+import { getTeam, teamUrl } from '@/lib/teams';
 
 export const metadata = {
   title: 'YouTube Campaign System',
@@ -21,6 +22,11 @@ export default async function HomePage({
 }) {
   const market = await getMarketFromRequest(searchParams);
   const q = market.id === 'uk' ? '' : `?market=${market.id}`;
+  /* A market with its own board goes to THAT board, token and all, rather
+     than to /team-watcher — which is an older shared board that silently
+     defaults to Nordics. */
+  const boardTeam = market.teamSlug ? getTeam(market.teamSlug) : null;
+  const teamHref = boardTeam ? teamUrl(boardTeam) : '/team-watcher';
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[680px] mx-auto px-6 py-16">
@@ -97,7 +103,7 @@ export default async function HomePage({
           }}
         >
           <ToolCard
-            href="/growth"
+            href={`/growth${q}`}
             title="Watcher"
             desc="Channel health monitoring — which channels are growing, flat, or at risk."
           />
@@ -111,7 +117,7 @@ export default async function HomePage({
               own route rather than a change to Watcher or /coach, so it can
               be evaluated — or removed — without touching either. */}
           <ToolCard
-            href="/coach-home"
+            href={`/coach-home${q}`}
             title="Campaign Coach"
             desc="What needs attention today, interpreted from Watcher data."
           />
@@ -135,7 +141,7 @@ export default async function HomePage({
             desc="Campaign status board with decision signals."
           />
           <ToolCard
-            href="/team-watcher"
+            href={teamHref}
             title="Team Watcher"
             desc="Shared team board — add artists, track campaigns, monitor health."
           />

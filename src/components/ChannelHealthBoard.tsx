@@ -533,6 +533,9 @@ export default function ChannelHealthBoard({
      query string, and a link that drops it sends the reader to a page
      that tells them they are not allowed in. */
   linkSuffix = '',
+  /* Where "channel behaviour" goes. Defaults to the UK campaigns board; a
+     market or team passes its own so the link does not leave their space. */
+  behaviourBase = '/campaigns',
   topVideos,
   marketFormatStats,
   singleTab = false,
@@ -549,6 +552,7 @@ export default function ChannelHealthBoard({
   rows: RowData[];
   linkPrefix?: string;
   linkSuffix?: string;
+  behaviourBase?: string;
   topVideos?: TopVideo[];
   marketFormatStats?: MarketFormatStats;
   /** Hide the managed/market toggle and show only the managed view */
@@ -761,7 +765,7 @@ export default function ChannelHealthBoard({
                   <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/30 mb-2">Long-form</div>
                   <div className="space-y-2">
                     {topLongform.map((v, i) => (
-                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} />
+                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
                 </div>
@@ -772,7 +776,7 @@ export default function ChannelHealthBoard({
                   <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/30 mb-2">Shorts</div>
                   <div className="space-y-2">
                     {topShorts.map((v, i) => (
-                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} />
+                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
                 </div>
@@ -801,10 +805,10 @@ export default function ChannelHealthBoard({
           </button>
           {moversOpen && (
             <div className="grid grid-cols-2 gap-4 mt-3 lg:grid-cols-4">
-              <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} linkPrefix={linkPrefix} />
-              <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} linkPrefix={linkPrefix} />
-              <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} />
-              <MoverColumn title="Cadence Risk" items={topMovers.cadenceRisk} linkPrefix={linkPrefix} />
+              <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+              <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+              <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+              <MoverColumn title="Cadence Risk" items={topMovers.cadenceRisk} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
             </div>
           )}
         </div>
@@ -1148,7 +1152,7 @@ export default function ChannelHealthBoard({
                   <div className="flex items-center gap-2 mb-3">
                     {pinnedSlugs.includes(r.slug) && (
                       <Link
-                        href={`/campaigns?behaviour=${r.slug}`}
+                        href={`${behaviourBase}${behaviourBase.includes('?') ? '&' : '?'}behaviour=${r.slug}`}
                         className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors no-underline"
                         style={{ background: '#2C25FF', color: '#fff' }}
                         onClick={(e) => e.stopPropagation()}
@@ -1415,7 +1419,12 @@ function MultiformatCell({
   );
 }
 
-function MoverColumn({ title, items, linkPrefix = '/watcher' }: { title: string; items: MoverEntry[]; linkPrefix?: string }) {
+/* linkSuffix matters as much as linkPrefix here. On a team board the prefix
+   is /team/australia and the suffix carries the access token — dropping it
+   produced /team/australia/<slug> with no key, which the route answers with
+   notFound(). Every name in these columns was a 404 for that team. */
+function MoverColumn({ title, items, linkPrefix = '/watcher', linkSuffix = '' }:
+  { title: string; items: MoverEntry[]; linkPrefix?: string; linkSuffix?: string }) {
   if (items.length === 0) {
     return (
       <div>
@@ -1430,7 +1439,7 @@ function MoverColumn({ title, items, linkPrefix = '/watcher' }: { title: string;
       <div className="space-y-1">
         {items.map((item, i) => (
           <div key={item.slug} className="flex items-center justify-between gap-2 text-[11px]">
-            <Link href={`${linkPrefix}/${item.slug}`} className="truncate text-ink/60 hover:underline">
+            <Link href={`${linkPrefix}/${item.slug}${linkSuffix}`} className="truncate text-ink/60 hover:underline">
               {i + 1}. {item.name}
             </Link>
             <span className="tabular-nums font-bold text-ink/50 shrink-0">{item.value}</span>
@@ -1441,7 +1450,8 @@ function MoverColumn({ title, items, linkPrefix = '/watcher' }: { title: string;
   );
 }
 
-function VideoRow({ v, rank, linkPrefix }: { v: TopVideo; rank: number; linkPrefix: string }) {
+function VideoRow({ v, rank, linkPrefix, linkSuffix = '' }:
+  { v: TopVideo; rank: number; linkPrefix: string; linkSuffix?: string }) {
   return (
     <div className="flex items-center gap-3 text-[12px]">
       <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{rank}.</span>
@@ -1456,7 +1466,7 @@ function VideoRow({ v, rank, linkPrefix }: { v: TopVideo; rank: number; linkPref
           {v.title}
         </a>
         <div className="text-[10px] text-ink/35 mt-0.5">
-          <Link href={`${linkPrefix}/${v.artistSlug}`} className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>
+          <Link href={`${linkPrefix}/${v.artistSlug}${linkSuffix}`} className="hover:underline" style={{ color: 'inherit', textDecoration: 'none' }}>
             {v.artistName}
           </Link>
           {' · '}{v.daysAgo === 0 ? 'today' : v.daysAgo === 1 ? '1d ago' : `${v.daysAgo}d ago`}

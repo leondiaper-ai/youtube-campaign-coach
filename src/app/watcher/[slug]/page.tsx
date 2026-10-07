@@ -1,4 +1,5 @@
 import WatcherArtistView from '@/components/WatcherArtistView';
+import { getMarketFromRequest } from '@/lib/marketServer';
 
 /* ═══════════════════════════════════════════════════════════════════════
    OUR OWN ARTIST PAGE — now genuinely just a mount point.
@@ -19,12 +20,24 @@ import WatcherArtistView from '@/components/WatcherArtistView';
 
 export const revalidate = 600;
 
-export default async function WatcherPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function WatcherPage({
+  params, searchParams,
+}: {
+  params: Promise<{ slug: string }> | { slug: string };
+  searchParams?:
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { slug } = await params;
+  /* The action bar's default "← Dashboard" and "Channel behaviour" links are
+     built from this. Without it an Australian user clicking either one left
+     their workspace. */
+  const market = await getMarketFromRequest(searchParams);
 
   return (
     <WatcherArtistView
       slug={slug}
+      market={market.id}
       signature="Watcher watches · Coach plans · You decide"
     />
   );

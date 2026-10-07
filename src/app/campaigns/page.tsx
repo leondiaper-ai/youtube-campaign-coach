@@ -458,7 +458,7 @@ export default async function CampaignsPage({
       <div className="max-w-6xl mx-auto px-5 py-6">
 
         <Suspense fallback={null}>
-          <CampaignStatusBoard
+          <CampaignStatusBoard market={market.id}
             initialCards={cards}
             availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))}
           />

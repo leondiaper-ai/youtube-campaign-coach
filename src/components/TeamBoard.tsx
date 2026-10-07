@@ -378,7 +378,7 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         status: c.boardStatus,
       }))}
       allTab={
-        <ChannelHealthBoard
+        <ChannelHealthBoard behaviourBase={`${linkPrefix}${linkSuffix}`}
           rows={rows}
           linkPrefix={linkPrefix}
           linkSuffix={linkSuffix}

@@ -38,6 +38,9 @@ export default async function ControlPage({
     | Promise<Record<string, string | string[] | undefined>>;
 }) {
   const market = await getMarketFromRequest(searchParams);
+  /* Every internal link on this page carries the market. The page resolved it
+     and then discarded it, which is the most common way a workspace leaks. */
+  const mq = market.id === 'uk' ? '' : `?market=${market.id}`;
   const custom = await listCustomArtists();
 
   /* ── WHO ELSE IS WATCHING ───────────────────────────────────────────
@@ -242,13 +245,13 @@ export default async function ControlPage({
                 Channel Health
               </span>
               <Link
-                href="/campaigns"
+                href={`/campaigns${mq}`}
                 className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
               >
                 Active Campaigns
               </Link>
               <Link
-                href="/coach"
+                href={`/coach${mq}`}
                 className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
               >
                 Coach
@@ -278,7 +281,7 @@ export default async function ControlPage({
         </div>
 
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
+        <ChannelHealthBoard linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
         {/* Navigation flow */}
         <div className="mt-8 flex items-center justify-center gap-3 text-[11px]">
@@ -286,11 +289,11 @@ export default async function ControlPage({
             Channel Health
           </span>
           <span className="text-ink/25">→</span>
-          <Link href="/campaigns" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+          <Link href={`/campaigns${mq}`} className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
             Active Campaigns
           </Link>
           <span className="text-ink/25">→</span>
-          <Link href="/coach" className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+          <Link href={`/coach${mq}`} className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
             Coach
           </Link>
         </div>

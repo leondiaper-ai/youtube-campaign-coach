@@ -25,10 +25,14 @@ const MUTED = '#E9E2D3';
 export default function CampaignStatusBoard({
   initialCards,
   availableArtists,
+  market = 'uk',
 }: {
   initialCards: CardData[];
   availableArtists: AvailableArtist[];
+  /** Keeps the two "← Dashboard" links inside this market's Watcher. */
+  market?: string;
 }) {
+  const mq = market === 'uk' ? '' : `?market=${market}`;
   const [cards, setCards] = useState<CardData[]>(initialCards);
   const [available, setAvailable] = useState<AvailableArtist[]>(availableArtists);
   const [showAdd, setShowAdd] = useState(false);
@@ -148,7 +152,7 @@ export default function CampaignStatusBoard({
           padding: '12px 20px',
           background: PAPER,
         }}>
-          <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 8 }}>
+          <Link href={`/growth${mq}`} className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 8 }}>
             ← Dashboard
           </Link>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -288,7 +292,7 @@ export default function CampaignStatusBoard({
     <>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Link href="/growth" className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 4 }}>
+          <Link href={`/growth${mq}`} className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 4 }}>
             ← Dashboard
           </Link>
           {/* eslint-disable-next-line @next/next/no-img-element */}
