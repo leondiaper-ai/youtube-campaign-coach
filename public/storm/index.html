@@ -142,7 +142,10 @@ h2 em{font-style:normal;color:var(--hot)}
 .glow{text-shadow:0 0 48px rgba(255,77,46,.42)}
 
 /* ══ 01 HERO ══ */
-#open{justify-content:flex-end}
+/* The cover is bottom-aligned while .foot is absolutely positioned, so the
+   closing line and the provenance note land on top of each other. Reserve the
+   footnote's own band — three mono lines plus its offset — as padding. */
+#open{justify-content:flex-end;padding-bottom:clamp(58px,6vw,92px)}
 #open .big{font-size:clamp(46px,13vw,236px);font-weight:900;font-stretch:58%;line-height:.80;
   letter-spacing:-.045em}
 #open .nm{font-family:var(--mono);font-size:clamp(9px,1vw,15px);letter-spacing:.42em;
