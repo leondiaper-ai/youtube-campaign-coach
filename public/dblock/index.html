@@ -142,13 +142,30 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
 .cstats .l{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-top:6px}
 .cfoot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font-family:var(--mono);
   font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#5A6371}
+/* A strip of their own releases across the foot of the cover. One hero
+   frame says "a video"; eleven says "a catalogue" before a word is read. */
+.strip{display:flex;gap:4px;margin:clamp(12px,1.7vw,22px) 0 clamp(10px,1.3vw,16px);overflow:hidden}
+.strip img{flex:1;min-width:0;aspect-ratio:16/9;object-fit:cover;border-radius:1px;
+  opacity:.5;filter:grayscale(.3) contrast(1.08);transition:opacity .5s ease,filter .5s ease}
+.strip img:nth-child(1),.strip img:nth-child(5),.strip img:nth-child(9){opacity:.82;filter:none}
+@media(max-width:700px){.strip img:nth-child(n+8){display:none}}
 
 /* ══ 02 SCALE ══ */
+/* The number is filled with FOUR of their own frames rather than one.
+   A single still made 973M look like one video's achievement; a collage
+   makes it read as a body of work, which is what the figure actually is.
+   The gold/teal wash sits on top so every letterform keeps luminance. */
 .billboard{font-stretch:62%;font-weight:900;line-height:.76;letter-spacing:-.035em;
   font-size:clamp(70px,18vw,330px);
-  background-image:linear-gradient(118deg,rgba(201,154,69,.62),rgba(95,168,179,.48) 54%,rgba(201,154,69,.66)),
-                   url('https://i.ytimg.com/vi/I4Ra4z2Arqg/maxresdefault.jpg');
-  background-size:cover;background-position:center 42%;
+  background-image:
+    linear-gradient(118deg,rgba(201,154,69,.58),rgba(95,168,179,.44) 54%,rgba(201,154,69,.62)),
+    url('https://i.ytimg.com/vi/I4Ra4z2Arqg/maxresdefault.jpg'),
+    url('https://i.ytimg.com/vi/VRc0PH7pHGs/maxresdefault.jpg'),
+    url('https://i.ytimg.com/vi/Ry1m40ScWks/maxresdefault.jpg'),
+    url('https://i.ytimg.com/vi/bnc7hO8UGXU/maxresdefault.jpg');
+  background-size:cover,25.6% 100%,25.6% 100%,25.6% 100%,25.6% 100%;
+  background-position:center,0% 40%,25.3% 40%,50.6% 40%,75.9% 40%;
+  background-repeat:no-repeat;
   -webkit-background-clip:text;background-clip:text;color:transparent;
   -webkit-text-stroke:1px rgba(245,243,239,.28);}
 .bbcap{font-family:var(--mono);font-size:clamp(9px,.78vw,12px);letter-spacing:.3em;text-transform:uppercase;
@@ -199,6 +216,8 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
 .towers{display:flex;gap:clamp(10px,2vw,36px);align-items:flex-end;margin-top:clamp(18px,2.4vw,34px);
   height:clamp(130px,19vw,250px);border-bottom:1px solid rgba(245,243,239,.26)}
 .tw{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:9px}
+.tw .twf{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:2px;opacity:.5;
+  filter:grayscale(.4) contrast(1.06);margin-bottom:2px}
 .tw .cap{font-size:clamp(17px,2.1vw,34px);font-stretch:62%;font-weight:800;color:var(--gold);line-height:1}
 .tw .col{width:100%;background:linear-gradient(180deg,rgba(201,154,69,.9),rgba(201,154,69,.32));border-radius:2px 2px 0 0}
 .twlabs{display:flex;gap:clamp(10px,2vw,36px);margin-top:11px}
@@ -279,6 +298,21 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
 .meth p{font-family:var(--mono);font-size:9.5px;line-height:1.72;color:var(--dim)}
 .meth p + p{margin-top:9px}
 
+/* Contact sheet — real frames, lazy-loaded, built in script. */
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:4px;
+  margin-top:clamp(14px,1.8vw,24px)}
+.sheet a{display:block;position:relative;overflow:hidden;border-radius:1px}
+.sheet img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  opacity:.44;filter:grayscale(.45) contrast(1.06);transition:opacity .35s ease,filter .35s ease,transform .35s ease}
+.sheet a:hover img{opacity:1;filter:none;transform:scale(1.05)}
+
+/* Figures animate in. A static number on a dark slide reads as a label;
+   watching it climb is the difference between "973M" and "973 MILLION". */
+.count .num,.cstats .num,.bbrow .num{font-variant-numeric:tabular-nums}
+.bar .fill{width:0;transition:width 1.05s cubic-bezier(.22,.8,.26,1)}
+.bars.go .fill{}
+.tw .col{height:0;transition:height 1.05s cubic-bezier(.22,.8,.26,1)}
+
 .tag{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
   padding:3px 7px;border-radius:2px;border:1px solid var(--hair);color:var(--dim);margin-left:9px;vertical-align:middle}
 .tag.open{border-color:rgba(201,154,69,.45);color:var(--gold)}
@@ -297,10 +331,23 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
   <div class="z">
     <h1>D-Block<br>Europe</h1>
     <div class="cline">One of Virgin UK's <em>biggest</em> YouTube audiences.</div>
-    <div class="cstats">
-      <div><div class="num v">9.23M</div><div class="l">UK monthly views · #1 Virgin artist</div></div>
-      <div><div class="num v">973M</div><div class="l">Lifetime channel views</div></div>
-      <div><div class="num v">661K</div><div class="l">Subscribers</div></div>
+    <div class="strip">
+      <img src="https://i.ytimg.com/vi/VRc0PH7pHGs/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/vSAlWKpbVNk/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/kFlfgHvgetY/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/Ry1m40ScWks/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/bY4FsK0M5Vw/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/G-EEYEIiqEk/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/bnc7hO8UGXU/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/Y7Zq0_DegQc/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/mecy6K90C0s/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/nQnnqfkpuwQ/mqdefault.jpg" alt="" loading="lazy">
+      <img src="https://i.ytimg.com/vi/mQs4LQloa2c/mqdefault.jpg" alt="" loading="lazy">
+    </div>
+    <div class="cstats count">
+      <div><div class="num v" data-n="9.23" data-dp="2" data-suffix="M">9.23M</div><div class="l">UK monthly views · #1 Virgin artist</div></div>
+      <div><div class="num v" data-n="973" data-suffix="M">973M</div><div class="l">Lifetime channel views</div></div>
+      <div><div class="num v" data-n="661" data-suffix="K">661K</div><div class="l">Subscribers</div></div>
       <div><div class="num v">#1</div><div class="l">UK is their top territory</div></div>
     </div>
   </div>
@@ -316,11 +363,11 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
     <div class="eyebrow">What has already been built</div>
     <div class="billboard">973M</div>
     <div class="bbcap">Lifetime views on @DBlockEuropeTV · 972,502,684 at 7 October 2026</div>
-    <div class="bbrow">
-      <div><div class="num v">198</div><div class="l">Public uploads</div></div>
-      <div><div class="num v">61</div><div class="l">Videos over 1M</div></div>
-      <div><div class="num v">13</div><div class="l">Videos over 10M</div></div>
-      <div><div class="num v">106.6M</div><div class="l">Overseas · single video</div></div>
+    <div class="bbrow count">
+      <div><div class="num v" data-n="198">198</div><div class="l">Public uploads</div></div>
+      <div><div class="num v" data-n="61">61</div><div class="l">Videos over 1M</div></div>
+      <div><div class="num v" data-n="13">13</div><div class="l">Videos over 10M</div></div>
+      <div><div class="num v" data-n="106.6" data-dp="1" data-suffix="M">106.6M</div><div class="l">Overseas · single video</div></div>
     </div>
     <div class="act">
       <div class="k">Why it matters</div>
@@ -335,18 +382,18 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
   <div class="z">
     <div class="eyebrow">Scale relative to audience size</div>
     <h2>DBE's UK viewing is exceptionally large for the size of their subscriber base.</h2>
-    <div class="vs">
+    <div class="vs count">
       <div class="card me">
         <div class="nm">D-Block Europe</div>
-        <div class="num big">9,230,272</div>
+        <div class="num big" data-n="9230272">9,230,272</div>
         <div class="sub">UK monthly YouTube views</div>
-        <div class="snd">661,000<s>Subscribers</s></div>
+        <div class="snd"><span data-n="661000">661,000</span><s>Subscribers</s></div>
       </div>
       <div class="card">
         <div class="nm">Dave</div>
-        <div class="num big">5,376,965</div>
+        <div class="num big" data-n="5376965">5,376,965</div>
         <div class="sub">UK monthly YouTube views</div>
-        <div class="snd">2,550,000<s>Subscribers</s></div>
+        <div class="snd"><span data-n="2550000">2,550,000</span><s>Subscribers</s></div>
       </div>
     </div>
     <p class="said">Roughly <b>1.7× the UK monthly viewing on about a quarter of the subscribers</b>. Both figures come from the same dataset on the same date, and both artists are UK rap on the Virgin roster — which is why this comparison stands where a view-total league table would not.</p>
@@ -363,29 +410,29 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
   <div class="z">
     <div class="eyebrow">Where the next growth can come from</div>
     <h2>Five levers. Each one grounded in something DBE already do.</h2>
-    <div class="levers">
+    <div class="levers count">
       <div class="lv">
-        <div class="n">01</div><div class="num v">23.4K</div>
+        <div class="n">01</div><div class="num v" data-n="23.4" data-dp="1" data-suffix="K">23.4K</div>
         <div class="t">Momentum</div>
         <div class="d">SEPA, still at 23,393 views/day on day 76. Demand outlasts the campaign calendar.</div>
       </div>
       <div class="lv">
-        <div class="n">02</div><div class="num v">92</div>
+        <div class="n">02</div><div class="num v" data-n="92">92</div>
         <div class="t">Releases</div>
         <div class="d">Same-day assets across four full-project launches. The capability is proven.</div>
       </div>
       <div class="lv">
-        <div class="n">03</div><div class="num v">498M</div>
+        <div class="n">03</div><div class="num v" data-n="498" data-suffix="M">498M</div>
         <div class="t">Catalogue</div>
         <div class="d">Views across the current public catalogue, against 973M lifetime. A large footprint to route through.</div>
       </div>
       <div class="lv">
-        <div class="n">04</div><div class="num v">172K</div>
+        <div class="n">04</div><div class="num v" data-n="172" data-suffix="K">172K</div>
         <div class="t">Formats</div>
         <div class="d">Views on the 2019 PTSD tour diary. Non-music formats already have an audience here.</div>
       </div>
       <div class="lv">
-        <div class="n">05</div><div class="num v">9.23M</div>
+        <div class="n">05</div><div class="num v" data-n="9.23" data-dp="2" data-suffix="M">9.23M</div>
         <div class="t">Audience</div>
         <div class="d">UK monthly views. The largest pool of people to convert into a returning channel audience.</div>
       </div>
@@ -428,11 +475,15 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
   <div class="z">
     <div class="eyebrow">What we can learn from DBE's own history</div>
     <h2>They have already built the full-project asset layer. Four times.</h2>
-    <div class="towers">
-      <div class="tw"><div class="num cap">24</div><div class="col" style="height:70%"></div></div>
-      <div class="tw"><div class="num cap">23</div><div class="col" style="height:67%"></div></div>
-      <div class="tw"><div class="num cap">15</div><div class="col" style="height:44%"></div></div>
-      <div class="tw"><div class="num cap">30</div><div class="col" style="height:88%"></div></div>
+    <div class="towers count">
+      <div class="tw"><img class="twf" src="https://i.ytimg.com/vi/x-AavfF5XAk/mqdefault.jpg" alt="" loading="lazy">
+        <div class="num cap" data-n="24">24</div><div class="col" data-h="70"></div></div>
+      <div class="tw"><img class="twf" src="https://i.ytimg.com/vi/Ry1m40ScWks/mqdefault.jpg" alt="" loading="lazy">
+        <div class="num cap" data-n="23">23</div><div class="col" data-h="67"></div></div>
+      <div class="tw"><img class="twf" src="https://i.ytimg.com/vi/bnc7hO8UGXU/mqdefault.jpg" alt="" loading="lazy">
+        <div class="num cap" data-n="15">15</div><div class="col" data-h="44"></div></div>
+      <div class="tw"><img class="twf" src="https://i.ytimg.com/vi/nQnnqfkpuwQ/mqdefault.jpg" alt="" loading="lazy">
+        <div class="num cap" data-n="30">30</div><div class="col" data-h="88"></div></div>
     </div>
     <div class="twlabs">
       <div>7 Nov 2019<br>PTSD · 38.6M</div>
@@ -532,12 +583,12 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
   <div class="z">
     <div class="eyebrow">Right now · 7-day average views per day</div>
     <h2>One July release is still leading the channel.</h2>
-    <div class="bars">
-      <div class="bar hero"><div class="nm">SEPA<br>23 Jul · day 76</div><div class="track"><div class="fill" style="width:100%"></div></div><div class="vv">23,393</div></div>
-      <div class="bar"><div class="nm">Rips &amp; Fr33<br>10 Sep</div><div class="track"><div class="fill" style="width:48.2%"></div></div><div class="vv">11,283</div></div>
-      <div class="bar"><div class="nm">Rico<br>27 Aug</div><div class="track"><div class="fill" style="width:44%"></div></div><div class="vv">10,295</div></div>
-      <div class="bar"><div class="nm">Fully Loaded<br>20 Aug</div><div class="track"><div class="fill" style="width:10.9%"></div></div><div class="vv">2,549</div></div>
-      <div class="bar"><div class="nm">Million Dollar Sign<br>15 Sep</div><div class="track"><div class="fill" style="width:7.9%"></div></div><div class="vv">1,840</div></div>
+    <div class="bars count">
+      <div class="bar hero"><div class="nm">SEPA<br>23 Jul · day 76</div><div class="track"><div class="fill" data-w="100"></div></div><div class="vv" data-n="23393">23,393</div></div>
+      <div class="bar"><div class="nm">Rips &amp; Fr33<br>10 Sep</div><div class="track"><div class="fill" data-w="48.2"></div></div><div class="vv" data-n="11283">11,283</div></div>
+      <div class="bar"><div class="nm">Rico<br>27 Aug</div><div class="track"><div class="fill" data-w="44"></div></div><div class="vv" data-n="10295">10,295</div></div>
+      <div class="bar"><div class="nm">Fully Loaded<br>20 Aug</div><div class="track"><div class="fill" data-w="10.9"></div></div><div class="vv" data-n="2549">2,549</div></div>
+      <div class="bar"><div class="nm">Million Dollar Sign<br>15 Sep</div><div class="track"><div class="fill" data-w="7.9"></div></div><div class="vv" data-n="1840">1,840</div></div>
     </div>
     <p class="said">SEPA alone is currently doing <b>roughly 90% of the combined daily velocity of all four Worldwide Wave videos</b> (25,967/day between them), and <b>2.07×</b> the fastest of them individually — at 76 days old, against assets 22 to 48 days old.</p>
     <div class="act">
@@ -600,6 +651,7 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
         <p>Output volumes are illustrative until production planning sets them. The format, not the number, is the recommendation.</p>
       </div>
     </div>
+    <div class="sheet" id="sheet"></div>
     <p class="said">DBE already built this. The <b>2019 PTSD tour diary ran seven consecutive episodes</b>. The recommendation is not a new idea — it is to run a format they have already proven, at the scale the channel now has.</p>
     <div class="act">
       <div class="k">What we do</div>
@@ -717,5 +769,113 @@ h2{font-size:clamp(25px,4.1vw,64px);max-width:22ch}
 </section>
 
 </div>
+
+<script>
+/* ── MOVEMENT ───────────────────────────────────────────────────────────
+   Figures count, bars fill and towers grow the first time their group
+   scrolls into view. A static number on a dark slide reads as a label;
+   watching 973M climb is the difference between reading a figure and
+   feeling a scale. Fires once per group, never on a loop.
+
+   Same approach as the Freak Slug deck, with one addition: these figures
+   carry suffixes (973M, 23.4K) and thousands separators, so the formatter
+   has to reproduce the resting text exactly or the number visibly changes
+   shape when it lands. */
+(function(){
+  var reduced = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Reproduce the final string exactly: decimals, suffix, separators. */
+  function fmt(v, el){
+    var dp = parseInt(el.getAttribute('data-dp') || '0', 10);
+    var suf = el.getAttribute('data-suffix') || '';
+    if (dp > 0) return v.toFixed(dp) + suf;
+    return Math.round(v).toLocaleString() + suf;
+  }
+
+  /* Pin each figure's finished width BEFORE counting. A counting number
+     changes width every frame, and inside a flex row that reflows the
+     whole line on every tick — which is what makes decks judder on open. */
+  function lockWidths(group){
+    group.querySelectorAll('[data-n]').forEach(function(v){
+      var w = v.getBoundingClientRect().width;
+      if (!w) return;
+      if (getComputedStyle(v).display.indexOf('inline') === 0) v.style.display = 'inline-block';
+      v.style.minWidth = Math.ceil(w) + 'px';
+    });
+  }
+
+  function paint(group){
+    group.classList.add('go');
+    group.querySelectorAll('.fill[data-w]').forEach(function(f){
+      f.style.width = f.getAttribute('data-w') + '%';
+    });
+    group.querySelectorAll('.col[data-h]').forEach(function(c){
+      c.style.height = c.getAttribute('data-h') + '%';
+    });
+    if (reduced) return;                       // bars still fill; text stays put
+    lockWidths(group);
+    group.querySelectorAll('[data-n]').forEach(function(v, i){
+      var end = parseFloat(v.getAttribute('data-n'));
+      if (isNaN(end)) return;
+      var dur = 1000, delay = 60 + i * 110, t0 = null;
+      v.textContent = fmt(0, v);
+      function step(ts){
+        if (t0 === null) t0 = ts;
+        var p = Math.min(1, (ts - t0) / dur);
+        var e = 1 - Math.pow(1 - p, 3);         // ease-out cubic
+        v.textContent = fmt(p < 1 ? end * e : end, v);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      setTimeout(function(){ requestAnimationFrame(step); }, delay);
+    });
+  }
+
+  /* A pinned width is only correct for the width it was measured at. */
+  var rt;
+  window.addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){
+      document.querySelectorAll('[data-n]').forEach(function(v){ v.style.minWidth = ''; });
+    }, 120);
+  });
+
+  var groups = document.querySelectorAll('.count');
+  if (!('IntersectionObserver' in window)) {
+    groups.forEach(paint);
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        paint(en.target);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.3 });
+    groups.forEach(function(g){ io.observe(g); });
+  }
+
+  /* ── CONTACT SHEET ───────────────────────────────────────────────────
+     Twenty-four real frames from across the catalogue — 2017 to 2026,
+     music videos, visualisers and collaborations. The tour slide argues
+     that a repeatable format produces a body of work; showing one is more
+     persuasive than describing it. Every tile links to the video. */
+  var IDS = ('I4Ra4z2Arqg,VRc0PH7pHGs,vSAlWKpbVNk,kFlfgHvgetY,Ry1m40ScWks,bY4FsK0M5Vw,'
+    + 'G-EEYEIiqEk,bnc7hO8UGXU,Y7Zq0_DegQc,x-AavfF5XAk,ixRcorTiBbw,KpOiymLrMKU,'
+    + 'Wv16VGTsnP8,XCQV3fIIako,8QCu_ZJNwZY,mecy6K90C0s,BKkEcSa5iHk,3i4pKlPpKig,'
+    + 'dM8ejbP2E2k,Db54CkP_TcI,nQnnqfkpuwQ,3d1xCxISRDA,H5GqULhjKX0,mQs4LQloa2c').split(',');
+  var el = document.getElementById('sheet');
+  if (!el) return;
+  IDS.forEach(function(id){
+    var a = document.createElement('a');
+    a.href = 'https://www.youtube.com/watch?v=' + id;
+    a.target = '_blank'; a.rel = 'noopener';
+    var img = new Image();
+    img.src = 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
+    img.alt = ''; img.loading = 'lazy';
+    a.appendChild(img);
+    el.appendChild(a);
+  });
+})();
+</script>
 </body>
 </html>
