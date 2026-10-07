@@ -118,9 +118,12 @@ export const MARKETS: Record<string, MarketDef> = {
 export const MARKET_IDS = Object.keys(MARKETS);
 export const DEFAULT_MARKET = 'uk';
 
-/** The cookie the switcher writes, so a choice survives navigation. */
-export const MARKET_COOKIE = 'vmg-market';
-/** The query param that overrides the cookie. Shareable links use this. */
+/**
+ * The query param that selects a market. The only mechanism — there was a
+ * cookie and a dropdown; both are gone, because the org line on each page
+ * already names the workspace and a preference nobody can see or change is
+ * worse than none.
+ */
 export const MARKET_PARAM = 'market';
 
 export function getMarket(id: string | null | undefined): MarketDef | null {
