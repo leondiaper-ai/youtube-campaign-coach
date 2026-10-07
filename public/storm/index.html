@@ -194,13 +194,19 @@ h2 em{font-style:normal;color:var(--hot)}
   line-height:.85}
 .dayline .t{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--warm);margin-top:9px;line-height:1.6;max-width:30ch}
-.mini{display:flex;flex-direction:column;gap:clamp(7px,1vw,14px);margin-top:clamp(12px,1.7vw,22px)}
+/* This column sits over the lit half of the VMA frame, so it carries its
+   own ground and brighter labels — at --dim the supporting figures were
+   legible in the file and not on the screen. */
+.mini{display:flex;flex-direction:column;gap:clamp(6px,.9vw,12px);margin-top:clamp(12px,1.7vw,22px);
+  background:rgba(5,7,11,.72);border:1px solid var(--hair);border-radius:3px;
+  padding:clamp(11px,1.5vw,20px)}
 .mini div{display:flex;align-items:baseline;gap:clamp(9px,1.3vw,18px);
   border-top:1px solid var(--hair);padding-top:clamp(6px,.85vw,11px)}
+.mini div:first-child{border-top:none;padding-top:0}
 .mini .mv{font-size:clamp(17px,2.2vw,34px);font-stretch:60%;font-weight:900;min-width:4.2ch;
-  font-variant-numeric:tabular-nums}
-.mini .ml{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--dim);line-height:1.5}
+  font-variant-numeric:tabular-nums;color:var(--bone)}
+.mini .ml{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--warm);line-height:1.55}
 
 /* ══ 04 CONCENTRATION ══ */
 .sys{position:relative;height:clamp(200px,36vh,400px);margin-top:clamp(12px,1.8vw,24px);
