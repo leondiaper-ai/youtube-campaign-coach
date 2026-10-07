@@ -148,7 +148,8 @@ h2{font-size:clamp(30px,6.2vw,104px);max-width:17ch}
   margin-top:clamp(10px,1.3vw,18px);text-transform:uppercase}
 
 /* ══ 04 + 11 CATALOGUE CANVAS ══ */
-.field{margin-top:clamp(12px,1.8vw,26px);display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start}
+.field{margin-top:clamp(12px,1.8vw,26px);display:flex;flex-wrap:wrap;gap:4px;
+  align-content:center;align-items:center;min-height:clamp(150px,34vh,380px)}
 .field i{display:block;border-radius:1px;background:#1C242E;transition:background .4s ease,transform .4s ease}
 .field i.m1{background:rgba(201,154,69,.55)}
 .field i.m10{background:var(--gold);box-shadow:0 0 14px rgba(201,154,69,.6)}
@@ -663,8 +664,13 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
     const max = Math.max(...CATALOGUE.map(v => v.views));
     CATALOGUE.forEach(v => {
       const i = document.createElement('i');
-      const scale = Math.sqrt(v.views / max);          // area, not length
-      const size = Math.max(5, Math.round(6 + scale * 60));
+      /* Area, not length: a 106m video is 380x a 280k one, so scaling the
+         SIDE by views would make everything else a speck. Square-rooting
+         puts the ratio in the area, which is what the eye reads. The floor
+         is generous because the point of the slide is the mass of the whole
+         catalogue — tiles too small to see would undercount it. */
+      const scale = Math.sqrt(v.views / max);
+      const size = Math.max(18, Math.round(20 + scale * 170));
       i.style.width = size + 'px';
       i.style.height = size + 'px';
       if (v.views >= 1e8) i.className = 'm100';
@@ -674,6 +680,29 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
         v.date.slice(6, 8) + '/' + v.date.slice(4, 6) + '/' + v.date.slice(0, 4);
       field.appendChild(i);
     });
+
+    /* The tiles are sized to fill the canvas, which means on a short window
+       they can push the slide past the fold — and on a scroll-snap deck,
+       past the fold is not "cramped", it is gone. So measure the real slide
+       and shrink the whole field until it fits, rather than guessing a size
+       that is safe everywhere and dull everywhere. Re-run on resize, since
+       the deck is presented on whatever screen is in the room. */
+    const slide = field.closest('section');
+    const fit = () => {
+      const tiles = [...field.children];
+      tiles.forEach((t) => { t.style.transform = ''; });
+      field.style.zoom = '';
+      let z = 1;
+      for (let pass = 0; pass < 14; pass++) {
+        const over = slide.scrollHeight - window.innerHeight;
+        if (over <= 0 || z <= 0.45) break;
+        z = Math.max(0.45, z - 0.05);
+        field.style.zoom = z;
+      }
+    };
+    fit();
+    let ft;
+    window.addEventListener('resize', () => { clearTimeout(ft); ft = setTimeout(fit, 150); });
   }
 
   /* ── SLIDE 11 · TEN YEARS OF VIEWING ──────────────────────────────
