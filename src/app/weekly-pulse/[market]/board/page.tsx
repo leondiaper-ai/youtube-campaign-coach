@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import TeamBoard from '@/components/TeamBoard';
-import PulseNav from '@/components/PulseNav';
 import { getMarket, MARKET_IDS } from '@/lib/market';
 import { getTeam } from '@/lib/teams';
 
@@ -17,7 +16,10 @@ import { getTeam } from '@/lib/teams';
  * Channel Spotlight, so someone working in the market dashboard does not have
  * to go and find a separate URL to see their own roster.
  *
- * Markets with no team board (the UK) do not get this tab — see PulseNav.
+ * Deliberately does NOT render PulseNav. Those tabs are the external pair
+ * that gets shared with YouTube; putting them on an internal roster page
+ * invites someone to send the wrong link. The board links back to the
+ * weekly views from its own header instead.
  */
 export const dynamic = 'force-dynamic';
 export const metadata = { robots: { index: false, follow: false } };
@@ -45,9 +47,6 @@ export default async function MarketBoardPage({
         }}>
           {m.orgName} · YouTube
         </div>
-      </div>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 40px 0' }}>
-        <PulseNav market={m.id} />
       </div>
       {/* Links stay inside the market dashboard rather than bouncing the
           reader out to the token-gated /team space. */}

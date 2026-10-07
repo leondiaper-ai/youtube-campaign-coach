@@ -18,10 +18,15 @@ const BASE_TABS = [
  * back into the UK workspace — the kind of bug that is invisible until
  * someone shares the wrong page.
  *
- * Markets with a team board get a third tab, so the roster, health counts and
- * channel behaviour live in the same place as the weekly views rather than
- * behind a separate token link the team has to keep track of. The UK has no
- * board, so it keeps the two tabs it has always had and looks unchanged.
+ * ONLY the two external-facing views live here. Priority Campaigns and
+ * Channel Spotlight are what gets shared with YouTube, so the tab bar must
+ * not advertise internal tooling next to them — a partner following a
+ * "Campaign Board" tab lands in our roster, health classifications and
+ * internal notes.
+ *
+ * The board is still one click away for the team, from the Coach nav, which
+ * is internal by definition. Reachability and exposure are different
+ * problems and this is the line between them.
  */
 export default function PulseNav({ market }: { market?: string } = {}) {
   const pathname = usePathname();
@@ -29,12 +34,11 @@ export default function PulseNav({ market }: { market?: string } = {}) {
   const isDefault = !m || m.id === 'uk';
   const suffix = isDefault ? '' : `?market=${m.id}`;
 
-  const tabs = [
-    ...BASE_TABS.map((t) => ({ href: `${t.href}${suffix}`, label: t.label, exact: t.href })),
-    ...(m?.teamSlug
-      ? [{ href: `/weekly-pulse/${m.id}/board`, label: 'Campaign Board', exact: `/weekly-pulse/${m.id}/board` }]
-      : []),
-  ];
+  const tabs = BASE_TABS.map((t) => ({
+    href: `${t.href}${suffix}`,
+    label: t.label,
+    exact: t.href,
+  }));
 
   return (
     <nav
