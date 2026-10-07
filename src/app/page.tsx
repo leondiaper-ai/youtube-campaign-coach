@@ -124,6 +124,15 @@ export default async function HomePage({
           {/* Meeting page, not a tool. Lives here because the alternative —
               finding it again in Resources on the morning of the catch-up —
               is exactly the failure it exists to prevent. */}
+          {/* Label-facing deep dives. These are presented from, and shared
+              externally, so they live on the home page rather than buried
+              in Resources where nobody finds them on the day. */}
+          <ToolCard
+            href="/storm/"
+            title="STORM — GENER8ION × Yung Lean"
+            desc="34.7M views and breaking twice. Where the demand is going, and the opportunity around it."
+            highlight
+          />
           <ToolCard
             href="/catchup/"
             title="YouTube Monthly Catch-up"

@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>STORM — GENER8ION × Yung Lean · YouTube Opportunity</title>
+
+<!--
+  GENER8ION / YUNG LEAN — STORM I & II
+  The YouTube opportunity. Read 7 October 2026.
+
+  ──────────────────────────────────────────────────────────────────────
+  WHAT THIS IS
+
+  Not an audit. STORM is one of the strongest visual music stories in the
+  campaign and the deck is built to feel like that. The emotional arc is:
+  "this is bigger on YouTube than we realised" → "and there are obvious
+  things we can do with it right now."
+
+  Nothing here criticises the artist or the label. The finding is that
+  demand is arriving faster than the owned channel can currently catch
+  it, which is a good problem and a cheap one to fix.
+
+  ──────────────────────────────────────────────────────────────────────
+  WHAT I VERIFIED MYSELF, LIVE, BEFORE BUILDING
+
+  Pulled from the YouTube Data API and the per-video daily observation
+  series on 7 Oct 2026 (@gener8ionworld, UCJZWYrX3FTpK_TVAF_8NU3Q).
+  These are not taken on trust from the forensic pack — they reproduce:
+
+    hero film STORM             34,743,841 lifetime
+    STORM BTS                      876,851 lifetime
+    GENER8ION subscribers           96,700
+    Yung Lean subscribers        1,320,000
+    hero peak day                1,264,534  (30 Sep)
+    hero today                     594,602
+    BTS today                       19,267
+    hero gain, VMA wave          8,086,900  (29 Sep – 7 Oct)
+    hero share of channel L7D         94.4%
+    Shorts share of channel L7D        0.46%
+    days with no upload                 117  (12 Jun → 7 Oct)
+    BTS as a share of hero, daily   2.4–3.8%
+
+  The VMA date is inferred from the series, not supplied: channel daily
+  views jump from 453,610 on 28 Sep to 996,185 on 29 Sep. Everything
+  labelled "VMA wave" means 29 Sep – 7 Oct.
+
+  Figures I could NOT verify from this window are the April–May and
+  summer phase averages and the 11 Sep–6 Oct total, because the daily
+  series only begins 19 Sep. Those come from the forensic analysis and
+  are labelled as such on the slide. The same applies to Spotify,
+  territory and comment-theme figures, which are not YouTube Data API
+  objects at all.
+
+  ──────────────────────────────────────────────────────────────────────
+  CLAIMS DELIBERATELY NOT MADE
+
+   1. That YouTube caused the Spotify growth. Video has repeatedly been
+      at the centre of STORM's biggest discovery moments — that is the
+      claim, and it is as far as the evidence goes.
+   2. That Asian YouTube demand is "failing to convert" to streaming.
+      Platform adoption differs enormously by market. It is an open
+      question worth money, not a diagnosis.
+   3. Any CPV-to-stream conversion maths. The brief asked for it to stay
+      out of the main deck and there is no honest version of it here.
+   4. That YouTube can recover the ~200K/day active-stream shortfall.
+      Nothing in this data supports that and the slide says so.
+   5. Any forecast. The scorecard targets are labelled proposed targets.
+
+  ──────────────────────────────────────────────────────────────────────
+  DESIGN
+
+  The visual language is STORM's own: film stills, the VMA world, the
+  BTS. Each act pulls from a different part of it rather than repeating
+  one hero frame. Near-black with a cold blue-steel cast taken from the
+  film, one hot signal colour for the thing that matters on each slide.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#05070B; --night:#080B12; --panel:#0C1018; --slate:#0A0E16;
+  --sig:#E8E3D9;                 /* bone — the hero */
+  --hot:#FF4D2E;                 /* STORM signal — one thing per slide */
+  --cold:#5B8FB9;                /* the comparison, the context */
+  --gold:#D9A441;
+  --bone:#F2EFE9; --warm:#A8A49D; --dim:#6B6762;
+  --hair:rgba(242,239,233,.11);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--bone);font-family:'Archivo',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:60;opacity:.02;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
+
+.deck{scroll-snap-type:y mandatory;overflow-y:auto;height:100vh}
+section{scroll-snap-align:start;min-height:100vh;position:relative;display:flex;flex-direction:column;
+  justify-content:center;padding:clamp(20px,3.4vw,66px);overflow:hidden}
+
+h1,h2{font-stretch:62%;font-weight:900;line-height:.86;letter-spacing:-.03em;text-transform:uppercase}
+h2{font-size:clamp(26px,5vw,82px);max-width:18ch}
+h2.sm{font-size:clamp(22px,3.5vw,54px);max-width:24ch}
+h2 em{font-style:normal;color:var(--hot)}
+.kick{font-size:clamp(12px,1.35vw,21px);font-weight:800;font-stretch:72%;text-transform:uppercase;
+  letter-spacing:.02em;line-height:1.18;max-width:36ch}
+.kick em{font-style:normal;color:var(--hot)}
+.kick.c em{color:var(--cold)}
+.eyebrow{font-family:var(--mono);font-size:clamp(8px,.62vw,10.5px);letter-spacing:.32em;
+  text-transform:uppercase;color:var(--hot);margin-bottom:clamp(10px,1.4vw,20px)}
+.act{position:absolute;top:clamp(18px,2.4vw,36px);right:clamp(20px,3.4vw,66px);font-family:var(--mono);
+  font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:#2F3640;z-index:3}
+.foot{position:absolute;left:clamp(20px,3.4vw,66px);bottom:clamp(12px,1.5vw,24px);
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#343B45;
+  max-width:86ch;line-height:1.65}
+.num{font-stretch:60%;font-weight:900;line-height:.78;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.z{position:relative;z-index:2}
+.bed{position:absolute;inset:0;z-index:0}
+.bed img{width:100%;height:100%;object-fit:cover;filter:saturate(1.1) contrast(1.06)}
+.scrim::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(100deg,rgba(5,7,11,.97) 16%,rgba(5,7,11,.68) 56%,rgba(5,7,11,.26) 100%),
+             linear-gradient(0deg,rgba(5,7,11,.95) 0%,transparent 28%,transparent 74%,rgba(5,7,11,.88) 100%)}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(5,7,11,.975) 6%,rgba(5,7,11,.80) 34%,rgba(5,7,11,.26) 76%,rgba(5,7,11,.04) 100%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(5,7,11,.975) 26%,rgba(5,7,11,.88) 48%,rgba(5,7,11,.44) 76%,rgba(5,7,11,.12) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(5,7,11,.80)}
+.grain::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.05;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+.stagger.visible>*{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}}
+.glow{text-shadow:0 0 48px rgba(255,77,46,.42)}
+
+/* ══ 01 HERO ══ */
+#open{justify-content:flex-end}
+#open .big{font-size:clamp(46px,13vw,236px);font-weight:900;font-stretch:58%;line-height:.80;
+  letter-spacing:-.045em}
+#open .nm{font-family:var(--mono);font-size:clamp(9px,1vw,15px);letter-spacing:.42em;
+  text-transform:uppercase;margin-bottom:clamp(12px,1.8vw,26px)}
+.hrow{display:flex;flex-wrap:wrap;gap:clamp(16px,3.2vw,60px);margin-top:clamp(16px,2.4vw,36px);
+  border-top:1px solid var(--hair);padding-top:clamp(12px,1.7vw,24px)}
+.hrow .v{font-size:clamp(20px,2.9vw,46px)}
+.hrow .v.h{color:var(--hot)}
+.hrow .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);margin-top:8px;line-height:1.55;max-width:20ch}
+
+/* ══ 02 WAVES ══ */
+.waves{display:flex;align-items:flex-end;gap:clamp(5px,.8vw,12px);height:clamp(150px,27vh,290px);
+  margin-top:clamp(14px,2vw,28px);border-bottom:1px solid rgba(242,239,233,.2)}
+.ph{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.ph .bar{width:100%;border-radius:2px 2px 0 0;height:0;transition:height 1s cubic-bezier(.2,.8,.25,1);
+  background:linear-gradient(180deg,#2B323C,#161B22)}
+.ph.hot .bar{background:linear-gradient(180deg,var(--hot),rgba(255,77,46,.25));
+  box-shadow:0 0 28px rgba(255,77,46,.4)}
+.ph.warm .bar{background:linear-gradient(180deg,var(--gold),rgba(217,164,65,.22))}
+.ph .pv{font-family:var(--mono);font-size:clamp(9px,.86vw,13px);color:var(--bone);margin-bottom:7px;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.ph.hot .pv{color:var(--hot);font-weight:700}
+.wx{display:grid;gap:clamp(5px,.8vw,12px);margin-top:10px}
+.wx div{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);text-align:center;line-height:1.5}
+
+/* the real daily curve, 19 Sep → 7 Oct */
+.curve{display:flex;align-items:flex-end;gap:2px;height:clamp(90px,15vh,160px);margin-top:clamp(12px,1.7vw,24px)}
+.curve b{flex:1;background:#232A34;border-radius:1px 1px 0 0;min-height:1px;
+  transition:height .9s cubic-bezier(.2,.8,.25,1)}
+.curve b.v{background:linear-gradient(180deg,var(--hot),rgba(255,77,46,.3))}
+.cx{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;
+  letter-spacing:.1em;color:#343B45;margin-top:6px}
+
+/* ══ 03 THE GAP ══ */
+.gapgrid{display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(16px,3.4vw,62px);
+  margin-top:clamp(12px,1.8vw,26px);align-items:center}
+@media(max-width:880px){.gapgrid{grid-template-columns:1fr}}
+.vs{display:flex;align-items:center;gap:clamp(14px,2.6vw,46px);flex-wrap:wrap}
+.vs .side .v{font-size:clamp(40px,8.4vw,150px);line-height:.8}
+.vs .side.in .v{color:var(--hot)}
+.vs .side.out .v{color:#39404A}
+.vs .side .l{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--dim);margin-top:11px;line-height:1.55;max-width:18ch}
+.dayline{margin-top:clamp(14px,2vw,28px);border-left:2px solid var(--hot);
+  padding-left:clamp(11px,1.5vw,20px)}
+.dayline .d{font-size:clamp(26px,4.4vw,70px);font-stretch:60%;font-weight:900;color:var(--hot);
+  line-height:.85}
+.dayline .t{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--warm);margin-top:9px;line-height:1.6;max-width:30ch}
+.mini{display:flex;flex-direction:column;gap:clamp(7px,1vw,14px);margin-top:clamp(12px,1.7vw,22px)}
+.mini div{display:flex;align-items:baseline;gap:clamp(9px,1.3vw,18px);
+  border-top:1px solid var(--hair);padding-top:clamp(6px,.85vw,11px)}
+.mini .mv{font-size:clamp(17px,2.2vw,34px);font-stretch:60%;font-weight:900;min-width:4.2ch;
+  font-variant-numeric:tabular-nums}
+.mini .ml{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);line-height:1.5}
+
+/* ══ 04 CONCENTRATION ══ */
+.sys{position:relative;height:clamp(200px,36vh,400px);margin-top:clamp(12px,1.8vw,24px);
+  display:flex;align-items:center;justify-content:center}
+.node{position:absolute;border-radius:50%;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center}
+.node.hero{width:clamp(150px,25vh,270px);height:clamp(150px,25vh,270px);
+  background:radial-gradient(circle at 42% 36%,rgba(255,77,46,.95),rgba(255,77,46,.45));
+  box-shadow:0 0 90px rgba(255,77,46,.45)}
+.node.hero .n{font-size:clamp(20px,3vw,48px);font-stretch:60%;font-weight:900;color:#0B0D10;
+  line-height:.85}
+.node.hero .s{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(11,13,16,.75);margin-top:7px}
+.node.sm{background:rgba(91,143,185,.3);border:1px solid rgba(91,143,185,.55)}
+.node.sm .n{font-family:var(--mono);font-size:8px;color:var(--bone);letter-spacing:.08em}
+.shareline{display:flex;gap:clamp(14px,2.6vw,46px);flex-wrap:wrap;margin-top:clamp(12px,1.8vw,24px);
+  border-top:1px solid var(--hair);padding-top:clamp(10px,1.4vw,18px)}
+.shareline .v{font-size:clamp(20px,2.9vw,46px)}
+.shareline .v.h{color:var(--hot)} .shareline .v.c{color:var(--cold)}
+.shareline .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--dim);margin-top:8px;line-height:1.5;max-width:20ch}
+
+/* ══ 05 BTS ══ */
+.attach{display:flex;align-items:flex-end;gap:3px;height:clamp(100px,17vh,180px);
+  margin-top:clamp(12px,1.7vw,24px)}
+.attach .pair{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%}
+.attach .h{background:rgba(242,239,233,.14);border-radius:1px 1px 0 0;min-height:1px;
+  transition:height .9s cubic-bezier(.2,.8,.25,1)}
+.attach .b{background:var(--hot);border-radius:1px;min-height:2px;
+  transition:height .9s cubic-bezier(.2,.8,.25,1)}
+
+/* ══ 06 COMMENTS ══ */
+.themes{display:flex;flex-direction:column;gap:clamp(7px,1vw,14px);margin-top:clamp(12px,1.8vw,26px)}
+.th{display:grid;grid-template-columns:minmax(128px,auto) 1fr minmax(48px,auto);
+  gap:clamp(10px,1.5vw,22px);align-items:center}
+.th .n{font-size:clamp(12px,1.35vw,21px);font-weight:900;font-stretch:70%;text-transform:uppercase;
+  color:var(--bone);text-align:right;line-height:1.1}
+.th .t{height:clamp(14px,1.9vw,28px);background:rgba(242,239,233,.05);border-radius:2px;overflow:hidden}
+.th .f{height:100%;width:0;border-radius:2px;transition:width 1s cubic-bezier(.2,.8,.25,1);
+  background:linear-gradient(90deg,rgba(255,77,46,.45),var(--hot))}
+.th.low .f{background:#2B323C}
+.th .p{font-family:var(--mono);font-size:clamp(10px,1.1vw,17px);color:var(--hot);
+  font-variant-numeric:tabular-nums;font-weight:700}
+.th.low .p{color:#4A525C}
+.quotebox{margin-top:clamp(12px,1.8vw,26px);border-left:3px solid var(--hot);
+  padding-left:clamp(11px,1.5vw,20px)}
+.quotebox .q{font-size:clamp(12px,1.4vw,22px);font-weight:800;font-stretch:72%;line-height:1.3;
+  text-transform:uppercase;color:var(--bone);max-width:40ch}
+.quotebox .a{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--hot);margin-top:9px}
+
+/* ══ 07 ECOSYSTEM ══ */
+.eco{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:clamp(8px,1.2vw,16px);
+  margin-top:clamp(12px,1.8vw,26px)}
+.ec{border:1px solid var(--hair);border-radius:3px;overflow:hidden;background:rgba(12,16,24,.72);
+  display:flex;flex-direction:column;transition:transform .3s ease,border-color .3s ease}
+.ec:hover{transform:translateY(-3px);border-color:rgba(255,77,46,.45)}
+.ec.core{border-color:rgba(255,77,46,.5);background:rgba(255,77,46,.09)}
+.ec .th2{aspect-ratio:16/9;background:#0D1117;position:relative;overflow:hidden}
+.ec .th2 img{width:100%;height:100%;object-fit:cover;filter:saturate(1.1) contrast(1.05)}
+.ec .bd{padding:clamp(8px,1.05vw,14px)}
+.ec .t{font-size:clamp(11px,1.2vw,18px);font-weight:900;font-stretch:66%;text-transform:uppercase;
+  line-height:1;color:var(--bone)}
+.ec.core .t{color:var(--hot)}
+.ec .d{font-family:var(--mono);font-size:8.5px;color:var(--warm);line-height:1.65;margin-top:7px}
+
+/* ══ 08 THE PLAY ══ */
+.play{display:grid;grid-template-columns:1.25fr .85fr;gap:clamp(14px,2.6vw,46px);
+  margin-top:clamp(12px,1.8vw,26px);align-items:start}
+@media(max-width:880px){.play{grid-template-columns:1fr}}
+.plist{display:flex;flex-direction:column;gap:clamp(4px,.6vw,8px);counter-reset:p}
+.plist div{counter-increment:p;position:relative;padding-left:30px;
+  font-size:clamp(11px,1.2vw,18px);font-weight:800;font-stretch:70%;text-transform:uppercase;
+  line-height:1.3;color:var(--bone);border-top:1px solid var(--hair);padding-top:clamp(5px,.7vw,9px)}
+.plist div::before{content:'0' counter(p);position:absolute;left:0;top:clamp(6px,.85vw,11px);
+  font-family:var(--mono);font-size:8.5px;color:var(--hot);letter-spacing:.1em}
+.funnel{display:flex;flex-direction:column;gap:clamp(4px,.6vw,8px);align-items:center;
+  border:1px solid rgba(255,77,46,.32);background:rgba(255,77,46,.06);border-radius:3px;
+  padding:clamp(12px,1.7vw,24px)}
+.funnel .st{font-size:clamp(11px,1.3vw,20px);font-weight:900;font-stretch:64%;text-transform:uppercase;
+  text-align:center;line-height:1;color:var(--bone)}
+.funnel .st.h{color:var(--hot)}
+.funnel .ar{color:#39404A;font-size:clamp(10px,1.1vw,16px);line-height:1}
+
+/* ══ 09 MAP ══ */
+.terr{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2.6vw,46px);
+  margin-top:clamp(12px,1.8vw,26px);align-items:start}
+@media(max-width:880px){.terr{grid-template-columns:1fr}}
+.mrow{display:grid;grid-template-columns:minmax(86px,auto) 1fr minmax(52px,auto);
+  gap:clamp(8px,1.2vw,16px);align-items:center;margin-bottom:clamp(4px,.6vw,8px)}
+.mrow .c{font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--bone)}
+.mrow .t{height:clamp(9px,1.2vw,16px);background:rgba(242,239,233,.05);border-radius:2px;overflow:hidden}
+.mrow .f{height:100%;width:0;border-radius:2px;transition:width .9s cubic-bezier(.2,.8,.25,1);
+  background:linear-gradient(90deg,rgba(255,77,46,.4),var(--hot))}
+.mrow .v{font-family:var(--mono);font-size:9px;color:var(--warm);text-align:right;
+  font-variant-numeric:tabular-nums}
+.contrast{border:1px solid rgba(91,143,185,.4);background:rgba(91,143,185,.07);border-radius:3px;
+  padding:clamp(12px,1.7vw,22px)}
+.contrast h4{font-family:var(--mono);font-size:9px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--cold);margin-bottom:clamp(9px,1.2vw,16px)}
+.contrast ul{list-style:none;display:flex;flex-wrap:wrap;gap:clamp(7px,1vw,14px)}
+.contrast li{font-size:clamp(12px,1.4vw,22px);font-weight:900;font-stretch:68%;text-transform:uppercase;
+  color:var(--bone)}
+.contrast li.miss{color:var(--hot)}
+
+/* ══ 10 PHASES ══ */
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.4vw,22px);
+  margin-top:clamp(12px,1.8vw,26px)}
+@media(max-width:860px){.phases{grid-template-columns:1fr}}
+.pz{border-top:2px solid var(--hot);padding-top:clamp(9px,1.2vw,17px)}
+.phases .pz:nth-child(2){border-top-color:var(--gold)}
+.phases .pz:nth-child(3){border-top-color:var(--cold)}
+.pz .ph2{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:8px}
+.pz h4{font-size:clamp(14px,1.8vw,30px);font-weight:900;font-stretch:66%;text-transform:uppercase;
+  line-height:1;color:var(--hot);margin-bottom:9px}
+.phases .pz:nth-child(2) h4{color:var(--gold)}
+.phases .pz:nth-child(3) h4{color:var(--cold)}
+.pz ul{list-style:none}
+.pz li{font-family:var(--mono);font-size:9px;color:var(--warm);line-height:1.75}
+
+/* ══ 11 SCORECARD ══ */
+table.score{width:100%;border-collapse:collapse;margin-top:clamp(12px,1.8vw,26px);font-family:var(--mono)}
+table.score th{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);
+  font-weight:400;text-align:left;padding:0 0 10px;border-bottom:1px solid var(--hair)}
+table.score td{padding:clamp(6px,.85vw,11px) 0;border-bottom:1px solid rgba(242,239,233,.05);
+  vertical-align:top}
+table.score td.m{font-family:'Archivo';font-size:clamp(10px,1.05vw,16px);font-weight:800;
+  font-stretch:72%;text-transform:uppercase;color:var(--bone);width:28%}
+table.score td.now{font-size:clamp(10px,1vw,14px);color:var(--warm);width:26%;
+  font-variant-numeric:tabular-nums}
+table.score td.tgt{font-size:clamp(10px,1vw,14px);color:var(--hot);line-height:1.5}
+
+/* ══ CLOSE ══ */
+#close{justify-content:flex-end}
+#close .l1{font-size:clamp(24px,5.2vw,92px);font-stretch:61%;font-weight:900;line-height:.86;
+  letter-spacing:-.034em;text-transform:uppercase;color:#6E6A64}
+#close .l2{font-size:clamp(24px,5.2vw,92px);font-stretch:61%;font-weight:900;line-height:.86;
+  letter-spacing:-.034em;text-transform:uppercase;color:var(--hot);margin-top:clamp(5px,.8vw,12px)}
+#close .three{display:flex;gap:clamp(18px,4vw,76px);flex-wrap:wrap;margin-top:clamp(16px,2.4vw,38px);
+  border-top:1px solid var(--hair);padding-top:clamp(12px,1.7vw,24px)}
+#close .three .v{font-size:clamp(24px,4vw,64px);color:var(--bone)}
+#close .three .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);margin-top:8px;max-width:19ch;line-height:1.55}
+#close .sig{margin-top:clamp(14px,2vw,28px);font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.3em;text-transform:uppercase;color:var(--hot)}
+
+/* ══ APPENDIX ══ */
+#appx{background:#060810}
+.apx{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:clamp(12px,2vw,34px);
+  margin-top:clamp(10px,1.4vw,20px)}
+.apx h4{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--hot);margin-bottom:9px}
+.apx p{font-family:var(--mono);font-size:8.5px;line-height:1.75;color:#6A6F78}
+.apx p+p{margin-top:7px}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- ═══ 01 · THE HERO ════════════════════════════════════════════════ -->
+<section id="open" class="grain">
+  <div class="bed scrim"><img data-vid="x6_mbnsh6VU" alt=""></div>
+  <div class="z">
+    <div class="nm">GENER8ION × Yung Lean · STORM I &amp; II</div>
+    <div class="num big glow" id="hero-n" data-n="34743841">34,743,841</div>
+    <div class="num big" style="font-size:clamp(17px,4vw,74px);color:var(--hot);margin-top:.14em">
+      views. And STORM has broken twice.</div>
+    <div class="hrow stagger count">
+      <div><div class="num v h" data-n="9.3" data-dp="1" data-suffix="M">9.3M</div>
+        <div class="l">VMA performance</div></div>
+      <div><div class="num v" data-n="1264534">1,264,534</div>
+        <div class="l">Hero peak, per day, after the VMAs</div></div>
+      <div><div class="num v" data-n="11.7" data-dp="1" data-suffix="M">11.7M</div>
+        <div class="l">Weekly Spotify streams now, from 5.3M</div></div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--warm)">
+      STORM isn't a streaming hit with a good video attached.
+      <em>Its visual world has repeatedly driven the cultural moment.</em></div>
+  </div>
+  <div class="foot">Hero film and daily velocity read from the YouTube Data API, 7 Oct 2026 · Spotify weekly from the campaign consumption data</div>
+</section>
+
+<!-- ═══ 02 · THE TWO WAVES ═══════════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The pattern</div>
+  <div class="bed scrim-f" style="opacity:.30"><img data-vid="xT_nmiJp0jw" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">Channel views per day, by phase</div>
+    <h2 class="sm reveal">Video has reignited this record <em>twice</em>.</h2>
+    <div class="waves" id="waves"></div>
+    <div class="wx" id="wavesx"></div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.8vw,26px);color:var(--bone)">
+      Demand didn't just hold through the summer. It came back
+      <em>roughly ten times</em> off the floor before the VMAs — and then
+      accelerated again.</div>
+  </div>
+  <div class="foot">April–May, summer and pre-VMA phase averages from the campaign analysis · VMA-wave figures verified from the daily observation series, 19 Sep – 7 Oct 2026</div>
+</section>
+
+<!-- ═══ 03 · THE BIGGEST FINDING ═════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The finding</div>
+  <div class="bed scrim-l" style="opacity:.42"><img data-vid="8pAVxmSp0FQ" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">11 September → 6 October</div>
+    <h2 class="reveal">22.2M views.<br><em>Zero uploads.</em></h2>
+    <div class="gapgrid">
+      <div>
+        <div class="vs count stagger">
+          <div class="side in"><div class="num v" data-n="22.2" data-dp="1" data-suffix="M">22.2M</div>
+            <div class="l">Channel views gained</div></div>
+          <div class="side out"><div class="num v" data-n="0">0</div>
+            <div class="l">Videos uploaded in that window</div></div>
+        </div>
+        <div class="dayline reveal">
+          <div class="num d" data-n="117">117</div>
+          <div class="t">Days between uploads, 12 June to 7 October —
+            the entire second wave</div>
+        </div>
+      </div>
+      <div>
+        <div class="mini count stagger">
+          <div><span class="num mv" style="color:var(--hot)" data-n="8086900">8,086,900</span>
+            <span class="ml">Hero views gained during the VMA wave alone</span></div>
+          <div><span class="num mv" data-n="11800">11,800</span>
+            <span class="ml">New subscribers in the same window</span></div>
+          <div><span class="num mv" data-n="9.3" data-dp="1" data-suffix="M">9.3M</span>
+            <span class="ml">Views on the VMA performance itself</span></div>
+          <div><span class="num mv" data-n="9.5" data-dp="1">9.5</span>
+            <span class="ml">Days after the performance before the VMA BTS landed —
+              by then roughly 80% of the hero's uplift had decayed</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.8vw,26px);color:var(--bone)">
+      The hard part is already solved. <em>Generating demand isn't the problem —
+      catching it while it's happening is.</em></div>
+  </div>
+  <div class="foot">Hero gain, upload gap and subscriber movement verified from the live channel and daily series · 22.2M window figure from the campaign analysis</div>
+</section>
+
+<!-- ═══ 04 · CONCENTRATION ═══════════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The shape</div>
+  <div class="z">
+    <div class="eyebrow">Share of channel views, last 7 days</div>
+    <h2 class="sm reveal">94% of recent views go to <em>one video</em>.</h2>
+    <div class="sys" id="sys"></div>
+    <div class="shareline stagger count">
+      <div><div class="num v h" data-n="94.4" data-dp="1" data-suffix="%">94.4%</div>
+        <div class="l">The hero film alone</div></div>
+      <div><div class="num v" data-n="0.46" data-dp="2" data-suffix="%">0.46%</div>
+        <div class="l">All Shorts combined</div></div>
+      <div><div class="num v" data-n="0">0</div>
+        <div class="l">STORM Shorts published since release</div></div>
+      <div><div class="num v c" data-n="1.32" data-dp="2" data-suffix="M">1.32M</div>
+        <div class="l">Yung Lean subscribers — STORM isn't on his channel</div></div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      Millions are arriving for STORM.
+      <em>There is almost nowhere for them to go next.</em></div>
+  </div>
+  <div class="foot">Shares computed from the per-video daily series, 1–7 Oct 2026 · GENER8ION 96,700 subscribers · conversion currently 0.7 subs per 1,000 views, against 2.0 in April–May</div>
+</section>
+
+<!-- ═══ 05 · THE BTS PROOF ═══════════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The proof</div>
+  <div class="bed scrim-f" style="opacity:.26"><img data-vid="Xoi7reIF2r8" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">STORM BTS, daily views against the hero film</div>
+    <h2 class="sm reveal">There is already appetite <em>beyond the hero</em>.</h2>
+    <div class="attach" id="attach"></div>
+    <div class="cx"><span>19 Sep</span><span>VMAs · 28 Sep</span><span>7 Oct</span></div>
+    <div class="hrow stagger count" style="margin-top:clamp(12px,1.7vw,22px)">
+      <div><div class="num v" data-n="876851">876,851</div><div class="l">BTS lifetime views</div></div>
+      <div><div class="num v h" data-n="259638">259,638</div><div class="l">Since the VMAs</div></div>
+      <div><div class="num v" data-n="19267">19,267</div><div class="l">Per day, currently</div></div>
+      <div><div class="num v h" data-n="3.2" data-dp="1" data-suffix="%">3.2%</div>
+        <div class="l">Of the hero's daily views, consistently</div></div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      The BTS doesn't create much discovery on its own — it
+      <em>harvests</em> demand the hero creates. Depth is proven.
+      New owned discovery is the thing we haven't tested.</div>
+  </div>
+  <div class="foot">Daily BTS and hero views from the observation series · attach rate ranges 2.4–3.8% across the window, like rates 2.0% BTS against 2.2% hero</div>
+</section>
+
+<!-- ═══ 06 · THE AUDIENCE BRIEF ══════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The audience</div>
+  <div class="z">
+    <div class="eyebrow">Themes in the most-liked comments on the VMA performance</div>
+    <h2 class="sm reveal">They aren't talking about <em>the song</em>.</h2>
+    <div class="themes stagger" id="themes"></div>
+    <div class="quotebox reveal">
+      <div class="q">Six of the dancers commented on the upload themselves.
+        Those comments alone drew 27,752 likes.</div>
+      <div class="a">The synchronised jacket removal is called out again and again</div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      The audience has already written the brief. It isn't a lyric video
+      or a visualiser — <em>it's the STORM visual world.</em></div>
+  </div>
+  <div class="foot">Theme coding of the most-liked comments on the VMA performance upload · percentages are share of coded comments and sum to more than 100 because comments carry multiple themes</div>
+</section>
+
+<!-- ═══ 07 · THE ECOSYSTEM ═══════════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The build</div>
+  <div class="z">
+    <div class="eyebrow">Not more promo — more ways in</div>
+    <h2 class="sm reveal">Build entrances, <em>not assets</em>.</h2>
+    <div class="eco stagger" id="eco"></div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      One connected STORM universe, every piece leading back to the film —
+      <em>not a checklist of deliverables.</em></div>
+  </div>
+</section>
+
+<!-- ═══ 08 · THE IMMEDIATE PLAY ══════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The play</div>
+  <div class="bed scrim-l" style="opacity:.34"><img data-vid="Uim5i5AfmNg" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">A seven-day organic test, from material that likely already exists</div>
+    <h2 class="sm reveal">The next test doesn't need <em>another big production</em>.</h2>
+    <div class="play">
+      <div class="plist stagger">
+        <div>Jacket sequence — film against VMA</div>
+        <div>Rehearsal against the final performance</div>
+        <div>Dancer POV and backstage</div>
+        <div>Choreographer explaining one movement</div>
+        <div>Meet the dancers · casting</div>
+        <div>One clean, uninterrupted peak STORM moment</div>
+        <div>Film choreography against live choreography</div>
+        <div>One strong making-of moment</div>
+      </div>
+      <div class="funnel reveal">
+        <div class="st">Short</div><div class="ar">↓</div>
+        <div class="st h">STORM visual world</div><div class="ar">↓</div>
+        <div class="st h">Hero film</div><div class="ar">↓</div>
+        <div class="st">Song · YouTube Music</div><div class="ar">↓</div>
+        <div class="st">Deeper consumption</div>
+      </div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      Alongside: pinned comments, descriptions and end screens; STORM II one
+      tap away; Yung Lean channel participation; the dancers and their own
+      audiences; and clean VMA performance rights.</div>
+  </div>
+  <div class="foot">Six to ten pieces · the principle is not to ask audiences to discover something new, but to give the millions already discovering STORM somewhere else to go</div>
+</section>
+
+<!-- ═══ 09 · THE GLOBAL OPPORTUNITY ══════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The territory</div>
+  <div class="z">
+    <div class="eyebrow">YouTube views, last 28 days</div>
+    <h2 class="sm reveal">Almost half of the demand is coming from <em>Asia</em>.</h2>
+    <div class="terr">
+      <div class="stagger" id="markets"></div>
+      <div>
+        <div class="contrast reveal">
+          <h4>Spotify's strongest cities</h4>
+          <ul>
+            <li>London</li><li>Stockholm</li><li>Paris</li><li>Sydney</li><li>Berlin</li>
+          </ul>
+          <div class="kick c" style="margin-top:clamp(11px,1.5vw,20px);font-size:clamp(11px,1.15vw,17px);color:var(--warm)">
+            Seoul is <em>not</em> in the Spotify top five, despite being the single
+            biggest YouTube market for STORM.</div>
+        </div>
+        <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
+          This isn't proof of failed conversion — platform adoption differs
+          enormously by market. But it is a real question:
+          <em>STORM has found millions of viewers in Asia. How much deeper
+          consumption can we build from them?</em></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Ten Asian markets represent approximately 48% of 28-day YouTube viewing · this could become a specific market strategy rather than buying more impressions in the UK</div>
+</section>
+
+<!-- ═══ 10 · WHERE THE $100K FITS ════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The money</div>
+  <div class="bed scrim-f" style="opacity:.24"><img data-vid="5NGIpXM8Cn0" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">Approximately $100K newly approved digital marketing budget</div>
+    <h2 class="sm reveal">Prove the funnel <em>before we buy more attention</em>.</h2>
+    <div class="phases stagger">
+      <div class="pz">
+        <div class="ph2">Phase 1</div>
+        <h4>Organic</h4>
+        <ul>
+          <li>Fix the capture layer now</li><li>Cost: editing, existing assets</li>
+          <li>Test 6–10 entrances into STORM</li>
+          <li>Measure Short views, retention,</li>
+          <li>click-through, hero decay,</li>
+          <li>support consumption, subs</li>
+        </ul>
+      </div>
+      <div class="pz">
+        <div class="ph2">Phase 2</div>
+        <h4>Identify winners</h4>
+        <ul>
+          <li>Which creative earns attention?</li><li>Which market responds?</li>
+          <li>Which content actually sends</li><li>viewers deeper?</li>
+        </ul>
+      </div>
+      <div class="pz">
+        <div class="ph2">Phase 3</div>
+        <h4>Paid test</h4>
+        <ul>
+          <li>Only then, a controlled slice</li><li>of the $100K behind proven</li>
+          <li>creative</li><li>Test against holdout markets</li>
+          <li>wherever measurement allows</li>
+        </ul>
+      </div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
+      The question isn't "can we buy more YouTube views".<br>
+      It's <em>can paid discovery generate incremental, high-intent music consumers.</em></div>
+    <div class="foot" style="position:static;margin-top:clamp(10px,1.4vw,18px);max-width:none">
+      On the roughly 300K/day active-stream shortfall, with about 100K recovered through additional
+      editorial: nothing in this data supports a claim that YouTube can simply replace the remaining
+      ~200K, and this deck does not make one. Speculative cost-per-view to stream conversion tables
+      are deliberately left out of the main deck.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · SCORECARD ═══════════════════════════════════════════════ -->
+<section class="grain">
+  <div class="act">The measure</div>
+  <div class="z">
+    <div class="eyebrow">Proposed test targets — not forecasts</div>
+    <h2 class="sm reveal">Turn a 34.7M-view video into <em>a bigger audience system</em>.</h2>
+    <table class="score">
+      <thead><tr><th>Measure</th><th>Where it is now</th><th>What we'd be testing for</th></tr></thead>
+      <tbody>
+        <tr><td class="m">Hero dependency</td><td class="now">94.4% of views</td>
+          <td class="tgt">Meaningful share moving to surrounding content</td></tr>
+        <tr><td class="m">Entrances live</td><td class="now">0 STORM Shorts</td>
+          <td class="tgt">6–10 pieces published and measured</td></tr>
+        <tr><td class="m">Support attach</td><td class="now">~3.2% BTS to hero</td>
+          <td class="tgt">More than one piece earning an attach rate</td></tr>
+        <tr><td class="m">Shorts share</td><td class="now">0.46%</td>
+          <td class="tgt">Prove at least some owned Shorts acquire independently</td></tr>
+        <tr><td class="m">Subscriber conversion</td><td class="now">0.7 per 1,000 views</td>
+          <td class="tgt">Back toward the 2.0 seen in April–May</td></tr>
+        <tr><td class="m">Hero decay</td><td class="now">594,602/day, falling</td>
+          <td class="tgt">Hold meaningfully above the pre-VMA baseline</td></tr>
+        <tr><td class="m">Deeper consumption</td><td class="now">Not yet measured</td>
+          <td class="tgt">Incremental streaming in test territories</td></tr>
+      </tbody>
+    </table>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
+      The shift we're making is from views to
+      <em>captured audience → deeper consumption → repeat consumption.</em></div>
+  </div>
+</section>
+
+<!-- ═══ 12 · THE OPPORTUNITY ═════════════════════════════════════════ -->
+<section id="close" class="grain">
+  <div class="bed scrim"><img data-vid="x6_mbnsh6VU" alt=""></div>
+  <div class="z">
+    <div class="l1">STORM has already<br>found the audience.</div>
+    <div class="l2">Now build the world<br>around it.</div>
+    <div class="three stagger count">
+      <div><div class="num v" data-n="34.7" data-dp="1" data-suffix="M">34.7M</div>
+        <div class="l">The hero film</div></div>
+      <div><div class="num v" data-n="22.2" data-dp="1" data-suffix="M">22.2M</div>
+        <div class="l">Channel views gained with zero uploads</div></div>
+      <div><div class="num v" data-n="48" data-suffix="%">48%</div>
+        <div class="l">Of recent YouTube viewing coming from Asia</div></div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--warm);max-width:52ch">
+      This is already one of the strongest visual music stories in the campaign.
+      The opportunity isn't to manufacture another moment — it's to build enough
+      around the one that already exists <em>for it to compound.</em></div>
+    <div class="sig">Virgin Music Group · 7 October 2026</div>
+  </div>
+</section>
+
+<!-- ═══ APPENDIX ═════════════════════════════════════════════════════ -->
+<section id="appx">
+  <div class="z">
+    <div class="eyebrow">Appendix · method, provenance and limits</div>
+    <h2 class="sm reveal" style="font-size:clamp(18px,2.8vw,40px)">What this is built on.</h2>
+    <div class="apx">
+      <div>
+        <h4>Verified live, 7 Oct 2026</h4>
+        <p>YouTube Data API and the per-video daily observation series for @gener8ionworld (UCJZWYrX3FTpK_TVAF_8NU3Q).</p>
+        <p>Hero film 34,743,841 · STORM BTS 876,851 · 96,700 subscribers · Yung Lean 1,320,000.</p>
+        <p>Hero peak 1,264,534/day on 30 Sep · hero today 594,602 · BTS today 19,267.</p>
+        <p>Hero gain across the VMA wave 8,086,900 (29 Sep – 7 Oct). Hero share of channel views 94.4% and Shorts 0.46% across 1–7 Oct.</p>
+        <p>117 days between uploads: 12 June to 7 October.</p>
+      </div>
+      <div>
+        <h4>Inferred, not supplied</h4>
+        <p>The VMA date is read from the series rather than given: channel daily views jump from 453,610 on 28 Sep to 996,185 on 29 Sep. Everything labelled "VMA wave" means 29 Sep – 7 Oct.</p>
+      </div>
+      <div>
+        <h4>From the campaign analysis</h4>
+        <p>April–May, summer and pre-VMA phase averages, and the 22.2M figure for 11 Sep – 6 Oct. The daily series only begins 19 Sep, so these could not be reproduced here and are presented as analysis rather than as live reads.</p>
+        <p>Spotify weekly streams, territory shares, city rankings and comment theme coding are not YouTube Data API objects and come from the campaign data and the forensic pack.</p>
+      </div>
+      <div>
+        <h4>What is deliberately not claimed</h4>
+        <p>That YouTube caused the downstream streaming growth. Video has repeatedly been at the centre of STORM's biggest discovery moments; that is the claim and it is as far as the evidence goes.</p>
+        <p>That Asian YouTube demand is failing to convert. Platform adoption differs substantially by market, so this is an open question rather than a diagnosis.</p>
+        <p>That YouTube can replace the remaining active-stream shortfall. Nothing here supports it.</p>
+        <p>No cost-per-view to stream conversion modelling, and no forecasts. Scorecard targets are proposed tests.</p>
+      </div>
+      <div>
+        <h4>Measurement notes</h4>
+        <p>Views are plays, not people. No YouTube Studio data is used anywhere here: no impressions, click-through rate, retention, watch time or traffic sources.</p>
+        <p>Comment theme percentages are share of coded comments and sum to more than 100 because a comment can carry several themes.</p>
+        <p>Shorts and long-form views are not the same unit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────────────────────
+   DATA
+
+   Everything in VERIFIED was pulled live from the YouTube Data API and
+   the daily observation series on 7 Oct 2026 and recomputed here, rather
+   than transcribed from the forensic pack. Everything in ANALYSIS comes
+   from the campaign work and is labelled as such on the slides, because
+   the daily series does not reach back far enough to reproduce it. */
+
+/* Channel-wide daily views, 20 Sep – 7 Oct 2026, summed across every
+   video with an observation series. The VMA step is visible between
+   28 and 29 Sep and is how the VMA date was established. */
+const DAILY = [
+  ['09-20',635081],['09-21',611649],['09-22',526725],['09-23',575215],['09-24',492260],
+  ['09-25',474327],['09-26',456283],['09-27',435672],['09-28',453610],['09-29',996185],
+  ['09-30',1358295],['10-01',1131526],['10-02',990036],['10-03',1039076],['10-04',969782],
+  ['10-05',794438],['10-06',691902],['10-07',630970],
+];
+
+/* Hero and BTS daily, same window — the attach-rate chart on slide 05. */
+const HERO_D = [600665,578375,496976,540493,462253,443818,429158,410727,425935,
+  921942,1264534,1056845,928764,988654,921834,754445,655280,594602];
+const BTS_D  = [17487,19163,15387,19487,16550,16790,14300,12679,13529,
+  34486,47197,38851,31923,24105,24174,20520,19115,19267];
+
+/* Phase averages. The first three are from the campaign analysis; the
+   VMA-wave peak is the verified single best day from the series. */
+const PHASES = [
+  { k:'Apr–May',  l:'Film release<br>first breakout',     v:658000,  c:'warm' },
+  { k:'Summer',   l:'Channel settles',                     v:71000,   c:'' },
+  { k:'September',l:'Asian resurgence<br>pre-VMA',         v:729000,  c:'warm' },
+  { k:'VMA wave', l:'Live performance<br>second breakout', v:1358295, c:'hot' },
+];
+
+/* Comment themes on the VMA performance upload. Share of coded comments;
+   they sum past 100 because a comment can carry more than one theme. */
+const THEMES = [
+  ['Choreography · dance', 59],
+  ['Performed live · staging', 41],
+  ['The dancers', 38],
+  ['Should have won', 29],
+  ['The song itself', 0.4],
+];
+
+/* 28-day YouTube views by market. */
+const MARKETS = [
+  ['South Korea',3120000],['Indonesia',1170000],['Vietnam',978000],['India',780000],
+  ['Thailand',751000],['Taiwan',748000],['Japan',533000],['Malaysia',506000],
+];
+
+/* The ecosystem. Each card is fronted by a real frame from the STORM
+   world so the idea is shown in the film's own imagery. */
+const ECO = [
+  { t:'STORM I & II', d:'34.7M · the hero film everything points back to',
+    id:'x6_mbnsh6VU', core:1 },
+  { t:'The dancers', d:'POVs · profiles · casting · backstage', id:'8pAVxmSp0FQ' },
+  { t:'The dance', d:'Choreography breakdown · rehearsal to final · film against VMA',
+    id:'xT_nmiJp0jw' },
+  { t:'The performance', d:'Clean VMA if rights allow · rehearsal to stage · live production',
+    id:'Uim5i5AfmNg' },
+  { t:'The film', d:'How the sequences were made · director and creative · visual language',
+    id:'Xoi7reIF2r8' },
+  { t:'Making STORM', d:'Longer-form documentary · interviews · unseen material',
+    id:'di1E6JTuYRE' },
+];
+
+(function () {
+  const reduced = window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const nf = n => n.toLocaleString();
+
+  /* YouTube serves a grey 120x90 placeholder with HTTP 200 when
+     maxresdefault is missing, so onerror alone never fires. Check the
+     decoded size and drop to hqdefault, which always exists. */
+  function thumb(img, id, big) {
+    img.loading = 'lazy';
+    const hq = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+    const fb = function () { if (!this.dataset.fb) { this.dataset.fb = '1'; this.src = hq; } };
+    img.onerror = fb;
+    img.onload = function () { if (this.naturalWidth <= 120) fb.call(this); };
+    img.src = 'https://i.ytimg.com/vi/' + id + '/' + (big ? 'maxresdefault' : 'mqdefault') + '.jpg';
+  }
+  document.querySelectorAll('img[data-vid]').forEach(i => thumb(i, i.dataset.vid, true));
+
+  /* ── 02 · PHASES ───────────────────────────────────────────────────
+     Square-root scale. The VMA wave is 19x the summer floor, and on a
+     linear axis the floor becomes an invisible line — which hides the
+     very thing the slide is about, the size of the climb back. */
+  const wEl = document.getElementById('waves'), wxEl = document.getElementById('wavesx');
+  if (wEl) {
+    const max = Math.max(...PHASES.map(p => p.v));
+    wxEl.style.gridTemplateColumns = 'repeat(' + PHASES.length + ',1fr)';
+    PHASES.forEach(p => {
+      const d = document.createElement('div');
+      d.className = 'ph' + (p.c ? ' ' + p.c : '');
+      d.innerHTML = '<div class="pv">' + (p.v >= 1e6
+        ? (p.v / 1e6).toFixed(2) + 'M' : Math.round(p.v / 1000) + 'K') + '/day</div>'
+        + '<div class="bar" data-h="' + (Math.sqrt(p.v / max) * 100).toFixed(1) + '"></div>';
+      wEl.appendChild(d);
+      const x = document.createElement('div');
+      x.innerHTML = '<b style="color:var(--bone)">' + p.k + '</b><br>' + p.l;
+      wxEl.appendChild(x);
+    });
+  }
+
+  /* ── 05 · ATTACH RATE ─────────────────────────────────────────────
+     Hero as the pale column, BTS stacked beneath it in signal colour.
+     The point is that the small bar tracks the big one — the BTS rises
+     and falls with the hero rather than independently of it. */
+  const at = document.getElementById('attach');
+  if (at) {
+    const max = Math.max(...HERO_D);
+    HERO_D.forEach((h, i) => {
+      const p = document.createElement('div');
+      p.className = 'pair';
+      p.innerHTML = '<div class="h" data-h="' + (h / max * 100).toFixed(1) + '"></div>'
+        + '<div class="b" data-h="' + (BTS_D[i] / max * 100 * 6).toFixed(1) + '"></div>';
+      p.title = 'Hero ' + nf(h) + ' · BTS ' + nf(BTS_D[i])
+        + ' (' + (BTS_D[i] / h * 100).toFixed(1) + '%)';
+      at.appendChild(p);
+    });
+  }
+
+  /* ── 04 · THE SYSTEM ──────────────────────────────────────────────
+     One enormous node and a ring of small ones, sized to the real view
+     shares. The picture is the argument: everything else is a speck. */
+  const sys = document.getElementById('sys');
+  if (sys) {
+    const hero = document.createElement('div');
+    hero.className = 'node hero';
+    hero.innerHTML = '<div class="n">94.4%</div><div class="s">STORM I &amp; II</div>';
+    sys.appendChild(hero);
+    const sats = [['BTS', 2.8], ['Shorts', 0.46], ['Neo Surf', 1.1], ['L&T', 0.9],
+                  ['Teasers', 0.2], ['VMA BTS', 0.1]];
+    sats.forEach((s, i) => {
+      const a = (i / sats.length) * Math.PI * 2 - Math.PI / 2;
+      const d = document.createElement('div');
+      d.className = 'node sm';
+      const size = Math.max(26, Math.min(62, 22 + s[1] * 13));
+      d.style.width = d.style.height = size + 'px';
+      d.style.left = 'calc(50% + ' + (Math.cos(a) * 38) + '% - ' + size / 2 + 'px)';
+      d.style.top = 'calc(50% + ' + (Math.sin(a) * 36) + '% - ' + size / 2 + 'px)';
+      d.innerHTML = '<div class="n">' + s[1] + '%</div>';
+      d.title = s[0] + ' · ' + s[1] + '% of channel views';
+      sys.appendChild(d);
+    });
+  }
+
+  /* ── 06 · THEMES ──────────────────────────────────────────────────── */
+  const th = document.getElementById('themes');
+  if (th) THEMES.forEach(([n, p]) => {
+    const d = document.createElement('div');
+    d.className = 'th' + (p < 5 ? ' low' : '');
+    d.innerHTML = '<span class="n">' + n + '</span>'
+      + '<span class="t"><span class="f" data-w="' + p + '"></span></span>'
+      + '<span class="p">' + p + '%</span>';
+    th.appendChild(d);
+  });
+
+  /* ── 07 · ECOSYSTEM ───────────────────────────────────────────────── */
+  const eco = document.getElementById('eco');
+  if (eco) ECO.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'ec' + (e.core ? ' core' : '');
+    d.innerHTML = '<div class="th2"><img alt=""></div>'
+      + '<div class="bd"><div class="t">' + e.t + '</div><div class="d">' + e.d + '</div></div>';
+    thumb(d.querySelector('img'), e.id, true);
+    eco.appendChild(d);
+  });
+
+  /* ── 09 · MARKETS ─────────────────────────────────────────────────── */
+  const mk = document.getElementById('markets');
+  if (mk) {
+    const max = MARKETS[0][1];
+    MARKETS.forEach(([n, v]) => {
+      const d = document.createElement('div');
+      d.className = 'mrow';
+      d.innerHTML = '<span class="c">' + n + '</span>'
+        + '<span class="t"><span class="f" data-w="' + (v / max * 100).toFixed(1) + '"></span></span>'
+        + '<span class="v">' + (v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : Math.round(v / 1000) + 'K') + '</span>';
+      mk.appendChild(d);
+    });
+  }
+
+  /* ── THE OPENING NUMBER ───────────────────────────────────────────
+     34,743,841 rolls up the moment the deck opens. Width is pinned from
+     the final string first, or the cover shunts sideways while it runs;
+     and a hard timer lands it even if the tab is hidden and rAF is
+     paused, because a cover reading "0" is the worst opening available. */
+  (function heroCount() {
+    const el = document.getElementById('hero-n');
+    if (!el || reduced) return;
+    const end = 34743841, dur = 2400;
+    const pin = () => { const w = el.getBoundingClientRect().width;
+      if (w) el.style.minWidth = Math.ceil(w) + 'px'; };
+    pin();
+    window.addEventListener('resize', () => { el.style.minWidth = ''; pin(); });
+    let done = false, t0 = null;
+    const land = () => { if (!done) { done = true; el.textContent = nf(end); } };
+    setTimeout(() => {
+      if (document.hidden) return land();
+      el.textContent = '0';
+      const step = ts => {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        const p = Math.min(1, (ts - t0) / dur);
+        if (p >= 1) return land();
+        el.textContent = nf(Math.round(end * (1 - Math.pow(1 - p, 4))));
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      setTimeout(land, dur + 600);
+    }, 260);
+  })();
+
+  /* ── COUNT-UPS ────────────────────────────────────────────────────
+     The markup carries the real value and the animation only ever
+     counts up to it, so a figure can never present as a confident zero
+     if the animation does not run. */
+  function fmt(v, el) {
+    const dp = parseInt(el.getAttribute('data-dp') || '0', 10);
+    const suf = el.getAttribute('data-suffix') || '';
+    return (dp > 0 ? v.toFixed(dp) : Math.round(v).toLocaleString()) + suf;
+  }
+  function paint(group) {
+    if (reduced || document.hidden) return;
+    group.querySelectorAll('[data-n]').forEach(v => {
+      const w = v.getBoundingClientRect().width;
+      if (w) v.style.minWidth = Math.ceil(w) + 'px';
+    });
+    group.querySelectorAll('[data-n]').forEach((v, i) => {
+      const end = parseFloat(v.getAttribute('data-n'));
+      if (isNaN(end)) return;
+      const dur = 900, delay = 50 + i * 60;
+      let t0 = null, done = false;
+      const land = () => { if (!done) { done = true; v.textContent = fmt(end, v); } };
+      v.textContent = fmt(0, v);
+      const step = ts => {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        const p = Math.min(1, (ts - t0) / dur);
+        if (p >= 1) return land();
+        v.textContent = fmt(end * (1 - Math.pow(1 - p, 3)), v);
+        requestAnimationFrame(step);
+      };
+      setTimeout(() => requestAnimationFrame(step), delay);
+      setTimeout(land, delay + dur + 450);
+    });
+  }
+
+  /* Bars and reveals fire as each slide arrives. The observer root is
+     the deck, not the viewport — the deck is the scrolling element, so
+     a viewport-rooted observer fires for everything at load. */
+  const deck = document.querySelector('.deck');
+  const grow = el => {
+    el.querySelectorAll('[data-h]').forEach(b => { b.style.height = b.dataset.h + '%'; });
+    el.querySelectorAll('[data-w]').forEach(b => { b.style.width = b.dataset.w + '%'; });
+  };
+  const watch = [...document.querySelectorAll('.count, .reveal, .stagger, #waves, #attach, #themes, #markets')];
+  if (reduced || !('IntersectionObserver' in window)) {
+    watch.forEach(el => { el.classList.add('visible'); grow(el); paint(el); });
+  } else {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      if (el.classList.contains('stagger')) {
+        [...el.children].forEach((c, i) => { c.style.transitionDelay = (i * 55) + 'ms'; });
+      }
+      el.classList.add('visible');
+      grow(el);
+      if (el.classList.contains('count')) paint(el);
+      io.unobserve(el);
+    }), { root: deck, threshold: .14, rootMargin: '0px 0px -6% 0px' });
+    watch.forEach(el => io.observe(el));
+    document.querySelectorAll('section:first-of-type .reveal, section:first-of-type .stagger')
+      .forEach(el => { el.classList.add('visible'); if (el.classList.contains('count')) paint(el); });
+  }
+
+  let rt;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => document.querySelectorAll('[data-n]')
+      .forEach(v => { v.style.minWidth = ''; }), 120);
+  });
+})();
+</script>
+</body>
+</html>
