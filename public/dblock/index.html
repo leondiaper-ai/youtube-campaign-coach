@@ -662,6 +662,7 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
   const field = document.getElementById('field');
   if (field) {
     const max = Math.max(...CATALOGUE.map(v => v.views));
+    const base = [];
     CATALOGUE.forEach(v => {
       const i = document.createElement('i');
       /* Area, not length: a 106m video is 380x a 280k one, so scaling the
@@ -671,6 +672,7 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
          catalogue — tiles too small to see would undercount it. */
       const scale = Math.sqrt(v.views / max);
       const size = Math.max(18, Math.round(20 + scale * 170));
+      base.push(size);
       i.style.width = size + 'px';
       i.style.height = size + 'px';
       if (v.views >= 1e8) i.className = 'm100';
@@ -688,17 +690,33 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
        that is safe everywhere and dull everywhere. Re-run on resize, since
        the deck is presented on whatever screen is in the room. */
     const slide = field.closest('section');
+    const tiles = [...field.children];
+    const apply = (m) => {
+      tiles.forEach((t, n) => {
+        const px = Math.round(base[n] * m);
+        t.style.width = px + 'px';
+        t.style.height = px + 'px';
+      });
+    };
+    /* Binary search the tile multiplier against the REAL measured slide,
+       rather than picking a size that is safe on every screen and therefore
+       timid on all of them. Scaling the tiles (not zooming the container)
+       is what matters: zoom changes the available width too, so the field
+       re-wraps into fewer rows and shrinks far faster than intended — it
+       collapsed to the floor on the first attempt. */
     const fit = () => {
-      const tiles = [...field.children];
-      tiles.forEach((t) => { t.style.transform = ''; });
-      field.style.zoom = '';
-      let z = 1;
-      for (let pass = 0; pass < 14; pass++) {
-        const over = slide.scrollHeight - window.innerHeight;
-        if (over <= 0 || z <= 0.45) break;
-        z = Math.max(0.45, z - 0.05);
-        field.style.zoom = z;
+      field.style.minHeight = '0px';
+      apply(1);
+      const other = slide.scrollHeight - field.offsetHeight;
+      const room = window.innerHeight - other - 6;
+      let lo = 0.3, hi = 2.2;
+      for (let pass = 0; pass < 18; pass++) {
+        const mid = (lo + hi) / 2;
+        apply(mid);
+        if (field.offsetHeight <= room) lo = mid; else hi = mid;
       }
+      apply(lo);
+      field.style.minHeight = '';
     };
     fit();
     let ft;
