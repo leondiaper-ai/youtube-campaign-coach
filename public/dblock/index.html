@@ -114,11 +114,15 @@ h2{font-size:clamp(30px,6.2vw,104px);max-width:17ch}
 #open .tiny{font-family:ui-monospace,monospace;font-size:clamp(9px,.78vw,12px);letter-spacing:.3em;
   text-transform:uppercase;color:var(--gold);margin-top:clamp(16px,2.2vw,32px)}
 
-/* ══ 02 STAT WALL ══ */
-.wall{display:flex;flex-direction:column;gap:clamp(4px,.7vw,12px);margin-top:clamp(16px,2.4vw,34px)}
+/* ══ 02 STAT WALL ══
+   Six rows is the most this slide can hold above the fold. The value size is
+   capped well below what the type would otherwise take, because a seventh
+   line of scroll turns the one-idea slide into a list the room has to read. */
+#wall-h{font-size:clamp(26px,4.4vw,66px);max-width:20ch}
+.wall{display:flex;flex-direction:column;gap:clamp(3px,.45vw,7px);margin-top:clamp(10px,1.4vw,20px)}
 .wrow{display:flex;align-items:baseline;gap:clamp(12px,2vw,34px);border-top:1px solid var(--hair);
-  padding-top:clamp(7px,1vw,15px);flex-wrap:wrap}
-.wrow .v{font-size:clamp(34px,7.4vw,124px);min-width:3.2ch}
+  padding-top:clamp(5px,.65vw,10px);flex-wrap:wrap}
+.wrow .v{font-size:clamp(28px,4.6vw,72px);min-width:3.2ch}
 .wrow .l{font-family:ui-monospace,monospace;font-size:clamp(8.5px,.76vw,12.5px);letter-spacing:.22em;
   text-transform:uppercase;color:var(--dim);line-height:1.5;max-width:30ch}
 .wrow.hi .v{color:var(--gold)}
@@ -229,10 +233,12 @@ h2{font-size:clamp(30px,6.2vw,104px);max-width:17ch}
 .col.them h3{color:var(--bone)}
 .col.us h3{color:var(--gold)}
 .col ul{list-style:none}
-.col li{font-size:clamp(13px,1.5vw,25px);font-weight:800;font-stretch:70%;text-transform:uppercase;
-  line-height:1.26;padding:clamp(4px,.55vw,8px) 0;color:#C5CBD3}
+/* Eleven Virgin jobs against three DBE ones is the whole point of the slide,
+   so the list stays complete and the type gives way instead. */
+.col li{font-size:clamp(12px,1.22vw,20px);font-weight:800;font-stretch:70%;text-transform:uppercase;
+  line-height:1.22;padding:clamp(2px,.3vw,5px) 0;color:#C5CBD3}
 .col.us li{color:var(--gold);opacity:.92}
-.col.them li{font-size:clamp(16px,2.1vw,36px);color:var(--bone)}
+.col.them li{font-size:clamp(15px,1.9vw,32px);color:var(--bone);padding:clamp(4px,.5vw,8px) 0}
 
 /* ══ 12 GRAPH ══ */
 .graph{display:flex;flex-wrap:wrap;gap:clamp(7px,1vw,14px);margin-top:clamp(16px,2.2vw,32px);
@@ -310,7 +316,7 @@ h2{font-size:clamp(30px,6.2vw,104px);max-width:17ch}
 <section class="grain">
   <div class="z">
     <div class="eyebrow">Virgin Music Group · October 2026</div>
-    <h2>This is one of Virgin's biggest YouTube businesses.</h2>
+    <h2 id="wall-h">This is one of Virgin's biggest YouTube businesses.</h2>
     <div class="wall count">
       <div class="wrow hi"><div class="num v" data-n="9.23" data-dp="2" data-suffix="M">9.23M</div>
         <div class="l">UK monthly views</div></div>
