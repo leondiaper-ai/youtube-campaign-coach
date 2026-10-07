@@ -463,6 +463,48 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 .evid .s{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#4F5762;margin-top:8px;
   line-height:1.6}
 
+/* ── TERRITORIES ─────────────────────────────────────────────────────────
+   Two readings on one slide: the shape of the map on the left, and the one
+   territory that tells a story on the right. The bars are deliberately a
+   log-ish scale by share rather than raw views — the UK is 15x Australia,
+   so a linear bar chart would be one bar and eighteen slivers. */
+.terrwrap{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(14px,2.6vw,46px);
+  margin-top:clamp(12px,1.8vw,26px);align-items:start}
+@media(max-width:900px){.terrwrap{grid-template-columns:1fr}}
+.terrbars{display:flex;flex-direction:column;gap:clamp(3px,.42vw,6px)}
+.tb{display:grid;grid-template-columns:minmax(74px,auto) 1fr minmax(62px,auto) minmax(44px,auto);
+  gap:clamp(6px,.9vw,13px);align-items:center}
+.tb .c{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--warm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb .t{height:clamp(7px,.85vw,12px);background:rgba(247,243,236,.05);border-radius:2px;overflow:hidden}
+.tb .f{height:100%;width:0;background:#2A2520;border-radius:2px;
+  transition:width .9s cubic-bezier(.2,.8,.25,1)}
+.tb .v{font-family:var(--mono);font-size:8.5px;color:var(--dim);text-align:right;
+  font-variant-numeric:tabular-nums}
+.tb .d{font-family:var(--mono);font-size:8.5px;text-align:right;font-variant-numeric:tabular-nums}
+.tb .d.up{color:#6FA86F} .tb .d.dn{color:var(--amber)} .tb .d.na{color:#3E382F}
+.tb.uk .c{color:var(--bone);font-weight:700}
+.tb.uk .f{background:linear-gradient(90deg,var(--gold),var(--gold-lt))}
+.tb.al .c{color:var(--amber);font-weight:700}
+.tb.al .f{background:linear-gradient(90deg,rgba(232,137,60,.5),var(--amber));
+  box-shadow:0 0 16px rgba(232,137,60,.45)}
+
+.albania{border:1px solid rgba(232,137,60,.42);background:rgba(232,137,60,.08);border-radius:3px;
+  padding:clamp(11px,1.5vw,22px)}
+.alabel{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:clamp(9px,1.2vw,16px)}
+.arow{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.4vw,22px)}
+@media(max-width:620px){.arow{grid-template-columns:1fr}}
+.arow .av{font-size:clamp(22px,3.2vw,50px);color:var(--amber)}
+.arow .al{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--warm);margin-top:8px;line-height:1.55}
+.afall{display:flex;align-items:baseline;gap:clamp(9px,1.4vw,20px);flex-wrap:wrap;
+  margin-top:clamp(11px,1.5vw,20px);padding-top:clamp(9px,1.2vw,16px);
+  border-top:1px solid rgba(232,137,60,.28)}
+.afall .num{font-size:clamp(20px,2.8vw,42px);color:var(--amber);font-stretch:60%;font-weight:900}
+.afall .at{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--warm);max-width:26ch;line-height:1.55}
+
 /* ── THE PROOF ───────────────────────────────────────────────────────────
    Adz's own channel. The strongest evidence in the deck, because it is not
    a recommendation — it is a thing DBE already did, and the numbers are
@@ -1022,6 +1064,51 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="foot">@dbenumber29skiski · 18 uploads between 11 Feb and 19 May 2024, nothing since · read from the YouTube Data API, 7 Oct 2026</div>
 </section>
 
+<!-- 19 · TERRITORIES -->
+<section class="grain">
+  <div class="act">Act IV · The world</div>
+  <div class="bed scrim-f" style="opacity:.34"><img data-vid="bnc7hO8UGXU" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">Where the viewing actually comes from</div>
+    <h2 class="sm reveal">A collaboration opened a country.<br>Nothing held it.</h2>
+
+    <div class="terrwrap">
+      <div class="terrleft">
+        <div class="terrbars stagger" id="terrbars"></div>
+        <div class="qual" style="margin-top:clamp(8px,1.1vw,14px)">
+          Chartmetric YouTube monthly views, reporting date 1 Oct 2026 · 19 countries listed, of which
+          Belgium, Hungary, UAE and New Zealand are Chartmetric estimates and are excluded from the
+          rise-and-fall read. The UK figure here (9,344,184, 1 Oct) is a later reading than the
+          9,230,272 used against Dave earlier, which is the 25 Sep VMG Landscape dataset.</div>
+      </div>
+
+      <div class="terrright">
+        <div class="albania">
+          <div class="alabel">Albania</div>
+          <div class="arow count">
+            <div><div class="num av" data-n="5">5</div><div class="al">Biggest country for DBE —
+              above Germany, Ireland and India</div></div>
+            <div><div class="num av" data-n="396770">396,770</div><div class="al">Monthly views</div></div>
+            <div><div class="num av" data-n="4">4</div><div class="al">Tirana is the 4th biggest city
+              in the world for DBE — ahead of Dublin, Sydney and Leeds</div></div>
+          </div>
+          <div class="afall">
+            <span class="num" data-n="-36.5" data-dp="1" data-suffix="%">−36.5%</span>
+            <span class="at">The steepest fall of any territory on the list</span>
+          </div>
+        </div>
+        <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+          Eagle ft. Noizy did <em>14.3M views</em>. Noizy is Albanian.
+          A single collaboration built DBE a market bigger than Germany —
+          and it is now draining away faster than anywhere else.</div>
+        <div class="punch s reveal" style="margin-top:clamp(10px,1.4vw,20px)">
+          Collabs open doors.<br><em>Someone has to hold them open.</em></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Chartmetric attributes territory to the artist, not to a single video — the Noizy connection is our read of why Albania appears at all, not something Chartmetric states</div>
+</section>
+
 <!-- 19 · THE COLLAB TOOL -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
@@ -1272,6 +1359,23 @@ const OPPS = [
 
 /* Stations — programming lanes, each fronted by a real upload so the
    idea is shown in DBE's own imagery rather than described. */
+/* Chartmetric YouTube monthly views by territory, reporting date 1 Oct 2026,
+   read from /api/chartmetric/territories/dblockeuropetv on 7 Oct.
+   [name, code, monthlyViews, changePct|null, isEstimate]
+   null change = Chartmetric had no prior reading for that market. */
+const TERR = [
+  ['United Kingdom','GB',9344184,  6.7,false], ['Australia','AU', 625811,  4.4,false],
+  ['United States','US', 487024,  9.9,false], ['Canada','CA',    402545,  8.5,false],
+  ['Albania','AL',       396770,-36.5,false], ['Germany','DE',   341667, -6.8,false],
+  ['Ireland','IE',       290153,  4.1,false], ['India','IN',     287417, -8.8,false],
+  ['Spain','ES',         225387, -6.8,false], ['Netherlands','NL',197628,  4.7,false],
+  ['France','FR',        188047,  4.9,false], ['Poland','PL',    183238,  5.2,false],
+  ['Italy','IT',         169599,-14.5,false], ['Indonesia','ID', 138813,-23.2,false],
+  ['Belgium','BE',       138503, null,true ], ['Romania','RO',   119842,  0.4,false],
+  ['Hungary','HU',        58030, null,true ], ['UAE','AE',        46424, null,true ],
+  ['New Zealand','NZ',    30026, null,true ],
+];
+
 /* Young Adz's own channel, @dbenumber29skiski. Six long-form vlogs, read
    from the YouTube Data API on 7 Oct 2026. These are the exact formats the
    deck recommends — travel, cars, faith, fans, tour — and DBE already made
@@ -1472,6 +1576,40 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
     thumb(d.querySelector('img'), o.id, true);
     oc.appendChild(d);
   });
+
+  /* ── 19 · TERRITORIES ──────────────────────────────────────────────
+     Bars are scaled by the FOURTH ROOT of views, not linearly. The UK is
+     311x New Zealand; on a linear scale this is one bar and eighteen
+     invisible lines, which hides the only interesting part of the chart —
+     the shape of the tail. The numbers are printed beside every bar, so
+     the bar is doing comparison and the figure is doing precision. */
+  const tbEl = document.getElementById('terrbars');
+  if (tbEl) {
+    const max = Math.max(...TERR.map(t => t[2]));
+    TERR.forEach(([name, code, views, chg, est]) => {
+      const row = document.createElement('div');
+      row.className = 'tb' + (code === 'GB' ? ' uk' : code === 'AL' ? ' al' : '');
+      const w = Math.pow(views / max, 0.25) * 100;
+      const dCls = chg == null ? 'na' : chg > 0 ? 'up' : 'dn';
+      const dTxt = chg == null ? 'est' : (chg > 0 ? '+' : '−') + Math.abs(chg).toFixed(1) + '%';
+      row.innerHTML = '<span class="c">' + name + '</span>'
+        + '<span class="t"><span class="f" data-w="' + w.toFixed(1) + '"></span></span>'
+        + '<span class="v">' + nf(views) + '</span>'
+        + '<span class="d ' + dCls + '">' + dTxt + '</span>';
+      row.title = name + (est ? ' · Chartmetric estimate' : '');
+      tbEl.appendChild(row);
+    });
+    /* Fill on scroll, same as every other bar in the deck. */
+    const fillTerr = () => tbEl.querySelectorAll('.f[data-w]')
+      .forEach(f => { f.style.width = f.dataset.w + '%'; });
+    if (reduced || !('IntersectionObserver' in window)) fillTerr();
+    else {
+      const tio = new IntersectionObserver(es => es.forEach(e => {
+        if (!e.isIntersecting) return; fillTerr(); tio.unobserve(e.target);
+      }), { root: document.querySelector('.deck'), threshold: 0.2 });
+      tio.observe(tbEl);
+    }
+  }
 
   /* ── 18 · ADZ'S VLOGS ──────────────────────────────────────────── */
   const ag = document.getElementById('adzgrid');
