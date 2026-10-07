@@ -519,7 +519,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="bed scrim"><img data-vid="I4Ra4z2Arqg" alt=""></div>
   <div class="z">
     <div class="name">D-Block Europe</div>
-    <div class="num big glow">973,000,000</div>
+    <div class="num big glow" id="hero-n" data-n="973000000">973,000,000</div>
     <div class="num big" style="font-size:clamp(18px,4.2vw,78px);color:var(--gold);margin-top:.12em">YouTube views</div>
     <div class="tiny">The next billion starts here</div>
   </div>
@@ -1428,6 +1428,58 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
     }), { threshold: 0.25 });
     groups.forEach(g => io.observe(g));
   }
+
+  /* ── THE OPENING NUMBER ────────────────────────────────────────────────
+     973,000,000 rolls up the moment the deck opens. It is the first thing
+     the room sees and the whole argument in one figure, so it gets its own
+     treatment rather than the shared scroll-triggered one: a longer run
+     (2.4s), a softer ease so the last hundred million takes its time, and
+     no scroll required.
+
+     Three things this has to get right, all learned the hard way:
+       - The width is pinned from the final string BEFORE the count starts.
+         "0" and "973,000,000" are wildly different widths at 214px, and an
+         unpinned figure would shunt the whole cover left-to-right for two
+         and a half seconds.
+       - It animates from a real number up to the real number. It never
+         displays a value it hasn't reached, and it lands exactly.
+       - If the tab is hidden, rAF is paused — so a timer lands it anyway.
+         A cover reading "0" is the worst possible opening frame. */
+  (function heroCount() {
+    const el = document.getElementById('hero-n');
+    if (!el) return;
+    const end = 973000000;
+    if (reduced) return;                 // leave the real figure in place
+    const pin = () => {
+      const w = el.getBoundingClientRect().width;
+      if (w) el.style.minWidth = Math.ceil(w) + 'px';
+    };
+    pin();
+    window.addEventListener('resize', () => { el.style.minWidth = ''; pin(); });
+
+    let done = false;
+    const land = () => { if (!done) { done = true; el.textContent = end.toLocaleString(); } };
+    const run = () => {
+      if (document.hidden) return land();
+      const dur = 2400;
+      let t0 = null;
+      el.textContent = '0';
+      const step = ts => {
+        if (done) return;
+        if (t0 === null) t0 = ts;
+        const p = Math.min(1, (ts - t0) / dur);
+        if (p >= 1) return land();
+        /* Quartic ease-out: fast off the line, then a long settle, so the
+           figure feels like it is arriving somewhere rather than stopping. */
+        el.textContent = Math.round(end * (1 - Math.pow(1 - p, 4))).toLocaleString();
+        requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      setTimeout(land, dur + 600);
+    };
+    /* A beat after load so the frame behind it has painted first. */
+    setTimeout(run, 260);
+  })();
 
   /* ── REVEAL ────────────────────────────────────────────────────────────
      Content lifts in as each slide arrives, and children of a .stagger
