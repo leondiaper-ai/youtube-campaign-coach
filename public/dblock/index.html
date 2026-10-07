@@ -253,10 +253,18 @@ section.splitscreen{padding:0}
 
 .field{margin-top:clamp(10px,1.5vw,22px);display:flex;flex-wrap:wrap;gap:4px;
   align-content:center;align-items:center}
-.field i{display:block;border-radius:1px;background:#1C242E}
+.field i{display:block;border-radius:1px;background:#1C242E;position:relative;overflow:hidden}
 .field i.m1{background:rgba(201,154,69,.55)}
 .field i.m10{background:var(--gold);box-shadow:0 0 14px rgba(201,154,69,.6)}
 .field i.m100{background:var(--bone);box-shadow:0 0 28px rgba(247,245,241,.75)}
+/* The tiles big enough to read carry their real artwork. The catalogue
+   stays a field of blocks; the hits become pictures. That is the slide's
+   whole point — most of this is mass, and a handful of it is iconic. */
+.field i.art{background-size:cover;background-position:center;
+  filter:saturate(1.18) contrast(1.06)}
+.field i.art::after{content:'';position:absolute;inset:0;
+  box-shadow:inset 0 0 0 1px rgba(201,154,69,.45)}
+.field i.m100.art::after{box-shadow:inset 0 0 0 2px rgba(247,245,241,.9)}
 .legend{display:flex;gap:clamp(14px,2.4vw,42px);flex-wrap:wrap;margin-top:clamp(12px,1.7vw,24px);
   border-top:1px solid var(--hair);padding-top:clamp(9px,1.3vw,17px)}
 .legend div .v{font-size:clamp(18px,2.5vw,42px)}
@@ -1404,6 +1412,14 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
       if (v.views >= 1e8) i.className = 'm100';
       else if (v.views >= 1e7) i.className = 'm10';
       else if (v.views >= 1e6) i.className = 'm1';
+      /* 4M is the point at which a tile is large enough for the artwork to
+         actually read. Below it a thumbnail is mush and the block says more.
+         mqdefault, not maxres: these render at ~30–60px, and 27 maxres files
+         would be megabytes for no visible gain. */
+      if (v.views >= 4e6) {
+        i.className += ' art';
+        i.style.backgroundImage = 'url(https://i.ytimg.com/vi/' + v.id + '/mqdefault.jpg)';
+      }
       i.title = nf(v.views) + ' views · ' + v.date.slice(6, 8) + '/' + v.date.slice(4, 6) + '/' + v.date.slice(0, 4);
       field.appendChild(i);
     });
