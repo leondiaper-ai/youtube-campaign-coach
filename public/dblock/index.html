@@ -397,6 +397,39 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   color:#9AA2AC;margin-top:5px;line-height:1.5}
 .st.on .nm{color:var(--gold)}
 
+/* ── THE STATIONS TOOL ────────────────────────────────────────────────── */
+.howrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:clamp(9px,1.3vw,20px);
+  margin-top:clamp(12px,1.8vw,26px)}
+.how{border-top:2px solid var(--gold);padding-top:clamp(9px,1.2vw,17px)}
+.howrow .how:nth-child(2){border-top-color:var(--amber)}
+.howrow .how:nth-child(3){border-top-color:var(--cold)}
+.how .n{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--dim);margin-bottom:8px}
+.how .t{font-size:clamp(14px,1.7vw,27px);font-weight:900;font-stretch:66%;text-transform:uppercase;
+  line-height:1;color:var(--gold)}
+.howrow .how:nth-child(2) .t{color:var(--amber)}
+.howrow .how:nth-child(3) .t{color:var(--cold)}
+.how .d{font-family:var(--mono);font-size:9.5px;color:var(--warm);line-height:1.7;margin-top:9px;
+  max-width:30ch}
+
+/* Real, live stations on real artist channels. Each is a link, because the
+   single most persuasive thing in this section is the room opening one. */
+.exrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:clamp(9px,1.3vw,18px);
+  margin-top:clamp(12px,1.8vw,26px)}
+.ex{border:1px solid var(--hair);border-radius:3px;overflow:hidden;text-decoration:none;display:block;
+  background:rgba(15,13,11,.7);transition:transform .3s ease,border-color .3s ease}
+.ex:hover{transform:translateY(-3px);border-color:rgba(201,154,69,.45)}
+.ex .th{aspect-ratio:16/9;position:relative;background:#11100E}
+.ex .th img{width:100%;height:100%;object-fit:cover;filter:saturate(1.14) contrast(1.05)}
+.ex .badge{position:absolute;left:7px;top:7px;background:var(--red);color:#fff;font-family:var(--mono);
+  font-size:7.5px;letter-spacing:.16em;padding:3px 7px;border-radius:2px;text-transform:uppercase;
+  font-weight:700}
+.ex .bd{padding:clamp(8px,1.05vw,14px)}
+.ex .nm{font-size:clamp(12px,1.25vw,19px);font-weight:900;font-stretch:66%;text-transform:uppercase;
+  line-height:1;color:var(--bone)}
+.ex .ch{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);margin-top:7px}
+.ex .nt{font-family:var(--mono);font-size:8.5px;color:var(--dim);margin-top:7px;line-height:1.6}
+
 .lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(192px,1fr));gap:clamp(9px,1.3vw,20px);
   margin-top:clamp(10px,1.4vw,20px)}
 /* Four lanes, four accents, nothing repeating twice in a row — the rule
@@ -879,17 +912,63 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   </div>
 </section>
 
-<!-- 15 · STATIONS -->
+<!-- 15 · THE TOOL -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
-  <div class="bed scrim-f" style="opacity:.42"><img data-vid="XCQV3fIIako" alt=""></div>
+  <div class="bed scrim-f" style="opacity:.36"><img data-vid="XCQV3fIIako" alt=""></div>
   <div class="z">
-    <div class="eyebrow">From an upload feed to a destination</div>
-    <h2 class="sm reveal">Eight stations inside one channel.</h2>
+    <div class="eyebrow">And YouTube has just built the tool for exactly this</div>
+    <h2 class="sm reveal">Stations.<br>An always-on channel, from videos you already have.</h2>
+    <div class="howrow stagger">
+      <div class="how"><div class="n">01</div><div class="t">Build a playlist</div>
+        <div class="d">In YouTube Studio, from videos already on the channel</div></div>
+      <div class="how"><div class="n">02</div><div class="t">Press Start Station</div>
+        <div class="d">YouTube generates and runs the livestream — no encoder, no broadcast setup</div></div>
+      <div class="how"><div class="n">03</div><div class="t">It's always on</div>
+        <div class="d">A live object on the channel with a Station badge, live chat, and
+          recommendations in Home and Search</div></div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.8vw,26px);color:var(--bone)">
+      YouTube's words: <em>"an always-on, lean-back viewing experience"</em> where fans
+      "watch and engage in real-time with other fans in live chat, making it feel like
+      a shared viewing room."</div>
+  </div>
+  <div class="foot">YouTube Product Director Kurt Wilms, via The Verge, Apr 2026 · YouTube Help, Aug 2026 · Viewable in all markets except Portugal, Switzerland and Türkiye</div>
+</section>
+
+<!-- 16 · WHO ALREADY HAS ONE -->
+<section class="grain">
+  <div class="act">Act IV · The world</div>
+  <div class="z">
+    <div class="eyebrow">Live right now, on artist channels</div>
+    <h2 class="sm reveal">This already exists.</h2>
+    <div class="exrow stagger" id="stationex"></div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.8vw,26px);color:var(--bone)">
+      A Station isn't only catalogue. Green Day's launched with
+      <em>100+ hours of unseen archive</em> and a new weekly show.<br>
+      Coachella's mixed archive with festival highlights, refreshed after each weekend.</div>
+    <div class="qual">
+      YouTube calls this a pilot — "we started this pilot with a small group of music
+      artists" — and widened it in August 2026 to select new artists and creators, with
+      only a limited number admitted. There is no published application process or
+      eligibility criteria, and no performance data has been released. This is an
+      opportunity to pursue with YouTube, not a feature we can switch on.</div>
+  </div>
+  <div class="foot">Titles and owning channels verified via the YouTube oEmbed API, 7 Oct 2026 · Coachella confirmed as a Station by YouTube (blog.youtube, 9 Apr 2026)</div>
+</section>
+
+<!-- 17 · WHAT DBE WOULD PUT ON IT -->
+<section class="grain">
+  <div class="act">Act IV · The world</div>
+  <div class="bed scrim-f" style="opacity:.44"><img data-vid="Ry1m40ScWks" alt=""></div>
+  <div class="z">
+    <div class="eyebrow">What DBE would programme on it</div>
+    <h2 class="sm reveal">D-Block Europe TV.</h2>
     <div class="stations stagger" id="stations"></div>
-    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:#AEB5BE">
-      Not separate channels — <em>programming lanes</em>. Playlists, series
-      naming, thumbnails and shelves, so the channel has places to go.</div>
+    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
+      Eight lanes, every one of them feedable from the catalogue
+      <em>that already exists</em> — and the 361 days a year the channel
+      currently has nothing on it is exactly the gap a Station fills.</div>
   </div>
 </section>
 
@@ -1183,6 +1262,27 @@ const OPPS = [
 
 /* Stations — programming lanes, each fronted by a real upload so the
    idea is shown in DBE's own imagery rather than described. */
+/* Live Stations on real artist channels. Every title and owning channel here
+   was verified through YouTube's own oEmbed API on 7 Oct 2026, so these are
+   the real objects and the real owners rather than something half-remembered
+   from a trade headline.
+
+   The honesty line matters as much as the examples. Jay-Z and Bruno Mars both
+   carry "Station" in the title, which is about as close to self-evidence as a
+   public object gets. Coachella is the only one YouTube has itself called a
+   Station in writing. Green Day's is unambiguously a 24/7 stream and Rolling
+   Stone called it a station, but YouTube has not — so the card says stream.
+   Metallica TV was the previous example here and has been dropped: the object
+   is real, but nothing connects it to the Stations product. */
+const STATION_EXAMPLES = [
+  { id:'s4OzgJinqwU', nm:'JAŸ-Z30 Station', ch:'JAŸ-Z',
+    nt:'"Station" in the title, on the official channel' },
+  { id:'4J41KdZ3JR8', nm:'The Romantic Station', ch:'Bruno Mars',
+    nt:'A launch partner for the pilot' },
+  { id:'Xu90G4oFq2o', nm:'Green Day TV', ch:'Green Day',
+    nt:'24/7 stream · 100+ hours of unseen archive, launched 6 Aug 2026' },
+];
+
 const STATIONS = [
   { nm:'DBE Hits',    ds:'The records everyone came for',        id:'I4Ra4z2Arqg', on:1 },
   { nm:'DBE Now',     ds:'The current campaign',                 id:'mecy6K90C0s', on:1 },
@@ -1362,7 +1462,21 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
     oc.appendChild(d);
   });
 
-  /* ── 15 · STATIONS ─────────────────────────────────────────────── */
+  /* ── 16 · REAL STATIONS ────────────────────────────────────────── */
+  const exr = document.getElementById('stationex');
+  if (exr) STATION_EXAMPLES.forEach(e => {
+    const a = document.createElement('a');
+    a.href = 'https://youtu.be/' + e.id; a.target = '_blank'; a.rel = 'noopener';
+    a.className = 'ex';
+    a.innerHTML = '<div class="th"><img alt=""><div class="badge">Live</div></div>'
+      + '<div class="bd"><div class="nm">' + e.nm + '</div>'
+      + '<div class="ch">' + e.ch + '</div>'
+      + '<div class="nt">' + e.nt + '</div></div>';
+    thumb(a.querySelector('img'), e.id, true);
+    exr.appendChild(a);
+  });
+
+  /* ── 17 · DBE'S OWN STATIONS ───────────────────────────────────── */
   const stn = document.getElementById('stations');
   if (stn) STATIONS.forEach(s => {
     const d = document.createElement('div');
