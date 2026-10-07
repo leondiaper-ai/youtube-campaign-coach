@@ -50,6 +50,17 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
   /** Carried onto every row link so the key survives a click. */
   linkSuffix?: string;
 }) {
+  /* The board answers "how are our channels doing". The planner is where a
+     campaign actually gets built, and until now there was no route between
+     them — a team would watch a channel go quiet with no way to act on it
+     from the page telling them so. Resolved from the team rather than passed
+     in, so every surface rendering this board gets the link for free. */
+  const { MARKETS } = await import('@/lib/market');
+  const boardMarket = Object.values(MARKETS).find((m) => m.teamSlug === team.slug) ?? null;
+  const plannerHref = boardMarket ? `/coach?market=${boardMarket.id}` : '/coach';
+  const weeklyHref = boardMarket
+    ? `/weekly-pulse/${boardMarket.id}/campaign-briefing`
+    : '/weekly-pulse/campaign-briefing';
   const entries = await listEntries(team.slug);
   const syncMeta = await readSyncMeta();
   const custom = await listCustomArtists();
@@ -309,7 +320,19 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
           {team.blurb}
         </p>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 flex-wrap justify-end">
+        <a
+          href={plannerHref}
+          className="text-[11px] font-bold px-3 py-2 rounded-md border border-ink/12 hover:bg-ink/[0.04] transition-colors whitespace-nowrap"
+        >
+          Content Planner
+        </a>
+        <a
+          href={weeklyHref}
+          className="text-[11px] font-bold px-3 py-2 rounded-md border border-ink/12 hover:bg-ink/[0.04] transition-colors whitespace-nowrap"
+        >
+          Priority Campaigns
+        </a>
         <AddArtistModal team={team.slug} regionTag={team.regionTag} />
         {syncMeta && (
           <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
