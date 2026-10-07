@@ -658,7 +658,12 @@ function Nav({ market = 'uk' }: { market?: string }) {
   const m = getMarket(market);
   const q = !m || m.id === 'uk' ? '' : `?market=${m.id}`;
   const team = m?.teamSlug ? getTeam(m.teamSlug) : null;
-  const link = 'px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors';
+  /* The board the team actually works from. A market with its own board goes
+     to THAT board, token and all; the UK has never had one, so its nearest
+     equivalent is the campaign list — labelled for what it is rather than
+     borrowing the board's name. */
+  const href = team ? teamUrl(team) : `/campaigns${q}`;
+  const label = team ? 'Campaign Board' : 'Active Campaigns';
   return (
     <div
       className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em]"
@@ -666,32 +671,13 @@ function Nav({ market = 'uk' }: { market?: string }) {
     >
       <span>YouTube Campaign System</span>
       <span style={{ color: '#D1C9BD' }}>·</span>
-      <div className="flex items-center gap-1 mt-0 flex-wrap">
-        <Link href={`/growth${q}`} className={link} style={{ color: MUTED }}>
-          Watcher
-        </Link>
-        <span
-          className="px-3 py-1.5 rounded-md text-[13px] font-black"
-          style={{ background: SOFT }}
-        >
-          Coach
-        </span>
-        <Link href={`/campaigns${q}`} className={link} style={{ color: MUTED }}>
-          Active Campaigns
-        </Link>
-        {team && (
-          <a href={teamUrl(team)} className={link} style={{ color: MUTED }}>
-            Campaign Board
-          </a>
-        )}
-        <Link
-          href={m && m.id !== 'uk' ? `/weekly-pulse/${m.id}/campaign-briefing` : '/weekly-pulse/campaign-briefing'}
-          className={link}
-          style={{ color: MUTED }}
-        >
-          Priority Campaigns
-        </Link>
-      </div>
+      <a
+        href={href}
+        className="px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors"
+        style={{ color: MUTED }}
+      >
+        ← {label}
+      </a>
     </div>
   );
 }
