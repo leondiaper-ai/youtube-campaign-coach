@@ -17,6 +17,7 @@ import {
   type ChannelContext,
 } from '@/lib/planEngine';
 import { type PlanIndexEntry } from '@/lib/planStore';
+import { getMarket } from '@/lib/market';
 import CampaignPlanOutput from './CampaignPlanOutput';
 
 // ── Design tokens ────────────────────────────────────────────────────────
@@ -192,7 +193,7 @@ export default function CoachPage({
   return (
     <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[800px] mx-auto px-6 py-10">
-        <Nav />
+        <Nav market={market} />
 
         {/* Page Title */}
         <div style={{ marginTop: 40, marginBottom: 32 }}>
@@ -634,7 +635,21 @@ function deriveMomentum(data: ChannelData): 'rising' | 'flat' | 'falling' {
 
 // ── Sub-components ───────────────────────────────────────────────────────
 
-function Nav() {
+/**
+ * Every destination carries the market.
+ *
+ * Without it, an Australian user clicking "Watcher" or "Active Campaigns"
+ * lands silently in the UK workspace — the nav is the one place a market
+ * leak is guaranteed to happen, because moving between tools is the normal
+ * thing to do. A market that cannot be navigated within is not a workspace.
+ *
+ * Markets with their own board get it as a destination too, so the roster
+ * is reachable from the planner rather than only from a token link.
+ */
+function Nav({ market = 'uk' }: { market?: string }) {
+  const m = getMarket(market);
+  const q = !m || m.id === 'uk' ? '' : `?market=${m.id}`;
+  const link = 'px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors';
   return (
     <div
       className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em]"
@@ -642,12 +657,8 @@ function Nav() {
     >
       <span>YouTube Campaign System</span>
       <span style={{ color: '#D1C9BD' }}>·</span>
-      <div className="flex items-center gap-1 mt-0">
-        <Link
-          href="/growth"
-          className="px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors"
-          style={{ color: MUTED }}
-        >
+      <div className="flex items-center gap-1 mt-0 flex-wrap">
+        <Link href={`/growth${q}`} className={link} style={{ color: MUTED }}>
           Watcher
         </Link>
         <span
@@ -656,12 +667,20 @@ function Nav() {
         >
           Coach
         </span>
+        <Link href={`/campaigns${q}`} className={link} style={{ color: MUTED }}>
+          Active Campaigns
+        </Link>
+        {m?.teamSlug && (
+          <Link href={`/weekly-pulse/${m.id}/board`} className={link} style={{ color: MUTED }}>
+            Campaign Board
+          </Link>
+        )}
         <Link
-          href="/campaigns"
-          className="px-3 py-1.5 rounded-md text-[13px] font-bold hover:bg-[#F6F1E7] transition-colors"
+          href={m && m.id !== 'uk' ? `/weekly-pulse/${m.id}/campaign-briefing` : '/weekly-pulse/campaign-briefing'}
+          className={link}
           style={{ color: MUTED }}
         >
-          Active Campaigns
+          Priority Campaigns
         </Link>
       </div>
     </div>

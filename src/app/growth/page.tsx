@@ -5,6 +5,8 @@ import {
   type Artist, type ChannelState,
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
+import { getMarketFromRequest } from '@/lib/marketServer';
+import { getArtistsForMarket } from '@/lib/marketScope';
 import { listAllTeamEntries } from '@/lib/teamWatcherStore';
 import { TEAMS, TEAM_SLUGS } from '@/lib/teams';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
@@ -28,7 +30,14 @@ const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
 const SOFT = '#F6F1E7';
 
-export default async function ControlPage() {
+export default async function ControlPage({
+  searchParams,
+}: {
+  searchParams?:
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const market = await getMarketFromRequest(searchParams);
   const custom = await listCustomArtists();
 
   /* ── WHO ELSE IS WATCHING ───────────────────────────────────────────
@@ -44,9 +53,11 @@ export default async function ControlPage() {
   const teamTagByChannel = new Map(
     teamEntries.map(e => [e.channelId, TEAMS[e.team]?.regionTag ?? e.regionTag]),
   );
-  const allArtists = mergeArtistLists(ARTISTS, custom);
+  /* Scoped to the market so the Watcher shows this team's roster. Markets
+     with a team board get everyone on that board — see marketScope. */
+  const allArtists = await getArtistsForMarket(market.id);
   const syncMeta = await readSyncMeta();
-  const pinned = await listPinned();
+  const pinned = await listPinned(market.id);
   const pinnedSlugs = pinned.map((p) => p.slug);
 
   // Batch-read all cached snaps from KV (zero YouTube API calls)

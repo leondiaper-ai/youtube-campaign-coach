@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
+import { getMarketFromRequest } from '@/lib/marketServer';
+import { getArtistsForMarket } from '@/lib/marketScope';
 import {
   listPinned, listNotes, getBaseline,
   listWeeklySnapshots, saveWeeklySnapshot,
@@ -422,10 +424,19 @@ async function loadCard(
   };
 }
 
-export default async function CampaignsPage() {
-  const pinned = await listPinned();
-  const custom = await listCustomArtists();
-  const allArtists = mergeArtistLists(ARTISTS, custom);
+export default async function CampaignsPage({
+  searchParams,
+}: {
+  searchParams?:
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
+}) {
+  /* Scoped to the market. The Coach nav links here with ?market=au, and a
+     link that carries the market but lands on UK data is worse than no link
+     at all — it looks like the market switch silently failed. */
+  const market = await getMarketFromRequest(searchParams);
+  const pinned = await listPinned(market.id);
+  const allArtists = await getArtistsForMarket(market.id);
 
   const cards = (
     await Promise.all(pinned.map((p) => loadCard(p, allArtists)))
