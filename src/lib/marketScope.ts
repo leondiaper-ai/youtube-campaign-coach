@@ -51,7 +51,47 @@ export async function getAllArtists(): Promise<Artist[]> {
  */
 export async function getArtistsForMarket(marketId: string): Promise<Artist[]> {
   const all = await getAllArtists();
-  return all.filter((a) => isInMarket(a, marketId));
+  const m = resolveMarket(marketId);
+
+  // Artists explicitly tagged into this market.
+  const tagged = all.filter((a) => isInMarket(a, m.id));
+
+  // Plus everyone on the market's team board, if it has one.
+  //
+  // Australia had fourteen artists on their board before markets existed.
+  // Requiring a migration to see their own roster would have meant the team
+  // opening a brand new, empty version of a tool they were already using —
+  // so the board is read as roster membership directly. It also keeps the two
+  // in step: adding an artist to the board adds them to the market, with no
+  // second step to forget.
+  if (!m.teamSlug) return tagged;
+
+  try {
+    const { listEntries } = await import('./teamWatcherStore');
+    const entries = await listEntries(m.teamSlug);
+    if (entries.length === 0) return tagged;
+
+    const bySlug = new Map(all.map((a) => [a.slug, a]));
+    const seen = new Set(tagged.map((a) => a.slug));
+    const out = [...tagged];
+
+    for (const e of entries) {
+      const hit =
+        bySlug.get(e.artistSlug) ??
+        // The board keys on channelId and the roster on slug, and nothing
+        // enforces that an entry's artistSlug matches a real artist. Fall
+        // back to the channel so a drifted entry still resolves.
+        all.find((a) => a.channelHandle && e.channelId && a.slug === e.artistSlug);
+      if (hit && !seen.has(hit.slug)) {
+        seen.add(hit.slug);
+        out.push(hit);
+      }
+    }
+    return out;
+  } catch {
+    // A board read failure must not empty a market's roster.
+    return tagged;
+  }
 }
 
 /** Slug set for the market, for cheap membership tests in hot paths. */

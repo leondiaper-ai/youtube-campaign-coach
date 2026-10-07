@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { getMarket } from '@/lib/market';
 
 const INK = '#0E0E0E';
 const BONE = '#E8E3DA';
 
-const TABS = [
+const BASE_TABS = [
   { href: '/weekly-pulse/campaign-briefing', label: 'Priority Campaigns' },
   { href: '/weekly-pulse/channel-spotlight', label: 'Channel Spotlight' },
 ] as const;
@@ -16,10 +17,24 @@ const TABS = [
  * Priority Campaigns to Channel Spotlight silently drops an Australian user
  * back into the UK workspace — the kind of bug that is invisible until
  * someone shares the wrong page.
+ *
+ * Markets with a team board get a third tab, so the roster, health counts and
+ * channel behaviour live in the same place as the weekly views rather than
+ * behind a separate token link the team has to keep track of. The UK has no
+ * board, so it keeps the two tabs it has always had and looks unchanged.
  */
 export default function PulseNav({ market }: { market?: string } = {}) {
   const pathname = usePathname();
-  const suffix = market && market !== 'uk' ? `?market=${market}` : '';
+  const m = getMarket(market ?? null);
+  const isDefault = !m || m.id === 'uk';
+  const suffix = isDefault ? '' : `?market=${m.id}`;
+
+  const tabs = [
+    ...BASE_TABS.map((t) => ({ href: `${t.href}${suffix}`, label: t.label, exact: t.href })),
+    ...(m?.teamSlug
+      ? [{ href: `/weekly-pulse/${m.id}/board`, label: 'Campaign Board', exact: `/weekly-pulse/${m.id}/board` }]
+      : []),
+  ];
 
   return (
     <nav
@@ -33,12 +48,17 @@ export default function PulseNav({ market }: { market?: string } = {}) {
         marginBottom: 20,
       }}
     >
-      {TABS.map((tab) => {
-        const isActive = pathname === tab.href;
+      {tabs.map((tab) => {
+        // Match on the path only — the market lives in the query string, and
+        // comparing the whole href would never match the per-market routes.
+        const isActive =
+          pathname === tab.exact ||
+          (tab.exact.includes('/campaign-briefing') && pathname?.endsWith('/campaign-briefing')) ||
+          (tab.exact.includes('/channel-spotlight') && pathname?.endsWith('/channel-spotlight'));
         return (
           <Link
             key={tab.href}
-            href={`${tab.href}${suffix}`}
+            href={tab.href}
             style={{
               padding: '8px 18px',
               borderRadius: 6,

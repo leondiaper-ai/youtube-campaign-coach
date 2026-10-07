@@ -75,6 +75,19 @@ export interface MarketDef {
   currency: { code: string; symbol: string };
   /** True only for the UK. See the legacy-keys note at the top of this file. */
   legacyKeys?: boolean;
+  /**
+   * The team board in `teams.ts` that belongs to this market, if any.
+   *
+   * This is the bridge between two things that were built separately: the
+   * token-gated team boards (which already hold Australia's 14 artists) and
+   * the market roster. Rather than migrating one into the other, an artist on
+   * the market's board simply counts as being in that market — so the board a
+   * team has already filled in becomes their roster with no data move and no
+   * chance of the two drifting apart.
+   *
+   * The UK has no board: it predates them and its roster is the default.
+   */
+  teamSlug?: string;
 }
 
 export const MARKETS: Record<string, MarketDef> = {
@@ -95,6 +108,7 @@ export const MARKETS: Record<string, MarketDef> = {
     short: 'AU',
     orgName: 'Virgin Music Australia',
     territories: ['AU', 'NZ'],
+    teamSlug: 'australia',
     timeZone: 'Australia/Sydney',
     locale: 'en-AU',
     currency: { code: 'AUD', symbol: '$' },
