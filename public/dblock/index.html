@@ -1040,7 +1040,53 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   </div>
 </section>
 
-<!-- 18 · THE PROOF ─ Adz already ran the experiment -->
+<!-- 16 · PROGRAMMING — the formats that would fit them. This is the setup
+     for the Adz slide that follows: name the formats first, then show that
+     DBE have already made them and already proved they work. Without it the
+     evidence lands with nothing to attach to. -->
+<section class="grain">
+  <div class="act">Act IV · The world</div>
+  <div class="sheet" id="sheet16"></div>
+  <div class="z">
+    <div class="eyebrow">What else could people watch, because they care about DBE?</div>
+    <h2 class="sm reveal">The formats that already fit them.</h2>
+    <div class="lanes stagger">
+      <div class="lane">
+        <h4>Behind the music</h4>
+        <ul>
+          <li>Making a track</li><li>Hearing the beat first</li><li>Unfinished versions</li>
+          <li>Choosing verses</li><li>Collaborator arriving</li><li>Studio conversations</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h4>Life around it</h4>
+        <ul>
+          <li>Release day</li><li>Show day</li><li>Travel day</li>
+          <li>Paris · London</li><li>Cars, fashion, food</li><li>Downtime, friends</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h4>Live</h4>
+        <ul>
+          <li>Soundcheck</li><li>Walk to stage</li><li>Full performance</li>
+          <li>Single-song cuts</li><li>Post-show reaction</li><li>Tour diary</li>
+        </ul>
+      </div>
+      <div class="lane">
+        <h4>The archive</h4>
+        <ul>
+          <li>Ten years of history</li><li>First videos, old shows</li><li>How DBE changed</li>
+          <li>Album era stories</li><li>Unseen footage</li><li>Anniversaries</li>
+        </ul>
+      </div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
+      The value here is <em>access</em>, not production. A real room is worth
+      more than polished corporate BTS.</div>
+  </div>
+</section>
+
+<!-- 17 · THE PROOF — Adz already ran the experiment -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
   <div class="z">
@@ -1064,7 +1110,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="foot">@dbenumber29skiski · 18 uploads between 11 Feb and 19 May 2024, nothing since · read from the YouTube Data API, 7 Oct 2026</div>
 </section>
 
-<!-- 19 · TERRITORIES -->
+<!-- 18 · TERRITORIES -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
   <div class="bed scrim-f" style="opacity:.34"><img data-vid="bnc7hO8UGXU" alt=""></div>
@@ -1112,7 +1158,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 <!-- 19 · THE COLLAB TOOL -->
 <section class="grain">
   <div class="act">Act IV · The world</div>
-  <div class="bed scrim-l" style="opacity:.52"><img data-vid="jOtrxyE1xpc" alt=""></div>
+  <div class="bed scrim-l" style="opacity:.52"><img data-vid="KpOiymLrMKU" alt=""></div>
   <div class="z">
     <div class="eyebrow">And the two channels don't have to stay separate</div>
     <h2 class="sm reveal">One upload.<br>Both channels.</h2>
@@ -1142,7 +1188,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 
 <!-- ═══ ACT V · THE SYSTEM ═══════════════════════════════════════════ -->
 
-<!-- 18 · RINGS -->
+<!-- 20 · RINGS -->
 <section class="grain">
   <div class="act">Act V · The system</div>
   <div class="bed scrim-l" style="opacity:.54"><img data-vid="d8hlIIWb3s4" alt=""></div>
@@ -1179,7 +1225,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="foot">Twelve of the twenty-four things on this slide need no artist time at all</div>
 </section>
 
-<!-- 19 · WHO DOES WHAT -->
+<!-- 21 · WHO DOES WHAT -->
 <section class="grain">
   <div class="act">Act V · The system</div>
   <div class="bed scrim-l" style="opacity:.58"><img data-vid="dP6e17UlF8U" alt=""></div>
@@ -1207,7 +1253,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   </div>
 </section>
 
-<!-- 20 · THE LOOP -->
+<!-- 22 · THE LOOP -->
 <section class="grain">
   <div class="act">Act V · The system</div>
   <div class="bed scrim-c" style="opacity:.62"><img data-vid="8QCu_ZJNwZY" alt=""></div>
@@ -1230,7 +1276,7 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 
 <!-- ═══ ACT VI ═══════════════════════════════════════════════════════ -->
 
-<!-- 21 -->
+<!-- 23 -->
 <section id="close" class="grain">
   <div class="bed scrim"><img data-vid="mecy6K90C0s" alt=""></div>
   <div class="z">
@@ -1417,12 +1463,25 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
   /* Thumbnails come from i.ytimg.com by video id. maxres does not exist
      for the older uploads, so every image falls back to hq rather than
      showing a broken frame in a presentation. */
+  /* YouTube does NOT 404 a missing maxresdefault. It serves a grey 120x90
+     "no thumbnail" placeholder with HTTP 200, so an onerror-only fallback
+     never fires and the slide quietly renders a grey box — which is exactly
+     what happened to two frames in this deck.
+
+     So the check is on the decoded size, not the error event: anything
+     120px or narrower is the placeholder, and we drop to hqdefault, which
+     exists for every video ever uploaded. */
   function thumb(img, id, big) {
-    img.src = 'https://i.ytimg.com/vi/' + id + '/' + (big ? 'maxresdefault' : 'mqdefault') + '.jpg';
     img.loading = 'lazy';
-    img.onerror = function () {
-      if (!this.dataset.fb) { this.dataset.fb = '1'; this.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'; }
+    const hq = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+    const fallback = function () {
+      if (this.dataset.fb) return;
+      this.dataset.fb = '1';
+      this.src = hq;
     };
+    img.onerror = fallback;
+    img.onload = function () { if (this.naturalWidth <= 120) fallback.call(this); };
+    img.src = 'https://i.ytimg.com/vi/' + id + '/' + (big ? 'maxresdefault' : 'mqdefault') + '.jpg';
   }
   document.querySelectorAll('img[data-vid]').forEach(i => thumb(i, i.dataset.vid, true));
 
