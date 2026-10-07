@@ -6,6 +6,8 @@
  * apart on the key name.
  */
 
+import { DEFAULT_MARKET, marketKey } from './market';
+
 export const BRIEFING_CACHE_KEY = 'partner-briefing:current';
 /** How long a built copy is retained, in seconds. */
 export const BRIEFING_CACHE_TTL = 86400;
@@ -13,6 +15,20 @@ export const BRIEFING_CACHE_TTL = 86400;
 export const BRIEFING_FRESH_MS = 10 * 60 * 1000;
 /** Lock key ensuring only one background rebuild runs at a time. */
 export const BRIEFING_LOCK_KEY = `${BRIEFING_CACHE_KEY}:rebuilding`;
+
+/**
+ * Per-market cache keys. Without this, two markets share one cached briefing
+ * and whichever rebuilt last wins — the UK would periodically be served
+ * Australia's Priority Campaigns page, which is the worst possible version of
+ * a data-isolation bug because it is intermittent and looks like a glitch.
+ *
+ * UK keeps the bare key, so the existing cached briefing stays valid through
+ * the deploy rather than everyone paying for a cold rebuild.
+ */
+export const briefingCacheKey = (marketId: string = DEFAULT_MARKET) =>
+  marketKey(BRIEFING_CACHE_KEY, marketId);
+export const briefingLockKey = (marketId: string = DEFAULT_MARKET) =>
+  `${briefingCacheKey(marketId)}:rebuilding`;
 
 async function kv() {
   const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
@@ -37,11 +53,13 @@ async function kv() {
  *
  * Never throws: failing to bust the cache is not a reason to fail a plan save.
  */
-export async function invalidateBriefingCache(): Promise<void> {
+export async function invalidateBriefingCache(
+  marketId: string = DEFAULT_MARKET,
+): Promise<void> {
   try {
     const redis = await kv();
     if (!redis) return;
-    await redis.del(BRIEFING_CACHE_KEY, BRIEFING_LOCK_KEY);
+    await redis.del(briefingCacheKey(marketId), briefingLockKey(marketId));
   } catch {
     // Non-fatal — the entry still expires on its own TTL.
   }

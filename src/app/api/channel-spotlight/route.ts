@@ -15,7 +15,8 @@ import {
   classifyArtist, isVirginOwned,
   type ChannelState, type RecentUpload,
 } from '@/lib/artists';
-import { listCustomArtists } from '@/lib/artistStore';
+import { resolveMarket } from '@/lib/market';
+import { getArtistsForMarket, getPlansForMarket, getMarketReadiness } from '@/lib/marketScope';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
@@ -27,10 +28,13 @@ import { classifyUploadFormat } from '@/lib/coach/matchEngine';
 
 export const revalidate = 600;
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const custom = await listCustomArtists();
-    const allArtists = mergeArtistLists(ARTISTS, custom);
+    /* MARKET SCOPE. Australia must not be shown UK channels simply because
+       data exists for them — a spotlight is a claim about "your roster this
+       week", and borrowing another market's winners makes it a lie. */
+    const market = resolveMarket(new URL(req.url).searchParams.get('market'));
+    const allArtists = await getArtistsForMarket(market.id);
     const syncMeta = await readSyncMeta();
 
     // Batch-read all cached snaps
@@ -185,7 +189,7 @@ export async function GET() {
 
     // ── Load coach plans ─────────────────────────────────────────────────
     // Three matching strategies: slug prefix, name match, name-in-slug
-    const planIndex = await listPlans();
+    const planIndex = await getPlansForMarket(market.id);
     const norm = (s: string) => s.replace(/-/g, '').toLowerCase();
     const normName = (s: string) => s.replace(/[^a-z0-9]/gi, '').toLowerCase();
     const coachPlans = new Map<string, SavedPlan>();

@@ -34,16 +34,39 @@ async function kv() {
 }
 
 // ── Pinned campaigns ─────────────────────────────────────────────────────
+//
+// Pins decide who appears on Priority Campaigns, so they are the membership
+// mechanism for the whole partner-facing view — and therefore the first
+// thing that had to become market-aware. An unscoped pin puts an Australian
+// campaign on the UK's page.
+//
+// The UK keeps the bare `campaigns:pinned` key and other markets get a
+// suffix (`campaigns:pinned:au`). See the legacy-keys note in market.ts:
+// UK storage is untouched, and Australia is empty by construction rather
+// than by filtering, which is the stronger guarantee.
+//
+// Every function here takes a market, defaulting to UK so existing callers
+// that have not been updated keep their current behaviour rather than
+// silently reading the wrong market.
 
-export async function listPinned(): Promise<PinnedCampaign[]> {
+import { DEFAULT_MARKET, marketKey } from './market';
+
+const pinnedKeyFor = (marketId: string) => marketKey(PINNED_KEY, marketId);
+
+export async function listPinned(
+  marketId: string = DEFAULT_MARKET,
+): Promise<PinnedCampaign[]> {
   const store = await kv();
   if (!store) return [];
-  return ((await store.get(PINNED_KEY)) as PinnedCampaign[] | null) ?? [];
+  return (
+    ((await store.get(pinnedKeyFor(marketId))) as PinnedCampaign[] | null) ?? []
+  );
 }
 
 export async function pinCampaign(
   slug: string,
   priority: 'high' | 'normal' = 'normal',
+  marketId: string = DEFAULT_MARKET,
 ): Promise<PinnedCampaign[]> {
   const store = await kv();
   const entry: PinnedCampaign = {
@@ -52,24 +75,32 @@ export async function pinCampaign(
     priority,
   };
   if (!store) return [entry];
-  const list = ((await store.get(PINNED_KEY)) as PinnedCampaign[] | null) ?? [];
+  const key = pinnedKeyFor(marketId);
+  const list = ((await store.get(key)) as PinnedCampaign[] | null) ?? [];
   // De-dupe
   const next = [...list.filter((p) => p.slug !== slug), entry];
-  await store.set(PINNED_KEY, next);
+  await store.set(key, next);
   return next;
 }
 
-export async function unpinCampaign(slug: string): Promise<PinnedCampaign[]> {
+export async function unpinCampaign(
+  slug: string,
+  marketId: string = DEFAULT_MARKET,
+): Promise<PinnedCampaign[]> {
   const store = await kv();
   if (!store) return [];
-  const list = ((await store.get(PINNED_KEY)) as PinnedCampaign[] | null) ?? [];
+  const key = pinnedKeyFor(marketId);
+  const list = ((await store.get(key)) as PinnedCampaign[] | null) ?? [];
   const next = list.filter((p) => p.slug !== slug);
-  await store.set(PINNED_KEY, next);
+  await store.set(key, next);
   return next;
 }
 
-export async function isPinned(slug: string): Promise<boolean> {
-  const list = await listPinned();
+export async function isPinned(
+  slug: string,
+  marketId: string = DEFAULT_MARKET,
+): Promise<boolean> {
+  const list = await listPinned(marketId);
   return list.some((p) => p.slug === slug);
 }
 

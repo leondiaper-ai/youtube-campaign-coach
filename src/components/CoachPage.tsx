@@ -46,9 +46,14 @@ type ChannelData = LiveSnap & {
 export default function CoachPage({
   artistOptions,
   savedPlans = [],
+  market = 'uk',
+  marketName = 'United Kingdom',
 }: {
   artistOptions: ArtistOption[];
   savedPlans?: PlanIndexEntry[];
+  /** Workspace this planner belongs to. Saved campaigns are filed here. */
+  market?: string;
+  marketName?: string;
 }) {
   const [selectedSlug, setSelectedSlug] = useState('');
   const [artistName, setArtistName] = useState('');
@@ -157,6 +162,7 @@ export default function CoachPage({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          market,
           artist: artistName,
           timeline,
           channelCtx,
@@ -173,7 +179,7 @@ export default function CoachPage({
     }
 
     setPlanLoading(false);
-  }, [timeline, artistName, channelCtx]);
+  }, [timeline, artistName, channelCtx, campaignName, market]);
 
   const handleBack = useCallback(() => {
     setPlan(null);
@@ -212,7 +218,40 @@ export default function CoachPage({
           >
             Paste a campaign timeline. Get a YouTube rollout.
           </p>
+          {/* Whose planner this is. Quiet, but it has to be unambiguous —
+              saving a campaign into the wrong market is silent and annoying
+              to unpick. */}
+          <div style={{ marginTop: 10, fontSize: 11, color: MUTED, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>
+            {marketName} workspace
+          </div>
         </div>
+
+        {/* A market with no roster cannot use the dropdown below, and the
+            free-text fallback gives no hint that adding a channel is even
+            possible. Say so, once, at the top. */}
+        {artistOptions.length === 0 && (
+          <div style={{
+            marginBottom: 24, padding: '14px 16px', border: `1px solid ${BORDER}`,
+            borderRadius: 8, background: SOFT,
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: INK, marginBottom: 4 }}>
+              No artists in this workspace yet
+            </div>
+            <div style={{ fontSize: 13, color: '#5A5650', lineHeight: 1.5, marginBottom: 10 }}>
+              You can still plan a campaign by typing an artist name below. To pull in
+              YouTube data as well, add the channel first.
+            </div>
+            <a
+              href={`/campaigns?market=${market}`}
+              style={{
+                display: 'inline-block', padding: '8px 14px', background: INK, color: '#fff',
+                fontSize: 12, fontWeight: 700, borderRadius: 6, textDecoration: 'none',
+              }}
+            >
+              Add artist / channel
+            </a>
+          </div>
+        )}
 
         {/* Artist Selector */}
         <div style={{ marginBottom: 24 }}>

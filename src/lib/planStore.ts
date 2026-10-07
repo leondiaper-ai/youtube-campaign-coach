@@ -55,6 +55,16 @@ export type SavedPlan = {
   historicalActivity?: HistoricalActivity[];
   /** Data coverage metadata */
   dataCoverage?: CampaignDataCoverage;
+  /**
+   * Which market's Content Planner created this. Absent means UK — plans
+   * saved before markets existed are UK by definition.
+   *
+   * Deliberately a field and not part of the slug: the briefing route matches
+   * plans to artists by scoring slug shape (exact / prefix / substring), so
+   * appending a market to the slug would silently reassign existing UK plans
+   * to the wrong artists.
+   */
+  market?: string;
 };
 
 export type PlanIndexEntry = {
@@ -67,6 +77,8 @@ export type PlanIndexEntry = {
   eventCount: number;
   /** Channel state at time of generation */
   channelState?: string;
+  /** Market that owns this plan. Absent means UK. */
+  market?: string;
 };
 
 // ── KV client ─────────────────────────────────────────────────────────────
@@ -108,6 +120,8 @@ export async function savePlan(
   plan: GeneratedPlan,
   channelCtx: ChannelContext | null,
   timelineText: string,
+  /** Market whose Content Planner saved this. Defaults to UK. */
+  market?: string,
 ): Promise<SavedPlan> {
   const store = await kv();
   const now = new Date().toISOString();
@@ -121,6 +135,7 @@ export async function savePlan(
     createdAt: now,
     updatedAt: now,
     timelineText,
+    ...(market ? { market } : {}),
   };
 
   if (!store) return saved;
@@ -129,6 +144,10 @@ export async function savePlan(
   const existing = await store.get(planKey(slug)) as SavedPlan | null;
   if (existing) {
     saved.createdAt = existing.createdAt;
+    // A plan does not change hands on edit. If the caller did not name a
+    // market, keep whatever the plan already had rather than silently
+    // re-homing an Australian campaign to the UK default.
+    if (!market && existing.market) saved.market = existing.market;
   }
 
   await store.set(planKey(slug), saved);
@@ -144,6 +163,7 @@ export async function savePlan(
     totalWeeks: plan.totalWeeks,
     eventCount: plan.events.length,
     channelState: channelCtx?.state,
+    ...(saved.market ? { market: saved.market } : {}),
   };
 
   const next = [

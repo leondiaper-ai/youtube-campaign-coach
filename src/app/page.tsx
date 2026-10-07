@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import MarketSwitcher from '@/components/MarketSwitcher';
+import { getMarketFromRequest } from '@/lib/marketServer';
 
 export const metadata = {
   title: 'YouTube Campaign System',
@@ -11,7 +13,15 @@ const SOFT = '#F6F1E7';
 const BORDER = '#E8E3DA';
 const MUTED = '#9B9589';
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?:
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const market = await getMarketFromRequest(searchParams);
+  const q = market.id === 'uk' ? '' : `?market=${market.id}`;
   return (
     <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
       <div className="max-w-[680px] mx-auto px-6 py-16">
@@ -24,9 +34,14 @@ export default function HomePage() {
             textTransform: 'uppercase',
             color: MUTED,
             marginBottom: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
           }}
         >
-          YouTube Campaign System
+          <span>YouTube Campaign System</span>
+          <MarketSwitcher current={market.id} compact />
         </div>
 
         {/* Hero */}
@@ -59,7 +74,7 @@ export default function HomePage() {
 
         {/* Primary CTA */}
         <Link
-          href="/coach"
+          href={`/coach${q}`}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -93,7 +108,7 @@ export default function HomePage() {
             desc="Channel health monitoring — which channels are growing, flat, or at risk."
           />
           <ToolCard
-            href="/coach"
+            href={`/coach${q}`}
             title="Coach"
             desc="Channel-aware campaign planning with live guidance."
             highlight
@@ -121,7 +136,7 @@ export default function HomePage() {
             desc="Virgin's UK consumption, UK audience and biggest UK artists — three rankings, never one score."
           />
           <ToolCard
-            href="/campaigns"
+            href={`/campaigns${q}`}
             title="Active Campaigns"
             desc="Campaign status board with decision signals."
           />
@@ -131,13 +146,13 @@ export default function HomePage() {
             desc="Shared team board — add artists, track campaigns, monitor health."
           />
           <ToolCard
-            href="/weekly-pulse/campaign-briefing"
+            href={`/weekly-pulse/campaign-briefing${q}`}
             title="Priority Campaigns"
             desc="Weekly campaign report — priority campaigns, upcoming moments, and YouTube asks."
             highlight
           />
           <ToolCard
-            href="/weekly-pulse/channel-spotlight"
+            href={`/weekly-pulse/channel-spotlight${q}`}
             title="Channel Spotlight"
             desc="Top performing channels this week — what the data says is working."
             highlight

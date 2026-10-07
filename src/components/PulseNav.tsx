@@ -11,8 +11,15 @@ const TABS = [
   { href: '/weekly-pulse/channel-spotlight', label: 'Channel Spotlight' },
 ] as const;
 
-export default function PulseNav() {
+/**
+ * `market` is carried through every tab href. Without it, switching from
+ * Priority Campaigns to Channel Spotlight silently drops an Australian user
+ * back into the UK workspace — the kind of bug that is invisible until
+ * someone shares the wrong page.
+ */
+export default function PulseNav({ market }: { market?: string } = {}) {
   const pathname = usePathname();
+  const suffix = market && market !== 'uk' ? `?market=${market}` : '';
 
   return (
     <nav
@@ -31,7 +38,7 @@ export default function PulseNav() {
         return (
           <Link
             key={tab.href}
-            href={tab.href}
+            href={`${tab.href}${suffix}`}
             style={{
               padding: '8px 18px',
               borderRadius: 6,

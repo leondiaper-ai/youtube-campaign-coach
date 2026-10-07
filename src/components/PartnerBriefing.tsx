@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, type CSSProperties, type ReactNode } from 'react';
 import PulseNav from './PulseNav';
+import MarketSwitcher from './MarketSwitcher';
 
 // ── Design System ───────────────────────────────────────────────────────────
 
@@ -96,6 +97,13 @@ type MomentWatching = {
 
 type BriefingData = {
   weekRange: string; generatedAt: string; activeCampaignCount: number;
+  /** Which market this briefing describes. Absent on a pre-markets cache. */
+  market?: { id: string; name: string; short: string; orgName: string };
+  /** Setup state, so an empty page can say which kind of empty it is. */
+  readiness?: {
+    stage: 'empty' | 'roster-only' | 'planning' | 'live';
+    artistCount: number; campaignCount: number; planCount: number; nextStep: string;
+  };
   focusCampaigns: FocusCampaign[];
   platformObservations: string[];
   upcomingMoments: UpcomingMoment[];
@@ -604,7 +612,10 @@ function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: 
 
 // ── Component ──────────────────────────────────────────────────────────────
 
-export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav?: boolean } = {}) {
+export default function PartnerBriefing({
+  showPulseNav = false,
+  market = 'uk',
+}: { showPulseNav?: boolean; market?: string } = {}) {
   const [data, setData] = useState<BriefingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -619,7 +630,9 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
     if (force) setRefreshing(true);
     setError(null);
     try {
-      const res = await fetch(`/api/partner-briefing${force ? '?refresh=1' : ''}`, {
+      const qs = new URLSearchParams({ market });
+      if (force) qs.set('refresh', '1');
+      const res = await fetch(`/api/partner-briefing?${qs.toString()}`, {
         cache: 'no-store',
       });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
@@ -632,7 +645,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [market]);
 
   useEffect(() => {
     // Honour ?refresh=1 on the page URL as a manual cache bust.
@@ -658,6 +671,84 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
       </div>
     </main>
   );
+
+  /* ── ONBOARDING ───────────────────────────────────────────────────────
+     A market with no campaigns renders a masthead, an empty Shorts grid and
+     a footer — technically fine, but it reads as a broken page rather than
+     an empty one, and that is exactly the first impression a new team gets.
+
+     This only fires when the market genuinely has nothing pinned. An
+     established market with a quiet week still gets the normal page. */
+  const readiness = data.readiness;
+  const mkt = data.market;
+  if (readiness && readiness.campaignCount === 0) {
+    return (
+      <main style={{ background: PAPER, minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 40px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST }}>
+            {mkt?.orgName ?? 'Virgin Music'} · YouTube
+          </div>
+          <MarketSwitcher current={mkt?.id ?? market} />
+        </div>
+        {showPulseNav && (
+          <div className="pb-nav-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 40px 0' }}>
+            <PulseNav market={mkt?.id ?? market} />
+          </div>
+        )}
+        <section style={{ maxWidth: 760, margin: '0 auto', padding: '72px 40px 120px' }}>
+          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, marginBottom: 18 }}>
+            {mkt?.name ?? 'This market'} · Getting started
+          </div>
+          <h1 style={{
+            fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic',
+            fontSize: 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.02,
+            margin: '0 0 18px', color: INK,
+          }}>
+            Build your roster.
+          </h1>
+          <p style={{ fontSize: 16, lineHeight: 1.55, color: WARM, margin: '0 0 10px', maxWidth: '46ch' }}>
+            Add artists and campaign timelines in the Content Planner. This page then builds
+            itself every week from those dates and what the channels actually do — the release
+            radar, the campaign hierarchy and the moments worth watching.
+          </p>
+          <p style={{ fontSize: 13, lineHeight: 1.55, color: SMOKE, margin: '0 0 28px', maxWidth: '46ch' }}>
+            Nothing needs configuring beyond that, and nothing from another market appears here.
+          </p>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 36 }}>
+            <a href={`/coach?market=${mkt?.id ?? market}`} style={{
+              display: 'inline-block', padding: '11px 18px', background: INK, color: PAPER,
+              fontSize: 12, fontWeight: 700, letterSpacing: '0.04em', textDecoration: 'none', borderRadius: 3,
+            }}>
+              Add first campaign
+            </a>
+            <a href={`/campaigns?market=${mkt?.id ?? market}`} style={{
+              display: 'inline-block', padding: '11px 18px', background: 'transparent', color: INK,
+              border: `1px solid ${BONE}`, fontSize: 12, fontWeight: 700, letterSpacing: '0.04em',
+              textDecoration: 'none', borderRadius: 3,
+            }}>
+              Manage roster
+            </a>
+          </div>
+
+          <div style={{ borderTop: `1px solid ${BONE}`, paddingTop: 18, display: 'flex', gap: 36, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, color: INK }}>{readiness.artistCount}</div>
+              <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginTop: 4 }}>Artists added</div>
+            </div>
+            <div>
+              <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, color: INK }}>{readiness.planCount}</div>
+              <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginTop: 4 }}>Campaigns planned</div>
+            </div>
+            <div style={{ maxWidth: '34ch' }}>
+              <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginBottom: 5 }}>Next step</div>
+              <div style={{ fontSize: 13, color: WARM, lineHeight: 1.45 }}>{readiness.nextStep}</div>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   const grouped = groupMomentsByWindow(data.upcomingMoments);
   const hasDateMoments = grouped.thisWeek.length > 0 || grouped.nextTwoWeeks.length > 0 || grouped.nextMonth.length > 0;
@@ -781,6 +872,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
           >
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
+          <MarketSwitcher current={data.market?.id ?? market} compact />
         </div>
       </div>
 
@@ -788,7 +880,7 @@ export default function PartnerBriefing({ showPulseNav = false }: { showPulseNav
       {/* ═══════ PULSE NAV (when embedded in weekly-pulse) ═══════ */}
       {showPulseNav && (
         <div className="pb-nav-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px' }}>
-          <PulseNav />
+          <PulseNav market={data.market?.id ?? market} />
         </div>
       )}
 

@@ -39,6 +39,16 @@ export type Artist = {
   // Campaign-period tracking: ISO date (yyyy-mm-dd) of the first post/short
   // that kicked off the active campaign. Used to compute growth since start.
   campaignStartDate?: string;
+  /**
+   * Which VMG markets work this artist, e.g. ['uk'] or ['uk','au'].
+   *
+   * A list rather than a single value because a global act can be actively
+   * campaigned by more than one team, each with its own timeline and its own
+   * pins. Absent means UK — see `artistMarkets()` in market.ts. That default
+   * is load-bearing: it is why introducing markets required no rewrite of
+   * existing records and no change to UK behaviour.
+   */
+  markets?: string[];
   // Marks this artist as user-added (vs a built-in seed entry).
   custom?: boolean;
   // Ad-hoc collab video IDs — videos uploaded to OTHER channels that feature

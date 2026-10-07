@@ -29,11 +29,13 @@ import type { ParsedEvent } from '@/lib/planEngine';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { readHistories, deltaOver } from '@/lib/snapshots';
 import {
-  BRIEFING_CACHE_KEY,
+  briefingCacheKey,
+  briefingLockKey,
   BRIEFING_CACHE_TTL,
   BRIEFING_FRESH_MS,
-  BRIEFING_LOCK_KEY,
 } from '@/lib/briefingCache';
+import { resolveMarket } from '@/lib/market';
+import { getArtistsForMarket, getCampaignsForMarket, getPlansForMarket, getMarketReadiness } from '@/lib/marketScope';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import { classifyUploadFormat, type UploadFormatLabel } from '@/lib/coach/matchEngine';
 import { computeMultiformat, type MultiformatScore } from '@/lib/contentStructure';
@@ -184,6 +186,20 @@ type UpcomingMoment = {
 type PartnerBriefingResponse = {
   weekRange: string;
   generatedAt: string;
+  /** Which market this briefing describes. */
+  market: { id: string; name: string; short: string; orgName: string };
+  /**
+   * How far through setup this market is. A page with no campaigns is
+   * identical in the data whether the team has not started or everything
+   * genuinely went quiet, and those need completely different copy.
+   */
+  readiness: {
+    stage: 'empty' | 'roster-only' | 'planning' | 'live';
+    artistCount: number;
+    campaignCount: number;
+    planCount: number;
+    nextStep: string;
+  };
   activeCampaignCount: number;
   focusCampaigns: FocusCampaign[];
   platformObservations: string[];
@@ -207,10 +223,21 @@ type PartnerBriefingResponse = {
 export async function GET(request: Request) {
   try {
     const redis = await kv();
-    const weekKey = BRIEFING_CACHE_KEY;
 
     const url = new URL(request.url);
     const forceRefresh = url.searchParams.get('refresh') === '1';
+
+    /* MARKET SCOPE. Everything below is one market's view. `?market=au`
+       selects it; omitting it means UK, which is what every existing caller
+       does, so the UK briefing is byte-identical to before this change.
+
+       The cache key is per-market: sharing one key would mean whichever
+       market rebuilt last wins, and the UK would intermittently be served
+       Australia's page. */
+    const market = resolveMarket(url.searchParams.get('market'));
+    const marketId = market.id;
+    const weekKey = briefingCacheKey(marketId);
+    const lockKey = briefingLockKey(marketId);
 
     if (redis && !forceRefresh) {
       const cached = await redis.get<PartnerBriefingResponse>(weekKey);
@@ -226,7 +253,7 @@ export async function GET(request: Request) {
         // concurrent readers from all triggering their own rebuild.
         let shouldRebuild = true;
         try {
-          const gotLock = await redis.set(BRIEFING_LOCK_KEY, '1', {
+          const gotLock = await redis.set(lockKey, '1', {
             ex: 300,
             nx: true,
           });
@@ -236,7 +263,7 @@ export async function GET(request: Request) {
         }
 
         if (shouldRebuild) {
-          void fetch(`${url.origin}/api/partner-briefing?refresh=1`, {
+          void fetch(`${url.origin}/api/partner-briefing?refresh=1&market=${marketId}`, {
             cache: 'no-store',
           }).catch(() => {
             // Best-effort. If it doesn't land, the lock expires and the next
@@ -251,13 +278,13 @@ export async function GET(request: Request) {
     // Load pinned active campaigns — these are the ONLY source for focus
     // campaigns, and they are exempt from the curation filters below so the
     // briefing always covers the same campaigns as /campaigns and the coach.
-    const pinnedCampaigns = await listPinned();
+    const pinnedCampaigns = await getCampaignsForMarket(marketId);
     const pinnedSlugs = new Set(pinnedCampaigns.map(p => p.slug));
 
-    // Load all artists
-    const custom = await listCustomArtists();
+    // Roster for THIS market only. getArtistsForMarket is the single place
+    // market membership is decided — see marketScope.ts.
     const PULSE_EXCLUDE_NAMES = ['league of legends'];
-    const allArtists = mergeArtistLists(ARTISTS, custom)
+    const allArtists = (await getArtistsForMarket(marketId))
       .filter(a => {
         if (pinnedSlugs.has(a.slug)) return true; // pinned always survives
         const name = a.name.toLowerCase();
@@ -545,7 +572,11 @@ export async function GET(request: Request) {
 
     // Load coach plans — match by artist slug prefix since plan slugs
     // are like "k-trap-k-trap-campaign" while artist slugs are "k-trap"
-    const planIndex = await listPlans();
+    /* Plans for THIS market only. Without this a UK plan whose artist name
+       happens to fuzzy-match an Australian artist would attach its dates to
+       the Australian card — the matcher scores on name and slug shape, so
+       cross-market collisions are plausible, not theoretical. */
+    const planIndex = await getPlansForMarket(marketId);
     const coachPlans = new Map<string, Awaited<ReturnType<typeof loadPlan>>>();
 
     // Build artist-slug → plan-slug mapping.
@@ -1252,6 +1283,17 @@ export async function GET(request: Request) {
     const response: PartnerBriefingResponse = {
       weekRange,
       generatedAt: nowDate.toISOString(),
+      market: { id: market.id, name: market.name, short: market.short, orgName: market.orgName },
+      readiness: await (async () => {
+        const r = await getMarketReadiness(marketId);
+        return {
+          stage: r.stage,
+          artistCount: r.artistCount,
+          campaignCount: r.campaignCount,
+          planCount: r.planCount,
+          nextStep: r.nextStep,
+        };
+      })(),
       activeCampaignCount,
       focusCampaigns,
       platformObservations: platformObservations.slice(0, 4),
@@ -1318,7 +1360,7 @@ export async function GET(request: Request) {
       try {
         await redis.set(weekKey, response, { ex: BRIEFING_CACHE_TTL });
         // Release the rebuild lock so the next stale read can refresh again.
-        await redis.del(BRIEFING_LOCK_KEY);
+        await redis.del(lockKey);
       } catch {
         // Cache write failure is non-fatal
       }
