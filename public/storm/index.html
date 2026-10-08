@@ -399,39 +399,41 @@ table.score td.tgt{font-size:clamp(10px,1vw,14px);color:var(--hot);line-height:1
   line-height:1;color:var(--bone);margin-bottom:9px}
 .sf p{font-family:var(--mono);font-size:clamp(9.5px,.78vw,11.5px);color:var(--warm);line-height:1.75}
 
-/* ══ 10 · THE THREE PRIORITIES ══ */
-.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.6vw,26px);
-  margin-top:clamp(14px,2vw,30px)}
-@media(max-width:880px){.tri{grid-template-columns:1fr}}
-.tc{border-top:3px solid var(--hot);padding-top:clamp(11px,1.5vw,20px)}
-.tri .tc:nth-child(2){border-top-color:var(--gold)}
-.tri .tc:nth-child(3){border-top-color:var(--cold)}
-.tc .n2{font-family:var(--mono);font-size:clamp(9.5px,.78vw,11.5px);letter-spacing:.24em;
-  color:var(--dim);margin-bottom:10px}
-.tc h4{font-size:clamp(16px,2.2vw,38px);font-weight:900;font-stretch:62%;text-transform:uppercase;
-  line-height:.94;color:var(--hot);margin-bottom:clamp(9px,1.2vw,15px)}
-.tri .tc:nth-child(2) h4{color:var(--gold)}
-.tri .tc:nth-child(3) h4{color:var(--cold)}
-.tc p{font-family:var(--mono);font-size:clamp(9.5px,.8vw,12px);color:var(--warm);line-height:1.8}
-
-/* ══ 11 · WHAT WE DO NOW ══ */
-.now2{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(14px,2.4vw,42px);
-  margin-top:clamp(12px,1.8vw,26px);align-items:start}
-@media(max-width:940px){.now2{grid-template-columns:1fr}}
-.wk{font-family:var(--mono);font-size:clamp(9.5px,.8vw,12px);letter-spacing:.24em;
-  text-transform:uppercase;color:var(--hot);margin-bottom:clamp(9px,1.2vw,15px)}
-.wk.b{color:var(--cold);margin-top:clamp(13px,1.9vw,26px)}
-.pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(8px,1.2vw,16px)}
-@media(max-width:620px){.pillars{grid-template-columns:1fr}}
-.pl{border:1px solid var(--hair);border-radius:4px;padding:clamp(10px,1.35vw,17px);
-  background:rgba(12,16,24,.66)}
-.pl h5{font-size:clamp(12px,1.2vw,18px);font-weight:900;font-stretch:66%;text-transform:uppercase;
-  color:var(--hot);line-height:1;margin-bottom:8px}
-.pl p{font-family:var(--mono);font-size:clamp(9.5px,.76vw,11.5px);color:var(--warm);line-height:1.7}
-.sidelist{display:flex;flex-direction:column;gap:clamp(4px,.55vw,7px)}
-.sidelist div{font-family:var(--mono);font-size:clamp(9.5px,.8vw,12px);color:var(--warm);
-  line-height:1.65;padding-left:15px;position:relative}
-.sidelist div::before{content:'·';position:absolute;left:3px;color:var(--hot)}
+/* ══ 10 · THE ACTION PLAN ══
+   Image-led, three across, with arrows between them so the three moves
+   read as one sequence rather than three separate asks. The pictures do
+   the work; each card gets one sentence and one purpose line. */
+.steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:start;
+  gap:clamp(8px,1.4vw,22px);margin-top:clamp(14px,2vw,30px)}
+@media(max-width:940px){.steps{grid-template-columns:1fr}.steps .link{display:none}}
+.st3{border:1px solid var(--hair);border-radius:4px;overflow:hidden;
+  background:rgba(12,16,24,.68);transition:border-color .3s ease,transform .3s ease}
+.st3:hover{border-color:rgba(255,77,46,.45);transform:translateY(-3px)}
+.shot{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0D1117}
+.shot img{width:100%;height:100%;object-fit:cover;filter:saturate(1.12) contrast(1.06)}
+.shot::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(5,7,11,.88) 4%,rgba(5,7,11,.12) 62%)}
+.sn{position:absolute;left:clamp(10px,1.3vw,18px);bottom:clamp(8px,1.1vw,15px);z-index:2;
+  font-family:var(--mono);font-size:clamp(11px,1.1vw,17px);font-weight:700;
+  letter-spacing:.2em;color:var(--hot)}
+.st3 h4{font-size:clamp(15px,2vw,34px);font-weight:900;font-stretch:62%;line-height:.92;
+  text-transform:uppercase;color:var(--bone);padding:clamp(11px,1.5vw,20px)
+  clamp(11px,1.5vw,20px) 0}
+.st3 p{font-family:var(--mono);font-size:clamp(9.5px,.8vw,12px);color:var(--warm);
+  line-height:1.75;padding:clamp(8px,1.1vw,14px) clamp(11px,1.5vw,20px) 0}
+.st3 .why{font-size:clamp(10px,1vw,14px);font-weight:800;font-stretch:72%;
+  text-transform:uppercase;line-height:1.3;color:var(--hot);
+  margin:clamp(9px,1.2vw,16px) clamp(11px,1.5vw,20px) clamp(11px,1.5vw,20px);
+  padding-top:clamp(8px,1.1vw,14px);border-top:1px solid rgba(255,77,46,.3)}
+.steps .link{align-self:center;color:#39404A;font-size:clamp(14px,1.8vw,28px);
+  line-height:1;padding-top:clamp(30px,5vw,80px)}
+.close3{margin-top:clamp(14px,2vw,30px);border-top:1px solid var(--hair);
+  padding-top:clamp(11px,1.5vw,20px)}
+.big3{font-size:clamp(15px,2.2vw,38px);font-weight:900;font-stretch:64%;line-height:1;
+  text-transform:uppercase;color:var(--bone)}
+.big3 em{font-style:normal;color:var(--hot)}
+.sub3{font-family:var(--mono);font-size:clamp(9.5px,.8vw,12px);color:var(--warm);
+  line-height:1.7;margin-top:clamp(8px,1.1vw,14px);max-width:96ch}
 
 /* ══ THE ANALYSIS TAB ══
    A persistent control on every slide opening a full-screen data view.
@@ -732,109 +734,49 @@ table.at td.h{color:var(--hot)}
   </div>
 </section>
 
-<!-- ═══ 10 · THE THREE PRIORITIES ════════════════════════════════════════════════════════════════════════
-     Replaces the budget slide entirely. The deck is label-facing and
-     carries no internal commercial information, so the strategic frame
-     has to stand on the YouTube argument alone. -->
-<section class="grain">
-  <div class="act">The strategy</div>
-  <div class="bed scrim-f" style="opacity:.26"><img data-vid="di1E6JTuYRE" alt=""></div>
-  <div class="z">
-    <div class="eyebrow">Three connected priorities</div>
-    <h2 class="sm reveal">Video created the moment.
-      <em>YouTube can help extend it.</em></h2>
-    <div class="tri stagger">
-      <div class="tc">
-        <div class="n2">01</div>
-        <h4>Create more<br>discovery</h4>
-        <p>Shorts built from the strongest existing moments. Destinations for
-          what audiences are already searching. Content that gives
-          recommendations something to surface. Cross-channel participation
-          and distribution beyond the owned channel.</p>
-      </div>
-      <div class="tc">
-        <div class="n2">02</div>
-        <h4>Build the<br>visual world</h4>
-        <p>The dancers, the choreography, the live performance, the
-          filmmaking and the BTS — the parts of STORM the audience is
-          already naming in its own words.</p>
-      </div>
-      <div class="tc">
-        <div class="n2">03</div>
-        <h4>Turn attention<br>into audience</h4>
-        <p>Connect every entrance back to the film, the channel, the song on
-          YouTube Music and the wider GENER8ION catalogue, so a view becomes
-          a return rather than a single play.</p>
-      </div>
-    </div>
-    <div class="kick reveal" style="margin-top:clamp(13px,1.9vw,28px);color:var(--bone)">
-      The question isn't whether STORM can find an audience. It already has.
-      It's <em>how much of that attention we can keep.</em></div>
-  </div>
-</section>
-
-<!-- ═══ 11 · WHAT WE SHOULD DO NOW ═══════════════════════════════════════════════════════════════════════
-     The play and the scorecard merged. Detailed KPI baselines moved into
-     the Analysis view; what stays here is what the room has to decide. -->
+<!-- ═══ 10 · THE ACTION PLAN ═══════════════════════════════════════════
+     This slide replaces BOTH the old strategy slide and the old action
+     slide. They were separately written but landed on the same three
+     ideas — create discovery, build the world, connect the audience —
+     one after the other. The detail that was here (the eight-piece list,
+     the channel checklist, the 2-4 week rollout and the measurement
+     pillars) now lives in Analysis. -->
 <section class="grain">
   <div class="act">The plan</div>
-  <div class="bed scrim-l" style="opacity:.30"><img data-vid="xT_nmiJp0jw" alt=""></div>
+  <div class="bed scrim-f" style="opacity:.20"><img data-vid="5NGIpXM8Cn0" alt=""></div>
   <div class="z">
-    <div class="eyebrow">Prioritised by what is likely to already exist</div>
-    <h2 class="sm reveal">What we should do
-      <em>on YouTube now</em>.</h2>
-    <div class="now2">
-      <div>
-        <div class="wk">Immediate · next 7 days</div>
-        <div class="plist stagger">
-          <div>Jacket sequence — film against VMA</div>
-          <div>Rehearsal against the final performance</div>
-          <div>Dancer POV and backstage</div>
-          <div>Choreographer explaining one movement</div>
-          <div>Meet the dancers · casting</div>
-          <div>One clean, uninterrupted peak STORM moment</div>
-          <div>Film choreography against live choreography</div>
-          <div>One strong filmmaking moment</div>
-        </div>
-        <div class="wk b">Next 2–4 weeks · follow what works</div>
-        <div class="sidelist reveal">
-          <div>Expand whichever formats earned attention, rather than
-            publishing the whole list again</div>
-          <div>Longer-form choreography and dancer-led storytelling</div>
-          <div>Film production breakdowns and extended BTS</div>
-          <div>A making-of documentary for depth rather than discovery</div>
-          <div>Territory-specific discovery in the strongest Asian markets</div>
-        </div>
+    <div class="eyebrow">Three connected moves</div>
+    <h2 class="sm reveal">Turn one film into
+      <em>a discovery ecosystem</em>.</h2>
+    <div class="steps stagger">
+      <div class="st3">
+        <div class="shot"><img data-vid="xT_nmiJp0jw" alt=""><span class="sn">01</span></div>
+        <h4>Create new<br>entrances</h4>
+        <p>Shorts built from the strongest moments already shot — the jacket
+          sequence, the choreography, the dancers.</p>
+        <div class="why">Reach new audiences through YouTube's discovery surfaces</div>
       </div>
-      <div>
-        <div class="wk">Alongside, on the channel itself</div>
-        <div class="sidelist reveal" style="margin-bottom:clamp(13px,1.9vw,26px)">
-          <div>A clear STORM destination and playlist, and a homepage that
-            leads with it</div>
-          <div>Descriptions, pinned comments, end screens and related-video
-            pathways that actually connect the pieces</div>
-          <div>The song one tap away, on YouTube Music</div>
-          <div>Explore Yung Lean channel support, without assuming a
-            collaboration transfers an audience</div>
-          <div>Involve the dancers and their own audiences</div>
-          <div>Confirm what VMA footage and rights are available</div>
-        </div>
-        <div class="wk">How we'd judge it</div>
-        <div class="pillars stagger">
-          <div class="pl"><h5>Discovery</h5>
-            <p>Are new pieces reaching people the film doesn't? Views and
-              velocity, Shorts viewed against swiped, new viewers.</p></div>
-          <div class="pl"><h5>Depth</h5>
-            <p>Are viewers consuming more of the world? Supporting-content
-              share, returning viewers, end-screen and related traffic.</p></div>
-          <div class="pl"><h5>Audience</h5>
-            <p>Is demand becoming an audience? Subscribers per 1,000 views,
-              returning viewers, wider catalogue consumption.</p></div>
-          <div class="pl"><h5>Sustained demand</h5>
-            <p>Does the cycle extend? Hero velocity, the viewing baseline,
-              territory performance, YouTube Music where available.</p></div>
-        </div>
+      <div class="link">→</div>
+      <div class="st3">
+        <div class="shot"><img data-vid="8pAVxmSp0FQ" alt=""><span class="sn">02</span></div>
+        <h4>Build the<br>STORM world</h4>
+        <p>Dancer stories, rehearsal footage, VMA material where rights allow,
+          and the filmmaking behind it.</p>
+        <div class="why">Give audiences more reasons to explore beyond the film</div>
       </div>
+      <div class="link">→</div>
+      <div class="st3">
+        <div class="shot"><img data-vid="di1E6JTuYRE" alt=""><span class="sn">03</span></div>
+        <h4>Connect the<br>audience</h4>
+        <p>A STORM playlist, related-video pathways, end screens, YouTube Music,
+          and Yung Lean channel support.</p>
+        <div class="why">Turn single viewing moments into repeat discovery</div>
+      </div>
+    </div>
+    <div class="close3 reveal">
+      <div class="big3">Start with existing footage. <em>Build on what works.</em></div>
+      <div class="sub3">Measure new discovery, deeper viewing and audience growth ·
+        the full content list, channel checklist and measurement framework are in Analysis</div>
     </div>
   </div>
 </section>
@@ -986,6 +928,76 @@ table.at td.h{color:var(--hot)}
           market, and no referral data is available to connect the two.</p>
       </div>
     </div>
+  </div>
+
+  <div class="asec">
+    <h4>Action detail · the full plan behind the three moves</h4>
+    <div class="acols">
+      <div>
+        <p class="anote"><b style="color:var(--hot)">First wave · prioritise
+          what likely already exists.</b></p>
+        <table class="at">
+          <tbody>
+            <tr><td class="n">01</td><td class="k">Jacket sequence — film against VMA</td></tr>
+            <tr><td class="n">02</td><td class="k">Rehearsal against the final performance</td></tr>
+            <tr><td class="n">03</td><td class="k">Dancer POV and backstage</td></tr>
+            <tr><td class="n">04</td><td class="k">Choreographer explaining one movement</td></tr>
+            <tr><td class="n">05</td><td class="k">Meet the dancers · casting</td></tr>
+            <tr><td class="n">06</td><td class="k">One clean, uninterrupted peak STORM moment</td></tr>
+            <tr><td class="n">07</td><td class="k">Film choreography against live choreography</td></tr>
+            <tr><td class="n">08</td><td class="k">One strong filmmaking moment</td></tr>
+          </tbody>
+        </table>
+        <p class="anote" style="margin-top:11px">Six to ten pieces. The
+          principle is not to ask audiences to discover something new, but to
+          give the millions already discovering STORM somewhere else to go.</p>
+      </div>
+      <div>
+        <p class="anote"><b style="color:var(--hot)">On the channel itself.</b></p>
+        <table class="at">
+          <tbody>
+            <tr><td class="k">A clear STORM destination and playlist, with a homepage that leads on it</td></tr>
+            <tr><td class="k">Descriptions, pinned comments, end screens and related-video pathways that connect the pieces</td></tr>
+            <tr><td class="k">The song one tap away, on YouTube Music</td></tr>
+            <tr><td class="k">Explore Yung Lean channel support — without assuming a collaboration transfers an audience</td></tr>
+            <tr><td class="k">Involve the dancers and their own audiences</td></tr>
+            <tr><td class="k">Confirm what VMA footage and rights are available</td></tr>
+          </tbody>
+        </table>
+        <p class="anote" style="margin-top:14px"><b style="color:var(--cold)">Next
+          2–4 weeks · follow what works.</b> Expand whichever formats earned
+          attention rather than publishing the whole list again. Longer-form
+          choreography and dancer-led storytelling; film production breakdowns
+          and extended BTS; a making-of documentary for depth rather than
+          discovery; territory-specific discovery in the strongest Asian
+          markets.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="asec">
+    <h4>Measurement framework · the four pillars</h4>
+    <table class="at">
+      <thead><tr><th>Pillar</th><th>The question</th><th>What we would track</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Discovery</td>
+          <td>Are additional Shorts and videos reaching audiences beyond the original film?</td>
+          <td class="h">Views and velocity · Shorts viewed against swiped · traffic sources · new viewers · recommendation and search traffic</td></tr>
+        <tr><td class="k">Depth</td>
+          <td>Are viewers consuming more of the STORM world?</td>
+          <td class="h">Supporting-content views · relative viewing share · returning viewers · end-screen interactions · related-video traffic</td></tr>
+        <tr><td class="k">Audience growth</td>
+          <td>Is the channel turning demand into an ongoing audience?</td>
+          <td class="h">Subscriber growth · subscribers per 1,000 views · returning viewers · wider GENER8ION catalogue consumption</td></tr>
+        <tr><td class="k">Sustained demand</td>
+          <td>Can additional content extend the discovery cycle?</td>
+          <td class="h">Hero-film daily velocity · viewing baseline · new content contribution · territory performance · YouTube Music where available</td></tr>
+      </tbody>
+    </table>
+    <p class="anote" style="margin-top:11px">Several of these need YouTube
+      Studio access to measure. Nothing here is a forecast, and no claim is
+      made that additional uploads produce a specific increase in views or
+      streams.</p>
   </div>
 
   <div class="asec">
