@@ -477,7 +477,11 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 .tb .c{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--warm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tb .t{height:clamp(7px,.85vw,12px);background:rgba(247,243,236,.05);border-radius:2px;overflow:hidden}
-.tb .f{height:100%;width:0;background:#2A2520;border-radius:2px;
+/* display:block is load-bearing. The fill is a span inside a span track,
+   and the track is a grid item but the fill is not, so without this it
+   stays inline, width and height are ignored, and every territory row
+   renders as an empty rail. */
+.tb .f{display:block;height:100%;width:0;background:#2A2520;border-radius:2px;
   transition:width .9s cubic-bezier(.2,.8,.25,1)}
 .tb .v{font-family:var(--mono);font-size:8.5px;color:var(--dim);text-align:right;
   font-variant-numeric:tabular-nums}
