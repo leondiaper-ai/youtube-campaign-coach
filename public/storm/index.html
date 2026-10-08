@@ -48,9 +48,9 @@
   Figures I could NOT verify from this window are the April–May and
   summer phase averages and the 11 Sep–6 Oct total, because the daily
   series only begins 19 Sep. Those come from the forensic analysis and
-  are labelled as such on the slide. The same applies to Spotify,
-  territory and comment-theme figures, which are not YouTube Data API
-  objects at all.
+  are labelled as such. The same applies to Spotify and comment-theme
+  figures. Territory and city data come from Chartmetric, pulled live and
+  dated 29 Sep 2026.
 
   ──────────────────────────────────────────────────────────────────────
   CLAIMS DELIBERATELY NOT MADE
@@ -399,6 +399,15 @@ table.score td.tgt{font-size:clamp(10px,1vw,14px);color:var(--hot);line-height:1
   line-height:1;color:var(--bone);margin-bottom:9px}
 .sf p{font-family:var(--mono);font-size:clamp(9.5px,.78vw,11.5px);color:var(--warm);line-height:1.75}
 
+.proof{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,1.5vw,24px);
+  margin-top:clamp(13px,1.9vw,26px);border-top:1px solid var(--hair);
+  padding-top:clamp(11px,1.5vw,20px)}
+@media(max-width:880px){.proof{grid-template-columns:1fr}}
+.proof div{font-family:var(--mono);font-size:clamp(9.5px,.8vw,12px);color:var(--warm);
+  line-height:1.7}
+.proof b{color:var(--hot);font-size:clamp(12px,1.25vw,19px);font-family:'Archivo';
+  font-weight:900;font-stretch:70%;display:block;margin-bottom:5px}
+
 /* ══ 10 · THE ACTION PLAN ══
    Image-led, three across, with arrows between them so the three moves
    read as one sequence rather than three separate asks. The pictures do
@@ -643,11 +652,18 @@ table.at td.h{color:var(--hot)}
     <h2 class="sm reveal">YouTube is more than
       <em>a place to host the video</em>.</h2>
     <div class="surf stagger" id="surf"></div>
-    <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
-      This isn't YouTube against TikTok — short-form discovery is working
-      across all of them. It's that YouTube is the one place where the
-      Short, the film, the documentary and <em>the song itself</em> can
-      live in the same ecosystem.</div>
+    <div class="proof reveal">
+      <div><b>15 of 15</b> markets with a prior reading at least doubled —
+        from +141% to +480%, median +265%</div>
+      <div><b>Seoul</b> is the single largest city for STORM, at 1.32M monthly
+        views and 3.4× its expected share</div>
+      <div><b>8 of the 10</b> largest cities are in Asia</div>
+    </div>
+    <div class="kick reveal" style="margin-top:clamp(11px,1.5vw,20px);color:var(--bone)">
+      That growth arrived everywhere at once, which is what platform
+      discovery looks like. This isn't YouTube against TikTok — it's that
+      YouTube is the one place where the Short, the film and
+      <em>the song itself</em> live in the same ecosystem.</div>
   </div>
 </section>
 
@@ -702,35 +718,6 @@ table.at td.h{color:var(--hot)}
     <div class="kick reveal" style="margin-top:clamp(11px,1.6vw,22px);color:var(--bone)">
       The film stays the destination. Everything around it is another way
       in — <em>not a checklist of deliverables.</em></div>
-  </div>
-</section>
-
-<!-- ═══ 09 · THE GLOBAL OPPORTUNITY ══════════════════════════════════════════════════════════════════════ -->
-<section class="grain">
-  <div class="act">The territory</div>
-  <div class="bed scrim-l" style="opacity:.30"><img data-vid="8pAVxmSp0FQ" alt=""></div>
-  <div class="z">
-    <div class="eyebrow">YouTube views, last 28 days</div>
-    <h2 class="sm reveal">Almost half of the demand is coming from <em>Asia</em>.</h2>
-    <div class="terr">
-      <div class="stagger" id="markets"></div>
-      <div>
-        <div class="contrast reveal">
-          <h4>Spotify's strongest cities</h4>
-          <ul>
-            <li>London</li><li>Stockholm</li><li>Paris</li><li>Sydney</li><li>Berlin</li>
-          </ul>
-          <div class="kick c" style="margin-top:clamp(11px,1.5vw,20px);font-size:clamp(11px,1.15vw,17px);color:var(--warm)">
-            Seoul is <em>not</em> in the Spotify top five, despite being the single
-            biggest YouTube market for STORM.</div>
-        </div>
-        <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--bone)">
-          This isn't proof of failed conversion — platform adoption differs
-          enormously by market. But it is a real question:
-          <em>STORM has found millions of viewers in Asia. How much deeper
-          consumption can we build from them?</em></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -792,8 +779,8 @@ table.at td.h{color:var(--hot)}
         <div class="l">The hero film</div></div>
       <div><div class="num v" data-n="22.2" data-dp="1" data-suffix="M">22.2M</div>
         <div class="l">Channel views gained with zero uploads</div></div>
-      <div><div class="num v" data-n="48" data-suffix="%">48%</div>
-        <div class="l">Of recent YouTube viewing coming from Asia</div></div>
+      <div><div class="num v" data-n="15" data-suffix="/15">15/15</div>
+        <div class="l">Markets that at least doubled on YouTube this cycle</div></div>
     </div>
     <div class="kick reveal" style="margin-top:clamp(12px,1.7vw,24px);color:var(--warm);max-width:52ch">
       This is already one of the strongest visual music stories in the campaign.
@@ -909,23 +896,47 @@ table.at td.h{color:var(--hot)}
   </div>
 
   <div class="asec">
-    <h4>Territories</h4>
+    <h4>Territories · Chartmetric YouTube monthly views, reported 29 Sep 2026</h4>
     <div class="acols">
       <div>
         <table class="at">
-          <thead><tr><th>Market</th><th>YouTube views, 28 days</th></tr></thead>
+          <thead><tr><th>Market</th><th>Monthly views</th><th>Previous</th><th>Change</th></tr></thead>
           <tbody id="a-mk"></tbody>
         </table>
       </div>
       <div>
-        <p class="anote">Ten Asian markets account for approximately 48% of
-          28-day YouTube viewing.</p>
-        <p class="anote">Spotify's strongest cities are London, Stockholm,
-          Paris, Sydney and Berlin. Seoul does not appear in that top five
-          despite being the single largest YouTube market for STORM.</p>
-        <p class="anote">This is a contrast, not a conversion failure.
-          Platform adoption and listening behaviour differ substantially by
-          market, and no referral data is available to connect the two.</p>
+        <table class="at">
+          <thead><tr><th>City</th><th>Monthly views</th><th>Affinity</th></tr></thead>
+          <tbody id="a-city"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="acols" style="margin-top:clamp(12px,1.7vw,22px)">
+      <div>
+        <p class="anote"><b style="color:var(--hot)">The growth was global, not
+          Asian.</b> All fifteen markets with a prior reading at least doubled,
+          from +141% to +480%, median +265%. Asia is the largest block of the
+          demand, not the explanation for it.</p>
+        <p class="anote">Ten Asian markets account for 8,967,629 of 14,008,754
+          listed monthly views — 64%. That denominator is listed countries
+          only, which is why it does not match the 48% of 28-day viewing
+          quoted in the earlier campaign analysis; the two use different
+          bases and different windows.</p>
+      </div>
+      <div>
+        <p class="anote">Seoul is the single largest city at 1,316,542 monthly
+          views, with an affinity of 3.4 — it over-indexes well above its size.
+          Eight of the ten largest cities are Asian.</p>
+        <p class="anote"><b style="color:var(--hot)">No mechanism identified.</b>
+          We looked for one: choreography trends, creator activity, reaction
+          videos, remakes or a traceable recommendation pattern. The YouTube
+          Data API exposes no traffic sources, and Chartmetric carries no
+          referral data, so nothing here can explain <em>why</em> the surge
+          happened. This is why the territory slide was cut from the deck
+          rather than redesigned — the numbers are real, but they do not
+          support a recommendation.</p>
+        <p class="anote">Seven of the twenty-two listed markets are Chartmetric
+          estimates and are excluded from the change figures above.</p>
       </div>
     </div>
   </div>
@@ -1091,10 +1102,29 @@ const THEMES = [
   ['The song itself', 0.4],
 ];
 
-/* 28-day YouTube views by market. */
+/* Chartmetric YouTube monthly views by market, reported 29 Sep 2026, pulled
+   live from /api/chartmetric/territories/gener8ionworld. previousViews is the
+   prior monthly reading; markets Chartmetric flags as estimates carry no
+   previous value and are excluded from the change read. */
 const MARKETS = [
-  ['South Korea',3120000],['Indonesia',1170000],['Vietnam',978000],['India',780000],
-  ['Thailand',751000],['Taiwan',748000],['Japan',533000],['Malaysia',506000],
+  ['South Korea',3119981,615603],  ['United States',1455377,482686],
+  ['Indonesia',1166230,291548],    ['Vietnam',978014,281448],
+  ['India',780296,136750],         ['Thailand',750591,205604],
+  ['Taiwan',747730,205742],        ['France',568428,235752],
+  ['Japan',532831,123937],         ['Malaysia',505850,168477],
+  ['Ukraine',503209,105943],       ['Russian Federation',434416,74876],
+  ['Brazil',405142,94283],         ['United Kingdom',399712,127179],
+  ['Germany',392589,113275],       ['Poland',379117,null],
+];
+
+/* Top cities, same read. Affinity is Chartmetric's over-indexing measure:
+   above 1.0 means the city consumes more than its size would predict. */
+const CITIES = [
+  ['Seoul',1316542,3.44],      ['Ho Chi Minh City',405026,1.77],
+  ['Bangkok',351091,1.02],     ['Busan',310827,2.24],
+  ['Hanoi',289183,1.13],       ['Jakarta',237291,1.06],
+  ['Kuala Lumpur',198295,2.68],['Hong Kong',196837,1.01],
+  ['Moscow',185262,1.71],      ['Kyiv',139852,1.10],
 ];
 
 /* The discovery surfaces. Each is a different mechanism by which someone
@@ -1217,21 +1247,6 @@ const ECO = [
     eco.appendChild(d);
   });
 
-  /* ── 09 · MARKETS ─────────────────────────────────────────────────── */
-  const mk = document.getElementById('markets');
-  if (mk) {
-    const max = MARKETS[0][1];
-    MARKETS.forEach(([n, v]) => {
-      const d = document.createElement('div');
-      d.className = 'mrow';
-      d.innerHTML = '<span class="c">' + n + '</span>'
-        + '<span class="t"><span class="f" data-w="'
-        + Math.max(4, v / max * 100).toFixed(1) + '"></span></span>'
-        + '<span class="v">' + (v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : Math.round(v / 1000) + 'K') + '</span>';
-      mk.appendChild(d);
-    });
-  }
-
   /* ── THE OPENING NUMBER ───────────────────────────────────────────
      34,743,841 rolls up the moment the deck opens. Width is pinned from
      the final string first, or the cover shunts sideways while it runs;
@@ -1306,7 +1321,7 @@ const ECO = [
     el.querySelectorAll('[data-h]').forEach(b => { b.style.height = b.dataset.h + '%'; });
     el.querySelectorAll('[data-w]').forEach(b => { b.style.width = b.dataset.w + '%'; });
   };
-  const watch = [...document.querySelectorAll('.count, .reveal, .stagger, #waves, #attach, #themes, #markets')];
+  const watch = [...document.querySelectorAll('.count, .reveal, .stagger, #waves, #attach, #themes')];
   if (reduced || !('IntersectionObserver' in window)) {
     watch.forEach(el => { el.classList.add('visible'); grow(el); paint(el); });
   } else {
@@ -1385,9 +1400,14 @@ const ECO = [
 
   fill('a-th', THEMES.map(t => row([t[0], t[1] + '%'], ['k', 'n h'])).join(''));
 
-  fill('a-mk', MARKETS.map(m => row([
-    m[0], m[1] >= 1e6 ? (m[1] / 1e6).toFixed(2) + 'M' : Math.round(m[1] / 1000) + 'K',
-  ], ['k', 'n'])).join(''));
+  fill('a-mk', MARKETS.map(([n, v, prev]) => row([
+    n, nf(v), prev ? nf(prev) : '—',
+    prev ? '+' + Math.round((v - prev) / prev * 100) + '%' : 'estimate',
+  ], ['k', 'n', 'n', 'n h'])).join(''));
+
+  fill('a-city', CITIES.map(([n, v, aff]) => row([
+    n, nf(v), aff.toFixed(2) + '×',
+  ], ['k', 'n', 'n h'])).join(''));
 
   fill('a-kpi', [
     ['Hero dependency', '94.4% of recent views', 'A meaningful share moving to surrounding content'],
