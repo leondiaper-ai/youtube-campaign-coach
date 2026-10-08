@@ -309,8 +309,11 @@ h2 em{font-style:normal;color:var(--hot)}
 .mrow .c{font-family:var(--mono);font-size:clamp(10px,.84vw,13px);letter-spacing:.08em;text-transform:uppercase;
   color:var(--bone)}
 .mrow .t{height:clamp(9px,1.2vw,16px);background:rgba(242,239,233,.05);border-radius:2px;overflow:hidden}
+/* Solid, not a gradient. A left-to-right gradient starts dark, so across
+   a 1440px track every bar read as a grey rail and eight different values
+   looked identical — length has to be the only variable here. */
 .mrow .f{height:100%;width:0;border-radius:2px;transition:width .9s cubic-bezier(.2,.8,.25,1);
-  background:linear-gradient(90deg,#8E2B1A,var(--hot))}
+  background:var(--hot)}
 .mrow .t{background:rgba(242,239,233,.07)}
 .mrow .v{font-family:var(--mono);font-size:clamp(10px,.84vw,13px);color:var(--bone);text-align:right;
   font-variant-numeric:tabular-nums}
@@ -464,8 +467,11 @@ body.locked .deck{overflow:hidden}
 .asec > h4{font-family:var(--mono);font-size:clamp(10px,.82vw,12.5px);letter-spacing:.26em;
   text-transform:uppercase;color:var(--hot);margin-bottom:clamp(9px,1.2vw,16px);
   border-left:2px solid var(--hot);padding-left:11px}
-table.at{width:100%;border-collapse:collapse;font-family:var(--mono);
+/* Capped, not full-bleed. At 1440 a two-column table stretched to the
+   window throws the value to the far edge and the eye loses the row. */
+table.at{width:100%;max-width:104ch;border-collapse:collapse;font-family:var(--mono);
   font-size:clamp(9.5px,.78vw,12px)}
+table.at td.k{width:34%}
 table.at th{text-align:left;font-weight:400;color:var(--dim);letter-spacing:.14em;
   text-transform:uppercase;font-size:clamp(9px,.7vw,10.5px);
   padding:0 clamp(10px,1.4vw,22px) 9px 0;border-bottom:1px solid var(--hair);white-space:nowrap}
