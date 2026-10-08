@@ -118,12 +118,6 @@ h2 em{font-style:normal;color:var(--hot)}
   text-transform:uppercase;color:var(--hot);margin-bottom:clamp(10px,1.4vw,20px)}
 .act{position:absolute;top:clamp(18px,2.4vw,36px);left:clamp(20px,3.4vw,66px);font-family:var(--mono);
   font-size:clamp(9px,.72vw,11px);letter-spacing:.3em;text-transform:uppercase;color:#49525E;z-index:3}
-/* Footnotes were set at 8.5px uppercase mono, which reads in the file and
-   not in a meeting room. Everything secondary moves up to 10–11px and the
-   colour lifts off the background. */
-.foot{position:absolute;left:clamp(20px,3.4vw,66px);bottom:clamp(12px,1.5vw,24px);
-  font-family:var(--mono);font-size:clamp(9.5px,.76vw,11.5px);letter-spacing:.1em;
-  text-transform:uppercase;color:#5A636F;max-width:92ch;line-height:1.7}
 .num{font-stretch:60%;font-weight:900;line-height:.78;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
 .z{position:relative;z-index:2}
 .bed{position:absolute;inset:0;z-index:0}
@@ -148,10 +142,7 @@ h2 em{font-style:normal;color:var(--hot)}
 .glow{text-shadow:0 0 48px rgba(255,77,46,.42)}
 
 /* ══ 01 HERO ══ */
-/* The cover is bottom-aligned while .foot is absolutely positioned, so the
-   closing line and the provenance note land on top of each other. Reserve the
-   footnote's own band — three mono lines plus its offset — as padding. */
-#open{justify-content:flex-end;padding-bottom:clamp(58px,6vw,92px)}
+#open{justify-content:flex-end}
 #open .big{font-size:clamp(46px,13vw,236px);font-weight:900;font-stretch:58%;line-height:.80;
   letter-spacing:-.045em}
 #open .nm{font-family:var(--mono);font-size:clamp(9px,1vw,15px);letter-spacing:.42em;
@@ -528,7 +519,6 @@ table.at td.h{color:var(--hot)}
       STORM isn't a streaming hit with a good video attached.
       <em>Its visual world has repeatedly driven the cultural moment.</em></div>
   </div>
-  <div class="foot">Hero film and daily velocity read from the YouTube Data API, 7 Oct 2026 · Spotify weekly from the campaign consumption data</div>
 </section>
 
 <!-- ═══ 02 · THE TWO WAVES ════════════════════════════════════════════════════════════════════════════════════════ -->
@@ -545,7 +535,6 @@ table.at td.h{color:var(--hot)}
       running <em>before</em> the VMAs — and the live performance
       accelerated it again.</div>
   </div>
-  <div class="foot">Every bar is an average across its period, not a single day · the VMA wave averaged 955,801/day and peaked at 1,264,534 on 30 Sep · April–May, summer and pre-VMA averages from the campaign analysis, VMA-wave figures computed from the daily observation series, 19 Sep – 7 Oct 2026</div>
 </section>
 
 <!-- ═══ 03 · THE BIGGEST FINDING ════════════════════════════════════════════════════════════════════════════ -->
@@ -587,7 +576,6 @@ table.at td.h{color:var(--hot)}
       The hard part is already solved. <em>Generating demand isn't the problem —
       catching it while it's happening is.</em></div>
   </div>
-  <div class="foot">Hero gain, upload gap and subscriber movement verified from the live channel and daily series · 22.2M window figure from the campaign analysis</div>
 </section>
 
 <!-- ═══ 04 · ONE VIDEO, ALL THE WORK ══════════════════════════════════════════════════════════════════════════════ -->
@@ -639,7 +627,6 @@ table.at td.h{color:var(--hot)}
       video-first record, <em>an important discovery surface is still
       almost entirely untested.</em></div>
   </div>
-  <div class="foot">Shares computed from the per-video daily observation series, 1–7 Oct 2026 · Shorts and long-form views are not the same unit · subscriber conversion currently 0.7 per 1,000 channel views, against 2.0 in April–May</div>
 </section>
 
 <!-- ═══ 05 · YOUTUBE IS MORE THAN A VIDEO DESTINATION ══════════════════════════════════
@@ -660,7 +647,6 @@ table.at td.h{color:var(--hot)}
       Short, the film, the documentary and <em>the song itself</em> can
       live in the same ecosystem.</div>
   </div>
-  <div class="foot">Connected TV is included as a creative consideration for a cinematic project, not as a sized audience claim — no device-level data is used anywhere in this deck</div>
 </section>
 
 <!-- ═══ 06 · AUDIENCES ALREADY WANT MORE ══════════════════════════════════════════════════════════════════════════ -->
@@ -683,7 +669,6 @@ table.at td.h{color:var(--hot)}
       Supporting content already earns real consumption. Depth is proven —
       <em>new owned discovery is the thing we haven't tested.</em></div>
   </div>
-  <div class="foot">Daily BTS and hero views from the observation series · the 3.2% is a ratio of views to views, not a measured viewer conversion — without YouTube Studio data we cannot show these are the same people · attach ratio ranges 2.4–3.8% across the window, like rates 2.0% BTS against 2.2% hero</div>
 </section>
 
 <!-- ═══ 07 · THE AUDIENCE BRIEF ══════════════════════════════════════════════════════════════════════════════ -->
@@ -703,7 +688,6 @@ table.at td.h{color:var(--hot)}
       The audience has already written the brief. It isn't a lyric video
       or a visualiser — <em>it's the STORM visual world.</em></div>
   </div>
-  <div class="foot">Theme coding of the most-liked comments on the VMA performance upload · percentages are share of coded comments and sum to more than 100 because comments carry multiple themes</div>
 </section>
 
 <!-- ═══ 08 · THE DISCOVERY ECOSYSTEM ══════════════════════════════════════════════════════════════════════════════ -->
@@ -717,7 +701,6 @@ table.at td.h{color:var(--hot)}
       The film stays the destination. Everything around it is another way
       in — <em>not a checklist of deliverables.</em></div>
   </div>
-  <div class="foot">Content opportunities, subject to what footage and rights are actually available · nothing here assumes access to rehearsal material, MTV footage, director interviews or dancer participation without confirmation</div>
 </section>
 
 <!-- ═══ 09 · THE GLOBAL OPPORTUNITY ══════════════════════════════════════════════════════════════════════ -->
@@ -747,7 +730,6 @@ table.at td.h{color:var(--hot)}
       </div>
     </div>
   </div>
-  <div class="foot">Ten Asian markets represent approximately 48% of 28-day YouTube viewing · bars are scaled to the actual view counts shown · reported AI remakes and Asian video communities are raised here as something to investigate — that evidence is from comments, not from confirmed referral data</div>
 </section>
 
 <!-- ═══ 10 · THE THREE PRIORITIES ════════════════════════════════════════════════════════════════════════
@@ -855,7 +837,6 @@ table.at td.h{color:var(--hot)}
       </div>
     </div>
   </div>
-  <div class="foot">Everything above is a test, not a forecast — no claim is made that additional uploads produce a specific increase in views or streams · measurement beyond public figures needs YouTube Studio access · full KPI baselines are in Analysis</div>
 </section>
 
 <!-- ═══ 12 · THE OPPORTUNITY ════════════════════════════════════════════════════════════════════════════════════ -->
@@ -951,6 +932,10 @@ table.at td.h{color:var(--hot)}
           (12 June to 7 October).</p>
         <p class="anote">Shorts and long-form views are not the same unit and
           are never summed here.</p>
+        <p class="anote">The content opportunities in the deck are subject to
+          what footage and rights actually exist. Nothing assumes access to
+          rehearsal material, MTV footage, director interviews or dancer
+          participation without confirmation.</p>
       </div>
     </div>
   </div>
@@ -973,6 +958,10 @@ table.at td.h{color:var(--hot)}
         <p class="anote">Six of the dancers commented on the upload
           themselves; those comments drew approximately 27,752 likes. Like
           rates run at 2.0% on the BTS against 2.2% on the hero film.</p>
+        <p class="anote"><b style="color:var(--hot)">On the 3.2%.</b> That is
+          a ratio of BTS views to hero views, not a measured viewer
+          conversion. Without YouTube Studio data we cannot show these are
+          the same people. The ratio ranges 2.4–3.8% across the window.</p>
       </div>
     </div>
   </div>
