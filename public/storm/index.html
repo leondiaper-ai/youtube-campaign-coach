@@ -254,8 +254,12 @@ h2 em{font-style:normal;color:var(--hot)}
 .th .n{font-size:clamp(12px,1.35vw,21px);font-weight:900;font-stretch:70%;text-transform:uppercase;
   color:var(--bone);text-align:right;line-height:1.1}
 .th .t{height:clamp(14px,1.9vw,28px);background:rgba(242,239,233,.05);border-radius:2px;overflow:hidden}
-.th .f{height:100%;width:0;border-radius:2px;transition:width 1s cubic-bezier(.2,.8,.25,1);
-  background:linear-gradient(90deg,rgba(255,77,46,.45),var(--hot))}
+/* display:block is load-bearing. These fills are spans inside a span
+   track, so they stay inline and their width/height are ignored — the
+   bar paints a zero-size box and the chart shows empty rails. */
+.th .f{display:block;height:100%;width:0;border-radius:2px;
+  transition:width 1s cubic-bezier(.2,.8,.25,1);
+  background:linear-gradient(90deg,rgba(255,77,46,.55),var(--hot))}
 .th.low .f{background:#2B323C}
 .th .p{font-family:var(--mono);font-size:clamp(10px,1.1vw,17px);color:var(--hot);
   font-variant-numeric:tabular-nums;font-weight:700}
@@ -312,8 +316,8 @@ h2 em{font-style:normal;color:var(--hot)}
 /* Solid, not a gradient. A left-to-right gradient starts dark, so across
    a 1440px track every bar read as a grey rail and eight different values
    looked identical — length has to be the only variable here. */
-.mrow .f{height:100%;width:0;border-radius:2px;transition:width .9s cubic-bezier(.2,.8,.25,1);
-  background:var(--hot)}
+.mrow .f{display:block;height:100%;width:0;border-radius:2px;
+  transition:width .9s cubic-bezier(.2,.8,.25,1);background:var(--hot)}
 .mrow .t{background:rgba(242,239,233,.07)}
 .mrow .v{font-family:var(--mono);font-size:clamp(10px,.84vw,13px);color:var(--bone);text-align:right;
   font-variant-numeric:tabular-nums}
