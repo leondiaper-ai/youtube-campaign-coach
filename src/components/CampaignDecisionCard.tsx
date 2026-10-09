@@ -151,10 +151,12 @@ export type CardData = {
   thumbnail?: string;
   /** Wide banner for the card head, from the channel's own recent work. */
   heroImage?: string;
-  /** The channel's latest uploads, newest first. Shown as a strip at the
-      foot of the card so a campaign is judged against the work, not only
-      against its numbers. */
-  recentVideos?: { id: string; title: string; views: number; daysAgo: number; isShort: boolean }[];
+  /** The channel's uploads, ranked by views added in the last week.
+      Shown as a strip at the foot of the card so a campaign is judged
+      against the work, not only against its numbers. */
+  recentVideos?: { id: string; title: string; views: number; recentGain: number | null; daysAgo: number; isShort: boolean }[];
+  /** Plain-English note on how that ranking was decided. */
+  recentVideosNote?: string;
   /** Artist relationship type — value model only applies to 'managed' */
   artistType?: 'managed' | 'observed' | 'external';
   /** Revenue ownership — only 'virgin' gets value calculations */
@@ -771,18 +773,19 @@ function SnapshotHistory({ slug, load }: {
 }
 
 // ─── Content Structure Warning (lightweight, only when relevant) ─────────
+/* A caveat, not an alarm. The filled yellow panel with its own border
+   drew more attention than the decision above it, which is the wrong
+   order of importance on a card whose job is to carry a decision. Same
+   words, same colour for the headline, no box. */
 function StructureWarningLine({ warning }: { warning: StructureWarning }) {
   return (
-    <div
-      className="flex items-start gap-2 mb-3 px-3 py-2 rounded text-[11px] leading-snug"
-      style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}
-    >
-      <span className="shrink-0 mt-px" style={{ color: '#92400E', fontSize: 11 }}>⚠</span>
+    <div className="flex items-start gap-1.5 text-micro leading-snug">
+      <span className="shrink-0" style={{ color: '#9A6324' }}>⚠</span>
       <div>
-        <span className="font-bold uppercase tracking-[0.04em]" style={{ color: '#92400E' }}>
+        <span className="font-bold" style={{ color: '#9A6324' }}>
           {warning.headline}
         </span>
-        <span style={{ color: '#78716C' }}> — {warning.detail}</span>
+        <span className="text-muted"> — {warning.detail}</span>
       </div>
     </div>
   );
@@ -1159,40 +1162,45 @@ export function DecisionCard({
             </div>
           </div>
 
-          {/* Totals since campaign started (not 7d — full campaign period) */}
-          <div className="flex items-center gap-4 mb-2">
-            <div>
-              {(() => {
-                // Same rule as the headline: a negative campaign-window total
-                // is a snapshot disagreement, not views lost.
-                const campViews = trustedViewDelta(cw.channelViewsDelta);
-                return (
+          {/* Campaign totals. These were three sizes and two cases in one
+              row — a 16px figure, a 9px uppercase label and a 10px
+              sentence — which made a simple pair of numbers look like
+              four separate things. Two figures, one caption each. */}
+          <div className="flex flex-wrap items-baseline gap-x-7 gap-y-1.5 mb-2">
+            {(() => {
+              // Same rule as the headline: a negative campaign-window total
+              // is a snapshot disagreement, not views lost.
+              const campViews = trustedViewDelta(cw.channelViewsDelta);
+              return (
+                <span className="text-body">
                   <span
-                    className="text-[16px] font-black tabular-nums"
+                    className="text-[17px] font-black tabular-nums"
                     style={{ color: campViews != null ? deltaColor(campViews) : 'rgba(14,14,14,0.25)' }}
                   >
                     {campViews != null ? `+${fmtNum(campViews)}` : 'Updating'}
                   </span>
-                );
-              })()}
-              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">views (total)</span>
-            </div>
-            <div>
-              <span className="text-[16px] font-black tabular-nums" style={{ color: cw.subsGained != null ? (cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)') : 'rgba(14,14,14,0.25)' }}>
+                  <span className="text-muted ml-1.5">views</span>
+                </span>
+              );
+            })()}
+            <span className="text-body">
+              <span
+                className="text-[17px] font-black tabular-nums"
+                style={{ color: cw.subsGained != null ? (cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)') : 'rgba(14,14,14,0.25)' }}
+              >
                 {cw.subsGained != null ? `${cw.subsGained >= 0 ? '+' : ''}${fmtNum(cw.subsGained)}` : '—'}
               </span>
-              <span className="text-[9px] text-ink/30 ml-1 uppercase tracking-[0.08em] font-bold">subs (total)</span>
-            </div>
-            <div className="text-[10px] text-ink/30">
-              {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''} ({cw.contentMix.shorts} Shorts · {cw.contentMix.videos} video{cw.contentMix.videos !== 1 ? 's' : ''})
-            </div>
+              <span className="text-muted ml-1.5">subs</span>
+            </span>
+            <span className="text-meta text-muted tabular-nums">
+              {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''} · {cw.contentMix.shorts} Shorts · {cw.contentMix.videos} video{cw.contentMix.videos !== 1 ? 's' : ''}
+            </span>
           </div>
 
-          {/* Momentum */}
+          {/* Momentum — a sentence, so it is set as one. */}
           {ct && ct.currentWeekViews != null && ct.currentWeekViews > 0 && (
-            <div className="text-[10px] text-ink/35 mb-2">
-              <span className="font-bold uppercase tracking-[0.08em] text-ink/30">Momentum:</span>{' '}
-              <span className="tabular-nums">{momentumLine(ct)}</span>
+            <div className="text-meta text-muted mb-2 tabular-nums">
+              {momentumLine(ct)}
             </div>
           )}
 
@@ -1294,32 +1302,41 @@ export function DecisionCard({
         </div>
       )}
 
-      {/* ─── Expand detail toggle ──────────────────────────────────── */}
-      {/* ─── Content Structure Warning ─────────────────────────── */}
-      {card.structureWarning && (
-        <StructureWarningLine warning={card.structureWarning} />
-      )}
-
-      {/* ─── Movement confidence indicator with directional reporting ── */}
-      {(card.movementConfidence === 'stale' || card.movementConfidence === 'limited') && (
-        <div className="flex items-center gap-1.5 mb-2 mt-1">
-          <span
-            className="inline-block w-[5px] h-[5px] rounded-full"
-            style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
-          />
-          <span className="text-[9px] tracking-[0.04em] text-ink/30 italic">
-            {card.movementConfidence === 'stale' && trustedViewDelta(card.lastKnownGoodViews7d) != null
-              ? `Last confirmed: +${fmtNum(trustedViewDelta(card.lastKnownGoodViews7d)!)} views · ${card.lastKnownGoodDaysAgo ?? '?'}d ago`
-              : card.movementConfidence === 'stale'
-                ? 'Public YouTube totals updating'
-                : 'Movement data building — limited history'}
-          </span>
+      {/* ─── Caveats ───────────────────────────────────────────────
+          The structure warning and the data-confidence note were two
+          separate strips stacked between the tracker and the controls,
+          each with its own fill, icon and type size. They say the same
+          kind of thing — read this with a caveat — so they share one
+          quiet row. Neither is dropped: a card whose figures are stale
+          has to say so. */}
+      {(card.structureWarning ||
+        card.movementConfidence === 'stale' ||
+        card.movementConfidence === 'limited') && (
+        <div className="space-y-1 mb-2.5">
+          {card.structureWarning && (
+            <StructureWarningLine warning={card.structureWarning} />
+          )}
+          {(card.movementConfidence === 'stale' || card.movementConfidence === 'limited') && (
+            <div className="flex items-center gap-1.5">
+              <span
+                className="inline-block w-[5px] h-[5px] rounded-full shrink-0"
+                style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
+              />
+              <span className="text-micro text-muted">
+                {card.movementConfidence === 'stale' && trustedViewDelta(card.lastKnownGoodViews7d) != null
+                  ? `Last confirmed +${fmtNum(trustedViewDelta(card.lastKnownGoodViews7d)!)} views, ${card.lastKnownGoodDaysAgo ?? '?'} days ago`
+                  : card.movementConfidence === 'stale'
+                    ? 'Public YouTube totals updating'
+                    : 'Movement data building — limited history'}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
       <button
         onClick={() => setShowDetail(!showDetail)}
-        className="text-[10px] text-ink/25 hover:text-ink/45 mb-2 transition-colors"
+        className="text-micro font-semibold text-muted hover:text-ink mb-2 transition-colors"
       >
         {showDetail ? 'Hide detail' : 'Show detail'}
       </button>
@@ -1441,8 +1458,15 @@ export function DecisionCard({
           figures above have something to point at. */}
       {card.recentVideos && card.recentVideos.length > 0 && (
         <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
-          <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">
-            Recent uploads
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2.5">
+            <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted">
+              Moving now
+            </div>
+            {card.recentVideosNote && (
+              /* The order is a claim about what is being watched, so the
+                 basis for it is printed rather than assumed. */
+              <div className="text-[11px] text-faint">{card.recentVideosNote}</div>
+            )}
           </div>
           <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${card.recentVideos.length}, minmax(0, 1fr))` }}>
             {card.recentVideos.map((v) => (
@@ -1475,8 +1499,21 @@ export function DecisionCard({
                 <div className="text-[12px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
                   {v.title}
                 </div>
-                <div className="text-[11px] text-muted mt-0.5 tabular-nums">
-                  {fmtNum(v.views)} views · {v.daysAgo}d ago
+                <div className="text-[11px] mt-0.5 tabular-nums">
+                  {v.recentGain != null ? (
+                    /* Ranked on the gain, so the gain leads. Lifetime
+                       stays as context behind it — putting the total
+                       first would explain the order with the wrong
+                       number. */
+                    <>
+                      <span className="font-bold" style={{ color: '#0C6A3F' }}>
+                        +{fmtNum(v.recentGain)}
+                      </span>
+                      <span className="text-muted"> · {fmtNum(v.views)} total · {v.daysAgo}d ago</span>
+                    </>
+                  ) : (
+                    <span className="text-muted">{fmtNum(v.views)} views · {v.daysAgo}d ago</span>
+                  )}
                 </div>
               </a>
             ))}

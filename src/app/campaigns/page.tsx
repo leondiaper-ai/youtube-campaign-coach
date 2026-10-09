@@ -19,6 +19,7 @@ import { checkContentStructure, type StructureWarning } from '@/lib/contentStruc
 import { computeWeeklyWindows } from '@/lib/campaignWeeks';
 import { normalizeChannelData, toGrowthInput, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import CampaignStatusBoard from '@/components/CampaignStatusBoard';
+import { rankByMomentum } from '@/lib/videoMomentum';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
 export const revalidate = 600;
@@ -125,8 +126,10 @@ export type StatusCardData = {
   thumbnail?: string;
   // Wide banner for the card head, from the channel's own recent work
   heroImage?: string;
-  // The channel's latest uploads, newest first
-  recentVideos?: { id: string; title: string; views: number; daysAgo: number; isShort: boolean }[];
+  // The channel's uploads, ranked by what is moving
+  recentVideos?: { id: string; title: string; views: number; recentGain: number | null; daysAgo: number; isShort: boolean }[];
+  // How that ranking was decided, in words
+  recentVideosNote?: string;
   // Artist type for value model scoping
   artistType?: 'managed' | 'observed' | 'external';
   // Revenue ownership — only 'virgin' gets value calculations
@@ -261,6 +264,26 @@ async function loadCard(
   } catch {
     // Non-critical
   }
+
+  /* ── WHAT IS ACTUALLY BEING WATCHED ───────────────────────────────
+     Ranked by views added in the last week rather than by publish date.
+     Newest-first answers "what went out", which the cadence figures
+     already cover — a campaign card should lead with what is moving.
+     rankByMomentum falls back to lifetime when too few videos have daily
+     history and reports which basis it used, so the card can say so. */
+  const uploadsForRank = snap.recentUploads ?? [];
+  const shortIds = new Set(
+    uploadsForRank.filter((u) => (u.durationSec ?? 0) <= 62).map((u) => u.id),
+  );
+  const recentRanked = await rankByMomentum(
+    uploadsForRank.map((u) => ({
+      id: u.id,
+      title: u.title,
+      views: u.viewCount ?? 0,
+      publishedAt: u.publishedAt,
+    })),
+    { windowDays: 7, limit: 3 },
+  );
 
   // ── Campaign window data ──────────────────────────────────────────────
   // campaignStart already computed above for normalizeChannelData
@@ -418,19 +441,20 @@ async function loadCard(
       const best = [...ups].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))[0];
       return best?.id ? `https://i.ytimg.com/vi/${best.id}/hqdefault.jpg` : undefined;
     })(),
-    /* Newest first, capped at three: the strip is a reminder of what is
-       going out, not a catalogue. */
-    recentVideos: (snap.recentUploads ?? [])
-      .slice()
-      .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
-      .slice(0, 3)
-      .map((u) => ({
-        id: u.id,
-        title: u.title,
-        views: u.viewCount ?? 0,
-        daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(u.publishedAt)) / 86400000)),
-        isShort: (u.durationSec ?? 0) <= 62,
-      })),
+    /* Ranked by views added in the last week, not by publish date.
+       Newest-first answers "what went out", which the cadence figures
+       already cover; a campaign card should lead with what is actually
+       being watched. Falls back to lifetime when too few videos have
+       daily history, and says which it did. */
+    recentVideos: recentRanked.items.map((v) => ({
+      id: v.id,
+      title: v.title,
+      views: v.views,
+      recentGain: v.recentGain,
+      daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(v.publishedAt)) / 86400000)),
+      isShort: shortIds.has(v.id),
+    })),
+    recentVideosNote: recentRanked.note,
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
     structureWarning: checkContentStructure(snap.recentUploads ?? []),

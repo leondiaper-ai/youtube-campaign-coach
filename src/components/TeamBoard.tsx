@@ -13,6 +13,7 @@ import {
   getYouTubeGrowthState, getCampaignSignal, getChannelHealth,
   type GrowthInput,
 } from '@/lib/youtubeGrowthOS';
+import { rankByMomentum } from '@/lib/videoMomentum';
 import { checkContentStructure, computeMultiformat } from '@/lib/contentStructure';
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
@@ -141,6 +142,19 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
       const snap = await readLiveSnap(entry.channelId);
       const history = snap?.channelId ? await readHistory(snap.channelId) : [];
       const campaignStart = entry.campaignStartDate || null;
+      /* Ranked by views added in the last week, exactly as the campaigns
+         board does it, so a team's priority tiles and the central board
+         never order the same channel differently. */
+      const uploadsForRank = snap?.recentUploads ?? [];
+      const shortIds = new Set(
+        uploadsForRank.filter((u) => (u.durationSec ?? 0) <= 62).map((u) => u.id),
+      );
+      const ranked = await rankByMomentum(
+        uploadsForRank.map((u) => ({
+          id: u.id, title: u.title, views: u.viewCount ?? 0, publishedAt: u.publishedAt,
+        })),
+        { windowDays: 7, limit: 3 },
+      );
       const nc = normalizeChannelData(snap, history, campaignStart ? {
         campaignName: entry.campaignName || 'Tracking',
         campaignStartDate: campaignStart,
@@ -297,17 +311,18 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         })(),
     /* Newest first, capped at three: the strip is a reminder of what is
            going out, not a catalogue. */
-            recentVideos: (snap?.recentUploads ?? [])
-          .slice()
-          .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
-          .slice(0, 3)
-          .map((u) => ({
-            id: u.id,
-            title: u.title,
-            views: u.viewCount ?? 0,
-            daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(u.publishedAt)) / 86400000)),
-            isShort: (u.durationSec ?? 0) <= 62,
-          })),
+        /* Ranked by views added in the last week, exactly as the campaigns
+           board does it, so a team's priority tiles and the central board
+           never order the same channel differently. */
+        recentVideos: ranked.items.map((v) => ({
+          id: v.id,
+          title: v.title,
+          views: v.views,
+          recentGain: v.recentGain,
+          daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(v.publishedAt)) / 86400000)),
+          isShort: shortIds.has(v.id),
+        })),
+        recentVideosNote: ranked.note,
         structureWarning: snap?.recentUploads
           ? checkContentStructure(snap.recentUploads)
           : null,
