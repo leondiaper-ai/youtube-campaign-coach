@@ -232,6 +232,7 @@ export default async function ControlPage({
     { href: `/growth${mq}`, label: 'Channel Health', match: '/growth' },
     { href: `/campaigns${mq}`, label: 'Active Campaigns', match: '/campaigns' },
     { href: `/coach${mq}`, label: 'Coach', match: '/coach' },
+    { href: '/teams', label: 'Workspaces', match: '/teams' },
     { href: '/resources', label: 'Resources', match: '/resources' },
   ];
 
