@@ -102,18 +102,19 @@ export default function ArtistMarkets({ slug }: { slug: string }) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-ink/40">
-        {/* "read 2026-10-01" was being taken as our staleness when it is
-            Chartmetric's own reading date — we refresh every 12 hours and
-            they publish per artist on their own cadence. Saying whose date
-            it is removes the ambiguity, and a reading that really has gone
-            quiet says so in days rather than leaving the reader to count. */}
+        {/* Just the source. The reading date was being read as our
+            staleness when it is Chartmetric's own, and "a different
+            measure from lifetime channel views" was explaining something
+            the words "monthly" and "by country" already say.
+
+            The one case that still speaks is a reading that has actually
+            gone quiet: past a fortnight, silence would let someone treat
+            an old number as current. That is an exception, not a caption
+            — on fresh data nothing prints. */}
         <span>
-          Chartmetric monthly YouTube views by country — a different measure
-          from lifetime channel views.
-          {t.reportingDate && (
-            <> Chartmetric last reported {t.reportingDate}{readingAge != null && readingAge > 14
-              ? `, ${readingAge} days ago.`
-              : '.'}</>
+          Chartmetric monthly YouTube views by country.
+          {readingAge != null && readingAge > 14 && (
+            <> Last reported {t.reportingDate}, {readingAge} days ago.</>
           )}
         </span>
         {t.estimatedCount > 0 && <span>{t.estimatedCount} markets modelled (est.).</span>}
