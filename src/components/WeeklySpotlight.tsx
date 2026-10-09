@@ -52,8 +52,8 @@ export type SpotlightChannel = {
 
 const INK   = '#0E0E0E';
 const PAPER = '#FAF7F2';
-const SMOKE = '#8A847A';
-const GHOST = '#C8C2B8';
+const SMOKE = '#7D776E';
+const GHOST = '#A8A199';
 const BONE  = '#E8E3DA';
 const WHITE = '#FFFFFF';
 const WARM  = '#4A4640';
@@ -268,7 +268,7 @@ export default function WeeklySpotlight({
                           display: 'inline-block',
                           padding: '3px 10px',
                           borderRadius: 20,
-                          fontSize: 9,
+                          fontSize: 11,
                           fontWeight: 700,
                           letterSpacing: '0.06em',
                           textTransform: 'uppercase',
@@ -313,7 +313,7 @@ export default function WeeklySpotlight({
               {ch.whatsWorking.length > 0 && (
                 <div style={{ marginBottom: 20 }}>
                   <div style={{
-                    fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
+                    fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
                     color: GHOST, marginBottom: 8,
                   }}>
                     What&apos;s Working
@@ -336,7 +336,7 @@ export default function WeeklySpotlight({
               {ch.recentVideos.length > 0 && (
                 <div style={{ marginBottom: 20 }}>
                   <div style={{
-                    fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
+                    fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
                     color: GHOST, marginBottom: 10,
                   }}>
                     Recent Uploads
@@ -374,7 +374,7 @@ export default function WeeklySpotlight({
                           <span style={{
                             position: 'absolute', top: 6, left: 6,
                             padding: '2px 7px', borderRadius: 4,
-                            fontSize: 8, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
+                            fontSize: 10.5, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
                             background: v.isShort ? 'rgba(107,33,168,0.85)' : 'rgba(26,86,184,0.85)',
                             color: WHITE, backdropFilter: 'blur(4px)',
                           }}>
@@ -384,7 +384,7 @@ export default function WeeklySpotlight({
                           <span style={{
                             position: 'absolute', bottom: 6, right: 6,
                             padding: '2px 7px', borderRadius: 4,
-                            fontSize: 9, fontWeight: 700,
+                            fontSize: 11, fontWeight: 700,
                             background: 'rgba(0,0,0,0.65)', color: WHITE,
                             backdropFilter: 'blur(4px)',
                           }}>
@@ -427,7 +427,7 @@ export default function WeeklySpotlight({
                             style={{ width: 48, height: 27, objectFit: 'cover', borderRadius: 3, flexShrink: 0 }}
                           />
                           <span style={{
-                            padding: '1px 5px', borderRadius: 3, fontSize: 8, fontWeight: 700,
+                            padding: '1px 5px', borderRadius: 3, fontSize: 10.5, fontWeight: 700,
                             textTransform: 'uppercase',
                             background: v.isShort ? '#F0E8FE' : '#E8F0FE',
                             color: v.isShort ? '#6B21A8' : '#1A56B8', flexShrink: 0,
@@ -454,7 +454,7 @@ export default function WeeklySpotlight({
               {ch.hasCoachPlan && (ch.currentMoment || ch.nextMoment || ch.upcomingMoment) && (
                 <div>
                   <div style={{
-                    fontSize: 9, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
+                    fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
                     color: GHOST, marginBottom: 8,
                   }}>
                     Pipeline Ahead
@@ -486,8 +486,8 @@ function StatCell({ value, label, sublabel, color }: { value: string; label: str
       <div style={{ fontSize: 18, fontWeight: 800, color: color ?? INK, fontVariantNumeric: 'tabular-nums' }}>
         {value}
       </div>
-      <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>{label}</div>
-      {sublabel && <div style={{ fontSize: 8, color: GHOST, marginTop: 1 }}>{sublabel}</div>}
+      <div style={{ fontSize: 11, color: SMOKE, marginTop: 1 }}>{label}</div>
+      {sublabel && <div style={{ fontSize: 10.5, color: GHOST, marginTop: 1 }}>{sublabel}</div>}
     </div>
   );
 }

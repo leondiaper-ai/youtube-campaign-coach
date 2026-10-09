@@ -8,8 +8,8 @@ import WeeklySpotlight, { type SpotlightChannel } from './WeeklySpotlight';
 
 const INK    = '#0E0E0E';
 const PAPER  = '#FAF7F2';
-const SMOKE  = '#8A847A';
-const GHOST  = '#C8C2B8';
+const SMOKE  = '#7D776E';
+const GHOST  = '#A8A199';
 const BONE   = '#E8E3DA';
 const WHITE  = '#FFFFFF';
 const WARM   = '#4A4640';
@@ -201,13 +201,13 @@ export default function ChannelSpotlightPage({ market = 'uk' }: { market?: strin
             <footer style={{ marginTop: 56, paddingTop: 24, borderTop: `1px solid ${BONE}` }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <VirginMusicLogo height={18} />
-                <span style={{ fontSize: 9, color: GHOST }}>×</span>
+                <span style={{ fontSize: 11, color: GHOST }}>×</span>
                 <YouTubeLogo height={11} />
               </div>
               <p style={{ fontSize: 10, color: GHOST, lineHeight: 1.6, maxWidth: 500 }}>
                 Channel Spotlight is generated from the YouTube Campaign System watcher data. Channels are scored on cadence, conversion efficiency, format diversity, and growth momentum — not audience size.
               </p>
-              <p style={{ fontSize: 9, color: GHOST, marginTop: 4 }}>
+              <p style={{ fontSize: 11, color: GHOST, marginTop: 4 }}>
                 Data refreshes with each sync cycle. Scores measure execution quality, not artist popularity.
               </p>
             </footer>

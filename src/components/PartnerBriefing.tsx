@@ -7,8 +7,8 @@ import PulseNav from './PulseNav';
 
 const INK    = '#0E0E0E';
 const PAPER  = '#FAF7F2';
-const SMOKE  = '#8A847A';
-const GHOST  = '#C8C2B8';
+const SMOKE  = '#7D776E';
+const GHOST  = '#A8A199';
 const BONE   = '#E8E3DA';
 const WHITE  = '#FFFFFF';
 const WARM   = '#4A4640';
@@ -365,7 +365,7 @@ function MomentCard({ m }: { m: UpcomingMoment }) {
       <span style={{
         display: 'inline-block', marginTop: 4,
         padding: '2px 7px', borderRadius: 10,
-        fontSize: 8, fontWeight: 700, color: ACCENT.green,
+        fontSize: 10.5, fontWeight: 700, color: ACCENT.green,
         background: 'rgba(45,106,79,0.06)',
       }}>
         {m.eventType}
@@ -383,7 +383,7 @@ function MomentCell({ label, title, date, color, dateColor }: {
   return (
     <div>
       <div style={{
-        fontSize: 7, fontWeight: 800, letterSpacing: '0.12em',
+        fontSize: 10, fontWeight: 800, letterSpacing: '0.12em',
         textTransform: 'uppercase' as const, color: `${color}55`,
         marginBottom: 4,
       }}>
@@ -446,7 +446,7 @@ function FormatTags({ videos }: { videos: BriefingVideo[] }) {
         return (
           <span key={fmt} style={{
             display: 'inline-block', padding: '2px 8px', borderRadius: 10,
-            fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
             background: s.bg, color: s.fg,
           }}>
             {fmt}
@@ -464,7 +464,7 @@ const ST_RELEASE_WEEK: CampaignStatus = { label: 'Release Week', color: '#C0392B
 const ST_NEXT_RELEASE: CampaignStatus = { label: 'Next Release', color: '#2D6A4F' }; // 🟢
 const ST_BUILDING:     CampaignStatus = { label: 'Building',     color: '#9A6324' }; // 🟡
 const ST_ACTIVE:       CampaignStatus = { label: 'Active',       color: '#1A56B8' }; // 🔵
-const ST_MONITORING:   CampaignStatus = { label: 'Monitoring',   color: '#8A847A' }; // ⚪
+const ST_MONITORING:   CampaignStatus = { label: 'Monitoring',   color: '#7D776E' }; // ⚪
 
 const RELEASE_RE = /release|album|single|drop|official\s*video|visuali|lyric|\bep\b|mixtape|deluxe|premiere/i;
 
@@ -535,7 +535,7 @@ function GenreTag({ genre, onDark = false }: { genre: string; onDark?: boolean }
   return (
     <span style={{
       display: 'inline-block', padding: '2px 8px', borderRadius: 4,
-      fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+      fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
       background: onDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.04)',
       color: onDark ? 'rgba(255,255,255,0.95)' : SMOKE,
       border: onDark ? 'none' : `1px solid ${BONE}`, whiteSpace: 'nowrap',
@@ -587,7 +587,7 @@ function EcosystemStrip({ fc, compact = false }: { fc: FocusCampaign; compact?: 
   return (
     <div>
       {!compact && (
-        <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>
           Content Ecosystem
         </div>
       )}
@@ -685,7 +685,7 @@ export default function PartnerBriefing({
     return (
       <main style={{ background: PAPER, minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 40px 0' }}>
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST }}>
             {mkt?.orgName ?? 'Virgin Music'} · YouTube
           </div>
         </div>
@@ -695,7 +695,7 @@ export default function PartnerBriefing({
           </div>
         )}
         <section style={{ maxWidth: 760, margin: '0 auto', padding: '72px 40px 120px' }}>
-          <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, marginBottom: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase', color: GHOST, marginBottom: 18 }}>
             {mkt?.name ?? 'This market'} · Getting started
           </div>
           <h1 style={{
@@ -733,14 +733,14 @@ export default function PartnerBriefing({
           <div style={{ borderTop: `1px solid ${BONE}`, paddingTop: 18, display: 'flex', gap: 36, flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, color: INK }}>{readiness.artistCount}</div>
-              <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginTop: 4 }}>Artists added</div>
+              <div style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginTop: 4 }}>Artists added</div>
             </div>
             <div>
               <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 700, color: INK }}>{readiness.planCount}</div>
-              <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginTop: 4 }}>Campaigns planned</div>
+              <div style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginTop: 4 }}>Campaigns planned</div>
             </div>
             <div style={{ maxWidth: '34ch' }}>
-              <div style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginBottom: 5 }}>Next step</div>
+              <div style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: SMOKE, marginBottom: 5 }}>Next step</div>
               <div style={{ fontSize: 13, color: WARM, lineHeight: 1.45 }}>{readiness.nextStep}</div>
             </div>
           </div>
@@ -861,7 +861,7 @@ export default function PartnerBriefing({
             disabled={refreshing}
             title="Rebuild from the latest coach timelines"
             style={{
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
@@ -894,7 +894,7 @@ export default function PartnerBriefing({
           {/* Left — Title + intro */}
           <div>
             <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
+              fontSize: 11, fontWeight: 800, letterSpacing: '0.25em',
               textTransform: 'uppercase' as const, color: GHOST, marginBottom: 16,
             }}>
               Virgin Music x YouTube
@@ -1002,7 +1002,7 @@ export default function PartnerBriefing({
 
             <div style={{ marginBottom: 28 }}>
               <div style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '0.25em',
+                fontSize: 11, fontWeight: 800, letterSpacing: '0.25em',
                 textTransform: 'uppercase' as const, color: GHOST, marginBottom: 12,
               }}>
                 Release Radar
@@ -1046,7 +1046,7 @@ export default function PartnerBriefing({
                           {m.artist}
                         </span>
                         {genreFor(m.artist) && (
-                          <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.14)', borderRadius: 4, padding: '1px 5px' }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)', background: 'rgba(255,255,255,0.14)', borderRadius: 4, padding: '1px 5px' }}>
                             {genreFor(m.artist)}
                           </span>
                         )}
@@ -1057,7 +1057,7 @@ export default function PartnerBriefing({
                       <span style={{
                         display: 'inline-block', marginTop: 4,
                         padding: '2px 7px', borderRadius: 8,
-                        fontSize: 8, fontWeight: 700,
+                        fontSize: 10.5, fontWeight: 700,
                         background: isTier1(m) ? 'rgba(45,106,79,0.3)' : 'rgba(255,255,255,0.08)',
                         color: isTier1(m) ? '#7DDFB0' : 'rgba(255,255,255,0.4)',
                       }}>
@@ -1111,7 +1111,7 @@ export default function PartnerBriefing({
                         {fmtDate}
                       </div>
                       {diffDays >= 0 && diffDays <= 7 && (
-                        <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
+                        <div style={{ fontSize: 11, color: SMOKE, marginTop: 1 }}>
                           {diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : `In ${diffDays}d`}
                         </div>
                       )}
@@ -1136,7 +1136,7 @@ export default function PartnerBriefing({
                           </span>
                           {genreFor(m.artist) && (
                             <span style={{
-                              fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+                              fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const,
                               color: SMOKE, background: 'rgba(0,0,0,0.04)', border: `1px solid ${BONE}`,
                               borderRadius: 4, padding: '1px 6px', flexShrink: 0, whiteSpace: 'nowrap', alignSelf: 'center',
                             }}>
@@ -1152,7 +1152,7 @@ export default function PartnerBriefing({
                           </span>
                           <span style={{
                             display: 'inline-block', padding: '1px 6px', borderRadius: 8,
-                            fontSize: 7, fontWeight: 700, flexShrink: 0,
+                            fontSize: 10, fontWeight: 700, flexShrink: 0,
                             background: isTier1(m) ? 'rgba(45,106,79,0.08)' : `${BONE}`,
                             color: isTier1(m) ? ACCENT.green : SMOKE,
                           }}>
@@ -1183,7 +1183,7 @@ export default function PartnerBriefing({
               <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 2, background: INK, marginBottom: 18 }} />
                 <div style={{ marginBottom: 28 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 6 }}>
                     Priority
                   </div>
                   <div style={{ fontSize: 34, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em', color: INK, fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic' }}>
@@ -1259,13 +1259,13 @@ export default function PartnerBriefing({
                                 marginBottom: 16,
                               }}>
                                 <div>
-                                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? SMOKE : ACCENT.green, marginBottom: 4 }}>{primaryLabel}</div>
+                                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? SMOKE : ACCENT.green, marginBottom: 4 }}>{primaryLabel}</div>
                                   <div style={{ fontSize: 17, fontWeight: 700, color: INK, lineHeight: 1.25 }}>{primaryName}</div>
                                   {primaryDate && <div style={{ fontSize: 22, fontWeight: 900, color: isNextPast ? SMOKE : ACCENT.green, marginTop: 4, letterSpacing: '-0.01em' }}>{primaryDate}</div>}
                                 </div>
                                 {showSecondary && (
                                   <div>
-                                    <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? ACCENT.green : SMOKE, marginBottom: 4 }}>{secondaryLabel}</div>
+                                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: isNextPast ? ACCENT.green : SMOKE, marginBottom: 4 }}>{secondaryLabel}</div>
                                     <div style={{ fontSize: 13, fontWeight: 600, color: WARM, lineHeight: 1.25 }}>{secondaryName}</div>
                                     {secondaryDate && <div style={{ fontSize: 15, fontWeight: 800, color: ACCENT.green, marginTop: 4 }}>{secondaryDate}</div>}
                                   </div>
@@ -1286,21 +1286,21 @@ export default function PartnerBriefing({
                           }}>
                             <div>
                               <div style={{ fontSize: 16, fontWeight: 800, color: INK }}>{fc.channel.subs != null ? fmtNum(fc.channel.subs) : '—'}</div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Subs</div>
+                              <div style={{ fontSize: 10.5, color: SMOKE }}>Subs</div>
                             </div>
                             <div>
                               <div style={{ fontSize: 16, fontWeight: 800, color: fc.channel.views7d && fc.channel.views7d > 0 ? INK : SMOKE }}>{fc.channel.views7d != null ? fmtNum(fc.channel.views7d) : '—'}</div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Views (7d)</div>
+                              <div style={{ fontSize: 10.5, color: SMOKE }}>Views (7d)</div>
                             </div>
                             <div>
                               <div style={{ fontSize: 16, fontWeight: 800, color: fc.channel.uploads30d >= 6 ? ACCENT.green : INK }}>{fc.channel.uploads30d}</div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Uploads (30d)</div>
+                              <div style={{ fontSize: 10.5, color: SMOKE }}>Uploads (30d)</div>
                             </div>
                             <div>
                               <div style={{ fontSize: 16, fontWeight: 800, color: (fc.channel.subs7d ?? 0) > 0 ? ACCENT.green : SMOKE }}>
                                 {fc.channel.subs7d != null && fc.channel.subs7d !== 0 ? `${fc.channel.subs7d > 0 ? '+' : ''}${fmtNum(fc.channel.subs7d)}` : '—'}
                               </div>
-                              <div style={{ fontSize: 8, color: SMOKE }}>Subs (7d)</div>
+                              <div style={{ fontSize: 10.5, color: SMOKE }}>Subs (7d)</div>
                             </div>
                           </div>
 
@@ -1332,7 +1332,7 @@ export default function PartnerBriefing({
                             if (bullets.length === 0) return null;
                             return (
                               <div style={{ marginBottom: 16, padding: '12px 14px', borderRadius: 8, background: 'rgba(45,106,79,0.04)', borderLeft: `3px solid ${ACCENT.green}` }}>
-                                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 7 }}>
+                                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: ACCENT.green, marginBottom: 7 }}>
                                   Why This Matters
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -1350,7 +1350,7 @@ export default function PartnerBriefing({
                           {/* ── Recent uploads (thumbnail grid, Spotlight-style) ── */}
                           {topVids.length > 0 && (
                             <div>
-                              <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>Recent Uploads</div>
+                              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 8 }}>Recent Uploads</div>
                               <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(topVids.length, 3)}, 1fr)`, gap: 8 }}>
                                 {topVids.map(v => (
                                   <a key={v.id} href={ytUrl(v.id, v.durationSec)} target="_blank" rel="noopener noreferrer" className="pb-link shorts-cell" style={{ display: 'block', textDecoration: 'none' }}>
@@ -1360,7 +1360,7 @@ export default function PartnerBriefing({
                                       <span style={{
                                         position: 'absolute', top: 4, left: 4,
                                         padding: '2px 6px', borderRadius: 4,
-                                        fontSize: 7, fontWeight: 700, textTransform: 'uppercase' as const,
+                                        fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const,
                                         background: v.durationSec <= 62 ? 'rgba(107,33,168,0.85)' : 'rgba(26,86,184,0.85)',
                                         color: WHITE,
                                       }}>
@@ -1370,7 +1370,7 @@ export default function PartnerBriefing({
                                     <div style={{ fontSize: 10, fontWeight: 600, color: INK, marginTop: 4, lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                       {v.title}
                                     </div>
-                                    <div style={{ fontSize: 9, color: SMOKE, marginTop: 1 }}>
+                                    <div style={{ fontSize: 11, color: SMOKE, marginTop: 1 }}>
                                       {fmtNum(v.viewCount)} views · {v.daysAgo}d ago
                                     </div>
                                   </a>
@@ -1391,7 +1391,7 @@ export default function PartnerBriefing({
               <section className="pb-fade pb-section" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 40px 48px' }}>
                 <div style={{ height: 1, background: BONE, marginBottom: 22 }} />
                 <div style={{ marginBottom: 22 }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 5 }}>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.22em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 5 }}>
                     In Rotation
                   </div>
                   <div style={{ fontSize: 23, fontWeight: 800, lineHeight: 1, letterSpacing: '-0.01em', color: INK, fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: 'italic' }}>
@@ -1425,7 +1425,7 @@ export default function PartnerBriefing({
                           const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
                           return (
                             <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}>
-                              <div style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>{isPast ? 'Last' : 'Next'}</div>
+                              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>{isPast ? 'Last' : 'Next'}</div>
                               <div style={{ fontSize: 12, fontWeight: 900, color: isPast ? SMOKE : ACCENT.green }}>{fc.nextDate}</div>
                             </div>
                           );
@@ -1435,7 +1435,7 @@ export default function PartnerBriefing({
                         <div style={{ marginBottom: 10 }}><EcosystemStrip fc={fc} compact /></div>
                         {/* CURRENT */}
                         <div style={{ marginBottom: 10 }}>
-                          <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Current</div>
+                          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>Current</div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: INK, lineHeight: 1.3 }}>{fc.nowLabel}</div>
                           <div style={{ fontSize: 10, color: SMOKE, marginTop: 2 }}>{fc.nowDetail}</div>
                         </div>
@@ -1446,19 +1446,19 @@ export default function PartnerBriefing({
                           return (
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
                               <div>
-                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Last' : 'Next'}</div>
+                                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Last' : 'Next'}</div>
                                 <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.nextLabel}</div>
                                 {fc.nextDate && <div style={{ fontSize: 11, fontWeight: 700, color: isPast ? SMOKE : ACCENT.green, marginTop: 2 }}>{fc.nextDate}</div>}
                               </div>
                               <div>
-                                <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Next' : 'After'}</div>
+                                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: GHOST, marginBottom: 2 }}>{isPast ? 'Next' : 'After'}</div>
                                 <div style={{ fontSize: 11, fontWeight: 500, color: WARM, lineHeight: 1.3 }}>{fc.afterLabel}</div>
                                 {fc.afterDate && <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT.green, marginTop: 2 }}>{fc.afterDate}</div>}
                               </div>
                             </div>
                           );
                         })()}
-                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
+                        <div style={{ fontSize: 11, color: SMOKE }}>{fc.channel.uploads30d} uploads in 30d{fc.channel.subs != null && <> · {fmtNum(fc.channel.subs)} subs</>}</div>
                         <div style={{ marginTop: 10 }}><PlannerButton fc={fc} /></div>
                       </div>
                     </a>
@@ -1492,7 +1492,7 @@ export default function PartnerBriefing({
                         {/* Status dot — small but present */}
                         <div style={{ position: 'absolute', top: 7, right: 8, display: 'flex', alignItems: 'center', gap: 4, padding: '2px 7px', borderRadius: 10, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}>
                           <span style={{ width: 6, height: 6, borderRadius: '50%', background: status.color }} />
-                          <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: WHITE }}>{status.label}</span>
+                          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: WHITE }}>{status.label}</span>
                         </div>
                         <div style={{ position: 'absolute', bottom: 6, left: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
                           {fc.channel.thumbnail && <img src={fc.channel.thumbnail} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.3)' }} />}
@@ -1504,12 +1504,12 @@ export default function PartnerBriefing({
                         <div style={{ fontSize: 11, fontWeight: 600, color: INK, lineHeight: 1.25, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {fc.nowLabel}
                         </div>
-                        <div style={{ fontSize: 9, color: SMOKE }}>{fc.nowDetail}</div>
+                        <div style={{ fontSize: 11, color: SMOKE }}>{fc.nowDetail}</div>
                         {fc.nextDate && (() => {
                           const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
                           const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
                           return (
-                          <div style={{ fontSize: 9, color: isPast ? SMOKE : ACCENT.green, fontWeight: 700, marginTop: 4 }}>
+                          <div style={{ fontSize: 11, color: isPast ? SMOKE : ACCENT.green, fontWeight: 700, marginTop: 4 }}>
                             {isPast ? 'Last' : 'Next'}: {fc.nextDate}
                           </div>
                           );
@@ -1534,7 +1534,7 @@ export default function PartnerBriefing({
 
           <div style={{ marginBottom: 24 }}>
             <div style={{
-              fontSize: 9, fontWeight: 800, letterSpacing: '0.22em',
+              fontSize: 11, fontWeight: 800, letterSpacing: '0.22em',
               textTransform: 'uppercase' as const, color: GHOST, marginBottom: 10,
             }}>
               Moments We&apos;re Watching
@@ -1568,7 +1568,7 @@ export default function PartnerBriefing({
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.6) 100%)' }} />
                   <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
-                    <div style={{ fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.04em', textTransform: 'uppercase' as const, marginBottom: 4 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.04em', textTransform: 'uppercase' as const, marginBottom: 4 }}>
                       {m.artistName}
                     </div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: WHITE, lineHeight: 1.25, textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
@@ -1607,7 +1607,7 @@ export default function PartnerBriefing({
           <YouTubeLogo height={13} />
         </div>
         <p style={{
-          fontSize: 9, color: GHOST, letterSpacing: '0.06em', lineHeight: 1.6,
+          fontSize: 11, color: GHOST, letterSpacing: '0.06em', lineHeight: 1.6,
           fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'italic',
           margin: 0,
         }}>

@@ -661,28 +661,36 @@ export default function ChannelHealthBoard({
           {/* Flat tabs on a rule, not pills in a tray. Two buttons inside a
               filled container with their own fill and a drop shadow is three
               surfaces to say one thing. The underline carries it. */}
-          <div className="flex items-center gap-7 mb-2" style={{ borderBottom: `1px solid ${MUTED}` }}>
+          {/* Sentence case on the type scale, with the count demoted to a
+              secondary weight. In all-caps black with wide tracking these
+              two read louder than the page title above them. */}
+          <div className="flex items-center gap-6 border-b border-line">
             {([
-              ['managed', `Virgin Managed (${managedRows.length})`],
-              ['market', `Market Watch (${marketRows.length})`],
-            ] as const).map(([key, label]) => (
+              ['managed', 'Virgin Managed', managedRows.length],
+              ['market', 'Market Watch', marketRows.length],
+            ] as const).map(([key, label, count]) => (
               <button
                 key={key}
                 onClick={() => { setView(key); setExpandedRow(null); setSearch(''); }}
-                className="pb-2.5 -mb-px text-[12px] font-black uppercase tracking-[0.1em] transition-colors"
-                style={{
-                  color: view === key ? INK : 'rgba(14,14,14,0.35)',
-                  borderBottom: `2px solid ${view === key ? INK : 'transparent'}`,
-                }}
+                aria-pressed={view === key}
+                className={`relative pb-2.5 -mb-px text-h4 transition-colors ${
+                  view === key ? 'font-extrabold text-ink' : 'font-semibold text-muted hover:text-ink'
+                }`}
               >
                 {label}
+                <span className={`ml-1.5 tabular-nums font-semibold ${view === key ? 'text-muted' : 'text-faint'}`}>
+                  {count}
+                </span>
+                {view === key && (
+                  <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-ink rounded-full" />
+                )}
               </button>
             ))}
           </div>
-          <div className="text-[10px] text-ink/35 mb-6">
+          <div className="text-meta text-muted mt-2.5 mb-7">
             {view === 'managed'
-              ? 'Owned / priority channels we can act on'
-              : 'External channels used to spot patterns, benchmarks and rollout signals'}
+              ? 'Owned and priority channels we can act on.'
+              : 'External channels used to spot patterns, benchmarks and rollout signals.'}
           </div>
         </>
       )}
@@ -838,7 +846,7 @@ export default function ChannelHealthBoard({
             {benchmarkRead.stats.map((stat, i) => (
               <div key={i}>
                 <div className="text-[18px] font-black tabular-nums">{stat.value}</div>
-                <div className="text-[10px] text-ink/40 leading-snug">{stat.label}</div>
+                <div className="text-micro text-muted leading-snug">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -848,11 +856,11 @@ export default function ChannelHealthBoard({
             <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-3 pt-2 border-t lg:grid-cols-4" style={{ borderColor: MUTED }}>
               <div>
                 <div className="text-[18px] font-black tabular-nums">{marketFormatStats.longformCount}</div>
-                <div className="text-[10px] text-ink/40 leading-snug">Long-form uploads (30d)</div>
+                <div className="text-micro text-muted leading-snug">Long-form uploads (30d)</div>
               </div>
               <div>
                 <div className="text-[18px] font-black tabular-nums">{fmtNum(marketFormatStats.longformViews)}</div>
-                <div className="text-[10px] text-ink/40 leading-snug">Long-form views</div>
+                <div className="text-micro text-muted leading-snug">Long-form views</div>
               </div>
               <div>
                 <div className="text-[18px] font-black tabular-nums">
@@ -860,11 +868,11 @@ export default function ChannelHealthBoard({
                     ? `${Math.round((marketFormatStats.longformCount / marketFormatStats.totalUploads) * 100)}%`
                     : '—'}
                 </div>
-                <div className="text-[10px] text-ink/40 leading-snug">Long-form share</div>
+                <div className="text-micro text-muted leading-snug">Long-form share</div>
               </div>
               <div>
                 <div className="text-[18px] font-black tabular-nums">{marketFormatStats.activeArtists}</div>
-                <div className="text-[10px] text-ink/40 leading-snug">Artists uploading (30d)</div>
+                <div className="text-micro text-muted leading-snug">Artists uploading (30d)</div>
               </div>
             </div>
           )}
@@ -922,12 +930,12 @@ export default function ChannelHealthBoard({
             })}
           </div>
           {view === 'managed' && (
-            <div className="mt-3 text-[10px] text-ink/30 leading-snug">
+            <div className="mt-3 text-micro text-muted leading-snug">
               Channels with the highest sustained upload cadence over the last 30 days.
             </div>
           )}
           {view === 'market' && (
-            <div className="mt-3 text-[10px] text-ink/30 leading-snug">
+            <div className="mt-3 text-micro text-muted leading-snug">
               Market artists leading on content consistency — benchmark for cadence targets.
             </div>
           )}
@@ -938,8 +946,8 @@ export default function ChannelHealthBoard({
       <div className="mb-3">
         <button
           onClick={() => setExplainerOpen(!explainerOpen)}
-          className="text-[11px] font-medium flex items-center gap-1 hover:underline"
-          style={{ color: 'rgba(14,14,14,0.4)' }}
+          className="text-micro font-semibold flex items-center gap-1.5 text-muted hover:text-ink transition-colors"
+          aria-expanded={explainerOpen}
         >
           <span style={{ transform: explainerOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s', display: 'inline-block' }}>▸</span>
           How to read this page

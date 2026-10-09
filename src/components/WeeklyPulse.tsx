@@ -6,8 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 
 const INK    = '#0E0E0E';
 const PAPER  = '#FAF7F2';
-const SMOKE  = '#8A847A';
-const GHOST  = '#C8C2B8';
+const SMOKE  = '#7D776E';
+const GHOST  = '#A8A199';
 const BONE   = '#E8E3DA';
 const WHITE  = '#FFFFFF';
 const WARM   = '#4A4640';
@@ -886,7 +886,7 @@ export default function WeeklyPulse() {
               {data.weekRange}
             </div>
             <button onClick={() => document.getElementById('pulse-share')?.scrollIntoView({ behavior: 'smooth' })}
-              style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 9, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
+              style={{ padding: '4px 10px', borderRadius: 20, border: 'none', background: 'transparent', fontSize: 11, fontWeight: 600, color: GHOST, cursor: 'pointer' }}>
               Share
             </button>
           </div>
@@ -1112,7 +1112,7 @@ export default function WeeklyPulse() {
                           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const }}>
                             {Array.from(fmts).map(f => (
                               <span key={f} style={{
-                                padding: '2px 7px', borderRadius: 8, fontSize: 8, fontWeight: 700,
+                                padding: '2px 7px', borderRadius: 8, fontSize: 10.5, fontWeight: 700,
                                 textTransform: 'uppercase' as const, letterSpacing: '0.04em',
                                 background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)',
                               }}>{f}</span>
@@ -1166,7 +1166,7 @@ export default function WeeklyPulse() {
                           background: 'rgba(0,0,0,0.5)',
                           color: WHITE,
                           backdropFilter: 'blur(6px)',
-                          fontSize: 7,
+                          fontSize: 10,
                         }}>
                           {story.signal}
                         </span>
@@ -1262,7 +1262,7 @@ export default function WeeklyPulse() {
                     ) : (
                       <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
                     )}
-                    <div style={{ display: 'flex', gap: 8, fontSize: 9, color: SMOKE, marginTop: 2 }}>
+                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: SMOKE, marginTop: 2 }}>
                       {ch.subs7d != null && ch.subs7d >= 20 && <span style={{ color: ACCENT.green, fontWeight: 700 }}>+{ch.subs7d} subs</span>}
                       <span>{ch.uploads30d} uploads/30d</span>
                     </div>
@@ -1381,11 +1381,11 @@ export default function WeeklyPulse() {
                           style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 40%, rgba(0,0,0,0.65) 100%)' }} />
                         <div style={{ position: 'absolute', top: 8, left: 8 }}>
-                          <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 8, fontWeight: 700, textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE }}>{(v as any)._fmt || v.format}</span>
+                          <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase' as const, background: 'rgba(26,86,184,0.85)', color: WHITE }}>{(v as any)._fmt || v.format}</span>
                         </div>
                         <div style={{ position: 'absolute', top: 8, right: 8 }}><PlayOverlay size={24} /></div>
                         <div style={{ position: 'absolute', bottom: 10, left: 12, right: 12 }}>
-                          <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>{v.channelName}</div>
+                          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.6)', marginBottom: 3 }}>{v.channelName}</div>
                           <div style={{ fontSize: 14, fontWeight: 700, color: WHITE, lineHeight: 1.2 }}>{v.title.length > 60 ? v.title.slice(0, 57) + '...' : v.title}</div>
                         </div>
                       </div>
@@ -1441,11 +1441,11 @@ export default function WeeklyPulse() {
                   ) : (
                     <div style={{ fontSize: 12, fontWeight: 700, color: INK }}>{ch.name}</div>
                   )}
-                  <div style={{ fontSize: 9, color: SMOKE }}>{ch.uploads30d} uploads / 30d</div>
+                  <div style={{ fontSize: 11, color: SMOKE }}>{ch.uploads30d} uploads / 30d</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <span style={{ fontSize: 15, fontWeight: 900, color: ACCENT.green }}>{ch.views7d != null ? fmtNum(ch.views7d) : '—'}</span>
-                  <div style={{ fontSize: 7, color: GHOST, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>views</div>
+                  <div style={{ fontSize: 10, color: GHOST, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>views</div>
                 </div>
               </div>
               );
@@ -1463,7 +1463,7 @@ export default function WeeklyPulse() {
                   <div key={gi} id={group.id} style={{ scrollMarginTop: 24 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 12 }}>
                       <span style={{ fontSize: 24, fontWeight: 900, color: INK, lineHeight: 1 }}>{group.count}</span>
-                      <span style={{ fontSize: 9, fontWeight: 600, color: SMOKE }}>{group.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: SMOKE }}>{group.label}</span>
                     </div>
                     {group.topChannels.map(ch => {
                       const chUrl = channelUrl(ch.channelHandle);
@@ -1489,7 +1489,7 @@ export default function WeeklyPulse() {
                       );
                     })}
                     {group.count > 4 && (
-                      <div style={{ fontSize: 9, color: GHOST, marginTop: 4, marginLeft: 26 }}>+ {group.count - 4} more</div>
+                      <div style={{ fontSize: 11, color: GHOST, marginTop: 4, marginLeft: 26 }}>+ {group.count - 4} more</div>
                     )}
                   </div>
                 ))}
@@ -1561,7 +1561,7 @@ export default function WeeklyPulse() {
           }}>
             {/* Red top accent */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: YT_RED }} />
-            <div style={{ fontSize: 8, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: 'rgba(250,247,242,0.35)', marginBottom: 12 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: 'rgba(250,247,242,0.35)', marginBottom: 12 }}>
               Playbook of the Week
             </div>
             <h3 style={{
@@ -1615,7 +1615,7 @@ export default function WeeklyPulse() {
         textAlign: 'center',
       }}>
         <p style={{
-          fontSize: 9, color: GHOST, letterSpacing: '0.06em', lineHeight: 1.6,
+          fontSize: 11, color: GHOST, letterSpacing: '0.06em', lineHeight: 1.6,
           fontFamily: 'Inter, system-ui, sans-serif', fontStyle: 'italic',
           margin: 0,
         }}>
@@ -1628,7 +1628,7 @@ export default function WeeklyPulse() {
         <section id="pulse-share" className="no-print" style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 40px 0' }}>
           <div style={{ height: 1, background: BONE, marginBottom: 20 }} />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: GHOST }}>
               Share This Briefing
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
