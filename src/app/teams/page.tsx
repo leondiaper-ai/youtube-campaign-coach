@@ -78,11 +78,14 @@ export default async function TeamsPage() {
         {/* ── The central view ──────────────────────────────────────── */}
         <div className="mb-10">
           <SectionHead title="Central view" meta="Every channel in the system" />
-          <div className="bg-surface border border-line rounded-card p-5">
+          <Link
+            href="/growth"
+            className="group block no-underline bg-surface border border-line rounded-card p-5 transition-colors hover:border-line-strong"
+          >
             <div className="flex flex-wrap items-start justify-between gap-6">
               <div className="min-w-0">
                 <Eyebrow>Virgin Music UK</Eyebrow>
-                <h3 className="text-h3 font-extrabold mt-1.5">United Kingdom</h3>
+                <h3 className="text-h3 font-extrabold mt-1.5 text-ink">United Kingdom</h3>
                 <p className="text-body text-secondary mt-1.5 max-w-[56ch]">
                   The default workspace. An artist with no market set belongs
                   here, which is why this view sees the whole roster rather
@@ -104,12 +107,11 @@ export default async function TeamsPage() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-line">
-              <DestLink href="/growth">Channel Health</DestLink>
-              <DestLink href="/coach">Content Planner</DestLink>
-              <DestLink href="/weekly-pulse/campaign-briefing">Priority Campaigns</DestLink>
+            <div className="flex items-center gap-1.5 mt-5 pt-4 border-t border-line text-[11px] font-bold uppercase tracking-label text-signal">
+              Open Channel Health
+              <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>→</span>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* ── Regional boards ───────────────────────────────────────── */}
@@ -120,11 +122,18 @@ export default async function TeamsPage() {
           />
           <div className="grid gap-4 lg:grid-cols-2">
             {teams.map(({ team, market, count, pinned, lastTouched }) => (
-              <div key={team.slug} className="bg-surface border border-line rounded-card p-5 flex flex-col">
+              /* The whole tile is the link. Three buttons in a row made the
+                 card look like a menu of equal choices, when the board is
+                 the destination and the other two are reachable from it. */
+              <a
+                key={team.slug}
+                href={teamUrl(team)}
+                className="group no-underline bg-surface border border-line rounded-card p-5 flex flex-col transition-colors hover:border-line-strong"
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <Eyebrow>{market ? market.orgName : team.regionTag}</Eyebrow>
-                    <h3 className="text-h3 font-extrabold mt-1.5 truncate">
+                    <h3 className="text-h3 font-extrabold mt-1.5 truncate text-ink">
                       {team.name.replace(/ — Campaign Board$/, '')}
                     </h3>
                   </div>
@@ -162,24 +171,6 @@ export default async function TeamsPage() {
                       : 'No update recorded yet.'}
                 </div>
 
-                <div className="flex flex-wrap gap-2 mt-auto pt-4 mt-4 border-t border-line">
-                  {/* The board link carries the team's key. Opening it from
-                      here is the same as being sent the URL. */}
-                  <DestLink href={teamUrl(team)}>Board</DestLink>
-                  <DestLink href={market ? `/coach?market=${market.id}` : '/coach'}>
-                    Content Planner
-                  </DestLink>
-                  <DestLink
-                    href={
-                      market
-                        ? `/weekly-pulse/${market.id}/campaign-briefing`
-                        : '/weekly-pulse/campaign-briefing'
-                    }
-                  >
-                    Priority Campaigns
-                  </DestLink>
-                </div>
-
                 {!market && (
                   /* A board with no market falls back to the UK pages, which
                      is the bug that sent Nordics to another region's
@@ -189,7 +180,14 @@ export default async function TeamsPage() {
                     back to the UK.
                   </div>
                 )}
-              </div>
+
+                {/* The link carries the team's key, so opening it from here
+                    is the same as being sent the URL. */}
+                <div className="flex items-center gap-1.5 mt-auto pt-4 mt-4 border-t border-line text-[11px] font-bold uppercase tracking-label text-signal">
+                  Open board
+                  <span className="transition-transform group-hover:translate-x-0.5" aria-hidden>→</span>
+                </div>
+              </a>
             ))}
           </div>
         </div>
@@ -207,13 +205,3 @@ export default async function TeamsPage() {
   );
 }
 
-function DestLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const external = href.startsWith('/team/');
-  const cls =
-    'text-micro font-semibold px-3 py-1.5 rounded-control border border-line text-secondary hover:text-ink hover:border-line-strong transition-colors no-underline whitespace-nowrap';
-  return external ? (
-    <a href={href} className={cls}>{children}</a>
-  ) : (
-    <Link href={href} className={cls}>{children}</Link>
-  );
-}
