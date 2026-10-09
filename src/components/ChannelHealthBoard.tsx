@@ -568,7 +568,6 @@ export default function ChannelHealthBoard({
   const router = useRouter();
   const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [moversOpen, setMoversOpen] = useState(false);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -1259,24 +1258,17 @@ export default function ChannelHealthBoard({
         topMovers.biggestDecline.length > 0 || topMovers.cadenceRisk.length > 0
       ) && (
         <div className="mb-8">
-          <button
-            onClick={() => setMoversOpen(!moversOpen)}
-            aria-expanded={moversOpen}
-            className="w-full flex items-end justify-between gap-4 text-left pb-2.5 mb-4 border-b border-line group"
-          >
-            <span className="text-h4 font-extrabold text-ink">Top movers</span>
-            <span className="text-micro font-semibold text-muted group-hover:text-ink transition-colors">
-              {moversOpen ? 'Hide' : 'Show'}
-            </span>
-          </button>
-          {moversOpen && (
-            <div className="bg-surface border border-line rounded-card p-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
-              <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
-              <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
-              <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
-              <MoverColumn title="Cadence Risk" items={topMovers.cadenceRisk} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
-            </div>
-          )}
+          {/* Always open. It was collapsed by default, which meant the one
+              section that answers "who moved this week" was the only one
+              you had to ask for — and it is twelve rows, not a long tail
+              worth hiding. */}
+          <SectionHead title="Top movers" meta="Last 7 days" />
+          <div className="bg-surface border border-line rounded-card p-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
+            <MoverColumn title="Views gainers" items={topMovers.topViews} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+            <MoverColumn title="Sub gainers" items={topMovers.topSubs} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+            <MoverColumn title="Biggest decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+            <MoverColumn title="Cadence risk" items={topMovers.cadenceRisk} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+          </div>
         </div>
       )}
 
@@ -1586,14 +1578,14 @@ function MoverColumn({ title, items, linkPrefix = '/watcher', linkSuffix = '' }:
   if (items.length === 0) {
     return (
       <div>
-        <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/30 mb-1.5">{title}</div>
-        <div className="text-[11px] text-ink/25">—</div>
+        <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">{title}</div>
+        <div className="text-micro text-faint">Nothing to report</div>
       </div>
     );
   }
   return (
     <div>
-      <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-ink/30 mb-1.5">{title}</div>
+      <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">{title}</div>
       <div className="space-y-1">
         {items.map((item, i) => (
           <div key={item.slug} className="flex items-center justify-between gap-2 text-[11px]">
