@@ -926,10 +926,17 @@ export function DecisionCard({
 
       <div className="p-5">
       {/* Remove — hover only */}
+      {/* On a bannered card this sits over the image, where the decision
+          chip is; on a plain one it keeps its old corner. Hiding it
+          outright would have removed a working action rather than moved
+          it. */}
       <button
         onClick={() => onUnpin(card.slug)}
-        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5 transition-all"
-        style={card.heroImage ? { display: 'none' } : undefined}
+        className={`absolute w-6 h-6 rounded-full flex items-center justify-center text-[14px] transition-all ${
+          card.heroImage
+            ? 'top-3 left-3 text-white/0 group-hover:text-white/70 hover:!text-white hover:bg-black/30'
+            : 'top-3 right-3 text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5'
+        }`}
         title="Remove"
       >
         &times;
@@ -952,12 +959,16 @@ export function DecisionCard({
               Partial
             </span>
           )}
-          <span
-            className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
-            style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
-          >
-            {read.decision}
-          </span>
+          {/* The banner carries the decision when there is one, so it is
+              not printed twice on the same card. */}
+          {!card.heroImage && (
+            <span
+              className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
+              style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
+            >
+              {read.decision}
+            </span>
+          )}
           {read.showConfidence && (
             <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: `${dStyle.fg}88` }}>
               {read.confidence}
