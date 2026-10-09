@@ -152,13 +152,17 @@ export default function CampaignStatusBoard({
           padding: '12px 20px',
           background: PAPER,
         }}>
-          <Link href={`/growth${mq}`} className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 8 }}>
-            ← Dashboard
+          {/* The product mark, not two vendor logos. Matches the global
+              header so the behaviour view reads as the same product
+              rather than a document that arrived from elsewhere. */}
+          <Link href={`/growth${mq}`} className="no-underline shrink-0">
+            <span className="text-[13px] font-black tracking-[0.1em] text-ink">VMG</span>
+            <span className="text-[13px] font-black tracking-[0.1em] text-signal ml-1.5">YOUTUBE</span>
           </Link>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 24 }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
+          <span className="w-px h-3.5 bg-line-strong shrink-0" aria-hidden />
+          <Link href={`/campaigns${mq}`} className="text-[11px] font-bold uppercase tracking-label text-muted hover:text-ink no-underline">
+            ← Active Campaigns
+          </Link>
         </div>
 
         {/* ─── Sidebar + Content row ─── */}
@@ -290,24 +294,12 @@ export default function CampaignStatusBoard({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Link href={`/growth${mq}`} className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink no-underline" style={{ marginRight: 4 }}>
-            ← Dashboard
-          </Link>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 28 }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
-        </div>
-        <div className="flex items-center gap-4" />
-      </div>
       <div className="mb-6 flex items-center justify-between">
         <div>
         {!showAdd ? (
           <button
             onClick={() => setShowAdd(true)}
-            className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink/30 hover:text-ink/60 transition-colors"
+            className="text-micro font-bold uppercase tracking-label px-3 py-2 rounded-control border border-line text-secondary hover:text-ink hover:border-line-strong transition-colors"
           >
             + Add campaign
           </button>

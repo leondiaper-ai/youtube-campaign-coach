@@ -19,6 +19,7 @@ import { checkContentStructure, type StructureWarning } from '@/lib/contentStruc
 import { computeWeeklyWindows } from '@/lib/campaignWeeks';
 import { normalizeChannelData, toGrowthInput, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import CampaignStatusBoard from '@/components/CampaignStatusBoard';
+import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
 export const revalidate = 600;
 
@@ -26,9 +27,6 @@ export const metadata = {
   title: 'Campaign Status Board',
   description: 'Live campaign status at a glance.',
 };
-
-const PAPER = '#FAF7F2';
-const INK = '#0E0E0E';
 
 // ── Board uses the unified 5-state ChannelState from artists.ts ─────────────
 
@@ -125,6 +123,8 @@ export type StatusCardData = {
   campaignSignalLabel: string;
   // YouTube channel thumbnail URL
   thumbnail?: string;
+  // Wide banner for the card head, from the channel's own recent work
+  heroImage?: string;
   // Artist type for value model scoping
   artistType?: 'managed' | 'observed' | 'external';
   // Revenue ownership — only 'virgin' gets value calculations
@@ -406,6 +406,16 @@ async function loadCard(
     campaignSignal: campSig.signal,
     campaignSignalLabel: campSig.label,
     thumbnail: snap.thumbnail ?? undefined,
+    /* The card's banner. The most-viewed of the recent uploads, because a
+       campaign tile should be fronted by the work rather than by a round
+       avatar stretched across a wide frame. hqdefault exists for every
+       public video; maxres does not, which would leave holes. */
+    heroImage: (() => {
+      const ups = snap.recentUploads ?? [];
+      if (ups.length === 0) return undefined;
+      const best = [...ups].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))[0];
+      return best?.id ? `https://i.ytimg.com/vi/${best.id}/hqdefault.jpg` : undefined;
+    })(),
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
     structureWarning: checkContentStructure(snap.recentUploads ?? []),
@@ -450,12 +460,30 @@ export default async function CampaignsPage({
   const pinnedSlugs = new Set(pinned.map((p) => p.slug));
   const available = allArtists.filter((a) => !pinnedSlugs.has(a.slug));
 
+  /* The board owns its own chrome when the Channel Behaviour view is open
+     — that is a full-bleed surface with its own sidebar — so the shell is
+     rendered here rather than inside it, and the board suppresses this
+     wrapper when it takes the screen. */
+  const mq = market.id === 'uk' ? '' : `?market=${market.id}`;
+
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: PAPER, color: INK, fontFamily: 'system-ui, -apple-system, sans-serif' }}
-    >
-      <div className="max-w-6xl mx-auto px-5 py-6">
+    <div className="min-h-screen bg-paper text-ink">
+      <AppHeader
+        nav={[
+          { href: `/growth${mq}`, label: 'Channel Health', match: '/growth' },
+          { href: `/campaigns${mq}`, label: 'Active Campaigns', match: '/campaigns' },
+          { href: `/coach${mq}`, label: 'Coach', match: '/coach' },
+          { href: '/teams', label: 'Workspaces', match: '/teams' },
+          { href: '/resources', label: 'Resources', match: '/resources' },
+        ]}
+        workspace={market.orgName}
+      />
+
+      <div className="max-w-[1180px] mx-auto px-6">
+        <PageTitle
+          title="Active Campaigns"
+          lede="The campaigns this team is working, with the decision each one is asking for."
+        />
 
         <Suspense fallback={null}>
           <CampaignStatusBoard market={market.id}

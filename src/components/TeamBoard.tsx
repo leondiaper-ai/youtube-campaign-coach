@@ -286,6 +286,15 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         campaignSignal: campSig.signal,
         campaignSignalLabel: campSig.label,
         thumbnail: snap?.thumbnail ?? undefined,
+        /* Same banner the campaigns board gives its cards — the channel's
+           best recent upload, so a team's priority tiles are fronted by
+           the work rather than by a stretched avatar. */
+        heroImage: (() => {
+          const ups = snap?.recentUploads ?? [];
+          if (ups.length === 0) return undefined;
+          const best = [...ups].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))[0];
+          return best?.id ? `https://i.ytimg.com/vi/${best.id}/hqdefault.jpg` : undefined;
+        })(),
         structureWarning: snap?.recentUploads
           ? checkContentStructure(snap.recentUploads)
           : null,

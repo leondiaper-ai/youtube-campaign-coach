@@ -147,8 +147,10 @@ export type CardData = {
   channelHealth: string;
   campaignSignal: string;
   campaignSignalLabel: string;
-  /** YouTube channel thumbnail URL */
+  /** YouTube channel thumbnail URL — the round avatar. */
   thumbnail?: string;
+  /** Wide banner for the card head, from the channel's own recent work. */
+  heroImage?: string;
   /** Artist relationship type — value model only applies to 'managed' */
   artistType?: 'managed' | 'observed' | 'external';
   /** Revenue ownership — only 'virgin' gets value calculations */
@@ -847,17 +849,87 @@ export function DecisionCard({
 
   return (
     <div
-      className="rounded-2xl p-5 relative group"
+      className="rounded-2xl relative group overflow-hidden"
       style={{
         background: '#FFFFFF',
         border: `${isFix ? '2px' : '1px'} solid ${cardBorder}`,
         boxShadow: isFix ? `0 0 0 1px ${dStyle.border}40` : undefined,
       }}
     >
+      {/* ─── Banner ──────────────────────────────────────────────────
+          A pinned campaign is the work a team is actually doing, and a
+          row of figures under a plain name does not read like that. The
+          banner is the channel's own best recent upload with the artist
+          over it — the same treatment the partner-facing featured cards
+          use, so the two surfaces describe one campaign the same way.
+
+          It only appears when there is a real image. A gradient block
+          standing in for artwork looks like a loading state that never
+          finished, so a channel with no recent uploads keeps the plain
+          head it had before. */}
+      {card.heroImage && (
+        <div className="relative h-[132px] overflow-hidden bg-sunken">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={card.heroImage}
+            alt=""
+            loading="lazy"
+            className="w-full h-full object-cover"
+            /* A 404 or a blocked thumbnail should not leave a broken-image
+               icon sitting in the header of a campaign card. */
+            onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(transparent 22%, rgba(0,0,0,0.78) 100%)' }}
+          />
+          {/* The decision is the loudest thing on the card, so it keeps
+              the strongest position. */}
+          <div className="absolute top-3 right-3">
+            <span
+              className="px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-label"
+              style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
+            >
+              {read.decision}
+            </span>
+          </div>
+          <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
+            {card.thumbnail && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={card.thumbnail}
+                alt=""
+                loading="lazy"
+                className="w-9 h-9 rounded-full object-cover shrink-0"
+                style={{ border: '2px solid rgba(255,255,255,0.35)' }}
+              />
+            )}
+            <div className="min-w-0">
+              <div
+                className="text-[21px] font-black leading-none truncate"
+                style={{ color: '#FFFFFF', textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}
+              >
+                {card.name}
+              </div>
+              {card.campaign && (
+                <div
+                  className="text-micro font-semibold mt-1.5 truncate"
+                  style={{ color: 'rgba(255,255,255,0.78)' }}
+                >
+                  {card.campaign}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="p-5">
       {/* Remove — hover only */}
       <button
         onClick={() => onUnpin(card.slug)}
         className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5 transition-all"
+        style={card.heroImage ? { display: 'none' } : undefined}
         title="Remove"
       >
         &times;
@@ -867,7 +939,9 @@ export function DecisionCard({
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2.5">
-            <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>
+            {/* The banner already carries the name and the decision, so
+                they are not repeated under it. */}
+            {!card.heroImage && <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>}
           {card.confidence === 'LOW' && (
             <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={card.healthNote ?? 'Limited data'}>
               Limited
@@ -1347,6 +1421,7 @@ export function DecisionCard({
       </div>
 
       {snapshot && <SnapshotModal text={snapshot} onClose={() => setSnapshot(null)} />}
+      </div>{/* close padded body */}
     </div>
   );
 }
