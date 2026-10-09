@@ -572,8 +572,30 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
 #close .sig{margin-top:clamp(14px,2vw,28px);font-family:var(--mono);font-size:9.5px;
   letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
 
-/* ══ APPENDIX ═══════════════════════════════════════════════════════ */
-#appx{background:#07090C}
+/* ══ APPENDIX ═══════════════════════════════════════════════════════
+   This was the last slide. It is now an overlay behind a tab, because a
+   room being presented to does not want to arrive at a wall of method
+   notes — but the person checking a figure afterwards needs them within
+   one click, and burying them in a linked file is how provenance stops
+   being read. Same pattern as the STORM deck's Analysis tab.
+
+   It is a panel, not a route: no history entry, nothing to get stuck in.
+   Escape and the back control both return the reader to the slide they
+   left, because the deck is scroll-snap and never lost its position. */
+#mtab{position:fixed;top:clamp(12px,1.7vw,24px);right:clamp(14px,2.2vw,38px);z-index:70;
+  font-family:var(--mono);font-size:clamp(8.5px,.72vw,10.5px);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--warm);background:rgba(7,9,12,.82);
+  border:1px solid var(--hair);border-radius:3px;padding:8px 14px;cursor:pointer;
+  backdrop-filter:blur(7px);transition:color .2s,border-color .2s}
+#mtab:hover{color:var(--gold);border-color:rgba(201,154,69,.5)}
+#method{position:fixed;inset:0;z-index:80;background:#07090C;overflow-y:auto;
+  padding:clamp(20px,3.4vw,60px);display:none}
+#method.on{display:block}
+body.locked .deck{overflow:hidden}
+#mback{position:fixed;top:clamp(12px,1.7vw,24px);right:clamp(14px,2.2vw,38px);z-index:90;
+  font-family:var(--mono);font-size:clamp(8.5px,.72vw,10.5px);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--gold);background:rgba(201,154,69,.1);
+  border:1px solid rgba(201,154,69,.5);border-radius:3px;padding:8px 14px;cursor:pointer}
 .apx{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:clamp(12px,2vw,34px);
   margin-top:clamp(10px,1.4vw,20px)}
 .apx h4{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
@@ -1276,11 +1298,22 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   </div>
 </section>
 
-<!-- APPENDIX -->
-<section id="appx">
-  <div class="z">
-    <div class="eyebrow">Appendix · method, sources and limits</div>
-    <h2 class="sm reveal" style="font-size:clamp(18px,2.8vw,40px)">What this is built on.</h2>
+</div>
+
+<!-- ── METHOD PANEL ────────────────────────────────────────────────
+     Outside .deck on purpose. Inside it, scroll-snap would make the
+     panel a 24th slide you could land on by scrolling. -->
+<button id="mtab" aria-haspopup="dialog">Method &amp; numbers</button>
+<div id="method" role="dialog" aria-modal="true" aria-label="Method, sources and limits">
+  <button id="mback">← Back to the deck</button>
+
+    <div class="eyebrow">Method, sources and limits</div>
+    <!-- No .reveal here. The reveal observer is rooted on .deck, and this
+         panel is outside it, so an element with .reveal would be observed
+         against a root that can never contain it and would sit at opacity
+         0 for ever. The panel is opened deliberately; it does not need an
+         entrance animation. -->
+    <h2 class="sm" style="font-size:clamp(18px,2.8vw,40px)">What this is built on.</h2>
     <div class="apx">
       <div>
         <h4>Channel data</h4>
@@ -1288,14 +1321,6 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         <p>Lifetime 972,502,684 views · 661,000 subscribers · 198 public uploads. The 198 public videos sum to 498,116,125 views.</p>
         <p>Per-video daily observation series for velocity; the series begins mid-September 2026.</p>
         <p>VMG UK Landscape — Chartmetric 25 Sep 2026, VMG UK consumption 23 Mar–20 Sep 2026.</p>
-      </div>
-      <div>
-        <h4>Not available</h4>
-        <p>No YouTube Studio data anywhere: no impressions, click-through rate, retention, watch time, traffic sources, unique viewers or revenue.</p>
-        <p>Views are plays, not people. No figure here counts humans reached.</p>
-        <p>Subscriber counts are rounded by YouTube to three significant figures.</p>
-        <p>Shorts and long-form views are not the same unit — YouTube changed Shorts counting in March 2025.</p>
-        <p>Velocity exists only for videos with an observation series. Overseas and the other large catalogue records have none, so no velocity is claimed for them.</p>
       </div>
       <div>
         <h4>How the audit was built</h4>
@@ -1324,9 +1349,6 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
         <p>Earlier working: <a href="/dblock/AUDIT.md">AUDIT.md</a> · <a href="/dblock/RESEARCH-FINDINGS.md">RESEARCH-FINDINGS.md</a></p>
       </div>
     </div>
-  </div>
-</section>
-
 </div>
 
 <script>
@@ -1810,6 +1832,26 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
     /* The cover must not wait for a scroll that may never come. */
     document.querySelectorAll('section:first-of-type .reveal, section:first-of-type .stagger')
       .forEach(el => el.classList.add('visible'));
+  }
+
+  /* ── METHOD PANEL ──────────────────────────────────────────────────
+     A panel, not a route. The deck is scroll-snap and keeps its own
+     position, so closing returns the reader to the slide they left
+     without anything being restored by hand. The tab hides while the
+     panel is open so the two controls never stack in the same corner. */
+  const mTab = document.getElementById('mtab'),
+        mPanel = document.getElementById('method'),
+        mBack = document.getElementById('mback');
+  if (mTab && mPanel && mBack) {
+    const openM = () => { mPanel.classList.add('on'); document.body.classList.add('locked');
+      mTab.style.display = 'none'; mPanel.scrollTop = 0; mBack.focus(); };
+    const closeM = () => { mPanel.classList.remove('on'); document.body.classList.remove('locked');
+      mTab.style.display = ''; mTab.focus(); };
+    mTab.addEventListener('click', openM);
+    mBack.addEventListener('click', closeM);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && mPanel.classList.contains('on')) closeM();
+    });
   }
 })();
 </script>
