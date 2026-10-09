@@ -59,6 +59,13 @@ export const TEAMS: Record<string, Team> = {
     regionTag: 'Nordics',
     token: 'nd-5p8w3t6hjc92',
   },
+  us: {
+    slug: 'us',
+    name: 'US — Campaign Board',
+    blurb: 'Add the artists you are working, and watch how their channels move.',
+    regionTag: 'US',
+    token: 'us-4r9n2v7zq58m',
+  },
 };
 
 export const TEAM_SLUGS = Object.keys(TEAMS);

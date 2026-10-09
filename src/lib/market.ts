@@ -136,6 +136,19 @@ export const MARKETS: Record<string, MarketDef> = {
        UK-derived, so value figures are withheld here rather than converted. */
     currency: { code: 'EUR', symbol: '€' },
   },
+  us: {
+    id: 'us',
+    name: 'United States',
+    short: 'US',
+    orgName: 'Virgin Music US',
+    territories: ['US', 'CA'],
+    teamSlug: 'us',
+    /* New York. The US spans six offsets, so a week boundary is a choice
+       either way; east coast is where the label day starts. */
+    timeZone: 'America/New_York',
+    locale: 'en-US',
+    currency: { code: 'USD', symbol: '$' },
+  },
 };
 
 export const MARKET_IDS = Object.keys(MARKETS);
