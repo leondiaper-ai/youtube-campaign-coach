@@ -18,6 +18,7 @@ import { computeMultiformat } from '@/lib/contentStructure';
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDaysBatch } from '@/lib/formatHistory';
 import AddArtistButton from '@/components/AddArtistButton';
+import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
 export const revalidate = 600;
 
@@ -25,10 +26,6 @@ export const metadata = {
   title: 'Channel Health — YouTube Campaign System',
   description: 'Which channels are growing, flat, or at risk.',
 };
-
-const INK = '#0E0E0E';
-const PAPER = '#FAF7F2';
-const SOFT = '#F6F1E7';
 
 export default async function ControlPage({
   searchParams,
@@ -228,78 +225,60 @@ export default async function ControlPage({
     };
   })();
 
+  /* The same four destinations the page already had, in the shared shell
+     rather than hand-drawn pills. The market query is still threaded by
+     this page, exactly as before. */
+  const nav = [
+    { href: `/growth${mq}`, label: 'Channel Health', match: '/growth' },
+    { href: `/campaigns${mq}`, label: 'Active Campaigns', match: '/campaigns' },
+    { href: `/coach${mq}`, label: 'Coach', match: '/coach' },
+    { href: '/resources', label: 'Resources', match: '/resources' },
+  ];
+
   return (
-    <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-      <div className="max-w-[1080px] mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-6 mb-6">
-          <div>
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
-              YouTube Campaign System
-            </div>
-            <div className="flex items-center gap-1 mt-2">
-              <span
-                className="px-3 py-1.5 rounded-md text-[13px] font-black"
-                style={{ background: SOFT }}
-              >
-                Channel Health
-              </span>
-              <Link
-                href={`/campaigns${mq}`}
-                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-              >
-                Active Campaigns
-              </Link>
-              <Link
-                href={`/coach${mq}`}
-                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-              >
-                Coach
-              </Link>
-              <Link
-                href="/resources"
-                className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-              >
-                Resources
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 shrink-0 mt-2">
-            <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
-              {syncMeta ? (
-                <>
-                  <span>Last sync: {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                  <br />
-                  <span className="text-ink/20">{syncMeta.artistsSuccess}/{syncMeta.artistsTotal} artists · from cache</span>
-                </>
-              ) : (
-                <span>No sync data yet</span>
-              )}
-            </span>
-            <AddArtistButton />
-          </div>
-        </div>
+    <main className="min-h-screen bg-paper text-ink">
+      <AppHeader
+        nav={nav}
+        workspace={market.orgName}
+        actions={<AddArtistButton />}
+        meta={
+          syncMeta ? (
+            <>
+              <div className="tabular-nums">
+                Synced {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', {
+                  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                })}
+              </div>
+              <div className="tabular-nums">
+                {syncMeta.artistsSuccess}/{syncMeta.artistsTotal} artists
+              </div>
+            </>
+          ) : (
+            <div>No sync data yet</div>
+          )
+        }
+      />
+
+      <div className="max-w-[1180px] mx-auto px-6">
+        <PageTitle
+          title="Channel Health"
+          lede="Which channels are growing, which are converting attention into audience, and which need feeding."
+        />
 
         {/* Client-side board with toggle */}
         <ChannelHealthBoard linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
-        {/* Navigation flow */}
-        <div className="mt-8 flex items-center justify-center gap-3 text-[11px]">
-          <span className="font-black text-ink/60 px-3 py-1.5 rounded-md" style={{ background: SOFT }}>
-            Channel Health
-          </span>
-          <span className="text-ink/25">→</span>
-          <Link href={`/campaigns${mq}`} className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+        <div className="mt-14 pt-5 pb-10 border-t border-line flex items-center gap-2 text-micro text-faint">
+          <span className="font-semibold text-muted">Channel Health</span>
+          <span aria-hidden>→</span>
+          <Link href={`/campaigns${mq}`} className="font-semibold text-muted hover:text-ink no-underline transition-colors">
             Active Campaigns
           </Link>
-          <span className="text-ink/25">→</span>
-          <Link href={`/coach${mq}`} className="font-bold text-ink/40 hover:text-ink/70 px-3 py-1.5 rounded-md hover:bg-[#F6F1E7] transition-colors">
+          <span aria-hidden>→</span>
+          <Link href={`/coach${mq}`} className="font-semibold text-muted hover:text-ink no-underline transition-colors">
             Coach
           </Link>
-        </div>
-
-        <div className="mt-8 text-[10px] uppercase tracking-[0.18em] text-ink/25">
-          Channel Health watches · Campaigns track · Plans direct
+          <span className="ml-auto">Channel Health watches · Campaigns track · Plans direct</span>
         </div>
       </div>
     </main>

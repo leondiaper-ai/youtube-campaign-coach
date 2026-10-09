@@ -1,5 +1,18 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+
+/* Both tailwind.config.ts and globals.css have named Inter since the
+   beginning and nothing ever fetched it, so every screen has been
+   rendering in the system fallback. Loading it properly is the single
+   largest visual change in this pass and costs no layout work.
+   `display: swap` keeps first paint immediate; the variable font keeps
+   the weight range the interface uses (400–900) in one file. */
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://youtube-campaign-coach.vercel.app'),
@@ -33,8 +46,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-paper text-ink">{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen bg-paper text-ink antialiased">{children}</body>
     </html>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
 import Sparkline from './Sparkline';
+import { SectionHead } from './ui';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -687,59 +688,75 @@ export default function ChannelHealthBoard({
       )}
 
       {/* ─── SUMMARY BAR ──────────────────────────────────────────────────
-          Four pastel blocks were the loudest thing on a page whose job is
-          to be read downwards, and they fought the tables underneath for
-          attention they did not need: the number is the signal, not the
-          rectangle around it. The figure keeps its state colour so Cold
-          still reads as a warning at a glance; everything else is a rule
-          and some air, which is the artist pages' own language. */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-6 mb-7">
-        {([
-          [growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence and positive momentum'],
-          [weakConvCount, 'Weak conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views growing faster than subscriber conversion'],
-          [underfedCount, 'Underfed', CLASSIFICATION_STYLE.UNDERFED.fg, 'Low upload activity limiting discovery potential'],
-          [coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Long periods of inactivity or declining momentum'],
-        ] as const).map(([count, label, fg, hint]) => (
-          <div key={label} style={{ borderTop: `1px solid ${MUTED}` }} className="pt-3" title={hint}>
-            <div
-              className="text-[34px] font-black leading-none tracking-[-0.03em] tabular-nums"
-              style={{ color: count > 0 ? fg : 'rgba(14,14,14,0.2)' }}
-            >
-              {count}
-            </div>
-            <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink/55 mt-2">{label}</div>
-          </div>
-        ))}
-      </div>
+          The four health states, as one analytical component rather than
+          four numbers spaced across a page. They share a surface and are
+          separated by dividers because they are one measurement of one
+          roster — read across, they always sum to the active count, and
+          the old layout gave no hint of that.
 
-      {/* ─── Multiformat Strategy Summary ──────────────────────────────── */}
-      {mfRows.length > 0 && (
-        <div className="flex items-center gap-4 mb-7 text-[10px]" style={{ color: 'rgba(14,14,14,0.45)' }}>
-          <span className="font-bold uppercase tracking-[0.12em]" style={{ color: 'rgba(14,14,14,0.3)' }}>Multiformat</span>
-          <span title="Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)">
-            <span className="font-black" style={{ color: '#0C6A3F' }}>{mfStrong}</span> strong
-          </span>
-          <span title="Channels using 2 formats">
-            <span className="font-black" style={{ color: '#7A5A00' }}>{mfPartial}</span> partial
-          </span>
-          <span title="Channels using 0–1 formats — multiformat strategy not active">
-            <span className="font-black" style={{ color: '#8A1F0C' }}>{mfWeak}</span> weak
-          </span>
+          Each state keeps the colour it carries everywhere else in the
+          product, and the definition is now visible rather than hidden in
+          a title attribute nobody hovers. */}
+      <div className="bg-surface border border-line rounded-card mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
+          {([
+            [growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence, positive momentum'],
+            [weakConvCount, 'Weak conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views outpacing subscriber conversion'],
+            [underfedCount, 'Underfed', CLASSIFICATION_STYLE.UNDERFED.fg, 'Upload activity limiting discovery'],
+            [coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Inactive or declining momentum'],
+          ] as const).map(([count, label, fg, hint]) => (
+            <div key={label} className="px-5 py-4 border-t border-line first:border-t-0 lg:border-t-0">
+              <div className="flex items-baseline gap-2">
+                <span
+                  className="text-kpiLg font-black tabular-nums"
+                  style={{ color: count > 0 ? fg : 'rgba(14,14,14,0.18)' }}
+                >
+                  {count}
+                </span>
+                <span className="text-micro text-faint tabular-nums">
+                  / {activeRows.length}
+                </span>
+              </div>
+              <div className="text-[11px] font-bold uppercase tracking-label text-secondary mt-2">{label}</div>
+              <div className="text-[11px] text-muted mt-1 leading-snug">{hint}</div>
+            </div>
+          ))}
         </div>
-      )}
+
+        {/* Multiformat belonged with the health read, not floating under it
+            as an unattached strip. Same component, quieter register. */}
+        {mfRows.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5 py-3 border-t border-line bg-raised/50 rounded-b-card">
+            <span className="text-[11px] font-bold uppercase tracking-label text-muted">
+              Multiformat
+            </span>
+            <span className="text-micro text-secondary" title="Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)">
+              <span className="font-black tabular-nums" style={{ color: '#0C6A3F' }}>{mfStrong}</span> strong
+            </span>
+            <span className="text-micro text-secondary" title="Channels using 2 formats">
+              <span className="font-black tabular-nums" style={{ color: '#7A5A00' }}>{mfPartial}</span> partial
+            </span>
+            <span className="text-micro text-secondary" title="Channels using 0–1 formats — multiformat strategy not active">
+              <span className="font-black tabular-nums" style={{ color: '#8A1F0C' }}>{mfWeak}</span> weak
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* ─── MANAGED VIEW: What Changed This Week ──────────────────────── */}
       {view === 'managed' && insights.length > 0 && (
-        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-2.5">
-            What Changed This Week
-          </div>
-          <div className="space-y-1.5">
+        <div className="mb-8">
+          <SectionHead title="What changed this week" meta={`${insights.length} signals`} />
+          <div className="space-y-0">
             {insights.map((ins, i) => {
               const ic = INSIGHT_ICON[ins.tone];
               return (
-                <div key={i} className="flex items-start gap-2 text-[12px] leading-snug" style={{ color: ic.color }}>
-                  <span className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ background: ic.dot }} />
+                <div
+                  key={i}
+                  className="flex items-start gap-2.5 py-2 border-b border-line-faint last:border-b-0 text-body leading-snug"
+                  style={{ color: ic.color }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
                   <span>{ins.text}</span>
                 </div>
               );
@@ -754,10 +771,8 @@ export default function ChannelHealthBoard({
         const topLongform = topVideos.filter((v) => !v.isShort).slice(0, 5);
         if (topShorts.length === 0 && topLongform.length === 0) return null;
         return (
-          <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
-            <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
-              Top Performing Videos This Week
-            </div>
+          <div className="mb-8">
+            <SectionHead title="Top performing videos" meta="Last 14 days, by daily velocity" />
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Long-form column */}
               {topLongform.length > 0 && (
@@ -791,16 +806,15 @@ export default function ChannelHealthBoard({
         topMovers.topViews.length > 0 || topMovers.topSubs.length > 0 ||
         topMovers.biggestDecline.length > 0 || topMovers.cadenceRisk.length > 0
       ) && (
-        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
+        <div className="mb-8">
           <button
             onClick={() => setMoversOpen(!moversOpen)}
-            className="w-full flex items-center justify-between text-left"
+            aria-expanded={moversOpen}
+            className="w-full flex items-end justify-between gap-4 text-left pb-2.5 mb-4 border-b border-line group"
           >
-            <span className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35">
-              Top Movers
-            </span>
-            <span className="text-[10px] font-bold text-ink/30">
-              {moversOpen ? '▲ Less' : '▼ Show'}
+            <span className="text-h4 font-extrabold text-ink">Top movers</span>
+            <span className="text-micro font-semibold text-muted group-hover:text-ink transition-colors">
+              {moversOpen ? 'Hide' : 'Show'}
             </span>
           </button>
           {moversOpen && (
@@ -816,10 +830,8 @@ export default function ChannelHealthBoard({
 
       {/* ─── MARKET VIEW: Market Benchmark Read ────────────────────────── */}
       {view === 'market' && benchmarkRead && (
-        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
-            Market Benchmark Read
-          </div>
+        <div className="mb-8">
+          <SectionHead title="Market benchmark read" />
 
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-3 lg:grid-cols-4">
@@ -877,10 +889,8 @@ export default function ChannelHealthBoard({
 
       {/* ─── BEST IN CLASS: Consistency Leaders ──────────────────────── */}
       {consistencyLeaders.length > 0 && (
-        <div className="pt-5 mb-7" style={{ borderTop: `1px solid ${MUTED}` }}>
-          <div className="text-[9px] font-black uppercase tracking-[0.18em] text-ink/35 mb-3">
-            Best in Class — Consistency
-          </div>
+        <div className="mb-8">
+          <SectionHead title="Best in class" meta="Highest sustained upload cadence, last 30 days" />
           <div className="space-y-2">
             {consistencyLeaders.map((c, i) => {
               const st = STATUS_STYLE[c.status];
@@ -949,27 +959,30 @@ export default function ChannelHealthBoard({
       </div>
 
       {/* ─── SEARCH ─────────────────────────────────────────────────────── */}
-      <div className="mb-4 relative max-w-xs">
+      {/* A bordered control rather than an underlined one: on a page of
+          hairline rules an underlined input is indistinguishable from a
+          divider until you click it. */}
+      <div className="mb-3 relative max-w-[280px]">
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search artists…"
-          className="w-full py-2 pl-6 pr-7 text-[12px] outline-none transition-colors bg-transparent"
-          style={{ color: INK, borderBottom: `1px solid ${MUTED}` }}
+          aria-label="Search artists"
+          className="w-full py-2 pl-8 pr-8 text-body text-ink bg-surface border border-line rounded-control outline-none transition-colors placeholder:text-faint focus:border-ink/30"
         />
         <svg
-          className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none"
-          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(14,14,14,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8A199" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
           <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
         </svg>
         {search && (
           <button
             onClick={() => setSearch('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-[14px] leading-none hover:opacity-70"
-            style={{ color: 'rgba(14,14,14,0.3)' }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-[15px] leading-none text-faint hover:text-ink transition-colors"
             title="Clear search"
+            aria-label="Clear search"
           >
             &times;
           </button>
@@ -977,10 +990,14 @@ export default function ChannelHealthBoard({
       </div>
 
       {/* ─── TABLE ──────────────────────────────────────────────────────── */}
-      <div style={{ borderTop: `1px solid ${MUTED}` }}>
+      {/* The table is the product. It gets its own surface so it reads as
+          one object, and the header sticks: on a 140-row roster the column
+          a figure belongs to is otherwise a guess by the time you scroll.
+          Header labels move off 9px — they were the smallest type on the
+          page and they are the key to everything under them. */}
+      <div className="bg-surface border border-line rounded-card overflow-hidden">
         <div
-          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 py-3 text-[9px] font-bold uppercase tracking-[0.14em] text-ink/40 border-b"
-          style={{ borderColor: MUTED }}
+          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-4 py-2.5 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10"
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
@@ -1037,10 +1054,13 @@ export default function ChannelHealthBoard({
           return (
             <div key={r.slug}>
               <div
-                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 py-4 items-center hover:brightness-[0.97] transition-all cursor-pointer ${
-                  i === filtered.length - 1 && !isExpanded ? '' : 'border-b'
+                /* hover:brightness dimmed the text along with the row, which
+                   made the thing you were pointing at the hardest to read.
+                   A background change leaves the content alone. */
+                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-4 py-3 items-center transition-colors cursor-pointer hover:bg-raised ${
+                  i === filtered.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
                 }`}
-                style={{ borderColor: MUTED, background: st.rowBg }}
+                style={{ background: st.rowBg }}
                 onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
               >
                 <div className="min-w-0 relative">
