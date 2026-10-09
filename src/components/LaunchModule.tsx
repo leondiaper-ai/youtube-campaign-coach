@@ -524,12 +524,12 @@ export default function LaunchModule({
     ? (metrics.conversion >= 1 ? '#0C6A3F' : metrics.conversion >= 0.5 ? '#7A5A00' : '#8A1F0C') : undefined;
 
   return (
-    <section className="mt-8">
+    <section>
       {/* ─── Section header ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2 h-2 rounded-full" style={{ background: dStyle.dot }} />
         <h2 className="text-[11px] font-bold uppercase tracking-eyebrow text-muted">
-          Launch result
+          Latest asset launch
         </h2>
       </div>
 

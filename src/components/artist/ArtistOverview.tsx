@@ -84,12 +84,18 @@ export interface ArtistOverviewProps {
    * leading — which is exactly the bug this arrangement removes.
    */
   topLongform: RankedGrid;
+  /* The launch module, injected rather than imported. It needs upload
+     history and deltas this component does not take, and it belongs
+     directly above the performing grids — the newest asset is the
+     thing a reader asks about first, and it was sitting four sections
+     below them. */
+  launchSlot?: React.ReactNode;
   topShorts: RankedGrid;
 }
 
 export default async function ArtistOverview({
   slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves: _moves, pinned: _pinned,
-  topLongform, topShorts,
+  topLongform, topShorts, launchSlot,
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
   const split = resolveRowFormatSplit(uploads, days, snap?.views ?? null);
@@ -250,8 +256,16 @@ export default async function ArtistOverview({
         </div>
       </section>
 
-      {/* ═══ 6. WHAT IS PERFORMING ══════════════════════════════ */}
-      <section className="mt-14 pt-8" style={{ borderTop: `1px solid ${RULE}` }}>
+      {/* ═══ 6. THE NEWEST ASSET ════════════════════════════════ */}
+      {launchSlot && (
+        <section className="mt-14 pt-8" style={{ borderTop: `1px solid ${RULE}` }}>
+          {launchSlot}
+        </section>
+      )}
+
+      {/* ═══ 7. WHAT IS PERFORMING ══════════════════════════════ */}
+      <section className={launchSlot ? 'mt-12' : 'mt-14 pt-8'}
+        style={launchSlot ? undefined : { borderTop: `1px solid ${RULE}` }}>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <Eyebrow>
             {topLongform.basis === 'recent' ? 'Long-form · moving now' : 'Top long-form'}

@@ -426,6 +426,17 @@ export default async function WatcherArtistView({
           pinned={campaignPinned}
           topLongform={topLongform}
           topShorts={topShorts}
+          launchSlot={
+            <LaunchModule
+              recentUploads={launchUploads}
+              uploads30d={uploads30d}
+              shorts14d={shorts14d}
+              daysSinceLastUpload={lastUpDays}
+              subs7Delta={subs7?.delta ?? null}
+              views7Delta={views7?.delta ?? null}
+              viewHistory={launchViewHistory}
+            />
+          }
         />
 
         {/* The decision headline and its consequence. The overview carries
@@ -502,17 +513,6 @@ export default async function WatcherArtistView({
             )}
           </section>
         )}
-
-        {/* ─── LAUNCH MODULE — only renders if a video published within 10d ── */}
-        <LaunchModule
-          recentUploads={launchUploads}
-          uploads30d={uploads30d}
-          shorts14d={shorts14d}
-          daysSinceLastUpload={lastUpDays}
-          subs7Delta={subs7?.delta ?? null}
-          views7Delta={views7?.delta ?? null}
-          viewHistory={launchViewHistory}
-        />
 
         {/* ─── FIX NOW ────────────────────────────────────────────────────── */}
         {(fixNow.length > 0 || isColdMode) && (
