@@ -113,6 +113,29 @@ export const MARKETS: Record<string, MarketDef> = {
     locale: 'en-AU',
     currency: { code: 'AUD', symbol: '$' },
   },
+  nordics: {
+    id: 'nordics',
+    name: 'Nordics',
+    short: 'Nordics',
+    orgName: 'Virgin Music Nordics',
+    /* Sweden first — largest Nordic YouTube market, so it anchors the
+       default sort. Mirrors the `nordics` group in territories/markets.ts,
+       which stays the authority on what Chartmetric returns per code. */
+    territories: ['SE', 'NO', 'DK', 'FI', 'IS'],
+    teamSlug: 'nordics',
+    /* Stockholm. The five countries span two offsets — Iceland sits on UTC
+       — but a week boundary has to be decided somewhere, and the largest
+       market is the least surprising place to decide it. */
+    timeZone: 'Europe/Stockholm',
+    /* The board is worked in English and sits beside the UK one, so dates
+       match rather than switching format per region. */
+    locale: 'en-GB',
+    /* No single Nordic currency: SEK, NOK, DKK, EUR and ISK across five
+       countries. EUR is the regional reporting unit. This only decides
+       formatting and the non-GBP suppression above — the RPM constants are
+       UK-derived, so value figures are withheld here rather than converted. */
+    currency: { code: 'EUR', symbol: '€' },
+  },
 };
 
 export const MARKET_IDS = Object.keys(MARKETS);
