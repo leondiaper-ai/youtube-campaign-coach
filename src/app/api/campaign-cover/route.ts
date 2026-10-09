@@ -213,6 +213,33 @@ function formatOf(v: any): { kind: string; label: string } {
   if (/\blyric\b/i.test(title)) return { kind: 'lyric', label: 'LYRIC VIDEO' };
   if (/\bvisuali[sz]er\b/i.test(title)) return { kind: 'visualiser', label: 'VISUALISER' };
   if (/official (music )?video|\bomv\b/i.test(title)) return { kind: 'omv', label: 'OFFICIAL VIDEO' };
+  /* ── A LIVE VERSION IS A RELEASE, EVEN IF IT WAS NEVER LIVE ───────
+     The only route to `live` used to be the premiere check below, which
+     needs YouTube to report wasLive/actualStart. That catches a streamed
+     premiere and misses the far more common thing: a studio or session
+     performance, filmed, edited and uploaded as a normal video. It was
+     landing in `long`, which is not in RELEASE_KINDS, so it could never
+     lead the page.
+
+     Kings of Leon is the case. "My Whole World (Live)" went up on 8 Oct
+     as a 77k-view landscape upload and sat in the supporting strip while
+     the 30 Sep lyric video kept the NOW slot — and the Short ANNOUNCING
+     the live video took the second hero, so the page showed the trailer
+     and hid the thing it was trailing.
+
+     Runs after the lyric/visualiser/OMV title checks so an explicit
+     format tag still wins, and after the ≤62s check above so a Short
+     captioned "... (Live) out now" stays a Short — both of those
+     orderings are load-bearing and were verified against live data.
+
+     Deliberately narrow. Parenthesised "(Live…)" is a format tag; bare
+     "live" is not, because songs are called things like Live Forever.
+     "Live at/from/session" is included because that is how a venue
+     recording is titled. Checked against every asset on the active
+     campaigns: one match, which is the upload above. */
+  if (/\(\s*(?:official\s+)?live\b[^)]{0,40}\)|\blive\s+(?:at|from|session|in\s+session)\b/i.test(title)) {
+    return { kind: 'live', label: 'LIVE' };
+  }
 
   /* The description, for the two formats that name themselves in it. */
   if (/\blyric(?:s)?\s+video\b/i.test(desc)) return { kind: 'lyric', label: 'LYRIC VIDEO' };
