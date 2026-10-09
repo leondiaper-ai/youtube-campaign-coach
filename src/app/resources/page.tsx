@@ -1,15 +1,11 @@
 import Link from 'next/link';
 import { RESOURCE_GROUPS, type ResourceKind } from '@/lib/resources';
+import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
 export const metadata = {
   title: 'Resources — YouTube Campaign System',
   description: 'Decks, analysis and source data produced for Virgin Music YouTube campaigns.',
 };
-
-const PAPER = '#FAF7F2';
-const INK = '#0E0E0E';
-/* Active-pill background. Matches /growth so the nav reads identically. */
-const SOFT = '#F6F1E7';
 
 /* Badge tints. Distinct enough to scan a column for "the spreadsheet" without
    reading titles, muted enough that they do not compete with them. */
@@ -24,51 +20,61 @@ const NEUTRAL_BADGE = { bg: 'rgba(14,14,14,0.07)', fg: 'rgba(14,14,14,0.62)' };
 
 export default function ResourcesPage() {
   return (
-    <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-      <div className="max-w-[1080px] mx-auto px-6 py-10">
-        {/* Header. Mirrors the pill nav on /growth so this reads as one of the
-            main boards rather than a page that arrived from somewhere else. */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45">
-            YouTube Campaign System
-          </div>
-          <div className="flex items-center gap-1 mt-2">
-            <Link
-              href="/growth"
-              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-            >
-              Channel Health
-            </Link>
-            <Link
-              href="/campaigns"
-              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-            >
-              Active Campaigns
-            </Link>
-            <Link
-              href="/coach"
-              className="px-3 py-1.5 rounded-md text-[13px] font-bold text-ink/50 hover:text-ink hover:bg-[#F6F1E7] transition-colors"
-            >
-              Coach
-            </Link>
-            <span className="px-3 py-1.5 rounded-md text-[13px] font-black" style={{ background: SOFT }}>
-              Resources
+    <main className="min-h-screen bg-paper text-ink">
+      <AppHeader
+        nav={[
+          { href: '/growth', label: 'Channel Health' },
+          { href: '/campaigns', label: 'Active Campaigns' },
+          { href: '/coach', label: 'Coach' },
+          { href: '/teams', label: 'Workspaces' },
+          { href: '/resources', label: 'Resources' },
+        ]}
+        workspace="Virgin Music UK"
+      />
+
+      <div className="max-w-[1180px] mx-auto px-6">
+        <PageTitle
+          title="Resources"
+          lede="Everything produced for Virgin Music on YouTube — artist decks, market analysis, and the method behind the numbers. Current versions only."
+        />
+
+        {/* ── The hub ──────────────────────────────────────────────────
+            This page is the file library: finished decks and reports, by
+            date. The hub is the live index of the same work — campaigns
+            and artist intelligence as they stand today. Somebody landing
+            here looking for "the Kings of Leon story" wants the hub, and
+            until now nothing in the product pointed at it. */}
+        <a
+          href="/intelligence"
+          className="group block no-underline rounded-card overflow-hidden mb-10 border border-ink/80 bg-ink"
+        >
+          <div className="px-6 py-5 flex flex-wrap items-center justify-between gap-5">
+            <div className="min-w-0">
+              <div className="text-[11px] font-black uppercase tracking-eyebrow">
+                <span className="text-paper">VMG</span>
+                <span className="text-signal ml-1.5">YOUTUBE HUB</span>
+              </div>
+              <div className="text-h3 font-extrabold text-paper mt-2">
+                Campaigns and artist intelligence, live
+              </div>
+              <p className="text-body mt-1.5 max-w-[62ch]" style={{ color: 'rgba(250,247,242,0.62)' }}>
+                Every active campaign and what we have gathered on each artist —
+                across Virgin Music Group and the wider YouTube ecosystem. The
+                pages below are the finished documents; the hub is the current
+                picture.
+              </p>
+            </div>
+            <span className="text-[11px] font-bold uppercase tracking-label text-signal shrink-0 group-hover:translate-x-0.5 transition-transform">
+              Open the hub →
             </span>
           </div>
-          <h1 className="font-black text-[28px] leading-tight mt-4">Resources</h1>
-          <p className="text-[11px] text-ink/35 mt-1 max-w-[560px]">
-            Everything produced for Virgin Music on YouTube — artist decks, market analysis,
-            and the method behind the numbers. Current versions only.
-          </p>
-        </div>
+        </a>
 
         {RESOURCE_GROUPS.map((group) => (
           <section key={group.heading} className="mb-9">
-            <h2 className="text-[13px] font-black uppercase tracking-[0.14em] text-ink/70">
-              {group.heading}
-            </h2>
+            <h2 className="text-h4 font-extrabold text-ink">{group.heading}</h2>
             {group.note && (
-              <p className="text-[11px] text-ink/35 mt-1 mb-3 max-w-[620px]">{group.note}</p>
+              <p className="text-meta text-muted mt-1 mb-3 max-w-[72ch]">{group.note}</p>
             )}
 
             <div className="grid gap-2 mt-3">
@@ -83,22 +89,22 @@ export default function ResourcesPage() {
                     <div className="flex items-baseline gap-2 flex-wrap">
                       <span className="text-[14px] font-bold">{r.title}</span>
                       <span
-                        className="text-[9px] font-bold uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
+                        className="text-[11px] font-bold uppercase tracking-label px-1.5 py-0.5 rounded"
                         style={{ background: kind.bg, color: kind.fg }}
                       >
                         {r.kind}
                       </span>
                       {r.external && (
-                        <span className="text-[9px] font-bold uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
+                        <span className="text-[11px] font-bold uppercase tracking-label px-1.5 py-0.5 rounded"
                           style={{ background: NEUTRAL_BADGE.bg, color: NEUTRAL_BADGE.fg }}>
                           Public link
                         </span>
                       )}
                     </div>
-                    <p className="text-[12px] text-ink/50 mt-1 leading-snug max-w-[680px]">
+                    <p className="text-body text-secondary mt-1 leading-snug max-w-[78ch]">
                       {r.blurb}
                     </p>
-                    <div className="text-[10px] uppercase tracking-[0.12em] text-ink/30 mt-1.5">
+                    <div className="text-micro uppercase tracking-label text-muted mt-1.5">
                       {r.updated}
                       {r.download && ' · Downloads'}
                       {r.offsite && ' · Opens in a new tab'}
@@ -107,8 +113,8 @@ export default function ResourcesPage() {
                 );
 
                 const cls =
-                  'block bg-white rounded-lg px-4 py-3 no-underline ' +
-                  'border border-black/5 hover:border-black/15 transition-colors';
+                  'block bg-surface rounded-card px-4 py-3.5 no-underline ' +
+                  'border border-line hover:border-line-strong transition-colors';
 
                 if (r.download) {
                   return <a key={r.href} href={r.href} download className={cls}>{inner}</a>;
@@ -126,7 +132,7 @@ export default function ResourcesPage() {
           </section>
         ))}
 
-        <p className="text-[10px] text-ink/25 mt-10 max-w-[620px] leading-relaxed">
+        <p className="text-micro text-muted pb-14 max-w-[72ch] leading-relaxed">
           Superseded drafts are kept off this page on purpose. If you need an earlier
           version of the market deck, it is on the shared drive rather than here.
         </p>
