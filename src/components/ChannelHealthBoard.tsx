@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE } from '@/lib/artists';
+import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE, CLASSIFICATION_LABEL } from '@/lib/artists';
 import Sparkline from './Sparkline';
 import { SectionHead } from './ui';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
@@ -572,6 +572,10 @@ export default function ChannelHealthBoard({
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  /* Clicking a health figure filters the table to those channels. The
+     count was already the answer to "how many" — this makes it the
+     answer to "which", which is the next question every time. */
+  const [classFilter, setClassFilter] = useState<ArtistClassification | null>(null);
 
   const handleRemove = useCallback(async (channelId: string, name: string) => {
     if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
@@ -626,7 +630,9 @@ export default function ChannelHealthBoard({
 
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
-  const sorted = [...activeRows].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status]);
+  const sorted = [...activeRows]
+    .sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])
+    .filter((r) => (classFilter ? r.classification === classFilter : true));
   const filtered = search.trim()
     ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
     : sorted;
@@ -671,7 +677,7 @@ export default function ChannelHealthBoard({
             ] as const).map(([key, label, count]) => (
               <button
                 key={key}
-                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); }}
+                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); setClassFilter(null); }}
                 aria-pressed={view === key}
                 className={`relative pb-2.5 -mb-px text-h4 transition-colors ${
                   view === key ? 'font-extrabold text-ink' : 'font-semibold text-muted hover:text-ink'
@@ -708,27 +714,51 @@ export default function ChannelHealthBoard({
       <div className="bg-surface border border-line rounded-card mb-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
           {([
-            [growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence, positive momentum'],
-            [weakConvCount, 'Weak conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views outpacing subscriber conversion'],
-            [underfedCount, 'Underfed', CLASSIFICATION_STYLE.UNDERFED.fg, 'Upload activity limiting discovery'],
-            [coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Inactive or declining momentum'],
-          ] as const).map(([count, label, fg, hint]) => (
-            <div key={label} className="px-5 py-4 border-t border-line first:border-t-0 lg:border-t-0">
-              <div className="flex items-baseline gap-2">
-                <span
-                  className="text-kpiLg font-black tabular-nums"
-                  style={{ color: count > 0 ? fg : 'rgba(14,14,14,0.18)' }}
-                >
-                  {count}
-                </span>
-                <span className="text-micro text-faint tabular-nums">
-                  / {activeRows.length}
-                </span>
-              </div>
-              <div className="text-[11px] font-bold uppercase tracking-label text-secondary mt-2">{label}</div>
-              <div className="text-[11px] text-muted mt-1 leading-snug">{hint}</div>
-            </div>
-          ))}
+            ['GROWING', growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence, positive momentum'],
+            ['WEAK_CONVERSION', weakConvCount, 'Weak conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views outpacing subscriber conversion'],
+            ['UNDERFED', underfedCount, 'Underfed', CLASSIFICATION_STYLE.UNDERFED.fg, 'Upload activity limiting discovery'],
+            ['COLD', coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Inactive or declining momentum'],
+          ] as const).map(([key, count, label, fg, hint]) => {
+            const isOn = classFilter === key;
+            /* A figure of zero is not a filter worth offering — it would
+               select an empty table and look broken. */
+            const selectable = count > 0;
+            return (
+              <button
+                key={label}
+                type="button"
+                disabled={!selectable}
+                aria-pressed={isOn}
+                onClick={() => {
+                  setClassFilter(isOn ? null : key);
+                  setExpandedRow(null);
+                }}
+                className={`text-left px-5 py-4 border-t border-line first:border-t-0 lg:border-t-0 transition-colors ${
+                  selectable ? 'cursor-pointer hover:bg-raised/70' : 'cursor-default'
+                } ${isOn ? 'bg-raised' : ''}`}
+                title={selectable ? (isOn ? 'Show all channels' : `Show only ${label.toLowerCase()} channels`) : undefined}
+              >
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className="text-kpiLg font-black tabular-nums"
+                    style={{ color: count > 0 ? fg : 'rgba(14,14,14,0.18)' }}
+                  >
+                    {count}
+                  </span>
+                  <span className="text-micro text-faint tabular-nums">
+                    / {activeRows.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <span className="text-[11px] font-bold uppercase tracking-label text-secondary">{label}</span>
+                  {isOn && (
+                    <span className="text-[11px] font-bold" style={{ color: fg }} aria-hidden>●</span>
+                  )}
+                </div>
+                <div className="text-[11px] text-muted mt-1 leading-snug">{hint}</div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Multiformat belonged with the health read, not floating under it
@@ -970,6 +1000,24 @@ export default function ChannelHealthBoard({
       {/* A bordered control rather than an underlined one: on a page of
           hairline rules an underlined input is indistinguishable from a
           divider until you click it. */}
+      {classFilter && (
+        /* The table below is no longer the whole roster, and that has to
+           be said in words rather than implied by a highlighted tile
+           further up the page. */
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-meta text-secondary">
+            Showing <strong className="text-ink">{filtered.length}</strong>{' '}
+            {CLASSIFICATION_LABEL[classFilter].toLowerCase()} channel{filtered.length === 1 ? '' : 's'}
+          </span>
+          <button
+            onClick={() => setClassFilter(null)}
+            className="text-micro font-semibold px-2.5 py-1 rounded-control border border-line text-secondary hover:text-ink hover:border-line-strong transition-colors"
+          >
+            Show all
+          </button>
+        </div>
+      )}
+
       <div className="mb-3 relative max-w-[280px]">
         <input
           type="text"
