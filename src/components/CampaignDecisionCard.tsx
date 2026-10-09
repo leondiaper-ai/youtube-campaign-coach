@@ -1016,27 +1016,28 @@ export function DecisionCard({
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-2 mt-1 flex-wrap text-[11px]">
-          <span className="font-bold uppercase tracking-[0.08em] text-ink/50">
-            Channel: <span style={{ color: dStyle.fg }}>{card.channelHealth}</span>
+        {/* Two states, as two chips. "CHANNEL: ACTIVE · CAMPAIGN: WEAK
+            CONVERSION" spent half its width on the words Channel and
+            Campaign — the chips say what they are. A campaign with no
+            signal prints nothing rather than the word None. */}
+        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          <span
+            className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-label"
+            style={{ background: dStyle.bg, color: dStyle.fg }}
+          >
+            {card.channelHealth}
           </span>
-          <span className="text-ink/20">·</span>
-          <span className="font-bold uppercase tracking-[0.08em] text-ink/50">
-            Campaign:{' '}
-            {card.campaignSignal !== 'NO_CAMPAIGN' ? (
-              <span
-                className="px-1.5 py-0.5 rounded"
-                style={{
-                  background: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.bg ?? SOFT,
-                  color: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.fg ?? INK,
-                }}
-              >
-                {card.campaignSignalLabel}
-              </span>
-            ) : (
-              <span className="text-ink/30">None</span>
-            )}
-          </span>
+          {card.campaignSignal !== 'NO_CAMPAIGN' && (
+            <span
+              className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-label"
+              style={{
+                background: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.bg ?? SOFT,
+                color: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.fg ?? INK,
+              }}
+            >
+              {card.campaignSignalLabel}
+            </span>
+          )}
         </div>
       </div>
 
@@ -1056,29 +1057,30 @@ export function DecisionCard({
         return (
           <div className="rounded-lg px-4 py-3 mb-3 flex items-center gap-6 flex-wrap"
             style={{ background: 'rgba(14,14,14,0.025)' }}>
-            <Figure
-              value={card.subs != null ? fmtNum(card.subs) : '—'}
-              label="Subs"
-            />
-            <Figure
-              value={hasViews ? `+${fmtNum(views7d!)}` : showUpdating ? 'Updating' : '—'}
-              label="Views (7d)"
-              tone={hasViews ? deltaColor(views7d) : undefined}
-            />
-            <Figure
-              value={String(card.uploads30d)}
-              label="Uploads (30d)"
-            />
-            <Figure
-              value={hasSubs7 ? `${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}` : '—'}
-              label="Subs (7d)"
-              tone={hasSubs7 ? deltaColor(card.subs7Delta) : undefined}
-            />
-            <Figure
-              value={spk != null ? spk.toFixed(1) : '—'}
-              label="Subs / 1K"
-              tone={spk != null ? conversionColor(spk) : undefined}
-            />
+            {/* A dash is not a reading. Figures with nothing to report are
+                left out rather than printed as "—", which was filling
+                the strip with placeholders and making the real numbers
+                harder to find. The caveat row below already says when
+                movement data is still building. */}
+            {card.subs != null && <Figure value={fmtNum(card.subs)} label="Subs" />}
+            {(hasViews || showUpdating) && (
+              <Figure
+                value={hasViews ? `+${fmtNum(views7d!)}` : 'Updating'}
+                label="Views (7d)"
+                tone={hasViews ? deltaColor(views7d) : undefined}
+              />
+            )}
+            <Figure value={String(card.uploads30d)} label="Uploads (30d)" />
+            {hasSubs7 && (
+              <Figure
+                value={`${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}`}
+                label="Subs (7d)"
+                tone={deltaColor(card.subs7Delta)}
+              />
+            )}
+            {spk != null && (
+              <Figure value={spk.toFixed(1)} label="Subs / 1K" tone={conversionColor(spk)} />
+            )}
             <div className="ml-auto rounded-lg px-3 py-1.5" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
               <Sparkline
                 data={card.sparkline}
@@ -1101,9 +1103,6 @@ export function DecisionCard({
           already holds — no new read. */}
       {card.uploads30d > 0 && (
         <div className="mb-3">
-          <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">
-            Content ecosystem
-          </div>
           <div className="flex flex-wrap gap-2">
             {card.uploads30d - card.shorts30d > 0 && (
               <Chip label="Long-form" count={card.uploads30d - card.shorts30d} tone="#2C6BFF" />
@@ -1126,9 +1125,6 @@ export function DecisionCard({
           borderLeft: `3px solid ${dStyle.fg}`,
         }}
       >
-        <div className="text-[11px] font-bold uppercase tracking-eyebrow mb-2" style={{ color: dStyle.fg }}>
-          Why this matters
-        </div>
         <div className="text-body font-semibold text-ink leading-snug">
           {whatHappening(card)}
         </div>
@@ -1147,69 +1143,52 @@ export function DecisionCard({
         )}
       </div>
 
-      {/* ─── 5. Campaign tracking + weekly progress ────────────────── */}
+      {/* ─── 5. Campaign tracking + weekly progress ──────────────────
+          This was a panel with its own fill and border containing four
+          stacked registers: a header row, a figures row, a momentum
+          sentence and a disclosure. It is campaign totals — one line of
+          them, on the card's own ground, with the momentum underneath. */}
       {cw && (
-        <div className="rounded-lg p-3.5 mb-3" style={{ background: 'rgba(14,14,14,0.02)', border: '1px solid rgba(14,14,14,0.06)' }}>
-          {/* Campaign / Tracking header row */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#2C6BFF' }} />
-              <span className="text-[12px] font-black uppercase tracking-[0.08em]" style={{ color: '#3B5998' }}>
-                Day {cw.campaignDay}
-              </span>
-              <span className="text-[11px] text-ink/30">·</span>
-              <span className="text-[11px] text-ink/40">{cw.campaignName}</span>
-            </div>
-          </div>
-
-          {/* Campaign totals. These were three sizes and two cases in one
-              row — a 16px figure, a 9px uppercase label and a 10px
-              sentence — which made a simple pair of numbers look like
-              four separate things. Two figures, one caption each. */}
-          <div className="flex flex-wrap items-baseline gap-x-7 gap-y-1.5 mb-2">
+        <div className="mb-3 pl-3" style={{ borderLeft: '2px solid rgba(44,107,255,0.4)' }}>
+          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-body">
+            <span className="font-bold text-ink">Day {cw.campaignDay}</span>
+            <span className="text-faint">·</span>
             {(() => {
               // Same rule as the headline: a negative campaign-window total
               // is a snapshot disagreement, not views lost.
               const campViews = trustedViewDelta(cw.channelViewsDelta);
               return (
-                <span className="text-body">
-                  <span
-                    className="text-[17px] font-black tabular-nums"
-                    style={{ color: campViews != null ? deltaColor(campViews) : 'rgba(14,14,14,0.25)' }}
-                  >
-                    {campViews != null ? `+${fmtNum(campViews)}` : 'Updating'}
-                  </span>
-                  <span className="text-muted ml-1.5">views</span>
+                <span className="tabular-nums font-semibold"
+                  style={{ color: campViews != null ? deltaColor(campViews) : 'rgba(14,14,14,0.3)' }}>
+                  {campViews != null ? `+${fmtNum(campViews)}` : 'Updating'}
+                  <span className="text-muted font-normal"> views</span>
                 </span>
               );
             })()}
-            <span className="text-body">
-              <span
-                className="text-[17px] font-black tabular-nums"
-                style={{ color: cw.subsGained != null ? (cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.25)') : 'rgba(14,14,14,0.25)' }}
-              >
-                {cw.subsGained != null ? `${cw.subsGained >= 0 ? '+' : ''}${fmtNum(cw.subsGained)}` : '—'}
+            {cw.subsGained != null && (
+              <span className="tabular-nums font-semibold"
+                style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
+                {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)}
+                <span className="text-muted font-normal"> subs</span>
               </span>
-              <span className="text-muted ml-1.5">subs</span>
-            </span>
-            <span className="text-meta text-muted tabular-nums">
-              {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''} · {cw.contentMix.shorts} Shorts · {cw.contentMix.videos} video{cw.contentMix.videos !== 1 ? 's' : ''}
+            )}
+            <span className="text-muted tabular-nums">
+              {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''}
             </span>
           </div>
 
-          {/* Momentum — a sentence, so it is set as one. */}
           {ct && ct.currentWeekViews != null && ct.currentWeekViews > 0 && (
-            <div className="text-meta text-muted mb-2 tabular-nums">
+            <div className="text-meta text-muted mt-1 tabular-nums">
               {momentumLine(ct)}
             </div>
           )}
 
           {/* Weekly progress (expandable dropdown) */}
           {card.weeklyProgress.length > 0 && (
-            <div style={{ borderTop: '1px solid rgba(14,14,14,0.06)' }} className="pt-2">
+            <div className="mt-1.5">
               <button
                 onClick={() => setShowWeeks(!showWeeks)}
-                className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink/35 hover:text-ink/55 transition-colors w-full"
+                className="flex items-center gap-1.5 text-micro font-semibold text-muted hover:text-ink transition-colors"
               >
                 <span
                   className="inline-block transition-transform text-[8px]"
