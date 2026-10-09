@@ -1416,8 +1416,10 @@ table.at tr.me td.k{color:var(--gold);font-weight:700}
         <tbody id="a-top"></tbody>
       </table>
       <p class="anote">Ten of 198 uploads carry over half the visible catalogue.
-        Identified by video ID rather than title because IDs are stable and titles
-        on this channel are not.</p>
+        Titles are shortened — the "D-Block Europe" prefix and the "(Official Music
+        Video)" tag are dropped, features kept. Each row carries its video ID on
+        hover, and the deck is keyed by ID throughout, because IDs are stable and
+        titles on this channel are not.</p>
     </div>
 
     <div class="asec">
@@ -1472,6 +1474,34 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
    API's own search both returned "- Topic" channels and, for @JHus, a
    39-subscriber imposter. Excluded for want of a single catalogue
    channel: Fredo, Giggs, ArrDee. */
+/* Display titles for the appendix's top-ten table, read 9 Oct 2026 from
+   /api/full-catalogue?handle=@DBlockEuropeOfficial.
+
+   CLEANED, and here is exactly what was removed so the edit is auditable:
+   the "D-Block Europe - " prefix (every row carries it, so it is noise in
+   a table about this one channel), the "(Official Music Video)" /
+   "[Official Video]" / "(Official Audio)" format tag, and the "@" from
+   collaborator handles — YouTube stores "ft. @CentralCee" because the
+   handle is a link in the description, not because that is the name.
+   Features and collaborators are KEPT: on this catalogue the feature is
+   often why the record travelled, and Overseas ft. Central Cee is the
+   single biggest upload on the channel.
+
+   Keyed by ID rather than position, so reordering the table or changing
+   the cut-off cannot silently attach the wrong title to a figure. */
+const TITLES = {
+  'I4Ra4z2Arqg': 'Overseas ft. Central Cee',
+  'VRc0PH7pHGs': 'Elegant & Gang',
+  'vSAlWKpbVNk': 'Ferrari Horses ft. Raye',
+  'kFlfgHvgetY': 'Make You Smile ft. AJ Tracey',
+  'Ry1m40ScWks': 'Pakistan ft. Clavish',
+  'bY4FsK0M5Vw': 'Kevin McCallister (x Lil Pino)',
+  'G-EEYEIiqEk': 'Birds Are Chirping (Young Adz x Dirtbike LB)',
+  'bnc7hO8UGXU': 'Eagle ft. Noizy',
+  'Y7Zq0_DegQc': 'Bankroll Got Bigger',
+  'x-AavfF5XAk': 'Outside',
+};
+
 const COHORT = [
   ['Central Cee',    2710732447, 7120000,  92, false],
   ['Dave',           1553419053, 2550000,  28, false],
@@ -2015,7 +2045,12 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
     let run = 0;
     fill('a-top', [...CATALOGUE].sort((a, b) => b.views - a.views).slice(0, 10)
       .map((v, i) => { run += v.views;
-        return row([i + 1, v.id, nf(v.views), pc(run, visible)], ['n', 'k', 'n', 'n g']); }).join(''));
+        /* Falls back to the ID if a title is missing rather than printing
+           an empty cell — a blank row in an evidence table reads as though
+           the video does not exist. */
+        const t = TITLES[v.id] || v.id;
+        return row([i + 1, '<span title="' + v.id + '">' + t + '</span>',
+          nf(v.views), pc(run, visible)], ['n', 'k', 'n', 'n g']); }).join(''));
 
     const mixTotal = MIX.reduce((a, m) => a + m.n, 0);
     fill('a-mix', MIX.map(m => row([m.k, nf(m.n), pc(m.n, mixTotal)], ['k', 'n', 'n'])).join(''));
