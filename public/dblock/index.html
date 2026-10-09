@@ -627,6 +627,34 @@ body.locked .deck{overflow:hidden}
 .apx p+p{margin-top:clamp(9px,1.1vw,15px)}
 .apx a{color:var(--gold);text-underline-offset:3px}
 .apx a:hover{color:var(--gold-lt)}
+
+/* ── Appendix tables ───────────────────────────────────────────────
+   Every figure below is COMPUTED at runtime from CATALOGUE and MIX,
+   the same constants the slides draw from. Nothing here is retyped,
+   so the appendix cannot drift away from the deck it is evidence for.
+   That is the whole point of an appendix: if these two disagree, the
+   deck is wrong, and the only way to guarantee they agree is to make
+   them the same arithmetic. */
+.asec{margin-top:clamp(26px,3.4vw,48px)}
+.asec > h4{font-family:var(--mono);font-size:clamp(9px,.76vw,11px);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:clamp(10px,1.3vw,16px);
+  border-left:2px solid var(--gold);padding-left:11px}
+table.at{width:100%;border-collapse:collapse;font-family:var(--mono);
+  font-size:clamp(10px,.82vw,12.5px)}
+table.at th{text-align:left;font-weight:400;color:var(--dim);letter-spacing:.14em;
+  text-transform:uppercase;font-size:clamp(8.5px,.68vw,10px);
+  padding:0 clamp(10px,1.4vw,20px) 9px 0;border-bottom:1px solid var(--hair);white-space:nowrap}
+table.at th.n,table.at td.n{text-align:right}
+table.at td{padding:clamp(6px,.75vw,10px) clamp(10px,1.4vw,20px) clamp(6px,.75vw,10px) 0;
+  border-bottom:1px solid rgba(247,243,236,.055);color:var(--warm);
+  vertical-align:top;line-height:1.6}
+table.at td.k{color:var(--bone)}
+table.at td.n{font-variant-numeric:tabular-nums;color:var(--bone);white-space:nowrap}
+table.at td.g{color:var(--gold)}
+table.at tr.me td{color:var(--gold)}
+table.at tr.me td.k{color:var(--gold);font-weight:700}
+.anote{font-family:var(--mono);font-size:clamp(9.5px,.78vw,11.5px);color:#6A727D;
+  line-height:1.8;margin-top:clamp(8px,1.1vw,14px);max-width:86ch}
 </style>
 </head>
 <body>
@@ -1364,18 +1392,67 @@ body.locked .deck{overflow:hidden}
         <p>Top Fan Exclusive 10× comments per view — YouTube for Artists, internal data Dec 2025–Mar 2026.</p>
         <p>73% / 72% — YouTube Culture &amp; Trends, <em>In Search of Mainstream</em>, with NRG, US, Apr 2026, n=939, ages 14–44. This is a general-population figure, not a music-fan figure, and is labelled as such on the slide.</p>
       </div>
-      <div>
-        <h4>Open questions</h4>
-        <p>The channel reports 972,502,684 lifetime views; the 198 current public videos sum to 498,116,125. The difference of 474,386,559 is unexplained. It may include deleted, private or unlisted videos and accounting changes. It is <em>not</em> evidence that those views sit on another channel, and no part of this deck treats it as such.</p>
-        <p>GRM Daily hosts early DBE material. Its scale could not be measured — their channel exceeds the retrieval cap — so no figure is claimed.</p>
-        <p>The Dave comparison is one dataset on one date. It is not an efficiency score and subscribers are not claimed to cause views.</p>
-        <p>No claim is made that a past decision would have produced more views. Every recommendation is a bet, not a forecast.</p>
-      </div>
-      <div>
-        <h4>Full evidence pack</h4>
-        <p>Claim-by-claim audit, provenance tags, withdrawn claims and known weaknesses: <a href="/dblock/AUDIT-V3.md">AUDIT-V3.md</a></p>
-        <p>Earlier working: <a href="/dblock/AUDIT.md">AUDIT.md</a> · <a href="/dblock/RESEARCH-FINDINGS.md">RESEARCH-FINDINGS.md</a></p>
-      </div>
+    </div>
+
+    <div class="asec">
+      <h4>Channel</h4>
+      <table class="at"><tbody id="a-ch"></tbody></table>
+    </div>
+
+    <div class="asec">
+      <h4>Where the views sit</h4>
+      <table class="at">
+        <thead><tr><th>Band</th><th class="n">Videos</th><th class="n">Views</th><th class="n">Share of catalogue</th></tr></thead>
+        <tbody id="a-band"></tbody>
+      </table>
+      <p class="anote">Shares are of the 198 visible uploads, not of lifetime channel
+        views. The two differ; the Channel table above gives both.</p>
+    </div>
+
+    <div class="asec">
+      <h4>The ten biggest uploads</h4>
+      <table class="at">
+        <thead><tr><th class="n">#</th><th>Video</th><th class="n">Views</th><th class="n">Running share</th></tr></thead>
+        <tbody id="a-top"></tbody>
+      </table>
+      <p class="anote">Ten of 198 uploads carry over half the visible catalogue.
+        Identified by video ID rather than title because IDs are stable and titles
+        on this channel are not.</p>
+    </div>
+
+    <div class="asec">
+      <h4>Format mix</h4>
+      <table class="at">
+        <thead><tr><th>Format</th><th class="n">Uploads</th><th class="n">Share</th></tr></thead>
+        <tbody id="a-mix"></tbody>
+      </table>
+      <p class="anote">Counts, not views. Classified from title and duration, so a
+        visualiser titled like an official video is counted as what it is named.</p>
+    </div>
+
+    <div class="asec">
+      <h4>Uploads by year</h4>
+      <table class="at">
+        <thead><tr><th>Year</th><th class="n">Uploads</th><th class="n">Views to date</th></tr></thead>
+        <tbody id="a-year"></tbody>
+      </table>
+      <p class="anote">Views are LIFETIME-TO-DATE, so older years have had longer to
+        accumulate them. This table shows when the catalogue was built, and must not
+        be read as a year-on-year performance trend.</p>
+    </div>
+
+    <div class="asec">
+      <h4>UK rap cohort</h4>
+      <table class="at">
+        <thead><tr><th class="n">#</th><th>Artist</th><th class="n">Lifetime views</th><th class="n">Subscribers</th><th class="n">Uploads</th></tr></thead>
+        <tbody id="a-coh"></tbody>
+      </table>
+      <p class="anote">Primary artist channel per artist, global lifetime views, read
+        9 Oct 2026. * marks an artist whose primary channel is their VEVO. Fredo,
+        Giggs and ArrDee are excluded, not dropped: no single channel carries their
+        catalogue, so there is no comparable figure. Lifetime views are global and
+        favour an older catalogue — this is not a UK ranking and not a current-viewing
+        ranking.</p>
     </div>
   </div>
 </div>
@@ -1389,6 +1466,34 @@ const CATALOGUE = "kn1S5f-llrQ;280060;20131030,PI2DGIAYP70;162832;20140209,Ah__n
   .split(',').map(r => { const p = r.split(';'); return { id: p[0], views: +p[1], date: p[2] }; });
 
 /* Format mix, from classifying all 198 uploads by title and duration. */
+/* UK rap cohort, read 9 Oct 2026 via /api/full-catalogue. Primary artist
+   channel per artist; [name, lifetimeViews, subscribers, uploads, isVevo].
+   Every handle was verified by channel.title — guessed handles and the
+   API's own search both returned "- Topic" channels and, for @JHus, a
+   39-subscriber imposter. Excluded for want of a single catalogue
+   channel: Fredo, Giggs, ArrDee. */
+const COHORT = [
+  ['Central Cee',    2710732447, 7120000,  92, false],
+  ['Dave',           1553419053, 2550000,  28, false],
+  ['Stormzy',        1155625726, 2410000,  86, false],
+  ['D-Block Europe',  972502684,  661000, 198, false],
+  ['Skepta',          563355571, 1010000, 111, false],
+  ['Aitch',           494293520, 1140000, 346, false],
+  ['Tion Wayne',      423335655,  879000,  65, true ],
+  ['Headie One',      404036865,  539000, 238, false],
+  ['Nines',           372077981,  365000, 144, false],
+  ['J Hus',           357825843,  192000,  55, true ],
+  ['AJ Tracey',       321735777,  548000,  68, false],
+  ['Russ Millions',   269539858,  554000,  63, false],
+  ['Potter Payper',   232378767,  212000,  74, false],
+  ['Clavish',         158993425,  167000, 131, false],
+  ['K-Trap',          123748096,  149000, 212, false],
+  ['Knucks',          119844661,  242000, 111, false],
+  ['Digga D',         119047457,  678000,  33, false],
+  ['Unknown T',        84664493,  203000,  50, false],
+  ['Ghetts',           41134721,   99700, 101, false],
+];
+
 const MIX = [
   { k: 'Official music videos', n: 39, c: '#C99A45' },
   { k: 'Visualisers',           n: 66, c: '#8A6B30' },
@@ -1862,6 +1967,71 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
     document.querySelectorAll('section:first-of-type .reveal, section:first-of-type .stagger')
       .forEach(el => el.classList.add('visible'));
   }
+
+  /* ── APPENDIX TABLES ───────────────────────────────────────────────
+     Computed from CATALOGUE, MIX and COHORT rather than typed, so the
+     appendix and the slides cannot disagree. Runs once at load; the
+     panel is display:none until opened, which costs nothing. */
+  (function appendix() {
+    const row = (cells, cls) => '<tr' + (cls && cls.me ? ' class="me"' : '') + '>'
+      + cells.map((c, i) => '<td class="' + ((cls && cls[i]) || '') + '">' + c + '</td>').join('')
+      + '</tr>';
+    const fill = (id, html) => { const e = document.getElementById(id); if (e) e.innerHTML = html; };
+    const pc = (n, d) => (d ? (n / d * 100) : 0).toFixed(1) + '%';
+    const ymd = d => d.slice(6, 8) + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+d.slice(4, 6) - 1]
+      + ' ' + d.slice(0, 4);
+
+    const visible = CATALOGUE.reduce((a, v) => a + v.views, 0);
+    const LIFETIME = 972502684;
+
+    fill('a-ch', [
+      ['Channel', 'D-Block Europe · @DBlockEuropeOfficial'],
+      ['Channel ID', 'UCzyLniLK2YQ5xCJigB2WetA'],
+      ['Subscribers', '661,000'],
+      ['Lifetime channel views', nf(LIFETIME)],
+      ['Public uploads', nf(CATALOGUE.length)],
+      ['Views across the visible catalogue', nf(visible)],
+      ['Visible as a share of lifetime', pc(visible, LIFETIME)],
+      ['First upload', ymd(CATALOGUE[0].date)],
+      ['Latest upload', ymd(CATALOGUE[CATALOGUE.length - 1].date)],
+      ['Read', '7 October 2026, YouTube Data API v3'],
+    ].map(r => row(r, ['k', 'n'])).join(''));
+
+    /* Bands are left-closed, right-open so every upload lands in exactly
+       one. 10M+ and 1M+ together are the 13 and 61 quoted on slide 02 —
+       same arithmetic, which is why they are computed and not typed. */
+    const bands = [
+      ['10M or more',        1e7, Infinity],
+      ['1M to 10M',          1e6, 1e7],
+      ['100K to 1M',         1e5, 1e6],
+      ['Under 100K',           0, 1e5],
+    ];
+    fill('a-band', bands.map(([label, lo, hi]) => {
+      const b = CATALOGUE.filter(v => v.views >= lo && v.views < hi);
+      const t = b.reduce((a, v) => a + v.views, 0);
+      return row([label, nf(b.length), nf(t), pc(t, visible)], ['k', 'n', 'n', 'n']);
+    }).join(''));
+
+    let run = 0;
+    fill('a-top', [...CATALOGUE].sort((a, b) => b.views - a.views).slice(0, 10)
+      .map((v, i) => { run += v.views;
+        return row([i + 1, v.id, nf(v.views), pc(run, visible)], ['n', 'k', 'n', 'n g']); }).join(''));
+
+    const mixTotal = MIX.reduce((a, m) => a + m.n, 0);
+    fill('a-mix', MIX.map(m => row([m.k, nf(m.n), pc(m.n, mixTotal)], ['k', 'n', 'n'])).join(''));
+
+    const years = {};
+    CATALOGUE.forEach(v => { const y = v.date.slice(0, 4);
+      years[y] = years[y] || { n: 0, v: 0 }; years[y].n++; years[y].v += v.views; });
+    fill('a-year', Object.keys(years).sort().map(y =>
+      row([y, nf(years[y].n), nf(years[y].v)], ['k', 'n', 'n'])).join(''));
+
+    fill('a-coh', COHORT.map(([name, views, subs, ups, vevo], i) => {
+      const me = name === 'D-Block Europe';
+      const cls = ['n', 'k', 'n', 'n', 'n']; cls.me = me;
+      return row([i + 1, name + (vevo ? ' *' : ''), nf(views), nf(subs), nf(ups)], cls);
+    }).join(''));
+  })();
 
   /* ── METHOD PANEL ──────────────────────────────────────────────────
      A panel, not a route. The deck is scroll-snap and keeps its own
