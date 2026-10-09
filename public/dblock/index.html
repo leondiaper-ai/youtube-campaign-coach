@@ -146,7 +146,7 @@ h2.sm{font-size:clamp(22px,3.4vw,52px);max-width:24ch}
 .kick em{font-style:normal;color:var(--gold)}
 .eyebrow{font-family:var(--mono);font-size:clamp(8px,.62vw,10.5px);letter-spacing:.32em;
   text-transform:uppercase;color:var(--gold);margin-bottom:clamp(10px,1.4vw,20px)}
-.act{position:absolute;top:clamp(18px,2.4vw,36px);right:clamp(20px,3.4vw,66px);font-family:var(--mono);
+.act{position:absolute;top:clamp(18px,2.4vw,36px);left:clamp(20px,3.4vw,66px);font-family:var(--mono);
   font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:#39414C;z-index:3}
 .foot{position:absolute;left:clamp(20px,3.4vw,66px);bottom:clamp(12px,1.5vw,24px);
   font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#39414C;
@@ -582,27 +582,50 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
    It is a panel, not a route: no history entry, nothing to get stuck in.
    Escape and the back control both return the reader to the slide they
    left, because the deck is scroll-snap and never lost its position. */
+   The button is a boxed control rather than a letterspaced pill, matching
+   the CHVRCHES deck chrome, and the panel reads as a DOCUMENT rather than
+   a five-column grid of 8.5px mono — the Freak Slug analysis page is the
+   reference. Those notes are the deck's evidence; set at caption size in
+   five columns they were technically present and practically unreadable.
+
+   NOTE .act moved to the top LEFT because of this button. It used to sit
+   top right, which is where the button is, and the button covered it. */
 #mtab{position:fixed;top:clamp(12px,1.7vw,24px);right:clamp(14px,2.2vw,38px);z-index:70;
-  font-family:var(--mono);font-size:clamp(8.5px,.72vw,10.5px);letter-spacing:.24em;
-  text-transform:uppercase;color:var(--warm);background:rgba(7,9,12,.82);
-  border:1px solid var(--hair);border-radius:3px;padding:8px 14px;cursor:pointer;
-  backdrop-filter:blur(7px);transition:color .2s,border-color .2s}
-#mtab:hover{color:var(--gold);border-color:rgba(201,154,69,.5)}
+  font:inherit;font-size:clamp(10px,.78vw,12.5px);font-weight:600;letter-spacing:.02em;
+  color:var(--bone);background:rgba(7,9,12,.88);
+  border:1px solid var(--hair);border-radius:6px;padding:.48rem .95rem;cursor:pointer;
+  backdrop-filter:blur(14px);transition:color .2s,border-color .2s}
+#mtab:hover{color:var(--gold);border-color:rgba(201,154,69,.6)}
 #method{position:fixed;inset:0;z-index:80;background:#07090C;overflow-y:auto;
-  padding:clamp(20px,3.4vw,60px);display:none}
+  padding:clamp(26px,4vw,72px) clamp(20px,3.4vw,60px) clamp(60px,7vw,120px);display:none}
 #method.on{display:block}
 body.locked .deck{overflow:hidden}
-#mback{position:fixed;top:clamp(12px,1.7vw,24px);right:clamp(14px,2.2vw,38px);z-index:90;
-  font-family:var(--mono);font-size:clamp(8.5px,.72vw,10.5px);letter-spacing:.24em;
-  text-transform:uppercase;color:var(--gold);background:rgba(201,154,69,.1);
-  border:1px solid rgba(201,154,69,.5);border-radius:3px;padding:8px 14px;cursor:pointer}
-.apx{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:clamp(12px,2vw,34px);
-  margin-top:clamp(10px,1.4vw,20px)}
-.apx h4{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:9px}
-.apx p{font-family:var(--mono);font-size:8.5px;line-height:1.75;color:#6A727D}
-.apx p+p{margin-top:7px}
-.apx a{color:#9BA3AD}
+/* Top LEFT, like the Freak Slug analysis page: the way out of a document
+   belongs where reading starts, not diagonally opposite it. */
+#mback{position:absolute;top:clamp(26px,4vw,72px);left:max(clamp(20px,3.4vw,60px),
+  calc(50% - 460px));z-index:90;font-family:var(--mono);font-size:clamp(9px,.74vw,11px);
+  letter-spacing:.22em;text-transform:uppercase;color:var(--warm);background:transparent;
+  border:0;padding:0;cursor:pointer;transition:color .2s}
+#mback:hover{color:var(--gold)}
+
+/* ── The document ──────────────────────────────────────────────────
+   One column, 920px, body copy at a size a person reads rather than
+   squints at. Measure is capped at 78ch because the figures here are
+   long and a full-width line of provenance is where the eye gives up. */
+.mdoc{max-width:920px;margin:clamp(42px,5vw,78px) auto 0}
+.mdoc h2{font-size:clamp(28px,4.4vw,62px);margin-bottom:clamp(14px,1.8vw,24px)}
+.mdoc .lede{font-size:clamp(14px,1.25vw,19px);line-height:1.6;color:var(--bone);
+  max-width:64ch;font-weight:500}
+.mdoc .lede b{color:var(--gold);font-weight:700}
+.apx{margin-top:clamp(30px,4vw,60px)}
+.apx>div{border-top:1px solid var(--hair);padding-top:clamp(16px,2vw,26px);
+  margin-top:clamp(22px,3vw,42px)}
+.apx h4{font-family:var(--mono);font-size:clamp(9px,.76vw,11px);letter-spacing:.24em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:clamp(12px,1.5vw,18px)}
+.apx p{font-size:clamp(12.5px,1.05vw,15.5px);line-height:1.75;color:var(--warm);max-width:78ch}
+.apx p+p{margin-top:clamp(9px,1.1vw,15px)}
+.apx a{color:var(--gold);text-underline-offset:3px}
+.apx a:hover{color:var(--gold-lt)}
 </style>
 </head>
 <body>
@@ -1307,13 +1330,17 @@ body.locked .deck{overflow:hidden}
 <div id="method" role="dialog" aria-modal="true" aria-label="Method, sources and limits">
   <button id="mback">← Back to the deck</button>
 
+  <div class="mdoc">
     <div class="eyebrow">Method, sources and limits</div>
     <!-- No .reveal here. The reveal observer is rooted on .deck, and this
          panel is outside it, so an element with .reveal would be observed
          against a root that can never contain it and would sit at opacity
          0 for ever. The panel is opened deliberately; it does not need an
          entrance animation. -->
-    <h2 class="sm" style="font-size:clamp(18px,2.8vw,40px)">What this is built on.</h2>
+    <h2>What this is built on.</h2>
+    <p class="lede">The deck reads all <b>198 videos currently public</b> on the
+      channel, pulled on <b>7 October 2026</b>. Sources, method, and the places the
+      evidence is thin are below.</p>
     <div class="apx">
       <div>
         <h4>Channel data</h4>
@@ -1349,6 +1376,7 @@ body.locked .deck{overflow:hidden}
         <p>Earlier working: <a href="/dblock/AUDIT.md">AUDIT.md</a> · <a href="/dblock/RESEARCH-FINDINGS.md">RESEARCH-FINDINGS.md</a></p>
       </div>
     </div>
+  </div>
 </div>
 
 <script>
