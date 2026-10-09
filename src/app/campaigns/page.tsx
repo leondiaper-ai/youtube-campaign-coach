@@ -125,6 +125,8 @@ export type StatusCardData = {
   thumbnail?: string;
   // Wide banner for the card head, from the channel's own recent work
   heroImage?: string;
+  // The channel's latest uploads, newest first
+  recentVideos?: { id: string; title: string; views: number; daysAgo: number; isShort: boolean }[];
   // Artist type for value model scoping
   artistType?: 'managed' | 'observed' | 'external';
   // Revenue ownership — only 'virgin' gets value calculations
@@ -416,6 +418,19 @@ async function loadCard(
       const best = [...ups].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))[0];
       return best?.id ? `https://i.ytimg.com/vi/${best.id}/hqdefault.jpg` : undefined;
     })(),
+    /* Newest first, capped at three: the strip is a reminder of what is
+       going out, not a catalogue. */
+    recentVideos: (snap.recentUploads ?? [])
+      .slice()
+      .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+      .slice(0, 3)
+      .map((u) => ({
+        id: u.id,
+        title: u.title,
+        views: u.viewCount ?? 0,
+        daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(u.publishedAt)) / 86400000)),
+        isShort: (u.durationSec ?? 0) <= 62,
+      })),
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
     structureWarning: checkContentStructure(snap.recentUploads ?? []),

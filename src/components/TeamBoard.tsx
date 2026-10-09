@@ -295,6 +295,19 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
           const best = [...ups].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))[0];
           return best?.id ? `https://i.ytimg.com/vi/${best.id}/hqdefault.jpg` : undefined;
         })(),
+    /* Newest first, capped at three: the strip is a reminder of what is
+           going out, not a catalogue. */
+            recentVideos: (snap?.recentUploads ?? [])
+          .slice()
+          .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+          .slice(0, 3)
+          .map((u) => ({
+            id: u.id,
+            title: u.title,
+            views: u.viewCount ?? 0,
+            daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(u.publishedAt)) / 86400000)),
+            isShort: (u.durationSec ?? 0) <= 62,
+          })),
         structureWarning: snap?.recentUploads
           ? checkContentStructure(snap.recentUploads)
           : null,

@@ -151,6 +151,10 @@ export type CardData = {
   thumbnail?: string;
   /** Wide banner for the card head, from the channel's own recent work. */
   heroImage?: string;
+  /** The channel's latest uploads, newest first. Shown as a strip at the
+      foot of the card so a campaign is judged against the work, not only
+      against its numbers. */
+  recentVideos?: { id: string; title: string; views: number; daysAgo: number; isShort: boolean }[];
   /** Artist relationship type — value model only applies to 'managed' */
   artistType?: 'managed' | 'observed' | 'external';
   /** Revenue ownership — only 'virgin' gets value calculations */
@@ -1033,111 +1037,111 @@ export function DecisionCard({
         </div>
       </div>
 
-      {/* ─── 2. Metrics row (views, subs, conversion, sparkline) ──── */}
-      <div className="flex items-end gap-6 mb-3">
-        <div>
-          {(() => {
-            const isStaleMovement = card.movementConfidence === 'stale';
-            // Negative view movement means the two totals disagree, not a loss —
-            // treat it exactly like stale data rather than showing "-32M".
-            const views7d = trustedViewDelta(card.views7Delta);
-            const isBadReading = card.views7Delta != null && views7d == null;
-            // When movement is stale, suppress +0 — show "—" instead
-            const hasRealDelta = views7d != null && !(isStaleMovement && views7d === 0);
-            const isZero = hasRealDelta && views7d === 0;
-            const showUpdating = isStaleMovement || isBadReading;
-            return (
-              <>
-                <div
-                  className="text-[28px] font-black leading-none tabular-nums"
-                  style={{ color: hasRealDelta ? (isZero ? 'rgba(14,14,14,0.35)' : deltaColor(views7d)) : 'rgba(14,14,14,0.2)' }}
-                >
-                  {hasRealDelta
-                    ? `+${fmtNum(views7d!)}`
-                    : showUpdating ? 'Updating' : '—'}
-                </div>
-                <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  7d views{!hasRealDelta ? (showUpdating ? ' · waiting for fresh totals' : card.confidence === 'LOW' ? ' · limited data' : '') : ''}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-        <div>
-          {(() => {
-            const isStaleMovement = card.movementConfidence === 'stale';
-            const hasRealDelta = card.subs7Delta != null && !(isStaleMovement && card.subs7Delta === 0);
-            const isZero = hasRealDelta && card.subs7Delta === 0;
-            return (
-              <>
-                <div
-                  className="text-[28px] font-black leading-none tabular-nums"
-                  style={{ color: hasRealDelta ? (isZero ? 'rgba(14,14,14,0.35)' : deltaColor(card.subs7Delta)) : INK }}
-                >
-                  {hasRealDelta
-                    ? `${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}`
-                    : isStaleMovement && card.subs != null ? fmtNum(card.subs)
-                    : card.subs != null
-                    ? fmtNum(card.subs)
-                    : '—'}
-                </div>
-                <div className="text-[10px] text-ink/35 mt-1 uppercase tracking-[0.1em] font-bold">
-                  {hasRealDelta ? '7d subs' : 'subs (total)'}
-                </div>
-              </>
-            );
-          })()}
-        </div>
-
-        {/* Conversion */}
-        <div>
-          <div
-            className="text-[20px] font-black leading-none tabular-nums"
-            style={{ color: spk != null ? conversionColor(spk) : 'rgba(14,14,14,0.25)' }}
-          >
-            {spk != null ? spk.toFixed(1) : '—'}
-          </div>
-          <div className="text-[9px] mt-1 uppercase tracking-[0.1em] font-bold" style={{
-            color: spk != null ? conv.color : 'rgba(14,14,14,0.25)',
-          }}>
-            subs/1K{spk != null ? ` · ${conv.text}` : ''}
-          </div>
-        </div>
-
-        {/* Sparkline */}
-        <div className="ml-auto rounded-lg px-3 py-2" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
-          <Sparkline
-            data={card.sparkline}
-            width={120}
-            height={40}
-            stroke={GOS_SPARK_STYLE[gs].stroke}
-            fill={GOS_SPARK_STYLE[gs].fill}
-          />
-          <div className="text-[9px] text-right mt-0.5 uppercase tracking-wider font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
-            30d trend
-          </div>
-        </div>
-      </div>
-
-      {/* ─── 3. Performance summary ────────────────────────────────── */}
-      <div className="text-[13px] font-semibold text-ink/75 leading-snug mb-1">
-        {whatHappening(card)}
-      </div>
-      <div className="text-[12px] text-ink/40 mb-1">
-        {whyCause(read, card)}
-      </div>
-
-
-      {/* ─── 4. Actions (max 3) ───────────────────────────────────── */}
-      <div className="rounded-lg p-3.5 mb-3" style={{ background: isFix ? dStyle.bg : SOFT }}>
-        <div className="space-y-1">
-          {read.actions.doNow.slice(0, 3).map((step, i) => (
-            <div key={i} className="text-[12px] font-medium leading-snug flex gap-2">
-              <span style={{ color: dStyle.fg }} className="shrink-0">→</span>
-              <span>{step}</span>
+      {/* ─── 2. Figures ────────────────────────────────────────────
+          One tinted strip of four, in the order the featured campaign
+          cards use. They were a loose inline row of differently-sized
+          numbers before, which made the conversion figure look like an
+          afterthought rather than a measure. The sparkline moves to the
+          end of the strip: it is context for the four, not a fifth. */}
+      {(() => {
+        const isStaleMovement = card.movementConfidence === 'stale';
+        const views7d = trustedViewDelta(card.views7Delta);
+        const isBadReading = card.views7Delta != null && views7d == null;
+        const hasViews = views7d != null && !(isStaleMovement && views7d === 0);
+        const hasSubs7 = card.subs7Delta != null && !(isStaleMovement && card.subs7Delta === 0);
+        const showUpdating = isStaleMovement || isBadReading;
+        return (
+          <div className="rounded-lg px-4 py-3 mb-3 flex items-center gap-6 flex-wrap"
+            style={{ background: 'rgba(14,14,14,0.025)' }}>
+            <Figure
+              value={card.subs != null ? fmtNum(card.subs) : '—'}
+              label="Subs"
+            />
+            <Figure
+              value={hasViews ? `+${fmtNum(views7d!)}` : showUpdating ? 'Updating' : '—'}
+              label="Views (7d)"
+              tone={hasViews ? deltaColor(views7d) : undefined}
+            />
+            <Figure
+              value={String(card.uploads30d)}
+              label="Uploads (30d)"
+            />
+            <Figure
+              value={hasSubs7 ? `${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}` : '—'}
+              label="Subs (7d)"
+              tone={hasSubs7 ? deltaColor(card.subs7Delta) : undefined}
+            />
+            <Figure
+              value={spk != null ? spk.toFixed(1) : '—'}
+              label="Subs / 1K"
+              tone={spk != null ? conversionColor(spk) : undefined}
+            />
+            <div className="ml-auto rounded-lg px-3 py-1.5" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
+              <Sparkline
+                data={card.sparkline}
+                width={104}
+                height={32}
+                stroke={GOS_SPARK_STYLE[gs].stroke}
+                fill={GOS_SPARK_STYLE[gs].fill}
+              />
+              <div className="text-[10px] text-right uppercase tracking-label font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
+                30d trend
+              </div>
             </div>
-          ))}
+          </div>
+        );
+      })()}
+
+      {/* ─── 3. Content ecosystem ──────────────────────────────────
+          What the channel is actually publishing, in the same chip
+          language the featured cards use. Derived from figures the card
+          already holds — no new read. */}
+      {card.uploads30d > 0 && (
+        <div className="mb-3">
+          <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">
+            Content ecosystem
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {card.uploads30d - card.shorts30d > 0 && (
+              <Chip label="Long-form" count={card.uploads30d - card.shorts30d} tone="#2C6BFF" />
+            )}
+            {card.shorts30d > 0 && (
+              <Chip label="Shorts" count={card.shorts30d} tone="#C77A16" />
+            )}
+          </div>
         </div>
+      )}
+
+      {/* ─── 4. Why this matters ───────────────────────────────────
+          The read, the cause and the moves were three separate blocks in
+          three different registers. They are one argument, so they are
+          now one block: what is happening, why, and what to do. */}
+      <div
+        className="rounded-lg px-4 py-3.5 mb-3"
+        style={{
+          background: isFix ? dStyle.bg : 'rgba(14,14,14,0.02)',
+          borderLeft: `3px solid ${dStyle.fg}`,
+        }}
+      >
+        <div className="text-[11px] font-bold uppercase tracking-eyebrow mb-2" style={{ color: dStyle.fg }}>
+          Why this matters
+        </div>
+        <div className="text-body font-semibold text-ink leading-snug">
+          {whatHappening(card)}
+        </div>
+        <div className="text-meta text-muted mt-1">
+          {whyCause(read, card)}
+        </div>
+        {read.actions.doNow.length > 0 && (
+          <div className="space-y-1 mt-3 pt-3" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
+            {read.actions.doNow.slice(0, 3).map((step, i) => (
+              <div key={i} className="text-meta font-medium leading-snug flex gap-2">
+                <span style={{ color: dStyle.fg }} className="shrink-0">→</span>
+                <span className="text-ink">{step}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ─── 5. Campaign tracking + weekly progress ────────────────── */}
@@ -1431,9 +1435,83 @@ export function DecisionCard({
         </div>
       </div>
 
+      {/* ─── Recent uploads ────────────────────────────────────────
+          A campaign card that never shows the work is a spreadsheet row.
+          Three newest, each labelled with its format, so the cadence
+          figures above have something to point at. */}
+      {card.recentVideos && card.recentVideos.length > 0 && (
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
+          <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">
+            Recent uploads
+          </div>
+          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${card.recentVideos.length}, minmax(0, 1fr))` }}>
+            {card.recentVideos.map((v) => (
+              <a
+                key={v.id}
+                href={`https://www.youtube.com/watch?v=${v.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/vid no-underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative rounded-lg overflow-hidden bg-sunken" style={{ aspectRatio: '16 / 9' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover/vid:scale-[1.03]"
+                  />
+                  <span
+                    className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-label"
+                    style={{
+                      background: v.isShort ? '#C77A16' : '#2C6BFF',
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    {v.isShort ? 'Short' : 'Long-form'}
+                  </span>
+                </div>
+                <div className="text-[12px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
+                  {v.title}
+                </div>
+                <div className="text-[11px] text-muted mt-0.5 tabular-nums">
+                  {fmtNum(v.views)} views · {v.daysAgo}d ago
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {snapshot && <SnapshotModal text={snapshot} onClose={() => setSnapshot(null)} />}
       </div>{/* close padded body */}
     </div>
+  );
+}
+
+/* One figure in the strip. Tone is only set where the colour means a
+   direction of travel — a flat total is never green. */
+function Figure({ value, label, tone }: { value: string; label: string; tone?: string }) {
+  return (
+    <div>
+      <div className="text-[21px] font-black leading-none tabular-nums" style={{ color: tone ?? INK }}>
+        {value}
+      </div>
+      <div className="text-[11px] text-muted mt-1.5">{label}</div>
+    </div>
+  );
+}
+
+function Chip({ label, count, tone }: { label: string; count: number; tone: string }) {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-label"
+      style={{ background: `${tone}14`, color: tone }}
+    >
+      {label}
+      <span className="tabular-nums">{count}</span>
+    </span>
   );
 }
 
