@@ -149,6 +149,44 @@ export const MARKETS: Record<string, MarketDef> = {
     locale: 'en-US',
     currency: { code: 'USD', symbol: '$' },
   },
+  eu: {
+    id: 'eu',
+    name: 'Europe',
+    short: 'EU',
+    orgName: 'Virgin Music EU',
+    /* Continental Europe. The UK and Ireland belong to the UK workspace
+       and the Nordics to theirs, so this is deliberately the rest —
+       Germany first as the largest of them. Which countries count as
+       "EU" here is a commercial decision, not a technical one; change
+       this list and the mirror in territories/markets.ts together. */
+    territories: ['DE', 'FR', 'NL', 'IT', 'ES', 'PL'],
+    teamSlug: 'eu',
+    timeZone: 'Europe/Berlin',
+    /* Worked in English alongside the other boards, so dates match
+       rather than switching format per region. */
+    locale: 'en-GB',
+    currency: { code: 'EUR', symbol: '€' },
+  },
+  latam: {
+    id: 'latam',
+    name: 'Latin America',
+    short: 'LATAM',
+    orgName: 'Virgin Music LATAM',
+    /* Brazil first — the largest Latin American music market, and the
+       one that moves a regional YouTube number most. */
+    territories: ['BR', 'MX', 'AR', 'CO', 'CL'],
+    teamSlug: 'latam',
+    /* São Paulo, for the same reason. The region spans four offsets, so
+       the week has to start somewhere and the biggest market is the
+       least surprising place. */
+    timeZone: 'America/Sao_Paulo',
+    locale: 'en-GB',
+    /* No single currency across five countries, and Argentine inflation
+       makes any local unit a moving target. USD is the regional
+       reporting unit. As elsewhere, the RPM constants are UK-derived so
+       value figures are withheld here rather than converted. */
+    currency: { code: 'USD', symbol: '$' },
+  },
 };
 
 export const MARKET_IDS = Object.keys(MARKETS);

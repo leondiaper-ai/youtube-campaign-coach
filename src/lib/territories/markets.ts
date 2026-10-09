@@ -58,6 +58,18 @@ export const MARKETS: Record<string, Market> = {
   IS: { code: 'IS', name: 'Iceland', short: 'IS' },
   US: { code: 'US', name: 'United States', short: 'US' },
   IE: { code: 'IE', name: 'Ireland', short: 'IE' },
+  CA: { code: 'CA', name: 'Canada', short: 'CA' },
+  DE: { code: 'DE', name: 'Germany', short: 'DE' },
+  FR: { code: 'FR', name: 'France', short: 'FR' },
+  NL: { code: 'NL', name: 'Netherlands', short: 'NL' },
+  IT: { code: 'IT', name: 'Italy', short: 'IT' },
+  ES: { code: 'ES', name: 'Spain', short: 'ES' },
+  PL: { code: 'PL', name: 'Poland', short: 'PL' },
+  BR: { code: 'BR', name: 'Brazil', short: 'BR' },
+  MX: { code: 'MX', name: 'Mexico', short: 'MX' },
+  AR: { code: 'AR', name: 'Argentina', short: 'AR' },
+  CO: { code: 'CO', name: 'Colombia', short: 'CO' },
+  CL: { code: 'CL', name: 'Chile', short: 'CL' },
 };
 
 export type Team = {
@@ -103,6 +115,32 @@ export const TEAMS: Record<string, Team> = {
     markets: ['SE', 'NO', 'DK', 'FI', 'IS'],
     roster: { ownership: ['nordics', 'se', 'no', 'dk', 'fi'] },
     description: 'Nordic roster and Swedish, Norwegian, Danish, Finnish and Icelandic YouTube audience.',
+  },
+  us: {
+    id: 'us',
+    name: 'US',
+    markets: ['US', 'CA'],
+    roster: { ownership: ['us', 'usa'] },
+    description: 'US roster and US and Canadian YouTube audience.',
+  },
+  eu: {
+    id: 'eu',
+    name: 'EU',
+    /* Germany first: largest European market after the UK, so it anchors
+       the default sort. This is continental Europe — the UK and Ireland
+       are the UK team's, and the Nordics are their own. */
+    markets: ['DE', 'FR', 'NL', 'IT', 'ES', 'PL'],
+    roster: { ownership: ['eu', 'de', 'fr', 'nl', 'it', 'es', 'pl'] },
+    description: 'Continental European roster and German, French, Dutch, Italian, Spanish and Polish YouTube audience.',
+  },
+  latam: {
+    id: 'latam',
+    name: 'LATAM',
+    /* Brazil first: largest Latin American music market, and the one
+       that moves a regional YouTube number most. */
+    markets: ['BR', 'MX', 'AR', 'CO', 'CL'],
+    roster: { ownership: ['latam', 'br', 'mx', 'ar', 'co', 'cl'] },
+    description: 'Latin American roster and Brazilian, Mexican, Argentine, Colombian and Chilean YouTube audience.',
   },
 };
 

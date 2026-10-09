@@ -66,6 +66,20 @@ export const TEAMS: Record<string, Team> = {
     regionTag: 'US',
     token: 'us-4r9n2v7zq58m',
   },
+  eu: {
+    slug: 'eu',
+    name: 'EU — Campaign Board',
+    blurb: 'Add the artists you are working, and watch how their channels move.',
+    regionTag: 'EU',
+    token: 'eu-6h3b8k1wnd47',
+  },
+  latam: {
+    slug: 'latam',
+    name: 'LATAM — Campaign Board',
+    blurb: 'Add the artists you are working, and watch how their channels move.',
+    regionTag: 'LATAM',
+    token: 'la-9z5c4m2ytr63',
+  },
 };
 
 export const TEAM_SLUGS = Object.keys(TEAMS);
