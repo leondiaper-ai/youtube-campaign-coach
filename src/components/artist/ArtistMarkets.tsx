@@ -65,6 +65,13 @@ export default function ArtistMarkets({ slug }: { slug: string }) {
 
   const maxViews = Math.max(...top3.map((c) => c.monthlyViews), 1);
 
+  /* Days between Chartmetric's reading date and now. Only surfaced when
+     it is genuinely old — printing "0 days ago" on fresh data would be
+     noise. */
+  const readingAge = t.reportingDate
+    ? Math.floor((Date.now() - Date.parse(t.reportingDate + 'T00:00:00Z')) / 86400000)
+    : null;
+
   return (
     <div>
       <div className="grid gap-5 sm:grid-cols-3">
@@ -95,9 +102,19 @@ export default function ArtistMarkets({ slug }: { slug: string }) {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-ink/40">
+        {/* "read 2026-10-01" was being taken as our staleness when it is
+            Chartmetric's own reading date — we refresh every 12 hours and
+            they publish per artist on their own cadence. Saying whose date
+            it is removes the ambiguity, and a reading that really has gone
+            quiet says so in days rather than leaving the reader to count. */}
         <span>
-          Chartmetric monthly YouTube views by country
-          {t.reportingDate ? `, read ${t.reportingDate}` : ''} — a different measure from lifetime channel views.
+          Chartmetric monthly YouTube views by country — a different measure
+          from lifetime channel views.
+          {t.reportingDate && (
+            <> Chartmetric last reported {t.reportingDate}{readingAge != null && readingAge > 14
+              ? `, ${readingAge} days ago.`
+              : '.'}</>
+          )}
         </span>
         {t.estimatedCount > 0 && <span>{t.estimatedCount} markets modelled (est.).</span>}
         <button
