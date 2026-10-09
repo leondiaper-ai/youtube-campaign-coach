@@ -657,18 +657,75 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
   <div class="act">Act I · The scale</div>
   <div class="bed scrim-l" style="opacity:.56"><img data-vid="bY4FsK0M5Vw" alt=""></div>
   <div class="z">
-    <div class="eyebrow">Virgin Music Group · October 2026</div>
+    <div class="eyebrow">October 2026</div>
     <!-- Framed by what the catalogue does rather than by whose it is.
-         "Biggest" is deliberately not claimed: nothing on this slide
-         ranks DBE against all UK channels, and the only ranking it does
-         hold is the Virgin one in the row below. "Most-watched" is what
-         the next slide actually evidences — 1.7x Dave's UK viewing. -->
+         "Biggest" is deliberately not claimed. "Most-watched" is what the
+         rest of the act evidences: 4th of 19 UK rap channels by lifetime
+         views, and 1.7x Dave's current UK viewing on the next slide.
+
+         ── THE RANK ROW THAT USED TO BE HERE ──────────────────────────
+         A row read "#1 Virgin artist — UK YouTube monthly views". True,
+         and an artefact: the Virgin UK universe is 49 artists of whom
+         exactly three are rap (DBE, Dave, French The Kid), so the rank
+         described our own artist list rather than UK rap. It is gone,
+         and deliberately not replaced — the honest substitute is "#4 of
+         19 by lifetime views", which is a weaker line than the four
+         figures that remain, so the wall is better without it.
+
+         The cohort is kept below anyway. It is the evidence for the
+         headline's "one of the UK's most-watched", it cost real API
+         calls, and the next person to wonder where DBE ranks should not
+         have to pull it again.
+
+         COHORT, read live 9 Oct 2026 via /api/full-catalogue. Global
+         lifetime views on each artist's PRIMARY channel. Ranked:
+           1  Central Cee     2,710,732,447   7.12M subs    92 uploads
+           2  Dave            1,553,419,053   2.55M         28
+           3  Stormzy         1,155,625,726   2.41M         86
+           4  D-BLOCK EUROPE    972,502,684    661K        198
+           5  Skepta            563,355,571   1.01M        111
+           6  Aitch             494,293,520   1.14M        346
+           7  Tion Wayne*       423,335,655    879K         65
+           8  Headie One        404,036,865    539K        238
+           9  Nines             372,077,981    365K        144
+          10  J Hus*            357,825,843    192K         55
+          11  AJ Tracey         321,735,777    548K         68
+          12  Russ Millions     269,539,858    554K         63
+          13  Potter Payper     232,378,767    212K         74
+          14  Clavish           158,993,425    167K        131
+          15  K-Trap            123,748,096    149K        212
+          16  Knucks            119,844,661    242K        111
+          17  Digga D           119,047,457    678K         33
+          18  Unknown T          84,664,493    203K         50
+          19  Ghetts             41,134,721   99.7K        101
+         * primary channel is the artist's VEVO, not an own-brand channel.
+
+         EXCLUDED, and why — not quietly dropped: Fredo, Giggs and ArrDee
+         have no single artist channel carrying their catalogue. Every
+         candidate handle resolved either to an auto-generated "- Topic"
+         channel, an unrelated channel of the same name ("Fredo on TV",
+         6,675 uploads), or a VEVO holding a handful of videos. Their
+         work sits across label and collaborator channels, so there is no
+         comparable figure to rank. Including a Topic channel would have
+         put Giggs at 41M and been nonsense.
+
+         VERIFY EVERY HANDLE BY channel.title. Guessed handles and the
+         API's own search fallback both returned wrong channels
+         repeatedly — @JHus is a 39-subscriber imposter, @DiggaD and
+         @Nines are Topic channels, @Fredo is a TV channel. This is the
+         same trap documented in the K-Trap deck.
+
+         WHAT THIS COHORT IS NOT. Lifetime views are global and favour an
+         older catalogue; they are not UK views and not current views.
+         A UK-monthly ranking of this cohort is NOT possible from what we
+         hold — Chartmetric territory data exists for DBE and Dave only,
+         so DBE leading Dave 1.7x is a two-artist fact, not a UK rap
+         league table. Do not promote "4th by lifetime views" into
+         "#1 in the UK" anywhere in this deck. -->
     <h2 id="wall-h" class="reveal">One of the UK's most-watched rap catalogues on YouTube.</h2>
     <div class="wall count stagger">
       <div class="wrow hi"><div class="num v" data-n="9.23" data-dp="2" data-suffix="M">9.23M</div>
         <div class="l">UK monthly views</div></div>
-      <div class="wrow hi"><div class="num v">#1</div>
-        <div class="l">Virgin artist — UK YouTube monthly views</div></div>
       <div class="wrow"><div class="num v" data-n="661" data-suffix="K">661K</div><div class="l">Subscribers</div></div>
       <div class="wrow"><div class="num v" data-n="61">61</div><div class="l">Million-view videos</div></div>
       <div class="wrow"><div class="num v" data-n="13">13</div><div class="l">Ten-million-view videos</div></div>
