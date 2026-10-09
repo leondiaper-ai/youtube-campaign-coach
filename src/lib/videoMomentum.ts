@@ -63,12 +63,29 @@ export interface RankedGrid {
 }
 
 /**
- * Minimum share of candidates that need a usable recent gain before the
- * grid ranks by it. Below this the ordering would be decided by whichever
- * handful happen to have series, which is worse than an honest lifetime
- * ranking because it looks the same.
+ * How many candidates need a usable recent gain before the grid ranks by
+ * it.
+ *
+ * This was a 50% share, and it was the wrong rule. On a catalogue channel
+ * coverage is never going to reach half: the writer records the ~60
+ * newest uploads per run, so a 33-video grid with 10 series sat at 30%
+ * and fell back to lifetime — which returns the same four videos from
+ * 2018 every week, the exact failure this module was written to fix.
+ *
+ * The reason the proportional floor felt safe was a worry that ranking on
+ * a subset would hide a hot video that has no series. That worry has it
+ * backwards. Coverage favours the NEWEST uploads, because those are the
+ * ones the cron keeps recording — so the videos missing a series are
+ * overwhelmingly old catalogue, which is precisely what should not be
+ * leading a "moving now" grid.
+ *
+ * So the floor is now a small absolute count. Enough that the order is
+ * not decided by one or two videos, low enough that a channel with real
+ * recent history gets a real recent ranking. Anything without a series
+ * still appears, below everything that has one, and the note says how
+ * many were ranked on what.
  */
-const COVERAGE_FLOOR = 0.5;
+const MIN_RANKED = 3;
 
 /** A 7-day window accepts a 5–9 day span. Outside that it is not a week. */
 const SPAN_TOLERANCE = 2;
@@ -147,7 +164,7 @@ export async function rankByMomentum(
 
   const withGain = scored.filter(v => v.recentGain != null);
   const covered = withGain.length;
-  const basis: RankBasis = covered / total >= COVERAGE_FLOOR ? 'recent' : 'lifetime';
+  const basis: RankBasis = covered >= MIN_RANKED ? 'recent' : 'lifetime';
 
   const items =
     basis === 'recent'
@@ -179,7 +196,7 @@ function describeBasis(
     return `Ranked by views added in the last ${windowDays} days${caveat}`;
   }
   if (covered > 0) {
-    return `Ranked by lifetime views — only ${covered} of ${total} have enough daily history to rank by recent views yet`;
+    return `Ranked by lifetime views — only ${covered} of ${total} have daily history so far, and ${MIN_RANKED} are needed to rank by recent views`;
   }
   return 'Ranked by lifetime views — daily per-video history has not accumulated for this channel yet';
 }
