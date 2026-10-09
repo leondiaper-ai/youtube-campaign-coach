@@ -785,13 +785,17 @@ export default function ChannelHealthBoard({
       {view === 'managed' && insights.length > 0 && (
         <div className="mb-8">
           <SectionHead title="What changed this week" meta={`${insights.length} signals`} />
-          <div className="space-y-0">
+          {/* Same surface as the health figures. These sections were sitting
+              on the page background with only a rule above them, so a long
+              board read as one undifferentiated column — the card is what
+              tells you where one answer ends and the next begins. */}
+          <div className="bg-surface border border-line rounded-card divide-y divide-line-faint">
             {insights.map((ins, i) => {
               const ic = INSIGHT_ICON[ins.tone];
               return (
                 <div
                   key={i}
-                  className="flex items-start gap-2.5 py-2 border-b border-line-faint last:border-b-0 text-body leading-snug"
+                  className="flex items-start gap-2.5 px-5 py-3 text-body leading-snug"
                   style={{ color: ic.color }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
@@ -811,11 +815,11 @@ export default function ChannelHealthBoard({
         return (
           <div className="mb-8">
             <SectionHead title="Top performing videos" meta="Last 14 days, by daily velocity" />
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="bg-surface border border-line rounded-card p-5 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:divide-x divide-line">
               {/* Long-form column */}
               {topLongform.length > 0 && (
                 <div>
-                  <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/30 mb-2">Long-form</div>
+                  <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Long-form</div>
                   <div className="space-y-2">
                     {topLongform.map((v, i) => (
                       <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
@@ -825,8 +829,8 @@ export default function ChannelHealthBoard({
               )}
               {/* Shorts column */}
               {topShorts.length > 0 && (
-                <div>
-                  <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-ink/30 mb-2">Shorts</div>
+                <div className="lg:pl-6">
+                  <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Shorts</div>
                   <div className="space-y-2">
                     {topShorts.map((v, i) => (
                       <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
@@ -856,7 +860,7 @@ export default function ChannelHealthBoard({
             </span>
           </button>
           {moversOpen && (
-            <div className="grid grid-cols-2 gap-4 mt-3 lg:grid-cols-4">
+            <div className="bg-surface border border-line rounded-card p-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
               <MoverColumn title="Views Gainers (7d)" items={topMovers.topViews} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
               <MoverColumn title="Sub Gainers (7d)" items={topMovers.topSubs} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
               <MoverColumn title="Biggest Decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
@@ -870,12 +874,13 @@ export default function ChannelHealthBoard({
       {view === 'market' && benchmarkRead && (
         <div className="mb-8">
           <SectionHead title="Market benchmark read" />
+          <div className="bg-surface border border-line rounded-card overflow-hidden">
 
           {/* Stats grid */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 px-5 py-4 lg:grid-cols-4">
             {benchmarkRead.stats.map((stat, i) => (
               <div key={i}>
-                <div className="text-[18px] font-black tabular-nums">{stat.value}</div>
+                <div className="text-h3 font-black tabular-nums">{stat.value}</div>
                 <div className="text-micro text-muted leading-snug">{stat.label}</div>
               </div>
             ))}
@@ -883,17 +888,17 @@ export default function ChannelHealthBoard({
 
           {/* Content format breakdown */}
           {marketFormatStats && marketFormatStats.totalUploads > 0 && (
-            <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-3 pt-2 border-t lg:grid-cols-4" style={{ borderColor: MUTED }}>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 px-5 py-4 border-t border-line lg:grid-cols-4">
               <div>
-                <div className="text-[18px] font-black tabular-nums">{marketFormatStats.longformCount}</div>
+                <div className="text-h3 font-black tabular-nums">{marketFormatStats.longformCount}</div>
                 <div className="text-micro text-muted leading-snug">Long-form uploads (30d)</div>
               </div>
               <div>
-                <div className="text-[18px] font-black tabular-nums">{fmtNum(marketFormatStats.longformViews)}</div>
+                <div className="text-h3 font-black tabular-nums">{fmtNum(marketFormatStats.longformViews)}</div>
                 <div className="text-micro text-muted leading-snug">Long-form views</div>
               </div>
               <div>
-                <div className="text-[18px] font-black tabular-nums">
+                <div className="text-h3 font-black tabular-nums">
                   {marketFormatStats.totalUploads > 0
                     ? `${Math.round((marketFormatStats.longformCount / marketFormatStats.totalUploads) * 100)}%`
                     : '—'}
@@ -901,26 +906,29 @@ export default function ChannelHealthBoard({
                 <div className="text-micro text-muted leading-snug">Long-form share</div>
               </div>
               <div>
-                <div className="text-[18px] font-black tabular-nums">{marketFormatStats.activeArtists}</div>
+                <div className="text-h3 font-black tabular-nums">{marketFormatStats.activeArtists}</div>
                 <div className="text-micro text-muted leading-snug">Artists uploading (30d)</div>
               </div>
             </div>
           )}
 
-          {/* Patterns */}
-          <div className="space-y-1.5 pt-2 border-t" style={{ borderColor: MUTED }}>
-            {benchmarkRead.winning && (
-              <div className="flex items-start gap-2 text-[12px] leading-snug">
-                <span className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ background: '#1FBE7A' }} />
-                <span style={{ color: '#0C6A3F' }}>{benchmarkRead.winning}</span>
-              </div>
-            )}
-            {benchmarkRead.weakness && (
-              <div className="flex items-start gap-2 text-[12px] leading-snug">
-                <span className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ background: '#F08A3C' }} />
-                <span style={{ color: '#8A4A1A' }}>{benchmarkRead.weakness}</span>
-              </div>
-            )}
+          {/* Patterns — the read, in the tinted footer the other cards use */}
+          {(benchmarkRead.winning || benchmarkRead.weakness) && (
+            <div className="space-y-1.5 px-5 py-3 border-t border-line bg-raised/50">
+              {benchmarkRead.winning && (
+                <div className="flex items-start gap-2 text-body leading-snug">
+                  <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: '#1FBE7A' }} />
+                  <span style={{ color: '#0C6A3F' }}>{benchmarkRead.winning}</span>
+                </div>
+              )}
+              {benchmarkRead.weakness && (
+                <div className="flex items-start gap-2 text-body leading-snug">
+                  <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: '#F08A3C' }} />
+                  <span style={{ color: '#8A4A1A' }}>{benchmarkRead.weakness}</span>
+                </div>
+              )}
+            </div>
+          )}
           </div>
         </div>
       )}
@@ -929,12 +937,13 @@ export default function ChannelHealthBoard({
       {consistencyLeaders.length > 0 && (
         <div className="mb-8">
           <SectionHead title="Best in class" meta="Highest sustained upload cadence, last 30 days" />
-          <div className="space-y-2">
+          <div className="bg-surface border border-line rounded-card overflow-hidden">
+          <div className="divide-y divide-line-faint">
             {consistencyLeaders.map((c, i) => {
               const st = STATUS_STYLE[c.status];
               return (
-                <div key={c.slug} className="flex items-center gap-3 text-[12px]">
-                  <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{i + 1}.</span>
+                <div key={c.slug} className="flex items-center gap-3 px-5 py-2.5 text-body">
+                  <span className="text-faint text-micro font-bold tabular-nums w-4 shrink-0">{i + 1}.</span>
                   <Link
                     href={`${linkPrefix}/${c.slug}${linkSuffix}`}
                     className="font-bold hover:underline min-w-0 truncate"
@@ -943,32 +952,28 @@ export default function ChannelHealthBoard({
                     {c.name}
                   </Link>
                   <span
-                    className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0"
+                    className="px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-label shrink-0"
                     style={{ background: st.bg, color: st.fg }}
                   >
                     {STATE_LABEL[c.status]}
                   </span>
-                  <span className="text-ink/35 text-[11px] shrink-0 ml-auto tabular-nums">
-                    <span className="font-black" style={{ color: INK }}>{c.uploads30d}</span>
-                    <span className="text-ink/30"> uploads</span>
+                  <span className="text-micro shrink-0 ml-auto tabular-nums">
+                    <span className="font-black text-ink">{c.uploads30d}</span>
+                    <span className="text-muted"> uploads</span>
                   </span>
-                  <span className="text-[10px] text-ink/30 shrink-0 hidden sm:inline">
+                  <span className="text-micro text-muted shrink-0 hidden sm:inline tabular-nums">
                     {c.formatLabel}
                   </span>
                 </div>
               );
             })}
           </div>
-          {view === 'managed' && (
-            <div className="mt-3 text-micro text-muted leading-snug">
-              Channels with the highest sustained upload cadence over the last 30 days.
-            </div>
-          )}
-          {view === 'market' && (
-            <div className="mt-3 text-micro text-muted leading-snug">
-              Market artists leading on content consistency — benchmark for cadence targets.
-            </div>
-          )}
+          <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-snug">
+            {view === 'managed'
+              ? 'Channels with the highest sustained upload cadence over the last 30 days.'
+              : 'Market artists leading on content consistency — benchmark for cadence targets.'}
+          </div>
+          </div>
         </div>
       )}
 
