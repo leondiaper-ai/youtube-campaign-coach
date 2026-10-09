@@ -528,44 +528,80 @@ export default function LaunchModule({
       {/* ─── Section header ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-2 mb-3">
         <span className="w-2 h-2 rounded-full" style={{ background: dStyle.dot }} />
-        <h2 className="text-[11px] font-black uppercase tracking-[0.18em] text-ink/50">
-          Launch Result
+        <h2 className="text-[11px] font-bold uppercase tracking-eyebrow text-muted">
+          Launch result
         </h2>
       </div>
 
-      <div className="rounded-2xl border p-5" style={{ borderColor: MUTED, background: PAPER }}>
+      <div className="rounded-card border bg-surface overflow-hidden" style={{ borderColor: MUTED }}>
 
-        {/* ─── 1-LINE SUMMARY (most important element) ─────────────────────── */}
-        <div className="text-[15px] font-black leading-snug mb-3">
-          {summary}
-        </div>
+        {/* ─── The asset, then the read ─────────────────────────────────────
+            This module was describing a launch without ever showing what
+            had launched — the title sat in grey two lines below the verdict
+            and the thumbnail was nowhere. Somebody reading "strong start"
+            should be able to see the thing that started. */}
+        <div className="flex flex-col sm:flex-row gap-4 p-5">
+          <a
+            href={`https://www.youtube.com/watch?v=${launch.videoId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/asset shrink-0 no-underline"
+            style={{ width: 168 }}
+          >
+            <div className="relative rounded-lg overflow-hidden bg-sunken" style={{ aspectRatio: '16 / 9' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://i.ytimg.com/vi/${launch.videoId}/hqdefault.jpg`}
+                alt=""
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover/asset:scale-[1.03]"
+              />
+              {/* The format is the first thing that changes how the numbers
+                  should be read, so it sits on the asset itself. */}
+              <span
+                className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-label"
+                style={{ background: launch.kind === 'short' ? '#C77A16' : '#2C6BFF', color: '#FFFFFF' }}
+              >
+                {typeLabel}
+              </span>
+            </div>
+          </a>
 
-        {/* ─── Status tag + content type (subtle) ──────────────────────────── */}
-        <div className="flex items-center gap-2.5 flex-wrap mb-4">
-          <StateBadge label={displayStatus} style={dStyle} />
-          <span className="text-[10px] text-ink/30">
-            {typeLabel} · {fmtHoursAgo(launchHours)}
-          </span>
-        </div>
+          <div className="min-w-0 flex-1">
+            {/* ─── 1-LINE SUMMARY (most important element) ───────────────── */}
+            <div className="text-[15px] font-black leading-snug">
+              {summary}
+            </div>
 
-        {/* ─── Signal tags (no raw numbers) ─────────────────────────────────── */}
-        <div className="flex items-center gap-4 flex-wrap">
-          <SignalTag label="Reach" value={reach} color={SIGNAL_COLOR[reach]} />
-          <SignalTag label="Engagement" value={eng} color={SIGNAL_COLOR[eng]} />
-          <SignalTag label="Conversion" value={conv} color={SIGNAL_COLOR[conv]} />
-        </div>
+            <div className="text-body text-secondary leading-snug mt-1.5 line-clamp-2" title={launch.title}>
+              {launch.title}
+            </div>
 
-        {/* ─── Video context (small) ───────────────────────────────────────── */}
-        <div className="mt-3 text-[12px] text-ink/45 truncate" title={launch.title}>
-          {launch.title} · {fmtNum(launch.views)} views
+            {/* ─── Status tag + age ───────────────────────────────────────── */}
+            <div className="flex items-center gap-2.5 flex-wrap mt-2.5">
+              <StateBadge label={displayStatus} style={dStyle} />
+              <span className="text-micro text-muted tabular-nums">
+                {fmtNum(launch.views)} views · {fmtHoursAgo(launchHours)}
+              </span>
+            </div>
+
+            {/* ─── Signal tags (no raw numbers) ───────────────────────────── */}
+            <div className="flex items-center gap-4 flex-wrap mt-3">
+              <SignalTag label="Reach" value={reach} color={SIGNAL_COLOR[reach]} />
+              <SignalTag label="Engagement" value={eng} color={SIGNAL_COLOR[eng]} />
+              <SignalTag label="Conversion" value={conv} color={SIGNAL_COLOR[conv]} />
+            </div>
+          </div>
         </div>
 
         {/* ─── Expand toggle ─────────────────────────────────────────────── */}
+        <div className="px-5 pb-5">
         <button
           onClick={() => setExpanded((v) => !v)}
-          className="mt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 hover:text-ink/70 transition-colors"
+          aria-expanded={expanded}
+          className="text-micro font-semibold text-muted hover:text-ink transition-colors"
         >
-          {expanded ? '▾ Hide details' : '▸ Show details'}
+          {expanded ? 'Hide details' : 'Show details'}
         </button>
 
         {/* ─── SYSTEM 2: Full detail (hidden by default) ───────────────────── */}
@@ -655,6 +691,7 @@ export default function LaunchModule({
             )}
           </div>
         )}
+        </div>{/* close padded foot */}
       </div>
     </section>
   );
