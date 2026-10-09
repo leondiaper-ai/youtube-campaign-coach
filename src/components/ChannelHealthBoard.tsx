@@ -576,6 +576,10 @@ export default function ChannelHealthBoard({
      count was already the answer to "how many" — this makes it the
      answer to "which", which is the next question every time. */
   const [classFilter, setClassFilter] = useState<ArtistClassification | null>(null);
+  /* A 120-row table is a long scroll to reach anything underneath it.
+     Twenty is roughly a screen and a half, which is enough to scan a
+     group without the page becoming a corridor. */
+  const [page, setPage] = useState(1);
 
   const handleRemove = useCallback(async (channelId: string, name: string) => {
     if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
@@ -637,6 +641,15 @@ export default function ChannelHealthBoard({
     ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
     : sorted;
 
+  /* Any change to what is being listed has to send the reader back to the
+     first page. Searching while on page 4 of the old list would otherwise
+     land on an empty page, which reads as "no results" for a search that
+     found plenty. */
+  const PAGE_SIZE = 20;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   // Classification counts
   const growingCount = activeRows.filter((r) => r.classification === 'GROWING').length;
   const weakConvCount = activeRows.filter((r) => r.classification === 'WEAK_CONVERSION').length;
@@ -677,7 +690,7 @@ export default function ChannelHealthBoard({
             ] as const).map(([key, label, count]) => (
               <button
                 key={key}
-                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); setClassFilter(null); }}
+                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); setClassFilter(null); setPage(1); }}
                 aria-pressed={view === key}
                 className={`relative pb-2.5 -mb-px text-h4 transition-colors ${
                   view === key ? 'font-extrabold text-ink' : 'font-semibold text-muted hover:text-ink'
@@ -732,6 +745,7 @@ export default function ChannelHealthBoard({
                 onClick={() => {
                   setClassFilter(isOn ? null : key);
                   setExpandedRow(null);
+                  setPage(1);
                 }}
                 className={`text-left px-5 py-4 border-t border-line first:border-t-0 lg:border-t-0 transition-colors ${
                   selectable ? 'cursor-pointer hover:bg-raised/70' : 'cursor-default'
@@ -819,7 +833,7 @@ export default function ChannelHealthBoard({
             {CLASSIFICATION_LABEL[classFilter].toLowerCase()} channel{filtered.length === 1 ? '' : 's'}
           </span>
           <button
-            onClick={() => setClassFilter(null)}
+            onClick={() => { setClassFilter(null); setPage(1); }}
             className="text-micro font-semibold px-2.5 py-1 rounded-control border border-line text-secondary hover:text-ink hover:border-line-strong transition-colors"
           >
             Show all
@@ -831,7 +845,7 @@ export default function ChannelHealthBoard({
         <input
           type="text"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           placeholder="Search artists…"
           aria-label="Search artists"
           className="w-full py-2 pl-8 pr-8 text-body text-ink bg-surface border border-line rounded-control outline-none transition-colors placeholder:text-faint focus:border-ink/30"
@@ -844,7 +858,7 @@ export default function ChannelHealthBoard({
         </svg>
         {search && (
           <button
-            onClick={() => setSearch('')}
+            onClick={() => { setSearch(''); setPage(1); }}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-[15px] leading-none text-faint hover:text-ink transition-colors"
             title="Clear search"
             aria-label="Clear search"
@@ -875,7 +889,7 @@ export default function ChannelHealthBoard({
           <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
         </div>
 
-        {filtered.map((r, i) => {
+        {paged.map((r, i) => {
           const st = STATUS_STYLE[r.status];
           const sp = SPARK_COLOR[r.status];
           const subsTotal = r.subs != null ? fmtNum(r.subs) : '—';
@@ -923,7 +937,7 @@ export default function ChannelHealthBoard({
                    made the thing you were pointing at the hardest to read.
                    A background change leaves the content alone. */
                 className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-4 py-3 items-center transition-colors cursor-pointer hover:bg-raised ${
-                  i === filtered.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
+                  i === paged.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
                 }`}
                 style={{ background: st.rowBg }}
                 onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
@@ -1030,7 +1044,7 @@ export default function ChannelHealthBoard({
               {/* ── Expanded: Actions + Strategy Profile + Fix This Week ───────── */}
               {isExpanded && (
                 <div
-                  className={`py-3.5 ${i === filtered.length - 1 ? '' : 'border-b'}`}
+                  className={`py-3.5 ${i === paged.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
                   {/* Action buttons row */}
@@ -1113,6 +1127,58 @@ export default function ChannelHealthBoard({
             {search
               ? <>No artists matching &ldquo;{search}&rdquo;</>
               : 'No channels in this group.'}
+          </div>
+        )}
+
+        {/* ─── Pager ───────────────────────────────────────────────────
+            Inside the table's own surface, so it reads as the foot of
+            the list rather than as a separate control that happens to
+            sit underneath it. The range is spelled out because "page 3
+            of 7" does not tell you how much roster you are looking at. */}
+        {pageCount > 1 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-line bg-raised/50">
+            <span className="text-micro text-muted tabular-nums">
+              Showing{' '}
+              <strong className="text-ink">
+                {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)}
+              </strong>{' '}
+              of <strong className="text-ink">{filtered.length}</strong>
+            </span>
+            <div className="flex items-center gap-1">
+              <PagerButton
+                onClick={() => { setPage(safePage - 1); setExpandedRow(null); }}
+                disabled={safePage === 1}
+              >
+                ← Previous
+              </PagerButton>
+              {/* Numbered pages, windowed around the current one. A
+                  seven-page roster can show them all; a thirty-page one
+                  cannot, and a row of thirty numbers is not navigation. */}
+              {pageWindow(safePage, pageCount).map((n, i) =>
+                n === null ? (
+                  <span key={`gap-${i}`} className="px-1 text-faint text-micro">…</span>
+                ) : (
+                  <button
+                    key={n}
+                    onClick={() => { setPage(n); setExpandedRow(null); }}
+                    aria-current={n === safePage ? 'page' : undefined}
+                    className={`min-w-[28px] px-1.5 py-1 rounded-control text-micro font-semibold tabular-nums transition-colors ${
+                      n === safePage
+                        ? 'bg-ink text-paper'
+                        : 'text-secondary hover:text-ink hover:bg-line/60'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ),
+              )}
+              <PagerButton
+                onClick={() => { setPage(safePage + 1); setExpandedRow(null); }}
+                disabled={safePage === pageCount}
+              >
+                Next →
+              </PagerButton>
+            </div>
           </div>
         )}
       </div>
@@ -1746,6 +1812,35 @@ function QuickCopyButton({ row, type }: { row: RowData; type: 'slack' | 'email' 
       }}
     >
       {copied ? 'Copied' : `${label} Update`}
+    </button>
+  );
+}
+
+/* ─── Pager pieces ─────────────────────────────────────────────────── */
+
+/** First, last, and the pages either side of the current one. */
+function pageWindow(current: number, total: number): (number | null)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const out: (number | null)[] = [1];
+  const from = Math.max(2, current - 1);
+  const to = Math.min(total - 1, current + 1);
+  if (from > 2) out.push(null);
+  for (let n = from; n <= to; n++) out.push(n);
+  if (to < total - 1) out.push(null);
+  out.push(total);
+  return out;
+}
+
+function PagerButton({ children, onClick, disabled }: {
+  children: React.ReactNode; onClick: () => void; disabled: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="px-2.5 py-1 rounded-control text-micro font-semibold text-secondary transition-colors enabled:hover:text-ink enabled:hover:bg-line/60 disabled:text-faint disabled:cursor-default"
+    >
+      {children}
     </button>
   );
 }
