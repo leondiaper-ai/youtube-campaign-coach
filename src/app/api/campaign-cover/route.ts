@@ -133,8 +133,18 @@ function cleanAssetTitle(title: string, artistName: string): string {
   const esc = a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const m = new RegExp(`^${esc}\\s*[-\u2013\u2014:]\\s*(.+)$`, 'i').exec(t);
   const out = m ? m[1].trim() : t;
-  /* "(Official Video)" and friends are packaging, not the name. */
-  return out.replace(/\s*\((official|lyric|visuali[sz]er)[^)]*\)\s*$/i, '').trim() || t;
+  /* "(Official Video)" and friends are packaging, not the name.
+
+     "(Live)" is in this list so that a live version keys to the SAME song
+     as the studio release. Without it "My Whole World (Live)" is a
+     different string from "My Whole World", the read treats it as a brand
+     new track, and the page announces "New track and live video out."
+     about a song that had been out for a fortnight.
+
+     Only safe because this function is not used for display — asset cards
+     render the raw title, so the live version is still labelled as one
+     everywhere a reader sees it. */
+  return out.replace(/\s*\((official|lyric|visuali[sz]er|live)[^)]*\)\s*$/i, '').trim() || t;
 }
 
 /**
@@ -262,6 +272,18 @@ function formatOf(v: any): { kind: string; label: string } {
  * says is out, so it lives here rather than being declared twice.
  */
 const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live']);
+
+/**
+ * How to name an asset that is the SECOND thing out for a song that is
+ * already released. "New track and live video out" is wrong twice over
+ * when the track is three weeks old.
+ */
+const FOLLOWUP_PHRASE: Record<string, string> = {
+  live: 'Live version',
+  visualiser: 'Visualiser',
+  lyric: 'Lyric video',
+  omv: 'Official video',
+};
 
 /** What a release is called in a sentence, as opposed to on a label. */
 const FORMAT_NOUN: Record<string, string> = {
@@ -1068,7 +1090,23 @@ function buildRead(
     .map(k => FORMAT_NOUN[k])
     .filter(Boolean);
 
-  const headline = nouns.length
+  /* ── IS THIS A NEW TRACK, OR A SECOND ASSET FOR AN OLD ONE? ────────
+     The headline said "New track and ..." for anything released. That is
+     right for the first video a song gets and wrong for every one after
+     it: Kings of Leon put a live version of My Whole World up on 8 Oct,
+     three weeks after the track already had a visualiser here, and the
+     page announced it as a new track.
+
+     A follow-up is simply a release asset for a song that already had
+     one. Decided by comparing the newest release against the EARLIEST
+     release for the same song, so it needs nobody to tag anything. */
+  const forSongByDate = [...forSong].sort((a, b) => a.publishedAt.localeCompare(b.publishedAt));
+  const firstForSong = forSongByDate[0] ?? null;
+  const isFollowUp = !!(newest && firstForSong && firstForSong.videoId !== newest.videoId);
+
+  const headline = isFollowUp && newest && song
+    ? `${FOLLOWUP_PHRASE[newest.kind] ?? 'New asset'} of “${song}” landed.`
+    : nouns.length
     /* "New track AND ..." because two things went out: the song, on every
        platform, and the asset that carries it here. */
     ? `New track and ${listPhrase(nouns)} out.`
@@ -1086,6 +1124,16 @@ function buildRead(
     ? new Date(newest.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })
     : '';
   let subject = song && subjectDate ? `“${song}”, ${subjectDate}. ` : '';
+
+  /* The headline already names the song for a follow-up, so repeating it
+     here is just the same words twice. The useful fact instead is WHEN
+     the track first had a video, because that is the evidence for calling
+     this a follow-up at all. */
+  if (isFollowUp && firstForSong) {
+    const firstDate = new Date(firstForSong.publishedAt)
+      .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+    subject = `Uploaded ${subjectDate}. First video for this track went up ${firstDate}. `;
+  }
 
   /* Nothing on the channel carries the release, so the subject comes from
      the plan instead — and says plainly that YouTube has not had the
@@ -1112,7 +1160,12 @@ function buildRead(
        The title remains the fallback, lowercased as before so it reads as a
        clause rather than a heading. An item with no stated action is a gap in
        the plan, not a reason to print nothing. */
-    line: subject + (next
+    /* A follow-up asset gets no forward instruction. The plan's next move
+       is written against the HERO of a release — "give it a second
+       destination" — and printing that under an asset which IS the second
+       destination argues with itself. The follow-up window in What's next
+       still carries the forward view, where it belongs. */
+    line: isFollowUp ? subject.trim() : subject + (next
       ? `Next: ${next.action ?? next.label.charAt(0).toLowerCase() + next.label.slice(1)}.`
       : 'Now we\'re watching what follows it.'),
   };
