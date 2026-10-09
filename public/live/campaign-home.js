@@ -135,8 +135,32 @@ function buildNext(tl){
      API now sorts its forward moments chronologically, and this renders
      them in the order it was given. */
   const FORWARD = { NEXT:1, WINDOW:1, ANCHOR:1 };
+
+  /* ── WHEN THE NEXT THING IS THE ALBUM, IT IS ONE ROW ───────────────
+     Late in a campaign the next confirmed moment IS the anchor, and the
+     API emits both — same date, same title, different kind. Rendered
+     straight through that printed the album twice with the halves
+     swapped:
+
+       6 NOV · 'O MY BELOVED'   Album Release
+       6 NOV · ALBUM            'O My Beloved'
+
+     which reads like two events six days apart until you look twice.
+
+     The ANCHOR row survives because its shape matches the WINDOW row
+     above it — date and type on the left, name on the right — and
+     because the NEXT row loses nothing: its branch renders
+     `detail || stage`, and detail is just the word "Album Release".
+
+     Matched on date AND title so a single released on album day is
+     still two rows, which it genuinely is. */
+  const anchorKey = m => `${m.date || m.dateLabel}|${String(m.title || '').trim().toLowerCase()}`;
+  const anchors = new Set(
+    tl.moments.filter(m => m.kind === 'ANCHOR').map(anchorKey));
+
   for(const m of tl.moments){
     if(!FORWARD[m.kind]) continue;
+    if(m.kind === 'NEXT' && anchors.has(anchorKey(m))) continue;
 
     /* Anything not confirmed says so, in the same small italic on every
        row. A recommendation and a tentative date are different claims from
