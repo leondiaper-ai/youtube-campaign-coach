@@ -73,7 +73,12 @@
       of projects years apart are not comparable and are not shown.
    6. "Missing" on the gap map means NO SUCH ASSET ON THIS CHANNEL. It
       is a statement about the public catalogue, not a claim that no
-      footage exists or that anyone did anything wrong.
+      footage exists or that anyone did anything wrong. The grid carries
+      no recommendation at all: the priority stars are gone, and so are
+      the Shorts and Playlist-routing columns — Shorts because the
+      per-record classification is not reliable enough to assert, and
+      playlist routing because it is not visible on a channel the way
+      the other assets are.
    7. The 474M lifetime-vs-catalogue difference is an open question in
       the appendix, never attributed to another channel.
    8. GRM Daily's DBE catalogue scale is NOT claimed — unverifiable.
@@ -889,10 +894,9 @@ table.gap td.vw{font-size:clamp(8.5px,.8vw,12px);color:var(--gold);text-align:ri
     <div class="gkey">
       <span><span class="dot has">●</span> &nbsp;Exists on the channel</span>
       <span><span class="dot no">○</span> &nbsp;Not on the channel</span>
-      <span><span class="dot pri">★</span> &nbsp;High priority to build</span>
     </div>
   </div>
-  <div class="foot">Built by matching every one of the 198 uploads back to the record it supports · priority reflects scale, current velocity and what already exists</div>
+  <div class="foot">Built by matching every one of the 198 uploads back to the record it supports · this grid says only what exists, not what to build</div>
 </section>
 
 <!-- 11 · OPPORTUNITY CARDS -->
@@ -1373,23 +1377,40 @@ const MIX = [
   { k: 'Live, BTS, interview',  n:  6, c: '#E8893C' },
 ];
 
-/* The gap map. Columns are asset types; every mark is derived from the
-   198-upload classification, EXCEPT the stars, which are our judgement
-   about what to build first and are labelled as priority, not fact. */
-const GAPCOLS = ['Official video','Lyric','Visualiser','Shorts','Live','Performance','BTS','Studio','Vlog','Playlist routing'];
+/* The gap map. Columns are asset types and every mark is derived from
+   the 198-upload classification — nothing on this grid is a judgement
+   any more.
+
+   WHAT CHANGED AND WHY
+   There was a third mark, a star, meaning "high priority to build". It
+   was our opinion sitting in the same cells as the classification, in a
+   grid whose whole claim is that it is derived. Worse, it was wrong in
+   places: Overseas carried priority stars under Live and Performance,
+   which reads as though a live asset is known to be the right move for
+   that record rather than one idea about it. The empty circles already
+   say everything — an open column across twelve records is the finding.
+
+   Two columns are gone as well. Shorts, because the classification
+   behind it is not reliable enough to assert per record. Playlist
+   routing, because it is not an asset you can see on a channel the way
+   the others are, so a mark in that column was never the same kind of
+   claim as a mark in the rest.
+
+   What is left is only: does this asset exist for this record. */
+const GAPCOLS = ['Official video','Lyric','Visualiser','Live','Performance','BTS','Studio','Vlog'];
 const GAPROWS = [
-  { s: 'Overseas ft. Central Cee', v: 106612902, m: ['has','no','no','no','pri','pri','no','no','no','pri'] },
-  { s: 'Elegant & Gang',           v:  22804620, m: ['has','no','no','pri','no','no','no','no','no','pri'] },
-  { s: 'Ferrari Horses ft. Raye',  v:  21841579, m: ['no','has','no','no','no','pri','no','no','no','pri'] },
-  { s: 'Make You Smile ft. AJ Tracey', v: 19406032, m: ['has','no','no','pri','no','no','no','no','no','pri'] },
-  { s: 'Pakistan ft. Clavish',     v:  18704632, m: ['has','no','has','has','no','no','no','no','no','pri'] },
-  { s: 'Kevin McCallister',        v:  18513648, m: ['has','no','no','no','no','no','no','no','no','pri'] },
-  { s: 'Birds Are Chirping',       v:  16669990, m: ['has','no','no','no','no','no','no','no','no','pri'] },
-  { s: 'Eagle ft. Noizy',          v:  14272747, m: ['has','no','has','has','no','no','no','no','no','pri'] },
-  { s: 'Bankroll Got Bigger',      v:  13603502, m: ['has','no','no','no','no','no','no','no','no','pri'] },
-  { s: 'Outside',                  v:  13115963, m: ['has','no','has','no','no','no','no','no','no','pri'] },
-  { s: 'No Competition',           v:   9957046, m: ['has','no','no','no','no','no','no','no','no','pri'] },
-  { s: 'SEPA ft. Morad',           v:   3240084, m: ['has','pri','pri','pri','no','pri','pri','pri','no','pri'] },
+  { s: 'Overseas ft. Central Cee', v: 106612902, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'Elegant & Gang',           v:  22804620, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'Ferrari Horses ft. Raye',  v:  21841579, m: ['no','has','no','no','no','no','no','no'] },
+  { s: 'Make You Smile ft. AJ Tracey', v: 19406032, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'Pakistan ft. Clavish',     v:  18704632, m: ['has','no','has','no','no','no','no','no'] },
+  { s: 'Kevin McCallister',        v:  18513648, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'Birds Are Chirping',       v:  16669990, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'Eagle ft. Noizy',          v:  14272747, m: ['has','no','has','no','no','no','no','no'] },
+  { s: 'Bankroll Got Bigger',      v:  13603502, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'Outside',                  v:  13115963, m: ['has','no','has','no','no','no','no','no'] },
+  { s: 'No Competition',           v:   9957046, m: ['has','no','no','no','no','no','no','no'] },
+  { s: 'SEPA ft. Morad',           v:   3240084, m: ['has','no','no','no','no','no','no','no'] },
 ];
 
 /* The four we would start with. "Exists" is from the catalogue; the
@@ -1620,7 +1641,7 @@ const ERAS = ['x-AavfF5XAk','NEPQC-WX5rc','G-EEYEIiqEk','bY4FsK0M5Vw','I4Ra4z2Ar
   /* ── 10 · THE GAP MAP ──────────────────────────────────────────── */
   const gm = document.getElementById('gapmap');
   if (gm) {
-    const mark = { has: ['has', '●'], no: ['no', '○'], pri: ['pri', '★'] };
+    const mark = { has: ['has', '●'], no: ['no', '○'] };
     let h = '<thead><tr><th class="song">Record</th><th></th>'
       + GAPCOLS.map(c => '<th>' + c.replace(/ /g, '<br>') + '</th>').join('') + '</tr></thead><tbody>';
     GAPROWS.forEach(r => {
