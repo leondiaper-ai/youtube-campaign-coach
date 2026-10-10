@@ -82,8 +82,8 @@ export interface GridVideo {
  * also why it sorts last: there is nothing to rank it by.
  */
 export function VideoGrid({
-  items, emptyNote, showGain = false,
-}: { items: GridVideo[]; emptyNote: string; showGain?: boolean }) {
+  items, emptyNote, showGain = false, format = 'long',
+}: { items: GridVideo[]; emptyNote: string; showGain?: boolean; format?: 'long' | 'short' }) {
   if (items.length === 0) {
     return <div className="text-[12px] text-ink/40">{emptyNote}</div>;
   }
@@ -127,15 +127,31 @@ export function VideoGrid({
                 /* The tooltip is a PROMPT, not a proof. It was four lines
                    explaining monotonic view counts, which is the reason the
                    badge is trustworthy and not the reason anyone cares. What
-                   a team needs at this moment is the next move: a record
-                   this far ahead should not be sitting on the channel with
-                   one asset against it. The arithmetic is in videoMomentum
-                   for whoever has to defend the number. */
+                   a team needs at this moment is the next move. The
+                   arithmetic is in videoMomentum for whoever has to defend
+                   the number.
+
+                   The next move is not the same for the two formats, which
+                   is why this reads the grid's format rather than printing
+                   one line everywhere:
+
+                     LONG-FORM  is the destination. A release this far ahead
+                                should not be sitting there with one asset
+                                against it — so the prompt is about building
+                                support around it.
+                     SHORT      is a discovery surface, and a Short that
+                                travels is only worth the reach if it routes
+                                anybody back to the music. So the prompt is
+                                whether the loop is actually closed. */
                 title={`Ahead of ${
                   v.aheadOf.passed === v.aheadOf.of
-                    ? 'every release'
-                    : `${v.aheadOf.passed} of the ${v.aheadOf.of} releases`
-                } before it. Has it got support around it — lyric, visualiser, live cut?`}
+                    ? format === 'short' ? 'every Short' : 'every release'
+                    : `${v.aheadOf.passed} of the ${v.aheadOf.of} ${format === 'short' ? 'Shorts' : 'releases'}`
+                } before it. ${
+                  format === 'short'
+                    ? 'Is the track tagged and linked, so this sends people to the music?'
+                    : 'Has it got support around it — lyric, visualiser, live cut?'
+                }`}
               >
                 Hot asset
               </span>

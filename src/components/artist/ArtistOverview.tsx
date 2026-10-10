@@ -288,6 +288,7 @@ export default async function ArtistOverview({
           <VideoGrid
             items={topShorts.items}
             showGain={topShorts.basis === 'recent'}
+            format="short"
             emptyNote="No Shorts in our cached inventory — none published, or none within the uploads we hold."
           />
         </div>
