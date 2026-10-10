@@ -678,15 +678,27 @@ export default function ChannelHealthBoard({
   const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
 
   // Multiformat strategy counts
-  /* Deepest stack first, then most recently extended — a stack still
-     being built is the live example, an old one is history. Capped at
-     five: this is a card that says "here is the behaviour", not a
-     leaderboard of everyone who has ever done it. */
+  /* ── ORDER: CAMPAIGNS FIRST ───────────────────────────────────────
+     A stack on a channel nobody is working is a nice pattern. A stack on
+     a campaign we are running right now is the thing to act on, and it
+     was being outranked by catalogue uploads that happened to carry two
+     formats. So a pinned campaign sorts above everything, and only then
+     by depth, then by most recently extended — a stack still being built
+     is the live example, an old one is history.
+
+     Pinned is the signal because it is the roster's own statement that a
+     campaign is being worked, it is already loaded for this board, and
+     it costs no extra call. It means TRACKED, not "uploaded recently" —
+     the chip says "in campaign" rather than "live" for that reason.
+
+     Capped at five: this is a card that says "here is the behaviour",
+     not a leaderboard of everyone who has ever done it. */
   const formatStacks = activeRows
     .filter((r): r is RowData & { formatStack: FormatStack } => !!r.formatStack)
-    .map((row) => ({ row, stack: row.formatStack }))
+    .map((row) => ({ row, stack: row.formatStack, inCampaign: pinnedSlugs.includes(row.slug) }))
     .sort((a, b) =>
-      b.stack.formats.length - a.stack.formats.length
+      Number(b.inCampaign) - Number(a.inCampaign)
+      || b.stack.formats.length - a.stack.formats.length
       || b.stack.latestAt.localeCompare(a.stack.latestAt))
     .slice(0, 5);
 
@@ -1424,7 +1436,7 @@ export default function ChannelHealthBoard({
           />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
             <div className="divide-y divide-line-faint">
-              {formatStacks.map(({ row, stack }) => (
+              {formatStacks.map(({ row, stack, inCampaign }) => (
                 <Link
                   key={row.slug}
                   href={`${linkPrefix}/${row.slug}${linkSuffix}`}
@@ -1432,7 +1444,22 @@ export default function ChannelHealthBoard({
                   style={{ textDecoration: 'none' }}
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="text-body font-bold text-ink truncate">{row.name}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-body font-bold text-ink truncate">{row.name}</span>
+                      {/* Same blue the board already uses for a tracked
+                          project, so the two mean the same thing in two
+                          places rather than inventing a second vocabulary
+                          for "we are working this". */}
+                      {inCampaign && (
+                        <span
+                          className="shrink-0 text-[9px] font-bold uppercase tracking-label px-1.5 py-[3px] rounded"
+                          style={{ background: '#2C25FF', color: '#fff' }}
+                          title="Pinned as a tracked campaign on this board"
+                        >
+                          In campaign
+                        </span>
+                      )}
+                    </div>
                     <div className="text-micro text-muted truncate">{stack.song}</div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -1457,11 +1484,12 @@ export default function ChannelHealthBoard({
               ))}
             </div>
             <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
-              Counts DESTINATIONS built around one song — video, visualiser, lyric,
-              live — not how many formats the channel posts in general. That
-              channel-level read is the Multiformat figure above, and the two
-              disagree on purpose: a channel can post four formats without ever
-              stacking two around the same record.
+              Campaigns we are tracking sort first, then by how many formats deep
+              the stack is. Counts DESTINATIONS built around one song — video,
+              visualiser, lyric, live — not how many formats the channel posts in
+              general. That channel-level read is the Multiformat figure above, and
+              the two disagree on purpose: a channel can post four formats without
+              ever stacking two around the same record.
             </div>
           </div>
         </div>
