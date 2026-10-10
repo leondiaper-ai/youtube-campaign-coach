@@ -109,9 +109,18 @@ export function VideoGrid({
               <span
                 className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded text-[9px] font-bold uppercase tracking-wide"
                 style={{ background: GAIN, color: '#FFFFFF' }}
-                title={`Outperforming the catalogue: more views than ${
-                  v.aheadOf.passed === v.aheadOf.of ? 'every one' : `${v.aheadOf.passed}`
-                } of the ${v.aheadOf.of} releases that came before it on this channel, despite being newer than all of them. Views only go up, so this compares its total against their full lifetime totals.`}
+                /* The tooltip is a PROMPT, not a proof. It was four lines
+                   explaining monotonic view counts, which is the reason the
+                   badge is trustworthy and not the reason anyone cares. What
+                   a team needs at this moment is the next move: a record
+                   this far ahead should not be sitting on the channel with
+                   one asset against it. The arithmetic is in videoMomentum
+                   for whoever has to defend the number. */
+                title={`Ahead of ${
+                  v.aheadOf.passed === v.aheadOf.of
+                    ? 'every release'
+                    : `${v.aheadOf.passed} of the ${v.aheadOf.of} releases`
+                } before it. Has it got support around it — lyric, visualiser, live cut?`}
               >
                 Hot asset
               </span>
