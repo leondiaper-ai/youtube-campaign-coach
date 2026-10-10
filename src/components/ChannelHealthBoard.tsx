@@ -1431,7 +1431,7 @@ export default function ChannelHealthBoard({
       {view === 'managed' && formatStacks.length > 0 && (
         <div className="mb-8">
           <SectionHead
-            title="Format stacks"
+            title="Top multiformat strategy"
             meta="More than one format around the same release, last 120 days"
           />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
@@ -1485,11 +1485,11 @@ export default function ChannelHealthBoard({
             </div>
             <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
               Campaigns we are tracking sort first, then by how many formats deep
-              the stack is. Counts DESTINATIONS built around one song — video,
-              visualiser, lyric, live — not how many formats the channel posts in
-              general. That channel-level read is the Multiformat figure above, and
-              the two disagree on purpose: a channel can post four formats without
-              ever stacking two around the same record.
+              the stack is. This counts formats around ONE RELEASE — video,
+              visualiser, lyric, live. The Multiformat figure higher up counts
+              formats across the CHANNEL, which is a different question, and the
+              two disagree on purpose: a channel can post four formats without ever
+              building two around the same record.
             </div>
           </div>
         </div>
