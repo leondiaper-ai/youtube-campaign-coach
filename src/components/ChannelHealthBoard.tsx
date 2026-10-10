@@ -585,6 +585,14 @@ export default function ChannelHealthBoard({
      count was already the answer to "how many" — this makes it the
      answer to "which", which is the next question every time. */
   const [classFilter, setClassFilter] = useState<ArtistClassification | null>(null);
+  /* The multiformat counts were a read-only footnote under four figures
+     that are all filters. Same question gets asked of them — "which 22?" —
+     so they answer it the same way.
+
+     Mutually exclusive with classFilter rather than stacked: the two are
+     different cuts of the same roster, and an intersection can easily be
+     empty, which reads as a broken board rather than as a true answer. */
+  const [mfFilter, setMfFilter] = useState<'strong' | 'partial' | 'weak' | null>(null);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
      group without the page becoming a corridor. */
@@ -645,7 +653,8 @@ export default function ChannelHealthBoard({
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows]
     .sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])
-    .filter((r) => (classFilter ? r.classification === classFilter : true));
+    .filter((r) => (classFilter ? r.classification === classFilter : true))
+    .filter((r) => (mfFilter ? mfBand(r) === mfFilter : true));
   const filtered = search.trim()
     ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
     : sorted;
@@ -667,9 +676,9 @@ export default function ChannelHealthBoard({
 
   // Multiformat strategy counts
   const mfRows = activeRows.filter((r) => r.multiformat);
-  const mfStrong = mfRows.filter((r) => r.multiformat!.score === 'Strong' || r.multiformat!.score === 'Good').length;
-  const mfPartial = mfRows.filter((r) => r.multiformat!.score === 'Partial').length;
-  const mfWeak = mfRows.filter((r) => r.multiformat!.score === 'Weak' || r.multiformat!.score === 'None').length;
+  const mfStrong = mfRows.filter((r) => mfBand(r) === 'strong').length;
+  const mfPartial = mfRows.filter((r) => mfBand(r) === 'partial').length;
+  const mfWeak = mfRows.filter((r) => mfBand(r) === 'weak').length;
 
   // Insights & movers (managed view only)
   const insights = view === 'managed' ? computeInsights(managedRows) : [];
@@ -699,7 +708,7 @@ export default function ChannelHealthBoard({
             ] as const).map(([key, label, count]) => (
               <button
                 key={key}
-                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); setClassFilter(null); setPage(1); }}
+                onClick={() => { setView(key); setExpandedRow(null); setSearch(''); setClassFilter(null); setMfFilter(null); setPage(1); }}
                 aria-pressed={view === key}
                 className={`relative pb-2.5 -mb-px text-h4 transition-colors ${
                   view === key ? 'font-extrabold text-ink' : 'font-semibold text-muted hover:text-ink'
@@ -753,6 +762,9 @@ export default function ChannelHealthBoard({
                 aria-pressed={isOn}
                 onClick={() => {
                   setClassFilter(isOn ? null : key);
+                  /* Clears the other cut, so the banner's single sentence
+                     is always the whole truth about what is listed. */
+                  setMfFilter(null);
                   setExpandedRow(null);
                   setPage(1);
                 }}
@@ -791,15 +803,36 @@ export default function ChannelHealthBoard({
             <span className="text-[11px] font-bold uppercase tracking-label text-muted">
               Multiformat
             </span>
-            <span className="text-micro text-secondary" title="Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)">
-              <span className="font-black tabular-nums" style={{ color: '#0C6A3F' }}>{mfStrong}</span> strong
-            </span>
-            <span className="text-micro text-secondary" title="Channels using 2 formats">
-              <span className="font-black tabular-nums" style={{ color: '#7A5A00' }}>{mfPartial}</span> partial
-            </span>
-            <span className="text-micro text-secondary" title="Channels using 0–1 formats — multiformat strategy not active">
-              <span className="font-black tabular-nums" style={{ color: '#8A1F0C' }}>{mfWeak}</span> weak
-            </span>
+            {([
+              ['strong',  mfStrong,  '#0C6A3F', 'Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)'],
+              ['partial', mfPartial, '#7A5A00', 'Channels using 2 formats'],
+              ['weak',    mfWeak,    '#8A1F0C', 'Channels using 0–1 formats — multiformat strategy not active'],
+            ] as const).map(([band, count, colour, hint]) => {
+              const isOn = mfFilter === band;
+              return (
+                <button
+                  key={band}
+                  type="button"
+                  /* A zero is not a filter — pressing it would empty the
+                     board and look like a fault. */
+                  disabled={count === 0}
+                  onClick={() => {
+                    setMfFilter(isOn ? null : band);
+                    setClassFilter(null);
+                    setPage(1);
+                  }}
+                  title={hint}
+                  aria-pressed={isOn}
+                  className={`text-micro text-secondary rounded px-1.5 py-0.5 -mx-1.5 transition-colors ${
+                    count === 0
+                      ? 'opacity-45 cursor-default'
+                      : 'hover:bg-surface cursor-pointer'
+                  } ${isOn ? 'bg-surface ring-1 ring-line-strong' : ''}`}
+                >
+                  <span className="font-black tabular-nums" style={{ color: colour }}>{count}</span> {band}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -832,17 +865,21 @@ export default function ChannelHealthBoard({
       {/* A bordered control rather than an underlined one: on a page of
           hairline rules an underlined input is indistinguishable from a
           divider until you click it. */}
-      {classFilter && (
+      {(classFilter || mfFilter) && (
         /* The table below is no longer the whole roster, and that has to
            be said in words rather than implied by a highlighted tile
-           further up the page. */
+           further up the page. One banner for both filters, because only
+           one can be active. */
         <div className="flex items-center gap-2 mb-3">
           <span className="text-meta text-secondary">
             Showing <strong className="text-ink">{filtered.length}</strong>{' '}
-            {CLASSIFICATION_LABEL[classFilter].toLowerCase()} channel{filtered.length === 1 ? '' : 's'}
+            {classFilter
+              ? CLASSIFICATION_LABEL[classFilter].toLowerCase()
+              : MF_LABEL[mfFilter!]}{' '}
+            channel{filtered.length === 1 ? '' : 's'}
           </span>
           <button
-            onClick={() => { setClassFilter(null); setPage(1); }}
+            onClick={() => { setClassFilter(null); setMfFilter(null); setPage(1); }}
             className="text-micro font-semibold px-2.5 py-1 rounded-control border border-line text-secondary hover:text-ink hover:border-line-strong transition-colors"
           >
             Show all
@@ -1914,3 +1951,20 @@ function PagerButton({ children, onClick, disabled }: {
     </button>
   );
 }
+
+/* ─── Multiformat banding ─────────────────────────────────────────────
+   One definition, used by the counts, the filter and the banner, so the
+   figure and the list it opens can never describe different sets. */
+function mfBand(r: RowData): 'strong' | 'partial' | 'weak' | null {
+  const sc = r.multiformat?.score;
+  if (!sc) return null;
+  if (sc === 'Strong' || sc === 'Good') return 'strong';
+  if (sc === 'Partial') return 'partial';
+  return 'weak';
+}
+
+const MF_LABEL: Record<'strong' | 'partial' | 'weak', string> = {
+  strong: 'strong multiformat',
+  partial: 'partial multiformat',
+  weak: 'weak multiformat',
+};
