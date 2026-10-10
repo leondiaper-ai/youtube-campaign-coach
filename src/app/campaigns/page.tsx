@@ -499,30 +499,47 @@ export default async function CampaignsPage({
   const pinnedSlugs = new Set(pinned.map((p) => p.slug));
   const available = allArtists.filter((a) => !pinnedSlugs.has(a.slug));
 
-  /* The board owns its own chrome when the Channel Behaviour view is open
-     — that is a full-bleed surface with its own sidebar — so the shell is
-     rendered here rather than inside it, and the board suppresses this
-     wrapper when it takes the screen. */
   const mq = market.id === 'uk' ? '' : `?market=${market.id}`;
+
+  /* ── WHO OWNS THE CHROME ──────────────────────────────────────────
+     The Channel Behaviour view is a full-bleed takeover with its own
+     logo strip, back link and sidebar. This page was rendering its
+     header and title above it anyway, so that URL showed the VMG
+     wordmark twice, the nav once, and "Active Campaigns" as both a page
+     title and a back link.
+
+     So the shell is suppressed when the behaviour view is the one on
+     screen. The condition has to match the board's own exactly —
+     a slug that is present but does NOT resolve to a pinned card falls
+     through to the normal list, and hiding the header on that would
+     leave the page with no navigation at all. */
+  const sp = (await searchParams) ?? {};
+  const rawBehaviour = sp.behaviour;
+  const behaviourSlug = typeof rawBehaviour === 'string' ? rawBehaviour : null;
+  const behaviourOpen = !!behaviourSlug && cards.some((c) => c.slug === behaviourSlug);
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <AppHeader
-        nav={[
-          { href: `/growth${mq}`, label: 'Channel Health', match: '/growth' },
-          { href: `/campaigns${mq}`, label: 'Active Campaigns', match: '/campaigns' },
-          { href: `/coach${mq}`, label: 'Coach', match: '/coach' },
-          { href: '/teams', label: 'Workspaces', match: '/teams' },
-          { href: '/resources', label: 'Resources', match: '/resources' },
-        ]}
-        workspace={market.orgName}
-      />
-
-      <div className="max-w-[1180px] mx-auto px-6">
-        <PageTitle
-          title="Active Campaigns"
-          lede="The campaigns this team is working, with the decision each one is asking for."
+      {!behaviourOpen && (
+        <AppHeader
+          nav={[
+            { href: `/growth${mq}`, label: 'Channel Health', match: '/growth' },
+            { href: `/campaigns${mq}`, label: 'Active Campaigns', match: '/campaigns' },
+            { href: `/coach${mq}`, label: 'Coach', match: '/coach' },
+            { href: '/teams', label: 'Workspaces', match: '/teams' },
+            { href: '/resources', label: 'Resources', match: '/resources' },
+          ]}
+          workspace={market.orgName}
         />
+      )}
+
+      <div className={behaviourOpen ? '' : 'max-w-[1180px] mx-auto px-6'}>
+        {!behaviourOpen && (
+          <PageTitle
+            title="Active Campaigns"
+            lede="The campaigns this team is working, with the decision each one is asking for."
+          />
+        )}
 
         <Suspense fallback={null}>
           <CampaignStatusBoard market={market.id}
