@@ -15,6 +15,7 @@ import { readHistory } from '@/lib/snapshots';
 import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
+import { bestFormatStack } from '@/lib/formatStack';
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDaysBatch } from '@/lib/formatHistory';
 import AddArtistButton from '@/components/AddArtistButton';
@@ -138,6 +139,12 @@ export default async function ControlPage({
         bestAvailableSource: nc.bestAvailable.source,
         bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
         multiformat: snap?.recentUploads ? computeMultiformat(snap.recentUploads) : undefined,
+        /* Release-level, unlike multiformat above, which is channel-level.
+           Both are kept because they answer different questions — see the
+           header of formatStack.ts. */
+        formatStack: snap?.recentUploads
+          ? bestFormatStack(snap.recentUploads, a.name) ?? undefined
+          : undefined,
         /* Recent-vs-lifetime decided by the shared resolver, so this
            column can never disagree with the artist strip. */
         formatSplit:

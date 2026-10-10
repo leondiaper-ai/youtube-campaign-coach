@@ -1,5 +1,6 @@
 'use client';
 
+import type { FormatStack } from '@/lib/formatStack';
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -56,6 +57,8 @@ export type RowData = {
   /** Whether best available data should be used in Top Movers rankings */
   bestAvailableShouldUseInTopMovers?: boolean;
   /** Multiformat strategy — which YouTube formats are active in the last 90d */
+  /** Deepest set of formats built around one release. See formatStack.ts. */
+  formatStack?: FormatStack;
   multiformat?: {
     hasShorts: boolean;
     hasOfficialVideo: boolean;
@@ -675,6 +678,18 @@ export default function ChannelHealthBoard({
   const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
 
   // Multiformat strategy counts
+  /* Deepest stack first, then most recently extended — a stack still
+     being built is the live example, an old one is history. Capped at
+     five: this is a card that says "here is the behaviour", not a
+     leaderboard of everyone who has ever done it. */
+  const formatStacks = activeRows
+    .filter((r): r is RowData & { formatStack: FormatStack } => !!r.formatStack)
+    .map((row) => ({ row, stack: row.formatStack }))
+    .sort((a, b) =>
+      b.stack.formats.length - a.stack.formats.length
+      || b.stack.latestAt.localeCompare(a.stack.latestAt))
+    .slice(0, 5);
+
   const mfRows = activeRows.filter((r) => r.multiformat);
   const mfStrong = mfRows.filter((r) => mfBand(r) === 'strong').length;
   const mfPartial = mfRows.filter((r) => mfBand(r) === 'partial').length;
@@ -1396,6 +1411,58 @@ export default function ChannelHealthBoard({
               )}
             </div>
           )}
+          </div>
+        </div>
+      )}
+
+      {/* ─── FORMAT STACKS: multiformat around ONE release ───────────── */}
+      {view === 'managed' && formatStacks.length > 0 && (
+        <div className="mb-8">
+          <SectionHead
+            title="Format stacks"
+            meta="More than one format around the same release, last 120 days"
+          />
+          <div className="bg-surface border border-line rounded-card overflow-hidden">
+            <div className="divide-y divide-line-faint">
+              {formatStacks.map(({ row, stack }) => (
+                <Link
+                  key={row.slug}
+                  href={`${linkPrefix}/${row.slug}${linkSuffix}`}
+                  className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-raised no-underline"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-body font-bold text-ink truncate">{row.name}</div>
+                    <div className="text-micro text-muted truncate">{stack.song}</div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {stack.formats.map((f) => (
+                      <span
+                        key={f}
+                        className="text-[10px] font-bold uppercase tracking-label px-1.5 py-0.5 rounded bg-raised text-secondary"
+                      >
+                        {f}
+                      </span>
+                    ))}
+                    {/* Shorts are support, not a destination — see
+                        formatStack.ts — so they are counted beside the
+                        stack rather than chipped into it. */}
+                    {stack.shorts > 0 && (
+                      <span className="text-micro text-faint tabular-nums ml-1">
+                        +{stack.shorts} Shorts
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
+              Counts DESTINATIONS built around one song — video, visualiser, lyric,
+              live — not how many formats the channel posts in general. That
+              channel-level read is the Multiformat figure above, and the two
+              disagree on purpose: a channel can post four formats without ever
+              stacking two around the same record.
+            </div>
           </div>
         </div>
       )}
