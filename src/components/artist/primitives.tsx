@@ -138,7 +138,12 @@ export function VideoGrid({
                      LONG-FORM  is the destination. A release this far ahead
                                 should not be sitting there with one asset
                                 against it — so the prompt is about building
-                                support around it.
+                                more ways in. "Discovery assets" rather than
+                                "support assets" on purpose: support sounds
+                                like housekeeping for a record that is already
+                                found, and the job of a lyric video, a
+                                visualiser or a live cut is to be another
+                                surface people arrive through.
                      SHORT      is a discovery surface, and a Short that
                                 travels is only worth the reach if it routes
                                 anybody back to the music. So the prompt is
@@ -150,7 +155,7 @@ export function VideoGrid({
                 } before it. ${
                   format === 'short'
                     ? 'Is the track tagged and linked, so this sends people to the music?'
-                    : 'Has it got support around it — lyric, visualiser, live cut?'
+                    : 'Has it got more discovery assets around it — lyric, visualiser, live cut?'
                 }`}
               >
                 Hot asset
