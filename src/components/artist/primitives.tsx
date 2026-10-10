@@ -55,6 +55,8 @@ export interface GridVideo {
   publishedAt: string;
   /** Views added in the ranking window, when we hold daily history. */
   recentGain?: number | null;
+  /** Older uploads this one has already passed. See AheadOf in videoMomentum. */
+  aheadOf?: { passed: number; of: number } | null;
 }
 
 /**
@@ -95,6 +97,19 @@ export function VideoGrid({
                  a polished grid is worse than an empty frame. */
               style={{ display: 'block' }}
             />
+            {/* The badge sits ON the tile because it is a property of the
+                video, not of the row of numbers underneath. The title
+                carries the full sentence: a reader who wants to know what
+                "8/11" means should not have to guess. */}
+            {v.aheadOf && (
+              <span
+                className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded text-[9px] font-bold uppercase tracking-wide tabular-nums"
+                style={{ background: GAIN, color: '#FFFFFF' }}
+                title={`Already has more views than ${v.aheadOf.passed} of the ${v.aheadOf.of} uploads released before it, despite being newer than all of them. Views only accumulate, so this is a floor: it has beaten their whole lifetime totals in less time.`}
+              >
+                Ahead of {v.aheadOf.passed}/{v.aheadOf.of}
+              </span>
+            )}
           </div>
           <div className="text-[12px] font-bold leading-snug mt-2 text-ink line-clamp-2">{v.title}</div>
           {showGain && v.recentGain != null ? (

@@ -41,11 +41,82 @@ export interface MomentumCandidate {
   publishedAt: string;
 }
 
+/**
+ * How a video stands against the ones that came before it.
+ *
+ * ── WHY THIS IS NOT A VIEWS-PER-DAY COMPARISON ────────────────────────
+ * The obvious way to ask "is this outperforming the last album" is to
+ * compare each video at the same age. We cannot: per-video daily series
+ * only start when the recorder shipped, so a release from last year has
+ * no first-fortnight curve to compare against, and `viewsAtAge` returns
+ * null for exactly the videos a benchmark would need.
+ *
+ * The other obvious way — lifetime views divided by age — is worse than
+ * useless. View rate decays steeply, so a 9-day-old video always wins on
+ * average-per-day and every new upload would be tagged as outperforming.
+ *
+ * ── WHAT IS ACTUALLY PROVABLE ─────────────────────────────────────────
+ * Views only go up. So if a video is YOUNGER than another and already has
+ * MORE views, it has beaten that video's entire lifetime total in less
+ * time — and no age correction is needed to say so, because the age
+ * difference runs against the claim rather than for it.
+ *
+ * That is the whole measure: of the uploads older than this one, how many
+ * has it already passed. It understates rather than overstates, which is
+ * the right direction for a badge.
+ */
+export interface AheadOf {
+  /** Older uploads whose lifetime total this video has already passed. */
+  passed: number;
+  /** How many older uploads it was compared against. */
+  of: number;
+}
+
 export interface RankedVideo extends MomentumCandidate {
   /** Views added across `spanDays`, or null when no usable series. */
   recentGain: number | null;
   /** Days actually spanned by the two observations used. */
   spanDays: number | null;
+  /** Set only when it has passed at least half of the older uploads. */
+  aheadOf: AheadOf | null;
+}
+
+/**
+ * Below this many older uploads there is no comparison worth printing —
+ * "ahead of 1 of 1" is noise, and the oldest videos on a channel have
+ * nothing behind them at all.
+ */
+const MIN_REFERENCE = 4;
+
+/**
+ * The share of older uploads a video must have passed to earn the badge.
+ *
+ * Tuned against the Kings of Leon long-form catalogue, because a badge
+ * that lands on half a grid says nothing. Beating the median tagged 21 of
+ * 39 uploads; 0.8 tagged 10; 0.9 tags 5, which is the level where the
+ * badge picks out releases that are genuinely ahead of the catalogue
+ * rather than merely above its weaker half.
+ *
+ * At 0.9 the tagged set is My Whole World (35 of 35 — it has passed every
+ * older long-form on the channel) and the previous album's best, To Space
+ * at 28 of 30. That is the comparison this was asked for.
+ */
+const AHEAD_RATIO = 0.9;
+
+function computeAheadOf(v: MomentumCandidate, all: MomentumCandidate[]): AheadOf | null {
+  const born = Date.parse(v.publishedAt);
+  if (!Number.isFinite(born)) return null;
+
+  const older = all.filter((o) => {
+    if (o.id === v.id) return false;
+    const t = Date.parse(o.publishedAt);
+    return Number.isFinite(t) && t < born;
+  });
+  if (older.length < MIN_REFERENCE) return null;
+
+  const passed = older.filter(o => v.views > o.views).length;
+  if (passed < Math.ceil(older.length * AHEAD_RATIO)) return null;
+  return { passed, of: older.length };
 }
 
 export type RankBasis = 'recent' | 'lifetime';
@@ -159,7 +230,16 @@ export async function rankByMomentum(
 
   const scored: RankedVideo[] = candidates.map(c => {
     const g = recentGain(series.get(c.id), windowDays);
-    return { ...c, recentGain: g?.gain ?? null, spanDays: g?.spanDays ?? null };
+    /* Compared against the FULL candidate list, not the handful that will
+       be displayed — the reference set is everything of this format we
+       hold for the channel, so the badge does not change meaning when the
+       grid's limit changes. */
+    return {
+      ...c,
+      recentGain: g?.gain ?? null,
+      spanDays: g?.spanDays ?? null,
+      aheadOf: computeAheadOf(c, candidates),
+    };
   });
 
   const withGain = scored.filter(v => v.recentGain != null);
