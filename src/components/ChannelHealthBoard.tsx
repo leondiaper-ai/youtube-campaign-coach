@@ -1498,7 +1498,11 @@ export default function ChannelHealthBoard({
       {/* ─── BEST IN CLASS: Consistency Leaders ──────────────────────── */}
       {consistencyLeaders.length > 0 && (
         <div className="mb-8">
-          <SectionHead title="Best in class" meta="Highest sustained upload cadence, last 30 days" />
+          {/* Named for what it ranks. With a second "best" card on the
+              board (Top multiformat strategy) an unqualified "Best in
+              class" no longer says which class. The meta drops the
+              repeat of the word now the title carries it. */}
+          <SectionHead title="Best in class cadence" meta="Last 30 days" />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
           <div className="divide-y divide-line-faint">
             {consistencyLeaders.map((c, i) => {
