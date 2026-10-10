@@ -230,6 +230,12 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
 type Insight = {
   text: string;
   tone: 'positive' | 'warning' | 'neutral';
+  /* The artist the signal is ABOUT, so the row can be opened rather than
+     read and then hunted for in the list below. Deliberately optional:
+     the cadence-risk signal counts dozens of channels and has no single
+     subject, and giving it a link would promise a destination that does
+     not exist. */
+  slug?: string;
 };
 
 function computeInsights(rows: RowData[]): Insight[] {
@@ -247,6 +253,7 @@ function computeInsights(rows: RowData[]): Insight[] {
     insights.push({
       text: `${topSubGainer.name}: ${fmtDelta(s)} subs this week${hasViews ? ' — conversion improving' : ''}`,
       tone: 'positive',
+      slug: topSubGainer.slug,
     });
   }
 
@@ -259,6 +266,7 @@ function computeInsights(rows: RowData[]): Insight[] {
     insights.push({
       text: `${convLeak.name}: ${fmtNum(convLeak.views7Delta ?? 0)} views but subs flat — conversion leak`,
       tone: 'warning',
+      slug: convLeak.slug,
     });
   }
 
@@ -270,6 +278,7 @@ function computeInsights(rows: RowData[]): Insight[] {
     insights.push({
       text: `${latent.name}: ${fmtDelta(latent.views7Delta ?? 0)} views but no recent uploads — latent demand`,
       tone: 'neutral',
+      slug: latent.slug,
     });
   }
 
@@ -291,6 +300,7 @@ function computeInsights(rows: RowData[]): Insight[] {
       insights.push({
         text: `${bigDrop.name}: views ${fmtPct(bigDrop.viewsWoW ?? 0)} week-on-week — attention dropping`,
         tone: 'warning',
+        slug: bigDrop.slug,
       });
     }
   }
@@ -1201,14 +1211,29 @@ export default function ChannelHealthBoard({
           <div className="bg-surface border border-line rounded-card divide-y divide-line-faint">
             {insights.map((ins, i) => {
               const ic = INSIGHT_ICON[ins.tone];
-              return (
-                <div
-                  key={i}
-                  className="flex items-start gap-2.5 px-5 py-3 text-body leading-snug"
-                  style={{ color: ic.color }}
-                >
+              const body = (
+                <>
                   <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
                   <span>{ins.text}</span>
+                </>
+              );
+              const cls = 'flex items-start gap-2.5 px-5 py-3 text-body leading-snug';
+              /* A signal names an artist, and the next thing anybody does is
+                 go and look at them. Only the ones WITH a subject become
+                 links — the aggregate cadence row stays plain text rather
+                 than carrying a hover state that leads nowhere. */
+              return ins.slug ? (
+                <Link
+                  key={i}
+                  href={`${linkPrefix}/${ins.slug}${linkSuffix}`}
+                  className={`${cls} transition-colors hover:bg-raised`}
+                  style={{ color: ic.color, textDecoration: 'none' }}
+                >
+                  {body}
+                </Link>
+              ) : (
+                <div key={i} className={cls} style={{ color: ic.color }}>
+                  {body}
                 </div>
               );
             })}
@@ -1224,8 +1249,12 @@ export default function ChannelHealthBoard({
         return (
           <div className="mb-8">
             <SectionHead title="Top performing videos" meta="Last 14 days, by daily velocity" />
-            <div className="bg-surface border border-line rounded-card p-5 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:divide-x divide-line">
-              {/* Long-form column */}
+            {/* Stacked, not two columns. Side by side, a long-form row and a
+                Shorts row sat at the same height and read as one ranking of
+                ten — and with thumbnails the formats are different shapes,
+                so columns of unequal tile heights never line up. Long-form
+                first because that is the format the board argues for. */}
+            <div className="bg-surface border border-line rounded-card p-5 space-y-5">
               {topLongform.length > 0 && (
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Long-form</div>
@@ -1236,9 +1265,8 @@ export default function ChannelHealthBoard({
                   </div>
                 </div>
               )}
-              {/* Shorts column */}
               {topShorts.length > 0 && (
-                <div className="lg:pl-6">
+                <div className={topLongform.length > 0 ? 'pt-5 border-t border-line' : undefined}>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Shorts</div>
                   <div className="space-y-2">
                     {topShorts.map((v, i) => (
@@ -1600,11 +1628,61 @@ function MoverColumn({ title, items, linkPrefix = '/watcher', linkSuffix = '' }:
   );
 }
 
+/* ─── Video thumbnail ──────────────────────────────────────────────────
+   WHICH URL, AND WHY IT IS NOT THE SAME FOR BOTH FORMATS.
+
+   A Short is a vertical video, and the standard thumbnail endpoints return
+   it letterboxed into a 16:9 box — cropping that back to portrait throws
+   away most of the frame. `oardefault.jpg` is the original-aspect-ratio
+   poster: probed live, it returns 1080x1920 for a Short and the 120x90
+   grey placeholder for a long-form upload. So Shorts get oardefault and
+   long-form gets mqdefault, which is 320x180 and always exists.
+
+   THE PLACEHOLDER IS SERVED AT HTTP 200, so `onError` never fires for a
+   missing image — the only way to detect it is the natural width. Hence
+   the onLoad check rather than an error handler, with a data flag so a
+   failing fallback cannot loop. */
+function VideoThumb({ videoId, isShort }: { videoId: string; isShort: boolean }) {
+  const primary = isShort
+    ? `https://i.ytimg.com/vi/${videoId}/oardefault.jpg`
+    : `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
+  return (
+    <div
+      className={`relative shrink-0 overflow-hidden rounded bg-raised ${isShort ? 'w-[42px] h-[74px]' : 'w-[94px] h-[53px]'}`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={primary}
+        alt=""
+        loading="lazy"
+        className="w-full h-full object-cover"
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img.naturalWidth <= 120 && img.dataset.fellBack !== '1') {
+            img.dataset.fellBack = '1';
+            img.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+          }
+        }}
+      />
+    </div>
+  );
+}
+
 function VideoRow({ v, rank, linkPrefix, linkSuffix = '' }:
   { v: TopVideo; rank: number; linkPrefix: string; linkSuffix?: string }) {
   return (
     <div className="flex items-center gap-3 text-[12px]">
       <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{rank}.</span>
+      <a
+        href={`https://youtube.com/watch?v=${v.videoId}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="shrink-0"
+        aria-hidden
+        tabIndex={-1}
+      >
+        <VideoThumb videoId={v.videoId} isShort={v.isShort} />
+      </a>
       <div className="flex-1 min-w-0">
         <a
           href={`https://youtube.com/watch?v=${v.videoId}`}
