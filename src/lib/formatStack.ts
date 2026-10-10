@@ -85,18 +85,37 @@ export function songKey(title: string, artistName: string): string {
 
 /** Which destination format an upload is, or null if it is not one. */
 export function formatOfUpload(u: RecentUpload): StackFormat | null {
+  return classifyUpload(u)?.format ?? null;
+}
+
+/**
+ * The format, and whether the TITLE SAID SO.
+ *
+ * The difference matters more than it looks. "(Visualizer)", "(Live)" and
+ * "(Official Video)" are the artist declaring a format. A bare
+ * "Artist - Title" is not — it is the shape of a lead single upload, and
+ * also the shape of every catalogue upload ever made.
+ *
+ * Treating the bare case as a confident 'Video' is what put the Ennio
+ * Morricone estate channel on this card: a catalogue upload of The
+ * Mission and a live solo-piano recording of the same piece scored as
+ * "Video + Live", which is indistinguishable from a campaign to the
+ * matcher and nothing like one in life.
+ */
+function classifyUpload(u: RecentUpload): { format: StackFormat; tagged: boolean } | null {
   if (isShort(u)) return null;
   const t = u.title ?? '';
-  if (/\blyric/i.test(t)) return 'Lyric';
-  if (/\bvisuali[sz]er\b/i.test(t)) return 'Visualiser';
-  if (/[[(]\s*(official\s+)?live\b|\blive\s+(at|from|session)\b/i.test(t)) return 'Live';
-  /* Anything else long-form is only a destination if it reads like a
-     release rather than a tour vlog. An explicit video tag qualifies it;
-     so does a bare "Artist - Title", which is how the main upload is
-     named. Everything else — "📍Glasgow", "August 26, 2026" — is not a
-     format for a record and must not create a one-item stack. */
-  if (/[[(]\s*official\s+(music\s+)?video\s*[)\]]|\bofficial\s+(music\s+)?video\b/i.test(t)) return 'Video';
-  return 'Video';
+  if (/\blyric/i.test(t)) return { format: 'Lyric', tagged: true };
+  if (/\bvisuali[sz]er\b/i.test(t)) return { format: 'Visualiser', tagged: true };
+  if (/[[(]\s*(official\s+)?live\b|\blive\s+(at|from|session)\b/i.test(t)) {
+    return { format: 'Live', tagged: true };
+  }
+  if (/[[(]\s*official\s+(music\s+)?video\s*[)\]]|\bofficial\s+(music\s+)?video\b/i.test(t)) {
+    return { format: 'Video', tagged: true };
+  }
+  /* Untagged long-form. Counted as the release's main video, because that
+     is usually what it is — but it cannot carry a stack on its own. */
+  return { format: 'Video', tagged: false };
 }
 
 /**
@@ -121,6 +140,8 @@ export function bestFormatStack(
   type Acc = {
     song: string;
     formats: Set<StackFormat>;
+    /** Formats the title explicitly declared. See classifyUpload. */
+    tagged: Set<StackFormat>;
     shorts: number;
     latestAt: string;
     firstAt: string;
@@ -128,8 +149,9 @@ export function bestFormatStack(
   const byKey = new Map<string, Acc>();
 
   for (const u of recent) {
-    const fmt = formatOfUpload(u);
-    if (!fmt) continue;
+    const cls = classifyUpload(u);
+    if (!cls) continue;
+    const fmt = cls.format;
     const key = songKey(u.title, artistName).toLowerCase();
     /* A key of one or two characters is a title we failed to parse, not a
        song. Grouping on it would merge unrelated uploads. */
@@ -137,11 +159,13 @@ export function bestFormatStack(
     const acc = byKey.get(key) ?? {
       song: songKey(u.title, artistName),
       formats: new Set<StackFormat>(),
+      tagged: new Set<StackFormat>(),
       shorts: 0,
       latestAt: u.publishedAt,
       firstAt: u.publishedAt,
     };
     acc.formats.add(fmt);
+    if (cls.tagged) acc.tagged.add(fmt);
     if (u.publishedAt > acc.latestAt) acc.latestAt = u.publishedAt;
     if (u.publishedAt < acc.firstAt) acc.firstAt = u.publishedAt;
     byKey.set(key, acc);
@@ -158,8 +182,26 @@ export function bestFormatStack(
     }
   }
 
+  /* ── WHAT COUNTS AS A STACK ───────────────────────────────────────
+     Two formats, and then evidence that this is a release being worked
+     rather than two catalogue uploads of the same song:
+
+       two DECLARED formats          the artist labelled both, or
+       one declared format + Shorts  they labelled one and promoted it.
+
+     A stack resting on an untagged upload with no Shorts behind it is
+     the catalogue case, and it is the one that has to be excluded —
+     without this rule the Morricone estate channel outranks Ezra
+     Collective on a card about campaign strategy.
+
+     Checked against the live board: this keeps Kings of Leon (2 declared
+     + 5 Shorts), Lukas Graham (3 declared), Ezra Collective (2 declared)
+     and mary in the junkyard (2 declared + 7 Shorts), and drops only
+     Morricone (1 declared, 0 Shorts). The Shorts clause earns its place
+     on the other side — it is what would keep a real campaign whose lead
+     upload is untagged, which is how a lead single is usually titled. */
   const stacks = Array.from(byKey.values())
-    .filter((a) => a.formats.size >= 2)
+    .filter((a) => a.formats.size >= 2 && (a.tagged.size >= 2 || a.shorts >= 1))
     .map((a) => ({
       song: a.song,
       formats: FORMAT_ORDER.filter((f) => a.formats.has(f)),
