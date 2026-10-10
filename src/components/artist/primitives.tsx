@@ -98,16 +98,22 @@ export function VideoGrid({
               style={{ display: 'block' }}
             />
             {/* The badge sits ON the tile because it is a property of the
-                video, not of the row of numbers underneath. The title
-                carries the full sentence: a reader who wants to know what
-                "8/11" means should not have to guess. */}
+                video, not of the row of numbers underneath.
+
+                "Ahead of 5/5" was what the measure computes, not what
+                anybody says out loud — a label reads a grid to find the
+                record that is working, and the phrase for that is a hot
+                asset. The ratio stays on hover, because the badge still
+                has to be checkable by whoever is asked to defend it. */}
             {v.aheadOf && (
               <span
-                className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded text-[9px] font-bold uppercase tracking-wide tabular-nums"
+                className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded text-[9px] font-bold uppercase tracking-wide"
                 style={{ background: GAIN, color: '#FFFFFF' }}
-                title={`Already has more views than ${v.aheadOf.passed} of the ${v.aheadOf.of} uploads released before it, despite being newer than all of them. Views only accumulate, so this is a floor: it has beaten their whole lifetime totals in less time.`}
+                title={`Outperforming the catalogue: more views than ${
+                  v.aheadOf.passed === v.aheadOf.of ? 'every one' : `${v.aheadOf.passed}`
+                } of the ${v.aheadOf.of} releases that came before it on this channel, despite being newer than all of them. Views only go up, so this compares its total against their full lifetime totals.`}
               >
-                Ahead of {v.aheadOf.passed}/{v.aheadOf.of}
+                Hot asset
               </span>
             )}
           </div>
