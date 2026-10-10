@@ -18,6 +18,21 @@ export const PAPER = '#FAF7F2';
 export const RULE = '#E9E2D3';
 export const GAIN = '#0C6A3F';
 export const LOSS = '#8A1F0C';
+/**
+ * The hot-asset badge. Burnt orange, and deliberately none of the three
+ * colours already in use:
+ *
+ *   GAIN green     is the growth NUMBER. The badge sat on it, which read
+ *                  as another metric rather than a flag.
+ *   negative red   means cold or declining on the health tiles. A positive
+ *                  badge in the decline colour argues with the board.
+ *   signal #FF4A1C is the VMG accent, rationed for navigation — and at
+ *                  3.36:1 against white it fails AA for small text, so it
+ *                  could not carry this label anyway.
+ *
+ * 5.65:1 against white, which clears AA for small bold text.
+ */
+export const HOT = '#B4411C';
 
 /* YouTube serves a deterministic thumbnail per video id, so real imagery
    costs no API request. hqdefault exists for every public video; the
@@ -108,7 +123,7 @@ export function VideoGrid({
             {v.aheadOf && (
               <span
                 className="absolute top-1.5 left-1.5 px-1.5 py-[3px] rounded text-[9px] font-bold uppercase tracking-wide"
-                style={{ background: GAIN, color: '#FFFFFF' }}
+                style={{ background: HOT, color: '#FFFFFF' }}
                 /* The tooltip is a PROMPT, not a proof. It was four lines
                    explaining monotonic view counts, which is the reason the
                    badge is trustworthy and not the reason anyone cares. What
