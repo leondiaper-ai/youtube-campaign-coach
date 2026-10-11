@@ -130,7 +130,19 @@ function gatherInsights(p: ReportProps): string[] {
       if (pct >= 20) {
         pool.push({
           priority: 7,
-          text: `7-day channel views increased ${pct}% compared to the previous release`,
+          /* Says what was actually compared. This read "7-day channel
+             views increased X% compared to the previous release", which
+             describes neither operand: the figures are two VIDEOS'
+             views-per-day, and the channel's seven-day total is a
+             different number on the same card. Nickelback printed 780%
+             here while its channel week was up 54%.
+
+             The comparison is still age-biased and the wording no longer
+             hides it: view curves decay, so a 16-day-old video almost
+             always out-runs an 88-day-old one per day whatever its
+             reach. Treat it as "this one started faster", not as proof
+             it will finish ahead. */
+          text: `"${curr.title}" is running at ~${fmtNum(currVpd)} views/day against ~${fmtNum(prevVpd)}/day for the upload before it (${pct}% faster, and it is ${prev.daysAgo - curr.daysAgo} days younger)`,
         });
       }
     }
