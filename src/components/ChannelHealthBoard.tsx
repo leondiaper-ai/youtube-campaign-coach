@@ -1498,13 +1498,17 @@ export default function ChannelHealthBoard({
                   : `Show all ${latentDemand.length} →`}
               </button>
             )}
-            <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
-              Channels posting little or nothing whose fans are still commenting far
-              more than usual. The multiple compares comments per 1,000 views against
-              an average channel on this roster, which gets {ROSTER_COMMENTS_PER_1K} —
-              a rate, so a big catalogue cannot win it by being big. It counts how
-              much people are talking, NOT whether they are being nice: a comment
-              count cannot tell praise from a pile-on, and only reading them can.
+            {/* One line, and it is the one that stops a misread. Everything
+                else the old footer said — the rate, the denominator, why a
+                big catalogue cannot win — is derivable from the rows or
+                simply not load-bearing. That a comment count cannot tell
+                praise from a pile-on is neither, so it stays, with the
+                full version on hover. */}
+            <div
+              className="px-5 py-2.5 border-t border-line bg-raised/50 text-micro text-muted"
+              title={`Comments per 1,000 views against an average channel on this roster, which gets ${ROSTER_COMMENTS_PER_1K}. A rate, so a big catalogue cannot win it by being big. A comment count cannot tell praise from a pile-on — only reading them can.`}
+            >
+              Counts how much they are talking, not whether they are being nice.
             </div>
           </div>
         </div>
@@ -1576,13 +1580,14 @@ export default function ChannelHealthBoard({
                 {showAllStacks ? 'Show fewer' : `Show all ${formatStacks.length} →`}
               </button>
             )}
-            <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
-              Campaigns we are tracking sort first, then by how many formats deep
-              the stack is. This counts formats around ONE RELEASE — video,
-              visualiser, lyric, live. The Multiformat figure higher up counts
-              formats across the CHANNEL, which is a different question, and the
-              two disagree on purpose: a channel can post four formats without ever
-              building two around the same record.
+            {/* The one thing a reader cannot work out from the rows is why
+                this disagrees with the Multiformat figure above it. That
+                stays; the sort order is visible in the list itself. */}
+            <div
+              className="px-5 py-2.5 border-t border-line bg-raised/50 text-micro text-muted"
+              title="Tracked campaigns sort first, then by how deep the stack is. The Multiformat figure higher up counts formats across the whole channel, which is a different question — a channel can post four formats without ever building two around the same record."
+            >
+              Formats around one release — not the channel-wide figure above.
             </div>
           </div>
         </div>
