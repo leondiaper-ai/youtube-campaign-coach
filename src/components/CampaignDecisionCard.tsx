@@ -981,6 +981,8 @@ export function DecisionCard({
         </div>
       </div>
 
+      <div className="flex flex-col lg:flex-row gap-5 items-start">
+        <div className="min-w-0 flex-1 w-full">
       {/* ─── 2. The read panel ────────────────────────────────────
           Six cells on a grid: the figures, the content mix folded under
           the upload count that it qualifies, and the trend. See the
@@ -1358,113 +1360,107 @@ export function DecisionCard({
           </button>
         </div>
       </div>
+        </div>
 
-      {/* ─── Recent uploads ────────────────────────────────────────
+      {/* ─── The work ───────────────────────────────────────────────
           A campaign card that never shows the work is a spreadsheet row.
-          Three newest, each labelled with its format, so the cadence
-          figures above have something to point at. */}
-      {card.recentVideos && card.recentVideos.length > 0 && (
-        <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2.5">
-            <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted">
+          Both rows live in a rail beside the read rather than under it.
+
+          Stacked underneath, four Shorts at 9:16 across the full width
+          of the card were 450px tall on their own and the card ran past
+          1000px, so the numbers and the videos could not be held in one
+          look — which is the whole job of a campaign card. In a 300px
+          rail the same four tiles are 124px, the long-form row becomes
+          three rows of thumbnail-and-title, and the card reads at a
+          glance without the tiles getting so small they stop being
+          pictures. */}
+      <aside className="shrink-0 w-full lg:w-[300px] lg:border-l lg:pl-5" style={{ borderColor: 'rgba(14,14,14,0.07)' }}>
+        {card.recentVideos && card.recentVideos.length > 0 && (
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">
               Moving now · Long-form
+            </div>
+            <div className="flex flex-col gap-2.5">
+              {card.recentVideos.map((v) => (
+                <a
+                  key={v.id}
+                  href={`https://www.youtube.com/watch?v=${v.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group/vid no-underline flex gap-2.5 items-start"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="relative rounded-md overflow-hidden bg-sunken shrink-0 w-[104px]" style={{ aspectRatio: '16 / 9' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+                      alt=""
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover/vid:scale-[1.04]"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold text-ink leading-snug line-clamp-2">
+                      {v.title}
+                    </div>
+                    <div className="text-[10px] mt-0.5 tabular-nums">
+                      {v.recentGain != null ? (
+                        <>
+                          <span className="font-bold" style={{ color: '#0C6A3F' }}>
+                            +{fmtNum(v.recentGain)}
+                          </span>
+                          <span className="text-muted"> · {fmtNum(v.views)} · {v.daysAgo}d</span>
+                        </>
+                      ) : (
+                        <span className="text-muted">{fmtNum(v.views)} · {v.daysAgo}d</span>
+                      )}
+                    </div>
+                  </div>
+                </a>
+              ))}
             </div>
             {card.recentVideosNote && (
               /* The order is a claim about what is being watched, so the
                  basis for it is printed rather than assumed. */
-              <div className="text-[11px] text-faint">{card.recentVideosNote}</div>
+              <div className="text-[10px] text-faint mt-2 leading-tight">{card.recentVideosNote}</div>
             )}
           </div>
-          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${card.recentVideos.length}, minmax(0, 1fr))` }}>
-            {card.recentVideos.map((v) => (
-              <a
-                key={v.id}
-                href={`https://www.youtube.com/watch?v=${v.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/vid no-underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="relative rounded-lg overflow-hidden bg-sunken" style={{ aspectRatio: '16 / 9' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
-                    alt=""
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover/vid:scale-[1.03]"
-                  />
-                </div>
-                <div className="text-[12px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
-                  {v.title}
-                </div>
-                <div className="text-[11px] mt-0.5 tabular-nums">
-                  {v.recentGain != null ? (
-                    /* Ranked on the gain, so the gain leads. Lifetime
-                       stays as context behind it — putting the total
-                       first would explain the order with the wrong
-                       number. */
-                    <>
+        )}
+
+        {card.recentShorts && card.recentShorts.length > 0 && (
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
+            <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">
+              Top shorts
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {card.recentShorts.map((v) => (
+                <a
+                  key={v.id}
+                  href={`https://www.youtube.com/shorts/${v.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group/sh no-underline"
+                  title={v.title}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ShortThumb id={v.id} />
+                  <div className="text-[10px] mt-1 tabular-nums">
+                    {v.recentGain != null ? (
                       <span className="font-bold" style={{ color: '#0C6A3F' }}>
                         +{fmtNum(v.recentGain)}
                       </span>
-                      <span className="text-muted"> · {fmtNum(v.views)} total · {v.daysAgo}d ago</span>
-                    </>
-                  ) : (
-                    <span className="text-muted">{fmtNum(v.views)} views · {v.daysAgo}d ago</span>
-                  )}
-                </div>
-              </a>
-            ))}
+                    ) : (
+                      <span className="text-muted">{fmtNum(v.views)}</span>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </aside>
 
-      {/* ─── Top Shorts ────────────────────────────────────────────
-          Shorts used to compete with long-form for the same three
-          slots, so a channel whose Shorts were moving pushed its own
-          music videos off the card — and a Short in a 16:9 tile is a
-          centre-crop of a vertical frame, which shows the least useful
-          part of it. They get their own row, in their own aspect, at a
-          size that says they are the support rather than the release.
-
-          Ranked by the same seven-day momentum as the row above, so the
-          two rows answer the same question about different formats. */}
-      {card.recentShorts && card.recentShorts.length > 0 && (
-        <div className="mt-4">
-          <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">
-            Top shorts
-          </div>
-          <div className="grid grid-cols-4 gap-3">
-            {card.recentShorts.map((v) => (
-              <a
-                key={v.id}
-                href={`https://www.youtube.com/shorts/${v.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group/sh no-underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ShortThumb id={v.id} />
-                <div className="text-[11px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
-                  {v.title}
-                </div>
-                <div className="text-[10px] mt-0.5 tabular-nums">
-                  {v.recentGain != null ? (
-                    <>
-                      <span className="font-bold" style={{ color: '#0C6A3F' }}>
-                        +{fmtNum(v.recentGain)}
-                      </span>
-                      <span className="text-muted"> · {fmtNum(v.views)}</span>
-                    </>
-                  ) : (
-                    <span className="text-muted">{fmtNum(v.views)} views</span>
-                  )}
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
 
       {snapshot && <SnapshotModal text={snapshot} onClose={() => setSnapshot(null)} />}
       </div>{/* close padded body */}
