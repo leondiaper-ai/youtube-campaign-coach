@@ -14,6 +14,8 @@ import {
   type GrowthInput,
 } from '@/lib/youtubeGrowthOS';
 import { rankByMomentum } from '@/lib/videoMomentum';
+import { commentDemand } from '@/lib/commentDemand';
+import { bestFormatStack } from '@/lib/formatStack';
 import { checkContentStructure, computeMultiformat } from '@/lib/contentStructure';
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
@@ -120,6 +122,17 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         bestAvailableSource: nc.bestAvailable.source,
         bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
         multiformat: snap?.recentUploads ? computeMultiformat(snap.recentUploads) : undefined,
+        /* ── THE SAME THREE FIELDS THE CENTRAL BOARD BUILDS ──────────
+           The All tab here IS ChannelHealthBoard, so the behaviour cards
+           it renders were already written — they simply had no data on a
+           team board, because these were only populated in growth/page.
+           Every one reads from the snap that is already in hand, so a
+           regional board costs no more than it did. */
+        thumbnail: snap?.thumbnail ?? undefined,
+        commentDemand: snap?.recentUploads ? commentDemand(snap.recentUploads) ?? undefined : undefined,
+        formatStack: snap?.recentUploads
+          ? bestFormatStack(snap.recentUploads, entry.displayName) ?? undefined
+          : undefined,
       };
     }),
   );
