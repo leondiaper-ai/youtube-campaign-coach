@@ -329,18 +329,25 @@ export function classifyCard(card: CardData): BoardSection {
 }
 
 // ─── Momentum one-liner (kept for reports) ──────────────────────────────
+/* Weekly movement, CHANNEL scope — computeWeeklyWindows reads the channel
+   history, so these are the channel's weeks, not the campaign's.
+
+   The campaign's own total used to be appended here as "· 13M total",
+   which put two different scopes in one sentence and made a channel week
+   of 17M look larger than a campaign lifetime of 13M. Read as one
+   measure that is simply a broken subtraction; read as two it is just
+   two true numbers about different things. The campaign total now has
+   its own labelled place on the card. */
 function momentumLine(ct: CampaignTrendData): string {
   const curr = ct.currentWeekViews != null ? fmtNum(ct.currentWeekViews) : '—';
   const prev = ct.previousWeekViews != null && ct.previousWeekViews > 0 ? fmtNum(ct.previousWeekViews) : null;
-  const total = ct.campaignViews != null ? fmtNum(ct.campaignViews) : '—';
   const arrow = (ct.currentWeekViews != null && ct.previousWeekViews != null)
     ? (ct.currentWeekViews > ct.previousWeekViews ? '↑' :
        ct.currentWeekViews < ct.previousWeekViews ? '↓' : '→')
     : '→';
-  if (prev) {
-    return `${curr} this week (${arrow} vs ${prev} last week) · ${total} total`;
-  }
-  return `${curr} this week · ${total} total`;
+  return prev
+    ? `${curr} this week (${arrow} vs ${prev} last week)`
+    : `${curr} this week`;
 }
 
 // ─── Campaign Progress Report generator ────────────────────────────────
@@ -387,7 +394,7 @@ function generateSnapshot(card: CardData): string {
     lines.push(`Channel view delta (whole channel, catalogue included): ${ct.totalChannelViews != null ? fmtNum(ct.totalChannelViews) : '—'}`);
     lines.push(`Channel subs delta: ${ct.totalChannelSubs != null ? `${ct.totalChannelSubs >= 0 ? '+' : ''}${fmtNum(ct.totalChannelSubs)}` : '—'}`);
     lines.push(`Content: ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
-    lines.push(`Momentum: ${momentumLine(ct)}`);
+    lines.push(`Channel momentum: ${momentumLine(ct)}`);
   }
 
   if (card.weeklyProgress.length > 0) {
@@ -1080,17 +1087,39 @@ export function DecisionCard({
           them, on the card's own ground, with the momentum underneath. */}
       {cw && (
         <div className="mb-3 pl-3" style={{ borderLeft: '2px solid rgba(44,107,255,0.4)' }}>
+          {/* ── CAMPAIGN SCOPE ──────────────────────────────────────
+              The campaign's own assets: what was published since the
+              campaign started, and what those uploads have earned. */}
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-body">
             <span className="font-bold text-ink">Day {cw.campaignDay}</span>
             <span className="text-faint">·</span>
+            <span className="tabular-nums font-semibold text-ink">
+              {cw.contentViews != null ? fmtNum(cw.contentViews) : '—'}
+              <span className="text-muted font-normal"> campaign views</span>
+            </span>
+            <span className="text-muted tabular-nums">
+              {cw.contentMix.uploads} asset{cw.contentMix.uploads !== 1 ? 's' : ''}
+              {cw.contentMix.uploads > 0 && (
+                <span className="text-faint">
+                  {' '}({cw.contentMix.videos} long-form · {cw.contentMix.shorts} Shorts)
+                </span>
+              )}
+            </span>
+          </div>
+
+          {/* ── CHANNEL SCOPE ───────────────────────────────────────
+              The channel around the campaign, catalogue included. Worth
+              knowing, and never the same number as the line above. */}
+          <div className="text-meta text-muted mt-1 flex flex-wrap items-baseline gap-x-2">
+            <span className="font-semibold text-ink/50">Whole channel</span>
             {(() => {
-              // Same rule as the headline: a negative campaign-window total
+              // Same rule as the headline: a negative channel-window total
               // is a snapshot disagreement, not views lost.
-              const campViews = trustedViewDelta(cw.channelViewsDelta);
+              const chViews = trustedViewDelta(cw.channelViewsDelta);
               return (
                 <span className="tabular-nums font-semibold"
-                  style={{ color: campViews != null ? deltaColor(campViews) : 'rgba(14,14,14,0.3)' }}>
-                  {campViews != null ? `+${fmtNum(campViews)}` : 'Updating'}
+                  style={{ color: chViews != null ? deltaColor(chViews) : 'rgba(14,14,14,0.3)' }}>
+                  {chViews != null ? `+${fmtNum(chViews)}` : 'Updating'}
                   <span className="text-muted font-normal"> views</span>
                 </span>
               );
@@ -1102,16 +1131,11 @@ export function DecisionCard({
                 <span className="text-muted font-normal"> subs</span>
               </span>
             )}
-            <span className="text-muted tabular-nums">
-              {cw.contentMix.uploads} upload{cw.contentMix.uploads !== 1 ? 's' : ''}
-            </span>
+            <span className="text-faint">since day 1</span>
+            {ct && ct.currentWeekViews != null && ct.currentWeekViews > 0 && (
+              <span className="tabular-nums text-faint">· {momentumLine(ct)}</span>
+            )}
           </div>
-
-          {ct && ct.currentWeekViews != null && ct.currentWeekViews > 0 && (
-            <div className="text-meta text-muted mt-1 tabular-nums">
-              {momentumLine(ct)}
-            </div>
-          )}
 
           {/* Weekly progress (expandable dropdown) */}
           {card.weeklyProgress.length > 0 && (
