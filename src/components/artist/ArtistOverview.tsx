@@ -24,6 +24,7 @@
    LIFETIME NEVER TAKES THE BIG TYPE. See FormatBlock.
    ═══════════════════════════════════════════════════════════════════════ */
 
+import { formatPerformance } from '@/lib/formatPerformance';
 import {
   fmtNum, daysSince, STATUS_COLOR,
   type ChannelState, type RecentUpload, type Artist,
@@ -99,6 +100,12 @@ export default async function ArtistOverview({
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
   const split = resolveRowFormatSplit(uploads, days, snap?.views ?? null);
+
+  /* Which format earns its cost ON THIS CHANNEL. Every page here tells a
+     team to build more formats around a release; this is the only thing
+     that says which one to build. Computed from the uploads already
+     loaded — no extra call. */
+  const perf = formatPerformance(uploads);
 
   const shorts = uploads.filter(u => classifyUploadFormat(u) === 'short');
   const longform = uploads.filter(u => classifyUploadFormat(u) !== 'short');
@@ -236,6 +243,73 @@ export default async function ArtistOverview({
             reading is old enough to change a decision, rather than on
             every render. */}
       </section>
+
+      {/* ═══ 3b. WHAT WORKS ON THIS CHANNEL ══════════════════════ */}
+      {perf.rows.length > 0 && (
+        <section className="mt-12 pt-8" style={{ borderTop: `1px solid ${RULE}` }}>
+          <Eyebrow>Which format performs · last 12 months</Eyebrow>
+
+          {/* The finding, in a sentence, before the table. A reader who
+              only takes one line off this page should take this one.
+              Only stated when the lead is big enough to call — see
+              `clear` in formatPerformance. */}
+          {perf.clear && perf.best && (
+            <div className="mt-4 text-[15px] font-bold leading-snug text-ink">
+              {perf.best.label}s are this channel&rsquo;s strongest format
+              {perf.rows[1] && (
+                <span className="font-normal text-ink/50">
+                  {' '}— {Math.round((perf.best.median / perf.rows[1].median) * 10) / 10}× the median of {perf.rows[1].label.toLowerCase()}s
+                </span>
+              )}
+            </div>
+          )}
+          {!perf.clear && (
+            <div className="mt-4 text-[15px] font-bold leading-snug text-ink/70">
+              {perf.rows.length === 1
+                ? `Only ${perf.rows[0].label.toLowerCase()}s have enough uploads to read yet.`
+                : 'No format is clearly ahead on this channel.'}
+            </div>
+          )}
+
+          <div className="mt-5 space-y-2" style={{ maxWidth: 560 }}>
+            {perf.rows.map((r) => {
+              const pct = perf.rows[0].median > 0 ? (r.median / perf.rows[0].median) * 100 : 0;
+              return (
+                <div key={r.type} className="flex items-center gap-3 text-[12px]">
+                  <span className="w-[104px] shrink-0 font-bold text-ink">{r.label}</span>
+                  <span className="flex-1 h-[7px] rounded-full overflow-hidden" style={{ background: RULE }}>
+                    <span
+                      className="block h-full rounded-full"
+                      style={{ width: `${Math.max(pct, 2)}%`, background: r === perf.rows[0] ? GAIN : '#B8B0A2' }}
+                    />
+                  </span>
+                  <span className="w-[62px] shrink-0 text-right tabular-nums font-bold text-ink">
+                    {fmtNum(r.median)}
+                  </span>
+                  {/* Count and age are not decoration. A median of three
+                      is fragile, and an older format has had longer to
+                      gather the views it is being credited with. */}
+                  <span className="w-[86px] shrink-0 text-right tabular-nums text-ink/40">
+                    {r.count} · {r.medianAgeDays}d old
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 text-[11px] leading-relaxed text-ink/40" style={{ maxWidth: 560 }}>
+            Median views per upload, so one hit does not carry a format.
+            Views accumulate, so an older format has had longer to gather
+            them — the bias flatters whichever format is older, which is
+            why the median age sits beside each row.
+            {perf.shorts && (
+              <> Shorts are counted separately ({fmtNum(perf.shorts.median)} median
+              across {perf.shorts.count}): YouTube changed how Shorts views are
+              counted in March 2025, so they are not the same unit as long-form.</>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ═══ 4+5. FORMAT + MARKETS, side by side ════════════════ */}
       <section className="mt-12 pt-8 grid gap-12 lg:grid-cols-2" style={{ borderTop: `1px solid ${RULE}` }}>
