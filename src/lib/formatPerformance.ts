@@ -33,7 +33,10 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import type { RecentUpload } from './artists';
-import { classifyLaunchType, type LaunchContentType } from '@/components/LaunchModule';
+/* From lib/, NOT from LaunchModule. That component is 'use client', and
+   importing this function from it returned a client reference that threw
+   on the server — every artist page 500'd. See launchContentType.ts. */
+import { classifyLaunchType, type LaunchContentType } from './launchContentType';
 
 /** The long-form formats worth comparing. Ranked in this order on ties. */
 const RANKED_TYPES: LaunchContentType[] = [

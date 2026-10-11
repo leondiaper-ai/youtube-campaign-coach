@@ -1,5 +1,7 @@
 'use client';
 
+import { classifyLaunchType, CONTENT_TYPE_LABEL, type LaunchContentType } from '@/lib/launchContentType';
+
 import { useState, useMemo } from 'react';
 
 // ─── Design system ─────────────────────────────────────────────────────────
@@ -31,28 +33,15 @@ export type LaunchModuleProps = {
 };
 
 // ─── Content type ──────────────────────────────────────────────────────────
-export type LaunchContentType =
-  | 'OFFICIAL_VIDEO' | 'LYRIC_VIDEO' | 'VISUALIZER'
-  | 'BTS' | 'LIVE' | 'SHORT' | 'OTHER';
-
-const CONTENT_TYPE_LABEL: Record<LaunchContentType, string> = {
-  OFFICIAL_VIDEO: 'Official Video', LYRIC_VIDEO: 'Lyric Video',
-  VISUALIZER: 'Visualizer', BTS: 'BTS', LIVE: 'Live',
-  SHORT: 'Short', OTHER: 'Video',
-};
-
-export function classifyLaunchType(title: string, kind: 'short' | 'video'): LaunchContentType {
-  if (kind === 'short') return 'SHORT';
-  const t = title.toLowerCase();
-  if (/\b(official\s*(music\s*)?video)\b/.test(t) || /\(official\)/.test(t) || /\bmusic\s*video\b/.test(t)) return 'OFFICIAL_VIDEO';
-  if (/\b(lyric\s*(video)?|lyrics?\s*video)\b/.test(t)) return 'LYRIC_VIDEO';
-  if (/\b(visuali[sz]er|official\s*visuali[sz]er)\b/.test(t)) return 'VISUALIZER';
-  if (/\b(behind\s*the\s*scenes|bts)\b/.test(t)) return 'BTS';
-  if (/\b(live\s*(at|from|in|session|performance)|tiny\s*desk|concert)\b/.test(t)) return 'LIVE';
-  if (/\bsession\b/.test(t)) return 'LIVE';
-  if (/\b(official\s*audio)\b/.test(t)) return 'OFFICIAL_VIDEO';
-  return 'OTHER';
-}
+/* Classification moved to lib/launchContentType so SERVER code can use it.
+   This file is 'use client', and a function imported from a client module
+   into server code arrives as a reference proxy that throws when called —
+   it took every artist page down once already. Re-exported here so existing
+   importers of this module keep working. */
+export {
+  classifyLaunchType, CONTENT_TYPE_LABEL,
+  type LaunchContentType,
+} from '@/lib/launchContentType';
 
 function isSupportContent(ct: LaunchContentType): boolean {
   return ct === 'BTS' || ct === 'LIVE' || ct === 'VISUALIZER';
