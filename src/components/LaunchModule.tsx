@@ -669,8 +669,13 @@ export default function LaunchModule({
             {/* Momentum Comparison */}
             {(momentum.week1Avg != null || momentum.week2Avg != null) && (
               <div>
+                {/* "Daily views" read as the launch video's views. It is
+                    the CHANNEL's — computeMomentum averages the same
+                    sparklineViews30d deltas the chart above plots, which
+                    are whole-channel daily gains. The launch video is the
+                    reason for the window, not the subject of the figure. */}
                 <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-2">
-                  Momentum · Weekly Avg Daily Views
+                  Momentum · Weekly avg daily channel views
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <MomentumWeek label="Week 1" value={momentum.week1Avg} />
@@ -682,8 +687,15 @@ export default function LaunchModule({
 
             {/* Baseline context */}
             {metrics.baseline.available && metrics.baseline.median > 0 && (
+              /* A DIFFERENT UNIT from everything above it, and it sits
+                 directly under three weekly figures, which invites exactly
+                 the comparison it cannot support: these are per-video
+                 LIFETIME totals, those are whole-channel DAILY gains.
+                 Reading "Week 1: 1.6M" against "Baseline: 229.5K" as 7x
+                 is meaningless. Spelling the unit out is the least the
+                 line can do while it stays on this card. */
               <div className="text-[10px] text-ink/30">
-                Baseline: {fmtNum(metrics.baseline.median)} median views ({metrics.baseline.label} · {metrics.baseline.count} video{metrics.baseline.count !== 1 ? 's' : ''})
+                Baseline: {fmtNum(metrics.baseline.median)} median lifetime views per video ({metrics.baseline.label} · {metrics.baseline.count} video{metrics.baseline.count !== 1 ? 's' : ''})
               </div>
             )}
             {!metrics.baseline.available && (
