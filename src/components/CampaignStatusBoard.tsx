@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
@@ -40,9 +40,31 @@ export default function CampaignStatusBoard({
   const [snapshotStatus, setSnapshotStatus] = useState<string | null>(null);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [behaviourSlug, setBehaviourSlug] = useState<string | null>(
     searchParams.get('behaviour')
   );
+
+  /* ── THE URL HAS TO FOLLOW ─────────────────────────────────────────
+     Opening Channel Behaviour was pure React state, so the address bar
+     still said /campaigns. That left the page thinking no behaviour view
+     was open — and the page is what suppresses its own header and title
+     when one is. The result was the duplicate chrome that was supposedly
+     fixed: it WAS fixed for /campaigns?behaviour=x, and clicking a card
+     never produced that URL.
+
+     Syncing the URL fixes the chrome, and makes the view linkable and
+     the back button work, which it never was. State is still set
+     immediately so opening stays instant; the replace rides behind it. */
+  const openBehaviour = useCallback((slug: string | null) => {
+    setBehaviourSlug(slug);
+    const sp = new URLSearchParams(Array.from(searchParams.entries()));
+    if (slug) sp.set('behaviour', slug);
+    else sp.delete('behaviour');
+    const qs = sp.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [router, pathname, searchParams]);
 
   async function handlePin(slug: string) {
     setPinning(true);
@@ -188,7 +210,7 @@ export default function CampaignStatusBoard({
         >
           {/* Back arrow */}
           <button
-            onClick={() => setBehaviourSlug(null)}
+            onClick={() => openBehaviour(null)}
             title="Back to board"
             style={{
               width: 42,
@@ -222,7 +244,7 @@ export default function CampaignStatusBoard({
             return (
               <button
                 key={c.slug}
-                onClick={() => setBehaviourSlug(c.slug)}
+                onClick={() => openBehaviour(c.slug)}
                 title={c.name}
                 style={{
                   width: 42,
@@ -283,7 +305,7 @@ export default function CampaignStatusBoard({
           <CampaignBehaviour
             slug={behaviourSlug}
             artistName={behaviourCard.name}
-            onClose={() => setBehaviourSlug(null)}
+            onClose={() => openBehaviour(null)}
             noBreakout
           />
         </div>
@@ -350,7 +372,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
-                    onViewBehaviour={setBehaviourSlug}
+                    onViewBehaviour={openBehaviour}
                   />
                 ))}
               </div>
@@ -369,7 +391,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
-                    onViewBehaviour={setBehaviourSlug}
+                    onViewBehaviour={openBehaviour}
                   />
                 ))}
               </div>
@@ -388,7 +410,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
-                    onViewBehaviour={setBehaviourSlug}
+                    onViewBehaviour={openBehaviour}
                   />
                 ))}
               </div>
@@ -406,7 +428,7 @@ export default function CampaignStatusBoard({
                     card={card}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
-                    onViewBehaviour={setBehaviourSlug}
+                    onViewBehaviour={openBehaviour}
                   />
                 ))}
               </div>
