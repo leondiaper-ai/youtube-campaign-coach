@@ -24,7 +24,7 @@
    LIFETIME NEVER TAKES THE BIG TYPE. See FormatBlock.
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { formatPerformance } from '@/lib/formatPerformance';
+import { formatPerformance, ROSTER_SUPPORT_BENCHMARK } from '@/lib/formatPerformance';
 import {
   fmtNum, daysSince, STATUS_COLOR,
   type ChannelState, type RecentUpload, type Artist,
@@ -244,68 +244,92 @@ export default async function ArtistOverview({
             every render. */}
       </section>
 
-      {/* ═══ 3b. WHAT WORKS ON THIS CHANNEL ══════════════════════ */}
-      {perf.rows.length > 0 && (
+      {/* ═══ 3b. WHAT TO AIM FOR AFTER THE VIDEO ═════════════════ */}
+      {perf.support.length > 0 && (
         <section className="mt-12 pt-8" style={{ borderTop: `1px solid ${RULE}` }}>
-          <Eyebrow>Which format performs · last 12 months</Eyebrow>
+          <Eyebrow>Best asset after the music video · last 12 months</Eyebrow>
 
-          {/* The finding, in a sentence, before the table. A reader who
-              only takes one line off this page should take this one.
-              Only stated when the lead is big enough to call — see
-              `clear` in formatPerformance. */}
-          {perf.clear && perf.best && (
+          {/* The official video is a YARDSTICK, not a contender. It wins
+              almost every time — 19 of 23 clear calls across 70 sampled
+              artists — so leading on it tells a team nothing they can act
+              on. The question worth answering is what to make NEXT. */}
+          {perf.bestSupport && (
             <div className="mt-4 text-[15px] font-bold leading-snug text-ink">
-              {perf.best.label}s are this channel&rsquo;s strongest format
-              {perf.rows[1] && (
+              {perf.bestSupport.label}s are the strongest asset here after the video
+              {perf.bestSupport.vsHero != null && (
                 <span className="font-normal text-ink/50">
-                  {' '}— {Math.round((perf.best.median / perf.rows[1].median) * 10) / 10}× the median of {perf.rows[1].label.toLowerCase()}s
+                  {' '}— {Math.round(perf.bestSupport.vsHero * 100)}% of what an official video does on this channel
                 </span>
               )}
             </div>
           )}
-          {!perf.clear && (
-            <div className="mt-4 text-[15px] font-bold leading-snug text-ink/70">
-              {perf.rows.length === 1
-                ? `Only ${perf.rows[0].label.toLowerCase()}s have enough uploads to read yet.`
-                : 'No format is clearly ahead on this channel.'}
+          {!perf.clear && perf.support.length > 1 && (
+            <div className="mt-1 text-[12px] text-ink/45">
+              Close to {perf.support[1].label.toLowerCase()}s though — treat this as
+              no clear difference rather than a winner.
             </div>
           )}
 
-          <div className="mt-5 space-y-2" style={{ maxWidth: 560 }}>
-            {perf.rows.map((r) => {
-              const pct = perf.rows[0].median > 0 ? (r.median / perf.rows[0].median) * 100 : 0;
+          <div className="mt-5 space-y-2" style={{ maxWidth: 620 }}>
+            {perf.support.map((r) => {
+              const topMedian = perf.support[0].median || 1;
+              const pct = (r.median / topMedian) * 100;
+              const bench = ROSTER_SUPPORT_BENCHMARK[r.type];
               return (
                 <div key={r.type} className="flex items-center gap-3 text-[12px]">
                   <span className="w-[104px] shrink-0 font-bold text-ink">{r.label}</span>
                   <span className="flex-1 h-[7px] rounded-full overflow-hidden" style={{ background: RULE }}>
                     <span
                       className="block h-full rounded-full"
-                      style={{ width: `${Math.max(pct, 2)}%`, background: r === perf.rows[0] ? GAIN : '#B8B0A2' }}
+                      style={{ width: `${Math.max(pct, 2)}%`, background: r === perf.support[0] ? GAIN : '#B8B0A2' }}
                     />
                   </span>
                   <span className="w-[62px] shrink-0 text-right tabular-nums font-bold text-ink">
                     {fmtNum(r.median)}
                   </span>
-                  {/* Count and age are not decoration. A median of three
-                      is fragile, and an older format has had longer to
-                      gather the views it is being credited with. */}
-                  <span className="w-[86px] shrink-0 text-right tabular-nums text-ink/40">
-                    {r.count} · {r.medianAgeDays}d old
+                  {/* Against the artist's own video, then against what the
+                      format does across the roster — the second is what
+                      turns "this is our number" into "this is good or bad". */}
+                  <span className="w-[118px] shrink-0 text-right tabular-nums text-ink/45">
+                    {r.vsHero != null ? `${Math.round(r.vsHero * 100)}% of video` : '—'}
+                    {bench && r.vsHero != null && (
+                      <span className={r.vsHero >= bench.ratio ? 'text-[#0C6A3F]' : 'text-ink/35'}>
+                        {' '}· roster {Math.round(bench.ratio * 100)}%
+                      </span>
+                    )}
+                  </span>
+                  <span className="w-[72px] shrink-0 text-right tabular-nums text-ink/35">
+                    {r.count} · {r.medianAgeDays}d
                   </span>
                 </div>
               );
             })}
+            {perf.hero && (
+              <div className="flex items-center gap-3 text-[12px] pt-2" style={{ borderTop: `1px solid ${RULE}` }}>
+                <span className="w-[104px] shrink-0 font-bold text-ink/45">{perf.hero.label}</span>
+                <span className="flex-1 text-ink/35">the yardstick</span>
+                <span className="w-[62px] shrink-0 text-right tabular-nums font-bold text-ink/45">
+                  {fmtNum(perf.hero.median)}
+                </span>
+                <span className="w-[118px] shrink-0" />
+                <span className="w-[72px] shrink-0 text-right tabular-nums text-ink/35">
+                  {perf.hero.count} · {perf.hero.medianAgeDays}d
+                </span>
+              </div>
+            )}
           </div>
 
-          <div className="mt-3 text-[11px] leading-relaxed text-ink/40" style={{ maxWidth: 560 }}>
-            Median views per upload, so one hit does not carry a format.
-            Views accumulate, so an older format has had longer to gather
-            them — the bias flatters whichever format is older, which is
-            why the median age sits beside each row.
+          <div className="mt-3 text-[11px] leading-relaxed text-ink/40" style={{ maxWidth: 620 }}>
+            Median views per upload, so one hit does not carry a format. The roster
+            figure is what each format does as a share of the official video across
+            the whole roster, so a big artist and a small one count the same — a
+            visualiser typically reaches 40% of the video, a lyric video or a live
+            cut around 20%, BTS under 10%. Views accumulate, so an older format has
+            had longer to gather them; the median age sits beside each row.
             {perf.shorts && (
-              <> Shorts are counted separately ({fmtNum(perf.shorts.median)} median
-              across {perf.shorts.count}): YouTube changed how Shorts views are
-              counted in March 2025, so they are not the same unit as long-form.</>
+              <> Shorts are excluded ({fmtNum(perf.shorts.median)} median across{' '}
+              {perf.shorts.count}): YouTube changed how Shorts views are counted in
+              March 2025, so they are not the same unit as long-form.</>
             )}
           </div>
         </section>
