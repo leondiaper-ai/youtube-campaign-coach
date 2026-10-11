@@ -236,6 +236,16 @@ export default async function ArtistOverview({
               {fmtNum(demand.comments)} comments · {demand.perThousand.toFixed(2)} per 1,000 views
               <span className="text-ink/35"> vs {ROSTER_COMMENTS_PER_1K} across the roster</span>
             </div>
+            {/* The finding is only half of it. A card that says an audience
+                is waiting and then stops is an observation; the reason to
+                surface this at all is that somebody should go and post.
+
+                Two moves, because they are different jobs: something new to
+                watch, and a reply to the people already there. The second
+                costs nothing and is the one that gets skipped. */}
+            <div className="text-[12px] font-semibold mt-2.5 leading-snug" style={{ color: GAIN }}>
+              Worth feeding — put something up, and reply to the people already talking.
+            </div>
           </div>
         )}
 
