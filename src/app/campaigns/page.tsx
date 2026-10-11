@@ -303,6 +303,10 @@ async function loadCard(
   // campaignStart already computed above for normalizeChannelData
   let campaignWindow: CampaignWindowData | null = null;
   let campaignTrend: CampaignTrendData | null = null;
+  /* The uploads the campaign actually consists of. Null until the window
+     resolves; the structure warning falls back to the whole cached set
+     when there is no campaign to scope it to. */
+  let campaignUploads: typeof snap.recentUploads | null = null;
   let weeklyProgress: WeeklyProgressEntry[] = [];
 
   if (campaignStart) {
@@ -325,6 +329,18 @@ async function loadCard(
       baselineAt: campaignStart,
     });
     const campaignDay = perf?.day ?? Math.max(1, Math.floor((Date.now() - startTs) / 86400000) + 1);
+
+    /* `perf.start.at` is the resolved campaign start — the channel's own
+       observable era onset where there is one, which is not the same as
+       the pin date. Filtering on it gives the structure warning exactly
+       the assets the card's campaign line counts. */
+    if (perf) {
+      const from = Date.parse(perf.start.at);
+      campaignUploads = (snap.recentUploads ?? []).filter((u) => {
+        const t = Date.parse(u.publishedAt);
+        return Number.isFinite(t) && t >= from;
+      });
+    }
 
     /* Whole-channel movement. Kept, because knowing the channel is up
        13.5M is worth knowing — but never again under a campaign label. */
@@ -468,7 +484,12 @@ async function loadCard(
     })),
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
-    structureWarning: checkContentStructure(snap.recentUploads ?? []),
+    /* Campaign-scoped where a campaign window resolved. It was given the
+       whole cached upload set, so a card could print "44 assets (8
+       long-form · 36 Shorts)" for the campaign and, two lines below,
+       "Shorts-heavy campaign — 41 Shorts vs 9 longform" for the channel.
+       Two counts of one thing, both labelled campaign. */
+    structureWarning: checkContentStructure(campaignUploads ?? snap.recentUploads ?? []),
     confidence: nc.confidence,
     healthNote: nc.healthNote,
     dataStatus: nc.dataStatus,
