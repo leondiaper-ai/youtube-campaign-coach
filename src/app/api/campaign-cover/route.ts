@@ -25,6 +25,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { labelSurfaceUploads, hasLabelSurface } from '@/lib/labelSurface';
 import { getCampaignProgress } from '@/lib/intelligence/campaignProgress';
 import { buildRollout } from '@/lib/intelligence/rollout';
 import { buildCampaignTimeline, nextConfirmedRelease } from '@/lib/intelligence/campaignTimeline';
@@ -75,6 +76,13 @@ interface CoverAsset {
   videoId: string;
   title: string;
   publishedAt: string;
+  /**
+   * The channel it was published on, when that is NOT the artist's own.
+   * Null for the artist channel, which is the overwhelming majority —
+   * labelling every card with the artist's own name would make the
+   * exception look like the rule.
+   */
+  source?: string | null;
   /** yyyy-mm-dd → "9 SEP" for the deck. Formatting stays here, not there. */
   dateLabel: string;
   kind: string;
@@ -439,6 +447,47 @@ export async function GET(req: NextRequest) {
         url: `https://www.youtube.com/watch?v=${v.id}`,
         role: 'supporting',
       });
+    }
+
+    /* ── THE SECOND PUBLISHING SURFACE ────────────────────────────────
+       Merged HERE, before anything is chosen, because every decision
+       below — which asset leads, what the read says is out, whether the
+       campaign counts as started — has to see the whole campaign.
+
+       This used to happen in the browser after the fact, which meant the
+       Sumerian official video could appear in Palaye's strip while the
+       page still led on a Short and said "no video on the channel yet".
+       A merge that arrives after the decision cannot change it. */
+    if (hasLabelSurface(who.slug)) {
+      const labelUploads = await labelSurfaceUploads(who.slug, startAt);
+      const known = new Set(postBaseline.map(a => a.videoId));
+      for (const u of labelUploads) {
+        /* Same id from both channels is one upload, not two. */
+        if (known.has(u.id)) continue;
+        const observed = formatOf(u);
+        const human = overrideFor(u.id);
+        const f = human ? { kind: human.kind, label: human.label } : observed;
+        postBaseline.push({
+          videoId: u.id,
+          title: u.title,
+          publishedAt: u.publishedAt,
+          dateLabel: dateLabel(u.publishedAt),
+          kind: f.kind,
+          formatLabel: f.label,
+          aspect: human?.frame ?? (observed.kind === 'short' ? 'portrait' : 'landscape'),
+          sourceAspect: observed.kind === 'short' ? 'portrait' : 'landscape',
+          labelledBy: human ? human.statedBy : null,
+          views: u.viewCount ?? null,
+          thumb: `https://i.ytimg.com/vi/${u.id}/maxresdefault.jpg`,
+          url: `https://www.youtube.com/watch?v=${u.id}`,
+          role: 'supporting',
+          source: u.source,
+        });
+        known.add(u.id);
+      }
+      if (labelUploads.length) {
+        coverage.push(`Includes ${labelUploads.length} upload${labelUploads.length === 1 ? '' : 's'} published via the label channel and confidently matched to this artist by title.`);
+      }
     }
 
     /* ── TWO ORDERS, BECAUSE THE TIERS ANSWER DIFFERENT QUESTIONS ─────
