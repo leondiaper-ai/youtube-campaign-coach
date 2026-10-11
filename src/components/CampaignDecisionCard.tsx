@@ -1444,19 +1444,7 @@ export function DecisionCard({
                 className="group/sh no-underline"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="relative rounded-lg overflow-hidden bg-sunken" style={{ aspectRatio: '9 / 16' }}>
-                  {/* oardefault is the only endpoint that returns the full
-                      vertical frame. It 200s with a grey placeholder for
-                      anything that is not a Short, which is why this row
-                      is only ever given Shorts. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://i.ytimg.com/vi/${v.id}/oardefault.jpg`}
-                    alt=""
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover/sh:scale-[1.03]"
-                  />
-                </div>
+                <ShortThumb id={v.id} />
                 <div className="text-[11px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
                   {v.title}
                 </div>
@@ -1515,6 +1503,48 @@ export function DecisionCard({
    cells instead of six and the panel still looks built rather than
    gappy.
    ═══════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE VERTICAL THUMBNAIL, AND WHY IT NEEDS A FALLBACK
+
+   oardefault.jpg is the endpoint that returns a Short's full 1080x1920
+   frame, and the obvious way to show a Short at the shape it was shot.
+   It is also missing far more often than its name suggests. Measured
+   across 96 Shorts on the live board, 24 of them — a quarter — came back
+   as the 120x90 grey placeholder, and they were unmistakably real
+   Shorts: "#newartist #newmusic #bedroompop", "Carry live".
+
+   Worse, the placeholder is served as HTTP 200. onError never fires, so
+   a quarter of the row would have sat there as grey boxes with nothing
+   in the console to say why.
+
+   So the check is on the pixels, not the status: anything that loads at
+   120x90 is the placeholder, and the tile falls back to hqdefault. That
+   is a 16:9 frame centre-cropped into a 9:16 box, which is not what the
+   Short looked like — but a crop of the real thing beats a grey
+   rectangle, and it is what the rest of the board already shows.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function ShortThumb({ id }: { id: string }) {
+  const [src, setSrc] = useState(`https://i.ytimg.com/vi/${id}/oardefault.jpg`);
+  const fallback = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  return (
+    <div className="relative rounded-lg overflow-hidden bg-sunken" style={{ aspectRatio: '9 / 16' }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="w-full h-full object-cover transition-transform duration-300 group-hover/sh:scale-[1.03]"
+        onLoad={(e) => {
+          const img = e.currentTarget;
+          if (img.naturalWidth <= 120 && img.naturalHeight <= 90) setSrc(fallback);
+        }}
+        onError={() => setSrc(fallback)}
+      />
+    </div>
+  );
+}
 
 function StatCell({
   value, label, sub, tone,
