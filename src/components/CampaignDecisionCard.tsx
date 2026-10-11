@@ -1092,7 +1092,6 @@ export function DecisionCard({
               value={String(card.uploads30d)}
               label="Uploads (30d)"
               sub={mixParts.length ? mixParts.join(' · ') : null}
-              span
             />
             <TrendCell
               data={card.sparkline}
@@ -1528,18 +1527,15 @@ export function DecisionCard({
    ═══════════════════════════════════════════════════════════════════════ */
 
 function StatCell({
-  value, label, sub, tone, span,
+  value, label, sub, tone,
 }: {
   value: string;
   label: string;
   sub?: string | null;
   tone?: string;
-  span?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-control border border-line bg-raised px-3 py-2.5 ${span ? 'col-span-2' : ''}`}
-    >
+    <div className="rounded-control border border-line bg-raised px-3 py-2.5">
       <div
         className="text-[25px] font-black leading-none tabular-nums truncate"
         style={{ color: tone ?? INK }}
@@ -1562,9 +1558,9 @@ function TrendCell({
   data, stroke, fill,
 }: { data: React.ComponentProps<typeof Sparkline>['data']; stroke: string; fill: string }) {
   return (
-    <div className="rounded-control border border-line bg-raised px-3 py-2.5 col-span-2 flex flex-col">
-      <div className="flex-1 flex items-end min-h-[38px]">
-        <Sparkline data={data} width={220} height={38} stroke={stroke} fill={fill} />
+    <div className="rounded-control border border-line bg-raised px-3 py-2.5 col-span-2 sm:col-span-3 flex flex-col">
+      <div className="flex-1 flex items-end min-h-[38px] w-full">
+        <Sparkline data={data} width={320} height={38} stroke={stroke} fill={fill} stretch />
       </div>
       <div className="text-[9px] font-bold uppercase tracking-label text-muted leading-none mt-2">
         30d trend
