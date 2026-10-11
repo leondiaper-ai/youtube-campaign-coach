@@ -636,10 +636,11 @@ export default function LaunchModule({
                 <span className="text-[10px] text-ink/40">Pre-launch:</span>
                 <StateBadge label={preLaunch.state} style={PRELAUNCH_STYLE[preLaunch.state]} />
                 <span className="text-[10px] text-ink/20">·</span>
-                {/* Same figure, same qualifier. This badge sits between
-                    two launch-video signals, so unqualified "Momentum"
-                    reads as the third one. */}
-                <span className="text-[10px] text-ink/40">Channel momentum:</span>
+                {/* Same figure, same problem twice over: unqualified
+                    "Momentum" sits between two signals that ARE about the
+                    launch video, and "Channel momentum" would collide with
+                    the page's own section of that name. */}
+                <span className="text-[10px] text-ink/40">Post-launch channel trend:</span>
                 <StateBadge label={momentum.state} style={MOMENTUM_STYLE[momentum.state]} />
               </div>
             </div>
@@ -672,15 +673,19 @@ export default function LaunchModule({
             {/* Momentum Comparison */}
             {(momentum.week1Avg != null || momentum.week2Avg != null) && (
               <div>
-                {/* Leads with the SUBJECT. computeMomentum averages the
-                    same sparklineViews30d deltas the chart above plots,
-                    which are whole-channel daily gains — the launch video
-                    is the reason for the window, not what is being
-                    measured. Qualifying "views" at the end of the line
-                    still let the eye read "Momentum" as the video's; the
-                    noun has to be "channel momentum" from the first word. */}
+                {/* Leads with the SUBJECT, because computeMomentum averages
+                    the same sparklineViews30d deltas the chart above plots
+                    — whole-channel daily gains. The launch video is the
+                    reason for the window, not what is measured.
+
+                    NOT "Channel momentum": ArtistOverview already has a
+                    section by that name on this very page, carrying
+                    lifetime views, 7-day views and subscribers. Two
+                    different figures under one heading is worse than the
+                    ambiguity this was fixing, so the heading says WHICH
+                    channel views — the ones after a launch. */}
                 <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-2">
-                  Channel momentum · Weekly avg daily views
+                  Post-launch channel views · Weekly avg per day
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <MomentumWeek label="Week 1" value={momentum.week1Avg} />
