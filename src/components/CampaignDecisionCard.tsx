@@ -1041,12 +1041,10 @@ export function DecisionCard({
         </div>
       </div>
 
-      {/* ─── 2. Figures ────────────────────────────────────────────
-          One tinted strip of four, in the order the featured campaign
-          cards use. They were a loose inline row of differently-sized
-          numbers before, which made the conversion figure look like an
-          afterthought rather than a measure. The sparkline moves to the
-          end of the strip: it is context for the four, not a fifth. */}
+      {/* ─── 2. The read panel ────────────────────────────────────
+          Six cells on a grid: the figures, the content mix folded under
+          the upload count that it qualifies, and the trend. See the
+          StatCell header for why they are shaped the way they are. */}
       {(() => {
         const isStaleMovement = card.movementConfidence === 'stale';
         const views7d = trustedViewDelta(card.views7Delta);
@@ -1054,65 +1052,56 @@ export function DecisionCard({
         const hasViews = views7d != null && !(isStaleMovement && views7d === 0);
         const hasSubs7 = card.subs7Delta != null && !(isStaleMovement && card.subs7Delta === 0);
         const showUpdating = isStaleMovement || isBadReading;
+
+        const longform = card.uploads30d - card.shorts30d;
+        const mixParts: string[] = [];
+        if (longform > 0) mixParts.push(`${longform} long-form`);
+        if (card.shorts30d > 0) mixParts.push(`${card.shorts30d} shorts`);
+
         return (
-          <div className="rounded-lg px-4 py-3 mb-3 flex items-center gap-6 flex-wrap"
-            style={{ background: 'rgba(14,14,14,0.025)' }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
             {/* A dash is not a reading. Figures with nothing to report are
                 left out rather than printed as "—", which was filling
-                the strip with placeholders and making the real numbers
+                the panel with placeholders and making the real numbers
                 harder to find. The caveat row below already says when
                 movement data is still building. */}
-            {card.subs != null && <Figure value={fmtNum(card.subs)} label="Subs" />}
+            {card.subs != null && <StatCell value={fmtNum(card.subs)} label="Subs" />}
             {(hasViews || showUpdating) && (
-              <Figure
+              <StatCell
                 value={hasViews ? `+${fmtNum(views7d!)}` : 'Updating'}
                 label="Views (7d)"
                 tone={hasViews ? deltaColor(views7d) : undefined}
               />
             )}
-            <Figure value={String(card.uploads30d)} label="Uploads (30d)" />
             {hasSubs7 && (
-              <Figure
+              <StatCell
                 value={`${card.subs7Delta! >= 0 ? '+' : ''}${fmtNum(card.subs7Delta!)}`}
                 label="Subs (7d)"
                 tone={deltaColor(card.subs7Delta)}
               />
             )}
             {spk != null && (
-              <Figure value={spk.toFixed(1)} label="Subs / 1K" tone={conversionColor(spk)} />
-            )}
-            <div className="ml-auto rounded-lg px-3 py-1.5" style={{ background: GOS_SPARK_STYLE[gs].fill }}>
-              <Sparkline
-                data={card.sparkline}
-                width={104}
-                height={32}
-                stroke={GOS_SPARK_STYLE[gs].stroke}
-                fill={GOS_SPARK_STYLE[gs].fill}
+              <StatCell
+                value={spk.toFixed(1)}
+                label="Subs / 1K"
+                sub={conversionLabel(spk).text}
+                tone={conversionColor(spk)}
               />
-              <div className="text-[10px] text-right uppercase tracking-label font-bold" style={{ color: GOS_SPARK_STYLE[gs].stroke }}>
-                30d trend
-              </div>
-            </div>
+            )}
+            <StatCell
+              value={String(card.uploads30d)}
+              label="Uploads (30d)"
+              sub={mixParts.length ? mixParts.join(' · ') : null}
+              span
+            />
+            <TrendCell
+              data={card.sparkline}
+              stroke={GOS_SPARK_STYLE[gs].stroke}
+              fill={GOS_SPARK_STYLE[gs].fill}
+            />
           </div>
         );
       })()}
-
-      {/* ─── 3. Content ecosystem ──────────────────────────────────
-          What the channel is actually publishing, in the same chip
-          language the featured cards use. Derived from figures the card
-          already holds — no new read. */}
-      {card.uploads30d > 0 && (
-        <div className="mb-3">
-          <div className="flex flex-wrap gap-2">
-            {card.uploads30d - card.shorts30d > 0 && (
-              <Chip label="Long-form" count={card.uploads30d - card.shorts30d} tone="#2C6BFF" />
-            )}
-            {card.shorts30d > 0 && (
-              <Chip label="Shorts" count={card.shorts30d} tone="#C77A16" />
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ─── 4. Why this matters ───────────────────────────────────
           The read, the cause and the moves were three separate blocks in
@@ -1508,26 +1497,79 @@ export function DecisionCard({
 
 /* One figure in the strip. Tone is only set where the colour means a
    direction of travel — a flat total is never green. */
-function Figure({ value, label, tone }: { value: string; label: string; tone?: string }) {
+/* ═══════════════════════════════════════════════════════════════════════
+   THE READ PANEL
+
+   The figures used to be a loose row inside one tinted strip: five
+   numbers at the same size, separated by nothing but whitespace, with
+   the sparkline pushed to the far end. Nothing told you where one
+   measure ended and the next began, so the eye had to parse the labels
+   to find the boundaries — which is the slowest possible way to read a
+   number.
+
+   Each measure is now its own cell, and the cell is laid out the way the
+   live campaign pages lay theirs out: the figure first and large, the
+   label under it in small caps, and a third line carrying whatever
+   qualifies the number. /kol has had this shape for months —
+   "6,158,580 / CAMPAIGN VIEWS / SINCE 12 AUG" — so adopting it here
+   means the board and the campaign pages describe a channel in one
+   visual language instead of two.
+
+   That third line is also what lets the panel absorb detail it was
+   previously spending whole components on. The long-form / Shorts split
+   was a separate row of coloured pills; it is the thing that qualifies
+   the upload count, so it sits under the upload count, exactly as /kol
+   prints "DAY 60 · 27 SHORTS · 4 LONG-FORM".
+
+   The cells sit on a grid, which is what lets the card take a varying
+   number of measures. A channel with no seven-day movement prints four
+   cells instead of six and the panel still looks built rather than
+   gappy.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function StatCell({
+  value, label, sub, tone, span,
+}: {
+  value: string;
+  label: string;
+  sub?: string | null;
+  tone?: string;
+  span?: boolean;
+}) {
   return (
-    <div>
-      <div className="text-[21px] font-black leading-none tabular-nums" style={{ color: tone ?? INK }}>
+    <div
+      className={`rounded-control border border-line bg-raised px-3 py-2.5 ${span ? 'col-span-2' : ''}`}
+    >
+      <div
+        className="text-[25px] font-black leading-none tabular-nums truncate"
+        style={{ color: tone ?? INK }}
+      >
         {value}
       </div>
-      <div className="text-[11px] text-muted mt-1.5">{label}</div>
+      <div className="text-[9px] font-bold uppercase tracking-label text-muted leading-none mt-2">
+        {label}
+      </div>
+      {sub && (
+        <div className="text-[9px] uppercase tracking-label leading-tight mt-1" style={{ color: 'rgba(14,14,14,0.32)' }}>
+          {sub}
+        </div>
+      )}
     </div>
   );
 }
 
-function Chip({ label, count, tone }: { label: string; count: number; tone: string }) {
+function TrendCell({
+  data, stroke, fill,
+}: { data: React.ComponentProps<typeof Sparkline>['data']; stroke: string; fill: string }) {
   return (
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-label"
-      style={{ background: `${tone}14`, color: tone }}
-    >
-      {label}
-      <span className="tabular-nums">{count}</span>
-    </span>
+    <div className="rounded-control border border-line bg-raised px-3 py-2.5 col-span-2 flex flex-col">
+      <div className="flex-1 flex items-end min-h-[38px]">
+        <Sparkline data={data} width={220} height={38} stroke={stroke} fill={fill} />
+      </div>
+      <div className="text-[9px] font-bold uppercase tracking-label text-muted leading-none mt-2">
+        30d trend
+      </div>
+    </div>
   );
 }
 
