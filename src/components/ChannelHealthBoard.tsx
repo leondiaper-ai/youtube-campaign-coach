@@ -1446,11 +1446,15 @@ export default function ChannelHealthBoard({
         </div>
       )}
 
-      {/* ─── STILL BEING TALKED ABOUT ──────────────────────────────── */}
+      {/* ─── ACTIVE FANS, QUIET CHANNEL ──────────────────────────────── */}
       {view === 'managed' && latentShown.length > 0 && (
         <div className="mb-8">
           <SectionHead
-            title="Quiet, but still being talked about"
+            /* Names both halves. "Quiet, but still being talked about"
+               described the channel and left the fans implied, so the
+               card read as a status rather than an opportunity — and the
+               opportunity is the whole point. */
+            title="Active fans, quiet channel"
             meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · vs our average channel`}
           />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
